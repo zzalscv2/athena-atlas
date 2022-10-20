@@ -24,6 +24,7 @@
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoTrd.h"
@@ -38,7 +39,11 @@
 namespace Trk {
     class SurfaceBounds;
 }
-
+namespace {
+    static const Amg::Vector3D x_axis{1., 0., 0.};
+    static const Amg::Vector3D y_axis{0., 1., 0.};
+    static const Amg::Vector3D z_axis{0., 0., 1.};
+}
 namespace MuonGM {
 
     //============================================================================
@@ -157,9 +162,15 @@ namespace MuonGM {
 
     //============================================================================
     void MMReadoutElement::initDesign(double /*maxY*/, double /*minY*/, double /*xS*/, double /*pitch*/, double /*thickness*/) {
-        m_etaDesign.clear();
-        m_etaDesign.resize(m_nlayers);
+       m_etaDesign.clear();
+       m_etaDesign.resize(m_nlayers);
 
+        if (m_ml < 1 || m_ml > 2) {
+            MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+            log << MSG::WARNING << "MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml << endmsg;
+            return;
+        }
+        
         char side     = getStationEta() < 0 ? 'C' : 'A';
         char sector_l = getStationName().substr(2, 1) == "L" ? 'L' : 'S';
         MMDetectorHelper aHelper;
@@ -177,8 +188,7 @@ namespace MuonGM {
         m_minHalfY      = roParam.activeBottomLength / 2; // 0.5*bottom length (active area)
         m_maxHalfY      = roParam.activeTopLength / 2;    // 0.5*top length (active area)
         m_offset        = -0.5*(ylFrame - ysFrame);       // radial dist. of active area center w.r.t. chamber center
-        double sideAngle = std::atan( 0.5*(m_maxHalfY - m_minHalfY) / m_halfX );
-
+       
         for (int il = 0; il < m_nlayers; il++) {
             // identifier of the first channel to retrieve max number of strips
             Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, il + 1, 1);
@@ -188,52 +198,33 @@ namespace MuonGM {
                 MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
                 log << MSG::WARNING << "MMReadoutElement -- Max number of strips not a valid value" << endmsg;
             }
+            MuonChannelDesign& design = m_etaDesign[il];
 
-            m_etaDesign[il].type                = MuonChannelDesign::ChannelType::etaStrip;
-            m_etaDesign[il].detType             = MuonChannelDesign::DetType::MM;
-            m_etaDesign[il].xSize               = 2 * m_halfX;            // radial length (active area)
-            m_etaDesign[il].minYSize            = 2 * m_minHalfY;         // bottom length (active area)
-            m_etaDesign[il].maxYSize            = 2 * m_maxHalfY;         // top length (active area)
-            m_etaDesign[il].inputPitch          = pitch;
-            m_etaDesign[il].sideAngle           = sideAngle;
-            m_etaDesign[il].inputLength         = m_etaDesign[il].minYSize;
-            m_etaDesign[il].inputWidth          = pitch;                  // inputwidth is defined as the pitch
-            m_etaDesign[il].thickness           = roParam.gasThickness; 
-            m_etaDesign[il].nMissedTopEta       = roParam.nMissedTopEta;  // #of eta strips that are not connected to any FE board
-            m_etaDesign[il].nMissedBottomEta    = roParam.nMissedBottomEta;
-            m_etaDesign[il].nMissedTopStereo    = roParam.nMissedTopStereo;  // #of stereo strips that are not connected to any FE board
-            m_etaDesign[il].nMissedBottomStereo = roParam.nMissedBottomStereo;
-            m_etaDesign[il].nRoutedTop          = roParam.nRoutedTop;     // #of stereo strips that are shorter in length (low efficient regions)
-            m_etaDesign[il].nRoutedBottom       = roParam.nRoutedBottom;
-            m_etaDesign[il].dlStereoTop         = roParam.dlStereoTop;    // x-length between edge of the last stereo strip and its intersection with the last eta strip
-            m_etaDesign[il].dlStereoBottom      = roParam.dlStereoBottom; // x-length between edge of the first stereo strip and its intersection with the first eta strip
-            m_etaDesign[il].minYPhiL            = roParam.minYPhiL;       // y-length of the first (routed) stereo strip left  edge from the first eta strip (non zero for LM1)
-            m_etaDesign[il].minYPhiR            = roParam.minYPhiR;       // y-length of the first (routed) stereo strip right edge from the first eta strip
-            m_etaDesign[il].maxYPhi             = roParam.maxYPhi;
-            m_etaDesign[il].totalStrips         = roParam.tStrips;
-            m_etaDesign[il].sAngle              = (roParam.stereoAngle).at(il);
-            m_etaDesign[il].febSide             = (il % 2 == 0) ? 1 : -1; // side of the first MMFE8: 1 for locY>0, -1 for loc Y<0 
-
-            if (m_ml < 1 || m_ml > 2) {
-                MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-                log << MSG::WARNING << "MMReadoutElement -- Unexpected Multilayer: m_ml= " << m_ml << endmsg;
-            }
-
-            if (m_etaDesign[il].sAngle == 0.) {  // eta layers
-                m_etaDesign[il].nch      = m_etaDesign[il].totalStrips - m_etaDesign[il].nMissedBottomEta - m_etaDesign[il].nMissedTopEta;
-                m_etaDesign[il].firstPos = -0.5 * m_etaDesign[il].xSize + pitch;
-
+            design.type                = MuonChannelDesign::ChannelType::etaStrip;
+            design.detType             = MuonChannelDesign::DetType::MM;
+            design.inputPitch          = pitch;
+            design.thickness           = roParam.gasThickness; 
+            design.nMissedTopEta       = roParam.nMissedTopEta;  // #of eta strips that are not connected to any FE board
+            design.nMissedBottomEta    = roParam.nMissedBottomEta;
+            design.nMissedTopStereo    = roParam.nMissedTopStereo;  // #of stereo strips that are not connected to any FE board
+            design.nMissedBottomStereo = roParam.nMissedBottomStereo;
+            design.totalStrips         = roParam.tStrips;           
+            design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, roParam.stereoAngle.at(il));
+            design.inputWidth          = pitch / std::cos(design.stereoAngle());                  // inputwidth is defined as the pitch
+           
+            m_nStrips.push_back(design.totalStrips);
+            if (!design.hasStereoAngle()) {  // eta layers
+                design.nch      = design.totalStrips - design.nMissedBottomEta - design.nMissedTopEta;
+                design.setFirstPos(-0.5 * design.xSize() + pitch);
             } else {  // stereo layers
-                m_etaDesign[il].nch      = m_etaDesign[il].totalStrips - m_etaDesign[il].nMissedBottomStereo - m_etaDesign[il].nMissedTopStereo;
-                m_etaDesign[il].firstPos = -0.5 * m_etaDesign[il].xSize + (1 + m_etaDesign[il].nMissedBottomStereo - m_etaDesign[il].nMissedBottomEta) * pitch;
+                design.nch      = design.totalStrips - design.nMissedBottomStereo - design.nMissedTopStereo;
+                design.setFirstPos( -0.5 * design.xSize() + (1 + design.nMissedBottomStereo - design.nMissedBottomEta) * pitch);
             }
-       
-            m_nStrips.push_back(m_etaDesign[il].totalStrips);
 
             MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
             if (log.level() <= MSG::DEBUG)
-                log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << m_etaDesign[il].inputPitch
-                    << ", nstrips " << m_etaDesign[il].nch << " stereo " << m_etaDesign[il].sAngle << endmsg;
+                log << MSG::DEBUG << "initDesign:" << getStationName() << " layer " << il << ", strip pitch " << design.inputPitch
+                    << ", nstrips " << design.nch << " stereo " << design.stereoAngle() / Gaudi::Units::degree << endmsg;
         }
     }
 
@@ -248,7 +239,7 @@ namespace MuonGM {
             return;
         }
 
-        m_surfaceData->m_surfBounds.emplace_back(std::make_unique<Trk::RotatedTrapezoidBounds>(m_halfX, m_minHalfY, m_maxHalfY));
+        
 
 #ifndef NDEBUG
         MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
@@ -256,25 +247,27 @@ namespace MuonGM {
         for (int layer = 0; layer < m_nlayers; ++layer) {
             // identifier of the first channel
             Identifier id = manager()->mmIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, layer + 1, 1);
-
+            const double sAngle = m_etaDesign[layer].stereoAngle();
             m_surfaceData->m_layerSurfaces.emplace_back(std::make_unique<Trk::PlaneSurface>(*this, id));
-
+            m_surfaceData->m_surfBounds.emplace_back(std::make_unique<Trk::RotatedTrapezoidBounds>(m_halfX, m_minHalfY, m_maxHalfY, sAngle));
+         
             m_surfaceData->m_layerTransforms.push_back(
                 absTransform()                         // transformation from chamber to ATLAS frame
                 * m_delta                              // rotations (a-lines) from the alignment group
                 * m_Xlg[layer]                         // x-shift of the gas-gap center w.r.t. quadruplet center
                 * Amg::Translation3D(0., 0., m_offset) // z-shift to volume center
-                * Amg::AngleAxis3D(-90. * CLHEP::deg, Amg::Vector3D(0., 1., 0.))); // x<->z because of GeoTrd definition
+                * Amg::AngleAxis3D(-90. * CLHEP::deg, y_axis) // x<->z because of GeoTrd definition
+                * Amg::AngleAxis3D(sAngle, z_axis)); 
 
             // surface info (center, normal)
             m_surfaceData->m_layerCenters.push_back(m_surfaceData->m_layerTransforms.back().translation());
-            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 0., -1.));
+            m_surfaceData->m_layerNormals.push_back(m_surfaceData->m_layerTransforms.back().linear() * (-z_axis));
 
 #ifndef NDEBUG
-            double sAngle = m_etaDesign[layer].sAngle;
+           
             if (log.level() <= MSG::DEBUG)
                 log << MSG::DEBUG << "MMReadoutElement layer " << layer << " sAngle " << sAngle << " phi direction MM eta strip "
-                    << (m_surfaceData->m_layerTransforms.back().linear() * Amg::Vector3D(0., 1., 0.)).phi() << endmsg;
+                    << (m_surfaceData->m_layerTransforms.back().linear() * y_axis).phi() << endmsg;
 #endif
         }
     }
@@ -300,8 +293,13 @@ namespace MuonGM {
     //============================================================================
     Amg::Vector3D MMReadoutElement::localToGlobalCoords(const Amg::Vector3D& locPos, const Identifier& id) const {
         int gg = manager()->mmIdHelper()->gasGap(id);
-
-        Amg::Vector3D locPos_ML = (m_Xlg[gg - 1]) * Amg::Translation3D(0., 0., m_offset) * locPos;
+        //const MuonChannelDesign* design = getDesign(id);
+        Amg::Vector3D locPos_ML = (m_Xlg[gg - 1]) * Amg::Translation3D(0., 0., m_offset) * 
+                                 //   (design->hasStereoAngle() ?  
+                                 //    Amg::AngleAxis3D(90. * CLHEP::deg, y_axis) * Amg::AngleAxis3D(design->stereoAngle(), z_axis)  *
+                                 //    Amg::AngleAxis3D(-90. * CLHEP::deg, y_axis)  : AmgSymMatrix(3)::Identity())*
+        locPos;
+       
 #ifndef NDEBUG
         MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
         if (log.level() <= MSG::DEBUG) {
@@ -324,9 +322,9 @@ namespace MuonGM {
             m_delta = Amg::Translation3D(0., tras, 0.) // translations (applied after rotations)
                     * Amg::Translation3D(0., 0., traz)  
                     * Amg::Translation3D(trat, 0., 0.) 
-                    * Amg::AngleAxis3D(rots, Amg::Vector3D(0., 1., 0.))  // rotation about Y (applied 3rd)
-                    * Amg::AngleAxis3D(rotz, Amg::Vector3D(0., 0., 1.))  // rotation about Z (applied 2nd)
-                    * Amg::AngleAxis3D(rott, Amg::Vector3D(1., 0., 0.)); // rotation about X (applied 1st)
+                    * Amg::AngleAxis3D(rots, y_axis)  // rotation about Y (applied 3rd)
+                    * Amg::AngleAxis3D(rotz, z_axis)  // rotation about Z (applied 2nd)
+                    * Amg::AngleAxis3D(rott, x_axis); // rotation about X (applied 1st)
 
             // The origin of the rotation axes is at the center of the active area 
             // in the z (radial) direction. Account for this shift in the definition 
@@ -445,15 +443,18 @@ namespace MuonGM {
         locPosML[2] += dz;
     }
 
-
+    void MMReadoutElement::refreshCache() {
+        clearCache();
+        fillCache();
+    }
     //============================================================================
-    void MMReadoutElement::spacePointPosition(const Identifier& layerId, double locXpos, double locYseed, Amg::Vector3D& pos) const {
+    bool MMReadoutElement::spacePointPosition(const Identifier& layerId, const Amg::Vector2D& lpos, Amg::Vector3D& pos) const {
 
         const MuonChannelDesign* design = getDesign(layerId);
         if (!design) {
             MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
             log << MSG::WARNING << "Unable to get MuonChannelDesign, therefore cannot provide position corrections. Returning." << endmsg;
-            return;
+            return false;
         }
         
         bool conditionsApplied{false};
@@ -466,7 +467,6 @@ namespace MuonGM {
         const NswAsBuilt::StripCalculator* sc = manager()->getMMAsBuiltCalculator();
         if (sc) {
             // nearest strip to locXpos
-            Amg::Vector2D lpos(locXpos, 0.);
             int istrip = stripNumber(lpos, layerId);          
 
             // setup strip calculator
@@ -477,10 +477,8 @@ namespace MuonGM {
 
             // length of the ETA STRIP with index "istrip", even for the case of stereo strips, 
             // since NswAsBuilt handles the conversion to stereo as an internal transformation 
-            // (formula copied from MuonChannelDesign.h)
-            double ylength = design->inputLength + ((design->maxYSize - design->minYSize)*(istrip - design->nMissedBottomEta + 0.5)*design->inputPitch / design->xSize);
-            double sx      = design->distanceToChannel(lpos, istrip)/design->inputPitch; // in [-0.5, 0.5]
-            double sy      = 2*locYseed/ylength; // in [-1, 1]
+            const double sx      = design->distanceToChannel(lpos, istrip)/design->inputWidth; // in [-0.5, 0.5]
+            const double sy      = 2.*lpos.y()/design->channelLength(istrip); // in [-1, 1]
 
             // get the position coordinates, in the multilayer frame, from NswAsBuilt.
             // Applying a 2.75mm correction along the layer normal, since NswAsBuilt considers the layer 
@@ -488,7 +486,6 @@ namespace MuonGM {
             NswAsBuilt::StripCalculator::position_t calcPos = sc->getPositionAlongStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, sy, sx);
             pos     = calcPos.pos;
             pos[0] += strip_id.ilayer%2 ? -2.75 : 2.75;
-
             // signal that we are in the multilayer reference frame
             conditionsApplied = true;
             trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);               
@@ -499,9 +496,9 @@ namespace MuonGM {
         // Case as-built is not applied: correct x for the stereo angle (manually)
         // we are still at the layer reference frame
         //*********************
-        if (!conditionsApplied) {
-            pos[0] = locXpos + locYseed*std::tan(design->sAngle);
-            pos[1] = locYseed;
+        if (!conditionsApplied) {            
+            pos[0] = lpos.x();
+            pos[1] = lpos.y();
             pos[2] = 0.;
         }
 
@@ -520,5 +517,13 @@ namespace MuonGM {
 
         // back to nominal layer frame from where we started
         if (conditionsApplied) pos = trfToML.inverse()*pos;
+        return true;
+    }
+    void MMReadoutElement::clearALinePar() {
+        if (has_ALines()) {
+            m_ALinePar = nullptr; 
+            m_delta = Amg::Transform3D::Identity(); 
+            refreshCache();
+        }
     }
 }  // namespace MuonGM

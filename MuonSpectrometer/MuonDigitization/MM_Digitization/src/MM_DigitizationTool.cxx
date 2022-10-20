@@ -620,7 +620,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             if (geoStripNumber == -1) ATH_MSG_WARNING("Failed to retrieve strip number");
             // retrieve channel position of closest active strip
             Amg::Vector2D chPos;
-            if (!mmChannelDesign->channelPosition(geoStripNumber, chPos)) {
+            if (!mmChannelDesign->center(geoStripNumber, chPos)) {
                 ATH_MSG_DEBUG("Failed to retrieve channel position for closest strip number "
                               << geoStripNumber
                               << ". Can happen if hit was found in non-active strip. Will not digitize it, since in data, "
@@ -687,7 +687,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
                                                                       m_idHelperSvc->mmIdHelper().gasGap(layerID), stripNumber);
                 ATH_CHECK(m_smearingTool->getGainFraction(id, gainFraction));
             }
-            double stripPitch = detectorReadoutElement->getDesign(layerID)->channelWidth(positionOnSurface);
+            double stripPitch = detectorReadoutElement->getDesign(layerID)->channelWidth();
 
             MM_StripToolOutput tmpStripOutput =
                 m_StripsResponseSimulation->GetResponseFrom(stripDigitInput, gainFraction, stripPitch, rndmEngine);

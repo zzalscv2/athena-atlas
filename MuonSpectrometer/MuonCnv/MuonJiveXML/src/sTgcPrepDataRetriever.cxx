@@ -100,15 +100,15 @@ namespace JiveXML {
            }
 
            // recalculate length and globalPos for wires, because design->channelLength(channel) doesn't look sensible
-           double fulllength = design->xSize - design->deadO - design->deadI;
-           double locY = design->firstPos + (channel-1) * design->inputPitch * design->groupWidth;
-           if (std::abs(locY) > 0.5 * design->minYSize - design->deadS) { // triangle region
-              double dY = 0.5 * (design->maxYSize - design->minYSize - 2 * design->deadS);
-              length = (0.5 * design->maxYSize - design->deadS - std::abs(locY)) / dY * fulllength;
+           double fulllength = design->xSize();
+           double locY = design->firstPos() + (channel-1) * design->inputPitch * design->groupWidth;
+           if (std::abs(locY) > 0.5 * design->minYSize()) { // triangle region
+              double dY = 0.5 * (design->maxYSize() - design->minYSize());
+              length = (0.5 * design->maxYSize()  - std::abs(locY)) / dY * fulllength;
               if (std::abs(locY) > 873) { // trapezoid region in the outter most part of the large sector
                  length += 0.5*fulllength;
               }
-              element->surface(id).localToGlobal(Amg::Vector2D(pos.x(), pos.y()+0.5*(fulllength-length)), Amg::Vector3D(0., 0., 0.), globalPos);
+              element->surface(id).localToGlobal(Amg::Vector2D(pos.x(), pos.y()+0.5*(fulllength-length)), Amg::Vector3D::Zero(), globalPos);
            }
            else { // rectangular region
               length = fulllength;

@@ -96,7 +96,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
   /// magnetic field
   MagField::AtlasFieldCache fieldCache;
   if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;
-  Amg::Vector3D magneticField{0.,0.,0.};
+  Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
   fieldCache.getField(globalPos.data(), magneticField.data());
 
   /// get the component parallel to to the eta strips (same used in digitization)
@@ -126,9 +126,9 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
 StatusCode Muon::NSWCalibTool::calibrateStrip(const Identifier& id, const double time, const double charge, const double lorentzAngle, NSWCalib::CalibratedStrip& calibStrip) const {
 
   //get local positon
-  Amg::Vector2D locPos;
+  Amg::Vector2D locPos{Amg::Vector2D::Zero()};
   if(!localStripPosition(id,locPos)) {
-    ATH_MSG_WARNING("Failed to retrieve local strip position");
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to retrieve local strip position "<<m_idHelperSvc->toString(id));
     return StatusCode::FAILURE;
   }
   
@@ -155,18 +155,16 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
   //get local postion
   Amg::Vector2D locPos{0,0};
   if(!localStripPosition(rdoId,locPos)) {
-    ATH_MSG_WARNING("Failed to retrieve local strip position");
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to retrieve local strip position "<<m_idHelperSvc->toString(rdoId));
     return StatusCode::FAILURE;
   }
 
   // MuonDetectorManager from the conditions store
-  /// DO WE REALLY NEED THE DETECTOR MANAGER HERE? 
-  /// WHY DOES PREPDATA->surface().associatedDetEle not work?
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey, ctx};
   const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
 
   //get globalPos
-  Amg::Vector3D globalPos{0.,0.,0.};
+  Amg::Vector3D globalPos{Amg::Vector3D::Zero()};
   const MuonGM::MMReadoutElement* detEl = muDetMgr->getMMReadoutElement(rdoId);
   detEl->stripGlobalPosition(rdoId,globalPos);
 
@@ -186,7 +184,7 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
 
 
   //get stripWidth
-  detEl->getDesign(rdoId)->channelWidth(locPos); // positon is not used for strip width 
+  detEl->getDesign(rdoId)->channelWidth(); // positon is not used for strip width 
 
   calibStrip.distDrift = m_vDrift * calibStrip.time;
   calibStrip.resTransDistDrift = pitchErr + std::pow(m_transDiff * calibStrip.distDrift, 2);
@@ -201,21 +199,18 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muo
 StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const {
 
   Identifier rdoId = sTGCRawData->identify();
-
-  // MuonDetectorManager from the conditions store
-  /// AGAIN WHY DO WE NEED THE DETMGR?
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey, ctx};
   const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
 
   //get globalPos
-  Amg::Vector3D globalPos{0.,0.,0.};
+  Amg::Vector3D globalPos{Amg::Vector3D::Zero()};
   const MuonGM::sTgcReadoutElement* detEl = muDetMgr->getsTgcReadoutElement(rdoId);
   detEl->stripGlobalPosition(rdoId,globalPos);
   
   //get local postion
-  Amg::Vector2D locPos{0.,0.};
+  Amg::Vector2D locPos{Amg::Vector2D::Zero()};
   if(!localStripPosition(rdoId,locPos)) {
-    ATH_MSG_WARNING("Failed to retrieve local strip position");
+    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" Failed to retrieve local strip position "<<m_idHelperSvc->toString(rdoId));
     return StatusCode::FAILURE;
   }
 
@@ -247,7 +242,7 @@ StatusCode Muon::NSWCalibTool::distToTime(const EventContext& ctx, const Muon::M
   /// retrieve the magnetic field
   MagField::AtlasFieldCache fieldCache;
   if (!loadMagneticField(ctx, fieldCache)) return StatusCode::FAILURE;  
-  Amg::Vector3D magneticField{0.,0.,0.};
+  Amg::Vector3D magneticField{Amg::Vector3D::Zero()};
   fieldCache.getField(globalPos.data(), magneticField.data());
 
   /// get the component parallel to to the eta strips (same used in digitization)

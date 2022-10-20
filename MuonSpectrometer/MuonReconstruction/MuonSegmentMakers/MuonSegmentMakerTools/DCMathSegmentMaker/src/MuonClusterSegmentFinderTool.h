@@ -14,9 +14,11 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
+#include "MuonReadoutGeometry/ArrayHelper.h"
 #include "MuonRecHelperTools/IMuonEDMHelperSvc.h"
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
+#include "MuonRecToolInterfaces/IMuonTrackCleaner.h"
 #include "MuonRecToolInterfaces/IMuonTrackToSegmentTool.h"
 #include "MuonSegment/MuonSegment.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinderTool.h"
@@ -24,10 +26,106 @@
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkToolInterfaces/ITrackAmbiguityProcessorTool.h"
 #include "TrkToolInterfaces/ITrackSummaryTool.h"
-
 namespace Muon {
 
-    class IMuonTrackCleaner;
+    class MuonClusterSegmentFinderTool;
+    struct NSWSeed {
+
+        /// Struct caching the MuonClusterOnTrack and providing the
+        /// orientation of the strip in addtion
+        struct SeedMeasurement{
+            SeedMeasurement() = default;
+            explicit SeedMeasurement(const Muon::MuonClusterOnTrack* cl) ;
+            /// Accomodations of the interface to make the changes as transparent as possible
+            const Muon::MuonClusterOnTrack* get() const{return m_cl;}
+            const Muon::MuonClusterOnTrack* operator->() const{return get();}
+            operator const Muon::MuonClusterOnTrack* () const { return get(); }
+          
+            bool operator==(const SeedMeasurement& other) const {return get() == other.get();}
+            bool operator!() const {return !get();}
+            operator bool() const {return get();}
+                     
+            const Amg::Vector3D& dir() const {return *m_dir;}
+            const Amg::Vector3D& pos() const {return m_cl->globalPosition();}
+
+            double dirDot(const SeedMeasurement& other) const {return dirDot(other.dir());}
+            double dirDot(const Amg::Vector3D& v) const { return dir().dot(v); }
+        
+            void setDistance(double d){m_distance = d;}
+            double distance() const {return m_distance;}
+        private:
+            const Muon::MuonClusterOnTrack* m_cl{nullptr};
+            std::shared_ptr<const Amg::Vector3D> m_dir {nullptr};
+            double m_distance{0.};
+        };
+
+        NSWSeed() = default;
+
+        //// Constructor used for the three micro mega stereo seeds
+        NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
+                const AmgSymMatrix(2)& diamond);
+
+        //// Constructor to build seeds from 2 eta/phi strips
+        NSWSeed(const MuonClusterSegmentFinderTool* parent, const SeedMeasurement& first, const SeedMeasurement& second);
+        /// Constructor to build a seed from an existing segment
+        NSWSeed(const MuonClusterSegmentFinderTool* parent, const Muon::MuonSegment& seg);
+        //// Constructor to build a seed to create 3D segments
+        NSWSeed(const MuonClusterSegmentFinderTool* parent, const Amg::Vector3D& pos, const Amg::Vector3D& dir);
+
+        double chi2() const {return m_chi2;}
+        /// Returns the number of measurements
+        size_t size() const { return m_size; }
+        /// Returns the position of the seed
+        const Amg::Vector3D& pos() const { return m_pos; }
+        /// Returns the direction of the seed
+        const Amg::Vector3D& dir() const { return m_dir; }
+
+        /// Returns the contained measurements
+        using MeasVec = std::vector<SeedMeasurement>;
+        MeasVec measurements() const;
+        /// Tries to add the measurement to the seeds. Returns false if the measurement is incompatible with the seed or the seed is invalid
+        bool add(SeedMeasurement meas, double max_uncert);
+        /// Adds a calibrated cluster to the garbage collection
+        const Muon::MuonClusterOnTrack* newCalibClust(std::unique_ptr<const Muon::MuonClusterOnTrack> new_clust);
+
+        enum class SeedOR { NoOverlap, Same, SubSet, SuperSet };
+        SeedOR overlap(const NSWSeed& other) const;
+
+    private:
+        /// Returns the channel of the measurement on the layer
+        int channel(const SeedMeasurement& meas) const;
+        /// Checks whether the measurement is already part of the seed
+        bool find(const SeedMeasurement& meas) const;
+        /// Calculates the minimal distance between seed and measurement
+        double distance(const SeedMeasurement& meas) const;
+        bool insert(const Muon::MuonClusterOnTrack* cl);
+
+        bool insert(SeedMeasurement meas);
+
+        const MuonClusterSegmentFinderTool* m_parent{nullptr};
+        /// Helper pair to cache the measurements with the respective distances
+        using SeedMeasCache = std::array<SeedMeasurement, 16>;
+        /// Cache the eta measurements
+        SeedMeasCache m_measurements{};
+        /// Cache the phi measurements
+        SeedMeasCache m_phiMeasurements{};
+        /// Cache the sTGC pad measurements
+        SeedMeasCache m_padMeasurements{};
+        /// Starting position of the seed
+        Amg::Vector3D m_pos{Amg::Vector3D::Zero()};
+        /// Seed direction
+        Amg::Vector3D m_dir{Amg::Vector3D::Zero()};
+        /// seed width
+        double m_width{0.};
+        /// Chi2
+        double m_chi2{0.};
+        /// Added measurements on track
+        size_t m_size{0};
+        /// Combination of stereo layers is doomed from the beginning
+        bool m_singularDiamond{false};
+        /// Garbage container per seed
+        std::set<std::shared_ptr<const Muon::MuonClusterOnTrack>> m_calibClust{};
+    };
 
     class MuonClusterSegmentFinderTool : virtual public IMuonClusterSegmentFinderTool, public AthAlgTool {
     public:
@@ -35,11 +133,11 @@ namespace Muon {
         MuonClusterSegmentFinderTool(const std::string& type, const std::string& name, const IInterface* parent);
         /** destructor */
         virtual ~MuonClusterSegmentFinderTool() = default;
-  
+
         virtual StatusCode initialize() override;
 
     private:
-        ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
+        ServiceHandle<IMuonIdHelperSvc> m_idHelperSvc{
             this,
             "MuonIdHelperSvc",
             "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
@@ -66,7 +164,7 @@ namespace Muon {
             "TrackToSegmentTool",
             "Muon::MuonTrackToSegmentTool/MuonTrackToSegmentTool",
         };  //<! track to segment converter
-	PublicToolHandle<MuonEDMPrinterTool> m_printer{
+        PublicToolHandle<MuonEDMPrinterTool> m_printer{
             this,
             "Printer",
             "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
@@ -84,73 +182,89 @@ namespace Muon {
 
         ToolHandle<IMuonClusterOnTrackCreator> m_mmClusterCreator{this, "MMClusterCreator", ""};
         ToolHandle<IMuonClusterOnTrackCreator> m_stgcClusterCreator{this, "MuonClusterCreator", ""};
-     
-        Gaudi::Property<bool>   m_ipConstraint{ this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
-        Gaudi::Property<double> m_maxClustDist{ this, "ClusterDistance", 5.};
-        Gaudi::Property<int>    m_nOfSeedLayers{this, "NOfSeedLayers", 1};
+
+        Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
+        Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};
+        Gaudi::Property<int> m_nOfSeedLayers{this, "NOfSeedLayers", 1};
 
     public:
+        using SeedMeasurement = NSWSeed::SeedMeasurement;
+        using MeasVec = NSWSeed::MeasVec;
+        using LayerMeasVec = std::vector<MeasVec>;
+      
+
         // find segments given a list of MuonCluster
         // segments can be added directly to a SegmentCollection, if they are to be written to SG, or returned in a list for
         // further processing
-        void find(const EventContext& ctx, std::vector<const Muon::MuonClusterOnTrack*>& clusters, std::vector<std::unique_ptr<Muon::MuonSegment>>& segments,
-                  Trk::SegmentCollection* segColl, Trk::SegmentCollection* segPerQuadColl) const override;
-       
+        void find(const EventContext& ctx, std::vector<const Muon::MuonClusterOnTrack*>& clusters,
+                  std::vector<std::unique_ptr<Muon::MuonSegment>>& segments, Trk::SegmentCollection* segColl,
+                  Trk::SegmentCollection* segPerQuadColl) const override;
+
+        int wedgeNumber(const Muon::MuonClusterOnTrack* cluster) const;
+        int layerNumber(const Muon::MuonClusterOnTrack* cluster) const;
+
+        const IMuonIdHelperSvc* idHelper() const;
+        bool isPad(const Muon::MuonClusterOnTrack* clust) const;
+        template <size_t N>
+        std::string printSeed(const std::array<SeedMeasurement, N>& seed) const;
+        std::string print(const SeedMeasurement& meas) const;
+
     private:
+        enum HitType { Eta = 1, Phi = 1 << 1, Wire = 1 << 2, Pad = 1 << 3 };
+
+        std::vector<std::unique_ptr<Muon::MuonSegment>> findStereoSegments(const EventContext& ctx,
+                                                                           const std::vector<const Muon::MuonClusterOnTrack*>& allClusts,
+                                                                           int singleWedge = 0) const;
 
         // reconstruct the segments in the precision (eta) plane
-        void findPrecisionSegments(const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters,
-                                                            std::vector<std::unique_ptr<Muon::MuonSegment>>& etaSegs,
-                                                            int singleWedge = 0) const;
+        std::vector<std::unique_ptr<Muon::MuonSegment>> findPrecisionSegments(
+            const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters, int singleWedge = 0) const;
         // recontruct 3D segments
-        void find3DSegments(const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters, 
-                                                     std::vector<std::unique_ptr<Muon::MuonSegment>> & etaSegs,
-                                                     std::vector<std::unique_ptr<Muon::MuonSegment>> & segments, 
-                                                     Trk::SegmentCollection* segColl,
-                                                     int singleWedge = 0) const;
+        std::vector<std::unique_ptr<Muon::MuonSegment>> find3DSegments(const EventContext& ctx,
+                                                                       const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters,
+                                                                       std::vector<std::unique_ptr<Muon::MuonSegment>>& etaSegs,
+                                                                       int singleWedge = 0) const;
         // clean the clusters
-        std::vector<const Muon::MuonClusterOnTrack*> cleanClusters(const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters, bool selectPhiClusters, int singleWedge = 0) const;
+        MeasVec cleanClusters(const std::vector<const Muon::MuonClusterOnTrack*>& MuonClusters,
+                              int hit_sel, int singleWedge) const;
 
         // classify clusters by layer (one vector per layer)
-        std::vector<std::vector<const Muon::MuonClusterOnTrack*> > classifyByLayer(const std::vector<const Muon::MuonClusterOnTrack*>& clusters, bool usePads) const;
+        LayerMeasVec classifyByLayer(const MeasVec& clusters, int hit_sel) const;
 
         // find segment seeds
-        std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > segmentSeed(const std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedClusters, bool usePhi) const;
-                                                                          
-	    std::vector<std::pair<Amg::Vector3D,Amg::Vector3D> >  segmentSeedFromMM(const std::vector< Amg::Vector3D >& phiStereo) const;
+        std::vector<NSWSeed> segmentSeed(const LayerMeasVec& orderedClusters,
+                                         bool usePhi) const;
 
-        std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > segmentSeedFromPads(const std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedClusters, 
-                                                                                  const Muon::MuonSegment* etaSeg) const;
+        std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters) const;
+        std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters, 
+                                               std::array<unsigned int,4> selLayers,
+                                               unsigned int& trial_counter) const;
 
-        std::vector<std::pair<double, double> > getPadPhiOverlap(const std::vector<std::vector<const Muon::sTgcPrepData*> >& pads) const;
         
-        // remove identical seeds from a vector
-        void segmentSeedPhiOR(std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> >& seeds) const;
+        std::vector<NSWSeed> segmentSeedFromPads(const LayerMeasVec& orderedClusters,
+                                                 const Muon::MuonSegment& etaSeg) const;
+
+        std::vector<std::pair<double, double>> getPadPhiOverlap(const std::vector<std::vector<const Muon::sTgcPrepData*>>& pads) const;
 
         // associate clusters to the segment seeds
-        int getClustersOnSegment(const std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedclusters, 
-                                 const std::pair<Amg::Vector3D, Amg::Vector3D>& seed, 
-                                 std::vector<const Muon::MuonClusterOnTrack*>& clusOnSeg,
-                                 int singleWedge = 0) const;
+        int getClustersOnSegment(const LayerMeasVec& orderedclusters, NSWSeed& seed,
+                                 const std::set<unsigned int>& exclude) const;
 
         // get the clusters after calibration
-        std::vector<const Muon::MuonClusterOnTrack*> getCalibratedClusters(const std::vector<const Muon::MuonClusterOnTrack*>& clusters,
-                                                                           const std::pair<Amg::Vector3D, Amg::Vector3D>& seed) const;
-                                                                           
-        int wedgeNumber(const Muon::MuonClusterOnTrack* cluster) const;
-        
-        // distance of cluster to segment seed
-        double clusterDistanceToSeed(const Muon::MuonClusterOnTrack* clust, const std::pair<Amg::Vector3D, Amg::Vector3D>& seed) const;
+        MeasVec getCalibratedClusters(NSWSeed& seed) const;
 
         // fit eta and phi hits and fill the track collection
-        bool hitsToTrack(const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& etaHitVec, 
-                                                  const std::vector<const Muon::MuonClusterOnTrack*>& phiHitVec, 
-                                                  const Trk::TrackParameters& startpar,
-                                                  TrackCollection& segTrkColl) const;
-                                                                            
-	//get the phi-superpoint between two MM stereo layers
-	std::vector<Amg::Vector3D> getPhiFromStereo(const std::vector<const Muon::MuonClusterOnTrack*>& clusters) const;
+        bool hitsToTrack(const EventContext& ctx, const MeasVec& etaHitVec,
+                         const MeasVec& phiHitVec, const Trk::TrackParameters& startpar,
+                         TrackCollection& segTrkColl) const;
 
+        /// creates the IP constraint
+        std::unique_ptr<Trk::PseudoMeasurementOnTrack> ipConstraint(const EventContext& ctx) const;
+
+        std::vector<NSWSeed> resolveAmbiguities(std::vector<NSWSeed>&& unresolved) const;
+        std::vector<std::unique_ptr<Muon::MuonSegment>> resolveAmbiguities(const EventContext& ctx, const TrackCollection& segColl) const;
+        std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const std::vector<const Trk::MeasurementBase*>& fit_meas,
+                                        const Trk::TrackParameters& perigee) const;
     };
 
 }  // namespace Muon
