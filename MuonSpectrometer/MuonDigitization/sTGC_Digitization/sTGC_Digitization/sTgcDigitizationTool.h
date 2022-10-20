@@ -118,7 +118,7 @@ private:
 
   SG::WriteHandleKey<sTgcDigitContainer> m_outputDigitCollectionKey{this,"OutputObjectName","sTGC_DIGITS","WriteHandleKey for Output sTgcDigitContainer"}; // name of the output digits
   SG::WriteHandleKey<MuonSimDataCollection> m_outputSDO_CollectionKey{this,"OutputSDOName","sTGC_SDO","WriteHandleKey for Output MuonSimDataCollection"}; // name of the output SDOs
-  
+
   Gaudi::Property<bool> m_doSmearing{this,"doSmearing",false};
   Gaudi::Property<bool> m_needsMcEventCollHelper{this,"UseMcEventCollectionHelper",false};
   Gaudi::Property<bool> m_doToFCorrection{this,"doToFCorrection",false};
@@ -149,10 +149,10 @@ private:
   const float m_timeJitterElectronicsPad{2.f}; //ns
   const float m_hitTimeMergeThreshold{30.f}; //30ns = resolution of peak finding descriminator
 
-  
+
   bool m_deadtimeON{true};
   bool m_produceDeadDigits{false};
-  
+
   float m_deadtimeWire{5.f};
   float m_readtimeStrip{6.25f};
   float m_readtimePad{6.25f};
@@ -162,6 +162,9 @@ private:
 
   uint16_t bcTagging(const float digittime, const int channelType) const;
   int humanBC(uint16_t bctag);
+
+  float getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const;
+
 
 };
 
