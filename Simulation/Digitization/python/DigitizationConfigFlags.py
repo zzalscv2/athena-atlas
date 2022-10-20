@@ -42,11 +42,11 @@ def createDigitizationCfgFlags():
 
     flags.addFlag("Digitization.DigiSteeringConf", _checkDigiSteeringConf)
     # Run Inner Detector noise simulation
-    flags.addFlag("Digitization.DoInnerDetectorNoise", True)
+    flags.addFlag("Digitization.DoInnerDetectorNoise", lambda prevFlags: not prevFlags.Common.isOverlay)
     # Run pile-up digitization on one bunch crossing at a time?
     flags.addFlag("Digitization.DoXingByXingPileUp", False)
     # Run Calorimeter noise simulation
-    flags.addFlag("Digitization.DoCaloNoise", True)
+    flags.addFlag("Digitization.DoCaloNoise", lambda prevFlags: not prevFlags.Common.isOverlay)
     # Produce inputs for Calorimeter hard scatter truth reconstruction
     flags.addFlag("Digitization.EnableCaloHSTruthRecoInputs", False)
     # Use high-gain Forward Calorimeters
