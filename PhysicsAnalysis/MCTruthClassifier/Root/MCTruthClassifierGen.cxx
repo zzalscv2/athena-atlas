@@ -1336,7 +1336,7 @@ MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer* mcTruthTES,
   //-- McAtNLo
   if (abs(motherPDG) < 7 && numOfParents == 2 && NumOfMuPl == 1 && NumOfMuMin == 1 && partOriVert->barcode() == -1) {
     int pdg1 = partOriVert->incomingParticle(0)->pdgId();
-    int pdg2 = partOriVert->incomingParticle(0)->pdgId();
+    int pdg2 = partOriVert->incomingParticle(1)->pdgId();
     if (abs(pdg1) == abs(pdg2))
       return ZBoson;
   }
@@ -1877,29 +1877,29 @@ MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer* mcTruthTE
     int npartout(0);
 
     int nphtout(0);
-    if (partOriVert != nullptr) {
-      npartin = partOriVert->nIncomingParticles();
-      for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
-        if (!partOriVert->incomingParticle(ipIn))
-          continue;
-        if (abs(partOriVert->incomingParticle(ipIn)->pdgId()) < 7)
-          nqin++;
-        if (abs(partOriVert->incomingParticle(ipIn)->pdgId()) == 21)
-          ngin++;
-      }
-
-      npartout = partOriVert->nOutgoingParticles();
-      for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
-        if (!partOriVert->outgoingParticle(ipOut))
-          continue;
-        if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) < 7)
-          nqout++;
-        if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 21)
-          ngout++;
-        if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 22)
-          nphtout++;
-      }
+    //note: partOriVert is already derereferenced before here, so cannot be null
+    npartin = partOriVert->nIncomingParticles();
+    for (unsigned int ipIn = 0; ipIn < partOriVert->nIncomingParticles(); ipIn++) {
+      if (!partOriVert->incomingParticle(ipIn))
+        continue;
+      if (abs(partOriVert->incomingParticle(ipIn)->pdgId()) < 7)
+        nqin++;
+      if (abs(partOriVert->incomingParticle(ipIn)->pdgId()) == 21)
+        ngin++;
     }
+
+    npartout = partOriVert->nOutgoingParticles();
+    for (unsigned int ipOut = 0; ipOut < partOriVert->nOutgoingParticles(); ipOut++) {
+      if (!partOriVert->outgoingParticle(ipOut))
+        continue;
+      if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) < 7)
+        nqout++;
+      if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 21)
+        ngout++;
+      if (abs(partOriVert->outgoingParticle(ipOut)->pdgId()) == 22)
+        nphtout++;
+    }
+    
 
     if (npartout == 2 && npartin == 2 &&
         (((nqin == 2 && ngin == 0) && (nqout == 0 && ngout == 1 && nphtout == 1)) ||
