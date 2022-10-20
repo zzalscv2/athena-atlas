@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -810,7 +810,7 @@ StatusCode ISF::PunchThroughTool::registerCorrelation(int pdgID1, int pdgID2,
  *  ==> see headerfile
  *======================================================================*/
 
-std::unique_ptr<ISF::PDFcreator> ISF::PunchThroughTool::readLookuptablePDF(int pdg, const std::string& folderName)
+std::unique_ptr<ISF::PDFcreator> ISF::PunchThroughTool::readLookuptablePDF(int pdg, std::string folderName)
 {
 
   // will hold the PDFcreator class which will be returned at the end
@@ -852,10 +852,10 @@ std::unique_ptr<ISF::PDFcreator> ISF::PunchThroughTool::readLookuptablePDF(int p
           histName = hist2D->GetName();
         }
         //extract energy and eta from hist name 6 and 1 to position delimeters correctly
-        std::string strEnergy = histName.substr( histName.find_first_of('E') + 1, histName.find_first_of('_')-histName.find_first_of('E') - 1 );
-        histName.erase(0, histName.find_first_of('_') + 1);
-        std::string strEtaMin = histName.substr( histName.find("etaMin") + 6, histName.find_first_of('_') - histName.find("etaMin") - 6 );
-        histName.erase(0, histName.find('_') + 1);
+        std::string strEnergy = histName.substr( histName.find_first_of("E") + 1, histName.find_first_of("_")-histName.find_first_of("E") - 1 );
+        histName.erase(0, histName.find_first_of("_") + 1);
+        std::string strEtaMin = histName.substr( histName.find("etaMin") + 6, histName.find_first_of("_") - histName.find("etaMin") - 6 );
+        histName.erase(0, histName.find("_") + 1);
         std::string strEtaMax = histName.substr( histName.find("etaMax") + 6, histName.length());
 
         //convert string slice information to int and push back to vector

@@ -31,7 +31,7 @@
 # the postInclude adds a validation algorithm which writes out an ntuple for sim hit validation
 # (without the postInclude, a standard simulation job would run)
 
-cond_tag="default:OFLCOND-MC21-SDR-RUN3-05"
+cond_tag="default:OFLCOND-MC21-SDR-RUN3-09"
 Sim_tf.py --inputEVNTFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/mc16_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.merge.EVNT.e3601_e5984/EVNT.12228944._002158.pool.root.1 \
           --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
           --conditionsTag "${cond_tag}" \

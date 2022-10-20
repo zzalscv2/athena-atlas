@@ -42,4 +42,5 @@ Muon::NSW_TrigRawDataSegment::NSW_TrigRawDataSegment(const Muon::NSW_TrigRawData
   m_lowRes = segment.m_lowRes;
   m_phiRes = segment.m_phiRes;
   m_monitor = segment.m_monitor;
+  for (const auto &ch : segment.m_channels) this->addChannel(ch.first, ch.second);
 }

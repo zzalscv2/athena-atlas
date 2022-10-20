@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -24,7 +24,7 @@
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-void ISF::PDFcreator::addToEnergyEtaRangeHist1DMap(double energy, const std::vector<double>& etaMinEtaMax, TFCS1DFunction *hist) {
+void ISF::PDFcreator::addToEnergyEtaRangeHist1DMap(double energy, std::vector<double> etaMinEtaMax, TFCS1DFunction *hist) {
 
  if(m_energy_etaRange_hists1D.find(energy) != m_energy_etaRange_hists1D.end()){ //if energy entry exists, insert into inner eta map
    (m_energy_etaRange_hists1D.find(energy)->second).insert(std::make_pair(etaMinEtaMax, hist));
@@ -36,7 +36,7 @@ void ISF::PDFcreator::addToEnergyEtaRangeHist1DMap(double energy, const std::vec
  }
 }
 
-void ISF::PDFcreator::addToEnergyEtaRangeHist2DMap(double energy, const std::vector<double>& etaMinEtaMax, std::map< double , TFCS1DFunction* >  *hist){
+void ISF::PDFcreator::addToEnergyEtaRangeHist2DMap(double energy, std::vector<double> etaMinEtaMax, std::map< double , TFCS1DFunction* >  *hist){
   if(m_energy_etaRange_hists2D.find(energy) != m_energy_etaRange_hists2D.end()){ //if energy entry exists, insert into inner eta map
     (m_energy_etaRange_hists2D.find(energy)->second).insert(std::make_pair(etaMinEtaMax, hist));
   }

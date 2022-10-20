@@ -45,7 +45,7 @@ def TileCellMonitoringConfig(flags, **kwargs):
     kwargs.setdefault('TimeBalanceThreshold', 25 * ns)
     kwargs.setdefault('EnergyThresholdForGapScintilator', 0 * MeV)
     kwargs.setdefault('fillChannelTimeHistograms', True)
-    kwargs.setdefault('fillTimeAndEnergyDiffHistograms', False)
+    kwargs.setdefault('fillTimeAndEnergyDiffHistograms', flags.Common.isOnline)
     kwargs.setdefault('fillGapScintilatorHistograms', False)
     kwargs.setdefault('EnergyLimitForTime', 750.0 * GeV)
 

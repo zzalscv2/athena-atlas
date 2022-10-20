@@ -76,7 +76,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillContainers(const EventContext& ctx) co
 StatusCode TrigBphysMonitorAlgorithm::fillContainerHists(const EventContext& ctx, const SG::ReadHandleKey<xAOD::TrigBphysContainer>& trigBphysContainerKey) const {
   SG::ReadHandle<xAOD::TrigBphysContainer> trigBphysContainer(trigBphysContainerKey, ctx);
   if( !trigBphysContainer.isValid() ) {
-    ATH_MSG_ERROR("No valid TrigBphysContainer with tag: " << trigBphysContainerKey);
+    ATH_MSG_WARNING("No valid TrigBphysContainer with tag: " << trigBphysContainerKey);
   }
   else {
     // Fill container-wise histograms

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHTOOL_H
@@ -78,7 +78,7 @@ namespace ISF {
     StatusCode registerCorrelation(int pdgID1, int pdgID2,double minCorrEnergy = 0., double fullCorrEnergy = 0.);
 
     /** reads out the lookuptable for the given type of particle */
-    std::unique_ptr<ISF::PDFcreator> readLookuptablePDF(int pdgID, const std::string& folderName);
+    std::unique_ptr<ISF::PDFcreator> readLookuptablePDF(int pdgID, std::string folderName);
 
     /** create the right number of punch-through particles for the given pdg
      *  and return the number of particles which was created. also create these

@@ -7,7 +7,7 @@
 #include "TrigT1CaloEvent/TriggerTower_ClassDEF.h"
 #include "TrigT1CaloUtils/DataError.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
-
+#include "TrigT1CaloCalibConditions/L1CaloCoolChannelId.h" 
 // xAOD
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 // =============================================
@@ -30,7 +30,8 @@ StatusCode PprMonitorAlgorithm::initialize() {
   // We initialise all the containers that we need
   ATH_CHECK( AthMonitorAlgorithm::initialize() );
   ATH_CHECK( m_xAODTriggerTowerContainerName.initialize() );
- 
+  ATH_CHECK(m_errorLocation.initialize());
+
   // Initialize the groups for GenericMonitoringArrays
   std::vector<std::string> partitionsEM = {"LArFCAL1C", "LArEMECC", "LArOverlapC", "LArEMBC", "LArEMBA", "LArOverlapA", "LArEMECA", "LArFCAL1A"};
   m_groupTimeslice_EM = Monitored::buildToolMap<int>(m_tools, "groupTimeslice_EM", partitionsEM);
@@ -50,6 +51,9 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
   uint32_t bunchCrossing = 0;
   bunchCrossing = ctx.eventID().bunch_crossing_id();
   ATH_MSG_DEBUG("BCID: " << bunchCrossing);
+  const int eventNumber =  ctx.eventID().event_number();
+  ATH_MSG_DEBUG("Event Number" << eventNumber); 
+  
   
   // Retrieve Trigger Towers from SG
   SG::ReadHandle<xAOD::TriggerTowerContainer> triggerTowerTES(m_xAODTriggerTowerContainerName, ctx);
@@ -67,7 +71,9 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     ATH_CHECK( makePPMTower(tt, vecMonTT) );     
   }
 
-  
+  // Error vector for global overview
+  ErrorVector overview(8);
+
   // Loop over the trigger tower objects and fill the histograms 
  
   for (auto& myTower : vecMonTT) {
@@ -305,9 +311,77 @@ StatusCode PprMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const 
     
     fill(groupName, eta_TT, mask_PedCorrOverflow, mask_PedCorrUnderflow);
 
+
+    //------------ SubStatus Word errors ----------------
+    
+    using LVL1::DataError;
+    if ( (myTower.tower)->errorWord()) {
+      const LVL1::DataError err((myTower.tower)->errorWord());
+      const L1CaloCoolChannelId coolId((myTower.tower)->coolId());
+      const int crate  = coolId.crate();
+      const int module = coolId.module();
+      const int ypos = (crate < 4) ? module + crate * 16 : module + (crate - 4) * 16;
+
+      auto  eventMonitor= Monitored::Scalar<std::string>("eventMonitor", std::to_string(eventNumber));
+      auto y_2D = Monitored::Scalar<int>("y_2D", ypos);
+      
+      for (int bit = 0; bit < 8; ++bit) {
+	auto bit_2D = Monitored::Scalar<int>("bit_2D", bit);
+	
+	if (err.get(bit + DataError::ChannelDisabled)) {
+	  if (crate < 4) fill("groupErrorField03", bit_2D, y_2D );
+	  else fill("groupErrorField47", bit_2D, y_2D );
+	  fill("groupASICErrorEventNumbers", eventMonitor, bit_2D );
+	}
+
+	if (err.get(bit + DataError::GLinkParity)) {
+	  if (crate < 4) fill("groupStatus03", bit_2D, y_2D );
+	  else fill("groupStatus47", bit_2D, y_2D );
+	  fill("group1DErrorSummary", bit_2D);
+	  fill("groupErrorEventNumbers", eventMonitor, bit_2D );
+
+	}
+      }
+      
+      if (err.get(DataError::ChannelDisabled) ||
+	  err.get(DataError::MCMAbsent))
+	overview[crate] |= 1;
+
+      if (err.get(DataError::Timeout) || err.get(DataError::ASICFull) ||
+	  err.get(DataError::EventMismatch) ||
+	  err.get(DataError::BunchMismatch) ||
+	  err.get(DataError::FIFOCorrupt) || err.get(DataError::PinParity))
+	overview[crate] |= (1 << 1);
+
+      if (err.get(DataError::GLinkParity) ||
+	  err.get(DataError::GLinkProtocol) ||
+	  err.get(DataError::FIFOOverflow) ||
+	  err.get(DataError::ModuleError) || err.get(DataError::GLinkDown) ||
+	  err.get(DataError::GLinkTimeout) || err.get(DataError::BCNMismatch))
+	overview[crate] |= (1 << 2);
+
+      
+ 
+    }
+      
+
+    
+
   } // End loop over tower objects 
 
+  // Save error vector for global summary
+  {
+    auto save = std::make_unique<ErrorVector>(overview);
+    auto* result = SG::makeHandle(m_errorLocation, ctx).put(std::move(save));
+    if (!result) {
+      ATH_MSG_ERROR("Error recording PPM vector in TES");
+      return StatusCode::FAILURE;
+    }
+  }
   
+  
+  
+
   return StatusCode::SUCCESS;
 }
 
@@ -463,7 +537,7 @@ StatusCode PprMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
     ATH_MSG_DEBUG("etaTT_2D: " << etaTT_2D << " phiTT_2D: " << phiTT_2D << " weight_2D: " << weight_2D);    
     ATH_MSG_DEBUG("groupName: " << groupName); 
     fill(groupName, etaTT_2D, phiTT_2D, weight_2D);
-    
+   
   }      
 
   return StatusCode::SUCCESS;

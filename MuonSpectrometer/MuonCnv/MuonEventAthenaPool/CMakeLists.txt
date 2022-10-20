@@ -43,13 +43,15 @@ atlas_add_poolcnv_library( MuonEventAthenaPoolPoolCnv
          MuonTrigCoinData/RpcCoinDataContainer.h
          MuonChamberT0s/ChamberT0s.h src/MuonMeasurements.h
          MuonRDO/NSW_PadTriggerDataContainer.h
+         MuonRDO/NSW_TrigRawDataContainer.h
    TYPES_WITH_NAMESPACE Muon::STGC_RawDataContainer Muon::MM_RawDataContainer
                         Muon::CscPrepDataContainer
                         Muon::CscStripPrepRawDataContainer
                         Muon::RpcPrepDataContainer Muon::TgcPrepDataContainer
                         Muon::MdtPrepDataContainer Muon::MMPrepDataContainer
                         Muon::sTgcPrepDataContainer Muon::TgcCoinDataContainer
-                        Muon::ChamberT0s TPCnv::MuonMeasurements Muon::NSW_PadTriggerDataContainer
+                        Muon::ChamberT0s TPCnv::MuonMeasurements
+                        Muon::NSW_PadTriggerDataContainer Muon::NSW_TrigRawDataContainer
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaPoolUtilities
                   AtlasSealCLHEP MuonRDO MuonRIO_OnTrack MuonSegment

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PDFCREATOR_H
@@ -39,8 +39,8 @@ namespace ISF
 
     /** all following is used to set up the class */
     void setName( std::string PDFname ) { m_name = PDFname; }; // set the pdf's name
-    void addToEnergyEtaRangeHist1DMap(double energy, const std::vector<double>& etaMinEtaMax, TFCS1DFunction *hist); //add entry to map linking energy, eta window and histogram
-    void addToEnergyEtaRangeHist2DMap(double energy, const std::vector<double>& etaMinEtaMax, std::map< double , TFCS1DFunction* > *hist); //add entry to map linking energy, eta window and histogram
+    void addToEnergyEtaRangeHist1DMap(double energy, std::vector<double> etaMinEtaMax, TFCS1DFunction *hist); //add entry to map linking energy, eta window and histogram
+    void addToEnergyEtaRangeHist2DMap(double energy, std::vector<double> etaMinEtaMax, std::map< double , TFCS1DFunction* > *hist); //add entry to map linking energy, eta window and histogram
 
     /** get the random value with this method, by providing the input parameters */
     double getRand(CLHEP::HepRandomEngine* rndmEngine, const std::vector<double>& inputPar, const double& outEnergy = 0., const double& randMin = 0., const double& randMax = 0.) const;

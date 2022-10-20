@@ -31,13 +31,21 @@ StatusCode jFEXFormTOBs::initialize()
 }
 
 
-uint32_t jFEXFormTOBs::formTauTOB(int iPhi, int iEta, int EtClus, int IsoRing, int Resolution, int ptMinToTopo )
+uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int IsoRing, int Resolution, int ptMinToTopo )
 {
     uint32_t tobWord = 0;
     
     int eta = iEta-8; // needed to substract 8 to be in the FPGA core area
     int phi = iPhi-8; // needed to substract 8 to be in the FPGA core area
     int sat = 0; //1 bit for saturation flag, not coded yet
+    
+    // correcting C-side. mirror symmetry
+    if(jFEX == 1 || jFEX == 2){
+        eta = 15 - iEta;
+    }
+    else if(jFEX == 0){
+        eta = 16 - iEta ;
+    }
 
     unsigned int et = EtClus/Resolution;
     if (et > 0x7ff) { //0x7ff is 11 bits
@@ -94,22 +102,27 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     int Res = 0; // 11 bits reserved
     int Sat = 0; //  1 bit for saturation. Set to 1 when jet energy is saturated
 
-    if(jFEX > 0 && jFEX < 5) {
+    if(jFEX == 1 || jFEX == 2) {
 
-        eta = iEta -8;
-        phi = iPhi -8;
+        eta = 15 - iEta;
+        phi = iPhi - 8;
+    }
+    if(jFEX == 3 || jFEX == 4) {
+
+        eta = iEta - 8;
+        phi = iPhi - 8;
     }
     else if(jFEX == 5) {
 
-        eta = iEta -8;
+        eta = iEta - 8;
         if(iEta < FEXAlgoSpaceDefs::jFEX_algoSpace_A_EMIE_eta) { // ieta lower than EMIE stats -> belong to EMB
-            phi = iPhi-8;
+            phi = iPhi - 8;
         }
         else if(iEta < FEXAlgoSpaceDefs::jFEX_algoSpace_A_FCAL_start_eta) { // ieta lower than FCAL stats -> belong to EMIE
-            phi = iPhi -4;
+            phi = iPhi - 4;
         }
         else { // rest ieta belongs to FCAL
-            phi = iPhi -2;
+            phi = iPhi - 2;
         }
     }
     else if(jFEX == 0) {
@@ -153,11 +166,16 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     int Res = 0; // 9 bits reserved
     int Sat = 0; //  1 bit for saturation. Set to 1 when jet energy is saturated
 
-    if(jFEX > 0 && jFEX < 5) {
-        eta = iEta -8;
-        phi = iPhi -8;
-    }
+    if(jFEX == 1 || jFEX == 2) {
 
+        eta = 15 - iEta;
+        phi = iPhi - 8;
+    }
+    if(jFEX == 3 || jFEX == 4) {
+
+        eta = iEta - 8;
+        phi = iPhi - 8;
+    }
     else if(jFEX == 5) {
         eta = iEta -8;
 

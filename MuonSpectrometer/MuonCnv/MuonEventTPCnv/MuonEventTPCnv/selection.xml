@@ -177,4 +177,9 @@
     <class name="std::vector<Muon::NSW_PadTriggerData_p1>" />
     <class name="Muon::NSW_PadTriggerDataContainer_p1" id="5E3C969A-84BF-4DA1-94B9-F1A6A94C3123" />
 
+    <class name="Muon::NSW_TrigRawDataSegment_p1" />
+    <class name="std::vector<Muon::NSW_TrigRawDataSegment_p1>" />
+    <class name="Muon::NSW_TrigRawData_p1" />
+    <class name="std::vector<Muon::NSW_TrigRawData_p1>" />
+    <class name="Muon::NSW_TrigRawDataContainer_p1" id="5D25FB79-BFE3-44DC-9EEC-8A93CE7776B3" />
 </lcgdict>
