@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -304,10 +304,11 @@ namespace Analysis {
         for(auto jpsiItr=selectedJpsiCandidates.cbegin(); jpsiItr!=selectedJpsiCandidates.cend(); ++jpsiItr) {
 
             // Extract tracks from J/psi
+           
             const xAOD::TrackParticle* jpsiTP1 = tracks[0] =  (*jpsiItr)->trackParticle(0);
             const xAOD::TrackParticle* jpsiTP2 = tracks[1] =  (*jpsiItr)->trackParticle(1);
 
-	    //If requested, only exclude duplicates in the same tripplet
+	    //If requested, only exclude duplicates in the same triplet
             if(!m_excludeCrossJpsiTracks){
                 jpsiTracks.resize(2);
                 jpsiTracks[0] = jpsiTP1;
@@ -396,7 +397,7 @@ namespace Analysis {
                             if(masscut && PtPassed) { masspTpassed = true; break; } 
                         }
                     }
-                    if ((*jpsiItr)!=NULL && masspTpassed) {
+                    if (masspTpassed) {
                         // Set links to J/psi
                         std::vector<const xAOD::Vertex*> theJpsiPreceding;
                         theJpsiPreceding.push_back(*jpsiItr);
