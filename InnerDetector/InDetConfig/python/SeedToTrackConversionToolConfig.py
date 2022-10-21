@@ -34,8 +34,8 @@ def ITkSeedToTrackConversionToolCfg(flags, name="ITkSeedToTrackConversionTool", 
         kwargs.setdefault("Extrapolator", AtlasExtrapolator)
 
     if "RIO_OnTrackCreator" not in kwargs:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorDigitalCfg
-        RotCreator = acc.popToolsAndMerge(ITkRotCreatorDigitalCfg(flags))
+        from TrkConfig.TrkRIO_OnTrackCreatorConfig import ITkRotCreatorCfg
+        RotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(flags))
         acc.addPublicTool(RotCreator)
         kwargs.setdefault("RIO_OnTrackCreator", RotCreator)
 

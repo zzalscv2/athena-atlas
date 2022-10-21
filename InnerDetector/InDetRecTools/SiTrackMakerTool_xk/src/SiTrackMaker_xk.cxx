@@ -642,7 +642,9 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   /// this checks if all of the clusters on the seed are already on one single existing track.
   /// If not, we consider the seed to be "good"
   if (m_seedsfilter) isGoodSeed=newSeed(data, Sp);
-  if (!isGoodSeed) return tracks;
+  if (!m_seedsegmentsWrite && !isGoodSeed) {
+    return tracks;
+  }
 
   // Get AtlasFieldCache
   MagField::AtlasFieldCache fieldCache;
@@ -659,6 +661,13 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   /// Get initial parameters estimation from our seed
   std::unique_ptr<Trk::TrackParameters> Tp = nullptr;
   Tp = getAtaPlane(fieldCache, data, false, Sp, ctx);
+  if (m_seedsegmentsWrite && Tp) {
+    m_seedtrack->executeSiSPSeedSegments(data.conversionData(), Tp.get(), isGoodSeed, Sp);
+  }
+
+  if (m_seedsegmentsWrite && !isGoodSeed) {
+    return tracks;
+  }
   /// if we failed to get the initial parameters, we bail out.
   /// Can happen in certain pathological cases (e.g. malformed strip hits),
   /// or if we would be running with calo-ROI strip seeds (we aren't)
@@ -666,6 +675,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
      ++data.summaryStatAll()[kTotalNoTrackPar][K];
      return tracks;
   }
+
   /// otherwise, increment the 'good seeds' counter
   ++data.goodseeds();
 
@@ -742,12 +752,6 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
     ++data.summaryStatUsedInTrack()[kSeedsWithTracksEta][K][r];
     data.summaryStatAll()[kOutputTracks][K] += tracks.size();
     data.summaryStatAll()[kExtraTracks][K] += (tracks.size()-1);
-  }
-
-  // Call seed to track execution
-  //
-  if (m_seedsegmentsWrite) {
-    m_seedtrack->executeSiSPSeedSegments(data.conversionData(), Tp.get(), tracks.size(), Sp);
   }
 
   return tracks;

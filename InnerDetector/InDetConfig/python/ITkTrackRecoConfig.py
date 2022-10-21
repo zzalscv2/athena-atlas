@@ -83,7 +83,7 @@ def ITkTrackRecoCfg(flags):
                                               Tracks = TrackContainer,
                                               DetailedTruth = TrackContainer+"DetailedTruth",
                                               TracksTruth = TrackContainer+"TruthCollection"))
-
+                                              
             result.merge(ITkTrackParticleCnvAlgCfg(current_flags,
                                                    name = extension + "TrackParticleCnvAlg",
                                                    TrackContainerName = TrackContainer,
@@ -120,6 +120,18 @@ def ITkTrackRecoCfg(flags):
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import InDetPhysHitDecoratorAlgCfg
             result.merge(InDetPhysHitDecoratorAlgCfg(flags))
+    
+    if flags.ITk.Tracking.doStoreTrackSeeds:
+        TrackContainer = "SiSPSeedSegments"
+        result.merge(ITkTrackTruthCfg(flags,
+                                Tracks = TrackContainer,
+                                DetailedTruth = f"{TrackContainer}DetailedTruth",
+                                TracksTruth = f"{TrackContainer}TruthCollection"))
+
+        result.merge(ITkTrackParticleCnvAlgCfg(flags,
+                                                name = f"{TrackContainer}TrackParticleCnvAlg",
+                                                TrackContainerName = TrackContainer,
+                                                xAODTrackParticlesFromTracksContainerName = f"{TrackContainer}TrackParticles"))
 
     # output
     result.merge(ITkTrackRecoOutputCfg(flags))
@@ -179,6 +191,11 @@ def ITkTrackRecoOutputCfg(flags):
                 flags.ITk.Tracking.LargeD0Pass.extension
             )
         )
+    if flags.ITk.Tracking.doStoreTrackSeeds:
+        toAOD += [
+            "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
+            "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."
+        ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toAOD+toESD))

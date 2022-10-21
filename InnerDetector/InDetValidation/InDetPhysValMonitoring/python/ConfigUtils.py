@@ -18,9 +18,11 @@ def dumpConfigurables(obj):
 
 
 def extractCollectionPrefix(track_collection_name):
-    return (
-        track_collection_name[:-6] if track_collection_name[-6:] == 'Tracks'
-        else track_collection_name)
+    suffixes = ['Tracks', 'TrackParticles']
+    for suffix in suffixes:
+        if track_collection_name.endswith(suffix):
+            return track_collection_name.removesuffix(suffix)
+    return track_collection_name
 
 
 def toolFactory(tool_class):
