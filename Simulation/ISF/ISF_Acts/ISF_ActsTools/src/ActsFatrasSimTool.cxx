@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include <algorithm>
 #include <random>
@@ -58,7 +58,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
 
 StatusCode ISF::ActsFatrasSimTool::simulate(
   const ISFParticle& isp, ISFParticleContainer& secondaries,
-  McEventCollection* mcEventCollection) const {
+  McEventCollection* mcEventCollection) {
   ATH_MSG_VERBOSE("Particle " << isp << " received for simulation.");
   // Check if particle passes filter, if there is one
   if (!m_particleFilter.empty() && !m_particleFilter->passFilter(isp)) {
@@ -76,7 +76,7 @@ StatusCode ISF::ActsFatrasSimTool::simulate(
 StatusCode ISF::ActsFatrasSimTool::simulateVector(
     const ConstISFParticleVector& particles,
     ISFParticleContainer& secondaries,
-    McEventCollection* /*mcEventCollection*/) const {
+    McEventCollection* /*mcEventCollection*/) {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   m_randomEngine->setSeed(m_randomEngineName, ctx);

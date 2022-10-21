@@ -196,7 +196,7 @@ StatusCode ISF::FastCaloTool::commonSetup()
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::FastCaloTool::simulate(const ISFParticle& isp, ISFParticleContainer&, McEventCollection*) const
+StatusCode ISF::FastCaloTool::simulate(const ISFParticle& isp, ISFParticleContainer&, McEventCollection*)
 {
 
   ATH_MSG_VERBOSE( "FastCaloTool " << name() << " simulate()" );
@@ -220,7 +220,7 @@ StatusCode ISF::FastCaloTool::simulate(const ISFParticle& isp, ISFParticleContai
 }
 
 
-StatusCode ISF::FastCaloTool::processOneParticle( const ISF::ISFParticle& isfp) const {
+StatusCode ISF::FastCaloTool::processOneParticle( const ISF::ISFParticle& isfp) {
   ATH_MSG_VERBOSE ( "Simulating pdgid = "<< isfp.pdgCode());
 
   std::vector<Trk::HitInfo>* hitVector= caloHits(isfp);

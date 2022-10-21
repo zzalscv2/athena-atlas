@@ -57,7 +57,7 @@ public:
 
   virtual StatusCode initialize() override;
 
-  virtual StatusCode simulate( const ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) const override;
+  virtual StatusCode simulate( const ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) override;
 
   virtual StatusCode setupEventST() override;
 
@@ -75,7 +75,7 @@ private:
     StatusCode commonSetup();
 
     /** process the given particle */
-    StatusCode processOneParticle( const ISF::ISFParticle &isfp) const;
+    StatusCode processOneParticle( const ISF::ISFParticle &isfp);
 
     /** extrapolation through Calo */
     std::vector<Trk::HitInfo>* caloHits(const ISF::ISFParticle &isfp) const;

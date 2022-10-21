@@ -53,7 +53,7 @@ namespace ISF {
     virtual StatusCode initialize() override final;
 
     /** Simulation Call */
-    virtual StatusCode simulate(const ISFParticle& isp, ISFParticleContainer&, McEventCollection* mcEventCollection) const override final;
+    virtual StatusCode simulate(const ISFParticle& isp, ISFParticleContainer&, McEventCollection* mcEventCollection) override final;
 
     /** Setup Event chain - in case of a begin-of event action is needed */
     virtual StatusCode setupEvent(const EventContext&) override final;

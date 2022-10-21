@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PARTICLEKILLERSIMTOOL_h
@@ -27,10 +27,10 @@ public:
 
   virtual StatusCode initialize() override;
 
-  virtual StatusCode simulate( const ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) const override;
+  virtual StatusCode simulate( const ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) override;
 
   /** */
-  virtual StatusCode simulateVector(const ConstISFParticleVector& particles, ISFParticleContainer&, McEventCollection* ) const override;
+  virtual StatusCode simulateVector(const ConstISFParticleVector& particles, ISFParticleContainer&, McEventCollection* ) override;
 
   virtual StatusCode setupEvent(const EventContext&) override { return StatusCode::SUCCESS; };
 

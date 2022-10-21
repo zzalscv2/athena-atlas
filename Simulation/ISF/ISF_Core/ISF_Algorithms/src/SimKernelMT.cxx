@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -191,7 +191,7 @@ StatusCode ISF::SimKernelMT::execute() {
   unsigned int loopCounter{0};
   // loop until there are no more particles to simulate
   ISF::ConstISFParticleVector particles{};
-  const ISimulatorTool* lastSimulator{};
+  ISimulatorTool* lastSimulator{};
   ISFParticleContainer newSecondaries{};
   while ( particleQueue.size() ) {
     ++loopCounter;
@@ -294,7 +294,7 @@ StatusCode ISF::SimKernelMT::finalize() {
 
 
 /// Returns the simulator to use for the given particle
-const ISF::ISimulatorTool& ISF::SimKernelMT::identifySimulator(const ISF::ISFParticle& particle) const {
+ISF::ISimulatorTool& ISF::SimKernelMT::identifySimulator(const ISF::ISFParticle& particle) {
   AtlasDetDescr::AtlasRegion geoID = particle.nextGeoID();
 
   auto& localSelectors = m_simSelectors[geoID];
