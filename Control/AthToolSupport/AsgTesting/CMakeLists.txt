@@ -4,9 +4,11 @@
 atlas_subdir( AsgTesting )
 
 # External dependencies:
-find_package( Boost COMPONENTS regex )
+find_package( Boost COMPONENTS program_options regex )
 find_package( GTest )
 find_package( GMock )
+find_package( ROOT COMPONENTS Gpad Hist ROOTDataFrame TreePlayer )
+find_package( VDT )
 
 # Component(s) in the package:
 atlas_add_library( AsgTestingLib
@@ -16,6 +18,11 @@ atlas_add_library( AsgTestingLib
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    LINK_LIBRARIES AsgTools AsgMessagingLib ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES}
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} )
+
+atlas_add_executable( compareFlatTrees
+   utils/compareFlatTrees.cxx
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${VDT_LIBRARIES} )
 
 atlas_add_test( gt_UnitTest_test
    SOURCES test/gt_UnitTest_test.cxx
