@@ -135,6 +135,10 @@ def fromRunArgs(runArgs):
     # force TreeAutoFlush=1 as events will be accessed randomly
     cfg.merge(PoolWriteCfg(ConfigFlags, forceTreeAutoFlush=1))
 
+    # Ensure proper metadata propagation
+    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+    cfg.merge(IOVDbSvcCfg(ConfigFlags))
+
     # Identifiers
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
     cfg.merge(DetDescrCnvSvcCfg(ConfigFlags))
