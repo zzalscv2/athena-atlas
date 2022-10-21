@@ -229,7 +229,7 @@ namespace xAOD{
    ///
    bool MuonRoI_v1::getPhiOverlap() const {
      if (isRun3()) {
-       if (getSource() == Barrel) return (roiWord() >> RUN3_BARREL_OL_SHIFT) & RUN3_BARREL_OL_MASK;
+       if (getSource() == Barrel) return (roiWord() >> RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT) & RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK;
        else return false;
      } else {
        if (getSource() == Barrel) return (roiWord() >> BARREL_OL_SHIFT) & BARREL_PHI_OL_MASK;
