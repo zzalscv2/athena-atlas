@@ -70,14 +70,13 @@ V0Decorator = InDet__V0MainDecorator(name = "IDTR2V0Decorator",
 ToolSvc += V0Decorator
 
 
-
 from InDetTrackSelectorTool.InDetTrackSelectorToolConf import InDet__InDetConversionTrackSelectorTool
 IDTR2InDetV0VxTrackSelectorLoose = InDet__InDetConversionTrackSelectorTool(name                = "IDTR2InDetV0VxTrackSelectorLoose",
                                                                       maxSiD0             = 99999.,
                                                                       maxTrtD0            = 99999.,
                                                                       maxSiZ0             = 99999.,
                                                                       maxTrtZ0            = 99999.,
-                                                                      minPt               = 500.0,
+                                                                      minPt               = 1000.0,
                                                                       significanceD0_Si   = 0.,
                                                                       significanceD0_Trt  = 0.,
                                                                       significanceZ0_Trt  = 0.,
@@ -85,7 +84,6 @@ IDTR2InDetV0VxTrackSelectorLoose = InDet__InDetConversionTrackSelectorTool(name 
                                                                       IsConversion        = False)
 ToolSvc += IDTR2InDetV0VxTrackSelectorLoose
 print(IDTR2InDetV0VxTrackSelectorLoose)
-
 IDTR2_V0FinderTools.V0FinderTool.TrackParticleCollection = "InDetWithLRTTrackParticles"
 IDTR2_V0FinderTools.V0FinderTool.TrackSelectorTool = IDTR2InDetV0VxTrackSelectorLoose
 
@@ -171,9 +169,6 @@ VrtSecInclusive_InDet.PixelConditionsSummaryTool   = InDetPixelConditionsSummary
 
 VrtSecInclusive_InDet.doAugmentDVimpactParametersToMuons     = False
 VrtSecInclusive_InDet.doAugmentDVimpactParametersToElectrons = False
-
-VrtSecInclusive_InDet.twoTrkVtxFormingD0Cut = 0.0
-VrtSecInclusive_InDet.TrkPtCut = 500
 
 SeqIDTR2 += VrtSecInclusive_InDet
 
