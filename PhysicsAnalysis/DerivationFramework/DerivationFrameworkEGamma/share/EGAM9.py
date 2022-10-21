@@ -12,6 +12,12 @@ from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM9ExtraContent import *
 
+from DerivationFrameworkEGamma.TriggerContent import *
+
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
+print('MenuType: ', MenuType)
 
 #====================================================================
 # read common DFEGamma settings from egammaDFFlags
@@ -28,8 +34,6 @@ RecomputeEGammaSelectors = True
 # check if we run on data or MC
 #====================================================================
 print("DerivationFrameworkIsMonteCarlo: ", DerivationFrameworkIsMonteCarlo)
-if not DerivationFrameworkIsMonteCarlo:
-    ExtraContainersTrigger += ExtraContainersTriggerDataOnly
 
 
 #====================================================================
@@ -205,48 +209,14 @@ ToolSvc += EGAM9_OfflineSkimmingTool
 print("EGAM9 offline skimming tool:", EGAM9_OfflineSkimmingTool)
 
 
+
 #====================================================================
 # trigger based selection
 #====================================================================
-triggers =[]
+triggers  = BootstrapPhotonTriggers[MenuType]
+triggers += noalgTriggers[MenuType]
 
-# HLT_noalg_ triggers
-triggers += ['HLT_noalg_L1EM15VH']
-triggers += ['HLT_noalg_L1EM12']
-triggers += ['HLT_noalg_L1EM15']
-triggers += ['HLT_noalg_L1EM18VH']
-triggers += ['HLT_noalg_L1EM20VH']
-triggers += ['HLT_noalg_L1EM10']
-triggers += ['HLT_noalg_L1EM10VH']
-triggers += ['HLT_noalg_L1EM13VH']
-triggers += ['HLT_noalg_L1EM20VHI']
-triggers += ['HLT_noalg_L1EM22VHI']
-triggers += ['HLT_noalg_L1EM8VH']
 
-# pt_cut triggers
-triggers += ['HLT_g20_etcut_L1EM12']
-
-# Passed through triggers for bootstrapping
-triggers += ['HLT_g10_loose']
-triggers += ['HLT_g15_loose_L1EM7']
-triggers += ['HLT_g20_loose_L1EM12']
-triggers += ['HLT_g20_loose']
-triggers += ['HLT_g25_loose_L1EM15']
-triggers += ['HLT_g60_loose']
-triggers += ['HLT_g100_loose']
-triggers += ['HLT_g120_loose']
-triggers += ['HLT_g160_loose']
-triggers += ['HLT_g160_loose_L1EM24VHIM']
-triggers += ['HLT_g180_loose']
-triggers += ['HLT_g180_loose_L1EM24VHIM']
-triggers += ['HLT_g35_loose_L1EM15']
-triggers += ['HLT_g40_loose_L1EM15']
-triggers += ['HLT_g45_loose_L1EM15']
-triggers += ['HLT_g50_loose_L1EM15']
-triggers += ['HLT_g70_loose']
-triggers += ['HLT_g80_loose']
-triggers += ['HLT_g140_loose']
-triggers += ['HLT_g200_loose']
 
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
 EGAM9_TriggerSkimmingTool = DerivationFramework__TriggerSkimmingTool(   name = "EGAM9_TriggerSkimmingTool", TriggerListOR = triggers)
@@ -304,16 +274,17 @@ if DerivationFrameworkIsMonteCarlo:
 EGAM9SlimmingHelper.IncludeEGammaTriggerContent = True
 
 # Extra variables
-EGAM9SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM9SlimmingHelper.ExtraVariables = ExtraVariables
 EGAM9SlimmingHelper.AllVariables = ExtraContainersElectrons
 EGAM9SlimmingHelper.AllVariables += ExtraContainersPhotons
-EGAM9SlimmingHelper.AllVariables += ExtraContainersTrigger
+EGAM9SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM9SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+if not DerivationFrameworkIsMonteCarlo:
+    EGAM9SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM9SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM9SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM9SlimmingHelper.AllVariables += ExtraContainersTruth
-else:
-    EGAM9SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
 
 for tool in EGAM9_ClusterEnergyPerLayerDecorators:
     EGAM9SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations( tool ) )

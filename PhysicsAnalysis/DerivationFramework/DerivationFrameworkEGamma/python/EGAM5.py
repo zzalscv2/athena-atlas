@@ -15,6 +15,11 @@ from AthenaCommon.SystemOfUnits import MeV, GeV
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent )
 
+from DerivationFrameworkEGamma.TriggerContent import (
+    WTnPTriggers, ExtraContainersTrigger,
+    ExtraContainersElectronTrigger, ExtraContainersTriggerDataOnly )
+
+
 
 def EGAM5SkimmingToolCfg(flags):
     '''Configure the EGAM5 skimming tool'''
@@ -22,111 +27,14 @@ def EGAM5SkimmingToolCfg(flags):
 
 
     # 1st selection: trigger-based (WTP triggers)
-
-    # L1Topo W T&P 
-    triggers =  ['HLT_e13_etcut_trkcut' ]
-    triggers +=  ['HLT_e18_etcut_trkcut' ]
-    ## # Non-L1Topo W TP commissioning triggers ==> in MC, in 50 ns data
-    triggers +=  ['HLT_e13_etcut_trkcut_xs15' ]
-    triggers +=  ['HLT_e18_etcut_trkcut_xs20' ]
-    ## W T&P triggers ==> not in MC, in 50 ns data
-    triggers +=  ['HLT_e13_etcut_trkcut_xs15_mt25' ]
-    triggers +=  ['HLT_e18_etcut_trkcut_xs20_mt35' ]
-    ###W T&P triggers ==> not in MC, not in 50 ns data, will be in 25 ns data
-    triggers +=  ['HLT_e13_etcut_trkcut_xs15_j20_perf_xe15_2dphi05' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_xs15_j20_perf_xe15_2dphi05_mt25' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_2dphi05_mt25' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_2dphi05' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_xs15_j20_perf_xe15_6dphi05' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_xs15_j20_perf_xe15_6dphi05_mt25' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_6dphi05_mt25' ]
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_6dphi05' ]
-    triggers +=  ['HLT_e18_etcut_trkcut_xs20_j20_perf_xe20_6dphi15' ]
-    triggers +=  ['HLT_e18_etcut_trkcut_xs20_j20_perf_xe20_6dphi15_mt35' ]
-    triggers +=  ['HLT_e18_etcut_trkcut_j20_perf_xe20_6dphi15_mt35' ]
-    triggers +=  ['HLT_e18_etcut_trkcut_j20_perf_xe20_6dphi15' ]
-
-    # others
-    triggers +=  ['HLT_e5_etcut_L1W-05DPHI-JXE-0']
-    triggers +=  ['HLT_e5_etcut_L1W-10DPHI-JXE-0']
-    triggers +=  ['HLT_e5_etcut_L1W-15DPHI-JXE-0']
-    triggers +=  ['HLT_e5_etcut_L1W-10DPHI-EMXE-0']
-    triggers +=  ['HLT_e5_etcut_L1W-15DPHI-EMXE-0']
-    triggers +=  ['HLT_e5_etcut_L1W-05DPHI-EMXE-1']
-    triggers +=  ['HLT_e5_etcut_L1W-05RO-XEHT-0']
-    triggers +=  ['HLT_e5_etcut_L1W-90RO2-XEHT-0']
-    triggers +=  ['HLT_e5_etcut_L1W-250RO2-XEHT-0']
-    triggers +=  ['HLT_e5_etcut_L1W-HT20-JJ15.ETA49']
-    triggers +=  ['HLT_e13_etcut_L1W-NOMATCH']
-    triggers +=  ['HLT_e13_etcut_L1W-NOMATCH_W-05RO-XEEMHT']
-    triggers +=  ['HLT_e13_etcut_L1EM10_W-MT25']
-    triggers +=  ['HLT_e13_etcut_L1EM10_W-MT30']
-    triggers +=  ['HLT_e13_etcut_trkcut_L1EM12']
-    triggers +=  ['HLT_e13_etcut_trkcut_L1EM10_W-MT25_W-15DPHI-JXE-0_W-15DPHI-EMXE']
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_6dphi15_mt25']
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_6dphi15_mt25_L1EM12_W-MT25_W-15DPHI-JXE-0_W-15DPHI-EMXE_XS20']
-    triggers +=  ['HLT_e13_etcut_trkcut_j20_perf_xe15_6dphi15_mt25_L1EM12_W-MT25_W-15DPHI-JXE-0_W-15DPHI-EMXE_W-90RO2-XEHT-0']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_xe30_mt35']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_j15_perf_xe30_6dphi05_mt35']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_j15_perf_xe30_6dphi15_mt35']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_j15_perf_xe30_2dphi05_mt35']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_j15_perf_xe30_2dphi15_mt35']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_j15_perf_xe30_2dphi15_mt35_L1EM12_W-MT25_W-15DPHI-JXE-0_W-15DPHI-EMXE_XS20']
-    triggers +=  ['HLT_e13_etcut_trkcut_xs30_j15_perf_xe30_6dphi15_mt35_L1EM12_W-MT25_W-15DPHI-JXE-0_W-15DPHI-EMXE_W-90RO2-XEHT-0']
-    triggers +=  ['HLT_e18_etcut_L1EM15_W-MT35']
-    triggers +=  ['HLT_e18_etcut_trkcut_L1EM15']
-    triggers +=  ['HLT_e18_etcut_trkcut_L1EM15_W-MT35_W-05DPHI-JXE-0_W-05DPHI-EMXE']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_xe30_mt35']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi05_mt35']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi15_mt35']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_2dphi05_mt35']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_2dphi15_mt35']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi05_mt35_L1EM15_W-MT35_W-05DPHI-JXE-0_W-05DPHI-EM15XE_XS30'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi15_mt35_L1EM15_W-MT35_W-05DPHI-JXE-0_W-05DPHI-EM15XE_XS30'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_2dphi05_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-05DPHI-JXE-0_W-05DPHI-EM15XE'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_2dphi15_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-05DPHI-JXE-0_W-05DPHI-EM15XE'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_2dphi15_mt35_L1EM15_W-MT35_W-05DPHI-JXE-0_W-05DPHI-EM15XE_XS30']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi05_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-05DPHI-JXE-0_W-05DPHI-EM15XE']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi15_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-05DPHI-JXE-0_W-05DPHI-EM15XE']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_j15_perf_xe30_6dphi15_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-15DPHI-JXE-0_W-15DPHI-EM15XE']
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_xe30_mt35_L1EM15_W-MT35_W-05DPHI-JXE-0_W-05DPHI-EM15XE_XS30'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_xe30_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-05DPHI-JXE-0_W-05DPHI-EM15XE'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_xs30_xe30_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-15DPHI-JXE-0_W-15DPHI-EM15XE']
-    triggers +=  ['HLT_e18_etcut_trkcut_j20_perf_xe20_6dphi15_mt35_L1EM15_W-MT35_W-05DPHI-JXE-0_W-05DPHI-EM15XE_XS30'] 
-    triggers +=  ['HLT_e18_etcut_trkcut_j20_perf_xe20_6dphi15_mt35_L1EM15_W-MT35_W-250RO2-XEHT-0_W-05DPHI-JXE-0_W-05DPHI-EM15XE']
-
-    # added for 2017
-    triggers += ['HLT_e60_etcut']
-    triggers += ['HLT_e60_etcut_L1EM24VHIM']
-    triggers += ['HLT_e60_etcut_trkcut_L1EM24VHIM_j15_perf_xe60_6dphi15_mt35']
-    triggers += ['HLT_e60_etcut_trkcut_L1EM24VHIM_xe60_mt35']
-    triggers += ['HLT_e60_etcut_trkcut_L1EM24VHIM_xs30_j15_perf_xe30_6dphi15_mt35']
-    triggers += ['HLT_e60_etcut_trkcut_L1EM24VHIM_xs30_xe30_mt35']
-    triggers += ['HLT_e60_lhmedium_nod0']
-    triggers += ['HLT_e60_lhmedium_nod0_L1EM24VHI']
-    triggers += ['HLT_e60_lhmedium_nod0_L1EM24VHIM']
-    triggers += ['HLT_e60_lhvloose_nod0']
-    triggers += ['HLT_e60_etcut_trkcut_j15_perf_xe60_6dphi05_mt35']
-    triggers += ['HLT_e60_etcut_trkcut_xs30_j15_perf_xe30_6dphi05_mt35']
-    triggers += ['HLT_e70_etcut']
-    triggers += ['HLT_e70_etcut_L1EM24VHIM']
-    triggers += ['HLT_e70_lhloose_nod0_L1EM24VHIM_xe70noL1']
-    triggers += ['HLT_e70_lhloose_nod0_xe70noL1']
-    triggers += ['HLT_noalg_l1topo_L1EM15']
-    triggers += ['HLT_noalg_l1topo_L1EM7']
-    triggers += ['HLT_j80_xe80']
-    triggers += ['HLT_xe80_tc_lcw_L1XE50']
-    triggers += ['HLT_xe90_mht_L1XE50']
-    triggers += ['HLT_xe90_tc_lcw_wEFMu_L1XE50']
-    triggers += ['HLT_xe90_mht_wEFMu_L1XE50']
-    triggers += ['HLT_xe110_mht_L1XE50']
-    triggers += ['HLT_xe110_pufit_L1XE50']
-    
-    #added for low-mu data analysis, 2017 and 2018 data
-    triggers += ['HLT_e15_lhloose_nod0_L1EM12']
-    #added for low-mu data analysis, 2018 data
-    triggers += ['HLT_xe35']
-    triggers += ['HLT_e15_etcut_trkcut_xe30noL1']
+    MenuType = None
+    if flags.Trigger.EDMVersion == 2:
+        MenuType = 'Run2'
+    elif flags.Trigger.EDMVersion == 3:
+        MenuType = 'Run3'
+    else:
+        MenuType = ''
+    triggers = WTnPTriggers[MenuType]
     print('EGAM5 trigger skimming list (OR): ', triggers)
     
     EGAM5_TriggerSkimmingTool = \
@@ -438,34 +346,18 @@ def EGAM5Cfg(ConfigFlags):
         'GSFTrackParticles',
         'egammaClusters' ]
 
-    # for trigger studies we also add:  
-    EGAM5SlimmingHelper.AllVariables += [
-        'HLT_xAOD__ElectronContainer_egamma_Electrons',
-        'HLT_xAOD__ElectronContainer_egamma_ElectronsAux.',
-        'HLT_xAOD__PhotonContainer_egamma_Photons',
-        'HLT_xAOD__PhotonContainer_egamma_PhotonsAux.',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFex',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFexAux.',
-        'HLT_xAOD__TrigPhotonContainer_L2PhotonFex',
-        'HLT_xAOD__TrigPhotonContainer_L2PhotonFexAux.',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.',
-        'LVL1EmTauRoIs',
-        'LVL1EmTauRoIsAux.',
-        'HLT_TrigPassBitsCollection_passbits',
-        'HLT_TrigPassBitsCollection_passbitsAux.',
-        'HLT_TrigPassFlagsCollection_passflags',
-        'HLT_TrigPassFlagsCollection_passflagsAux.',
-        'HLT_TrigRoiDescriptorCollection_initialRoI',
-        'HLT_TrigRoiDescriptorCollection_initialRoIAux.'
-    ]
+    # for trigger studies we also add:
+    MenuType = None
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        MenuType = 'Run2'
+    elif ConfigFlags.Trigger.EDMVersion == 3:
+        MenuType = 'Run3'
+    else:
+        MenuType = ''
+    EGAM5SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+    EGAM5SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
     if not ConfigFlags.Input.isMC:
-        EGAM5SlimmingHelper.AllVariables += [
-            'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma',
-            'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux.'
-        ]
+        EGAM5SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
         
     # and on MC we also add:
     if ConfigFlags.Input.isMC:

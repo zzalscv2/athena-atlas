@@ -11,17 +11,23 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-#should not be needed
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent )
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
     ElectronsCPDetailedContent, GSFTracksCPDetailedContent )
 
+from DerivationFrameworkEGamma.TriggerContent import (
+    BootstrapPhotonTriggers, noalgTriggers,
+    ExtraContainersTrigger, ExtraContainersPhotonTrigger,
+    ExtraContainersTriggerDataOnly )
+
+
 # additional settings for this derivation
 thinCells = False
 keepCells = False
-applyTriggerSelection = False
+applyTriggerSelection = True
 saveJets = False
+
 
 def EGAM9SkimmingToolCfg(flags):
     '''Configure the EGAM9 skimming tool'''
@@ -36,44 +42,15 @@ def EGAM9SkimmingToolCfg(flags):
 
     if applyTriggerSelection:
         # trigger-based selection
-        # HLT_noalg_ triggers
-        triggers = []
-        triggers += ['HLT_noalg_L1EM15VH']
-        triggers += ['HLT_noalg_L1EM12']
-        triggers += ['HLT_noalg_L1EM15']
-        triggers += ['HLT_noalg_L1EM18VH']
-        triggers += ['HLT_noalg_L1EM20VH']
-        triggers += ['HLT_noalg_L1EM10']
-        triggers += ['HLT_noalg_L1EM10VH']
-        triggers += ['HLT_noalg_L1EM13VH']
-        triggers += ['HLT_noalg_L1EM20VHI']
-        triggers += ['HLT_noalg_L1EM22VHI']
-        triggers += ['HLT_noalg_L1EM8VH']
-
-        # pt_cut triggers
-        triggers += ['HLT_g20_etcut_L1EM12']
-
-        # Passed through triggers for bootstrapping
-        triggers += ['HLT_g10_loose']
-        triggers += ['HLT_g15_loose_L1EM7']
-        triggers += ['HLT_g20_loose_L1EM12']
-        triggers += ['HLT_g20_loose']
-        triggers += ['HLT_g25_loose_L1EM15']
-        triggers += ['HLT_g60_loose']
-        triggers += ['HLT_g100_loose']
-        triggers += ['HLT_g120_loose']
-        triggers += ['HLT_g160_loose']
-        triggers += ['HLT_g160_loose_L1EM24VHIM']
-        triggers += ['HLT_g180_loose']
-        triggers += ['HLT_g180_loose_L1EM24VHIM']
-        triggers += ['HLT_g35_loose_L1EM15']
-        triggers += ['HLT_g40_loose_L1EM15']
-        triggers += ['HLT_g45_loose_L1EM15']
-        triggers += ['HLT_g50_loose_L1EM15']
-        triggers += ['HLT_g70_loose']
-        triggers += ['HLT_g80_loose']
-        triggers += ['HLT_g140_loose']
-        triggers += ['HLT_g200_loose']
+        MenuType = None
+        if flags.Trigger.EDMVersion == 2:
+            MenuType = 'Run2'
+        elif flags.Trigger.EDMVersion == 3:
+            MenuType = 'Run3'
+        else:
+            MenuType = ''
+        triggers = BootstrapPhotonTriggers[MenuType]
+        triggers += noalgTriggers[MenuType]
         print('EGAM9 trigger skimming list (OR): ', triggers)    
         EGAM9_TriggerSkimmingTool = \
             CompFactory.DerivationFramework.TriggerSkimmingTool(
@@ -322,43 +299,17 @@ def EGAM9Cfg(ConfigFlags):
         'egammaClusters' ]
 
     # for trigger studies we also add:  
-    EGAM9SlimmingHelper.AllVariables += [
-        'HLT_xAOD__ElectronContainer_egamma_Electrons',
-        'HLT_xAOD__ElectronContainer_egamma_ElectronsAux.',
-        'HLT_xAOD__PhotonContainer_egamma_Photons',
-        'HLT_xAOD__PhotonContainer_egamma_PhotonsAux.',
-        'HLT_xAOD__PhotonContainer_egamma_Iso_Photons',
-        'HLT_xAOD__PhotonContainer_egamma_Iso_PhotonsAux.',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFex',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFexAux.',
-        'HLT_xAOD__TrigPhotonContainer_L2PhotonFex',
-        'HLT_xAOD__TrigPhotonContainer_L2PhotonFexAux.',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.',
-        'LVL1EmTauRoIs',
-        'LVL1EmTauRoIsAux.',
-        'HLT_TrigPassBitsCollection_passbits',
-        'HLT_TrigPassBitsCollection_passbitsAux.',
-        'HLT_TrigPassFlagsCollection_passflags',
-        'HLT_TrigPassFlagsCollection_passflagsAux.',
-        'HLT_TrigRoiDescriptorCollection_initialRoI',
-        'HLT_TrigRoiDescriptorCollection_initialRoIAux.'
-    ]
+    MenuType = None
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        MenuType = 'Run2'
+    elif ConfigFlags.Trigger.EDMVersion == 3:
+        MenuType = 'Run3'
+    else:
+        MenuType = ''
+    EGAM9SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+    EGAM9SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
     if not ConfigFlags.Input.isMC:
-        EGAM9SlimmingHelper.AllVariables += [
-            'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma',
-            'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux.',
-            'HLT_xAOD__CaloClusterContainer_TrigCaloClusterMaker',
-            'HLT_xAOD__CaloClusterContainer_TrigCaloClusterMakerAux.',
-            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTF',
-            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTFAux.',
-            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_L2ID',
-            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_L2IDAux.',
-            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrig',
-            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux.'
-        ]
+        EGAM9SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if ConfigFlags.Input.isMC:

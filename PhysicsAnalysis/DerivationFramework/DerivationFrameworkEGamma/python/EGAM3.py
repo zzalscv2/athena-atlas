@@ -15,6 +15,11 @@ from AthenaCommon.SystemOfUnits import MeV
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
     ElectronsCPDetailedContent, GSFTracksCPDetailedContent )
 
+from DerivationFrameworkEGamma.TriggerContent import (
+    ExtraContainersTrigger, ExtraContainersPhotonTrigger,
+    ExtraContainersElectronTrigger, ExtraContainersTriggerDataOnly,
+    ExtraVariablesHLTPhotons )
+
 
 def EGAM3SkimmingToolCfg(flags):
     '''Configure the EGAM3 skimming tool'''
@@ -414,43 +419,18 @@ def EGAM3Cfg(ConfigFlags):
         'ForwardElectronClusters' ]
     
     # for trigger studies we also add:
-    EGAM3SlimmingHelper.AllVariables += [
-        'HLT_xAOD__ElectronContainer_egamma_Electrons',
-        'HLT_xAOD__ElectronContainer_egamma_ElectronsAux.',
-        'HLT_xAOD__PhotonContainer_egamma_Photons',
-        'HLT_xAOD__PhotonContainer_egamma_PhotonsAux.',
-        'HLT_xAOD__PhotonContainer_egamma_Iso_Photons',
-        'HLT_xAOD__PhotonContainer_egamma_Iso_PhotonsAux.',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFex',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFexAux.',
-        'HLT_xAOD__TrigPhotonContainer_L2PhotonFex',
-        'HLT_xAOD__TrigPhotonContainer_L2PhotonFexAux.',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrig',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux.'
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.',
-        'LVL1EmTauRoIs',
-        'LVL1EmTauRoIsAux.',
-        'HLT_TrigPassBitsCollection_passbits',
-        'HLT_TrigPassBitsCollection_passbitsAux.',
-        'HLT_TrigPassFlagsCollection_passflags',
-        'HLT_TrigPassFlagsCollection_passflagsAux.',
-        'HLT_TrigRoiDescriptorCollection_initialRoI',
-        'HLT_TrigRoiDescriptorCollection_initialRoIAux.'
-    ]
+    MenuType = None
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        MenuType = 'Run2'
+    elif ConfigFlags.Trigger.EDMVersion == 3:
+        MenuType = 'Run3'
+    else:
+        MenuType = ''
+    EGAM3SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+    EGAM3SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+    EGAM3SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
     if not ConfigFlags.Input.isMC:
-        EGAM3SlimmingHelper.AllVariables +=[
-        'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma',
-        'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux.',
-        'HLT_xAOD__CaloClusterContainer_TrigCaloClusterMaker',
-        'HLT_xAOD__CaloClusterContainer_TrigCaloClusterMakerAux.',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTF',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTFAux.',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_L2ID',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_L2IDAux.',
-        ]
+        EGAM3SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
     # and on MC we also add:
     if ConfigFlags.Input.isMC:
@@ -541,6 +521,9 @@ def EGAM3Cfg(ConfigFlags):
     for tool in ClusterEnergyPerLayerDecorators:
         EGAM3SlimmingHelper.ExtraVariables.extend(
             getClusterEnergyPerLayerDecorations( tool ) )
+
+    # photon HLT variables
+    EGAM3SlimmingHelper.ExtraVariables += ExtraVariablesHLTPhotons[MenuType]
 
     # truth
     if ConfigFlags.Input.isMC:

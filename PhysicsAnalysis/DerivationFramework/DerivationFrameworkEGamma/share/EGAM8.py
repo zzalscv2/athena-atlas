@@ -28,8 +28,6 @@ RecomputeElectronSelectors = True
 # check if we run on data or MC
 #====================================================================
 print("DerivationFrameworkIsMonteCarlo: ", DerivationFrameworkIsMonteCarlo)
-if not DerivationFrameworkIsMonteCarlo:
-    ExtraContainersTrigger += ExtraContainersTriggerDataOnly
 
 
 #====================================================================
@@ -338,15 +336,12 @@ EGAM8SlimmingHelper.IncludeEGammaTriggerContent = True
 EGAM8SlimmingHelper.IncludeMuonTriggerContent = True
 
 # Extra variables
-EGAM8SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM8SlimmingHelper.ExtraVariables = ExtraVariables
 EGAM8SlimmingHelper.AllVariables = ExtraContainersElectrons
-EGAM8SlimmingHelper.AllVariables += ExtraContainersTrigger
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM8SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM8SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM8SlimmingHelper.AllVariables += ExtraContainersTruth
-else:
-    EGAM8SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
 
 for tool in EGAM8_ClusterEnergyPerLayerDecorators:
     EGAM8SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations( tool ) )

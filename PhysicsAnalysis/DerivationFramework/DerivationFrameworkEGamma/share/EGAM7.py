@@ -13,6 +13,12 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import (
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM7ExtraContent import *
+from DerivationFrameworkEGamma.TriggerContent import *
+
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
+
 
 
 #====================================================================
@@ -28,8 +34,6 @@ thinCells = True
 # check if we run on data or MC
 #====================================================================
 print("DerivationFrameworkIsMonteCarlo: ", DerivationFrameworkIsMonteCarlo)
-if not DerivationFrameworkIsMonteCarlo:
-    ExtraContainersTrigger += ExtraContainersTriggerDataOnly
 
 
 #====================================================================
@@ -230,102 +234,9 @@ ToolSvc += EGAM7_OfflineSkimmingTool
 print("EGAM7 offline skimming tool:", EGAM7_OfflineSkimmingTool)
 
 
-#====================================================================
-# trigger-based selection
-# prescaled _etcut triggers
-# prescaled _loose triggers
-# prescaled _lhloose triggers
-#====================================================================
-triggers =  ['HLT_e4_etcut'        ]
-triggers += ['HLT_e5_etcut'        ]
-triggers += ['HLT_e9_etcut'        ]            
-triggers += ['HLT_e10_etcut_L1EM7' ]            
-triggers += ['HLT_e14_etcut'       ]            
-triggers += ['HLT_e15_etcut_L1EM7' ]
-triggers += ['HLT_e17_etcut_L1EM15']            
-triggers += ['HLT_e20_etcut_L1EM12']            
-triggers += ['HLT_e25_etcut_L1EM15']            
-triggers += ['HLT_e30_etcut_L1EM15']            
-triggers += ['HLT_e40_etcut_L1EM15']            
-triggers += ['HLT_e50_etcut_L1EM15']            
-triggers += ['HLT_e60_etcut'       ]            
-triggers += ['HLT_e80_etcut'       ]            
-triggers += ['HLT_e100_etcut'      ]            
-triggers += ['HLT_e120_etcut'      ]            
-triggers += ['HLT_g10_etcut'       ]            
-triggers += ['HLT_g20_etcut_L1EM12']            
-triggers += ['HLT_g200_etcut'      ]            
-
-triggers += ['HLT_e5_lhloose'                      ]
-triggers += ['HLT_e5_lhvloose'                     ]
-triggers += ['HLT_e5_loose'                        ]
-triggers += ['HLT_e5_vloose'                       ]
-triggers += ['HLT_e10_lhvloose_L1EM7'              ]
-triggers += ['HLT_e10_vloose_L1EM7'                ]
-triggers += ['HLT_e12_lhloose'                     ]
-triggers += ['HLT_e12_lhloose_L1EM10VH'            ]
-triggers += ['HLT_e12_lhvloose_L1EM10VH'           ]
-triggers += ['HLT_e12_loose'                       ]
-triggers += ['HLT_e12_loose_L1EM10VH'              ]
-triggers += ['HLT_e12_vloose_L1EM10VH'             ]
-triggers += ['HLT_e15_lhloose_L1EM13VH'            ]
-triggers += ['HLT_e15_lhvloose_L1EM13VH'           ]
-triggers += ['HLT_e15_lhvloose_L1EM7'              ]
-triggers += ['HLT_e15_loose_L1EM13VH'              ]
-triggers += ['HLT_e15_vloose_L1EM13VH'             ]
-triggers += ['HLT_e15_vloose_L1EM7'                ]
-triggers += ['HLT_e17_lhloose'                     ]
-triggers += ['HLT_e17_lhloose_L1EM15'              ]
-triggers += ['HLT_e17_lhloose_cutd0dphideta_L1EM15']
-triggers += ['HLT_e17_lhloose_nod0_L1EM15'         ]
-triggers += ['HLT_e17_lhloose_nodeta_L1EM15'       ]
-triggers += ['HLT_e17_lhloose_nodphires_L1EM15'    ]
-triggers += ['HLT_e17_lhloose_L1EM15VHJJ1523ETA49' ]
-triggers += ['HLT_e17_lhvloose'                    ]
-triggers += ['HLT_e17_loose'                       ]
-triggers += ['HLT_e17_loose_L1EM15'                ]
-triggers += ['HLT_e17_loose_L1EM15VHJJ1523ETA49'   ]
-triggers += ['HLT_e17_vloose'                      ]
-triggers += ['HLT_e20_lhvloose'                    ]
-triggers += ['HLT_e20_lhvloose_L1EM12'             ]
-triggers += ['HLT_e20_vloose'                      ]
-triggers += ['HLT_e20_vloose_L1EM12'               ]
-triggers += ['HLT_e25_lhvloose_L1EM15'             ]
-triggers += ['HLT_e25_vloose_L1EM15'               ]
-triggers += ['HLT_e30_lhvloose_L1EM15'             ]
-triggers += ['HLT_e30_vloose_L1EM15'               ]
-triggers += ['HLT_e40_lhvloose'                    ]
-triggers += ['HLT_e40_lhvloose_L1EM15'             ]
-triggers += ['HLT_e40_vloose_L1EM15'               ]
-triggers += ['HLT_e50_lhvloose_L1EM15'             ]
-triggers += ['HLT_e50_vloose_L1EM15'               ]
-triggers += ['HLT_e60_loose'                       ]
-triggers += ['HLT_e60_vloose'                      ]
-triggers += ['HLT_e60_lhvloose'                    ]
-triggers += ['HLT_e70_etcut'                       ]
-triggers += ['HLT_e70_lhloose'                     ]
-triggers += ['HLT_e70_lhvloose'                    ]
-triggers += ['HLT_e70_loose'                       ]
-triggers += ['HLT_e70_vloose'                      ]
-triggers += ['HLT_e80_lhvloose'                    ]
-triggers += ['HLT_e80_vloose'                      ]
-triggers += ['HLT_e100_lhvloose'                   ]
-triggers += ['HLT_e100_vloose'                     ]
-triggers += ['HLT_e120_lhvloose'                   ]
-triggers += ['HLT_e120_lhloose'                    ]
-triggers += ['HLT_e120_loose'                      ]
-triggers += ['HLT_e120_vloose'                     ]
-triggers += ['HLT_e140_etcut'                      ]
-triggers += ['HLT_e160_etcut'                      ]
-triggers += ['HLT_e180_etcut'                      ]
-triggers += ['HLT_e200_etcut'                      ]
-triggers += ['HLT_e250_etcut'                      ]
-triggers += ['HLT_e300_etcut'                      ]
-triggers += ['HLT_g250_etcut'                      ]
-triggers += ['HLT_g300_etcut'                      ]
 
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
-EGAM7_TriggerSkimmingTool = DerivationFramework__TriggerSkimmingTool(   name = "EGAM7_TriggerSkimmingTool", TriggerListOR = triggers)
+EGAM7_TriggerSkimmingTool = DerivationFramework__TriggerSkimmingTool(   name = "EGAM7_TriggerSkimmingTool", TriggerListOR = BkgElectronTriggers[MenuType])
 ToolSvc += EGAM7_TriggerSkimmingTool
 print("EGAM7 trigger skimming tool:", EGAM7_TriggerSkimmingTool)
 
@@ -392,20 +303,18 @@ if DerivationFrameworkIsMonteCarlo:
 EGAM7SlimmingHelper.IncludeEGammaTriggerContent = True
 
 # Extra variables
-EGAM7SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM7SlimmingHelper.ExtraVariables = ExtraVariables
+
 EGAM7SlimmingHelper.AllVariables = ExtraContainersElectrons
-EGAM7SlimmingHelper.AllVariables += ExtraContainersTrigger
 
-# not available yet in R22
-#from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent
-#EGAM7SlimmingHelper.ExtraVariables.extend(BTaggingStandardContent("AntiKt4PV0TrackJets"))
-
+EGAM7SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM7SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+if not DerivationFrameworkIsMonteCarlo:
+    EGAM7SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM7SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM7SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM7SlimmingHelper.AllVariables += ExtraContainersTruth
-else:
-    EGAM7SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
 
 for tool in EGAM7_ClusterEnergyPerLayerDecorators:
     EGAM7SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations( tool ) )

@@ -1,20 +1,20 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #Content included in addition to the Smart Slimming Content
 
-ExtraContentElectrons=[
+ExtraVariablesElectrons=[
     "Electrons.Loose",
     "Electrons.Medium",
     "Electrons.Tight",
     ]
 
-ExtraElectronsTruth=[
+ExtraVariablesElectronsTruth=[
     "Electrons.truthOrigin",
     "Electrons.truthType",
     "Electrons.truthParticleLink"
     ]
 
-ExtraContentMuons=[
+ExtraVariablesMuons=[
     "Muons.ptcone20",
     "Muons.ptcone30",
     "Muons.ptcone40",
@@ -23,26 +23,18 @@ ExtraContentMuons=[
     "Muons.etcone40"
     ]
 
-ExtraMuonsTruth=[
-#    "MuonTruthParticles.e",
-#    "MuonTruthParticles.px",
-#    "MuonTruthParticles.py",
-#    "MuonTruthParticles.pz",
-#    "MuonTruthParticles.status",
-#    "MuonTruthParticles.pdgId",
-#    "MuonTruthParticles.truthOrigin",
-#    "MuonTruthParticles.truthType"
+ExtraVariablesMuonsTruth=[
     ]
 
-ExtraContentPhotons=[
+ExtraVariablesPhotons=[
 ]
 
-ExtraContentPrimaryVertices=["PrimaryVertices.x.y.sumPt2"]
+ExtraVariablesPrimaryVertices=["PrimaryVertices.x.y.sumPt2"]
 
-ExtraPhotonsTruth=[
+ExtraVariablesPhotonsTruth=[
 ]
 
-ExtraContentGSFConversionVertices=[
+ExtraVariablesGSFConversionVertices=[
         "GSFConversionVertices.x",
         "GSFConversionVertices.y",
         "GSFConversionVertices.z",
@@ -56,19 +48,14 @@ ExtraContentGSFConversionVertices=[
         "GSFConversionVertices.trackParticleLinks"
         ]
 
-ExtraContentHLTPhotons=[
-        "HLT_xAOD__PhotonContainer_egamma_Photons.e.pt.m.author.Rhad.Rhad1.e277.Reta.Rphi.weta2.f1.fracs1.wtots1.weta1.DeltaE.Eratio.caloClusterLinks",
-        "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex.calE.calEta.calPhi.calM.e_sampl.eta_sampl.etaCalo.phiCalo.ETACALOFRAME.PHICALOFRAME"
-]
 
 from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import GainDecorator, getGainDecorations
 GainDecoratorTool = GainDecorator()
-ExtraContentPhotons.extend( getGainDecorations(GainDecoratorTool) )
-ExtraContentElectrons.extend( getGainDecorations(GainDecoratorTool) )
+ExtraVariablesPhotons.extend( getGainDecorations(GainDecoratorTool) )
+ExtraVariablesElectrons.extend( getGainDecorations(GainDecoratorTool) )
 
-ExtraContentAll=ExtraContentElectrons+ExtraContentMuons+ExtraContentPhotons+ExtraContentGSFConversionVertices+ExtraContentHLTPhotons+ExtraContentPrimaryVertices
-ExtraContentAllTruth=ExtraElectronsTruth+ExtraMuonsTruth+ExtraPhotonsTruth
-
+ExtraVariables=ExtraVariablesElectrons+ExtraVariablesMuons+ExtraVariablesPhotons+ExtraVariablesGSFConversionVertices+ExtraVariablesPrimaryVertices
+ExtraVariablesTruth=ExtraVariablesElectronsTruth+ExtraVariablesMuonsTruth+ExtraVariablesPhotonsTruth
 
 ExtraContainersTruth=["TruthEvents", 
                       "TruthParticles",
@@ -81,33 +68,4 @@ ExtraContainersPhotons=["Photons",
                         "GSFTrackParticles",
                         "egammaClusters"]
 
-# for trigger studies and for trigger matching
-ExtraContainersTrigger=[
-        "HLT_xAOD__MuonContainer_MuonEFInfo",
-        "HLT_xAOD__MuonContainer_MuonEFInfoAux.",
-        "HLT_xAOD__MuonContainer_MuonEFInfo_FullScan",
-        "HLT_xAOD__MuonContainer_MuonEFInfo_FullScanAux.",
-        "HLT_xAOD__PhotonContainer_egamma_Photons",
-        "HLT_xAOD__PhotonContainer_egamma_PhotonsAux.",
-        "HLT_xAOD__PhotonContainer_egamma_Iso_Photons",
-        "HLT_xAOD__PhotonContainer_egamma_Iso_PhotonsAux.",
-        "HLT_xAOD__TrigPhotonContainer_L2PhotonFex",
-        "HLT_xAOD__TrigPhotonContainer_L2PhotonFexAux.",
-        "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex",
-        "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.",
-        "LVL1EmTauRoIs",
-        "LVL1EmTauRoIsAux.",
-        "HLT_TrigPassBitsCollection_passbits",
-        "HLT_TrigPassBitsCollection_passbitsAux.",
-        "HLT_TrigPassFlagsCollection_passflags",
-        "HLT_TrigPassFlagsCollection_passflagsAux.",
-        "HLT_TrigRoiDescriptorCollection_initialRoI",
-        "HLT_TrigRoiDescriptorCollection_initialRoIAux."
-        ]
 
-ExtraContainersTriggerDataOnly=[
-        "HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma",
-        "HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux.",
-        "HLT_xAOD__CaloClusterContainer_TrigCaloClusterMaker",
-        "HLT_xAOD__CaloClusterContainer_TrigCaloClusterMakerAux."
-        ]

@@ -11,6 +11,11 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import (
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM3ExtraContent import *
+from DerivationFrameworkEGamma.TriggerContent import *
+
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
 
 
 #====================================================================
@@ -37,7 +42,6 @@ print("DerivationFrameworkIsMonteCarlo: ", DerivationFrameworkIsMonteCarlo)
 if not DerivationFrameworkIsMonteCarlo:
     DoCellReweighting = False
     DoCellReweightingVariations = False
-    ExtraContainersTrigger += ExtraContainersTriggerDataOnly
 
 
 #====================================================================
@@ -570,9 +574,16 @@ if DoCellReweighting:
 
 
 # Extra variables
-EGAM3SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM3SlimmingHelper.ExtraVariables = ExtraVariables
+EGAM3SlimmingHelper.ExtraVariables += ExtraVariablesHLTPhotons[MenuType]
+
 EGAM3SlimmingHelper.AllVariables = ExtraContainersPhotons
-EGAM3SlimmingHelper.AllVariables += ExtraContainersTrigger
+
+EGAM3SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM3SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+EGAM3SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+if not DerivationFrameworkIsMonteCarlo:
+    EGAM3SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
 if DoCellReweighting:
     EGAM3SlimmingHelper.AllVariables += ["NewSwPhotons"]
@@ -581,10 +592,9 @@ if DoCellReweighting:
     EGAM3SlimmingHelper.ExtraVariables += ExtraContentReweightedElectrons
         
 if DerivationFrameworkIsMonteCarlo:
-    EGAM3SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM3SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM3SlimmingHelper.AllVariables += ExtraContainersTruth
-else:
-    EGAM3SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
+
 
 for tool in EGAM3_ClusterEnergyPerLayerDecorators:
     EGAM3SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations( tool ) )

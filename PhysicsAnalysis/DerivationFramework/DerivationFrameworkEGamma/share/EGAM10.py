@@ -10,9 +10,14 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFramewor
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM10ExtraContent import *
+from DerivationFrameworkEGamma.TriggerContent import *
 
 from DerivationFrameworkEGamma import EGammaIso
 pflowIsoVar,densityList,densityDict = EGammaIso.makeEGammaCommonIso()
+
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
 
 #====================================================================
 # read common DFEGamma settings from egammaDFFlags
@@ -149,222 +154,7 @@ print("EGAM10 offline skimming tool:", EGAM10_OfflineSkimmingTool)
 #====================================================================
 # SKIMMING TOOL - trigger-based selection
 #====================================================================
-# 2015 data triggers. unprescaled list validated with https://twiki.cern.ch/twiki/bin/viewauth/Atlas/LowestUnprescaled#Egamma_MET.
-# full list avaiable here: https://svnweb.cern.ch/trac/atlasoff/browser/Trigger/TriggerCommon/TrigMenuRulebook/trunk/python/Physics_pp_v5_rules.py (good luck)
-singlePhotonTriggers = ['HLT_g10_loose',
-                        'HLT_g15_loose_L1EM7',
-                        'HLT_g20_loose_L1EM12',
-                        'HLT_g25_loose_L1EM15 ',
-                        'HLT_g35_loose_L1EM15',
-                        'HLT_g25_loose',
-                        'HLT_g25_medium',
-                        'HLT_g35_loose',
-                        'HLT_g35_medium',
-                        'HLT_g40_loose_L1EM15',
-                        'HLT_g45_loose_L1EM15',
-                        'HLT_g50_loose_L1EM15',
-                        'HLT_g50_loose',
-                        'HLT_g60_loose',
-                        'HLT_g70_loose',
-                        'HLT_g80_loose',
-                        'HLT_g100_loose',
-                        'HLT_g120_loose',
-                        'HLT_g140_loose',
-                        'HLT_g140_loose_HLTCalo',
-                        'HLT_g200_etcut',
-                        'HLT_g10_etcut',
-                        'HLT_g20_etcut_L1EM12',
-                        'HLT_g300_etcut_L1EM24VHIM',
-                        'HLT_g22_tight',
-                        'HLT_g25_medium_L1EM22VHI',
-                        'HLT_g35_loose_L1EM22VHI',
-                        'HLT_g45_tight_L1EM22VHI',
-                        'HLT_g35_loose_L1EM24VHI',
-                        'HLT_g35_loose_L1EM26VHI',
-                        'HLT_g10_medium',
-                        'HLT_g15_loose_L1EM3',
-                        'HLT_g15_loose',
-                        'HLT_g20_loose',
-                        'HLT_g20_tight',
-                        'HLT_g40_tight',
-                        'HLT_g45_tight',
-                        'HLT_g60_loose_L1EM15VH ',
-                        'HLT_g180_loose',
-                        'HLT_g60_loose_L1EM24VHI',
-                        'HLT_g70_loose_L1EM24VHI',
-                        'HLT_g80_loose_L1EM24VHI',
-                        'HLT_g100_loose_L1EM24VHI',
-                        'HLT_g120_loose_L1EM24VHI',
-                        'HLT_g60_loose_L1EM26VHI',
-                        'HLT_g70_loose_L1EM26VHI',
-                        'HLT_g80_loose_L1EM26VHI',
-                        'HLT_g100_loose_L1EM26VHI',
-                        'HLT_g120_loose_L1EM26VHI',
-                        'HLT_g140_loose_L1EM26VHI',
-                        'HLT_g160_loose_L1EM26VHI',
-                        'HLT_g180_loose_L1EM26VHI',
-                        'HLT_200_loose_L1EM26VHI',
-                        'HLT_g20_loose_L1EM18VH',
-                        'HLT_g24_loose',
-                        'HLT_g35_medium_L1EM22VHI',
-                        'HLT_g35_medium_L1EM24VHI',
-                        'HLT_g10_loose_L1EM3',
-                        'HLT_g10_medium_L1EM3',
-                        'HLT_g140_tight_L1EM24VHIM',
-                        'HLT_g200_loose_L1EM24VHIM',
-                        'HLT_g20_tight_L1EM15VHI',
-                        'HLT_g20_tight_icalovloose_L1EM15VHI',
-                        'HLT_g20_tight_icalotight_L1EM15VHI',
-                        'HLT_g22_tight_L1EM15VHI',
-                        'HLT_g22_tight_icalovloose_L1EM15VHI',
-                        'HLT_g22_tight_icalotight_L1EM15VHI',
-                        'HLT_g25_loose_L1EM20VH',
-                        'HLT_g12_loose',
-                        'HLT_g12_medium',
-                        'HLT_g70_loose_L1EN24VHIM',
-                        'HLT_g80_loose_L1EM24VHIM',
-                        'HLT_g80_loose_icalovloose_L1EM24VHIM',
-                        'HLT_g60_loose_L1EM24VHIM',
-                        'HLT_g100_loose_L1EM24VHIM',
-                        'HLT_g120_loose_L1EM24VHIM',
-                        'HLT_g140_loose_L1EM24VHIM',
-                        'HLT_g160_loose_L1EM24VHIM',
-                        'HLT_g180_loose_L1EM24VHIM',
-                        'HLT_g35_loose_L1EM24VHIM',
-                        'HLT_g35_tight_icalotight_L1EM24VHIM',
-                        'HLT_g40_tight_icalotight_L1EM24VHIM',
-                        'HLT_g85_tight_L1EM24VHIM',
-                        'HLT_g85_tight_icalovloose_L1EM24VHIM',
-                        'HLT_g100_tight_L1EM24VHIM',
-                        'HLT_g100_tight_icalovloose_L1EM24',
-                        'HLT_g45_tight_L1EM24VHI',
-                        'HLT_g300_etcut_L1EM24VHI',
-                        'HLT_g85_tight_L1EM24VHI',
-                        'HLT_g100_tight',
-                        'HLT_g100_tight_L1EM24VHI',
-                        'HLT_g100_tight_icalovloose_L1EM24VHIM',
-                        'HLT_g70_loose_L1EM24VHIM',
-                        'HLT_g85_tight',
-                        'HLT_g6_loose',
-                        'HLT_g6_tight_icalotight',
-                        'HLT_g25_tight_L1EM20VH',
-                        'HLT_g15_loose_L1EM8VH',
-                        'HLT_g50_loose_L1EM20VH',
-                        'HLT_g60_loose_L1EM20VH',
-                        'HLT_g25_medium_L1EM20VH',
-                        'HLT_g35_medium_L1EM20VH',
-                        'HLT_g35_loose_L1EM20VH',
-                        'HLT_g22_tight_icalovloose',
-                        'HLT_g22_tight_icalotight',
-                        'HLT_g35_tight_icalotight_L1EM24VHI',
-                        'HLT_g40_tight_icalotight_L1EM24VHI',
-                        'HLT_g85_tight_icalovloose_L1EM24VHI',
-                        'HLT_g100_tight_icalovloose_L1EM24VHI',
-                        'HLT_g35_medium_icalovloose',
-                        'HLT_g35_medium_icalotight',
-                        'HLT_g15_etcut_L1EM7',
-                        'HLT_g20_medium_L1EM15',
-                        'HLT_g20_tight_L1EM15',
-                        'HLT_g20_etcut_L1EM15',
-                        'HLT_g20_medium',
-                        'HLT_g20_etcut',
-                        'HLT_g25_medium_L1EM15',
-                        'HLT_g25_tight_L1EM15',
-                        'HLT_g25_etcut_L1EM15',
-                        'HLT_g30_loose_L1EM15',
-                        'HLT_g30_etcut_L1EM15']
-
-
-diPhotonTriggers = ['HLT_2g20_loose_L12EM15',
-                    'HLT_2g20_loose',
-                    'HLT_2g20_tight',
-                    'HLT_2g22_tight',
-                    'HLT_2g25_tight',
-                    'HLT_g35_loose_g25_loose',
-                    'HLT_g35_medium_HLTCalo_g25_medium_HLTCalo',
-                    'HLT_g35_loose_L1EM15_g25_loose_L1EM15',
-                    'HLT_g35_loose_L1EM15VH_g25_loose_L1EM15VH',
-                    'HLT_g35_medium_g25_medium',
-                    'HLT_2g50_loose',
-                    'HLT_2g60_loose_L12EM15VH ',
-                    'HLT_2g10_loose',
-                    'HLT_2g50_loose_L12EM18VH',
-                    'HLT_2g60_loose_L12EM18VH',
-                    'HLT_2g50_loose_L12EM20VH',
-                    'HLT_g50_loose_L12EM18VH',
-                    'HLT_g60_loose_L12EM18VH',
-                    'HLT_g50_loose_L12EM20VH',
-                    'HLT_g60_loose_L12EM20VH',
-                    'HLT_2g25_tight_L12EM20VH',
-                    'HLT_g35_loose_g25_loose_L12EM18VH',
-                    'HLT_g35_loose_g25_loose_L12EM20VH ',
-                    'HLT_g35_medium_g25_medium_L12EM18VH',
-                    'HLT_g35_medium_g25_medium_L12EM20VH',
-                    'HLT_2g20_tight_L12EM15VHI',
-                    'HLT_2g20_tight_icalovloose_L12EM15VHI',
-                    'HLT_2g20_tight_icalotight_L12EM15VHI',
-                    'HLT_2g22_tight_L12EM15VHI',
-                    'HLT_2g22_tight_icalovloose_L12EM15VHI',
-                    'HLT_2g22_tight_icalotight_L12EM15VHI',
-                    'HLT_2g60_loose_L12EM20VH',
-                    'HLT_2g3_loose_dPhi15_L12EM3_VTE50',
-                    'HLT_2g3_loose_L12EM3_VTE50',
-                    'HLT_2g3_medium_dPhi15_L12EM3_VTE50',
-                    'HLT_2g22_tight_icalovloose',
-                    'HLT_2g22_tight_icalotight',
-                    'HLT_2g10_loose_L12EM7',
-                    'HLT_2g15_loose_L12EM7']
-
-
-triPhotonTriggers = ['HLT_3g15_loose',
-                     'HLT_g20_loose_2g15_loose_L12EM13VH',
-                     'HLT_2g20_loose_g15_loose',
-                     'HLT_3g20_loose',
-                     'HLT_3g20_loose_L12EM18VH',
-                     'HLT_2g24_loose_g15_loose',
-                     'HLT_2g24_g20_loose',
-                     'HLT_3g24_loose_L12EM20VH',
-                     'HLT_2g25_loose_g15_loose',
-                     'HLT_2g25_loose_g20_loose',
-                     'HLT_3g25_loose']
-
-firstDataTriggers = ['HLT_2g10_loose',
-                     'HLT_g20_loose_L1EM15']
-
-# 2016 data triggers (preliminary)
-# full list avaiable here: https://svnweb.cern.ch/trac/atlasoff/browser/Trigger/TriggerCommon/TriggerMenu/trunk/python/menu/Physics_pp_v6.py (good luck)
-singlePhotonTriggers_2016 = ['HLT_g140_loose',
-                             'HLT_g160_loose',
-                             'HLT_g200_loose',
-                             'HLT_g140_tight',
-                             'HLT_g250_etcut',
-                             'HLT_g300_etcut']
-
-diPhotonTriggers_2016 = ['HLT_g35_medium_g25_medium',
-                         'HLT_2g50_loose',
-                         'HLT_2g60_loose_L12EM15VH',
-                         'HLT_2g20_tight',
-                         'HLT_2g22_tight']
-
-triPhotonTriggers_2016 = ['HLT_2g20_loose_g15_loose',
-                          'HLT_3g20_loose']
-
-noalgTriggers = ['HLT_noalg_L1EM12',
-                 'HLT_noalg_L1EM15',
-                 'HLT_noalg_L1EM18VH',
-                 'HLT_noalg_L1EM20VH',
-                 'HLT_noalg_L1EM10',
-                 'HLT_noalg_L1EM10VH',
-                 'HLT_noalg_L1EM13VH',
-                 'HLT_noalg_L1EM20VHI',
-                 'HLT_noalg_L1EM22VHI',
-                 'HLT_noalg_L1EM8VH',
-                 'HLT_noalg_L1EM15VH',
-                 'HLT_noalg_L12EM7',
-                 'HLT_noalg_L12EM15']
-
-allTriggers = singlePhotonTriggers + diPhotonTriggers + triPhotonTriggers + firstDataTriggers + singlePhotonTriggers_2016 + diPhotonTriggers_2016 + triPhotonTriggers_2016 + noalgTriggers
-
+allTriggers = singlePhotonTriggers[MenuType] + diPhotonTriggers[MenuType] + triPhotonTriggers[MenuType] + noalgTriggers[MenuType]
 #remove duplicates
 allTriggers = list(set(allTriggers))
 
@@ -427,7 +217,7 @@ EGAM10SlimmingHelper.SmartCollections = ["Electrons",
 EGAM10SlimmingHelper.IncludeEGammaTriggerContent = True
 
 # Extra variables
-EGAM10SlimmingHelper.ExtraVariables = ExtraContentElectrons + ExtraContentPhotons + ExtraContentVtx + ExtraContentTrk + ExtraContentJets + ExtraContentEventShape
+EGAM10SlimmingHelper.ExtraVariables = ExtraVariablesElectrons + ExtraVariablesPhotons + ExtraVariablesVtx + ExtraVariablesTrk + ExtraVariablesJets + ExtraVariablesEventShape
 
 EGAM10SlimmingHelper.AppendToDictionary.update(densityDict)
 EGAM10SlimmingHelper.ExtraVariables += densityList + [f'Photons{pflowIsoVar}']
@@ -446,7 +236,7 @@ EGAM10SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
 # additional truth-level variables
 if DerivationFrameworkIsMonteCarlo:
-    EGAM10SlimmingHelper.ExtraVariables += ExtraElectronsTruth+ExtraPhotonsTruth
+    EGAM10SlimmingHelper.ExtraVariables += ExtraVariablesElectronsTruth+ExtraVariablesPhotonsTruth
     EGAM10SlimmingHelper.AllVariables   += ExtraContainersTruth+ExtraContainersTruthPhotons
     EGAM10SlimmingHelper.AllVariables   += ["TruthIsoCentralEventShape", "TruthIsoForwardEventShape"]
     EGAM10SlimmingHelper.AppendToDictionary.update(ExtraDictionary)

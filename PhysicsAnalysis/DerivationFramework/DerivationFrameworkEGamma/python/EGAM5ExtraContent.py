@@ -2,7 +2,7 @@
 
 #Content included in addition to the Smart Slimming Content
 
-ExtraContentMuons=[
+ExtraVariablesMuons=[
     "Muons.ptcone20",
     "Muons.ptcone30",
     "Muons.ptcone40",
@@ -11,7 +11,7 @@ ExtraContentMuons=[
     "Muons.etcone40"
 ]
 
-ExtraMuonsTruth=[
+ExtraVariablesMuonsTruth=[
     "MuonTruthParticles.e",
     "MuonTruthParticles.px",
     "MuonTruthParticles.py",
@@ -22,21 +22,21 @@ ExtraMuonsTruth=[
     "MuonTruthParticles.truthType"
 ]
 
-ExtraContentPhotons=[
+ExtraVariablesPhotons=[
 ]
 
-ExtraContentElectrons=[
+ExtraVariablesElectrons=[
 ]
 
-ExtraContentPrimaryVertices=["PrimaryVertices.x.y.sumPt2"]
+ExtraVariablesPrimaryVertices=["PrimaryVertices.x.y.sumPt2"]
 
-ExtraPhotonsTruth=[
+ExtraVariablesPhotonsTruth=[
     "Photons.truthOrigin",
     "Photons.truthType",
     "Photons.truthParticleLink"
 ]
 
-ExtraContentGSFConversionVertices=[
+ExtraVariablesGSFConversionVertices=[
         "GSFConversionVertices.x",
         "GSFConversionVertices.y",
         "GSFConversionVertices.z",
@@ -52,11 +52,11 @@ ExtraContentGSFConversionVertices=[
 
 from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import GainDecorator, getGainDecorations
 GainDecoratorTool = GainDecorator()
-ExtraContentPhotons.extend( getGainDecorations(GainDecoratorTool) )
-ExtraContentElectrons.extend( getGainDecorations(GainDecoratorTool) )
+ExtraVariablesPhotons.extend( getGainDecorations(GainDecoratorTool) )
+ExtraVariablesElectrons.extend( getGainDecorations(GainDecoratorTool) )
 
-ExtraContentAll=ExtraContentElectrons+ExtraContentMuons+ExtraContentPhotons+ExtraContentGSFConversionVertices+ExtraContentPrimaryVertices
-ExtraContentAllTruth=ExtraMuonsTruth+ExtraPhotonsTruth
+ExtraVariables=ExtraVariablesElectrons+ExtraVariablesMuons+ExtraVariablesPhotons+ExtraVariablesGSFConversionVertices+ExtraVariablesPrimaryVertices
+ExtraVariablesTruth=ExtraVariablesMuonsTruth+ExtraVariablesPhotonsTruth
 
 ExtraContainersTruth=["TruthEvents", 
                       "TruthParticles",
@@ -69,34 +69,3 @@ ExtraContainersElectrons=["Electrons",
                           "egammaClusters"
                           ]
 
-# for trigger studies
-ExtraContainersTrigger=[
-        "HLT_xAOD__ElectronContainer_egamma_Electrons",
-        "HLT_xAOD__ElectronContainer_egamma_ElectronsAux.",
-        "HLT_xAOD__PhotonContainer_egamma_Photons",
-        "HLT_xAOD__PhotonContainer_egamma_PhotonsAux.",
-        "HLT_xAOD__TrigElectronContainer_L2ElectronFex",
-        "HLT_xAOD__TrigElectronContainer_L2ElectronFexAux.",
-        "HLT_xAOD__TrigPhotonContainer_L2PhotonFex",
-        "HLT_xAOD__TrigPhotonContainer_L2PhotonFexAux.",
-        "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex",
-        "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.",
-        "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID",
-        "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.",
-        "LVL1EmTauRoIs",
-        "LVL1EmTauRoIsAux.",
-        "HLT_TrigPassBitsCollection_passbits",
-        "HLT_TrigPassBitsCollection_passbitsAux.",
-        "HLT_TrigPassFlagsCollection_passflags",
-        "HLT_TrigPassFlagsCollection_passflagsAux.",
-        "HLT_TrigRoiDescriptorCollection_initialRoI",
-        "HLT_TrigRoiDescriptorCollection_initialRoIAux."
-        ]
-
-ExtraContainersTriggerDataOnly=[
-        "HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma",
-        "HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux."
-        ]
-
-#should probably slim electron/cluster collections and keep only relevant subset of variables..
-# no ForwardElectrons, InDetTrackParticlesForward, ForwardElectronClusters, CaloCalTopoCluster
