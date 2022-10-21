@@ -184,9 +184,14 @@ def runTCCReconstruction(configFlags, caloClusterName="CaloCalTopoClusters", det
 
 def runUFOReconstruction(configFlags, constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
     """wrapper function using CAtoGlobalWrapper in order to maintain compatibility with RunII-style config in derivations"""
-    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-    return CAtoGlobalWrapper( runUFOReconstruction_r22, configFlags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
-    
+    from AthenaConfiguration.ComponentFactory import isRun3Cfg
+    if isRun3Cfg():
+        return runUFOReconstruction_r22(configFlags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
+    else:
+        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+        return CAtoGlobalWrapper(runUFOReconstruction_r22, configFlags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
+
+
 def runUFOReconstruction_r22( configFlags,constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
     
     """Create a UFO collection from PFlow and tracks (PFO retrieved from PFOPrefix and tracks directly from trackParticleName). 
