@@ -3,7 +3,6 @@
 # art-description: DirectIOART AthenaMP Reco_tf.py inputFile:RAW protocol=HTTPS
 # art-type: grid
 # art-output: *.pool.root
-# art-include: master/Athena
 # art-athena-mt: 2
 
 set -e
