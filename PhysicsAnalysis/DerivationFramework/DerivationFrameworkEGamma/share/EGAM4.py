@@ -11,7 +11,11 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import (
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM4ExtraContent import *
+from DerivationFrameworkEGamma.TriggerContent import *
 
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
 
 #====================================================================
 # read common DFEGamma settings from egammaDFFlags
@@ -33,7 +37,6 @@ print("DerivationFrameworkIsMonteCarlo: ", DerivationFrameworkIsMonteCarlo)
 if not DerivationFrameworkIsMonteCarlo:
     DoCellReweighting = False
     DoCellReweightingVariations = False
-    ExtraContainersTrigger += ExtraContainersTriggerDataOnly
 
 
 #====================================================================
@@ -484,9 +487,16 @@ if DoCellReweighting:
         })
 
 # Extra variables
-EGAM4SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM4SlimmingHelper.ExtraVariables = ExtraVariables
+EGAM4SlimmingHelper.ExtraVariables += ExtraVariablesHLTPhotons[MenuType]
+
 EGAM4SlimmingHelper.AllVariables = ExtraContainersPhotons
-EGAM4SlimmingHelper.AllVariables += ExtraContainersTrigger
+
+EGAM4SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM4SlimmingHelper.AllVariables += ExtraContainersPhotonTrigger[MenuType]
+EGAM4SlimmingHelper.AllVariables += ExtraContainersMuonTrigger[MenuType]
+if not DerivationFrameworkIsMonteCarlo:
+    EGAM4SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
 if DoCellReweighting:
     EGAM4SlimmingHelper.AllVariables += ["NewSwPhotons"]
@@ -494,10 +504,8 @@ if DoCellReweighting:
         EGAM4SlimmingHelper.AllVariables += ["MaxVarSwPhotons", "MinVarSwPhotons"]
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM4SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM4SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM4SlimmingHelper.AllVariables += ExtraContainersTruth
-else:
-    EGAM4SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
 
 for tool in EGAM4_ClusterEnergyPerLayerDecorators:
     EGAM4SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations( tool ) )

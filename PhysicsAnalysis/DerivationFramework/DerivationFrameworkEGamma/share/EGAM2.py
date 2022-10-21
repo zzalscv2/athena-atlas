@@ -29,6 +29,11 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import (
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM2ExtraContent import *
+from DerivationFrameworkEGamma.TriggerContent import *
+
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
 
 
 # ====================================================================
@@ -283,32 +288,9 @@ ToolSvc += EGAM2_OfflineSkimmingTool
 print("EGAM2 offline skimming tool:", EGAM2_OfflineSkimmingTool)
 
 # trigger-based selection
-triggers = ['HLT_e5_lhtight_e4_etcut_Jpsiee']
-triggers += ['HLT_e5_lhtight_nod0_e4_etcut_Jpsiee']
-triggers += ['HLT_e5_lhtight_e4_etcut']
-triggers += ['HLT_e5_lhtight_nod0_e4_etcut']
-
-triggers += ['HLT_e9_lhtight_e4_etcut_Jpsiee']
-triggers += ['HLT_e9_lhtight_nod0_e4_etcut_Jpsiee']
-triggers += ['HLT_e9_etcut_e5_lhtight_nod0_Jpsiee']
-triggers += ['HLT_e9_etcut_e5_lhtight_Jpsiee']
-
-triggers += ['HLT_e14_etcut_e5_lhtight_Jpsiee']
-triggers += ['HLT_e14_etcut_e5_lhtight_nod0_Jpsiee']
-triggers += ['HLT_e14_lhtight_e4_etcut_Jpsiee']
-triggers += ['HLT_e14_lhtight_nod0_e4_etcut_Jpsiee']
-
-triggers += ['HLT_e5_lhtight_nod0_e4_etcut_Jpsiee_L1RD0_FILLED']
-triggers += ['HLT_e5_lhtight_nod0_e9_etcut_Jpsiee']
-triggers += ['HLT_e5_lhtight_nod0_e14_etcut_Jpsiee']
-triggers += ['HLT_e5_lhtight_nod0_e9_etcut_Jpsiee_L1JPSI-1M5-EM7']
-triggers += ['HLT_e9_lhtight_nod0_e4_etcut_Jpsiee_L1JPSI-1M5-EM7']
-triggers += ['HLT_e5_lhtight_nod0_e14_etcut_Jpsiee_L1JPSI-1M5-EM12']
-triggers += ['HLT_e14_lhtight_nod0_e4_etcut_Jpsiee_L1JPSI-1M5-EM12']
-
 EGAM2_TriggerSkimmingTool = DerivationFramework__TriggerSkimmingTool(
     name="EGAM2_TriggerSkimmingTool",
-    TriggerListOR=triggers)
+    TriggerListOR=JPsiTriggers[MenuType])
 ToolSvc += EGAM2_TriggerSkimmingTool
 print("EGAM2 trigger skimming tool:", EGAM2_TriggerSkimmingTool)
 
@@ -364,15 +346,14 @@ if DerivationFrameworkIsMonteCarlo:
 EGAM2SlimmingHelper.IncludeEGammaTriggerContent = True
 
 # Extra variables
-EGAM2SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM2SlimmingHelper.ExtraVariables = ExtraVariables
 EGAM2SlimmingHelper.AllVariables = ExtraContainersElectrons
-EGAM2SlimmingHelper.AllVariables += ExtraContainersTrigger
+EGAM2SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM2SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM2SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM2SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM2SlimmingHelper.AllVariables += ExtraContainersTruth
-else:
-    EGAM2SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
 
 for tool in EGAM2_ClusterEnergyPerLayerDecorators:
     EGAM2SlimmingHelper.ExtraVariables.extend(

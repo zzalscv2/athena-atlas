@@ -16,6 +16,11 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
     PhotonsCPDetailedContent )
 
+from DerivationFrameworkEGamma.TriggerContent import (
+    BkgElectronTriggers, ExtraContainersTrigger,
+    ExtraContainersElectronTrigger, ExtraContainersTriggerDataOnly )
+
+
 thinCells = True
 
 def EGAM7SkimmingToolCfg(flags):
@@ -31,95 +36,14 @@ def EGAM7SkimmingToolCfg(flags):
             expression = expression)
 
     # trigger-based selection
-    # prescaled _etcut triggers
-    # prescaled _loose triggers
-    # prescaled _lhloose triggers
-    triggers =  ['HLT_e4_etcut'        ]
-    triggers += ['HLT_e5_etcut'        ]
-    triggers += ['HLT_e9_etcut'        ]            
-    triggers += ['HLT_e10_etcut_L1EM7' ]            
-    triggers += ['HLT_e14_etcut'       ]            
-    triggers += ['HLT_e15_etcut_L1EM7' ]
-    triggers += ['HLT_e17_etcut_L1EM15']            
-    triggers += ['HLT_e20_etcut_L1EM12']            
-    triggers += ['HLT_e25_etcut_L1EM15']            
-    triggers += ['HLT_e30_etcut_L1EM15']            
-    triggers += ['HLT_e40_etcut_L1EM15']            
-    triggers += ['HLT_e50_etcut_L1EM15']            
-    triggers += ['HLT_e60_etcut'       ]            
-    triggers += ['HLT_e80_etcut'       ]            
-    triggers += ['HLT_e100_etcut'      ]            
-    triggers += ['HLT_e120_etcut'      ]            
-    triggers += ['HLT_g10_etcut'       ]            
-    triggers += ['HLT_g20_etcut_L1EM12']            
-    triggers += ['HLT_g200_etcut'      ]                
-    triggers += ['HLT_e5_lhloose'      ]
-    triggers += ['HLT_e5_lhvloose'                     ]
-    triggers += ['HLT_e5_loose'                        ]
-    triggers += ['HLT_e5_vloose'                       ]
-    triggers += ['HLT_e10_lhvloose_L1EM7'              ]
-    triggers += ['HLT_e10_vloose_L1EM7'                ]
-    triggers += ['HLT_e12_lhloose'                     ]
-    triggers += ['HLT_e12_lhloose_L1EM10VH'            ]
-    triggers += ['HLT_e12_lhvloose_L1EM10VH'           ]
-    triggers += ['HLT_e12_loose'                       ]
-    triggers += ['HLT_e12_loose_L1EM10VH'              ]
-    triggers += ['HLT_e12_vloose_L1EM10VH'             ]
-    triggers += ['HLT_e15_lhloose_L1EM13VH'            ]
-    triggers += ['HLT_e15_lhvloose_L1EM13VH'           ]
-    triggers += ['HLT_e15_lhvloose_L1EM7'              ]
-    triggers += ['HLT_e15_loose_L1EM13VH'              ]
-    triggers += ['HLT_e15_vloose_L1EM13VH'             ]
-    triggers += ['HLT_e15_vloose_L1EM7'                ]
-    triggers += ['HLT_e17_lhloose'                     ]
-    triggers += ['HLT_e17_lhloose_L1EM15'              ]
-    triggers += ['HLT_e17_lhloose_cutd0dphideta_L1EM15']
-    triggers += ['HLT_e17_lhloose_nod0_L1EM15'         ]
-    triggers += ['HLT_e17_lhloose_nodeta_L1EM15'       ]
-    triggers += ['HLT_e17_lhloose_nodphires_L1EM15'    ]
-    triggers += ['HLT_e17_lhloose_L1EM15VHJJ1523ETA49' ]
-    triggers += ['HLT_e17_lhvloose'                    ]
-    triggers += ['HLT_e17_loose'                       ]
-    triggers += ['HLT_e17_loose_L1EM15'                ]
-    triggers += ['HLT_e17_loose_L1EM15VHJJ1523ETA49'   ]
-    triggers += ['HLT_e17_vloose'                      ]
-    triggers += ['HLT_e20_lhvloose'                    ]
-    triggers += ['HLT_e20_lhvloose_L1EM12'             ]
-    triggers += ['HLT_e20_vloose'                      ]
-    triggers += ['HLT_e20_vloose_L1EM12'               ]
-    triggers += ['HLT_e25_lhvloose_L1EM15'             ]
-    triggers += ['HLT_e25_vloose_L1EM15'               ]
-    triggers += ['HLT_e30_lhvloose_L1EM15'             ]
-    triggers += ['HLT_e30_vloose_L1EM15'               ]
-    triggers += ['HLT_e40_lhvloose'                    ]
-    triggers += ['HLT_e40_lhvloose_L1EM15'             ]
-    triggers += ['HLT_e40_vloose_L1EM15'               ]
-    triggers += ['HLT_e50_lhvloose_L1EM15'             ]
-    triggers += ['HLT_e50_vloose_L1EM15'               ]
-    triggers += ['HLT_e60_loose'                       ]
-    triggers += ['HLT_e60_vloose'                      ]
-    triggers += ['HLT_e60_lhvloose'                    ]
-    triggers += ['HLT_e70_etcut'                       ]
-    triggers += ['HLT_e70_lhloose'                     ]
-    triggers += ['HLT_e70_lhvloose'                    ]
-    triggers += ['HLT_e70_loose'                       ]
-    triggers += ['HLT_e70_vloose'                      ]
-    triggers += ['HLT_e80_lhvloose'                    ]
-    triggers += ['HLT_e80_vloose'                      ]
-    triggers += ['HLT_e100_lhvloose'                   ]
-    triggers += ['HLT_e100_vloose'                     ]
-    triggers += ['HLT_e120_lhvloose'                   ]
-    triggers += ['HLT_e120_lhloose'                    ]
-    triggers += ['HLT_e120_loose'                      ]
-    triggers += ['HLT_e120_vloose'                     ]
-    triggers += ['HLT_e140_etcut'                      ]
-    triggers += ['HLT_e160_etcut'                      ]
-    triggers += ['HLT_e180_etcut'                      ]
-    triggers += ['HLT_e200_etcut'                      ]
-    triggers += ['HLT_e250_etcut'                      ]
-    triggers += ['HLT_e300_etcut'                      ]
-    triggers += ['HLT_g250_etcut'                      ]
-    triggers += ['HLT_g300_etcut'                      ]
+    MenuType = None
+    if flags.Trigger.EDMVersion == 2:
+        MenuType = 'Run2'
+    elif flags.Trigger.EDMVersion == 3:
+        MenuType = 'Run3'
+    else:
+        MenuType = ''
+    triggers = BkgElectronTriggers[MenuType]
     print('EGAM7 trigger skimming list (OR): ', triggers)
     
     EGAM7_TriggerSkimmingTool = \
@@ -421,33 +345,18 @@ def EGAM7Cfg(ConfigFlags):
         'GSFTrackParticles',
         'egammaClusters' ]
 
-    # for trigger studies we also add:  
-    EGAM7SlimmingHelper.AllVariables += [
-        'HLT_xAOD__ElectronContainer_egamma_Electrons',
-        'HLT_xAOD__ElectronContainer_egamma_ElectronsAux.',
-        'HLT_xAOD__PhotonContainer_egamma_Photons',
-        'HLT_xAOD__PhotonContainer_egamma_PhotonsAux.',
-        'HLT_xAOD__TrigRingerRingsContainer_TrigT2CaloEgamma',
-        'HLT_xAOD__TrigRingerRingsContainer_TrigT2CaloEgammaAux.',
-        'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma',
-        'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux.',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex',
-        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.',
-        'HLT_xAOD__TrigRNNOutputContainer_TrigRingerNeuralFex',
-        'HLT_xAOD__TrigRNNOutputContainer_TrigRingerNeuralFexAux.',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrig',
-        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux.',
-        'HLT_xAOD__TrigPassBitsContainer_passbits',
-        'HLT_xAOD__TrigPassBitsContainer_passbitsAux.',
-        'LVL1EmTauRoIs',
-        'LVL1EmTauRoIsAux.',
-        'HLT_TrigRoiDescriptorCollection_initialRoI',
-        'HLT_TrigRoiDescriptorCollection_initialRoIAux.',
-        'HLT_xAOD__RoiDescriptorStore_initialRoI',
-        'HLT_xAOD__RoiDescriptorStore_initialRoIAux.',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFex',
-        'HLT_xAOD__TrigElectronContainer_L2ElectronFexAux.'
-    ]
+    # for trigger studies we also add:
+    MenuType = None
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        MenuType = 'Run2'
+    elif ConfigFlags.Trigger.EDMVersion == 3:
+        MenuType = 'Run3'
+    else:
+        MenuType = ''
+    EGAM7SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+    EGAM7SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
+    if not ConfigFlags.Input.isMC:
+        EGAM7SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
     
     # and on MC we also add:
     if ConfigFlags.Input.isMC:

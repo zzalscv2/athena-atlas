@@ -24,6 +24,11 @@ from DerivationFrameworkCalo.DerivationFrameworkCaloConf import (
 from DerivationFrameworkEGamma.DerivationFrameworkEGammaConf import (
     DerivationFramework__EGInvariantMassTool)
 
+from DerivationFrameworkEGamma.TriggerContent import *
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
+
 
 #====================================================================
 # read common DFEGamma settings from egammaDFFlags
@@ -440,14 +445,15 @@ if DerivationFrameworkIsMonteCarlo:
 EGAM6SlimmingHelper.IncludeEGammaTriggerContent = True
 
 # read list of extra content from EGAM1 file (output of EGAM6 and EGAM1 is the same)
-EGAM6SlimmingHelper.ExtraVariables = ExtraContentAll
+EGAM6SlimmingHelper.ExtraVariables = ExtraVariables
 EGAM6SlimmingHelper.AllVariables = ExtraContainersElectrons
-EGAM6SlimmingHelper.AllVariables += ExtraContainersTrigger
+EGAM6SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM6SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 if not DerivationFrameworkIsMonteCarlo:
-    EGAM6SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly
+    EGAM6SlimmingHelper.AllVariables += ExtraContainersTriggerDataOnly[MenuType]
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM6SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM6SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM6SlimmingHelper.AllVariables += ExtraContainersTruth
 
 

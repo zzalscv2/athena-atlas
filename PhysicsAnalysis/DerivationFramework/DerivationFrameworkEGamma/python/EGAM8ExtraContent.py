@@ -3,9 +3,9 @@
 
 #Content included in addition to the Smart Slimming Content
 
-ExtraContentElectrons=[]
+ExtraVariablesElectrons=[]
 
-ExtraContentMuons=[
+ExtraVariablesMuons=[
     "Muons.ptcone20",
     "Muons.ptcone30",
     "Muons.ptcone40",
@@ -14,7 +14,7 @@ ExtraContentMuons=[
     "Muons.etcone40"
     ]
 
-ExtraMuonsTruth=[
+ExtraVariablesMuonsTruth=[
     "MuonTruthParticles.e",
     "MuonTruthParticles.px",
     "MuonTruthParticles.py",
@@ -25,18 +25,18 @@ ExtraMuonsTruth=[
     "MuonTruthParticles.truthType"
     ]
 
-ExtraContentPhotons=[
+ExtraVariablesPhotons=[
         ]
 
-ExtraContentPrimaryVertices=["PrimaryVertices.x.y.sumPt2"]
+ExtraVariablesPrimaryVertices=["PrimaryVertices.x.y.sumPt2"]
 
-ExtraPhotonsTruth=[
+ExtraVariablesPhotonsTruth=[
     "Photons.truthOrigin",
     "Photons.truthType",
     "Photons.truthParticleLink"
     ]
 
-ExtraContentGSFConversionVertices=[
+ExtraVariablesGSFConversionVertices=[
         "GSFConversionVertices.x",
         "GSFConversionVertices.y",
         "GSFConversionVertices.z",
@@ -52,11 +52,11 @@ ExtraContentGSFConversionVertices=[
 
 from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import GainDecorator, getGainDecorations
 GainDecoratorTool = GainDecorator()
-ExtraContentPhotons.extend( getGainDecorations(GainDecoratorTool) )
-ExtraContentElectrons.extend( getGainDecorations(GainDecoratorTool) )
+ExtraVariablesPhotons.extend( getGainDecorations(GainDecoratorTool) )
+ExtraVariablesElectrons.extend( getGainDecorations(GainDecoratorTool) )
 
-ExtraContentAll=ExtraContentElectrons+ExtraContentMuons+ExtraContentPhotons+ExtraContentGSFConversionVertices+ExtraContentPrimaryVertices
-ExtraContentAllTruth=ExtraMuonsTruth+ExtraPhotonsTruth
+ExtraVariables=ExtraVariablesElectrons+ExtraVariablesMuons+ExtraVariablesPhotons+ExtraVariablesGSFConversionVertices+ExtraVariablesPrimaryVertices
+ExtraVariablesTruth=ExtraVariablesMuonsTruth+ExtraVariablesPhotonsTruth
 
 ExtraContainersTruth=["TruthEvents", 
                       "TruthParticles",
@@ -69,8 +69,4 @@ ExtraContainersElectrons=["Electrons",
                           "GSFTrackParticles",
                           "egammaClusters",
                           "ForwardElectronClusters"]
-
-# for trigger studies
-ExtraContainersTrigger=[]
-ExtraContainersTriggerDataOnly=[]
 

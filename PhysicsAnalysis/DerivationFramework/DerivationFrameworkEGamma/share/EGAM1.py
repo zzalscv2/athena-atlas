@@ -29,9 +29,14 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import (
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkEGamma.EGammaCommon import *
 from DerivationFrameworkEGamma.EGAM1ExtraContent import *
+from DerivationFrameworkEGamma.TriggerContent import *
 
 from DerivationFrameworkEGamma import EGammaIso
 pflowIsoVar,densityList,densityDict = EGammaIso.makeEGammaCommonIso()
+
+MenuType = 'Run3'
+if ConfigFlags.Trigger.EDMVersion == 2: 
+    MenuType = 'Run2'
 
 # ====================================================================
 # read common DFEGamma settings from egammaDFFlags
@@ -48,9 +53,6 @@ RecomputeElectronSelectors = True
 DoCellReweighting = jobproperties.egammaDFFlags.doEGammaCellReweighting
 DoCellReweightingVariations = jobproperties.egammaDFFlags.doEGammaCellReweightingVariations
 # override if needed (do at your own risk..)
-#DoCellReweighting = False
-#DoCellReweighting = True
-#DoCellReweightingVariations = True
 
 
 # ====================================================================
@@ -254,7 +256,6 @@ if DoCellReweighting:
     # first, create the container with the new cells (after reweighting)
     EGAM1_NewCellTool = NewCellTool(
         "EGAM1_NewCellTool",
-        #OutputLevel = DEBUG,
         CellContainerName="AllCalo",
         ReweightCellContainerName="NewCellContainer",
         SGKey_electrons="Electrons",
@@ -268,7 +269,6 @@ if DoCellReweighting:
     # second, run a tool that creates the clusters and objects from these new cells
     EGAM1_ClusterDecoratorTool = ClusterDecoratorWithNewCells(
         "EGAM1_ClusterDecoratorTool",
-        # OutputLevel=DEBUG,
         OutputClusterSGKey="EGammaSwClusterWithNewCells",
         OutputClusterLink="NewSwClusterLink",
         SGKey_caloCells="NewCellContainer",
@@ -292,7 +292,6 @@ if DoCellReweighting:
     # fourth, decorate the new objects with their shower shapes computed from the new clusters
     EGAM1_EGammaReweightTool = EGammaReweightTool(
         "EGAM1_EGammaReweightTool",
-        # OutputLevel=DEBUG,
         SGKey_electrons="Electrons",
         SGKey_photons="Photons",
         NewCellContainerName="NewCellContainer",
@@ -318,7 +317,6 @@ if DoCellReweighting:
         # first, create the container with the new cells (after reweighting)
         EGAM1_MaxVarCellTool = MaxVarCellTool(
             "EGAM1_MaxVarCellTool",
-            #OutputLevel = DEBUG,
             CellContainerName="AllCalo",
             ReweightCellContainerName="MaxVarCellContainer",
             SGKey_electrons="Electrons",
@@ -349,7 +347,6 @@ if DoCellReweighting:
         # fourth, decorate the new objects with their shower shapes computed from the new clusters
         EGAM1_EGammaMaxVarReweightTool = EGammaReweightTool(
             "EGAM1_EGammaMaxVarReweightTool",
-            #OutputLevel = DEBUG,
             SGKey_electrons="Electrons",
             SGKey_photons="Photons",
             NewCellContainerName="MaxVarCellContainer",
@@ -372,7 +369,6 @@ if DoCellReweighting:
         # first, create the container with the new cells (after reweighting)
         EGAM1_MinVarCellTool = MinVarCellTool(
             "EGAM1_MinVarCellTol",
-            #OutputLevel = DEBUG,
             CellContainerName="AllCalo",
             ReweightCellContainerName="MinVarCellContainer",
             SGKey_electrons="Electrons",
@@ -404,7 +400,6 @@ if DoCellReweighting:
         # fourth, decorate the new objects with their shower shapes computed from the new clusters
         EGAM1_EGammaMinVarReweightTool = EGammaReweightTool(
             "EGAM1_EGammaMinVarReweightTool",
-            #OutputLevel = DEBUG,
             SGKey_electrons="Electrons",
             SGKey_photons="Photons",
             NewCellContainerName="MinVarCellContainer",
@@ -431,7 +426,6 @@ if DoCellReweighting:
 # ====================================================================
 # Gain and cluster energies per layer decoration tool
 # ====================================================================
-# GM: do we really need new, different tools: getClusterEnergyPerLayerDecoratorNew, getClusterEnergyPerLayerDecoratorMaxVar, getClusterEnergyPerLayerDecoratorMinVar?
 EGAM1_GainDecoratorTool = GainDecorator()
 ToolSvc += EGAM1_GainDecoratorTool
 augmentationTools += [EGAM1_GainDecoratorTool]
@@ -699,17 +693,18 @@ if DoCellReweighting:
         })
 
 # Extra variables
-EGAM1SlimmingHelper.ExtraVariables = ExtraContentAll
-# the next line is not needed because we save all variables for electrons, including
-# the prompt lepton decorations
+EGAM1SlimmingHelper.ExtraVariables = ExtraVariables
+# prompt lepton decorations
 # EGAM1SlimmingHelper.ExtraVariables += JetTagConfig.GetExtraPromptVariablesForDxAOD()
 EGAM1SlimmingHelper.AllVariables = ExtraContainersElectrons
-EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger
+
+EGAM1SlimmingHelper.AllVariables += ExtraContainersTrigger[MenuType]
+EGAM1SlimmingHelper.AllVariables += ExtraContainersElectronTrigger[MenuType]
 if DoCellReweighting:
     EGAM1SlimmingHelper.AllVariables = ExtraContainersReweightedElectrons
 
 if DerivationFrameworkIsMonteCarlo:
-    EGAM1SlimmingHelper.ExtraVariables += ExtraContentAllTruth
+    EGAM1SlimmingHelper.ExtraVariables += ExtraVariablesTruth
     EGAM1SlimmingHelper.AllVariables += ExtraContainersTruth
 else:
     EGAM1SlimmingHelper.ExtraVariables += ExtraContainersTriggerDataOnly
