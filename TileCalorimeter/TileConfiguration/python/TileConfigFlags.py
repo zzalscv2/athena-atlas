@@ -20,17 +20,17 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doOptATLAS', _doOptATLAS)
      tcf.addFlag('Tile.NoiseFilter', lambda prevFlags : -1 if prevFlags.Input.isMC else 1)
      tcf.addFlag('Tile.RunType', _getRunType)
-     tcf.addFlag('Tile.correctTime', lambda prevFlags : prevFlags.Beam.Type is BeamType.Collisions)
+     tcf.addFlag('Tile.correctTime', lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Beam.Type is BeamType.Collisions)
      tcf.addFlag('Tile.correctTimeNI', True)
      tcf.addFlag('Tile.correctAmplitude', True)
      tcf.addFlag('Tile.AmpMinForAmpCorrection', 15.0)
      tcf.addFlag('Tile.TimeMinForAmpCorrection', lambda prevFlags : (prevFlags.Beam.BunchSpacing / -2.))
      tcf.addFlag('Tile.TimeMaxForAmpCorrection', lambda prevFlags : (prevFlags.Beam.BunchSpacing / 2.))
      tcf.addFlag('Tile.OfcFromCOOL', True)
-     tcf.addFlag('Tile.BestPhaseFromCOOL', lambda prevFlags : prevFlags.Beam.Type is BeamType.Collisions)
+     tcf.addFlag('Tile.BestPhaseFromCOOL', lambda prevFlags : not prevFlags.Input.isMC and prevFlags.Beam.Type is BeamType.Collisions)
      tcf.addFlag('Tile.readDigits', lambda prevFlags : not prevFlags.Input.isMC)
      tcf.addFlag('Tile.doOverflowFit', True)
-     tcf.addFlag('Tile.zeroAmplitudeWithoutDigits', _zeroAmplitudeWithouDigits)
+     tcf.addFlag('Tile.zeroAmplitudeWithoutDigits', _zeroAmplitudeWithoutDigits)
      tcf.addFlag('Tile.correctPedestalDifference', _correctPedestalDifference)
      tcf.addFlag('Tile.correctTimeJumps', _correctTimeJumps)
      tcf.addFlag('Tile.RawChannelContainer', _getRawChannelContainer)
@@ -102,7 +102,7 @@ def _doOptATLAS(prevFlags):
                return False
 
 
-def _zeroAmplitudeWithouDigits(prevFlags):
+def _zeroAmplitudeWithoutDigits(prevFlags):
      if not prevFlags.Input.isMC:
           runNumber = prevFlags.Input.RunNumber[0]
           # Use OF1 corrections only for years 2015 - 2016
@@ -113,7 +113,7 @@ def _zeroAmplitudeWithouDigits(prevFlags):
 
 def _correctPedestalDifference(prevFlags):
      if not prevFlags.Common.isOnline:
-          return _zeroAmplitudeWithouDigits(prevFlags)
+          return _zeroAmplitudeWithoutDigits(prevFlags)
      else:
           return False
 
