@@ -127,7 +127,7 @@ StatusCode AthenaPoolAddressProviderSvc::loadAddresses(StoreID::type storeID,
    }
    // second data header
    if (m_attrListKey.value() != "") {
-      const AthenaAttributeList* attrList;
+      const AthenaAttributeList* attrList = nullptr;
       std::string tokenStr;
       if (eventStore()->retrieve(attrList, m_attrListKey.value()).isSuccess()) {
          try {
