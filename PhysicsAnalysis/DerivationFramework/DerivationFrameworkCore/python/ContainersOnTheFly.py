@@ -123,6 +123,9 @@ ContainersOnTheFly = [
                         ["CHSGNeutralParticleFlowObjects","xAOD::FlowElementContainer"], 
                         ["CHSGNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
 
+                        ['UFOCSSK','xAOD::FlowElementContainer'],
+                        ['UFOCSSKAux','xAOD::FlowElementAuxContainer'],
+
 ]
 
 from InDetPrepRawDataToxAOD.InDetDxAODJobProperties import InDetDxAODFlags

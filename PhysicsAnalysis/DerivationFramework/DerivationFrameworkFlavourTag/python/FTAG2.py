@@ -119,21 +119,21 @@ def FTAG2Cfg(ConfigFlags):
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
             ]
 
-    from DerivationFrameworkFlavourTag import FtagCommonCA
+    from DerivationFrameworkFlavourTag import FtagBaseContent
 
     # Static content
-    FtagCommonCA.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
+    FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG2SlimmingHelper)
 
     # Add truth containers
     if ConfigFlags.Input.isMC:
-        FtagCommonCA.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
+        FtagBaseContent.add_truth_to_SlimmingHelper(FTAG2SlimmingHelper)
 
     # Add ExtraVariables
-    FtagCommonCA.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper)
+    FtagBaseContent.add_ExtraVariables_to_SlimmingHelper(FTAG2SlimmingHelper)
    
     # Trigger content
-    FtagCommonCA.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
-    FtagCommonCA.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, ConfigFlags)
+    FtagBaseContent.trigger_setup(FTAG2SlimmingHelper, 'FTAG2')
+    FtagBaseContent.trigger_matching(FTAG2SlimmingHelper, FTAG2TriggerListsHelper, ConfigFlags)
 
 
     # Output stream    
