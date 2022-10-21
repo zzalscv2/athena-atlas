@@ -53,5 +53,7 @@ def getG4AtlasAlg(name='G4AtlasAlg', **kwargs):
 
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", simFlags.G4Commands.get_Value())
-
+    if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     return CfgMgr.G4AtlasAlg(name, **kwargs)
