@@ -54,7 +54,7 @@ class FastCaloSim: public G4VFastSimulationModel
   // Random generator services
   ServiceHandle<IAthRNGSvc> m_rndmGenSvc;
   Gaudi::Property<std::string> m_randomEngineName;
-  ATHRNG::RNGWrapper* m_rngWrapper;
+  ATHRNG::RNGWrapper* m_rngWrapper{};
   // FastCaloSimCaloExtrapolation tool to extrapolate particle shower positions to layers
   PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation;
   // Main FastCaloSim service
