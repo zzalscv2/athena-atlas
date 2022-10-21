@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LUCID_BYTESTREAMRAWDATACNV_H
@@ -9,7 +9,7 @@
 #include <map>
 #include <string>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 
@@ -20,7 +20,7 @@
 
 class LUCID_RodDecoder;
 
-class LUCID_ByteStreamRawDataCnv: public AthAlgorithm {
+class LUCID_ByteStreamRawDataCnv: public AthReentrantAlgorithm {
 
  public:
   
@@ -28,7 +28,7 @@ class LUCID_ByteStreamRawDataCnv: public AthAlgorithm {
   virtual ~LUCID_ByteStreamRawDataCnv();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
   virtual StatusCode finalize() override;
 
   StatusCode fillContainer(const std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>&,

@@ -1,15 +1,15 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "LUCID_RawDataByteStreamCnv/LUCID_ByteStreamRawDataCnv.h"
 #include "StoreGate/WriteHandle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
+
 using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 LUCID_ByteStreamRawDataCnv::LUCID_ByteStreamRawDataCnv(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm     (name                , pSvcLocator),
+  AthReentrantAlgorithm     (name                , pSvcLocator),
   m_robDataProvider("ROBDataProviderSvc", name) {
 }
 
@@ -29,9 +29,8 @@ StatusCode LUCID_ByteStreamRawDataCnv::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode LUCID_ByteStreamRawDataCnv::execute() {
+StatusCode LUCID_ByteStreamRawDataCnv::execute(const EventContext& ctx) const{
 
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   ATH_MSG_DEBUG(" LUCID_ByteStreamRawDataCnv::execute ");
   
   std::vector<const ROBFragment*> listOfRobf;
