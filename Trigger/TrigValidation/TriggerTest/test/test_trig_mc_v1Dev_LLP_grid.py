@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger RDO->RDO_TRIG athena test of the Dev_pp_run3_v1 menu with StauStau sample to help check counts in LLP menu
+# art-description: Trigger RDO->RDO_TRIG athena test of the Dev_pp_run3_v1 menu with SlepSlep sample to help check counts in LLP menu
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -25,7 +25,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 ex = ExecStep.ExecStep()
 ex.type = 'athena'
 ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
-ex.input = 'StauStau'
+ex.input = 'SlepSlep'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.args = '-c "setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\';doWriteBS=False;doWriteRDOTrigger=True;"'
