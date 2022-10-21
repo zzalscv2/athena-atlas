@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopEventReconstructionTools/PTMaxReco.h"
@@ -67,7 +67,7 @@ namespace top {
       }
     }
 
-    std::cout << lepb->pt() << std::endl;
+    if (lepb) std::cout << lepb->pt() << std::endl;
 
     return true;
   }
