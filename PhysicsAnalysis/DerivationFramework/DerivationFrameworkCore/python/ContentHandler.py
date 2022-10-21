@@ -27,6 +27,9 @@ class ContentHandler:
 
 	def expandAuxStore(self,auxContainerName):
 		# Expand to dynamic variables via the AuxStoreWrapper
+		# Since the transition to the component accumulator this code is no longer active.
+		# In addition the remaining containers are no longer needed. To be cleaned up in a
+		# future MR 
 		wrapperName = auxContainerName+"Wrapper"
 		if wrapperName.startswith( "HLT_xAOD__" ):
 			wrapperName = wrapperName[ len( "HLT_xAOD__" ) : ]
@@ -57,6 +60,8 @@ class ContentHandler:
 					mainOutput.append(mainItem)
 			if len(components)>1:
 				# Deal with the (few) containers that still need expanding
+				# As of October 2022 ContainersForExpansion is empty so this is dead code
+				# Also doesn't work with component accumulator. To be removed in a future MR.
 				if (mainItem.split('#')[0] in self.ContainersForExpansion):
 					self.expandAuxStore(components[0])
 				# All variables needed
