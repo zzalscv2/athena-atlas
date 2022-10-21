@@ -1,3 +1,5 @@
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 
-ContainersForExpansion = ["xAOD::JetTrigAuxContainer","xAOD::TrigCompositeAuxContainer"]
+# As of October 2022 it seems this mechanism is no longer required so this is now dead code. 
+# To be removed as part of a wider clean-up after component accumulator migration is done
+ContainersForExpansion = []
