@@ -74,8 +74,12 @@ namespace test {
 void testConstructors() {
   
   {
-    ISF::ISFTruthIncident truthIncident = test::truthIncident;
 
+    ISF::ISFTruthIncident truthIncident(test::isp1,
+					test::pvec_children,
+					test::procBC,
+					test::origin.first);
+    
     assert(test::procBC == truthIncident.physicsProcessCode());
     assert(test::origin.first == truthIncident.geoID());
 
