@@ -3,6 +3,9 @@
 bool listdirs(TDirectory* dir,TString DBprefix="",TString top="")
 {
   TIterator *iter=dir->GetListOfKeys()->MakeIterator();
+  if (not iter){
+    return false;
+  }
   iter->Reset();
   
   bool has_objects=false;
