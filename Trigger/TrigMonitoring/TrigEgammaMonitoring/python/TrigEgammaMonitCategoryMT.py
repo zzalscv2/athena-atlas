@@ -5,10 +5,9 @@
 monitoring_photon = [
     'HLT_g20_tight_L1EM15VHI',
     'HLT_g20_tight_icaloloose_L1EM15VHI',
-    'HLT_g25_tight_icaloloose_L1EM22VHI',
-    'HLT_g25_tight_icalotight_L1EM22VHI',
     'HLT_g22_tight_L1EM15VHI',
     'HLT_g35_medium_L1EM20VH',
+    'HLT_g50_loose_L1EM20VH',
     'HLT_g25_medium_L1EM20VH',
     'HLT_g140_loose_L1EM22VHI',
     'HLT_g300_etcut_L1EM22VHI'
@@ -29,13 +28,6 @@ monitoring_electron = [
             ]
 
 monitoringTP_electron = [
-    'HLT_e17_lhvloose_L1EM15VHI',
-    'HLT_e20_lhvloose_L1EM15VH',
-    'HLT_e20_lhloose_L1EM15VH',
-    'HLT_e20_lhmedium_L1EM15VH',
-    'HLT_e20_lhtight_L1EM15VH',
-    'HLT_e20_lhtight_ivarloose_L1EM15VH',
-    'HLT_e20_lhtight_ivarloose_L1EM15VHI',
     'HLT_e140_lhloose_L1EM22VHI',
     'HLT_e140_lhloose_noringer_L1EM22VHI',
     'HLT_e60_lhmedium_L1EM22VHI',
