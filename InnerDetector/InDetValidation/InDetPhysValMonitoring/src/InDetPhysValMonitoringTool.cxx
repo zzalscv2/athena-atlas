@@ -308,6 +308,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
   IDPVM::CachedGetAssocTruth getAsTruth; // only cache one way, track->truth, not truth->tracks 
 
   if (not tracks.isValid()) {
+    ATH_MSG_ERROR("Invalid trackname = " << m_trkParticleName << "!");
     return StatusCode::FAILURE;
   }
   if (not pie.isValid()){

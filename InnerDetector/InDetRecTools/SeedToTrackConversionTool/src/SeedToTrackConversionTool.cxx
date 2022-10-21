@@ -130,8 +130,11 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
         }
       }
     }
-    if (mtrk>0) { // survived seeds set as
-      data.trackInfo().setTrackFitter(Trk::TrackInfo::xKalman); // xk seedfinder
+    
+    if (mtrk>0) { // survived seeds set as  
+      data.trackInfo().setTrackFitter(Trk::TrackInfo::xKalman); // xkalman
+    } else {
+      data.trackInfo().setTrackFitter(Trk::TrackInfo::Unknown);
     }
     Trk::Track* t = new Trk::Track(data.trackInfo(), std::move(traj), nullptr);
     if (t) data.seedSegmentsCollection()->push_back(t);
