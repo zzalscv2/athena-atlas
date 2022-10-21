@@ -270,7 +270,7 @@ namespace G4UA{
 	  if ( genIt != m_trackGenMap.end()) m_gen = (genIt->second >= 0) ? genIt->second+1 : genIt->second-1;
 	}
 	
-	if (m_trackGenMap.find(trackID)==m_trackGenMap.end())  m_trackGenMap[trackID]=m_gen;
+	m_trackGenMap.try_emplace(trackID, m_gen);
 	
 	m_currentTrack=trackID;
 	
