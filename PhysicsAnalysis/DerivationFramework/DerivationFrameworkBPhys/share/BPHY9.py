@@ -210,8 +210,7 @@ BPHY9ThinningHelper.AppendToStream( BPHY9Stream )
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__JetTrackParticleThinning
 BPHY9JetTPThinningTool = DerivationFramework__JetTrackParticleThinning(name                   = 'BPHY9JetTPThinningTool',
                                                                        JetKey                 = 'AntiKt4EMTopoJets',
-                                                                       InDetTrackParticlesKey = 'InDetTrackParticles',
-                                                                       ApplyAnd               = True)
+                                                                       InDetTrackParticlesKey = 'InDetTrackParticles')
 ToolSvc += BPHY9JetTPThinningTool
 thinningTools.append(BPHY9JetTPThinningTool)
 

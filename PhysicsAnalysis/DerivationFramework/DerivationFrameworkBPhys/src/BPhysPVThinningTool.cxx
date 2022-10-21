@@ -64,9 +64,9 @@ StatusCode DerivationFramework::BPhysPVThinningTool::finalize()
 // The thinning itself
 StatusCode DerivationFramework::BPhysPVThinningTool::doThinning() const
 {
-
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     // Get the track container
-    SG::ThinningHandle<xAOD::VertexContainer> PV_col(m_PVContainerName);
+    SG::ThinningHandle<xAOD::VertexContainer> PV_col(m_PVContainerName, ctx);
     if(!PV_col.isValid()) {
         ATH_MSG_ERROR ("Couldn't retrieve VertexContainer with key PrimaryVertices");
         return StatusCode::FAILURE;
@@ -83,7 +83,7 @@ StatusCode DerivationFramework::BPhysPVThinningTool::doThinning() const
     
 
     for(auto &str : m_BPhyCandList) {
-        SG::ReadHandle<xAOD::VertexContainer> Container(str);
+        SG::ReadHandle<xAOD::VertexContainer> Container(str, ctx);
         ATH_CHECK(Container.isValid());
         size_t s = Container->size();
         for(size_t i = 0; i<s; i++) {
@@ -107,7 +107,7 @@ StatusCode DerivationFramework::BPhysPVThinningTool::doThinning() const
     m_npass += std::accumulate(mask.begin(), mask.end(), 0);
 
     if(m_keepTracks){
-         SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_TrackContainerName);
+         SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_TrackContainerName, ctx);
          std::vector<bool> trackmask(importedTrackParticles->size(), false);
          size_t pvnum = mask.size();
          for(size_t i =0; i<pvnum;i++){
@@ -124,10 +124,10 @@ StatusCode DerivationFramework::BPhysPVThinningTool::doThinning() const
                 trackmask.at(x) = true;
             }
          }
-      importedTrackParticles.keep(trackmask, SG::ThinningHandleBase::Op::Or);
+      importedTrackParticles.keep(trackmask);
       m_tracks_kept += std::accumulate(trackmask.begin(), trackmask.end(), 0);
     }
-    PV_col.keep(mask, SG::ThinningHandleBase::Op::Or);
+    PV_col.keep(mask);
 
     return StatusCode::SUCCESS;
 }

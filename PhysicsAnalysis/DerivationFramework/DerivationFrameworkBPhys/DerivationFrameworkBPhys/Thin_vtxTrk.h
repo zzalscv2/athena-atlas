@@ -44,8 +44,6 @@ namespace DerivationFramework {
       SG::ThinningHandleKeyArray<xAOD::VertexContainer>        m_vertexContainerName;
       std::vector<std::string> m_passFlags;
       SG::ReadDecorHandleKeyArray<xAOD::VertexContainer> m_passArray{this, "INTERNALARRAY", {}};
-      bool m_and;
-      bool m_trackAnd;
       bool m_thinTracks;
       bool m_noFlags;  //To take all entries, regardless of flags
   }; 
