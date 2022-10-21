@@ -13,6 +13,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 // Trk
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
+#include "TrkGeometry/TrackingGeometry.h"
 // STL
 #include <vector>
 #include <utility>

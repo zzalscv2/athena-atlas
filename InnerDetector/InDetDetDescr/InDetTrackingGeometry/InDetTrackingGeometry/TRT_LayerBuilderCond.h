@@ -16,6 +16,7 @@
 // Trk
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
 #include "TrkDetDescrUtils/SharedObject.h"
+#include "TrkGeometry/TrackingGeometry.h"
 // InDet
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
 // StoreGate

@@ -13,6 +13,7 @@
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
 #include "TrkDetDescrUtils/BinningType.h"
 #include "TrkGeometry/TrackingVolumeManipulator.h"
+#include "TrkGeometry/TrackingGeometry.h"
 //InDet
 #include "StagedTrackingGeometryBuilder.h"
 // Athena
@@ -37,7 +38,6 @@
 
 
 namespace Trk {
- class TrackingGeometry;
  class ILayerProviderCond;
  class ITrackingVolumeCreator;
  class ILayerArrayCreator;
