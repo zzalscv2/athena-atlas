@@ -74,6 +74,7 @@ def FTAG1Cfg(ConfigFlags):
             "BTagging_AntiKt4EMPFlowJFVtx",
             "BTagging_AntiKt4EMPFlowSecVtx",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+            "UFOCSSK",
             "TruthParticles",
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
