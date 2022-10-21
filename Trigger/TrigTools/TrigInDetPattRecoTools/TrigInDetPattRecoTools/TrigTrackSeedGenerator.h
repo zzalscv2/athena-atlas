@@ -215,7 +215,7 @@ public:
     }
   }
    
-  void sortSpacePoints(const std::vector<TRIG_INDET_SI_LAYER>& layerGeometry) {
+  void sortSpacePoints(const std::vector<TrigInDetSiLayer>& layerGeometry) {
     int layerId = 0;
     for(std::vector<L_PHI_SECTOR>::iterator it=m_layers.begin();it!=m_layers.end();++it,layerId++) {
       if((*it).m_nSP==0) continue;
@@ -223,7 +223,7 @@ public:
     }
   }
 
-  void sortSpacePoints2(const std::vector<TRIG_INDET_SI_LAYER>& layerGeometry) {
+  void sortSpacePoints2(const std::vector<TrigInDetSiLayer>& layerGeometry) {
     int layerId = 0;
     for(std::vector<L_PHI_SECTOR>::iterator it=m_layers.begin();it!=m_layers.end();++it,layerId++) {
       if((*it).m_nSP==0) continue;

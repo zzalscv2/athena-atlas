@@ -25,12 +25,12 @@ TrigFTF_GNN_EdgeState(bool f) : m_initialized(f) {};
 
   ~TrigFTF_GNN_EdgeState() {};
 
-  void initialize(TrigFTF_GNN_EDGE*);
+  void initialize(TrigFTF_GNN_Edge*);
   void clone(const struct TrigFTF_GNN_EdgeState&);
 
   float m_J;
 
-  std::vector<TrigFTF_GNN_EDGE*> m_vs;
+  std::vector<TrigFTF_GNN_Edge*> m_vs;
 
   float m_X[3], m_Y[2], m_Cx[3][3], m_Cy[2][2];
   float m_refX, m_refY, m_c, m_s;
@@ -44,23 +44,23 @@ TrigFTF_GNN_EdgeState(bool f) : m_initialized(f) {};
 
 typedef class TrigFTF_GNN_TrackingFilter {
  public:
-  TrigFTF_GNN_TrackingFilter(const std::vector<TRIG_INDET_SI_LAYER>&, std::vector<TrigFTF_GNN_EDGE>&);
+  TrigFTF_GNN_TrackingFilter(const std::vector<TrigInDetSiLayer>&, std::vector<TrigFTF_GNN_Edge>&);
   ~TrigFTF_GNN_TrackingFilter(){};
 
-  void followTrack(TrigFTF_GNN_EDGE*, TrigFTF_GNN_EDGE_STATE&);
+  void followTrack(TrigFTF_GNN_Edge*, TrigFTF_GNN_EDGE_STATE&);
 
  protected:
 
-  void propagate(TrigFTF_GNN_EDGE*, TrigFTF_GNN_EDGE_STATE&);
+  void propagate(TrigFTF_GNN_Edge*, TrigFTF_GNN_EDGE_STATE&);
 
-  bool update(TrigFTF_GNN_EDGE*, TrigFTF_GNN_EDGE_STATE&);
+  bool update(TrigFTF_GNN_Edge*, TrigFTF_GNN_EDGE_STATE&);
 
   int getLayerType(int);  
 
 
-  const std::vector<TRIG_INDET_SI_LAYER>& m_geo;
+  const std::vector<TrigInDetSiLayer>& m_geo;
   
-  std::vector<TrigFTF_GNN_EDGE>& m_segStore;
+  std::vector<TrigFTF_GNN_Edge>& m_segStore;
 
   std::vector<TrigFTF_GNN_EDGE_STATE*> m_stateVec;
 
