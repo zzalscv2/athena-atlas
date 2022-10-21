@@ -316,7 +316,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
 
 
-  if( (m_event_counter[lumiNo] <=1) && (eventCounter < m_maxEvents) ){ 
+  if( (m_event_counter[lumiNo] <m_maxEvents) && (eventCounter < m_maxEvents) ){ 
     ATH_MSG_DEBUG( "EventID :: " <<  m_event_counter[lumiNo]);
     
       // Saving the lumiblock and event number of the events with mistimed 
@@ -481,7 +481,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 	}}}
   }
 
-  else if ( eventCounter >= m_maxEvents ) { 
+  else { 
     auto  eventMonitor_all= Monitored::Scalar<std::string>("eventMonitor_all", std::to_string(currentEventNo));
     auto  lbMonitor_all= Monitored::Scalar<std::string>("lbMonitor_all", std::to_string(lumiNo));
     fill("Event_all_", eventMonitor_all, lbMonitor_all );
