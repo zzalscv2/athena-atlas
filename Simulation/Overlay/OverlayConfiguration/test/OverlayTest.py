@@ -11,7 +11,7 @@ from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
 from OverlayConfiguration.OverlaySteering import OverlayMainCfg
 from OverlayConfiguration.OverlayTestHelpers import \
     CommonTestArgumentParser, OverlayJobOptsDumperCfg, \
-    defaultTestFlags, postprocessAndLockFlags, printAndRun
+    overlayTestFlags, postprocessAndLockFlags, printAndRun
 
 # Argument parsing
 parser = CommonTestArgumentParser("OverlayTest.py")
@@ -46,7 +46,7 @@ if args.dependencies:
     print()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
+overlayTestFlags(ConfigFlags, args)
 postprocessAndLockFlags(ConfigFlags, args)
 
 # Construct our accumulator to run

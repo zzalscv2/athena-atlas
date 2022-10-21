@@ -45,61 +45,57 @@ def CommonTestArgumentParser(prog):
     return parser
 
 
-def defaultTestFlags(configFlags, args):
+def overlayTestFlags(flags, args):
     """Fill default overlay flags for testing"""
-    configFlags.GeoModel.Align.Dynamic = False
-    configFlags.Digitization.DoCaloNoise = False
-    configFlags.Digitization.DoInnerDetectorNoise = False
-    configFlags.Digitization.EnableCaloHSTruthRecoInputs = False
     if args.disableTruth:
-        configFlags.Digitization.EnableTruth = False
-    configFlags.LAr.OFCShapeFolder = "4samples1phase"
-    configFlags.LAr.ROD.DoOFCPileupOptimization = True
-    configFlags.LAr.ROD.nSamples = 4
-    configFlags.LAr.ROD.NumberOfCollisions = 20
-    configFlags.LAr.ROD.UseHighestGainAutoCorr = True
-    configFlags.Tile.BestPhaseFromCOOL = False
-    configFlags.Tile.correctTime = False
-    configFlags.Tile.zeroAmplitudeWithoutDigits = False
+        flags.Digitization.EnableTruth = False
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.Enums import ProductionStep
-    configFlags.Common.ProductionStep = ProductionStep.Overlay
+    flags.Common.ProductionStep = ProductionStep.Overlay
     if args.data:
-        configFlags.Input.isMC = False  # TODO: this one should be autodetected
-        configFlags.Input.Files = defaultTestFiles.HITS_DATA_OVERLAY
-        configFlags.Input.SecondaryFiles = defaultTestFiles.RAW_BKG
-        configFlags.Output.RDOFileName = "dataOverlayRDO.pool.root"
-        configFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2016-12-01"
-        configFlags.IOVDb.DatabaseInstance = "CONDBR2"
-        configFlags.Overlay.DataOverlay = True
+        flags.Input.isMC = False
+        flags.Input.Files = defaultTestFiles.HITS_DATA_OVERLAY
+        flags.Input.SecondaryFiles = defaultTestFiles.RAW_BKG
+        flags.Output.RDOFileName = "dataOverlayRDO.pool.root"
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2016-12-01"
+        flags.IOVDb.DatabaseInstance = "CONDBR2"
+        flags.Overlay.DataOverlay = True
+        from Campaigns import DataOverlayPPTest
+        DataOverlayPPTest(flags)
     else:
-        configFlags.Input.MCChannelNumber = GetFileMD(configFlags.Input.SecondaryFiles).get("mc_channel_number", 0)
+        flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles).get("mc_channel_number", 0)
         if args.run is LHCPeriod.Run2:
-            configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
-            configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
-            configFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
+            flags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
+            flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
+            flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
+            from Campaigns import MC20e
+            MC20e(flags)
         elif args.run is LHCPeriod.Run3:
-            configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
-            configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
-            configFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+            flags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
+            flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
+            flags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
+            from Campaigns import MC21a
+            MC21a(flags)
         elif args.run is LHCPeriod.Run4:
-            configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
-            configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
-            configFlags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+            flags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
+            flags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
+            flags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+            from Campaigns import PhaseIIPileUp200
+            PhaseIIPileUp200(flags)
         else:
             raise ValueError("Run not supported")
-        configFlags.Output.RDOFileName = "mcOverlayRDO.pool.root"
-        configFlags.Overlay.DataOverlay = False
+        flags.Output.RDOFileName = "mcOverlayRDO.pool.root"
+        flags.Overlay.DataOverlay = False
 
     if args.output:
         if args.output == 'None':
-            configFlags.Output.RDOFileName = ''
+            flags.Output.RDOFileName = ''
         else:
-            configFlags.Output.RDOFileName = args.output
+            flags.Output.RDOFileName = args.output
 
     if args.outputSig:
-        configFlags.Output.RDO_SGNLFileName = args.outputSig
+        flags.Output.RDO_SGNLFileName = args.outputSig
 
     if 'detectors' in args and args.detectors:
         detectors = args.detectors
@@ -107,30 +103,30 @@ def defaultTestFlags(configFlags, args):
         detectors = None
 
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(configFlags, detectors, toggle_geometry=True, use_metadata=True)
+    setupDetectorFlags(flags, detectors, toggle_geometry=True, use_metadata=True)
 
 
-def postprocessAndLockFlags(configFlags, args):
+def postprocessAndLockFlags(flags, args):
     """Postprocess and lock config flags for overlay"""
 
     # Flags relating to multithreaded execution
-    configFlags.Concurrency.NumThreads = args.threads
+    flags.Concurrency.NumThreads = args.threads
     if args.threads > 0:
-        configFlags.Scheduler.ShowDataDeps = True
-        configFlags.Scheduler.ShowDataFlow = True
-        configFlags.Scheduler.ShowControlFlow = True
-        configFlags.Concurrency.NumConcurrentEvents = args.concurrent if args.concurrent > 0 else args.threads
+        flags.Scheduler.ShowDataDeps = True
+        flags.Scheduler.ShowDataFlow = True
+        flags.Scheduler.ShowControlFlow = True
+        flags.Concurrency.NumConcurrentEvents = args.concurrent if args.concurrent > 0 else args.threads
 
-    configFlags.lock()
+    flags.lock()
 
 
-def printAndRun(accessor, configFlags, args):
+def printAndRun(accessor, flags, args):
     """Common debugging and execution for overlay tests"""
     # Dump config
     accessor.printConfig(withDetails=args.verboseAccumulators)
     if args.verboseStoreGate:
         accessor.getService("StoreGateSvc").Dump = True
-    configFlags.dump()
+    flags.dump()
 
     if args.debug:
         accessor.setDebugStage (args.debug)

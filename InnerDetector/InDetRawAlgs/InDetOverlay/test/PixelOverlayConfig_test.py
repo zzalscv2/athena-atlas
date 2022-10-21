@@ -10,7 +10,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from InDetOverlay.PixelOverlayConfig import PixelOverlayCfg
 from OverlayConfiguration.OverlayTestHelpers import \
-    CommonTestArgumentParser, defaultTestFlags, postprocessAndLockFlags, printAndRun
+    CommonTestArgumentParser, overlayTestFlags, postprocessAndLockFlags, printAndRun
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyMcEventCollectionCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
@@ -19,7 +19,7 @@ parser = CommonTestArgumentParser("PixelOverlayConfig_test.py")
 args = parser.parse_args()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
+overlayTestFlags(ConfigFlags, args)
 ConfigFlags.Output.RDOFileName = 'mcOverlayRDO_Pixel.pool.root'
 postprocessAndLockFlags(ConfigFlags, args)
 
