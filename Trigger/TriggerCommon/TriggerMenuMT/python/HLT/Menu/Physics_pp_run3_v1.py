@@ -956,6 +956,8 @@ def setupMenu():
         # primary emerging jets single-jet chain
         ChainProp(name='HLT_j175_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj225_L1J100', groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J100'], l1SeedThresholds=['FSNOSEED']),
         ChainProp(name='HLT_j200_0eta180_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100', groups=SingleJetGroup+PrimaryLegGroup, l1SeedThresholds=['FSNOSEED']),
+        # [ATR-26377] Backup emerging jet chain
+        ChainProp(name='HLT_j200_0eta160_emergingPTF0p08dR1p2_a10sd_cssk_pf_jes_ftf_preselj200_L1J100', groups=SingleJetGroup+PrimaryLegGroup, l1SeedThresholds=['FSNOSEED']),
         
         
         ##HT chains
@@ -2400,6 +2402,9 @@ def setupMenu():
         ChainProp(name='HLT_g25_medium_tau25_dipion4_tracktwoMVA_50invmAB_L1eEM26M', l1SeedThresholds=['eEM26M','eTAU12'], stream=[PhysicsStream], groups=PrimaryPhIGroup+EgammaTauGroup),
     
         ChainProp(name='HLT_j180_2dispjet50_2p_L1J100', groups=SingleJetGroup+SupportLegGroup+['RATE:CPS_J100'], l1SeedThresholds=['FSNOSEED']*2),
+
+        # [ATR-26377] To understand the muvtx rates as compared to Run 2
+        ChainProp(name='HLT_j30_mu3vtx_L12MU8F', l1SeedThresholds=['FSNOSEED','MU8F'], groups=PrimaryL1MuGroup+MultiMuonGroup),
     ]
 
 
