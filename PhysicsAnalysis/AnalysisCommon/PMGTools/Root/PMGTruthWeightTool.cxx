@@ -294,7 +294,6 @@ namespace PMGTools
     // Update cached weight data
     const std::vector<std::string> &truthWeightNames = (*itTruthMetaDataPtr)->weightNames();
     for(std::size_t idx = 0; idx < truthWeightNames.size(); ++idx ) {
-      ANA_MSG_VERBOSE("    " << truthWeightNames.at(idx));
       m_weightNames.push_back(truthWeightNames.at(idx));
       m_weightIndices[truthWeightNames.at(idx)] = idx;
 
@@ -302,7 +301,12 @@ namespace PMGTools
       if (!sysName.empty()) {
         m_systematicsSet.insert(CP::SystematicVariation(sysName));
       }
-      m_weightIndicesSys[sysName] = idx;
+
+      ANA_MSG_VERBOSE("    " << truthWeightNames.at(idx) << " " << sysName);
+
+      if (m_weightIndicesSys.find(sysName) == m_weightIndicesSys.end()) {
+        m_weightIndicesSys[sysName] = idx;
+      }
     }
     return this->validateWeightLocationCaches();
   }
@@ -326,7 +330,6 @@ namespace PMGTools
     // Use input map to fill the index map and the weight names
     ATH_MSG_INFO("Attempting to load weight meta data from HepMC IOVMetaData container");
     for (auto& kv : hepMCWeightNamesMap) {
-      ANA_MSG_VERBOSE("    " << kv.first);
       m_weightNames.push_back(kv.first);
       m_weightIndices[kv.first] = kv.second;
 
@@ -334,7 +337,12 @@ namespace PMGTools
       if (!sysName.empty()) {
         m_systematicsSet.insert(CP::SystematicVariation(sysName));
       }
-      m_weightIndicesSys[sysName] = kv.second;
+
+      ANA_MSG_VERBOSE("    " << kv.first << " " << sysName);
+
+      if (m_weightIndicesSys.find(sysName) == m_weightIndicesSys.end()) {
+        m_weightIndicesSys[sysName] = kv.second;
+      }
     }
     return this->validateWeightLocationCaches();
 #endif // XAOD_STANDALONE

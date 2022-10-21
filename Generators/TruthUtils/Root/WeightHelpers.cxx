@@ -29,9 +29,9 @@ std::string weightNameCleanup(const std::string &name)
     [](unsigned char c){ return std::tolower(c); });
 
   // more cases of nominal weights
-  if (outLowercase == "nominal" // Powheg calls it "nominal"
+  if (outLowercase == "default" // This is a primary weight in newer samples
+    || outLowercase == "nominal" // Powheg calls it "nominal"
     || outLowercase == "weight" // Sherpa names the nominal weight just "Weight"
-    || outLowercase == "default"
     || outLowercase == "0")
   {
     return {};

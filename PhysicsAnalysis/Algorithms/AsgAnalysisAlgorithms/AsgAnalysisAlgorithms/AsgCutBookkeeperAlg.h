@@ -12,6 +12,7 @@
 #include <AsgServices/ServiceHandle.h>
 #include <PMGAnalysisInterfaces/IPMGTruthWeightTool.h>
 #include <SystematicsHandles/ISystematicsSvc.h>
+#include <xAODCutFlow/CutBookkeeper.h>
 
 namespace CP
 {
@@ -36,6 +37,11 @@ namespace CP
   public:
     /// \brief finalize
     StatusCode finalize () override;
+
+  private:
+    /// \brief process a CutBookkeeper
+    void processCutBookkeeper (const xAOD::CutBookkeeper *cbk,
+                               size_t index);
 
     /// \brief flag to enable systematics
   private:
