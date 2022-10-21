@@ -12920,26 +12920,23 @@ HLT_mu10_l2mt_L1MU10BO:
 HLT_mu10_l2mt_L1MU10BOM:
   eventCount: 1
   stepCounts:
-    0: 2
+    0: 1
     1: 1
     2: 1
     3: 1
   stepFeatures:
-    0: 3
+    0: 1
     1: 1
     2: 1
     3: 1
 HLT_mu10_l2mt_mu4_l2mt_bJpsimumu_L1MU10BOM:
   eventCount: 0
-  stepCounts:
-    0: 1
   stepFeatures:
-    0: 6
-    1: 2
+    0: 2
 HLT_mu10_l2mt_mu4_l2mt_bJpsimumu_L1MU12BOM:
   eventCount: 0
   stepFeatures:
-    0: 4
+    0: 2
 HLT_mu10_mu6_probe_PhysicsTLA_L1MU8F:
   eventCount: 3
   stepCounts:
