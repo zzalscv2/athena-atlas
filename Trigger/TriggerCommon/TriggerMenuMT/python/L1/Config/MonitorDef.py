@@ -376,12 +376,13 @@ class MonitorDef:
                 "L1_2MU3V_VTE50",
                 # Legacy L1Calo
                 # EM
-                "L1_EM3", "L1_EM10", "L1_EM20VHI",
+                #"L1_EM3", 
+                "L1_EM10", "L1_EM20VHI",
                 "L1_EM7_VTE200",
-                "L1_EM3_ALFA_ANY",
-                "L1_EM3_ALFA_EINE",
-                "L1_2EM3_ALFA_EINE",
-                "L1_EM7_AFP_A_OR_C",
+                #"L1_EM3_ALFA_ANY",
+                #"L1_EM3_ALFA_EINE",
+                #"L1_2EM3_ALFA_EINE",
+                #"L1_EM7_AFP_A_OR_C",
                 # Tau
                 "L1_TAU8", "L1_TAU12IM",
                 "L1_TAU1_TE3_VTE200",

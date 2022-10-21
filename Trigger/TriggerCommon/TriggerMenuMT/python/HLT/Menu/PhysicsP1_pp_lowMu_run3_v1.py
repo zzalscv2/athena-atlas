@@ -47,9 +47,9 @@ def setupMenu():
     chains['Egamma'] = [
 
         #ART-23577
-        ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_OR_C', l1SeedThresholds=['EM7'], groups=SingleElectronGroup+LowMuGroupLeg),
-        ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_AND_C', l1SeedThresholds=['EM7'], groups=SingleElectronGroup+LowMuGroupLeg),
-        ChainProp(name='HLT_e20_lhloose_L1EM7', l1SeedThresholds=['EM7'], groups=LowMuGroupLeg),
+        #ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_OR_C', l1SeedThresholds=['EM7'], groups=SingleElectronGroup+LowMuGroupLeg),
+        #ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_AND_C', l1SeedThresholds=['EM7'], groups=SingleElectronGroup+LowMuGroupLeg),
+        #ChainProp(name='HLT_e20_lhloose_L1EM7', l1SeedThresholds=['EM7'], groups=LowMuGroupLeg),
         ChainProp(name='HLT_e20_lhloose_L1eEM9_AFP_A_OR_C', l1SeedThresholds=['eEM9'], groups=SingleElectronGroup+LowMuGroupPhI),
         ChainProp(name='HLT_e20_lhloose_L1eEM9_AFP_A_AND_C', l1SeedThresholds=['eEM9'], groups=SingleElectronGroup+LowMuGroupPhI),
         ChainProp(name='HLT_e20_lhloose_L1eEM9', l1SeedThresholds=['eEM9'], groups=LowMuGroupPhI),
@@ -251,8 +251,9 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1MU3V',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup),
         ChainProp(name='HLT_noalg_L1MU8VF',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup),
         ChainProp(name="HLT_noalg_L1MU5VF",      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=SingleMuonGroup),
-        ChainProp(name='HLT_noalg_L1EM3',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM7',        l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=EgammaStreamersGroup+SupportLegGroup),
+        #EM3 is removed from HI L1 menu
+        #ChainProp(name='HLT_noalg_L1EM3',        l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7',        l1SeedThresholds=['FSNOSEED'], stream=['Main', 'express'], groups=EgammaStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1EM12',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1EM15',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1EM8VH',      l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=EgammaStreamersGroup+SupportLegGroup),
@@ -283,8 +284,8 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1XE60',       l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=METStreamersGroup+SupportLegGroup),
 
         # Low mu AFP
-        ChainProp(name='HLT_noalg_L1EM7_AFP_A_OR_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM7_AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7_AFP_A_OR_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7_AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1MU5VF_AFP_A_OR_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU5VF_AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=MinBiasGroup+SupportGroup),
 
@@ -334,6 +335,14 @@ def setupMenu():
     ]
 
     # Add all standard monitoring chains from addP1Signatures function
-    addP1Signatures(chains)
-
+    tempChains = ChainStore()
+    addP1Signatures(tempChains)
+    for sig, chainsInSig in tempChains.items():
+        for c in chainsInSig:
+                if "EM3" in c.name: # EM3 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
+                        continue
+                if "EM7" in c.name: # EM7 without VTE or AFP is removed from HI L1 menu to avoid L1Calo EM overflow
+                        continue
+                else:
+                        chains[sig].append(c)
     return chains

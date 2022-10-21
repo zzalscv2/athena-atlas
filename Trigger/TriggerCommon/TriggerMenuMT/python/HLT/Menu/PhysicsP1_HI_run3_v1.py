@@ -48,7 +48,7 @@ def setupMenu():
     chains = ChainStore()
 
     chains['Muon'] = [
-        #ChainProp(name='HLT_mu4_L1MU3V', stream=[HardProbesStream], groups=SingleMuonGroup),
+        ChainProp(name='HLT_mu4_L1MU3V', stream=[HardProbesStream], groups=SingleMuonGroup),
 
 #ART-26051, AFP+Muon triggers for LHCf runs
         ChainProp(name='HLT_mu20_L1MU5VF_AFP_A_OR_C',   l1SeedThresholds=['MU5VF'], stream=[PhysicsStream], groups=SingleMuonGroup+LowMuGroup+['PS:Online']),
@@ -60,9 +60,9 @@ def setupMenu():
     chains['Egamma'] = [
 
 #ART-26051, AFP+Electron triggers for LHCf runs
-        ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_OR_C',  l1SeedThresholds=['EM7'], stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupLeg+['PS:Online']),
-        ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_AND_C', l1SeedThresholds=['EM7'], stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupLeg+['PS:Online']),
-        ChainProp(name='HLT_e20_lhloose_L1EM7',             l1SeedThresholds=['EM7'], stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupLeg+['PS:Online']),
+        #ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_OR_C',  l1SeedThresholds=['EM7'], stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupLeg+['PS:Online']),
+        #ChainProp(name='HLT_e20_lhloose_L1EM7_AFP_A_AND_C', l1SeedThresholds=['EM7'], stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupLeg+['PS:Online']),
+        #ChainProp(name='HLT_e20_lhloose_L1EM7',             l1SeedThresholds=['EM7'], stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupLeg+['PS:Online']),
         ChainProp(name='HLT_e20_lhloose_L1eEM9_AFP_A_OR_C', l1SeedThresholds=['eEM9'],stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupPhI+['PS:Online']),
         ChainProp(name='HLT_e20_lhloose_L1eEM9_AFP_A_AND_C',l1SeedThresholds=['eEM9'],stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupPhI+['PS:Online']),
         ChainProp(name='HLT_e20_lhloose_L1eEM9',            l1SeedThresholds=['eEM9'],stream=[PhysicsStream], groups=SingleElectronGroup+LowMuGroupPhI+['PS:Online']),
@@ -219,12 +219,12 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1AFP_FSC_TOF_T3_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1AFP_NSA_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1AFP_NSC_BGRP12', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1EM7_AFP_A_OR_C',    l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM7_AFP_A_AND_C',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7_AFP_A_OR_C',    l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7_AFP_A_AND_C',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1MU5VF_AFP_A_OR_C',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MU5VF_AFP_A_AND_C', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1RD0_EMPTY',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup),
-        ChainProp(name='HLT_noalg_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup), 
+        ChainProp(name='HLT_noalg_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+['PS:Online']+SupportGroup), 
 
 #Run2-style Heavy Ion ZDC streamers
         ChainProp(name='HLT_noalg_L1ZDC_A', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online']+SupportGroup),
@@ -243,8 +243,7 @@ def setupMenu():
 
         ChainProp(name='HLT_noalg_L1MU3V',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name="HLT_noalg_L1MU5VF", l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
-        ChainProp(name='HLT_noalg_L1EM3',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:Online']+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1EM7',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:Online']+SupportLegGroup),
+        #ChainProp(name='HLT_noalg_L1EM7',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:Online']+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1J12',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=['PS:Online']+SupportLegGroup),
 
 
@@ -300,6 +299,10 @@ def setupMenu():
                 continue
         for c in chainsInSig:
                 if "IDCalibPEB" in c.name: # heavy tracking
+                        continue
+                elif "EM3" in c.name: # EM3 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow 
+                        continue
+                elif "EM7" in c.name: # EM7 without VTE and AFP is removed from HI L1 menu to avoid L1Calo EM overflow 
                         continue
                 else:
                         chains[sig].append(c)
