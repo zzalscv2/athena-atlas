@@ -90,6 +90,18 @@ def ITkPixelClusterizationCfg(flags, name = "ITkPixelClusterization", **kwargs):
     acc.addEventAlgo(CompFactory.InDet.PixelClusterization(name, **kwargs))
     return acc
 
+def ITkTrigPixelClusterizationCfg(flags, name = "ITkTrigPixelClusterization", roisKey="", signature="", **kwargs):
+    acc = ComponentAccumulator()
+    from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+    acc.merge(ITkPixelClusterizationCfg(flags,
+                                        name="ITkPixelClusterization_"+signature,
+                                        isRoI_Seeded=True,
+                                        RoIs=roisKey,
+                                        ClustersName = "ITkTrigPixelClusters",
+                                        ClusterContainerCacheKey="PixelTrigClustersCache",
+                                        RegSelTool= acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags))))
+    return acc
+
 def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
     acc = ComponentAccumulator()
 
@@ -164,6 +176,18 @@ def ITkStripClusterizationCfg(flags, name="ITkStripClusterization", **kwargs):
     kwargs.setdefault("SCT_FlaggedCondData", "ITkStripFlaggedCondData")
 
     acc.addEventAlgo( CompFactory.InDet.SCT_Clusterization(name, **kwargs))
+    return acc
+
+def ITkTrigStripClusterizationCfg(flags, name="ITkTrigStripClusterization", roisKey="", signature="", **kwargs):
+    acc = ComponentAccumulator()
+    from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+    acc.merge(ITkStripClusterizationCfg(flags,
+                                        name="ITkStripClusterization_"+signature,
+                                        isRoI_Seeded=True,
+                                        RoIs=roisKey,
+                                        ClustersName = "ITkTrigStripClusters",
+                                        ClusterContainerCacheKey="SCT_ClustersCache",
+                                        RegSelTool= acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags))))
     return acc
 
 def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):

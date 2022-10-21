@@ -304,11 +304,8 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
 
   flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
 
-  from AthenaCommon.Configurable import ConfigurableRun3Behavior
-
-  with ConfigurableRun3Behavior():
-    ca = CAtoGlobalWrapper(InDetAmbiScoringToolCfg, flags, **kwargs)
-    sct = ca.popPrivateTools()
+  ca = CAtoGlobalWrapper(InDetAmbiScoringToolCfg, flags, **kwargs)
+  sct = ca.popPrivateTools()
 
   scoringTool = conf2toConfigurable(sct)
   from AthenaCommon.AppMgr import ToolSvc

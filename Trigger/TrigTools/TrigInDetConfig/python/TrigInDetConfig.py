@@ -267,6 +267,10 @@ def trackFTFConverterCfg(flags, signature):
 
 
 def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_view=True ):
+  if inflags.Detector.GeometryITk:
+    from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetFastTrackingCfg
+    return  ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view )
+ 
   """ Generates precision fast tracking config, it is a primary config function """
 
   # redirect InDet.Tracking.ActivePass flags to point to a specific trigger setting
@@ -303,7 +307,7 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
                                   ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         sgil_load = [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ),
-                     ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
+                    ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
         acc.merge(SGInputLoaderCfg(flags, Load=sgil_load))
 
     acc.addEventAlgo(verifier)
@@ -366,7 +370,6 @@ def TRTExtrensionBuilderCfg(flags):
 #  'InDet::TRT_TrackExtensionAlg/InDetTrigMTTrackExtensionAlg_electronLRT', 
 #  'InDet::InDetExtensionProcessor/InDetTrigMTExtensionProcessor_electronLRT', 
 
-
   return acc
 
 def ambiguitySolverAlgCfg(flags):
@@ -383,6 +386,10 @@ def trackEFIDConverterCfg(flags):
 
 
 def trigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
+  if inflags.Detector.GeometryITk:
+    from TrigInDetConfig.TrigInDetConfigITk import ITktrigInDetPrecisionTrackingCfg
+    return  ITktrigInDetPrecisionTrackingCfg(inflags, signatureName, in_view=True)
+ 
   """ Generates precision tracking config, it is a primary config function """
 
   acc = ComponentAccumulator()

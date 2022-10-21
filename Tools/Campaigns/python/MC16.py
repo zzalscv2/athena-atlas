@@ -12,9 +12,6 @@ def MC16a(flags):
     LArConfigRun2PileUp(flags)
     flags.Digitization.HighGainEMECIW = True
 
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
-
     # pile-up
     flags.Digitization.PU.NumberOfLowPtMinBias = 44.3839246425
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.116075313
@@ -30,9 +27,6 @@ def MC16d(flags):
 
     from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
-
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
 
     # pile-up
     flags.Digitization.PU.NumberOfLowPtMinBias = 80.290021063135
@@ -50,9 +44,6 @@ def MC16e(flags):
     from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
 
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
-
     # pile-up
     flags.Digitization.PU.NumberOfLowPtMinBias = 99.2404608
     flags.Digitization.PU.NumberOfHighPtMinBias = 0.2595392
@@ -66,9 +57,6 @@ def MC16NoPileUp(flags):
 
     from LArConfiguration.LArConfigRun2 import LArConfigRun2NoPileUp
     LArConfigRun2NoPileUp(flags)
-
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
 
 
 def MC16Simulation(flags):

@@ -5,6 +5,8 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
+# art-input: valid1.516697.MGPy8EG_A14NNPDF23LO_SmuSmuLLP_100_0_1ns.recon.RDO.e8481_e8455_s3928_s3874_r13929_tid30934262_00
+# art-input-nfiles: 4
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -30,8 +32,8 @@ Slices  = ['L2muonLRT']
 Events  = 8000 
 Threads = 8 
 Slots   = 8
-Input   = 'StauStau'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles = False
+Input   = 'SmuSmu'    # defined in TrigValTools/share/TrigValInputs.json
+GridFiles = True
 Release = "current"
 
 ExtraAna = ' -c LRT="True" '

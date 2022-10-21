@@ -52,15 +52,25 @@ def EFMuonCBViewDataVerifierCfg(flags, name):
         EFMuonCBViewDataVerifier.DataObjects +=[( 'Muon::HoughDataPerSectorVec' , 'StoreGateSvc+HoughDataPerSectorVec' )]
 
     else:
-        EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
-                                                 ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Trigger.InDetTracking.Muon.tracks_FTF ),
-                                                 ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )]
+        if flags.Detector.GeometryITk:
+            EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
+                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Trigger.ITkTracking.Muon.tracks_FTF )]
+        else:
+            EFMuonCBViewDataVerifier.DataObjects += [( 'MuonCandidateCollection' , 'StoreGateSvc+MuonCandidates' ),
+                                                    ( 'xAOD::TrackParticleContainer' , 'StoreGateSvc+'+flags.Trigger.InDetTracking.Muon.tracks_FTF ),
+                                                    ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_FlaggedCondData' )]
+
     if flags.Input.Format is Format.BS:
         EFMuonCBViewDataVerifier.DataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                                                  ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
     if flags.Input.isMC:
-        EFMuonCBViewDataVerifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ),
-                                                 ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ]
+        if flags.Detector.GeometryITk:
+            EFMuonCBViewDataVerifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ), 
+                                                    ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ) ] 
+        else:
+            EFMuonCBViewDataVerifier.DataObjects += [( 'PixelRDO_Container' , 'StoreGateSvc+PixelRDOs' ), 
+                                                    ( 'SCT_RDO_Container' , 'StoreGateSvc+SCT_RDOs' ) ] 
+
     result = ComponentAccumulator()
     result.addEventAlgo(EFMuonCBViewDataVerifier)
     return result
