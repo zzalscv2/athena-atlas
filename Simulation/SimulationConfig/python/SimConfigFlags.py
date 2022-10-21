@@ -11,7 +11,14 @@ def createSimConfigFlags():
     scf=AthConfigFlags()
 
     scf.addFlag("Sim.ParticleID", False)
-    scf.addFlag("Sim.CalibrationRun", CalibrationRun.DeadLAr, enum=CalibrationRun)
+
+    def _checkCalibrationRun(prevFlags):
+        if prevFlags.Sim.ISF.Simulator not in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.AtlasG4] \
+            or prevFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
+            return CalibrationRun.Off
+        return CalibrationRun.DeadLAr
+
+    scf.addFlag("Sim.CalibrationRun", _checkCalibrationRun, enum=CalibrationRun)
 
     scf.addFlag("Sim.CavernBackground", CavernBackground.Off, enum=CavernBackground)
     scf.addFlag("Sim.ReadTR", False)
@@ -62,7 +69,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.TwissFileVersion", "v01")
 
     # G4AtlasAlg
-    scf.addFlag("Sim.ReleaseGeoModel", True)
+    scf.addFlag("Sim.ReleaseGeoModel", False)
     scf.addFlag("Sim.RecordFlux", False)
     scf.addFlag("Sim.TruthStrategy", lambda prevFlags : TruthStrategy.Validation if prevFlags.Sim.ISF.ValidationMode else TruthStrategy.MC12,
                 enum=TruthStrategy)
