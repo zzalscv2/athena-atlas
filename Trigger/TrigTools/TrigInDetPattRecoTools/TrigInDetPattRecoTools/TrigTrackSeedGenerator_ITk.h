@@ -37,7 +37,7 @@ private:
 
   const TrigCombinatorialSettings& m_settings;
   float m_phiSliceWidth;
-  float m_minDeltaRadius, m_maxDeltaRadius, m_zTol;
+  float m_minDeltaRadius, m_maxDeltaRadius;
 
   float m_CovMS, m_minR_squ, m_dtPreCut;
 
