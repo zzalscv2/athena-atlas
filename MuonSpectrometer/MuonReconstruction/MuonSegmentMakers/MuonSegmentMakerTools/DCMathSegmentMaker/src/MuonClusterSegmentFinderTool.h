@@ -121,8 +121,6 @@ namespace Muon {
         double m_chi2{0.};
         /// Added measurements on track
         size_t m_size{0};
-        /// Combination of stereo layers is doomed from the beginning
-        bool m_singularDiamond{false};
         /// Garbage container per seed
         std::set<std::shared_ptr<const Muon::MuonClusterOnTrack>> m_calibClust{};
     };
