@@ -4,6 +4,20 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def VSI_VKalVrtFitterCfg(flags, name="VSI_TrkVKalVrtFitter", **kwargs):
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
+
+    kwargs.setdefault("IterationNumber", flags.InDet.SecVertex.Fitter.IterationNumber)
+
+    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
+    return acc
+
 def TrkVKalVrtFitterCfg(flags, name="TrkVKalVrtFitter", **kwargs):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
