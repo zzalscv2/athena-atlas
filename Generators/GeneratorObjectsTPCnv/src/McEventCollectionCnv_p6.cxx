@@ -527,6 +527,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
                               genEvt->m_event_scale,
                               genEvt->m_alphaQCD,
                               genEvt->m_alphaQED,
+                              1, // dummy value as this does not exist in HepMC2::GenEvent
                               signalProcessVtx,
                               beamParticle1Barcode,       // barcodes of beam particles
                               beamParticle2Barcode,
