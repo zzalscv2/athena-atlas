@@ -123,18 +123,6 @@ if InDetFlags.doSplitVertexFindingForMonitoring():
   if InDetFlags.doPrintConfigurables():
     printfunc (InDetPriVxFinderSplit)
 
-# ----------------------------------------------------------------------------
-#
-# --- TRT low beta finder (sources unslimmed tracks via TrackParticle objects)
-#
-# ----------------------------------------------------------------------------
-
-if InDetFlags.doLowBetaFinder():
-  include ("InDetRecExample/ConfiguredLowBetaFinder.py")
-  from AthenaCommon.GlobalFlags import globalflags
-  InDetLowBetaTrkAlgorithm = ConfiguredLowBetaFinder(InDetKeys.xAODTrackParticleContainer(),
-                                                     True if (globalflags.DataSource != "data") else False,
-                                                     InDetKeys.UnslimmedTracks())
 
 # -------------------------------------------------------------------------
 #

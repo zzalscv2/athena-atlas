@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -279,7 +279,7 @@ class TrigTZReco(ExecStep):
         self.max_events = -1
         self.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
         self.args += ' --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root'
-        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-06\' --geometryVersion=\'ATLAS-R2-2016-01-00-01\''
+        self.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
         self.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
         self.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
 
@@ -410,6 +410,3 @@ class TrigInDetCpuCostStep(RefComparisonStep):
         else:
             self.args  = self.input_file + " " + self.reference + " -o " + self.output_dir + " " + self.extra
         Step.configure(self, test)
-
-
-

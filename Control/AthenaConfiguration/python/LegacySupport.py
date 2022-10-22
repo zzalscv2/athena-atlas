@@ -77,7 +77,7 @@ def _setProperties( dest, src, indent="" ):
             setattr( dest, pname, pvalue )
 
 
-def conf2toConfigurable( comp, indent="", parent="", suppressDupes=False ):
+def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppressDupes=False ):
     """
     Method converts from Conf2 ( comp argument ) to old Configurable
     If the Configurable of the same name exists, the properties merging process is invoked
@@ -167,7 +167,7 @@ def conf2toConfigurable( comp, indent="", parent="", suppressDupes=False ):
         else:
             return listOrDictHelper
 
-    def _areSettingsSame( conf1, conf2, indent="" ):
+    def _areSettingsSame( conf1, conf2, indent="",servicesOfThisCA=[] ):
         """Are the properties the same between old-style conf1 and new-style conf2 instance?"""
         from AthenaCommon.AppMgr import ToolSvc
 
@@ -206,7 +206,7 @@ def conf2toConfigurable( comp, indent="", parent="", suppressDupes=False ):
                     _log.warning('%s New (conf2) %s for %s',indent, sorted(newCset), conf2.getFullJobOptName())
                     _log.warning('%s Will try to merge them, but this might go wrong!',indent)
                 for oldC in oldCset & newCset:
-                    _areSettingsSame( toolDict[oldC], newCdict[oldC], _indent(indent))
+                    _areSettingsSame( toolDict[oldC], newCdict[oldC], _indent(indent),servicesOfThisCA)
 
                 # And now just the new properties in conf2 (the stuff just in conf1 is already in the objec)
                 for newC in sorted(newCset-oldCset):
@@ -247,9 +247,13 @@ def conf2toConfigurable( comp, indent="", parent="", suppressDupes=False ):
                   "ServiceHandle" in propType):
                 existingVal = getattr(conf1, pname)
                 if isinstance( pvalue, str ):
-                    _log.warning("%sThe handle %s of new-config component %s.%s is just a string %s, "
-                                 "skipping deeper checks, configuration may be incorrect",
-                                 indent, propType, conf2.name, pname, pvalue)
+                    #Try getting the component from the known services:
+                    if "ServiceHandle" in propType and pvalue in servicesOfThisCA:
+                        _log.debug("%sThe service %s is part of the CA. Consistency checks will be performed when the service is merged") 
+                    else:
+                        _log.warning("%sThe handle %s of new-config component %s.%s is just a string %s, "
+                                     "skipping deeper checks, configuration may be incorrect",
+                                     indent, propType, conf2.name, pname, pvalue)
                 elif pvalue is None:
                     _log.debug("%sThe property value for %s of %s is None. Skipping.", indent, pname, conf2.name )
                     continue
@@ -267,11 +271,11 @@ def conf2toConfigurable( comp, indent="", parent="", suppressDupes=False ):
                     instance._name = pvalueCompName
                     setattr(conf1, pname, instance)
                     existingVal = getattr(conf1, pname)
-                    _areSettingsSame( existingVal, pvalue, indent)
+                    _areSettingsSame( existingVal, pvalue, indent,servicesOfThisCA)
                 else:
                     _log.debug( "%sSome kind of handle and, object type %s existing %s",
                                 indent, type(pvalue), type(existingVal) )
-                    _areSettingsSame( existingVal, pvalue, indent)
+                    _areSettingsSame( existingVal, pvalue, indent,servicesOfThisCA)
             else:
                 if isinstance(pvalue, (GaudiConfig2.semantics._ListHelper, GaudiConfig2.semantics._DictHelper)):
                     pvalue = pvalue.data
@@ -341,7 +345,7 @@ def conf2toConfigurable( comp, indent="", parent="", suppressDupes=False ):
     if existingConfigurable: # if configurable exists we try to merge with it
         _log.debug( "%sPre-existing configurable %s was found, checking if has the same properties",
                     indent, existingConfigurable.getFullJobOptName() )
-        _areSettingsSame( existingConfigurable, comp, indent )
+        _areSettingsSame( existingConfigurable, comp, indent,  servicesOfThisCA )
         _log.debug( "%sPre-existing configurable %s was found to have the same properties",
                     indent, comp.name )
         instance = existingConfigurable if not suppressDupes else None
@@ -379,15 +383,18 @@ def appendCAtoAthena(ca):
     _log = logging.getLogger( "conf2toConfigurable" )
     _log.debug( "Merging ComponentAccumulator into global configuration" )
 
+
+    servicesOfThisCA=[svc.getFullJobOptName() for svc in ca.getServices()]
+
     if len( ca.getPublicTools() ) != 0:
         for comp in ca.getPublicTools():
-            instance = conf2toConfigurable( comp, indent="  ", parent="ToolSvc" )
+            instance = conf2toConfigurable( comp, indent="  ", parent="ToolSvc", servicesOfThisCA=servicesOfThisCA )
             if instance not in ToolSvc:
                 ToolSvc += instance
 
     if len(ca.getServices()) != 0:
         for comp in ca.getServices():
-            instance = conf2toConfigurable( comp, indent="  " )
+            instance = conf2toConfigurable( comp, indent="  ", servicesOfThisCA=servicesOfThisCA )
             if instance not in ServiceMgr:
                 ServiceMgr += instance
         for svcName in ca._servicesToCreate:
@@ -396,7 +403,7 @@ def appendCAtoAthena(ca):
 
     if  len(ca._conditionsAlgs) != 0:
         for comp in ca._conditionsAlgs:
-            instance = conf2toConfigurable( comp, indent="  " )
+            instance = conf2toConfigurable( comp, indent="  ", servicesOfThisCA=servicesOfThisCA )
             if instance not in athCondSeq:
                 athCondSeq += instance
 

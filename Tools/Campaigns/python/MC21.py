@@ -12,9 +12,6 @@ def MC21a(flags):
     from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
     LArConfigRun3PileUp(flags)
 
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
-
     # radiation damage
     flags.Digitization.DoPixelPlanarRadiationDamage = True
 
@@ -49,9 +46,6 @@ def MC21NoPileUp(flags):
 
     from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
     LArConfigRun3NoPileUp(flags)
-
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
 
     # radiation damage
     flags.Digitization.DoPixelPlanarRadiationDamage = True

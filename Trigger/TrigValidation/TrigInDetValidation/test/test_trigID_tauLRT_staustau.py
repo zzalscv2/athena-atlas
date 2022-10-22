@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 
-# art-description: art job for tau_ztautau_pu46
+# art-description: art job for tauLRT_staustau
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
+# art-input: valid1.516640.MGPy8EG_A14NNPDF23LO_StauStauLLP_100_0_1ns.recon.RDO.e8481_e8455_s3928_s3874_r13929_tid30933875_00
+# art-input-nfiles: 3
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -31,6 +33,7 @@ Threads = 8
 Slots   = 8
 Release = "current"
 Input   = 'StauStau'    # defined in TrigValTools/share/TrigValInputs.json
+GridFiles = True
 
 ExtraAna = " -c 'LRT=True;parentpdgid=15' "
 

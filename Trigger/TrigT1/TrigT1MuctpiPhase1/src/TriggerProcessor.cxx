@@ -107,7 +107,7 @@ namespace LVL1MUCTPIPHASE1 {
             //CANDIDIATE FLAGS
             if (isys == 0) 
             {
-              daq_word |= (sectorData->ovl(icand)              & LVL1::MuCTPIBits::RUN3_BARREL_OL_MASK) << LVL1::MuCTPIBits::RUN3_BARREL_OL_SHIFT;
+              daq_word |= (sectorData->ovl(icand)              & LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK) << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT;
               daq_word |= (sectorData->is2candidates(icand)    & LVL1::MuCTPIBits::ROI_OVERFLOW_MASK)   << LVL1::MuCTPIBits::RUN3_ROI_OVERFLOW_SHIFT;
             }
             else

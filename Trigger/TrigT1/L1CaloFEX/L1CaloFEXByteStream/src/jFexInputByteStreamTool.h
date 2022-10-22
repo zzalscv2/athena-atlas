@@ -56,8 +56,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         // FiberMapping property required by the interface
         
         // Commented out until the mapping issue is solve and the new version is validated
-        //Gaudi::Property<std::string> m_FiberMapping {this, "FiberMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-09-13/jFEX_fiber_mapping.txt").c_str(), "Text file to convert from hardware fiber to eta-phi location"};
-        Gaudi::Property<std::string> m_FiberMapping {this, "FiberMapping", "/afs/cern.ch/user/s/serodrig/public/L1CaloScellMapping/athenaTowerMap.txt", "Text file to convert from hardware fiber to eta-phi location"};
+        Gaudi::Property<std::string> m_FiberMapping {this, "jFexTowerMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jFexTowerMap.txt"), "Text file to convert from hardware fiber to eta-phi location"};
 
         //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
         SG::WriteHandleKey< xAOD::jFexTowerContainer> m_jTowersWriteKey   {this,"jTowersWriteKey"  ,"L1_jTowers","Write jFexEDM Trigger Tower container"};

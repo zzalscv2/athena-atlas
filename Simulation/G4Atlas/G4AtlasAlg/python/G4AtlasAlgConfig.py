@@ -85,6 +85,10 @@ def G4AtlasAlgCfg(ConfigFlags, name="G4AtlasAlg", **kwargs):
 
     # Set commands for the G4AtlasAlg
     kwargs.setdefault("G4Commands", ConfigFlags.Sim.G4Commands)
+    from SimulationConfig.SimEnums import CalibrationRun
+    if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
 
     result.addEventAlgo(CompFactory.G4AtlasAlg(name, **kwargs))
 

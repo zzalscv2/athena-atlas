@@ -11,7 +11,9 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AsgTools/ToolHandle.h"
+
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 // Local include(s):
 #include "TrigT1CaloCalibToolInterfaces/IL1CaloxAODOfflineTriggerTowerTools.h"
@@ -45,13 +47,34 @@ class L1CaloTriggerTowerDecoratorAlg : public AthAlgorithm {
 
   ToolHandle<LVL1::IL1CaloxAODOfflineTriggerTowerTools> m_ttTools;
 
-  std::unique_ptr<xAOD::TriggerTower::Decorator<float>> m_caloCellEnergyDecorator;
-  std::unique_ptr<xAOD::TriggerTower::Decorator<float>> m_caloCellETDecorator;
-  std::unique_ptr<xAOD::TriggerTower::Decorator<float>> m_caloCellsQualityDecorator;
-  std::unique_ptr<xAOD::TriggerTower::Decorator<std::vector<float>>> m_caloCellEnergyByLayerDecorator;
-  std::unique_ptr<xAOD::TriggerTower::Decorator<std::vector<float>>> m_caloCellETByLayerDecorator;
-  std::unique_ptr<xAOD::TriggerTower::Decorator<std::vector<std::vector<float>>>> m_caloCellEnergyByLayerByReceiverDecorator;
-  std::unique_ptr<xAOD::TriggerTower::Decorator<std::vector<std::vector<float>>>> m_caloCellETByLayerByReceiverDecorator;
+  // The following are set automatically based on input and the string
+  // properties
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
+    m_caloCellEnergyKey{ this, "caloCellEnergyKey_doNoSet", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
+    m_caloCellETKey{ this, "caloCellETKey_doNoSet", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
+    m_caloCellsQualityKey{ this, "caloCellsQualityKey_doNoSet", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellEnergyByLayerKey{
+    this,
+    "caloCellEnergyByLayerKey_doNoSet",
+    "",
+    ""
+  };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
+    m_caloCellETByLayerKey{ this, "caloCellETByLayerKey_doNoSet", "", "" };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
+    m_caloCellEnergyByLayerByReceiverKey{
+      this,
+      "caloCellEnergyByLayerByReceiverKey_doNoSet",
+      "",
+      ""
+    };
+  SG::WriteDecorHandleKey<xAOD::TriggerTowerContainer>
+    m_caloCellETByLayerByReceiverKey{ this,
+                                      "caloCellETByLayerByReceiverKey_doNotSet",
+                                      "",
+                                      "" };
 };
 }
 #endif

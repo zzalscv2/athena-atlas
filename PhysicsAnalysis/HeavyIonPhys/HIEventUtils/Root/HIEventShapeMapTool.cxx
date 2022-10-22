@@ -38,7 +38,7 @@ const HIEventShapeIndex* HIEventShapeMapTool::getIndex(HI::BinningScheme key) co
 
 const HIEventShapeIndex* HIEventShapeMapTool::getIndexFromShape(const xAOD::HIEventShapeContainer* shape) const
 {
-  ATH_MSG_INFO("In getIndexFromShape, Shape size " << shape->size() << " And TOWER is: " << (HI::TowerBins::numLayers()*HI::TowerBins::numEtaBins()));
+  ATH_MSG_DEBUG("In getIndexFromShape, Shape size " << shape->size() << " And TOWER is: " << (HI::TowerBins::numLayers()*HI::TowerBins::numEtaBins()));
   if(shape->size() == HI::BinningScheme::TOWER){
     //TOWER
     auto itr = m_map.find( HI::BinningScheme::TOWER );
