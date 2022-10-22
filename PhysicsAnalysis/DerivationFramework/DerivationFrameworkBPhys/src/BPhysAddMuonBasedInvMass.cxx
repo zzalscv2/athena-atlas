@@ -23,6 +23,23 @@
 
 namespace DerivationFramework {
 
+
+  struct BasedInvCache{
+      BasedInvCache(const EventContext& c = Gaudi::Hive::currentContext()) : ctx(c){}
+      /// map original -> adjusted track particles
+      typedef std::map<const xAOD::TrackParticle*, const xAOD::TrackParticle*>
+        TpMap_t;
+      /// map of adjusted track particles as cache
+      TpMap_t adjTpCache;
+      const EventContext& ctx;
+      ~BasedInvCache(){
+       for (auto& p : adjTpCache) {
+         delete(p.second);
+       }
+     }
+  };
+
+
   //--------------------------------------------------------------------------
   BPhysAddMuonBasedInvMass::BPhysAddMuonBasedInvMass(const std::string& t,
 						     const std::string& n,
@@ -106,7 +123,7 @@ namespace DerivationFramework {
   StatusCode BPhysAddMuonBasedInvMass::addBranches() const {
 
     ATH_MSG_DEBUG("BPhysAddMuonBasedInvMass::addBranches() -- begin");
-    
+    BasedInvCache cache;
     // vertex container and its auxilliary store
     xAOD::VertexContainer*     vtxContainer    = NULL;
     xAOD::VertexAuxContainer*  vtxAuxContainer = NULL;
@@ -139,7 +156,7 @@ namespace DerivationFramework {
 
       // TODO: check number of muons requested!
       std::pair<double,double> MuCalcCandMass =
-	getMuCalcMass(vtx, m_trkMasses, 2);
+	getMuCalcMass(vtx, m_trkMasses, 2, cache);
 
       // fill default values
       d_mucalc_mass(**vtxItr)    = MuCalcCandMass.first;
@@ -156,7 +173,7 @@ namespace DerivationFramework {
 	  d_minChi2ToAnyPV(**vtxItr) =
 	    getMinChi2ToAnyPV(vtx, pvContainer, m_pvTypesToConsider,
 			      m_minNTracksInPV, m_addMinChi2ToAnyPVMode,
-			      xAOD::BPhysHelper::PV_MIN_A0); // dummy
+			      xAOD::BPhysHelper::PV_MIN_A0, cache); // dummy
 	} else if (m_addMinChi2ToAnyPVMode > 1 && m_addMinChi2ToAnyPVMode < 4) {
 	  // skip or replace associated PVs
 	  for (auto pvAssocType : m_pvAssocTypes) {
@@ -167,7 +184,7 @@ namespace DerivationFramework {
 	    d_minChi2ToAnyPV(**vtxItr) =
 	      getMinChi2ToAnyPV(vtx, pvContainer, m_pvTypesToConsider,
 				m_minNTracksInPV, m_addMinChi2ToAnyPVMode,
-				pvAssocType);
+				pvAssocType, cache);
 	    
 	  } // for pvAssocType
 	} else {
@@ -178,8 +195,6 @@ namespace DerivationFramework {
       } // if m_addMinChi2ToAnyPVMode
     } // end of loop over vertices
       
-    // clean cache
-    clearAdjTpCache();
     
     ATH_MSG_DEBUG("BPhysAddMuonBasedInvMass::addBranches() -- end");
 
@@ -191,18 +206,18 @@ namespace DerivationFramework {
   //
   std::pair<double, double>
   BPhysAddMuonBasedInvMass::getMuCalcMass(xAOD::BPhysHelper& vtx,
-					  std::vector<double> trkMasses,
-					  int nMuRequested) const {
+					  const std::vector<double> &trkMasses,
+					  int nMuRequested, BasedInvCache &cache) const {
 
     std::pair<double, double> mpe(0., -1.);
 
-    std::pair<TrackBag, int> tracksWithMu = getTracksWithMuons(vtx);
+    std::pair<TrackBag, int> tracksWithMu = getTracksWithMuons(vtx, cache);
 
     if ( tracksWithMu.second == nMuRequested ) {
       if ( tracksWithMu.first.size() == trkMasses.size() ) {
 	mpe = getInvariantMassWithError(tracksWithMu.first,
 					trkMasses,
-					vtx.vtx()->position());
+					vtx.vtx()->position(), cache);
       } else {
 	ATH_MSG_WARNING("BPhysAddMuonBasedInvMass::getMuCalcMass:"
 			<< " vector sizes disagree!"
@@ -246,7 +261,7 @@ namespace DerivationFramework {
   // Obtain a set of tracks with muon track information if available
   //--------------------------------------------------------------------------
   std::pair<TrackBag, int>
-  BPhysAddMuonBasedInvMass::getTracksWithMuons(xAOD::BPhysHelper& vtx) const {
+  BPhysAddMuonBasedInvMass::getTracksWithMuons(xAOD::BPhysHelper& vtx, BasedInvCache &cache) const {
     
     TrackBag            tracksWithMu;
     int                 nMuFound = 0;
@@ -264,7 +279,7 @@ namespace DerivationFramework {
 	    if ( vtx.refTrkOrigin(itrk) ==
 		 muons.at(imu)->trackParticle(xAOD::Muon::InnerDetectorTrackParticle) ) {
 	      const xAOD::TrackParticle* trkMuon = 
-		adjustTrackParticle(muons.at(imu));
+		adjustTrackParticle(muons.at(imu), cache);
 	      if ( trkMuon != NULL ) {
 		trkParticle    = trkMuon;
 		nMuFound++;
@@ -291,7 +306,7 @@ namespace DerivationFramework {
 		  "nMuFound     = " << nMuFound
 		  << "\nvnMuFound    = " << svnMuFound );
     
-    return std::pair<TrackBag, int>(tracksWithMu, nMuFound);
+    return std::pair<TrackBag, int>(std::move(tracksWithMu), nMuFound);
   }
   //--------------------------------------------------------------------------
   // adjustTrackParticle: extract primary track particle from muon
@@ -299,15 +314,15 @@ namespace DerivationFramework {
   // a pointer to it.
   //--------------------------------------------------------------------------
   const xAOD::TrackParticle* BPhysAddMuonBasedInvMass
-  ::adjustTrackParticle(const xAOD::Muon* muon) const {
+  ::adjustTrackParticle(const xAOD::Muon* muon, BasedInvCache &cache) const {
 
     const xAOD::TrackParticle* tp  = NULL;    
     const xAOD::TrackParticle* org = muon->primaryTrackParticle();
 
     if ( m_adjustToMuonKinematics ) {
       if ( org != NULL ) {
-	TpMap_t::iterator it = m_adjTpCache.find(org);
-	if ( it != m_adjTpCache.end() ) {
+	auto it = cache.adjTpCache.find(org);
+	if ( it != cache.adjTpCache.end() ) {
 	  // copy cached link
 	  tp = it->second;
 	  ATH_MSG_DEBUG("adjustTrackParticle(): from cache: tp = " << tp);
@@ -326,7 +341,7 @@ namespace DerivationFramework {
 	  newTp->setDefiningParameters(org->d0(), org->z0(),
 				       p4.Phi(), p4.Theta(), qoverp);
 	  // cache new TrackParticle
-	  m_adjTpCache[org] = newTp;
+	  cache.adjTpCache[org] = newTp;
 	  tp = newTp;
 	  ATH_MSG_DEBUG("adjustTrackParticle(): new tp = " << tp
 			<< " org = " << org);
@@ -358,16 +373,7 @@ namespace DerivationFramework {
     }
     return tp;
   }
-  //--------------------------------------------------------------------------
-  // clearAdjTpCache: clear the cache of adjusted TrackParticles
-  //--------------------------------------------------------------------------
-  void BPhysAddMuonBasedInvMass::clearAdjTpCache() const {
 
-    for (auto& p : m_adjTpCache) {
-      delete(p.second);
-    }
-    m_adjTpCache.clear();
-  }
   //--------------------------------------------------------------------------
   // findAllMuonsInDecay: returns a vector of xAOD::Muon objects found
   // in this vertex and subsequent decay vertices.
@@ -402,7 +408,8 @@ namespace DerivationFramework {
 					      const int minNTracksInPV,
 					      const int mode,
 					      const xAOD::BPhysHelper::pv_type&
-					      pvAssocType) const {
+					      pvAssocType,
+                                              BasedInvCache &cache) const {
 
     MuonBag  muons  = findAllMuonsInDecay(vtx);
     TrackBag tracks = getIdTracksForMuons(muons);
@@ -455,7 +462,7 @@ namespace DerivationFramework {
 	  if ( (int)cvtx->nTrackParticles() >= minNTracksInPV ) {
 	    for (auto &track : tracks) {
 	      const Amg::Vector3D pos = cvtx->position();
-	      minChi2 = std::min(minChi2, getTrackPVChi2(*track, pos));
+	      minChi2 = std::min(minChi2, getTrackPVChi2(*track, pos, cache));
 	    } // for track
 	  } // if minNTracksInPV
 	} // if pvTypes in pvtypes vector
@@ -474,12 +481,12 @@ namespace DerivationFramework {
   //--------------------------------------------------------------------------
   double
   BPhysAddMuonBasedInvMass::getTrackPVChi2(const xAOD::TrackParticle& track,
-					   const Amg::Vector3D& pos) const {
+					   const Amg::Vector3D& pos, BasedInvCache &cache) const {
     
   double chi2 = -100.;
 
   auto trkPerigee =
-    m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, pos);
+    m_trackToVertexTool->perigeeAtVertex(cache.ctx, track, pos);
   if ( trkPerigee != NULL ) {
     const AmgSymMatrix(5)* locError = trkPerigee->covariance();
     if ( locError != NULL ) {
@@ -510,8 +517,9 @@ namespace DerivationFramework {
   //--------------------------------------------------------------------------
   std::pair<double,double> BPhysAddMuonBasedInvMass::
   getInvariantMassWithError(TrackBag trksIn,
-			    std::vector<double> massHypotheses,
-			    const Amg::Vector3D& pos) const {
+			    const std::vector<double> &massHypotheses,
+			    const Amg::Vector3D& pos,
+                             BasedInvCache &cache) const {
     
   std::pair<double, double> mass(0.,0.);
 
@@ -519,14 +527,14 @@ namespace DerivationFramework {
   if ( trksIn.size() == massHypotheses.size() ) {
     std::vector<const xAOD::TrackParticle*>::iterator trItr = trksIn.begin();
     std::vector<const xAOD::TrackParticle*>::iterator trItrEnd  =trksIn.end();
-    std::vector<double>::iterator massHypItr = massHypotheses.begin();
+    auto massHypItr = massHypotheses.cbegin();
     
     double pxTmp,pyTmp,pzTmp,massTmp,eTmp;
     
     std::vector<TLorentzVector> trkMom;
     TLorentzVector totMom;
     std::vector<const Trk::Perigee*> trkPer;
-    auto ctx = Gaudi::Hive::currentContext();
+    const auto &ctx = cache.ctx;
     for (;trItr != trItrEnd; ++trItr,++massHypItr){
       auto trkPerigee = 
         m_trackToVertexTool->perigeeAtVertex(ctx, *(*trItr), pos);

@@ -31,7 +31,7 @@ namespace DerivationFramework {
   //
   typedef std::vector<const xAOD::TrackParticle*> TrackBag;
   typedef std::vector<const xAOD::Muon*>          MuonBag;
-
+  struct BasedInvCache;
   ///
   /// @class BPhysAddMuonBasedInvMass
   /// @author Wolfgang Walkowiak <wolfgang.walkowiak@cern.ch>
@@ -103,7 +103,7 @@ namespace DerivationFramework {
   ///  For a usage example see BPHY8.py .
   /// 
   class BPhysAddMuonBasedInvMass : virtual public AthAlgTool,
-    virtual public IAugmentationTool {
+    public IAugmentationTool {
 
   public:
       ///
@@ -133,16 +133,16 @@ namespace DerivationFramework {
       ///          vertex and the corresponding uncertainty
       /// 
       std::pair<double, double> getMuCalcMass(xAOD::BPhysHelper& vtx,
-					      std::vector<double>
+					      const std::vector<double>&
 					      trkMasses,
-					      int nMuRequested) const;
+					      int nMuRequested, BasedInvCache &cache) const;
       ///
       /// @brief Obtain a set of tracks with muon track information if available
       ///
       /// @param[in] vtx secondary vertex
       /// @returns   container of muon tracks, number of muons found
       ///
-      std::pair<TrackBag, int> getTracksWithMuons(xAOD::BPhysHelper& vtx) const;
+      std::pair<TrackBag, int> getTracksWithMuons(xAOD::BPhysHelper& vtx, BasedInvCache&) const;
       ///
       /// @brief Calculate invariant mass and uncertainty from a set of tracks.
       ///
@@ -160,8 +160,8 @@ namespace DerivationFramework {
       ///
       std::pair<double,double>
 	getInvariantMassWithError(TrackBag trksIn,
-				  std::vector<double> massHypotheses,
-				  const Amg::Vector3D& pos) const;
+				  const std::vector<double> &massHypotheses,
+				  const Amg::Vector3D& pos, BasedInvCache&) const;
       ///
       /// @brief Determine minimum log chi2 of signal muon tracks w.r.t.
       //         any primary vertex.
@@ -188,7 +188,8 @@ namespace DerivationFramework {
 			       const int minNTracksInPV,
 			       const int mode,
 			       const xAOD::BPhysHelper::pv_type&
-			       pvAssocType) const;
+			       pvAssocType,
+             BasedInvCache &cache) const;
       ///
       /// @brief Calculate log chi2 value of a track w.r.t. a position.
       ///
@@ -200,7 +201,7 @@ namespace DerivationFramework {
       /// @returns   log chi2 value
       ///
       double getTrackPVChi2(const xAOD::TrackParticle& track,
-			    const Amg::Vector3D& pos) const;
+			    const Amg::Vector3D& pos, BasedInvCache &cache) const;
       ///
       /// @brief Extract 3x3 momentum covariance matrix from a TrackParticle.
       ///
@@ -263,16 +264,12 @@ namespace DerivationFramework {
       /// @param[in] muon pointer to muon
       /// @returns   TrackParticle pointer
       ///
-      const xAOD::TrackParticle* adjustTrackParticle(const xAOD::Muon* muon)
+      const xAOD::TrackParticle* adjustTrackParticle(const xAOD::Muon* muon, BasedInvCache &cache)
 	const;
       ///
       /// @brief Initialize PV-to-SV association type vector.
       ///
       void initPvAssocTypeVec();
-      ///
-      /// @brief Clear the cache of adjusted TrackParticles.
-      ///
-      void clearAdjTpCache() const;
       /// @}
   private:      
       /// @name job options
@@ -289,11 +286,6 @@ namespace DerivationFramework {
       int                              m_doVertexType;
       /// @}
       ///
-      /// map original -> adjusted track particles
-      typedef std::map<const xAOD::TrackParticle*, const xAOD::TrackParticle*>
-	TpMap_t;
-      /// map of adjusted track particles as cache
-      mutable TpMap_t m_adjTpCache; 
 
       /// cache for individual vertex types
       std::vector<xAOD::BPhysHelper::pv_type> m_pvAssocTypes;

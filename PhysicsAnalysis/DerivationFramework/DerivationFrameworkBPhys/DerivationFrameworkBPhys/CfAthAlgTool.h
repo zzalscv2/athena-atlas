@@ -52,13 +52,13 @@ namespace DerivationFramework {
 
   protected:
     // add a counter by name -- returns id if it already exists
-    virtual CutIdentifier getCounter(const std::string &name) const;
+    CutIdentifier getCounter(const std::string &name) const;
 
     // returns counter name by id
-    virtual std::string getCounterNameById(CutIdentifier id) const;
+    std::string getCounterNameById(CutIdentifier id) const;
 
     // returns counter id by name
-    virtual CutIdentifier getCounterIdByName(const std::string &name) const;
+    CutIdentifier getCounterIdByName(const std::string &name) const;
     
   private:
     // handle to the service holding tables of cut-flows for filtering algs.

@@ -223,13 +223,12 @@ namespace DerivationFramework {
     : name(std::move(Name)), m_parent(Parent) {
   }
 
-  BPhysVertexTrackBase::TrackTypeCounter::~TrackTypeCounter() {
-  }
+  BPhysVertexTrackBase::TrackTypeCounter::~TrackTypeCounter() =default;
 
   void BPhysVertexTrackBase::TrackTypeCounter::addToCounter(uint64_t atype,
                                                             uint64_t rtype,
-                                                            std::string prefix,
-                                                            std::string suffix,
+                                                            const std::string &prefix,
+                                                            const std::string &suffix,
                                                             uint64_t counts) {
     boost::format f("%sT%010d_R%010d%s");
     f % (prefix.length() > 0 ? prefix+"_" : "")
@@ -240,7 +239,7 @@ namespace DerivationFramework {
     addToCounter(f.str(), atype, counts);
   }
   
-  void BPhysVertexTrackBase::TrackTypeCounter::addToCounter(std::string name,
+  void BPhysVertexTrackBase::TrackTypeCounter::addToCounter(const std::string &name,
                                                             uint64_t atype,
                                                             uint64_t counts) {
 
