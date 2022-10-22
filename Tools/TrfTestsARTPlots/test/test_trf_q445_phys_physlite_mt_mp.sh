@@ -3,7 +3,6 @@
 # art-description: Reco_tf.py q445, HITtoRDO/RDOtoRDOTrigger/RAWtoALL in MT and AODtoDAOD in MP
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
 # art-athena-mt: 8
 # art-output: dcube*
 # art-html: dcube_physlite
@@ -45,15 +44,20 @@ xAODHist.py --analysis --outputHISTFile hist_physlite_latest.root DAOD_PHYSLITE.
 rc3=$?
 echo "art-result: ${rc3} xAODHist DAOD_PHYSLITE.art.pool.root" 
 
+echo "============ xAODHistSize DAOD_PHYSLITE.art.pool.root,DAOD_PHYS.art.pool.root,tmp.AOD"
+xAODHistSize.py --outputHISTFile hist_physlite_latest.root --xAODFiles DAOD_PHYSLITE.art.pool.root,DAOD_PHYS.art.pool.root,tmp.AOD
+rc4=$?
+echo "art-result: ${rc4} xAODHistSize" 
+
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v1/hist_physlite_2306.root"
-dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v1/dcube_config_hist_physlite_2306.xml"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v2/hist_physlite_2307.root"
+dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v2/dcube_config_hist_physlite_2307.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
 
 # Run dcube comparison
 echo "============ dcube"
 $ATLAS_LOCAL_ROOT/dcube/current/DCubeClient/python/dcube.py -p --jobId PHYSLITETest -c ${dcubeXML} -r ${dcubeRef} -x dcube_physlite hist_physlite_latest.root
-rc4=$?
-echo "art-result: ${rc4} dcube_physlite" 
+rc5=$?
+echo "art-result: ${rc5} dcube_physlite" 
