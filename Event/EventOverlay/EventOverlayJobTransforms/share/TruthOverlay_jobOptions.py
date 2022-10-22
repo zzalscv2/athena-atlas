@@ -7,11 +7,11 @@ from OverlayCommonAlgs.OverlayFlags import overlayFlags
 job += CfgGetter.getAlgorithm("CopyMcEventCollection")
 
 # Copy CaloCalibrationHitContainer(s) and TrackRecordCollection(s)
-if 'TrackRecordCollection' in overlayFlags.optionalContainerMap():
+if 'TrackRecordCollection' in overlayFlags.optionalContainerMap() and not athenaCommonFlags.DoFullChain():
     for collection in overlayFlags.optionalContainerMap()['TrackRecordCollection']:
         job += CfgGetter.getAlgorithmClone('CopyTrackRecordCollection' + collection, 'CopyTrackRecordCollection', collectionName = collection)
 
-if 'CaloCalibrationHitContainer' in overlayFlags.optionalContainerMap():
+if 'CaloCalibrationHitContainer' in overlayFlags.optionalContainerMap() and not athenaCommonFlags.DoFullChain():
     for collection in overlayFlags.optionalContainerMap()['CaloCalibrationHitContainer']:
         job += CfgGetter.getAlgorithmClone('CopyCaloCalibrationHitContainer' + collection, 'CopyCaloCalibrationHitContainer', collectionName = collection)
 
