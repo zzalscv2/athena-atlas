@@ -6,6 +6,7 @@ from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
 from OverlayCommonAlgs.OverlayFlags import overlayFlags
+from ISF_Config.ISF_jobProperties import ISF_Flags
 
 from AthenaCommon.ConcurrencyFlags import jobproperties as jp
 nThreads = jp.ConcurrencyFlags.NumThreads()
@@ -20,9 +21,14 @@ outStream.ItemList += [ 'xAOD::EventInfo#EventInfo', 'xAOD::EventAuxInfo#EventIn
 if DetFlags.overlay.Truth_on():
     outStream.ItemList += ['McEventCollection#TruthEvent']
 
-    if 'TrackRecordCollection' in overlayFlags.optionalContainerMap():
-        for collection in overlayFlags.optionalContainerMap()['TrackRecordCollection']:
-            outStream.ItemList += ['TrackRecordCollection#' + collection]
+    if athenaCommonFlags.DoFullChain():
+        outStream.ItemList += ['TrackRecordCollection#CaloEntryLayer']
+        outStream.ItemList += ['TrackRecordCollection#MuonEntryLayer']
+        outStream.ItemList += ['TrackRecordCollection#MuonExitLayer']
+    else:
+        if 'TrackRecordCollection' in overlayFlags.optionalContainerMap():
+            for collection in overlayFlags.optionalContainerMap()['TrackRecordCollection']:
+                outStream.ItemList += ['TrackRecordCollection#' + collection]
 
     if not overlayFlags.isDataOverlay():
         if 'xAOD::JetContainer' in overlayFlags.optionalContainerMap():
@@ -39,7 +45,8 @@ if DetFlags.overlay.Truth_on():
             outStream.ItemList += ["xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
 
     if DetFlags.overlay.BCM_on():
-        outStream.ItemList += [ 'InDetSimDataCollection#BCM_SDO_Map' ]
+        if not athenaCommonFlags.DoFullChain() or ("ATLFASTIIF" not in ISF_Flags.Simulator() and "ATLFAST3F" not in ISF_Flags.Simulator()):
+            outStream.ItemList += [ 'InDetSimDataCollection#BCM_SDO_Map' ]
 
     if DetFlags.overlay.pixel_on():
         outStream.ItemList += [ 'InDetSimDataCollection#PixelSDO_Map' ]
@@ -81,7 +88,8 @@ if DetFlags.overlay.Truth_on():
 
 # Inner detector
 if DetFlags.overlay.BCM_on():
-    outStream.ItemList+=['BCM_RDO_Container#BCM_RDOs']
+    if not athenaCommonFlags.DoFullChain() or ("ATLFASTIIF" not in ISF_Flags.Simulator() and "ATLFAST3F" not in ISF_Flags.Simulator()):
+        outStream.ItemList+=['BCM_RDO_Container#BCM_RDOs']
 
 if DetFlags.overlay.pixel_on():
     outStream.ItemList += ['PixelRDO_Container#PixelRDOs']

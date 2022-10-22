@@ -480,6 +480,7 @@ def pileupMetaDataCheck(sigsimdict,pileupsimdict):
             logOverlayReadMetadata.debug("All sub-detectors simulated in the signal sample were also simulated in the %s background sample.", longpileuptype)
 
     # Check for optional containers presence
+    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
     if not skipCheck('OptionalContainers'):
         # Combine the two dictionaries
         optionalContainers = sigsimdict['OptionalContainers']
@@ -489,6 +490,11 @@ def pileupMetaDataCheck(sigsimdict,pileupsimdict):
                     optionalContainers[key] |= value #Here the expectation is that the values are sets
                 else:
                     optionalContainers[key] = value
+
+        from OverlayCommonAlgs.OverlayFlags import overlayFlags
+        overlayFlags.optionalContainerMap.set_Value_and_Lock(optionalContainers)
+    elif athenaCommonFlags.DoFullChain():
+        optionalContainers = pileupsimdict['OptionalContainers']
 
         from OverlayCommonAlgs.OverlayFlags import overlayFlags
         overlayFlags.optionalContainerMap.set_Value_and_Lock(optionalContainers)

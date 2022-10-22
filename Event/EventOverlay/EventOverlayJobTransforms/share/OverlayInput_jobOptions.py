@@ -2,6 +2,7 @@
 
 include.block('EventOverlayJobTransforms/OverlayInput_jobOptions.py')
 
+from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaCommon.DetFlags import DetFlags
 from OverlayCommonAlgs.OverlayFlags import overlayFlags
 
@@ -19,10 +20,10 @@ else:
 if DetFlags.overlay.Truth_on():
     AddressRemappingSvc.addInputRename('McEventCollection', 'TruthEvent', 'Sig_TruthEvent')
 
-    if 'TrackRecordCollection' in overlayFlags.optionalContainerMap():
+    if 'TrackRecordCollection' in overlayFlags.optionalContainerMap() and not athenaCommonFlags.DoFullChain():
         for collection in overlayFlags.optionalContainerMap()['TrackRecordCollection']:
             AddressRemappingSvc.addInputRename('TrackRecordCollection', collection, 'Sig_' + collection)
 
-    if 'CaloCalibrationHitContainer' in overlayFlags.optionalContainerMap():
+    if 'CaloCalibrationHitContainer' in overlayFlags.optionalContainerMap() and not athenaCommonFlags.DoFullChain():
         for collection in overlayFlags.optionalContainerMap()['CaloCalibrationHitContainer']:
             AddressRemappingSvc.addInputRename('CaloCalibrationHitContainer', collection, 'Sig_' + collection)

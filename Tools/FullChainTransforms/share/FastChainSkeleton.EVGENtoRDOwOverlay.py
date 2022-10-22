@@ -518,7 +518,6 @@ import MagFieldServices.SetupField
 #------------------------------------------------------------
 
 overlayFlags.processLegacyEventInfo.set_Value_and_Lock(True)
-overlayFlags.optionalContainerMap = []
 if overlayFlags.processLegacyEventInfo() and not hasattr(job, "xAODMaker::EventInfoCnvAlg"):
     from xAODEventInfoCnv.xAODEventInfoCreator import xAODMaker__EventInfoCnvAlg
     alg = xAODMaker__EventInfoCnvAlg("EventInfoCnvAlg")
@@ -579,12 +578,7 @@ if DetFlags.overlay.LVL1_on():
 
 # Truth overlay
 if DetFlags.overlay.Truth_on():
-
-   job += CfgGetter.getAlgorithm("CopyInTimeAntiKt4JetTruthInfo")
-   job += CfgGetter.getAlgorithm("CopyOutOfTimeAntiKt4JetTruthInfo")
-   job += CfgGetter.getAlgorithm("CopyInTimeAntiKt6JetTruthInfo")
-   job += CfgGetter.getAlgorithm("CopyOutOfTimeAntiKt6JetTruthInfo")
-   job += CfgGetter.getAlgorithm("CopyPileupParticleTruthInfo")
+   include ( "EventOverlayJobTransforms/TruthOverlay_jobOptions.py" )
 
 # Run calculation of weight for the beam spot size reweighting
 if digitizationFlags.doBeamSpotSizeReweighting() and digitizationFlags.OldBeamSpotZSize() > 0:
@@ -592,24 +586,6 @@ if digitizationFlags.doBeamSpotSizeReweighting() and digitizationFlags.OldBeamSp
 
 # Save the overlay output
 include("EventOverlayJobTransforms/OverlayOutput_jobOptions.py")
-
-# Output for truth
-if DetFlags.overlay.Truth_on():
-    outStream.ItemList += ['TrackRecordCollection#*']
-
-    outStream.ItemList += ['xAOD::JetContainer#InTimeAntiKt4TruthJets']
-    outStream.ItemList += ['xAOD::AuxContainerBase!#InTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights']
-    outStream.ItemList += ['xAOD::JetContainer#OutOfTimeAntiKt4TruthJets']
-    outStream.ItemList += ['xAOD::AuxContainerBase!#OutOfTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights']
-    outStream.ItemList += ['xAOD::JetContainer#InTimeAntiKt6TruthJets']
-    outStream.ItemList += ['xAOD::AuxContainerBase!#InTimeAntiKt6TruthJetsAux.-constituentLinks.-constituentWeights']
-    outStream.ItemList += ['xAOD::JetContainer#OutOfTimeAntiKt6TruthJets']
-    outStream.ItemList += ['xAOD::AuxContainerBase!#OutOfTimeAntiKt6TruthJetsAux.-constituentLinks.-constituentWeights']
-    outStream.ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles"]
-    outStream.ItemList += ["xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
-
-    if DetFlags.overlay.LAr_on() or DetFlags.overlay.Tile_on():
-        outStream.ItemList += ['CaloCalibrationHitContainer#*']
 
 # Save the signal-only output
 if overlayFlags.signalOnlyOutput() == True:
