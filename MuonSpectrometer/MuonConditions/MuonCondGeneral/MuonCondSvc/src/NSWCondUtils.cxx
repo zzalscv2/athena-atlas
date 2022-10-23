@@ -29,8 +29,6 @@ namespace MuonCalib{
     int nNewALines = 0;
     int nNewBLines = 0;
     std::string line;
-    std::string_view since_str;
-    std::string_view till_str;
 
     while(std::getline(inputFile,line)){
 
@@ -44,6 +42,7 @@ namespace MuonCalib{
 
       if(type[0] == '#') continue;  // skip comments
 
+/*
       if(boost::algorithm::starts_with(type, "Header")){
         char delimiter = '|';
         auto tokens = MdtStringUtils::tokenize(line, delimiter);
@@ -59,6 +58,7 @@ namespace MuonCalib{
         std::string_view str_iovThisBlob = tokens[ival];
         std::from_chars(str_iovThisBlob.data(), str_iovThisBlob.data() + str_iovThisBlob.size(), iovThisBlob);
       }
+*/
 
       if(boost::algorithm::starts_with(type, "Corr")){
         char delimiter = ' ';
