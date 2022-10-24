@@ -19,6 +19,7 @@
 #include "../LArFebErrorSummaryMaker.h"
 #include "../LArCalibDigitsAccumulatorFreeGain.h"
 #include "../LArRawChannelBuilderAlg.h"
+#include "../LArRawChannelBuilderSCAlg.h"
 #include "../LArRawChannelBuilderIterAlg.h"
 #include "../LArNNRawChannelBuilder.h"
 #include "../LArSCSimpleMaker.h"
@@ -48,6 +49,7 @@ DECLARE_COMPONENT( LArRawChannelBuilderPedestalDataBase )
 DECLARE_COMPONENT( LArRawChannelBuilderPedestalSampleZero )
 DECLARE_COMPONENT( LArRawChannelBuilderToolTileInfo )
 DECLARE_COMPONENT( LArRawChannelBuilderAlg )
+DECLARE_COMPONENT( LArRawChannelBuilderSCAlg )
 DECLARE_COMPONENT( LArRawChannelBuilderIterAlg )
 DECLARE_COMPONENT( LArNNRawChannelBuilder )
 DECLARE_COMPONENT( LArSCSimpleMaker )
