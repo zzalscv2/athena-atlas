@@ -258,6 +258,14 @@ void ConfAnalysis::initialiseInternal() {
   mres.push_back(  rChi2_bad     = new Resplot( "Chi2_bad",     ptnbins, ptbinlims, 200, 0, 100 ) );
   mres.push_back(  rChi2dof_bad  = new Resplot( "Chi2dof_bad",  ptnbins, ptbinlims, 100, 0,  10 ) );
 
+  mres.push_back(  rChi2prob_rec = new Resplot( "Chi2prob_rec", ptnbins, ptbinlims,  20, 0,   1 ) );
+  mres.push_back(  rChi2_rec     = new Resplot( "Chi2_rec",     ptnbins, ptbinlims, 200, 0, 100 ) );
+  mres.push_back(  rChi2dof_rec  = new Resplot( "Chi2dof_rec",  ptnbins, ptbinlims, 100, 0,  10 ) );
+
+  mres.push_back( rChi2d_vs_Chi2d = new Resplot( "Chi2d_vs_Chi2d", 200, 0,   100, 200, 0, 100 ) );
+
+  mres.push_back( rDChi2dof = new Resplot( "DChi2dof", 200, 0,   100, 200, -100, 100 ) ); 
+
   /// additional resplots for additional si hit and hold monitoring
 
   double d0bins[40] = { -5.0,  -4.0,  -3.0,  -2.5,
@@ -1849,6 +1857,17 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 
       /// matched track distributions
 
+
+      rChi2prob_rec->Fill( pTr, TMath::Prob(matchedreco->chi2(),matchedreco->dof()) ); 
+      rChi2_rec->Fill( pTr, matchedreco->chi2() ); 
+      rChi2dof_rec->Fill( pTr, matchedreco->chi2()/matchedreco->dof() );
+
+      rChi2d_vs_Chi2d->Fill( reftracks[i]->chi2()/reftracks[i]->dof(),
+			     matchedreco->chi2()/matchedreco->dof() );
+
+      rDChi2dof->Fill( reftracks[i]->chi2()/reftracks[i]->dof(),
+		       (matchedreco->chi2()/matchedreco->dof())-(reftracks[i]->chi2()/reftracks[i]->dof()) );
+            
     }
     else {
       
