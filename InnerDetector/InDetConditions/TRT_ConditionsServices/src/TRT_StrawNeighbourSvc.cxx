@@ -51,8 +51,7 @@ TRT_StrawNeighbourSvc::TRT_StrawNeighbourSvc( const std::string& name,
 
 
 TRT_StrawNeighbourSvc::~TRT_StrawNeighbourSvc()
-{
-}
+= default;
 
 
 StatusCode TRT_StrawNeighbourSvc::initialize() 
@@ -380,7 +379,6 @@ void TRT_StrawNeighbourSvc::getAtlasIdentifier(int strawnumber, Identifier &outp
 			       m_trtid->layer_or_wheel(inputID),
 			       layer,
 			       straw);
-  return;
 }
 
 
@@ -486,8 +484,6 @@ void TRT_StrawNeighbourSvc::getChip(Identifier offlineID, int& chip ){
   if (board<6) { board *= 2; if (strawlayer>7) board++; }
   else { board += 6; }
   chip += board * 12;
-
-  return;
 
 // end FIX ENDCAP CHIP MAPPING - SASA, 27 July 2009
 
@@ -625,8 +621,6 @@ void TRT_StrawNeighbourSvc::getPad(Identifier offlineID, int& pad ){
   }
   msg(MSG::ERROR) << "Something went wrong: Pad not found, returning 0" << endmsg;
   pad = 0;
-
-  return;
 }
 
 
@@ -673,8 +667,7 @@ void TRT_StrawNeighbourSvc::getStrawsFromPad(Identifier offlineID, std::vector<I
       }
     }
   }
-  return;
-}
+  }
 
 /////////////////////////////////////////////
 
@@ -744,8 +737,7 @@ void TRT_StrawNeighbourSvc::getStrawsFromChip(Identifier inputID, std::vector<Id
  
 
 
-  return;
-}
+  }
 
 ///////////////////////////////////////////////////
 

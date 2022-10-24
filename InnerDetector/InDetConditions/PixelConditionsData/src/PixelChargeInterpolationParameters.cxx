@@ -154,8 +154,7 @@ namespace PixelCalib{
       m_errdeltay.push_back(0.);
     }
 
-    return;
-  }
+     }
 
   int PixelChargeInterpolationParameters::getNumberOfXbins() const{ 
     return m_deltax.size();
@@ -465,30 +464,30 @@ namespace PixelCalib{
       }
       // Then write bin extremes
 
-      for(unsigned int i=0; i<m_csx.size(); i++){
-        *outfile << m_csx[i] << " ";
+      for(float i : m_csx){
+        *outfile << i << " ";
       }
       *outfile << std::endl;
-      for(unsigned int i=0; i<m_csy.size(); i++){
-        *outfile << m_csy[i] << " ";
+      for(float i : m_csy){
+        *outfile << i << " ";
       }
       *outfile << std::endl;
       if(m_etaibl>0 && m_alphaibl >0 ){ // IBL
-        for(unsigned int i=0; i<m_ibletabins.size(); i++){
-          *outfile << m_ibletabins[i] << " ";
+        for(float ibletabin : m_ibletabins){
+          *outfile << ibletabin << " ";
         }
         *outfile << std::endl;
-        for(unsigned int i=0; i<m_iblphibins.size(); i++){
-          *outfile << m_iblphibins[i] << " ";
+        for(float iblphibin : m_iblphibins){
+          *outfile << iblphibin << " ";
         }
         *outfile << std::endl;
       }
-      for(unsigned int i=0; i<m_etabins.size(); i++){
-        *outfile << m_etabins[i] << " ";
+      for(float etabin : m_etabins){
+        *outfile << etabin << " ";
       }
       *outfile << std::endl;
-      for(unsigned int i=0; i<m_phibins.size(); i++){
-        *outfile << m_phibins[i] << " ";
+      for(float phibin : m_phibins){
+        *outfile << phibin << " ";
       }
       *outfile << std::endl;      
     }

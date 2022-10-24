@@ -15,8 +15,7 @@
 #include <iostream>
 
 PixelHistoConverter::PixelHistoConverter()
-{
-}
+= default;
 
 StatusCode PixelHistoConverter::setHisto1D(const TH1* histo) {
 

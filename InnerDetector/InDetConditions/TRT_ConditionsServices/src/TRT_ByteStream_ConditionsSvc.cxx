@@ -42,7 +42,7 @@ TRT_ByteStream_ConditionsSvc::TRT_ByteStream_ConditionsSvc( const std::string& n
 //////////
 /// Destructor
 /////
-TRT_ByteStream_ConditionsSvc::~TRT_ByteStream_ConditionsSvc() {}
+TRT_ByteStream_ConditionsSvc::~TRT_ByteStream_ConditionsSvc() = default;
 
 //////////
 /// Initialize
@@ -130,8 +130,6 @@ TRT_ByteStream_ConditionsSvc::handle(const Incident&)
 {
    this->resetSets();
    this->resetCounts();
-
-   return;
 }
 
 void 
@@ -151,8 +149,6 @@ TRT_ByteStream_ConditionsSvc::resetSets( void )
    std::set<std::pair<uint32_t,uint32_t> >().swap (m_bcid_pair_errors);
 
    std::set<std::pair<uint32_t,uint32_t> >().swap (m_rob_status_errors);
- 
-  return;
 }
 
 /** The following methods are for HLT, to get the numbers of errors 
@@ -168,8 +164,6 @@ TRT_ByteStream_ConditionsSvc::resetCounts( void )
   m_num_error_errors=0;
   m_num_sid_errors=0;
   m_num_robStatus_errors=0;
-
-  return;
 }
 
 int 

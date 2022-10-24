@@ -23,7 +23,7 @@ TRT_ConditionsTestSvc::TRT_ConditionsTestSvc( const std::string& name,
 //////////
 /// Destructor
 /////
-TRT_ConditionsTestSvc::~TRT_ConditionsTestSvc() {}
+TRT_ConditionsTestSvc::~TRT_ConditionsTestSvc() = default;
 
 //////////
 /// Initialize

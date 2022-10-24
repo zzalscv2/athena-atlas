@@ -16,7 +16,7 @@ TRTActiveCondAlg::TRTActiveCondAlg(const std::string& name
     m_strawStatus("TRT_StrawStatusSummaryTool",this),
     m_trtId(nullptr)
 { declareProperty("TRTStrawStatusSummaryTool",m_strawStatus); }
-TRTActiveCondAlg::~TRTActiveCondAlg(){}
+TRTActiveCondAlg::~TRTActiveCondAlg()= default;
 
 StatusCode TRTActiveCondAlg::initialize()
 {

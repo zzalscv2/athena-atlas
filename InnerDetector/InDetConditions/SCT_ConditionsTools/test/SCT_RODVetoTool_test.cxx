@@ -46,9 +46,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 namespace SCT_test {
    EventIDBase timestamp (int t)
    {
-      return EventIDBase (EventIDBase::UNDEFNUM,  // run
+      return {EventIDBase::UNDEFNUM,  // run
                           EventIDBase::UNDEFEVT,  // event
-                          t);
+                          static_cast<EventIDBase::number_type>(t)};
    }
 
 

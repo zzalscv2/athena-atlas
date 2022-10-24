@@ -44,7 +44,7 @@ TRT_HWMappingSvc::TRT_HWMappingSvc( const std::string& name,
 //////////
 /// Destructor
 /////
-TRT_HWMappingSvc::~TRT_HWMappingSvc() {}
+TRT_HWMappingSvc::~TRT_HWMappingSvc() = default;
 
 //////////
 /// Initialize
@@ -491,5 +491,4 @@ void TRT_HWMappingSvc::DumpMaps() {
     }
   }
 
-  return;
-}
+  }

@@ -22,8 +22,8 @@ void StorePIDinfo::update( int nbins, float min, float max, const std::vector<fl
 	  log << MSG::ERROR << " Different Values of n_bins and vector size!!!" << endmsg;
 	}
 	m_values.clear();
-	for (unsigned int i = 0; i<values.size(); i++ ){
-		m_values.push_back( values.at(i));
+	for (float value : values){
+		m_values.push_back( value);
 	}
 }
 

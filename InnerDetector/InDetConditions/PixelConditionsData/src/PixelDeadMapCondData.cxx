@@ -10,7 +10,7 @@ PixelDeadMapCondData::PixelDeadMapCondData():
 {
 }
 
-PixelDeadMapCondData::~PixelDeadMapCondData() { }
+PixelDeadMapCondData::~PixelDeadMapCondData() = default;
 
 // Module status
 void PixelDeadMapCondData::setModuleStatus(const int chanNum, const int value) {

@@ -56,8 +56,8 @@ StatusCode PixelTDAQCondAlg::execute(const EventContext& ctx) const {
 
     // Read dead map info
     std::vector<int> checkActive;
-    for (CondAttrListCollection::const_iterator attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
-      CondAttrListCollection::ChanNum channelNumber = attrList->first;
+    for (const auto & attrList : *readCdo) {
+      CondAttrListCollection::ChanNum channelNumber = attrList.first;
       checkActive.push_back((int)channelNumber-1);
     }
 

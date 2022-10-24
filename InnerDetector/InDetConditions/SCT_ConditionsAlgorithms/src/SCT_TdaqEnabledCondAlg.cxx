@@ -83,7 +83,7 @@ StatusCode SCT_TdaqEnabledCondAlg::execute(const EventContext& ctx) const
       unsigned int rodNumber{parseChannelName(chanName)};
       // range check on the rod channel number has been removed, since it refers both to existing channel names
       // which can be rods in slots 1-128 but also historical names which have since been removed
-      if (m_onlineId.rodIdInRange(rodNumber)) {
+      if (SCT_OnlineId::rodIdInRange(rodNumber)) {
         if ((not enabled.empty()) and (not writeCdo->setGoodRod(rodNumber))) {
           ATH_MSG_WARNING("Set insertion failed for rod "<<rodNumber);
         }

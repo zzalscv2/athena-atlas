@@ -29,9 +29,7 @@ TRT_ConditionsSummarySvc::TRT_ConditionsSummarySvc( const std::string& name, ISv
 }
 
 // Destructor
-TRT_ConditionsSummarySvc::~TRT_ConditionsSummarySvc(){
-  
-}
+TRT_ConditionsSummarySvc::~TRT_ConditionsSummarySvc()= default;
 
 //Initialize
 StatusCode 

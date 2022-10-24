@@ -79,7 +79,6 @@ void PixelClusterErrorData::setDeltaError(const Identifier* pixelId,
 				    delta_y_slope, delta_y_offset, error_y};
 
   m_constmap[*pixelId] = linevalues;
-  return;
 
 }
 

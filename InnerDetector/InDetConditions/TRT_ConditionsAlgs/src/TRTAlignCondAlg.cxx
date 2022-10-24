@@ -17,8 +17,7 @@ TRTAlignCondAlg::TRTAlignCondAlg(const std::string& name
 }
 
 TRTAlignCondAlg::~TRTAlignCondAlg()
-{
-}
+= default;
 
 StatusCode TRTAlignCondAlg::initialize()
 {

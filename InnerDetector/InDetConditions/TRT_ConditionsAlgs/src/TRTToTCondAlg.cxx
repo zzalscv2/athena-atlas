@@ -24,7 +24,7 @@ TRTToTCondAlg::TRTToTCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
   : ::AthAlgorithm(name,pSvcLocator)
 {}
-TRTToTCondAlg::~TRTToTCondAlg(){}
+TRTToTCondAlg::~TRTToTCondAlg()= default;
 
 StatusCode TRTToTCondAlg::initialize()
 {

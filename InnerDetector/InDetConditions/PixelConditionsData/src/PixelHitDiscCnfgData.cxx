@@ -5,10 +5,9 @@
 #include "PixelConditionsData/PixelHitDiscCnfgData.h"
 
 PixelHitDiscCnfgData::PixelHitDiscCnfgData()
-{
-}
+= default;
 
-PixelHitDiscCnfgData::~PixelHitDiscCnfgData() { }
+PixelHitDiscCnfgData::~PixelHitDiscCnfgData() = default;
 
 void PixelHitDiscCnfgData::setHitDiscCnfgPL(int hitDiscCnfgPL) { m_hitDiscCnfgPL=hitDiscCnfgPL; }
 void PixelHitDiscCnfgData::setHitDiscCnfg3D(int hitDiscCnfg3D) { m_hitDiscCnfg3D=hitDiscCnfg3D; }

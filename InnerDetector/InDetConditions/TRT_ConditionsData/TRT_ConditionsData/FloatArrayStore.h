@@ -37,7 +37,6 @@ public:
   typedef std::less<Identifier> lessp;
   typedef std::map<Identifier,int,lessp> BufferMap;
   typedef BufferMap::const_iterator map_citr;
-  typedef BufferMap::iterator map_itr;
   typedef std::vector< std::vector<float> > Buffer;
 
 /** constructors, optionally with a tag */
@@ -78,8 +77,8 @@ public:
 /** remove data with no index pointing to it */
   void cleanUp();
 /** begin/end iterators */
-  map_itr begin();
-  map_itr end();
+  map_citr begin() const;
+  map_citr end() const;
 /** return stored vector */
   const Buffer& buffer() const { return m_buf ; }
   
@@ -154,11 +153,11 @@ inline void FloatArrayStore::share
 
 inline const std::string& FloatArrayStore::tag() const {return m_tag;}
  
-inline  FloatArrayStore::map_itr
- FloatArrayStore::begin() { return m_bufmap.begin(); }
+inline  FloatArrayStore::map_citr
+ FloatArrayStore::begin() const { return m_bufmap.begin(); }
  
-inline  FloatArrayStore::map_itr
- FloatArrayStore::end() { return m_bufmap.end(); }
+inline  FloatArrayStore::map_citr
+ FloatArrayStore::end() const { return m_bufmap.end(); }
  
 inline  FloatArrayStore::map_citr
  FloatArrayStore::cbegin() const { return m_bufmap.begin(); }

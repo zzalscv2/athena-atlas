@@ -24,8 +24,7 @@ void TRT_BSIdErrContainerCnv_p1::transToPers
     std::pair<uint8_t, std::pair<uint32_t, uint8_t> >* ptr ATLAS_THREAD_SAFE = const_cast<std::pair<uint8_t, std::pair<uint32_t, uint8_t> >*> (*it);
     (persCont->m_bsErrs).push_back(ptr);
   }
-  return;
-}
+  }
 
 void  TRT_BSIdErrContainerCnv_p1::persToTrans(const TRT_BSIdErrContainer_p1* persCont, TRT_BSIdErrContainer* transCont, MsgStream & /* log */) 
 {
@@ -37,8 +36,7 @@ void  TRT_BSIdErrContainerCnv_p1::persToTrans(const TRT_BSIdErrContainer_p1* per
   for (; it != itEnd; ++it) {
     transCont->push_back(*it);
   }
-  return;
-
+  
 }
 
 //================================================================

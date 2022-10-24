@@ -81,7 +81,7 @@ TRT_DCS_ConditionsSvc::TRT_DCS_ConditionsSvc( const std::string& name,
 //////////
 /// Destructor
 /////
-TRT_DCS_ConditionsSvc::~TRT_DCS_ConditionsSvc() {}
+TRT_DCS_ConditionsSvc::~TRT_DCS_ConditionsSvc() = default;
 
 //////////
 /// Initialize
@@ -480,8 +480,7 @@ void TRT_DCS_ConditionsSvc::monitorBarrel(){
 
     } // end of doMonitoring
 
-  return;
-}
+  }
 /// Monitor EndcapA HV
 /////
 void TRT_DCS_ConditionsSvc::monitorEndcapA(){
@@ -537,8 +536,7 @@ void TRT_DCS_ConditionsSvc::monitorEndcapA(){
 	if (!sc.isFailure()) m_h_EndcapA_HVvalAvg->Fill(chanNum,theVoltage);
       }
     }
-   return;
-}
+   }
 /// Monitor EndcapC HV
 /////
 void TRT_DCS_ConditionsSvc::monitorEndcapC(){
@@ -594,5 +592,4 @@ void TRT_DCS_ConditionsSvc::monitorEndcapC(){
 	if (!sc.isFailure()) m_h_EndcapC_HVvalAvg->Fill(chanNum,theVoltage);
       }
     }
-   return;
-}
+   }

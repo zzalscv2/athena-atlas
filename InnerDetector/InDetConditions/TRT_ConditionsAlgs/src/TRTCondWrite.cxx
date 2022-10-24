@@ -49,7 +49,7 @@ TRTCondWrite::TRTCondWrite(const std::string& name, ISvcLocator* pSvcLocator)
 }
 
 TRTCondWrite::~TRTCondWrite(void)
-{}
+= default;
 
 StatusCode TRTCondWrite::initialize() {
 
@@ -221,12 +221,11 @@ StatusCode TRTCondWrite::writeTextFile_Format1(std::ostream& outfile) const
   outfile << "# RtRelation" << std::endl ;
   RtRelationContainer::FlatContainer rtrelations ;
   rtContainer->getall( rtrelations ) ;
-  for( RtRelationContainer::FlatContainer::iterator it = rtrelations.begin() ;
-       it != rtrelations.end(); ++it) {
+  for(auto & rtrelation : rtrelations) {
     // write the identifier
-    outfile << it->first << " : " ;
+    outfile << rtrelation.first << " : " ;
     // write the rt-relation via the factory
-    TRTCond::RtRelationFactory::writeToFile(outfile,**(it->second)) ;
+    TRTCond::RtRelationFactory::writeToFile(outfile,**(rtrelation.second)) ;
     outfile << std::endl ;
   }
 
@@ -235,10 +234,9 @@ StatusCode TRTCondWrite::writeTextFile_Format1(std::ostream& outfile) const
   StrawT0Container::FlatContainer packedstrawdata ;
   t0Container->getall( packedstrawdata ) ;
   float t0(0), t0err(0);
-  for( TRTCond::StrawT0Container::FlatContainer::iterator it = packedstrawdata.begin() ;
-       it != packedstrawdata.end(); ++it) {
-    const TRTCond::ExpandedIdentifier& calid = it->first ;
-    t0Container->unpack(calid,*it->second,t0,t0err) ; 
+  for(auto & it : packedstrawdata) {
+    const TRTCond::ExpandedIdentifier& calid = it.first ;
+    t0Container->unpack(calid,*it.second,t0,t0err) ; 
     outfile << calid << " : " << t0 << " " << t0err << std::endl ;
   }
   return StatusCode::SUCCESS ;
@@ -335,12 +333,11 @@ StatusCode TRTCondWrite::writeTextFile_Format2(std::ostream& outfile) const
   outfile << "# RtRelation" << std::endl ;
   RtRelationContainer::FlatContainer rtrelations ;
   rtContainer->getall( rtrelations ) ;
-  for( RtRelationContainer::FlatContainer::iterator it = rtrelations.begin() ;
-       it != rtrelations.end(); ++it) {
+  for(auto & rtrelation : rtrelations) {
     // write the identifier
-    outfile << it->first << " : " ;
+    outfile << rtrelation.first << " : " ;
     // write the rt-relation via the factory
-    TRTCond::RtRelationFactory::writeToFile(outfile,**(it->second)) ;
+    TRTCond::RtRelationFactory::writeToFile(outfile,**(rtrelation.second)) ;
     outfile << std::endl ;
   }
 
@@ -348,12 +345,11 @@ StatusCode TRTCondWrite::writeTextFile_Format2(std::ostream& outfile) const
   outfile << "# RtErrors" << std::endl ;
   RtRelationContainer::FlatContainer errors ;
   errContainer->getall( errors ) ;
-  for( RtRelationContainer::FlatContainer::iterator it = errors.begin() ;
-       it != errors.end(); ++it) {
+  for(auto & error : errors) {
     // write the identifier
-    outfile << it->first << " : " ;
+    outfile << error.first << " : " ;
     // write the errors via the factory
-    TRTCond::RtRelationFactory::writeToFile(outfile,**(it->second)) ;
+    TRTCond::RtRelationFactory::writeToFile(outfile,**(error.second)) ;
     outfile << std::endl ;
   }
 
@@ -362,10 +358,9 @@ StatusCode TRTCondWrite::writeTextFile_Format2(std::ostream& outfile) const
   StrawT0Container::FlatContainer packedstrawdata ;
   t0Container->getall( packedstrawdata ) ;
   float t0(0), t0err(0);
-  for( TRTCond::StrawT0Container::FlatContainer::iterator it = packedstrawdata.begin() ;
-       it != packedstrawdata.end(); ++it) {
-    const TRTCond::ExpandedIdentifier& calid = it->first ;
-    t0Container->unpack(calid,*it->second,t0,t0err) ; 
+  for(auto & it : packedstrawdata) {
+    const TRTCond::ExpandedIdentifier& calid = it.first ;
+    t0Container->unpack(calid,*it.second,t0,t0err) ; 
     outfile << calid << " : " << t0 << " " << t0err << std::endl ;
   }
 
@@ -599,12 +594,11 @@ StatusCode TRTCondWrite::writeTextFile_Format3(std::ostream& outfile) const
   outfile << "# Rtrelation" << std::endl ;
   RtRelationContainer::FlatContainer rtrelations ;
   rtContainer->getall( rtrelations ) ;
-  for( RtRelationContainer::FlatContainer::iterator it = rtrelations.begin() ;
-       it != rtrelations.end(); ++it) {
+  for(auto & rtrelation : rtrelations) {
     // write the identifier
-    outfile << it->first << " : " ;
+    outfile << rtrelation.first << " : " ;
     // write the rt-relation via the factory
-    TRTCond::RtRelationFactory::writeToFile(outfile,**(it->second)) ;
+    TRTCond::RtRelationFactory::writeToFile(outfile,**(rtrelation.second)) ;
     outfile << std::endl ;
   }
 
@@ -612,12 +606,11 @@ StatusCode TRTCondWrite::writeTextFile_Format3(std::ostream& outfile) const
   outfile << "# RtErrors" << std::endl ;
   RtRelationContainer::FlatContainer errors ;
   errContainer->getall( errors ) ;
-  for( RtRelationContainer::FlatContainer::iterator it = errors.begin() ;
-       it != errors.end(); ++it) {
+  for(auto & error : errors) {
     // write the identifier
-    outfile << it->first << " : " ;
+    outfile << error.first << " : " ;
     // write the errors via the factory
-    TRTCond::RtRelationFactory::writeToFile(outfile,**(it->second)) ;
+    TRTCond::RtRelationFactory::writeToFile(outfile,**(error.second)) ;
     outfile << std::endl ;
   }
 
@@ -625,12 +618,11 @@ StatusCode TRTCondWrite::writeTextFile_Format3(std::ostream& outfile) const
   outfile << "# RtSlopes" << std::endl ;
   RtRelationContainer::FlatContainer slopes ;
   slopeContainer->getall( slopes ) ;
-  for( RtRelationContainer::FlatContainer::iterator it = slopes.begin() ;
-       it != slopes.end(); ++it) {
+  for(auto & slope : slopes) {
     // write the identifier
-    outfile << it->first << " : " ;
+    outfile << slope.first << " : " ;
     // write the slopes via the factory
-    TRTCond::RtRelationFactory::writeToFile(outfile,**(it->second)) ;
+    TRTCond::RtRelationFactory::writeToFile(outfile,**(slope.second)) ;
     outfile << std::endl ;
   }
 
@@ -639,10 +631,9 @@ StatusCode TRTCondWrite::writeTextFile_Format3(std::ostream& outfile) const
   StrawT0Container::FlatContainer packedstrawdata ;
   t0Container->getall( packedstrawdata ) ;
   float t0(0), t0err(0);
-  for( TRTCond::StrawT0Container::FlatContainer::iterator it = packedstrawdata.begin() ;
-       it != packedstrawdata.end(); ++it) {
-    const TRTCond::ExpandedIdentifier& calid = it->first ;
-    t0Container->unpack(calid,*it->second,t0,t0err) ;
+  for(auto & it : packedstrawdata) {
+    const TRTCond::ExpandedIdentifier& calid = it.first ;
+    t0Container->unpack(calid,*it.second,t0,t0err) ;
     outfile << calid << " : " << t0 << " " << t0err << std::endl ;
   }
   return StatusCode::SUCCESS ;

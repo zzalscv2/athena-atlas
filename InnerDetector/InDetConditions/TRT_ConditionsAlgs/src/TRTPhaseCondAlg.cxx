@@ -14,7 +14,7 @@ TRTPhaseCondAlg::TRTPhaseCondAlg(const std::string& name
     m_trtId(nullptr)
 { declareProperty("TRTCalDbTool",m_caldbtool); }
 
-TRTPhaseCondAlg::~TRTPhaseCondAlg(){}
+TRTPhaseCondAlg::~TRTPhaseCondAlg()= default;
 
 StatusCode TRTPhaseCondAlg::initialize()
 {

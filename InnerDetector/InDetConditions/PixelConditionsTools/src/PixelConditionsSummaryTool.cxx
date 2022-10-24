@@ -20,7 +20,7 @@ PixelConditionsSummaryTool::PixelConditionsSummaryTool(const std::string& type, 
   declareProperty("IsActiveStates", m_isActiveStates);
 }
 
-PixelConditionsSummaryTool::~PixelConditionsSummaryTool(){}
+PixelConditionsSummaryTool::~PixelConditionsSummaryTool()= default;
 
 StatusCode PixelConditionsSummaryTool::initialize(){
   ATH_MSG_DEBUG("PixelConditionsSummaryTool::initialize()");
@@ -71,14 +71,14 @@ StatusCode PixelConditionsSummaryTool::initialize(){
   }
 
   m_activeStatusMask=0;
-  for (unsigned int istatus=0; istatus<m_isActiveStatus.size(); istatus++) {
-    if      (m_isActiveStatus[istatus]=="OK")       { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::OK); }
-    else if (m_isActiveStatus[istatus]=="WARNING")  { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::WARNING); }
-    else if (m_isActiveStatus[istatus]=="ERROR")    { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::ERROR); }
-    else if (m_isActiveStatus[istatus]=="FATAL")    { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::FATAL); }
-    else if (m_isActiveStatus[istatus]=="NOSTATUS") { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::NOSTATUS); }
+  for (auto & isActiveStatus : m_isActiveStatus) {
+    if      (isActiveStatus=="OK")       { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::OK); }
+    else if (isActiveStatus=="WARNING")  { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::WARNING); }
+    else if (isActiveStatus=="ERROR")    { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::ERROR); }
+    else if (isActiveStatus=="FATAL")    { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::FATAL); }
+    else if (isActiveStatus=="NOSTATUS") { m_activeStatus.push_back(PixelDCSStatusData::DCSModuleStatus::NOSTATUS); }
     else {
-      ATH_MSG_ERROR("No matching DCS status " << m_isActiveStatus[istatus] << " in DCSModuleStatus");
+      ATH_MSG_ERROR("No matching DCS status " << isActiveStatus << " in DCSModuleStatus");
       return StatusCode::FAILURE;
     }
     if (m_activeStatus.back()<0 || m_activeStatus.back()>31) {
@@ -247,8 +247,8 @@ bool PixelConditionsSummaryTool::isActive(const IdentifierHash& moduleHash, cons
 
   SG::ReadCondHandle<PixelDCSStateData> dcsstate_data(m_condDCSStateKey,ctx);
   bool isDCSActive = false;
-  for (unsigned int istate=0; istate<m_activeState.size(); istate++) {
-    if (m_activeState[istate]==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
+  for (int istate : m_activeState) {
+    if (istate==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
   }
   if (!isDCSActive) { return false; }
 
@@ -268,8 +268,8 @@ bool PixelConditionsSummaryTool::isActive(const IdentifierHash& moduleHash, cons
 
   SG::ReadCondHandle<PixelDCSStateData> dcsstate_data(m_condDCSStateKey,ctx);
   bool isDCSActive = false;
-  for (unsigned int istate=0; istate<m_activeState.size(); istate++) {
-    if (m_activeState[istate]==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
+  for (int istate : m_activeState) {
+    if (istate==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
   }
   if (!isDCSActive) { return false; }
 
@@ -311,15 +311,15 @@ bool PixelConditionsSummaryTool::isGood(const Identifier& elementId, const InDet
 
   SG::ReadCondHandle<PixelDCSStateData> dcsstate_data(m_condDCSStateKey, ctx);
   bool isDCSActive = false;
-  for (unsigned int istate=0; istate<m_activeState.size(); istate++) {
-    if (m_activeState[istate]==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
+  for (int istate : m_activeState) {
+    if (istate==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
   }
   if (!isDCSActive) { return false; }
 
   SG::ReadCondHandle<PixelDCSStatusData> dcsstatus_data(m_condDCSStatusKey, ctx);
   bool isDCSGood = false;
-  for (unsigned int istatus=0; istatus<m_activeStatus.size(); istatus++) {
-    if (m_activeStatus[istatus]==dcsstatus_data->getModuleStatus(moduleHash)) { isDCSGood=true; }
+  for (int activeStatus : m_activeStatus) {
+    if (activeStatus==dcsstatus_data->getModuleStatus(moduleHash)) { isDCSGood=true; }
   }
   if (!isDCSGood) { return false; }
 
@@ -542,15 +542,15 @@ bool PixelConditionsSummaryTool::isGood(const IdentifierHash& moduleHash, const 
 
   SG::ReadCondHandle<PixelDCSStateData> dcsstate_data(m_condDCSStateKey, ctx);
   bool isDCSActive = false;
-  for (unsigned int istate=0; istate<m_activeState.size(); istate++) {
-    if (m_activeState[istate]==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
+  for (int istate : m_activeState) {
+    if (istate==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
   }
   if (!isDCSActive) { return false; }
 
   SG::ReadCondHandle<PixelDCSStatusData> dcsstatus_data(m_condDCSStatusKey, ctx);
   bool isDCSGood = false;
-  for (unsigned int istatus=0; istatus<m_activeStatus.size(); istatus++) {
-    if (m_activeStatus[istatus]==dcsstatus_data->getModuleStatus(moduleHash)) { isDCSGood=true; }
+  for (int activeStatus : m_activeStatus) {
+    if (activeStatus==dcsstatus_data->getModuleStatus(moduleHash)) { isDCSGood=true; }
   }
   if (!isDCSGood) { return false; }
 
@@ -567,15 +567,15 @@ bool PixelConditionsSummaryTool::isGood(const IdentifierHash & moduleHash, const
 
   SG::ReadCondHandle<PixelDCSStateData> dcsstate_data(m_condDCSStateKey, ctx);
   bool isDCSActive = false;
-  for (unsigned int istate=0; istate<m_activeState.size(); istate++) {
-    if (m_activeState[istate]==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
+  for (int istate : m_activeState) {
+    if (istate==dcsstate_data->getModuleStatus(moduleHash)) { isDCSActive=true; }
   }
   if (!isDCSActive) { return false; }
 
   SG::ReadCondHandle<PixelDCSStatusData> dcsstatus_data(m_condDCSStatusKey, ctx);
   bool isDCSGood = false;
-  for (unsigned int istatus=0; istatus<m_activeStatus.size(); istatus++) {
-    if (m_activeStatus[istatus]==dcsstatus_data->getModuleStatus(moduleHash)) { isDCSGood=true; }
+  for (int activeStatus : m_activeStatus) {
+    if (activeStatus==dcsstatus_data->getModuleStatus(moduleHash)) { isDCSGood=true; }
   }
   if (!isDCSGood) { return false; }
 

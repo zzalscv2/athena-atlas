@@ -33,8 +33,8 @@ namespace TRTCond
     rhs.getall(allentries) ;
     
     // store them one-by-one
-    for(FlatContainer::const_iterator it = allentries.begin() ; it != allentries.end(); ++it)
-      set( it->first, *(it->second) ) ;
+    for(const auto & entry : allentries)
+      set( entry.first, *(entry.second) ) ;
     
     return *this ;
   }

@@ -17,8 +17,7 @@ void InDetBSErrContainerCnv_p1::transToPers
     std::pair<IdentifierHash, int>* ptr ATLAS_THREAD_SAFE = const_cast<std::pair<IdentifierHash, int>*> (*it);
     (persCont->m_bsErrs).push_back(ptr);
   }
-  return;
-}
+  }
 
 void  InDetBSErrContainerCnv_p1::persToTrans(const InDetBSErrContainer_p1* persCont, InDetBSErrContainer* transCont, MsgStream& /*log*/)
 {
@@ -29,8 +28,7 @@ void  InDetBSErrContainerCnv_p1::persToTrans(const InDetBSErrContainer_p1* persC
   for (; it != itEnd; ++it) {
     transCont->push_back(*it);
   }
-  return;
-
+  
 }
 
 //================================================================

@@ -324,8 +324,6 @@ void SCT_ChargeTrappingTool::holeTransport(double& x0, double& y0, double& xfin,
     }
   }  
   ATH_MSG_DEBUG("h:qstrip=" << qstrip[0] << " " << qstrip[1] << " " << qstrip[2] << " " << qstrip[3] << " " << qstrip[4]);
-  // end of hole tracing 
-  return;
 }
 
 double 

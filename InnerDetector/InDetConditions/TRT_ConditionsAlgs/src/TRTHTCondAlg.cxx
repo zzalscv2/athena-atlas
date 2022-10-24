@@ -8,7 +8,7 @@ TRTHTCondAlg::TRTHTCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
   : ::AthAlgorithm(name,pSvcLocator)
 {}
-TRTHTCondAlg::~TRTHTCondAlg(){}
+TRTHTCondAlg::~TRTHTCondAlg()= default;
 
 StatusCode TRTHTCondAlg::initialize()
 {
