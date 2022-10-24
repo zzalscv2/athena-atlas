@@ -13,8 +13,9 @@
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/TrackMeasurement.h"
 
-
+#include "ActsTrkEvent/SourceLink.h"
 
 namespace ActsTrk {
 
@@ -113,7 +114,7 @@ namespace ActsTrk {
              */
 
             inline size_t size_impl() const {
-            	return trackStates().size();
+            	return m_trackStates->size();
             };
 
             /**
@@ -145,8 +146,8 @@ namespace ActsTrk {
             // bare pointers to the backend (need to be fast and we do not claim ownership anyways)
             TrackStateContainerBackendPtr m_trackStates = nullptr;
 
-            inline const xAOD::TrackStateContainer& trackStates() const { return *m_trackStates; }
-            inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
+            // inline const xAOD::TrackStateContainer& trackStates() const { return *m_trackStates; }
+            // inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
             
             TrackParametersContainerBackendPtr m_trackParameters = nullptr;
 
@@ -168,12 +169,16 @@ namespace ActsTrk {
             friend class ActsTrk::MultiTrajectory<IsReadOnly>;
 
             std::vector<detail::Decoration> m_decorations;
-
             //!< decoration accessors, one per type
             template<typename T>
             std::any decorationSetter(IndexType, const std::string&);
             template<typename T>
             const std::any decorationGetter(IndexType, const std::string&) const;
+
+            ///!< cache of source links for uncalibrated measurements
+            using SourceLinkType = Acts::SourceLink;
+            std::vector<SourceLinkType*> m_sourceLinks;
+
     };
 
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>  ConstMultiTrajectory;

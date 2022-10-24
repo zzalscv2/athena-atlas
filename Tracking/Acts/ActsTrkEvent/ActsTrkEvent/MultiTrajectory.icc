@@ -10,6 +10,8 @@ ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(MultiTrajectory<RWState>::Tra
       m_trackParameters(parameters),
       m_trackJacobians(jacobians),
       m_trackMeasurements(measurements){        
+        enableDecoration<IndexType>("calibratedSourceLink");
+
       } 
 
 
@@ -31,17 +33,19 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
     ActsTrk::MultiTrajectory<RWState>::addTrackState_impl(
                 Acts::TrackStatePropMask mask,
                 ActsTrk::MultiTrajectory<RWState>::IndexType previous) {   
+        using namespace Acts::HashedStringLiteral;
+
         assert(m_trackStates && "Missing Track States backend");
    
         auto state = new xAOD::TrackState_v1();
-        trackStates().push_back(state);
+        m_trackStates->push_back(state);
         
         // set kInvalid
         using Acts::MultiTrajectoryTraits::kInvalid;
         
            
         if (previous >= kInvalid - 1) previous = kInvalid; // fix needed in Acts::MTJ
-        trackStates().back()->setPrevious(previous);
+        m_trackStates->back()->setPrevious(previous);
         using namespace Acts;
 
         auto addParam = [this]() -> IndexType {
@@ -74,7 +78,23 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
             state->setSmoothed(addParam());
         }
 
+        m_sourceLinks.push_back(nullptr);
+        state->setUncalibrated(m_sourceLinks.size()-1);
+
         state->setCalibrated(kInvalid);
+        if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
+            xAOD::TrackMeasurement* meas = new xAOD::TrackMeasurement();
+            m_trackMeasurements->push_back(meas);
+            state->setCalibrated(m_trackMeasurements->size()-1);
+            // there is little asymmetry here, i.e. uncalibrated points to sourceLink
+            // while calibrated points to measurement
+            // and there is additional field/index for the calibrated link
+            // however there is also such asymmetry in ACTS
+            m_sourceLinks.push_back(nullptr);
+            *std::any_cast<IndexType*>(component_impl("calibratedSourceLink"_hash, m_trackStates->size()-1)) = m_sourceLinks.size()-1;
+        }
+
+
         state->setProjector(kInvalid);
         if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
             state->setCalibrated(addMeasurement());
@@ -88,7 +108,6 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
             state->setJacobian(addJacobian());
         }
 
-        state->setUncalibrated(kInvalid);
         return m_trackStates->size() - 1;
     }
 
@@ -106,19 +125,19 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         
         // set kInvalid
         using Acts::MultiTrajectoryTraits::kInvalid;        
-
+        const auto& trackStates = *m_trackStates;
         switch (key) {
-		case "previous"_hash:  return trackStates()[istate]->previous() < kInvalid;
-		case "chi2"_hash:      return trackStates()[istate]->chi2() < kInvalid;
-		case "pathLength"_hash:return trackStates()[istate]->pathLength() < kInvalid;        
-		case "predicted"_hash: return trackStates()[istate]->predicted() < kInvalid;
-		case "filtered"_hash:  return trackStates()[istate]->filtered() < kInvalid;
-		case "smoothed"_hash:  return trackStates()[istate]->smoothed() < kInvalid;
-		case "jacobian"_hash:  return trackStates()[istate]->jacobian() < kInvalid;
-		case "projector"_hash: return trackStates()[istate]->projector() < kInvalid;
-		case "uncalibrated"_hash: return trackStates()[istate]->uncalibrated() < kInvalid;
-		case "calibrated"_hash: return trackStates()[istate]->calibrated() < kInvalid;
-		case "measdim"_hash: return trackStates()[istate]->measDim() < kInvalid;
+		case "previous"_hash:  return trackStates[istate]->previous() < kInvalid;
+		case "chi2"_hash:      return trackStates[istate]->chi2() < kInvalid;
+		case "pathLength"_hash:return trackStates[istate]->pathLength() < kInvalid;        
+		case "predicted"_hash: return trackStates[istate]->predicted() < kInvalid;
+		case "filtered"_hash:  return trackStates[istate]->filtered() < kInvalid;
+		case "smoothed"_hash:  return trackStates[istate]->smoothed() < kInvalid;
+		case "jacobian"_hash:  return trackStates[istate]->jacobian() < kInvalid;
+		case "projector"_hash: return trackStates[istate]->projector() < kInvalid;
+		case "uncalibrated"_hash: return trackStates[istate]->uncalibrated() < kInvalid;
+		case "calibrated"_hash: return trackStates[istate]->calibrated() < kInvalid;
+		case "measdim"_hash: return trackStates[istate]->measDim() < kInvalid;
         default:
             for (auto& d : m_decorations) {
                 if (d.hash == key) {
@@ -137,20 +156,25 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         template<bool RWState>
         const std::any ActsTrk::MultiTrajectory<RWState>::component_impl(Acts::HashedString key, ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
         	using namespace Acts::HashedStringLiteral;
-        	assert(istate < trackStates().size() && "Attempt to reach beyond the Track States container size");
-        	
+        	assert(istate < m_trackStates->size() && "Attempt to reach beyond the Track States container size");
+        	const auto& trackStates = *m_trackStates;
         	switch (key) {
-        		case "previous"_hash: return trackStates()[istate]->previousPtr();
-        		case "chi2"_hash: return trackStates()[istate]->chi2Ptr();
-        		case "pathLength"_hash: return trackStates()[istate]->pathLengthPtr();
-        		case "predicted"_hash: return trackStates()[istate]->predictedPtr();
-        		case "filtered"_hash: return trackStates()[istate]->filteredPtr();
-        		case "smoothed"_hash: return trackStates()[istate]->smoothedPtr();
-        		case "jacobian"_hash: return trackStates()[istate]->jacobianPtr();
-        		case "projector"_hash: return trackStates()[istate]->projectorPtr();
-        		case "uncalibrated"_hash: return trackStates()[istate]->uncalibratedPtr();
-        		case "calibrated"_hash: return trackStates()[istate]->calibratedPtr();
-        		case "measdim"_hash: return trackStates()[istate]->measDimPtr();
+        		case "previous"_hash: return trackStates[istate]->previousPtr();
+        		case "chi2"_hash: return trackStates[istate]->chi2Ptr();
+        		case "pathLength"_hash: return trackStates[istate]->pathLengthPtr();
+        		case "predicted"_hash: return trackStates[istate]->predictedPtr();
+        		case "filtered"_hash: return trackStates[istate]->filteredPtr();
+        		case "smoothed"_hash: return trackStates[istate]->smoothedPtr();
+        		case "jacobian"_hash: return trackStates[istate]->jacobianPtr();
+        		case "projector"_hash: return trackStates[istate]->projectorPtr();
+        		case "uncalibrated"_hash: {
+                    const IndexType uncalibratedIndex = trackStates[istate]->uncalibrated();
+                    return &(m_sourceLinks[uncalibratedIndex]);
+                }
+        		case "calibrated"_hash: {
+                    return trackStates[istate]->calibratedPtr();
+                }
+        		case "measdim"_hash: return trackStates[istate]->measDimPtr();
         		default: {
                     for (auto& d : m_decorations) {
                         if (d.hash == key) {
@@ -168,20 +192,24 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         template<bool RWState>
         std::any ActsTrk::MultiTrajectory<RWState>::component_impl(Acts::HashedString key, ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
         	using namespace Acts::HashedStringLiteral;
-        	assert(istate < trackStates().size() && "Attempt to reach beyond the Track States container size");
+        	assert(istate < m_trackStates->size() && "Attempt to reach beyond the Track States container size");
 
         	switch (key) {
-        		case "previous"_hash: return trackStates()[istate]->previousPtr();
-        		case "chi2"_hash: return trackStates()[istate]->chi2Ptr();
-        		case "pathLength"_hash: return trackStates()[istate]->pathLengthPtr();
-        		case "predicted"_hash: return trackStates()[istate]->predictedPtr();
-        		case "filtered"_hash: return trackStates()[istate]->filteredPtr();
-        		case "smoothed"_hash: return trackStates()[istate]->smoothedPtr();
-        		case "jacobian"_hash: return trackStates()[istate]->jacobianPtr();
-        		case "projector"_hash: return trackStates()[istate]->projectorPtr();
-        		case "uncalibrated"_hash: return trackStates()[istate]->uncalibratedPtr();
-        		case "calibrated"_hash: return trackStates()[istate]->calibratedPtr();
-        		case "measdim"_hash: return trackStates()[istate]->measDimPtr();
+        		case "previous"_hash: return (*m_trackStates)[istate]->previousPtr();
+        		case "chi2"_hash: return (*m_trackStates)[istate]->chi2Ptr();
+        		case "pathLength"_hash: return (*m_trackStates)[istate]->pathLengthPtr();
+        		case "predicted"_hash: return (*m_trackStates)[istate]->predictedPtr();
+        		case "filtered"_hash: return (*m_trackStates)[istate]->filteredPtr();
+        		case "smoothed"_hash: return (*m_trackStates)[istate]->smoothedPtr();
+        		case "jacobian"_hash: return (*m_trackStates)[istate]->jacobianPtr();
+        		case "projector"_hash: return (*m_trackStates)[istate]->projectorPtr();
+        		case "uncalibrated"_hash: {
+                    const IndexType uncalibratedIndex = (*m_trackStates)[istate]->uncalibrated();
+                    return &(m_sourceLinks[uncalibratedIndex]);
+                }
+        		case "calibrated"_hash:
+                    return (*m_trackStates)[istate]->calibratedPtr();
+        		case "measdim"_hash: return (*m_trackStates)[istate]->measDimPtr();
         		default: {
                     for (auto& d : m_decorations) {
                         if (d.hash == key) {
@@ -205,7 +233,8 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         if constexpr (std::is_same<T, float>::value
                     or std::is_same<T, double>::value
                     or std::is_same<T, short>::value
-                    or std::is_same<T, int>::value) {
+                    or std::is_same<T, int>::value
+                    or std::is_same<T, std::uint32_t>::value) {
             m_decorations.emplace_back(name,
                 std::bind(&ActsTrk::MultiTrajectory<RWState>::decorationSetter<T>, this, _1, _2),
                 std::bind(&ActsTrk::MultiTrajectory<RWState>::decorationGetter<T>, this, _1, _2));
@@ -219,13 +248,14 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
     std::any ActsTrk::MultiTrajectory<RWState>::decorationSetter(IndexType idx, const std::string& name) {
         //TODO this approach is known not to be fastest possible, it would be better to construct SG::Accessor and reuse it
         // however the SG::Accessor is typed and we'll need a classic inheritance for that
-        SG::AuxElement* el = trackStates().at(idx);
+        const SG::AuxElement* el = (*m_trackStates)[idx];
         return &(el->auxdecor<T>(name));
     }
 
     template<bool RWState>
     template<typename T>
     const std::any ActsTrk::MultiTrajectory<RWState>::decorationGetter(IndexType idx, const std::string& name) const {
-        const SG::AuxElement* el = trackStates().at(idx);
+        const auto& trackStates = *m_trackStates;
+        const SG::AuxElement* el = trackStates[idx];
         return &(el->auxdecor<T>(name)); // yeah, xAOD auxdecor returns nonconst ref even for const AuxElements, here we shield
     }
