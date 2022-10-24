@@ -450,6 +450,7 @@ namespace EL
     static const std::string optGridShowCmd;
     static const std::string optGridCpuTimePerEvent;
     static const std::string optGridMaxWalltime;
+    static const std::string optGridAvoidVP;
     /// Enables to ship additional files to the tarbal sent to the grid
     /// Should be a list of comma separated path to files and/or directories
     /// Beware for root or heavy files you should also add their name (not their full path) to EL::Job::optUserFiles
