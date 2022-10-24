@@ -114,3 +114,8 @@ atlas_add_test( TileDigitsMonitorAlgorithm_test
                 SCRIPT python -m TileMonitoring.TileDigitsMonitorAlgorithm
                 PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh)
+
+atlas_add_test( TileDigitsFlxMonitorAlgorithm_test
+                SCRIPT python -m TileMonitoring.TileDigitsFlxMonitorAlgorithm
+                PROPERTIES TIMEOUT 600
+                POST_EXEC_SCRIPT nopost.sh)
