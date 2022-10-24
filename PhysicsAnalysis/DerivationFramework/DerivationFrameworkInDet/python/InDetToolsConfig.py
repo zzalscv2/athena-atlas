@@ -176,3 +176,11 @@ def TauJetLepRMParticleThinningCfg(ConfigFlags, name, **kwargs):
     acc.addPublicTool(TauJetLepRMParticleThinningTool(name, **kwargs), primary = True)
     return acc
 
+# Tool for thinning TrackParticles that aren't associated with egamma objects
+def EgammaTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+    """Configure the EgammaTrackParticleThinning tool"""
+    acc = ComponentAccumulator()
+    EgammaTrackParticleThinning = CompFactory.DerivationFramework.EgammaTrackParticleThinning
+    acc.addPublicTool(EgammaTrackParticleThinning(name, **kwargs),
+                      primary = True)
+    return acc

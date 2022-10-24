@@ -4,7 +4,7 @@
 #====================================================================
 
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo, DerivationFrameworkJob, buildFileName
-from DerivationFrameworkJetEtMiss.JetCommon import addJetOutputs, OutputJets, addOriginCorrectedClusters
+from DerivationFrameworkJetEtMiss.JetCommon import addOriginCorrectedClusters
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkTrigger.TriggerMatchingHelper import TriggerMatchingHelper
 
@@ -236,6 +236,19 @@ if DerivationFrameworkIsMonteCarlo:
   JETM6SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
   JETM6SlimmingHelper.AppendToDictionary['TruthBottom'] = 'xAOD::TruthParticleContainer'
   JETM6SlimmingHelper.AppendToDictionary['TruthBottomAux'] = 'xAOD::TruthParticleAuxContainer'
+  JETM6SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
+  JETM6SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+
+JETM6SlimmingHelper.AppendToDictionary['UFOCSSK'] = 'xAOD::FlowElementContainer'
+JETM6SlimmingHelper.AppendToDictionary['UFOCSSKAux'] = 'xAOD::FlowElementAuxContainer'
+JETM6SlimmingHelper.AppendToDictionary["GlobalChargedParticleFlowObjects"]='xAOD::FlowElementContainer'
+JETM6SlimmingHelper.AppendToDictionary["GlobalChargedParticleFlowObjectsAux"]='xAOD::FlowElementAuxContainer'
+JETM6SlimmingHelper.AppendToDictionary["GlobalNeutralParticleFlowObjects"]='xAOD::FlowElementContainer'
+JETM6SlimmingHelper.AppendToDictionary["GlobalNeutralParticleFlowObjectsAux"]='xAOD::FlowElementAuxContainer'
+JETM6SlimmingHelper.AppendToDictionary["CSSKGChargedParticleFlowObjects"]='xAOD::FlowElementContainer'
+JETM6SlimmingHelper.AppendToDictionary["CSSKGChargedParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
+JETM6SlimmingHelper.AppendToDictionary["CSSKGNeutralParticleFlowObjects"]='xAOD::FlowElementContainer'
+JETM6SlimmingHelper.AppendToDictionary["CSSKGNeutralParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
 
 JETM6SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles","PrimaryVertices",
                                         "Electrons","Photons","Muons","TauJets",
@@ -247,12 +260,17 @@ JETM6SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles","Prima
                                         "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                         "BTagging_AntiKt4EMPFlow"]
 
-JETM6SlimmingHelper.AllVariables = ["TruthEvents"]
+JETM6SlimmingHelper.AllVariables = ["Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape"]
 
 JETM6SlimmingHelper.ExtraVariables  = ['CaloCalTopoClusters.calE.calEta.calM.calPhi.CENTER_MAG']
+JETM6SlimmingHelper.ExtraVariables.append('GlobalChargedParticleFlowObjects.chargedObjectLinks')
+JETM6SlimmingHelper.ExtraVariables.append('GlobalNeutralParticleFlowObjects.chargedObjectLinks')
+JETM6SlimmingHelper.ExtraVariables.append('CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink')
+JETM6SlimmingHelper.ExtraVariables.append('CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink')
 
 if DerivationFrameworkIsMonteCarlo:
-    JETM6SlimmingHelper.AllVariables += ["TruthMuons", "TruthElectrons", "TruthPhotons", "TruthBottom", "TruthTopQuarkWithDecayParticles", "TruthBosonsWithDecayParticles", "TruthHFWithDecayParticles"]
+    JETM6SlimmingHelper.AllVariables += ["TruthMuons", "TruthElectrons", "TruthPhotons", "TruthBottom", "TruthTopQuarkWithDecayParticles", "TruthBosonsWithDecayParticles", "TruthHFWithDecayParticles",
+                                         "TruthEvents", "TruthParticles"]
 
 #====================================================================
 # ORIGIN CORRECTED CLUSTERS

@@ -55,23 +55,6 @@ def HepMCtoXAODTruthCfg(ConfigFlags):
 
     return acc
 
-# TODO: this should be in the JetCommon.py, but it isn't yet CA compatible
-def AddDAODJetsCACfg(flags,jetlist):
-
-    from JetRecConfig.JetRecConfig import getJetAlgs, reOrderAlgs
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
-    acc = ComponentAccumulator()
-
-    for jd in jetlist:
-        algs, jetdef_i = getJetAlgs(flags, jd, True)
-        algs = reOrderAlgs( [a for a in algs if a is not None])
-        for a in algs:
-            acc.addEventAlgo(a)
-
-    return(acc)
-
-
 
 # Helper for adding truth jet collections via new jet config
 def AddTruthJetsCfg(ConfigFlags):
@@ -79,11 +62,16 @@ def AddTruthJetsCfg(ConfigFlags):
 
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged
     from JetRecConfig.StandardLargeRJets import AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop
+    from JetRecConfig.JetRecConfig import JetRecCfg
+    from JetRecConfig.JetConfigFlags import jetInternalFlags
+
+    jetInternalFlags.isRecoJob = True
 
     jetList = [AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged,
                AntiKt10TruthTrimmed,AntiKt10TruthSoftDrop]
 
-    acc.merge(AddDAODJetsCACfg(ConfigFlags,jetList))
+    for jd in jetList:
+        acc.merge(JetRecCfg(ConfigFlags,jd))
 
     return acc
 
@@ -255,6 +243,15 @@ def AddBosonsAndDownstreamParticlesCfg(generations=1,
                                               prefix               = 'Bosons',
                                               rejectHadronChildren = rejectHadronChildren)
 
+# Add top quark and their downstream particles
+def AddTopQuarkAndDownstreamParticlesCfg(generations=1,
+                                         rejectHadronChildren=False):
+    """Add top quarks and downstream particles"""
+    return AddParentAndDownstreamParticlesCfg(generations=generations,
+                                              parents=[6],
+                                              prefix='TopQuark',
+                                              rejectHadronChildren=rejectHadronChildren)
+
 # Following commented methods don't seem to be used for anything...
 
 #def addBottomQuarkAndDownstreamParticles(kernel=None, generations=1, rejectHadronChildren=False):
@@ -264,13 +261,6 @@ def AddBosonsAndDownstreamParticlesCfg(generations=1,
 #                                          prefix='BottomQuark',
 #                                          rejectHadronChildren=rejectHadronChildren)
 #
-#def addTopQuarkAndDownstreamParticles(kernel=None, generations=1,
-#                                      rejectHadronChildren=False):
-#   return addParentAndDownstreamParticles(kernel=kernel,
-#                                          generations=generations,
-#                                          parents=[6],
-#                                          prefix='TopQuark',
-#                                          rejectHadronChildren=rejectHadronChildren)
 #
 ## Add electrons, photons, and their downstream particles in a special collection
 #def addEgammaAndDownstreamParticles(kernel=None, generations=1):

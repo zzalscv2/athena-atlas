@@ -166,3 +166,34 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
         acc.addEventAlgo(eventCleanAlg)
 
     return acc
+
+
+def addJetsToSlimmingTool(slimhelper,contentlist,smartlist=[]):
+    for item in contentlist:
+        if item not in slimhelper.AppendToDictionary:
+            slimhelper.AppendToDictionary[item]='xAOD::JetContainer'
+            slimhelper.AppendToDictionary[item+"Aux"]='xAOD::JetAuxContainer'
+        if item in smartlist:
+            slimhelper.SmartCollections.append(item)
+        else:
+            slimhelper.AllVariables.append(item)
+
+
+##################################################################
+# Helper to add origin corrected clusters to output
+##################################################################
+def addOriginCorrectedClustersToSlimmingTool(slimhelper,writeLC=False,writeEM=False):
+
+    slimhelper.ExtraVariables.append('CaloCalTopoClusters.calE.calEta.calPhi.calM')
+
+    if writeLC:
+        if "LCOriginTopoClusters" not in slimhelper.AppendToDictionary:
+            slimhelper.AppendToDictionary["LCOriginTopoClusters"]='xAOD::CaloClusterContainer'
+            slimhelper.AppendToDictionary["LCOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
+            slimhelper.ExtraVariables.append('LCOriginTopoClusters.calEta.calPhi')
+
+    if writeEM:
+        if "EMOriginTopoClusters" not in slimhelper.AppendToDictionary:
+            slimhelper.AppendToDictionary["EMOriginTopoClusters"]='xAOD::CaloClusterContainer'
+            slimhelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
+            slimhelper.ExtraVariables.append('EMOriginTopoClusters.calE.calEta.calPhi')

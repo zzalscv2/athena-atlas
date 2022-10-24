@@ -125,11 +125,25 @@ JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
                                     "TruthParticles", "TruthEvents", "TruthVertices",
                                     "MuonSegments",
                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape",
-                                    "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects"
+                                    "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects", "UFOCSSK"
                                     ]
 
 # Add QG tagger variables
 JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
                                         "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
+
+if DerivationFrameworkIsMonteCarlo:
+
+  JETM5SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
+  JETM5SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+  JETM5SlimmingHelper.AppendToDictionary['TruthVertices'] = 'xAOD::TruthVertexContainer'
+  JETM5SlimmingHelper.AppendToDictionary['TruthVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
+
+JETM5SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
+JETM5SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
+JETM5SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+JETM5SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
+JETM5SlimmingHelper.AppendToDictionary['UFOCSSK'] = 'xAOD::FlowElementContainer'
+JETM5SlimmingHelper.AppendToDictionary['UFOCSSKAux'] = 'xAOD::FlowElementAuxContainer'
 
 JETM5SlimmingHelper.AppendContentToStream(JETM5Stream)
