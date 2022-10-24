@@ -6,11 +6,11 @@
 
 MuonAlignmentErrorData::MuonAlignmentErrorData() : m_test(0), m_vec(0) {}
 
-MuonAlignmentErrorData::~MuonAlignmentErrorData() {}
+MuonAlignmentErrorData::~MuonAlignmentErrorData() = default;
 
 deviationStr::deviationStr() : traslation(0.), rotation(0.), stationName(""), multilayer("") {}
 
-deviationStr::~deviationStr() {}
+deviationStr::~deviationStr() = default;
 
 void MuonAlignmentErrorData::setVec(const std::vector<deviationStr>& vec) { m_vec = vec; }
 

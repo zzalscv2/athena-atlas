@@ -159,7 +159,7 @@ void MdtCalibInputSvc::create_mean_rts() {
     }
 
     ATH_MSG_INFO("Found " << matching_relations.size() << " rt-relations for calibration region");
-    if (matching_relations.size() == 0) return;
+    if (matching_relations.empty()) return;
     // averageing over rt relations is not yet implemented - take the first found
     if (matching_relations.size() > 1) { ATH_MSG_WARNING("More than one rt relation for this region loaded! Taking first!"); }
     m_sel_region_rt = *(matching_relations.begin());

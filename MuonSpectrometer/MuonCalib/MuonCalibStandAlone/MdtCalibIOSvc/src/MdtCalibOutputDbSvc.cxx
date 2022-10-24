@@ -40,8 +40,6 @@ MdtCalibOutputDbSvc::MdtCalibOutputDbSvc(const std::string &name, ISvcLocator *s
 
     // for the sake of coverity
     m_resolution = nullptr;
-
-    return;
 }
 
 //*****************************************************************************
@@ -162,9 +160,9 @@ StatusCode MdtCalibOutputDbSvc::saveCalibrationResults(void) {
     /////////////////////////////////////////////////////////////////////////////
 
     //-----------------------------------------------------------------------------
-    for (std::vector<MuonCalib::NtupleStationId>::const_iterator it = m_region_ids.begin(); it != m_region_ids.end(); it++) {
+    for (const auto & region_id : m_region_ids) {
         //-----------------------------------------------------------------------------
-        MuonCalib::NtupleStationId the_id(*it);
+        MuonCalib::NtupleStationId the_id(region_id);
         // get region geometry if required
         if (m_postprocess_calibration) {
             if (!the_id.InitializeGeometry(m_idHelperSvc->mdtIdHelper(), MuonDetMgr)) {
@@ -176,8 +174,8 @@ StatusCode MdtCalibOutputDbSvc::saveCalibrationResults(void) {
         if (t0_output != nullptr) {
             ATH_MSG_INFO("Writing out t0s.");
             const MdtTubeFitContainer *new_t0s = t0_output->t0s();
-            if (t0_output->GetMap().size()) {
-                std::map<NtupleStationId, MdtTubeFitContainer *>::const_iterator mit(t0_output->GetMap().find(*it));
+            if (!t0_output->GetMap().empty()) {
+                std::map<NtupleStationId, MdtTubeFitContainer *>::const_iterator mit(t0_output->GetMap().find(region_id));
                 if (mit != t0_output->GetMap().end()) { new_t0s = mit->second; }
             }
             if (!new_t0s) continue;
@@ -225,7 +223,6 @@ StatusCode MdtCalibOutputDbSvc::saveCalibrationResults(void) {
 //::::::::::::::::::
 void MdtCalibOutputDbSvc::reset() {
     m_results.reset();
-    return;
 }
 
 const MuonCalib::MdtTubeFitContainer *MdtCalibOutputDbSvc::postprocess_t0s(const MuonCalib::MdtTubeFitContainer *t0,
@@ -300,7 +297,7 @@ inline void MdtCalibOutputDbSvc::create_default_resolution(const std::shared_ptr
             res_points[i].set_error(1);
         }
         RtResolutionFromPoints respoints;
-        m_resolution = std::make_shared<RtResolutionLookUp>(respoints.getRtResolutionLookUp(res_points));
+        m_resolution = std::make_shared<RtResolutionLookUp>(MuonCalib::RtResolutionFromPoints::getRtResolutionLookUp(res_points));
         return;
     }
     ATH_MSG_INFO("Creating default resolution");

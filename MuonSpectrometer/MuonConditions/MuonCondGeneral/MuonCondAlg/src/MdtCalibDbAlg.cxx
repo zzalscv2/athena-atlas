@@ -55,8 +55,8 @@ StatusCode MdtCalibDbAlg::initialize() {
     // m_TsCorrectionT0=m_MeanCorrectionVsR[0] and subtract this each value in the vector.
     if (m_MeanCorrectionVsR.size()) {
         m_TsCorrectionT0 = m_MeanCorrectionVsR[0];
-        for (std::vector<float>::iterator it = m_MeanCorrectionVsR.begin(); it != m_MeanCorrectionVsR.end(); it++) {
-            (*it) -= m_TsCorrectionT0;
+        for (float & it : m_MeanCorrectionVsR) {
+            it -= m_TsCorrectionT0;
         }
     }
 
@@ -340,8 +340,7 @@ StatusCode MdtCalibDbAlg::loadRt() {
     }
 
     // unpack the strings in the collection and update the writeCdoRt
-    for (unsigned int idx = 0; idx < dataPerChannel.size(); ++idx) {
-        coral::AttributeList atr = dataPerChannel[idx];
+    for (auto atr : dataPerChannel) {
         bool rt_ts_applied = (atr["tech"].data<int>() & MuonCalib::TIME_SLEWING_CORRECTION_APPLIED);
         std::string header = "", payload = "", trailer = "";
         // if BLOB data
@@ -515,12 +514,12 @@ StatusCode MdtCalibDbAlg::loadRt() {
         if (rt_ts_applied != m_TimeSlewingCorrection) {
             float sign(rt_ts_applied ? -1.0 : 1.0);
             float slice_width = innerTubeRadius / static_cast<float>(m_MeanCorrectionVsR.size());
-            for (std::vector<MuonCalib::SamplePoint>::iterator it = tr_points.begin(); it != tr_points.end(); it++) {
-                int slice_number = static_cast<int>(std::floor(it->x2() / slice_width));
+            for (auto & tr_point : tr_points) {
+                int slice_number = static_cast<int>(std::floor(tr_point.x2() / slice_width));
                 if (slice_number < 0) slice_number = 0;
                 if (slice_number >= static_cast<int>(m_MeanCorrectionVsR.size()))
                     slice_number = static_cast<int>(m_MeanCorrectionVsR.size()) - 1;
-                it->set_x1(it->x1() + sign * m_MeanCorrectionVsR[slice_number]);
+                tr_point.set_x1(tr_point.x1() + sign * m_MeanCorrectionVsR[slice_number]);
             }
         }
 
@@ -538,7 +537,7 @@ StatusCode MdtCalibDbAlg::loadRt() {
 
         // Create RT function from tr_points and load RT and resolution functions
         try {
-            MuonCalib::IRtRelation *rt = new MuonCalib::RtRelationLookUp(rt_fromPoints.getRtRelationLookUp(tr_points));
+            MuonCalib::IRtRelation *rt = new MuonCalib::RtRelationLookUp(MuonCalib::RtFromPoints::getRtRelationLookUp(tr_points));
             if (reso && rt) {
                 if (regionId >= writeCdoRt->size()) {
                     delete reso;
@@ -789,8 +788,7 @@ StatusCode MdtCalibDbAlg::loadTube() {
 
     // unpack the strings in the collection and update the
     // MdtTubeCalibContainers in TDS
-    for (unsigned int idx = 0; idx < dataPerChannel.size(); ++idx) {
-        coral::AttributeList atr = dataPerChannel[idx];
+    for (auto atr : dataPerChannel) {
         std::string header = "", payload = "", trailer = "";
 
         bool t0_ts_applied = (atr["tech"].data<int>() & MuonCalib::TIME_SLEWING_CORRECTION_APPLIED);

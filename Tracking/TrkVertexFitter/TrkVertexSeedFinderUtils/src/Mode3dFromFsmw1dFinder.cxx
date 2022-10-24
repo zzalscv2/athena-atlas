@@ -81,7 +81,7 @@ Mode3dFromFsmw1dFinder::getMode(const double /*vx*/,
   std::vector<double> ally;
   std::vector<double> allz;
     
-  for (std::vector<Amg::Vector3D>::const_iterator i = begin; i!=end; i++) {
+  for (std::vector<Amg::Vector3D>::const_iterator i = begin; i!=end; ++i) {
     allx.push_back((*i).x());
     ally.push_back((*i).y());
     allz.push_back((*i).z());
@@ -135,7 +135,7 @@ Mode3dFromFsmw1dFinder::getMode (Mode3dFromFsmw1dInfo& info,
   int idx = 0 ; // the idx is unique among the three dimensions 
   std::vector<Trk::PositionAndWeight> vectorOfPoints ;
 
-  for (std::vector<PositionAndWeight>::const_iterator i = begin; i!=end; i++) {
+  for (std::vector<PositionAndWeight>::const_iterator i = begin; i!=end; ++i) {
     double wght = i->second ;
     double px = i->first.x() ;   if ( px == 0 ) px += 0.000001 ;
     double py = i->first.y() ;
@@ -608,7 +608,7 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
     double bX = 0., bY = 0., bZ = 0., Bwght = 0. ;
     for (const auto& bx : bb)
     {
-      for (auto & ib : bx)
+      for (const auto & ib : bx)
       {
         int idxB = ib.first ;
         std::vector<Trk::PositionAndWeight>::const_iterator Bposi = vectorOfPoints.begin() + idxB ;
@@ -650,7 +650,7 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
         supp.clear() ;
         corre.clear() ;
 
-        for (auto & m : bx)
+        for (const auto & m : bx)
         {
           std::vector<int>::iterator it = std::find( axidx.begin(), axidx.end(), m.first ) ;
           if ( it == axidx.end() ) supp.emplace_back( m.first, m.second ) ;
@@ -703,7 +703,7 @@ Mode3dFromFsmw1dFinder::getFsmw1dMode( std::vector< IndexedWeighted > & posidxwg
     if ( step < minModeDiff ) break ;
 
     std::vector<IndexedWeighted>::const_iterator j_end= begin+step-1;
-    for (std::vector<IndexedWeighted>::const_iterator j=begin;j!=j_end;j++) 
+    for (std::vector<IndexedWeighted>::const_iterator j=begin;j!=j_end;++j) 
       overallweight+=j->second;
 
     step -- ;  // since ( step - 1 ) will be frequently used in the following
@@ -766,7 +766,7 @@ Mode3dFromFsmw1dFinder::getFsmw1dMode( std::vector< IndexedWeighted > & posidxwg
     }
 
 //  at least two crossing points will be collected
-    for ( mid = best_begin ; mid != best_end ; mid ++ )
+    for ( mid = best_begin ; mid != best_end ; ++mid )
     {
       // the indexed position 
       idx.emplace_back( mid->first.second.first, mid->first.second.second ) ;   
@@ -815,7 +815,7 @@ Mode3dFromFsmw1dFinder::getClosestPair (Mode3dFromFsmw1dInfo& info,
     
   std::vector<Trk::PositionAndWeight>::const_iterator pwitr = VP.begin() ;
 
-  for ( ; pwitr != VP.end() ; pwitr++, offset ++ )
+  for ( ; pwitr != VP.end() ; ++pwitr, ++offset)
   {
     double X = ( pwitr->first ).x() - vx ;
     double Y = ( pwitr->first ).y() - vy ;
@@ -848,7 +848,7 @@ Mode3dFromFsmw1dFinder::getClosestPair (Mode3dFromFsmw1dInfo& info,
   double seedZ = ( pwitr->first ).z() ;
   double wt = 0. ;
 
-  for (std::vector<PositionAndWeight>::const_iterator i = pwitr + 1 ; i!=VP.end(); i++ ) 
+  for (std::vector<PositionAndWeight>::const_iterator i = pwitr + 1 ; i!=VP.end(); ++i ) 
   {
     double sdX = ( i->first ).x() ;
     double sdY = ( i->first ).y() ;
@@ -896,7 +896,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
   {
     double totwght = 0. ;
     double seedX0 = 0., seedY0 = 0., seedZ0 = 0. ;
-    for (auto & mode : modes) 
+    for (const auto & mode : modes) 
     {
 
       int idx = mode.first ;
@@ -940,7 +940,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
   {
     double xywght = 0. ;
     double xyX = 0., xyY = 0., xyZ = 0. ;
-    for (auto & xymode : xymodes)
+    for (const auto & xymode : xymodes)
     {
       int idxXY = xymode.first ;
       std::vector<Trk::PositionAndWeight>::const_iterator posi = vectorOfPoints.begin() + idxXY ;
@@ -965,7 +965,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
     double zX = 0., zY = 0., zZ = 0., zwght = 0. ;
     for (const auto& zmodes : Z) 
     {
-      for (auto & zmode : zmodes)
+      for (const auto & zmode : zmodes)
       {
         int idxZ = zmode.first ;
         std::vector<Trk::PositionAndWeight>::const_iterator zposi = vectorOfPoints.begin() + idxZ ;
@@ -1032,7 +1032,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
     double pwght = 0. ;
     double pX = 0., pY = 0., pZ = 0. ;
 
-    for (auto & pmode : pmodes)
+    for (const auto & pmode : pmodes)
     {
       int idxp = pmode.first ;
       std::vector<Trk::PositionAndWeight>::const_iterator pposi = vectorOfPoints.begin() + idxp ;
@@ -1056,7 +1056,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
       double rwght = 0. ;
       double rX = 0., rY = 0., rZ = 0. ;
 
-      for (auto & rmode : rmodes)
+      for (const auto & rmode : rmodes)
       {
         int idxr = rmode.first ;
         std::vector<Trk::PositionAndWeight>::const_iterator rposi = vectorOfPoints.begin() + idxr ;
@@ -1083,7 +1083,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
         double zwght = 0. ;
         double zX = 0., zY = 0., zZ = 0. ;
 
-        for (auto & zmode : zmodes)
+        for (const auto & zmode : zmodes)
         {
           int idxz = zmode.first ;
           std::vector<Trk::PositionAndWeight>::const_iterator zposi = vectorOfPoints.begin() + idxz ;

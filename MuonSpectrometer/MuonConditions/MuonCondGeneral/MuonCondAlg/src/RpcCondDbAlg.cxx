@@ -108,8 +108,7 @@ StatusCode RpcCondDbAlg::loadDataDeadPanels(EventIDRange& rangeW, RpcCondDbData*
 
             Identifier PanelId;
 
-            for (unsigned int i = 0; i < info_panel.size(); i++) {
-                const std::string_view &ch_tmp = info_panel[i];
+            for (auto & ch_tmp : info_panel) {
                 PanelId =  MdtStringUtils::atoi(ch_tmp);
                 ATH_MSG_DEBUG("info_panel " << ch_tmp << " " << PanelId);
 
@@ -171,8 +170,7 @@ StatusCode RpcCondDbAlg::loadDataOffPanels(EventIDRange& rangeW, RpcCondDbData* 
 
             Identifier PanelId;
 
-            for (unsigned int i = 0; i < info_panel.size(); i++) {
-                const std::string_view &ch_tmp = info_panel[i];
+            for (auto & ch_tmp : info_panel) {
                 PanelId = MdtStringUtils::atoi(ch_tmp);
                 ATH_MSG_DEBUG("info_panel " << ch_tmp << " " << PanelId);
 

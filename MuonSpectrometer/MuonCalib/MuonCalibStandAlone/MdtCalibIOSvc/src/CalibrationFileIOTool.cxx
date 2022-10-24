@@ -210,7 +210,7 @@ namespace MuonCalib {
     }  // end CalibrationFileIOTool::fill_rt
 
     inline bool CalibrationFileIOTool::interpret_chamber_name(const std::string &nm, const char *prefix, std::string &station, int &eta,
-                                                              int &phi, int &ml) const {
+                                                              int &phi, int &ml) {
         // check if name begins with the prefix
         std::string prefix_st(prefix);
         if (nm.find(prefix_st) != 0) return false;
@@ -274,9 +274,9 @@ namespace MuonCalib {
         // convert rt relation
         MuonCalib::RtFromPoints rt_from_points;
         if (m_rt_lookup) {
-            rts[id] = new MuonCalib::RtRelationLookUp(rt_from_points.getRtRelationLookUp(point));
+            rts[id] = new MuonCalib::RtRelationLookUp(MuonCalib::RtFromPoints::getRtRelationLookUp(point));
         } else {
-            rts[id] = new MuonCalib::RtChebyshev((rt_from_points.getRtChebyshev(point, 10)));
+            rts[id] = new MuonCalib::RtChebyshev((MuonCalib::RtFromPoints::getRtChebyshev(point, 10)));
         }
         if (multilayer_diff < 8e8) rts[id]->SetTmaxDiff(multilayer_diff);
         // create resolution function
@@ -286,7 +286,7 @@ namespace MuonCalib {
             point[k].set_x2(res[k]);
             point[k].set_error(1.0);
         }
-        res_map[id] = new MuonCalib::RtResolutionChebyshev(res_from_points.getRtResolutionChebyshev(point, 8));
+        res_map[id] = new MuonCalib::RtResolutionChebyshev(MuonCalib::RtResolutionFromPoints::getRtResolutionChebyshev(point, 8));
     }  // end CalibrationFileIOTool::read_rt_relation
 
 }  // namespace MuonCalib
