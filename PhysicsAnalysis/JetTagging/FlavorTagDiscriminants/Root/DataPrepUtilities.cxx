@@ -605,6 +605,7 @@ namespace FlavorTagDiscriminants {
 
       // we rewrite the inputs if we're using flip taggers
       StringRegexes flip_converters {
+        {"(GN1[^_]*)"_r, "$1Flip"},
         {"(IP[23]D)_(.*)"_r, "$1Neg_$2"},
         {"(rnnip|dips[^_]*)_(.*)"_r, "$1flip_$2"},
         {"(JetFitter|SV1|JetFitterSecondaryVertex)_(.*)"_r, "$1Flip_$2"},
