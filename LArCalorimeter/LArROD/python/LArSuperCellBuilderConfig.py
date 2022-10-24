@@ -29,10 +29,8 @@ def LArSuperCellBuilderAlgCfg(flags, **kwargs):
 
     kwargs.setdefault("LArDigitKey", 'LArDigitSCL2') # TODO Understand why this isn't LArDigitSCL1
 
-    kwargs.setdefault("useDB", False)
-    kwargs.setdefault("IsSuperCell", True)
-    kwargs.setdefault("ECutFortQ",  -1024)
-    acc.addEventAlgo(CompFactory.LArRawChannelBuilderAlg(name="LArSuperCellBuilderAlg", **kwargs))
+    kwargs.setdefault("ECutFortQ", 0)
+    acc.addEventAlgo(CompFactory.LArRawChannelBuilderSCAlg(name="LArSuperCellBuilderAlg", **kwargs))
     return acc
 
 

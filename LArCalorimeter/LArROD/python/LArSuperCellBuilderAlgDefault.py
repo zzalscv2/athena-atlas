@@ -36,8 +36,8 @@ def LArSuperCellBuilderAlgDefault():
    
    LArADC2MeVSCCondAlgDefault()
    LArOFCSCCondAlgDefault()
-   from LArROD.LArRODConf import LArRawChannelBuilderAlg
-   theSelf = LArRawChannelBuilderAlg("LArSuperCellBuilderAlg")
+   from LArROD.LArRODConf import LArRawChannelBuilderSCAlg
+   theSelf = LArRawChannelBuilderSCAlg("LArSuperCellBuilderAlg")
    theSelf.CablingKey='LArOnOffIdMapSC'
    theSelf.ADC2MeVKey='LArADC2MeVSC'
    theSelf.ShapeKey='LArShapeSC'
@@ -45,7 +45,5 @@ def LArSuperCellBuilderAlgDefault():
    theSelf.OFCKey='LArOFCSC'
    theSelf.CaloCellKey='SCellnoBCID'
    theSelf.LArDigitKey='LArDigitSCL2'
-   theSelf.useDB=False
-   theSelf.IsSuperCell=True
-   theSelf.ECutFortQ = -1024
+   theSelf.ECutFortQ = 0
    return theSelf
