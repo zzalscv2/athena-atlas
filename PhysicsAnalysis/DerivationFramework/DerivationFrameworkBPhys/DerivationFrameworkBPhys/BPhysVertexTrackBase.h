@@ -44,6 +44,7 @@ namespace InDet {
 class TVector3;
 
 namespace DerivationFramework {
+
   //
   // typedefs -- to abbreviate long lines
   //
@@ -84,16 +85,16 @@ namespace DerivationFramework {
 
     public:
       TrackTypeCounter(BPhysVertexTrackBase& Parent, std::string Name);
-      virtual ~TrackTypeCounter();
+      ~TrackTypeCounter();
 
-      virtual void addToCounter(uint64_t atype, uint64_t rtype=0,
-                                std::string prefix="", std::string suffix="",
+      void addToCounter(uint64_t atype, uint64_t rtype=0,
+                                const std::string &prefix="", const std::string &suffix="",
                                 uint64_t counts=1);
 
-      virtual void addToCounter(std::string name, uint64_t atype=0,
+      void addToCounter(const std::string &name, uint64_t atype=0,
                                 uint64_t counts=1);
 
-      virtual std::string countsToString(uint indent=0) const;
+      std::string countsToString(uint indent=0) const;
       
     public:
       std::string name;
@@ -144,9 +145,9 @@ namespace DerivationFramework {
       BPhysVertexTrackBase(const std::string& t, const std::string& n,
 			   const IInterface* p);
       
-      virtual StatusCode  initialize();
-      virtual StatusCode  finalize();
-      virtual StatusCode  addBranches() const;
+      virtual StatusCode  initialize() override;
+      virtual StatusCode  finalize() override;
+      virtual StatusCode  addBranches() const override;
 
   protected:
       //
@@ -167,7 +168,7 @@ namespace DerivationFramework {
       //
       // Methods to be called from within addBranchesSVLoopHook()
       //
-      virtual StatusCode  calculateValues(const xAOD::Vertex* vtx) const;
+      StatusCode  calculateValues(const xAOD::Vertex* vtx) const;
 
       //
       // internal methods
@@ -177,50 +178,50 @@ namespace DerivationFramework {
 						const int ipv) const;
       
       virtual void        initPvAssocTypeVec();
-      virtual TrackBag    findAllTracksInDecay(xAOD::BPhysHelper& vtx) const;
-      virtual void        findAllTracksInDecay(xAOD::BPhysHelper& vtx,
+      TrackBag    findAllTracksInDecay(xAOD::BPhysHelper& vtx) const;
+      void        findAllTracksInDecay(xAOD::BPhysHelper& vtx,
 					       TrackBag& tracks) const;
-      virtual MuonBag     findAllMuonsInDecay(xAOD::BPhysHelper& vtx) const;
-      virtual void        findAllMuonsInDecay(xAOD::BPhysHelper& vtx,
+      MuonBag     findAllMuonsInDecay(xAOD::BPhysHelper& vtx) const;
+      void        findAllMuonsInDecay(xAOD::BPhysHelper& vtx,
 					      MuonBag& muons) const;
-      virtual TrackBag    findAllMuonIdTracksInDecay(xAOD::BPhysHelper& vtx,
+      TrackBag    findAllMuonIdTracksInDecay(xAOD::BPhysHelper& vtx,
 						     MuonBag& muons) const;
-      virtual std::vector<TVector3>
+      std::vector<TVector3>
 	findMuonRefTrackMomenta(xAOD::BPhysHelper& vtx, MuonBag& muons) const;
 
-      virtual TrackBag    selectTracks(const xAOD::TrackParticleContainer*
+      TrackBag    selectTracks(const xAOD::TrackParticleContainer*
 				       inpTracks,
 				       xAOD::BPhysHelper& cand,
 				       const unsigned int ipv,
 				       const unsigned int its,
 				       const unsigned int itt) const;
-      virtual TrackBag    selectTracks(const xAOD::TrackParticleContainer*
+      TrackBag    selectTracks(const xAOD::TrackParticleContainer*
 				       inpTracks,
 				       const TrackBag& exclTracks,
 				       xAOD::BPhysHelper& cand,
 				       const unsigned int ipv,
 				       const unsigned int its,
 				       const unsigned int itt) const;
-      virtual uint64_t detTrackTypes(const xAOD::TrackParticle* track,
+      uint64_t detTrackTypes(const xAOD::TrackParticle* track,
                                      const xAOD::Vertex* candPV,
                                      const xAOD::Vertex* candRefPV) const;
-      virtual double   getTrackCandPVLogChi2(const xAOD::TrackParticle*
+      double   getTrackCandPVLogChi2(const xAOD::TrackParticle*
                                              track,
                                              const xAOD::Vertex* vtx,
                                              bool doDCAin3D=false,
                                              int chi2DefToUse=0) const;
-      virtual std::vector<double> getTrackLogChi2DCA(const xAOD::TrackParticle*
+      std::vector<double> getTrackLogChi2DCA(const xAOD::TrackParticle*
                                                      track,
                                                      const xAOD::Vertex* vtx,
                                                      bool doDCAin3D=false,
                                                      int chi2DefToUse=0)
         const;
-      virtual std::string buildBranchBaseName(unsigned int its,
+      std::string buildBranchBaseName(unsigned int its,
                                               unsigned int ipv,
                                               unsigned int itt,
                                               std::string preSuffix="") const;
       
-      virtual std::pair<const xAOD::Vertex*, double>
+      std::pair<const xAOD::Vertex*, double>
         findMinChi2PV(const xAOD::TrackParticle* track,
                       const xAOD::Vertex* candPV,
                       const xAOD::Vertex* candRefPV,
@@ -230,7 +231,7 @@ namespace DerivationFramework {
                       const bool doDCAin3D,
                       const int chi2DefToUse) const;
 
-      virtual const xAOD::Vertex*
+      const xAOD::Vertex*
         findAssocPV(const xAOD::TrackParticle* track,
                     const xAOD::Vertex* candPV,
                     const xAOD::Vertex* candRefPV,

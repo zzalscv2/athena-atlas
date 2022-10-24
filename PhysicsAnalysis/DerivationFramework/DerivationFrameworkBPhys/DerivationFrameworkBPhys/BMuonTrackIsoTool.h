@@ -29,7 +29,7 @@ namespace InDet {
 
 namespace DerivationFramework {
   
-  class BMuonTrackIsoTool : virtual public BPhysVertexTrackBase {
+  class BMuonTrackIsoTool : public BPhysVertexTrackBase {
 
   private:
     typedef BPhysVertexTrackBase super;
@@ -46,14 +46,14 @@ namespace DerivationFramework {
 	      const std::string& Prefix="");
     virtual ~MuIsoItem();
 	
-    virtual void        resetVals();
-    virtual void        copyVals(const BaseItem& item);
-    virtual void        copyVals(const MuIsoItem& item);
-    virtual void        fill(double isoValue=-2., int nTracks=-1,
+    virtual void        resetVals() override;
+    virtual void        copyVals(const BaseItem& item) override;
+    void        copyVals(const MuIsoItem& item);
+    void        fill(double isoValue=-2., int nTracks=-1,
 			     const xAOD::Muon* muon=NULL);
-    virtual std::string muIsoName() const;
-    virtual std::string nTracksName() const;
-    virtual std::string muLinkName() const;
+    std::string muIsoName() const;
+    std::string nTracksName() const;
+    std::string muLinkName() const;
     
   public:
     std::vector<float>  vIsoValues;
@@ -67,26 +67,26 @@ namespace DerivationFramework {
 
   protected:
       // Hook methods 
-      virtual StatusCode  initializeHook();
-      virtual StatusCode  finalizeHook();
+      virtual StatusCode  initializeHook() override;
+      virtual StatusCode  finalizeHook() override;
       
-      virtual StatusCode  addBranchesVCSetupHook(size_t ivc) const;
+      virtual StatusCode  addBranchesVCSetupHook(size_t ivc) const override;
 
-      virtual StatusCode  addBranchesSVLoopHook(const xAOD::Vertex* vtx) const;
+      virtual StatusCode  addBranchesSVLoopHook(const xAOD::Vertex* vtx) const override;
 
       virtual StatusCode  calcValuesHook(const xAOD::Vertex* vtx,
 					 const unsigned int ipv,
 					 const unsigned int its,
-					 const unsigned int itt) const;
+					 const unsigned int itt) const override;
       virtual bool        fastFillHook(const xAOD::Vertex* vtx,
-				       const int ipv) const;
+				       const int ipv) const override;
       
   private:
-      virtual StatusCode  saveIsolation(const xAOD::Vertex* vtx) const;
-      virtual void        initResults();
-      virtual void        setResultsPrefix(std::string prefix) const;
+      StatusCode  saveIsolation(const xAOD::Vertex* vtx) const;
+      void        initResults();
+      void        setResultsPrefix(std::string prefix) const;
       
-      virtual std::string buildBranchName(unsigned int ic,
+      std::string buildBranchName(unsigned int ic,
 					  unsigned int its,
 					  unsigned int ipv,
 					  unsigned int itt) const;
