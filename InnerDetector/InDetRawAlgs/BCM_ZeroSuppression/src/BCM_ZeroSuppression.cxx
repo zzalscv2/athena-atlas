@@ -15,7 +15,8 @@
 using namespace std;
 
 BCM_ZeroSuppression::BCM_ZeroSuppression(const std::string& name,
-                                         ISvcLocator* pSvcLocator): AthAlgorithm(name, pSvcLocator)
+                                         ISvcLocator* pSvcLocator)
+  : AthReentrantAlgorithm(name, pSvcLocator)
 {
   declareProperty("BcmContainerName",     m_bcmContainerName = "BCM_RDOs");
   declareProperty("BcmOutputContainerName",     m_bcmOutputName = "BCM_CompactDOs");
@@ -30,9 +31,9 @@ StatusCode BCM_ZeroSuppression::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode BCM_ZeroSuppression::execute() {
+StatusCode BCM_ZeroSuppression::execute(const EventContext& ctx) const {
   // Retrieve BCM RDO
-  SG::ReadHandle<BCM_RDO_Container> bcm_rdo(m_bcmContainerName);
+  SG::ReadHandle<BCM_RDO_Container> bcm_rdo(m_bcmContainerName, ctx);
   if( !bcm_rdo.isValid() ) {
     // There is a warning from StoreGate anyways at this point.
     // @TODO return failure instead ?
@@ -40,7 +41,7 @@ StatusCode BCM_ZeroSuppression::execute() {
   }
 
   // Create output RDO container and record it to StoreGate
-  SG::WriteHandle<BCM_RDO_Container> bcm_compact_DO(m_bcmOutputName);
+  SG::WriteHandle<BCM_RDO_Container> bcm_compact_DO(m_bcmOutputName, ctx);
   if (bcm_compact_DO.record(std::make_unique<BCM_RDO_Container>()).isFailure()) {
     ATH_MSG_FATAL( "Container '" << m_bcmOutputName  << "' could not be registered in StoreGate");
     return StatusCode::FAILURE;
@@ -57,7 +58,7 @@ StatusCode BCM_ZeroSuppression::execute() {
       int bcm_pulse1width = RDO_element->getPulse1Width();
       int bcm_pulse2width = RDO_element->getPulse2Width();
       if ((bcm_pulse1width != 0) || (bcm_pulse2width !=0)) {
-	  my_collection->push_back((new BCM_RawData(*RDO_element)));
+        my_collection->push_back((new BCM_RawData(*RDO_element)));
       }
 
     }

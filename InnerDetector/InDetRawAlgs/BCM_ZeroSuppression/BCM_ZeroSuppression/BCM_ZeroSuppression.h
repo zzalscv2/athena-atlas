@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BCM_ZEROSUPPRESSION_H
 #define BCM_ZEROSUPPRESSION_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "InDetBCM_RawData/BCM_RDO_Container.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -19,14 +19,14 @@
   providing a smaller object to go into the AOD.
 
 */
-class BCM_ZeroSuppression : public AthAlgorithm {
+class BCM_ZeroSuppression final: public AthReentrantAlgorithm {
  public:
   BCM_ZeroSuppression(const std::string& name, ISvcLocator* pSvcLocator);
   ~BCM_ZeroSuppression();
   
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  StatusCode initialize() override;
+  StatusCode execute(const EventContext& ctx) const override;
+  StatusCode finalize() override;
   
  private:
   /** A data member to contain the name of the BCM RDO
