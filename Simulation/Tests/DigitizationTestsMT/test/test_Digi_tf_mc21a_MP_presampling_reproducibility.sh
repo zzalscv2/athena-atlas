@@ -10,7 +10,7 @@
 # art-output: mc21a_presampling_MP_fork_evt0.RDO.pool.root
 # art-output: mc21a_presampling_MP_fork_evt1.RDO.pool.root
 
-f [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
+if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
   ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
 fi
 
