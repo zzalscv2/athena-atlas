@@ -48,7 +48,8 @@ def ELG_prun(sample) :
                 'official',
                 'mergeOutput',
                 'useRootCore',
-                'useAthenaPackages']
+                'useAthenaPackages',
+                'avoidVP']
 
     from ROOT import SH
     for opt in opts :
