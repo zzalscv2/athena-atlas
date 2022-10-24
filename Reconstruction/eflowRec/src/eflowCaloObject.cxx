@@ -49,9 +49,7 @@ double eflowCaloObject::getClusterEnergy() const {
 
 void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction){
 
-  for (unsigned int iTrack = 0; iTrack < m_eflowRecTracks.size(); ++iTrack) {
-
-    eflowRecTrack* thisEfRecTrack = m_eflowRecTracks.at(iTrack);
+  for (auto *thisEfRecTrack : m_eflowRecTracks) {
 
     std::vector<eflowRecCluster*> matchedClusters;
     matchedClusters.clear();

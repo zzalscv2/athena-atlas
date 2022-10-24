@@ -87,8 +87,8 @@ PFClusterSelectorTool::retrieveLCCalCellWeight(
   if (matchedCalCluster){
     if (!(fabs(energy - matchedCalCluster->rawE()) < 0.001)) {
       matchedCalCluster = nullptr;
-      for (unsigned iCalCalCluster = 0; iCalCalCluster < caloCalClustersContainer.size();++iCalCalCluster) {
-        matchedCalCluster = caloCalClustersContainer.at(iCalCalCluster);
+      for (const auto *iCalCalCluster : caloCalClustersContainer) {
+        matchedCalCluster = iCalCalCluster;
         if (fabs(energy - matchedCalCluster->rawE()) < 0.001) {
 	        break;
 	      }

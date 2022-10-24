@@ -84,9 +84,7 @@ void eflowRingSubtractionManager::setParameters(const eflowFirstIntParameters& p
   m_rankMap.clear();
   double weight;
   double weightMax = ringMeanRank(param.getShapeParameters(orderedLayers[0]), 0.0, ringThickness[orderedLayers[0]])/m_weightRange;
-  for (unsigned int i = 0; i < orderedLayers.size(); i++) {
-    eflowCaloENUM layer = orderedLayers[i];
-
+  for (auto layer : orderedLayers) {
     /* Add weights to map (map does the ordering) */
     const int nRings = (int)(m_rMax / ringThickness[layer]);
 

@@ -101,8 +101,8 @@ unsigned int eflowCaloObjectMaker::makeTrkCluCaloObjects(std::vector<eflowRecTra
       thisEflowCaloObject->addTracks(trackList);
       
       thisEflowCaloObject->addClusters(clusterList);
-      for(std::vector<eflowRecCluster*>::const_iterator itr_cluster = clusterList.begin(); itr_cluster != clusterList.end(); ++itr_cluster) {
-	thisEflowCaloObject->addTrackClusterLinks((*itr_cluster)->getTrackMatches());
+      for(auto *itr_cluster : clusterList) {
+	thisEflowCaloObject->addTrackClusterLinks(itr_cluster->getTrackMatches());
       }
       caloObjectContainer->push_back(std::move(thisEflowCaloObject));
       
@@ -123,20 +123,20 @@ unsigned int eflowCaloObjectMaker::makeTrkCluCaloObjects(std::vector<eflowRecTra
 std::vector<eflowRecCluster*> eflowCaloObjectMaker::uniqCluster(const std::vector<eflowRecTrack*>& trackForNextLoop, const std::vector<eflowRecCluster*>& clusterList) {
   std::vector<eflowRecCluster*> result; result.clear();
   std::vector<int> allClusterId; allClusterId.clear();
-  for(std::vector<eflowRecTrack*>::const_iterator itr_track = trackForNextLoop.begin(); itr_track != trackForNextLoop.end(); ++itr_track) {
-    std::vector<eflowTrackClusterLink*> allLinks = (*itr_track)->getClusterMatches();
-    for(std::vector<eflowTrackClusterLink*>::const_iterator itr_link = allLinks.begin(); itr_link != allLinks.end(); ++itr_link) {
-      int id = (*itr_link)->getCluster()->getClusterId();
+  for(auto *itr_track : trackForNextLoop) {
+    std::vector<eflowTrackClusterLink*> allLinks = itr_track->getClusterMatches();
+    for(auto *allLink : allLinks) {
+      int id = allLink->getCluster()->getClusterId();
       bool notInList(true);
-      for (std::vector<eflowRecCluster*>::const_iterator itr_cluster = clusterList.begin(); itr_cluster != clusterList.end(); ++itr_cluster) {
-        if (id == (*itr_cluster)->getClusterId()) {
+      for (auto *itr_cluster : clusterList) {
+        if (id == itr_cluster->getClusterId()) {
           notInList = false;
           break;
         }
       }
       if ((find(allClusterId.begin(), allClusterId.end(), id) == allClusterId.end()) && notInList) {
         allClusterId.push_back(id);
-        result.push_back((*itr_link)->getCluster());
+        result.push_back(allLink->getCluster());
       } else {
         continue;
       }
@@ -148,20 +148,20 @@ std::vector<eflowRecCluster*> eflowCaloObjectMaker::uniqCluster(const std::vecto
 std::vector<eflowRecTrack*> eflowCaloObjectMaker::uniqTrack(const std::vector<eflowRecCluster*>& clusterForNextLoop, const std::vector<eflowRecTrack*>& trackList) {
   std::vector<eflowRecTrack*> result; result.clear();
   std::vector<int> allTrackId; allTrackId.clear();
-  for(std::vector<eflowRecCluster*>::const_iterator itr_cluster = clusterForNextLoop.begin(); itr_cluster != clusterForNextLoop.end(); ++itr_cluster) {
-    std::vector<eflowTrackClusterLink*> allLinks = (*itr_cluster)->getTrackMatches();
-    for(std::vector<eflowTrackClusterLink*>::const_iterator itr_link = allLinks.begin(); itr_link != allLinks.end(); ++itr_link) {
-      int id = (*itr_link)->getTrack()->getTrackId();
+  for(auto *itr_cluster : clusterForNextLoop) {
+    std::vector<eflowTrackClusterLink*> allLinks = itr_cluster->getTrackMatches();
+    for(auto *allLink : allLinks) {
+      int id = allLink->getTrack()->getTrackId();
       bool notInList(true);
-      for (std::vector<eflowRecTrack*>::const_iterator itr_track = trackList.begin(); itr_track != trackList.end(); ++itr_track) {
-        if (id == (*itr_track)->getTrackId()) {
+      for (auto *itr_track : trackList) {
+        if (id == itr_track->getTrackId()) {
           notInList = false;
           break;
         }
       }
       if ((find(allTrackId.begin(), allTrackId.end(), id) == allTrackId.end()) && notInList) {
         allTrackId.push_back(id);
-        result.push_back((*itr_link)->getTrack());
+        result.push_back(allLink->getTrack());
       } else {
         continue;
       }

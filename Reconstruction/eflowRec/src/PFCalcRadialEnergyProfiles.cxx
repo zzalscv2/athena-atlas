@@ -26,11 +26,11 @@ void PFCalcRadialEnergyProfiles::calculate(const PFData& data) const{
       std::vector<eflowRecCluster*> matchedClusters;
       matchedClusters.clear();
       std::vector<eflowTrackClusterLink*> links = efRecTrack->getClusterMatches();
-      for (auto thisEFlowTrackClusterLink : links) matchedClusters.push_back(thisEFlowTrackClusterLink->getCluster());
+      for (auto *thisEFlowTrackClusterLink : links) matchedClusters.push_back(thisEFlowTrackClusterLink->getCluster());
 
       std::vector<std::pair<xAOD::CaloCluster*, bool> > clusterSubtractionList;
       clusterSubtractionList.reserve(matchedClusters.size());
-for (auto thisEFlowRecCluster : matchedClusters) clusterSubtractionList.emplace_back(thisEFlowRecCluster->getCluster(),false);
+for (auto *thisEFlowRecCluster : matchedClusters) clusterSubtractionList.emplace_back(thisEFlowRecCluster->getCluster(),false);
 
       eflowCellList calorimeterCellList;
       eflowSubtract::Subtractor::makeOrderedCellList(efRecTrack->getTrackCaloPoints(),clusterSubtractionList,calorimeterCellList);
