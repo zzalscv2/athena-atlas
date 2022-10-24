@@ -644,6 +644,11 @@ class ComponentAccumulator:
         else:
             return self.__getOne( self._services, name, "Services")
 
+    def getAuditor(self,name):
+        """Retuns a single auditor, exception if not found"""
+        return self.__getOne(self._auditors,name,"Auditors")
+
+
     def getAppProps(self):
         return self._theAppProps
 
@@ -794,6 +799,11 @@ class ComponentAccumulator:
         for pt in other._publicTools:
             addContext = createContextForDeduplication("Merging incoming Public Tool", pt.name, other._componentsContext) # noqa : F841
             self.addPublicTool(pt) #Profit from deduplicaton here
+
+
+        for aud in other._auditors:
+            addContext = createContextForDeduplication("Merging incoming Auditor", aud.name, other._componentsContext) # noqa : F841
+            self.addAuditor(aud) #Profit from deduplicaton here
 
         #Merge AppMgr properties:
         for (k,v) in other._theAppProps.items():
