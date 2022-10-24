@@ -158,14 +158,14 @@ namespace MuonDQA {
 	  return MuonDQAeventInfo;
 	}
 
-      const CTP_RDO* ctpRDO;
+      const CTP_RDO* ctpRDO = nullptr;
       sc = m_eventStore->retrieve( ctpRDO, "CTP_RDO" );
       if ( sc.isFailure() ) {
 	ATH_MSG_WARNING( "CTP_RDO trigger info missing, not added to EventTag" );
 	return MuonDQAeventInfo;
       }
 
-      const CTP_RIO* ctpRIO;
+      const CTP_RIO* ctpRIO = nullptr;
       sc = m_eventStore->retrieve( ctpRIO, "CTP_RIO" );
       if ( sc.isFailure() ) {
 	ATH_MSG_WARNING( "CTP_RIO trigger info missing, not added to EventTag" );
