@@ -134,6 +134,20 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
     BOOST_CHECK_THROW((ts2.component<float,"sth"_hash>()), std::runtime_error);
 }
 
+BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
+  auto i0 = mtj->addTrackState();
+  auto ts0 = mtj->getTrackState(i0);
+  using namespace Acts::HashedStringLiteral;
+
+  BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink*, "uncalibrated"_hash>()), nullptr);
+
+  auto link1 = std::shared_ptr<ActsTrk::SourceLink>(nullptr);
+  ts0.component<Acts::SourceLink*, "uncalibrated"_hash>() = link1.get();
+  BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink*, "uncalibrated"_hash>()), link1.get());
+
+  // TODO add test for an instantiation of MTJ with eager SourceLinks creation
+}
+
 BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
   
