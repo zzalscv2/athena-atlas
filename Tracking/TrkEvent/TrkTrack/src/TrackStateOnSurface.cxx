@@ -232,7 +232,10 @@ TrackStateOnSurface::isSane() const
   }
 
   if (surfacesDiffer) {
-    std::cerr << "TrackStateOnSurface::isSane. Surfaces differ! " << std::endl;
+    std::cerr << "TrackStateOnSurface::isSane. With :" << '\n';
+    std::cerr << "Types : " << m_typeFlags.to_string() << '\n';
+    std::cerr << "Hints " << hints().to_string() << '\n';
+    std::cerr << "Surfaces differ! " << std::endl;
     if (m_trackParameters) {
       std::cerr << "ParamSurf: [" << &(m_trackParameters->associatedSurface())
                 << "] " << m_trackParameters->associatedSurface() << std::endl;
