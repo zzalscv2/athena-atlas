@@ -4,7 +4,7 @@
 #====================================================================
 
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo, DerivationFrameworkJob, buildFileName
-from DerivationFrameworkJetEtMiss.JetCommon import addOriginCorrectedClusters, OutputJets, addJetOutputs
+from DerivationFrameworkJetEtMiss.JetCommon import addOriginCorrectedClusters
 from DerivationFrameworkPhys import PhysCommon
 
 #====================================================================
@@ -140,8 +140,6 @@ if DerivationFrameworkIsMonteCarlo:
 JETM8SlimmingHelper.SmartCollections = ["EventInfo",
                                         "Electrons", "Photons", "Muons",
                                         "InDetTrackParticles", "PrimaryVertices",
-                                        "AntiKt2TruthJets",
-                                        "AntiKt2LCTopoJets",
                                         "AntiKt4TruthJets",
                                         "AntiKt4TruthWZJets",
                                         "AntiKt4EMPFlowJets",

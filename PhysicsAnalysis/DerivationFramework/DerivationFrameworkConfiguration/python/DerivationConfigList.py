@@ -78,6 +78,18 @@ from DerivationFrameworkEGamma.EGAM10 import EGAM10Cfg
 from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
 from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
 
+# Jet/Etmiss derivations
+from DerivationFrameworkJetEtMiss.JETM1 import JETM1Cfg
+from DerivationFrameworkJetEtMiss.JETM3 import JETM3Cfg
+from DerivationFrameworkJetEtMiss.JETM4 import JETM4Cfg
+from DerivationFrameworkJetEtMiss.JETM5 import JETM5Cfg
+from DerivationFrameworkJetEtMiss.JETM6 import JETM6Cfg
+from DerivationFrameworkJetEtMiss.JETM8 import JETM8Cfg
+from DerivationFrameworkJetEtMiss.JETM10 import JETM10Cfg
+from DerivationFrameworkJetEtMiss.JETM11 import JETM11Cfg
+from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
+from DerivationFrameworkJetEtMiss.JETM13 import JETM13Cfg
+from DerivationFrameworkJetEtMiss.JETM14 import JETM14Cfg
 
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
@@ -95,5 +107,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'BPHY21Cfg', 'BPHY22Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
-           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg'
+           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg',
+           'JETM1Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg','JETM8Cfg',
+           'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM13Cfg','JETM14Cfg',
            ]
