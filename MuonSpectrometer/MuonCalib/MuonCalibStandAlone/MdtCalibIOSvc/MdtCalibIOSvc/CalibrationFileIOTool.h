@@ -41,7 +41,7 @@ namespace MuonCalib {
         bool fill_rt(std::unique_ptr<RtDataFromFile::RtRelation> &rt, const std::shared_ptr<const IRtRelation>& new_rt,
                      const std::shared_ptr<const MuonCalib::IRtResolution>& resolut);
         //! extract station identifier from file name
-        bool interpret_chamber_name(const std::string &nm, const char *prefix, std::string &station, int &eta, int &phi, int &ml) const;
+        static bool interpret_chamber_name(const std::string &nm, const char *prefix, std::string &station, int &eta, int &phi, int &ml) ;
         //! create the rt relation and resolution
         void read_rt_relation(const std::string &fname, std::map<NtupleStationId, IRtRelation *> &rts,
                               std::map<NtupleStationId, IRtResolution *> &res, const MuonCalib::NtupleStationId &id);

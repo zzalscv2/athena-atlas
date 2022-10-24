@@ -436,9 +436,9 @@ StatusCode MdtCondDbAlg::loadDroppedChambers(writeHandle_t& wh, MdtCondDbData* w
 
         constexpr char delimiter = ' ';
         auto tokens = MuonCalib::MdtStringUtils::tokenize(chamber_dropped, delimiter);
-        for (unsigned int i = 0; i < tokens.size(); i++) {
-            if (tokens[i] != "0") {
-                const auto &chamber_name = tokens[i];
+        for (auto & token : tokens) {
+            if (token != "0") {
+                const auto &chamber_name = token;
                 Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name, true);
                 if (ChamberId.is_valid()) { writeCdo->setDeadStation(chamber_name, ChamberId); }
             }
@@ -476,15 +476,15 @@ StatusCode MdtCondDbAlg::loadMcDeadElements(writeHandle_t& wh, MdtCondDbData* wr
         auto tokens_mlayer = MuonCalib::MdtStringUtils::tokenize(list_mlayer, delimiter);
         auto tokens_layer = MuonCalib::MdtStringUtils::tokenize(list_layer, delimiter);
 
-        for (unsigned int i = 0; i < tokens.size(); i++) {
-            if (tokens[i] != "0") {
-                int ml = MuonCalib::MdtStringUtils::atoi(tokens[i].substr(0, 1));
-                int layer = MuonCalib::MdtStringUtils::atoi(tokens[i].substr(1, 2));
-                int tube = MuonCalib::MdtStringUtils::atoi(tokens[i].substr(2));
+        for (auto & token : tokens) {
+            if (token != "0") {
+                int ml = MuonCalib::MdtStringUtils::atoi(token.substr(0, 1));
+                int layer = MuonCalib::MdtStringUtils::atoi(token.substr(1, 2));
+                int tube = MuonCalib::MdtStringUtils::atoi(token.substr(2));
                 Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, tube);
                 thename = chamber_name;
                 thename += '_';
-                thename += tokens[i];
+                thename += token;
                 writeCdo->setDeadTube(thename, ChannelId);
                 writeCdo->setDeadChamber(ChamberId);
             }
@@ -546,14 +546,14 @@ StatusCode MdtCondDbAlg::loadMcDeadTubes(writeHandle_t& wh, MdtCondDbData* write
         auto tokens = MuonCalib::MdtStringUtils::tokenize(dead_tube, delimiter);
         Identifier ChamberId = m_condMapTool->ConvertToOffline(chamber_name);
 
-        for (unsigned int i = 0; i < tokens.size(); i++) {
-            int ml = MuonCalib::MdtStringUtils::atoi(tokens[i].substr(0, 1));
-            int layer = MuonCalib::MdtStringUtils::atoi(tokens[i].substr(1, 2));
-            int tube = MuonCalib::MdtStringUtils::atoi(tokens[i].substr(2));
+        for (auto & token : tokens) {
+            int ml = MuonCalib::MdtStringUtils::atoi(token.substr(0, 1));
+            int layer = MuonCalib::MdtStringUtils::atoi(token.substr(1, 2));
+            int tube = MuonCalib::MdtStringUtils::atoi(token.substr(2));
             thename = chamber_name;
             thename += '_';
-            thename += tokens[i];
-            tube_list = tokens[i];
+            thename += token;
+            tube_list = token;
             tube_list += '.';
             Identifier ChannelId = m_idHelperSvc->mdtIdHelper().channelID(ChamberId, ml, layer, tube);
             writeCdo->setDeadTube(thename, ChannelId);

@@ -1138,8 +1138,7 @@ void MuonAlignmentCondAlg::setALinesFromAscii(ALineMapContainer* writeALineCdo) 
             }
         }
     }
-    return;
-}
+    }
 
 void MuonAlignmentCondAlg::setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo) const {
     ATH_MSG_INFO(" Set alignment constants from text file " << m_asBuiltFile);
@@ -1178,6 +1177,4 @@ void MuonAlignmentCondAlg::setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo)
         }
     }
     ATH_MSG_INFO("Parsed AsBuilt parameters: " << count);
-
-    return;
 }

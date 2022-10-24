@@ -45,7 +45,7 @@ namespace Trk
     std::vector<Trk::DoubleAndWeight> ally;
     std::vector<Trk::DoubleAndWeight> allz;
     
-    for (std::vector<PositionAndWeight>::const_iterator i = begin; i!=end; i++) {
+    for (std::vector<PositionAndWeight>::const_iterator i = begin; i!=end; ++i) {
       allx.emplace_back(i->first.x(),i->second);
       ally.emplace_back(i->first.y(),i->second);
       allz.emplace_back(i->first.z(),i->second);
@@ -83,7 +83,7 @@ namespace Trk
     std::vector<double> ally;
     std::vector<double> allz;
     
-    for (std::vector<Amg::Vector3D>::const_iterator i = begin; i!=end; i++) {
+    for (std::vector<Amg::Vector3D>::const_iterator i = begin; i!=end; ++i) {
       allx.push_back((*i).x());
       ally.push_back((*i).y());
       allz.push_back((*i).z());

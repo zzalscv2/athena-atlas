@@ -267,12 +267,12 @@ NswCalibDbAlg::loadTimeChargeData(const EventContext& ctx, const readKey_t& read
 			calib_data.interceptError = interceptError;
 			
 			if(!channelId.get_compact()){
-				writeCdo->setZero(type, tech, std::move(calib_data));
+				writeCdo->setZero(type, tech, calib_data);
 				++nChns;
 				continue;
 			}
 
-			writeCdo->setData(type, channelId, std::move(calib_data));
+			writeCdo->setData(type, channelId, calib_data);
 			++nChns;
 		}
 		ATH_MSG_VERBOSE("Retrieved data for "<<nChns<<" channels. "<<tree->GetName()<<" "<<tree->GetEntries());
