@@ -152,7 +152,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
 
         This code is switched using two switches:
         m_LinkNeutralFEClusters (turns on the experimental feature)
-        m_UseMuonTopoClusters (True= Case 1, False = Case 2)
+        m_useMuonTopoClusters (True= Case 1, False = Case 2)
     **/
     if (m_LinkNeutralFEClusters) {
         ATH_MSG_VERBOSE("Experimental: Cluster Linkers between neutral FEs and Muons are used");
@@ -193,7 +193,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     ATH_MSG_DEBUG("Muon has an invalid link to cluster");
                     continue;
                 }
-                if (m_UseMuonTopoClusters) {
+                if (m_useMuonTopoClusters) {
                     // get the linker to the topo clusters
                     const std::vector<ElementLink<xAOD::CaloClusterContainer>>& linksToTopoClusters = acc_constClusterLinks(*cluster);
                     for (const ElementLink<xAOD::CaloClusterContainer>& TopoClusterLink : linksToTopoClusters) {
@@ -225,7 +225,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     // retrieve the link to cells
                     const CaloClusterCellLink* CellLink = FE_cluster->getCellLinks();
                     // build the iterator(s) for the looping over the elements inside the CellLink
-                    if (!CellLink && !m_UseMuonTopoClusters) {  // safety check if no celll link and we're doing the cell based matching only
+                    if (!CellLink && !m_useMuonTopoClusters) {  // safety check if no celll link and we're doing the cell based matching only
                        ATH_MSG_WARNING("Flow Element cluster link is nullptr");
                         continue;
                     }
