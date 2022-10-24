@@ -142,14 +142,16 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     unsigned int intID = mapIndex(jfex, fpga, channel, idata);
 
                     // Exists the jTower in the mapping?
-                    auto it = m_Firm2Tower_map.find(intID);
-                    if(it == m_Firm2Tower_map.end()){
+                    auto it_Firm2Tower_map = m_Firm2Tower_map.find(intID);
+                    if(it_Firm2Tower_map == m_Firm2Tower_map.end()){
+
                         // jTower not found in the mapping.. skipping. 
                         // If we are here means that the jTower is not actually used in the firmware
                         continue;
                     }
-                    
-                    const auto [IDsim, eta, phi, source, iEta, iPhi] = it->second;
+
+                    const auto [IDsim, eta, phi, source, iEta, iPhi] = it_Firm2Tower_map->second;
+
                     
                     std::vector<uint16_t> vtower;
                     vtower.clear();
