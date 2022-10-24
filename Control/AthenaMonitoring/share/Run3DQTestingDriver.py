@@ -13,6 +13,7 @@
 if __name__=='__main__':
     import sys
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.Enums import Format
 
     parser = ConfigFlags.getArgumentParser()
@@ -102,10 +103,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(ConfigFlags)
-
-    # add FPE auditor
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    cfg.addAuditor(CompFactory.FPEAuditor())
 
     # add perfmon
     if args.perfmon:

@@ -149,13 +149,15 @@ def MainServicesCfg(cfgFlags, LoopMgr='AthenaEventLoopMgr'):
     AlgContextSvc=CompFactory.AlgContextSvc
     cfg.addService(AlgContextSvc(BypassIncidents=True))
     cfg.addAuditor(CompFactory.AlgContextAuditor())
+    cfg.setAppProperty("AuditAlgorithms", True)
 
     StoreGateSvc=CompFactory.StoreGateSvc
     cfg.addService(StoreGateSvc())
     cfg.addService(StoreGateSvc("DetectorStore"))
     cfg.addService(StoreGateSvc("HistoryStore"))
     cfg.addService(StoreGateSvc("ConditionStore"))
-    cfg.addService(CompFactory.CoreDumpSvc(FastStackTrace=True), create=True)
+    from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
+    cfg.merge(FPEAndCoreDumpCfg(cfgFlags))
 
     cfg.setAppProperty('InitializationLoopCheck',False)
 
@@ -188,7 +190,6 @@ def MainServicesCfg(cfgFlags, LoopMgr='AthenaEventLoopMgr'):
         ## Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
         #
         cfg.addAuditor( CompFactory.SGCommitAuditor() )
-        cfg.setAppProperty("AuditAlgorithms", True)
     elif LoopMgr == 'AthenaEventLoopMgr':
         cfg.merge(AthenaEventLoopMgrCfg(cfgFlags))
 
@@ -207,6 +208,7 @@ def MainEvgenServicesCfg(cfgFlags, LoopMgr='AthenaEventLoopMgr',seqName="AthAlgS
     cfg.merge (McEventSelectorCfg (cfgFlags))
     # Temporarily inject the xAOD::EventInfo converter here to allow for adiabatic migration of the clients
     cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(AODKey = 'McEventInfo'),sequenceName=seqName)
+
     return cfg
 
 if __name__=="__main__":

@@ -24,6 +24,7 @@ def _createCfgFlags():
     acf.addFlag('Exec.MaxEvents',-1)
     acf.addFlag('Exec.SkipEvents',0)
     acf.addFlag('Exec.DebugStage','')
+    acf.addFlag('Exec.FPE',0) #-1: Abort with core-dump, 0: FPE Auditor w/o stack-tace, >0: number of stack-trace printed by the job
 
     acf.addFlag('ExecutorSplitting.TotalSteps', 0)
     acf.addFlag('ExecutorSplitting.Step', -1)

@@ -52,7 +52,6 @@ def getArgumentParser():
     parser.add_argument('--outputDirectory', default='.', help='Output directory for produced files')
 
     parser.add_argument('--perfmon', action='store_true', help='Run perfmon')
-    parser.add_argument('--fpe', action='store_true', help='Run FPE auditor')
 
     parser.add_argument('-v', '--version', type=str, default='0', help='Version to be used in output files for ntuple and monitoring')
 
@@ -257,10 +256,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(ConfigFlags)
-
-    # Add FPE auditor
-    if args.fpe:
-        cfg.addAuditor(CompFactory.FPEAuditor())
 
     # Add perfmon
     if args.perfmon:
