@@ -26,14 +26,14 @@ TrigFTF_GNN_EtaBin::TrigFTF_GNN_EtaBin() {
 }
 
 TrigFTF_GNN_EtaBin::~TrigFTF_GNN_EtaBin() {
-  for(std::vector<TrigFTF_GNN_NODE*>::iterator it = m_vn.begin();it!=m_vn.end();++it) {
+  for(std::vector<TrigFTF_GNN_Node*>::iterator it = m_vn.begin();it!=m_vn.end();++it) {
     delete (*it);
   }
   m_vn.clear();
 }
 
 void TrigFTF_GNN_EtaBin::sortByPhi() {
-  std::sort(m_vn.begin(), m_vn.end(), TrigFTF_GNN_NODE::CompareByPhi());
+  std::sort(m_vn.begin(), m_vn.end(), TrigFTF_GNN_Node::CompareByPhi());
 }
 
 
@@ -41,7 +41,7 @@ void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
 
   for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
 
-    TrigFTF_GNN_NODE* pN = m_vn.at(nIdx);
+    TrigFTF_GNN_Node* pN = m_vn.at(nIdx);
     float phi = pN->m_sp.phi();
     if(phi <= M_PI-dphi) continue;
     
@@ -50,13 +50,13 @@ void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
   }
 
   for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
-    TrigFTF_GNN_NODE* pN = m_vn.at(nIdx);
+    TrigFTF_GNN_Node* pN = m_vn.at(nIdx);
     float phi = pN->m_sp.phi();
     m_vPhiNodes.push_back(std::pair<float, unsigned int>(phi, nIdx));
   }
 
   for(unsigned int nIdx=0;nIdx<m_vn.size();nIdx++) {
-    TrigFTF_GNN_NODE* pN = m_vn.at(nIdx);
+    TrigFTF_GNN_Node* pN = m_vn.at(nIdx);
     float phi = pN->m_sp.phi();
     if(phi >= -M_PI + dphi) break;
     m_vPhiNodes.push_back(std::pair<float, unsigned int>(phi + 2*M_PI, nIdx));
@@ -68,7 +68,7 @@ TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g, 
 
 
   for(int k=0;k<g.num_bins();k++) {
-    m_etaBins.push_back(TrigFTF_GNN_ETA_BIN());
+    m_etaBins.push_back(TrigFTF_GNN_EtaBin());
   }
 }
 
@@ -78,7 +78,7 @@ TrigFTF_GNN_DataStorage::~TrigFTF_GNN_DataStorage() {
 
 int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase& sp) {
 
-  const TrigFTF_GNN_LAYER* pL = m_geo.getTrigFTF_GNN_LayerByIndex(sp.layer());
+  const TrigFTF_GNN_Layer* pL = m_geo.getTrigFTF_GNN_LayerByIndex(sp.layer());
   if(pL==nullptr) return -1;
 
   int binIndex = pL->getEtaBin(sp.z(), sp.r());
@@ -95,14 +95,14 @@ int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase& sp) {
     float cluster_width = pCL->width().widthPhiRZ().y();
     float min_tau = 6.7*(cluster_width - 0.2);
     float max_tau = 1.6 + 0.15/(cluster_width + 0.2) + 6.1*(cluster_width - 0.2);
-    m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_NODE(sp, min_tau, max_tau));
+    m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_Node(sp, min_tau, max_tau));
   }
   else {
     const Trk::SpacePoint* osp = sp.offlineSpacePoint();
     const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
     float cluster_width = pCL->width().widthPhiRZ().y();
     if(cluster_width > 0.2) return -3;
-    m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_NODE(sp));
+    m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_Node(sp));
   }
 
   return 0;
@@ -127,13 +127,13 @@ void TrigFTF_GNN_DataStorage::generatePhiIndexing(float dphi) {
 }
 
 
-void TrigFTF_GNN_DataStorage::getConnectingNodes(std::vector<const TrigFTF_GNN_NODE*>& vn) {
+void TrigFTF_GNN_DataStorage::getConnectingNodes(std::vector<const TrigFTF_GNN_Node*>& vn) {
   
   vn.clear();
   vn.reserve(numberOfNodes());
   
   for(const auto& b : m_etaBins) {
-    for(std::vector<TrigFTF_GNN_NODE*>::const_iterator nIt = b.m_vn.begin();nIt!=b.m_vn.end();++nIt) {
+    for(std::vector<TrigFTF_GNN_Node*>::const_iterator nIt = b.m_vn.begin();nIt!=b.m_vn.end();++nIt) {
       if((*nIt)->m_in.empty()) continue;
       if((*nIt)->m_out.empty()) continue;
       vn.push_back(*nIt);

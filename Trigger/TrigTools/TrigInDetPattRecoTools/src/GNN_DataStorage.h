@@ -17,7 +17,7 @@
 
 class TrigFTF_GNN_Geometry;
 
-typedef struct TrigFTF_GNN_Node {
+class TrigFTF_GNN_Node {
 public:
 
   struct CompareByPhi {
@@ -60,9 +60,9 @@ public:
   std::vector<unsigned int> m_out;
   float m_minCutOnTau, m_maxCutOnTau;
 
-} TrigFTF_GNN_NODE;
+};
 
-typedef struct TrigFTF_GNN_EtaBin {
+class TrigFTF_GNN_EtaBin {
 public:
   TrigFTF_GNN_EtaBin();
   ~TrigFTF_GNN_EtaBin();
@@ -75,24 +75,24 @@ public:
   
   void generatePhiIndexing(float);
   
-  std::vector<TrigFTF_GNN_NODE*> m_vn;
+  std::vector<TrigFTF_GNN_Node*> m_vn;
   std::vector<std::pair<float, unsigned int> > m_vPhiNodes;
 
-} TrigFTF_GNN_ETA_BIN;
+};
 
-typedef struct TrigFTF_GNN_DataStorage {
+class TrigFTF_GNN_DataStorage {
 public:
   TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&, float);
   ~TrigFTF_GNN_DataStorage();
 
   int addSpacePoint(const TrigSiSpacePointBase&);
   unsigned int numberOfNodes() const;
-  void getConnectingNodes(std::vector<const TrigFTF_GNN_NODE*>&);
+  void getConnectingNodes(std::vector<const TrigFTF_GNN_Node*>&);
   void sortByPhi();
   void generatePhiIndexing(float);
 
 
-  const TrigFTF_GNN_ETA_BIN& getEtaBin(int idx) const {
+  const TrigFTF_GNN_EtaBin& getEtaBin(int idx) const {
     if(idx >= static_cast<int>(m_etaBins.size())) idx = idx-1;
     return m_etaBins.at(idx);
   }
@@ -102,23 +102,23 @@ protected:
   const TrigFTF_GNN_Geometry& m_geo;
   float m_phiBinWidth;
 
-  std::vector<TrigFTF_GNN_ETA_BIN> m_etaBins; 
+  std::vector<TrigFTF_GNN_EtaBin> m_etaBins; 
 
-} TrigFTF_GNN_DataStorage;
+};
 
-typedef struct TrigFTF_GNN_Edge {
+class TrigFTF_GNN_Edge {
 public:
 
   struct CompareLevel {
   public:
-    bool operator()(const struct TrigFTF_GNN_Edge* pS1, const struct TrigFTF_GNN_Edge* pS2) {
+    bool operator()(const TrigFTF_GNN_Edge* pS1, const TrigFTF_GNN_Edge* pS2) {
       return pS1->m_level > pS2->m_level;
     }
   };
 
   TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
 
-  inline void initialize(TrigFTF_GNN_NODE* n1, TrigFTF_GNN_NODE* n2) {
+  inline void initialize(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2) {
     m_n1 = n1; 
     m_n2 = n2;
     m_level = 1;
@@ -127,8 +127,8 @@ public:
   }
 
 
-  TrigFTF_GNN_NODE* m_n1;
-  TrigFTF_GNN_NODE* m_n2;
+  TrigFTF_GNN_Node* m_n1;
+  TrigFTF_GNN_Node* m_n2;
   
   char m_level, m_next;
 
@@ -137,6 +137,6 @@ public:
   
   unsigned int m_vNei[N_SEG_CONNS];//global indices of the connected edges
 
-} TrigFTF_GNN_EDGE;
+};
 
 #endif

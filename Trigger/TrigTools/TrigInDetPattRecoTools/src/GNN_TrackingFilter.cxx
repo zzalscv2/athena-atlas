@@ -12,7 +12,7 @@
 #include<list>
 
 
-void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_EDGE* pS) {
+void TrigFTF_GNN_EdgeState::initialize(TrigFTF_GNN_Edge* pS) {
 
   m_initialized = true;
 
@@ -77,11 +77,11 @@ void TrigFTF_GNN_EdgeState::clone(const TrigFTF_GNN_EDGE_STATE& st) {
   m_initialized = true;
 }
 
-TrigFTF_GNN_TrackingFilter::TrigFTF_GNN_TrackingFilter(const std::vector<TRIG_INDET_SI_LAYER>& g, std::vector<TrigFTF_GNN_EDGE>& sb) : m_geo(g), m_segStore(sb) {
+TrigFTF_GNN_TrackingFilter::TrigFTF_GNN_TrackingFilter(const std::vector<TrigInDetSiLayer>& g, std::vector<TrigFTF_GNN_Edge>& sb) : m_geo(g), m_segStore(sb) {
 
 }
 
-void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_EDGE* pS, TrigFTF_GNN_EDGE_STATE& output) {
+void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& output) {
 
   
   if(pS->m_level == -1) return;//already collected
@@ -114,7 +114,7 @@ void TrigFTF_GNN_TrackingFilter::followTrack(TrigFTF_GNN_EDGE* pS, TrigFTF_GNN_E
  
 }
 
-void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_EDGE* pS, TrigFTF_GNN_EDGE_STATE& ts) {
+void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& ts) {
 
   if(m_globalStateCounter >= MAX_EDGE_STATE) return;
   
@@ -131,12 +131,12 @@ void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_EDGE* pS, TrigFTF_GNN_EDG
   
   int level = pS->m_level;
 
-  std::list<TrigFTF_GNN_EDGE*> lCont;
+  std::list<TrigFTF_GNN_Edge*> lCont;
 
   for(int nIdx=0;nIdx<pS->m_nNei;nIdx++) {//loop over the neighbours of this segment
     unsigned int nextSegmentIdx = pS->m_vNei[nIdx];
     
-    TrigFTF_GNN_EDGE* pN = &(m_segStore.at(nextSegmentIdx));
+    TrigFTF_GNN_Edge* pN = &(m_segStore.at(nextSegmentIdx));
     
     if(pN->m_level == -1) continue;//already collected
     
@@ -168,13 +168,13 @@ void TrigFTF_GNN_TrackingFilter::propagate(TrigFTF_GNN_EDGE* pS, TrigFTF_GNN_EDG
   } 
   else {//branching
     int nBranches = 0;
-    for(std::list<TrigFTF_GNN_EDGE*>::iterator sIt = lCont.begin();sIt!=lCont.end();++sIt, nBranches++) {
+    for(std::list<TrigFTF_GNN_Edge*>::iterator sIt = lCont.begin();sIt!=lCont.end();++sIt, nBranches++) {
       propagate((*sIt), new_ts);//recursive call
     }
   }
 }
 
-bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_EDGE* pS, TrigFTF_GNN_EDGE_STATE& ts) {
+bool TrigFTF_GNN_TrackingFilter::update(TrigFTF_GNN_Edge* pS, TrigFTF_GNN_EDGE_STATE& ts) {
 
   const float sigma_t = 0.0003;
   const float sigma_w = 0.00009;

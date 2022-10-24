@@ -23,8 +23,8 @@
 
 TrigTrackSeedGeneratorITk::TrigTrackSeedGeneratorITk(const TrigCombinatorialSettings& tcs) 
   : m_settings(tcs), 
-    m_minDeltaRadius(2.0),
-    m_zTol(3.0) {
+    m_minDeltaRadius(2.0)
+{
   
   m_maxDeltaRadius = m_settings.m_doublet_dR_Max;
   m_phiSliceWidth = 2*M_PI/m_settings.m_nMaxPhiSlice;
@@ -87,7 +87,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   const FASTRACK_CONNECTOR& conn = *(m_settings.m_conn);
 
-  std::vector<TrigFTF_GNN_EDGE> edgeStorage;
+  std::vector<TrigFTF_GNN_Edge> edgeStorage;
   
   edgeStorage.resize(MaxEdges);
 
@@ -105,8 +105,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
       unsigned int src = (*cIt)->m_src;//n2 : the new connectors
       unsigned int dst = (*cIt)->m_dst;//n1
 
-      const TrigFTF_GNN_LAYER* pL1 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(dst);
-      const TrigFTF_GNN_LAYER* pL2 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(src);
+      const TrigFTF_GNN_Layer* pL1 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(dst);
+      const TrigFTF_GNN_Layer* pL2 = m_settings.m_geo->getTrigFTF_GNN_LayerByKey(src);
 
       if (pL1==nullptr) {
 	continue; 
@@ -123,13 +123,13 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
       for(int b1=0;b1<nDstBins;b1++) {//loop over bins in Layer 1
 
-	const TrigFTF_GNN_ETA_BIN& B1 = m_storage->getEtaBin(pL1->m_bins.at(b1));
+	const TrigFTF_GNN_EtaBin& B1 = m_storage->getEtaBin(pL1->m_bins.at(b1));
 
 	if(B1.empty()) continue;
 
 	for(int b2=0;b2<nSrcBins;b2++) {//loop over bins in Layer 2
 
-          const TrigFTF_GNN_ETA_BIN& B2 = m_storage->getEtaBin(pL2->m_bins.at(b2));
+          const TrigFTF_GNN_EtaBin& B2 = m_storage->getEtaBin(pL2->m_bins.at(b2));
 
           if(B2.empty()) continue;
 
@@ -141,9 +141,9 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	  unsigned int first_it = 0;
 
-	  for(std::vector<TrigFTF_GNN_NODE*>::const_iterator n1It = B1.m_vn.begin();n1It!=B1.m_vn.end();++n1It) {
+	  for(std::vector<TrigFTF_GNN_Node*>::const_iterator n1It = B1.m_vn.begin();n1It!=B1.m_vn.end();++n1It) {
 
-	    TrigFTF_GNN_NODE& n1 = *(*n1It);
+	    TrigFTF_GNN_Node& n1 = *(*n1It);
 
 	    if(n1.m_in.size() == MAX_SEG_PER_NODE) continue;
 
@@ -169,7 +169,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	      }
 	      if(phi2 > maxPhi) break;
 
-	      TrigFTF_GNN_NODE& n2 = *B2.m_vn.at(B2.m_vPhiNodes.at(n2PhiIdx).second);
+	      TrigFTF_GNN_Node& n2 = *B2.m_vn.at(B2.m_vPhiNodes.at(n2PhiIdx).second);
 	      
 	      if(n2.m_out.size() == MAX_SEG_PER_NODE) continue;
 	      if(n2.isFull()) continue;
@@ -234,7 +234,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
               
 	      if(nEdges < MaxEdges) {
 
-		TrigFTF_GNN_EDGE* pE = &(edgeStorage.at(nEdges));
+		TrigFTF_GNN_Edge* pE = &(edgeStorage.at(nEdges));
 
 		float* params = pE->m_p;//exp(-eta), curvature, phi1, phi2
 	      
@@ -258,7 +258,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
   }
 
 
-  std::vector<const TrigFTF_GNN_NODE*> vNodes;
+  std::vector<const TrigFTF_GNN_Node*> vNodes;
 
   m_storage->getConnectingNodes(vNodes);
 
@@ -270,7 +270,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
     
   for(int nodeIdx=0;nodeIdx<nNodes;nodeIdx++) {
       
-    const TrigFTF_GNN_NODE* pN = vNodes.at(nodeIdx);
+    const TrigFTF_GNN_Node* pN = vNodes.at(nodeIdx);
 
     std::vector<std::pair<float, int > > in_sort, out_sort;
     in_sort.resize(pN->m_in.size());
@@ -278,13 +278,13 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
     for(int inIdx = 0;inIdx<static_cast<int>(pN->m_in.size());inIdx++) {
       int inEdgeIdx = pN->m_in.at(inIdx);
-      TrigFTF_GNN_EDGE* pS = &(edgeStorage.at(inEdgeIdx));
+      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
       in_sort[inIdx].second  = inEdgeIdx;
       in_sort[inIdx].first = pS->m_p[0];
     }
     for(int outIdx = 0;outIdx<static_cast<int>(pN->m_out.size());outIdx++) {
       int outEdgeIdx = pN->m_out.at(outIdx);
-      TrigFTF_GNN_EDGE* pS = &(edgeStorage.at(outEdgeIdx));
+      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(outEdgeIdx));
       out_sort[outIdx].second  = outEdgeIdx;
       out_sort[outIdx].first = pS->m_p[0];
     }
@@ -298,7 +298,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
       int inEdgeIdx = in_sort[in_idx].second;
 
-      TrigFTF_GNN_EDGE* pS = &(edgeStorage.at(inEdgeIdx));
+      TrigFTF_GNN_Edge* pS = &(edgeStorage.at(inEdgeIdx));
 
       pS->m_nNei  = 0;
       float tau1  = pS->m_p[0];
@@ -310,7 +310,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	int outEdgeIdx = out_sort[out_idx].second;
 
-	TrigFTF_GNN_EDGE* pNS = &(edgeStorage.at(outEdgeIdx));
+	TrigFTF_GNN_Edge* pNS = &(edgeStorage.at(outEdgeIdx));
 	
 	
 	float tau2 = pNS->m_p[0];
@@ -355,11 +355,11 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
   int iter = 0;
 
   
-  std::vector<TrigFTF_GNN_EDGE*> v_old;
+  std::vector<TrigFTF_GNN_Edge*> v_old;
   
   for(int edgeIndex=0;edgeIndex<nEdges;edgeIndex++) {
 
-    TrigFTF_GNN_EDGE* pS = &(edgeStorage.at(edgeIndex));
+    TrigFTF_GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
     if(pS->m_nNei == 0) continue;
     v_old.push_back(pS);//TO-DO: increment level for segments as they already have at least one neighbour
   }
@@ -368,12 +368,12 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 
     //generate proposals
-    std::vector<TrigFTF_GNN_EDGE*> v_new;
+    std::vector<TrigFTF_GNN_Edge*> v_new;
     v_new.clear();
 
-    for(std::vector<TrigFTF_GNN_EDGE*>::iterator sIt = v_old.begin();sIt != v_old.end();++sIt) {
+    for(std::vector<TrigFTF_GNN_Edge*>::iterator sIt = v_old.begin();sIt != v_old.end();++sIt) {
       
-      TrigFTF_GNN_EDGE* pS = (*sIt);
+      TrigFTF_GNN_Edge* pS = (*sIt);
       
       int next_level = pS->m_level;
           
@@ -381,7 +381,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
             
         unsigned int nextEdgeIdx = pS->m_vNei[nIdx];
             
-        TrigFTF_GNN_EDGE* pN = &(edgeStorage.at(nextEdgeIdx));
+        TrigFTF_GNN_Edge* pN = &(edgeStorage.at(nextEdgeIdx));
             
         if(pS->m_level == pN->m_level) {
           next_level = pS->m_level + 1;
@@ -397,9 +397,9 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
     int nChanges = 0;
       
-    for(std::vector<TrigFTF_GNN_EDGE*>::iterator it=v_new.begin();it!=v_new.end();++it) {
+    for(std::vector<TrigFTF_GNN_Edge*>::iterator it=v_new.begin();it!=v_new.end();++it) {
         
-      TrigFTF_GNN_EDGE* pS = (*it); 
+      TrigFTF_GNN_Edge* pS = (*it); 
       if(pS->m_next != pS->m_level) {
         nChanges++;
         pS->m_level = pS->m_next;
@@ -418,10 +418,10 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
   int minLevel = 3;//a triplet + 2 confirmation
   
 
-  std::vector<TrigFTF_GNN_EDGE*> vSeeds;
+  std::vector<TrigFTF_GNN_Edge*> vSeeds;
 
   for(int edgeIndex=0;edgeIndex<nEdges;edgeIndex++) {
-    TrigFTF_GNN_EDGE* pS = &(edgeStorage.at(edgeIndex));
+    TrigFTF_GNN_Edge* pS = &(edgeStorage.at(edgeIndex));
 
     if(pS->m_level < minLevel) continue;
 
@@ -430,7 +430,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   m_triplets.clear();
 
-  std::sort(vSeeds.begin(), vSeeds.end(), TrigFTF_GNN_EDGE::CompareLevel());
+  std::sort(vSeeds.begin(), vSeeds.end(), TrigFTF_GNN_Edge::CompareLevel());
 
   if(vSeeds.empty()) return;
 
@@ -441,9 +441,9 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   INTERNAL_TRIPLET_BUFFER output;
 
-  for(std::vector<TrigFTF_GNN_EDGE*>::iterator sIt=vSeeds.begin();sIt!=vSeeds.end();++sIt) {
+  for(std::vector<TrigFTF_GNN_Edge*>::iterator sIt=vSeeds.begin();sIt!=vSeeds.end();++sIt) {
 
-    TrigFTF_GNN_EDGE* pS = (*sIt);
+    TrigFTF_GNN_Edge* pS = (*sIt);
     
 
     if(pS->m_level == -1) continue;
@@ -462,7 +462,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
     std::vector<const TrigSiSpacePointBase*> vSP;
     
-    for(std::vector<TrigFTF_GNN_EDGE*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
+    for(std::vector<TrigFTF_GNN_Edge*>::reverse_iterator sIt=rs.m_vs.rbegin();sIt!=rs.m_vs.rend();++sIt) {
       
       if((*sIt)->m_level < minLevel-1) 
 	(*sIt)->m_level = -1;//mark as collected

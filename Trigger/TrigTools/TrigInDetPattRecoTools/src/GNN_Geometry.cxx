@@ -10,7 +10,7 @@
 #include<cstring>
 #include<algorithm>
 
-TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TRIG_INDET_SI_LAYER& ls, float ew, int bin0) : m_layer(ls), m_etaBinWidth(ew) {
+TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int bin0) : m_layer(ls), m_etaBinWidth(ew) {
 
   if(m_layer.m_type == 0) {//barrel
     m_r1 = m_layer.m_refCoord;
@@ -119,7 +119,7 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TRIG_INDET_SI_LAYER& ls, float ew, in
   }
 }
 
-bool TrigFTF_GNN_Layer::verifyBin(const struct TrigFTF_GNN_Layer* pL, int b1, int b2, float min_z0, float max_z0) const {
+bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, float min_z0, float max_z0) const {
 
   float z1min = m_minBinCoord.at(b1);
   float z1max = m_maxBinCoord.at(b1);
@@ -222,7 +222,7 @@ TrigFTF_GNN_Layer::~TrigFTF_GNN_Layer() {
   m_bins.clear();
 }
 
-TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TRIG_INDET_SI_LAYER>& layers, const FASTRACK_CONNECTOR* conn) : m_nEtaBins(0) {
+TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TrigInDetSiLayer>& layers, const FASTRACK_CONNECTOR* conn) : m_nEtaBins(0) {
 
   const float min_z0 = -168.0;
   const float max_z0 =  168.0;
@@ -231,7 +231,7 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TRIG_INDET_SI_LAYER
 
   std::cout<<"TrigFTF_GNN Geometry::initialize, delta_eta="<<m_etaBinWidth<<std::endl;
 
-  for(std::vector<TRIG_INDET_SI_LAYER>::const_iterator it = layers.begin();it!=layers.end();++it) {
+  for(std::vector<TrigInDetSiLayer>::const_iterator it = layers.begin();it!=layers.end();++it) {
     const TrigFTF_GNN_Layer* pL = addNewLayer((*it), m_nEtaBins);
     m_nEtaBins += pL->num_bins();
   }
@@ -240,7 +240,7 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TRIG_INDET_SI_LAYER
 
   int nBins = 0;
   
-  for(std::vector<TrigFTF_GNN_LAYER*>::iterator it =  m_layArray.begin();it!=m_layArray.end();++it) {
+  for(std::vector<TrigFTF_GNN_Layer*>::iterator it =  m_layArray.begin();it!=m_layArray.end();++it) {
     nBins += (*it)->num_bins();
   }
 
@@ -257,8 +257,8 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TRIG_INDET_SI_LAYER
       unsigned int src = (*cIt)->m_src;//n2 : the new connectors
       unsigned int dst = (*cIt)->m_dst;//n1
       
-      const TrigFTF_GNN_LAYER* pL1 = getTrigFTF_GNN_LayerByKey(dst);
-      const TrigFTF_GNN_LAYER* pL2 = getTrigFTF_GNN_LayerByKey(src);
+      const TrigFTF_GNN_Layer* pL1 = getTrigFTF_GNN_LayerByKey(dst);
+      const TrigFTF_GNN_Layer* pL2 = getTrigFTF_GNN_LayerByKey(src);
       
       if (pL1==nullptr) {
 	std::cout << " skipping invalid dst layer " << dst << std::endl; 
@@ -285,36 +285,36 @@ TrigFTF_GNN_Geometry::TrigFTF_GNN_Geometry(const std::vector<TRIG_INDET_SI_LAYER
 }
 
 TrigFTF_GNN_Geometry::~TrigFTF_GNN_Geometry() {
-  for(std::vector<TrigFTF_GNN_LAYER*>::iterator it =  m_layArray.begin();it!=m_layArray.end();++it) {
+  for(std::vector<TrigFTF_GNN_Layer*>::iterator it =  m_layArray.begin();it!=m_layArray.end();++it) {
     delete (*it);
   }
   m_layMap.clear();m_layArray.clear();
 }
 
-const TrigFTF_GNN_LAYER* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByKey(unsigned int key) const {
-  std::map<unsigned int, TrigFTF_GNN_LAYER*>::const_iterator it = m_layMap.find(key);
+const TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByKey(unsigned int key) const {
+  std::map<unsigned int, TrigFTF_GNN_Layer*>::const_iterator it = m_layMap.find(key);
   if(it == m_layMap.end()) {
-    std::cout << " TrigFTF_GNN_LAYER* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByKey("<<key<<") returning nullptr" << std::endl; 
+    std::cout << " TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByKey("<<key<<") returning nullptr" << std::endl; 
     return nullptr;
   }
   return (*it).second;
 }
 
-const TrigFTF_GNN_LAYER* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByIndex(int idx) const {
+const TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::getTrigFTF_GNN_LayerByIndex(int idx) const {
   return m_layArray.at(idx);
 }
 
 
 
-const TrigFTF_GNN_LAYER* TrigFTF_GNN_Geometry::addNewLayer(const TRIG_INDET_SI_LAYER& l, int bin0) {
+const TrigFTF_GNN_Layer* TrigFTF_GNN_Geometry::addNewLayer(const TrigInDetSiLayer& l, int bin0) {
 
   unsigned int layerKey = l.m_subdet;
 
   float ew = m_etaBinWidth;
   
-  TrigFTF_GNN_LAYER* pHL = new TrigFTF_GNN_LAYER(l, ew, bin0);
+  TrigFTF_GNN_Layer* pHL = new TrigFTF_GNN_Layer(l, ew, bin0);
   
-  m_layMap.insert(std::pair<unsigned int, TrigFTF_GNN_LAYER*>(layerKey, pHL));
+  m_layMap.insert(std::pair<unsigned int, TrigFTF_GNN_Layer*>(layerKey, pHL));
   m_layArray.push_back(pHL);
   return pHL;
 }
