@@ -42,14 +42,14 @@ G4MaterialPropertiesTable* Geo2G4MatPropTableFactory::Build(const GeoMaterialPro
   GeoMaterialPropertiesTable::GeoMatPMap_ConstIt it1_first = thePropTable->beginPMap();
   GeoMaterialPropertiesTable::GeoMatPMap_ConstIt it1_last  = thePropTable->endPMap();
 
-  for(;it1_first!=it1_last;it1_first++)
+  for(;it1_first!=it1_last;++it1_first)
     newTable->AddConstProperty((it1_first->first).c_str(),it1_first->second);
 
   // 2. Vector properties
   GeoMaterialPropertiesTable::GeoMatPVMap_ConstIt it2_first = thePropTable->beginPVMap();
   GeoMaterialPropertiesTable::GeoMatPVMap_ConstIt it2_last  = thePropTable->endPVMap();
 
-  for(;it2_first!=it2_last;it2_first++)
+  for(;it2_first!=it2_last;++it2_first)
     {
       GeoMaterialPropertyVector* geoMPV = it2_first->second;
       //from G4 9.6 G4MaterialPropertyVector is now a typedef of G4PhysicsOrderedFreeVector
