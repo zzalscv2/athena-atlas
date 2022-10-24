@@ -6,7 +6,6 @@
 
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigConfData/HLTMenu.h"
-#include "TrigCostMonitor/ITrigCostSvc.h"
 #include "HLTSeeding/IPrescalingTool.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -44,20 +43,11 @@ private:
   SG::WriteHandleKey<std::vector<std::string>> m_streamsSummaryKey{ this, "StreamsSummaryKey", "HLTStreamsSummary",
       "Set of streams accepted in the event"};
 
-  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_costWriteHandleKey { this, "CostWriteHandleKey", "HLT_TrigCostContainer",
-    "TrigComposite collections summarising the HLT execution" };
-
-  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_rosWriteHandleKey { this, "ROSWriteHandleKey", "HLT_TrigCostROSContainer",
-    "TrigComposite collections summarising the ROS requests" };
-
   SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_hltSeedingSummaryKey { this, "HLTSeedingSummaryKey", "HLTSeedingSummary",
     "Chains status after L1 and prescaling" };
 
   SG::ReadHandleKey<TrigConf::HLTMenu> m_hltMenuKey{this, "HLTMenuKey", "DetectorStore+HLTTriggerMenu",
     "HLT Menu"};
-
-  ServiceHandle<ITrigCostSvc> m_trigCostSvcHandle { this, "TrigCostSvc", "TrigCostSvc",
-    "The trigger cost service" };
 
   ToolHandle<IPrescalingTool> m_prescaler{this, "Prescaler", "PrescalingTool/PrescalingTool",
     "Prescaling tool used to determine express stream prescale decisions"};
@@ -67,9 +57,6 @@ private:
 
   Gaudi::Property< std::map< std::string, std::vector<std::string> > > m_lastStepForChain{ this, "FinalStepDecisions", {},
     "The map of chain name to names of the collections in which the final decision is found" };
-
-  Gaudi::Property<bool> m_doCostMonitoring{this, "DoCostMonitoring", false,
-    "Enables end-of-event cost monitoring behavior."};
 
   Gaudi::Property<bool> m_warnOnLargeRoIUpdates{this, "WarnOnLargeRoIUpdates", true,
     "Print warnings from RoI update monitoring if the difference between initial and final RoI is large"};

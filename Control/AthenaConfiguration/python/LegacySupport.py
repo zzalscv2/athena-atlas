@@ -7,7 +7,7 @@ from AthenaCommon import CfgMgr, CFElements
 from AthenaCommon.AlgSequence import AlgSequence
 from AthenaCommon.Configurable import Configurable, ConfigurableRun3Behavior
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
 from AthenaConfiguration.ComponentAccumulator import ConfigurationError
 from AthenaConfiguration.Deduplication import DeduplicationFailed
 
@@ -363,6 +363,8 @@ def conf2toConfigurable( comp, indent="", parent="", servicesOfThisCA=[], suppre
 def CAtoGlobalWrapper(cfgFunc, flags, **kwargs):
     """Execute the cfgFunc CA with the given flags and arguments and run appendCAtoAthena.
     Return the result of cfgFunc."""
+    if isRun3Cfg():
+        raise RuntimeError("CAtoGlobalWrapper should not be called in pure CA config")
 
     if not callable(cfgFunc):
         raise TypeError("CAtoGlobalWrapper must be called with a configuration-function as parameter")

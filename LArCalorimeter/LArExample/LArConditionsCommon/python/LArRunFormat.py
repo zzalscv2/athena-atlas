@@ -69,7 +69,7 @@ def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
         mlog_LRF.info ("Running in DBRelease, forcing readOracle to False")
         readOracle=False
 
-    mlog_LRF.info("run=%i",run)
+    mlog_LRF.info("Found LAr info for run %i",run)
     runDB=indirectOpen(connstring,oracle=readOracle)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
@@ -132,7 +132,7 @@ def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
         mlog_LRF.info("Running in DBRelease, forcing readOracle to False")
         readOracle=False
 
-    mlog_LRF.info("run=%i",run)
+    mlog_LRF.info("Found DT info for run %i",run)
     runDB=indirectOpen(connstring,oracle=readOracle)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
@@ -140,8 +140,8 @@ def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
     typesMap={0:"ADC", 1:"RawADC", 2:"Energy", 3:"SelectedEnergy",15:"Invalid"}
     sTypes=[]
     sLengths=[]    
-    timing=None
-    adccalib=None
+    timing="LAR"
+    adccalib=0
     mux=[]
     try:
         folder=runDB.getFolder('/LAR/Configuration/RunLogDT')
@@ -155,11 +155,14 @@ def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
         adccalib=payload['ADCCalibMode']
     except Exception:
         mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
-        #mlog_LRF.warning(e)
-        return None
+        mlog_LRF.warning("Using defaults: MUX0: ADC MUX1: ET_ID receipe: at0_bc5-at1_bc1_ts1-q")
+        recipe="at0_bc5-at1_bc1_ts1-q"
+        mux.append(0)
+        mux.append(3)
 
     runDB.closeDatabase()
-    mlog_LRF.info("Found DT info for run %i", run)
+    mlog_LRF.info("Found DT info for run %d", run)
+    print(mux)
     # parse recipe string of the type at0_bcX-at1_bcY...
     for s,m in ["at0_bc",0],["at1_bc",1]:
        pos=recipe.find(s)

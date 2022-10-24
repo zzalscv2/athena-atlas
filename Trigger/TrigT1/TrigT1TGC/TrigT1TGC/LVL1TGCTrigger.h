@@ -171,7 +171,7 @@ class LVL1TGCTrigger : public AthAlgorithm
     SG::ReadHandleKey<TgcRdoContainer> m_keyTgcRdoIn{this,"InputRDO","TGCRDO","Location of input TgcRdoContainer"};
     SG::ReadHandleKey<TgcDigitContainer> m_keyTgcDigit{this,"InputData_perEvent","TGC_DIGITS","Location of TgcDigitContainer"};
     SG::ReadHandleKey<TileMuonReceiverContainer> m_keyTileMu{this,"TileMuRcv_Input","TileMuRcvCnt","Location of TileMuonReceiverContainer"};
-    SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer> m_keyNSWTrigOut{this,"NSWTrigger_Input","NSWTRGRDO","Location of NSW_TrigRawDataContainer"};
+    SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer> m_keyNSWTrigOut{this,"NSWTrigger_Input","L1_NSWTrigContainer","Location of NSW_TrigRawDataContainer"};
     SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContainer> m_keyBIS78TrigOut{this,"BIS78Trig_Input","BIS78TrigContainer","Location of RpcBis78_TrigRawDataContainer"};
     SG::ReadCondHandleKey<TGCTriggerData> m_readCondKey{this,"ReadCondKey","TGCTriggerData"};
     SG::ReadCondHandleKey<TGCTriggerLUTs> m_readLUTs_CondKey{this,"ReadLUTCondKey","TGCTriggerLUTs"};

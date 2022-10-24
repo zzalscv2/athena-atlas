@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -7,20 +7,11 @@
 #include "TileIdentifier/TileHWID.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 
-#include <math.h> 
 // Athena includes
 #include "StoreGate/ReadHandle.h"
 
-
-TileDigitsFlxMonitorAlgorithm::TileDigitsFlxMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
-  :AthMonitorAlgorithm(name, pSvcLocator)
-  , m_tileHWID(nullptr)
-{}
-
-
-TileDigitsFlxMonitorAlgorithm::~TileDigitsFlxMonitorAlgorithm() {
-}
-
+#include <cmath>
+#include <algorithm>
 
 StatusCode TileDigitsFlxMonitorAlgorithm::initialize() {
 
@@ -29,9 +20,23 @@ StatusCode TileDigitsFlxMonitorAlgorithm::initialize() {
   ATH_MSG_INFO("in initialize()");
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
-
   ATH_CHECK( m_digitsContainerKey.initialize() );
 
+  std::ostringstream os;
+
+  if ( m_fragIDs.size() != 0) {
+    std::sort(m_fragIDs.begin(), m_fragIDs.end());
+    for (int fragID : m_fragIDs) {
+      unsigned int ros    = fragID >> 8;
+      unsigned int drawer = fragID & 0xFF;
+      std::string module = TileCalibUtils::getDrawerString(ros, drawer);
+      os << " " << module << "/0x" << std::hex << fragID << std::dec;
+    }
+  } else {
+    os << "ALL";
+  }
+
+  ATH_MSG_INFO("Monitored modules/frag ID:" << os.str());
 
   return StatusCode::SUCCESS;
 }
@@ -55,6 +60,12 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
 
     for (const TileDigits* tile_digits : *digitsCollection) {
 
+      if (!m_fragIDs.empty() && !std::binary_search(m_fragIDs.begin(), m_fragIDs.end(), fragId)) {
+        continue;
+      }
+
+      ATH_MSG_VERBOSE((std::string) *tile_digits);
+
       HWIdentifier adcId = tile_digits->adc_HWID();
       int channel = m_tileHWID->channel(adcId);
       int gain = m_tileHWID->adc(adcId);         
@@ -68,45 +79,37 @@ StatusCode TileDigitsFlxMonitorAlgorithm::fillHistograms( const EventContext& ct
       auto monitoredChannel = Monitored::Scalar<float>(channelName, channel);
 
       std::vector<float> digits_monitored;
-      for(int i = m_firstSample; i<m_lastSample; i++){
-        float sample = digits[i];
+      if (digits.size() > 1) {
 
+        unsigned int lastSample = std::min((unsigned int) m_lastSample, (unsigned int) digits.size());
+        unsigned int firstSample = std::min((unsigned int) m_firstSample, (lastSample - 1));
+        for(unsigned int i = firstSample; i < lastSample; ++i) {
+          float sample = digits[i];
+          channelSample = sample;
+          fill("TileFlxMonSamples", channelSample);
+          digits_monitored.push_back(sample);
+        }
 
-        channelSample = sample;
-        fill("TileFlxMonSamples", channelSample);
+        unsigned int nSamples = digits_monitored.size();
+        float sampleMean = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0) / nSamples;
 
+        double sampleRMS = std::accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0, [] (double acc, float sample) {
+                                                                                                     return acc + sample * sample;
+                                                                                                   });
+        sampleRMS = sampleRMS / nSamples - sampleMean * sampleMean;
+        sampleRMS = (sampleRMS > 0.0) ? sqrt(sampleRMS * nSamples / (nSamples - 1)) : 0.0;
 
-        digits_monitored.push_back(sample);
+        std::string monHFN = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_HFN";
+        auto hfn = Monitored::Scalar<float>(monHFN, sampleRMS);
+        fill("TileFlxMonHFN", monitoredChannel, hfn);
+
+        std::string monPedestal = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Pedestal";
+        auto pedestal = Monitored::Scalar<float>(monPedestal, digits[firstSample]);
+        fill("TileFlxMonPed", monitoredChannel, pedestal);
       }
-      
-      float MonSamp_Mean = accumulate( digits_monitored.begin(), digits_monitored.end(), 0.0)/digits_monitored.size(); 
-      double Sum_Distance = 0;
-      for(int i = m_firstSample; i<m_lastSample; i++){
-        float sample = digits[i];
-        Sum_Distance += pow((sample-MonSamp_Mean),2);
-      }
-      int N = digits_monitored.size();
-      double RMS_Mon_samples = sqrt(Sum_Distance/N);
-      
-      std::string HFN_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_HFN";
-      auto HFN_samples = Monitored::Scalar<float>(HFN_name, RMS_Mon_samples);
-
-      std::string Ped_name = TileCalibUtils::getDrawerString(ros, drawer) + "_" + gainName[gain] + "_Pedestal[0]";
-      auto Pedestal_sample = Monitored::Scalar<float>(Ped_name, digits[m_firstSample]);
-
-      fill("TileFlxMonPed",monitoredChannel,Pedestal_sample);
-      
-      fill("TileFlxMonHFN",monitoredChannel,HFN_samples);
-
-
     }
-
-
   }
 
-
-
-  
   fill("TileDigitsFlxMonExecuteTime", timer);
     
   return StatusCode::SUCCESS;

@@ -54,6 +54,7 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtdecorKey    { this, "SCellEtdecorKey"    , "L1_jTowers.SCellEt"    , "SCell Et information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtadecorKey   { this, "SCellEtadecorKey"   , "L1_jTowers.SCellEta"   , "SCell Eta information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellPhidecorKey   { this, "SCellPhidecorKey"   , "L1_jTowers.SCellPhi"   , "SCell Phi information of the jTower"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellIDdecorKey    { this, "SCellIDdecorKey"    , "L1_jTowers.SCellID"    , "SCell IDs information of the jTower"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_jtowerEtMeVdecorKey{ this, "jtowerEtMeVdecorKey", "L1_jTowers.jtowerEtMeV", "jFex Tower Et information in MeV"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtMeVdecorKey  { this, "TileEtMeVdecorKey"  , "L1_jTowers.TileEtMeV"  , "Tile Tower Et information in MeV"};
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtadecorKey    { this, "TileEtadecorKey"    , "L1_jTowers.TileEta"    , "Tile Tower Eta information in MeV"};
@@ -68,7 +69,8 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
         StatusCode ReadTilefromFile(const std::string& );
         bool isBadSCellID(const std::string&) const;
         
-        std::unordered_map< uint32_t, std::vector<uint64_t> > m_map_TTower2SCells;
+        std::unordered_map< uint32_t, std::vector<uint64_t> > m_map_TTower2SCellsEM;
+        std::unordered_map< uint32_t, std::vector<uint64_t> > m_map_TTower2SCellsHAD;
         std::unordered_map< uint32_t, std::tuple<uint32_t,float,float> > m_map_TTower2Tile;
 
 };

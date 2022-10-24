@@ -35,6 +35,7 @@ class LArSC2Ntuple : public LArDigits2Ntuple
   ToolHandle<ICaloSuperCellIDTool>   m_scidtool{this, "CaloSuperCellIDTool", "CaloSuperCellIDTool", "Offline / SuperCell ID mapping tool"};
 
   NTuple::Item<short> m_latomeChannel;
+  NTuple::Item<short> m_LB;
 
   NTuple::Array<float>  m_ROD_energy;
 

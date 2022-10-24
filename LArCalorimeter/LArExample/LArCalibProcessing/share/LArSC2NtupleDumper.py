@@ -121,7 +121,6 @@ if __name__=='__main__':
      log.info("Adding ROD energies")
 
   # now construct the job
-  #ConfigFlags.Input.ProjectName="data22_calib"
   ConfigFlags.LAr.doAlign=False
 
   ConfigFlags.lock()

@@ -19,6 +19,8 @@
 
 #include "AtlasHepMC/GenParticle.h"
 
+// std::abs
+#include <cmath> 
 
 namespace test {
 
@@ -66,8 +68,10 @@ namespace test {
                                       test::pvec_children,
                                       test::procBC,
                                       test::origin.first);
+  // rounding 
+  double eps = pow(10,-8);
 
-}
+} // end of test namespace
 
 
 
@@ -97,26 +101,83 @@ void testConstructors() {
 }
 
 
-void testChildParticle() {
- 
-  unsigned int childIndex = 0;
-  Barcode::ParticleBarcode childBarcode = 3;
-  Barcode::ParticleBarcode originalChildBarcode = test::truthIncident.childBarcode(0);
-  HepMC::GenParticlePtr gPP = test::truthIncident.childParticle(childIndex,childBarcode);
-  // truthIncident should remain unmodified, GenParticle gets the assigned barcode
-  assert(test::truthIncident.childBarcode(0)==originalChildBarcode);
-  assert(gPP->barcode()==childBarcode);
-  // genparticle pdgid
-  assert(gPP->pdg_id()==test::truthIncident.childPdgCode(0));
-  
-  return;
+void testChildP2() {
+  assert(test::truthIncident.childP2(0)==test::isp2.momentum().mag2());
 }
 
+
+void testChildPt2() {
+  assert(test::truthIncident.childPt2(0) == test::isp2.momentum().perp2());
+}
+
+
+void testChildEkin() {
+  assert(test::truthIncident.childEkin(0) == test::isp2.ekin());
+}
+
+
+void testChildPdgCode() {
+  assert(test::truthIncident.childPdgCode(0) == test::isp2.pdgCode());
+}
+
+
+void testChildBarcode() {
+  assert(test::truthIncident.childBarcode(0) == test::isp2.barcode());
+  Barcode::ParticleBarcode undefBC = Barcode::fUndefinedBarcode;
+  unsigned int childIndexOutOfRange = 1;
+  assert(undefBC == test::truthIncident.childBarcode(childIndexOutOfRange));
+}
+
+
+void testChildParticle() {
+ 
+  // ChildParticle(index, bc):
+  // - returns HepMC::GenParticle gP with bc for child with index = index,
+  // - assigns the truthincident child barcode bc 
+
+  //--------------------------------------------------------------------
+  // prepare test info:
+  // used to test gP child: index and bc 
+  unsigned int childIndex = 0;
+  Barcode::ParticleBarcode childBarcode = 3;
+
+  // used to test TruthIncident: no change to properties, apart from BC
+  // snapshot of original child properties
+  double originalChildPt2 = test::truthIncident.childPt2(0);
+  int originalChildPdgCode = test::truthIncident.childPdgCode(0);
+
+  //--------------------------------------------------------------------
+  // get gP:
+  std::cout << "LM test::truthIncident.childBarcode(0) pre childParticle  " << test::truthIncident.childBarcode(0) << std::endl;
+  HepMC::GenParticlePtr gPP = test::truthIncident.childParticle(childIndex,childBarcode);
+  std::cout << "LM test::truthIncident.childBarcode(0) post childParticle" << test::truthIncident.childBarcode(0) << std::endl;
+  //--------------------------------------------------------------------
+  // run tests:
+  // do gP properties match original child, apart from barcode?
+  assert(test::eps >= std::fabs(gPP->momentum().perp2() - originalChildPt2));  
+  assert(gPP->pdg_id() == originalChildPdgCode);
+  assert(gPP->barcode() == childBarcode);
+
+  // truthIncident: no change to properties, apart from BC?
+  assert(test::truthIncident.childPt2(0) == originalChildPt2);
+  assert(test::truthIncident.childPdgCode(0) == originalChildPdgCode);
+  assert(test::truthIncident.childBarcode(0) == childBarcode);
+
+}
 
 
 int main() {
 
   testConstructors();
+
+  // const getters 
+  testChildP2();
+  testChildPt2();
+  testChildEkin();
+  testChildPdgCode();
+  testChildBarcode();
+
+  // not const getter; returns genParticle, changes TruthIncident child barcode 
   testChildParticle();
 
   return 0;

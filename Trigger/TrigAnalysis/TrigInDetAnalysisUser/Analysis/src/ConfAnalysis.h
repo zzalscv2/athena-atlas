@@ -202,6 +202,13 @@ private:
   Resplot* rChi2_bad = 0;
   Resplot* rChi2dof_bad = 0;
 
+  Resplot* rChi2prob_rec = 0;
+  Resplot* rChi2_rec = 0;
+  Resplot* rChi2dof_rec = 0;
+
+  Resplot* rChi2d_vs_Chi2d = 0;
+  Resplot* rDChi2dof = 0;
+
   //  TH2F* hnpix_v_sct;
   //  TH2F* hnpix_v_sct_rec;
   //  TH2F* hnpix_v_sct_match;
@@ -317,8 +324,6 @@ private:
   Resplot* z_vs_lb = 0;
 
   std::map<int, int> rmap;
-
-  //TH1F* hchi2;
 
   Efficiency* eff_vs_mult = 0;
 

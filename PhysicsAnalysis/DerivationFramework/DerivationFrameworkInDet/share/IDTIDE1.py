@@ -187,33 +187,65 @@ if IsMonteCarlo:
 #====================================================================
 skimmingTools = []
 if not IsMonteCarlo and skimEvents:
-  sel_jet600 = 'AntiKt4EMTopoJets.JetConstitScaleMomentum_pt >= 600.*GeV'
-  sel_jet800 = 'AntiKt4EMTopoJets.JetConstitScaleMomentum_pt >= 800.*GeV'
-  sel_jet1000 = 'AntiKt4EMTopoJets.JetConstitScaleMomentum_pt >= 1000.*GeV'
 
-  desd_jetA = '(HLT_j100 || HLT_j110 || HLT_j150 || HLT_j175 || HLT_j200 || HLT_j260 || HLT_j300)'
-  desd_jetB = '( HLT_j320 )'
-  desd_jetC = '( HLT_j360 ||  HLT_j380 || HLT_j400 )'
-  desd_jetD = '( HLT_j420 && !HLT_j460 )'
-  desd_jetE = '( HLT_j460 )'
-  desd_jetF = '( HLT_j460 && count('+sel_jet600+')>0 && count('+sel_jet800+')==0 )'
-  desd_jetG = '( HLT_j460 && count('+sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
-  desd_jetH = '( HLT_j460 && count('+sel_jet1000+')>0 )'
+  """
+  DISCLAIMER =================================
+  
+  We are adopting a temporary hack to avoid the use of HLT_jet trigger items in the IDTIDE skimming as these have been found to cause problems, 
+  leading to empty Run 3 data files, as described in this ticket: https://its.cern.ch/jira/browse/ATLIDTRKCP-423 
 
-  prescaleA = 20
-  prescaleB = 10
-  prescaleC = 40
+  As a temporary fix to obtain Run 3 IDTIDE files during the on-going data-taking, the HLT_jet trigger based skimming has been replaced by a 
+  skimming based on offline jets.
+
+  The effective jet pT threshold of the skimming is now 400 GeV. We plan to revert back to the previous skimming including lower jet pT once 
+  the issues mentioned in the ticket are fixed.
+
+  The skimming selection is applied with AntiKt4EMPFlowJets as it is the primary offline jet container with supported calibration in Run 3.
+
+  In the tools F, G and H of the Skimming we use some redundancies (e.g., count both jets with 500 GeV and 600 GeV) just to maintain the 
+  structure that was being used with the online-trigger-based tools. This helps us to keep track which parts of the tools were modified. 
+  
+  """
+
+
+  sel_jet400 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 400.*GeV'
+  sel_jet500 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 500.*GeV'
+  sel_jet600 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 600.*GeV'
+  sel_jet800 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 800.*GeV'
+  sel_jet1000 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 1000.*GeV'
+
+  #desd_jetA = '(HLT_j100 || HLT_j110 || HLT_j150 || HLT_j175 || HLT_j200 || HLT_j260 || HLT_j300)'
+  #desd_jetB = '( HLT_j320 )'
+  #desd_jetC = '( HLT_j360 ||  HLT_j380 || HLT_j400 )'
+  #desd_jetD = '( HLT_j420 && !HLT_j460 )'
+  #desd_jetE = '( HLT_j460 )'
+  #desd_jetF = '( HLT_j460 && count('+sel_jet600+')>0 && count('+sel_jet800+')==0 )'
+  #desd_jetG = '( HLT_j460 && count('+sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
+  #desd_jetH = '( HLT_j460 && count('+sel_jet1000+')>0 )'
+  desd_jetD  = '( count('+sel_jet400+')>0 && count('+sel_jet500+')==0 )'
+  desd_jetE  = '( count('+sel_jet500+')>0 )'
+  desd_jetF = '( count('+sel_jet500+')>0 && count('+sel_jet600+')>0 && count('+sel_jet800+')==0 )'
+  desd_jetG = '( count('+sel_jet500+')>0 && count('+sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
+  desd_jetH = '( count('+sel_jet500+')>0 && count('+sel_jet1000+')>0 )'
+
+
+  #prescaleA = 20
+  #prescaleB = 10
+  #prescaleC = 40
   prescaleD = 30
   prescaleE = 20
   prescaleF = 10
   prescaleG = 5
   prescaleH = 1
 
+  _info("Running with Offline Triggers only")
+
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationOR
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationAND
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__PrescaleTool
 
+  """
   IDTIDE_SkimmingToolA = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolA", expression = desd_jetA)
   ToolSvc += IDTIDE_SkimmingToolA
   IDTIDE_PrescaleToolA = DerivationFramework__PrescaleTool(name="IDTIDE_PrescaleToolA",Prescale=prescaleA)
@@ -234,6 +266,7 @@ if not IsMonteCarlo and skimEvents:
   ToolSvc += IDTIDE_PrescaleToolC
   IDTIDE_ANDToolC = DerivationFramework__FilterCombinationAND(name="IDTIDE_ANDToolC",FilterList=[IDTIDE_SkimmingToolC,IDTIDE_PrescaleToolC] )
   ToolSvc += IDTIDE_ANDToolC
+  """
 
   IDTIDE_SkimmingToolD = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolD", expression = desd_jetD)
   ToolSvc += IDTIDE_SkimmingToolD
@@ -266,8 +299,10 @@ if not IsMonteCarlo and skimEvents:
   IDTIDE_SkimmingToolH = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolH", expression = desd_jetH)
   ToolSvc += IDTIDE_SkimmingToolH
 
-  IDTIDE_ORTool = DerivationFramework__FilterCombinationOR(name="myLogicalCombination", FilterList=[IDTIDE_ANDToolA,IDTIDE_ANDToolB,IDTIDE_ANDToolC,IDTIDE_ANDToolD,IDTIDE_ANDToolE,IDTIDE_ANDToolF,IDTIDE_ANDToolG,IDTIDE_SkimmingToolH] )
+  IDTIDE_ORTool = DerivationFramework__FilterCombinationOR(name="myLogicalCombination", FilterList=[IDTIDE_ANDToolD,IDTIDE_ANDToolE,IDTIDE_ANDToolF,IDTIDE_ANDToolG,IDTIDE_SkimmingToolH] )
   ToolSvc += IDTIDE_ORTool
+  #IDTIDE_ORTool = DerivationFramework__FilterCombinationOR(name="myLogicalCombination", FilterList=[IDTIDE_ANDToolA,IDTIDE_ANDToolB,IDTIDE_ANDToolC,IDTIDE_ANDToolD,IDTIDE_ANDToolE,IDTIDE_ANDToolF,IDTIDE_ANDToolG,IDTIDE_SkimmingToolH] )
+  #ToolSvc += IDTIDE_ORTool
 
   skimmingTools.append(IDTIDE_ORTool)
   _info( "IDTIDE1.py IDTIDE_ORTool: %s", IDTIDE_ORTool)

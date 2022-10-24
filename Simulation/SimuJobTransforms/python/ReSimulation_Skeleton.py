@@ -6,15 +6,6 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from SimuJobTransforms.CommonSimulationSteering import CommonSimulationCfg, specialConfigPreInclude, specialConfigPostInclude
 
 
-def defaultReSimulationFlags(ConfigFlags):
-    """Fill default resimulation flags"""
-    ConfigFlags.Sim.ISF.ReSimulation = True
-
-    # others are the same as standard simulation
-    from SimuJobTransforms.ISF_Skeleton import defaultSimulationFlags
-    defaultSimulationFlags(ConfigFlags)
-
-
 def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
     log = logging.getLogger('Sim_tf')
@@ -32,15 +23,17 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
 
+    # Set the simulator
     if hasattr(runArgs, 'simulator'):
        ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+
+    # This is ISF and resimulation
+    ConfigFlags.Sim.ISFRun = True
+    ConfigFlags.Sim.ISF.ReSimulation = True
 
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
-
-    # Setup common simulation flags
-    defaultReSimulationFlags(ConfigFlags)
 
     if hasattr(runArgs, 'inputHITSFile'):
         ConfigFlags.Input.Files = runArgs.inputHITSFile

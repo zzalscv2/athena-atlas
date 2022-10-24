@@ -124,6 +124,10 @@ int ISF::ISFTruthIncident::childPdgCode(unsigned short index) const {
   return m_children[index]->pdgCode();
 }
 
+Barcode::ParticleBarcode ISF::ISFTruthIncident::childBarcode(unsigned short index) const {
+  return numberOfChildren() > index ? m_children[index]->barcode() : Barcode::fUndefinedBarcode;
+}
+
 HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
                                                          Barcode::ParticleBarcode bc) const {
   // the child particle

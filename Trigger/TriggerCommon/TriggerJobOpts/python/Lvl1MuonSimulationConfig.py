@@ -300,7 +300,7 @@ def NSWTriggerConfig(flags):
                                                MMStripTdsTool = MMStripTdsTool,
                                                MMTriggerTool = MMTriggerTool,
                                                MMTriggerProcessorTool = TriggerProcessorTool,
-                                               NSWTrigRDOContainerName = "NSWTRGRDO" )
+                                               NSWTrigRDOContainerName = "L1_NSWTrigContainer" )
     acc.addEventAlgo(nswAlg)
     return acc
 
@@ -330,7 +330,7 @@ def TGCTriggerConfig(flags):
         tgcAlg.MaskFileName12 = "TrigT1TGCMaskedChannel.noFI._12.db"
         tgcAlg.USENSW = True
         tgcAlg.NSWSideInfo = "AC"
-        tgcAlg.NSWTrigger_Input = "NSWTRGRDO"
+        tgcAlg.NSWTrigger_Input = "L1_NSWTrigContainer"
         tgcAlg.FORCENSWCOIN = not flags.Trigger.L1MuonSim.NSWVetoMode
         tgcAlg.USEBIS78 = flags.Trigger.L1MuonSim.doBIS78
     else:
