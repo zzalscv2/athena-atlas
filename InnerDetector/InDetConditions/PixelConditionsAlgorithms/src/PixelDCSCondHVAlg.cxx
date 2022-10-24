@@ -61,9 +61,9 @@ StatusCode PixelDCSCondHVAlg::execute(const EventContext& ctx) const {
 
     // Read HV info
     std::string param("HV");
-    for (CondAttrListCollection::const_iterator attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
-      const CondAttrListCollection::ChanNum &channelNumber = attrList->first;
-      const CondAttrListCollection::AttributeList &payload = attrList->second;
+    for (const auto & attrList : *readCdo) {
+      const CondAttrListCollection::ChanNum &channelNumber = attrList.first;
+      const CondAttrListCollection::AttributeList &payload = attrList.second;
       if (payload.exists(param) and not payload[param].isNull()) {
         float val = payload[param].data<float>();
         if (val>1000.0 || val<-1000.0) {

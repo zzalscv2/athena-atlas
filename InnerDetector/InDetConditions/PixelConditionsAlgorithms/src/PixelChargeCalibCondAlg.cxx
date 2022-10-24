@@ -84,9 +84,9 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_INFO("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
     ATH_MSG_INFO("Range of input is " << rangeW);
 
-    for (CondAttrListCollection::const_iterator attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
-      const CondAttrListCollection::ChanNum &channelNumber = attrList->first;
-      const CondAttrListCollection::AttributeList &payload = attrList->second;
+    for (const auto & attrList : *readCdo) {
+      const CondAttrListCollection::ChanNum &channelNumber = attrList.first;
+      const CondAttrListCollection::AttributeList &payload = attrList.second;
 
       // RUN-2 format
       if (payload.exists("data") and not payload["data"].isNull()) {

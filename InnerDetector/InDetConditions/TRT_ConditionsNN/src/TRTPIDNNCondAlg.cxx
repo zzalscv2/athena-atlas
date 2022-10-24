@@ -9,7 +9,7 @@ TRTPIDNNCondAlg::TRTPIDNNCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
   : ::AthAlgorithm(name,pSvcLocator)
 {}
-TRTPIDNNCondAlg::~TRTPIDNNCondAlg(){}
+TRTPIDNNCondAlg::~TRTPIDNNCondAlg()= default;
 
 StatusCode TRTPIDNNCondAlg::initialize()
 {

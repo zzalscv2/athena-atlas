@@ -77,9 +77,9 @@ StatusCode PixelDCSCondTempAlg::execute(const EventContext& ctx) const {
     };
     
     countChannels=readCdo->size();
-    for (auto attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
-      const auto channelNumber{attrList->first};
-      const auto & payload{attrList->second};
+    for (const auto & attrList : *readCdo) {
+      const auto channelNumber{attrList.first};
+      const auto & payload{attrList.second};
       if (payload.exists(parameterName) and not payload[parameterName].isNull()) {
         float val = payload[parameterName].data<float>();
         if (outsideValidRange(val)) {

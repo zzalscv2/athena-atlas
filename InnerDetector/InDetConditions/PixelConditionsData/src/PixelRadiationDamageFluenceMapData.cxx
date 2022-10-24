@@ -26,7 +26,7 @@ PixelRadiationDamageFluenceMapData::PixelRadiationDamageFluenceMapData():
   m_timeMap3D_h()
 { }
 
-PixelRadiationDamageFluenceMapData::~PixelRadiationDamageFluenceMapData() { }
+PixelRadiationDamageFluenceMapData::~PixelRadiationDamageFluenceMapData() = default;
 
 // Map for radiation damage simulation
 void PixelRadiationDamageFluenceMapData::setFluenceLayer(std::vector<double> fluenceLayer) { m_fluenceLayer = std::move(fluenceLayer); }

@@ -83,8 +83,8 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
     ATH_MSG_INFO("Size of CondAttrListCollection " << readHandle.fullKey() << " readCdo->size()= " << readCdo->size());
     ATH_MSG_INFO("Range of input is " << rangeW);
 
-    for (CondAttrListCollection::const_iterator attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
-      const CondAttrListCollection::AttributeList &payload = attrList->second;
+    for (const auto & attrList : *readCdo) {
+      const CondAttrListCollection::AttributeList &payload = attrList.second;
 
       // RUN-3 format
       if (payload.exists("data_array") and not payload["data_array"].isNull()) {

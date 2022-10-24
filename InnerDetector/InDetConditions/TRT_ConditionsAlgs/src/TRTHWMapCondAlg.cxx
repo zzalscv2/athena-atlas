@@ -10,7 +10,7 @@ TRTHWMapCondAlg::TRTHWMapCondAlg(const std::string& name
 				 , ISvcLocator* pSvcLocator )
   : ::AthAlgorithm(name,pSvcLocator)
 {}
-TRTHWMapCondAlg::~TRTHWMapCondAlg(){}
+TRTHWMapCondAlg::~TRTHWMapCondAlg()= default;
 
 StatusCode TRTHWMapCondAlg::initialize()
 {

@@ -41,8 +41,8 @@ std::ostream& operator<<(std::ostream& os, const FloatArrayStore& store){
   // it is a bit of a heck, but the FloatArrayStore doesn't allow for more.
   // first make an inverse map
   std::map<int, std::vector<Identifier> > indextoidentmap ;
-  for( FloatArrayStore::map_citr it = store.cbegin(); it!=store.cend(); ++it)
-    indextoidentmap[it->second].push_back(it->first) ;
+  for(auto it : store)
+    indextoidentmap[it.second].push_back(it.first) ;
   // store the number of lines
   os << indextoidentmap.size() << std::endl ;
   // now store all elements, as follows
@@ -50,14 +50,12 @@ std::ostream& operator<<(std::ostream& os, const FloatArrayStore& store){
   for( std::map<int, std::vector<Identifier> >::const_iterator it = indextoidentmap.begin() ;
        it != indextoidentmap.end(); ++it) {
     os << it->second.size() << " " ;
-    for( std::vector<Identifier>::const_iterator vit = it->second.begin() ;
-	 vit != it->second.end(); ++vit)
-      os << *vit << " " ;
+    for(auto vit : it->second)
+      os << vit << " " ;
     const std::vector<float>& data = store[it->second.front()] ;
     os << data.size() << " " ;
-    for( std::vector<float>::const_iterator vit = data.begin() ;
-	 vit != data.end(); ++vit)
-      os << *vit << " " ;
+    for(float vit : data)
+      os << vit << " " ;
     os << std::endl ;
   }
   return os ;

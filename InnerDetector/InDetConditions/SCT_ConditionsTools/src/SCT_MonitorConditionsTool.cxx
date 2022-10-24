@@ -177,12 +177,12 @@ void SCT_MonitorConditionsTool::getDetectorElementStatus(const EventContext& ctx
         tmp_bad_strips.clear();
         tmp_bad_strips.reserve(bad_module_strips_in.size()*SCT_ConditionsData::STRIPS_PER_CHIP);
 
-        for (unsigned int chip_i=0; chip_i < bad_module_strips_in.size(); ++chip_i) {
+        for (auto chip_i : bad_module_strips_in) {
            unsigned int geoemtrical_chip_id = SCT::getGeometricalChipID(strip_i);
 
-           for (unsigned int strip_per_chip_i=0; strip_per_chip_i<bad_module_strips_in[chip_i].size(); ++strip_per_chip_i) {
-              if (bad_module_strips_in[chip_i].test(strip_per_chip_i)) {
-                 tmp_bad_strips.push_back(std::make_pair(geoemtrical_chip_id,strip_i));
+           for (unsigned int strip_per_chip_i=0; strip_per_chip_i<chip_i.size(); ++strip_per_chip_i) {
+              if (chip_i.test(strip_per_chip_i)) {
+                 tmp_bad_strips.emplace_back(geoemtrical_chip_id,strip_i);
                  ++bad_strip_counts.at(geoemtrical_chip_id);
               }
               ++strip_i;

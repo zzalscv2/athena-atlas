@@ -65,7 +65,7 @@ TRTStrawAlign::TRTStrawAlign(const std::string& name, ISvcLocator* pSvcLocator)
 
 
 TRTStrawAlign::~TRTStrawAlign(void)
-{}
+= default;
 
 StatusCode TRTStrawAlign::initialize() {
 

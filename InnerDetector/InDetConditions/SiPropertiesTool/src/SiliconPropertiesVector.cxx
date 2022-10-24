@@ -16,8 +16,7 @@ namespace InDet {
   {
   }
 
-  SiliconPropertiesVector::~SiliconPropertiesVector() {
-  }
+  SiliconPropertiesVector::~SiliconPropertiesVector() = default;
 
   void SiliconPropertiesVector::resize(IdentifierHash::value_type size) {
     m_data.resize(size);

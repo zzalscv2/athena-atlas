@@ -28,7 +28,7 @@ TRT_DAQ_ConditionsSvc::TRT_DAQ_ConditionsSvc( const std::string& name, ISvcLocat
 //////////
 /// Destructor
 /////
-TRT_DAQ_ConditionsSvc::~TRT_DAQ_ConditionsSvc() {}
+TRT_DAQ_ConditionsSvc::~TRT_DAQ_ConditionsSvc() = default;
 
 //////////
 /// Initialize

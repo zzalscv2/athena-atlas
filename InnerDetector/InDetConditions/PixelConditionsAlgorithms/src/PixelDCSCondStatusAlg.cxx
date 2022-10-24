@@ -56,9 +56,9 @@ StatusCode PixelDCSCondStatusAlg::execute(const EventContext& ctx) const {
 
     // Read state info
     const std::string paramStatus = "FSM_status";
-    for (CondAttrListCollection::const_iterator attrListStatus=readCdoStatus->begin(); attrListStatus!=readCdoStatus->end(); ++attrListStatus) {
-      const CondAttrListCollection::ChanNum &channelNumber = attrListStatus->first;
-      const CondAttrListCollection::AttributeList &payload = attrListStatus->second;
+    for (const auto & readCdoStatu : *readCdoStatus) {
+      const CondAttrListCollection::ChanNum &channelNumber = readCdoStatu.first;
+      const CondAttrListCollection::AttributeList &payload = readCdoStatu.second;
       if (payload.exists(paramStatus.c_str()) and not payload[paramStatus.c_str()].isNull()) {
         const std::string& val = payload[paramStatus.c_str()].data<std::string>();
         if      (val=="OK")      { writeCdoStatus->setModuleStatus(channelNumber,PixelDCSStatusData::DCSModuleStatus::OK); }

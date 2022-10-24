@@ -14,13 +14,11 @@
 void TRT_BSErrContainerCnv_p1::transToPers(const TRT_BSErrContainer*, TRT_BSErrContainer_p1* , MsgStream & /* log */) 
 {
   throw std::runtime_error("Obsolete TRT_BSErrContainerCnv_p1::transToPers() not implemented");
-  return; 
 }
 
 void  TRT_BSErrContainerCnv_p1::persToTrans(const TRT_BSErrContainer_p1* , TRT_BSErrContainer* , MsgStream & /* log */) 
 {
   throw std::runtime_error("Obsolete TRT_BSErrContainerCnv_p1::persToTrans() not implemented");
-  return;
 
 }
 

@@ -66,9 +66,9 @@ StatusCode PixelDCSCondStateAlg::execute(const EventContext& ctx) const {
 
     // Read state info
     std::string paramState = "FSM_state";
-    for (CondAttrListCollection::const_iterator attrListState=readCdoState->begin(); attrListState!=readCdoState->end(); ++attrListState) {
-      const CondAttrListCollection::ChanNum &channelNumber = attrListState->first;
-      const CondAttrListCollection::AttributeList &payload = attrListState->second;
+    for (const auto & attrListState : *readCdoState) {
+      const CondAttrListCollection::ChanNum &channelNumber = attrListState.first;
+      const CondAttrListCollection::AttributeList &payload = attrListState.second;
       if (payload.exists(paramState.c_str()) and not payload[paramState.c_str()].isNull()) {
         std::string val = payload[paramState.c_str()].data<std::string>();
          std::unordered_map<std::string,PixelDCSStateData::DCSModuleState>::const_iterator iter = m_stateMap.find(val);

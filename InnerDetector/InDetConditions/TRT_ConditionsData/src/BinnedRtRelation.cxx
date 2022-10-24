@@ -61,7 +61,7 @@ namespace TRTCond
   std::ostream& BinnedRtRelation::write( std::ostream& os ) const 
   {
     os << m_tmin << " " << m_tmax << " " << m_values.size() << " " ;
-    for(size_t i=0; i<m_values.size(); ++i) os << m_values[i] << " " ;
+    for(float value : m_values) os << value << " " ;
     return os ;
   }
 

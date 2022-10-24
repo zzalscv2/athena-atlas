@@ -62,8 +62,7 @@ void PixelClusterErrorData::Initialize() {
     m_iblphierror.push_back(14.43*CLHEP::micrometer);
     m_ibletaerror.push_back(72.2*CLHEP::micrometer);
   }
-  return;
-}
+  }
 
 void PixelClusterErrorData::setVersion(int version){ m_version = version; }
 

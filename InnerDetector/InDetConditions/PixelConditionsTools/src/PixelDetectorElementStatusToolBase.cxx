@@ -10,7 +10,7 @@ PixelDetectorElementStatusToolBase::PixelDetectorElementStatusToolBase(const std
 {
 }
 
-PixelDetectorElementStatusToolBase::~PixelDetectorElementStatusToolBase(){}
+PixelDetectorElementStatusToolBase::~PixelDetectorElementStatusToolBase()= default;
 
 StatusCode PixelDetectorElementStatusToolBase::initialize(){
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));

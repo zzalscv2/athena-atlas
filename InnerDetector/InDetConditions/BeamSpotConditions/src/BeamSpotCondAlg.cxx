@@ -22,7 +22,7 @@ BeamSpotCondAlg::BeamSpotCondAlg( const std::string& name, ISvcLocator* pSvcLoca
 { }
 
 
-BeamSpotCondAlg::~BeamSpotCondAlg() {}
+BeamSpotCondAlg::~BeamSpotCondAlg() = default;
 
 
 StatusCode BeamSpotCondAlg::initialize() 

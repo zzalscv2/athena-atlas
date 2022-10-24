@@ -43,7 +43,7 @@ TRT_StrawAlignDbSvc::TRT_StrawAlignDbSvc( const std::string& name,
 
 
 TRT_StrawAlignDbSvc::~TRT_StrawAlignDbSvc()
-{}
+= default;
 
 
 StatusCode TRT_StrawAlignDbSvc::initialize() 
@@ -123,9 +123,8 @@ StatusCode TRT_StrawAlignDbSvc::writeTextFile(const std::string& filename) const
   msg(MSG::INFO) << "Number of entries in flatcontainer: " 
 	<< packedstrawdata.size() << std::endl ;
   
-  for( TRTCond::StrawDxContainer::FlatContainer::iterator it = packedstrawdata.begin() ;
-       it != packedstrawdata.end(); ++it) {
-    const TRTCond::ExpandedIdentifier& calid = it->first ;
+  for(auto & it : packedstrawdata) {
+    const TRTCond::ExpandedIdentifier& calid = it.first ;
     // get the end point corrections. if not the right type, store zeros.
     float dx1=m_dxcontainer->getDx1(calid) ; 
     float dx2=m_dxcontainer->getDx2(calid) ; 

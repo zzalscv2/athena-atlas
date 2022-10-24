@@ -9,7 +9,7 @@ PixelReadoutSpeedData::PixelReadoutSpeedData():
 {
 }
 
-PixelReadoutSpeedData::~PixelReadoutSpeedData() { }
+PixelReadoutSpeedData::~PixelReadoutSpeedData() = default;
 
 void PixelReadoutSpeedData::clear() {
   m_rodReadoutMap.clear();

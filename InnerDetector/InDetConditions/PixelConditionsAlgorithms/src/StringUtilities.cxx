@@ -30,8 +30,8 @@ namespace PixelConditionsAlgorithms{
     auto is_quote=[](const char c)->bool{
       return (c=='"');
     };
-    auto pc=s.data();
-    const auto pcEnd=pc+s.size();
+    const auto *pc=s.data();
+    const auto *const pcEnd=pc+s.size();
     int hash{};
     int status{};
     static constexpr  std::errc success{};

@@ -494,10 +494,9 @@ StatusCode TRTStrawStatusWrite::writeToTextFile(const std::string& filename )
 
     getStrawStatusContainer()->getall(flatcontainer) ;
 
-    for( TRTCond::StrawStatusContainer::FlatContainer::const_iterator
-         it = flatcontainer.begin() ; it != flatcontainer.end() ; ++it) {
-      TRTCond::ExpandedIdentifier id = it->first ;
-      const TRTCond::StrawStatus* status = it->second ;
+    for(const auto & it : flatcontainer) {
+      TRTCond::ExpandedIdentifier id = it.first ;
+      const TRTCond::StrawStatus* status = it.second ;
       outfile << id << " " << int(status->getstatus()) << std::endl ;
     }
   }
@@ -511,10 +510,9 @@ StatusCode TRTStrawStatusWrite::writeToTextFile(const std::string& filename )
    getStrawStatusHTContainer()->getall(flatcontainerHT) ;
 
 
-    for( TRTCond::StrawStatusContainer::FlatContainer::const_iterator
-         it = flatcontainerHT.begin() ; it != flatcontainerHT.end() ; ++it) {
-      TRTCond::ExpandedIdentifier id = it->first ;
-      const TRTCond::StrawStatus* status = it->second ;
+    for(const auto & it : flatcontainerHT) {
+      TRTCond::ExpandedIdentifier id = it.first ;
+      const TRTCond::StrawStatus* status = it.second ;
       outfile << id << " " << int(status->getstatus()) << std::endl ;
     }
   }
@@ -528,10 +526,9 @@ StatusCode TRTStrawStatusWrite::writeToTextFile(const std::string& filename )
    getStrawStatusPermanentContainer()->getall(flatcontainerpermanent) ;
 
 
-   for( TRTCond::StrawStatusContainer::FlatContainer::const_iterator
-         it = flatcontainerpermanent.begin() ; it != flatcontainerpermanent.end() ; ++it) {
-     TRTCond::ExpandedIdentifier id = it->first ;
-     const TRTCond::StrawStatus* status = it->second ;
+   for(const auto & it : flatcontainerpermanent) {
+     TRTCond::ExpandedIdentifier id = it.first ;
+     const TRTCond::StrawStatus* status = it.second ;
      outfile << id << " " << int(status->getstatus()) << std::endl ;
    }
  }

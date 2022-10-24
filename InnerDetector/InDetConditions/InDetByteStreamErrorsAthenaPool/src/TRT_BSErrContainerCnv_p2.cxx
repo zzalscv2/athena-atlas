@@ -25,8 +25,7 @@ void TRT_BSErrContainerCnv_p2::transToPers(const TRT_BSErrContainer* transCont, 
     persCont->m_sidError.push_back(id);
   }
   
-  return;
-}
+  }
 
 void  TRT_BSErrContainerCnv_p2::persToTrans(const TRT_BSErrContainer_p2* persCont, TRT_BSErrContainer* transCont, MsgStream & /* log */) 
 {
@@ -42,8 +41,7 @@ void  TRT_BSErrContainerCnv_p2::persToTrans(const TRT_BSErrContainer_p2* persCon
   for (const uint32_t id : persCont->m_sidError) {
     transCont->add_sid_error(id);
   }
-  return;
-}
+  }
 
 //================================================================
 TRT_BSErrContainer* TRT_BSErrContainerCnv_p2::createTransient(const TRT_BSErrContainer_p2* persObj, MsgStream& log) {

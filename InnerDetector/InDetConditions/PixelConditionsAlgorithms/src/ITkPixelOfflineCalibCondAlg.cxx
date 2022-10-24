@@ -114,13 +114,13 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
 
     std::vector<float> constants;
 
-    for(CondAttrListCollection::const_iterator attrList = readCdo->begin(); attrList != readCdo->end(); ++attrList){
+    for(const auto & attrList : *readCdo){
 
       std::ostringstream attrStr;
-      (*attrList).second.toOutputStream(attrStr);
-      ATH_MSG_DEBUG( "ChanNum " << (*attrList).first << " Attribute list " << attrStr.str() );
+      attrList.second.toOutputStream(attrStr);
+      ATH_MSG_DEBUG( "ChanNum " << attrList.first << " Attribute list " << attrStr.str() );
 
-      std::string stringData = (*attrList).second["data_array"].data<std::string>();
+      std::string stringData = attrList.second["data_array"].data<std::string>();
       std::string delimiter = "],";
       size_t pos = 0;
       std::vector<std::string> component;
@@ -133,8 +133,8 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
       component.push_back(stringData);
       ATH_MSG_INFO("Last component="<<stringData);
 
-      for (size_t i=0; i<component.size(); i++) {
-	std::string checkModule = component[i];
+      for (auto & i : component) {
+	std::string checkModule = i;
 	std::vector<std::string> moduleString;
 	delimiter = ":[";
 	pos = 0;
@@ -146,7 +146,7 @@ StatusCode PixelOfflineCalibCondAlg::execute(const EventContext& ctx) const {
 	moduleString.push_back(checkModule);
 
 	if (moduleString.size()!=2) {
-	  ATH_MSG_FATAL("String size (moduleString) is not 2. " << moduleString.size() << " in " << component[i] << " channel " <<  (*attrList).first << " read from " << readHandle.fullKey());
+	  ATH_MSG_FATAL("String size (moduleString) is not 2. " << moduleString.size() << " in " << i << " channel " <<  attrList.first << " read from " << readHandle.fullKey());
 	  return StatusCode::FAILURE;
 	}
 

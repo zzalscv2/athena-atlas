@@ -18,7 +18,7 @@ namespace PixelCalib{
      Initialize();
   }
 
-   PixelClusterOnTrackErrorData::~PixelClusterOnTrackErrorData(){}
+   PixelClusterOnTrackErrorData::~PixelClusterOnTrackErrorData()= default;
 
 // Load defaults, will be used if reading from DB does not work
 void PixelClusterOnTrackErrorData::Initialize(){
@@ -66,43 +66,6 @@ void PixelClusterOnTrackErrorData::Initialize(){
   m_csybinsibl = 0;
   m_etabinsibl = 0;
   m_phibinsibl = 0;
-  /* init not needed  
-   // Init from DB for IBL: 
-   m_version = -2;
-   m_csxbinsibl = 3;
-   m_csybinsibl = 3;
-   m_etabinsibl = 6;
-   m_ibletaref.reserve(m_etabinsibl+1);
-   m_ibletaref.push_back(0.00);
-   m_ibletaref.push_back(0.55);
-   m_ibletaref.push_back(1.275);
-   m_ibletaref.push_back(1.725);
-   m_ibletaref.push_back(2.025);
-   m_ibletaref.push_back(2.25);
-   m_ibletaref.push_back(2.70);
-
-   // alfa (Rphi incidence angle) bins: [-15.47, 15.47]
-   float phimin = -15.47;
-   float phimax = 15.47;
-   m_phibinsibl = 9
-   m_iblphibins.reserve(m_phibinsibl+1);
-   for(int i=0; i<m_phibinsibl+1; i++){
-     m_iblphibins.push_back(phimin +i*(phimax-phimin)/m_phibinsibl);
-   }
-   // load defaults for IBL
-   int nbinyibl = m_csybinsibl*m_ibletaref.size();
-   m_ibletaerror.reserve(nbinyibl);
-   for(int i = 0; i<nbinyibl; i++){
-     m_ibletaerror.push_back(72.2*CLHEP::micrometer);
-   }
-
-   int nbinxibl = m_csxbinsibl*m_iblphibins.size();
-   m_iblphierror.reserve(nbinxibl);
-   for(int i = 0; i<nbinxibl; i++){
-     m_iblphierror.push_back(14.4*CLHEP::micrometer);
-   }
-  */
-  return;
 }
 
 int PixelClusterOnTrackErrorData::getNumberOfPhiBarrelBins() const{
@@ -326,8 +289,7 @@ void PixelClusterOnTrackErrorData::setParameters(const int n1, // number of clus
   for(int i = 0; i<nbinx; i++){
      m_barrelphierror.push_back(50./sqrt(12)*CLHEP::micrometer);
   }
-  return;
-}
+  }
 
  void PixelClusterOnTrackErrorData::setVersion(int version){ m_version = version; }
 
@@ -363,12 +325,12 @@ void PixelClusterOnTrackErrorData::Print(const std::string& file) const {
   }
   *outfile << std::endl;
   if(m_etabinsibl>0 && m_phibinsibl >0 ){ // IBL
-    for(unsigned int i=0; i<m_ibletaref.size(); i++){
-      *outfile << m_ibletaref[i] << " ";
+    for(float i : m_ibletaref){
+      *outfile << i << " ";
     }
     *outfile << std::endl;
-    for(unsigned int i=0; i<m_iblphibins.size(); i++){
-      *outfile << m_iblphibins[i] << " ";
+    for(float iblphibin : m_iblphibins){
+      *outfile << iblphibin << " ";
     }
     *outfile << std::endl;
   }

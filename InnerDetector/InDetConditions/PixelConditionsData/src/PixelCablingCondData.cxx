@@ -27,7 +27,7 @@ PixelCablingCondData::PixelCablingCondData():
   m_allRobs()
 { }
 
-PixelCablingCondData::~PixelCablingCondData() { }
+PixelCablingCondData::~PixelCablingCondData() = default;
 
 void PixelCablingCondData::add_entry_onoff(const uint64_t onlineId, const Identifier offlineId) {
   m_idMap_onoff.insert(std::make_pair(onlineId, offlineId)); // add online identifier -> offline identifier pair in m_idMap_onoff

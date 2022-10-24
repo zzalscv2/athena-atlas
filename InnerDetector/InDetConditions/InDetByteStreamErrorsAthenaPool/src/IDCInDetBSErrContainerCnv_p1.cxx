@@ -10,7 +10,6 @@ void IDCInDetBSErrContainerCnv_p1::transToPers(const IDCInDetBSErrContainer* tra
   const auto vect = transCont->getAll();
   persCont->m_bsErrs.reserve(vect.size());
   for(const auto& v : vect) persCont->m_bsErrs.emplace_back(v.first, v.second);
-  return;
 }
 
 void  IDCInDetBSErrContainerCnv_p1::persToTrans(const InDetBSErrContainer64_p1* persCont, IDCInDetBSErrContainer* transCont, MsgStream& /*log*/)
@@ -18,8 +17,7 @@ void  IDCInDetBSErrContainerCnv_p1::persToTrans(const InDetBSErrContainer64_p1* 
   for (const std::pair<IdentifierHash, uint64_t>& bsErr: persCont->m_bsErrs) {
     transCont->setOrDrop(bsErr.first, bsErr.second);
   }
-  return;
-}
+  }
 
 //================================================================
 IDCInDetBSErrContainer* IDCInDetBSErrContainerCnv_p1::createTransient(const InDetBSErrContainer64_p1* persObj, MsgStream& log) {

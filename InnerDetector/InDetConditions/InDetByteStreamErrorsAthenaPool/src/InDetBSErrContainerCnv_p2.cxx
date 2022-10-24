@@ -15,8 +15,7 @@ void InDetBSErrContainerCnv_p2::transToPers(const InDetBSErrContainer* transCont
     (persCont->m_bsErrs).push_back(*bsErr);
   }
 
-  return;
-}
+  }
 
 void  InDetBSErrContainerCnv_p2::persToTrans(const InDetBSErrContainer_p2* persCont, InDetBSErrContainer* transCont, MsgStream& /*log*/)
 {
@@ -25,8 +24,7 @@ void  InDetBSErrContainerCnv_p2::persToTrans(const InDetBSErrContainer_p2* persC
     transCont->push_back(std::make_unique<std::pair<IdentifierHash, int>>(bsErr));
   }
 
-  return;
-}
+  }
 
 //================================================================
 InDetBSErrContainer* InDetBSErrContainerCnv_p2::createTransient(const InDetBSErrContainer_p2* persObj, MsgStream& log) {
