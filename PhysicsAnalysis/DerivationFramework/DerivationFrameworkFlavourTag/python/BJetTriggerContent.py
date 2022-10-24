@@ -1,6 +1,8 @@
 # Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 
 BJetTriggerContent = [
+    "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_BTagging",
+    "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
     "HLT_xAOD__BTaggingContainer_HLTBjetFex",
     "HLT_xAOD__BTaggingContainer_HLTBjetFexAux.",
     "HLT_xAOD__JetContainer_EFJet",
