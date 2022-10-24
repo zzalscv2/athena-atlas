@@ -38,6 +38,7 @@ class LArSC2Ntuple : public LArDigits2Ntuple
 
   NTuple::Item<short> m_ELVL1Id;
   NTuple::Item<short> m_latomeChannel;
+  NTuple::Item<short> m_LB;
 
   NTuple::Array<float>  m_ROD_energy;
 

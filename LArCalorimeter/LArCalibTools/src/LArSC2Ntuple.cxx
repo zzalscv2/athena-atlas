@@ -29,6 +29,13 @@ StatusCode LArSC2Ntuple::initialize() {
     ATH_MSG_ERROR( "addItem 'latomeChannel' failed" );
     return sc;
   }
+
+  sc=m_nt->addItem("LB",m_LB);
+  if (sc.isFailure()) {
+    ATH_MSG_ERROR( "addItem 'LB' failed" );
+    return sc;
+  }
+  
   
   sc = m_nt->addItem("bcidVec",m_Nsamples, m_bcidVec);//here - > define length?
   if (sc.isFailure()) {
@@ -135,14 +142,13 @@ StatusCode LArSC2Ntuple::execute()
 
   ATH_MSG_DEBUG( "LArSC2Ntuple in execute" ); 
   m_event++;
-  unsigned long long thisevent = 0;
-  unsigned long	thisbcid       = 0;
 
   SG::ReadHandle<xAOD::EventInfo>evt (m_evtInfoKey, ctx);
-  thisevent	   = evt->eventNumber();
+  unsigned long long thisevent	  = evt->eventNumber();
+  unsigned short thislb           = evt->lumiBlock();
 
   // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
-  thisbcid	   = evt->bcid();
+  unsigned long thisbcid	  = evt->bcid();
   //
   /// set it here once and no need to set at each SC/cell
   bool hasDigitContainer=true;
@@ -279,6 +285,7 @@ StatusCode LArSC2Ntuple::execute()
     if(m_fillBCID) m_bcid	   = thisbcid; 
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = m_event;
+    m_LB           = thislb;
     if( hasDigitContainer ){
 
       const LArDigit* digi   = DigitContainer->at(c);     
