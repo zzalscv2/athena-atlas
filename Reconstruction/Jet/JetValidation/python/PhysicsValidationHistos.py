@@ -131,7 +131,12 @@ def commonPhysValTool(container, refcontainer="", onlyKinematics = False, global
                 jhm.rg,
                 jhm.zg,
             ]
-
+        elif "Trimmed" in container:
+            filler.HistoTools += [
+                jhm.NTrimSubjets,
+                jhm.TrackSumPt,
+                jhm.TrackSumMass,
+            ]
 
         if "Trimmed" in container or "SoftDrop" in container:
             filler.HistoTools += [
@@ -139,48 +144,34 @@ def commonPhysValTool(container, refcontainer="", onlyKinematics = False, global
               #main list of substrcture variables
               JetSubStructureHistos("substructure"), 
 
-              jhm.ECF1,
-              jhm.ECF2,
-              jhm.ECF3,
-              jhm.Tau1_wta,
-              jhm.Tau2_wta,
-              jhm.Tau3_wta,
-              jhm.Split12,
-              jhm.Split23,
-              jhm.NTrimSubjets,
-              jhm.DetectorEta,
-              jhm.TrackSumPt,
-              jhm.TrackSumMass,      
-              jhm.Qw,
-              jhm.PlanarFlow,
-              jhm.FoxWolfram2,
-              jhm.FoxWolfram0,
-              jhm.Angularity,
-              jhm.Aplanarity,
-              jhm.KtDR,
-              jhm.ZCut12,
-              jhm.Dip12,
-              jhm.Dip13,
-              jhm.Dip23,
-              jhm.DipExcl12,
-              jhm.Split34,
-              jhm.ZCut23,
-              jhm.ZCut34,
-              jhm.Mu12,
-              jhm.ThrustMin,
-              jhm.ThrustMaj,
-              jhm.FoxWolfram1,
-              jhm.FoxWolfram3,
-              jhm.FoxWolfram4,
-              jhm.Sphericity,
-              jhm.PullMag,
-              jhm.PullPhi,
-              jhm.Pull_C00,
-              jhm.Pull_C01,
-              jhm.Pull_C10,
-              jhm.Pull_C11,
-              jhm.Charge,
-                ]
+                jhm.DetectorEta,
+                jhm.ECF1,
+                jhm.ECF2,
+                jhm.ECF3,
+                jhm.Tau1_wta,
+                jhm.Tau2_wta,
+                jhm.Tau3_wta,
+                jhm.Split12,
+                jhm.Split23,
+                jhm.Qw,
+                jhm.PlanarFlow,
+                jhm.FoxWolfram0,
+                jhm.FoxWolfram2,
+                jhm.Angularity,
+                jhm.Aplanarity,
+                jhm.KtDR,
+                jhm.ZCut12,
+                jhm.ZCut23,
+                jhm.ZCut34,
+                jhm.Split34,
+                jhm.ThrustMin,
+                jhm.ThrustMaj,
+                jhm.FoxWolfram1,
+                jhm.FoxWolfram3,
+                jhm.FoxWolfram4,
+                jhm.Sphericity,
+                jhm.Charge
+            ]
 
     if 'PV0Track' in container:
         filler.HistoTools += [
