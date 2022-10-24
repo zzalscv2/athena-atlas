@@ -307,7 +307,7 @@ def getMuonFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
         PFMuonFlowElementLinkerAlgorithm.JetEtMissChargedFlowElementContainer = kwargs['charged_FE_cont_name']
     
     PFMuonFlowElementLinkerAlgorithm.LinkNeutralFEClusters = kwargs['LinkNeutralFEClusters']
-    PFMuonFlowElementLinkerAlgorithm.UseMuonTopoClusters = kwargs['useMuonTopoClusters']
+    PFMuonFlowElementLinkerAlgorithm.useMuonTopoClusters = kwargs['useMuonTopoClusters']
 
     #prototype on AOD with the linkers already defined - so need to rename the output links to something besides their default name.
 

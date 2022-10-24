@@ -149,7 +149,7 @@ from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
 #AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use
 #this special setting for the muon-FE links.
-CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags,UseMuonTopoClusters=True)
+CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags,useMuonTopoClusters=True)
 
 
 # Event cleaning flags

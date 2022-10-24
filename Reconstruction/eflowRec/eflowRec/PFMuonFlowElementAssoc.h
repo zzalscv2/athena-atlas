@@ -82,6 +82,6 @@ private:
       True: Link FEs to Topoclusters associated to Muons
       False: Link FEs to CaloClusters associated to Muons
  **/
-  Gaudi::Property<bool> m_UseMuonTopoClusters{this,"UseMuonTopoClusters",false,"Toggle usage of linker of muon associated topoclusters to flow elements - false by default (EXPERIMENTAL)"};
+  Gaudi::Property<bool> m_useMuonTopoClusters{this,"useMuonTopoClusters",false,"Toggle usage of linker of muon associated topoclusters to flow elements - false by default (EXPERIMENTAL)"};
 };
 #endif // PFMUONFLOWELEMENTASSOC.H

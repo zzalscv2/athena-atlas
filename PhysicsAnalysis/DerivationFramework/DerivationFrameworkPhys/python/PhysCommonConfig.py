@@ -75,7 +75,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
     #AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use
     #this special setting for the muon-FE links.
-    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags, UseMuonTopoClusters=True))
+    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags, useMuonTopoClusters=True))
     acc.merge(AddDiTauLowPtCfg(ConfigFlags, prefix = 'PhysCommon'))
     acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags, prefix = 'PhysCommon'))
     acc.merge(AddTauWPDecorationCfg(ConfigFlags, prefix = 'PhysCommon', evetoFixTag="v1"))
