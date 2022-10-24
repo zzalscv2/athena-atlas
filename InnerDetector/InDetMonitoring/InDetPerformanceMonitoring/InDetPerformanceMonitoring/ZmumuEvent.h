@@ -64,7 +64,7 @@ class ZmumuEvent : public EventAnalysis
   inline void                        doIsoSelection (bool doIso)          { m_xMuonID.doIsoSelection(doIso);  }
   inline void                        doIPSelection (bool doIPsel)         { m_xMuonID.doIPSelection(doIPsel); }
   inline void                        doMCPSelection (bool doMCP)          { m_xMuonID.doMCPSelection(doMCP);  }
-  inline bool                        EventPassed()                        { return m_passedSelectionCuts;   }
+  inline bool                        AcceptEvent()                        { return m_passedSelectionCuts;   }
   void                               finalize();
   inline unsigned int                getAcceptedEvents ()                 { return m_acceptedEventCount; }      
   const xAOD::Muon*                  getCombMuon(  unsigned int uPart )   { return (uPart < NUM_MUONS) ? m_pxRecMuon[uPart] : NULL;  }
