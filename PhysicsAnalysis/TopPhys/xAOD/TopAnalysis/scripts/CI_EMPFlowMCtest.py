@@ -16,12 +16,12 @@ cutfilepath = ROOT.PathResolver.find_file(cutfilename,
 returnCode = CITest("DAOD_PHYS MC",
                     cutfilename,
                     cutfilepath,
-                    "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22/MC/p4844/"
-                    "DAOD_PHYS.410470_r13145_p4844.pool.root",
+                    "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22/MC/p5267/"
+                    "DAOD_PHYS.410470_r13145_p5226.pool.root.1",
                     [("#NEvents.*", "NEvents 500")])
 
 if returnCode != 0:
-    print("Error in DAOD_PHYS MC")
+    print("Error in DAOD_PHYS MC20")
     sys.exit(returnCode)
 
 # -- Return 0 as all tests were successful -- #

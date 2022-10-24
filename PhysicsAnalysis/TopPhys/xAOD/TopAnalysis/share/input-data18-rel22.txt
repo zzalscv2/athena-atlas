@@ -1,1 +1,1 @@
-/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22/Data/p4844/DAOD_PHYS.data18_r13100_p4844.pool.root
+/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22/Data/p5226/DAOD_PHYS.data18.p5226.pool.root.1

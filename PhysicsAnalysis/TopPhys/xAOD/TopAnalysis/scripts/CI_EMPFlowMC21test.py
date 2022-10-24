@@ -8,20 +8,20 @@ from CI_test import CITest
 import sys
 import ROOT
 
-cutfilename = "validation-cuts.txt"
+cutfilename = "validation-cuts-mc21.txt"
 cutfilepath = ROOT.PathResolver.find_file(cutfilename,
                                           "DATAPATH",
                                           ROOT.PathResolver.RecursiveSearch)
 
-returnCode = CITest("DAOD_PHYS DATA",
+returnCode = CITest("DAOD_PHYS MC",
                     cutfilename,
                     cutfilepath,
-                    "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22/Data/p5226/"
-                    "DAOD_PHYS.data18.p5226.pool.root.1",
-                    [("#NEvents.*", "NEvents 5000")])
+                    "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/AnalysisTop/ContinuousIntegration/R22-Run3/MC/p5278/"
+                    "DAOD_PHYS.p5278.pool.root.1",
+                    [("#NEvents.*", "NEvents 500")])
 
 if returnCode != 0:
-    print("Error in DAOD_PHYS Data18")
+    print("Error in DAOD_PHYS MC21")
     sys.exit(returnCode)
 
 # -- Return 0 as all tests were successful -- #
