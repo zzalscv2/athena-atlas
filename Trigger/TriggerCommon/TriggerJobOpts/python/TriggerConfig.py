@@ -175,7 +175,6 @@ def triggerSummaryCfg(flags, hypos):
     Returns: ca, algorithm
     """
     acc = ComponentAccumulator()
-    from TrigEDMConfig.TriggerEDMRun3 import recordable
     from TrigOutputHandling.TrigOutputHandlingConfig import DecisionSummaryMakerAlgCfg
     decisionSummaryAlg = DecisionSummaryMakerAlgCfg()
     chainToLastCollection = OrderedDict() # keys are chain names, values are lists of collections
@@ -224,8 +223,6 @@ def triggerSummaryCfg(flags, hypos):
     decisionSummaryAlg.FinalDecisionKeys = collectionsWithFinalDecisions
     decisionSummaryAlg.FinalStepDecisions = dict(chainToLastCollection)
     decisionSummaryAlg.DecisionsSummaryKey = "HLTNav_Summary" # Output
-    decisionSummaryAlg.DoCostMonitoring = flags.Trigger.CostMonitoring.doCostMonitoring
-    decisionSummaryAlg.CostWriteHandleKey = recordable(flags.Trigger.CostMonitoring.outputCollection)
     decisionSummaryAlg.SetFilterStatus = flags.Trigger.writeBS
     return acc, decisionSummaryAlg
 
@@ -662,6 +659,12 @@ def triggerRunCfg( flags, menu=None ):
     # Configure output writing
     outputAcc, edmSet = triggerOutputCfg( flags, hypos )
     acc.merge( outputAcc, sequenceName="HLTTop" )
+
+    # Cost monitoring should be finished between acceptedEventTopSeq and EDMCreator
+    from TrigCostMonitor.TrigCostMonitorConfig import TrigCostMonitorFinalizeCfg
+    costFinalizeAlg = TrigCostMonitorFinalizeCfg(flags)
+    if costFinalizeAlg: # None if Cost Monitoring is turned off
+        acc.addEventAlgo(costFinalizeAlg, sequenceName="HLTFinalizeSeq" )
 
     if edmSet:
         mergingAlg = triggerMergeViewsAndAddMissingEDMCfg( flags, [edmSet] , hypos, viewMakers, decObj, decObjHypoOut )

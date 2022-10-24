@@ -163,7 +163,7 @@ class TrigCostSvc : public extends <AthService, ITrigCostSvc> {
   Gaudi::Property<bool>        m_saveHashes{this, "SaveHashes", false, "Store a copy of the hash dictionary for easier debugging"};
   Gaudi::Property<size_t>      m_masterSlot{this, "MasterSlot", 0, "The slot responsible for saving MultiSlot data"};
   Gaudi::Property<std::string> m_costSupervisorAlgName{this, "CostSupervisorAlgName", "TrigCostSupervisorAlg", "The name of cost monitoring supervising algorithm, starting at the begining of the event"};
-  Gaudi::Property<std::string> m_decisionSummaryMakerAlgName{this, "DecisionSummaryMakerAlgName", "DecisionSummaryMakerAlg", "The name of the Gaudi Configurable of type DecisionSummaryMakerAlg"};
+  Gaudi::Property<std::string> m_costFinalizeAlgName{this, "CostFinalizeAlgName", "TrigCostFinalizeAlg", "The name of cost monitoring finalize algorithm, starting at the end of the event"};
 
 
 };

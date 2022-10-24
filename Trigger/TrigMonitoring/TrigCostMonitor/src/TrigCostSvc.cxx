@@ -211,9 +211,9 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
     return StatusCode::SUCCESS;
   }
 
-  // As we will miss the AuditType::After of the DecisionSummaryMakerAlg (which is calling this TrigCostSvc::endEvent), let's add it now.
+  // As we will miss the AuditType::After of the TrigCostFinalizeAlg (which is calling this TrigCostSvc::endEvent), let's add it now.
   // This will be our canonical final timestamps for measuring this event. Similar was done for HLTSeeding at the start
-  ATH_CHECK(processAlg(context, m_decisionSummaryMakerAlgName, AuditType::After));
+  ATH_CHECK(processAlg(context, m_costFinalizeAlgName, AuditType::After));
 
   // Reset eventMonitored flags
   m_eventMonitored[ context.slot() ] = false;
@@ -230,7 +230,7 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
   // Let's start by getting the global STOP time we just wrote
   uint64_t eventStopTime = 0;
   {
-    const AlgorithmIdentifier myAi = AlgorithmIdentifierMaker::make(context, m_decisionSummaryMakerAlgName, msg());
+    const AlgorithmIdentifier myAi = AlgorithmIdentifierMaker::make(context, m_costFinalizeAlgName, msg());
     ATH_CHECK( myAi.isValid() );
     tbb::concurrent_hash_map<AlgorithmIdentifier, TrigTimeStamp, AlgorithmIdentifierHashCompare>::const_accessor stopTimeAcessor;
     if (m_algStopTime.retrieve(myAi, stopTimeAcessor, msg()).isFailure()) {
@@ -289,7 +289,7 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
     }
 
     // Lock the start and stop times to be no later than eventStopTime.
-    // E.g. it's possible for an alg in another slot to start or stop running after 'processAlg(context, m_decisionSummaryMakerAlgName, AuditType::After))'
+    // E.g. it's possible for an alg in another slot to start or stop running after 'processAlg(context, m_costFinalizeAlgName, AuditType::After))'
     // but before 'lockUnique( m_slotMutex[ context.slot() ] )', creating a timestamp after the nominal end point for this event.
     // If the alg starts afterwards, we disregard it in lieu of setting to have zero walltime.
     // If the alg stops afterwards, we truncate its stop time to be no later than eventStopTime

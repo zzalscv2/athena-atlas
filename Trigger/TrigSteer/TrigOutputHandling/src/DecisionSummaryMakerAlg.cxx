@@ -32,11 +32,6 @@ StatusCode DecisionSummaryMakerAlg::initialize() {
     }
   }
 
-  ATH_CHECK( m_costWriteHandleKey.initialize( m_doCostMonitoring ) );
-  ATH_CHECK( m_rosWriteHandleKey.initialize( m_doCostMonitoring ) );
-  if (m_doCostMonitoring) {
-    ATH_CHECK( m_trigCostSvcHandle.retrieve() );
-  }
   ATH_CHECK( m_prescaler.retrieve() );
   if (!m_monTool.empty()) {
     ATH_CHECK(m_monTool.retrieve());
@@ -168,14 +163,6 @@ StatusCode DecisionSummaryMakerAlg::execute(const EventContext& context) const {
   decisionIDs( prescaledChains, prescaledIDs ); // Extract from prescaledChains (a Decision*) into prescaledIDs (a set<int>)
   decisionIDs( prescaledOutput ).insert( decisionIDs( prescaledOutput ).end(),
         prescaledIDs.begin(), prescaledIDs.end() ); // Save this to the output
-
-  // Do cost monitoring
-  if (m_doCostMonitoring) {
-    SG::WriteHandle<xAOD::TrigCompositeContainer> costMonOutput = createAndStore(m_costWriteHandleKey, context);
-    SG::WriteHandle<xAOD::TrigCompositeContainer> rosMonOutput = createAndStore(m_rosWriteHandleKey, context);
-    // Populate collection (assuming monitored event, otherwise collection will remain empty)
-    ATH_CHECK(m_trigCostSvcHandle->endEvent(context, costMonOutput, rosMonOutput));
-  }
 
   // Calculate and save express stream prescale decisions
   // TODO: this involves pointless conversions set<uint> -> vector<HLT::Identifier> -> set<uint>, adapt IPrescalingTool to operate on set<uint>
