@@ -6,20 +6,6 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from SimuJobTransforms.CommonSimulationSteering import CommonSimulationCfg, specialConfigPreInclude, specialConfigPostInclude
 
 
-def defaultSimulationFlags(ConfigFlags):
-    """Fill default simulation flags"""
-    # TODO: how to autoconfigure those
-    # Writing out CalibrationHits only makes sense if we are running FullG4 simulation without frozen showers
-    from SimulationConfig.SimEnums import CalibrationRun, LArParameterization
-    if ConfigFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
-        ConfigFlags.Sim.CalibrationRun = CalibrationRun.Off
-
-    ConfigFlags.Sim.RecordStepInfo = False
-    ConfigFlags.Sim.ReleaseGeoModel = False
-    ConfigFlags.Sim.ISFRun = False # Need to change this for G4AA and ISF!
-    ConfigFlags.GeoModel.Align.Dynamic = False
-
-
 def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
     log = logging.getLogger('AtlasG4_tf')
@@ -38,17 +24,18 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
 
+    # Set the simulator
     if hasattr(runArgs, 'simulator'):
         ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
     else:
         ConfigFlags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
 
+    # This is not ISF
+    ConfigFlags.Sim.ISFRun = False
+
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
-
-    # Setup common simulation flags
-    defaultSimulationFlags(ConfigFlags)
 
     # Beam Type
     if hasattr(runArgs,'beamType'):

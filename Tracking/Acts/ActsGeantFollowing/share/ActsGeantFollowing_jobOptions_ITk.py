@@ -59,8 +59,6 @@ def defaultTestFlags(configFlags, args):
     configFlags.Sim.CavernBackground = CavernBackground.Signal
     configFlags.Sim.ISFRun = False
     configFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
-    configFlags.Sim.ReleaseGeoModel = False
-
 
     configFlags.Input.RunNumber = [284500]
     configFlags.Input.OverrideRunNumber = True

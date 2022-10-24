@@ -62,7 +62,6 @@ def defaultTestFlags(configFlags, args):
     configFlags.Sim.CalibrationRun = CalibrationRun.Off 
     configFlags.Sim.RecordStepInfo = False
     configFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
-    configFlags.Sim.ReleaseGeoModel = False
     configFlags.Sim.ISFRun = True
     configFlags.Sim.ISF.Simulator = SimulationFlavour.ATLFAST3MT
     configFlags.Sim.FastCalo.ParamsInputFilename = "FastCaloSim/MC16/TFCSparam_run2_reprocessing.root"
