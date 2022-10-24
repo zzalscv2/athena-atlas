@@ -65,7 +65,7 @@ Subtractor::makeOrderedCellList(
     CaloClusterCellLink::const_iterator lastCell = theCellLink->end();
 
     /* Loop over cells in cluster */
-    for (; firstCell != lastCell; firstCell++) {
+    for (; firstCell != lastCell; ++firstCell) {
       std::pair<const CaloCell*, int> myPair((*firstCell),
                                        countMatchedClusters);
       orderedCells.addCell(myPair);

@@ -88,7 +88,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
   const EventContext &ctx = Gaudi::Hive::currentContext();
 
   /* loop tracks in data.tracks and do matching */
-  for (auto thisEfRecTrack : data.tracks)
+  for (auto *thisEfRecTrack : data.tracks)
   {
     /** No point to do anything if e/p reference bin does not exist */
     if (!thisEfRecTrack->hasBin()) {
@@ -140,7 +140,7 @@ unsigned int PFSubtractionTool::matchAndCreateEflowCaloObj(PFData &data) const{
 
     if (msgLvl(MSG::DEBUG))
     {
-      for (auto thisClusterLink : bestClusters ) {
+      for (auto *thisClusterLink : bestClusters ) {
         xAOD::CaloCluster* thisCluster = thisClusterLink->getCluster()->getCluster();
         ATH_MSG_DEBUG("Matched this track to cluster with e,pt, eta and phi " << thisCluster->e() << ", " << thisCluster->pt() << ", " << thisCluster->eta() << " and " << thisCluster->phi());
       }
@@ -430,13 +430,13 @@ std::string PFSubtractionTool::printCluster(const xAOD::CaloCluster* cluster) {
 
 void PFSubtractionTool::printAllClusters(const eflowRecClusterContainer& recClusterContainer) const {
 
-  for ( auto thisEFRecCluster : recClusterContainer){
+  for ( const auto *thisEFRecCluster : recClusterContainer){
     if (thisEFRecCluster->getTrackMatches().empty()) {
       ATH_MSG_DEBUG("Isolated" << printCluster(thisEFRecCluster->getCluster()));
     } else {
       ATH_MSG_DEBUG("Matched" << printCluster(thisEFRecCluster->getCluster()));
       std::vector<eflowTrackClusterLink*> theTrackLinks = thisEFRecCluster->getTrackMatches();
-      for ( auto thisTrack : theTrackLinks){
+      for ( auto *thisTrack : theTrackLinks){
        ATH_MSG_DEBUG("Matched" << printTrack(thisTrack->getTrack()->getTrack()));
       }
     }

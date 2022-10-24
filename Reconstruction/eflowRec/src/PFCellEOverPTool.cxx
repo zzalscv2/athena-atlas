@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "eflowRec/eflowEEtaBinnedParameters.h"
@@ -15,7 +15,11 @@
 #include <fstream>
 #include <sstream>
 
-PFCellEOverPTool::PFCellEOverPTool(const std::string& type,const std::string& name,const IInterface* parent) : IEFlowCellEOverPTool( type, name, parent) {
+PFCellEOverPTool::PFCellEOverPTool(const std::string& type,
+                                   const std::string& name,
+                                   const IInterface* parent)
+  : IEFlowCellEOverPTool(type, name, parent)
+{
 
   declareInterface<IEFlowCellEOverPTool>(this);
 
@@ -30,7 +34,6 @@ PFCellEOverPTool::PFCellEOverPTool(const std::string& type,const std::string& na
     m_etaBinBounds.push_back(x);
   }
   m_etaBinBounds.push_back(2.5);
-
 }
 
 StatusCode PFCellEOverPTool::initialize(){
@@ -39,7 +42,7 @@ StatusCode PFCellEOverPTool::initialize(){
 }
 
 
-std::string_view PFCellEOverPTool::eBinsToString(const E_BINS& e_bins) const {
+std::string_view PFCellEOverPTool::eBinsToString(const E_BINS& e_bins){
 
   switch(e_bins){
     case E001bin : return "E001bin";
@@ -52,7 +55,7 @@ std::string_view PFCellEOverPTool::eBinsToString(const E_BINS& e_bins) const {
   }
 }
 
-std::string_view PFCellEOverPTool::etaBinsToString(const ETA_BINS& eta_bins) const {
+std::string_view PFCellEOverPTool::etaBinsToString(const ETA_BINS& eta_bins) {
 
   switch(eta_bins){
     case eta050bin : return "eta050bin";
