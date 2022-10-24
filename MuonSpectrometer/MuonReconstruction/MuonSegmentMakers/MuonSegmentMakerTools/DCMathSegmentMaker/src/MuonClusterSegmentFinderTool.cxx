@@ -758,7 +758,7 @@ namespace Muon {
                         usedLayerR = true;
                         NSWSeed seed{this,hitL, hitR};
                         if (!usePhi && m_ipConstraint) {
-                            const double eta = std::abs(seed.dir().eta());
+                            const double eta = seed.dir().perp() > std::numeric_limits<float>::epsilon() ? std::abs(seed.dir().eta()): FLT_MAX;
                             if (eta < minEtaNSW || eta > maxEtaNSW) {
                                 continue;
                             }
