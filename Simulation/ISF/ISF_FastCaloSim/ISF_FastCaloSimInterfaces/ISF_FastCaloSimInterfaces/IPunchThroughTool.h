@@ -12,8 +12,6 @@
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
-#include "ISF_FastCaloSimEvent/TFCSSimulationState.h"
-
 namespace Trk{
   class Track;
 }
@@ -41,7 +39,7 @@ namespace ISF {
         DeclareInterfaceID(IPunchThroughTool, 1, 0);
 
         /** Creates new vector of ISFParticle out of a given ISFParticle */
-   virtual const ISF::ISFParticleVector* computePunchThroughParticles(const ISFParticle& isfp, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine) const = 0;
+   virtual const ISF::ISFParticleVector* computePunchThroughParticles(const ISFParticle& isfp, CLHEP::HepRandomEngine* rndmEngine) const = 0;
  };
 
 } // end of namespace
