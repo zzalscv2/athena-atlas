@@ -7,7 +7,7 @@
 //                              -------------------
 //      This reentrant algorithm is meant to decorate the FEX Towers (input data and simulation) with the corresponding matching set of SuperCell from LAr
 //      Information about SCellContainer objetcs are in:
-//          - https://gitlab.cern.ch/atlas/athena/-/blob/master/Calorimeter/CaloEvent/CaloEvent/CaloCell.h
+//          - https://gitlab.cern.ch/atlas/athena/-/blob/22.0/Calorimeter/CaloEvent/CaloEvent/CaloCell.h
 //      
 //     begin                : 01 09 2022
 //     email                : sergi.rodriguez@cern.ch
@@ -36,10 +36,12 @@ StatusCode jFexTower2SCellDecorator::initialize() {
     ATH_CHECK( m_SCellEtdecorKey.initialize() );
     ATH_CHECK( m_SCellEtadecorKey.initialize() );
     ATH_CHECK( m_SCellPhidecorKey.initialize() );
+    ATH_CHECK( m_SCellIDdecorKey.initialize() );
     ATH_CHECK( m_jtowerEtMeVdecorKey.initialize() );
     ATH_CHECK( m_TileEtMeVdecorKey.initialize() );
     ATH_CHECK( m_TileEtadecorKey.initialize() );
     ATH_CHECK( m_TilePhidecorKey.initialize() );
+    
     
     //Reading from CVMFS Trigger Tower and their corresponding SCell ID
     ATH_CHECK(ReadSCfromFile(m_jFEX2Scellmapping));
@@ -95,13 +97,14 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
     }    
         
     //Setup Decorator Handlers
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt  (m_SCellEtdecorKey    , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta (m_SCellEtadecorKey   , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi (m_SCellPhidecorKey   , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerEtMeV    (m_jtowerEtMeVdecorKey, ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEtMeV(m_TileEtMeVdecorKey  , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta  (m_TileEtadecorKey    , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi  (m_TilePhidecorKey    , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt    (m_SCellEtdecorKey     , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta   (m_SCellEtadecorKey    , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi   (m_SCellPhidecorKey    , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<int> >   jTowerSCellID    (m_SCellIDdecorKey     , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerEtMeV      (m_jtowerEtMeVdecorKey , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEtMeV  (m_TileEtMeVdecorKey   , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta    (m_TileEtadecorKey     , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi    (m_TilePhidecorKey     , ctx);
     
     //looping over the jTowers to decorate them!
     for(const xAOD::jFexTower* jTower : *jTowerContainer){
@@ -120,60 +123,79 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         std::vector<float> scEt;
         std::vector<float> scEta;
         std::vector<float> scPhi;
+        std::vector<int>   scID;
         int TileEt = -99;
         float TileEta = -99.0;
         float TilePhi = -99.0;
         
         if(source != 1){ // Source == 1 is belong to Tile Calorimeter, and of course the is not SCell information!
             
+            const std::unordered_map< uint32_t, std::vector<uint64_t> > * ptr_TTower2Cells;
+            
+            //HAD layer for HEC, FCAL2 and FCAL3
+            if(source == 3 or source > 4){
+                ptr_TTower2Cells = &m_map_TTower2SCellsHAD;
+            } 
+            else{
+                ptr_TTower2Cells = &m_map_TTower2SCellsEM;
+            }  
+            
             //check that the jFEX Tower ID exists in the map
-            if(m_map_TTower2SCells.find(jFexID) == m_map_TTower2SCells.end()) {
-                ATH_MSG_ERROR("ID: "<<jFexID<< " not found on map m_map_TTower2SCells");
+            auto it_TTower2SCells = (*ptr_TTower2Cells).find(jFexID);
+            if(it_TTower2SCells == (*ptr_TTower2Cells).end()) {
+                ATH_MSG_ERROR("ID: "<<jFexID<< " not found on map m_map_TTower2SCellsEM/HAD");
                 return StatusCode::FAILURE;
             }
             
-            for (auto const& SCellID : m_map_TTower2SCells.at(jFexID)) {
-
+            for (auto const& SCellID : it_TTower2SCells->second ) {
+                
                 //check that the SCell Identifier exists in the map
-                if(map_ScellID2ptr.find(SCellID) == map_ScellID2ptr.end()) {
+                auto it_ScellID2ptr = map_ScellID2ptr.find(SCellID);
+                if(it_ScellID2ptr == map_ScellID2ptr.end()) {
                     ATH_MSG_ERROR("Scell ID: "<<SCellID<< " not found on map map_ScellID2ptr");
                     return StatusCode::FAILURE;
                 }
 
-                const CaloCell* myCell = map_ScellID2ptr.at(SCellID);
+
+                const CaloCell* myCell = it_ScellID2ptr->second;
+                
                 scEt.push_back(myCell->et());
                 scEta.push_back(myCell->eta());
                 scPhi.push_back(myCell->phi());
-
+                // bit shifting to get only a 32 bit number
+                scID.push_back( SCellID >> 32 );
             }   
+
         }
         else if(source == 1){
             
             //check that the jFEX Tower ID exists in the map
-            if(m_map_TTower2Tile.find(jFexID) == m_map_TTower2Tile.end()) {
+            auto it_TTower2Tile = m_map_TTower2Tile.find(jFexID);
+            if(it_TTower2Tile == m_map_TTower2Tile.end()) {
                 ATH_MSG_ERROR("ID: "<<jFexID<< " not found on map m_map_TTower2Tile");
                 return StatusCode::FAILURE;
             }
             
-            uint32_t TileID = std::get<0>( m_map_TTower2Tile.at(jFexID) );
+            uint32_t TileID = std::get<0>( it_TTower2Tile->second );
             
             //check that the Tile Identifier exists in the map
-            if(map_TileID2ptr.find(TileID) == map_TileID2ptr.end()) {
+            auto it_TileID2ptr = map_TileID2ptr.find(TileID);
+            if(it_TileID2ptr == map_TileID2ptr.end()) {
                 ATH_MSG_ERROR("Scell ID: "<<TileID<< " not found on map map_TileID2ptr");
                 return StatusCode::FAILURE;
             }            
             
-            TileEt = map_TileID2ptr.at(TileID)->cpET()*500;
-            TileEta = map_TileID2ptr.at(TileID)->eta();
-            float phi = map_TileID2ptr.at(TileID)->phi() < M_PI ? map_TileID2ptr.at(TileID)->phi() : map_TileID2ptr.at(TileID)->phi()-2*M_PI;
+            TileEt = (it_TileID2ptr->second)->cpET()*500;
+            TileEta = (it_TileID2ptr->second)->eta();
+            float phi = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
             TilePhi = phi;
-            
         }
-                    
+        
         // Decorating the tower with the corresponding information
         jTowerSCellEt   (*jTower) = scEt;
         jTowerSCellEta  (*jTower) = scEta;
         jTowerSCellPhi  (*jTower) = scPhi;
+        jTowerSCellID   (*jTower) = scID;
         jTowerEtMeV     (*jTower) = static_cast<int>( jFEXCompression::Expand(jFexEt) );
         jTowerTileEtMeV (*jTower) = static_cast<int>( TileEt );
         jTowerTileEta   (*jTower) = TileEta;
@@ -200,8 +222,10 @@ StatusCode  jFexTower2SCellDecorator::ReadSCfromFile(const std::string& fileName
     
     //loading the mapping information into an unordered_map <Fex Tower ID, vector of SCell IDs>
     while ( std::getline (myfile, myline) ) {
-        std::vector<uint64_t> SCellvector;
-        SCellvector.clear();
+        std::vector<uint64_t> SCellvectorEM;
+        SCellvectorEM.clear();
+        std::vector<uint64_t> SCellvectorHAD;
+        SCellvectorHAD.clear();
 
         //removing the header of the file (it is just information!)
         if(myline[0] == '#') continue;
@@ -228,11 +252,18 @@ StatusCode  jFexTower2SCellDecorator::ReadSCfromFile(const std::string& fileName
                 
                 // converts hex number to unsigned long long int
                 uint64_t scid_uint64 = std::strtoull(substr.c_str(), nullptr, 0);
-                SCellvector.push_back(scid_uint64);                
+                
+                //empty slots are filled with 0xffffffffffffffff
+                if(scid_uint64 == 0xffffffffffffffff) continue;
+                
+                //from element from 2 to 13 are EM SCells, element 14 is a HAD SCell
+                if(elem<14) SCellvectorEM.push_back(scid_uint64);
+                else        SCellvectorHAD.push_back(scid_uint64);          
             }
         }        
         
-        m_map_TTower2SCells[TTID] = SCellvector;
+        m_map_TTower2SCellsEM[TTID] = SCellvectorEM;
+        m_map_TTower2SCellsHAD[TTID] = SCellvectorHAD;
         
     }
     myfile.close();
