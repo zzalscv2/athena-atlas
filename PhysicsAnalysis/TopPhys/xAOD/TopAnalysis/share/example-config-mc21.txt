@@ -33,22 +33,25 @@ Systematics Nominal #Nominal->only nominal. All -> all systematics (will be much
 ############GRL and PRW#############
 #here Good Run List and Pileup Reweighting settings are provided, see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/TopGroupDataDerivationList#Lumicalc_GRL_and_PRW_files for the most update settings
 
-##these are the settings for MC16e, we don't have centrally-provided PRW files for mc20 yet
+##these are the settings for MC21a
 GRLDir GoodRunsLists
-GRLFile data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml
+GRLFile data22_13p6TeV/20220902/data22_13p6TeV.periodF_DetStatus-v108-pro28_MERGED_PHYS_StandardGRL_All_Good_25ns.xml
 
-PRWConfigFiles_FS dev/AnalysisTop/PileupReweighting/user.iconnell.Top.PRW.MC16e.FS.v2/prw.merged.root
-PRWConfigFiles_AF dev/AnalysisTop/PileupReweighting/user.iconnell.Top.PRW.MC16e.AF.v2/prw.merged.root
-PRWActualMu_FS GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root
-PRWActualMu_AF GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root
-PRWLumiCalcFiles GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root
+IsRun3 True # IMPORTANT this flag ensures that ANalysisTop is configured to run over Run-III data/MC instead of Run-II R22-reprocessed data/MC
+
+PRWConfigFiles_FS PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root
+PRWConfigFiles_AF PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root
+PRWLumiCalcFiles GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root
+
+#For Run-III need to use a different TDP file (default is for 13 TeV Run-II)
+TDPPath dev/AnalysisTop/TopDataPreparation/XSection-MC21-13p6TeV.data
 
 ###########Reco-level object definitions (i.e. object-level selection)##########
 
 ### Global lepton trigger scale factor example
-UseGlobalLeptonTriggerSF True
-GlobalTriggers 2015@e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose,mu20_iloose_L1MU15_OR_mu50 2016@e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0,mu26_ivarmedium_OR_mu50 2017@e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0,mu26_ivarmedium_OR_mu50 2018@e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0,mu26_ivarmedium_OR_mu50
-GlobalTriggersLoose 2015@e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose,mu20_iloose_L1MU15_OR_mu50 2016@e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0,mu26_ivarmedium_OR_mu50 2017@e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0,mu26_ivarmedium_OR_mu50 2018@e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0,mu26_ivarmedium_OR_mu50
+UseGlobalLeptonTriggerSF False
+GlobalTriggers 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI,mu26_ivarmedium_L1MU14FCH_OR_mu50_L1MU14FCH
+GlobalTriggersLoose 2022@e26_lhtight_ivarloose_L1EM22VHI_OR_e60_lhmedium_L1EM22VHI_OR_e140_lhloose_L1EM22VHI,mu26_ivarmedium_L1MU14FCH_OR_mu50_L1MU14FCH
 
 ### Object container names
 ElectronCollectionName Electrons
@@ -78,6 +81,7 @@ MuonIsolationWPs PflowTight_VarRad PflowLoose_VarRad Tight_VarRad Loose_VarRad
 MuonIsolation Tight_VarRad
 MuonIsolationSF None
 MuonIsolationLoose None
+MuonForceTrigger HLT_mu26_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH
 
 ### Jet configuration
 JetPt 25000
@@ -115,20 +119,8 @@ PDFInfo False
 
 #####General definition of periods#####
 
-SUB period_2015
-RUN_NUMBER >= 276262
-RUN_NUMBER <= 284484
-
-SUB period_2016
-RUN_NUMBER >= 296939
-RUN_NUMBER <= 311481
-
-SUB period_2017
-RUN_NUMBER >= 324320
-RUN_NUMBER <= 341649
-
-SUB period_2018
-RUN_NUMBER >= 348197
+SUB period_2022
+RUN_NUMBER >= 400000
 
 #####Reco-level definitions######
 
@@ -143,60 +135,24 @@ RECO_LEVEL
 
 ### lepton trigger and offline cuts sub-selections
 
-SUB EL_2015
+SUB EL_2022
 . BASIC
-. period_2015
-GTRIGDEC
+. period_2022
+TRIGDEC HLT_e26_lhtight_ivarloose_L1EM22VHI HLT_e60_lhmedium_L1EM22VHI HLT_e140_lhloose_L1EM22VHI
 EL_N 25000 >= 1
 
-SUB EL_2016
+SUB MU_2022
 . BASIC
-. period_2016
-GTRIGDEC
-EL_N 27000 >= 1
-
-SUB EL_2017
-. BASIC
-. period_2017
-GTRIGDEC
-EL_N 27000 >= 1
-
-SUB EL_2018
-. BASIC
-. period_2018
-GTRIGDEC
-EL_N 27000 >= 1
-
-SUB MU_2015
-. BASIC
-. period_2015
-GTRIGDEC
+. period_2022
+TRIGDEC HLT_mu26_ivarmedium_L1MU14FCH HLT_mu50_L1MU14FCH
 MU_N 25000 >= 1
-
-SUB MU_2016
-. BASIC
-. period_2016
-GTRIGDEC
-MU_N 27000 >= 1
-
-SUB MU_2017
-. BASIC
-. period_2017
-GTRIGDEC
-MU_N 27000 >= 1
-
-SUB MU_2018
-. BASIC
-. period_2018
-GTRIGDEC
-MU_N 27000 >= 1
 
 ### e+jets selections
 
 SUB ejets_basic
 EL_N 25000 == 1
 MU_N 25000 == 0
-GTRIGMATCH
+TRIGMATCH
 JETCLEAN LooseBad
 JET_N 25000 >= 1
 JET_N 25000 >= 2
@@ -210,26 +166,8 @@ EXAMPLEPLOTS
 #PRINT
 NOBADMUON
 
-SELECTION ejets_DL1r_2015
-. EL_2015
-. ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
-SAVE
-
-SELECTION ejets_DL1r_2016
-. EL_2016
-. ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
-SAVE
-
-SELECTION ejets_DL1r_2017
-. EL_2017
-. ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
-SAVE
-
-SELECTION ejets_DL1r_2018
-. EL_2018
+SELECTION ejets_DL1r_2022
+. EL_2022
 . ejets_basic
 JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
 SAVE
@@ -239,7 +177,7 @@ SAVE
 SUB mujets_basic
 MU_N 25000 == 1
 EL_N 25000 == 0
-GTRIGMATCH
+TRIGMATCH
 JETCLEAN LooseBad
 JET_N 25000 >= 1
 JET_N 25000 >= 2
@@ -252,26 +190,8 @@ EXAMPLEPLOTS
 #PRINT
 NOBADMUON
 
-SELECTION mujets_DL1r_2015
-. MU_2015
-. mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
-SAVE
-
-SELECTION mujets_DL1r_2016
-. MU_2016
-. mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
-SAVE
-
-SELECTION mujets_DL1r_2017
-. MU_2017
-. mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
-SAVE
-
-SELECTION mujets_DL1r_2018
-. MU_2018
+SELECTION mujets_DL1r_2022
+. MU_2022
 . mujets_basic
 JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
 SAVE
