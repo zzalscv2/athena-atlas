@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 // HepMC includes
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/Flow.h"
 #include "AtlasHepMC/SimpleVector.h" // HepMC::FourVector
 

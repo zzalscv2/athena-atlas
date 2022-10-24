@@ -4,13 +4,13 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// GenEvent_p6.h 
+// GenEvent_p6.h
 // Header file for class GenEvent_p6
 // Author: S.Binet<binet@cern.ch>
 // Date:   March 2007
-/////////////////////////////////////////////////////////////////// 
-#ifndef GENERATOROBJECTSTPCNV_GENEVENT_P6_H 
-#define GENERATOROBJECTSTPCNV_GENEVENT_P6_H 
+///////////////////////////////////////////////////////////////////
+#ifndef GENERATOROBJECTSTPCNV_GENEVENT_P6_H
+#define GENERATOROBJECTSTPCNV_GENEVENT_P6_H
 
 // STL includes
 #include <vector>
@@ -20,56 +20,57 @@
 class McEventCollectionCnv_p6;
 
 class GenEvent_p6
-{ 
-  /////////////////////////////////////////////////////////////////// 
+{
+  ///////////////////////////////////////////////////////////////////
   // Friend classes
-  /////////////////////////////////////////////////////////////////// 
+  ///////////////////////////////////////////////////////////////////
 
   // Make the AthenaPoolCnv class our friend
   friend class McEventCollectionCnv_p6;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Public methods 
-  /////////////////////////////////////////////////////////////////// 
- public: 
+  ///////////////////////////////////////////////////////////////////
+  // Public methods
+  ///////////////////////////////////////////////////////////////////
+public:
 
   /** Default constructor
    */
   GenEvent_p6();
-  
+
   /** Constructor with parameters
    */
-  GenEvent_p6( int signalProcessId, 
-	       int eventNbr,
-	       int mpi,
-	       double eventScale,
-	       double alphaQCD,
-	       double alphaQED,
-	       int signalProcessVtx,
-	       int beamParticle1,
-	       int beamParticle2,
-	       const std::vector<double>& weights,
-	       const std::vector<long int>& randomStates,
-	       const std::vector<double>& crossSection,
-	       const std::vector<float>& heavyIon,
-	       const std::vector<double>& pdfinfo,
-	       int momentumUnit,
-	       int lengthUnit,
-	       unsigned int verticesBegin,
-	       unsigned int verticesEnd,
-	       unsigned int particlesBegin,
-	       unsigned int particlesEnd 
-          ,const std::vector<int>&         e_attribute_id =  std::vector<int>()    
-          ,const std::vector<std::string>& e_attribute_name = std::vector<std::string>() 
-          ,const std::vector<std::string>& e_attribute_string = std::vector<std::string>() 
-          ,const std::vector<std::string>& r_attribute_name = std::vector<std::string>()   
-          ,const std::vector<std::string>& r_attribute_string = std::vector<std::string>() 
-	       );
+  GenEvent_p6( int signalProcessId,
+               int eventNbr,
+               int mpi,
+               double eventScale,
+               double alphaQCD,
+               double alphaQED,
+               double filterWeight,
+               int signalProcessVtx,
+               int beamParticle1,
+               int beamParticle2,
+               const std::vector<double>& weights,
+               const std::vector<long int>& randomStates,
+               const std::vector<double>& crossSection,
+               const std::vector<float>& heavyIon,
+               const std::vector<double>& pdfinfo,
+               int momentumUnit,
+               int lengthUnit,
+               unsigned int verticesBegin,
+               unsigned int verticesEnd,
+               unsigned int particlesBegin,
+               unsigned int particlesEnd
+               ,const std::vector<int>&         e_attribute_id =  std::vector<int>()
+               ,const std::vector<std::string>& e_attribute_name = std::vector<std::string>()
+               ,const std::vector<std::string>& e_attribute_string = std::vector<std::string>()
+               ,const std::vector<std::string>& r_attribute_name = std::vector<std::string>()
+               ,const std::vector<std::string>& r_attribute_string = std::vector<std::string>()
+               );
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected data: 
-  /////////////////////////////////////////////////////////////////// 
- protected: 
+  ///////////////////////////////////////////////////////////////////
+  // Protected data:
+  ///////////////////////////////////////////////////////////////////
+protected:
 
   /** Id of the processus being generated
    */
@@ -80,7 +81,7 @@ class GenEvent_p6
   int m_eventNbr;
 
   /** Number of multi particle interactions
-  */
+   */
   int m_mpi;
 
   /** Energy scale. see hep-ph/0109068
@@ -95,6 +96,10 @@ class GenEvent_p6
    */
   double m_alphaQED;
 
+  /** value of the extra weight introduced during reweighting events in filter
+   */
+  double m_filterWeight;
+
   /** Barcode of the GenVertex holding the signal process.
    *  0 means that no signal process vertex has been written out.
    *  This may come from upstream limitations (like HEPEVT)
@@ -102,11 +107,11 @@ class GenEvent_p6
   int m_signalProcessVtx;
 
   /** Barcode of the beam particle 1
-  */
+   */
   int m_beamParticle1;
-  
+
   /** Barcode of the beam particle 2
-  */
+   */
   int m_beamParticle2;
 
   /** Weights for this event.
@@ -119,24 +124,24 @@ class GenEvent_p6
   std::vector<long int> m_randomStates;
 
   /** Container of HepMC::GenCrossSection object translated to vector<double>
-  */
+   */
   std::vector<double> m_crossSection;
 
   /** Container of HepMC::HeavyIon object translated to vector<double>
-  */
+   */
   std::vector<float> m_heavyIon;
 
-  /** Container of HepMC::PdfInfo object translated to 
+  /** Container of HepMC::PdfInfo object translated to
    * vector<double> for simplicity
    */
   std::vector<double> m_pdfinfo;
 
-  /** HepMC::Units::MomentumUnit casted to int 
-  */
+  /** HepMC::Units::MomentumUnit casted to int
+   */
   int m_momentumUnit;
 
-  /** HepMC::Units::LengthUnit casted to int 
-  */
+  /** HepMC::Units::LengthUnit casted to int
+   */
   int m_lengthUnit;
 
   /** Begin position in the vector of vertices composing this event.
@@ -161,11 +166,11 @@ class GenEvent_p6
   std::vector<std::string> m_e_attribute_string; ///< Attribute serialized as string for event
   std::vector<std::string> m_r_attribute_name;   ///< Attribute name for run info
   std::vector<std::string> m_r_attribute_string; ///< Attribute serialized as string for run info
-}; 
+};
 
-/////////////////////////////////////////////////////////////////// 
-/// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
+/// Inline methods:
+///////////////////////////////////////////////////////////////////
 inline GenEvent_p6::GenEvent_p6():
   m_signalProcessId  ( -1 ),
   m_eventNbr         ( -1 ),
@@ -173,6 +178,7 @@ inline GenEvent_p6::GenEvent_p6():
   m_eventScale       ( -1 ),
   m_alphaQCD         ( -1 ),
   m_alphaQED         ( -1 ),
+  m_filterWeight     (  1 ),
   m_signalProcessVtx (  0 ),
   m_beamParticle1    (  0 ),
   m_beamParticle2    (  0 ),
@@ -194,38 +200,40 @@ inline GenEvent_p6::GenEvent_p6():
   ,m_r_attribute_string(    )
 {}
 
-inline GenEvent_p6::GenEvent_p6( int signalProcessId, 
-				 int eventNbr,
-         int mpi,
-				 double eventScale,
-				 double alphaQCD,
-				 double alphaQED,
-				 int signalProcessVtx,
-				 int beamParticle1,
-				 int beamParticle2,
-				 const std::vector<double>& weights,
-				 const std::vector<long int>& randomStates,
-				 const std::vector<double>& crossSection,
-				 const std::vector<float>& heavyIon,
-				 const std::vector<double>& pdfinfo,
-				 int momentumUnit,
-				 int lengthUnit,
-				 unsigned int verticesBegin,
-				 unsigned int verticesEnd,
-				 unsigned int particlesBegin,
-				 unsigned int particlesEnd
-                ,const std::vector<int>&         e_attribute_id
-                ,const std::vector<std::string>& e_attribute_name 
-                ,const std::vector<std::string>& e_attribute_string 
-                ,const std::vector<std::string>& r_attribute_name   
-                ,const std::vector<std::string>& r_attribute_string 
-				  ) :
+inline GenEvent_p6::GenEvent_p6( int signalProcessId,
+                                 int eventNbr,
+                                 int mpi,
+                                 double eventScale,
+                                 double alphaQCD,
+                                 double alphaQED,
+                                 double filterWeight,
+                                 int signalProcessVtx,
+                                 int beamParticle1,
+                                 int beamParticle2,
+                                 const std::vector<double>& weights,
+                                 const std::vector<long int>& randomStates,
+                                 const std::vector<double>& crossSection,
+                                 const std::vector<float>& heavyIon,
+                                 const std::vector<double>& pdfinfo,
+                                 int momentumUnit,
+                                 int lengthUnit,
+                                 unsigned int verticesBegin,
+                                 unsigned int verticesEnd,
+                                 unsigned int particlesBegin,
+                                 unsigned int particlesEnd
+                                 ,const std::vector<int>&         e_attribute_id
+                                 ,const std::vector<std::string>& e_attribute_name
+                                 ,const std::vector<std::string>& e_attribute_string
+                                 ,const std::vector<std::string>& r_attribute_name
+                                 ,const std::vector<std::string>& r_attribute_string
+                                 ) :
   m_signalProcessId  ( signalProcessId ),
   m_eventNbr         ( eventNbr ),
   m_mpi              ( mpi ),
   m_eventScale       ( eventScale ),
   m_alphaQCD         ( alphaQCD ),
   m_alphaQED         ( alphaQED ),
+  m_filterWeight     ( filterWeight ),
   m_signalProcessVtx ( signalProcessVtx ),
   m_beamParticle1    ( beamParticle1 ),
   m_beamParticle2    ( beamParticle2 ),

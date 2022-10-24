@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p3.cxx
@@ -83,6 +83,7 @@ void McEventCollectionCnv_p3::persToTrans( const McEventCollection_p3* persObj,
 
     HepMC::GenEvent * genEvt        = datapools.getGenEvent();
 #ifdef HEPMC3
+    genEvt->add_attribute ("barcodes", std::make_shared<HepMC::GenEventBarcodes>());
     genEvt->add_attribute("signal_process_id",std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
     genEvt->set_event_number(persEvt.m_eventNbr);
     genEvt->add_attribute("event_scale",std::make_shared<HepMC3::DoubleAttribute>(persEvt.m_eventScale));
@@ -188,7 +189,7 @@ McEventCollectionCnv_p3::createGenVertex( const McEventCollection_p3& persEvt,
   vtx->set_position( HepMC::FourVector(persVtx.m_x,persVtx.m_y,persVtx.m_z,persVtx.m_t) );
   vtx->set_status(persVtx.m_id);
   vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
-  vtx->add_attribute("barcode",std::make_shared<HepMC3::IntAttribute>(persVtx.m_barcode));
+  HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   // handle the in-going (orphans) particles
   //Is this needed for HEPMC3?
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
@@ -276,6 +277,7 @@ McEventCollectionCnv_p3::createGenParticle( const GenParticle_p3& persPart,
   }
   //We construct it here as vector w/o gaps.
   p->add_attribute("flows", std::make_shared<HepMC3::VectorIntAttribute>(flows));
+  HepMC::suggest_barcode(p,persPart.m_barcode);
 #else
   p->m_pdg_id              = persPart.m_pdgId;
   p->m_status              = persPart.m_status;
