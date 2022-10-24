@@ -1100,6 +1100,14 @@ else:
       if (InDetFlags.doPrintConfigurables()):
         printfunc (InDetTrkSlimmingTool)
 
+      from TrkTrackSlimmer.TrkTrackSlimmerConf import Trk__TrackSlimmer as ConfigurableTrackSlimmer
+      InDetTrkSlimmer = ConfigurableTrackSlimmer(name                 = "InDetTrackSlimmer",
+                                                 TrackLocation        = [ InputTrackCollection ],
+                                                 TrackSlimmingTool    = InDetTrkSlimmingToolTracks)
+      topSequence += InDetTrkSlimmer
+      if (InDetFlags.doPrintConfigurables()):
+        printfunc (InDetTrkSlimmer)
+
       if not (InDetFlags.doMonitoringGlobal() or
               InDetFlags.doNtupleCreation() or
               (InDetFlags.doMonitoringPixel() and not InDetFlags.doTrackSegmentsPixel()) or
