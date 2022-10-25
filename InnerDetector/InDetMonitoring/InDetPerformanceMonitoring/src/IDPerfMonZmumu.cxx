@@ -236,7 +236,6 @@ StatusCode IDPerfMonZmumu::initialize()
   ATH_MSG_INFO(" -- IDPerfMonZmumu::initialize() -- init m_beamSpotKey ");
   ATH_CHECK(m_beamSpotKey.initialize());
 
-  m_xZmm.setDebugMode(false);
   // START new place for initilization of params
   m_xZmm.setContainer       (PerfMonServices::MUON_COLLECTION);
   m_xZmm.doIsoSelection     (m_doIsoSelection);
@@ -253,8 +252,7 @@ StatusCode IDPerfMonZmumu::initialize()
   m_xZmm.SetSkipMSCheck     (m_skipMS);
 
   if (m_useCustomMuonSelector) {
-    m_xZmm.SetMuonSelectionTool (m_muonSelector);
-    
+    m_xZmm.SetMuonSelectionTool (m_muonSelector);    
   }
   // END new place for initialization of params
 
@@ -1038,6 +1036,16 @@ StatusCode IDPerfMonZmumu::execute()
       }      
     } // combined tracks
     
+
+    // double check
+    if (p1_comb && p2_comb) {
+      ATH_MSG_INFO("** IDPerfMonZmumu::execute ** successfull retrieval of muons as " << m_trackParticleName << ". p1_comb & p2_comb both exist" );
+    }
+    else {
+      ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** problems retrieving muons as " << m_trackParticleName <<". p1_comb or p2_comb are not available");
+    }
+
+
     // vertex
     const EventContext& ctx = Gaudi::Hive::currentContext();
     SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey, ctx };
@@ -1070,7 +1078,7 @@ StatusCode IDPerfMonZmumu::execute()
   //
   
 
-  if ( m_xZmm.EventPassed() ) {
+  if ( m_xZmm.AcceptEvent() ) { 
     ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Going to fill ntuples for Run: " << m_runNumber 
 		  << "  event: " << m_evtNumber 
 		  << "  Lumiblock: " << m_lumi_block 
@@ -1270,11 +1278,11 @@ StatusCode IDPerfMonZmumu::execute()
     
     // changed refitting to combinedparticles since run II DESDM_ZMUMU did not store InDetTrackParticles
     if (!p1_comb->track() || !p2_comb->track()) {
-      ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** Track missing!  p1_comb->track() or p2_comb->track()  ** Skipping Event Run: " << m_runNumber << "  event: " << m_evtNumber);
+      ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** Track missing!  p1_comb->track() or p2_comb->track() ** Skipping Event Run: " << m_runNumber << "  event: " << m_evtNumber);
       return StatusCode::SUCCESS;
     }
     
-    if( m_doRefit ){
+    if( m_doRefit ) {
       ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** Going to build TrackCollections: muonTrks, muonTrksRefit1 and muonTrksRefit2");
       TrackCollection* muonTrks        = new TrackCollection(SG::OWN_ELEMENTS);
       TrackCollection* muonTrksRefit1  = new TrackCollection(SG::OWN_ELEMENTS);
@@ -1506,15 +1514,13 @@ StatusCode IDPerfMonZmumu::execute()
       
       ATH_MSG_DEBUG("Execute() All NTUPLES filled  Run: " << m_runNumber << "  event: " << m_evtNumber << "  mass: " << m_xZmm.GetInvMass() << " GeV ");
     }
-  }
+  } // closing -> if ( m_xZmm.AcceptEvent() )
 
-  if ( m_xZmm.EventPassed() ) {
+  if ( !m_xZmm.AcceptEvent() ) {
     // no good muon pair found
-    if ( !m_xZmm.EventPassed()) {
-      //failed cuts, continue to next event
-      ATH_MSG_DEBUG ("** IDPerfMonZmumu::execute ** No good muon pair found. Leaving Execute(). Run: " << m_runNumber << "  event: " << m_evtNumber);
-	return StatusCode::SUCCESS;
-    }
+    //failed cuts, continue to next event
+    ATH_MSG_DEBUG ("** IDPerfMonZmumu::execute ** No good muon pair found. Leaving Execute(). Run: " << m_runNumber << "  event: " << m_evtNumber);
+    return StatusCode::SUCCESS;
   }
 
   //
