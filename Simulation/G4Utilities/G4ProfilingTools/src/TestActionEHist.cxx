@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -72,6 +72,7 @@ namespace G4UA
   void TestActionEHist::BeginOfRunAction(const G4Run*)
   {
     // initialize histogramming file (DON'T USE GAUDI) & directories
+    delete m_world;
     m_world = new TFile(m_config.name.c_str(), "RECREATE");
     G4cout<<m_config.name<<" initialized, in directory "<<gDirectory->GetPath()<<G4endl;
   }
@@ -99,7 +100,7 @@ namespace G4UA
       m_firstStep = true;
       if (currentTree.GetStepNumber() > 1) {
         for ( vector<string>::const_iterator it = m_trajectory.begin();
-              it != m_trajectory.end(); it++ ) {
+              it != m_trajectory.end(); ++it ) {
           if ( *it == stringify( currentTree.GetVolume()->GetName() ) ) {
             m_firstStep = false;
             break;
