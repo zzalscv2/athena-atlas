@@ -62,7 +62,7 @@ namespace pool {
          @param secondaryQuery parameter currently unused
          @param options type currently unused
      */
-    ImplicitCollectionIterator* select( std::string primaryQuery = "",
+    ImplicitCollectionIterator* select( const std::string & primaryQuery = "",
                                         std::string secondaryQuery = "",
                                         std::string options = "" );
 
