@@ -90,11 +90,6 @@ StatusCode Trk::MaterialMapping::initialize()
 
     ATH_MSG_INFO("initialize()");
 
-#ifdef LEGACY_TRKGEOM
-    if (!m_trackingGeometrySvc.empty()) {
-       ATH_CHECK( m_trackingGeometrySvc.retrieve());
-    }
-#endif
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
 
     ATH_CHECK(m_extrapolationEngine.retrieve());
