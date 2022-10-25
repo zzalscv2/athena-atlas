@@ -11,6 +11,8 @@
 #include <TROOT.h>
 #include <TStyle.h>
 
+#include <CxxUtils/checker_macros.h>
+
 #include <boost/program_options.hpp>
 
 #include <algorithm>
@@ -38,7 +40,7 @@ std::vector<std::string> intersection(std::vector<std::string> &v1,
   return v3;
 }
 
-int main(int argc, char *argv[])
+int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
 {
   namespace po = boost::program_options;
   po::options_description poDescription("Common options");

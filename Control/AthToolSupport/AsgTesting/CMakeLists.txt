@@ -22,7 +22,7 @@ atlas_add_library( AsgTestingLib
 atlas_add_executable( compareFlatTrees
    utils/compareFlatTrees.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${VDT_LIBRARIES} )
+   LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${VDT_LIBRARIES} )
 
 atlas_add_test( gt_UnitTest_test
    SOURCES test/gt_UnitTest_test.cxx
