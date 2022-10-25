@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,11 +30,11 @@
 class LWBinUtils {
 public:
 
-  static unsigned valueToBin( const double& x, float*varBinnings,
+  static unsigned valueToBin( const double& x, const float*varBinnings,
 			      const double& invDelta,
 			      const double& xmin,const double& xmax,
 			      unsigned nbinsplus1 );
-  static double getBinCenter( int bin, float*varBinnings,
+  static double getBinCenter( int bin, const float*varBinnings,
 			      const double& invDelta, const double& xmin,
 			      unsigned nbinsplus1);
 
@@ -46,7 +46,7 @@ private:
   //We don't inline this, since we want to keep the inlined valueToBin
   //code-size small:
   static unsigned valueToVarBin( const double&x,
-				 float*varBinnings,
+				 const float*varBinnings,
 				 unsigned nbinsplus1 );
 
   LWBinUtils();
@@ -57,7 +57,7 @@ private:
 //  INLINES  //
 ///////////////
 
-inline unsigned LWBinUtils::valueToBin( const double& x, float*varBinnings,
+inline unsigned LWBinUtils::valueToBin( const double& x, const float*varBinnings,
 					const double& invDelta,const double& xmin,const double& xmax,
 					unsigned nbinsplus1 ) {
 #ifdef LW_STRICT_ROOT_BEHAVIOUR
@@ -82,7 +82,7 @@ inline unsigned LWBinUtils::valueToBin( const double& x, float*varBinnings,
 }
 
 
-inline double LWBinUtils::getBinCenter( int bin, float*varBinnings,
+inline double LWBinUtils::getBinCenter( int bin, const float*varBinnings,
 					const double& invDelta, const double& xmin,
 					unsigned nbinsplus1)
 {

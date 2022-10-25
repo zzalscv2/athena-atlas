@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VALIDATEFUNCTIONS_H
@@ -106,6 +106,18 @@ namespace HistValFunctions {
     Double_t& access_fMaximum() { return fMaximum; }
     Double_t& access_fMinimum() { return fMinimum; }
     Double_t& access_fNormFactor() { return fNormFactor; }
+
+    Int_t access_fNcells() const { return fNcells; }
+    Int_t access_fDimension() const { return fDimension; }
+    Double_t access_fEntries() const { return fEntries; }
+    Double_t access_fTsumw() const { return fTsumw; }
+    Double_t access_fTsumw2() const { return fTsumw2; }
+    Double_t access_fTsumwx() const { return fTsumwx; }
+    Double_t access_fTsumwx2() const { return fTsumwx2; }
+    Double_t access_fMaximum() const { return fMaximum; }
+    Double_t access_fMinimum() const { return fMinimum; }
+    Double_t access_fNormFactor() const { return fNormFactor; }
+
     static void set_fgAddDirectory(bool b) { fgAddDirectory = b; }
   };
 
@@ -115,16 +127,27 @@ namespace HistValFunctions {
     Double_t& access_fTsumwy2() { return fTsumwy2; }
     Double_t& access_fTsumwxy() { return fTsumwxy; }
     Double_t& access_fScalefactor() { return fScalefactor; }
+
+    Double_t access_fTsumwy() const { return fTsumwy; }
+    Double_t access_fTsumwy2() const { return fTsumwy2; }
+    Double_t access_fTsumwxy() const { return fTsumwxy; }
+    Double_t access_fScalefactor() const { return fScalefactor; }
   };
   class TProfile_FieldsAccess : public TProfile {
   public:
     Double_t& access_fTsumwy() { return fTsumwy; }
     Double_t& access_fTsumwy2() { return fTsumwy2; }
+
+    Double_t access_fTsumwy() const { return fTsumwy; }
+    Double_t access_fTsumwy2() const { return fTsumwy2; }
   };
   class TProfile2D_FieldsAccess : public TProfile2D {
   public:
     Double_t& access_fTsumwz() { return fTsumwz; }
     Double_t& access_fTsumwz2() { return fTsumwz2; }
+
+    Double_t access_fTsumwz() const { return fTsumwz; }
+    Double_t access_fTsumwz2() const { return fTsumwz2; }
   };
 
   //____________________________________________________________________
@@ -133,7 +156,7 @@ namespace HistValFunctions {
   //____________________________________________________________________
   // Disable ubsan to turn off warnings about casting TH1F to TH1_FieldsAccess.
   template <class TH, class THLW>
-  static inline void compareMetaData NO_SANITIZE_UNDEFINED (TH* hroot, THLW * hlw, bool ignorename = false)
+  static inline void compareMetaData NO_SANITIZE_UNDEFINED (const TH* hroot, const THLW * hlw, bool ignorename = false)
   {
     assert (hroot&&hlw);
     if (!hroot||!hlw)
@@ -162,7 +185,7 @@ namespace HistValFunctions {
     test("GetXaxis()->GetBinCenter(nbinsx+1)",hroot->GetXaxis()->GetBinCenter(nbinsx+1),hlw->GetXaxis()->GetBinCenter(nbinsx+1));
     test("GetXaxis()->GetBinCenter(nbinsx+2)",hroot->GetXaxis()->GetBinCenter(nbinsx+2),hlw->GetXaxis()->GetBinCenter(nbinsx+2));
 
-    if (dynamic_cast<TH2*>(hroot)) {
+    if (dynamic_cast<const TH2*>(hroot)) {
       test("GetYaxis()->GetBinCenter(-200)",hroot->GetYaxis()->GetBinCenter(-200),hlw->GetYaxis()->GetBinCenter(-200));
       test("GetYaxis()->GetBinCenter(0)",hroot->GetYaxis()->GetBinCenter(0),hlw->GetYaxis()->GetBinCenter(0));
       test("GetYaxis()->GetBinCenter(1)",hroot->GetYaxis()->GetBinCenter(1),hlw->GetYaxis()->GetBinCenter(1));
@@ -171,16 +194,16 @@ namespace HistValFunctions {
       test("GetYaxis()->GetBinCenter(500)",hroot->GetYaxis()->GetBinCenter(500),hlw->GetYaxis()->GetBinCenter(500));
     }
     //Protected TH1 fields:
-    TH1_FieldsAccess * hroot_1daccess(static_cast<TH1_FieldsAccess*>(static_cast<TH1*>(hroot)));
+    const TH1_FieldsAccess * hroot_1daccess(static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(hroot)));
     test("Entries",hroot_1daccess->access_fEntries(), hlw->GetEntries());
 
-    if (dynamic_cast<TH2*>(hroot)) {
-      TH2* hroot2d = static_cast<TH2*>(static_cast<TH1*>(hroot));
-      LWHist2D * hlw2d = dynamic_cast<LWHist2D *>(hlw);
+    if (dynamic_cast<const TH2*>(hroot)) {
+      const TH2* hroot2d = static_cast<const TH2*>(static_cast<const TH1*>(hroot));
+      const LWHist2D * hlw2d = dynamic_cast<const LWHist2D *>(hlw);
       if (hlw2d) {
         test("GetNbinsY()",int(hroot2d->GetNbinsY()), int(hlw2d->GetNbinsY()));
-        TH1_FieldsAccess * hroot_1daccess(static_cast<TH1_FieldsAccess*>(static_cast<TH1*>(hroot2d)));
-        TH2_FieldsAccess * hroot_2daccess(static_cast<TH2_FieldsAccess*>(hroot2d));
+        const TH1_FieldsAccess * hroot_1daccess(static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(hroot2d)));
+        const TH2_FieldsAccess * hroot_2daccess(static_cast<const TH2_FieldsAccess*>(hroot2d));
         double sumW, sumW2, sumWX, sumWX2;
         double sumWY, sumWY2, sumWXY;
         hlw2d->getSums(sumW, sumW2, sumWX, sumWX2,sumWY, sumWY2, sumWXY);
@@ -192,14 +215,14 @@ namespace HistValFunctions {
         test("sumwy2",hroot_2daccess->access_fTsumwy2(), sumWY2);
         test("sumwxy",hroot_2daccess->access_fTsumwxy(), sumWXY);
       } else {
-        TProfile2D_LW * hlwprof2d = dynamic_cast<TProfile2D_LW *>(hlw);
-        TProfile2D* hrootprof2d = static_cast<TProfile2D*>(static_cast<TH1*>(hroot));
+        const TProfile2D_LW * hlwprof2d = dynamic_cast<const TProfile2D_LW *>(hlw);
+        const TProfile2D* hrootprof2d = static_cast<const TProfile2D*>(static_cast<const TH1*>(hroot));
         assert(hlwprof2d);
         assert(hrootprof2d);
         test("GetNbinsY()",int(hrootprof2d->GetNbinsY()), int(hlwprof2d->GetNbinsY()));
-        TH1_FieldsAccess * hroot_1daccess(static_cast<TH1_FieldsAccess*>(static_cast<TH1*>(hroot2d)));
-        TH2_FieldsAccess * hroot_2daccess(static_cast<TH2_FieldsAccess*>(hroot2d));
-        TProfile2D_FieldsAccess * hroot_prof2daccess(static_cast<TProfile2D_FieldsAccess*>(hroot2d));
+        const TH1_FieldsAccess * hroot_1daccess(static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(hroot2d)));
+        const TH2_FieldsAccess * hroot_2daccess(static_cast<const TH2_FieldsAccess*>(hroot2d));
+        const TProfile2D_FieldsAccess * hroot_prof2daccess(static_cast<const TProfile2D_FieldsAccess*>(hroot2d));
         double sumW, sumW2, sumWX, sumWX2;
         double sumWY, sumWY2, sumWXY;
         double sumWZ, sumWZ2;
@@ -215,7 +238,7 @@ namespace HistValFunctions {
         test("sumwz2",hroot_prof2daccess->access_fTsumwz2(), sumWZ2);
       }
     } else {
-      LWHist1D * hlw1d = dynamic_cast<LWHist1D *>(hlw);
+      const LWHist1D * hlw1d = dynamic_cast<const LWHist1D *>(hlw);
       if (hlw1d) {
         double sumW, sumW2, sumWX, sumWX2;
         hlw1d->getSums(sumW, sumW2, sumWX, sumWX2);
@@ -224,9 +247,9 @@ namespace HistValFunctions {
         test("sumwx",hroot_1daccess->access_fTsumwx(), sumWX);
         test("sumwx2",hroot_1daccess->access_fTsumwx2(), sumWX2);
       } else {
-        TProfile_LW * hlwprof = dynamic_cast<TProfile_LW *>(hlw);
+        const TProfile_LW * hlwprof = dynamic_cast<const TProfile_LW *>(hlw);
         assert(hlwprof);
-        TProfile_FieldsAccess * hroot_profileaccess(static_cast<TProfile_FieldsAccess*>(static_cast<TH1*>(hroot)));
+        const TProfile_FieldsAccess * hroot_profileaccess(static_cast<const TProfile_FieldsAccess*>(static_cast<const TH1*>(hroot)));
         double sumW, sumW2, sumWX, sumWX2,sumWY, sumWY2;
         hlwprof->getSums(sumW, sumW2, sumWX, sumWX2,sumWY, sumWY2);
         test("sumw",hroot_1daccess->access_fTsumw(), sumW);
@@ -274,7 +297,7 @@ namespace HistValFunctions {
 
   //____________________________________________________________________
   template <class T1, class T2>
-  static void compareBinContents_1D(T1* t1, T2 * t2, bool relaxedErrorComparison = false)
+  static void compareBinContents_1D(const T1* t1, const T2 * t2, bool relaxedErrorComparison = false)
   {
     test("GetNbinsX()",int(t1->GetNbinsX()), int(t2->GetNbinsX()));
     int n = t1->GetNbinsX();
@@ -301,7 +324,7 @@ namespace HistValFunctions {
   }
   //____________________________________________________________________
   template <class T1, class T2>
-  static void compareBinContents_2D(T1* t1, T2 * t2, bool relaxedErrorComparison = false)
+  static void compareBinContents_2D(const T1* t1, const T2 * t2, bool relaxedErrorComparison = false)
   {
     assert(t1);
     assert(t2);
