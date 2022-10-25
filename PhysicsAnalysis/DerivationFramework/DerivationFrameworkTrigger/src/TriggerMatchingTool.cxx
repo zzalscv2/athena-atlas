@@ -21,7 +21,7 @@ namespace {
   template <typename T>
     using constAcc_t = SG::AuxElement::ConstAccessor<T>;
   template <typename T>
-    using dec_t = SG::AuxElement::Decorator<T>;
+    using acc_t = SG::AuxElement::Accessor<T>;
   template <typename T>
     using vecLink_t = std::vector<ElementLink<T>>;
 
@@ -203,7 +203,7 @@ namespace DerivationFramework {
       for (const particleVec_t& foundCombination : offlineCombinations) {
         xAOD::TrigComposite* composite = new xAOD::TrigComposite();
         container->push_back(composite);
-        static const dec_t<vecLink_t<xAOD::IParticleContainer>> dec_links(
+        static const acc_t<vecLink_t<xAOD::IParticleContainer>> dec_links(
             "TrigMatchedObjects");
         vecLink_t<xAOD::IParticleContainer>& links = dec_links(*composite);
         for (const xAOD::IParticle* part : foundCombination) {
