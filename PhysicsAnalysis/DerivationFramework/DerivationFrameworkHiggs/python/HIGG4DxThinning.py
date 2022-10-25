@@ -40,12 +40,26 @@ def TriggerChains(HIGG4DxName):
         return '|'.join([met, singleE, singleMu, singleTau])
     elif HIGG4DxName in ['HDBS1']:
         # single-e, single-mu
-        return '(^(?!.*_[0-9]*(tau|mu|j|xe|g|b|perf|idperf))(?!HLT_e.*_[0-9]*e.*)(HLT_e.*))|(^(?!.*_[0-9]*(tau|e|j|xe|g|b|perf|idperf))(?!HLT_mu.*_[0-9]*mu.*)(HLT_mu.*))'
+        singleE = '(^(?!.*_[0-9]*(tau|mu|j|xe|g|b|perf|idperf))(?!HLT_e.*_[0-9]*e.*)(HLT_e.*))'
+        singleMu = '(^(?!.*_[0-9]*(tau|e|j|xe|g|b|perf|idperf))(?!HLT_mu.*_[0-9]*mu.*)(HLT_mu.*))'
+        singleJet = '(^(?!.*_[0-9]*(tau|e|mu|xe|g|b|perf|idperf))(?!HLT_[0-9]*j[0-9]*.*)(HLT_j.*))'        
+        return '|'.join([singleE, singleMu, singleJet])
     else :
         assert False, "HIGG4DxThinning: Unknown derivation stream '{}'".format(HIGG4DxName)
 
 def setup(HIGG4DxName, HIGG4DxThinningSvc, ToolSvc):
     thinningTools=[]
+
+    thinning_expression     = "(InDetTrackParticles.pt > 0.5*GeV) && (InDetTrackParticles.numberOfPixelHits > 0) && (InDetTrackParticles.numberOfSCTHits > 5) && (abs(DFCommonInDetTrackZ0AtPV) < 1.5)"
+    if HIGG4DxName in ['HDBS1']:
+        from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__TrackParticleThinning
+        HIGG4DxMetTPThinningTool    = DerivationFramework__TrackParticleThinning( name                      = HIGG4DxName+"MetTPThinningTool",
+                                                                                  ThinningService           = HIGG4DxThinningSvc,
+                                                                                  SelectionString           = thinning_expression,
+                                                                                  InDetTrackParticlesKey    = "InDetTrackParticles",
+                                                                                  ApplyAnd                  = True)
+        ToolSvc += HIGG4DxMetTPThinningTool
+        thinningTools.append(HIGG4DxMetTPThinningTool)
 
     #fat jets and track thinning
     if HIGG4DxName in ['HIGG4D2', 'HIGG4D3', 'HIGG4D6']:
@@ -64,7 +78,6 @@ def setup(HIGG4DxName, HIGG4DxThinningSvc, ToolSvc):
         HIGG4DxJetTrackThinningTool3 = DerivationFramework__JetTrackParticleThinning( name          	    = HIGG4DxName+"JetTrackThinningTool3",
                                                                                       ThinningService        = HIGG4DxThinningSvc,
                                                                                       JetKey                 = "AntiKt4EMPFlowJets",
-                                                                                      SelectionString        = "AntiKt4EMPFlowJets.pt > 20*GeV",
                                                                                       InDetTrackParticlesKey = "InDetTrackParticles",
                                                                                       ApplyAnd               = False)
         ToolSvc += HIGG4DxJetTrackThinningTool3
