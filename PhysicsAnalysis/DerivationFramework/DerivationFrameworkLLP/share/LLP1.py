@@ -396,9 +396,11 @@ LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                        "MET_Baseline_AntiKt4EMTopo",
                                        "MET_Baseline_AntiKt4EMPFlow",
                                        "TauJets",
+                                       "TauJets_MuonRM",
                                        "DiTauJets",
                                        "DiTauJetsLowPt",
                                        "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
+                                       "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                        "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                       ]
 
