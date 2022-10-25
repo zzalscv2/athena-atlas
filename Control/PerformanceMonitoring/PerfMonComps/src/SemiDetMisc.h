@@ -598,19 +598,14 @@ inline double PMonSD::CompDataExtended::maxDeltaMalloc() const { return m_max_dm
 inline unsigned PMonSD::CompDataExtended::maxDeltaMalloc_iEntry() const { return m_max_dmal_ientry; }
 inline int PMonSD::CompDataStdSteps::index(const std::string& stepName)
 {
-  static const std::unordered_map<std::string, int> steps = {
-    {"evt", index_evt},
-    {"ini", index_ini},
-    {"fin", index_fin},
-    {"cbk", index_cbk},
-    {"1st", index_1st}
-  };
-
-  try {
-    return steps.at(stepName);
-  } catch (const std::out_of_range& e) {
-    return index_other;
-  }
+  // Only 5 possibilities --- not worth doing anything fancier.
+  // Try to put the most frequent ones first.
+  if (stepName == "evt") return index_evt;
+  if (stepName == "cbk") return index_cbk;
+  if (stepName == "1st") return index_1st;
+  if (stepName == "ini") return index_ini;
+  if (stepName == "fin") return index_fin;
+  return index_other;
 }
 
 inline void PMonSD::setUTCTimeString(std::string&s,double offset_ms)
