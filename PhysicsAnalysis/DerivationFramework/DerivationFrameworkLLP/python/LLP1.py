@@ -11,6 +11,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+MergedElectronContainer = "StdWithLRTElectrons"
+MergedMuonContainer = "StdWithLRTMuons"
+MergedTrackCollection = "InDetWithLRTTrackParticles"
 LLP1VrtSecInclusiveSuffixes = []
 
 # Main algorithm config
@@ -20,25 +23,34 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
 
     # Augmentations
 
-    # LRT merge
+    # LRT track merge
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleMergerCfg
     LLP1TrackParticleMergerTool = acc.getPrimaryAndMerge(TrackParticleMergerCfg(
         ConfigFlags,
         name                        = "LLP1TrackParticleMergerTool",
         TrackParticleLocation       = ["InDetTrackParticles", "InDetLargeD0TrackParticles"],
-        OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
+        OutputTrackParticleLocation = MergedTrackCollection,
         CreateViewColllection       = True))
 
-    from DerivationFrameworkEGamma.EGammaToolsConfig import ElectronMergerCfg
-    LLP1ElectronMergerTool= acc.getPrimaryAndMerge(ElectronMergerCfg(
-        ConfigFlags,
-        name         = "LRTAndStandardElectronMergerTool",
-        InCollectionsLocation= ["Electrons","LRTElectrons"],
-        OutputCollectionName = "StdWithLRTElectrons",
-        CreateViewCollection = True))
-
-    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = [LLP1TrackParticleMergerTool, LLP1ElectronMergerTool])
+    LRTMergeAug = CompFactory.DerivationFramework.CommonAugmentation("InDetLRTMerge", AugmentationTools = [LLP1TrackParticleMergerTool])
     acc.addEventAlgo(LRTMergeAug)
+
+    # LRT muons merge
+    from DerivationFrameworkLLP.LLPToolsConfig import LRTMuonMergerAlg
+    acc.merge(LRTMuonMergerAlg( ConfigFlags,
+                                PromptMuonLocation    = "Muons",
+                                LRTMuonLocation       = "MuonsLRT",
+                                OutputMuonLocation    = MergedMuonContainer,
+                                CreateViewCollection  = True))
+
+    # LRT electrons merge
+    from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronMergerAlg
+    acc.merge(LRTElectronMergerAlg( ConfigFlags,
+                                    PromptElectronLocation = "Electrons",
+                                    LRTElectronLocation    = "LRTElectrons",
+                                    OutputCollectionName   = MergedElectronContainer,
+                                    isDAOD                 = False,
+                                    CreateViewCollection   = True))
 
     # Max Cell sum decoration tool
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
@@ -75,6 +87,10 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    # flavor tagging
+    from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
+    acc.merge(FtagJetCollectionsCfg(ConfigFlags, ['AntiKt4EMTopoJets']))
+
     # VrtSecInclusive
     from VrtSecInclusive.VrtSecInclusiveConfig import VrtSecInclusiveCfg
 
@@ -82,9 +98,24 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                                  name = "VrtSecInclusive",
                                  AugmentingVersionString  = "",
                                  FillIntermediateVertices = False,
-                                 TrackLocation            = "InDetWithLRTTrackParticles"))
-
+                                 TrackLocation            = MergedTrackCollection))
     LLP1VrtSecInclusiveSuffixes.append("")
+
+    # leptons-only VSI
+    LeptonsModSuffix = "_LeptonsMod_LRTR3_1p0"
+    acc.merge(VrtSecInclusiveCfg(ConfigFlags,
+                                 name = "VrtSecInclusive_InDet_"+LeptonsModSuffix,
+                                 AugmentingVersionString     = LeptonsModSuffix,
+                                 FillIntermediateVertices    = False,
+                                 TrackLocation               = MergedTrackCollection,
+                                 twoTrkVtxFormingD0Cut       = 1.0,
+                                 doSelectTracksWithLRTCuts   = True,
+                                 doSelectTracksFromMuons     = True,
+                                 doRemoveCaloTaggedMuons     = True,
+                                 doSelectTracksFromElectrons = True,
+                                 MuonLocation                = MergedMuonContainer,
+                                 ElectronLocation            = MergedElectronContainer))
+    LLP1VrtSecInclusiveSuffixes.append(LeptonsModSuffix)
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
@@ -239,10 +270,6 @@ def LLP1Cfg(ConfigFlags):
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     LLP1TriggerListsHelper = TriggerListsHelper()
 
-    # TODO: can we borrow from PHYS here?
-    # from DerivationFrameworkPhys.PHYS import PHYSKernelCfg
-    # acc.merge(PHYSKernelCfg(ConfigFlags, name="LLP1Kernel", StreamName = 'StreamDAOD_LLP1', TriggerListsHelper = LLP1TriggerListsHelper))
-
     # Common augmentations
     acc.merge(LLP1KernelCfg(ConfigFlags, name="LLP1Kernel", StreamName = 'StreamDAOD_LLP1', TriggerListsHelper = LLP1TriggerListsHelper))
 
@@ -254,6 +281,7 @@ def LLP1Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
     LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+
     LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",
                                            "LRTElectrons",
@@ -279,7 +307,16 @@ def LLP1Cfg(ConfigFlags):
                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
 
-    LLP1SlimmingHelper.AllVariables =  ["MuonSegments"]
+    LLP1SlimmingHelper.AllVariables =  ["MSDisplacedVertex",
+                                        "MuonSpectrometerTrackParticles",
+                                        "MuonSegments",
+                                        "MSonlyTracklets",
+                                        "CombinedMuonTrackParticles",
+                                        "ExtrapolatedMuonTrackParticles",
+                                        "CombinedMuonsLRTTrackParticles",
+                                        "ExtraPolatedMuonsLRTTrackParticles",
+                                        "MSOnlyExtraPolatedMuonsLRTTrackParticles",
+                                        ]
 
 
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
@@ -320,7 +357,8 @@ def LLP1Cfg(ConfigFlags):
                                                 'TruthHFWithDecayParticles':'xAOD::TruthParticleContainer','TruthHFWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
                                                 'TruthHFWithDecayVertices':'xAOD::TruthVertexContainer','TruthHFWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
                                                 'TruthCharm':'xAOD::TruthParticleContainer','TruthCharmAux':'xAOD::TruthParticleAuxContainer',
-                                                'TruthPrimaryVertices':'xAOD::TruthVertexContainer','TruthPrimaryVerticesAux':'xAOD::TruthVertexAuxContainer'
+                                                'TruthPrimaryVertices':'xAOD::TruthVertexContainer','TruthPrimaryVerticesAux':'xAOD::TruthVertexAuxContainer',
+                                                'AntiKt10TruthTrimmedPtFrac5SmallR20Jets':'xAOD::JetContainer', 'AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux':'xAOD::JetAuxContainer'
                                                 }
 
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
@@ -332,8 +370,8 @@ def LLP1Cfg(ConfigFlags):
                                           "Electrons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "LRTElectrons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                           "Photons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
-                                          "egammaClusters.phi_sampl",
-                                          "LRTegammaClusters.phi_sampl",
+                                          "egammaClusters.phi_sampl.eta0.phi0",
+                                          "LRTegammaClusters.phi_sampl.eta0.phi0",
                                           "Muons.TruthLink", "MuonsLRT.TruthLink",
                                           "Photons.TruthLink",
                                           "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal.GhostTrack.GhostTrackCount.GhostTrackLRT.GhostTrackLRTCount",
@@ -344,8 +382,8 @@ def LLP1Cfg(ConfigFlags):
                                           "PrimaryVertices.t.x.y.z",
                                           "InDetTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern",
                                           "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.hitPattern",
-                                          "GSFTrackParticles.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
-                                          "LRTGSFTrackParticles.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
+                                          "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
+                                          "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
                                           "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                           "TauJets.dRmax.etOverPtLeadTrk",
                                           "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
@@ -361,7 +399,8 @@ def LLP1Cfg(ConfigFlags):
     for suffix in LLP1VrtSecInclusiveSuffixes:
         LLP1SlimmingHelper.ExtraVariables += [ "InDetTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
         LLP1SlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
-
+        LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+        LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
     # Trigger content
     LLP1SlimmingHelper.IncludeTriggerNavigation = False
@@ -376,7 +415,6 @@ def LLP1Cfg(ConfigFlags):
     LLP1SlimmingHelper.IncludeMinBiasTriggerContent = False
 
     # Trigger matching
-
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
@@ -384,8 +422,8 @@ def LLP1Cfg(ConfigFlags):
                                               name = "LRTTriggerMatchingTool",
                                               OutputContainerPrefix = "LRTTrigMatch_",
                                               TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
-                                              InputElectrons="StdWithLRTElectrons",
-                                              InputMuons="MuonsLRT" # TODO Important, change to transient collection name after !53881 is merged
+                                              InputElectrons=MergedElectronContainer,
+                                              InputMuons=MergedMuonContainer
                                               ))
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
@@ -397,8 +435,8 @@ def LLP1Cfg(ConfigFlags):
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
                                          OutputContainerPrefix = "LRTTrigMatch_",
                                          TriggerList = LLP1TriggerListsHelper.Run2TriggerNamesNoTau,
-                                         InputElectrons="StdWithLRTElectrons",
-                                         InputMuons="MuonsLRT" # TODO Important, change to transient collection name after !53881 is merged
+                                         InputElectrons=MergedElectronContainer,
+                                         InputMuons=MergedMuonContainer
                                          )
     # Run 3
     elif ConfigFlags.Trigger.EDMVersion == 3:
@@ -407,8 +445,8 @@ def LLP1Cfg(ConfigFlags):
                                               name = "LRTTriggerMatchingTool",
                                               OutputContainerPrefix = "LRTTrigMatch_",
                                               TriggerList = LLP1TriggerListsHelper.Run3TriggerNamesNoTau,
-                                              InputElectrons="StdWithLRTElectrons",
-                                              InputMuons="MuonsLRT" # TODO Important, change to transient collection name after !53881 is merged
+                                              InputElectrons=MergedElectronContainer,
+                                              InputMuons=MergedMuonContainer
                                               ))
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(LLP1SlimmingHelper)
@@ -424,8 +462,8 @@ def LLP1Cfg(ConfigFlags):
                                          name = "LRTDFTriggerMatchingTool",
                                          OutputContainerPrefix = "LRTTrigMatch_",
                                          TriggerList = LLP1TriggerListsHelper.Run3TriggerNamesNoTau,
-                                         InputElectrons="StdWithLRTElectrons",
-                                         InputMuons="MuonsLRT" # TODO Important, change to transient collection name after !53881 is merged
+                                         InputElectrons=MergedElectronContainer,
+                                         InputMuons=MergedMuonContainer
                                          )
 
     # Output stream
