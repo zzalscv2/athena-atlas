@@ -10,20 +10,24 @@
 
 namespace xAOD {
 
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float    , eta         , setEta         )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float    , phi         , setPhi         )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int      , iEta        , setiEta        )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int      , iPhi        , setiPhi        )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , module      , setModule      )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , fpga        , setFpga        )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , channel     , setChannel     )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , jFEXdataID  , setJFEXdataID  )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, char     , isSaturated , setIsSaturated )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint32_t , jFEXtowerID , setjFEXtowerID )
-AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , Calosource  , setCalosource  )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float        , eta         , setEta         )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float        , phi         , setPhi         )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int          , globalEta   , setglobalEta   )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, unsigned int , globalPhi   , setglobalPhi   )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t      , module      , setModule      )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t      , fpga        , setFpga        )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t      , channel     , setChannel     )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t      , jFEXdataID  , setJFEXdataID  )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint32_t     , jFEXtowerID , setjFEXtowerID )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t      , Calosource  , setCalosource  )
 
 AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<uint16_t> , et_count , setEt_count )
 AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<uint16_t> , et_count , setEt_count )
+
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<char> , isSaturated , setIsSaturated )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<char> , isSaturated , setIsSaturated )
+
+
 /// initialize
 void jFexTower_v1::initialize(const float Eta,const float Phi)
 {
@@ -33,8 +37,8 @@ void jFexTower_v1::initialize(const float Eta,const float Phi)
 
 void jFexTower_v1::initialize(const float Eta,
                               const float Phi,
-                              const int IEta,
-                              const int IPhi,
+                              const int globaleta,
+                              const unsigned int globalphi,
                               const uint32_t IDSim,
                               const uint8_t source,
                               const std::vector<uint16_t>& Et_count,
@@ -42,12 +46,12 @@ void jFexTower_v1::initialize(const float Eta,
                               const uint8_t Fpga,
                               const uint8_t Channel,
                               const uint8_t JFEXdataID,
-                              const char IsSaturated)
+                              const std::vector<char>& IsSaturated)
 {
     setEta( Eta );
     setPhi( Phi );
-    setiEta( IEta );
-    setiPhi( IPhi );
+    setglobalEta( globaleta );
+    setglobalPhi( globalphi );
     setModule( Module );
     setFpga( Fpga );
     setChannel( Channel );
