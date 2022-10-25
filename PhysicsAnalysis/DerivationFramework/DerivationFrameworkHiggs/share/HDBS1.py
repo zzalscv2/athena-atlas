@@ -31,6 +31,16 @@ fileName   = buildFileName( derivationFlags.WriteDAOD_HDBS1Stream )
 HDBS1Stream = MSMgr.NewPoolRootStream( streamName, fileName )
 HDBS1Stream.AcceptAlgs([DAOD_StreamID+"Kernel"])
 
+#==========================================
+#Ditau N_trk decoration for leading subjets
+#==========================================
+from DerivationFrameworkTau.DerivationFrameworkTauConf import DerivationFramework__DiTauProngDecorator
+DiTauProngDecorator = DerivationFramework__DiTauProngDecorator(
+    name              = "DiTauProngDecorator",
+    DiTauContainerName  = "DiTauJetsLowPt",
+    )
+ToolSvc += DiTauProngDecorator
+
 #============
 # Setup tools
 #============
@@ -87,7 +97,7 @@ DerivationFrameworkHiggs.HIGG4DxJets.setup(DAOD_StreamID, HDBS1Sequence, HDBS1Sl
 DerivationFrameworkHiggs.HIGG4DxJets.buildDiTau(DAOD_StreamID, HDBS1Sequence, HDBS1SlimmingHelper, ToolSvc)
 
 # thinning + skimming #2 based on ditaus (now we have them created)
-HDBS1Sequence += CfgMgr.DerivationFramework__DerivationKernel(DAOD_StreamID+"Kernel", ThinningTools = thinningTools, SkimmingTools = fatJetSkimmingTools)
+HDBS1Sequence += CfgMgr.DerivationFramework__DerivationKernel(DAOD_StreamID+"Kernel", ThinningTools = thinningTools, SkimmingTools = fatJetSkimmingTools, AugmentationTools = [DiTauProngDecorator])
 
 # add the private sequence to the main job
 DerivationFrameworkJob += HDBS1Sequence
