@@ -120,7 +120,6 @@ private:
   SG::WriteHandleKey<MuonSimDataCollection> m_outputSDO_CollectionKey{this,"OutputSDOName","sTGC_SDO","WriteHandleKey for Output MuonSimDataCollection"}; // name of the output SDOs
 
   Gaudi::Property<bool> m_doSmearing{this,"doSmearing",false};
-  Gaudi::Property<bool> m_needsMcEventCollHelper{this,"UseMcEventCollectionHelper",false};
   Gaudi::Property<bool> m_doToFCorrection{this,"doToFCorrection",false};
   Gaudi::Property<bool> m_doEfficiencyCorrection{this,"doEfficiencyCorrection",false};
 
@@ -161,10 +160,8 @@ private:
   void readDeadtimeConfig();
 
   uint16_t bcTagging(const float digittime, const int channelType) const;
-  int humanBC(uint16_t bctag);
 
   float getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const;
-
 
 };
 

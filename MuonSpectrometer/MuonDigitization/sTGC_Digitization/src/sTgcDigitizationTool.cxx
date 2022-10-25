@@ -1116,11 +1116,6 @@ uint16_t sTgcDigitizationTool::bcTagging(const float digitTime, const int channe
   return bctag;
 }
 
-int sTgcDigitizationTool::humanBC(uint16_t bctag) {
-    if(bctag << 15 == 1) return ~bctag;
-    else return bctag;
-}
-
 float sTgcDigitizationTool::getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const {
 
   double threshold = m_chargeThreshold;

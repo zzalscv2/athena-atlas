@@ -141,8 +141,6 @@ namespace Muon {
             if (occupancy > m_occupancyThreshold) highOccupancy = true;
 
             if (occupancy > m_occupancyCutOff) aboveOccupancyCut = true;
-
-            ATH_MSG_VERBOSE(" multilayer occupancy: " << occupancy << "   " << m_idHelperSvc->toStringDetEl(mit->first->identify()));
         }
 
         // sanity check

@@ -339,7 +339,7 @@ def MuonExtrapolatorCfg(flags, name="MuonExtrapolator", **kwargs):
     kwargs.setdefault("MultipleScatteringUpdater",
                       result.popToolsAndMerge(AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
 
-    AtlasNavigator = result.popToolsAndMerge(TC.AtlasNavigatorCfg(flags))
+    AtlasNavigator = result.popToolsAndMerge(TC.AtlasNavigatorCfg(flags, name = 'InDetNavigator' if use_old_names else None))
     kwargs.setdefault("Navigator", AtlasNavigator)
 
     AtlasELossUpdater = result.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))

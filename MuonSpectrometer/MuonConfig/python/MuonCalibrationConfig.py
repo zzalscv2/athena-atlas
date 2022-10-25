@@ -83,7 +83,11 @@ def MdtCalibrationToolCfg(flags, **kwargs):
     kwargs.setdefault("DoTemperatureCorrection", flags.Muon.Calib.applyRtScaling)
     kwargs.setdefault("DoWireSagCorrection", flags.Muon.Calib.correctMdtRtWireSag)
     kwargs.setdefault("DoTofCorrection", flags.Beam.Type is BeamType.Collisions) # No TOF correction if not collisions
-    
+
+    if flags.Beam.Type is BeamType.Collisions:
+        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtCalibWindowNumber
+        kwargs.setdefault("TimeWindowSetting", MdtCalibWindowNumber('Collision_G4'))
+
     acc = AtlasFieldCacheCondAlgCfg(flags)
     result.merge(acc)
 
@@ -147,12 +151,8 @@ def NSWCalibToolCfg(flags, name="NSWCalibTool", **kwargs):
     result = ComponentAccumulator()
     result.merge(NswCalibDbAlgCfg(flags))
     kwargs.setdefault("isData", not flags.Input.isMC)
-    if flags.Input.isMC: ## peaking times for MC
-        kwargs.setdefault("mmPeakTime",200)
-        kwargs.setdefault("sTgcPeakTime",0)
-    else: ## peaking times for data
-        kwargs.setdefault("mmPeakTime",200)
-        kwargs.setdefault("sTgcPeakTime",0)
+    kwargs.setdefault("mmPeakTime",200)
+    kwargs.setdefault("sTgcPeakTime",0)    
     the_tool = CompFactory.Muon.NSWCalibTool(name,**kwargs)
     result.setPrivateTools(the_tool)
     return result
