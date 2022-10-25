@@ -218,6 +218,8 @@ JetChainParts = {
        'presel5c25XXc25b85',
        'presel2a20b90XX2a20',
        'presela20b85XX3a20',
+       #beamspot preselction option
+       'presel2c20b85',
      ],
     # Hypo information
     #   If hypoScenario is 'simple', then hypo configuration is handled based on the
