@@ -8,7 +8,7 @@ createxAODSlimmedContainer("TruthMET",prefiltSeq)
 prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
 
 from GeneratorFilters.GeneratorFiltersConf import xAODMETFilter
-xAODMissingEtFilter = xAODMissingEtFilter("xAODMissingEtFilter")  
+xAODMissingEtFilter = xAODMETFilter("xAODMissingEtFilter")  
 filtSeq += xAODMissingEtFilter
 
 # to modiify cuts put into JOs e.g.:
