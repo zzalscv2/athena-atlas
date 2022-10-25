@@ -481,7 +481,7 @@ def TrigmuCombHypoToolFromDict( chainDict ):
 
 def TrigmuCombHypoToolwORFromDict( chainDict ):
 
-    if 'idperf' in chainDict['chainParts'][0]['addInfo']:
+    if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
        thresholds = ['passthrough']
     else:
        thresholds = getThresholdsFromDict( chainDict )
@@ -549,7 +549,7 @@ def Trigl2IOHypoToolwORFromDict( chainDict ):
 # muComb Hypo for L2 multi-track SA mode
 def Trigl2mtCBHypoToolwORFromDict( chainDict ):
 
-    if 'idperf' in chainDict['chainParts'][0]['addInfo']:
+    if 'idperf' in chainDict['chainParts'][0]['addInfo'] or 'idtp' in chainDict['chainParts'][0]['addInfo'] :
        thresholds = ['passthrough']
     else:
        thresholds = getThresholdsFromDict( chainDict )
