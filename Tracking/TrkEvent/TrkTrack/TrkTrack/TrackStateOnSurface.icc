@@ -39,12 +39,12 @@ Trk::TrackStateOnSurface::alignmentEffectsOnTrack() const
 }
 
 inline bool
-Trk::TrackStateOnSurface::type(const TrackStateOnSurfaceType& type) const
+Trk::TrackStateOnSurface::type(const TrackStateOnSurfaceType type) const
 {
   if (type == NumberOfTrackStateOnSurfaceTypes || type == Unknown) {
     return false;
   }
-  return m_typeFlags.test(type);
+  return (m_typeFlags & (1<<type));
 }
 
 inline Trk::TrackStateOnSurface::Variety
@@ -57,27 +57,27 @@ inline void
 Trk::TrackStateOnSurface::setFlags()
 {
   if (m_measurementOnTrack) {
-    m_typeFlags.set(Measurement, true);
+    m_typeFlags |= 1 << Measurement;
   }
   if (m_materialEffectsOnTrack) {
-    m_typeFlags.set(InertMaterial, true);
+    m_typeFlags |= 1 << InertMaterial;
   }
   if (m_alignmentEffectsOnTrack) {
-    m_typeFlags.set(Alignment, true);
+    m_typeFlags |= 1 << Alignment;
   }
   if (m_trackParameters) {
-    m_typeFlags.set(Parameter, true);
+    m_typeFlags |= 1 << Parameter;
   }
   if (m_fitQualityOnSurface) {
-    m_typeFlags.set(FitQuality, true);
+    m_typeFlags |= 1 << FitQuality;
   }
 }
 
 inline const std::bitset<
-  Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>&
+  Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
 Trk::TrackStateOnSurface::types() const
 {
-  return m_typeFlags;
+  return {m_typeFlags};
 }
 
 inline const std::bitset<

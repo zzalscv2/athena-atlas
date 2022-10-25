@@ -38,7 +38,7 @@ TrackStateOnSurface::TrackStateOnSurface(
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
   , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
-  , m_typeFlags(typePattern)
+  , m_typeFlags(typePattern.to_ulong())
 {
   assert(isSane());
 }
@@ -56,7 +56,7 @@ TrackStateOnSurface::TrackStateOnSurface(
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
   , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
-  , m_typeFlags(typePattern)
+  , m_typeFlags(typePattern.to_ulong())
   , m_hints(hintPattern.to_ulong())
 {
   assert(isSane());
@@ -149,37 +149,38 @@ std::string
 TrackStateOnSurface::dumpType() const
 {
   std::string type;
-  if (m_typeFlags.test(TrackStateOnSurface::Measurement)) {
+  auto typesSet = types();
+  if (typesSet.test(TrackStateOnSurface::Measurement)) {
     type += "Measurement ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::InertMaterial)) {
+  if (typesSet.test(TrackStateOnSurface::InertMaterial)) {
     type += "InertMaterial ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::BremPoint)) {
+  if (typesSet.test(TrackStateOnSurface::BremPoint)) {
     type += "BremPoint ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::Scatterer)) {
+  if (typesSet.test(TrackStateOnSurface::Scatterer)) {
     type += "Scatterer ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::Perigee)) {
+  if (typesSet.test(TrackStateOnSurface::Perigee)) {
     type += "Perigee ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::Outlier)) {
+  if (typesSet.test(TrackStateOnSurface::Outlier)) {
     type += "Outlier ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::Hole)) {
+  if (typesSet.test(TrackStateOnSurface::Hole)) {
     type += "Hole ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::CaloDeposit)) {
+  if (typesSet.test(TrackStateOnSurface::CaloDeposit)) {
     type += "CaloDeposit ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::Parameter)) {
+  if (typesSet.test(TrackStateOnSurface::Parameter)) {
     type += "Parameter ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::FitQuality)) {
+  if (typesSet.test(TrackStateOnSurface::FitQuality)) {
     type += "FitQuality ";
   }
-  if (m_typeFlags.test(TrackStateOnSurface::Alignment)) {
+  if (typesSet.test(TrackStateOnSurface::Alignment)) {
     type += "Alignment ";
   }
   return type;
@@ -233,7 +234,7 @@ TrackStateOnSurface::isSane() const
 
   if (surfacesDiffer) {
     std::cerr << "TrackStateOnSurface::isSane. With :" << '\n';
-    std::cerr << "Types : " << m_typeFlags.to_string() << '\n';
+    std::cerr << "Types : " << types().to_string() << '\n';
     std::cerr << "Hints " << hints().to_string() << '\n';
     std::cerr << "Surfaces differ! " << std::endl;
     if (m_trackParameters) {
