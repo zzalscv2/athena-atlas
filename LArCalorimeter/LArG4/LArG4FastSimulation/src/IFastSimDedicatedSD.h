@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4FASTSIMULATION_IFASTSIMDEDICATEDSD_H
@@ -15,7 +15,7 @@ class IFastSimDedicatedSD : public LArG4SimpleSD {
  public:
 
   /// Simple constructor and destructor
-  IFastSimDedicatedSD( std::string name , StoreGateSvc * detStore ) : LArG4SimpleSD( name , detStore ) {}
+  IFastSimDedicatedSD( const std::string& name , StoreGateSvc * detStore ) : LArG4SimpleSD( name , detStore ) {}
 
   ~IFastSimDedicatedSD() {}
 

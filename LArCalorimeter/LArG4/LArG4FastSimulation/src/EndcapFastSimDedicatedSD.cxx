@@ -102,7 +102,7 @@ void EndcapFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
   double z   = localPosition.z();
 
   EMECDetectorManager::DetectorRegionConstIterator e;
-  for (e=m_emecManager->beginDetectorRegion();e!=m_emecManager->endDetectorRegion();  e++) {
+  for (e=m_emecManager->beginDetectorRegion();e!=m_emecManager->endDetectorRegion();  ++e) {
     const EMECDetectorRegion *region = *e;
     if (region->getEndcapIndex()!=zIndex) continue;
     const EMECDetDescr       *regionDescriptor=region->getDescriptor();

@@ -52,7 +52,7 @@ void BarrelFastSimDedicatedSD::ProcessSpot(const EnergySpot  & spot){
   bool implementWaves=true;
 
   EMBDetectorManager::DetectorRegionConstIterator e;
-  for (e=m_embManager->beginDetectorRegion();e!=m_embManager->endDetectorRegion();  e++) {
+  for (e=m_embManager->beginDetectorRegion();e!=m_embManager->endDetectorRegion();  ++e) {
     const EMBDetectorRegion *region = *e;
     if (region->getEndcapIndex()!=zIndex) continue;
     const EMBDetDescr       *regionDescriptor=region->getDescriptor();
