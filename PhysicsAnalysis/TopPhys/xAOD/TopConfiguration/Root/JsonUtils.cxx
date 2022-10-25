@@ -67,8 +67,8 @@ namespace top {
       }
 
     private:
-      T m_value;
-      std::unique_ptr<Property> m_convprop;
+      T m_value{};
+      std::unique_ptr<Property> m_convprop{};
     };
   }
 
