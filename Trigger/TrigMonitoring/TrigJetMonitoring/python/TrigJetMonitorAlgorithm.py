@@ -549,13 +549,13 @@ def getHTBinning(chain,binwidth):
 # Adds a 20 GeV jet pT cut to avoid FPE WARNINGS from jets below min jet pT for RoI track association
 def addFlavourTagVariables(conf, network_prefix):
     cutname='pt20'
-    fastDipsSelectSpec = SelectSpec(cutname, '20<pt:GeV&|eta|<3.2', path='NoTriggerSelection/'+cutname, FillerTools=[])
+    fillerTools = []
     for f in "cub":
       xvar = f"{network_prefix}_p{f}"
       varname = f"ftag_p{f}"
-      fastDipsHistSpec = HistoSpec(varname, xvar=xvar, bins=(70, -0.2, 1.2), title=f"{varname};{varname};;Entries")
-      fastDipsSelectSpec.appendHistos(fastDipsHistSpec)
-      conf.appendHistos(fastDipsSelectSpec)
+      fillerTools += [HistoSpec(varname, xvar=xvar, bins=(70, -0.2, 1.2), title=f"{varname};{varname};;Entries")]
+    fastDipsSelectSpec = SelectSpec(cutname, '20<pt:GeV&|eta|<3.2', path='NoTriggerSelection/'+cutname, FillerTools=fillerTools)
+    conf.appendHistos(fastDipsSelectSpec)
 
 #########################################################
 # Schedule more histograms for dedicated jet collections
