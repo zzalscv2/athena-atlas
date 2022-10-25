@@ -38,10 +38,6 @@ def sTgcDigitizationTool(name="sTgcDigitizationTool",**kwargs):
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
     kwargs.setdefault("SmearingTool","STgcCalibSmearingTool")
-    if 'NewMerge' in jobproperties.Digitization.experimentalDigi():
-        kwargs.setdefault("UseMcEventCollectionHelper",True)
-    else:
-        kwargs.setdefault("UseMcEventCollectionHelper",False)
     return CfgMgr.sTgcDigitizationTool(name,**kwargs)
 
 def getSTGCRange(name="sTgcRange", **kwargs): 

@@ -60,26 +60,8 @@ StatusCode sTgcDigitMaker::initialize(const int channelTypes)
   // initialize the TGC identifier helper
   m_idHelper = m_mdManager->stgcIdHelper();
 
-  // Read share/sTGC_Digitization_energyThreshold.dat file and store values in m_energyThreshold.
-  // Currently no point in wasting memory to read an empty file for energy threshold.
-  // We have no gap-by-gap energy threshold currently for the sTGC
-  // Alexandre Laurier - April 13 2021
-  //ATH_CHECK(readFileOfEnergyThreshold());
-
-  //// Read share/sTGC_Digitization_crossTalk.dat file and store values in m_crossTalk.
-  //ATH_CHECK(readFileOfCrossTalk());
-
-  // Read share/sTGC_Digitization_deadChamber.dat file and store values in m_isDeadChamber.
-  ATH_CHECK(readFileOfDeadChamber());
-
   // Read share/sTGC_Digitization_effChamber.dat file and store values in m_ChamberEfficiency.
   ATH_CHECK(readFileOfEffChamber());
-
-  // Read share/sTGC_Digitization_timeWindowOffset.dat file and store values in m_timeWindowOffset.
-  ATH_CHECK(readFileOfTimeWindowOffset());
-
-  //// Read share/sTGC_Digitization_alignment.dat file and store values in m_alignmentZ, m_alignmentT, m_alignmentS, m_alignmentTHS
-  //ATH_CHECK(readFileOfAlignment());
 
   // Read share/sTGC_Digitization_timeArrivale.dat, containing the digit time of arrival
   ATH_CHECK(readFileOfTimeArrival());
@@ -311,38 +293,12 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
     if (CLHEP::RandFlat::shoot(rndmEngine,0.0,1.0) > efficiency) return nullptr;
   }
 
-  //// Check the chamber is dead or not.
-  if(isDeadChamber(stationName, stationEta, stationPhi, multiPlet, gasGap)) return nullptr;
-
-  //***************************** check effeciency ******************************** 
-  // use energyDeposit to implement detector effeciency 
-  // Currently, we do not have a gap-by-gap minimum energy deposit threshold
-  // If and when this is implemented, the value must be read from a database
-  //if(!efficiencyCheck(stationName, stationEta, stationPhi, multiPlet, gasGap, 1, energyDeposit)) return 0; 
-  
   IdentifierHash coll_hash;
   // contain (name, eta, phi, multiPlet)
   m_idHelper->get_detectorElement_hash(layid, coll_hash);
   //ATH_MSG_DEBUG(" looking up collection using hash " << (int)coll_hash << " " << m_idHelper->print_to_string(layid) );
 
   auto digits = std::make_unique<sTgcDigitCollection>(layid, coll_hash);
-
- 
-
-  // #################################################################
-  //***************************** BCTAGGER ******************************** 
-  // #################################################################
-
-  // use energyDeposit to implement detector effeciency 
-  // Time of flight correction for each chamber
-  // the offset is set to 0 for ASD located at the postion where tof is minimum in each chamber,
-  // i.e. the ASD at the smallest R in each chamber
-  //float tofCorrection = hit->globalPosition().mag()/CLHEP::c_light; //FIXME use CLHEP::c_light
-  //float tofCorrection = globalHitTime; 
-
-  //// bunch time
-  //float bunchTime = globalHitTime - tofCorrection;
-
 
   //const float stripPropagationTime = 3.3*CLHEP::ns/CLHEP::m * detEl->distanceToReadout(posOnSurf_strip, elemId); // 8.5*ns/m was used until MC10. 
   const float stripPropagationTime = 0.; // 8.5*ns/m was used until MC10. 
@@ -351,27 +307,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   float sDigitTimePad = sDigitTimeWire;
   float sDigitTimeStrip = sDigitTimeWire + stripPropagationTime;
 
-
-  //if(m_doTimeCorrection) sDigitTime = bunchTime + timeJitterDetector + timeJitterElectronics + stripPropagationTime;
-  //else {
-  //  sDigitTime = timeJitterDetector + timeJitterElectronics + stripPropagationTime;
-  //  ATH_WARNING("Did not do Time Correction for this hit!");
-  //}
-
   uint16_t bctag = 0;
-
-  //if(sDigitTime < -m_bunchCrossingTime+m_timeWindowOffsetStrip || +m_bunchCrossingTime+m_timeWindowOffsetStrip+ m_timeWindowStrip < sDigitTime) {
-  //    ATH_MSG_DEBUG("Strip: Digitized time is outside of time window. " << sDigitTime
-  //      	      << " bunchTime: " << bunchTime 
-  //                    << " time jitter from detector response : " << timeJitterDetector  
-  //                    << " time jitter from electronics response : " << timeJitterElectronics  
-  //      	      << " propagation time: " << stripPropagationTime )
-  //  return digits;
-  //}
-
-  //currently do not give any bcId information, just give the acurate time
-  //bctag = bcTagging(sDigitTime, channelType);
-
 
   //##################################################################################
   //######################################### strip readout ##########################
@@ -838,39 +774,6 @@ sTgcDigitMaker::Ionization sTgcDigitMaker::pointClosestApproach(const Identifier
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-bool sTgcDigitMaker::efficiencyCheck(const std::string& stationName, const int stationEta, const int stationPhi,const int multiPlet, const int gasGap, const int channelType, const double energyDeposit) const {
-  // If the energy deposit is equal to or greater than the threshold value of the chamber,
-  // return true.
-  return (energyDeposit >= getEnergyThreshold(stationName, stationEta, stationPhi, multiPlet, gasGap, channelType));
-}
-//+++++++++++++++++++++++++++++++++++++++++++++++
-//uint16_t sTgcDigitMaker::bcTagging(const float digitTime, const int channelType) const {
-//
-//  uint16_t bctag = 0;
-//
-//  double offset, window;
-//  if(channelType == 1) { //strips 
-//    offset = m_timeWindowOffsetStrip;
-//    window = m_timeWindowStrip;
-//  }
-//  else { // wire gangs or pads
-//    offset = m_timeWindowOffsetPad;
-//    window = m_timeWindowPad;
-//  }
-//
-//  if(-m_bunchCrossingTime+offset < digitTime && digitTime < -m_bunchCrossingTime+offset+window) {
-//    bctag = (bctag | 0x1);
-//  }
-//  if(                     offset < digitTime && digitTime <                      offset+window) {
-//    bctag = (bctag | 0x2);
-//  }
-//  if(+m_bunchCrossingTime+offset < digitTime && digitTime < +m_bunchCrossingTime+offset+window) {
-//    bctag = (bctag | 0x4);
-//  }
-//
-//  return bctag;
-//}
-//+++++++++++++++++++++++++++++++++++++++++++++++
 void sTgcDigitMaker::addDigit(sTgcDigitCollection* digits, const Identifier id, const uint16_t bctag, const float digittime, int channelType) const {
 
   if((channelType!=sTgcIdHelper::sTgcChannelTypes::Pad) && (channelType!=sTgcIdHelper::sTgcChannelTypes::Wire)) {
@@ -920,159 +823,6 @@ void sTgcDigitMaker::addDigit(sTgcDigitCollection* digits, const Identifier id, 
 }
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-StatusCode sTgcDigitMaker::readFileOfEnergyThreshold() {
-  // Indices to be used
-  int iStationName, stationEta, stationPhi, multiPlet, gasGap, channelType;
-
-  for(iStationName=0; iStationName<N_STATIONNAME; iStationName++) {
-    for(stationEta=0; stationEta<N_STATIONETA; stationEta++) {
-      for(stationPhi=0; stationPhi<N_STATIONPHI; stationPhi++) {
-        for(multiPlet=0; multiPlet<N_MULTIPLET; multiPlet++) {
-          for(gasGap=0; gasGap<N_GASGAP; gasGap++) {
-            for(channelType=0; channelType<N_CHANNELTYPE; channelType++) {
-              m_energyThreshold[iStationName][stationEta][stationPhi][multiPlet][gasGap][channelType] = 0.00052; //MeV
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Find path to the sTGC_Digitization_energyThreshold.dat file
-  const std::string fileName = "sTGC_Digitization_energyThreshold.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
-  if(fileWithPath.empty()) {
-    ATH_MSG_FATAL("readFileOfEnergyThreshold(): Could not find file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Open the sTGC_Digitization_energyThreshold.dat file
-  std::ifstream ifs;
-  ifs.open(fileWithPath.c_str(), std::ios::in);
-  if(ifs.bad()) {
-    ATH_MSG_FATAL("readFileOfEnergyThreshold(): Could not open file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  double energyThreshold;
-  // Read the sTGC_Digitization_energyThreshold.dat file
-  while(ifs.good()&& !ifs.eof() ) {
-    ifs >> iStationName >> stationEta
-        >> stationPhi   >> multiPlet
-        >> gasGap >> channelType >> energyThreshold;
-    ATH_MSG_DEBUG(  "sTgcDigitMaker::readFileOfEnergyThreshold"
-                    << " stationName= " << iStationName
-                    << " stationEta= " << stationEta
-                    << " stationPhi= " << stationPhi
-                    << " multiPlet= " << multiPlet
-                    << " gasGap= " << gasGap
-                    << " channelType= " << channelType
-                    << " energyThreshold(MeV)= " << energyThreshold );
-
-    // Subtract offsets to use indices of energyThreshold array
-    iStationName -= OFFSET_STATIONNAME;
-    stationEta   -= OFFSET_STATIONETA;
-    stationPhi   -= OFFSET_STATIONPHI;
-    multiPlet    -= OFFSET_MULTIPLET;
-    gasGap       -= OFFSET_GASGAP;
-    channelType  -= OFFSET_CHANNELTYPE;
-
-    // Check the indices are valid
-    if(iStationName<0 || iStationName>=N_STATIONNAME) continue;
-    if(stationEta  <0 || stationEta  >=N_STATIONETA ) continue;
-    if(stationPhi  <0 || stationPhi  >=N_STATIONPHI ) continue;
-    if(multiPlet   <0 || multiPlet   >=N_MULTIPLET  ) continue;
-    if(gasGap      <0 || gasGap      >=N_GASGAP     ) continue;
-    if(channelType <0 || channelType >=N_CHANNELTYPE    ) continue;
-
-    m_energyThreshold[iStationName][stationEta][stationPhi][multiPlet][gasGap][channelType] = energyThreshold;
-
-    // If it is the end of the file, get out from while loop.
-    if(ifs.eof()) break;
-  }
-
-  // Close the sTGC_Digitization_energyThreshold.dat file
-  ifs.close();
-  return StatusCode::SUCCESS;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-StatusCode sTgcDigitMaker::readFileOfDeadChamber() {
-  // Indices to be used
-  int iStationName, stationEta, stationPhi, multiPlet, gasGap;
-
-  for(iStationName=0; iStationName<N_STATIONNAME; iStationName++) {
-    for(stationEta=0; stationEta<N_STATIONETA; stationEta++) {
-      for(stationPhi=0; stationPhi<N_STATIONPHI; stationPhi++) {
-        for(multiPlet=0; multiPlet<N_MULTIPLET; multiPlet++) {
-          for(gasGap=0; gasGap<N_GASGAP; gasGap++) {
-            m_isDeadChamber[iStationName][stationEta][stationPhi][multiPlet][gasGap] = false;
-          }
-        } 
-      }
-    }
-  }
-
-  // Find path to the sTGC_Digitization_deadChamber.dat file
-  const std::string fileName = "sTGC_Digitization_deadChamber.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
-  if(fileWithPath.empty()) {
-    ATH_MSG_FATAL("readFileOfDeadChamber(): Could not find file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Open the sTGC_Digitization_deadChamber.dat file
-  std::ifstream ifs;
-  ifs.open(fileWithPath.c_str(), std::ios::in);
-  if(ifs.bad()) {
-    ATH_MSG_FATAL("readFileOfDeadChamber(): Could not open file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Read the sTGC_Digitization_deadChamber.dat file
-  unsigned int nDeadChambers = 0;
-  std::string comment;
-  while(ifs.good()) {
-    ifs >> iStationName >> stationEta >> stationPhi >> multiPlet >> gasGap;
-    bool valid = getline(ifs, comment).good();
-    if(!valid) break;
-
-    ATH_MSG_DEBUG( "sTgcDigitMaker::readFileOfDeadChamber"
-                    << " stationName= " << iStationName
-                    << " stationEta= " << stationEta
-                    << " stationPhi= " << stationPhi
-                    << " multiPlet= "  << multiPlet 
-                    << " gasGap= " << gasGap
-                    << " comment= " << comment );
-
-    // Subtract offsets to use indices of isDeadChamber array
-    iStationName -= OFFSET_STATIONNAME;
-    stationEta   -= OFFSET_STATIONETA;
-    stationPhi   -= OFFSET_STATIONPHI;
-    multiPlet    -= OFFSET_MULTIPLET;
-    gasGap       -= OFFSET_GASGAP;
-
-    // Check the indices are valid
-    if(iStationName<0 || iStationName>=N_STATIONNAME) continue;
-    if(stationEta  <0 || stationEta  >=N_STATIONETA ) continue;
-    if(stationPhi  <0 || stationPhi  >=N_STATIONPHI ) continue;
-    if(multiPlet   <0 || multiPlet   >=N_MULTIPLET  ) continue;
-    if(gasGap      <0 || gasGap      >=N_GASGAP     ) continue;
-
-    m_isDeadChamber[iStationName][stationEta][stationPhi][multiPlet][gasGap] = true;
-    nDeadChambers++;
-
-    // If it is the end of the file, get out from while loop.
-    if(ifs.eof()) break;
-  }
-
-  // Close the sTGC_Digitization_deadChamber.dat file
-  ifs.close();
-
-  ATH_MSG_VERBOSE("sTgcDigitMaker::readFileOfDeadChamber: the number of dead chambers = " << nDeadChambers );
-  return StatusCode::SUCCESS;
-}
-
 StatusCode sTgcDigitMaker::readFileOfEffChamber() {
   // Indices to be used
   int iStationName, stationEta, stationPhi, multiPlet, gasGap;
@@ -1158,141 +908,9 @@ StatusCode sTgcDigitMaker::readFileOfEffChamber() {
   ATH_MSG_VERBOSE("sTgcDigitMaker::readFileOfEffChamber: the number of dead chambers = " << nDeadChambers );
   return StatusCode::SUCCESS;
 }
-//+++++++++++++++++++++++++++++++++++++++++++++++
-StatusCode sTgcDigitMaker::readFileOfTimeWindowOffset() {
-  // Indices to be used
-  int iStationName, stationEta, channelType;
-
-  for(iStationName=0; iStationName<N_STATIONNAME; iStationName++) {
-    for(stationEta=0; stationEta<N_STATIONETA; stationEta++) {
-      for(channelType=0; channelType<N_CHANNELTYPE; channelType++) {
-        m_timeWindowOffset[iStationName][stationEta][channelType] = 0.;
-      }
-    }
-  }
-
-  // Find path to the sTGC_Digitization_timeWindowOffset.dat file
-  const std::string fileName = "sTGC_Digitization_timeWindowOffset.dat";
-  std::string fileWithPath = PathResolver::find_file(fileName.c_str(), "DATAPATH");
-  if(fileWithPath.empty()) {
-    ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not find file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Open the sTGC_Digitization_timeWindowOffset.dat file
-  std::ifstream ifs;
-  ifs.open(fileWithPath.c_str(), std::ios::in);
-  if(ifs.bad()) {
-    ATH_MSG_FATAL("readFileOfTimeWindowOffset(): Could not open file " << fileName.c_str() );
-    return StatusCode::FAILURE;
-  }
-
-  // Read the sTGC_Digitization_timeWindowOffset.dat file
-  double timeWindowOffset;
-  while(ifs.good()) {
-    ifs >> iStationName >> stationEta >> channelType >> timeWindowOffset;
-    ATH_MSG_DEBUG(  "sTgcDigitMaker::readFileOfTimeWindowOffset"
-                    << " stationName= " << iStationName
-                    << " stationEta= " << stationEta
-                    << " channelType= " << channelType
-                    << " timeWindowOffset= " << timeWindowOffset );
-
-    // Subtract offsets to use indices of isDeadChamber array
-    iStationName -= OFFSET_STATIONNAME;
-    stationEta   -= OFFSET_STATIONETA;
-    channelType  -= OFFSET_CHANNELTYPE;
-
-    // Check the indices are valid
-    if(iStationName<0 || iStationName>=N_STATIONNAME) continue;
-    if(stationEta  <0 || stationEta  >=N_STATIONETA ) continue;
-    if(channelType     <0 || channelType     >=N_CHANNELTYPE    ) continue;
-
-    m_timeWindowOffset[iStationName][stationEta][channelType] = timeWindowOffset;
-
-    // If it is the end of the file, get out from while loop.
-    if(ifs.eof()) break;
-  }
-
-  // Close the sTGC_Digitization_timeWindowOffset.dat file
-  ifs.close();
-  return StatusCode::SUCCESS;
-}
 
 //+++++++++++++++++++++++++++++++++++++++++++++++
-double sTgcDigitMaker::getEnergyThreshold(const std::string& stationName, int stationEta, int stationPhi, int multiPlet, int gasGap, int channelType) const {
-  // Convert std::string stationName to int iStationName from 41 to 48
-  int iStationName = getIStationName(stationName);
-
-  // Subtract offsets to use these as the indices of the energyThreshold array
-  iStationName -= OFFSET_STATIONNAME;
-  stationEta   -= OFFSET_STATIONETA;
-  stationPhi   -= OFFSET_STATIONPHI;
-  multiPlet    -= OFFSET_MULTIPLET;
-  gasGap       -= OFFSET_GASGAP;
-  channelType  -= OFFSET_CHANNELTYPE;
-
-  double energyThreshold = +999999.;
-
-  // If the indices are valid, the energyThreshold array is fetched.
-  if((iStationName>=0 && iStationName<N_STATIONNAME) &&
-     (stationEta  >=0 && stationEta  <N_STATIONETA ) &&
-     (stationPhi  >=0 && stationPhi  <N_STATIONPHI ) &&
-     (multiPlet   >=0 && multiPlet   <N_MULTIPLET ) &&
-     (gasGap      >=0 && gasGap      <N_GASGAP     ) &&
-     (channelType >=0 && channelType <N_CHANNELTYPE    )) {
-    energyThreshold = m_energyThreshold[iStationName][stationEta][stationPhi][multiPlet][gasGap][channelType];
-  }
-
-  // Show the energy threshold value
-  ATH_MSG_VERBOSE( "sTgcDigitMaker::getEnergyThreshold"
-                    << " stationName= " << iStationName+OFFSET_STATIONNAME
-                    << " stationEta= " << stationEta+OFFSET_STATIONETA
-                    << " stationPhi= " << stationPhi+OFFSET_STATIONPHI
-                    << " multiPlet= " << multiPlet+OFFSET_MULTIPLET
-                    << " gasGap= "      << gasGap+OFFSET_GASGAP
-                    << " channelType= " << channelType+OFFSET_CHANNELTYPE
-                    << " energyThreshold(MeV)= " << energyThreshold );
-
-  return energyThreshold;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-bool sTgcDigitMaker::isDeadChamber(const std::string& stationName, int stationEta, int stationPhi, int multiPlet, int gasGap) const {
-  bool v_isDeadChamber = true;
-
-  // Convert std::string stationName to int iStationName from 41 to 48
-  int iStationName = getIStationName(stationName);
-
-  // Subtract offsets to use these as the indices of the energyThreshold array
-  iStationName -= OFFSET_STATIONNAME;
-  stationEta   -= OFFSET_STATIONETA;
-  stationPhi   -= OFFSET_STATIONPHI;
-  multiPlet    -= OFFSET_MULTIPLET;
-  gasGap       -= OFFSET_GASGAP;
-
-  // If the indices are valid, the energyThreshold array is fetched.
-  if((iStationName>=0 && iStationName<N_STATIONNAME) &&
-     (stationEta  >=0 && stationEta  <N_STATIONETA ) &&
-     (stationPhi  >=0 && stationPhi  <N_STATIONPHI ) &&
-     (multiPlet   >=0 && multiPlet   <N_MULTIPLET  ) && 
-     (gasGap      >=0 && gasGap      <N_GASGAP     )) {
-    v_isDeadChamber = m_isDeadChamber[iStationName][stationEta][stationPhi][multiPlet][gasGap];
-  }
-
-  // Show the energy threshold value
-  ATH_MSG_VERBOSE(  "sTgcDigitMaker::isDeadChamber"
-                    << " stationName= " << iStationName+OFFSET_STATIONNAME
-                    << " stationEta= " << stationEta+OFFSET_STATIONETA
-                    << " stationPhi= " << stationPhi+OFFSET_STATIONPHI
-                    << " multiPlet = " << multiPlet +OFFSET_MULTIPLET
-                    << " gasGap= " << gasGap+OFFSET_GASGAP
-                    << " isDeadChamber= " << v_isDeadChamber );
-
-  return v_isDeadChamber;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-float sTgcDigitMaker::getChamberEfficiency(int stationName, int stationEta, int stationPhi, int multiPlet, int gasGap) const {
+float sTgcDigitMaker::getChamberEfficiency(const int stationName, const int stationEta, const int stationPhi, const int multiPlet, const int gasGap) const {
 
   // If the indices are valid, the energyThreshold array is fetched.
   if((stationName>=0 && stationName<2 ) &&
@@ -1305,25 +923,6 @@ float sTgcDigitMaker::getChamberEfficiency(int stationName, int stationEta, int 
   else ATH_MSG_INFO("sTGC getChamberEfficiency bug! Indexes not ok!");
 
   return 1.;
-}
-
-//+++++++++++++++++++++++++++++++++++++++++++++++
-double sTgcDigitMaker::getTimeWindowOffset(const std::string& stationName, int stationEta, int channelType) const {
-  // Convert std::string stationName to int iStationName from 41 to 48
-  int iStationName = getIStationName(stationName);
-
-  // Subtract offsets to use these as the indices of the energyThreshold array
-  iStationName -= OFFSET_STATIONNAME;
-  stationEta   -= OFFSET_STATIONETA;
-  channelType  -= OFFSET_CHANNELTYPE;
-
-  // Check the indices are valid
-  if(iStationName<0 || iStationName >=N_STATIONNAME) return 0.;
-  if(stationEta  <0 || stationEta   >=N_STATIONETA ) return 0.;
-  if(channelType <0 || channelType  >=N_CHANNELTYPE    ) return 0.;
-
-  // Values were determined to reproduce the fraction of Previous BC hit fraction in Z->mumu data during Periods B,D,E in 2011.
-  return m_timeWindowOffset[iStationName][stationEta][channelType];
 }
 
 int sTgcDigitMaker::getIStationName(const std::string& stationName) const {
@@ -1474,40 +1073,3 @@ double sTgcDigitMaker::getTimeOffsetStrip(int neighbor_index) const {
   }
   return 0.0;
 }
-
-////+++++++++++++++++++++++++++++++++++++++++++++++
-//void sTgcDigitMaker::adHocPositionShift(const std::string stationName, int stationEta, int stationPhi,
-//                                       const Amg::Vector3D direCos, Amg::Vector3D &localPos) const {
-//  int iStationName = getIStationName(stationName);
-//  iStationName -= OFFSET_STATIONNAME;
-//  stationEta   -= OFFSET_STATIONETA;
-//  stationPhi   -= OFFSET_STATIONPHI;
-//  // Check the indices are valid
-//  if(iStationName<0 || iStationName>=N_STATIONNAME) return;
-//  if(stationEta  <0 || stationEta  >=N_STATIONETA ) return;
-//  if(stationPhi  <0 || stationPhi  >=N_STATIONPHI ) return;
-//
-//  // Local +x (-x) direction is global +z direction on A-side (C-side).
-//  double localDisplacementX = m_alignmentT[iStationName][stationEta][stationPhi];
-//
-//  // Local +z direction is global +r direction.
-//  double localDisplacementZ = m_alignmentZ[iStationName][stationEta][stationPhi];
-//
-//  // Local +s direction is global +phi direction.
-//  double localDisplacementY = m_alignmentS[iStationName][stationEta][stationPhi];
-//
-//  // Rotation around the s-axis is not implemented yet (2011/11/29).
-//  // m_alignmentTHS[tmpStationName][tmpStationEta][tmpStationPhi];
-//
-//  // Convert local x translation to local y and z translations
-//  double localDisplacementYByX = 0.;
-//  double localDisplacementZByX = 0.;
-//  if(fabs(localDisplacementX)>1.0E-12) { // local y and z translations are non-zero only if local x translation is non-zero.
-//    if(fabs(direCos[0])<1.0E-12) return; // To avoid zero-division
-//    localDisplacementYByX = direCos[1]/direCos[0]*localDisplacementX;
-//    localDisplacementZByX = direCos[2]/direCos[0]*localDisplacementX;
-//  }
-//  localPos.y() = localPos.y()+localDisplacementYByX+localDisplacementY;
-//  localPos.z() = localPos.z()+localDisplacementZByX-localDisplacementZ;
-//}
-
