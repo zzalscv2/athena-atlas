@@ -18,6 +18,8 @@
 #include "BarcodeEvent/Barcode.h"
 
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/GenEvent.h"
 
 // std::abs
 #include <cmath> 
@@ -149,14 +151,21 @@ void testChildParticle() {
   //--------------------------------------------------------------------
   // get gP:
   std::cout << "LM test::truthIncident.childBarcode(0) pre childParticle  " << test::truthIncident.childBarcode(0) << std::endl;
+  std::unique_ptr<HepMC::GenEvent> event(HepMC::newGenEvent(1,1));
+  HepMC::GenVertexPtr vertex = HepMC::newGenVertexPtr();
+  event->add_vertex(vertex);
   HepMC::GenParticlePtr gPP = test::truthIncident.childParticle(childIndex,childBarcode);
-  std::cout << "LM test::truthIncident.childBarcode(0) post childParticle" << test::truthIncident.childBarcode(0) << std::endl;
+   vertex->add_particle_out(gPP);
+#ifdef HEPMC3
+  HepMC::suggest_barcode( gPP, childBarcode);
+#endif
+ std::cout << "LM test::truthIncident.childBarcode(0) post childParticle" << test::truthIncident.childBarcode(0) << std::endl;
   //--------------------------------------------------------------------
   // run tests:
   // do gP properties match original child, apart from barcode?
   assert(test::eps >= std::fabs(gPP->momentum().perp2() - originalChildPt2));  
   assert(gPP->pdg_id() == originalChildPdgCode);
-  assert(gPP->barcode() == childBarcode);
+  assert(HepMC::barcode(gPP) == childBarcode);
 
   // truthIncident: no change to properties, apart from BC?
   assert(test::truthIncident.childPt2(0) == originalChildPt2);
