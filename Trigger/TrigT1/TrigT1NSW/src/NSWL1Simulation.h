@@ -61,7 +61,7 @@ namespace NSWL1 {
     virtual StatusCode execute(const EventContext& ctx) const override;
 
   protected:
-    SG::WriteHandleKey<Muon::NSW_TrigRawDataContainer> m_trigRdoContainer{this, "NSWTrigRDOContainerName", "NSWTRGRDO", "Name of the NSW trigger RDO container"};
+    SG::WriteHandleKey<Muon::NSW_TrigRawDataContainer> m_trigRdoContainer{this, "NSWTrigRDOContainerName", "L1_NSWTrigContainer", "Name of the NSW trigger RDO container"};
 
   private:
     ToolHandle <IPadTdsTool>           m_pad_tds{this, "PadTdsTool", "NSWL1::PadTdsOfflineTool", "Tool simulating the functionalities of the sTGC PAD TDS"};

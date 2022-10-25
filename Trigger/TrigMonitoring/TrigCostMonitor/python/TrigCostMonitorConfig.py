@@ -35,6 +35,27 @@ def TrigCostMonitorCfg(flags, seqName=""):
     return acc
 
 
+def TrigCostMonitorFinalizeCfg(flags, seqName=""):
+    """
+    Component Accumulator based configuration of Trigger Cost Finalize Alg
+    """
+    from TrigEDMConfig.TriggerEDMRun3 import recordable
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('TrigCostMonitorSetup')
+
+    if flags.Trigger.CostMonitoring.doCostMonitoring:
+      costFinalizeAlg = CompFactory.TrigCostFinalizeAlg()
+      costFinalizeAlg.CostWriteHandleKey = recordable(flags.Trigger.CostMonitoring.outputCollection)
+
+      log.debug('Enabling finalize of online trigger cost monitoring')
+      return costFinalizeAlg
+    else:
+      log.debug('Cost monitoring is not enabled - TrigCostFinalizeAlg will not be included')
+
+    return None
+
+
 def TrigCostMonitorPostSetup():
   from AthenaCommon.Logging import logging
   log = logging.getLogger('TrigCostMonitorPostSetup')

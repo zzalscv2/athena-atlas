@@ -90,7 +90,7 @@ namespace ISF {
     /** Return the PDG Code of the i-th child particle */
     int                       childPdgCode(unsigned short index) const override final;
     /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
-    Barcode::ParticleBarcode  childBarcode(unsigned short) const override final {return 0;};
+    Barcode::ParticleBarcode  childBarcode(unsigned short) const override final;
     /** Return the i-th child as a HepMC particle type and assign the given
         Barcode to the simulator particle (usually only called for particles that
         will enter the HepMC truth event) */

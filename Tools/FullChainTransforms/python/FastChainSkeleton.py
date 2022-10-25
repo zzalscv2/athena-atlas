@@ -30,6 +30,9 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs, 'simulator'):
         ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
 
+    # This is ISF
+    ConfigFlags.Sim.ISFRun = True
+
     # Set input files
     if hasattr(runArgs, 'inputRDO_BKGFile') or hasattr(runArgs, 'inputBS_SKIMFile'):
         # Set inputs for Overlay
@@ -65,10 +68,6 @@ def fromRunArgs(runArgs):
     # Generate detector list (must be after input setting)
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
-
-    # Setup common simulation flags
-    from SimuJobTransforms.ISF_Skeleton import defaultSimulationFlags
-    defaultSimulationFlags(ConfigFlags)
 
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags

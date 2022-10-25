@@ -41,7 +41,6 @@ if __name__ == '__main__':
     ConfigFlags.Sim.RecordStepInfo = False
     ConfigFlags.Sim.CavernBackground = CavernBackground.Signal
     ConfigFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
-    ConfigFlags.Sim.ReleaseGeoModel = False
     ConfigFlags.Sim.ISFRun = True
     ConfigFlags.Sim.ISF.Simulator = SimulationFlavour.FullG4MT
 

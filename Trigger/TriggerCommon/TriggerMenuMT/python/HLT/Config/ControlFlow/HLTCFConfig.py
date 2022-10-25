@@ -240,6 +240,11 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
     with ConfigurableRun3Behavior():
         edmAlg = triggerMergeViewsAndAddMissingEDMCfg(flags, ['AOD', 'ESD'], hypos, viewMakers, decObj, decObjHypoOut)
 
+    from TrigCostMonitor.TrigCostMonitorConfig import TrigCostMonitorFinalizeCfg
+    costAlg = TrigCostMonitorFinalizeCfg(flags)
+    if costAlg: # None if Cost Monitoring is turned off
+        hltFinalizeSeq += conf2toConfigurable( costAlg )
+
     # C) Finally, we create the EDM output
     hltFinalizeSeq += conf2toConfigurable(edmAlg)
 

@@ -1052,9 +1052,9 @@ int main(int argc, char** argv)
     std::cout << "Filter: " << inputdata.GetString("Filter") << " : " << filter << std::endl;
     if ( filter.head()=="Offline2017" ) {
       std::string filter_type = filter.tail();
-      filter_offline2017 = new Filter_Offline2017( pT, filter_type, z0v, a0v ); 
+      filter_offline2017 = new Filter_Offline2017( pT, filter_type, zed, a0 ); 
       filter_off2017     = new Filter_Combined ( filter_offline2017, &filter_vertex);
-      refFilter = filter_off2017;
+      refFilter          = filter_off2017;
     }
     else { 
       std::cerr << "unimplemented Filter requested: " << filter.head() << std::endl; 
@@ -1202,7 +1202,7 @@ int main(int argc, char** argv)
     if ( chainConfig[i].values().size()>0 ) { 
       std::cout << "chain:: " << chainname << "\t(" << chainConfig[i] << " : size " << chainConfig[i].values().size() << ")" << std::endl; 
       for ( unsigned ik=chainConfig[i].values().size() ; ik-- ; ) {
-        std::cout << "\tchainconfig: " << ik << "\tkey " << chainConfig[i].keys()[ik] << " " << chainConfig[i].values()[ik] << std::endl; 
+	 std::cout << "\tchainconfig: " << ik << "\tkey " << chainConfig[i].keys()[ik] << " " << chainConfig[i].values()[ik] << std::endl; 
       }
     }
   
@@ -1716,12 +1716,9 @@ int main(int argc, char** argv)
         }
       }
       
-      //      if ( vertices.size()>0 ) std::cout << "vertex " << vertices[0] << std::endl;
-      //      else                     std::cout << "NO vertex !!!" << std::endl;
-      
       /// always push back the vector - if required there will be only one vertex on it
       filter_vertex.setVertex( vertices );
-      
+ 
       /// calculate number of "vertex tracks"
       
       NvtxCount = 0;
@@ -1737,6 +1734,7 @@ int main(int argc, char** argv)
     }
 
     //    filter_vertex.setVertex( vvtx ) ;
+
     hcorr->Fill( vertices.size(), Nvtxtracks ); 
 
     dynamic_cast<Filter_Combined*>(refFilter)->setRoi(0);
@@ -1750,15 +1748,16 @@ int main(int argc, char** argv)
 
     TrigObjectMatcher tom;
 
-    for (std::string rc : refChains){
-      for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) { 
+    for ( const std::string& rc : refChains ) {
+ 
+      for ( size_t ic=0 ; ic<chains.size() ; ic++ ) { 
+
         if ( chains[ic].name()==rc ) { 
 
           refchain = &chains[ic];
           foundReference = true;
 
           //Get tracks from within reference roi
-          //        ibl_filter( chains[ic].rois()[0].tracks() ); 
 
           refTracks.selectTracks( chains[ic].rois()[0].tracks() );
 
@@ -1771,7 +1770,9 @@ int main(int argc, char** argv)
           break;
 
         }
+
       }
+
     }
 
     if ( !foundReference ) continue;
@@ -1814,13 +1815,11 @@ int main(int argc, char** argv)
       else {
 	// if not a tnp analysis then fill rois in the normal way
 	rois.reserve( chain.size() );
-	for ( size_t ir=0 ; ir<chain.size() ; ir++ )
-	  rois.push_back( &(chain.rois()[ir]) );
+	for ( size_t ir=0 ; ir<chain.size() ; ir++ ) rois.push_back( &(chain.rois()[ir]) );
       }
  
       /// debug printout
-      if ( false )
-        std::cout << "++++++++++++ rois size = " << rois.size() << " +++++++++++" << std::endl;
+      if ( false )  std::cout << "++++++++++++ rois size = " << rois.size() << " +++++++++++" << std::endl;
  
       //for (unsigned int ir=0 ; ir<chain.size() ; ir++ ) { 
       for (unsigned int ir=0 ; ir<rois.size() ; ir++ ) {  // changed for tagNprobe
@@ -1875,7 +1874,6 @@ int main(int argc, char** argv)
             vertices_test.push_back(selected);
           }
         }
-
         else if ( vtxind_rec!=-1 ) {
           if ( unsigned(vtxind_rec)<mvt.size() ) { 
             TIDA::Vertex selected( mvt[vtxind] );
@@ -1883,7 +1881,6 @@ int main(int argc, char** argv)
             vertices_test.push_back( selected );
           }
         }
-        
         else {  
           for ( unsigned iv=0 ; iv<mvt.size() ; iv++ ) {
             TIDA::Vertex selected( mvt[iv] );
@@ -1935,6 +1932,10 @@ int main(int argc, char** argv)
         
         if ( select_roi ) {
 
+	  /// what is all this logic doing ? It looks needlessly convoluted, and should 
+	  /// at the very least have some proper explanation of what it is supposed to 
+	  /// be doing 
+
           bool customRefRoi_thisChain = false;
 
           if ( use_custom_ref_roi ) { // Ideally just want to say ( use_custom_ref_roi && (chain.name() in custRefRoi_chain]sist) )
@@ -1948,7 +1949,7 @@ int main(int argc, char** argv)
             refRoi = makeCustomRefRoi( roi, custRefRoi_params[0], custRefRoi_params[1], custRefRoi_params[2] ); 
           }
           else refRoi = roi;
-
+	  
           dynamic_cast<Filter_Combined*>(refFilter)->setRoi(&refRoi);
         }
         
@@ -1963,7 +1964,6 @@ int main(int argc, char** argv)
 
         std::vector<TIDA::Track*>  refp_vec = refTracks.tracks( refFilter );
         
-
         // Selecting only truth matched reference tracks
         if ( truthMatch ) {       
           /// get the truth particles ...
@@ -2157,7 +2157,7 @@ int main(int argc, char** argv)
         }
 
         _matcher->match( refp, testp);
-        
+       
         if ( tom.status() ) analitr->second->execute( refp, testp, _matcher, &tom );
         else                analitr->second->execute( refp, testp, _matcher );
 

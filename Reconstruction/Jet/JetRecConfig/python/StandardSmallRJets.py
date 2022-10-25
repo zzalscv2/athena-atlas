@@ -82,7 +82,7 @@ if not ConfigFlags.Jet.useCalibJetThreshold:
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+filterPF+truthmods+standardmods,
+                               modifiers = calibmods+filterPF+truthmods+standardmods+("JetGhostLabel",),
                                lock = True
 )
 

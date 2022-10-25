@@ -29,6 +29,13 @@ StatusCode LArSC2Ntuple::initialize() {
     ATH_MSG_ERROR( "addItem 'latomeChannel' failed" );
     return sc;
   }
+
+  sc=m_nt->addItem("LB",m_LB);
+  if (sc.isFailure()) {
+    ATH_MSG_ERROR( "addItem 'LB' failed" );
+    return sc;
+  }
+  
   
   sc = m_nt->addItem("bcidVec",m_Nsamples, m_bcidVec);//here - > define length?
   if (sc.isFailure()) {
@@ -136,8 +143,10 @@ StatusCode LArSC2Ntuple::execute()
   ATH_MSG_DEBUG( "LArSC2Ntuple in execute" ); 
   unsigned long long thisevent = 0;
   unsigned long	thisbcid       = 0;
+  unsigned short thislb        = 0;
 
   thisevent	   = ctx.eventID().event_number();
+  thislb       = ctx.eventID().lumi_block();
 
   // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
   thisbcid	   = ctx.eventID().bunch_crossing_id();
@@ -277,6 +286,7 @@ StatusCode LArSC2Ntuple::execute()
     if(m_fillBCID) m_bcid	   = thisbcid; 
     m_IEvent	   = thisevent;
     if(m_overwriteEventNumber) m_IEvent   = ctx.evt();
+    m_LB           = thislb;
     if( hasDigitContainer ){
 
       const LArDigit* digi   = DigitContainer->at(c);     
