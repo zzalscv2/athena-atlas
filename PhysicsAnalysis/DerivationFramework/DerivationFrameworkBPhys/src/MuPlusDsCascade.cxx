@@ -209,7 +209,10 @@ namespace DerivationFramework {
       ATH_CHECK(evtStore()->retrieve(dxContainer   , m_vertexDxContainerKey       ));
 
       for (Trk::VxCascadeInfo* x : cascadeinfoContainer) {
-        if(x==nullptr) ATH_MSG_ERROR("cascadeinfoContainer is null");
+        if(x==nullptr){
+          ATH_MSG_ERROR("cascadeinfoContainer is null");
+          continue;
+        }
 
         // the cascade fitter returns:
         // std::vector<xAOD::Vertex*>, each xAOD::Vertex contains the refitted track parameters (perigee at the vertex position)
