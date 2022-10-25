@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -18,9 +18,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 // TrkGeometry
 #include "TrkGeometry/TrackingGeometry.h"
-#ifdef LEGACY_TRKGEOM
-#include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
-#endif
 
 namespace Trk {
 
@@ -77,22 +74,18 @@ namespace Trk {
           
         const TrackingGeometry& trackingGeometry() const;
 
-        #ifdef LEGACY_TRKGEOM
-        ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "",""};
-#endif
         void throwFailedToGetTrackingGeometry() const;
-        const TrackingGeometry* retrieveTrackingGeometry(const EventContext& ctx) const {
-#ifdef LEGACY_TRKGEOM
-           if (m_trackingGeometryReadKey.key().empty()) {
-              return m_trackingGeometrySvc->trackingGeometry();
-           }
-#endif
-           SG::ReadCondHandle<TrackingGeometry>  handle(m_trackingGeometryReadKey,ctx);
-           if (!handle.isValid()) {
-              ATH_MSG_FATAL("Could not load TrackingGeometry with name '" << m_trackingGeometryReadKey.key() << "'. Aborting." );
-              throwFailedToGetTrackingGeometry();
-           }
-           return handle.cptr();
+        const TrackingGeometry* retrieveTrackingGeometry(
+          const EventContext& ctx) const
+        {
+          SG::ReadCondHandle<TrackingGeometry> handle(m_trackingGeometryReadKey,
+                                                      ctx);
+          if (!handle.isValid()) {
+            ATH_MSG_FATAL("Could not load TrackingGeometry with name '"
+                          << m_trackingGeometryReadKey.key() << "'. Aborting.");
+            throwFailedToGetTrackingGeometry();
+          }
+          return handle.cptr();
         }
 
         SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey

@@ -57,11 +57,6 @@ StatusCode Trk::MaterialValidation::initialize()
 {
     
     // Get the TrackingGeometry from StoreGate
-#ifdef LEGACY_TRKGEOM
-    if (!m_trackingGeometrySvc.empty()) {
-       ATH_CHECK( m_trackingGeometrySvc.retrieve());
-    }
-#endif
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
     
     if ( (m_materialMapper.retrieve()).isFailure() )
