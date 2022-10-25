@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -53,24 +53,38 @@ namespace LWHistRootUtils {
     double& getSumWX() { return fTsumwx; }
     double& getSumWX2() { return fTsumwx2; }
     TArrayD& getSumw2Array() { return fSumw2; }
+    double getSumW() const { return fTsumw; }
+    double getSumW2() const { return fTsumw2; }
+    double getSumWX() const { return fTsumwx; }
+    double getSumWX2() const { return fTsumwx2; }
+    const TArrayD& getSumw2Array() const { return fSumw2; }
   };
   class TH2_FieldsAccess : public TH2 {
   public:
     double& getSumWY() { return fTsumwy; }
     double& getSumWY2() { return fTsumwy2; }
     double& getSumWXY() { return fTsumwxy; }
+    double getSumWY() const { return fTsumwy; }
+    double getSumWY2() const { return fTsumwy2; }
+    double getSumWXY() const { return fTsumwxy; }
   };
   class TProfile_FieldsAccess : public TProfile {
   public:
     double& getSumWY() { return fTsumwy; }
     double& getSumWY2() { return fTsumwy2; }
     TArrayD& getBinEntriesArray() { return fBinEntries; }
+    double getSumWY() const { return fTsumwy; }
+    double getSumWY2() const { return fTsumwy2; }
+    const TArrayD& getBinEntriesArray() const { return fBinEntries; }
   };
   class TProfile2D_FieldsAccess : public TProfile2D {
   public:
     double& getSumWZ() { return fTsumwz; }
     double& getSumWZ2() { return fTsumwz2; }
     TArrayD& getBinEntriesArray() { return fBinEntries; }
+    double getSumWZ() const { return fTsumwz; }
+    double getSumWZ2() const { return fTsumwz2; }
+    const TArrayD& getBinEntriesArray() const { return fBinEntries; }
   };
 
   inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (TH1*h) { return static_cast<TH1_FieldsAccess*>(h)->getSumW(); }
@@ -82,6 +96,48 @@ namespace LWHistRootUtils {
   inline double getSumWXY LWHISTS_NO_SANITIZE_UNDEFINED (TH2*h) { return static_cast<TH2_FieldsAccess*>(h)->getSumWXY(); }
   inline TArrayD& getSumw2Array LWHISTS_NO_SANITIZE_UNDEFINED (TH1*h) { return static_cast<TH1_FieldsAccess*>(h)->getSumw2Array(); }
 
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH1*h) { return static_cast<const TH1_FieldsAccess*>(h)->getSumW(); }
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH1I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW(); }
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW(); }
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH1D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW(); }
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW(); }
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH1F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW(); }
+  inline double getSumW LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1*h) { return static_cast<const TH1_FieldsAccess*>(h)->getSumW2(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW2(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW2(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW2(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW2(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW2(); }
+  inline double getSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumW2(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH1*h) { return static_cast<const TH1_FieldsAccess*>(h)->getSumWX(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH1I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH1D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH1F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX(); }
+  inline double getSumWX LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1*h) { return static_cast<const TH1_FieldsAccess*>(h)->getSumWX2(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX2(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX2(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX2(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX2(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH1F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX2(); }
+  inline double getSumWX2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH1_FieldsAccess*>(static_cast<const TH1*>(h))->getSumWX2(); }
+  inline double getSumWY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2*h) { return static_cast<const TH2_FieldsAccess*>(h)->getSumWY(); }
+  inline double getSumWY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWY(); }
+  inline double getSumWY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWY(); }
+  inline double getSumWY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWY(); }
+  inline double getSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2*h) { return static_cast<const TH2_FieldsAccess*>(h)->getSumWY2(); }
+  inline double getSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWY2(); }
+  inline double getSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWY2(); }
+  inline double getSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWY2(); }
+  inline double getSumWXY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2*h) { return static_cast<const TH2_FieldsAccess*>(h)->getSumWXY(); }
+  inline double getSumWXY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2I*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWXY(); }
+  inline double getSumWXY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2D*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWXY(); }
+  inline double getSumWXY LWHISTS_NO_SANITIZE_UNDEFINED (const TH2F*h) { return static_cast<const TH2_FieldsAccess*>(static_cast<const TH2*>(h))->getSumWXY(); }
+  inline const TArrayD& getSumw2Array LWHISTS_NO_SANITIZE_UNDEFINED (const TH1*h) { return static_cast<const TH1_FieldsAccess*>(h)->getSumw2Array(); }
+
   inline void setSumW LWHISTS_NO_SANITIZE_UNDEFINED (TH1*h,const double&s) { static_cast<TH1_FieldsAccess*>(h)->getSumW() = s; }
   inline void setSumW2 LWHISTS_NO_SANITIZE_UNDEFINED (TH1*h,const double&s) { static_cast<TH1_FieldsAccess*>(h)->getSumW2() = s; }
   inline void setSumWX LWHISTS_NO_SANITIZE_UNDEFINED (TH1*h,const double&s) { static_cast<TH1_FieldsAccess*>(h)->getSumWX() = s; }
@@ -90,14 +146,14 @@ namespace LWHistRootUtils {
   inline void setSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (TH2*h,const double&s) { static_cast<TH2_FieldsAccess*>(h)->getSumWY2() = s; }
   inline void setSumWXY LWHISTS_NO_SANITIZE_UNDEFINED (TH2*h,const double&s) { static_cast<TH2_FieldsAccess*>(h)->getSumWXY() = s; }
 
-  inline double getSumWY LWHISTS_NO_SANITIZE_UNDEFINED (TProfile*h) { return static_cast<TProfile_FieldsAccess*>(h)->getSumWY(); }
-  inline double getSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (TProfile*h) { return static_cast<TProfile_FieldsAccess*>(h)->getSumWY2(); }
+  inline double getSumWY LWHISTS_NO_SANITIZE_UNDEFINED (const TProfile*h) { return static_cast<const TProfile_FieldsAccess*>(h)->getSumWY(); }
+  inline double getSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (const TProfile*h) { return static_cast<const TProfile_FieldsAccess*>(h)->getSumWY2(); }
   inline void setSumWY LWHISTS_NO_SANITIZE_UNDEFINED (TProfile*h,const double&s) { static_cast<TProfile_FieldsAccess*>(h)->getSumWY() = s; }
   inline void setSumWY2 LWHISTS_NO_SANITIZE_UNDEFINED (TProfile*h,const double&s) { static_cast<TProfile_FieldsAccess*>(h)->getSumWY2() = s; }
   inline TArrayD& getBinEntriesArray LWHISTS_NO_SANITIZE_UNDEFINED (TProfile*h) { return static_cast<TProfile_FieldsAccess*>(h)->getBinEntriesArray(); }
 
-  inline double getSumWZ LWHISTS_NO_SANITIZE_UNDEFINED (TProfile2D*h) { return static_cast<TProfile2D_FieldsAccess*>(h)->getSumWZ(); }
-  inline double getSumWZ2 LWHISTS_NO_SANITIZE_UNDEFINED (TProfile2D*h) { return static_cast<TProfile2D_FieldsAccess*>(h)->getSumWZ2(); }
+  inline double getSumWZ LWHISTS_NO_SANITIZE_UNDEFINED (const TProfile2D*h) { return static_cast<const TProfile2D_FieldsAccess*>(h)->getSumWZ(); }
+  inline double getSumWZ2 LWHISTS_NO_SANITIZE_UNDEFINED (const TProfile2D*h) { return static_cast<const TProfile2D_FieldsAccess*>(h)->getSumWZ2(); }
   inline void setSumWZ LWHISTS_NO_SANITIZE_UNDEFINED (TProfile2D*h,const double&s) { static_cast<TProfile2D_FieldsAccess*>(h)->getSumWZ() = s; }
   inline void setSumWZ2 LWHISTS_NO_SANITIZE_UNDEFINED (TProfile2D*h,const double&s) { static_cast<TProfile2D_FieldsAccess*>(h)->getSumWZ2() = s; }
   inline TArrayD& getBinEntriesArray LWHISTS_NO_SANITIZE_UNDEFINED (TProfile2D*h) { return static_cast<TProfile2D_FieldsAccess*>(h)->getBinEntriesArray(); }

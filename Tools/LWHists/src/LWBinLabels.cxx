@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -46,10 +46,11 @@ void LWBinLabels::apply(TAxis*a) const
 //____________________________________________________________________
 const char * LWBinLabels::getBinLabel(unsigned bin) const
 {
-  unsigned i = std::lower_bound(m_list,m_list+m_size,Entry(bin,0),cmp)-m_list;
+  const Entry* list = m_list;
+  unsigned i = std::lower_bound(list,list+m_size,Entry(bin,0),cmp)-list;
   if (i>=m_size)
     return "";
-  Entry & e = m_list[i];
+  const Entry & e = m_list[i];
   return e.first == bin && e.second ? e.second : "";
 }
 
