@@ -169,7 +169,7 @@ namespace pool {
    // old method implemented for backward compatibility
    // and maybe also for the ease of use?
    ImplicitCollectionIterator*
-   ImplicitCollection::select( std::string primaryQuery,
+   ImplicitCollection::select( const std::string & primaryQuery,
                                std::string,
                                std::string )
    {
