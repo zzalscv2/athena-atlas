@@ -323,7 +323,7 @@ public:
    *
    * @return true if the TrackStateOnSurface is of this type
    */
-  bool type(const TrackStateOnSurfaceType& type) const;
+  bool type(const TrackStateOnSurfaceType type) const;
 
   /** Use this method to find if this is a Single, Multi or Align
    * TrackStateOnsurface
@@ -346,7 +346,7 @@ public:
   if (tsos.types() & mask ) { // do something}
   @endcode
   */
-  const std::bitset<NumberOfTrackStateOnSurfaceTypes>& types() const;
+  const std::bitset<NumberOfTrackStateOnSurfaceTypes> types() const;
 
   /**
    * Use this method to set persistification hints.
@@ -377,7 +377,7 @@ private:
   std::unique_ptr<const MeasurementBase> m_measurementOnTrack{};
   std::unique_ptr<const MaterialEffectsBase> m_materialEffectsOnTrack{};
   std::unique_ptr<const AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
-  std::bitset<NumberOfTrackStateOnSurfaceTypes> m_typeFlags{};
+  uint16_t m_typeFlags{};
   mutable std::atomic<uint8_t> m_hints{};
 };
 
