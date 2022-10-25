@@ -38,7 +38,7 @@ def eFexByteStreamToolCfg(name, flags, *, writeBS=False, TOBs=True, xTOBs=False,
         for module in range(0,12):
           efex_raw_ids += [inputId + shelf*0x100 + module*0x010 ]
       tool.ROBIDs += efex_raw_ids
-      tool.eTowerContainerWriteKey   = "L1_eTowers"
+      tool.eTowerContainerWriteKey   = "L1_eFexDataTowers"
 
   return tool
 
@@ -150,14 +150,14 @@ def jFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
   #will be needed in the future for jTower container, still not coded
   if writeBS:
     # write BS == read xAOD
-    tool.jTowersReadKey   = "L1_jTowers" 
+    tool.jTowersReadKey   = "L1_jFexDataTowers" 
 
     tool.jTowersWriteKey  =""
   else:
     # read BS == write xAOD
     tool.jTowersReadKey   =""
 
-    tool.jTowersWriteKey  = "L1_jTowers"
+    tool.jTowersWriteKey  = "L1_jFexDataTowers"
     
   return tool
 
@@ -170,13 +170,13 @@ def gFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
 
   if writeBS:
     # write BS == read xAOD
-    tool.gTowersReadKey   = "L1_gTowers" 
+    tool.gTowersReadKey   = "L1_gFexDataTowers" 
 
     tool.gTowersWriteKey  =""
   else:
     # read BS == write xAOD
     tool.gTowersReadKey   =""
   
-    tool.gTowersWriteKey  = "L1_gTowers"
+    tool.gTowersWriteKey  = "L1_gFexDataTowers"
     
   return tool

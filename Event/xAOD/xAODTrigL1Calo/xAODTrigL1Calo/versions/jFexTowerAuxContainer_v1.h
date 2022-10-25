@@ -27,17 +27,18 @@ class jFexTowerAuxContainer_v1 : public AuxContainerBase {
 
         std::vector<float>    eta;
         std::vector<float>    phi;
-        std::vector<int>      iEta;
-        std::vector<int>      iPhi;
+        std::vector<int>      globalEta;
+        std::vector<unsigned int>      globalPhi;
         std::vector<uint8_t>  module;
         std::vector<uint8_t>  fpga;
         std::vector<uint8_t>  channel;
         std::vector<uint8_t>  jFEXdataID;
-        std::vector<char>     isSaturated;
         std::vector<uint32_t> jFEXtowerID;
         std::vector<uint8_t>  Calosource;
+        
         std::vector<std::vector<uint16_t> > et_count;
-
+        std::vector<std::vector<char>>      isSaturated;
+        
 }; // class jFexTowerAuxContainer_v1
 } // namespace xAOD
 

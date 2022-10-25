@@ -29,15 +29,15 @@ namespace xAOD {
       float eta() const; /// getter for the global eta value (float)
       void setEta(float); /// setter for the above
       
-      int iEta() const; /// getter for the global eta value (int)
-      void setiEta(int); /// setter for the above
+      int globalEta() const; /// getter for the global eta value (int)
+      void setglobalEta(int); /// setter for the above
 
       /// @brief The azimuthal angle (\f$\phi\f$)     
       float phi() const; /// getter for the global phi value (float)
       void setPhi(float); /// setter for the above
       
-      int iPhi() const; /// getter for the global phi value (int)
-      void setiPhi(int); /// setter for the above
+      unsigned int globalPhi() const; /// getter for the global phi value (int)
+      void setglobalPhi(unsigned int); /// setter for the above
 
       /// get module number
       uint8_t module() const; /// getter for the module number [0-5] inclusive
@@ -67,9 +67,10 @@ namespace xAOD {
       void setJFEXdataID(uint8_t); /// setter for the above
 
       /// Is the Tower saturated?
-      char isSaturated() const; /// getter for the saturation flag of jTower
+      const std::vector<char>& isSaturated() const; /// getter for the saturation flag of jTower
       /// set saturation flag of the Tower
-      void setIsSaturated(char); ///setter for the above
+      void setIsSaturated(const std::vector<char>&); ///setter for the above
+      void setIsSaturated(std::vector<char>&&); ///setter for the above
 
       /// get the Simulation ID
       uint32_t jFEXtowerID() const; /// getter for the jtower simulation ID
@@ -87,7 +88,7 @@ namespace xAOD {
 
 
       void initialize(  const float Eta,const float Phi);
-      void initialize(  const float Eta,const float Phi,const int IEta,const int IPhi,
+      void initialize(  const float Eta,const float Phi,const int globaleta,const unsigned int globalphi,
                         const uint32_t IDsim,
                         const uint8_t source,
                         const std::vector<uint16_t>& Et_count,
@@ -95,7 +96,7 @@ namespace xAOD {
                         const uint8_t Fpga,
                         const uint8_t Channel,
                         const uint8_t JFEXdataID,
-                        const char IsSaturated);
+                        const std::vector<char>& IsSaturated);
 
     
     private:

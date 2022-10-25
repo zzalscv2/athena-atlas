@@ -48,7 +48,7 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
         SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerKey {this, "xODTriggerTowers", "xAODTriggerTowers", "xAODTriggerTowers container"};
         
         //Readhandle for Scell container
-        SG::ReadHandleKey < xAOD::jFexTowerContainer > m_jTowersReadKey    {this,"jTowersReadKey"   ,"L1_jTowers", "Read jFexEDM Trigger Tower container"};
+        SG::ReadHandleKey < xAOD::jFexTowerContainer > m_jTowersReadKey    {this,"jTowersReadKey"   ,"L1_jFexDataTowers", "Read jFexEDM Trigger Tower container"};
         
         //WriteDecorHandle
         SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtdecorKey    { this, "SCellEtdecorKey"    , "L1_jTowers.SCellEt"    , "SCell Et information of the jTower"};
