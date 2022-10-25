@@ -10,6 +10,8 @@ from AthenaConfiguration.Enums import BeamType
 def MuonEDMPrinterToolCfg(flags, name="MuonEDMPrinterTool", **kwargs):
     result = ComponentAccumulator()  
     kwargs.setdefault('TgcPrdCollection', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    #kwargs.setdefault('TgcPrdCollection', 'TGC_Measurements' )
+    # We need to override TgcPrdCollection to match old config, so keep line above for ease of testing.
     kwargs.setdefault('ResidualPullCalculator', CompFactory.Trk.ResidualPullCalculator('ResidualPullCalculator'))
     the_tool = CompFactory.Muon.MuonEDMPrinterTool(name, **kwargs)
     result.setPrivateTools(the_tool)
@@ -144,7 +146,7 @@ def MuonAmbiProcessorCfg(flags, name="MuonAmbiProcessor", **kwargs):
     result.setPrivateTools(CompFactory.Trk.TrackSelectionProcessorTool(name=name,**kwargs))
     return result
 
-def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", **kwargs):
+def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", seg=False, **kwargs):
     Muon__MuonTrackCleaner=CompFactory.Muon.MuonTrackCleaner
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
     from TrkConfig.AtlasExtrapolatorConfig import MuonStraightLineExtrapolatorCfg
@@ -166,8 +168,15 @@ def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", **kwargs):
     slfitter = result.popToolsAndMerge(MCTBSLFitterMaterialFromTrackCfg(flags))
     kwargs.setdefault("SLFitter", slfitter)
 
-    fitter = result.popToolsAndMerge(MCTBFitterMaterialFromTrackCfg(flags))
-    kwargs.setdefault("Fitter", fitter)
+    if seg:
+        # I might move this into its own function eventually
+        # See ATLASRECTS-7325 for more discussion of this
+        kwargs.setdefault("Fitter", result.popToolsAndMerge(MCTBSLFitterMaterialFromTrackCfg(flags)))
+        kwargs.setdefault("PullCut", 3)
+        kwargs.setdefault("PullCutPhi", 3)
+        kwargs.setdefault("UseSLFit", True)
+    else:
+        kwargs.setdefault("Fitter", result.popToolsAndMerge(MCTBFitterMaterialFromTrackCfg(flags)))
 
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) ) #private here
     # kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags, TgcPrdCollection="TGC_Measurements" )) ) # FIXME Hack to get wrapping working. Keep in for now, to aid debugging
@@ -177,9 +186,6 @@ def MuonTrackCleanerCfg(flags, name="MuonTrackCleaner", **kwargs):
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("Iterate", False)
         kwargs.setdefault("RecoverOutliers", False)
-
-    # FIXME - do remaining tools
-
     
     result.setPrivateTools(Muon__MuonTrackCleaner(name, **kwargs))
     

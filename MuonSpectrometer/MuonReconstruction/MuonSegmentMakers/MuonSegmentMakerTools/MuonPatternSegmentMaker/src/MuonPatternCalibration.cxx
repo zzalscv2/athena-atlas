@@ -219,7 +219,7 @@ MuonPatternCalibration::createRegionMap(const MuonPatternCombination& pat, Regio
 
                         auto pos = containers.m_rpcPrdContainer->indexFindPtr(chit->first);
                         if (pos == nullptr)
-                            ATH_MSG_DEBUG("RpcPrepDataCollection not found in container!!");
+                            ATH_MSG_DEBUG("RpcPrepDataCollection not found in container!!"<< m_keyRpc);
                         else {
                             RpcPrepDataCollection::const_iterator rpcit     = pos->begin();
                             RpcPrepDataCollection::const_iterator rpcit_end = pos->end();
@@ -233,7 +233,7 @@ MuonPatternCalibration::createRegionMap(const MuonPatternCombination& pat, Regio
                     } else if (m_idHelperSvc->isTgc(id) && containers.m_tgcPrdContainer) {
                         auto pos = containers.m_tgcPrdContainer->indexFindPtr(chit->first);
                         if (pos == nullptr)
-                            ATH_MSG_DEBUG("TgcPrepDataCollection not found in container!!");
+                            ATH_MSG_DEBUG("TgcPrepDataCollection not found in container!! "<< m_keyTgc);
                         else {
                             TgcPrepDataCollection::const_iterator tgcit     = pos->begin();
                             TgcPrepDataCollection::const_iterator tgcit_end = pos->end();
