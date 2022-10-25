@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LUCID_PileUpTool.h"
@@ -39,15 +39,15 @@ LUCID_PileUpTool::LUCID_PileUpTool(const std::string& type,
   {0.000001,0.000001,0.000001,0.000001,0.000001,
    0.000001,0.000001,0.000001,0.000001,0.000001,
    0.000001,0.000001,0.000001,0.000001,0.000001},//15 values m_npeThreshold
-  false) //m_fillRootTree
+  false), //m_fillRootTree
+  m_key_digitCnt ("Lucid_Digits")
 {
-
-  m_SimHitCollectionName = "LucidSimHitsVector";
-  m_digitsContainerName  = "LucidDigitsCnt";
-  m_key_digitCnt         = "Lucid_Digits";
-
-  declareProperty("SimHitCollection"    , m_SimHitCollectionName, "Name of the input Collection of simulated hits");
-  declareProperty("LucidDigitsContainer", m_digitsContainerName , "Name of the Container to hold the output from the digitization");
+  declareProperty("SimHitCollection"    ,
+                  m_SimHitCollectionName = "LucidSimHitsVector",
+                  "Name of the input Collection of simulated hits");
+  declareProperty("LucidDigitsContainer",
+                  m_digitsContainerName = "LucidDigitsCnt",
+                  "Name of the Container to hold the output from the digitization");
 
   declareProperty("numTubes"            , m_numTubes);
   declareProperty("qdcChannelsPerPE"    , m_qdcChannelsPerPE);
