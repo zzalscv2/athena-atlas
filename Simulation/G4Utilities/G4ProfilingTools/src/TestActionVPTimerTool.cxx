@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestActionVPTimerTool.h"
@@ -126,7 +126,7 @@ namespace G4UA
     VolIt v = m_report.time_index.find(id);
     if (v != m_report.time_index.end()) {
       depth++;
-      for (VolIt c = m_report.time_index.begin(); c != m_report.time_index.end(); c++) {
+      for (VolIt c = m_report.time_index.begin(); c != m_report.time_index.end(); ++c) {
         VolTree check = c->first;
         check.pop_back();
         if (id == check)  TreeOut(c->first, tAtlas, depth);

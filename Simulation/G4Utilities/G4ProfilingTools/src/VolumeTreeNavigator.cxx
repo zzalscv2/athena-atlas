@@ -108,8 +108,8 @@ void VolumeTreeNavigator::SetDepthCutDetail(const char* cpath)
   advance( v_nav, distance( m_history.begin(), m_h_nav ) );
   while ( v_nav != volumes.end() && m_h_nav != m_history.end() ) {
       if ( *v_nav == stringify( m_h_nav->first->GetName() ) ) {
-          m_h_nav++;
-          v_nav++; }
+          ++m_h_nav;
+          ++v_nav; }
       else {
           break; }
   }
@@ -123,7 +123,7 @@ VolTree VolumeTreeNavigator::Extract()
 {
   // Derive a permanent VolTree object from the current volume and its history
   VolTree ret;
-  for (VolNav t = m_history.begin(); t != m_h_nav+1; t++) {
+  for (VolNav t = m_history.begin(); t != m_h_nav+1; ++t) {
       ret.push_back(*t);
   }
   ATH_MSG_DEBUG("VolumeTreeNavigator::Extract succeeded for "<< m_h_nav->first->GetName() <<".");
