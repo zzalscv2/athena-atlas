@@ -607,8 +607,8 @@ std::unique_ptr<SCT_RDO_Collection> SCT_DigitizationTool::createRDO(SiChargedDio
             if (it2->second.flag() & 0xDE) {
               int tmp{cluscounter};
               while ((it2 != i_chargedDiode_end) and (cluscounter < size - 1) and (it2->second.flag() & 0xDE)) {
-                it2++;
-                cluscounter++;
+                ++it2;
+                ++cluscounter;
               }
               if ((it2 != collection->end()) and !(it2->second.flag() & 0xDE)) {
                 SiHelper::ClusterUsed(it2->second, false);
