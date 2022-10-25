@@ -88,15 +88,26 @@ def getStreamRDO_ItemList(log):
             prefix = overlayFlags.bkgPrefix()
 
         if 'PileUpAntiKt4TruthJets' in digitizationFlags.experimentalDigi():
+            dropped_jet_vars = ['constituentLinks',
+                                'constituentWeights',
+                                'ConeExclBHadronsFinal',
+                                'ConeExclCHadronsFinal',
+                                'ConeExclTausFinal',
+                                'GhostPartons',
+                                'GhostBHadronsFinal',
+                                'GhostCHadronsFinal',
+                                'GhostTausFinal']
+            jet_var_str = '.-'.join ([''] + dropped_jet_vars)
+                                
             StreamRDO_ItemList+=[f"xAOD::JetContainer#{prefix}InTimeAntiKt4TruthJets"]
-            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights"]
+            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt4TruthJetsAux" + jet_var_str]
             StreamRDO_ItemList+=[f"xAOD::JetContainer#{prefix}OutOfTimeAntiKt4TruthJets"]
-            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights"]
+            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt4TruthJetsAux" + jet_var_str]
         if 'PileUpAntiKt6TruthJets' in digitizationFlags.experimentalDigi():
             StreamRDO_ItemList+=[f"xAOD::JetContainer#{prefix}InTimeAntiKt6TruthJets"]
-            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
+            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt6TruthJetsAux" + jet_var_str]
             StreamRDO_ItemList+=[f"xAOD::JetContainer#{prefix}OutOfTimeAntiKt6TruthJets"]
-            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
+            StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt6TruthJetsAux" + jet_var_str]
         if 'PileUpTruthParticles' in digitizationFlags.experimentalDigi():
             StreamRDO_ItemList+=["xAOD::TruthParticleContainer#*"]
             StreamRDO_ItemList+=["xAOD::TruthParticleAuxContainer#*"]
