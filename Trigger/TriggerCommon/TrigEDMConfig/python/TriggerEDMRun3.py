@@ -179,6 +179,7 @@ three_output_taggers = [
     'DL1d20210528r22',          # uses IP3D track selection dips
     'dipsLoose20210729',        # DIPS offline retraining in r22
     'DL1dv00',                  # first 'official' offline r22
+    'dips20211116',             # DIPS input to the current online DL1d
     'DL1d20211216',             # current online r22
     'DL1bb20220331',            # anti-bb tagger, ATLINFR-4511
     'GN120220813'
