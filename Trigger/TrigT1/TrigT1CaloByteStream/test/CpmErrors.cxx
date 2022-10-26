@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ISvcLocator.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "TrigT1CaloEvent/CMXCPTob.h"
 #include "TrigT1CaloEvent/CMXCPHits.h"
@@ -461,15 +459,8 @@ void CpmErrors::cpmTobRoiErrors(const CpmTobRoiCollection* /*crCollection*/,
 
 void CpmErrors::errorMessage(const std::string& errmsg)
 {
-  int eventNumber = 0;
-  const EventInfo* evInfo = 0;
-  StatusCode sc = evtStore()->retrieve(evInfo);
-  if (sc.isFailure()) {
-    msg(MSG::ERROR) << "No EventInfo found" << endmsg;
-  } else {
-    const EventID* evID = evInfo->event_ID();
-    if (evID) eventNumber = evID->event_number();
-  }
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  int eventNumber = ctx.eventID().event_number();
   msg(MSG::INFO) << "Event " << eventNumber
                  << " has error " << errmsg << endmsg;
 }
