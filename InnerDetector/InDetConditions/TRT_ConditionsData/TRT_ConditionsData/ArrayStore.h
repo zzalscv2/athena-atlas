@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRTCONDITIONSDATA_ARRAYSTORE_H
@@ -39,7 +39,7 @@ public:
   
 /** constructors, optionally with a tag */
   ArrayStore();
-  ArrayStore(const std::string tag);
+  ArrayStore(const std::string& tag);
 /** destructor  */
   virtual ~ArrayStore();
   
@@ -88,7 +88,7 @@ template <typename IdType, typename StorageType>
 inline ArrayStore<IdType, StorageType>::ArrayStore() : m_tag("Undefined") { }
 
 template <typename IdType, typename StorageType> 
-inline ArrayStore<IdType, StorageType>::ArrayStore(const std::string tag) : m_tag(tag) { }
+inline ArrayStore<IdType, StorageType>::ArrayStore(const std::string& tag) : m_tag(tag) { }
 
 template <typename IdType, typename StorageType>
 inline ArrayStore<IdType, StorageType>::~ArrayStore() {}
