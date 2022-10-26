@@ -417,11 +417,7 @@ namespace xAOD {
 
 } // namespace xAOD
 
-// Set up a CLID for the class:
-#include "xAODCore/CLASS_DEF.h"
-CLASS_DEF( xAOD::Muon_v1, 239636954, 1 )
-
-  // Declare IParticle as a base class of Muon_v1:
+// Declare IParticle as a base class of Muon_v1:
 #include "AthContainers/DataVector.h"
   DATAVECTOR_BASE( xAOD::Muon_v1, xAOD::IParticle );
 
