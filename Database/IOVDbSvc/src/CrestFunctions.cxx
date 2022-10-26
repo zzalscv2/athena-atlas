@@ -16,7 +16,7 @@
 namespace IOVDbNamespace{
   const std::string
   urlBase(){
-    return  "http://crest-01.cern.ch:8080";
+    return  "http://crest-02.cern.ch:8080";
   }
 
   std::string
@@ -43,7 +43,12 @@ namespace IOVDbNamespace{
     if (not testing){
       //...CrestApi returns Iovs as a json object
       auto myCrestClient = Crest::CrestClient(urlBase());
-      reply = myCrestClient.findAllIovs(tag).dump();
+      try{
+        reply = myCrestClient.findAllIovs(tag).dump();
+      } catch (std::exception & e){
+        std::cout<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the IOVs"<<std::endl;
+        return "";
+      }
     }
     return extractHashFromJson(reply);
   }
@@ -53,8 +58,13 @@ namespace IOVDbNamespace{
     std::string reply{R"delim({"data":{"0":["[DB=B2E3B2B6-B76C-DF11-A505-000423D5ADDA][CNT=CollectionTree(LArTTCell_P/LArTTCellMapAtlas)][CLID=DF8C509C-A91A-40B5-B76C-5B57EEE21EC3][TECH=00000202][OID=00000003-00000000]"]}})delim"};
     if (not testing){
       //CrestApi method:
-      auto   myCrestClient = Crest::CrestClient(urlBase());
-      reply = myCrestClient.getPayloadAsString(hash);
+      try{
+        auto   myCrestClient = Crest::CrestClient(urlBase());
+        reply = myCrestClient.getPayloadAsString(hash);
+      } catch (std::exception & e){
+        std::cout<<__FILE__<<":"<<__LINE__<< ": "<<e.what()<<" while trying to find the payload"<<std::endl;
+        return "";
+      }
     }
     return reply;
   }

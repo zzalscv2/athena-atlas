@@ -58,7 +58,7 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b, const std::string &
   Json2Cool::init(std::istream & s, const std::string & specString){
     //temporary fudge: extend iov from 0 to infinity
     const std::pair<cool::ValidityKey, cool::ValidityKey> iov(0, cool::ValidityKeyMax);
-    if (not s.good()){
+    if (not s.good() or s.eof()){
       const std::string msg("Json2Cool constructor; Input is invalid and could not be opened.");
       throw std::runtime_error(msg);
     } else {

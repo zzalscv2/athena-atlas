@@ -229,10 +229,17 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     const std::string  completeTag=jsonTagName(globalTag, m_foldername);
     ATH_MSG_INFO("Download tag would be: "<<completeTag);
     std::string reply=getPayloadForTag(completeTag);
-    
+    if (reply.empty()){
+      ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
+      return false;
+    }
     //
     std::istringstream ss(reply);
     const auto & specString =  payloadSpecificationForTag(completeTag);
+    if (specString.empty()){
+      ATH_MSG_FATAL("Reading payload spec from "<<m_foldername<<" failed.");
+      return false;
+    }
     //basic folder now contains the info
     Json2Cool inputJson(ss, b, specString);
     if (b.empty()){
