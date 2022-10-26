@@ -957,7 +957,7 @@ std::vector< ModulePosition > HGTD_DetectorFactory::prepareModulePositionsInRowT
 
       modPos_row = posOfLastPlacedModule + 2.*halfHeight + spacing;
 
-      if ( back ) modPos_row -= tailModCorrection[ row ][ moduleCounter ];
+      if ( back && moduleCounter < 19) modPos_row -= tailModCorrection[ row ][ moduleCounter ];
 
     } // endif  non-leading module
 
