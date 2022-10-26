@@ -129,46 +129,54 @@ def defineMenu():
         'L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C',
         'L1_ZDC_AND', 'L1_ZDC_XOR',
         'L1_ZDC_C_VZDC_A', 'L1_ZDC_A_VZDC_C',
-        # Run3 ZDC items for heavy ion runs 
-        'L1_VZDC_A_VZDC_C',
-        'L1_1TO4ZDC_A_VZDC_C',
-        'L1_VZDC_A_1TO4ZDC_C',
-        'L1_1TO4ZDC_A_1TO4ZDC_C',
-        'L1_5ZDC_A_VZDC_C',
-        'L1_VZDC_A_5ZDC_C',
-        'L1_ZDC_1TO4XOR5',
-        'L1_5ZDC_A_5ZDC_C',
-        
         # ZDC and calo
         'L1_ZDC_A_C_VTE50',
+
+        # Run3 ZDC items for heavy ion runs 
+        # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
+        # They are needed for scheduled 2023 5 TeV pp and Pb+Pb runs, so not removed from the menu
+        #'L1_VZDC_A_VZDC_C',
+        #'L1_1TO4ZDC_A_VZDC_C',
+        #'L1_VZDC_A_1TO4ZDC_C',
+        #'L1_1TO4ZDC_A_1TO4ZDC_C',
+        #'L1_5ZDC_A_VZDC_C',
+        #'L1_VZDC_A_5ZDC_C',
+        #'L1_ZDC_1TO4XOR5',
+        #'L1_5ZDC_A_5ZDC_C',
+        
         
         # VDM
 
         # ZDC bits and comb for debugging
-        'L1_ZDC_BIT2',
-        'L1_ZDC_BIT1',
-        'L1_ZDC_BIT0',
-        'L1_ZDC_COMB0',
-        'L1_ZDC_COMB1',
-        'L1_ZDC_COMB2',
-        'L1_ZDC_COMB3',
-        'L1_ZDC_COMB4',
-        'L1_ZDC_COMB5',
-        'L1_ZDC_COMB6',
-        'L1_ZDC_COMB7',
+        # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
+        # They are needed for scheduled 2023 5 TeV pp and Pb+Pb runs, so not removed from the menu
+        #'L1_ZDC_BIT2',
+        #'L1_ZDC_BIT1',
+        #'L1_ZDC_BIT0',
+        #'L1_ZDC_COMB0',
+        #'L1_ZDC_COMB1',
+        #'L1_ZDC_COMB2',
+        #'L1_ZDC_COMB3',
+        #'L1_ZDC_COMB4',
+        #'L1_ZDC_COMB5',
+        #'L1_ZDC_COMB6',
+        #'L1_ZDC_COMB7',
 
         # ZDC items for LHCf+ZDC special run ATR-26051
-        'L1_ZDC_OR'           ,
-        'L1_ZDC_XOR_E2'       ,
-        'L1_ZDC_XOR_E1_E3'    ,
-        'L1_ZDC_E1_AND_E1'    ,
-        'L1_ZDC_E1_AND_E2ORE3',
-        'L1_ZDC_E2_AND_E2'    ,
-        'L1_ZDC_E2_AND_E3'    ,
-        'L1_ZDC_E3_AND_E3'    ,
-        'L1_ZDC_A_AND_C'      ,
-        'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_ISO', 'L1_ZDC_OR_UNPAIRED_NONISO',
-        'L1_ZDC_OR_LHCF',
+        # Commented out for more CTP space for 2022 Nov heavy ion test run (ATR-26405) 
+        # They are needed for scheduled 2023 5 TeV pp runs, so not removed from the menu
+        #'L1_ZDC_OR'           ,
+        #'L1_ZDC_XOR_E2'       ,
+        #'L1_ZDC_XOR_E1_E3'    ,
+        #'L1_ZDC_E1_AND_E1'    ,
+        #'L1_ZDC_E1_AND_E2ORE3',
+        #'L1_ZDC_E2_AND_E2'    ,
+        #'L1_ZDC_E2_AND_E3'    ,
+        #'L1_ZDC_E3_AND_E3'    ,
+        #'L1_ZDC_A_AND_C'      ,
+        #'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_ISO', 'L1_ZDC_OR_UNPAIRED_NONISO',
+        #'L1_ZDC_OR_LHCF',
+
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
 
@@ -211,7 +219,19 @@ def defineMenu():
         #'L1_MBTSA0', 'L1_MBTSA1', 'L1_MBTSA2', 'L1_MBTSA3', 'L1_MBTSA4', 'L1_MBTSA5', 'L1_MBTSA6', 'L1_MBTSA7', 'L1_MBTSA8', 'L1_MBTSA9', 'L1_MBTSA10', 'L1_MBTSA11', 'L1_MBTSA12', 'L1_MBTSA13', 'L1_MBTSA14', 'L1_MBTSA15',
         #'L1_MBTSC0', 'L1_MBTSC1', 'L1_MBTSC2', 'L1_MBTSC3', 'L1_MBTSC4', 'L1_MBTSC5', 'L1_MBTSC6', 'L1_MBTSC7', 'L1_MBTSC8', 'L1_MBTSC9', 'L1_MBTSC10', 'L1_MBTSC11', 'L1_MBTSC12', 'L1_MBTSC13', 'L1_MBTSC14', 'L1_MBTSC15',
 
+
+        # L1 items for 2022 Nov. heavy ion test run, ATR-26405
+        # Additionla peripheral physics L1 items
+        'L1_VTE5', 
+        'L1_MBTS_1_VTE5', 
+        # Additioanl supporting itesm for BeamSpot, IDCalib
+        'L1_J12_VTE100',
+        'L1_J30_VTE200',
+        'L1_J100_VTE200', # to be checked if J100 is too high
+        'L1_XE35_VTE200',
+        'L1_XE50_VTE200',
  
+
         #--------------------------------
         # TOPO items
         #--------------------------------

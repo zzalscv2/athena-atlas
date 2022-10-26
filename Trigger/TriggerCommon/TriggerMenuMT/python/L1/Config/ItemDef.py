@@ -288,6 +288,11 @@ class ItemDef:
 
         MenuItem('L1_J12_VTE100'         ).setLogic( d.J12  & Not(d.TE100) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_J12_VTE200'         ).setLogic( d.J12  & Not(d.TE200) & physcond).setTriggerType( TT.calo )
+        # L1 items for IDCalibPEB,  IDCalib in heavy ion collisions, ATR-26405
+        MenuItem('L1_J100_VTE200'        ).setLogic( d.J100 & Not(d.TE200) & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_J30_VTE200'         ).setLogic( d.J30  & Not(d.TE200) & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_XE35_VTE200'        ).setLogic( d.XE35 & Not(d.TE200) & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_XE50_VTE200'        ).setLogic( d.XE50 & Not(d.TE200) & physcond).setTriggerType( TT.calo )
 
         MenuItem('L1_VTE200'             ).setLogic( Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TE20_VTE200'        ).setLogic( d.TE20 & Not(d.TE200) & physcond).setTriggerType( TT.calo )
@@ -826,6 +831,7 @@ class ItemDef:
 
         MenuItem('L1_J15_NL' ).setLogic( d.J15      & Not(d.LUCID_A) & Not(d.LUCID_C) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J15_NL').setLogic( d.J15.x(2) & Not(d.LUCID_A) & Not(d.LUCID_C) & physcond).setTriggerType(TT.calo)
+
 
         # XE
         MenuItem('L1_XE35').setLogic( d.XE35 & physcond).setTriggerType(TT.calo)
