@@ -153,14 +153,17 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     const auto [IDsim, eta, phi, source, iEta, iPhi] = it_Firm2Tower_map->second;
 
                     
-                    std::vector<uint16_t> vtower;
-                    vtower.clear();
-                    vtower.push_back(allDATA[idata]);
+                    std::vector<uint16_t> vtower_ET;
+                    vtower_ET.clear();
+                    vtower_ET.push_back(allDATA[idata]);
                     
+                    std::vector<char> vtower_SAT;
+                    vtower_SAT.clear();
+                    vtower_SAT.push_back(et_saturation);
                     
                     //initilize the jTower EDM
                     jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
-                    jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDsim, source, vtower, jfex, fpga, channel, idata, et_saturation );                    
+                    jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDsim, source, vtower_ET, jfex, fpga, channel, idata, vtower_SAT );                    
                 }
                 
                 // keeping this for future x-checks

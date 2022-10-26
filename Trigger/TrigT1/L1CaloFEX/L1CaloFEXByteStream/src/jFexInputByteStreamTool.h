@@ -59,10 +59,10 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         Gaudi::Property<std::string> m_FiberMapping {this, "jFexTowerMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jFexTowerMap.txt"), "Text file to convert from hardware fiber to eta-phi location"};
 
         //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
-        SG::WriteHandleKey< xAOD::jFexTowerContainer> m_jTowersWriteKey   {this,"jTowersWriteKey"  ,"L1_jTowers","Write jFexEDM Trigger Tower container"};
+        SG::WriteHandleKey< xAOD::jFexTowerContainer> m_jTowersWriteKey   {this,"jTowersWriteKey"  ,"L1_jFexDataTowers","Write jFexEDM Trigger Tower container"};
         
         // Read handle keys for the L1Calo EDMs for xAOD->BS mode of operation
-        SG::ReadHandleKey < xAOD::jFexTowerContainer> m_jTowersReadKey    {this,"jTowersReadKey"   ,"L1_jTowers","Read jFexEDM Trigger Tower container"};
+        SG::ReadHandleKey < xAOD::jFexTowerContainer> m_jTowersReadKey    {this,"jTowersReadKey"   ,"L1_jFexDataTowers","Read jFexEDM Trigger Tower container"};
 
         std::array<uint32_t,3> jFEXtoRODTrailer  (uint32_t, uint32_t) const;
         std::array<uint16_t,2> BulkStreamTrailer (uint32_t, uint32_t) const;

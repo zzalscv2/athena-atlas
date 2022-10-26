@@ -82,3 +82,30 @@ def AtlasTrackHoleSearchToolCfg(flags, name = 'AtlasHoleSearchTool', **kwargs):
 
   result.setPrivateTools(result.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags, name, **kwargs)))
   return result
+
+def CombinedMuonIDHoleSearchCfg(flags, name = 'CombinedMuonIDHoleSearch', **kwargs):
+  if flags.Detector.GeometryITk:
+    return ITkTrackHoleSearchToolCfg(flags, name, **kwargs)
+
+  result = ComponentAccumulator()
+
+  if 'Extrapolator' not in kwargs:
+      from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+      extrapolatorTool = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+      result.addPublicTool(extrapolatorTool)
+      kwargs.setdefault("Extrapolator", extrapolatorTool)
+  
+  if 'BoundaryCheckTool' not in kwargs:
+    from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
+    from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolCfg
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    atlasextrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    result.addPublicTool(atlasextrapolator)  # TODO: migrate to private?
+    BoundaryCheckTool = result.popToolsAndMerge(
+      InDetBoundaryCheckToolCfg(flags, name='CombinedMuonIDBoundaryCheckTool', 
+      PixelLayerTool=result.popToolsAndMerge(
+        InDetTestPixelLayerToolCfg(flags, name='CombinedMuonPixelLayerToolDefault', Extrapolator=atlasextrapolator))))
+    kwargs.setdefault('BoundaryCheckTool', BoundaryCheckTool)
+  result.setPrivateTools(result.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags, name, **kwargs)))
+  return result
+ 

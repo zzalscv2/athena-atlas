@@ -15,7 +15,9 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: *.root
+# art-output: d*.root
+# art-output: e*.root
+# art-output: T*.root
 # art-output: *.check*
 # art-output: HLT*
 # art-output: times*

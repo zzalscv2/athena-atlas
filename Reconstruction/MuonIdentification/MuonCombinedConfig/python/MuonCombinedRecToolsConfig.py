@@ -1150,7 +1150,8 @@ def MuTagAmbiguitySolverToolCfg(flags, name='MuTagAmbiguitySolverTool', **kwargs
     result = MuonEDMPrinterToolCfg(flags)
     kwargs.setdefault("Printer", result.popPrivateTools())
     kwargs.setdefault("MuonSegmentMatchingTool", result.popToolsAndMerge(
-        MuonSegmentMatchingToolCfg(flags)))
+        MuonSegmentMatchingToolCfg(flags, name='MuonSegmentMatchingTool', doPhiMatching=False))) 
+    # EJWM. Not sure where doPhiMatching is set to False in old, but this is what I see in configuration diffs
 
     tool = CompFactory.MuTagAmbiguitySolverTool(name, **kwargs)
     result.addPublicTool(tool, primary=True)
