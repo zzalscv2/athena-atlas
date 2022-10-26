@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena/Gaudi includes
@@ -10,10 +10,6 @@
 #include "TrigT1NSWSimTools/MMFPGAOfflineTool.h"
 #include "TrigT1NSWSimTools/MMStripOfflineData.h"
 #include "TrigT1NSWSimTools/MMCandidateOfflineData.h"
-
-//Event info includes
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 // local includes
 #include "TTree.h"
@@ -171,16 +167,9 @@ namespace NSWL1 {
 
 
       // retrieve the current run number and event number
-      const EventInfo* pevt = 0;
-      StatusCode sc = evtStore()->retrieve(pevt);
-      if ( !sc.isSuccess() ) {
-        ATH_MSG_WARNING( "Could not retrieve the EventInfo, so cannot associate run and event number to the current Strip cache" ); 
-        m_mmcandidate_cache_runNumber   = -1;
-        m_mmcandidate_cache_eventNumber = -1;
-      } else {
-        m_mmcandidate_cache_runNumber   = pevt->event_ID()->run_number();
-        m_mmcandidate_cache_eventNumber = pevt->event_ID()->event_number();
-      }
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+      m_mmcandidate_cache_runNumber   = ctx.eventID().run_number();
+      m_mmcandidate_cache_eventNumber = ctx.eventID().event_number();
 
       if (this->apply_trigger_logic(mmstrips) != OK) {
           ATH_MSG_ERROR("FPGA trigger solgic simulation not succesfull!");

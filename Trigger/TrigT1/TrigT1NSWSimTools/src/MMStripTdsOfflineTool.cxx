@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena/Gaudi includes
@@ -10,10 +10,6 @@
 // local includes
 #include "TrigT1NSWSimTools/MMStripTdsOfflineTool.h"
 #include "TrigT1NSWSimTools/MMStripOfflineData.h"
-
-//Event info includes
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include <cmath>
 
@@ -475,20 +471,9 @@ namespace NSWL1 {
       }
 
       // retrieve the current run number and event number
-      const EventInfo* pevt = 0;
-      StatusCode sc = evtStore()->retrieve(pevt);
-
-      if ( !sc.isSuccess() ) {
-        ATH_MSG_WARNING( "Could not retrieve the EventInfo, so cannot associate run and event number to the current Strip cache" );
-        m_mmstrip_cache_runNumber   = -1;
-        m_mmstrip_cache_eventNumber = -1;
-
-      } else {
-        m_mmstrip_cache_runNumber   = pevt->event_ID()->run_number();
-        m_mmstrip_cache_eventNumber = pevt->event_ID()->event_number();
-
-
-      }
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+      m_mmstrip_cache_runNumber   = ctx.eventID().run_number();
+      m_mmstrip_cache_eventNumber = ctx.eventID().event_number();
 
       if (m_mmstrip_cache_status==CLEARED) {
 
