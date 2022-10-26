@@ -22,6 +22,7 @@ def main():
     parser.add_argument('--userDetails', help='User supplied metadata string giving any extra details about this run.')
     parser.add_argument('--oksMetadata', action='store_true', help='Retrieve additional metadata from OKS for Cost CPU studies')
     parser.add_argument('--jira', help='Related jira ticket number')
+    parser.add_argument('--trpDetails', type=bool, default=False, help='Include details read from TRP like pileup and deadtime in the metadata - to be used for P1 data')
     parser.add_argument('--amiTag', help='AMI tag used for data reprocessing')
     parser.add_argument('--partition', default='ATLAS', help='Used partition (needed to read OKS details)')
     parser.add_argument('--underflowThreshold', default=0.5, help='Threshold of underflow percent value to save warning in metadata tree.')
@@ -42,7 +43,7 @@ def main():
 
     if inputFile.IsOpen():
         warningMsg = exploreTree(inputFile, args.dumpAlgorithmSummary, args.underflowThreshold, args.overflowThreshold, args.maxRanges)
-        saveMetadata(inputFile, metadata, warningMsg)
+        saveMetadata(inputFile, metadata, warningMsg, args.trpDetails)
     else:
         log.error("File %s not found", args.file)
 
