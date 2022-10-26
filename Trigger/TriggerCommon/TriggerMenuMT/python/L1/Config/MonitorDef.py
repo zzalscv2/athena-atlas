@@ -316,16 +316,16 @@ class MonitorDef:
                 "L1_ALFA_SYST12", "L1_ALFA_SYST17", "L1_ALFA_SYST18",
                 # ZDC
                 # Basic inputs
-                "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
-                "L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
-                "L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
+                #"L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
+                #"L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
+                #"L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
                 #
-                "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
-                "L1_ZDC_AND", "L1_ZDC_A_AND_C",
-                "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
-                "L1_ZDC_E1_AND_E2ORE3", 
-                "L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_ISO",
-                "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
+                #"L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
+                #"L1_ZDC_AND", "L1_ZDC_A_AND_C",
+                #"L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
+                #"L1_ZDC_E1_AND_E2ORE3", 
+                #"L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_ISO",
+                #"L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
                 # Vetos
                 "L1_ZDC_A_C_VTE50",
                 "L1_ZDC_A_VZDC_C_VTE200",
@@ -448,8 +448,14 @@ class MonitorDef:
                 "L1_jJ90p31ETA49",
                 #
                 "L1_gTE200",
+                "L1_jTE200",
                 #
                 "L1_eEM9_AFP_A_AND_C", "L1_eEM9_AFP_A_OR_C",
+                # Addtional L1 items added for 2022 Nov HI test run
+                "L1_MBTS_1_VTE5", "L1_VTE5", 
+                "L1_J12_VTE100", 
+                "L1_J30_VTE200", "L1_J100_VTE200", 
+                "L1_XE35_VTE200", "L1_XE50_VTE200",
                 ]
 
         monItemsHF[TBP|TAP|TAV] = [
