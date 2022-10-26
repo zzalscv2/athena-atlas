@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigT1NSWSimTools )
@@ -14,7 +14,7 @@ atlas_add_library( TrigT1NSWSimToolsLib
                    PUBLIC_HEADERS TrigT1NSWSimTools
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel FourMomUtils GaudiKernel GeoPrimitives Identifier MuonDigitContainer MuonIdHelpersLib MuonRDO MuonReadoutGeometry MuonSimData MuonSimEvent RegSelLUT TrkSurfaces TrackRecordLib
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AGDDKernel AtlasHepMCLib EventInfo GeneratorObjects MuonAGDDDescription MuonRegionSelectorLib PathResolver StoreGateLib )
+                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AGDDKernel AtlasHepMCLib GeneratorObjects MuonAGDDDescription MuonRegionSelectorLib PathResolver StoreGateLib )
 
 # Component(s) in the package:
 atlas_add_component( TrigT1NSWSimTools
