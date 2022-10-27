@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <MuonEfficiencyCorrections/HistHandler.h>
@@ -137,12 +137,12 @@ namespace CP {
     }
     HistHandler::~HistHandler() {
     }    
-    void HistHandler::SetBinContent(int bin, float val) const {
+    void HistHandler::SetBinContent(int bin, float val) {
         if (m_H) {
             m_H->SetBinContent(bin, val);
         }
     }    
-    void HistHandler::SetBinError(int bin, float val) const {
+    void HistHandler::SetBinError(int bin, float val) {
         if (m_H) {
             m_H->SetBinError(bin, val);
         }

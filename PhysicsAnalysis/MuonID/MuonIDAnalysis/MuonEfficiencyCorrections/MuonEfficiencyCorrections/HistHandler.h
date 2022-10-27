@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONEFFICIENCYCORRECTIONS_HISTOHANDLER_H
@@ -14,6 +14,7 @@
 #include <TH3D.h>
 #include <TH2Poly.h>
 
+#include "CxxUtils/checker_macros.h"
 #include "PATInterfaces/CorrectionCode.h"
 // further ROOT includes
 #include <TFile.h>
@@ -47,7 +48,7 @@ namespace CP {
                 return m_H->GetBinContent(bin);
             }
             
-            void SetBinContent(int bin, float val) const;
+            void SetBinContent(int bin, float val);
             
             inline  double GetBinError(int bin) const{
                 if (!m_H) return DBL_MAX;
@@ -58,7 +59,7 @@ namespace CP {
                 return m_H.get();
             }
 
-            void SetBinError(int bin, float val) const;
+            void SetBinError(int bin, float val);
             
             ///Function that changes from Implementation to implementation
             virtual CorrectionCode FindBin(const xAOD::Muon & muon, int & bin) const = 0;
@@ -232,9 +233,9 @@ namespace CP {
             
         private:
             //this static variable is safe because it is only used during object creation (to set the value of m_acc) and avoiding it would require a significant rewrite
-            static std::string s_close_jet_decor;
+            static std::string s_close_jet_decor ATLAS_THREAD_SAFE;
             //this static variable is safe because it is only used during object creation (to set the value of m_use_2D_sf) and avoiding it would require a significant rewrite
-            static bool s_use_2D_sf;
+            static bool s_use_2D_sf ATLAS_THREAD_SAFE;
             
             SG::AuxElement::ConstAccessor<float> m_acc;
             bool m_use_2D_sf;
