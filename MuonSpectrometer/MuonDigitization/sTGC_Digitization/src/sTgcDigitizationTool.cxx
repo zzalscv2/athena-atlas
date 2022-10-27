@@ -1118,12 +1118,12 @@ uint16_t sTgcDigitizationTool::bcTagging(const float digitTime, const int channe
 
 float sTgcDigitizationTool::getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const {
 
-  double threshold = m_chargeThreshold;
-  double elecThrsld = 0;
+  float threshold = m_chargeThreshold;
+  float elecThrsld = 0;
 
   if(!thresholdData->getThreshold(channelID, elecThrsld))
     ATH_MSG_ERROR("Cannot find retrieve VMM threshold from conditions data base!");
-  if(!m_calibTool->pdoToCharge(ctx, true, (int) elecThrsld, channelID, threshold))
+  if(!m_calibTool->pdoToCharge(ctx, true, elecThrsld, channelID, threshold))
     ATH_MSG_ERROR("Cannot convert VMM charge threshold via conditions data!");
 
   return threshold;

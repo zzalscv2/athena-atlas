@@ -72,16 +72,16 @@ namespace Muon {
     virtual StatusCode calibrateStrip(const EventContext& ctx, const Muon::MM_RawData* mmRawData, NSWCalib::CalibratedStrip& calibStrip) const = 0;
     virtual StatusCode calibrateStrip(const EventContext& ctx, const Muon::STGC_RawData* sTGCRawData, NSWCalib::CalibratedStrip& calibStrip) const = 0;
 
-    virtual bool tdoToTime  (const EventContext& ctx, const bool inCounts, const int tdo, const Identifier& chnlId, double& time, const int relBCID) const = 0;
-    virtual bool timeToTdo  (const EventContext& ctx, const double time, const Identifier& chnlId, int& tdo, int& relBCID) const = 0;
-    virtual bool chargeToPdo(const EventContext& ctx, const double charge, const Identifier& chnlId, int& pdo) const = 0;
-    virtual bool pdoToCharge(const EventContext& ctx, const bool inCounts, const int pdo, const Identifier& chnlId, double& charge) const = 0;
+    virtual bool tdoToTime  (const EventContext& ctx, const bool inCounts, const int tdo, const Identifier& chnlId, float& time, const int relBCID) const = 0;
+    virtual bool timeToTdo  (const EventContext& ctx, const float time, const Identifier& chnlId, int& tdo, int& relBCID) const = 0;
+    virtual bool chargeToPdo(const EventContext& ctx, const float charge, const Identifier& chnlId, int& pdo) const = 0;
+    virtual bool pdoToCharge(const EventContext& ctx, const bool inCounts, const int pdo, const Identifier& chnlId, float& charge) const = 0;
 
     virtual StatusCode distToTime(const EventContext& ctx, const Muon::MMPrepData* prepData, const Amg::Vector3D& globalPos,const std::vector<double>& driftDistances, std::vector<double>& driftTimes) const = 0;
 
     virtual NSWCalib::MicroMegaGas mmGasProperties() const = 0;
-    virtual double mmPeakTime() const = 0;
-    virtual double stgcPeakTime() const = 0;
+    virtual float mmPeakTime() const = 0;
+    virtual float stgcPeakTime() const = 0;
   };
   
 }

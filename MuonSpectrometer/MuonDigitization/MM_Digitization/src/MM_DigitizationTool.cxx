@@ -947,7 +947,7 @@ MM_ElectronicsToolInput MM_DigitizationTool::combinedStripResponseAllHits(const 
                 if (m_useCondThresholds) {
                     const Identifier id = m_idHelperSvc->mmIdHelper().channelID(digitID, m_idHelperSvc->mmIdHelper().multilayer(digitID),
                                                                                 m_idHelperSvc->mmIdHelper().gasGap(digitID), strip_id);
-                    double threshold = 0;
+                    float threshold = 0;
                     if (!thresholdData->getThreshold(id, threshold))
                         ATH_MSG_ERROR("Cannot find retrieve VMM threshold from conditions data base!");
                     v_stripThresholdResponseAllHits.push_back(threshold);

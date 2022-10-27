@@ -20,7 +20,7 @@ NswCalibDbThresholdData::NswCalibDbThresholdData(const MmIdHelper& mmIdHelper, c
 
 // setData
 void
-NswCalibDbThresholdData::setData(const Identifier& chnlId, const double threshold) {
+NswCalibDbThresholdData::setData(const Identifier& chnlId, const float threshold) {
 	unsigned long long channelId = chnlId.get_compact();
 	if(m_data.find(channelId) != m_data.end()) return;
 	// storing as vector is not optimal, but keep for now in case we'll add more data in the future
@@ -29,7 +29,7 @@ NswCalibDbThresholdData::setData(const Identifier& chnlId, const double threshol
 
 // setZero
 void
-NswCalibDbThresholdData::setZero(ThrsldTechType tech, const double threshold) {
+NswCalibDbThresholdData::setZero(ThrsldTechType tech, const float threshold) {
     m_zero[tech] = threshold;
 }
 
@@ -63,7 +63,7 @@ NswCalibDbThresholdData::getChannelIds(const std::string tech, const std::string
 
 // getThreshold
 bool
-NswCalibDbThresholdData::getThreshold(const Identifier& chnlId, double& threshold) const {
+NswCalibDbThresholdData::getThreshold(const Identifier& chnlId, float& threshold) const {
 	unsigned long long channelId = chnlId.get_compact();
 	ChannelMap::const_iterator chan_itr = m_data.find(channelId);
 	/// For the moment require that there is only one channel per identifier
