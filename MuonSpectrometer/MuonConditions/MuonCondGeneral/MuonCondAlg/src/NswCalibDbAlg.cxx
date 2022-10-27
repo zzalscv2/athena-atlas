@@ -239,15 +239,16 @@ NswCalibDbAlg::loadTimeChargeData(const EventContext& ctx, const readKey_t& read
 		}
 		// parse tree
 		unsigned int elinkId{0}, vmm{0}, channel{0};
-		float slope{0}, slopeError{0}, intercept{0},interceptError{0};	
+		float slope{0}, intercept{0};
+		//float slope{0}, slopeError{0}, intercept{0},interceptError{0};	
 
 		tree->SetBranchAddress("vmm"           , &vmm           );
 		tree->SetBranchAddress("channel"       , &channel       );
 		tree->SetBranchAddress("elinkId"       , &elinkId       );
 		tree->SetBranchAddress("slope"         , &slope         );
-		tree->SetBranchAddress("slopeError"    , &slopeError    );
+		//tree->SetBranchAddress("slopeError"    , &slopeError    ); // keep for later
 		tree->SetBranchAddress("intercept"     , &intercept     );
-		tree->SetBranchAddress("interceptError", &interceptError);
+		//tree->SetBranchAddress("interceptError", &interceptError);
 		
 
 		// loop over channels
@@ -262,9 +263,9 @@ NswCalibDbAlg::loadTimeChargeData(const EventContext& ctx, const readKey_t& read
 
 			NswCalibDbTimeChargeData::CalibConstants calib_data{};
 			calib_data.slope = slope;
-			calib_data.slopeError = slopeError;
+			//calib_data.slopeError = slopeError; // keep for later
 			calib_data.intercept = intercept;
-			calib_data.interceptError = interceptError;
+			//calib_data.interceptError = interceptError;
 			
 			if(!channelId.get_compact()){
 				writeCdo->setZero(type, tech, std::move(calib_data));
