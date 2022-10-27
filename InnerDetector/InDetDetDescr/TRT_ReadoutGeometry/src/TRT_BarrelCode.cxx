@@ -24,9 +24,6 @@ const int TRT_BarrelCode::PHI_SHIFT         = 3;
 const int TRT_BarrelCode::STRAWLAYER_SHIFT  = 8;
 
 
-
-
-
 TRT_BarrelCode::TRT_BarrelCode()
 {
   m_key = 0;
@@ -40,27 +37,6 @@ TRT_BarrelCode::TRT_BarrelCode(unsigned isPos, unsigned moduleIndex, unsigned ph
 	(( strawLayerIndex & STRAWLAYER_MASK ) << STRAWLAYER_SHIFT))
 {
 }
-
-TRT_BarrelCode::TRT_BarrelCode(const TRT_BarrelCode &right)
-{
-  m_key = right.getKey();
-}
-
-
-
-
-
-
-
-TRT_BarrelCode & TRT_BarrelCode::operator=(const TRT_BarrelCode &right)
-{ 
-  if (this != &right){
-    m_key = right.getKey();
-  }
-  return *this;
-}
-
-
 
 std::string TRT_BarrelCode::getName() const {
   std::ostringstream outputStream;

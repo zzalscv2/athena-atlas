@@ -25,7 +25,7 @@ namespace InDetDD {
        Objects of this class are owned by TRT_DetectorManager.
        */
 
-  class TRT_EndcapDescriptor
+  class TRT_EndcapDescriptor final
     
     {
       
@@ -34,8 +34,11 @@ namespace InDetDD {
       /** Constructor */
       TRT_EndcapDescriptor();
 
+      TRT_EndcapDescriptor(TRT_EndcapDescriptor &&right) = default;
+      TRT_EndcapDescriptor & operator=(TRT_EndcapDescriptor &&right) = default;
+ 
       /** Destructor */
-      virtual ~TRT_EndcapDescriptor();
+      ~TRT_EndcapDescriptor() = default;
 
       /** Sets the transform field for straws and offset.  We do not own the function: */
       void setStrawTransformField(const GeoXF::Function *xf, size_t offsetInto);
@@ -75,12 +78,8 @@ namespace InDetDD {
 
     private:
       
-      // Illegal to copy:
-      TRT_EndcapDescriptor(const TRT_EndcapDescriptor &right);
-      
-      
-      // Illegal to assign:
-      const TRT_EndcapDescriptor & operator=(const TRT_EndcapDescriptor &right);
+      TRT_EndcapDescriptor(const TRT_EndcapDescriptor &right) = delete;
+      TRT_EndcapDescriptor & operator=(const TRT_EndcapDescriptor &right) = delete;
       
       
       // Number of straws in the module.
