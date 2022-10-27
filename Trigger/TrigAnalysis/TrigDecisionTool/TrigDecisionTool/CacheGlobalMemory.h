@@ -171,8 +171,7 @@ namespace Trig {
     /**
      * @brief unpacks everything that belongs to a ChainGroup
      **/
-    void updateChainGroup(Trig::ChainGroup& chainGroup,
-                          TrigDefs::Group props = TrigDefs::Group::Default);
+    void updateChainGroup(Trig::ChainGroup& chainGroup);
 
     //
     // Data members
