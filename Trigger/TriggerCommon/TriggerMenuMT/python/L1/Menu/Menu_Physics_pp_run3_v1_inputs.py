@@ -167,7 +167,7 @@ def defineInputsMenu():
             # jJ thresholds for production
             'jJSPARE3', 'jJSPARE4', 'jJSPARE5', 'jJSPARE6',
 
-            None,None,
+            None, None,
 
             # jLJ thresholds for commissioning
             'jLJ80', 'jLJ120', 'jLJ140', 'jLJ180',
@@ -213,7 +213,9 @@ def defineInputsMenu():
             # jEM thresholds for production
             'jEMSPARE1',
     
-            None,
+            # LAr saturation for Phase-I
+            ('LArSaturation',1),
+            (None,1),
 
             # energy thresholds
             # commissioning

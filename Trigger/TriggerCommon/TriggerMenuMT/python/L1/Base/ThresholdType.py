@@ -37,7 +37,7 @@ class ThrType( Enum ):
     
     @staticmethod
     def Run3Types():
-        return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE ]
+        return [ ThrType.MU, ThrType.eEM, ThrType.jEM, ThrType.eTAU, ThrType.jTAU, ThrType.cTAU, ThrType.jJ, ThrType.jLJ, ThrType.gJ, ThrType.gLJ, ThrType.gXE, ThrType.gTE, ThrType.jXE, ThrType.jTE, ThrType.LArSat ]
     
     @staticmethod
     def NIMTypes():

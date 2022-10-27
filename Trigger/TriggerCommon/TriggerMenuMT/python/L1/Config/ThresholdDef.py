@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold
+from ..Base.Thresholds import MuonThreshold, eEMThreshold, eEMVarThreshold, jEMThreshold, eTauThreshold, jTauThreshold, cTauThreshold, jJetThreshold, jLJetThreshold, gJetThreshold, gLJetThreshold, XEThreshold, TEThreshold, LArSaturationThreshold, MBTSThreshold, MBTSSIThreshold, NimThreshold, NSWMonThreshold
 from .L1CaloThresholdMapping import get_threshold_cut
 
 # Max thresholds for SPARE triggers, corresponding to maximum value in L1Topo
@@ -295,6 +295,9 @@ class ThresholdDef:
 
         for thrV in [100,]:
             TEThreshold('jTEFWDC%i' % thrV, 'jTE').setTE(thrV)
+
+        # ATR-22344
+        LArSaturationThreshold('LArSaturation')
 
         # CALREQ
             
