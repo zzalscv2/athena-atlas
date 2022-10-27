@@ -37,14 +37,7 @@ void Trig::ChainGroupFunctions::ChainGroupInitialize() {
 
 const Trig::ChainGroup* Trig::ChainGroupFunctions::getChainGroup(const std::vector< std::string >& triggerNames,
                                                                  TrigDefs::Group props) const {
-  auto searchRes = cgm()->getChainGroups().find(triggerNames);
-
-  if ( searchRes != cgm()->getChainGroups().end()) {
-    return searchRes->second;
-  }
-  else {
-    return cgm()->createChainGroup(triggerNames, /*alias*/{}, props);
-  }
+  return cgm()->getChainGroup (triggerNames, props);
 }
 
 const Trig::ChainGroup* Trig::ChainGroupFunctions::getChainGroup(const std::string& triggerNames,
