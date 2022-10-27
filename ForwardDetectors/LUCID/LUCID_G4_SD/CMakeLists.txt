@@ -24,7 +24,7 @@ atlas_add_library( LUCID_G4_SD
 
 atlas_add_test( LUCID_SensitiveDetector_gtest
                 SOURCES test/LUCID_SensitiveDetector_gtest.cxx
-                LINK_LIBRARIES LUCID_G4_SDLib G4AtlasToolsLib TestTools
+                LINK_LIBRARIES LUCID_G4_SDLib G4AtlasToolsLib TestTools CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
