@@ -39,4 +39,3 @@ atlas_add_dictionary( OLD_GeneratorObjectsTPCnvDict
                       GeneratorObjectsTPCnv/OLD_selection.xml
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${HEPMC_INCLUDE_DIRS}
                       LINK_LIBRARIES ${ROOT_LIBRARIES} ${HEPMC_LIBRARIES} SGTools AthenaPoolCnvSvcLib GaudiKernel GeneratorObjects AthAllocators AthenaKernel GeneratorObjectsTPCnv )
-
