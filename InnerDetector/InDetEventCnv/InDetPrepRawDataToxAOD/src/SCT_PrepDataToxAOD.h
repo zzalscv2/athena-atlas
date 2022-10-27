@@ -86,8 +86,8 @@ class SCT_PrepDataToxAOD : public AthReentrantAlgorithm {
 
   BooleanProperty m_useTruthInfo{this, "UseTruthInfo", false};
   BooleanProperty m_writeRDOinformation{this, "WriteRDOinformation", true};
-  BooleanProperty m_writeSDOs{this, "WriteSDOs", true};
-  BooleanProperty m_writeSiHits{this, "WriteSiHits", true};
+  BooleanProperty m_writeSDOs{this, "WriteSDOs", false};
+  BooleanProperty m_writeSiHits{this, "WriteSiHits", false};
   
   // --- private members
   mutable std::atomic_bool m_firstEventWarnings{false};

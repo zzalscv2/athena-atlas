@@ -35,6 +35,11 @@ def InDetPixelPrepDataToxAODCfg(flags, name='InDetPixelPrepDataToxAOD', **kwargs
     acc.addEventAlgo(CompFactory.PixelPrepDataToxAOD(name, **kwargs))
     return acc
 
+def InDetPixelPrepDataToxAOD_ExtraTruthCfg(flags, name='InDetPixelPrepDataToxAOD_ExtraTruth', **kwargs):
+    kwargs.setdefault("WriteSDOs", True)
+    kwargs.setdefault("WriteSiHits", True)
+    return InDetPixelPrepDataToxAODCfg(flags, name, **kwargs)
+
 def ITkPixelPrepDataToxAODCfg(flags, name='ITkPixelPrepDataToxAOD', **kwargs):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     acc = ITkPixelReadoutGeometryCfg(flags)
@@ -81,6 +86,12 @@ def InDetSCT_PrepDataToxAODCfg(flags, name='InDetSCTPrepDataToxAOD', **kwargs):
     acc.addEventAlgo(CompFactory.SCT_PrepDataToxAOD(name, **kwargs))
     return acc
 
+def InDetSCT_PrepDataToxAOD_ExtraTruthCfg(flags, name='InDetSCTPrepDataToxAOD_ExtraTruth', **kwargs):
+    kwargs.setdefault("WriteSDOs", True)
+    kwargs.setdefault("WriteSiHits", True)
+    return InDetSCT_PrepDataToxAODCfg(flags, name, **kwargs)
+
+
 def ITkStripPrepDataToxAODCfg(flags, name='ITkStripPrepDataToxAOD', **kwargs):
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
     acc = ITkStripReadoutGeometryCfg(flags)
@@ -103,3 +114,7 @@ def InDetTRT_PrepDataToxAODCfg(flags, name='InDetTRTPrepDataToxAOD', **kwargs):
     kwargs.setdefault("UseTruthInfo", flags.Input.isMC)
     acc.addEventAlgo(CompFactory.TRT_PrepDataToxAOD(name, **kwargs))
     return acc
+
+def InDetTRT_PrepDataToxAOD_ExtraTruthCfg(flags, name='InDetTRTPrepDataToxAOD_ExtraTruth', **kwargs):
+    kwargs.setdefault("WriteSDOs", True)
+    return InDetTRT_PrepDataToxAODCfg(flags, name, **kwargs)

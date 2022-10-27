@@ -58,8 +58,8 @@ PixelPrepDataToxAOD::PixelPrepDataToxAOD(const std::string &name, ISvcLocator *p
  
   declareProperty("UseTruthInfo", m_useTruthInfo=false);
   declareProperty("UseSiHitsGeometryMatching", m_useSiHitsGeometryMatching=true);
-  declareProperty("WriteSDOs", m_writeSDOs = true);
-  declareProperty("WriteSiHits", m_writeSiHits = true);
+  declareProperty("WriteSDOs", m_writeSDOs = false);
+  declareProperty("WriteSiHits", m_writeSiHits = false);
   declareProperty("WriteNNinformation", m_writeNNinformation = true);
   declareProperty("WriteRDOinformation", m_writeRDOinformation = true);
   declareProperty("WriteExtendedPRDinformation", m_writeExtendedPRDinformation = false);
