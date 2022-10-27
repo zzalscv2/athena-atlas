@@ -118,6 +118,26 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
             CaloClCollectionSGKey="egammaClusters",
             ConeSize=-1.0))
 
+        # GSF tracks associated to electrons
+        PHYSLITEElectronGSFTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+            name = 'PHYSLITEElectronGSFTPThinningTool',
+            StreamName = kwargs['StreamName'],
+            SGKey = 'AnalysisElectrons',
+            GSFTrackParticlesKey = 'GSFTrackParticles',
+            InDetTrackParticlesKey = '',
+            BestMatchOnly = True)
+        acc.addPublicTool(PHYSLITEElectronGSFTPThinningTool)
+
+        # GSF tracks associated to photons
+        PHYSLITEPhotonGSFTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+            name = 'PHYSLITEPhotonGSFTPThinningTool',
+            StreamName = kwargs['StreamName'],
+            SGKey = 'AnalysisPhotons',
+            GSFTrackParticlesKey = 'GSFTrackParticles',
+            InDetTrackParticlesKey = '',
+            BestMatchOnly = True)
+        acc.addPublicTool(PHYSLITEPhotonGSFTPThinningTool)
+
         # Collect the thinning tools
         thinningTools = [PHYSLITETrackParticleThinningTool,
                          PHYSLITEMuonTPThinningTool,
@@ -128,7 +148,9 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
                          PHYSLITEDiTauLowPtThinningTool,
                          PHYSLITEDiTauLowPtTPThinningTool,
                          PHYSLITEElectronCaloClusterThinningTool,
-                         PHYSLITEPhotonCaloClusterThinningTool ]
+                         PHYSLITEPhotonCaloClusterThinningTool,
+                         PHYSLITEElectronGSFTPThinningTool,
+                         PHYSLITEPhotonGSFTPThinningTool ]
 
     # End of block that should only be executed for AOD input
 
