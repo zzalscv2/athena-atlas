@@ -70,7 +70,22 @@ StatusCode eFexByteStreamTool::initialize() {
 
     m_decoder = std::make_unique<L1CaloBsDecoderRun3>();
 
+    // Initialize monitoring tool if not empty
+    if (!m_monTool.empty()) {
+        ATH_CHECK(m_monTool.retrieve());
+        m_decoder->setLogger( std::make_unique<MonitoredLogging>(m_monTool) );
+        ATH_MSG_INFO("Logging errors to " << m_monTool.name() << " monitoring tool");
+    }
+
+
     return StatusCode::SUCCESS;
+}
+
+void eFexByteStreamTool::MonitoredLogging::err(const std::string& location, const std::string& title, const std::string&) const {
+    Monitored::Group(m_monTool,
+                     Monitored::Scalar("efexDecoderErrorLocation",location.empty() ? std::string("UNKNOWN") : location),
+                     Monitored::Scalar("efexDecoderErrorTitle",title.empty() ? std::string("UNKNOWN") : title)
+                     );
 }
 
 // BS->xAOD conversion
@@ -150,7 +165,7 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                 }
                 counts[9] = t.getSupercells().at(9);
 
-                eTowers->back()->initialize(t.getRegion().getEtaIndex()*0.1,2.*ROOT::Math::Pi()*(t.getRegion().getPhiIndex() - 64*(t.getRegion().getPhiIndex()>=32))/64,
+                eTowers->back()->initialize(t.getRegion().getEtaIndex()*0.1 + 0.05,2.*ROOT::Math::Pi()*(0.5 + t.getRegion().getPhiIndex() - 64*(t.getRegion().getPhiIndex()>=32))/64,
                                         counts,
                                         t.getModule() + t.getCrate()*12,
                                         t.getFpgaNumber(),
@@ -166,7 +181,7 @@ StatusCode eFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                     // possible that ecal tower was zero-suppressed but hcal has energy, so create such a tower
                     towerMap[std::make_tuple(t.getCrate(),t.getModule(),t.getFpgaNumber(),t.getRegion().getEtaIndex(),t.getRegion().getPhiIndex())] = eTowers->size();
                     eTowers->push_back( std::make_unique<xAOD::eFexTower>() );
-                    eTowers->back()->initialize(t.getRegion().getEtaIndex()*0.1,2.*ROOT::Math::Pi()*(t.getRegion().getPhiIndex() - 64*(t.getRegion().getPhiIndex()>=32))/64,
+                    eTowers->back()->initialize(t.getRegion().getEtaIndex()*0.1 + 0.05,2.*ROOT::Math::Pi()*(0.5 + t.getRegion().getPhiIndex() - 64*(t.getRegion().getPhiIndex()>=32))/64,
                                                 std::vector<uint16_t>(11,0),
                                                 t.getModule() + t.getCrate()*12,t.getFpgaNumber(),0,t.getFlag());
                 }
