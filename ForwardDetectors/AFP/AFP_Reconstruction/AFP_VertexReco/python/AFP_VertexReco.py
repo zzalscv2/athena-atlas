@@ -56,7 +56,7 @@ def AFP_VertexReco_HLT(flags):
 			conddb.addFolder("FWD_OFL","/FWD/AFP/ToFParameters/Vertex<tag>AFPMCToFVtx-ideal-01</tag>", className="CondAttrListCollection")
 	else:
 		if not conddb.folderRequested('/FWD/Onl/AFP/ToFParameters/Vertex'):
-			conddb.addFolder("FWD_ONL","/FWD/Onl/AFP/ToFParameters/Vertex<tag>AFPToFVtx-03</tag>", className="CondAttrListCollection")
+			conddb.addFolder("FWD_ONL","/FWD/Onl/AFP/ToFParameters/Vertex<tag>AFPToFVtx-01</tag>", className="CondAttrListCollection")
 	
 	acc.merge(AFP_VertexReco_Cfg(flags, {"AFPToFTrackContainerKey": "HLT_AFPToFTrackContainer", "AFPProtonContainerKey": "HLT_AFPProtonContainer", "verticesContainerName": recordable("HLT_AFPVertexContainer")}))
 	
