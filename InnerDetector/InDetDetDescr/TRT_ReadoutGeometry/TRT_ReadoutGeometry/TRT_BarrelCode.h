@@ -26,18 +26,22 @@ namespace InDetDD {
   class TRT_BarrelCode 
     {
     public:
-      
-      typedef enum { MODULE_A   = 0, 
-		     MODULE_B   = 1,
-		     MODULE_C   = 2 }       Module;
-      
+      typedef enum
+      {
+        MODULE_A = 0,
+        MODULE_B = 1,
+        MODULE_C = 2
+      } Module;
+
       TRT_BarrelCode();
       TRT_BarrelCode( unsigned int  isPositive, unsigned int moduleIndex, unsigned phiIndex, unsigned int strawLayerIndex); 
       
-      TRT_BarrelCode( const TRT_BarrelCode & right );
+      TRT_BarrelCode( const TRT_BarrelCode & right ) = default;
+      TRT_BarrelCode & operator=( const TRT_BarrelCode & right ) = default;
+      TRT_BarrelCode( TRT_BarrelCode && right ) = default;
+      TRT_BarrelCode & operator=( TRT_BarrelCode && right ) = default;
+      
       ~TRT_BarrelCode() = default;
-      //(operator= ) was returning const ref; changed on 10/12/2014 sroe
-      TRT_BarrelCode & operator=( const TRT_BarrelCode & right );
       
       bool operator < (const TRT_BarrelCode & right) const;
       bool operator > (const TRT_BarrelCode & right) const;

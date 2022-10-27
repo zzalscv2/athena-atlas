@@ -36,16 +36,18 @@ namespace InDetDD {
                                                                
        */
   
-  class TRT_BarrelDescriptor
+  class TRT_BarrelDescriptor final
     {
       
     public:
       
       /** Constructor: */
       TRT_BarrelDescriptor();
-
+      TRT_BarrelDescriptor(TRT_BarrelDescriptor &&right) = default;
+      TRT_BarrelDescriptor & operator=(TRT_BarrelDescriptor &&right) = default;
+  
       /** Destructor: */
-      virtual ~TRT_BarrelDescriptor();
+      ~TRT_BarrelDescriptor() = default;
       
       /** Add a new straw at position x, y: */
       void addStraw(double xPos, double yPos);
@@ -95,8 +97,8 @@ namespace InDetDD {
 
     private:
       
-      TRT_BarrelDescriptor(const TRT_BarrelDescriptor &right);
-      const TRT_BarrelDescriptor & operator=(const TRT_BarrelDescriptor &right);
+      TRT_BarrelDescriptor(const TRT_BarrelDescriptor &right) = delete;
+      TRT_BarrelDescriptor & operator=(const TRT_BarrelDescriptor &right) = delete;
       
       std::vector<double> m_x;
       std::vector<double> m_y;

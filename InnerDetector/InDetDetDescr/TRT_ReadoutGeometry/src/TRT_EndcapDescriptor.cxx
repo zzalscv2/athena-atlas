@@ -25,9 +25,6 @@ TRT_EndcapDescriptor::TRT_EndcapDescriptor():
 {
 }
 
-TRT_EndcapDescriptor::~TRT_EndcapDescriptor()
-= default;
-
 void TRT_EndcapDescriptor::setStrawTransformField(const GeoXF::Function *xf, size_t offsetInto) {
   m_f=xf;
   m_o=offsetInto;
