@@ -19,7 +19,7 @@ jFexTowerAuxContainer_v1::jFexTowerAuxContainer_v1() :
     AUX_VARIABLE( fpga        );
     AUX_VARIABLE( channel     );
     AUX_VARIABLE( jFEXdataID  );
-    AUX_VARIABLE( isSaturated );
+    AUX_VARIABLE( isjTowerSat );
     AUX_VARIABLE( jFEXtowerID );
     AUX_VARIABLE( Calosource  );
     AUX_VARIABLE( et_count    );

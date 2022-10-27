@@ -24,8 +24,8 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t      , Calosource  ,
 AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<uint16_t> , et_count , setEt_count )
 AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<uint16_t> , et_count , setEt_count )
 
-AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<char> , isSaturated , setIsSaturated )
-AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<char> , isSaturated , setIsSaturated )
+AUXSTORE_OBJECT_SETTER_AND_GETTER   ( jFexTower_v1, std::vector<char> , isjTowerSat , setIsjTowerSat )
+AUXSTORE_OBJECT_MOVE                ( jFexTower_v1, std::vector<char> , isjTowerSat , setIsjTowerSat )
 
 
 /// initialize
@@ -46,7 +46,7 @@ void jFexTower_v1::initialize(const float Eta,
                               const uint8_t Fpga,
                               const uint8_t Channel,
                               const uint8_t JFEXdataID,
-                              const std::vector<char>& IsSaturated)
+                              const std::vector<char>& IsjTowerSat)
 {
     setEta( Eta );
     setPhi( Phi );
@@ -56,7 +56,7 @@ void jFexTower_v1::initialize(const float Eta,
     setFpga( Fpga );
     setChannel( Channel );
     setJFEXdataID( JFEXdataID );
-    setIsSaturated( IsSaturated );
+    setIsjTowerSat( IsjTowerSat );
     setjFEXtowerID( IDSim );
     setCalosource( source );
     setEt_count( Et_count );
