@@ -9,7 +9,7 @@
 
 
 MuonChainFilterAlg::MuonChainFilterAlg(const std::string& name, ISvcLocator* pSvcLocator)
-    : ::AthAlgorithm(name, pSvcLocator) {}
+    : ::AthReentrantAlgorithm(name, pSvcLocator) {}
 
 
 StatusCode MuonChainFilterAlg::initialize() {
@@ -30,22 +30,22 @@ StatusCode MuonChainFilterAlg::initialize() {
 }
 
 
-StatusCode MuonChainFilterAlg::execute() {
+StatusCode MuonChainFilterAlg::execute(const EventContext& ctx) const {
 
   // check if there is anything in the filter list
   if (m_filterChains.empty()) {
     ATH_MSG_DEBUG( "Nothing to filter, pass = " << (m_notGate ? "false" : "true") );
 
     if (m_notGate) {
-      ATH_CHECK( createDummyMuonContainers() );
+      ATH_CHECK( createDummyMuonContainers(ctx) );
     }
-    setFilterPassed(!m_notGate);
+    setFilterPassed(!m_notGate, ctx);
     return StatusCode::SUCCESS;
   }
 
   // get input decisions (from output of input maker)
   for (auto inputKey : m_inputDecisionKeys) {
-    auto inputDecisions = SG::makeHandle(inputKey);
+    auto inputDecisions = SG::makeHandle(inputKey, ctx);
     ATH_CHECK( inputDecisions.isValid() );
     ATH_MSG_DEBUG( "Checking inputHandle " << inputDecisions.key() << " with size: " << inputDecisions->size() );
     for (const TrigCompositeUtils::Decision* dec : *inputDecisions) {
@@ -64,14 +64,14 @@ StatusCode MuonChainFilterAlg::execute() {
           }
           else {
             ATH_MSG_DEBUG( "chain " << chainName << " is not on the filter list, passing" );
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
         }
         else {  // pass if id is found in the filter list
           if (itr != m_filterChainIDs.end()) {
             ATH_MSG_DEBUG( "chain " << chainName << " is on the not-filter list, passing" );
-            setFilterPassed(true);
+            setFilterPassed(true, ctx);
             return StatusCode::SUCCESS;
           }
           else {
@@ -84,22 +84,22 @@ StatusCode MuonChainFilterAlg::execute() {
 
   // if we've reached this point, the only active chains were on the filter list, so the filter will fail
   ATH_MSG_DEBUG( "No trigger chains found, pass = false" );
-  ATH_CHECK( createDummyMuonContainers() );
-  setFilterPassed(false);
+  ATH_CHECK( createDummyMuonContainers(ctx) );
+  setFilterPassed(false, ctx);
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode MuonChainFilterAlg::createDummyMuonContainers() {
+StatusCode MuonChainFilterAlg::createDummyMuonContainers(const EventContext& ctx) const {
 
   // write out empty muComb/muFast container since EDM creator expects the container to always be present in the view
   if (m_writeL2muComb) {
-    SG::WriteHandle handle(m_muCombKey);
+    SG::WriteHandle handle(m_muCombKey, ctx);
     ATH_CHECK( handle.record(std::make_unique<xAOD::L2CombinedMuonContainer>(), std::make_unique<xAOD::L2CombinedMuonAuxContainer>()) );
   }
   if (m_writeL2muFast) {
-    SG::WriteHandle handle(m_muFastKey);
+    SG::WriteHandle handle(m_muFastKey, ctx);
     ATH_CHECK( handle.record(std::make_unique<xAOD::L2StandAloneMuonContainer>(), std::make_unique<xAOD::L2StandAloneMuonAuxContainer>()) );
   }
   return StatusCode::SUCCESS;
