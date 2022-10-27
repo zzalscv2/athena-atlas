@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDENTIFIER_RANGE_H
@@ -7,6 +7,7 @@
  
 #include <Identifier/ExpandedIdentifier.h> 
 #include <cassert>
+#include <stdexcept>
  
 /** 
  *    A Range describes the possible ranges for the field values of an ExpandedIdentifier 
@@ -582,7 +583,9 @@ Range::field::get_value_at (size_type index) const
     // both_bounded if the more frequent case and so comes first.
 
     if (both_bounded == m_mode) {
-        assert (index < (size_type) (m_maximum - m_minimum + 1));
+        if (index >= (size_type) (m_maximum - m_minimum + 1)) {
+          throw std::out_of_range("Range::field::get_value_at");
+        }
 	return (m_minimum + index); 
 //  	if (index >= (size_type) (m_maximum - m_minimum + 1)) return (0); 
 //  	else return (m_minimum + index); 
