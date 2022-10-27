@@ -63,7 +63,7 @@ class MenuThresholdsCollection( object ):
 
     def json(self):
         confObj = odict()
-        for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.ALFA] + [ThrType.NSWMon]):
+        for ttype in (ThrType.Run3Types() + ThrType.NIMTypes() + [ThrType.TOPO, ThrType.MUTOPO] + [ThrType.ALFA, ThrType.LArSat, ThrType.NSWMon]):
             confObj[ttype.name] = odict()
             confObj[ttype.name]["type"] = ttype.name
             confObj[ttype.name]["thresholds"] = odict()
@@ -935,6 +935,18 @@ class XEThreshold( Threshold ):
     def json(self):
         confObj = odict()
         confObj["value"] = self.xe
+        confObj["mapping"] = self.mapping
+        return confObj
+
+
+class LArSaturationThreshold( Threshold ):
+
+    def __init__(self, name, mapping = -1):
+        super(LArSaturationThreshold,self).__init__(name = name, ttype = ThrType.LArSat, mapping=mapping, run = 3)
+        self.thresholdValues = [ThresholdValue(thrtype=self.ttype,value=0,**ThresholdValue.getDefaults(self.ttype))]
+
+    def json(self):
+        confObj = odict()
         confObj["mapping"] = self.mapping
         return confObj
 
