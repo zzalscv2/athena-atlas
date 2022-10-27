@@ -122,12 +122,15 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkInDetToXAODClusterConversionCfg
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
 
-    if flags.ITk.Tracking.EnableNativexAODclusters and flags.Detector.EnableITkPixel:
-        if flags.Detector.EnableITkStrip:
-            raise NotImplementedError("Native xAOD strip clusterization not yet implemented!")
+    if flags.ITk.Tracking.EnableNativexAODclusters:
+        if flags.Detector.EnableITkPixel:
+            from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkPixelClusterizationAlgCfg
+            acc.merge(ActsTrkITkPixelClusterizationAlgCfg(flags))
 
-        from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkPixelClusterizationAlgCfg
-        acc.merge(ActsTrkITkPixelClusterizationAlgCfg(flags))
+        if flags.Detector.EnableITkStrip:
+            from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkStripClusterizationAlgCfg
+            acc.merge(ActsTrkITkStripClusterizationAlgCfg(flags))
+
 
     if flags.ITk.Tracking.convertXAODClusters and flags.Detector.EnableITkPixel and flags.Detector.EnableITkStrip:
         #

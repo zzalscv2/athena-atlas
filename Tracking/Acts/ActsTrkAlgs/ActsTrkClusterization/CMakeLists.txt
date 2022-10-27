@@ -13,6 +13,7 @@ atlas_add_component( ActsTrkClusterization
                      AthenaBaseComps
                      AthenaMonitoringKernelLib
                      GaudiKernel
+		     InDetConditionsSummaryService
 		     InDetIdentifier
 		     InDetRawData
 		     xAODInDetMeasurement
