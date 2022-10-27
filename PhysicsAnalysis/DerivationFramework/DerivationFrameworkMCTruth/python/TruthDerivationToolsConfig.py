@@ -352,3 +352,12 @@ def TruthPVCollectionMakerCfg(ConfigFlags, name, **kwargs):
     acc.addPublicTool(TruthPVCollectionMaker(name, **kwargs),
                       primary = True)
     return acc
+
+# Tool for thinning TruthParticles
+def GenericTruthThinningCfg(ConfigFlags, name, **kwargs):
+    """Configure the GenericTruthThinning tool"""
+    acc = ComponentAccumulator()
+    GenericTruthThinning = CompFactory.DerivationFramework.GenericTruthThinning
+    acc.addPublicTool(GenericTruthThinning(name, **kwargs),
+                      primary = True)
+    return acc

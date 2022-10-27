@@ -2,16 +2,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TruthCategoriesDecoratorCfg(flags, name="TruthCategoriesDecorator", **kwargs):
-    result = ComponentAccumulator()
-    if not flags.Input.isMC: return result
+def TruthCategoriesDecoratorCfg(ConfigFlags, name="TruthCategoriesDecorator", **kwargs):
+    acc = ComponentAccumulator()
     from TruthConverters.TruthConvertersCfg import xAODtoHEPToolCfg
     from TruthRivetTools.TruthRivetToolsCfg import HiggsTruthCategoryToolCfg
-    kwargs.setdefault("HepMCTool", result.popToolsAndMerge(xAODtoHEPToolCfg(flags)))
-    kwargs.setdefault("CategoryTool", result.popToolsAndMerge(HiggsTruthCategoryToolCfg(flags)))
+    kwargs.setdefault("HepMCTool", acc.popToolsAndMerge(xAODtoHEPToolCfg(ConfigFlags)))
+    kwargs.setdefault("CategoryTool", acc.popToolsAndMerge(HiggsTruthCategoryToolCfg(ConfigFlags)))
     the_alg = CompFactory.DerivationFramework.TruthCategoriesDecorator(name, **kwargs)
-    result.addEventAlgo(the_alg, primary = True)
-    return result
+    acc.addEventAlgo(the_alg, primary = True)
+    return acc
 
 if __name__ == "__main__":
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments

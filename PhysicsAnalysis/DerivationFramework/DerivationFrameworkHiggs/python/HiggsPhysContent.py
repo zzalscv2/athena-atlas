@@ -5,8 +5,9 @@ def setupHiggsAugmentationAlgs(ConfigFlags, stream_name="", ttva_wp = "Nonprompt
     acc = ComponentAccumulator()
     from DerivationFrameworkHiggs.FourLeptonVertexing import FourLeptonVertexerCfg
     acc.merge(FourLeptonVertexerCfg(ConfigFlags))
-    from DerivationFrameworkHiggs.TruthCategoriesConfig import TruthCategoriesDecoratorCfg
-    acc.merge(TruthCategoriesDecoratorCfg(ConfigFlags))
+    if ConfigFlags.Input.isMC:
+        from DerivationFrameworkHiggs.TruthCategoriesConfig import TruthCategoriesDecoratorCfg
+        acc.merge(TruthCategoriesDecoratorCfg(ConfigFlags))
 
     from IsolationSelection.IsolationSelectionConfig import IsoCloseByCorrSkimmingAlgCfg, IsoCloseByCaloDecorCfg
     ### Add the tracks that potentially polute the isolation cones of others to the collection. 

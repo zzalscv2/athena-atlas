@@ -34,9 +34,18 @@ def GetTaggerTrainingMap(jet_collection_list):
             "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM
             "BTagging/20220509/gn1/antikt4empflow/network.onnx",
         ],
+        # PFlow jet with custom vertex definition used in HIGG1D1 
         "AntiKt4EMPFlowCustomVtx": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
             "BTagging/201903/dl1r/antikt4empflow/network.json",
+            "BTagging/20210729/dipsLoose/antikt4empflow/network.json",  # old r22 trainings
+            "BTagging/20210729/dips/antikt4empflow/network.json",
+            "BTagging/20210824r22/dl1dLoose/antikt4empflow/network.json",  # “recommended tagger” which is DL1dLoose20210824r22 named DL1dv00 in EDM
+            "BTagging/20210824r22/dl1d/antikt4empflow/network.json",
+            "BTagging/20210824r22/dl1r/antikt4empflow/network.json",
+            "BTagging/20220314/dipsLoose/antikt4empflow/network.json",  # new r22 training
+            "BTagging/20220509/dl1dLoose/antikt4empflow/network.json",  # new "recommended tagger" named DL1dv01 in EDM    
+            "BTagging/20220509/gn1/antikt4empflow/network.onnx"
         ],
         "AntiKt4EMTopo": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
