@@ -360,11 +360,6 @@ SCT_Module::build(SCT_Identifier id)
     } else
     {
         
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-        
-        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
-        
-        
         // Add innerside
         int innerSideNumber = (m_upperSide) ? 0 : 1;
         id.setSide(innerSideNumber);
@@ -373,7 +368,7 @@ SCT_Module::build(SCT_Identifier id)
         m_innerSide->build(id);
         
         std::string key="Side#"+intToString(innerSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        m_detectorManager->addAlignableTransform(0, innerId, mapAX[key], mapFPV[key]);
+        m_detectorManager->addAlignableTransform(0, innerId, (*m_mapAX)[key], (*m_mapFPV)[key]);
        
         
         // Add outerside
@@ -384,7 +379,7 @@ SCT_Module::build(SCT_Identifier id)
         m_outerSide->build(id);
         
         key="Side#"+intToString(outerSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        m_detectorManager->addAlignableTransform(0, outerId, mapAX[key], mapFPV[key]);
+        m_detectorManager->addAlignableTransform(0, outerId, (*m_mapAX)[key], (*m_mapFPV)[key]);
         
     }
     return module;

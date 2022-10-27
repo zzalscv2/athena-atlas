@@ -75,7 +75,6 @@ SCT_FwdRing::getParameters()
         m_discRotated     = (parameters->fwdRingUsualRingSide(m_iRing) != m_ringSide);
         m_identifier = m_iRing;
     }
-    
     // Set numerology
     m_detectorManager->numerology().setNumPhiModulesForDiskRing(m_iWheel,m_iRing,m_numModules);
 
@@ -270,10 +269,6 @@ SCT_FwdRing::build(SCT_Identifier id)
     }
     else{
         
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-               
-        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
-               
         
         for (int i = 0; i < m_numModules; i++){
             
@@ -307,7 +302,7 @@ SCT_FwdRing::build(SCT_Identifier id)
             std::string key="FwdModuleR" + intToString(m_iRing)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
             
             // Store alignable transform
-            m_detectorManager->addAlignableTransform(1, id.getWaferId(), mapAX[key], mapFPV[key]);
+            m_detectorManager->addAlignableTransform(1, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
             
         }
 

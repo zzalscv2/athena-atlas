@@ -47,8 +47,9 @@ SCT_Barrel::SCT_Barrel(const std::string & name,
   : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader)
 {
   getParameters();
-  if(!m_sqliteReader)
-      m_logVolume = SCT_Barrel::preBuild();
+  if(!m_sqliteReader) {
+    m_logVolume = SCT_Barrel::preBuild();
+  }
 }
 
 
@@ -171,8 +172,6 @@ SCT_Barrel::build(SCT_Identifier id)
         
     }else
     {
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
         
         // There is only one type of module. So we create it just the once and pass it to the layers.
         SCT_Module module("Module", m_detectorManager, m_geometryManager, nullptr, m_sqliteReader);
@@ -183,7 +182,7 @@ SCT_Barrel::build(SCT_Identifier id)
             id.setLayerDisk(iLayer);
             layer.build(id); //MB to verify
             // Store alignable transform
-            m_detectorManager->addAlignableTransform(2, id.getWaferId(), mapAX["Layer#"+intToString(iLayer)], mapFPV["Layer#"+intToString(iLayer)]);
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)["Layer#"+intToString(iLayer)], (*m_mapFPV)["Layer#"+intToString(iLayer)]);
     
         }
     }

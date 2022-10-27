@@ -47,6 +47,7 @@ SCT_Forward::SCT_Forward(const std::string & name, int ec,
 {
   getParameters();
   m_logVolume = SCT_Forward::preBuild();
+
 }
 
 SCT_Forward::~SCT_Forward()
@@ -273,10 +274,6 @@ SCT_Forward::build(SCT_Identifier id)
 
     }else
     {
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-        
-        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
-        
         for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
             
             SCT_FwdWheel * wheel = m_wheels[iWheel].get();
@@ -287,12 +284,12 @@ SCT_Forward::build(SCT_Identifier id)
             std::string key=wheelName.str()+"_"+std::to_string(id.getBarrelEC());
             
             // Store the alignable transform
-            m_detectorManager->addAlignableTransform(2, id.getWaferId(), mapAX[key], mapFPV[key]);
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
         }
         if (m_endcap > 0) {
-            forward= mapFPV["SCTEndcapA"];
+	  forward= (*m_mapFPV)["SCTEndcapA"];
         } else {
-            forward= mapFPV["SCTEndcapC"];
+	  forward= (*m_mapFPV)["SCTEndcapC"];
         }
     
     }

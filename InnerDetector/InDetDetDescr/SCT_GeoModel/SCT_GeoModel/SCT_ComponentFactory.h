@@ -7,6 +7,8 @@
 
 #include "SCT_GeoModel/SCT_Identifier.h"
 #include <string>
+#include <map>
+#include <memory>
 
 namespace InDetDD{class SCT_DetectorManager;}
 class SCT_GeometryManager;
@@ -14,6 +16,8 @@ class SCT_MaterialManager;
 
 class GeoLogVol;
 class GeoVPhysVol;
+class GeoFullPhysVol;
+class GeoAlignableTransform;
 
 namespace GeoModelIO {
   class ReadGeoModel;
@@ -75,11 +79,7 @@ public:
   SCT_UniqueComponentFactory(const std::string & name,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
-                             SCT_MaterialManager* materials=nullptr, GeoModelIO::ReadGeoModel* sqliteReader=nullptr) :
-    SCT_ComponentFactory(name, detectorManager, geometryManager, materials),
-    m_logVolume{nullptr},
-    m_sqliteReader(sqliteReader)
-  {};
+                             SCT_MaterialManager* materials=nullptr, GeoModelIO::ReadGeoModel* sqliteReader=nullptr);
 
   virtual GeoVPhysVol * build(SCT_Identifier id) = 0;
 
@@ -88,6 +88,9 @@ protected:
   GeoModelIO::ReadGeoModel* m_sqliteReader;
 
   virtual const GeoLogVol * preBuild() = 0;
+
+  std::unique_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
+  std::unique_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
 
 };
 

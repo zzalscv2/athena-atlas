@@ -4,7 +4,7 @@
 
 #include "SCT_GeoModel/SCT_ComponentFactory.h"
 #include "GaudiKernel/SystemOfUnits.h"
-
+#include "GeoModelRead/ReadGeoModel.h"
 #include <sstream>
 #include <string>
 
@@ -38,3 +38,19 @@ SCT_ComponentFactory::epsilon() const
 {
   return s_epsilon;
 }
+
+
+SCT_UniqueComponentFactory::SCT_UniqueComponentFactory(const std::string & name,
+			    InDetDD::SCT_DetectorManager* detectorManager,
+                            SCT_GeometryManager* geometryManager,
+                            SCT_MaterialManager* materials, 
+                            GeoModelIO::ReadGeoModel* sqliteReader) :
+  SCT_ComponentFactory(name, detectorManager, geometryManager, materials),
+  m_logVolume(nullptr),
+  m_sqliteReader(sqliteReader)
+{
+  if (sqliteReader) {
+    m_mapFPV = std::make_unique<std::map<std::string, GeoFullPhysVol*>>         (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT"));
+    m_mapAX  = std::make_unique< std::map<std::string, GeoAlignableTransform*>> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT"));
+  }
+};

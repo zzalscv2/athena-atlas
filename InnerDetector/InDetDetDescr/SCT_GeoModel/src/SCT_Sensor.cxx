@@ -35,6 +35,7 @@ SCT_Sensor::SCT_Sensor(const std::string & name,
 {
   getParameters();
   m_logVolume = SCT_Sensor::preBuild();
+
 }
 
 
@@ -144,11 +145,9 @@ SCT_Sensor::build(SCT_Identifier id)
     GeoFullPhysVol * sensor;
     if(m_sqliteReader){
         
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-        
-        std::string key="Sensor_Side#"+std::to_string(id.getSide())+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        
-        sensor=mapFPV[key];
+      std::string key="Sensor_Side#"+std::to_string(id.getSide())+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+
+      sensor=(*m_mapFPV)[key];
         
     }
     else sensor= new GeoFullPhysVol(m_logVolume);

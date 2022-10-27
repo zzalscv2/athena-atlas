@@ -51,8 +51,9 @@ SCT_Ski::SCT_Ski(const std::string & name,
     m_module(module)
 {
   getParameters();
-  if(!m_sqliteReader)
+  if(!m_sqliteReader) {
       m_logVolume = SCT_Ski::preBuild();
+  }
 }
 
 
@@ -382,10 +383,6 @@ SCT_Ski::build(SCT_Identifier id)
     }
     else{
         
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-        
-        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
-        
         for (int iModule = 0; iModule < m_modulesPerSki; iModule++) {
             
             // Add modules.
@@ -395,7 +392,7 @@ SCT_Ski::build(SCT_Identifier id)
             std::string key="ModuleSKI_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
             
             // Store alignable transform
-            m_detectorManager->addAlignableTransform(1, id.getWaferId(), mapAX[key], mapFPV[key]);
+            m_detectorManager->addAlignableTransform(1, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
             
         }
     }

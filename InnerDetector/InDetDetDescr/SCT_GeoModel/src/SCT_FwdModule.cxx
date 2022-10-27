@@ -251,17 +251,13 @@ GeoVPhysVol * SCT_FwdModule::build(SCT_Identifier id)
     }
     else{
         
-        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-        
-        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
-        
         int bottomSideNumber = (m_upperSide) ? 0 : 1;
         id.setSide(bottomSideNumber);
         m_sensor->build(id);
         
         // Store transform
         std::string key="FwdSensor_Side#"+std::to_string(bottomSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
-        m_detectorManager->addAlignableTransform(0, id.getWaferId(), mapAX[key], mapFPV[key]);
+        m_detectorManager->addAlignableTransform(0, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
         
         int topSideNumber = m_upperSide;
         id.setSide(topSideNumber);
@@ -271,7 +267,7 @@ GeoVPhysVol * SCT_FwdModule::build(SCT_Identifier id)
         key="FwdSensor_Side#"+std::to_string(topSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
         
         // Store transform
-        m_detectorManager->addAlignableTransform(0, id.getWaferId(), mapAX[key], mapFPV[key]);
+        m_detectorManager->addAlignableTransform(0, id.getWaferId(), (*m_mapAX)[key], (*m_mapFPV)[key]);
         
     }
     return module;
