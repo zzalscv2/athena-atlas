@@ -98,7 +98,9 @@ std::vector<std::shared_ptr<CSVWrapper::tableline>> CSVWrapper::FindLines(
 }
 
 CSVWrapper::tableline  CSVWrapper::GetLine(const int element) const{
-    return m_table.at(element);
+   if (element==-1)
+      return m_table.back();
+   return m_table.at(element);
 }
 
 /*!

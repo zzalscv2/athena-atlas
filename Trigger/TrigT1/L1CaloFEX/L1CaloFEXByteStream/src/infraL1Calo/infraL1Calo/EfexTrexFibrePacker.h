@@ -34,6 +34,7 @@ public:
 
     virtual bool checkCRC(const std::vector<myDataWord>& encodedData, InputDataFrameType frameType) const override;
     virtual myDataWord getBcNumber(const std::vector<myDataWord>& encodedData, InputDataFrameType frameType) const override;
+    virtual myDataWord getBcMask(InputDataFrameType frameType) const;
 
     /**
      *  \brief Function unpacking the data from LATOME format, either standard or alignement frame

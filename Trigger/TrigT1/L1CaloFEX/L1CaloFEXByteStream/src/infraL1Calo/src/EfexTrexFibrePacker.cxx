@@ -119,6 +119,11 @@ FibrePackerBase::myDataWord  EfexTrexFibrePacker::getBcNumber(const std::vector<
     return BcNumber;
 }
 
+FibrePackerBase::myDataWord  EfexTrexFibrePacker::getBcMask(InputDataFrameType /*frameType*/) const {
+    // BC number is the full 12 bits from any frame.
+    return 0xfff;
+}
+
 std::vector<FibrePackerBase::myDataWord>  EfexTrexFibrePacker::getUnpackedData(const std::vector<myDataWord>& encodedData, 
                                                                 InputDataFrameType frameType) const {
     std::vector<myDataWord> unpackedData; 

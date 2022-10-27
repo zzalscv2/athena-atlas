@@ -1,6 +1,4 @@
-/*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-*/
+
 #include "bytestreamDecoder/L1CaloRdo.h"
 
 #include "bytestreamDecoder/L1CaloRdoRodInfo.h"
