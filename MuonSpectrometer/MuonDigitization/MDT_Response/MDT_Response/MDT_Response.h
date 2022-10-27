@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MDT_RESPONSE_MDT_RESPONSE_H
@@ -23,7 +23,7 @@ class MDT_Response {
   typedef std::vector<double> clusterVec;
 
   MDT_Response();
-  MDT_Response(double binsize, double window); // time window in which to look for threshold
+  MDT_Response(double timewindow, double binsize); // time window in which to look for threshold
   ~MDT_Response();
 
   // set segment
