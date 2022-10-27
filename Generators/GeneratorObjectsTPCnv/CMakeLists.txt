@@ -54,6 +54,12 @@ atlas_add_test( McEventCollectionCnv_p5_test
                 INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPMC_INCLUDE_DIRS}
                 LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPMC_LIBRARIES} AthenaPoolCnvSvcLib GaudiKernel GeneratorObjects TestTools StoreGateLib SGtests GeneratorObjectsTPCnv )
 
+atlas_add_test( McEventCollectionCnv_p6_test
+                SOURCES
+                test/McEventCollectionCnv_p6_test.cxx
+                INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPMC_INCLUDE_DIRS}
+                LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPMC_LIBRARIES} AthenaPoolCnvSvcLib GaudiKernel GeneratorObjects TestTools StoreGateLib SGtests GeneratorObjectsTPCnv )
+
 atlas_add_test( HepMcParticleLinkCnv_p1_test
                 SOURCES
                 test/HepMcParticleLinkCnv_p1_test.cxx
