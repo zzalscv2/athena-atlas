@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FLAVOURTAGGINGPERFORMANCEFUNCTIONS_CXX
@@ -30,7 +30,7 @@ void UpgradePerformanceFunctions::setFlavourTaggingCalibrationFilename(TString f
   m_flavourTaggingCalibrationFilename = file;
 }
 
-float UpgradePerformanceFunctions::getFlavourTagEfficiency(float ptMeV, float eta, char flavour, TString tagger, int operating_point, bool track_confirmation) {
+float UpgradePerformanceFunctions::getFlavourTagEfficiency ATLAS_NOT_THREAD_SAFE (float ptMeV, float eta, char flavour, TString tagger, int operating_point, bool track_confirmation) {
   double ptGeV = ptMeV/1000.;
 
   // the function returns b/c/l-tagging efficincies obtained using ttbar samples
@@ -80,7 +80,7 @@ float UpgradePerformanceFunctions::getFlavourTagEfficiency(float ptMeV, float et
     "mu80_sc6296"
   };
 
-  static double etamax[nopt] = {
+  static const double etamax[nopt] = {
     4,3.3,2.7,4,3.3,2.7,2.7
   };
 

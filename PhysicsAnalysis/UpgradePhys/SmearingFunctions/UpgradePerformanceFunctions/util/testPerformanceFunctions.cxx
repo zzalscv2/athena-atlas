@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include "TROOT.h"
+#include "CxxUtils/checker_macros.h"
 #include "UpgradePerformanceFunctions/UpgradePerformanceFunctions.h"
 
-int main() {
+int main ATLAS_NOT_THREAD_SAFE () {
   std::cout << "This is a test." << std::endl;
   // This hack is needed to force dictionary loading in ROOT 5
   gROOT->ProcessLine("#include <vector>");
