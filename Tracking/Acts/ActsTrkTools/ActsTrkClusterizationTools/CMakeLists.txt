@@ -15,6 +15,7 @@ atlas_add_component(ActsTrkClusterizationTools
 		    ActsCore
 		    ActsTrkToolInterfacesLib
 		    InDetRawData
+		    InDetReadoutGeometry
 		    SiClusterizationToolLib
 		    xAODInDetMeasurement)
 

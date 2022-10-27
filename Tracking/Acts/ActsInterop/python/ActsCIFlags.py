@@ -13,8 +13,6 @@ def actsWorkflowFlags(flags):
     """flags for Reco_tf with CA used in CI tests: add Acts workflow to reco sequence"""
     flags.Reco.EnableHGTDExtension = False
     flags.DQ.useTrigger = False
-    flags.ITk.Tracking.doTruth = True
-    flags.Detector.EnableITkStrip = False
     flags.ITk.Tracking.EnableNativexAODclusters = True
     flags.ITk.Tracking.produceNewSpacePointContainer = True
     flags.Output.HISTFileName = "ActsMonitoringOutput.root"

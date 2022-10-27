@@ -3,5 +3,7 @@
 */
 
 #include "src/PixelClusterizationAlg.h"
+#include "src/StripClusterizationAlg.h"
 
 DECLARE_COMPONENT(ActsTrk::PixelClusterizationAlg)
+DECLARE_COMPONENT(ActsTrk::StripClusterizationAlg)
