@@ -53,7 +53,7 @@ private:
 
   // --- Steering and configuration flags
   Gaudi::Property<bool> m_useTruthInfo {this, "UseTruthInfo",false,"Use data object"};
-  Gaudi::Property<bool> m_writeSDOs {this, "WriteSDOs", true,"Use data object"};
+  Gaudi::Property<bool> m_writeSDOs {this, "WriteSDOs", false,"Use data object"};
 
   // --- Configuration keys
   SG::ReadHandleKey<InDet::TRT_DriftCircleContainer> m_driftcirclecontainer {this,"DriftCircleContainer","TRT_DriftCircles","RHK to retrieve the drift Circle Container"};
