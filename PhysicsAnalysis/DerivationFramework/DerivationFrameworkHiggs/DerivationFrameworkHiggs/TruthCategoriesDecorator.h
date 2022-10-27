@@ -36,7 +36,7 @@ namespace DerivationFramework {
         ToolHandle<IxAODtoHepMCTool> m_xAODtoHepMCTool{this, "HepMCTool", "xAODtoHepMCTool"};
         ToolHandle<IHiggsTruthCategoryTool> m_higgsTruthCatTool{this, "CategoryTool", "HiggsTruthCategoryTool"};
 
-        // Path to TEnv file containing MC-channel-numbre <-> HiggsProdMode map
+        // Path to TEnv file containing MC-channel-number <-> HiggsProdMode map
         Gaudi::Property<std::string> m_configPath{this, "ConfigPath", "DerivationFrameworkHiggs/HiggsMCsamples.cfg"};
         struct HTXSSample {
             /// Higgs production modes, corresponding to input sample
