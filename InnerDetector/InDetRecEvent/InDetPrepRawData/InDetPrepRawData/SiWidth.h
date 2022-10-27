@@ -22,7 +22,7 @@ namespace InDet {
 
       @author Veronique.Boisvert
     */
-  class SiWidth {
+  class SiWidth final{ 
 
    ///////////////////////////////////////////////////////////////////
    // Public methods:
@@ -34,6 +34,8 @@ namespace InDet {
 
    // Copy constructor:
    SiWidth(const SiWidth& position);
+   //move ctor
+   SiWidth(SiWidth&& position) = default;
 
    // Constructor with parameters: <col, row> in units of RDOs (so should be int), 
    //                              <phiR width in mm, Z width in mm>
@@ -43,10 +45,12 @@ namespace InDet {
    SiWidth(const Amg::Vector2D& colrow);
 
    // Destructor:
-   virtual ~SiWidth();
+   ~SiWidth() = default;
 
    // Assignment operator:
    SiWidth &operator=(const SiWidth& width);
+   // move assignment 
+   SiWidth &operator=(SiWidth&& width) = default;
 
    ///////////////////////////////////////////////////////////////////
    // Const methods:
@@ -84,17 +88,13 @@ namespace InDet {
 
    void setPhirzWidth(const Amg::Vector2D& phirzWidth);
 
+   /** dump information about the PRD object. */
+   MsgStream& dump(MsgStream& stream) const;
 
-  // addition
+   /** dump information about the PRD object. */
+   std::ostream& dump(std::ostream& stream) const;
 
-  /** dump information about the PRD object. */
-  virtual MsgStream&    dump( MsgStream&    stream) const;
-
-  /** dump information about the PRD object. */
-  virtual std::ostream& dump( std::ostream& stream) const;
-
-
-  //scaling
+   // scaling
 
    ///////////////////////////////////////////////////////////////////
    // Private data:

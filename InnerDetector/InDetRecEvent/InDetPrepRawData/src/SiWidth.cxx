@@ -37,10 +37,6 @@ InDet::SiWidth::SiWidth(const Amg::Vector2D& colrow) :
 {}
 
 
-// Destructor:
-InDet::SiWidth::~SiWidth()
-= default;
-
 // Assignment operator:
 InDet::SiWidth& InDet::SiWidth::operator=(const InDet::SiWidth &width)
 {
