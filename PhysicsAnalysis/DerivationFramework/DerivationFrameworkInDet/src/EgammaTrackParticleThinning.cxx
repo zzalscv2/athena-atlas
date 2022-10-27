@@ -44,19 +44,25 @@ DerivationFramework::EgammaTrackParticleThinning::initialize()
 
   ATH_CHECK(m_gsfSGKey.initialize(m_streamName));
   ATH_MSG_INFO(
+    "Using " << m_gsfSGKey.key()
+             << " as the source collection for GSF track particles");
+
+  ATH_MSG_INFO(
     "GSF track particles associated with objects in "
-    << m_gsfSGKey
+    << m_egammaKey.key()
     << " will be retained in this format with the rest being thinned away");
 
   ATH_CHECK(m_inDetSGKey.initialize(m_streamName, !m_inDetSGKey.empty()));
-  ATH_MSG_INFO(
-    "Using " << m_inDetSGKey.key()
-             << "as the source collection for inner detector track particles");
+  if (!m_inDetSGKey.empty()) {
+    ATH_MSG_INFO(
+      "Using " << m_inDetSGKey.key()
+               << " as the source collection for inner detector track particles");
 
-  ATH_MSG_INFO(
-    "Inner detector track particles associated with objects in "
-    << m_egammaKey.key()
-    << " will be retained in this format with the rest being thinned away");
+    ATH_MSG_INFO(
+      "Inner detector track particles associated with objects in "
+      << m_egammaKey.key()
+      << " will be retained in this format with the rest being thinned away");
+  }
 
   // Set up the text-parsing machinery for selectiong the objects directly
   // according to user cuts
@@ -83,6 +89,8 @@ DerivationFramework::EgammaTrackParticleThinning::finalize()
 StatusCode
 DerivationFramework::EgammaTrackParticleThinning::doThinning() const
 {
+  ATH_MSG_VERBOSE("doThinning() ...");
+
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
   SG::ThinningHandle<xAOD::TrackParticleContainer> importedGSFTrackParticles(
@@ -104,7 +112,8 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
   const xAOD::TrackParticleContainer* gsfs = importedGSFTrackParticles.cptr();
   unsigned int nTracks = tps ? tps->size() : 0;
   unsigned int nGSF = gsfs->size();
-  if (nTracks == 0 || nGSF == 0) {
+  ATH_MSG_DEBUG("nTracks : " << nTracks << " , nGSF : " << nGSF);
+  if (nTracks == 0 && nGSF == 0) {
     return StatusCode::SUCCESS;
   }
 
@@ -123,6 +132,7 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
     return StatusCode::FAILURE;
   }
   unsigned int nEgammas(importedEgamma->size());
+  ATH_MSG_DEBUG("nEgammas : " << nEgammas);
   if (nEgammas == 0)
     return StatusCode::SUCCESS;
   std::vector<const xAOD::Egamma*> egToCheck;
@@ -162,6 +172,7 @@ DerivationFramework::EgammaTrackParticleThinning::doThinning() const
   // Set elements in the mask to true if there is a corresponding ElementLink
   // from a reconstructed object
   //
+  ATH_MSG_DEBUG("Setting the masks");
   if (m_selectionString.empty()) { // check all objects as user didn't provide a
                                    // selection string
     if (isElectrons)
@@ -213,6 +224,7 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
   const xAOD::TrackParticleContainer* gsfs,
   const bool bestMatchOnly) const
 {
+  ATH_MSG_VERBOSE("setPhotonMasks() ...");
 
   DerivationFramework::TracksInCone trIC;
   for (xAOD::EgammaContainer::const_iterator egIt = egammas->begin();
@@ -258,10 +270,12 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
           continue;
         }
         gsfMask[link.index()] = true;
-        const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
-          orig(*((*gsfs)[link.index()]));
-        int inDetIndex = origTrackLink.index();
-        mask[inDetIndex] = true;
+        if (tps) {
+          const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
+            orig(*((*gsfs)[link.index()]));
+          int inDetIndex = origTrackLink.index();
+          mask[inDetIndex] = true;
+	}
       }
     }
   }
@@ -277,6 +291,8 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
   const xAOD::TrackParticleContainer* gsfs,
   const bool bestMatchOnly) const
 {
+  ATH_MSG_VERBOSE("setPhotonMasks() ...");
+
   DerivationFramework::TracksInCone trIC;
   for (std::vector<const xAOD::Egamma*>::iterator egIt = egammas.begin();
        egIt != egammas.end();
@@ -316,12 +332,14 @@ DerivationFramework::EgammaTrackParticleThinning::setPhotonMasks(
           continue;
         }
         gsfMask[link.index()] = true;
-        const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
-          orig(*((*gsfs)[link.index()]));
-        if (origTrackLink.isValid()) {
-          int inDetIndex = origTrackLink.index();
-          mask[inDetIndex] = true;
-        }
+        if (tps) {
+          const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
+            orig(*((*gsfs)[link.index()]));
+          if (origTrackLink.isValid()) {
+            int inDetIndex = origTrackLink.index();
+            mask[inDetIndex] = true;
+          }
+	}
       }
     }
   }
@@ -337,6 +355,8 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
   const xAOD::TrackParticleContainer* gsfs,
   const bool bestMatchOnly) const
 {
+  ATH_MSG_VERBOSE("setElectronMasks() ...");
+
   DerivationFramework::TracksInCone trIC;
   for (xAOD::EgammaContainer::const_iterator egIt = egammas->begin();
        egIt != egammas->end();
@@ -364,11 +384,13 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
       }
       int gsfIndex = electron->trackParticleLink(i).index();
       gsfMask[gsfIndex] = true;
-      const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
-        orig(*((*gsfs)[gsfIndex]));
-      if (origTrackLink.isValid()) {
-        int inDetIndex = origTrackLink.index();
-        mask[inDetIndex] = true;
+      if (tps) {
+        const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
+          orig(*((*gsfs)[gsfIndex]));
+        if (origTrackLink.isValid()) {
+          int inDetIndex = origTrackLink.index();
+          mask[inDetIndex] = true;
+	}
       }
     }
   }
@@ -384,6 +406,8 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
   const xAOD::TrackParticleContainer* gsfs,
   const bool bestMatchOnly) const
 {
+  ATH_MSG_VERBOSE("setElectronMasks() ...");
+
   DerivationFramework::TracksInCone trIC;
   for (std::vector<const xAOD::Egamma*>::iterator egIt = egammas.begin();
        egIt != egammas.end();
@@ -411,11 +435,13 @@ DerivationFramework::EgammaTrackParticleThinning::setElectronMasks(
       }
       int gsfIndex = electron->trackParticleLink(i).index();
       gsfMask[gsfIndex] = true;
-      const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
-        orig(*((*gsfs)[gsfIndex]));
-      if (origTrackLink.isValid()) {
-        int inDetIndex = origTrackLink.index();
-        mask[inDetIndex] = true;
+      if (tps) {
+        const ElementLink<xAOD::TrackParticleContainer> origTrackLink =
+          orig(*((*gsfs)[gsfIndex]));
+        if (origTrackLink.isValid()) {
+          int inDetIndex = origTrackLink.index();
+          mask[inDetIndex] = true;
+        }
       }
     }
   }
