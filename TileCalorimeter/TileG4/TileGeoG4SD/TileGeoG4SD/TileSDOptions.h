@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILESDOPTIONS_h
@@ -19,7 +19,8 @@ class TileSDOptions
 public:
   /** Setup defaults */
   TileSDOptions()
-    : timeCut(350.5),
+    : deltaTHit {0.5 , -75.25 , 75.25 , 5.},
+      timeCut(350.5),
       tileTB(false),
       plateToCell(-1),
       uShape(-1),
@@ -31,7 +32,7 @@ public:
       rDBAccessSvcName("RDBAccessSvc"),
       geoModelSvcName("GeoModelSvc")
   {
-    deltaTHit = {0.5 , -75.25 , 75.25 , 5.};
+    
   }
 
   /** A time granularity for G4 hits in TileHit
