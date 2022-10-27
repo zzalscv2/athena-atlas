@@ -13,7 +13,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('CostAnalysisPostProcessing')
 
 
-def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[]):
+def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails=False):
     ''' @brief Save metadata from ntuple to json file
     '''
     import json
@@ -55,6 +55,13 @@ def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[]):
     metadata.append({'AdditionalHashMap' : str(metatree.AdditionalHashMap)})
     metadata.append({'DoEBWeighting' : metatree.DoEBWeighting})
     metadata.append({'BaseEventWeight' : metatree.BaseEventWeight})
+
+    if doTRPDetails:
+        detailsPerLb = readDetailsFromTRP(inputFile, metatree.runNumber)
+        if detailsPerLb:
+            metadata.append({"LumiblockDetails" : detailsPerLb})
+        else:
+            log.error("Reading lumiblock details for TRP failed!")
 
     metadata.append({'Histogram under/overflows' : processingWarnings})
 
@@ -280,3 +287,112 @@ def readHLTConfigKeysFromAMI(amiTag):
     configMetadata.append({'LVL1PSK' : amiTagInfo['DBl1pskey'] if "DBl1pskey" in amiTagInfo else None})
 
     return configMetadata
+
+
+def readDetailsFromTRP(inputFile, runNumber, itemName="L1_TAU8--enabled", server="https://atlasop.cern.ch"):
+    log.info("Reading run details from TRP")
+
+    import ROOT
+
+    lumiBlockDict = {} # Mapping of range to lumiblocks in the range
+
+    for timeRange in inputFile.GetListOfKeys():
+        rangeObj = timeRange.ReadObj()
+        if not rangeObj.IsA().InheritsFrom(ROOT.TDirectory.Class()): continue # Skip metadata TTree
+        rangeName = rangeObj.GetName()
+
+        for table in rangeObj.GetListOfKeys():
+            tableObj = table.ReadObj()
+            if "Global" not in tableObj.GetName(): continue # Find Global summary
+
+            dirKey = set(key.ReadObj().GetName() for key in tableObj.GetListOfKeys() if key.ReadObj().GetName().startswith('LumiBlock'))
+            lumiBlockDict[rangeName] = sorted(dirKey)
+
+    if not lumiBlockDict:
+        log.error("No lumiblocks were found in the input file")
+        return {}
+
+    # Read start and stop timestamps for lumiblock ranges
+    from DQUtils.sugar import RunLumi
+    from time import ctime
+    from PyCool import cool
+    from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
+    dbconn = TriggerCoolUtil.GetConnection("CONDBR2")
+
+    lbRangeTsDict = {} # Timestamps for lumiblock range
+
+    f = dbconn.getFolder( "/TRIGGER/LUMI/LBLB" )
+    for lbRange in lumiBlockDict:
+        startLb = int(min(lumiBlockDict[lbRange]).replace('LumiBlock_', ''))
+        endLb = int(max(lumiBlockDict[lbRange]).replace('LumiBlock_', ''))
+        log.debug("For range {0} first lumiblock is {1} and last {2}".format(lbRange, startLb, endLb))
+
+        since = RunLumi(runNumber, startLb)
+        until = RunLumi(runNumber, endLb)
+
+        objs = f.browseObjects(since, until, cool.ChannelSelection(0))
+        objs.goToNext()
+        objCurrRef = objs.currentRef()
+        startTime = int(objCurrRef.payload()["StartTime"]/1000)
+
+        while objs.goToNext():
+            objCurrRef = objs.currentRef()
+
+        endTime = int(objCurrRef.payload()["EndTime"]/1000)
+
+        lbRangeTsDict[lbRange] = {"start": startTime, "end" : endTime}
+
+        log.debug("Read start and end of range {0} from COOL: {1} - {2}".format(lbRange, ctime(startTime/1E6).replace(' ','_'), ctime(endTime/1E6).replace(' ','_')))
+
+
+    # Read details from PBeast
+    lbRangeDetailsDict = {}
+    try:
+        import libpbeastpy
+        pbeast = libpbeastpy.ServerProxy(server)
+
+        for lbRange in lbRangeTsDict:
+            lbStart = lbRangeTsDict[lbRange]["start"]
+            lbEnd = lbRangeTsDict[lbRange]["end"]
+
+            # Deadtime
+            physicsDT = pbeast.get_data('ATLAS', 'L1_Rate', 'DT', 'ISS_TRP.' + itemName, False, lbStart, lbEnd, 0, True)[0].data['ISS_TRP.' + itemName]
+
+            avgDt = 0
+            counter = 0
+            entryCounter = 1
+            # Read only values between timestamps - pbeast returns one timestamp earlier and one later
+            while physicsDT[entryCounter].ts > lbStart and physicsDT[entryCounter].ts < lbEnd:
+                if type(physicsDT[entryCounter].value) != float: # None type
+                    entryCounter += 1
+                    continue
+                avgDt += physicsDT[entryCounter].value
+                counter += 1
+                entryCounter += 1
+                    
+            dt = avgDt/counter if counter > 0 else 1.
+
+            # Pileup
+            mu = pbeast.get_data('OLC', 'OCLumi', 'Mu', 'OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS', False, lbStart, lbEnd)[0].data['OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS']
+            muSet = []
+            entryCounter = 1
+            while mu[entryCounter].ts > lbStart and mu[entryCounter].ts < lbEnd:
+                if type(mu[entryCounter].value) != float: # None type
+                    entryCounter += 1
+                    continue
+                muSet.append(mu[entryCounter].value)
+                entryCounter += 1
+
+            muAvg = sum(muSet)/len(muSet) if len(muSet) > 0 else -1
+            lbRangeDetailsDict[lbRange] = {"avgPileup" : round(muAvg, 3), "minPileup" : round(min(muSet), 3), "maxPileup" : round(max(muSet), 3), "deadtime" : round(dt, 3)}
+
+    except ImportError:
+        log.error("The pbeast python library was not found! Remember to setup tdaq release!")
+        return {}
+    except RuntimeError:
+        log.error("Error when reading from Pbeast! Remember to export pbeast server sso: export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos")
+        return {}
+
+    log.debug("The final lumiblock dictionary is {0}".format(lbRangeDetailsDict))
+
+    return lbRangeDetailsDict
