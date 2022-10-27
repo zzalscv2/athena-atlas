@@ -128,36 +128,31 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     auto roiCollectionHdl = SG::makeHandle(m_roiCollectionKey, ctx);
     auto roiCollection = roiCollectionHdl.get();
 
-    if ( (roiCollection->size() < 1) ){ //should be the L1 Muon RoI container
-      ATH_MSG_ERROR("Input TrigRoiDescriptorCollection isn't the correct size! Aborting chain.");
-      return StatusCode::FAILURE;
+    if (roiCollection->size() < 2){ //should be the L1 Muon RoI container
+        ATH_MSG_WARNING("Input TrigRoiDescriptorCollection isn't the correct size! Potential L1 menu inconsistency. Got " << roiCollection->size() << " RoIs");
+        return StatusCode::SUCCESS;
     }
 
     ATH_MSG_DEBUG("begin loop on TrigRoiDescriptors and get muon RoIs");
 
-    if(roiCollection->size()==0) {
-        ATH_MSG_WARNING("Can't get any TrigRoiDescriptor from m_roiCollectionKey!");
-        return StatusCode::FAILURE;
-    } else {
-        nL1RoIs = roiCollection->size();
-        nRoIinClusters = 0;
-        for (const TrigRoiDescriptor *roi : *roiCollection)
-        {
-            if(iter_cl>= kMAX_ROI) {
-                ATH_MSG_WARNING("Too many L1 Muon RoIs: bailing out");
-                break;
-          }
-
-          RoiEta_mon.push_back(roi->eta());
-          RoiPhi_mon.push_back(roi->phi());
-          lvl1_muclu_roi my_lvl1_clu_roi;
-          my_lvl1_clu_roi.eta = roi->eta();
-          my_lvl1_clu_roi.phi = roi->phi();
-          my_lvl1_clu_roi.nroi = 0;
-          muonClu[iter_cl] = my_lvl1_clu_roi;
-          muonClu0[iter_cl] = my_lvl1_clu_roi;
-          ++iter_cl;
+    nL1RoIs = roiCollection->size();
+    nRoIinClusters = 0;
+    for (const TrigRoiDescriptor *roi : *roiCollection)
+    {
+        if(iter_cl>= kMAX_ROI) {
+            ATH_MSG_WARNING("Too many L1 Muon RoIs: bailing out");
+            break;
         }
+
+        RoiEta_mon.push_back(roi->eta());
+        RoiPhi_mon.push_back(roi->phi());
+        lvl1_muclu_roi my_lvl1_clu_roi;
+        my_lvl1_clu_roi.eta = roi->eta();
+        my_lvl1_clu_roi.phi = roi->phi();
+        my_lvl1_clu_roi.nroi = 0;
+        muonClu[iter_cl] = my_lvl1_clu_roi;
+        muonClu0[iter_cl] = my_lvl1_clu_roi;
+        ++iter_cl;
     }
     int n_cl = iter_cl;
 
