@@ -22,9 +22,9 @@ TRT_BaseElement::TRT_BaseElement(const GeoVFullPhysVol* volume,
   , m_id(id)
   , m_idHelper(idHelper)
   , m_conditions(conditions)
-  , m_surfaceCache{}
   , m_surface{}
   , m_surfaces{}
+  , m_surfaceCache{}
 {
   m_idHash = m_idHelper->straw_layer_hash(id);
 }

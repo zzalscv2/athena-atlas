@@ -206,23 +206,21 @@ namespace InDetDD {
   protected:
     Identifier                                          m_id;
     IdentifierHash                                      m_idHash;
-    const TRT_ID*                                       m_idHelper=nullptr;
-    const TRT_Conditions*                               m_conditions=nullptr;
     /*
      * The number of straws and the vector below need to
      * initialosed in the derived constructors for now.
      * This should fine as this is pure virtual class
      */
     unsigned int m_nstraws = 0;
-    // Amg cache for the straw surfaces
+    const TRT_ID*                                       m_idHelper=nullptr;
+    const TRT_Conditions*                               m_conditions=nullptr;
+    CxxUtils::CachedUniquePtr<Trk::Surface> m_surface;
+   // Amg cache for the straw surfaces
     std::vector<CxxUtils::CachedUniquePtr<Trk::StraightLineSurface>> m_strawSurfaces{};
     std::vector<CxxUtils::CachedUniquePtr<SurfaceCacheBase>> m_strawSurfacesCache{};
-
     //!< helper element surface for the cache
-    CxxUtils::CachedValue<SurfaceCache> m_surfaceCache;
-    CxxUtils::CachedUniquePtr<Trk::Surface> m_surface;
-
     CxxUtils::CachedValue<std::vector<const Trk::Surface*>> m_surfaces;
+    CxxUtils::CachedValue<SurfaceCache> m_surfaceCache;
 
   };
 
