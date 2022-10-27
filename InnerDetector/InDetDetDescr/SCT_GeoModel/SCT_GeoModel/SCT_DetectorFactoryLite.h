@@ -12,8 +12,13 @@
 #include "GeoModelKernel/GeoVDetectorFactory.h"
 
 #include <memory>
+#include <map>
+#include <string>
 
 class GeoPhysVol;
+class GeoFullPhysVol;
+class GeoAlignableTransform;
+
 class SCT_DataBase;
 class SCT_GeometryManager;
 class SCT_GeoModelAthenaComps;
@@ -53,6 +58,10 @@ class SCT_DetectorFactoryLite : public InDetDD::DetectorFactoryBase
   std::unique_ptr<SCT_DataBase> m_db;
   std::unique_ptr<SCT_MaterialManager> m_materials;
   bool m_useDynamicAlignFolders;
+
+  std::unique_ptr<std::map<std::string, GeoFullPhysVol*>>        m_mapFPV;
+  std::unique_ptr<std::map<std::string, GeoAlignableTransform*>> m_mapAX;
+
 
 }; 
  

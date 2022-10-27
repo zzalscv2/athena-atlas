@@ -129,6 +129,11 @@ SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqlit
                            versionPatchNumber);
   m_detectorManager->setVersion(version);
 
+  if (sqliteReader) {
+    m_mapFPV = std::make_unique<std::map<std::string, GeoFullPhysVol*>>         (m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT"));
+    m_mapAX  = std::make_unique< std::map<std::string, GeoAlignableTransform*>> (m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT"));
+  }
+
 } 
  
  
@@ -158,10 +163,6 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
   bool forwardPlusPresent  = sctGeneral->partPresent(forwardPlusLabel);
   bool forwardMinusPresent = sctGeneral->partPresent(forwardMinusLabel);
 
-  std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
-    
-  std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
-
   //
   // The Barrel
   //  
@@ -178,8 +179,8 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     id.setBarrelEC(0);
     //GeoVPhysVol * barrelPV =
     sctBarrel.build(id);
-    GeoFullPhysVol *barrelPV = mapFPV["SCT_Barrel"];
-    GeoAlignableTransform * barrelTransform = mapAX["SCT_Barrel"];
+    GeoFullPhysVol *barrelPV = (*m_mapFPV)["SCT_Barrel"];
+    GeoAlignableTransform * barrelTransform = (*m_mapAX)["SCT_Barrel"];
     m_detectorManager->addTreeTop(barrelPV);
 
     // Store alignable transform
@@ -203,8 +204,8 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     //GeoVPhysVol * forwardPlusPV =
     sctForwardPlus.build(idFwdPlus);
     
-    GeoFullPhysVol *forwardPlusPV = mapFPV["SCT_ForwardPlus"];
-    GeoAlignableTransform * fwdGeoTransformPlus = mapAX["SCT_ForwardPlus"];
+    GeoFullPhysVol *forwardPlusPV = (*m_mapFPV)["SCT_ForwardPlus"];
+    GeoAlignableTransform * fwdGeoTransformPlus = (*m_mapAX)["SCT_ForwardPlus"];
     
     m_detectorManager->addTreeTop(forwardPlusPV);
 
@@ -229,8 +230,8 @@ void SCT_DetectorFactoryLite::create(GeoPhysVol*)
     //GeoVPhysVol * forwardMinusPV =
     sctForwardMinus.build(idFwdMinus);
       
-    GeoFullPhysVol *forwardMinusPV = mapFPV["SCT_ForwardMinus"];
-    GeoAlignableTransform * fwdGeoTransformMinus = mapAX["SCT_ForwardMinus"];
+    GeoFullPhysVol *forwardMinusPV = (*m_mapFPV)["SCT_ForwardMinus"];
+    GeoAlignableTransform * fwdGeoTransformMinus = (*m_mapAX)["SCT_ForwardMinus"];
     m_detectorManager->addTreeTop(forwardMinusPV);
 
 
