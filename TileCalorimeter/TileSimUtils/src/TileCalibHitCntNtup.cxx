@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileSimUtils/TileCalibHitCntNtup.h"
@@ -348,20 +348,17 @@ StatusCode TileCalibHitCntNtup::StoreCNT(const CaloCalibrationHitContainer* Acti
     ATH_MSG_INFO(text_info);
 
     if (nhit != 0) {
-      CaloCalibrationHitContainer::const_iterator it = ActiveHitCnt->begin();
-      CaloCalibrationHitContainer::const_iterator end = ActiveHitCnt->end();
+      for (const CaloCalibrationHit* hit : *ActiveHitCnt) {
+        m_act_totE += hit->energyTotal();
+        m_act_visE += hit->energyEM() + hit->energyNonEM();
 
-      for (; it != end; it++) {
-        m_act_totE += (*it)->energyTotal();
-        m_act_visE += (*it)->energyEM() + (*it)->energyNonEM();
+        m_Total->push_back( hit->energyTotal());
+        m_Em->push_back( hit->energyEM());
+        m_NonEm->push_back( hit->energyNonEM());
+        m_Invisible->push_back( hit->energyInvisible());
+        m_Escaped->push_back( hit->energyEscaped());
 
-        m_Total->push_back( (*it)->energyTotal());
-        m_Em->push_back( (*it)->energyEM());
-        m_NonEm->push_back( (*it)->energyNonEM());
-        m_Invisible->push_back( (*it)->energyInvisible());
-        m_Escaped->push_back( (*it)->energyEscaped());
-
-        Identifier id = (*it)->cellID();
+        Identifier id = hit->cellID();
 
         m_subCalo->push_back(m_caloCell_ID->sub_calo(id));
         m_section->push_back(m_caloCell_ID->section(id));
@@ -371,29 +368,29 @@ StatusCode TileCalibHitCntNtup::StoreCNT(const CaloCalibrationHitContainer* Acti
         m_sample->push_back(m_caloCell_ID->sample(id));
 
         if (m_caloCell_ID->is_tile_barrel(id)) {
-          m_barr_totE += (*it)->energyTotal();
-          m_barr_Em += (*it)->energyEM();
-          m_barr_NonEm += (*it)->energyNonEM();
-          m_barr_Invisible += (*it)->energyInvisible();
-          m_barr_Escaped += (*it)->energyEscaped();
+          m_barr_totE += hit->energyTotal();
+          m_barr_Em += hit->energyEM();
+          m_barr_NonEm += hit->energyNonEM();
+          m_barr_Invisible += hit->energyInvisible();
+          m_barr_Escaped += hit->energyEscaped();
         } else if (m_caloCell_ID->is_tile_extbarrel(id)) {
-          m_ext_totE += (*it)->energyTotal();
-          m_ext_Em += (*it)->energyEM();
-          m_ext_NonEm += (*it)->energyNonEM();
-          m_ext_Invisible += (*it)->energyInvisible();
-          m_ext_Escaped += (*it)->energyEscaped();
+          m_ext_totE += hit->energyTotal();
+          m_ext_Em += hit->energyEM();
+          m_ext_NonEm += hit->energyNonEM();
+          m_ext_Invisible += hit->energyInvisible();
+          m_ext_Escaped += hit->energyEscaped();
         } else if (m_caloCell_ID->is_tile_gapscin(id)) {
-          m_gscin_totE += (*it)->energyTotal();
-          m_gscin_Em += (*it)->energyEM();
-          m_gscin_NonEm += (*it)->energyNonEM();
-          m_gscin_Invisible += (*it)->energyInvisible();
-          m_gscin_Escaped += (*it)->energyEscaped();
+          m_gscin_totE += hit->energyTotal();
+          m_gscin_Em += hit->energyEM();
+          m_gscin_NonEm += hit->energyNonEM();
+          m_gscin_Invisible += hit->energyInvisible();
+          m_gscin_Escaped += hit->energyEscaped();
         } else if (m_caloCell_ID->is_tile_gap(id)) {
-          m_itc_totE += (*it)->energyTotal();
-          m_itc_Em += (*it)->energyEM();
-          m_itc_NonEm += (*it)->energyNonEM();
-          m_itc_Invisible += (*it)->energyInvisible();
-          m_itc_Escaped += (*it)->energyEscaped();
+          m_itc_totE += hit->energyTotal();
+          m_itc_Em += hit->energyEM();
+          m_itc_NonEm += hit->energyNonEM();
+          m_itc_Invisible += hit->energyInvisible();
+          m_itc_Escaped += hit->energyEscaped();
         } else {
           ATH_MSG_WARNING("CalibHit in TileCalibHitActiveCell container hasn't Tile Identifier");
         }
@@ -411,20 +408,17 @@ StatusCode TileCalibHitCntNtup::StoreCNT(const CaloCalibrationHitContainer* Acti
     ATH_MSG_INFO(text_info);
 
     if (nhit != 0) {
-      CaloCalibrationHitContainer::const_iterator it = InactiveHitCnt->begin();
-      CaloCalibrationHitContainer::const_iterator end = InactiveHitCnt->end();
+      for (const CaloCalibrationHit* hit : *InactiveHitCnt) {
+        m_inact_totE += hit->energyTotal();
+        m_inact_visE += hit->energyEM() + hit->energyNonEM();
 
-      for (; it != end; it++) {
-        m_inact_totE += (*it)->energyTotal();
-        m_inact_visE += (*it)->energyEM() + (*it)->energyNonEM();
+        m_inact_Total->push_back( hit->energyTotal());
+        m_inact_Em->push_back( hit->energyEM());
+        m_inact_NonEm->push_back( hit->energyNonEM());
+        m_inact_Invisible->push_back( hit->energyInvisible());
+        m_inact_Escaped->push_back( hit->energyEscaped());
 
-        m_inact_Total->push_back( (*it)->energyTotal());
-        m_inact_Em->push_back( (*it)->energyEM());
-        m_inact_NonEm->push_back( (*it)->energyNonEM());
-        m_inact_Invisible->push_back( (*it)->energyInvisible());
-        m_inact_Escaped->push_back( (*it)->energyEscaped());
-
-        Identifier id = (*it)->cellID();
+        Identifier id = hit->cellID();
 
         m_inact_subCalo->push_back(m_caloCell_ID->sub_calo(id));
         m_inact_section->push_back(m_caloCell_ID->section(id));
@@ -434,29 +428,29 @@ StatusCode TileCalibHitCntNtup::StoreCNT(const CaloCalibrationHitContainer* Acti
         m_inact_sample->push_back(m_caloCell_ID->sample(id));
 
         if (m_caloCell_ID->is_tile_barrel(id)) {
-          m_inact_barr_totE += (*it)->energyTotal();
-          m_inact_barr_Em += (*it)->energyEM();
-          m_inact_barr_NonEm += (*it)->energyNonEM();
-          m_inact_barr_Invisible += (*it)->energyInvisible();
-          m_inact_barr_Escaped += (*it)->energyEscaped();
+          m_inact_barr_totE += hit->energyTotal();
+          m_inact_barr_Em += hit->energyEM();
+          m_inact_barr_NonEm += hit->energyNonEM();
+          m_inact_barr_Invisible += hit->energyInvisible();
+          m_inact_barr_Escaped += hit->energyEscaped();
         } else if (m_caloCell_ID->is_tile_extbarrel(id)) {
-          m_inact_ext_totE += (*it)->energyTotal();
-          m_inact_ext_Em += (*it)->energyEM();
-          m_inact_ext_NonEm += (*it)->energyNonEM();
-          m_inact_ext_Invisible += (*it)->energyInvisible();
-          m_inact_ext_Escaped += (*it)->energyEscaped();
+          m_inact_ext_totE += hit->energyTotal();
+          m_inact_ext_Em += hit->energyEM();
+          m_inact_ext_NonEm += hit->energyNonEM();
+          m_inact_ext_Invisible += hit->energyInvisible();
+          m_inact_ext_Escaped += hit->energyEscaped();
         } else if (m_caloCell_ID->is_tile_gapscin(id)) {
-          m_inact_gscin_totE += (*it)->energyTotal();
-          m_inact_gscin_Em += (*it)->energyEM();
-          m_inact_gscin_NonEm += (*it)->energyNonEM();
-          m_inact_gscin_Invisible += (*it)->energyInvisible();
-          m_inact_gscin_Escaped += (*it)->energyEscaped();
+          m_inact_gscin_totE += hit->energyTotal();
+          m_inact_gscin_Em += hit->energyEM();
+          m_inact_gscin_NonEm += hit->energyNonEM();
+          m_inact_gscin_Invisible += hit->energyInvisible();
+          m_inact_gscin_Escaped += hit->energyEscaped();
         } else if (m_caloCell_ID->is_tile_gap(id)) {
-          m_inact_itc_totE += (*it)->energyTotal();
-          m_inact_itc_Em += (*it)->energyEM();
-          m_inact_itc_NonEm += (*it)->energyNonEM();
-          m_inact_itc_Invisible += (*it)->energyInvisible();
-          m_inact_itc_Escaped += (*it)->energyEscaped();
+          m_inact_itc_totE += hit->energyTotal();
+          m_inact_itc_Em += hit->energyEM();
+          m_inact_itc_NonEm += hit->energyNonEM();
+          m_inact_itc_Invisible += hit->energyInvisible();
+          m_inact_itc_Escaped += hit->energyEscaped();
         } else {
           ATH_MSG_WARNING("CalibHit in TileCalibHitInactiveCell container hasn't Tile Identifier");
         }
@@ -474,17 +468,14 @@ StatusCode TileCalibHitCntNtup::StoreCNT(const CaloCalibrationHitContainer* Acti
     ATH_MSG_INFO(text_info);
 
     if (nhit != 0) {
-      CaloCalibrationHitContainer::const_iterator it = dmHitCnt->begin();
-      CaloCalibrationHitContainer::const_iterator end = dmHitCnt->end();
+      for (const CaloCalibrationHit* hit : *dmHitCnt) {
+        m_DM_totE += hit->energyTotal();
+        m_DM_visE += hit->energyEM() + hit->energyNonEM();
 
-      for (; it != end; it++) {
-        m_DM_totE += (*it)->energyTotal();
-        m_DM_visE += (*it)->energyEM() + (*it)->energyNonEM();
+        Identifier id = hit->cellID();
 
-        Identifier id = (*it)->cellID();
-
-        m_dm_ene->push_back( (*it)->energyTotal());
-        m_dm_vis->push_back( (*it)->energyEM() + (*it)->energyNonEM());
+        m_dm_ene->push_back( hit->energyTotal());
+        m_dm_vis->push_back( hit->energyEM() + hit->energyNonEM());
         m_dm_subDet->push_back(m_caloDM_ID->pos_neg_z(id));
         m_dm_type->push_back(m_caloDM_ID->dmat(id));
         m_dm_sampling->push_back(m_caloDM_ID->sampling(id));
