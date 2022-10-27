@@ -997,6 +997,15 @@ class ComponentAccumulator:
         return appPropsToSet, mspPropsToSet, bshPropsToSet
 
     def run(self,maxEvents=None,OutputLevel=INFO):
+        from os import environ
+        if "PICKLECAFILE" in environ:
+            outpklfile=environ["PICKLECAFILE"]
+            self._msg.info("Store configurtion in pickle file %s",outpklfile)
+            with open(outpklfile, "wb") as f:
+                self.store(f)
+            from Gaudi.Main import BootstrapHelper
+            return BootstrapHelper.StatusCode(True)
+
         # Make sure python output is flushed before triggering output from Gaudi.
         # Otherwise, observed output ordering may differ between py2/py3.
         sys.stdout.flush()

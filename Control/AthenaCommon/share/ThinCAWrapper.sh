@@ -21,18 +21,29 @@ scriptargs=""
 for a in $otherargs
 do
     case "$a" in
+	--config-only*)  export PICKLECAFILE=${a#*=};;
 	*.py) topscriptfile=$a;;
+	*.pkl) picklefile=$a;;
 	*) scriptargs="$scriptargs $a";;
     esac
 done
 
-#Check if we got a top-level script 
-#Improve: Check if there is exactly one!
-if [ -z "$topscriptfile" ]
+#Check if we got a pickle-file 
+if [ -z "${picklefile+x}" ]
     then
-    echo "ERROR: No top-level python script given"
-    exit 1
-fi
+    #Check if we got a top-level script 
+    #Improve: Check if there is exactly one!
+    if [ -z "$topscriptfile" ]
+        then
+	echo "ERROR: No top-level python script given"
+	exit 1
+    fi
+else 
+    echo "Starting from pickle file $picklefile"
+    topscriptfile="AthenaConfiguration/CARunner.py"
+    scriptargs="$picklefile $scriptargs"
+fi 
+
 
 #Assemble the search path for top-level jobOption files.
 #Search the local directoy, a possible WorkDir and the installed Athena

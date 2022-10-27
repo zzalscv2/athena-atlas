@@ -14,7 +14,7 @@ else()
     find_package( future )
 
     # Install files from the package:
-    atlas_install_python_modules( python/*.py python/iconfTool
+    atlas_install_python_modules( python/*.py python/iconfTool share/CARunner.py
                                   POST_BUILD_CMD ${ATLAS_FLAKE8} )
     
     atlas_install_scripts( share/confTool.py python/iconfTool/iconfTool share/CARunner.py
