@@ -10,6 +10,9 @@ they are replacing, so athena-style configuration can be used unchanged in Analy
 
 This module is thus designed ONLY for AnalysisBase and to run EventLoop jobs.
 
+IMPORTANT : this module is only designed so the jet configuration works. There's no guarantee it won't mess up
+when used with other part of Athena configuration.
+
 Internally, the athena-style configurations of algorithms are translated to AnaReentrantAlgorithmConfig or 
 AnaAlgorithmConfig. The configuration of AsgTools are translated to call to AnaAlgorithmConfig.addPrivateTool() 
 or AnaAlgorithmConfig.setPropertyFromString()
@@ -31,54 +34,18 @@ driver.submit( job, "out")
 
 """
 
-import logging
-from types import SimpleNamespace, ModuleType
+
+from types import  ModuleType
 import ROOT
 
-#*******************************************************************
-### configure logger module ----------------------------------------
-logging.VERBOSE = logging.DEBUG - 1
-logging.ALL     = logging.DEBUG - 2
-logging.addLevelName( logging.VERBOSE, 'VERBOSE' )
-logging.addLevelName( logging.ALL, 'ALL' )
-def _verbose(self, message, *args, **kws):
-    if self.isEnabledFor(logging.VERBOSE):
-        # Yes, logger takes its '*args' as 'args'.
-        self._log(logging.VERBOSE, message, args, **kws) 
-logging.Logger.verbose = _verbose
 
+# #*******************************************************************
+# reset the base logging class : the one set by xAH breaks AthenaCommon.Logging
+import logging
+logging.setLoggerClass( logging.Logger ) 
+    
+# #*******************************************************************
 
-Logging = ModuleType("Logging")
-Logging.logging = logging
-
-
-#*******************************************************************
-class SystemOfUnits:
-    """Recopied from AthenaCommon.SystemOfUnits. Only energies for now """
-    #
-    # Energy [E]
-    #
-    megaelectronvolt = 1. 
-    electronvolt     = 1.e-6*megaelectronvolt
-    kiloelectronvolt = 1.e-3*megaelectronvolt
-    gigaelectronvolt = 1.e+3*megaelectronvolt
-    teraelectronvolt = 1.e+6*megaelectronvolt
-    petaelectronvolt = 1.e+9*megaelectronvolt
-
-    #joule = electronvolt/e_SI                    # joule = 6.24150 e+12 * MeV
-
-    # symbols
-    MeV = megaelectronvolt
-    eV  = electronvolt
-    keV = kiloelectronvolt
-    GeV = gigaelectronvolt
-    TeV = teraelectronvolt
-    PeV = petaelectronvolt
-
-
-
-
-#*******************************************************************
 
 def stringPropValue( value ):
      """Helper function producing a string property value"""
@@ -216,7 +183,9 @@ class Configured:
             # any other type :
             alg.setPropertyFromString(self.prefixed(k) , stringPropValue( v ) )
 
-            
+    def getType(self):
+        return self.type
+        
 def generateConfigured(classname, cppclass, prefix=""):
     import cppyy
 
@@ -285,32 +254,13 @@ class ConfNameSpace:
 # A replacement for CompFactory
 CompFactory = ConfNameSpace()
 # Add known namespaces  : 
-CompFactory.addNameSpaces( 'Analysis', 'Trk', 'Jet', 'Sim')
+CompFactory.addNameSpaces( 'Analysis', 'Trk', 'Jet', 'Sim',)
 
 # Make a pseudo-Module :
 ComponentFactory = ModuleType("ComponentFactory")
 ComponentFactory.CompFactory = CompFactory
 
-
-
-#*******************************************************************
-# replacements for ConfigFlags
-ConfigFlags = SimpleNamespace(
-    Input = SimpleNamespace(),    
-)
-AllConfigFlags = ModuleType("AllConfigFlags")
-AllConfigFlags.ConfigFlags= ConfigFlags
-
-def setupFlags(inputFiles, ):
-    """Setup the ConfigFlags according to the input files content. 
-    This is required for some part of the Athena-style config to work.
-    """
-    ConfigFlags.Input.Files = inputFiles
-    f = ROOT.TFile(ConfigFlags.Input.Files[0]) 
-    tree = f.CollectionTree
-    ConfigFlags.Input.Collections = [br.GetName() for br in tree.GetListOfBranches() if '.' not in br.GetName()]
-
-    return ConfigFlags
+ComponentFactory.isRun3Cfg = lambda : True
 
 
 #*******************************************************************
@@ -355,7 +305,6 @@ ComponentAccumulator.ComponentAccumulator = ComponentAccumulatorMockUp
 
 
 
-
 #*******************************************************************
 #
 def addManyAlgs(job, algList):
@@ -372,19 +321,23 @@ ROOT.EL.Job.addManyAlgs = addManyAlgs
 # to what we have defined in this module 
 import sys
 JetAnalysisCommon = sys.modules[__name__]
-sys.modules['AthenaCommon'] = JetAnalysisCommon
-sys.modules['AthenaCommon.Logging'] = JetAnalysisCommon.Logging
-sys.modules['AthenaCommon.SystemOfUnits'] = JetAnalysisCommon.SystemOfUnits
-sys.modules['AthenaConfiguration'] = JetAnalysisCommon
+
+#import AthenaConfiguration, AthenaCommon
 sys.modules['AthenaConfiguration.ComponentFactory'] = JetAnalysisCommon.ComponentFactory
 sys.modules['AthenaConfiguration.ComponentAccumulator'] = JetAnalysisCommon.ComponentAccumulator
 sys.modules['AthenaCommon.CFElements'] = JetAnalysisCommon.CFElements
-sys.modules['AthenaConfiguration.AllConfigFlags'] = JetAnalysisCommon.AllConfigFlags
 
 
+def mock_JetRecTools():
+    """Allows to ignore JetRecTools in case this package is not checked out on top of AnalysisBase"""
+    sys.modules['JetRecTools'] = ModuleType('JetRecTools')
+    sys.modules['JetRecTools.JetRecToolsConfig'] = ModuleType('JetRecToolsConfig')
 
+
+    
 #*******************************************************************
-# hack specific to jets
+# hacks specific to jets
+
 import JetRecConfig.JetRecConfig as JetRecConfig
 
 # In Athena the jet config relies on the automatic scheduling of algorithms
@@ -407,6 +360,8 @@ def JetRecCfg_reorder(jetdef, configFlags, returnFinalJetDef=False):
 
     # ************
     # reorder EventDensity and PseudoJetAlg 
+    if not hasattr(ROOT, 'EventDensityAthAlg'):
+        return res 
     evtDensityAlgs = [ (i,alg) for (i,alg) in enumerate(algs) if alg._cppclass == ROOT.EventDensityAthAlg ]
     pjAlgs = [ (i,alg) for (i,alg) in enumerate(algs) if alg._cppclass == ROOT.PseudoJetAlgorithm ]
     pairsToswap = []
@@ -426,3 +381,11 @@ def JetRecCfg_reorder(jetdef, configFlags, returnFinalJetDef=False):
     return res
 
 JetRecConfig.JetRecCfg = JetRecCfg_reorder
+
+
+#*******************************************************************
+# Some flags are not available in AnalysisBase.
+# Add them manually :
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
+ConfigFlags.addFlag('Reco.EnableTracking',True)
+ConfigFlags.addFlag('Reco.EnableCombinedMuon',True)
