@@ -76,14 +76,11 @@ AlSymMat::AlSymMat(const AlSymMat& m)
 
 //______________________________________________________________________________
 AlSymMat::AlSymMat(const AlSpaMat& m)
-  : m_ptr_data(new double[m_nele])
+  : AlSymMatBase (m.size()),
+    m_ptr_data (new double[m_nele]),
+    m_pathbin (m.pathBin()),
+    m_pathtxt (m.pathTxt())
 {
-  m_matrix_type = 1;
-  m_size      = m.size();
-  m_nele      = m_size*(m_size+1)/2;
-  m_pathbin = m.pathBin();
-  m_pathtxt = m.pathTxt();
-
   AlSymMat::copy(m);
 }
 
