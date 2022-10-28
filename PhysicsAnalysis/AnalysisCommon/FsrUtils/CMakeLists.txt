@@ -10,7 +10,7 @@ find_package( ROOT COMPONENTS Core Physics RIO )
 atlas_add_library( FsrUtilsLib
    FsrUtils/*.h Root/*.cxx
    PUBLIC_HEADERS FsrUtils
-   LINK_LIBRARIES AsgTools PATInterfaces xAODEgamma xAODMuon
+   LINK_LIBRARIES AsgTools CxxUtils PATInterfaces xAODEgamma xAODMuon
    PRIVATE_LINK_LIBRARIES AthContainers EgammaAnalysisInterfacesLib IsolationCorrectionsLib
    IsolationSelectionLib xAODRootAccess )
 
