@@ -67,6 +67,19 @@ def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bma
 
     return topo_trigline_labels
 
+def getMultiplicityLabels(flags,topoModule):
+    topo_trigline_labels = ["" for i in range(128)]
+    lvl1name = getL1MenuFileName(flags)
+    lvl1access  = L1MenuAccess(lvl1name)
+    topo_triglines_dict = lvl1access.connector(topoModule)['triggerlines']
+
+    for topo_trigline in topo_triglines_dict:
+        topo_trigline_name = topo_trigline['name']
+        bit_id = topo_trigline['startbit']
+        topo_trigline_labels[bit_id] = topo_trigline_name
+    
+    return topo_trigline_labels
+
 
 def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, forceCtp=False, logLevel = None):
     # Placeholder for phase-1 implementation
@@ -99,11 +112,12 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
 
     #TODO: add labels
     for cable in range(4):
+        topoName = 'Topo1Opt'+str(cable)
         name = 'CableOpti_'+str(cable+4)
-        name += ';Topo1Opt'+str(cable)
+        name += f';{topoName}'
         title = f'Topo Optical Cable {cable}'
         alg.MonTool.defineHistogram(name, path='EXPERT', type='TH1I',
-                                    title=title, xbins=128, 
+                                    title=title, xbins=128, xlabels=getMultiplicityLabels(flags=flags,topoModule=topoName),
                                     xmin=0, xmax=128)
 
     alg.MonTool.defineHistogram('TopoSim', path='EXPERT', type='TH1I',
