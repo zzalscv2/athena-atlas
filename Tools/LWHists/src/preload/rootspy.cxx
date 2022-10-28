@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //Preload library for spying on (typical) calls to ROOT histograms.
@@ -85,6 +85,7 @@ namespace RootSpy {
       real = (const char* (*)(void*))dlsym(RTLD_NEXT, "_ZNK6TNamed7GetNameEv");//Fixme: avoid this symbol hardcoding.
       if (!real)
 	std::cout<<"ROOTSPY ERROR: Could not find symbol for TNamed::GetName() through hardcoded mangling."<<std::endl;
+    return nullptr;
     }
     return real(tobject);
   }
@@ -95,6 +96,7 @@ namespace RootSpy {
       real = (const char* (*)(void*))dlsym(RTLD_NEXT, "_ZNK7TObject9ClassNameEv");//Fixme: avoid this symbol hardcoding.
       if (!real)
 	std::cout<<"ROOTSPY ERROR: Could not find symbol for TObject::GetName() through hardcoded mangling."<<std::endl;
+    return nullptr;
     }
     return real(tobject);
   }
