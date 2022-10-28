@@ -114,7 +114,7 @@ namespace FSR {
 
 
     CP::CorrectionCode FsrPhotonTool::getFsrPhoton(const xAOD::IParticle* part, FsrCandidate& candidate,
-                                                   const xAOD::PhotonContainer* photons,
+                                                   xAOD::PhotonContainer* photons,
                                                    const xAOD::ElectronContainer* electrons) 
     {
 
@@ -148,10 +148,10 @@ namespace FSR {
 
     std::vector<FsrCandidate>* 
     FsrPhotonTool::getFsrCandidateList(const xAOD::IParticle* part,
-                                       const xAOD::PhotonContainer* photons,
+                                       xAOD::PhotonContainer* photons,
                                        const xAOD::ElectronContainer* electrons) 
     {
-        const xAOD::PhotonContainer* photons_cont = NULL;
+        xAOD::PhotonContainer* photons_cont = NULL;
         const xAOD::ElectronContainer* electrons_cont = NULL;
 
         // check for photon container
@@ -197,7 +197,7 @@ namespace FSR {
     }
     
     std::vector<FsrCandidate>* FsrPhotonTool::getFarFsrCandidateList(const xAOD::IParticle* part, 
-                                                                     const xAOD::PhotonContainer* photons_cont) {
+                                                                     xAOD::PhotonContainer* photons_cont) {
 
 
     static const SG::AuxElement::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
@@ -215,13 +215,11 @@ namespace FSR {
    
    	ATH_MSG_DEBUG( "In getFarFsrCandidateList function : photon size = " << photons_cont->size());
    
-   	for (auto photon : *photons_cont) {
+   	for (auto ph : *photons_cont) {
             
-            bool is_tight_photon = DFCommonPhotonsIsEMTight(*photon);
-            if ( (photon->p4().Et() > m_far_fsr_etcut) && is_tight_photon) {
+            bool is_tight_photon = DFCommonPhotonsIsEMTight(*ph);
+            if ( (ph->p4().Et() > m_far_fsr_etcut) && is_tight_photon) {
                 // correct isolation leakage
-                xAOD::Photon* ph = const_cast<xAOD::Photon*>(photon);
-                // Isolation selection
 
                 ATH_MSG_VERBOSE( "Far Fsr ph bef : pt   " << ph->pt() << " topoetcone20 = " << topoetcone20(*ph));
 
