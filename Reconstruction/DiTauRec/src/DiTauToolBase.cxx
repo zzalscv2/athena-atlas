@@ -2,16 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-//-----------------------------------------------------------------------------
-// original file: TauBuilderHelper.cxx
-// package:     Reconstruction/tauEvent
-// authors:     Lukasz Janyst
-// date:        2007-02-13
-//
-//  MODIFICATIONS
-// 2008-04-22: (nicom) moved setObject()/getObject() to TauCandidateData
-//-----------------------------------------------------------------------------
- 
 #include "DiTauRec/DiTauToolBase.h"
  
 static const InterfaceID DiTauToolBaseID( "DiTauToolBase", 1, 0 );
@@ -60,15 +50,6 @@ StatusCode DiTauToolBase::finalize()
  
  
 // Helpers
-template <class T>
-bool DiTauToolBase::openContainer(T* &container, std::string containerName, bool printFATAL) {
-  StatusCode sc = evtStore()->retrieve(container, containerName);
-  if (sc.isFailure() || !container) {
-    if (printFATAL) ATH_MSG_FATAL("Container (" << containerName << ") not found in StoreGate");
-    return 0;
-  }
-  return container;
-}
  
 template <class T>
 bool DiTauToolBase::retrieveTool(T & tool) {

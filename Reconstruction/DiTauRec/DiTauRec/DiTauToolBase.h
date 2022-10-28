@@ -54,9 +54,6 @@ class DiTauToolBase: public AthAlgTool
   //! Convenience functions to handle storegate objects
   //-------------------------------------------------------------
   template <class T>
-    bool openContainer(T* &container, std::string containerName, bool printFATAL=false);
- 
-  template <class T>
     bool retrieveTool(T &tool);
  
 };
