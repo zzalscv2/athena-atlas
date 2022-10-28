@@ -8,7 +8,6 @@
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
-#include "CxxUtils/checker_macros.h"
 
 // Local include(s):
 #include "FsrUtils/IFsrPhotonTool.h"
@@ -26,10 +25,9 @@ namespace FSR {
     /// Implementation for the "FSR" provider tool
     ///
     /// @author Tulay Cuhadar Donszelmann <tcuhadar@cern.ch>
-
-    class ATLAS_NOT_THREAD_SAFE FsrPhotonTool : public virtual IFsrPhotonTool,
-                                                public asg::AsgTool {
-        // ^ not thread-safe: modifies photons in place
+    ///
+    class FsrPhotonTool : public virtual IFsrPhotonTool,
+                          public asg::AsgTool {
 
         /// Create a proper constructor for Athena
         ASG_TOOL_CLASS( FsrPhotonTool, FSR::IFsrPhotonTool )
@@ -54,18 +52,18 @@ namespace FSR {
 
         /// Get the "FSR candidate" as a return value for a muon (collinar and far FSR)
         virtual CP::CorrectionCode getFsrPhoton(const xAOD::IParticle* part, FsrCandidate& candidate,
-                                                const xAOD::PhotonContainer* photons,
+                                                xAOD::PhotonContainer* photons,
                                                 const xAOD::ElectronContainer* electrons);
 
         /// Find ALL FSR candidates for a given particle (electron or muon)
         ///   providing newly calibrated photon and electron containers
         virtual std::vector<FsrCandidate>* getFsrCandidateList(const xAOD::IParticle* part,
-                                                               const xAOD::PhotonContainer* photons,
+                                                               xAOD::PhotonContainer* photons,
                                                                const xAOD::ElectronContainer* electrons);
 
         /// Find and Return ALL FAR FSR candidates
         virtual std::vector<FsrCandidate>* getFarFsrCandidateList(const xAOD::IParticle* part,
-                                                                  const xAOD::PhotonContainer* photons_cont);
+                                                                  xAOD::PhotonContainer* photons_cont);
 
         /// Find and Return ALL NEAR FSR candidates
         virtual std::vector<FsrCandidate>* getNearFsrCandidateList(const xAOD::Muon* part,

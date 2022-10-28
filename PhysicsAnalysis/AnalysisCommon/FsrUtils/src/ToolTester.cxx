@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -49,7 +49,7 @@ namespace FSR {
       ATH_MSG_INFO( "Number of muons: " << muons->size() );
 
       // Retrieve photons and electrons
-      const xAOD::PhotonContainer* phs = 0;
+      xAOD::PhotonContainer* phs = 0;
       ATH_CHECK( evtStore()->retrieve( phs, m_sgPhotonKey ) );
       ATH_MSG_DEBUG("retrieved photons");
       const xAOD::ElectronContainer* els = 0;
