@@ -109,11 +109,11 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
    virtual double getAverageMu() const override;
   
   /**
-   * @return the fractional deadtime in the event. Currently a fixed number, in future may be reported as a fn. of LB.
+   * @return the fractional deadtime in the event. Reported as function per LB if value is available else a fixed number
    * There is no deadtime in MC, so for MC this will always return 1. 
    * Retrieved from CVMFS XML or fetched from TRIG1 dAOD
    */
-   virtual double getDeadtime() const override;
+   virtual double getDeadtime(const int lumiblock = -1) const override;
 
   /**
    * @return The number of colliding bunches in the Enhanced Bias run being used.
@@ -212,6 +212,7 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
     std::unordered_map<uint32_t, uint32_t> m_eventsPerLB; //!< Map of how many EnhancedBias events were recorded per LB 
     std::unordered_map<uint32_t, double>   m_lumiPerLB; //!< Map of instantaneous luminosity per LB 
     std::unordered_map<uint32_t, uint8_t>  m_goodLB;  //!< Like a Good Run List flag for EnhancedBias runs.
+    std::unordered_map<uint32_t, double>   m_deadtimePerLB; //!< Map of average deadtime per LB 
 
     std::vector<int32_t> m_bunches; //!< Number of BCIDs in each bunch group
 
