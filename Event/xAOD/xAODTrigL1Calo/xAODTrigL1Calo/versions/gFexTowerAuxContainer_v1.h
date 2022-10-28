@@ -25,6 +25,8 @@ namespace xAOD{
     
   private:   
     
+    std::vector<float>    eta;
+    std::vector<float>    phi;
     std::vector<uint8_t> iEta;           
     std::vector<uint8_t> iPhi; 
     std::vector<uint8_t> fpga;

@@ -99,7 +99,7 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
 
         virtual void gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const;
         
-
+        virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi) const;
         
 };
 
