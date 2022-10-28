@@ -64,7 +64,6 @@ FPEAuditor::FPEAuditor( const std::string& name,
 			ISvcLocator* pSvcLocator ) :
   AthCommonMsg<Auditor>     ( name, pSvcLocator  ),
   m_CountFPEs(),
-  m_NstacktracesOnFPE(0),
   m_env(),
   m_nexceptions(0)
 {
@@ -74,6 +73,8 @@ FPEAuditor::FPEAuditor( const std::string& name,
                   "After collecting the stacktrace, the code has to modify the mcontext_t "
                   "struct to ignore FPEs for the rest of the processing of the algorithm/service "
                   "This part is highly non-portable!" );
+
+  declareProperty("Nstacklines", m_Nstacklines,"Limit how deep we dive into the stack");
 }
 
 // Destructor
@@ -232,7 +233,7 @@ FPEAuditor::report_fpe(const std::string& step,
       ++m_CountFPEs[FPEAUDITOR_OVERFLOW];
       if ( m_NstacktracesOnFPE && FPEAudit::s_tlsdata.s_array_O[0] != NULL )
 	{
-	  for (unsigned int j = 0; j < 100; j++)
+	  for (unsigned int j = 0; j < m_Nstacklines; j++)
 	    {
               FPEAudit::lock_t lock (FPEAudit::s_mutex);
 	      if (FPEAudit::s_tlsdata.s_array_O[j]==NULL) break;
@@ -251,7 +252,7 @@ FPEAuditor::report_fpe(const std::string& step,
     }
     if ( m_NstacktracesOnFPE && FPEAudit::s_tlsdata.s_array_I[0] != NULL )
       {
-	for (unsigned int j = 0; j < 100; j++)
+	for (unsigned int j = 0; j < m_Nstacklines; j++)
 	  {
             FPEAudit::lock_t lock (FPEAudit::s_mutex);
             if (FPEAudit::s_tlsdata.s_array_I[j]==NULL) break;
@@ -269,7 +270,7 @@ FPEAuditor::report_fpe(const std::string& step,
       if ( m_NstacktracesOnFPE && FPEAudit::s_tlsdata.s_array_D[0] != NULL )
 	{
           FPEAudit::lock_t lock (FPEAudit::s_mutex);
-	  for (unsigned int j = 0; j < 100; j++)
+	  for (unsigned int j = 0; j < m_Nstacklines; j++)
 	    {
 	      if (FPEAudit::s_tlsdata.s_array_D[j]==NULL) break;
 	      this->msg(MSG::INFO) << "FPE stacktrace " << j << " :\n";
