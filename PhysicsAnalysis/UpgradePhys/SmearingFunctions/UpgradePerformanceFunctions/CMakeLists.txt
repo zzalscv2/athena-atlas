@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the name of this package:
 atlas_subdir( UpgradePerformanceFunctions )
@@ -16,7 +16,7 @@ atlas_add_library( UpgradePerformanceFunctions Root/*.cxx Root/*.h Root/*.icc
                    UpgradePerformanceFunctions/*.h UpgradePerformanceFunctions/*.icc UpgradePerformanceFunctions/*/*.h
                    UpgradePerformanceFunctions/*/*.icc ${_cintDictSource}
                    PUBLIC_HEADERS UpgradePerformanceFunctions
-                   LINK_LIBRARIES PathResolver
+                   LINK_LIBRARIES CxxUtils PathResolver
                                   ${ROOT_LIBRARIES}
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} )
 

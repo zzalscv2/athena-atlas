@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef UPGRADEPERFORMANCEFUNCTIONS_H
@@ -16,6 +16,8 @@
 #include "TH1F.h"
 #include "TGraphErrors.h"
 #include "TTree.h"
+
+#include "CxxUtils/checker_macros.h"
 
 class UpgradePerformanceFunctions {
 
@@ -98,7 +100,7 @@ class UpgradePerformanceFunctions {
 
   // Flavour-tagging performance functions
   void setFlavourTaggingCalibrationFilename(TString flavourTaggingCalibrationFilename);
-  float getFlavourTagEfficiency(float ptMeV, float eta, char flavour, TString tagger = "mv1", int operating_point = 70, bool track_confirmation = false);
+  float getFlavourTagEfficiency ATLAS_NOT_THREAD_SAFE (float ptMeV, float eta, char flavour, TString tagger = "mv1", int operating_point = 70, bool track_confirmation = false);
 
   // Trigger performance functions
   float getSingleElectronTriggerEfficiency(float ptMeV, float eta);
