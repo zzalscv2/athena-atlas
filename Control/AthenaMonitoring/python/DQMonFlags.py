@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 ##
 ## @file DataQualityTools/python/DQMonFlags.py
@@ -441,13 +441,6 @@ class doNewMonitoring(JobProperty):
     allowedTypes=['bool']
     StoredValue=True
 list+=[doNewMonitoring]
-
-class triggerMixedMode(JobProperty):
-    """ Enable R21 HLT/L1 trigger monitoring on Run 2 data """
-    statusOn=True
-    allowedTypes=['bool']
-    StoredValue=False
-list+=[triggerMixedMode]
 
 class doPostProcessing(JobProperty):
     """ Run histogram postprocessing in Athena job """

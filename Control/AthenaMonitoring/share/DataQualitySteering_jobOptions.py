@@ -342,32 +342,6 @@ if DQMonFlags.doMonitoring():
 
    else:
       from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-      # schedule legacy HLT and L1 monitoring if Run 2 EDM
-      if mixedModeFlag and (DQMonFlags.doHLTMon()
-                            or DQMonFlags.doLVL1CaloMon()
-                            or DQMonFlags.doCTPMon()):
-         local_logger.info('Using mixed mode monitoring')
-         include("AthenaMonitoring/TrigDecTool_jobOptions.py")
-         doOldStylePreSetup()
-
-         addlSequences=[]
-         if DQMonFlags.doHLTMon():
-            local_logger.warning("The legacy Run-2 HLT monitoring is no longer supported")
-         if DQMonFlags.doLVL1CaloMon():
-            try:
-               include("TrigT1CaloMonitoring/TrigT1CaloMonitoring_forRecExCommission.py")
-               include("TrigT1Monitoring/TrigT1Monitoring_forRecExCommission.py")
-            except Exception:
-               treatException("DataQualitySteering_jobOptions.py: exception when setting up L1 Calo monitoring")
-         if DQMonFlags.doCTPMon():
-            try:
-               include("TrigT1CTMonitoring/TrigT1CTMonitoringJobOptions_forRecExCommission.py")
-               addlSequences.append(CTPMonSeq)
-            except Exception:
-               treatException("DataQualitySteering_jobOptions.py: exception when setting up central trigger monitoring")
-         doOldStylePostSetup(addlSequences)
-
       ConfigFlags.dump()
 
       from AthenaConfiguration import ComponentAccumulator
