@@ -61,7 +61,8 @@ If for some reason, you do need to revert back to an older Rivet version, feel f
 
 | Rivet version | Athena release | Comments |
 | :----:  | :-------:| :----- |
-| v3.1.6 | `21.6.94,AthGeneration` | |
+| v3.1.7 | `21.6.100,AthGeneration` | |
+| v3.1.6 | `21.6.94,AthGeneration` | log inflated by rogue cout |
 | v3.1.5 | `21.6.86,AthGeneration` | |
 | v3.1.4 | `21.6.67,AthGeneration` | |
 | v3.1.2 | `21.6.33,AthGeneration` | |
