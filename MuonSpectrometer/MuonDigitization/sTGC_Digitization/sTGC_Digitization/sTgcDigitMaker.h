@@ -156,9 +156,9 @@ class sTgcDigitMaker : public AthMessaging {
   bool m_doTimeOffsetStrip{false};
   double m_GausMean{2.27};  //mm; VMM response from Oct/Nov 2013 test beam
   double m_GausSigma{0.1885}; //mm; VMM response from Oct/Nov 2013 test beam
-  double m_StripResolution{0.07}; // Angular strip resolution parameter 
+  double m_StripResolution{0.0949}; // Angular strip resolution parameter 
   double m_posResIncident{1.};
-  double m_posResAngular{12.};
+  double m_posResAngular{0.305/m_StripResolution};
 };
 
 #endif
