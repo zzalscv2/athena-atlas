@@ -357,7 +357,7 @@ if __name__ == '__main__':
       acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
 
-  acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM,doMuons=True), sequenceName='AthAlgSeq')
+  acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM,doMuons=('Muons' in subsystem)), sequenceName='AthAlgSeq')
   if args.algoHdwMon:
       acc.getEventAlgo('L1TopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1TopoSimulation').PrescaleDAQROBAccess = 1
@@ -370,7 +370,7 @@ if __name__ == '__main__':
       sequenceName="AthAlgSeq"
   )
   # legacy mon
-  acc.addEventAlgo(TopoMonConfig.getL1TopoLegacyOnlineMonitor(flags,'L1/L1LegacyTopoOffline',algLogLevel),
+  acc.addEventAlgo(TopoMonConfig.getL1TopoLegacyOnlineMonitor(flags,'L1/L1LegacyTopoOffline',configBS=False,logLevel=algLogLevel),
                    sequenceName="AthAlgSeq")
 
 
