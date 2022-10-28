@@ -984,7 +984,7 @@ void RootTreeContainer::setBranchOffsetTabLen(TBranch* b, int offsettab_len)
 
 
 /// Access options
-DbStatus RootTreeContainer::getOption(DbOption& opt)  const  {
+DbStatus RootTreeContainer::getOption(DbOption& opt) {
   if ( m_tree )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n,"BYTES_IO") )  {
