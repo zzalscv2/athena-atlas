@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FSRUTILS_FsrPhotonTool_H
@@ -8,7 +8,6 @@
 // Framework include(s):
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
-#include "CxxUtils/checker_macros.h"
 
 // Local include(s):
 #include "FsrUtils/IFsrPhotonTool.h"
@@ -26,10 +25,11 @@ namespace FSR {
     /// Implementation for the "FSR" provider tool
     ///
     /// @author Tulay Cuhadar Donszelmann <tcuhadar@cern.ch>
+    ///
+    /// $Date: 2014-07-18 $
 
-    class ATLAS_NOT_THREAD_SAFE FsrPhotonTool : public virtual IFsrPhotonTool,
-                                                public asg::AsgTool {
-        // ^ not thread-safe: modifies photons in place
+    class FsrPhotonTool : public virtual IFsrPhotonTool,
+                          public asg::AsgTool {
 
         /// Create a proper constructor for Athena
         ASG_TOOL_CLASS( FsrPhotonTool, FSR::IFsrPhotonTool )
