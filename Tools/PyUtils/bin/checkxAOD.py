@@ -63,6 +63,7 @@ if __name__ == "__main__":
         "AnalysisJets" : ["^AnalysisJets" ],
         "AnalysisHLT" : ["^AnalysisHLT" ],
         "AnalysisTrigMatch" : ["^AnalysisTrigMatch" ],
+        "AnalysisLargeRJets" : ["^AnalysisLargeRJets" ],
         }
     
     fileNames = []
