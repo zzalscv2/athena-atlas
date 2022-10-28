@@ -374,7 +374,7 @@ double EtaJESCorrection::getSplineSlope(const int ieta, const double minE) const
 
 
 double EtaJESCorrection::getSplineCorr(const int etaBin, double E) const {
-  if( E >= m_etajesFactors[ etaBin ]->GetBinLowEdge(m_etajesFactors[ etaBin ]->GetNbinsX()+1)) E =  m_etajesFactors[ etaBin ]->GetBinLowEdge(m_etajesFactors[ etaBin ]->GetNbinsX());
+  if( E >= m_etajesFactors[ etaBin ]->GetBinLowEdge(m_etajesFactors[ etaBin ]->GetNbinsX()-1)) E =  m_etajesFactors[ etaBin ]->GetBinLowEdge(m_etajesFactors[ etaBin ]->GetNbinsX()-1);
   double R = m_etajesFactors[ etaBin ]->Interpolate(E);
   return R;
 }
