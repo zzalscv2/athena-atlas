@@ -333,7 +333,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             alg.calibrationTool.CalibSequence = "EtaJES_JMS"
         elif config.dataType() == "data":
             alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
-        alg.calibrationTool.IsData = 0
+        alg.calibrationTool.IsData = (config.dataType() == "data")
         alg.jets = config.readName (self.containerName)
 
         # Jet uncertainties
