@@ -2,7 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: IDbContainer.h 726071 2016-02-25 09:23:05Z krasznaa $
 //
 //  Package    : pool/StorageSvc (The pool framework)
 //
@@ -65,7 +64,7 @@ namespace pool    {
     /// Set options
     virtual DbStatus setOption(const DbOption& refOpt) = 0;
     /// Access options
-    virtual DbStatus getOption(DbOption& refOpt) const = 0;
+    virtual DbStatus getOption(DbOption& refOpt) = 0;
     /// In place allocation of raw memory
     virtual void* allocate( unsigned long siz, 
                             DbContainer&  cntH,

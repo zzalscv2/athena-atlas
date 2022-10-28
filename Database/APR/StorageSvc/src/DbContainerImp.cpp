@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -45,7 +45,7 @@ long long int DbContainerImp::nextRecordId()   {
 }
 
 /// Access options
-DbStatus DbContainerImp::getOption(DbOption& /* opt */) const { 
+DbStatus DbContainerImp::getOption(DbOption& /* opt */) {
   return Error;  
 }
 

@@ -150,7 +150,7 @@ namespace pool  {
       *
       * @return DbStatus code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& opt) const;
+    virtual DbStatus getOption(DbOption& opt);
 
     /// Set options
     /** @param opt      [IN]  Reference to option object.

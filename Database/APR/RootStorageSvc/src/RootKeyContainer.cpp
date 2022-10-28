@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -401,7 +401,7 @@ DbStatus RootKeyContainer::select(DbSelect& /* crit */) {
 }
 
 /// Access options
-DbStatus RootKeyContainer::getOption(DbOption& opt)  const  { 
+DbStatus RootKeyContainer::getOption(DbOption& opt) {
   if ( m_dir )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n,"BYTES_IO") )  {
