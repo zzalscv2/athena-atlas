@@ -75,6 +75,8 @@ private:
 
   std::vector<unsigned> m_ctpIds;
 
+  std::vector<std::vector<unsigned>> m_startbit;
+
   //RateVars m_rateVars{};
   // ------------------------- Properties and handles --------------------------
   ToolHandle<GenericMonitoringTool> m_monTool {
@@ -121,6 +123,8 @@ private:
     
   /// Get CTP ids from menu
   std::vector<unsigned> getCtpIds(const TrigConf::L1Menu& l1menu);
+
+  std::vector<std::vector<unsigned>> getStartBits(const TrigConf::L1Menu& l1menu);
 
 };
 
