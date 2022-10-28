@@ -59,7 +59,7 @@ namespace CP {
     }
     template <class CONT_TYPE>
     StatusCode TestIsolationCloseByCorrAlg::loadContainer(const EventContext& ctx, const SG::ReadHandleKey<CONT_TYPE>& key,
-                                                          CONT_TYPE*& cont) const {
+                                                          const CONT_TYPE*& cont) const {
         if (key.empty()) {
             ATH_MSG_DEBUG("No key given. Assume it's no required to load the container");
             return StatusCode::SUCCESS;
@@ -69,7 +69,7 @@ namespace CP {
             ATH_MSG_FATAL("Failed to load container " << key.fullKey());
             return StatusCode::FAILURE;
         }
-        cont = const_cast<CONT_TYPE*>(readHandle.ptr());
+        cont = readHandle.ptr();
         if (!m_selDecorator && !m_isoDecorator) return StatusCode::SUCCESS;
         for (const auto part : *cont) {
             if (m_selDecorator) (*m_selDecorator)(*part) = passSelection(ctx, part);
@@ -95,14 +95,14 @@ namespace CP {
 
     StatusCode TestIsolationCloseByCorrAlg::execute() {
         const EventContext& ctx = Gaudi::Hive::currentContext();
-        xAOD::ElectronContainer* Electrons{nullptr};
-        xAOD::MuonContainer* Muons{nullptr};
-        xAOD::PhotonContainer* Photons{nullptr};
-        xAOD::EgammaContainer* Egamma{nullptr};
+        const xAOD::ElectronContainer* Electrons{nullptr};
+        const xAOD::MuonContainer* Muons{nullptr};
+        const xAOD::PhotonContainer* Photons{nullptr};
+        const xAOD::EgammaContainer* Egamma{nullptr};
         ATH_CHECK(loadContainer(ctx, m_elecKey, Egamma));
-        Electrons = dynamic_cast<xAOD::ElectronContainer*>(Egamma);
+        Electrons = dynamic_cast<const xAOD::ElectronContainer*>(Egamma);
         ATH_CHECK(loadContainer(ctx, m_photKey, Egamma));
-        Photons = dynamic_cast<xAOD::PhotonContainer*>(Egamma);
+        Photons = dynamic_cast<const xAOD::PhotonContainer*>(Egamma);
         ATH_CHECK(loadContainer(ctx, m_muonKey, Muons));
 
         // Okay everything is defined for the preselection of the algorithm. lets  pass the things  towards the IsoCorrectionTool
@@ -142,7 +142,7 @@ namespace CP {
         }
 
         // Store everything in the final ntuples
-        auto fill_helper = [&](std::shared_ptr<IsoCorrectionTestHelper> helper, xAOD::IParticleContainer* parts) -> StatusCode{
+        auto fill_helper = [&](std::shared_ptr<IsoCorrectionTestHelper> helper, const xAOD::IParticleContainer* parts) -> StatusCode{
             if (!helper) return StatusCode::SUCCESS;
             helper->SetClusters(muon_clusters);
             helper->SetFlowElements(pflows);

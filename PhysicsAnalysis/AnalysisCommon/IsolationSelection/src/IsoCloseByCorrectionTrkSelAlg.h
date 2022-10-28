@@ -7,6 +7,8 @@
 
 // Gaudi & Athena basics
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthContainers/ConstDataVector.h"
+#include "CxxUtils/checker_macros.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
 #include "GaudiKernel/SystemOfUnits.h"
@@ -83,13 +85,13 @@ namespace CP {
         SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_thinKey{this, "ThinninKey", "InDetTrackParticles",
                                                                       "Apply the thinning decision to. Decision is set to OR"};
         /// Optionally the user can also dump a TrackParticleContainer containing all the tracks entring the cone 0.3
-        SG::WriteHandleKey<xAOD::TrackParticleContainer> m_trkKey{this, "OutContainerKey", "",
-                                                                  "The associated track particles can be written to an outpt container"};
+        SG::WriteHandleKey<ConstDataVector<xAOD::TrackParticleContainer>> m_trkKey{this, "OutContainerKey", "",
+                                                                                   "The associated track particles can be written to an outpt container"};
 
         /// Array counting the number of accepted tracks per object type
         ///    muon[0], electron[1], photon[2]
-        mutable std::array<std::atomic<Long64_t>, 3> m_accepted_trks{};
-        mutable std::array<std::atomic<Long64_t>, 3> m_selected_obj{};
+        mutable std::array<std::atomic<Long64_t>, 3> m_accepted_trks ATLAS_THREAD_SAFE;
+        mutable std::array<std::atomic<Long64_t>, 3> m_selected_obj ATLAS_THREAD_SAFE;
         /// Total track counter
         mutable std::atomic<Long64_t> m_tot_trks{};
     };
