@@ -64,24 +64,38 @@ def LRTElectronIsolationSteeringDerivCfg(flags, name = 'LRTElectronCaloIsolation
 
     acc = ComponentAccumulator()
 
+    # Need to add density inputs for mc20 (containers present in MC21 AODs)
+    from IsolationAlgs.IsoDensityConfig import (
+        NFlowInputAlgCfg, DensityForIsoAlgCfg)
+    acc.merge(NFlowInputAlgCfg(flags,InputType = "EMPFlow"))
+    acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityForNFlowIso'))
+    acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityForNFlowIso'))
+
     # Prepare CaloIsolationTool
     kwargs = dict()
+    the_pflowElementsTool = CompFactory.xAOD.FlowElementsInConeTool(
+            name='FlowElementsInConeTool')
+
     from IsolationAlgs.IsoToolsConfig import EGammaCaloIsolationToolCfg
-    kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
+    cisoTool = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags,
+                                                               FlowElementsInConeTool = the_pflowElementsTool))
 
     # Prepare IsolationBuilder
     from xAODPrimitives.xAODIso import xAODIso as isoPar
-    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ] ]
-    isoCor   = [ [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ] ]
-    isoExCor = [ [ ] ]
-    kwargs['ElIsoTypes'] = isoType
-    kwargs['ElCorTypes'] = isoCor
-    kwargs['ElCorTypesExtra'] = isoExCor
-    kwargs['ElectronCollectionContainerName'] = 'LRT'+flags.Egamma.Keys.Output.Electrons
+    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ],
+                 [ isoPar.neflowisol20, isoPar.neflowisol30, isoPar.neflowisol40 ] ]
+    isoCor   = [ [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ],
+                 [ isoPar.coreCone, isoPar.pileupCorrection ] ]
+    isoExCor = [ [ ], [ isoPar.coreConeSC ] ]
 
-    kwargs['name'] = 'LRTElectronCaloIsolationBuilder'
-
-    acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
+    acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs,
+                                                  name = 'LRTElectronCaloIsolationBuilder',
+                                                  ElectronCollectionContainerName = 'LRT'+flags.Egamma.Keys.Output.Electrons,
+                                                  ElIsoTypes = isoType,
+                                                  ElCorTypes = isoCor,
+                                                  ElCorTypesExtra = isoExCor,
+                                                  CaloTopoIsolationTool = cisoTool,
+                                                  PFlowIsolationTool = cisoTool))
 
     mlog.info("LRTElectron calo isolation configured")
 

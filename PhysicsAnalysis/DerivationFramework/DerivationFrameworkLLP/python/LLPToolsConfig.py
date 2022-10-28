@@ -110,3 +110,143 @@ def LRTElectronMergerAlg(ConfigFlags, name="LLP1_ElectronLRTMergingAlg", **kwarg
     alg = CompFactory.CP.ElectronLRTMergingAlg(name, **kwargs)
     acc.addEventAlgo(alg, primary=True)
     return acc
+
+# Electron LLH setup for LLP1
+# because the egamma config does not support setting the conf file
+def LRTElectronLHSelectorsCfg(ConfigFlags):
+    
+    AsgElectronLikelihoodTool = CompFactory.AsgElectronLikelihoodTool
+    acc = ComponentAccumulator()
+
+    ElectronLHSelectorVeryLooseNoPix = AsgElectronLikelihoodTool(
+        "ElectronLHSelectorVeryLooseNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf")
+    ElectronLHSelectorVeryLooseNoPix.primaryVertexContainer = "PrimaryVertices"
+    ElectronLHSelectorVeryLooseNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    acc.addPublicTool(ElectronLHSelectorVeryLooseNoPix)
+
+
+    ElectronLHSelectorLooseNoPix = AsgElectronLikelihoodTool(
+        "ElectronLHSelectorLooseNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf")
+    ElectronLHSelectorLooseNoPix.primaryVertexContainer = "PrimaryVertices"
+    ElectronLHSelectorLooseNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    acc.addPublicTool(ElectronLHSelectorLooseNoPix)
+
+
+    ElectronLHSelectorMediumNoPix = AsgElectronLikelihoodTool(
+        "ElectronLHSelectorMediumNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodMediumTriggerConfig_NoPix.conf")
+    ElectronLHSelectorMediumNoPix.primaryVertexContainer = "PrimaryVertices"
+    ElectronLHSelectorMediumNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    acc.addPublicTool(ElectronLHSelectorMediumNoPix)
+
+
+    ElectronLHSelectorTightNoPix = AsgElectronLikelihoodTool(
+        "ElectronLHSelectorTightNoPix",
+        ConfigFile = "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodTightTriggerConfig_NoPix.conf")
+    ElectronLHSelectorTightNoPix.primaryVertexContainer = "PrimaryVertices"
+    ElectronLHSelectorTightNoPix.usePVContainer = ConfigFlags.InDet.PriVertex.doVertexFinding
+    acc.addPublicTool(ElectronLHSelectorTightNoPix)
+
+    from DerivationFrameworkEGamma.EGammaToolsConfig import EGElectronLikelihoodToolWrapperCfg
+
+    # decorate electrons with the output of LH very loose
+    ElectronPassLHVeryLooseNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,
+        name="ElectronPassLHVeryLooseNoPix",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
+        ContainerName="Electrons",
+        StoreTResult=False))
+
+    ElectronPassLHVeryLooseNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,
+        name="ElectronPassLHVeryLooseNoPixLRT",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorVeryLooseNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
+        ContainerName="LRTElectrons",
+        StoreTResult=False))
+
+    # decorate electrons with the output of LH loose
+    ElectronPassLHLooseNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,   
+        name="ElectronPassLHLooseNoPix",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
+        ContainerName="Electrons",
+        StoreTResult=False))
+
+    ElectronPassLHLooseNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,   
+        name="ElectronPassLHLooseNoPixLRT",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorLooseNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHLooseNoPix",
+        ContainerName="LRTElectrons",
+        StoreTResult=False))
+
+    # decorate electrons with the output of LH medium
+    ElectronPassLHMediumNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,
+        name="ElectronPassLHMediumNoPix",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
+        ContainerName="Electrons",
+        StoreTResult=False))
+
+    ElectronPassLHMediumNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,
+        name="ElectronPassLHMediumNoPixLRT",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorMediumNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHMediumNoPix",
+        ContainerName="LRTElectrons",
+        StoreTResult=False))
+
+    # decorate electrons with the output of LH tight
+    ElectronPassLHTightNoPix = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,
+        name="ElectronPassLHTightNoPix",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHTightNoPix",
+        ContainerName="Electrons",
+        StoreTResult=False))
+
+    ElectronPassLHTightNoPixLRT = acc.getPrimaryAndMerge(EGElectronLikelihoodToolWrapperCfg(
+        ConfigFlags,
+        name="ElectronPassLHTightNoPixLRT",
+        EGammaElectronLikelihoodTool=ElectronLHSelectorTightNoPix,
+        EGammaFudgeMCTool="",
+        CutType="",
+        StoreGateEntryName="DFCommonElectronsLHTightNoPix",
+        ContainerName="LRTElectrons",
+        StoreTResult=False))
+
+    LRTEGAugmentationTools = [ElectronPassLHVeryLooseNoPix,
+                              ElectronPassLHVeryLooseNoPixLRT,
+                              ElectronPassLHLooseNoPix,
+                              ElectronPassLHLooseNoPixLRT,
+                              ElectronPassLHMediumNoPix,
+                              ElectronPassLHMediumNoPixLRT,
+                              ElectronPassLHTightNoPix,
+                              ElectronPassLHTightNoPixLRT]
+
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
+        "LLP1EGammaLRTKernel",
+        AugmentationTools=LRTEGAugmentationTools
+    ))
+
+    return acc

@@ -87,6 +87,18 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
     from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
+    # LRT Egamma
+    from DerivationFrameworkEGamma.EGammaLRTConfig import EGammaLRTCfg
+    acc.merge(EGammaLRTCfg(ConfigFlags))
+
+    from DerivationFrameworkLLP.LLPToolsConfig import LRTElectronLHSelectorsCfg
+    acc.merge(LRTElectronLHSelectorsCfg(ConfigFlags))
+
+    # LRT Muons
+    from DerivationFrameworkMuons.MuonsCommonConfig import MuonsCommonCfg
+    acc.merge(MuonsCommonCfg(ConfigFlags,
+                             suff="LRT"))
+
     # flavor tagging
     from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(ConfigFlags, ['AntiKt4EMTopoJets']))
