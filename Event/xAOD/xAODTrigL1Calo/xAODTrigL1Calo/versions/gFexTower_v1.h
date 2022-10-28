@@ -27,11 +27,18 @@ namespace xAOD {
 
       /// @brief The pseudorapidity (\f$\eta\f$)
       uint8_t iEta() const; /// getter for integer eta index (0-39)
-      void setEta(uint8_t); /// setter for the above
+      void setiEta(uint8_t); /// setter for the above
 
       /// @brief The azimuthal angle (\f$\phi\f$)     
       uint8_t iPhi() const; /// Getter for integer phi index [0-31] inclusive
-      void setPhi(uint8_t); /// setter for the above
+      void setiPhi(uint8_t); /// setter for the above
+
+      float eta() const; /// getter for float eta value [-pi, pi]
+      void setEta(float); /// setter for the above
+
+      /// @brief The azimuthal angle (\f$\phi\f$)     
+      float phi() const; /// Getter for float phi value 
+      void setPhi(float); /// setter for the above
 
       /// get fpga number
       uint8_t fpga() const; /// getter for the fpga number [0-2] inclusive
@@ -50,8 +57,9 @@ namespace xAOD {
       /// set saturation flag of gTower
       void setIsSaturated(char); ///setter for the above
 
-      void initialize(const uint8_t Eta,const uint8_t Phi);
-      void initialize(const uint8_t Eta,const uint8_t Phi,
+      void initialize(const uint8_t IEta,const uint8_t IPhi);
+      void initialize(const uint8_t IEta,const uint8_t IPhi,
+                      const float Eta,const float Phi,
                       const int TowerEt,const uint8_t Fpga,
 				              const char IsSaturated);
 
