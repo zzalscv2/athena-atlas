@@ -15,7 +15,7 @@
 #include <TTree.h>
 #include <TFile.h>
 namespace CP {
-    static SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
+    static const SG::AuxElement::ConstAccessor<unsigned int> acc_rnd("RandomRunNumber");
 
     MuonEfficiencyScaleFactors::MuonEfficiencyScaleFactors(const std::string& name) :
                 asg::AsgTool(name),

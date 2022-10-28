@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <sstream>
@@ -897,7 +897,7 @@ namespace CP {
         if (itr == m_systFilter.end()) {
 
             // New systematic. We need to parse it.
-            static CP::SystematicSet affectingSys = affectingSystematics();
+            static const CP::SystematicSet affectingSys = affectingSystematics();
             CP::SystematicSet filteredSys;
             if (!CP::SystematicSet::filterForAffectingSystematics(systConfig, affectingSys, filteredSys)) {
                 ATH_MSG_ERROR("Unsupported combination of systematics passed to the tool!");

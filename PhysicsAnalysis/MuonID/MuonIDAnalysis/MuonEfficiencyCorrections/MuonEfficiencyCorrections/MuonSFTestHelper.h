@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MUONEFFICIENCYCORRECTION_MUONSFTESTHELPER_H
@@ -186,8 +186,8 @@ namespace TestMuonSF {
             void setSelectionTool(const asg::AnaToolHandle<CP::IMuonSelectionTool> & sel_tool);
             void setSelectionTool(const ToolHandle<CP::IMuonSelectionTool> & sel_tool);
             
-            TTree* tree() const;
-            std::shared_ptr<TTree> tree_shared() const;
+            TTree* tree();
+            std::shared_ptr<TTree> tree_shared();
             CP::CorrectionCode fill(const xAOD::MuonContainer* muons);
             CP::CorrectionCode fill(const xAOD::Muon* mu);
             CP::CorrectionCode fill(const xAOD::Muon& mu);
