@@ -47,7 +47,6 @@
 #include <vector>
 
 class AtlasDetectorID;
-using namespace Acts::UnitLiterals;
 
 namespace iFatras {
   class ISimHitCreator;
