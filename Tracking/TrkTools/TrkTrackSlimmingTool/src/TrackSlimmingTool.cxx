@@ -153,6 +153,8 @@ Trk::TrackSlimmingTool::setHints(const Trk::Track& track) const
     // We only keep TSOS if they either contain a perigee, OR are a measurement
     if ((*itTSoS)->measurementOnTrack() == nullptr &&
         !(*itTSoS)->type(TrackStateOnSurface::Perigee)) {
+      // pass the hints to the tsos before we continue to the next
+      (*itTSoS)->setHints(hints.to_ulong());
       continue;
     }
 
