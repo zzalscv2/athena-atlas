@@ -153,7 +153,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
 
 
         
-def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', logLevel = None):
+def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', configBS = True, logLevel = None):
     alg = CompFactory.L1TopoLegacyOnlineMonitor()
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool('MonTool')
@@ -172,7 +172,7 @@ def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', logLev
     # that all names start with HLT_ which doesn't make sense for L1TopoErrorFlags
     # alg.ErrorFlagsKey = recordable(str(getAlgProp('ErrorFlagsKey')))
 
-    if getAlgProp('PrescaleDAQROBAccess') >= 1 and flags.Input.Format is Format.BS:
+    if getAlgProp('PrescaleDAQROBAccess') >= 1 and flags.Input.Format is Format.BS and configBS:
         # Add BS converter for DAQ L1Topo RDO collection
         from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRDOCollectionBSCnvCfg
         CAtoGlobalWrapper(L1TopoRDOCollectionBSCnvCfg, ConfigFlags)
