@@ -6,7 +6,6 @@
 
 #include "VP1UtilsBase/VP1FileUtilities.h"
 
-#include "StorageSvc/DbType.h"
 #include "PathResolver/PathResolver.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h" // ATH_MSG_* macros
