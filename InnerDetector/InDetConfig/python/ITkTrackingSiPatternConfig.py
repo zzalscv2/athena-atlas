@@ -40,8 +40,8 @@ def ITkTrackingSiPatternCfg(flags,
     #
     # ------------------------------------------------------------
     if flags.ITk.Tracking.doFastTracking:
-        from TrkConfig.TrkCollectionAliasAlgConfig import ITkCopyAlgForAmbiCfg
-        acc.merge(ITkCopyAlgForAmbiCfg(flags, "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActivePass.extension,
+        from TrkConfig.TrkCollectionAliasAlgConfig import CopyAlgForAmbiCfg
+        acc.merge(CopyAlgForAmbiCfg(flags, "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActivePass.extension,
                                        CollectionName = SiSPSeededTrackCollectionKey, # Input
                                        AliasName = ResolvedTrackCollectionKey))       # Output
 
