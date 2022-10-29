@@ -9,7 +9,7 @@
 import os,sys  
 from math import fabs
 from re import match
-from time import strftime,gmtime
+from time import strftime,localtime
 
 from ROOT import TFile
 from ROOT import TH1F
@@ -51,7 +51,6 @@ parser.add_argument('--restrictTagRuns',dest='parser_restrictTagRuns',help='In d
 parser.add_argument('--minLumi',type=float,dest='parser_minLumiLPR',default = 0.,help='Minimal lumi loss (in pb-1) to consider a run in year stats per defect',action='store')
 parser.add_argument('--retrieveComments',dest='parser_retrieveComments',help='Retrieve comments from the defect DB',action='store_true')
 parser.add_argument('--recapDefects',dest='parser_recapDefects',help='',action='store_true')
-parser.add_argument('--savePage1',dest='parser_savePage1',help='Save yearStats results in ~larmon/public/prod/LADIeS/DeMoPlots',action='store_true')
 parser.add_argument('--prepareReproc',dest='parser_reproc',help='Prepare a txt file to be updated for reprocessing signoff with recoverable defect',action='store_true')
 
 args = parser.parse_args()
@@ -133,7 +132,6 @@ options['plotLossPerRun'] = args.parser_plotLPR
 options['plotDiff2tags'] = args.parser_diff2tags
 options['restrictTagRuns'] = args.parser_restrictTagRuns
 options['recapDefects'] = args.parser_recapDefects 
-options['savePage1'] = args.parser_savePage1  
 options['prepareReproc'] = args.parser_reproc  
 runsFilter = []
 # If runs filter is requested, look for the runs of the chosen year/tag
@@ -147,9 +145,6 @@ if (options['plotDiff2tags'] and options['restrictTagRuns'] in list(yearTagPrope
 
 options['minLumiYearStatsDefect'] = args.parser_minLumiLPR
 options['retrieveComments'] = args.parser_retrieveComments
-if options['savePage1']:
-  options['plotLossPerRun'] = True
-  options['retrieveComments'] = True
 
 if options['recapDefects']:
   options['plotLossPerRun'] = True
@@ -166,18 +161,18 @@ if options['retrieveComments']:
     defRecap[iDef] = "\n\n===== Recap for %s================================================================================================================================\n"%(iDef.ljust(15))
     defRecap[iDef] += "Description: %s - %s\n"%(defectVeto["description"][iDef],defVetoType[iDef])
     if (defVetoType[iDef] == "Intolerable defect"):
-      defRecap[iDef] +="     Run| Tot lumi|GRL|Lost lumi|Recov. L.|  LB range |     Author | "
+      defRecap[iDef] +="     Run| Tot lumi|Lost lumi|Recov. L.|  LB range |     Author | "
     else:
-      defRecap[iDef] +="     Run| Tot lumi|GRL|Aff. lumi|Recov. L.|  LB range |     Author | "
+      defRecap[iDef] +="     Run| Tot lumi|Aff. lumi|Recov. L.|  LB range |     Author | "
 
     if (defVetoType[iDef] == "Intolerable defect"):
-      defRecapHtml[iDef] ='<tr class="out0intolerable" id="%s-%s-%s"> <th colspan="8"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
-      defRecapHtml[iDef] +='<tr class="out0intolerable"> <th colspan="8"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
-      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> GRL </th><th> Lost lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
+      defRecapHtml[iDef] ='<tr class="out0intolerable" id="%s-%s-%s"> <th colspan="7"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
+      defRecapHtml[iDef] +='<tr class="out0intolerable"> <th colspan="7"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
+      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> Lost lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
     else:
-      defRecapHtml[iDef] ='<tr class="out0tolerable" id="%s-%s-%s"> <th colspan="8"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
-      defRecapHtml[iDef] +='<tr class="out0tolerable"> <th colspan="8"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
-      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> GRL </th><th> Aff. lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
+      defRecapHtml[iDef] ='<tr class="out0tolerable" id="%s-%s-%s"> <th colspan="7"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
+      defRecapHtml[iDef] +='<tr class="out0tolerable"> <th colspan="7"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
+      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> Aff. lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
 
 if options['prepareReproc']:
   defReproc = {}
@@ -283,7 +278,6 @@ for iYT in yearTagList:
               
           # if the loss is above the required minimum (0 by default), store it
           if (runnumber>options['runMinLossPerRun'] and runnumber<=options['runMaxLossPerRun'] and lostLumi > options['minLumiYearStatsDefect']):  #uncomment this for real runs!!
-          #if True:
             runsLPR[iYT][iDefVeto].append(runnumber)
             lossLPR[iYT][iDefVeto].append(lostLumi)
             loss_rLPR[iYT][iDefVeto].append(recovLumi)
@@ -293,16 +287,12 @@ for iYT in yearTagList:
               system_defects = []
               for iPrefix in grlDef["prefix"]:
                 system_defects += [d for d in (db.defect_names | db.virtual_defect_names) if (d.startswith(iPrefix) and iDefVeto in d)]
-              #lar_defects = [d for d in (db.defect_names | db.virtual_defect_names) if ((d.startswith("LAR") or d.startswith("CALO_ONLINEDB")) and iDefVeto in d)]
               defects = db.retrieve((runnumber, 1), (runnumber+1, 0), system_defects)   
               defectCompact = {}
               for defect in defects:
                 if ("SEVNOISEBURST" in defect.channel and ("HEC" in defect.channel or "FCAL" in defect.channel)): # LAr only : Skip the HEC/FCAL SEVNOISEBURST defect as they also appear in EMEC
                   continue
                 for iDef in options['defect']:
-#                  if (iDef in defect.channel): # NB : some problem may arise from this incomplete test (if similar name for 2 defects) but there is a protection later when recaping
-                  # Nov 2018:The line below was replaced to cope with MDT defects containing both PROBLEM
-                  # In order to avoid partitions problems, endswith is used instead of == / Not fully tested though...
                   if (defect.channel.endswith(iDef) or # NB : some problem may arise from this incomplete test (if similar name for 2 defects) but there is a protection later when recaping
                       "EGAMMA_%s"%iDef in defect.channel): # So far, EGamma is the only system with a defect name ending with the partition (and not the generic DeMo defect name)
                     defectSinceLumiAtlasReady = -1
@@ -321,18 +311,18 @@ for iYT in yearTagList:
                     else:
                       lbRange = "%4d->%4d"%(defectSinceLumiAtlasReady,defectUntilLumiAtlasReady-1)
                       lbRangeReproc = "%d-%d"%(defectSinceLumiAtlasReady,defectUntilLumiAtlasReady-1)
+                    cleanedDefect = ((defect.comment).replace('\xd7','')).replace('\xb5','').replace('\xe9','').replace('\u2013','').replace('\u03b7','').replace('\u03c6','').replace('\u2014','')
                     if ("\n %d |"%runnumber not in defRecap[iDef]):
                       # This "replace" is a dirty hack due to bad unicode in defect comment in run 355995/LAr
                       # You may need to add some others if you observe a crash...
-                      cleanedDefect = ((defect.comment).replace('\xd7','')).replace('\xb5','').replace('\xe9','').replace('\u2013','').replace('\u03b7','').replace('\u03c6','').replace('\u2014','')
 
-                      defRecap[iDef] += "\n %d |%s|?|%s|%s|%s |%s| %s"%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
-                      defRecapHtml[iDef] += '<tr class="out1"><th> %d </th> <th> %s </th><th> ? </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><tr>'%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecap[iDef] += "\n %d |%s|%s|%s|%s |%s| %s"%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecapHtml[iDef] += '<tr class="out1"><th> %d </th> <th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><tr>'%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
                       if (options['prepareReproc'] and recovLumi>0.):
                         defReproc[iDef] += "\n@%d"%runnumber
                     else:
-                      defRecap[iDef] += "\n -----------------------------------------|%s |%s| %s"%(lbRange,defect.user.rjust(12),cleanedDefect)
-                      defRecapHtml[iDef] += '<tr class="out1"><th colspan="5"><th> %s </th><th> %s </th><th> %s </th><tr>'%(lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecap[iDef] += "\n -------------------------------------|%s |%s| %s"%(lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecapHtml[iDef] += '<tr class="out1"><th colspan="4"><th> %s </th><th> %s </th><th> %s </th><tr>'%(lbRange,defect.user.rjust(12),cleanedDefect)
                     for iPart in ["EMBA","EMBC","EMECA","EMECC","HECA","HECC","FCALA","FCALC"]:
                       if iPart in defect.channel and "SEVNOISEBURST" not in defect.channel: # Add the affected partition (except for SEVNOISEBURST, where the comment should contain it)
                         defRecap[iDef] += " - %s"%iPart
@@ -383,12 +373,8 @@ if options['plotLossPerRun'] and options['retrieveComments']:
   f = open("%s/YearStats-%s/%s/%s/recapDefects.txt"%(args.parser_directory,args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
   fHtml = open("%s/YearStats-%s/%s/%s/recapDefects.html"%(args.parser_directory,args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
   fHtml.write('<table class="report">')
-  fHtml.write('<tr class="out0"> <th width="60pix"></th><th width="90pix"></th><th width="45pix"></th><th width="90pix"></th><th width="90pix"></th><th width="90pix"></th><th width="90pix"></th><th></th></tr>')
-  if options['savePage1']:
-    fPage1 = open("../LArPage1/DeMoPlots/recapDefects.txt",'w')
-    fPage1.write("This list contains all defect in LAr calorimeter, including all for runs not used in GRL\n")
-    fPage1.write("It is different from the incremental inefficiency produced by DeMoStatus. Produced by DeMoScan --savePage1\n")
-    fPage1.write("Last update : %s"%(strftime("%a, %d %b %Y %H:%M", gmtime())))
+  fHtml.write('<tr class="out0"> <th width="60pix"></th><th width="100pix"></th></th><th width="100pix"></th><th width="100pix"></th><th width="100pix"></th><th width="100pix"></th><th></th></tr>')
+  fHtml.write('<tr class="out0"> <th colspan="7"> Recap generated on %s </th></tr>'%(strftime("%a, %d %b %Y %H:%M", localtime())))
   if options['prepareReproc']:
     fReproc = open("YearStats-%s/%s/%s/defectsForReproc.txt"%(args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
 
@@ -406,17 +392,12 @@ if options['plotLossPerRun'] and options['retrieveComments']:
         print(defRecap[iDef])
         f.write(defRecap[iDef])
         fHtml.write("%s</tr>"%defRecapHtml[iDef].replace("LUMILOSTTOBEREPLACED",strLumi(h1_lossLPR[iYT][iDef].Integral(),"pb^{-1}")))
-        if options['savePage1']:
-          fPage1.write(defRecap[iDef])
-          fPage1.write("\nTotal loss: %s (recov:%s)"%(strLumi(h1_lossLPR[iYT][iDef].Integral(),"pb^{-1}"),strLumi(h1_loss_rLPR[iYT][iDef].Integral(),"pb^{-1}")))
         if options['prepareReproc']:
           fReproc.write(defReproc[iDef])
 
   f.close()
   fHtml.write('</table>')
   fHtml.close()
-  if options['savePage1']:
-    fPage1.close()    
   if options['prepareReproc']:
     fReproc.close()
 

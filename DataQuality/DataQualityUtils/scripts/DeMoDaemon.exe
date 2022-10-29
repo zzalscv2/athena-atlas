@@ -24,9 +24,7 @@ cmd="python DeMoUpdate.py --runListUpdate -y ${year}"
 echo "** ${cmd} **"
 eval "${cmd}"
 
-systems='LAr Pixel SCT TRT Tile MDT TGC RPC IDGlobal BTag CaloCP MuonCP Trig_L1 Trig_HLT Lumi ALFA LUCID ZDC Global'
-
-#systems='LAr'
+systems='LAr Pixel SCT TRT Tile MDT TGC RPC Trig_L1 Trig_HLT Lumi Global ALFA LUCID ZDC IDGlobal BTag CaloCP MuonCP '
 
 for system in $systems
 do
@@ -37,7 +35,7 @@ do
     echo "====================================================================================="
     
     # Script for the weekly production
-    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weekly --vetoLumiEvol --noUpdateYS"
+    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weeklyReport --onlineLumiNorm --vetoLumiEvol"
     log="YearStats-${system}/${year}/${tag}/daemon-weekly.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
@@ -45,9 +43,8 @@ do
 
 
     # Script for updating the year stats for all runs (Tier0_2022 DeMo tag)
-    # If you want to restrict to the RunList/grl-*.dat created/updated by the DQ coordination (GRL_2022 DeMo tag), remove the  --noGrlFilter option
-    # If you want to reset the year stats, add --resetYS (no recommanded as much longer)
-    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --grlUpdate --vetoLumiEvol --noGrlFilter"
+    # If you want to reset the year stats, add --resetYearStats (not recommanded as much longer)
+    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
     log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
@@ -70,7 +67,5 @@ do
 done
 
 echo "Generate webpage"
-cmd="cd /afs/cern.ch/user/a/atlasdqm/www/DeMo"
-eval ${cmd}
 cmd="python /afs/cern.ch/user/a/atlasdqm/w1/DeMo/DeMoGenerateWWW.py"
 eval ${cmd}
