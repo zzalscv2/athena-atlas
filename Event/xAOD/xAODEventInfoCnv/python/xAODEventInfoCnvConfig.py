@@ -52,13 +52,6 @@ def EventInfoOverlayAlgCfg(flags, name="EventInfoOverlay", **kwargs):
     # Do the xAOD::EventInfo overlay
     acc.addEventAlgo(CompFactory.xAODMaker.EventInfoOverlay(name, **kwargs))
 
-    # Re-map signal address
-    from SGComps.AddressRemappingConfig import AddressRemappingCfg
-    acc.merge(AddressRemappingCfg([
-        f"xAOD::EventInfo#EventInfo->{flags.Overlay.SigPrefix}EventInfo",
-        f"xAOD::EventAuxInfo#EventInfoAux.->{flags.Overlay.SigPrefix}EventInfoAux.",
-    ]))
-
     # Add output
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     if flags.Output.doWriteRDO:
@@ -93,6 +86,14 @@ def EventInfoOverlayCfg(flags, **kwargs):
 
         inputs.append(f"EventInfo#{flags.Overlay.SigPrefix}McEventInfo")
     else:
+        if not flags.Overlay.FastChain:
+            # Re-map signal address
+            from SGComps.AddressRemappingConfig import AddressRemappingCfg
+            acc.merge(AddressRemappingCfg([
+                f"xAOD::EventInfo#EventInfo->{flags.Overlay.SigPrefix}EventInfo",
+                f"xAOD::EventAuxInfo#EventInfoAux.->{flags.Overlay.SigPrefix}EventInfoAux.",
+            ]))
+
         inputs.append(f"xAOD::EventInfo#{flags.Overlay.SigPrefix}EventInfo")
 
     from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
@@ -111,7 +112,7 @@ def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg"
     acc.merge(BeamSpotCondAlgCfg(flags))
 
     kwargs.setdefault("SignalInputKey", "Input_EventInfo")
-    kwargs.setdefault("OutputKey", "EventInfo")
+    kwargs.setdefault("OutputKey", f"{flags.Overlay.SigPrefix}EventInfo" if flags.Overlay.FastChain else "EventInfo")
 
     if flags.Input.MCChannelNumber > 0:
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)
