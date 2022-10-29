@@ -54,7 +54,11 @@ def MdtMonitoringConfig(inputFlags):
     mdtMonAlg.do_mdtchamberstatphislice=True
     if (inputFlags.GeoModel.Run == LHCPeriod.Run3):
         mdtMonAlg.do_Run3Geometry=True
-
+    
+    ### Check if the file is a release 21 input
+    if inputFlags.Input.Release and inputFlags.Input.Release.find("21.") != -1:
+        mdtMonAlg.SegmentKey = [ "TrackMuonSegments"]
+        
     if not inputFlags.DQ.triggerDataAvailable:
         mdtMonAlg.L1RoiKey=''
     # Add a generic monitoring tool (a "group" in old language). The returned 
