@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************
@@ -27,7 +27,6 @@
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 
 class CondAttrListCollection;
-class EventInfo;
 class ITHistSvc;
 class L1CaloPprFineTimePlotManager;
 class L1CaloPprPedestalPlotManager;
@@ -56,7 +55,6 @@ class L1CaloPprMonitoring : public AthAlgorithm
 
     private:
 
-        const EventInfo* m_eventInfo;
         const CondAttrListCollection* m_dbPpmDeadChannels;
         const CondAttrListCollection* m_dbPpmDisabledTowers;
 	const CondAttrListCollection* m_dbFineTimeRefsTowers;

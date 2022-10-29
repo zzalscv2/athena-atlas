@@ -21,9 +21,6 @@
 #include "LWHists/TProfile_LW.h"
 #include "LWHists/TProfile2D_LW.h"
 
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-
 #include "TrigT1CaloCalibTools/L1CaloPprPlotManager.h"
 #include "TrigT1CaloMonitoringTools/TrigT1CaloLWHistogramTool.h"
 #include "TrigT1CaloCalibConditions/L1CaloCoolChannelId.h"
@@ -48,7 +45,6 @@ L1CaloPprPlotManager::L1CaloPprPlotManager(ITHistSvc* histSvc,
     AthMessaging(Form("L1CaloPpr%sPlotManager", monitoringPath.data())),
     m_histTool("LVL1::TrigT1CaloLWHistogramTool/TrigT1CaloLWHistogramTool"),
     m_ttToolOffline(ttTool_offline),
-    m_eventInfo(0),
     m_histoSvc(histSvc),
     m_monObj(0),
     m_pathInRootFile(pathInRootFile),
@@ -100,7 +96,6 @@ L1CaloPprPlotManager::L1CaloPprPlotManager(ManagedMonitorToolBase* aMonObj,
     AthMessaging(Form("L1CaloPpr%sPlotManager", monitoringPath.data())),
     m_histTool("LVL1::TrigT1CaloLWHistogramTool/TrigT1CaloLWHistogramTool"),
     m_ttToolOnline(ttTool_online),
-    m_eventInfo(0),
     m_histoSvc(0),
     m_monObj(aMonObj),
     m_pathInRootFile(pathInRootFile),
@@ -146,14 +141,13 @@ L1CaloPprPlotManager::~L1CaloPprPlotManager()
 
 // --------------------------------------------------------------------------
 
-void L1CaloPprPlotManager::Analyze(const EventInfo* evtInfo, const xAOD::TriggerTower* trigTower, bool channelDisabled)
+void L1CaloPprPlotManager::Analyze(const EventContext& ctx, const xAOD::TriggerTower* trigTower, bool channelDisabled)
 {
     unsigned int coolID = trigTower->coolId();
 
-    m_eventInfo = evtInfo;
-    m_lumiNo = evtInfo->event_ID()->lumi_block();
-    m_currentRunNo = evtInfo->event_ID()->run_number();
-    m_bunchCrossing = evtInfo->event_ID()->bunch_crossing_id();
+    m_lumiNo = ctx.eventID().lumi_block();
+    m_currentRunNo = ctx.eventID().run_number();
+    m_bunchCrossing = ctx.eventID().bunch_crossing_id();
 
     if (!m_isOnline && m_doRunHistograms)
     {
