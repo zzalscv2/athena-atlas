@@ -832,7 +832,7 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
    // process flush to write file
    if( action == Transaction::TRANSACT_FLUSH && m_file != nullptr && m_file->IsWritable()) {
       m_file->Write();
-      // check all TTrees, if Branch baskets are below max
+      // check all TTrees, if Branch baskets are below max, after explicit Write() call
       for( map< TTree*, ContainerSet_t >::iterator treeIt = m_containersInTree.begin(),
               mapEnd = m_containersInTree.end(); treeIt != mapEnd; ++treeIt ) {
          TTree *tree = treeIt->first;
@@ -857,6 +857,21 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
    for( map< TTree*, ContainerSet_t >::iterator treeIt = m_containersInTree.begin(),
            mapEnd = m_containersInTree.end(); treeIt != mapEnd; ++treeIt ) {
       TTree *tree = treeIt->first;
+      // check all TTrees, if Branch baskets are below max, after flushing is triggered via ROOT auto-flush
+      if (tree->GetEntriesFast() == tree->GetAutoFlush()) {
+         TIter next(tree->GetListOfBranches());
+         TBranch * b = nullptr;
+         while((b = (TBranch*)next())){
+            if (b->GetBasketSize() > m_maxBufferSize) {
+               DbPrint log( m_file->GetName() );
+               log << DbPrintLvl::Debug << b->GetName() << " Basket size = " << b->GetBasketSize()
+                   << " reduced to " << m_maxBufferSize
+                   << DbPrint::endmsg;
+               b->SetBasketSize(m_maxBufferSize);
+            }
+         }
+      }
+
       ContainerSet_t &containers = treeIt->second;
       if( (*containers.begin())->usingTreeFillMode() ) {
          // cout << "------- TTree " << tree->GetName() << " - checking containers for commit" << endl;
