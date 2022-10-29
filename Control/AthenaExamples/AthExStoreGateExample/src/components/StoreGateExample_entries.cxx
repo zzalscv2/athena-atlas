@@ -11,7 +11,6 @@
 //====================================================================
 
 #include "../ReadData.h"
-#include "../ReadPileUpData.h"
 #include "../WriteData.h"
 #include "../WriteDataReentrant.h"
 #include "../ReadDataReentrant.h"
@@ -20,7 +19,6 @@
 #include "../HandleTestAlg.h"
 
 DECLARE_COMPONENT( ReadData )
-DECLARE_COMPONENT( ReadPileUpData )
 DECLARE_COMPONENT( WriteData )
 DECLARE_COMPONENT( WriteDataReentrant )
 DECLARE_COMPONENT( ReadDataReentrant )
