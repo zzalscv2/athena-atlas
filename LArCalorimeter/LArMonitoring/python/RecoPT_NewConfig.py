@@ -13,10 +13,10 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
     LArRawDataReadingAlg=CompFactory.LArRawDataReadingAlg
     acc.addEventAlgo(LArRawDataReadingAlg())
 
-    if "LArMon" in CONFIG:
+    from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
+    acc.merge(LArFebErrorSummaryMakerCfg(ConfigFlags))
 
-        from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-        acc.merge(LArFebErrorSummaryMakerCfg(ConfigFlags))
+    if "LArMon" in CONFIG:
 
         from LArMonitoring.LArFEBMonAlg import LArFEBMonConfig
         acc.merge(LArFEBMonConfig(ConfigFlags))
@@ -71,13 +71,14 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
 
            from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
            acc.merge(CaloTopoClusterCfg(ConfigFlags,clustersname="CaloTopoClusters"))
+
            egammaTopoClusterCopier = CompFactory.egammaTopoClusterCopier(
                                                  name='egammaLArCopier',InputTopoCollection="CaloTopoClusters",
                                                  OutputTopoCollection="egammaClusters",
                                                  OutputTopoCollectionShallow="tmp_egammaClusters",
                                                  )
            acc.addEventAlgo(egammaTopoClusterCopier)
-           # include collision time, 
+
            from LArMonitoring.LArCollisionTimeMonAlg import LArCollisionTimeMonConfig
            acc.merge(LArCollisionTimeMonConfig(ConfigFlags))
 
@@ -151,15 +152,17 @@ def LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType=1):
 
         from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
         acc.merge(CaloTopoClusterCfg(ConfigFlags,clustersname="CaloTopoClusters"))
+
         egammaTopoClusterCopier = CompFactory.egammaTopoClusterCopier(
                                               name='egammaLArCopier',InputTopoCollection="CaloTopoClusters",
                                               OutputTopoCollection="egammaClusters",
                                               OutputTopoCollectionShallow="tmp_egammaClusters",
                                               )
         acc.addEventAlgo(egammaTopoClusterCopier)
-        # include clusters monitoring 
+
         from JetInputsMonitoring.ClusterMonitorAlgorithm import ClusterMonitoringConfig
         acc.merge(ClusterMonitoringConfig(ConfigFlags))
+
         from AthenaCommon.CFElements import findAlgorithm
         mons=acc.getSequence("AthMonSeq_ClusterAthMonitorCfg")
         a=findAlgorithm(mons,"ClusterMonAlg")

@@ -169,3 +169,23 @@ Input: [ 'LAr/PedMonGroupNewAlg/(?P<part>EMB|EMEC|HEC|FCal)/nbOfFebBlocks_(?P=pa
 Output: [ 'LAr/MeanFeb' ]
 Function: LArMonitoring.LArMonTransforms.Mean
 Description: LAr_NbOfFebvsPartition_Mean
+
+
+
+
+# LArDigitalTrigger
+---
+Input: [ 'LArDigitalTrigger/CoveragePerPartition/BadQualityBit/CoverageEtaPhi_BadQualityBit_(?P<part>EMB|EMEC)(?P<layer>P|1|2|3)(?P<side>A|C)', 'LArDigitalTrigger/CoveragePerPartition/NoCut/CoverageEtaPhi_(?P<part>EMB|EMEC)(?P<layer>P|1|2|3)(?P<side>A|C)' ]
+Output: [ 'LArDigitalTrigger/CoveragePerPartition/BadQualityBit/Rate_CoverageEtaPhi_BadQualityBit_(?P<part>EMB|EMEC)(?P<layer>P|1|2|3)(?P<side>A|C)' ]
+Function: LArMonitoring.LArMonTransforms.normToEntries
+Parameters: { titleToReplace : 'SC coverage ', replaceWith: 'SC coverage rate' }
+Description: LArDigitalTrigger_Coverage_BadQualityBit_NormaliseToEntries
+
+---
+Input: [ 'LArDigitalTrigger/CoveragePerPartition/BadQualityBit/CoverageEtaPhi_BadQualityBit_(?P<part>HEC|FCAL)(?P<layer>0|1|2|3)(?P<side>A|C)', 'LArDigitalTrigger/CoveragePerPartition/NoCut/CoverageEtaPhi_(?P<part>HEC|FCAL)(?P<layer>0|1|2|3)(?P<side>A|C)' ]
+Output: [ 'LArDigitalTrigger/CoveragePerPartition/BadQualityBit/Rate_CoverageEtaPhi_BadQualityBit_(?P<part>HEC|FCAL)(?P<layer>0|1|2|3)(?P<side>A|C)' ]
+Function: LArMonitoring.LArMonTransforms.normToEntries
+Parameters: { titleToReplace : 'SC coverage ', replaceWith: 'SC coverage rate' }
+Description: LArDigitalTrigger_Coverage_BadQualityBit_NormaliseToEntries
+
+#---

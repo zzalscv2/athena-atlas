@@ -22,7 +22,7 @@ def LArRawChannelMonConfigOld(inputFlags):
     from LArMonitoring.LArMonitoringConf import LArRawChannelMonAlg
     cosmics = jobproperties.Beam.beamType() == 'cosmics'
     stream = _get_stream(DQMonFlags)
-    from LArMonTools.LarMonFlags import LArMonFlags
+    from LArMonTools.LArMonFlags import LArMonFlags
     signal = LArMonFlags.doLArRawMonitorSignal()
     helper = AthMonitorCfgHelperOld(inputFlags, 'LArRawChannelMonAlgOldCfg')
     alg = LArRawChannelMonConfigCore(

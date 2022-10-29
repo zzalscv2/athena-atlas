@@ -19,7 +19,8 @@ def LArSuperCellMonConfigOld(inputFlags):
     else:
        isMC=True
 
-    if not isMC:
+    from AthenaCommon.AthenaCommonFlags import athenaCommonFlags   
+    if not isMC and not athenaCommonFlags.isOnline:
         from LumiBlockComps.LBDurationCondAlgDefault import LBDurationCondAlgDefault
         LBDurationCondAlgDefault()
         from LumiBlockComps.TrigLiveFractionCondAlgDefault import TrigLiveFractionCondAlgDefault
@@ -51,7 +52,7 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     cfg=ComponentAccumulator()
 
-    if not inputFlags.DQ.enableLumiAccess:
+    if not inputFlags.DQ.enableLumiAccess and not inputFlags.DQ.Environment == 'online':
        mlog.warning('This algo needs Lumi access, returning empty config')
        return cfg
 
@@ -62,6 +63,9 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
 
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
     cfg.merge(DetDescrCnvSvcCfg(inputFlags))
+
+    if inputFlags.Common.isOnline:
+       cfg.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg('CaloSuperCellAlignCondAlg'))       
 
     from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
     cfg.merge(LArCollisionTimeCfg(inputFlags))
@@ -86,7 +90,7 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
     lArCellMonAlg=CompFactory.LArSuperCellMonAlg
 
 
-    if inputFlags.Input.isMC is False:
+    if inputFlags.Input.isMC is False and not inputFlags.Common.isOnline:
        from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
        cfg.merge(LuminosityCondAlgCfg(inputFlags))
        from LumiBlockComps.LBDurationCondAlgConfig import  LBDurationCondAlgCfg
@@ -102,10 +106,10 @@ def LArSuperCellMonConfig(inputFlags, **kwargs):
                                      inputFlags.Beam.Type is BeamType.Cosmics,
                                      inputFlags.Input.isMC, algname)
 
-    #if not inputFlags.Input.isMC:
-    #   from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
-    #   algo.BadLBTool=cfg.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))
-    print("Check the Algorithm properties",algo)
+    if not inputFlags.Input.isMC and not inputFlags.Common.isOnline:
+       from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
+       algo.BadLBTool=cfg.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))
+    mlog.info("Check the Algorithm properties",algo)
 
     cfg.merge(helper.result())
 
@@ -121,7 +125,7 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
     GroupName="LArSuperCellMon"
     LArSuperCellMonAlg.MonGroupName = GroupName
 
-    LArSuperCellMonAlg.EnableLumi = True
+    LArSuperCellMonAlg.EnableLumi = False
     LArSuperCellMonAlg.CaloCellContainer = "SCell_ET"
     LArSuperCellMonAlg.CaloCellContainerRef = "EmulatedSCell"
     
@@ -341,9 +345,11 @@ if __name__=='__main__':
 
     #ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
     ConfigFlags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = True
+    ConfigFlags.DQ.enableLumiAccess = False
     ConfigFlags.DQ.useTrigger = False
     ConfigFlags.DQ.Environment = 'tier0'
+    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
+    ConfigFlags.Common.isOnline = True
     ConfigFlags.GeoModel.Run=LHCPeriod.Run3
     ConfigFlags.lock()
 
@@ -362,8 +368,9 @@ if __name__=='__main__':
     #from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     #cfg.merge(PoolReadCfg(ConfigFlags))
 
-    from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
+    if not ConfigFlags.DQ.Environment == 'online':
+       from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
+       cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
 
     cfg.merge(LArSuperCellMonConfig(ConfigFlags)) 
 
