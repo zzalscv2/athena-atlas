@@ -57,7 +57,12 @@ def CscMonitoringESD_AlgConfig(inputFlags):
     cscSegmMonAlg.DoEventSelection = False
     cscSegmMonAlg.EventSelTriggers = [ "L1_MU10", "L1_MU15", "EF_mu20_muCombTag_NoEF", "EF_mu15", "EF_mu15_mu10_EFFS", "EF_2mu10", "EF_2mu10_loose"  ]
     cscSegmMonAlg.SegmentSlopeCut = 0.07
-
+    ### Check if the file is a release 21 input
+    from AthenaConfiguration.Enums import Format
+    if inputFlags and inputFlags.Input.Format != Format.BS  and \
+                  inputFlags.Input.Release and inputFlags.Input.Release.find("21.") != -1:
+        cscSegmMonAlg.SegmentKey = [ "TrackMuonSegments"]
+   
     ### STEP 4 ###
     # Add some tools. N.B. Do not use your own trigger decion tool. Use the
     # standard one that is included with AthMonitorAlgorithm.
