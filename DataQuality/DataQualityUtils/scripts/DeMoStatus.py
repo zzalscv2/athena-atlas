@@ -344,4 +344,5 @@ if (yearTagNb >= 2 and (options['plotYearStats'] or options['plotYearStatsLarge'
       canvasResults["veto--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-veto-DQPaper_.pdf"%(args.parser_directory,args.parser_system))
       canvasResults["veto--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-veto-DQPaper_.eps"%(args.parser_directory,args.parser_system))
 
-input("I am done. Type <return> to exit...")
+if not args.parser_batchMode:
+  input("I am done. Type <return> to exit...")
