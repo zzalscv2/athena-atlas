@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
@@ -199,14 +199,12 @@ const ToolHandle<Trig::TrigDecisionTool>& AthMonitorAlgorithm::getTrigDecisionTo
 
 
 bool AthMonitorAlgorithm::trigChainsArePassed( const std::vector<std::string>& vTrigNames ) const {
+
+    // If no triggers were given, return true.
+    if (vTrigNames.empty()) return true;
+
     // Check whether ANY of the triggers in the list are passed
-    for ( auto& trigName : vTrigNames ) {
-        if ( m_trigDecTool->isPassed(trigName) ) {
-            return true;
-        }
-    }
-    // If no triggers were given, return true. Otherwise, the trigger requirement failed
-    return vTrigNames.size()==0;
+    return m_trigDecTool->getChainGroup(vTrigNames)->isPassed();
 }
 
 
