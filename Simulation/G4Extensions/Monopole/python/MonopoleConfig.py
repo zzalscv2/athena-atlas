@@ -126,6 +126,7 @@ def fcpPreInclude(flags):
             assert "Y" in simdict
             CODE=int(20000000)+int(simdict["X"])*1000+int(simdict["Y"])*10
             simdict['InteractingPDGCodes'] = str([CODE,-1*CODE])
+            flags.Input.SpecialConfiguration = simdict
 
 
 def fcpCfg(flags):
@@ -161,6 +162,7 @@ def QballPreInclude(flags):
             assert "CHARGE" in simdict
             CODE=10000000+int(float(simdict["CHARGE"])*100)
             simdict['InteractingPDGCodes'] = str([CODE,-1*CODE])
+            flags.Input.SpecialConfiguration = simdict
 
 
 def QballCfg(flags):
@@ -199,6 +201,7 @@ def MonopolePreInclude(flags):
         simdict = flags.Input.SpecialConfiguration
         if "InteractingPDGCodes" not in simdict:
             simdict['InteractingPDGCodes'] = str([4110000,-4110000])
+            flags.Input.SpecialConfiguration = simdict
 
 
 def MonopoleCfg(flags):
