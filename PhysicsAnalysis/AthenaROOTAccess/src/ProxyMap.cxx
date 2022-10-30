@@ -41,7 +41,7 @@ namespace AthenaROOTAccess {
 
 
 /// An invalid payload, for default key handling.
-ProxyMap::payload_t ProxyMap::s_invalid_data;
+const ProxyMap::payload_t ProxyMap::s_invalid_data{};
 
 
 /**
@@ -223,6 +223,15 @@ ProxyMap::getProxy (sgkey_t sgkey, Long64_t entry)
  * @brief Return the string pool.
  */
 SG::StringPool& ProxyMap::stringPool ()
+{
+  return m_pool;
+}
+
+
+/**
+ * @brief Return the string pool (const).
+ */
+const SG::StringPool& ProxyMap::stringPool () const
 {
   return m_pool;
 }
@@ -835,7 +844,7 @@ void ProxyMap::handleDHE (unsigned int pclid,
   if (m_proxymap.find (sgkey_anon) == m_proxymap.end())
     m_proxymap[sgkey_anon] = data;
   else {
-    m_proxymap[sgkey_anon] = &s_invalid_data;
+    m_proxymap[sgkey_anon] = const_cast<ProxyMap::payload_t*>(&s_invalid_data);
   }
 }
 

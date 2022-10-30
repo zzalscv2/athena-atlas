@@ -1,10 +1,9 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TBranchAlias.h,v 1.8 2008-12-23 05:01:34 ssnyder Exp $
 
 /**
  * @file AthenaROOTAccess/TBranchAlias.h
@@ -223,7 +222,7 @@ private:
   TMethodCall m_clearCache_method;
 
   /// Dynamic branches indexed by auxid.
-  mutable std::unordered_map<SG::auxid_t, TBranch*> m_dyn_branch_map;
+  std::unordered_map<SG::auxid_t, TBranch*> m_dyn_branch_map;
 
   /// Original branch being read.  May be different from m_aux_branch
   /// in the case of a conversion.

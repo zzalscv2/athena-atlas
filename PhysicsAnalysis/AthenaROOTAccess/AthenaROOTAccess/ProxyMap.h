@@ -101,6 +101,11 @@ public:
    */
   SG::StringPool& stringPool ();
 
+  /**
+   * @brief Return the string pool (const).
+   */
+  const SG::StringPool& stringPool () const;
+
 
   /**
    * @brief Clear cached data.
@@ -469,7 +474,7 @@ private:
   Long64_t m_lastfillentry;
 
   /// An invalid payload, for default key handling.
-  static payload_t s_invalid_data;
+  static const payload_t s_invalid_data;
 
 
   struct redirect_key_t

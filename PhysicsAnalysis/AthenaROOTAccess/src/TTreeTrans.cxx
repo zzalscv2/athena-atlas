@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -227,11 +227,19 @@ bool TTreeTrans::sawFile (TFile* file)
 /**
  * @brief Return the associated persistent tree.
  */
-TTree* TTreeTrans::getPersTree() const
+TTree* TTreeTrans::getPersTree()
 {
   return m_pers_tree;
 }
 
+
+/**
+ * @brief Return the associated persistent tree (const).
+ */
+const TTree* TTreeTrans::getPersTree() const
+{
+  return m_pers_tree;
+}
 
 
 /**
@@ -436,9 +444,9 @@ TTreeTrans::sgkey_t TTreeTrans::stringToKey (const std::string& str, CLID clid)
  */
 const std::string* TTreeTrans::keyToString (sgkey_t key) const
 {
-  const std::string* ret =  m_proxyMap->stringPool().keyToString (key);
+  const std::string* ret = std::as_const(m_proxyMap)->stringPool().keyToString (key);
   if (!ret && m_proxyMap->maybeFillProxyMap (m_entry))
-    ret =  m_proxyMap->stringPool().keyToString (key);
+    ret = std::as_const(m_proxyMap)->stringPool().keyToString (key);
   return ret;
 }
 
@@ -453,9 +461,9 @@ const std::string* TTreeTrans::keyToString (sgkey_t key) const
  */
 const std::string* TTreeTrans::keyToString (sgkey_t key, CLID& clid) const
 {
-  const std::string* ret =  m_proxyMap->stringPool().keyToString (key, clid);
+  const std::string* ret = std::as_const(m_proxyMap)->stringPool().keyToString (key, clid);
   if (!ret && m_proxyMap->maybeFillProxyMap (m_entry))
-    ret =  m_proxyMap->stringPool().keyToString (key, clid);
+    ret = std::as_const(m_proxyMap)->stringPool().keyToString (key, clid);
   return ret;
 }
 

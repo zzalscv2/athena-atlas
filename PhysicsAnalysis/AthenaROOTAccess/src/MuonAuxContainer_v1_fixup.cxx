@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -38,11 +38,11 @@ getPrimaryTrackParticleLink(xAOD::MuonAuxContainer_v1* aux,
                             size_t i)
 {
   typedef ElementLink< xAOD::TrackParticleContainer> el_t;
-  static SG::AuxElement::Accessor<el_t> combinedTrackParticleLink_ac
+  static const SG::AuxElement::Accessor<el_t> combinedTrackParticleLink_ac
     ("combinedTrackParticleLink");
-  static SG::AuxElement::Accessor<el_t> inDetTrackParticleLink_ac
+  static const SG::AuxElement::Accessor<el_t> inDetTrackParticleLink_ac
     ("inDetTrackParticleLink");
-  static SG::AuxElement::Accessor<el_t> muonSpectrometerTrackParticleLink_ac
+  static const SG::AuxElement::Accessor<el_t> muonSpectrometerTrackParticleLink_ac
     ("muonSpectrometerTrackParticleLink");
 
   const el_t* ret = 0;
@@ -69,7 +69,7 @@ void MuonAuxContainer_v1_fixup::fixupAfterAux (void* data, long long /*entry*/)
   xAOD::MuonAuxContainer_v1* aux =
     reinterpret_cast<xAOD::MuonAuxContainer_v1*> (data);
 
-  static SG::AuxElement::Accessor<float> charge_ac ("charge");
+  static const SG::AuxElement::Accessor<float> charge_ac ("charge");
   const std::vector<float>* charge =
     reinterpret_cast<const std::vector<float>* > (aux->getIOData (charge_ac.auxid()));
   if (!charge) return;
