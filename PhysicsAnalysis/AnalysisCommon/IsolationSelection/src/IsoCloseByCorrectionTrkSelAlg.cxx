@@ -113,19 +113,20 @@ namespace CP {
         }
         /// Dump the containers
         if (!m_trkKey.empty()) {
-            SG::WriteHandle<xAOD::TrackParticleContainer> writeHandle{m_trkKey, ctx};
-            ATH_CHECK(writeHandle.record(std::make_unique<xAOD::TrackParticleContainer>(SG::VIEW_ELEMENTS)));
+            auto tracks = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
             for (const TrackPtr& trk : assoc_trks) { 
                 const xAOD::TrackParticle* trk_p = trk;
-                writeHandle->push_back(const_cast<xAOD::TrackParticle*>(trk_p)); 
+                tracks->push_back(trk_p);
             }
+            auto writeHandle = SG::makeHandle(m_trkKey, ctx);
+            ATH_CHECK(writeHandle.record(std::move(tracks)));
         }
         if (!m_thinKey.empty()) {
             SG::ThinningHandle<xAOD::TrackParticleContainer> thinner{m_thinKey, ctx};
             m_tot_trks += thinner->size();
             std::vector<bool> thin_dec(thinner->size(), false);
             for (const TrackPtr& trk : assoc_trks) { thin_dec[trk->index()] = true; }
-            thinner.keep(thin_dec, SG::ThinningDecisionBase::Op::Or);
+            thinner.keep(thin_dec, SG::ThinningDecisionBase::Op::And);
         }
         return StatusCode::SUCCESS;
     }

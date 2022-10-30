@@ -44,7 +44,6 @@ class TProfile2D;
 class TProfile_LW;
 class TProfile2D_LW;
 
-class EventInfo;
 class ITHistSvc;
 class ManagedMonitorToolBase;
 
@@ -129,7 +128,7 @@ protected:
 public:
 
     // start the actual monitoring of the considered trigger tower
-    void Analyze(const EventInfo* evtInfo, const xAOD::TriggerTower* trigTower, bool channelDisabled);
+    void Analyze(const EventContext& ctx, const xAOD::TriggerTower* trigTower, bool channelDisabled);
     // possibility to summarize plots at the end of a run
     virtual StatusCode MakeSummary();
 
@@ -163,7 +162,6 @@ protected:
     ToolHandle<LVL1::IL1CaloOfflineTriggerTowerTools> m_ttToolOffline;
     ToolHandle<LVL1::IL1TriggerTowerTool> m_ttToolOnline;
 
-    const EventInfo* m_eventInfo;
     ITHistSvc* m_histoSvc;
     ManagedMonitorToolBase* m_monObj;
 

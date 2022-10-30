@@ -378,21 +378,22 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
 
   //************************************ spread charge among readout element ************************************** 
 
-  // Assume spread charge follows a gaussian distribution
+  // Charge Spread including tan(theta) resolution term.
+  const double tan_theta = GLODIRE.perp()/GLODIRE.z();
+  // The angle dependance on strip resolution goes as tan^2(angle)
+  const double angle_dependency = std::hypot(m_posResIncident, m_posResAngular * tan_theta);
+
+  //// Assume spread charge follows a gaussian distribution
   const double charge_width = CLHEP::RandGaussZiggurat::shoot(rndmEngine, m_GausMean, m_GausSigma);
+
+  const double cluster_posX = posOnSurf_strip.x();
+  double peak_position = CLHEP::RandGaussZiggurat::shoot(rndmEngine, cluster_posX, m_StripResolution*angle_dependency);
 
   // each readout plane reads about half the total charge produced on the wire
   const double norm = 0.5*total_charge/(charge_width*std::sqrt(2.*M_PI));
   std::unique_ptr<TF1> charge_spread = std::make_unique<TF1>("fgaus", "gaus(0)", -1000., 1000.); 
-  charge_spread->SetParameters(norm, posOnSurf_strip.x(), charge_width);
+  charge_spread->SetParameters(norm, peak_position, charge_width);
   
-  // Charge Spread including tan(theta) resolution term.
-  const double tan_theta = GLODIRE.perp()/GLODIRE.z();
-  // The angle dependance on strip resolution goes as tan^2(angle)
-  const double angle_dependency = std::sqrt(m_posResIncident + m_posResAngular * tan_theta*tan_theta);
-  // Smearing of the charge, no noise is considered yet
-  const double chargeSpreadFactor = m_StripResolution * angle_dependency;
-
   // Get the nominal strip width, which is 2.7 mm, while the strip pitch is 3.2 mm.
   const double stripWidth = detEl->getDesign(newId)->inputWidth;
 
@@ -408,7 +409,7 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
   // If a hit is placed between two strips, then these two strips 
   // are considered as middle strips.
   int middleStrip[2] = {0, 0};
-  double hitRelativeLocation = posOnSurf_strip.x() - middleStrip_pos.x();
+  double hitRelativeLocation = cluster_posX - middleStrip_pos.x();
   if (std::abs(hitRelativeLocation) < (stripWidth/2)) {
     // Only one middle strip, so add the same strip number in the array
     middleStrip[0] = stripNumber;
@@ -475,9 +476,6 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
           if (stripnum >= middleStrip[1]) createNeighbor2 = false;
           continue;
         }
-        charge = CLHEP::RandGaussZiggurat::shoot(rndmEngine, charge, chargeSpreadFactor*charge);
-        // Workaround to prevent negative charge
-        if (charge < 0.0) charge = 0.;
 
         // Estimate digit time
         double strip_time = sDigitTimeStrip;
@@ -498,7 +496,6 @@ std::unique_ptr<sTgcDigitCollection> sTgcDigitMaker::executeDigi(const sTGCSimHi
         ATH_MSG_VERBOSE("Created a strip digit: strip number = " << stripnum << ", charge = " << charge 
                         << ", time = " << strip_time << ", time offset = " << strip_time-sDigitTimeStrip 
                         << ", neighbor index = " << neighbor
-                        << ", charge stdev = " << chargeSpreadFactor
                         << ", strip position = (" << locpos.x() << "," << locpos.y() << ")");
 
         ++counter_strip;

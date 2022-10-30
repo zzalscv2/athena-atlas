@@ -84,11 +84,11 @@ lArCellBinningScheme.etaNbin = {}
 lArCellBinningScheme.etaMin = {}
 lArCellBinningScheme.etaCellSize = {}
 
-lArCellBinningScheme.etaNbin["EMB"]=    {"P":[0,61],"1":[0,1,446,450],"2":[0,56,59],"3":[0, 27, 28]}
+lArCellBinningScheme.etaNbin["EMB"]=    {"P":[0,61],"1":[0,1,447,451],"2":[0,58,60],"3":[0, 27, 28]}
 lArCellBinningScheme.etaMin["EMB"]=    {"P":0.0,"1":0.0,"2":0.0,"3":0.0}
 lArCellBinningScheme.etaCellSize["EMB"]={"P":[0.025],"1":[0.025/4,0.025/8,0.025],"2":[0.025,0.05],"3":[0.05, 0.125]}
 
-lArCellBinningScheme.etaNbin["EMEC"]=    {"P":[0,12],"1":[0,1,3,99,147,211,215,223],"2":[0,1,43,51],"3":[0,20]}
+lArCellBinningScheme.etaNbin["EMEC"]=    {"P":[0,12],"1":[0,1,3,107,155,219,223,230],"2":[0,1,47,54],"3":[0,20]}
 lArCellBinningScheme.etaMin["EMEC"]=    {"P":1.5,"1":1.375,"2":1.375,"3":1.5}
 lArCellBinningScheme.etaCellSize["EMEC"]={"P":[0.025],"1":[0.05,0.025,0.025/8,0.025/6,0.025/4,0.025,0.1],"2":[0.05,0.025,0.1],"3":[0.05]}
 
@@ -96,12 +96,10 @@ lArCellBinningScheme.etaNbin["HEC"]=    {"0":[0,10,14],"1":[0,10,13],"2":[0,9,12
 lArCellBinningScheme.etaMin["HEC"]=    {"0":1.5,"1":1.5,"2":1.6,"3":1.7}
 lArCellBinningScheme.etaCellSize["HEC"]={"0":[0.1,0.2],"1":[0.1,0.2],"2":[0.1,0.2],"3":[0.1,0.2]}
 
-lArCellBinningScheme.etaNbin["FCAL"]=    {"1":[0, 3, 9, 13, 15],"2":[0, 1, 2, 3, 5, 7, 8, 9, 12, 13, 17, 19, 20, 21, 22, 23],"3":[0,2,4,5,6,8]}
+lArCellBinningScheme.etaNbin["FCAL"]=    {"1":[0, 3, 9, 13, 15],"2":[0, 1, 4, 5, 6, 7, 10, 12, 13, 14, 17, 21, 25, 27, 28, 29, 30, 31],"3":[0,2,4,5,6,8]}
+
 lArCellBinningScheme.etaMin["FCAL"]=    {"1":3.08,"2":3.192,"3":3.27}
-lArCellBinningScheme.etaCellSize["FCAL"] ={"1":[0.04, 0.1, 0.2, 0.11],"2":[0.007, 0.007, 0.014, 0.02, 0.04, 0.03, 0.02, 0.043, 0.05, 0.066, 0.132, 0.265, 0.135, 0.15, 0.16],"3":[0.08, 0.135, 0.21, 0.42, 0.21]}
-
-
-
+lArCellBinningScheme.etaCellSize["FCAL"] ={"1":[0.04, 0.1, 0.2, 0.11],"2":[0.007, 0.0035, 0.008, 0.0005, 0.012, 0.01, 0.04, 0.03, 0.02, 0.043, 0.0125, 0.066, 0.132, 0.265, 0.135, 0.15, 0.16],"3":[0.08, 0.135, 0.21, 0.42, 0.21]}
 
 
 ###################
@@ -133,14 +131,16 @@ for Part in lArCellBinningScheme.PartitionLayers:
             Ranges=lArCellBinningScheme.etaNbin[Part][Lay]
             Sizes=lArCellBinningScheme.etaCellSize[Part][Lay]
             if not len(Ranges)-len(Sizes)==1 :
-                  print("Bad list of ranges and size please check")
+                  print("Bad list of ranges and size please check", Part,Lay, len(Ranges), len(Sizes))
                   continue
                   #exit(1)
             etamin=lArCellBinningScheme.etaMin[Part][Lay]
             currange=[etamin]
+            
             for k in range(len(Ranges)-1) :
                   currange+=[round(currange[-1] + x * Sizes[k],5) for x in range(1,Ranges[k+1]-Ranges[k]+1)]
                   pass
+
             lArCellBinningScheme.etaRange[Part+Lay+"A"]=currange
             #The C side is just the symmeteric of the A side
 #            if Part=="FCAL":

@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef EFFICOLLECTION_H_
 #define EFFICOLLECTION_H_
@@ -127,7 +127,7 @@ namespace CP {
             CollectionContainer(const MuonEfficiencyScaleFactors& ref_tool, CollectionContainer* Nominal, const std::string& syst_name, unsigned int syst_bit_map);
           
             /// Retrieve the scale-factor map belonging to that particular run of data-taking
-            EfficiencyScaleFactor* retrieve(unsigned int RunNumer) const;
+            EfficiencyScaleFactor* retrieve(unsigned int RunNumer);
             
             /// Checks if the global bin number belongs to this map
             bool isBinInMap (unsigned int bin) const;
@@ -173,10 +173,10 @@ namespace CP {
             std::map<std::string, std::pair<unsigned int, unsigned int>> findPeriods(const MuonEfficiencyScaleFactors& ref_tool) const;
             std::string fileName(const MuonEfficiencyScaleFactors& ref_tool) const;
           
-            bool LoadPeriod(unsigned int RunNumber) const;
+            bool LoadPeriod(unsigned int RunNumber);
            
             std::vector<std::shared_ptr<EfficiencyScaleFactor>> m_SF;
-            mutable EfficiencyScaleFactor* m_currentSF;
+            EfficiencyScaleFactor* m_currentSF;
             
             EffiCollection::CollectionType m_FileType;
             /// Offset to translate between the bin-numbers in the bin numbers

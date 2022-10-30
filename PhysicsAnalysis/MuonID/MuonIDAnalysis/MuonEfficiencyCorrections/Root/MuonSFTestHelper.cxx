@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "MuonEfficiencyCorrections/MuonSFTestHelper.h"
@@ -344,10 +344,10 @@ namespace TestMuonSF {
         }
         return CP::CorrectionCode::Ok;
     }
-    TTree* MuonSFTestHelper::tree() const {
+    TTree* MuonSFTestHelper::tree() {
         return m_tree_raw_ptr;
     }
-    std::shared_ptr<TTree> MuonSFTestHelper::tree_shared() const {
+    std::shared_ptr<TTree> MuonSFTestHelper::tree_shared() {
         return m_tree;
     }
     void MuonSFTestHelper::fillTree() {

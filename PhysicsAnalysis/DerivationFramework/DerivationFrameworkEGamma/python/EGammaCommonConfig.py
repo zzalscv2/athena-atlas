@@ -615,7 +615,7 @@ def EGammaCommonCfg(ConfigFlags):
     # ADD TOOLS : custom electron, photon and muon track isolation
     # =======================================
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
-    acc.merge(DerivationTrackIsoCfg(ConfigFlags, object_type = ('Electrons', 'Muons')))
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags, object_types = ('Electrons', 'Muons')))
 
     from IsolationAlgs.IsolationSteeringDerivConfig import IsolationSteeringDerivCfg
     acc.merge(IsolationSteeringDerivCfg(ConfigFlags))

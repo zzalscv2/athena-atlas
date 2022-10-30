@@ -69,7 +69,7 @@ namespace CP {
         }
     }
 
-    StatusCode IsoCorrectionTestHelper::Fill(xAOD::IParticleContainer* Particles) {
+    StatusCode IsoCorrectionTestHelper::Fill(const xAOD::IParticleContainer* Particles) {
         if (!Particles) {
             Error("IsoCorrectionTestHelper::Fill()", "No particles given");
             return StatusCode::FAILURE;
@@ -160,7 +160,7 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
     float IsoCorrectionTestHelper::Charge(const xAOD::IParticle* P) const {
-        static FloatAccessor acc_charge("charge");
+        static const FloatAccessor acc_charge("charge");
         if (!acc_charge.isAvailable(*P))
             return 0;
         else

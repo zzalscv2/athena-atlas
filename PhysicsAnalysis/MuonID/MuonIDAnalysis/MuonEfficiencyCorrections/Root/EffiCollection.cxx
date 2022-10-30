@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <MuonEfficiencyCorrections/EffiCollection.h>
@@ -346,7 +346,7 @@ namespace CP {
             return a->firstRun() < b->firstRun();});
         return true;
     }
-    bool CollectionContainer::LoadPeriod(unsigned int RunNumber) const {
+    bool CollectionContainer::LoadPeriod(unsigned int RunNumber) {
         if (!m_currentSF || !m_currentSF->coversRunNumber(RunNumber)) {
             for (auto& period : m_SF) {
                 if (period->coversRunNumber(RunNumber)) {
@@ -358,7 +358,7 @@ namespace CP {
         Error("CollectionContainer", "Could not find any SF period in %s matching the run number %u", EffiCollection::FileTypeName(type()).c_str(), RunNumber);
         return false;
     }
-    EfficiencyScaleFactor* CollectionContainer::retrieve(unsigned int RunNumber) const {
+    EfficiencyScaleFactor* CollectionContainer::retrieve(unsigned int RunNumber) {
         if (!LoadPeriod(RunNumber)) {
             return (*m_SF.begin()).get();
         }

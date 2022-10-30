@@ -6,7 +6,7 @@ atlas_subdir( VP1AlgsBatch )
 # Component(s) in the package:
 atlas_add_component( VP1AlgsBatch
    src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel StorageSvc xAODEventInfo PathResolver
+   LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib xAODEventInfo PathResolver
    VP1UtilsBase )
 
 # Install files from the package:

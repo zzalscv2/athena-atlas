@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -297,7 +297,7 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         while (ih!=trtHits->end() && m_id==(*ih).GetHitID() && m_barcode==(*ih).GetTrackID() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).GetEnergyDeposit();
-          ih++;
+          ++ih;
         }
         m_t_simHits->Fill();
       }

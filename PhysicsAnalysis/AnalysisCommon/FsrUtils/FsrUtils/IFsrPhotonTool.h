@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FSRUTILS_IFsrPhotonTool_H
@@ -23,8 +23,6 @@ namespace FSR {
    /// Simple interface for searching the FSR candidate
    ///
    /// @author Tulay Cuhadar Donszelmann <tcuhadar@cern.ch>
-   ///
-   /// $Date: 2014-07-18 $
    ///
    class FsrCandidate {
    public:
@@ -55,15 +53,15 @@ namespace FSR {
       /// Get the Ok/Error as a return value
       
       virtual CP::CorrectionCode getFsrPhoton(const xAOD::IParticle* part, FsrCandidate& candidate,
-                                              const xAOD::PhotonContainer* photons,
+                                              xAOD::PhotonContainer* photons,
                                               const xAOD::ElectronContainer* electrons) = 0;
 
       virtual std::vector<FsrCandidate>* getFsrCandidateList(const xAOD::IParticle* part,
-                                                             const xAOD::PhotonContainer* photons,
+                                                             xAOD::PhotonContainer* photons,
                                                              const xAOD::ElectronContainer* electrons) = 0;
 
       virtual std::vector<FsrCandidate>* getFarFsrCandidateList(const xAOD::IParticle* part,
-                                                                const xAOD::PhotonContainer* photons ) = 0;
+                                                                xAOD::PhotonContainer* photons ) = 0;
 
       virtual std::vector<FsrCandidate>* getNearFsrCandidateList(const xAOD::Muon* part,
                                                                 const xAOD::PhotonContainer* photons,

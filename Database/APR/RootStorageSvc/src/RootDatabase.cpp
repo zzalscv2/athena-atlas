@@ -370,7 +370,7 @@ long long int RootDatabase::byteCount(int which) const   {
 }
 
 /// Access options
-DbStatus RootDatabase::getOption(DbOption& opt)  const   { 
+DbStatus RootDatabase::getOption(DbOption& opt)  {
   const char* n = opt.name().c_str();
   switch( ::toupper(n[0]) )  {
     case 'C':

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibUtils/L1CaloPprPhos4ShapeMaker.h"
@@ -15,7 +15,6 @@ L1CaloPprPhos4ShapeMaker::L1CaloPprPhos4ShapeMaker(const std::string& name, ISvc
    m_l1aFadcSlice(0),
    m_triggerTowers(0),
    m_rodHeader(0),
-   m_evtInfo(0),
    m_runNumber(0),
    m_attrList(0),
    m_l1CaloTTIdTools("LVL1::L1CaloTTIdTools/L1CaloTTIdTools"),
@@ -65,7 +64,6 @@ StatusCode L1CaloPprPhos4ShapeMaker::initialize(){
    m_lvl1Helper = 0;
 //    m_cells2tt = 0;
 
-   m_evtInfo = 0;
    m_runNumber = 0;
    m_attrList = 0;
    m_pprChanCalibFolderName = "/TRIGGER/L1Calo/V1/Calibration/Calib1/PprChanCalib";
@@ -108,21 +106,16 @@ StatusCode L1CaloPprPhos4ShapeMaker::execute(){
    // This section is for code that is run for each event.
    
    ATH_MSG_INFO("In execute()");
-   
-   StatusCode sc;
-   sc = GetEventInfo();
-   if(sc.isFailure()){
-      ATH_MSG_WARNING( "Failed to get Event Info, but continuing." );
-   }
+   const EventContext& ctx = Gaudi::Hive::currentContext();
    
    if(m_runNumber == 0){
-      m_runNumber = m_evtInfo->event_ID()->run_number();
+      m_runNumber = ctx.eventID().run_number();
       
       ATH_MSG_INFO("Run Number: " << m_runNumber );
       m_signalShapes->SetRunNumber(m_runNumber);
    }
    
-   uint64_t eventNum = m_evtInfo->event_ID()->event_number();
+   uint64_t eventNum = ctx.eventID().event_number();
    
    // Retrieve the Database parameters.
    // Only need to do this once because they do not change from event to event.
@@ -135,7 +128,7 @@ StatusCode L1CaloPprPhos4ShapeMaker::execute(){
       // first  open the ReadoutConfig folder so I can see in which bunch
       // the peak should be located.
       
-      sc = GetDatabaseHandle(m_readoutConfigFolderName);
+      StatusCode sc = GetDatabaseHandle(m_readoutConfigFolderName);
       if(sc.isFailure()){
          ATH_MSG_INFO( "Failed to retrieve database handle: " << m_readoutConfigFolderName );
          return sc;
@@ -301,11 +294,11 @@ StatusCode L1CaloPprPhos4ShapeMaker::execute(){
    ATH_MSG_INFO("Event Number: " << eventNum );
    
    if (eventNum == 0 && m_isTile){
-      return sc;
+     return StatusCode::SUCCESS;
    }
    
    
-   sc = GetTriggerTowers();
+   StatusCode sc = GetTriggerTowers();
    if(sc.isFailure()){
       ATH_MSG_FATAL( "Failed to get the trigger tower collection so stopping." );
       return StatusCode::FAILURE;
@@ -555,16 +548,6 @@ StatusCode L1CaloPprPhos4ShapeMaker::GetRODHeader(){
    StatusCode sc = evtStore()->retrieve(m_rodHeader, "RODHeaders");
    if(sc.isFailure()){
       ATH_MSG_INFO("Failed to load ROD Headers");
-      return StatusCode::FAILURE;
-   }
-   return StatusCode::SUCCESS;
-}
-
-StatusCode L1CaloPprPhos4ShapeMaker::GetEventInfo(){
-   
-   StatusCode sc = evtStore()->retrieve(m_evtInfo);
-   if(sc.isFailure()){
-      ATH_MSG_INFO("Failed to load Event Information");
       return StatusCode::FAILURE;
    }
    return StatusCode::SUCCESS;

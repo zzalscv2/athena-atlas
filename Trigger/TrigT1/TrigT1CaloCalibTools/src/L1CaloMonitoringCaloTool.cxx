@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -26,9 +26,6 @@
 
 #include "Identifier/Identifier.h"
 #include "Identifier/Identifier32.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "TrigT1CaloCalibToolInterfaces/IL1CaloCells2TriggerTowers.h"
 
@@ -149,23 +146,11 @@ StatusCode L1CaloMonitoringCaloTool::loadCaloCells()
 
   // Don't run more than once per event
 
-  int eventNumber = 0;
-  int runNumber   = 0;
-  const EventInfo* evInfo = 0;
-  sc = evtStore()->retrieve(evInfo);
-  if (sc.isFailure()) {
-    if (debug) {
-    ATH_MSG_DEBUG("No EventInfo found");
-    }
-  } else {
-    const EventID* evID = evInfo->event_ID();
-    if (evID) {
-      eventNumber = evID->event_number();
-      runNumber   = evID->run_number();
-      if (eventNumber == m_lastEvent && runNumber == m_lastRun) {
-        return StatusCode::SUCCESS;
-      }
-    }
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  int eventNumber = ctx.eventID().event_number();
+  int runNumber   = ctx.eventID().run_number();
+  if (eventNumber == m_lastEvent && runNumber == m_lastRun) {
+    return StatusCode::SUCCESS;
   }
   m_lastEvent = eventNumber;
   m_lastRun   = runNumber;

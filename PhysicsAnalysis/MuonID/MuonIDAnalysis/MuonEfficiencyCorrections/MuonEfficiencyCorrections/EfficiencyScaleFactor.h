@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 #ifndef MUONEFFICIENCYCORRECITONS_EFFICIENCYSCALEFACTOR_H_
 #define MUONEFFICIENCYCORRECITONS_EFFICIENCYSCALEFACTOR_H_
@@ -212,8 +212,8 @@ namespace CP {
             /// default TTVA efficiency value (in case of MuonStandAlone for |eta|>2.5)
             float m_default_eff_ttva;
             
-            mutable unsigned int m_warnsPrinted;
-            static unsigned int m_warningLimit;
+            mutable std::atomic<unsigned int> m_warnsPrinted;
+            static const unsigned int m_warningLimit;
             
             unsigned int m_firstRun;
             unsigned int m_lastRun;

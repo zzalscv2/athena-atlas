@@ -48,7 +48,7 @@ namespace CP {
 
     private:
         template <class CONT_TYPE>
-        StatusCode loadContainer(const EventContext& ctx, const SG::ReadHandleKey<CONT_TYPE>& key, CONT_TYPE*& cont) const;
+        StatusCode loadContainer(const EventContext& ctx, const SG::ReadHandleKey<CONT_TYPE>& key, const CONT_TYPE*& cont) const;
 
         bool passSelection(const EventContext& ctx, const xAOD::Muon* muon) const;
         bool passSelection(const EventContext& ctx, const xAOD::Egamma* egamm) const;

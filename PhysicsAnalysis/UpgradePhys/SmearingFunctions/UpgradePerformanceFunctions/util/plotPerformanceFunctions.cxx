@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -17,6 +17,8 @@
 #include "TROOT.h"
 #include "UpgradePerformanceFunctions/UpgradePerformanceFunctions.h"
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // plotting code
 
 void plotElectronEfficiency(UpgradePerformanceFunctions *m_upgrade, float plot_eta, float plot_pt);
 void plotElectronTriggerEfficiency(UpgradePerformanceFunctions *m_upgrade, float plot_eta, float plot_pt);

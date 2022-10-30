@@ -499,11 +499,9 @@ if DQMonFlags.configureFromOldStyleFlags():
    Steering = ConfigFlags.DQ.Steering
    Steering.doDataFlowMon=DQMonFlags.doDataFlowMon()
    Steering.doGlobalMon=DQMonFlags.doGlobalMon()
-   # do not enable new trigger monitoring in mixed mode if we are not in Run 3 EDM
-   mixedModeFlag = (DQMonFlags.triggerMixedMode() and ConfigFlags.Trigger.EDMVersion == 2)
-   Steering.doHLTMon=DQMonFlags.doHLTMon() and not mixedModeFlag
-   Steering.doLVL1CaloMon=DQMonFlags.doLVL1CaloMon() and not mixedModeFlag
-   Steering.doCTPMon=DQMonFlags.doCTPMon() and not mixedModeFlag
+   Steering.doHLTMon=DQMonFlags.doHLTMon()
+   Steering.doLVL1CaloMon=DQMonFlags.doLVL1CaloMon()
+   Steering.doCTPMon=DQMonFlags.doCTPMon()
    Steering.doPixelMon=DQMonFlags.doPixelMon()
    Steering.doSCTMon=DQMonFlags.doSCTMon()
    Steering.doTRTMon=DQMonFlags.doTRTMon()
@@ -525,8 +523,6 @@ if DQMonFlags.configureFromOldStyleFlags():
    Steering.doTauMon=DQMonFlags.doTauMon()
    Steering.doJetTagMon=DQMonFlags.doJetTagMon()
    Steering.doJetInputsMon=DQMonFlags.doJetInputsMon()
-else:
-   mixedModeFlag = False
 
 if DQMonFlags.doNewMonitoring():
    ConfigFlags.DQ.isReallyOldStyle = False

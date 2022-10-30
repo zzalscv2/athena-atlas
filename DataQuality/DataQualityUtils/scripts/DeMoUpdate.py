@@ -12,7 +12,7 @@ import time
 from ROOT import TFile
 from ROOT import TH1F,TProfile
 from ROOT import TCanvas,TPaveText
-from ROOT import kBlack,kOrange,kGreen
+from ROOT import kBlack,kAzure,kBlue
 from ROOT import gStyle
 from ROOT import gROOT
 from ROOT import TLatex
@@ -48,14 +48,6 @@ runListDir = scriptdir+"/RunList"
 
 ################################################################################################################################################
 #### Ancillary functions
-def chmkDir( path ):
-  # Safely create a directory
-  try:
-      os.makedirs(path)
-  except OSError as exception:
-      if exception.errno != errno.EEXIST:
-          raise
-
 def printProp(varname):
   print("**",varname,"**")
   if hasattr(sys.modules[__name__],varname):
@@ -102,7 +94,6 @@ def singleRunReport(runNumber,dict1,dict2,directory,defects,veto,exactVetoComput
   import string
 
   runDir = directory+"/Run"
-  chmkDir(runDir)
 
   if dict1['signoff'] == "DONE" or dict1['signoff'] == "FINAL OK":
     repOnDisk = True
@@ -125,7 +116,6 @@ def singleRunReport(runNumber,dict1,dict2,directory,defects,veto,exactVetoComput
   for idef in (defects["partIntol"]):
     if (len(dict2[idef]["AllPartitions"])>0):
       printBoth('Nb of LBs with %24s: %i -> %.2f%% (%s)'%(defectVeto["description"][idef].ljust(24),len(dict2[idef]["AllPartitions"]),dict1["ineffDefect_%s"%(idef)],str(dict2[idef]["AllPartitions"])),repOnDisk,f)
-      #print "-----> LBs affected : ",dict2[idef]["AllPartitions"]
   if len(veto["all"])>0:
     if exactVetoComput:
       printBoth('LAr veto inefficiency                  : %.3f%%'%(dict1["ineffVeto_allVeto"]),repOnDisk,f)
@@ -240,12 +230,11 @@ def retrieveDefectsFromDB(run, defectTag, grlDef):
     return parsed_defects
 
 ################################################################################################################################################
-#### Retrieval of run characteristics or new runs
-def updateRunList(year=time.localtime().tm_year, runListDir=runListDir):
+#### Retrieval of new runs not yet in RunList/all-[year].dat
+def updateRunList(year=time.localtime().tm_year):
     # Update list of runs. If there is not an up-to-date file, get the latest info from the atlas dqm APIs'''
     print("Checking run list for year",year)
 
-    chmkDir(runListDir)
     latestRun=dqmapi.get_latest_run()
     recentRuns = dqmapi.get_run_beamluminfo({'low_run':str(latestRun-200),'high_run':str(latestRun)})
     def writeRuns(outfile, fileRuns = []):
@@ -273,10 +262,12 @@ def updateRunList(year=time.localtime().tm_year, runListDir=runListDir):
       print("The run list for year ",year," is not available... please create one by hand")
       sys.exit()
 
+################################################################################################################################################
+#### Retrieval of run characteristics
 def getRunInfo(runlist, defectTag="HEAD"):
     # Retrieve run characteristics (period,  time...)
-    possDefects = sum(list(signOff.values()),[])
-    run_defects = dqmapi.get_defects_lb({'run_list':runlist},possDefects,defectTag,True,True)
+    possSignoffDefects = sum(list(signOff.values()),[])
+    run_signoffDefects = dqmapi.get_defects_lb({'run_list':runlist},possSignoffDefects,defectTag,True,True)
 
     infokeys = ["Run type", "Project tag", "Partition name", "Number of events passing Event Filter", "Run start", "Run end", "Number of luminosity blocks", "Data source", "Detector mask", "Recording enabled", "Number of events in physics streams" ]
 
@@ -284,9 +275,9 @@ def getRunInfo(runlist, defectTag="HEAD"):
 
     beamkeys = ["Max beam energy during run", "Stable beam flag enabled during run", "ATLAS ready flag enabled during run", "Total integrated luminosity", "ATLAS ready luminosity (/nb)"]
 
-    for rd in run_defects.keys():
-        for defect in run_defects[rd].keys():
-            run_defects[rd][defect] = { ik:li for ik,li in zip(defectvals,run_defects[rd][defect][0]) }
+    for rd in run_signoffDefects.keys():
+        for defect in run_signoffDefects[rd].keys():
+            run_signoffDefects[rd][defect] = { ik:li for ik,li in zip(defectvals,run_signoffDefects[rd][defect][0]) }
             
     run_spec = {'run_list':runlist, 'stream': 'physics_CosmicCalo', 'source': 'tier0'}
     run_info = dqmapi.get_run_information(run_spec)
@@ -311,7 +302,7 @@ def getRunInfo(runlist, defectTag="HEAD"):
     addDetails(run_info)
     addDetails(beam_info)
     addDetails(run_periods, "periods")
-    addDetails(run_defects, "defects")
+    addDetails(run_signoffDefects, "signoffDefects")
 
     # only take first period??
     for r in allinfo.keys():
@@ -331,29 +322,33 @@ def getRunInfo(runlist, defectTag="HEAD"):
 from argparse import RawTextHelpFormatter,ArgumentParser
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
-parser.add_argument('-r','--run',type=int,dest='run',default=[],help='Run or run range',nargs='*',action='store')
+# General arguments
 parser.add_argument('-y','--year',dest='year',default = str(time.localtime().tm_year),help='Year [Default: '+str(time.localtime().tm_year)+']. May also include special conditions such as 5TeV, hi... Check the RunList files',action='store')
 parser.add_argument('-t','--tag',dest='tag',default = "Tier0_"+str(time.localtime().tm_year),help='Defect tag [Default: "Tier0_'+str(time.localtime().tm_year)+'"]',action='store')
+parser.add_argument('-s','--system',dest='system',default="LAr",help='System: LAr, Pixel, IDGlobal, RPC... [Default: "LAr"]',action='store')
 parser.add_argument('-b','--batch',dest='batchMode',help='Batch mode',action='store_true')
-parser.add_argument('-s','--system',dest='system',default="LAr",help='System: LAr, CaloCP [Default: "LAr"]',action='store')
-parser.add_argument('--runListUpdate',dest='runListUpdate',help='Run list update. No other action allowed. Exit when done',action='store_true')
-parser.add_argument('--weekly',dest='weekly',help='Weekly report. No run range to specify',action='store_true')
-parser.add_argument('--allRuns',dest='allRuns',help='All year runs. No run range to specify',action='store_true')
-parser.add_argument('--grlUpdate',dest='grlUpdate',help='GRL update. No run range to specify',action='store_true')
-parser.add_argument('--noPlot',dest='plotResults',help='Do not plot the results',action='store_false')
-parser.add_argument('--resetYS',dest='resetYearStats',help='Reset year stats',action='store_true')
-parser.add_argument('--noUpdateYS',dest='updateYearStats',help='Do not update year stats with new runs',action='store_false')
-parser.add_argument('--skipUnsignedOff',dest='skipUnsignedOff',help='Ignore completely runs that are not signed off',action='store_true')
-parser.add_argument('--skipAlreadyUpdated',dest='skipAlreadyUpdated',help='Ignore completely runs that are already in year stats',action='store_true')
+# Different options. 
+parser.add_argument('--runListUpdate',dest='runListUpdate',help='Update of the run list (all-[year].dat). No other action allowed. Exit when done.',action='store_true') 
+parser.add_argument('--weeklyReport',dest='weekly',help='Weekly report. No run range to specify, no year-stats update.',action='store_true')
+# Selection of runs to be considered
+parser.add_argument('--runRange',type=int,dest='runRange',default=[],help='Run or run range (in addition to RunList)',nargs='*',action='store')
+parser.add_argument('--skipAlreadyUpdated',dest='skipAlreadyUpdated',help='Ignore completely runs that are already included in year stats',action='store_true')
+parser.add_argument('--noGlobalFilter',dest='noGlobalFilter',help='Switch off the primary filter based on GLOBAL defects. So far, the global defects used are: "GLOBAL_LHC_50NS","GLOBAL_LHC_NONSTANDARD_BC","GLOBAL_LHC_LOW_N_BUNCHES","GLOBAL_LHC_NOBUNCHTRAIN","GLOBAL_LHC_COMMISSIONING","GLOBAL_LHC_HIGHBETA","GLOBAL_LOWMUCONFIG_IN_HIGHMU","LUMI_VDM","GLOBAL_NOTCONSIDERED (defined in DeMoLib.py)"',action='store_true')
+# Option related to year stats
+parser.add_argument('--resetYearStats',dest='resetYearStats',help='Reset year stats. To be used only the incremental update can not be used (for example, when runs were removed or when a defect of an already signed off run was changed)',action='store_true')
+parser.add_argument('--updateYearStats',dest='updateYearStats',help='Update year stats with the new runs fully signed off',action='store_true')
+# Veto options (relevant only for LAr)
 parser.add_argument('--noVeto',dest='noVeto',help='Do not consider time-veto information',action='store_true')
 parser.add_argument('--vetoLumiEvol',dest='vetoLumiEvolution',help='Plot the evolution of veto as a function of lumi',action='store_true')
+parser.add_argument('--roughVetoComput',dest='exactVetoComput',help='Rough veto computation (no lumi weighting,no correlation with intol defect.)',action='store_false')
+# Plotting, saving
+parser.add_argument('--noPlot',dest='plotResults',help='Do not plot the results',action='store_false')
 parser.add_argument('--saveHistos',dest='saveHistos',help='Save all histograms (NOT needed for year stats)',action='store_true')
 parser.add_argument('--savePlots',dest='savePlots',help='Save all plots in Weekly dir',action='store_true')
-parser.add_argument('--roughVetoComput',dest='exactVetoComput',help='Rough veto computation (no lumi weighting,no correlation with intol defect.)',action='store_false')
-parser.add_argument('--noGlobalFilter',dest='noGlobalFilter',help='',action='store_true')
-parser.add_argument('--deliveredLumiNorm',dest='deliveredLumiNorm',help='Normalize by the delivered lumi (used until 2018)',action='store_true')
-parser.add_argument('--onlineLumiNorm',dest='onlineLumiNorm',help='Normalize by the online lumi (used until 2018)',action='store_true')
-parser.add_argument('--noGrlFilter',dest='noGrlFilter',help='By default, --grlUpdate update the year stats for the runs stored in the RunList/grl-*.dat file (created/updated by DQ coordinators). With this option, all runs are considered for update',action='store_true')
+# Characteristics of luminosity used for nirmalisation
+parser.add_argument('--deliveredLumiNorm',dest='deliveredLumiNorm',help='Normalize by the delivered lumi',action='store_true')
+parser.add_argument('--onlineLumiNorm',dest='onlineLumiNorm',help='Normalize by the online lumi',action='store_true')
+
 
 args = parser.parse_args()
 # parser.print_help()
@@ -370,17 +365,15 @@ grlDef = {}
 defectVeto = {}
 veto = {}
 signOff = {}
+runlist = {'filename':"",'primary':[],'toprocess':[],'roughVeto':[]}
 
 if args.runListUpdate:
   updateRunList(year=args.year)
+  print("Done.I am exiting...")
+  sys.exit()
 
-  if args.updateYearStats:
-      if 'tokenName' in dir(): os.system("rm -f %s"%tokenName) 
-      print("I am exiting due to updateYearStats option...")
-      sys.exit()
-
-
-initialize(args.system,yearTagProperties,partitions,grlDef,defectVeto,veto,signOff,args.year,args.tag)
+options = args.__dict__
+initialize(options['system'],yearTagProperties,partitions,grlDef,defectVeto,veto,signOff,options['year'],options['tag'],runlist)
 
 if debug:
   printProp("yearTagProperties")
@@ -390,18 +383,24 @@ if debug:
   printProp("veto")
   printProp("signOff")
   
-options = args.__dict__
-options['recordedLumiNorm'] = not args.deliveredLumiNorm
+# Choose between recorded and delivered luminosity - By default, use the delivered one
+options['recordedLumiNorm'] = not options['deliveredLumiNorm']
 # tag to access defect database and COOL database (for veto windows) - Defined in DeMoLib.py
-options['defectTag']=yearTagProperties["defect"][args.tag]
+options['defectTag']=yearTagProperties["defect"][options['tag']]
 if len(yearTagProperties["veto"])>0: # The veto tag is not defined for all systems
-  options['vetoTag']=yearTagProperties["veto"][args.tag]
+  options['vetoTag']=yearTagProperties["veto"][options['tag']]
 else:
   options['vetoTag']=""
-options['yearStatsDir'] = "YearStats-%s/%s/%s"%(options['system'],options['year'],args.tag)
+options['yearStatsDir'] = "YearStats-%s/%s/%s"%(options['system'],options['year'],options['tag'])
+
+# No run range active, no update years stats, no filter... in weekly report
+if (options['weekly']):
+  options['updateYearStats'] = False
+  options['runRange'] = []
+
 # Token to avoid having multiple yearStats update in the same time
 if options['updateYearStats']:
-  tokenName = "DeMo-%s-%s-%s.token"%(options['system'],options['year'],args.tag)
+  tokenName = "DeMo-%s-%s-%s.token"%(options['system'],options['year'],options['tag'])
   if os.path.exists(tokenName):
     print("A different DeMoUpdate is apparently running (or it was not properly ended recently). This may cause trouble when updating yearStats")
     os.system("ls -ltr %s"%tokenName)
@@ -411,18 +410,42 @@ if options['updateYearStats']:
   else:
     os.system("touch %s"%tokenName)
 
+# Define the run list to consider depending on the options
+# In RunList directory, are the different lists:
+# - all-[year].dat: contains all the runs with ATLAS ready. Automatically updated with the command: python DeMoUpdate.py --runListUpdate -y [year]
+# - grl-[year].dat: contains all runs that belongs to the year GRL (so far only one GRL, the largest but could be changed). By default these runs are necessarily in all-[year].dat. Updated by hand.
+# - [system]/roughVeto-[year].dat: sometimes, some runs may require a rough veto to reduce processing time. By default, this list is empty.
 
-runlist = {'all':[],'grl':[],'%s/roughVeto'%(options['system']):[],'range':[]}
-for iRunList in list(runlist.keys()):
-    iRunListDat = runListDir+"/%s-%s.dat"%(iRunList,options['year'])
-    # If the grl filter is deactivated, replace the grl run list by the whole run list
-    if (options['noGrlFilter']) and iRunList == "grl":
-        iRunListDat = runListDir+"/all-%s.dat"%(options['year'])
-    if os.path.exists(iRunListDat):
-        fRunList = open(iRunListDat,'r')
-        for iRun in fRunList.readlines():
-            runlist[iRunList].append(int(iRun))
-        fRunList.close()
+startrun = 0
+endrun   = 1e12
+if len(options['runRange']) == 1: # Single run 
+  startrun = options['runRange'][0]
+  endrun   = options['runRange'][0]
+if len(options['runRange']) == 2: # Run range
+  startrun = options['runRange'][0]
+  endrun   = options['runRange'][1]
+
+# runlist['primary'] contains all runs extracted from the runList convoluted with the run range (if any was defined - not mandatory - Deactivated for weeklyReport)
+# runlist['toprocess'] is derived from the primary list. Some runs may be removed depending on the options (skipAlreadyUpdated) and also for the weekly report (see below)
+# runlist['toprocess'] contains all run that will be processed and that will be displayed in the final table / plots
+runListFilename = "%s/%s"%(runListDir,runlist['filename'])
+if os.path.exists(runListFilename):
+  fRunList = open(runListFilename,'r')
+  for iRun in fRunList.readlines():
+    if (int(iRun) >= startrun and int(iRun) <= endrun):
+      runlist['primary'].append(int(iRun))
+  fRunList.close()
+else:
+  print("The %s file does not exist. Create it or choose a different tag."%runListFilename)
+  sys.exit()
+
+roughVetoFilename = runListDir+"/%s/roughVeto-%s.dat"%(options['system'],options['year'])
+if os.path.exists(roughVetoFilename):
+  fRoughVeto = open(roughVetoFilename,'r')
+  for iRun in fRoughVeto.readlines():
+    runlist['roughVeto'].append(int(iRun))
+  fRoughVeto.close()
+
 if len(veto["all"]) == 0:
     options['noVeto'] = True
     print("No veto information provided in DeMoLib.py")
@@ -430,9 +453,8 @@ else:
     if options['noVeto']:
         print("WARNING: I do not consider time veto information...")
 
-chmkDir(options['yearStatsDir'])
+yearStatsArchiveFilename = '%s/TProfiles.root'%options['yearStatsDir']
 if options['updateYearStats']:
-    yearStatsArchiveFilename = '%s/TProfiles.root'%options['yearStatsDir']
     if not os.path.exists(yearStatsArchiveFilename):
         print("No archive file found in %s"%options['yearStatsDir'])
         print("I am forcing the year stats reset...")
@@ -446,7 +468,8 @@ if options['updateYearStats']:
         print("I am forcing the year stats reset...")
         options['resetYearStats'] = True
 
-if options['updateYearStats'] and options['resetYearStats']:
+# Reseting the year stats - Allowed even if updateYearStats not requested
+if options['resetYearStats']:
     print("WARNING: I am going to reset the %s stats..."%options['yearStatsDir'])
     if (options['batchMode']): # In batch mode, no confirmation requested
         confirm = "y"
@@ -455,105 +478,70 @@ if options['updateYearStats'] and options['resetYearStats']:
 
     if ("y" in confirm):
         print("I reset the %s stats"%options['yearStatsDir'])
-        # Delete the dat files that contains the runs updated and the associated lumi
         os.system("rm -f %s/lumi*.dat"%options['yearStatsDir'])
         os.system("rm -f %s/runs*.dat"%options['yearStatsDir'])
         os.system("rm -f %s/errors.log"%options['yearStatsDir'])
-        if (args.resetYearStats): # The loss files are deleted only if explicit request by the user. Relevant when no GRL run found yet (hence reset forced) but defect already set
-            os.system("rm -f %s/loss*.dat"%options['yearStatsDir'])
-            os.system("rm -f %s/Run/*.txt"%options['yearStatsDir'])
-        else:
-            print("However, I did NOT delete the loss files to preserve defects set in non-GRL runs")
+        os.system("rm -f %s/loss*.dat"%options['yearStatsDir'])
+        os.system("rm -f %s/Run/*.txt"%options['yearStatsDir'])
+        os.system("rm -f %s"%(yearStatsArchiveFilename))
 
-    # Delete the root file that contains the TProfiles
-    os.system("rm -f %s"%(yearStatsArchiveFilename))
-else:
-    print("I did NOT reset the %s stats"%options['yearStatsDir'])
-    options['resetYearStats'] = False
-
-
+# Open log file : errors and not yet signed off runs
 errorLogFile = open("%s/errors.log"%options['yearStatsDir'],'a')
 notYetSignedOffRuns = open('%s/runs-notYetSignedOff.dat'%options['yearStatsDir'],'w')
 
-runinfo = getRunInfo(runlist['all'],options['defectTag'])
+# Retrieve all characteristics of the runs of the primary list (start, end, nb of LB, ATLAS ready LB...)x
+runinfo = getRunInfo(runlist['primary'],options['defectTag'])
 
-for run in runlist['all']:
+# If the run is too recent (< 2 hours) or still ongoing, remove it from the runlist['primary']
+for run in runlist['primary']:
     if runinfo[run]["Run end"] == 0:
         print("Run",run,"is still ongoing")
         runinfo.pop(run)
-        runlist['all'].pop(runlist['all'].index(run))
+        runlist['primary'].pop(runlist['primary'].index(run))
     if (time.time() - runinfo[run]["Run end"])/3600 < 2:
         print("Run",run,"ended very recently. It is best to wait for the defects DBs to properly populate")
         runinfo.pop(run)
-        runlist['all'].pop(runlist['all'].index(run))
+        runlist['primary'].pop(runlist['primary'].index(run))
     
-
-# Fill the list of runs to be considered 
-if args.allRuns: # all year runs
-    runlist['toprocess'] = runlist['all']
-elif args.weekly: # Weekly report - Look for the last 7-days runs + unsigned off
-    print("I am looking for all runs signed off in the past week and the older ones not yet signed off...")
+# Fill the list of runs to be considered
+oldRunsNotYetignedOff = []
+if options['weekly']: # Weekly report - Look for the last 7-days runs + the signed off runs in the last 7 days
+    print("===== Weekly =====")
+    print("I am looking for all runs taken or signed off in the past week...")
     options['savePlots'] = True
-    runlist['toprocess'] = []
+    options['updateYearStats'] = False
     oneWeek = 7*24*3600 # Nb of seconds in one week
-    runSignedOffBeyondOneWeek = []
-    for run in sorted(runlist['all'], key=int, reverse=True):
-        if len(runSignedOffBeyondOneWeek) >= 5: # Do not look too far in the past for unsigned off runs...
-            continue
-        if "defects" not in runinfo[run].keys():
+    for run in sorted(runlist['primary'], key=int, reverse=True):
+        if "signoffDefects" not in runinfo[run].keys():
             print("Run",run, "has no defects... perhaps it is still ongoing?")
             continue
-        defects = runinfo[run]["defects"].keys()
-        statuses = [ runinfo[run]["defects"][d]["status"] for d in defects ]
+        defects = runinfo[run]["signoffDefects"].keys()
+        statuses = [ runinfo[run]["signoffDefects"][d]["status"] for d in defects ]
 
         fullySignedOff = True
         if any('Red' in s for s in statuses):
             fullySignedOff = False
-
+            if (time.time()-runinfo[run]["Run start"] > oneWeek):
+              oldRunsNotYetignedOff.append(run)
+            
         signOffTime = 0
         if any('Green' in s for s in statuses):
-            signOffTime = max([ runinfo[run]["defects"][d]["time"] for d in defects if runinfo[run]["defects"][d]["status"] == "Green" ] )
-        if (fullySignedOff and time.time()-signOffTime > oneWeek):
-            print("Run",run,"was fully signed off > 1 week ago")
-            runSignedOffBeyondOneWeek.append(run)
-        else:
-            if debug:
-                print("Will process",run,"with signoff status:",[ runinfo[run]["defects"][d]["status"] for d in runinfo[run]["defects"].keys() ])
+            signOffTime = max([ runinfo[run]["signoffDefects"][d]["time"] for d in defects if runinfo[run]["signoffDefects"][d]["status"] == "Green" ] )
+        if (fullySignedOff and time.time()-signOffTime < oneWeek):
+            print("Old run",run,"was fully signed off during the last seven days")
+            runlist['toprocess'].append(run)
+        elif (time.time()-runinfo[run]["Run start"] < oneWeek):
+            print("Run",run,"was acquired during the last seven days")
             runlist['toprocess'].append(run)
 
     runlist['toprocess'].reverse()
     print("I will process these runs :",runlist['toprocess'])
-elif args.grlUpdate: # Reprocess all grl runs skipping the ones already updated
-    runlist['toprocess'] = runlist['grl']
-    options['skipAlreadyUpdated'] = True
-    print("I am here",runlist)
-elif len(args.run) == 1: # Single run 
-    runNb = args.run[0]
-    if (runNb not in (runlist['all'])):
-        print("------------>Please first add the run in the run list")
-        if options['updateYearStats']:
-            os.system("rm -f %s"%tokenName)
-        sys.exit()
-    runlist['toprocess'] = [runNb]
-    if (not options['vetoLumiEvolution']):
-        options['plotResults']=False;
-    options['saveHistos']=False #Do not produce plots, nor save histos! 
-elif len(args.run) == 2: # Run range
-    startrun = min(args.run)
-    endrun   = max(args.run)
-    runlist['toprocess'] = []
-    for runNb in (runlist['all']): # Add all runs of runList.py in the run range
-        if (runNb>=startrun and runNb<=endrun):
-            runlist['toprocess'].append(runNb)
-else:
-    print("Please specify run number or run range with -r option")
-    if options['updateYearStats']:
-        os.system("rm -f %s"%tokenName)
-    sys.exit()
-
-if len(runlist['toprocess']) == 0 and len(args.run)>0:
-    print("No run found in this run range...")
-    print("Please double check or update the runlist file...")
+else: # Default option (i.e. not a weekly report). The possible run range was already filtered in the runlist['primary'] list
+    runlist['toprocess'] = runlist['primary']
+    
+if len(runlist['toprocess']) == 0:
+    print("No run to process")
+    print("Please double check your run range (if any) or update the runlist file...")
     if options['updateYearStats']:
         os.system("rm -f %s"%tokenName)
     sys.exit()
@@ -583,47 +571,36 @@ for iper in allperiods:
         f = open(periodFileName,'r')
         existingRuns = f.readlines()
         for irun in periodListCurrent[iper]:
-            if options['updateYearStats']:
-                if irun in runlist['grl']:
-                    runinfo[irun]['newInYearStats'] = True
-                else:
-                    runinfo[irun]['newInYearStats'] = False
-                    print("Run %d not in GRL run list -> Ignored for YearStats"%irun)
+            if (options['updateYearStats'] and "%d\n"%(irun) not in existingRuns):
+                runinfo[irun]['newInYearStats'] = True
             else:
                 runinfo[irun]['newInYearStats'] = False
-            if "%d\n"%(irun) in existingRuns:
-                runinfo[irun]['newInYearStats'] = False # This run was already treated. Not used in incremental year stats
         f.close()
     else: # This is a period not yet treated in year stats.
         periodToBeAdded = False
         for irun in periodListCurrent[iper]:
             if options['updateYearStats']:
-                if irun in runlist['grl']:
-                    runinfo[irun]['newInYearStats'] = True
-                    periodToBeAdded = True
-                else:
-                    runinfo[irun]['newInYearStats'] = False
-                    print("Run %d not in GRL run list -> Ignored for YearStats"%irun)
+                runinfo[irun]['newInYearStats'] = True
+                periodToBeAdded = True
             else:
                 runinfo[irun]['newInYearStats'] = False
         if options['updateYearStats'] and periodToBeAdded:
             print("I am going to add period %s in year stats!"%(iper))
             newPeriodInYearStats.append(iper)
+
 for iper in list(periodListCurrent.keys()): # Loop on all periods found and print the runs to be updated
     for irun in periodListCurrent[iper]:
         if runinfo[irun]['newInYearStats']:
             print("I am going to add run %d (period %s) in %s stats (provided that it is fully signed off - Not yet known...)!"%(irun,runinfo[irun]['period'],options['year']))
-            bool_newRunsInYearStats = True
         else:
             if (options['skipAlreadyUpdated']):
                 runinfo.pop(irun)
                 runlist['toprocess'].pop(runlist['toprocess'].index(irun))
-                print("%d was already processed in yearStats - I am complety ignoring it..."%(irun))
+                print("%d was already processed in yearStats - I am complety skipping it..."%(irun))
 
-if (not bool_newRunsInYearStats):
-    options['updateYearStats'] = False # No new run -> no update needed
-    if 'tokenName' in dir(): os.system("rm -f %s"%tokenName)
-
+if (len(runlist['toprocess']) == 0):
+    print("No run to process :-). Exiting...")
+    sys.exit()
 
 ######################################
 
@@ -726,7 +703,6 @@ if (options['updateYearStats'] and periodNbYear>0): # If update is required, it 
 
   for iBin in range(1,hProfPeriod_IntolDefect[idef].GetNbinsX()+1): # No matter what is idef, we just need the number of entries per bin to get the luminosity of past periods
     h1Per_IntLumi.Fill(iBin-1,hProfPeriod_IntolDefect[idef].GetBinEntries(iBin)/1e6)
-  h1Per_IntLumi.Print("all")
 
 
 #######################################################################################
@@ -755,7 +731,6 @@ if (len(list(runinfo.keys())) == 1):
 
 print("I will use the following defect/veto tags:%s %s"%(options['defectTag'],options['vetoTag']))
 
-brokenruns = [] # list of any broken runs
 #######################################################################################
 #### Main loop over selected runs
 for irun,runNb in enumerate(runlist['toprocess']):
@@ -775,7 +750,7 @@ for irun,runNb in enumerate(runlist['toprocess']):
   lbAffected['allIntol_irrecov'] = [] # List of LBs affected with intolerable irrecoverable defect independant of the defect/partition
   
 
-  boolExactVetoComput_run = (options['exactVetoComput']) and (runNb not in runlist['%s/roughVeto'%(options['system'])]) and (runNb in runlist['grl'])
+  boolExactVetoComput_run = (options['exactVetoComput']) and (runNb not in runlist['roughVeto'])
 
   # Start retrieving the general characteristics of the run
   # Get run infos
@@ -791,24 +766,25 @@ for irun,runNb in enumerate(runlist['toprocess']):
   # Treatement of global filter
   globalFilterLB = []
   if not options['noGlobalFilter']:
-    retrievedDefects = defectDatabase.retrieve((runNb, 1), (runNb+1, 0), grlDef["globalFilterDefects"])   
-    if any(rd.until.lumi > 4000000000 for rd in retrievedDefects):
-        # some runs seem to have corruption in the trips DB
-        print("Something seems wrong with run",runNb,"... huge LB number...")
-        print("Run end time was:",time.ctime(runinfo[runNb]["Run end"]))
-        brokenruns.append(runNb)
-        continue
+    retrievedDefects = defectDatabase.retrieve((runNb, 1), (runNb, runinfo[runNb]['nLB']), grlDef["globalFilterDefects"])
     for iRetrievedDefects in retrievedDefects:
-      for lb in range(iRetrievedDefects.since.lumi,iRetrievedDefects.until.lumi):
-        globalFilterLB.append(lb)
+      if (iRetrievedDefects.until.lumi > 4000000000):
+        # The GLOBAL_NOTCONSIDERED defect is apparently set by default with a huge end of IOV.
+        # BT October 2022 : this protection should be obsolete with the change of run 2 lines above. To be confirmed
+        if (time.time()-v_lbTimeSt[len(v_lbTimeSt)][1]) > 48*3600: # During 48 hours after the end of run, the global filter is deactived to display all recent runs
+          for lb in range(iRetrievedDefects.since.lumi,runinfo[runNb]['nLB']+1):
+            globalFilterLB.append(lb)
+      else:
+        for lb in range(iRetrievedDefects.since.lumi,iRetrievedDefects.until.lumi):
+          globalFilterLB.append(lb)
 
   # Atlas Ready
   atlasready=GetReadyFlag(runNb)
   runinfo[runNb]['readyLB']=[]
   runinfo[runNb]['readyLB_globalFilter']=[]
   for lb in list(atlasready.keys()):
-    if (atlasready[lb]>0): runinfo[runNb]['readyLB']+=[lb]  #uncomment this for real runs!!
-    if (atlasready[lb]>0) and (lb not in globalFilterLB): runinfo[runNb]['readyLB_globalFilter']+=[lb]  #uncomment this for real runs!!
+    if (atlasready[lb]>0): runinfo[runNb]['readyLB']+=[lb] 
+    if (atlasready[lb]>0) and (lb not in globalFilterLB): runinfo[runNb]['readyLB_globalFilter']+=[lb] 
   runinfo[runNb]['nLBready'] = float(len(runinfo[runNb]['readyLB_globalFilter']))    
 
   thisRunPerLB = dict() # Contains various per LB run characteristics retrieved from COOL
@@ -816,10 +792,7 @@ for irun,runNb in enumerate(runlist['toprocess']):
   if options['onlineLumiNorm']:
     thisRunPerLB["deliveredLumi"] = GetOnlineLumiFromCOOL(runNb,0)
   else:
-    if runNb in runlist['grl']:
-      thisRunPerLB["deliveredLumi"] = GetOfflineLumiFromCOOL(runNb,0,yearTagProperties["offlineLumiTag"]["grl"][options['year']])
-    else:
-      thisRunPerLB["deliveredLumi"] = GetOfflineLumiFromCOOL(runNb,0,yearTagProperties["offlineLumiTag"]["preliminary"])
+    thisRunPerLB["deliveredLumi"] = GetOfflineLumiFromCOOL(runNb,0,yearTagProperties["offlineLumiTag"]["OflLumi"][options['year']])
 
   # Look for peak lumi
   runinfo[runNb]['peakLumi'] = 0.
@@ -831,13 +804,13 @@ for irun,runNb in enumerate(runlist['toprocess']):
   thisRunPerLB['duration'] = GetLBDuration(runNb)
 
   # Back up method. Retrieve the precise LB duration (more precise than GetLBDuration(runNb)) and liveFraction (relevant if recorded lumi normalisation).
-  #lumiacct=fetch_iovs('COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/LumiAccounting', tag='OflLumiAcct-001', since=v_lbTimeSt[1][0]*1000000000, until=v_lbTimeSt[len(v_lbTimeSt)][1]*1000000000) 
-  #thisRunPerLB['duration'] = dict()
-  #for iLumiAcct in range(len(lumiacct)):
-  #  if options['recordedLumiNorm']: # The LB duration is corrected by the live fraction 
-  #    thisRunPerLB['duration'][lumiacct[iLumiAcct].LumiBlock] = lumiacct[iLumiAcct].LBTime*lumiacct[iLumiAcct].LiveFraction
-  #  else:
-  #    thisRunPerLB['duration'][lumiacct[iLumiAcct].LumiBlock] = lumiacct[iLumiAcct].LBTime
+  lumiacct=fetch_iovs('COOLOFL_TRIGGER::/TRIGGER/OFLLUMI/LumiAccounting', tag=yearTagProperties["offlineLumiTag"]["OflLumiAcct"][options['year']], since=v_lbTimeSt[1][0]*1000000000, until=v_lbTimeSt[len(v_lbTimeSt)][1]*1000000000) 
+  thisRunPerLB['duration'] = dict()
+  for iLumiAcct in range(len(lumiacct)):
+    if options['recordedLumiNorm']: # The LB duration is corrected by the live fraction 
+      thisRunPerLB['duration'][lumiacct[iLumiAcct].LumiBlock] = lumiacct[iLumiAcct].LBTime*lumiacct[iLumiAcct].LiveFraction
+    else:
+      thisRunPerLB['duration'][lumiacct[iLumiAcct].LumiBlock] = lumiacct[iLumiAcct].LBTime
 
   # Store the luminosity used for the efficiency normalisations
   for lb in range(1,runinfo[runNb]['nLB']+2): # Loop on all LB - Protection to set a zero luminosity if not available
@@ -845,12 +818,12 @@ for irun,runNb in enumerate(runlist['toprocess']):
       if lb not in list(thisRunPerLB["deliveredLumi"].keys()):
         thisRunPerLB["deliveredLumi"][lb] = 0.
         errorMsg = "Missing lumi for Run %d - LB %d\n"%(runNb,lb)
-        print(errorMsg)  #uncomment this for real runs!!
+        print(errorMsg)
         errorLogFile.write(errorMsg)
       if lb not in list(thisRunPerLB["duration"].keys()):
         thisRunPerLB["duration"][lb] = 0.
         errorMsg = "Missing duration/LiveFraction for Run %d - LB %d\n"%(runNb,lb)
-        print(errorMsg)  #uncomment this for real runs!!
+        print(errorMsg)
         errorLogFile.write(errorMsg)
     else:
       if lb not in list(thisRunPerLB["deliveredLumi"].keys()):
@@ -922,14 +895,6 @@ for irun,runNb in enumerate(runlist['toprocess']):
             if (not iRetrievedDefects.recoverable and lb not in lbAffected['allIntol_irrecov']): 
               lbAffected['allIntol_irrecov'].append(lb)
 
-  # By default, an unsignedoff runs is kept in the final table/plots such that the LADIeS can use the plot. On 
-  # request, they can be also ignored.
-  # NB: in any way, a non signed off run is never considered in year stats
-  if options['skipUnsignedOff'] and runinfo[runNb]['signoff'] != 'FINAL OK':
-    print("Run %d is not yet signed off. Skipping it..."%runNb)
-    runinfo.pop(runNb)
-    continue
-
   # Now treat recoverability - Storing all irrecoverable lb per defect (not partition wise as useless)
   for idef in grlDef["partIntol"]:
     lbAffected['%s__recov'%idef]["AllPartitions"]=[]
@@ -946,7 +911,7 @@ for irun,runNb in enumerate(runlist['toprocess']):
   for idef in (grlDef["tol"]+grlDef["intol"]+grlDef["intol_recov"]+allIntolDef):
     runinfo[runNb]["lumiDefect_%s"%(idef)] = 0.
     runinfo[runNb]["ineffDefect_%s"%(idef)] = 0.
-  runinfo[runNb]['Lumi'] = 0
+  runinfo[runNb]['Lumi'] = 0.
 
   # Loop on all LB of the run
   for lb in runinfo[runNb]["readyLB_globalFilter"]:
@@ -1051,14 +1016,6 @@ if options['vetoLumiEvolution']:
   for iVeto in veto["all"]:
     h1_vetoInstLumiEvol[iVeto].Divide(h1_vetoInstLumiEvol[iVeto],h1_vetoInstLumiEvol['NoVeto'],100.,1.)
     
-
-# I am not sure about this - BT october 2022
-for br in brokenruns:
-    runinfo.pop(br)
-    runlist['all'].pop(runlist['all'].index(br))
-    if br in runlist['toprocess']: runlist['toprocess'].pop(runlist['toprocess'].index(br))
-    if br in runlist['grl']: runlist['grl'].pop(runlist['grl'].index(br))
-
 ######################### Treatment when a run range was considered (weekly report)
 if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
   # Compute inefficiencies for the whole period
@@ -1085,20 +1042,24 @@ if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
           
     if newCanvas:
       # NewCanvas facility almost removed (50 runs cut) Size of the last TCanvas not properly computed
-      c1[canvasIndex] = TCanvas("runSummary_%s"%canvasIndex,"Run collection - %s"%canvasIndex,10,10,1000,(len(runlist['toprocess'])+1)*22)
+      c1[canvasIndex] = TCanvas("runSummary_%s"%canvasIndex,"Run collection - %s"%canvasIndex,10,10,1000,(len(runlist['toprocess'])+2)*22)
       column[canvasIndex] = []
       lineNb[canvasIndex] = 0
       labels_col = ["Run","Run start / stop","LB ready","Peak lumi","Int. lumi","GRL ineff.","Veto ineff.","Period","Status"]
-      labels_xlow = [0.01,0.13,0.44,0.51,0.59,0.65,0.72,0.855,0.925,0.99]
-      labels_xlow = [0.01,0.08,0.41,0.49,0.575,0.655,0.74,0.835,0.9,0.99]
-      
+      xlow_col = [0.01,0.08,0.41,0.49,0.575,0.655,0.74,0.835,0.9,0.99]
+      ylowTable = 0.99 - 0.98/(len(runlist['toprocess'])+5)*(len(runlist['toprocess'])+2)
+
       for i in range(len(labels_col)):
-        column[canvasIndex].append(TPaveText(labels_xlow[i],0.01,labels_xlow[i+1],0.99))
+        column[canvasIndex].append(TPaveText(xlow_col[i],ylowTable,xlow_col[i+1],0.99))
         column[canvasIndex][i].AddText(labels_col[i])
         if (i%2 == 0):
-          column[canvasIndex][i].SetFillColor(kOrange-3)
+          column[canvasIndex][i].SetFillColor(kAzure+2)
         else:
-          column[canvasIndex][i].SetFillColor(kGreen+2)
+          column[canvasIndex][i].SetFillColor(kBlue-10)
+      notYetSignedOff_TPave = TPaveText(xlow_col[0],0.01,xlow_col[len(labels_col)],ylowTable)
+      notYetSignedOff_TPave.AddText("Completed at %s"%(time.strftime("%H:%M (%d %b)", time.localtime())))
+      notYetSignedOff_TPave.SetFillColor(kAzure+2)
+      
       newCanvas = False
     if runNb == "AllRuns":
       column[canvasIndex][0].AddText("ALL")
@@ -1115,22 +1076,36 @@ if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
     lineNb[canvasIndex] += 1
     if (lineNb[canvasIndex]==50 or runNb == "AllRuns"):
       for i in range(len(column[canvasIndex])):
-        if i == 1:
-          column[canvasIndex][i].AddText("Completed at %s"%(time.strftime("%H:%M (%d %b)", time.localtime())))
-        else:
-          column[canvasIndex][i].AddText("")
         column[canvasIndex][i].Draw()
+      tmp = "Old runs (> 7 days) not yet signed off: "
+      tmp2 = ""
+      if len(oldRunsNotYetignedOff):
+        for iRun in range(len(oldRunsNotYetignedOff)):
+          if (iRun < 10):
+            tmp = tmp + "%d "%oldRunsNotYetignedOff[iRun]
+          else:
+            tmp2 = tmp2 + "%d "%oldRunsNotYetignedOff[iRun]                                            
+      else:
+        tmp = tmp + "None :-)"
+      notYetSignedOff_TPave.AddText(tmp)
+      notYetSignedOff_TPave.AddText(tmp2)
+      notYetSignedOff_TPave.Draw()
+
       c1[canvasIndex].SetWindowSize(1000,lineNb[canvasIndex]*40)
       c1[canvasIndex].Update()
 
       newCanvas = True
       canvasIndex += 1
-      
-    if runinfo[runNb]["signoff"] != "FINAL OK" and runNb != "AllRuns":
-      print("Run %d not fully signed off -> no year stats update. Current status: %s"%(runNb,runinfo[runNb]["signoff"]))
+    
+    if options['updateYearStats'] and (runinfo[runNb]["signoff"] != "FINAL OK" or runinfo[runNb]['Lumi'] < 1e-40) and runNb != "AllRuns":
+      if (runinfo[runNb]['Lumi'] < 1e-40 ):
+        print("Run %d has zero luminosity (wrong faulty db tag?) -> no year stats update. Current status: %s"%(runNb,runinfo[runNb]["signoff"]))
+      if (runinfo[runNb]["signoff"] != "FINAL OK"):
+        print("Run %d not fully signed off -> no year stats update. Current status: %s"%(runNb,runinfo[runNb]["signoff"]))
       notYetSignedOffRuns.write("%d (period %s) -> Current status : %s \n"%(runNb,runinfo[runNb]['period'],runinfo[runNb]["signoff"]))
+    if options['updateYearStats'] and runinfo[runNb]["signoff"] == "FINAL OK" and runinfo[runNb]['newInYearStats']:
+      bool_newRunsInYearStats = True
 
-  chmkDir(options['yearStatsDir']+'/Weekly')  
   if options['savePlots']:
     for iCanvas in range(len(c1)):
       c1[iCanvas].SaveAs("%s/Weekly/summary-%d.png"%(options['yearStatsDir'],iCanvas))
@@ -1156,7 +1131,6 @@ if options['plotResults']:
       h1_vetoInstLumiEvol[iVeto].Draw()
 
   if options['savePlots']:
-    chmkDir(options['yearStatsDir']+'/Weekly')  
     for iCanvas in list(canvasResults.keys()):
       canvasResults[iCanvas].SaveAs("%s/Weekly/%s.png"%(options['yearStatsDir'],iCanvas))
     
@@ -1228,8 +1202,8 @@ if (options['updateYearStats'] and bool_newRunsInYearStats):
 # that are not in the GRL.  
 # for irun in list(runinfo.keys()):  # should just be processed runs, or we don't have signoff
 for irun in runlist['toprocess']:
-  if runinfo[irun]['signoff'] == 'FINAL OK' and irun != "AllRuns":  #uncomment this for real runs!!
-    # NB : GRL information no longer stored here as this information is now stored in runlist['toprocess']
+  if runinfo[irun]['signoff'] == 'FINAL OK' and irun != "AllRuns" and options['updateYearStats']: 
+    # NB : GRL information no longer stored here
     # Backwards compatibility with DeMoScan to be checked
     irun_string = "%d (%.0f ub-1)"%(irun,runinfo[irun]['Lumi'])
    

@@ -8,6 +8,9 @@
 //inheritance:
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 
+//LAr services:
+#include "LArElecCalib/ILArPedestal.h"
+
 //STL:
 #include <string>
 
@@ -59,6 +62,11 @@ private:
   /** Switch to online/offline mode*/
   Gaudi::Property<bool>        m_IsOnline      {this, "IsOnline", false}; 
   Gaudi::Property<int>         m_NLatomeBins{this, "NLatomeBins", 117};
+  Gaudi::Property<int>         m_NLatomeBins_side{this, "NLatomeBins", 56};
+
+
+  Gaudi::Property<std::string>        m_EtName{this, "EtName", "Dummy"};
+  Gaudi::Property<std::string>        m_AdcName{this, "AdcName", "Dummy"};
 
 
   //Added for Stream aware:
@@ -76,7 +84,13 @@ private:
   /** Handle to digits */
   SG::ReadHandleKey<LArDigitContainer> m_digitContainerKey{this,"LArDigitContainerKey","SC","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
   SG::ReadHandleKey<LArRawSCContainer> m_rawSCContainerKey{this,"LArRawSCContainerKey","SC_ET","SG key of LArRawSCContainer read from Bytestream"};
+
+  SG::ReadHandleKey<LArDigitContainer> m_digitBaselineContainerKey{this,"LArDigitBaselineContainerKey","SC_ADC_BAS","SG key of LArDigitContainer read from Bytestream"}; //raw ADC 12 bits - ADC axis up to 4096
+  SG::ReadHandleKey<LArRawSCContainer> m_rawSCEtIdContainerKey{this,"LArRawSCEtIdContainerKey","SC_ET_ID","SG key of LArRawSCContainer read from Bytestream"};
   
+  /** Handle to pedestal */
+  SG::ReadCondHandleKey<ILArPedestal>    m_keyPedestalSC{this,"LArPedestalKeySC","LArPedestalSC","SG key of LArPedestal CDO"};
+
   // SC_ET_ID cuts on taus selection, SC_ET just takes everything
 
   /* Id helpers */
@@ -86,6 +100,7 @@ private:
 
   int WhatPartition(HWIdentifier id, int side) const; 
   int getXbinFromSourceID(int sourceID) const;
+  int getXbinPerSideFromSourceID(int sourceID) const;
 
   //Enumerate layer-types, ignoring sides. Useful for configuration that is per-definition symmetric 
   enum LayerEnumNoSides{EMBPNS=0, EMB1NS, EMB2NS, EMB3NS, HEC0NS, HEC1NS, HEC2NS, HEC3NS,
@@ -98,12 +113,42 @@ private:
     {CaloSampling::HEC0,HEC0NS}, {CaloSampling::HEC1,HEC1NS}, {CaloSampling::HEC2,HEC2NS}, {CaloSampling::HEC3,HEC3NS},              //Hadronic endcap
     {CaloSampling::FCAL0,FCAL1NS}, {CaloSampling::FCAL1,FCAL2NS}, {CaloSampling::FCAL2,FCAL3NS}                                      //FCAL
   };
-
+  
   StringArrayProperty m_layerNames{this, "LayerNames", {"EMBPA", "EMBPC", "EMB1A", "EMB1C", "EMB2A", "EMB2C", "EMB3A", "EMB3C",
 	"HEC0A", "HEC0C", "HEC1A", "HEC1C", "HEC2A", "HEC2C", "HEC3A", "HEC3C",
 	"EMECPA", "EMECPC", "EMEC1A", "EMEC1C", "EMEC2A", "EMEC2C", "EMEC3A", "EMEC3C", 
 	"FCAL1A", "FCAL1C", "FCAL2A", "FCAL2C", "FCAL3A", "FCAL3C"},
         "Names of individual layers to monitor"};
-};
 
+
+  //From: https://gitlab.cern.ch/atlas-lar-online/atlas-moncfg/-/blob/master/tools/LATOMEMonitoring.py#L82
+  std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMapping = {
+    {"0x48",{"FCALC",1}},
+    {"0x4c",{"EMEC/HECC",3}},
+  {"0x44",{"EMECC",11}},
+    {"0x4a",{"EMB/EMECC",27}},
+    {"0x42",{"EMBC",43}},
+    {"0x41",{"EMBA",59}},
+    {"0x49",{"EMB/EMECA",75}},
+    {"0x43",{"EMECA",91}},
+    {"0x4b",{"EMEC/HECA",107}},
+    {"0x47",{"FCALA",115}}
+  };
+  std::map <std::string, std::pair<std::string, int> > m_LatomeDetBinMappingPerSide = { 
+    {"0x48",{"FCAL",57}},
+    {"0x4c",{"EMEC_HEC",49}},
+    {"0x44",{"EMEC",33}},
+    {"0x4a",{"EMB_EMEC",17}},
+    {"0x42",{"EMB",1}},
+    {"0x41",{"EMB",1}},
+    {"0x49",{"EMB_EMEC",17}},
+    {"0x43",{"EMEC",33}},
+    {"0x4b",{"EMEC_HEC",49}},
+    {"0x47",{"FCAL",57}}
+  };				     
+
+
+
+
+};
 #endif

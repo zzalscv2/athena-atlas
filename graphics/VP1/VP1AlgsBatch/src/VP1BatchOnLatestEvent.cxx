@@ -6,7 +6,6 @@
 
 #include "VP1UtilsBase/VP1FileUtilities.h"
 
-#include "StorageSvc/DbType.h"
 #include "PathResolver/PathResolver.h"
 
 #include "GaudiKernel/ServiceHandle.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -21,10 +21,6 @@
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "GaudiKernel/ToolHandle.h"
-
-// Get the Event information
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 // Trigger Menu tools
 #include "TrigConfL1Data/TriggerItem.h"
@@ -112,8 +108,6 @@ private:
    StatusCode GetTriggerTowers();
    const DataVector<LVL1::RODHeader>* m_rodHeader;
    StatusCode GetRODHeader();
-   const EventInfo* m_evtInfo;
-   StatusCode GetEventInfo();
    unsigned int m_runNumber;
    const CondAttrListCollection* m_attrList;
    std::string m_pprChanCalibFolderName;

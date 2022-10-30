@@ -162,7 +162,7 @@ class AnaAlgSequence( AlgSequence ):
                 if getFullName(alg) in self._algToDecorToolMap:
                     tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
                     if inputPropName:
-                        setattr( tool, inputPropName, currentInputs[ inputLabel ] )
+                        setattr( tool, inputPropName, currentInputs[ inputLabel ].replace('%SYS%','NOSYS') )
                 pass
 
             # Set up the output name(s):
@@ -189,7 +189,7 @@ class AnaAlgSequence( AlgSequence ):
                     if getFullName(alg) in self._algToDecorToolMap:
                         tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
                         if outputPropName:
-                            setattr( tool, outputPropName, currentInputs[ outputLabel ] )
+                            setattr( tool, outputPropName, currentInputs[ outputLabel ].replace('%SYS%','NOSYS') )
 
                     pass
                 pass
@@ -215,7 +215,7 @@ class AnaAlgSequence( AlgSequence ):
                         if getFullName(alg) in self._algToDecorToolMap:
                             tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
                             if outputPropName:
-                                setattr( tool, outputPropName, currentInputs[ outputLabel ] )
+                                setattr( tool, outputPropName, currentInputs[ outputLabel ].replace('%SYS%','NOSYS') )
 
                         del currentOutputs[ outputLabel ]
                         pass
@@ -232,7 +232,7 @@ class AnaAlgSequence( AlgSequence ):
                         if getFullName(alg) in self._algToDecorToolMap:
                             tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
                             if inputPropName:
-                                setattr( tool, inputPropName, currentInputs[ inputLabel ] )
+                                setattr( tool, inputPropName, currentInputs[ inputLabel ].replace('%SYS%','NOSYS') )
 
             pass
 

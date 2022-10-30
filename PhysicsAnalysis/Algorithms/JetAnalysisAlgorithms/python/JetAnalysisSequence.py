@@ -415,7 +415,7 @@ def makeLargeRJetAnalysisSequence( seq, dataType, jetCollection,
         alg.calibrationTool.CalibSequence = "EtaJES_JMS"
     elif dataType == "data":
         alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
-    alg.calibrationTool.IsData = 0
+    alg.calibrationTool.IsData = (dataType == "data")
     seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'calibration' )
 
     # Jet uncertainties

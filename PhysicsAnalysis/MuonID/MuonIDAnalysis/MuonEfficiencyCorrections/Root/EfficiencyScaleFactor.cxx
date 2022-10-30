@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <MuonEfficiencyCorrections/EfficiencyScaleFactor.h>
@@ -8,7 +8,7 @@
 #include <TRandom3.h>
 #include <TClass.h>
 namespace CP {
-    unsigned int EfficiencyScaleFactor::m_warningLimit = 10;
+    const unsigned int EfficiencyScaleFactor::m_warningLimit = 10;
     EfficiencyScaleFactor::EfficiencyScaleFactor(std::shared_ptr<EfficiencyScaleFactor> nominal,
                                   const MuonEfficiencyScaleFactors& ref_tool,
                                   const std::string& file,

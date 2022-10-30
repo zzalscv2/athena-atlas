@@ -519,7 +519,7 @@ StatusCode Trk::MaterialMapping::handleTrackingGeometry()
     ATH_MSG_INFO("Add "<< trackingGeometry().numBoundaryLayers() << " boundary layers to mapping setup.");
     
     // register the layers from boundary surfaces
-    for (const auto& bLayerIter : trackingGeometry().boundaryLayers())
+    for (const auto bLayerIter : trackingGeometry().boundaryLayers())
         insertLayerMaterialRecord(*(bLayerIter.first));
 
     ATH_MSG_INFO("Map for "<< m_layerRecords.size() << " layers booked & prepared for mapping procedure");

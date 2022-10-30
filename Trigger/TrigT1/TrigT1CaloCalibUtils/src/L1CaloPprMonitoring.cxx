@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibUtils/L1CaloPprMonitoring.h"
@@ -8,8 +8,6 @@
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 #include "CaloEvent/CaloCellContainer.h"
 
 #include "TrigT1CaloEvent/TriggerTowerCollection.h"
@@ -24,7 +22,6 @@
 
 L1CaloPprMonitoring::L1CaloPprMonitoring(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name,pSvcLocator),
-    m_eventInfo(nullptr),
     m_dbPpmDeadChannels(nullptr),
     m_dbPpmDisabledTowers(nullptr),
     m_dbFineTimeRefsTowers(nullptr),
@@ -112,6 +109,7 @@ StatusCode L1CaloPprMonitoring::initialize()
 
 StatusCode L1CaloPprMonitoring::execute()
 {
+    const EventContext& ctx = Gaudi::Hive::currentContext();
     CHECK(this->loadContainers());
     for(const auto* tt: *m_triggerTowers) {
         //Dead Channel DB folder used for 2010 data
@@ -153,19 +151,19 @@ StatusCode L1CaloPprMonitoring::execute()
 	    m_fineTimePlotManager->SetReferenceValue(Reference);
 	    m_fineTimePlotManager->SetCalibrationFactor(CalFactor);
 	        
-	    m_fineTimePlotManager->Analyze(m_eventInfo, tt, ChanIsDisabled);
+	    m_fineTimePlotManager->Analyze(ctx, tt, ChanIsDisabled);
 	}
 	if (m_doPedestalPlots)
 	{
-	    m_pedestalPlotManager->Analyze(m_eventInfo, tt, ChanIsDisabled);
+	    m_pedestalPlotManager->Analyze(ctx, tt, ChanIsDisabled);
 	}
 	if (m_doPedestalCorrectionPlots)
 	{
-	    m_pedestalCorrectionPlotManager->Analyze(m_eventInfo, tt, ChanIsDisabled);	    
+	    m_pedestalCorrectionPlotManager->Analyze(ctx, tt, ChanIsDisabled);	    
 	}
 	if (m_doEtCorrelationPlots)
 	{
-	    m_etCorrelationPlotManager->Analyze(m_eventInfo, tt, ChanIsDisabled);
+	    m_etCorrelationPlotManager->Analyze(ctx, tt, ChanIsDisabled);
 	}
     }
     return StatusCode::SUCCESS;
@@ -198,7 +196,6 @@ StatusCode L1CaloPprMonitoring::finalize()
 
 StatusCode L1CaloPprMonitoring::loadContainers()
 {
-    CHECK(evtStore()->retrieve(m_eventInfo));
     CHECK(detStore()->retrieve(m_dbPpmDeadChannels, m_dbPpmDeadChannelsFolder));
     CHECK(detStore()->retrieve(m_dbPpmDisabledTowers,m_dbPpmDisabledTowersFolder));
     CHECK(evtStore()->retrieve(m_triggerTowers,m_triggerTowersLocation));

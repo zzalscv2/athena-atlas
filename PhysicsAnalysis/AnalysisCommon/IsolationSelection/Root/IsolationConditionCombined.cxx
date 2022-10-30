@@ -2,6 +2,7 @@
  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
+#include "CxxUtils/checker_macros.h"
 #include "IsolationSelection/IsolationConditionCombined.h"
 
 #include <TF2.h>
@@ -32,7 +33,11 @@ namespace CP {
             } else
                 isoVars[acc] = acc_ele(x);           
         }
-        const float isoValue = m_isoFunction->EvalPar(isoVars.data());
+        // In general TF1::EvalPar is non-const/not thread-safe. But for the special
+        // case of using it as TFormula it can be considered const/safe. It would be safer
+        // to change the interface to not allow a generic TF1.
+        TF1* f ATLAS_THREAD_SAFE = m_isoFunction.get();
+        const float isoValue = f->EvalPar(isoVars.data());
         return isoValue <= cutValue;
     }
 
@@ -40,7 +45,8 @@ namespace CP {
         const float cutValue = m_cutFunction->Eval(x.pt);
         std::vector<double> isoVars;
         for (unsigned int itype = 0; itype < num_types(); ++itype) isoVars.push_back(x.isolationValues[type(itype)]);
-        const float isoValue = m_isoFunction->EvalPar(isoVars.data());
+        TF1* f ATLAS_THREAD_SAFE = m_isoFunction.get(); // see comment above
+        const float isoValue = f->EvalPar(isoVars.data());
         return isoValue <= cutValue;
     }
 }  // namespace CP

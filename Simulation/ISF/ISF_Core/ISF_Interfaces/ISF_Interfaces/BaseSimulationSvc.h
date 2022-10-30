@@ -103,16 +103,14 @@ namespace ISF {
     virtual StatusCode simulateVector(const ConstISFParticleVector& particles, McEventCollection* mcEventCollection) {
       // this implementation is a wrapper in case the simulator does
       // implement particle-vector input
-      ConstISFParticleVector::const_iterator partIt    = particles.begin();
-      ConstISFParticleVector::const_iterator partItEnd = particles.end();
       bool success = true;
       // simulate each particle individually
-      for ( ; partIt != partItEnd; partIt++) {
-        ATH_MSG_VERBOSE( m_screenOutputPrefix <<  "Starting simulation of particle: " << (*partIt) );
-        if ( this->simulate(**partIt, mcEventCollection).isFailure()) {
+      for (const ISF::ISFParticle* part : particles) {
+        ATH_MSG_VERBOSE( m_screenOutputPrefix <<  "Starting simulation of particle: " << part );
+        if ( this->simulate(*part, mcEventCollection).isFailure()) {
           ATH_MSG_WARNING("Simulation of particle failed!" << endmsg <<
                           "   -> simulator: " << this->simSvcDescriptor() <<
-                          "   -> particle : " << (ISFParticle&)(**partIt) );
+                          "   -> particle : " << *part );
           success = false;
         }
       }

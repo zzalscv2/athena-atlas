@@ -180,8 +180,8 @@ namespace CP {
             }
         }
     }
-    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection(xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
-                                                                           xAOD::PhotonContainer* Photons) const {
+    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection(const xAOD::ElectronContainer* Electrons, const xAOD::MuonContainer* Muons,
+                                                                           const xAOD::PhotonContainer* Photons) const {
         if (!m_isInitialised) {
             ATH_MSG_ERROR("The IsolationCloseByCorrectionTool was not initialised!!!");
             return CorrectionCode::Error;
@@ -654,9 +654,11 @@ namespace CP {
             // TODO: figure out if this is actually a valid situation
             // or if we should just fail at this point.
             ATH_MSG_WARNING("Could not cast particle for acceptCorrected. Will return false.");
-            static asg::AcceptInfo dummyAcceptInfo;
-            static std::once_flag onceFlag;
-            std::call_once(onceFlag, [&]() { dummyAcceptInfo.addCut("castCut", "whether we managed to cast to a known type"); });
+            static const asg::AcceptInfo dummyAcceptInfo = []() {
+              asg::AcceptInfo info;
+              info.addCut("castCut", "whether we managed to cast to a known type");
+              return info;
+            }();
             if (m_dec_isoselection) (*m_dec_isoselection)(x) = false;
             return asg::AcceptData(&dummyAcceptInfo);
         }

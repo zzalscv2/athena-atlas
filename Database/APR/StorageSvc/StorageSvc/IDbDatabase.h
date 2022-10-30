@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
-// $Id: IDbDatabase.h 726071 2016-02-25 09:23:05Z krasznaa $
 //
 //  Package    : pool/StorageSvc (The pool framework)
 //
@@ -58,7 +57,7 @@ namespace pool    {
       *
       * @return DbStatus code indicating success or failure.  
       */
-    virtual DbStatus getOption(DbOption& refOpt) const = 0;
+    virtual DbStatus getOption(DbOption& refOpt) = 0;
 
     /// Close database access
     /** @param mode     [IN]  Desired session access mode.
