@@ -69,6 +69,10 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
   const EventIDBase stop {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
 
   EventIDRange rangeW{start, stop};
+  unsigned int channel_warnings=0;
+  unsigned int max_channel_warnings=10;
+  unsigned int min_invalid_channel=std::numeric_limits<unsigned int>::max();
+  unsigned int max_invalid_channel=0;
   if (!m_readKey.empty()) {
     SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey, ctx);
     const CondAttrListCollection* readCdo = *readHandle;
@@ -90,6 +94,18 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
 
       // RUN-2 format
       if (payload.exists("data") and not payload["data"].isNull()) {
+        // ignore invalid channelNumbers
+        // otherwise usage of e.g. CONDBR2-HLTP-2018-03 will lead to range errors.
+        if (channelNumber >= m_pixelID->wafer_hash_max()) {
+           min_invalid_channel = std::min(min_invalid_channel,channelNumber);
+           max_invalid_channel = std::max(max_invalid_channel,channelNumber);
+           if (channel_warnings++ < max_channel_warnings) {
+              ATH_MSG_WARNING("Invalid module hash (COOL channel number: " << channelNumber << " !< " <<  m_pixelID->wafer_hash_max() << ")."
+                              << (channel_warnings==max_channel_warnings ? " Further such warnings will not be reported." : ""));
+           }
+           continue;
+        }
+
         std::string stringStatus = payload["data"].data<std::string>();
 
         std::stringstream ss(stringStatus);
@@ -253,6 +269,11 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
       writeCdo -> setTotRes2(moduleHash, std::vector<float>(numFE, 0.0));
     }
   }
+  if (channel_warnings>max_channel_warnings) {
+     ATH_MSG_WARNING("Encountered " << channel_warnings << " invalid channel numbers (range " << min_invalid_channel << " .. "
+                     << max_invalid_channel << " !< " <<  m_pixelID->wafer_hash_max() << ")");
+  }
+
 
   // Scan over if the DB contents need to be overwritten.
   // This is useful for threshold study. So far only threshold value.

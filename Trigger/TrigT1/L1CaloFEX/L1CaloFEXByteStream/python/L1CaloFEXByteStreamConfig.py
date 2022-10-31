@@ -40,6 +40,24 @@ def eFexByteStreamToolCfg(name, flags, *, writeBS=False, TOBs=True, xTOBs=False,
       tool.ROBIDs += efex_raw_ids
       tool.eTowerContainerWriteKey   = "L1_eFexDataTowers"
 
+  if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
+    if flags.Trigger.doHLT:
+      from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+      monTool = GenericMonitoringTool('MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+      topDir = "EXPERT"
+    else:
+      # if used in offline reconstruction respect DQ convention (ATR-26371)
+      from AthenaMonitoring import AthMonitorCfgHelper
+      helper = AthMonitorCfgHelper(flags, 'HLTFramework')
+      monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
+      topDir = None
+    monTool.defineHistogram('efexDecoderErrorTitle,efexDecoderErrorLocation;errors', path=topDir, type='TH2I',
+                            title='Decoder Errors;Title;Location',
+                            xbins=1, xmin=0, xmax=1, xlabels=["UNKNOWN"],
+                            ybins=1, ymin=0, ymax=1, ylabels=["UNKNOWN"],
+                            opt=['kCanRebin'])
+    tool.MonTool = monTool
+
   return tool
 
 

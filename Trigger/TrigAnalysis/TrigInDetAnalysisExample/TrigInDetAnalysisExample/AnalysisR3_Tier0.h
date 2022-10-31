@@ -176,6 +176,10 @@ private:
 
   TIDA::Histogram<float>* m_hntrk_rec;
 
+  TIDA::Histogram<float>* m_chi2dof;
+  TIDA::Histogram<float>* m_chi2dof_rec;
+
+
   TIDA::Histogram<float>* m_hlayer;
 
 

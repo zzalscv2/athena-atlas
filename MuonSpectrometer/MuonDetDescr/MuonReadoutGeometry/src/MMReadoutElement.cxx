@@ -208,9 +208,11 @@ namespace MuonGM {
             design.nMissedBottomEta    = roParam.nMissedBottomEta;
             design.nMissedTopStereo    = roParam.nMissedTopStereo;  // #of stereo strips that are not connected to any FE board
             design.nMissedBottomStereo = roParam.nMissedBottomStereo;
-            design.totalStrips         = roParam.tStrips;           
-            design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, roParam.stereoAngle.at(il));
-            design.inputWidth          = pitch / std::cos(design.stereoAngle());                  // inputwidth is defined as the pitch
+            design.totalStrips         = roParam.tStrips;   
+            /// The stereo angle is defined clock-wise from the y-axis
+            design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, - roParam.stereoAngle.at(il));
+            /// Input width is defined as the distance between two channels
+            design.inputWidth          = pitch * std::cos(design.stereoAngle());
            
             m_nStrips.push_back(design.totalStrips);
             if (!design.hasStereoAngle()) {  // eta layers

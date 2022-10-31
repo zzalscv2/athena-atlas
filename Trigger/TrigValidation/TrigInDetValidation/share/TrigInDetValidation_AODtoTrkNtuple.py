@@ -48,36 +48,17 @@ doTier0Mon = False
 
 if 'doTIDATier0' in locals():
   doTier0Mon = doTIDATier0
-                
-doNewTier0Mon = False
+
 
 if 'doNewTIDATier0' in locals():
-  doNewTier0Mon = doNewTIDATier0
+  doTier0Mon = doNewTIDATier0
 
 
 ############ TrigInDetMonitoring part ################################
 
 from AthenaCommon.AppMgr import ToolSvc
 
-
-from TrigInDetAnalysisExample.TrigInDetAnalysisExampleConf import TrigTestBase
-
-
-if doTier0Mon and not doNewTier0Mon:
-
-  from TrigIDtrkMonitoring.TrigIDtrkMonitoringConfig import TrigIDtrkMonitoringTool
-
-  montools = TrigIDtrkMonitoringTool()
-
-  HLTMonManager.AthenaMonTools += montools
-
-  from GaudiSvc.GaudiSvcConf import THistSvc
-  ServiceMgr += THistSvc()
-  ServiceMgr.THistSvc.Output = ["AANT DATAFILE='data-hists-tier0.root' OPT='RECREATE'"]
-  HLTMonManager.FileKey = "AANT"
-
-
-if doNewTier0Mon :   
+if doTier0Mon :   
 
   # this is the new location ...
   from TrigInDetMonitoring.TIDAMonitoring import TIDAMonitoring

@@ -188,64 +188,32 @@ if IsMonteCarlo:
 skimmingTools = []
 if not IsMonteCarlo and skimEvents:
 
-  """
-  DISCLAIMER =================================
-  
-  We are adopting a temporary hack to avoid the use of HLT_jet trigger items in the IDTIDE skimming as these have been found to cause problems, 
-  leading to empty Run 3 data files, as described in this ticket: https://its.cern.ch/jira/browse/ATLIDTRKCP-423 
-
-  As a temporary fix to obtain Run 3 IDTIDE files during the on-going data-taking, the HLT_jet trigger based skimming has been replaced by a 
-  skimming based on offline jets.
-
-  The effective jet pT threshold of the skimming is now 400 GeV. We plan to revert back to the previous skimming including lower jet pT once 
-  the issues mentioned in the ticket are fixed.
-
-  The skimming selection is applied with AntiKt4EMPFlowJets as it is the primary offline jet container with supported calibration in Run 3.
-
-  In the tools F, G and H of the Skimming we use some redundancies (e.g., count both jets with 500 GeV and 600 GeV) just to maintain the 
-  structure that was being used with the online-trigger-based tools. This helps us to keep track which parts of the tools were modified. 
-  
-  """
-
-
-  sel_jet400 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 400.*GeV'
-  sel_jet500 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 500.*GeV'
   sel_jet600 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 600.*GeV'
   sel_jet800 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 800.*GeV'
   sel_jet1000 = 'AntiKt4EMPFlowJets.JetConstitScaleMomentum_pt >= 1000.*GeV'
 
-  #desd_jetA = '(HLT_j100 || HLT_j110 || HLT_j150 || HLT_j175 || HLT_j200 || HLT_j260 || HLT_j300)'
-  #desd_jetB = '( HLT_j320 )'
-  #desd_jetC = '( HLT_j360 ||  HLT_j380 || HLT_j400 )'
-  #desd_jetD = '( HLT_j420 && !HLT_j460 )'
-  #desd_jetE = '( HLT_j460 )'
-  #desd_jetF = '( HLT_j460 && count('+sel_jet600+')>0 && count('+sel_jet800+')==0 )'
-  #desd_jetG = '( HLT_j460 && count('+sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
-  #desd_jetH = '( HLT_j460 && count('+sel_jet1000+')>0 )'
-  desd_jetD  = '( count('+sel_jet400+')>0 && count('+sel_jet500+')==0 )'
-  desd_jetE  = '( count('+sel_jet500+')>0 )'
-  desd_jetF = '( count('+sel_jet500+')>0 && count('+sel_jet600+')>0 && count('+sel_jet800+')==0 )'
-  desd_jetG = '( count('+sel_jet500+')>0 && count('+sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
-  desd_jetH = '( count('+sel_jet500+')>0 && count('+sel_jet1000+')>0 )'
+  desd_jetA = '( HLT_j110_pf_ftf_preselj80_L1J30 || HLT_j175_pf_ftf_preselj140_L1J50 || HLT_j260_pf_ftf_preselj200_L1J75 )'
+  desd_jetC = '( HLT_j360_pf_ftf_preselj225_L1J100 )'
+  desd_jetD = '( HLT_j420_pf_ftf_preselj225_L1J100 && !HLT_j460_pf_ftf_preselj225_L1J100 )'
+  desd_jetE = '( HLT_j460_pf_ftf_preselj225_L1J100 )'
+  desd_jetF = '( HLT_j460_pf_ftf_preselj225_L1J100 && count('+sel_jet600+')>0 && count('+sel_jet800+')==0 )'
+  desd_jetG = '( HLT_j460_pf_ftf_preselj225_L1J100 && count('+sel_jet800+')>0 && count('+sel_jet1000+')==0 )'
+  desd_jetH = '( HLT_j460_pf_ftf_preselj225_L1J100 && count('+sel_jet1000+')>0 )'
 
-
-  #prescaleA = 20
-  #prescaleB = 10
-  #prescaleC = 40
+  prescaleA = 20
+  prescaleC = 40
   prescaleD = 30
   prescaleE = 20
   prescaleF = 10
   prescaleG = 5
   prescaleH = 1
-
-  _info("Running with Offline Triggers only")
-
+  
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationOR
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationAND
   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__PrescaleTool
 
-  """
+
   IDTIDE_SkimmingToolA = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolA", expression = desd_jetA)
   ToolSvc += IDTIDE_SkimmingToolA
   IDTIDE_PrescaleToolA = DerivationFramework__PrescaleTool(name="IDTIDE_PrescaleToolA",Prescale=prescaleA)
@@ -253,20 +221,12 @@ if not IsMonteCarlo and skimEvents:
   IDTIDE_ANDToolA = DerivationFramework__FilterCombinationAND(name="IDTIDE_ANDToolA",FilterList=[IDTIDE_SkimmingToolA,IDTIDE_PrescaleToolA] )
   ToolSvc += IDTIDE_ANDToolA
 
-  IDTIDE_SkimmingToolB = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolB", expression = desd_jetB)
-  ToolSvc += IDTIDE_SkimmingToolB
-  IDTIDE_PrescaleToolB = DerivationFramework__PrescaleTool(name="IDTIDE_PrescaleToolB",Prescale=prescaleB)
-  ToolSvc += IDTIDE_PrescaleToolB
-  IDTIDE_ANDToolB = DerivationFramework__FilterCombinationAND(name="IDTIDE_ANDToolB",FilterList=[IDTIDE_SkimmingToolB,IDTIDE_PrescaleToolB] )
-  ToolSvc += IDTIDE_ANDToolB
-
   IDTIDE_SkimmingToolC = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolC", expression = desd_jetC)
   ToolSvc += IDTIDE_SkimmingToolC
   IDTIDE_PrescaleToolC = DerivationFramework__PrescaleTool(name="IDTIDE_PrescaleToolC",Prescale=prescaleC)
   ToolSvc += IDTIDE_PrescaleToolC
   IDTIDE_ANDToolC = DerivationFramework__FilterCombinationAND(name="IDTIDE_ANDToolC",FilterList=[IDTIDE_SkimmingToolC,IDTIDE_PrescaleToolC] )
   ToolSvc += IDTIDE_ANDToolC
-  """
 
   IDTIDE_SkimmingToolD = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolD", expression = desd_jetD)
   ToolSvc += IDTIDE_SkimmingToolD
@@ -299,11 +259,9 @@ if not IsMonteCarlo and skimEvents:
   IDTIDE_SkimmingToolH = DerivationFramework__xAODStringSkimmingTool(name = "IDTIDE_SkimmingToolH", expression = desd_jetH)
   ToolSvc += IDTIDE_SkimmingToolH
 
-  IDTIDE_ORTool = DerivationFramework__FilterCombinationOR(name="myLogicalCombination", FilterList=[IDTIDE_ANDToolD,IDTIDE_ANDToolE,IDTIDE_ANDToolF,IDTIDE_ANDToolG,IDTIDE_SkimmingToolH] )
+  IDTIDE_ORTool = DerivationFramework__FilterCombinationOR(name="myLogicalCombination", FilterList=[IDTIDE_ANDToolA,IDTIDE_ANDToolC,IDTIDE_ANDToolD,IDTIDE_ANDToolE,IDTIDE_ANDToolF,IDTIDE_ANDToolG,IDTIDE_SkimmingToolH] )
   ToolSvc += IDTIDE_ORTool
-  #IDTIDE_ORTool = DerivationFramework__FilterCombinationOR(name="myLogicalCombination", FilterList=[IDTIDE_ANDToolA,IDTIDE_ANDToolB,IDTIDE_ANDToolC,IDTIDE_ANDToolD,IDTIDE_ANDToolE,IDTIDE_ANDToolF,IDTIDE_ANDToolG,IDTIDE_SkimmingToolH] )
-  #ToolSvc += IDTIDE_ORTool
-
+  
   skimmingTools.append(IDTIDE_ORTool)
   _info( "IDTIDE1.py IDTIDE_ORTool: %s", IDTIDE_ORTool)
   
@@ -444,123 +402,114 @@ IDTIDE1Stream.AcceptAlgs( accept_algs )
 #====================================================================
 # CONTENT LIST  
 #====================================================================
-IDTIDE1Stream.AddItem("xAOD::EventInfo#*")
-if not select_aux_items :
-   IDTIDE1Stream.AddItem("xAOD::EventAuxInfo#*")
-else :
-   IDTIDE1Stream.AddItem('xAOD::EventAuxInfo#EventInfoAux' \
-                      +'.TrtPhaseTime.actualInteractionsPerCrossing.averageInteractionsPerCrossing.backgroundFlags.bcid' \
-                      +'.beamPosSigmaX.beamPosSigmaXY.beamPosSigmaY.beamPosSigmaZ.beamPosX.beamPosY.beamPosZ.beamStatus.beamTiltXZ.beamTiltYZ' \
-                      + '.coreFlags.detDescrTags.detectorMask0.detectorMask1.detectorMask2.detectorMask3.eventNumber.eventTypeBitmask.extendedLevel1ID.forwardDetFlags.larFlags' \
-                      + '.level1TriggerType.lumiBlock.lumiFlags.mcChannelNumber.mcEventNumber.mcEventWeights.muonFlags.pixelFlags.runNumber.sctFlags.statusElement.streamTagDets' \
-                      + '.streamTagNames.streamTagObeysLumiblock.streamTagRobs.streamTagTypes.tileFlags.timeStamp.timeStampNSOffset.trtFlags')
+from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+IDTIDE1SlimmingHelper = SlimmingHelper("IDTIDE1SlimmingHelper")
 
-IDTIDE1Stream.AddItem("xAOD::EventShape#*")
-IDTIDE1Stream.AddItem("xAOD::EventShapeAuxInfo#*")
-IDTIDE1Stream.AddItem("xAOD::TriggerMenuContainer#*")
-IDTIDE1Stream.AddItem("xAOD::TriggerMenuContainer#TriggerMenu")
-IDTIDE1Stream.AddItem("xAOD::TriggerMenuAuxContainer#*")
-IDTIDE1Stream.AddItem("xAOD::TriggerMenuAuxContainer#TriggerMenuAux.")
-IDTIDE1Stream.AddItem("xAOD::TrigConfKeys#*")
-IDTIDE1Stream.AddItem("xAOD::TrigDecision#*")
-IDTIDE1Stream.AddItem("xAOD::TrigDecisionAuxInfo#*")
-#IDTIDE1Stream.AddItem("xAOD::TrigNavigation#*")
-#IDTIDE1Stream.AddItem("xAOD::TrigNavigationAuxInfo#*")
-IDTIDE1Stream.AddItem("xAOD::TrackParticleContainer#InDetTrackParticles")
-IDTIDE1Stream.AddItem("xAOD::TrackParticleContainer#InDetLargeD0TrackParticles")
-if not select_aux_items :
-  IDTIDE1Stream.AddItem("xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux.-caloExtension.-cellAssociation.-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition")
-  IDTIDE1Stream.AddItem("xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux.-caloExtension.-cellAssociation.-clusterAssociation.-trackParameterCovarianceMatrices.-parameterX.-parameterY.-parameterZ.-parameterPX.-parameterPY.-parameterPZ.-parameterPosition")
-else :
-  tp_items = '.IDTIDE1_biased_PVd0Sigma.IDTIDE1_biased_PVz0Sigma.IDTIDE1_biased_PVz0SigmaSinTheta.IDTIDE1_biased_d0.IDTIDE1_biased_d0Sigma.IDTIDE1_biased_z0.IDTIDE1_biased_z0Sigma' \
-           + '.IDTIDE1_biased_z0SigmaSinTheta.IDTIDE1_biased_z0SinTheta.IDTIDE1_unbiased_PVd0Sigma.IDTIDE1_unbiased_PVz0Sigma.IDTIDE1_unbiased_PVz0SigmaSinTheta.IDTIDE1_unbiased_d0' \
-           + '.IDTIDE1_unbiased_d0Sigma.IDTIDE1_unbiased_z0.IDTIDE1_unbiased_z0Sigma.IDTIDE1_unbiased_z0SigmaSinTheta.IDTIDE1_unbiased_z0SinTheta' \
-           + '.TRTTrackOccupancy.TRTdEdx.TRTdEdxUsedHits.TTVA_AMVFVertices.TTVA_AMVFWeights' \
-           + '.TrkBLX.TrkBLY.TrkBLZ.TrkIBLX.TrkIBLY.TrkIBLZ.TrkL1X.TrkL1Y.TrkL1Z.TrkL2X.TrkL2Y.TrkL2Z' \
-           + '.beamlineTiltX.beamlineTiltY.btagIp_d0.btagIp_d0Uncertainty.btagIp_trackDisplacement.btagIp_trackMomentum.btagIp_z0SinTheta.btagIp_z0SinThetaUncertainty' \
-           + '.chiSquared.d0.definingParametersCovMatrixDiag.definingParametersCovMatrixOffDiag.eProbabilityComb.eProbabilityHT.eProbabilityNN' \
-           + '.expectInnermostPixelLayerHit.expectNextToInnermostPixelLayerHit.hitPattern.identifierOfFirstHit.msosLink.nBC_meas.numberDoF.numberOfContribPixelLayers' \
-           + '.numberOfDBMHits.numberOfGangedFlaggedFakes.numberOfGangedPixels.numberOfIBLOverflowsdEdx.numberOfInnermostPixelLayerHits.numberOfInnermostPixelLayerOutliers' \
-           + '.numberOfInnermostPixelLayerSharedHits.numberOfInnermostPixelLayerSplitHits.numberOfNextToInnermostPixelLayerHits.numberOfNextToInnermostPixelLayerOutliers' \
-           + '.numberOfNextToInnermostPixelLayerSharedHits.numberOfNextToInnermostPixelLayerSplitHits.numberOfOutliersOnTrack.numberOfPhiHoleLayers.numberOfPhiLayers' \
-           + '.numberOfPixelDeadSensors.numberOfPixelHits.numberOfPixelHoles.numberOfPixelOutliers.numberOfPixelSharedHits.numberOfPixelSplitHits.numberOfPixelSpoiltHits' \
-           + '.numberOfPrecisionHoleLayers.numberOfPrecisionLayers.numberOfSCTDeadSensors.numberOfSCTDoubleHoles.numberOfSCTHits.numberOfSCTHoles.numberOfSCTOutliers' \
-           + '.numberOfSCTSharedHits.numberOfSCTSpoiltHits.numberOfTRTDeadStraws.numberOfTRTHighThresholdHits.numberOfTRTHighThresholdHitsTotal.numberOfTRTHighThresholdOutliers' \
-           + '.numberOfTRTHits.numberOfTRTHoles.numberOfTRTOutliers.numberOfTRTSharedHits.numberOfTRTTubeHits.numberOfTRTXenonHits.numberOfTriggerEtaHoleLayers' \
-           + '.numberOfTriggerEtaLayers.numberOfUsedHitsdEdx' \
-           + '.particleHypothesis.patternRecoInfo.phi.pixeldEdx.qOverP.radiusOfFirstHit.standardDeviationOfChi2OS.theta.trackFitter.trackLink.trackProperties' \
-           + '.vx.vy.vz.z0'
-  if IsMonteCarlo :
-    tp_items +=  '.truthMatchProbability.truthParticleLink.truthOrigin.truthType'
-  IDTIDE1Stream.AddItem("xAOD::TrackParticleAuxContainer#InDetTrackParticlesAux" + tp_items)
-  IDTIDE1Stream.AddItem("xAOD::TrackParticleAuxContainer#InDetLargeD0TrackParticlesAux" + tp_items)
+AllVariables = []
+StaticContent = []
+SmartCollections = []
+ExtraVariables = []
 
-IDTIDE1Stream.AddItem("xAOD::TrackParticleClusterAssociationContainer#InDetTrackParticlesClusterAssociations*")
-IDTIDE1Stream.AddItem("xAOD::TrackParticleClusterAssociationAuxContainer#InDetTrackParticlesClusterAssociations*")
-IDTIDE1Stream.AddItem("xAOD::TrackParticleClusterAssociationContainer#InDetLargeD0TrackParticlesClusterAssociations*")
-IDTIDE1Stream.AddItem("xAOD::TrackParticleClusterAssociationAuxContainer#InDetLargeD0TrackParticlesClusterAssociations*")
-# to build jets
-IDTIDE1Stream.AddItem("xAOD::FlowElementContainer#JetETMissNeutralParticleFlowObjects")
-IDTIDE1Stream.AddItem("xAOD::FlowElementAuxContainer#JetETMissNeutralParticleFlowObjectsAux.")
-IDTIDE1Stream.AddItem("xAOD::FlowElementContainer#JetETMissChargedParticleFlowObjects")
-IDTIDE1Stream.AddItem("xAOD::FlowElementAuxContainer#JetETMissChargedParticleFlowObjectsAux.")
+IDTIDE1SlimmingHelper.AppendToDictionary.update ({"Muons":"xAOD::MuonContainer", "MuonsAux":"xAOD::MuonAuxContainer", 
+    "Electrons":"xAOD::ElectronContainer", "ElectronsAux":"xAOD::ElectronAuxContainer",
+    "Photons":"xAOD::PhotonContainer", "PhotonsAux":"xAOD::PhotonAuxContainer",
+    "JetETMissNeutralParticleFlowObjects":"xAOD::FlowElementContainer", "JetETMissNeutralParticleFlowObjectsAux":"xAOD::FlowElementAuxContainer",
+    "JetETMissChargedParticleFlowObjects":"xAOD::FlowElementContainer", "JetETMissChargedParticleFlowObjectsAux":"xAOD::FlowElementAuxContainer",
+    "TauJets":"xAOD::TauJetContainer", "TauJetsAux":"xAOD::TauJetAuxContainer",
+    "InDetTrackParticles":"xAOD::TrackParticleContainer", "InDetTrackParticlesAux":"xAOD::TrackParticleAuxContainer",
+    "InDetLargeD0TrackParticles":"xAOD::TrackParticleContainer", "InDetLargeD0TrackParticlesAux":"xAOD::TrackParticleAuxContainer", 
+    "PixelClusters":"xAOD::TrackMeasurementValidationContainer", "PixelClustersAux":"xAOD::TrackMeasurementValidationAuxContainer", 
+    "SCT_Clusters":"xAOD::TrackMeasurementValidationContainer", "SCT_ClustersAux":"xAOD::TrackMeasurementValidationAuxContainer", 
+    "Kt4EMTopoOriginEventShape":"xAOD::EventShape", "Kt4EMTopoOriginEventShapeAux":"xAOD::EventShapeAuxInfo",
+    "Kt4LCTopoOriginEventShape":"xAOD::EventShape", "Kt4LCTopoOriginEventShapeAux":"xAOD::EventShapeAuxInfo",
+    "NeutralParticleFlowIsoCentralEventShape":"xAOD::EventShape", "NeutralParticleFlowIsoCentralEventShapeAux":"xAOD::EventShapeAuxInfo",
+    "NeutralParticleFlowIsoForwardEventShape":"xAOD::EventShape", "NeutralParticleFlowIsoForwardEventShapeAux":"xAOD::EventShapeAuxInfo",
+    "TopoClusterIsoCentralEventShape":"xAOD::EventShape", "TopoClusterIsoCentralEventShapeAux":"xAOD::EventShapeAuxInfo",
+    "TopoClusterIsoForwardEventShape":"xAOD::EventShape", "TopoClusterIsoForwardEventShapeAux":"xAOD::EventShapeAuxInfo"}
+)
 
-keys = ['PixelMSOSs'] if idDxAOD_doPix else []
-keys+= ['SCT_MSOSs']  if idDxAOD_doSct else []
-keys+= ['TRT_MSOSs']  if idDxAOD_doTrt else []
-for key in keys :
-  IDTIDE1Stream.AddItem("xAOD::TrackStateValidationContainer#%s*" % key)
-  IDTIDE1Stream.AddItem("xAOD::TrackStateValidationAuxContainer#%s*" % key)
-keys = []
-if idDxAOD_doPix and not select_aux_items :
-  keys += ['PixelClusters'] if idDxAOD_doPix else []
-elif idDxAOD_doPix :
-  keys += ['PixelClustersAux' \
-           +'.BiasVoltage.DCSState.DepletionVoltage.LVL1A.LorentzShift.NN_etaPixelIndexWeightedPosition.NN_localEtaPixelIndexWeightedPosition.NN_localPhiPixelIndexWeightedPosition' \
-           + '.NN_matrixOfCharge.NN_matrixOfToT.NN_phiBS.NN_phiPixelIndexWeightedPosition.NN_sizeX.NN_sizeY.NN_thetaBS.NN_vectorOfPitchesY.Temperature.ToT.bec.broken.charge.detectorElementID' \
-           + '.eta_module.eta_pixel_index.gangedPixel.globalX.globalY.globalZ.hasBSError.identifier.isFake.isSplit.layer.localX.localXError.localXYCorrelation.localY.localYError.nRDO.phi_module' \
-           + '.phi_pixel_index.rdoIdentifierList.rdo_Aterm.rdo_Cterm.rdo_Eterm.rdo_charge.rdo_eta_pixel_index.rdo_phi_pixel_index.rdo_tot.sihit_barcode.sizePhi.sizeZ.splitProbability1' \
-           + '.splitProbability2.truth_barcode'
-           ]
-  if IsMonteCarlo :
-    keys[-1] += '.NN_barcode.NN_energyDep.NN_motherBarcode.NN_motherPdgid.NN_pathlengthX.NN_pathlengthY.NN_pathlengthZ.NN_pdgid.NN_phi.NN_positionsX.NN_positionsY' \
-      + '.NN_positions_indexX.NN_positions_indexY.NN_theta.NN_trueP.sdo_depositsBarcode.sdo_depositsEnergy.sdo_words.sihit_endPosX.sihit_endPosY.sihit_endPosZ.sihit_energyDeposit' \
-      + '.sihit_meanTime.sihit_pdgid.sihit_startPosX.sihit_startPosY.sihit_startPosZ'
+SmartCollections += ["Muons", "Electrons", "Photons"]
 
-keys+= ['SCT_Clusters']     if idDxAOD_doSct else []
-keys+= ['TRT_DriftCircles'] if idDxAOD_doTrt else []
-print('DEBUG keys %s' % (keys))
-for key in keys :
-  IDTIDE1Stream.AddItem("xAOD::TrackMeasurementValidationContainer#%s*" % key.split('Aux.',1)[0])
-  IDTIDE1Stream.AddItem("xAOD::TrackMeasurementValidationAuxContainer#%s%s" % (key,"*" if key.find(".")<0 else ""))
-IDTIDE1Stream.AddItem("xAOD::VertexContainer#PrimaryVertices")
-IDTIDE1Stream.AddItem("xAOD::VertexAuxContainer#PrimaryVerticesAux.-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV")
-IDTIDE1Stream.AddItem("xAOD::ElectronContainer#Electrons")
-IDTIDE1Stream.AddItem("xAOD::ElectronAuxContainer#ElectronsAux.")
-IDTIDE1Stream.AddItem("xAOD::PhotonContainer#Photons")
-IDTIDE1Stream.AddItem("xAOD::PhotonAuxContainer#PhotonsAux.")
-IDTIDE1Stream.AddItem("xAOD::MuonContainer#Muons")
-IDTIDE1Stream.AddItem("xAOD::MuonAuxContainer#MuonsAux.")
-IDTIDE1Stream.AddItem("xAOD::TauJetContainer#TauJets")
-IDTIDE1Stream.AddItem("xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters.")
-IDTIDE1Stream.AddItem("xAOD::JetContainer#AntiKt4EMTopoJets")
-IDTIDE1Stream.AddItem("xAOD::JetAuxContainer#AntiKt4EMTopoJetsAux.-PseudoJet")
-IDTIDE1Stream.AddItem("xAOD::JetContainer#AntiKt4EMPFlowJets")
-IDTIDE1Stream.AddItem("xAOD::JetAuxContainer#AntiKt4EMPFlowJetsAux.-PseudoJet")
-IDTIDE1Stream.AddItem("xAOD::JetContainer#AntiKt2PV0TrackJets")
-IDTIDE1Stream.AddItem("xAOD::JetAuxContainer#AntiKt2PV0TrackJetsAux.-PseudoJet")
-IDTIDE1Stream.AddItem("xAOD::BTaggingContainer#BTagging_AntiKt4EMTopo")
-IDTIDE1Stream.AddItem("xAOD::BTaggingAuxContainer#BTagging_AntiKt4EMTopoAux.")
-IDTIDE1Stream.AddItem("xAOD::BTaggingContainer#BTagging_AntiKt4EMPFlow")
-IDTIDE1Stream.AddItem("xAOD::BTaggingAuxContainer#BTagging_AntiKt4EMPFlowAux.")
+AllVariables += ["EventInfo", 
+    "JetETMissNeutralParticleFlowObjects", 
+    "JetETMissChargedParticleFlowObjects",
+    "InDetTrackParticles", 
+    "InDetLargeD0TrackParticles", 
+    "PixelClusters", 
+    "SCT_Clusters", 
+    "Kt4EMTopoOriginEventShape", 
+    "Kt4LCTopoOriginEventShape", 
+    "NeutralParticleFlowIsoCentralEventShape", 
+    "NeutralParticleFlowIsoForwardEventShape",
+    "TopoClusterIsoCentralEventShape", 
+    "TopoClusterIsoForwardEventShape", 
+]
+
+IDTIDE1SlimmingHelper.AppendToDictionary.update({"TauJets":"xAOD::TauJetContainer", "TauJetsAux": "xAOD::TauJetAuxContainer",
+    "Kt4EMPFlowEventShape":"xAOD::EventShape", "Kt4EMPFlowEventShapeAux":"xAOD::EventShapeAuxInfo",
+    "PrimaryVertices":"xAOD::VertexContainer", "PrimaryVerticesAux":"xAOD::VertexAuxContainer",
+    "InDetTrackParticlesClusterAssociations":"xAOD::TrackParticleClusterAssociationContainer", "InDetTrackParticlesClusterAssociationsAux":"xAOD::TrackParticleClusterAssociationAuxContainer",
+    "AntiKt4EMTopoJets":"xAOD::JetContainer", "AntiKt4EMTopoJetsAux":"xAOD::JetAuxContainer",
+    "AntiKt4EMPFlowJets":"xAOD::JetContainer", "AntiKt4EMPFlowJetsAux":"xAOD::JetAuxContainer",
+    "BTagging_AntiKt4EMTopo":"xAOD::BTaggingContainer", "BTagging_AntiKt4EMTopoAux":"xAOD::BTaggingAuxContainer",
+    "BTagging_AntiKt4EMPFlow":"xAOD::BTaggingContainer", "BTagging_AntiKt4EMPFlowAux":"xAOD::BTaggingAuxContainer"}
+)
+
+ExtraVariables += ["TauJets.ABS_ETA_LEAD_TRACK.ClusterTotalEnergy.ClustersMeanCenterLambda.ClustersMeanEMProbability.ClustersMeanFirstEngDens.ClustersMeanPresamplerFrac.ClustersMeanSecondLambda.EMFRACTIONATEMSCALE_MOVEE3.EMFracFixed.GhostMuonSegmentCount.LeadClusterFrac.NNDecayMode.NNDecayModeProb_1p0n.NNDecayModeProb_1p1n.NNDecayModeProb_1pXn.NNDecayModeProb_3p0n.NNDecayModeProb_3pXn.PFOEngRelDiff.PanTau_DecayModeExtended.TAU_ABSDELTAETA.TAU_ABSDELTAPHI.TAU_SEEDTRK_SECMAXSTRIPETOVERPT.UpsilonCluster.absipSigLeadTrk.chargedFELinks.etHotShotDR1.etHotShotDR1OverPtLeadTrk.etHotShotWin.etHotShotWinOverPtLeadTrk.etaCombined.hadLeakFracFixed.leadTrackProbHT.mCombined.mu.nConversionTracks.nFakeTracks.nModifiedIsolationTracks.nVtxPU.neutralFELinks.passThinning.phiCombined.ptCombined.ptIntermediateAxisEM.rho"]
+ExtraVariables += ["PrimaryVertices.sumPt2.x.y.z"]
+
+AllVariables += ["Kt4EMPFlowEventShape", "InDetTrackParticlesClusterAssociations", 
+                  "AntiKt4EMTopoJets", "AntiKt4EMPFlowJets",
+                  "BTagging_AntiKt4EMTopo", "BTagging_AntiKt4EMPFlow"]
+
+if idDxAOD_doPix:     
+    IDTIDE1SlimmingHelper.AppendToDictionary.update( {'PixelMSOSs':'xAOD::TrackStateValidationContainer','PixelMSOSsAux':'xAOD::TrackStateValidationAuxContainer'} )
+    AllVariables += ["PixelMSOSs"]
+
+if idDxAOD_doSct:
+    IDTIDE1SlimmingHelper.AppendToDictionary.update( {'SCT_MSOSs':'xAOD::TrackStateValidationContainer','SCT_MSOSsAux':'xAOD::TrackStateValidationAuxContainer'} )
+    AllVariables += ["SCT_MSOSs"]
+
+if idDxAOD_doTrt:
+    IDTIDE1SlimmingHelper.AppendToDictionary.update( {'TRT_MSOSs':'xAOD::TrackStateValidationContainer','TRT_MSOSsAux':'xAOD::TrackStateValidationAuxContainer'} )
+    AllVariables += ["TRT_MSOSs"]
+
 if IsMonteCarlo:
-  IDTIDE1Stream.AddItem("xAOD::TruthParticleContainer#*")
-  IDTIDE1Stream.AddItem("xAOD::TruthParticleAuxContainer#TruthParticlesAux.-caloExtension")
-  IDTIDE1Stream.AddItem("xAOD::TruthVertexContainer#*")
-  IDTIDE1Stream.AddItem("xAOD::TruthVertexAuxContainer#*.-vxTrackAtVertex")
-  IDTIDE1Stream.AddItem("xAOD::TruthEventContainer#*")
-  IDTIDE1Stream.AddItem("xAOD::TruthEventAuxContainer#*")
-  IDTIDE1Stream.AddItem("xAOD::JetContainer#AntiKt4TruthJets")
-  IDTIDE1Stream.AddItem("xAOD::JetAuxContainer#AntiKt4TruthJetsAux.-PseudoJet")
 
-print(IDTIDE1Stream)
+    IDTIDE1SlimmingHelper.AppendToDictionary.update({"AntiKt4TruthJets":"xAOD::JetContainer", "AntiKt4TruthJetsAux":"xAOD::JetAuxContainer",
+        "JetInputTruthParticles":"xAOD::TruthParticleContainer",
+        "JetInputTruthParticlesNoWZ":"xAOD::TruthParticleContainer",
+        "TruthEvents":"xAOD::TruthEventContainer", "TruthEventsAux":"xAOD::TruthEventAuxContainer",
+        "TruthParticles":"xAOD::TruthParticleContainer", "TruthParticlesAux":"xAOD::TruthParticleAuxContainer"}
+    )
+
+    AllVariables += ["AntiKt4TruthJets", 
+                      "JetInputTruthParticles",
+                      "JetInputTruthParticlesNoWZ",
+                      "TruthEvents", 
+                      "TruthParticles",
+                      "egammaTruthParticles",
+                      "MuonTruthParticles",
+                      "LRTegammaTruthParticles",
+                      "TruthVertices" 
+                    ]
+
+    list_aux = ["BHadronsFinal", "BHadronsInitial", "BQuarksFinal",  
+                "CHadronsFinal", "CHadronsInitial", "CQuarksFinal",
+                "HBosons", "Partons", "TQuarksFinal", "TausFinal", "WBosons", "ZBosons"] 
+    for item in list_aux:
+        label = "TruthLabel"+item
+        labelAux = label+"Aux"
+        IDTIDE1SlimmingHelper.AppendToDictionary.update( { label : "xAOD::TruthParticleContainer", labelAux : "xAOD::TruthParticleAuxContainer"} )
+        AllVariables += [label]
+# End of isMC block      
+
+IDTIDE1SlimmingHelper.IncludeTriggerNavigation = True   # Trigger info is actually stored only when running on data...
+IDTIDE1SlimmingHelper.IncludeAdditionalTriggerContent = True 
+
+IDTIDE1SlimmingHelper.AllVariables = AllVariables
+IDTIDE1SlimmingHelper.StaticContent = StaticContent
+IDTIDE1SlimmingHelper.SmartCollections = SmartCollections
+IDTIDE1SlimmingHelper.ExtraVariables = ExtraVariables
+
+IDTIDE1SlimmingHelper.AppendContentToStream(IDTIDE1Stream)

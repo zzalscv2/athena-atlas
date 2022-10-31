@@ -34,7 +34,7 @@ FastChain_tf.py \
   --digiSeedOffset2 727 \
   --conditionsTag OFLCOND-MC16-SDR-RUN2-09  \
   --geometryVersion ATLAS-R2-2016-01-00-01 \
-  --preInclude 'all:Campaigns/MC16Simulation.py,Campaigns/MC20a.py' \
+  --preInclude 'all:Campaigns/MC16SimulationNoIoV.py,Campaigns/MC20a.py' \
   --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
   --DataRunNumber '284500' \
   --imf False

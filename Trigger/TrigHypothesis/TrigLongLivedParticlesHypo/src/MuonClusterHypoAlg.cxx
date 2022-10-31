@@ -79,6 +79,8 @@ StatusCode MuonClusterHypoAlg::execute(const EventContext& ctx) const
     auto t1            = Monitored::Timer("TIME_HypoAlg");
     auto t2            = Monitored::Timer("TIME_HypoAlg_DecisionLoop");
 
+    t1.start();
+    
     auto mon = Monitored::Group(m_monTool, acceptAll, nRoIEndCap, nRoIBarrel, etaMax, etaMid, CluNum, isPass, t1, t2);
 
     if(acceptAll) {
@@ -88,46 +90,62 @@ StatusCode MuonClusterHypoAlg::execute(const EventContext& ctx) const
         ATH_MSG_DEBUG("and endcap muon RoI clusters with |eta| > : " << etaMid << "and >= " <<nRoIEndCap << " RoIs");
     }
 
-    // I think this imports previous trigger chain decisions, which we'll append to?
+    // Obtain incoming Decision Objects (one per L1 muon ROI)
     auto previousDecisionsHandle = SG::makeHandle( decisionInput(), ctx );
     ATH_CHECK( previousDecisionsHandle.isValid() );
     ATH_MSG_DEBUG( "Running with "<< previousDecisionsHandle->size() <<" previous decisions");
 
-    // New trigger decisions
-    SG::WriteHandle<DecisionContainer> outputHandle = createAndStore(decisionOutput(), ctx); // Creating a decision output for our HypoTool
+    // New output trigger decisions container
+    SG::WriteHandle<DecisionContainer> outputHandle = createAndStore(decisionOutput(), ctx);
     auto decisions = outputHandle.ptr();
 
-    // Getting previous Decision
-    const Decision *previousDecision = previousDecisionsHandle->at(0);
+    if (previousDecisionsHandle->size() == 0) {
+        ATH_MSG_DEBUG( "No incoming decision objects, nothing to do");
+        return StatusCode::SUCCESS;
+    }
 
     // Get the TrigCompositeContainer linked to the ReadHandleKey
     // it contains the Muon RoI Cluster information
     auto compContHdl = SG::makeHandle(m_outputCompositesKey, ctx);
     auto compCont = compContHdl.get();
 
+    if (compCont->size() == 0) {
+        ATH_MSG_DEBUG( "No reconstructed muon-roi-cluster summary object, nothing to do");
+        return StatusCode::SUCCESS;
+    } else if (compCont->size() > 1) {
+        ATH_MSG_ERROR( "This HypoAlg is only expecting exactly one reconstructed muon cluster object, but MuonCluster reconstruction has output " << compCont->size() << ". Cannot currently deal with this.");
+        return StatusCode::FAILURE;
+    }
+
     // Creating a DecisionIDContainer to hold all active chain IDs
     DecisionIDContainer prev;
-    decisionIDs(previousDecision, prev);
 
-    // Create new decisions and link to previous decision
-    Decision* d = newDecisionIn(decisions, previousDecision, hypoAlgNodeName(), ctx);
-    linkToPrevious(d, previousDecision, ctx);
-    decisionIDs(d, prev);                   // This adds the active chain ID to prev
+    // Create new output decision object
+    // as we have only one output physics object ("muCluster") and many inputs (L1 muon ROI) we link multiple parents
+    Decision* d = newDecisionIn(decisions, hypoAlgNodeName());
+
+    // Link our physics object ("muCluster")
     d->setObjectLink( featureString(), ElementLink<xAOD::TrigCompositeContainer>(*compCont, 0, ctx) );
 
+    // Link our parents (L1 muon ROI)
+    for (const Decision* previousDecision : *previousDecisionsHandle) {
+        linkToPrevious(d, previousDecision, ctx);
+        decisionIDs(previousDecision, prev);  // Collate active chains on this L1 ROI (previousDecision) into prev
+    }
+   
     // Creating the DecisionInfo struct to pass to the HypoTool
     MuonClusterHypoTool::DecisionInfo tool_info{d, compCont, prev};
 
+    t2.start();
     for ( auto& tool: m_hypoTools ){
         ATH_CHECK( tool->decide(tool_info) );
     }
+    t2.stop();
 
-    ATH_CHECK(hypoBaseOutputProcessing(outputHandle));
-
-    t2.start();
     // We only have 1 decision. If more decisions are needed in the future, wrap 'if' in a loop over the decision container.
     if (!allFailed(d)) {isPass = 1;}    // allFailed returns true is d is empty, else returns false.
-    t2.stop();
+    
+    ATH_CHECK(hypoBaseOutputProcessing(outputHandle));
 
     return StatusCode::SUCCESS;
 

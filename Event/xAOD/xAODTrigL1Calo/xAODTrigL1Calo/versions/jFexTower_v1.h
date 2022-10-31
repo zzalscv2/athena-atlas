@@ -67,10 +67,10 @@ namespace xAOD {
       void setJFEXdataID(uint8_t); /// setter for the above
 
       /// Is the Tower saturated?
-      const std::vector<char>& isSaturated() const; /// getter for the saturation flag of jTower
+      const std::vector<char>& isjTowerSat() const; /// getter for the saturation flag of jTower
       /// set saturation flag of the Tower
-      void setIsSaturated(const std::vector<char>&); ///setter for the above
-      void setIsSaturated(std::vector<char>&&); ///setter for the above
+      void setIsjTowerSat(const std::vector<char>&); ///setter for the above
+      void setIsjTowerSat(std::vector<char>&&); ///setter for the above
 
       /// get the Simulation ID
       uint32_t jFEXtowerID() const; /// getter for the jtower simulation ID
@@ -96,7 +96,7 @@ namespace xAOD {
                         const uint8_t Fpga,
                         const uint8_t Channel,
                         const uint8_t JFEXdataID,
-                        const std::vector<char>& IsSaturated);
+                        const std::vector<char>& IsjTowerSat);
 
     
     private:

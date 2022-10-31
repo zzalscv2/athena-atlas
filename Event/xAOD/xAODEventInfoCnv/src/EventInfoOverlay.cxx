@@ -125,7 +125,8 @@ StatusCode EventInfoOverlay::execute(const EventContext& ctx) const
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   if (m_validateBeamSpot.value()) {
     if (std::abs(signalEvent->beamPosSigmaZ() - bkgEvent->beamPosSigmaZ()) > 1e-5f) {
-      ATH_MSG_ERROR("Beam spot size does not match between signal and background events");
+      ATH_MSG_ERROR("Beam spot size does not match between signal and background events ("
+                    << signalEvent->beamPosSigmaZ() << " vs " << bkgEvent->beamPosSigmaZ() << ")");
       return StatusCode::FAILURE;
     }
   } else {

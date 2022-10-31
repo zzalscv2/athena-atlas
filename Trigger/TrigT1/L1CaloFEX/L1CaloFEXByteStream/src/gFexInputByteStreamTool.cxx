@@ -197,6 +197,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         // Fill the gTower EDM with the corresponding towers
         int iEta = 0;
         int iPhi = 0;
+        float Eta = 0;
+        float Phi = 0;
         int Et  = 0;
         int Fpga = 0;
         char IsSaturated = 0;
@@ -211,8 +213,9 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 iPhi = irow;
                 Et = AtwrS[irow][icol];
                 Fpga = 0;
+                getEtaPhi(Eta, Phi, iEta, iPhi);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);                    
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);                    
 
   
 
@@ -225,8 +228,9 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 iPhi = irow;
                 Et = BtwrS[irow][icol];
                 Fpga = 1;
+                getEtaPhi(Eta, Phi, iEta, iPhi);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);     
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);     
             }
         }
         // Save towers from FPGA C in gTower EDM
@@ -236,16 +240,18 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 iPhi = irow;
                 Et = CtwrS[irow][icol];
                 Fpga = 2;
+                getEtaPhi(Eta, Phi, iEta, iPhi);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);     
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);     
             }
             for (int icol = twr_cols/2; icol < twr_cols; icol++){                
                 iEta = icol + 26;
                 iPhi = irow;
                 Et = CtwrS[irow][icol];
                 Fpga = 2;
+                getEtaPhi(Eta, Phi, iEta, iPhi);
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
-                gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);     
+                gTowersContainer->back()->initialize(iEta, iPhi, Eta, Phi, Et, Fpga, IsSaturated);     
             }
         }  
         
@@ -1058,6 +1064,21 @@ void gFexInputByteStreamTool::gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale
             twrScaled[irow][icolumn] = twr[irow][icolumn]/scale; 
         }
     }
+}
+
+void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const{
+    
+    float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
+    const std::vector<float> s_EtaCenter = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
+                                             -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
+                                             -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
+                                             1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
+                                             3.2, 3.4, 3.7, 4.2, 4.7};
+    
+
+    Eta = s_EtaCenter[iEta];     
+    Phi = ( (iPhi * s_centralPhiWidth) + s_centralPhiWidth/2) - M_PI;
+  
 }
 
 /// xAOD->BS conversion

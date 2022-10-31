@@ -357,6 +357,8 @@ public:
     m_noiseSigLG = noiseSigLG;
   }
 
+  void SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG); 
+
   void SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float maxAmpHG, float maxAmpLG);
 
   void SetTauT0Values(bool fixTau1, bool fixTau2, float tau1, float tau2, float t0HG, float t0LG);
