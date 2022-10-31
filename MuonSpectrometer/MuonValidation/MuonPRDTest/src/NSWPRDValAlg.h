@@ -82,6 +82,8 @@ private:
     Gaudi::Property<bool> m_doTGCDigit{this, "doTGCDigit", false};            // switch on the output of the TGC digitization
     Gaudi::Property<bool> m_doTGCRDO{this, "doTGCRDO", false};                // switch on the output of the TGC RDO
     Gaudi::Property<bool> m_doTGCPRD{this, "doTGCPRD", false};                // switch on the output of the TGC prepdata
+    Gaudi::Property<bool> m_doMMSDO{this, "doMMSDO", false};                  // switch on the output of the MicroMegas SDO
+    Gaudi::Property<bool> m_doSTGCSDO{this, "doSTGCSDO", false};              // switch on the output of the sTGC SDO
 
     Gaudi::Property<std::string> m_Truth_ContainerName{this, "Truth_ContainerName", "TruthEvent"};
     Gaudi::Property<std::string> m_MuEntry_ContainerName{this, "MuonEntryLayer_ContainerName", "MuonEntryLayer"};

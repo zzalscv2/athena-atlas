@@ -42,7 +42,8 @@ StatusCode NSWPRDValAlg::initialize() {
     if (m_doSTGCHit) { m_tree.addBranch(std::make_unique<sTGCSimHitVariables>(m_tree, m_NSWsTGC_ContainerName.value(), msgLevel())); }
     if (m_doSTGCDigit) {
         m_tree.addBranch(std::make_unique<sTgcDigitVariables>(m_tree, m_NSWsTGC_DigitContainerName.value(), msgLevel()));
-        // Take SDO conainer
+    }
+    if (m_doSTGCSDO) {
         m_tree.addBranch(std::make_unique<sTgcSDOVariables>(m_tree, m_NSWsTGC_SDOContainerName.value(), msgLevel()));
     }
     if (m_doSTGCFastDigit) { m_tree.addBranch(std::make_unique<sTgcSDOVariables>(m_tree, "sTGCfast_SDO", msgLevel())); }
@@ -52,7 +53,8 @@ StatusCode NSWPRDValAlg::initialize() {
     if (m_doMMHit) { m_tree.addBranch(std::make_unique<MMSimHitVariables>(m_tree, m_NSWMM_ContainerName.value(), msgLevel())); }
     if (m_doMMDigit) {
         m_tree.addBranch(std::make_unique<MMDigitVariables>(m_tree, m_NSWMM_DigitContainerName.value(), msgLevel()));
-        // Take SDO conainer
+    }
+    if (m_doMMSDO) {
         m_tree.addBranch(std::make_unique<MMSDOVariables>(m_tree, m_NSWMM_SDOContainerName.value(), msgLevel()));
     }
     if (m_doMMFastDigit) { m_tree.addBranch(std::make_unique<MMSDOVariables>(m_tree, "MMfast_SDO", msgLevel())); }

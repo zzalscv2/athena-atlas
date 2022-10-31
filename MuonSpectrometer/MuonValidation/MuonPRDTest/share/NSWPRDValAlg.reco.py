@@ -43,6 +43,10 @@ NSWPRDValAlg.doTGCDigit = False # no TGC_DIGITS present in RDO files
 NSWPRDValAlg.doTGCRDO = False
 NSWPRDValAlg.doTGCPRD = False
 
+#Turn off by default but keep the option to turn on for validation of the NSW 
+NSWPRDValAlg.doMMSDO   = False
+NSWPRDValAlg.doSTGCSDO = False
+
 if not MuonGeometryFlags.hasCSC():
   NSWPRDValAlg.CscRDODecoder = '' # Remove the tool to prevent initializing CSC calibration tool
 NSWPRDValAlg.doCSCHit = False # no CSC_Hits present in RDO files
