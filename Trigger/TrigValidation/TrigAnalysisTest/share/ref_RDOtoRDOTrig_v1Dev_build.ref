@@ -8745,14 +8745,12 @@ HLT_g35_tight_icalotight_mu15noL1_mu2noL1_L1EM24VHI:
     2: 8
     3: 6
     4: 6
-    5: 1
   stepFeatures:
     0: 11
     1: 8
     2: 8
     3: 6
     4: 6
-    5: 4
 HLT_g35_tight_icalotight_mu18noL1_L1EM24VHI:
   eventCount: 0
   stepCounts:
@@ -8790,13 +8788,11 @@ HLT_g35_tight_mu15noL1_mu2noL1_L1EM24VHI:
     1: 8
     2: 8
     3: 6
-    4: 1
   stepFeatures:
     0: 11
     1: 8
     2: 8
     3: 6
-    4: 4
 HLT_g35_tight_mu18noL1_L1EM24VHI:
   eventCount: 0
   stepCounts:
