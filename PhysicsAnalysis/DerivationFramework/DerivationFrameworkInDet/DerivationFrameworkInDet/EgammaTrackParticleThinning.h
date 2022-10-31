@@ -41,6 +41,9 @@ private:
   mutable std::atomic<unsigned long int> m_ntotGSF = 0;
   mutable std::atomic<unsigned long int> m_npass = 0;
   mutable std::atomic<unsigned long int> m_nGSFPass = 0;
+  mutable std::atomic<unsigned long int> m_nEgammas = 0;
+  mutable std::atomic<unsigned long int> m_nSelEgammas = 0;
+
   StringProperty m_streamName{ this,
                                "StreamName",
                                "",
