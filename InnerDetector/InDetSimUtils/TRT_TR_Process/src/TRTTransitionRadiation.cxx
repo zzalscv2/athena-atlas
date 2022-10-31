@@ -19,10 +19,16 @@
 #include "StoreGate/DataHandle.h"
 #include "StoreGate/StoreGateSvc.h" //Detector Store
 
+#include "RDBAccessSvc/IRDBAccessSvc.h"
+#include "RDBAccessSvc/IRDBRecordset.h"
+#include "RDBAccessSvc/IRDBRecord.h"
+#include "GeoModelInterfaces/IGeoDbTagSvc.h"
+
 // Geant4 includes
 #include "G4DynamicParticle.hh"
 #include "G4Gamma.hh"
 #include "G4Material.hh"
+#include "G4Element.hh"
 #include "G4EmProcessSubType.hh" // for fTransitionRadiation
 #include "G4ProcessType.hh" // for fElectromagnetic
 
@@ -104,35 +110,86 @@ void TRTTransitionRadiation::Initialize() {
   //    On a related note we should get rid of the xml files too -
   //    they are a loophole in the versioning.
 
+  G4Material* g4mat_Gas{nullptr};
+  G4Material* g4mat_FoilMaterial{nullptr};
+  std::string errorMessage;
+
   // Get material information from storegate.
   ISvcLocator *svcLocator = Gaudi::svcLocator(); // from Bootstrap
   StoreGateSvc *detStore(nullptr);
   if( StatusCode::SUCCESS != svcLocator->service( "DetectorStore", detStore ) ) {
-    ATH_MSG_FATAL ( "Can not access Detector Store " );
-    return;
+    errorMessage = "Can not access Detector Store";
+    ATH_MSG_FATAL (errorMessage);
+    throw std::runtime_error(errorMessage);
   };
-  StoredMaterialManager* materialManager = nullptr;
-  if (StatusCode::SUCCESS != detStore->retrieve(materialManager, std::string("MATERIALS"))) {
-    ATH_MSG_FATAL ( "Could not retrieve material manager from Detector Store" );
-    return;
-  };
+  StoredMaterialManager* materialManager = detStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
+  if(materialManager) {
+    Geo2G4MaterialFactory geo2g4_material_fact;//Note - this is a very lightweight class!
+    g4mat_Gas = geo2g4_material_fact.Build(materialManager->getMaterial("trt::CO2"));
+    g4mat_FoilMaterial = geo2g4_material_fact.Build(materialManager->getMaterial("trt::CH2"));
 
-  Geo2G4MaterialFactory geo2g4_material_fact;//Note - this is a very lightweight class!
-  G4Material *g4mat_Gas(geo2g4_material_fact.Build(materialManager->getMaterial("trt::CO2")));
-  G4Material *g4mat_FoilMaterial(geo2g4_material_fact.Build(materialManager->getMaterial("trt::CH2")));
-  //Note: One might wonder if we now own g4mat_Gas and
-  //g4mat_FoilMaterial, but since the elementfactory used inside
-  //Geo2G4MaterialFactory is static, we must NOT delete them!!
+    //Note: One might wonder if we now own g4mat_Gas and
+    //g4mat_FoilMaterial, but since the elementfactory used inside
+    //Geo2G4MaterialFactory is static, we must NOT delete them!!
+  }
+  else {
+    ATH_MSG_INFO("GeoModel Material is not available. Construct TR materials using IRDBAccessSvc interface");
+    IGeoDbTagSvc *geoDbTagSvc{nullptr};
+    if(StatusCode::SUCCESS != svcLocator->service("GeoDbTagSvc",geoDbTagSvc)) {
+      errorMessage = "Can not access GeoDbTagSvc";
+      ATH_MSG_FATAL (errorMessage);
+      throw std::runtime_error(errorMessage);
 
-  //   FadsMolecule FadsGas( "TRTCO2", 1.842*mg/cm3, 2 );
-  //   FadsGas.AddElement( "C", 1 );
-  //   FadsGas.AddElement( "O", 2 );
-  //   g4mat_Gas = FadsGas.GetG4Material();
-  //   FadsMolecule FadsFoilMaterial( "TRTCH2", 0.935*g/cm3, 2 );
-  //   FadsFoilMaterial.AddElement( "C", 1 );
-  //   FadsFoilMaterial.AddElement( "H", 2 );
-  //   g4mat_FoilMaterial = FadsFoilMaterial.GetG4Material();
+      return;
+    };
+    IRDBAccessSvc *pAccessSvc{nullptr};
+    if(StatusCode::SUCCESS != svcLocator->service(geoDbTagSvc->getParamSvcName(),pAccessSvc)) {
+      errorMessage = "Can not access " + geoDbTagSvc->getParamSvcName();
+      ATH_MSG_FATAL (errorMessage);
+      throw std::runtime_error(errorMessage);
+    }
 
+    std::map<std::string,int> materialComponentsMap; // Number of elements for each material
+    std::map<std::string,G4Material*> materialMap;
+    IRDBRecordset_ptr materialsRec = pAccessSvc->getRecordsetPtr("TRMaterials","","");
+    // Step #1. Count elements per material
+    for(auto material : *materialsRec) {
+      std::string key = material->getString("NAME");
+      auto mapIt = materialComponentsMap.find(key);
+      if(mapIt == materialComponentsMap.end()) {
+	materialComponentsMap.emplace(key,1);
+      }
+      else {
+	materialComponentsMap.at(key) = mapIt->second + 1;
+      }
+    }
+    // Step #2. Build materials
+    for(auto material :*materialsRec) {
+      std::string key = material->getString("NAME");
+      G4Material* g4Material{nullptr};
+      if(materialMap.find(key)==materialMap.end()) {
+	auto itNElements = materialComponentsMap.find(key);
+	g4Material = new G4Material(key
+				    ,material->getDouble("DENSITY")*(CLHEP::gram / CLHEP::cm3)
+				    ,itNElements->second);
+	materialMap.emplace(key,g4Material);
+      }
+      else {
+	g4Material = materialMap.at(key);
+      }
+
+      G4Element* g4Element = G4Element::GetElement(material->getString("ELEMENT_NAME"));
+      if(!g4Element) {
+	errorMessage = "Wrong name for element " + material->getString("ELEMENT_NAME") 
+	  + " found in the description of material " + key;
+	ATH_MSG_FATAL (errorMessage);
+	throw std::runtime_error(errorMessage);
+      }
+      g4Material->AddElement(g4Element,(G4int)material->getInt("N"));
+    }
+    g4mat_Gas = materialMap.at("CO2");
+    g4mat_FoilMaterial = materialMap.at("CH2");
+  }
 
   G4double PlasmaCof(4.0*M_PI*CLHEP::fine_structure_const*CLHEP::hbarc*CLHEP::hbarc*CLHEP::hbarc/CLHEP::electron_mass_c2);
 
