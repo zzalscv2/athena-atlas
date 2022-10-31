@@ -19,7 +19,7 @@ def createHTTConfigFlags():
 
     # road finding selection
     cf.addFlag('houghRootoutput', False)
-    cf.addFlag('hough', False)
+    cf.addFlag('hough', True)
     cf.addFlag('hough1D', False)
 
     # NN filtering
@@ -40,10 +40,10 @@ def createHTTConfigFlags():
     cf.addFlag('fieldCorrection', True)
     cf.addFlag('phiMin', 0.0)
     cf.addFlag('phiMax', 0.0)
-    cf.addFlag('xBins', 0)
-    cf.addFlag('yBins', 0)
-    cf.addFlag('xBufferBins', 0)
-    cf.addFlag('yBufferBins', 0)
+    cf.addFlag('xBins', 216)
+    cf.addFlag('yBins', 216)
+    cf.addFlag('xBufferBins', 6)
+    cf.addFlag('yBufferBins', 2)
     cf.addFlag('threshold', [7])
     cf.addFlag('convolution', [])
     cf.addFlag('convSizeX', 0)
@@ -60,7 +60,7 @@ def createHTTConfigFlags():
 
     # track Fitter
     cf.addFlag('chi2DoFRecoveryMin', 40)
-    cf.addFlag('chi2DoFRecoveryMax', 100000000000)
+    cf.addFlag('chi2DoFRecoveryMax', 20000)
     cf.addFlag('nHitsNoRecovery', -1)
     cf.addFlag('guessHits', True)
     cf.addFlag('doMissingHitsChecks', False)
@@ -147,13 +147,13 @@ def createHoughHTTConfigFlags():
     cf.addFlag('lrtStraighttrackXBufferBins', 6)
     cf.addFlag('lrtStraighttrackYBufferBins', 2)
     cf.addFlag('lrtStraighttrackSlicing', True)
-    cf.addFlag('lrtStraighttrackThreshold', [7])
+    cf.addFlag('lrtStraighttrackThreshold', [1])
     cf.addFlag('lrtStraighttrackConvolution', [])
     cf.addFlag('lrtStraighttrackCombineLayers', [0,1,2,3,4,5,6,7])
-    cf.addFlag('lrtStraighttrackScale', [1,1,1,1,1,1,1,1])
+    cf.addFlag('lrtStraighttrackScale', [1])
     cf.addFlag('lrtStraighttrackConvSizeX', 0)
     cf.addFlag('lrtStraighttrackConvSizeY', 0)
-    cf.addFlag('lrtStraighttrackHitExtendX', [2,1,0,0,0,0,0,0])
+    cf.addFlag('lrtStraighttrackHitExtendX', [])
     cf.addFlag('lrtStraighttrackStereo', False)
     cf.addFlag('lrtStraighttrackLocalMaxWindowSize', 0) 
 
