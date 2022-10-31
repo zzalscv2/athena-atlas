@@ -1119,7 +1119,7 @@ if rec.doWriteAOD():
 
     # cannot redo the slimming if readAOD and writeAOD
     if not rec.readAOD() and (rec.doESD() or rec.readESD()):
-        if AODFlags.ThinTRTStandaloneTracks:
+        if rec.doInDet and AODFlags.ThinTRTStandaloneTracks:
             from ThinningUtils.ThinningUtilsConf import ThinTRTStandaloneTrackAlg
             thinTRTStandaloneTrackAlg = ThinTRTStandaloneTrackAlg('ThinTRTStandaloneTrackAlg',
                                                                   doElectron = (rec.doEgamma() and AODFlags.Electron()),
