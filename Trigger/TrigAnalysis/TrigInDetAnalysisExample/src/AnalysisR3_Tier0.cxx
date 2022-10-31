@@ -223,6 +223,9 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_hntrt     = new TIDA::Histogram<float>( monTool(), "ntrt" );
   m_hntrt_rec = new TIDA::Histogram<float>( monTool(), "ntrt_rec" );
 
+  m_chi2dof     = new TIDA::Histogram<float>( monTool(), "chi2dof" );
+  m_chi2dof_rec = new TIDA::Histogram<float>( monTool(), "chi2dof_rec" );
+
 
   /// miscelaneous histograms
 
@@ -340,6 +343,7 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
     m_hnsctvseta->Fill( referenceEta,  (*reference)->sctHits() ); 
     m_hntrtvseta->Fill( referenceEta,  (*reference)->strawHits() ); 
 
+    if ( (*reference)->dof()!=0 ) m_chi2dof->Fill( (*reference)->chi2()/(*reference)->dof() ); 
 
     m_hnpixvsphi->Fill( referencePhi,  int(((*reference)->pixelHits()+0.5)*0.5) ); 
     m_hnsctvsphi->Fill( referencePhi,  (*reference)->sctHits() ); 
@@ -469,6 +473,8 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
       m_hntrtvsphi_rec->Fill( referencePhi, test->strawHits() ); 
 
       m_hd0vsphi_rec->Fill( test->phi(), test->a0() );
+
+      if ( test->dof()!=0 ) m_chi2dof_rec->Fill( test->chi2()/test->dof() ); 
 
     }
     
