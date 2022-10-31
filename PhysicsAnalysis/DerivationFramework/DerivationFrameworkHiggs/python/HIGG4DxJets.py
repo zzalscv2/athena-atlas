@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 #################################################################
 # Common code used for the HIGG4 jet building and calibration   #
@@ -17,6 +17,7 @@ def setup(HIGG4DxName, HIGG4DxSequence, HIGG4DxSlimmingHelper):
     if not HIGG4DxName in OutputJets:
         reducedJetList = ["AntiKt4TruthJets",
                           "AntiKt4TruthWZJets",
+                          "AntiKt4TruthDressedWZJets"
                           ]
       
         if HIGG4DxName in ['HIGG4D2', 'HIGG4D3', 'HIGG4D6']:
@@ -31,6 +32,7 @@ def setup(HIGG4DxName, HIGG4DxSequence, HIGG4DxSlimmingHelper):
                                "AntiKt2PV0TrackJets"
                                ]                      
         replaceAODReducedJets(reducedJetList,HIGG4DxSequence,HIGG4DxName)
+        addAntiKt4TruthDressedWZJets(HIGG4DxSequence,HIGG4DxName)
         
         # AntiKt4EMPFlow is not tagged by default. Need to re-tag:
         FlavorTagInit(JetCollections  = ['AntiKt4EMPFlowJets'], Sequencer = HIGG4DxSequence)
@@ -73,5 +75,3 @@ def buildDiTau(HIGG4DxName, HIGG4DxSequence, HIGG4DxSlimmingHelper, ToolSvc):
             Rcore=0.1)
 
         HIGG4DxSequence += DiTauBuilderBase
-
-
