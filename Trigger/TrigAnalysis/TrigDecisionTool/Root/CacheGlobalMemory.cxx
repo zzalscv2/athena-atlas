@@ -78,6 +78,28 @@ const Trig::ChainGroup* Trig::CacheGlobalMemory::createChainGroup(const std::vec
   return m_chainGroupsRef[key];
 }
 
+const Trig::ChainGroup*
+Trig::CacheGlobalMemory::getChainGroup (const std::vector<std::string>& triggerNames,
+                                        TrigDefs::Group props) const
+{
+  std::lock_guard<std::recursive_mutex> lock(m_cgmMutex);
+  auto searchRes = m_chainGroupsRef.find(triggerNames);
+
+  if ( searchRes != m_chainGroupsRef.end()) {
+    return searchRes->second;
+  }
+  return createChainGroup(triggerNames, /*alias*/{}, props);
+}
+
+
+size_t
+Trig::CacheGlobalMemory::nChainGroups() const
+{
+  std::lock_guard<std::recursive_mutex> lock(m_cgmMutex);
+  return m_chainGroupsRef.size();
+}
+
+
 void Trig::CacheGlobalMemory::updateChainGroup(Trig::ChainGroup& chainGroup) {
   chainGroup.update(m_confChains, m_confItems);
 }
