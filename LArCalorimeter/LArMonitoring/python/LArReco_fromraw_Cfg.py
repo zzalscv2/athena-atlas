@@ -62,5 +62,5 @@ if __name__=="__main__":
    cfg.store(f)
    f.close()
 
-   #cfg.run(10,OutputLevel=DEBUG)
+   #cfg.run(10)
 

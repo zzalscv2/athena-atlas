@@ -34,6 +34,7 @@ if __name__=="__main__":
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     ConfigFlags.LAr.doAlign=False
+    ConfigFlags.Exec.OutputLevel=DEBUG
     ConfigFlags.Input.Files = defaultTestFiles.RAW
     ConfigFlags.lock()
 
@@ -45,5 +46,5 @@ if __name__=="__main__":
     acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
     acc.addEventAlgo(DumpLArRawChannels(LArRawChannelContainerName="LArRawChannels",))
 
-    acc.run(2,OutputLevel=DEBUG)
+    acc.run(2)
 

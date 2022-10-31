@@ -290,6 +290,8 @@ if __name__=='__main__':
     ConfigFlags.DQ.useTrigger = True
     
     ConfigFlags.Output.HISTFileName = 'LArNoisyROMonitoringOutput.root'
+
+    ConfigFlags.Exec.OutputLevel=DEBUG
     ConfigFlags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
@@ -320,5 +322,5 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
    
-    cfg.run(20,OutputLevel=DEBUG) #use cfg.run() to run on all events
+    cfg.run(20) #use cfg.run() to run on all events
     #cfg.run() #use cfg.run() to run on all events

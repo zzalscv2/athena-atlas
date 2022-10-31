@@ -350,4 +350,4 @@ if __name__=='__main__':
     f.close()
 
     #in case you need directly run uncomment:
-    #cfg.run(100,OutputLevel=WARNING)
+    #cfg.run(100)

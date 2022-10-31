@@ -29,11 +29,12 @@ if __name__=="__main__":
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     ConfigFlags.LAr.doAlign=False
+    ConfigFlags.Exec.OutputLevel=DEBUG
     ConfigFlags.Input.Files = defaultTestFiles.RAW
     ConfigFlags.lock()
 
     acc = MainServicesCfg( ConfigFlags )
     acc.merge(LArRawSCDataReadingCfg(ConfigFlags))
     
-    acc.run(2,OutputLevel=DEBUG)
+    acc.run(2)
 

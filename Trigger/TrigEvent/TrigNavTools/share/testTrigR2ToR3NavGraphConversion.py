@@ -136,5 +136,5 @@ if __name__=='__main__':
     cfg.merge(TileGMCfg(ConfigFlags))
 
     cfg.printConfig(withDetails=True, summariseProps=False) # set True for exhaustive info
-    sc = cfg.run(ConfigFlags.Exec.MaxEvents, ConfigFlags.Exec.OutputLevel)
+    sc = cfg.run()
     sys.exit(0 if sc.isSuccess() else 1)

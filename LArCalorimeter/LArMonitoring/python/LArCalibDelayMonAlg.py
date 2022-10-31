@@ -186,4 +186,4 @@ if __name__=='__main__':
    cfg.store(f)
    f.close()
 
-   cfg.run(500,OutputLevel=DEBUG) #to only run on first 500 events
+   cfg.run(500) #to only run on first 500 events

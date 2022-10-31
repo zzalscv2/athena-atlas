@@ -532,4 +532,4 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
 
-#    cfg.run(10,OutputLevel=WARNING) #use cfg.run() to run on all events
+#    cfg.run(10) #use cfg.run() to run on all events

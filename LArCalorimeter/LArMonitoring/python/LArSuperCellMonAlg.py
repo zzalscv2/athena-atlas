@@ -351,6 +351,7 @@ if __name__=='__main__':
     ConfigFlags.IOVDb.GlobalTag = "CONDBR2-ES1PA-2022-07"
     ConfigFlags.Common.isOnline = True
     ConfigFlags.GeoModel.Run=LHCPeriod.Run3
+    ConfigFlags.Exec.OutputLevel=WARNING
     ConfigFlags.lock()
 
 
@@ -378,4 +379,4 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
 
-    cfg.run(OutputLevel=WARNING) #use cfg.run() to run on all events
+    cfg.run() #use cfg.run() to run on all events
