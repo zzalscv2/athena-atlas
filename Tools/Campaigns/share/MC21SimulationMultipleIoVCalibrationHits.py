@@ -2,3 +2,6 @@
 
 from AthenaCommon.Resilience import protectedInclude
 protectedInclude("Campaigns/MC21SimulationMultipleIoV.py")
+
+protectedInclude("SimulationJobOptions/preInclude.CalHits.py")
+protectedInclude("SimulationJobOptions/preInclude.ParticleID.py")

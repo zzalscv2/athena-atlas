@@ -23,7 +23,7 @@ else
         --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
         --simulator 'FullG4' \
         --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py' \
+        --preInclude 'EVNTtoHITS:Campaigns/MC16SimulationSingleIoV.py' \
         --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
         --inputEVNTFile $INPUTEVNTFILE \
         --outputHITSFile "original.HITS.pool.root" \
@@ -44,7 +44,7 @@ then
         --conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
         --simulator 'FullG4MT_QS' \
         --postInclude 'ReSim:PyJobTransforms.UseFrontier' \
-        --preInclude 'ReSim:Campaigns.MC16Simulation' \
+        --preInclude 'ReSim:Campaigns.MC16SimulationNoIoV' \
         --geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.CA.HITS.pool.root" \
@@ -65,7 +65,7 @@ then
         --conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
         --simulator 'FullG4MT_QS' \
         --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
+        --preInclude 'ReSim:Campaigns/MC16SimulationNoIoV.py' \
         --geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.CA.HITS.pool.root" \
@@ -77,7 +77,7 @@ then
         --conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
         --simulator 'FullG4MT_QS' \
         --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
+        --preInclude 'ReSim:Campaigns/MC16SimulationNoIoV.py' \
         --geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.CG.HITS.pool.root" \

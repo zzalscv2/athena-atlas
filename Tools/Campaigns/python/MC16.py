@@ -59,15 +59,11 @@ def MC16NoPileUp(flags):
     LArConfigRun2NoPileUp(flags)
 
 
-def MC16Simulation(flags):
-    """MC16 flags for simulation"""
+def MC16SimulationNoIoV(flags):
+    """MC16 flags for simulation without specifying conditions IoVs"""
     from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
-
-    flags.Input.RunNumber = [284500]
-    flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
 
     flags.Sim.TRTRangeCut = 30.0
     flags.Sim.TightMuonStepping = True
@@ -76,3 +72,17 @@ def MC16Simulation(flags):
     enableBeamPipeKill(flags)
     if flags.Sim.ISF.Simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS]:
         enableFrozenShowersFCalOnly(flags)
+
+
+def MC16SimulationSingleIoV(flags):
+    """MC16 flags for Simulation"""
+    MC16SimulationNoIoV(flags)
+
+    flags.Input.RunNumber = [284500]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
+
+
+def MC16Simulation(flags):
+    """MC16 flags for Simulation (alias)"""
+    MC16SimulationSingleIoV(flags)

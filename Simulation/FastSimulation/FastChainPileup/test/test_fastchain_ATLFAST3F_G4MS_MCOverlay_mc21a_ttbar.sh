@@ -37,7 +37,7 @@ FastChain_tf.py \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationMultiBeamSpot.py' \
+  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationNoIoV.py' \
   --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' \
   --imf False
 

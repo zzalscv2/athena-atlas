@@ -33,7 +33,7 @@ FastChain_tf.py \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationMultiBeamSpot.py' \
+  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationNoIoV.py' \
   --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' \
   --athenaopts '"--config-only=ConfigCG.pkl"' \
   --imf False
@@ -63,7 +63,7 @@ FastChain_tf.py \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationMultiBeamSpot.py' \
+  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationNoIoV.py' \
   --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' \
   --imf False
 cg=$?
@@ -84,7 +84,7 @@ FastChain_tf.py \
   --skipEvents 0 \
   --digiSeedOffset1 511 \
   --digiSeedOffset2 727 \
-  --preInclude 'Campaigns.MC21a' 'Campaigns.MC21Simulation' \
+  --preInclude 'Campaigns.MC21a' 'Campaigns.MC21SimulationNoIoV' \
   --postInclude 'PyJobTransforms.UseFrontier' \
   --inputRDO_BKGFile ${RDO_BKG_File} \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \

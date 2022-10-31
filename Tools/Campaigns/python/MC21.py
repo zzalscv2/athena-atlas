@@ -59,8 +59,8 @@ def BeamspotSplitMC21a():
     return substeps, event_fractions
 
 
-def MC21SimulationBase(flags):
-    """MC21 base flags for simulation"""
+def MC21SimulationNoIoV(flags):
+    """MC21 base flags for simulation without specifying conditions IoVs"""
     from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
@@ -77,18 +77,23 @@ def MC21SimulationBase(flags):
     enableG4Optimizations(flags)
 
 
-def MC21Simulation(flags):
+def MC21SimulationSingleIoV(flags):
     """MC21 flags for simulation"""
-    MC21SimulationBase(flags)
+    MC21SimulationNoIoV(flags)
 
     flags.Input.RunNumber = [410000]
     flags.Input.OverrideRunNumber = True
     flags.Input.LumiBlockNumber = [1] # dummy value
 
 
-def MC21SimulationMultiBeamSpot(flags):
+def MC21Simulation(flags):
+    """MC21 flags for simulation (alias)"""
+    MC21SimulationSingleIoV(flags)
+
+
+def MC21SimulationMultipleIoV(flags):
     """MC21 flags for simulation"""
-    MC21SimulationBase(flags)
+    MC21SimulationNoIoV(flags)
 
     flags.Input.OverrideRunNumber = True
 
@@ -97,17 +102,32 @@ def MC21SimulationMultiBeamSpot(flags):
                               profile= 'RunDependentSimData.PileUpProfile_run410000_MC21a_MultiBeamspot')
 
 
-def MC21SimulationCalibrationHits(flags):
+def MC21SimulationMultiBeamSpot(flags):
+    """MC21 flags for simulation (alias)"""
+    MC21SimulationMultipleIoV(flags)
+
+
+def MC21SimulationSingleIoVCalibrationHits(flags):
     """MC21 flags for simulation with CalibrationHits"""
-    MC21Simulation(flags)
+    MC21SimulationSingleIoV(flags)
+    from SimuJobTransforms import CalHits, ParticleID
+    CalHits(flags)
+    ParticleID(flags)
+
+
+def MC21SimulationCalibrationHits(flags):
+    """MC21 flags for simulation with CalibrationHits (alias)"""
+    MC21SimulationSingleIoVCalibrationHits(flags)
+
+
+def MC21SimulationMultipleIoVCalibrationHits(flags):
+    """MC21 flags for simulation with CalibrationHits"""
+    MC21SimulationMultipleIoV(flags)
     from SimuJobTransforms import CalHits, ParticleID
     CalHits(flags)
     ParticleID(flags)
 
 
 def MC21SimulationMultiBeamSpotCalibrationHits(flags):
-    """MC21 flags for simulation with CalibrationHits"""
-    MC21SimulationMultiBeamSpot(flags)
-    from SimuJobTransforms import CalHits, ParticleID
-    CalHits(flags)
-    ParticleID(flags)
+    """MC21 flags for simulation with CalibrationHits (alias)"""
+    MC21SimulationMultipleIoVCalibrationHits(flags)
