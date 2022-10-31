@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -35,29 +35,29 @@ class IBTaggingEfficiencyTool : virtual public CP::ISystematicsTool {
 
 
   virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet & jet,
-               float & sf) const =0 ;
+               float & sf) = 0 ;
 
   virtual CP::CorrectionCode getEfficiency( const xAOD::Jet & jet,
-              float & eff) const=0;
+              float & eff) = 0;
 
   virtual CP::CorrectionCode getInefficiency( const xAOD::Jet & jet,
-                float & eff) const=0;
+                float & eff) = 0;
 
   virtual CP::CorrectionCode getInefficiencyScaleFactor( const xAOD::Jet & jet,
-              float & sf) const=0;
+              float & sf) = 0;
 
   virtual CP::CorrectionCode getMCEfficiency( const xAOD::Jet & jet,
-                float & eff) const=0;
+                float & eff) = 0;
 
 
   virtual CP::CorrectionCode getScaleFactor( int flavour, const Analysis::CalibrationDataVariables& v,
-             float & sf) const=0;
+             float & sf) = 0;
 
   virtual CP::CorrectionCode getMCEfficiency( int flavour, const Analysis::CalibrationDataVariables& v,
-              float & eff) const=0;
+              float & eff) = 0;
 
   virtual CP::CorrectionCode getInefficiencyScaleFactor( int flavour, const Analysis::CalibrationDataVariables& v,
-             float & sf) const=0;
+             float & sf) = 0;
 
 
   // utility methods
