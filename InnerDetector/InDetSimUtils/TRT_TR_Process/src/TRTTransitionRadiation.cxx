@@ -80,13 +80,10 @@ TRTTransitionRadiation::~TRTTransitionRadiation() {
 ///////////////////////////////////////////////////////////////////////////
 void TRTTransitionRadiation::AddRadiatorParameters(TRTRadiatorParameters p) {
 
-  if (msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG) << " New Radiator parameters being defined for TR process"
-                    << endmsg;
-    msg(MSG::DEBUG) << " Volume " << p.GetLogicalVolume()->GetName() << endmsg;
-    msg(MSG::DEBUG) << " FoilThickness " << p.GetFoilThickness() << endmsg;
-    msg(MSG::DEBUG) << " GasThickness  " << p.GetGasThickness() << endmsg;
-  }
+  ATH_MSG_DEBUG(" New Radiator parameters being defined for TR process");
+  ATH_MSG_DEBUG(" Volume " << p.GetLogicalVolume()->GetName());
+  ATH_MSG_DEBUG(" FoilThickness " << p.GetFoilThickness());
+  ATH_MSG_DEBUG(" GasThickness  " << p.GetGasThickness());
 
   m_radiators.push_back(p);
 
@@ -197,14 +194,10 @@ void TRTTransitionRadiation::Initialize() {
   m_WplasmaFoil = sqrt( PlasmaCof * g4mat_FoilMaterial->GetElectronDensity() );
   m_WplasmaGas  = sqrt( PlasmaCof * g4mat_Gas->GetElectronDensity() );
 
-  if (msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG) << "Foil material : " << g4mat_FoilMaterial->GetName()
-                    << "; plasma energy : " << m_WplasmaFoil/CLHEP::eV << " eV"
-                    << endmsg;
-    msg(MSG::DEBUG) << "Gas : " << g4mat_Gas->GetName()
-                    << "; plasma energy : " << m_WplasmaGas/CLHEP::eV << " eV"
-                    << G4endl;
-  }
+  ATH_MSG_DEBUG("Foil material : " << g4mat_FoilMaterial->GetName()
+		<< "; plasma energy : " << m_WplasmaFoil/CLHEP::eV << " eV");
+  ATH_MSG_DEBUG("Gas : " << g4mat_Gas->GetName()
+		<< "; plasma energy : " << m_WplasmaGas/CLHEP::eV << " eV");
 
   m_Omg       = new G4double[m_NumBins];
   m_om        = new G4double[m_NumBins];
