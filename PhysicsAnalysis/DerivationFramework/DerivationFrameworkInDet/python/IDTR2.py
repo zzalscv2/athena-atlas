@@ -35,6 +35,28 @@ def IDTR2Cfg(ConfigFlags):
                                  FillIntermediateVertices = False,
                                  TrackLocation            = "InDetWithLRTTrackParticles"))
 
+    # NewVrtSecInclusive
+    from NewVrtSecInclusiveTool.NewVrtSecInclusiveConfig import MaterialSVFinderToolCfg, DVFinderToolCfg
+
+    MaterialSVFinderTool = acc.popToolsAndMerge(MaterialSVFinderToolCfg(ConfigFlags))
+    acc.addPublicTool(MaterialSVFinderTool)
+    acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(name = "NewVrtSecInclusive_Material", 
+                                                       TrackContainerName = "InDetWithLRTTrackParticles",
+                                                       PVContainerName = "PrimaryVertices",
+                                                       BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices_Material",  
+                                                       BVertexTool = MaterialSVFinderTool
+                                                       ))
+
+    DVFinderToolCfg = acc.popToolsAndMerge(DVFinderToolCfg(ConfigFlags))
+    acc.addPublicTool(DVFinderToolCfg)
+    acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(name = "NewVrtSecInclusive_DV", 
+                                                       TrackContainerName = "InDetWithLRTTrackParticles",
+                                                       PVContainerName = "PrimaryVertices",
+                                                       BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices_DV",  
+                                                       BVertexTool = DVFinderToolCfg
+                                                       ))
+
+
     # V0Finder
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import BPHY_V0ToolCfg
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, "IDTR2"))
@@ -53,21 +75,18 @@ def IDTR2Cfg(ConfigFlags):
                                     LambdabarContainerName = IDTR2LambdabarContainerName)
     acc.addPublicTool(V0Decorator)
 
-    """
     from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
     V0TrackSelectorLoose = CompFactory.InDet.InDetConversionTrackSelectorTool(name = "IDTR2InDetV0VxTrackSelectorLoose",
                                                                               maxSiD0             = 99999.,
                                                                               maxTrtD0            = 99999.,
                                                                               maxSiZ0             = 99999.,
                                                                               maxTrtZ0            = 99999.,
-                                                                              minPt               = 500.0,
+                                                                              minPt               = 1000.0,
                                                                               significanceD0_Si   = 0.,
                                                                               significanceD0_Trt  = 0.,
                                                                               significanceZ0_Trt  = 0.,
                                                                               Extrapolator        = acc.popToolsAndMerge(InDetExtrapolatorCfg(ConfigFlags)),
                                                                               IsConversion        = False)
-    """
-    #acc.addPublicTool(V0TrackSelectorLoose)
 
     from DerivationFrameworkBPhys.V0ToolConfig import V0VtxPointEstimatorCfg
     from InDetConfig.InDetV0FinderConfig import InDetV0FinderToolCfg
@@ -83,7 +102,7 @@ def IDTR2Cfg(ConfigFlags):
                                   name                   = "IDTR2_Reco_V0Finder",
                                   V0FinderTool           = acc.popToolsAndMerge(InDetV0FinderToolCfg(ConfigFlags,"IDTR2_V0FinderTool",
                                        TrackParticleCollection = "InDetWithLRTTrackParticles",
-                                       #TrackSelectorTool = V0TrackSelectorLoose,
+                                       TrackSelectorTool = V0TrackSelectorLoose,
                                        V0ContainerName = IDTR2V0ContainerName,
                                        KshortContainerName = IDTR2KshortContainerName,
                                        LambdaContainerName = IDTR2LambdaContainerName,
@@ -127,6 +146,13 @@ def IDTR2Cfg(ConfigFlags):
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#VrtSecInclusive_SecondaryVertices"]
     StaticContent += ["xAOD::VertexAuxContainer#VrtSecInclusive_SecondaryVerticesAux."]
+
+    StaticContent += ["xAOD::VertexContainer#NewVrtSecInclusive_SecondaryVertices_DV"]
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'NewVrtSecInclusive_SecondaryVertices_DV']
+
+    StaticContent += ["xAOD::VertexContainer#NewVrtSecInclusive_SecondaryVertices_Material"]
+    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'NewVrtSecInclusive_SecondaryVertices_Material']
+
     StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoV0Candidates']
     StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % 'IDTR2RecoV0Candidates']
     StaticContent += ["xAOD::VertexContainer#%s"        %                 'IDTR2RecoKshortCandidates']
