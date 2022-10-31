@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingTool.h
@@ -111,14 +111,11 @@ private:
   BooleanProperty m_sortDescending;
 
 
-  /// Internal container type identifier
-  mutable unsigned int m_contID;
-
   /// Internal identifier for the type of sorting
-  mutable int m_sortID;
+  int m_sortID;
 
   /// Internal event counter
-  mutable unsigned long m_nEventsProcessed;
+  mutable std::atomic<unsigned long> m_nEventsProcessed;
 
 };
 

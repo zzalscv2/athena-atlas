@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSelectionTool.h
@@ -112,7 +112,7 @@ private:
 
 
   /// Internal event counter
-  mutable unsigned long m_nEventsProcessed;
+  mutable std::atomic<unsigned long> m_nEventsProcessed;
 
 
 };
