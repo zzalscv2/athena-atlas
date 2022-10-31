@@ -23,8 +23,8 @@ def TRTMonitoringRun3ESD_AlgConfig(inputFlags):
                                                   'AlgTRTMonitoringRun3',
                                                   ComTimeObjectName = 'TRT_Phase' if have_trt_phase else '')
 
-    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_Cfg
-    algTRTMonitoringRun3ESD.TrackSelectionTool = result.popToolsAndMerge(InDetTrackSelectionTool_TightPrimary_Cfg(inputFlags))
+    from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
+    algTRTMonitoringRun3ESD.TrackSelectionTool = result.popToolsAndMerge(InDetTrackSelectionTool_Loose_Cfg(inputFlags))
 
     # trigger flag
     if not inputFlags.DQ.triggerDataAvailable:
