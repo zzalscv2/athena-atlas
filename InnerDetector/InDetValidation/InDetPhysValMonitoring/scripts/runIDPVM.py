@@ -10,6 +10,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int)
     IDPVMparser.add_argument("--doLargeD0Tracks", help='also run LRT plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doMergedLargeD0Tracks", help='also run merged STD+LRT plots', action='store_true', default=False)
+    IDPVMparser.add_argument("--doRecoOnly", help='skip truth-specific processing', action='store_true', default=False)
     IDPVMparser.add_argument("--doLoose", help='also run loose plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doTightPrimary", help='also run tight-primary plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doTracksInJets", help='also run tracks in jets', action='store_true', default=False)
@@ -27,6 +28,8 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--outputFile", help='Name of output file',default="M_output.root")
     IDPVMparser.add_argument("--HSFlag", help='Hard-scatter flag - decides what is used for truth matching', choices=['HardScatter', 'All', 'PileUp'],default="HardScatter")
     IDPVMparser.add_argument("--ancestorIDList", help='List of ancestor truth IDs to match.', default = [], nargs='+', type=int)
+    IDPVMparser.add_argument("--requiredSiHits", help='Number of truth silicon hits', type=int, default=0)
+    IDPVMparser.add_argument("--maxProdVertRadius", help='Maximum production radius for truth particles', type=float, default=300)
     IDPVMparser.add_argument("--GRL", help='Which GRL(s) to use, if any, when running on data', choices=['2015', '2016', '2017', '2018', '2022'], nargs='+', default=[])
     IDPVMparser.add_argument("--validateExtraTrackCollections", help='List of extra track collection names to be validated in addition to Tracks.', nargs='+', default=[])
     return IDPVMparser.parse_args()
@@ -48,9 +51,12 @@ ConfigFlags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTrac
 ConfigFlags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks
 ConfigFlags.PhysVal.IDPVM.doValidateLargeD0Tracks = MyArgs.doLargeD0Tracks
 ConfigFlags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks = MyArgs.doMergedLargeD0Tracks
+ConfigFlags.PhysVal.IDPVM.doRecoOnly = MyArgs.doRecoOnly
 ConfigFlags.PhysVal.IDPVM.doPerAuthorPlots = MyArgs.doPerAuthor
 ConfigFlags.PhysVal.IDPVM.doHitLevelPlots = MyArgs.doHitLevelPlots
 ConfigFlags.PhysVal.IDPVM.runDecoration = not MyArgs.disableDecoration
+ConfigFlags.PhysVal.IDPVM.requiredSiHits = MyArgs.requiredSiHits
+ConfigFlags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
 ConfigFlags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
 ConfigFlags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
 ConfigFlags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt

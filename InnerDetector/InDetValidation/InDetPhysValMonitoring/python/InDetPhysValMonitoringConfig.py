@@ -113,10 +113,14 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("useGRL", True)
         kwargs.setdefault('GoodRunsListSelectionTool', grlTool)
 
-    if flags.Input.isMC:
+    if flags.Input.isMC and not flags.PhysVal.IDPVM.doRecoOnly:
         kwargs.setdefault("TruthParticleContainerName", "TruthParticles")
         if 'TruthSelectionTool' not in kwargs:
             TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags))
+            TruthSelectionTool.maxProdVertRadius = flags.PhysVal.IDPVM.maxProdVertRadius
+            TruthSelectionTool.minPt = flags.PhysVal.IDPVM.truthMinPt
+            TruthSelectionTool.ancestorList = flags.PhysVal.IDPVM.ancestorIDs
+            TruthSelectionTool.requireSiHit = flags.PhysVal.IDPVM.requiredSiHits
             kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
 
         if 'hardScatterSelectionTool' not in kwargs:
@@ -260,9 +264,10 @@ def InDetLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, name = "AthTruthSelectionToolForIDPVM_LargeD0", **kwargs))
-    TruthSelectionTool.maxProdVertRadius = 400.
-    TruthSelectionTool.minPt = 1200.
+    TruthSelectionTool.maxProdVertRadius = flags.PhysVal.IDPVM.maxProdVertRadius
+    TruthSelectionTool.minPt = flags.PhysVal.IDPVM.truthMinPt
     TruthSelectionTool.ancestorList = flags.PhysVal.IDPVM.ancestorIDs
+    TruthSelectionTool.requireSiHit = flags.PhysVal.IDPVM.requiredSiHits
 
     kwargs.setdefault("SubFolder", 'LRT/')
     kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)
@@ -278,9 +283,10 @@ def InDetMergedLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
     TruthSelectionTool = acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags, name = "AthTruthSelectionToolForIDPVM_MergedLargeD0", **kwargs))
-    TruthSelectionTool.maxProdVertRadius = 400.
-    TruthSelectionTool.minPt = 1200.
+    TruthSelectionTool.maxProdVertRadius = flags.PhysVal.IDPVM.maxProdVertRadius
+    TruthSelectionTool.minPt = flags.PhysVal.IDPVM.truthMinPt
     TruthSelectionTool.ancestorList = flags.PhysVal.IDPVM.ancestorIDs
+    TruthSelectionTool.requireSiHit = flags.PhysVal.IDPVM.requiredSiHits
 
     kwargs.setdefault("SubFolder", 'LRTMerged/')
     kwargs.setdefault("TruthSelectionTool", TruthSelectionTool)

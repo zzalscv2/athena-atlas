@@ -56,6 +56,11 @@ class doValidateMergedLargeD0Tracks(InDetPhysValFlagsJobProperty):
     allowedTypes = ['bool']
     StoredValue = False
 
+class doRecoOnly(InDetPhysValFlagsJobProperty):
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+
 class doValidateGSFTracks(InDetPhysValFlagsJobProperty):
     statusOn = True
     allowedTypes = ['bool']
@@ -154,6 +159,10 @@ class requiredSiHits(InDetPhysValFlagsJobProperty):
     allowedTypes = ['int']
     StoredValue = 0
 
+class maxProdVertRadius(InDetPhysValFlagsJobProperty):
+    statusOn = True
+    allowedTypes = ['float']
+    StoredValue = 300
 
 class hardScatterStrategy(InDetPhysValFlagsJobProperty):
     """The hard-scatter vertex selection strategy to use when running hard-scatter efficiency / performance plots in IDPVM. 0 corresponds to sumPt^2, 1 corresponds to sumPt"""
@@ -227,6 +236,7 @@ _list_InDetPhysValJobProperties = [
     setTruthStrategy,
     doValidateLargeD0Tracks,
     doValidateMergedLargeD0Tracks,
+    doRecoOnly,
     doTruthOriginPlots,
     doPerAuthorPlots,
     doHitLevelPlots,
