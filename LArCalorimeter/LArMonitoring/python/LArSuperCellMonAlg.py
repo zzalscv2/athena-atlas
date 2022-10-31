@@ -345,6 +345,7 @@ if __name__=='__main__':
     ConfigFlags.DQ.useTrigger = False
     ConfigFlags.DQ.Environment = 'tier0'
     ConfigFlags.GeoModel.Run=LHCPeriod.Run3
+    ConfigFlags.Exec.OutputLevel=WARNING
     ConfigFlags.lock()
 
 
@@ -371,4 +372,4 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
 
-    cfg.run(OutputLevel=WARNING) #use cfg.run() to run on all events
+    cfg.run() #use cfg.run() to run on all events

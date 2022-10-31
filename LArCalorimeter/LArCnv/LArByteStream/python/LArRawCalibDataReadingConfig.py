@@ -35,6 +35,8 @@ if __name__=="__main__":
 
     ConfigFlags.LAr.doAlign=False
     ConfigFlags.Input.Files = ["/eos/atlas/atlastier0/rucio/data22_calib/calibration_LArElec-Pedestal-32s-High-All/00420537/data22_calib.00420537.calibration_LArElec-Pedestal-32s-High-All.daq.RAW/data22_calib.00420537.calibration_LArElec-Pedestal-32s-High-All.daq.RAW._lb0000._SFO-4._0001.data"]
+
+    ConfigFlags.Exec.OutputLevel=DEBUG
     ConfigFlags.lock()
 
     acc = MainServicesCfg( ConfigFlags )
@@ -46,4 +48,4 @@ if __name__=="__main__":
     #f=open("LArRawCalibDataReading.pkl","wb")
     #acc.store(f)
     #f.close()
-    acc.run(-1,OutputLevel=DEBUG)
+    acc.run(-1)

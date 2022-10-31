@@ -6,7 +6,6 @@ import GaudiKernel.GaudiHandles as GaudiHandles
 import AthenaPython.Configurables
 from AthenaCommon.Logging import logging
 from AthenaCommon.Debugging import DbgStage
-from AthenaCommon.Constants import INFO
 from AthenaCommon.CFElements import (isSequence, findSubSequence, findAlgorithm, flatSequencers,
                                      checkSequenceConsistency, findAllAlgorithmsByName)
 
@@ -845,7 +844,7 @@ class ComponentAccumulator:
         return
 
 
-    def createApp(self, OutputLevel=INFO):
+    def createApp(self):
         # Create the Gaudi object early.
         # Without this here, pyroot can sometimes get confused
         # and report spurious type mismatch errors about this object.
@@ -853,7 +852,7 @@ class ComponentAccumulator:
         ROOT.gROOT.SetBatch(True)
         ROOT.Gaudi
 
-        appPropsToSet, mspPropsToSet, bshPropsToSet = self.gatherProps(OutputLevel)
+        appPropsToSet, mspPropsToSet, bshPropsToSet = self.gatherProps()
 
         self._wasMerged = True
         from Gaudi.Main import BootstrapHelper
@@ -880,7 +879,7 @@ class ComponentAccumulator:
         sys.stdout.flush()
         return app
 
-    def gatherProps(self, OutputLevel=INFO):
+    def gatherProps(self):
         from GaudiConfig2._configurables import Configurable
 
         # Convenice hack
@@ -909,8 +908,6 @@ class ComponentAccumulator:
 
         appPropsToSet["ExtSvc"] = str(extSvc)
         appPropsToSet["CreateSvc"] = str(svcToCreate)
-
-        mspPropsToSet["OutputLevel"] = str(OutputLevel)
 
         def getCompsToBeAdded(comp, namePrefix=""):
             name = namePrefix + comp.getName()
@@ -996,7 +993,7 @@ class ComponentAccumulator:
 
         return appPropsToSet, mspPropsToSet, bshPropsToSet
 
-    def run(self,maxEvents=None,OutputLevel=INFO):
+    def run(self,maxEvents=None):
         from os import environ
         if "PICKLECAFILE" in environ:
             outpklfile=environ["PICKLECAFILE"]
@@ -1015,7 +1012,7 @@ class ComponentAccumulator:
 
         checkSequenceConsistency(self._sequence)
         
-        app = self.createApp (OutputLevel)
+        app = self.createApp()
         self.__verifyFinalSequencesStructure()
 
         #Determine maxEvents

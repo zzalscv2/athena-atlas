@@ -206,6 +206,7 @@ if __name__=='__main__':
     ConfigFlags.DQ.enableLumiAccess = True
     ConfigFlags.DQ.useTrigger = True
     ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
+    ConfigFlags.Exec.OutputLevel=WARNING
     ConfigFlags.lock()
 
 
@@ -218,4 +219,4 @@ if __name__=='__main__':
 
     cfg.merge(CaloBaselineMonConfig(ConfigFlags,False)) 
 
-    cfg.run(10,OutputLevel=WARNING) #use cfg.run() to run on all events
+    cfg.run(10) #use cfg.run() to run on all events

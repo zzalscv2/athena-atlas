@@ -58,7 +58,7 @@ if __name__=="__main__":
     ConfigFlags.LAr.doHVCorr = False
     from LArConfiguration.LArConfigFlags import RawChannelSource
     ConfigFlags.LAr.RawChannelSource = RawChannelSource.Calculated
-
+    ConfigFlags.Exec.OutputLEvel=DEBUG
 
     ConfigFlags.lock()
 
@@ -67,4 +67,4 @@ if __name__=="__main__":
     acc.merge(CaloRecoCalibCfg(ConfigFlags))
     
 
-    acc.run(10,OutputLevel=DEBUG)
+    acc.run(10)

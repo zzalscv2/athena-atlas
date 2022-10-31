@@ -81,4 +81,4 @@ if __name__=='__main__':
    cfg.store(f)
    f.close()
 
-   #cfg.run(100,OutputLevel=WARNING)
+   #cfg.run(100)

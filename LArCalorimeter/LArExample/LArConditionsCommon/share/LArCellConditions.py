@@ -154,6 +154,6 @@ cfg.addEventAlgo(theLArCellConditionsAlg)
 if os.path.exists( fhistory ):
     readline.read_history_file( fhistory )
 readline.set_history_length( 128 )
-cfg.run(2,OutputLevel=7) #First event is dummy to close DB connections, second has the user-loop
+cfg.run(2) #First event is dummy to close DB connections, second has the user-loop
 
 readline.write_history_file(fhistory)
