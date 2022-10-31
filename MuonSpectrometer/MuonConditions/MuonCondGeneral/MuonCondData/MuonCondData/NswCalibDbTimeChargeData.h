@@ -14,7 +14,6 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 
-
 class NswCalibDbTimeChargeData {  
 
 public:
@@ -29,15 +28,13 @@ public:
     /// Helper struct to cache all calibration constants 
     /// in a common place of the memory
     struct CalibConstants{
-       double slope{0.};
-       double slopeError{0.};
-       double intercept{0.};
-       double interceptError{0.};
-       bool is_valid{false}; /// Flag set by the data indicating that the constants are actually valid 
- 
+       float slope{0.};
+       float intercept{0.};
+       //float slopeError{0.}; // keep for later
+       //float interceptError{0.};       
     };
     
-    NswCalibDbTimeChargeData(const MmIdHelper&, const sTgcIdHelper&);
+    NswCalibDbTimeChargeData(const MmIdHelper& mmHelper, const sTgcIdHelper& stgcHelper);
     virtual ~NswCalibDbTimeChargeData() = default;
 
 	// setting functions
@@ -47,18 +44,44 @@ public:
 	// retrieval functions
 	
     //// Retrieves the list of all identifiers for which calibration channels are available
-    std::vector<Identifier> getChannelIds   (const CalibDataType type, const std::string& tech, const std::string& side) const;
+    std::vector<Identifier> getChannelIds(const CalibDataType type, const std::string& tech, const std::string& side) const;
     /// Retrieves the calibration constant for a particular readout channel. If there is no calibration constant available,
     /// then the zero calibChannel is returned.
-    const CalibConstants& getCalibForChannel(const CalibDataType type, const Identifier& channelId) const; 
+    const CalibConstants* getCalibForChannel(const CalibDataType type, const Identifier& channelId) const; 
     /// Returns the dummy calibration constant for the given technology type
-    const CalibConstants& getZeroCalibChannel(const CalibDataType type, const CalibTechType tech) const;
+    const CalibConstants* getZeroCalibChannel(const CalibDataType type, const CalibTechType tech) const;
  
 private:
     
+    int identToModuleIdx(const Identifier& chan_id) const;
+    // Copied from https://gitlab.cern.ch/atlas/athena/-/blob/master/MuonSpectrometer/MuonDetDescr/MuonReadoutGeometry/MuonReadoutGeometry/MuonDetectorManager.h
+    enum sTgcGMRanges {
+            NsTgStatEta = 6,      /// 3 x 2 sides (-3,-2,-1 and 1,2,3)
+            NsTgStEtaOffset = 3,  /// needed offest to map (-3,-2,-1,1,2,3) to (0,1,2,3,4,5)
+            NsTgStatPhi = 16,     // large and small sector together
+            NsTgcStatLay = 4,   // 4 wedges of stgcs
+            NsTgcChannelTypes =3, // Pads / Wires / Strips
+            NsTgChamberLayer = 2
+        };
+    enum mmGMRanges {
+            NMMcStatEta = 4,      /// 2 x 2 sides (-2,-1 and 1,2)
+            NMMcStEtaOffset = 2,  /// needed offest to map (-2,-1,1,2) to (0,1,2,3)
+            NMMcStatPhi = 16,     // large and small sector together
+            NMMcStatLay = 4, /// 4 wedges of micromegas
+            NMMcChamberLayer = 2
+        };
+    
+    static constexpr int s_NumMaxSTgcElemets = NsTgStatEta * NsTgStatPhi * NsTgChamberLayer *NsTgcStatLay * NsTgcChannelTypes;
+    static constexpr int s_NumMaxMMElements = NMMcStatEta * NMMcStatPhi * NMMcChamberLayer *NMMcStatLay;
+
 	// containers
-    using ChannelCalibMap = std::map<unsigned long long, CalibConstants>;
-    std::map<CalibDataType, ChannelCalibMap> m_data{};
+    struct CalibModule{
+        std::vector<std::unique_ptr<CalibConstants>> channels{};
+        Identifier layer_id{0};
+    };
+    using ChannelCalibMap = std::array<CalibModule, s_NumMaxSTgcElemets + s_NumMaxMMElements>;
+    ChannelCalibMap m_pdo_data{};
+    ChannelCalibMap m_tdo_data{};
 
     using ZeroCalibMap = std::map<CalibDataType, CalibConstants>;
     std::map<CalibTechType, ZeroCalibMap> m_zero{};

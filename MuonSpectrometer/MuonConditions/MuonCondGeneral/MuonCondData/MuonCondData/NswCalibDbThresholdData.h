@@ -32,19 +32,19 @@ public:
     virtual ~NswCalibDbThresholdData() = default;
 
 	// setting functions
-	void setData(const Identifier&, const double);
-	void setZero(ThrsldTechType   , const double);
+	void setData(const Identifier&, const float);
+	void setZero(ThrsldTechType   , const float);
 
 	// retrieval functions
 	std::vector<Identifier> getChannelIds(const std::string="", const std::string="") const;
-	bool                    getThreshold (const Identifier&   , double&             ) const;
+	bool                    getThreshold (const Identifier&   , float&              ) const;
 
  
 private:
 
 	// containers
-    using ChannelMap = std::map<unsigned long long, std::vector<double>>;
-    using ZeroMap = std::map<ThrsldTechType, double >;
+    using ChannelMap = std::map<unsigned long long, std::vector<float>>;
+    using ZeroMap = std::map<ThrsldTechType, float>;
     ChannelMap m_data{};
     ZeroMap m_zero{};
 

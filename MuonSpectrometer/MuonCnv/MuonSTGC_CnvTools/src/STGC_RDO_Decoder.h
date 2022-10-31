@@ -55,7 +55,7 @@ inline sTgcDigit * Muon::STGC_RDO_Decoder::getDigit(const Muon::STGC_RawData* da
   uint16_t bcTag   = data->bcTag();
   bool isDead      = data->isDead();
   // MM_RawData has time and charge in counts, need physical units
-  double charge{0.},  time{0.};
+  float charge{0.},  time{0.};
   m_calibTool->tdoToTime  (ctx, data->timeAndChargeInCounts(), tdo, Id, time  , bcTag); 
   m_calibTool->pdoToCharge(ctx, data->timeAndChargeInCounts(), pdo, Id, charge       ); 
 

@@ -134,16 +134,16 @@ StatusCode NswCondTestAlg::retrieveTdoPdo(const EventContext& ctx, TimeChargeTyp
     if (!channelIds.empty()) {
         const Identifier& channel = channelIds[0];
         
-        const NswCalibDbTimeChargeData::CalibConstants calib_data = readCdo->getCalibForChannel(data, channel);
+        const NswCalibDbTimeChargeData::CalibConstants& calib_data = *readCdo->getCalibForChannel(data, channel);
         ATH_MSG_INFO("Checking channel 0 (Id = " << channel.get_compact() << ") "<<calib_data);
         if (!m_logName.empty()){
             for (const Identifier& chan_id : channelIds) {
-                const NswCalibDbTimeChargeData::CalibConstants& calib_data = readCdo->getCalibForChannel(data, channel);
+                const NswCalibDbTimeChargeData::CalibConstants& calib_data = *readCdo->getCalibForChannel(data, channel);
                 sstr<<m_idHelperSvc->toString(chan_id)<<" "<<calib_data<<std::endl;
             }                   
         }
     } else if (!m_logName.empty()) {
-       const NswCalibDbTimeChargeData::CalibConstants& calib_data = readCdo->getZeroCalibChannel(data, tech == "MM" ? TimeTech::MM : TimeTech::STGC); 
+       const NswCalibDbTimeChargeData::CalibConstants& calib_data = *readCdo->getZeroCalibChannel(data, tech == "MM" ? TimeTech::MM : TimeTech::STGC); 
         sstr<<"Dummy calib channel "<<calib_data<<std::endl; 
     }
 
@@ -194,7 +194,7 @@ StatusCode NswCondTestAlg::retrieveVmm(const EventContext& ctx, const std::strin
     std::stringstream sstr {};
     if (!channelIds.empty()) {
         const Identifier& channel = channelIds[0];
-        double threshold{0.};
+        float threshold{0.};
         readCdo->getThreshold(channel, threshold);
         ATH_MSG_INFO("Checking channel 0 (Id = " << m_idHelperSvc->toString(channel)<< ")  threshold "<< threshold);
         if (!m_logName.empty()){
