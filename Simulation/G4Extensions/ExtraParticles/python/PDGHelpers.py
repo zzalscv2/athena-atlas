@@ -58,11 +58,9 @@ def updateExtraParticleWhiteList(listName='G4particle_whitelist_ExtraParticles.t
     if getExtraParticleWhiteList(listName):
         import shutil
         shutil.copy(listName, listName+'.org')
-    existingpdgcodes = [int(x) for x in open(listName).readlines()]
-    newpdgcodes = list(set(pdgcodes).difference(existingpdgcodes))
     # update the whitelist for GenParticleSimWhiteList
     with open(listName, 'a') as writer:
-        for pdg in newpdgcodes:
+        for pdg in pdgcodes:
             writer.write('%s\n' % pdg)
 
 
