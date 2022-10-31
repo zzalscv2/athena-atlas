@@ -39,8 +39,14 @@ namespace InDetSecVertexTruthMatchUtils {
     MERGED,  // not matched
     SPLIT,   // highest weight truth interaction contributes to >1 vtx (vtx with highest fraction of sumpT2 remains matched/merged)
     FAKE,    // highest contribution is fake (if pile-up MC info not present those tracks end up as "fakes")
+    LLP,
+    OTHER,
+    ALL,
     NTYPES   // access to number of types
   };
+
+  constexpr std::initializer_list<VertexMatchType> allTypes = { MATCHED, MERGED, SPLIT, FAKE, LLP, OTHER, ALL };
+
 
   //type codes for truth vertices
   //NOTE: types are subsets of subsequent types
@@ -109,8 +115,6 @@ class InDetSecVertexTruthMatchTool : public virtual IInDetSecVertexTruthMatchToo
   ITHistSvc* m_thistSvc{nullptr};
   TH1F* m_matchType = nullptr;
   TH1F* m_truth_Ntrk = nullptr;
-  TH1F* m_positionRes_R = nullptr;
-  TH1F* m_positionRes_Z = nullptr;
 
   TH1F* m_truthInclusive_r = nullptr;
   TH1F* m_truthReconstructable_r = nullptr;
@@ -122,104 +126,51 @@ class InDetSecVertexTruthMatchTool : public virtual IInDetSecVertexTruthMatchToo
   TH1F* m_truthReconstructable_trkSel = nullptr;
   TH1F* m_truthReconstructed_trkSel = nullptr;
 
-  TH1F* m_recoX = nullptr;
-  TH1F* m_recoY = nullptr;
-  TH1F* m_recoZ = nullptr;
-  TH1F* m_recoR = nullptr;
-  TH1F* m_recodistFromPV = nullptr;
-  TH1F* m_recoPt = nullptr;
-  TH1F* m_recoEta = nullptr;
-  TH1F* m_recoPhi = nullptr;
-  TH1F* m_recoMass = nullptr;
-  TH1F* m_recoMu = nullptr;
-  TH1F* m_recoChi2 = nullptr;
-  TH1F* m_recoDir = nullptr;
-  TH1F* m_recoCharge = nullptr;
-  TH1F* m_recoH = nullptr;
-  TH1F* m_recoHt = nullptr;
-  TH1F* m_recoMinOpAng = nullptr;
-  TH1F* m_recoMaxOpAng = nullptr;
-  TH1F* m_recoMaxDR = nullptr;
-  TH1F* m_recoMinD0 = nullptr;
-  TH1F* m_recoMaxD0 = nullptr;
-  TH1F* m_recoNtrk = nullptr;
+  std::map<std::string,TH1F*> m_positionRes_R;
+  std::map<std::string,TH1F*> m_positionRes_Z;
+  std::map<std::string,TH1F*> m_recoX;
+  std::map<std::string,TH1F*> m_recoY;
+  std::map<std::string,TH1F*> m_recoZ;
+  std::map<std::string,TH1F*> m_recoR;
+  std::map<std::string,TH1F*> m_recodistFromPV;
+  std::map<std::string,TH1F*> m_recoPt;
+  std::map<std::string,TH1F*> m_recoEta;
+  std::map<std::string,TH1F*> m_recoPhi;
+  std::map<std::string,TH1F*> m_recoMass;
+  std::map<std::string,TH1F*> m_recoMu;
+  std::map<std::string,TH1F*> m_recoChi2;
+  std::map<std::string,TH1F*> m_recoDir;
+  std::map<std::string,TH1F*> m_recoCharge;
+  std::map<std::string,TH1F*> m_recoH;
+  std::map<std::string,TH1F*> m_recoHt;
+  std::map<std::string,TH1F*> m_recoMinOpAng;
+  std::map<std::string,TH1F*> m_recoMaxOpAng;
+  std::map<std::string,TH1F*> m_recoMaxDR;
+  std::map<std::string,TH1F*> m_recoMinD0;
+  std::map<std::string,TH1F*> m_recoMaxD0;
+  std::map<std::string,TH1F*> m_recoNtrk;
 
-  TH1F* m_recoR_LLP = nullptr;
-  TH1F* m_recoPt_LLP = nullptr;
-  TH1F* m_recoEta_LLP = nullptr;
-  TH1F* m_recoPhi_LLP = nullptr;
-  TH1F* m_recoMass_LLP = nullptr;
-  TH1F* m_recoMu_LLP = nullptr;
-  TH1F* m_recoChi2_LLP = nullptr;
-  TH1F* m_recoDir_LLP = nullptr;
-  TH1F* m_recoCharge_LLP = nullptr;
-  TH1F* m_recoH_LLP = nullptr;
-  TH1F* m_recoHt_LLP = nullptr;
-  TH1F* m_recoMinOpAng_LLP = nullptr;
-  TH1F* m_recoMaxOpAng_LLP = nullptr;
-  TH1F* m_recoMaxDR_LLP = nullptr;
-  TH1F* m_recoMinD0_LLP = nullptr;
-  TH1F* m_recoMaxD0_LLP = nullptr;
-  TH1F* m_recoNtrk_LLP = nullptr;
+  std::map<std::string,TH1F*> m_recoTrk_qOverP;
+  std::map<std::string,TH1F*> m_recoTrk_theta; 
+  std::map<std::string,TH1F*> m_recoTrk_E; 
+  std::map<std::string,TH1F*> m_recoTrk_M; 
+  std::map<std::string,TH1F*> m_recoTrk_Pt;  
+  std::map<std::string,TH1F*> m_recoTrk_Px; 
+  std::map<std::string,TH1F*> m_recoTrk_Py; 
+  std::map<std::string,TH1F*> m_recoTrk_Pz;  
+  std::map<std::string,TH1F*> m_recoTrk_Eta; 
+  std::map<std::string,TH1F*> m_recoTrk_Phi;
+  std::map<std::string,TH1F*> m_recoTrk_D0; 
+  std::map<std::string,TH1F*> m_recoTrk_Z0;
+  std::map<std::string,TH1F*> m_recoTrk_errD0; 
+  std::map<std::string,TH1F*> m_recoTrk_errZ0; 
+  std::map<std::string,TH1F*> m_recoTrk_Chi2;
+  std::map<std::string,TH1F*> m_recoTrk_nDoF; 
+  std::map<std::string,TH1F*> m_recoTrk_charge;
 
-  TH1F* m_recoR_Fake = nullptr;
-  TH1F* m_recoPt_Fake = nullptr;
-  TH1F* m_recoEta_Fake = nullptr;
-  TH1F* m_recoPhi_Fake = nullptr;
-  TH1F* m_recoMass_Fake = nullptr;
-  TH1F* m_recoMu_Fake = nullptr;
-  TH1F* m_recoChi2_Fake = nullptr;
-  TH1F* m_recoDir_Fake = nullptr;
-  TH1F* m_recoCharge_Fake = nullptr;
-  TH1F* m_recoH_Fake = nullptr;
-  TH1F* m_recoHt_Fake = nullptr;
-  TH1F* m_recoMinOpAng_Fake = nullptr;
-  TH1F* m_recoMaxOpAng_Fake = nullptr;
-  TH1F* m_recoMaxDR_Fake = nullptr;
-  TH1F* m_recoMinD0_Fake = nullptr;
-  TH1F* m_recoMaxD0_Fake = nullptr;
-  TH1F* m_recoNtrk_Fake = nullptr;
-
-  TH1F* m_recoR_Split = nullptr;
-  TH1F* m_recoPt_Split = nullptr;
-  TH1F* m_recoEta_Split = nullptr;
-  TH1F* m_recoPhi_Split = nullptr;
-  TH1F* m_recoMass_Split = nullptr;
-  TH1F* m_recoMu_Split = nullptr;
-  TH1F* m_recoChi2_Split = nullptr;
-  TH1F* m_recoDir_Split = nullptr;
-  TH1F* m_recoCharge_Split = nullptr;
-  TH1F* m_recoH_Split = nullptr;
-  TH1F* m_recoHt_Split = nullptr;
-  TH1F* m_recoMinOpAng_Split = nullptr;
-  TH1F* m_recoMaxOpAng_Split = nullptr;
-  TH1F* m_recoMaxDR_Split = nullptr;
-  TH1F* m_recoMinD0_Split = nullptr;
-  TH1F* m_recoMaxD0_Split = nullptr;
-  TH1F* m_recoNtrk_Split = nullptr;
-
-
-  TH1F* m_recoTrk_qOverP = nullptr;
-  TH1F* m_recoTrk_theta = nullptr; 
-  TH1F* m_recoTrk_E = nullptr; 
-  TH1F* m_recoTrk_M = nullptr; 
-  TH1F* m_recoTrk_Pt = nullptr;  
-  TH1F* m_recoTrk_Px = nullptr; 
-  TH1F* m_recoTrk_Py = nullptr; 
-  TH1F* m_recoTrk_Pz = nullptr;  
-  TH1F* m_recoTrk_Eta = nullptr; 
-  TH1F* m_recoTrk_Phi = nullptr;
-  TH1F* m_recoTrk_D0 = nullptr; 
-  TH1F* m_recoTrk_Z0 = nullptr;
-  TH1F* m_recoTrk_errD0 = nullptr; 
-  TH1F* m_recoTrk_errZ0 = nullptr; 
-  TH1F* m_recoTrk_Chi2 = nullptr;
-  TH1F* m_recoTrk_nDoF = nullptr; 
-  TH1F* m_recoTrk_charge = nullptr;
-  
-  TH1F* m_matchScore_weight = nullptr;
-  TH1F* m_matchScore_pt = nullptr;
-  TH1F* m_matchedTruthID = nullptr;  
+  std::map<std::string,TH1F*> m_matchScore_weight;
+  std::map<std::string,TH1F*> m_matchScore_pt;
+  std::map<std::string,TH1F*> m_matchedTruthID;  
   
   TH1F* m_truthX = nullptr;  
   TH1F* m_truthY = nullptr;
