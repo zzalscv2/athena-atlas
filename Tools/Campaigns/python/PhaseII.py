@@ -94,15 +94,11 @@ def PhaseIINoPileUp(flags):
     flags.Digitization.DoInnerDetectorNoise = False  # disable noise for now
 
 
-def PhaseIISimulation(flags):
+def PhaseIISimulationNoIoV(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
     from SimulationConfig.SimEnums import TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
-
-    flags.Input.RunNumber = [242000]
-    flags.Input.OverrideRunNumber = True
-    flags.Input.LumiBlockNumber = [1] # dummy value
 
     flags.Sim.TightMuonStepping = True
 
@@ -111,3 +107,17 @@ def PhaseIISimulation(flags):
     enableFrozenShowersFCalOnly(flags)
     from SimuJobTransforms.G4Optimizations import enableG4Optimizations
     enableG4Optimizations(flags)
+
+
+def PhaseIISimulationSingleIoV(flags):
+    """Phase-II Upgrade / Run 4 flags for simulation"""
+    PhaseIISimulationNoIoV(flags)
+
+    flags.Input.RunNumber = [242000]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1] # dummy value
+
+
+def PhaseIISimulation(flags):
+    """Phase-II Upgrade / Run 4 flags for simulation (alias)"""
+    PhaseIISimulationSingleIoV(flags)

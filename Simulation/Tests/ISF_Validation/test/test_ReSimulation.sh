@@ -16,7 +16,7 @@ Sim_tf.py \
 --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py' \
+--preInclude 'EVNTtoHITS:Campaigns/MC16SimulationSingleIoV.py' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --inputEVNTFile $INPUTEVNTFILE \
 --outputHITSFile "original.HITS.pool.root" \
@@ -30,7 +30,7 @@ ReSim_tf.py \
 --conditionsTag 'ReSim:OFLCOND-MC16-SDR-14' \
 --simulator 'FullG4_QS' \
 --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
---preInclude 'ReSim:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
+--preInclude 'ReSim:Campaigns/MC16SimulationNoIoV.py' \
 --geometryVersion 'ReSim:ATLAS-R2-2016-01-00-01' \
 --inputHITSFile "original.HITS.pool.root" \
 --outputHITS_RSMFile "resim.HITS.pool.root" \
