@@ -218,7 +218,7 @@ StatusCode Trig::TrigDecisionTool::beginEvent() {
                  << ", HLTPSK " << newKeys[2]
                  << ", BGSK " << newKeys[3]
                  << " for " << iHLTConfig->chains().size() << " chains and "
-                 << cgmPtr->getChainGroups().size() << " chain groups done ("
+                 << cgmPtr->nChainGroups() << " chain groups done ("
                  << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
                  << " ms)" );
   }
