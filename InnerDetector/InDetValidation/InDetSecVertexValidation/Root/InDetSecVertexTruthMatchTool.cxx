@@ -37,275 +37,195 @@ StatusCode InDetSecVertexTruthMatchTool::initialize() {
   ////////////////////////////////////////////
   ////// Seconvery Vertex Histograms /////////
   ////////////////////////////////////////////
-  m_matchType                 = new TH1F("reco_matchType","Vertex Match Type",6,-0.5,5.5);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/matchType", m_matchType));
+  m_matchType                 = new TH1F("reco_matchType","Vertex Match Type",8,-0.5,7.5);  
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/matchType", m_matchType));
 
-  m_recoX                     = new TH1F("reco_X","Reco vertex x [mm]",500,-500,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/X", m_recoX));
-  m_recoY                     = new TH1F("reco_Y","Reco vertex y [mm]",500,-500,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Y", m_recoY));
-  m_recoZ                     = new TH1F("reco_Z","Reco vertex z [mm]",500,-500,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Z", m_recoZ));
-  m_recoR                     = new TH1F("reco_R","Reco vertex r [mm]",500,0,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/R", m_recoR));
-  m_recodistFromPV            = new TH1F("reco_distFromPV","Reco vertex distFromPV [mm]",500,0,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/distFromPV", m_recodistFromPV));
-  m_recoPt                    = new TH1F("reco_Pt","Reco vertex Pt [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Pt", m_recoPt));
-  m_recoEta                   = new TH1F("reco_Eta","Reco vertex Eta ",100,-5,5); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Eta", m_recoEta));
-  m_recoPhi                   = new TH1F("reco_Phi","Reco vertex Phi ",64,-3.2,3.2);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Phi", m_recoPhi));
-  m_recoMass                  = new TH1F("reco_Mass","Reco vertex Mass [GeV]",500,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Mass", m_recoMass));
-  m_recoMu                    = new TH1F("reco_Mu","Reco vertex Red. Mass [GeV]",500,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Mu", m_recoMu));
-  m_recoChi2                  = new TH1F("reco_Chi2","Reco vertex recoChi2",100,0,10); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Chi2", m_recoChi2));
-  m_recoDir                   = new TH1F("reco_Dir","Reco vertex recoDirection",100,-1,1);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Dir", m_recoDir));
-  m_recoCharge                = new TH1F("reco_Charge","Reco vertex recoCharge",20,-10,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Charge", m_recoCharge));
-  m_recoH                     = new TH1F("reco_H","Reco vertex H [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/H", m_recoH));
-  m_recoHt                    = new TH1F("reco_Ht","Reco vertex Mass [GeV]",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Ht", m_recoHt));
-  m_recoMinOpAng              = new TH1F("reco_MinOpAng","Reco vertex minOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/MinOpAng", m_recoMinOpAng));
-  m_recoMaxOpAng              = new TH1F("reco_MaxOpAng","Reco vertex MaxOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/MaxOpAng", m_recoMaxOpAng));
-  m_recoMaxDR                 = new TH1F("reco_MaxDR","Reco vertex maxDR",100,0,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/MaxDR", m_recoMaxDR));
-  m_recoMinD0                 = new TH1F("reco_MinD0","Reco vertex min d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/MinD0", m_recoMinD0));
-  m_recoMaxD0                 = new TH1F("reco_MaxD0","Reco vertex max d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/MaxD0", m_recoMaxD0));
-  m_recoNtrk                  = new TH1F("reco_Ntrk","Reco vertex n tracks",30,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Ntrk", m_recoNtrk));
-
-  // splitting up by match type
-  m_positionRes_R             = new TH1F("reco_positionRes_R","Position resolution for vertices matched to truth LLP decays",400,-20,20);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/positionRes_R", m_positionRes_R));
-  m_positionRes_Z             = new TH1F("reco_positionRes_z","Position resolution for vertices matched to truth LLP decays",400,-20,20);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/positionRes_Z", m_positionRes_Z));
-  m_matchScore_weight          = new TH1F("matchScore_weight","Vertex Match Score (weight)",101,0,1.01);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/matchScore_weight", m_matchScore_weight));
-  m_matchScore_pt             = new TH1F("matchScore_pt","Vertex Match Score (pT)",101,0,1.01);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/matchScore_pt", m_matchScore_pt));
-  m_matchedTruthID            = new TH1F("matchedTruthID","Vertex Truth Match ID",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/matchedTruthID", m_matchedTruthID));
-
-  m_recoR_LLP                  = new TH1F("reco_R_LLP","Reco vertex r [mm]",500,0,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/R", m_recoR_LLP));
-  m_recoPt_LLP                 = new TH1F("reco_Pt_LLP","Reco vertex Pt [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Pt", m_recoPt_LLP));
-  m_recoEta_LLP                = new TH1F("reco_Eta_LLP","Reco vertex Eta ",100,-5,5); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Eta", m_recoEta_LLP));
-  m_recoPhi_LLP                = new TH1F("reco_Phi_LLP","Reco vertex Phi ",64,-3.2,3.2);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Phi", m_recoPhi_LLP));
-  m_recoMass_LLP               = new TH1F("reco_Mass_LLP","Reco vertex Mass [GeV]",500,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Mass", m_recoMass_LLP));
-  m_recoMu_LLP                 = new TH1F("reco_Mu_LLP","Reco vertex Red. Mass [GeV]",500,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Mu", m_recoMu_LLP));
-  m_recoChi2_LLP               = new TH1F("reco_Chi2_LLP","Reco vertex recoChi2",100,0,10); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Chi2", m_recoChi2_LLP));
-  m_recoDir_LLP                = new TH1F("reco_Dir_LLP","Reco vertex recoDirection",100,-1,1);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Dir", m_recoDir_LLP));
-  m_recoCharge_LLP             = new TH1F("reco_Charge_LLP","Reco vertex recoCharge",20,-10,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Charge", m_recoCharge_LLP));
-  m_recoH_LLP                  = new TH1F("reco_H_LLP","Reco vertex H [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/H", m_recoH_LLP));
-  m_recoHt_LLP                 = new TH1F("reco_Ht_LLP","Reco vertex Mass [GeV]",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Ht", m_recoHt_LLP));
-  m_recoMinOpAng_LLP           = new TH1F("reco_MinOpAng_LLP","Reco vertex minOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/MinOpAng", m_recoMinOpAng_LLP));
-  m_recoMaxOpAng_LLP           = new TH1F("reco_MaxOpAng_LLP","Reco vertex MaxOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/MaxOpAng", m_recoMaxOpAng_LLP));
-  m_recoMaxDR_LLP              = new TH1F("reco_MaxDR_LLP","Reco vertex maxDR",100,0,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/MaxDR", m_recoMaxDR_LLP));
-  m_recoMinD0_LLP              = new TH1F("reco_MinD0_LLP","Reco vertex min d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/MinD0", m_recoMinD0_LLP));
-  m_recoMaxD0_LLP              = new TH1F("reco_MaxD0_LLP","Reco vertex max d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/MaxD0", m_recoMaxD0_LLP));
-  m_recoNtrk_LLP               = new TH1F("reco_Ntrk_LLP","Reco vertex n tracks",30,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/LLP/Ntrk", m_recoNtrk_LLP));
+  for(auto type : allTypes) {
+    std::string vertexType = "";
+    switch (type)
+    {
+    case MATCHED:
+      vertexType = "Matched";
+      break;
+    case MERGED:
+      vertexType = "Merged";
+      break;
+    case SPLIT:
+      vertexType = "Split";
+      break;
+    case LLP:
+      vertexType = "LLP";
+      break;
+    case OTHER:
+      vertexType = "Other";
+      break;
+    case FAKE:
+      vertexType = "Fake";
+      break;
+    case ALL:
+      vertexType = "All";
+      break;
+    default:
+      break;
+    }
 
 
-  m_recoR_Fake                  = new TH1F("reco_R_Fake","Reco vertex r [mm]",500,0,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/R", m_recoR_Fake));
-  m_recoPt_Fake                 = new TH1F("reco_Pt_Fake","Reco vertex Pt [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Pt", m_recoPt_Fake));
-  m_recoEta_Fake                = new TH1F("reco_Eta_Fake","Reco vertex Eta ",100,-5,5); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Eta", m_recoEta_Fake));
-  m_recoPhi_Fake                = new TH1F("reco_Phi_Fake","Reco vertex Phi ",64,-3.2,3.2);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Phi", m_recoPhi_Fake));
-  m_recoMass_Fake               = new TH1F("reco_Mass_Fake","Reco vertex Mass [GeV]",500,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Mass", m_recoMass_Fake));
-  m_recoMu_Fake                 = new TH1F("reco_Mu_Fake","Reco vertex Red. Mass [GeV]",500,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Mu", m_recoMu_Fake));
-  m_recoChi2_Fake               = new TH1F("reco_Chi2_Fake","Reco vertex recoChi2",100,0,10); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Chi2", m_recoChi2_Fake));
-  m_recoDir_Fake                = new TH1F("reco_Dir_Fake","Reco vertex recoDirection",100,-1,1);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Dir", m_recoDir_Fake));
-  m_recoCharge_Fake             = new TH1F("reco_Charge_Fake","Reco vertex recoCharge",20,-10,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Charge", m_recoCharge_Fake));
-  m_recoH_Fake                  = new TH1F("reco_H_Fake","Reco vertex H [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/H", m_recoH_Fake));
-  m_recoHt_Fake                 = new TH1F("reco_Ht_Fake","Reco vertex Mass [GeV]",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Ht", m_recoHt_Fake));
-  m_recoMinOpAng_Fake           = new TH1F("reco_MinOpAng_Fake","Reco vertex minOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/MinOpAng", m_recoMinOpAng_Fake));
-  m_recoMaxOpAng_Fake           = new TH1F("reco_MaxOpAng_Fake","Reco vertex MaxOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/MaxOpAng", m_recoMaxOpAng_Fake));
-  m_recoMaxDR_Fake              = new TH1F("reco_MaxDR_Fake","Reco vertex maxDR",100,0,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/MaxDR", m_recoMaxDR_Fake));
-  m_recoMinD0_Fake              = new TH1F("reco_MinD0_Fake","Reco vertex min d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/MinD0", m_recoMinD0_Fake));
-  m_recoMaxD0_Fake              = new TH1F("reco_MaxD0_Fake","Reco vertex max d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/MaxD0", m_recoMaxD0_Fake));
-  m_recoNtrk_Fake               = new TH1F("reco_Ntrk_Fake","Reco vertex n tracks",30,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Fake/Ntrk", m_recoNtrk_Fake));
+    m_recoX[vertexType]                  = new TH1F(("recoZ" + vertexType).c_str(),"Reco vertex x [mm]",500,0,500); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/X", m_recoX[vertexType]));
+    m_recoY[vertexType]                  = new TH1F(("recoY" + vertexType).c_str(),"Reco vertex y [mm]",500,0,500); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Y", m_recoY[vertexType]));
+    m_recoZ[vertexType]                  = new TH1F(("recoZ" + vertexType).c_str(),"Reco vertex z [mm]",500,0,500); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Z", m_recoZ[vertexType]));
+    m_recoR[vertexType]                  = new TH1F(("recoR" + vertexType).c_str(),"Reco vertex r [mm]",500,0,500); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/R", m_recoR[vertexType]));
+    m_recoPt[vertexType]                 = new TH1F(("recoPt" + vertexType).c_str(),"Reco vertex Pt [GeV]",100,0,100); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Pt", m_recoPt[vertexType]));
+    m_recoEta[vertexType]                = new TH1F(("recoEta" + vertexType).c_str(),"Reco vertex Eta ",100,-5,5); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Eta", m_recoEta[vertexType]));
+    m_recoPhi[vertexType]                = new TH1F(("recoPhi" + vertexType).c_str(),"Reco vertex Phi ",64,-3.2,3.2);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Phi", m_recoPhi[vertexType]));
+    m_recoMass[vertexType]               = new TH1F(("recoMass" + vertexType).c_str(),"Reco vertex Mass [GeV]",500,0,100);
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Mass", m_recoMass[vertexType]));
+    m_recoMu[vertexType]                 = new TH1F(("recoMu" + vertexType).c_str(),"Reco vertex Red. Mass [GeV]",500,0,100); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Mu", m_recoMu[vertexType]));
+    m_recoChi2[vertexType]               = new TH1F(("recoChi2" + vertexType).c_str(),"Reco vertex recoChi2",100,0,10); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Chi2", m_recoChi2[vertexType]));
+    m_recoDir[vertexType]                = new TH1F(("recoDir" + vertexType).c_str(),"Reco vertex recoDirection",100,-1,1);
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Dir", m_recoDir[vertexType]));
+    m_recoCharge[vertexType]             = new TH1F(("recoCharge" + vertexType).c_str(),"Reco vertex recoCharge",20,-10,10);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Charge", m_recoCharge[vertexType]));
+    m_recoH[vertexType]                  = new TH1F(("recoH" + vertexType).c_str(),"Reco vertex H [GeV]",100,0,100); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/H", m_recoH[vertexType]));
+    m_recoHt[vertexType]                 = new TH1F(("recoHt" + vertexType).c_str(),"Reco vertex Mass [GeV]",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Ht", m_recoHt[vertexType]));
+    m_recoMinOpAng[vertexType]           = new TH1F(("recoMinOpAng" + vertexType).c_str(),"Reco vertex minOpAng",100,-1,1); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/MinOpAng", m_recoMinOpAng[vertexType]));
+    m_recoMaxOpAng[vertexType]           = new TH1F(("recoMaxOpAng" + vertexType).c_str(),"Reco vertex MaxOpAng",100,-1,1); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/MaxOpAng", m_recoMaxOpAng[vertexType]));
+    m_recoMaxDR[vertexType]              = new TH1F(("recoMaxDR" + vertexType).c_str(),"Reco vertex maxDR",100,0,10);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/MaxDR", m_recoMaxDR[vertexType]));
+    m_recoMinD0[vertexType]              = new TH1F(("recoMinD0" + vertexType).c_str(),"Reco vertex min d0 [mm]",100,0,100); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/MinD0", m_recoMinD0[vertexType]));
+    m_recoMaxD0[vertexType]              = new TH1F(("recoMaxD0" + vertexType).c_str(),"Reco vertex max d0 [mm]",100,0,100); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/MaxD0", m_recoMaxD0[vertexType]));
+    m_recoNtrk[vertexType]               = new TH1F(("recoNtrk" + vertexType).c_str(),"Reco vertex n tracks",30,0,30);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Ntrk", m_recoNtrk[vertexType]));
 
+    m_positionRes_R[vertexType]             = new TH1F(("positionRes_R" + vertexType).c_str(),"Position resolution for vertices matched to truth  decays",400,-20,20);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/positionRes_R", m_positionRes_R[vertexType]));
+    m_positionRes_Z[vertexType]             = new TH1F(("positionRes_Z" + vertexType).c_str(),"Position resolution for vertices matched to truth  decays",400,-20,20);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/positionRes_Z", m_positionRes_Z[vertexType]));
+    m_matchScore_weight[vertexType]          = new TH1F(("matchScore_weight" + vertexType).c_str(),"Vertex Match Score (weight)",101,0,1.01);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/matchScore_weight", m_matchScore_weight[vertexType]));
+    m_matchScore_pt[vertexType]             = new TH1F(("matchScore_pt" + vertexType).c_str(),"Vertex Match Score (pT)",101,0,1.01);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/matchScore_pt", m_matchScore_pt[vertexType]));
+    m_matchedTruthID[vertexType]            = new TH1F(("matchedTruthID" + vertexType).c_str(),"Vertex Truth Match ID",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/matchedTruthID", m_matchedTruthID[vertexType]));
 
-  m_recoR_Split                  = new TH1F("reco_R_Split","Reco vertex r [mm]",500,0,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/R", m_recoR_Split));
-  m_recoPt_Split                 = new TH1F("reco_Pt_Split","Reco vertex Pt [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Pt", m_recoPt_Split));
-  m_recoEta_Split                = new TH1F("reco_Eta_Split","Reco vertex Eta ",100,-5,5); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Eta", m_recoEta_Split));
-  m_recoPhi_Split                = new TH1F("reco_Phi_Split","Reco vertex Phi ",64,-3.2,3.2);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Phi", m_recoPhi_Split));
-  m_recoMass_Split               = new TH1F("reco_Mass_Split","Reco vertex Mass [GeV]",500,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Mass", m_recoMass_Split));
-  m_recoMu_Split                 = new TH1F("reco_Mu_Split","Reco vertex Red. Mass [GeV]",500,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Mu", m_recoMu_Split));
-  m_recoChi2_Split               = new TH1F("reco_Chi2_Split","Reco vertex recoChi2",100,0,10); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Chi2", m_recoChi2_Split));
-  m_recoDir_Split                = new TH1F("reco_Dir_Split","Reco vertex recoDirection",100,-1,1);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Dir", m_recoDir_Split));
-  m_recoCharge_Split             = new TH1F("reco_Charge_Split","Reco vertex recoCharge",20,-10,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Charge", m_recoCharge_Split));
-  m_recoH_Split                  = new TH1F("reco_H_Split","Reco vertex H [GeV]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/H", m_recoH_Split));
-  m_recoHt_Split                 = new TH1F("reco_Ht_Split","Reco vertex Mass [GeV]",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Ht", m_recoHt_Split));
-  m_recoMinOpAng_Split           = new TH1F("reco_MinOpAng_Split","Reco vertex minOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/MinOpAng", m_recoMinOpAng_Split));
-  m_recoMaxOpAng_Split           = new TH1F("reco_MaxOpAng_Split","Reco vertex MaxOpAng",100,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/MaxOpAng", m_recoMaxOpAng_Split));
-  m_recoMaxDR_Split              = new TH1F("reco_MaxDR_Split","Reco vertex maxDR",100,0,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/MaxDR", m_recoMaxDR_Split));
-  m_recoMinD0_Split              = new TH1F("reco_MinD0_Split","Reco vertex min d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/MinD0", m_recoMinD0_Split));
-  m_recoMaxD0_Split              = new TH1F("reco_MaxD0_Split","Reco vertex max d0 [mm]",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/MaxD0", m_recoMaxD0_Split));
-  m_recoNtrk_Split               = new TH1F("reco_Ntrk_Split","Reco vertex n tracks",30,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Split/Ntrk", m_recoNtrk_Split));
+    // tracks
+    m_recoTrk_qOverP[vertexType]            = new TH1F(("recoTrk_qOverP" + vertexType).c_str(),"Reco track qOverP ",100,0,.01);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_qOverP", m_recoTrk_qOverP[vertexType]));
+    m_recoTrk_theta[vertexType]             = new TH1F(("recoTrk_theta" + vertexType).c_str(),"Reco track theta ",64,0,3.2);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_theta", m_recoTrk_theta[vertexType]));
+    m_recoTrk_E[vertexType]                 = new TH1F(("recoTrk_E" + vertexType).c_str(),"Reco track E ",100,0,100); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_E", m_recoTrk_E[vertexType]));
+    m_recoTrk_M[vertexType]                 = new TH1F(("recoTrk_M" + vertexType).c_str(),"Reco track M ",100,0,10);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_M", m_recoTrk_M[vertexType]));
+    m_recoTrk_Pt[vertexType]                = new TH1F(("recoTrk_Pt" + vertexType).c_str(),"Reco track Pt ",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Pt", m_recoTrk_Pt[vertexType]));
+    m_recoTrk_Px[vertexType]                = new TH1F(("recoTrk_Px" + vertexType).c_str(),"Reco track Px ",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Px", m_recoTrk_Px[vertexType]));
+    m_recoTrk_Py[vertexType]                = new TH1F(("recoTrk_Py" + vertexType).c_str(),"Reco track Py ",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Py", m_recoTrk_Py[vertexType]));
+    m_recoTrk_Pz[vertexType]                = new TH1F(("recoTrk_Pz" + vertexType).c_str(),"Reco track Pz ",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Pz", m_recoTrk_Pz[vertexType]));
+    m_recoTrk_Eta[vertexType]               = new TH1F(("recoTrk_Eta" + vertexType).c_str(),"Reco track Eta ",100,-5,5);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Eta", m_recoTrk_Eta[vertexType]));
+    m_recoTrk_Phi[vertexType]               = new TH1F(("recoTrk_Phi" + vertexType).c_str(),"Reco track Phi ",63,-3.2,3.2); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Phi", m_recoTrk_Phi[vertexType]));
+    m_recoTrk_D0[vertexType]                = new TH1F(("recoTrk_D0" + vertexType).c_str(),"Reco track D0 ",300,-300,300); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_D0", m_recoTrk_D0[vertexType]));
+    m_recoTrk_Z0[vertexType]                = new TH1F(("recoTrk_Z0" + vertexType).c_str(),"Reco track Z0 ",500,-500,500); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Z0", m_recoTrk_Z0[vertexType]));
+    m_recoTrk_errD0[vertexType]             = new TH1F(("recoTrk_errD0" + vertexType).c_str(),"Reco track errD0 ",300,0,30);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_errD0", m_recoTrk_errD0[vertexType]));
+    m_recoTrk_errZ0[vertexType]             = new TH1F(("recoTrk_errZ0" + vertexType).c_str(),"Reco track errZ0 ",500,0,50);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_errZ0", m_recoTrk_errZ0[vertexType]));
+    m_recoTrk_Chi2[vertexType]              = new TH1F(("recoTrk_Chi2" + vertexType).c_str(),"Reco track Chi2 ",100,0,10); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_Chi2", m_recoTrk_Chi2[vertexType]));
+    m_recoTrk_nDoF[vertexType]              = new TH1F(("recoTrk_nDoF" + vertexType).c_str(),"Reco track nDoF ",100,0,100);  
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_nDoF", m_recoTrk_nDoF[vertexType]));
+    m_recoTrk_charge[vertexType]            = new TH1F(("recoTrk_charge" + vertexType).c_str(),"Reco track charge ",3,-1.5,1.5); 
+    ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/SecondaryVertex/" + vertexType + "/Trk_charge", m_recoTrk_charge[vertexType]));
 
-  // tracks
-  m_recoTrk_qOverP            = new TH1F("reco_Trk_qOverP","Reco track qOverP ",100,0,.01);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_qOverP", m_recoTrk_qOverP));
-  m_recoTrk_theta             = new TH1F("reco_Trk_theta","Reco track theta ",64,0,3.2);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_theta", m_recoTrk_theta));
-  m_recoTrk_E                 = new TH1F("reco_Trk_E","Reco track E ",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_E", m_recoTrk_E));    
-  m_recoTrk_M                 = new TH1F("reco_Trk_M","Reco track M ",100,0,10);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_M", m_recoTrk_M));
-  m_recoTrk_Pt                = new TH1F("reco_Trk_Pt","Reco track Pt ",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Pt", m_recoTrk_Pt));
-  m_recoTrk_Px                = new TH1F("reco_Trk_Px","Reco track Px ",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Px", m_recoTrk_Px));
-  m_recoTrk_Py                = new TH1F("reco_Trk_Py","Reco track Py ",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Py", m_recoTrk_Py));
-  m_recoTrk_Pz                = new TH1F("reco_Trk_Pz","Reco track Pz ",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Pz", m_recoTrk_Pz));
-  m_recoTrk_Eta               = new TH1F("reco_Trk_Eta","Reco track Eta ",100,-5,5);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Eta", m_recoTrk_Eta));
-  m_recoTrk_Phi               = new TH1F("reco_Trk_Phi","Reco track Phi ",63,-3.2,3.2); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Phi", m_recoTrk_Phi));
-  m_recoTrk_D0                = new TH1F("reco_Trk_D0","Reco track D0 ",300,-300,300); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_D0", m_recoTrk_D0));
-  m_recoTrk_Z0                = new TH1F("reco_Trk_Z0","Reco track Z0 ",500,-500,500); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Z0", m_recoTrk_Z0));
-  m_recoTrk_errD0             = new TH1F("reco_Trk_errD0","Reco track errD0 ",300,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_errD0", m_recoTrk_errD0));
-  m_recoTrk_errZ0             = new TH1F("reco_Trk_errZ0","Reco track errZ0 ",500,0,50);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_errZ0", m_recoTrk_errZ0));
-  m_recoTrk_Chi2              = new TH1F("reco_Trk_Chi2","Reco track Chi2 ",100,0,10); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_Chi2", m_recoTrk_Chi2));
-  m_recoTrk_nDoF              = new TH1F("reco_Trk_nDoF","Reco track nDoF ",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_nDoF", m_recoTrk_nDoF));
-  m_recoTrk_charge            = new TH1F("reco_Trk_charge","Reco track charge ",3,-1.5,1.5); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/SecondaryVertex/Trk_charge", m_recoTrk_charge));
-
+  }
 
   ////////////////////////////////////////////
   //////// Truth Vertex Histograms ///////////
   ////////////////////////////////////////////
   m_truthX                    = new TH1F("truth_X","truth vertex x [mm]",500,-500,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthX", m_truthX));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthX", m_truthX));
   m_truthY                    = new TH1F("truth_Y","truth vertex y [mm]",500,-500,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthY", m_truthY));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthY", m_truthY));
   m_truthZ                    = new TH1F("truth_Z","truth vertex z [mm]",500,-500,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthZ", m_truthZ));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthZ", m_truthZ));
   m_truthR                    = new TH1F("truth_R","truth vertex r [mm]",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthR", m_truthR));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthR", m_truthR));
   m_truthdistFromPV           = new TH1F("truth_distFromPV","truth vertex distFromPV [mm]",500,0,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthdistFromPV", m_truthdistFromPV));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthdistFromPV", m_truthdistFromPV));
   m_truthEta                  = new TH1F("truth_Eta","truth veEtatex Eta ",100,-5,5);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthEta", m_truthEta));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthEta", m_truthEta));
   m_truthPhi                  = new TH1F("truth_Phi","truth vePhitex Phi ",64,-3.2,3.2); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthPhi", m_truthPhi));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthPhi", m_truthPhi));
   m_truthNtrk_out             = new TH1F("truth_Ntrk_out","truth vertex n outgoing tracks",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthNtrk_out", m_truthNtrk_out));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthNtrk_out", m_truthNtrk_out));
   m_truthParent_E             = new TH1F("truth_Parent_E","Reco track E ",100,0,100); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParent_E", m_truthParent_E));    
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParent_E", m_truthParent_E));    
   m_truthParent_M             = new TH1F("truth_Parent_M","Reco track M ",500,0,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParent_M", m_truthParent_M));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParent_M", m_truthParent_M));
   m_truthParent_Pt            = new TH1F("truth_Parent_Pt","Reco track Pt ",100,0,100);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParent_Pt", m_truthParent_Pt));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParent_Pt", m_truthParent_Pt));
   m_truthParent_Eta           = new TH1F("truth_Parent_Eta","Reco track Eta ",100,-5,5);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParent_Eta", m_truthParent_Eta));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParent_Eta", m_truthParent_Eta));
   m_truthParent_Phi           = new TH1F("truth_Parent_Phi","Reco track Phi ",63,-3.2,3.2); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParent_Phi", m_truthParent_Phi));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParent_Phi", m_truthParent_Phi));
   m_truthParent_charge        = new TH1F("truth_Parent_charge","Reco track charge ",3,-1,1); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParent_charge", m_truthParent_charge));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParent_charge", m_truthParent_charge));
   m_truthParentProdX          = new TH1F("truth_ParentProdX","truthParentProd vertex x [mm]",500,-500,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProdX", m_truthParentProdX));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProdX", m_truthParentProdX));
   m_truthParentProdY          = new TH1F("truth_ParentProdY","truthParentProd vertex y [mm]",500,-500,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProdY", m_truthParentProdY));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProdY", m_truthParentProdY));
   m_truthParentProdZ          = new TH1F("truth_ParentProdZ","truthParentProd vertex z [mm]",500,-500,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProdZ", m_truthParentProdZ));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProdZ", m_truthParentProdZ));
   m_truthParentProdR          = new TH1F("truth_ParentProdR","truthParentProd vertex r [mm]",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProdR", m_truthParentProdR));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProdR", m_truthParentProdR));
   m_truthParentProddistFromPV = new TH1F("truth_ParentProddistFromPV","truthParentProd vertex distFromPV [mm]",500,0,500);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProddistFromPV", m_truthParentProddistFromPV));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProddistFromPV", m_truthParentProddistFromPV));
   m_truthParentProdEta        = new TH1F("truth_ParentProdEta","truthParentProd veEtatex Eta ",100,-5,5);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProdEta", m_truthParentProdEta));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProdEta", m_truthParentProdEta));
   m_truthParentProdPhi        = new TH1F("truth_ParentProdPhi","truthParentProd vePhitex Phi ",64,-3.2,3.2); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/truthParentProdPhi", m_truthParentProdPhi));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/truthParentProdPhi", m_truthParentProdPhi));
 
   m_truthInclusive_r            = new TH1F("truth_R_Inclusive","Reconstructable Truth Vertices",6000,0,600); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Inclusive/R", m_truthInclusive_r));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Inclusive/R", m_truthInclusive_r));
   m_truthReconstructable_r      = new TH1F("truth_R_Reconstructable","Truth Vertices in detector acceptance",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Reconstructable/R", m_truthReconstructable_r));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Reconstructable/R", m_truthReconstructable_r));
   m_truthAccepted_r             = new TH1F("truth_R_Accepted","Truth Vertices in detector acceptance",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Accepted/R", m_truthAccepted_r));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Accepted/R", m_truthAccepted_r));
   m_truthSeeded_r               = new TH1F("truth_R_Seeded","Seedable Truth Vertices",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Seeded/R", m_truthSeeded_r));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Seeded/R", m_truthSeeded_r));
   m_truthReconstructed_r        = new TH1F("truth_R_Reconstructed","Vertex with Match Score > 0.5",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Reconstructed/R", m_truthReconstructed_r));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Reconstructed/R", m_truthReconstructed_r));
   m_truthSplit_r                = new TH1F("truth_R_Split","Split Vertex",6000,0,600);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Split/R", m_truthSplit_r));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Split/R", m_truthSplit_r));
 
   // TODO: implement these plots
   m_truth_Ntrk                  = new TH1F("truth_Ntrk","Truth vertex n track pass tracks",30,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Inclusive/Ntrk", m_truth_Ntrk));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Inclusive/Ntrk", m_truth_Ntrk));
   m_truthReconstructable_trkSel = new TH1F("truth_Ntrk_Seeded","Seedable Truth Vertices",30,0,30); 
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Reconstructable/Ntrk", m_truthReconstructable_trkSel));
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Reconstructable/Ntrk", m_truthReconstructable_trkSel));
   m_truthReconstructed_trkSel   = new TH1F("truth_Ntrk_Reconstructed","Vertex with Match Score > 0.5",30,0,30);  
-  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/TruthVertex/Reconstructed/Ntrk", m_truthReconstructed_trkSel));
-
+  ATH_CHECK( m_thistSvc->regHist("/VTXPLOTS/" + name() + "/TruthVertex/Reconstructed/Ntrk", m_truthReconstructed_trkSel));
   return StatusCode::SUCCESS;
 }
 
@@ -342,6 +262,9 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
   static const xAOD::Vertex::Decorator<VertexMatchType> matchTypeDecor("VertexMatchType");
   static const xAOD::Vertex::Decorator<std::vector<ElementLink<xAOD::VertexContainer> > > splitPartnerDecor("SplitPartners");
   static const xAOD::Vertex::Decorator<ElementLink<xAOD::TruthVertexContainer> > backLinkDecor("RecoToTruthLink");
+
+  const xAOD::Vertex::Decorator<float> fakeScoreDecor("FakeScore");
+  const xAOD::Vertex::Decorator<float> otherScoreDecor("OtherScore");
 
   //setup accessors
   // can switch to built in method in xAOD::Vertex once don't have to deal with changing names anymore
@@ -396,8 +319,9 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
     ATH_MSG_DEBUG("Matching new vertex at (" << vtx->x() << ", " << vtx->y() << ", " << vtx->z() << ")" << " with " << ntracks << " tracks, at index: " << vtx->index());
 
     float totalWeight = 0.;
-
     float totalPt = 0; 
+    float otherPt = 0;
+    float fakePt = 0;
 
     unsigned vx_n_bad_links = 0;
     //loop over the tracks in the vertex
@@ -454,10 +378,13 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
           std::get<2>(matchinfo[matchIdx]) += trk.pt();
         } else {
           //truth particle failed cuts
+          ATH_MSG_DEBUG("Truth particle not from LLP decay.");
+          otherPt += trk.pt();
         }
       } else {
         //not valid or low matching probability
         ATH_MSG_DEBUG("Invalid or low prob truth link!");
+        fakePt += trk.pt();
       }
     }//end loop over tracks in vertex
 
@@ -472,8 +399,12 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
       std::get<2>(link) /= totalPt;
     });
 
-    // TODO: sort match info first
-    matchInfoDecor( *vtx ) = matchinfo;
+    float fakeScore = fakePt/totalPt;
+    float otherScore = otherPt/totalPt;
+
+    matchInfoDecor ( *vtx ) = matchinfo;
+    fakeScoreDecor ( *vtx ) = fakeScore;
+    otherScoreDecor( *vtx ) = otherScore;
   }
 
   //After first loop, all vertices have been decorated with their vector of match info (link to TruthVertex paired with weight)
@@ -495,10 +426,21 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
     }
 
     std::vector<VertexTruthMatchInfo> & info = matchInfoDecor( *vtxContainer[i] );
+    float fakeScore  = fakeScoreDecor( *vtxContainer[i] );
 
-    if (info.empty()) {                                // no true decay vertices matched 
-      ATH_MSG_DEBUG("No true decay vertices matched. Vertex is fake.");
+    if(fakeScore > m_vxMatchWeight) {
+      ATH_MSG_DEBUG("Vertex is fake.");
       matchTypeDecor( *vtxContainer[i] ) = FAKE;
+    } else if (info.size() == 1) {
+      if(std::get<2>(info[0]) > m_vxMatchWeight ) { // one truth matched vertex, sufficient weight
+        ATH_MSG_DEBUG("One true decay vertices matched with sufficient weight. Vertex is matched.");
+        matchTypeDecor( *vtxContainer[i] ) = MATCHED;
+        isMatched(**std::get<0>(info[0])) = true;
+      }
+      else {
+        ATH_MSG_DEBUG("One true decay vertices matched with insufficient weight. Vertex is other.");
+        matchTypeDecor( *vtxContainer[i] ) = OTHER;
+      }
     } else if (info.size() >= 2 ) {                        // more than one true deacy vertices matched
       ATH_MSG_DEBUG("Multiple true decay vertices matched. Vertex is merged.");
       matchTypeDecor( *vtxContainer[i] ) = MERGED;
@@ -506,13 +448,9 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
       {
         isMatched(**std::get<0>(link)) = true;
       });
-    } else if ( std::get<2>(info[0]) > m_vxMatchWeight ) { // one truth matched vertex, sufficient weight
-      ATH_MSG_DEBUG("One true decay vertices matched. Vertex is matched.");
-      matchTypeDecor( *vtxContainer[i] ) = MATCHED;
-      isMatched(**std::get<0>(info[0])) = true;
-    } else {                                               // one truth matched vertex, insufficient weight 
-      ATH_MSG_DEBUG("One true decay vertices matched with insufficient score. Vertex is fake.");
-      matchTypeDecor( *vtxContainer[i] ) = FAKE;
+    } else {                                // zero truth matched vertices, but not fake 
+      ATH_MSG_DEBUG("Vertex is neither fake nor LLP. Marking as OTHER.");
+      matchTypeDecor( *vtxContainer[i] ) = OTHER;
     }
 
     //check for splitting
@@ -613,23 +551,23 @@ StatusCode InDetSecVertexTruthMatchTool::labelTruthVertices( const xAOD::TruthVe
     ATH_MSG_DEBUG("Info for this LLP decay: " << vertexInfo);
 
     matchTypeDecor(*truthVtx) = INCLUSIVE;
-    if( vertexInfo.at(0) > 1 &&  truthVtx->perp() <  563 && abs(truthVtx->z()) < 2720){
+    if( vertexInfo.at(0) > 1 &&  truthVtx->perp() <  320 && abs(truthVtx->z()) < 1500){
       ATH_MSG_DEBUG("Vertex is reconstructable and in Inner Det region");
       matchTypeDecor(*truthVtx) = RECONSTRUCTABLE;
     }
-    if( vertexInfo.at(1) > 1){
-      ATH_MSG_DEBUG("Vertex is Reconstructable");
+    if( matchTypeDecor(*truthVtx) == RECONSTRUCTABLE and vertexInfo.at(1) > 1){
+      ATH_MSG_DEBUG("Vertex has at least two tracks");
       matchTypeDecor(*truthVtx) = ACCEPTED;
     }
-    if(vertexInfo.at(2) > 1){
-      ATH_MSG_DEBUG("Vertex has at least two tracks passing track selection: " << vertexInfo.at(2));
+    if(matchTypeDecor(*truthVtx) == ACCEPTED and vertexInfo.at(2) > 1){
+      ATH_MSG_DEBUG("Vertex is has at least two tracks passing track selection: " << vertexInfo.at(2));
       matchTypeDecor(*truthVtx) = SEEDED;
     }
-    if(isMatched(*truthVtx)){
+    if(matchTypeDecor(*truthVtx) == SEEDED and isMatched(*truthVtx)){
       ATH_MSG_DEBUG("Vertex is matched to a reconstructed secVtx");
       matchTypeDecor(*truthVtx) = RECONSTRUCTED;
     }
-    if(isSplit(*truthVtx)){
+    if(matchTypeDecor(*truthVtx) == SEEDED and isSplit(*truthVtx)){
       ATH_MSG_DEBUG("Vertex is matched to multiple secVtx");
       matchTypeDecor(*truthVtx) = RECONSTRUCTEDSPLIT;
     }
@@ -688,14 +626,32 @@ StatusCode InDetSecVertexTruthMatchTool::fillRecoPlots( const xAOD::Vertex& secV
   xAOD::Vertex::ConstAccessor<std::vector<float> > weightAcc("trackWeights");
   
   // set of decorators for truth matching info
-  static const xAOD::Vertex::Decorator<VertexMatchType> matchTypeDecor("VertexMatchType");
-  static const xAOD::Vertex::Decorator<std::vector<VertexTruthMatchInfo> > matchInfoDecor("TruthVertexMatchingInfos");
+  const xAOD::Vertex::Decorator<VertexMatchType> matchTypeDecor("VertexMatchType");
+  const xAOD::Vertex::Decorator<std::vector<VertexTruthMatchInfo> > matchInfoDecor("TruthVertexMatchingInfos");
+
+  std::string vertexType = "";
+  switch (matchTypeDecor(secVtx))
+  {
+  case MATCHED:
+    vertexType = "Matched";
+    break;
+  case MERGED:
+    vertexType = "Merged";
+    break;
+  case SPLIT:
+    vertexType = "Split";
+    break;
+  case OTHER:
+    vertexType = "Other";
+    break;
+  case FAKE:
+    vertexType = "Fake";
+    break;
+  default:
+    break;
+  }
 
   m_matchType->Fill(matchTypeDecor(secVtx));
-
-  m_recoX->Fill(secVtx.x());
-  m_recoY->Fill(secVtx.y());
-  m_recoZ->Fill(secVtx.z());
 
   TVector3 reco_pos(secVtx.x(), secVtx.y(), secVtx.z());
   float reco_r = reco_pos.Perp();
@@ -725,26 +681,8 @@ StatusCode InDetSecVertexTruthMatchTool::fillRecoPlots( const xAOD::Vertex& secV
     }
     const xAOD::TrackParticle & trk = **trkParts[t];
 
-    m_recoTrk_errD0->Fill(trk.definingParametersCovMatrix()(0,0));
-    m_recoTrk_errZ0->Fill(trk.definingParametersCovMatrix()(1,1));
     double trk_d0 = std::abs(trk.definingParameters()[0]);
     double trk_z0 = std::abs(trk.definingParameters()[1]);
-
-    m_recoTrk_theta->Fill(trk.definingParameters()[3]);
-    m_recoTrk_qOverP->Fill(trk.definingParameters()[4]);
-    m_recoTrk_E->Fill(trk.e()/GeV);
-    m_recoTrk_M->Fill(trk.m()/GeV);
-    m_recoTrk_Pt->Fill(trk.pt()/GeV);
-
-    m_recoTrk_Px->Fill(trk.p4().Px()/GeV);
-    m_recoTrk_Py->Fill(trk.p4().Py()/GeV);
-    m_recoTrk_Pz->Fill(trk.p4().Pz()/GeV);
-
-    m_recoTrk_Eta->Fill(trk.eta());
-    m_recoTrk_Phi->Fill(trk.phi0());
-
-    m_recoTrk_D0->Fill(trk_d0);
-    m_recoTrk_Z0->Fill(trk_z0);
 
     if(trk_d0 < minD0){ minD0 = trk_d0; }
     if(trk_d0 > maxD0){ maxD0 = trk_d0; }
@@ -782,98 +720,81 @@ StatusCode InDetSecVertexTruthMatchTool::fillRecoPlots( const xAOD::Vertex& secV
     if( DR > maxDR ){ maxDR = DR;}
 
     charge += trk.charge();
-    m_recoTrk_charge->Fill(trk.charge());
 
     xAOD::TrackParticle::ConstAccessor<float> Trk_Chi2("chiSquared");
     xAOD::TrackParticle::ConstAccessor<float> Trk_nDoF("numberDoF");
 
     if ( Trk_Chi2.isAvailable(trk) && Trk_Chi2(trk) && Trk_nDoF.isAvailable(trk) && Trk_nDoF(trk) )  {
-      m_recoTrk_Chi2->Fill(trk.chiSquared() / trk.numberDoF());
-      m_recoTrk_nDoF->Fill(trk.numberDoF()); 
+      m_recoTrk_Chi2[vertexType]->Fill( Trk_Chi2(trk) / Trk_nDoF(trk));
+      m_recoTrk_nDoF[vertexType]->Fill( Trk_nDoF(trk) ); 
     }
+    m_recoTrk_charge[vertexType]->Fill(trk.charge());
+    m_recoTrk_errD0[vertexType]->Fill(trk.definingParametersCovMatrix()(0,0));
+    m_recoTrk_errZ0[vertexType]->Fill(trk.definingParametersCovMatrix()(1,1));
+
+    m_recoTrk_theta[vertexType]->Fill(trk.definingParameters()[3]);
+    m_recoTrk_qOverP[vertexType]->Fill(trk.definingParameters()[4]);
+    m_recoTrk_E[vertexType]->Fill(trk.e()/GeV);
+    m_recoTrk_M[vertexType]->Fill(trk.m()/GeV);
+    m_recoTrk_Pt[vertexType]->Fill(trk.pt()/GeV);
+
+    m_recoTrk_Px[vertexType]->Fill(trk.p4().Px()/GeV);
+    m_recoTrk_Py[vertexType]->Fill(trk.p4().Py()/GeV);
+    m_recoTrk_Pz[vertexType]->Fill(trk.p4().Pz()/GeV);
+
+    m_recoTrk_Eta[vertexType]->Fill(trk.eta());
+    m_recoTrk_Phi[vertexType]->Fill(trk.phi0());
+
+    m_recoTrk_D0[vertexType]->Fill(trk_d0);
+    m_recoTrk_Z0[vertexType]->Fill(trk_z0);
   } // end loop over tracks
 
   const double dir  = sumP4.Vect().Dot( reco_pos ) / sumP4.Vect().Mag() / reco_pos.Mag();
 
   xAOD::Vertex::ConstAccessor<float> Chi2("chiSquared");
   xAOD::Vertex::ConstAccessor<float> nDoF("numberDoF");
+  m_recoX[vertexType]->Fill(secVtx.x());
+  m_recoY[vertexType]->Fill(secVtx.y());
+  m_recoZ[vertexType]->Fill(secVtx.z());
+  m_recoR[vertexType]->Fill(reco_r);
+  m_recoNtrk[vertexType]->Fill(ntracks);
+  m_recoPt[vertexType]->Fill(sumP4.Pt() / GeV);
+  m_recoEta[vertexType]->Fill(sumP4.Eta());
+  m_recoPhi[vertexType]->Fill(sumP4.Phi());
+  m_recoMass[vertexType]->Fill(sumP4.M() / GeV);
+  m_recoMu[vertexType]->Fill(sumP4.M()/maxDR / GeV);
+  m_recoChi2[vertexType]->Fill(Chi2(secVtx)/nDoF(secVtx));
+  m_recoDir[vertexType]->Fill(dir);
+  m_recoCharge[vertexType]->Fill(charge);
+  m_recoH[vertexType]->Fill(H / GeV);
+  m_recoHt[vertexType]->Fill(HT / GeV);
+  m_recoMinOpAng[vertexType]->Fill(minOpAng);
+  m_recoMaxOpAng[vertexType]->Fill(maxOpAng); 
+  m_recoMinD0[vertexType]->Fill(minD0);
+  m_recoMaxD0[vertexType]->Fill(maxD0); 
+  m_recoMaxDR[vertexType]->Fill(maxDR); 
 
-  m_recoR->Fill(reco_r);
-  m_recoNtrk->Fill(ntracks);
-  m_recoPt->Fill(sumP4.Pt() / GeV);
-  m_recoEta->Fill(sumP4.Eta());
-  m_recoPhi->Fill(sumP4.Phi());
-  m_recoMass->Fill(sumP4.M() / GeV);
-  m_recoMu->Fill(sumP4.M()/maxDR / GeV);
-  m_recoChi2->Fill(Chi2(secVtx)/nDoF(secVtx));
-  m_recoDir->Fill(dir);
-  m_recoCharge->Fill(charge);
-  m_recoH->Fill(H / GeV);
-  m_recoHt->Fill(HT / GeV);
-  m_recoMinOpAng->Fill(minOpAng);
-  m_recoMaxOpAng->Fill(maxOpAng); 
-  m_recoMinD0->Fill(minD0);
-  m_recoMaxD0->Fill(maxD0); 
-  m_recoMaxDR->Fill(maxDR); 
+  m_recoX["All"]->Fill(secVtx.x());
+  m_recoY["All"]->Fill(secVtx.y());
+  m_recoZ["All"]->Fill(secVtx.z());
+  m_recoR["All"]->Fill(reco_r);
+  m_recoNtrk["All"]->Fill(ntracks);
+  m_recoPt["All"]->Fill(sumP4.Pt() / GeV);
+  m_recoEta["All"]->Fill(sumP4.Eta());
+  m_recoPhi["All"]->Fill(sumP4.Phi());
+  m_recoMass["All"]->Fill(sumP4.M() / GeV);
+  m_recoMu["All"]->Fill(sumP4.M()/maxDR / GeV);
+  m_recoChi2["All"]->Fill(Chi2(secVtx)/nDoF(secVtx));
+  m_recoDir["All"]->Fill(dir);
+  m_recoCharge["All"]->Fill(charge);
+  m_recoH["All"]->Fill(H / GeV);
+  m_recoHt["All"]->Fill(HT / GeV);
+  m_recoMinOpAng["All"]->Fill(minOpAng);
+  m_recoMaxOpAng["All"]->Fill(maxOpAng); 
+  m_recoMinD0["All"]->Fill(minD0);
+  m_recoMaxD0["All"]->Fill(maxD0); 
+  m_recoMaxDR["All"]->Fill(maxDR); 
 
-  // fill the conditional hists
-  if(matchTypeDecor(secVtx) == SPLIT) {
-    m_recoR_Split->Fill(reco_r);
-    m_recoNtrk_Split->Fill(ntracks);
-    m_recoPt_Split->Fill(sumP4.Pt() / GeV);
-    m_recoEta_Split->Fill(sumP4.Eta());
-    m_recoPhi_Split->Fill(sumP4.Phi());
-    m_recoMass_Split->Fill(sumP4.M() / GeV);
-    m_recoMu_Split->Fill(sumP4.M()/maxDR / GeV);
-    m_recoChi2_Split->Fill(Chi2(secVtx)/nDoF(secVtx));
-    m_recoDir_Split->Fill(dir);
-    m_recoCharge_Split->Fill(charge);
-    m_recoH_Split->Fill(H / GeV);
-    m_recoHt_Split->Fill(HT / GeV);
-    m_recoMinOpAng_Split->Fill(minOpAng);
-    m_recoMaxOpAng_Split->Fill(maxOpAng); 
-    m_recoMinD0_Split->Fill(minD0);
-    m_recoMaxD0_Split->Fill(maxD0); 
-    m_recoMaxDR_Split->Fill(maxDR); 
-  }
-  else if(matchTypeDecor(secVtx) == FAKE)  {
-    m_recoR_Fake->Fill(reco_r);
-    m_recoNtrk_Fake->Fill(ntracks);
-    m_recoPt_Fake->Fill(sumP4.Pt() / GeV);
-    m_recoEta_Fake->Fill(sumP4.Eta());
-    m_recoPhi_Fake->Fill(sumP4.Phi());
-    m_recoMass_Fake->Fill(sumP4.M() / GeV);
-    m_recoMu_Fake->Fill(sumP4.M()/maxDR / GeV);
-    m_recoChi2_Fake->Fill(Chi2(secVtx)/nDoF(secVtx));
-    m_recoDir_Fake->Fill(dir);
-    m_recoCharge_Fake->Fill(charge);
-    m_recoH_Fake->Fill(H / GeV);
-    m_recoHt_Fake->Fill(HT / GeV);
-    m_recoMinOpAng_Fake->Fill(minOpAng);
-    m_recoMaxOpAng_Fake->Fill(maxOpAng); 
-    m_recoMinD0_Fake->Fill(minD0);
-    m_recoMaxD0_Fake->Fill(maxD0); 
-    m_recoMaxDR_Fake->Fill(maxDR); 
-  }
-  else if(matchTypeDecor(secVtx) == MATCHED) {
-    m_recoR_LLP->Fill(reco_r);
-    m_recoNtrk_LLP->Fill(ntracks);
-    m_recoPt_LLP->Fill(sumP4.Pt() / GeV);
-    m_recoEta_LLP->Fill(sumP4.Eta());
-    m_recoPhi_LLP->Fill(sumP4.Phi());
-    m_recoMass_LLP->Fill(sumP4.M() / GeV);
-    m_recoMu_LLP->Fill(sumP4.M()/maxDR / GeV);
-    m_recoChi2_LLP->Fill(Chi2(secVtx)/nDoF(secVtx));
-    m_recoDir_LLP->Fill(dir);
-    m_recoCharge_LLP->Fill(charge);
-    m_recoH_LLP->Fill(H / GeV);
-    m_recoHt_LLP->Fill(HT / GeV);
-    m_recoMinOpAng_LLP->Fill(minOpAng);
-    m_recoMaxOpAng_LLP->Fill(maxOpAng); 
-    m_recoMinD0_LLP->Fill(minD0);
-    m_recoMaxD0_LLP->Fill(maxD0); 
-    m_recoMaxDR_LLP->Fill(maxDR); 
-  }
   std::vector<VertexTruthMatchInfo> truthmatchinfo;
   truthmatchinfo = matchInfoDecor(secVtx);
 
@@ -882,17 +803,42 @@ StatusCode InDetSecVertexTruthMatchTool::fillRecoPlots( const xAOD::Vertex& secV
     float matchScore_weight = std::get<1>(truthmatchinfo.at(0));
     float matchScore_pt     = std::get<2>(truthmatchinfo.at(0));
 
-    m_matchScore_weight->Fill(matchScore_weight);
-    m_matchScore_pt->Fill(matchScore_pt);
+    m_matchScore_weight[vertexType]->Fill(matchScore_weight);
+    m_matchScore_pt[vertexType]->Fill(matchScore_pt);
 
     ATH_MSG_DEBUG("Match Score and probability: " << matchScore_weight << " " << matchScore_pt/0.01);
 
     const ElementLink<xAOD::TruthVertexContainer>& truthVertexLink = std::get<0>(truthmatchinfo.at(0));
     const xAOD::TruthVertex& truthVtx = **truthVertexLink ;
-    xAOD::TruthVertex::Decorator<int> isReconstructed("VertexReconstructed");
 
-    m_positionRes_R->Fill(reco_r - truthVtx.perp());
-    m_positionRes_Z->Fill(secVtx.z() - truthVtx.z());
+    m_positionRes_R[vertexType]->Fill(reco_r - truthVtx.perp());
+    m_positionRes_Z[vertexType]->Fill(secVtx.z() - truthVtx.z());
+
+    m_recoX["LLP"]->Fill(secVtx.x());
+    m_recoY["LLP"]->Fill(secVtx.y());
+    m_recoZ["LLP"]->Fill(secVtx.z());
+    m_recoR["LLP"]->Fill(reco_r);
+    m_recoNtrk["LLP"]->Fill(ntracks);
+    m_recoPt["LLP"]->Fill(sumP4.Pt() / GeV);
+    m_recoEta["LLP"]->Fill(sumP4.Eta());
+    m_recoPhi["LLP"]->Fill(sumP4.Phi());
+    m_recoMass["LLP"]->Fill(sumP4.M() / GeV);
+    m_recoMu["LLP"]->Fill(sumP4.M()/maxDR / GeV);
+    m_recoChi2["LLP"]->Fill(Chi2(secVtx)/nDoF(secVtx));
+    m_recoDir["LLP"]->Fill(dir);
+    m_recoCharge["LLP"]->Fill(charge);
+    m_recoH["LLP"]->Fill(H / GeV);
+    m_recoHt["LLP"]->Fill(HT / GeV);
+    m_recoMinOpAng["LLP"]->Fill(minOpAng);
+    m_recoMaxOpAng["LLP"]->Fill(maxOpAng); 
+    m_recoMinD0["LLP"]->Fill(minD0);
+    m_recoMaxD0["LLP"]->Fill(maxD0); 
+    m_recoMaxDR["LLP"]->Fill(maxDR); 
+
+    m_positionRes_R["LLP"]->Fill(reco_r - truthVtx.perp());
+    m_positionRes_Z["LLP"]->Fill(secVtx.z() - truthVtx.z());
+    m_matchScore_weight["LLP"]->Fill(matchScore_weight);
+    m_matchScore_pt["LLP"]->Fill(matchScore_pt);
   }
   
   return StatusCode::SUCCESS;
