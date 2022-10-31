@@ -72,11 +72,10 @@ namespace Rec {
        return StatusCode::FAILURE;
      }
 
-     //-- create container for new vertices
-     xAOD::VertexContainer    * bVertexContainer    = new (std::nothrow) xAOD::VertexContainer();
-     xAOD::VertexAuxContainer * bVertexAuxContainer = new (std::nothrow) xAOD::VertexAuxContainer();
-     if(!bVertexContainer || !bVertexAuxContainer )return StatusCode::FAILURE;
-     bVertexContainer->setStore(bVertexAuxContainer);
+     // Vertex container and its auxilliary store
+     std::unique_ptr<xAOD::VertexContainer>    bVertexContainer    = std::make_unique<xAOD::VertexContainer>();
+     std::unique_ptr<xAOD::VertexAuxContainer> bVertexAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
+     bVertexContainer->setStore(bVertexAuxContainer.get());
 
      std::vector<const xAOD::TrackParticle*> trkparticles(0);
      for(auto tp : (*tp_cont)) trkparticles.push_back(tp);
@@ -106,8 +105,8 @@ namespace Rec {
      ATH_MSG_DEBUG("Found Vertices in this event: " << bVertexContainer->size());
 
      SG::WriteHandle<xAOD::VertexContainer>  vrtInThisEvent(m_foundVertices);
-     ATH_CHECK( vrtInThisEvent.record (std::make_unique<xAOD::VertexContainer>(*bVertexContainer),
-                                       std::make_unique<xAOD::VertexAuxContainer>(*bVertexAuxContainer)) );
+     ATH_CHECK( vrtInThisEvent.record ( std::move(bVertexContainer), std::move(bVertexAuxContainer) ) );
+
      return StatusCode::SUCCESS;
    }
 }
