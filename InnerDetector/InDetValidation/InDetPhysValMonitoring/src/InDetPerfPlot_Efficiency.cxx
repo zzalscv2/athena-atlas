@@ -25,13 +25,17 @@ InDetPerfPlot_Efficiency::initializePlots() {
   book(m_efficiency_vs_pt_high, "efficiency_vs_pt_high");
   book(m_efficiency_vs_phi, "efficiency_vs_phi");
   book(m_efficiency_vs_d0, "efficiency_vs_d0");
+  book(m_efficiency_vs_d0_abs, "efficiency_vs_d0_abs");
   book(m_efficiency_vs_z0, "efficiency_vs_z0");
+  book(m_efficiency_vs_z0_abs, "efficiency_vs_z0_abs");
   book(m_efficiency_vs_R, "efficiency_vs_R");
   book(m_efficiency_vs_Z, "efficiency_vs_Z");
   book(m_efficiency_vs_mu, "efficiency_vs_mu");
 
   book(m_extended_efficiency_vs_d0, "extended_efficiency_vs_d0");
+  book(m_extended_efficiency_vs_d0_abs, "extended_efficiency_vs_d0_abs");
   book(m_extended_efficiency_vs_z0, "extended_efficiency_vs_z0");
+  book(m_extended_efficiency_vs_z0_abs, "extended_efficiency_vs_z0_abs");
   book(m_efficiency_vs_prodR, "efficiency_vs_prodR");
   book(m_efficiency_vs_prodR_extended, "efficiency_vs_prodR_extended");
   book(m_efficiency_vs_prodZ, "efficiency_vs_prodZ");
@@ -65,12 +69,16 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   double R = truth.auxdata<float>("prodR");
   double Z = truth.auxdata<float>("prodZ");
   fillHisto(m_efficiency_vs_d0, d0, isGood, weight);
+  fillHisto(m_efficiency_vs_d0_abs, std::abs(d0), isGood, weight);
   fillHisto(m_efficiency_vs_z0, z0, isGood, weight);
+  fillHisto(m_efficiency_vs_z0_abs, std::abs(z0), isGood, weight);
   fillHisto(m_efficiency_vs_R, R, isGood, weight);
   fillHisto(m_efficiency_vs_Z, Z, isGood, weight);
 
   fillHisto(m_extended_efficiency_vs_d0, d0, isGood, weight);
+  fillHisto(m_extended_efficiency_vs_d0_abs, std::abs(d0), isGood, weight);
   fillHisto(m_extended_efficiency_vs_z0, z0, isGood, weight);
+  fillHisto(m_extended_efficiency_vs_z0_abs, std::abs(z0), isGood, weight);
   fillHisto(m_efficiency_vs_mu, mu, isGood, weight);
 
   if (truth.hasProdVtx()) {
