@@ -32,10 +32,11 @@ namespace Muon {
         void select(const EventContext& ctx, const MuonSystemExtension::Intersection& intersection,
                     const std::vector<std::shared_ptr<const Muon::MuonSegment> >& segments,
                     std::vector<std::shared_ptr<const Muon::MuonSegment> >& selectedSegments) const override;
-
-    private:
+        
         /** match segment to intersection */
-        bool match(const EventContext& ctx, const MuonSystemExtension::Intersection& intersection, const MuonSegment& segment) const;
+        bool match(const EventContext& ctx, const MuonSystemExtension::Intersection& intersection, const MuonSegment& segment) const override;
+    private:
+        
 
         /// Helper tool for debugging purposes
         PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "MuonEDMPrinterTool", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"};
