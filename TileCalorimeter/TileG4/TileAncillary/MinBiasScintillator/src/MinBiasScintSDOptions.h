@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MINBIASSCINTILLATOR_MINBIASSCINTSDOPTIONS_h
@@ -20,7 +20,8 @@
 struct MinBiasScintSDOptions {
     /** Setup defaults */
     MinBiasScintSDOptions()
-        : timeCut(350.5),
+        : deltaTHit {0.5 , -75.25 , 75.25 , 5.},
+          timeCut(350.5),
           tileTB(false),
           doBirk(true),
           birk1(0.0130 * CLHEP::g / (CLHEP::MeV * CLHEP::cm2)),
@@ -30,7 +31,7 @@ struct MinBiasScintSDOptions {
           rDBAccessSvcName("RDBAccessSvc"),
           geoModelSvcName("GeoModelSvc")
     {
-      deltaTHit = {0.5 , -75.25 , 75.25 , 5.};
+      
     }
 
     /** A time granularity for G4 hits in TileHit
