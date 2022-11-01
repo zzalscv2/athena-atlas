@@ -125,6 +125,7 @@ public:
     };
 
 private:
+    using Collections_t = std::vector<std::unique_ptr<MdtDigitCollection> >;
     CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, const EventContext& ctx) const;
     int digitizeTime(double time, bool isHPTDC, CLHEP::HepRandomEngine* rndmEngine) const;
     double minimumTof(Identifier DigitId, const MuonGM::MuonDetectorManager* detMgr) const;
@@ -135,7 +136,7 @@ private:
 
     bool handleMDTSimhit(const TimedHitPtr<MDTSimHit>& phit, CLHEP::HepRandomEngine* twinRndmEngine,
                          CLHEP::HepRandomEngine* toolRndmEngine);
-    bool createDigits(MdtDigitContainer* digitContainer, MuonSimDataCollection* sdoContainer, CLHEP::HepRandomEngine* rndmEngine);
+    bool createDigits(Collections_t& collections, MuonSimDataCollection* sdoContainer, CLHEP::HepRandomEngine* rndmEngine);
 
     // calculate local hit position in local sagged wire frame, also returns whether the hit passed above or below the wire
     GeoCorOut correctGeometricalWireSag(const MDTSimHit& hit, const Identifier& id, const MuonGM::MdtReadoutElement* element) const;
@@ -232,8 +233,8 @@ private:
     ///////////////////////////////////////////////////////////////////
     // Get next event and extract collection of hit collections:
     StatusCode getNextEvent(const EventContext& ctx);
-    StatusCode doDigitization(const EventContext& ctx, MdtDigitContainer* digitContainer, MuonSimDataCollection* sdoContainer);
-    MdtDigitCollection* getDigitCollection(Identifier elementId, MdtDigitContainer* digitContainer);
+    StatusCode doDigitization(const EventContext& ctx, Collections_t& collections, MuonSimDataCollection* sdoContainer);
+    MdtDigitCollection* getDigitCollection(Identifier elementId, Collections_t& collections);
     void fillMaps(const MDTSimHit* mdtHit, const Identifier digitId, const double driftR);
 
 protected:
