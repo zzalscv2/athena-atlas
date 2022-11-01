@@ -286,7 +286,7 @@ caught.
 
 @author Edward.Moyse@cern.ch
 */
-class TrackSummary
+class TrackSummary final
 {
 public:
   friend class InDet::InDetTrackSummaryHelperTool;
@@ -321,7 +321,7 @@ public:
   /** Move assignment operator */
   TrackSummary& operator=(TrackSummary&&) noexcept = default;
 
-  virtual ~TrackSummary();
+  ~TrackSummary();
 
   /** adds the values of the passed TrackSummary to this TrackSummary. Mainly
    intended for adding Muon and ID TrackSummaries, when making a combined Track
@@ -372,9 +372,11 @@ private: // data members
   /**contains the 'hit pattern'*/
   unsigned long m_idHitPattern;
 
+
+#ifndef NDEBUG
   /** number of objects of this type in memory */
   static std::atomic<unsigned int> s_numberOfInstantiations;
-
+#endif
   /** pointer to the MuonTrackSummary */
   std::unique_ptr<MuonTrackSummary> m_muonTrackSummary;
 };

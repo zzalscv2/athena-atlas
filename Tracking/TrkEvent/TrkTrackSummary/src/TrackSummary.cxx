@@ -11,7 +11,9 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "GaudiKernel/MsgStream.h"
 
+#ifndef NDEBUG
 std::atomic<unsigned int> Trk::TrackSummary::s_numberOfInstantiations{ 0 };
+#endif
 const int Trk::TrackSummary::SummaryTypeNotSet = -1;
 
 Trk::TrackSummary::TrackSummary()
@@ -244,6 +246,11 @@ Trk::operator<<(MsgStream& out, const TrackSummary& trackSum)
 unsigned int
 Trk::TrackSummary::numberOfInstantiations()
 {
+
+#ifndef NDEBUG
   return s_numberOfInstantiations;
+#else
+  return 0;
+#endif
 }
 
