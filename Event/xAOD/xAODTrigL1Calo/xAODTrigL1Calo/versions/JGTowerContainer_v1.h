@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // Dear emacs, this is -*- c++ -*-
@@ -11,9 +11,6 @@
 
 // Local include(s):
 #include "JGTower_v1.h"
-
-// Declare IParticle as a base class of JGTower_v1:
-DATAVECTOR_BASE(xAOD::JGTower_v1, xAOD::IParticle);
 
 namespace xAOD
 {

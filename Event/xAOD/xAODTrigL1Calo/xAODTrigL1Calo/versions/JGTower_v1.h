@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // Dear emacs, this is -*- c++ -*-
@@ -8,7 +8,6 @@
 
 // EDM include(s):
 #include "xAODBase/IParticle.h"
-#include "AthLinks/ElementLink.h"
 #include "AthContainers/AuxElement.h"
 
 // System include(s):
@@ -119,5 +118,9 @@ namespace xAOD
     virtual void initialize(const int Id, const float Eta, const float Phi);
   }; // class JGTower_v1
 } // namespace xAOD
+
+// Declare IParticle as a base class of JGTower_v1:
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE(xAOD::JGTower_v1, xAOD::IParticle);
 
 #endif // XAODTRIGL1CALO_VERSIONS_JGTOWER_V1_H

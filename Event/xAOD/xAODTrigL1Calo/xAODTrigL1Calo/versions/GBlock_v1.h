@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODTRIGL1CALO_VERSIONS_GBLOCK_V1_H
@@ -92,5 +92,9 @@ namespace xAOD
     void setTowerLinks(const std::vector<ElementLink<JGTowerContainer>> &links);
   }; //> end class GBlock_v1
 } // namespace xAOD
+
+// Declare IParticle as a base class of GBlock_v1
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE(xAOD::GBlock_v1, xAOD::IParticle);
 
 #endif //> !XAODTRIGL1CALO_VERSIONS_GBLOCK_V1_H

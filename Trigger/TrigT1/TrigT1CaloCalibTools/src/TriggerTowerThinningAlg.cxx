@@ -23,6 +23,7 @@
 // TrigT1 common definitions
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "StoreGate/ThinningHandle.h"
+#include "StoreGate/ReadDecorHandle.h"
 #include "AthenaKernel/RNGWrapper.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "CLHEP/Random/RandomEngine.h"
@@ -56,6 +57,7 @@ namespace DerivationFramework {
     ATH_MSG_INFO("L1Calo TriggerTowerThinningAlg::initialize()");
 
     ATH_CHECK( m_triggerTowerLocation.initialize (m_streamName) );
+    ATH_CHECK( m_caloCellETByLayerKey.initialize(SG::AllowEmpty) );
 
     ATH_CHECK( m_rndmSvc.retrieve() );
 
@@ -99,6 +101,9 @@ namespace DerivationFramework {
       }
     }
 
+    SG::ReadDecorHandle<xAOD::TriggerTowerContainer, std::vector<float> > caloCellETByLayerHandle(m_caloCellETByLayerKey, ctx);
+    bool isDecorAvailable = caloCellETByLayerHandle.isAvailable();
+
     // Iterate over all trigger towers
     for(auto tt : *tts){
 
@@ -107,10 +112,11 @@ namespace DerivationFramework {
       
       // Test for Calo ET
       if(saveMe == false){
-        if (tt->isAvailable< std::vector<float> > ("CaloCellETByLayer")) {
-          std::vector<float> caloCellETByLayer = tt->auxdataConst< std::vector<float> > ("CaloCellETByLayer");
+	if (isDecorAvailable) {
+	  const std::vector<float>& caloCellETByLayer = caloCellETByLayerHandle(*tt);
+
           float totalCaloCellET(0.);
-          for (auto c : caloCellETByLayer) {
+          for (float c : caloCellETByLayer) {
             totalCaloCellET += c;
           }
           if (totalCaloCellET > m_minCaloCellET) {
@@ -122,9 +128,9 @@ namespace DerivationFramework {
 
       // Test for ADC values
       if (saveMe == false) {
-        const std::vector<uint16_t> ttADC = tt->adc();
-        for (std::vector<uint16_t>::const_iterator i=ttADC.begin();i!=ttADC.end();++i) {
-          if ( (*i) > m_minADC) {
+        const std::vector<uint16_t>& ttADC = tt->adc();
+        for (uint16_t i : ttADC) {
+          if ( i > m_minADC) {
             saveMe = true;
             break;
           }
@@ -142,6 +148,7 @@ namespace DerivationFramework {
 
     // Counters
     m_nTriggerTowersProcessed += nTotal;
+    // FIXME: nKeep is always 0
     m_nTriggerTowersKept += nKeep;
     m_nTriggerTowersRejected += nReject;
 
