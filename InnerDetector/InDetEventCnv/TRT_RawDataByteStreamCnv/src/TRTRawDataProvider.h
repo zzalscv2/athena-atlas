@@ -30,7 +30,7 @@ class TRTRawDataProviderTool;
 class TRT_CablingSvc;
 
 
-class TRTRawDataProvider final: public AthReentrantAlgorithm
+class TRTRawDataProvider : public AthReentrantAlgorithm
 {
 public:
 
@@ -38,13 +38,13 @@ public:
   TRTRawDataProvider(const std::string &name, ISvcLocator *pSvcLocator);
 
   //! Initialize
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize();
 
   //! Execute
-  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode execute(const EventContext& ctx) const;
 
   //! Finalize
-  virtual StatusCode finalize() override
+  virtual StatusCode finalize()
     { return StatusCode::SUCCESS;}
 
   //! Destructor
