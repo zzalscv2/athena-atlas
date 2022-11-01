@@ -13,6 +13,7 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=100
                         -DLCG_VERSION_POSTFIX="_ATLAS_7"
                         -DATLAS_GAUDI_TAG="v36r0.000"
                         -DATLAS_BUILD_CORAL=TRUE
+                        -DATLAS_ACTS_TAG="v9.1.2"
                         -DATLAS_CORAL_TAG="9d9d9725")
 ATLAS_EXTRA_MAKE_ARGS=()
 
