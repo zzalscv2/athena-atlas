@@ -12,7 +12,8 @@
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonSegment/MuonSegment.h"
 #include "TrkSegment/SegmentCollection.h"
-
+#include "TrkEventPrimitives/FitQuality.h"
+#include <typeinfo>
 using namespace xAOD::P4Helpers;
 namespace {
     static const float OneOverSqrt12 = 1. / std::sqrt(12);
@@ -32,6 +33,10 @@ namespace Muon {
         if (m_idHelperSvc->hasCSC() && !m_csc2dSegmentFinder.empty()) ATH_CHECK(m_csc2dSegmentFinder.retrieve());
         if (m_idHelperSvc->hasCSC() && !m_csc4dSegmentFinder.empty()) ATH_CHECK(m_csc4dSegmentFinder.retrieve());
         ATH_CHECK(m_clusterSegMakerNSW.retrieve());
+        ATH_CHECK(m_patternSegs.initialize(!m_patternSegs.empty()));
+        if (!m_patternSegs.empty()) {
+            ATH_CHECK(m_segmentMatchingTool.retrieve());
+        }else m_segmentMatchingTool.disable();
         ATH_CHECK(m_houghDataPerSectorVecKey.initialize(!m_houghDataPerSectorVecKey.empty()));
         return StatusCode::SUCCESS;
     }
@@ -99,6 +104,7 @@ namespace Muon {
 
         // No need to call the NSW segment finding
         if (layerPrepRawData.mms.empty() && layerPrepRawData.stgcs.empty()) return;
+
         // NSW segment finding
         MuonLayerROTs layerROTs;
         if (!m_muonPRDSelectionTool->calibrateAndSelect(intersection, layerPrepRawData, layerROTs)) {
@@ -120,6 +126,34 @@ namespace Muon {
         if (!clustersMM.empty()) {
             ATH_MSG_DEBUG(" MM clusters " << clustersMM.size());
             clusters.insert(clusters.end(), std::make_move_iterator(clustersMM.begin()), std::make_move_iterator(clustersMM.end()));
+        }
+        
+        
+        if (!m_patternSegs.empty()) {
+            std::set<Identifier> needed_rios{};        
+            for (const MuonClusterOnTrack* clus : clusters) {
+                needed_rios.insert(clus->identify());
+            }
+            SG::ReadHandle<Trk::SegmentCollection>  input_segs{m_patternSegs, ctx};
+            for (const Trk::Segment *trk_seg : *input_segs) {
+                const MuonSegment *seg = dynamic_cast<const Muon::MuonSegment *>(trk_seg);
+                // Initial check that the segments are on the same detector side
+                if (intersection.trackParameters->associatedSurface().center().z() * seg->globalPosition().z() < 0) continue;
+            
+                /// Find whether the segment has some hits that are needed
+                bool hasNSW{false};
+                for (size_t n = 0; !hasNSW && n < seg->numberOfContainedROTs(); ++n) {
+                    const MuonClusterOnTrack *clus = dynamic_cast<const MuonClusterOnTrack *>(seg->rioOnTrack(n));
+                    hasNSW |=  (clus && needed_rios.count(clus->identify()));              
+                }
+                /// Nope
+                if (!hasNSW) continue;            
+                /// Segment is compatible
+                if (m_segmentMatchingTool->match(ctx, intersection, *seg)) segments.emplace_back(seg->clone());
+            }
+            /// If no NSW was reconstructed thus far there's no hope that we'll do it later as well. Give up
+            /// Lasst, die Ihr eintretet, alle Hoffnung fahren!
+            return;
         }
 
         std::vector<std::unique_ptr<MuonSegment>> foundSegments;

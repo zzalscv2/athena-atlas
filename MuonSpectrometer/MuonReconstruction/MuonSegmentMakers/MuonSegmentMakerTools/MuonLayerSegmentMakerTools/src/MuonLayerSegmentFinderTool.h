@@ -23,6 +23,7 @@
 #include "MuonSegmentMakerToolInterfaces/IMuonClusterSegmentFinderTool.h"
 #include "MuonSegmentMakerToolInterfaces/IMuonLayerSegmentFinderTool.h"
 #include "MuonRecToolInterfaces/HoughDataPerSec.h"
+#include "MuonCombinedToolInterfaces/IMuonLayerSegmentMatchingTool.h"
 
 namespace Muon {
 
@@ -102,9 +103,16 @@ namespace Muon {
             "NSWMuonClusterSegmentFinderTool",
             "Muon::MuonClusterSegmentFinderTool/MuonClusterSegmentFinderTool",
         };
+
+        ToolHandle<Muon::IMuonLayerSegmentMatchingTool> m_segmentMatchingTool{
+            this, "MuonLayerSegmentMatchingTool", "Muon::MuonLayerSegmentMatchingTool/MuonLayerSegmentMatchingTool"};
+    
         /// Use the hough data to find sectors in the speectrometer traversed by a muon.
         SG::ReadHandleKey<Muon::HoughDataPerSectorVec> m_houghDataPerSectorVecKey{this, "HoughKey",
                                                                                    "", "HoughDataPerSectorVec key"};
+                                                                                        
+        /// Do not rebuild the segments if the segment is already built upstream
+        SG::ReadHandleKey<Trk::SegmentCollection> m_patternSegs{this,"InSegmentContainer","TrackMuonSegments"};
 
         const Muon::MuonSectorMapping m_muonSectorMapping{};
 

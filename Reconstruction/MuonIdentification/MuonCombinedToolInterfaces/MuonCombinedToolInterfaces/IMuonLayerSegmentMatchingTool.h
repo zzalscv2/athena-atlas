@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONLAYERSEGMENTMATCHINGTOOL_H
@@ -28,6 +28,8 @@ namespace Muon {
         virtual void select(const EventContext& ctx, const MuonSystemExtension::Intersection& intersection,
                             const std::vector<std::shared_ptr<const Muon::MuonSegment> >& segments,
                             std::vector<std::shared_ptr<const Muon::MuonSegment> >& selectedSegments) const = 0;
+        
+        virtual bool match(const EventContext& ctx, const MuonSystemExtension::Intersection& intersection, const MuonSegment& segment) const = 0;
     };
 }  // namespace Muon
 
