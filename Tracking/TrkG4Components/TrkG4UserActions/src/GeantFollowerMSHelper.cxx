@@ -187,7 +187,7 @@ StatusCode Trk::GeantFollowerMSHelper::finalize()
 
 
 
-void Trk::GeantFollowerMSHelper::beginEvent() const
+void Trk::GeantFollowerMSHelper::beginEvent()
 {
     m_treeData->m_t_x        = 0.;
     m_treeData->m_t_y        = 0.;
@@ -227,7 +227,7 @@ void Trk::GeantFollowerMSHelper::beginEvent() const
 
 }
 
-void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos, const G4ThreeVector& mom, int pdg, double charge, float t, float X0) const
+void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos, const G4ThreeVector& mom, int pdg, double charge, float t, float X0)
 {
    const EventContext& ctx = Gaudi::Hive::currentContext();
 // as the MS starts at 6736 in R.07 the cut is just before
@@ -816,7 +816,7 @@ void Trk::GeantFollowerMSHelper::trackParticle(const G4ThreeVector& pos, const G
     ++m_treeData->m_g4_steps;
     if(m_treeData->m_g4_stepsMS!=-1)  ++m_treeData->m_g4_stepsMS;
 }
-const std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyTSOSvector(const std::vector<const Trk::TrackStateOnSurface*>& matvec, double scaleX0, double scaleEloss, bool reposition, bool aggregate, bool updateEloss, double caloEnergy, double caloEnergyError, double pCaloEntry, double momentumError, double & Eloss_tot) const
+std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyTSOSvector(const std::vector<const Trk::TrackStateOnSurface*>& matvec, double scaleX0, double scaleEloss, bool reposition, bool aggregate, bool updateEloss, double caloEnergy, double caloEnergyError, double pCaloEntry, double momentumError, double & Eloss_tot) const
 {
 //
 // inputs: TSOSs for material (matvec) and scale factors for X0 (scaleX0) and Eloss (scaleEloss)
@@ -1327,7 +1327,7 @@ const std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::m
 
    return newTSOSvector;
 }
-void Trk::GeantFollowerMSHelper::endEvent() const
+void Trk::GeantFollowerMSHelper::endEvent()
 {
     // fill the validation tree
     m_validationTree->Fill();

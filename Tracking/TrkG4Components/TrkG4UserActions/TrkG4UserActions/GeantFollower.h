@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -52,8 +52,7 @@ namespace G4UA
 
     Config m_config;
 
-    /// FIXME: mutable helper! See ATLASSIM-3561.
-    mutable const Trk::IGeantFollowerHelper* m_helperPointer;
+    Trk::IGeantFollowerHelper* m_helperPointer;
 
   }; // class GeantFollower
 
