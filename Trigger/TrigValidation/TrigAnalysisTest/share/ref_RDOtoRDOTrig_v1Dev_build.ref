@@ -6142,23 +6142,23 @@ HLT_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15:
     4: 16
     5: 13
 HLT_e5_nopid_L1EM3:
-  eventCount: 19
+  eventCount: 20
   stepCounts:
     0: 20
     1: 20
-    2: 19
-    3: 19
-    4: 19
-    5: 19
-    6: 19
+    2: 20
+    3: 20
+    4: 20
+    5: 20
+    6: 20
   stepFeatures:
-    0: 45
-    1: 45
-    2: 161
-    3: 48
-    4: 48
-    5: 48
-    6: 45
+    0: 156
+    1: 156
+    2: 473
+    3: 111
+    4: 111
+    5: 111
+    6: 91
 HLT_e60_dnnmedium_L1EM22VHI:
   eventCount: 3
   stepCounts:
