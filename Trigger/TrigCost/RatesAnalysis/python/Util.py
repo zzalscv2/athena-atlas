@@ -190,7 +190,11 @@ def populateTriggers(inputFile, metadata, globalGroup, filter):
         for triggerKey in subdirKey.ReadObj().GetListOfKeys():
             for hist in triggerKey.ReadObj().GetListOfKeys():
               if hist.GetName() == 'data':
-                triggerList.append( RatesTrigger(getTriggerName(triggerKey.GetName(), filter), metadata, hist.ReadObj(), globalGroup) )
+                try:
+                  triggerList.append(RatesTrigger(getTriggerName(triggerKey.GetName(), filter), metadata, hist.ReadObj(), globalGroup))
+                except ValueError:
+                  log.error("Cannot create a new trigger for {0}".format(triggerKey.GetName()))
+                  return []
   return triggerList
 
 

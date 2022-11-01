@@ -85,7 +85,7 @@ class Chain_HLT_TableConstructor(TableConstructorBase):
         totalTimeEntries = self.columns["totalTime"].content
         if (sum(totalTimeEntries) == 0):
             log.error("No histograms for the Chain HLT summary were found")
-            return
+            raise ValueError
 
         for entry in totalTimeEntries:
             self.columns["totalTimeFrac"].addValue(100 * entry / self.totalTime)

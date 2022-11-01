@@ -9,6 +9,8 @@
 
 import math
 from enum import Enum
+from AthenaCommon.Logging import logging
+log = logging.getLogger('RatesTrigger')
 
 class RatesBins(Enum):
   ACTIVE_RAW_BIN  = 1
@@ -49,6 +51,9 @@ class RatesTrigger:
 
     # Wall-time in seconds. No error on this.
     self.rateDenominator = metadata['normalisation']
+    if not self.rateDenominator:
+      log.error("Normalisation factor not found in the input ntuple! Check if it's not corrupted")
+      raise ValueError
 
     # Trigger's rate is total weighted passing events normalised to wall-time
     self.rate    = self.passWeighted / self.rateDenominator
