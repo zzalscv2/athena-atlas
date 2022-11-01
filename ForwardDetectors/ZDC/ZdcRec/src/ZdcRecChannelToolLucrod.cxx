@@ -157,7 +157,7 @@ int ZdcRecChannelToolLucrod::convertLucrod2ZM(const ZdcLucrodDataContainer* lucr
 	    {
 	      xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
 	      zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
-	      new_sum->setZdcSide((iside==0) ? -1 : 1);
+	      new_sum->setZdcSide(iside);
 	      new_sum->auxdata<uint16_t>("LucrodTriggerSideAmp") = (iside==0) ? zld->GetTrigAvgC() : zld->GetTrigAvgA();
 	    }
 	}

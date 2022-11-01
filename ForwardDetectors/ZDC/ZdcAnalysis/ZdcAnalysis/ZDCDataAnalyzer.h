@@ -122,10 +122,6 @@ public:
 
   bool disableModule(size_t side, size_t module);
 
-  void SetGainFactorsHGLG(float gainFactorHG, float gainFactorLG);
-
-  void SetGainFactorsHGLG(const ZDCModuleFloatArray& gainFactorsHG, const ZDCModuleFloatArray& gainFactorsLG); 
-
   void SetPeak2ndDerivMinTolerances(size_t tolerance);
 
   void SetFitTimeMax(float tmax);
