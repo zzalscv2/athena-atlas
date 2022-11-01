@@ -10,5 +10,5 @@ else
     echo
     echo "JOs reading stage finished, launching CARunner from pickle file"
     echo 
-    CARunner.py MuonRdoDecode_Cache.pkl 20
+    CARunner.py MuonRdoDecode_Cache.pkl --evtMax 20
 fi
