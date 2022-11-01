@@ -6,7 +6,6 @@
 #include "FPTracker/STLHelpers.h"
 #include "FPTracker/IParticle.h"
 #include "FPTracker/IBeamElement.h"
-#include "FPTracker/SimpleLogger.h"
 #include "boost/shared_ptr.hpp"
 #include <algorithm>
 #include <cassert>
@@ -99,7 +98,6 @@ namespace FPTracker{
 							     particle.z(),  
 							     zPosNextElement() );
 
-    SimpleLogger::getLogger()->reset();
     // pass the particle to succesive beam elements until either it goes out of aperture, or it reaches the end plane.
     //cppcheck-suppress ignoredReturnValue
     std::find_if(nextElement,
