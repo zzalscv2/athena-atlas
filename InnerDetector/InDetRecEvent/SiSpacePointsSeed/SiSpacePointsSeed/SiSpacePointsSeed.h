@@ -27,7 +27,7 @@ class MsgStream;
 
 namespace InDet {
 
-  class SiSpacePointsSeed {
+  class SiSpacePointsSeed final{
     
     /////////////////////////////////////////////////////////////////////////////////
     // Public methods:
@@ -44,7 +44,7 @@ namespace InDet {
        const double&);
     SiSpacePointsSeed(const SiSpacePointsSeed&);
     SiSpacePointsSeed& operator = (const SiSpacePointsSeed&);
-    virtual ~SiSpacePointsSeed();
+    ~SiSpacePointsSeed();
     void                                     erase();
     void                                     add(const Trk::SpacePoint*&);
     void                                     setD0     (const double&);
