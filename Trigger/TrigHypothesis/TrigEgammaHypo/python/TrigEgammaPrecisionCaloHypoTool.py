@@ -47,7 +47,7 @@ def _IncTool(name, monGroups, threshold, sel, tool=None):
         tool.dETACLUSTERthr = 9999.
         tool.dPHICLUSTERthr = 9999.
 
-    if sel == 'etcut':
+    if sel == 'etcut' or sel == 'nopid':
         tool.ETthr          = same( float( threshold )*GeV )
         tool.dETACLUSTERthr = 9999.
         tool.dPHICLUSTERthr = 9999.
