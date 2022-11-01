@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -282,8 +282,15 @@ StatusCode MdtDigitizationTool::mergeEvent(const EventContext& ctx) {
     ATH_CHECK(sdoContainer.record(std::make_unique<MuonSimDataCollection>()));
     ATH_MSG_DEBUG("Recorded MuonSimDataCollection called " << sdoContainer.name() << " in store " << sdoContainer.store());
 
-    StatusCode status = doDigitization(ctx, digitContainer.ptr(), sdoContainer.ptr());
+    Collections_t collections;
+    StatusCode status = doDigitization(ctx, collections, sdoContainer.ptr());
     if (status.isFailure()) { ATH_MSG_ERROR("doDigitization Failed"); }
+
+    for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+      if (collections[coll_hash]) {
+        ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+      }
+    }
 
     // Clean-up
     std::vector<MDTSimHitCollection*>::iterator MDTHitColl = m_MDTHitCollList.begin();
@@ -319,12 +326,19 @@ StatusCode MdtDigitizationTool::processAllSubEvents(const EventContext& ctx) {
         }
     }
 
-    ATH_CHECK(doDigitization(ctx, digitContainer.ptr(), sdoContainer.ptr()));
+    Collections_t collections;
+    ATH_CHECK(doDigitization(ctx, collections, sdoContainer.ptr()));
+
+    for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+      if (collections[coll_hash]) {
+        ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+      }
+    }
 
     return status;
 }
 
-StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, MdtDigitContainer* digitContainer,
+StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, Collections_t& collections,
                                                MuonSimDataCollection* sdoContainer) {
     // Set the RNGs to use for this event.
     CLHEP::HepRandomEngine* rndmEngine = getRandomEngine("", ctx);
@@ -369,7 +383,7 @@ StatusCode MdtDigitizationTool::doDigitization(const EventContext& ctx, MdtDigit
     }
 
     // loop over drift time map entries, convert to tdc value and construct/store the digit
-    createDigits(digitContainer, sdoContainer, rndmEngine);
+    createDigits(collections, sdoContainer, rndmEngine);
 
     // reset hits
     m_hits.clear();
@@ -728,7 +742,7 @@ bool MdtDigitizationTool::checkMDTSimHit(const MDTSimHit& hit) const {
     return ok;
 }
 
-bool MdtDigitizationTool::createDigits(MdtDigitContainer* digitContainer, MuonSimDataCollection* sdoContainer,
+bool MdtDigitizationTool::createDigits(Collections_t& collections, MuonSimDataCollection* sdoContainer,
                                        CLHEP::HepRandomEngine* rndmEngine) {
     Identifier currentDigitId;
     Identifier currentElementId;
@@ -763,7 +777,7 @@ bool MdtDigitizationTool::createDigits(MdtDigitContainer* digitContainer, MuonSi
         // Check if we are in a new chamber, if so get the DigitCollection
         if (elementId != currentElementId) {
             currentElementId = elementId;
-            digitCollection = getDigitCollection(elementId, digitContainer);
+            digitCollection = getDigitCollection(elementId, collections);
 
             //+ForCosmics
             // this offset emulates the time jitter of cosmic ray muons w.r.t LVL1 accept
@@ -876,9 +890,7 @@ bool MdtDigitizationTool::createDigits(MdtDigitContainer* digitContainer, MuonSi
     return true;
 }
 
-MdtDigitCollection* MdtDigitizationTool::getDigitCollection(Identifier elementId, MdtDigitContainer* digitContainer) {
-    MdtDigitCollection* digitCollection;
-
+MdtDigitCollection* MdtDigitizationTool::getDigitCollection(Identifier elementId, Collections_t& collections) {
     IdContext mdtContext = m_idHelperSvc->mdtIdHelper().module_context();
     IdentifierHash coll_hash;
     if (m_idHelperSvc->mdtIdHelper().get_hash(elementId, coll_hash, &mdtContext)) {
@@ -888,23 +900,15 @@ MdtDigitCollection* MdtDigitizationTool::getDigitCollection(Identifier elementId
         elementId.show();
     }
 
-    // Get the messaging service, print where you are
-    MdtDigitCollection* coll = nullptr;
-    auto sc = digitContainer->naughtyRetrieve(coll_hash,coll);
-    if(sc.isFailure()){
-        ATH_MSG_ERROR("Not allowed to naughtyRetrieve");
-        return nullptr;
+    if (coll_hash >= collections.size()) {
+      collections.resize (coll_hash+1);
     }
+
+    auto& coll = collections[coll_hash];
     if (!coll) {
-        digitCollection = new MdtDigitCollection(elementId, coll_hash);
-        if (digitContainer->addCollection(digitCollection, coll_hash).isFailure())
-            ATH_MSG_ERROR("Couldn't record MdtDigitCollection with key=" << coll_hash << " in StoreGate!");
-        else
-            ATH_MSG_DEBUG("New MdtDigitCollection with key=" << coll_hash << " recorded in StoreGate.");
-    } else {
-        digitCollection = coll;
+      coll = std::make_unique<MdtDigitCollection>(elementId, coll_hash);
     }
-    return digitCollection;
+    return coll.get();
 }
 
 int MdtDigitizationTool::digitizeTime(double time, bool isHPTDC, CLHEP::HepRandomEngine* rndmEngine) const {
