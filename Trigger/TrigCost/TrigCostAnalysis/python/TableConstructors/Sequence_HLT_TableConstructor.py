@@ -80,7 +80,7 @@ class Sequence_HLT_TableConstructor(TableConstructorBase):
 
         if (totalTime == 0):
             log.error("No histograms for the Sequence HLT summary were found")
-            return
+            raise ValueError
 
         for entry in totalTimeEntries:
             self.columns["totalTimePerc"].addValue(100 * entry / totalTime)
