@@ -1,58 +1,39 @@
 #!/usr/bin/env python 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import sys,os
 import pickle
-import getopt
-from AthenaCommon.Debugging import DbgStage
-
-def usage():
-    print ("""CARunner, to execute a pickled ComponentAccumulator
-Usage:
-CARunner.py [options] <picklefile> [nEvents]
-
-Accepted command line options:
- -d, --debug <stage>                  ...  attach debugger (gdb) before run,
-                                            w/ <stage>: conf, init, exec, fini
-                                           -d is a shorthand for --debug init and takes no argument
-""")
-    
-    sys.exit(-1)
-
-
 
 if __name__=="__main__":
+    import argparse
+    parser= argparse.ArgumentParser(prog="CARunner.py",description="Executes a pickled ComponentAccumulator",
+                                    usage="CARunner.py [-h] [-d DEBUG] [--evtMax EVTMAX] [-l LOGLEVEL] <picklefile>")
+    parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: init, exec, fini")
+    parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
+    parser.add_argument("-l", "--loglevel", default=None, help="logging level (ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, or FATAL")
 
-    opts = 'd'
-    longopts = ['debug=']
+    (args,leftover)=parser.parse_known_args(sys.argv[1:])
 
-    try:
-        optlist, args = getopt.getopt (sys.argv[1:], opts, longopts)
-    except getopt.error:
-        print (sys.exc_info()[1])
-        usage()
+    if len(leftover)==0:
+        print ("ERROR: No pickle file given")
+        sys.exit(-1)
 
-    if not (len(args)==1 or len(args)==2):
-        usage()
+    if len(leftover)>1:
+        print ("Expect exactly one pickle file, got %s" % " ".join(leftover))
+        sys.exit(-1)
 
-        
-
-    inputName=args[0]
+    inputName=leftover[0]
     if not os.access(inputName,os.R_OK):
         print("ERROR, can't read file",inputName)
-        usage()
+        sys.exit(-1)
     
-    nEvt=None
-    if len(args)==2:
-        try:
-            nEvt=int(args[1])
-        except ValueError:
-            print("Failed to interpret nEvent, got",args[1])
-            usage()
-
     inFile=open(inputName, 'rb')
     
     acc=pickle.load(inFile)
+
+    nEvt=None
+    if args.evtMax:
+        nEvt=args.evtMax
 
     if acc._isMergable: #Not a top-level accumulator
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -62,12 +43,20 @@ if __name__=="__main__":
     else:
         acc1 = acc
 
-    for opt, arg in optlist:
-        if opt in ('-d', '--debug'):
-            if not arg:
-                arg = 'init'
-            elif arg not in DbgStage.allowed_values:
-                usage()
-            acc1.setDebugStage (arg)
+    if args.debug:
+        from AthenaCommon.Debugging import DbgStage
+        if args.debug not in DbgStage.allowed_values:
+            print ("ERROR, Unknown debug-stage, allowed value are init, exec, fini")
+            sys.exit(-1)
+        acc1.setDebugStage(args.debug)
+
+
+    if args.loglevel:
+        from AthenaCommon import Constants
+        if hasattr(Constants,args.loglevel):
+            acc1.getService("MessageSvc").OutputLevel=getattr(Constants,args.loglevel)
+        else:
+            print ("ERROR: Unknown log-level, allowed values are ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, FATAL")
+            sys.exit(-1)
 
     acc1.run(nEvt)

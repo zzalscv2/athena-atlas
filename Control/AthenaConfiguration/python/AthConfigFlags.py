@@ -432,7 +432,7 @@ class AthConfigFlags(object):
         """
         import argparse
         parser= argparse.ArgumentParser()
-        parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: conf, init, exec, fini")
+        parser.add_argument("-d","--debug", default=None, help="attach debugger (gdb) before run, <stage>: init, exec, fini")
         parser.add_argument("--evtMax", type=int, default=None, help="Max number of events to process")
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
         parser.add_argument("--filesInput", default=None, help="Input file(s), supports * wildcard")
