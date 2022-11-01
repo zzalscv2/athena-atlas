@@ -70,6 +70,9 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
    ATH_MSG_DEBUG("retrieving " << m_muonInputProvider);
    CHECK( m_muonInputProvider.retrieve(DisableTool{m_isLegacyTopo}) );
 
+   ATH_MSG_DEBUG("retrieving " << m_ControlHistSvc);
+   CHECK( m_ControlHistSvc.retrieve());
+
    CHECK(m_l1topoRawDataKey.initialize(m_fillHistogramsBasedOnHardwareDecision));
 
    CHECK(m_legacyTopoCTPLocation.initialize(m_isLegacyTopo));
@@ -113,12 +116,8 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
    m_topoSteering->setAlgMsgLevel( TrigConf::MSGTC::Level((int)m_topoOutputLevel) );
    m_topoSteering->setOutputAlgosFillBasedOnHardware(m_fillHistogramsBasedOnHardwareDecision);
 
-   std::shared_ptr<IL1TopoHistSvc> topoHistSvc = std::shared_ptr<IL1TopoHistSvc>( new AthenaL1TopoHistSvc(m_histSvc) );
+   ATH_CHECK(m_ControlHistSvc->SetHistSvc(m_topoSteering, m_histBaseDir.value()));
 
-   topoHistSvc->setBaseDir("/EXPERT/" + m_histBaseDir.value());
-
-   m_topoSteering->setHistSvc(topoHistSvc);
-   
    ATH_CHECK(m_legacyL1topoKey.initialize(m_isLegacyTopo));
    ATH_CHECK(m_l1topoKey.initialize(!m_isLegacyTopo));
    

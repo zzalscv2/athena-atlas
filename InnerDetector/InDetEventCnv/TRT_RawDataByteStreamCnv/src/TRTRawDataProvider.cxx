@@ -12,13 +12,13 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 // Constructor
 
 TRTRawDataProvider::TRTRawDataProvider(const std::string& name,
-                                       ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_robDataProvider("ROBDataProviderSvc", name)
-  , m_rawDataTool("TRTRawDataProviderTool", this)
-  , m_CablingSvc("TRT_CablingSvc", name)
-  , m_trt_id(nullptr)
-  , m_rdoContainerKey("")
+				       ISvcLocator* pSvcLocator) :
+  AthReentrantAlgorithm      ( name, pSvcLocator ),
+  m_robDataProvider ( "ROBDataProviderSvc", name ),
+  m_rawDataTool     ( "TRTRawDataProviderTool",this ),
+  m_CablingSvc      ( "TRT_CablingSvc", name ),
+  m_trt_id          ( nullptr ),
+  m_rdoContainerKey("")
 {
   declareProperty("RoIs", m_roiCollectionKey = std::string(""), "RoIs to read in");
   declareProperty("isRoI_Seeded", m_roiSeeded = false, "Use RoI");
@@ -96,7 +96,7 @@ StatusCode TRTRawDataProvider::initialize() {
 
 StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
 {
-  SG::WriteHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey,ctx);
+  SG::WriteHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey, ctx);
   rdoContainer = std::make_unique<TRT_RDO_Container>(m_trt_id->straw_hash_max(), EventContainers::Mode::OfflineFast); 
   ATH_CHECK(rdoContainer.isValid());
 
@@ -107,7 +107,7 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
     listOfRobs = m_CablingSvc->getAllRods();
   }
   else {//Enter RoI-seeded mode
-      SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey,ctx);
+      SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey, ctx);
       ATH_CHECK(roiCollection.isValid());
 
       TrigRoiDescriptorCollection::const_iterator roi = roiCollection->begin();
@@ -126,7 +126,7 @@ StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
   ATH_MSG_DEBUG( "Number of ROB fragments " << listOfRobf.size() );
 
   // ask TRTRawDataProviderTool to decode it and to fill the IDC
-  if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get()).isFailure())
+  if (m_rawDataTool->convert(listOfRobf,&(*rdoContainer),bsErrCont.get(),ctx).isFailure())
     ATH_MSG_WARNING( "BS conversion into RDOs failed" );
 
   ATH_MSG_DEBUG( "Number of Collections in IDC " << rdoContainer->numberOfCollections() );

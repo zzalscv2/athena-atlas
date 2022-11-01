@@ -10,25 +10,31 @@
 
 namespace xAOD{  
 
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , iEta , setEta )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , iPhi , setPhi )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , iEta , setiEta )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , iPhi , setiPhi )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, float   , eta  , setEta )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, float   , phi  , setPhi )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , fpga , setFpga )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, int , towerEt , setTowerEt )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, char , isSaturated , setIsSaturated )
   
   /// initialize
-  void gFexTower_v1::initialize(const uint8_t Eta,const uint8_t Phi)
+  void gFexTower_v1::initialize(const uint8_t IEta,const uint8_t IPhi)
   {
-    setEta( Eta );
-    setPhi( Phi );    
+    setiEta( IEta );
+    setiPhi( IPhi );    
   }
   
-  void gFexTower_v1::initialize(const uint8_t Eta,
-                                const uint8_t Phi,
+  void gFexTower_v1::initialize(const uint8_t IEta,
+                                const uint8_t IPhi,
+                                const float Eta,
+                                const float Phi,                                
                                 const int TowerEt,
                                 const uint8_t Fpga,
                                 const char IsSaturated)
   {
+    setiEta( IEta );
+    setiPhi( IPhi );
     setEta( Eta );
     setPhi( Phi );
     setFpga( Fpga );

@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from collections import namedtuple
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo
+from ..Base.TopoAlgos import EMMultiplicityAlgo, TauMultiplicityAlgo, JetMultiplicityAlgo, XEMultiplicityAlgo, LArSaturationAlgo
 from ..Base.TopoAlgorithms import AlgType, AlgCategory
 
 class TopoAlgoDefMultiplicity(object):
@@ -231,6 +231,7 @@ class TopoAlgoDefMultiplicity(object):
                                       nbits = 1)
             tm.registerTopoAlgo(alg)
 
+        tm.registerTopoAlgo(LArSaturationAlgo())
 
     @staticmethod
     def checkMultAlgoFWconstraints(l1menu):
@@ -258,6 +259,7 @@ class TopoAlgoDefMultiplicity(object):
            multLimits( thrtype='cTAU', conn='Topo1Opt3', nbit=3, startbit=14, endbit=19),
            multLimits( thrtype='cTAU', conn='Topo1Opt3', nbit=2, startbit=23, endbit=28),
            multLimits( thrtype='jEM',  conn='Topo1Opt3', nbit=2, startbit=31, endbit=36),
+           multLimits( thrtype='LArSaturation', conn='Topo1Opt3', nbit=1, startbit=37, endbit=37),
            multLimits( thrtype='EN',   conn='Topo1Opt3', nbit=1, startbit=39, endbit=86),
         ]
 
@@ -272,7 +274,9 @@ class TopoAlgoDefMultiplicity(object):
                 goodAlgo = False
                 for ml in multiplicities:
                     thrtype = algo.input
-                    if 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input:
+                    if 'LArSaturation' in algo.name:
+                        thrtype = 'LArSaturation'
+                    elif 'XE' in algo.input or 'TE' in algo.input or 'MHT' in algo.input:
                         thrtype = 'EN'
                     if 'eEmVar' in algo.classtype:
                         thrtype = 'eEMV'

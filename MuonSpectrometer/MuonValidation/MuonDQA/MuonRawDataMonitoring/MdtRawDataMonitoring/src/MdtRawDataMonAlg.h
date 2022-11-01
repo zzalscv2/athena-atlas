@@ -67,7 +67,7 @@ namespace monAlg {
 
     class TubeTraversedBySegment {
     public:
-        TubeTraversedBySegment(std::string hn, int tb, bool ih, IdentifierHash idh) {
+        TubeTraversedBySegment(const std::string& hn, int tb, bool ih, IdentifierHash idh) {
             hardware_name = hn;
             tubeBin = tb;
             isHit = ih;
@@ -84,16 +84,10 @@ namespace monAlg {
     // Hope I was careful ;)
     struct TubeTraversedBySegment_cmp {
         bool operator()(const TubeTraversedBySegment& A, const TubeTraversedBySegment& B) const {
-            if (A.idHash > B.idHash) {
-                return true;
-            } else {
-                if ((A.tubeBin > B.tubeBin) && (A.idHash == B.idHash)) {
-                    return true;
-                } else {
-                    if ((A.isHit > B.isHit) && (A.tubeBin == B.tubeBin) && (A.idHash == B.idHash)) { return true; }
-                }
-            }
-            return false;
+            if (A.idHash != B.idHash) return A.idHash < B.idHash;
+            
+            if (A.tubeBin != B.tubeBin) return A.tubeBin < B.tubeBin;
+            return A.isHit < B.isHit;
         }
     };
 }  // namespace monAlg
@@ -151,7 +145,7 @@ private:
     StatusCode GetTimingInfo();  // here
     void initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl);
 
-    SG::ReadHandleKey<Trk::SegmentCollection> m_segm_type{this, "Eff_segm_type", "TrackMuonSegments", "muon segments"};
+    SG::ReadHandleKeyArray<Trk::SegmentCollection> m_segm_type{this, "SegmentKey", {"TrkMuonSegments", "UnAssocMuonTrkSegments"}, "muon segments"};
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_muon_type{this, "Muon_type", "ExtrapolatedMuonTrackParticles", "extrapolated muons"};
 
     std::vector<Identifier> m_chambersId;
@@ -187,7 +181,7 @@ private:
 
     bool m_BMGpresent{false};
     int m_BMGid{-1};
-    std::map<Identifier, std::vector<Identifier> > m_DeadChannels;
+    std::map<Identifier, std::set<Identifier> > m_DeadChannels{};
     mutable std::atomic<int> m_firstEvent{-1};
 
     bool m_atlas_ready{false};

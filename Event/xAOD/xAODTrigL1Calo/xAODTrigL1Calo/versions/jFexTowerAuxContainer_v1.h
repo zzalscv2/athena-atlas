@@ -37,7 +37,7 @@ class jFexTowerAuxContainer_v1 : public AuxContainerBase {
         std::vector<uint8_t>  Calosource;
         
         std::vector<std::vector<uint16_t> > et_count;
-        std::vector<std::vector<char>>      isSaturated;
+        std::vector<std::vector<char>>      isjTowerSat;
         
 }; // class jFexTowerAuxContainer_v1
 } // namespace xAOD

@@ -102,7 +102,7 @@ def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
   tool.RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
   tool.TGCRecRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
   tool.TrigThresholdDecisionTool = acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))
- 
+
   acc.setPrivateTools(tool)
   return acc
 
@@ -300,6 +300,7 @@ if __name__ == '__main__':
   parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
   parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
+  parser.add_argument('--outputHISTFile',default="",help="if specified, will activate monitoring")
   parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
                       help="What data to decode and output.")
   args = parser.parse_args()
@@ -320,6 +321,7 @@ if __name__ == '__main__':
   flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
   flags.Concurrency.NumThreads = 1
   flags.Concurrency.NumConcurrentEvents = 1
+  flags.Output.HISTFileName = args.outputHISTFile
 
   if any(["data22" in f for f in args.filesInput]):
     s=args.filesInput[0].replace('*','').replace('.data','')
@@ -463,7 +465,12 @@ if __name__ == '__main__':
   # note it's odd that the AthenaCommon.globalflags input format property doesn't get updated appropriately by flags??
   acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
 
+  if args.outputHISTFile != "":
+    from AthenaMonitoring.AthMonitorCfgHelper import getDQTHistSvc
+    acc.merge(getDQTHistSvc(flags))
 
+  acc.printConfig()
+  flags.dump()
 
   if acc.run().isFailure():
     sys.exit(1)

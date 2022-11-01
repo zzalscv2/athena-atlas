@@ -5,7 +5,7 @@
 #ifndef TRIGMUONEF_MUONCHAINFILTERALG_H
 #define TRIGMUONEF_MUONCHAINFILTERALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include "xAODTrigger/TrigComposite.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
@@ -17,14 +17,14 @@
  * initially designed to pass if at least one active chain is NOT in the list to be filtered (NotGate = false)
  * the filter will also pass if NotGate = true and at least one active chain is FOUND in the list
  **/
-class MuonChainFilterAlg : public ::AthAlgorithm {
+class MuonChainFilterAlg : public ::AthReentrantAlgorithm {
  public:
   MuonChainFilterAlg(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
  private:
-    StatusCode createDummyMuonContainers();
+    StatusCode createDummyMuonContainers(const EventContext& ctx) const;
 
     Gaudi::Property<std::vector<std::string>> m_filterChains {this, "ChainsToFilter", {}, "Vector of chains to filter out"};
     SG::ReadHandleKeyArray<TrigCompositeUtils::DecisionContainer> m_inputDecisionKeys{this, "InputDecisions", {}, "Inputs to the filter"};

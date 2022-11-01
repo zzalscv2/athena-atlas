@@ -157,14 +157,11 @@ StatusCode MdtRawDataMonAlg::initialize()
     ATH_CHECK(m_key_rpc.initialize());
     ATH_CHECK(m_eventInfo.initialize());
     ATH_CHECK(m_muon_type.initialize());
-
-    m_BMGpresent = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMG") != -1;
-    if (m_BMGpresent) {
+    m_BMGid = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMG");
+    if (m_BMGid != -1) {
         ATH_MSG_DEBUG("Processing configuration for layouts with BMG chambers.");
-        m_BMGid = m_idHelperSvc->mdtIdHelper().stationNameIndex("BMG");
-
+        m_BMGpresent = true;
         // MuonDetectorManager from the Detector Store
-        std::string managerName = "Muon";
         const MuonGM::MuonDetectorManager* MuonDetMgrDS{nullptr};
         ATH_CHECK(detStore()->retrieve(MuonDetMgrDS));
 
@@ -466,25 +463,26 @@ StatusCode MdtRawDataMonAlg::fillHistograms(const EventContext& ctx) const
         }  // m_environment == AthenaMonManager::tier0 || m_environment == AthenaMonManager::tier0ESD
     }      // m_doMdtESD==true
 
-    SG::ReadHandle<Trk::SegmentCollection> segms(m_segm_type, ctx);
-    if (!segms.isValid()) {
-        ATH_MSG_ERROR("evtStore() does not contain mdt segms Collection with name " << m_segm_type);
-        return StatusCode::FAILURE;
+    for (const auto& key : m_segm_type){
+        SG::ReadHandle<Trk::SegmentCollection> segms(key, ctx);
+        if (!segms.isValid()) {
+            ATH_MSG_ERROR("evtStore() does not contain mdt segms Collection with name " << key);
+            return StatusCode::FAILURE;
+        }
+
+        MDTSegmentHistogramStruct segsPlots[4][4][16];  // [region][layer][phi]
+
+        ATH_CHECK(handleEvent_effCalc_fillVects(segms.cptr(), segsPlots));
+
+        ATH_CHECK(fillMDTSegmentHistograms(segsPlots));
     }
-
-    MDTSegmentHistogramStruct segsPlots[4][4][16];  // [region][layer][phi]
-
-    ATH_CHECK(handleEvent_effCalc_fillVects(segms.cptr(), segsPlots));
-
-    ATH_CHECK(fillMDTSegmentHistograms(segsPlots));
-
     return StatusCode::SUCCESS;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 void MdtRawDataMonAlg::fillMDTOverviewVects(const Muon::MdtPrepData* mdtCollection, bool& isNoiseBurstCandidate,
                                             MDTOverviewHistogramStruct& vects) const {
-    Identifier digcoll_id = (mdtCollection)->identify();
+    Identifier digcoll_id = mdtCollection->identify();
 
     std::string hardware_name = getChamberName(mdtCollection);
     bool isNoisy = m_masked_tubes->isNoisy(mdtCollection);
@@ -492,7 +490,7 @@ void MdtRawDataMonAlg::fillMDTOverviewVects(const Muon::MdtPrepData* mdtCollecti
     // MuonDetectorManager from the conditions store
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey};
     const MuonGM::MuonDetectorManager* MuonDetMgr = DetectorManagerHandle.cptr();
-    if (MuonDetMgr == nullptr) {
+    if (!MuonDetMgr) {
         ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
         return;
     }
@@ -930,8 +928,8 @@ StatusCode MdtRawDataMonAlg::fillMDTHistograms(const Muon::MdtPrepData* mdtColle
 //          we must preference the ones that are part of a segment that records a hit in those tubes
 StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCollection* segms,
                                                            MDTSegmentHistogramStruct (&vects)[4][4][16]) const {
-    StatusCode sc = StatusCode::SUCCESS;
     std::string type = "MDT";
+    const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
     std::set<monAlg::TubeTraversedBySegment, monAlg::TubeTraversedBySegment_cmp> store_effTubes;
     std::set<Identifier> store_ROTs;
 
@@ -939,202 +937,132 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey};
     const MuonGM::MuonDetectorManager* MuonDetMgr = DetectorManagerHandle.cptr();
-    if (MuonDetMgr == nullptr) {
+    if (!MuonDetMgr) {
         ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object");
         return StatusCode::FAILURE;
     }
 
     // LOOP OVER SEGMENTS
-    for (Trk::SegmentCollection::const_iterator s = segms->begin(); s != segms->end(); ++s) {
-        const Muon::MuonSegment* segment = dynamic_cast<const Muon::MuonSegment*>(*s);
+    for (const Trk::Segment* trk_seg : *segms) {
+        const Muon::MuonSegment* segment = dynamic_cast<const Muon::MuonSegment*>(trk_seg);
         if (!segment) {
             ATH_MSG_DEBUG("no pointer to segment!!!");
             break;
         }
-        if (segment->numberOfContainedROTs() < m_nb_hits || segment->numberOfContainedROTs() <= 0 ||
+        if (segment->numberOfContainedROTs() < std::max(0lu,m_nb_hits.value()) ||
             segment->fitQuality()->chiSquared() / segment->fitQuality()->doubleNumberDoF() > m_chi2_cut) {
             continue;
-        }
-        // Gather hits used in segment
-        std::vector<Identifier> ROTs_chamber;
-        std::vector<int> ROTs_tube;
-        std::vector<int> ROTs_L;
-        std::vector<int> ROTs_ML;
-        std::vector<float> ROTs_DR;
-        std::vector<float> ROTs_DRerr;
-        std::vector<float> ROTs_DT;
+        }         
         for (unsigned int irot = 0; irot < segment->numberOfContainedROTs(); irot++) {
             const Trk::RIO_OnTrack* rot = segment->rioOnTrack(irot);
             const Muon::MdtDriftCircleOnTrack* mrot = dynamic_cast<const Muon::MdtDriftCircleOnTrack*>(rot);
-            if (mrot) {
-                Identifier tmpid = rot->identify();
-                IdentifierHash idHash;
-                MDTChamber* chamber = nullptr;
-                m_idHelperSvc->mdtIdHelper().get_module_hash(tmpid, idHash);
-                ATH_CHECK(getChamber(idHash, chamber));
-                std::string chambername = chamber->getName();
-                float adc = mrot->prepRawData()->adc();
+            if (!mrot) continue;
+            Identifier tmpid = rot->identify();
+            // This information needs to be stored fully for each segment (for calculations below), so deal with these duplicates later
+            // (otherwise we may not check a traversed ML for a differently pointing overlapping segment, for example)
+           
+            IdentifierHash idHash{0};
+            MDTChamber* chamber = nullptr;
+            id_helper.get_module_hash(tmpid, idHash);
+            ATH_CHECK(getChamber(idHash, chamber));
+            const std::string& chambername = chamber->getName();
+            float adc = mrot->prepRawData()->adc();
 
-                if (chambername.substr(0, 3) == "BMG") adc /= m_adcScale;
-                /*DEV
-                //if(m_overalladc_segm_Lumi) m_overalladc_segm_Lumi->Fill(adc);
-                 DEV */
-                if (store_ROTs.find(tmpid) == store_ROTs.end()) {  // Let's not double-count hits belonging to multiple segments
-                    store_ROTs.insert(tmpid);
+            if (m_idHelperSvc->hasHPTDC(tmpid)) adc /= m_adcScale;
+            
+            if (store_ROTs.count(tmpid)) {continue;}  
+            store_ROTs.insert(tmpid);
 
-                    double tdc = mrot->prepRawData()->tdc() * 25.0 / 32.0;
-                    // Note: the BMG is digitized with 200ps which is not same as other MDT chambers with 25/32=781.25ps
-                    if (chambername.substr(0, 3) == "BMG") tdc = mrot->prepRawData()->tdc() * 0.2;
-                    //      double tdc = mrot->driftTime()+500;
-                    int iregion = chamber->GetRegionEnum();
-                    int ilayer = chamber->GetLayerEnum();
-                    int statphi = chamber->GetStationPhi();
-                    //	  int ibarrel_endcap = chamber->GetBarrelEndcapEnum();
+            double tdc = mrot->prepRawData()->tdc() * 25.0 / 32.0;
+            // Note: the BMG is digitized with 200ps which is not same as other MDT chambers with 25/32=781.25ps
+            if (m_idHelperSvc->hasHPTDC(tmpid)) tdc = mrot->prepRawData()->tdc() * 0.2;
+            int iregion = chamber->GetRegionEnum();
+            int ilayer = chamber->GetLayerEnum();
+            int statphi = chamber->GetStationPhi();
+           
+            auto& thisVects = vects[iregion][ilayer][statphi];
+            thisVects.adc_segs_mon.push_back(adc);
 
-                    auto& thisVects = vects[iregion][ilayer][statphi];
-                    thisVects.adc_segs_mon.push_back(adc);
+            if (adc > m_ADCCut) {  // This is somewhat redundant because this is usual cut for segment-reconstruction, but that's OK
+                
+                thisVects.tdc_segs_mon.push_back(tdc);
 
-                    if (adc > m_ADCCut) {  // This is somewhat redundant because this is usual cut for segment-reconstruction, but that's OK
-                        if (statphi > 15) {
-                            ATH_MSG_ERROR("MDT StationPhi: " << statphi << " Is too high.  Chamber name: " << chamber->getName());
-                            continue;
-                        }
-                        thisVects.tdc_segs_mon.push_back(tdc);
+                int binx = chamber->GetMDTHitsPerChamber_IMO_BinX();
+                if (iregion < 2)
+                    binx = binx - 9;
+                else
+                    binx = binx - 7;
+                int biny = chamber->GetMDTHitsPerChamber_IMO_BinY();                
+                thisVects.x_segs_mon.push_back(binx);
+                thisVects.y_segs_mon.push_back(biny - 1);
 
-                        int binx = chamber->GetMDTHitsPerChamber_IMO_BinX();
-                        if (iregion < 2)
-                            binx = binx - 9;
-                        else
-                            binx = binx - 7;
-                        int biny = chamber->GetMDTHitsPerChamber_IMO_BinY();
+            }  // adc cut
 
-                        std::string varx = " ";
-                        std::string vary = " ";
-                        if (iregion < 2) {
-                            varx = "x_segs_mon_barrel";
-                            vary = "y_segs_mon_barrel";
-                        } else {
-                            varx = "x_segs_mon_endcap";
-                            vary = "y_segs_mon_endcap";
-                        }
+            int mdtMultLayer = m_idHelperSvc->mdtIdHelper().multilayer(tmpid);
+            auto adc_perch = Monitored::Scalar<float>("adc_segs_perch_" + chambername, adc);
+            auto adc_ml1 = Monitored::Scalar<int>("adc_ml1", (int)(mdtMultLayer == 1));
+            auto adc_ml2 = Monitored::Scalar<int>("adc_ml2", (int)(mdtMultLayer == 2));
 
-                        thisVects.x_segs_mon.push_back(binx);
-                        thisVects.y_segs_mon.push_back(biny - 1);
+            std::string monPerCh = "MdtMonPerChamber";
+            if (iregion == 0) monPerCh += "BA";
+            else if (iregion == 1) monPerCh += "BC";
+            else if (iregion == 2) monPerCh += "EA";
+            else if (iregion == 3) monPerCh += "EC";
 
-                    }  // adc cut
-
-                    int mdtMultLayer = m_idHelperSvc->mdtIdHelper().multilayer(tmpid);
-                    auto adc_perch = Monitored::Scalar<float>("adc_segs_perch_" + chambername, adc);
-                    auto adc_ml1 = Monitored::Scalar<int>("adc_ml1", (int)(mdtMultLayer == 1));
-                    auto adc_ml2 = Monitored::Scalar<int>("adc_ml2", (int)(mdtMultLayer == 2));
-
-                    std::string monPerCh = "MdtMonPerChamber";
-                    if (iregion == 0) monPerCh += "BA";
-                    if (iregion == 1) monPerCh += "BC";
-                    if (iregion == 2) monPerCh += "EA";
-                    if (iregion == 3) monPerCh += "EC";
-
-                    fill(monPerCh, adc_perch, adc_ml1, adc_ml2);
-                }
-                // This information needs to be stored fully for each segment (for calculations below), so deal with these duplicates later
-                // (otherwise we may not check a traversed ML for a differently pointing overlapping segment, for example)
-
-                ROTs_chamber.push_back(tmpid);
-                ROTs_ML.push_back(m_idHelperSvc->mdtIdHelper().multilayer(tmpid));
-                ROTs_L.push_back(m_idHelperSvc->mdtIdHelper().tubeLayer(tmpid));
-                ROTs_tube.push_back(m_idHelperSvc->mdtIdHelper().tube(tmpid));
-                ROTs_DR.push_back(mrot->driftRadius());
-                ROTs_DRerr.push_back((mrot->localCovariance())(Trk::driftRadius, Trk::driftRadius));  // always returns value 2.0
-                ROTs_DT.push_back(mrot->driftTime());
-            }
+            fill(monPerCh, adc_perch, adc_ml1, adc_ml2);
+            
         }
         // Finished gathering hits used in segment
 
-        if (m_doChamberHists) {  // Don't perform this block if not doing chamber by chamber hists
-
+        if (m_doChamberHists) {
             // Find unique chambers (since above we stored one chamber for every tube)
             // Also store the MLs affected by the ROTs, since we don't necessarily want to look for traversed tubes in entire chamber
-            std::vector<Identifier> unique_chambers;
-            std::vector<std::vector<int>> unique_chambers_ML;
-            for (unsigned i = 0; i < ROTs_chamber.size(); i++) {
-                bool isUnique = true;
-                for (unsigned j = 0; j < unique_chambers.size(); j++) {
-                    if (getChamberName(ROTs_chamber.at(i)) == getChamberName(unique_chambers.at(j))) {
-                        isUnique = false;
-                        if (!AinB(ROTs_ML.at(i), unique_chambers_ML.at(j))) unique_chambers_ML.at(j).push_back(ROTs_ML.at(i));
-                        break;
-                    }
-                }
-                if (isUnique) {
-                    unique_chambers.push_back(ROTs_chamber.at(i));
-                    std::vector<int> tmp_ML;
-                    tmp_ML.push_back(ROTs_ML.at(i));
-                    unique_chambers_ML.push_back(tmp_ML);
-                }
+            std::set<Identifier> unique_chambers;
+            
+            for (const Identifier& id : store_ROTs) {
+                unique_chambers.insert(id_helper.multilayerID(id));
             }
             // Done finding unique chambers
 
             // Loop over the unique chambers
             // Here we store the tubes in each chamber that were traversed by the segment
-            std::vector<Identifier> traversed_station_id;
-            std::vector<int> traversed_tube;
-            std::vector<int> traversed_L;
-            std::vector<int> traversed_ML;
-            std::vector<float> traversed_distance;
-            for (unsigned i_chamber = 0; i_chamber < unique_chambers.size(); i_chamber++) {
-                Identifier station_id = unique_chambers.at(i_chamber);
-                if (!m_idHelperSvc->isMdt(station_id)) { ATH_MSG_DEBUG("Non-MDT station Identifier in segm-based mdt eff calc"); }
-                std::string hardware_name = getChamberName(station_id);
+            std::vector<Identifier> traversed_station_id;           
+            for (const Identifier& station_id: unique_chambers) {
+                const std::string hardware_name = getChamberName(station_id);
 
                 // SEGMENT track
                 const MuonGM::MdtReadoutElement* detEl = MuonDetMgr->getMdtReadoutElement(station_id);
-                Amg::Transform3D gToStation = detEl->GlobalToAmdbLRSTransform();
-                Amg::Vector3D segPosG(segment->globalPosition());
-                Amg::Vector3D segDirG(segment->globalDirection());
-                Amg::Vector3D segPosL = gToStation * segPosG;
-                Amg::Vector3D segDirL = gToStation.linear() * segDirG;
-                MuonCalib::MTStraightLine segment_track =
-                    MuonCalib::MTStraightLine(segPosL, segDirL, Amg::Vector3D(0, 0, 0), Amg::Vector3D(0, 0, 0));
-
+                const Amg::Transform3D& gToStation = detEl->GlobalToAmdbLRSTransform();
+                const Amg::Vector3D segPosL = gToStation * segment->globalPosition();
+                const Amg::Vector3D segDirL = gToStation.linear() * segment->globalDirection();
+               
                 // Loop over tubes in chamber, find those along segment
-                for (unsigned i_ML = 0; i_ML < unique_chambers_ML.at(i_chamber).size(); i_ML++) {
-                    int ML = unique_chambers_ML.at(i_chamber).at(i_ML);
-                    Identifier newId = m_idHelperSvc->mdtIdHelper().channelID(
-                        hardware_name.substr(0, 3), m_idHelperSvc->mdtIdHelper().stationEta(station_id),
-                        m_idHelperSvc->mdtIdHelper().stationPhi(station_id), ML, 1, 1);
+                for (int ML : {1,2}) {
+                    Identifier newId = id_helper.channelID(station_id, ML, 1, 1);
+                    const MuonGM::MdtReadoutElement* MdtRoEl = MuonDetMgr->getMdtReadoutElement(newId);
                     int tubeMax = cachedTubeMax(newId);
                     int tubeLayerMax = cachedTubeLayerMax(newId);
                     CorrectTubeMax(hardware_name, tubeMax);
                     CorrectLayerMax(hardware_name, tubeLayerMax);
-                    for (int i_tube = m_idHelperSvc->mdtIdHelper().tubeMin(newId); i_tube <= tubeMax; i_tube++) {
-                        for (int i_layer = m_idHelperSvc->mdtIdHelper().tubeLayerMin(newId); i_layer <= tubeLayerMax; i_layer++) {
-                            const MuonGM::MdtReadoutElement* MdtRoEl = MuonDetMgr->getMdtReadoutElement(newId);
+                    for (int i_tube = id_helper.tubeMin(newId); i_tube <= tubeMax; ++i_tube) {
+                        for (int i_layer = id_helper.tubeLayerMin(newId); i_layer <= tubeLayerMax; ++i_layer) {                            
                             if (m_BMGpresent && m_idHelperSvc->mdtIdHelper().stationName(newId) == m_BMGid) {
-                                std::map<Identifier, std::vector<Identifier>>::const_iterator myIt =
-                                    m_DeadChannels.find(MdtRoEl->identify());
+                                std::map<Identifier, std::set<Identifier>>::const_iterator myIt = m_DeadChannels.find(MdtRoEl->identify());
                                 if (myIt != m_DeadChannels.end()) {
-                                    Identifier tubeId = m_idHelperSvc->mdtIdHelper().channelID(
-                                        hardware_name.substr(0, 3), m_idHelperSvc->mdtIdHelper().stationEta(station_id),
-                                        m_idHelperSvc->mdtIdHelper().stationPhi(station_id), ML, i_layer, i_tube);
-                                    if (std::find((myIt->second).begin(), (myIt->second).end(), tubeId) != (myIt->second).end()) {
+                                    Identifier tubeId = id_helper.channelID(newId, ML, i_layer, i_tube);
+                                    if (myIt->second.count(tubeId)) {
                                         ATH_MSG_DEBUG("Skipping tube with identifier "
-                                                      << m_idHelperSvc->mdtIdHelper().show_to_string(tubeId));
+                                                      << m_idHelperSvc->toString(tubeId));
                                         continue;
                                     }
                                 }
                             }
                             Amg::Vector3D TubePos = MdtRoEl->GlobalToAmdbLRSCoords(MdtRoEl->tubePos(ML, i_layer, i_tube));
-                            Amg::Vector3D tube_position = Amg::Vector3D(TubePos.x(), TubePos.y(), TubePos.z());
-                            Amg::Vector3D tube_direction = Amg::Vector3D(1, 0, 0);
-                            MuonCalib::MTStraightLine tube_track =
-                                MuonCalib::MTStraightLine(tube_position, tube_direction, Amg::Vector3D(0, 0, 0), Amg::Vector3D(0, 0, 0));
-                            double distance = std::abs(segment_track.signDistFrom(tube_track));
-                            if (distance < (MdtRoEl->innerTubeRadius())) {
-                                traversed_station_id.push_back(station_id);
-                                traversed_tube.push_back(i_tube);
-                                traversed_L.push_back(i_layer);
-                                traversed_ML.push_back(ML);
-                                traversed_distance.push_back(segment_track.signDistFrom(tube_track));
+                            static const Amg::Vector3D tube_direction{1, 0, 0};
+                            std::optional<double> distance = MuonGM::intersect<3>(segPosL, segDirL, TubePos, tube_direction);
+                            if (distance && (*distance) < (MdtRoEl->innerTubeRadius())) {
+                                traversed_station_id.push_back(station_id);                               
+                               
                             }
                         }
                     }
@@ -1144,45 +1072,33 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
             // Loop over traversed tubes that were stored above
             // Here we fill the DRvsDT/DRvsSegD histos, as well is unique hits and traversed tubes to calculate efficiencies
-            const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();
-            if (traversed_tube.size() < 20) {  // quality cut here -- 20 traversed tubes is ridiculous and generates low efficiencies (these
+            if (traversed_station_id.size() < 20) {  // quality cut here -- 20 traversed tubes is ridiculous and generates low efficiencies (these
                                                // are due to non-pointing segments)
-                for (unsigned k = 0; k < traversed_tube.size(); k++) {
-                    std::string hardware_name = getChamberName(traversed_station_id.at(k));
+                for (const Identifier& trav_id : traversed_station_id) {
+                    std::string hardware_name = getChamberName(trav_id);
                     // GET HISTS
                     IdentifierHash idHash{0};
-                    id_helper.get_module_hash(traversed_station_id.at(k), idHash);
+                    id_helper.get_module_hash(trav_id, idHash);
                     MDTChamber* chamber{nullptr};
                     ATH_CHECK(getChamber(idHash, chamber));
 
-                    bool hit_flag = false;
-                    for (unsigned j = 0; j < ROTs_tube.size(); j++) {
-                        if ((getChamberName(ROTs_chamber.at(j)) == hardware_name) && (traversed_tube.at(k) == ROTs_tube.at(j)) &&
-                            (traversed_L.at(k) == ROTs_L.at(j)) &&
-                            (traversed_ML.at(k) == ROTs_ML.at(j))) {  // found traversed tube with hit used in segment
-                            hit_flag = true;
-                            break;
-                        }
-                    }
-
-                    const Identifier& trav_id = traversed_station_id.at(k);
-                    Identifier newId = id_helper.channelID(trav_id, traversed_ML.at(k), 1, 1);
+                    const bool hit_flag = store_ROTs.count(trav_id);
+                   
+                    Identifier newId = id_helper.multilayerID(trav_id);
                     int tubeLayerMax = cachedTubeLayerMax(newId);
                     id_helper.get_module_hash(newId, idHash);
 
                     CorrectLayerMax(hardware_name, tubeLayerMax);  // ChamberTubeNumberCorrection handles the tubeMax problem
-                    int mdtlayer = ((traversed_L.at(k) - 1) + (traversed_ML.at(k) - 1) * tubeLayerMax);
-                    int ibin = traversed_tube.at(k) + mdtlayer * cachedTubeMax(newId);
-                    ChamberTubeNumberCorrection(ibin, hardware_name, traversed_tube.at(k), mdtlayer);
+                    const int mdtlayer = id_helper.tubeLayer(trav_id) - 1 + id_helper.multilayer(trav_id) * tubeLayerMax;
+                    const int tube = id_helper.tube(trav_id);
+                    int ibin = tube + mdtlayer * cachedTubeMax(newId);
+                    ChamberTubeNumberCorrection(ibin, hardware_name, tube, mdtlayer);
                     // Store info for eff calc
                     // (Here we make sure we are removing duplicates from overlapping segments by using sets)
                     std::set<monAlg::TubeTraversedBySegment, monAlg::TubeTraversedBySegment_cmp>::iterator it;
-                    monAlg::TubeTraversedBySegment tmp_effTube = monAlg::TubeTraversedBySegment(hardware_name, ibin, hit_flag, idHash);
-                    monAlg::TubeTraversedBySegment tmp_effTube_Hit = monAlg::TubeTraversedBySegment(hardware_name, ibin, true, idHash);
-                    monAlg::TubeTraversedBySegment tmp_effTube_noHit = monAlg::TubeTraversedBySegment(hardware_name, ibin, false, idHash);
-                    it = store_effTubes.find(tmp_effTube_Hit);
-                    if (hit_flag || (it == store_effTubes.end()))
-                        store_effTubes.insert(tmp_effTube);  // Insert if w/hit, but if w/o hit then only insert if no already stored w/ hit
+                    monAlg::TubeTraversedBySegment tmp_effTube {hardware_name, ibin, hit_flag, idHash};
+                    monAlg::TubeTraversedBySegment tmp_effTube_noHit{hardware_name, ibin, false, idHash};
+                    store_effTubes.insert(tmp_effTube);  // Insert if w/hit, but if w/o hit then only insert if no already stored w/ hit
                     it = store_effTubes.find(tmp_effTube_noHit);
                     if (hit_flag && (it != store_effTubes.end()))
                         store_effTubes.erase(it);  // If w/ hit, and the same tube is stored w/o hit, remove duplicate w/o hit
@@ -1195,12 +1111,11 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
     // Fill effentries/effcounts hists for efficiency calculation
     if (m_doChamberHists) {  // Don't perform this block if not doing chamber by chamber hists
-        for (std::set<monAlg::TubeTraversedBySegment, monAlg::TubeTraversedBySegment_cmp>::iterator it = store_effTubes.begin();
-             it != store_effTubes.end(); it++) {
+        for (const monAlg::TubeTraversedBySegment & it : store_effTubes) {
             // GET HISTS
             MDTChamber* chamber{nullptr};
-            ATH_CHECK(getChamber((*it).idHash, chamber));
-            int tubebin = (*it).tubeBin;
+            ATH_CHECK(getChamber(it.idHash, chamber));
+            int tubebin = it.tubeBin;
 
             int iregion = chamber->GetRegionEnum();
             std::string monPerCh = "MdtMonPerChamber";
@@ -1211,12 +1126,12 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
             std::string chambername = chamber->getName();
             auto tube_perch_segs = Monitored::Scalar<int>("tube_perch_segs_" + chambername, tubebin);
-            auto hitcut = Monitored::Scalar<int>("hitcut", (int)((*it).isHit));
+            auto hitcut = Monitored::Scalar<int>("hitcut", (int)(it.isHit));
 
             fill(monPerCh, tube_perch_segs, hitcut);
         }
     }
-    return sc;
+    return StatusCode::SUCCESS;
 }
 
 StatusCode MdtRawDataMonAlg::fillMDTSegmentHistograms(const MDTSegmentHistogramStruct (&vects)[4][4][16]) const {
@@ -1259,16 +1174,13 @@ void MdtRawDataMonAlg::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl
 
     Identifier detElId = mydetEl->identify();
 
-    int name = m_idHelperSvc->mdtIdHelper().stationName(detElId);
-    int eta = m_idHelperSvc->mdtIdHelper().stationEta(detElId);
-    int phi = m_idHelperSvc->mdtIdHelper().stationPhi(detElId);
-    int ml = m_idHelperSvc->mdtIdHelper().multilayer(detElId);
-    std::vector<Identifier> deadTubes;
+  
+    std::set<Identifier>& deadTubes = m_DeadChannels[detElId];
 
-    for (int layer = 1; layer <= mydetEl->getNLayers(); layer++) {
-        for (int tube = 1; tube <= mydetEl->getNtubesperlayer(); tube++) {
+    for (int layer = 1; layer <= mydetEl->getNLayers(); ++layer) {
+        for (int tube = 1; tube <= mydetEl->getNtubesperlayer(); ++tube) {
             bool tubefound = false;
-            for (unsigned int kk = 0; kk < cv->getNChildVols(); kk++) {
+            for (unsigned int kk = 0; kk < cv->getNChildVols(); ++kk) {
                 int tubegeo = cv->getIdOfChildVol(kk) % maxNTubesPerLayer;
                 int layergeo = (cv->getIdOfChildVol(kk) - tubegeo) / maxNTubesPerLayer;
                 if (tubegeo == tube && layergeo == layer) {
@@ -1278,14 +1190,10 @@ void MdtRawDataMonAlg::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl
                 if (layergeo > layer) break;  // don't loop any longer if you cannot find tube anyway anymore
             }
             if (!tubefound) {
-                Identifier deadTubeId = m_idHelperSvc->mdtIdHelper().channelID(name, eta, phi, ml, layer, tube);
-                deadTubes.push_back(deadTubeId);
-                ATH_MSG_VERBOSE("adding dead tube (" << tube << "), layer(" << layer << "), phi(" << phi << "), eta(" << eta << "), name("
-                                                     << name << "), multilayerId(" << ml << ") and identifier " << deadTubeId << " .");
+                Identifier deadTubeId = m_idHelperSvc->mdtIdHelper().channelID(detElId, mydetEl->getMultilayer(), layer, tube);
+                deadTubes.insert(deadTubeId);
+                ATH_MSG_VERBOSE("adding dead tube "<<m_idHelperSvc->toString(deadTubeId));
             }
         }
-    }
-    std::sort(deadTubes.begin(), deadTubes.end());
-    m_DeadChannels[detElId] = deadTubes;
-    return;
+    } 
 }

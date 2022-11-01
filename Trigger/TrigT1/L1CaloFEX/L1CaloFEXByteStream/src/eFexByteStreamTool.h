@@ -28,6 +28,8 @@
 #include "bytestreamDecoder/L1CaloRdoEfexTob.h"
 #include "bytestreamDecoder/L1CaloBsDecoderRun3.h"
 
+#include "AthenaMonitoringKernel/Monitored.h"
+
 // Gaudi includes
 #include "Gaudi/Property.h"
 
@@ -56,6 +58,16 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         }
 
     private:
+        ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
+
+        /// Create a class to override logging interface in underlying decoder tool
+          class MonitoredLogging : public L1CaloBsDecoderRun3::Logging {
+            public:
+              MonitoredLogging(ToolHandle<GenericMonitoringTool> tool) : m_monTool(tool) { }
+              virtual void err(const std::string& location, const std::string& title, const std::string& detail) const override;
+              ToolHandle<GenericMonitoringTool> m_monTool;
+          };
+
         // ------------------------- Properties --------------------------------------
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
