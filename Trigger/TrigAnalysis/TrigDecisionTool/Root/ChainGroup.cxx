@@ -14,6 +14,7 @@
  *
  ***********************************************************************************/
 #include <limits>
+#include "boost/regex.hpp"
 #include "boost/range/adaptor/reversed.hpp"
 
 #include "CxxUtils/bitmask.h"
@@ -38,19 +39,11 @@
 using namespace std;
 
 Trig::ChainGroup::ChainGroup(const std::vector< std::string >& triggerNames,
-                             Trig::CacheGlobalMemory& parent, TrigDefs::Group properties)
+                             Trig::CacheGlobalMemory& parent)
   :
   m_patterns(triggerNames),
-  m_properties(properties),
   m_cgm(parent)
-{
-  if (!CxxUtils::test(m_properties, TrigDefs::Group::NoRegex)) {
-    m_regex.reserve(m_patterns.size());
-    for (const std::string& pat : m_patterns) {
-      m_regex.emplace_back(pat);
-    }
-  }
-}
+{}
 
 const Trig::ChainGroup& Trig::ChainGroup::operator+(const Trig::ChainGroup& rhs) {
   std::vector< std::string > v;
@@ -596,7 +589,8 @@ std::vector< std::vector< TrigConf::HLTTriggerElement* > > Trig::ChainGroup::get
 
 void
 Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
-                         const TrigConf::ItemContainer* confItems) {
+                         const TrigConf::ItemContainer* confItems,
+                         TrigDefs::Group prop) {
 
    m_confChains.clear();
    m_confItems.clear();
@@ -605,20 +599,21 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
    // protect against genConf failure
    if (!(confChains && confItems) ) return;
 
-   if (!CxxUtils::test(m_properties, TrigDefs::Group::NoRegex)) {
+   if (!CxxUtils::test(prop, TrigDefs::Group::NoRegex)) {
 
-     boost::cmatch what;
-     for(const boost::regex& pat : m_regex) {
+     for(const std::string& pat : m_patterns) {
         // find chains matching pattern
+        boost::regex compiled(pat);
+        boost::cmatch what;
 
         for(TrigConf::HLTChain* ch : *confChains) {
-           if ( boost::regex_match(ch->chain_name().c_str(), what, pat) ) {
+           if ( boost::regex_match(ch->chain_name().c_str(), what, compiled) ) {
               m_confChains.push_back(ch);
            }
         }
 
         for(TrigConf::TriggerItem* item : *confItems) {
-           if ( boost::regex_match( item->name().c_str(), what, pat) ) {
+           if ( boost::regex_match( item->name().c_str(), what, compiled) ) {
               m_confItems.push_back(item);
            }
         }

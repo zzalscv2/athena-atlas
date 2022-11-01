@@ -31,8 +31,6 @@
 #include "TrigSteeringEvent/Enums.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
-#include "boost/regex.hpp"
-
 namespace HLT {
   class Chain;
 }
@@ -57,8 +55,7 @@ namespace Trig {
    public:
 
       ChainGroup(const std::vector< std::string >& triggerNames,
-                 Trig::CacheGlobalMemory& parent,
-                 TrigDefs::Group properties = TrigDefs::Group::Default);
+                 Trig::CacheGlobalMemory& parent);
       ~ChainGroup() = default;
 
       typedef std::vector<std::string>::const_iterator const_iterator;
@@ -179,9 +176,7 @@ namespace Trig {
       std::string getLowerName(const std::string& EFname) const;
 
       std::vector<std::string> m_patterns;  //!< patterns with which the CG was constructed
-      std::vector<boost::regex> m_regex;    //!< the compiled regex for each pattern
-      TrigDefs::Group m_properties;         //!< group properties
-
+    
       std::vector<const TrigConf::HLTChain*>           m_confChains;
       std::vector<const TrigConf::TriggerItem*>        m_confItems;
 
@@ -197,7 +192,8 @@ namespace Trig {
 
       // update the configuration
       void update(const TrigConf::HLTChainList* confChains,
-                  const TrigConf::ItemContainer* confItems);
+                  const TrigConf::ItemContainer* confItems,
+                  TrigDefs::Group prop = TrigDefs::Group::Default);
 
       ChainGroup& operator= (const ChainGroup&);
 

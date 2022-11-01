@@ -25,8 +25,6 @@
 
 #include "AsgTools/CurrentContext.h"
 
-#include <chrono>
-
 /// Number of TDT instances
 static std::atomic<int> s_instances = 0;
 
@@ -206,21 +204,16 @@ StatusCode Trig::TrigDecisionTool::beginEvent() {
   };
   if (*getKeys() != newKeys or getForceConfigUpdate())
   {
-    auto t0 = std::chrono::high_resolution_clock::now();
+    ATH_MSG_INFO("Updating config in slot " << slot
+        << " with SMK: " << newKeys[0]
+        << " and L1PSK: " << newKeys[1] 
+        << " and HLTPSK: " << newKeys[2]
+        << " and BGSK: " << newKeys[3]
+        << " getForceConfigUpdate()=" << getForceConfigUpdate()
+        << " HLT Chains: " << iHLTConfig->chains().size());
     *getKeys() = newKeys;
     configurationUpdate( &iHLTConfig->chains(), iL1Config->ctpConfig() );
     setForceConfigUpdate(false);
-    auto t1 = std::chrono::high_resolution_clock::now();
-
-    ATH_MSG_INFO("Configuration update in slot " << slot
-                 << " with SMK " << newKeys[0]
-                 << ", L1PSK " << newKeys[1]
-                 << ", HLTPSK " << newKeys[2]
-                 << ", BGSK " << newKeys[3]
-                 << " for " << iHLTConfig->chains().size() << " chains and "
-                 << cgmPtr->getChainGroups().size() << " chain groups done ("
-                 << std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count()
-                 << " ms)" );
   }
   else
     ATH_MSG_DEBUG("Cached trigger configuration keys match for this event in slot " << slot);
