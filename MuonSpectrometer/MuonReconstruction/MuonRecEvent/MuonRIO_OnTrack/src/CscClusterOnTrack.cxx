@@ -29,14 +29,7 @@ namespace Muon
   {}
 
   // copy constructor:
-  CscClusterOnTrack::CscClusterOnTrack( const CscClusterOnTrack& rot):
-    MuonClusterOnTrack(rot), // base clas ctor
-    m_rio(rot.m_rio),
-    m_detEl(rot.m_detEl),
-    m_status(rot.m_status),
-    m_timeStatus(rot.m_timeStatus),
-    m_time(rot.m_time)
-  {}
+  CscClusterOnTrack::CscClusterOnTrack( const CscClusterOnTrack& rot) = default;
 
   // Constructor with parameters
   CscClusterOnTrack::CscClusterOnTrack(
@@ -79,8 +72,7 @@ namespace Muon
 
   // Destructor:
   CscClusterOnTrack::~CscClusterOnTrack()
-  {
-  }
+  = default;
 
   // assignment operator:
   CscClusterOnTrack& CscClusterOnTrack::operator=( const CscClusterOnTrack& rot)

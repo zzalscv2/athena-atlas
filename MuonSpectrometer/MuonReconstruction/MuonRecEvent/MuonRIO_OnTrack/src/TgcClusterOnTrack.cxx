@@ -26,11 +26,7 @@ TgcClusterOnTrack::TgcClusterOnTrack():
 {}
 
 // copy constructor:
-TgcClusterOnTrack::TgcClusterOnTrack( const TgcClusterOnTrack& rot):
-        MuonClusterOnTrack(rot), // base clas ctor
-        m_rio(rot.m_rio),
-        m_detEl(rot.m_detEl)
-{}
+TgcClusterOnTrack::TgcClusterOnTrack( const TgcClusterOnTrack& rot) = default;
 
 // Constructor with parameters
 TgcClusterOnTrack::TgcClusterOnTrack(

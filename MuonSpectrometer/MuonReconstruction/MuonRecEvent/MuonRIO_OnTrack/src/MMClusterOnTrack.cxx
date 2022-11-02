@@ -18,13 +18,7 @@ namespace Muon
   {}
 
   // copy constructor:
-  MMClusterOnTrack::MMClusterOnTrack( const MMClusterOnTrack& rot):
-    MuonClusterOnTrack(rot), // base clas ctor
-    m_rio(rot.m_rio),
-    m_detEl(rot.m_detEl),
-    m_stripDriftDists(rot.m_stripDriftDists),
-    m_stripDriftDistErrors(rot.m_stripDriftDistErrors)
-  {}
+  MMClusterOnTrack::MMClusterOnTrack( const MMClusterOnTrack& rot) = default;
 
   // Constructor with parameters
   MMClusterOnTrack::MMClusterOnTrack(
