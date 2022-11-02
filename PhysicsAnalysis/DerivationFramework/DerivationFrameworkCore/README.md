@@ -21,6 +21,8 @@ This directory contains a large number of python scripts, in particular defining
 * Smart slimming lists for the triggers (several files), event info (`EventInfoContent`), compulsory content needed for all formats (`CompulsoryContent`)
 * `ContainersForExpansion`: list of containers that can't be converted into AuxDyn variables in the release 22 way but must be explicitly expanded via the legacy mechanism
 * `ContainersOnTheFly`: list of containers that are added via common augmentation and which are listed centrally to avoid users having to write them explicitly into their format definitions
+* `FullListOfSmartContainers`: list of all of the containers with smart slimming lists. **Obsolete?**
+* `StaticNamesAndTypes`: fall-back dictionary of container names and their types, to be used in case the job can't automatically generate the dictionary as it reads in the file metadata. **Obsolete?**
 * `TriggerMatchingAugmentation`:  **Obsolete?**
 * `DerivationFrameworkMaster`: must be imported into the scope of all non-CA derivation job options. **Obsolete for component accumulator configuration**
 * `DerivationFrameworkProdFlags`: mapping of format names provided by the user at run time (`--reductionConf`) to the job options location. **Obsolete for component accumulator configuration**
