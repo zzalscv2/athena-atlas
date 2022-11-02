@@ -403,7 +403,7 @@ void LArG4GenShowerLib::truncate(ShowerLib::StepInfoList* stepinfo)
   double rsum = 0.;
   ShowerLib::StepInfoList::iterator iterCut;
   //we're continuing our cycle if  (we're not at the end yet)  && ( (the current hit is still inside maxDistance radius) || (the total energy still less then the threshold) )
-  for (iterCut = stepinfo->begin(); (iterCut != stepinfo->end()) && (((*iterCut)->position().mag2() <  m_maxDistance) || (rsum < minEnergy));iterCut++) {
+  for (iterCut = stepinfo->begin(); (iterCut != stepinfo->end()) && (((*iterCut)->position().mag2() <  m_maxDistance) || (rsum < minEnergy));++iterCut) {
     rsum += (*iterCut)->dep();
   }
 

@@ -297,14 +297,13 @@ StatusCode SingleTrackValidation::execute() {
   const McEventCollection* mcEvent;
   sc=stg->retrieve(mcEvent,"TruthEvent");
   if (sc.isFailure()) return StatusCode::SUCCESS;
-  DataVector<HepMC::GenEvent>::const_iterator e;
-  for (e=mcEvent->begin();e!=mcEvent->end();e++) {
+  for (const HepMC::GenEvent* e : *mcEvent) {
 
     // Get just the primary, call it "theParticle"
 #ifdef HEPMC3
-    HepMC::ConstGenParticlePtr theParticle = (*e)->particles().front();
+    HepMC::ConstGenParticlePtr theParticle = e->particles().front();
 #else
-    const HepMC::GenParticle *theParticle= *((**e).particles_begin());
+    const HepMC::GenParticle *theParticle= *(e->particles_begin());
 #endif
 
     // Fetch whatever particle properties will be used in the following:
