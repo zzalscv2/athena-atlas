@@ -13,6 +13,7 @@
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysWriteHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
+#include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <METInterface/IMETMaker.h>
 #include <METInterface/IMETSystematicsTool.h>
 
@@ -73,6 +74,11 @@ namespace CP
     SysReadHandle<xAOD::IParticleContainer> m_electronsHandle {
       this, "electrons", "", "the electron container to use" };
 
+    /// \brief the selection on the input electrons
+  private:
+    SysReadSelectionHandle m_electronsSelection {
+      this, "electronsSelection", "", "the selection on the input electrons" };
+
     /// \brief the key for \ref m_electronsHandle
   private:
     std::string m_electronsKey {"RefEle"};
@@ -81,6 +87,11 @@ namespace CP
   private:
     SysReadHandle<xAOD::IParticleContainer> m_photonsHandle {
       this, "photons", "", "the photon container to use" };
+
+    /// \brief the selection on the input photons
+  private:
+    SysReadSelectionHandle m_photonsSelection {
+      this, "photonsSelection", "", "the selection on the input photons" };
 
     /// \brief the key for \ref m_photonsHandle
   private:
@@ -91,6 +102,11 @@ namespace CP
     SysReadHandle<xAOD::IParticleContainer> m_muonsHandle {
       this, "muons", "", "the muon container to use" };
 
+    /// \brief the selection on the input muons
+  private:
+    SysReadSelectionHandle m_muonsSelection {
+      this, "muonsSelection", "", "the selection on the input muons" };
+
     /// \brief the key for \ref m_muonsHandle
   private:
     std::string m_muonsKey {"Muons"};
@@ -99,6 +115,11 @@ namespace CP
   private:
     SysReadHandle<xAOD::IParticleContainer> m_tausHandle {
       this, "taus", "", "the tau container to use" };
+
+    /// \brief the selection on the input taus
+  private:
+    SysReadSelectionHandle m_tausSelection {
+      this, "tausSelection", "", "the selection on the input taus" };
 
     /// \brief the key for \ref m_tausHandle
   private:

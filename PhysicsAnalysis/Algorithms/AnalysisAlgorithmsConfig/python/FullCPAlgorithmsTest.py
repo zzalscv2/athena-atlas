@@ -307,48 +307,24 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
 
     # Now make view containers for the inputs to the met calculation
-    metInputs = { 'jets'      : 'METJets_%SYS%',
-                  'taus'      : 'METTauJets_%SYS%',
-                  'muons'     : 'METMuons_%SYS%',
-                  'electrons' : 'METElectrons_%SYS%',
-                  'photons'   : 'METPhotons_%SYS%' }
-    viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METElectronsViewAlg' )
-    viewalg.selection = [ 'selectPtEta', 'baselineSelection_loose,as_char' ]
-    viewalg.input = 'AnaElectrons_%SYS%'
-    viewalg.output = 'METElectrons_%SYS%'
-    algSeq += viewalg
-
-    viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METPhotonsViewAlg' )
-    viewalg.selection = [ 'selectPtEta', 'baselineSelection_tight,as_char' ]
-    viewalg.input = 'AnaPhotons_%SYS%'
-    viewalg.output = 'METPhotons_%SYS%'
-    algSeq += viewalg
-
-    viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METMuonsViewAlg' )
-    viewalg.selection = [ 'selectPtEta', 'baselineSelection_medium,as_char' ]
-    viewalg.input = 'AnaMuons_%SYS%'
-    viewalg.output = 'METMuons_%SYS%'
-    algSeq += viewalg
-
-    viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METTauJetsViewAlg' )
-    viewalg.selection = [ 'selectPtEta', 'baselineSelection_tight,as_char' ]
-    viewalg.input = 'AnaTauJets_%SYS%'
-    viewalg.output = 'METTauJets_%SYS%'
-    algSeq += viewalg
-
-    viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METJetsViewAlg' )
-    viewalg.selection = [ 'selectPtEta' ]
-    viewalg.input = 'AnaJets_%SYS%'
-    viewalg.output = 'METJets_%SYS%'
-    algSeq += viewalg
-
+    metInputs = { 'jets'      : 'AnaJets_%SYS%',
+                  'taus'      : 'AnaTauJets_%SYS%',
+                  'muons'     : 'AnaMuons_%SYS%',
+                  'electrons' : 'AnaElectrons_%SYS%',
+                  'photons'   : 'AnaPhotons_%SYS%' }
     # Include, and then set up the met analysis algorithm sequence:
     from MetAnalysisAlgorithms.MetAnalysisSequence import makeMetAnalysisSequence
     if isPhyslite :
         metSuffix = 'AnalysisMET'
     else :
         metSuffix = jetContainer[:-4]
-    metSequence = makeMetAnalysisSequence( dataType, metSuffix=metSuffix )
+    metSequence = makeMetAnalysisSequence(
+            dataType,
+            metSuffix=metSuffix,
+            electronsSelection = "selectPtEta && baselineSelection_loose,as_char",
+            photonsSelection = "selectPtEta && baselineSelection_tight,as_char",
+            muonsSelection = "selectPtEta && baselineSelection_medium,as_char",
+            tausSelection = "selectPtEta && baselineSelection_tight,as_char" )
     metSequence.configure( inputName = metInputs,
                            outputName = 'AnaMET_%SYS%' )
 
