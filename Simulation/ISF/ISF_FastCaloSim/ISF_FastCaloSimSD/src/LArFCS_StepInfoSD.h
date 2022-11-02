@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIM_LARFCS_STEPINFOSD_H
@@ -14,7 +14,6 @@
 class LArEM_ID;
 class LArFCAL_ID;
 class LArHEC_ID;
-class LArMiniFCAL_ID;
 class CaloDetDescrManager;
 
 class G4Step;
