@@ -7,7 +7,11 @@ from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 def makeMetAnalysisSequence( dataType, metSuffix,
                              postfix = '',
                              useFJVT = True,
-                             treatPUJets = True ):
+                             treatPUJets = True,
+                             electronsSelection = "",
+                             muonsSelection = "",
+                             photonsSelection = "",
+                             tausSelection = ""):
     """Create a met analysis algorithm sequence
 
     After creating the sequence object, it needs to be configured with a call
@@ -24,6 +28,8 @@ def makeMetAnalysisSequence( dataType, metSuffix,
 
     Note that defining a jet container is mandatory, but all other input
     containers are optional.
+
+    Selections on each container can also be defined
 
     Keyword arguments:
       dataType -- The data type to run on ("data", "mc" or "afii")
@@ -57,6 +63,10 @@ def makeMetAnalysisSequence( dataType, metSuffix,
         addPrivateTool( alg, 'systematicsTool', 'met::METSystematicsTool' )
     alg.metCore = 'MET_Core_' + metSuffix
     alg.metAssociation = 'METAssoc_' + metSuffix
+    alg.electronsSelection = electronsSelection
+    alg.muonsSelection = muonsSelection
+    alg.photonsSelection = photonsSelection
+    alg.tausSelection = tausSelection
     seq.append( alg,
                 inputPropName = { 'jets'      : 'jets',
                                   'electrons' : 'electrons',

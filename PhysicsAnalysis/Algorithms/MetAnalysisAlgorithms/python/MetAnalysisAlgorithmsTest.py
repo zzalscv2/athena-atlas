@@ -26,7 +26,7 @@ def makeSequence (dataType) :
     # that the input container is non-const
     eleCopyAlg = createAlgorithm( 'CP::AsgShallowCopyAlg', 'MetEleCopyAlg' )
     eleCopyAlg.input = 'Electrons'
-    eleCopyAlg.output = 'DecorElectrons_%SYS%'
+    eleCopyAlg.output = 'METElectrons_%SYS%'
     algSeq += eleCopyAlg
 
 
@@ -35,19 +35,16 @@ def makeSequence (dataType) :
     selalg.selectionTool.minPt = 10e3
     selalg.selectionTool.maxEta = 2.47
     selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'DecorElectrons_%SYS%'
+    selalg.particles = 'METElectrons_%SYS%'
     algSeq += selalg
-
-    # Now make a view container holding only the electrons for the MET calculation
-    viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METEleViewAlg' )
-    viewalg.selection = [ 'selectPtEta' ]
-    viewalg.input = 'DecorElectrons_%SYS%'
-    viewalg.output = 'METElectrons_%SYS%'
-    algSeq += viewalg
 
     # Include, and then set up the met analysis algorithm sequence:
     from MetAnalysisAlgorithms.MetAnalysisSequence import makeMetAnalysisSequence
-    metSequence = makeMetAnalysisSequence( dataType, metSuffix = jetContainer[:-4] )
+    metSequence = makeMetAnalysisSequence(
+            dataType,
+            metSuffix = jetContainer[:-4],
+            electronsSelection = 'selectPtEta'
+    )
     metSequence.configure( inputName = { 'jets'      : 'AnalysisJets_%SYS%',
                                          'muons'     : 'Muons',
                                          'electrons' : 'METElectrons_%SYS%' },
