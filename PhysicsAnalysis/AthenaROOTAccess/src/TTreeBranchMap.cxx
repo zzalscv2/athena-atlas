@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TTreeBranchMap.cxx,v 1.3 2008-07-14 21:02:50 ssnyder Exp $
 /**
  * @file AthenaROOTAccess/src/TTreeBranchMap.cxx
  * @author scott snyder
@@ -66,7 +65,7 @@ TTreeBranchMap::findBranch (const std::string& mapped_name) const
   map_t::const_iterator i = m_map.find (mapped_name);
   if (i != m_map.end())
     return i->second;
-  static std::string dum;
+  static const std::string dum;
   return dum;
 }
 

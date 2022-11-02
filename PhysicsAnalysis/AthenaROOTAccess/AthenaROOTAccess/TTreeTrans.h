@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -168,7 +168,12 @@ public:
   /**
    * @brief Return the associated persistent tree.
    */
-  TTree* getPersTree() const;
+  TTree* getPersTree();
+
+  /**
+   * @brief Return the associated persistent tree (const).
+   */
+  const TTree* getPersTree() const;
 
 
   //@}

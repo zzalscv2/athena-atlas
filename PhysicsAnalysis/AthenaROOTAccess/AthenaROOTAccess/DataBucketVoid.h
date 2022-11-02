@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -134,7 +134,7 @@ private:
   void* m_ptr;
 
   /// For calling baseOffset on the vector.
-  mutable TMethodCall m_baseOffsetMeth;
+  TMethodCall m_baseOffsetMeth;
 
   /// Class of the held object, down-converted to a DataVector.
   TClass* m_dvcl;
@@ -183,7 +183,7 @@ private:
 
   /// Table of type/offset pairs for casting.
   typedef std::vector<std::pair<const std::type_info*, int> > offset_table_t;
-  mutable offset_table_t m_offsets;
+  offset_table_t m_offsets;
 
 
   /**
