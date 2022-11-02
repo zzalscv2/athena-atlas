@@ -4,14 +4,14 @@
 atlas_subdir( ISF_ActsTools )
 
 find_package( Acts CONFIG REQUIRED COMPONENTS Core PluginJson Fatras )
+find_package( CLHEP )
 
 # Component(s) in the package:
 atlas_add_component( ISF_ActsTools
                      src/*.cxx
                      src/components/*.cxx
 		             INCLUDE_DIRS
-                     ${CLHEP_INCLUDE_DIRS} ${HEPMC_INCLUDE_DIRS}
-                     ${EIGEN_INCLUDE_DIRS}
+                     ${CLHEP_INCLUDE_DIRS} ${Acts_INCLUDE_DIR} 
                      LINK_LIBRARIES ActsCore ActsFatras AthenaBaseComps CxxUtils
                      TrkTrack ISF_Event AthenaKernel AtlasDetDescr GeoPrimitives
                      GaudiKernel GeneratorObjects ISF_Event StoreGateLib
