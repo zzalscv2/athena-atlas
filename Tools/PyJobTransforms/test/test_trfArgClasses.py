@@ -357,14 +357,14 @@ class argSubstepListTests(unittest.TestCase):
 
 class argSteeringTests(unittest.TestCase):
     def test_basicStrSet(self):
-        steer = argSubstepSteering('RAWtoESD:out-RDO')
+        steer = argSubstepSteering('RAWtoALL:out-RDO')
         self.assertEqual(len(steer.value), 1)
-        self.assertEqual(steer.value, {'RAWtoESD': [('out', '-', 'RDO')]})
+        self.assertEqual(steer.value, {'RAWtoALL': [('out', '-', 'RDO')]})
 
     def test_multiStrSet(self):
-        steer = argSubstepSteering('RAWtoESD:out-RDO,out+RDO_TRIG')
+        steer = argSubstepSteering('RAWtoALL:out-RDO,out+RDO_TRIG')
         self.assertEqual(len(steer.value), 1)
-        self.assertEqual(steer.value, {'RAWtoESD': [('out', '-', 'RDO'), ('out', '+', 'RDO_TRIG')]})
+        self.assertEqual(steer.value, {'RAWtoALL': [('out', '-', 'RDO'), ('out', '+', 'RDO_TRIG')]})
 
     def test_multiStrSet2(self):
         steer = argSubstepSteering(['RAWtoESD:out-RDO,out+RDO_TRIG', 'ESDtoAOD:in+JUNK'])

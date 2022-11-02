@@ -57,7 +57,7 @@ if hasattr(runArgs,"outputAODFile"):
 DRAWInputs = [ prop for prop in dir(runArgs) if prop.startswith('inputDRAW') and prop.endswith('File')]
 if hasattr(runArgs,"inputBSFile"):
     if len(DRAWInputs) > 0:
-        raise RuntimeError('Impossible to run RAWtoESD with input BS and DRAW files (one input type only!)')
+        raise RuntimeError('Impossible to run RAWtoALL with input BS and DRAW files (one input type only!)')
     rec.readRDO.set_Value_and_Lock( True )
     globalflags.InputFormat.set_Value_and_Lock('bytestream')
     athenaCommonFlags.BSRDOInput.set_Value_and_Lock( runArgs.inputBSFile )

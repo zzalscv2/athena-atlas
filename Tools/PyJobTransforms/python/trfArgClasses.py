@@ -2041,9 +2041,9 @@ class argSubstep(argument):
 ## @brief Argument class for substep lists, suitable for preExec/postExec 
 #  @details substep is followed by a ':'  then the python fragments.
 #  The substep is validated and set as the key in a dictionary with the value being the python following the ':'.
-#  - If no substep (r2e, e2e, etc) is specified, it will be parsed for 'all'.
+#  - If no substep (e.g. r2a) is specified, it will be parsed for 'all'.
 #  @note substep can be either the subspet property of an executor or the executor's name.
-#  Thus r2e:something is the same as RAWtoESD:something.
+#  Thus r2a:something is the same as RAWtoALL:something.
 class argSubstepList(argSubstep):
     
     ## @brief argSubstepList constructor
