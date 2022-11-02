@@ -92,6 +92,14 @@ Trig::CacheGlobalMemory::getChainGroup (const std::vector<std::string>& triggerN
 }
 
 
+size_t
+Trig::CacheGlobalMemory::nChainGroups() const
+{
+  std::lock_guard<std::recursive_mutex> lock(m_cgmMutex);
+  return m_chainGroupsRef.size();
+}
+
+
 void Trig::CacheGlobalMemory::updateChainGroup(Trig::ChainGroup& chainGroup, TrigDefs::Group props) {
   chainGroup.update(m_confChains, m_confItems, props);
 }
