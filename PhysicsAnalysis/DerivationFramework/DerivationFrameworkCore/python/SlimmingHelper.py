@@ -38,7 +38,6 @@ from DerivationFrameworkCore.CompulsoryContent import CompulsoryContent, Compuls
 from DerivationFrameworkCore.ContentHandler import ContentHandler
 from DerivationFrameworkCore.ContainersForExpansion import ContainersForExpansion
 from DerivationFrameworkCore.ContainersOnTheFly import ContainersOnTheFly
-from DerivationFrameworkCore.FullListOfSmartContainers import FullListOfSmartContainers
 import PyUtils.Logging as L
 msg = L.logging.getLogger('DerivationFramework__SlimmingHelper')
 msg.setLevel(L.logging.INFO)
@@ -66,16 +65,16 @@ class lockable_list(list):
 # Builds the "NamesAndTypes" map needed to set up the item list
 def buildNamesAndTypes(*args):
         namesAndTypes = {}
+        # 1st possibility: non-CA job, user didn't provide a list from ComponentAccumulator 
         if len(args)==0:
-                # 1st possibility: non-CA job, user didn't provide a list from ComponentAccumulator 
                 from RecExConfig.InputFilePeeker import inputFileSummary
                 if inputFileSummary['eventdata_items'] is not None:
                         for item in inputFileSummary['eventdata_items']:
                                 namesAndTypes[item[1].strip('.')] = item[0]
                 # 2nd possibility: CA job, user provided the list from ComponentAccumulator
                 else:
-                        from DerivationFrameworkCore.StaticNamesAndTypes import StaticNamesAndTypes
-                        namesAndTypes = StaticNamesAndTypes
+                        raise RuntimeError("Unable to find the names and types list... for CA jobs check you passed ConfigFlags.Input.TypedCollections to slimming helper")
+         # 2nd possibility: CA job, user provided the list from ComponentAccumulator
         else:
                 for item in args[0]:
                         item = item.split('#')
@@ -338,8 +337,6 @@ class SlimmingHelper:
         def GetSmartItems(self,collectionName):
                 # Look up what is needed for this container type
                 items = []
-                if collectionName not in FullListOfSmartContainers:
-                        raise RuntimeError("Smart slimming container "+collectionName+" does not exist or does not have a smart slimming list")
                 if collectionName=="EventInfo":
                         from DerivationFrameworkCore.EventInfoContent import EventInfoContent
                         items.extend(EventInfoContent)
