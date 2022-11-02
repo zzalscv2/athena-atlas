@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASSERVICES_G4GEOMETRYNOTIFIERSVC_H
@@ -23,7 +23,7 @@ public:
 
   //FIXME This is a bit nasty as it is not thread-safe, but we assume
   //that the geometry building will be done in a single thread.
-  void SetCurrentDetectorName(std::string s) override final {m_currentDetectorName=s;}
+  void SetCurrentDetectorName(const std::string& s) override final {m_currentDetectorName=s;}
   const std::string GetCurrentDetectorName() const override final {return m_currentDetectorName;}
 
 private:

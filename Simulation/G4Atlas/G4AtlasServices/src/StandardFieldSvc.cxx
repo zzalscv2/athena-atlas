@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StandardFieldSvc.h"
@@ -95,7 +95,7 @@ StatusCode StandardFieldSvc::createFieldMap()
     ATH_MSG_INFO ( "StandardFieldSvc::createFieldMap: Use map file " << mapFile);
         
     // find the path to the map file
-    std::string resolvedMapFile = PathResolver::find_file( mapFile.c_str(), "DATAPATH" );
+    std::string resolvedMapFile = PathResolver::find_file( mapFile, "DATAPATH" );
     if ( resolvedMapFile.empty() ) {
         ATH_MSG_ERROR( "StandardFieldSvc::createFieldMap: Field map file " << mapFile << " not found" );
         return StatusCode::FAILURE;
