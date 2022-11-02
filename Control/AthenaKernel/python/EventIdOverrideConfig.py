@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Project
+from AthenaConfiguration.Enums import ProductionStep
 
 # based on https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/Control/AthenaServices/python/Configurables.py#0247
 def add_modifier(run_nbr=None, evt_nbr=None, time_stamp=None, lbk_nbr=None, nevts=1):
@@ -129,7 +129,9 @@ def getMinMaxRunNumbers(ConfigFlags):
 
 def EvtIdModifierSvcCfg(ConfigFlags, name="EvtIdModifierSvc", **kwargs):
     acc = ComponentAccumulator()
-    if ConfigFlags.Common.Project is not Project.AthSimulation and (ConfigFlags.Digitization.PileUp or ConfigFlags.Sim.DoFullChain):
+    isMT = ConfigFlags.Concurrency.NumThreads > 0
+    pileUp = ConfigFlags.Digitization.PileUp and ConfigFlags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and not ConfigFlags.Overlay.FastChain
+    if pileUp and not isMT:
         kwargs.setdefault("EvtStoreName", "OriginalEvent_SG")
     else:
         kwargs.setdefault("EvtStoreName", "StoreGateSvc")
