@@ -236,7 +236,7 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
   
   SG::ReadHandle<xAOD::L1TopoRawDataContainer> cont(m_l1topoRawDataKey, ctx);
   if(!cont.isValid()){
-    ATH_MSG_FATAL("Could not retrieve L1Topo RAW Data Container from the BS data.");
+    ATH_MSG_WARNING("Could not retrieve L1Topo RAW Data Container from the BS data.");
     return StatusCode::FAILURE;
   }
 
@@ -250,6 +250,10 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
   for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
     const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
     size_t nWords = dataWords.size();
+    if (nWords!=50) {
+      ATH_MSG_WARNING("Expected data word container size is 50, but found " << nWords);
+      return StatusCode::FAILURE;
+    }
     uint32_t rodTrailer2 = dataWords[--nWords];
     uint32_t rodTrailer1 = dataWords[--nWords];
 
