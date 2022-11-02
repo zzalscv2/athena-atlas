@@ -14,7 +14,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/TileID.h"
 #include "LArG4Code/ILArCalculatorSvc.h"
 #include "LArG4Code/VolumeUtils.h"
@@ -51,12 +50,10 @@ namespace FCS_Param
     , m_fcal1calc("FCAL1Calculator", name)
     , m_fcal2calc("FCAL2Calculator", name)
     , m_fcal3calc("FCAL3Calculator", name)
-    , m_minfcalcalc("MiniFCALCalculator", name)
     , m_tileCalculator("TileGeoG4SDCalc", name)
     , m_larEmID(nullptr)
     , m_larFcalID(nullptr)
     , m_larHecID(nullptr)
-    , m_larMiniFcalID(nullptr)
     , m_tileID(nullptr)
     , m_config()
   {
@@ -74,7 +71,6 @@ namespace FCS_Param
     declareProperty("FCAL2Volumes", m_fcal2Volumes);
     declareProperty("FCAL3Volumes", m_fcal3Volumes);
     declareProperty("SliceVolumes", m_sliceVolumes);
-    declareProperty("MiniVolumes", m_miniVolumes);
     declareProperty("TileVolumes", m_tileVolumes);
 
     declareProperty("EMBPSCalculator",m_bpsmodcalc);
@@ -90,7 +86,6 @@ namespace FCS_Param
     declareProperty("FCAL1Calculator",m_fcal1calc);
     declareProperty("FCAL2Calculator",m_fcal2calc);
     declareProperty("FCAL3Calculator",m_fcal3calc);
-    declareProperty("MiniFCALActiveCalculator",m_minfcalcalc);
     declareProperty("TileCalculator", m_tileCalculator);
 
     declareProperty("shift_lar_subhit",m_config.shift_lar_subhit, "");
@@ -150,11 +145,6 @@ namespace FCS_Param
       ATH_MSG_ERROR("Invalid LAr HEC ID helper");
       return StatusCode::FAILURE;
     }
-    m_larMiniFcalID = idMgr->getMiniFCAL_ID();
-    if(m_larMiniFcalID == nullptr) {
-      ATH_MSG_ERROR("Invalid LAr Mini FCAL ID helper");
-      return StatusCode::FAILURE;
-    }
     m_tileID = idMgr->getTileID();
     if(m_tileID == nullptr) {
       ATH_MSG_ERROR("Invalid Tile ID helper");
@@ -188,7 +178,6 @@ namespace FCS_Param
     ATH_CHECK(m_fcal1calc.retrieve());
     ATH_CHECK(m_fcal2calc.retrieve());
     ATH_CHECK(m_fcal3calc.retrieve());
-    ATH_CHECK(m_minfcalcalc.retrieve());
     ATH_CHECK(m_tileCalculator.retrieve());
 
     return StatusCode::SUCCESS;
@@ -231,7 +220,6 @@ namespace FCS_Param
     sdWrapper->addSD( makeOneLArSD( "FCAL::Module2::Gap::StepInfo", &*m_fcal2calc, m_fcal2Volumes ) );
     sdWrapper->addSD( makeOneLArSD( "FCAL::Module3::Gap::StepInfo", &*m_fcal3calc, m_fcal3Volumes ) );
     sdWrapper->addSD( makeOneLArSD( "HEC::Module::Depth::Slice::Wheel::StepInfo", &*m_heccalc, m_sliceVolumes ) );
-    sdWrapper->addSD( makeOneLArSD( "MiniFCAL::Wafer::StepInfo", &*m_minfcalcalc, m_miniVolumes ) );
     sdWrapper->addSD( makeOneTileSD( "Tile::Scintillator::StepInfo", &*m_tileCalculator, m_tileVolumes ) );
 
     return sdWrapper;
@@ -261,7 +249,7 @@ namespace FCS_Param
     // Create the simple SD
    std::unique_ptr<FCS_StepInfoSD> sd =
       std::make_unique<LArFCS_StepInfoSD>(sdName, config);
-   sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID, m_tileID);
+   sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_tileID);
 
     // Assign the volumes to the SD
     if( this->assignSD( sd.get(), parsedVolumes ).isFailure() ) {
@@ -293,7 +281,7 @@ namespace FCS_Param
      // Create the simple SD
     std::unique_ptr<FCS_StepInfoSD> sd =
       std::make_unique<TileFCS_StepInfoSD>(sdName, config);
-    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID, m_tileID);
+    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_tileID);
 
     // Assign the volumes to the SD
     if( this->assignSD( sd.get(), volumes ).isFailure() ) {
