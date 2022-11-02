@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTOOLS_USERLIMITSSVC_H
@@ -28,8 +28,8 @@ class UserLimitsSvc final : public extends<AthService, IUserLimitsSvc> {
 
  private:
   /** Functions for string comparison */
-  bool isMatch(const std::string& pattern, const std::string logicalVolume) const;
-  bool contains(const std::string& pattern, const std::string logicalVolume) const;
+  bool isMatch(const std::string& pattern, const std::string& logicalVolume) const;
+  bool contains(const std::string& pattern, const std::string& logicalVolume) const;
   /** Maximum step length */
   Gaudi::Property<double> m_MaxStep{this, "MaxStep", -1., "Maximum step length"};
   /** Minimum remaining kinetic energy for a track */

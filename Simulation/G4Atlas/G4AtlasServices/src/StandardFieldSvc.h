@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASSERVICES_StandardFieldSvc_H
@@ -32,8 +32,9 @@ class AtlasField : public G4MagneticField
 {
   public:
     /// Construct the field object from conditions object
-  AtlasField(double scaleSolenoid, double scaleToroid, const MagField::AtlasFieldMap* fieldMap) {
-            m_fieldCache = MagField::AtlasFieldCache( scaleSolenoid, scaleToroid, fieldMap);
+  AtlasField(double scaleSolenoid, double scaleToroid, const MagField::AtlasFieldMap* fieldMap)
+    : m_fieldCache (MagField::AtlasFieldCache( scaleSolenoid, scaleToroid, fieldMap))
+  {
     }
     /// Construct the field object from the IMagFieldSvc
     AtlasField(MagField::IMagFieldSvc* m) :

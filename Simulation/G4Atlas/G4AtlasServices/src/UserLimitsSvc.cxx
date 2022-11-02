@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -32,7 +32,7 @@ StatusCode UserLimitsSvc::initialize()
   ATH_MSG_INFO("G4LogicalVolumeStore unique size: " << volumes.size());
 
   // Define with a configurable string which string comparison fucntion to use
-  using function_t = bool (UserLimitsSvc::*) (const std::string& pattern, const std::string logicalVolume) const;
+  using function_t = bool (UserLimitsSvc::*) (const std::string& pattern, const std::string& logicalVolume) const;
   std::map<std::string, function_t> funcMap;
   funcMap.emplace("isMatch", &UserLimitsSvc::isMatch);
   funcMap.emplace("contains", &UserLimitsSvc::contains);
@@ -72,12 +72,12 @@ StatusCode UserLimitsSvc::initialize()
   return StatusCode::SUCCESS;
 }
 
-bool UserLimitsSvc::contains(const std::string& pattern, const std::string logicalVolume) const
+bool UserLimitsSvc::contains(const std::string& pattern, const std::string& logicalVolume) const
 {
     return (logicalVolume.find(pattern) != std::string::npos);
 }
 
-bool UserLimitsSvc::isMatch(const std::string& a,const std::string b) const
+bool UserLimitsSvc::isMatch(const std::string& a,const std::string& b) const
 {
   // straightforward cases
   if (a=="*") return true;

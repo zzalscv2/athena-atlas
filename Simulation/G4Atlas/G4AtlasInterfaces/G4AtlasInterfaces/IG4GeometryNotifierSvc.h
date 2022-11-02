@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASINTERFACES_IG4GEOMETRYNOTIFIERSVC_H
@@ -21,7 +21,7 @@ class IG4GeometryNotifierSvc : virtual public IService {
   virtual ~IG4GeometryNotifierSvc() {}
   /// Creates the InterfaceID and interfaceID() method
   DeclareInterfaceID(IG4GeometryNotifierSvc, 1, 0);
-  virtual void SetCurrentDetectorName(std::string) = 0;
+  virtual void SetCurrentDetectorName(const std::string&) = 0;
 
   virtual const std::string GetCurrentDetectorName() const = 0;
 };
