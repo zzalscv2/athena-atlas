@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// BCM_Builder.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef BCMBCMBUILDER_H
 #define BCMBCMBUILDER_H
@@ -22,21 +18,20 @@ class StoreGateSvc;
 namespace InDetDD
 {
 
-  /** @class BCMBuilder 
+  /** @class BCMBuilder
 
   Beam Condition Monitor Builder
       @author  Bostjan Macek <bostjan.macek@cern.ch>
-  */  
+  */
 
-  //class BCM_Builder : virtual public IBCMBuilder, public AlgTool
-  class BCM_Builder : virtual public IGeoSubDetTool, public AthAlgTool
+  class BCM_Builder : public extends<AthAlgTool, IGeoSubDetTool>
     {
     public:
       BCM_Builder(const std::string&,const std::string&,const IInterface*);
 
        /** default destructor */
-      virtual ~BCM_Builder ();
-      
+      virtual ~BCM_Builder () = default;
+
        /** standard Athena-Algorithm method */
       virtual StatusCode initialize();
        /** standard Athena-Algorithm method */
@@ -45,7 +40,7 @@ namespace InDetDD
       //virtual void build(GeoFullPhysVol*& Phys, StoredMaterialManager*& mat_mgr);
       virtual StatusCode build(GeoVPhysVol* parent);
 
-      /** For alignment */      
+      /** For alignment */
       // Register callback function on ConDB object
       virtual StatusCode registerCallback( StoreGateSvc* detStore );
 
@@ -54,7 +49,7 @@ namespace InDetDD
 
 
     private:
-      
+
       /** member variables for algorithm properties: */
       // int/double/bool  m_propertyName;
       std::vector<double> m_module0;
@@ -68,7 +63,7 @@ namespace InDetDD
       unsigned int m_moduleon;
       bool m_bcmon;
       bool m_BDparameters;
-    }; 
+    };
 } // end of namespace
 
-#endif 
+#endif

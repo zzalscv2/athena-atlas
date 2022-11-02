@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// BLM_Builder.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef BLMBUILDER_H
 #define BLMBUILDER_H
@@ -28,13 +24,13 @@ namespace InDetDD
       @author  Bostjan Macek <bostjan.macek@cern.ch>
   */  
 
-  class BLM_Builder : virtual public IGeoSubDetTool, public AthAlgTool
+  class BLM_Builder : public extends<AthAlgTool, IGeoSubDetTool>
     {
     public:
       BLM_Builder(const std::string&,const std::string&,const IInterface*);
 
        /** default destructor */
-      virtual ~BLM_Builder ();
+      virtual ~BLM_Builder () = default;
       
        /** standard Athena-Algorithm method */
       virtual StatusCode initialize();

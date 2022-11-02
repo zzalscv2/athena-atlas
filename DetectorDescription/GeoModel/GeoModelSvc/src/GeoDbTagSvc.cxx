@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoDbTagSvc.h"
@@ -11,12 +11,8 @@
 #include "RDBAccessSvc/IRDBRecord.h"
 
 GeoDbTagSvc::GeoDbTagSvc(const std::string& name,ISvcLocator* svc)
-  : AthService(name,svc)
+  : base_class(name,svc)
   , m_geoConfig(GeoModel::GEO_RUN1)
-{
-}
-
-GeoDbTagSvc::~GeoDbTagSvc()
 {
 }
 
@@ -30,23 +26,6 @@ StatusCode GeoDbTagSvc::finalize()
 {
   ATH_MSG_DEBUG("finalize()");
   return StatusCode::SUCCESS;
-}
-
-// Query the interfaces.
-//   Input: riid, Requested interface ID
-//          ppvInterface, Pointer to requested interface
-//   Return: StatusCode indicating SUCCESS or FAILURE.
-// N.B. Don't forget to release the interface after use!!!
-StatusCode GeoDbTagSvc::queryInterface(const InterfaceID& riid, void** ppvInterface)
-{
-  if(IGeoDbTagSvc::interfaceID().versionMatch(riid)) {
-    *ppvInterface = (IGeoDbTagSvc*)this;
-    addRef();
-    return StatusCode::SUCCESS;
-  } else  {
-    // Interface is not directly available: try out a base class
-    return AthService::queryInterface(riid, ppvInterface);
-  }
 }
 
 StatusCode GeoDbTagSvc::setupTags()

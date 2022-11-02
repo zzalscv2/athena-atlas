@@ -35,15 +35,11 @@
 
 CaloAlignTool::CaloAlignTool(const std::string& type, 
 			     const std::string& name, 
-			     const IInterface* parent) :
-  AthAlgTool(type,name,parent),
-  m_IOVDbSvc("IOVDbSvc", name)
+			     const IInterface* parent)
+  : base_class(type,name,parent)
+  , m_IOVDbSvc("IOVDbSvc", name)
 {
   declareInterface<IGeoAlignTool>(this);
-}
- 
-CaloAlignTool::~CaloAlignTool()  
-{
 }
 
 StatusCode CaloAlignTool::initialize()
@@ -93,11 +89,6 @@ StatusCode CaloAlignTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloAlignTool::finalize()
-{
-  return StatusCode::SUCCESS;
-}
- 
 StatusCode CaloAlignTool::align(IOVSVC_CALLBACK_ARGS)
 {
   StatusCode status;

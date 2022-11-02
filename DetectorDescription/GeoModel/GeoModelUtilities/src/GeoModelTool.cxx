@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BUILDVP1LIGHT
@@ -10,16 +10,9 @@
  ** Constructor(s)
  **/
 GeoModelTool::GeoModelTool( const std::string& type, const std::string& name, const IInterface* parent )
-  : AthAlgTool( type, name, parent )
+  : base_class( type, name, parent )
   , m_detector(0)
 {
-  declareInterface<IGeoModelTool>( this );
-}
-
-/**
- ** Destructor
- **/
-GeoModelTool::~GeoModelTool()  {
 }
 
 /**

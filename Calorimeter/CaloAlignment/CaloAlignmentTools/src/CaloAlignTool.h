@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -32,7 +32,7 @@
  * which is registered as a callback by CaloAlignTool::initialize()
  */
 
-class ATLAS_NOT_THREAD_SAFE CaloAlignTool : public AthAlgTool, virtual public IGeoAlignTool
+class ATLAS_NOT_THREAD_SAFE CaloAlignTool : public extends<AthAlgTool, IGeoAlignTool>
 {
  public:
 
@@ -42,29 +42,24 @@ class ATLAS_NOT_THREAD_SAFE CaloAlignTool : public AthAlgTool, virtual public IG
    * @param name [IN] Alg Tool name
    * @param parent [IN] Alg Tool parent interface
    */
-  CaloAlignTool(const std::string& type, 
-		const std::string& name, 
-		const IInterface* parent); 
-  
+  CaloAlignTool(const std::string& type,
+                const std::string& name,
+                const IInterface* parent);
+
   /**
    * @brief Destructor
    */
-  virtual ~CaloAlignTool();
-  
+  virtual ~CaloAlignTool() = default;
+
   /**
    * @brief  Standard initialize method of Alg Tools
    */
   StatusCode initialize();
 
   /**
-   * @brief  Standard finalize method of Alg Tools
-   */
-  StatusCode finalize();
-  
-  /**
    * @brief Callback function trigerred when alignment constants are updated
    * in the Store Gate. Is called after LAr and Tile alignment callbacks
-   * The same callback is registered on Sagging object, so both sagging and alignment 
+   * The same callback is registered on Sagging object, so both sagging and alignment
    * are applied at the same time
    */
   virtual StatusCode align(IOVSVC_CALLBACK_ARGS);
@@ -73,7 +68,7 @@ class ATLAS_NOT_THREAD_SAFE CaloAlignTool : public AthAlgTool, virtual public IG
   /**
    * @brief handle on the IOVDbSvc for releasing conditions objects from memory
    */
-  ServiceHandle<IIOVDbSvc>  m_IOVDbSvc; 
+  ServiceHandle<IIOVDbSvc>  m_IOVDbSvc;
 
   /// Not implemented.
   CaloAlignTool() = delete;

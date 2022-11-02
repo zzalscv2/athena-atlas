@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BLM_GeoModel/BLM_Builder.h"
@@ -27,11 +27,8 @@ InDetDD::BLM_Builder::BLM_Builder(const std::string& t,
 			  const std::string& n,
 			  const IInterface*  p )
   :
-  AthAlgTool(t,n,p)
+  base_class(t,n,p)
 {
-  //declareInterface<IBLMBuilder>(this);
-  declareInterface<IGeoSubDetTool>(this);
-
   //default settings
   //          Z                              R                               PHI                        ROT_X                      ROT_Y                        ROT_Z                  DIAM_TRANS_X               DIAM_TRANS_Y              DIAM_TRANS_Z
   m_module0.push_back(3383.5);     m_module0.push_back(62.825);    m_module0.push_back(17);    m_module0.push_back(180);   m_module0.push_back(0);    m_module0.push_back(287);    m_module0.push_back(0);    m_module0.push_back(0);    m_module0.push_back(0);
@@ -64,12 +61,6 @@ InDetDD::BLM_Builder::BLM_Builder(const std::string& t,
   declareProperty("BLMon", m_blmon=true);
   declareProperty("DBparameters", m_BDparameters=true);
 }
-
-//================ Destructor =================================================
-
-InDetDD::BLM_Builder::~BLM_Builder()
-{}
-
 
 //================ Initialisation =================================================
 

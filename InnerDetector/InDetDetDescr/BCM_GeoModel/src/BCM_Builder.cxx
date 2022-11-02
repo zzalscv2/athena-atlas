@@ -26,10 +26,8 @@ InDetDD::BCM_Builder::BCM_Builder(const std::string& t,
 			  const std::string& n,
 			  const IInterface*  p )
   :
-  AthAlgTool(t,n,p)
+  base_class(t,n,p)
 {
-  //declareInterface<IBCMBuilder>(this);
-  declareInterface<IGeoSubDetTool>(this);
 
   //default settings
   //                 TRANS_X                        TRANS_Y                        TRANS_Z                          ROT_X                       ROT_Y                      ROT_Z                   DIMENSION_Z               DIAM_TRANS_Y                   DIAM_TRANS_Z             DIAM_DIAM_X                 DIAM_DIAM_Y                  DIAM_DIAM_Z                LAMEL_OFFSET_H                   LAMEL_OFFSET_I                 LAMEL_OFFSET_J
@@ -55,12 +53,6 @@ InDetDD::BCM_Builder::BCM_Builder(const std::string& t,
   declareProperty("BCMon", m_bcmon=true);
   declareProperty("DBparameters", m_BDparameters=true);
 }
-
-//================ Destructor =================================================
-
-InDetDD::BCM_Builder::~BCM_Builder()
-{}
-
 
 //================ Initialisation =================================================
 
