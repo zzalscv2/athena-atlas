@@ -19,7 +19,7 @@
 
 namespace InDet{
 
-  class SiClusterLink_xk
+  class SiClusterLink_xk final
     {
       ///////////////////////////////////////////////////////////////////
       // Public methods:

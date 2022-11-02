@@ -25,7 +25,7 @@ namespace InDet {
     @author goblirsc@cern.ch
   */
 
-  class SiDetElementRoadMakerData_xk {
+  class SiDetElementRoadMakerData_xk final{
 
   public:
 

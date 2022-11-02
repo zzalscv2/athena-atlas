@@ -27,7 +27,7 @@ namespace Trk {
 namespace InDet {
   class SiCluster;
 
-  class SiSpacePointForSeed {
+  class SiSpacePointForSeed final{
     
     /////////////////////////////////////////////////////////////////////////////////
     // Public methods:
@@ -39,7 +39,7 @@ namespace InDet {
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*);
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*,const float*);
     SiSpacePointForSeed(const SiSpacePointForSeed&);
-    virtual ~SiSpacePointForSeed();
+    ~SiSpacePointForSeed();
     SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&);
 
     void set(const Trk::SpacePoint*const&,const float*);

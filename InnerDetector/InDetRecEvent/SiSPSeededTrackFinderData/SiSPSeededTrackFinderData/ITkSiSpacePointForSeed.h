@@ -30,7 +30,7 @@ namespace InDet {
 
 namespace ITk
 {
-  class SiSpacePointForSeed {
+  class SiSpacePointForSeed final{
 
     /////////////////////////////////////////////////////////////////////////////////
     // Public methods:
@@ -42,7 +42,7 @@ namespace ITk
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*);
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*,const float*);
     SiSpacePointForSeed(const SiSpacePointForSeed&);
-    virtual ~SiSpacePointForSeed()                 ;
+    ~SiSpacePointForSeed();
     SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&);
 
     void set(const Trk::SpacePoint*const&,const float*)  ;

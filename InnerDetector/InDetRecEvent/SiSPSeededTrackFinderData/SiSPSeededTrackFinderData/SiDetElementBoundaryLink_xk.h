@@ -21,7 +21,7 @@
 namespace InDet{
 
 
-  class SiDetElementBoundaryLink_xk
+  class SiDetElementBoundaryLink_xk final
     {
       ///////////////////////////////////////////////////////////////////
       // Public methods:
