@@ -220,6 +220,8 @@ if __name__=='__main__':
 
   # Set the Athena configuration flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  # verbosity defined in Control/AthenaCommon/python/Constants.py
+  ConfigFlags.Exec.OutputLevel = args.loglevel
   ConfigFlags.fillFromArgs(args.flags)
   ConfigFlags.lock()
 
@@ -249,5 +251,5 @@ if __name__=='__main__':
   # If you want to turn on more detailed messages ...
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
-  sc = cfg.run(args.maxEvents, args.loglevel)
+  sc = cfg.run(args.maxEvents)
   sys.exit(0 if sc.isSuccess() else 1)
