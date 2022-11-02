@@ -827,7 +827,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	  }
 	  muon2pv_dz.push_back(dz);
 	  muon2pv_dca.push_back(dca);
-	  if( std::abs(dz) > m_muonToPVdz.value() )continue;
+	  if( std::abs(dz-m_muonToPVdzOffset.value()) > m_muonToPVdz.value() )continue;
 	  if( std::abs(dca) > m_muonToPVdca.value() )continue;
 	}
 
