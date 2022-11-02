@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ImplicitCollection )
@@ -11,7 +11,7 @@ atlas_add_library( ImplicitCollection
                    src/*.cpp
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${CORAL_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionBase POOLCore PersistencySvc PersistentDataModel StorageSvc )
+                   PRIVATE_LINK_LIBRARIES ${CORAL_LIBRARIES} AthenaKernel CollectionBase CxxUtils POOLCore PersistencySvc PersistentDataModel StorageSvc )
 
 # Component list generation:
 atlas_generate_componentslist( ImplicitCollection )

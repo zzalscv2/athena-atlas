@@ -8,6 +8,7 @@
 #include "CollectionBase/ICollection.h"
 #include "CollectionBase/CollectionDescription.h"
 
+#include "CxxUtils/checker_macros.h"
 #include "Gaudi/PluginService.h"
 
 namespace pool {
@@ -23,7 +24,8 @@ namespace pool {
    class ImplicitCollectionMetadata;
 
   /// An implicit collection implementation of the ICollection interface
-  class ImplicitCollection : virtual public ICollection
+  class ATLAS_NOT_THREAD_SAFE ImplicitCollection : virtual public ICollection
+  //    ^ due to not thread-safe ImplicitCollectionIterator
   {
   public:
     typedef Gaudi::PluginService::Factory<ICollection*( const ICollectionDescription*, ICollection::OpenMode, ISession*)> Factory;  

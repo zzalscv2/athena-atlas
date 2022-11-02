@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IMPLICITCOLLECTION_COLLECTIONITERATOR_H
@@ -13,6 +13,7 @@
 
 #include "PersistencySvc/IPositionSeek.h"
 #include "AthenaKernel/ICollectionSize.h"
+#include "CxxUtils/checker_macros.h"
 
 class Token;
 
@@ -33,10 +34,10 @@ namespace pool {
     * Single class implementing both Query and Cursor interfaces
     * to simplify backward compatibility
     */
-   class ImplicitCollectionIterator : public ICollectionQuery,
-                                      public ICollectionCursor,
-                                      virtual public IPositionSeek,
-                                      virtual public ICollectionSize
+   class ATLAS_NOT_THREAD_SAFE ImplicitCollectionIterator : public ICollectionQuery,
+                                                            public ICollectionCursor,
+                                                            virtual public IPositionSeek,
+                                                            virtual public ICollectionSize
    {
   public:
      /// Constructor
