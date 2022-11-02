@@ -25,7 +25,6 @@ class ILArCalculatorSvc;
 class LArEM_ID;
 class LArFCAL_ID;
 class LArHEC_ID;
-class LArMiniFCAL_ID;
 class TileID;
 class ITileCalculator;
 
@@ -90,7 +89,6 @@ namespace FCS_Param
     std::vector<std::string> m_fcal2Volumes;
     std::vector<std::string> m_fcal3Volumes;
     std::vector<std::string> m_sliceVolumes;
-    std::vector<std::string> m_miniVolumes;
     std::vector<std::string> m_tileVolumes;
     /// @}
 
@@ -107,7 +105,6 @@ namespace FCS_Param
     ServiceHandle<ILArCalculatorSvc> m_fcal1calc;
     ServiceHandle<ILArCalculatorSvc> m_fcal2calc;
     ServiceHandle<ILArCalculatorSvc> m_fcal3calc;
-    ServiceHandle<ILArCalculatorSvc> m_minfcalcalc;  //LArG4::MiniFCAL::MiniFCALCalibrationCalculator(LArG4::MiniFCAL::kActive)
     ServiceHandle<ITileCalculator> m_tileCalculator;
 
     /// @name Calo identifier helpers
@@ -115,7 +112,6 @@ namespace FCS_Param
     const LArEM_ID*       m_larEmID;
     const LArFCAL_ID*     m_larFcalID;
     const LArHEC_ID*      m_larHecID;
-    const LArMiniFCAL_ID* m_larMiniFcalID;
     const TileID*         m_tileID;
     /// @}
     FCS_Param::Config m_config;

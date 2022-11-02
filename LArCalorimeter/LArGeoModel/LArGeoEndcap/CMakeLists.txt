@@ -13,5 +13,5 @@ atlas_add_library( LArGeoEndcap
                    PUBLIC_HEADERS LArGeoEndcap
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} LArGeoFcal LArGeoHec StoreGateLib CaloDetDescrLib
-                   PRIVATE_LINK_LIBRARIES CaloIdentifier GeoModelUtilities GaudiKernel LArGeoCode LArGeoMiniFcal RDBAccessSvcLib )
+                   PRIVATE_LINK_LIBRARIES CaloIdentifier GeoModelUtilities GaudiKernel LArGeoCode RDBAccessSvcLib )
 
