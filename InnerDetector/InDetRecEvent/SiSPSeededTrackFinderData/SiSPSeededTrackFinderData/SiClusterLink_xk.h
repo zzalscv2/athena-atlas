@@ -29,9 +29,9 @@ namespace InDet{
       
       SiClusterLink_xk();
       SiClusterLink_xk(const InDet::SiCluster*&,double&);
-      SiClusterLink_xk(const SiClusterLink_xk&);
-      ~SiClusterLink_xk();
-      SiClusterLink_xk& operator  = (const SiClusterLink_xk&);
+      SiClusterLink_xk(const SiClusterLink_xk&) = default;
+      ~SiClusterLink_xk() = default;
+      SiClusterLink_xk& operator  = (const SiClusterLink_xk&) = default;
 
       ///////////////////////////////////////////////////////////////////
       // Main methods
@@ -73,23 +73,6 @@ namespace InDet{
       m_xi2      = xi2;
     }
 
-  inline SiClusterLink_xk::SiClusterLink_xk(const SiClusterLink_xk& L)
-    {
-      m_cluster     = L.m_cluster;
-      m_xi2         = L.m_xi2;
-    }
-  
-  inline SiClusterLink_xk& SiClusterLink_xk::operator = 
-    (const SiClusterLink_xk& L) 
-    {
-      if(&L!=this) {
-	m_cluster     = L.m_cluster;
-	m_xi2         = L.m_xi2;
-      }
-      return(*this);
-    }
-
-  inline SiClusterLink_xk::~SiClusterLink_xk() {}
 
   inline void SiClusterLink_xk::Set(const InDet::SiCluster*& c, double& xi2)
     {

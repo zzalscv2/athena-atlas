@@ -30,9 +30,9 @@ namespace InDet{
     public:
       
       SiDetElementBoundaryLink_xk(const InDetDD::SiDetectorElement*&, bool isITk = false);
-      SiDetElementBoundaryLink_xk(const SiDetElementBoundaryLink_xk&);
-      ~SiDetElementBoundaryLink_xk();
-      SiDetElementBoundaryLink_xk& operator  = (const SiDetElementBoundaryLink_xk&);
+      SiDetElementBoundaryLink_xk(const SiDetElementBoundaryLink_xk&) = default;
+      ~SiDetElementBoundaryLink_xk() = default;
+      SiDetElementBoundaryLink_xk& operator  = (const SiDetElementBoundaryLink_xk&) = default;
 
       ///////////////////////////////////////////////////////////////////
       // Main methods
@@ -62,31 +62,6 @@ namespace InDet{
   // Inline methods
   /////////////////////////////////////////////////////////////////////////////////
 
-  inline SiDetElementBoundaryLink_xk::SiDetElementBoundaryLink_xk(const SiDetElementBoundaryLink_xk& L)
-    {
-      m_detelement =  L.m_detelement;
-      m_ITkGeometry = L.m_ITkGeometry;
-      for(int i=0; i!=4; ++i) {
-	for(int j=0; j!=3; ++j) {m_bound[i][j]=L.m_bound[i][j];}
-      }
-      m_dR = L.m_dR;
-    }
-  
-  inline SiDetElementBoundaryLink_xk& SiDetElementBoundaryLink_xk::operator = 
-    (const SiDetElementBoundaryLink_xk& L) 
-    {
-      if(&L!=this) {
-	m_detelement =  L.m_detelement;
-	m_ITkGeometry = L.m_ITkGeometry;
-	for(int i=0; i!=4; ++i) {
-	  for(int j=0; j!=3; ++j) {m_bound[i][j]=L.m_bound[i][j];}
-	}
-	m_dR = L.m_dR;
-      }
-      return(*this);
-    }
-
-  inline SiDetElementBoundaryLink_xk::~SiDetElementBoundaryLink_xk() {}
 
 } // end of name space
 

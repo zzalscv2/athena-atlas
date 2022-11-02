@@ -34,27 +34,6 @@ namespace InDet {
     m_sn    = nullptr ;
   }
 
-  SiSpacePointForSeed& SiSpacePointForSeed::operator = 
-  (const SiSpacePointForSeed& sp) 
-  {
-    if(&sp!=this) {
-      spacepoint  = sp.spacepoint;
-      m_x         = sp.m_x       ;
-      m_y         = sp.m_y       ;
-      m_z         = sp.m_z       ;
-      m_r         = sp.m_r       ;
-      m_covr      = sp.m_covr    ;
-      m_covz      = sp.m_covz    ;
-      m_q         = sp.m_q       ;
-      m_dzdr      = sp.m_dzdr    ;
-      m_d0        = sp.m_d0      ;
-      m_eta       = sp.m_eta     ;
-      m_pt        = sp.m_pt      ;
-      m_su        = sp.m_su      ;
-      m_sn        = sp.m_sn      ;        
-    }
-    return(*this);
-  }
  
   SiSpacePointForSeed::SiSpacePointForSeed
   (const Trk::SpacePoint*const& sp,const float* r) 
@@ -68,21 +47,6 @@ namespace InDet {
     set(sp,r,sc); m_param = 0.; 
   }
 
-  /////////////////////////////////////////////////////////////////////////////////
-  // Copy constructor
-  /////////////////////////////////////////////////////////////////////////////////
-
-  SiSpacePointForSeed::SiSpacePointForSeed (const SiSpacePointForSeed& sp)
-  {
-    *this = sp;
-  }
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // Destructor
-  /////////////////////////////////////////////////////////////////////////////////
-
-  SiSpacePointForSeed::~SiSpacePointForSeed() 
-  = default;
 
   /////////////////////////////////////////////////////////////////////////////////
   // Set
