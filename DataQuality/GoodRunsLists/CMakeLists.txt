@@ -37,7 +37,7 @@ if( NOT XAOD_STANDALONE )
    endif()
    atlas_add_component( GoodRunsLists
       src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AthenaBaseComps AthenaKernel EventInfo GaudiKernel GoodRunsListsLib PathResolver StoreGateLib xAODEventInfo )
+      LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel GoodRunsListsLib PathResolver StoreGateLib xAODEventInfo )
 endif()
 
 atlas_add_dictionary( GoodRunsListsDict

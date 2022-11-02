@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -12,8 +12,6 @@
 #include "PathResolver/PathResolver.h"
 
 #include "GaudiKernel/MsgStream.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "TFormula.h"
 #include "TSystem.h"
@@ -198,18 +196,12 @@ GoodRunsListSelectorTool::passThisRunLB( const std::vector<std::string>& grlname
 {
   ATH_MSG_DEBUG ("passThisRunLB() ");
 
-  const EventInfo*  pEvent = 0;
-  StatusCode status = evtStore()->retrieve(pEvent);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
-  if(!(status.isSuccess() && pEvent!=0)) {
-    ATH_MSG_ERROR ("Unable to retrieve EventInfo from StoreGate. Don't pass LB.");
-    return false;
-  }
-
-  int eventNumber = pEvent->event_ID()->event_number();
-  int runNumber   = pEvent->event_ID()->run_number();
-  int lumiBlockNr = pEvent->event_ID()->lumi_block();
-  int timeStamp   = pEvent->event_ID()->time_stamp();
+  int eventNumber = ctx.eventID().event_number();
+  int runNumber   = ctx.eventID().run_number();
+  int lumiBlockNr = ctx.eventID().lumi_block();
+  int timeStamp   = ctx.eventID().time_stamp();
 
   ATH_MSG_DEBUG ("passThisRunLB() :: run number = " << runNumber <<
                  " ; event number = " << eventNumber <<
