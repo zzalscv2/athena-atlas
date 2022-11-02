@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MMT_FINDER_H
@@ -17,7 +17,7 @@ class MMT_Finder : public AthMessaging {
   void set_roads(int roads) { m_nRoads=roads; }
   int get_roads() const {return m_nRoads;}
   void fillHitBuffer(std::map<std::pair<int,int>,finder_entry>& hitBuffer, const Hit& hit, std::shared_ptr<MMT_Parameters> par) const;
-  void checkBufferForHits(std::vector<bool>& plane_is_hit, std::vector<Hit>& track, int road, std::map<std::pair<int,int>,finder_entry> hitBuffer, std::shared_ptr<MMT_Parameters> par) const;
+  void checkBufferForHits(std::vector<bool>& plane_is_hit, std::vector<Hit>& track, int road, const std::map<std::pair<int,int>,finder_entry>& hitBuffer, std::shared_ptr<MMT_Parameters> par) const;
 
  private:
   std::vector<int> q_planes(const std::string& type) const;

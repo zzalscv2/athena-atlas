@@ -228,8 +228,15 @@ def MuonSegmentRegionRecoveryToolCfg(flags, name="MuonSegmentRegionRecoveryTool"
     
     kwargs.setdefault("Extrapolator", 
                       result.popToolsAndMerge(MuonExtrapolatorCfg(flags)))
-    kwargs.setdefault("Builder",  result.popToolsAndMerge(
-        CombinedMuonTrackBuilderFitCfg(flags, MuonHoleRecovery="")))
+    if 'OnlyEO' in kwargs:
+        #MuonEORecoveryTool's CombinedMuonTrackBuilderFit apparently *should* have MuonHoleRecovery
+        kwargs.setdefault("Builder",  result.popToolsAndMerge(
+            CombinedMuonTrackBuilderFitCfg(flags)))
+    else:
+        kwargs.setdefault("Builder",  result.popToolsAndMerge(
+            CombinedMuonTrackBuilderFitCfg(flags, MuonHoleRecovery= "")))
+    
+
     kwargs.setdefault("Fitter", 
                       result.popToolsAndMerge(MCTBSLFitterCfg(flags, name='MCTBSLFitter')))
     kwargs.setdefault("HitSummaryTool",  result.popToolsAndMerge( MuonHitSummaryToolCfg(flags)))

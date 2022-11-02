@@ -11,5 +11,5 @@ atlas_add_component( MuonLayerSegmentMakerTools
                      src/components/*.cxx
                      LINK_LIBRARIES GaudiKernel AthenaBaseComps EventPrimitives MuonPrepRawDataProviderToolsLib MuonDetDescrUtils FourMomUtils
                                     MuonIdHelpersLib MuonHoughPatternToolsLib MuonLayerEvent MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib 
-                                    MuonRecToolInterfaces MuonLayerHough TrkSegment MuonSegmentMakerToolInterfaces CscSegmentMakersLib )
+                                    MuonRecToolInterfaces MuonLayerHough TrkSegment MuonSegmentMakerToolInterfaces CscSegmentMakersLib MuonCombinedToolInterfaces)
 

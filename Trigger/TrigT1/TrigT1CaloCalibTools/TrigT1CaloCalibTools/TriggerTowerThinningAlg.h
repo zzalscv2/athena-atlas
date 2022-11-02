@@ -28,6 +28,8 @@
 #include "DerivationFrameworkInterfaces/IThinningTool.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "StoreGate/ThinningHandleKey.h"
+#include "xAODBase/IParticleContainer.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -49,8 +51,12 @@ namespace DerivationFramework {
   private:
     StringProperty m_streamName
     { this, "StreamName", "", "Name of the stream being thinned" };
+
     SG::ThinningHandleKey<xAOD::TriggerTowerContainer> m_triggerTowerLocation
       { this, "TriggerTowerLocation", LVL1::TrigT1CaloDefs::xAODTriggerTowerLocation, "" };
+
+    SG::ReadDecorHandleKey<xAOD::TriggerTowerContainer> m_caloCellETByLayerKey
+      { this, "CaloCellETByLayerKey", m_triggerTowerLocation.key()+".CaloCellETByLayer", "" };
 
     // python configurables
     double m_minCaloCellET;

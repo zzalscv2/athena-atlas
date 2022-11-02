@@ -85,7 +85,7 @@ class Algorithm_HLT_TableConstructor(TableConstructorBase):
         totalTime = sum(totalTimeEntries)
         if (totalTime == 0):
             log.error("No histograms for the Algorithm HLT summary were found")
-            return
+            raise ValueError
 
         for entry in totalTimeEntries:
             self.columns["totalTimePerc"].addValue(100 * entry / totalTime)
