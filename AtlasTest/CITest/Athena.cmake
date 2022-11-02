@@ -55,7 +55,7 @@ atlas_add_citest( RecoRun2Data
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2Data_CAConfig
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA --maxEvents 5' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA --maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2Data q442
@@ -73,7 +73,7 @@ atlas_add_citest( RecoRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--maxEvents 25' --threads 0 --no-output-checks )
 
 atlas_add_citest( RecoRun2MC_CAConfig
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA --maxEvents 5' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA --maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2MC_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2MC q443
@@ -86,6 +86,13 @@ atlas_add_citest( RecoRun2MC_PileUp
 atlas_add_citest( RecoRun3Data
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 -e '--maxEvents 100' --threads 8 --no-output-checks
    PROPERTIES PROCESSORS 8 )
+
+atlas_add_citest( RecoRun3Data_CAConfig
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA --maxEvents 100' --threads 8 --no-output-checks )
+
+atlas_add_citest( RecoRun3Data_LegacyVsCA
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3Data q449
+   DEPENDS_SUCCESS RecoRun3Data RecoRun3Data_CAConfig )
 
 atlas_add_citest( RecoRun3Data_Bulk
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1262 -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --postExec="all:FPEAuditor.NStacktracesOnFPE=20"' --threads 8 --no-output-checks
@@ -104,7 +111,7 @@ atlas_add_citest( RecoRun3MC
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoRun3MC.sh )
 
 atlas_add_citest( RecoRun3MC_CAConfig
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA --maxEvents 5' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w MCReco -e '--CA --maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun3MC_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun3MC q445
