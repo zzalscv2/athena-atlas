@@ -5,10 +5,11 @@
 #ifndef INDETGEOMODELUTILS_EXTRAMATERIAL
 #define INDETGEOMODELUTILS_EXTRAMATERIAL
 
+#include "AthenaBaseComps/AthMessaging.h"
+#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include <cmath>
 #include <string>
 #include <sstream>
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 
 class GeoPhysVol;
 class GeoFullPhysVol;
@@ -18,7 +19,7 @@ namespace InDetDD {
 
 class DistortedMaterialManager;
 
-class ExtraMaterial
+class ExtraMaterial : public AthMessaging
 {
 public:
   ExtraMaterial(IRDBRecordset_ptr xMatTable, StoredMaterialManager * matManager);

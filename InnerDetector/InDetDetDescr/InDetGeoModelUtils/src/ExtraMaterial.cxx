@@ -27,13 +27,15 @@
 
 namespace InDetDD {
   ExtraMaterial::ExtraMaterial(IRDBRecordset_ptr xMatTable, StoredMaterialManager* matManager)
-    : m_xMatTable(std::move(xMatTable)),
-    m_matManager(matManager)
+    : AthMessaging("ExtraMaterial")
+    , m_xMatTable(std::move(xMatTable))
+    , m_matManager(matManager)
   {}
 
   ExtraMaterial::ExtraMaterial(DistortedMaterialManager* manager)
-    : m_xMatTable(manager->extraMaterialTable()),
-    m_matManager(manager->materialManager())
+    : AthMessaging("ExtraMaterial")
+    , m_xMatTable(manager->extraMaterialTable())
+    , m_matManager(manager->materialManager())
   {}
 
   void
@@ -48,16 +50,22 @@ namespace InDetDD {
 
   void
   ExtraMaterial::add(GeoPhysVol* parent, GeoFullPhysVol* fullparent, const std::string& region, double zParent) {
-    //std::cout << "Adding Extra material for region: " << region << ", zParent = " << zParent << std::endl;
+    ATH_MSG_DEBUG("Adding Extra material for region: " << region << ", zParent = " << zParent);
 
     for (unsigned int i = 0; i < m_xMatTable->size(); i++) {
       std::ostringstream volnamestr;
       volnamestr << "ExtraMaterial" << i;
 
-      //std::cout << "In Extra material " << i << std::endl;
+      ATH_MSG_VERBOSE("In Extra material " << i);
 
       if ((*m_xMatTable)[i]->getString("REGION") == region) {
-        //std::cout << "Extra material Match " << i << std::endl;
+        ATH_MSG_VERBOSE("Extra material Match " << i);
+
+	if(!m_matManager) {
+	  std::string errorMessage("Null pointer to Stored Material Manager!");
+	  ATH_MSG_FATAL(errorMessage);
+	  throw std::runtime_error(errorMessage);
+	}
 
         GenericTubeMaker tubeHelper((*m_xMatTable)[i]);
         const GeoMaterial* material = m_matManager->getMaterial(tubeHelper.volData().material());
