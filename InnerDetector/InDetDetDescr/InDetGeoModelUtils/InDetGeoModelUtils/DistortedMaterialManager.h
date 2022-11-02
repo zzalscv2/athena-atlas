@@ -18,7 +18,7 @@ public:
   StoredMaterialManager * materialManager() {return  m_materialManager;}
 
 private:
-  StoredMaterialManager * m_materialManager;
+  StoredMaterialManager * m_materialManager{nullptr};
   IRDBRecordset_ptr  m_xMatTable;
 };
 

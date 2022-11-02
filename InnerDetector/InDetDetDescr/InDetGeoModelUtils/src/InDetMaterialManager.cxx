@@ -82,19 +82,18 @@ InDetMaterialManager::~InDetMaterialManager() {
   }
 }
 
-StoredMaterialManager*
+inline StoredMaterialManager*
 InDetMaterialManager::retrieveManager(const StoreGateSvc* detStore) {
-  StoredMaterialManager* theGeoMaterialManager = nullptr;
-
-  if (StatusCode::SUCCESS != detStore->retrieve(theGeoMaterialManager, "MATERIALS")) {
-    ATH_MSG_FATAL("Cannot locate Materials");
-  }
-
-  return theGeoMaterialManager;
+  return detStore->tryRetrieve<StoredMaterialManager>("MATERIALS");
 }
 
 const GeoElement*
 InDetMaterialManager::getElement(const std::string& elementName) {
+  if(!m_materialManager) {
+    std::string errorMessage("Null pointer to Stored Material Manager!");
+    ATH_MSG_FATAL(errorMessage);
+    throw std::runtime_error(errorMessage);
+  }
   return m_materialManager->getElement(elementName);
 }
 
@@ -115,6 +114,11 @@ InDetMaterialManager::getMaterialInternal(const std::string& materialName) {
   const GeoMaterial* material = getAdditionalMaterial(materialName);
 
   if (!material) {
+    if(!m_materialManager) {
+      std::string errorMessage("Null pointer to Stored Material Manager!");
+      ATH_MSG_FATAL(errorMessage);
+      throw std::runtime_error(errorMessage);
+    }
     // This prints error message if not found.
     material = m_materialManager->getMaterial(materialName);
   }
