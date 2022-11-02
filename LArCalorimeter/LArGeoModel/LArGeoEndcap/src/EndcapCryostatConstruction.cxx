@@ -61,8 +61,6 @@
 #include <string>
 #include <utility>
 
-#include "LArGeoMiniFcal/MiniFcalConstruction.h"
-
 using namespace GeoGenfun;
 using namespace GeoXF;
 
@@ -772,16 +770,6 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
     cryoMotherPhysical->add( fcalEnvelope );
 
 
-  }
-
-  //_________________________ Mini FCAL ___________________________________________________
-  if(m_pAccessSvc->getChildTag("MiniFcal",detectorKey, detectorNode)!="") {
-    MiniFcalConstruction minifcal(bPos);
-    GeoFullPhysVol* miniFcalEnvelope = minifcal.GetEnvelope();
-    if(miniFcalEnvelope) {
-      cryoMotherPhysical->add(new GeoTransform(minifcal.GetTopTransform()));
-      cryoMotherPhysical->add(miniFcalEnvelope);
-    }
   }
 
   //__________________________ MBTS+moderator+JM tube _____________________________________

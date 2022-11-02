@@ -245,7 +245,6 @@
 + LArCalorimeter/LArGeoModel/LArGeoEndcap
 + LArCalorimeter/LArGeoModel/LArGeoFcal
 + LArCalorimeter/LArGeoModel/LArGeoHec
-+ LArCalorimeter/LArGeoModel/LArGeoMiniFcal
 + LArCalorimeter/LArGeoModel/LArGeoRAL
 + LArCalorimeter/LArGeoModel/LArGeoTBBarrel
 + LArCalorimeter/LArGeoModel/LArHV
