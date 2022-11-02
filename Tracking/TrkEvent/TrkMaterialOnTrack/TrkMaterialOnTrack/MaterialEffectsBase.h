@@ -34,6 +34,11 @@ namespace Trk {
 class MaterialEffectsBase : public SurfacePtrHolderDetEl
 {
 public:
+  enum MaterialEffectsDerivedType{
+    ESTIMATED_BREM_ON_TRACK = 0,
+    MATERIAL_EFFECTS_ON_TRACK,
+    NTYPES
+  };
   enum MaterialEffectsType
   {
     //! contains material effects due to multiple scattering
@@ -99,6 +104,9 @@ public:
    * @return true if the MaterialEffectsBase is of this type
    */
   bool type(const MaterialEffectsType& type) const;
+  
+  //!  Returns the concrete derived type
+ virtual  MaterialEffectsDerivedType derivedType() const = 0;
 
   //! returns a string with the type of the object
   std::string dumpType() const;

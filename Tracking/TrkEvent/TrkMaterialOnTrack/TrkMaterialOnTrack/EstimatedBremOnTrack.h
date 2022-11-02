@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -60,6 +60,12 @@ public:
   EstimatedBremOnTrack& operator=(EstimatedBremOnTrack&& rhs) noexcept = default;
   //! Destructor
   virtual ~EstimatedBremOnTrack() = default;
+  
+  //! actual type
+  MaterialEffectsBase::MaterialEffectsDerivedType 
+  derivedType() const override final {
+    return MaterialEffectsBase::ESTIMATED_BREM_ON_TRACK;
+  }
 
   //! Virtual constructor
   virtual EstimatedBremOnTrack* clone() const override final;

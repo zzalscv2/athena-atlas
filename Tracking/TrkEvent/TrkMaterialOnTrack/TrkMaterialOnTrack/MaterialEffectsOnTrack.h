@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKMATERIALEFFECTSONTRACK_MATERIALEFFECTSONTRACK_H
@@ -110,6 +110,12 @@ public:
 
   //! virtual destructor
   virtual ~MaterialEffectsOnTrack() = default;
+  
+  //! concrete type
+  MaterialEffectsBase::MaterialEffectsDerivedType 
+  derivedType() const override final {
+    return MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK;
+  }
 
   /** @brief returns the MCS-angles object. Careful: DO NOT DELETE!
              Pointer may be NULL if no MCS but only energy loss is contained. */

@@ -705,11 +705,10 @@ namespace Trk {
       
       for (auto & i : tmp_matvec) {
         propdir = firstismuon ? Trk::alongMomentum : oppositeMomentum;
-        const MaterialEffectsOnTrack *meff = dynamic_cast<const MaterialEffectsOnTrack *>(i->materialEffectsOnTrack());
-        
-        if (meff == nullptr) {
+        if (i->materialEffectsOnTrack()->derivedType() != MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK){
           continue;
         }
+        const MaterialEffectsOnTrack *meff = static_cast<const MaterialEffectsOnTrack *>(i->materialEffectsOnTrack());
         
         const Surface *matsurf = &meff->associatedSurface();
         tmppar = m_propagator->propagateParameters(
@@ -785,10 +784,14 @@ namespace Trk {
           cache.m_idmat = false;
         }
         
-        const MaterialEffectsOnTrack *meot = dynamic_cast<const MaterialEffectsOnTrack *>((*itStates)->materialEffectsOnTrack());
+        const auto pBaseMEOT = (*itStates)->materialEffectsOnTrack();
+        const bool itsAnMEOT = (pBaseMEOT->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK);
         
-        if ((meot != nullptr) && ((meot->scatteringAngles() == nullptr) || (meot->energyLoss() == nullptr))) {
-          cache.m_getmaterialfromtrack = true;  // always take calorimeter layers
+        if (itsAnMEOT ){
+          const auto pMEOT =static_cast<const MaterialEffectsOnTrack *>((*itStates)->materialEffectsOnTrack());
+          if ((pMEOT->scatteringAngles() == nullptr) or (pMEOT->energyLoss() == nullptr)) {
+            cache.m_getmaterialfromtrack = true;  // always take calorimeter layers
+          }
         }
       }
       
@@ -1180,11 +1183,11 @@ namespace Trk {
       
       if (meff != nullptr) {
         if (!firstismuon) {
-          const MaterialEffectsOnTrack *mefot = dynamic_cast<const MaterialEffectsOnTrack *>(meff);
-          
-          if (
-            (mefot != nullptr) && 
-            (mefot->energyLoss() != nullptr) && 
+          const MaterialEffectsOnTrack *mefot{};
+          if (meff->derivedType()  == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK){
+            mefot = static_cast<const MaterialEffectsOnTrack *>(meff);
+          }
+          if ( mefot and mefot->energyLoss() and 
             std::abs(mefot->energyLoss()->deltaE()) > 250 && 
             mefot->energyLoss()->sigmaDeltaE() < 1.e-9
           ) {
@@ -2599,19 +2602,17 @@ namespace Trk {
       if (cache.m_acceleration && trajectory.numberOfHits() == 0) {
         return;
       }
-      
-      const MaterialEffectsOnTrack *meff = dynamic_cast<const MaterialEffectsOnTrack *>(tsos->materialEffectsOnTrack());
-      
-      if (meff == nullptr) {
-        return; // This should never happen
+      if (tsos->materialEffectsOnTrack()->derivedType() != MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK){
+        return;
       }
-      
+      const MaterialEffectsOnTrack *meff = static_cast<const MaterialEffectsOnTrack *>(tsos->materialEffectsOnTrack());
+     
       std::unique_ptr<GXFMaterialEffects> newmeff;
 
       if (
-        (meff->scatteringAngles() != nullptr) || 
-        (meff->energyLoss() != nullptr) || 
-        !tsos->type(TrackStateOnSurface::Scatterer) || 
+        meff->scatteringAngles() or 
+        meff->energyLoss() or
+        !tsos->type(TrackStateOnSurface::Scatterer) or 
         (tsos->trackParameters() == nullptr)
       ) {
         newmeff = std::make_unique<GXFMaterialEffects>(meff);
@@ -3930,9 +3931,9 @@ namespace Trk {
         if (matvec && !matvec->empty()) {
           for (int i = (int)matvec->size() - 1; i > -1; i--) {
             const MaterialEffectsBase *meb = (*matvec)[i]->materialEffectsOnTrack();
-            if (meb != nullptr) {
-              const MaterialEffectsOnTrack *meot = dynamic_cast < const MaterialEffectsOnTrack * >(meb);
-              if (meot != nullptr) {
+            if (meb) {
+              if (meb->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) {
+                const MaterialEffectsOnTrack *meot = static_cast < const MaterialEffectsOnTrack * >(meb);
                 std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
                 const TrackParameters * newpars = (*matvec)[i]->trackParameters() != nullptr ? (*matvec)[i]->trackParameters()->clone() : nullptr;
                 meff->setSigmaDeltaE(0);
@@ -4033,10 +4034,9 @@ namespace Trk {
           for (const auto & i : *matvec) {
             const Trk::MaterialEffectsBase * meb = i->materialEffectsOnTrack();
             
-            if (meb != nullptr) {
-              const MaterialEffectsOnTrack *meot = dynamic_cast<const MaterialEffectsOnTrack *>(meb);
-              
-              if (meot != nullptr) {
+            if (meb) {
+              if (meb->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) {
+                const MaterialEffectsOnTrack *meot = static_cast<const MaterialEffectsOnTrack *>(meb);
                 std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
                 if (cache.m_fiteloss && (meot->energyLoss() != nullptr)) {
                   meff->setSigmaDeltaE(meot->energyLoss()->sigmaDeltaE());
@@ -4334,10 +4334,9 @@ namespace Trk {
           for (int j = 0; j < (int) matvec->size(); j++) {
             const MaterialEffectsBase *meb = (*matvec)[j]->materialEffectsOnTrack();
             
-            if (meb != nullptr) {
-              const MaterialEffectsOnTrack *meot = dynamic_cast<const MaterialEffectsOnTrack *>(meb);
-
-              if ((meot != nullptr) && j < (int) matvec->size() - 1) {
+            if (meb) {
+              if ((meb->derivedType() ==  MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) and (j < (int) matvec->size() - 1)) {
+                const MaterialEffectsOnTrack *meot = static_cast<const MaterialEffectsOnTrack *>(meb);
                 std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
               
                 if (
@@ -4446,9 +4445,10 @@ namespace Trk {
             const MaterialEffectsBase *meb = (*matvec)[j]->materialEffectsOnTrack();
             
             if (meb != nullptr) {
-              const MaterialEffectsOnTrack *meot = dynamic_cast<const MaterialEffectsOnTrack *>(meb);
+              
 
-              if ((meot != nullptr) && j < (int) matvec->size() - 1) {
+              if ((meb->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK) && j < (int) matvec->size() - 1) {
+                const MaterialEffectsOnTrack *meot = static_cast<const MaterialEffectsOnTrack *>(meb);
                 std::unique_ptr<GXFMaterialEffects> meff = std::make_unique<GXFMaterialEffects>(meot);
                 
                 if (
