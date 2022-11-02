@@ -208,7 +208,7 @@ namespace RootAuxDynIO
 
 
 
-void RootAuxDynReader::BranchInfo::setAddress(void* data) const
+void RootAuxDynReader::BranchInfo::setAddress(void* data)
 {
    if( needsSE ) {
       // reading through the TTree - allows for schema evolution
@@ -279,7 +279,7 @@ void RootAuxDynReader::init(bool standalone)
 
 // Called by the AuxStore when it is reading new attribute data from the file
 // All information is cached in a BranchInfo object for better performance
-const RootAuxDynReader::BranchInfo&
+RootAuxDynReader::BranchInfo&
 RootAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store)
 {
    BranchInfo& brInfo = m_branchInfos[auxid];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ROOTAUXDYNSTORE_H
@@ -70,16 +70,5 @@ private:
   /// Optional mutex used to serialize I/O with RootStorageSvc (not owned)
   std::recursive_mutex       *m_iomutex;
 };
-
-  
-
-inline
-void* RootAuxDynStore::getData(SG::auxid_t auxid, size_t /*size*/, size_t /*capacity*/)
-{
-   // MN:  how do we add new attributes to this store? A:for now we don't
-   return const_cast<void*>(getData(auxid));
-}
-
-  
 
 #endif

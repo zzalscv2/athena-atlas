@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -38,10 +38,18 @@ const void* RootAuxDynStore::getData(SG::auxid_t auxid) const
   // lock
   const void* ret = SG::AuxStoreInternal::getData (auxid);
   if (!ret) {
-    const_cast<RootAuxDynStore*>(this)->readData(auxid);
+    auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
+    this_nc->readData(auxid);
     ret = SG::AuxStoreInternal::getData (auxid);
   }
   return ret;
+}
+
+
+void* RootAuxDynStore::getData(SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/)
+{
+  // MN:  how do we add new attributes to this store? A:for now we don't
+  throw("Non-const access to RootAuxDynStore is not supported");
 }
 
 
@@ -50,7 +58,8 @@ const void* RootAuxDynStore::getIOData(SG::auxid_t auxid) const
   guard_t guard (m_mutex);
   const void* ret = SG::AuxStoreInternal::getIODataInternal (auxid, true);
   if (!ret) {
-    const_cast<RootAuxDynStore*>(this)->readData(auxid);
+    auto this_nc ATLAS_THREAD_SAFE = const_cast<RootAuxDynStore*>(this); // locked above
+    this_nc->readData(auxid);
     ret = SG::AuxStoreInternal::getIOData (auxid);
   }
   return ret;
@@ -73,7 +82,8 @@ bool RootAuxDynStore::readData(SG::auxid_t auxid)
       }
 
       // get memory location where to write data from the branch entry
-      void *       vector = const_cast<void*>(SG::AuxStoreInternal::getIOData (auxid)); // xxx
+      // const_cast because TTree::SetBranchAddress requires void*
+      void *       vector ATLAS_THREAD_SAFE = const_cast<void*>(SG::AuxStoreInternal::getIOData (auxid));
       void *       data = &vector;
       if( standalone() && !brInfo.tclass ) {
          // reading fundamental type - ROOT expects a direct pointer
