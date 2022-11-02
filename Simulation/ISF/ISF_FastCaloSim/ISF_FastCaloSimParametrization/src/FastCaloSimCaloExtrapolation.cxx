@@ -792,11 +792,12 @@ void FastCaloSimCaloExtrapolation::getIterativePCA(float cylR, float cylZ, Amg::
     Amg::Vector3D boundDir = BoundB - BoundA;
     double distBounds = boundDir.norm();
 
-    //if bounds are close enough together, there is nothing to do.
-    if (distBounds < 0.001){ PCA = BoundA; return;} 
-
     //this sets the precision of the iterative finding procedure
     double stepSize = 0.01;
+
+    //if bounds are close enough together, there is nothing to do.
+    if (distBounds < 2*stepSize){ PCA = BoundA; return;} 
+
 
     Amg::Vector3D tmpBoundA, tmpBoundB, tmpOnCylinderBoundA, tmpOnCylinderBoundB;
     Amg::Vector3D resBoundA, resBoundB, resOnCylinderBoundA, resOnCylinderBoundB;
