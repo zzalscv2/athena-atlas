@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_GEODBTAGSVC_H
@@ -10,7 +10,7 @@
 
 template <class TYPE> class SvcFactory;
 
-class ATLAS_CHECK_THREAD_SAFETY GeoDbTagSvc : public AthService, virtual public IGeoDbTagSvc
+class ATLAS_CHECK_THREAD_SAFETY GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
 {
   friend class GeoModelSvc;
 
@@ -18,12 +18,8 @@ class ATLAS_CHECK_THREAD_SAFETY GeoDbTagSvc : public AthService, virtual public 
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
-  virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
-
-  friend class SvcFactory<GeoDbTagSvc>;
-
   GeoDbTagSvc(const std::string& name, ISvcLocator* svc);
-  virtual ~GeoDbTagSvc();
+  virtual ~GeoDbTagSvc() = default;
 
  protected:
 

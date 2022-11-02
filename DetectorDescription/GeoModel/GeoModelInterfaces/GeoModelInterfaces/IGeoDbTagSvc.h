@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELINTERFACES_IGEODBTAGSVC_H
@@ -23,12 +23,9 @@ namespace GeoModel {
   };
 }
 
-static const InterfaceID IID_IGeoDbTagSvc("IGeoDbTagSvc", 1, 0);
-
 class IGeoDbTagSvc : virtual public IInterface {
  public:
-  // Retrieve interface ID
-  static const InterfaceID& interfaceID() {return IID_IGeoDbTagSvc;}
+  DeclareInterfaceID(IGeoDbTagSvc, 1, 0);
 
   virtual const std::string & atlasVersion()                    const =0;
   virtual const std::string & inDetVersion()                    const =0;
@@ -42,7 +39,7 @@ class IGeoDbTagSvc : virtual public IInterface {
   virtual const std::string & magFieldVersion()                 const =0;
   virtual const std::string & cavernInfraVersion()              const =0;
   virtual const std::string & forwardDetectorsVersion()         const =0;
-  
+
   virtual const std::string & inDetVersionOverride()            const =0;
   virtual const std::string & pixelVersionOverride()            const =0;
   virtual const std::string & SCT_VersionOverride()             const =0;
@@ -54,12 +51,12 @@ class IGeoDbTagSvc : virtual public IInterface {
   virtual const std::string & magFieldVersionOverride()         const =0;
   virtual const std::string & cavernInfraVersionOverride()      const =0;
   virtual const std::string & forwardDetectorsVersionOverride() const =0;
-  
+
   virtual GeoModel::GeoConfig geoConfig() const = 0;
 
   // Get the name of the IRDBAccessSvc used in the given job
   virtual const std::string & getParamSvcName() const = 0;
-  
+
   // Are we building GeoModel description from the GeometryDB or from the SQLite file?
   // Yes - if the returned pointer in not null
   // No  - otherwise

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELSVC_GEOMODELTOOL_H
@@ -13,7 +13,7 @@
 
 class GeoVDetectorManager;
 
-class GeoModelTool : public AthAlgTool, public virtual IGeoModelTool {
+class GeoModelTool : public extends<AthAlgTool, IGeoModelTool> {
 
 public:
 
@@ -21,23 +21,20 @@ public:
     GeoModelTool( const std::string& type, const std::string& name, const IInterface* parent );
 
     // Standard Destructor
-    virtual ~GeoModelTool();
+    virtual ~GeoModelTool() = default;
 
     virtual GeoVDetectorManager* manager();
     virtual const GeoVDetectorManager* manager() const;
 
-    virtual StatusCode clear() override;	
+    virtual StatusCode clear() override;
     virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override;
     virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;
 
 protected:
 
-    GeoVDetectorManager*   m_detector;        		// The corresponding 
+    GeoVDetectorManager*   m_detector;                  // The corresponding
 };
 
 #endif  // BUILDVP1LIGHT
 
 #endif // GEOMODELSVC_DETDESCRTOOL_H
-
-
-

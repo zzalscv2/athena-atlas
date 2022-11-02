@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMODELINTERFACES_IGEOMODELTOOL_H
@@ -9,13 +9,10 @@
 #include "AthenaKernel/IOVSvcDefs.h"
 #include "CxxUtils/checker_macros.h"
 
-static const InterfaceID IID_IGeoModelTool( "IGeoModelTool", 1, 0 );
-
 class IGeoModelTool : public virtual IAlgTool {
 public:
 
-    /// Retrieve Interface ID
-    static const InterfaceID& interfaceID( ) { return IID_IGeoModelTool; }
+    DeclareInterfaceID( IGeoModelTool, 1, 0 );
 
     // Abstract interface method(s)
     virtual StatusCode create() = 0;
@@ -30,10 +27,7 @@ public:
 
     // Callback function itself
     virtual StatusCode align(IOVSVC_CALLBACK_ARGS) = 0;
-	
+
 };
 
 #endif // GEOMODELINTERFACES_IGEOMODELTOOL_H
-
-
-
