@@ -64,6 +64,16 @@ namespace Muon {
         */
         virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const;
 
+
+        /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a predicted Trk::TrackParameter.
+            @param RIO Trk::PrepRawData object to be calibrated
+            @param GP  Predicted intersect position of the muon with the measurement plane
+            @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
+            The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
+        */
+        virtual const MuonClusterOnTrack* calibratedCluster(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const override;
+
+     
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 

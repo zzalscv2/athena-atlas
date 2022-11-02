@@ -26,6 +26,7 @@
 
 namespace Muon {
 
+    //================================================================================
     MuonClusterOnTrackCreator::MuonClusterOnTrackCreator(const std::string& ty, const std::string& na, const IInterface* pa) :
         AthAlgTool(ty, na, pa) {
         // algtool interface - necessary!
@@ -46,6 +47,7 @@ namespace Muon {
         declareProperty("FixedErrorCscPhi", m_fixedErrorCscPhi = 5.);
     }
 
+    //================================================================================
     StatusCode MuonClusterOnTrackCreator::initialize() {
         if (AthAlgTool::initialize().isFailure()) {
             ATH_MSG_ERROR(" AthAlgTool::initialize() failed ");
@@ -57,6 +59,7 @@ namespace Muon {
         return StatusCode::SUCCESS;
     }
 
+    //================================================================================
     const MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP) const
 
     {
@@ -95,8 +98,9 @@ namespace Muon {
         double positionAlongStrip = 0;
         double positionAlongz = 0;
 
-        if (!EL->surface(RIO.identify()).globalToLocal(GP, GP, lp)) {
-            Amg::Vector3D lpos = RIO.detectorElement()->surface(RIO.identify()).transform().inverse() * GP;
+        const Trk::Surface& rio_surface = EL->surface(RIO.identify());
+        if (!rio_surface.globalToLocal(GP, GP, lp)) {
+            Amg::Vector3D lpos = rio_surface.transform().inverse() * GP;
             ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
             lp[Trk::locX] = lpos.x();
             lp[Trk::locY] = lpos.y();
@@ -258,12 +262,62 @@ namespace Muon {
         return MClT;
     }
 
-    const MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP,
-                                                                           const Amg::Vector3D&) const {
+
+    //================================================================================
+    const MuonClusterOnTrack* MuonClusterOnTrackCreator::createRIO_OnTrack(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D&) const {
         return createRIO_OnTrack(RIO, GP);
     }
 
+
+    //================================================================================
     const MuonClusterOnTrack* MuonClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const {
         return createRIO_OnTrack(RIO, TP.position(), TP.momentum());
     }
+    
+    
+    //================================================================================
+    const Muon::MuonClusterOnTrack* MuonClusterOnTrackCreator::calibratedCluster(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& /* GD*/) const {
+
+        // calibration is currently available only for sTGC strips. Return an uncalibrated cluster in all other cases
+        if (!m_idHelperSvc->issTgc(RIO.identify()) || m_idHelperSvc->measuresPhi(RIO.identify())) {
+            return createRIO_OnTrack(RIO, GP);
+        }
+
+        // make sure RIO has a detector element
+        const MuonGM::sTgcReadoutElement* stgEL = static_cast<const MuonGM::sTgcReadoutElement*>(RIO.detectorElement());
+        if (!stgEL) {
+            ATH_MSG_WARNING("RIO does not have associated detectorElement! Skipping cluster calibration.");
+            return nullptr;
+        }
+
+        Amg::MatrixX loce = RIO.localCovariance();    
+        // > 1 in case we want to keep pads in the future ? 
+        Trk::LocalParameters locpar = loce.cols() > 1 ? Trk::LocalParameters{RIO.localPosition()} : Trk::LocalParameters{Trk::DefinedParameter{RIO.localPosition().x(), Trk::locX}};
+    
+        // transform the seeded position to the local layer frame just to get the seeded y
+        Amg::Vector2D lp{ Amg::Vector2D::Zero() };
+        const Trk::PlaneSurface& rio_surface = stgEL->surface(RIO.identify());
+        if (!rio_surface.globalToLocal(GP, GP, lp)) {
+            Amg::Vector3D lpos = rio_surface.transform().inverse() * GP;
+            ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
+            lp[Trk::locX] = lpos.x();
+            lp[Trk::locY] = lpos.y();
+        }
+        double positionAlongStrip = lp[Trk::locY];
+
+        // correct localX for as-built conditions and b-lines (eta and stereo strips), if enabled.
+        // note: there's no point in correcting the seeded y-coordinate.
+        Amg::Vector3D localposition3D { Amg::Vector3D::Zero() };
+        stgEL->spacePointPosition(RIO.identify(), locpar[Trk::locX], positionAlongStrip, localposition3D);
+        locpar[Trk::locX] = localposition3D.x();
+        double offsetZ = localposition3D.z();
+
+        // no further calibration available at the moment for sTGCs
+	const sTgcPrepData* stgPPD = static_cast<const sTgcPrepData*>(&RIO);
+        ATH_MSG_VERBOSE("generating sTgcClusterOnTrack in MuonClusterBuilder");
+        MuonClusterOnTrack* cluster = new sTgcClusterOnTrack(stgPPD, locpar, loce, positionAlongStrip);
+        cluster->setOffsetNormal(offsetZ);
+
+        return cluster;
+}
 }  // namespace Muon

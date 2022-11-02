@@ -1306,13 +1306,10 @@ namespace Muon {
 
     //============================================================================
     MeasVec MuonClusterSegmentFinderTool::getCalibratedClusters(NSWSeed& seed) const {
+
         MeasVec calibratedClusters;
-
-        ATH_MSG_VERBOSE("seed global position " << seed.pos() << " seed direction " << seed.dir());
-        ATH_MSG_VERBOSE("seed global position theta " << seed.pos().theta() << " seed direction theta " << seed.dir().theta());
-        ATH_MSG_VERBOSE("seed global position phi " << seed.pos().phi() << " seed direction phi " << seed.dir().phi());
-
         MeasVec clusters = seed.measurements();
+
         // loop on the segment clusters and use the phi of the seed to correct them
         for (const SeedMeasurement& clus : clusters) {
             std::unique_ptr<const Muon::MuonClusterOnTrack> newClus;
@@ -1324,24 +1321,19 @@ namespace Muon {
 
             if (m_idHelperSvc->isMM(hitID)) {
                 // build a  new MM cluster on track with correct position
-                ATH_MSG_VERBOSE("Calibrate measurement from "<< to_string(intersect.position)<<" and direction "<<to_string(seed.dir()));
-                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_mmClusterCreator->calibratedCluster(*clus->prepRawData(), 
-                                                                                                               intersect.position, seed.dir())};
-                ATH_MSG_VERBOSE("Position before correction: " << to_string(clus->globalPosition()));
-                ATH_MSG_VERBOSE("Position after correction: " << to_string(newClus->globalPosition()));
+                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_mmClusterCreator->calibratedCluster(*clus->prepRawData(), intersect.position, seed.dir())};
                 calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));
-                
             } else if (m_idHelperSvc->issTgc(hitID)) {
-                // calibration to be added for sTGCs
-                 std::unique_ptr<const Muon::MuonClusterOnTrack> newClus{m_stgcClusterCreator->createRIO_OnTrack(*(clus->prepRawData()), 
-                                                                                                                 intersect.position)};
-                 calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));               
+                // build a  new sTGC cluster on track with correct position
+                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_stgcClusterCreator->calibratedCluster(*clus->prepRawData(), intersect.position, seed.dir())};
+                calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));                             
             }
-           
-           
         }
+
         return calibratedClusters;
     }
+    
+    //============================================================================
     template <size_t N>
     std::string MuonClusterSegmentFinderTool::printSeed(const std::array<SeedMeasurement, N>& seed) const {
         std::stringstream sstr{};
@@ -1349,6 +1341,8 @@ namespace Muon {
         for (const SeedMeasurement& cl : seed) sstr << " *** " << print(cl) << std::endl;
         return sstr.str();
     }
+
+    //============================================================================
     std::string MuonClusterSegmentFinderTool::print(const SeedMeasurement& cl) const {
         std::stringstream sstr{};
         sstr << m_idHelperSvc->toString(cl->identify()) << " at " <<to_string(cl.pos()) 
