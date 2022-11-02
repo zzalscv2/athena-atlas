@@ -29,9 +29,9 @@ namespace MuonGM {
     template <int N>
     std::optional<double> intersect(const AmgVector(N)& posA, const  AmgVector(N)& dirA, const AmgVector(N)& posB, const  AmgVector(N)& dirB) {
         //// Use the formula
-        ///    A + lambda dir A  = B + mu dirB
+        ///    A + lambda dirA  = B + mu dirB
         ///    (A-B) + lambda dirA = mu dirB
-        ///    <A-B, dirB> + lambda <dirA,dirB> = mu dirB
+        ///    <A-B, dirB> + lambda <dirA,dirB> = mu
         ///     A + lambda dirA = B + (<A-B, dirB> + lambda <dirA,dirB>)dirB
         ///     <A-B,dirA> + lambda <dirA, dirA> = <A-B, dirB><dirA,dirB> + lamda<dirA,dirB><dirA,dirB>
         ///   -> lambda = (<A-B, dirA> - <A-B, dirB> * <dirA, dirB>) / (1- <dirA,dirB>^2)
