@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -27,8 +27,7 @@ base_class(t,n,p)
 }
 
 // Destructor
-DerivationFramework::MuonTrackParticleThinning::~MuonTrackParticleThinning() {
-}
+DerivationFramework::MuonTrackParticleThinning::~MuonTrackParticleThinning() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::MuonTrackParticleThinning::initialize()
@@ -100,37 +99,37 @@ StatusCode DerivationFramework::MuonTrackParticleThinning::doThinning() const
 
     DerivationFramework::TracksInCone tInC;    
     if (m_selectionString=="") { // check all muons as user didn't provide a selection string
-	    for (xAOD::MuonContainer::const_iterator muIt=importedMuons->begin(); muIt!=importedMuons->end(); ++muIt) {
-	      if ((*muIt)->inDetTrackParticleLink().isValid()) {
+	    for (const auto *muIt : *importedMuons) {
+	      if (muIt->inDetTrackParticleLink().isValid()) {
 		//This line prevents SiliconAssociatedForwardMuon from being used unless we're skimming InDetForwardTrackParticles
 		//since their track links point to this container while all others point to InDetTrackParticles
-		if ((*muIt)->muonType()==xAOD::Muon::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
+		if (muIt->muonType()==xAOD::Muon::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
 		  {
 		    ATH_MSG_DEBUG("Skipping Forward Muon since we are not skimming InDetForwardParticles");
 		  }
 		else{
-		  ATH_MSG_DEBUG("Simming Muon tracks in " << m_inDetSGKey << " "<< (*muIt)->muonType());
-		  int index = (*muIt)->inDetTrackParticleLink().index();
+		  ATH_MSG_DEBUG("Simming Muon tracks in " << m_inDetSGKey << " "<< muIt->muonType());
+		  int index = muIt->inDetTrackParticleLink().index();
 		  mask[index] = true;
 		}
 	      }
-	        if (m_coneSize>0.0) tInC.select(*muIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the muon if req'd
+	        if (m_coneSize>0.0) tInC.select(muIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the muon if req'd
 	      }
     } else { // check only muons passing user selection string
-        for (std::vector<const xAOD::Muon*>::iterator muIt = muToCheck.begin(); muIt!=muToCheck.end(); ++muIt) {
-	    if ((*muIt)->inDetTrackParticleLink().isValid()) {
+        for (auto & muIt : muToCheck) {
+	    if (muIt->inDetTrackParticleLink().isValid()) {
 	      
-	      if ((*muIt)->muonType()==xAOD::Muon::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
+	      if (muIt->muonType()==xAOD::Muon::SiliconAssociatedForwardMuon &&  m_inDetSGKey.key() != "InDetForwardTrackParticles")
 		{
 		  ATH_MSG_DEBUG("Skipping Forward Muon since we are not skimming InDetForwardParticles");
 		}
 	      else{
-		ATH_MSG_DEBUG("Simming Muon tracks in " << m_inDetSGKey << " "<< (*muIt)->muonType());
-		int index = (*muIt)->inDetTrackParticleLink().index();
+		ATH_MSG_DEBUG("Simming Muon tracks in " << m_inDetSGKey << " "<< muIt->muonType());
+		int index = muIt->inDetTrackParticleLink().index();
 		mask[index] = true;
 	      }
 	    } 	
-	    if (m_coneSize>0.0) tInC.select(*muIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the muon if req'd	
+	    if (m_coneSize>0.0) tInC.select(muIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the muon if req'd	
         }
     }
 

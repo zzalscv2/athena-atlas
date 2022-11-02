@@ -380,7 +380,7 @@ namespace DerivationFramework {
     }
   }
 
-  const xAOD::TruthParticle* PseudoTrackSelector::getTruth( const xAOD::TrackParticle* track ) const {
+  const xAOD::TruthParticle* PseudoTrackSelector::getTruth( const xAOD::TrackParticle* track ) {
     // create a pointer to a truth particle which will correspond to this track
     const xAOD::TruthParticle* linkedTruthParticle = nullptr;
 

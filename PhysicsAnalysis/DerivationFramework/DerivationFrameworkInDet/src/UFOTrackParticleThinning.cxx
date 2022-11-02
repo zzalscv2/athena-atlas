@@ -19,8 +19,7 @@ base_class(t,n,p)
 }
 
 // Destructor
-DerivationFramework::UFOTrackParticleThinning::~UFOTrackParticleThinning() {
-}
+DerivationFramework::UFOTrackParticleThinning::~UFOTrackParticleThinning() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::UFOTrackParticleThinning::initialize()
@@ -122,7 +121,7 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning() const
   }
 
   if (m_selectionString=="") { // check all jets as user didn't provide a selection string
-    for(auto jet : *importedJets){
+    for(const auto *jet : *importedJets){
       for( size_t j = 0; j < jet->numConstituents(); ++j ) {
         auto ufo = jet->constituentLinks().at(j);
         int index = ufo.index();
@@ -157,9 +156,9 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::doThinning() const
     
   } else {
     
-    for (std::vector<const xAOD::Jet*>::iterator jetIt=jetToCheck.begin(); jetIt!=jetToCheck.end(); ++jetIt) {
-      for( size_t j = 0; j < (*jetIt)->numConstituents(); ++j ) {
-        auto ufo = (*jetIt)->constituentLinks().at(j);
+    for (auto & jetIt : jetToCheck) {
+      for( size_t j = 0; j < jetIt->numConstituents(); ++j ) {
+        auto ufo = jetIt->constituentLinks().at(j);
 	int index = ufo.index();
 	maskUFOs[index] = true;
 

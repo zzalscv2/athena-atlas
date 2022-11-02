@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkInDet/UnassociatedHitsGetterTool.h"
@@ -25,9 +25,7 @@ UnassociatedHitsGetterTool::UnassociatedHitsGetterTool(const std::string& type,
   declareInterface<IUnassociatedHitsGetterTool>(this);
 }
 
-UnassociatedHitsGetterTool::~UnassociatedHitsGetterTool(){
-  
-}
+UnassociatedHitsGetterTool::~UnassociatedHitsGetterTool()= default;
   
 StatusCode UnassociatedHitsGetterTool::initialize(){
 

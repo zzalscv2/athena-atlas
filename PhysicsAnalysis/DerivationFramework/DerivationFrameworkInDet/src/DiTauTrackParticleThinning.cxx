@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -24,8 +24,7 @@ base_class(t,n,p)
 {}
 
 // Destructor
-DerivationFramework::DiTauTrackParticleThinning::~DiTauTrackParticleThinning() {
-}
+DerivationFramework::DiTauTrackParticleThinning::~DiTauTrackParticleThinning() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::DiTauTrackParticleThinning::initialize()
@@ -98,24 +97,24 @@ StatusCode DerivationFramework::DiTauTrackParticleThinning::doThinning() const
     // Set elements in the mask to true if there is a corresponding ElementLink from a reconstructed object
     // ... ditaus
     if (m_selectionString=="") { // check all ditaus as user didn't provide a selection string
-      for (xAOD::DiTauJetContainer::const_iterator ditauIt=importedDiTaus->begin(); ditauIt!=importedDiTaus->end(); ++ditauIt) {
-        for (unsigned int i=0; i<(*ditauIt)->nTracks(); ++i) {
-          int index = (*ditauIt)->trackLinks().at(i).index();
+      for (const auto *ditauIt : *importedDiTaus) {
+        for (unsigned int i=0; i<ditauIt->nTracks(); ++i) {
+          int index = ditauIt->trackLinks().at(i).index();
           mask[index] = true;
         }
-        for (unsigned int i=0; i<(*ditauIt)->nIsoTracks(); ++i) {
-          int index = (*ditauIt)->isoTrackLinks().at(i).index();
+        for (unsigned int i=0; i<ditauIt->nIsoTracks(); ++i) {
+          int index = ditauIt->isoTrackLinks().at(i).index();
           mask[index] = true;
         }
       }
     } else { // check only ditaus passing user selection string
-        for (std::vector<const xAOD::DiTauJet*>::iterator ditauIt = ditauToCheck.begin(); ditauIt!=ditauToCheck.end(); ++ditauIt) {
-          for (unsigned int i=0; i<(*ditauIt)->nTracks(); ++i) {
-              int index = (*ditauIt)->trackLinks().at(i).index();
+        for (auto & ditauIt : ditauToCheck) {
+          for (unsigned int i=0; i<ditauIt->nTracks(); ++i) {
+              int index = ditauIt->trackLinks().at(i).index();
               mask[index] = true;
           }
-          for (unsigned int i=0; i<(*ditauIt)->nIsoTracks(); ++i) {
-              int index = (*ditauIt)->isoTrackLinks().at(i).index();
+          for (unsigned int i=0; i<ditauIt->nIsoTracks(); ++i) {
+              int index = ditauIt->isoTrackLinks().at(i).index();
               mask[index] = true;
           }
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +26,7 @@ base_class(t,n,p)
 }
 
 // Destructor
-DerivationFramework::JetTrackParticleThinning::~JetTrackParticleThinning() {
-}
+DerivationFramework::JetTrackParticleThinning::~JetTrackParticleThinning() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::JetTrackParticleThinning::initialize()
@@ -103,25 +102,25 @@ StatusCode DerivationFramework::JetTrackParticleThinning::doThinning() const
     // Set elements in the mask to true if there is a corresponding ElementLink from a reconstructed object
     // ... jets
     if (m_selectionString.empty()) { // check all jets as user didn't provide a selection string
-        for (xAOD::JetContainer::const_iterator jetIt=importedJets->begin(); jetIt!=importedJets->end(); ++jetIt) {
+        for (const auto *jetIt : *importedJets) {
             std::vector<const xAOD::TrackParticle*> jetTracks;
-            bool haveJetTracks = (*jetIt)->getAssociatedObjects(xAOD::JetAttribute::GhostTrack, jetTracks);
+            bool haveJetTracks = jetIt->getAssociatedObjects(xAOD::JetAttribute::GhostTrack, jetTracks);
             if ( !haveJetTracks ) {ATH_MSG_WARNING("Associated tracks not found");}
             else {
-                for (std::vector<const xAOD::TrackParticle*>::iterator jetTrIt=jetTracks.begin(); jetTrIt!=jetTracks.end(); ++jetTrIt) {
-                    int index = (*jetTrIt)->index();
+                for (auto & jetTrack : jetTracks) {
+                    int index = jetTrack->index();
                     mask[index] = true;
                 }
             }
         }
     } else { // check only jets passing user selection string
-    	for (std::vector<const xAOD::Jet*>::iterator jetIt = jetToCheck.begin(); jetIt!=jetToCheck.end(); ++jetIt) {
+    	for (auto & jetIt : jetToCheck) {
             std::vector<const xAOD::TrackParticle*> jetTracks;
-            bool haveJetTracks = (*jetIt)->getAssociatedObjects(xAOD::JetAttribute::GhostTrack, jetTracks);
+            bool haveJetTracks = jetIt->getAssociatedObjects(xAOD::JetAttribute::GhostTrack, jetTracks);
             if ( !haveJetTracks ) {ATH_MSG_WARNING("Associated tracks not found");}
             else {
-                for (std::vector<const xAOD::TrackParticle*>::iterator jetTrIt=jetTracks.begin(); jetTrIt!=jetTracks.end(); ++jetTrIt) {
-                    int index = (*jetTrIt)->index();
+                for (auto & jetTrack : jetTracks) {
+                    int index = jetTrack->index();
                     mask[index] = true;
                 }
             }

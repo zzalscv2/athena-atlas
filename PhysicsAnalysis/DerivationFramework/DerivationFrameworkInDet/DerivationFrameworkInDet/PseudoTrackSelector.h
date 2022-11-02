@@ -78,7 +78,7 @@ namespace DerivationFramework {
                            bool onlyFromB = false,
                            bool onlyNotFromB = false) const;
       // Get truth particle associated to a given track particle
-      const xAOD::TruthParticle* getTruth( const xAOD::TrackParticle* track ) const;
+      static const xAOD::TruthParticle* getTruth( const xAOD::TrackParticle* track ) ;
 
     private:
         // convience types
