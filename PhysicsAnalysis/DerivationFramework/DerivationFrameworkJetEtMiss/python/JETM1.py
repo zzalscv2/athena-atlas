@@ -273,8 +273,22 @@ def JETM1ExtraContentCfg(ConfigFlags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTopQuarkAndDownstreamParticlesCfg
         acc.merge(AddTopQuarkAndDownstreamParticlesCfg(generations=4,rejectHadronChildren=True))
 
-    return acc
+    #=======================================
+    # Add Run-2 jet trigger collections
+    # Only needed for Run-2 due to different aux container type (JetTrigAuxContainer) which required special wrapper for conversion to AuxContainerBase
+    # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
+    #=======================================
 
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
+
+        for trigger in triggerNames:
+            wrapperName = trigger+'AuxWrapper'
+            auxContainerName = 'HLT_xAOD__'+trigger+'Aux'
+
+            acc.addEventAlgo(CompFactory.xAODMaker.AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] ))
+
+    return acc
 
 def JETM1Cfg(ConfigFlags):
 
@@ -327,22 +341,17 @@ def JETM1Cfg(ConfigFlags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM1SlimmingHelper)
 
-        JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticles'] = 'xAOD::TruthParticleContainer'
-        JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
-        JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVertices'] = 'xAOD::TruthVertexContainer'
-        JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
-        JETM1SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
-        JETM1SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
-        
+        JETM1SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
+
         JETM1SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices"]
         JETM1SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
         JETM1SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
 
-
-    JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShape'] = 'xAOD::EventShape'
-    JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
-    JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShape'] = 'xAOD::EventShape'
-    JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
+    JETM1SlimmingHelper.AppendToDictionary.update({'Kt4UFOCSSKEventShape':'xAOD::EventShape',
+                                                   'Kt4UFOCSSKEventShapeAux':'xAOD::EventShapeAuxInfo',
+                                                   'Kt4UFOCSSKNeutEventShape':'xAOD::EventShape',
+                                                   'Kt4UFOCSSKNeutEventShapeAux':'xAOD::EventShapeAuxInfo'})
 
     # Trigger content
     JETM1SlimmingHelper.IncludeTriggerNavigation = False

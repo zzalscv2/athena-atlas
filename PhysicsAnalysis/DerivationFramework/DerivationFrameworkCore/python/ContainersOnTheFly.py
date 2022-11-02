@@ -18,6 +18,10 @@ ContainersOnTheFly = [
                         ['TruthBottomAux','xAOD::TruthParticleAuxContainer'],
                         ['TruthTop','xAOD::TruthParticleContainer'],
                         ['TruthTopAux','xAOD::TruthParticleAuxContainer'],
+                        ['TruthTopQuarkWithDecayParticles','xAOD::TruthParticleContainer'],
+                        ['TruthTopQuarkWithDecayParticlesAux','xAOD::TruthParticleAuxContainer'],
+                        ['TruthTopQuarkWithDecayVertices','xAOD::TruthVertexContainer'],
+                        ['TruthTopQuarkWithDecayVerticesAux','xAOD::TruthVertexAuxContainer'],
                         ["TruthMuons","xAOD::TruthParticleContainer"],
                         ["TruthMuonsAux","xAOD::TruthParticleAuxContainer"],
                         ["TruthElectrons","xAOD::TruthParticleContainer"],
@@ -144,6 +148,11 @@ ContainersOnTheFly = [
                         ["BTagging_AntiKt4EMPFlowSecVtx","xAOD::VertexContainer"],
                         ["BTagging_AntiKt4EMPFlowSecVtxAux","xAOD::VertexAuxContainer"],
                                         
+                        ["GlobalChargedParticleFlowObjects","xAOD::FlowElementContainer"],
+                        ["GlobalChargedParticleFlowObjectsAux","xAOD::FlowElementAuxContainer"],
+                        ["GlobalNeutralParticleFlowObjects","xAOD::FlowElementContainer"],
+                        ["GlobalNeutralParticleFlowObjectsAux","xAOD::FlowElementAuxContainer"],
+
                         ["CHSGChargedParticleFlowObjects","xAOD::FlowElementContainer"], 
                         ["CHSGChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
                         ["CHSGNeutralParticleFlowObjects","xAOD::FlowElementContainer"], 

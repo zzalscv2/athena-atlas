@@ -119,7 +119,6 @@ def JETM2Cfg(ConfigFlags):
                                              "MET_Baseline_AntiKt4EMPFlow",
                                              "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
                                              "AntiKt4TruthJets","AntiKt10TruthJets",
-                                             
                                              "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                              "BTagging_AntiKt4EMPFlow",
                                              "BTagging_AntiKtVR30Rmax4Rmin02Track",
@@ -127,43 +126,32 @@ def JETM2Cfg(ConfigFlags):
     ]
 
     JETM2SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloCalFwdTopoTowers",
-                                         "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
-                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
-                                         "TruthParticles",
-                                         "TruthVertices",
-                                         "TruthEvents"]
+                                        "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
+                                        "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
+                                        "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
+                                        "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
+                                        "TruthParticles","TruthVertices","TruthEvents"]
 
-    JETM2SlimmingHelper.ExtraVariables = ["UFOCSSK.pt.eta.phi.m.signalType",
-                                           "UFO.pt.eta.phi.m.signalType",
-                                           "InDetTrackParticles.particleHypothesis.vx.vy.vz",
-                                           "GSFTrackParticles.particleHypothesis.vx.vy.vz",
-                                           "PrimaryVertices.x.y.z",
-                                           "TauJets.clusterLinks",
-                                           "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
-                                           "MuonSegments.x.y.z.px.py.pz",
-                                           "CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink",
-                                           "CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink"]
+    JETM2SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.GhostTower",
+                                          "UFOCSSK.pt.eta.phi.m.signalType",
+                                          "UFO.pt.eta.phi.m.signalType",
+                                          "InDetTrackParticles.particleHypothesis.vx.vy.vz",
+                                          "GSFTrackParticles.particleHypothesis.vx.vy.vz",
+                                          "PrimaryVertices.x.y.z",
+                                          "TauJets.clusterLinks",
+                                          "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
+                                          "MuonSegments.x.y.z.px.py.pz",
+                                          "CSSKGChargedParticleFlowObjects.pt.eta.phi.m.matchedToPV.originalObjectLink",
+                                          "CSSKGNeutralParticleFlowObjects.pt.eta.phi.m.originalObjectLink"]
 
-
-    JETM2SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary["CSSKGNeutralParticleFlowObjects"]='xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary["CSSKGNeutralParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary['UFOCSSK'] = 'xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary['UFOCSSKAux'] = 'xAOD::FlowElementAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary['UFO'] = 'xAOD::FlowElementContainer'
-    JETM2SlimmingHelper.AppendToDictionary['UFOAux'] = 'xAOD::FlowElementAuxContainer'
-    JETM2SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShape'] = 'xAOD::EventShape'
-    JETM2SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
-    JETM2SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShape'] = 'xAOD::EventShape'
-    JETM2SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
+    JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
+                                                   'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
+                                                   'UFO': 'xAOD::FlowElementContainer',
+                                                   'UFOAux': 'xAOD::FlowElementAuxContainer',
+                                                   'Kt4UFOCSSKEventShape': 'xAOD::EventShape',
+                                                   'Kt4UFOCSSKEventShapeAux': 'xAOD::EventShapeAuxInfo',
+                                                   'Kt4UFOCSSKNeutEventShape': 'xAOD::EventShape',
+                                                   'Kt4UFOCSSKNeutEventShapeAux': 'xAOD::EventShapeAuxInfo'})
 
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
     addOriginCorrectedClustersToSlimmingTool(JETM2SlimmingHelper,writeLC=True,writeEM=True)
@@ -174,12 +162,8 @@ def JETM2Cfg(ConfigFlags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM2SlimmingHelper)
 
-        JETM2SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticles'] = 'xAOD::TruthParticleContainer'
-        JETM2SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
-        JETM2SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVertices'] = 'xAOD::TruthVertexContainer'
-        JETM2SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
-        JETM2SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
-        JETM2SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+        JETM2SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
         
         JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles"]
         JETM2SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]

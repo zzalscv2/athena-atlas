@@ -181,6 +181,22 @@ def JETM3ExtraContentCfg(ConfigFlags):
     from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
     acc.merge(PFlowCommonCfg(ConfigFlags))
 
+    #=======================================
+    # Add Run-2 jet trigger collections
+    # Only needed for Run-2 due to different aux container type (JetTrigAuxContainer) which required special wrapper for conversion to AuxContainerBase
+    # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
+    #=======================================
+
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
+
+        for trigger in triggerNames:
+            wrapperName = trigger+'AuxWrapper'
+            auxContainerName = 'HLT_xAOD__'+trigger+'Aux'
+
+            acc.addEventAlgo(CompFactory.xAODMaker.AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] ))
+
+
     return acc
 
 
@@ -239,24 +255,13 @@ def JETM3Cfg(ConfigFlags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM3SlimmingHelper)
 
-        JETM3SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
-        JETM3SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+        JETM3SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
         
         JETM3SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", 
                                              "TruthParticles", "TruthEvents", "TruthVertices", 
                                              "MuonTruthParticles", "egammaTruthParticles",]
         JETM3SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
-
-
-    JETM3SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
-    JETM3SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
-    JETM3SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM3SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
-    JETM3SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM3SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
-    JETM3SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM3SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
-
 
     # Trigger content
     JETM3SlimmingHelper.IncludeTriggerNavigation = False

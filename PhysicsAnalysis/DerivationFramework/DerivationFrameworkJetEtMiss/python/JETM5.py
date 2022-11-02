@@ -139,17 +139,10 @@ def JETM5Cfg(ConfigFlags):
     JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
 
     if ConfigFlags.Input.isMC:
-        JETM5SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
-        JETM5SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
-        JETM5SlimmingHelper.AppendToDictionary['TruthVertices'] = 'xAOD::TruthVertexContainer'
-        JETM5SlimmingHelper.AppendToDictionary['TruthVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
-
-    JETM5SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
-    JETM5SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
-    JETM5SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
-    JETM5SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
-    JETM5SlimmingHelper.AppendToDictionary['UFOCSSK'] = 'xAOD::FlowElementContainer'
-    JETM5SlimmingHelper.AppendToDictionary['UFOCSSKAux'] = 'xAOD::FlowElementAuxContainer'
+        JETM5SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer',
+                                                       'TruthVertices': 'xAOD::TruthVertexContainer',
+                                                       'TruthVerticesAux': 'xAOD::TruthVertexAuxContainer'})
 
     # Trigger content
     JETM5SlimmingHelper.IncludeTriggerNavigation = False

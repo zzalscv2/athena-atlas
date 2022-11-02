@@ -297,6 +297,22 @@ def JETM6ExtraContentCfg(ConfigFlags):
         acc.merge(AddTopQuarkAndDownstreamParticlesCfg(generations=4,rejectHadronChildren=True))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(TruthCollections=["TruthTopQuarkWithDecayParticles","TruthBosonsWithDecayParticles"],prefix='Top'))
 
+
+    #=======================================
+    # Add Run-2 jet trigger collections
+    # Only needed for Run-2 due to different aux container type (JetTrigAuxContainer) which required special wrapper for conversion to AuxContainerBase
+    # In Run-3, the aux. container type is directly JetAuxContainer (no conversion needed)
+    #=======================================
+
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        triggerNames = ["JetContainer_a4tcemsubjesFS", "JetContainer_a4tcemsubjesISFS", "JetContainer_a10tclcwsubjesFS", "JetContainer_GSCJet"]
+
+        for trigger in triggerNames:
+            wrapperName = trigger+'AuxWrapper'
+            auxContainerName = 'HLT_xAOD__'+trigger+'Aux'
+
+            acc.addEventAlgo(CompFactory.xAODMaker.AuxStoreWrapper( wrapperName, SGKeys = [ auxContainerName+"." ] ))
+
     return acc
 
 
@@ -346,12 +362,8 @@ def JETM6Cfg(ConfigFlags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM6SlimmingHelper)
 
-        JETM6SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticles'] = 'xAOD::TruthParticleContainer'
-        JETM6SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
-        JETM6SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVertices'] = 'xAOD::TruthVertexContainer'
-        JETM6SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
-        JETM6SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
-        JETM6SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+        JETM6SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
+                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
         
         JETM6SlimmingHelper.AllVariables += ["TruthEvents", "TruthParticles", "TruthTopQuarkWithDecayParticles", "TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles"]
 
@@ -359,20 +371,10 @@ def JETM6Cfg(ConfigFlags):
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
     addOriginCorrectedClustersToSlimmingTool(JETM6SlimmingHelper,writeLC=True,writeEM=True) 
 
-    JETM6SlimmingHelper.AppendToDictionary['UFOCSSK'] = 'xAOD::FlowElementContainer'
-    JETM6SlimmingHelper.AppendToDictionary['UFOCSSKAux'] = 'xAOD::FlowElementAuxContainer'
-
-    JETM6SlimmingHelper.AppendToDictionary["GlobalChargedParticleFlowObjects"]='xAOD::FlowElementContainer'
-    JETM6SlimmingHelper.AppendToDictionary["GlobalChargedParticleFlowObjectsAux"]='xAOD::FlowElementAuxContainer'
-
-    JETM6SlimmingHelper.AppendToDictionary["GlobalNeutralParticleFlowObjects"]='xAOD::FlowElementContainer'
-    JETM6SlimmingHelper.AppendToDictionary["GlobalNeutralParticleFlowObjectsAux"]='xAOD::FlowElementAuxContainer'
-
-    JETM6SlimmingHelper.AppendToDictionary["CSSKGChargedParticleFlowObjects"]='xAOD::FlowElementContainer'
-    JETM6SlimmingHelper.AppendToDictionary["CSSKGChargedParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
-
-    JETM6SlimmingHelper.AppendToDictionary["CSSKGNeutralParticleFlowObjects"]='xAOD::FlowElementContainer'
-    JETM6SlimmingHelper.AppendToDictionary["CSSKGNeutralParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
+    JETM6SlimmingHelper.AppendToDictionary.update({"CSSKGChargedParticleFlowObjects":'xAOD::FlowElementContainer',
+                                                   "CSSKGChargedParticleFlowObjectsAux":'xAOD::ShallowAuxContainer',
+                                                   "CSSKGNeutralParticleFlowObjects":'xAOD::FlowElementContainer',
+                                                   "CSSKGNeutralParticleFlowObjectsAux":'xAOD::ShallowAuxContainer'})
 
     # Trigger content
     JETM6SlimmingHelper.IncludeTriggerNavigation = False

@@ -79,15 +79,25 @@ from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
 from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
 
 # Jet/Etmiss derivations
+# JETM1: dijet for MC calibrations, JER, MJB, eta-intercalibration
 from DerivationFrameworkJetEtMiss.JETM1 import JETM1Cfg
+# JETM2: MC only - tagger and JetDef developments
 from DerivationFrameworkJetEtMiss.JETM2 import JETM2Cfg
+# JETM3: Z(ll) + jets
 from DerivationFrameworkJetEtMiss.JETM3 import JETM3Cfg
+# JETM4: gamma+jets
 from DerivationFrameworkJetEtMiss.JETM4 import JETM4Cfg
+# JETM5: zero bias data - random cones
 from DerivationFrameworkJetEtMiss.JETM5 import JETM5Cfg
+# JETM6: tagging SFs
 from DerivationFrameworkJetEtMiss.JETM6 import JETM6Cfg
+# JETM10: MET trigger
 from DerivationFrameworkJetEtMiss.JETM10 import JETM10Cfg
+# JETM11: MET trigger (e + mu skimming)
 from DerivationFrameworkJetEtMiss.JETM11 import JETM11Cfg
+# JETM12: E/p studies in W to tau + v events
 from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
+# JETM14: MET trigger (single mu selection)
 from DerivationFrameworkJetEtMiss.JETM14 import JETM14Cfg
 
 # Avoids compilation warnings from Flake8
