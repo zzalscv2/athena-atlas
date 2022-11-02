@@ -110,7 +110,7 @@ StatusCode Trk::GeantFollowerHelper::finalize()
   return StatusCode::SUCCESS;
 }
 
-void Trk::GeantFollowerHelper::beginEvent() const
+void Trk::GeantFollowerHelper::beginEvent()
 {
   m_treeData->m_t_x        = 0.;
   m_treeData->m_t_y        = 0.;
@@ -128,7 +128,7 @@ void Trk::GeantFollowerHelper::beginEvent() const
 void Trk::GeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
                                              const G4ThreeVector& mom,
                                              int pdg, double charge,
-                                             float t, float X0) const
+                                             float t, float X0)
 {
   // construct the initial parameters
   Amg::Vector3D npos(pos.x(),pos.y(),pos.z());
@@ -212,7 +212,7 @@ void Trk::GeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   ++m_treeData->m_g4_steps;
 }
 
-void Trk::GeantFollowerHelper::endEvent() const
+void Trk::GeantFollowerHelper::endEvent()
 {
   // fill the validation tree
   m_validationTree->Fill();

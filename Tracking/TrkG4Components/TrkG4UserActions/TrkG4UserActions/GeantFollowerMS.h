@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -55,10 +55,7 @@ namespace G4UA
 
     Config m_config;
 
-    /** tracking geometry
-        FIXME: mutables in thread-local action! ATLASSIM-3561.
-    */
-    mutable const Trk::IGeantFollowerMSHelper*   m_helperPointer;
+    Trk::IGeantFollowerMSHelper*   m_helperPointer;
 
   }; // class GeantFollowerMS
 
