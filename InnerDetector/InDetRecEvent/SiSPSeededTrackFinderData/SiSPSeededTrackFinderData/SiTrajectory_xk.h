@@ -39,7 +39,7 @@ namespace InDet{
   }; 
 
 
-  class SiTrajectory_xk
+  class SiTrajectory_xk final
     {
       friend class  SiCombinatorialTrackFinder_xk;
 
@@ -84,11 +84,10 @@ namespace InDet{
          bool                                                &,
          const EventContext&);
 
-      double pTseed
-	(const Trk::TrackParameters                          &,
-	 std::list<const InDet::SiCluster*>                  &,
-	 std::vector<const InDet::SiDetElementBoundaryLink_xk*>&,
-	 const EventContext&);
+      double pTseed(const Trk::TrackParameters&,
+                    std::list<const InDet::SiCluster*>&,
+                    std::vector<const InDet::SiDetElementBoundaryLink_xk*>&,
+                    const EventContext&);
 
       bool trackParametersToClusters
         (const PixelClusterContainer*                             ,

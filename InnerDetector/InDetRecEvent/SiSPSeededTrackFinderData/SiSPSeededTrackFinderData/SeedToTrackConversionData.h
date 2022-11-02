@@ -24,7 +24,7 @@ namespace InDet
       @author Susumu Oda <Susumu.Oda@cern.ch>
   */  
 
-  class SeedToTrackConversionData
+  class SeedToTrackConversionData final
   {
   public:
     SeedToTrackConversionData();

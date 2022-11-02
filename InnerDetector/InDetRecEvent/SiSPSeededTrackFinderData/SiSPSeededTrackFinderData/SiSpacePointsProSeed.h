@@ -21,7 +21,7 @@ namespace InDet {
   class SiSpacePointForSeed;
   class SiSpacePointsSeed;
 
-  class SiSpacePointsProSeed {
+  class SiSpacePointsProSeed final{
     
     /////////////////////////////////////////////////////////////////////////////////
     // Public methods:
@@ -33,7 +33,7 @@ namespace InDet {
 
     SiSpacePointsProSeed(SiSpacePointForSeed*&,SiSpacePointForSeed*&,SiSpacePointForSeed*&,float);
     SiSpacePointsProSeed(const SiSpacePointsProSeed&);
-    virtual ~SiSpacePointsProSeed();
+    ~SiSpacePointsProSeed();
     SiSpacePointsProSeed& operator  = (const SiSpacePointsProSeed&);
 
     SiSpacePointForSeed* spacepoint0() {return m_s0;}

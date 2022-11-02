@@ -32,7 +32,7 @@
 
 namespace InDet{
 
-  class SiTrajectoryElement_xk
+  class SiTrajectoryElement_xk final
     {
       ///////////////////////////////////////////////////////////////////
       // Public methods:
