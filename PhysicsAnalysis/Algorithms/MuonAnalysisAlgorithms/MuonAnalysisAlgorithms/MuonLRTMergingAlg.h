@@ -11,6 +11,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <xAODMuon/MuonContainer.h>
+#include <xAODMuon/MuonAuxContainer.h>
 #include <MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h>
 #include <AsgTools/CurrentContext.h>
 #include <AsgTools/ToolHandle.h>
@@ -45,7 +46,7 @@ namespace CP
       SG::ReadHandleKey<xAOD::MuonContainer>      m_promptMuonLocation{this, "PromptMuonLocation","Muons", "Prompt muons to merge"}; /** Vector of muon collections to be merged. */
       SG::ReadHandleKey<xAOD::MuonContainer>      m_lrtMuonLocation{this, "LRTMuonLocation","MuonsLRT", "LRT muons to merge"}; /** Vector of muon collections to be merged. */
       SG::WriteHandleKey<xAOD::MuonContainer>     m_outMuonLocation{this, "OutputMuonLocation", "StdWithLRTMuons", "name of the muon container to write"};   /** Combined muon collection.   */
-      
+
       /// flag to create a view collection rather than building deep-copies (true by default)
       Gaudi::Property<bool>  m_createViewCollection{this, "CreateViewCollection", true};     //!< option to create a view collection and not deep-copy muons
       ToolHandle<CP::IMuonLRTOverlapRemovalTool>  m_overlapRemovalTool{this, "overlapRemovalTool", "", "tool to determine overlaps between regular and LRT muons"}; 
@@ -58,10 +59,15 @@ namespace CP
       /** @brief Private methods:                                    */
       ///////////////////////////////////////////////////////////////////
 
+      /** @brief A routine that merges the muon collections into a view container. */
+      StatusCode mergeMuon(const xAOD::MuonContainer & muonCol,
+                           const std::vector<bool> & muonIsGood,
+                           ConstDataVector<xAOD::MuonContainer>* outputCol) const;
+
       /** @brief A routine that merges the muon collections. */
       StatusCode mergeMuon(const xAOD::MuonContainer & muonCol,
-                     const std::vector<bool> & muonIsGood,
-                     xAOD::MuonContainer* outputCol) const;               
+                           const std::vector<bool> & muonIsGood,
+                           xAOD::MuonContainer* outputCol) const;
 
 
   };

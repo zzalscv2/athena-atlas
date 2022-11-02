@@ -12,8 +12,9 @@
 // to be used downstream for combining LRTmuons and standard muons 
 ///////////////////////////////////////////////////////////////////
 #include "MuonAnalysisAlgorithms/MuonLRTMergingAlg.h"
-#include <AsgTools/CurrentContext.h>
 #include "xAODMuon/MuonAuxContainer.h"
+#include <AsgTools/CurrentContext.h>
+#include <AthContainers/ConstDataVector.h>
 #include <AsgTools/AsgToolConfig.h>
 
 namespace CP{
@@ -49,17 +50,14 @@ namespace CP{
 
         const EventContext& ctx = Gaudi::Hive::currentContext();
 
-        // retrieve the merged muon container        
-        std::unique_ptr<xAOD::MuonContainer> outputCol;
-        std::unique_ptr<xAOD::MuonAuxContainer> outputAuxCol;
+        // Setup containers for output, to avoid const conversions setup two different kind of containers
+        auto outputViewCol = std::make_unique<ConstDataVector<xAOD::MuonContainer>>(SG::VIEW_ELEMENTS);
+        auto outputCol = std::make_unique<xAOD::MuonContainer>();
 
+        std::unique_ptr<xAOD::MuonAuxContainer> outputAuxCol;
         if(!m_createViewCollection) {
-            outputCol = std::make_unique<xAOD::MuonContainer>();
             outputAuxCol = std::make_unique<xAOD::MuonAuxContainer>();
             outputCol->setStore(outputAuxCol.get());
-        }
-        else {
-            outputCol = std::make_unique<xAOD::MuonContainer>(SG::VIEW_ELEMENTS);
         }
 
         /// retrieve muons from StoreGate
@@ -73,8 +71,6 @@ namespace CP{
             ATH_MSG_FATAL("Unable to retrieve xAOD::MuonContainer, \"" << m_lrtMuonLocation << "\", cannot run the LRT muon merger!");
             return StatusCode::FAILURE;
         }
-        outputCol->reserve(promptCol->size() + lrtCol->size());
-
 
         // Check and resolve overlaps 
         std::vector<bool> writePromptMuon;
@@ -87,44 +83,62 @@ namespace CP{
         for (const xAOD::Muon* mu : *lrtCol) isLRT(*mu) = 1;
 
         // and merge
-        ATH_CHECK(mergeMuon(*promptCol, writePromptMuon, outputCol.get()));
-        ATH_CHECK(mergeMuon(*lrtCol, writeLRTMuon, outputCol.get()));
-        SG::WriteHandle<xAOD::MuonContainer> h_write(m_outMuonLocation, ctx);
-        if (m_createViewCollection){
-            ATH_CHECK(h_write.record(std::move(outputCol)));
-        }
-        else{  
-            ATH_CHECK(h_write.record(std::move(outputCol), std::move(outputAuxCol))); 
+        if (m_createViewCollection) {
+          outputViewCol->reserve(promptCol->size() + lrtCol->size());
+          ATH_CHECK(mergeMuon(*promptCol, writePromptMuon, outputViewCol.get()));
+          ATH_CHECK(mergeMuon(*lrtCol, writeLRTMuon, outputViewCol.get()));
+        } else {
+          outputCol->reserve(promptCol->size() + lrtCol->size());
+          ATH_CHECK(mergeMuon(*promptCol, writePromptMuon, outputCol.get()));
+          ATH_CHECK(mergeMuon(*lrtCol, writeLRTMuon, outputCol.get()));
         }
 
-        ATH_MSG_DEBUG("Done initializing!");  
+        // write
+        SG::WriteHandle<xAOD::MuonContainer> h_write(m_outMuonLocation, ctx);
+        if (m_createViewCollection) {
+          ATH_CHECK(evtStore()->record(outputViewCol.release(), m_outMuonLocation.key()));
+        }
+        else {
+          ATH_CHECK(h_write.record(std::move(outputCol), std::move(outputAuxCol)));
+        }
+
         return StatusCode::SUCCESS;
 
     }
+
   ///////////////////////////////////////////////////////////////////
   // Merge muon collections and remove duplicates
   ///////////////////////////////////////////////////////////////////
 
     StatusCode MuonLRTMergingAlg::mergeMuon(const xAOD::MuonContainer & muonCol,
-                             const std::vector<bool> & writeMuon,
-                                xAOD::MuonContainer* outputCol) const{
+                                            const std::vector<bool> & writeMuon,
+                                            ConstDataVector<xAOD::MuonContainer>* outputCol) const{
+        // loop over muons, accept them and add them into association tool
+        if(muonCol.empty()) {return StatusCode::SUCCESS;}
+
+        for(const xAOD::Muon* muon : muonCol){
+            // add muon into output
+            if (writeMuon.at(muon->index())){
+              outputCol->push_back(muon);
+            }
+        }
+        return StatusCode::SUCCESS;
+    }
+
+    StatusCode MuonLRTMergingAlg::mergeMuon(const xAOD::MuonContainer & muonCol,
+                                            const std::vector<bool> & writeMuon,
+                                            xAOD::MuonContainer* outputCol) const{
         // loop over muons, accept them and add them into association tool
         if(muonCol.empty()) {return StatusCode::SUCCESS;}
         static const SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> originalMuonLink("originalMuonLink");
         for(const xAOD::Muon* muon : muonCol){
             // add muon into output
             if (writeMuon.at(muon->index())){
-                xAOD::Muon* newMuon;
-                if (!m_createViewCollection) {
-                    newMuon = new xAOD::Muon(*muon);
-                    ElementLink<xAOD::MuonContainer> myLink;
-                    myLink.toIndexedElement(muonCol, muon->index());
-                    originalMuonLink(*newMuon) = myLink;
-                }
-                else {
-                    newMuon = const_cast<xAOD::Muon*>(muon);
-                }
-                outputCol->push_back(newMuon);
+              xAOD::Muon* newMuon = new xAOD::Muon(*muon);
+              ElementLink<xAOD::MuonContainer> myLink;
+              myLink.toIndexedElement(muonCol, muon->index());
+              originalMuonLink(*newMuon) = myLink;
+              outputCol->push_back(newMuon);
             }
         }
         return StatusCode::SUCCESS;
