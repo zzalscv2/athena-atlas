@@ -185,20 +185,10 @@ private:
                                                true,
                                                "Reintegrate Outliers" };
 
-  Gaudi::Property<bool> m_makePerigee{ this,
-                                       "MakePerigee",
-                                       true,
-                                       "Make Perigee" };
-
   Gaudi::Property<bool> m_refitOnMeasurementBase{ this,
                                                   "RefitOnMeasurementBase",
                                                   true,
                                                   "Refit On Measurement Base" };
-
-  Gaudi::Property<bool> m_doHitSorting{ this,
-                                        "DoHitSorting",
-                                        true,
-                                        "Do Hit Sorting" };
 
   Gaudi::Property<bool> m_combineWithFitter{
     this,

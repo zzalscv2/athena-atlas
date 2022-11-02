@@ -52,8 +52,6 @@ def getGSFTrackFitter(name="EMGSFTrackFitter",
     from TrkGaussianSumFilter.TrkGaussianSumFilterConf import (
         Trk__GaussianSumFitter)
     kwargs.setdefault("ReintegrateOutliers", True)
-    kwargs.setdefault("MakePerigee", True)
-    kwargs.setdefault("DoHitSorting", True)
 
     GSFTrackFitter = Trk__GaussianSumFitter(name, **kwargs)
     # --- end of fitter loading

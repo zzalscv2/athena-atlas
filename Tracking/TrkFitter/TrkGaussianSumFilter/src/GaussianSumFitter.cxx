@@ -281,16 +281,14 @@ Trk::GaussianSumFitter::fit(
 
   // We need a sorted PrepRawDataSet
   Trk::PrepRawDataSet sortedPrepRawDataSet = PrepRawDataSet(prepRawDataSet);
-  if (m_doHitSorting) {
-    Trk::PrepRawDataComparisonFunction prdComparisonFunction =
-      Trk::PrepRawDataComparisonFunction(
-        estimatedParametersNearOrigin.position(),
-        estimatedParametersNearOrigin.momentum());
+  Trk::PrepRawDataComparisonFunction prdComparisonFunction =
+    Trk::PrepRawDataComparisonFunction(
+      estimatedParametersNearOrigin.position(),
+      estimatedParametersNearOrigin.momentum());
 
-    std::sort(sortedPrepRawDataSet.begin(),
-              sortedPrepRawDataSet.end(),
-              prdComparisonFunction);
-  }
+  std::sort(sortedPrepRawDataSet.begin(),
+            sortedPrepRawDataSet.end(),
+            prdComparisonFunction);
 
   // Create Extrapolator cache that holds material effects cache;
   Trk::IMultiStateExtrapolator::Cache extrapolatorCache;
@@ -321,15 +319,13 @@ Trk::GaussianSumFitter::fit(
   }
 
   // Create parameters at perigee if needed
-  if (m_makePerigee) {
-    auto perigeeMultiStateOnSurface = makePerigee(
-      ctx, extrapolatorCache, smoothedTrajectory, particleHypothesis);
-    if (perigeeMultiStateOnSurface) {
-      smoothedTrajectory.push_back(perigeeMultiStateOnSurface.release());
-    } else {
-      m_PerigeeFailure.fetch_add(1, std::memory_order_relaxed);
-      return nullptr;
-    }
+  auto perigeeMultiStateOnSurface =
+    makePerigee(ctx, extrapolatorCache, smoothedTrajectory, particleHypothesis);
+  if (perigeeMultiStateOnSurface) {
+    smoothedTrajectory.push_back(perigeeMultiStateOnSurface.release());
+  } else {
+    m_PerigeeFailure.fetch_add(1, std::memory_order_relaxed);
+    return nullptr;
   }
 
   // Reverse the order of the TSOS's after the smoother
@@ -389,15 +385,12 @@ Trk::GaussianSumFitter::fit(
   Trk::MeasurementSet sortedMeasurementSet =
     MeasurementSet(cleanedMeasurementSet);
 
-  if (m_doHitSorting) {
-
-    Trk::MeasurementBaseComparisonFunction measurementBaseComparisonFunction(
-      estimatedParametersNearOrigin.position(),
-      estimatedParametersNearOrigin.momentum());
-    sort(sortedMeasurementSet.begin(),
-         sortedMeasurementSet.end(),
-         measurementBaseComparisonFunction);
-  }
+  Trk::MeasurementBaseComparisonFunction measurementBaseComparisonFunction(
+    estimatedParametersNearOrigin.position(),
+    estimatedParametersNearOrigin.momentum());
+  sort(sortedMeasurementSet.begin(),
+       sortedMeasurementSet.end(),
+       measurementBaseComparisonFunction);
 
   // Create Extrapolator cache that holds material effects cache;
   Trk::IMultiStateExtrapolator::Cache extrapolatorCache;
@@ -431,15 +424,13 @@ Trk::GaussianSumFitter::fit(
   }
 
   // Create parameters at perigee if needed
-  if (m_makePerigee) {
-    auto perigeeMultiStateOnSurface = makePerigee(
-      ctx, extrapolatorCache, smoothedTrajectory, particleHypothesis);
-    if (perigeeMultiStateOnSurface) {
-      smoothedTrajectory.push_back(perigeeMultiStateOnSurface.release());
-    } else {
-      m_PerigeeFailure.fetch_add(1, std::memory_order_relaxed);
-      return nullptr;
-    }
+  auto perigeeMultiStateOnSurface =
+    makePerigee(ctx, extrapolatorCache, smoothedTrajectory, particleHypothesis);
+  if (perigeeMultiStateOnSurface) {
+    smoothedTrajectory.push_back(perigeeMultiStateOnSurface.release());
+  } else {
+    m_PerigeeFailure.fetch_add(1, std::memory_order_relaxed);
+    return nullptr;
   }
 
   // Reverse the order of the TSOS's to make be order flow from inside to out
@@ -473,14 +464,13 @@ Trk::GaussianSumFitter::fit(const EventContext& ctx,
   }
   // determine the Track Parameter which is the start of the trajectory
   const TrackParameters* estimatedStartParameters =
-    m_doHitSorting ? *(std::min_element(intrk.trackParameters()->begin(),
-                                        intrk.trackParameters()->end(),
-                                        m_trkParametersComparisonFunction))
-                   : *intrk.trackParameters()->begin();
+    *(std::min_element(intrk.trackParameters()->begin(),
+                       intrk.trackParameters()->end(),
+                       m_trkParametersComparisonFunction));
 
-  // use external preparator class to prepare PRD set for fitter interface
-  PrepRawDataSet PRDColl = Trk::TrackFitInputPreparator::stripPrepRawData(
-    intrk, addPrdColl, false, true);
+    // use external preparator class to prepare PRD set for fitter interface
+    PrepRawDataSet PRDColl = Trk::TrackFitInputPreparator::stripPrepRawData(
+      intrk, addPrdColl, false, true);
 
   // delegate to fitting PrepRawData interface method
   return fit(ctx, PRDColl, *estimatedStartParameters, runOutlier, matEffects);
