@@ -1,3 +1,4 @@
+
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
@@ -1020,6 +1021,10 @@ class ComponentAccumulator:
         # Otherwise, observed output ordering may differ between py2/py3.
         sys.stdout.flush()
 
+
+        #Set TDAQ_ERS_NO_SIGNAL_HANDLERS to avoid interference with 
+        #TDAQ signal handling
+        environ['TDAQ_ERS_NO_SIGNAL_HANDLERS']='1'
         from AthenaCommon.Debugging import allowPtrace, hookDebugger
         allowPtrace()
 

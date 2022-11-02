@@ -24,7 +24,7 @@
 
 // C includes
 #include <fenv.h>
-#include <stdlib.h>
+
 
 namespace FPEAudit {
   const int MAXARRAY=100;
@@ -95,17 +95,6 @@ StatusCode FPEAuditor::initialize()
   // still initializing (so one edge is left orphaned)
   add_fpe_node();
 
-  if ( m_NstacktracesOnFPE ) {
-    FPEAudit::lock_t lock (FPEAudit::s_mutex);
-    int stat ATLAS_THREAD_SAFE = setenv("TDAQ_ERS_NO_SIGNAL_HANDLERS","1",1);
-    if (0 == stat) { 
-      // Set this variable to avoid TDAQ ErrorHandler overriding us 
-      ATH_MSG_INFO("Setting environment variable TDAQ_ERS_NO_SIGNAL_HANDLERS");
-    }
-    else {
-      ATH_MSG_WARNING("Failed to set environment variable TDAQ_ERS_NO_SIGNAL_HANDLERS");
-    }
-  }
   return StatusCode::SUCCESS;
 }
 
