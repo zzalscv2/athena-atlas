@@ -186,6 +186,8 @@ namespace InDet {
       BooleanProperty m_doFastTracking{this, "doFastTracking", false};
       StringProperty m_fieldmode{this, "MagneticFieldMode", "MapSolenoid", "Mode of magnetic field"};
       DoubleProperty m_qualityCut{this, "TrackQualityCut", 9.3, "Simple track quality cut"};
+      FloatProperty m_minPtCut{this, "MinFinalPtCut", 100, "Cut on the pt of the final track. Must be >0 to avoid NANs when computing eta."};
+      float  m_minPt2Cut=0;
       BooleanProperty m_writeHolesFromPattern{this, "writeHolesFromPattern", false,"Flag to activate writing hole info from the pattern recognition"}; 
       //@}
 
@@ -222,8 +224,8 @@ namespace InDet {
 
       static void getTrackQualityCuts(SiCombinatorialTrackFinderData_xk& data, const TrackQualityCuts&) ;
 
-      static Trk::Track* convertToTrack(SiCombinatorialTrackFinderData_xk& data) ;
-      static Trk::Track* convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) ;
+      Trk::Track* convertToTrack(SiCombinatorialTrackFinderData_xk& data) const;
+      Trk::Track* convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) const;
  
       void magneticFieldInit();
 
