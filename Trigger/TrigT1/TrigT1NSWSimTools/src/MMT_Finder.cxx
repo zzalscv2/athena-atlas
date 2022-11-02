@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/getMessageSvc.h"
@@ -91,7 +91,8 @@ void MMT_Finder::fillHitBuffer( map< pair<int,int> , finder_entry > & hitBuffer,
 
           // If this road+plane combination is not already in the buffer
           // Or if this hit's key is smaller than the key that's in there...
-          if( hitBuffer.find(key) == hitBuffer.end() || hit.key < hitBuffer.find(key)->second.hit.key ){
+	  auto hitBuffer_it = hitBuffer.find(key);
+          if( hitBuffer_it == hitBuffer.end() || hit.key < hitBuffer_it->second.hit.key ){
             hitBuffer[key]=finder_entry(true,m_clock,hit); // Put it in there!
           }
 
@@ -129,11 +130,11 @@ void MMT_Finder::fillHitBuffer( map< pair<int,int> , finder_entry > & hitBuffer,
     for(int road = road_min; road<=road_max; road++){ // road loop
 
       key.first = road;
-
-      if( hitBuffer.find(key) == hitBuffer.end() ){ // If this road+plane combination is not already in the buffer
+      auto hitBuffer_it = hitBuffer.find(key);
+      if( hitBuffer_it == hitBuffer.end() ){ // If this road+plane combination is not already in the buffer
         hitBuffer[key]=finder_entry(true,m_clock,hit); // Put it in there!
       }
-      else if( hit.key < hitBuffer.find(key)->second.hit.key ){ // Or if this hit's key is smaller than the key that's in there...
+      else if( hit.key < hitBuffer_it->second.hit.key ){ // Or if this hit's key is smaller than the key that's in there...
         hitBuffer[key]=finder_entry(true,m_clock,hit);
       }
     } // road loop
@@ -144,7 +145,7 @@ void MMT_Finder::fillHitBuffer( map< pair<int,int> , finder_entry > & hitBuffer,
 void MMT_Finder::checkBufferForHits(vector<bool>& plane_is_hit,
                                     vector<Hit>& track,
                                     int road,
-                                    map<pair<int,int>,finder_entry> hitBuffer,
+                                    const map<pair<int,int>,finder_entry>& hitBuffer,
                                     std::shared_ptr<MMT_Parameters> par
                                     ) const{
   //Loops through the buffer which should have entries = nplanes
