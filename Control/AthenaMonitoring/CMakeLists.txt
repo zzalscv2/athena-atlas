@@ -37,7 +37,6 @@ atlas_add_library(
         SGAudCore
         StoreGateLib
         AthenaPoolUtilities
-        EventInfo
         LWHists
         MuonAlignmentData
         InDetReadoutGeometry
