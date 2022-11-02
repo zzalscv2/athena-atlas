@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSortingTool.cxx
@@ -39,7 +39,6 @@ ParticleSortingTool::ParticleSortingTool( const std::string& type,
   m_outCollKey(""),
   m_sortVar("pt"),
   m_sortDescending(true),
-  m_contID(0),
   m_sortID(0),
   m_nEventsProcessed(0)
 {
@@ -76,7 +75,6 @@ StatusCode ParticleSortingTool::initialize()
   ATH_MSG_DEBUG ( " using = " << m_outCollKey );
 
   // initialize the counters
-  m_contID           = 0;
   m_sortID           = 0;
   m_nEventsProcessed = 0;
 
