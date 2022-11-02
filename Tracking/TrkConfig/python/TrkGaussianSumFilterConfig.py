@@ -64,8 +64,6 @@ def EMGSFTrackFitterCfg(flags, name="EMGSFTrackFitter", **kwargs):
         kwargs["ToolForExtrapolation"] = acc.popToolsAndMerge(gsfextrap)
 
     kwargs.setdefault("ReintegrateOutliers", True)
-    kwargs.setdefault("MakePerigee", True)
-    kwargs.setdefault("DoHitSorting", True)
 
     acc.setPrivateTools(CompFactory.Trk.GaussianSumFitter(**kwargs))
 
@@ -80,9 +78,7 @@ def GaussianSumFitterCfg(flags, name="GaussianSumFitter", **kwargs):
         InDetRotCreator = acc.popToolsAndMerge(InDetRotCreatorCfg(flags))
         kwargs.setdefault("ToolForROTCreation", InDetRotCreator)
 
-    kwargs.setdefault("MakePerigee", True)
     kwargs.setdefault("RefitOnMeasurementBase", True)
-    kwargs.setdefault("DoHitSorting", True)
 
     GaussianSumFitter = acc.popToolsAndMerge(
         EMGSFTrackFitterCfg(flags, name, **kwargs)
@@ -100,9 +96,7 @@ def ITkGaussianSumFitterCfg(flags, name="ITkGaussianSumFitter", **kwargs):
         ITkRotCreator = acc.popToolsAndMerge(ITkRotCreatorCfg(flags))
         kwargs.setdefault("ToolForROTCreation", ITkRotCreator)
 
-    kwargs.setdefault("MakePerigee", True)
     kwargs.setdefault("RefitOnMeasurementBase", True)
-    kwargs.setdefault("DoHitSorting", True)
 
     GaussianSumFitter = acc.popToolsAndMerge(
         EMGSFTrackFitterCfg(flags, name=name, **kwargs)
