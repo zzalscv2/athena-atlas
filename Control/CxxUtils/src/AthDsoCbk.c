@@ -348,12 +348,17 @@ setup()
 void
 cleanup()
 {
+  int i;
   static int finalized = 0;
   if (!finalized) {
     finalized = 1;
     ath_dl_hook_release();
     
     /* free list of registered callbacks */
+    for (i = 0; i != g_dso_callbacks->length; ++i) {
+      ath_dso_event_cbk * elem = g_dso_callbacks->data[i];
+      if (elem) free (elem);
+    }
     arraylist_free(g_dso_callbacks);
   }
 }
