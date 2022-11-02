@@ -544,7 +544,7 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                return Error;
             }
             m_branchName = treeName.substr(inx+1, inx2-inx-1);
-            treeName = treeName.substr(0, inx);
+            treeName.resize(inx);
             log << DbPrintLvl::Debug << "Branch container '" << m_branchName << "'" << DbPrint::endmsg;
          }
       }
