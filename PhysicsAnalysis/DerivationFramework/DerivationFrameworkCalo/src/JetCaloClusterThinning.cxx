@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -132,7 +132,7 @@ DerivationFramework::JetCaloClusterThinning::doThinning() const
           jetToCheck.push_back((*importedJets)[i]);
     }
 
-    if(jetToCheck.size() == 0)
+    if(jetToCheck.empty())
       return StatusCode::SUCCESS;
     
     for( const xAOD::Jet* jet : jetToCheck){
@@ -168,8 +168,8 @@ DerivationFramework::JetCaloClusterThinning::doThinning() const
   // Execute the thinning service based on the mask. Finish.
   importedTopoCaloCluster.keep(topomask);
 
-  for(unsigned int i = 0; i < m_addClusterKeys.size(); i++){
-    SG::ThinningHandle<xAOD::CaloClusterContainer>  tempClusters(m_addClusterKeys[i]);
+  for(const auto & addClusterKey : m_addClusterKeys){
+    SG::ThinningHandle<xAOD::CaloClusterContainer>  tempClusters(addClusterKey);
     tempClusters.keep(topomask);
   }
 

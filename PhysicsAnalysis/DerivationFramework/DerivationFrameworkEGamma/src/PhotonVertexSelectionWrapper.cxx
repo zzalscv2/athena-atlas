@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkEGamma/PhotonVertexSelectionWrapper.h"
@@ -76,11 +76,8 @@ PhotonVertexSelectionWrapper::addBranches() const
                                                                ctx);
 
   // Loop over vertices and update auxdata
-  for (xAOD::VertexContainer::const_iterator vtxItr = vertices->begin();
-       vtxItr != vertices->end();
-       ++vtxItr) {
+  for (const auto *vertex : *vertices) {
 
-    const xAOD::Vertex* vertex = *vtxItr;
     // initialize decorations to some default value
     vtxPt(*vertex) = -999.;
     vtxEta(*vertex) = -999.;
