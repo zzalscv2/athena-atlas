@@ -18,8 +18,7 @@ DerivationFramework::PixelNtupleMaker::PixelNtupleMaker(const std::string& t, co
   declareInterface<DerivationFramework::ISkimmingTool>(this);
 }
 
-DerivationFramework::PixelNtupleMaker::~PixelNtupleMaker() {
-}
+DerivationFramework::PixelNtupleMaker::~PixelNtupleMaker() = default;
 
 StatusCode DerivationFramework::PixelNtupleMaker::initialize() {
   ATH_CHECK(m_containerKey.initialize());
@@ -56,20 +55,20 @@ bool DerivationFramework::PixelNtupleMaker::eventPassesFilter() const {
 
   std::vector<float> tmpCov(15,0.);
   static const SG::AuxElement::ConstAccessor<MeasurementsOnTrack>  acc_MeasurementsOnTrack("msosLink");
-  for (xAOD::TrackParticleContainer::const_iterator trk=tracks->begin(); trk!=tracks->end(); ++trk) {
+  for (const auto *trk : *tracks) {
 
     bool passTrack = true;
-    if ((*trk)->pt()<1000.0) {
+    if (trk->pt()<1000.0) {
       uint8_t getInt = 0;
-      (*trk)->summaryValue(getInt,xAOD::numberOfPixelHits); int nPixHits = getInt;
-      (*trk)->summaryValue(getInt,xAOD::numberOfSCTHits);   int nSCTHits = getInt;
+      trk->summaryValue(getInt,xAOD::numberOfPixelHits); int nPixHits = getInt;
+      trk->summaryValue(getInt,xAOD::numberOfSCTHits);   int nSCTHits = getInt;
       if (nPixHits<4) { passTrack=false; }
       if (nSCTHits<1) { passTrack=false; }
     }
 
     if (passTrack) {
       xAOD::TrackParticle* tp = new xAOD::TrackParticle();
-      tp->makePrivateStore(**trk);
+      tp->makePrivateStore(*trk);
       tp->setDefiningParametersCovMatrixVec(tmpCov);
 
       std::vector<int> holeIndex;
@@ -108,10 +107,10 @@ bool DerivationFramework::PixelNtupleMaker::eventPassesFilter() const {
       std::vector<std::vector<int>> rdoPhi;
       std::vector<std::vector<int>> rdoEta;
 
-      const MeasurementsOnTrack& measurementsOnTrack = acc_MeasurementsOnTrack(*(*trk));
-      for (MeasurementsOnTrackIter msos_iter=measurementsOnTrack.begin(); msos_iter!=measurementsOnTrack.end(); ++msos_iter) {  
-        if (!(*msos_iter).isValid()) { continue; }
-        const xAOD::TrackStateValidation* msos = *(*msos_iter); 
+      const MeasurementsOnTrack& measurementsOnTrack = acc_MeasurementsOnTrack(*trk);
+      for (const auto & msos_iter : measurementsOnTrack) {  
+        if (!msos_iter.isValid()) { continue; }
+        const xAOD::TrackStateValidation* msos = *msos_iter; 
         if (!msos->trackMeasurementValidationLink().isValid()) { continue; }
         if (!(*(msos->trackMeasurementValidationLink())))      { continue; }
         if (msos->detType()==1) { // its a pixel 
@@ -155,15 +154,15 @@ bool DerivationFramework::PixelNtupleMaker::eventPassesFilter() const {
             int numNeighborCluster20x4 = 0;
             int nTotalClustersPerModule = 0;
             int nTotalPixelsPerModule = 0;
-            for (xAOD::TrackMeasurementValidationContainer::const_iterator clus_neighbor=pixClusters->begin(); clus_neighbor!=pixClusters->end(); ++clus_neighbor) {
-              if ((*clus_neighbor)->auxdata<int>("layer")==(*clus_itr)->auxdata<int>("layer")
-                  && (*clus_neighbor)->auxdata<int>("bec")==(*clus_itr)->auxdata<int>("bec")
-                  && (*clus_neighbor)->auxdata<int>("phi_module")==(*clus_itr)->auxdata<int>("phi_module")
-                  && (*clus_neighbor)->auxdata<int>("eta_module")==(*clus_itr)->auxdata<int>("eta_module")) {
-                float deltaX = std::abs((*clus_neighbor)->localX()-(*clus_itr)->localX());
-                float deltaY = std::abs((*clus_neighbor)->localY()-(*clus_itr)->localY());
+            for (const auto *clus_neighbor : *pixClusters) {
+              if (clus_neighbor->auxdata<int>("layer")==(*clus_itr)->auxdata<int>("layer")
+                  && clus_neighbor->auxdata<int>("bec")==(*clus_itr)->auxdata<int>("bec")
+                  && clus_neighbor->auxdata<int>("phi_module")==(*clus_itr)->auxdata<int>("phi_module")
+                  && clus_neighbor->auxdata<int>("eta_module")==(*clus_itr)->auxdata<int>("eta_module")) {
+                float deltaX = std::abs(clus_neighbor->localX()-(*clus_itr)->localX());
+                float deltaY = std::abs(clus_neighbor->localY()-(*clus_itr)->localY());
                 nTotalClustersPerModule++;
-                nTotalPixelsPerModule += (*clus_neighbor)->auxdata<int>("nRDO");
+                nTotalPixelsPerModule += clus_neighbor->auxdata<int>("nRDO");
                 if (deltaX>0.0 && deltaY>0.0) {
                   if ((*clus_itr)->auxdata<int>("layer")==0 && (*clus_itr)->auxdata<int>("bec")==0) {  // IBL
                     if (deltaX<0.500 && deltaY<0.500) { numNeighborCluster10x2++; }
@@ -228,7 +227,7 @@ bool DerivationFramework::PixelNtupleMaker::eventPassesFilter() const {
             std::vector<float> tmpCharge;
             std::vector<int> tmpPhi;
             std::vector<int> tmpEta;
-            if ((*trk)->pt()>2000.0) {
+            if (trk->pt()>2000.0) {
               if ((*clus_itr)->isAvailable<std::vector<int>>("rdo_phi_pixel_index")) {
                 for (int i=0; i<(int)(*clus_itr)->auxdata<std::vector<int>>("rdo_phi_pixel_index").size(); i++) {
                   int phi = (*clus_itr)->auxdata<std::vector<int>>("rdo_phi_pixel_index")[i];
@@ -289,8 +288,8 @@ bool DerivationFramework::PixelNtupleMaker::eventPassesFilter() const {
       static const SG::AuxElement::Decorator<std::vector<std::vector<float>>> RdoCharge("RdoCharge");
       static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoPhi("RdoPhi");
       static const SG::AuxElement::Decorator<std::vector<std::vector<int>>>   RdoEta("RdoEta");
-      d0err(*tp)             = (*trk)->definingParametersCovMatrixVec().at(0);
-      z0err(*tp)             = (*trk)->definingParametersCovMatrixVec().at(2);
+      d0err(*tp)             = trk->definingParametersCovMatrixVec().at(0);
+      z0err(*tp)             = trk->definingParametersCovMatrixVec().at(2);
       HoleIndex(*tp)         = std::move(holeIndex);
       ClusterLayer(*tp)      = std::move(clusterLayer);
       ClusterBEC(*tp)        = std::move(clusterBEC);
@@ -383,5 +382,4 @@ void DerivationFramework::PixelNtupleMaker::GetLayerEtaPhiFromId(uint64_t id,int
       *barrelEC=2;
       break;
   }
-  return;
-}
+  }

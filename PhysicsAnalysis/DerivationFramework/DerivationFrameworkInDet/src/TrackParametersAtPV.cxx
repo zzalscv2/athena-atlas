@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,8 +22,7 @@ DerivationFramework::TrackParametersAtPV::TrackParametersAtPV( const std::string
   }
 
 // Destructor
-DerivationFramework::TrackParametersAtPV::~TrackParametersAtPV() {
-}
+DerivationFramework::TrackParametersAtPV::~TrackParametersAtPV() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::TrackParametersAtPV::initialize()
@@ -81,9 +80,9 @@ StatusCode DerivationFramework::TrackParametersAtPV::addBranches() const
   }
 
   // Get track z0 w.r.t PV
-  for (xAOD::TrackParticleContainer::const_iterator trackIt=tracks->begin(); trackIt!=tracks->end(); ++trackIt) {
+  for (const auto *trackIt : *tracks) {
     if (pv) {
-      float z0wrtPV = (*trackIt)->z0() + (*trackIt)->vz() - pv->z();
+      float z0wrtPV = trackIt->z0() + trackIt->vz() - pv->z();
       track_z0_PV->push_back(z0wrtPV);
 
     } else {

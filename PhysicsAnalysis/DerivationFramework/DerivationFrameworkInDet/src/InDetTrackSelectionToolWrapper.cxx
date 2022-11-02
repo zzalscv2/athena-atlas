@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ namespace DerivationFramework {
     ATH_CHECK( m_tracksKey.initialize() );
     std::string::size_type pos = m_tracksKey.key().find('+');
     pos =  (pos != std::string::npos) ? pos+1 : 0;
-    std::string_view container_name( &(m_tracksKey.key().data()[pos]), m_tracksKey.key().size() - pos);
+    std::string_view container_name( &(m_tracksKey.key()[pos]), m_tracksKey.key().size() - pos);
     std::string_view decor_name(m_decorationKey.key());
     if (!(decor_name.compare(0,m_tracksKey.key().size(),std::string_view(m_tracksKey.key()))==0 && decor_name.compare(0,container_name.size(),container_name)==0)) {
        m_decorationKey = std::string(container_name) + "." + m_decorationKey.key();
@@ -67,8 +67,8 @@ namespace DerivationFramework {
     }
     // Run tool for each element and decorate with the decision
     SG::WriteDecorHandle<xAOD::TrackParticleContainer,bool > accept(m_decorationKey);
-    for (xAOD::TrackParticleContainer::const_iterator trItr = tracks->begin(); trItr!=tracks->end(); ++trItr) {
-      accept( **trItr ) = m_tool->accept(*trItr).getCutResult(0);
+    for (const auto *trItr : *tracks) {
+      accept( *trItr ) = m_tool->accept(trItr).getCutResult(0);
     } // end of loop over tracks
 
     return StatusCode::SUCCESS;

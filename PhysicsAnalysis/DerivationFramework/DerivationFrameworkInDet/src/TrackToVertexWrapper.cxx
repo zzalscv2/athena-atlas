@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -89,13 +89,13 @@ namespace DerivationFramework {
     std::vector<SG::WriteDecorHandle<xAOD::TrackParticleContainer,float> >
       track_decorators = createDecorators<xAOD::TrackParticleContainer,float>(m_trackFloatDecorKeys,ctx);
     // Run tool for each element and calculate the impact parameters/errors 
-    for (xAOD::TrackParticleContainer::const_iterator trItr = tracks->begin(); trItr!=tracks->end(); ++trItr) {
+    for (const auto *trItr : *tracks) {
       std::unique_ptr<const Trk::ImpactParametersAndSigma> iPandSigma;
       std::unique_ptr<const Trk::ImpactParametersAndSigma> iPandSigmaBiased;
       const xAOD::Vertex* foundVertex { nullptr };
       for (const auto *const vx : *vertices) {
         for (const auto& tpLink : vx->trackParticleLinks()) {
-          if (*tpLink == *trItr) {
+          if (*tpLink == trItr) {
             foundVertex = vx;
             break;
           }
@@ -103,8 +103,8 @@ namespace DerivationFramework {
         if (foundVertex) break;
       }
       if ( foundVertex ) {
-        iPandSigma.reset(m_tool->estimate(*trItr,foundVertex,true));
-        iPandSigmaBiased.reset(m_tool->estimate(*trItr,foundVertex,false));
+        iPandSigma.reset(m_tool->estimate(trItr,foundVertex,true));
+        iPandSigmaBiased.reset(m_tool->estimate(trItr,foundVertex,false));
         if( !iPandSigma )       ATH_MSG_WARNING ("trackToVertexIPEstimator failed !");
         if( !iPandSigmaBiased ) ATH_MSG_WARNING ("trackToVertexIPEstimator biased IP failed !");
       }
@@ -114,49 +114,49 @@ namespace DerivationFramework {
 
       // Do the decoration for each track
       if (iPandSigma) {
-        track_decorators[kdecnD0Decor]( **trItr )              = iPandSigma->IPd0;
-        track_decorators[kdecnZ0Decor]( **trItr )              = iPandSigma->IPz0;
-        track_decorators[kdecnZ0SinThetaDecor]( **trItr )      = iPandSigma->IPz0SinTheta;
-        track_decorators[kdecnD0ErrDecor]( **trItr )           = iPandSigma->sigmad0;
-        track_decorators[kdecnZ0ErrDecor]( **trItr )           = iPandSigma->sigmaz0;
-        track_decorators[kdecnZ0SinThetaErrDecor]( **trItr )   = iPandSigma->sigmaz0SinTheta;
-        track_decorators[kdecnPVD0ErrDecor] (**trItr )         = iPandSigma->PVsigmad0;
-        track_decorators[kdecnPVZ0ErrDecor] (**trItr )         = iPandSigma->PVsigmaz0;
-        track_decorators[kdecnPVZ0SinThetaErrDecor] (**trItr ) = iPandSigma->PVsigmaz0SinTheta;
+        track_decorators[kdecnD0Decor]( *trItr )              = iPandSigma->IPd0;
+        track_decorators[kdecnZ0Decor]( *trItr )              = iPandSigma->IPz0;
+        track_decorators[kdecnZ0SinThetaDecor]( *trItr )      = iPandSigma->IPz0SinTheta;
+        track_decorators[kdecnD0ErrDecor]( *trItr )           = iPandSigma->sigmad0;
+        track_decorators[kdecnZ0ErrDecor]( *trItr )           = iPandSigma->sigmaz0;
+        track_decorators[kdecnZ0SinThetaErrDecor]( *trItr )   = iPandSigma->sigmaz0SinTheta;
+        track_decorators[kdecnPVD0ErrDecor] (*trItr )         = iPandSigma->PVsigmad0;
+        track_decorators[kdecnPVZ0ErrDecor] (*trItr )         = iPandSigma->PVsigmaz0;
+        track_decorators[kdecnPVZ0SinThetaErrDecor] (*trItr ) = iPandSigma->PVsigmaz0SinTheta;
       }
       else {
-        track_decorators[kdecnD0Decor]( **trItr )              = 999.;
-        track_decorators[kdecnZ0Decor]( **trItr )              = 999.;
-        track_decorators[kdecnZ0SinThetaDecor]( **trItr )      = 999.;
-        track_decorators[kdecnD0ErrDecor]( **trItr )           = 999.;
-        track_decorators[kdecnZ0ErrDecor]( **trItr )           = 999.;
-        track_decorators[kdecnZ0SinThetaErrDecor]( **trItr )   = 999.;
-        track_decorators[kdecnPVD0ErrDecor] (**trItr )         = 999.;
-        track_decorators[kdecnPVZ0ErrDecor] (**trItr )         = 999.;
-        track_decorators[kdecnPVZ0SinThetaErrDecor] (**trItr ) = 999.;
+        track_decorators[kdecnD0Decor]( *trItr )              = 999.;
+        track_decorators[kdecnZ0Decor]( *trItr )              = 999.;
+        track_decorators[kdecnZ0SinThetaDecor]( *trItr )      = 999.;
+        track_decorators[kdecnD0ErrDecor]( *trItr )           = 999.;
+        track_decorators[kdecnZ0ErrDecor]( *trItr )           = 999.;
+        track_decorators[kdecnZ0SinThetaErrDecor]( *trItr )   = 999.;
+        track_decorators[kdecnPVD0ErrDecor] (*trItr )         = 999.;
+        track_decorators[kdecnPVZ0ErrDecor] (*trItr )         = 999.;
+        track_decorators[kdecnPVZ0SinThetaErrDecor] (*trItr ) = 999.;
       }
 
       if (iPandSigmaBiased) {
-        track_decorators[kdecn_b_D0Decor]( **trItr )              = iPandSigmaBiased->IPd0;
-        track_decorators[kdecn_b_Z0Decor]( **trItr )              = iPandSigmaBiased->IPz0;
-        track_decorators[kdecn_b_Z0SinThetaDecor]( **trItr )      = iPandSigmaBiased->IPz0SinTheta;
-        track_decorators[kdecn_b_D0ErrDecor]( **trItr )           = iPandSigmaBiased->sigmad0;
-        track_decorators[kdecn_b_Z0ErrDecor]( **trItr )           = iPandSigmaBiased->sigmaz0;
-        track_decorators[kdecn_b_Z0SinThetaErrDecor]( **trItr )   = iPandSigmaBiased->sigmaz0SinTheta;
-        track_decorators[kdecn_b_PVD0ErrDecor] (**trItr )         = iPandSigmaBiased->PVsigmad0;
-        track_decorators[kdecn_b_PVZ0ErrDecor] (**trItr )         = iPandSigmaBiased->PVsigmaz0;
-        track_decorators[kdecn_b_PVZ0SinThetaErrDecor] (**trItr ) = iPandSigmaBiased->PVsigmaz0SinTheta;
+        track_decorators[kdecn_b_D0Decor]( *trItr )              = iPandSigmaBiased->IPd0;
+        track_decorators[kdecn_b_Z0Decor]( *trItr )              = iPandSigmaBiased->IPz0;
+        track_decorators[kdecn_b_Z0SinThetaDecor]( *trItr )      = iPandSigmaBiased->IPz0SinTheta;
+        track_decorators[kdecn_b_D0ErrDecor]( *trItr )           = iPandSigmaBiased->sigmad0;
+        track_decorators[kdecn_b_Z0ErrDecor]( *trItr )           = iPandSigmaBiased->sigmaz0;
+        track_decorators[kdecn_b_Z0SinThetaErrDecor]( *trItr )   = iPandSigmaBiased->sigmaz0SinTheta;
+        track_decorators[kdecn_b_PVD0ErrDecor] (*trItr )         = iPandSigmaBiased->PVsigmad0;
+        track_decorators[kdecn_b_PVZ0ErrDecor] (*trItr )         = iPandSigmaBiased->PVsigmaz0;
+        track_decorators[kdecn_b_PVZ0SinThetaErrDecor] (*trItr ) = iPandSigmaBiased->PVsigmaz0SinTheta;
       }
       else {
-        track_decorators[kdecn_b_D0Decor]( **trItr )              = 999.;
-        track_decorators[kdecn_b_Z0Decor]( **trItr )              = 999.;
-        track_decorators[kdecn_b_Z0SinThetaDecor]( **trItr )      = 999.;
-        track_decorators[kdecn_b_D0ErrDecor]( **trItr )           = 999.;
-        track_decorators[kdecn_b_Z0ErrDecor]( **trItr )           = 999.;
-        track_decorators[kdecn_b_Z0SinThetaErrDecor]( **trItr )   = 999.;
-        track_decorators[kdecn_b_PVD0ErrDecor] (**trItr )         = 999.;
-        track_decorators[kdecn_b_PVZ0ErrDecor] (**trItr )         = 999.;
-        track_decorators[kdecn_b_PVZ0SinThetaErrDecor] (**trItr ) = 999.;
+        track_decorators[kdecn_b_D0Decor]( *trItr )              = 999.;
+        track_decorators[kdecn_b_Z0Decor]( *trItr )              = 999.;
+        track_decorators[kdecn_b_Z0SinThetaDecor]( *trItr )      = 999.;
+        track_decorators[kdecn_b_D0ErrDecor]( *trItr )           = 999.;
+        track_decorators[kdecn_b_Z0ErrDecor]( *trItr )           = 999.;
+        track_decorators[kdecn_b_Z0SinThetaErrDecor]( *trItr )   = 999.;
+        track_decorators[kdecn_b_PVD0ErrDecor] (*trItr )         = 999.;
+        track_decorators[kdecn_b_PVZ0ErrDecor] (*trItr )         = 999.;
+        track_decorators[kdecn_b_PVZ0SinThetaErrDecor] (*trItr ) = 999.;
       }
     } // end of loop over tracks          
     

@@ -46,9 +46,7 @@ m_thinHitsOnTrack(false)
 }
 
 // Destructor
-DerivationFramework::TrackParticleThinning::~TrackParticleThinning() {
-   
-}
+DerivationFramework::TrackParticleThinning::~TrackParticleThinning() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::TrackParticleThinning::initialize()
@@ -264,7 +262,7 @@ void DerivationFramework::TrackParticleThinning::selectTrackHits(const xAOD::Tra
     if (not inputMask[trkIndex]) continue;
 
     // loop over the TrackStateValidation objects, and add them to the outputStatesMask    
-    typedef std::vector<ElementLink< xAOD::TrackStateValidationContainer > > StatesOnTrack;
+    using StatesOnTrack = std::vector<ElementLink<xAOD::TrackStateValidationContainer>>;
     static const std::string trackStateNames = "msosLink";
     if( ! trkIt->isAvailable< StatesOnTrack >( trackStateNames ) ) {
       ATH_MSG_DEBUG("Cannot find TrackState link from xAOD::TrackParticle. Skipping track.");

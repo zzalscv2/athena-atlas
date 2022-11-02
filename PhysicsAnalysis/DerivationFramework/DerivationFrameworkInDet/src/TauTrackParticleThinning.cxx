@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -26,8 +26,7 @@ base_class(t,n,p)
 }
 
 // Destructor
-DerivationFramework::TauTrackParticleThinning::~TauTrackParticleThinning() {
-}
+DerivationFramework::TauTrackParticleThinning::~TauTrackParticleThinning() = default;
 
 // Athena initialize and finalize
 StatusCode DerivationFramework::TauTrackParticleThinning::initialize()
@@ -115,18 +114,18 @@ StatusCode DerivationFramework::TauTrackParticleThinning::doThinning() const
     // ... taus
     DerivationFramework::TracksInCone trIC;
     if (m_selectionString=="") { // check all taus as user didn't provide a selection string
-	    for (xAOD::TauJetContainer::const_iterator tauIt=importedTaus->begin(); tauIt!=importedTaus->end(); ++tauIt) {
-                if (m_coneSize>0.0) trIC.select(*tauIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the tau if req'd
-            	for (unsigned int i=0; i<(*tauIt)->nTracks(); ++i) {
-		  int index = xAOD::TauHelpers::trackParticleLinks(*tauIt, xAOD::TauJetParameters::TauTrackFlag::classifiedCharged).at(i).index();
+	    for (const auto *tauIt : *importedTaus) {
+                if (m_coneSize>0.0) trIC.select(tauIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the tau if req'd
+            	for (unsigned int i=0; i<tauIt->nTracks(); ++i) {
+		  int index = xAOD::TauHelpers::trackParticleLinks(tauIt, xAOD::TauJetParameters::TauTrackFlag::classifiedCharged).at(i).index();
                   mask[index] = true;
             	}
 	    }
     } else { // check only taus passing user selection string
-        for (std::vector<const xAOD::TauJet*>::iterator tauIt = tauToCheck.begin(); tauIt!=tauToCheck.end(); ++tauIt) {
-            if (m_coneSize>0.0) trIC.select(*tauIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the tau if req'd	
-            for (unsigned int i=0; i<(*tauIt)->nTracks(); ++i) {
-	      int index = xAOD::TauHelpers::trackParticleLinks(*tauIt, xAOD::TauJetParameters::TauTrackFlag::classifiedCharged).at(i).index();
+        for (auto & tauIt : tauToCheck) {
+            if (m_coneSize>0.0) trIC.select(tauIt,m_coneSize,importedTrackParticles.cptr(),mask); // check tracks in a cone around the tau if req'd	
+            for (unsigned int i=0; i<tauIt->nTracks(); ++i) {
+	      int index = xAOD::TauHelpers::trackParticleLinks(tauIt, xAOD::TauJetParameters::TauTrackFlag::classifiedCharged).at(i).index();
               mask[index] = true;
             }
         }

@@ -817,7 +817,7 @@ namespace DerivationFramework {
     const IdentContIndex& contIndex = prd->getHashAndIndex();
     if( contIndex.collHash() >= offsets->size() ){
       ATH_MSG_ERROR(" Offsets are incorrect " <<  contIndex.collHash() << " " <<  offsets->size() <<" "<< contIndex.objIndex());
-      return ElementLink< xAOD::TrackMeasurementValidationContainer >(0,0);
+      return {0,0};
     }
     
     unsigned int xaodIndex = offsets->at( contIndex.collHash() ) + contIndex.objIndex(); 
