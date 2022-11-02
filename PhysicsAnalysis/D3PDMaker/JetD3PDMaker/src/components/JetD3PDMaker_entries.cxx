@@ -3,7 +3,6 @@
 #include "../JetVtxFillerTool.h"
 #include "../JetEMFractionFillerTool.h"
 #include "../JetSamplingsFillerTool.h"
-#include "../JetSignalStateFillerTool.h"
 #include "../JetAuthorFillerTool.h"
 #include "../JetMomentFillerTool.h"
 #include "../JetConstituentFillerTool.h"
@@ -13,7 +12,6 @@
 #include "../FlavorAssociationTool.h"
 #include "../JetCaloUtilsFillerTool.h"
 #include "../JetShapeFillerTool.h"
-//#include "../JetFixupAlg.h"
 #include "../JetROIWordFillerTool.h"
 #include "../JetSamplingsFracFillerTool.h"
 
@@ -24,7 +22,6 @@ DECLARE_COMPONENT( D3PD::JetTrueTagFillerTool )
 DECLARE_COMPONENT( D3PD::JetVtxFillerTool )
 DECLARE_COMPONENT( D3PD::JetEMFractionFillerTool )
 DECLARE_COMPONENT( D3PD::JetSamplingsFillerTool )
-DECLARE_COMPONENT( D3PD::JetSignalStateFillerTool )
 DECLARE_COMPONENT( D3PD::JetAuthorFillerTool )
 DECLARE_COMPONENT( D3PD::JetMomentFillerTool )
 DECLARE_COMPONENT( D3PD::JetConstituentFillerTool )
@@ -33,7 +30,6 @@ DECLARE_COMPONENT( D3PD::JetCaloUtilsFillerTool )
 DECLARE_COMPONENT( D3PD::JetShapeFillerTool )
 DECLARE_COMPONENT( D3PD::JetTileCellFillerTool )
 DECLARE_COMPONENT( JetTileFilterAlg )
-//DECLARE_COMPONENT( D3PD::JetFixupAlg )
 DECLARE_COMPONENT( D3PD::JetROIWordFillerTool )
 DECLARE_COMPONENT( D3PD::JetSamplingsFracFillerTool )
 
