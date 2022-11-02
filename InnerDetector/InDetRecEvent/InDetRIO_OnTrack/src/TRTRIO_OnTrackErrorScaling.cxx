@@ -21,8 +21,8 @@ bool TRTRIO_OnTrackErrorScaling::postProcess() {
   if (params().size() != kNParamTypes ) {
       std::stringstream message;
       message << " TRTRIO_OnTrackErrorScaling: Expecting parameters for et least 2 parameters for";
-      for (unsigned int idx=0; idx < kNParamTypes; ++idx) {
-        message << " " << s_names[idx];
+      for (const auto *s_name : s_names) {
+        message << " " << s_name;
       }
       message << "(" << kNParamTypes << ") for run2.";
       message << " But got " << params().size() << ".";

@@ -28,13 +28,7 @@ RpcClusterOnTrack::RpcClusterOnTrack()
 {}
 
 // copy constructor:
-RpcClusterOnTrack::RpcClusterOnTrack( const RpcClusterOnTrack& rot)
-    :
-    MuonClusterOnTrack(rot), // base clas ctor
-    m_rio(rot.m_rio),
-    m_detEl(rot.m_detEl),
-    m_time(rot.m_time)
-{}
+RpcClusterOnTrack::RpcClusterOnTrack( const RpcClusterOnTrack& rot) = default;
 
 
 // Constructor with parameters

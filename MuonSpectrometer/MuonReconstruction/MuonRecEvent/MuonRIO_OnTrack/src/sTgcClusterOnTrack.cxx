@@ -16,11 +16,7 @@ namespace Muon
   {}
 
   // copy constructor:
-  sTgcClusterOnTrack::sTgcClusterOnTrack( const sTgcClusterOnTrack& rot):
-    MuonClusterOnTrack(rot), // base clas ctor
-    m_rio(rot.m_rio),
-    m_detEl(rot.m_detEl)
-  {}
+  sTgcClusterOnTrack::sTgcClusterOnTrack( const sTgcClusterOnTrack& rot) = default;
 
   // Constructor with parameters
   sTgcClusterOnTrack::sTgcClusterOnTrack(

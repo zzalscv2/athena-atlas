@@ -52,9 +52,7 @@ MuonClusterOnTrack::MuonClusterOnTrack
 }
 
 // Destructor:
-MuonClusterOnTrack::~MuonClusterOnTrack()
-{ 
-}
+MuonClusterOnTrack::~MuonClusterOnTrack() = default;
 
 // assignment operator:
 MuonClusterOnTrack& MuonClusterOnTrack::operator=( const MuonClusterOnTrack& rot){
