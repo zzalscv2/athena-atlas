@@ -181,14 +181,23 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
         if(!bit23)
         {
           // HPTDC 2017
-          AFP_ToFRawData& ToFData = collectionToF->newDataRecord();
-          ToFData.setHeader( m_wordReadout->getBits(the_word, 23, 21) );
-          ToFData.setEdge( m_wordReadout->getBits(the_word, 20, 20) );
-          ToFData.setChannel( m_wordReadout->getBits(the_word, 19, 16) );
-          ToFData.setPulseLength( m_wordReadout->getBits(the_word, 15, 10) );
-          ToFData.setTime( m_wordReadout->getBits(the_word, 9, 0) );
+          uint32_t bits22_21=m_wordReadout->getBits(the_word, 22, 21);
+          if(bits22_21==2)
+          {
+            // ToF measurement
+            AFP_ToFRawData& ToFData = collectionToF->newDataRecord();
+            ToFData.setHeader( m_wordReadout->getBits(the_word, 23, 21) );
+            ToFData.setEdge( m_wordReadout->getBits(the_word, 20, 20) );
+            ToFData.setChannel( m_wordReadout->getBits(the_word, 19, 16) );
+            ToFData.setPulseLength( m_wordReadout->getBits(the_word, 15, 10) );
+            ToFData.setTime( m_wordReadout->getBits(the_word, 9, 0) );
 
-          setDataHeader (the_word, &ToFData);
+            setDataHeader (the_word, &ToFData);
+          }
+          else
+          {
+            ATH_MSG_DEBUG("This is not a ToF measurement, bit23 = "<<bit23<<", bits22_21 "<<bits22_21<<", ignoring word = "<<the_word);
+          }
         }
         else
         {
