@@ -112,7 +112,7 @@ StatusCode JetTrackMomentsTool::decorate(const xAOD::JetContainer& jets) const {
         size_t numConstit = jet->numConstituents();
         for ( size_t i=0; i<numConstit; i++ ) {
           const xAOD::FlowElement* constit = dynamic_cast<const xAOD::FlowElement*>(jet->rawConstituent(i));
-          if(constit != nullptr && (constit->signalType() & xAOD::FlowElement::PFlow)){
+          if(constit != nullptr && ((constit->signalType() & xAOD::FlowElement::PFlow) || constit->signalType() == xAOD::FlowElement::Charged)){
             isPFlowJet = true;
             if (constit->isCharged()){
               const xAOD::TrackParticle *thisTrack = dynamic_cast<const xAOD::TrackParticle*>(constit->chargedObject(0));//PFO should have only 1 track
