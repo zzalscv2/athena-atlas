@@ -841,7 +841,7 @@ Trk::GaussianSumFitter::stepForwardFit(
   // state before the update
   if (fitQuality->chiSquared() >
       m_cutChiSquaredPerNumberDOF * fitQuality->numberDoF()) {
-    fitQuality = std::make_unique<FitQuality>(1, 1);
+    fitQuality = std::make_unique<FitQualityOnSurface>(1, 1);
     std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type(0);
     type.set(TrackStateOnSurface::Outlier);
     const Trk::MultiComponentStateOnSurface* multiComponentStateOnSurface =
@@ -1012,7 +1012,7 @@ Trk::GaussianSumFitter::smootherFit(
       updatedStateOnSurface = new Trk::MultiComponentStateOnSurface(
         std::move(measurement),
         std::move(extrapolatedState),
-        std::make_unique<FitQuality>(1, 1),
+        std::make_unique<FitQualityOnSurface>(1, 1),
         nullptr,
         type);
       loopUpdatedState = &(updatedStateOnSurface->components());

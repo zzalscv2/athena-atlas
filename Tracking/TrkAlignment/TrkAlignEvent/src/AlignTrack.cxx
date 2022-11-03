@@ -441,10 +441,10 @@ namespace Trk {
       newTrackStateOnSurfaces.reserve( states->size() );
       
       for (; tsit!=tsit_end ; ++tsit) {
-        std::unique_ptr<const Trk::MeasurementBase>     newMeas  = (*tsit)->measurementOnTrack() ? (*tsit)->measurementOnTrack()->uniqueClone() : nullptr;
-        std::unique_ptr<const Trk::TrackParameters>    newPars  = (*tsit)->trackParameters() ? (*tsit)->trackParameters()->uniqueClone() : nullptr;
-        std::unique_ptr<const Trk::FitQualityOnSurface> newFitQoS= (*tsit)->fitQualityOnSurface() ? (*tsit)->fitQualityOnSurface()->uniqueClone() : nullptr;
-        std::unique_ptr<const Trk::MaterialEffectsBase> meb      = (*tsit)->materialEffectsOnTrack() ? (*tsit)->materialEffectsOnTrack()->uniqueClone() : nullptr;
+        auto newMeas  = (*tsit)->measurementOnTrack() ? (*tsit)->measurementOnTrack()->uniqueClone() : nullptr;
+        auto newPars  = (*tsit)->trackParameters() ? (*tsit)->trackParameters()->uniqueClone() : nullptr;
+        auto newFitQoS= (*tsit)->fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*((*tsit)->fitQualityOnSurface())) : nullptr;
+        auto meb      = (*tsit)->materialEffectsOnTrack() ? (*tsit)->materialEffectsOnTrack()->uniqueClone() : nullptr;
   
         if (meb) {
           //meot is just used as observer, not owner, so can safely duplicate the pointer
@@ -458,7 +458,7 @@ namespace Trk {
             const Trk::Surface& surf = meot->associatedSurface();
             std::bitset<MaterialEffectsBase::NumberOfMaterialEffectsTypes> typeMaterial;
             if (eLoss) typeMaterial.set(MaterialEffectsBase::EnergyLossEffects);
-            const Trk::MaterialEffectsOnTrack* newmeot=
+            Trk::MaterialEffectsOnTrack* newmeot=
                 new Trk::MaterialEffectsOnTrack(tinX0,std::nullopt,std::move(eLoss),surf,typeMaterial);
             meb.reset(newmeot);
           }

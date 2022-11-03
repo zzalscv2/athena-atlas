@@ -240,7 +240,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::TrackStateOnSurface tsos1 (std::make_unique<Trk::PseudoMeasurementOnTrack> (pmeas),
                                   std::make_unique<Trk::Perigee> (perigee),
-                                  std::make_unique<Trk::FitQuality> (fq),
+                                  std::make_unique<Trk::FitQualityOnSurface> (fq),
                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me),
                                   nullptr);
 
