@@ -153,7 +153,14 @@ namespace Trk
                      << endmsg << "Matrix vrt_cov = " << vrt_cov);
      return;
    }
-   const AmgSymMatrix(3) vrt_weight = vtx.covariancePosition().inverse();
+   AmgSymMatrix(3)   vrt_weight;
+   bool invertible;
+   vtx.covariancePosition().computeInverseWithCheck(vrt_weight,invertible);
+
+   if(!invertible) {
+     ATH_MSG_VERBOSE ("The vertex's cov is not invertible, quit updating the track.");
+     return;
+   }
 
    //making a new track covariance matrix
    AmgSymMatrix(3) posMomentumCovariance =  -vrt_cov * A.transpose() * trkParametersWeight * B *Sm;
@@ -163,7 +170,12 @@ namespace Trk
    //this operation invokes removing of the track from the vertex
    const IVertexUpdator::positionUpdateOutcome & reducedVrt = m_Updator->positionUpdate( vtx, linTrack, trk.weight(), IVertexUpdator::removeTrack );
 
-   const AmgSymMatrix(3) reduced_vrt_weight = reducedVrt.covariancePosition.inverse();
+   AmgSymMatrix(3)   reduced_vrt_weight;
+   reducedVrt.covariancePosition.computeInverseWithCheck(reduced_vrt_weight,invertible);
+   if(!invertible) {
+     ATH_MSG_VERBOSE ("The vertex's cov is not invertible, quit updating the track.");
+     return;
+   }
    //  const CLHEP::HepSymMatrix & reduced_vrt_cov = reducedVrt.covariancePosition();
 
    Amg::Vector3D posDifference = vtx.position() - reducedVrt.position;
