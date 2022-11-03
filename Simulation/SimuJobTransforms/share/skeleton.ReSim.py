@@ -306,8 +306,6 @@ if DetFlags.AFP_on():
     #AddressRemappingSvc.addInputRename("AFP_SIDSimHitCollection")
     pass
 
-svcMgr.StoreGateSvc.Dump = True #FIXME remove this line
-
 ## Add AMITag MetaData to TagInfoMgr
 from PyUtils import AMITagHelper
 AMITagHelper.SetAMITag(runArgs=runArgs)

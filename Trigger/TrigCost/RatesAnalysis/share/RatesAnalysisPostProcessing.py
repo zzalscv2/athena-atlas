@@ -57,6 +57,10 @@ def main():
   HLTTriggers = populateTriggers(inputFile, metadata, HLTGlobalGroup, 'ChainHLT')
   AllGlobalGroups = populateTriggers(inputFile, metadata, HLTGlobalGroup, 'Group')
 
+  if not L1Triggers or not HLTTriggers or not AllGlobalGroups:
+    log.error("Failed to populate triggers")
+    return
+
   L1Table = getTableName("L1")
   HLTTable = getTableName("HLT")
   GroupTable = getTableName("Group")

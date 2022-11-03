@@ -64,7 +64,7 @@ public:
     TH1F_LW* mdttubenoise;  // just added
     TH1F_LW* mdttdctube;    // just added
 
-    inline std::string getName() { return m_hardware_name; }
+    inline const std::string& getName() const { return m_hardware_name; }
     // return 0 for barrel, 1 for endcap, based on m_barrel_region
     inline int GetBarrelEndcapEnum() { return (m_barrel_region < 2 ? 0 : 1); }
     inline int GetRegionEnum() { return m_barrel_region; }

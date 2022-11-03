@@ -271,10 +271,10 @@ def MuonCreatorAlgCfg(flags, name="MuonCreatorAlg", **kwargs):
     # if muGirl is off, remove "muGirlTagMap" from "TagMaps"
     # but don't set this default in case the StauCreatorAlg is created (see below)
     tag_maps = []
-    if flags.MuonCombined.doCaloTrkMuId: tag_maps += ["caloTagMap"]
     if flags.MuonCombined.doMuGirl: tag_maps+=["muGirlTagMap"]
     if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap"]
     if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap"]
+    if flags.MuonCombined.doCaloTrkMuId: tag_maps += ["caloTagMap"]
     if flags.MuonCombined.doMuonSegmentTagger: tag_maps+=["segmentTagMap"]
     kwargs.setdefault("TagMaps", tag_maps)
     if flags.Muon.MuonTrigger:
@@ -294,7 +294,7 @@ def LRT_MuonCreatorAlgCfg(flags, name="MuonCreatorAlg_LRT", **kwargs):
     result = ComponentAccumulator()
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCreatorToolCfg
     creatorTool = result.popToolsAndMerge(
-        MuonCreatorToolCfg(flags, "MuonCreatorTool_LRT"))
+        MuonCreatorToolCfg(flags, "MuonCreatorTool_LRT", RequireIDTrack=True))
     kwargs.setdefault("MuonCreatorTool", creatorTool)
     # In cases we want to switch them off we should add the flags here
     tag_maps = []

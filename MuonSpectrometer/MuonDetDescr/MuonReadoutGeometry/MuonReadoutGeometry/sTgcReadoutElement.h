@@ -229,14 +229,6 @@ namespace MuonGM {
         Amg::Transform3D m_Xlg[4];
     };
 
-    inline void sTgcReadoutElement::clearALinePar() {
-        if (has_ALines()) {
-            m_ALinePar = nullptr; 
-            m_delta = Amg::Transform3D::Identity(); 
-            refreshCache();
-        }
-    }
-
     inline int sTgcReadoutElement::surfaceHash(const Identifier& id) const {
         return surfaceHash(manager()->stgcIdHelper()->gasGap(id), manager()->stgcIdHelper()->channelType(id));
     }

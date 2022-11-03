@@ -779,6 +779,8 @@ class ItemDef:
         # we provide the seed rather than a dedicated threshold
         MenuItem('L1_ZB_eEM18', ctpid=508).setLogic(d.eEM18 & physcond).setTriggerType(TT.zerobs)
 
+        # LAr Saturation
+        MenuItem('L1_LArSaturation').setLogic( d.LArSaturation & physcond ).setTriggerType(TT.calo)
 
         # combined jet - xe
         MenuItem('L1_J40_XE50').setLogic( d.J40 & d.XE50 & physcond).setTriggerType(TT.calo)

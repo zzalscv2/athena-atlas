@@ -626,6 +626,14 @@ namespace MuonGM {
         }
     }
 
+    //============================================================================
+    void sTgcReadoutElement::clearALinePar() {
+        if (has_ALines()) {
+            m_ALinePar = nullptr; 
+            m_delta = Amg::Transform3D::Identity(); 
+            refreshCache();
+        }
+    }
 
     //============================================================================
     void sTgcReadoutElement::setBLinePar(const BLinePar& bLine) {
@@ -719,6 +727,8 @@ namespace MuonGM {
     //============================================================================
     void sTgcReadoutElement::spacePointPosition(const Identifier& layerId, double locXpos, double locYpos, Amg::Vector3D& pos) const {
 
+        pos = Amg::Vector3D(locXpos, locYpos, 0.);
+
         const MuonChannelDesign* design = getDesign(layerId);
         if (!design) {
             MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
@@ -735,50 +745,48 @@ namespace MuonGM {
         //*********************
         const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();
         if (sc) {
-            // nearest strip to locXpos
-            Amg::Vector2D lpos(locXpos, 0.);
-            int istrip = stripNumber(lpos, layerId);          
-
+            Amg::Vector2D lpos(locXpos, locYpos);
+ 
             // setup strip calculator
-            NswAsBuilt::stripIdentifier_t stgcStrip_id;
-            stgcStrip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
-            stgcStrip_id.ilayer     = manager()->stgcIdHelper()->gasGap(layerId);
-            stgcStrip_id.istrip     = istrip;
-            
-            // length of the strip with index "istrip"  
-            // (formula copied from MuonChannelDesign.h)
-            double ylength = design->inputLength + ((design->maxYSize() - design->minYSize())*(istrip - design->nMissedBottomEta + 0.5)*design->inputPitch / design->xSize());
-            double sy      = 2*locYpos/ylength; // in [-1, 1]
+            NswAsBuilt::stripIdentifier_t strip_id;
+            strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
+            strip_id.ilayer     = manager()->stgcIdHelper()->gasGap(layerId);
+            strip_id.istrip     = stripNumber(lpos, layerId); // nearest strip to locXpos 
 
-            // get the position coordinates, in the multilayer frame, from NswAsBuilt.
-            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, stgcStrip_id, sy);
-            pos     = calcPos.pos;
+            Amg::Vector2D rel_pos;
+            if (!design->positionWithinStrip(lpos, rel_pos)) {
+                MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+                log << MSG::WARNING << "Position corrections can be provided for eta strips and only within the active area. Returning." << endmsg;
+                return;
+            }
 
-            // signal that we are in the multilayer reference frame
+            // get the position coordinates, in the chamber frame, from NswAsBuilt.
+            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y());
+            pos = calcPos.pos;
+
+            // signal that pos is now in the chamber reference frame
+            // (don't go back to the layer frame yet, since we may apply b-lines later on)
+            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);   
             conditionsApplied = true;
-            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);     
         }
 #endif 
 
         //*********************
-        // Case as-built is not applied: 
-        //*********************
-        if (!conditionsApplied) pos = Amg::Vector3D(locXpos, locYpos, 0.);
-
-        //*********************
         // B-Lines
         //*********************
-        // if (!has_BLines()) return;
-        if (has_BLines()) {
+        /*if (has_BLines()) {
           // go to the multilayer reference frame if we are not already there
           if (!conditionsApplied) {
-             conditionsApplied = true; 
              trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
              pos = trfToML*pos;
+             
+             // signal that pos is now in the multilayer reference frame
+             conditionsApplied = true; 
           }
           posOnDefChamber(pos);
-        }
-               // back to nominal layer frame from where we started
+        }*/
+        
+        // back to the layer reference frame from where we started
         if (conditionsApplied) pos = trfToML.inverse()*pos;
     }
 

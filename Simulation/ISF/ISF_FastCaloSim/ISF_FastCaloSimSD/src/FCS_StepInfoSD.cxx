@@ -9,7 +9,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/TileID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 

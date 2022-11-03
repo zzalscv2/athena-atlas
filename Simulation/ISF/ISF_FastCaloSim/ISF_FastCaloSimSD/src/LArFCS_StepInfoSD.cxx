@@ -316,21 +316,10 @@ Identifier LArFCS_StepInfoSD::ConvertID(const LArG4Identifier& a_ident) const
         }
       }
       else {
-        //is Mini FCAL
-        try {
-          id = m_larMiniFcalID->channel_id(a_ident[2],  // zSide
-                                           a_ident[3],  // module
-                                           a_ident[4],  // depth
-                                           a_ident[5],  // eta
-                                           a_ident[6]); // phi
-        }
-        catch(LArID_Exception& e) {
           G4ExceptionDescription description;
-          description << "ConvertID: LArMiniFCAL_ID error code " << e.code() << " "
-                      << (std::string) e;
+          description << "ConvertID: Unsupported ID.  ";
           G4Exception("LArFCS_StepInfoSD", "ConvertIDMiniFCAL", FatalException, description);
           abort();
-        }
       }
     }
   }

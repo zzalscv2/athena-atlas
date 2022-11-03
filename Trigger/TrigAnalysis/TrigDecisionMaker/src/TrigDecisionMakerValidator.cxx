@@ -108,7 +108,7 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
       const bool isPassedRaw = (passBits & TrigDefs::EF_passedRaw);
       const bool inTerminusNode = (terminusIDs.count( HLT::Identifier(chain).numeric() ) == 1);
 
-      if (passedPhysics) {
+      if (isPassedRaw) {
         ++passHLT;
         ATH_MSG_VERBOSE("Passing HLT:" << chain);
       }

@@ -35,7 +35,7 @@ EnhancedBiasWeighter::EnhancedBiasWeighter( const std::string& name )
 
 StatusCode EnhancedBiasWeighter::initialize() 
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_DEBUG ("Initializing " << name() << "...");
   ATH_CHECK( m_bunchCrossingKey.initialize( m_useBunchCrossingData ) );
 
   if (m_isMC) {
@@ -68,7 +68,7 @@ StatusCode EnhancedBiasWeighter::initialize()
 
 StatusCode EnhancedBiasWeighter::finalize() 
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_DEBUG ("Finalizing " << name() << "...");
   return StatusCode::SUCCESS;
 }
 
@@ -79,6 +79,8 @@ StatusCode EnhancedBiasWeighter::loadWeights()
   const uint32_t runNumber = m_runNumber; // This is because Gaudi::Properties have special behaviour with the << operator
   fileName  << "EnhancedBiasWeights_" << runNumber << ".xml";
   std::string weightingFile = (!m_weightsDirectory.empty()) ? findLocalFile(fileName.str()) : PathResolverFindCalibFile("TrigCostRootAnalysis/" + fileName.str() );  // Check standard area
+
+  ATH_MSG_DEBUG("Using weighting file " << weightingFile);
 
   if (weightingFile == "") {
     msg() << (m_errorOnMissingEBWeights ? MSG::ERROR : MSG::WARNING)  << "Could not retrieve " << fileName.str() << ", cannot perform enhanced bias weighting." << endmsg;
@@ -155,6 +157,8 @@ StatusCode EnhancedBiasWeighter::loadLumi()
   std::stringstream fileName;
   fileName    << "enhanced_bias_run_" << runNumber << ".xml";
   std::string runFile = (!m_weightsDirectory.empty()) ? findLocalFile(fileName.str()) : PathResolverFindCalibFile("TrigCostRootAnalysis/" + fileName.str() );  // Check standard area
+  
+  ATH_MSG_DEBUG("Using run file " << runFile);
   if (runFile == "") {
     msg() << (m_errorOnMissingEBWeights ? MSG::ERROR : MSG::WARNING)  << "Could not retrieve " << fileName.str() << ", cannot perform enhanced bias weighting." << endmsg;
     return (m_errorOnMissingEBWeights ? StatusCode::FAILURE : StatusCode::SUCCESS);
@@ -194,6 +198,11 @@ StatusCode EnhancedBiasWeighter::loadLumi()
         m_eventsPerLB[lb] = nEvents;
         m_goodLB[lb] = (flag == "bad" ? 0 : 1); 
         m_lumiPerLB[lb] = lumi < 1e10 ? 1e30 * lumi : lumi;
+
+        if (xml->HasAttr(node, "deadtime")) {
+          // Deadtime is a weight factor, the weight will be multiplied by deadtime + 1
+          m_deadtimePerLB[lb] = 1. + std::atof( xml->GetAttr(node, "deadtime") );
+        }
 
         node = xml->GetNext(node); 
       }
@@ -666,8 +675,14 @@ double EnhancedBiasWeighter::getLBLumi(const EventContext& context) const
   } // isData
 }
 
-double EnhancedBiasWeighter::getDeadtime() const
+double EnhancedBiasWeighter::getDeadtime(const int lumiblock) const
 {
+  if (m_isMC) {
+    return 1.;
+  }
+  else if (m_deadtimePerLB.count(lumiblock)) {
+    return m_deadtimePerLB.at(lumiblock);
+  }
   return m_deadtime;
 }
 
@@ -720,7 +735,7 @@ StatusCode EnhancedBiasWeighter::addBranches() const
   decoratorLBLumi(*eventInfo) = getLBLumi(eventInfo);
   decoratorUnbiasedFlag(*eventInfo) = isUnbiasedEvent(eventInfo);
   decoratorGoodLBFlag(*eventInfo) = isGoodLB(eventInfo);
-  decoratorDeadtime(*eventInfo) = m_deadtime;
+  decoratorDeadtime(*eventInfo) = getDeadtime(eventInfo->lumiBlock());
   decoratorBCIDDistanceFromFront(*eventInfo) = distance;
 
   return StatusCode::SUCCESS;

@@ -6,6 +6,9 @@ from TrigCostAnalysis.ROSToROB import ROSToROBMap
 from TrigCostAnalysis.TableConstructorBase import TableConstructorBase, Column
 ROSToROBMap = ROSToROBMap().get_mapping()
 
+from AthenaCommon.Logging import logging
+log = logging.getLogger('ROS_HLT')
+
 '''
 @file ROS_HLT_TableConstructor.py
 @brief Contains TableConstructor classes per ROS_HLT table. Defines what
@@ -69,4 +72,8 @@ class ROS_HLT_TableConstructor(TableConstructorBase):
         nMaxRobsRequests = self.getHistogram("NROBsPerRequest_perCall").GetBinContent(maxRobs)
 
         allRobsRequests = self.getHistogram("NROBsPerRequest_perCall").Integral()
+        if (allRobsRequests == 0):
+            log.error("No histograms for the ROS HLT summary were found")
+            raise ValueError
+
         self.columns['fullRequests'].addValue(nMaxRobsRequests/allRobsRequests*100)

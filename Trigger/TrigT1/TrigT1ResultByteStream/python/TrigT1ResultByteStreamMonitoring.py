@@ -74,11 +74,13 @@ def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
     if flags.Trigger.doHLT:
         monTool = GenericMonitoringTool('MonTool', HistPath = f'HLTFramework/L1BSConverters/{name}')
         topDir = 'EXPERT'
-    else: # if used in offline reconstruction respect DQ convention (ATR-26371)
+    elif flags.DQ.Steering.doHLTMon: # if used in offline reconstruction respect DQ convention (ATR-26371)
         from AthenaMonitoring import AthMonitorCfgHelper
         helper = AthMonitorCfgHelper(flags, 'HLTFramework')
         monTool = helper.addGroup(None, f'{name}MonTool', f'/HLT/HLTFramework/L1BSConverters/{name}')
         topDir = None
+    else:
+        return None
 
     monTool.defineHistogram('TIME_execute', path=topDir, type='TH1F',
                             title='Time of the alg execute() method;Time [ms];N events',

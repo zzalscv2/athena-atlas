@@ -23,6 +23,7 @@ public:
 
     virtual bool checkCRC(const std::vector<myDataWord>& encodedData, InputDataFrameType frameType) const override;
     virtual myDataWord getBcNumber(const std::vector<myDataWord>& encodedData, InputDataFrameType frameType) const override;
+    virtual myDataWord getBcMask(InputDataFrameType frameType) const { return 0; }
 
     virtual std::vector<myDataWord> getUnpackedData(const std::vector<myDataWord>& encodedData, InputDataFrameType frameType) const override;
 

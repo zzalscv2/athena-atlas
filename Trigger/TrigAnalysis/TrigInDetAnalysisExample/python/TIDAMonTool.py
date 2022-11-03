@@ -167,6 +167,9 @@ def createMonTool( flags, slicetag, chain ) :
     
     defineHisto( monTool,  "ntrt",          path=mypath, type="TH1F", title="ntrt",                 xbins=91,     xmin=-0.5,   xmax=91.5  )
     defineHisto( monTool,  "ntrt_rec",      path=mypath, type="TH1F", title="ntrt_rec",             xbins=91,    xmin=-0.5,   xmax=91.5  )
+
+    defineHisto( monTool,  "chi2dof",          path=mypath, type="TH1F", title="chi2dof",           xbins=75,    xmin=-0,   xmax=15  )
+    defineHisto( monTool,  "chi2dof_rec",      path=mypath, type="TH1F", title="chi2dof_rec",       xbins=75,    xmin=-0,   xmax=15  )
     
     
     defineHisto( monTool,  "Eff_overall",       path=mypath, type="TProfile", title="total efficiency",    xbins=1,    xmin=0.,   xmax=1.    )

@@ -90,6 +90,22 @@ def AthenaHiveEventLoopMgrCfg(cfgFlags):
     return cfg
 
 
+def MessageSvcCfg(cfgFlags):
+    cfg = ComponentAccumulator()
+    msgsvc=CompFactory.MessageSvc()
+    msgsvc.OutputLevel=cfgFlags.Exec.OutputLevel
+    msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(cfgFlags.Common.MsgSourceLength)
+    from AthenaConfiguration.Enums import ProductionStep
+    if cfgFlags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction]:
+        msgsvc.Format = "% F%18W%S%7W%R%T %0W%M" # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs
+    if cfgFlags.Concurrency.NumThreads>0:
+        # Migrated code from AtlasThreadedJob.py
+        msgsvc.defaultLimit = 0
+        msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(cfgFlags.Common.MsgSourceLength)
+    cfg.addService(msgsvc)
+    return cfg
+
+
 def MainServicesCfg(cfgFlags, LoopMgr='AthenaEventLoopMgr'):
     # Run a serial job for threads=0
     if cfgFlags.Concurrency.NumThreads>0:
@@ -161,10 +177,7 @@ def MainServicesCfg(cfgFlags, LoopMgr='AthenaEventLoopMgr'):
 
     cfg.setAppProperty('EvtMax',cfgFlags.Exec.MaxEvents)
 
-    msgsvc=CompFactory.MessageSvc()
-    msgsvc.OutputLevel=cfgFlags.Exec.OutputLevel
-    msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(cfgFlags.Common.MsgSourceLength)
-    cfg.addService(msgsvc)
+    cfg.merge(MessageSvcCfg(cfgFlags))
 
     if cfgFlags.Exec.DebugStage != "":
         cfg.setDebugStage(cfgFlags.Exec.DebugStage)
@@ -177,10 +190,6 @@ def MainServicesCfg(cfgFlags, LoopMgr='AthenaEventLoopMgr'):
     ########################################################################
     # Additional components needed for threaded jobs only
     if cfgFlags.Concurrency.NumThreads>0:
-
-        # Migrated code from AtlasThreadedJob.py
-        msgsvc.defaultLimit = 0
-        msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(cfgFlags.Common.MsgSourceLength)
 
         cfg.merge(AthenaHiveEventLoopMgrCfg(cfgFlags))
 

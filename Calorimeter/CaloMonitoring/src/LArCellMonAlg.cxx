@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     LArCellMonAlg.cxx
@@ -296,24 +296,20 @@ void LArCellMonAlg::checkTriggerAndBeamBackground(bool passBeamBackgroundRemoval
   mon_trig=0.5;
   fill(m_MonGroupName,mon_trig);
 
-  if (m_useTrigger && !getTrigDecisionTool().empty()) {
+  const ToolHandle<Trig::TrigDecisionTool>& trigTool = getTrigDecisionTool();
+  if (m_useTrigger && !trigTool.empty()) {
     std::bitset<MAXTRIGTYPE> triggersPassed(0x1<<NOTA); //Last bit: NOTA, always passes
     constexpr std::bitset<MAXTRIGTYPE> NOTAmask=~(0x1<<NOTA);
 
-    //get the trigger
-    const ToolHandle<Trig::TrigDecisionTool> trigTool=getTrigDecisionTool();
-      
     for (unsigned i=0;i<NOTA;++i) {
-      bool anytrig=false;
       const std::string& chainName=m_triggerNames[i];
       if(!chainName.empty()) {
-	const Trig::ChainGroup* cg = getTrigDecisionTool()->getChainGroup(chainName);
-	for(const std::string& trigName : cg->getListOfTriggers()) anytrig = (anytrig || trigTool->isPassed(trigName));
-	if(anytrig) {
-	  triggersPassed.set(i);
-	  mon_trig=0.5+i;
-	  fill(m_MonGroupName,mon_trig);
-	}
+        const Trig::ChainGroup* cg = trigTool->getChainGroup(chainName);
+        if(cg->isPassed()) {
+          triggersPassed.set(i);
+          mon_trig=0.5+i;
+          fill(m_MonGroupName,mon_trig);
+        }
       }
     }//end of loop over trigger types
 

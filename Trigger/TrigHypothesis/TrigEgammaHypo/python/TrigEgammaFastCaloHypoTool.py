@@ -272,7 +272,7 @@ class TrigEgammaFastCaloHypoToolConfig:
   #
   def compile(self):
 
-    if self.pidname() in ('etcut', 'ion'):
+    if self.pidname() in ('etcut', 'ion', 'nopid'):
       self.etcut()
 
     elif self.pidname() in self.__operation_points and 'noringer' in self.noringerinfo() and self.isElectron():

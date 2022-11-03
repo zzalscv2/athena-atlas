@@ -113,7 +113,9 @@ namespace Trig {
     }
     void navigation(HLT::TrigNavStructure* nav) { m_navigation = nav; }       //!< sets navigation object pointer
 
-    const std::map< std::vector< std::string >, Trig::ChainGroup* >& getChainGroups() const {return m_chainGroupsRef;};
+    const Trig::ChainGroup* getChainGroup (const std::vector<std::string>& triggerNames,
+                                           TrigDefs::Group props) const;
+    size_t nChainGroups() const;
     const std::map<std::string, std::vector<std::string> >& getStreams() const {return m_streams;};
 
     /**
@@ -171,8 +173,7 @@ namespace Trig {
     /**
      * @brief unpacks everything that belongs to a ChainGroup
      **/
-    void updateChainGroup(Trig::ChainGroup& chainGroup,
-                          TrigDefs::Group props = TrigDefs::Group::Default);
+    void updateChainGroup(Trig::ChainGroup& chainGroup);
 
     //
     // Data members

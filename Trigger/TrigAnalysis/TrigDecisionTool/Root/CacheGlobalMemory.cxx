@@ -60,9 +60,9 @@ const Trig::ChainGroup* Trig::CacheGlobalMemory::createChainGroup(const std::vec
   // create a proper key
   std::vector< std::string > key=Trig::keyWrap(triggerNames);
 
-  auto [itr, inserted] = m_chainGroups.try_emplace (key, /*ChainGroup*/ key, *nc_this);
+  auto [itr, inserted] = m_chainGroups.try_emplace (key, /*ChainGroup*/ key, *nc_this, props);
   if (inserted) {
-    nc_this->updateChainGroup(itr->second, props);
+    nc_this->updateChainGroup(itr->second);
     m_chainGroupsRef[key] = &(itr->second);
   }
   // this overwrites the pointer in the map each time in case the alias needs defining
@@ -78,8 +78,30 @@ const Trig::ChainGroup* Trig::CacheGlobalMemory::createChainGroup(const std::vec
   return m_chainGroupsRef[key];
 }
 
-void Trig::CacheGlobalMemory::updateChainGroup(Trig::ChainGroup& chainGroup, TrigDefs::Group props) {
-  chainGroup.update(m_confChains, m_confItems, props);
+const Trig::ChainGroup*
+Trig::CacheGlobalMemory::getChainGroup (const std::vector<std::string>& triggerNames,
+                                        TrigDefs::Group props) const
+{
+  std::lock_guard<std::recursive_mutex> lock(m_cgmMutex);
+  auto searchRes = m_chainGroupsRef.find(triggerNames);
+
+  if ( searchRes != m_chainGroupsRef.end()) {
+    return searchRes->second;
+  }
+  return createChainGroup(triggerNames, /*alias*/{}, props);
+}
+
+
+size_t
+Trig::CacheGlobalMemory::nChainGroups() const
+{
+  std::lock_guard<std::recursive_mutex> lock(m_cgmMutex);
+  return m_chainGroupsRef.size();
+}
+
+
+void Trig::CacheGlobalMemory::updateChainGroup(Trig::ChainGroup& chainGroup) {
+  chainGroup.update(m_confChains, m_confItems);
 }
 
 
@@ -110,7 +132,6 @@ void Trig::CacheGlobalMemory::update(const TrigConf::HLTChainList* confChains,
                               0, 0, 0, prescales[ctpid]);
      ATH_MSG_DEBUG( "new configuration for item" << item->name() );
   }
-  ATH_MSG_DEBUG( "Updating configuration, done with L1" );
 
   //clear cache completely because underlying config objects might have changed
   m_l2chainsCache.clear();
@@ -130,7 +151,6 @@ void Trig::CacheGlobalMemory::update(const TrigConf::HLTChainList* confChains,
 
     // updating internal cache of HLT::Chains
     for(auto ch : *m_confChains) {
-      //    std::cerr << "CacheGlobalMemory::update updating chain" << (*cChIt)->chain_name() << std::endl;
       int cntr = ch->chain_counter();
       if( ch->level()=="L2" ) {
         m_l2chainsCache.emplace(cntr, /*HLT::Chain*/ch);
@@ -138,9 +158,6 @@ void Trig::CacheGlobalMemory::update(const TrigConf::HLTChainList* confChains,
         m_efchainsCache.emplace(cntr, /*HLT::Chain*/ch);
       }
     }
-    ATH_MSG_DEBUG( "Updating configuration, done with basic HLT based on "
-       << m_confChains->size() << " configuration chains" );
-
 
     // code for the streams and pre-defined groups
     // -- assume that the groups and streams have all changed!!!

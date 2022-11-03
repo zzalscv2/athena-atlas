@@ -22,7 +22,7 @@ else
         --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
         --simulator 'FullG4MT' \
         --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py' \
+        --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationMultipleIoV.py' \
         --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
         --inputEVNTFile $INPUTEVNTFILE \
         --outputHITSFile "original.HITS.pool.root" \
@@ -44,17 +44,17 @@ then
         --conditionsTag 'ReSim:OFLCOND-MC21-SDR-RUN3-05' \
         --simulator 'FullG4MT_QS' \
         --postInclude 'ReSim:PyJobTransforms.UseFrontier' \
-        --preInclude 'ReSim:Campaigns.MC16Simulation' \
+        --preInclude 'ReSim:Campaigns.MC21SimulationNoIoV' \
         --geometryVersion 'ReSim:ATLAS-R3S-2021-03-00-00' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.CA.HITS.pool.root" \
         --maxEvents $MAXEVENTS \
-        --postExec 'ReSim:with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+        --postExec 'ReSim:with open("ConfigReSimCA.pkl", "wb") as f: cfg.store(f)' \
         --imf False
 
     rc1=$?
     status=$rc1
-    mv log.ReSim log.ResSim.CA
+    mv log.ReSim log.ReSim.CA
 fi
 echo "art-result: $rc1 resimCA"
 
@@ -65,19 +65,19 @@ then
         --conditionsTag 'ReSim:OFLCOND-MC21-SDR-RUN3-05' \
         --simulator 'FullG4MT_QS' \
         --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
+        --preInclude 'ReSim:Campaigns/MC21SimulationNoIoV.py' \
         --geometryVersion 'ReSim:ATLAS-R3S-2021-03-00-00' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.CA.HITS.pool.root" \
         --maxEvents $MAXEVENTS \
         --imf False \
-        --athenaopts '"--config-only=ConfigSimCG.pkl"'
+        --athenaopts '"--config-only=ConfigReSimCG.pkl"'
 
     ReSim_tf.py \
         --conditionsTag 'ReSim:OFLCOND-MC21-SDR-RUN3-05' \
         --simulator 'FullG4MT_QS' \
         --postInclude 'ReSim:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'ReSim:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
+        --preInclude 'ReSim:Campaigns/MC21SimulationNoIoV.py' \
         --geometryVersion 'ReSim:ATLAS-R3S-2021-03-00-00' \
         --inputHITSFile "original.HITS.pool.root" \
         --outputHITS_RSMFile "resim.CG.HITS.pool.root" \

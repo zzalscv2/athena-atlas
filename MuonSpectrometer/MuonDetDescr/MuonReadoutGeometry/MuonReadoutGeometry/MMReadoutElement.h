@@ -46,7 +46,7 @@ namespace MuonGM {
         bool stripGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const;
 
         /** Wrapper to MuonChannelDesign::stereoAngle() */
-        double stripAngle(const Identifier& id) const;
+        double stereoAngle(const Identifier& id) const;
 
         /** strip length
         Wrappers to MuonChannelDesign::channelLength() taking into account the passivated width */
@@ -209,7 +209,7 @@ namespace MuonGM {
         return design->center(manager()->mmIdHelper()->channel(id), pos);
     }
 
-    inline double MMReadoutElement::stripAngle(const Identifier& id) const {
+    inline double MMReadoutElement::stereoAngle(const Identifier& id) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return 0;
         return design->stereoAngle();

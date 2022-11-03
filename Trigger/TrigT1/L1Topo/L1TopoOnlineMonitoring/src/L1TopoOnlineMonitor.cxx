@@ -82,6 +82,8 @@ StatusCode L1TopoOnlineMonitor::start() {
 
    m_ctpIds = getCtpIds(*l1menu);
 
+   m_startbit = getStartBits(*l1menu);
+
    return StatusCode::SUCCESS;
 }
 
@@ -165,10 +167,11 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, const Even
       Monitored::Group(m_monTool,monTopoDec);
     }
     else if (l1topo_dec->bitWidth() == 64) {
-      for(unsigned int i=0; i<64; ++i) {
-	uint64_t mask = 0x11; mask <<= i;
-	if ((l1topo_dec->topoWord64() & mask) !=0)
-	  {topoword.push_back(64*l1topo_dec->clock()+i);}
+      for(auto startbit : m_startbit[l1topo_dec->connectionId() - 4]) {
+	      uint64_t mask = 0x11; mask <<= startbit;
+	      if ((l1topo_dec->topoWord64() & mask) !=0) { 
+          topoword.push_back(64*l1topo_dec->clock() + startbit);
+        }
       }
       std::string name = "CableOpti_";
       name += std::to_string(l1topo_dec->connectionId());
@@ -233,7 +236,7 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
   
   SG::ReadHandle<xAOD::L1TopoRawDataContainer> cont(m_l1topoRawDataKey, ctx);
   if(!cont.isValid()){
-    ATH_MSG_FATAL("Could not retrieve L1Topo RAW Data Container from the BS data.");
+    ATH_MSG_WARNING("Could not retrieve L1Topo RAW Data Container from the BS data.");
     return StatusCode::FAILURE;
   }
 
@@ -247,6 +250,10 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
   for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
     const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
     size_t nWords = dataWords.size();
+    if (nWords!=50) {
+      ATH_MSG_WARNING("Expected data word container size is 50, but found " << nWords);
+      return StatusCode::FAILURE;
+    }
     uint32_t rodTrailer2 = dataWords[--nWords];
     uint32_t rodTrailer1 = dataWords[--nWords];
 
@@ -379,6 +386,23 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
   return StatusCode::SUCCESS;
 }
 
+std::vector<std::vector<unsigned>> L1TopoOnlineMonitor::getStartBits( const TrigConf::L1Menu& l1menu ) {
+
+  std::vector<std::vector<unsigned>> startbit_vec;
+  std::vector<std::string> connNames = l1menu.connectorNames();
+  for( const std::string connName : {"Topo1Opt0", "Topo1Opt1", "Topo1Opt2", "Topo1Opt3"}) {
+    if( find(connNames.begin(), connNames.end(), connName) == connNames.end() ) {
+      continue;
+    }
+    std::vector<unsigned> startbit;
+	  for(auto & t1 : l1menu.connector(connName).triggerLines()) {
+      startbit.push_back(t1.startbit());
+    }
+    startbit_vec.push_back(startbit);
+  }
+  return startbit_vec;
+}
+// 
 
 std::vector<unsigned> L1TopoOnlineMonitor::getCtpIds( const TrigConf::L1Menu& l1menu ) {
   

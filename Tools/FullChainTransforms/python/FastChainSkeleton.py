@@ -137,6 +137,13 @@ def fromRunArgs(runArgs):
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
 
+    if (not ConfigFlags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in ConfigFlags.Input.TypedCollections) \
+        or (ConfigFlags.Overlay.FastChain and "xAOD::EventInfo#EventInfo" in ConfigFlags.Input.SecondaryTypedCollections):
+        # Make sure signal EventInfo is rebuilt from event context
+        # TODO: this is probably not needed, but keeping it to be in sync with standard simulation
+        from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
+        cfg.merge(EventInfoUpdateFromContextAlgCfg(ConfigFlags))
+
     if ConfigFlags.Overlay.FastChain:
         # CopyMcEventCollection should be before Kernel
         from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyMcEventCollectionCfg

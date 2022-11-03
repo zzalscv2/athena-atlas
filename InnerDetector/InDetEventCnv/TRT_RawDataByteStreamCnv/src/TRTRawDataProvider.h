@@ -20,7 +20,7 @@
 #include "IRegionSelector/IRegSelTool.h" 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "InDetByteStreamErrors/TRT_BSErrContainer.h"
           
@@ -30,7 +30,7 @@ class TRTRawDataProviderTool;
 class TRT_CablingSvc;
 
 
-class TRTRawDataProvider : public AthAlgorithm
+class TRTRawDataProvider : public AthReentrantAlgorithm
 {
 public:
 
@@ -41,7 +41,7 @@ public:
   virtual StatusCode initialize();
 
   //! Execute
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx) const;
 
   //! Finalize
   virtual StatusCode finalize()

@@ -159,6 +159,12 @@ FibrePackerBase::myDataWord  EfexLatomeFibrePacker::getBcNumber(const std::vecto
     return BcNumber;
 }
 
+FibrePackerBase::myDataWord  EfexLatomeFibrePacker::getBcMask(InputDataFrameType frameType) const {
+    // BC number is just 7 bits for normal frames
+    // but the full 12 bits from align frames.
+    return (frameType == InputDataFrameType::Alignement) ? 0xfff : 0x07f;
+}
+
 std::vector<FibrePackerBase::myDataWord>  EfexLatomeFibrePacker::getUnpackedData(const std::vector<myDataWord>& encodedData, 
                                                                 InputDataFrameType frameType) const {
     std::vector<myDataWord> unpackedData; 

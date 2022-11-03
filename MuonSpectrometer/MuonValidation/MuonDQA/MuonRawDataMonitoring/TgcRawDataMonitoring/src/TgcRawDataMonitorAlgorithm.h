@@ -168,6 +168,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<xAOD::VertexContainer> m_PrimaryVertexContainerKey{this,"PrimaryVertexContainerName","PrimaryVertices","Primary Vertex Container"};
   
   DoubleProperty m_muonToPVdz{this,"MuonToPVdz",50.,"Window size in deltaZ between muon track and primary vertex"};
+  DoubleProperty m_muonToPVdzOffset{this,"MuonToPVdzOffset",0.,"Offset of deltaZ between muon track and primary vertex"};
   DoubleProperty m_muonToPVdca{this,"MuonToPVdca",0.5,"Distance to closest approach of muon track to primary vertex"};
   BooleanProperty m_doExpressProcessing{this,"doExpressProcessing",false,"Processing express_express data"};
   StringProperty m_packageName{this,"PackageName","TgcRawDataMonitor","group name for histograming"};

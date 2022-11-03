@@ -27,6 +27,11 @@
 #include <utility>
 #include <stdexcept>
 
+namespace {
+   template <typename T>
+   inline T sqr(T a) {return a*a; }
+}
+
 ///////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////
@@ -104,6 +109,8 @@ StatusCode InDet::SiCombinatorialTrackFinder_xk::initialize()
   ATH_CHECK( m_fieldCondObjInputKey.initialize() );
   ATH_CHECK( m_pixelDetElStatus.initialize( !m_pixelDetElStatus.empty() && m_usePIX) );
   ATH_CHECK( m_sctDetElStatus.initialize( !m_sctDetElStatus.empty() && m_useSCT) );
+
+  m_minPt2Cut = sqr(m_minPtCut.value());
   return StatusCode::SUCCESS;
 }
 
@@ -363,10 +370,11 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracks
 
 
   Trk::Track* t = convertToTrack(data);
-  ++data.findtracks();
-  if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
-  data.tracks().push_back(t);
-
+  if (t) {
+     ++data.findtracks();
+     if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
+     data.tracks().push_back(t);
+  }
   if (!data.tools().multiTrack() || data.simpleTrack() || Sp.size()<=2 || data.cosmicTrack() || data.trajectory().pTfirst() < data.tools().pTmin()) return data.tracks();
 
   while ((t=convertToNextTrack(data))) {
@@ -417,7 +425,7 @@ const std::list<Trk::Track*>& InDet::SiCombinatorialTrackFinder_xk::getTracks
   // Trk::Track production
   //
   Trk::Track* t = convertToTrack(data);
-  if (t==nullptr) return data.tracks();
+  if (t==nullptr) return data.tracks(); // @TODO should one check if convertToNextTrack would yield anything ?
   if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
 
   ++data.findtracks();
@@ -488,7 +496,7 @@ const std::list<Trk::Track*>&  InDet::SiCombinatorialTrackFinder_xk::getTracksWi
     data.trackinfo() = oldinfo;
     data.tools().setMultiTracks(mult,Xi2m);
 
-    if (!t) return data.tracks();
+    if (t==nullptr) return data.tracks(); // @TODO should one check whether the next findTrack call would yield something ?
     if (m_writeHolesFromPattern) data.addPatternHoleSearchOutcome(t,data.trajectory().getHoleSearchResult());
     ++data.findtracks();
     data.tracks().push_back(t);
@@ -798,8 +806,19 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 // Trk::Track production
 ///////////////////////////////////////////////////////////////////
 
-Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorialTrackFinderData_xk& data) 
+Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorialTrackFinderData_xk& data) const
 {
+  Trk::TrackParameters* param = data.trajectory().firstTrackParameters();
+  if (param) {
+     auto momentum = param->momentum();
+     const auto  pt2 = momentum.perp2();
+     // reject tracks with small pT
+     // The cut should be large enough otherwise eta computation of such tracks may yield NANs.
+     if (pt2 < m_minPt2Cut) {
+        ATH_MSG_WARNING( "Reject low pT track (pT = " << sqrt(pt2) << " < " << m_minPtCut.value() << ")");
+        return nullptr;
+     }
+  }
   if (!data.simpleTrack()) {
     return new Trk::Track(data.trackinfo(),
                           data.trajectory().convertToTrackStateOnSurface(data.cosmicTrack()),
@@ -824,10 +843,30 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
 // Next Trk::Track production
 ///////////////////////////////////////////////////////////////////
 
-Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) 
+Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToNextTrack(SiCombinatorialTrackFinderData_xk& data) const
 {
   auto tsos = data.trajectory().convertToNextTrackStateOnSurface();
   if (tsos.empty()) return nullptr;
+
+  // verify first track parameters
+  const Trk::TrackParameters *param = nullptr;
+  for (const Trk::TrackStateOnSurface *a_tsos : tsos) {
+     const Trk::TrackParameters *param = a_tsos->trackParameters();
+     if (param) {
+        break;
+     }
+  }
+
+  if (param) {
+     auto momentum = param->momentum();
+     const auto  pt2 = momentum.perp2();
+     // reject tracks with small pT
+     // The cut should be large enough otherwise eta computation of such tracks may yield NANs.
+     if (pt2 < m_minPt2Cut) {
+        ATH_MSG_WARNING( "Reject low pT track (pT = " << sqrt(pt2) << " < " << m_minPtCut.value() << ")");
+        return nullptr;
+     }
+  }
   return new Trk::Track(data.trackinfo(),
                         std::move(tsos),
                         data.trajectory().convertToFitQuality());

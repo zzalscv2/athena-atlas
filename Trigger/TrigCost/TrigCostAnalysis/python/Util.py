@@ -76,6 +76,9 @@ def exploreTree(inputFile, dumpSummary=False, underflowThreshold=0.1, overflowTh
 
                 processingWarnings += t.getWarningMsgs()
 
+            except (ValueError):
+                log.error("Processing of table {0} failed!".format(table.GetName()))
+                return []
             except (NameError, ImportError):
                 log.warning("Class {0} not defined - directory {1} will not be processed"
                             .format(table.GetName()+"_TableConstructor", table.GetName()))

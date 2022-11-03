@@ -259,3 +259,9 @@ class MuMultiplicityAlgo(MultiplicityAlgo):
 
     def configureFromThreshold(self, thr):
         pass
+
+class LArSaturationAlgo(MultiplicityAlgo):
+    def __init__(self):
+        name = 'LArSaturation'
+        super(LArSaturationAlgo, self).__init__(name=name, classtype=name, input='jTE', output=name, threshold=name, nbits=1)
+

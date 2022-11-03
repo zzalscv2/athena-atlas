@@ -216,7 +216,15 @@ StatusCode MuCTPIPhase1ByteStreamAlgo::convert( const IROBDataProviderSvc::ROBF*
 
           }
           else
-              ATH_MSG_WARNING("MUCTPI DQ DEBUG: skipping Mult processing, no nbits defined");
+          {
+              //if nbits size !=32, then it's not set
+              //for now, ignore, and can fill the histos with the Mult bits, as they come
+              //without decoding
+              //=>suppress this warning
+              //ATH_MSG_WARNING("MUCTPI DQ DEBUG: skipping Mult processing, no nbits defined");
+
+              //todo: add code + histos for Mult bits
+          }
 
           break;
       }

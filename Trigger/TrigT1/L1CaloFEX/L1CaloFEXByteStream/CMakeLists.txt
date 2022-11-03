@@ -16,7 +16,7 @@ atlas_add_component( L1CaloFEXByteStream
                      src/defsL1Calo/src/*.cxx
                      DEFINITIONS OFFLINE_DECODER
                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} src/bytestreamDecoder src/channelMappings src/infraL1Calo src/defsL1Calo
-                     LINK_LIBRARIES TrigT1ResultByteStreamLib xAODTrigger TrigConfData xAODTrigL1Calo PathResolver ${TDAQ-COMMON_LIBRARIES} )
+                     LINK_LIBRARIES TrigT1ResultByteStreamLib xAODTrigger TrigConfData xAODTrigL1Calo PathResolver AthenaMonitoringKernelLib ${TDAQ-COMMON_LIBRARIES} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

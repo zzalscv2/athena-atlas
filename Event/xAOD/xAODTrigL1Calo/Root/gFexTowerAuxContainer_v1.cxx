@@ -11,6 +11,8 @@ namespace xAOD {
     AuxContainerBase()
     {
     
+    AUX_VARIABLE( eta );
+    AUX_VARIABLE( phi );
     AUX_VARIABLE( iEta );           
     AUX_VARIABLE( iPhi );
     AUX_VARIABLE( fpga );

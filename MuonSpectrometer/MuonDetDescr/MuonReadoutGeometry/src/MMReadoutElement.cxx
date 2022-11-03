@@ -208,9 +208,11 @@ namespace MuonGM {
             design.nMissedBottomEta    = roParam.nMissedBottomEta;
             design.nMissedTopStereo    = roParam.nMissedTopStereo;  // #of stereo strips that are not connected to any FE board
             design.nMissedBottomStereo = roParam.nMissedBottomStereo;
-            design.totalStrips         = roParam.tStrips;           
-            design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, roParam.stereoAngle.at(il));
-            design.inputWidth          = pitch / std::cos(design.stereoAngle());                  // inputwidth is defined as the pitch
+            design.totalStrips         = roParam.tStrips;   
+            /// The stereo angle is defined clock-wise from the y-axis
+            design.defineTrapezoid(m_minHalfY, m_maxHalfY,m_halfX, - roParam.stereoAngle.at(il));
+            /// Input width is defined as the distance between two channels
+            design.inputWidth          = pitch * std::cos(design.stereoAngle());
            
             m_nStrips.push_back(design.totalStrips);
             if (!design.hasStereoAngle()) {  // eta layers
@@ -356,7 +358,15 @@ namespace MuonGM {
         }
     }
 
- 
+    //============================================================================
+    void MMReadoutElement::clearALinePar() {
+        if (has_ALines()) {
+            m_ALinePar = nullptr; 
+            m_delta = Amg::Transform3D::Identity(); 
+            refreshCache();
+        }
+    }
+
     //============================================================================
     void MMReadoutElement::setBLinePar(const BLinePar& bLine) {
         MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
@@ -447,8 +457,12 @@ namespace MuonGM {
         clearCache();
         fillCache();
     }
+    
+
     //============================================================================
     bool MMReadoutElement::spacePointPosition(const Identifier& layerId, const Amg::Vector2D& lpos, Amg::Vector3D& pos) const {
+
+        pos = Amg::Vector3D(lpos.x(), lpos.y(), 0.);
 
         const MuonChannelDesign* design = getDesign(layerId);
         if (!design) {
@@ -456,7 +470,7 @@ namespace MuonGM {
             log << MSG::WARNING << "Unable to get MuonChannelDesign, therefore cannot provide position corrections. Returning." << endmsg;
             return false;
         }
-        
+
         bool conditionsApplied{false};
         Amg::Transform3D trfToML{Amg::Transform3D::Identity()};
 
@@ -466,41 +480,33 @@ namespace MuonGM {
         //*********************
         const NswAsBuilt::StripCalculator* sc = manager()->getMMAsBuiltCalculator();
         if (sc) {
-            // nearest strip to locXpos
-            int istrip = stripNumber(lpos, layerId);          
 
             // setup strip calculator
             NswAsBuilt::stripIdentifier_t strip_id;
             strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::MML : NswAsBuilt::quadrupletIdentifier_t::MMS), getStationEta(), getStationPhi(), m_ml };
             strip_id.ilayer     = manager()->mmIdHelper()->gasGap(layerId);
-            strip_id.istrip     = istrip;
+            strip_id.istrip     = stripNumber(lpos, layerId); // nearest strip to lpos
 
-            // length of the ETA STRIP with index "istrip", even for the case of stereo strips, 
-            // since NswAsBuilt handles the conversion to stereo as an internal transformation 
-            const double sx      = design->distanceToChannel(lpos, istrip)/design->inputWidth; // in [-0.5, 0.5]
-            const double sy      = 2.*lpos.y()/design->channelLength(istrip); // in [-1, 1]
+            Amg::Vector2D rel_pos;
+            if (!design->positionWithinStrip(lpos, rel_pos)) {
+                MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+                log << MSG::WARNING << "Position corrections can be provided for eta strips and only within the active area. Returning." << endmsg;
+                return false;
+            } 
 
-            // get the position coordinates, in the multilayer frame, from NswAsBuilt.
+            // get the position coordinates, in the chamber frame, from NswAsBuilt.
             // Applying a 2.75mm correction along the layer normal, since NswAsBuilt considers the layer 
             // on the readout strips, whereas Athena wants it at the middle of the drift gap.
-            NswAsBuilt::StripCalculator::position_t calcPos = sc->getPositionAlongStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, sy, sx);
+            NswAsBuilt::StripCalculator::position_t calcPos = sc->getPositionAlongStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y(), rel_pos.x());
             pos     = calcPos.pos;
             pos[0] += strip_id.ilayer%2 ? -2.75 : 2.75;
-            // signal that we are in the multilayer reference frame
+            
+            // signal that pos is now in the chamber reference frame
+            // (don't go back to the layer frame yet, since we may apply b-lines later on)
+            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
             conditionsApplied = true;
-            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);               
         }
 #endif 
-
-        //*********************
-        // Case as-built is not applied: correct x for the stereo angle (manually)
-        // we are still at the layer reference frame
-        //*********************
-        if (!conditionsApplied) {            
-            pos[0] = lpos.x();
-            pos[1] = lpos.y();
-            pos[2] = 0.;
-        }
 
         //*********************
         // B-Lines
@@ -508,22 +514,19 @@ namespace MuonGM {
         if (has_BLines()) {
           // go to the multilayer reference frame if we are not already there
           if (!conditionsApplied) {
-             conditionsApplied = true; 
              trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
              pos = trfToML*pos;
+             
+             // signal that pos is now in the multilayer reference frame
+             conditionsApplied = true; 
           }
           posOnDefChamber(pos);
        }
 
-        // back to nominal layer frame from where we started
+        // back to the layer reference frame from where we started
         if (conditionsApplied) pos = trfToML.inverse()*pos;
+        
         return true;
     }
-    void MMReadoutElement::clearALinePar() {
-        if (has_ALines()) {
-            m_ALinePar = nullptr; 
-            m_delta = Amg::Transform3D::Identity(); 
-            refreshCache();
-        }
-    }
+    
 }  // namespace MuonGM
