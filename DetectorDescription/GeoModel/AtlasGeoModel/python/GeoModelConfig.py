@@ -25,6 +25,7 @@ def GeoModelCfg(configFlags):
     result.merge(TagInfoMgrCfg(configFlags))
 
     gms=CompFactory.GeoModelSvc(AtlasVersion=version,
+                                SQLiteDB = configFlags.GeoModel.SQLiteDB,
                                 SupportedGeometry = int(relversion[0]))
     if configFlags.Common.ProductionStep == ProductionStep.Simulation:
         ## Protects GeoModelSvc in the simulation from the AlignCallbacks
