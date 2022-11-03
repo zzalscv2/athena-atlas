@@ -40,6 +40,7 @@ namespace CP
         typedef enum
         {
             defaultStrategy = 0
+            agnosticStrategy = 1
         } overlapStrategy;
 
         /// Check the overlap between the prompt and LRT electron collections.
