@@ -47,7 +47,7 @@ filter_bs.input = ''
 filter_bs.args = '-l 0' # data_cos input includes files from multiple LBs, see ATR-26461
 filter_bs.args += ' -s Main ' + find_file('*_HLTMPPy_output.*.data')
 
-# Tier-0 reco step (BS->ESD->AOD)
+# Tier-0 reco step (BS->AOD)
 tzrecoPreExec = ' '.join([
   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
   "ConfigFlags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';",
@@ -62,11 +62,12 @@ tzreco.input = ''
 tzreco.explicit_input = True
 tzreco.max_events = 2000
 tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
-tzreco.args += ' --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root'
+tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\'' # RecExConfig AutoConfiguration use outdated default
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\''     # RecExConfig AutoConfiguration use outdated default
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
+tzreco.args += ' --steering "doRAWtoALL"'
 
 # Tier-0 monitoring step (AOD->HIST)
 tzmon = ExecStep.ExecStep('Tier0Mon')

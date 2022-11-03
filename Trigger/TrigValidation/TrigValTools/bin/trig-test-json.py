@@ -239,7 +239,7 @@ def main():
     if do_prmon:
         prmon_log = newest_file(r'prmon\..*\.txt')
         if not prmon_log:
-            prmon_log = first_existing_file(['prmon.full.RDOtoRDOTrigger', 'prmon.full.RAWtoESD', 'prmon.full.ESDtoAOD'])
+            prmon_log = first_existing_file(['prmon.full.RDOtoRDOTrigger', 'prmon.full.RAWtoESD', 'prmon.full.ESDtoAOD', 'prmon.full.RAWtoALL'])
         if not prmon_log:
             logging.info("No prmon output found, the result will be empty")
             data['prmon'] = 'n/a'
