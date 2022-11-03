@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test of transform RDO->RDO_TRIG->ESD->AOD followed by HLT monitoring step with Run-3 DQ framework
+# art-description: Test of transform RDO->RDO_TRIG->AOD followed by HLT monitoring step with Run-3 DQ framework
 # art-type: build
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -22,7 +22,7 @@ rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
 rdo2aod.threads = 4
 rdo2aod.concurrent_events = 4
-rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG" --valid=True'
+rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL" --valid=True'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 dq = ExecStep.ExecStep('Run3DQ')

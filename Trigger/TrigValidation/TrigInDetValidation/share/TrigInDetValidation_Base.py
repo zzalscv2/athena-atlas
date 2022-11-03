@@ -111,7 +111,6 @@ rdo2aod.input   = Input    # defined in TrigValTools/share/TrigValInputs.json
 
 if GridFiles:
     if local:
-#   rdo2aod.input = 'Single_el_larged0'    # defined in TrigValTools/share/TrigValInputs.json  
        rdo2aod.input = Input   # should match definition in TrigValTools/share/TrigValInputs.json  
     else:
        rdo2aod.input = ''
@@ -122,7 +121,7 @@ if (Malloc):
     os.environ["MALLOC_CHECK_"] = "3"
     rdo2aod.malloc = True
 
-for a in ["preexec_trig", "preexec_reco", "preexec_aod", "preexec_all", "postexec_trig", "postexec_reco"]:
+for a in ["preexec_trig", "preexec_reco", "preexec_all", "postexec_trig", "postexec_reco"]:
     if a in locals():
         v = locals()[a]
         if type(v) is list: v = ";".join(v)

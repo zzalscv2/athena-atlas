@@ -52,7 +52,8 @@ tzreco.explicit_input = True
 tzreco.input = ''
 tzreco.max_events = 50
 tzreco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
-tzreco.args += ' --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root'
+# TODO: add RAWtoALL steering (ATR-26605)
+tzreco.args += ' --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=hist.root'
 tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-09\' --geometryVersion=\'ATLAS-R2-2016-01-00-01\''
