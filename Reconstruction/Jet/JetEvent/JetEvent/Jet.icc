@@ -297,7 +297,7 @@ Jet::getAssociation(const mkey_t& key, bool /*useLink*/ ) const
 }
   
 template <class T>
-void Jet::setAssociation(const T* pAssoc,bool /*useLink*/) const
+void Jet::setAssociation(const T* pAssoc,bool /*useLink*/)
 {
   // use check function
   size_t aInd(size_t(-1));
@@ -313,7 +313,7 @@ void Jet::setAssociation(const T* pAssoc,bool /*useLink*/) const
   }
 }
 
-inline void Jet::removeAssociation( const mkey_t& key ) const
+inline void Jet::removeAssociation( const mkey_t& key )
 {
   if ( bool(m_assocStore) ) {
     size_t aInd;
@@ -323,7 +323,7 @@ inline void Jet::removeAssociation( const mkey_t& key ) const
   }
 }
 
-inline void Jet::removeAssociation (const size_t index) const
+inline void Jet::removeAssociation (const size_t index)
 {
   delete (m_assocStore->operator[])(index);
   (m_assocStore->operator[])(index) = 0;
