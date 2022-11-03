@@ -9,10 +9,11 @@ from AthenaCommon.CfgGetter import addTool, addService, addAlgorithm
 
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getNIMatEffUpdator",                 "ISF_NIMatEffUpdator")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getNIPropagator",                    "ISF_NIPropagator")
-addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getNINavigator",                      "ISF_NINavigator")
+addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getNINavigator",                     "ISF_NINavigator")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getNITimedExtrapolator",             "ISF_NITimedExtrapolator")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getTimedExtrapolator",               "TimedExtrapolator")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getPunchThroughTool",                "ISF_PunchThroughTool")
+addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getPunchThroughClassifier",          "ISF_PunchThroughClassifier")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getEmptyCellBuilderTool",            "ISF_EmptyCellBuilderTool")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getFastShowerCellBuilderTool",       "ISF_FastShowerCellBuilderTool")
 addTool("ISF_FastCaloSimServices.AdditionalConfigLegacy.getLegacyFastShowerCellBuilderTool", "ISF_LegacyFastShowerCellBuilderTool")

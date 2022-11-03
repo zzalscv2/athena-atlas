@@ -169,32 +169,6 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
 
   ATHRNG::RNGWrapper* rngWrapper = m_rndmGenSvc->getEngine(this, m_randomEngineName); // TODO ideally would pass the event context to this method
 
-  if (m_doPunchThrough) {
-    Barcode::PhysicsProcessCode process = 201;
-    // call punch-through simulation
-    const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, *rngWrapper);
-    if (someSecondaries && !someSecondaries->empty()) {
-      //Record truth incident for created punch through particles
-      ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(isfp),
-                                   *someSecondaries,
-                                   process,
-                                   isfp.nextGeoID(),  // inherits from the parent
-                                   ISF::fKillsPrimary);
-      m_truthRecordSvc->registerTruthIncident( truth, true );
-      for (auto *secondary : *someSecondaries) {
-        if (secondary->getTruthBinding()) {
-          secondaries.push_back(secondary);
-        }
-        else {
-          ATH_MSG_WARNING("Secondary particle created by PunchThroughTool not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secondary <<")");
-          delete secondary;
-        }
-      }
-      delete someSecondaries;
-    }
-  }
-
-
   //Don't simulate particles with total energy below 10 MeV
   if(isfp.ekin() < 10) {
     ATH_MSG_VERBOSE("Skipping particle with Ekin: " << isfp.ekin() <<" MeV. Below the 10 MeV threshold.");
@@ -216,7 +190,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
 
   TFCSExtrapolationState extrapol;
   m_FastCaloSimCaloExtrapolation->extrapolate(extrapol, &truth);
-  
+
   ATH_MSG_DEBUG(" particle: " << isfp.pdgCode() << " Ekin: " << isfp.ekin() << " position eta: " << particle_position.eta() << " direction eta: " << particle_direction.eta() << " position phi: " << particle_position.phi() << " direction phi: " << particle_direction.phi());
 
   //only simulate if extrapolation to calo surface succeeded
@@ -235,6 +209,35 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
     for(const auto& iter : simulstate.cells()) {
       CaloCell* theCell = (CaloCell*)m_theContainer->findCell(iter.first->calo_hash());
       theCell->addEnergy(iter.second);
+    }
+
+    //now perform punch through
+    if (m_doPunchThrough) {
+      Barcode::PhysicsProcessCode process = 201;
+      // call punch-through simulation
+      const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, simulstate, *rngWrapper);
+
+      if (someSecondaries && !someSecondaries->empty()) {
+        //Record truth incident for created punch through particles
+        ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(isfp),
+                                     *someSecondaries,
+                                     process,
+                                     isfp.nextGeoID(),  // inherits from the parent
+                                     ISF::fKillsPrimary);
+
+        m_truthRecordSvc->registerTruthIncident( truth, true );
+
+        for (auto *secondary : *someSecondaries) {
+          if (secondary->getTruthBinding()) {
+            secondaries.push_back(secondary);
+          }
+          else {
+            ATH_MSG_WARNING("Secondary particle created by PunchThroughTool not written out to truth.\n Parent (" << isfp << ")\n Secondary (" << *secondary <<")");
+            delete secondary;
+          }
+        }
+        delete someSecondaries;
+      }
     }
     simulstate.DoAuxInfoCleanup();
   }
