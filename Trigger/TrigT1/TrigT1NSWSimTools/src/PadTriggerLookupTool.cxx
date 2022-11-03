@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/PadTriggerLookupTool.h"
@@ -139,13 +139,13 @@ StatusCode PadTriggerLookupTool::expandCoincidenceTable(){//There we append 3o4s
         for(const auto& kv : m_pats){
             int bandid=kv.second.first;
             int phiid=kv.second.second;
-            for(const int& in : innerIndices ){
+            for(int in : innerIndices ){
                 std::vector<int> pattern=kv.first;//copy
                 if(pattern.at(in)==nullPadNumber || pattern.at(in+4)==nullPadNumber){
                     continue;
                 }
                 pattern.at(in)=nullPadNumber;
-                for(const int& out :outerIndices){
+                for(int out :outerIndices){
                     int thispattern=pattern.at(out);
                     pattern.at(out)=nullPadNumber;
                     derivedCoincidencePatterns[pattern]=std::pair<int,int>(bandid,phiid);
@@ -153,7 +153,7 @@ StatusCode PadTriggerLookupTool::expandCoincidenceTable(){//There we append 3o4s
                 }
             }
 
-            for(const int& i : allIndices){
+            for(int i : allIndices){
                 std::vector<int> pattern=kv.first;//copy
                 pattern.at(i)=nullPadNumber;
                 derivedCoincidencePatterns[pattern]=std::pair<int,int>(bandid,phiid);
@@ -217,7 +217,7 @@ std::vector<std::vector<std::shared_ptr<PadData> >> PadTriggerLookupTool::select
         }
         //assigns a vector of {nullPad} (size 1) on a layer if it has no hits
         auto addEmptyLayerIfAny=[]( std::vector<std::shared_ptr<PadData> >& layerPads)->void{
-            if(layerPads.size() ==0 ){
+            if(layerPads.empty()){
                  std::vector<std::shared_ptr<PadData>> emptyLayer;
                  std::shared_ptr<PadData> nullPad=std::make_shared<PadOfflineData>(Identifier(0), 0, 0, nullptr);//do not change the null pointer !
                  emptyLayer.push_back(nullPad);
@@ -326,17 +326,17 @@ std::vector<std::vector<std::shared_ptr<PadData> >> PadTriggerLookupTool::select
         std::vector<std::pair<int,int> > uniqueBandPhiIds;//just to keep track of  the unique triggers found within this lookup call
         std::vector<std::vector<std::shared_ptr<PadData>> > innerPatterns=selectWedgePatterns(pads, side,  sector,STGCINNER);
         std::vector<std::vector<std::shared_ptr<PadData>> > outerPatterns=selectWedgePatterns(pads, side,  sector,STGCOUTER);
-        if(innerPatterns.size()== 0){
+        if(innerPatterns.empty()){
             ATH_MSG_WARNING(" No hit patterns found / inner wedge");
             return StatusCode::SUCCESS;
         }
-        if(outerPatterns.size()== 0){
+        if(outerPatterns.empty()){
             ATH_MSG_WARNING(" No hit patterns found / outer wedge");
             return StatusCode::SUCCESS;
         }
 
-        for( std::vector<std::shared_ptr<PadData>> inner: innerPatterns){
-            for( std::vector<std::shared_ptr<PadData>> outer: outerPatterns){
+        for(const std::vector<std::shared_ptr<PadData>>& inner: innerPatterns){
+            for(const std::vector<std::shared_ptr<PadData>>& outer: outerPatterns){
                 //concatenate the two if modules match then Lookup
                 if(! inOutModuleMatch(inner,outer)) continue;
                 std::vector<std::shared_ptr<PadData>> combinedInOut;
@@ -520,4 +520,3 @@ StatusCode PadTriggerLookupTool::printGeometry( const std::vector<std::shared_pt
     }
 
 } // NSWL1
-
