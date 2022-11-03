@@ -30,7 +30,6 @@ class G4TouchableHistory;
 class LArEM_ID;
 class LArFCAL_ID;
 class LArHEC_ID;
-class LArMiniFCAL_ID;
 class TileID;
 
 class LArHitContainer;
@@ -107,12 +106,10 @@ public:
   void setupHelpers( const LArEM_ID* EM ,
                      const LArFCAL_ID* FCAL ,
                      const LArHEC_ID* HEC ,
-                     const LArMiniFCAL_ID* mini,
                      const TileID* tile) {
     m_larEmID = EM;
     m_larFcalID = FCAL;
     m_larHecID = HEC;
-    m_larMiniFcalID = mini;
     m_tileID = tile;
   }
 
@@ -127,7 +124,6 @@ protected:
   const LArEM_ID*       m_larEmID{nullptr};
   const LArFCAL_ID*     m_larFcalID{nullptr};
   const LArHEC_ID*      m_larHecID{nullptr};
-  const LArMiniFCAL_ID* m_larMiniFcalID{nullptr};
   const TileID*         m_tileID{nullptr};
   CxxUtils::CachedPointer<const CaloDetDescrManager> m_calo_dd_man;
   std::map< Identifier , std::vector< ISF_FCS_Parametrization::FCS_StepInfo* >* > m_hit_map;
