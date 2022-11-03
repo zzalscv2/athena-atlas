@@ -37,32 +37,6 @@ namespace ITk
     for(int i=0; i!=3; ++i) {m_b0[i]=0.; m_b1[i]=0.; m_dr[i]=0.; m_r0[i]=0.;}
   }
 
-  SiSpacePointForSeed& SiSpacePointForSeed::operator = 
-  (const SiSpacePointForSeed& sp) 
-  {
-    if(&sp!=this) {
-      spacepoint     = sp.spacepoint        ;
-      m_x            = sp.m_x               ;
-      m_y            = sp.m_y               ;
-      m_z            = sp.m_z               ;
-      m_r            = sp.m_r               ;
-      m_covr         = sp.m_covr            ;
-      m_covz         = sp.m_covz            ;
-      m_q            = sp.m_q               ;
-      m_su           = sp.m_su              ;
-      m_sn           = sp.m_sn              ; 
-      m_scorePenalty = sp.m_scorePenalty    ; 
-      m_dR           = sp.m_dR              ;
-      m_eta          = sp.m_eta             ;
-      m_pt           = sp.m_pt              ;
-      m_dzdr         = sp.m_dzdr            ;       
-      for(int i=0; i!=3; ++i) m_b0[i]=sp.m_b0[i];
-      for(int i=0; i!=3; ++i) m_b1[i]=sp.m_b1[i];
-      for(int i=0; i!=3; ++i) m_dr[i]=sp.m_dr[i];
-      for(int i=0; i!=3; ++i) m_r0[i]=sp.m_r0[i];
-    }
-    return(*this);
-  }
  
   SiSpacePointForSeed::SiSpacePointForSeed
   (const Trk::SpacePoint*const& sp,const float* r) 
@@ -75,22 +49,6 @@ namespace ITk
   {
     set(sp,r,sc); m_param = 0.;
   }
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // Copy constructor
-  /////////////////////////////////////////////////////////////////////////////////
-
-  SiSpacePointForSeed::SiSpacePointForSeed (const SiSpacePointForSeed& sp)
-  {
-    *this = sp;
-  }
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // Destructor
-  /////////////////////////////////////////////////////////////////////////////////
-
-  SiSpacePointForSeed::~SiSpacePointForSeed() 
-  = default;
 
   /////////////////////////////////////////////////////////////////////////////////
   // Set

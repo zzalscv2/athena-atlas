@@ -38,9 +38,9 @@ namespace InDet {
     SiSpacePointForSeed();
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*);
     SiSpacePointForSeed(const Trk::SpacePoint*const&,const float*,const float*);
-    SiSpacePointForSeed(const SiSpacePointForSeed&);
-    ~SiSpacePointForSeed();
-    SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&);
+    SiSpacePointForSeed(const SiSpacePointForSeed&) = default;
+    ~SiSpacePointForSeed() = default;
+    SiSpacePointForSeed& operator  = (const SiSpacePointForSeed&) = default;
 
     void set(const Trk::SpacePoint*const&,const float*);
     void set(const Trk::SpacePoint*const&,const float*,const float*);
