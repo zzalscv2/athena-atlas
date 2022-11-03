@@ -208,7 +208,8 @@ namespace LVL1
   {
     //find the lowest pt threshold passed
     std::string thrName="";
-    double thrVal=0;
+    //just some high value ... 
+    double thrVal=999999999999;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
       std::shared_ptr<TrigConf::L1Threshold> thr = decisions[idec].first;
@@ -218,6 +219,8 @@ namespace LVL1
 	thrName = thr->name();
       }
     }
+    //if nothing is found set back to the old (broken default value)
+    if (thrVal==999999999999) thrVal=0;
     return std::make_pair(thrName, thrVal);
   }
 
