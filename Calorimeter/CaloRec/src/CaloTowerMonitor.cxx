@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,9 +9,6 @@
 #include "StoreGate/ReadHandle.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
-
-#include "AIDA/IHistogram1D.h"
-#include "AIDA/IHistogram2D.h"
 
 #include "CaloGeoHelpers/CaloPhiRange.h"
 
@@ -28,179 +25,211 @@
 using CLHEP::GeV;
 using CLHEP::deg;
 
-CaloTowerMonitor::CaloTowerMonitor(const std::string& name,
-				   ISvcLocator* pService)
-  : AthAlgorithm(name,pService),
-    m_nTowers(nullptr),
-    m_nTowersVsEta(nullptr),
-    m_nTowersVsPhi(nullptr),
-    m_cellsInEtaVsPhi(nullptr),
-    m_nCellsInTower(nullptr),
-    m_nCellsInTowerVsEta(nullptr),
-    m_nCellsInTowerVsPhi(nullptr),
-    m_eTowers(nullptr),
-    m_eTowersVsEta(nullptr),
-    m_eTowersVsPhi(nullptr),
-    m_eLogTowers(nullptr),
-    m_etTowers(nullptr),
-    m_etTowersVsEta(nullptr),
-    m_etTowersVsPhi(nullptr),
-    m_etLogTowers(nullptr),
-    m_etaTowerVsCell(nullptr),
-    m_phiTowerVsCell(nullptr)
-{
-  m_collectionNames.resize(0);
-  declareProperty("InputTowerCollections",m_collectionNames);
-}
-
-CaloTowerMonitor::~CaloTowerMonitor()
-{ }
 
 StatusCode CaloTowerMonitor::initialize()
 {
+  ATH_CHECK( m_histSvc.retrieve() );
   ////////////////////////
   // Book Distributions //
   ////////////////////////
 
+  auto book1 = [&] (const std::string& name,
+                    const std::string& title,
+                    int nx,
+                    float xlo,
+                    float xhi,
+                    TH1*& hptr) -> StatusCode
+  {
+    return m_histSvc->regHist ("/" + m_streamName + "/CaloTowerMonitor/" + name,
+                               std::make_unique<TH1F> (name.c_str(), title.c_str(),
+                                                       nx, xlo, xhi),
+                               hptr);
+  };
+  auto book2 = [&] (const std::string& name,
+                    const std::string& title,
+                    int nx,
+                    float xlo,
+                    float xhi,
+                    int ny,
+                    float ylo,
+                    float yhi,
+                    TH2*& hptr) -> StatusCode
+  {
+    return m_histSvc->regHist ("/" + m_streamName + "/CaloTowerMonitor/" + name,
+                               std::make_unique<TH2F> (name.c_str(), title.c_str(),
+                                                       nx, xlo, xhi,
+                                                       ny, ylo, yhi),
+                               hptr);
+  };
+
   // number of towers
-  m_nTowers = histoSvc()->book("/stat/towermonitor", 100, 
-			      "Number of CaloTowers",
-			      500, 0., 10000.);
-  m_nTowersVsEta = histoSvc()->book("/stat/towermonitor", 101, 
-				   "Number of CaloTowers vs Eta",
-				   100, -5., 5.); 
-  m_nTowersVsPhi = histoSvc()->book("/stat/towermonitor", 102,
-				   "Number of CaloTowers vs Phi [deg]",
-				   100, -200., 200. );
+  ATH_CHECK( book1 ("nTowersVsEta", "Number of CaloTowers vs Eta",
+                    100, -5., 5.,
+                    m_nTowersVsEta) );
+  ATH_CHECK( book1 ("nTowersVsPhi", "Number of CaloTowers vs Phi [deg]",
+                    100, -200., 200.,
+                    m_nTowersVsPhi) );
+
   // tower energies
-  m_eTowers = histoSvc()->book("/stat/towermonitor", 200,
-			      "CaloTower E [GeV]",
-			       100, 0., 100.);
-  m_eTowersVsEta = histoSvc()->book("/stat/towermonitor", 201,
-				   "CaloTower E [GeV] vs Eta",
-				   100, -5., 5., 100, 0., 100. );
-  m_eTowersVsPhi = histoSvc()->book("/stat/towermonitor", 202,
-				   "CaloTower E [Gev] vs Phi [deg]",
-				   100, -200., 200., 100, 0., 100. );
-  m_eLogTowers = histoSvc()->book("/stat/towermonitor", 1200,
-				  "CaloTower log(E/GeV)",
-				  100, -7., 3. );
+  ATH_CHECK( book1 ("eTowers", "CaloTower E [GeV]",
+                    100, 0., 100.,
+                    m_eTowers) );
+  ATH_CHECK( book2 ("eTowersVsEta", "CaloTower E [GeV] vs Eta",
+                    100, -5., 5.,
+                    100, 0., 100.,
+                    m_eTowersVsEta) );
+  ATH_CHECK( book2 ("eTowersVsPhi", "CaloTower E [Gev] vs Phi [deg]",
+                    100, -200., 200.,
+                    100, 0., 100.,
+                    m_eTowersVsPhi) );
+  ATH_CHECK( book1 ("eLogTowers", "CaloTower log(E/GeV)",
+                    100, -7., 3.,
+                    m_eLogTowers) );
+
   // tower et's
-  m_etTowers = histoSvc()->book("/stat/towermonitor", 300,
-				"CaloTower Et [GeV]",
-				100, 0., 100.);
-  m_etTowersVsEta = histoSvc()->book("/stat/towermonitor", 301,
-				    "CaloTower Et [GeV] vs Eta",
-				    100, -5., 5., 100, 0., 100. );
-  m_etTowersVsPhi = histoSvc()->book("/stat/towermonitor", 302,
-				    "CaloTower Et [Gev] vs Phi [deg]",
-				    100, -200., 200., 100, 0., 100. );
-  m_etLogTowers = histoSvc()->book("/stat/towermonitor", 1300,
-				   "CaloTower log(Et/GeV)",
-				   100, -7., 3. );
+  ATH_CHECK( book1 ("etTowers", "CaloTower Et [GeV]",
+                    100, 0., 100.,
+                    m_etTowers) );
+  ATH_CHECK( book2 ("etTowersVsEta", "CaloTower Et [GeV] vs Eta",
+                    100, -5., 5.,
+                    100, 0., 100.,
+                    m_etTowersVsEta) );
+  ATH_CHECK( book2 ("etTowersVsPhi", "CaloTower Et [Gev] vs Phi [deg]",
+                    100, -200., 200.,
+                    100, 0., 100.,
+                    m_etTowersVsPhi) );
+  ATH_CHECK( book1 ("etLogTowers", "CaloTower log(Et/GeV)",
+                    100, -7., 3.,
+                    m_etLogTowers) );
+
   // tower shapes
-  m_cellsInEtaVsPhi = histoSvc()->book("/stat/towermonitor", 410,
-				      "CaloTower Shape",
-				      100, -0.5, 0.5,
-				      100, -0.5, 0.5 );
-  m_nCellsInTower = histoSvc()->book("/stat/towermonitor", 400,
-				    "Number of Cells in CaloTower",
-				    100, 0., 100.);
-  m_nCellsInTowerVsEta = histoSvc()->book("/stat/towermonitor", 401,
-					 "Number of Cells vs Eta",
-					 100, -5., 5., 100, 0., 100. );
-  m_nCellsInTowerVsPhi = histoSvc()->book("/stat/towermonitor", 402,
-					 "Number of Cells vs Phi [deg]",
-					 100, -200., 200., 100, 0., 100. );
+  ATH_CHECK( book2 ("cellsInEtaVsPhi", "CaloTower Shape",
+                    100, -0.5, 0.5,
+                    100, -0.5, 0.5,
+                    m_cellsInEtaVsPhi) );
+  ATH_CHECK( book1 ("nCellsInTower", "Number of Cells in CaloTower",
+                    100, 0., 100.,
+                    m_nCellsInTower) );
+  ATH_CHECK( book2 ("nCellsInTowerVsEta", "Number of Cells vs Eta",
+                    100, -5., 5.,
+                    100, 0., 100.,
+                    m_nCellsInTowerVsEta) );
+  ATH_CHECK( book2 ("nCellsInTowerVsPhi", "Number of Cells vs Phi [deg]",
+                    100, -200., 200.,
+                    100, 0., 100.,
+                    m_nCellsInTowerVsPhi) );
+
   // eta direction matches
-  m_etaTowerVsCell = histoSvc()->book("/stat/towermonitor", 600,
-				      "Cell Eta vs TowerEta",
-				      100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::PreSamplerB]
-    = histoSvc()->book("/stat/towermonitor", 500,
-		       "Cell Eta vs Tower Eta PreSampB",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::EMB1]
-    = histoSvc()->book("/stat/towermonitor", 501,
-		       "Cell Eta vs Tower Eta EMB",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::PreSamplerE]
-    = histoSvc()->book("/stat/towermonitor", 502,
-		       "Cell Eta vs Tower Eta PreSampE",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::EME1] 
-    = histoSvc()->book("/stat/towermonitor", 503,
-		       "Cell Eta vs Tower Eta EMEC",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::HEC0]
-    = histoSvc()->book("/stat/towermonitor", 504,
-		       "Cell Eta vs Tower Eta HEC",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::TileBar0]
-    = histoSvc()->book("/stat/towermonitor", 505,
-		       "Cell Eta vs Tower Eta TileBarrel",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::TileExt0]
-    = histoSvc()->book("/stat/towermonitor", 506,
-		       "Cell Eta vs Tower Eta TileExtended",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::FCAL0]
-    = histoSvc()->book("/stat/towermonitor", 507,
-		       "Cell Eta vs Tower Eta FCal1",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::FCAL1]
-    = histoSvc()->book("/stat/towermonitor", 508,
-		       "Cell Eta vs Tower Eta FCal2",
-		       100, -5., 5., 100, -5., 5.);
-  m_etaTowerVsCellCalos[CaloSampling::FCAL2]
-    = histoSvc()->book("/stat/towermonitor", 509,
-		       "Cell Eta vs Tower Eta FCal3",
-		       100, -5., 5., 100, -5., 5.);
+  ATH_CHECK( book2 ("etaTowerVsCell", "Cell Eta vs TowerEta",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCell) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosPreSamplerB",
+                    "Cell Eta vs Tower Eta PreSampB",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::PreSamplerB]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosEMB1",
+                    "Cell Eta vs Tower Eta EMB1",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::EMB1]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosPreSamplerE",
+                    "Cell Eta vs Tower Eta PreSampE",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::PreSamplerE]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosEME1",
+                    "Cell Eta vs Tower Eta EME1",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::EME1]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosHEC0",
+                    "Cell Eta vs Tower Eta HEC0",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::HEC0]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosTileBar0",
+                    "Cell Eta vs Tower Eta TileBar0",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::TileBar0]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosTileExt0",
+                    "Cell Eta vs Tower Eta TileExt0",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::TileExt0]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosFCAL0",
+                    "Cell Eta vs Tower Eta FCAL0",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::FCAL0]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosFCAL1",
+                    "Cell Eta vs Tower Eta FCAL1",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::FCAL1]) );
+  ATH_CHECK( book2 ("etaTowerVsCellCalosFCAL2",
+                    "Cell Eta vs Tower Eta FCAL2",
+                    100, -5., 5.,
+                    100, -5., 5.,
+                    m_etaTowerVsCellCalos[CaloSampling::FCAL2]) );
 
   // phi direction matches
-  m_phiTowerVsCell = histoSvc()->book("/stat/towermonitor", 800,
-				      "Cell Phi vs TowerPhi",
-				      100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::PreSamplerB]
-    = histoSvc()->book("/stat/towermonitor", 700,
-		       "Cell Phi vs Tower Phi PreSampB",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::EMB1]
-    = histoSvc()->book("/stat/towermonitor", 701,
-		       "Cell Phi vs Tower Phi EMB",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::PreSamplerE]
-    = histoSvc()->book("/stat/towermonitor", 702,
-		       "Cell Phi vs Tower Phi PreSampE",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::EME1] 
-    = histoSvc()->book("/stat/towermonitor", 703,
-		       "Cell Phi vs Tower Phi EMEC",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::HEC0]
-    = histoSvc()->book("/stat/towermonitor", 704,
-		       "Cell Phi vs Tower Phi HEC",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::TileBar0]
-    = histoSvc()->book("/stat/towermonitor", 705,
-		       "Cell Phi vs Tower Phi TileBarrel",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::TileExt0]
-    = histoSvc()->book("/stat/towermonitor", 706,
-		       "Cell Phi vs Tower Phi TileExtended",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::FCAL0]
-    = histoSvc()->book("/stat/towermonitor", 707,
-		       "Cell Phi vs Tower Phi FCal1",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::FCAL1]
-    = histoSvc()->book("/stat/towermonitor", 708,
-		       "Cell Phi vs Tower Phi FCal2",
-		       100, -200., 200., 100, -200., 200.);
-  m_phiTowerVsCellCalos[CaloSampling::FCAL2]
-    = histoSvc()->book("/stat/towermonitor", 709,
-		       "Cell Phi vs Tower Phi FCal3",
-		       100, -200., 200., 100, -200., 200.);
+  ATH_CHECK( book2 ("phiTowerVsCell", "Cell Phi vs TowerPhi",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCell) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosPreSamplerB",
+                    "Cell Phi vs Tower Phi PreSampB",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::PreSamplerB]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosEMB1",
+                    "Cell Phi vs Tower Phi EMB1",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::EMB1]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosPreSamplerE",
+                    "Cell Phi vs Tower Phi PreSampE",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::PreSamplerE]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosEME1",
+                    "Cell Phi vs Tower Phi EME1",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::EME1]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosHEC0",
+                    "Cell Phi vs Tower Phi HEC0",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::HEC0]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosTileBar0",
+                    "Cell Phi vs Tower Phi TileBar0",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::TileBar0]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosTileExt0",
+                    "Cell Phi vs Tower Phi TileExt0",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::TileExt0]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosFCAL0",
+                    "Cell Phi vs Tower Phi FCAL0",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::FCAL0]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosFCAL1",
+                    "Cell Phi vs Tower Phi FCAL1",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::FCAL1]) );
+  ATH_CHECK( book2 ("phiTowerVsCellCalosFCAL2",
+                    "Cell Phi vs Tower Phi FCAL2",
+                    100, -200., 200.,
+                    100, -200., 200.,
+                    m_phiTowerVsCellCalos[CaloSampling::FCAL2]) );
 
   ATH_CHECK( m_collectionNames.initialize() );
 
@@ -250,29 +279,29 @@ StatusCode CaloTowerMonitor::execute()
                        << e << " GeV (eta,phi) = ("
                        << eta << "," << phi << ")"  );
         // fill distributions
-        m_nTowersVsEta->fill(eta,1.);
-        m_nTowersVsPhi->fill(phi*(1/deg),1.);
+        m_nTowersVsEta->Fill(eta,1.);
+        m_nTowersVsPhi->Fill(phi*(1/deg),1.);
         // ATH_MSG_INFO( "fill tower e   " << e  );
-        m_eTowers->fill(e,1.);
-        m_eTowersVsEta->fill(eta,e,1.);
-        m_eTowersVsPhi->fill(phi*(1./deg),e,1.);
+        m_eTowers->Fill(e,1.);
+        m_eTowersVsEta->Fill(eta,e,1.);
+        m_eTowersVsPhi->Fill(phi*(1./deg),e,1.);
         if ( e > 0. )
         {
-          m_eLogTowers->fill(log10(e),1.);
+          m_eLogTowers->Fill(log10(e),1.);
         }
         // ATH_MSG_INFO( "fill tower et  " << et  );
-        m_etTowers->fill(et,1.);
-        m_etTowersVsEta->fill(eta,et,1.);
-        m_etTowersVsPhi->fill(phi*(1./deg),et,1.);
+        m_etTowers->Fill(et,1.);
+        m_etTowersVsEta->Fill(eta,et,1.);
+        m_etTowersVsPhi->Fill(phi*(1./deg),et,1.);
         if ( et > 0. )
         {
-          m_etLogTowers->fill(log10(et),1.);
+          m_etLogTowers->Fill(log10(et),1.);
         }
         // tower shape
         // ATH_MSG_INFO( "fill tower cls " << cells  );
-        m_nCellsInTower->fill(cells,1.);
-        m_nCellsInTowerVsEta->fill(eta,cells,1.);
-        m_nCellsInTowerVsPhi->fill(phi*(1./deg),cells,1.);
+        m_nCellsInTower->Fill(cells,1.);
+        m_nCellsInTowerVsEta->Fill(eta,cells,1.);
+        m_nCellsInTowerVsPhi->Fill(phi*(1./deg),cells,1.);
         for (const CaloCell* aCell : *aTower)
         {
           // calculate distance
@@ -283,14 +312,14 @@ StatusCode CaloTowerMonitor::execute()
           double deltaPhi = CaloPhiRange::diff(phi, aCell->phi());
           // log << MSG::INFO << "fill cell deta,dphi " 
           //  << deltaEta << "," << deltaPhi << endmsg;
-          m_cellsInEtaVsPhi->fill(deltaEta,deltaPhi,1.);
+          m_cellsInEtaVsPhi->Fill(deltaEta,deltaPhi,1.);
           // direction matches
           //log << MSG::INFO << "fill cell eta " 
           //	  << cellEta << endmsg;
-          m_etaTowerVsCell->fill(cellEta,eta,1.);
+          m_etaTowerVsCell->Fill(cellEta,eta,1.);
           //log << MSG::INFO << "fill tower phi " 
           //		  << cellPhi/deg << endmsg;
-          m_phiTowerVsCell->fill(cellPhi*(1./deg),phi*(1./deg),1.);
+          m_phiTowerVsCell->Fill(cellPhi*(1./deg),phi*(1./deg),1.);
           CaloSampling::CaloSample theSample = aCell->caloDDE()->getSampling();
           CaloSampling::CaloSample takeSample = theSample;
           switch ( theSample )
@@ -322,8 +351,8 @@ StatusCode CaloTowerMonitor::execute()
           default:
             break;
           }
-          m_etaTowerVsCellCalos[takeSample]->fill(cellEta,eta,1.);
-          m_phiTowerVsCellCalos[takeSample]->fill(cellPhi*(1./deg),
+          m_etaTowerVsCellCalos[takeSample]->Fill(cellEta,eta,1.);
+          m_phiTowerVsCellCalos[takeSample]->Fill(cellPhi*(1./deg),
                                                   phi*(1./deg),1.);
         } // cell loop
       } // tower kinematics ok
@@ -332,7 +361,3 @@ StatusCode CaloTowerMonitor::execute()
   return StatusCode::SUCCESS;
 }		    
 
-StatusCode CaloTowerMonitor::finalize()
-{
-  return StatusCode::SUCCESS;
-}
