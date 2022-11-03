@@ -187,7 +187,7 @@ TrkObjToString::name(const Trk::MaterialEffectsBase& mb){
 }
 
 QString          
-TrkObjToString::name(const Trk::FitQuality& /**mb*/){
+TrkObjToString::name(const Trk::FitQualityImpl& /**mb*/){
   return {"FitQuality"};
 }
 
@@ -303,7 +303,7 @@ TrkObjToString::shortInfo(const Trk::MaterialEffectsBase& me){
 }
 
 QString
-TrkObjToString::shortInfo(const Trk::FitQuality& fqos){
+TrkObjToString::shortInfo(const Trk::FitQualityImpl& fqos){
   QString info("(Chi^2, DOF)=(");
   info+=QString::number(fqos.chiSquared());
   info.append(", ");
@@ -332,7 +332,7 @@ TrkObjToString::fullInfo(const Trk::TrackParameters& tp)
 }
 
 QStringList
-TrkObjToString::fullInfo(const Trk::FitQuality& fqos){
+TrkObjToString::fullInfo(const Trk::FitQualityImpl& fqos){
   QStringList info("Chi^2");
   info+=QString::number(fqos.chiSquared());
   info+="NDF";

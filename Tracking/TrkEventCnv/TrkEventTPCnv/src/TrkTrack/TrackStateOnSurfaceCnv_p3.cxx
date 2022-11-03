@@ -26,7 +26,9 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
   if (!m_parametersCnv)  m_parametersCnv = dynamic_cast<TrackParametersCnv_p2*>(dummy); // FIXME - only in init?
   const Trk::TrackParameters* trackParameters = dynamic_cast<const Trk::TrackParameters*>(createTransFromPStore( &m_parametersCnv, persObj->m_trackParameters, log ));
 
-  const Trk::FitQualityOnSurface* fitQoS = createTransFromPStore( &m_fitQCnv, persObj->m_fitQualityOnSurface, log );
+  std::unique_ptr<const Trk::FitQuality>  fitQ(createTransFromPStore( &m_fitQCnv, persObj->m_fitQualityOnSurface, log));
+  auto fitQos = fitQ ? std::make_unique<Trk::FitQualityOnSurface>(*fitQ) : nullptr;
+
 
   ITPConverterFor<Trk::MaterialEffectsBase> *matBaseCnv = nullptr;  
   const Trk::MaterialEffectsBase* materialEffects = createTransFromPStore( &matBaseCnv, persObj->m_materialEffects, log );
@@ -43,7 +45,7 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
   *transObj = Trk::TrackStateOnSurface(
     nullptr,
     std::unique_ptr<const Trk::TrackParameters>(trackParameters),
-    std::unique_ptr<const Trk::FitQualityOnSurface>(fitQoS),
+    std::move(fitQos),
     nullptr,
     types,
     hints);
@@ -68,10 +70,13 @@ transToPers( const Trk::TrackStateOnSurface *transObj, Trk::TrackStateOnSurface_
                                                : nullptr),
                                              log );
 
+  auto fitQos =
+    (persistify_all && transObj->fitQualityOnSurface())
+      ? std::make_unique<Trk::FitQuality>(*(transObj->fitQualityOnSurface()))
+      : nullptr;
+
   persObj->m_fitQualityOnSurface = toPersistent( &m_fitQCnv,
-                                                 (persistify_all
-                                                  ? transObj->fitQualityOnSurface() 
-                                                  : nullptr),
+                                                 fitQos.get(),
                                                  log ); 
 
   ITPConverterFor<Trk::MeasurementBase>  *measureCnv = nullptr;

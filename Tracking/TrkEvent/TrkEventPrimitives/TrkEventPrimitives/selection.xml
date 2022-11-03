@@ -1,4 +1,5 @@
 <lcgdict>
   <class name="Trk::FitQuality" />
+  <class name="Trk::FitQualityOnSurface" />
   <enum pattern="Trk::*" /> 
 </lcgdict>

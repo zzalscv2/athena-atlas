@@ -271,7 +271,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
             if (!(**itSet).type(Trk::TrackStateOnSurface::Perigee)) {
               auto trackpar=(**itSet).trackParameters() ? (**itSet).trackParameters()->uniqueClone() : nullptr;
               auto measurement=(**itSet).measurementOnTrack() ? (**itSet).measurementOnTrack()->uniqueClone() : nullptr;
-              auto fitQual=(**itSet).fitQualityOnSurface() ? (**itSet).fitQualityOnSurface()->uniqueClone() : nullptr;
+              auto fitQual=(**itSet).fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(*itSet)->fitQualityOnSurface()) : nullptr;
               auto mateff=(**itSet).materialEffectsOnTrack() ? (**itSet).materialEffectsOnTrack()->uniqueClone() : nullptr;
               std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
               if ((**itSet).type(Trk::TrackStateOnSurface::Measurement)) typePattern.set(Trk::TrackStateOnSurface::Measurement);

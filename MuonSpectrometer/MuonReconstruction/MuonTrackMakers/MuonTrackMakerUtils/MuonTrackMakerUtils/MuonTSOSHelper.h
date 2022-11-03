@@ -21,11 +21,12 @@ namespace Muon {
                 typePattern.set(Trk::TrackStateOnSurface::Outlier, false);
             typePattern.set(type);
 
-            return std::make_unique<Trk::TrackStateOnSurface>(tsos.measurementOnTrack() ? tsos.measurementOnTrack()->uniqueClone() : nullptr,
-                                                tsos.trackParameters() ? tsos.trackParameters()->uniqueClone() : nullptr,
-                                                tsos.fitQualityOnSurface() ? tsos.fitQualityOnSurface()->uniqueClone() : nullptr,
-                                                tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : nullptr,
-                                                 typePattern);
+            return std::make_unique<Trk::TrackStateOnSurface>(
+              tsos.measurementOnTrack() ? tsos.measurementOnTrack()->uniqueClone() : nullptr,
+              tsos.trackParameters() ? tsos.trackParameters()->uniqueClone() : nullptr,
+              tsos.fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(tsos.fitQualityOnSurface())) : nullptr,
+              tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : nullptr,
+              typePattern);
         }
 
         /** clone input, replacing the track parameteres and the measurement base and updating the type */
@@ -40,10 +41,12 @@ namespace Muon {
                 typePattern.set(Trk::TrackStateOnSurface::Outlier, false);
             typePattern.set(type);
 
-            return std::make_unique<Trk::TrackStateOnSurface>(meas.uniqueClone(), pars.uniqueClone(),
-                                                tsos.fitQualityOnSurface() ? tsos.fitQualityOnSurface()->uniqueClone() : nullptr,
-                                                tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : 0, 
-                                                typePattern);
+            return std::make_unique<Trk::TrackStateOnSurface>(
+              meas.uniqueClone(),
+              pars.uniqueClone(),
+              tsos.fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(tsos.fitQualityOnSurface())) : nullptr,
+              tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : 0,
+              typePattern);
         }
 
         /** create a perigee TSOS, takes ownership of the Perigee */
@@ -77,10 +80,14 @@ namespace Muon {
             else if (type == Trk::TrackStateOnSurface::Measurement)
                 typePattern.set(Trk::TrackStateOnSurface::Outlier, false);
             typePattern.set(type);
-            return std::make_unique<Trk::TrackStateOnSurface>(std::move(meas), std::move(pars), tsos.fitQualityOnSurface() ? tsos.fitQualityOnSurface()->uniqueClone() : 0,
-                                                tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : 0, typePattern);
+            return std::make_unique<Trk::TrackStateOnSurface>(
+              std::move(meas),
+              std::move(pars),
+              tsos.fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*(tsos.fitQualityOnSurface())) : nullptr,
+              tsos.materialEffectsOnTrack() ? tsos.materialEffectsOnTrack()->uniqueClone() : 0,
+              typePattern);
         }
-        
+
         /** create a hole TSOS, takes ownership of the pointers */
         static std::unique_ptr<Trk::TrackStateOnSurface> createHoleTSOS(std::unique_ptr<const Trk::TrackParameters> pars) {
             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;

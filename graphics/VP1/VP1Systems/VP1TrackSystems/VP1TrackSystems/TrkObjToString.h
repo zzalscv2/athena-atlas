@@ -61,17 +61,17 @@ public:
   static QString          name(const Trk::MeasurementBase& mb);
   static QString          name(const Trk::TrackParameters& mb);
   static QString          name(const Trk::MaterialEffectsBase& mb);
-  static QString          name(const Trk::FitQuality& mb);
+  static QString          name(const Trk::FitQualityImpl& mb);
   
   static QString          shortInfo(const Trk::MeasurementBase& mb);
   static QString          shortInfo(const Trk::TrackParameters& tp);
   static QString          shortInfo(const Trk::MaterialEffectsBase& me);
-  static QString          shortInfo(const Trk::FitQuality& fqos);
+  static QString          shortInfo(const Trk::FitQualityImpl& fqos);
   
   static QStringList      fullInfo(const Trk::MeasurementBase& tp); //!< Returns list of key, value, key, value etc
   static QStringList      fullInfo(const Trk::TrackParameters& tp); //!< Returns list of key, value, key, value etc
   static QStringList      fullInfo(const Trk::MaterialEffectsBase& tp); //!< Returns list of key, value, key, value etc
-  static QStringList      fullInfo(const Trk::FitQuality& tp); //!< Returns list of key, value, key, value etc
+  static QStringList      fullInfo(const Trk::FitQualityImpl& tp); //!< Returns list of key, value, key, value etc
   
   static void             addBaseROTInfo(QString& info, const Trk::MeasurementBase& mb);
   static void             addFullInfo(QStringList& info, const Trk::RIO_OnTrack*);

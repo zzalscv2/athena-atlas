@@ -6810,7 +6810,11 @@ namespace Trk {
     // Convert internal track state into "official" TrackStateOnSurface
     std::unique_ptr<const TrackParameters> trackpar = uclone(state.trackParameters());
     std::unique_ptr<const MeasurementBase> measurement = uclone(state.measurement());
-    std::unique_ptr<const FitQualityOnSurface> fitQual = uclone(state.fitQuality());
+
+    std::unique_ptr<const FitQualityOnSurface> fitQual =
+      state.fitQuality()
+        ? std::make_unique<FitQualityOnSurface>(*(state.fitQuality()))
+        : nullptr;
 
     GXFMaterialEffects *gxfmeff = state.materialEffects();
     std::unique_ptr<const MaterialEffectsBase> mateff = nullptr;

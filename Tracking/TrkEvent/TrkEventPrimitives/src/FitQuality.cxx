@@ -12,7 +12,7 @@
 #include <ostream>
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug output*/ 
-MsgStream& Trk::operator << ( MsgStream& sl, const Trk::FitQuality& fq)
+MsgStream& Trk::operator << ( MsgStream& sl, const Trk::FitQualityImpl& fq)
 { 
   std::streamsize ss = sl.precision();
   sl << std::setiosflags(std::ios::fixed)<< std::setprecision(3);
@@ -23,7 +23,7 @@ MsgStream& Trk::operator << ( MsgStream& sl, const Trk::FitQuality& fq)
   return sl; 
 }
 
-std::ostream& Trk::operator << ( std::ostream& sl, const Trk::FitQuality& fq)
+std::ostream& Trk::operator << ( std::ostream& sl, const Trk::FitQualityImpl& fq)
 { 
   std::streamsize ss = sl.precision();
   sl << std::setiosflags(std::ios::fixed)<< std::setprecision(3);

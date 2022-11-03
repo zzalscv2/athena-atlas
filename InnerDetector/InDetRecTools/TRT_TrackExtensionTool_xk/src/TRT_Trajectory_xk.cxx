@@ -566,7 +566,7 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
   if(!sur) {
     Amg::Vector3D GP(0.,0.,0.); sur = new Trk::PerigeeSurface(GP);
   }
-  Trk::FitQuality      * fqu = new Trk::FitQualityOnSurface(m_xi2,m_ndf)         ;
+  Trk::FitQuality * fqu = new Trk::FitQuality(m_xi2,m_ndf);
 
   return new Trk::TrackSegment(Trk::LocalParameters(P[0],P[1],P[2],P[3],P[4]),*m_parameters.covariance(),sur,rio,fqu,Trk::Segment::TRT_SegmentMaker);
 }

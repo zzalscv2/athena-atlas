@@ -23,8 +23,8 @@
 #include <iostream>
 
 
-void compare (const Trk::FitQuality& p1,
-              const Trk::FitQuality& p2)
+void compare (const Trk::FitQualityImpl& p1,
+              const Trk::FitQualityImpl& p2)
 {
   assert (p1.chiSquared() == p2.chiSquared());
   assert (p1.numberDoF()  == p2.numberDoF());
@@ -167,12 +167,12 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Trk::LocalParameters parms1 (1.5, 2.5, 3.5, 4.5, 5.5);
   Trk::PseudoMeasurementOnTrack pmeas (parms1, cov, psurf);
   Trk::Perigee perigee (100, 200, 1.5, 0.5, 1e-3, psurf, std::nullopt);
-  Trk::FitQuality fq (10, 20);
+  Trk::FitQualityOnSurface fq (10, 20);
   Trk::MaterialEffectsOnTrack me (12.5, psurf);
 
   Trk::TrackStateOnSurface trans1 (std::make_unique<Trk::PseudoMeasurementOnTrack>(pmeas),
                                    std::make_unique<Trk::Perigee> (perigee),
-                                   std::make_unique<Trk::FitQuality> (fq),
+                                   std::make_unique<Trk::FitQualityOnSurface> (fq),
                                    std::make_unique<Trk::MaterialEffectsOnTrack> (me),
                                    nullptr);
   testit (trans1);
@@ -193,7 +193,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::TrackStateOnSurface trans4 (nullptr,
                                    nullptr,
-                                   std::make_unique<Trk::FitQuality> (fq),
+                                   std::make_unique<Trk::FitQualityOnSurface> (fq),
                                    nullptr,
                                    nullptr);
   testit (trans4);
