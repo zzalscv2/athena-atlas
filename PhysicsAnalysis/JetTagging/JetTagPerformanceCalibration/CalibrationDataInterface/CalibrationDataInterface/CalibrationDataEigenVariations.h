@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,7 @@
 #ifndef ANALYSISCALIBRATIONDATAINTERFACEEVVARIATIONS_H
 #define ANALYSISCALIBRATIONDATAINTERFACEEVVARIATIONS_H
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <map>
@@ -16,6 +17,8 @@
 #include <utility>
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
+
+#include "CxxUtils/checker_macros.h"
 
 class TH1;
 
@@ -29,7 +32,7 @@ namespace Analysis
     typedef std::set<IndexSet> IndexSuperSet;
 
     /** normal constructor. The second argument, if true, will attempt to retrieve a 'recommended' set of uncertainties to be excluded from EV decomposition */
-    CalibrationDataEigenVariations(const CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet = false);
+    CalibrationDataEigenVariations(CalibrationDataHistogramContainer* cnt, bool excludeRecommendedUncertaintySet = false);
     ~CalibrationDataEigenVariations();
 
     /** exclude the source of uncertainty indicated by  name  from eigenvector calculations */
@@ -60,40 +63,40 @@ namespace Analysis
     unsigned int getNamedVariationIndex(const std::string& name) const;
 
     /** retrieve the number of eigenvector variations */
-    unsigned int getNumberOfEigenVariations() const;
+    unsigned int getNumberOfEigenVariations();
 
     /** obtain the "up" and "down" variations for the given eigenvector number.
 	The return value will be false if the eigenvector number is invalid. */
-    bool getEigenvectorVariation(unsigned int variation, TH1*& up, TH1*& down) const;
+    bool getEigenvectorVariation(unsigned int variation, TH1*& up, TH1*& down);
 
     /** obtain the "up" and "down" variations for the named uncertainty.
 	The return value will be false if the given name is not listed as
 	being excluded from the eigenvector calculations. */
-    bool getNamedVariation(const std::string& name, TH1*& up, TH1*& down) const;
+    bool getNamedVariation(const std::string& name, TH1*& up, TH1*& down);
     /** obtain the "up" and "down" variations for the source uncertainty
 	pointed to by the given index (which is assumed to correspond to the
 	value retrieved using getNamedVariationIndex()).
 	The return value will be false if the index is out of bounds. */
-    bool getNamedVariation(unsigned int nameIndex, TH1*& up, TH1*& down) const;
+    bool getNamedVariation(unsigned int nameIndex, TH1*& up, TH1*& down);
     /** flag whether the given index corresponds to an extrapolation variation */
     bool isExtrapolationVariation(unsigned int nameIndex) const;
 
     /** also provide (some) access to the underlying information:
 	covariance matrix corresponding to eigenvector variations */
-    TMatrixDSym getEigenCovarianceMatrix() const;
+    TMatrixDSym getEigenCovarianceMatrix();
     /** covariance matrix corresponding to eigenvector variations constructed from
 	the eigen-variation */
-    TMatrixDSym getEigenCovarianceMatrixFromVariations() const;
+    TMatrixDSym getEigenCovarianceMatrixFromVariations();
     /** matrix to remove unecessary rows and columns from covariance */
-    TMatrixD    getJacobianReductionMatrix() const;
+    TMatrixD    getJacobianReductionMatrix();
 
     /** Eigenvector recomposition method.*/
     bool EigenVectorRecomposition(const std::string label,
-				  std::map<std::string, std::map<std::string, float>> &coefficientMap) const;
+				  std::map<std::string, std::map<std::string, float>> &coefficientMap);
 
   private:
     /** container object containing the basic information */
-    const CalibrationDataHistogramContainer* m_cnt;
+    CalibrationDataHistogramContainer* m_cnt;
 
     /** flag whether the initialization has been carried out */
     bool m_initialized;

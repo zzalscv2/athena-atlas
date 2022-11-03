@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -201,7 +201,7 @@ ClassImp(CalibrationDataEigenVariations)
 #endif
 
 //________________________________________________________________________________
-CalibrationDataEigenVariations::CalibrationDataEigenVariations(const CalibrationDataHistogramContainer* cnt,
+CalibrationDataEigenVariations::CalibrationDataEigenVariations(CalibrationDataHistogramContainer* cnt,
 							       bool excludeRecommendedUncertaintySet) :
 m_cnt(cnt), m_initialized(false), m_namedExtrapolation(-1), m_statVariations(false)
 {
@@ -269,7 +269,7 @@ CalibrationDataEigenVariations::excludeNamedUncertainty(const std::string& name)
 
 //________________________________________________________________________________
 TMatrixDSym
-CalibrationDataEigenVariations::getEigenCovarianceMatrix() const
+CalibrationDataEigenVariations::getEigenCovarianceMatrix()
 {
   // Construct the covariance matrix that is to be diagonalised.
   // Note that extrapolation uncertainties (identified by the keyword "extrapolation,
@@ -319,7 +319,7 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrix() const
 
 //________________________________________________________________________________
 TMatrixDSym
-CalibrationDataEigenVariations::getEigenCovarianceMatrixFromVariations() const
+CalibrationDataEigenVariations::getEigenCovarianceMatrixFromVariations()
 {
   // Construct the (Eigen-variation part of the) covariance matrix from the individual variations.
   // This must be called _after_ initialize()!
@@ -346,7 +346,7 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrixFromVariations() const
 
 //________________________________________________________________________________
 TMatrixD
-CalibrationDataEigenVariations::getJacobianReductionMatrix() const
+CalibrationDataEigenVariations::getJacobianReductionMatrix()
 {
   // Construct the matrix that removes the rows and columns that fail to influence
   // the eigen-variations. To reduce the covariance matrix, do the following:
@@ -946,16 +946,16 @@ CalibrationDataEigenVariations::listNamedVariations() const
 
 //________________________________________________________________________________
 unsigned int
-CalibrationDataEigenVariations::getNumberOfEigenVariations() const
+CalibrationDataEigenVariations::getNumberOfEigenVariations()
 {
-  if (! m_initialized) const_cast<CalibrationDataEigenVariations*>(this)->initialize();
+  if (! m_initialized) initialize();
   return m_eigen.size();
 }
 
 //________________________________________________________________________________
 bool
 CalibrationDataEigenVariations::getEigenvectorVariation(unsigned int variation,
-							TH1*& up, TH1*& down) const
+							TH1*& up, TH1*& down)
 {
   // Return the pointers to the up- and downward variation histogram for the specified
   // eigenvector variation. In case of an invalid variation number, null pointers will
@@ -965,7 +965,7 @@ CalibrationDataEigenVariations::getEigenvectorVariation(unsigned int variation,
   //     up:          (reference to) pointer to upward variation histogram
   //     down:        (reference to) pointer to downward variation histogram
 
-  if (! m_initialized) const_cast<CalibrationDataEigenVariations*>(this)->initialize();
+  if (! m_initialized) initialize();
   if (variation < m_eigen.size()) {
     up   = m_eigen[variation].first;
     down = m_eigen[variation].second;
@@ -979,7 +979,7 @@ CalibrationDataEigenVariations::getEigenvectorVariation(unsigned int variation,
 //________________________________________________________________________________
 bool
 CalibrationDataEigenVariations::getNamedVariation(const string& name,
-						  TH1*& up, TH1*& down) const
+						  TH1*& up, TH1*& down)
 {
   // Return the pointers to the up- and downward variation histogram for the specified
   // named variation. In case of an invalid named variation, null pointers will
@@ -999,7 +999,7 @@ CalibrationDataEigenVariations::getNamedVariation(const string& name,
 //________________________________________________________________________________
 bool
 CalibrationDataEigenVariations::getNamedVariation(unsigned int nameIndex,
-						  TH1*& up, TH1*& down) const
+						  TH1*& up, TH1*& down)
 {
   // Return the pointers to the up- and downward variation histogram for the specified
   // named variation. In case of an invalid named variation number, null pointers will
@@ -1009,7 +1009,7 @@ CalibrationDataEigenVariations::getNamedVariation(unsigned int nameIndex,
   //     up:          (reference to) pointer to upward variation histogram
   //     down:        (reference to) pointer to downward variation histogram
 
-  if (! m_initialized) const_cast<CalibrationDataEigenVariations*>(this)->initialize();
+  if (! m_initialized) initialize();
 
   if (nameIndex < m_named.size()) {
     up   = m_named[nameIndex].first;
@@ -1045,7 +1045,7 @@ CalibrationDataEigenVariations::isExtrapolationVariation(unsigned int nameIndex)
 //________________________________________________________________________________
 bool
 CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string label, 
-							 std::map<std::string, std::map<std::string, float>> &coefficientMap) const
+							 std::map<std::string, std::map<std::string, float>> &coefficientMap)
 {
   // Calculating eigen vector recomposition coefficient map and pass to
   // user by reference. Return true if method success. Return false and
@@ -1053,7 +1053,7 @@ CalibrationDataEigenVariations::EigenVectorRecomposition(const std::string label
   //
   //     label:          flavour label
   //     coefficientMap: (reference to) coefficentMap which will be used as return value.
-  if (! m_initialized) const_cast<CalibrationDataEigenVariations*>(this)->initialize();
+  if (! m_initialized) initialize();
 
   std::vector<TH1*> originSF_hvec;
   std::vector<TH1*> eigenSF_hvec;
