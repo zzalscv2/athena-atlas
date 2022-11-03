@@ -18,6 +18,13 @@
 
 namespace FlavorTagDiscriminants {
 
+  enum ExclusiveType {
+    Other    = 0,
+    Pion     = 1,
+    Kaon     = 2,
+    Electron = 3,
+    Muon     = 4
+  };
 
   class TrackTruthDecoratorAlg: public AthReentrantAlgorithm {
   public:
@@ -41,6 +48,9 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_origin_label {
       this, "truthOriginLabel", "truthOriginLabel", 
         "Exclusive origin label of the track"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_type_label {
+      this, "truthTypeLabel", "truthTypeLabel", 
+        "Exclusive truth type label of the track"};
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_vertex_index {
       this, "truthVertexIndex", "truthVertexIndex", 
         "Truth vertex index of the track"};
@@ -66,6 +76,7 @@ namespace FlavorTagDiscriminants {
                                                 std::vector<const xAOD::TruthVertex*> vertices) const;
     float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B) const;
     const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle) const;
+    int get_truth_type(const xAOD::TruthParticle* truth_particle) const;
   };
 
 }
