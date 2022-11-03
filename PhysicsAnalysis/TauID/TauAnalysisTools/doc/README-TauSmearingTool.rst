@@ -86,7 +86,7 @@ The tool can be used to apply tau pt smearing for a specific
    * - ``RecommendationTag``
      - ``std::string``
      - ``"2019-summer"``
-     - ``""``
+     - ``"2022-prerec"``
 
 The following table lists other properties for further configurations:
 
@@ -97,13 +97,52 @@ The following table lists other properties for further configurations:
       
    * - property name
      - type
-     - default value
+     - default(alt) value
      - comment
 
+   * - ``Campaign``
+     - ``std::string``
+     - ``"mc21"("mc20")``
+     - For ``2022-prerec``, toggle between run-2 (``"mc20"``) and run-3 (``"mc21"``) pre-recommendations
+   * - ``Generator``
+     - ``std::string``
+     - ``"PoPy"("Sherpa")``
+     - For ``2022-prerec``, toggle between smearing/uncertainties calculated from PowhegPythia or Sherpa 
    * - ``ApplyMVATESQualityCheck``
      - ``bool``
      - ``false``
-     - apply a compatibility check between calo TES and MVA TES. For taus that do not pass the test calo based TES is used. 
+     - apply a compatibility check between calo TES and MVA TES. For taus that do not pass the test calo based TES is used. Not recommended for ``2022-prerec`` tag.
+
+Release Specific Configuration
+==============================
+.. list-table::
+   :header-rows: 1
+   :widths: 10 5 15 10 10 15
+      
+   * - Release
+     - Run
+     - ``RecommendationTag``
+     - ``Campaign``
+     - ``Generator``
+     - ``ApplyMVATESQualityCheck``
+   * - 21.2
+     - 2
+     - ``"2019-summer"`` (default)
+     - Not used
+     - Not used
+     - ``true``
+   * - ``>=22``
+     - 2
+     - ``"2022-prerec"``
+     - ``"mc20"``
+     - ``"PoPy"`` (default)
+     - ``false`` (default)
+   * - ``>=22``
+     - 3
+     - ``"2022-prerec"``
+     - ``"mc21"`` (default)
+     - ``"PoPy"`` (default)
+     - ``false`` (default)
 
 
 Notes for run 1 tau pt smearing

@@ -66,6 +66,8 @@ private:
   asg::AnaToolHandle<ITauSmearingTool> m_tCommonSmearingTool;
   std::string m_sInputFilePath;
   std::string m_sRecommendationTag;
+  std::string m_sGenerator;
+  std::string m_sCampaign;
   bool m_sAFII;
   bool m_bSkipTruthMatchCheck;
   bool m_bApplyFading;
