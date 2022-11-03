@@ -141,7 +141,7 @@ ISF::PunchThroughTool::~PunchThroughTool()
 
 StatusCode ISF::PunchThroughTool::initialize()
 {
-  ATH_MSG_INFO( "initialize()" );
+  ATH_MSG_DEBUG( "initialize()" );
 
   if (m_punchThroughClassifier.retrieve().isFailure() )
   {
@@ -360,7 +360,7 @@ StatusCode ISF::PunchThroughTool::initialize()
 
 StatusCode ISF::PunchThroughTool::finalize()
 {
-  ATH_MSG_INFO( "[punchthrough] finalize() successful" );
+  ATH_MSG_DEBUG( "[punchthrough] finalize() successful" );
 
   // close the file with the lookuptable
   m_fileLookupTable->Close();
@@ -435,7 +435,7 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
   //Draw random number to compare to probability
   double punchThroughClassifierRand = CLHEP::RandFlat::shoot(m_randomEngine);
 
-  ATH_MSG_INFO("[ punchthrough ] punchThroughProbability output: " << punchThroughProbability << " RandFlat: " << punchThroughClassifierRand );
+  ATH_MSG_DEBUG("[ punchthrough ] punchThroughProbability output: " << punchThroughProbability << " RandFlat: " << punchThroughClassifierRand );
 
   //If probability < random number then don't simulate punch through
   if( punchThroughClassifierRand > punchThroughProbability){
@@ -702,7 +702,7 @@ int ISF::PunchThroughTool::getCorrelatedParticles(int pdg, int corrParticles) co
  *  ==> see headerfile
  *=======================================================================*/
 
-ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double maxEnergy) const
+ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double) const
 {
 
   // get a local copy of the needed punch-through particle class
@@ -878,6 +878,7 @@ StatusCode ISF::PunchThroughTool::initializeInversePCA(std::string inversePCACon
                     PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "comp_1" ) ) );
                     PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "comp_2" ) ) );
                     PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "comp_3" ) ) );
+                    PCA_matrix_row.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "comp_4" ) ) );
 
                     m_inverse_PCA_matrix.push_back(PCA_matrix_row);
 
@@ -889,6 +890,7 @@ StatusCode ISF::PunchThroughTool::initializeInversePCA(std::string inversePCACon
                     m_PCA_means.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "mean_1" ) ) );
                     m_PCA_means.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "mean_2" ) ) );
                     m_PCA_means.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "mean_3" ) ) );
+                    m_PCA_means.push_back( atof( (const char*) xmlGetProp( nodePCAinverse, BAD_CAST "mean_4" ) ) );
 
                 }
             }
