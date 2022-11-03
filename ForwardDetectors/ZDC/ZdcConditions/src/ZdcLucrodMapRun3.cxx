@@ -7,18 +7,10 @@
 
 #include <fstream>
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-ZdcLucrodMapRun3* ZdcLucrodMapRun3::getInstance()
+const ZdcLucrodMapRun3* ZdcLucrodMapRun3::getInstance()
 {
-  static ZdcLucrodMapRun3 map_run3;
+  static const ZdcLucrodMapRun3 map_run3;
   return &map_run3;
-}
-
-void ZdcLucrodMapRun3::deleteInstance()
-{
-  // clear resources if needed
 }
 
 //constructor
@@ -43,7 +35,7 @@ ZdcLucrodMapRun3::ZdcLucrodMapRun3() : asg::AsgMessaging("ZdcLucrodMapRun3")
 
   m_lucrodInfo.resize(6);
 
-  for (auto& element: m_mainJson)
+  for (const auto& element: m_mainJson)
     {
       int source_ID = element["source_ID"] ; 
       m_lucrodInfo[source_ID] = element;
