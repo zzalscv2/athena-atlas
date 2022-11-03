@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -124,11 +124,19 @@ StatusCode CscDigitizationTool::processAllSubEvents(const EventContext& ctx) {
 
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this);
   rngWrapper->setSeed( name(), ctx );
-  return CoreDigitization(cscDigits.ptr(),cscSimData.ptr(), rngWrapper->getEngine(ctx));
 
+  Collections_t collections;
+  ATH_CHECK( CoreDigitization(collections,cscSimData.ptr(), rngWrapper->getEngine(ctx)) );
+  for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+    if (collections[coll_hash]) {
+      ATH_CHECK( cscDigits->addCollection (collections[coll_hash].release(), coll_hash) );
+    }
+  }
+
+  return StatusCode::SUCCESS;
 }
 
-StatusCode CscDigitizationTool::CoreDigitization(CscDigitContainer* cscDigits,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine) {
+StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine) {
 
   std::map <IdentifierHash,deposits> myDeposits;
   csc_map    data_map;
@@ -226,11 +234,11 @@ StatusCode CscDigitizationTool::CoreDigitization(CscDigitContainer* cscDigits,Cs
     double flat = CLHEP::RandFlat::shoot(rndmEngine, 0.0,1.0);                 // for other particles
     bool phaseToSet = flat<0.5;
     if (phaseToSet)
-      return FillCollectionWithNewDigitEDM(data_SampleMapOddPhase, myDeposits, phaseToSet, cscDigits, cscSimData);
+      return FillCollectionWithNewDigitEDM(data_SampleMapOddPhase, myDeposits, phaseToSet, collections, cscSimData);
     else
-      return FillCollectionWithNewDigitEDM(data_SampleMap, myDeposits, phaseToSet, cscDigits, cscSimData);
+      return FillCollectionWithNewDigitEDM(data_SampleMap, myDeposits, phaseToSet, collections, cscSimData);
   }  else
-    return FillCollectionWithOldDigitEDM(data_map, myDeposits, cscDigits, cscSimData);
+    return FillCollectionWithOldDigitEDM(data_map, myDeposits, collections, cscSimData);
 
 }
 
@@ -238,7 +246,7 @@ StatusCode CscDigitizationTool::CoreDigitization(CscDigitContainer* cscDigits,Cs
 StatusCode CscDigitizationTool::
 FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap,
                               std::map<IdentifierHash,deposits>& myDeposits,
-                              bool phaseToSet, CscDigitContainer* cscDigits,CscSimDataCollection* cscSimData
+                              bool phaseToSet, Collections_t& collections,CscSimDataCollection* cscSimData
                               ) {
 
   CscDigitCollection * collection = nullptr;
@@ -316,30 +324,17 @@ FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap,
                     );
 
     if (prevId != elementId) {
-      CscDigitCollection*  it_coll=nullptr;
-      ATH_CHECK(cscDigits->naughtyRetrieve(coll_hash,it_coll));
-      if (nullptr ==  it_coll) {
-        CscDigitCollection * newCollection = new CscDigitCollection(elementId,coll_hash);
-
-        if (phaseToSet) newCollection->set_samplingPhase();
-
-        CscDigit * newDigit  = new CscDigit(digitId, samples);
-        newCollection->push_back(newDigit);
-
-        if ( cscDigits->addCollection(newCollection, coll_hash).isFailure() )
-          ATH_MSG_ERROR( "Couldn't record CscDigitCollection with key=" << coll_hash << " in StoreGate!");
-
-        collection = newCollection;
-
-      } else {
-        CscDigitCollection * existingCollection =  it_coll;
-        if (phaseToSet) existingCollection->set_samplingPhase();
-
-        CscDigit * newDigit  = new CscDigit(digitId, samples);
-
-        existingCollection->push_back(newDigit);
-        collection = existingCollection;
+      if (coll_hash >= collections.size()) {
+        collections.resize (coll_hash+1);
       }
+      collection = collections[coll_hash].get();
+      if (nullptr ==  collection) {
+        collections[coll_hash] = std::make_unique<CscDigitCollection>(elementId,coll_hash);
+        collection = collections[coll_hash].get();
+      }
+      if (phaseToSet) collection->set_samplingPhase();
+      collection->push_back (std::make_unique<CscDigit>(digitId, samples));
+
       prevId = elementId;
     } else {
       // According to coverity, collection could still be null here.
@@ -349,10 +344,7 @@ FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap,
       }
 
       if (phaseToSet) collection->set_samplingPhase();
-
-      CscDigit * newDigit  = new CscDigit(digitId, samples);
-
-      collection->push_back(newDigit);
+      collection->push_back (std::make_unique<CscDigit>(digitId, samples));
     }
   }
   return StatusCode::SUCCESS;
@@ -360,7 +352,7 @@ FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap,
 
 
 StatusCode CscDigitizationTool::
-FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposits>& myDeposits,CscDigitContainer* cscDigits,CscSimDataCollection* cscSimData) {
+FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposits>& myDeposits,Collections_t& collections,CscSimDataCollection* cscSimData) {
 
   CscDigitCollection * collection = nullptr;
   IdContext context    = m_idHelperSvc->cscIdHelper().channel_context();
@@ -411,7 +403,7 @@ FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposit
     // fill the digit collections in StoreGate
     // Now, we pass driftTime as well as stripCharge.
     // SimHIT time should be added to distinguish prompt muons from secondary.... 11/19/2009 WP
-    CscDigit * newDigit  = new CscDigit(digitId, int(stripCharge+1), float(driftTime) );
+    auto newDigit  = std::make_unique<CscDigit>(digitId, int(stripCharge+1), float(driftTime) );
     Identifier elementId = m_idHelperSvc->cscIdHelper().parentID(digitId);
 
     ATH_MSG_DEBUG ( "CSC Digit sector:measphi:wlay:istrip:charge "
@@ -430,26 +422,20 @@ FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposit
     }
 
     if (prevId != elementId) {
-      CscDigitCollection* it_coll = nullptr;
-      ATH_CHECK(cscDigits->naughtyRetrieve(coll_hash,it_coll));
-      if (nullptr ==  it_coll) {
-        CscDigitCollection * newCollection = new CscDigitCollection(elementId,coll_hash);
-        newCollection->push_back(newDigit);
-        collection = newCollection;
-        StatusCode status = cscDigits->addCollection(collection, coll_hash );
-        if (status.isFailure())
-          ATH_MSG_ERROR ( "Couldn't record CscDigitCollection with key=" << coll_hash
-                          << " in StoreGate!" );
-      } else {
-        CscDigitCollection * existingCollection =it_coll;
-        existingCollection->push_back(newDigit);
-        collection = existingCollection;
+      if (coll_hash >= collections.size()) {
+        collections.resize (coll_hash+1);
       }
+      collection = collections[coll_hash].get();
+      if (nullptr ==  collection) {
+        collections[coll_hash] = std::make_unique<CscDigitCollection>(elementId,coll_hash);
+        collection = collections[coll_hash].get();
+      }
+      collection->push_back(std::move(newDigit));
       prevId = elementId;
     } else {
       // According to coverity, collection could still be null here.
       if (collection) {
-        collection->push_back(newDigit);
+        collection->push_back(std::move(newDigit));
       } else {
         ATH_MSG_ERROR("Trying to push back NULL CscDigitCollection");
         return StatusCode::FAILURE;
@@ -576,7 +562,14 @@ StatusCode CscDigitizationTool::mergeEvent(const EventContext& ctx) {
 
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this);
   rngWrapper->setSeed( name(), ctx );
-  ATH_CHECK(CoreDigitization(cscDigits.ptr(),cscSimData.ptr(), rngWrapper->getEngine(ctx)));
+
+  Collections_t collections;
+  ATH_CHECK(CoreDigitization(collections,cscSimData.ptr(), rngWrapper->getEngine(ctx)));
+  for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+    if (collections[coll_hash]) {
+      ATH_CHECK( cscDigits->addCollection (collections[coll_hash].release(), coll_hash) );
+    }
+  }
 
   // remove cloned one in processBunchXing......
   std::list<CSCSimHitCollection*>::iterator cscHitColl = m_cscHitCollList.begin();
