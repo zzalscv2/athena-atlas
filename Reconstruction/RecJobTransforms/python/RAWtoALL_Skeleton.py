@@ -38,7 +38,7 @@ def fromRunArgs(runArgs):
     inputsDRAW = [prop for prop in dir(runArgs) if prop.startswith('inputDRAW') and prop.endswith('File')]
     if hasattr(runArgs, 'inputBSFile'):
         if inputsDRAW:
-            raise RuntimeError('Impossible to run RAWtoESD with input BS and DRAW files (one input type only!)')
+            raise RuntimeError('Impossible to run RAWtoALL with input BS and DRAW files (one input type only!)')
         ConfigFlags.Input.Files = runArgs.inputBSFile
     if len(inputsDRAW) == 1:
         ConfigFlags.Input.Files = getattr(runArgs, inputsDRAW[0])

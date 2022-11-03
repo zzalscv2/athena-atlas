@@ -27,7 +27,6 @@ for f in onlyfiles:
     openFile = open(mypath+f)
   print(f)
   for line in openFile:
-    # changed from 'RAWtoESD' to 'RAWtoALL' in R21
     if re.match('RAWtoALL.*RPVLL.*Events',line) or re.match('RAWtoALL.*BSESOutputSvcStreamDRAW_RPVLL.*events',line):
       if badName: 
 	text_file.write('.'.join(f.split('.')[3:16]) + ':' + line)

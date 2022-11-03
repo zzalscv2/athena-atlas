@@ -1383,7 +1383,7 @@ class athenaExecutor(scriptExecutor):
             self._exe = self.conf.argdict['athena'].value
         self._cmd = [self._exe]
         
-        # Find options for the current substep. Name is prioritised (e.g. RAWtoESD) over alias (e.g. r2e). Last look for 'all'
+        # Find options for the current substep. Name is prioritised (e.g. RAWtoALL) over alias (e.g. r2a). Last look for 'all'
         currentSubstep = None
         if 'athenaopts' in self.conf.argdict:
             currentName = commonExecutorStepName(self.name)

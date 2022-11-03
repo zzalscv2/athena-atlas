@@ -331,7 +331,7 @@ inline double PMonMT::get_wall_time() {
  */
 
 // Read from proc's smaps file. It is costly to do this operation too often.
-// In a realistic RAWtoESD job, the smaps for the the whole application can get large.
+// In a realistic reconstruction job, the smaps for the the whole application can get large.
 // Therefore, this operation might take about 100 ms per call, which is fairly substantial.
 // However, this is one of the most reliable way to get PSS.
 // Therefore, keep it as is but don't call it too often!

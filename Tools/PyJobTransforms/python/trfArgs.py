@@ -43,8 +43,8 @@ def addStandardTrfArgs(parser):
     parser.add_argument('--steering', type=argFactory(trfArgClasses.argSubstepSteering, runarg=False), nargs='+', metavar='substep:{in/out}{+-}DATA',
                         help='Steer the transform by manipulating the execution graph before the execution path is calculated. '
                         'Format is substep:{in,out}{+-}DATA,{in,out}{+-}DATA,... to modify the substep\'s input/output ' 
-                        ' by adding/removing a data type. e.g. RAWtoESD:in-RDO,in+RDO_TRIG would remove RDO and add '
-                        'RDO_TRIG to the list of valid input datatypes for the RAWtoESD substep. See current version of '
+                        ' by adding/removing a data type. e.g. RAWtoALL:in-RDO,in+RDO_TRIG would remove RDO and add '
+                        'RDO_TRIG to the list of valid input datatypes for the RAWtoALL substep. See current version of '
                         'trfArgClasses.argSubstepSteering.steeringAlises for supported aliases. '
                         'https://twiki.cern.ch/twiki/bin/view/AtlasComputing/TransformSteering')
     addMetadataArguments(parser)
@@ -551,7 +551,7 @@ def addTriggerArguments(parser, addTrigFilter=True):
     if addTrigFilter:
         parser.add_argument('--trigFilterList',
                             type=argFactory(trfArgClasses.argList), nargs="+",
-                            help='Trigger filter list (multiple values can be given separately or split on commas; only understood in RAWtoESD)', 
+                            help='Trigger filter list (multiple values can be given separately or split on commas; only understood in RAWtoALL/RAWtoESD)', 
                             group='Trigger')
 
 ## Tea for two and two for tea... these arguments are used for testing
