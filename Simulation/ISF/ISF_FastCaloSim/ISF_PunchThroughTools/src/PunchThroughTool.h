@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_PUNCHTHROUGHTOOLS_SRC_PUNCHTHROUGHTOOL_H
@@ -7,6 +7,8 @@
 
 #include "ISF_FastCaloSimInterfaces/IPunchThroughTool.h"
 #include <string>
+
+#include "ISF_FastCaloSimInterfaces/IPunchThroughClassifier.h"
 
 // Athena Base
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -29,6 +31,14 @@
 #include "ISF_Event/ISFParticleContainer.h"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
+
+//libXML
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xmlreader.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 
 /*-------------------------------------------------------------------------
  *  Forward declarations
@@ -61,7 +71,7 @@ namespace ISF {
     /** AlgTool finalize method */
     virtual StatusCode finalize  ();
     /** interface function: fill a vector with the punch-through particles */
-    const ISF::ISFParticleVector* computePunchThroughParticles(const ISF::ISFParticle &isfp, CLHEP::HepRandomEngine* rndmEngine) const;
+    const ISF::ISFParticleVector* computePunchThroughParticles(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine) const;
 
   private:
     /*---------------------------------------------------------------------
@@ -78,22 +88,22 @@ namespace ISF {
     StatusCode registerCorrelation(int pdgID1, int pdgID2,double minCorrEnergy = 0., double fullCorrEnergy = 0.);
 
     /** reads out the lookuptable for the given type of particle */
-    std::unique_ptr<ISF::PDFcreator> readLookuptablePDF(int pdgID, std::string folderName);
+    std::unique_ptr<ISF::PDFcreator> readLookuptablePDF(int pdgID, const std::string& folderName);
 
     /** create the right number of punch-through particles for the given pdg
      *  and return the number of particles which was created. also create these
      *  particles with the right distributions (energy, theta, phi).
      *  if a second argument is given, create exactly this number of particles
      *  (also with the right energy,theta,phi distributions */
-    int getAllParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, CLHEP::HepRandomEngine* rndmEngine, int pdg, int numParticles = -1) const;
+    int getAllParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, CLHEP::HepRandomEngine* rndmEngine, int pdg, double interpEnergy, double interpEta, int numParticles = -1) const;
 
     /** get the right number of particles for the given pdg while considering
      *  the correlation to an other particle type, which has already created
      *  'corrParticles' number of particles */
-    int getCorrelatedParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, int doPdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine) const;
+    int getCorrelatedParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, int doPdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine, double interpEnergy, double interpEta) const;
 
     /** create exactly one punch-through particle with the given pdg and the given max energy */
-    ISF::ISFParticle *getOneParticle(const ISF::ISFParticle &isfp, int pdg, double maxEnergy, CLHEP::HepRandomEngine* rndmEngine) const;
+    ISF::ISFParticle *getOneParticle(const ISF::ISFParticle &isfp, int pdg, CLHEP::HepRandomEngine* rndmEngine, double interpEnergy, double interpEta) const;
 
     /** create a ISF Particle state at the MS entrace containing a particle with the given properties */
     ISF::ISFParticle *createExitPs(const ISF::ISFParticle &isfp, int PDGcode, double energy, double theta, double phi, double momTheta, double momPhi) const;
@@ -103,9 +113,41 @@ namespace ISF {
     /** get particle through the calorimeter */
     Amg::Vector3D propagator(double theta, double phi) const;
 
+    //apply the inverse PCA transform
+    std::vector<double> inversePCA(std::vector<double> &variables) const;
+
+    //apply the inverse CDF trainsform
+    double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) const;
+
+    //dot product between matrix and vector, used to inverse PCA
+    std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) const;
+
+    //returns normal cdf based on normal gaussian value
+    double normal_cdf(double x) const;
+
+    //apply energy interpolation
+    double interpolateEnergy(const double &energy, CLHEP::HepRandomEngine* rndmEngine) const;
+
+    //apply eta interpolation
+    double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
+
+    //load inverse quantile transformer from XML
+    StatusCode initializeInverseCDF(std::string quantileTransformerConfigFile);
+
+    //get CDF mapping for individual XML node
+    std::map<double, double> getVariableCDFmappings(xmlNodePtr& nodeParent);
+
+    //load inverse PCA from XML
+    StatusCode initializeInversePCA(std::string inversePCAConfigFile);
+
+
     /*---------------------------------------------------------------------
      *  Private members
      *---------------------------------------------------------------------*/
+
+     /** energy and eta points in param */
+     std::vector<double>                 m_energyPoints;
+     std::vector<double>                 m_etaPoints;
 
     /** calo-MS borders */
     double                               m_R1{0.};
@@ -127,32 +169,51 @@ namespace ISF {
      *---------------------------------------------------------------------*/
 
     /** Properties */
-    std::string                          m_filenameLookupTable{"CaloPunchThroughParametrisation.root"};     //!< holds the filename of the lookup table (property)
-    std::vector<int>                     m_pdgInitiators;           //!< vector of punch-through initiator pgds
-    std::vector<int>                     m_initiatorsMinEnergy;     //!< vector of punch-through initiator min energyies to create punch through
-    std::vector<double>                  m_initiatorsEtaRange;      //!< vector of min and max abs eta range to allow punch through initiators
-    std::vector<int>                     m_punchThroughParticles;   //!< vector of pdgs of the particles produced in punch-throughs
-    std::vector<bool>                    m_doAntiParticles;         //!< vector of bools to determine if anti-particles are created for each punch-through particle type
-    std::vector<int>                     m_correlatedParticle;      //!< holds the pdg of the correlated particle for each given pdg
-    std::vector<double>                  m_minCorrEnergy;           //!< holds the energy threshold below which no particle correlation is computed
-    std::vector<double>                  m_fullCorrEnergy;          //!< holds the energy threshold above which a particle correlation is fully developed
-    std::vector<double>                  m_posAngleFactor;          //!< tuning parameter to scale the position deflection angles
-    std::vector<double>                  m_momAngleFactor;          //!< tuning parameter to scale the momentum deflection angles
-    std::vector<double>                  m_minEnergy;               //!< punch-through particles minimum energies
-    std::vector<int>                     m_maxNumParticles;         //!< maximum number of punch-through particles for each particle type
-    std::vector<double>                  m_numParticlesFactor;      //!< scale the number of punch-through particles
-    std::vector<double>                  m_energyFactor;            //!< scale the energy of the punch-through particles
+    StringProperty m_filenameLookupTable{this, "FilenameLookupTable", "CaloPunchThroughParametrisation.root", "holds the filename of the lookup table"};
+    StringProperty m_filenameInverseCDF{this, "FilenameInverseCdf", "", "holds the filename of inverse quantile transformer config"};
+    StringProperty m_filenameInversePCA{this, "FilenameInversePca", "",  "holds the filename of inverse PCA config"};
+
+    PublicToolHandle<IPunchThroughClassifier> m_punchThroughClassifier{this, "PunchThroughClassifier", "ISF_PunchThroughClassifier", ""};
+    IntegerArrayProperty   m_pdgInitiators{this, "PunchThroughInitiators", {}, "vector of punch-through initiator pgds"};
+    IntegerArrayProperty   m_initiatorsMinEnergy{this, "InitiatorsMinEnergy", {}, "vector of punch-through initiator min energies to create punch through"};
+    DoubleArrayProperty   m_initiatorsEtaRange{this, "InitiatorsEtaRange", {}, "vector of min and max abs eta range to allow punch through initiators"};
+    IntegerArrayProperty   m_punchThroughParticles{this, "PunchThroughParticles", {}, "vector of pdgs of the particles produced in punch-throughs"};
+    BooleanArrayProperty m_doAntiParticles{this, "DoAntiParticles", {}, "vector of bools to determine if anti-particles are created for each punch-through particle type"};
+    IntegerArrayProperty   m_correlatedParticle{this, "CorrelatedParticle", {}, "holds the pdg of the correlated particle for each given pdg"};
+    DoubleArrayProperty   m_minCorrEnergy{this, "MinCorrelationEnergy", {}, "holds the energy threshold below which no particle correlation is computed"};
+    DoubleArrayProperty   m_fullCorrEnergy{this, "FullCorrelationEnergy", {}, "holds the energy threshold above which a particle correlation is fully developed"};
+    DoubleArrayProperty   m_posAngleFactor{this, "ScalePosDeflectionAngles", {}, "tuning parameter to scale the position deflection angles"};
+    DoubleArrayProperty   m_momAngleFactor{this, "ScaleMomDeflectionAngles", {}, "tuning parameter to scale the momentum deflection angles"};
+    DoubleArrayProperty   m_minEnergy{this, "MinEnergy", {}, "punch-through particles minimum energies"};
+    IntegerArrayProperty   m_maxNumParticles{this, "MaxNumParticles", {}, "maximum number of punch-through particles for each particle type"};
+    DoubleArrayProperty   m_numParticlesFactor{this, "NumParticlesFactor", {}, "scale the number of punch-through particles"};
+    DoubleArrayProperty   m_energyFactor{this, "EnergyFactor", {}, "scale the energy of the punch-through particles"};
+
+    /*---------------------------------------------------------------------
+     *  Constants
+     *---------------------------------------------------------------------*/
+     constexpr static double m_SQRT_0p5 = std::sqrt(0.5);
+     constexpr static double m_SQRT_2 = std::sqrt(2);
 
     /*---------------------------------------------------------------------
      *  ServiceHandles
      *---------------------------------------------------------------------*/
-    ServiceHandle<IPartPropSvc>          m_particlePropSvc;         //!< particle properties svc
-    ServiceHandle<IGeoIDSvc>             m_geoIDSvc;
-    ServiceHandle<Barcode::IBarcodeSvc>  m_barcodeSvc;
-    ServiceHandle<IEnvelopeDefSvc>       m_envDefSvc;
+    ServiceHandle<IPartPropSvc>          m_particlePropSvc{this, "PartPropSvc", "PartPropSvc", "particle properties svc"};
+    ServiceHandle<IGeoIDSvc>             m_geoIDSvc{this, "GeoIDSvc", "ISF::GeoIDSvc"};
+    ServiceHandle<Barcode::IBarcodeSvc>  m_barcodeSvc{this, "BarcodeSvc", "BarcodeSvc"};
+    ServiceHandle<IEnvelopeDefSvc>       m_envDefSvc{this, "EnvelopeDefSvc", "AtlasGeometry_EnvelopeDefSvc"};
 
     /** beam pipe radius */
-    double                              m_beamPipe{500.};
+    DoubleProperty                                  m_beamPipe{this, "BeamPipeRadius", 500.};
+
+    std::vector<std::vector<double>> m_inverse_PCA_matrix;
+    std::vector<double> m_PCA_means;
+
+    std::map<double, double>  m_variable0_inverse_cdf;
+    std::map<double, double>  m_variable1_inverse_cdf;
+    std::map<double, double>  m_variable2_inverse_cdf;
+    std::map<double, double>  m_variable3_inverse_cdf;
+    std::map<double, double>  m_variable4_inverse_cdf;
   };
 }
 
