@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBTaggingEfficiency/BTaggingEfficiencyTool.h"
@@ -501,7 +501,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 }
 
 CorrectionCode
-BTaggingEfficiencyTool::getScaleFactor( const xAOD::Jet & jet, float & sf) const
+BTaggingEfficiencyTool::getScaleFactor( const xAOD::Jet & jet, float & sf)
 {
   if (! m_initialised) {
     ATH_MSG_ERROR("BTaggingEfficiencyTool has not been initialised");
@@ -522,7 +522,7 @@ BTaggingEfficiencyTool::getScaleFactor( const xAOD::Jet & jet, float & sf) const
 
 CorrectionCode
 BTaggingEfficiencyTool::getScaleFactor( int flavour, const Analysis::CalibrationDataVariables& v,
-					float & sf) const
+					float & sf)
 {
   if (! m_initialised) {
     ATH_MSG_ERROR("BTaggingEfficiencyTool has not been initialised");
@@ -584,7 +584,7 @@ BTaggingEfficiencyTool::getScaleFactor( int flavour, const Analysis::Calibration
 }
   
 CorrectionCode
-BTaggingEfficiencyTool::getEfficiency( const xAOD::Jet & jet, float & eff) const
+BTaggingEfficiencyTool::getEfficiency( const xAOD::Jet & jet, float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -602,7 +602,7 @@ BTaggingEfficiencyTool::getEfficiency( const xAOD::Jet & jet, float & eff) const
 
 CorrectionCode
 BTaggingEfficiencyTool::getEfficiency( int flavour, const Analysis::CalibrationDataVariables& v, 
-				       float & eff) const
+				       float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -660,7 +660,7 @@ BTaggingEfficiencyTool::getEfficiency( int flavour, const Analysis::CalibrationD
 }
   
 CorrectionCode
-BTaggingEfficiencyTool::getInefficiency( const xAOD::Jet & jet, float & eff) const
+BTaggingEfficiencyTool::getInefficiency( const xAOD::Jet & jet, float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -678,7 +678,7 @@ BTaggingEfficiencyTool::getInefficiency( const xAOD::Jet & jet, float & eff) con
 
 CorrectionCode
 BTaggingEfficiencyTool::getInefficiency( int flavour, const Analysis::CalibrationDataVariables& v, 
-					 float & eff) const
+					 float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -736,7 +736,7 @@ BTaggingEfficiencyTool::getInefficiency( int flavour, const Analysis::Calibratio
 }
 
 CorrectionCode
-BTaggingEfficiencyTool::getInefficiencyScaleFactor( const xAOD::Jet & jet, float & sf) const
+BTaggingEfficiencyTool::getInefficiencyScaleFactor( const xAOD::Jet & jet, float & sf)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -754,7 +754,7 @@ BTaggingEfficiencyTool::getInefficiencyScaleFactor( const xAOD::Jet & jet, float
 
 CorrectionCode
 BTaggingEfficiencyTool::getInefficiencyScaleFactor( int flavour, const Analysis::CalibrationDataVariables& v, 
-						    float & sf) const
+						    float & sf)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -812,7 +812,7 @@ BTaggingEfficiencyTool::getInefficiencyScaleFactor( int flavour, const Analysis:
 }
   
 CorrectionCode
-BTaggingEfficiencyTool::getMCEfficiency( const xAOD::Jet & jet, float & eff) const
+BTaggingEfficiencyTool::getMCEfficiency( const xAOD::Jet & jet, float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -830,7 +830,7 @@ BTaggingEfficiencyTool::getMCEfficiency( const xAOD::Jet & jet, float & eff) con
 
 CorrectionCode
 BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::CalibrationDataVariables& v, 
-					 float & eff) const
+					 float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
