@@ -107,21 +107,21 @@ class LHEFilters(object):
                     lhe_files.append(tarfile.open(compressedFile).getnames()[0]) # retrieve the name of the compressed lhe file
                 else:
                     lhe_files.append(inputLhe_file)
-                if len(lhe_files) == 0:
-                    athMsgLog.error("Could not find uncompressed LHE file")
-                    raise RuntimeError
-                for lhe_file in lhe_files:
-                    athMsgLog.info("Checking for duplicates in "+lhe_file)
-                    FindDuplicates(inFileName=lhe_file)
-                if len(lhe_files) > 1:
-                    athMsgLog.info("Found more than one uncompressed LHE file: {}".format(lhe_files))
-                    # skeleton.GENtoEVGEN splits the file name on "._" (in rel. 20.7.9.9.6,MCProd,
-                    # so insert this in the merged file name - to make it run also for this release)
-                    my_lhe_file = "merged_lhef._0.events"
-                    merge_lhe_files(lhe_files, my_lhe_file )
-                    lhe_files[0] = my_lhe_file
-                athMsgLog.info("Using uncompressed LHE file '{}' as input of LHEFilter".format(lhe_files[0]))
-                self.fIn = open(lhe_files[0], 'r')
+            if len(lhe_files) == 0:
+                athMsgLog.error("Could not find uncompressed LHE file")
+                raise RuntimeError
+            for lhe_file in lhe_files:
+                athMsgLog.info("Checking for duplicates in "+lhe_file)
+                FindDuplicates(inFileName=lhe_file)
+            if len(lhe_files) > 1:
+                athMsgLog.info("Found more than one uncompressed LHE file: {}".format(lhe_files))
+                # skeleton.GENtoEVGEN splits the file name on "._" (in rel. 20.7.9.9.6,MCProd,
+                # so insert this in the merged file name - to make it run also for this release)
+                my_lhe_file = "merged_lhef._0.events"
+                merge_lhe_files(lhe_files, my_lhe_file )
+                lhe_files[0] = my_lhe_file
+            athMsgLog.info("Using uncompressed LHE file '{}' as input of LHEFilter".format(lhe_files[0]))
+            self.fIn = open(lhe_files[0], 'r')
         except:
             athMsgLog.error("Impossible to use input lhe file {}".format(inFile))
             raise RuntimeError
@@ -220,13 +220,24 @@ class LHEFilters(object):
     def process_event(self):
         rx_start = re.compile('<event>')
         rx_end = re.compile('</event>')
+        rx_final = re.compile('</LesHouchesEvents>')
 
         last_pos = self.fIn.tell()
         line = self.fIn.readline()
 
-        if not rx_start.match(line):
+        # check if the end of the LesHouchesRecord is reached
+        # if so, return False
+        if rx_final.match(line):
             self.fIn.seek(last_pos)
             return False
+
+        # check if new event starts
+        # otherwise it's probably a comment that we just copy to the filtered LHE file
+        if not rx_start.match(line):
+            self.fOut.write(line)
+            return True
+
+        # if a new event indeed starts, go with the old flow
 
         # Acquire all content lines.
         line = self.fIn.readline()
