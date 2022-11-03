@@ -30,10 +30,33 @@ class PreJetAnalysisConfig (ConfigBlock) :
         else :
             config.setSourceName (self.containerName, self.jetCollection)
 
+        # Setup the postfix
+        postfix = self.postfix
+        if postfix != '':
+            postfix = "_" + postfix
+
+        # Remove b-tagging calibration from the container name
+        jetCollection = self.jetCollection
+        btIndex = jetCollection.find('_BTagging')
+        if btIndex != -1:
+            jetCollection = jetCollection[:btIndex]
+
+        # interpret the jet collection
+        collection_pattern = re.compile(
+            r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFOCSSK)(TrimmedPtFrac5SmallR20|SoftDropBeta100Zcut10)?Jets")
+        match = collection_pattern.match(jetCollection)
+        if not match:
+            raise ValueError(
+                "Jet collection {0} does not match expected pattern!".format(jetCollection) )
+        radius = int(match.group(1) )
+        if radius not in [2, 4, 6, 10]:
+            raise ValueError("Jet collection has an unsupported radius '{0}'!".format(radius) )
+        jetInput = match.group(2)
+
         # Relink original jets in case of b-tagging calibration
-        if self.runOriginalObjectLink :
+        if btIndex != -1:
             alg = config.createAlgorithm( 'CP::AsgOriginalObjectLinkAlg',
-                                          'JetOriginalObjectLinkAlg'+self.postfix )
+                                          'JetOriginalObjectLinkAlg'+postfix )
             alg.baseContainerName = self.jetCollection
             alg.particles = config.readName (self.containerName)
             if config.wantCopy (self.containerName) :
@@ -41,13 +64,31 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the jet ghost muon association algorithm:
-        if (self.runGhostMuonAssociation is None and not config.isPhyslite()) or \
-           (self.runGhostMuonAssociation is True):
+        if self.runGhostMuonAssociation:
             alg = config.createAlgorithm( 'CP::JetGhostMuonAssociationAlg',
-                                          'JetGhostMuonAssociationAlg'+self.postfix )
+                                          'JetGhostMuonAssociationAlg'+postfix )
             alg.jets = config.readName (self.containerName)
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
+
+        # IsBtag decoration for Jet Flavour Uncertainties
+        # (https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR)
+        if config.dataType() != 'data' and radius < 10:
+            # Step 1: pt and eta selection
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JetIsBtagPtEtaSelectionAlg'+postfix)
+            config.addPrivateTool('selectionTool', 'CP::AsgPtEtaSelectionTool')
+            alg.selectionTool.minPt = 20
+            alg.selectionTool.maxEta = 2.5
+            alg.selectionDecoration = 'kinematicSelectionBtag,as_char'
+            alg.particles = config.readName (self.containerName)
+            # Step 2: truth selection using HadronConeExclTruthLabelID
+            alg = config.createAlgorithm('CP::AsgSelectionAlg', 'JetIsBtagTruthSelectionAlg'+postfix)
+            alg.preselection = 'kinematicSelectionBtag,as_char'
+            config.addPrivateTool('selectionTool', 'CP::AsgIntValueSelectionTool')
+            alg.selectionTool.selectionFlag = 'HadronConeExclTruthLabelID'
+            alg.selectionTool.acceptedValues = [5]
+            alg.selectionDecoration = 'IsBjet,as_char'
+            alg.particles = config.readName (self.containerName)
 
 
 
@@ -62,34 +103,31 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         self.jetCollection = jetCollection
         self.jetInput = jetInput
         self.postfix = postfix
-        if self.postfix != '' and self.postfix[0] != '_' :
-            self.postfix = '_' + self.postfix
-        self.runJvtUpdate = False
-        self.runFJvtUpdate = False
+        self.runJvtUpdate = True
+        self.runFJvtUpdate = True
         self.runJvtSelection = True
-        self.runFJvtSelection = False
+        self.runFJvtSelection = True
         self.runJvtEfficiency = True
-        self.runFJvtEfficiency = False
+        self.runFJvtEfficiency = True
         self.reduction = "Global"
         self.JEROption = "Simple"
+        self.truthJetCollection = 'AntiKt4TruthDressedWZJets'
 
 
     def makeAlgs (self, config) :
 
-        jetCollectionName=self.jetCollection
-        if(self.jetCollection=="AnalysisJets") :
-            jetCollectionName="AntiKt4EMPFlowJets"
-        if(self.jetCollection=="AnalysisLargeRJets") :
-            jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+        postfix = self.postfix
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
 
         if self.jetInput not in ["EMTopo", "EMPFlow"]:
             raise ValueError(
                 "Unsupported input type '{0}' for R=0.4 jets!".format(self.jetInput) )
 
         # Prepare the jet calibration algorithm
-        alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+self.postfix )
+        alg = config.createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
         config.addPrivateTool( 'calibrationTool', 'JetCalibrationTool' )
-        alg.calibrationTool.JetCollection = jetCollectionName[:-4]
+        alg.calibrationTool.JetCollection = self.jetCollection[:-4]
         # Get the correct string to use in the config file name
         if config.dataType() == 'afii':
             configFile = "JES_MC16Recommendation_AFII_{0}_Apr2019_Rel21.config"
@@ -107,6 +145,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         alg.calibrationTool.IsData = (config.dataType() == 'data')
         alg.jets = config.readName (self.containerName)
         alg.jetsOut = config.copyName (self.containerName)
+        alg.preselection = config.getPreselection (self.containerName, '')
 
         # Jet uncertainties
         # Prepare the config file
@@ -125,9 +164,9 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 "Invalid combination of reduction and JEROption settings: "
                 "reduction: {0}, JEROption: {1}".format(self.reduction, self.JEROption) )
 
-        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+self.postfix )
+        alg = config.createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
         config.addPrivateTool( 'uncertaintiesTool', 'JetUncertaintiesTool' )
-        alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+        alg.uncertaintiesTool.JetDefinition = self.jetCollection[:-4]
         # Add the correct directory on the front
         alg.uncertaintiesTool.ConfigFile = "rel21/Fall2018/"+configFile
         alg.uncertaintiesTool.MCType = "AFII" if config.dataType() == "afii" else "MC16"
@@ -138,26 +177,14 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
 
         # Set up the JVT update algorithm:
         if self.runJvtUpdate :
-            alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+self.postfix )
+            alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+postfix )
             config.addPrivateTool( 'jvtTool', 'JetVertexTaggerTool' )
-            alg.jvtTool.JetContainer = self.jetCollection
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
-        if self.runNNJvtUpdate:
-            assert self.jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
-            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+self.postfix )
-            config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
-            # Set this actually to the *output* collection
-            alg.jets = config.readName (self.containerName)
-            alg.jetsOut = config.copyName (self.containerName)
-            alg.decorator.JetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
-            alg.decorator.SuppressInputDependence=True
-            alg.decorator.SuppressOutputDependence=True
-
         if self.runFJvtUpdate :
-            alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+self.postfix )
+            alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+postfix )
             config.addPrivateTool( 'modifierTool', 'JetForwardJvtTool')
             alg.modifierTool.OutputDec = "passFJVT" #Output decoration
             # fJVT WPs depend on the MET WP
@@ -167,12 +194,11 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.modifierTool.ForwardMaxPt = 120.0e3 #Max Pt to define fwdJets for JVT
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
-            alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the jet efficiency scale factor calculation algorithm
         # Change the truthJetCollection property to AntiKt4TruthWZJets if preferred
         if self.runJvtSelection :
-            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+self.postfix )
+            alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'JvtEfficiencyAlg'+postfix )
             config.addPrivateTool( 'efficiencyTool', 'CP::JetJvtEfficiency' )
             if self.jetInput == 'EMPFlow':
                 alg.efficiencyTool.SFFile = 'JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root'
@@ -181,7 +207,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.efficiencyTool.SFFile = 'JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root'
                 alg.efficiencyTool.MaxPtForJvt = 120e3
             alg.efficiencyTool.WorkingPoint = 'Tight' if self.jetInput == 'EMPFlow' else 'Medium'
-            alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.selection = 'jvt_selection'
             alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
             # Disable scale factor decorations if running on data
@@ -189,6 +214,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             if not self.runJvtEfficiency or config.dataType() == 'data':
                 alg.scaleFactorDecoration = ''
                 alg.truthJetCollection = ''
+            elif self.truthJetCollection is not None:
+                alg.truthJetCollection = self.truthJetCollection
+            else :
+                alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.outOfValidity = 2
             alg.outOfValidityDeco = 'no_jvt'
             alg.skipBadEfficiency = 0
@@ -204,7 +233,6 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root'
             alg.efficiencyTool.WorkingPoint = 'Tight'
             alg.efficiencyTool.UseMuSFFormat = True
-            alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.dofJVT = True
             alg.fJVTStatus = 'passFJVT,as_char'
             alg.selection = 'fjvt_selection'
@@ -214,6 +242,10 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             if not self.runFJvtEfficiency or config.dataType() == 'data':
                 alg.scaleFactorDecoration = ''
                 alg.truthJetCollection = ''
+            elif self.truthJetCollection is not None:
+                alg.truthJetCollection = self.truthJetCollection
+            else :
+                alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.outOfValidity = 2
             alg.outOfValidityDeco = 'no_fjvt'
             alg.skipBadEfficiency = 0
@@ -437,10 +469,11 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = '',
 
 def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
                                    jetInput, postfix = '',
-                                   runJvtUpdate = False, runFJvtUpdate = False,
-                                   runJvtSelection = True, runFJvtSelection = False,
-                                   runJvtEfficiency = True, runFJvtEfficiency = False,
-                                   reduction = "Global", JEROption = "Simple"):
+                                   runJvtUpdate = True, runFJvtUpdate = True,
+                                   runJvtSelection = True, runFJvtSelection = True,
+                                   runJvtEfficiency = True, runFJvtEfficiency = True,
+                                   reduction = "Global", JEROption = "Simple",
+                                   truthJetCollection = None):
     """Add algorithms for the R=0.4 jets.
 
       Keyword arguments
@@ -456,6 +489,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         runFJvtEfficiency -- Determines whether or not to calculate the forward JVT efficiency
         reduction -- Which NP reduction scheme should be used (All, Global, Category, Scenario)
         JEROption -- Which variant of the reduction should be used (All, Full, Simple). Note that not all combinations of reduction and JEROption are valid!
+        truthJetCollection -- a custom jet collection to use for truth jets
     """
 
     if jetInput not in ["EMTopo", "EMPFlow"]:
@@ -472,6 +506,8 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
     config.runFJvtEfficiency = runFJvtEfficiency
     config.reduction = reduction
     config.JEROption = JEROption
+    if truthJetCollection is not None :
+        config.truthJetCollection = truthJetCollection
     seq.append (config)
 
 

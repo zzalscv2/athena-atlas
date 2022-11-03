@@ -9,67 +9,47 @@ class PileupReweightingBlock (ConfigBlock):
 
     def __init__ (self) :
         super (PileupReweightingBlock, self).__init__ ()
-        self.campaign=None
-        self.files=None
-        self.useDefaultConfig=False
-        self.userLumicalcFiles=None
-        self.userPileupConfigs=None
+        self.userPileupConfigs=[]
+        self.userLumicalcFiles=[]
+        self.autoConfig=False
 
 
     def makeAlgs (self, config) :
-
-        from Campaigns.Utils import Campaign
 
         try:
             from AthenaCommon.Logging import logging
         except ImportError:
             import logging
-        log = logging.getLogger('makePileupAnalysisSequence')
+        prwlog = logging.getLogger('makePileupAnalysisSequence')
 
-        # TODO: support per-campaign config
+        muMcFiles = self.userPileupConfigs[:]
+        userLumicalcFiles = self.userLumicalcFiles
+        if self.autoConfig:
+            from PileupReweighting.AutoconfigurePRW import getLumiCalcFiles,getMCMuFiles
+            userLumicalcFiles = getLumiCalcFiles()
+            if len(muMcFiles)==0:
+                muMcFiles = getMCMuFiles()
+            else:
+                prwlog.warning('Sent autoconfig and self.userPileupConfigs='+str(self.userPileupConfigs))
+                prwlog.warning('Ignoring autoconfig and keeping user-specified files')
 
-        toolConfigFiles = []
-        toolLumicalcFiles = []
-        campaign = self.campaign
-        if self.files is not None and (campaign is None or campaign is Campaign.Unknown or self.userPileupConfigs is None):
-            if campaign is None or campaign is Campaign.Unknown:
-                from Campaigns.Utils import getMCCampaign
-                campaign = getMCCampaign(self.files)
-                if campaign:
-                    log.info(f'Autoconfiguring PRW with campaign: {campaign}')
-                else:
-                    log.info('Campaign could not be determined.')
-
-            if campaign:
-                if self.userPileupConfigs is None:
-                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
-                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig)
-                    log.info('Setting PRW configuration based on input files')
-
-                    if toolConfigFiles:
-                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
-                else:
-                    log.info('Using user provided PRW configuration')
-
-        if self.userPileupConfigs is not None:
-            toolConfigFiles = self.userPileupConfigs[:]
-
-        if self.userLumicalcFiles is not None:
-            log.info('Using user-provided lumicalc files')
-            toolLumicalcFiles = self.userLumicalcFiles[:]
+        if userLumicalcFiles==[]:
+            muDataFiles = ["GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
+                           "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
+                           "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root",
+                           "GoodRunsLists/data18_13TeV/20190708/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root" ]
         else:
-            from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
-            toolLumicalcFiles = getLumicalcFiles(campaign)
+            muDataFiles = userLumicalcFiles[:]
 
         # Set up the only algorithm of the sequence:
         alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
         config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
-        alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
-        if not toolConfigFiles and config.dataType() != "data":
-            log.info("No PRW config files provided. Disabling reweighting")
+        alg.pileupReweightingTool.ConfigFiles = muMcFiles
+        if not muMcFiles and config.dataType() != "data":
+            prwlog.info("No PRW config files provided. Disabling reweighting")
             # Setting the weight decoration to the empty string disables the reweighting
             alg.pileupWeightDecoration = ""
-        alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+        alg.pileupReweightingTool.LumiCalcFiles = muDataFiles
 
 
 
@@ -123,7 +103,7 @@ class PrimaryVertexBlock (ConfigBlock):
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
-    def __init__ (self, containerName, *, postfix, minPt, maxEta,
+    def __init__ (self, containerName, postfix, minPt, maxEta,
                   selectionDecoration) :
         super (PtEtaSelectionBlock, self).__init__ ()
         self.containerName = containerName
@@ -160,7 +140,7 @@ class PtEtaSelectionBlock (ConfigBlock):
 class OutputThinningBlock (ConfigBlock):
     """the ConfigBlock for output thinning"""
 
-    def __init__ (self, containerName, *, postfix) :
+    def __init__ (self, containerName, postfix) :
         super (OutputThinningBlock, self).__init__ ()
         self.containerName = containerName
         self.postfix = postfix
@@ -199,7 +179,7 @@ class OutputThinningBlock (ConfigBlock):
 
 
 
-def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfig=False, userLumicalcFiles=None, userPileupConfigs=None ):
+def makePileupReweightingConfig( seq, userPileupConfigs=[], userLumicalcFiles=[] , autoConfig=False ):
     """Create a PRW analysis config
 
     Keyword arguments:
@@ -207,11 +187,9 @@ def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfi
     # TO DO: add explanation of the keyword arguments, left to experts
 
     config = PileupReweightingBlock ()
-    config.campaign = campaign
-    config.files = files
-    config.useDefaultConfig = useDefaultConfig
-    config.userLumicalcFiles = userLumicalcFiles
     config.userPileupConfigs = userPileupConfigs
+    config.userLumicalcFiles = userLumicalcFiles
+    config.autoConfig = autoConfig
     seq.append (config)
 
 
@@ -246,8 +224,8 @@ def makePrimaryVertexConfig( seq ) :
 
 
 def makePtEtaSelectionConfig( seq, containerName,
-                              *, postfix = '', minPt = None, maxEta = None,
-                              selectionDecoration):
+                              selectionDecoration,
+                              postfix = '', minPt = None, maxEta = None):
     """Create a pt-eta kinematic selection config
 
     Keyword arguments:
@@ -269,7 +247,7 @@ def makePtEtaSelectionConfig( seq, containerName,
 
 
 def makeOutputThinningConfig( seq, containerName,
-                              *, postfix = '', selection = None, outputName = None):
+                              postfix = '', selection = None, outputName = None):
     """Create an output thinning config
 
     This will do a consistent selection of output containers (if there

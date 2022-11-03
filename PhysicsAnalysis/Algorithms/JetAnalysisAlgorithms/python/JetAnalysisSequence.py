@@ -160,7 +160,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
                                    runJvtUpdate = True, runFJvtUpdate = True,
                                    runJvtSelection = True, runFJvtSelection = True,
                                    runJvtEfficiency = True, runFJvtEfficiency = True,
-                                   reduction = "Global", JEROption = "Simple"):
+                                   reduction = "Global", JEROption = "Simple",
+                                   truthJetCollection = None):
     """Add algorithms for the R=0.4 jets.
 
       Keyword arguments
@@ -177,6 +178,7 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         runFJvtEfficiency -- Determines whether or not to calculate the forward JVT efficiency
         reduction -- Which NP reduction scheme should be used (All, Global, Category, Scenario)
         JEROption -- Which variant of the reduction should be used (All, Full, Simple). Note that not all combinations of reduction and JEROption are valid!
+        truthJetCollection -- a custom jet collection to use for truth jets
     """
     if jetInput not in ["EMTopo", "EMPFlow"]:
         raise ValueError(
@@ -267,6 +269,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         if not runJvtEfficiency or dataType == 'data':
             alg.scaleFactorDecoration = ''
             alg.truthJetCollection = ''
+        elif truthJetCollection is not None:
+            alg.truthJetCollection = truthJetCollection
         alg.outOfValidity = 2
         alg.outOfValidityDeco = 'no_jvt'
         alg.skipBadEfficiency = 0
@@ -291,6 +295,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         if not runFJvtEfficiency or dataType == 'data':
             alg.scaleFactorDecoration = ''
             alg.truthJetCollection = ''
+        elif truthJetCollection is not None:
+            alg.truthJetCollection = truthJetCollection
         alg.outOfValidity = 2
         alg.outOfValidityDeco = 'no_fjvt'
         alg.skipBadEfficiency = 0

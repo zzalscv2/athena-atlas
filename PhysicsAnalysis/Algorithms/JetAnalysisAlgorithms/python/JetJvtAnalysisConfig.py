@@ -15,7 +15,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         self.postfix = postfix
         if self.postfix != '' and self.postfix[0] != '_' :
             self.postfix = '_' + self.postfix
-        self.enableFJvt = False
+        self.disableFJvt = False
         self.globalSF = True
         self.runSelection = True
 
@@ -34,7 +34,7 @@ class JetJvtAnalysisConfig (ConfigBlock) :
             alg.scaleFactorOutputDecoration = 'jvt_effSF_%SYS%'
             alg.particles = config.readName (self.containerName)
 
-            if self.enableFJvt:
+            if not self.disableFJvt:
                 alg = config.createAlgorithm( 'CP::AsgEventScaleFactorAlg', 'ForwardJvtEventScaleFactorAlg' )
                 preselection = config.getPreselection (self.containerName, '')
                 alg.preselection = preselection + '&&no_fjvt' if preselection else 'no_fjvt'
@@ -45,27 +45,27 @@ class JetJvtAnalysisConfig (ConfigBlock) :
         if self.runSelection:
             config.addSelection (self.containerName, '', 'jvt_selection',
                                  bits=1, preselection=False)
-            if self.enableFJvt :
+            if not self.disableFJvt :
                 config.addSelection (self.containerName, '', 'fjvt_selection',
                                      bits=1, preselection=False)
 
 
 def makeJetJvtAnalysisConfig( seq, containerName, jetCollection,
                               postfix = '',
-                              enableFJvt = False,
+                              disableFJvt = False,
                               globalSF = True,
                               runSelection = True ):
     """Create a jet JVT analysis algorithm config
 
     Keyword arguments:
       jetCollection -- The jet container to run on
-      enableFJvt -- Whether to enable forward JVT calculations
+      disableFJvt -- Whether to disable forward JVT calculations
       globalSF -- Whether to calculate per event scale factors
       runSelection -- Whether to run selection
     """
 
     config = JetJvtAnalysisConfig (containerName, jetCollection, postfix)
-    config.enableFJvt = enableFJvt
+    config.disableFJvt = disableFJvt
     config.globalSF = globalSF
     config.runSelection = runSelection
 

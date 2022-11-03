@@ -171,7 +171,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                             bits=(32 if self.recomputeIsEM else 1))
+                             bits=(32 if self.recomputeIsEM else 1), preselection=True)
 
         # Set up the isolation selection algorithm:
         if self.isolationWP != 'NonIso' :
@@ -183,7 +183,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.egammas = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
-                                 bits=1)
+                                 bits=1, preselection=True)
 
         # Set up an algorithm used for decorating baseline photon selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
@@ -201,7 +201,7 @@ class PhotonWorkingPointConfig (ConfigBlock) :
             alg.scaleFactorDecoration = 'ph_effSF' + self.postfix + '_%SYS%'
             if config.dataType() == 'afii':
                 alg.efficiencyCorrectionTool.ForceDataType = \
-                    ROOT.PATCore.ParticleDataType.Full  # no AFII ID SFs for now
+                    ROOT.PATCore.ParticleDataType.Fast
             elif config.dataType() == 'mc':
                 alg.efficiencyCorrectionTool.ForceDataType = \
                     ROOT.PATCore.ParticleDataType.Full

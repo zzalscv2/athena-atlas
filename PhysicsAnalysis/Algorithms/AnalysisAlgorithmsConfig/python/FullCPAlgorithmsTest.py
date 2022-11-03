@@ -92,23 +92,23 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
     else :
         input = jetContainer
     jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
-                                           runJvtUpdate = True,
-                                           enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
-                                           runGhostMuonAssociation = not isPhyslite)
+                                           truthJetCollection='AntiKt4TruthDressedWZJets',
+                                           enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False)
 
-    if not noPhysliteBroken :
-        from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
-        btagger = "MV2c10"
-        btagWP = "FixedCutBEff_77"
-        makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
-                                  enableCutflow=True, btagger = btagger, btagWP = btagWP )
-        vars += [
-            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
-        ]
-        if dataType != 'data' :
-            vars += [
-                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
-            ]
+    # FIX ME: f-tag needs an overhaul to run on DAOD_PHYS
+    # if not noPhysliteBroken :
+    #     from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
+    #     btagger = "MV2c10"
+    #     btagWP = "FixedCutBEff_77"
+    #     makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
+    #                               enableCutflow=True, btagger = btagger, btagWP = btagWP )
+    #     vars += [
+    #         'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+    #     ]
+    #     if dataType != 'data' :
+    #         vars += [
+    #             'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+    #         ]
 
     jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
 
@@ -213,7 +213,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         input = 'AnalysisPhotons'
     else :
         input = 'Photons'
-    photonSequence = makePhotonAnalysisSequence( dataType, 'Tight.FixedCutTight', postfix = 'tight',
+    photonSequence = makePhotonAnalysisSequence( dataType, 'Tight.FixedCutTight', postfix = 'tight', ptSelectionOutput=True,
                                                  recomputeIsEM=False, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
     photonSequence.configure( inputName = input,
                               outputName = 'AnaPhotons_%SYS%' )
@@ -232,7 +232,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         input = 'AnalysisTauJets'
     else :
         input = 'TauJets'
+    # FIX ME: Need to disable truth matching for taus to run on DAOD_PHYS
     tauSequence = makeTauAnalysisSequence( dataType, 'Tight', postfix = 'tight',
+                                           rerunTruthMatching = False,
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
     tauSequence.configure( inputName = input, outputName = 'AnaTauJets_%SYS%' )
 
@@ -454,7 +456,6 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
 
     configSeq = ConfigSequence ()
 
-
     if not isPhyslite :
         # Include, and then set up the pileup analysis sequence:
         prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
@@ -506,7 +507,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     # Include, and then set up the photon analysis algorithm sequence:
     from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
 
-    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False)
+    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False, ptSelectionOutput=True)
     makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight', recomputeIsEM=False)
     vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
               'OutPhotons_NOSYS.phi -> ph_phi',
@@ -519,7 +520,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
 
-    makeMuonCalibrationConfig (configSeq, 'AnaMuons')
+    makeMuonCalibrationConfig (configSeq, 'AnaMuons', ptSelectionOutput=True)
     makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Medium.Iso', postfix='medium')
     makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Tight.Iso', postfix='tight')
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
@@ -536,7 +537,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     # Include, and then set up the tau analysis algorithm sequence:
     from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
 
-    makeTauCalibrationConfig (configSeq, 'AnaTauJets')
+    # FIX ME: Need to disable truth matching for taus to run on DAOD_PHYS
+    makeTauCalibrationConfig (configSeq, 'AnaTauJets',
+                              rerunTruthMatching = False)
     makeTauWorkingPointConfig (configSeq, 'AnaTauJets', workingPoint='Tight', postfix='tight')
     vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
               'OutTauJets_NOSYS.phi -> tau_phi',

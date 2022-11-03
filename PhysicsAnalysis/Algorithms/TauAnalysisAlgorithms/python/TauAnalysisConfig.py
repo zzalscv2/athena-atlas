@@ -79,12 +79,12 @@ class TauWorkingPointConfig (ConfigBlock) :
 
         # Set up the algorithm selecting taus:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + self.postfix )
-        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
-        alg.selectionTool.ConfigPath = inputfile
+        alg.selectionTool = '%s/%s' % \
+            ( selectionTool.getType(), selectionTool.getName() )
         alg.selectionDecoration = 'selected_tau' + self.postfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, bits=6)
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, bits=6, preselection=True)
 
         # Set up an algorithm used for decorating baseline tau selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
