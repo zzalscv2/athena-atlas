@@ -20,7 +20,9 @@ TauSmearingTool::TauSmearingTool( const std::string& sName )
   , m_tCommonSmearingTool(sName+"_CommonSmearingTool", this)
 {
   declareProperty( "InputFilePath",           m_sInputFilePath = "" );
-  declareProperty( "RecommendationTag",       m_sRecommendationTag = "2019-summer" );
+  declareProperty( "RecommendationTag",       m_sRecommendationTag = "2022-prerec" );
+  declareProperty( "Campaign",                m_sCampaign = "mc21" );
+  declareProperty( "Generator",               m_sGenerator = "PoPy" );  
   declareProperty( "SkipTruthMatchCheck",     m_bSkipTruthMatchCheck = false );
   declareProperty( "ApplyFading",             m_bApplyFading = true );
   declareProperty( "ApplyMVATESQualityCheck", m_bApplyMVATESQualityCheck = false );
@@ -44,6 +46,24 @@ StatusCode TauSmearingTool::initialize()
     if (m_sRecommendationTag == "2019-summer") {
       if (m_sAFII) m_sInputFilePath = sDirectory+"TES_TrueHadTau_2019-summer_AFII.root";
       else m_sInputFilePath = sDirectory+"TES_TrueHadTau_2019-summer.root";
+    } else if (m_sRecommendationTag == "2022-prerec") {
+
+      if (m_sCampaign!="mc21" && m_sCampaign!="mc20"){
+        ATH_MSG_ERROR("unknown campaign (mc20|mc21):" << m_sCampaign);
+        return StatusCode::FAILURE;
+      }
+
+      if (m_sGenerator!="PoPy" && m_sCampaign!="Sherpa"){
+        ATH_MSG_ERROR("unknown generator tag (PoPy|Sherpa):" << m_sCampaign);
+        return StatusCode::FAILURE;
+      }
+
+      if (m_sGenerator == "PoPy" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc20-prerec.root";
+      if (m_sCampaign=="mc21") {
+        m_sInputFilePath = sDirectory+"TES_TrueHadTau_PoPy8_mc21-prerec.root";
+        if (m_sGenerator=="Sherpa")ATH_MSG_WARNING("No Sherpa mc21 recommendations available yet, using PoPy8!");
+      }
+      if (m_sGenerator == "Sherpa" && m_sCampaign=="mc20") m_sInputFilePath = sDirectory+"TES_TrueHadTau_Sherpa2211-prerec.root";
     }
     else {
       ATH_MSG_ERROR("unknown recommendation tag " << m_sRecommendationTag);
