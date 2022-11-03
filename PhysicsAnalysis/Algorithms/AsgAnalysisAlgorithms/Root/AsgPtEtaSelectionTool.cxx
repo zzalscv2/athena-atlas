@@ -150,7 +150,7 @@ namespace CP
       }
 
       if (m_minPtCutIndex >= 0) {
-        if (!std::isfinite(pt) || pt <= 0.)
+        if (!std::isfinite(pt) || pt < 0.)
         {
           ANA_MSG_WARNING ("invalid pt value, setting object to fail pt-cut: " << pt);
           accept.setCutResult (m_minPtCutIndex, false);
