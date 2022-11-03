@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONDIGITIZATION_CSCDIGITIZATIONTOOL_H
@@ -71,18 +71,20 @@ public:
   /// all the required SubEvents.
   virtual StatusCode processAllSubEvents(const EventContext& ctx)  override final;
 
-public: //possibly these should be private?
+private:
+  using Collections_t = std::vector<std::unique_ptr<CscDigitCollection> >;
   StatusCode FillCollectionWithNewDigitEDM(csc_newmap& data_SampleMap, //csc_newmap& data_SampleMapOddPhase,
                                            std::map<IdentifierHash,deposits>& myDeposits,bool phaseToSet,
-                                           CscDigitContainer* cscDigits,CscSimDataCollection* cscSimData);
-  StatusCode FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposits>& myDeposits,CscDigitContainer* cscDigits,CscSimDataCollection* cscSimData);
+                                           Collections_t& collections,
+                                           CscSimDataCollection* cscSimData);
+  StatusCode FillCollectionWithOldDigitEDM(csc_map& data_map, std::map<IdentifierHash,deposits>& myDeposits,
+                                           Collections_t& collections,
+                                           CscSimDataCollection* cscSimData);
 
-  StatusCode CoreDigitization(CscDigitContainer* cscDigits,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine);
+  StatusCode CoreDigitization(Collections_t& collections,CscSimDataCollection* cscSimData, CLHEP::HepRandomEngine* rndmEngine);
 
   // Get next event and extract collection of hit collections:
   StatusCode getNextEvent(const EventContext& ctx);
-
-private:
 
   ToolHandle<ICscCalibTool> m_pcalib{this, "cscCalibTool", "CscCalibTool", "CSC calibration tool"};
 
