@@ -4,7 +4,6 @@
 atlas_subdir( CaloRec )
 
 # External dependencies:
-find_package( AIDA )
 find_package( CLHEP )
 find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( Eigen )
@@ -15,7 +14,7 @@ atlas_add_library( CaloRecLib
    CaloRec/*.h CaloRec/*.icc src/*.cxx
    PUBLIC_HEADERS CaloRec
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${AIDA_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent CaloGeoHelpers

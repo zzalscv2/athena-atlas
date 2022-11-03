@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOWERMONITOR_H
@@ -18,66 +18,66 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloEvent/CaloTowerContainer.h"
 #include "StoreGate/ReadHandleKeyArray.h"
-
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "TH1.h"
+#include "TH2.h"
 
 #include <string>
 #include <vector>
 #include <map>
 
-namespace AIDA {
-class IHistogram1D;
-class IHistogram2D;
-}
 
 class CaloTowerMonitor : public AthAlgorithm
 {
+public:
+  using AthAlgorithm::AthAlgorithm;
 
- public:
-  /// Algorithm constructor
-  CaloTowerMonitor(const std::string& name, ISvcLocator* pService );
-  
-  virtual ~CaloTowerMonitor();
-
-  virtual StatusCode initialize();
-  virtual StatusCode execute();
-  virtual StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
 
  protected:
 
-  SG::ReadHandleKeyArray<CaloTowerContainer> m_collectionNames;
+  SG::ReadHandleKeyArray<CaloTowerContainer> m_collectionNames
+  { this, "InputTowerCollections", {} };
 
   ////////////////
   // Histograms //
   ////////////////
 
   // number of towers
-  IHistogram1D* m_nTowers;
-  IHistogram1D* m_nTowersVsEta;
-  IHistogram1D* m_nTowersVsPhi;
+  TH1* m_nTowersVsEta = nullptr;
+  TH1* m_nTowersVsPhi = nullptr;
 
   // tower shape
-  IHistogram2D* m_cellsInEtaVsPhi;
-  IHistogram1D* m_nCellsInTower;
-  IHistogram2D* m_nCellsInTowerVsEta;
-  IHistogram2D* m_nCellsInTowerVsPhi;
+  TH2* m_cellsInEtaVsPhi = nullptr;
+  TH1* m_nCellsInTower = nullptr;
+  TH2* m_nCellsInTowerVsEta = nullptr;
+  TH2* m_nCellsInTowerVsPhi = nullptr;
 
   // tower energies
-  IHistogram1D* m_eTowers;
-  IHistogram2D* m_eTowersVsEta;
-  IHistogram2D* m_eTowersVsPhi;
-  IHistogram1D* m_eLogTowers;
+  TH1* m_eTowers = nullptr;
+  TH2* m_eTowersVsEta = nullptr;
+  TH2* m_eTowersVsPhi = nullptr;
+  TH1* m_eLogTowers = nullptr;
 
   // tower transversal energies
-  IHistogram1D* m_etTowers;
-  IHistogram2D* m_etTowersVsEta;
-  IHistogram2D* m_etTowersVsPhi;
-  IHistogram1D* m_etLogTowers;
+  TH1* m_etTowers = nullptr;
+  TH2* m_etTowersVsEta = nullptr;
+  TH2* m_etTowersVsPhi = nullptr;
+  TH1* m_etLogTowers = nullptr;
 
   // eta/phi matches
-  IHistogram2D* m_etaTowerVsCell;
-  IHistogram2D* m_phiTowerVsCell;
-  std::map<CaloSampling::CaloSample,IHistogram2D*> m_etaTowerVsCellCalos;
-  std::map<CaloSampling::CaloSample,IHistogram2D*> m_phiTowerVsCellCalos;
+  TH2* m_etaTowerVsCell = nullptr;
+  TH2* m_phiTowerVsCell = nullptr;
+  std::map<CaloSampling::CaloSample,TH2*> m_etaTowerVsCellCalos;
+  std::map<CaloSampling::CaloSample,TH2*> m_phiTowerVsCellCalos;
+
+  ServiceHandle<ITHistSvc> m_histSvc
+    { this, "THistSvc", "THistSvc" };
+
+  StringProperty m_streamName
+    { this, "StreamName", "ESD", "Histogram stream name" };
 };
 #endif
