@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test of transform HITS->RDO followed by RDO->RDO_TRIG,ESD,AOD
+# art-description: Test of transform HITS->RDO followed by RDO->RDO_TRIG,AOD
 # art-type: build
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -35,7 +35,8 @@ rdo2aod.type = 'Reco_tf'
 rdo2aod.input = ''
 rdo2aod.explicit_input = True
 rdo2aod.threads = 1
-rdo2aod.args = '--inputRDOFile=RDO.pool.root --outputRDO_TRIGFile=RDO_TRIG.pool.root --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
+rdo2aod.args = '--inputRDOFile=RDO.pool.root --outputRDO_TRIGFile=RDO_TRIG.pool.root --outputAODFile=AOD.pool.root'
+rdo2aod.args += ' --steering "doRDO_TRIG" "doTRIGtoALL"'
 rdo2aod.args += ' --preExec="setMenu=\'Dev_pp_run3_v1_TriggerValidation_prescale\'"'
 
 test = Test.Test()

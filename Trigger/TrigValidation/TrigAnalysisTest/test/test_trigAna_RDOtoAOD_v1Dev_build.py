@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test of transform RDO->RDO_TRIG->ESD->AOD with threads=1
+# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=1
 # art-type: build
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -21,7 +21,7 @@ rdo2aod = ExecStep.ExecStep()
 rdo2aod.type = 'Reco_tf'
 rdo2aod.input = 'ttbar'
 rdo2aod.threads = 1
-rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
+rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
 test = Test.Test()
