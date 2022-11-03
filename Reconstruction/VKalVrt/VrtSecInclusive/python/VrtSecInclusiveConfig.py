@@ -6,7 +6,6 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.Constants as Lvl
-from AthenaCommon.GlobalFlags import globalflags
 
 def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
 
@@ -53,7 +52,7 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     kwargs.setdefault("doMergeFinalVerticesDistance"           , True)
     kwargs.setdefault("doAssociateNonSelectedTracks"           , True)
     kwargs.setdefault("doFinalImproveChi2"                     , False)
-    kwargs.setdefault("DoTruth"                                , (globalflags.DataSource == 'geant4' and globalflags.InputFormat == "pool"))
+    kwargs.setdefault("DoTruth"                                , flags.Input.isMC)
     kwargs.setdefault("FillHist"                               , True)
     kwargs.setdefault("FillNtuple"                             , False)
     kwargs.setdefault("TruthParticleFilter"                    , "Higgs")
