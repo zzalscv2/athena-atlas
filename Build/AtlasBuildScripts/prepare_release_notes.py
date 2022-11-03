@@ -113,7 +113,7 @@ def sanitize_args(target_release, nightly_tag, keep_going=False):
     rel_match = re.search(
         r'release/(?P<ver>\d+)\.(?P<maj>\d+?)\.(?P<rev>\d+?)', target_release)
     nig_match = re.search(
-        r'nightly/(?P<branch>((\d+\.\d+)|master))/(?P<date>\d{4}-\d{2}-\d{2})T(?P<time>\d{4})', nightly_tag)
+        r'nightly/(?P<branch>((\d+\.\d+)|master|22\.0-mc20))/(?P<date>\d{4}-\d{2}-\d{2})T(?P<time>\d{4})', nightly_tag)
 
     if not rel_match:
         print("The target release is not formatted as xx.y.z (version.major.revision semantic)")
