@@ -2,6 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <RootCoreUtils/StringUtil.h>
+
 #include <ROOT/RDataFrame.hxx>
 #include <ROOT/RLogger.hxx>
 #include <TCanvas.h>
@@ -84,6 +86,7 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
 
   // Base name of branches to read
   std::string treeName = poVariablesMap["tree-name"].as<std::string>();
+  std::string treeNameOut = RCU::substitute(treeName, "/", "_");
   std::string referenceInput = poVariablesMap["reference-file"].as<std::string>();
   std::string testInput = poVariablesMap["test-file"].as<std::string>();
   std::string baseBranchName;
@@ -91,11 +94,11 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   if (poVariablesMap.count("branch-name") > 0)
   {
     baseBranchName = poVariablesMap["branch-name"].as<std::string>();
-    outputPDF = "comparison_" + treeName + "_" + baseBranchName + ".pdf";
+    outputPDF = "comparison_" + treeNameOut + "_" + baseBranchName + ".pdf";
   }
   else
   {
-    outputPDF = "comparison_" + treeName + ".pdf";
+    outputPDF = "comparison_" + treeNameOut + ".pdf";
   }
 
   bool scale = poVariablesMap.count("scale") > 0;
@@ -127,7 +130,7 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   // Event count and ratio
   auto eventsRefr{dataFrameRefr.Count()};
   auto eventsTest{dataFrameTest.Count()};
-  float eventRatio{static_cast<float>(eventsRefr.GetValue()) / static_cast<float>(eventsTest.GetValue())};
+  double eventRatio{static_cast<float>(eventsRefr.GetValue()) / static_cast<float>(eventsTest.GetValue())};
 
   // Get column names for each file and then the intersection
   auto colNamesRefr = dataFrameRefr.GetColumnNames();
@@ -169,30 +172,44 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
   size_t counter{};
   size_t failedCount{};
   std::chrono::seconds totalDuration{};
-  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMinValues;
-  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMaxValues;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMinValuesRefr;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMinValuesTest;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMaxValuesRefr;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMaxValuesTest;
   std::unordered_map<std::string, ROOT::RDF::RResultPtr<TH1D>> mapHistRefr;
   std::unordered_map<std::string, ROOT::RDF::RResultPtr<TH1D>> mapHistTest;
 
   std::cout << "Preparing ranges..." << std::endl;
   for (const std::string &colName : requiredColumns)
   {
-    mapMinValues.emplace(colName, dataFrameRefr.Min(colName));
-    mapMaxValues.emplace(colName, dataFrameRefr.Max(colName));
+    mapMinValuesRefr.emplace(colName, dataFrameRefr.Min(colName));
+    mapMinValuesTest.emplace(colName, dataFrameTest.Min(colName));
+    mapMaxValuesRefr.emplace(colName, dataFrameRefr.Max(colName));
+    mapMaxValuesTest.emplace(colName, dataFrameTest.Max(colName));
   }
 
   std::cout << "Preparing histograms..." << std::endl;
   auto start = std::chrono::high_resolution_clock::now();
-  for (const std::string &colName : requiredColumns)
+  for (auto it = requiredColumns.begin(); it != requiredColumns.end();)
   {
+    const std::string &colName = *it;
     const char* colNameCh = colName.c_str();
 
     // Initial histogram range
-    float min = static_cast<float>(mapMinValues[colName].GetValue());
-    float max = static_cast<float>(mapMaxValues[colName].GetValue()) * 1.02f;
-    if (max > 250e3 && min > 0.0f)
+    double min = std::min(mapMinValuesRefr[colName].GetValue(), mapMinValuesTest[colName].GetValue());
+    double max = std::max(mapMaxValuesRefr[colName].GetValue(), mapMaxValuesTest[colName].GetValue()) * 1.02;
+    if (std::isinf(min) || std::isinf(max))
     {
-      min = 0.0f;
+      std::cout << "  skipping " << colName << " ..." << std::endl;
+      it = requiredColumns.erase(it);
+      continue;
+    } else {
+      ++it;
+    }
+
+    if (max > 250e3 && min > 0.0)
+    {
+      min = 0.0;
     }
 
     // Initial histograms
@@ -219,11 +236,11 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
       auto &histTest = mapHistTest[colName];
 
       // Initial histogram range
-      float min = static_cast<float>(mapMinValues[colName].GetValue());
-      float max = static_cast<float>(mapMaxValues[colName].GetValue()) * 1.02f;
-      if (max > 250e3 && min > 0.0f)
+      double min = std::min(mapMinValuesRefr[colName].GetValue(), mapMinValuesTest[colName].GetValue());
+      double max = std::max(mapMaxValuesRefr[colName].GetValue(), mapMaxValuesTest[colName].GetValue()) * 1.02;
+      if (max > 250e3 && min > 0.0)
       {
-        min = 0.0f;
+        min = 0.0;
       }
 
       // Check range - make sure that bins other than the first contain at least one per mille events
@@ -238,12 +255,12 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
           std::cout << std::endl
                     << "   Range tuning... iteration number " << rangeItrCntr << std::endl;
         }
-        float entriesFirstBin = static_cast<float>(histRefr.GetPtr()->GetBinContent(1));
-        float entriesLastBin = static_cast<float>(histRefr.GetPtr()->GetBinContent(nBins));
-        float entriesOtherBins{};
+        double entriesFirstBin = histRefr.GetPtr()->GetBinContent(1);
+        double entriesLastBin = histRefr.GetPtr()->GetBinContent(nBins);
+        double entriesOtherBins{};
         for (size_t i{2}; i < nBinsU; ++i)
         {
-          entriesOtherBins += static_cast<float>(histRefr.GetPtr()->GetBinContent(i));
+          entriesOtherBins += histRefr.GetPtr()->GetBinContent(i);
         }
         bool firstBinOK{((entriesOtherBins + entriesLastBin) / entriesFirstBin > 0.001f)};
         bool lastBinOK{((entriesOtherBins + entriesFirstBin) / entriesLastBin > 0.001f)};
@@ -262,13 +279,13 @@ int main ATLAS_NOT_THREAD_SAFE(int argc, char *argv[])
           }
           if (!firstBinOK)
           {
-            max = (max - min) / static_cast<float>(nBins);
+            max = (max - min) / static_cast<double>(nBins);
             histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
             histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
           }
           if (!lastBinOK)
           {
-            min = max * (1.0f - (1.0f / static_cast<float>(nBins)));
+            min = max * (1.0f - (1.0f / static_cast<double>(nBins)));
             histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
             histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
           }
