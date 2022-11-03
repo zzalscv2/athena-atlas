@@ -161,6 +161,35 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg", **kwargs):
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
     return result
 
+def MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "MuonStandaloneTrackParticleCnvAlg",**kwargs):
+    from TrkConfig.TrkParticleCreatorConfig import MuonParticleCreatorToolCfg
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+
+    result=ComponentAccumulator()
+    result.merge(BeamSpotCondAlgCfg(flags))
+
+    muonparticlecreatortool = result.popToolsAndMerge(MuonParticleCreatorToolCfg(flags))
+    result.addPublicTool(muonparticlecreatortool) # Public in TrackCollectionCnvTool
+
+    kwargs.setdefault("TrackParticleCreator", muonparticlecreatortool)
+    kwargs.setdefault("RecTrackParticleContainerCnvTool", result.popToolsAndMerge(
+        MuonRecTrackParticleContainerCnvToolCfg(flags, TrackParticleCreator = muonparticlecreatortool)))
+    muontrackcollectioncnvtool = result.popToolsAndMerge(
+        MuonTrackCollectionCnvToolCfg(flags, TrackParticleCreator = muonparticlecreatortool))
+    kwargs.setdefault("TrackCollectionCnvTool", muontrackcollectioncnvtool)
+
+    kwargs.setdefault("TrackContainerName", "MuonSpectrometerTracks")
+    kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "MuonSpectrometerTrackParticles")
+    kwargs.setdefault("AODContainerName", "")
+    kwargs.setdefault("AODTruthContainerName", "")
+    kwargs.setdefault("xAODTruthLinkVector",  "")
+    kwargs.setdefault("ConvertTrackParticles", False)
+    kwargs.setdefault("ConvertTracks", True)
+    kwargs.setdefault("AddTruthLink", False)
+
+    result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
+    return result
+
 def MuonTrackParticleCnvCfg(flags, name = "MuonTrackParticleCnvAlg",**kwargs):
     result=ComponentAccumulator()
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
@@ -182,14 +211,4 @@ def MuonTrackParticleCnvCfg(flags, name = "MuonTrackParticleCnvAlg",**kwargs):
     kwargs.setdefault("AddTruthLink", False)
 
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
-    return result
-
-def MuonStandaloneTrackParticleCnvAlgCfg(flags, name = "MuonStandaloneTrackParticleCnvAlg", **kwargs):
-    result=ComponentAccumulator()
-
-    if "TrackParticleCreator" not in kwargs:
-        from TrkConfig.TrkParticleCreatorConfig import MuonParticleCreatorToolCfg
-        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(MuonParticleCreatorToolCfg(flags)))
-
-    result.merge(MuonTrackParticleCnvCfg(flags, name, **kwargs))
     return result

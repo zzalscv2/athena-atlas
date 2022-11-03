@@ -130,8 +130,6 @@ def fromRunArgs(runArgs):
 
     cfg = CommonSimulationCfg(ConfigFlags, log)
 
-    cfg.getService("MessageSvc").Format = "% F%18W%S%7W%R%T %0W%M"
-
     # Special Configuration postInclude
     specialConfigPostInclude(ConfigFlags, cfg)
 

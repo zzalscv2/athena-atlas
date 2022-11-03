@@ -52,21 +52,22 @@ namespace Muon {
             double dirDot(const Amg::Vector3D& v) const { return dir().dot(v); }
         
             void setDistance(double d){m_distance = d;}
-            double distance() const {return m_distance;}
+            double distance() const {return m_distance;}          
+            
         private:
             const Muon::MuonClusterOnTrack* m_cl{nullptr};
             std::shared_ptr<const Amg::Vector3D> m_dir {nullptr};
-            double m_distance{0.};
+            double m_distance{0.};           
         };
 
         NSWSeed() = default;
 
         //// Constructor used for the three micro mega stereo seeds
         NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
-                const AmgSymMatrix(2)& diamond);
+                const std::array<double, 2>& lengths);
 
         //// Constructor to build seeds from 2 eta/phi strips
-        NSWSeed(const MuonClusterSegmentFinderTool* parent, const SeedMeasurement& first, const SeedMeasurement& second);
+        NSWSeed(const MuonClusterSegmentFinderTool* parent,  const SeedMeasurement& first, const SeedMeasurement& second);
         /// Constructor to build a seed from an existing segment
         NSWSeed(const MuonClusterSegmentFinderTool* parent, const Muon::MuonSegment& seg);
         //// Constructor to build a seed to create 3D segments
@@ -200,13 +201,16 @@ namespace Muon {
 
         int wedgeNumber(const Muon::MuonClusterOnTrack* cluster) const;
         int layerNumber(const Muon::MuonClusterOnTrack* cluster) const;
-
+        /// Returns the channel of the measurement on the layer
+        int channel(const Muon::MuonClusterOnTrack* cluster) const;
+        
         const IMuonIdHelperSvc* idHelper() const;
         bool isPad(const Muon::MuonClusterOnTrack* clust) const;
         template <size_t N>
         std::string printSeed(const std::array<SeedMeasurement, N>& seed) const;
         std::string print(const SeedMeasurement& meas) const;
 
+        
     private:
         enum HitType { Eta = 1, Phi = 1 << 1, Wire = 1 << 2, Pad = 1 << 3 };
 
@@ -263,6 +267,18 @@ namespace Muon {
         std::vector<std::unique_ptr<Muon::MuonSegment>> resolveAmbiguities(const EventContext& ctx, const TrackCollection& segColl) const;
         std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const std::vector<const Trk::MeasurementBase*>& fit_meas,
                                         const Trk::TrackParameters& perigee) const;
+
+        
+        enum class ChannelConstraint{
+            InWindow,
+            TooNarrow,
+            TooWide
+
+        };
+        /// Checks whether the two measurements are compatible within the IP constraint
+        
+        ChannelConstraint compatiblyFromIP(const SeedMeasurement& meas1, const SeedMeasurement& meas2) const;
+
     };
 
 }  // namespace Muon

@@ -10,9 +10,9 @@ namespace NSWL1 {
 
   MMTriggerTool::MMTriggerTool( const std::string& type, const std::string& name, const IInterface* parent) :
     AthAlgTool(type,name,parent),
-    m_detManager(0),
-    m_MmIdHelper(0),
-    m_tree(0)
+    m_detManager(nullptr),
+    m_MmIdHelper(nullptr),
+    m_tree(nullptr)
   {
     declareInterface<NSWL1::IMMTriggerTool>(this);
   }
@@ -46,7 +46,7 @@ namespace NSWL1 {
         ITHistSvc* tHistSvc;
         ATH_CHECK( service("THistSvc", tHistSvc) );
 
-        m_tree = 0;
+        m_tree = nullptr;
         std::string ntuple_name = algo_name+"Tree";
         ATH_CHECK( tHistSvc->getTree(ntuple_name,m_tree) );
         ATH_MSG_DEBUG("Analysis ntuple succesfully retrieved");
@@ -196,7 +196,7 @@ namespace NSWL1 {
               }
             }
             std::vector<double> slopes = diamond->getHitSlopes();
-            for (const auto &s : slopes) if (m_doNtuple) m_trigger_RZslopes->push_back(s);
+            if (m_doNtuple) for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
             diamond->resetSlopes();
             slopes.clear();
             /*

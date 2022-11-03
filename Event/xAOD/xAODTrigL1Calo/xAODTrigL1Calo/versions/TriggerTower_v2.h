@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TriggerTower_v2.h 793304 2017-01-21 04:50:44Z ssnyder $
@@ -10,7 +10,6 @@
 
 // EDM include(s):
 #include "xAODBase/IParticle.h"
-#include "AthLinks/ElementLink.h"
 #include "AthContainers/AuxElement.h"
 
 // System include(s):
@@ -226,5 +225,9 @@ namespace xAOD {
         
   }; // class TriggerTower_v2
 } // namespace xAOD
+
+// Declare IParticle as a base class of TriggerTower_v2:
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE( xAOD::TriggerTower_v2, xAOD::IParticle );
 
 #endif // XAODTRIGL1CALO_VERSIONS_TRIGGERTOWER_V2_H

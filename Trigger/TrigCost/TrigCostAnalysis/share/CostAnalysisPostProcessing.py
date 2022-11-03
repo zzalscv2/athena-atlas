@@ -43,7 +43,10 @@ def main():
 
     if inputFile.IsOpen():
         warningMsg = exploreTree(inputFile, args.dumpAlgorithmSummary, args.underflowThreshold, args.overflowThreshold, args.maxRanges)
-        saveMetadata(inputFile, metadata, warningMsg, args.trpDetails)
+        if not warningMsg:
+            log.error("Postprocessing script failed!")
+        else:
+            saveMetadata(inputFile, metadata, warningMsg, args.trpDetails)
     else:
         log.error("File %s not found", args.file)
 

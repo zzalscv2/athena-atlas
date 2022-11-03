@@ -919,6 +919,13 @@ def MuonLayerSegmentFinderToolCfg(flags, name="MuonLayerSegmentFinderTool", **kw
     kwargs.setdefault("SegmentMaker",  result.popToolsAndMerge(DCMathSegmentMakerCfg(flags, name="DCMathSegmentMaker")))
     kwargs.setdefault("NSWMuonClusterSegmentFinderTool", 
                       result.popToolsAndMerge(MuonClusterSegmentFinderToolCfg(flags, name="MuonClusterSegmentFinderTool")))  
+    
+    ###
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run < LHCPeriod.Run3 or flags.Muon.MuonTrigger:
+        kwargs.setdefault("InSegmentContainer", "")
+    else:
+        kwargs.setdefault("MuonLayerSegmentMatchingTool", result.popToolsAndMerge(MuonLayerSegmentMatchingToolCfg(flags)))
     tool = CompFactory.Muon.MuonLayerSegmentFinderTool(name, **kwargs)
     result.setPrivateTools(tool)
     return result
