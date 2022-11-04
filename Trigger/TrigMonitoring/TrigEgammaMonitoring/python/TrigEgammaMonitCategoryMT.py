@@ -186,10 +186,10 @@ monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1EM22VHI',
                 ] + primary_single_ele
 
 monitoring_Jpsiee = [
-        'HLT_e10_lhvloose_L1EM7',
-        'HLT_e14_lhvloose_L1EM10VH',
         'HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-EM7',
         'HLT_e5_lhtight_e14_etcut_1invmAB5_L1JPSI-1M5-EM12',
         'HLT_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM7',
-        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM12'
+        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM12',
+        'HLT_e10_lhvloose_L1EM7',
+        'HLT_e14_lhvloose_L1EM10VH'
         ]
