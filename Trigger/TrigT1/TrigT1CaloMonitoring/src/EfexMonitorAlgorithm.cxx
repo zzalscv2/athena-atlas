@@ -37,6 +37,11 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     ATH_MSG_ERROR("No eFex EM container found in storegate  "<< m_eFexContainerKey); 
     return StatusCode::SUCCESS;
   }
+  // Fill histogram for the total number of ToBs (without any cuts applied)
+  auto nEmTOBs_total = Monitored::Scalar<int>("nEMTOBs_nocut",0.0);
+  nEmTOBs_total = eFexContainer->size();
+  fill(m_packageName, nEmTOBs_total);
+  // Fill histograms for the low/high cuts
   const xAOD::eFexEMRoIContainer* emDataContPtr = eFexContainer.cptr();
   ATH_CHECK(fillEMHistograms("LowPtCut", emDataContPtr, m_lowPtCut));
   ATH_CHECK(fillEMHistograms("HiPtCut", emDataContPtr, m_hiPtCut));
@@ -48,6 +53,11 @@ StatusCode EfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
     ATH_MSG_ERROR("No eFex Tau container found in storegate  "<< m_eFexTauContainerKey);
     return StatusCode::SUCCESS;
   }
+  // Fill histogram for the total number of ToBs (without any cuts applied)
+  auto nTauTOBs_total = Monitored::Scalar<int>("nTauTOBs_nocut",0.0); // Overall number of ToBs
+  nTauTOBs_total = eFexTauContainer->size();
+  fill(m_packageName, nTauTOBs_total);
+  // Fill histograms for the low/high cuts
   const xAOD::eFexTauRoIContainer* tauDataContPtr = eFexTauContainer.cptr();
   ATH_CHECK(fillTauHistograms("LowPtCut", tauDataContPtr, m_lowPtCut));
   ATH_CHECK(fillTauHistograms("HiPtCut", tauDataContPtr, m_hiPtCut));
@@ -61,7 +71,6 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, c
   std::string groupName = m_packageName+'_'+cut_name;
 
   // monitored variables for histograms
-  auto nEmTOBs_total = Monitored::Scalar<int>("nEMTOBs_nocut",0.0); // Overall number of ToBs
   auto nEmTOBs_passcut = Monitored::Scalar<int>("nEMTOBs",0.0); // Number of ToBs passing the cut
   auto TOBeT = Monitored::Scalar<float>("TOBTransverseEnergy",0.0);
   auto TOBeta = Monitored::Scalar<float>("TOBEta",0.0);
@@ -77,7 +86,6 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, c
   auto TOBRhad_threshold = Monitored::Scalar<float>("TOBRhad_threshold",0.0);
   auto TOBWstot_threshold = Monitored::Scalar<float>("TOBWstot_threshold",0.0);
 
-  nEmTOBs_total = emcont->size();
   for(const xAOD::eFexEMRoI* efexEmRoI : *emcont){
     if (efexEmRoI->et() > cut_et){
       nEmTOBs_passcut += 1;
@@ -112,7 +120,6 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, c
       fill(groupName, TOBWstot_threshold);
     }
   }
-  fill(groupName, nEmTOBs_total);
   fill(groupName, nEmTOBs_passcut);
 
   return StatusCode::SUCCESS;
@@ -120,11 +127,10 @@ StatusCode EfexMonitorAlgorithm::fillEMHistograms(const std::string& cut_name, c
 
 StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& cut_name, const xAOD::eFexTauRoIContainer *taucont, const float &cut_et) const {
 
-  ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillEMHistograms");
+  ATH_MSG_DEBUG("EfexMonitorAlgorithm::fillTauHistograms");
   std::string groupName = m_packageName+'_'+cut_name;
 
   // monitored variables for histograms
-  auto nTauTOBs_total = Monitored::Scalar<int>("nTauTOBs_nocut",0.0); // Overall number of ToBs
   auto nTauTOBs_passcut = Monitored::Scalar<int>("nTauTOBs",0.0); // Number of ToBs passing the cut
   auto tauTOBeT = Monitored::Scalar<float>("tauTOBTransverseEnergy",0.0);
   auto tauTOBeta = Monitored::Scalar<float>("tauTOBEta",0.0);
@@ -139,7 +145,6 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& cut_name, 
   auto tauTOBRhad_threshold = Monitored::Scalar<float>("tauTOBRhad_threshold",0.0);
   auto tauTOBthree_threshold = Monitored::Scalar<float>("tauTOBthree_threshold",0.0);
 
-  nTauTOBs_total = taucont->size();
   for(const xAOD::eFexTauRoI* efexTauRoI : *taucont){
     if (efexTauRoI->et() > cut_et){
       nTauTOBs_passcut += 1;
@@ -172,7 +177,6 @@ StatusCode EfexMonitorAlgorithm::fillTauHistograms(const std::string& cut_name, 
       fill(groupName, tauTOBthree_threshold);
     }
   }
-  fill(groupName, nTauTOBs_total);
   fill(groupName, nTauTOBs_passcut);
 
   return StatusCode::SUCCESS;
