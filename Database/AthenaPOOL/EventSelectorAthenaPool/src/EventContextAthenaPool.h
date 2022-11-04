@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTCONTEXTATHENAPOOL_H
@@ -10,6 +10,7 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/IEvtSelector.h"
 
 class EventSelectorAthenaPool;
@@ -53,6 +54,7 @@ inline const EventContextAthenaPool& EventContextAthenaPool::operator=(const Eve
 }
 
 inline void* EventContextAthenaPool::identifier() const {
-   return((void*)(m_evtSelector));
+   void* id ATLAS_THREAD_SAFE = const_cast<IEvtSelector*>(m_evtSelector);
+   return id;
 }
 #endif
