@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOL_SIMPLEUTILITYBASE
@@ -14,6 +14,7 @@
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
 
+#include "CxxUtils/checker_macros.h"
 
 namespace pool {
    
@@ -28,7 +29,7 @@ namespace pool {
      virtual int	run();
 
      virtual bool 	parseArguments(); 
-     virtual void 	startSession();
+     virtual void 	startSession ATLAS_NOT_THREAD_SAFE ();
      virtual void 	readFileGUIDs();
      virtual std::string readFileGUID( const std::string& pfn );
 
@@ -53,7 +54,7 @@ namespace pool {
    /* this is a class and not a namespace so it can be autoloaded by ROOT */
    class Utils {
     public:
-     static std::string        readFileGUID( const std::string& pfn );
+     static std::string        readFileGUID ATLAS_NOT_THREAD_SAFE ( const std::string& pfn );
    };
 
    

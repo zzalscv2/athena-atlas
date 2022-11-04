@@ -15,7 +15,6 @@
 #include "RootDatabase.h"
 
 #include "TSystem.h"
-#include "TError.h"
 #include "TFile.h"
 #include "TROOT.h"
 #include "TTree.h"
@@ -65,15 +64,7 @@ DbStatus RootDomain::setOption(const DbOption& opt)  {
       }
       break;
     case 'E':
-      if ( !strcasecmp(n, "ERROR_LEVEL") )  {
-        int lvl = gErrorIgnoreLevel;
-        DbStatus sc = opt._getValue(lvl);
-        if ( sc.isSuccess() )  {
-          gErrorIgnoreLevel = lvl;
-        }
-        return sc;
-      }
-      else if ( !strcasecmp(n, "ENABLE_THREADSAFETY") )  {
+      if ( !strcasecmp(n, "ENABLE_THREADSAFETY") )  {
         bool multithreaded = false;
         DbStatus sc = opt._getValue(multithreaded);
         if ( sc.isSuccess() && multithreaded )  {
@@ -161,9 +152,6 @@ DbStatus RootDomain::getOption(DbOption& opt) const   {
     case 'E':
       if ( !strcasecmp(n, "ERRNO") )  {
         return opt._setValue(int(gSystem->GetErrno()));
-      }
-      else if ( !strcasecmp(n, "ERROR_LEVEL") )  {
-        return opt._setValue(int(gErrorIgnoreLevel));
       }
       break;
     case 'N':

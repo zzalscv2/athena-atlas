@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
 
+#include "CxxUtils/checker_macros.h"
 #include "PersistencySvc/SimpleUtilityBase.h"
 #include "FileCatalog/URIParser.h"
 #include "FileCatalog/IFileCatalog.h"
@@ -12,7 +13,7 @@
 
 using namespace pool;
 
-class InsertFileToCatalogApplication : public SimpleUtilityBase {
+class ATLAS_NOT_THREAD_SAFE InsertFileToCatalogApplication : public SimpleUtilityBase {
 public:
   InsertFileToCatalogApplication( int argc, char* argv[] );
 
@@ -92,7 +93,7 @@ InsertFileToCatalogApplication::printSyntax()
 
 
 
-int main( int argc, char* argv[] )
+int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
 {
    SystemTools::initGaudi();
    InsertFileToCatalogApplication	app( argc, argv );
