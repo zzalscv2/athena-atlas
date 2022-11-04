@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -99,7 +99,7 @@ CalibrationDataContainer::~CalibrationDataContainer()
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataContainer::getSystUncertainty(const CalibrationDataVariables& x,
-					     UncertaintyResult& result, TObject* obj) const
+					     UncertaintyResult& result, TObject* obj)
 {
   // short-hand for the total systematic uncertainty retrieval.
   // For "normal" usage (retrieval of central values and total uncertainties), the total systematic
@@ -136,7 +136,7 @@ CalibrationDataContainer::listUncertainties() const
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataContainer::getUncertainties(const CalibrationDataVariables& x,
-					   std::map<std::string, UncertaintyResult>& all) const
+					   std::map<std::string, UncertaintyResult>& all)
 {
   // Retrieve all uncertainties for this calibration.
 
@@ -305,7 +305,7 @@ CalibrationDataContainer::typeFromString(const std::string& key) const
 
 //________________________________________________________________________________
 CalibrationStatus
-CalibrationDataContainer::computeVariables(const CalibrationDataVariables& x, bool extrapolate) const
+CalibrationDataContainer::computeVariables(const CalibrationDataVariables& x, bool extrapolate)
 {
   // Determine which variables are to be used, and insert them in a separate array (which is only used internally).
   // The return value is used to indicate whether any input co-ordinate was out of bounds; where a distinction
@@ -389,7 +389,7 @@ CalibrationDataContainer::getUpperBound(unsigned int vartype, bool extrapolate) 
 
 //________________________________________________________________________________
 std::vector<std::pair<double, double> >
-CalibrationDataContainer::getBounds() const
+CalibrationDataContainer::getBounds()
 {
   // List the validity bounds relevant to this container.
 
@@ -406,7 +406,7 @@ CalibrationDataContainer::getBounds() const
 
 //________________________________________________________________________________
 std::vector<unsigned int>
-CalibrationDataContainer::getVariableTypes() const
+CalibrationDataContainer::getVariableTypes()
 {
   // List the variable types used for this calibration object.
   // The meaning of the types is encapsulated by the CalibrationParametrization enum.
@@ -488,7 +488,7 @@ CalibrationDataHistogramContainer::~CalibrationDataHistogramContainer()
 
 //________________________________________________________________________________
 void
-CalibrationDataHistogramContainer::computeVariableTypes() const
+CalibrationDataHistogramContainer::computeVariableTypes()
 {
   // Compute the variable types for this container object, using the histogram axis labels.
   // Valid axis labels can be found in the CalibrationDataContainer::typeFromString() method.
@@ -535,7 +535,7 @@ CalibrationDataHistogramContainer::computeVariableTypes() const
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataHistogramContainer::getResult(const CalibrationDataVariables& x,
-					     double& result, TObject* obj, bool extrapolate) const
+					     double& result, TObject* obj, bool extrapolate)
 {
   // Retrieve the central value for the given input variables. There are cases where
   // it may be useful to provide an alternative histogram rather than the original
@@ -582,7 +582,7 @@ CalibrationDataHistogramContainer::getResult(const CalibrationDataVariables& x,
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataHistogramContainer::getStatUncertainty(const CalibrationDataVariables& x,
-						      double& result) const
+						      double& result)
 {
   // Retrieve the statistical uncertainty for the given input variables.
   //
@@ -624,7 +624,7 @@ CalibrationDataHistogramContainer::getStatUncertainty(const CalibrationDataVaria
 CalibrationStatus
 CalibrationDataHistogramContainer::getUncertainty(const std::string& unc,
 						  const CalibrationDataVariables& x,
-						  UncertaintyResult& result, TObject* obj) const
+						  UncertaintyResult& result, TObject* obj)
 {
   // Retrieve the uncertainty for the given input variables.
   //
@@ -936,7 +936,7 @@ CalibrationDataHistogramContainer::getInterpolatedUncertainty(TH1* hist) const
 
 //________________________________________________________________________________
 int
-CalibrationDataHistogramContainer::getTagWeightAxis() const
+CalibrationDataHistogramContainer::getTagWeightAxis()
 {
   // Test whether this calibration object is one for "continuous" calibration
   // (this has some subtle consequences for the treatment of bin-to-bin correlations).
@@ -953,7 +953,7 @@ CalibrationDataHistogramContainer::getTagWeightAxis() const
 
 //________________________________________________________________________________
 std::vector<double>
-CalibrationDataHistogramContainer::getBinBoundaries(unsigned int vartype) const
+CalibrationDataHistogramContainer::getBinBoundaries(unsigned int vartype)
 {
   // Retrieve the bin boundaries for the specified variable type (which should be a CalibrationParametrization enum).
   // An empty vector will be returned if the specified variable is not actually used.
@@ -1031,7 +1031,7 @@ CalibrationDataMappedHistogramContainer::~CalibrationDataMappedHistogramContaine
 
 //________________________________________________________________________________
 void
-CalibrationDataMappedHistogramContainer::computeVariableTypes() const
+CalibrationDataMappedHistogramContainer::computeVariableTypes()
 {
   // Compute the variable types for this container object.
   // The computation differs from that used for the parent CalibrationDataHistogramContainer
@@ -1151,7 +1151,7 @@ CalibrationDataMappedHistogramContainer::checkBounds()
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataMappedHistogramContainer::getResult(const CalibrationDataVariables& x,
-						   double& result, TObject* obj, bool /* extrapolate */) const
+						   double& result, TObject* obj, bool /* extrapolate */)
 {
   // Retrieve the central value for the given input variables. There are cases where
   // it may be useful to provide an alternative histogram rather than the original
@@ -1185,7 +1185,7 @@ CalibrationDataMappedHistogramContainer::getResult(const CalibrationDataVariable
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataMappedHistogramContainer::getStatUncertainty(const CalibrationDataVariables& x,
-							    double& result) const
+							    double& result)
 {
   // Retrieve the statistical uncertainty for the given input variables.
   //
@@ -1211,7 +1211,7 @@ CalibrationDataMappedHistogramContainer::getStatUncertainty(const CalibrationDat
 CalibrationStatus
 CalibrationDataMappedHistogramContainer::getUncertainty(const std::string& unc,
 							const CalibrationDataVariables& x,
-							UncertaintyResult& result, TObject* obj) const
+							UncertaintyResult& result, TObject* obj)
 {
   // Retrieve the uncertainty for the given input variables.
   //
@@ -1249,7 +1249,7 @@ CalibrationDataMappedHistogramContainer::getUncertainty(const std::string& unc,
 
 //________________________________________________________________________________
 int
-CalibrationDataMappedHistogramContainer::getTagWeightAxis() const
+CalibrationDataMappedHistogramContainer::getTagWeightAxis()
 {
   // Test whether this calibration object is one for "continuous" calibration
   // (this has some subtle consequences for the treatment of bin-to-bin correlations).
@@ -1305,7 +1305,7 @@ CalibrationDataMappedHistogramContainer::getNMappedBins() const
 
 //________________________________________________________________________________
 Int_t
-CalibrationDataMappedHistogramContainer::findMappedBin(double* x) const
+CalibrationDataMappedHistogramContainer::findMappedBin(const double* x)
 {
   // Find the mapped bin corresponding to the variables used for the mapping
 
@@ -1326,7 +1326,7 @@ CalibrationDataMappedHistogramContainer::findMappedBin(double* x) const
 
 //________________________________________________________________________________
 Int_t
-CalibrationDataMappedHistogramContainer::findBin() const
+CalibrationDataMappedHistogramContainer::findBin()
 {
   // Find the bin corresponding to the computed variables (the computation is assumed to have just
   // taken place and resulted in the m_vars array having been filled appropriately)
@@ -1354,7 +1354,7 @@ CalibrationDataMappedHistogramContainer::findBin() const
 
 //________________________________________________________________________________
 std::vector<double>
-CalibrationDataMappedHistogramContainer::getBinBoundaries(unsigned int vartype) const
+CalibrationDataMappedHistogramContainer::getBinBoundaries(unsigned int vartype)
 {
   // Retrieve the bin boundaries for the specified variable type (which should be a CalibrationParametrization enum).
   // An empty vector will be returned if the specified variable is not actually used.
@@ -1449,7 +1449,7 @@ CalibrationDataMappedHistogramContainer::Bin::Bin():
 }
 
 //________________________________________________________________________________
-CalibrationDataMappedHistogramContainer::Bin::Bin(unsigned int dimension, double* low, double* up):
+CalibrationDataMappedHistogramContainer::Bin::Bin(unsigned int dimension, const double* low, const double* up):
   m_dimension(dimension)
 {
   // Normal constructor, containing a full specification of the bin boundaries
@@ -1501,7 +1501,7 @@ CalibrationDataMappedHistogramContainer::Bin::~Bin()
 
 //________________________________________________________________________________
 bool
-CalibrationDataMappedHistogramContainer::Bin::contains(double* x) const
+CalibrationDataMappedHistogramContainer::Bin::contains(const double* x) const
 {
   // Determine whether the given set of variables is within the bin boundaries.
 
@@ -1568,7 +1568,7 @@ CalibrationDataFunctionContainer::~CalibrationDataFunctionContainer()
 
 //________________________________________________________________________________
 void
-CalibrationDataFunctionContainer::computeVariableTypes() const
+CalibrationDataFunctionContainer::computeVariableTypes()
 {
   // Determine which variable types are to be used.
   // This needs to be done only once per calibration object, as the results will be
@@ -1602,7 +1602,7 @@ CalibrationDataFunctionContainer::computeVariableTypes() const
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataFunctionContainer::getResult(const CalibrationDataVariables& x,
-					    double& result, TObject* obj, bool /* extrapolate */) const
+					    double& result, TObject* obj, bool /* extrapolate */)
 {
   // Retrieve the central value for the given input variables. There are cases where
   // it may be useful to provide an alternative parametrisation rather than the original
@@ -1631,7 +1631,7 @@ CalibrationDataFunctionContainer::getResult(const CalibrationDataVariables& x,
 CalibrationStatus
 CalibrationDataFunctionContainer::getUncertainty(const std::string& unc,
 						 const CalibrationDataVariables& x,
-						 UncertaintyResult& result, TObject* obj) const
+						 UncertaintyResult& result, TObject* obj)
 {
   // Retrieve the uncertainty for the given input variables.
   // Note that the uncertainties returned will be symmetrised.
@@ -1672,7 +1672,7 @@ CalibrationDataFunctionContainer::getUncertainty(const std::string& unc,
 //________________________________________________________________________________
 CalibrationStatus
 CalibrationDataFunctionContainer::getStatUncertainty(const CalibrationDataVariables& x,
-						     double& result) const
+						     double& result)
 {
   // Retrieve the statistical uncertainty for the given input variables.
   // The model that is assumed here is that statistical uncertainties follow from

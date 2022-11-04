@@ -301,11 +301,11 @@ namespace ST {
 
     virtual double FJVT_SFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) = 0;
 
-    virtual float BtagSF(const xAOD::JetContainer* jets) const = 0;
+    virtual float BtagSF(const xAOD::JetContainer* jets) = 0;
 
     virtual float BtagSFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) = 0;
 
-    virtual float BtagSF_trkJet(const xAOD::JetContainer* trkjets) const = 0;
+    virtual float BtagSF_trkJet(const xAOD::JetContainer* trkjets) = 0;
 
     virtual float BtagSFsys_trkJet(const xAOD::JetContainer* trkjets, const CP::SystematicSet& systConfig) = 0;
 

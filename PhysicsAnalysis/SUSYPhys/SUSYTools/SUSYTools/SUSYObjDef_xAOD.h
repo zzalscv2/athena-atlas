@@ -221,11 +221,11 @@ namespace ST {
 
     int IsTrackBJetContinuous(const xAOD::Jet& input) const override final;
 
-    float BtagSF(const xAOD::JetContainer* jets) const override final;
+    float BtagSF(const xAOD::JetContainer* jets) override final;
 
     float BtagSFsys(const xAOD::JetContainer* jets, const CP::SystematicSet& systConfig) override final;
 
-    float BtagSF_trkJet(const xAOD::JetContainer* trkjets) const override final;
+    float BtagSF_trkJet(const xAOD::JetContainer* trkjets) override final;
 
     float BtagSFsys_trkJet(const xAOD::JetContainer* trkjets, const CP::SystematicSet& systConfig) override final;
 
