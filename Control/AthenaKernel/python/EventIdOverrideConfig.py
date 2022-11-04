@@ -130,7 +130,7 @@ def getMinMaxRunNumbers(ConfigFlags):
 def EvtIdModifierSvcCfg(ConfigFlags, name="EvtIdModifierSvc", **kwargs):
     acc = ComponentAccumulator()
     isMT = ConfigFlags.Concurrency.NumThreads > 0
-    pileUp = ConfigFlags.Digitization.PileUp and ConfigFlags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and not ConfigFlags.Overlay.FastChain
+    pileUp = ConfigFlags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.FastChain] and ConfigFlags.Digitization.PileUp and not ConfigFlags.Overlay.FastChain
     if pileUp and not isMT:
         kwargs.setdefault("EvtStoreName", "OriginalEvent_SG")
     else:
