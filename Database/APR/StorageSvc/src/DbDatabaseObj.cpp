@@ -601,12 +601,13 @@ DbStatus DbDatabaseObj::retire()  {
       DbContainerObj* curr = (*j).second;
       curr->retire();
     }
+    DbStatus ret = Success;
     if ( m_info )    {
-      m_info->close(mode());
+      ret = m_info->close(mode());
     }
     cleanup();
     m_fileAge = 0;
-    return Success;
+    return ret;
   }
   return Error;
 }
