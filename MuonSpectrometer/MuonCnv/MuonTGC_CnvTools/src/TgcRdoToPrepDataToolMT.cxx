@@ -10,7 +10,6 @@
 #include "MuonDigitContainer/TgcDigit.h"
 #include "MuonTrigCoinData/TgcCoinData.h"
 #include "TrkSurfaces/Surface.h"
-#include "MuonCnvToolInterfaces/IDC_Helper.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include <FourMomUtils/xAODP4Helpers.h>
