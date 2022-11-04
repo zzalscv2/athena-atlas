@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -69,8 +69,8 @@ namespace ShowerLib {
     TestShowerLib() {}
 
     struct genInfo {
-		HepMC::FourVector * vertex;
-		HepMC::FourVector * momentum;
+                std::unique_ptr<HepMC::FourVector> vertex;
+                std::unique_ptr<HepMC::FourVector> momentum;
 	};
 
 	typedef std::pair<genInfo,Shower> storedShower;

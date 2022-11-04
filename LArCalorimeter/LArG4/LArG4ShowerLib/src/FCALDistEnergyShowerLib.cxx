@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -413,7 +413,7 @@ namespace ShowerLib {
 	  int spread = 2; //will calculate average Z for 5 showers max ( -2 .. 0 .. +2 )
 	  double upperEnergy = (*distit).first * 1.01; //we allow 1% off
 	  for (int i = 0; i < spread; i++) {
-		  distiter++;
+		  ++distiter;
 		  if (distiter == (*libit).second.end()) {
 			  break;
 		  }
