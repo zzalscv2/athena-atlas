@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DBREPLICASVC_DBREPLICASVC_H
@@ -8,12 +8,12 @@
 // CORAL IReplicaSortingAlgorithm
 // Richard Hawkings, started 24/4/07
 
-#include<string>
+#include <string>
 #include "AthenaBaseComps/AthService.h"
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 #include "RelationalAccess/IDatabaseServiceDescription.h"
 
-class ATLAS_CHECK_THREAD_SAFETY DBReplicaSvc : public virtual IDBReplicaSvc, public virtual AthService
+class DBReplicaSvc : public virtual IDBReplicaSvc, public virtual AthService
 {
   template <class TYPE> class SvcFactory;
  public:

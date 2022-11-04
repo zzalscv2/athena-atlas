@@ -44,7 +44,6 @@
 #include "DBReplicaSvc/IDBReplicaSvc.h"
 
 #include <boost/algorithm/string.hpp> // for starts_with()
-#include <boost/filesystem.hpp>
 
 #include <cstdlib> 	// for getenv()
 #include <cstring> 	// for strcmp()
@@ -446,8 +445,7 @@ void PoolSvc::renamePfn(const std::string& pf, const std::string& newpf) {
    m_catalog->renamePFN(pf, newpf);
 }
 //__________________________________________________________________________
-pool::ICollection* PoolSvc::createCollection ATLAS_NOT_THREAD_SAFE
-               (const std::string& collectionType,
+pool::ICollection* PoolSvc::createCollection(const std::string& collectionType,
 		const std::string& connection,
 		const std::string& collectionName,
 		unsigned int contextId) const {
@@ -500,25 +498,28 @@ pool::ICollection* PoolSvc::createCollection ATLAS_NOT_THREAD_SAFE
          if (contH == nullptr) {
             ATH_MSG_INFO("Failed to find container " << collection << " to create POOL collection.");
             if (insertFile && m_attemptCatalogPatch.value()) {
-               dbH->setTechnology(pool::ROOT_StorageType.type());
-               std::string fid = dbH->fid();
-               m_catalog->registerPFN(connection.substr(4), "ROOT_All", fid);
-            }
+               patchCatalog(connection.substr(4), *dbH);
+             }
             return(nullptr); // no events
          }
       } catch(std::exception& e) {
          ATH_MSG_INFO("Failed to open container to check POOL collection - trying.");
       }
    }
-   pool::CollectionFactory* collFac = pool::CollectionFactory::get();
+
+   // access to these variables is locked below:
+   pool::CollectionFactory* collFac ATLAS_THREAD_SAFE = pool::CollectionFactory::get();
+   pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
+
    pool::CollectionDescription collDes(collection, collectionType, collectionType == "ImplicitCollection" ? connection : "");
-   pool::ICollection* collPtr = nullptr;
    if (collectionType == "RootCollection" &&
 	   m_persistencySvcVec[contextId]->session().defaultConnectionPolicy().writeModeForNonExisting() != pool::DatabaseConnectionPolicy::RAISE_ERROR) {
       ATH_MSG_INFO("Writing ExplicitROOT Collection - do not pass session pointer");
+      std::scoped_lock lock(m_pool_mut);
       collPtr = collFac->create(collDes,  pool::ICollection::READ);
    } else {
       try {
+         std::scoped_lock lock(m_pool_mut);
          collPtr = collFac->create(collDes, pool::ICollection::READ, &m_persistencySvcVec[contextId]->session());
       } catch (std::exception &e) {
          if (insertFile) {
@@ -540,9 +541,7 @@ pool::ICollection* PoolSvc::createCollection ATLAS_NOT_THREAD_SAFE
          ATH_MSG_INFO("Cannot retrieve the FID of an existing POOL database: '"
                       << connection << "' - FileCatalog will NOT be updated.");
       } else {
-         dbH->setTechnology(pool::ROOT_StorageType.type());
-         std::string fid = dbH->fid();
-         m_catalog->registerPFN(connection.substr(4), "ROOT_All", fid);
+        patchCatalog(connection.substr(4), *dbH);
       }
    }
    // For multithreaded processing (with multiple events in flight),
@@ -554,6 +553,14 @@ pool::ICollection* PoolSvc::createCollection ATLAS_NOT_THREAD_SAFE
    }
 
    return(collPtr);
+}
+//__________________________________________________________________________
+void PoolSvc::patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const {
+   std::scoped_lock lock(m_pool_mut);
+   dbH.setTechnology(pool::ROOT_StorageType.type());
+   std::string fid = dbH.fid();
+   pool::IFileCatalog* catalog_locked ATLAS_THREAD_SAFE = m_catalog;
+   catalog_locked->registerPFN(pfn, "ROOT_All", fid);
 }
 //__________________________________________________________________________
 Token* PoolSvc::getToken(const std::string& connection,
@@ -657,8 +664,12 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
          ATH_MSG_ERROR("disconnect failed to commit " << persSvc);
          return(StatusCode::FAILURE);
       }
-      persSvc->session().disconnectAll();
-      ATH_MSG_DEBUG("Disconnected PersistencySvc session");
+      if (persSvc->session().disconnectAll()) {
+         ATH_MSG_DEBUG("Disconnected PersistencySvc session");
+      } else {
+         ATH_MSG_ERROR("disconnect failed to diconnect PersistencySvc");
+         return(StatusCode::FAILURE);
+      }
    }
    return(StatusCode::SUCCESS);
 }

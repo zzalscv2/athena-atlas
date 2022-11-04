@@ -84,9 +84,10 @@ DbStatus DbDatabase::open(DbDomain&       domH,
 
 /// Close Database
 DbStatus DbDatabase::close() {
-  if ( isValid() ) ptr()->close();
+  DbStatus ret = Success;
+  if ( isValid() ) ret = ptr()->close();
   switchPtr(0);  
-  return Success;
+  return ret;
 }
 
 /// Access the size of the database: May be undefined for some technologies

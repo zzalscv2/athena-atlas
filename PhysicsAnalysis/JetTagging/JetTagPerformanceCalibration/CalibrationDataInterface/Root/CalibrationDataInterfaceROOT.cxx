@@ -678,7 +678,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveCalibrationIndex (const std::str
 								  const std::string& OP,
 								  const std::string& author,
 								  bool isSF, unsigned int& index,
-								  unsigned int mapIndex) const
+								  unsigned int mapIndex)
 {
   // Retrieve the integer index corresponding to a given combination of 
   // flavour label / tagger / working point / jet collection name, and separately
@@ -710,7 +710,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveCalibrationIndex (const std::str
     string flavour = (label == "N/A") ? "Light" : label;
     string dirname = m_taggerName + "/" + getAlias(author) + "/" + OP + "/" + flavour;
     string cntname = getContainername(flavour, isSF, mapIndex);
-    const_cast<Analysis::CalibrationDataInterfaceROOT*>(this)->retrieveContainer(dirname, cntname, isSF, m_verbose);
+    retrieveContainer(dirname, cntname, isSF, m_verbose);
     it = m_objectIndices.find(name);
     if (it == m_objectIndices.end()) return false;
   }
@@ -724,7 +724,7 @@ Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
 							const string& label, const string& OP,
 							Uncertainty unc, unsigned int numVariation,
-							unsigned int mapIndex) const
+							unsigned int mapIndex)
 {
   // Scale factor retrieval identifying the requested calibration object by name.
   // The return value is either a (value, uncertainty) or an (up, down) variation pair, as documented
@@ -759,7 +759,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
 							unsigned int indexSF, unsigned int indexEff,
-							Uncertainty unc, unsigned int numVariation) const
+							Uncertainty unc, unsigned int numVariation)
 {
   // Scale factor retrieval identifying the requested calibration object by index.
   // The return value is either a (value, uncertainty) or an (up, down) variation pair, as documented
@@ -782,7 +782,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
 							unsigned int indexSF, unsigned int indexEff,
 							Uncertainty unc, unsigned int numVariation,
-							Analysis::CalibResult& result) const
+							Analysis::CalibResult& result)
 {
   // Scale factor retrieval identifying the requested calibration object by index.
   //
@@ -813,7 +813,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
      cerr << " Please correct your configuration first. Nominal uncertainties used. " << endl;
   }
   if (unc == SFEigen || unc == SFNamed) {
-    const CalibrationDataEigenVariations* eigenVariation = nullptr;
+    CalibrationDataEigenVariations* eigenVariation = nullptr;
     try {
       eigenVariation=m_eigenVariationsMap.at(container);
     }
@@ -851,9 +851,9 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
       assert (statUp != Analysis::kExtrapolatedRange); // no need to test also statDown
     else if (m_otherStrategy == Flag) {
       if (statUp == Analysis::kRange)
-	const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF);
+        increaseCounter(indexSF);
       else if (statUp == Analysis::kExtrapolatedRange)
-	const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, Extrapolated);
+        increaseCounter(indexSF, Extrapolated);
     }
 
     result.first  = MCMCSF*valueUp;
@@ -879,9 +879,9 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
     assert (status != Analysis::kExtrapolatedRange);
   else if (m_otherStrategy == Flag) {
     if (status == Analysis::kRange)
-      const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF);
+      increaseCounter(indexSF);
     else if (status == Analysis::kExtrapolatedRange)
-      const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, Extrapolated);
+      increaseCounter(indexSF, Extrapolated);
   }
 
   // retrieve the statistical uncertainty if desired
@@ -927,7 +927,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVariables& variables,
 							 const string& label, const string& OP,
-							 Uncertainty unc, unsigned int mapIndex) const
+							 Uncertainty unc, unsigned int mapIndex)
 {
   // MC efficiency retrieval identifying the requested calibration object by name.
   // The return value is a (value, uncertainty) pair, as documented above, and will
@@ -955,7 +955,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
 //________________________________________________________________________________
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVariables& variables,
-							 unsigned int index, Uncertainty unc) const
+							 unsigned int index, Uncertainty unc)
 {
   // MC efficiency retrieval identifying the requested calibration object by index.
   // The return value is a (value, uncertainty) pair, as documented above, and will
@@ -974,7 +974,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
 Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVariables& variables,
 							 unsigned int index, Uncertainty unc,
-							 Analysis::CalibResult& result) const
+							 Analysis::CalibResult& result)
 {
   // MC efficiency retrieval identifying the requested calibration object by index.
   //
@@ -998,7 +998,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
     assert (status != Analysis::kRange); // no need to test also statDown
   else if (m_otherStrategy == Flag)
     if (status == Analysis::kRange)
-      const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(index);
+      increaseCounter(index);
 
   // retrieve the statistical uncertainty if desired
   double stat(0);
@@ -1033,7 +1033,7 @@ Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVariables& variables,
 						       const string& label,
 						       const string& OP, Uncertainty unc,
-                                                       unsigned int numVariation, unsigned int mapIndex) const
+                                                       unsigned int numVariation, unsigned int mapIndex)
 {
   // Data efficiency retrieval identifying the requested calibration objects by name.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor.
@@ -1068,7 +1068,7 @@ Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVari
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVariables& variables,
 						       unsigned int indexSF, unsigned int indexEff,
-						       Uncertainty unc, unsigned int numVariation) const
+						       Uncertainty unc, unsigned int numVariation)
 {
   // Data efficiency retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor.
@@ -1092,7 +1092,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVariables& variables,
 						       unsigned int indexSF, unsigned int indexEff,
 						       Uncertainty unc, unsigned int numVariation,
-						       Analysis::CalibResult& result) const
+						       Analysis::CalibResult& result)
 {
   // Data efficiency retrieval identifying the requested calibration objects by index.
   //
@@ -1155,7 +1155,7 @@ Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor (const CalibrationDataVariables& variables,
 								    const string& label,
 								    const string& OP, Uncertainty unc,
-								    unsigned int numVariation, unsigned int mapIndex) const
+								    unsigned int numVariation, unsigned int mapIndex)
 {
   // Inefficiency scale factor retrieval identifying the requested calibration objects by name.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1191,7 +1191,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor (const Calibr
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor(const CalibrationDataVariables& variables,
 								   unsigned int indexSF, unsigned int indexEff,
-								   Uncertainty unc, unsigned int numVariation) const
+								   Uncertainty unc, unsigned int numVariation)
 {
   // Inefficiency scale factor retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1216,7 +1216,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor(const CalibrationDataVariables& variables,
 								   unsigned int indexSF, unsigned int indexEff,
 								   Uncertainty unc, unsigned int numVariation,
-								   Analysis::CalibResult& result) const
+								   Analysis::CalibResult& result)
 {
   // Inefficiency scale factor retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1276,7 +1276,7 @@ Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVariables& variables,
 							 const string& label,
 							 const string& OP, Uncertainty unc,
-							 unsigned int numVariation, unsigned int mapIndex) const
+							 unsigned int numVariation, unsigned int mapIndex)
 {
   // Data inefficiency retrieval identifying the requested calibration objects by name.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1312,7 +1312,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVa
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVariables& variables,
 							 unsigned int indexSF, unsigned int indexEff,
-							 Uncertainty unc, unsigned int numVariation) const
+							 Uncertainty unc, unsigned int numVariation)
 {
   // Data inefficiency retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1337,7 +1337,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVariables& variables,
 							 unsigned int indexSF, unsigned int indexEff,
 							 Uncertainty unc, unsigned int numVariation,
-							 Analysis::CalibResult& result) const
+							 Analysis::CalibResult& result)
 {
   // Data inefficiency retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1390,7 +1390,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVa
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getMCInefficiency (const CalibrationDataVariables& variables,
 							   const string& label, const string& OP,
-							   Uncertainty unc, unsigned int mapIndex) const
+							   Uncertainty unc, unsigned int mapIndex)
 {
   // Data inefficiency retrieval identifying the requested calibration objects by name.
   // The inefficiency is computed as the 1 minus the efficiency.
@@ -1412,7 +1412,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCInefficiency (const CalibrationData
 //________________________________________________________________________________
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getMCInefficiency (const CalibrationDataVariables& variables,
-							   unsigned int index, Uncertainty unc) const
+							   unsigned int index, Uncertainty unc)
 {
   // MC inefficiency retrieval identifying the requested calibration object by index.
   // The inefficiency is computed as the 1 minus the efficiency.
@@ -1453,7 +1453,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCMCScaleFactor(const CalibrationData
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationDataVariables& variables,
 							      const string& label, Uncertainty unc,
-							      unsigned int numVariation, unsigned int mapIndex) const
+							      unsigned int numVariation, unsigned int mapIndex)
 {
   // Tag weight fraction scale factor retrieval identifying the requested calibration object by name.
   // The return value is either a (value, uncertainty) or (if eigenvector or named variations are specified)
@@ -1491,7 +1491,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationDataVariables& variables,
 							      unsigned int indexSF, unsigned int indexEff,
-							      Uncertainty unc, unsigned int numVariation) const
+							      Uncertainty unc, unsigned int numVariation)
 {
   // Tag weight fraction scale factor retrieval identifying the requested calibration object by index.
   // The return value is either a (value, uncertainty) or (if eigenvector or named variations are specified)
@@ -1518,7 +1518,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationDataVariables& variables,
 							      unsigned int indexSF, unsigned int indexEff,
 							      Uncertainty unc, unsigned int numVariation,
-							      Analysis::CalibResult& result) const
+							      Analysis::CalibResult& result)
 {
   // Tag weight fraction scale factor retrieval identifying the requested calibration object by index.
   // Note that in contrast to the "regular" (non-continuous) case, the computation of the scale factor in
@@ -1556,9 +1556,9 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   else if (m_otherStrategy == GiveUpExtrapolated) assert (status != Analysis::kExtrapolatedRange);
   else if (m_otherStrategy == Flag) {
     if (status == Analysis::kRange)
-      const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF);
+      increaseCounter(indexSF);
     else if (status == Analysis::kExtrapolatedRange)
-      const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, Extrapolated);
+      increaseCounter(indexSF, Extrapolated);
   }
 
   // Retrieve the reference MC tag weight fraction (corresponding to the calibration scale factors)
@@ -1591,7 +1591,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   if (effStatus == Analysis::kError) return effStatus;
   if (m_otherStrategy == GiveUp) assert (effStatus != Analysis::kRange);
   else if (m_otherStrategy == Flag)
-    if (effStatus == Analysis::kRange) const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexEff);
+    if (effStatus == Analysis::kRange) increaseCounter(indexEff);
   // since we need to divide by this quantity, check that it is well-defined
   if (!(fracMCnew > 0.) and m_useTopologyRescaling) {// but we only care if using topology rescaling
     cerr << "getWeightScaleFactor: error: null fracMCnew would lead to invalid operation" << endl;
@@ -1603,7 +1603,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
      cerr << "                             Please correct your .env config file first. Nominal uncertainties used. " << endl;
   }
   if (unc == SFEigen || unc == SFNamed) {
-    const CalibrationDataEigenVariations* eigenVariation = nullptr;
+    CalibrationDataEigenVariations* eigenVariation = nullptr;
     try {
       eigenVariation = m_eigenVariationsMap.at(container);
     }
@@ -1657,14 +1657,14 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
     valueUp   = value + variationUp;
     valueDown = value + variationDown;
     if (valueUp < 0) {
-      valueUp = 0; const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, TagWeight);
+      valueUp = 0; increaseCounter(indexSF, TagWeight);
     } else if (valueUp > m_maxTagWeight) {
-      valueUp = m_maxTagWeight; const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, TagWeight);
+      valueUp = m_maxTagWeight; increaseCounter(indexSF, TagWeight);
     }
     if (valueDown < 0) {
-      valueDown = 0; const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, TagWeight);
+      valueDown = 0; increaseCounter(indexSF, TagWeight);
     } else if (valueDown > m_maxTagWeight) {
-      valueDown = m_maxTagWeight; const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, TagWeight);
+      valueDown = m_maxTagWeight; increaseCounter(indexSF, TagWeight);
     }
 
     result.first  = valueUp;
@@ -1711,9 +1711,9 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   // Third step: from the MC object's reference sample to the MC sample itself
   if (m_useTopologyRescaling) value = 1.0 + (value - 1.0) * (fracEffref / fracMCnew);
   if (value < 0) {
-    value = 0; const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, TagWeight);
+    value = 0; increaseCounter(indexSF, TagWeight);
   } else if (value > m_maxTagWeight) {
-    value = m_maxTagWeight; const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(indexSF, TagWeight);
+    value = m_maxTagWeight; increaseCounter(indexSF, TagWeight);
   }
   // Since all transformations of the scale factor itself are linear, the transformation of the uncertainty is simpler.
   if (m_useTopologyRescaling) {
@@ -1731,7 +1731,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
 //________________________________________________________________________________
 void
 Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int indexSF,
-								unsigned int indexEff) const
+								unsigned int indexEff)
 {
   // Check the tag weight scale factors that would result from the combination of
   // the provided scale factor and MC tag weight objects.
@@ -1746,7 +1746,7 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
 
   // Assume that only histogram containers are involved here (this should be the case
   // as at least a strict tag weight binning should be applied).
-  const CalibrationDataHistogramContainer* container = dynamic_cast<const CalibrationDataHistogramContainer*>(m_objects[indexSF]);
+  CalibrationDataHistogramContainer* container = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[indexSF]);
   if (! container) {
     cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: container for object "
 	 << nameFromIndex(indexSF) << " not found!" << endl;
@@ -1756,7 +1756,7 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
 	 << nameFromIndex(indexSF) << "!" << endl;
     return;
   }
-  const CalibrationDataHistogramContainer* effContainer = dynamic_cast<const CalibrationDataHistogramContainer*>(m_objects[indexEff]);
+  CalibrationDataHistogramContainer* effContainer = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[indexEff]);
   if (! effContainer) {
     cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: container for object "
 	 << nameFromIndex(indexEff) << " not found!" << endl;
@@ -1902,7 +1902,7 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
 //________________________________________________________________________________
 void
 Analysis::CalibrationDataInterfaceROOT::checkAbsEta(const CalibrationDataVariables& variables,
-						    unsigned int index) const
+						    unsigned int index)
 {
   // Check whether the jet eta value is outside the range of validity, subject to the strategy
   // specified in the configuration file.
@@ -1914,7 +1914,7 @@ Analysis::CalibrationDataInterfaceROOT::checkAbsEta(const CalibrationDataVariabl
   case Flag:
   default:
     if (std::fabs(variables.jetEta) > m_maxAbsEta)
-      const_cast<CalibrationDataInterfaceROOT*>(this)->increaseCounter(index, Eta);
+      increaseCounter(index, Eta);
   }
 }
 
@@ -1965,7 +1965,7 @@ std::vector<string>
 Analysis::CalibrationDataInterfaceROOT::listScaleFactorUncertainties(const string& author,
 								     const string& label,
 								     const string& OP,
-								     bool named) const
+								     bool named)
 {
   // Retrieve the sources of uncertainty relevant for the given scale factor calibration object,
   // identifying the object by name.
@@ -2027,7 +2027,7 @@ unsigned int
 Analysis::CalibrationDataInterfaceROOT::getNumVariations(const std::string& author,
 							 const std::string& label,
 							 const std::string& OP,
-							 Uncertainty unc) const
+							 Uncertainty unc)
 {
   // Retrieve the number of eigenvector variations or named variations relevant for
   // the given scale factor calibration object, identifying the object by name.
@@ -2059,7 +2059,7 @@ Analysis::CalibrationDataInterfaceROOT::getNumVariations(unsigned int index,
   if (! (unc == SFEigen || unc == SFNamed)) return 0;
   CalibrationDataContainer* container = m_objects[index];
   if (! container) return 0;
-  const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap.at(container);
+  CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap.at(container);
   return (unc == SFEigen) ?
     eigenVariation->getNumberOfEigenVariations() :
     eigenVariation->getNumberOfNamedVariations();
@@ -2069,7 +2069,7 @@ Analysis::CalibrationDataInterfaceROOT::getNumVariations(unsigned int index,
 const TH1*
 Analysis::CalibrationDataInterfaceROOT::getBinnedScaleFactors (const std::string& author,
 							       const std::string& label,
-							       const std::string& OP) const
+							       const std::string& OP)
 {
   // Retrieve the actual histogrammed calibration scale factors, identifying the object by name.
   //
@@ -2093,7 +2093,7 @@ const TObject*
 Analysis::CalibrationDataInterfaceROOT::getMCEfficiencyObject (const std::string& author,
 							       const std::string& label,
 							       const std::string& OP,
-							       unsigned int mapIndex) const
+							       unsigned int mapIndex)
 {
   // Retrieve the actual central values object for the MC efficiences, identifying the object by name.
   // The object returned can be either a TH1 or a TF1; it is up to the user to determine which.
@@ -2122,7 +2122,7 @@ Analysis::CalibrationDataInterfaceROOT::getShiftedScaleFactors (const std::strin
 								const std::string& label,
 								const std::string& OP,
 								const std::string& unc,
-								double sigmas) const
+								double sigmas)
 {
   // Retrieve the actual histogrammed calibration scale factors, identifying the object by name
   // and with the scale factors shifted by the uncertainties due to the given source of uncertainty
@@ -2210,7 +2210,7 @@ Analysis::CalibrationDataInterfaceROOT::runEigenVectorRecomposition (const std::
   }
 
   // Retrieve eigenvariation
-  const CalibrationDataEigenVariations* eigenVariation = nullptr;
+  CalibrationDataEigenVariations* eigenVariation = nullptr;
   try {
     eigenVariation = m_eigenVariationsMap.at(container);
   }
@@ -2310,7 +2310,7 @@ TMatrixDSym
 Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix (const std::string& author,
 									const std::string& label,
 									const std::string& OP,
-									const std::string& unc) const
+									const std::string& unc)
 {
   // Return the scale factor covariance matrix for the given calibration object.
   // This function is deprecated since its functionality is duplicated in the
@@ -2520,7 +2520,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& dir, con
   // - the dual use of "isSF" (both referring to the file and to the object, see above) requires another protection here
   // - the constructor's second argument is used to determine whether to exclude a pre-determined set of uncertainties from the EV decomposition
   if (m_runEigenVectorMethod && isSF && name.find("_SF") != string::npos) {
-    const CalibrationDataHistogramContainer* histoContainer=dynamic_cast<const CalibrationDataHistogramContainer*>(cnt);
+    CalibrationDataHistogramContainer* histoContainer=dynamic_cast<CalibrationDataHistogramContainer*>(cnt);
     if (histoContainer==0) {
       cerr << "Could not cast Container to a HistogramContainer. " << endl;
       return 0;

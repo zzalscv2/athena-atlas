@@ -51,15 +51,17 @@ then
 fi
 echo "art-result: $rc2 reco"
 
-rc3=-9999
-if [ $rc -eq 0 ]
-then
-    ArtPackage=$1
-    ArtJobName=$2
-    art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --file testRTT.RDO.pool.root --diff-root
-    rc3=$?
-    status=$rc3
+if command -v art.py >/dev/null 2>&1; then
+    rc3=-9999
+    if [ $rc -eq 0 ]
+    then
+        ArtPackage=$1
+        ArtJobName=$2
+        art.py compare grid --entries 10 "${ArtPackage}" "${ArtJobName}" --mode=semi-detailed --file testRTT.RDO.pool.root --diff-root
+        rc3=$?
+        status=$rc3
+    fi
+    echo "art-result: $rc3 regression"
 fi
-echo "art-result: $rc3 regression"
 
 exit $status

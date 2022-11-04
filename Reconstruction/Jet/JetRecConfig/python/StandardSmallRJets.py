@@ -131,7 +131,7 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = ("ConstitFourMom","Sort","Filter:1","EMScaleMom","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge","CaloEnergies",)+truthmods,
+                                      modifiers = ("ConstitFourMom", "Sort", "Filter:1", "EMScaleMom", "JetPtAssociation", "Width", "TrackMoments", "TrackSumMoments", "JVF", "JVT", "Charge", "CaloEnergies", "N90",)+truthmods,
                                       ptmin = 1,
                                       lock = True
 )

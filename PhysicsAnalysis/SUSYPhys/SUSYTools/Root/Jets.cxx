@@ -741,7 +741,7 @@ namespace ST {
     return isbjet;
   }
 
-  float SUSYObjDef_xAOD::BtagSF(const xAOD::JetContainer* jets) const {
+  float SUSYObjDef_xAOD::BtagSF(const xAOD::JetContainer* jets) {
 
     float totalSF = 1.;
     for ( const xAOD::Jet* jet : *jets ) {
@@ -822,7 +822,7 @@ namespace ST {
     return totalSF;
   }
 
-  float SUSYObjDef_xAOD::BtagSF_trkJet(const xAOD::JetContainer* trkjets) const {
+  float SUSYObjDef_xAOD::BtagSF_trkJet(const xAOD::JetContainer* trkjets) {
 
     float totalSF = 1.;
     for ( const xAOD::Jet* trkjet : *trkjets ) {

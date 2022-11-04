@@ -50,7 +50,7 @@ namespace pool {
       void disconnect( DatabaseHandler* database );
 
       /// Disconnects from all the databases
-      void disconnectAll();
+      bool disconnectAll();
 
       /// Returns the technology
       long technology() const;

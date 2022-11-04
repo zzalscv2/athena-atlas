@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -73,7 +73,7 @@ class CondAttrListCollection;
  *           
  * 
  */
-class  ATLAS_CHECK_THREAD_SAFETY IOVDbSvc : public virtual IIOVCondDbSvc,
+class IOVDbSvc : public virtual IIOVCondDbSvc,
                  public virtual IIOVDbSvc,
                  public virtual IAddressProvider,
                  public virtual IIncidentListener,

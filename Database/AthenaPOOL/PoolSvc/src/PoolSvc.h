@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef POOLSVC_H
@@ -13,6 +13,7 @@
 #include "PoolSvc/IPoolSvc.h"
 #include "GaudiKernel/IIoComponent.h"
 #include "AthenaBaseComps/AthService.h"
+#include "CxxUtils/checker_macros.h"
 #include "PersistentDataModel/Guid.h"
 
 #include <string>
@@ -117,8 +118,7 @@ public: // Non-static members
    /// @param collectionName [IN] string containing the persistent name of the collection.
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual
-   pool::ICollection* createCollection ATLAS_NOT_THREAD_SAFE
-          (const std::string& collectionType,
+   pool::ICollection* createCollection(const std::string& collectionType,
 	   const std::string& connection,
 	   const std::string& collectionName,
 	   unsigned int contextId = IPoolSvc::kInputStream) const override;
@@ -207,12 +207,12 @@ public: // Non-static members
 
 private: // data
    typedef std::recursive_mutex CallMutex;
-   mutable CallMutex                                 m_pool_mut ATLAS_THREAD_SAFE;
+   mutable CallMutex                                 m_pool_mut;
    coral::Context*                                   m_context{nullptr};
    bool                                              m_shareCat{false};
    pool::IFileCatalog*                               m_catalog{nullptr};
    std::vector<pool::IPersistencySvc*>               m_persistencySvcVec;
-   mutable std::vector<CallMutex*>                   m_pers_mut ATLAS_THREAD_SAFE;
+   std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
    std::map<std::string, unsigned int>               m_outputContextLabel;
    std::string                                       m_mainOutputLabel{};
@@ -257,6 +257,7 @@ private: // internal helper functions
    void clearState();
 
    pool::IFileCatalog* createCatalog();
+   void patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const;
 
    // setup APR persistency
    StatusCode setupPersistencySvc();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -14,10 +14,9 @@
 #include "CaloInterface/IxAODClusterCompressor.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 
-#include "CxxUtils/checker_macros.h"
 #include "CxxUtils/FloatCompressor.h"
 
-class ATLAS_CHECK_THREAD_SAFETY xAODClusterCompressor : 
+class xAODClusterCompressor :
   virtual public IxAODClusterCompressor, public AthService { 
   
  protected:   
