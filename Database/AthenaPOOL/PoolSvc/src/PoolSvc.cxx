@@ -657,8 +657,12 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) const {
          ATH_MSG_ERROR("disconnect failed to commit " << persSvc);
          return(StatusCode::FAILURE);
       }
-      persSvc->session().disconnectAll();
-      ATH_MSG_DEBUG("Disconnected PersistencySvc session");
+      if (persSvc->session().disconnectAll()) {
+         ATH_MSG_DEBUG("Disconnected PersistencySvc session");
+      } else {
+         ATH_MSG_ERROR("disconnect failed to diconnect PersistencySvc");
+         return(StatusCode::FAILURE);
+      }
    }
    return(StatusCode::SUCCESS);
 }

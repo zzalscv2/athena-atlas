@@ -110,12 +110,14 @@ pool::PersistencySvc::MicroSessionManager::disconnect( pool::PersistencySvc::Dat
 }
 
 
-void
+bool
 pool::PersistencySvc::MicroSessionManager::disconnectAll()
 {
+  bool ret = true;
   for ( std::set< pool::PersistencySvc::DatabaseHandler* >::iterator idb = m_databaseHandlers.begin();
         idb != m_databaseHandlers.end(); ++idb ) {
     m_registry.deregisterDatabaseHandler( *idb );
+    ret = (*idb)->disconnectTransaction();
     delete *idb;
   }
   m_databaseHandlers.clear();
@@ -124,6 +126,7 @@ pool::PersistencySvc::MicroSessionManager::disconnectAll()
     m_storageSvc->endSession( m_session );
     m_session = 0;
   }
+  return ret;
 }
 
 

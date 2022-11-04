@@ -296,6 +296,7 @@ static void printErrno(DbPrint& log, const char* nam, int err) {
 /// Close the root Database: in CREATE/Update mode write the file header...
 DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
   int n(0);
+  int err(0);
   if ( m_file )   {
     if ( m_file->IsOpen() )     {
       DbPrint log("RootDatabase.close");
@@ -320,10 +321,12 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
 	  n = m_fileMgr->close(m_file,"RootDatabase");
 	}
 	closed = true;
-        printErrno(log, nam, m_file->GetErrno());
+        err = m_file->GetErrno();
+        printErrno(log, nam, err);
         if (m_file->GetSeekKeys() == 0)   {
           log << DbPrintLvl::Error << "Failed to close file: " << nam
             << " something wrong happened in Close." << DbPrint::endmsg;
+          err = 1;
         }
       }
       log << DbPrintLvl::Debug
@@ -337,10 +340,12 @@ DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
     }    
   }
   if (n == 0) {
-    return deletePtr(m_file);
-  } else {
-    return Success;
+    if (!deletePtr(m_file).isSuccess()) err = 1;
   }
+  if (err == 0) {
+     return Success;
+  }
+  return Error;
 }
 
 /// Do some statistics: add number of bytes read/written/other
