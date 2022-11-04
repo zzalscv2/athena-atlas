@@ -24,6 +24,8 @@ namespace MuonHough {
 
     struct Plots {
         Plots(const char* title, int nBinsX, float xMin, float xMax, int nBinsY, float yMin, float yMax);
+        Plots(const Plots&) = delete;
+        Plots& operator=(const Plots&) = delete;
 
         TH2F* Reco{};
         TH2F* Truth{};
