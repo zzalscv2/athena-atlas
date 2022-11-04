@@ -96,7 +96,7 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         
         //unpacking internal coordinates
         
-        std::array<float,2> getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word) const;
+        std::array<float,2> getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word, const char* obj) const;
         std::array<uint8_t,2> unpackLocalCoords  (uint32_t word) const;
         static const int s_etaBit   = 5;
         static const int s_phiBit   = 1;
