@@ -4,10 +4,7 @@
 
 #include "CscCalibEvent/CscCalibDataContainer.h"
 #include "EventContainers/SelectAllObject.h"
-#include <map>
-#include <cassert>
 #include <iostream>
-#include <TString.h> // for Form
 
 CscCalibDataContainer::CscCalibDataContainer(int maxhash) 
 	: IdentifiableContainer<CscCalibDataCollection>(maxhash) {
@@ -18,23 +15,6 @@ const CLID& CscCalibDataContainer::classID() {
   return ClassID_traits<CscCalibDataContainer>::ID();       
 }
 
-/** Insert a CscCalibData. */
-void CscCalibDataContainer::push_back ATLAS_NOT_THREAD_SAFE (CscCalibData* calibData) {
-
-  /** find the collection where to insert this CalibData */ 
-  IdentifierHash channelHash = calibData->idHash(); 
-  // I don't think there's any need for this any more. EJWM
-  // Not sure if the "Identifier existing" check is important though
-
-     CscCalibDataCollection* coll = nullptr;
-     auto sc = MyBase::naughtyRetrieve(channelHash, coll);
-     if(sc.isSuccess() && coll) {
-       coll->push_back(calibData); 
-     } else {
-      throw std::runtime_error(Form("File: %s, Line: %d\nCscCalibDataContainer::push_back() - ERROR: Collection does not exist", __FILE__, __LINE__));
-     }
-  return ; 
-}
 
 /** Return the total number of CalibDatas in the container */
 CscCalibDataContainer::size_type CscCalibDataContainer::calibData_size() const {

@@ -12,7 +12,6 @@
  Class to hold collections of CSC pulser calibration data
 ****************************************************************/
 
-#include <vector>
 #include <string>
 
 #include "CscCalibEvent/CscCalibDataCollection.h"
@@ -20,7 +19,6 @@
 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "EventContainers/IdentifiableContainer.h"
-#include "CxxUtils/checker_macros.h"
 
 class CscCalibDataContainer : public IdentifiableContainer<CscCalibDataCollection> {
  public:  
@@ -35,24 +33,11 @@ class CscCalibDataContainer : public IdentifiableContainer<CscCalibDataCollectio
     typedef CscCalibDataCollection::size_type size_type ; 
     typedef IdentifiableContainer<CscCalibDataCollection> MyBase; 
 
-    /** Insert a Calibration data */
-    void push_back ATLAS_NOT_THREAD_SAFE ( CscCalibData* calibData);
-
     /** content size */
     size_type calibData_size() const ; 
 
     /** IdentifiableContainer is still a DataObject Put CLID here. */ 
     static const CLID& classID();
-
-    /** return class ID */
-    virtual const CLID& clID() const {
-      return classID(); 
-    }
-
-    /** for the default constructor without parameters */
-    //void setHashFunc (const CscIdHelper* helper, int offset) ; Don't think this is needed anymore. EJWM
-
- private:
 
 };
 
