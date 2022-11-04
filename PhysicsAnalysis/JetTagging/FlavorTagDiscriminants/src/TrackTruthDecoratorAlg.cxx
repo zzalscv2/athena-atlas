@@ -225,6 +225,9 @@ namespace FlavorTagDiscriminants {
   }
 
   int TrackTruthDecoratorAlg::get_truth_type(const xAOD::TruthParticle* truth_particle) const {
+    if (!truth_particle) {
+      return ExclusiveType::NoTruth;
+    }
     // simple pdgid check for pion/kaon based on 
     // PhysicsAnalysis/MCTruthClassifier/Root/MCTruthClassifierGen.cxx#L1159
     if (std::abs(truth_particle->pdgId()) == 211) {

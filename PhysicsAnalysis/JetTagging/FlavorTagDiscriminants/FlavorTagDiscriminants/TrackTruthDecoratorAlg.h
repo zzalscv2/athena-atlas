@@ -19,11 +19,12 @@
 namespace FlavorTagDiscriminants {
 
   enum ExclusiveType {
-    Other    = 0,
-    Pion     = 1,
-    Kaon     = 2,
-    Electron = 3,
-    Muon     = 4
+    NoTruth  = 0,
+    Other    = 1,
+    Pion     = 2,
+    Kaon     = 3,
+    Electron = 4,
+    Muon     = 5
   };
 
   class TrackTruthDecoratorAlg: public AthReentrantAlgorithm {
