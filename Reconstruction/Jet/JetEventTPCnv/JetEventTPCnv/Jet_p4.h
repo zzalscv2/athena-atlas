@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Jet_p4.h 
@@ -15,7 +15,7 @@
 #define JETEVENTTPCNV_JET_P4_H 
 
 // STL includes
-//#include <vector>
+#include <vector>
 
 // DataModelAthenaPool includes
 #include "DataModelAthenaPool/Navigable_p1.h"
@@ -49,28 +49,21 @@ public:
 
   /** Default constructor: 
    */
-  Jet_p4();
+  Jet_p4() = default;
 
-  // Warning: this is a _move_ constructor, not really a copy constructor.
-  // See the description in the .cxx file.
-  Jet_p4(const Jet_p4& other);
-
-  /** Destructor: 
+  /** Destructor:
    */
-  ~Jet_p4();
+  ~Jet_p4() = default;
   
-  //default assignment
-  Jet_p4 & operator=(const Jet_p4 &) = default;
+  // copy and move constructor defaulted
+  Jet_p4(const Jet_p4& other) noexcept = default;
+  Jet_p4(Jet_p4&& other) noexcept = default;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
+  // copy and move assignment defaulted
+  Jet_p4 & operator=(const Jet_p4 &) noexcept = default;
+  Jet_p4 & operator=(Jet_p4 &&) noexcept = default;
+
   ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  /////////////////////////////////////////////////////////////////// 
   // Private data: 
   /////////////////////////////////////////////////////////////////// 
 private: 
@@ -84,11 +77,10 @@ private:
   /// The Particle base stuff -- since Jet now inherrits from particle base.
   ParticleBase_p1 m_partBase;
 
-  unsigned int m_author;
+  unsigned int m_author{0};
   
   /// combined likelihoods
-  //std::vector<double> m_combinedLikelihood;
-  unsigned int m_num_combinedLikelihood;
+  unsigned int m_num_combinedLikelihood{0};
 
   /// JetMomentStore
   std::vector<float> m_shapeStore;
@@ -106,12 +98,4 @@ private:
   char  m_ratioPz{}; /**ratio for uncalibrated  p_z  */
 }; 
 
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline Jet_p4::Jet_p4() : m_author(0), 
-                          m_num_combinedLikelihood(0)
-{}
-
-#endif //> JETEVENTTPCNV_JET_P1_H
+#endif //> JETEVENTTPCNV_JET_P4_H
