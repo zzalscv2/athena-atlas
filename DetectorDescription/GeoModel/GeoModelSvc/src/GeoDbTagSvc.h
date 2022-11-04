@@ -10,7 +10,7 @@
 
 template <class TYPE> class SvcFactory;
 
-class ATLAS_CHECK_THREAD_SAFETY GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
+class GeoDbTagSvc : public extends<AthService, IGeoDbTagSvc>
 {
   friend class GeoModelSvc;
 
