@@ -240,7 +240,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 
                 //saving xjEM into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_xjEM; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jEM xTOB");
                     jEMContainer->push_back( std::make_unique<xAOD::jFexFwdElRoI>() );
                     jEMContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),0, thr_jEM.resolutionMeV(), eta, phi);
                 }
@@ -249,7 +249,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving xjTau into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_xjTau; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jTau xTOB");
                     jTauContainer->push_back( std::make_unique<xAOD::jFexTauRoI>() );
                     jTauContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),0, thr_jTAU.resolutionMeV(), eta, phi);
                 }
@@ -258,7 +258,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving xjLJ into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_xjLJ; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jLJ xTOB");
                     jLJContainer->push_back( std::make_unique<xAOD::jFexLRJetRoI>() );
                     jLJContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),0, thr_jLJ.resolutionMeV(), eta, phi);
                 }
@@ -267,7 +267,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving xjJ into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_xjJ; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jJ xTOB");
                     jJContainer->push_back( std::make_unique<xAOD::jFexSRJetRoI>() );
                     jJContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),0, thr_jJ.resolutionMeV(), eta, phi);
                 }
@@ -308,7 +308,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving jEM into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_jEM; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jEM TOB");
                     jEMContainer->push_back( std::make_unique<xAOD::jFexFwdElRoI>() );
                     jEMContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),1, thr_jEM.resolutionMeV(), eta, phi);
                 }
@@ -317,7 +317,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving jTau into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_jTau; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jTau TOB");
                     jTauContainer->push_back( std::make_unique<xAOD::jFexTauRoI>() );
                     jTauContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),1, thr_jTAU.resolutionMeV(), eta, phi);
                 }
@@ -326,7 +326,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving jLJ into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_jLJ; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jLJ TOB");
                     jLJContainer->push_back( std::make_unique<xAOD::jFexLRJetRoI>() );
                     jLJContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),1, thr_jLJ.resolutionMeV(), eta, phi);
                 }
@@ -335,7 +335,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
 
                 //saving jJ into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_jJ; i--) {
-                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1));
+                    const auto [eta, phi ] = getEtaPhi(jfex, fpga, vec_words.at(i-1),"jJ TOB");
                     jJContainer->push_back( std::make_unique<xAOD::jFexSRJetRoI>() );
                     jJContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),1, thr_jJ.resolutionMeV(), eta, phi);
                 }
@@ -509,14 +509,14 @@ std::array<uint8_t,2> jFexRoiByteStreamTool::unpackLocalCoords  (uint32_t word) 
     
 }
 
-std::array<float,2> jFexRoiByteStreamTool::getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word) const{
+std::array<float,2> jFexRoiByteStreamTool::getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word, const char* obj = "") const{
     
     const auto [iEta, iPhi] = unpackLocalCoords(word);
     unsigned int index = mapIndex(jfex, fpga, iEta, iPhi);
     
     auto it = m_TobPos_map.find(index);
     if(it == m_TobPos_map.end()){
-        ATH_MSG_WARNING("No index found for TOB word, jFex:"<<jfex << " Fpga:"<<fpga<< " for 32-bit word: 0x"<<std::hex<<word<<std::dec);
+        ATH_MSG_WARNING("No index found for "<< obj <<" word, jFex:"<<jfex << " Fpga:"<<fpga<< " iEta:"<<+iEta<< " iPhi:"<<+iPhi<< " for 32-bit word: 0x"<<std::hex<<word<<std::dec);
         return {-99, -99};
     }
     
