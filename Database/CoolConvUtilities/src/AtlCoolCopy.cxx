@@ -144,7 +144,7 @@ class AtlCoolCopy {
   int tagParents();
   int writeTagInfo();
   int listPoolRefs();
-  int resolvePoolRefs();
+  int resolvePoolRefs ATLAS_NOT_THREAD_SAFE ();
   static std::string getCoolHistGUID(const std::string& file);
   void filePoolRefs();
   static pool::IFileCatalog* setupCatalog(const std::vector<std::string>& catvec);
@@ -3019,7 +3019,7 @@ int AtlCoolCopy::listPoolRefs() {
   return 0;
 }
 
-int AtlCoolCopy::resolvePoolRefs() {
+int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
   std::cout << "Total of " << m_poolrefs.size() << " POOL Files referenced"
 	    << std::endl;
   pool::IFileCatalog* catalog=setupCatalog(m_poolcat);
