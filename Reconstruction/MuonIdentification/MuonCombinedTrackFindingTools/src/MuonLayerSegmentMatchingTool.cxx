@@ -43,7 +43,8 @@ namespace Muon {
 
         std::shared_ptr<Trk::AtaPlane> ataPlane = std::dynamic_pointer_cast<Trk::AtaPlane>(exPars);
         if (!ataPlane) {
-            ATH_MSG_WARNING(" dynamic_cast<> failed "<<typeid(*exPars).name()<<std::endl<<segment.associatedSurface()<<std::endl<<std::endl<<(*intersection.trackParameters));
+          Trk::TrackParameters* p = exPars.get(); // avoid clang warning.
+            ATH_MSG_WARNING(" dynamic_cast<> failed "<<typeid(*p).name()<<std::endl<<segment.associatedSurface()<<std::endl<<std::endl<<(*intersection.trackParameters));
             return false;
         }
         if (msgLvl(MSG::VERBOSE)) {
