@@ -91,10 +91,11 @@ public:
     virtual StatusCode processAllSubEvents(const EventContext& ctx) override final;
 
 private:
+    using Collections_t = std::vector<std::unique_ptr<RpcDigitCollection> >;
     /** Get next event and extract collection of hit collections: */
     StatusCode getNextEvent(const EventContext& ctx);
     /** Digitization functionality shared with RPC_PileUpTool */
-    StatusCode doDigitization(const EventContext& ctx, RpcDigitContainer* digitContainer, MuonSimDataCollection* sdoContainer);
+    StatusCode doDigitization(const EventContext& ctx, Collections_t& collections, MuonSimDataCollection* sdoContainer);
     /** */
     StatusCode fillTagInfo();
     /** */
