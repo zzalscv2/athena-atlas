@@ -148,7 +148,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Flag to control the scheduling of online Run 3 trigger navigation compactification into a single collection (uses slimming framework).
     flags.addFlag('Trigger.doOnlineNavigationCompactification', True)
 
-    # Flag to control the scheduling of offline Run 3 trigger navigation slimming in RAWtoESD, RAWtoAOD, AODtoDAOD or RAWtoALL transforms.
+    # Flag to control the scheduling of offline Run 3 trigger navigation slimming in RAWtoALL, RAWtoAOD or AODtoDAOD transforms.
     flags.addFlag('Trigger.doNavigationSlimming', True)
 
     # True if we have at least one input file, it is a POOL file, it has a metadata store, and the store has xAOD trigger configuration data

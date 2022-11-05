@@ -7,7 +7,7 @@
 def main():
     from optparse import OptionParser
     parser = OptionParser(usage = "usage: %prog arguments", version="%prog")
-    parser.add_option("-r","--runNumber",        dest="InputFile", help="Input raw data run number (default: %default)")
+    parser.add_option("-r", dest="runNumber",type="string", help="Input raw data run number (default: %default)")
     parser.set_defaults(runNumber="00436354")
     (options,args) = parser.parse_args()
     
@@ -69,5 +69,6 @@ def main():
 # ===============================================================
 if __name__ == '__main__':
     main()
+
 
 

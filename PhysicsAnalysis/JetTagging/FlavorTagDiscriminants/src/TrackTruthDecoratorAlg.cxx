@@ -36,6 +36,7 @@ namespace FlavorTagDiscriminants {
 
     // Prepare decorators
     m_dec_origin_label = m_TrackContainerKey.key() + "." + m_dec_origin_label.key();
+    m_dec_type_label = m_TrackContainerKey.key() + "." + m_dec_type_label.key();    
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
     m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key();
     m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key();
@@ -43,11 +44,13 @@ namespace FlavorTagDiscriminants {
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
     ATH_MSG_DEBUG( "    ** " << m_dec_origin_label );
+    ATH_MSG_DEBUG( "    ** " << m_dec_type_label );
     ATH_MSG_DEBUG( "    ** " << m_dec_vertex_index );
     ATH_MSG_DEBUG( "    ** " << m_dec_barcode );
     ATH_MSG_DEBUG( "    ** " << m_dec_parent_barcode );
 
     CHECK( m_dec_origin_label.initialize() );
+    CHECK( m_dec_type_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
     CHECK( m_dec_barcode.initialize() );
     CHECK( m_dec_parent_barcode.initialize() );
@@ -73,6 +76,7 @@ namespace FlavorTagDiscriminants {
     
     // instantiate decorators
     SG::WriteDecorHandle<TPC, int> dec_origin_label(m_dec_origin_label, ctx);
+    SG::WriteDecorHandle<TPC, int> dec_type_label(m_dec_type_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_vertex_index(m_dec_vertex_index, ctx);
     SG::WriteDecorHandle<TPC, int> dec_barcode(m_dec_barcode, ctx);
     SG::WriteDecorHandle<TPC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
@@ -107,6 +111,9 @@ namespace FlavorTagDiscriminants {
       // get the truth vertex of the track and store for now
       auto truth_vertex = get_truth_vertex(track);
       trk_truth_vertex.push_back(truth_vertex);
+
+      // decorate truth type
+      dec_type_label(*track) = get_truth_type(truth);
     }
 
     // decorate tracks with truth vertex info
@@ -217,6 +224,26 @@ namespace FlavorTagDiscriminants {
     return nullptr;
   }
 
+  int TrackTruthDecoratorAlg::get_truth_type(const xAOD::TruthParticle* truth_particle) const {
+    if (!truth_particle) {
+      return ExclusiveType::NoTruth;
+    }
+    // simple pdgid check for pion/kaon based on 
+    // PhysicsAnalysis/MCTruthClassifier/Root/MCTruthClassifierGen.cxx#L1159
+    if (std::abs(truth_particle->pdgId()) == 211) {
+      return ExclusiveType::Pion * truth_particle->charge();
+    }
+    if (std::abs(truth_particle->pdgId()) == 321) {
+      return ExclusiveType::Kaon * truth_particle->charge();
+    }
+    if (truth_particle->isElectron()) {
+      return ExclusiveType::Electron * truth_particle->charge() * -1;
+    }
+    if (truth_particle->isMuon()) {
+      return ExclusiveType::Muon * truth_particle->charge() * -1;
+    }
+    return ExclusiveType::Other;
+  }
 }
 
 

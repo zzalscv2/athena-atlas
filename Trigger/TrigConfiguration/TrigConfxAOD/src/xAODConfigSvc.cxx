@@ -633,7 +633,7 @@ namespace TrigConf {
       // Can the incident service provide this to us?
       const EventContext& context = Gaudi::Hive::currentContext();
 
-      if (!m_useInFileMetadata) { // Run 3 RAWtoESD, RAWtoALL decoding mode
+      if (!m_useInFileMetadata) { // Run 3 RAWtoALL decoding mode
          return prepareEventRun3Athena(context);
       }
 
