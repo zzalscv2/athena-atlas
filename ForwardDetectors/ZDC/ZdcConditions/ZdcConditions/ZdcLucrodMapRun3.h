@@ -9,29 +9,22 @@
 #include <iostream>
 #include "AsgMessaging/AsgMessaging.h"
 
-#include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
-
-
 class ZdcLucrodMapRun3 : public asg::AsgMessaging
 {
 
 private:
   std::vector<nlohmann::json> m_lucrodInfo;
   nlohmann::json m_mainJson;
-  bool m_debug;
 
 public:
   ZdcLucrodMapRun3();
 
-  static ZdcLucrodMapRun3* getInstance();
-  static void deleteInstance();
-  const nlohmann::json& getLucrod(int i) 
+  static const ZdcLucrodMapRun3* getInstance();
+  const nlohmann::json& getLucrod(int i) const
   {
-    if (m_debug) std::cout << "ZdcLucrodMapRun3: getting LUCROD info for " << i << std::endl; 
+    ATH_MSG_DEBUG("getting LUCROD info for " << i);
     return m_lucrodInfo.at(i);
   }
-  void setDebug(bool b){m_debug = b;}
 
 };
 
