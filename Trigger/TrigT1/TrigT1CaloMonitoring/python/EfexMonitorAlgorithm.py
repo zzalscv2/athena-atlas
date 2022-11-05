@@ -41,17 +41,19 @@ def EfexMonitoringConfig(inputFlags):
     tobStr = "xTOB" if hasXtobs else "TOB"
 
     # add monitoring algorithm to group, with group name and main directory 
+    noCutGroup = helper.addGroup(EfexMonAlg, groupName, mainDir)
     lowPtCutGroup = helper.addGroup(EfexMonAlg, groupName+'_LowPtCut' , mainDir)
     hiPtCutGroup = helper.addGroup(EfexMonAlg, groupName+'_HiPtCut' , mainDir)
     groups = [lowPtCutGroup, hiPtCutGroup]
 
+    noCutGroup.defineHistogram('nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s;EM '+tobStr+'s;Number of EM '+tobStr+'s',
+                            type='TH1I', path=trigPath, xbins=10,xmin=0,xmax=10)
+    noCutGroup.defineHistogram('nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s;Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
+                            type='TH1I', path=trigPath, xbins=10,xmin=0,xmax=10)
     for myGroup, cut_name, cut_val in zip(groups, cut_names, cut_vals):
         cut_title_addition = '' if (cut_val == 0.0) else ' (Et>' + '%.1f'%(cut_val/1000) + 'GeV cut)'
 
         # histograms of eEM variables
-        myGroup.defineHistogram('nEMTOBs_nocut;h_nEmTOBs_nocut', title='Number of eFex EM '+tobStr+'s'+cut_title_addition+';EM '+tobStr+'s;Number of EM '+tobStr+'s',
-                                type='TH1I', path=trigPath+'eEM'+cut_name+'/', xbins=10,xmin=0,xmax=10)
-
         myGroup.defineHistogram('nEMTOBs;h_nEmTOBs', title='Number of eFex EM '+tobStr+'s'+cut_title_addition+';EM '+tobStr+'s;Number of EM '+tobStr+'s',
                                 type='TH1I', path=trigPath+'eEM'+cut_name+'/', xbins=10,xmin=0,xmax=10)
 
@@ -59,13 +61,13 @@ def EfexMonitoringConfig(inputFlags):
                                 type='TH1F', path=trigPath+'eEM'+cut_name+'/', xbins=100,xmin=0,xmax=50000)
 
         myGroup.defineHistogram('TOBEta;h_TOBEta', title='eFex '+tobStr+' EM Eta'+cut_title_addition,
-                                type='TH1F', path=trigPath+'eEM'+cut_name+'/', xbins=50,xmin=-3.0,xmax=3.0)
+                                type='TH1F', path=trigPath+'eEM'+cut_name+'/', xbins=50,xmin=-2.5,xmax=2.5)
 
         myGroup.defineHistogram('TOBPhi;h_TOBPhi', title='eFex '+tobStr+' EM Phi'+cut_title_addition,
                                 type='TH1F', path=trigPath+'eEM'+cut_name+'/', xbins=64,xmin=-math.pi,xmax=math.pi)
 
         myGroup.defineHistogram('TOBEta,TOBPhi;h_TOBEtaPhiMap', title='eFex '+tobStr+' EM Eta vs Phi'+cut_title_addition+';'+tobStr+' EM Eta;'+tobStr+' EM Phi',
-                                type='TH2F',path=trigPath+'eEM'+cut_name+'/', xbins=50,xmin=-3.0,xmax=3.0,ybins=64,ymin=-math.pi,ymax=math.pi)
+                                type='TH2F',path=trigPath+'eEM'+cut_name+'/', xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
         myGroup.defineHistogram('TOBshelfNumber;h_TOBshelfNumber', title='eFex '+tobStr+' EM Shelf Number'+cut_title_addition,
                                 type='TH1F', path=trigPath+'eEM'+cut_name+'/', xbins=2,xmin=0,xmax=2)
@@ -99,9 +101,6 @@ def EfexMonitoringConfig(inputFlags):
                                 type='TH1F', path=trigPath+'eEM'+cut_name+'/', xbins=4,xmin=0,xmax=4.0,xlabels=threshold_labels)
 
         # plotting of eTau variables
-        myGroup.defineHistogram('nTauTOBs_nocut;h_nTauTOBs_nocut', title='Number of eFex Tau '+tobStr+'s'+cut_title_addition+';Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
-                                type='TH1I', path=trigPath+'eTau'+cut_name+'/', xbins=10,xmin=0,xmax=10)
-        
         myGroup.defineHistogram('nTauTOBs;h_nTauTOBs', title='Number of eFex Tau '+tobStr+'s'+cut_title_addition+';Tau '+tobStr+'s;Number of Tau '+tobStr+'s',
                                 type='TH1I', path=trigPath+'eTau'+cut_name+'/', xbins=10,xmin=0,xmax=10)
 
@@ -109,13 +108,13 @@ def EfexMonitoringConfig(inputFlags):
                                 type='TH1F', path=trigPath+'eTau'+cut_name+'/', xbins=100,xmin=0,xmax=50000)
 
         myGroup.defineHistogram('tauTOBEta;h_tauTOBEta', title='eFex '+tobStr+' Tau Eta'+cut_title_addition,
-                                type='TH1F', path=trigPath+'eTau'+cut_name+'/', xbins=60,xmin=-3.0,xmax=3.0)
+                                type='TH1F', path=trigPath+'eTau'+cut_name+'/', xbins=60,xmin=-2.5,xmax=2.5)
 
         myGroup.defineHistogram('tauTOBPhi;h_tauTOBPhi', title='eFex '+tobStr+' Tau Phi'+cut_title_addition,
                                 type='TH1F', path=trigPath+'eTau'+cut_name+'/', xbins=100,xmin=-math.pi,xmax=math.pi)
 
         myGroup.defineHistogram('tauTOBEta,tauTOBPhi;h_tauTOBEtaPhiMap', title='eFex '+tobStr+' Tau Eta vs Phi'+cut_title_addition+';'+tobStr+' Tau Eta;'+tobStr+' Tau Phi',
-                                type='TH2F',path=trigPath+'eTau'+cut_name+'/', xbins=50,xmin=-3.0,xmax=3.0,ybins=64,ymin=-math.pi,ymax=math.pi)
+                                type='TH2F',path=trigPath+'eTau'+cut_name+'/', xbins=50,xmin=-2.5,xmax=2.5,ybins=64,ymin=-math.pi,ymax=math.pi)
 
         myGroup.defineHistogram('tauTOBshelfNumber;h_tauTOBshelfNumber', title='eFex '+tobStr+' Tau Shelf Number'+cut_title_addition,
                                 type='TH1F', path=trigPath+'eTau'+cut_name+'/', xbins=2,xmin=0,xmax=2)
