@@ -56,7 +56,7 @@ def checkTreeBasketWise(tree):
     return 0
 
 
-def checkTreeEventWise(tree):
+def checkTreeEventWise(tree, printInterval = 150000):
 
     nEntries=tree.GetEntries()
 
@@ -66,6 +66,10 @@ def checkTreeEventWise(tree):
         if tree.GetEntry(i)<0:
             msg.warning('Event %s of tree %s is corrupted.' % (i, tree.GetName()))
             return 1
+
+        # Show a sign of life for long validation jobs: ATLASJT-433
+        if (i%printInterval)==0 and i>0:
+            msg.info('Validated %s events so far...', i)
 
     return 0
 
