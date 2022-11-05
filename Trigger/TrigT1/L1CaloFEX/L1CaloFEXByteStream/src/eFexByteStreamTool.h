@@ -64,6 +64,7 @@ class eFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
           class MonitoredLogging : public L1CaloBsDecoderRun3::Logging {
             public:
               MonitoredLogging(ToolHandle<GenericMonitoringTool> tool) : m_monTool(tool) { }
+              virtual ~MonitoredLogging() = default;
               virtual void err(const std::string& location, const std::string& title, const std::string& detail) const override;
               ToolHandle<GenericMonitoringTool> m_monTool;
           };
