@@ -564,8 +564,7 @@ int TileNeighbour::next_samp_wide (const IdentifierHash & id,
 
 void TileNeighbour::get_id(std::string & strName, Identifier & id, const Tile_Base_ID* tileID)
 {
-    char * name = new char[strName.size()+1];
-    strcpy(name,strName.data());
+    const char * name = strName.c_str();
     int se;
     int sd;
     int sm;
@@ -610,8 +609,6 @@ void TileNeighbour::get_id(std::string & strName, Identifier & id, const Tile_Ba
     }
 
     id = tileID->cell_id(se,sd,0,tw,sm);
-
-    delete[] name;
 }
 
 void TileNeighbour::get_name(Identifier & id, std::string & strSection,
