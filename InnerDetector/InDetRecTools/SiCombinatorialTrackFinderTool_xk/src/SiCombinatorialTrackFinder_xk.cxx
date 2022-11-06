@@ -27,11 +27,6 @@
 #include <utility>
 #include <stdexcept>
 
-namespace {
-   template <typename T>
-   inline T sqr(T a) {return a*a; }
-}
-
 ///////////////////////////////////////////////////////////////////
 // Constructor
 ///////////////////////////////////////////////////////////////////
@@ -109,8 +104,8 @@ StatusCode InDet::SiCombinatorialTrackFinder_xk::initialize()
   ATH_CHECK( m_fieldCondObjInputKey.initialize() );
   ATH_CHECK( m_pixelDetElStatus.initialize( !m_pixelDetElStatus.empty() && m_usePIX) );
   ATH_CHECK( m_sctDetElStatus.initialize( !m_sctDetElStatus.empty() && m_useSCT) );
-
-  m_minPt2Cut = sqr(m_minPtCut.value());
+  auto ptCutVal = m_minPtCut.value();
+  m_minPt2Cut = ptCutVal * ptCutVal;
   return StatusCode::SUCCESS;
 }
 
@@ -808,14 +803,14 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
 Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorialTrackFinderData_xk& data) const
 {
-  Trk::TrackParameters* param = data.trajectory().firstTrackParameters();
+  std::unique_ptr<Trk::TrackParameters> param = data.trajectory().firstTrackParameters();
   if (param) {
      auto momentum = param->momentum();
      const auto  pt2 = momentum.perp2();
      // reject tracks with small pT
      // The cut should be large enough otherwise eta computation of such tracks may yield NANs.
      if (pt2 < m_minPt2Cut) {
-        ATH_MSG_WARNING( "Reject low pT track (pT = " << sqrt(pt2) << " < " << m_minPtCut.value() << ")");
+        ATH_MSG_DEBUG( "Reject low pT track (pT = " << std::sqrt(pt2) << " < " << m_minPtCut.value() << ")");
         return nullptr;
      }
   }

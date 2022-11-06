@@ -24,6 +24,7 @@
 #include "SiSPSeededTrackFinderData/SiDetElementBoundaryLink_xk.h"
 
 #include <map>
+#include <memory>
 
 namespace InDet{
 
@@ -111,7 +112,7 @@ namespace InDet{
       bool filterWithPreciseClustersError();
       bool backwardSmoother (bool);
       bool isLastPixel      ();
-      Trk::TrackParameters* firstTrackParameters();
+      std::unique_ptr<Trk::TrackParameters> firstTrackParameters();
       void getClusters(std::list<const InDet::SiCluster*>&);
 
       DataVector<const Trk::TrackStateOnSurface>

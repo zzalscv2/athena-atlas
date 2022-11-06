@@ -70,7 +70,7 @@ inline bool InDet::SiTrajectory_xk::isLastPixel()
   return false;
 } 
 
-inline Trk::TrackParameters* InDet::SiTrajectory_xk::firstTrackParameters()
+inline std::unique_ptr<Trk::TrackParameters> InDet::SiTrajectory_xk::firstTrackParameters()
 {
-  return m_elements[m_elementsMap[m_firstElement]].trackParameters(false,1).release();
+  return m_elements[m_elementsMap[m_firstElement]].trackParameters(false,1);
 }
