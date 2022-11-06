@@ -1518,10 +1518,10 @@ namespace AtlasRoot {
       // release 20 run 2 systematics for mc15 like geometries
       else {
         //Just pick the owned one from a unique_ptr per case
-        TH2* histo = nullptr;
-        if (ptype == PATCore::ParticleType::Electron && m_pp0_elec) histo = checked_own_cast<TH2*>(m_pp0_elec.get());
-        else if (ptype == PATCore::ParticleType::ConvertedPhoton && m_pp0_conv ) histo = checked_own_cast<TH2*>(m_pp0_conv.get());
-        else if (ptype == PATCore::ParticleType::UnconvertedPhoton && m_pp0_unconv) histo = checked_own_cast<TH2*>(m_pp0_unconv.get());
+        const TH2* histo = nullptr;
+        if (ptype == PATCore::ParticleType::Electron && m_pp0_elec) histo = m_pp0_elec.get();
+        else if (ptype == PATCore::ParticleType::ConvertedPhoton && m_pp0_conv ) histo = m_pp0_conv.get();
+        else if (ptype == PATCore::ParticleType::UnconvertedPhoton && m_pp0_unconv) histo = m_pp0_unconv.get();
 
         if (histo) {
           const double aeta = std::abs(cl_eta);
@@ -2599,20 +2599,19 @@ namespace AtlasRoot {
     const double ETGeV = energy / cosh(cl_eta) / 1E3;
 
     //This will point to the return of get() of a unique_ptr
-    TAxis* axis;
-    TList* graphs;
+    const TAxis* axis;
+    const TList* graphs;
 
     if (ptype == PATCore::ParticleType::Electron ) {
-      axis=(checked_own_cast<TAxis*>(m_E4ElectronEtaBins.get()));
-      graphs=(checked_own_cast<TList*>(m_E4ElectronGraphs.get()));
+      axis=m_E4ElectronEtaBins.get();
+      graphs=m_E4ElectronGraphs.get();
     } else if (ptype == PATCore::ParticleType::UnconvertedPhoton) {
-      axis=checked_own_cast<TAxis*>(m_E4UnconvertedEtaBins.get());
-      graphs=checked_own_cast<TList*>(m_E4UnconvertedGraphs.get());
-      graphs->SetOwner();
+      axis=m_E4UnconvertedEtaBins.get();
+      graphs=m_E4UnconvertedGraphs.get();
     }
     else if (ptype == PATCore::ParticleType::ConvertedPhoton) {
-      axis=checked_own_cast<TAxis*>(m_E4ConvertedEtaBins.get());
-      graphs=checked_own_cast<TList*>(m_E4ConvertedGraphs.get());
+      axis=m_E4ConvertedEtaBins.get();
+      graphs=m_E4ConvertedGraphs.get();
     }
     else { ATH_MSG_FATAL("invalid particle type"); return -1; }
 
