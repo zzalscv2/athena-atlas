@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Jet_p5.h
@@ -17,9 +17,6 @@
 
 // DataModelAthenaPool includes
 #include "DataModelAthenaPool/Navigable_p1.h"
-
-// EventCommonTPCnv includes
-// #include "EventCommonTPCnv/P4PxPyPzE_p1.h"
 
 #include "AthenaPoolUtilities/TPObjRef.h"
 
@@ -47,28 +44,21 @@ public:
   
   /** Default constructor: 
    */
-  Jet_p5();
+  Jet_p5() = default;
   
-  // Warning: this is a _move_ constructor, not really a copy constructor.
-  // See the description in the .cxx file.
-  Jet_p5(const Jet_p5& other);
-  
-  /** Destructor: 
+  /** Destructor:
    */
-  ~Jet_p5();
+  ~Jet_p5() = default;
   
-  //default assignment
-  Jet_p5 & operator=(const Jet_p5 &) = default;
-  
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
+  // copy and move constructor defaulted
+  Jet_p5(const Jet_p5& other) noexcept = default;
+  Jet_p5(Jet_p5&& other) noexcept = default;
+
+  // copy and move assignment defaulted
+  Jet_p5 & operator=(const Jet_p5 &) noexcept = default;
+  Jet_p5 & operator=(Jet_p5 &&) noexcept = default;
+
   ///////////////////////////////////////////////////////////////////
-  
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
-  
-  /////////////////////////////////////////////////////////////////// 
   // Private data: 
   /////////////////////////////////////////////////////////////////// 
 private: 
@@ -89,10 +79,10 @@ private:
   ParticleBase_p1 m_partBase;
   
   /// storing what jet algorithm the jet belongs to
-  unsigned int m_author;
+  unsigned int m_author{0};
   
   /// combined likelihoods
-  unsigned int m_num_combinedLikelihood;
+  unsigned int m_num_combinedLikelihood{0};
   
   /// JetMomentStore
   std::vector<float> m_shapeStore;
@@ -103,30 +93,14 @@ private:
   /// JetAssociationBase objects
   std::vector<TPObjRef> m_associations;
   
-  /* // Signal states 
-     char  m_ratioE;  / **ratio for uncalibrated  E    * /
-     char  m_ratioPx; / **ratio for uncalibrated  p_x  * /
-     char  m_ratioPy; / **ratio for uncalibrated  p_y  * /
-     char  m_ratioPz; / **ratio for uncalibrated  p_z  */
-  
   /** we store the recoStatus for jets here
    */
-  unsigned int m_recoStatus; 
+  unsigned int m_recoStatus{0};
 
-  bool         m_usedForTrigger;
+  bool         m_usedForTrigger{false};
 
-  unsigned int  m_constituentsN;
+  unsigned int  m_constituentsN{0};
   
 };
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline Jet_p5::Jet_p5() : m_author(0), 
-                          m_num_combinedLikelihood(0),
-                          m_recoStatus(0),
-                          m_usedForTrigger(false),
-                          m_constituentsN(0) {}
 
 #endif //> JETEVENTTPCNV_JET_P5_H

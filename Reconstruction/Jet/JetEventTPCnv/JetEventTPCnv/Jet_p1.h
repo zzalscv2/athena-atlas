@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Jet_p1.h 
@@ -40,19 +40,19 @@ public:
 
   /** Default constructor: 
    */
-  Jet_p1();
+  Jet_p1() = default;
 
   /** Destructor: 
    */
   ~Jet_p1() = default;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
+  // copy and move constructor defaulted
+  Jet_p1(const Jet_p1& other) noexcept = default;
+  Jet_p1(Jet_p1&& other) noexcept = default;
 
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
+  // copy and move assignment defaulted
+  Jet_p1 & operator=(const Jet_p1 &) noexcept = default;
+  Jet_p1 & operator=(Jet_p1 &&) noexcept = default;
 
   /////////////////////////////////////////////////////////////////// 
   // Private data: 
@@ -66,12 +66,5 @@ private:
   P4PxPyPzE_p1 m_momentum;
 
 }; 
-
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-
-inline Jet_p1::Jet_p1()
-{}
 
 #endif //> RECTPCNV_JET_P1_H
