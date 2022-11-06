@@ -1403,7 +1403,7 @@ void ZdcNtuple::setupTriggerHistos()
   int ic = 0;
   for (auto &trig : triggers)
     {
-      auto cg = (Trig::ChainGroup*) m_trigDecisionTool->getChainGroup(trig);
+      const Trig::ChainGroup* cg = m_trigDecisionTool->getChainGroup(trig);
       if (cg->getListOfTriggers().size())
 	{
 	  ANA_MSG_INFO("setupTriggerHistos(): Trigger found = " << trig.c_str() << " bit " << ic);
@@ -1426,7 +1426,7 @@ void ZdcNtuple::setupTriggerHistos()
   ANA_MSG_INFO("Adding rerun trigger branches!");
   for (auto &trig : rerunTriggers)
     {
-      auto cg = m_trigDecisionTool->getChainGroup(trig);
+      const Trig::ChainGroup* cg = m_trigDecisionTool->getChainGroup(trig);
       m_rerunChainGroups.push_back(cg);
       if (cg->getListOfTriggers().size())
 	{
