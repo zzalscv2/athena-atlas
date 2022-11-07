@@ -212,7 +212,7 @@ namespace InDet {
         typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       par_tsos = new Trk::TrackStateOnSurface(
-        nullptr, std::move(perParm), nullptr, nullptr, typePattern);
+        nullptr, std::move(perParm), nullptr, typePattern);
       // push new TSOS into the list
       ntsos.push_back(par_tsos);
     }
@@ -639,7 +639,7 @@ namespace InDet {
         typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(
-        nullptr, std::move(per), nullptr, nullptr, typePattern);
+        nullptr, std::move(per), nullptr, typePattern);
       ntsos.insert(ntsos.begin(), seg_tsos);
 
       ATH_MSG_VERBOSE("Constructed perigee at input to fit : " << (*per));

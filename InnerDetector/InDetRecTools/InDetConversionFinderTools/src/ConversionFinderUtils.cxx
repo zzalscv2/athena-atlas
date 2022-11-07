@@ -250,7 +250,7 @@ namespace InDet {
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       const Trk::TrackStateOnSurface* per_tsos =
         ((*its)->type(Trk::TrackStateOnSurface::Perigee))
-          ? new Trk::TrackStateOnSurface(nullptr, mp->uniqueClone(), nullptr, nullptr, typePattern)
+          ? new Trk::TrackStateOnSurface(nullptr, mp->uniqueClone(), nullptr, typePattern)
           : (*its)->clone();
       ntsos.push_back(per_tsos);
     }

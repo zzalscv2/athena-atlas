@@ -26,6 +26,7 @@ public:
   using FitQualityImpl::numberDoF;
   using FitQualityImpl::setChiSquared;
   using FitQualityImpl::setNumberDoF;
+  using FitQualityImpl::operator bool;
   ~FitQualityOnSurface() = default;
 
   // Needed for T/P since we used to have only

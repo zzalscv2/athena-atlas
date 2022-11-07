@@ -162,7 +162,7 @@ namespace Rec {
                             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type;
                             type.set(Trk::TrackStateOnSurface::Measurement);
                             trackStateOnSurfaces.push_back(
-                                new const Trk::TrackStateOnSurface(std::move(vertexInFit), nullptr, nullptr, nullptr, type));
+                                new const Trk::TrackStateOnSurface(std::move(vertexInFit), nullptr, nullptr, type));
                             ATH_MSG_DEBUG(" found Perigee and added vertex " << itsos);
                         }
                     }
@@ -227,7 +227,7 @@ namespace Rec {
                             typePatternScat.set(Trk::TrackStateOnSurface::Scatterer);
 
                             const Trk::TrackStateOnSurface* newTSOS =
-                                new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), nullptr, std::move(meotNew), typePatternScat);
+                                new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), std::move(meotNew), typePatternScat);
 
                             trackStateOnSurfaces.push_back(newTSOS);
                         }
@@ -565,7 +565,7 @@ namespace Rec {
                             typePatternScat.set(Trk::TrackStateOnSurface::Scatterer);
 
                             const Trk::TrackStateOnSurface* newTSOS =
-                                new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), nullptr, std::move(meotNew), typePatternScat);
+                                new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), std::move(meotNew), typePatternScat);
 
                             trackStateOnSurfaces.push_back(newTSOS);
 

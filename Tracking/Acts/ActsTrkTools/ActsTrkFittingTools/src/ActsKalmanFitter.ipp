@@ -92,8 +92,8 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx, Acts::GeometryContext& tgCo
             measState = sl.atlasHit().uniqueClone();
           }
           double nDoF = state.calibratedSize();
-          auto quality =std::make_unique<const Trk::FitQualityOnSurface>(state.chi2(), nDoF);
-          const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(std::move(measState), std::move(parm), std::move(quality), nullptr, typePattern);
+          auto quality =Trk::FitQualityOnSurface(state.chi2(), nDoF);
+          const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(quality, std::move(measState), std::move(parm), nullptr, typePattern);
           // If a state was succesfully created add it to the trajectory 
           if (perState) {
             finalTrajectory.insert(finalTrajectory.begin(), perState);
@@ -108,7 +108,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx, Acts::GeometryContext& tgCo
     std::unique_ptr<const Trk::TrackParameters> per = m_ATLASConverterTool->ActsTrackParameterToATLAS(actsPer, tgContext);
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
-    const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, nullptr, typePattern);
+    const Trk::TrackStateOnSurface *perState = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
     if (perState) finalTrajectory.insert(finalTrajectory.begin(), perState);
 
     // Create the track using the states

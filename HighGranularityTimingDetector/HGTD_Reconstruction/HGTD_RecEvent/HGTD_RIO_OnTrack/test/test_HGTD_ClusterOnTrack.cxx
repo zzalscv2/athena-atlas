@@ -88,7 +88,7 @@ createClusterOnTrackWithCluster(const HGTD_Cluster& cluster) {
 
 void testCopyCtor(const HGTD_ClusterOnTrack& cot) {
   std::cout << "testCopyCtor\n";
-  HGTD_ClusterOnTrack copied_cot(cot);
+  const HGTD_ClusterOnTrack& copied_cot(cot);
 
   compare(cot, copied_cot);
   std::cout << "testCopyCtor done\n";

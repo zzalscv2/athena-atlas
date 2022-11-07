@@ -807,14 +807,14 @@ double InDet::SiSPSeededTrackFinder::trackQuality(const Trk::Track* Tr)
    /// exclude anything which is not an actual hit 
    if (not m->type(Trk::TrackStateOnSurface::Measurement)) continue;
   /// retrieve the fit quality for a given hit
-   const Trk::FitQualityOnSurface* fq = m->fitQualityOnSurface();
-   if (fq==nullptr) continue;
+   const Trk::FitQualityOnSurface fq = m->fitQualityOnSurface();
+   if (!fq) continue;
   
-   double x2 = fq->chiSquared();
+   double x2 = fq.chiSquared();
    double hitQualityScore;
    /// score the hit based on the technology (pixels get higher score) and 
    /// the local chi2 for the hit 
-   if (fq->numberDoF() == 2) hitQualityScore = (1.2*(baseScorePerHit-x2*.5));   // pix
+   if (fq.numberDoF() == 2) hitQualityScore = (1.2*(baseScorePerHit-x2*.5));   // pix
    else                      hitQualityScore =      (baseScorePerHit-x2    );   // sct
    if (hitQualityScore < 0.) hitQualityScore = 0.;    // do not allow a bad hit to decrement the overall score 
    quality += hitQualityScore;
@@ -897,9 +897,9 @@ void InDet::SiSPSeededTrackFinder::filterSharedTracksFast(std::multimap<double, 
     for (const Trk::TrackStateOnSurface* tsos: *((*it_qualityAndTrack).second->trackStateOnSurfaces())) {
 
       if(!tsos->type(Trk::TrackStateOnSurface::Measurement)) continue;
-      const Trk::FitQualityOnSurface* fq =  tsos->fitQualityOnSurface();
+      const Trk::FitQualityOnSurface fq =  tsos->fitQualityOnSurface();
       if(!fq) continue;
-      if(fq->numberDoF() == 2) ++nPixels;
+      if(fq.numberDoF() == 2) ++nPixels;
 
       /// get the PRD from the measurement
       const Trk::MeasurementBase* mb = tsos->measurementOnTrack();
@@ -908,7 +908,7 @@ void InDet::SiSPSeededTrackFinder::filterSharedTracksFast(std::multimap<double, 
       const Trk::PrepRawData* pr = ri->prepRawData();
       if (pr) {
         /// increase cluster count
-	++nClusters;
+        ++nClusters;
         /// and check if the cluster was already used in a previous ( = higher quality) track
         if (clusters.find(pr)==it_clustersEnd) {
           /// if not, record as a free (not prevously used) cluster

@@ -50,22 +50,22 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
   auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
   PerigeeSurface periSurf;
   auto           trackParameter = std::make_unique<Perigee>(4.0, 3.0, 2.0, 1.0, 0.001, periSurf);
-  //parameters to TrackStateOnSurface are unique_ptr to: RIO_OnTrack, TrackParameters, FitQuality, MaterialEffectsBase
-  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter), nullptr,  nullptr) );
+  //parameters to TrackStateOnSurface are unique_ptr to: RIO_OnTrack, TrackParameters, MaterialEffectsBase
+  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter),  nullptr) );
 
   //std::cout<<counter++<<std::endl;
 
   // test state #1 - arbitrary TP AtaCylinder
   Trk::CylinderSurface surface(1.0, 2*M_PI, 4.0);
   auto trackParameter2=surface.createUniqueParameters<5,Trk::Charged>(0.0,1.0,3.0,4.0,0.5,std::nullopt);
-  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter2), nullptr,  nullptr) );
+  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter2),  nullptr) );
 
   // test state #2 - arbitrary TP AtaDisc
   Amg::Translation3D amgtranslation(1.,2.,3.);
   Amg::Transform3D amgTransf = Amg::Transform3D(amgtranslation);
   DiscSurface discSf(amgTransf, 1.0, 2.0);
   auto trackParameter3 = discSf.createUniqueParameters<5,Trk::Charged>(0.0,1.0,3.0,4.0,0.5,std::nullopt);
-  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter3), nullptr,  nullptr) );
+  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter3),  nullptr) );
 
   // test state #3 - arbitrary AtaPlane + Estimated Brem
   Amg::Transform3D amgTransf2(amgtranslation);
@@ -74,7 +74,7 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
   auto ebr = std::make_unique<EstimatedBremOnTrack>((0.7), -0.3,0.3, 0.03,planeSf);
   std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type1(0);
   type1.set(Trk::TrackStateOnSurface::BremPoint);
-  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter4), nullptr,  std::move(ebr),type1) );
+  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter4),  std::move(ebr),type1) );
 
   if (elements){
     // test state #4 - AtaPlane at a valid detector element + MatEffects
@@ -97,7 +97,7 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
     auto mefBase = std::make_unique<Trk::MaterialEffectsOnTrack>(70.7,scatt,std::move(eloss),planeDetElSf, mefPattern);
     std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
     typePattern.set(Trk::TrackStateOnSurface::Scatterer);
-    trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter5), nullptr, std::move(mefBase),  typePattern) );
+    trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter5), std::move(mefBase),  typePattern) );
   }
   //Curvi
   Amg::Vector3D pos(1.0,2.0,3.0);
@@ -106,7 +106,7 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
   auto trackParameter6 = std::make_unique<CurvilinearParameters>(pos,mom,1.0);
   std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
   typePattern.set(Trk::TrackStateOnSurface::Parameter);
-  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter6), nullptr, nullptr,  typePattern) );
+  trackStateOnSurfaces.push_back( new TrackStateOnSurface(nullptr, std::move(trackParameter6), nullptr,  typePattern) );
   
   AmgSymMatrix(2)  locCov;
   locCov.setIdentity();           // sets it to identity
@@ -145,7 +145,7 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
       assgnProb->push_back(0.6);
       auto cProt= std::make_unique<InDet::CompetingPixelClustersOnTrack>(childrots,assgnProb);
       trackStateOnSurfaces.push_back( new TrackStateOnSurface(
-        std::move(cProt),nullptr,nullptr,nullptr));
+        std::move(cProt),nullptr,nullptr));
     }
   }
   //std::cout<<counter++<<std::endl;

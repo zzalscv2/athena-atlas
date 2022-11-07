@@ -869,7 +869,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
         }
         auto mefot =
           std::make_unique<Trk::MaterialEffectsOnTrack>(dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
-        cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+        cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), std::move(mefot)));
         ATH_MSG_DEBUG("  [M] Collecting material from static volume '" << propagVol->volumeName()
                                                                        << "', t/X0 = " << dInX0);
       }
@@ -1184,7 +1184,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
 
         cache.m_matstates->push_back(new TrackStateOnSurface(
-          nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+          nullptr, std::move(cvlTP), std::move(mefot)));
 
         ATH_MSG_DEBUG("  [M] Collecting material from dense volume '"
                       << cache.m_currentDense->volumeName() << "', t/X0 = " << dInX0);
@@ -1320,7 +1320,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
                   dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
                 cache.m_matstates->push_back(new TrackStateOnSurface(
-                  nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+                  nullptr, std::move(cvlTP), std::move(mefot)));
               }
             }
           } // end material update at massive (static volume) boundary
@@ -1480,7 +1480,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               auto mefot = std::make_unique<const Trk::MaterialEffectsOnTrack>(
                 dInX0, newsa, std::move(eloss), cvlTP->associatedSurface());
               cache.m_matstates->push_back(new TrackStateOnSurface(
-                nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+                nullptr, std::move(cvlTP), std::move(mefot)));
             }
             //
             if (m_cacheLastMatLayer) {
@@ -4556,7 +4556,7 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
       tInX0, scatAngles, std::move(energyLoss), *lay.surfaceRepresentation().baseSurface());
     // push it to the material states
     cache.m_matstates->push_back(
-      new TrackStateOnSurface(nullptr, parsOnLayer.to_unique(), nullptr, std::move(meot)));
+      new TrackStateOnSurface(nullptr, parsOnLayer.to_unique(), std::move(meot)));
  
   }
 }
@@ -5128,7 +5128,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         dInX0, newsa, std::move(eloss), *((nextPar->associatedSurface()).baseSurface()));
 
       cache.m_matstates->push_back(
-        new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), nullptr, std::move(mefot)));
+        new TrackStateOnSurface(nullptr, ManagedTrackParmPtr(nextPar).to_unique(), std::move(mefot)));
  
       ATH_MSG_DEBUG("  [M] Collecting material from dense volume '"
                     << cache.m_currentDense->volumeName() << "', t/X0 = " << dInX0);

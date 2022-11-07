@@ -23,7 +23,7 @@ namespace MuonCombined {
     const Trk::Track* MuGirlTag::primaryTrack() const { return combinedTrack(); }
     ElementLink<TrackCollection> MuGirlTag::combinedTrackLink() const { return m_combLink; }
     ElementLink<TrackCollection> MuGirlTag::updatedExtrapolatedTrackLink() const { return m_meLink; }
-    void MuGirlTag::setUpdatedExtrapolatedTrack(ElementLink<TrackCollection> melink) { m_meLink = melink; }
+    void MuGirlTag::setUpdatedExtrapolatedTrack(const ElementLink<TrackCollection>& melink) { m_meLink = melink; }
 
     std::string MuGirlTag::name() const { return "MuGirlTag"; }
     std::string MuGirlTag::toString() const { return name(); }

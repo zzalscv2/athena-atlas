@@ -27,8 +27,7 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
   const Trk::TrackParameters* trackParameters = dynamic_cast<const Trk::TrackParameters*>(createTransFromPStore( &m_parametersCnv, persObj->m_trackParameters, log ));
 
   std::unique_ptr<const Trk::FitQuality>  fitQ(createTransFromPStore( &m_fitQCnv, persObj->m_fitQualityOnSurface, log));
-  auto fitQos = fitQ ? std::make_unique<Trk::FitQualityOnSurface>(*fitQ) : nullptr;
-
+  auto fitQos = fitQ ? Trk::FitQualityOnSurface(*fitQ) : Trk::FitQualityOnSurface{};
 
   ITPConverterFor<Trk::MaterialEffectsBase> *matBaseCnv = nullptr;  
   const Trk::MaterialEffectsBase* materialEffects = createTransFromPStore( &matBaseCnv, persObj->m_materialEffects, log );
@@ -43,9 +42,9 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
   // which did allow reading  such tracks.  So defer setting these pointers
   // until after the checks,
   *transObj = Trk::TrackStateOnSurface(
+    fitQos,
     nullptr,
     std::unique_ptr<const Trk::TrackParameters>(trackParameters),
-    std::move(fitQos),
     nullptr,
     types,
     hints);
@@ -71,13 +70,11 @@ transToPers( const Trk::TrackStateOnSurface *transObj, Trk::TrackStateOnSurface_
                                              log );
 
   auto fitQos =
-    (persistify_all && transObj->fitQualityOnSurface())
-      ? std::make_unique<Trk::FitQuality>(*(transObj->fitQualityOnSurface()))
+    persistify_all
+      ? std::make_unique<Trk::FitQuality>(transObj->fitQualityOnSurface())
       : nullptr;
 
-  persObj->m_fitQualityOnSurface = toPersistent( &m_fitQCnv,
-                                                 fitQos.get(),
-                                                 log ); 
+  persObj->m_fitQualityOnSurface = toPersistent(&m_fitQCnv, fitQos.get(), log);
 
   ITPConverterFor<Trk::MeasurementBase>  *measureCnv = nullptr;
   persObj->m_measurementOnTrack = toPersistent( &measureCnv,

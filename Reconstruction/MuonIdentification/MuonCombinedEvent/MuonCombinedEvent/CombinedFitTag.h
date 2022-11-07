@@ -39,7 +39,7 @@ namespace MuonCombined {
         ElementLink<TrackCollection> combinedTrackLink() const;
 
         /** set combined track ElementLink*/
-        void setCombinedTrackLink(ElementLink<TrackCollection> combLink);
+        void setCombinedTrackLink(const ElementLink<TrackCollection>& combLink);
 
         /** access to MuonCandidate */
         const MuonCandidate& muonCandidate() const;
@@ -51,7 +51,7 @@ namespace MuonCombined {
         ElementLink<TrackCollection> updatedExtrapolatedTrackLink() const;
 
         /** set update extrapolated track ElementLink */
-        void setUpdatedExtrapolatedTrackLink(ElementLink<TrackCollection> MELink);
+        void setUpdatedExtrapolatedTrackLink(const ElementLink<TrackCollection>& MELink);
 
         /** store inner match quality info */
         void innerMatch(double chi2, int dof, double prob);
@@ -66,7 +66,7 @@ namespace MuonCombined {
         double matchProb() const;
 
         /** set field integral measurements*/
-        void fieldIntegral(Rec::FieldIntegral fieldI);
+        void fieldIntegral(const Rec::FieldIntegral& fieldI);
 
         /** get field integral measurements*/
         Rec::FieldIntegral fieldIntegral() const;

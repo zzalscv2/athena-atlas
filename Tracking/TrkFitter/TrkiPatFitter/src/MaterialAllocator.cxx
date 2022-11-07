@@ -727,10 +727,10 @@ namespace Trk
 
     // convert back to TSOS
     for (const auto& m : leadingMeasurements)
-      leadingTSOS->emplace_back(new TrackStateOnSurface(nullptr,
-                                                     nullptr,
-                                                     nullptr,
-                                                      m->materialEffects()->uniqueClone()));
+      leadingTSOS->emplace_back(
+        new TrackStateOnSurface(nullptr,
+                                nullptr,
+                                m->materialEffects()->uniqueClone()));
 
     deleteMaterial(extrapolatedTSOS.release(), garbage);
 

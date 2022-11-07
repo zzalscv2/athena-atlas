@@ -930,7 +930,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
   //
   auto tsosn = DataVector<const Trk::TrackStateOnSurface>();
 
-  tsosn.push_back(new Trk::TrackStateOnSurface(nullptr,Tp.convert(true),nullptr,nullptr,(*s)->types()));
+  tsosn.push_back(new Trk::TrackStateOnSurface(nullptr,Tp.convert(true),nullptr,(*s)->types()));
 
   // Copy old information to new track
   //
@@ -945,7 +945,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
     if(mb) {
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>  typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Measurement);
-      tsosn.push_back(new Trk::TrackStateOnSurface(std::move(mb),nullptr,nullptr,nullptr,typePattern));
+      tsosn.push_back(new Trk::TrackStateOnSurface(std::move(mb),nullptr,nullptr,typePattern));
     }
   }
 
@@ -956,7 +956,7 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>  typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
     tsosn.push_back
-      (new Trk::TrackStateOnSurface(std::move(mb),m_parameters.convert(true),nullptr,nullptr,typePattern));
+      (new Trk::TrackStateOnSurface(std::move(mb),m_parameters.convert(true),nullptr,typePattern));
   }
 
   // New fit quality production

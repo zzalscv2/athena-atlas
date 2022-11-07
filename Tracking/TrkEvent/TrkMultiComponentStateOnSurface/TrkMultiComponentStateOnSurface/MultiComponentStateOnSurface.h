@@ -58,9 +58,9 @@ public:
       a single track paramters vector is now repleaced with a pointer to a
      multi-component state */
   MultiComponentStateOnSurface(
+    const FitQualityOnSurface&,
     std::unique_ptr<const MeasurementBase>,
     MultiComponentState&&,
-    std::unique_ptr<const FitQualityOnSurface>,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr,
     double modeQoverP = 0.);
 
@@ -68,18 +68,18 @@ public:
    * of the track parameters to be passed to the Trk::TrackStateOnSurface base
    * class */
   MultiComponentStateOnSurface(
+    const FitQualityOnSurface&,
     std::unique_ptr<const MeasurementBase>,
     std::unique_ptr<const TrackParameters>,
     MultiComponentState&&,
-    std::unique_ptr<const FitQualityOnSurface>,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack = nullptr,
     double modeQoverP = 0.);
 
   /** Create TrackStateOnSurface with TrackStateOnSurfaceType. */
   MultiComponentStateOnSurface(
+    const FitQualityOnSurface&,
     std::unique_ptr<const MeasurementBase>,
     MultiComponentState&&,
-    std::unique_ptr<const FitQualityOnSurface>,
     std::unique_ptr<const MaterialEffectsBase>,
     const std ::bitset<NumberOfTrackStateOnSurfaceTypes>&,
     double modeQoverP = 0.);
@@ -88,10 +88,10 @@ public:
    * of the track parameters to be passed to the base and also a
    * TrackStateOnSurfaceType */
   MultiComponentStateOnSurface(
+    const FitQualityOnSurface&,
     std::unique_ptr<const MeasurementBase>,
     std::unique_ptr<const TrackParameters>,
     MultiComponentState&&,
-    std::unique_ptr<const FitQualityOnSurface>,
     std::unique_ptr<const MaterialEffectsBase>,
     const std ::bitset<NumberOfTrackStateOnSurfaceTypes>& types,
     double modeQoverP = 0.);

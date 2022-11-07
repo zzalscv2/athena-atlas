@@ -117,7 +117,7 @@ void compare (const Trk::TrackStateOnSurface& p1,
               const Trk::TrackStateOnSurface& p2)
 {
   if (p1.fitQualityOnSurface())
-    compare (*p1.fitQualityOnSurface(), *p2.fitQualityOnSurface());
+    compare (p1.fitQualityOnSurface(), p2.fitQualityOnSurface());
   else
     assert (!p2.fitQualityOnSurface());
 
@@ -170,15 +170,14 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Trk::FitQualityOnSurface fq (10, 20);
   Trk::MaterialEffectsOnTrack me (12.5, psurf);
 
-  Trk::TrackStateOnSurface trans1 (std::make_unique<Trk::PseudoMeasurementOnTrack>(pmeas),
+  Trk::TrackStateOnSurface trans1 (fq,
+                                   std::make_unique<Trk::PseudoMeasurementOnTrack>(pmeas),
                                    std::make_unique<Trk::Perigee> (perigee),
-                                   std::make_unique<Trk::FitQualityOnSurface> (fq),
                                    std::make_unique<Trk::MaterialEffectsOnTrack> (me),
                                    nullptr);
   testit (trans1);
 
   Trk::TrackStateOnSurface trans2 (std::make_unique<Trk::PseudoMeasurementOnTrack> (pmeas),
-                                   nullptr,
                                    nullptr,
                                    nullptr,
                                    nullptr);
@@ -187,19 +186,17 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Trk::TrackStateOnSurface trans3 (nullptr,
                                    std::make_unique<Trk::Perigee> (perigee),
                                    nullptr,
-                                   nullptr,
                                    nullptr);
   testit (trans3);
 
-  Trk::TrackStateOnSurface trans4 (nullptr,
+  Trk::TrackStateOnSurface trans4 (fq,
                                    nullptr,
-                                   std::make_unique<Trk::FitQualityOnSurface> (fq),
+                                   nullptr,
                                    nullptr,
                                    nullptr);
   testit (trans4);
 
   Trk::TrackStateOnSurface trans5 (nullptr,
-                                   nullptr,
                                    nullptr,
                                    std::make_unique<Trk::MaterialEffectsOnTrack> (me),
                                    nullptr);
