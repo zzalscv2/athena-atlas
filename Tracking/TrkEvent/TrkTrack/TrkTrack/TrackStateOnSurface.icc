@@ -8,10 +8,10 @@ Trk::TrackStateOnSurface::clone() const
   return new TrackStateOnSurface(*this);
 }
 
-inline const Trk::FitQualityOnSurface*
+inline const Trk::FitQualityOnSurface&
 Trk::TrackStateOnSurface::fitQualityOnSurface() const
 {
-  return m_fitQualityOnSurface.get();
+  return m_fitQualityOnSurface;
 }
 
 inline const Trk::TrackParameters*
@@ -68,7 +68,7 @@ Trk::TrackStateOnSurface::setFlags()
   if (m_trackParameters) {
     m_typeFlags |= 1 << Parameter;
   }
-  if (m_fitQualityOnSurface) {
+  if(m_fitQualityOnSurface){
     m_typeFlags |= 1 << FitQuality;
   }
 }

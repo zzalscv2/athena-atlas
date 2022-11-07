@@ -46,7 +46,7 @@ namespace MuonCombined {
         ElementLink<TrackCollection> updatedExtrapolatedTrackLink() const;
 
         /** set update extrapolated track*/
-        void setUpdatedExtrapolatedTrack(ElementLink<TrackCollection> melink);
+        void setUpdatedExtrapolatedTrack(const ElementLink<TrackCollection>& melink);
 
         std::vector<const Muon::MuonSegment*> associatedSegments() const override;
 

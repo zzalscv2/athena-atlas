@@ -6865,11 +6865,12 @@ namespace Trk {
       }
     }
 
-    return std::make_unique<TrackStateOnSurface>(std::move(measurement),
-                                                 std::move(trackpar),
-                                                 std::move(fitQual),
-                                                 std::move(mateff),
-                                                 typePattern);
+    return std::make_unique<TrackStateOnSurface>(
+      (fitQual ? *fitQual : Trk::FitQualityOnSurface{}),
+      std::move(measurement),
+      std::move(trackpar),
+      std::move(mateff),
+      typePattern);
   }
 
   void GlobalChi2Fitter::makeTrackFillDerivativeMatrix(

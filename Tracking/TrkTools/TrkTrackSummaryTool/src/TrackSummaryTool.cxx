@@ -380,15 +380,15 @@ Trk::TrackSummaryTool::processTrackStates(
     }   // if type measurement, scatterer or outlier
 
     if (isMeasurement) {
-      if (const auto *const pFitQuality{ trackState.fitQualityOnSurface() };
-          pFitQuality and pFitQuality->numberDoF() > 0) {
+      if (const auto& pFitQuality{ trackState.fitQualityOnSurface() };
+          pFitQuality and pFitQuality.numberDoF() > 0) {
         ++cntAddChi2;
-        if (const auto& chiSq{ pFitQuality->chiSquared() };
+        if (const auto& chiSq{ pFitQuality.chiSquared() };
             chiSq > 1.e5) { // limit unphysical values and protect against FPE
           chi2Sum += 1.e5;
           chi2Sum2 += 1.e10;
         } else {
-          const float chi2add = chiSq / pFitQuality->numberDoF();
+          const float chi2add = chiSq / pFitQuality.numberDoF();
           chi2Sum += chi2add;
           chi2Sum2 += chi2add * chi2add;
         }

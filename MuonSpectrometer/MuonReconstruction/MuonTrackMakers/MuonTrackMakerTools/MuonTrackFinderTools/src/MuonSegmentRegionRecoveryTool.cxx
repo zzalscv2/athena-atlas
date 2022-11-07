@@ -798,7 +798,7 @@ namespace Muon {
                                     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
                                     typePattern.set(Trk::TrackStateOnSurface::Measurement);
                                     Trk::TrackStateOnSurface* tsos =
-                                        new Trk::TrackStateOnSurface(hit->uniqueClone(), std::move(hitPars), nullptr, nullptr, typePattern);
+                                        new Trk::TrackStateOnSurface(hit->uniqueClone(), std::move(hitPars), nullptr, typePattern);
                                     states.emplace_back(tsos);
                                     const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(hit);
                                     if (mdt) newMdtHashes.insert(mdt->collectionHash());

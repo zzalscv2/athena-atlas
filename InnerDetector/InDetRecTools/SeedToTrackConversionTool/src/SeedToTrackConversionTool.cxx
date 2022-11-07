@@ -113,7 +113,7 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
   if (per) {
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
-    const Trk::TrackStateOnSurface* pertsos = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, nullptr, typePattern);
+    const Trk::TrackStateOnSurface* pertsos = new Trk::TrackStateOnSurface(nullptr, std::move(per), nullptr, typePattern);
     auto traj = DataVector<const Trk::TrackStateOnSurface>();
     traj.push_back(pertsos);
     for (const Trk::PrepRawData* prd: prdsInSp) {
@@ -124,7 +124,7 @@ void InDet::SeedToTrackConversionTool::executeSiSPSeedSegments(SeedToTrackConver
         typePattern.set(Trk::TrackStateOnSurface::Measurement);
         std::unique_ptr<const Trk::RIO_OnTrack> rot(m_rotcreator->correct(*prd, *thispar));
         if (rot) {
-          const Trk::TrackStateOnSurface* tsos = new Trk::TrackStateOnSurface(std::move(rot), thispar->uniqueClone(), nullptr, nullptr, typePattern);
+          const Trk::TrackStateOnSurface* tsos = new Trk::TrackStateOnSurface(std::move(rot), thispar->uniqueClone(), nullptr, typePattern);
           traj.push_back(tsos);
           prevpar = std::move(thispar);
         }

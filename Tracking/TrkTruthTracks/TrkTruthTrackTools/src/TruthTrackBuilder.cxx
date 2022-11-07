@@ -151,7 +151,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Perigee);
     
-   const Trk::TrackStateOnSurface *pertsos=new Trk::TrackStateOnSurface(nullptr,std::move(per),nullptr,nullptr,typePattern);
+   const Trk::TrackStateOnSurface *pertsos=new Trk::TrackStateOnSurface(nullptr,std::move(per),nullptr,typePattern);
    auto traj = DataVector<const Trk::TrackStateOnSurface>();
    traj.push_back(pertsos);
    
@@ -189,7 +189,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
           continue;
         }
         // create the ROTs for the reference trajectory
-        const Trk::TrackStateOnSurface *tsos=new Trk::TrackStateOnSurface(std::move(rot),thispar->uniqueClone(),nullptr,nullptr,typePattern);
+        const Trk::TrackStateOnSurface *tsos=new Trk::TrackStateOnSurface(std::move(rot),thispar->uniqueClone(),nullptr,typePattern);
         traj.push_back(tsos);
         prevpar=std::move(thispar);
    }
@@ -239,7 +239,6 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
        for (int j = 0; j < (int)measset.size(); j++) {
          traj2.push_back(new Trk::TrackStateOnSurface(
            std::unique_ptr<const MeasurementBase>(measset[j]),
-           nullptr,
            nullptr,
            nullptr,
            typePattern2));

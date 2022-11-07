@@ -359,7 +359,7 @@ int TRTTrackHoleSearchTool::extrapolateBetweenHits(const Trk::TrackParameters* s
 			
 			std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
 			typePattern.set(Trk::TrackStateOnSurface::Hole);
-			holes->push_back( new Trk::TrackStateOnSurface(nullptr, (*step)->uniqueClone(), nullptr, nullptr, typePattern) );
+			holes->push_back( new Trk::TrackStateOnSurface(nullptr, (*step)->uniqueClone(), nullptr, typePattern) );
 			hole_count++;
 			previous_id = id;
 		} // end loop over parameters from extrapolation

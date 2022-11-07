@@ -1155,7 +1155,7 @@ namespace MuonCombined {
                     ctx, *pars, meas->associatedSurface(), Trk::anyDirection, false, Trk::MagneticFieldProperties(Trk::NoField))};
                 if (!exPars) { ATH_MSG_VERBOSE("Could not propagate Track to segment surface"); }
                 Trk::TrackStateOnSurface* trackState =
-                    new Trk::TrackStateOnSurface(meas->uniqueClone(), std::move(exPars), nullptr, nullptr, typePattern);
+                    new Trk::TrackStateOnSurface(meas->uniqueClone(), std::move(exPars), nullptr, typePattern);
                 trackStateOnSurfaces.push_back(trackState);
             }  // end segment loop
         }

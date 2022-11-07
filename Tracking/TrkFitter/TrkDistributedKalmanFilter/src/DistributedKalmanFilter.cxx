@@ -833,8 +833,8 @@ Trk::TrackStateOnSurface* Trk::DistributedKalmanFilter::createTrackStateOnSurfac
   if (pRIO == nullptr) {
     return nullptr;
   }
-  auto pFQ = std::make_unique<const Trk::FitQualityOnSurface>(pN->getChi2(), pN->getNdof());
-  pTSS = new Trk::TrackStateOnSurface(std::move(pRIO), std::move(pTP), std::move(pFQ));
+  auto pFQ = Trk::FitQualityOnSurface(pN->getChi2(), pN->getNdof());
+  pTSS = new Trk::TrackStateOnSurface(pFQ, std::move(pRIO), std::move(pTP));
   return pTSS;
 }
 
@@ -1128,7 +1128,7 @@ Trk::DistributedKalmanFilter::fit(
       typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
       const TrackStateOnSurface* pTSOS =
-        new TrackStateOnSurface(nullptr, std::move(pMP), nullptr, nullptr, typePattern);
+        new TrackStateOnSurface(nullptr, std::move(pMP), nullptr, typePattern);
 
       pvTS.push_back(pTSOS);
 

@@ -46,7 +46,7 @@ namespace MuonCombined {
         const Trk::Track* updatedExtrapolatedTrack() const;
 
         /** set update extrapolated track*/
-        void setUpdatedExtrapolatedTrack(ElementLink<TrackCollection> meLink);
+        void setUpdatedExtrapolatedTrack(const ElementLink<TrackCollection>& meLink);
 
         /** access segments */
         const std::vector<ElementLink<Trk::SegmentCollection> >& segments() const;

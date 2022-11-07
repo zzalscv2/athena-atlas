@@ -681,16 +681,16 @@ namespace Rec {
         for (const Trk::MeasurementBase* const in_meas : spectrometerMeasurements) {
             if (frontParameters) {
                 trackStateOnSurfaces.push_back(
-                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(frontParameters), nullptr, nullptr, typeP));
+                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(frontParameters), nullptr, typeP));
             } else if (in_meas == midMeasurement) {
                 trackStateOnSurfaces.push_back(
-                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(midParameters), nullptr, nullptr, typeP));
+                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(midParameters), nullptr, typeP));
             } else if (backParameters && in_meas == spectrometerMeasurements.back()) {
                 trackStateOnSurfaces.push_back(
-                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(backParameters), nullptr, nullptr, typeP));
+                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), std::move(backParameters), nullptr, typeP));
             } else {
                 trackStateOnSurfaces.push_back(
-                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), nullptr, nullptr, nullptr, typeM));
+                    new Trk::TrackStateOnSurface(in_meas->uniqueClone(), nullptr, nullptr, typeM));
             }
         }
 
@@ -1103,7 +1103,7 @@ namespace Rec {
                 if (vertexInFit) type.set(Trk::TrackStateOnSurface::Measurement);
 
                 trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(
-                    std::move(vertexInFit), badfit->perigeeParameters()->uniqueClone(), nullptr, nullptr, type));
+                    std::move(vertexInFit), badfit->perigeeParameters()->uniqueClone(),  nullptr, type));
 
                 for (Trk::TrackStates::const_iterator s = badfit->trackStateOnSurfaces()->begin() + 1;
                      s != badfit->trackStateOnSurfaces()->end(); ++s) {
@@ -1625,7 +1625,7 @@ namespace Rec {
                 typePatternScat.set(Trk::TrackStateOnSurface::Scatterer);
 
                 std::unique_ptr<Trk::TrackStateOnSurface> newTSOS =
-                    std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(parsNew), nullptr, std::move(meotNew), typePatternScat);
+                    std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(parsNew), std::move(meotNew), typePatternScat);
 
                 trackStateOnSurfaces.push_back(std::move(newTSOS));
                 ATH_MSG_DEBUG(" add new TSOS for ID ");
@@ -2221,7 +2221,7 @@ namespace Rec {
                 typePatternScat.set(Trk::TrackStateOnSurface::Scatterer);
 
                 const Trk::TrackStateOnSurface* newTSOS =
-                    new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), nullptr, std::move(meotNew), typePatternScat);
+                    new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), std::move(meotNew), typePatternScat);
                 trackStateOnSurfaces.push_back(newTSOS);
 
                 ATH_MSG_DEBUG(" old Calo scatterer had sigmaDeltaPhi mrad      " << scat->sigmaDeltaPhi() * 1000 << " sigmaDeltaTheta mrad "
@@ -2775,7 +2775,7 @@ namespace Rec {
                 std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type;
                 type.set(Trk::TrackStateOnSurface::CaloDeposit);
 
-                TSOS = new Trk::TrackStateOnSurface(nullptr, (**s).trackParameters()->uniqueClone(), nullptr, std::move(materialEffects), type);
+                TSOS = new Trk::TrackStateOnSurface(nullptr, (**s).trackParameters()->uniqueClone(),std::move(materialEffects), type);
                 trackStateOnSurfaces.push_back(TSOS);
                 ++s;
             } else {
@@ -3483,7 +3483,7 @@ namespace Rec {
                         type.set(Trk::TrackStateOnSurface::Measurement);
                     }
                     trackStateOnSurfaces.push_back(
-                        new Trk::TrackStateOnSurface(std::move(measurementBase), std::move(parameters), nullptr, nullptr, type));
+                        new Trk::TrackStateOnSurface(std::move(measurementBase), std::move(parameters),  nullptr, type));
                 } else {
                     trackStateOnSurfaces.push_back(tsos->clone());
                 }
@@ -3512,7 +3512,7 @@ namespace Rec {
                     std::unique_ptr<Trk::MeasurementBase> measurementBase;
                     measurementBase = tsos->measurementOnTrack()->uniqueClone();
                     trackStateOnSurfaces.push_back(
-                        new Trk::TrackStateOnSurface(std::move(measurementBase), std::move(trackParameters), nullptr, nullptr, type));
+                        new Trk::TrackStateOnSurface(std::move(measurementBase), std::move(trackParameters), nullptr, type));
                 }
                 continue;
             } else if (!tsos->measurementOnTrack() && tsos->trackParameters() &&
@@ -3549,7 +3549,7 @@ namespace Rec {
                     materialEffects = tsos->materialEffectsOnTrack()->uniqueClone();
                 }
                 trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(std::move(measurementBase), std::move(trackParameters),
-                                                                                  nullptr, std::move(materialEffects), type));
+                                                                            std::move(materialEffects), type));
             } else {
                 trackStateOnSurfaces.push_back(tsos->clone());
             }

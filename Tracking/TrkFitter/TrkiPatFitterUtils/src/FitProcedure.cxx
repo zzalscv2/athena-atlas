@@ -104,7 +104,7 @@ FitProcedure::constructTrack(
   trackStateOnSurfaces.reserve(size);
   std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffects{};
   const FitMeasurement* fitMeasurement = measurements.front();
-  std::unique_ptr<const FitQualityOnSurface> fitQoS{};
+  const FitQualityOnSurface fitQoS{};
   std::unique_ptr<const MaterialEffectsBase> materialEffects{};
   std::unique_ptr<const MeasurementBase> measurementBase{};
   const Surface* surface = nullptr;
@@ -119,12 +119,13 @@ FitProcedure::constructTrack(
   unsigned tsos = 0;
   std::unique_ptr<const Perigee> perigee(parameters.perigee());
   typePattern.set(TrackStateOnSurface::Perigee);
-  trackStateOnSurfaces.push_back(new TrackStateOnSurface(std::move(measurementBase),
-                                                          std::move(perigee),
-                                                          std::move(fitQoS),
-                                                          std::move(materialEffects),
-                                                          typePattern,
-                                                          std::move(alignmentEffects)));
+  trackStateOnSurfaces.push_back(
+    new TrackStateOnSurface(fitQoS,
+                            std::move(measurementBase),
+                            std::move(perigee),
+                            std::move(materialEffects),
+                            typePattern,
+                            std::move(alignmentEffects)));
   ++tsos;
 
   // append leading TSOS to perigee
@@ -168,9 +169,9 @@ FitProcedure::constructTrack(
           }
           typePattern.set(TrackStateOnSurface::Parameter);
           trackStateOnSurfaces.push_back(
-            new TrackStateOnSurface(std::move(measurementBase),
+            new TrackStateOnSurface(fitQoS,
+                                    std::move(measurementBase),
                                     std::move(trackParameters),
-                                    std::move(fitQoS),
                                     std::move(materialEffects),
                                     typePattern,
                                     std::move(alignmentEffects)));
@@ -180,7 +181,6 @@ FitProcedure::constructTrack(
       fitMeasurement = m;
       surface = m->surface();
       measurementBase.reset();
-      fitQoS.reset();
       materialEffects.reset();
       typePattern = defaultPattern;
       alignmentEffects.reset();
@@ -209,15 +209,14 @@ FitProcedure::constructTrack(
         }
         typePattern.set(TrackStateOnSurface::Parameter);
         trackStateOnSurfaces.push_back(
-          new TrackStateOnSurface(std::move(measurementBase),
+          new TrackStateOnSurface(fitQoS,
+                                  std::move(measurementBase),
                                   std::move(trackParameters),
-                                  std::move(fitQoS),
                                   std::move(materialEffects),
                                   typePattern,
                                   std::move(alignmentEffects)));
         ++tsos;
         fitMeasurement = m;
-        fitQoS.reset();
         materialEffects.reset();
         typePattern = defaultPattern;
         alignmentEffects.reset();
@@ -338,12 +337,13 @@ FitProcedure::constructTrack(
     return nullptr;
   }
   typePattern.set(TrackStateOnSurface::Parameter);
-  trackStateOnSurfaces.push_back(new TrackStateOnSurface(std::move(measurementBase),
-                                                          std::move(trackParameters),
-                                                          std::move(fitQoS),
-                                                          std::move(materialEffects),
-                                                          typePattern,
-                                                          std::move(alignmentEffects)));
+  trackStateOnSurfaces.push_back(
+    new TrackStateOnSurface(fitQoS,
+                            std::move(measurementBase),
+                            std::move(trackParameters),
+                            std::move(materialEffects),
+                            typePattern,
+                            std::move(alignmentEffects)));
   ++tsos;
 
   // construct track

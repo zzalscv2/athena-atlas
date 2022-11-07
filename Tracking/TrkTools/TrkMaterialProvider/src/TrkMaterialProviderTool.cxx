@@ -1217,7 +1217,7 @@ void Trk::TrkMaterialProviderTool::updateVectorMS(Trk::TrackStates* inputTSOS,
            // make new TSOS
            const Trk::TrackStateOnSurface* newTSOS =
              new Trk::TrackStateOnSurface(
-               nullptr, std::move(pars), nullptr, std::move(newMeot), typePattern);
+               nullptr, std::move(pars), std::move(newMeot), typePattern);
            Trk::TrackStates* newTSOSvector =
              new Trk::TrackStates(SG::VIEW_ELEMENTS);
            newTSOSvector->push_back(&(*newTSOS));
@@ -1530,7 +1530,7 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
 
         // make new TSOS
         const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface(
-          nullptr, std::move(pars), nullptr, std::move(meotLast), typePattern);
+          nullptr, std::move(pars), std::move(meotLast), typePattern);
 
         newTSOSvector->push_back(newTSOS);
 
@@ -1577,7 +1577,7 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
           //        make new TSOS
           const Trk::TrackStateOnSurface* newTSOS =
             new Trk::TrackStateOnSurface(
-              nullptr, std::move(pars), nullptr, std::move(meotLast), typePattern);
+              nullptr, std::move(pars), std::move(meotLast), typePattern);
           newTSOSvector->push_back(newTSOS);
 
           X0_tot = 0.;
@@ -1659,10 +1659,10 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
           //
           const Trk::TrackStateOnSurface* newTSOSFirst =
             new Trk::TrackStateOnSurface(
-              nullptr, std::move(parsFirst), nullptr, std::move(meotFirst), typePattern);
+              nullptr, std::move(parsFirst), std::move(meotFirst), typePattern);
           const Trk::TrackStateOnSurface* newTSOS =
             new Trk::TrackStateOnSurface(
-              nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePattern);
+              nullptr, std::move(parsLast), std::move(meotLast), typePattern);
 
 
           newTSOSvector->push_back(newTSOSFirst);
@@ -1847,13 +1847,13 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
         //
         const Trk::TrackStateOnSurface* newTSOSFirst =
           new Trk::TrackStateOnSurface(
-            nullptr, std::move(parsFirst), nullptr, std::move(meotFirst), typePattern);
+            nullptr, std::move(parsFirst), std::move(meotFirst), typePattern);
         const Trk::TrackStateOnSurface* newTSOS =
           (elossFlag != 0
              ? new Trk::TrackStateOnSurface(
-                 nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePatternDeposit)
+                 nullptr, std::move(parsLast), std::move(meotLast), typePatternDeposit)
              : new Trk::TrackStateOnSurface(
-                 nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePattern));
+                 nullptr, std::move(parsLast), std::move(meotLast), typePattern));
         newTSOSvector->push_back(newTSOSFirst);
         newTSOSvector->push_back(newTSOS);
       } else {
@@ -1887,12 +1887,12 @@ Trk::TrkMaterialProviderTool::modifyTSOSvector(const std::vector<const Trk::Trac
 
         const Trk::TrackStateOnSurface* newTSOSFirst =
           new Trk::TrackStateOnSurface(
-            nullptr, std::move(parsFirst), nullptr, std::move(meotFirst), typePatternScat);
+            nullptr, std::move(parsFirst), std::move(meotFirst), typePatternScat);
         const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface(
-          nullptr, std::move(pars), nullptr, std::move(meot), typePatternDeposit);
+          nullptr, std::move(pars), std::move(meot), typePatternDeposit);
         const Trk::TrackStateOnSurface* newTSOSLast =
           new Trk::TrackStateOnSurface(
-            nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePatternScat);
+            nullptr, std::move(parsLast), std::move(meotLast), typePatternScat);
 
         newTSOSvector->push_back(newTSOSFirst);
         newTSOSvector->push_back(newTSOS);

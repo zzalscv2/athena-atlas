@@ -117,7 +117,7 @@ const Trk::Track * TrackHandle_xAODTrackParticle::provide_pathInfoTrkTrack() con
         continue;
       if (!common()->trackSanityHelper()->isSafe(p))
         continue;
-      trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr,nullptr));
+      trackStateOnSurfaces->push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
     }
   // }
 

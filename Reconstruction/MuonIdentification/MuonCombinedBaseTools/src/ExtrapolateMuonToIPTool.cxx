@@ -161,7 +161,7 @@ std::unique_ptr<Trk::Track> ExtrapolateMuonToIPTool::extrapolate(const Trk::Trac
                 std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
                 typePattern.set(Trk::TrackStateOnSurface::Perigee);
                 trackStateOnSurfaces.push_back(
-                    new Trk::TrackStateOnSurface(nullptr, ipPerigee->uniqueClone(), nullptr, nullptr, typePattern));
+                    new Trk::TrackStateOnSurface(nullptr, ipPerigee->uniqueClone(), nullptr, typePattern));
             }
         }
 
@@ -172,7 +172,7 @@ std::unique_ptr<Trk::Track> ExtrapolateMuonToIPTool::extrapolate(const Trk::Trac
     if (ipPerigee) {
         std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
         typePattern.set(Trk::TrackStateOnSurface::Perigee);
-        trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr, ipPerigee->uniqueClone(), nullptr, nullptr, typePattern));
+        trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr, ipPerigee->uniqueClone(), nullptr, typePattern));
     }
     ATH_MSG_DEBUG(" creating new track ");
 

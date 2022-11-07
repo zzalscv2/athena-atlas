@@ -22,7 +22,7 @@ namespace MuonCombined {
 
     const Trk::Track* MuGirlLowBetaTag::updatedExtrapolatedTrack() const { return m_meLink.isValid() ? *m_meLink : nullptr; }
 
-    void MuGirlLowBetaTag::setUpdatedExtrapolatedTrack(ElementLink<TrackCollection> meLink) { m_meLink = meLink; }
+    void MuGirlLowBetaTag::setUpdatedExtrapolatedTrack(const ElementLink<TrackCollection>& meLink) { m_meLink = meLink; }
 
     const std::vector<ElementLink<Trk::SegmentCollection> >& MuGirlLowBetaTag::segments() const { return m_segments; }
 

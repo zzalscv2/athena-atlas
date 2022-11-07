@@ -34,13 +34,13 @@ namespace MuonCombined {
 
     const Trk::Track* CombinedFitTag::primaryTrack() const { return combinedTrack(); }
     ElementLink<TrackCollection> CombinedFitTag::combinedTrackLink() const { return m_combLink; }
-    void CombinedFitTag::setCombinedTrackLink(ElementLink<TrackCollection> combLink) { m_combLink = combLink; }
+    void CombinedFitTag::setCombinedTrackLink(const ElementLink<TrackCollection>& combLink) { m_combLink = combLink; }
     ElementLink<TrackCollection> CombinedFitTag::updatedExtrapolatedTrackLink() const { return m_MELink; }
-    void CombinedFitTag::setUpdatedExtrapolatedTrackLink(ElementLink<TrackCollection> MELink) { m_MELink = MELink; }
+    void CombinedFitTag::setUpdatedExtrapolatedTrackLink(const ElementLink<TrackCollection>& MELink) { m_MELink = MELink; }
     double CombinedFitTag::matchChi2() const { return m_matchChi2; }
     int CombinedFitTag::matchDoF() const { return m_matchDoF; }
     double CombinedFitTag::matchProb() const { return m_matchProb; }
-    void CombinedFitTag::fieldIntegral(Rec::FieldIntegral fieldI) { m_fieldIntegral = fieldI; }
+    void CombinedFitTag::fieldIntegral(const Rec::FieldIntegral& fieldI) { m_fieldIntegral = fieldI; }
     Rec::FieldIntegral CombinedFitTag::fieldIntegral() const { return m_fieldIntegral; }
     void CombinedFitTag::momentumBalanceSignificance(double m) { m_momentumBalanceSignificance = m; }
     double CombinedFitTag::momentumBalanceSignificance() const { return m_momentumBalanceSignificance; }

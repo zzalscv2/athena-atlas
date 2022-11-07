@@ -136,7 +136,7 @@ public:
     CaloDeposit = 8,
 
     /**
-     * This TSOS contains a Trk::MeasurementBase
+     * This TSOS contains a Trk::ParameterBase
      */
     Parameter = 9,
 
@@ -221,41 +221,44 @@ public:
   TrackStateOnSurface();
 
   /**
-   * Partial constructor.
+   * Partial constructors
    *
    * The objects passed in belong to the this object, or to the Track
    * to which this FQOS will be assigned.
+   *
+   * These  ctors will set appropriate flags for all non-null objects passed
    */
+  explicit TrackStateOnSurface(
+    const FitQualityOnSurface& fitQoS,
+    std::unique_ptr<const MeasurementBase> meas,
+    std::unique_ptr<const TrackParameters> trackParameters,
+    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
+
   explicit TrackStateOnSurface(
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const FitQualityOnSurface> fitQoS,
     std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr,
     std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   /**
-   * Full constructor.
+   * Full constructors
    *
-   * The objects passed in belong to the this object
-   * @param[in] meas pointer to a MeasurementBase, or 0 if no object is being
+   * @param[in] FitQualityOnSurface (we provide an without it) 
+   * @param[in] unique pointer to a MeasurementBase, or 0 if no object is being
    *            passed.
-   * @param[in] trackParameter pointer to a TrackParameters, or 0 if no object
+   * @param[in] unigue trackParameter pointer to a TrackParameters, or 0 if no object
    *            is being passed.
-   * @param[in] fitQoS pointer to a FitQualityOnSurface, or 0 if no object is
    *            being passed.
    * @param[in] materialEffectsOnTrack pointer to a MaterialEffectsBase, or 0
    *            if no object is being passed.
    * @param[in] typePattern The pattern of 'types' which correspond to this
    *            TSoS. You create the bitset as follows:
-   *     std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
-   * typePattern(0); typePattern.set(TrackStateOnSurface::Measurement);
-   * @param[in] alignmentEffectsOnTrack pointer to a AlignmentEffectsOnTrack, or
-   * 0 if no object is being passed.
    */
   explicit TrackStateOnSurface(
+    const FitQualityOnSurface& fitQoS,
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const FitQualityOnSurface> fitQoS,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
     const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
     std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr
@@ -264,24 +267,25 @@ public:
   explicit TrackStateOnSurface(
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const FitQualityOnSurface> fitQoS,
+    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
+    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr
+  );
+
+  /**
+   * ctor with hints for slimming
+   */
+  explicit TrackStateOnSurface(
+    const FitQualityOnSurface& fitQoS,
+    std::unique_ptr<const MeasurementBase> meas,
+    std::unique_ptr<const TrackParameters> trackParameters,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
     const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
     const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
     std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr
   );
 
-  /**
-   * constructor without a FitQualityOnSurface. Both the objects passed now
-   * belong to this object, 
-   * This ctor will set appropriate flags for all non-null objects passed
-   * in (i.e. if there is a MeasurementBase, it will set the measurement flag)
-   */
-  explicit TrackStateOnSurface(
-    std::unique_ptr<const MeasurementBase> meas,
-    std::unique_ptr<const TrackParameters> trackParameters);
-
-  /**
+ /**
    * Pseudo-constructor: needed to avoid excessive RTTI
    */
   virtual TrackStateOnSurface* clone() const;
@@ -298,7 +302,7 @@ public:
   virtual ~TrackStateOnSurface() = default;
 
   /** returns 0 if there is no FQOS object assigned*/
-  const FitQualityOnSurface* fitQualityOnSurface() const;
+  const FitQualityOnSurface& fitQualityOnSurface() const;
 
   /**
    * returns trackparameters of TrackStateOnSurface, or 0 if no
@@ -372,7 +376,7 @@ private:
   /** set sensible default flags*/
   void setFlags();
 
-  std::unique_ptr<const FitQualityOnSurface> m_fitQualityOnSurface{};
+  FitQualityOnSurface m_fitQualityOnSurface{};
   std::unique_ptr<const TrackParameters> m_trackParameters{};
   std::unique_ptr<const MeasurementBase> m_measurementOnTrack{};
   std::unique_ptr<const MaterialEffectsBase> m_materialEffectsOnTrack{};

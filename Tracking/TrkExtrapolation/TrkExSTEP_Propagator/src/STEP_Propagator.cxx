@@ -2928,7 +2928,7 @@ propagateRungeKuttaImpl(Cache& cache,
           auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
             cache.m_combinedThickness, sa, std::move(eloss), cvlTP->associatedSurface());
 
-          cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+          cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), std::move(mefot)));
         }
 
         cache.m_matdump_lastpath = path;

@@ -43,8 +43,8 @@ namespace AmbiguityProcessor{
       vecTsos.push_back(newTsos);
       if((*iTsos)->type(Trk::TrackStateOnSurface::Measurement)){  //Get the chi2 and number of hits
         if ((*iTsos)->fitQualityOnSurface()) {
-          reXi2 += (*iTsos)->fitQualityOnSurface()->chiSquared();
-          nDF   += (*iTsos)->fitQualityOnSurface()->numberDoF();
+          reXi2 += (*iTsos)->fitQualityOnSurface().chiSquared();
+          nDF   += (*iTsos)->fitQualityOnSurface().numberDoF();
         }
       }
     }

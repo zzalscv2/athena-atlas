@@ -431,7 +431,6 @@ namespace Muon {
                         nullptr,
                         tsit->trackParameters()->uniqueClone(),
                         nullptr,
-                        nullptr,
                         typePattern,
                         std::move(aEOT));
                     indexAEOTs.push_back(index);
@@ -583,7 +582,6 @@ namespace Muon {
               nullptr,
               tsos->trackParameters()->uniqueClone(),
               nullptr,
-              nullptr,
               typePattern,
               std::move(aEOT));
         }
@@ -602,7 +600,6 @@ namespace Muon {
             tsosAEOTInner = std::make_unique<Trk::TrackStateOnSurface>(
               nullptr,
               tsosInner->trackParameters()->uniqueClone(),
-              nullptr,
               nullptr,
               typePattern,
               std::move(aEOTInner));

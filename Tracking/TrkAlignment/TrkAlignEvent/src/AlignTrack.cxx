@@ -290,10 +290,7 @@ namespace Trk {
 
       else if ( !tsos->type(TrackStateOnSurface::Scatterer) &&
                 !tsos->type(TrackStateOnSurface::InertMaterial)) {
-        if ( tsos->fitQualityOnSurface()!=nullptr) 
-          msg << "," << *( tsos->fitQualityOnSurface() )<<endmsg;
-        else
-          msg << ", no FitQuality!"<<endmsg;
+          msg << "," << ( tsos->fitQualityOnSurface() )<<endmsg;
       }
 
       else {
@@ -443,7 +440,7 @@ namespace Trk {
       for (; tsit!=tsit_end ; ++tsit) {
         auto newMeas  = (*tsit)->measurementOnTrack() ? (*tsit)->measurementOnTrack()->uniqueClone() : nullptr;
         auto newPars  = (*tsit)->trackParameters() ? (*tsit)->trackParameters()->uniqueClone() : nullptr;
-        auto newFitQoS= (*tsit)->fitQualityOnSurface() ? std::make_unique<Trk::FitQualityOnSurface>(*((*tsit)->fitQualityOnSurface())) : nullptr;
+        auto newFitQoS= (*tsit)->fitQualityOnSurface();
         auto meb      = (*tsit)->materialEffectsOnTrack() ? (*tsit)->materialEffectsOnTrack()->uniqueClone() : nullptr;
   
         if (meb) {
@@ -469,7 +466,12 @@ namespace Trk {
           if ((*tsit)->type(Trk::TrackStateOnSurface::TrackStateOnSurfaceType(i)))
             typePattern.set(i);
         }
-        const Trk::TrackStateOnSurface* newTsos= new Trk::TrackStateOnSurface( std::move(newMeas), std::move(newPars), std::move(newFitQoS), std::move(meb), typePattern);
+        const Trk::TrackStateOnSurface* newTsos =
+          new Trk::TrackStateOnSurface(newFitQoS,
+                                       std::move(newMeas),
+                                       std::move(newPars),
+                                       std::move(meb),
+                                       typePattern);
         newTrackStateOnSurfaces.push_back(newTsos);
       }
       

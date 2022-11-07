@@ -998,7 +998,7 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
         auto pars = m->trackParameters()->uniqueClone();
 
         // make new TSOS
-        const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface( nullptr, std::move(pars), nullptr, std::move(meotLast), typePattern );
+        const Trk::TrackStateOnSurface* newTSOS = new Trk::TrackStateOnSurface( nullptr, std::move(pars), std::move(meotLast), typePattern );
         newTSOSvector.push_back(newTSOS);
 
 
@@ -1042,7 +1042,6 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
           const Trk::TrackStateOnSurface* newTSOS =
             new Trk::TrackStateOnSurface(nullptr,
                                          std::move(pars),
-                                         nullptr,
                                          std::move(meotLast),
                                          typePattern);
           newTSOSvector.push_back(newTSOS);
@@ -1123,10 +1122,10 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
           //
           const Trk::TrackStateOnSurface* newTSOSFirst =
             new Trk::TrackStateOnSurface(
-              nullptr, std::move(parsFirst), nullptr, std::move(meotFirst), typePattern);
+              nullptr, std::move(parsFirst), std::move(meotFirst), typePattern);
           const Trk::TrackStateOnSurface* newTSOS =
             new Trk::TrackStateOnSurface(
-              nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePattern);
+              nullptr, std::move(parsLast), std::move(meotLast), typePattern);
 
 
           newTSOSvector.push_back(newTSOSFirst);
@@ -1259,13 +1258,13 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
             //
             const Trk::TrackStateOnSurface* newTSOSFirst =
               new Trk::TrackStateOnSurface(
-                nullptr, std::move(parsFirst), nullptr, std::move(meotFirst), typePattern);
+                nullptr, std::move(parsFirst), std::move(meotFirst), typePattern);
             const Trk::TrackStateOnSurface* newTSOS =
               (elossFlag != 0
                  ? new Trk::TrackStateOnSurface(
-                     nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePatternDeposit)
+                     nullptr, std::move(parsLast), std::move(meotLast), typePatternDeposit)
                  : new Trk::TrackStateOnSurface(
-                     nullptr, std::move(parsLast), nullptr, std::move(meotLast), typePattern));
+                     nullptr, std::move(parsLast), std::move(meotLast), typePattern));
             newTSOSvector.push_back(newTSOSFirst);
             newTSOSvector.push_back(newTSOS);
           } else {
@@ -1301,19 +1300,16 @@ std::vector<const Trk::TrackStateOnSurface*> Trk::GeantFollowerMSHelper::modifyT
             const Trk::TrackStateOnSurface* newTSOSFirst =
               new Trk::TrackStateOnSurface(nullptr,
                                            std::move(parsFirst),
-                                           nullptr,
                                            std::move(meotFirst),
                                            typePattern);
             const Trk::TrackStateOnSurface* newTSOS =
               new Trk::TrackStateOnSurface(nullptr,
                                            std::move(pars),
-                                           nullptr,
                                            std::move(meot),
                                            typePatternDeposit);
             const Trk::TrackStateOnSurface* newTSOSLast =
               new Trk::TrackStateOnSurface(nullptr,
                                            std::move(parsLast),
-                                           nullptr,
                                            std::move(meotLast),
                                            typePattern);
             newTSOSvector.push_back(newTSOSFirst);

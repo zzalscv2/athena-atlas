@@ -561,7 +561,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
     } else {
       std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
       typePattern.set(Trk::TrackStateOnSurface::Measurement);
-      const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, nullptr, typePattern);
+      const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, typePattern);
       ntsos.push_back(seg_tsos);
     }
   }
@@ -619,9 +619,9 @@ Trk::Track* InDet::TRT_SeededTrackFinder::segToTrack(const EventContext& ctx, co
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
     if (it == 0){
-      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), std::move(segPar), nullptr, nullptr, typePattern);
+      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), std::move(segPar), nullptr, typePattern);
     } else {
-      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, nullptr, typePattern);
+      seg_tsos = new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr, nullptr, typePattern);
     }
     ntsos.push_back(seg_tsos);
   }
@@ -670,7 +670,7 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   for (int it = 0; it < int(tS.size()); it++) {
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
-    const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS[it]->uniqueClone(), nullptr, nullptr, nullptr, typePattern);
+    const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS[it]->uniqueClone(), nullptr, nullptr, typePattern);
     ntsos.push_back(seg_tsos);
   }
   ///Construct the new track

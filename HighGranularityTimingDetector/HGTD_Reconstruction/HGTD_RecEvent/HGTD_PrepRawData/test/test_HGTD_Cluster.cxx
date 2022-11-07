@@ -76,7 +76,7 @@ HGTD_Cluster createCluster() {
 
 void testCopyCtor(const HGTD_Cluster& cluster) {
   std::cout << "testCopyCtor\n";
-  HGTD_Cluster copied_cluster(cluster);
+  const HGTD_Cluster& copied_cluster(cluster);
 
   compare(cluster, copied_cluster);
   std::cout << "testCopyCtor done\n";
