@@ -15,7 +15,6 @@ const JetKeyConstants::key_t JetKeyConstants::AssoCat = "JetAssociations";
 const JetKeyConstants::key_t JetKeyConstants::TagCat = "JetTags";
 const JetKeyConstants::key_t JetKeyConstants::InfoCat = "JetInfo";
 
-JetKeyDescriptorInstance                              JetKeyDescriptorInstance::s_instance;
 const size_t                                          JetKeyDescriptorInstance::m_invalid  = size_t(-1);
 const std::string                                     JetKeyDescriptorInstance::m_notFound = "unknown";
 const std::vector<JetKeyDescriptorInstance::key_t>    JetKeyDescriptorInstance::m_invalidKeys;
