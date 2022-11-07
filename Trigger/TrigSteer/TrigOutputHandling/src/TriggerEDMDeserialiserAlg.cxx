@@ -380,9 +380,15 @@ StatusCode TriggerEDMDeserialiserAlg::deserialiseDynAux( const std::string& tran
   SG::AuxTypeRegistry& registry = SG::AuxTypeRegistry::instance();     
   SG::auxid_t id = registry.findAuxID ( decorationName );
   if (id != SG::null_auxid ) {
-    if ( stripStdVec( registry.getVecTypeName(id) ) != stripStdVec(transientTypeName) and transientTypeName.find("ElementLink") == std::string::npos ) {
-      ATH_MSG_INFO( "Schema evolution required for decoration \"" << decorationName << "\" from " << transientTypeName << " to "  <<  registry.getVecTypeName( id ) << " not handled yet"); 
-      return StatusCode::SUCCESS;
+    std::string regTypeName = stripStdVec( registry.getVecTypeName(id) );
+    if ( regTypeName != stripStdVec(transientTypeName) and transientTypeName.find("ElementLink") == std::string::npos )
+    {
+      // Before giving up, also translate any typedefs in the transient name.
+      RootUtils::Type tname (transientTypeName);
+      if ( regTypeName != stripStdVec(tname.getTypeName()) ) {
+        ATH_MSG_INFO( "Schema evolution required for decoration \"" << decorationName << "\" from " << transientTypeName << " to "  <<  registry.getVecTypeName( id ) << " not handled yet");
+        return StatusCode::SUCCESS;
+      }
     }
   } else {
       std::string elementTypeName;
