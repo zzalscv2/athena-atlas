@@ -96,7 +96,8 @@ else:
             events_file = myTarball.extractfile( myEvents )
             update_lhe_file(lhe_file_old=myEvents,param_card_old=param_card_old,masses=masses)
             for aline in events_file:
-                if 'ktdurham' in aline and "=" in aline:
+                # Note that because this was directly extracted, we have a binary file, not a text file!
+                if b'ktdurham' in aline and b'=' in aline:
                     ktdurham = float(aline.split('=')[0].strip())
                     break
         myTarball.close()
