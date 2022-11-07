@@ -57,7 +57,7 @@ namespace ExpressionParsing {
     else return VT_UNK;
   }
 
-  int SGNTUPProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int SGNTUPProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
     SG_GET_SCALAR(int, int);
     SG_GET_SCALAR(int, bool);
@@ -65,14 +65,14 @@ namespace ExpressionParsing {
     throw std::runtime_error("Unknown int-like proxy: " + varname);
   }
 
-  double SGNTUPProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double SGNTUPProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
     SG_GET_SCALAR(double, float);
     SG_GET_SCALAR(double, double);
     throw std::runtime_error("Unknown double-like proxy: " + varname);
   }
 
-  std::vector<int> SGNTUPProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> SGNTUPProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
     SG_GET_VECTOR(int, int);
     SG_GET_VECTOR(int, bool);
@@ -80,7 +80,7 @@ namespace ExpressionParsing {
     throw std::runtime_error("Unknown vector<int>-like proxy: " + varname);
   }
 
-  std::vector<double> SGNTUPProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
+  std::vector<double> SGNTUPProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
   {
     SG_GET_VECTOR(double, float);
     SG_GET_VECTOR(double, double);

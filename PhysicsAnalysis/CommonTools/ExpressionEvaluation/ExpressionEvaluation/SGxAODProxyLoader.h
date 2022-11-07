@@ -54,10 +54,10 @@ namespace ExpressionParsing {
 
       virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
 
-      virtual int loadIntVariableFromString(const std::string &varname);
-      virtual double loadDoubleVariableFromString(const std::string &varname);
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname);
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname);
+      virtual int loadIntVariableFromString(const std::string &varname) const;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
      /** Interface of an auxiliary class to pass the parent, e.g. @ref AthCommonDataStore, to this loader to declare new data handles.
       */

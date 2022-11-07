@@ -152,10 +152,10 @@ namespace ExpressionParsing {
       void setData(const SG::AuxElement *auxElement);
 
       virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
-      virtual int loadIntVariableFromString(const std::string &varname);
-      virtual double loadDoubleVariableFromString(const std::string &varname);
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname);
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname);
+      virtual int loadIntVariableFromString(const std::string &varname) const;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
       const SG::AuxElement *m_auxElement;
@@ -174,10 +174,10 @@ namespace ExpressionParsing {
       void setData(const SG::AuxVectorData *auxElement);
 
       virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
-      virtual int loadIntVariableFromString(const std::string &varname);
-      virtual double loadDoubleVariableFromString(const std::string &varname);
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname);
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname);
+      virtual int loadIntVariableFromString(const std::string &varname) const;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
       const SG::AuxVectorData *m_auxVectorData;
