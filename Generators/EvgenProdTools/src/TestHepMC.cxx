@@ -191,8 +191,7 @@ StatusCode TestHepMC::initialize() {
 
   // open the files and read G4particle_whitelist.txt
 
-  static const char* fileName = "G4particle_whitelist.txt";
-  const std::string fileLocation = PathResolverFindDataFile ( fileName);
+  const std::string& fileLocation = PathResolverFindDataFile ( "G4particle_whitelist.txt" );
   std::ifstream G4file;
   G4file.open(fileLocation);
   std::string line;
