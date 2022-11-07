@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/Magnet.h"
@@ -53,26 +53,13 @@ namespace FPTracker{
     return pm;
   }
 
-  double Magnet::s_y0IP  = 0.;
-  double Magnet::s_ay0IP = 0.;
-  
-  double Magnet::s_x0IP  = 0.;
-  double Magnet::s_ax0IP = 0.;
-  
-  
   double Magnet::frontFace()  const {return m_frontFace;}
   double Magnet::rearFace()   const {return m_rearFace;}
   double Magnet::zsignedpos() const {return m_center.z();}
   double Magnet::zabspos()    const {return std::fabs(m_center.z());}
   Point  Magnet::position()   const {return m_center;}
   Side   Magnet::side()       const {return m_side;}
-  
 
-  void Magnet::set_y0IP(double v) {s_y0IP  = v;}
-  void Magnet::set_ay0IP(double v){s_ay0IP = v;}
-  void Magnet::set_x0IP(double v) {s_x0IP  = v;}
-  void Magnet::set_ax0IP(double v){s_ax0IP = v;}
-  
   bool Magnet::isEndElement() const{return false;}
   
   void Magnet::track(IParticle& particle) const{
@@ -237,11 +224,7 @@ namespace FPTracker{
 	<< "m_aper_A3  "  << m_aper_A3   <<'\n'
 	<< "m_aper_A4  "  << m_aper_A4   <<'\n'
 	<< "m_xb       "  << m_xb        <<'\n'
-	<< "m_side     "  << m_side      <<'\n'
-	<< "s_y0IP     "  << s_y0IP      <<'\n'
-	<< "s_ay0IP    "  << s_ay0IP     <<'\n'
-	<< "s_x0IP     "  << s_x0IP      <<'\n'
-	<< "s_ax0IP    "  << s_ax0IP     <<'\n';
+	<< "m_side     "  << m_side      <<'\n';
     return ost.str();
   }
   std::ostream& operator<<(std::ostream& os, const Magnet& mag){

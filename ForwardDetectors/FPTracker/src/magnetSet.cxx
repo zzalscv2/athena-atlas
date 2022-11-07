@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/magnetSet.h"
@@ -118,25 +118,6 @@ namespace FPTracker
 	else
 	  {
 	    assert(false);
-	  }
-	
-	if( (magname == "\"IP1\"" && IP==1) || (magname == "\"IP5\"" && IP==5))
-	  
-	  {// this is the IP
-	    
-	    if(magver==1)
-	      {
-		PY = PY * 142.5/142. ; PX = PX * 142.5/142.;
-	      }
-	    
-	    //** a fudge because the file is only to 3 sig fig. 
-	    Magnet::set_y0IP(Y); 
-	    Magnet::set_ay0IP(PY);   
-	    
-	    Magnet::set_x0IP(X);
-	    Magnet::set_ax0IP(PX);
-	    
-	    // if(IP==1) {thisIP= "IP1"; else thisIP = "IP5";} PS: not used?
 	  }
 	
 	if(magver==1)
