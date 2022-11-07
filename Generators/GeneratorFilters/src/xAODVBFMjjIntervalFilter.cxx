@@ -164,7 +164,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
     }
 
     // Filter based on rapidity acceptance and sort
-    xAOD::JetContainer filteredJets(SG::VIEW_ELEMENTS);
+    ConstDataVector<xAOD::JetContainer> filteredJets(SG::VIEW_ELEMENTS);
     for (xAOD::JetContainer::const_iterator jitr = truthJetCollection->begin(); jitr != truthJetCollection->end(); ++jitr)
     {
         if (std::abs((*jitr)->rapidity()) < m_yMax && (*jitr)->pt() >= m_olapPt)
@@ -188,7 +188,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
 
             if (!JetOverlapsWithPhoton && !JetOverlapsWithElectron && !JetOverlapsWithTau)
             {
-                filteredJets.push_back(const_cast<xAOD::Jet *>(*jitr));
+                filteredJets.push_back(*jitr);
             }
         }
     }
@@ -327,7 +327,7 @@ bool xAODVBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::v
     return false;
 }
 
-bool xAODVBFMjjIntervalFilter::ApplyMassDphi(xAOD::JetContainer *jets)
+bool xAODVBFMjjIntervalFilter::ApplyMassDphi(ConstDataVector<xAOD::JetContainer> *jets)
 {
     if (jets->size() < 2)
         return false;
@@ -345,7 +345,7 @@ bool xAODVBFMjjIntervalFilter::ApplyMassDphi(xAOD::JetContainer *jets)
     return pass;
 }
 
-double xAODVBFMjjIntervalFilter::getEventWeight(xAOD::JetContainer *jets)
+double xAODVBFMjjIntervalFilter::getEventWeight(ConstDataVector<xAOD::JetContainer> *jets)
 {
     double weight = 1.0;
     if (jets->size() == 0)
