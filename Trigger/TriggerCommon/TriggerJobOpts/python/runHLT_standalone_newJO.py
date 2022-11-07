@@ -155,17 +155,8 @@ if flags.Overlay.doTrackOverlay:
 if log.getEffectiveLevel() <= logging.DEBUG:
     acc.printConfig(withDetails=False, summariseProps=True, printDefaults=True)
 
-fName =  args.configOnly if args.configOnly else "runHLT_standalone_newJO.pkl" 
-log.info("Storing config in the file %s ", fName)
-with open(fName, "wb") as p:
-    acc.store(p)
-    p.close()
-
-if not args.configOnly:
-    log.info("Running ...")
-    status = acc.run()
-    if status.isFailure():
-        import sys
-        sys.exit(1)
-else:
-    log.info("The configOnly option used ... exiting.")
+log.info("Running ...")
+status = acc.run()
+if status.isFailure():
+  import sys
+  sys.exit(1)
