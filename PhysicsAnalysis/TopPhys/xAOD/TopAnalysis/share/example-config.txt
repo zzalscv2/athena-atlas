@@ -84,8 +84,7 @@ JetPt 25000
 JVTWP Default
 
 ### B-tagging configuration
-BTaggingCaloJetWP DL1r:FixedCutBEff_77
-BTaggingCaloJetUncalibWP DL1dv00:FixedCutBEff_77
+BTaggingCaloJetWP DL1dv01:FixedCutBEff_77 DL1dv01:Continuous
 # for track jet, use BTaggingTrackJetWP option
 
 ###########Reco-level systematics models##########
@@ -204,34 +203,34 @@ JET_N 25000 >= 3
 JET_N 25000 >= 4
 MET > 30000
 MWT > 30000
-#RECO::KLFITTERRUN kElectron KLFitterBTaggingWP:DL1r:FixedCutBEff_77
+#RECO::KLFITTERRUN kElectron KLFitterBTaggingWP:DL1dv01:FixedCutBEff_77
 #KLFITTER > -50.0
 EXAMPLEPLOTS
 #PRINT
 NOBADMUON
 
-SELECTION ejets_DL1r_2015
+SELECTION ejets_2015
 . EL_2015
 . ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
-SELECTION ejets_DL1r_2016
+SELECTION ejets_2016
 . EL_2016
 . ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
-SELECTION ejets_DL1r_2017
+SELECTION ejets_2017
 . EL_2017
 . ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
-SELECTION ejets_DL1r_2018
+SELECTION ejets_2018
 . EL_2018
 . ejets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
 ### mu+jets selections
@@ -246,34 +245,34 @@ JET_N 25000 >= 2
 JET_N 25000 >= 3
 JET_N 25000 >= 4
 MET+MWT > 60000
-#RECO::KLFITTERRUN kMuon KLFitterBTaggingWP:DL1r:FixedCutBEff_77
+#RECO::KLFITTERRUN kMuon KLFitterBTaggingWP:DL1dv01:FixedCutBEff_77
 #KLFITTER > -50.0
 EXAMPLEPLOTS
 #PRINT
 NOBADMUON
 
-SELECTION mujets_DL1r_2015
+SELECTION mujets_2015
 . MU_2015
 . mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
-SELECTION mujets_DL1r_2016
+SELECTION mujets_2016
 . MU_2016
 . mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
-SELECTION mujets_DL1r_2017
+SELECTION mujets_2017
 . MU_2017
 . mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
-SELECTION mujets_DL1r_2018
+SELECTION mujets_2018
 . MU_2018
 . mujets_basic
-JET_N_BTAG DL1r:FixedCutBEff_77 >= 1
+JET_N_BTAG DL1dv01:FixedCutBEff_77 >= 1
 SAVE
 
 ##### particle-level selection #####
