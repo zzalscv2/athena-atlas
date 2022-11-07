@@ -437,7 +437,7 @@ class AthConfigFlags(object):
         parser.add_argument("--skipEvents", type=int, default=None, help="Number of events to skip")
         parser.add_argument("--filesInput", default=None, help="Input file(s), supports * wildcard")
         parser.add_argument("-l", "--loglevel", default=None, help="logging level (ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, or FATAL")
-        parser.add_argument("--configOnly", type=str, default=None, help="Stop after configuration phase (may not be respected by all diver scripts)")
+        parser.add_argument("--config-only", type=str, default=None, help="Stop after configuration phase (may not be respected by all diver scripts)")
         parser.add_argument("--threads", type=int, default=0, help="Run with given number of threads")
         parser.add_argument("--nprocs", type=int, default=0, help="Run AthenaMP with given number of worker processes")
 
@@ -487,7 +487,11 @@ class AthConfigFlags(object):
                 self.Exec.OutputLevel=getattr(Constants,args.loglevel)
             else:
                 raise ValueError("Unknown log-level, allowed values are ALL, VERBOSE, DEBUG,INFO, WARNING, ERROR, FATAL")
-
+        
+        if args.config_only:
+            from os import environ
+            environ["PICKLECAFILE"] = args.config_only
+            
         if args.threads:
             self.Concurrency.NumThreads = args.threads
 
