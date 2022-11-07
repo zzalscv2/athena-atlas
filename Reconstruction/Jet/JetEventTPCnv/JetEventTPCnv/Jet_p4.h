@@ -79,9 +79,6 @@ private:
 
   unsigned int m_author{0};
   
-  /// combined likelihoods
-  unsigned int m_num_combinedLikelihood{0};
-
   /// JetMomentStore
   std::vector<float> m_shapeStore;
   
