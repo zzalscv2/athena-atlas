@@ -4,7 +4,6 @@
 #include "AssociationUtils/EleJetOverlapTool.h"
 #include "AssociationUtils/EleMuSharedTrkOverlapTool.h"
 #include "AssociationUtils/MuJetOverlapTool.h"
-#include "AssociationUtils/MuPFJetOverlapTool.h"
 #include "AssociationUtils/AltMuJetOverlapTool.h"
 #include "AssociationUtils/ObjLinkOverlapTool.h"
 #include "AssociationUtils/TauLooseEleOverlapTool.h"
@@ -22,7 +21,6 @@ DECLARE_COMPONENT( ORUtils::EleEleOverlapTool )
 DECLARE_COMPONENT( ORUtils::EleJetOverlapTool )
 DECLARE_COMPONENT( ORUtils::EleMuSharedTrkOverlapTool )
 DECLARE_COMPONENT( ORUtils::MuJetOverlapTool )
-DECLARE_COMPONENT( ORUtils::MuPFJetOverlapTool )
 DECLARE_COMPONENT( ORUtils::AltMuJetOverlapTool )
 DECLARE_COMPONENT( ORUtils::ObjLinkOverlapTool )
 DECLARE_COMPONENT( ORUtils::TauLooseEleOverlapTool )

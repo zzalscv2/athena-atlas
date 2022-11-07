@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopObjectSelectionTools/TopObjectSelection.h"
@@ -50,7 +50,6 @@ namespace top {
     m_ORToolDecoration("ORToolDecoration"),
     m_ORToolDecorationLoose("ORToolDecorationLoose"),
     m_doLooseCuts(false),
-    m_overlapRemovalTool_softMuons_PFjets("OverlapRemovalTool_softMuons_PFjets"),
     m_overlapRemovalTool_softMuons_Alljets("OverlapRemovalTool_softMuons_Alljets")
   {
     declareProperty("config", m_config);
@@ -75,7 +74,6 @@ namespace top {
     //
 
     if (m_config->useSoftMuons() && m_config->useMuons()) {
-      top::check(m_overlapRemovalTool_softMuons_PFjets.retrieve(), "Failed to retrieve overlap removal tool for soft muons - PF jets");
       top::check(m_overlapRemovalTool_softMuons_Alljets.retrieve(), "Failed to retrieve overlap removal tool for soft muons - all jets");
     }
 
@@ -943,7 +941,6 @@ void TopObjectSelection::applySelectionPreOverlapRemovalJetGhostTracks() {
       if(m_config->useJets())
       {
         top::check(m_overlapRemovalTool_softMuons_Alljets->removeOverlaps(nullptr, xaod_softmu, xaod_jet, nullptr, nullptr), "Failed to identify overlap for soft muons - all jets");
-        if(m_config->useParticleFlowJets())top::check(m_overlapRemovalTool_softMuons_PFjets->removeOverlaps(nullptr, xaod_softmu, xaod_jet, nullptr, nullptr), "Failed to identify overlap for soft muons - PFlow jets");
       }
 
       int i(0);
