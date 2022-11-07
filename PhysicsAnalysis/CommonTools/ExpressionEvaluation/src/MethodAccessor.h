@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _ExpressionEvaluation_MethodAccessor_h_
 #define _ExpressionEvaluation_MethodAccessor_h_
@@ -11,6 +11,7 @@
 
 #include "TClass.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
 #include "TMethodCall.h"
 #include "TVirtualCollectionProxy.h"
 #include "TFunction.h"
@@ -34,7 +35,8 @@ namespace ExpressionParsing {
       {
          (void) n_elements;
          assert( m_methodCall->IsValid());
-         m_collectionProxy->PushProxy(const_cast<void *>(data));
+         void* data_nc ATLAS_THREAD_SAFE = const_cast<void *>(data);  // required by TVirtualCollectionProxy
+         m_collectionProxy->PushProxy(data_nc);
          assert( m_collectionProxy->Size() == n_elements);
       }
 

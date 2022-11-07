@@ -4,6 +4,7 @@
 
 #include "ExpressionEvaluation/xAODVariableProxyLoaders.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "TClass.h"
 
@@ -104,7 +105,7 @@ namespace ExpressionParsing {
     }
   }
 
-  IProxyLoader::VariableType TMethodWrapper::variableType() const
+  IProxyLoader::VariableType TMethodWrapper::variableType()
   {
     if (!m_methodCall) return IProxyLoader::VT_UNK;
     switch (m_methodCall->ReturnType()) {
@@ -143,12 +144,12 @@ namespace ExpressionParsing {
     return retDouble;
   }
 
-  std::vector<int> TMethodWrapper::getVecIntValue(const SG::AuxVectorData *) const
+  std::vector<int> TMethodWrapper::getVecIntValue(const SG::AuxVectorData *)
   {
     throw std::runtime_error("TMethodWrapper doesn't deal with containers");
   }
 
-  std::vector<double> TMethodWrapper::getVecDoubleValue(const SG::AuxVectorData *) const
+  std::vector<double> TMethodWrapper::getVecDoubleValue(const SG::AuxVectorData *)
   {
     throw std::runtime_error("TMethodWrapper doesn't deal with containers");
   }
@@ -187,7 +188,7 @@ namespace ExpressionParsing {
     }
   }
 
-  IProxyLoader::VariableType TMethodCollectionWrapper::variableType() const
+  IProxyLoader::VariableType TMethodCollectionWrapper::variableType()
   {
     if (!m_methodCall) return IProxyLoader::VT_UNK;
     switch (m_methodCall->ReturnType()) {
@@ -222,10 +223,11 @@ namespace ExpressionParsing {
     throw std::runtime_error("TMethodCollectionWrapper doesn't deal with scalars");
   }
 
-  std::vector<int> TMethodCollectionWrapper::getVecIntValue(const SG::AuxVectorData *auxVectorData) const
+  std::vector<int> TMethodCollectionWrapper::getVecIntValue(const SG::AuxVectorData *auxVectorData)
   {
     long retLong;
-    m_collectionProxy->PushProxy((void *)auxVectorData);
+    auto data_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*>(auxVectorData);  // required by TVirtualCollectionProxy
+    m_collectionProxy->PushProxy(data_nc);
     const UInt_t N = m_collectionProxy->Size();
     std::vector<int> result(N);
     for (UInt_t i = 0; i < N; ++i) {
@@ -237,10 +239,11 @@ namespace ExpressionParsing {
     return result;
   }
 
-  std::vector<double> TMethodCollectionWrapper::getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const
+  std::vector<double> TMethodCollectionWrapper::getVecDoubleValue(const SG::AuxVectorData *auxVectorData)
   {
     double retDouble;
-    m_collectionProxy->PushProxy((void *)auxVectorData);
+    auto data_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxVectorData*>(auxVectorData);  // required by TVirtualCollectionProxy
+    m_collectionProxy->PushProxy(data_nc);
     const UInt_t N = m_collectionProxy->Size();
     std::vector<double> result(N);
     for (UInt_t i = 0; i < N; ++i) {
