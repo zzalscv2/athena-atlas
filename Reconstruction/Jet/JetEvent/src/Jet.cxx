@@ -787,7 +787,7 @@ Jet* Jet::clone(bool copyStores, bool copyConstituents) const
 
 JetKeyDescriptorInstance * Jet::keyDesc() const {
   if( m_collection ) return m_collection->keyDesc();
-  return &JetKeyDescriptorInstance::s_instance;
+  return JetKeyDescriptorInstance::instance();
 }
 
 /////////////

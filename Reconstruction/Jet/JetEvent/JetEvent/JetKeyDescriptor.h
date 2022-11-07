@@ -122,10 +122,10 @@ class JetKeyDescriptorInstance
   
   static JetKeyDescriptorInstance* instance()
     {
-      return &s_instance;
+      static JetKeyDescriptorInstance instance;
+      return &instance;
     }
-  static JetKeyDescriptorInstance       s_instance;
-  
+
   // get a unique index
   size_t getIndex(const category_t& cat,const key_t& key, bool createIfMissing = true );
   size_t getIndex(const category_t& cat,const key_t& key) const;
