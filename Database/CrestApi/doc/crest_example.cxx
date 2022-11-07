@@ -24,7 +24,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 using namespace Crest;
 
 using namespace std;
-std::string SURL = "http://mvg-pc-04.cern.ch:8090";
+std::string SURL = "http://crest-01.cern.ch:8090";
 
 void print_path() {
   std::cout << SURL << std::endl;
@@ -433,10 +433,68 @@ void testCreateRunLumiInfo() {
   std::string str =
     "{\"since\":\"10\",\"run\":\"7777771\",\"lb\":\"62\",\"starttime\":\"10\",\"endtime\":\"200\"}";
   nlohmann::json js = myCrestClient.getJson(str);
+  std::cout << "run-lumi = " << std::endl
+            << js.dump(4) << std::endl;
 
   try{
     myCrestClient.createRunLumiInfo(js);
     std::cout << std::endl << "test: createRunLumiInfo (success) = " << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: createRunLumiInfo (failed)" << std::endl;
+    std::cout << e.what() << std::endl;
+  }
+}
+
+void testCreateRunLumiInfo2() {
+  std::cout << std::endl << "test: createRunLumiInfo2" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL);
+
+  nlohmann::json jsRes =
+  {
+    {"since", 0},
+    {"runNumber", 0},
+    {"lb", 0},
+    {"starttime", 0},
+    {"endtime", 10}
+  };
+
+  nlohmann::json jsFilter =
+  {
+    {"name", "test"},
+    {"additionalProp1", "test1"},
+    {"additionalProp2", "test2"},
+    {"additionalProp3", "test3"}
+  };
+
+  nlohmann::json jsPage =
+  {
+    {"size", 10},
+    {"totalElements", 0},
+    {"totalPages", 0},
+    {"number", 0}
+  };
+
+  nlohmann::json res = nlohmann::json {
+    jsRes
+  };
+
+  nlohmann::json jsRM =
+  {
+    {"size", 1},
+    {"datatype", "string"},
+    {"format", "RunLumiSetDto"},
+    {"page", jsPage},
+    {"filter", jsFilter},
+    {"resources", res}
+  };
+
+  std::cout << "run-lumi = " << std::endl
+            << jsRM.dump(4) << std::endl;
+
+  try{
+    myCrestClient.createRunLumiInfo(jsRM);
+    std::cout << std::endl << "test: createRunLumiInfo (success)" << std::endl;
   }
   catch (const std::exception& e) {
     std::cout << std::endl << "test: createRunLumiInfo (failed)" << std::endl;
@@ -611,7 +669,7 @@ void testFindAllIovsParams(std::string tagname, int size, int page) {
 
   try{
     nlohmann::json iov_list_1 = myCrestClient.findAllIovsParams(tagname, size, page);
-    nlohmann::json iov_list_2 = myCrestClient.findAllIovsParams(tagname, _page = size, _size = page);
+    nlohmann::json iov_list_2 = myCrestClient.findAllIovsParams(tagname, _page = page, _size = size);
 
     std::cout << std::endl << "test: findAllIovs (result A) =" << std::endl;
     std::cout << iov_list_1.dump(4) << std::endl;
@@ -695,6 +753,51 @@ void testSelectIovsFS(std::string tagname, long since, long until) {
   }
   catch (const std::exception& e) {
     std::cout << std::endl << "test: selectIovsFS with additional parameters (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+void testSelectIovs(std::string tagname) {
+  std::cout << std::endl << "test: selectIovs" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL);
+
+  try{
+    nlohmann::json tag_info = myCrestClient.selectIovs(tagname);
+    std::cout << std::endl << "test: selectIovs (result) =" << std::endl;
+    std::cout << tag_info.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: selectIovs (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+void testSelectIovs(std::string tagname, long since, long until, long snapshot) {
+  std::cout << std::endl << "test: selectIovs, all paprams" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL);
+
+  try{
+    nlohmann::json tag_info = myCrestClient.selectIovs(tagname, since, until, snapshot);
+    std::cout << std::endl << "test: selectIovs (result) =" << std::endl;
+    std::cout << tag_info.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: selectIovs (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
+  }
+}
+
+void testSelectGroups(std::string tagname) {
+  std::cout << std::endl << "test: selectGroups" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL);
+
+  try{
+    nlohmann::json tag_info = myCrestClient.selectGroups(tagname);
+    std::cout << std::endl << "test: selectGroups (result) =" << std::endl;
+    std::cout << tag_info.dump(4) << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: selectGroups (failed)" << std::endl;
     std::cerr << e.what() << std::endl;
   }
 }
@@ -1787,21 +1890,6 @@ void testGetSize(std::string tagname) {
   }
 }
 
-void testGetSizeByTag(std::string tagname) {
-  std::cout << std::endl << "test: getSizeByTag" << std::endl;
-  CrestClient myCrestClient = CrestClient(SURL);
-
-  try {
-    int info = myCrestClient.getSizeByTag(tagname);
-    std::cout << std::endl << "test: getSizeByTag (result) = "
-              << info << std::endl;
-  }
-  catch (const std::exception& e) {
-    std::cout << std::endl << "test: getSizeByTag (failed)" << std::endl;
-    std::cout << e.what() << std::endl;
-  }
-}
-
 void testGetSizeFS(std::string tagname) {
   std::cout << std::endl << "test: getSizeFS" << std::endl;
 
@@ -1869,6 +1957,22 @@ void testGetTagDataInfo(std::string tagname) {
   catch (const std::exception& e) {
     std::cout << std::endl << "test: testGetTagDataInfo (failed)" << std::endl;
     std::cout << e.what() << std::endl;
+  }
+}
+
+void testGetFirstLetters(std::string str) {
+  std::cout << std::endl << "test: getFirstLetters" << std::endl;
+  CrestClient myCrestClient = CrestClient(SURL);
+
+  std::cout << "string to test = " << str << std::endl;
+
+  try{
+    std::string str2 = myCrestClient.getFirstLetters(str);
+    std::cout << std::endl << "test: getFirstLetters (result) = " << str2 << std::endl;
+  }
+  catch (const std::exception& e) {
+    std::cout << std::endl << "test: getFirstLetters (failed)" << std::endl;
+    std::cerr << e.what() << std::endl;
   }
 }
 
@@ -1945,7 +2049,7 @@ int main(int argc, char* argv[]) {
   } else {
     std::cout << "CREST Server path not found" << std::endl;
     std::cout << "Please, run this program with a server path:" << std::endl;
-    std::cout << "crest_example http://mvg-pc-04.cern.ch:8090" << std::endl;
+    std::cout << "crest_example http://crest-01.cern.ch:8090" << std::endl;
   }
   std::cout << "Test ended" << std::endl;
   return 0;
