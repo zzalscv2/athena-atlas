@@ -23,7 +23,6 @@
 #include "xAODEgamma/Egamma.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEventInfo/EventInfo.h"
-#include "AsgTools/AnaToolHandle.h"
 #include "AsgServices/ServiceHandle.h"
 
 
