@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,29 +17,33 @@
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "NewVrtSecInclusiveTool/IVrtInclusive.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 
 
 namespace Rec {
 
-   class NewVrtSecInclusiveAlg : public AthAlgorithm {
+   class NewVrtSecInclusiveAlg : public AthReentrantAlgorithm {
      public: 
 
        NewVrtSecInclusiveAlg( const std::string& name, ISvcLocator* pSvcLocator );
 
        StatusCode initialize() override;
-       StatusCode execute() override;
+       StatusCode execute(const EventContext &ctx) const override;
        StatusCode finalize() override;
 
     private:
 
-      std::string m_tpContainerName;
-      std::string m_pvContainerName;
+      SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tpContainerKey{this,"TrackParticleContainer","InDetTrackParticles","Read TrackParticle container"};
+      SG::ReadHandleKey<xAOD::VertexContainer>        m_pvContainerKey{this,"PrimaryVertexContained","PrimaryVertices","Read PrimaryVertices container"};
 
-      SG::WriteHandle<xAOD::VertexContainer>  m_foundVertices;
-      ToolHandle < Rec::IVrtInclusive >       m_bvertextool;
+      SG::WriteHandleKey<xAOD::VertexContainer>  m_foundVerticesKey{this,"BVertexContainerName","AllBVertices","Found vertices container"};
+      ToolHandle < Rec::IVrtInclusive >          m_bvertextool;
   };
 }
 
