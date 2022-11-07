@@ -74,6 +74,7 @@ public:
   };
 
 private:
+  StatusCode firstEvent();
   StatusCode beginEvent();
 
   std::string ConvertJetIDToString(const int iLevel) const;
@@ -122,7 +123,7 @@ private:
   int m_iTriggerPeriodBinning;
   std::string m_sMCCampaign;
   bool m_sAFII;
-
+  bool m_firstEvent = false;
   unsigned int m_iRunNumber;
   unsigned int m_iMu;
 

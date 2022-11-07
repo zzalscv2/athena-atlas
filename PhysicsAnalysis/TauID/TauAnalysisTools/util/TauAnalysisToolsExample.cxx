@@ -115,14 +115,14 @@ int main( int argc, char* argv[] )
   // defining needed Container
   const xAOD::EventInfo* xEventInfo = 0;
   const xAOD::TauJetContainer* xTauJetContainer = 0;
-  /*
+  
   CP::PileupReweightingTool* m_tPRWTool = new CP::PileupReweightingTool("PileupReweightingTool");
-  std::vector<std::string> vLumiCalcFiles = {"/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/PileupReweighting/ilumicalc_histograms_HLT_e24_lhvloose_nod0_L1EM20VH_297730-304494_OflLumi-13TeV-005.root"};
+  std::vector<std::string> vLumiCalcFiles = {"/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20221025/ilumicalc_histograms_None_428648-436169_OflLumi-Run3-001.root","/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/GoodRunsLists/data22_13p6TeV/20221025/ilumicalc_histograms_None_430536-436169_OflLumi-Run3-001.root"};
   CHECK(m_tPRWTool->setProperty("LumiCalcFiles", vLumiCalcFiles));
   // CHECK(m_tPRWTool->setProperty("DefaultChannel", "" ));
   CHECK(m_tPRWTool->initialize());
   ToolHandle<CP::IPileupReweightingTool> m_tPRWToolHandle = m_tPRWTool;
-  */
+  
   // ===========================================================================
   // TauSelectionTool
   // ===========================================================================
@@ -185,12 +185,12 @@ int main( int argc, char* argv[] )
   // ===========================================================================
   // TauEfficiencyCorrectionsTriggerTool
   // ===========================================================================
-  /*
+
   TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffTrigTool( "TauEfficiencyCorrectionsTriggerTool" );
   TauEffTrigTool.msg().setLevel( MSG::DEBUG );
   CHECK(TauEffTrigTool.setProperty("EfficiencyCorrectionTypes", std::vector<int>({SFTriggerHadTau}) ));
   CHECK(TauEffTrigTool.setProperty("TriggerName", "HLT_tau25_medium1_tracktwo" ));
-  CHECK(TauEffTrigTool.setProperty("IDLevel", (int)JETIDRNNTIGHT ));
+  CHECK(TauEffTrigTool.setProperty("JetIDLevel", (int)JETIDRNNTIGHT ));
   CHECK(TauEffTrigTool.setProperty("PileupReweightingTool", m_tPRWToolHandle ));
   CHECK(TauEffTrigTool.setProperty("TriggerSFMeasurement", "combined"));
   CHECK(TauEffTrigTool.initialize());
@@ -203,7 +203,7 @@ int main( int argc, char* argv[] )
     vEfficiencyCorrectionsTriggerSystematicSet.push_back(CP::SystematicSet());
     vEfficiencyCorrectionsTriggerSystematicSet.back().insert(SystematicsVariation);
   }
-  */
+  
   // ===========================================================================
   // TauTruthMatchingTool
   // ===========================================================================
@@ -331,7 +331,7 @@ int main( int argc, char* argv[] )
               xTau->auxdata< double >( "TauScaleFactorEleOLRHadTau" ),
               xTau->auxdata< double >( "TauScaleFactorEleOLRElectron" ));
       }
-      /*
+
       for (auto sSystematicSet: vEfficiencyCorrectionsTriggerSystematicSet)
       {
         CHECK( TauEffTrigTool.applySystematicVariation(sSystematicSet));
@@ -341,7 +341,6 @@ int main( int argc, char* argv[] )
               sSystematicSet.name().c_str(),
               xTau->auxdata< double >( "TauScaleFactorTriggerHadTau" ));
       }
-      */
       // print some info about the selected tau:
       Info( "TauAnalysisToolsExample", "Selected tau: pt = %g MeV, eta = %g, phi = %g, prong = %i, charge = %i",
             xTau->pt(), xTau->eta(), xTau->phi(), int(xTau->nTracks()), int(xTau->charge()));
