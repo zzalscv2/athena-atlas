@@ -11,6 +11,20 @@ def mapUserName (name) :
 
 
 
+class SelectionConfig :
+    """all the data for a given selection that has been registered"""
+
+    def __init__ (self, selectionName, decoration,
+                  bits, preselection=None) :
+        self.name = selectionName
+        self.bits = bits
+        self.decoration = decoration
+        if preselection is not None :
+            self.preselection = preselection
+        else :
+            self.preselection = (selectionName == '')
+
+
 
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
@@ -24,10 +38,7 @@ class ContainerConfig :
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
-        self.selection = {}
-        self.selection[''] = []
-        self.selectionBits = {}
-        self.selectionBits[''] = []
+        self.selections = []
 
     def currentName (self) :
         if self.index == 0 :
@@ -41,11 +52,7 @@ class ContainerConfig :
         self.maxIndex = self.index
         self.index = 0
         self.viewIndex = 1
-        self.selection = {}
-        self.selection[''] = []
-        self.selectionBits = {}
-        self.selectionBits[''] = []
-
+        self.selections = []
 
 
 
@@ -67,10 +74,11 @@ class ConfigAccumulator :
     """
 
 
-    def __init__ (self, dataType, algSeq):
+    def __init__ (self, dataType, algSeq, isPhyslite=False):
         if dataType not in ["data", "mc", "afii"] :
             raise ValueError ("invalid data type: " + dataType)
         self._dataType = dataType
+        self._isPhyslite = isPhyslite
         self._algSeq = algSeq
         self._containerConfig = {}
         self._pass = 0
@@ -81,6 +89,12 @@ class ConfigAccumulator :
     def dataType (self) :
         """the data type we run on (data, mc, afii)"""
         return self._dataType
+
+
+    def isPhyslite (self) :
+        """whether we run on PHYSLITE"""
+        return self._isPhyslite
+
 
     def createAlgorithm (self, type, name) :
         """create a new algorithm and register it as the current algorithm"""
@@ -127,7 +141,19 @@ class ConfigAccumulator :
             DualUseConfig.addPrivateTool (self._currentAlg, type, name)
 
 
-    def readName (self, containerName, sourceName=None) :
+    def setSourceName (self, containerName, sourceName) :
+        """set the (default) name of the original container
+
+        This is essentially meant to allow using e.g. the muon
+        configuration and the user not having to manually specify that
+        they want to use the Muons/AnalysisMuons container from the
+        input file.
+        """
+        if containerName not in self._containerConfig :
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+
+
+    def readName (self, containerName) :
         """get the name of the "current copy" of the given container
 
         As extra copies get created during processing this will track
@@ -135,9 +161,7 @@ class ConfigAccumulator :
         in the name of the container before the first copy.
         """
         if containerName not in self._containerConfig :
-            if not sourceName :
-                raise Exception ("no source container for: " + containerName)
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+            raise Exception ("no source container for: " + containerName)
         return self._containerConfig[containerName].currentName()
 
 
@@ -150,16 +174,14 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].currentName()
 
 
-    def wantCopy (self, containerName, sourceName=None) :
+    def wantCopy (self, containerName) :
         """ask whether we want/need a copy of the container
 
         This usually only happens if no copy of the container has been
         made yet and the copy is needed to allow modifications, etc.
         """
         if containerName not in self._containerConfig :
-            if not sourceName :
-                raise Exception ("no source container for: " + containerName)
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+            raise Exception ("no source container for: " + containerName)
         return self._containerConfig[containerName].index == 0
 
 
@@ -177,20 +199,39 @@ class ConfigAccumulator :
         self._currentAlg = None
 
 
-    def getSelection (self, containerName, selectionName) :
+    def getPreselection (self, containerName, selectionName) :
 
-        """get the selection string for the given selection on the given
-        container"""
+        """get the preselection string for the given selection on the given
+        container
+        """
         if containerName not in self._containerConfig :
             return ""
         config = self._containerConfig[containerName]
-        selection = config.selection['']
-        if selectionName != '' and selectionName in config.selection :
-            selection = selection + config.selection[selectionName]
-        return '&&'.join (selection)
+        decorations = []
+        for selection in config.selections :
+            if (selection.name == '' or selection.name == selectionName) and \
+               selection.preselection :
+                decorations += [selection.decoration]
+        return '&&'.join (decorations)
 
 
-    def addSelection (self, containerName, selectionName, selectionDecoration, selectionBits) :
+    def getFullSelection (self, containerName, selectionName) :
+
+        """get the preselection string for the given selection on the given
+        container
+        """
+        if containerName not in self._containerConfig :
+            return ""
+        config = self._containerConfig[containerName]
+        decorations = []
+        for selection in config.selections :
+            if (selection.name == '' or selection.name == selectionName) :
+                decorations += [selection.decoration]
+        return '&&'.join (decorations)
+
+
+    def addSelection (self, containerName, selectionName, decoration,
+                      **kwargs) :
         """add another selection decoration to the selection of the given
         name for the given container
 
@@ -199,8 +240,5 @@ class ConfigAccumulator :
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, containerName)
         config = self._containerConfig[containerName]
-        if selectionName not in config.selection :
-            config.selection[selectionName] = []
-            config.selectionBits[selectionName] = []
-        config.selection[selectionName].append (selectionDecoration)
-        config.selectionBits[selectionName].append (selectionBits)
+        selection = SelectionConfig (selectionName, decoration, **kwargs)
+        config.selections.append (selection)

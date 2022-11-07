@@ -77,6 +77,9 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     else:
         bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root"
 
+    # This is the new calibration file, but it seems to have issues in some cases
+    #bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
+
     # # Create the analysis algorithm sequence object:
     # seq = AnaAlgSequence( "FTagAnalysisSequence" )
 

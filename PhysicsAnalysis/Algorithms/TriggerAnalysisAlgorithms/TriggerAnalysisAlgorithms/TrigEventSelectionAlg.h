@@ -9,6 +9,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AnaAlgorithm/FilterReporterParams.h>
+#include <AsgTools/PropertyWrapper.h> 
 #include <AsgTools/ToolHandle.h> 
 #include <AthContainers/AuxElement.h>
 #include <TrigDecisionInterface/ITrigDecisionTool.h>
@@ -34,6 +35,9 @@ namespace CP
     
     /// \brief the decoration for trigger selection
     std::string m_selectionDecoration;
+
+    /// \brief whether to not apply an event filter
+    Gaudi::Property<bool> m_noFilter {this, "noFilter", false, "whether to not apply an event filter"};
 
     /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
     std::vector<SG::AuxElement::Decorator<bool>> m_selectionAccessors;

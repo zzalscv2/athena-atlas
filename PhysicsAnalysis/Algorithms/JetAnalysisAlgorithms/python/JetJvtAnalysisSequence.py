@@ -9,6 +9,7 @@ def makeJetJvtAnalysisSequence( dataType, jetCollection,
                                 disableFJvt = False,
                                 globalSF = True,
                                 runSelection = True,
+                                shallowViewOutput = True,
                                 enableCutflow = False ):
     """Create a jet JVT analysis algorithm sequence
 
@@ -68,10 +69,11 @@ def makeJetJvtAnalysisSequence( dataType, jetCollection,
 
         # Set up an algorithm that makes a view container using the selections
         # performed previously:
-        alg = createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'JetJvtViewFromSelectionAlg' )
-        seq.append( alg, inputPropName = { 'jets' : 'input' },
-                    outputPropName = { 'jets' : 'output' },
-                    dynConfig = {'selection' : lambda meta : meta["selectionDecorNames"][:]} )
+        if shallowViewOutput :
+            alg = createAlgorithm( 'CP::AsgViewFromSelectionAlg', 'JetJvtViewFromSelectionAlg' )
+            seq.append( alg, inputPropName = { 'jets' : 'input' },
+                        outputPropName = { 'jets' : 'output' },
+                        dynConfig = {'selection' : lambda meta : meta["selectionDecorNames"][:]} )
 
     # Return the sequence:
     return seq
