@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,15 +15,15 @@ JetMomentMapCnv_p6::transToPers(const JetMomentMap* transObj,
   reporter << MSG::DEBUG << "JetMomentMapConverterBase toPers() Template _p6" << endmsg;
   
   persObj->m_momentNum.clear();
-  size_t njet = transObj->m_store.size();
+  size_t njet = transObj->map().size();
   persObj->m_momentNum.resize(njet);
   persObj->m_jetIds.resize(njet);
   persObj->m_moments.reserve(njet*10); // just a guess 
   persObj->m_momentStatus.reserve(njet*10); // just a guess 
 
 
-  JetMomentMap::map_t::iterator mapIt = transObj->m_store.begin();
-  JetMomentMap::map_t::iterator mapItE = transObj->m_store.end();
+  JetMomentMap::map_t::const_iterator mapIt = transObj->map().begin();
+  JetMomentMap::map_t::const_iterator mapItE = transObj->map().end();
   size_t i=0;
   for(; mapIt != mapItE; ++mapIt){
     // check validity of vectors
@@ -33,7 +33,7 @@ JetMomentMapCnv_p6::transToPers(const JetMomentMap* transObj,
       continue ; // don't save anything.
     }
 
-    JetMomentMap::record_t & moments = *(*mapIt).second.get();
+    const JetMomentMap::record_t & moments = *(*mapIt).second.get();
     size_t jetId= (*mapIt).first;
 
     size_t momNum = moments.size();
