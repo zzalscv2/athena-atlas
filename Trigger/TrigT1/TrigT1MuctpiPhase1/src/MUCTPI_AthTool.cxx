@@ -452,9 +452,9 @@ namespace LVL1MUCTPIPHASE1 {
           return StatusCode::FAILURE;
         }
       }
-
-      std::pair<std::string, double> minThrInfo = m_trigThresholdDecisionTool->getMinThresholdNameAndValue(data.thresholdDecisions, roiData.eta());
-      xAODRoIs->back()->initialize(data.dataWord, roiData.eta(), roiData.phi(), minThrInfo.first, minThrInfo.second);
+      // despite the name "GetMin" we are actually getting the Max thr value here 
+      std::pair<std::string, double> maxThrInfo = m_trigThresholdDecisionTool->getMinThresholdNameAndValue(data.thresholdDecisions, roiData.eta());
+      xAODRoIs->back()->initialize(data.dataWord, roiData.eta(), roiData.phi(), maxThrInfo.first, maxThrInfo.second);
     }
 
     // Get outputs for L1Topo and store into Storegate
