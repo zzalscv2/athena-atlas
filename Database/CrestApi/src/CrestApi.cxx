@@ -210,8 +210,6 @@ namespace Crest {
   }
 
   void CrestClient::createTag(const std::string& name, const std::string& desc, const std::string& timeType) {
-    //const char* method_name = "CrestClient::createTag";
-
     nlohmann::json js2 = {{"description", desc}, {"endOfValidity", 0},
                           {"lastValidatedTime", 0}, {"synchronization", "none"}, {"payloadSpec", "json"},
                           {"name", name}, {"timeType", timeType}};
@@ -220,8 +218,6 @@ namespace Crest {
 
   void CrestClient::createTag(const std::string& name, const std::string& desc, const std::string& timeType,
                               const std::string& payloadSpec) {
-    //const char* method_name = "CrestClient::createTag";
-
     nlohmann::json js2 = {{"description", desc}, {"endOfValidity", 0},
                           {"lastValidatedTime", 0}, {"synchronization", "none"}, {"payloadSpec", payloadSpec},
                           {"name", name}, {"timeType", timeType}};
@@ -321,8 +317,6 @@ namespace Crest {
   void CrestClient::flush() {
     if (m_mode == SERVER_MODE) return;
 
-    std::cerr << "Flush start" << std::endl;
-
     for (auto& item : m_data) {
       nlohmann::json iov = item.second;
       std::string name = item.first;
@@ -361,17 +355,19 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += "?by=tagname:";
+    current_path += "?method=";
+    current_path += s_METHOD_IOVS;
+    current_path += "&tagname=";
     current_path += tagname;
 
     std::string retv;
 
     nlohmann::json js = nullptr;
     retv = performRequest(current_path, GET, js, method_name);
-    
+
     nlohmann::json respond = getJson(retv, method_name);
-    
-    auto answer = getResources(respond);
+
+    auto answer = getResources(respond); 
     return answer;
   }
 
@@ -389,7 +385,9 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += "?by=tagname:";
+    current_path += "?method=";
+    current_path += s_METHOD_IOVS;
+    current_path += "&tagname=";
     current_path += tagname;
     current_path += "&size=";
     current_path += std::to_string(size);
@@ -412,16 +410,18 @@ namespace Crest {
     return getResources(respond);
   }
 
-  nlohmann::json CrestClient::getSizeByTag(const std::string& tagname) {
-    const char* method_name = "CrestClient::getSizeByTag";
+  int CrestClient::getSize(const std::string& tagname) {
+    const char* method_name = "CrestClient::getSize";
 
-    checkFsException(method_name);
+    if (m_mode == FILESYSTEM_MODE) {
+      return getSizeFS(tagname);
+    }
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_SIZE_PATH_FOR_TAG;
+    current_path += s_IOV_SIZE_PATH;
     current_path += "?tagname=";
-    current_path += tagname; //return json
+    current_path += tagname; 
 
     std::string retv;
 
@@ -443,40 +443,10 @@ namespace Crest {
     if (res.find("niovs") != res.end()) {
       result = res["niovs"];
     } else {
-      throw std::runtime_error("ERROR in CrestClient::getSizeByTag CREST Server JSON response has no \"size\" key.");
-    }
-
-    return result;
-  }
-
-  int CrestClient::getSize(const std::string& tagname) {
-    const char* method_name = "CrestClient::getSize";
-
-    if (m_mode == FILESYSTEM_MODE) {
-      return getSizeFS(tagname);
-    }
-
-    std::string current_path = s_PATH;
-    current_path += s_IOV_PATH;
-    current_path += s_IOV_SIZE_PATH;
-    current_path += "?tagname=";
-    current_path += tagname; //return json
-
-    std::string retv;
-
-    nlohmann::json js = nullptr;
-    int res = 0;
-
-    retv = performRequest(current_path, GET, js, method_name);
-    js = getJson(retv);
-
-    if (js.find("size") != js.end()) {
-      res = js["size"];
-    } else {
       throw std::runtime_error("ERROR in CrestClient::getSize CREST Server JSON response has no \"size\" key.");
     }
 
-    return res;
+    return result;
   }
 
   nlohmann::json CrestClient::selectIovs(const std::string& tagname) {
@@ -486,9 +456,11 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_SELECT_PATH;
-    current_path += "?tagname=";
-    current_path += tagname; //return json
+    current_path += "?method=";
+    current_path += s_METHOD_IOVS;
+    current_path += "&tagname=";
+
+    current_path += tagname; 
 
     std::string retv;
 
@@ -508,11 +480,14 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_SELECT_PATH;
-    current_path += "?tagname=";
+
+    current_path += "?method=";
+    current_path += s_METHOD_IOVS;
+    current_path += "&tagname=";
+
     current_path += tagname;
     current_path += "&snapshot=";
-    current_path += std::to_string(snapshot); //return json
+    current_path += std::to_string(snapshot); 
 
     std::string retv;
 
@@ -532,8 +507,11 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_SELECT_PATH;
-    current_path += "?tagname=";
+
+    current_path += "?method=";
+    current_path += s_METHOD_IOVS;
+    current_path += "&tagname=";
+
     current_path += tagname;
     current_path += "&since=";
     current_path += std::to_string(since);
@@ -564,9 +542,12 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_GROUP_PATH;
-    current_path += "?tagname=";
-    current_path += tagname; //return json
+
+    current_path += "?method=";
+    current_path += s_METHOD_GROUPS;
+    current_path += "&tagname=";
+
+    current_path += tagname;
 
     std::string retv;
 
@@ -586,11 +567,14 @@ namespace Crest {
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_GROUP_PATH;
-    current_path += "?tagname=";
+
+    current_path += "?method=";
+    current_path += s_METHOD_GROUPS;
+    current_path += "&tagname=";
+
     current_path += tagname;
     current_path += "&snapshot=";
-    current_path += std::to_string(snapshot); //return json
+    current_path += std::to_string(snapshot); 
 
     std::string retv;
 
@@ -602,50 +586,50 @@ namespace Crest {
     return getResources(respond);
   }
 
-  nlohmann::json CrestClient::selectSnapshot(const std::string& tagname) {
-    const char* method_name = "CrestClient::selectSnapshot";
+  void CrestClient::storeBatchIOVs(nlohmann::json& js) {
+    const char* method_name = "CrestClient::storeBatchIOVs";
 
-    checkFsException(method_name);
+    if (m_mode == FILESYSTEM_MODE) {
+      std::string messageL = "ERROR in ";
+      messageL += method_name;
+      messageL += " This methods is unsupported for FILESYSTEM mode";
+      throw std::runtime_error(messageL);
+    }
+
+    /*
+
+       Request Example:
+
+       curl -H "Accept: application/json" -H "Content-Type: application/json"  -X POST
+          http://crest-02.cern.ch:8090/crestapi/iovs/storebatch
+       -d '{"size": 2, "datatype": "iovs", "format": "IovSetDto","resources":
+       [
+       {"payloadHash": "9834876dcfb05cb167a5c24953eba58c4ac89b1adf57f28f2f9d09af107ee8f0","since": 200,"tagName":
+          "test_MvG10"},
+       {"payloadHash": "3e744b9dc39389baf0c5a0660589b8402f3dbb49b89b3e75f2c9355852a3c677","since": 250,"tagName":
+          "test_MvG10"}
+       ]
+       }'
+     */
+
+    int n = js.size();
+
+    nlohmann::json arg =
+    {
+      {"size", n},
+      {"datatype", "iovs"},
+      {"format", "IovSetDto"},
+      {"resources", js}
+    };
+
 
     std::string current_path = s_PATH;
     current_path += s_IOV_PATH;
-    current_path += s_IOV_SNAPSHOT_PATH;
-    current_path += "?tagname=";
-    current_path += tagname; //return json
+    current_path += s_STOREBATCH_PATH;
 
     std::string retv;
 
-    nlohmann::json js = nullptr;
-
-    retv = performRequest(current_path, GET, js, method_name);
-
-    nlohmann::json respond = getJson(retv, method_name);
-
-    return getResources(respond);
-  }
-
-  nlohmann::json CrestClient::selectSnapshot(const std::string& tagname, long snapshot) {
-    const char* method_name = "CrestClient::selectSnapshot";
-
-    checkFsException(method_name);
-
-    std::string current_path = s_PATH;
-    current_path += s_IOV_PATH;
-    current_path += s_IOV_SNAPSHOT_PATH;
-    current_path += "?tagname=";
-    current_path += tagname;
-    current_path += "&snapshot=";
-    current_path += std::to_string(snapshot); //return json
-
-    std::string retv;
-
-    nlohmann::json js = nullptr;
-
-    retv = performRequest(current_path, GET, js, method_name);
-
-    nlohmann::json respond = getJson(retv, method_name);
-
-    return getResources(respond);
+    retv = performRequest(current_path, POST, arg, method_name);
   }
 
 // GLOBALTAGS
@@ -688,8 +672,6 @@ namespace Crest {
   }
 
   void CrestClient::createGlobalTag(const std::string& tagname, const std::string& description) {
-    //const char* method_name = "CrestClient::createGlobalTag";
-
     nlohmann::json js =
     {
       {"name", tagname},
@@ -793,7 +775,7 @@ namespace Crest {
     std::string current_path = s_PATH;
     current_path += s_GLOBALTAG_PATH;
     if (!name.empty()) {
-      std::string nameString = "?by=name:";
+      std::string nameString = "?name=";
       nameString += name;
       current_path += nameString;
       current_path += "&size=";
@@ -910,7 +892,6 @@ namespace Crest {
   }
 
   std::string CrestClient::getBlobInStream(const std::string& hash, std::ofstream& out) {
-    //const char* method_name = "CrestClient::getBlobInStream";
     if (m_mode == FILESYSTEM_MODE) {
       return getBlobInStreamFs(hash, out);
     }
@@ -1255,7 +1236,10 @@ namespace Crest {
   }
 
   std::string CrestClient::storePayloadRequest(const std::string& tag, uint64_t since, const std::string& js) {
-    std::string current_path = "/crestapi/payloads/store";
+    std::string current_path = s_PATH;
+    current_path += s_PAYLOAD_PATH;
+    current_path += s_STORE_PATH;
+
     CURL* curl;
     CURLcode res;
 
@@ -1324,13 +1308,13 @@ namespace Crest {
                                           const char* method_name) {
     CURL* curl;
     CURLcode res;
-    
+
 
     /* Enable tracing of ascii data */
     //sanitise the current path
     std::string sanitisedPath(current_path);
     auto caretPosition = sanitisedPath.find("^");
-    if (caretPosition != std::string::npos) sanitisedPath.replace(caretPosition,1,"%5E");
+    if (caretPosition != std::string::npos) sanitisedPath.replace(caretPosition, 1, "%5E");
     /* get a curl handle */
     curl = curl_easy_init();
     std::string stt;
@@ -1339,7 +1323,7 @@ namespace Crest {
       std::ostringstream url;
       std::string s;
       url << "http://" << m_host << ':' << m_port << sanitisedPath;
-      std::cout<<"cURL request to "<<url.str()<<std::endl;
+      std::cout << "cURL request to " << url.str() << std::endl;
 
       curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
       if (js.is_null()) {
@@ -1390,6 +1374,7 @@ namespace Crest {
 
   std::string CrestClient::performRequest(const std::string& current_path, Action action, nlohmann::json& js) {
     const char* method = "Unknown";
+
     return performRequest(current_path, action, js, method);
   }
 
@@ -1481,7 +1466,7 @@ namespace Crest {
         std::cout << header << std::endl;
       }
       std::cout << std::endl;
-      //========
+  
       std::ostringstream txt;
 
       // Write whatever content we already have to output.
@@ -1521,7 +1506,9 @@ namespace Crest {
 
   //
   std::string CrestClient::storeBatchPayloadRequest(const std::string& tag, uint64_t endtime, const std::string& js) {
-    std::string_view current_path = "/crestapi/payloads/storebatch";
+    std::string current_path = s_PATH;
+    current_path += s_PAYLOAD_PATH;
+    current_path += s_BATCH_PATH;
 
     CURL* curl;
     CURLcode res;
@@ -1546,11 +1533,11 @@ namespace Crest {
       // URL if that is what should receive the data.
 
       curl_easy_setopt(curl, CURLOPT_URL, url.str().c_str());
+      headers = curl_slist_append(headers, "X-Crest-PayloadFormat: JSON");
       headers = curl_slist_append(headers, "Accept: */*");
       headers = curl_slist_append(headers, "Content-Type:  multipart/form-data");
-      headers = curl_slist_append(headers, "Expect:");
+
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-      curl_easy_setopt(curl, CURLOPT_POST, 1L); //
 
       // Create the form  for new version
       curl_formadd(&formpost,
@@ -1569,13 +1556,14 @@ namespace Crest {
                    &lastptr,
                    CURLFORM_COPYNAME, "iovsetupload",
                    CURLFORM_COPYCONTENTS, js.c_str(),
+                   CURLFORM_CONTENTTYPE, "application/json",
                    CURLFORM_END);
+
 
 
       curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, CurlWrite_CallbackFunc_StdString);
       curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
-
 
       // Perform the request, res will get the return code
       res = curl_easy_perform(curl);
@@ -1583,7 +1571,7 @@ namespace Crest {
       // data to check the errors in the server response:
       long response_code;
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response_code);
-      const char* method_name = "CrestClient::storePayload";
+      const char* method_name = "CrestClient::storeBatchPayloads";
 
       /* always cleanup */
       curl_easy_cleanup(curl);
@@ -1831,8 +1819,8 @@ namespace Crest {
     flush(); // MvG
   }
 
-  // storeBatchPayloadsFs (end)
 
+  // Auxillary methods:
 
   std::string CrestClient::getEnvA(const char* varname) {
     std::string respond = "";
@@ -1849,6 +1837,7 @@ namespace Crest {
 
     std::string respond = getEnvA(varName);
     respond += "/data/crestapi";
+
     return respond;
   }
 
@@ -1872,9 +1861,14 @@ namespace Crest {
     auto r2 = js.find("message");
 
     if (r1 != js.end()) {
+      std::string error = js.value("error", " unknown error ");
       if (r2 != js.end()) {
-        std::string message = js.value("message", " unknown message ");
-        throw std::runtime_error("ERROR in " + std::string(method) + " | CREST response: " + message);
+        std::string message = js.value("message", "");
+        if (message == "") {
+          throw std::runtime_error("ERROR in " + std::string(method) + " | CREST response: " + error);
+        } else {
+          throw std::runtime_error("ERROR in " + std::string(method) + " | CREST response: " + message);
+        }
       }
     }
     return result;
@@ -2001,7 +1995,6 @@ namespace Crest {
   }
 
   void CrestClient::createTagMetaInfo(const std::string& tagname, nlohmann::json& js) {
-    //const char* method_name = "CrestClient::createTagMetaInfo";
     std::string name = js["tagName"];
     if (tagname != name) {
       throw std::runtime_error("ERROR in CrestClient::createTagMetaInfo tagname in method and in JSON are different.");
@@ -2274,7 +2267,6 @@ namespace Crest {
   nlohmann::json CrestClient::findGlobalTagFs(const std::string& name) {
     nlohmann::json js = nullptr;
 
-
     std::string workDir = m_root_folder;
     workDir += s_FS_GLOBALTAG_PATH;
     workDir += '/';
@@ -2414,11 +2406,14 @@ namespace Crest {
   void CrestClient::storePayloadDump(const std::string& tag, uint64_t since, const std::string& js) {
     std::ofstream myfile;
 
-
-
     // payload file:
     std::string hashCode = getHash(js);
     std::string workDir = m_data_folder;
+    workDir += '/';
+    workDir += getFirstLetters(hashCode);
+    if (!std::filesystem::exists(std::filesystem::path(workDir))) {
+      std::filesystem::create_directory(std::filesystem::path(workDir));
+    }
     workDir += '/';
     workDir += hashCode;
     if (!std::filesystem::exists(std::filesystem::path(workDir))) {
@@ -2430,7 +2425,6 @@ namespace Crest {
     myfile.open(tagFile);
     myfile << js;
     myfile.close();
-
 
     /*
        // meta info data example:
@@ -2513,6 +2507,8 @@ namespace Crest {
   std::string CrestClient::getPayloadAsStringFS(const std::string& hash) {
     std::string workDir = m_data_folder;
     workDir += '/';
+    workDir += getFirstLetters(hash);
+    workDir += '/';
     workDir += hash;
     std::string filePath = workDir + "/payload.json";
     std::string res = "";
@@ -2535,6 +2531,8 @@ namespace Crest {
 
   std::string CrestClient::getPayloadMetaInfoAsStringFS(const std::string& hash) {
     std::string workDir = m_data_folder;
+    workDir += '/';
+    workDir += getFirstLetters(hash);
     workDir += '/';
     workDir += hash;
 
@@ -2575,6 +2573,8 @@ namespace Crest {
 
     std::string workDir = m_data_folder;
     workDir += '/';
+    workDir += getFirstLetters(hash);
+    workDir += '/';
     workDir += hash;
 
     std::string file_path = workDir;
@@ -2583,6 +2583,7 @@ namespace Crest {
     std::ifstream in(file_path);
 
     if (in.is_open() && out.is_open()) {
+
       while (getline(in, line)) {
         out << line << std::endl;
       }
@@ -2716,4 +2717,11 @@ namespace Crest {
     std::cout << "Directory Number (" << tagname << ") = "
               << dirNumber << std::endl;
   }
+
+
+  std::string CrestClient::getFirstLetters(const std::string& str) {
+    std::string result = str.substr(0, s_FS_PREFIX_LENGTH);
+    return result;
+  }
+
 } // namespace
