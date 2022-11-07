@@ -1508,13 +1508,13 @@ namespace VKalVrtAthena {
     
     unsigned nPixelLayers { 0 };
     {
-      nPixelLayers += ( pattern & (1 << Trk::pixelBarrel0) );
-      nPixelLayers += ( pattern & (1 << Trk::pixelBarrel1) );
-      nPixelLayers += ( pattern & (1 << Trk::pixelBarrel2) );
-      nPixelLayers += ( pattern & (1 << Trk::pixelBarrel3) );
-      nPixelLayers += ( pattern & (1 << Trk::pixelEndCap0) );
-      nPixelLayers += ( pattern & (1 << Trk::pixelEndCap1) );
-      nPixelLayers += ( pattern & (1 << Trk::pixelEndCap2) );
+      if ( pattern & (1 << Trk::pixelBarrel0) ) nPixelLayers++;
+      if ( pattern & (1 << Trk::pixelBarrel1) ) nPixelLayers++;
+      if ( pattern & (1 << Trk::pixelBarrel2) ) nPixelLayers++;
+      if ( pattern & (1 << Trk::pixelBarrel3) ) nPixelLayers++;
+      if ( pattern & (1 << Trk::pixelEndCap0) ) nPixelLayers++;
+      if ( pattern & (1 << Trk::pixelEndCap1) ) nPixelLayers++;
+      if ( pattern & (1 << Trk::pixelEndCap2) ) nPixelLayers++;
     }
     
     //////////////////////////////////////////////////////////////////////////////////
