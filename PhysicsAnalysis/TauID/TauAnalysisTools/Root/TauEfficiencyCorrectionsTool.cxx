@@ -207,6 +207,18 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   return StatusCode::SUCCESS;
 }
 
+StatusCode TauEfficiencyCorrectionsTool::firstEvent() 
+{
+  const xAOD::EventInfo* xEventInfo = nullptr;
+  ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
+
+  if (xEventInfo->runNumber() != 284500 && xEventInfo->runNumber() != 300000 && xEventInfo->runNumber() != 310000)  // mc21/2022: 410000
+  {
+    ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (" << xEventInfo->runNumber() << "). Will only print this warning once." );
+  }
+  return StatusCode::SUCCESS;
+}
+
 StatusCode TauEfficiencyCorrectionsTool::beginEvent()
 {
   if (!m_bIsConfigured)
@@ -217,6 +229,11 @@ StatusCode TauEfficiencyCorrectionsTool::beginEvent()
     m_bIsConfigured = true;
   }
 
+  if (!m_firstEvent){
+    ATH_CHECK(firstEvent());
+    m_firstEvent = true;
+      
+  }
   if (m_bIsData)
     return StatusCode::SUCCESS;
 
@@ -224,12 +241,6 @@ StatusCode TauEfficiencyCorrectionsTool::beginEvent()
   ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
   m_iMu = xEventInfo->averageInteractionsPerCrossing();
 
-  // FIXME: this should be harmonised for R22 recommendations
-  if (xEventInfo->runNumber() != 284500 && xEventInfo->runNumber() != 300000 && xEventInfo->runNumber() != 310000)
-  {
-    ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted." );
-  }
-  
   if (m_bReadRandomRunNumber)
   {
     // Reset the number at the beginning of event
