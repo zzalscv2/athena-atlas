@@ -1,6 +1,6 @@
 // -*- C++ -*-
 #include "Rivet/Analysis.hh"
-#include "HepMC/GenEvent.h"
+#include "Rivet/Event.hh"
 
 namespace Rivet {
 
