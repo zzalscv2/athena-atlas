@@ -22,7 +22,6 @@
 #include "CaloTopoSplitterClusterCell.h"
 #include "CaloTopoSplitterHashCluster.h"
 #include "CaloTopoTmpHashCell.h"
-#include "CaloUtils/CaloClusterEtSort.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloTopoTmpHashCellSort.h"
 #include "CaloRec/CaloBadCellHelper.h"
@@ -1136,7 +1135,6 @@ StatusCode CaloTopoClusterSplitter::execute(const EventContext& ctx,
     }
   }
 
-  //CaloClusterEtSort::compare compareEt;
   std::sort(myCaloClusters.begin(),myCaloClusters.end(),[](const std::unique_ptr<CaloProtoCluster>& pc1, 
 							   const std::unique_ptr<CaloProtoCluster>& pc2) {
       //As in CaloUtils/CaloClusterEtSort. 
