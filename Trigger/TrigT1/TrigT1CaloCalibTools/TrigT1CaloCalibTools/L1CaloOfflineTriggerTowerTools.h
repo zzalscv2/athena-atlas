@@ -32,7 +32,6 @@
 // L1 includes
 #include "TrigT1CaloEvent/TriggerTower.h"
 #include "TrigT1CaloEvent/TriggerTowerCollection.h"
-#include "TrigT1CaloCondSvc/L1CaloCondSvc.h"
 #include "TrigT1CaloCalibTools/L1CaloTTIdTools.h"
 #include "TrigT1CaloCalibConditions/L1CaloCoolChannelId.h"
 #include "TrigT1CaloCalibToolInterfaces/IL1CaloCells2TriggerTowers.h"
@@ -259,7 +258,6 @@ private:
       CaloTriggerTowerService*                         m_ttSvc;
       const TTOnlineID*                                m_ttOnlineIdHelper;
       const CaloLVL1_ID*                               m_lvl1Helper;
-      L1CaloCondSvc*                                   m_l1CondSvc;
       const LArOnlineID*                               m_larOnlineID;
       ToolHandle<ICaloSuperCellIDTool>                 m_scidtool;
 
