@@ -69,7 +69,6 @@ namespace LVL1 {
     std::pair<std::string, double> getMinThresholdNameAndValue(const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions,
 							       const double& eta = 0) const override;
 
-
   protected:
 
     struct TGCFlagDecision

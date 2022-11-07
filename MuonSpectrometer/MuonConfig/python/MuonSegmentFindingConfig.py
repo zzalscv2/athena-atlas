@@ -80,13 +80,14 @@ def AdjustableT0Tool(flags,**kwargs):
 
 def MdtMathSegmentFinderCfg(flags,name="MdtMathSegmentFinder", **kwargs):
     # beamType       = getattr(extraFlags,"beamType", beamFlags.beamType())
-    # doSegmentT0Fit = getattr(extraFlags,"doSegmentT0Fit",muonRecFlags.doSegmentT0Fit())
     # enableCurvedSegmentFinding = getattr(extraFlags,"enableCurvedSegmentFinding", muonStandaloneFlags.enableCurvedSegmentFinding())
     result = ComponentAccumulator()
     
+    doSegmentT0Fit = kwargs.pop('doSegmentT0Fit', flags.Muon.doSegmentT0Fit)
+
     kwargs.setdefault("FinderDebugLevel", 0) # This is just to avoid that the tool seems unconfigured. Real fix is to use default name.
 
-    if flags.Muon.doSegmentT0Fit:
+    if doSegmentT0Fit:
         kwargs.setdefault("AssociationRoadWidth", 3.)
         kwargs.setdefault("MDTAssocationPullcut", 3.)
         kwargs.setdefault("RecoverMdtOutliers", False)
@@ -122,7 +123,9 @@ def MdtSegmentT0FitterCfg(flags, name="MdtSegmentT0Fitter", **kwargs):
     result.setPrivateTools(CompFactory.TrkDriftCircleMath.MdtSegmentT0Fitter(name, **kwargs))    
     return result
 
-def DCMathSegmentMakerCfg(flags, doSegmentT0Fit=None, **kwargs):
+def DCMathSegmentMakerCfg(flags,
+                          doSegmentT0Fit=None, # Probably need to be removed, kept for now as it creates more differences in muon outputs
+                          **kwargs):
     doSegmentT0Fit = kwargs.pop('doSegmentT0Fit', flags.Muon.doSegmentT0Fit)
     
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
@@ -184,7 +187,7 @@ def DCMathSegmentMakerCfg(flags, doSegmentT0Fit=None, **kwargs):
         mdt_dcot_CA = MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtDriftCircleOnTrackCreatorAdjustableT0", TimingMode=3, \
                    DoTofCorrection=True, TimeWindowSetting=MdtCalibWindowNumber('Collision_data'))
         kwargs.setdefault("MdtCreatorT0", result.getPrimaryAndMerge(mdt_dcot_CA)) # TODO - is this correct? 
-        kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags, doSegmentT0Fit=True))))
+        kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags, doSegmentT0Fit=True)))
     else:
         kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags)) )
 

@@ -101,7 +101,7 @@ then
    confTool.py --diff --ignoreIrrelevant --shortenDefaultComponents --ignoreDefaults run_cg_pkl/ConfigCG.pkl run_ca/ConfigCA.pkl > pkldiff.log
    pkldiff=$(grep -o 'differ' pkldiff.log | wc -l)
 
-   art.py compare ref run_ca/RDO_CA.pool.root run_cg/RDO_CG.pool.root --mode=semi-detailed --entries 10
+   art.py compare ref run_ca/${RDO_File} run_cg/${RDO_File} --mode=semi-detailed --entries 10
    diff=$?
 fi
 echo  "art-result: ${pkldiff} pklDiff"

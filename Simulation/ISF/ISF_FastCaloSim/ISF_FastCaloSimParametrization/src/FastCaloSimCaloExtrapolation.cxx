@@ -793,17 +793,15 @@ void FastCaloSimCaloExtrapolation::getIterativePCA(float cylR, float cylZ, Amg::
     double distBounds = boundDir.norm();
 
     //this sets the precision of the iterative finding procedure
-    double stepSize = 0.01;
+    const double stepSize = 0.01;
 
-    //if bounds are close enough together, there is nothing to do.
-    if (distBounds < 2*stepSize){ PCA = BoundA; return;} 
-
+    //if bounds are close enough together, there is nothing to do
+    //should make sure that nHalfDivisions >= 2
+    if (distBounds <= 4*stepSize){PCA = BoundA + 0.5*(BoundB - BoundA); return;} 
 
     Amg::Vector3D tmpBoundA, tmpBoundB, tmpOnCylinderBoundA, tmpOnCylinderBoundB;
     Amg::Vector3D resBoundA, resBoundB, resOnCylinderBoundA, resOnCylinderBoundB;
 
-    resBoundA.setZero();
-    resBoundB.setZero();
     
     //initial positions on cylinder and distance to line segment
     Amg::Vector3D OnCylinderBoundA = projectOnCylinder(cylR, cylZ, BoundA);
@@ -812,9 +810,17 @@ void FastCaloSimCaloExtrapolation::getIterativePCA(float cylR, float cylZ, Amg::
     double minDistA = (BoundA - OnCylinderBoundA).norm();
     double minDistB = (BoundB - OnCylinderBoundB).norm();
 
+    //initialize result bounds with closest input bounds as fall back option
+    if(minDistA < minDistB){
+      resBoundA = BoundA;
+      resBoundB = BoundA;
+    }
+    else{
+      resBoundA = BoundB;
+      resBoundB = BoundB;
+    }
     double tmpMinDistA, tmpMinDistB;
     unsigned int nHalfDivisions = (distBounds/stepSize)/2;
-    
     for(unsigned int step = 0; step < nHalfDivisions; step++){
 
       //temporary bounds on line segment
@@ -828,7 +834,7 @@ void FastCaloSimCaloExtrapolation::getIterativePCA(float cylR, float cylZ, Amg::
       //temporary minimum distance between bound on segment and bound on cylinder
       tmpMinDistA = (tmpBoundA - tmpOnCylinderBoundA).norm();
       tmpMinDistB = (tmpBoundB - tmpOnCylinderBoundB).norm();
-      
+
       if(minDistA >= tmpMinDistA){
         minDistA = tmpMinDistA;
       }

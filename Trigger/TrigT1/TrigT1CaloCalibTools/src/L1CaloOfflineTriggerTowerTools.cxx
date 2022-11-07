@@ -27,7 +27,6 @@ namespace LVL1 {
     m_ttSvc = 0;
     m_ttOnlineIdHelper = 0;
     m_lvl1Helper = 0;
-    m_l1CondSvc = 0;
     m_larOnlineID = 0;
     m_isLArHVCorrToolSet = false;
     m_tileHWID = 0;
@@ -1696,9 +1695,7 @@ namespace LVL1 {
     ATH_CHECK( svcLoc->service( "ToolSvc",toolSvc  ) );
     ATH_CHECK( toolSvc->retrieveTool("CaloTriggerTowerService",m_ttSvc) );
 
-    // DB Access
-    ATH_CHECK( service("L1CaloCondSvc", m_l1CondSvc) );
-
+    
     ATH_CHECK( m_onlineScaleCorrKey.initialize() );
 
     ATH_MSG_INFO("L1Calo L1CaloOfflineTriggerTowerTools initialize() success!");
