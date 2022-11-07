@@ -206,18 +206,18 @@ namespace LVL1
 
   std::pair<std::string, double> TrigThresholdDecisionTool::getMinThresholdNameAndValue(const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions, const double& eta) const
   {
-    //find the lowest pt threshold passed
+    //find the highest pt threshold passed - depite the name of this function
     std::string thrName="";
     //just some high value ... 
     double thrVal=999999999999;
     for (unsigned idec=0;idec<decisions.size();++idec) {
       if (!decisions[idec].second) continue;
       std::shared_ptr<TrigConf::L1Threshold> thr = decisions[idec].first;
-      if (thr->thrValue(eta) < thrVal)
-      {
-	thrVal = thr->thrValue(eta);
-	thrName = thr->name();
-      }
+      if (thr->thrValue(eta) > thrVal)
+	{
+	  thrVal = thr->thrValue(eta);
+	  thrName = thr->name();
+	}
     }
     //if nothing is found set back to the old (broken default value)
     if (thrVal==999999999999) thrVal=0;
