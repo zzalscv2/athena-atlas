@@ -75,7 +75,7 @@ def makeOverlapSequence (dataType) :
     # Include, and then set up the overlap analysis algorithm sequence:
     from AsgAnalysisAlgorithms.OverlapAnalysisSequence import \
         makeOverlapAnalysisSequence
-    overlapSequence = makeOverlapAnalysisSequence( dataType, doMuPFJetOR=True, doTaus=False, enableCutflow=True )
+    overlapSequence = makeOverlapAnalysisSequence( dataType, doTaus=False, enableCutflow=True )
     overlapSequence.configure(
         inputName = {
             'electrons' : 'AnalysisElectrons_%SYS%',
