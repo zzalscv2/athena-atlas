@@ -1338,6 +1338,19 @@ class WriteDAOD_SUSY20Stream(JobProperty):
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_SUSY20Stream)
 listAODtoDPD.append(WriteDAOD_SUSY20Stream.StreamName)
 
+class WriteDAOD_SUSY21Stream(JobProperty):
+    """SUSY21: 1electron + 1gamma for low-pT electron tagger calibration"""
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+    StreamName = 'StreamDAOD_SUSY21'
+    FileName = ''
+    isVirtual = False
+    DPDMakerScript = "DerivationFrameworkSUSY/SUSY21.py"
+    pass
+jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_SUSY21Stream)
+listAODtoDPD.append(WriteDAOD_SUSY21Stream.StreamName)
+
 #################################
 # Defined by the Exotics group
 #################################
