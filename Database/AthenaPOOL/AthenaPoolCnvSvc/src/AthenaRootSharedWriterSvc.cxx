@@ -125,25 +125,59 @@ struct ParallelFileMerger : public TObject
    Bool_t MergeTrees(TFile *input)
    {
       fMerger.AddFile(input);
-      TTree* outCollTree = static_cast<TTree*>(fMerger.GetOutputFile()->Get("CollectionTree"));
-      TTree* inCollTree = static_cast<TTree*>(input->Get("CollectionTree"));
-      if (inCollTree != nullptr && outCollTree != nullptr) {
-         if (syncBranches(outCollTree, inCollTree)) {
-            input->Write();
-         }
-         syncBranches(inCollTree, outCollTree);
-      }
-      Bool_t result = fMerger.PartialMerge(TFileMerger::kIncremental | TFileMerger::kResetable | TFileMerger::kKeepCompression);
       TIter nextKey(input->GetListOfKeys());
       while (TKey* key = static_cast<TKey*>(nextKey())) {
          TClass* cl = TClass::GetClass(key->GetClassName());
-         if (0 != cl->GetResetAfterMerge()) {
+         if (cl != nullptr && cl->InheritsFrom("TTree")) {
+            TTree* outCollTree = static_cast<TTree*>(fMerger.GetOutputFile()->Get(key->GetName()));
+            TTree* inCollTree = static_cast<TTree*>(input->Get(key->GetName()));
+            if (inCollTree != nullptr && outCollTree != nullptr) {
+               if (syncBranches(outCollTree, inCollTree)) {
+                  input->Write();
+               }
+               syncBranches(inCollTree, outCollTree);
+            }
+         }
+      }
+
+      Bool_t result = fMerger.PartialMerge(TFileMerger::kIncremental | TFileMerger::kResetable | TFileMerger::kKeepCompression);
+      nextKey = input->GetListOfKeys();
+      while (TKey* key = static_cast<TKey*>(nextKey())) {
+         TClass* cl = TClass::GetClass(key->GetClassName());
+         if (cl != nullptr && 0 != cl->GetResetAfterMerge()) {
             key->Delete();
             input->GetListOfKeys()->Remove(key);
             delete key;
          }
       }
       return result;
+   }
+
+   Bool_t BuildIndex()
+   {
+      bool updated = false;
+      TIter nextKey(fMerger.GetOutputFile()->GetListOfKeys());
+      while (TKey* key = static_cast<TKey*>(nextKey())) {
+         TClass* cl = TClass::GetClass(key->GetClassName());
+         if (cl != nullptr && cl->InheritsFrom("TTree")) {
+            TTree* outTree = static_cast<TTree*>(fMerger.GetOutputFile()->Get(key->GetName()));
+            if (outTree != nullptr && outTree->GetBranch("index_ref") != nullptr && outTree->GetEntries() > 0) {
+               TList* friendTrees(outTree->GetListOfFriends());
+               if (friendTrees != nullptr && !friendTrees->IsEmpty()) {
+                  outTree->BuildIndex("index_ref");
+                  updated = true;
+                  for (const auto&& obj: *friendTrees) {
+                     TTree* friendTree = outTree->GetFriend(obj->GetName());
+                     if (friendTree != nullptr && friendTree->GetBranch("index_ref") != nullptr && friendTree->GetEntries() > 0) {
+                        friendTree->BuildIndex("index_ref");
+                        updated = true;
+                     }
+                  }
+               }
+            }
+         }
+      }
+      return updated;
    }
 };
 
@@ -185,7 +219,7 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
          }
          streamPort = m_rootServerSocket->GetLocalPort();
          const std::string newStreamPortString{streamPortStringProp.value().substr(0,streamPortStringProp.value().find(':')+1) + std::to_string(streamPort)};
-         if(propertyServer->setProperty(propertyName,newStreamPortString).isFailure()) {
+         if (propertyServer->setProperty(propertyName,newStreamPortString).isFailure()) {
             ATH_MSG_FATAL("Could not set Conversion Service property " << propertyName << " from " << streamPortString << " to " << newStreamPortString);
             return StatusCode::FAILURE;
          }
@@ -196,13 +230,13 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
    }
    // Count the number of output streams
    const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
-   for(const auto& alg : algMgr->getAlgorithms()) {
-      if(alg->type() == "AthenaOutputStream") {
+   for (const auto& alg : algMgr->getAlgorithms()) {
+      if (alg->type() == "AthenaOutputStream") {
          ATH_MSG_DEBUG("Counting " << alg->name() << " as an output stream algorithm");
          m_numberOfStreams++;
       }
    }
-   if(m_numberOfStreams == 0) {
+   if (m_numberOfStreams == 0) {
       ATH_MSG_WARNING("No output stream algorithm found, setting the number of streams to 1");
       m_numberOfStreams = 1;
    } else {
@@ -259,6 +293,12 @@ StatusCode AthenaRootSharedWriterSvc::share(int numClients, bool motherClient) {
                   --m_rootClientCount;
                   if (m_rootMonitor->GetActive() == 0 || m_rootClientCount == 0) {
                      if (!motherClient) {
+                        TIter nextFileMerger(m_rootMergers.MakeIterator());
+                        while (ParallelFileMerger* merger = static_cast<ParallelFileMerger*>(nextFileMerger())) {
+                           if (merger->BuildIndex()) {
+                              ATH_MSG_INFO("ROOT Monitor: build index for trees in " << merger);
+                           }
+                        }
                         anyActiveClients = false;
                         ATH_MSG_INFO("ROOT Monitor: No more active clients...");
                      } else {

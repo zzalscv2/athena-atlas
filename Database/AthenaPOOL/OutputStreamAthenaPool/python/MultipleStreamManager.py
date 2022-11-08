@@ -633,11 +633,26 @@ class MultipleStreamManager:
         theStream = self.NewStream(StreamName,FileName,Parent=Parent,type='extension',asAlg=asAlg, noTag=True)
         theStream.Stream.MetadataItemList = [ ]
         theStream.Stream.ItemList = [ ]
+        theStream.Stream.WritingTool.SubLevelBranchName = "<key>"
         theStream.Stream.WritingTool.OutputCollection = "POOLContainer_" + StreamName
         theStream.Stream.WritingTool.PoolContainerPrefix = "CollectionTree_" + StreamName
         from AthenaCommon.AppMgr import theApp
         svcMgr = theApp.serviceMgr()
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DatabaseName = '" + FileName + "'; INDEX_MASTER = 'POOLContainer(DataHeader)'" ]
+        svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ "DatabaseName = '" + FileName + "'; FRIEND_TREE = 'CollectionTree:CollectionTree_" + StreamName + "'" ]
+        # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
+        from AthenaPoolCnvSvc import PoolAttributeHelper as pah
+        CONTAINER_SPLITLEVEL = 0
+        if Parent in ["StreamDAOD_PHYSVAL"]:
+            TREE_AUTO_FLUSH = 100
+        if Parent in ["StreamDAOD_PHYS"]:
+            TREE_AUTO_FLUSH = 500
+        if Parent in ["StreamDAOD_PHYSLITE"]:
+            TREE_AUTO_FLUSH = 1000
+            CONTAINER_SPLITLEVEL = 99
+        svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree_" + StreamName, str(TREE_AUTO_FLUSH) ) ]
+        svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree_" + StreamName, str(CONTAINER_SPLITLEVEL) ) ]
+        svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]
         return theStream
 
     def NewVirtualStream(self,StreamName,FileName="default", asAlg=False):
