@@ -8,6 +8,7 @@
 #include "AsgTools/IAsgTool.h"
 
 #include "xAODParticleEvent/ParticleContainer.h"
+#include "xAODPFlow/PFOContainer.h"
 
 namespace PanTau {
     class PanTauSeed;
@@ -28,10 +29,10 @@ namespace PanTau {
         public:
 
         virtual bool isInitialized() = 0;
-        virtual StatusCode execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container) const = 0;
+        virtual StatusCode execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const = 0;
 
     };
 
 }
 
-#endif // PANTAUALGS_ITAUDISCRIMINANTTOOL_H
+#endif // PANTAUALGS_ITOOL_DETAILSARRANGER_H

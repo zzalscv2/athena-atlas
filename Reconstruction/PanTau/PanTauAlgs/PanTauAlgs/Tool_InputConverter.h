@@ -41,7 +41,7 @@ namespace PanTau {
         
         virtual StatusCode initialize();
         
-        virtual StatusCode ConvertToTauConstituent(xAOD::PFO* pfo,
+        virtual StatusCode ConvertToTauConstituent(const xAOD::PFO* pfo,
                                                    PanTau::TauConstituent* &tauConstituent,
                                                    const xAOD::TauJet* tauJet) const;
         

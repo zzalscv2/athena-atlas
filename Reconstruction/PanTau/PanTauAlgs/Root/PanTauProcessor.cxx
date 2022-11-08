@@ -83,7 +83,7 @@ StatusCode PanTau::PanTauProcessor::finalize() {
 }
 
 
-StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& pi0Container) const {
+StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const {
     
   //get the current TauJet
   xAOD::TauJet* curTauJet = &pTau;
@@ -172,7 +172,7 @@ StatusCode PanTau::PanTauProcessor::executePanTau(xAOD::TauJet& pTau, xAOD::Part
   ATH_CHECK( m_Tool_DecayModeDeterminator->execute(curPanTauSeed) );
   
   // 2. calculate the four momentum and link the details to the tauJet
-  ATH_CHECK( m_Tool_DetailsArranger->execute(curPanTauSeed, pi0Container) );
+  ATH_CHECK( m_Tool_DetailsArranger->execute(curPanTauSeed, pi0Container, neutralPFOContainer) );
   
   delete curPanTauSeed;
   return StatusCode::SUCCESS;

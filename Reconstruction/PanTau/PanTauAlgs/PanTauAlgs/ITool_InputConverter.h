@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PANTAUALGS_ITOOL_INPUTCONVERTER_H
@@ -14,10 +14,6 @@
 
 namespace PanTau{
     class TauConstituent;
-}
-
-namespace Rec {
-    class TrackParticle;
 }
 
 namespace PanTau {
@@ -36,10 +32,10 @@ namespace PanTau {
 
     virtual bool isInitialized() = 0;
             
-    //PFO Converter (r19+)
-    virtual StatusCode ConvertToTauConstituent(xAOD::PFO* pfo,
-						PanTau::TauConstituent* &tauConstituent,
-						const xAOD::TauJet* tauJet) const = 0;
+    //PFO Converter
+    virtual StatusCode ConvertToTauConstituent(const xAOD::PFO* pfo,
+					       PanTau::TauConstituent* &tauConstituent,
+					       const xAOD::TauJet* tauJet) const = 0;
             
     };
     

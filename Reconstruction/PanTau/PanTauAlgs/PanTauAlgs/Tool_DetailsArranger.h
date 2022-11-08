@@ -13,6 +13,7 @@
 
 #include "xAODTau/TauJet.h"
 #include "xAODParticleEvent/ParticleContainer.h"
+#include "xAODPFlow/PFOContainer.h"
 
 #include "PanTauAlgs/ITool_DetailsArranger.h"
 #include "PanTauAlgs/ITool_InformationStore.h"
@@ -50,7 +51,7 @@ namespace PanTau {
         
         virtual StatusCode initialize();
         
-        virtual StatusCode execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container) const;
+        virtual StatusCode execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
         
     protected:
         
@@ -62,7 +63,7 @@ namespace PanTau {
 				     xAOD::TauJetParameters::PanTauDetails detailEnum,
 				     PanTauDetailsType detailType) const;
 	
-        StatusCode arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container) const;
+        StatusCode arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
 
         void SetHLVTau(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, const std::string& inputAlg, const std::string& varTypeName_Basic) const;
 
@@ -70,7 +71,7 @@ namespace PanTau {
 
 	void SetNeutralConstituentMass(xAOD::PFO* neutral_pfo, double mass) const;
 
-	void SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, double mass) const;
+	void SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, xAOD::PFOContainer& neutralPFOContainer, double mass) const;
 
 	std::vector< ElementLink< xAOD::PFOContainer > > CollectConstituentsAsPFOLinks( PanTau::PanTauSeed* inSeed,
 											const std::vector< ElementLink< xAOD::PFOContainer > >& cellbased_neutralPFOLinks,

@@ -10,7 +10,7 @@ PanTau::TauConstituent::TauConstituent() :
   m_TypeFlags(),
   m_BDTValue(PanTau::TauConstituent::DefaultBDTValue()),
   m_Charge(PanTau::TauConstituent::DefaultCharge()),
-  m_PFOLink(0),
+  m_PFO(nullptr),
   m_Shots(),
   m_nPhotonsInShot(0)
 {
@@ -21,13 +21,13 @@ PanTau::TauConstituent::TauConstituent(TLorentzVector   itsMomentum,
 				       int              itsCharge,
 				       std::vector<int> itsType,
 				       double           itsBDTValue,
-				       xAOD::PFO*       itsPFO) :
+				       const xAOD::PFO* itsPFO) :
   IParticle(),
   m_p4(itsMomentum),
   m_TypeFlags(itsType),
   m_BDTValue(itsBDTValue),
   m_Charge(itsCharge),
-  m_PFOLink(itsPFO),
+  m_PFO(itsPFO),
   m_Shots(),
   m_nPhotonsInShot(0)
 {
@@ -40,7 +40,7 @@ PanTau::TauConstituent::TauConstituent(const PanTau::TauConstituent& rhs) :
   m_TypeFlags(rhs.m_TypeFlags),
   m_BDTValue(rhs.m_BDTValue),
   m_Charge(rhs.m_Charge),
-  m_PFOLink(rhs.m_PFOLink),
+  m_PFO(rhs.m_PFO),
   m_Shots(rhs.m_Shots),
   m_nPhotonsInShot(rhs.m_nPhotonsInShot)
 {
@@ -69,7 +69,7 @@ PanTau::TauConstituent& PanTau::TauConstituent::operator=(const PanTau::TauConst
     m_TypeFlags = tauConst.m_TypeFlags;
     m_BDTValue  = tauConst.m_BDTValue;
     m_Charge    = tauConst.m_Charge;
-    m_PFOLink   = tauConst.m_PFOLink;
+    m_PFO       = tauConst.m_PFO;
     m_Shots     = tauConst.m_Shots;
     m_nPhotonsInShot = tauConst.m_nPhotonsInShot;
   }
@@ -259,7 +259,7 @@ int PanTau::TauConstituent::getCharge() const {
 
 
 const xAOD::PFO* PanTau::TauConstituent::getPFO() const {
-  return m_PFOLink;
+  return m_PFO;
 }
 
 

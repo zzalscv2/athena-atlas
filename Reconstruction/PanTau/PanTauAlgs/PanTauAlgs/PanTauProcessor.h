@@ -2,17 +2,15 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// PanTauProcessor.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef PANTAU_PANTAUPROCESSOR_H
 #define PANTAU_PANTAUPROCESSOR_H
 
 // Gaudi includes
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/ToolHandle.h"
+
 #include "tauRecTools/TauRecToolBase.h"
+#include "xAODPFlow/PFOContainer.h"
 
 // C++ includes
 #include <string>
@@ -50,7 +48,7 @@ namespace PanTau
 
        virtual StatusCode initialize();
        virtual StatusCode finalize();
-       virtual StatusCode executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& pi0Container) const;
+       virtual StatusCode executePanTau(xAOD::TauJet& pTau, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const;
        
     private:
         

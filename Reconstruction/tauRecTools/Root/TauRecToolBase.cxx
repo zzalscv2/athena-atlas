@@ -194,7 +194,7 @@ StatusCode TauRecToolBase::executePi0nPFO(xAOD::TauJet& /*pTau*/, xAOD::PFOConta
   return StatusCode::FAILURE;
 }
 
-StatusCode TauRecToolBase::executePanTau(xAOD::TauJet& /*pTau*/, xAOD::ParticleContainer& /*particleContainer*/) const {
+StatusCode TauRecToolBase::executePanTau(xAOD::TauJet& /*pTau*/, xAOD::ParticleContainer& /*particleContainer*/, xAOD::PFOContainer& /*neutralPFOContainer*/) const {
   ATH_MSG_ERROR("function not implemented");
   return StatusCode::FAILURE;
 }
