@@ -58,9 +58,6 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--inputRDO_TRIGFile', 
                         type=trfArgClasses.argFactory(trfArgClasses.argRDOFile, io='input'),
                         help='Input RDO_TRIG file', group='Reco Files')
-    parser.add_argument('--inputRDO_FTKFile',
-                        type=trfArgClasses.argFactory(trfArgClasses.argRDOFile, io='input'),
-                        help='Input RDO_FTK file', group='Reco Files')
     parser.add_argument('--inputAODFile', nargs='+', 
                         type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='input'),
                         help='Input AOD file', group='Reco Files')
@@ -97,7 +94,7 @@ def addRecoSubsteps(executorSet):
     executorSet.add(athenaExecutor(name = 'RDOtoBS', skeletonFile = 'RecJobTransforms/skeleton.RDOtoBS_tf.py',
                                    substep = 'r2b', inData = ['RDO'], outData = ['BS']))
     executorSet.add(athenaExecutor(name = 'RDOtoRDOTrigger', skeletonFile = 'RecJobTransforms/skeleton.RDOtoRDOtrigger.py',
-                                   substep = 'r2t', inData = ['RDO','RDO_FTK'], outData = ['RDO_TRIG']))
+                                   substep = 'r2t', inData = ['RDO'], outData = ['RDO_TRIG']))
     # Note that the RAWtoALL substep is disabled by defaut (no inputs or outputs)
     # It will be enabled explicitly via --steering if required
     executorSet.add(athenaExecutor(name = 'RAWtoALL', skeletonFile = 'RecJobTransforms/skeleton.RAWtoALL_tf.py',
@@ -105,7 +102,7 @@ def addRecoSubsteps(executorSet):
                                    substep = 'r2a', inData = [],
                                    outData = []))
     executorSet.add(athenaExecutor(name = 'RAWtoESD', skeletonFile = 'RecJobTransforms/skeleton.RAWtoESD_tf.py',
-                                   substep = 'r2e', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL', 'RDO_FTK'], 
+                                   substep = 'r2e', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
                                    outData = ['ESD', 'HIST_ESD_INT', 'TXT_JIVEXMLTGZ'],))
     executorSet.add(athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
                                    substep = 'e2a', inData = ['ESD'], outData = ['AOD', 'HIST_AOD_INT']))
