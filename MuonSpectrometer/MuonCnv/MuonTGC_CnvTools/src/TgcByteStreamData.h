@@ -250,9 +250,9 @@ struct TGC_BYTESTREAM_RPCBIS78_POS
 struct TGC_BYTESTREAM_RPCBIS78_COIN
 {
   unsigned fill1:     4;
-  unsigned flag:      2;
-  unsigned dphi:      3;
   unsigned deta:      3;
+  unsigned dphi:      3;
+  unsigned flag:      2;
   unsigned fill2:     1;
   unsigned bcid:      4;
   unsigned fill3:     3;
@@ -269,8 +269,8 @@ struct TGC_BYTESTREAM_NSL_EIFI
 {
   unsigned ei:        8;
   unsigned fi:        8;
-  unsigned chamberid: 2;
-  unsigned fill1:     4;
+  unsigned chamberid: 3;
+  unsigned fill1:     3;
   unsigned bcBitmap:  2;
   unsigned sector:    4;
   unsigned fwd:       1;
