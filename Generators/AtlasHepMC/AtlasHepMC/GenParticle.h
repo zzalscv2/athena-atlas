@@ -41,7 +41,7 @@ inline int barcode(ConstGenParticlePtr p) {
 inline int barcode(const HepMC3::GenParticle p) {
     auto e = p.parent_event();
     if (!e) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=e.attribute<HepMC3::IntAttribute>("barcode",p.id());
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p.id());
     return barcode?(barcode->value()):p.id();
 }
 inline int barcode(const HepMC3::GenParticle* p) {
