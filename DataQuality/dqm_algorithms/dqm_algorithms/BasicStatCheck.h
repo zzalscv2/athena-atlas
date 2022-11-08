@@ -9,13 +9,16 @@
 #ifndef DQM_ALGORITHMS_BASICSTATCHECK_H
 #define DQM_ALGORITHMS_BASICSTATCHECK_H
 
+#include "CxxUtils/checker_macros.h"
+
 #include <dqm_core/Algorithm.h>
 #include <string>
 #include <iosfwd>
 
 namespace dqm_algorithms
 {
-	struct BasicStatCheck : public dqm_core::Algorithm
+	struct ATLAS_NOT_THREAD_SAFE BasicStatCheck : public dqm_core::Algorithm
+	//     ^ range change on const histogram
         {
 	  BasicStatCheck(const std::string & name);
 

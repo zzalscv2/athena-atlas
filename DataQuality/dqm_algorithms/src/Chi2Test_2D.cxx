@@ -44,21 +44,16 @@ dqm_algorithms::Chi2Test_2D::execute(	const std::string & name ,
 					const TObject & object, 
 					const dqm_core::AlgorithmConfig & config )
 {
-const TH2 * inputgraph_original;
+  const TH2 * inputgraph;
   
   if(object.IsA()->InheritsFrom( "TH1" )) {
-    inputgraph_original = static_cast<const TH2*>( &object );
+    inputgraph = static_cast<const TH2*>( &object );
     
   } else {
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
   }
 
-//now, cast inputgraph_original to a non const object
- 
- TH2* inputgraph = const_cast<TH2*>(inputgraph_original); 
- 
- 
- //Make sure the input histogram has enough statistics 
+ //Make sure the input histogram has enough statistics
   double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), 1 );
   
   if (inputgraph->GetEntries() < minstat ) {
@@ -117,7 +112,7 @@ if(normalize==1)
 {double ref_entries=refhist->GetEntries();
  double input_entries=inputgraph->GetEntries();
  //call sumw2() to make sure that you have the errors as sqrt(n)
- inputgraph->Sumw2();
+ const_cast<TH2*>(inputgraph)->Sumw2();
  refhist->Sumw2();
 //now, rescale the reference histogram to the inputgraph histogram. The errors should scale properly, now that I have called Sumw2()
  refhist->Scale(input_entries/ref_entries);

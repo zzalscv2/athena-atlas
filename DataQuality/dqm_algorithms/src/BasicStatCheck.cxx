@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BasicStatCheck.cxx checks basic histogram quanitites like over/underflow; if filled and returns dqm_core::Result
@@ -43,10 +43,10 @@ dqm_algorithms::BasicStatCheck::execute(	const std::string & name ,
 						const TObject & object, 
                                                 const dqm_core::AlgorithmConfig & config )
 { 
-  TH1 * histogram;
+  const TH1 * histogram;
   
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
     if (histogram->GetDimension() > 2 ){ 
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 2 " );
     }
@@ -67,8 +67,8 @@ dqm_algorithms::BasicStatCheck::execute(	const std::string & name ,
   
   
   std::vector<int> range=dqm_algorithms::tools::GetBinRange(histogram, config.getParameters()); 
-  histogram->GetXaxis()->SetRange(range[0], range[1]);
-  histogram->GetYaxis()->SetRange(range[2], range[3]);
+  const_cast<TAxis*>(histogram->GetXaxis())->SetRange(range[0], range[1]);
+  const_cast<TAxis*>(histogram->GetYaxis())->SetRange(range[2], range[3]);
   
   std::map<std::string, double> params;
   if (m_name == "Mean") {

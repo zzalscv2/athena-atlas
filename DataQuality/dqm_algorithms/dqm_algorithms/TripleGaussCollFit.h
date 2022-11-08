@@ -5,6 +5,8 @@
 #ifndef DQM_ALGORITHMS_TRIPLEGAUSSCOLLFIT_H
 #define DQM_ALGORITHMS_TRIPLEGAUSSCOLLFIT_H
 
+#include "CxxUtils/checker_macros.h"
+
 #include <dqm_core/Algorithm.h>
 #include <string>
 #include <iosfwd>
@@ -14,7 +16,8 @@ class TH1;
 
 namespace dqm_algorithms {
   
-  class TripleGaussCollFit : public dqm_core::Algorithm {
+  class ATLAS_NOT_THREAD_SAFE TripleGaussCollFit : public dqm_core::Algorithm {
+  //    ^ fit of constant histogram
     
   public:
     TripleGaussCollFit (const std::string& _name);
