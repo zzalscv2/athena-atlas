@@ -785,7 +785,6 @@ ntp
 netap
 CaloCellRandomizer
 CaloDetDescr
-CaloCellContainerMergerTool
 LArDigitization
 CLHEP
 MomentumCollection
