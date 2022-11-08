@@ -27,9 +27,6 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
     from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)
     pixRegSelTool = acc.popToolsAndMerge( regSelTool_ITkPixel_Cfg( flags) )
     sctRegSelTool = acc.popToolsAndMerge( regSelTool_ITkStrip_Cfg( flags) )
-
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    acc.merge( TrackingGeometrySvcCfg( flags ) )
     
     acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( name = "TrigL2LayerNumberToolITk_FTF",UseNewLayerScheme = True) )
     acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( "TrigL2LayerNumberToolITk_FTF" ) )
