@@ -2,12 +2,11 @@
 # Configuration of InDetPrepRawDataFormation package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format, BeamType
+from AthenaConfiguration.Enums import Format
 
 def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConversion", **kwargs):
     acc = ComponentAccumulator()
-    conversionAlg=CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs)
-    acc.addEventAlgo(conversionAlg)
+    acc.addEventAlgo(CompFactory.InDetToXAODClusterConversion(name, **kwargs))
     return acc
 
 def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConversion", **kwargs):
@@ -16,8 +15,7 @@ def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConvers
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
 
-    conversionAlg=CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs)
-    acc.addEventAlgo(conversionAlg)
+    acc.addEventAlgo(CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs))
     return acc
 
 def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
@@ -194,20 +192,44 @@ def InDetTRT_RIO_MakerCfg(flags, name = "InDetTRT_RIO_Maker", **kwargs):
     acc = ComponentAccumulator()
 
     if "TRT_DriftCircleTool" not in kwargs:
-        from InDetConfig.TRTPreProcessing import TRT_DriftCircleToolCfg
+        from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
             TRT_DriftCircleToolCfg(flags)))
 
     kwargs.setdefault("TrtDescrManageLocation", 'TRT')
     kwargs.setdefault("TRTRDOLocation", 'TRT_RDOs')    
-    kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCirclesUncalibrated' if flags.Beam.Type is BeamType.Cosmics else 'TRT_DriftCircles')
+    kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCircles')
 
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name, **kwargs))
     return acc
 
+def InDetTRT_NoTime_RIO_MakerCfg(flags, name = "InDetTRT_NoTime_RIO_Maker", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TRT_DriftCircleTool" not in kwargs:
+        from InDetConfig.TRT_DriftCircleToolConfig import TRT_NoTime_DriftCircleToolCfg
+        kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
+            TRT_NoTime_DriftCircleToolCfg(flags)))
+
+    kwargs.setdefault("TRTRIOLocation", 'TRT_DriftCirclesUncalibrated')
+
+    acc.merge(InDetTRT_RIO_MakerCfg(flags, name, **kwargs))
+    return acc
+
+def InDetTRT_Phase_RIO_MakerCfg(flags, name = "InDetTRT_Phase_RIO_Maker", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TRT_DriftCircleTool" not in kwargs:
+        from InDetConfig.TRT_DriftCircleToolConfig import TRT_Phase_DriftCircleToolCfg
+        kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
+            TRT_Phase_DriftCircleToolCfg(flags)))
+
+    acc.merge(InDetTRT_RIO_MakerCfg(flags, name, **kwargs))
+    return acc
+
 def InDetTRT_RIO_MakerPUCfg(flags, name = "InDetTRT_RIO_MakerPU", **kwargs):
     kwargs.setdefault("TRTRDOLocation", 'TRT_PU_RDOs')    
-    kwargs.setdefault("TRTRIOLocation", 'TRT_PU_DriftCirclesUncalibrated' if flags.Beam.Type is BeamType.Cosmics else 'TRT_PU_DriftCircles')
+    kwargs.setdefault("TRTRIOLocation", 'TRT_PU_DriftCircles')
     return InDetTRT_RIO_MakerCfg(flags, name, **kwargs)
 
 def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):

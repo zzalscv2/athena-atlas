@@ -14,6 +14,17 @@ def TRT_TrackExtensionAlgCfg(flags, name = 'InDetTRT_Extension', **kwargs):
     acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(name + flags.InDet.Tracking.ActivePass.extension, **kwargs))
     return acc
 
+def TRT_Phase_TrackExtensionAlgCfg(flags, name = 'InDetTRT_Phase_Extension', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "TrackExtensionTool" not in kwargs:
+        from InDetConfig.TRT_TrackExtensionToolConfig import TRT_TrackExtensionToolPhaseCfg
+        kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(
+            TRT_TrackExtensionToolPhaseCfg(flags)))
+
+    acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(name, **kwargs))
+    return acc
+
 def Trig_TRT_TrackExtensionAlgCfg(flags, name = 'InDetTrigMTTrackExtensionAlg', **kwargs):
     acc = ComponentAccumulator()
 

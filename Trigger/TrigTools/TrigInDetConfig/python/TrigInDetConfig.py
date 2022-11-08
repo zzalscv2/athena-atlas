@@ -197,8 +197,6 @@ def ftfCfg(flags, roisKey, signature, signatureName):
   sctRegSelTool = acc.popToolsAndMerge( regSelTool_SCT_Cfg( flags) )
 
 
-  from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-  acc.merge( TrackingGeometrySvcCfg( flags ) )
   acc.addPublicTool( CompFactory.TrigL2LayerNumberTool( name = "TrigL2LayerNumberTool_FTF",
                                                         UseNewLayerScheme = True) )
   acc.addPublicTool( CompFactory.TrigL2LayerNumberTool( "TrigL2LayerNumberTool_FTF" ) )

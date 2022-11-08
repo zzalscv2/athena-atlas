@@ -25,9 +25,6 @@ def ITkFastTrackFinderStandaloneCfg(flags):
     from RegionSelector.RegSelToolConfig import (regSelTool_ITkStrip_Cfg, regSelTool_ITkPixel_Cfg)
     pixRegSelTool = acc.popToolsAndMerge( regSelTool_ITkPixel_Cfg( newflags) )
     sctRegSelTool = acc.popToolsAndMerge( regSelTool_ITkStrip_Cfg( newflags) )
-
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    acc.merge( TrackingGeometrySvcCfg( newflags ) )
     
     acc.addPublicTool( CompFactory.TrigL2LayerNumberToolITk( name = "TrigL2LayerNumberTool_FTF",UseNewLayerScheme = True) )
 

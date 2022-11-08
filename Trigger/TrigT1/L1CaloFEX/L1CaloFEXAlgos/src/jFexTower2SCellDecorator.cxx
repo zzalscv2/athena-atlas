@@ -102,7 +102,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
     SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi   (m_SCellPhidecorKey    , ctx);
     SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<int> >   jTowerSCellID    (m_SCellIDdecorKey     , ctx);
     SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerEtMeV      (m_jtowerEtMeVdecorKey , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEtMeV  (m_TileEtMeVdecorKey   , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEt     (m_TileEtMeVdecorKey   , ctx);
     SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta    (m_TileEtadecorKey     , ctx);
     SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi    (m_TilePhidecorKey     , ctx);
     
@@ -185,10 +185,10 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 return StatusCode::FAILURE;
             }            
             
-            TileEt = (it_TileID2ptr->second)->cpET()*500;
-            TileEta = (it_TileID2ptr->second)->eta();
+            TileEt    = (it_TileID2ptr->second)->cpET();
+            TileEta   = (it_TileID2ptr->second)->eta();
             float phi = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
-            TilePhi = phi;
+            TilePhi   = phi;
         }
         
         // Decorating the tower with the corresponding information
@@ -197,7 +197,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         jTowerSCellPhi  (*jTower) = scPhi;
         jTowerSCellID   (*jTower) = scID;
         jTowerEtMeV     (*jTower) = static_cast<int>( jFEXCompression::Expand(jFexEt) );
-        jTowerTileEtMeV (*jTower) = static_cast<int>( TileEt );
+        jTowerTileEt    (*jTower) = static_cast<int>( TileEt );
         jTowerTileEta   (*jTower) = TileEta;
         jTowerTilePhi   (*jTower) = TilePhi;
         
