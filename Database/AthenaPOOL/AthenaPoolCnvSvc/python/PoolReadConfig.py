@@ -54,6 +54,12 @@ def EventSelectorAthenaPoolCfg(flags):
             pass
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
         result.merge(EvtIdModifierSvcCfg(flags))
+    elif flags.Common.ProductionStep in [ProductionStep.Simulation] and len(flags.Input.RunNumber) and flags.Sim.ISF.ReSimulation:
+        # ReSimulation case
+        evSel.OverrideRunNumber = True
+        evSel.RunNumber = flags.Input.RunNumber[0]
+        if flags.Input.LumiBlockNumber: evSel.FirstLB = flags.Input.LumiBlockNumber[0]
+        evSel.InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(flags.Input.RunNumber[0], 1)
 
     result.addService(evSel)
     return result
