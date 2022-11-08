@@ -215,7 +215,10 @@ def ftfCfg(flags, roisKey, signature, signatureName):
   acc.merge(SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags))
   acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
 
-  ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_" + signature,
+  from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
+  monTool = TrigFastTrackFinderMonitoring(name = "trigfasttrackfinder_" + signature, doResMon=False)
+
+  ftf = CompFactory.TrigFastTrackFinder( name = "trigfasttrackfinder_" + signature,
                                          LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
                                          SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool" + signature ),
                                          TrackSummaryTool         = TrackSummaryTool,
@@ -240,7 +243,8 @@ def ftfCfg(flags, roisKey, signature, signatureName):
                                          useNewLayerNumberScheme  = True,
                                          MinHits                  = 5,
                                          useGPU                   = False,
-                                         DoubletDR_Max            = 270)
+                                         DoubletDR_Max            = 270,
+                                         MonTool = monTool)
   acc.addEventAlgo( ftf, primary=True )
 
 
