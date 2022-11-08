@@ -4,15 +4,17 @@
 
 #ifndef __CONDITIONSSINGLETON_H
 #define __CONDITIONSSINGLETON_H
-// sami
+
 #include <string>
 #include <vector>
-//#include <utility>
 #include <map>
+
+#include "CxxUtils/checker_macros.h"
+
 class TMap;
 
 namespace dqi{
-  class ConditionsSingleton
+  class ATLAS_NOT_THREAD_SAFE ConditionsSingleton
   {
   private:
     ConditionsSingleton() = default;

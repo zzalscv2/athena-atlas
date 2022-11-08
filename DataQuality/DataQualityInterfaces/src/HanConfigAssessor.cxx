@@ -15,6 +15,8 @@
 #include <TH1F.h>
 #include <TClass.h>
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
 
 //Get rid of Root macros that confuse Doxygen
 ///\cond CLASSIMP

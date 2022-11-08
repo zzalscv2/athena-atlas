@@ -15,7 +15,6 @@
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/split.hpp"
 
-
 namespace dqi{
 
   ConditionsSingleton& ConditionsSingleton::getInstance(){

@@ -12,9 +12,10 @@
 #include <TFile.h>
 #include <TKey.h>
 
+#include "CxxUtils/checker_macros.h"
+
 #include "DataQualityInterfaces/HanConfigGroup.h"
 #include "DataQualityInterfaces/HanConfigMetadata.h"
-
 #include "DataQualityInterfaces/ConditionsSingleton.h"
 
 namespace {
@@ -32,7 +33,7 @@ struct CmdLineArgs {
 } // unnamed namespace
 
 
-int main( int argc, char *argv[] )
+int main ATLAS_NOT_THREAD_SAFE ( int argc, char *argv[] )
 {
   CmdLineArgs arg;
   int rc = arg.parse( argc, argv );
