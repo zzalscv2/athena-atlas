@@ -26,6 +26,7 @@
 
 // Root include files
 #include "TFile.h"
+#include "TMemFile.h"
 #include "TFileCacheWrite.h"
 #include "TTree.h"
 #include "TTreeCache.h"
@@ -597,6 +598,29 @@ DbStatus RootDatabase::setOption(const DbOption& opt)  {
         m_file->ReadStreamerInfo();
         return Success;
       }
+      else if ( !strcasecmp(n, "FRIEND_TREE") )  {
+        DbPrint log("RootDatabase::setOption");
+        char *s = nullptr;
+        char *s2 = nullptr;
+        if( opt._getValue(s).isSuccess() and s ) {
+          for (s2 = s; *s2 != '\0'; s2++) {
+            if (*s2 == ':') {
+              *s2 = '\0';
+              s2++;
+              break;
+            }
+          }
+          TTree* tree1 = (TTree*)m_file->Get(s);
+          TTree* tree2 = (TTree*)m_file->Get(s2);
+          if (!tree1 || !tree2) {
+             return Error;
+          }
+          tree1->AddFriend(tree2);
+          log << DbPrintLvl::Debug << "FRIEND_TREE set to " << s << " and " << s2 << DbPrint::endmsg;
+          return Success;
+        }
+        return Error;
+      }
       break;
     case 'I':
        if( !strcasecmp(n, "INDEX_MASTER") ) {
@@ -844,13 +868,27 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
          TTree *tree = treeIt->first;
          TIter next(tree->GetListOfBranches());
          TBranch * b = nullptr;
+         DbPrint log( m_file->GetName() );
          while((b = (TBranch*)next())){
             if (b->GetBasketSize() > m_maxBufferSize) {
-               DbPrint log( m_file->GetName() );
                log << DbPrintLvl::Debug << b->GetName() << " Basket size = " << b->GetBasketSize()
                    << " reduced to " << m_maxBufferSize
                    << DbPrint::endmsg;
                b->SetBasketSize(m_maxBufferSize);
+            }
+         }
+         if (tree->GetBranch("index_ref") != nullptr && tree->GetEntries() > 0 && dynamic_cast<TMemFile*>(tree->GetCurrentFile()) == nullptr) {
+            TList* friendTrees(tree->GetListOfFriends());
+            if (friendTrees != nullptr && !friendTrees->IsEmpty()) {
+               log << DbPrintLvl::Debug << "BuildIndex for index_ref to " << tree->GetName() << DbPrint::endmsg;
+               tree->BuildIndex("index_ref");
+               for (const auto&& obj: *friendTrees) {
+                  TTree* friendTree = tree->GetFriend(obj->GetName());
+                  if (friendTree != nullptr && friendTree->GetBranch("index_ref") != nullptr && friendTree->GetEntries() > 0 && dynamic_cast<TMemFile*>(friendTree->GetCurrentFile()) == nullptr) {
+                     log << DbPrintLvl::Debug << "BuildIndex for index_ref to " << friendTree->GetName() << DbPrint::endmsg;
+                     friendTree->BuildIndex("index_ref");
+                  }
+               }
             }
          }
       }
