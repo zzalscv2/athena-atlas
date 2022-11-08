@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <memory>
 
+#include "CxxUtils/checker_macros.h"
 #include "PersistencySvc/SimpleUtilityBase.h"
 
 using namespace pool;
 
 
-class ExtractFileIdentifierApplication  : public SimpleUtilityBase {
+class ATLAS_NOT_THREAD_SAFE ExtractFileIdentifierApplication  : public SimpleUtilityBase {
 public:
   ExtractFileIdentifierApplication( int argc, char* argv[] );
 
@@ -69,7 +70,7 @@ ExtractFileIdentifierApplication::printSyntax()
 
 
 
-int main( int argc, char* argv[] )
+int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] )
 {
    ExtractFileIdentifierApplication	app( argc, argv );
    return app.run();

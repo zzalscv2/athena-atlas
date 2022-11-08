@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -12,6 +12,8 @@
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/FileDescriptor.h"
+
+#include "TError.h"
 
 using namespace pool;
 
@@ -48,7 +50,7 @@ bool SimpleUtilityBase::parseArguments()
 }
 
 
-void SimpleUtilityBase::startSession()
+void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
 {
    storageSvc = pool::createStorageSvc("StorageSvc");
    if( !storageSvc ) {
@@ -66,12 +68,10 @@ void SimpleUtilityBase::startSession()
       throw std::runtime_error( "Could not start a new session" );
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
-      // Set ERROR_LEVEL ROOT domain option to kError (==3000)
-      // to disable warnings about unknown classes when opening the file
+      // Disable warnings about unknown classes when opening the file
       // ----  (NOT needed when nostreamers option is used)
-      pool::DbOption        err_lvl("ERROR_LEVEL", "", 3000); 
-      storageExplorer->setDomainOption(session, err_lvl);
-       
+      gErrorIgnoreLevel = kError;
+
       // Tell ROOT to not autoload dictionaries (speedup)
       pool::DbOption        no_streamers("FILE_READSTREAMERINFO", "", 0);
       //  (DISABLED! Seems to break ROOT 5.20 ability to read 5.18 files)
@@ -126,7 +126,7 @@ int SimpleUtilityBase::run()
 
 
 //  ------------------   Utils -----------------------
-std::string Utils::readFileGUID( const std::string& pfn )
+std::string Utils::readFileGUID ATLAS_NOT_THREAD_SAFE ( const std::string& pfn )
 {
    SimpleUtilityBase util;
    util.startSession();
