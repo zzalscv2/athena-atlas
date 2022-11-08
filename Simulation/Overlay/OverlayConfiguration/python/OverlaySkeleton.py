@@ -118,9 +118,6 @@ def fromRunArgs(runArgs):
     # Pre-exec
     processPreExec(runArgs, ConfigFlags)
 
-    # TODO not parsed yet:
-    # '--fSampltag'
-
     # Lock flags
     ConfigFlags.lock()
 

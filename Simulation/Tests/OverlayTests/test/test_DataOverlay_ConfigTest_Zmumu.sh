@@ -23,7 +23,6 @@ Overlay_tf.py \
 --maxEvents $events \
 --conditionsTag CONDBR2-BLKPA-2016-12-01 \
 --samplingFractionDbTag FTFP_BERT_BIRK \
---fSampltag LARElecCalibMCfSampl-G496-19213- \
 --preExec 'from LArROD.LArRODFlags import larRODFlags;larRODFlags.nSamples.set_Value_and_Lock(4);from LArConditionsCommon.LArCondFlags import larCondFlags; larCondFlags.OFCShapeFolder.set_Value_and_Lock("4samples1phase")' \
 --postInclude 'EventOverlayJobTransforms/Rt_override_CONDBR2-BLKPA-2015-12.py' \
 --ignorePatterns "L1TopoMenuLoader.+ERROR." \
@@ -37,7 +36,6 @@ Overlay_tf.py \
 --maxEvents $events \
 --conditionsTag CONDBR2-BLKPA-2016-12-01 \
 --samplingFractionDbTag FTFP_BERT_BIRK \
---fSampltag LARElecCalibMCfSampl-G496-19213- \
 --preExec 'from LArROD.LArRODFlags import larRODFlags;larRODFlags.nSamples.set_Value_and_Lock(4);from LArConditionsCommon.LArCondFlags import larCondFlags; larCondFlags.OFCShapeFolder.set_Value_and_Lock("4samples1phase")' \
 --postExec 'job+=CfgMgr.JobOptsDumperAlg(FileName="OverlayLegacyConfig.txt");' 'all:CfgMgr.MessageSvc().setError+=["HepMcParticleLink"]' \
 --postInclude 'EventOverlayJobTransforms/Rt_override_CONDBR2-BLKPA-2015-12.py' \
@@ -60,7 +58,7 @@ then
     --maxEvents $events \
     --conditionsTag CONDBR2-BLKPA-2016-12-01 \
     --preInclude 'Campaigns.DataOverlayPPTest' \
-    --postInclude 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+    --postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
     --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
     --imf False \
     --athenaopts="--threads=1"

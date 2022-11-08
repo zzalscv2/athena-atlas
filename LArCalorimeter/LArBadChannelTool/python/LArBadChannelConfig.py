@@ -31,10 +31,7 @@ def LArBadFebCfg(configFlags, tag=None):
     result=ComponentAccumulator()
     rekey="/LAR/BadChannels/MissingFEBs"
 
-    if configFlags.Overlay.DataOverlay:
-        # TODO: move this in a better location
-        result.merge(addFolders(configFlags, "/LAR/BadChannels/MissingFEBs", "LAR_OFL", className="AthenaAttributeList", tag="LArBadChannelsMissingFEBs-IOVDEP-04", db="OFLP200"))
-    elif configFlags.Input.isMC:
+    if configFlags.Input.isMC:
         result.merge(addFolders(configFlags,"/LAR/BadChannels/MissingFEBs","LAR_OFL",tag=tag,
                                 className="AthenaAttributeList"))
     else:

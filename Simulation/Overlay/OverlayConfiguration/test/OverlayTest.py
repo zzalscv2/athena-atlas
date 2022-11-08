@@ -57,6 +57,9 @@ if args.profile:
 if args.dump:
     acc.merge(OverlayJobOptsDumperCfg(ConfigFlags))
 acc.merge(DigitizationMessageSvcCfg(ConfigFlags))
+if ConfigFlags.Overlay.DataOverlay:
+    from OverlayConfiguration.DataOverlayConditions import PPTestCfg
+    acc.merge(PPTestCfg(ConfigFlags))
 
 # Count algorithm misses
 if ConfigFlags.Concurrency.NumThreads > 0:

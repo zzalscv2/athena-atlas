@@ -21,7 +21,7 @@ Overlay_tf.py \
 --maxEvents 10 \
 --conditionsTag CONDBR2-BLKPA-2016-12-01 \
 --preInclude 'Campaigns.DataOverlayPPTest' \
---postInclude 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
+--postInclude 'OverlayConfiguration.DataOverlayConditions.PPTestCfg' 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
 --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
 --imf False
 

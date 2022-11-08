@@ -67,6 +67,7 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
                                "OFC":("LArOFC","/LAR/ElecCalibFlat/OFC",LArOFCCondAlg),
                                "Shape":("LArShape","/LAR/ElecCalibFlat/Shape",LArShapeCondAlg),
                                "HVScaleCorr":("LArHVScaleCorr","/LAR/ElecCalibFlat/HVScaleCorr",LArHVScaleCorrCondFlatAlg),
+                               "fSampl":("LArfSamplSym","/LAR/ElecCalibMC/fSampl",LArfSamplSymAlg),
                            }
 
     result=IOVDbSvcCfg(ConfigFlags)
@@ -75,15 +76,6 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
 
 
     for condData in condObjs:
-        if condData == "fSampl" and ConfigFlags.Overlay.DataOverlay:
-            LArMCSymCondAlg = CompFactory.LArMCSymCondAlg
-            result.addCondAlgo(LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
-            from IOVDbSvc.IOVDbSvcConfig import addFolders
-            # TODO: does this need to be configurable?
-            result.merge(addFolders(ConfigFlags, "/LAR/ElecCalibMC/fSampl", "LAR_OFL", className="LArfSamplMC", tag="LARElecCalibMCfSampl-G496-19213-FTFP_BERT_BIRK", db="OFLP200"))
-            result.addCondAlgo(LArfSamplSymAlg(ReadKey="LArfSampl", WriteKey="LArfSamplSym"))
-            continue
-
         try:
             outputKey,fldr,calg=_larCondDBFoldersDataR2[condData]
         except KeyError:
@@ -91,21 +83,25 @@ def LArElecCalibDBRun2Cfg(ConfigFlags,condObjs):
             
         dbString="<db>COOLONL_LAR/CONDBR2</db>"
         persClass="CondAttrListCollection"
-        #Potential special treatment for OFC/Shape: Load them from offline DB
-        if len(ConfigFlags.LAr.OFCShapeFolder)>0 and condData=="OFC":
+        # Potential special treatment for OFC/Shape: Load them from offline DB
+        if ConfigFlags.LAr.OFCShapeFolder and condData == "OFC":
             fldr="/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+ConfigFlags.LAr.OFCShapeFolder
             dbString="<db>COOLOFL_LAR/CONDBR2</db>"
             persClass="LArOFCComplete"
             calg = None
-            if ConfigFlags.Overlay.DataOverlay and ConfigFlags.LAr.OFCShapeFolder == "4samples1phase":
-                dbString+="<tag>LARElecCalibOflOFCPhysWaveRTM4samples1phase-RUN2-UPD4-00</tag>"
-        if len(ConfigFlags.LAr.OFCShapeFolder)>0 and condData=="Shape":
+        if ConfigFlags.LAr.OFCShapeFolder and condData == "Shape":
             fldr="/LAR/ElecCalibOfl/Shape/RTM/"+ConfigFlags.LAr.OFCShapeFolder
             dbString="<db>COOLOFL_LAR/CONDBR2</db>"
             persClass="LArShapeComplete"
             calg = None
-            if ConfigFlags.Overlay.DataOverlay and ConfigFlags.LAr.OFCShapeFolder == "4samples1phase":
-                dbString+="<tag>LARElecCalibOflShapeRTM4samples1phase-RUN2-UPD4-00</tag>"
+        if condData == "fSampl":
+            if not ConfigFlags.Overlay.DataOverlay:
+                raise ConfigurationError("fSampl is only supported for data overlay")
+            dbString="<db>COOLOFL_LAR/OFLP200</db>"
+            persClass="LArfSamplMC"
+            result.addCondAlgo(CompFactory.LArMCSymCondAlg(ReadKey="LArOnOffIdMap"))
+            result.addCondAlgo(calg(ReadKey="LArfSampl", WriteKey=outputKey))
+            calg = None
 
         iovDbSvc.Folders.append(fldr+dbString)# (addFolder(ConfigFlags,fldr,"LAR_ONL",'CondAttrListCollection'))
         condLoader.Load.append((persClass,fldr))
