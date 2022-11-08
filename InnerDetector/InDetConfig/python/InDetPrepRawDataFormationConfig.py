@@ -6,7 +6,7 @@ from AthenaConfiguration.Enums import Format
 
 def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConversion", **kwargs):
     acc = ComponentAccumulator()
-    acc.addEventAlgo(CompFactory.InDetToXAODClusterConversion(name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.InDetToXAODClusterConversion(name, **kwargs))
     return acc
 
 def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConversion", **kwargs):
