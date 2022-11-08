@@ -53,6 +53,9 @@ public:
   Gaudi::Property< double > m_roiZedSinThetaFlag{this,"RoIZedSinThetaFlag", false,
     "use a delta zed/sin\theta width rather than just a zed width"};
 
+  Gaudi::Property< bool > m_useBeamspot{this,"UseBeamSpot", false,
+    "correct for the pointlessly adjusted average beamspot z"};
+
 };
 
 #endif //> !DECISIONHANDLING_VIEWCREATORCENTREDONIPARTICLEROITOOL_H
