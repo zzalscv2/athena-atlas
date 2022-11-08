@@ -51,7 +51,7 @@ public:
     StatusCode initializeCalibrator(std::string calibratorConfigFile);
 
     /** interface method to return probability prediction of punch through */
-    double computePunchThroughProbability(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const;
+    virtual double computePunchThroughProbability(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const override;
 
     /** calcalate NN inputs based on isfp and simulstate */
     std::map<std::string, std::map<std::string, double> > computeInputs(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const;
@@ -63,8 +63,6 @@ public:
     double calibrateOutput(double& networkOutput) const;
 
 private:
-    const char* m_name=nullptr;
-
     /** NN graph */
     std::unique_ptr<lwt::LightweightGraph> m_graph;
 
