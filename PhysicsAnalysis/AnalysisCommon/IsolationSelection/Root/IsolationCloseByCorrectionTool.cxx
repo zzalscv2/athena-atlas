@@ -297,19 +297,21 @@ namespace CP {
                     ATH_MSG_ERROR("Failed to apply track correction");
                     return CorrectionCode::Error;
 
-                } else if (isTopoEtIso(iso_type)) {
-                    if (getCloseByCorrectionTopoIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
-                        ATH_MSG_ERROR("Failed to apply topo cluster correction");
-                        return CorrectionCode::Error;
-                    }
-                } else if (isPFlowIso(iso_type)) {
-                    if (getCloseByCorrectionPflowIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
-                        ATH_MSG_ERROR("Failed to apply pflow correction");
-                        return CorrectionCode::Error;
-                    }
                 }
-                ++Cone;
             }
+            else if (isTopoEtIso(iso_type)) {
+              if (getCloseByCorrectionTopoIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
+                ATH_MSG_ERROR("Failed to apply topo cluster correction");
+                return CorrectionCode::Error;
+              }
+            }
+            else if (isPFlowIso(iso_type)) {
+              if (getCloseByCorrectionPflowIso(ctx, &par, iso_type, cache, (*Cone)) == CorrectionCode::Error) {
+                ATH_MSG_ERROR("Failed to apply pflow correction");
+                return CorrectionCode::Error;
+              }
+            }
+            ++Cone;
         }
         return CorrectionCode::Ok;
     }
@@ -492,13 +494,13 @@ namespace CP {
             ATH_MSG_ERROR("getCloseByCorrectionTopoIso() -- The isolation type is not an et cone variable " << toString(type));
             return CorrectionCode::Error;
         }
-        if (m_isohelpers.at(type)->getOrignalIsolation(primary, isoValue) != CorrectionCode::Error) {
+        if (m_isohelpers.at(type)->getOrignalIsolation(primary, isoValue) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not retrieve the isolation variable.");
             return CorrectionCode::Error;
         }
         /// Disable the correction of already isolated objects
         if (isoValue <= 0.) {
-            ATH_MSG_DEBUG("Topo et cone variable is already sufficnetly isolated");
+            ATH_MSG_DEBUG("Topo et cone variable is already sufficiently isolated");
             return CorrectionCode::Ok;
         }
         float ref_eta{0.f}, ref_phi{0.f};
@@ -669,15 +671,17 @@ namespace CP {
         strPar.pt = x.pt();
         strPar.eta = x.eta();
         strPar.type = x.type();
-        if (getCloseByCorrection(strPar.isolationValues, x, iso_types, closePar) == CorrectionCode::Error) {
+        std::vector<float> corrections;
+        if (getCloseByCorrection(corrections, x, iso_types, closePar) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not calculate the corrections. acceptCorrected(x) is done without the corrections.");
             if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(m_selectorTool->accept(x));
             return m_selectorTool->accept(x);
         }
         for (unsigned int i = 0; i < iso_types.size(); ++i) {
+            strPar.isolationValues[iso_types[i]] = corrections[i];
             const SG::AuxElement::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types.at(i));
             float old = (*acc)(x);
-            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << strPar.isolationValues.at(i));
+            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << corrections[i]);
         }
         auto accept = m_selectorTool->accept(strPar);
         if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(accept);

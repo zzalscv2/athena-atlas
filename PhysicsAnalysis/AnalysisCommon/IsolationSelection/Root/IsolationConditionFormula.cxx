@@ -40,8 +40,8 @@ namespace CP {
 
     bool IsolationConditionFormula::accept(const strObj& x) const {
         const float cutVal = m_cutFunction->Eval(x.pt);
-        if (!m_invertCut) return x.isolationValues[type()] <= cutVal;
-        return x.isolationValues[type()] > cutVal;
+        if (!m_invertCut) return x.isolationValues.at(type()) <= cutVal;
+        return x.isolationValues.at(type()) > cutVal;
     }
 
 }  // namespace CP
