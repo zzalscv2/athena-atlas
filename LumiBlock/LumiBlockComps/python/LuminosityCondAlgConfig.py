@@ -10,8 +10,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
-
+@AccumulatorCache
 def LuminosityCondAlgCfg (configFlags, useOnlineLumi=None, suffix=None):
     # This function, without the useOnlineLumi and suffix arguments,  will set up a default configuration 
     # appropriate to the job; the conditions object will be called LuminosityCondData
