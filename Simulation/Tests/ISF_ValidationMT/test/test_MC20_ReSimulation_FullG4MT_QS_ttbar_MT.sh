@@ -54,7 +54,7 @@ then
 
     rc1=$?
     status=$rc1
-    mv log.ReSim log.ResSim.CA
+    mv log.ReSim log.ReSim.CA
 fi
 echo "art-result: $rc1 resimCA"
 
