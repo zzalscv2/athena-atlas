@@ -32,8 +32,8 @@ namespace ExpressionParsing {
 
       virtual int getIntValue(const SG::AuxElement *auxElement) const = 0;
       virtual double getDoubleValue(const SG::AuxElement *auxElement) const = 0;
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const = 0;
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const = 0;
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) = 0;
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) = 0;
   };
 
 
@@ -72,7 +72,7 @@ namespace ExpressionParsing {
         return (double) m_acc(*auxElement);
       }
 
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const {
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) {
         size_t N = auxVectorData->size_v();
         std::vector<int> result(N);
         for (size_t i = 0; i < N; ++i) {
@@ -81,7 +81,7 @@ namespace ExpressionParsing {
         return result;
       }
 
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const {
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) {
         size_t N = auxVectorData->size_v();
         std::vector<double> result(N);
         for (size_t i = 0; i < N; ++i) {
@@ -102,14 +102,14 @@ namespace ExpressionParsing {
       TMethodWrapper(const TMethodWrapper&) = delete;
       TMethodWrapper& operator= (const TMethodWrapper&) = delete;
       virtual ~TMethodWrapper();
-      IProxyLoader::VariableType variableType() const;
+      IProxyLoader::VariableType variableType();
       virtual bool isValid(const SG::AuxElement *auxElement) const;
       virtual bool isValid(const SG::AuxVectorData *auxVectorData) const;
 
       virtual int getIntValue(const SG::AuxElement *auxElement) const;
       virtual double getDoubleValue(const SG::AuxElement *auxElement) const;
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const;
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const;
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData);
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData);
 
     private:
       TMethodCall *m_methodCall;
@@ -123,14 +123,14 @@ namespace ExpressionParsing {
       TMethodCollectionWrapper(const TMethodCollectionWrapper&) = delete;
       TMethodCollectionWrapper& operator= (const TMethodCollectionWrapper&) = delete;
       virtual ~TMethodCollectionWrapper();
-      IProxyLoader::VariableType variableType() const;
+      IProxyLoader::VariableType variableType();
       virtual bool isValid(const SG::AuxElement *auxElement) const;
       virtual bool isValid(const SG::AuxVectorData *auxVectorData) const;
 
       virtual int getIntValue(const SG::AuxElement *auxElement) const;
       virtual double getDoubleValue(const SG::AuxElement *auxElement) const;
-      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData) const;
-      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData) const;
+      virtual std::vector<int> getVecIntValue(const SG::AuxVectorData *auxVectorData);
+      virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData);
 
     private:
       TVirtualCollectionProxy *m_collectionProxy;
