@@ -201,14 +201,14 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
   ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
   ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
   
-  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {0, 1.3, 0.9, 1.0,
-  					       0, 1.2, 1.3, 1.35};
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1 = {{{0, 1.3, 0.9, 1.0},
+                                                {0, 1.2, 1.3, 1.35}}};
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5};
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau2 = {{{4.5, 4.5, 4.5, 4.5}, {4.5, 4.5, 4.5, 4.5}}};
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {0, 26.3, 26.5, 26.8, 32, 32, 32, 32};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0HG = {{{0, 26.3, 26.5, 26.8}, {32, 32, 32, 32}}};
 					       
-  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {0, 26.3, 26.5, 26.8, 0, 26.6, 26.3, 25.3};
+  ZDCDataAnalyzer::ZDCModuleFloatArray t0LG = {{{0, 26.3, 26.5, 26.8}, {0, 26.6, 26.3, 25.3}}};
 
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -252,18 +252,18 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
 
   zdcDataAnalyzer->SetGainFactorsHGLG(0.1, 1); // a gain adjustment of unity applied to LG ADC, 0.1 to HG ADC values
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {2, 2, 2, 2, 2, 2, 2, 2};
-  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {20, 20, 20, 20, 20, 20, 20, 20};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasLG = {{{2, 2, 2, 2}, {2, 2, 2, 2}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray noiseSigmasHG = {{{20, 20, 20, 20}, {20, 20, 20, 20}}};
 
   zdcDataAnalyzer->SetNoiseSigmas(noiseSigmasHG, noiseSigmasLG);
 
   // Enable two-pass analysis
   // 
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {-10, -10, -10, -10,
-								  -10, -10, -10, -10};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassHG = {{{-10, -10, -10, -10},
+								   {-10, -10, -10, -10}}};
 
-  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {-6, -6, -6, -6,
-								  -6, -6, -6, -6};
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinRepassLG = {{{-6, -6, -6, -6},
+								   {-6, -6, -6, -6}}};
 
   zdcDataAnalyzer->enableRepass(peak2ndDerivMinRepassHG, peak2ndDerivMinRepassLG);
 
