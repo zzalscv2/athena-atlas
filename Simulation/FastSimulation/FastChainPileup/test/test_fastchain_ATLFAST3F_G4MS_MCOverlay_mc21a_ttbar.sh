@@ -20,6 +20,7 @@ NTUP_File="MC_plus_MC.NTUP.pool.root"
 
 
 FastChain_tf.py \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
