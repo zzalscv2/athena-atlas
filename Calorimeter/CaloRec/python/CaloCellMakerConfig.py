@@ -46,12 +46,6 @@ def CaloCellMakerCfg(configFlags):
         theCaloTimeCorr=CaloCellTimeCorrCfg(configFlags)
         cellMakerTools.append(result.popToolsAndMerge(theCaloTimeCorr))
 
-
-    #Old Config:
-    #CaloCellMakerToolNames': PrivateToolHandleArray(['LArCellBuilderFromLArRawChannelTool/LArCellBuilderFromLArRawChannelTool','TileCellBuilder/TileCellBuilder','CaloCellContainerFinalizerTool/CaloCellContainerFinalizerTool','LArCellNoiseMaskingTool/LArCellNoiseMaskingTool','CaloCellPedestalCorr/CaloCellPedestalCorr','CaloCellNeighborsAverageCorr/CaloCellNeighborsAverageCorr','CaloCellContainerCheckerTool/CaloCellContainerCheckerTool']),
-
-    print(cellMakerTools)
-
     cellAlgo = CompFactory.CaloCellMaker(CaloCellMakerToolNames=cellMakerTools,
                                          CaloCellsOutputName="AllCalo")
 
