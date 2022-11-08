@@ -76,6 +76,6 @@ rc8=$?
 echo "art-result: ${rc8} hist_diff.sh ca/myHIST_ca.root def/myHIST.root"
 
 echo "============ diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
-acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --ignore-leaves RecoTimingObj_p1_HITStoRDO_timings RecoTimingObj_p1_RAWtoESD_mems RecoTimingObj_p1_RAWtoESD_timings RAWtoESD_mems RAWtoESD_timings ESDtoAOD_mems ESDtoAOD_timings HITStoRDO_timings RAWtoALL_mems RAWtoALL_timings RecoTimingObj_p1_RAWtoALL_mems RecoTimingObj_p1_RAWtoALL_timings RecoTimingObj_p1_EVNTtoHITS_timings EVNTtoHITS_timings RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref  --order-trees --entries 50 --mode semi-detailed
+acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --order-trees --entries 50 --mode semi-detailed
 rc9=$?
 echo "art-result: ${rc9} diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
