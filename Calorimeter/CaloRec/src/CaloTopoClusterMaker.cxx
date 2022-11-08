@@ -25,7 +25,6 @@
 #include "CaloTopoTmpHashCell.h"
 #include "CaloTopoTmpHashCellSort.h"
 #include "CaloRec/CaloBadCellHelper.h"
-#include "CaloUtils/CaloClusterEtSort.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
