@@ -95,18 +95,41 @@ namespace ActsTrk {
              * @param index 
              * @return TrackStateProxy::Parameters 
              */
-            typename ConstTrackStateProxy::Parameters parameters_impl(IndexType index) const;
-            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Parameters) parameters_impl(IndexType index);
+
+            typename ConstTrackStateProxy::Parameters parameters_impl(IndexType index) const {
+                return trackParameters().at(index)-> paramsEigen();
+            };
+            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Parameters) parameters_impl(IndexType index){
+                return trackParameters().at(index)-> paramsEigen();
+            }
 
             /**
              * @brief obtain covariances for a state at given index
              * 
              * @param index 
              * @return TrackStateProxy::Covariance 
-             */
-            typename ConstTrackStateProxy::Covariance covariance_impl(IndexType index) const;
-            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) covariance_impl(IndexType index);
+             */            
+            typename ConstTrackStateProxy::Covariance covariance_impl(IndexType index) const {
+                return trackMeasurements().at(index)-> covMatrixEigen();
+            };        
+            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) covariance_impl(IndexType index) {
+                return trackMeasurements().at(index)-> covMatrixEigen();
+            }
 
+            /**
+             * @brief obtain jacobian for a state at given index
+             * 
+             * @param index 
+             * @return TrackStateProxy::Covariance 
+             */
+            
+            inline typename ConstTrackStateProxy::Covariance jacobian_impl(IndexType index) const {
+                return trackJacobians().at(index)-> jacEigen();
+            };
+            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) jacobian_impl(IndexType index) {
+                return trackJacobians().at(index)-> jacEigen();
+            }
+            
             /**
              * @brief size of the MTJ
              * 
