@@ -7,11 +7,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/IO_HEPEVT.h"
 #include "AtlasHepMC/HEPEVT_Wrapper.h"
-#ifdef HEPMC3 
-#include "HepMC3/GenCrossSection.h"
-#else
-#include "HepMC/GenCrossSection.h" 
-#endif
+#include "AtlasHepMC/GenCrossSection.h" 
 #include "GaudiKernel/DataSvc.h"
 
 #include "StoreGate/StoreGateSvc.h"
