@@ -179,10 +179,14 @@ if __name__=='__main__':
    ConfigFlags.DQ.FileKey=''
    ConfigFlags.DQ.Environment='online'
    
-   ConfigFlags.LAr.doAlign=False
+   ConfigFlags.LAr.doAlign=True
    ConfigFlags.LAr.doHVCorr=False
 
    ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib=False
+
+   #test multithreads
+   #ConfigFlags.Concurrency.NumThreads=1
+   #ConfigFlags.Concurrency.NumConcurrentEvents=1
 
    def __monflags():
       from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
@@ -236,7 +240,7 @@ if __name__=='__main__':
    
    bytestream_input.KeyCount = 15
    bytestream_input.KeyCount = 150
-   bytestream_input.UpdatePeriod = 200
+   bytestream_input.UpdatePeriod = 60
    #
    # #######################################
    # Set this to the IS server where you want
@@ -252,9 +256,9 @@ if __name__=='__main__':
    # ########################################
    
    if STREAM!='NONE':
-     bytestream_input.PublishName = '%s-%s'%(CONFIG,STREAM)
+     bytestream_input.PublishName = '%s-Test-%s'%(CONFIG,STREAM)
    else:
-     bytestream_input.PublishName = '%s-%s'%(CONFIG,"NoTrigSel")
+     bytestream_input.PublishName = '%s-Test-%s'%(CONFIG,"NoTrigSel")
    
    # ###################################################
    # Should histograms be cleared at new run ? default: yes
@@ -273,7 +277,7 @@ if __name__=='__main__':
    # Frequency of updates (in number of events, not secs...)
    # ###############################################
    
-   bytestream_input.Frequency = 5
+   #bytestream_input.Frequency = 5
    
    # #######################################################
    # TimeOut (in milliseconds) - Prevent job with low rates 
@@ -360,6 +364,8 @@ if __name__=='__main__':
    # your configuration.
    # #################################################
    
+   #acc.addService(bytestream_input)
+
    event_selector = CompFactory.EventSelectorByteStream(
         name='EventSelector',
         ByteStreamInputSvc=bytestream_input.name,
@@ -379,9 +385,6 @@ if __name__=='__main__':
    proxy.ProviderNames += [address_provider.name]
    acc.addService(proxy)
 
-   acc.merge(SGInputLoaderCfg(ConfigFlags, FailIfNoProxy=True))
-
-
    from TriggerJobOpts.TriggerRecoConfig import TriggerRecoCfg
    acc.merge(TriggerRecoCfg(ConfigFlags))
 
@@ -394,8 +397,11 @@ if __name__=='__main__':
    from LArMonitoring.RecoPT_NewConfig import LArMonitoringConfig
    print('CONFIG ',CONFIG)
    print('STREAM ',STREAM)
-   acc.merge(LArMonitoringConfig(ConfigFlags,CONFIG,STREAM,RunType))
    
+   # testing Denis stuff
+   from LArMonitoring.LArSuperCellMonAlg import LArSuperCellMonConfig
+   acc.merge(LArSuperCellMonConfig(ConfigFlags))
+
    # fixes for splashes
    if RunType == 0:
       acc.getEventAlgo("LArRawDataReadingAlg").LArRawChannelKey="" 
@@ -429,5 +435,6 @@ if __name__=='__main__':
    # example how to dump the store:
    #acc.getService("StoreGateSvc").Dump=True
    #acc.getService("StoreGateSvc").OutputLevel=DEBUG
+   #acc.getService("MessageSvc").OutputLevel=DEBUG
 
    acc.run()

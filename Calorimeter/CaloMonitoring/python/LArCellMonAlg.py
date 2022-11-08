@@ -48,8 +48,6 @@ def LArCellMonConfigOld(inputFlags):
     return helper.result()
 
 def LArCellMonConfig(inputFlags):
-    from AthenaCommon.Logging import logging
-    mlog = logging.getLogger( 'LArCellMonConfig' )
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'LArCellMonAlgCfg')
@@ -57,9 +55,6 @@ def LArCellMonConfig(inputFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     cfg=ComponentAccumulator()
 
-    if not inputFlags.DQ.enableLumiAccess:
-       mlog.warning('This algo needs Lumi access, returning empty config')
-       return cfg
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     cfg.merge(LArGMCfg(inputFlags))
@@ -75,11 +70,6 @@ def LArCellMonConfig(inputFlags):
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
 
-    if inputFlags.Input.isMC is False:
-      from LumiBlockComps.LuminosityCondAlgConfig import  LuminosityCondAlgCfg
-      cfg.merge(LuminosityCondAlgCfg(inputFlags))
-      from LumiBlockComps.LBDurationCondAlgConfig import  LBDurationCondAlgCfg
-      cfg.merge(LBDurationCondAlgCfg(inputFlags))
 
     from AthenaConfiguration.ComponentFactory import CompFactory
     lArCellMonAlg=CompFactory.LArCellMonAlg
