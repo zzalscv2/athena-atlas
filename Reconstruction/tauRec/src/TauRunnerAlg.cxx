@@ -7,7 +7,6 @@
 #include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
 
-
 #include "xAODTau/TauJetContainer.h"
 #include "xAODTau/TauJetAuxContainer.h"
 #include "xAODTau/TauDefs.h"
@@ -24,7 +23,7 @@
 //-----------------------------------------------------------------------------
 TauRunnerAlg::TauRunnerAlg(const std::string &name,
 			   ISvcLocator * pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator) {
+  AthReentrantAlgorithm(name, pSvcLocator) {
 }
 
 //-----------------------------------------------------------------------------
@@ -83,35 +82,35 @@ StatusCode TauRunnerAlg::initialize() {
 //-----------------------------------------------------------------------------
 // Execution
 //-----------------------------------------------------------------------------
-StatusCode TauRunnerAlg::execute() {
+StatusCode TauRunnerAlg::execute(const EventContext& ctx) const {
   
   // write neutral PFO container
-  SG::WriteHandle<xAOD::PFOContainer> neutralPFOHandle( m_neutralPFOOutputContainer );
+  SG::WriteHandle<xAOD::PFOContainer> neutralPFOHandle(m_neutralPFOOutputContainer, ctx);
   ATH_CHECK(neutralPFOHandle.record(std::make_unique<xAOD::PFOContainer>(), std::make_unique<xAOD::PFOAuxContainer>()));
   xAOD::PFOContainer* neutralPFOContainer = neutralPFOHandle.ptr();
 
   // write hadronic cluster PFO container
-  SG::WriteHandle<xAOD::PFOContainer> hadronicPFOHandle( m_hadronicPFOOutputContainer );
+  SG::WriteHandle<xAOD::PFOContainer> hadronicPFOHandle(m_hadronicPFOOutputContainer, ctx);
   ATH_CHECK(hadronicPFOHandle.record(std::make_unique<xAOD::PFOContainer>(), std::make_unique<xAOD::PFOAuxContainer>()));
   xAOD::PFOContainer* hadronicClusterPFOContainer = hadronicPFOHandle.ptr();
 
   // write secondary vertices
-  SG::WriteHandle<xAOD::VertexContainer> vertOutHandle( m_vertexOutputContainer );
+  SG::WriteHandle<xAOD::VertexContainer> vertOutHandle(m_vertexOutputContainer, ctx);
   ATH_CHECK(vertOutHandle.record(std::make_unique<xAOD::VertexContainer>(), std::make_unique<xAOD::VertexAuxContainer>()));
   xAOD::VertexContainer* pSecVtxContainer = vertOutHandle.ptr();
 
   // write charged PFO container
-  SG::WriteHandle<xAOD::PFOContainer> chargedPFOHandle( m_chargedPFOOutputContainer );
+  SG::WriteHandle<xAOD::PFOContainer> chargedPFOHandle(m_chargedPFOOutputContainer, ctx);
   ATH_CHECK(chargedPFOHandle.record(std::make_unique<xAOD::PFOContainer>(), std::make_unique<xAOD::PFOAuxContainer>()));
   xAOD::PFOContainer* chargedPFOContainer = chargedPFOHandle.ptr();
 
   // write pi0 container
-  SG::WriteHandle<xAOD::ParticleContainer> pi0Handle( m_pi0Container );
+  SG::WriteHandle<xAOD::ParticleContainer> pi0Handle(m_pi0Container, ctx);
   ATH_CHECK(pi0Handle.record(std::make_unique<xAOD::ParticleContainer>(), std::make_unique<xAOD::ParticleAuxContainer>()));
   xAOD::ParticleContainer* pi0Container = pi0Handle.ptr();
   
   // Read the CaloClusterContainer created by the CaloClusterMaker
-  SG::ReadHandle<xAOD::CaloClusterContainer> pi0ClusterInHandle( m_pi0ClusterInputContainer );
+  SG::ReadHandle<xAOD::CaloClusterContainer> pi0ClusterInHandle(m_pi0ClusterInputContainer, ctx);
   if (!pi0ClusterInHandle.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << pi0ClusterInHandle.key());
     return StatusCode::FAILURE;
@@ -119,7 +118,7 @@ StatusCode TauRunnerAlg::execute() {
   const xAOD::CaloClusterContainer * pi0ClusterContainer = pi0ClusterInHandle.cptr();
   
   // Read in temporary tau jets
-  SG::ReadHandle<xAOD::TauJetContainer> tauInputHandle(m_tauInputContainer);
+  SG::ReadHandle<xAOD::TauJetContainer> tauInputHandle(m_tauInputContainer, ctx);
   if (!tauInputHandle.isValid()) {
     ATH_MSG_ERROR ("Could not retrieve HiveDataObj with key " << tauInputHandle.key());
     return StatusCode::FAILURE;
@@ -127,7 +126,7 @@ StatusCode TauRunnerAlg::execute() {
   const xAOD::TauJetContainer* pTauContainer = tauInputHandle.cptr();
 
   // Write the output tau jets, which is a deep copy of the input ones 
-  SG::WriteHandle<xAOD::TauJetContainer> outputTauHandle(m_tauOutputContainer);
+  SG::WriteHandle<xAOD::TauJetContainer> outputTauHandle(m_tauOutputContainer, ctx);
   ATH_CHECK(outputTauHandle.record(std::make_unique<xAOD::TauJetContainer>(), std::make_unique<xAOD::TauJetAuxContainer>()));    
   xAOD::TauJetContainer* newTauCon = outputTauHandle.ptr();
 
@@ -144,7 +143,7 @@ StatusCode TauRunnerAlg::execute() {
     //-----------------------------------------------------------------
     StatusCode sc;
     
-    for (ToolHandle<ITauToolBase>& tool : m_tools) {
+    for (const ToolHandle<ITauToolBase>& tool : m_tools) {
       ATH_MSG_DEBUG("RunnerAlg Invoking tool " << tool->name());
       if ( tool->type() == "TauPi0ClusterCreator"){
 	sc = tool->executePi0ClusterCreator(*pTau, *neutralPFOContainer, *hadronicClusterPFOContainer, *pi0ClusterContainer);
