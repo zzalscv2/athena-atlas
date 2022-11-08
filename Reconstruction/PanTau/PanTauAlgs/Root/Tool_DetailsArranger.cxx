@@ -62,7 +62,7 @@ StatusCode PanTau::Tool_DetailsArranger::initialize() {
 }
 
 
-StatusCode PanTau::Tool_DetailsArranger::execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container) const {
+StatusCode PanTau::Tool_DetailsArranger::execute(PanTau::PanTauSeed* inSeed, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const {
 
   std::string inputAlg = inSeed->getNameInputAlgorithm();
     
@@ -82,7 +82,7 @@ StatusCode PanTau::Tool_DetailsArranger::execute(PanTau::PanTauSeed* inSeed, xAO
     return StatusCode::SUCCESS;
   }
     
-  ATH_CHECK(arrangePFOLinks(inSeed, tauJet, pi0Container));
+  ATH_CHECK(arrangePFOLinks(inSeed, tauJet, pi0Container, neutralPFOContainer));
 
   //Basic variables
   addPanTauDetailToTauJet(inSeed, m_varTypeName_Basic + "_isPanTauCandidate",      xAOD::TauJetParameters::PanTau_isPanTauCandidate, PanTau::Tool_DetailsArranger::t_Int);
@@ -169,7 +169,7 @@ void PanTau::Tool_DetailsArranger::addPanTauDetailToTauJet(PanTauSeed* inSeed,
 }
 
 
-StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container) const {
+StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inSeed, xAOD::TauJet* tauJet, xAOD::ParticleContainer& pi0Container, xAOD::PFOContainer& neutralPFOContainer) const {
 
   std::string inputAlg = inSeed->getNameInputAlgorithm();
    
@@ -192,7 +192,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
   std::sort (neutralPFOLinks.begin(), neutralPFOLinks.end(), sortBDTscore);
 
   // set the masses of all neutrals *and pi0 neutrals* to 0:
-  SetNeutralConstituentVectorMasses(neutralPFOLinks, 0.);
+  SetNeutralConstituentVectorMasses(neutralPFOLinks, neutralPFOContainer, 0.);
     
   // arrange charged & neutral PFOs: they are not changed -> copy from cellbased
   tauJet->setChargedPFOLinks(chrgPFOLinks);
@@ -220,7 +220,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       preLinkPi0PFOLinks.push_back( pi0PFOLinks.at(0) );
 	
       // set all masses correctly:
-      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, MASS_PI0);
+      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
 	
     } else {
 
@@ -228,7 +228,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       preLinkPi0PFOLinks=pi0PFOLinks;
 	
       // set all masses correctly:
-      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, MASS_PI0);
+      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
     }
 
   } else {
@@ -240,7 +240,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 
       // set the mass:
-      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, MASS_PI0);
+      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
 
     } else if( decayModeFinal == xAOD::TauJetParameters::Mode_1p0n && decayModeProto == xAOD::TauJetParameters::Mode_1p1n ){
 
@@ -252,7 +252,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       if( pi0PFOLinks.size() == 1 && HasMultPi0sInOneCluster(pi0PFOLinks.at(0).cachedElement(), decayModeProto, inputAlg) ){ 
 	  
 	// assign twice the pi0 mass to the one pi0 PFO:
-	SetNeutralConstituentVectorMasses(pi0PFOLinks, 2*MASS_PI0);
+	SetNeutralConstituentVectorMasses(pi0PFOLinks, neutralPFOContainer, 2*MASS_PI0);
 	  
 	// assign the same constituents to Pantau:
 	preLinkPi0PFOLinks=pi0PFOLinks;
@@ -266,7 +266,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
 	else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 	  
 	// set the mass:
-	SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, MASS_PI0);
+	SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
       }
 
     } else if( decayModeFinal == xAOD::TauJetParameters::Mode_1p1n && decayModeProto == xAOD::TauJetParameters::Mode_1pXn ){
@@ -276,7 +276,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       preLinkPi0PFOLinks.push_back( pi0PFOLinks.at(1) );
 
       // set both pi0neutrals to mass 0 (photon mass):
-      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, 0.);
+      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, 0.);
 
     } else if( decayModeFinal == xAOD::TauJetParameters::Mode_3pXn && decayModeProto == xAOD::TauJetParameters::Mode_3p0n ){
 
@@ -285,7 +285,7 @@ StatusCode PanTau::Tool_DetailsArranger::arrangePFOLinks(PanTau::PanTauSeed* inS
       else ATH_MSG_WARNING("No neutral PFO Links although there should be!!");
 	
       // set the mass:
-      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, MASS_PI0);
+      SetNeutralConstituentVectorMasses(preLinkPi0PFOLinks, neutralPFOContainer, MASS_PI0);
 
     } else if( decayModeFinal == xAOD::TauJetParameters::Mode_3p0n && decayModeProto == xAOD::TauJetParameters::Mode_3pXn ){
 
@@ -391,13 +391,12 @@ void PanTau::Tool_DetailsArranger::SetNeutralConstituentMass(xAOD::PFO* neutral_
 }
 
 
-void PanTau::Tool_DetailsArranger::SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, double mass) const {
-    
-  for(unsigned int iNeutral=0; iNeutral<neutralPFOLinks.size(); iNeutral++) {
-    ElementLink<xAOD::PFOContainer> curNeutralPFOLink   = neutralPFOLinks.at(iNeutral);
-    xAOD::PFO*                      curNeutralPFO       = const_cast<xAOD::PFO*>(curNeutralPFOLink.cachedElement());
-      
-    SetNeutralConstituentMass(curNeutralPFO, mass);      
+void PanTau::Tool_DetailsArranger::SetNeutralConstituentVectorMasses(const std::vector< ElementLink<xAOD::PFOContainer> >& neutralPFOLinks, xAOD::PFOContainer& neutralPFOContainer, double mass) const {
+
+  for (const auto& link : neutralPFOLinks) {
+    size_t index = link.index();
+    xAOD::PFO* curNeutralPFO = neutralPFOContainer.at(index);
+    SetNeutralConstituentMass(curNeutralPFO, mass);
   }
     
   return;    

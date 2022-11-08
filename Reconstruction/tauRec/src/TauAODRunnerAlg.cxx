@@ -141,7 +141,7 @@ StatusCode TauAODRunnerAlg::execute() {
                 else if (tool->type() == "TauPi0Selector")
                     sc = tool->executePi0nPFO(*pTau, *neutralPFOContainer);
                 else if (tool->type() == "PanTau::PanTauProcessor")
-                    sc = tool->executePanTau(*pTau, *pi0Container);
+		    sc = tool->executePanTau(*pTau, *pi0Container, *neutralPFOContainer);
                 else if (tool->type() == "tauRecTools::TauTrackRNNClassifier")
                     sc = tool->executeTrackClassifier(*pTau, *newTauTrkCon);
                 else
