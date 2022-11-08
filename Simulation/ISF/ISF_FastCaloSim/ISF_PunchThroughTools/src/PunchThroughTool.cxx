@@ -51,6 +51,9 @@
 //Amg
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
+const double ISF::PunchThroughTool::m_SQRT_0p5 = std::sqrt(0.5);
+const double ISF::PunchThroughTool::m_SQRT_2 = std::sqrt(2);
+
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
