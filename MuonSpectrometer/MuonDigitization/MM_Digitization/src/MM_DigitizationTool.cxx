@@ -394,6 +394,8 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
     TimedHitCollection<MMSimHit>::const_iterator i, e;
     int nhits = 0;
 
+    std::vector<std::unique_ptr<MmDigitCollection> > collections;
+
     // nextDetectorElement-->sets an iterator range with the hits of current detector element , returns a bool when done
     while (m_timedHitCollection_MM->nextDetectorElement(i, e)) {
         Identifier layerID;
@@ -873,17 +875,16 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
         }
         m_idHelperSvc->mmIdHelper().get_module_hash(elemId, moduleHash);
 
-        // put new collection in storegate
-        // Get the messaging service, print where you are
-        MmDigitCollection* coll = nullptr;
-        ATH_CHECK(digitContainer->naughtyRetrieve(moduleHash, coll));
-        if (!coll) {
-            coll = new MmDigitCollection(elemId, moduleHash);
-            coll->push_back(std::move(newDigit));
-            ATH_CHECK(digitContainer->addCollection(coll, moduleHash));
-        } else {
-            coll->push_back(std::move(newDigit));
+        // store new collection
+        if (moduleHash >= collections.size()) {
+          collections.resize (moduleHash+1);
         }
+        MmDigitCollection* coll = collections[moduleHash].get();
+        if (!coll) {
+            collections[moduleHash] = std::make_unique<MmDigitCollection>(elemId, moduleHash);
+            coll = collections[moduleHash].get();
+        }
+        coll->push_back(std::move(newDigit));
 
         //
         // (VMM-Level) Output Of Digitization
@@ -891,6 +892,12 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
         ////////////////////////////////////////////////////////////////////
 
         v_stripDigitOutput.clear();
+    }
+
+    for (size_t coll_hash = 0; coll_hash < collections.size(); ++coll_hash) {
+      if (collections[coll_hash]) {
+        ATH_CHECK( digitContainer->addCollection (collections[coll_hash].release(), coll_hash) );
+      }
     }
 
     ATH_MSG_DEBUG("MM_Digitization Done!");
