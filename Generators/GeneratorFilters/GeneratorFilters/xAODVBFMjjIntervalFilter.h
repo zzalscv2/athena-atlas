@@ -5,6 +5,7 @@
 #ifndef GENERATORFILTERSXAODVBFMJJINTERVALFILTER_H
 #define GENERATORFILTERSXAODVBFMJJINTERVALFILTER_H
 
+#include "AthContainers/ConstDataVector.h"
 #include "GeneratorModules/GenFilter.h"
 #include "xAODJet/JetContainer.h"
 
@@ -64,8 +65,8 @@ private:
 
 public:
 
-  bool ApplyMassDphi(xAOD::JetContainer *jets);
-  double getEventWeight(xAOD::JetContainer *jets);
+  bool ApplyMassDphi(ConstDataVector<xAOD::JetContainer> *jets);
+  double getEventWeight(ConstDataVector<xAOD::JetContainer> *jets);
 };
 
 #endif
