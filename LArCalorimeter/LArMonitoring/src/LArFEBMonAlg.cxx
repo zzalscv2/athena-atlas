@@ -130,6 +130,8 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
             ATH_MSG_DEBUG( i << " " << l1triggers.at(i) << " , " );
        }
        ATH_MSG_DEBUG( "] " );
+    } else {
+      ATH_MSG_WARNING("TrigDecisionTool is empty");
     }
     if (l1triggers.size()>0) {trigok=true;} else {trigok=false;}
   }
@@ -330,7 +332,7 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
     evtrej=2;
     auto rbits = Monitored::Scalar<unsigned long>("rejBits", rejectionBits.to_ulong());
     fill(m_monGroupName, rbits, evtrej);
-    
+
     evt_yield = 100.;
     if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO)) {
        evtrej=4;
@@ -390,7 +392,7 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
 	}
       }
       streambin =  streamsThisEvent[str];
-      evsize = larEventSize/sizeNorm;
+      evsize = larEventSize/262144;
       fill(m_monGroupName,lb,streambin,evsize);
       
       for(unsigned i=0; i <m_partitions.size(); ++i){
@@ -587,7 +589,8 @@ void LArFEBMonAlg::fillErrorsSummary(unsigned int partitNb_2,int ft,int slot,uin
        auto lbf = Monitored::Scalar<float>("LBf",0.5);
        auto erry = Monitored::Scalar<float>("erronl",ferr);
        fill(m_tools[m_histoGroups.at(subdet).at(m_partitions[partitNb_2])],lbf,erry);
-  } 
+  }
+  
   return;
 }
 

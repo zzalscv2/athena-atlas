@@ -19,6 +19,8 @@ if __name__=='__main__':
 
    #some defaults
    #INPUT = '/det/dqm/GlobalMonitoring/SMW_test/testpart_sample/data21_900GeV.00405543.physics_MinBias.daq.RAW._lb1977._SFO-6._0001.data'
+   # At P1 use:     
+   #INPUT = '/detwork/dqm/GlobalMonitoring_test_data/data22_13p6TeV.00428353.express_express.merge.RAW._lb0479._SFO-ALL._0001.1'
    INPUT = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/data18_13TeV/data18_13TeV.00357750.physics_Main.daq.RAW/data18_13TeV.00357750.physics_Main.daq.RAW._lb0083._SFO-1._0001.data'
    CONFIG = 'LArMon'
    STREAM = "NONE"
@@ -192,7 +194,19 @@ if __name__=='__main__':
    ConfigFlags.LAr.doAlign=False
    ConfigFlags.LAr.doHVCorr=False
 
+   ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib=False
+
    ConfigFlags.Input.Files=[INPUT]
+
+   #test multithreads
+   ConfigFlags.Concurrency.NumThreads=4
+   ConfigFlags.Concurrency.NumConcurrentEvents=4
+
+   def __monflags():
+      from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
+      return createLArMonConfigFlags()
+
+   ConfigFlags.addFlagsCategory("LArMon", __monflags)
 
    if 'CaloMon' in CONFIG: # needs Lumi access
       ConfigFlags.DQ.enableLumiAccess=True

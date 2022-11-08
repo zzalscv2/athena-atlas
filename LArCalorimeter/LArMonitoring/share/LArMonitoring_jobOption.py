@@ -39,8 +39,9 @@ if 'ESD' not in DQMonFlags.monManEnvironment() and globalflags.DataSource() == '
     if LArMonFlags.doLArFEBMon():
        topSequence +=LArFEBMonConfigOld(DQMonFlags)
 
-    from LArMonitoring.LArCoverageAlg import LArCoverageConfigOld
-    topSequence +=LArCoverageConfigOld(DQMonFlags)
+    if LArMonFlags.doLArCoverage():
+       from LArMonitoring.LArCoverageAlg import LArCoverageConfigOld
+       topSequence +=LArCoverageConfigOld(DQMonFlags)
 
     from LArMonitoring.LArCosmicsMonAlg import LArCosmicsMonConfigOld
     if LArMonFlags.doLArCosmicsMonTool():
