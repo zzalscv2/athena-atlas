@@ -30,6 +30,38 @@ def EventInfoRDOAnalysisCfg(flags, name="EventInfoRDOAnalysis", **kwargs):
     return result
 
 
+def PixelRDOAnalysisCfg(flags, name="PixelRDOAnalysis", **kwargs):
+    from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
+    result = PixelReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "Pixel")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/Pixel/")
+
+    result.addEventAlgo(CompFactory.PixelRDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
+def SCT_RDOAnalysisCfg(flags, name="SCT_RDOAnalysis", **kwargs):
+    from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+    result = SCT_ReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("NtupleFileName", "/RDOAnalysis")
+    kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
+    kwargs.setdefault("NtupleTreeName", "SCT")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/SCT/")
+
+    result.addEventAlgo(CompFactory.SCT_RDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
 def ITkPixelRDOAnalysisCfg(flags, name="ITkPixelRDOAnalysis", **kwargs):
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
     result = ITkPixelReadoutGeometryCfg(flags)
@@ -84,6 +116,12 @@ def RDOAnalysisCfg(flags):
     acc = ComponentAccumulator()
 
     acc.merge(EventInfoRDOAnalysisCfg(flags))
+
+    if flags.Detector.EnablePixel:
+        acc.merge(PixelRDOAnalysisCfg(flags))
+
+    if flags.Detector.EnableSCT:
+        acc.merge(SCT_RDOAnalysisCfg(flags))
 
     if flags.Detector.EnableITkPixel:
         acc.merge(ITkPixelRDOAnalysisCfg(flags))
