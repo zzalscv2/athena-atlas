@@ -13,6 +13,7 @@
 #include "xAODTrigCalo/TrigEMClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
+#include "TrigDecisionTool/FeatureRequestDescriptor.h"
 
 class HLTCalo_L2CaloEMClustersMonitor : public AthMonitorAlgorithm {
 
@@ -29,6 +30,7 @@ private:
   SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKey{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" };
   SG::ReadHandleKey<xAOD::TrigEMClusterContainer> m_HLT_cont_key;
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_OFF_cont_key;
+  std::string m_hltChainsT0;
   std::string m_HLT_cont_name;
   std::string m_OFF_cont_name;
   std::string m_mongroup_name;
@@ -37,6 +39,6 @@ private:
   float m_OFF_min_et;
   std::vector<int> m_OFF_types;
   float m_max_delta_r;
-
+  bool ifChainPassed(const std::string& chain) const;
 };
 #endif
