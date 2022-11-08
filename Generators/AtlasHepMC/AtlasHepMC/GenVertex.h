@@ -32,16 +32,22 @@ inline int particles_out_size(ConstGenVertexPtr v) { return v->particles_out().s
 
 inline int barcode(GenVertexPtr p) {
     if (!p) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=p->attribute<HepMC3::IntAttribute>("barcode");
+    auto e = p->parent_event();
+    if (!e) return 0;
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
     return barcode?(barcode->value()):p->id();
 }
 inline int barcode(ConstGenVertexPtr p) {
     if (!p) return 0;
-    std::shared_ptr<HepMC3::IntAttribute> barcode=p->attribute<HepMC3::IntAttribute>("barcode");
+    auto e = p->parent_event();
+    if (!e) return 0;
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
     return barcode?(barcode->value()):p->id();
 }
 inline int barcode(HepMC3::GenVertex p) {
-    std::shared_ptr<HepMC3::IntAttribute> barcode=p.attribute<HepMC3::IntAttribute>("barcode");
+    auto e = p.parent_event();
+    if (!e) return 0;
+    std::shared_ptr<HepMC3::IntAttribute> barcode=e.attribute<HepMC3::IntAttribute>("barcode",p.id());
     return barcode?(barcode->value()):p.id();
 }
 
