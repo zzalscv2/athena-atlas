@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkSurfaces/PlaneSurface.h"
@@ -69,6 +69,10 @@ inline bool InDet::SiTrajectory_xk::isLastPixel()
   if (m_elements[m_elementsMap[m_lastElement]].ndf()==2) return true;
   return false;
 } 
+
+inline const Trk::PatternTrackParameters *InDet::SiTrajectory_xk::firstParameters() {
+  return m_elements[m_elementsMap[m_firstElement]].parameters();
+}
 
 inline std::unique_ptr<Trk::TrackParameters> InDet::SiTrajectory_xk::firstTrackParameters()
 {

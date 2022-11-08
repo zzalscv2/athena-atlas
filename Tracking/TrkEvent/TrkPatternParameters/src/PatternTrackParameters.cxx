@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -501,7 +501,7 @@ Amg::Vector3D Trk::PatternTrackParameters::calculatePosition(void) const {
 }
 
 Amg::Vector3D Trk::PatternTrackParameters::calculateMomentum(void) const {
-  double p = m_parameters[4] != 0. ? 1. / std::abs(m_parameters[4]) : 10e9;
+  double p = absoluteMomentum();
 
   double Sf = std::sin(m_parameters[2]), Cf = std::cos(m_parameters[2]);
   double Se = std::sin(m_parameters[3]), Ce = std::cos(m_parameters[3]);
