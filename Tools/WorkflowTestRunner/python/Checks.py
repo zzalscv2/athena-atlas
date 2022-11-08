@@ -6,7 +6,7 @@ import subprocess
 from .Helpers import warnings_count
 from .Inputs import references_CVMFS_path
 from .References import references_map
-from .Test import TestSetup, WorkflowCheck, WorkflowTest, WorkflowType
+from .Test import TestSetup, WorkflowCheck, WorkflowRun, WorkflowTest, WorkflowType
 
 
 class FailedOrPassedCheck(WorkflowCheck):
@@ -492,7 +492,8 @@ class FPECheck(WorkflowCheck):
     """Run FPE check."""
 
     # Ignore FPEs for these tests:
-    ignoreTests = [WorkflowType.FullSim, WorkflowType.DataOverlay, WorkflowType.MCOverlay]
+    ignoreTestRuns = [WorkflowRun.Run4]
+    ignoreTestTypes = [WorkflowType.FullSim, WorkflowType.DataOverlay, WorkflowType.MCOverlay]
 
     def run(self, test: WorkflowTest):
         self.logger.info("-----------------------------------------------------")
@@ -525,7 +526,7 @@ class FPECheck(WorkflowCheck):
                         last_stack_trace.append(line.strip()[9:])
 
             if fpes.keys():
-                msgLvl = logging.WARNING if test.type in self.ignoreTests else logging.ERROR
+                msgLvl = logging.WARNING if test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes else logging.ERROR
                 result = False
                 self.logger.log(msgLvl, f" {step} validation test step FPEs")
                 for fpe, count in sorted(fpes.items(), key=lambda item: item[1]):
@@ -539,7 +540,7 @@ class FPECheck(WorkflowCheck):
 
         if result:
             self.logger.info("Passed!\n")
-        elif test.type in self.ignoreTests:
+        elif test.run in self.ignoreTestRuns or test.type in self.ignoreTestTypes:
             self.logger.warning("Failed!")
             self.logger.warning("Check disabled due to irreproducibilities!\n")
             result = True
