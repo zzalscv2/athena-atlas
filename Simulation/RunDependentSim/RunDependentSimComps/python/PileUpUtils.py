@@ -346,8 +346,8 @@ def setupPileUpProfile(flags):
         pileUpProfile = flags.Digitization.PU.ProfileConfig
 
     # sanity check
-    if not bunchStructure or not pileUpProfile:
-        raise ValueError('Bunch structure and pile-up profile need to be set')
+    if not bunchStructure:
+        raise ValueError('Bunch structure needs to be set')
 
     # Setup beam intensity pattern
     parts = bunchStructure.split('.')
@@ -360,8 +360,8 @@ def setupPileUpProfile(flags):
     function_def(flags)
 
     # Setup pile-up profile
-    generatePileUpProfile(flags, pileUpProfile,
-                          sequentialEventNumbers=flags.Digitization.PU.ForceSequentialEventNumbers)
-
     flags.Digitization.PU.NumberOfCollisions = flags.Digitization.PU.NumberOfLowPtMinBias + flags.Digitization.PU.NumberOfHighPtMinBias
-    scaleNumberOfCollisions(flags)
+    if pileUpProfile:
+        generatePileUpProfile(flags, pileUpProfile,
+                              sequentialEventNumbers=flags.Digitization.PU.ForceSequentialEventNumbers)
+        scaleNumberOfCollisions(flags)

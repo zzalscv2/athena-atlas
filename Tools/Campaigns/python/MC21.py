@@ -39,6 +39,28 @@ def MC21aSingleBeamspot(flags):
     flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run410000_MC21a_SingleBeamspot'
 
 
+def MC21LowMu(flags):
+    """MC21 flags for MC to match Run 3 data with low pile-up"""
+    flags.Beam.NumberOfCollisions = 60.
+    flags.Input.ConditionsRunNumber = 410000
+
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
+    LArConfigRun3PileUp(flags)
+
+    # radiation damage
+    flags.Digitization.DoPixelPlanarRadiationDamage = True
+
+    # pile-up
+    # These numbers are based upon a relative XS scaling of the high-pt slice
+    # of 64%, which leads to a relative high-pt / low-pt sampling of
+    # 0.001953314389 / 0.9980466856. Those numbers are then multiplied by 0.05
+    # to simulate low pile-up. Only a relevant number of significant digits
+    # are kept.
+    flags.Digitization.PU.NumberOfLowPtMinBias = 0.0499
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.0001
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
+
+
 def MC21NoPileUp(flags):
     """MC21a flags for MC to match initial Run 3 data"""
     flags.Beam.NumberOfCollisions = 0.
