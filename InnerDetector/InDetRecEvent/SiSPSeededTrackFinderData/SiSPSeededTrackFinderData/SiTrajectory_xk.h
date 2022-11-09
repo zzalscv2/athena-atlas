@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +112,13 @@ namespace InDet{
       bool filterWithPreciseClustersError();
       bool backwardSmoother (bool);
       bool isLastPixel      ();
+
+      /** @brief Return the pattern track parameters of the first element of this trajectory matching its status
+       * @return nullptr or a pointer to the element owned pattern track parameters matching the current status
+       *   of the trajectory element.
+       */
+      const Trk::PatternTrackParameters *firstParameters();
+
       std::unique_ptr<Trk::TrackParameters> firstTrackParameters();
       void getClusters(std::list<const InDet::SiCluster*>&);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -134,6 +134,12 @@ namespace InDet{
       /// observed
       const Trk::PatternTrackParameters& parametersUB() const {return m_parametersUpdatedBackward;} 
       const Trk::PatternTrackParameters& parametersSM() const {return m_parametersSM;} 
+
+      /** @brief return pattern parameters matching the status of this element
+        * @return nullptr or pointer to the internal pattern track parameters PF, UF, PB, UB, SM depending on m_status and m_cluster
+        * The returned pointer is owned by this element.
+       */
+      const Trk::PatternTrackParameters* parameters() const;
 
       const Trk::Surface*  surface()  const {return m_surface;}
       const InDet::SiClusterLink_xk& linkF (int i) const {return m_linkForward[i];}
