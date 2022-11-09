@@ -192,8 +192,8 @@ namespace ISF {
     /*---------------------------------------------------------------------
      *  Constants
      *---------------------------------------------------------------------*/
-     constexpr static double m_SQRT_0p5 = std::sqrt(0.5);
-     constexpr static double m_SQRT_2 = std::sqrt(2);
+     const static double m_SQRT_0p5;
+     const static double m_SQRT_2;
 
     /*---------------------------------------------------------------------
      *  ServiceHandles
