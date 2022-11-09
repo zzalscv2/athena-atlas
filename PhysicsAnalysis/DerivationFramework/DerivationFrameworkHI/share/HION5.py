@@ -93,7 +93,7 @@ JetThinningThreshold = {'AntiKt2HIJets': 15, 'AntiKt4HIJets': 15,'DFAntiKt2HIJet
 #Event Selection
 #==========================================================
 #DFCommonMuonsSelectorPreselection.TrtCutOff = True
-req_electrons = 'count( Electrons.DFCommonElectronsLHLoose && ( Electrons.pt > 15*GeV ))>0'
+req_electrons = 'count( Electrons.DFCommonElectronsHILHLoose && ( Electrons.pt > 15*GeV ))>0'
 req_muons     = 'count( Muons.DFCommonMuonsPreselection && (Muons.pt > 15*GeV) && ( abs(Muons.eta) < 2.7))>0'
 if HIDerivationFlags.isPPb(): req_photons = 'count( Photons.DFCommonPhotonsIsEMLoose && (Photons.pt > 10*GeV) ) > 0'
 else : req_photons = 'count( Photons.DFCommonPhotonsIsEMLoose && (Photons.pt > 40*GeV) ) > 0'
@@ -331,6 +331,30 @@ if DerivationFrameworkHasTruth and not doWZBosonsTruth:
   ToolSvc += DFCommonTruthTauDressingTool
   augToolList.append(DFCommonTruthTauDressingTool)
 
+ElectronLHSelectorHILHLoose = AsgElectronLikelihoodTool("ElectronLHSelectorHILHLoose", ConfigFile="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/ElectronPhotonSelectorTools/offline/mc15_20160907_HI/ElectronLikelihoodLooseOfflineConfig2016_HI.conf")
+ElectronLHSelectorHILHLoose.primaryVertexContainer = "PrimaryVertices"
+ToolSvc += ElectronLHSelectorHILHLoose
+ElectronPassHILHLoose = DerivationFramework__EGSelectionToolWrapper(name = "ElectronPassHILHLoose",
+                                                                    EGammaSelectionTool = ElectronLHSelectorHILHLoose,
+                                                                    EGammaFudgeMCTool = "",
+                                                                    CutType = "",
+                                                                    StoreGateEntryName = "DFCommonElectronsHILHLoose",
+                                                                    ContainerName = "Electrons")
+ToolSvc += ElectronPassHILHLoose
+augToolList.append(ElectronPassHILHLoose)
+
+ElectronLHSelectorHILHMedium = AsgElectronLikelihoodTool("ElectronLHSelectorHILHMedium", ConfigFile="/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/ElectronPhotonSelectorTools/offline/mc15_20160907_HI/ElectronLikelihoodMediumOfflineConfig2016_HI.conf")
+ElectronLHSelectorHILHMedium.primaryVertexContainer = "PrimaryVertices"
+ToolSvc += ElectronLHSelectorHILHMedium
+ElectronPassHILHMedium = DerivationFramework__EGSelectionToolWrapper(name = "ElectronPassHILHMedium",
+                                                                     EGammaSelectionTool = ElectronLHSelectorHILHMedium,
+                                                                     EGammaFudgeMCTool = "",
+                                                                     CutType = "",
+                                                                     StoreGateEntryName = "DFCommonElectronsHILHMedium",
+                                                                     ContainerName = "Electrons")
+ToolSvc += ElectronPassHILHMedium
+augToolList.append(ElectronPassHILHMedium)
+
 JetCollectionList = ['AntiKt2HIJets', 'AntiKt4HIJets', 'DFAntiKt2HIJets', 'DFAntiKt4HIJets', 'DFAntiKt6HIJets', 'DFAntiKt8HIJets', 'AntiKt10HIJets', 'DFAntiKt10HIJets', 'AntiKt2HIJets_Seed1']
 
 if doWZBosonsTruth:
@@ -423,6 +447,8 @@ HION5SlimmingHelper.ExtraVariables.append("ExtrapolatedMuonTrackParticles.vx.vy.
 HION5SlimmingHelper.ExtraVariables.append("MuonSpectrometerTrackParticles.vx.vy.vz")
 HION5SlimmingHelper.ExtraVariables.append("CombinedMuonTrackParticles.vx.vy.vz")
 HION5SlimmingHelper.ExtraVariables.append("Muons.EnergyLoss.energyLossType")
+HION5SlimmingHelper.ExtraVariables.append("Electrons.DFCommonElectronsHILHLoose.DFCommonElectronsHILHMedium.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.etcone20.etcone30.etcone40.topoetcone20.topoetcone30.topoetcone40.ptvarcone20_TightTTVA_pt500.ptvarcone30_TightTTVA_pt500.ptvarcone40_TightTTVA_pt500.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVA_pt1000.ptvarcone20_TightTTVALooseCone_pt500.ptvarcone30_TightTTVALooseCone_pt500.ptvarcone40_TightTTVALooseCone_pt500.ptvarcone20_TightTTVALooseCone_pt1000.ptvarcone30_TightTTVALooseCone_pt1000.ptvarcone40_TightTTVALooseCone_pt1000.ptcone20_TightTTVA_pt500.ptcone30_TightTTVA_pt500.ptcone40_TightTTVA_pt500.ptcone20_TightTTVA_pt1000.ptcone30_TightTTVA_pt1000.ptcone40_TightTTVA_pt1000.ptcone20_TightTTVALooseCone_pt500.ptcone30_TightTTVALooseCone_pt500.ptcone40_TightTTVALooseCone_pt500.ptcone20_TightTTVALooseCone_pt1000.ptcone30_TightTTVALooseCone_pt1000.ptcone40_TightTTVALooseCone_pt1000.topoetcone20ptCorrection.topoetcone30ptCorrection.topoetcone40ptCorrection")
+HION5SlimmingHelper.ExtraVariables.append("Muons.ptcone20.ptcone30.ptcone40.ptvarcone20.ptvarcone30.ptvarcone40.etcone20.etcone30.etcone40.topoetcone20.topoetcone30.topoetcone40.ptcone20_TightTTVA_pt500.ptcone30_TightTTVA_pt500.ptcone40_TightTTVA_pt500.ptcone20_TightTTVA_pt1000.ptcone30_TightTTVA_pt1000.ptcone40_TightTTVA_pt1000.ptvarcone20_TightTTVA_pt500.ptvarcone30_TightTTVA_pt500.ptvarcone40_TightTTVA_pt500.ptvarcone20_TightTTVA_pt1000.ptvarcone30_TightTTVA_pt1000.ptvarcone40_TightTTVA_pt1000.ptcone20_TightTTVALooseCone_pt500.ptcone30_TightTTVALooseCone_pt500.ptcone40_TightTTVALooseCone_pt500.ptcone20_TightTTVALooseCone_pt1000.ptcone30_TightTTVALooseCone_pt1000.ptcone40_TightTTVALooseCone_pt1000.ptvarcone20_TightTTVALooseCone_pt500.ptvarcone30_TightTTVALooseCone_pt500.ptvarcone40_TightTTVALooseCone_pt500.ptvarcone20_TightTTVALooseCone_pt1000.ptvarcone30_TightTTVALooseCone_pt1000.ptvarcone40_TightTTVALooseCone_pt1000")
 
 
 addMETOutputs(HION5SlimmingHelper,met_ptCutList)
