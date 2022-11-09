@@ -9,6 +9,7 @@
 #include "DataQualityInterfaces/HanConfig.h"
 #include "DataQualityInterfaces/ConditionsSingleton.h"
 
+#include "CxxUtils/checker_macros.h"
 #include "CxxUtils/ubsan_suppress.h"
 #include "TInterpreter.h"
 
@@ -31,7 +32,7 @@ struct CmdLineArgs {
 } // unnamed namespace
 
 
-int main( int argc, char *argv[] )
+int main ATLAS_NOT_THREAD_SAFE ( int argc, char *argv[] )
 {
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
 

@@ -51,6 +51,9 @@
 #include <boost/pointer_cast.hpp>
 #include <utility>
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
+
 ClassImp(dqi::HanConfig)
 
 namespace dqi {
