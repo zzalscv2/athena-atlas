@@ -16,6 +16,7 @@ RDO_File="MC_plus_MC.RDO.pool.root"
 
 mkdir ./run_cg_pkl; cd run_cg_pkl
 FastChain_tf.py \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
@@ -46,6 +47,7 @@ echo "art-result: $cgpkl EVNTtoRDO_CG_PKL"
 
 cd ..; mkdir ./run_cg; cd run_cg
 FastChain_tf.py \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
@@ -72,6 +74,7 @@ echo "art-result: $cg EVNTtoRDO_CG"
 cd ../; mkdir run_ca; cd run_ca
 FastChain_tf.py \
   --CA \
+  --runNumber 601229 \
   --simulator ATLFAST3F_G4MS \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
@@ -89,6 +92,7 @@ FastChain_tf.py \
   --inputRDO_BKGFile ${RDO_BKG_File} \
   --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
   --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
+  --postExec 'with open("ConfigCA.pkl", "wb") as f: cfg.store(f)' \
   --imf False
 ca=$?
 echo  "art-result: $ca EVNTtoRDO_CA"
