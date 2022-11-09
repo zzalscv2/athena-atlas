@@ -104,8 +104,7 @@ StatusCode InDet::SiCombinatorialTrackFinder_xk::initialize()
   ATH_CHECK( m_fieldCondObjInputKey.initialize() );
   ATH_CHECK( m_pixelDetElStatus.initialize( !m_pixelDetElStatus.empty() && m_usePIX) );
   ATH_CHECK( m_sctDetElStatus.initialize( !m_sctDetElStatus.empty() && m_useSCT) );
-  auto ptCutVal = m_minPtCut.value();
-  m_minPt2Cut = ptCutVal * ptCutVal;
+  m_minPt2Cut = std::pow(m_minPtCut.value(),2);
   return StatusCode::SUCCESS;
 }
 
@@ -803,14 +802,13 @@ InDet::SiCombinatorialTrackFinder_xk::EStat_t InDet::SiCombinatorialTrackFinder_
 
 Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorialTrackFinderData_xk& data) const
 {
-  std::unique_ptr<Trk::TrackParameters> param = data.trajectory().firstTrackParameters();
+  const Trk::PatternTrackParameters *param = data.trajectory().firstParameters();
   if (param) {
-     auto momentum = param->momentum();
-     const auto  pt2 = momentum.perp2();
+     double pt = param->transverseMomentum();
      // reject tracks with small pT
      // The cut should be large enough otherwise eta computation of such tracks may yield NANs.
-     if (pt2 < m_minPt2Cut) {
-        ATH_MSG_DEBUG( "Reject low pT track (pT = " << std::sqrt(pt2) << " < " << m_minPtCut.value() << ")");
+     if (pt < m_minPtCut.value()) {
+        ATH_MSG_DEBUG( "Reject low pT track (pT = " << pt << " < " << m_minPtCut.value() << ")");
         return nullptr;
      }
   }
