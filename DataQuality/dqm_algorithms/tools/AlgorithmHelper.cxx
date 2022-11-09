@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
@@ -805,13 +805,13 @@ dqm_algorithms::tools::BookHistogramByExample(const TH1* histogram, const std::s
 
 void
 dqm_algorithms::tools::handleReference( const TObject& ro ,
-					TObject*& firstReference ,
+					const TObject*& firstReference ,
 					TObject*& secondReference )
 {
   if ( ro.InheritsFrom("TH1") )
     {
       //Simple reference
-      firstReference = const_cast<TObject*>(&ro);
+      firstReference = &ro;
       secondReference = 0;
       return;
     }

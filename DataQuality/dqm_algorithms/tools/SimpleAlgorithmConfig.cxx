@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file SimpleAlgorithmConfig  Defines the class SimpleAlgorithmConfig a concrete simple implementation of dqm_core::AlgorithmConfig
  *  \author andrea.dotti@cern.ch
  */
 #include <dqm_algorithms/tools/SimpleAlgorithmConfig.h>
+
+#include "CxxUtils/checker_macros.h"
 
 dqm_algorithms::tools::SimpleAlgorithmConfig::SimpleAlgorithmConfig() :
   dqm_core::AlgorithmConfig() , m_ref(0)
@@ -35,7 +37,8 @@ dqm_algorithms::tools::SimpleAlgorithmConfig::SimpleAlgorithmConfig(const Algori
 TObject* 
 dqm_algorithms::tools::SimpleAlgorithmConfig::getReference() const
 {
-  return m_ref;
+  TObject* ref ATLAS_THREAD_SAFE = const_cast<TObject*>(m_ref);  // dictated by interface
+  return ref;
 }
 
 const std::map<std::string, double>&

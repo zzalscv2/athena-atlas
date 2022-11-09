@@ -59,7 +59,7 @@ dqm_algorithms::AddReference::execute(const std::string& name, const TObject& ob
   double coeff = dqm_algorithms::tools::GetFirstFromMap("Coeff",config.getParameters(), 1);
   
   TObject* ro = config.getReference();
-  TObject* firstReference = 0;
+  const TObject* firstReference = 0;
   TObject* secondReference= 0;
   try {
     dqm_algorithms::tools::handleReference( *ro , firstReference , secondReference );
@@ -68,7 +68,7 @@ dqm_algorithms::AddReference::execute(const std::string& name, const TObject& ob
     throw dqm_core::BadRefHist(ERS_HERE,name," Could not retreive reference");
   }
 
-  TH1* refhist = dynamic_cast<TH1*>(firstReference);
+  const TH1* refhist = dynamic_cast<const TH1*>(firstReference);
   if ( refhist == 0 )
     {
       throw dqm_core::BadRefHist(ERS_HERE,name," Could not retreive reference");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file AlgorithmHelper.cpp does basic functions to get dqm_core::Results from algorithms 
@@ -127,7 +127,7 @@ namespace dqm_algorithms
 			      inputReference
      \throw dqm_core::BadRefHist : in case of wrong references
      */
-    void handleReference( const TObject& inputReference , TObject*& firstReference , TObject*& secondReference);
+    void handleReference( const TObject& inputReference , const TObject*& firstReference , TObject*& secondReference);
     
     // Function to find outliers in input; iterates over values nIteration times, recalculating mean each time and 
     // removing values that are beyond threshold * scale, where:

@@ -9,6 +9,8 @@
 #ifndef DQM_ALGORITHMS_ROOTFITGRAPH_H
 #define DQM_ALGORITHMS_ROOTFITGRAPH_H
 
+#include "CxxUtils/checker_macros.h"
+
 #include <dqm_core/Algorithm.h>
 #include <string>
 #include <memory>
@@ -18,7 +20,8 @@ class TF1;
 
 namespace dqm_algorithms
 {
-  struct RootFitGraph : public dqm_core::Algorithm
+  struct ATLAS_NOT_THREAD_SAFE RootFitGraph : public dqm_core::Algorithm
+  //     ^ fit of constant graph
   {
     RootFitGraph( const std::string & name );
 	  
