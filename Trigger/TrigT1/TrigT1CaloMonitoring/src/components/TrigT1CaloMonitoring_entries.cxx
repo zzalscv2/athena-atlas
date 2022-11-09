@@ -8,6 +8,7 @@
 #include "../L1CaloLegacyEDMMonitorAlgorithm.h"
 #include "../PPMSimBSMonitorAlgorithm.h"
 #include "../MistimedStreamMonitorAlgorithm.h"
+#include "../JetEfficiencyMonitorAlgorithm.h"
 
 // Phase 1
 #include "../EfexMonitorAlgorithm.h"
@@ -24,6 +25,7 @@ DECLARE_COMPONENT( OverviewMonitorAlgorithm )
 DECLARE_COMPONENT( L1CaloLegacyEDMMonitorAlgorithm )
 DECLARE_COMPONENT( PPMSimBSMonitorAlgorithm )
 DECLARE_COMPONENT( MistimedStreamMonitorAlgorithm )
+DECLARE_COMPONENT( JetEfficiencyMonitorAlgorithm )
 
 // Phase 1 systems
 DECLARE_COMPONENT( EfexMonitorAlgorithm )

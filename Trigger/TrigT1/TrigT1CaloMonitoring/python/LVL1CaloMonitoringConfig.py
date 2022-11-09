@@ -43,12 +43,14 @@ def LVL1CaloMonitoringConfig(flags):
             from TrigT1CaloMonitoring.JepCmxMonitorAlgorithm import JepCmxMonitoringConfig
             from TrigT1CaloMonitoring.OverviewMonitorAlgorithm import OverviewMonitoringConfig
             from TrigT1CaloMonitoring.PPMSimBSMonitorAlgorithm import PPMSimBSMonitoringConfig
+            from TrigT1CaloMonitoring.JetEfficiencyMonitorAlgorithm import JetEfficiencyMonitoringConfig
             
             result.merge(CpmMonitoringConfig(flags))
             result.merge(CpmSimMonitoringConfig(flags))
             result.merge(JepCmxMonitoringConfig(flags))
             result.merge(OverviewMonitoringConfig(flags))
             result.merge(PPMSimBSMonitoringConfig(flags))
+            result.merge(JetEfficiencyMonitoringConfig(flags))
 
             if  flags.Input.TriggerStream == "physics_Mistimed":
                 from TrigT1CaloMonitoring.MistimedStreamMonitorAlgorithm import MistimedStreamMonitorConfig
@@ -66,13 +68,14 @@ def LVL1CaloMonitoringConfig(flags):
     if validation:
         from TrigT1CaloMonitoring.L1CaloLegacyEDMMonitorAlgorithm import L1CaloLegacyEDMMonitoringConfig
         result.merge(L1CaloLegacyEDMMonitoringConfig(flags))
-        # Phase 1 systems 
+        # Phase 1 systems
         from TrigT1CaloMonitoring.EfexMonitorAlgorithm import EfexMonitoringConfig
         result.merge(EfexMonitoringConfig(flags))
         from TrigT1CaloMonitoring.GfexMonitorAlgorithm import GfexMonitoringConfig
         result.merge(GfexMonitoringConfig(flags))
         from TrigT1CaloMonitoring.JfexMonitorAlgorithm import JfexMonitoringConfig
         result.merge(JfexMonitoringConfig(flags))
+
 
 
     return result
