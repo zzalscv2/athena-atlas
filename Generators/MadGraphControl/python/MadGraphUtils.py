@@ -202,7 +202,7 @@ def write_test_script():
     mglog.info('Script also written to %s/standalone_script.sh',os.getcwd())
 
 
-def new_process(process='generate p p > t t~\noutput -f', keepJpegs=False, usePMGSettings=False):
+def new_process(process='generate p p > t t~\noutput -f', plugin=None, keepJpegs=False, usePMGSettings=False):
     """ Generate a new process in madgraph.
     Pass a process string.
     Optionally request JPEGs to be kept and request for PMG settings to be used in the param card
@@ -260,15 +260,15 @@ def new_process(process='generate p p > t t~\noutput -f', keepJpegs=False, usePM
 
     mglog.info('Started process generation at '+str(time.asctime()))
 
-    plugin = '--mode=CVMFS_PATCH'
+    plugin_cmd = '--mode='+plugin if plugin is not None else ''
 
     # Note special handling here to explicitly print the process
     global MADGRAPH_COMMAND_STACK
     MADGRAPH_COMMAND_STACK += ['# All jobs should start in a clean directory']
     MADGRAPH_COMMAND_STACK += ['mkdir standalone_test; cd standalone_test']
-    MADGRAPH_COMMAND_STACK += [' '.join([python,madpath+'/bin/mg5_aMC '+plugin+' << EOF\n'+process+'\nEOF\n'])]
+    MADGRAPH_COMMAND_STACK += [' '.join([python,madpath+'/bin/mg5_aMC '+plugin_cmd+' << EOF\n'+process+'\nEOF\n'])]
     global MADGRAPH_CATCH_ERRORS
-    generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
+    generate = subprocess.Popen([python,madpath+'/bin/mg5_aMC',plugin_cmd,card_loc],stdin=subprocess.PIPE,stderr=subprocess.PIPE if MADGRAPH_CATCH_ERRORS else None)
     (out,err) = generate.communicate()
     error_check(err)
 
