@@ -1074,11 +1074,12 @@ void gFexInputByteStreamTool::getEtaPhi ( float &Eta, float &Phi, int iEta, int 
                                              -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
                                              1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
                                              3.2, 3.4, 3.7, 4.2, 4.7};
-    
+    float Phi_gFex = -99;
 
-    Eta = s_EtaCenter[iEta];     
-    Phi = ( (iPhi * s_centralPhiWidth) + s_centralPhiWidth/2) - M_PI;
-  
+    Eta = s_EtaCenter[iEta]; 
+    Phi_gFex = ( (iPhi * s_centralPhiWidth) + s_centralPhiWidth/2);
+    if (Phi_gFex < M_PI) Phi = Phi_gFex;
+      else Phi = (Phi_gFex - 2*M_PI);
 }
 
 /// xAOD->BS conversion
