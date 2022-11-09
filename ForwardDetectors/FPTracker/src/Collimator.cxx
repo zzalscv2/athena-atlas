@@ -75,7 +75,7 @@ namespace FPTracker{
 
   } 
 
-  void Collimator::calibrate(IParticle& particle) const
+  void Collimator::calibrate(IParticle& particle)
   {						
     // the collimator jaws start wide open.
     this->track(particle);

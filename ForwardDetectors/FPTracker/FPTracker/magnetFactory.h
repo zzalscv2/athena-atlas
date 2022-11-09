@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_MAGNETFACTORY_H
@@ -9,7 +9,7 @@
 #include "Magnet.h"
 namespace FPTracker{
   class Magnet;
-  Magnet::ConstPtr_t magnetFactory(
+  Magnet::Ptr_t magnetFactory(
 				   double x,
 				   double y,
 				   double center,

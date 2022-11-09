@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_IBEAMELEMENT_H
@@ -32,18 +32,19 @@ namespace FPTracker{
     virtual std::string label()                 const = 0;
     virtual bool isEndElement()                 const = 0;
     virtual void track(IParticle&)              const = 0;
-    virtual void calibrate(IParticle&)          const  = 0;
+    virtual void calibrate(IParticle&)                = 0;
     virtual std::string str()                   const = 0;
     
     virtual boost::shared_ptr< const IBeamElement > clone()  const = 0;
 
     typedef boost::shared_ptr< const IBeamElement >  ConstPtr_t;
+    typedef boost::shared_ptr< IBeamElement >        Ptr_t;
 
-    typedef std::vector< ConstPtr_t >                Container_t;
+    typedef std::vector< Ptr_t >                     Container_t;
     typedef Container_t::iterator                    Iter_t;
     typedef Container_t::const_iterator              ConstIter_t;
     
-    typedef std::list< ConstPtr_t >                  List_t;
+    typedef std::list< Ptr_t >                       List_t;
     typedef List_t::iterator                         ListIter_t;
     typedef List_t::const_iterator                   ConstListIter_t;
   };
