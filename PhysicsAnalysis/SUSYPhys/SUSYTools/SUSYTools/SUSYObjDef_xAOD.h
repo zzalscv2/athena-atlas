@@ -646,6 +646,8 @@ namespace ST {
     std::string m_tauConfigPath;
     std::string m_tauConfigPathBaseline;
     bool   m_tauDoTTM;
+    std::string m_tauSmearingToolRecommendationTag;
+    std::string m_tauSmearingToolGenerator;
 
     double m_jetPt;
     double m_jetEta;

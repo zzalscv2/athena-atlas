@@ -27,6 +27,7 @@ CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCu
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF (with comment: 'ttbar_PDF+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
 CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF (with comment: 'ttbarC+addSys[newsys]+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
+ToolSvc.TauEffTool_MediumWARNING Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (430542). Will only print this warning once.
 Info in <CP::TPileupReweighting::GetLumiBlockMu>: Initializing the subtool..
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
