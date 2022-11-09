@@ -6,6 +6,7 @@ from __future__ import print_function
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 import re
+import ROOT
 
 
 class PreJetAnalysisConfig (ConfigBlock) :
@@ -181,7 +182,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             else:
                 alg.efficiencyTool.SFFile = 'JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root'
                 alg.efficiencyTool.MaxPtForJvt = 120e3
-            alg.efficiencyTool.WorkingPoint = 'Tight' if self.jetInput == 'EMPFlow' else 'Medium'
+            alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.NNJvt
+            alg.efficiencyTool.WorkingPoint = 'FixedEffPt'
             alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.selection = 'jvt_selection'
             alg.scaleFactorDecoration = 'jvt_effSF_%SYS%'
@@ -203,8 +205,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root'
             else:
                 alg.efficiencyTool.SFFile = 'JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root'
-            alg.efficiencyTool.WorkingPoint = 'Tight'
-            alg.efficiencyTool.UseMuSFFormat = True
+            alg.efficiencyTool.TaggingAlg = ROOT.CP.JvtTagger.fJvt
+            alg.efficiencyTool.WorkingPoint = 'Loose'
             alg.truthJetCollection = 'AntiKt4TruthDressedWZJets'
             alg.dofJVT = True
             alg.fJVTStatus = 'passFJVT,as_char'

@@ -11,6 +11,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+import ROOT
 
 def getJvtEffToolCfg(ConfigFlags, jetalg):
   """Configure the JVT efficiency tool"""
@@ -22,6 +23,9 @@ def getJvtEffToolCfg(ConfigFlags, jetalg):
 
   jvtefftool = CompFactory.CP.JetJvtEfficiency("JVTEff_{0}".format(jetalg))
   jvtefftool.SFFile=configs[jetalg]
+  # NNJvt isn't calculated for EMTopo jets (yet) so fallback to Jvt
+  if jetalg == "AntiKt4EMTopo":
+    jvtefftool.TaggingAlg = ROOT.CP.JvtTagger.Jvt
 
   acc.setPrivateTools(jvtefftool)
   return acc
@@ -41,7 +45,10 @@ def getJvtEffTool( jetalg , toolname = ''):
   }
 
   jvtefftool = CfgMgr.CP__JetJvtEfficiency(toolname)
-  jvtefftool.SFFile=configs[ jetalg ] 
+  jvtefftool.SFFile=configs[ jetalg ]
+  # NNJvt isn't calculated for EMTopo jets (yet) so fallback to Jvt
+  if jetalg == "AntiKt4EMTopo":
+    jvtefftool.TaggingAlg = ROOT.CP.JvtTagger.Jvt
 
   jetjvttoollog.info("Configured JetJvtEfficiencyTool {} for jetalg {}".format(toolname, jetalg))
 
