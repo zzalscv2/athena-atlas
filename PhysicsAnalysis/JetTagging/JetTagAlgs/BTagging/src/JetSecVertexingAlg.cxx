@@ -155,8 +155,8 @@ namespace Analysis {
 
     unsigned int nVertexes = h_VertexCollectionName->size();
     if (nVertexes == 0) {
-      ATH_MSG_DEBUG("#BTAG#  Vertex container is empty");
-      return StatusCode::SUCCESS;
+      ATH_MSG_ERROR("#BTAG#  Vertex container is empty");
+      return StatusCode::FAILURE;
     }
     for (xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin(); fz != h_VertexCollectionName->end(); ++fz) {
       if ((*fz)->vertexType() == xAOD::VxType::PriVtx) {

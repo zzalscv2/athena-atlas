@@ -52,8 +52,10 @@ StatusCode ViewCreatorCentredOnIParticleROITool::attachROILinks(TrigCompositeUti
          double zed0  = 0.0; //initialization
 
          if ( muon && muon->primaryTrackParticle() ) {
+
 	     zed0 = muon->primaryTrackParticle()->z0();
-	   
+	     if ( m_useBeamspot ) zed0 += muon->primaryTrackParticle()->vz();
+	    
              double zed0p   = zed0 + m_roiZedWidth; // in mm
              double zed0m   = zed0 - m_roiZedWidth; // in mm
 	     

@@ -28,10 +28,10 @@ public:
 private:
 
   SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKey{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" };
-
   SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_HLT_cont_key;
   SG::ReadHandleKey<xAOD::CaloClusterContainer> m_OFF_cont_key;
+  std::string m_hltChainsT0;
   std::string m_HLT_cont_name;
   std::string m_OFF_cont_name;
   std::string m_mongroup_name;
@@ -43,6 +43,6 @@ private:
   bool m_match_types;
   bool m_doLC;
   float m_max_delta_r;
-
+  bool ifChainPassed(const std::string& chain) const;
 };
 #endif

@@ -27,6 +27,30 @@ def NewTrackingTRTExtensionCfg(flags,
                                          ExtensionMap = ExtendedTracksMap))
 
     return acc
+
+def NewTrackingTRTExtensionPhaseCfg(flags,
+                                    SiTrackCollection = None,
+                                    ExtendedTrackCollection = None,
+                                    ExtendedTracksMap = None):
+    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+    acc = TRTPreProcessingCfg(flags)
+    #
+    # Track extension to TRT algorithm
+    #
+    from InDetConfig.TRT_TrackExtensionAlgConfig import TRT_Phase_TrackExtensionAlgCfg
+    acc.merge(TRT_Phase_TrackExtensionAlgCfg(flags,
+                                             InputTracksLocation = SiTrackCollection,
+                                             ExtendedTracksLocation = ExtendedTracksMap))
+
+    from InDetConfig.InDetExtensionProcessorConfig import InDetExtensionProcessorCfg
+    acc.merge(InDetExtensionProcessorCfg(flags,
+                                         name = "InDetExtensionProcessorPhase",
+                                         TrackName = SiTrackCollection,
+                                         NewTrackName = ExtendedTrackCollection,
+                                         ExtensionMap = ExtendedTracksMap))
+
+    return acc
+
 ##########################################################################################################################
 
 if __name__ == "__main__":

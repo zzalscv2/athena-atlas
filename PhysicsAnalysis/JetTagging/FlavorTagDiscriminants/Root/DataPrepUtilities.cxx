@@ -409,14 +409,12 @@ namespace FlavorTagDiscriminants {
             [=](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
-              double n_module_shared = (
-                pix_shared(*tp) + sct_shared(*tp) / 2);
+              double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
               if (tp->pt() <= 1e3) return false;
               if (std::abs(aug.d0(*tp)) >= 1.0) return false;
               if (std::abs(aug.z0SinTheta(*tp)) >= 1.5) return false;
-              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp)
-                  + sct_dead(*tp) < 7) return false;
+              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 7) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
               return true;
@@ -468,14 +466,12 @@ namespace FlavorTagDiscriminants {
             [=](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
-              double n_module_shared = (
-                pix_shared(*tp) + sct_shared(*tp) / 2);
+              double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
               if (tp->pt() <= 0.5e3) return false;
               if (std::abs(aug.d0(*tp)) >= 3.5) return false;
               if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
-              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp)
-                  + sct_dead(*tp) < 7) return false;
+              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 7) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
               return true;
@@ -485,16 +481,49 @@ namespace FlavorTagDiscriminants {
           return {
             [=](const Tp* tp) {
               if (std::abs(tp->eta()) > 2.5) return false;
-              double n_module_shared = (
-                pix_shared(*tp) + sct_shared(*tp) / 2);
+              double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
               if (tp->pt() <= 0.5e3) return false;
-              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp)
-                  + sct_dead(*tp) < 7) return false;
+              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 7) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
               return true;
             }, track_deps
+          };
+        // R22_DEFAULT is similar to DIPS_LOOSE_202102, but modifies the min Si hit cut to 8,
+        // which is the default tracking CP recommendation for r22, see
+        // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TrackingCPRecsRun2R22#Selection_Criteria
+        case TrackSelection::R22_DEFAULT:
+          return {
+            [=](const Tp* tp) {
+              // from the track selector tool
+              if (std::abs(tp->eta()) > 2.5) return false;
+              double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
+              if (n_module_shared > 1) return false;
+              if (tp->pt() <= 0.5e3) return false;
+              if (std::abs(aug.d0(*tp)) >= 3.5) return false;
+              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 8) return false;
+              if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
+              if (pix_holes(*tp) > 1) return false;
+              return true;
+            }, data_deps
+          };
+        // R22_LOOSE is similar to R22_DEFAULT, but removes the shared module cut 
+        // and loosens the d0 cut
+        case TrackSelection::R22_LOOSE:
+          return {
+            [=](const Tp* tp) {
+              // from the track selector tool
+              if (std::abs(tp->eta()) > 2.5) return false;
+              if (tp->pt() <= 0.5e3) return false;
+              if (std::abs(aug.d0(*tp)) >= 5.0) return false;
+              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 8) return false;
+              if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
+              if (pix_holes(*tp) > 1) return false;
+              return true;
+            }, data_deps
           };
         default:
           throw std::logic_error("unknown track selection function");
@@ -725,6 +754,8 @@ namespace FlavorTagDiscriminants {
         {".*_all_.*"_r, TrackSelection::ALL},
         {".*_dipsLoose202102_.*"_r, TrackSelection::DIPS_LOOSE_202102},
         {".*_loose202102NoIpCuts_.*"_r, TrackSelection::LOOSE_202102_NOIP},
+        {".*_r22default_.*"_r, TrackSelection::R22_DEFAULT},
+        {".*_r22loose_.*"_r, TrackSelection::R22_LOOSE},
       };
 
       auto trk_config = get_track_input_config(

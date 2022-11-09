@@ -51,14 +51,14 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
         SG::ReadHandleKey < xAOD::jFexTowerContainer > m_jTowersReadKey    {this,"jTowersReadKey"   ,"L1_jFexDataTowers", "Read jFexEDM Trigger Tower container"};
         
         //WriteDecorHandle
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtdecorKey    { this, "SCellEtdecorKey"    , "L1_jTowers.SCellEt"    , "SCell Et information of the jTower"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtadecorKey   { this, "SCellEtadecorKey"   , "L1_jTowers.SCellEta"   , "SCell Eta information of the jTower"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellPhidecorKey   { this, "SCellPhidecorKey"   , "L1_jTowers.SCellPhi"   , "SCell Phi information of the jTower"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellIDdecorKey    { this, "SCellIDdecorKey"    , "L1_jTowers.SCellID"    , "SCell IDs information of the jTower"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_jtowerEtMeVdecorKey{ this, "jtowerEtMeVdecorKey", "L1_jTowers.jtowerEtMeV", "jFex Tower Et information in MeV"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtMeVdecorKey  { this, "TileEtMeVdecorKey"  , "L1_jTowers.TileEtMeV"  , "Tile Tower Et information in MeV"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtadecorKey    { this, "TileEtadecorKey"    , "L1_jTowers.TileEta"    , "Tile Tower Eta information in MeV"};
-        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TilePhidecorKey    { this, "TilePhidecorKey"    , "L1_jTowers.TilePhi"    , "Tile Tower Phi information in MeV"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtdecorKey    { this, "SCellEtdecorKey"    , "L1_jFexDataTowers.SCellEt"    , "SCell Et information of the jTower"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellEtadecorKey   { this, "SCellEtadecorKey"   , "L1_jFexDataTowers.SCellEta"   , "SCell Eta information of the jTower"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellPhidecorKey   { this, "SCellPhidecorKey"   , "L1_jFexDataTowers.SCellPhi"   , "SCell Phi information of the jTower"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_SCellIDdecorKey    { this, "SCellIDdecorKey"    , "L1_jFexDataTowers.SCellID"    , "SCell IDs information of the jTower"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_jtowerEtMeVdecorKey{ this, "jtowerEtMeVdecorKey", "L1_jFexDataTowers.jtowerEtMeV", "jFex Tower Et information in MeV"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtMeVdecorKey  { this, "TileEtMeVdecorKey"  , "L1_jFexDataTowers.TileEt"     , "Tile Tower Et information in Encoded from cpET"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TileEtadecorKey    { this, "TileEtadecorKey"    , "L1_jFexDataTowers.TileEta"    , "Tile Tower Eta information in MeV"};
+        SG::WriteDecorHandleKey<xAOD::jFexTowerContainer> m_TilePhidecorKey    { this, "TilePhidecorKey"    , "L1_jFexDataTowers.TilePhi"    , "Tile Tower Phi information in MeV"};
 
         
         //property for jFEX mapping

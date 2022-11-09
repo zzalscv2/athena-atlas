@@ -235,7 +235,7 @@ class TrigEgammaFastCaloHypoToolConfig:
 
   def etcut(self):
 
-    self.__log.debug( 'Configure etcut' )
+    self.__log.debug( 'Configure etcut or nopid' )
     self.tool().UseRinger      = False
     self.tool().ETthr          = same( ( self.etthr()  -  3 )*GeV, self.tool() )
     self.tool().dETACLUSTERthr = 9999.

@@ -41,7 +41,9 @@ namespace FlavorTagDiscriminants {
     DIPS_TIGHT_UPGRADE,
     DIPS_LOOSE_UPGRADE,
     DIPS_LOOSE_202102,
-    LOOSE_202102_NOIP
+    LOOSE_202102_NOIP,
+    R22_DEFAULT,
+    R22_LOOSE
   };
 
 

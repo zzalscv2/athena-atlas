@@ -128,7 +128,7 @@ if __name__ == '__main__':
     
     # Decodes LATOME into SCell container
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg,TriggerTowersInputCfg
-    if any(["data22_cos" or "data22_comm" in f for f in args.filesInput]):
+    if any(["data22_cos" in f for f in args.filesInput]):
         acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
     else:
         acc.merge(ReadSCellFromByteStreamCfg(flags))
