@@ -57,6 +57,10 @@ InDet = getattr (cppyy.gbl, 'InDet', None)
 InDetLowBetaCandidate = getattr (InDet, 'InDetLowBetaCandidate', None)
 InDetLowBetaCandidateNull = cppyy.bind_object(cppyy.nullptr, InDetLowBetaCandidate) if InDetLowBetaCandidate else None
 
+Trk = getattr (cppyy.gbl, 'Trk', None)
+FitQuality = getattr (Trk, 'FitQuality', None)
+fitQualityNull = cppyy.bind_object(cppyy.nullptr, FitQuality) if FitQuality else None
+
 
 # Work around a cling bug.
 if hasattr(ROOT,'TrackParticleTruthCollection'):
@@ -1591,7 +1595,7 @@ def dump_TrackParticle (p, f):
         dump_Threevec (vx.recVertex().position(), f)
     else:
         fprint (f, tonone (vx))
-    if p.fitQuality():
+    if p.fitQuality() != fitQualityNull:
         fprint (f, '\n        fq')
         dump_FitQuality (p.fitQuality(), f)
     if p.trackSummary():
