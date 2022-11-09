@@ -39,6 +39,7 @@
 
 // framework includes
 #include "AsgDataHandles/ReadHandle.h"
+#include <AsgTools/AsgToolConfig.h>
 #include "xAODPFlow/PFOAuxContainer.h"
 #include <xAODCore/AuxContainerBase.h>
 #include <AthContainers/AuxElement.h>
@@ -91,8 +92,14 @@ namespace met {
   METMaker::METMaker(const std::string& name) :
     AsgTool(name),
     m_PVkey("PrimaryVertices"),
-    m_extraJetRejection(false),
-    m_trkseltool("")
+    m_acc_jetJvtMoment(nullptr),
+    m_acc_jetRejectionDec(nullptr),
+    m_JvtCutTight(-100.0),
+    m_JvtTightPtMax(-100.0),
+    m_JvtCutMedium(-100.0),
+    m_JvtMediumPtMax(-100.0),
+    m_trkseltool(""),
+    m_JvtTool("", this)
   {
     //
     // Property declaration
@@ -111,7 +118,10 @@ namespace met {
     declareProperty("DoSoftTruth",        m_doSoftTruth        = false               );
     declareProperty("DoJetTruth",         m_doConstJet         = false               );
 
-    declareProperty("JetSelection",       m_jetSelection       = "Default"           );//Default, Tight, PFlow or Expert
+    declareProperty("JetSelection",       m_jetSelection       = "Tight"             );
+    declareProperty("JetEtaMax",          m_JetEtaMax          = 4.5                 );
+    declareProperty("JetEtaForw",         m_JetEtaForw         = 2.5                 );
+    declareProperty("UseR21JvtFallback",  m_useR21JvtFallback  = false               );
     declareProperty("CustomCentralJetPt", m_customCenJetPtCut  = 20e3                );
     declareProperty("CustomForwardJetPt", m_customFwdJetPtCut  = 20e3                );
     declareProperty("CustomJetJvtCut",    m_customJvtCut       = 0.59                );
@@ -130,8 +140,15 @@ namespace met {
     declareProperty("DoRemoveElecTrks",   m_doRemoveElecTrks   = true                );
     declareProperty("DoRemoveElecTrksEM", m_doRemoveElecTrksEM = false               );
 
-    declareProperty("TrackSelectorTool",  m_trkseltool                               );
+    // muon overlap variables (expert use only)
+    declareProperty("JetTrkNMuOlap",      m_jetTrkNMuOlap = 5                        );
+    declareProperty("JetWidthMuOlap",     m_jetWidthMuOlap = 0.1                     );
+    declareProperty("JetPsEMuOlap",       m_jetPsEMuOlap = 2.5e3                     );
+    declareProperty("JetEmfMuOlap",       m_jetEmfMuOlap = 0.9                       );
+    declareProperty("JetTrkPtMuPt",       m_jetTrkPtMuPt = 0.8                       );
+    declareProperty("muIDPTJetPtRatioMuOlap", m_muIDPTJetPtRatioMuOlap = 2.0         );
 
+    declareProperty("TrackSelectorTool",  m_trkseltool                               );
   }
 
   // Destructor
@@ -146,32 +163,72 @@ namespace met {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
     //default jet selection i.e. pre-recommendation
-    ATH_MSG_VERBOSE("Use jet selection criterion: " << m_jetSelection);
-    if (m_jetSelection == "Default")     { m_CenJetPtCut = 20e3; m_FwdJetPtCut = 20e3; m_JvtCut = 0.59; m_JvtPtMax = 60e3;}
-    else if (m_jetSelection == "PFlow")  { m_CenJetPtCut = 20e3; m_FwdJetPtCut = 20e3; m_JvtCut = 0.2; m_JvtPtMax = 60e3;}
-    else if (m_jetSelection == "Tight")  { m_CenJetPtCut = 20e3; m_FwdJetPtCut = 30e3; m_JvtCut = 0.59; m_JvtPtMax = 60e3;}
-    else if (m_jetSelection == "Tier0")  { m_CenJetPtCut = 0;    m_FwdJetPtCut = 0;    m_JvtCut = -1;   m_JvtPtMax = 0;}
+    ATH_MSG_INFO("Use jet selection criterion: " << m_jetSelection << " PFlow: " << m_doPFlow);
+    // note: default in R22 is to let the JvtTool apply the NNJvt cuts based on the chosen WP;
+    // only if m_useR21JvtFallback is used the Jvt requirements based on m_JvtCut are applied manually
+    if (m_jetSelection == "Loose")       { m_CenJetPtCut = 20e3; m_FwdJetPtCut = 20e3; m_JvtWP = "FixedEffPt"; m_JvtCut = m_doPFlow ? 0.5 : 0.59; m_JvtPtMax = 60e3; }
+    else if (m_jetSelection == "Tight")  { m_CenJetPtCut = 20e3; m_FwdJetPtCut = 30e3; m_JvtWP = "FixedEffPt"; m_JvtCut = m_doPFlow ? 0.5 : 0.59; m_JvtPtMax = 60e3; }
+    else if (m_jetSelection == "Tighter"){ m_CenJetPtCut = 20e3; m_FwdJetPtCut = 35e3; m_JvtWP = "FixedEffPt"; m_JvtCut = m_doPFlow ? 0.5 : 0.59; m_JvtPtMax = 60e3; }
+    else if (m_jetSelection == "Tenacious")  {
+      m_CenJetPtCut  = 20e3; m_FwdJetPtCut = 35e3;
+      m_JvtCutTight  = 0.91; m_JvtTightPtMax  = 40.0e3;
+      m_JvtCutMedium = 0.59; m_JvtMediumPtMax = 60.0e3;
+      m_JvtCut       = 0.11; m_JvtPtMax = 120e3;
+      // for the current definition of the Tenacious WP we need to rely on placing individual Jvt cuts
+      m_useR21JvtFallback = true;
+    }
+    else if (m_jetSelection == "Tier0")  { m_CenJetPtCut = 0;    m_FwdJetPtCut = 0;    m_JvtCut = -1;   m_JvtPtMax = 0; m_useR21JvtFallback = true;}
     else if (m_jetSelection == "Expert")  {
       ATH_MSG_INFO("Custom jet selection configured. *** FOR EXPERT USE ONLY ***");
       m_CenJetPtCut = m_customCenJetPtCut;
       m_FwdJetPtCut = m_customFwdJetPtCut;
       m_JvtCut = m_customJvtCut;
       m_JvtPtMax = m_customJvtPtMax;
+      m_JvtWP = m_customJvtWP;
     }
-    else { ATH_MSG_ERROR( "Error: No available jet selection found! Choose one: Default, Tight, PFlow, Expert" ); return StatusCode::FAILURE; }
-
-    if (!m_jetRejectionDec.empty()) m_extraJetRejection = true;
-
-    if (!m_trkseltool.empty()) ATH_CHECK( m_trkseltool.retrieve() );
-
-    if(m_jetSelection=="PFlow" && !m_doPFlow) {
-      ATH_MSG_ERROR("\'PFlow\' jet selection needs DoPFlow=true.");
+    else if (m_jetSelection == "HRecoil")  {
+      ATH_MSG_INFO("Jet selection for hadronic recoil calculation is configured.");
+      m_CenJetPtCut = 9999e3;
+      m_FwdJetPtCut = 9999e3;
+      m_JetEtaMax   = 5;
+      //m_JvtCut   = 0.;    // currently skip
+      //m_JvtPtMax = 0.;  // currently skip
+      // this WP also requires that we place the Jvt cuts manually
+      m_useR21JvtFallback = true;
+    }
+    else {
+      if (m_jetSelection == "Default") ATH_MSG_WARNING( "WARNING:  Default is now deprecated" );
+      ATH_MSG_ERROR( "Error: No available jet selection found! Please update JetSelection in METMaker. Choose one: Loose, Tight (recommended), Tighter, Tenacious" );
       return StatusCode::FAILURE;
     }
 
-    // ReadHandleKey(s)
+    // if using the old R21 Jvt cuts also enforce the same forward threshold
+    if (m_useR21JvtFallback) m_JetEtaForw = 2.4;
 
+    if (!m_trkseltool.empty()) ATH_CHECK( m_trkseltool.retrieve() );
+
+    // do not setup Jvt tool if we use the fallback option, i.e. apply Jvt requirements manually
+    if (!m_useR21JvtFallback) {
+      if (m_JvtTool.empty()) {
+        asg::AsgToolConfig config_jvt ("CP::JetJvtEfficiency/JvtTool");
+        ATH_CHECK(config_jvt.setProperty("WorkingPoint", m_JvtWP));
+        ATH_CHECK(config_jvt.setProperty("TaggingAlg", CP::JvtTagger::NNJvt));
+        ATH_CHECK(config_jvt.setProperty("MaxPtForJvt", m_JvtPtMax));
+        ATH_CHECK(config_jvt.makePrivateTool(m_JvtTool));
+      }
+      ATH_CHECK(m_JvtTool.retrieve());
+    }
+
+    // ReadHandleKey(s)
     ATH_CHECK( m_PVkey.initialize() );
+
+    // configurable accessors
+    m_acc_jetJvtMoment.reset(new SG::AuxElement::ConstAccessor<float>(m_jetJvtMomentName));
+    if (!m_jetRejectionDec.empty()) {
+      m_acc_jetRejectionDec.reset(new SG::AuxElement::ConstAccessor<char>(m_jetRejectionDec));
+      ATH_MSG_INFO("Applying additional jet rejection criterium in MET calculation: " << m_jetRejectionDec);
+    }
+
 
     return StatusCode::SUCCESS;
   }
@@ -627,24 +684,40 @@ namespace met {
       }
       if(assoc && !assoc->isMisc()) {
         ATH_MSG_VERBOSE( "Jet calib pt = " << jet->pt());
-        bool selected = (fabs(jet->eta())<2.4 && jet->pt()>m_CenJetPtCut) || (fabs(jet->eta())>=2.4 && jet->pt()>m_FwdJetPtCut );//jjj
+
+        bool selected = (std::abs(jet->eta())<m_JetEtaForw && jet->pt()>m_CenJetPtCut) || (std::abs(jet->eta())>=m_JetEtaForw && jet->pt()>m_FwdJetPtCut );
         bool JVT_reject(false);
         bool isMuFSRJet(false);
 
+        // Apply a cut on the maximum jet eta. This restricts jets to those with calibration. Excluding more forward jets was found to have a minimal impact on the MET in Zee events
+        if(m_JetEtaMax>0.0 && std::abs(jet->eta())>m_JetEtaMax) JVT_reject=true;
+
         if(doJetJVT) {
-          if(jet->pt()<m_JvtPtMax && fabs(jet->eta())<2.4) {
-            float jvt;
-            bool gotJVT = jet->getAttribute<float>(m_jetJvtMomentName,jvt);
-            if(gotJVT) {
-              JVT_reject = jvt<m_JvtCut;
-              ATH_MSG_VERBOSE("Jet " << (JVT_reject ? "fails" : "passes") <<" JVT selection");
-            } else {
-              JVT_reject = true;
-              ATH_MSG_WARNING("Tried to retrieve JVT but this was not set. Failing this jet.");
+          if (!m_useR21JvtFallback) {
+            // intrinsically checks that is within range to apply Jvt requirement
+            JVT_reject  = !m_JvtTool->passesJvtCut(*jet);
+          }
+          else {
+            if(jet->pt()<m_JvtPtMax && std::abs(jet->eta())<m_JetEtaForw) {
+              float jvt;
+              bool gotJVT = m_acc_jetRejectionDec->isAvailable(*jet);
+              if(gotJVT) {
+                jvt = (*m_acc_jetRejectionDec)(*jet);
+                JVT_reject = jvt<m_JvtCut;
+                if(m_JvtMediumPtMax>0.0 && jet->pt()<m_JvtMediumPtMax) JVT_reject = (jvt<m_JvtCutMedium);
+                if(m_JvtTightPtMax>0.0  && jet->pt()<m_JvtTightPtMax)  JVT_reject = (jvt<m_JvtCutTight);
+                ATH_MSG_VERBOSE("Jet " << (JVT_reject ? "fails" : "passes") <<" JVT selection");
+              } else {
+                JVT_reject = true;
+                ATH_MSG_WARNING("Tried to retrieve JVT but this was not set. Failing this jet.");
+              }
             }
           }
+          ATH_MSG_VERBOSE("Jet " << (JVT_reject ? "fails" : "passes") <<" JVT selection");
         }
-        if (m_extraJetRejection && jet->auxdata<char>(m_jetRejectionDec)==0) JVT_reject = true;
+
+        // if defined apply additional jet criterium
+        if (m_acc_jetRejectionDec && (*m_acc_jetRejectionDec)(*jet)==0) JVT_reject = true;
         bool hardJet(false);
         MissingETBase::Types::constvec_t calvec = assoc->overlapCalVec(helper);
         bool caloverlap = false;
@@ -777,7 +850,7 @@ namespace met {
               float jet_trk_N = acc_trkN.isAvailable(*jet) && this->getPV() ? acc_trkN(*jet)[this->getPV()->index()] : 0.;
               ATH_MSG_VERBOSE("Muon has ID pt " << mu_id_pt);
               ATH_MSG_VERBOSE("Jet has pt " << jet->pt() << ", trk sumpt " << jet_trk_sumpt << ", trk N " << jet_trk_N);
-              bool jet_from_muon = mu_id_pt>1e-9 && jet_trk_sumpt>1e-9 && (jet->pt()/mu_id_pt < 2 && mu_id_pt/jet_trk_sumpt>0.8) && jet_trk_N<5;
+              bool jet_from_muon = mu_id_pt>1e-9 && jet_trk_sumpt>1e-9 && (jet->pt()/mu_id_pt < m_muIDPTJetPtRatioMuOlap && mu_id_pt/jet_trk_sumpt>m_jetTrkPtMuPt) && jet_trk_N<m_jetTrkNMuOlap;
               if(jet_from_muon) {
                 ATH_MSG_VERBOSE("Jet is from muon -- remove.");
                 JVT_reject = true;
@@ -803,7 +876,7 @@ namespace met {
                 return StatusCode::FAILURE;
               }
 
-              bool jet_from_muon = jet_trk_sumpt>1e-9 && jet_trk_N<3 && mu_id_pt / jet_trk_sumpt > 0.8 && acc_emf(*jet)>0.9 && acc_width(*jet)<0.1 && jet_psE>2500;
+              bool jet_from_muon = jet_trk_sumpt>1e-9 && jet_trk_N<3 && mu_id_pt / jet_trk_sumpt > m_jetTrkPtMuPt && acc_emf(*jet)>m_jetEmfMuOlap && acc_width(*jet)<m_jetWidthMuOlap && jet_psE>m_jetPsEMuOlap;
               ATH_MSG_VERBOSE("Muon has ID pt " << mu_id_pt);
               ATH_MSG_VERBOSE("Jet has trk sumpt " << jet_trk_sumpt << ", trk N " << jet_trk_N << ", PS E " << jet_psE << ", width " << acc_width(*jet) << ", emfrac " << acc_emf(*jet));
 
@@ -929,7 +1002,7 @@ namespace met {
             if(metSoftClus && !JVT_reject) {
               // add fractional contribution
               ATH_MSG_VERBOSE("Jet added at const scale");
-              if (fabs(jet->eta())<2.5 || !(coreSoftClus->source()&MissingETBase::Source::Central)) {
+              if (std::abs(jet->eta())<2.5 || !(coreSoftClus->source()&MissingETBase::Source::Central)) {
                 softJetLinks.push_back( jetLink );
                 softJetWeights.push_back( uniquefrac );
                 metSoftClus->add(opx,opy,opt);
@@ -969,7 +1042,7 @@ namespace met {
               ATH_MSG_VERBOSE( "This jet has no associated tracks" );
             }
             if (hardJet) metJet->add(opx,opy,opt);
-            else if (fabs(jet->eta())<2.5 || !(coreSoftTrk->source()&MissingETBase::Source::Central)) {
+            else if (std::abs(jet->eta())<2.5 || !(coreSoftTrk->source()&MissingETBase::Source::Central)) {
               metSoftTrk->add(opx,opy,opt);
               // Don't need to add if already done for softclus.
               if(!metSoftClus) {

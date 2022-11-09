@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETJVTEFFICIENCYSCALEFACTORS_H_
@@ -9,7 +9,10 @@
 #include "JetInterface/IJetDecorator.h"
 #include "PATInterfaces/SystematicsTool.h"
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/AnaToolHandle.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
+#include "JetMomentTools/JetVertexNNTagger.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -21,12 +24,10 @@ namespace CP {
 
 enum SystApplied {
   NONE,
-  JVT_EFFICIENCY_DOWN,
-  JVT_EFFICIENCY_UP,
+  NNJVT_EFFICIENCY_DOWN,
+  NNJVT_EFFICIENCY_UP,
   FJVT_EFFICIENCY_DOWN,
   FJVT_EFFICIENCY_UP,
-  MVFJVT_EFFICIENCY_DOWN,
-  MVFJVT_EFFICIENCY_UP
 };
 
 class JetJvtEfficiency: public asg::AsgTool,
@@ -53,6 +54,8 @@ public:
     // Decorate jets with flag for passJVT decision
     virtual StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
+    virtual StatusCode recalculateScores(const xAOD::JetContainer& jets) const override;
+
     bool isAffectedBySystematic(const CP::SystematicVariation& var) const override {return CP::SystematicsTool::isAffectedBySystematic(var);}
     CP::SystematicSet affectingSystematics() const override {return CP::SystematicsTool::affectingSystematics();}
     CP::SystematicSet recommendedSystematics() const override {return CP::SystematicsTool::recommendedSystematics();}
@@ -60,7 +63,7 @@ public:
     StatusCode sysApplySystematicVariation(const CP::SystematicSet&) override;
 
     float getJvtThresh() const override {return m_jvtCut;}
-    float getUserPtMax() const override {return m_maxPtForJvt;} 
+    float getUserPtMax() const override {return m_maxPtForJvt;}
     StatusCode tagTruth(const xAOD::IParticleContainer *jets,const xAOD::IParticleContainer *truthJets) override;
 
 private:
@@ -69,29 +72,41 @@ private:
 
     SystApplied m_appliedSystEnum;
 
+    asg::AnaToolHandle<JetPileupTag::JetVertexNNTagger>  m_NNJvtTool_handle{"JetPileupTag::JetVertexNNTagger/NNJvt", this};
+
+    int m_tagger;
     std::string m_wp;
     std::string m_file;
-    std::unique_ptr<SG::AuxElement::Decorator< float > > m_sfDec;
-    std::unique_ptr<SG::AuxElement::Decorator< char > > m_isHSDec;
-    std::unique_ptr<SG::AuxElement::ConstAccessor< char > > m_isHSAcc;
+    JvtTagger m_taggingAlg;
     std::unique_ptr<TH2> m_h_JvtHist;
     std::unique_ptr<TH2> m_h_EffHist;
+    std::string m_passJvtDecName;
     std::string m_sf_decoration_name;
     std::string m_isHS_decoration_name;
     std::string m_truthJetContName;
-    float m_jvtCut;
-    float m_jvtCutBorder;
-    std::string m_jetJvtMomentName;
-    std::string m_jetfJvtMomentName;
-    std::string m_jetMVfJvtMomentName;
     std::string m_jetEtaName;
     float m_maxPtForJvt;
-    bool m_dofJVT;
-    bool m_doMVfJVT;
     bool m_doTruthRequirement;
     std::string m_ORdec;
-    bool m_doOR;
     bool m_useMuBinsSF;
+    bool m_useDummySFs;
+    std::string m_jetContainerName;
+    std::string m_NNJvtParamFile;
+    std::string m_NNJvtCutFile;
+
+    // kept for backwards compatibility with legacy Jvt
+    std::string m_jetJvtMomentName;
+    float m_jvtCut;
+    float m_jvtCutBorder;
+
+    // configurable accessors/decorators
+    std::unique_ptr<SG::AuxElement::ConstAccessor< float > > m_jetJvtMomentAcc;
+    std::unique_ptr<SG::AuxElement::ConstAccessor< char > > m_passJvtAcc;
+    std::unique_ptr<SG::AuxElement::ConstAccessor< float > > m_jetEtaAcc;
+    std::unique_ptr<SG::AuxElement::ConstAccessor< char > > m_passORAcc;
+    std::unique_ptr<SG::AuxElement::Decorator< float > > m_sfDec;
+    std::unique_ptr<SG::AuxElement::Decorator< char > > m_isHSDec;
+    std::unique_ptr<SG::AuxElement::ConstAccessor< char > > m_isHSAcc;
 
     SG::WriteDecorHandleKey<xAOD::JetContainer> m_passJvtKey{this, "PassJVTKey", "passJvt",
       "SG key for passJvt decoration (including jet container name)"};
