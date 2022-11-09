@@ -110,7 +110,9 @@ class FPEAuditor : public AthCommonMsg<Auditor>
   
   std::atomic<unsigned int> m_CountFPEs[FPEAUDITOR_ARRAYSIZE];
   
-  unsigned int m_NstacktracesOnFPE;
+  unsigned int m_NstacktracesOnFPE=0;
+
+  unsigned int m_Nstacklines=100;
   
   void InstallHandler();
 

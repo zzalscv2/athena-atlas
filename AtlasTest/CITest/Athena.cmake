@@ -123,10 +123,13 @@ atlas_add_citest( RecoRun3MC_PileUp
 
 atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root'  # go two levels up as the test runs in a subfolder
+   LOG_IGNORE_PATTERN "WARNING FPE" 
    DEPENDS_SUCCESS SimulationRun4FullSim )
+
 
 atlas_add_citest( RecoRun4MC_DAODPHYS
   SCRIPT RunWorkflowTests_Run4.py --CI -d -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root'  # go two levels up as the test runs in a subfolder
+  LOG_IGNORE_PATTERN "WARNING FPE INVALID"
   DEPENDS_SUCCESS RecoRun4MC )
 
 #################################################################################
@@ -170,10 +173,12 @@ atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
 atlas_add_citest( ACTS_SiSpacePointSeedMaker
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsSiSpacePointSeedMaker.sh )
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsSiSpacePointSeedMaker.sh 
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" ) #Ignore FPEs in ITkSiSpTrackFinder 
 
 atlas_add_citest( ACTS_Workflow
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh )
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh 
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
 #################################################################################
 # Trigger

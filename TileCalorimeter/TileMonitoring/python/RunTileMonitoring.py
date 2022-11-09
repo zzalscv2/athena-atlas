@@ -116,7 +116,6 @@ if __name__=='__main__':
     parser.add_argument('--postProcessingInterval', type=int, default=10000000,
                         help='Number of events between postprocessing steps (<0: disabled, >evtMax: during finalization)')
     parser.add_argument('--perfmon', action='store_true', help='Run perfmon')
-    parser.add_argument('--fpe', action='store_true', help='Run FPE auditor')
 
     update_group = parser.add_mutually_exclusive_group()
     update_group.add_argument('--frequency', type=int, default=0, help='EMON, Frequency (in number of events) of publishing histograms')
@@ -250,10 +249,6 @@ if __name__=='__main__':
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     cfg = MainServicesCfg(ConfigFlags)
-
-    # Add FPE auditor
-    if args.fpe:
-        cfg.addAuditor(CompFactory.FPEAuditor())
 
     # Add perfmon
     if args.perfmon:

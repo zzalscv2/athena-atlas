@@ -1,3 +1,4 @@
+
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import GaudiConfig2
@@ -643,6 +644,11 @@ class ComponentAccumulator:
         else:
             return self.__getOne( self._services, name, "Services")
 
+    def getAuditor(self,name):
+        """Retuns a single auditor, exception if not found"""
+        return self.__getOne(self._auditors,name,"Auditors")
+
+
     def getAppProps(self):
         return self._theAppProps
 
@@ -793,6 +799,11 @@ class ComponentAccumulator:
         for pt in other._publicTools:
             addContext = createContextForDeduplication("Merging incoming Public Tool", pt.name, other._componentsContext) # noqa : F841
             self.addPublicTool(pt) #Profit from deduplicaton here
+
+
+        for aud in other._auditors:
+            addContext = createContextForDeduplication("Merging incoming Auditor", aud.name, other._componentsContext) # noqa : F841
+            self.addAuditor(aud) #Profit from deduplicaton here
 
         #Merge AppMgr properties:
         for (k,v) in other._theAppProps.items():
@@ -1007,6 +1018,10 @@ class ComponentAccumulator:
         # Otherwise, observed output ordering may differ between py2/py3.
         sys.stdout.flush()
 
+
+        #Set TDAQ_ERS_NO_SIGNAL_HANDLERS to avoid interference with 
+        #TDAQ signal handling
+        environ['TDAQ_ERS_NO_SIGNAL_HANDLERS']='1'
         from AthenaCommon.Debugging import allowPtrace, hookDebugger
         allowPtrace()
 
