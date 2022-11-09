@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
+from AthenaConfiguration.Enums import ProductionStep
 
 # This file is a placeholder - the entire way we build geometry needs to be rewritten so this is to unblock new configuration developments for the moment.
 # It is based on: https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/AtlasTrackingGeometrySvc.py#L112
@@ -516,6 +517,12 @@ def TrackingGeometrySvcCfg( flags , name = 'AtlasTrackingGeometrySvc', doMateria
     """
     Sets up the Tracking Geometry Service
     """
+    if not (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] or
+            flags.Sim.ISFRun is True):
+        from AthenaCommon.Logging import logging
+        mlog = logging.getLogger("TrackingGeometrySvcCfg")
+        mlog.warning(
+            " TrackingGeometrySvc is to be deprecated in favour of TrackingGeometryCondAlg")
     result = ComponentAccumulator()
     atlas_tracking_geometry_name = 'AtlasTrackingGeometry'
     from TrkConfig.TrkDetDescrToolsConfig import TrackingVolumeHelperCfg, TrackingVolumeArrayCreatorCfg
