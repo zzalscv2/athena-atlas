@@ -165,6 +165,7 @@ class TileROD_Decoder: public AthAlgTool {
     void fillCollection_TileMuRcv_RawChannel(const ROBData* rob, TileRawChannelCollection& v) const;
     void fillCollection_TileMuRcv_Digi(const ROBData* rob, TileDigitsCollection& v) const;
     void fillContainer_TileMuRcv_Decision(const ROBData* rob, TileMuonReceiverContainer& v) const;
+    void fillCollection_FELIX_Digi(const ROBData* rob,  TileDigitsCollection& v) const;
 
     void loadRw2Cell(const int section, const std::vector<int>& vec) {
       //    std::cout << vec.size() << std::endl;
@@ -469,7 +470,7 @@ class TileROD_Decoder: public AthAlgTool {
                           TileCellCollection& v, const uint16_t DQuality,
                           D0CellsHLT& d0cells,
                           TileCellCollection * MBTS) const;
-
+    std::vector<uint32_t> get_correct_data(const uint32_t* p) const;
     inline void make_copy(const ROBData * rob, pBeamVec & pBeam, TileBeamElemCollection& v) const;
     inline void make_copy(const ROBData * rob, pBeamVec & pBeam, TileDigitsCollection& v) const;
     inline void make_copy(const ROBData * rob, pBeamVec & pBeam, TileRawChannelCollection& v) const;
@@ -1132,7 +1133,6 @@ void TileROD_Decoder::fillCollection(const ROBData * rob,
           break;
 
         case 6:
-          unpack_frag6(version, sizeOverhead, digitsMetaData, p, pDigits);
           break;
 
         case 0xA:
