@@ -170,10 +170,12 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
   auto primaryTruthParticle = truthBinding->getGenerationZeroTruthParticle();
   auto generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
   auto currentlyTracedHepPart = truthBinding->getTruthParticle();
+  auto currentlyTracedHepPart_nc = std::const_pointer_cast<HepMC3::GenParticle>(currentlyTracedHepPart);
 #else
   auto* primaryTruthParticle = truthBinding->getGenerationZeroTruthParticle();
   auto* generationZeroTruthParticle = truthBinding->getGenerationZeroTruthParticle();
   auto* currentlyTracedHepPart = truthBinding->getTruthParticle();
+  auto currentlyTracedHepPart_nc = const_cast<HepMC::GenParticlePtr>(currentlyTracedHepPart);
 #endif
   auto classification = classify(primaryTruthParticle,
                                  generationZeroTruthParticle,
@@ -188,7 +190,8 @@ void TrackProcessorUserActionBase::setupPrimary(G4Track& aTrack)
 
   setCurrentParticle(const_cast<ISF::ISFParticle*>(baseISP),
                      primaryTruthParticle,
-                     currentlyTracedHepPart);
+                     currentlyTracedHepPart_nc);
+
   return;
 }
 

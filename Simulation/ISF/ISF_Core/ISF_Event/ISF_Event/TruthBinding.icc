@@ -75,7 +75,8 @@ namespace ISF {
   }
 
   /** pointer to the particle in the simulation truth */
-  HepMC::GenParticlePtr TruthBinding::getTruthParticle() const { return m_truthParticle; }
+  HepMC::GenParticlePtr TruthBinding::getTruthParticle() { return m_truthParticle; }
+  HepMC::ConstGenParticlePtr TruthBinding::getTruthParticle() const { return m_truthParticle; }
   void                TruthBinding::setTruthParticle(HepMC::GenParticlePtr p) { m_truthParticle = p; }
 
   /** pointer to the primary particle in the simulation truth */

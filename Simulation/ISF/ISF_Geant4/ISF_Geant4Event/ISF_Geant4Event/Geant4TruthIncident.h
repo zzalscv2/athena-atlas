@@ -97,7 +97,8 @@ namespace iGeant4 {
       // only called once accepted
 
       /** Return the parent particle as a HepMC particle type */
-      HepMC::GenParticlePtr   parentParticle() const override final;
+      HepMC::ConstGenParticlePtr parentParticle() const override final;
+      HepMC::GenParticlePtr      parentParticle() override final;
       /** Return the i-th child as a HepMC particle type and assign the given
           Barcode to the simulator particle */
       HepMC::GenParticlePtr   childParticle(unsigned short index,

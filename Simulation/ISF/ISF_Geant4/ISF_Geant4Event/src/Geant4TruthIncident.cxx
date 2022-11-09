@@ -120,10 +120,12 @@ Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() const {
   return (parent) ? HepMC::barcode(parent) : Barcode::fUndefinedBarcode;
 }
 
-HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() const {
-  HepMC::GenParticlePtr hepParticle = std::as_const(m_atlasG4EvtUserInfo)->GetCurrentlyTraced();
+HepMC::ConstGenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() const {
+  return std::as_const(m_atlasG4EvtUserInfo)->GetCurrentlyTraced();
+}
 
-  return hepParticle;
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() {
+  return m_atlasG4EvtUserInfo->GetCurrentlyTraced();
 }
 
 int iGeant4::Geant4TruthIncident::parentBCID() const { 

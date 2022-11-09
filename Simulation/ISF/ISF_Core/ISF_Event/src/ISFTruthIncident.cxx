@@ -74,7 +74,15 @@ int ISF::ISFTruthIncident::parentPdgCode() const {
   return m_parent.pdgCode();
 }
 
-HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() const {
+HepMC::ConstGenParticlePtr ISF::ISFTruthIncident::parentParticle() const {
+  if ( m_parent.getTruthBinding() || m_parent.getParticleLink()) {
+    return getHepMCTruthParticle(m_parent);
+  } else {
+    return updateHepMCTruthParticle(m_parent, &m_parent);
+  }
+}
+
+HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
   if ( m_parent.getTruthBinding() || m_parent.getParticleLink()) {
     return getHepMCTruthParticle(m_parent);
   } else {
@@ -163,7 +171,7 @@ void ISF::ISFTruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarcode bc) 
 
 
 /** return attached truth particle */
-HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( const ISF::ISFParticle& particle ) const {
+HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFParticle& particle ) const {
   auto* truthBinding     = particle.getTruthBinding();
   HepMC::GenParticlePtr hepTruthParticle = truthBinding ? truthBinding->getTruthParticle() : nullptr;
 

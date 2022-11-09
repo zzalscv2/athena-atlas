@@ -74,7 +74,8 @@ namespace ISF {
     virtual int                       parentPdgCode() const = 0;
     /** Return the parent particle as a HepMC particle type
         (only called for particles that will enter the HepMC truth event) */
-    virtual HepMC::GenParticlePtr     parentParticle() const = 0;
+    virtual HepMC::ConstGenParticlePtr parentParticle() const = 0;
+    virtual HepMC::GenParticlePtr      parentParticle() = 0;
     /** Return the barcode of the parent particle */
     virtual Barcode::ParticleBarcode  parentBarcode() const = 0;
     /** Return the bunch-crossing identifier of the parent particle */
