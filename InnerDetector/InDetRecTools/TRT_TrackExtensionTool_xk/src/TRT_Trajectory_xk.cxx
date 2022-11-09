@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -72,12 +72,21 @@ void InDet::TRT_Trajectory_xk::initiateForPrecisionSeed
   std::vector<const InDetDD::TRT_BaseElement*>::const_iterator d=De.begin(),de=De.end();
 
   std::list< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
-  if(i0==ie) return;
+  // At least two elements are needed for the direction computation.
+  // So, return immediately if there are no elements, or if the next
+  // element is already the end.
+  if(Gp.empty() || ++i==ie) {
+     m_firstRoad       =  0;
+     m_lastRoad        =  0;
+     m_firstTrajectory = -1;
+     m_lastTrajectory  = -1;
+     return;
+  }
 
   // Primary trajectory direction calculation
   // Tp.parameters()[4] is the (signed) q/p
   double A[4]={0., 0., 0., Tp.parameters()[4]};
-  for(++i; i!=ie; ++i) {
+  for(; i!=ie; ++i) {
     if((*i).second-(*i0).second > 1.) {
       A[0] = (*i).first.x()-(*i0).first.x();
       A[1] = (*i).first.y()-(*i0).first.y();
@@ -150,11 +159,18 @@ void InDet::TRT_Trajectory_xk::initiateForTRTSeed
 
   std::list< std::pair<Amg::Vector3D,double> >::iterator i=Gp.begin(),i0=Gp.begin(),ie=Gp.end();
   if(i0==ie) return;
+  // At least two elements are needed for the direction computation.
+  // So, return immediately if there are no elements, or if the next
+  // element is already the end.
+  if(Gp.empty() || ++i==ie) {
+     m_lastTrajectory  = -1;
+     return;
+  }
 
   // Primary trajectory direction calculation
   //
   double A[4]={0.,0.,0.,Tp.parameters()[4]}; 
-  for(++i; i!=ie; ++i) {
+  for(; i!=ie; ++i) {
     if( (*i).second-(*i0).second > 1.) {
       A[0] = (*i).first.x()-(*i0).first.x();
       A[1] = (*i).first.y()-(*i0).first.y();
