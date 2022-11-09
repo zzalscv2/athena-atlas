@@ -73,18 +73,11 @@ public:
   /** set the number of degrees of freedom*/
   void setNumberDoF(double numberDoF) { m_numberDoF = numberDoF; }
 
-  explicit operator bool() const
-  {
-    //we need to have set something
-    return (m_chiSquared != 0 || m_numberDoF != 0);
-  }
-
 protected:
   //Protected
   //We do not want to create/destroy
   //objects via this class
   ~FitQualityImpl() = default;
-private:
   double m_chiSquared{};
   double m_numberDoF{};
 
