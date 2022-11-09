@@ -63,7 +63,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
     std::ostringstream location;
     location << m_outputCoinCollectionLocation
              << (bcTag==TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-             << (bcTag==TgcDigit::BC_NEXT ? "NextBC" : "");   // BC_NEXTNEXT stored in NextBC
+             << (bcTag==TgcDigit::BC_NEXT ? "NextBC" : "")
+             << (bcTag==TgcDigit::BC_NEXTNEXT ? "NextNextBC" : "");
     m_outputCoinKeys.at(ibc) = location.str();
   }
 
@@ -103,7 +104,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::initialize()
       std::ostringstream location;
       location << m_coinContainerCacheKeyStr.value()
                << (bcTag==TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-               << (bcTag==TgcDigit::BC_NEXT ? "NextBC" : "");   // BC_NEXTNEXT stored in NextBC
+               << (bcTag==TgcDigit::BC_NEXT ? "NextBC" : "")
+               << (bcTag==TgcDigit::BC_NEXTNEXT ? "NextNextBC" : "");
       m_coinContainerCacheKeys.at(ibc) = location.str();
       ATH_MSG_DEBUG(location.str());
     }
@@ -186,9 +188,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
   }
   std::vector<const TgcRdo*> decodedRdoCollVec;
   std::vector<bool> decodedOnlineId (cinfo->m_MAX_N_ROD, false);
-  
-  // Could be removed (but creates a big git diff becaues of re-indenting)
-  const bool nothingToDoForAllBC = false;
 
   /// clean up containers for Coincidence
   for (unsigned int ibc=0; ibc < NBC_TRIG; ibc++) {
@@ -227,188 +226,184 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decode(std::vector<IdentifierHash>& req
     state.m_tgcCoinDataContainer[ibc] = handle.ptr();
   }  // loop on BC_TRIG
 
-  if (!nothingToDoForAllBC) { // If still need to do something 
-    // if TGC decoding is switched off stop here
-    if(!m_decodeData) {
-      ATH_MSG_DEBUG("Stored empty container. Decoding TGC RDO into TGC PrepRawData is switched off");
-      return StatusCode::SUCCESS;
-    }
+  // if TGC decoding is switched off stop here
+  if(!m_decodeData) {
+    ATH_MSG_DEBUG("Stored empty container. Decoding TGC RDO into TGC PrepRawData is switched off");
+    return StatusCode::SUCCESS;
+  }
 
-    ATH_MSG_DEBUG("Decoding TGC RDO into TGC PrepRawData");
+  ATH_MSG_DEBUG("Decoding TGC RDO into TGC PrepRawData");
 
-    // retrieve the collection of RDO
-    ATH_MSG_DEBUG("Retriving TGC RDO container from the store");
-    auto rdoContainer = SG::makeHandle(m_rdoContainerKey);
-    if(!rdoContainer.isValid()) {
-      ATH_MSG_WARNING("No TGC RDO container in StoreGate!");
-      return StatusCode::SUCCESS;
-    }
+  // retrieve the collection of RDO
+  ATH_MSG_DEBUG("Retriving TGC RDO container from the store");
+  auto rdoContainer = SG::makeHandle(m_rdoContainerKey);
+  if(!rdoContainer.isValid()) {
+    ATH_MSG_WARNING("No TGC RDO container in StoreGate!");
+    return StatusCode::SUCCESS;
+  }
 
-    ///////////// here the RDO container is retrieved and filled -whatever input type we start with- => check the size 
-    if(rdoContainer->size()==0) { 
-      // empty csm container - no tgc rdo in this event
-      ATH_MSG_DEBUG("Empty rdo container - no tgc rdo in this event");
-      return StatusCode::SUCCESS;
-    }
+  ///////////// here the RDO container is retrieved and filled -whatever input type we start with- => check the size
+  if(rdoContainer->size()==0) {
+    // empty csm container - no tgc rdo in this event
+    ATH_MSG_DEBUG("Empty rdo container - no tgc rdo in this event");
+    return StatusCode::SUCCESS;
+  }
 
-    ATH_MSG_DEBUG("Not empty rdo container in this event, the container size is " << 
-		  rdoContainer->size());
+  ATH_MSG_DEBUG("Not empty rdo container in this event, the container size is " <<
+		rdoContainer->size());
   
-    // select RDOs to be decoded when seeded mode is used  
-    std::vector<const TgcRdo*> rdoCollVec; 
-    if(sizeVectorRequested!=0) { 
-      unsigned int nRdo = 0;
-      for (IdentifierHash offlineCollHash : requestedIdHashVect) {
-        uint16_t onlineId = cinfo->m_hashToOnlineId.at(static_cast<unsigned int>(offlineCollHash)); 
+  // select RDOs to be decoded when seeded mode is used
+  std::vector<const TgcRdo*> rdoCollVec;
+  if(sizeVectorRequested!=0) {
+    unsigned int nRdo = 0;
+    for (IdentifierHash offlineCollHash : requestedIdHashVect) {
+      uint16_t onlineId = cinfo->m_hashToOnlineId.at(static_cast<unsigned int>(offlineCollHash));
 
-        if(decodedOnlineId.at(onlineId)) { 
-          ATH_MSG_DEBUG("The ROB with onlineId " << onlineId << " which contains hash " 
-                        << static_cast<unsigned int>(offlineCollHash) 
-                        << " is already decoded and skipped"); 
-          continue; 
-        } 
+      if(decodedOnlineId.at(onlineId)) {
+	ATH_MSG_DEBUG("The ROB with onlineId " << onlineId << " which contains hash "
+		      << static_cast<unsigned int>(offlineCollHash)
+		      << " is already decoded and skipped");
+	continue;
+      }
 
-        decodedOnlineId.at(onlineId) = true; // The ROB with this onlineId will be decoded only once 
+      decodedOnlineId.at(onlineId) = true; // The ROB with this onlineId will be decoded only once
 
-        for(const TgcRdo* rdoColl : *rdoContainer) {
-          if(rdoColl->identify()==onlineId) { 
-            if(!isAlreadyConverted(decodedRdoCollVec, rdoCollVec, rdoColl)) { 
-              rdoCollVec.push_back(rdoColl); 
-              nRdo++; 
-            } 
-            break; 
-          } 
-        } 
-      } 
-      ATH_MSG_DEBUG("Number of RDOs to be converted is " << nRdo); 
-    } // End of selection of RDOs to be decoded
+      for(const TgcRdo* rdoColl : *rdoContainer) {
+	if(rdoColl->identify()==onlineId) {
+	  if(!isAlreadyConverted(decodedRdoCollVec, rdoCollVec, rdoColl)) {
+	    rdoCollVec.push_back(rdoColl);
+	    nRdo++;
+	  }
+	  break;
+	}
+      }
+    }
+    ATH_MSG_DEBUG("Number of RDOs to be converted is " << nRdo);
+  } // End of selection of RDOs to be decoded
 
     // Decode Hits
-    if(sizeVectorRequested!=0) {
-      ATH_MSG_DEBUG("Start loop over rdos - seeded mode");
+  if(sizeVectorRequested!=0) {
+    ATH_MSG_DEBUG("Start loop over rdos - seeded mode");
 
-      for (const TgcRdo* rdo : rdoCollVec) {
-        // for each RDO collection we collect up all the PRD collections and then write them once filled
-        // need a vector because we have the collections for the different bunch crosssings
-        std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > > prdCollectionMap(NBC_HIT);
-        std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > > coinMap(NBC_TRIG);
-        for (const TgcRawData* rd : *rdo) {
-	  //Since OnlineIds are not unique, need some additional filtering on offline hashId 
-	  //to avoid decoding RDO outside of an RoI
-	  Identifier offlineId;
-	  IdentifierHash tgcHashId;
-	  IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
+    // for each RDO collection we collect up all the PRD collections and then write them once filled
+    // need a vector because we have the collections for the different bunch crosssings
+    std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > > prdCollectionMap(NBC_HIT);
+    std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > > coinMap(NBC_TRIG);
+    for (const TgcRdo* rdo : rdoCollVec) {
+      for (const TgcRawData* rd : *rdo) {
+	//Since OnlineIds are not unique, need some additional filtering on offline hashId
+	//to avoid decoding RDO outside of an RoI
+	Identifier offlineId;
+	IdentifierHash tgcHashId;
+	IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
 
-	  if(tgcCabling->getElementIDfromReadoutID(offlineId, rd->subDetectorId(), rd->rodId(), rd->sswId(), rd->slbId(), rd->bitpos())){
-	    if(m_idHelperSvc->tgcIdHelper().get_module_hash(offlineId, tgcHashId)!=1){
-	      if(std::find(requestedIdHashVect.begin(), requestedIdHashVect.end(), tgcHashId) != requestedIdHashVect.end()){
-		selectDecoder(state, 
-                              *rd, rdo,
-                              prdCollectionMap, coinMap);
-	      }
+	if(tgcCabling->getElementIDfromReadoutID(offlineId, rd->subDetectorId(), rd->rodId(), rd->sswId(), rd->slbId(), rd->bitpos())){
+	  if(m_idHelperSvc->tgcIdHelper().get_module_hash(offlineId, tgcHashId)!=1){
+	    if(std::find(requestedIdHashVect.begin(), requestedIdHashVect.end(), tgcHashId) != requestedIdHashVect.end()){
+	      selectDecoder(state,
+			    *rd, rdo,
+			    prdCollectionMap, coinMap);
 	    }
 	  }
-        }//loop on RDO collection
-        decodedRdoCollVec.push_back(rdo);
-        // now write all the PRD collections
-        for(unsigned int ibc = 0; ibc < prdCollectionMap.size(); ++ibc) {
-          ATH_MSG_DEBUG("Process collection map for BC " << ibc);
-          auto& thismap = prdCollectionMap[ibc];
-          for(auto& mapPair : thismap) {
-            IdentifierHash tgcHashId = mapPair.first;
-            if(tgcHashId.is_valid()) { 
-              TgcPrepDataContainer::IDC_WriteHandle lock = state.m_tgcPrepDataContainer[ibc]->getWriteHandle(tgcHashId);
-              if (!lock.alreadyPresent()) {
-                ATH_MSG_DEBUG("Calling addOrDelete " << ibc << " " << tgcHashId);
-                ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
-              } else ATH_MSG_DEBUG("lock.alreadyPresent for " << ibc << " " << tgcHashId);
-            } else{
-              ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
-            }
-            
-          }// loop on collections in the map
-        }//loop on BC
+	}
+      }//loop on RDO collection
+      decodedRdoCollVec.push_back(rdo);
+    }
 
-        // now write all the coin collections
-        for(unsigned int ibc = 0; ibc < coinMap.size(); ++ibc) {
-          auto& thismap = coinMap[ibc];
-          for(auto& mapPair : thismap) {
-            IdentifierHash tgcHashId = mapPair.first;
-            if(tgcHashId.is_valid()) {
-              TgcCoinDataContainer::IDC_WriteHandle lock = state.m_tgcCoinDataContainer[ibc]->getWriteHandle(tgcHashId);
-              if (!lock.alreadyPresent()) {
-                ATH_MSG_DEBUG("Call addOrDelete for coin " << ibc << " tgcHashId: " << tgcHashId << " size = " << mapPair.second->size());
-                ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
-              }
-            } else{
-              ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
-            }
-          }//loop on collections in the map        
-        }//loop on BC
-      
+    // now write all the PRD collections
+    for(unsigned int ibc = 0; ibc < prdCollectionMap.size(); ++ibc) {
+      ATH_MSG_DEBUG("Process collection map for BC " << ibc);
+      auto& thismap = prdCollectionMap[ibc];
+      for(auto& mapPair : thismap) {
+	IdentifierHash tgcHashId = mapPair.first;
+	if(tgcHashId.is_valid()) {
+	  TgcPrepDataContainer::IDC_WriteHandle lock = state.m_tgcPrepDataContainer[ibc]->getWriteHandle(tgcHashId);
+	  if (!lock.alreadyPresent()) {
+	    ATH_MSG_DEBUG("Calling addOrDelete " << ibc << " " << tgcHashId);
+	    ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
+	  } else ATH_MSG_DEBUG("lock.alreadyPresent for " << ibc << " " << tgcHashId);
+	} else{
+	  ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
+	}
 
-      }// loop on RDO collections
+      }// loop on collections in the map
+    }//loop on BC
+
+    // now write all the coin collections
+    for(unsigned int ibc = 0; ibc < coinMap.size(); ++ibc) {
+      auto& thismap = coinMap[ibc];
+      for(auto& mapPair : thismap) {
+	IdentifierHash tgcHashId = mapPair.first;
+	if(tgcHashId.is_valid()) {
+	  TgcCoinDataContainer::IDC_WriteHandle lock = state.m_tgcCoinDataContainer[ibc]->getWriteHandle(tgcHashId);
+	  if (!lock.alreadyPresent()) {
+	    ATH_MSG_DEBUG("Call addOrDelete for coin " << ibc << " tgcHashId: " << tgcHashId << " size = " << mapPair.second->size());
+	    ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
+	  }
+	} else{
+	  ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
+	}
+      }//loop on collections in the map
+    }//loop on BC
+
+    // show the vector of IdentifierHash which contains the data within requested range
+    showIdentifierHashVector(state, selectedIdHashVect);
+  } else {
+    ATH_MSG_DEBUG("Start loop over rdos - unseeded mode");
 
 
-      // show the vector of IdentifierHash which contains the data within requested range
-      showIdentifierHashVector(state, selectedIdHashVect);
-    } else {
-      ATH_MSG_DEBUG("Start loop over rdos - unseeded mode");
+    // loop over all elements of the rdo container
+    std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > > prdCollectionMap(NBC_HIT);
+    std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > > coinMap(NBC_TRIG);
+    for(const TgcRdo* rdoColl : *rdoContainer) {
+      if(rdoColl->size()>0 && !isAlreadyConverted(decodedRdoCollVec, rdoCollVec, rdoColl)) {
+	ATH_MSG_DEBUG(" Number of RawData in this rdo " << rdoColl->size());
+	for (const TgcRawData* rd : *rdoColl) {
+	  selectDecoder(state,
+			*rd, rdoColl,
+			prdCollectionMap, coinMap);
+	}
+	decodedRdoCollVec.push_back(rdoColl);
+      }
+    }
     
+    // now write all the PRD collections
+    for(unsigned int ibc = 0; ibc < prdCollectionMap.size(); ++ibc) {
+      auto& thismap = prdCollectionMap[ibc];
+      for(auto& mapPair : thismap) {
+	IdentifierHash tgcHashId = mapPair.first;
+	if(tgcHashId.is_valid()) {
+	  TgcPrepDataContainer::IDC_WriteHandle lock = state.m_tgcPrepDataContainer[ibc]->getWriteHandle(tgcHashId);
+	  if (!lock.alreadyPresent()) {
+	    ATH_MSG_DEBUG("Call addOrDelete for " << ibc << " tgcHashId: " << tgcHashId << " size = " << mapPair.second->size());
+	    ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
+	  }
+	} else{
+	  ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
+	}
+      }//loop on collections in the map
+    }//loop on BC
 
-      // loop over all elements of the rdo container 
-      for(const TgcRdo* rdoColl : *rdoContainer) {
-        std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > > prdCollectionMap(NBC_HIT);
-        std::vector< std::unordered_map< IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > > coinMap(NBC_TRIG);
-        if(rdoColl->size()>0 && !isAlreadyConverted(decodedRdoCollVec, rdoCollVec, rdoColl)) {
-          ATH_MSG_DEBUG(" Number of RawData in this rdo " << rdoColl->size());
-          for (const TgcRawData* rd : *rdoColl) {
-            selectDecoder(state,
-                          *rd, rdoColl,
-                          prdCollectionMap, coinMap);
-          }
-          decodedRdoCollVec.push_back(rdoColl);
-        }
+    // now write all the coin collections
+    for(unsigned int ibc = 0; ibc < coinMap.size(); ++ibc) {
+      auto& thismap = coinMap[ibc];
+      for(auto& mapPair : thismap) {
+	IdentifierHash tgcHashId = mapPair.first;
+	if(tgcHashId.is_valid()) {
+	  TgcCoinDataContainer::IDC_WriteHandle lock = state.m_tgcCoinDataContainer[ibc]->getWriteHandle(tgcHashId);
+	  if (!lock.alreadyPresent()) {
+	    ATH_MSG_DEBUG("Call addOrDelete for coin " << ibc << " tgcHashId: " << tgcHashId << " size = " << mapPair.second->size());
+	    ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
+	  }
+	} else{
+	  ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
+	}
+      }//loop on collections in the map
+    }//loop on BC
 
-        // now write all the PRD collections
-        for(unsigned int ibc = 0; ibc < prdCollectionMap.size(); ++ibc) {
-          auto& thismap = prdCollectionMap[ibc];
-          for(auto& mapPair : thismap) {
-            IdentifierHash tgcHashId = mapPair.first;
-            if(tgcHashId.is_valid()) {
-              TgcPrepDataContainer::IDC_WriteHandle lock = state.m_tgcPrepDataContainer[ibc]->getWriteHandle(tgcHashId);
-              if (!lock.alreadyPresent()) {
-                ATH_MSG_DEBUG("Call addOrDelete for " << ibc << " tgcHashId: " << tgcHashId << " size = " << mapPair.second->size());
-                ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
-              }
-            } else{
-              ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
-            }
-          }//loop on collections in the map        
-        }//loop on BC
-
-        // now write all the coin collections
-        for(unsigned int ibc = 0; ibc < coinMap.size(); ++ibc) {
-          auto& thismap = coinMap[ibc];
-          for(auto& mapPair : thismap) {
-            IdentifierHash tgcHashId = mapPair.first;
-            if(tgcHashId.is_valid()) {
-              TgcCoinDataContainer::IDC_WriteHandle lock = state.m_tgcCoinDataContainer[ibc]->getWriteHandle(tgcHashId);
-              if (!lock.alreadyPresent()) {
-                ATH_MSG_DEBUG("Call addOrDelete for coin " << ibc << " tgcHashId: " << tgcHashId << " size = " << mapPair.second->size());
-                ATH_CHECK(lock.addOrDelete(std::move(mapPair.second)));
-              }
-            } else{
-              ATH_MSG_ERROR("Invalid hash ID when trying to write, this should not happen");
-            }
-          }//loop on collections in the map        
-        }//loop on BC
-        
-      }//RDO collection loop
-      // show the vector of IdentifierHash which contains the data
-      showIdentifierHash(state);
-    }//unseeded mode
-  }
+    // show the vector of IdentifierHash which contains the data
+    showIdentifierHash(state);
+  }//unseeded mode
 
   // Need to create the collection for all BC, which can be done from the collections we have just written
 
@@ -650,7 +645,8 @@ void Muon::TgcRdoToPrepDataToolMT::printPrepDataImpl
       ATH_MSG_INFO("TgcCoinDataContainer of "
 		   << (bc_digit == TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
 		   << (bc_digit == TgcDigit::BC_CURRENT ? "CurrentBC" : "")
-		   << (bc_digit == TgcDigit::BC_NEXT ? "NextBC" : ""));   // BC_NEXTNEXT is stored in NextBCs
+		   << (bc_digit == TgcDigit::BC_NEXT ? "NextBC" : "")
+		   << (bc_digit == TgcDigit::BC_NEXTNEXT ? "NextNextBC" : ""));
 
       ATH_MSG_INFO("CoinData Collection ID "
 		   << m_idHelperSvc->toString(tgcCoinColl->identify()));
@@ -664,13 +660,12 @@ void Muon::TgcRdoToPrepDataToolMT::printPrepDataImpl
 }
 
 void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,                                            
-                                                   const TgcRawData& rd,
-                                                   const TgcRdo* rdoColl,
-                                                   std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > >& collectionMap,
-                                                   std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
+						 const TgcRawData& rd,
+						 const TgcRdo* rdoColl,
+						 std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > >& collectionMap,
+						 std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
 {
   StatusCode status = StatusCode::SUCCESS;
-  if(!status.isSuccess()) return;
 
   const CablingInfo* cinfo = getCabling();
   if (!cinfo) {
@@ -686,36 +681,22 @@ void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,
 
     if((rd.type()==TgcRawData::TYPE_TRACKLET)) {
       if((rd.slbType()==TgcRawData::SLB_TYPE_DOUBLET_WIRE) || 
-	 (rd.slbType()==TgcRawData::SLB_TYPE_DOUBLET_STRIP)) { 
-	status = decodeTracklet(state, rd, coinMap);
+         (rd.slbType()==TgcRawData::SLB_TYPE_DOUBLET_STRIP)){
+        status = decodeTracklet(state, rd, coinMap);
       } else if((rd.slbType()==TgcRawData::SLB_TYPE_INNER_WIRE) ||
-		(rd.slbType()==TgcRawData::SLB_TYPE_INNER_STRIP)) {
-	status = decodeTrackletEIFI(state, rd, coinMap);
+                (rd.slbType()==TgcRawData::SLB_TYPE_INNER_STRIP)) {
+        status = decodeTrackletEIFI(state, rd, coinMap);
       }
-    } else if((rd.type()==TgcRawData::TYPE_HIPT) && (rd.rodId() < 13) && ((rd.sector() & 4) != 0)) { // inner in Run2 data
-      status = decodeInner(state, rd, coinMap);
-    } else if((rd.type()==TgcRawData::TYPE_HIPT) && (rd.rodId() < 13) &&
-	      (rd.isHipt())) { // hipt in Run2 data
+    } else if( (rd.type()==TgcRawData::TYPE_HIPT) && ( (rd.isHipt() && rd.rodId()<13) || rd.rodId()>12) ) { // rd.rodId()<13 for Run2, rd.rodId()>12 for Run3
       status = decodeHiPt(state, rd, coinMap);
-    } else if((rd.type()==TgcRawData::TYPE_HIPT) && (rd.rodId() < 20)){ // hipt in Run3 data
-      if (rd.bcTag() != 4 ){
-        status = decodeHiPt_NSL(state, rd, coinMap);
-      }
-    } else if((rd.type()==TgcRawData::TYPE_INNER_NSW)||
-              (rd.type()==TgcRawData::TYPE_INNER_BIS)||
-              (rd.type()==TgcRawData::TYPE_INNER_EIFI)||
-              (rd.type()==TgcRawData::TYPE_INNER_TMDB)) { // inner in Run3 data
-      if (rd.bcTag() != 4 ){
-        status = decodeInner_NSL(state, rd, coinMap);
-      }
+    } else if( (rd.rodId()<13 && rd.type()==TgcRawData::TYPE_HIPT && (rd.sector() & 4)!=0) || // Run2
+	       (rd.rodId()>12 && ( rd.type()==TgcRawData::TYPE_INNER_NSW  || // Run3
+				   rd.type()==TgcRawData::TYPE_INNER_BIS  || // Run3
+				   rd.type()==TgcRawData::TYPE_INNER_EIFI || // Run3
+				   rd.type()==TgcRawData::TYPE_INNER_TMDB )) ){ // Run3
+      status = decodeInner(state, rd, coinMap);
     } else if((rd.type()==TgcRawData::TYPE_SL)) {
-      if (rd.rodId() < 13){
-        status = decodeSL(state, rd, rdoColl, coinMap);
-      }else if (rd.rodId() < 20){
-        if (rd.bcTag() != 4 ){
-          status = decodeNSL(state, rd, rdoColl, coinMap);
-        }
-      }
+      status = decodeSL(state, rd, rdoColl, coinMap);
     }
     if(!status.isSuccess()) {
       ATH_MSG_WARNING("Cannot decode TGC Coincidences");
@@ -954,7 +935,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(State& state,
  * to the correct collection in the coinMap.
  **/
 Muon::TgcCoinDataCollection* Muon::TgcRdoToPrepDataToolMT::getTgcCoinDataColFromMap(const IdentifierHash& tgcHashId, State& state, std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap, int locId, const Identifier& elementId) const {
-  
   // first check if the collection we need exists in the temporary collections
   if( coinMap[locId].count(tgcHashId) > 0 ) {
     ATH_MSG_DEBUG("Collection is already in map, will use it " << tgcHashId);
@@ -964,13 +944,14 @@ Muon::TgcCoinDataCollection* Muon::TgcRdoToPrepDataToolMT::getTgcCoinDataColFrom
       // Collection does not exist in cache, so create it in our map
       auto itPair = coinMap[locId].emplace(std::make_pair(tgcHashId, std::make_unique<TgcCoinDataCollection>(tgcHashId)));
       if(!itPair.second) {
-        ATH_MSG_ERROR("Did not insert TGC Coin collection, this is not expected");
-      } else ATH_MSG_DEBUG("Inserted TgcCoinDataCollection into map with hash ID " << tgcHashId);
+	ATH_MSG_ERROR("Did not insert TGC Coin collection, this is not expected");
+      } else {
+	ATH_MSG_DEBUG("Inserted TgcCoinDataCollection into map with hash ID " << tgcHashId);
+      }
       itPair.first->second->setIdentifier(elementId);
       // note we don't write the collection yet, do this only after it is fully filled
 
-    }// not in cache
-    else {
+    } else { // not in cache
       ATH_MSG_DEBUG("Coin collection " << tgcHashId << " in cache, no need to decode");
       return nullptr;
     }//collection not in map
@@ -1379,7 +1360,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeTrackletEIFI(State& state,
 }
 
 StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(State& state,
-                                                      const TgcRawData& rd,
+                                                      const TgcRawData& rd0,
                                                       std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
 {
   m_nHiPtRDOs++; // Count the number of input HiPt RDOs. 
@@ -1389,6 +1370,25 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(State& state,
     return StatusCode::FAILURE;
   }
   const ITGCcablingSvc* tgcCabling = cinfo->m_tgcCabling;
+
+  // conversion for Run3
+  uint16_t tmprodId, tmpsector;
+  convertToRun2(rd0,tmprodId,tmpsector);
+  const TgcRawData rd(rd0.bcTag(),
+		      rd0.subDetectorId(),
+		      tmprodId,
+		      rd0.l1Id(),
+		      rd0.bcId(),
+		      rd0.isStrip(),
+		      rd0.isForward(),
+		      tmpsector,
+		      rd0.chip(),
+		      rd0.index(),
+		      rd0.isHipt(),
+		      rd0.hitId(),
+		      rd0.hsub(),
+		      rd0.delta(),
+		      rd0.inner() );
 
   // Protection against invalid subDetectorId and isForward
   if((rd.subDetectorId()!=ASIDE && rd.subDetectorId()!=CSIDE)) {
@@ -1493,7 +1493,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(State& state,
   //*** TGC1 end ***//
   
   ATH_MSG_DEBUG("TGC RDO->Coindata for HIPT: " << m_idHelperSvc->toString(channelIdOut[1])); 
-  
+
   Identifier elementId = m_idHelperSvc->tgcIdHelper().elementID(channelIdOut[1]);
   if(m_idHelperSvc->tgcIdHelper().get_module_hash(elementId, tgcHashId)) {
     ATH_MSG_WARNING("Unable to get TGC hash id from TGC RDO collection "
@@ -1652,291 +1652,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(State& state,
   
   return StatusCode::SUCCESS;
 }
-
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt_NSL(State& state,
-                                                        const TgcRawData& rd,
-                                                        std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
-{
-  m_nHiPtRDOs++; // Count the number of input HiPt RDOs. 
-
-  const CablingInfo* cinfo = getCabling();
-  if (!cinfo) {
-    return StatusCode::FAILURE;
-  }
-  const ITGCcablingSvc* tgcCabling = cinfo->m_tgcCabling;
-
-  // Protection against invalid subDetectorId and isForward
-  if((rd.subDetectorId()!=ASIDE && rd.subDetectorId()!=CSIDE)) {
-    ATH_MSG_DEBUG("TgcRdoToPrepDataToolMT::decodeHiPt::Unknown subDetectorId!!");
-    return StatusCode::SUCCESS;
-  }
-
-  // Protection against invalid hitId
-  if(rd.hitId()==0) {
-    ATH_MSG_DEBUG("Invalid hitId_rdo_hipt, hitId == 0!! skip to convert this RDO to PRD");
-    return StatusCode::SUCCESS;
-  }
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey};
-  const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
-
-  IdentifierHash tgcHashId;
-  IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
-  
-  int slbsubMatrix = 0;
-  bool isBackward = isBackwardBW(rd);  // Backward or Forward
-  int deltaBeforeConvert = getDeltaBeforeConvert(rd);
-  
-  bool found = false;
-  
-  Identifier channelIdOut_tmp;
-  Identifier channelIdOut[2];
-  int bitpos_o[2] = {0, 0};
-  int slbchannel_o[2] = {0, 0};
-  int sswId_o = 0;
-  int sbLoc_o = 0;
-  int slbId_o = 0;
-  
-  Identifier channelIdIn_tmp;
-  Identifier channelIdIn[4];
-  int bitpos_i[4] = {0, 0, 0, 0};
-  int slbchannel_i[4] = {0, 0, 0, 0};
-  int sswId_i = 0;
-  int sbLoc_i = 0;
-  int slbId_in[4] = {0, 0, 0, 0}; // only used for wire
-  int sbLoc_in[4] = {0, 0, 0, 0}; // only used for wire
-
-  int gasGap_i[4] = {0, 0, 0, 0}; 
-  int channel_i[4] = {0, 0, 0, 0}; 
-  double width_i = 0.;
-  double hit_position_i = 0.;
-  Amg::Vector2D tmp_hitPos_i(0., 0.);
-
-  int gasGap_o[2] = {0, 0}; 
-  int channel_o[2] = {0, 0};
-  double width_o = 0.;
-  double hit_position_o = 0.;
-  Amg::Vector2D tmp_hitPos_o(0., 0.);
-
-  const MuonGM::TgcReadoutElement* descriptor_ii = nullptr;
-  const MuonGM::TgcReadoutElement* descriptor_oo = nullptr;
-
-  //*** TGC3 start ***//
-  // RDOHighPtID --> (Sim)HighPtID --> OfflineID --> ReadoutID --> getSLBID
-  found = getHiPtIds(rd, sswId_o, sbLoc_o, slbId_o); // in NSL
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-
-  // get the OfflineID of cernter of ROI of TGC3
-  if(!(rd.isStrip())) { // wire
-    getBitPosOutWire(rd, slbsubMatrix, bitpos_o);
-  } else { // strip
-    getBitPosOutStrip(rd, slbsubMatrix, bitpos_o);
-  }
-
-  // ROD ID conversion for Run3
-  int tmprodId = -1;
-  tmprodId = rd.rodId() - 17;
-  if (rd.isForward()){ // Forward
-    tmprodId = tmprodId*4 + rd.sector()/2 +1;
-  }else{ // Endcap
-    tmprodId = tmprodId*4 + rd.sector()/4 +1;
-  }
-
-  for(int i=0; i<2; i++) {
-    found = tgcCabling->getOfflineIDfromReadoutID(channelIdOut[i], rd.subDetectorId(), tmprodId, 
-                                                  sswId_o, sbLoc_o, bitpos_o[i]);
-    if(!found ) {
-      ATH_MSG_DEBUG("Failed to get OfflineID from ReadoutID for Pivot "
-                    << (rd.isStrip() ? "Strip" : "Wire") << ".");
-      return StatusCode::SUCCESS;
-    }
-  }
-   
-  //*** TGC3 end ***//
-
-  //*** TGC1 start ***//
-  // get the OfflineID of cernter of ROI of TGC1
-  if(!(rd.isStrip())) { // wire
-    getBitPosInWire(rd, deltaBeforeConvert, bitpos_i, slbchannel_i, slbId_in, sbLoc_in, sswId_i, bitpos_o, 
-                    slbchannel_o, slbId_o);
-  } else { // strip
-    getBitPosInStrip(rd, deltaBeforeConvert, bitpos_i, slbchannel_i, sbLoc_i, sswId_i, bitpos_o, slbchannel_o);
-  }
-  for(int i=0; i<4; i++) {
-    found = tgcCabling->getOfflineIDfromReadoutID(channelIdIn[i], rd.subDetectorId(), tmprodId, sswId_i,
-                                                  (rd.isStrip() ? sbLoc_i : sbLoc_in[i]), 
-                                                  bitpos_i[i]);
-    if(!found) {
-      ATH_MSG_DEBUG("Failed to get OfflineID from ReadoutID for Pivot "
-                    << (rd.isStrip() ? "Strip" : "Wire") << ".");
-      return StatusCode::SUCCESS;
-    }
-  }
-  //}
-  //*** TGC1 end ***//
-  
-  ATH_MSG_DEBUG("TGC RDO->Coindata for HIPT: " << m_idHelperSvc->toString(channelIdOut[1])); 
-  
-  Identifier elementId = m_idHelperSvc->tgcIdHelper().elementID(channelIdOut[1]);
-  if(m_idHelperSvc->tgcIdHelper().get_module_hash(elementId, tgcHashId)) {
-    ATH_MSG_WARNING("Unable to get TGC hash id from TGC RDO collection "
-		    << "context begin_index = " << tgcContext.begin_index()
-		    << " context end_index  = " << tgcContext.end_index()
-		    << " the identifier is ");
-    elementId.show();
-  }
-
-  int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED) 
-    ? 1 : rd.bcTag()-1;
-
-  Muon::TgcCoinDataCollection* coincollection = this->getTgcCoinDataColFromMap(tgcHashId, state, coinMap, locId, elementId);
-  if(coincollection==nullptr) {
-    ATH_MSG_DEBUG("Collection is in cache, do not need to decode " << tgcHashId);
-    return StatusCode::SUCCESS;
-  }
-  
-  //*** TGC3 start ***// 
-  // Get geometry of pivot plane 
-  const MuonGM::TgcReadoutElement* descriptor_o[2] = {muDetMgr->getTgcReadoutElement(channelIdOut[0]), 
-                                                      muDetMgr->getTgcReadoutElement(channelIdOut[1])};
-  for(int i=0; i<2; i++) {
-    if(!isOfflineIdOKForTgcReadoutElement(descriptor_o[i], channelIdOut[i])) {
-      return StatusCode::SUCCESS;
-    }
-  }
-
-  for(int i=0; i<2; i++) { 
-    gasGap_o[i] = m_idHelperSvc->tgcIdHelper().gasGap(channelIdOut[i]);
-    channel_o[i] = m_idHelperSvc->tgcIdHelper().channel(channelIdOut[i]);
-  }
-
-  if(!(rd.isStrip())) { // wire
-    found = getPosAndIdWireOut(descriptor_o, channelIdOut,
-                               gasGap_o, channel_o,
-                               width_o, hit_position_o, tmp_hitPos_o,
-                               channelIdOut_tmp);
-  } else { //strip
-    found = getPosAndIdStripOut(descriptor_o, channelIdOut,
-                                gasGap_o, channel_o,
-                                width_o, hit_position_o, tmp_hitPos_o,
-                                channelIdOut_tmp,
-                                isBackward, (rd.subDetectorId()==ASIDE));
-  }
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-  if(width_o<s_cutDropPrdsWithZeroWidth && m_dropPrdsWithZeroWidth) { // Invalid PRD's whose widths are zero are dropped.
-    return StatusCode::SUCCESS;
-  }
-
-  descriptor_oo = muDetMgr->getTgcReadoutElement(channelIdOut_tmp);
-  if(!isOfflineIdOKForTgcReadoutElement(descriptor_oo, channelIdOut_tmp)) {
-    return StatusCode::SUCCESS;
-  }
-  //}
-  //*** TGC3 end ***// 
-  
-  //*** TGC1 start ***// 
-  // Get geometry of non-pivot plane 
-  const MuonGM::TgcReadoutElement* descriptor_i[4] = {muDetMgr->getTgcReadoutElement(channelIdIn[0]), 
-                                                      muDetMgr->getTgcReadoutElement(channelIdIn[1]), 
-                                                      muDetMgr->getTgcReadoutElement(channelIdIn[2]), 
-                                                      muDetMgr->getTgcReadoutElement(channelIdIn[3])};
-  for(int i=0; i<4; i++) {
-    if(!isOfflineIdOKForTgcReadoutElement(descriptor_i[i], channelIdIn[i])) {
-      return StatusCode::SUCCESS;
-    }
-  }
-  for(int i=0; i<4; i++) { 
-    gasGap_i[i] = m_idHelperSvc->tgcIdHelper().gasGap(channelIdIn[i]); 
-    channel_i[i] = m_idHelperSvc->tgcIdHelper().channel(channelIdIn[i]); 
-  }
-    
-  if(!rd.isStrip()) { // WIRE
-    found = getPosAndIdWireIn(descriptor_i, channelIdIn,
-                              gasGap_i, channel_i,
-                              width_i, hit_position_i, tmp_hitPos_i,
-                              channelIdIn_tmp);
-  } else { // STRIP
-    found = getPosAndIdStripIn(descriptor_i, channelIdIn,
-                               gasGap_i, channel_i,
-                               width_i, hit_position_i, tmp_hitPos_i,
-                               channelIdIn_tmp,
-                               isBackward, (rd.subDetectorId()==ASIDE));
-  }
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-  if(width_i<s_cutDropPrdsWithZeroWidth && m_dropPrdsWithZeroWidth) { // Invalid PRD's whose widths are zero are dropped.
-    return StatusCode::SUCCESS;
-  }
-
-  descriptor_ii = muDetMgr->getTgcReadoutElement(channelIdIn_tmp);
-  if(!isOfflineIdOKForTgcReadoutElement(descriptor_ii, channelIdIn_tmp)) {
-    return StatusCode::SUCCESS;
-  }
-  //}
-  //*** TGC1 end ***// 
-
-  int trackletId = 2*sbLoc_o + slbsubMatrix;
-  int delta = static_cast<int>(rd.delta());
-  int hsub = static_cast<int>(rd.hsub());
-  int inner = static_cast<int>(rd.inner());
-
-  // check duplicate digits
-  for (const TgcCoinData* tgcCoinData : *coincollection) {
-    if((TgcCoinData::TYPE_HIPT==tgcCoinData->type()) && // Coincidence type
-       (channelIdOut_tmp==tgcCoinData->identify()) && // channelIdOut, identify returns channelIdOut for HiPt
-       (channelIdIn_tmp==tgcCoinData->channelIdIn()) && // channelIdIn
-       (trackletId==tgcCoinData->trackletId()) && // trackletId 
-       (delta==tgcCoinData->delta()) && // delta
-       (hsub==tgcCoinData->sub()) && // hsub
-       (inner==tgcCoinData->inner())
-       ) { 
-      if(38<=trackletId && trackletId<=41) {
-	// This drop is most probably due to the fix of the HiPt Endcap Strip Board bug. 
-	m_nHiPtRDOs--; // Reduce the number of input RDOs. 
-      }
-      ATH_MSG_DEBUG("Duplicated TgcCoinData (HiPt) = "
-		    << m_idHelperSvc->toString(channelIdOut_tmp));
-      return StatusCode::SUCCESS;
-    }
-  }
-  
-  auto hitPos_o = std::make_unique< Amg::Vector2D >(tmp_hitPos_o);
-  auto hitPos_i = std::make_unique< Amg::Vector2D >(tmp_hitPos_i);
- 
-  TgcCoinData* newCoinData = new TgcCoinData(channelIdIn_tmp,
-					     channelIdOut_tmp,
-					     tgcHashId, // determined from channelIdOut[1]
-					     descriptor_ii, // determined from channelIdIn_tmp
-					     descriptor_oo, // determined from channelIdOut_tmp
-					     TgcCoinData::TYPE_HIPT, // Coincidence type
-					     (rd.subDetectorId()==ASIDE), // isAside
-					     static_cast<int>(m_idHelperSvc->tgcIdHelper().stationPhi(channelIdOut_tmp)), // phi
-                                             0, // isInner
-					     static_cast<bool>(rd.isForward()), // isForward
-					     static_cast<bool>(rd.isStrip()), // isStrip
-					     trackletId, // trackletId
-					     hitPos_i.release(),
-					     hitPos_o.release(),
-					     width_i,
-					     width_o,
-					     delta, // delta
-					     hsub,  // hsub
-                                             inner);
-  // add the digit to the collection
-  newCoinData->setHashAndIndex(coincollection->identifyHash(), coincollection->size());  
-  coincollection->push_back(newCoinData);
-
-  ATH_MSG_DEBUG("coincollection->push_back done (for HIPT)");
-
-  m_nHiPtPRDs++; // Count the number of output HiPt PRDs. 
-  
-  return StatusCode::SUCCESS;
-}
-
 
 StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
                                                        const TgcRawData& rd,
@@ -1961,151 +1676,22 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
 
   IdentifierHash tgcHashId;
   IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
- 
-  Identifier channelIdIn; 
-  Identifier channelIdOut; 
+
+  Identifier channelIdIn;
+  Identifier channelIdOut;
   int sswId_o = 9;
   int sbLoc_o = rd.sector() & 3;
   int inner   = rd.inner();
-  
-  int phi = 0; bool isAside = false; bool isEndcap;
-  tgcCabling->getSLIDfromReadoutID(phi, isAside, isEndcap, subDetectorId, 
-      rd.rodId(), sswId_o, sbLoc_o);
-  
-  int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED) 
-    ? 1 : rd.bcTag()-1;
-  
-  auto hitPos_o = std::make_unique< Amg::Vector2D >(0,0);
-  auto hitPos_i = std::make_unique< Amg::Vector2D >(0,0);
-  
+  bool isStrip = rd.isStrip();
 
-  const MuonGM::TgcReadoutElement* descriptor_ii = nullptr;
-  const MuonGM::TgcReadoutElement* descriptor_oo = nullptr;
-
-  std::string stationName = "T3E"; 
-  int stationEta = isAside ? 1 : -1;
-  int stationPhi = phi;
-  bool isValid{false};
-  Identifier elementId = m_idHelperSvc->tgcIdHelper().elementID(stationName, stationEta, stationPhi, isValid);
-  if(!isValid || m_idHelperSvc->tgcIdHelper().get_module_hash(elementId, tgcHashId)) {
-    ATH_MSG_WARNING("Unable to get TGC hash id from TGC RDO collection "
-		    << "context begin_index = " << tgcContext.begin_index()
-		    << " context end_index  = " << tgcContext.end_index()
-		    << " the identifier is ");
-    elementId.show();
-  }
-
-  Muon::TgcCoinDataCollection* coincollection = this->getTgcCoinDataColFromMap(tgcHashId, state, coinMap, locId, elementId);
-  if(coincollection==nullptr) {
-    ATH_MSG_DEBUG("Collection is in cache, do not need to decode " << tgcHashId);
-    return StatusCode::SUCCESS;
-  }
-  
-  ATH_MSG_DEBUG("Inner Data Word, phi: " << phi << " isAside: " << isAside << " isEndcap: " << isEndcap
-                << " subDetectorId: " << subDetectorId << " isStrip: " << rd.isStrip()
-                << " rodId: " << rd.rodId() << " slbId: " << sbLoc_o << " inner:"<< rd.inner());
-
-  TgcCoinData* newCoinData = new TgcCoinData(channelIdIn,  // empty
-					     channelIdOut, // empty
-					     tgcHashId, // determined from channelIdOut[1]
-					     descriptor_ii, // determined from channelIdIn_tmp
-					     descriptor_oo, // determined from channelIdOut_tmp
-					     TgcCoinData::TYPE_HIPT, // Coincidence type
-					     isAside, // isAside
-					     phi, // phi
-                                             isInner,
-					     0, // isForward
-					     static_cast<bool>(rd.isStrip()), // isStrip, Inner or Tile
-					     0, // trackletId
-					     hitPos_i.release(),
-					     hitPos_o.release(),
-					     0., // width_i,
-					     0., // width_o,
-					     0, // delta,
-					     0, // hsub,
-                                             inner);
-  // add the digit to the collection
-  newCoinData->setHashAndIndex(coincollection->identifyHash(), coincollection->size());  
-  coincollection->push_back(newCoinData);
-
-  ATH_MSG_DEBUG("coincollection->push_back done (for Inner)");
-
-  m_nHiPtPRDs++; // Count the number of output HiPt PRDs. 
-  
-  return StatusCode::SUCCESS;
-}
-
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner_NSL(State& state,
-                                                         const TgcRawData& rd,
-                                                         std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
-{
-  m_nHiPtRDOs++; // Count the number of input HiPt RDOs. 
-
-  const CablingInfo* cinfo = getCabling();
-  if (!cinfo) {
-    return StatusCode::FAILURE;
-  }
-  const ITGCcablingSvc* tgcCabling = cinfo->m_tgcCabling;
-
-  int subDetectorId = rd.subDetectorId();
-  // Protection against invalid subDetectorId and isForward
-  if(subDetectorId!=ASIDE && subDetectorId!=CSIDE) {
-    ATH_MSG_DEBUG("TgcRdoToPrepDataToolMT::decodeHiPt::Unknown subDetectorId!!");
-    return StatusCode::SUCCESS;
-  }
-
-  IdentifierHash tgcHashId;
-  IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
- 
-  Identifier channelIdIn; 
-  Identifier channelIdOut; 
-  //int sswId_o = 9;
-  
   int phi = 0; bool isAside = false; bool isEndcap = false;
-  int sbLoc_o = -1;
-  if ((rd.rodId() > 12) && (rd.rodId() < 20)){ // SROD
+  if(rd.rodId() < 13){ // Run2
+    tgcCabling->getSLIDfromReadoutID(phi, isAside, isEndcap, subDetectorId,
+				     rd.rodId(), sswId_o, sbLoc_o);
+  }else{ // Run3
     sbLoc_o = rd.sector();
     tgcCabling->getSLIDfromSReadoutID(phi, isAside, subDetectorId, rd.rodId(), sbLoc_o, rd.isForward());
     isEndcap = !rd.isForward();
-  }else{
-    ATH_MSG_WARNING("Invalid ROD ID : " << rd.rodId() );
-    return StatusCode::FAILURE;    
-  }
-  int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED) 
-    ? 1 : rd.bcTag()-1;
-  
-  
-  const MuonGM::TgcReadoutElement* descriptor_ii = nullptr;
-  const MuonGM::TgcReadoutElement* descriptor_oo = nullptr;
-
-  std::string stationName = "T3E"; 
-  int stationEta = isAside ? 1 : -1;
-  int stationPhi = phi;
-  bool isValid{false};
-  Identifier elementId = m_idHelperSvc->tgcIdHelper().elementID(stationName, stationEta, stationPhi, isValid);
-  if(!isValid || m_idHelperSvc->tgcIdHelper().get_module_hash(elementId, tgcHashId)) {
-    ATH_MSG_WARNING("Unable to get TGC hash id from TGC RDO collection "
-		    << "context begin_index = " << tgcContext.begin_index()
-		    << " context end_index  = " << tgcContext.end_index()
-		    << " the identifier is ");
-    elementId.show();
-  }
-
-  Muon::TgcCoinDataCollection* coincollection = this->getTgcCoinDataColFromMap(tgcHashId, state, coinMap, locId, elementId);
-  if(coincollection==nullptr) {
-    ATH_MSG_DEBUG("Collection is in cache, do not need to decode " << tgcHashId);
-    return StatusCode::SUCCESS;
-  }
-  
-  ATH_MSG_DEBUG("Inner Data Word, phi: " << phi << " isAside: " << isAside << " isEndcap: " << isEndcap
-                << " subDetectorId: " << subDetectorId << " isStrip: " << rd.isStrip()
-                << " rodId: " << rd.rodId() << " slbId: " << sbLoc_o << " inner:"<< rd.inner());
-
-  // Inner Data Encoding
-  bool isInner = false;
-  bool isStrip = false;
-  int inner = 0;
-  if ((rd.rodId() > 12) && (rd.rodId() < 20)){ // SROD
     if(rd.type()==TgcRawData::TYPE_INNER_NSW){
       isInner = true; isStrip = false;
       inner = rd.nsweta()           // 8 bit
@@ -2135,50 +1721,92 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner_NSL(State& state,
       inner = rd.tmdbmod()          // 12 bit
         + (rd.tmdbbcid() << 12) ;   //  4 bit
     }
-  }else{
-    ATH_MSG_WARNING("Invalid ROD ID : " << rd.rodId() );
-    return StatusCode::FAILURE;    
   }
-  auto hitPos_o = std::make_unique<Amg::Vector2D>(0., 0.);
-  auto hitPos_i = std::make_unique<Amg::Vector2D>(0., 0.);
-  TgcCoinData* newCoinData = new TgcCoinData(channelIdIn,  // empty
-                                             channelIdOut, // empty
-                                             tgcHashId, // determined from channelIdOut[1]
-                                             descriptor_ii, // determined from channelIdIn_tmp
-                                             descriptor_oo, // determined from channelIdOut_tmp
-                                             TgcCoinData::TYPE_UNKNOWN, // 3 used for INNER
-                                             isAside, // isAside
-                                             phi, // phi
-                                             static_cast<bool>(isInner), // Selection for NSW/BIS/EIFI/TMDB
-                                             0, // isForward
-                                             static_cast<bool>(isStrip), // Selection for NSW/BIS/EIFI/TMDB
-                                             0, // trackletId
-                                             hitPos_i.release(),
-                                             hitPos_o.release(),
-                                             0., // width_i,
-                                             0., // width_o,
-                                             0, // delta,
-                                             0, // hsub,
-                                             inner);
+  
+  int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED)
+    ? 1 : rd.bcTag()-1;
+  
+  auto hitPos_o = std::make_unique< Amg::Vector2D >(0,0);
+  auto hitPos_i = std::make_unique< Amg::Vector2D >(0,0);
 
+  const MuonGM::TgcReadoutElement* descriptor_ii = nullptr;
+  const MuonGM::TgcReadoutElement* descriptor_oo = nullptr;
+
+  std::string stationName = "T3E";
+  int stationEta = isAside ? 1 : -1;
+  int stationPhi = phi;
+  bool isValid{false};
+  Identifier elementId = m_idHelperSvc->tgcIdHelper().elementID(stationName, stationEta, stationPhi, isValid);
+  if(!isValid || m_idHelperSvc->tgcIdHelper().get_module_hash(elementId, tgcHashId)) {
+    ATH_MSG_WARNING("Unable to get TGC hash id from TGC RDO collection "
+		    << "context begin_index = " << tgcContext.begin_index()
+		    << " context end_index  = " << tgcContext.end_index()
+		    << " the identifier is ");
+    elementId.show();
+  }
+
+  Muon::TgcCoinDataCollection* coincollection = this->getTgcCoinDataColFromMap(tgcHashId, state, coinMap, locId, elementId);
+  if(coincollection==nullptr) {
+    ATH_MSG_DEBUG("Collection is in cache, do not need to decode " << tgcHashId);
+    return StatusCode::SUCCESS;
+  }
+  
+  ATH_MSG_DEBUG("Inner Data Word, phi: " << phi << " isAside: " << isAside << " isEndcap: " << isEndcap
+                << " subDetectorId: " << subDetectorId << " isStrip: " << rd.isStrip()
+                << " rodId: " << rd.rodId() << " slbId: " << sbLoc_o << " inner:"<< rd.inner());
+
+  TgcCoinData* newCoinData = new TgcCoinData(channelIdIn,  // empty
+					     channelIdOut, // empty
+					     tgcHashId, // determined from channelIdOut[1]
+					     descriptor_ii, // determined from channelIdIn_tmp
+					     descriptor_oo, // determined from channelIdOut_tmp
+					     (rd.rodId()<13)?(TgcCoinData::TYPE_HIPT):(TgcCoinData::TYPE_UNKNOWN), // Coincidence type: rd.rodId()<13 for Run2, rd.rodId()>12 for Run3
+					     isAside, // isAside
+					     phi, // phi
+                                             isInner, // Selection for NSW/BIS/EIFI/TMDB
+					     !isEndcap, // isForward
+					     isStrip, // Selection for NSW/BIS/EIFI/TMDB
+					     0, // trackletId
+					     hitPos_i.release(),
+					     hitPos_o.release(),
+					     0., // width_i,
+					     0., // width_o,
+					     0, // delta,
+					     0, // hsub,
+                                             inner);
   // add the digit to the collection
   newCoinData->setHashAndIndex(coincollection->identifyHash(), coincollection->size());  
   coincollection->push_back(newCoinData);
 
   ATH_MSG_DEBUG("coincollection->push_back done (for Inner)");
 
-  m_nHiPtPRDs++; // Count the number of output HiPt PRDs. 
-  
+  m_nHiPtPRDs++; // Count the number of output HiPt PRDs.
+
   return StatusCode::SUCCESS;
 }
 
-
 StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
-                                                    const TgcRawData& rd,
+                                                    const TgcRawData& rd0,
                                                     const TgcRdo* rdoColl,
                                                     std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
 {
   m_nSLRDOs++; // Count the number of input SL RDOs. 
+
+  // conversion for Run3
+  uint16_t tmprodId, tmpsector;
+  convertToRun2(rd0,tmprodId,tmpsector);
+  const TgcRawData rd(rd0.bcTag(),
+		      rd0.subDetectorId(),
+		      tmprodId,
+		      rd0.l1Id(),
+		      rd0.bcId(),
+		      rd0.isForward(),
+		      tmpsector,
+		      rd0.innerflag(),
+		      rd0.coinflag(),
+		      rd0.isMuplus(),
+		      rd0.threshold(),
+		      rd0.roi());
 
   // Protection against invalid subDetectorId
   if((rd.subDetectorId()!=ASIDE && rd.subDetectorId()!=CSIDE)) {
@@ -2249,6 +1877,10 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
   int trackletIdStrip = 2*sbLoc_s + subMatrix_s;
   int roi = static_cast<int>(rd.roi());
   int pt = static_cast<int>(rd.threshold());
+  if(rd0.rodId()>12){ // Run3:  pT 4 bit, CoinFlag 3 bit, InnerFlag 4 bit
+    pt += (static_cast<int>( rd.coinflag() ) << 4 );
+    pt += (static_cast<int>( rd.innerflag() ) << 7 );
+  }
   bool veto = rd.isVeto();
   bool isPositiveDeltaR = rd.isMuplus(); // Current SL sets isMuplus flag based on sign of deltaR. 
                                               // Postive deltaR gives isMuplus=true.
@@ -2308,7 +1940,7 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     return StatusCode::SUCCESS;
   }
   
-  Amg::Vector3D tmp_gp(tmp_r*cos(tmp_phi), tmp_r*sin(tmp_phi), tmp_wire_z); 
+  Amg::Vector3D tmp_gp(tmp_r*std::cos(tmp_phi), tmp_r*std::sin(tmp_phi), tmp_wire_z);
   Amg::Vector2D tmp_hitPos;
   bool onSurface = descriptor_w2->surface(channelId_wire[2]).globalToLocal(tmp_gp,tmp_gp,tmp_hitPos);
     // If TGC A-lines with rotations are used, the z-coordinate of a chamber depends on position. 
@@ -2316,184 +1948,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     // Obtain the local position in a different way. 
   const Amg::Vector2D* hitPos = !onSurface ? new Amg::Vector2D(tmp_hitPos) : getSLLocalPosition(descriptor_w2, channelId_wire[2], tmp_eta, tmp_phi);
 
-
-  Amg::MatrixX mat(2,2);
-  mat.setIdentity();
-  mat(0,0) = width_w;
-  mat(1,1) = width_s;
-  const Amg::MatrixX* errMat = new Amg::MatrixX(mat);
-
-
-  // new TgcCoinData		  
-  TgcCoinData* newCoinData = new TgcCoinData(channelId_wire[2],
-					     tgcHashId, // determined from channelId_wire[1]
-					     descriptor_w2, // determined from channelId_wire[2]
-					     TgcCoinData::TYPE_SL, // Coincidence type
-					     static_cast<bool>(rd.subDetectorId()==ASIDE), // isAside
-					     static_cast<int>(m_idHelperSvc->tgcIdHelper().stationPhi(channelId_wire[2])), // phi
-					     static_cast<bool> (rd.isForward()), // isForward
-					     trackletId, // trackletId 
-					     trackletIdStrip, // trackletIdStrip
-					     hitPos,
-					     errMat,
-					     roi, // roi from RDO
-					     pt, // threshold from RDO
-					     veto, // veto flag from RDO
-					     isPositiveDeltaR); // isMuplus from RDO
-
-  // add the digit to the collection
-  newCoinData->setHashAndIndex(coincollection->identifyHash(), coincollection->size());  
-  coincollection->push_back(newCoinData);
-  ATH_MSG_DEBUG("coincollection->push_back done (for SL)");
-
-  m_nSLPRDs++; // Count the number of output SL PRDs.
-  return StatusCode::SUCCESS;
-}
-
-StatusCode Muon::TgcRdoToPrepDataToolMT::decodeNSL(State& state,
-                                                   const TgcRawData& rd,
-                                                   const TgcRdo* rdoColl,
-                                                   std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const
-{
-  m_nSLRDOs++; // Count the number of input SL RDOs. 
-
-  // Protection against invalid subDetectorId
-  if((rd.subDetectorId()!=ASIDE && rd.subDetectorId()!=CSIDE)) {
-    ATH_MSG_DEBUG("TgcRdoToPrepDataToolMT::decodeSL::Unknown subDetectorId!!");
-    return StatusCode::SUCCESS;
-  }
-  
-  IdentifierHash tgcHashId;
-  IdContext tgcContext = m_idHelperSvc->tgcIdHelper().module_context();
-  
-  bool found = false;
-
-  Identifier channelId_wire[3];
-  int index_w = 0;
-  int chip_w = 0;
-  int hitId_w = 0;
-  int sub_w = 0;
-  int sswId_w = 0;
-  int sbLoc_w = 0;
-  int subMatrix_w = 0;
-  int bitpos_w[3] = {0, 0, 0};
-
-  //***  get OfflineID, center of ROI of R (wire) ***//
-  found = getSLIds(false, rd, channelId_wire, index_w, chip_w, hitId_w, sub_w, sswId_w, sbLoc_w, 
-		   subMatrix_w, bitpos_w);
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-
-  Identifier channelId_strip[3];
-  int index_s = 0;
-  int chip_s = 0;
-  int hitId_s = 0;
-  int sub_s = 0;
-  int sswId_s = 0;
-  int sbLoc_s = 0;
-  int subMatrix_s = 0;
-  int bitpos_s[3] = {0, 0, 0};
-
-  //***  get OfflineID, center of ROI of phi (strip) ***//
-  found = getSLIds(true, rd, channelId_strip, index_s, chip_s, hitId_s, sub_s, sswId_s, sbLoc_s, subMatrix_s, 
-		   bitpos_s, isIncludedInChamberBoundary(rd), rdoColl, index_w, chip_w, hitId_w, sub_w);
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-
-  ATH_MSG_DEBUG("TGC RDO->TgcCoindata(SL): " << m_idHelperSvc->toString(channelId_wire[1])); 
-  
-  Identifier elementId = m_idHelperSvc->tgcIdHelper().elementID(channelId_wire[1]);
-  if(m_idHelperSvc->tgcIdHelper().get_module_hash(elementId, tgcHashId)) {
-    ATH_MSG_WARNING("Unable to get TGC hash id from TGC RDO collection "
-		    << "context begin_index = " << tgcContext.begin_index()
-		    << " context end_index  = " << tgcContext.end_index()
-		    << " the identifier is ");
-    elementId.show();
-  }
-
-  int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED) 
-    ? 1 : rd.bcTag()-1;
-
-  Muon::TgcCoinDataCollection* coincollection = this->getTgcCoinDataColFromMap(tgcHashId, state, coinMap, locId, elementId);
-  if(coincollection==nullptr) {
-    ATH_MSG_DEBUG("Collection is in cache, do not need to decode " << tgcHashId);
-    return StatusCode::SUCCESS;
-  }
-  
-  int trackletId = 2*sbLoc_w + subMatrix_w;
-  int trackletIdStrip = 2*sbLoc_s + subMatrix_s;
-  int roi = static_cast<int>(rd.roi());
-  int pt = static_cast<int>(rd.threshold())
-    + (static_cast<int>( rd.coinflag() ) << 4 )
-    + (static_cast<int>( rd.innerflag() ) << 7 ); // pT 4 bit, CoinFlag 3 bit, InnerFlag 4 bit
-  bool veto = rd.isVeto();
-  bool isPositiveDeltaR = rd.isMuplus(); // Current SL sets isMuplus flag based on sign of deltaR. 
-                                              // Postive deltaR gives isMuplus=true.
-  // check duplicate digits
-  for (const TgcCoinData* tgcCoinData : *coincollection) {
-    if((TgcCoinData::TYPE_SL==tgcCoinData->type()) &&
-       (channelId_wire[2]==tgcCoinData->identify()) &&
-       (trackletId==tgcCoinData->trackletId()) &&
-       (trackletIdStrip==tgcCoinData->trackletIdStrip()) &&
-       (roi==tgcCoinData->roi()) && 
-       (pt==tgcCoinData->pt()) && 
-       (veto==tgcCoinData->veto()) && 
-       (isPositiveDeltaR==tgcCoinData->isPositiveDeltaR()) 
-       ) {
-      ATH_MSG_DEBUG("Duplicated TgcCoinData (SL) = "
-		    << m_idHelperSvc->toString(channelId_wire[2]));
-      return StatusCode::SUCCESS;
-    }
-  }
- 
-  //*** R (wire) start ***//
-  double width_w = 0.;
-  double tmp_r = 0.;
-  double tmp_wire_z = 0.;
-  found = getSLWireGeometry(channelId_wire, width_w, tmp_r, tmp_wire_z);
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-  if(width_w<s_cutDropPrdsWithZeroWidth && m_dropPrdsWithZeroWidth) { // Invalid PRD's whose widths are zero are dropped.
-    return StatusCode::SUCCESS;
-  }
-
-  double tmp_eta = 0.; 
-  bool isGoodEta = getEtafromRZ(tmp_r, tmp_wire_z, tmp_eta); 
-  if(!isGoodEta) { 
-    ATH_MSG_WARNING("Conversion from r and z to eta by Muon::TgcRdoToPrepDataToolMT::getEtafromRZ failed."); 
-    return StatusCode::SUCCESS; 
-  } 
-  if(tmp_wire_z<0.) tmp_eta *= -1.; 
-  //*** R (wire) end ***//
-
-  //*** Phi (strip) start ***//
-  double width_s = 0.;
-  double tmp_phi = 0.;
-  found = getSLStripGeometry(channelId_strip, isBackwardBW(rd), (rd.subDetectorId()==ASIDE), width_s, tmp_phi);
-  if(!found) {
-    return StatusCode::SUCCESS;
-  }
-  if(width_s<s_cutDropPrdsWithZeroWidth && m_dropPrdsWithZeroWidth) { // Invalid PRD's whose widths are zero are dropped.
-    return StatusCode::SUCCESS;
-  }
-  //*** Phi (strip) end ***//
-  SG::ReadCondHandle<MuonGM::MuonDetectorManager> muDetMgrHandle{m_muDetMgrKey};
-  const MuonGM::MuonDetectorManager* muDetMgr = muDetMgrHandle.cptr();
-  const MuonGM::TgcReadoutElement* descriptor_w2 = muDetMgr->getTgcReadoutElement(channelId_wire[2]);
-  if(!isOfflineIdOKForTgcReadoutElement(descriptor_w2, channelId_wire[2])) {
-    return StatusCode::SUCCESS;
-  }
-  
-  Amg::Vector3D tmp_gp(tmp_r*std::cos(tmp_phi), tmp_r*std::sin(tmp_phi), tmp_wire_z); 
-  Amg::Vector2D tmp_hitPos;
-  bool onSurface = descriptor_w2->surface(channelId_wire[2]).globalToLocal(tmp_gp,tmp_gp,tmp_hitPos);
-    // If TGC A-lines with rotations are used, the z-coordinate of a chamber depends on position. 
-    // In this case, the global to local conversion fails. 
-    // Obtain the local position in a different way. 
-  const Amg::Vector2D* hitPos = !onSurface ? new Amg::Vector2D(tmp_hitPos) : getSLLocalPosition(descriptor_w2, channelId_wire[2], tmp_eta, tmp_phi);
 
   Amg::MatrixX mat(2,2);
   mat.setIdentity();
@@ -3709,18 +3163,8 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd, int& sswId_o
   }
   
   // conversion for Run3
-  int tmprodId = -1;
-  int tmpsector = -1;
-  if (rd.rodId()>12){
-    tmprodId = rd.rodId() - 17;
-    if (rd.isForward()){ // Forward
-      tmpsector = (rd.sector() % 2) << 1 ;
-      tmprodId = tmprodId*4 + rd.sector()/2 +1;
-    }else{ // Endcap
-      tmpsector = rd.sector() % 4 ;
-      tmprodId = tmprodId*4 + rd.sector()/4 +1;
-    }
-  }
+  uint16_t tmprodId, tmpsector;
+  convertToRun2(rd,tmprodId,tmpsector);
 
   Identifier dummyId;
   if (rd.rodId()>12){ // Run3
@@ -3751,7 +3195,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd, int& sswId_o
   
   int i_o[2] = {0, 0};
   bool b_o[2] = {false, false};
-  if (rd.rodId()>12){
+  if (rd.rodId()>12){ // Run3
     found = tgcCabling->getSLBIDfromReadoutID(i_o[0], b_o[0], b_o[1], i_o[1], slbId_o, 
                                               rd.subDetectorId(), tmprodId, sswId_o, sbLoc_o);
   }else{
@@ -3766,7 +3210,6 @@ bool Muon::TgcRdoToPrepDataToolMT::getHiPtIds(const TgcRawData& rd, int& sswId_o
 
   return true;
 }
-
 bool Muon::TgcRdoToPrepDataToolMT::getSLIds(const bool isStrip,
                                               const TgcRawData& rd,
                                               Identifier* channelId, 
@@ -3806,44 +3249,17 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(const bool isStrip,
     return false;
   }
   
-  // conversion for Run3
-  int tmprodId = -1;
-  int tmpsector = -1;
-  if (rd.rodId()>12){
-    tmprodId = rd.rodId() - 17;
-    if (rd.isForward()){ // Forward
-      tmpsector = (rd.sector() % 2) << 1 ;
-      tmprodId = tmprodId*4 + rd.sector()/2 +1;
-    }else{ // Endcap
-      tmpsector = rd.sector() % 4 ;
-      tmprodId = tmprodId*4 + rd.sector()/4 +1;
-    }
-  }
-
   Identifier offlineId;
-  if (rd.rodId()>12){
-    found = tgcCabling->getOfflineIDfromHighPtID(offlineId, 
-                                                 rd.subDetectorId(),
-                                                 tmprodId,
-                                                 tmpsector,
-                                                 isStrip,
-                                                 rd.isForward(),
-                                                 index,
-                                                 chip,
-                                                 hitId,
-                                                 sub);
-  }else{
-    found = tgcCabling->getOfflineIDfromHighPtID(offlineId, 
-                                                 rd.subDetectorId(),
-                                                 rd.rodId(),
-                                                 rd.sector(),
-                                                 isStrip,
-                                                 rd.isForward(),
-                                                 index,
-                                                 chip,
-                                                 hitId,
-                                                 sub);
-  }
+  found = tgcCabling->getOfflineIDfromHighPtID(offlineId,
+					       rd.subDetectorId(),
+					       rd.rodId(),
+					       rd.sector(),
+					       isStrip,
+					       rd.isForward(),
+					       index,
+					       chip,
+					       hitId,
+					       sub);
   if(!found) {
     ATH_MSG_DEBUG("Failed to get OfflineID from HighPtID for "
 		  << (!isStrip ? "Wire" : "Strip"));
@@ -3912,6 +3328,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSLIds(const bool isStrip,
   return true;
 }
 
+
 bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(const TgcRawData& rd, int& sbLoc,
 								       const TgcRdo* rdoColl, 
 								       const int index_w, const int chip_w, const int hitId_w, const int sub_w) const
@@ -3930,30 +3347,52 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(const T
   int trackletIdStripThird  = -1;
   getEndcapStripCandidateTrackletIds(static_cast<int>(rd.roi()), trackletIdStripFirst, 
 				     trackletIdStripSecond, trackletIdStripThird); 
-  
+
   // Loop over all HiPt Strip to find an associated one
-  for (const TgcRawData* rdH : *rdoColl) {
-    if((rdH->type()==TgcRawData::TYPE_HIPT) && // HiPt
-       (rdH->isHipt()) && // HiPt flag is required
-       (rdH->isStrip()) && // Strip
-       (!rdH->isForward()) && // Endcap
-       (rdH->bcTag()==rd.bcTag()) && // The same timing 
-       (rdH->subDetectorId()==rd.subDetectorId()) && // The same side
-       (rdH->rodId()==rd.rodId()) && // The same ROD 
-       (rdH->sector()==rd.sector()) // The same sector (1/48 phi)
+  for (const TgcRawData* rdH0 : *rdoColl) {
+
+    // conversion for Run3
+    uint16_t tmprodId, tmpsector;
+    convertToRun2(rdH0,tmprodId,tmpsector);
+    const TgcRawData rdH(rdH0->bcTag(),
+			 rdH0->subDetectorId(),
+			 tmprodId,
+			 rdH0->l1Id(),
+			 rdH0->bcId(),
+			 rdH0->isStrip(),
+			 rdH0->isForward(),
+			 tmpsector,
+			 rdH0->chip(),
+			 rdH0->index(),
+			 rdH0->isHipt(),
+			 rdH0->hitId(),
+			 rdH0->hsub(),
+			 rdH0->delta(),
+			 rdH0->inner());
+
+    if((rdH.type()==TgcRawData::TYPE_HIPT) && // HiPt
+       (rdH.isHipt()) && // HiPt flag is required
+       (rdH.isStrip()) && // Strip
+       (!rdH.isForward()) && // Endcap
+       (rdH.bcTag()==rd.bcTag()) && // The same timing
+       (rdH.subDetectorId()==rd.subDetectorId()) && // The same side
+       (rdH.rodId()==rd.rodId()) && // The same ROD
+       (rdH.sector()==rd.sector()) // The same sector (1/48 phi)
        ) {
 
       // Get sbLoc
       int sswId_o = 0;
       int sbLoc_o = 0;
       int slbId_o = 0;
-      bool found = getHiPtIds(*rdH, sswId_o, sbLoc_o, slbId_o);
-      if(!found) continue;
+      bool found = getHiPtIds(rdH, sswId_o, sbLoc_o, slbId_o);
+      if(!found){
+	continue;
+      }
 
       // Get subMatrix
       int slbsubMatrix = 0;
       int bitpos_o[2] = {0, 0};
-      getBitPosOutStrip(*rdH, slbsubMatrix, bitpos_o);
+      getBitPosOutStrip(rdH, slbsubMatrix, bitpos_o);
 
       // Get trackletId 
       int trackletIdStrip = 2*sbLoc_o + slbsubMatrix;
@@ -3982,9 +3421,9 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromHiPt(const T
       }
 
       // RDO High Pt ID of Strip 
-      int chip_s = static_cast<int>(rdH->chip());
-      int hitId_s = static_cast<int>(rdH->hitId());
-      int hsub_s = static_cast<int>(rdH->hsub());
+      int chip_s = static_cast<int>(rdH.chip());
+      int hitId_s = static_cast<int>(rdH.hitId());
+      int hsub_s = static_cast<int>(rdH.hsub());
 
       int roi = 0;
       found = tgcCabling->getROINumberfromHighPtID(roi,
@@ -4033,20 +3472,37 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(con
 				     trackletIdStripSecond, trackletIdStripThird); 
   
   // Loop over all Tracklet Strip to find an associated one
-  for (const TgcRawData* rdS : *rdoColl) {
-    bool isForward_s = (rdS->sswId()==7); // Doublet, Forward
-    if(isForward_s) continue; // Chamber boundaries exist in endcap only
+  for (const TgcRawData* rdS0 : *rdoColl) {
+
+    // conversion for Run3
+    uint16_t tmprodId, tmpsector;
+    convertToRun2(rdS0,tmprodId,tmpsector);
+    const TgcRawData rdS(rdS0->bcTag(),
+			 rdS0->subDetectorId(),
+			 tmprodId,
+			 rdS0->sswId(),
+			 rdS0->slbId(),
+			 rdS0->l1Id(),
+			 rdS0->bcId(),
+			 rdS0->slbType(),
+			 rdS0->delta(),
+			 rdS0->segment(),
+			 rdS0->subMatrix(),
+			 rdS0->position());
     
-    if((rdS->type()==TgcRawData::TYPE_TRACKLET) &&
-       (rdS->slbType()==TgcRawData::SLB_TYPE_DOUBLET_STRIP) &&
-       (rdS->bcTag()==rd.bcTag()) &&
-       (rdS->subDetectorId()==rd.subDetectorId()) &&
-       (rdS->rodId()==rd.rodId()) && 
-       (rdS->sswId()-3==rd.sector()) // SSW3: M3-EC phi0, SSW4: M3-EC phi1, SSW5: M3-EC phi2, SSW6: M3-EC phi3 
+    bool isForward_s = (rdS.sswId()==7); // Doublet, Forward
+    if(isForward_s) continue; // Chamber boundaries exist in endcap only
+
+    if((rdS.type()==TgcRawData::TYPE_TRACKLET) &&
+       (rdS.slbType()==TgcRawData::SLB_TYPE_DOUBLET_STRIP) &&
+       (rdS.bcTag()==rd.bcTag()) &&
+       (rdS.subDetectorId()==rd.subDetectorId()) &&
+       (rdS.rodId()==rd.rodId()) &&
+       (rdS.sswId()-3==rd.sector()) // SSW3: M3-EC phi0, SSW4: M3-EC phi1, SSW5: M3-EC phi2, SSW6: M3-EC phi3
        ) {
-      
+
       // Compare trackletIds 
-      int trackletIdStrip = static_cast<int>(2*rdS->slbId()+rdS->subMatrix()); // trackletId of Tracklet Strip
+      int trackletIdStrip = static_cast<int>(2*rdS.slbId()+rdS.subMatrix()); // trackletId of Tracklet Strip
       if(trackletIdStrip!=trackletIdStripFirst && 
 	 trackletIdStrip!=trackletIdStripSecond && 
 	 trackletIdStrip!=trackletIdStripThird) continue; 
@@ -4055,9 +3511,9 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(con
       if(exist_tracklet_s && trackletIdStrip==trackletIdStripThird) continue;
       
       Identifier offlineId;
-      bool found = tgcCabling->getOfflineIDfromLowPtCoincidenceID(offlineId, rdS->subDetectorId(), rdS->rodId(),
-                                                                  rdS->sswId(), rdS->slbId(), rdS->subMatrix(), 
-                                                                  rdS->position(), false);
+      bool found = tgcCabling->getOfflineIDfromLowPtCoincidenceID(offlineId, rdS.subDetectorId(), rdS.rodId(),
+                                                                  rdS.sswId(), rdS.slbId(), rdS.subMatrix(),
+                                                                  rdS.position(), false);
       if(!found) {
 	ATH_MSG_DEBUG("Failed to get OfflineID from LowPtCoincidenceID for Strip");
 	continue;
@@ -4114,7 +3570,7 @@ bool Muon::TgcRdoToPrepDataToolMT::getSbLocOfEndcapStripBoundaryFromTracklet(con
       }
       
       if(roi==rd.roi()) { 
-	sbLoc = rdS->slbId(); 
+	sbLoc = rdS.slbId();
 	exist_tracklet_s = true;
 	if(trackletIdStrip==trackletIdStripFirst) break; // If the first candidate is found, exit from this for loop 
       }
