@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -62,6 +62,7 @@ namespace Trk {
       double           cosTheta          ()     const;
       double           cotTheta          ()     const;
       void             changeDirection   ()          ;
+      double           transverseMomentum()     const;
 
       virtual Amg::Vector3D position() const override final;
       virtual Amg::Vector3D momentum() const override final;
@@ -150,7 +151,8 @@ namespace Trk {
 
       Amg::Vector3D calculatePosition(void) const;
       Amg::Vector3D calculateMomentum(void) const;
-      
+      double        absoluteMomentum() const;
+
       private:
         std::string to_string() const;
     };
@@ -362,7 +364,7 @@ namespace Trk {
       } else {
         return -1.0;
       }
-    }	
+    }
 
   inline double         PatternTrackParameters::sinPhi        () const
     {
@@ -393,6 +395,19 @@ namespace Trk {
     {
       return calculateMomentum();
     }
+
+  inline double        PatternTrackParameters::absoluteMomentum() const
+    {
+       return m_parameters[4] != 0. ? 1. / std::abs(m_parameters[4]) : 10e9;
+    }
+
+  inline double        PatternTrackParameters::transverseMomentum() const
+    {
+       double p = absoluteMomentum();
+       double Se = std::sin(m_parameters[3]);
+       return p * Se;
+    }
+
 } // end of name space
 
 #endif // PatternTrackParameters

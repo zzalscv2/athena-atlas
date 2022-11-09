@@ -234,10 +234,10 @@ def MuonCombinedParticleCreatorCfg(flags, name="MuonCombinedParticleCreator", **
         kwargs.setdefault("MuonSummaryTool", result.popToolsAndMerge(
             MuonHitSummaryToolCfg(flags)))
 
-    # if "PixelToTPIDTool" not in kwargs and not flags.Muon.MuonTrigger and flags.GeoModel.Run < LHCPeriod.Run4:
-    #    from InDetConfig.TrackingCommonConfig import InDetPixelToTPIDToolCfg
-    #    kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
-    #        InDetPixelToTPIDToolCfg(flags)))
+    if "PixelToTPIDTool" not in kwargs and not flags.Muon.MuonTrigger and flags.GeoModel.Run < LHCPeriod.Run4:
+        from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+            PixelToTPIDToolCfg(flags)))
 
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("KeepAllPerigee", True)

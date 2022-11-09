@@ -80,6 +80,7 @@ if DetFlags.detdescr.Muon_on() and rec.doWriteESD():
    MuonESDList+=["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
    MuonESDList+=["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"]
    MuonESDList+=["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextBC"]
+   MuonESDList+=["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC"]
    MuonESDList+=["Muon::RpcCoinDataContainer#RPC_triggerHits"]
    MuonESDList+=["RpcSectorLogicContainer#RPC_SECTORLOGIC"]
 

@@ -51,12 +51,12 @@ StatusCode MuonPRDCacheCreator::initialize() {
     }
     const bool doTgcCoinCache = not m_tgcCoinCacheKeyStr.empty();
     if (doTgcCoinCache) {
-        m_TgcCoinCacheKeys.resize(TgcDigit::BC_NEXT);
-        for (int ibc = 0; ibc < TgcDigit::BC_NEXT; ibc++) {
+        m_TgcCoinCacheKeys.resize(TgcDigit::BC_NEXTNEXT);
+        for (int ibc = 0; ibc < TgcDigit::BC_NEXTNEXT; ibc++) {
             const int bcTag = ibc + 1;
             std::ostringstream location;
             location << m_tgcCoinCacheKeyStr.value() << (bcTag == TgcDigit::BC_PREVIOUS ? "PriorBC" : "")
-                     << (bcTag == TgcDigit::BC_NEXT ? "NextBC" : "");
+                     << (bcTag == TgcDigit::BC_NEXT ? "NextBC" : "") << (bcTag == TgcDigit::BC_NEXTNEXT ? "NextNextBC" : "");
             m_TgcCoinCacheKeys.at(ibc) = location.str();
             ATH_MSG_INFO("Setting next TGC Coin Cache to " << location.str());
         }  // BC loop
