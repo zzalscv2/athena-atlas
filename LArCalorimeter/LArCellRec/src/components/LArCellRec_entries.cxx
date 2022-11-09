@@ -7,7 +7,6 @@
 #include "../LArBadFebMaskingTool.h"
 #include "../LArCellGainPathology.h"
 #include "../LArCellMerger.h"
-#include "../LArCellDeadOTXCorr.h"
 #include "../LArNoisyROAlg.h"
 #include "../LArNoisyROTool.h"
 #include "../LArCollisionTimeAlg.h"
@@ -26,7 +25,6 @@ DECLARE_COMPONENT( LArCellNoiseMaskingTool )
 DECLARE_COMPONENT( LArBadFebMaskingTool )
 DECLARE_COMPONENT( LArCellGainPathology )
 DECLARE_COMPONENT( LArCellMerger )
-DECLARE_COMPONENT( LArCellDeadOTXCorr )
 DECLARE_COMPONENT( LArNoisyROTool )
 DECLARE_COMPONENT( LArCollisionTimeAlg )
 DECLARE_COMPONENT( LArTimeVetoAlg )
