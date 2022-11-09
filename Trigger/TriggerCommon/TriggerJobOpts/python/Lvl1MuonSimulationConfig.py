@@ -418,6 +418,7 @@ if __name__ == "__main__":
     flags.Scheduler.ShowDataFlow=True
     flags.Trigger.enableL1MuonPhase1=True
     flags.Trigger.triggerMenuSetup='Dev_pp_run3_v1'
+    flags.fillFromArgs()
     flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

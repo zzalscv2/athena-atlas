@@ -73,6 +73,7 @@ if __name__ == "__main__":
 
     flags.Input.Files = defaultTestFiles.RAW
     flags.Exec.MaxEvents = 20
+    flags.fillFromArgs()
     flags.lock()
 
     topCA = MainServicesCfg(flags)
