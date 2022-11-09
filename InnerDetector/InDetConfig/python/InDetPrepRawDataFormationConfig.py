@@ -232,7 +232,7 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
             regSelTool_TRT_Cfg(flags)))
 
     if "TRT_DriftCircleTool" not in kwargs:
-        from InDetConfig.TRTPreProcessing import TRT_DriftCircleToolCfg
+        from InDetConfig.TRT_DriftCircleToolConfig import TRT_DriftCircleToolCfg
         kwargs.setdefault("TRT_DriftCircleTool", acc.popToolsAndMerge(
             TRT_DriftCircleToolCfg(flags)))
 
