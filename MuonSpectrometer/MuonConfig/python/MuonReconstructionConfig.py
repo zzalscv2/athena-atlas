@@ -85,6 +85,7 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"]
     esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextBC"]
+    esd_items += ["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC"]
     esd_items += ["Muon::RpcCoinDataContainer#RPC_triggerHits"]
     esd_items += ["RpcSectorLogicContainer#RPC_SECTORLOGIC"]
 

@@ -78,9 +78,9 @@ namespace Muon
     protected:
       /** The number of recorded Bunch Crossings (BCs) FOR HITS is 3 (Previous, Current, and Next BCs) */
       static constexpr int NBC_HIT = 3;
-      /** The number of recorded Bunch Crossings (BCs) FOR TRIGGER (HPT/SL) is 4 (Previous, Current, Next, and Next-to-Next BCs),
-          but for instance, the container and the collection are kept to three (Next and Next-to-next BCs are stored in the same container). */
-      static constexpr int NBC_TRIG = 3;
+      /* Run1,2: The number of recorded Bunch Crossings (BCs) FOR TRIGGER (HPT/SL) is 3 (Previous, Current, Next BCs) */
+      /* Run3: The number of recorded Bunch Crossings (BCs) FOR TRIGGER (HPT/SL) is 4 (Previous, Current, Next, and Next-to-Next BCs) */
+      static constexpr int NBC_TRIG = 4;
 
       struct State {
         /** TgcPrepRawData (hit PRD) containers */
@@ -215,25 +215,15 @@ namespace Muon
       StatusCode decodeHiPt(State& state,
                             const TgcRawData& rd,
                             std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
-      StatusCode decodeHiPt_NSL(State& state,
-                                const TgcRawData& rd,
-                                std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       /** Decode RDO's of Inner */
       StatusCode decodeInner(State& state,
                              const TgcRawData& rd,
                              std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
-      StatusCode decodeInner_NSL(State& state,
-                                 const TgcRawData& rd,
-                                 std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       /** Decode RDO's of SectorLogic */
       StatusCode decodeSL(State& state,
                           const TgcRawData& rd,
                           const TgcRdo* rdoColl,
                           std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
-      StatusCode decodeNSL(State& state,
-                           const TgcRawData& rd,
-                           const TgcRdo* rdoColl,
-                           std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       
       /** Get bitpos from channel and SlbType */
       int getbitpos(int channel, TgcRawData::SlbType slbType) const;
@@ -435,6 +425,24 @@ namespace Muon
 
       /** Aboid compiler warning **/
       virtual StatusCode decode( const std::vector<uint32_t>& /*robIds*/ ) const override {return StatusCode::FAILURE;}
+
+      // Run3->Run2 conversion of rodId and sector
+      void convertToRun2(const TgcRawData* rd, uint16_t& newrodId, uint16_t& newsector) const {
+	newrodId = rd->rodId();
+	newsector = rd->sector();
+	if (rd->rodId()>12){ // Run3 rodID is 17..19 while Run2 rodId is 1..12
+	  if(rd->isForward()){
+	    newrodId = rd->sector() / 2 + 1 + (rd->rodId()-17) * 4;
+	    newsector = (rd->sector() + (rd->rodId()-17)*8) % 2;
+	  }else{
+	    newrodId = rd->sector() / 4 + 1 + (rd->rodId()-17) * 4;
+	    newsector = (rd->sector() + (rd->rodId()-17)*16) % 4;
+	  }
+	}
+      }
+      void convertToRun2(const TgcRawData& rd, uint16_t& newrodId, uint16_t& newsector) const {
+	convertToRun2(&rd,newrodId,newsector);
+      }
 
    }; 
 } // end of namespace
