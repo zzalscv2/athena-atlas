@@ -1307,6 +1307,11 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     if (!m_tauSmearingTool.isUserConfigured()) {
       m_tauSmearingTool.setTypeAndName("TauAnalysisTools::TauSmearingTool/TauSmearingTool");
+      ATH_CHECK( m_tauSmearingTool.setProperty("RecommendationTag", m_tauSmearingToolRecommendationTag) );
+      if (m_isRun3){ ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc21") );}
+      else         { ATH_CHECK( m_tauSmearingTool.setProperty("Campaign", "mc20") );}
+      ATH_CHECK( m_tauSmearingTool.setProperty("Generator", m_tauSmearingToolGenerator) );
+      ATH_CHECK( m_tauSmearingTool.setProperty("isAFII", isAtlfast()) );
       ATH_CHECK( m_tauSmearingTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_tauSmearingTool.retrieve() );
     } else ATH_CHECK( m_tauSmearingTool.retrieve() );
