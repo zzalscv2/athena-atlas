@@ -988,11 +988,11 @@ def createSCTTrackingPassFlags():
                            else maxZImpact_ranges( pcf )
     maxHolesDefault = 2
     icf.maxHoles         = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxHolesDefault( pcf )
+                           else maxHolesDefault
     icf.nHolesMax        = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxHolesDefault( pcf )
+                           else maxHolesDefault
     icf.nHolesGapMax     = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \
-                           else maxHolesDefault( pcf )
+                           else maxHolesDefault
     icf.maxPixelHoles    = lambda pcf: 0 if pcf.Beam.Type is BeamType.Cosmics \
                            else 0
     icf.maxSctHoles      = lambda pcf: 3 if pcf.Beam.Type is BeamType.Cosmics \

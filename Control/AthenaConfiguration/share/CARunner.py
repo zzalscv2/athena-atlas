@@ -42,7 +42,7 @@ if __name__=="__main__":
         print("ERROR, can't read file",inputName)
         usage()
     
-    nEvt=10
+    nEvt=None
     if len(args)==2:
         try:
             nEvt=int(args[1])
