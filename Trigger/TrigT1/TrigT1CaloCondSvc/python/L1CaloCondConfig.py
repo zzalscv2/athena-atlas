@@ -69,7 +69,7 @@ if __name__=="__main__":
     flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-02'
     flags.GeoModel.AtlasVersion="ATLAS-R2-2015-03-01-00"
     flags.Trigger.enableL1CaloLegacy = True 
-    
+    flags.fillFromArgs()    
     flags.lock() 
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

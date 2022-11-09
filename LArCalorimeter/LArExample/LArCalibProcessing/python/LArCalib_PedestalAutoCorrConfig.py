@@ -214,6 +214,7 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-000-02"
 
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
 
     from AthenaCommon import Logging
