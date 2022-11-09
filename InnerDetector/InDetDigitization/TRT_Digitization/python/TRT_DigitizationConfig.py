@@ -8,7 +8,6 @@ from AthenaConfiguration.Enums import BeamType, ProductionStep
 from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
 from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
 from TRT_PAI_Process.TRT_PAI_ProcessConfig import TRT_PAI_Process_XeToolCfg, TRT_PAI_Process_ArToolCfg, TRT_PAI_Process_KrToolCfg
-from IOVDbSvc.IOVDbSvcConfig import addFolders
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
 from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
@@ -40,12 +39,7 @@ def TRT_DigitizationBasicToolCfg(flags, name="TRT_DigitizationBasicTool", **kwar
     acc.merge(AtlasFieldCacheCondAlgCfg(flags))
     PartPropSvc = CompFactory.PartPropSvc
     acc.addService(PartPropSvc(InputFile="PDGTABLE.MeV"))
-    # TODO: move this data overlay in a separate place
-    if flags.Common.isOverlay and flags.Overlay.DataOverlay:
-        acc.merge(addFolders(flags, "/TRT/Cond/DigVers", "TRT_OFL", tag="TRTCondDigVers-Collisions-01", db="OFLP200",
-                             className = 'AthenaAttributeList'))
-    else:
-        kwargs.setdefault ('DigVersContainerKey', '')
+    kwargs.setdefault("DigVersContainerKey", "")
     # default arguments
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     StrawStatusTool = acc.popToolsAndMerge(TRT_StrawStatusSummaryToolCfg(flags))
@@ -160,6 +154,12 @@ def TRT_DigitizationSplitNoMergePUToolCfg(flags, name="TRT_DigitizationToolSplit
 def TRT_OverlayDigitizationToolCfg(flags, name="TRT_OverlayDigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured Overlay TRT digitization tool"""
     acc = ComponentAccumulator()
+    if flags.Overlay.DataOverlay:
+        from IOVDbSvc.IOVDbSvcConfig import addFolders
+        # TODO: remove the hardcode
+        acc.merge(addFolders(flags, "/TRT/Cond/DigVers", "TRT_OFL", tag="TRTCondDigVers-Collisions-01", db="OFLP200", className="AthenaAttributeList"))
+        kwargs.setdefault("DigVersContainerKey", "/TRT/Cond/DigVers")
+
     kwargs.setdefault("OnlyUseContainerName", False)
     #in the case of track overlay, only run digitization on the HS
     if not flags.Overlay.doTrackOverlay:

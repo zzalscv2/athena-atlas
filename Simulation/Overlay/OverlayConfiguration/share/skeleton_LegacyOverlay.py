@@ -136,10 +136,11 @@ if overlayFlags.isDataOverlay():
     larCondFlags.LArCoolChannelSelection.set_Value_and_Lock('')
     larCondFlags.useShape.set_Value_and_Lock(True)
     larCondFlags.OFCShapeFolder.set_Value_and_Lock('')
+    # TODO: put into global tag?
+    fSampltag = 'LARElecCalibMCfSampl-G496-19213-'
     if hasattr(overlayArgs, 'fSampltag'):
-        larCondFlags.LArfSamplTag.set_Value_and_Lock(overlayArgs.fSampltag + digitizationFlags.physicsList.get_Value())
-    else:
-        raise RuntimeError ('--fSampltag not specified on command-line - see --help message')
+        logOverlay.warning('fSampltag argument is deprecated, using %s', fSampltag)
+    larCondFlags.LArfSamplTag.set_Value_and_Lock(fSampltag + digitizationFlags.physicsList.get_Value())
 
 # TODO: investigate why this is even needed
 from RecExConfig.RecFlags import rec

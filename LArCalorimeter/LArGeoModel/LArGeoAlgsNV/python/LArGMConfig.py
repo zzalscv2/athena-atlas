@@ -27,14 +27,8 @@ def LArGMCfg(configFlags):
                 result.merge(addFolders(configFlags,"/LAR/Align","LAR_OFL"))
                 result.merge(addFolders(configFlags,"/LAR/LArCellPositionShift","LAR_OFL"))
         else:
-            if configFlags.Overlay.DataOverlay:
-                #Data overlay
-                result.merge(addFolders(configFlags, "/LAR/Align", "LAR_ONL",className="DetCondKeyTrans"))
-                result.merge(addFolders(configFlags, "/LAR/LArCellPositionShift", "LAR_OFL", tag="LArCellPositionShift-ideal", db="OFLP200",className="CaloRec::CaloCellPositionShift"))
-            else:
-                #Regular offline data processing
-                result.merge(addFolders(configFlags,"/LAR/Align","LAR_ONL",className="DetCondKeyTrans"))
-                result.merge(addFolders(configFlags,"/LAR/LArCellPositionShift","LAR_ONL",className="CaloRec::CaloCellPositionShift"))
+            result.merge(addFolders(configFlags,"/LAR/Align","LAR_ONL",className="DetCondKeyTrans"))
+            result.merge(addFolders(configFlags,"/LAR/LArCellPositionShift","LAR_ONL",className="CaloRec::CaloCellPositionShift"))
 
         if activateCondAlgs:
             result.addCondAlgo(CompFactory.LArAlignCondAlg())

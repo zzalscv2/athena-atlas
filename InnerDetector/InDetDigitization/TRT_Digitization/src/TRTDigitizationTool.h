@@ -168,8 +168,7 @@ private:
   // const  ComTime* m_ComTime{};
   double m_cosmicEventPhase{0.0};     // local replacement for the comTime service
   const HepPDT::ParticleDataTable* m_particleTable{};
-  SG::ReadCondHandleKey<AthenaAttributeList> m_digverscontainerkey
-  { this, "DigVersContainerKey", "/TRT/Cond/DigVers", "" };
+  SG::ReadCondHandleKey<AthenaAttributeList> m_digverscontainerkey{ this, "DigVersContainerKey", "", "" };
   bool m_first_event{true};
 
   bool m_HardScatterSplittingSkipper{false};

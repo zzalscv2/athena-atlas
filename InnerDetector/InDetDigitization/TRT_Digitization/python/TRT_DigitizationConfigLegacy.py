@@ -133,6 +133,8 @@ def TRT_OverlayDigitizationTool(name="TRT_OverlayDigitizationTool",**kwargs):
     kwargs.setdefault("Override_noiseInSimhits", 0)
     kwargs.setdefault("Override_noiseInUnhitStraws", 0)
     kwargs.setdefault("Override_isOverlay", 1)
+    if overlayFlags.isDataOverlay():
+        kwargs.setdefault("DigVersContainerKey", "/TRT/Cond/DigVers")
     return BasicTRTDigitizationTool(name,**kwargs)
 
 def TRT_OverlayDigitization(name="TRT_OverlayDigitization",**kwargs):

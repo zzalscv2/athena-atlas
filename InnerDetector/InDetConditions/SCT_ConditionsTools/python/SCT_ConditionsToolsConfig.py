@@ -326,19 +326,8 @@ def SCT_ReadCalibChipDataCfg(flags, name="SCT_ReadCalibChip", **kwargs):
     # Folders
     noiseFolder = kwargs.get("noiseFolder", "/SCT/DAQ/Calibration/ChipNoise")
     gainFolder = kwargs.get("gainFolder", "/SCT/DAQ/Calibration/ChipGain")
-    if flags.Overlay.DataOverlay:
-        forceDb="OFLP200"
-        noiseTag="SctDaqCalibrationChipNoise-Apr10-01"
-        gainTag="SctDaqCalibrationChipGain-Apr10-01"
-    else:
-        forceDb=None
-        noiseTag=None
-        gainTag=None
-
-    acc.merge(addFoldersSplitOnline(flags, "SCT", noiseFolder, noiseFolder, "CondAttrListCollection",
-                                    forceDb=forceDb, tag=noiseTag))
-    acc.merge(addFoldersSplitOnline(flags, "SCT", gainFolder, gainFolder, "CondAttrListCollection",
-                                    forceDb=forceDb, tag=gainTag))
+    acc.merge(addFoldersSplitOnline(flags, "SCT", noiseFolder, noiseFolder, "CondAttrListCollection"))
+    acc.merge(addFoldersSplitOnline(flags, "SCT", gainFolder, gainFolder, "CondAttrListCollection"))
 
     # Algorithms
     acc.addCondAlgo(CompFactory.SCT_ReadCalibChipNoiseCondAlg(name=f"{name}NoiseCondAlg", ReadKey=noiseFolder))
