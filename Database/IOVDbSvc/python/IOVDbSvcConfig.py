@@ -125,7 +125,8 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
         folders.append(fs)
 
 
-    result = IOVDbSvcCfg(flags, Folders=folders)
+    result = IOVDbSvcCfg(flags)
+    result.getPrimary().Folders+=folders
     if loadFolders:
         result.getCondAlgo('CondInputLoader').Load += loadFolders
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
