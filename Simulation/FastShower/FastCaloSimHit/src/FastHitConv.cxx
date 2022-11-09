@@ -198,7 +198,7 @@ StatusCode FastHitConv::hitConstruction()
   CaloCellContainer::const_iterator it1 = cellContainer->beginConstCalo(CaloCell_ID::LAREM);
   CaloCellContainer::const_iterator it2 = cellContainer->endConstCalo(CaloCell_ID::LAREM);
 
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell LArEM"<<countFastCell);
 
@@ -238,7 +238,7 @@ StatusCode FastHitConv::hitConstruction()
 
   countFastCell = 0;
 
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell LArHEC"<<countFastCell);
 
@@ -269,7 +269,7 @@ StatusCode FastHitConv::hitConstruction()
   it1 = cellContainer->beginConstCalo(CaloCell_ID::LARFCAL);
   it2 = cellContainer->endConstCalo(CaloCell_ID::LARFCAL);
   countFastCell = 0;
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell LArFCAL"<<countFastCell);
       cellid = (*it1)->ID();
@@ -306,7 +306,7 @@ StatusCode FastHitConv::hitConstruction()
   Identifier pmt_id0( (unsigned int) 0);
   Identifier pmt_id1( (unsigned int) 0);
 
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell Tile Cal"<<countFastCell);
       cellid = (*it1)->ID();

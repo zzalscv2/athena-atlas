@@ -137,7 +137,7 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
 
   CaloCellContainer::const_iterator it1=theCellCont->beginConstCalo(CaloCell_ID::LAREM);
   CaloCellContainer::const_iterator it2=theCellCont->endConstCalo(CaloCell_ID::LAREM);
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell LArEM"<<countFastCell);
 
@@ -173,7 +173,7 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
   it2=theCellCont->endConstCalo(CaloCell_ID::LARHEC);
 
   countFastCell=0;
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell LArHEC"<<countFastCell);
 
@@ -201,7 +201,7 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
   it1=theCellCont->beginConstCalo(CaloCell_ID::LARFCAL);
   it2=theCellCont->endConstCalo(CaloCell_ID::LARFCAL);
   countFastCell=0;
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell LArFCAL"<<countFastCell);
       cellid=(*it1)->ID();
@@ -234,7 +234,7 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
   Identifier pmt_id0((unsigned int) 0);
   Identifier pmt_id1((unsigned int) 0);
 
-  for(;it1!=it2;it1++)
+  for(;it1!=it2;++it1)
     {
       ATH_MSG_DEBUG("FastCell Tile Cal"<<countFastCell);
       cellid=(*it1)->ID();
