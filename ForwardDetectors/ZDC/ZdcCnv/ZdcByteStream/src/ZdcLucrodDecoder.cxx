@@ -7,7 +7,7 @@
 
 #define endreq endmsg
 
-StatusCode ZdcLucrodDecoder::decode(const ROBFragment* robFragment, ZdcLucrodData* zld) {
+StatusCode ZdcLucrodDecoder::decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFragment, ZdcLucrodData* zld) {
   
   if (msgLevel(MSG::DEBUG)) msg(MSG::DEBUG) << " ZdcLucrodDecoder::decode" << endreq;
   

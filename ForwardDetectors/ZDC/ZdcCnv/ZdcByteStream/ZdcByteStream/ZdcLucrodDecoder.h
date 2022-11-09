@@ -28,7 +28,6 @@
 #define ROD_STATUS_POS    1
 #define ROD_NCHANNELS     8
 
-using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 class ZdcLucrodDecoder : public AthMessaging {
   
@@ -37,7 +36,7 @@ class ZdcLucrodDecoder : public AthMessaging {
  ZdcLucrodDecoder() :  AthMessaging(Athena::getMessageSvc(), "ZdcLucrodDecoder")  {};
   ~ZdcLucrodDecoder() {};
   
-  StatusCode decode(const ROBFragment* robFragment, ZdcLucrodData* zld);
+  StatusCode decode(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment* robFragment, ZdcLucrodData* zld);
   
   MsgStream& msg(MSG::Level lvl) const { return AthMessaging::msg() << lvl; }
   
