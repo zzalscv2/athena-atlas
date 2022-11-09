@@ -22,7 +22,6 @@
 class StoreGateSvc;
 class ZdcLucrodDecoder;
 
-using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 
 class ZdcByteStreamLucrodData: public AthAlgorithm {
 
@@ -35,7 +34,7 @@ class ZdcByteStreamLucrodData: public AthAlgorithm {
   StatusCode execute();
   StatusCode finalize();
 
-  StatusCode fillContainer(std::vector<const ROBFragment*>, ZdcLucrodDataContainer* zdcLucrodDataContainer); 
+  StatusCode fillContainer(std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*>, ZdcLucrodDataContainer* zdcLucrodDataContainer); 
   
 private:
   

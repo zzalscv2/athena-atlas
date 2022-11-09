@@ -6,6 +6,8 @@
 #include "ZdcByteStream/ZdcLucrodDataContainer.h"
 #include "ZdcByteStream/ZdcLucrodData.h"
 
+using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
+
 ZdcByteStreamLucrodData::ZdcByteStreamLucrodData(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm     (name                , pSvcLocator),
   m_robDataProvider("ROBDataProviderSvc", name) {
