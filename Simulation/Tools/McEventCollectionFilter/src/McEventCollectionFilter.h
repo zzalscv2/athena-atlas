@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCEVENTCOLLECTIONFILTER_H
@@ -9,7 +9,9 @@
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <GeneratorObjects/McEventCollection.h>
 #include <InDetSimEvent/TRTUncompressedHitCollection.h>
+#include <climits>
 
+static constexpr unsigned int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 
 class McEventCollectionFilter : public AthReentrantAlgorithm
 {
