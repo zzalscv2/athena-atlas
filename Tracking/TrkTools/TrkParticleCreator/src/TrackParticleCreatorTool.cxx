@@ -124,7 +124,6 @@ TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
   , m_keepParameters(false)
   , m_keepFirstParameters(false)
   , m_keepAllPerigee(false)
-  , m_expressPerigeeToBeamSpot(true)
   , m_perigeeExpression("BeamLine")
 {
   declareProperty("DoITk" , m_doITk = false);
@@ -132,13 +131,12 @@ TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
   declareProperty("KeepParameters", m_keepParameters);
   declareProperty("KeepFirstParameters", m_keepFirstParameters);
   declareProperty("KeepAllPerigee", m_keepAllPerigee);
-  declareProperty("ExpressPerigeeToBeamSpot", m_expressPerigeeToBeamSpot);
   declareProperty("CheckConversion", m_checkConversion = true);
   declareProperty("MinSiHitsForCaloExtrap", m_minSiHits = 4);
   declareProperty("MinPtForCaloExtrap", m_minPt = 1000.);
   declareProperty("PerigeeExpression", m_perigeeExpression);
-  // 0 = off, 1 = OOT, 2 = dE/dx, 3 = combination of OOT and dE/dx, 4 = combination of OOT, dE/dx,
-  // and size
+  // 0 = off, 1 = OOT, 2 = dE/dx, 3 = combination of OOT and dE/dx, 4 =
+  // combination of OOT, dE/dx, and size
   declareProperty("BadClusterID", m_badclusterID = 0);
   declareProperty("ExtraSummaryTypes", m_copyExtraSummaryName);
 }
@@ -156,12 +154,6 @@ TrackParticleCreatorTool::initialize()
     return StatusCode::FAILURE;
   }
 
-  if (!m_expressPerigeeToBeamSpot) {
-    ATH_MSG_WARNING("Using old configuration option! please use one of " << m_perigeeOptions
-                                                                         << ". Assuming Origin.");
-    m_perigeeExpression = "Origin";
-  }
-
   /* Retrieve track summary tool */
   if (!m_trackSummaryTool.empty()) {
     if (m_trackSummaryTool.retrieve().isFailure()) {
@@ -169,7 +161,6 @@ TrackParticleCreatorTool::initialize()
       return StatusCode::FAILURE;
     }
     ATH_MSG_DEBUG("Retrieved tool " << m_trackSummaryTool);
-
   } else {
     m_trackSummaryTool.disable();
   }
@@ -280,7 +271,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
 {
   const Trk::Perigee* aPer = nullptr;
   const Trk::TrackParameters* parsToBeDeleted = nullptr;
-  // the default way; I left it as it was because it is working fine!!
+  // Origin
   if (m_perigeeExpression == "Origin") {
     aPer = track.perigeeParameters();
     if (aPer) {
@@ -299,7 +290,8 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
         return nullptr;
       }
     }
-  } else if (m_perigeeExpression == "BeamSpot") { // Express parameters at beamspot
+    // Beamspot
+  } else if (m_perigeeExpression == "BeamSpot") {
     const Trk::Perigee* result = m_trackToVertex->perigeeAtVertex(ctx, track, CacheBeamSpotData(ctx)->beamVtx().position()).release();
     if (!result) {
       ATH_MSG_WARNING("Failed to extrapolate to first Beamspot - No TrackParticle created.");
@@ -307,9 +299,9 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
     }
     parsToBeDeleted = result;
     aPer = result;
-
-  } else if (m_perigeeExpression ==
-             "Vertex") { // the non default way, express the perigee wrt. the vertex position
+  }
+  // the non default way, express the perigee wrt. the vertex position
+  else if (m_perigeeExpression == "Vertex") {
     if (vxCandidate != nullptr) {
       const Trk::Perigee* result = m_trackToVertex->perigeeAtVertex(ctx, track, vxCandidate->position()).release();
       if (result != nullptr) {
@@ -322,13 +314,13 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
     } else {
       ATH_MSG_WARNING("Perigee expression at Vertex, but no vertex found! No TrackParticle created.");
     }
+    //BeamLine
   } else if (m_perigeeExpression == "BeamLine") {
     const Trk::Perigee* result = m_trackToVertex->perigeeAtBeamline(ctx, track, CacheBeamSpotData(ctx)).release();
     if (!result) {
       ATH_MSG_WARNING("Failed to extrapolate to Beamline - No TrackParticle created.");
       return nullptr;
     }
-
     parsToBeDeleted = result;
     aPer = result;
   }
