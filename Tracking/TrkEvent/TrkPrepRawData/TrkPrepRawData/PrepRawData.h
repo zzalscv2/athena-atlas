@@ -16,6 +16,7 @@
 // Eigen ATLAS helpers
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 //
 #include <atomic>
 #include <iostream>
@@ -30,7 +31,6 @@ class RpcPrepDataContainerCnv_p1;
 }
 
 namespace Trk {
-
 
 /* The various kind of PrepRawData
  * to avoid dynamic_cast via using the type method
@@ -52,14 +52,13 @@ enum class PrepRawDataType
   sTgcPrepData
 };
 
-
 class TrkDetElementBase;
 
 /** class thrown in the event of an variable not being defined.*/
 class PrepRawDataUndefinedVariable
 {};
 
-class PrepRawData
+class PrepRawData : public Trk::ObjectCounter<Trk::PrepRawData>
 {
   ///////////////////////////////////////////////////////////////////
   // Public methods:
@@ -110,7 +109,6 @@ public:
               const Amg::Vector2D& locpos,
               Amg::MatrixX&& locerr);
 
-
   /** Destructor:*/
   virtual ~PrepRawData();
 
@@ -147,9 +145,6 @@ public:
   void setHashAndIndex(unsigned short collHash, unsigned short objIndex);
   const IdentContIndex& getHashAndIndex() const;
 
-  /**return number of parameters currently created*/
-  static unsigned int numberOfInstantiations();
-
 private:
   friend class ::PrepRawDataCnv_p1;
   friend class Muon::RpcPrepDataContainerCnv_p1;
@@ -167,10 +162,6 @@ private:
   /**Stores its own position (index) in collection plus the hash id for the
      collection (needed for the EL to IDC) */
   IdentContIndex m_indexAndHash;
-
-  /** number of objects of this type in memory */
-
-  static std::atomic<unsigned int> s_numberOfInstantiations;
 };
 
 MsgStream&

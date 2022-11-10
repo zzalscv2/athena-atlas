@@ -3,40 +3,33 @@
  */
 
 #include "TrkTrack/Track.h"
+
 #include "GaudiKernel/MsgStream.h"
-#include "TrkEventPrimitives/FitQuality.h"
-#include "TrkEventPrimitives/FitQualityOnSurface.h"
+
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
-#include "TrkTrack/TrackStateOnSurface.h"
-#include "TrkTrackSummary/TrackSummary.h"
 
 #include <cassert>
 #include <iostream>
 #include <string>
 
-#ifndef NDEBUG
-std::atomic<unsigned int> Trk::Track::s_numberOfInstantiations{};
-#endif
-
 Trk::Track::Track()
-  : m_trackStateVector{}
+  : Trk::ObjectCounter<Trk::Track>()
+  , m_trackStateVector{}
   , m_cachedParameterVector{}
   , m_cachedMeasurementVector{}
   , m_cachedOutlierVector{}
   , m_perigeeParameters{}
   , m_fitQuality(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Track, so increment total count
-#endif
 }
 
 Trk::Track::Track(const TrackInfo& info,
                   TrackStates&& trackStateOnSurfaces,
                   const FitQuality* fitQuality)
-  : m_trackStateVector(std::move(trackStateOnSurfaces))
+  : Trk::ObjectCounter<Trk::Track>()
+  , m_trackStateVector(std::move(trackStateOnSurfaces))
   , m_cachedParameterVector{}
   , m_cachedMeasurementVector{}
   , m_cachedOutlierVector{}
@@ -46,13 +39,10 @@ Trk::Track::Track(const TrackInfo& info,
 {
   // find the Perigee params they will become valid given the outcome
   findPerigeeImpl();
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Track, so increment total count
-#endif
 }
 
 Trk::Track::Track(const Trk::Track& rhs)
-  : m_trackStateVector{}
+  : Trk::ObjectCounter<Trk::Track>(rhs)
   , m_cachedParameterVector{}
   , m_cachedMeasurementVector{}
   , m_cachedOutlierVector{}
@@ -61,10 +51,6 @@ Trk::Track::Track(const Trk::Track& rhs)
 {
   // Do the actual payload copy
   copyHelper(rhs);
-
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Track, so increment total count
-#endif
 }
 
 Trk::Track&
@@ -129,15 +115,6 @@ Trk::Track::copyHelper(const Trk::Track& rhs)
     }
   }
 }
-
-#ifndef NDEBUG // When DEBUG we need to count down instantiations.
-Trk::Track::~Track()
-{
-  s_numberOfInstantiations--; // delete Track, so decrement total count
-}
-#else
-Trk::Track::~Track() = default;
-#endif
 
 const DataVector<const Trk::TrackParameters>*
 Trk::Track::trackParameters() const
@@ -314,17 +291,6 @@ Trk::Track::reset()
   m_cachedMeasurementVector.reset();
   m_cachedOutlierVector.reset();
   m_perigeeParameters.reset();
-}
-
-unsigned int
-Trk::Track::numberOfInstantiations()
-{
-
-#ifndef NDEBUG
-  return s_numberOfInstantiations;
-#else
-  return 0;
-#endif
 }
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug

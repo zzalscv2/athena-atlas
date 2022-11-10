@@ -7,5 +7,6 @@ atlas_subdir( TrkPrepRawData )
 atlas_add_library( TrkPrepRawData
                    src/*.cxx
                    PUBLIC_HEADERS TrkPrepRawData
-                   LINK_LIBRARIES AthLinks AthContainers AthenaKernel GeoPrimitives Identifier EventPrimitives EventContainers
+                   LINK_LIBRARIES AthLinks AthContainers AthenaKernel GeoPrimitives Identifier EventPrimitives 
+                   EventContainers TrkEventPrimitives
                    PRIVATE_LINK_LIBRARIES GaudiKernel )

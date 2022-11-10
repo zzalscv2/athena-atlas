@@ -12,101 +12,80 @@
 #include <new>
 
 namespace Trk {
-std::atomic<unsigned int> PrepRawData::s_numberOfInstantiations{ 0 };
 
 PrepRawData::PrepRawData(const Identifier& clusId,
                          const Amg::Vector2D& locpos,
                          const std::vector<Identifier>& rdoList,
                          const Amg::MatrixX& locerr)
-  : m_clusId(clusId)
+  : Trk::ObjectCounter<Trk::PrepRawData>()
+  , m_clusId(clusId)
   , m_localPos(locpos)
   , m_rdoList(rdoList)
   , m_localCovariance(locerr)
   , m_indexAndHash()
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new PrepRawData, so increment total count
-#endif
 }
 
 PrepRawData::PrepRawData(const Identifier& clusId,
                          const Amg::Vector2D& locpos,
                          std::vector<Identifier>&& rdoList,
                          Amg::MatrixX&& locerr)
-  : m_clusId(clusId)
+  : Trk::ObjectCounter<Trk::PrepRawData>()
+  , m_clusId(clusId)
   , m_localPos(locpos)
   , m_rdoList(std::move(rdoList))
   , m_localCovariance(std::move(locerr))
   , m_indexAndHash()
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new PrepRawData, so increment total count
-#endif
 }
 
 // Constructor with parameters:
 PrepRawData::PrepRawData(const Identifier& clusId,
                          const Amg::Vector2D& locpos,
                          const Amg::MatrixX& locerr)
-  : m_clusId(clusId)
+  : Trk::ObjectCounter<Trk::PrepRawData>()
+  , m_clusId(clusId)
   , m_localPos(locpos)
   , m_localCovariance(locerr)
   , m_indexAndHash()
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new PrepRawData, so increment total count
-#endif
   m_rdoList.push_back(clusId);
 }
 
 PrepRawData::PrepRawData(const Identifier& clusId,
                          const Amg::Vector2D& locpos,
                          Amg::MatrixX&& locerr)
-  : m_clusId(clusId)
+  : Trk::ObjectCounter<Trk::PrepRawData>()
+  , m_clusId(clusId)
   , m_localPos(locpos)
   , m_localCovariance(std::move(locerr))
   , m_indexAndHash()
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new PrepRawData, so increment total count
-#endif
   m_rdoList.push_back(clusId);
 }
 
-#ifndef NDEBUG
-// Destructor:
-PrepRawData::~PrepRawData()
-{
-  s_numberOfInstantiations--; // delete PrepRawData, so decrement total count
-}
-#else
 PrepRawData::~PrepRawData() = default;
-#endif
 
 // Default constructor:
 PrepRawData::PrepRawData()
-  : m_clusId(0)
+  : Trk::ObjectCounter<Trk::PrepRawData>()
+  , m_clusId(0)
   , m_localPos()
   , m_rdoList()
   , m_localCovariance{}
   , m_indexAndHash()
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new PrepRawData, so increment total count
-#endif
 }
 
 // copy constructor:
 PrepRawData::PrepRawData(const PrepRawData& RIO)
-  : m_clusId(RIO.m_clusId)
+  : Trk::ObjectCounter<Trk::PrepRawData>(RIO)
+  , m_clusId(RIO.m_clusId)
   , m_localPos(RIO.m_localPos)
   , m_rdoList(RIO.m_rdoList)
   , m_localCovariance(RIO.m_localCovariance)
   , m_indexAndHash(RIO.m_indexAndHash)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new PrepRawData, so increment total count
-#endif
 }
 
 MsgStream&
@@ -171,12 +150,6 @@ std::ostream&
 operator<<(std::ostream& stream, const PrepRawData& prd)
 {
   return prd.dump(stream);
-}
-
-unsigned int
-PrepRawData::numberOfInstantiations()
-{
-  return s_numberOfInstantiations;
 }
 
 } // end of ns
