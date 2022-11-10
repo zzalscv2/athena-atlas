@@ -38,6 +38,9 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                                                     SCT_SP_ContainerName = "ITkStripSpacePoints",
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
 
+    from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
+    monTool = TrigFastTrackFinderMonitoring(name = "TrigFastTrackFinder_", doResMon=False)
+
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_",
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
                                             SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"),
@@ -64,7 +67,8 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                             useGPU                   = False,
                                             DoubletDR_Max            = 270,
                                             ITkMode                  = True, # Allows ftf to use the new TrigTrackSeedGenerator for ITk
-                                            StandaloneMode              = True) # Allows ftf to be run as an offline algorithm with reco_tf
+                                            StandaloneMode           = True,
+                                            MonTool                  = monTool) # Allows ftf to be run as an offline algorithm with reco_tf
 
     acc.addEventAlgo( ftf, primary=True )
 
