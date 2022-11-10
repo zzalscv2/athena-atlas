@@ -54,7 +54,7 @@ private:
 
   SG::WriteHandleKey<MuCTPI_Phase1_RDO> m_MuCTPI_Phase1_RDOKey{ this, "MuCTPI_Phase1_RDOKey", "MUCTPI_Phase1_RDO" };
 
-  std::vector<uint32_t> m_muctpi_Nbits;
+  std::vector<uint32_t> m_muctpi_Nbits = {3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1}; //default value, used for DQ mon
   Gaudi::Property<std::string> m_alias_db{this,"TriggerDBAlias","TRIGGERDB_RUN3","Alias to the TriggerDB to download CTP configuration from"};
 
 }; // class MuCTPIPhase1ByteStreamAlgo
