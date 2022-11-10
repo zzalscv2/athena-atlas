@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSEnergyAndHitGAN_h
@@ -60,7 +60,7 @@ public:
   const lwt::LightweightGraph* get_graph() const {return m_graph;};
   const std::string* get_input() const {return m_input;};
   
-  bool initializeNetwork(int pid,int etaMin,std::string FastCaloGANInputFolderName);
+  bool initializeNetwork(int pid,int etaMin,const std::string& FastCaloGANInputFolderName);
   
   bool fillFastCaloGanNetworkInputs(TFCSSimulationState& simulstate,const TFCSTruthState* truth, NetworkInputs & inputs,double & trueEnergy) const;
   bool fillEnergy(TFCSSimulationState& simulstate, const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol, NetworkInputs inputs) const;
@@ -71,7 +71,7 @@ public:
   static void unit_test(TFCSSimulationState* simulstate=nullptr,const TFCSTruthState* truth=nullptr, const TFCSExtrapolationState* extrapol=nullptr);
 
 protected:  
-  void GetBinning(int pid,int etaMax,std::string FastCaloGANInputFolderName);
+  void GetBinning(int pid,int etaMax,const std::string& FastCaloGANInputFolderName);
   
 private:
   std::vector< int > m_bin_ninit;

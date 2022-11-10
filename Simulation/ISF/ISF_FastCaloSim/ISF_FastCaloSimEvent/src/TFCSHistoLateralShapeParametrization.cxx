@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandFlat.h"
@@ -24,7 +24,7 @@
 TFCSHistoLateralShapeParametrization::TFCSHistoLateralShapeParametrization(const char* name, const char* title) :
   TFCSLateralShapeParametrizationHitBase(name,title),m_nhits(0),m_r_offset(0),m_r_scale(1.0)
 {
-  reset_phi_symmetric();
+  TFCSHistoLateralShapeParametrization::reset_phi_symmetric();
 }
 
 TFCSHistoLateralShapeParametrization::~TFCSHistoLateralShapeParametrization()

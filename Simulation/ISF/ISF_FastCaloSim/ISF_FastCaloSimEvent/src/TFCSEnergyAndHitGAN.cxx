@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGAN.h"
@@ -81,7 +81,7 @@ void TFCSEnergyAndHitGAN::set_nr_of_init(unsigned int bin,unsigned int ninit)
 }
 
 // initialize lwtnn network 
-bool TFCSEnergyAndHitGAN::initializeNetwork(int pid,int etaMin,std::string FastCaloGANInputFolderName)
+bool TFCSEnergyAndHitGAN::initializeNetwork(int pid,int etaMin,const std::string& FastCaloGANInputFolderName)
 {
 
   // initialize all necessary constants
@@ -134,7 +134,7 @@ bool TFCSEnergyAndHitGAN::initializeNetwork(int pid,int etaMin,std::string FastC
   return true;
 }
 
-void TFCSEnergyAndHitGAN::GetBinning(int pid,int etaMid,std::string FastCaloGANInputFolderName){ 
+void TFCSEnergyAndHitGAN::GetBinning(int pid,int etaMid,const std::string& FastCaloGANInputFolderName){ 
    std::string xmlFullFileName = FastCaloGANInputFolderName + "/binning.xml";
    ATH_MSG_DEBUG("Opening XML file in "<< xmlFullFileName);
    
@@ -653,9 +653,7 @@ void TFCSEnergyAndHitGAN::unit_test(TFCSSimulationState* simulstate,const TFCSTr
 
   fGAN=TFile::Open("FCSGANtest.root");
   TFCSEnergyAndHitGAN* GAN2=(TFCSEnergyAndHitGAN*)(fGAN->Get("GAN"));
-  if(GAN2) {
-    GAN2->Print();
-  }
+  GAN2->Print();
   
   GAN2->setLevel(MSG::DEBUG);
   GAN2->simulate(*simulstate,truth,extrapol);
