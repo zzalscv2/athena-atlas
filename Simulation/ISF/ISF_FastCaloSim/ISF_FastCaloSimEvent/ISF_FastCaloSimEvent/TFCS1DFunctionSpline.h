@@ -25,11 +25,11 @@ class ATLAS_NOT_THREAD_SAFE TFCS1DFunctionSpline:public TFCS1DFunction
 
     static double get_maxdev(const TH1* hist,const TSpline3& sp,double& maxeffsig,double& p_maxdev,double& p_maxeffsig,int ntoy=10000);
 
-    virtual double Initialize(TH1* hist,double maxdevgoal=0.01,double maxeffsiggoal=3,int maxnp=20);
+    double Initialize(TH1* hist,double maxdevgoal=0.01,double maxeffsiggoal=3,int maxnp=20);
 
-    virtual double InitializeFromSpline(TH1* hist,const TSpline3& sp,double maxdevgoal=0.01,double maxeffsiggoal=3);
-    virtual double InitializeEqualDistance(TH1* hist,double maxdevgoal=0.01,double maxeffsiggoal=3,int nsplinepoints=5);
-    virtual double InitializeEqualProbability(TH1* hist,double maxdevgoal=0.01,double maxeffsiggoal=3,int nsplinepoints=5);
+    double InitializeFromSpline(TH1* hist,const TSpline3& sp,double maxdevgoal=0.01,double maxeffsiggoal=3);
+    double InitializeEqualDistance(TH1* hist,double maxdevgoal=0.01,double maxeffsiggoal=3,int nsplinepoints=5);
+    double InitializeEqualProbability(TH1* hist,double maxdevgoal=0.01,double maxeffsiggoal=3,int nsplinepoints=5);
 
     using TFCS1DFunction::rnd_to_fct;
     
