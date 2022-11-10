@@ -136,5 +136,9 @@ ToolSvc                                              INFO Removing all tools cre
 *****Chrono*****                                     INFO ****************************************************************************************************
 *****Chrono*****                                     INFO ****************************************************************************************************
 ChronoStatSvc.finalize()                             INFO  Service finalized successfully 
+FPEAuditor                                           INFO FPE summary for this job
+FPEAuditor                                           INFO  FPE OVERFLOWs  : 0
+FPEAuditor                                           INFO  FPE INVALIDs   : 0
+FPEAuditor                                           INFO  FPE DIVBYZEROs : 0
 ApplicationMgr                                       INFO Application Manager Finalized successfully
 ApplicationMgr                                       INFO Application Manager Terminated successfully
