@@ -97,10 +97,6 @@ def PrepareStandAloneBTagCfg(inputFlags):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     result.merge(PoolReadCfg(inputFlags))
 
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    acc = TrackingGeometrySvcCfg(inputFlags)
-    result.merge(acc)
-
     # get standard config for magnetic field - map and cache
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge(AtlasFieldCacheCondAlgCfg( inputFlags ))

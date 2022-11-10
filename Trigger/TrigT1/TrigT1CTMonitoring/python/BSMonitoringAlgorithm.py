@@ -545,20 +545,24 @@ def BSMonitoringConfig(inputFlags):
 
         #mult
         monPath="/MUCTPI/Mult"
-        myGroup.defineHistogram('multX;mult', title='MLT thresholds total count', path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('multPerLBX,multPerLBY;multPerLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multThrX;multThr', title='MLT thresholds total count', path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multThrVsLBX,multThrVsLBY;multThrVsLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
 
-        multSliceVsMultMUCTPIBinLabels = [ #cxx indices
-        "Central Slice"         ,      #1
-        "Other Slice"           ,      #2
-        ]
-        myGroup.defineHistogram('multSliceVsMultX,multSliceVsMulY;multSliceVsMult',title='Mult slice vs Thr', type='TH2F', path=monPath, xbins=32,xmin=-0.5,xmax=31.5, ybins=len(multSliceVsMultMUCTPIBinLabels), ymin=0., ymax=len(multSliceVsMultMUCTPIBinLabels), ylabels=multSliceVsMultMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('multBitsX;multBits', title='MLT bits total count', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multBitsVsLBX,multBitsVsLBY;multBitsVsLB', title='MLT bits total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
 
         #cand
         monPath="/MUCTPI/Cand"
         myGroup.defineHistogram('candPtBAX;candPtBA', title='BA cand pT', path=monPath,xbins=6,xmin=0.5,xmax=6.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtECX;candPtEC', title='EC cand pT', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candPtFWX;candPtFW', title='FW cand pT', path=monPath,xbins=15,xmin=0.5,xmax=15.5,opt='kAlwaysCreate')
+
+        myGroup.defineHistogram('candSLVsLBBAX,candSLVsLBBAY;candSLVsLBBA', title='BA cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=64,ymin=-0.5,ymax=63.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSLVsLBECX,candSLVsLBECY;candSLVsLBEC', title='EC cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=96,ymin=-0.5,ymax=95.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSLVsLBFWX,candSLVsLBFWY;candSLVsLBFW', title='FW cand SL vs LB', type='TH2F', path=monPath,xbins=2000,xmin=0.5,xmax=2000.5, ybins=48,ymin=-0.5,ymax=47.5 ,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLBAX,candVetoFlag_RoiVsSLBAY;candVetoFlag_RoiVsSLBA', title='BA cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLECX,candVetoFlag_RoiVsSLECY;candVetoFlag_RoiVsSLEC', title='EC cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candVetoFlag_RoiVsSLFWX,candVetoFlag_RoiVsSLFWY;candVetoFlag_RoiVsSLFW', title='FW cand VetoFlag | RoI vs SL', type='TH2F', path=monPath,xbins=48,xmin=-0.5,xmax=47.5,ybins=148,ymin=-0.5,ymax=147.5,opt='kAlwaysCreate')
 
         myGroup.defineHistogram('candRoiVsSLBACentralSliceX,candRoiVsSLBACentralSliceY;candRoiVsSLBACentralSlice', title='BA cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=64,xmin=-0.5,xmax=63.5,ybins=30,ymin=-0.5,ymax=29.5,opt='kAlwaysCreate')
         myGroup.defineHistogram('candRoiVsSLECCentralSliceX,candRoiVsSLCentralSliceECY;candRoiVsSLECCentralSlice', title='EC cand RoI vs SL (central slice)', type='TH2F', path=monPath,xbins=96,xmin=-0.5,xmax=95.5,ybins=64,ymin=-0.5,ymax=63.5,opt='kAlwaysCreate')
@@ -577,8 +581,8 @@ def BSMonitoringConfig(inputFlags):
         "InnerCoin"             ,          #2
         "GoodMF"                ,          #2
         ]
-        myGroup.defineHistogram('candCandFlagsVsSLBACentralSliceX,candCandFlagsVsSLBACentralSliceY;candCandFlagssVsSLBACentralSlice', title='BA cand CandFlags vs SL (central slice)', type='TH2F', path=monPath, xbins=64, xmin=-0.5,xmax=63.5,  ybins=2, ymin=-0.5,ymax=1.5,ylabels=candFlagsMUCTPIBinLabels_BA,opt='kAlwaysCreate')
-        myGroup.defineHistogram('candCandFlagssVsSLECCentralSliceX,candCandFlagssVsSLCentralSliceECY;candCandFlagsVsSLECCentralSlice', title='EC cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,xbins=96, xmin=-0.5,xmax=95.5,  ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLBACentralSliceX,candCandFlagsVsSLBACentralSliceY;candCandFlagsVsSLBACentralSlice', title='BA cand CandFlags vs SL (central slice)', type='TH2F', path=monPath, xbins=64, xmin=-0.5,xmax=63.5,  ybins=2, ymin=-0.5,ymax=1.5,ylabels=candFlagsMUCTPIBinLabels_BA,opt='kAlwaysCreate')
+        myGroup.defineHistogram('candCandFlagsVsSLECCentralSliceX,candCandFlagsVsSLCentralSliceECY;candCandFlagsVsSLECCentralSlice', title='EC cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,xbins=96, xmin=-0.5,xmax=95.5,  ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
         myGroup.defineHistogram('candCandFlagsVsSLFWCentralSliceX,candCandFlagsVsSLFWCentralSliceY;candCandFlagsVsSLFWCentralSlice', title='FW cand CandFlags vs SL (central slice)', type='TH2F', path=monPath,  xbins=48,xmin=-0.5,xmax=47.5, ybins=4, ymin=-0.5,ymax=3.5,ylabels=candFlagsMUCTPIBinLabels_ECFW,opt='kAlwaysCreate')
 
         #sec err per LB
@@ -612,12 +616,17 @@ def BSMonitoringConfig(inputFlags):
         monPath="/MUCTPI/Timing"
 
         candSliceVsSLMUCTPIBinLabels = [ #cxx indices
-        "Central Slice"         ,    #1
-        "Other Slice"           ,    #2
+        "-3 Slice"           ,    #1
+        "-2 Slice"           ,    #2
+        "-1 Slice"           ,    #3
+        "Central Slice"      ,    #4
+        "+1 Slice"           ,    #5
+        "+2 Slice"           ,    #6
+        "+3 Slice"           ,    #7
         ]
-        myGroup.defineHistogram('candSliceVsSLBAX,candSliceVsSLBAY;candSliceVsSLBA',title='SL (BA) slice vs SL', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=2., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
-        myGroup.defineHistogram('candSliceVsSLECX,candSliceVsSLECY;candSliceVsSLEC',title='SL (EC) slice vs SL', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=2., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
-        myGroup.defineHistogram('candSliceVsSLFWX,candSliceVsSLFWY;candSliceVsSLFW',title='SL (FW) slice vs SL', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=2., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLBAX,candSliceVsSLBAY;candSliceVsSLBA',title='SL (BA) slice vs SL', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLECX,candSliceVsSLECY;candSliceVsSLEC',title='SL (EC) slice vs SL', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLFWX,candSliceVsSLFWY;candSliceVsSLFW',title='SL (FW) slice vs SL', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
 
 
 
