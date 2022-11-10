@@ -86,7 +86,6 @@ public:
     return pars ? new Trk::TrackStateOnSurface(
                     nullptr,
                     std::unique_ptr<const Trk::TrackParameters>(pars),
-                    {},
                     nullptr)
                 : nullptr;
   }

@@ -981,7 +981,7 @@ const Trk::Track* VP1BPhysSystem::getTrack(const Rec::TrackParticle* trackpartic
 
 			messageDebug("new TrackStateOnSurface");
 
-			if (p) trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr,nullptr));
+			if (p) trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
 		}
 		unsigned limit(needresorting?trackpars.size()-1:trackpars.size());
 		messageDebug("...done");
@@ -995,7 +995,7 @@ const Trk::Track* VP1BPhysSystem::getTrack(const Rec::TrackParticle* trackpartic
 				continue;
 /*      if (!common()->trackSanityHelper()->isSafe(p))
 			continue;*/
-			trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr,nullptr));
+			trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
 		}
 		messageDebug("...done");
 
@@ -1038,7 +1038,7 @@ const Trk::Track* VP1BPhysSystem::getRefittedTrack(const Amg::Vector3D& position
 
   //creates a vector of TracksStates on surface
 	auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
-	trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr,nullptr));
+	trackStateOnSurfaces.push_back(new Trk::TrackStateOnSurface(nullptr,p->uniqueClone(),nullptr));
 
   //create track
 #ifdef TRKTRACK_TRACKINFO_H

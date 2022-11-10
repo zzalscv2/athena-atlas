@@ -15,13 +15,11 @@ TrackStateOnSurface::TrackStateOnSurface(
   const FitQualityOnSurface& fitQoS,
   std::unique_ptr<const MeasurementBase> meas,
   std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  std::unique_ptr<const MaterialEffectsBase> materialEffects)
   : m_fitQualityOnSurface(fitQoS)
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
-  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
 {
   assert(isSane());
   setFlags();
@@ -30,13 +28,11 @@ TrackStateOnSurface::TrackStateOnSurface(
 TrackStateOnSurface::TrackStateOnSurface(
   std::unique_ptr<const MeasurementBase> meas,
   std::unique_ptr<const TrackParameters> trackParameters,
-  std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  std::unique_ptr<const MaterialEffectsBase> materialEffects)
   : m_fitQualityOnSurface{}
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
-  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
 {
   assert(isSane());
   setFlags();
@@ -48,13 +44,11 @@ TrackStateOnSurface::TrackStateOnSurface(
   std::unique_ptr<const MeasurementBase> meas,
   std::unique_ptr<const TrackParameters> trackParameters,
   std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern)
   : m_fitQualityOnSurface(fitQoS)
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
-  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
   , m_typeFlags(typePattern.to_ulong())
 {
   assert(isSane());
@@ -64,13 +58,11 @@ TrackStateOnSurface::TrackStateOnSurface(
   std::unique_ptr<const MeasurementBase> meas,
   std::unique_ptr<const TrackParameters> trackParameters,
   std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern)
   : m_fitQualityOnSurface{}
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
-  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
   , m_typeFlags(typePattern.to_ulong())
 {
   assert(isSane());
@@ -83,13 +75,11 @@ TrackStateOnSurface::TrackStateOnSurface(
   std::unique_ptr<const TrackParameters> trackParameters,
   std::unique_ptr<const MaterialEffectsBase> materialEffects,
   const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-  const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
-  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern)
   : m_fitQualityOnSurface(fitQoS)
   , m_trackParameters(std::move(trackParameters))
   , m_measurementOnTrack(std::move(meas))
   , m_materialEffectsOnTrack(std::move(materialEffects))
-  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
   , m_typeFlags(typePattern.to_ulong())
   , m_hints(hintPattern.to_ulong())
 {
@@ -107,10 +97,6 @@ TrackStateOnSurface::TrackStateOnSurface(const TrackStateOnSurface& rhs)
   , m_materialEffectsOnTrack(rhs.m_materialEffectsOnTrack
                                ? rhs.m_materialEffectsOnTrack->clone()
                                : nullptr)
-  , m_alignmentEffectsOnTrack(
-      rhs.m_alignmentEffectsOnTrack
-        ? std::make_unique<const AlignmentEffectsOnTrack>(*rhs.m_alignmentEffectsOnTrack)
-        : nullptr)
   , m_typeFlags(rhs.m_typeFlags)
 {}
 
@@ -120,7 +106,6 @@ TrackStateOnSurface::TrackStateOnSurface(TrackStateOnSurface&& rhs) noexcept
   , m_trackParameters(std::move(rhs.m_trackParameters))
   , m_measurementOnTrack(std::move(rhs.m_measurementOnTrack))
   , m_materialEffectsOnTrack(std::move(rhs.m_materialEffectsOnTrack))
-  , m_alignmentEffectsOnTrack(std::move(rhs.m_alignmentEffectsOnTrack))
   , m_typeFlags(rhs.m_typeFlags)
 {
 }
@@ -138,11 +123,6 @@ TrackStateOnSurface::operator=(const TrackStateOnSurface& rhs)
     m_materialEffectsOnTrack.reset(rhs.m_materialEffectsOnTrack
                                      ? rhs.m_materialEffectsOnTrack->clone()
                                      : nullptr);
-    m_alignmentEffectsOnTrack =
-      rhs.m_alignmentEffectsOnTrack
-        ? std::make_unique<const AlignmentEffectsOnTrack>(
-            *rhs.m_alignmentEffectsOnTrack)
-        : nullptr;
     m_typeFlags = rhs.m_typeFlags;
     assert(isSane());
   }
@@ -158,7 +138,6 @@ TrackStateOnSurface::operator=(Trk::TrackStateOnSurface&& rhs) noexcept
     m_trackParameters = std::move(rhs.m_trackParameters);
     m_measurementOnTrack = std::move(rhs.m_measurementOnTrack);
     m_materialEffectsOnTrack = std::move(rhs.m_materialEffectsOnTrack);
-    m_alignmentEffectsOnTrack = std::move(rhs.m_alignmentEffectsOnTrack);
     m_typeFlags = rhs.m_typeFlags;
   }
   return *this;
@@ -217,9 +196,6 @@ TrackStateOnSurface::surface() const
   if (m_materialEffectsOnTrack) {
     return m_materialEffectsOnTrack->associatedSurface();
   }
-  if (m_alignmentEffectsOnTrack) {
-    return m_alignmentEffectsOnTrack->associatedSurface();
-  }
   throw std::runtime_error("TrackStateOnSurface without Surface!");
 }
 
@@ -236,9 +212,6 @@ TrackStateOnSurface::isSane() const
   }
   if (m_materialEffectsOnTrack) {
     surfaces.push_back(&(m_materialEffectsOnTrack->associatedSurface()));
-  }
-  if (m_alignmentEffectsOnTrack) {
-    surfaces.push_back(&(m_alignmentEffectsOnTrack->associatedSurface()));
   }
 
   auto surfaceIt = surfaces.begin();
@@ -269,11 +242,6 @@ TrackStateOnSurface::isSane() const
       std::cerr << "matSurf: ["
                 << &(m_materialEffectsOnTrack->associatedSurface()) << "] "
                 << m_materialEffectsOnTrack->associatedSurface() << std::endl;
-    }
-    if (m_alignmentEffectsOnTrack) {
-      std::cerr << "alignSurf: ["
-                << &(m_alignmentEffectsOnTrack->associatedSurface()) << "] "
-                << m_alignmentEffectsOnTrack->associatedSurface() << std::endl;
     }
     return false;
   }

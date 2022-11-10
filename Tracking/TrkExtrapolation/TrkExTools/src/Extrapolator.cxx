@@ -2272,7 +2272,7 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   if (parameterAtDestination) {
     ATH_MSG_VERBOSE("  [+] Adding the destination surface to the TSOS vector in extrapolateM() ");
     cache.m_matstates->push_back(
-      new TrackStateOnSurface(nullptr, parameterAtDestination.to_unique(), nullptr, nullptr));
+      new TrackStateOnSurface(nullptr, parameterAtDestination.to_unique(), nullptr));
   } else {
     ATH_MSG_VERBOSE("  [-] Destination surface was not hit extrapolateM(), but not required "
                     "through configuration.");
