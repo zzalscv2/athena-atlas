@@ -11,9 +11,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def FPEAndCoreDumpCfg(flags):
     cfg=ComponentAccumulator()
     cds=CompFactory.CoreDumpSvc(FastStackTrace=True)
-
+    
     #AthGeneration & AthAnalysis don't contain the FPEAuditor
-    if hasattr(CompFactory,"FPEAuditor"):
+    if flags.Exec.FPE != -2 and hasattr(CompFactory,"FPEAuditor"):
         #If we run with FPEAuditor, the CoreDumpSvc should not catch SIGFPE 
         #(but otherwise use the default list of signals)     
         signalsToCatch=[int(i) for i in cds.Signals] # Get the default
