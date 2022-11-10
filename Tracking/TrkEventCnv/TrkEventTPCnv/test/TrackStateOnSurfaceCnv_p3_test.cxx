@@ -173,24 +173,20 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Trk::TrackStateOnSurface trans1 (fq,
                                    std::make_unique<Trk::PseudoMeasurementOnTrack>(pmeas),
                                    std::make_unique<Trk::Perigee> (perigee),
-                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me),
-                                   nullptr);
+                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me));
   testit (trans1);
 
   Trk::TrackStateOnSurface trans2 (std::make_unique<Trk::PseudoMeasurementOnTrack> (pmeas),
-                                   nullptr,
                                    nullptr,
                                    nullptr);
   testit (trans2);
 
   Trk::TrackStateOnSurface trans3 (nullptr,
                                    std::make_unique<Trk::Perigee> (perigee),
-                                   nullptr,
                                    nullptr);
   testit (trans3);
 
   Trk::TrackStateOnSurface trans4 (fq,
-                                   nullptr,
                                    nullptr,
                                    nullptr,
                                    nullptr);
@@ -198,8 +194,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Trk::TrackStateOnSurface trans5 (nullptr,
                                    nullptr,
-                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me),
-                                   nullptr);
+                                   std::make_unique<Trk::MaterialEffectsOnTrack> (me));
   testit (trans5);
 }
 

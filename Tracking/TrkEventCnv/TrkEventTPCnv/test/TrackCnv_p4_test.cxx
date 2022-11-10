@@ -241,8 +241,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   Trk::TrackStateOnSurface tsos1 (fq,
                                   std::make_unique<Trk::PseudoMeasurementOnTrack> (pmeas),
                                   std::make_unique<Trk::Perigee> (perigee),
-                                  std::make_unique<Trk::MaterialEffectsOnTrack> (me),
-                                  nullptr);
+                                  std::make_unique<Trk::MaterialEffectsOnTrack> (me));
 
   DataVector<const Trk::TrackStateOnSurface> tsvec (SG::VIEW_ELEMENTS);
   tsvec.push_back (&tsos1);

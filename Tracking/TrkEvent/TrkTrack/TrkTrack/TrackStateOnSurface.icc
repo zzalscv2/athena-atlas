@@ -35,7 +35,7 @@ Trk::TrackStateOnSurface::materialEffectsOnTrack() const
 inline const Trk::AlignmentEffectsOnTrack*
 Trk::TrackStateOnSurface::alignmentEffectsOnTrack() const
 {
-  return m_alignmentEffectsOnTrack.get();
+  return nullptr;
 }
 
 inline bool
@@ -61,9 +61,6 @@ Trk::TrackStateOnSurface::setFlags()
   }
   if (m_materialEffectsOnTrack) {
     m_typeFlags |= 1 << InertMaterial;
-  }
-  if (m_alignmentEffectsOnTrack) {
-    m_typeFlags |= 1 << Alignment;
   }
   if (m_trackParameters) {
     m_typeFlags |= 1 << Parameter;
