@@ -84,8 +84,8 @@ comparexAODDigest.py myAOD_def.txt myAOD_ca.txt
 rc7=$?
 echo "art-result: ${rc7} comparexAODDigest.py myAOD_def.txt myAOD_ca.txt"
 
-echo "============ hist_diff.sh ca/myHIST_ca.root def/myHIST.root -i -x (TIME_execute|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors)"
-hist_diff.sh ca/myHIST_ca.root def/myHIST_def.root -i -x "(TIME_execute|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors)"
+echo "============ hist_diff.sh ca/myHIST_ca.root def/myHIST.root -i -x (TIME_|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors|noEth_rndm_CSCveto)"
+hist_diff.sh ca/myHIST_ca.root def/myHIST_def.root -i -x "(TIME_|LAr/Coverage|MismatchEventNumbers|L1Calo/Overview/Errors|noEth_rndm_CSCveto)"
 rc8=$?
 echo "art-result: ${rc8} hist_diff.sh ca/myHIST_ca.root def/myHIST.root"
 
