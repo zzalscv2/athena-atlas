@@ -43,6 +43,7 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     ConfigFlags.Detector.GeometryLAr = doLAr
     ConfigFlags.Detector.GeometryTile = doTile
     ConfigFlags.Detector.GeometryMuon = doMuon
+    ConfigFlags.Exec.FPE=-2 #Turn FPE checks off
     ConfigFlags.lock()
 
     # Construct ComponentAccumulator
