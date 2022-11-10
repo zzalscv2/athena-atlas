@@ -135,12 +135,12 @@ class AccumulatorDecorator:
             for a in args:
                 if(not AccumulatorDecorator._hasHash(a)):
                     hashable_args = False
-                    _msg.debug("Positional argument to AccumulatorDecorator __call__ is not hashable.")
+                    _msg.debug("Positional argument %s to AccumulatorDecorator __call__ is not hashable.",str(a))
                     break
             for k , v in kwargs.items():
                 if(not AccumulatorDecorator._hasHash(v)):
                     hashable_args = False
-                    _msg.debug("Value in keyword argument to AccumulatorDecorator __call__ is not hashable.")
+                    _msg.debug("Value in keyword argument %s to AccumulatorDecorator __call__ is not hashable.",str(k))
                     break
             if(hashable_args):
                 # frozen set makes the order of keyword arguments irrelevant
