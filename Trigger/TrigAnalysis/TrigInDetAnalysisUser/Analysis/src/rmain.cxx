@@ -680,6 +680,15 @@ int main(int argc, char** argv)
     }
   }
 
+  std::string exclude = "";
+
+  TrackAssociator* ex_matcher = 0;
+
+  if ( inputdata.isTagDefined("Exclude") ) { 
+    exclude    = inputdata.GetString("Exclude");
+    ex_matcher = new Associator_BestDeltaRZSinThetaMatcher( "deltaRZ", 0.01, 0.01, 2 ); 
+  }
+
   if (refChains.size() == 0){
     std::cerr << "Error: refChains is empty\n" <<std::endl;
     return -1;
@@ -1667,6 +1676,7 @@ int main(int argc, char** argv)
         }
       }
     }
+    
     /// select the reference offline vertices
 
     std::vector<TIDA::Vertex> vertices; // keep for now as needed for line 1709
@@ -1683,6 +1693,7 @@ int main(int argc, char** argv)
       double  selection = 0;
       
       //  std::vector<TIDA::Vertex>& vertices = vertices;
+
       if ( debugPrintout ) std::cout << "vertices:\n" << mv << std::endl;      
       
       if ( bestPTVtx || bestPT2Vtx )  {  
@@ -1759,22 +1770,74 @@ int main(int argc, char** argv)
 
           //Get tracks from within reference roi
 
-          refTracks.selectTracks( chains[ic].rois()[0].tracks() );
+	  /// get any objects to exclude matched from the reference selection
 
-          /// get objects if requested
+	  if ( exclude.empty() ) { 
+	    refTracks.selectTracks( chains[ic].rois()[0].tracks() );
+	  }
+	  else { 
 
-          if ( chains[ic].rois()[0].objects().size()>0 ) { 
-            tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
-          }
+	    std::vector<TIDA::Track> tmptracks = chains[ic][0].tracks();
 
-          break;
+	    for ( size_t ix=chains.size() ; ix-- ; ) {
+	      
+	      if ( chains[ix].name()==exclude ) {
+		
+		std::vector<TIDA::Track> extracks = chains[ix][0].tracks();
 
-        }
+		std::vector<TIDA::Track*> refp;
+		std::vector<TIDA::Track*> refx;
+		
+		for ( size_t it=tmptracks.size() ; it-- ; )  refp.push_back( &tmptracks[it] );
+		for ( size_t it=extracks.size()  ; it-- ; )  refx.push_back( &extracks[it] );
 
+		/// match between the reference tracks and the objects to be excluded, 
+		/// and rebuild the reference tracks without the matches  
+		
+		ex_matcher->match( refp, refx );
+
+		std::vector<TIDA::Track*> refp_ex;
+
+		for ( size_t it=refp.size() ; it-- ; ) { 
+		  /// if no match then add back to the standard reefrence 
+		  if ( ex_matcher->matched(refp[it])==0 ) refp_ex.push_back(refp[it]);
+		}
+		
+		refTracks.clear();
+		refTracks.selectTracks( refp_ex );
+
+		if ( debugPrintout ) { 
+		  
+		  std::cout << "\nexclude: " << refp.size() << "\t" << refp_ex.size() << std::endl;
+		  std::cout << "exclude:\n"  << extracks << std::endl;
+		  std::cout << "reference tracks: " << std::endl;
+
+		  size_t it0 = refp_ex.size();
+		  
+		  for ( size_t it=0 ; it<refp.size() && it0>0 ; it++ ) { 
+		    if ( refp[it]==refp_ex[it0-1] ) std::cout << it << "\t" << *refp[it] << "\t" << *refp_ex[--it0] << std::endl;
+		    else 		            std::cout << "\n" << it << "\t" << *refp[it] << "\t----\n" << std::endl;
+		  }
+
+		}
+
+		break;
+	      }
+
+	    }
+	  }
+
+	  /// get objects if requested
+	  
+	  if ( chains[ic].rois()[0].objects().size()>0 ) { 
+	    tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
+	  }
+	  
+	  break; 
+	}
       }
-
     }
-
+    
     if ( !foundReference ) continue;
     
     if ( debugPrintout ) { 
@@ -2280,6 +2343,8 @@ int main(int argc, char** argv)
 
   foutput.Write();
   foutput.Close();
+
+  if ( ex_matcher ) delete ex_matcher;
 
   std::cout << "done" << std::endl;
 
