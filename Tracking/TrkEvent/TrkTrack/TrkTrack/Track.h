@@ -5,14 +5,19 @@
 #ifndef TRKTRACK_H
 #define TRKTRACK_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
 
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "TrkTrack/TrackStateOnSurface.h"
-#include "TrkTrack/TrackInfo.h"
+
+#include "TrkEventPrimitives/FitQuality.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TrkTrack/TrackInfo.h"
+#include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkTrackSummary/TrackSummary.h"
+
 #include "CxxUtils/CachedValue.h"
 #include <atomic>
 #include <memory>
@@ -25,9 +30,6 @@ class TrackCnv_p12;
 
 namespace Trk
 {
-    class TrackSummary;
-    class TrackSummaryTool;
-    class FitQuality;
     using TrackStates = DataVector<const TrackStateOnSurface>;
     /**
      * @brief The ATLAS Track class.
@@ -92,7 +94,7 @@ namespace Trk
      * @author Christos Anastopoulos (MT modifications)
      */
     
-    class Track
+    class Track : public Trk::ObjectCounter<Trk::Track>
     {
       public:
        friend class TrackSlimmingTool;  					     	    
@@ -133,7 +135,7 @@ namespace Trk
 
        Track& operator=(Track&& rhs) = default; //!< move assignment operator
 
-       virtual ~Track(); //!< destructor
+       virtual ~Track() = default; //!< destructor
 
        /**
         * returns true if the track has non-nullptr 
@@ -246,11 +248,6 @@ namespace Trk
         */
        void reset();
 
-       /**									            
-        * return number of Tracks currently created				            
-        */									            
-       static unsigned int numberOfInstantiations() ;				            
-
       protected:
        friend class ::TrackCnv_p1;
        friend class ::TrackCnv_p2;
@@ -334,20 +331,16 @@ namespace Trk
         * This is aclass which stores the identity of where the track 	   
         * was created, fitted, which properties the reconstruction had								   
         */									   
-       Trk::TrackInfo  m_trackInfo;						   
-     
-#ifndef NDEBUG 									     
-       static std::atomic<unsigned int> s_numberOfInstantiations;				   
-#endif       
-       private:
+       Trk::TrackInfo  m_trackInfo;
+
+     private:
        /**
-        * find PerigeeImpl. 
+        * find PerigeeImpl.
         * Assumes that Perigee parameters are currently inValid.
         */
-       void findPerigeeImpl() const;						   
-             
-};//end of class definitions
+       void findPerigeeImpl() const;
 
+    }; // end of class definitions
 
    /**
     * Overload of << operator for MsgStream for debug output

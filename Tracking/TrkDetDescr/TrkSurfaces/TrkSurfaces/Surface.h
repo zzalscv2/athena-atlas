@@ -24,6 +24,7 @@
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkEventPrimitives/SurfaceTypes.h"
 #include "TrkEventPrimitives/SurfaceUniquePtrT.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 //
 #include "TrkParametersBase/Charged.h"
 #include "TrkParametersBase/Neutral.h"
@@ -69,7 +70,7 @@ enum SurfaceOwner
  @author Shaun Roe (interface cleanup)
  */
 
-class Surface
+class Surface: public Trk::ObjectCounter<Trk::Surface>
 {
 
   /** Declare the ILayerBuilder / ITrackingVolumeHelper to be a friend class
@@ -428,12 +429,6 @@ public:
   /** Return properly formatted class name */
   virtual std::string name() const = 0;
 
-  /**return number of surfaces currently created - needed for EDM monitor */
-  static unsigned int numberOfInstantiations();
-  /**return number of free surfaces currently created (i.e. those not belonging
-   * to a DE) - needed for EDM monitor */
-  static unsigned int numberOfFreeInstantiations();
-
   /** method to associate the associated Trk::Layer which is alreay owned
      - only allowed by LayerBuilder
      - only done if no Layer is set already  */
@@ -471,14 +466,6 @@ protected:
 
   /**Tolerance for being on Surface */
   static constexpr double s_onSurfaceTolerance = 10e-5; // 0.1 * micron
-#ifndef NDEBUG
-  /** number of objects of this type in memory - needed for EDM monitor*/
-  static std::atomic<unsigned int> s_numberOfInstantiations;
-
-  /** number of objects of this type in memory which do not belong to a detector
-   * element - needed for EDM monitor*/
-  static std::atomic<unsigned int> s_numberOfFreeInstantiations;
-#endif
 };
 /**Overload of << operator for both, MsgStream and std::ostream for debug
  * output*/

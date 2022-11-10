@@ -7,8 +7,9 @@ atlas_subdir( TrkTrack )
 atlas_add_library( TrkTrack
                    src/*.cxx
                    PUBLIC_HEADERS TrkTrack
-                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel CxxUtils Identifier TrkEventPrimitives TrkMaterialOnTrack TrkMeasurementBase TrkNeutralParameters TrkParameters TrkTrackLink
-                   PRIVATE_LINK_LIBRARIES GaudiKernel TrkSurfaces TrkTrackSummary )
+                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel CxxUtils Identifier TrkEventPrimitives TrkMaterialOnTrack TrkMeasurementBase 
+                   TrkNeutralParameters TrkParameters TrkTrackLink TrkTrackSummary
+                   PRIVATE_LINK_LIBRARIES GaudiKernel TrkSurfaces)
 
 atlas_add_dictionary( TrkTrackDict
                       TrkTrack/TrkTrackDict.h

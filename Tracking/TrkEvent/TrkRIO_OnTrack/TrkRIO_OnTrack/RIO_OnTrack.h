@@ -15,6 +15,7 @@
 // Trk
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkEventPrimitives/LocalParameters.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 // Identifier
 #include "Identifier/Identifier.h"
 
@@ -62,28 +63,33 @@ namespace Trk {
     };
   }
 
-  class RIO_OnTrack : public MeasurementBase {
-    
+  class RIO_OnTrack
+    : public MeasurementBase
+    , public Trk::ObjectCounter<Trk::RIO_OnTrack>
+  {
+
     friend class ITrkEventCnvTool;
       
     public:
+      /** Constructor with parameters and without externalPrediction:
+      LocalParameters, LocalAmg::MatrixX, id& This class owns the
+      LocalParameters and the error matrix */
+      RIO_OnTrack(const LocalParameters& locpars,
+                  const Amg::MatrixX& loccov,
+                  const Identifier& id);
+
       /** Default Constructor for POOL */
-      RIO_OnTrack();
+      RIO_OnTrack() = default;
       /** Copy Constructor */
-      RIO_OnTrack(const RIO_OnTrack& rot);
+      RIO_OnTrack(const RIO_OnTrack& rot) = default;
+      RIO_OnTrack(RIO_OnTrack&& rot) = default;
 
       /** Assignment operator */
-      RIO_OnTrack& operator=(const RIO_OnTrack& rot);
+      RIO_OnTrack& operator=(const RIO_OnTrack& rot) = default;
+      RIO_OnTrack& operator=(RIO_OnTrack&& rot) = default;
 
-      /** Constructor with parameters and without externalPrediction: LocalParameters, 
-      LocalAmg::MatrixX, id&
-      This class owns the LocalParameters and the error matrix */
-      RIO_OnTrack( const LocalParameters& locpars,
-                   const Amg::MatrixX& loccov,
-                   const Identifier& id);
-    
       /** Destructor */
-      virtual ~RIO_OnTrack();
+      virtual ~RIO_OnTrack() = default;
 
       /** Pseudo-constructor, needed to avoid excessive RTTI*/
       virtual RIO_OnTrack* clone() const override = 0;
@@ -133,9 +139,6 @@ namespace Trk {
        /** return the identifier
       -extends MeasurementBase */
       virtual Identifier identify() const final;
-
-      /**return number of parameters currently created*/
-      static unsigned int numberOfInstantiations() ;
      
     protected:
       friend class ::RIO_OnTrackCnv_p1;
@@ -147,12 +150,9 @@ namespace Trk {
           const Trk::PrepRawData* prd)=0;
         
       /**Identifier of the RIO_OnTrack (comes from the associated Trk::PrepRawData)*/     
-      Identifier m_identifier; 
-
-      /** number of objects of this type in memory */
-      static std::atomic<unsigned int> s_numberOfInstantiations;
+      Identifier m_identifier{}; 
   };
-  
+
   inline Identifier RIO_OnTrack::identify() const     
   { return m_identifier; }
 }

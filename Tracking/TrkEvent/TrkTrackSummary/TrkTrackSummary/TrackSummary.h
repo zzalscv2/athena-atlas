@@ -12,6 +12,7 @@ email                : edward.moyse@cern.ch
 #define TRKTRACKSUMMARY_H
 
 #include "TrkTrackSummary/MuonTrackSummary.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #include <atomic>
 #include <bitset>
 #include <iostream>
@@ -286,7 +287,7 @@ caught.
 
 @author Edward.Moyse@cern.ch
 */
-class TrackSummary final
+class TrackSummary final : public Trk::ObjectCounter<Trk::TrackSummary>
 {
 public:
   friend class InDet::InDetTrackSummaryHelperTool;
@@ -352,9 +353,6 @@ public:
    */
   MuonTrackSummary* muonTrackSummary();
 
-  /**return number of parameters currently created*/
-  static unsigned int numberOfInstantiations();
-
   /** Update unset summary information.
    * @param type the type of the summary information to be updated.
    * @param new_value the value to be set for the given type.
@@ -372,11 +370,6 @@ private: // data members
   /**contains the 'hit pattern'*/
   unsigned long m_idHitPattern;
 
-
-#ifndef NDEBUG
-  /** number of objects of this type in memory */
-  static std::atomic<unsigned int> s_numberOfInstantiations;
-#endif
   /** pointer to the MuonTrackSummary */
   std::unique_ptr<MuonTrackSummary> m_muonTrackSummary;
 };

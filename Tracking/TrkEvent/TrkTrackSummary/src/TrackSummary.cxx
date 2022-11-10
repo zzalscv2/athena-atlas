@@ -11,39 +11,30 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "GaudiKernel/MsgStream.h"
 
-#ifndef NDEBUG
-std::atomic<unsigned int> Trk::TrackSummary::s_numberOfInstantiations{ 0 };
-#endif
 const int Trk::TrackSummary::SummaryTypeNotSet = -1;
 
 Trk::TrackSummary::TrackSummary()
-  : m_information(numberOfTrackSummaryTypes, SummaryTypeNotSet)
+  : Trk::ObjectCounter<Trk::TrackSummary>()
+  , m_information(numberOfTrackSummaryTypes, SummaryTypeNotSet)
   , m_idHitPattern(0)
   , m_muonTrackSummary(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new TrackSummary, so increment total count
-#endif
 }
 
 Trk::TrackSummary::TrackSummary(const std::vector<int>& information,
                                 std::bitset<numberOfDetectorTypes>& hitPattern)
-  : m_information(information)
+  : Trk::ObjectCounter<Trk::TrackSummary>()
+  , m_information(information)
   , m_idHitPattern(hitPattern.to_ulong())
   , m_muonTrackSummary(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new TrackSummary, so increment total count
-#endif
 }
 
 Trk::TrackSummary::TrackSummary(const TrackSummary& rhs)
-  : m_information(rhs.m_information)
+  : Trk::ObjectCounter<Trk::TrackSummary>(rhs)
+  , m_information(rhs.m_information)
   , m_idHitPattern(rhs.m_idHitPattern)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new TrackSummary, so increment total count
-#endif
   if (rhs.m_muonTrackSummary) {
     m_muonTrackSummary =
       std::make_unique<MuonTrackSummary>(*rhs.m_muonTrackSummary);
@@ -65,12 +56,7 @@ Trk::TrackSummary::operator=(const TrackSummary& rhs)
   return *this;
 }
 
-Trk::TrackSummary::~TrackSummary()
-{
-#ifndef NDEBUG
-  s_numberOfInstantiations--; // delete TrackSummary, so decrement total count
-#endif
-}
+Trk::TrackSummary::~TrackSummary() = default;
 
 Trk::TrackSummary&
 Trk::TrackSummary::operator+=(const TrackSummary& ts)
@@ -242,15 +228,3 @@ Trk::operator<<(MsgStream& out, const TrackSummary& trackSum)
 {
   return dumpTrackSummary(out, trackSum);
 }
-
-unsigned int
-Trk::TrackSummary::numberOfInstantiations()
-{
-
-#ifndef NDEBUG
-  return s_numberOfInstantiations;
-#else
-  return 0;
-#endif
-}
-

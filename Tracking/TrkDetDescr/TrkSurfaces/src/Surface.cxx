@@ -17,25 +17,15 @@
 #include <iostream>
 #include <utility>
 
-
-#ifndef NDEBUG
-std::atomic<unsigned int> Trk::Surface::s_numberOfInstantiations{ 0 };
-std::atomic<unsigned int> Trk::Surface::s_numberOfFreeInstantiations{ 0 };
-#endif
-
 Trk::Surface::Surface()
-  : m_transforms(nullptr)
+  : Trk::ObjectCounter<Trk::Surface>()
+  , m_transforms(nullptr)
   , m_associatedDetElement(nullptr)
   , m_associatedDetElementId()
   , m_associatedLayer(nullptr)
   , m_materialLayer(nullptr)
   , m_owner(Trk::noOwn)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++;     // EDM Monitor
-  s_numberOfFreeInstantiations++; // EDM Monitor
-
-#endif
 }
 
 #if defined(__GNUC__)
@@ -47,44 +37,37 @@ Trk::Surface::Surface()
 __attribute__((flatten))
 #endif
 Trk::Surface::Surface(const Amg::Transform3D& tform)
-  : m_transforms(std::make_unique<Transforms>(tform))
+  : Trk::ObjectCounter<Trk::Surface>()
+  , m_transforms(std::make_unique<Transforms>(tform))
   , m_associatedDetElement(nullptr)
   , m_associatedDetElementId()
   , m_associatedLayer(nullptr)
   , m_materialLayer(nullptr)
   , m_owner(Trk::noOwn)
 {
-
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // EDM Monitor - increment one instance
-  s_numberOfFreeInstantiations++;
-#endif
 }
 
 Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement)
-  : m_transforms(nullptr)
+  : Trk::ObjectCounter<Trk::Surface>()
+  , m_transforms(nullptr)
   , m_associatedDetElement(&detelement)
   , m_associatedDetElementId()
   , m_associatedLayer(nullptr)
   , m_materialLayer(nullptr)
   , m_owner(Trk::DetElOwn)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // EDM Monitor - increment one instance
-#endif
 }
 
-Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement, const Identifier& id)
-  : m_transforms(nullptr)
+Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement,
+                      const Identifier& id)
+  : Trk::ObjectCounter<Trk::Surface>()
+  , m_transforms(nullptr)
   , m_associatedDetElement(&detelement)
   , m_associatedDetElementId(id)
   , m_associatedLayer(nullptr)
   , m_materialLayer(nullptr)
   , m_owner(Trk::DetElOwn)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // EDM Monitor - increment one instance
-#endif
 }
 
 #if defined(__GNUC__)
@@ -93,22 +76,19 @@ Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement, const Identifier
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+__attribute__((flatten))
 #endif
-// copy constructor - Attention! sets the associatedDetElement to 0 and the identifier to invalid
+// copy constructor - Attention! sets the associatedDetElement to 0 and the
+// identifier to invalid
 Trk::Surface::Surface(const Surface& sf)
-  : m_transforms(std::make_unique<Transforms>(sf.transform()))
+  : Trk::ObjectCounter<Trk::Surface>(sf)
+  , m_transforms(std::make_unique<Transforms>(sf.transform()))
   , m_associatedDetElement(nullptr)
   , m_associatedDetElementId()
   , m_associatedLayer(sf.m_associatedLayer)
   , m_materialLayer(sf.m_materialLayer)
   , m_owner(Trk::noOwn)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // EDM Monitor - increment one instance
-  // this is by definition a free surface since a copy is not allowed to point to the det element
-  s_numberOfFreeInstantiations++;
-#endif
 }
 
 #if defined(__GNUC__)
@@ -122,37 +102,24 @@ __attribute__((flatten))
 // copy constructor with shift - Attention! sets the associatedDetElement to 0
 // and the identifier to invalid also invalidates the material layer
 Trk::Surface::Surface(const Surface& sf, const Amg::Transform3D& shift)
-  : m_transforms(nullptr)
+  : Trk::ObjectCounter<Trk::Surface>(sf)
+  , m_transforms(nullptr)
   , m_associatedDetElement(nullptr)
   , m_associatedDetElementId()
   , m_associatedLayer(nullptr)
   , m_materialLayer(nullptr)
   , m_owner(Trk::noOwn)
 {
-
   if (sf.m_transforms) {
     m_transforms = std::make_unique<Transforms>(
       shift * sf.m_transforms->transform, shift * sf.m_transforms->center);
   } else {
     m_transforms = std::make_unique<Transforms>(Amg::Transform3D(shift));
   }
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // EDM Monitor - increment one instance
-  // this is by definition a free surface since a copy is not allowed to point to the det element
-  s_numberOfFreeInstantiations++;
-#endif
 }
 
 // destructor
-Trk::Surface::~Surface()
-{
-#ifndef NDEBUG
-  s_numberOfInstantiations--; // EDM Monitor - decrement one instance
-  if (isFree()){
-    s_numberOfFreeInstantiations--;
-  }
-#endif
-}
+Trk::Surface::~Surface() = default;
 
 // assignment operator
 // the assigned surfaces loses its link to the detector element
@@ -204,28 +171,6 @@ Amg::RotationMatrix3D
 Trk::Surface::measurementFrame(const Amg::Vector3D&, const Amg::Vector3D&) const
 {
   return transform().rotation();
-}
-
-// for the EDM monitor
-unsigned int
-Trk::Surface::numberOfInstantiations()
-{
-#ifndef NDEBUG
-  return s_numberOfInstantiations;
-#else
-  return 0;
-#endif
-}
-
-// for the EDM monitor
-unsigned int
-Trk::Surface::numberOfFreeInstantiations()
-{
-#ifndef NDEBUG
-  return s_numberOfFreeInstantiations;
-#else
-  return 0;
-#endif
 }
 
 // overload dump for MsgStream operator
