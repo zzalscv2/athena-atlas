@@ -36,12 +36,10 @@ def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kw
     kwargs.setdefault("BadClusterID", 3) # Select the mode to identify suspicous pixel cluster
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-    # need to treat Vertex specifically because at the time of
+    # Vertex as PerigeeExpression is not supported in default reco config because at the time of
     # the track particle creation the primary vertex does not yet exist.
-    # The problem is solved by first creating track particles wrt. the beam line
-    # and correcting the parameters after the vertex finding.
-    kwargs.setdefault("PerigeeExpression", "BeamLine" if flags.InDet.Tracking.perigeeExpression=="Vertex"
-                      else flags.InDet.Tracking.perigeeExpression)
+    # The problem can be solved by first creating track particles wrt. the beam line
+    kwargs.setdefault("PerigeeExpression", flags.InDet.Tracking.perigeeExpression)
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
 
@@ -104,12 +102,10 @@ def ITkTrackParticleCreatorToolCfg(flags, name="ITkTrackParticleCreatorTool", **
     kwargs.setdefault("BadClusterID", 3) # Select the mode to identify suspicous pixel cluster
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-    # need to treat Vertex specifically because at the time of
+    # Vertex as PerigeeExpression is not supported in default reco config because at the time of
     # the track particle creation the primary vertex does not yet exist.
-    # The problem is solved by first creating track particles wrt. the beam line
-    # and correcting the parameters after the vertex finding.
-    kwargs.setdefault("PerigeeExpression", "BeamLine" if flags.ITk.Tracking.perigeeExpression=="Vertex"
-                      else flags.ITk.Tracking.perigeeExpression)
+    # The problem can be solved by first creating track particles wrt. the beam line
+    kwargs.setdefault("PerigeeExpression", flags.ITk.Tracking.perigeeExpression)
     kwargs.setdefault("IBLParameterSvc", "")
 
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
