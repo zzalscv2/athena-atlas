@@ -8,6 +8,7 @@
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
 #include "Run2ToRun3TrigNavConverterV2.h"
+#include "TrigCompositeUtils/ChainNameParser.h"
 
 namespace TCU = TrigCompositeUtils;
 
@@ -262,11 +263,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
   {
     ATH_CHECK(numberOfHNodesPerProxyNotExcessive(convProxies));
   }
-
+  
+  ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
   ATH_CHECK(linkFeaNode(convProxies, *decisionOutput, *run2NavigationPtr, context));
   ATH_CHECK(linkRoiNode(convProxies, *run2NavigationPtr));
   ATH_CHECK(linkTrkNode(convProxies, *run2NavigationPtr));
-  ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
   ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
 
@@ -285,7 +286,7 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
   ATH_CHECK(not m_configSvc->chains().empty());
   for (auto ptrChain : m_configSvc->chains())
   {
-    std::string chainName = ptrChain->name();
+    std::string chainName = ptrChain->name();    
     if (not m_chainsToSave.empty())
     {
       auto found = std::find(m_chainsToSave.begin(), m_chainsToSave.end(), chainName);
@@ -294,21 +295,61 @@ StatusCode Run2ToRun3TrigNavConverterV2::extractTECtoChainMapping(TEIdToChainsMa
         continue;
       }
     }
-
+    // chains with a single leg
     HLT::Identifier chainId = HLT::Identifier(chainName);
     ATH_MSG_DEBUG(" CHAIN name " << chainName << " CHAIN Id " << chainId);
     for (auto ptrHLTSignature : ptrChain->signatures())
     {
       for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
       {
-        unsigned int trigConfDataId = ptrHLTTE->id();
-        allTEs[trigConfDataId].insert(chainId);
+        unsigned int teId = ptrHLTTE->id();
+        allTEs[teId].insert(chainId);
         if (ptrHLTSignature == ptrChain->signatures().back())
         {
-          finalTEs[trigConfDataId].insert(chainId);
+          finalTEs[teId].insert(chainId);
         }
       }
     }
+    // chains with a multiple legs
+    std::vector<int> multiplicities = ChainNameParser::multiplicities(chainName);
+    if ( multiplicities.size() > 1 ) {
+      // the chain structure (in terms of multiplicities) may change along the way
+      // we'll assign legs only to these TEs of the steps that have identical multiplicity pattern
+      // e.g. for the chain: HLT_2g25_loose_g20 the multiplicities are: [2, 1]
+      // 
+      ATH_MSG_DEBUG("CHAIN " << chainName << " needs legs: " << multiplicities );
+
+      for (auto ptrHLTSignature : ptrChain->signatures())
+        {
+          std::vector<int> teCounts;
+          std::vector<unsigned int> teIds;
+          unsigned int lastSeenId = 0;
+          for (auto ptrHLTTE : ptrHLTSignature->outputTEs())
+          {
+            if ( lastSeenId != ptrHLTTE->id()) {
+              teCounts.push_back(1);
+              teIds.push_back(ptrHLTTE->id());
+            } else { 
+              teCounts.back()++;
+            }
+            lastSeenId = ptrHLTTE->id();
+          }
+          const bool isLastStep = ptrHLTSignature == ptrChain->signatures().back();
+
+          ATH_MSG_DEBUG("TE multiplicities seen in this step " << teCounts);
+          if ( multiplicities == teCounts ) {
+            ATH_MSG_DEBUG("There is a match, will assign chain leg IDs to TEs " << teCounts);
+            for ( size_t legNumber = 0; legNumber < teIds.size(); ++ legNumber){
+              HLT::Identifier chainLegId = TrigCompositeUtils::createLegName(chainId, legNumber);
+              allTEs[teIds[legNumber]].insert(chainLegId);
+              if ( isLastStep ) {
+                finalTEs[teIds[legNumber]].insert(chainLegId);
+              }
+            }
+          }
+        }
+    }
+
   }
   ATH_MSG_DEBUG("Recognised " << allTEs.size() << " kinds of TEs and among them " << finalTEs.size() << " final types");
   return StatusCode::SUCCESS;
