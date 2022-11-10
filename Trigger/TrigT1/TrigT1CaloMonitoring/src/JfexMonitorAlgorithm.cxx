@@ -71,18 +71,18 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
   // jJ
   auto jFexSRJetModule  = Monitored::Scalar<int>  ("jJ_jFexNumber",0);
   auto jFexSRJetFPGA    = Monitored::Scalar<int>  ("jJ_fpgaNumber",0);
-  auto jFexSRJetEt  = Monitored::Scalar<int>  ("jJ_Et",0);
-  auto jFexSRJeteta = Monitored::Scalar<float>("jJ_Eta",0.0);
-  auto jFexSRJetphi = Monitored::Scalar<float>("jJ_Phi",0.0);
+  auto jFexSRJetEt      = Monitored::Scalar<int>  ("jJ_Et",0);
+  auto jFexSRJeteta     = Monitored::Scalar<float>("jJ_Eta",0.0);
+  auto jFexSRJetphi     = Monitored::Scalar<float>("jJ_Phi",0.0);
   auto jFexSRJeteta_glo = Monitored::Scalar<float>("jJ_GlobalEta",0.0);
   auto jFexSRJetphi_glo = Monitored::Scalar<float>("jJ_GlobalPhi",0.0);
   
   // jLJ
   auto jFexLRJetModule  = Monitored::Scalar<int>  ("jLJ_jFexNumber",0);
   auto jFexLRJetFPGA    = Monitored::Scalar<int>  ("jLJ_fpgaNumber",0);
-  auto jFexLRJetEt  = Monitored::Scalar<int>  ("jLJ_Et",0);
-  auto jFexLRJeteta = Monitored::Scalar<float>("jLJ_Eta",0.0);
-  auto jFexLRJetphi = Monitored::Scalar<float>("jLJ_Phi",0.0);
+  auto jFexLRJetEt      = Monitored::Scalar<int>  ("jLJ_Et",0);
+  auto jFexLRJeteta     = Monitored::Scalar<float>("jLJ_Eta",0.0);
+  auto jFexLRJetphi     = Monitored::Scalar<float>("jLJ_Phi",0.0);
   auto jFexLRJeteta_glo = Monitored::Scalar<float>("jLJ_GlobalEta",0.0);
   auto jFexLRJetphi_glo = Monitored::Scalar<float>("jLJ_GlobalPhi",0.0);
   
@@ -90,24 +90,24 @@ StatusCode JfexMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const
   // jTau
   auto jFexTauModule  = Monitored::Scalar<int>  ("jTau_jFexNumber",0);
   auto jFexTauFPGA    = Monitored::Scalar<int>  ("jTau_fpgaNumber",0);
-  auto jFexTauEt  = Monitored::Scalar<int>  ("jTau_Et",0);
-  auto jFexTauIso = Monitored::Scalar<int>  ("jTau_Iso",0);
-  auto jFexTaueta = Monitored::Scalar<float>("jTau_Eta",0.0);
-  auto jFexTauphi = Monitored::Scalar<float>("jTau_Phi",0.0);
+  auto jFexTauEt      = Monitored::Scalar<int>  ("jTau_Et",0);
+  auto jFexTauIso     = Monitored::Scalar<int>  ("jTau_Iso",0);
+  auto jFexTaueta     = Monitored::Scalar<float>("jTau_Eta",0.0);
+  auto jFexTauphi     = Monitored::Scalar<float>("jTau_Phi",0.0);
   auto jFexTaueta_glo = Monitored::Scalar<float>("jTau_GlobalEta",0.0);
   auto jFexTauphi_glo = Monitored::Scalar<float>("jTau_GlobalPhi",0.0);
   
   // jEM
   auto jFexEMModule  = Monitored::Scalar<int>  ("jEM_jFexNumber",0);
   auto jFexEMFPGA    = Monitored::Scalar<int>  ("jEM_fpgaNumber",0);
-  auto jFexEMEt  = Monitored::Scalar<int>  ("jEM_Et",0);
-  auto jFexEMeta = Monitored::Scalar<float>("jEM_Eta",0.0);
-  auto jFexEMphi = Monitored::Scalar<float>("jEM_Phi",0.0);
+  auto jFexEMEt      = Monitored::Scalar<int>  ("jEM_Et",0);
+  auto jFexEMeta     = Monitored::Scalar<float>("jEM_Eta",0.0);
+  auto jFexEMphi     = Monitored::Scalar<float>("jEM_Phi",0.0);
   auto jFexEMeta_glo = Monitored::Scalar<float>("jEM_GlobalEta",0.0);
   auto jFexEMphi_glo = Monitored::Scalar<float>("jEM_GlobalPhi",0.0);
-  auto jFexEMIso = Monitored::Scalar<int>  ("jEM_Iso",0);
-  auto jFexEMf1  = Monitored::Scalar<int>  ("jEM_f1",0);
-  auto jFexEMf2  = Monitored::Scalar<int>  ("jEM_f2",0);
+  auto jFexEMIso     = Monitored::Scalar<int>  ("jEM_Iso",0);
+  auto jFexEMf1      = Monitored::Scalar<int>  ("jEM_f1",0);
+  auto jFexEMf2      = Monitored::Scalar<int>  ("jEM_f2",0);
   
   // jXE
   auto jFexMETX   = Monitored::Scalar<int>  ("jXE_X",0);
