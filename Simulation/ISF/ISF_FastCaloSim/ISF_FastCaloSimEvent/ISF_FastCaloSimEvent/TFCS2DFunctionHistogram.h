@@ -20,7 +20,7 @@ class TFCS2DFunctionHistogram:public TFCS2DFunction
     TFCS2DFunctionHistogram(TH2* hist=nullptr) {if(hist) Initialize(hist);};
     ~TFCS2DFunctionHistogram() {};
 
-    virtual void Initialize(TH2* hist);
+    void Initialize(TH2* hist);
 
     using TFCS2DFunction::rnd_to_fct;
     virtual void rnd_to_fct(float& valuex,float& valuey,float rnd0,float rnd1) const;

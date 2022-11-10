@@ -20,7 +20,7 @@ class TFCS1DFunctionInt32Histogram:public TFCS1DFunction
     TFCS1DFunctionInt32Histogram(const TH1* hist=nullptr) {if(hist) Initialize(hist);};
     ~TFCS1DFunctionInt32Histogram() {};
 
-    virtual void Initialize(const TH1* hist);
+    void Initialize(const TH1* hist);
 
     using TFCS1DFunction::rnd_to_fct;
     

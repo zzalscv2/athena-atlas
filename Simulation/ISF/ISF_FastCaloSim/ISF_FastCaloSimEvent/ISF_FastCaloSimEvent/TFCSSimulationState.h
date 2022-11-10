@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSSimulationState_h
@@ -113,6 +113,7 @@ class TFCSSimulationState:public TObject
       
       //template set method. No general implementation exist, only explict implementations are added after the class definition
       template<class T> void set(T val);
+      void set(const AuxInfo_t& val);
     };
     
     // FNV-1a 32bit hashing algorithm that is evaluated during compile time
@@ -148,7 +149,7 @@ class TFCSSimulationState:public TObject
 };
 
 //Explicit template implementations for template<class T> void TFCSSimulationState::AuxInfo_t::set(T val);
-template<> inline void TFCSSimulationState::AuxInfo_t::set<const TFCSSimulationState::AuxInfo_t>(const TFCSSimulationState::AuxInfo_t val) {*this=val;}
+inline void TFCSSimulationState::AuxInfo_t::set(const TFCSSimulationState::AuxInfo_t& val) {*this=val;}
 template<> inline void TFCSSimulationState::AuxInfo_t::set<bool>(bool val)     {b=val;}
 template<> inline void TFCSSimulationState::AuxInfo_t::set<char>(char val)     {c=val;}
 template<> inline void TFCSSimulationState::AuxInfo_t::set<int>(int val)       {i=val;}

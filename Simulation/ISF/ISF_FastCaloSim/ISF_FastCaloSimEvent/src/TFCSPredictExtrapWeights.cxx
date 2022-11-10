@@ -87,7 +87,7 @@ bool TFCSPredictExtrapWeights::operator==(const TFCSParametrizationBase& ref) co
 
 // getNormInputs()
 // Get values needed to normalize inputs
-bool TFCSPredictExtrapWeights::getNormInputs(std::string etaBin, std::string FastCaloTXTInputFolderName)
+bool TFCSPredictExtrapWeights::getNormInputs(const std::string& etaBin, const std::string& FastCaloTXTInputFolderName)
 {
   ATH_MSG_DEBUG(" Getting normalization inputs... ");
 
@@ -234,7 +234,7 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationSta
 
 // initializeNetwork()
 // Initialize lwtnn network 
-bool TFCSPredictExtrapWeights::initializeNetwork(int pid, std::string etaBin, std::string FastCaloNNInputFolderName)
+bool TFCSPredictExtrapWeights::initializeNetwork(int pid, const std::string& etaBin, const std::string& FastCaloNNInputFolderName)
 {
 
   ATH_MSG_INFO("Using FastCaloNNInputFolderName: " << FastCaloNNInputFolderName );

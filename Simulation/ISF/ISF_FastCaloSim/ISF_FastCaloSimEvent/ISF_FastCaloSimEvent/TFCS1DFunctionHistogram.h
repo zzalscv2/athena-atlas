@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionHistogram_h
@@ -22,8 +22,8 @@ class TFCS1DFunctionHistogram:public TFCS1DFunction
     virtual double rnd_to_fct(double rnd) const;
     TH1* vector_to_histo();
     double get_inverse(double rnd) const;
-    double linear(double x1,double x2,double y1,double y2,double x) const;
-    double non_linear(double x1,double x2,double y1,double y2,double x) const;
+    double linear(double y1,double y2,double x1,double x2,double x) const;
+    double non_linear(double y1,double y2,double x1,double x2,double x) const;
     
     double  get_maxdev(TH1*, TH1D*);
     void    smart_rebin_loop(TH1* hist, double);

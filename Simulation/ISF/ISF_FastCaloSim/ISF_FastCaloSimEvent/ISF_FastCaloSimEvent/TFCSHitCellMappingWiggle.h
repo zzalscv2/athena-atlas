@@ -29,7 +29,7 @@ public:
   void initialize(const std::vector< const TFCS1DFunction* >& functions, const std::vector< float >& bin_low_edges);
 
   void initialize(TH1* histogram,float xscale=1);
-  void initialize(const std::vector< const TH1* > histograms, std::vector< float > bin_low_edges, float xscale=1);
+  void initialize(const std::vector< const TH1* >& histograms, const std::vector< float >& bin_low_edges, float xscale=1);
 
   inline unsigned int get_number_of_bins() const {return m_functions.size();};
   

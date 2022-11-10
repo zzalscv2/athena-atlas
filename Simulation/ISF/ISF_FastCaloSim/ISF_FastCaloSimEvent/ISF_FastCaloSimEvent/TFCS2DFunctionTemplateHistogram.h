@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS2DFunctionTemplateHistogram_h
@@ -38,7 +38,7 @@ template <typename Txvec, typename Tyvec, typename Tz, typename Trandom=float> c
     
 
     ///Initialize from root histogram. Depending on the precision of the x- and y-axis, bins are merged if numerical identical
-    virtual void Initialize(const TH2* hist) {
+    void Initialize(const TH2* hist) {
 	Int_t nbinsx = hist->GetNbinsX();
 	Int_t nbinsy = hist->GetNbinsY();
       std::vector<double> temp_HistoContents;
