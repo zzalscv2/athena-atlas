@@ -41,8 +41,8 @@ namespace xAOD {
     void setZdcChannel(int );
 
     
-    void setWaveform(const std::string, const std::vector<uint16_t>&);
-    const std::vector<uint16_t>& getWaveform(const std::string) const;
+    void setWaveform(const std::string&, const std::vector<uint16_t>&);
+    const std::vector<uint16_t>& getWaveform(const std::string&) const;
     
 
    }; // class ZdcModule_v1
