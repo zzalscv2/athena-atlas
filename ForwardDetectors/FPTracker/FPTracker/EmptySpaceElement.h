@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTACKER_EMPTYSPACEELEMENT_H
@@ -41,7 +41,7 @@ namespace FPTracker{
     std::string label() const;
 
     void track(IParticle&) const;
-    void calibrate(IParticle&) const;
+    void calibrate(IParticle&);
 
     typedef boost::shared_ptr< const EmptySpaceElement >  ConstPtr_t;
 

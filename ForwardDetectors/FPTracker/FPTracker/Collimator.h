@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_COLLIMATOR_H
@@ -34,19 +34,19 @@ namespace FPTracker{
 
     void track(IParticle&)                      const;
     //center collimator jaws on calibration particle trajectory
-    void calibrate(IParticle&)                  const;
+    void calibrate(IParticle&);
 
 
-    typedef boost::shared_ptr< const Collimator >  ConstPtr_t;
-    typedef std::vector< ConstPtr_t >              Container_t;
+    typedef boost::shared_ptr< Collimator >   Ptr_t;
+    typedef std::vector< Ptr_t >              Container_t;
 
   private:
 
     static const std::string s_label;
     Point  m_position;
     double m_xaperture;
-    mutable double m_xouter;
-    mutable double m_xinner;
+    double m_xouter;
+    double m_xinner;
     Side   m_side;
 
     bool isOutOfAperture(const TransversePoint&) const;

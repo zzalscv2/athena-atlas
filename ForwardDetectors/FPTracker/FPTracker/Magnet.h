@@ -53,13 +53,13 @@ namespace FPTracker{
     std::string label()              const;
 
     void track(IParticle&)           const;
-    void calibrate(IParticle&)       const;
+    void calibrate(IParticle&);
 
     IBeamElement::ConstPtr_t clone() const;
 
 
-    typedef boost::shared_ptr< const Magnet >     ConstPtr_t;
-    typedef std::vector< ConstPtr_t >             Container_t;
+    typedef boost::shared_ptr< Magnet >     Ptr_t;
+    typedef std::vector< Ptr_t >            Container_t;
     
     enum Type {hbDipole, hfQuadrupole, vfQuadrupole, vbDipole, notAMagnet};
 

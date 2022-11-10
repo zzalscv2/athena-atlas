@@ -96,7 +96,7 @@ namespace FPTracker{
 
   }
   
-  void Magnet::calibrate(IParticle& particle) const
+  void Magnet::calibrate(IParticle& particle)
   {
     return this->track(particle);
   }

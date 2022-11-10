@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FPTRACKER_PLANE_H
@@ -33,7 +33,7 @@ namespace FPTracker{
 
     bool isEndElement()               const; 
     void track(IParticle&)            const;
-    void calibrate(IParticle&)        const;
+    void calibrate(IParticle&);
 
     typedef boost::shared_ptr< const Plane >   ConstPtr_t;
     typedef std::vector< ConstPtr_t >          Container_t;

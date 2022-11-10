@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FPTracker/magnetFactory.h"
@@ -84,7 +84,7 @@ namespace FPTracker{
     throw std::logic_error("unknown magnet type");
   }
   
-  Magnet::ConstPtr_t magnetFactory(
+  Magnet::Ptr_t magnetFactory(
 				   double x,
 				   double y,
 				   double center,
@@ -103,7 +103,7 @@ namespace FPTracker{
     IBender::ConstPtr_t bender( benderFactory(type, length, strength, pbeam0, side) );
     std::string label( typeToString(type) );
     
-    return Magnet::ConstPtr_t(new Magnet( x,
+    return Magnet::Ptr_t(new Magnet( x,
 					  y, 
 					  center, 
 					  strength, 

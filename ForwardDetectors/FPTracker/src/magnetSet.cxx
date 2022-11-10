@@ -257,7 +257,7 @@ namespace FPTracker
 	double mmagnet_x  = beamlineXPosition(mmagcen)[0];
 	double mmagnet_y  = beamlineXPosition(mmagcen)[1];
 	
-	Magnet::ConstPtr_t mptr = magnetFactory(mmagnet_x,
+	Magnet::Ptr_t mptr = magnetFactory(mmagnet_x,
 						mmagnet_y,
 						mmagcen,
 						magstrength,

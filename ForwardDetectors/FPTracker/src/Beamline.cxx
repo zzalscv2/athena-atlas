@@ -42,11 +42,10 @@ namespace FPTracker{
 
   Beamline::Beamline(){}
 
-  Beamline::Beamline(IBeamElement::ConstListIter_t begin, IBeamElement::ConstListIter_t end)
+  Beamline::Beamline(IBeamElement::ListIter_t begin, IBeamElement::ListIter_t end)
   { // exception aware: attemt to create as a temp, if no exception, do safe swap ....
     IBeamElement::Container_t temp(begin, end);
     IBeamElement::Iter_t tempIter = findBeamLineEnd(temp);
-    //BeamElementContainer temp2(temp.begin(), endIter(temp));
     IBeamElement::Container_t temp2(temp.begin(), tempIter);
     
     m_elements.swap(temp2); 
@@ -107,40 +106,28 @@ namespace FPTracker{
     
   }
 
-  class Calibrator{
-  public:
-    Calibrator(IParticle& particle):m_particle(particle)
-    {
-    }
-    
-    bool  operator()(const IBeamElement::ConstPtr_t& be)
-    {
-      be->calibrate(m_particle);
-      return m_particle.isOutOfAperture();
-    }
-  private:
-    IParticle& m_particle;
 
-  };
-
-
-  void Beamline::calibrate(IParticle& particle) const
+  void Beamline::calibrate(IParticle& particle)
   {
-    IBeamElement::ConstIter_t nextElement = std::lower_bound(m_elements.begin(), 
+    IBeamElement::Iter_t nextElement = std::lower_bound(m_elements.begin(),
 							     m_elements.end(), 
 							     particle.z(),  
 							     zPosNextElement() );
 
     // pass the particle to succesive beam elements until either it goes out of aperture, or it reaches the end plane.
-    IBeamElement::ConstIter_t lastElement = std::find_if(nextElement,
-							 m_elements.end(),
-							 Calibrator(particle)
-							 );
-    if( lastElement != m_elements.end() )
+
+    IBeamElement::ConstIter_t iter;
+    for (iter = nextElement; iter!=m_elements.end(); ++iter) {
+      (*iter)->calibrate(particle);
+      if (particle.isOutOfAperture()) break;
+    }
+
+
+    if( iter != m_elements.end() )
       {
 	std::ostringstream s;
 	s<<"Calibration particle did not reach end of beamline\n"<<particle<<'\n';
-	s<<"Particle stopped at beam element "<<**lastElement<<'\n';
+	s<<"Particle stopped at beam element "<<**iter<<'\n';
 	throw std::runtime_error(s.str());
       }
   
