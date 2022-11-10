@@ -252,7 +252,13 @@ template <class T> void set_signal_process_vertex(GenEvent* e, T v) {
 }
 inline ConstGenVertexPtr signal_process_vertex(const GenEvent* e) { for (auto v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>("signal_process_vertex")) return v; return nullptr; }
 inline      GenVertexPtr signal_process_vertex(GenEvent* e) { for (auto v: e->vertices()) if (v->attribute<HepMC3::IntAttribute>("signal_process_vertex")) return v; return nullptr; }
-inline bool valid_beam_particles(const GenEvent* e) { if (!e) return false; if  (e->beams().size()!=2) return false; return true;}
+inline bool valid_beam_particles(const GenEvent* e) { 
+  if (!e) return false; 
+  size_t nBeams = 0;
+  for (const auto& p : e->beams()) { if (p->status() == 4)  ++nBeams; }
+  if  (nBeams != 2) return false; 
+  return true;
+}
 
 template <class T> bool suggest_barcode(T p, int i) {
   if (!p->parent_event()) return false;
