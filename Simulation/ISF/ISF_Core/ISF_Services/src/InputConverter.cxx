@@ -712,7 +712,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const ISF::ISFParti
       G4Exception("iGeant4::TransportTool", "NoISFTruthBinding", FatalException, description);
       return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
-  HepMC::GenParticlePtr             genpart = truthBinding->getTruthParticle();
+  HepMC::ConstGenParticlePtr        genpart = truthBinding->getTruthParticle();
   HepMC::ConstGenParticlePtr primaryGenpart = truthBinding->getPrimaryTruthParticle();
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(isp.pdgCode());
@@ -891,7 +891,12 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const ISF::ISFParti
       }
     }  
 
-    genpart->set_momentum(HepMC::FourVector(px,py,pz,pe));
+#ifdef HEPMC3
+    auto genpart_nc = std::const_pointer_cast<HepMC3::GenParticle>(genpart);
+#else
+    auto genpart_nc = const_cast<HepMC::GenParticlePtr>(genpart);
+#endif
+    genpart_nc->set_momentum(HepMC::FourVector(px,py,pz,pe));
   } // Truth was detected
 
   ATH_MSG_VERBOSE("PrimaryParticleInformation:");
