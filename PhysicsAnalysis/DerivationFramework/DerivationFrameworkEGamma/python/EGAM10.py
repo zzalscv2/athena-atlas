@@ -396,10 +396,6 @@ def EGAM10Cfg(ConfigFlags):
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM10SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM10TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM10SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',
             TriggerList = EGAM10TriggerListsHelper.Run2TriggerNamesNoTau)

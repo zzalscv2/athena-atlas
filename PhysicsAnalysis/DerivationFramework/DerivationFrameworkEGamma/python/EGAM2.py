@@ -329,13 +329,13 @@ def EGAM2Cfg(ConfigFlags):
     # it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run
     # multiple times in a train.
-    # DODO: restrict it to relevant triggers
+    # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     EGAM2TriggerListsHelper = TriggerListsHelper()
-    EGAM2TriggerListsHelper.Run3TriggerNames = \
-        EGAM2TriggerListsHelper.Run3TriggerNamesNoTau
-    EGAM2TriggerListsHelper.Run3TriggerNamesTau = []
-    EGAM2TriggerListsHelper.Run2TriggerNamesTau = []
+    if ConfigFlags.Trigger.EDMVersion == 3:
+        EGAM2TriggerListsHelper.Run3TriggerNames = \
+            EGAM2TriggerListsHelper.Run3TriggerNamesNoTau
+        EGAM2TriggerListsHelper.Run3TriggerNamesTau = []
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM2KernelCfg(ConfigFlags,
@@ -476,10 +476,6 @@ def EGAM2Cfg(ConfigFlags):
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM2SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM2TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM2SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',
