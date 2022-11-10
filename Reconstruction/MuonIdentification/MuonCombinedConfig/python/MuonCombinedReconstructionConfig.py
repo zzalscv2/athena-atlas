@@ -91,8 +91,9 @@ def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
     kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
-    kwargs.setdefault("TGCPrepDataLocation",
-                      'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    # kwargs.setdefault("TGCPrepDataLocation",
+    #                   'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    kwargs.setdefault("TGCPrepDataLocation", 'TGC_Measurements') # This is probably wrong, but matches old-config. #FIXME
     kwargs.setdefault("CombinedTrackCollection", "MuGirlStauCombinedTracks")
     kwargs.setdefault("METrackCollection", "")
     kwargs.setdefault("SegmentCollection", "TrkStauSegments")
@@ -335,7 +336,7 @@ def EMEO_MuonCreatorAlgCfg(flags, name="MuonCreatorAlg_EMEO", **kwargs):
 
 def StauCreatorAlgCfg(flags, name="StauCreatorAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCreatorToolCfg
-    result = MuonCreatorToolCfg(flags, BuildStauContainer=True)
+    result = MuonCreatorToolCfg(flags, BuildStauContainer=True, name='StauCreatorTool')
     kwargs.setdefault("MuonCreatorTool", result.popPrivateTools())
     kwargs.setdefault("MuonContainerLocation", "Staus")
     kwargs.setdefault("CombinedLocation", "CombinedStau")

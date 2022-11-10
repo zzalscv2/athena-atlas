@@ -137,7 +137,7 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
     muon_edm_printer = result.getPrimaryAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault("Printer", muon_edm_printer)
 
-    kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool(
+    kwargs.setdefault("MuonPrinter", CompFactory.Rec.MuonPrintingTool( name = 'MuonPrintingTool',
         MuonStationPrinter=muon_edm_printer))
 
     acc = ParticleCaloExtensionToolCfg(flags, StartFromPerigee=True)
@@ -182,7 +182,7 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
         kwargs.setdefault("UseCaloCells", False)       
     else:
         from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
-        kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags)))
+        kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, name='MuonRecoSelTool')))
     # This tool needs MuonScatteringAngleSignificanceTool... which in turn needs TrackingVolumeSvc.
     # FIXME - probably this should be someplace central.
     trackingVolSvc = CompFactory.Trk.TrackingVolumesSvc(
@@ -857,7 +857,7 @@ def TrackDepositInCaloToolCfg(flags, name='TrackDepositInCaloTool', **kwargs):
     acc = AtlasExtrapolatorCfg(flags)
     kwargs.setdefault("ExtrapolatorHandle", acc.popPrivateTools())
     result.merge(acc)
-    acc = ParticleCaloCellAssociationToolCfg(flags)
+    acc = ParticleCaloCellAssociationToolCfg(flags, name="Rec::ParticleCaloCellAssociationTool")
     kwargs.setdefault("ParticleCaloCellAssociationTool",
                       acc.popPrivateTools())
     result.merge(acc)
@@ -1053,7 +1053,7 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     # segmentmaker also used by MuonSeededSegmentFinder below
     kwargs.setdefault("MuonSegmentMaker", segmentmaker)
     kwargs.setdefault("MuonSegmentMakerT0Fit", result.popToolsAndMerge(DCMathSegmentMakerCfg(
-        flags, name="DCMathStauSegmentMaker", MdtCreator=rotcreator, doSegmentT0Fit=True)))
+        flags, name="DCMathT0FitSegmentMaker", MdtCreator=rotcreator, doSegmentT0Fit=True)))
 
     kwargs.setdefault("MuonLayerSegmentMatchingTool", result.popToolsAndMerge(MuonLayerSegmentMatchingToolCfg(flags)))
 
@@ -1066,6 +1066,7 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     kwargs.setdefault("MuonPRDSelectionToolStau", result.popToolsAndMerge(
         MuonPRDSelectionToolCfg(flags, MdtDriftCircleOnTrackCreator=rotcreator)))
     kwargs.setdefault("MdtDriftCircleOnTrackCreator",   result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
+    kwargs.setdefault("MdtDriftCircleOnTrackCreatorStau", rotcreator)
     # Now setup MuonInsideOutRecoTool property of MuonStauRecoTool. Long chain here! Could split for clarity. Another option would be to have a Stau flag on
     # shared tool functions.
     chamberholerecoverytool = result.popToolsAndMerge(
@@ -1083,7 +1084,7 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     muoncandidatetrackbuilder = CompFactory.Muon.MuonCandidateTrackBuilderTool(
         name="MuonStauCandidateTrackBuilderTool", MuonTrackBuilder=trackbuilder)
     kwargs.setdefault("MuonInsideOutRecoTool", result.popToolsAndMerge(
-        MuonInsideOutRecoToolCfg(flags, MuonCandidateTrackBuilderTool=muoncandidatetrackbuilder)))
+        MuonInsideOutRecoToolCfg(flags, name='MuonStauInsideOutRecoTool', MuonCandidateTrackBuilderTool=muoncandidatetrackbuilder)))
     # Rest
 
     kwargs.setdefault("MdtCalibrationDbTool", result.popToolsAndMerge(
