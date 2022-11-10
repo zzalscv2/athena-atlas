@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdlib>
 
+#include "CxxUtils/checker_macros.h"
 #include "DataQualityInterfaces/HanConfig.h"
 #include "DataQualityInterfaces/HanOutput.h"
 #include "DataQualityInterfaces/HanInputRootFile.h"
@@ -13,7 +14,7 @@
 #include "dqm_core/LibraryManager.h"
 
 
-int main( )
+int main ATLAS_NOT_THREAD_SAFE ( )
 {
   const auto* chconfig = std::getenv("HANCONFIGFILE");
   const auto* cdata = std::getenv("HISTFILE");
