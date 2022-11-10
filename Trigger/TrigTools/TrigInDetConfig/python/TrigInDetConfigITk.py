@@ -41,6 +41,9 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                                                     SCT_SP_ContainerName="ITkStripTrigSpacePoints", 
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberToolITk_FTF") ) )
 
+    from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
+    monTool = TrigFastTrackFinderMonitoring(name = "trigfasttrackfinder_" + signature, doResMon=False)
+
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_" + signature,
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberToolITk_FTF" ),
                                             SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool" + signature ),
@@ -68,7 +71,8 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                             useGPU                   = False,
                                             DoubletDR_Max            = 270,
                                             ITkMode                  = True, 
-                                            StandaloneMode           = False)
+                                            StandaloneMode           = False,
+                                            MonTool = monTool)
 
     acc.addEventAlgo( ftf, primary=True )
 
