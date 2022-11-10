@@ -215,15 +215,6 @@ def PHYSCfg(ConfigFlags):
     if ConfigFlags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSSlimmingHelper)        
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = PHYSTriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSSlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = PHYSTriggerListsHelper.Run3TriggerNamesNoTau)
-
 
     # Output stream    
     PHYSItemList = PHYSSlimmingHelper.GetItemList()

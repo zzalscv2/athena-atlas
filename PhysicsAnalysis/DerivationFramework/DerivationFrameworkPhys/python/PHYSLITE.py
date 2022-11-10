@@ -290,29 +290,42 @@ def PHYSLITECfg(ConfigFlags):
     PHYSLITESlimmingHelper.IncludeBJetTriggerContent = False
     PHYSLITESlimmingHelper.IncludeBPhysTriggerContent = False
     PHYSLITESlimmingHelper.IncludeMinBiasTriggerContent = False
-
+    
     # Trigger matching
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
+        # Need to re-run matching so that new Analysis<X> containers are matched to triggers
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import TriggerMatchingCommonRun2Cfg
+        acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
+                                               name = "PHYSLITETrigMatchNoTau", 
+                                               OutputContainerPrefix = "AnalysisTrigMatch_", 
+                                               ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau,
+                                               InputElectrons = "AnalysisElectrons",
+                                               InputPhotons = "AnalysisPhotons",
+                                               InputMuons = "AnalysisMuons",
+                                               InputTaus = "AnalysisTauJets"))
+        acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
+                                               name = "PHYSLITETrigMatchTau", 
+                                               OutputContainerPrefix = "AnlaysisTrigMatch_", 
+                                               ChainNames = PHYSLITETriggerListsHelper.Run2TriggerNamesTau, 
+                                               DRThreshold = 0.2,
+                                               InputElectrons = "AnalysisElectrons",
+                                               InputPhotons = "AnalysisPhotons",
+                                               InputMuons = "AnalysisMuons",
+                                               InputTaus = "AnalysisTauJets"))
+        # Now add the resulting decorations to the output 
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
+                                         OutputContainerPrefix = "AnalysisTrigMatch_", 
                                          TriggerList = PHYSLITETriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
+                                         OutputContainerPrefix = "AnalysisTrigMatch_",
                                          TriggerList = PHYSLITETriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
     if ConfigFlags.Trigger.EDMVersion == 3:
+        # No need to run matching: just keep navigation so matching can be done by analysts
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSLITESlimmingHelper)        
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
-                                         TriggerList = PHYSLITETriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSLITESlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = PHYSLITETriggerListsHelper.Run3TriggerNamesNoTau)
 
     # Event content
     PHYSLITESlimmingHelper.AppendToDictionary.update({

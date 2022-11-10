@@ -95,25 +95,14 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
             acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
                                                    name = "PhysCommonTrigMatchNoTau", 
                                                    OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run2TriggerNamesNoTau))
+                                                   ChainNames = triggerListsHelper.Run2TriggerNamesNoTau))
             acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
                                                    name = "PhysCommonTrigMatchTau", 
                                                    OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run2TriggerNamesTau, 
+                                                   ChainNames = triggerListsHelper.Run2TriggerNamesTau, 
                                                    DRThreshold = 0.2))
         if ConfigFlags.Trigger.EDMVersion == 3:
             acc.merge(TriggerMatchingCommonRun3Cfg(ConfigFlags, TriggerList = triggerListsHelper.Run3TriggerNames))
-            # This is here temporarily for testing/comparison/debugging purposes
-            acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
-                                                   name = "PhysCommonTrigMatchNoTau", 
-                                                   OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run3TriggerNamesNoTau))
-            acc.merge(TriggerMatchingCommonRun2Cfg(ConfigFlags, 
-                                                   name = "PhysCommonTrigMatchTau", 
-                                                   OutputContainerPrefix = "TrigMatch_", 
-                                                   TriggerList = triggerListsHelper.Run3TriggerNamesTau, 
-                                                   DRThreshold = 0.2))
-
 
     return acc
 
