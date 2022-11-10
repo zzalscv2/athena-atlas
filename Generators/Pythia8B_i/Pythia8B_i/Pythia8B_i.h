@@ -64,6 +64,8 @@ private:
     Pythia8::SuppressSmallPT *m_SuppressSmallPT;
     unsigned int m_failureCount;
 
+    std::string m_dsid;
+    std::string m_seed_from_tf_arg;
 };
 
 #endif

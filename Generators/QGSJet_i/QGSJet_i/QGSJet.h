@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULESQGSJET_H
@@ -51,6 +51,9 @@ protected:
   int         m_itab;
   int         m_ilheout;
   int         m_nEvents;
+
+  std::string m_dsid;
+  std::string m_seed_from_tf_arg;
 
   static const size_t kMaxParticles = HEPEVT_EntriesAllocation; 
   std::vector<int>    m_partID;

@@ -102,6 +102,8 @@ m_athenaTool("")
   declareProperty("OutputParticleData",m_outputParticleDataFile="ParticleData.local.xml");
   declareProperty("ShowerWeightNames",m_showerWeightNames);
   declareProperty("CustomInterface",m_athenaTool);
+  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
+  declareProperty("Dsid", m_dsid);
 
 
   m_particleIDs["PROTON"]      = PROTON;

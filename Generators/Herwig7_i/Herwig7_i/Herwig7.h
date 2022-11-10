@@ -197,6 +197,10 @@ private:
   /// Scale integrated cross section by a factor for MetaData output
   double m_xsscale;
 
+  /// Gen_tf.py run args needed in interface 
+  std::string m_dsid;
+  std::string m_seed_from_tf_arg;
+
   SG::ReadHandleKey<xAOD::EventInfo>  m_evtInfoKey{this
       , "EventInfo"
       ,  "TMPEvtInfo"

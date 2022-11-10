@@ -125,6 +125,9 @@ private:
   
   std::string m_beam1;
   std::string m_beam2;
+ 
+  std::string m_dsid;
+  std::string m_seed_from_tf_arg;
 
   std::string m_lheFile;
 

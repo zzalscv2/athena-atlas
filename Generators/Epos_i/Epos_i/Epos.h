@@ -56,6 +56,9 @@ protected:
   int         m_nEvents;
   double      m_degymx;
 
+  std::string m_dsid;
+  std::string m_seed_from_tf_arg;
+
     // max number of particles MUST BE EQUAL TO THE NUMBER SET IN crmc-aaa.f! (it is max. number allowed by HepMC2.6 now)
 // static const size_t kMaxParticles = HEPEVT_EntriesAllocation; 
 //  static const size_t kMaxParticles = HEPEVT_SIZE_REPLACE;

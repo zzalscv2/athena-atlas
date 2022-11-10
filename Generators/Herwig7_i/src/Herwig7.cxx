@@ -54,6 +54,9 @@ Herwig7::Herwig7(const std::string& name, ISvcLocator* pSvcLocator) :
   declareProperty("CrossSectionScaleFactor", m_xsscale=1.0);
 
   declareProperty("CleanupHerwigScratch", m_cleanup_herwig_scratch);
+
+  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
+  declareProperty("Dsid", m_dsid);
 }
 
 /*!

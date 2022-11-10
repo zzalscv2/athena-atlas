@@ -52,6 +52,8 @@ Pythia8B_i::Pythia8B_i
     declareProperty("pT0timesMPI", m_pt0timesMPI=1.0);
     declareProperty("numberAlphaS", m_numberAlphaS=3.0);
     declareProperty("useSameAlphaSasMPI", m_sameAlphaSAsMPI=false);
+    declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
+    declareProperty("Dsid", m_dsid);
 
     m_totalBQuark = 0;
     m_totalBBarQuark = 0;
