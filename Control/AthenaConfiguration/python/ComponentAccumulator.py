@@ -141,6 +141,17 @@ class ComponentAccumulator:
         summary += "  Created by: " + self._creationCallStack
         return summary
 
+    def _cleanup(self): 
+        #Delete internal data structures, to be called after all properties are tranferred to the C++ application
+        #Purpose: Free memory
+        del self._sequence
+        del self._algorithms
+        del self._conditionsAlgs
+        del self._services
+        del self._publicTools
+        del self._auditors
+        import gc
+        gc.collect()
 
     def empty(self):
         return (len(self._sequence.Members)+len(self._conditionsAlgs)+len(self._services)+
@@ -1036,6 +1047,9 @@ class ComponentAccumulator:
                 maxEvents=self._theAppProps["EvtMax"]
             else:
                 maxEvents=-1
+
+        #At this point, we don't need the internal structures of this CA any more, clean them up
+        self._cleanup()
 
         if (self._debugStage.value == "init"):
             hookDebugger()
