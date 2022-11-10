@@ -163,7 +163,6 @@ def createInDetConfigFlags():
             prevFlags.InDet.Tracking.doLowMu)))
     icf.addFlag("InDet.Tracking.doTrackSegmentsDisappearing", lambda prevFlags: (
         not(prevFlags.Reco.EnableHI or
-            prevFlags.Reco.EnableHI or
             prevFlags.InDet.Tracking.doInnerDetectorCommissioning)))
     # Turn running of BeamGas second pass on and off
     icf.addFlag("InDet.Tracking.doBeamGas",
@@ -175,7 +174,7 @@ def createInDetConfigFlags():
     # Switch for running Robust settings
     icf.addFlag("InDet.Tracking.doRobustReco", False)
     # Switch for running looser settings in ID for commissioning
-    icf.addFlag("InDet.Tracking.doInnerDetectorCommissioning", False)
+    icf.addFlag("InDet.Tracking.doInnerDetectorCommissioning", lambda prevFlags: prevFlags.Beam.Type is BeamType.Cosmics)
     # Special reconstruction for BLS physics
     icf.addFlag("InDet.Tracking.doBLS", False)
     # Special reconstruction for vertex lumi measurement
