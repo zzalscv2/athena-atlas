@@ -169,8 +169,6 @@ private:
   std::vector<std::string> m_weightCommands;
   std::vector<std::string> m_showerWeightNames;
 
-  static std::string    m_pythia_stream;
-
   ToolHandle<IPythia8Custom>    m_athenaTool;
 
   static int s_allowedTunes(double version);
