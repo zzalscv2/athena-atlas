@@ -76,7 +76,10 @@ Epos::Epos( const std::string &name, ISvcLocator *pSvcLocator ):
   declareProperty( "TabCreate",       m_itab       = 0 );
   declareProperty( "nEvents",         m_nEvents    = 5500 );
   declareProperty( "maxCMEnergy",     m_degymx     = 13000.0 ); // maximum center-of-mass energy which will be call in the run [GeV]
-  
+
+  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
+  declareProperty("Dsid", m_dsid);
+
   m_events = 0; // current event number (counted by interface)
   m_ievent = 0;  // current event number counted by Epos
   m_iout = 0; // output type (output)

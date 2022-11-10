@@ -140,6 +140,9 @@ Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("VariationWeightCap", m_variation_weight_cap=10.0);
   declareProperty("CrossSectionScaleFactor", m_xsscale=1.0);
   declareProperty("CleanupGeneratedFiles", m_cleanup=true);
+
+  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
+  declareProperty("Dsid", m_dsid);
 }
 
 

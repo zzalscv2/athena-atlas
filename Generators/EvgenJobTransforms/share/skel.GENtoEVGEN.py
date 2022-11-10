@@ -510,6 +510,9 @@ svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": 'collisions'})
 # TODO: Standardise energy setting in the GenModule interface
 include("EvgenJobTransforms/Generate_ecmenergies.py")
 
+# Propagate DSID and seed to the generators
+include("EvgenJobTransforms/Generate_dsid_ranseed.py")
+
 ## Process random seed arg and pass to generators
 include("EvgenJobTransforms/Generate_randomseeds.py")
 

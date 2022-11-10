@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ---------------------------------------------------------------------- 
@@ -189,7 +189,10 @@ QGSJet::QGSJet( const std::string &name, ISvcLocator *pSvcLocator ):
   declareProperty( "LheFile",         m_lheout       = "qgsjet.lhe" );
   declareProperty( "TabCreate",       m_itab       = 0 );
   declareProperty( "nEvents",         m_nEvents    = 5500 );
-  
+
+  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
+  declareProperty("Dsid", m_dsid);
+
   m_events = 0; // current event number (counted by interface)
   m_ievent = 0;  // current event number counted by QGSJet
   m_iout = 0; // output type (output)
