@@ -180,6 +180,7 @@ if __name__ == '__main__':
     flags.Exec.MaxEvents=25
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents=1
+    flags.fillFromArgs()
     flags.lock()
 
     acc = MainServicesCfg(flags)

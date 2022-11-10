@@ -62,6 +62,7 @@ if __name__ == '__main__':
     ConfigFlags.Concurrency.NumThreads = 1
     ConfigFlags.PerfMon.doFastMonMT = True
     ConfigFlags.PerfMon.OutputJSON = 'perfmonmt_test.json'
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
 
     # Set up the configuration and add the relevant services
