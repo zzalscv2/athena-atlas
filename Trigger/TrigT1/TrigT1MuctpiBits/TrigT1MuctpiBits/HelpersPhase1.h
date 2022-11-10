@@ -206,6 +206,7 @@ namespace LVL1::MuCTPIBits {
         bool nswMon               = false;
         bool candOverflow         = false;
         std::vector<uint32_t> cnt = {};
+        uint64_t bits = 0;
   };
   struct Candidate {
       bool     side = false;//C=0 A=1
