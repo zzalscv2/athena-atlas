@@ -290,7 +290,6 @@ private:
   /** keep all MeasuredPerigee parameters (e.g. adding those that may exist at
    * Volume boundaries) */
   bool m_keepAllPerigee;
-  bool m_expressPerigeeToBeamSpot;
   int m_badclusterID;
 
   std::string m_perigeeExpression;
