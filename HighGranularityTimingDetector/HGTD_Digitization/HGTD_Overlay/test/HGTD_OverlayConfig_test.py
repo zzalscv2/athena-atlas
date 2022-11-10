@@ -10,7 +10,7 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from HGTD_Overlay.HGTD_OverlayConfig import HGTD_OverlayCfg
 from OverlayConfiguration.OverlayTestHelpers import \
-    CommonTestArgumentParser, defaultTestFlags, postprocessAndLockFlags, printAndRun
+    CommonTestArgumentParser, overlayTestFlags, postprocessAndLockFlags, printAndRun
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import CopyMcEventCollectionCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
@@ -19,7 +19,7 @@ parser = CommonTestArgumentParser("HGTD_OverlayConfig_test.py")
 args = parser.parse_args()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
+overlayTestFlags(ConfigFlags, args)
 postprocessAndLockFlags(ConfigFlags, args)
 
 # Construct our accumulator to run

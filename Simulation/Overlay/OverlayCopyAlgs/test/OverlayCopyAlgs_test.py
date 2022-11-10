@@ -9,7 +9,7 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from OverlayConfiguration.OverlayTestHelpers import \
-    CommonTestArgumentParser, defaultTestFlags, postprocessAndLockFlags, printAndRun
+    CommonTestArgumentParser, overlayTestFlags, postprocessAndLockFlags, printAndRun
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyMcEventCollectionCfg, \
     CopyTrackRecordCollectionsCfg
@@ -20,7 +20,7 @@ parser = CommonTestArgumentParser("OverlayCopyAlgs_test.py")
 args = parser.parse_args()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
+overlayTestFlags(ConfigFlags, args)
 postprocessAndLockFlags(ConfigFlags, args)
 
 # Construct our accumulator to run

@@ -25,7 +25,7 @@ class defaultTestFiles:
     RDO_RUN2 = [f"{d}/WorkflowReferences/master/q443/v1/myRDO.pool.root"]
     RDO_BKG_RUN2 = [f"{d}/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1715/RDO.26811908._031801.pool.root.1"]
     RDO_BKG_RUN3 = [f"{d}/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/50events.RDO.pool.root"]
-    RDO_BKG_RUN4 = [f"{d}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/50events.RDO.pool.root"]
+    RDO_BKG_RUN4 = [f"{d}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/mu200.50events.RDO.pool.root"]
     ESD = [f"{d}/RecExRecoTest/mc16_13TeV.361022.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2W.recon.ESD.e3668_s3170_r10572_homeMade.pool.root"]
     AOD = [f"{d}/CommonInputs/data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1"]
     AOD_MC = [f"{d}/CommonInputs/mc16_13TeV.410501.PowhegPythia8EvtGen_A14_ttbar_hdamp258p75_nonallhad.merge.AOD.e5458_s3126_r9364_r9315/AOD.11182705._000001.pool.root.1"]

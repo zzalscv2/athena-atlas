@@ -12,14 +12,14 @@ from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
 from Digitization.DigitizationParametersConfig import writeDigitizationParameters
 from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck
-from OverlayConfiguration.OverlayTestHelpers import defaultTestFlags, postprocessAndLockFlags, printAndRun, CommonTestArgumentParser
+from OverlayConfiguration.OverlayTestHelpers import overlayTestFlags, postprocessAndLockFlags, printAndRun, CommonTestArgumentParser
 
 # Argument parsing
 parser = CommonTestArgumentParser("OverlayMetadataConfig_test.py")
 args = parser.parse_args()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
+overlayTestFlags(ConfigFlags, args)
 overlayMetadataCheck(ConfigFlags)
 postprocessAndLockFlags(ConfigFlags, args)
 ConfigFlags.initAll()
