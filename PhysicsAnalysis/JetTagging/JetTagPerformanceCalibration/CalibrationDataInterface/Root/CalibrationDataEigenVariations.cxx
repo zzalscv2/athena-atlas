@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
+#include <vector>
 
 #include "TH1.h"
 #include "TVectorT.h"
@@ -248,7 +249,6 @@ CalibrationDataEigenVariations::excludeNamedUncertainty(const std::string& name)
   //   meaningful in this context, and specifying them is not allowed.
   // - Once the eigenvector diagonalisation has been carried out, this method may
   //   not be used anymore.
-
   if (m_initialized)
     std::cerr << "CalibrationDataEigenVariations::excludeNamedUncertainty error:"
 	      << " initialization already done" << std::endl;
@@ -257,9 +257,29 @@ CalibrationDataEigenVariations::excludeNamedUncertainty(const std::string& name)
 	   name == "MCreference" || name == "MChadronisation" || name == "ReducedSets" || name == "excluded_set")
     std::cerr << "CalibrationDataEigenVariations::excludeNamedUncertainty error:"
 	      << " name " << name << " not allowed" << std::endl;
-  else if (! m_cnt->GetValue(name.c_str()))
+  // in case multiple uncertainties should be discarded
+  else if (name.back() == '*'){
+    std::string temp_name = name.substr(0, name.size()-1); //remove "*"
+    std::vector<std::string> uncs = m_cnt->listUncertainties();
+    std::vector<std::string> unc_subgroup;
+    std::copy_if(uncs.begin(), uncs.end(), back_inserter(unc_subgroup),
+		 [&temp_name](const std::string& el) {
+		   return el.compare(0, temp_name.size(), temp_name) == 0;
+		 });
+    std::cout <<"Found a group of uncertainties to exclude: " <<name <<" found " <<unc_subgroup.size() <<" uncertainties corresponding to the query" <<std::endl;
+    for (auto single_name : unc_subgroup){
+      // only really add if the entry is not yet in the list
+      if (m_namedIndices.find(single_name) == m_namedIndices.end()) {
+      std::cout <<"Name : " <<single_name <<std::endl;
+      m_named.push_back(std::pair<TH1*, TH1*>(0, 0));
+      m_namedIndices[single_name] = m_named.size()-1;
+      }
+    }
+  }
+  else if (! m_cnt->GetValue(name.c_str())){
     std::cerr << "CalibrationDataEigenVariations::excludeNamedUncertainty error:"
-	      << " uncertainty named " << name << " not found" << std::endl;
+              << " uncertainty named " << name << " not found" << std::endl;
+  }
   // only really add if the entry is not yet in the list
   else if (m_namedIndices.find(name) == m_namedIndices.end()) {
     m_named.push_back(std::pair<TH1*, TH1*>(0, 0));
@@ -309,7 +329,6 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrix() const
         uncs[t] == "ReducedSets" || uncs[t] == "excluded_set") continue;
     // entries that can be excluded if desired
     if (m_namedIndices.find(uncs[t]) != m_namedIndices.end()) continue;
-
     TH1* hunc = dynamic_cast<TH1*>(m_cnt->GetValue(uncs[t].c_str()));
     cov += getSystCovarianceMatrix(result, hunc, m_cnt->isBinCorrelated(uncs[t]), m_cnt->getTagWeightAxis());
   }

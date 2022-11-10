@@ -390,6 +390,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const strin
     // Second, flavour-specific lists are scanned.
     test = "excludeFromCovMatrix";
     std::vector<std::string> to_exclude = split(env.GetValue(test.c_str(), ""));
+
     // Copy the resulting list to all flavours
     for (auto const& flavour : flavours) {
       m_excludeFromCovMatrix[flavour] = to_exclude;
@@ -562,6 +563,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
     for (auto const& flavour : flavours) {
       n_excluded += m_excludeFromCovMatrix[flavour].size();
     }
+    
     if (m_verbose) {
       cout << " List of uncertainties to exclude:";
       if (n_excluded == 0) cout << " none";
