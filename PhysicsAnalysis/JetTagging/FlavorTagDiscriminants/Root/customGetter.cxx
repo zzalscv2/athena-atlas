@@ -228,6 +228,22 @@ namespace {
         return std::log(std::sqrt(t.definingParametersCovMatrixDiagVec().at(1)));
       });
     }
+
+    if (name == "numberOfPixelHitsInclDead") {
+      SG::AuxElement::ConstAccessor<unsigned char> pix_hits("numberOfPixelHits");
+      SG::AuxElement::ConstAccessor<unsigned char> pix_dead("numberOfPixelDeadSensors");
+      return TJGetter([pix_hits, pix_dead](const Tp& t, const Jet&) {
+        return pix_hits(t) + pix_dead(t);
+      });
+    }
+    if (name == "numberOfSCTHitsInclDead") {
+      SG::AuxElement::ConstAccessor<unsigned char> sct_hits("numberOfSCTHits");
+      SG::AuxElement::ConstAccessor<unsigned char> sct_dead("numberOfSCTDeadSensors");
+      return TJGetter([sct_hits, sct_dead](const Tp& t, const Jet&) {
+        return sct_hits(t) + sct_dead(t);
+      });
+    }
+
     return std::nullopt;
   }
 
