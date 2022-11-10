@@ -73,7 +73,7 @@ def EGAM5SkimmingToolCfg(flags):
     # do the OR of previous selections
     print('EGAM5 skimming is logical OR of previous selections')
     EGAM5_SkimmingTool = CompFactory.DerivationFramework.FilterCombinationOR(
-        name = 'EGAM2_SkimmingTool',
+        name = 'EGAM5_SkimmingTool',
         FilterList=[EGAM5_OfflineSkimmingTool, 
                     EGAM5_TriggerSkimmingTool,
                     EGAM5_OnlineOfflineSkimmingTool])
@@ -462,10 +462,6 @@ def EGAM5Cfg(ConfigFlags):
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM5SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM5TriggerListsHelper.Run2TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM5SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',

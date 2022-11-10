@@ -466,10 +466,6 @@ def EGAM7Cfg(ConfigFlags):
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM7SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM7TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM7SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',
             TriggerList = EGAM7TriggerListsHelper.Run2TriggerNamesNoTau)

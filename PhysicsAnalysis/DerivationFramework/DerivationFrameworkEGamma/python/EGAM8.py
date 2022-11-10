@@ -478,10 +478,6 @@ def EGAM8Cfg(ConfigFlags):
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM8SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM8TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM8SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',
             TriggerList = EGAM8TriggerListsHelper.Run2TriggerNamesNoTau)
@@ -493,10 +489,6 @@ def EGAM8Cfg(ConfigFlags):
         # Run 2 is added here temporarily to allow testing/comparison/debugging
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
-        AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM8SlimmingHelper, 
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM8TriggerListsHelper.Run3TriggerNamesTau)
         AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM8SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',

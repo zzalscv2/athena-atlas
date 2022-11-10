@@ -415,10 +415,6 @@ def EGAM9Cfg(ConfigFlags):
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
             AddRun2TriggerMatchingToSlimmingHelper )
         AddRun2TriggerMatchingToSlimmingHelper(
-            SlimmingHelper = EGAM9SlimmingHelper,
-            OutputContainerPrefix = 'TrigMatch_', 
-            TriggerList = EGAM9TriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(
             SlimmingHelper = EGAM9SlimmingHelper, 
             OutputContainerPrefix = 'TrigMatch_',
             TriggerList = EGAM9TriggerListsHelper.Run2TriggerNamesNoTau)
@@ -427,6 +423,13 @@ def EGAM9Cfg(ConfigFlags):
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
             AddRun3TrigNavSlimmingCollectionsToSlimmingHelper )
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM9SlimmingHelper)
+        # Run 2 is added here temporarily to allow testing/comparison/debugging
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
+            AddRun2TriggerMatchingToSlimmingHelper )
+        AddRun2TriggerMatchingToSlimmingHelper(
+            SlimmingHelper = EGAM9SlimmingHelper, 
+            OutputContainerPrefix = 'TrigMatch_',
+            TriggerList = EGAM9TriggerListsHelper.Run3TriggerNamesNoTau)
 
     # Add CellContainer and cluster->cell links
     if keepCells:
