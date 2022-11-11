@@ -87,7 +87,7 @@ double TFCS1DFunctionRegression::rnd_to_fct(double rnd) const
   
 }
 
-void TFCS1DFunctionRegression::set_weights(vector<vector<double> > fWeightMatrix0to1, vector<vector<double> > fWeightMatrix1to2)
+void TFCS1DFunctionRegression::set_weights(const vector<vector<double> >& fWeightMatrix0to1, const vector<vector<double> >& fWeightMatrix1to2)
 {
  
  m_fWeightMatrix0to1=fWeightMatrix0to1;

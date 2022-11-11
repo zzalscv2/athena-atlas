@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionTemplateHistogram_h
@@ -32,7 +32,7 @@ template <typename Txvec, typename Ty,typename Trandom=float> class TFCS1DFuncti
     inline size_t get_nbins() const {return m_HistoContents.get_nbins();};
     
     ///Initialize from root histogram. Depending on the precision of the x- and y-axis, bins are merged if numerical identical
-    virtual void Initialize(const TH1* hist, bool doprint=true) {
+    void Initialize(const TH1* hist, bool doprint=true) {
       Int_t nbins = hist->GetNbinsX();
       
       std::vector<double> temp_HistoContents;
