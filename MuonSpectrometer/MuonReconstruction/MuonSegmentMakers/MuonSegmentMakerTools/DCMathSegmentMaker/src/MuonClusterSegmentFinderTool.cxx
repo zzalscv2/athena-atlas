@@ -16,6 +16,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
 #include "TrkTrack/Track.h"
+#include "MuonDetDescrUtils/MuonSectorMapping.h"
 
 
 
@@ -42,7 +43,7 @@ namespace {
 
     std::string to_string(const Amg::Vector3D& v) {
         std::stringstream sstr{};
-        sstr<<"[x,y,z]=("<<v.x()<<","<<v.y()<<","<<v.z()<<") [theta/eta/phi]=("<<(v.theta() / Gaudi::Units::degree)<<","<<v.eta()<<","<<v.phi()<<")";
+        sstr<<"[x,y,z]=("<<v.x()<<","<<v.y()<<","<<v.z()<<") [theta/eta/phi]=("<<(v.theta() / Gaudi::Units::degree)<<","<<v.eta()<<","<<(v.phi()/ Gaudi::Units::degree)<<")";
         return sstr.str();
     }
     /// Coarse eta cut on the segment direction if the beam spot constraint is activated
@@ -1143,6 +1144,11 @@ namespace Muon {
                             if (eta < minEtaNSW || eta > maxEtaNSW) {
                                 continue;
                             }
+                            if (seed.dir().block<2,1>(0,0).dot(seed.pos().block<2,1>(0,0)) < 0.) continue;
+                            /// We will revise this requirement in the near future. Keep the block for the moment
+                            ///   static const Muon::MuonSectorMapping  sector_mapping{};
+                            ///   const double deltaPhi = std::abs(seed.dir().deltaPhi(seed.pos()));
+                            /// if (deltaPhi > sector_mapping.sectorWidth(m_idHelperSvc->sector(base_seed[0]->identify()))) continue;
                         }                   
                         getClustersOnSegment(orderedClusters, seed, {selLayers[0], selLayers[1],selLayers[2], selLayers[3]});
                         seeds.emplace_back(std::move(seed));
