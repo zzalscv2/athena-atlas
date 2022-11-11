@@ -36,19 +36,24 @@ StatusCode StripDetectorTool::create()
 
   m_commonItems = std::make_unique<InDetDD::SiCommonItems>(idHelper);
 
-  //
-  // Check the availability
-  //
+
+  // If we are not taking the geo from sqlite, check the availability of tables 
+  // (or that we have a local geometry)
   std::string node{"SCT"};
   std::string table{"ITKXDD"};
-  if (!isAvailable(node, table)) {
-    ATH_MSG_INFO("Trying new " << m_detectorName.value() << " database location.");
-    node = "InnerDetector";
-    table = "StripXDD";
-    if (!isAvailable(node, table)) {
-      ATH_MSG_ERROR("No ITk Strip geometry found. ITk Strip can not be built.");
-      return StatusCode::FAILURE;
-    }
+
+  const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
+
+  if(!sqlreader){
+      if (!isAvailable(node, table)) {
+        ATH_MSG_INFO("Trying new " << m_detectorName.value() << " database location.");
+        node = "InnerDetector";
+        table = "StripXDD";
+        if (!isAvailable(node, table)) {
+           ATH_MSG_ERROR("No ITk Strip geometry found. ITk Strip can not be built.");
+           return StatusCode::FAILURE;
+        }
+      }
   }
   //
   // Create the detector manager
@@ -60,14 +65,13 @@ StatusCode StripDetectorTool::create()
   manager->addFolder(m_alignmentFolderName);
 
   InDetDD::ITk::StripGmxInterface gmxInterface(manager, m_commonItems.get(), &m_waferTree);
-
-  // Load the geometry, create the volume,
-  // and then find the volume index within the world to allow it to be added
-  // last two arguments are the location in the DB to look for the clob
-  // (may want to make those configurables)
-  int childIndex = createTopVolume(world, gmxInterface, node, table);
-  if (childIndex != -1) { //-1 represents an error state from the above method
-    manager->addTreeTop(&*world->getChildVol(childIndex));
+  // Load the geometry, create the volume, 
+  // node,table are the location in the DB to look for the clob
+  // empty strings are the (optional) containing detector and envelope names
+  // allowed to pass a null sqlreader ptr - it will be used to steer the source of the geometry
+  const GeoVPhysVol* topVolume = createTopVolume(world, gmxInterface, node, table,"","",sqlreader);
+  if (topVolume) { //see that a valid pointer is returned
+    manager->addTreeTop(topVolume);
     doNumerology(manager);
     manager->initNeighbours();
   } else {
