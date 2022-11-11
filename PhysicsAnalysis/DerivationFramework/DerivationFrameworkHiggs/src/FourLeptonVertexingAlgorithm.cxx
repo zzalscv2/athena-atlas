@@ -62,12 +62,13 @@ namespace DerivationFramework {
     StatusCode FourLeptonVertexingAlgorithm::finalize() {
         unsigned int n_processed = std::accumulate(m_num_lep.begin(), m_num_lep.end(), 0, [](const std::atomic<unsigned int>& l, unsigned int n){
             return n +l;
-        });
+        });        
         ATH_MSG_INFO("Proccessed in total "<<n_processed<<" events. Lepton multiplicities observed:");
         for (unsigned int l = 0 ; l < m_num_lep.size(); ++l) {
-            ATH_MSG_INFO("    ---- Events with "<<l<<" leptons: "<<m_num_lep[l]<<" (elec/muon) "<<m_num_ele[l]<<"/"<<m_num_muo[l]<<" ("<<(100.*m_num_lep[l] /n_processed)<<"%)" );            
+            ATH_MSG_INFO("    ---- Events with "<<l<<" leptons: "<<m_num_lep[l]<<" (elec/muon) "<<m_num_ele[l]<<"/"<<m_num_muo[l]<<" ("<<(100.*m_num_lep[l] / std::max(1u,n_processed))<<"%)" );            
         }
-        ATH_MSG_INFO("---> Attempted fits "<<m_tried_fits<<" out of which "<<m_good_fits<<" ("<<(100.* m_good_fits / m_tried_fits )<<"%) succeeded." );
+        const unsigned int n_trials = m_tried_fits;
+        ATH_MSG_INFO("---> Attempted fits "<<m_tried_fits<<" out of which "<<m_good_fits<<" ("<<(100.* m_good_fits / std::max(1u, n_trials) )<<"%) succeeded." );
         return StatusCode::SUCCESS;
     }
     StatusCode FourLeptonVertexingAlgorithm::execute(const EventContext& ctx) const {
