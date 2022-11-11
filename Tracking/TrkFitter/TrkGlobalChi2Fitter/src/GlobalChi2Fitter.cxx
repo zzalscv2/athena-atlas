@@ -6517,7 +6517,13 @@ namespace Trk {
             newres1 = broadrot->localParameters()[Trk::locX] - trackpar_maxsipull->parameters()[Trk::locX];
           }
           
-          newpull1 = std::abs(newres1 / newerror[0]);
+          if (newerror[0] == 0.0) {
+            ATH_MSG_WARNING("Measurement error is zero or negative, treating as outlier");
+            newpull1 = 9999.;
+          }
+          else {
+            newpull1 = std::abs(newres1 / newerror[0]);
+          }
           
           if (hittype_maxsipull == TrackState::Pixel) {
             newerror[1] = std::sqrt(covmat(1, 1));

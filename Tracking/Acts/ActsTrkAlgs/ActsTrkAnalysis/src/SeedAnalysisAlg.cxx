@@ -497,7 +497,11 @@ namespace ActsTrk {
     float dzdr_t = (zT - zM) / (rT - rM);    
 
     // eta
-    float theta = std::atan(1. / std::sqrt(cotThetaB * cotThetaT));
+    float cotThetaAvg2 = cotThetaB * cotThetaT;
+    if (cotThetaAvg2 <= 0) {
+      return {-1, -1, -1, -1, -1, -1, -1};
+    }
+    float theta = std::atan(1. / std::sqrt(cotThetaAvg2));
     float eta = -std::log(std::tan(0.5 * theta));
 
     // pt
