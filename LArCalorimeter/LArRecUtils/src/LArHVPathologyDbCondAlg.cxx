@@ -142,9 +142,10 @@ StatusCode LArHVPathologyDbCondAlg::execute(const EventContext& ctx) const {
       
        void* blob_data ATLAS_THREAD_SAFE = const_cast<void*> (blob.startingAddress());
        TBufferFile buf(TBuffer::kRead, blob.size(), blob_data, false);
-       LArHVPathologiesDb* hvpathdb = (LArHVPathologiesDb*)buf.ReadObjectAny(m_klass);
+       std::unique_ptr<LArHVPathologiesDb> hvpathdb
+         (static_cast<LArHVPathologiesDb*>(buf.ReadObjectAny(m_klass)));
 
-       auto hvpath = std::make_unique<LArHVPathology>(hvpathdb);
+       auto hvpath = std::make_unique<LArHVPathology>(hvpathdb.get());
 
        fillElectMap(calodetdescrmgr, hvpath.get(), writeHandle);
 
