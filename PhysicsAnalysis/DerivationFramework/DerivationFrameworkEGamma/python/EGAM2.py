@@ -332,10 +332,6 @@ def EGAM2Cfg(ConfigFlags):
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     EGAM2TriggerListsHelper = TriggerListsHelper()
-    if ConfigFlags.Trigger.EDMVersion == 3:
-        EGAM2TriggerListsHelper.Run3TriggerNames = \
-            EGAM2TriggerListsHelper.Run3TriggerNamesNoTau
-        EGAM2TriggerListsHelper.Run3TriggerNamesTau = []
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM2KernelCfg(ConfigFlags,
