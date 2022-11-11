@@ -132,13 +132,13 @@ namespace ISF {
     double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
 
     //load inverse quantile transformer from XML
-    StatusCode initializeInverseCDF(std::string quantileTransformerConfigFile);
+    StatusCode initializeInverseCDF(const std::string & quantileTransformerConfigFile);
 
     //get CDF mapping for individual XML node
     std::map<double, double> getVariableCDFmappings(xmlNodePtr& nodeParent);
 
     //load inverse PCA from XML
-    StatusCode initializeInversePCA(std::string inversePCAConfigFile);
+    StatusCode initializeInversePCA(const std::string & inversePCAConfigFile);
 
 
     /*---------------------------------------------------------------------
