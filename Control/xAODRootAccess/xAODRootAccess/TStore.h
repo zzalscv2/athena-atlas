@@ -89,6 +89,9 @@ namespace xAOD {
       template< typename T >
       void keys( std::vector< std::string >& vkeys ) const;
 
+      /// return holder for key
+      const THolder* holder( const std::string& key ) const;
+
       /// Remove an object from the store by name
       StatusCode remove( const std::string& key );
       /// Remove an object from the store by pointer
