@@ -43,7 +43,7 @@ namespace ISF
     ~PDFcreator() { };
 
     /** all following is used to set up the class */
-    void setName( std::string PDFname ){ m_name = PDFname; }; //get the pdf's name
+    void setName( const std::string & PDFname ){ m_name = PDFname; }; //get the pdf's name
     void addToEnergyEtaHist1DMap(int energy, int etaMin, TH1 *hist); //add entry to map linking energy, eta window and histogram
 
     /** get the random value with this method, by providing the input parameters */

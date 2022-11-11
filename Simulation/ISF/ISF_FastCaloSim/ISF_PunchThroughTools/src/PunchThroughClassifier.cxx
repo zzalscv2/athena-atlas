@@ -78,7 +78,7 @@ StatusCode ISF::PunchThroughClassifier::finalize(){
     return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::PunchThroughClassifier::initializeScaler(std::string scalerConfigFile){
+StatusCode ISF::PunchThroughClassifier::initializeScaler(const std::string & scalerConfigFile){
 
     //parse xml that contains config for MinMaxScaler for each of the network inputs
 
@@ -112,7 +112,7 @@ StatusCode ISF::PunchThroughClassifier::initializeScaler(std::string scalerConfi
     return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::PunchThroughClassifier::initializeNetwork(std::string networkConfigFile){
+StatusCode ISF::PunchThroughClassifier::initializeNetwork(const std::string & networkConfigFile){
 
     ATH_MSG_INFO( "[ punchthroughclassifier ] Loading classifier: " << networkConfigFile);
 
@@ -133,7 +133,7 @@ StatusCode ISF::PunchThroughClassifier::initializeNetwork(std::string networkCon
 }
 
 
-StatusCode ISF::PunchThroughClassifier::initializeCalibrator(std::string calibratorConfigFile){
+StatusCode ISF::PunchThroughClassifier::initializeCalibrator(const std::string & calibratorConfigFile){
 
     //parse xml that contains config for isotonic regressor used to calibrate the network output
     ATH_MSG_INFO( "[ punchthroughclassifier ] Loading calibrator: " << calibratorConfigFile);
