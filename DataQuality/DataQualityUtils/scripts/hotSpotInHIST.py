@@ -29,7 +29,7 @@ def lbStr(lb):
   return "_lb"+lb.zfill(5) 
 
 ### The method below was added by someone unknown in 2016-2022 period but never really used
-### It was commented by B.Trocme on March 2022
+### It was commented by B.Trocme on March 2022 - Kept here just in case but should be deleted in upcoming months
 ### 
 ###def getStruct(r_in):
 ###  """Produce a list containing the paths of all histograms in the file"""
@@ -100,7 +100,7 @@ def getHistoInfo(objectType, runNumber):
                    "BAR_thr2":"BAR - Et > 15 GeV",
                    "BAR_thr3":"BAR - Et > 25 GeV"}
     histoType = "2d_etaPhiHotSpot"
-    histoName = "TopoClusters"
+    histoName = "TopoClusters occupancy"
 
   elif objectType == "EMTopoClusters": # Release 22 : OK
     histoPath  = {"Et4GeV":runstr+"/CaloMonitoring/ClusterMon/LArClusterEMNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh1",
@@ -127,11 +127,10 @@ def getHistoInfo(objectType, runNumber):
                    "BAR_thr1":"BAR - Et > 4 GeV",
                    "BAR_thr2":"BAR - Et > 10 GeV",
                    "BAR_thr3":"BAR - Et > 15 GeV"}
-
     histoType = "2d_etaPhiHotSpot"
-    histoName = "EMTopoClusters"
+    histoName = "EMTopoClusters occupancy"
 
-  elif objectType == "EMTopoJet": # Missing histograms
+  elif objectType == "EMTopoJet": # Release 22 : Missing histograms
     histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/OccupancyEtaPhi",
                   "cut1":runstr+"/Jets/AntiKt4EMTopoJets/OccupancyEtaPhisel_20000_inf_pt_inf_500000",
                   "cut2":runstr+"/Jets/AntiKt4EMTopoJets/OccupancyEtaPhisel_500000_inf_pt_inf_1000000",
@@ -145,17 +144,23 @@ def getHistoInfo(objectType, runNumber):
     histoType = "2d_etaPhiHotSpot"
     histoName = "EMTopoJets"
 
-  elif (objectType == "EMTopoJets_eta"): # Missing histograms
-    histoPath  = {"cut1":runstr+"/Jets/AntiKt4EMTopoJets/etasel_20000_inf_pt_inf_500000",
-                  "cut2":runstr+"/Jets/AntiKt4EMTopoJets/etasel_500000_inf_pt_inf_1000000",
-                  "cut3":runstr+"/Jets/AntiKt4EMTopoJets/etasel_1000000_inf_pt_inf_2000000",
-                  "cut4":runstr+"/Jets/AntiKt4EMTopoJets/etasel_2000000_inf_pt_inf_8000000"}
-    histoLegend = {"cut1":"20GeV-500GeV",
-                   "cut2":"500GeV-1TeV",
-                   "cut3":"1TeV-2TeV",
-                   "cut4":"2TeV-8TeV"}
-    histoType = "1d_etaHotSpot"
-    histoName = "EMTopoJets"
+  elif objectType == "AntiKt4EMTopoJets": # Release 22 : OK
+    histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/standardHistos/phi_eta"}
+    histoLegend = {"noCut":"No cut"}
+    histoType = "2d_etaPhiHotSpot"
+    histoName = "Occupancy of AntiKt4EMTopoJets"
+
+  elif objectType == "AntiKt4EMTopoJets_Pt": # Release 22 : OK
+    histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/standardHistos/phi_eta_pt"}
+    histoLegend = {"noCut":"No cut"}
+    histoType = "2d_etaPhiHotSpot"
+    histoName = "Mean Pt of AntiKt4EMTopoJets"
+
+  elif objectType == "MET_Topo_phi": # Release 22 : OK
+    histoPath  = {"MET":runstr+"/MissingEt/AllTriggers/MET_Calo/EMTopo/MET_Topo_phi"}
+    histoLegend = {"MET":"MET"}
+    histoType = "1d_phiHotSpot"
+    histoName = "MET phi"
 
   elif objectType == "Tau": # Release 22 : OK
     histoPath  = {"NoCut":runstr+"/Tau/tauPhiVsEta",
@@ -163,7 +168,7 @@ def getHistoInfo(objectType, runNumber):
     histoLegend = {"NoCut":"Et > 0 GeV (tbc)",
                    "Et15GeV":"Et > 15 GeV"}
     histoType = "2d_etaPhiHotSpot"
-    histoName = "Tau"
+    histoName = "Tau occupancy"
 
   elif objectType == "Tau_phi": # Release 22 : OK
     histoPath  = {"single":runstr+"/Tau/tauPhi"}
@@ -175,45 +180,45 @@ def getHistoInfo(objectType, runNumber):
     histoPath  = {"single":runstr+"/Tau/tauEta"}
     histoLegend = {"single":"All candidates"}
     histoType = "1d_etaHotSpot"
-    histoName = "Tau"
+    histoName = "Tau phi"
 
   elif objectType == "NumberTau": # Release 22 : OK
-    histoPath  = {"highPt":runstr+"/Tau/nHighPtTauCandidates"}
+    histoPath  = {"highPt":runstr+"/Tau/nHightPtTauCandidates"}
     histoLegend = {"highPt":"High Pt (>100GeV) candidates"}
     histoType = "1d_integralAbove"
     histoName = "Number of Tau candidates"
 
-  elif objectType == "TightFwdElectrons": # Missing histogram
+  elif objectType == "TightFwdElectrons": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronTightEtaPhi"}
     histoLegend = {"single":"10GeV"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Tight electrons"
 
-  elif objectType == "LoosePhotons": # Missing histogram
+  elif objectType == "LoosePhotons": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/CBLoosePhotons/Eta_Phi_distribution_with_Pt.gt.4GeV"}
     histoLegend = {"single":"4GeV"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Loose photons"
 
-  elif objectType == "NumberTightFwdElectrons": # Missing histogram
+  elif objectType == "NumberTightFwdElectrons": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronTightN"}
     histoLegend = {"single":"All candidates"}
     histoType = "1d_integralAbove"
     histoName = "Number of tight forward electrons"
 
-  elif objectType == "forwardElectronEtaPhi": # Missing histogram
+  elif objectType == "forwardElectronEtaPhi": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronEtaPhi"}
     histoLegend = {"single":"All candidates"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Forward electrons"
 
-  elif objectType == "NumberHLTJet": # Missing histogram
+  elif objectType == "NumberHLTJet": # Release 22 : Missing histogram
     histoPath  = {"HLTJet":runstr+"/HLT/JetMon/HLT/10j40_L14J20/HLTJet_n"}
     histoLegend = {"HLTJet":"All candidates"}
     histoType = "1d_integralAbove"
     histoName = "Number of HLT jets - 10J40_L14J20 trigger"
 
-  elif objectType == "LArDigits":
+  elif objectType == "LArDigits": # Release 22 : not tested
     histoPath  = {"Null-EMBA":runstr+"/LAr/Digits/Barrel/NullDigitChan_BarrelA",
                   "Satu-EMBA":runstr+"/LAr/Digits/Barrel/SaturationChan_BarrelA",
                   "Null-EMBC":runstr+"/LAr/Digits/Barrel/NullDigitChan_BarrelC",
@@ -305,7 +310,6 @@ def main(args):
   for iHisto in histoPath.keys():
     #if histoPath[iHisto] not in histPathList:
     #  print("The desired histo path",histoPath[iHisto],"is not in the input file!")
-
     histo[iHisto] = f.Get(histoPath[iHisto])
     histo[iHisto].SetTitle("%s (%s) - Run %d"%(histo[iHisto].GetTitle(),histoLegend[iHisto],args.runNumber))
 
@@ -441,7 +445,7 @@ def main(args):
   nLB=maxLB
   nbHitInHot = {}
   for iHisto in histoPath.keys():
-    nbHitInHot[iHisto] = [0.] * nLB
+    nbHitInHot[iHisto] = [0.] * (nLB+1)
   lowerLB = maxLB
   upperLB = 0
   lbCanvas = []
