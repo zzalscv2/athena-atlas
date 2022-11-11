@@ -117,11 +117,11 @@ def printAndRun(accessor, configFlags, args):
     if args.debug:
         accessor.setDebugStage (args.debug)
 
-    # Execute and finish
-    sc = accessor.run(maxEvents=args.maxEvents)
-
     # Dump config summary
     accessor.printConfig(withDetails=False)
+
+    # Execute and finish
+    sc = accessor.run(maxEvents=args.maxEvents)
 
     # Success should be 0
     return not sc.isSuccess()

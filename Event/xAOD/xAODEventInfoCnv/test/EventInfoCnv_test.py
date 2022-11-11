@@ -70,11 +70,11 @@ ConfigFlags.dump()
 if args.debug:
     acc.setDebugStage (args.debug)
 
-# Execute and finish
-sc = acc.run(maxEvents=args.maxEvents)
-
 # Dump config summary
 acc.printConfig(withDetails=False)
+
+# Execute and finish
+sc = acc.run(maxEvents=args.maxEvents)
 
 # Success should be 0
 sys.exit(not sc.isSuccess())
