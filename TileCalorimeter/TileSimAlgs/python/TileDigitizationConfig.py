@@ -77,7 +77,7 @@ if __name__ == "__main__":
 
     ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
     ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Output.RDOFileName = 'myRDO.pool.root'
+    ConfigFlags.Output.RDOFileName = 'myRDO-TileDigitization.pool.root'
     ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
     ConfigFlags.Digitization.PileUp = False
 
