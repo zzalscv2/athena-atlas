@@ -152,7 +152,7 @@ if __name__ == "__main__":
     ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
     ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
     ConfigFlags.Digitization.PileUp = False
-    ConfigFlags.Output.RDOFileName = "myRDO.pool.root"
+    ConfigFlags.Output.RDOFileName = "myRDO-TileHitToTTL1.pool.root"
     ConfigFlags.Exec.MaxEvents = 3
     ConfigFlags.fillFromArgs()
     ConfigFlags.lock()

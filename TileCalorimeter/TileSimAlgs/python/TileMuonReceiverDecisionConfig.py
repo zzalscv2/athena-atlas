@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
     ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Output.RDOFileName = 'myRDO.pool.root'
+    ConfigFlags.Output.RDOFileName = 'myRDO->TileMuonReceiverDecision.pool.root'
     ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
 
     ConfigFlags.fillFromArgs()

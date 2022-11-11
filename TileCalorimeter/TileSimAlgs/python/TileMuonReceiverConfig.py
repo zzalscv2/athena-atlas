@@ -140,7 +140,7 @@ if __name__ == "__main__":
     log.setLevel(DEBUG)
 
     ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.Output.RDOFileName = 'myRDO.pool.root'
+    ConfigFlags.Output.RDOFileName = 'myRDO-TileMuonReceiver.pool.root'
     ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC16-SDR-16'
     ConfigFlags.Digitization.PileUp = False
     ConfigFlags.Exec.MaxEvents = 3
