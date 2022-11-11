@@ -277,7 +277,7 @@ bool iFatras::G4HadIntProcessor::hadronicInteraction(const Amg::Vector3D& positi
 }
 
 
-StatusCode iFatras::G4HadIntProcessor::initG4RunManager() {
+StatusCode iFatras::G4HadIntProcessor::initG4RunManager ATLAS_NOT_THREAD_SAFE () {
 
   ATH_MSG_DEBUG("[ g4sim ] Initializing G4RunManager");
 
@@ -378,7 +378,8 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
   static const StatusCode g4RunManagerInit = [&]() {
     std::scoped_lock lock(processMapMutex);
     auto this_nc ATLAS_THREAD_SAFE = const_cast<iFatras::G4HadIntProcessor*>(this);
-    return this_nc->initG4RunManager();
+    StatusCode sc ATLAS_THREAD_SAFE = this_nc->initG4RunManager();
+    return sc;
   }();
   if (g4RunManagerInit.isFailure()) return chDef;
 

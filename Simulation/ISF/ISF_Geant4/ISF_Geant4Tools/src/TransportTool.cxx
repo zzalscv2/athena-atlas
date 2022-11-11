@@ -102,7 +102,7 @@ StatusCode iGeant4::G4TransportTool::initialize()
 }
 
 //________________________________________________________________________
-void iGeant4::G4TransportTool::initializeOnce()
+void iGeant4::G4TransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
 {
   // get G4AtlasRunManager
   ATH_MSG_DEBUG("initialize G4AtlasRunManager");
@@ -298,7 +298,7 @@ StatusCode iGeant4::G4TransportTool::simulateVector( const ISF::ConstISFParticle
 #endif
   }
   else {
-    auto* workerRM = G4AtlasRunManager::GetG4AtlasRunManager();
+    auto* workerRM ATLAS_THREAD_SAFE = G4AtlasRunManager::GetG4AtlasRunManager();  // non-MT case
     abort = workerRM->ProcessEvent(inputEvent);
   }
   if (abort) {

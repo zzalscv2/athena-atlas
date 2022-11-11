@@ -174,8 +174,8 @@ namespace G4UA{
       const G4StepPoint *preStep =aStep->GetPreStepPoint();
       const G4StepPoint *postStep=aStep->GetPostStepPoint();
 
-      G4TouchableHistory *preTHist=(G4TouchableHistory *)preStep->GetTouchable();
-      G4TouchableHistory *postTHist=(G4TouchableHistory *)postStep->GetTouchable();
+      const G4TouchableHistory *preTHist=static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
+      const G4TouchableHistory *postTHist=static_cast<const G4TouchableHistory*>(postStep->GetTouchable());
       int nLev1 = preTHist->GetHistoryDepth();
       int nLev2 = postTHist->GetHistoryDepth();
 

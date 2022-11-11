@@ -93,28 +93,28 @@ namespace G4UA{
       float                                                         m_dt;
       
       TTree                                                        *m_interactions;   //!< ROOT tree containing vertex info
-      mutable int                                                   m_process;
-      mutable int                                                   m_pdg_mother;
-      mutable int                                                   m_gen_mother;
-      mutable int                                                   m_nChild;
-      mutable  float                                                m_vtx_dist;
-      mutable float                                                 m_vtx_theta;
-      mutable float                                                 m_vtx_phi;
-      mutable float                                                 m_vtx_e_diff;
-      mutable float                                                 m_vtx_p_diff;
-      mutable float                                                 m_vtx_plong_diff;
-      mutable float                                                 m_vtx_pperp_diff;
-      mutable float                                                 m_p_mother;
-      mutable float                                                 m_radLength;
-      mutable int                                                   m_pdg_child[MAXCHILDREN] ={};     // decay product pdg code
-      mutable float                                                 m_fp_child[MAXCHILDREN] ={};      // fraction of incoming momentum
-      mutable float                                                 m_oa_child[MAXCHILDREN] ={};      // opening angle wrt the mother
+      int                                                           m_process;
+      int                                                           m_pdg_mother;
+      int                                                           m_gen_mother;
+      int                                                           m_nChild;
+      float                                                         m_vtx_dist;
+      float                                                         m_vtx_theta;
+      float                                                         m_vtx_phi;
+      float                                                         m_vtx_e_diff;
+      float                                                         m_vtx_p_diff;
+      float                                                         m_vtx_plong_diff;
+      float                                                         m_vtx_pperp_diff;
+      float                                                         m_p_mother;
+      float                                                         m_radLength;
+      int                                                           m_pdg_child[MAXCHILDREN] ={};     // decay product pdg code
+      float                                                         m_fp_child[MAXCHILDREN] ={};      // fraction of incoming momentum
+      float                                                         m_oa_child[MAXCHILDREN] ={};      // opening angle wrt the mother
       
       
       int m_volumeOffset;
       int m_minHistoryDepth;
       
-      mutable int m_currentTrack;
+      int m_currentTrack;
       std::map<int, int> m_trackGenMap;
       
     }; // class PhysicsValidationUserAction

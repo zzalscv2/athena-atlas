@@ -11,6 +11,7 @@
 // GaudiKernel & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -99,7 +100,7 @@ namespace iFatras {
 
     private:
       /** initialize G4RunManager on first call if not done by then */
-      StatusCode initG4RunManager();
+      StatusCode initG4RunManager ATLAS_NOT_THREAD_SAFE ();
 
       /** collect secondaries for layer material update */                           
       ISF::ISFParticleVector getHadState(const ISF::ISFParticle* parent,
