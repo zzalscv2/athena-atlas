@@ -214,9 +214,10 @@ if __name__ == "__main__":
     cfg.printConfig(withDetails=True)
     ConfigFlags.dump()
 
-    # Run it in athena
-    cfg.run(maxEvents=20)
-
     # Store in a pickle file
     with open("BeamEffectsAlg.pkl", "wb") as f:
         cfg.store(f)
+
+    # Run it in athena
+    cfg.run(maxEvents=20)
+
