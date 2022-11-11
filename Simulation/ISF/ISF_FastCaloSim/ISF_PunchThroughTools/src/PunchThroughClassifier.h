@@ -42,13 +42,13 @@ public:
     virtual StatusCode finalize() override final;
 
     /** input variable MinMaxScaler initialize method */
-    StatusCode initializeScaler(std::string scalerConfigFile);
+    StatusCode initializeScaler(const std::string & scalerConfigFile);
 
     /** neural network initialize method */
-    StatusCode initializeNetwork(std::string networkConfigFile);
+    StatusCode initializeNetwork(const std::string & networkConfigFile);
 
     /** isotonic regressor calibrator initialize method */
-    StatusCode initializeCalibrator(std::string calibratorConfigFile);
+    StatusCode initializeCalibrator(const std::string & calibratorConfigFile);
 
     /** interface method to return probability prediction of punch through */
     virtual double computePunchThroughProbability(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate) const override;
@@ -64,18 +64,18 @@ public:
 
 private:
     /** NN graph */
-    std::unique_ptr<lwt::LightweightGraph> m_graph;
+    std::unique_ptr<lwt::LightweightGraph> m_graph{};
 
     /** input variable MinMaxScaler members */
-    double m_scalerMin;
-    double m_scalerMax;
+    double m_scalerMin{};
+    double m_scalerMax{};
     std::map<std::string, double> m_scalerMinMap;
     std::map<std::string, double> m_scalerMaxMap;
 
     /** isotonic regressor calibrator members */
     std::string m_calibratorConfigFile;
-    double m_calibrationMin;
-    double m_calibrationMax;
+    double m_calibrationMin{};
+    double m_calibrationMax{};
     std::map<double, double> m_calibrationMap;
 
     //properties

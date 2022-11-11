@@ -731,7 +731,7 @@ std::vector<double> ISF::PunchThroughTool::inversePCA(std::vector<double> &varia
     return transformed_variables;
 }
 
-StatusCode ISF::PunchThroughTool::initializeInversePCA(std::string inversePCAConfigFile){
+StatusCode ISF::PunchThroughTool::initializeInversePCA(const std::string & inversePCAConfigFile){
 
     xmlDocPtr doc = xmlParseFile( inversePCAConfigFile.c_str() );
 
@@ -771,7 +771,7 @@ StatusCode ISF::PunchThroughTool::initializeInversePCA(std::string inversePCACon
     return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::PunchThroughTool::initializeInverseCDF(std::string inverseCdfConfigFile){
+StatusCode ISF::PunchThroughTool::initializeInverseCDF(const std::string & inverseCdfConfigFile){
 
     //parse xml that contains config for inverse CDF for each of punch through particle kinematics
 
