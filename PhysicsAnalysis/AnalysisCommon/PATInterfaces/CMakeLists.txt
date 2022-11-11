@@ -1,7 +1,4 @@
-# $Id: CMakeLists.txt 744627 2016-05-03 18:51:43Z krasznaa $
-################################################################################
-# Package: PATInterfaces
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PATInterfaces )
@@ -43,6 +40,11 @@ macro( _add_test name )
 endmacro( _add_test )
 
 # Test(s) in the package:
+atlas_add_test( gt_SystematicsCache
+   SOURCES test/gt_SystematicsCache.cxx
+   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+   LINK_LIBRARIES ${GTEST_LIBRARIES} PATInterfaces RootCoreUtils )
+
 atlas_add_test( gt_SystematicSet
    SOURCES test/gt_SystematicSet.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
