@@ -610,7 +610,47 @@ BkgElectronTriggers['Run2'] = [
 
 BootstrapPhotonTriggers = {}
 BootstrapPhotonTriggers['Run3'] = [
+        'HLT_g25_medium_L1EM20VH',
+        'HLT_g35_medium_L1EM20VH',
+        'HLT_g20_tight_icaloloose_L1EM15VHI',
+        'HLT_g15_tight_L1EM10VH',
+        'HLT_g20_tight_L1EM15VHI',
+        'HLT_g22_tight_L1EM15VHI',
+        'HLT_g25_medium_L1eEM24L',
+        'HLT_g35_medium_L1eEM24L',
+        'HLT_g20_tight_icaloloose_L1eEM18M',
+        'HLT_g15_tight_L1eEM12L',
+        'HLT_g20_tight_L1eEM18M',
+        'HLT_g22_tight_L1eEM18M',
+        'HLT_g250_etcut_L1EM22VHI',
+        'HLT_g10_loose_L1EM7',
+        'HLT_g15_loose_L1EM10VH',
+        'HLT_g20_loose_L1EM15VH',
+        'HLT_g25_loose_L1EM20VH',
+        'HLT_g30_loose_L1EM20VH',
+        'HLT_g40_loose_L1EM20VH',
+        'HLT_g50_loose_L1EM20VH',
+        'HLT_g60_loose_L1EM22VHI',
+        'HLT_g80_loose_L1EM22VHI',
+        'HLT_g100_loose_L1EM22VHI',
+        'HLT_g120_loose_L1EM22VHI',
+        'HLT_g250_etcut_L1eEM26M',
+        'HLT_g10_loose_L1eEM9',
+        'HLT_g15_loose_L1eEM12L',
+        'HLT_g20_loose_L1eEM18L',
+        'HLT_g25_loose_L1eEM24L',
+        'HLT_g30_loose_L1eEM24L',
+        'HLT_g40_loose_L1eEM24L',
+        'HLT_g50_loose_L1eEM24L',
+        'HLT_g60_loose_L1eEM26M',
+        'HLT_g80_loose_L1eEM26M',
+        'HLT_g100_loose_L1eEM26M',
+        'HLT_g120_loose_L1eEM26M',
+        'HLT_g25_tight_icaloloose_L1EM20VH',
+        'HLT_g25_tight_icalomedium_L1EM20VH',
+        'HLT_g25_tight_icalotight_L1EM20VH',
         ]
+
 BootstrapPhotonTriggers['Run2'] = [
         # pt_cut triggers
         'HLT_g20_etcut_L1EM12'
@@ -698,6 +738,10 @@ ExtraContainersElectronTrigger['Run3'] = [
         "HLT_FastElectrons_LRTAux.",
         "HLT_CaloEMClusters_Electron",
         "HLT_CaloEMClusters_ElectronAux.",
+        "HLT_TrigEMClusters_Electrons",
+        "HLT_TrigEMClusters_ElectronsAux.",
+        "HLT_TrigEMClusters_Electrons_GSF",
+        "HLT_TrigEMClusters_Electrons_GSFAux."
         "HLT_IDTrack_Electron_IDTrig",
         "HLT_IDTrack_Electron_IDTrigAux.",
         "HLT_IDTrack_Electron_GSF",
