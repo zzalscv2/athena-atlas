@@ -8,6 +8,18 @@ class TrackFitterType(FlagEnum):
     GlobalChi2Fitter = 'GlobalChi2Fitter'
     GaussianSumFilter = 'GaussianSumFilter'
 
+def cutLevel(flags):
+    if flags.Reco.EnableHI:
+        return 2
+    elif flags.InDet.Tracking.doLowMu:
+        return 3
+    elif flags.Beam.Type is BeamType.Cosmics:
+        return 8
+    elif flags.InDet.Tracking.doMinBias:
+        return 12
+    else:
+        return 19
+
 def createInDetConfigFlags():
     icf = AthConfigFlags()
 
@@ -44,7 +56,8 @@ def createInDetConfigFlags():
 
     # Turn on to save the Track Seeds in a xAOD track collecting for development studies
     icf.addFlag("InDet.Tracking.doStoreTrackSeeds", False)
-    icf.addFlag("InDet.Tracking.materialInteractions", True)
+    icf.addFlag("InDet.Tracking.materialInteractions",
+                lambda prevFlags: prevFlags.Beam.Type is not BeamType.SingleBeam)
     # Control which type of particle hypothesis to use for the material interactions
     # 0=non-interacting,1=electron,2=muon,3=pion,4=kaon,5=proton. See ParticleHypothesis.h for full definition.
     icf.addFlag("InDet.Tracking.materialInteractionsType",
@@ -64,7 +77,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.perigeeExpression",
                 lambda prevFlags: "Vertex" if prevFlags.Reco.EnableHI else "BeamLine")
     # Control cuts and settings for different lumi to limit CPU and disk space
-    icf.addFlag("InDet.Tracking.cutLevel", 19)
+    icf.addFlag("InDet.Tracking.cutLevel", cutLevel)
     # Switch for running TIDE Ambi
     icf.addFlag("InDet.Tracking.doTIDE_Ambi", True)
     # Turn on running of Brem Recovery in tracking
