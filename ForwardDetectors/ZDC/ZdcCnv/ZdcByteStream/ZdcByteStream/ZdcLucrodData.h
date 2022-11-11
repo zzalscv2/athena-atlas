@@ -50,7 +50,7 @@ class ZdcLucrodData {
 
   void AddTrigData(uint16_t val) { m_trigData.push_back(val); }
 
-  void AddChanData(unsigned int id, std::vector<uint16_t> waveform) { 
+  void AddChanData(unsigned int id, const std::vector<uint16_t>& waveform) { 
     
     ZdcLucrodChannel channel;
     
