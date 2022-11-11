@@ -27,9 +27,9 @@
 #include <iomanip>
 #include <cmath>
 
-#define MLOG(x)   if (m_log->level()<=MSG::x) *m_log << MSG::x
 
 // 23-feb-2005
+
 /**
    Z-shift for ext.barrel introduced
    with Z-shift > 0, eta coordinate of the cell
@@ -55,16 +55,13 @@
 // ------------- Temporary solution for cell volumes
 
 TileDetDescrManager::TileDetDescrManager(TileDddbManager_ptr dbManager)
-        : m_dbManager(dbManager)
+        : AthMessaging ("TileDetDescrManager")
+        , m_dbManager(dbManager)
         , m_elements_created(false)
         , m_tile_id(0)
         , m_cell_id(0)
         , m_tile_hwid(0)
 {
-  m_log = new MsgStream(Athena::getMessageSvc(), "TileDetDescrManager");
-
-  m_verbose = (m_log->level()<=MSG::VERBOSE);
-
   setName("Tile");
 }
 
@@ -148,7 +145,7 @@ void TileDetDescrManager::create_elements()
 }
 void TileDetDescrManager::create_elements(bool checks)
 {
-  MLOG(INFO) << "Entering create_elements()" << endmsg;
+  ATH_MSG_INFO( "Entering create_elements()" );
 
   // resize vectors :
   m_tile_module_vec.resize( (int) m_tile_id->module_hash_max(),0);
@@ -165,7 +162,7 @@ void TileDetDescrManager::create_elements(bool checks)
   int n_cells = 0;
 
   // For each descriptor :
-  MLOG(DEBUG) << "Looping over descriptors..." << endmsg;
+  ATH_MSG_DEBUG( "Looping over descriptors..." );
 
   for (; first != last; ++first) {
 
@@ -180,14 +177,14 @@ void TileDetDescrManager::create_elements(bool checks)
 
     int etasign = descr->sign_eta();
     if (side != etasign) {
-      MLOG(ERROR) << "side and eta sign in TileDetDescriptor[" << n_regions
-                  << "] do not match" << endmsg;
+      ATH_MSG_ERROR( "side and eta sign in TileDetDescriptor[" << n_regions
+                     << "] do not match" );
     }
     ++n_regions;
 
-    MLOG(DEBUG) << "descriptor - " << reg_id << ", " << section << ", " << side
-                << ", " << zshift << ", " << doZshift
-                << ", " << etasign << ", " << n_regions << endmsg;
+    ATH_MSG_DEBUG( "descriptor - " << reg_id << ", " << section << ", " << side
+                   << ", " << zshift << ", " << doZshift
+                   << ", " << etasign << ", " << n_regions );
 
     int nsamp = descr->n_samp();
 
@@ -333,10 +330,6 @@ void TileDetDescrManager::create_elements(bool checks)
       emin = -etmp;
     }
 
-    if ( m_verbose )
-      std::cout << std::setiosflags(std::ios::fixed)
-                << std::setw(9) << std::setprecision(2);
-
     // and now create calo descriptors per every module ( 6 * 64 = 384 in total)
     double phi  = descr->phi_min() + dphi/2.;
 
@@ -373,10 +366,10 @@ void TileDetDescrManager::create_elements(bool checks)
         add_module(idhash,modDescr);
         ++n_modules;
       } catch ( const TileID_Exception& ) {
-        MLOG(ERROR) << "can't build module ID from ("
-                    << section << ","
-                    << side << ","
-                    << module << ")" << endmsg;
+        ATH_MSG_ERROR( "can't build module ID from ("
+                       << section << ","
+                       << side << ","
+                       << module << ")" );
         continue;
       }
 
@@ -402,13 +395,6 @@ void TileDetDescrManager::create_elements(bool checks)
               IdentifierHash idhash;
               /* int result = */ m_tile_id->get_hash(id,idhash,&cell_context);
 
-//            if ( m_verbose && 0 == iphi )
-//              (*log) << MSG::VERBOSE  << "Cell ("
-//                     << section << "," << side << "," << module << ","
-//                     << tower << "," << sample << ") ("
-//                     << eta*etasign << "," << phi  << "," << rcenter << ") ("
-//                     << deta << "," << dphi << "," << dr << ") " << (int)idhash << endmsg;
-
               TileDetectorElement* elt = new TileDetectorElement(
                   idhash, TileHWID::NOT_VALID_HASH, TileHWID::NOT_VALID_HASH, modDescr);
 
@@ -422,19 +408,19 @@ void TileDetDescrManager::create_elements(bool checks)
                 double eta1 = shiftEta(eta-deta/2,rcenter,zshift);
                 double eta2 = shiftEta(eta+deta/2,rcenter,zshift);
 
-                if ( m_verbose && (0 == iphi) )
-                  std::cout << "side/sec/mod/twr/samp="
-                            <<side<<"/"<<section<<"/"<<module<<"/"<<tower<<"/"<<sample
-                            << " rcen = "<<rcenter
-                            << " dr = "<<dr
-                            << " eta = "  << eta
-                            << " eta1 = " << eta1
-                            << " eta2 = " << eta2
-                            << " eta' = " << (eta1+eta2)/2.
-                            << " deta = " << (eta2-eta1)
-                            << " iphi = " << iphi
-                            << " dphi = " << dphi
-                            << std::endl;
+                if (0 == iphi) {
+                  ATH_MSG_VERBOSE( "side/sec/mod/twr/samp="
+                                   <<side<<"/"<<section<<"/"<<module<<"/"<<tower<<"/"<<sample
+                                   << " rcen = "<<rcenter
+                                   << " dr = "<<dr
+                                   << " eta = "  << eta
+                                   << " eta1 = " << eta1
+                                   << " eta2 = " << eta2
+                                   << " eta' = " << (eta1+eta2)/2.
+                                   << " deta = " << (eta2-eta1)
+                                   << " iphi = " << iphi
+                                   << " dphi = " << dphi );
+                }
 
                 elt->set_cylindric((eta1+eta2)/2.*etasign,phi,rcenter);
 //                elt->set_cylindric_size((eta2-eta1),dphi,dr);
@@ -447,16 +433,16 @@ void TileDetDescrManager::create_elements(bool checks)
 
               } else {
 
-                if ( m_verbose && (0 == iphi) )
-                  std::cout << "side/sec/mod/twr/samp="
-                            <<side<<"/"<<section<<"/"<<module<<"/"<<tower<<"/"<<sample
-                            << " rcen = "<<rcenter
-                            << " dr = "<<dr
-                            << " eta = "  << eta
-                            << " deta = " << deta
-                            << " iphi = " << iphi
-                            << " dphi = " << dphi
-                            << std::endl;
+                if (0 == iphi) {
+                  ATH_MSG_VERBOSE( "side/sec/mod/twr/samp="
+                                   <<side<<"/"<<section<<"/"<<module<<"/"<<tower<<"/"<<sample
+                                   << " rcen = "<<rcenter
+                                   << " dr = "<<dr
+                                   << " eta = "  << eta
+                                   << " deta = " << deta
+                                   << " iphi = " << iphi
+                                   << " dphi = " << dphi );
+                }
 
                 elt->set_cylindric(eta*etasign,phi,rcenter);
                 // elt->set_cylindric_size(deta,dphi,dr);
@@ -487,7 +473,7 @@ void TileDetDescrManager::create_elements(bool checks)
                   for ( ; ic>=0; --ic) {
                     z2 = cell_dim->getZMin(ic);
                     if (0 == iphi)
-                      MLOG(DEBUG) << "z2: " << z2 << ", ZMax: " << cell_dim->getZMax(ic) << ", diff: " << z2-cell_dim->getZMax(ic) << endmsg;
+                      ATH_MSG_DEBUG( "z2: " << z2 << ", ZMax: " << cell_dim->getZMax(ic) << ", diff: " << z2-cell_dim->getZMax(ic) );
                     if (fabs(z2-cell_dim->getZMax(ic))>0.1) break;
                   }
                 } else {
@@ -495,13 +481,13 @@ void TileDetDescrManager::create_elements(bool checks)
                   for ( ; ic>=0; --ic) {
                     z2 = cell_dim->getZMax(ic);
                     if (0 == iphi)
-                      MLOG(DEBUG) << "z2: " << z2 << ", ZMin: " << cell_dim->getZMin(ic) << ", diff: " << z2-cell_dim->getZMin(ic) << endmsg;
+                      ATH_MSG_DEBUG( "z2: " << z2 << ", ZMin: " << cell_dim->getZMin(ic) << ", diff: " << z2-cell_dim->getZMin(ic) );
                     if (fabs(z2-cell_dim->getZMin(ic))>0.1) break;
                   }
                 }
 
                 if (ic<0) {
-                  MLOG(WARNING) << "TileDetDescrManager -- ic < 0! Expect crashes or misbehavior! ==> This should be checked, because 'ic' should be related to the numbers of rows!! Note: 'ic' gets < 0 when z2-cell_dim is too small and does not make the above loop break; that can be caused, for example, if 'barrelPeriodThickness' and 'extendedPeriodThickness' are not set (or set to the default 0. value) and, as a result, ZMax is not properly set." << endmsg;
+                  ATH_MSG_WARNING( "TileDetDescrManager -- ic < 0! Expect crashes or misbehavior! ==> This should be checked, because 'ic' should be related to the numbers of rows!! Note: 'ic' gets < 0 when z2-cell_dim is too small and does not make the above loop break; that can be caused, for example, if 'barrelPeriodThickness' and 'extendedPeriodThickness' are not set (or set to the default 0. value) and, as a result, ZMax is not properly set." );
                 }
 
                 double z = (z1+z2)/2.;
@@ -513,7 +499,7 @@ void TileDetDescrManager::create_elements(bool checks)
                 // numbers to 0.
                 if (std::abs(z) < 1e-8 * Gaudi::Units::mm) {
                   if (0 == iphi)
-                    MLOG(DEBUG) << "Cell D0 - put cell center at Z=0" << endmsg;
+                    ATH_MSG_DEBUG( "Cell D0 - put cell center at Z=0" );
                   z = 0;
                 }
 
@@ -523,34 +509,36 @@ void TileDetDescrManager::create_elements(bool checks)
                                        -cell_dim->getZMin(ic)); // size and position right
 
                 if (section == TileID::BARREL && sample==1 && tower < 8) {
-                  if ( m_verbose && (0 == iphi) ) {
+                  if (msgLvl (MSG::VERBOSE) && 0 == iphi) {
                     double z1  = 0.5*(cell_dim->getZMax(0)+cell_dim->getZMin(0));
                     double dz1 = fabs(cell_dim->getZMax(0)-cell_dim->getZMin(0));
                     double z2  = 0.5*(cell_dim->getZMax(ic)+cell_dim->getZMin(ic));
                     double dz2 = fabs(cell_dim->getZMax(ic)-cell_dim->getZMin(ic));
-                    std::cout<<"old z/dz: " << oldz << " " << olddz << std::endl
-                             <<"new z/dz: " << z << " " << dz << " ( B: " << z1 << " " << dz1 << "  C: " << z2 << " " << dz2 << " ) "
-                             << z/oldz*100-100 << " % diff "
-                             <<"do not change z/dz for BC cells in barrel"<<std::endl;
+                    ATH_MSG_VERBOSE( "old z/dz: " << oldz << " " << olddz << std::endl
+                                     <<"new z/dz: " << z << " " << dz << " ( B: " << z1 << " " << dz1 << "  C: " << z2 << " " << dz2 << " ) "
+                                     << z/oldz*100-100 << " % diff "
+                                     <<"do not change z/dz for BC cells in barrel" );
                   }
                 } else if ( (section == TileID::GAPDET) && (sample == TileID::SAMP_E) ) {
 
                   elt->set_z( descr->zcenter(isamp) );
                   elt->set_dz( descr->dz(isamp) );
-                  if ( m_verbose && (0 == iphi) )
-                    std::cout<<"old z/dz: " << oldz << " " << olddz << std::endl
-                             <<"new z/dz: " << elt->z() << " " << elt->dz() << " "
-                             << elt->z()/oldz*100-100 << " % diff "
-                             <<"use z/dz from descriptor for E cells"<<std::endl;
+                  if (0 == iphi) {
+                    ATH_MSG_VERBOSE( "old z/dz: " << oldz << " " << olddz << std::endl
+                                     <<"new z/dz: " << elt->z() << " " << elt->dz() << " "
+                                     << elt->z()/oldz*100-100 << " % diff "
+                                     <<"use z/dz from descriptor for E cells" );
+                  }
 
                 } else {
                   // elt->set_z_pos_and_size(z,dz);
                   elt->set_z(z);
                   elt->set_dz(dz);
-                  if ( m_verbose && (0 == iphi) )
-                    std::cout<<"old z/dz: " << oldz << " " << olddz << std::endl
-                             <<"new z/dz: " << elt->z() << " " << elt->dz() << " "
-                             << elt->z()/(oldz+1.e-10)*100-100 << " % diff" << std::endl;
+                  if (0 == iphi) {
+                    ATH_MSG_VERBOSE( "old z/dz: " << oldz << " " << olddz << std::endl
+                                     <<"new z/dz: " << elt->z() << " " << elt->dz() << " "
+                                     << elt->z()/(oldz+1.e-10)*100-100 << " % diff" );
+                  }
                 }
 
 
@@ -562,10 +550,11 @@ void TileDetDescrManager::create_elements(bool checks)
 
                 elt->set_r((r1+r2)/2.);
                 elt->set_dr(fabs(r2-r1));
-                if ( m_verbose && (0 == iphi) )
-                  std::cout<<"old r/dr: " << oldr << " " << olddr << std::endl
-                           <<"new r/dr: " << elt->r() << " " << elt->dr() << " "
-                           << elt->r()/(oldr+1.e-10)*100-100 << " % diff" << std::endl;
+                if (0 == iphi) {
+                  ATH_MSG_VERBOSE( "old r/dr: " << oldr << " " << olddr << std::endl
+                                   <<"new r/dr: " << elt->r() << " " << elt->dr() << " "
+                                   << elt->r()/(oldr+1.e-10)*100-100 << " % diff" );
+                }
 
                 double oldv=elt->volume();
                 double newv = cell_dim->getVolume();   // ps  cell volume to correct for special cells
@@ -579,20 +568,19 @@ void TileDetDescrManager::create_elements(bool checks)
                   {
                     double oldv=elt->volume();
 
-                    if ( m_verbose ) {
-                      std::cout<<"CUTOUT CELL VOLUME UPDATE"<< std::endl
-                               <<"old volume: " << oldv << std::endl
-                               << " iphi = " << iphi
-                               << " phi = " << (module + 0.5)*dphi  <<" phi2 = "<<elt->phi()
-                               << std::endl
-                               << " Mod# = " << ModuleNcp <<" module = "<<module<<" tower = "<<tower
-                               << std::endl
-                               <<"sample = "<<sample
-                               <<" A = " << (TileID::SAMP_A  == sample)
-                               <<" BC = "<< (TileID::SAMP_BC == sample)
-                               <<" D = " << (TileID::SAMP_D  == sample)
-                               <<" ---------------------"
-                               << std::endl;
+                    if (msgLvl (MSG::VERBOSE)) {
+                      ATH_MSG_VERBOSE( "CUTOUT CELL VOLUME UPDATE"<< std::endl
+                                       <<"old volume: " << oldv << std::endl
+                                       << " iphi = " << iphi
+                                       << " phi = " << (module + 0.5)*dphi  <<" phi2 = "<<elt->phi()
+                                       << std::endl
+                                       << " Mod# = " << ModuleNcp <<" module = "<<module<<" tower = "<<tower
+                                       << std::endl
+                                       <<"sample = "<<sample
+                                       <<" A = " << (TileID::SAMP_A  == sample)
+                                       <<" BC = "<< (TileID::SAMP_BC == sample)
+                                       <<" D = " << (TileID::SAMP_D  == sample)
+                                       <<" ---------------------" );
                       cell_dim->print();
                     }
 
@@ -612,14 +600,13 @@ void TileDetDescrManager::create_elements(bool checks)
                         double rowVolume = cell_dim->computeRowVolume(iRow);
                         double oldrv = rowVolume;
 
-                        if (m_verbose) std::cout <<" *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << std::endl;
+                        ATH_MSG_VERBOSE( " *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] );
 
-                        MLOG(DEBUG) << "Computing radMax and deltaZ..." << endmsg;
+                        ATH_MSG_DEBUG( "Computing radMax and deltaZ..." );
                         double radMax =  cell_dim->getRMax(iRow), radMin = cell_dim->getRMin(iRow);
                         double deltaZ =  cell_dim->getZMax(iRow) - cell_dim->getZMin(iRow);
 
-                        if (m_verbose)
-                          std::cout <<"deltaz = "<<deltaZ<<" rmax = "<<radMax<<" rmin = "<<radMin<<" rowVolume = "<<rowVolume<<" oldrv = "<<oldrv<<" irow = "<<iRow<<" tower = "<<tower<< std::endl;
+                        ATH_MSG_VERBOSE( "deltaz = "<<deltaZ<<" rmax = "<<radMax<<" rmin = "<<radMin<<" rowVolume = "<<rowVolume<<" oldrv = "<<oldrv<<" irow = "<<iRow<<" tower = "<<tower );
 
                         if ( 15 == tower )
                           {
@@ -629,23 +616,23 @@ void TileDetDescrManager::create_elements(bool checks)
                                 rowVolume -= epVolume;
                                 deltaZ -= epThickness;
 
-                                if (m_verbose) std::cout <<" \t\t epV = "<<epVolume<<" epT = "<<epThickness << " diff = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<<std::endl;
+                                ATH_MSG_VERBOSE( " \t\t epV = "<<epVolume<<" epT = "<<epThickness << " diff = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                               }
 
                             volumeInRow[iRow] += (rowVolume * (32./48) );  // the remaining 32 periods which are not cutted out
                             deltaZ    *= 16./48.;                          // dz of the cutted part
                             rowVolume *= 16./48.;                          // volume of the cutted part of the cell, but before cut
-                            if (m_verbose) std::cout <<" *** 15 rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] <<" diff = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                            ATH_MSG_VERBOSE( " *** 15 rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] <<" diff = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                           }
                         else if ( 12 == tower )
                           {
                             volumeInRow[iRow] += (rowVolume * (2./25) );   // the remaining 2 periods which are not cutted out
                             deltaZ    *= 23./25.;                          // dz of the cutted part
                             rowVolume *= 23./25.;                          // volume of the cutted part of the cell, but before cut
-                            if (m_verbose) std::cout <<" *** 12 rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                            ATH_MSG_VERBOSE( " *** 12 rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                           }
 
-                        if (m_verbose) std::cout <<"deltaz = "<<deltaZ<<" rmax = "<<radMax<<" rmin = "<<radMin<<" changed dz ?"<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                        ATH_MSG_VERBOSE( "deltaz = "<<deltaZ<<" rmax = "<<radMax<<" rmin = "<<radMin<<" changed dz ?"<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
 
                         if ( (ModuleNcp == 61) || (ModuleNcp == 36) )
                           {
@@ -668,8 +655,7 @@ void TileDetDescrManager::create_elements(bool checks)
 
                             volumeInRow[iRow] += rowVolume;
 
-                            if (m_verbose)
-                              std::cout <<" *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                            ATH_MSG_VERBOSE( " *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                           } // Module 61  36
 
                         if ( (ModuleNcp == 62) || (ModuleNcp == 35) )
@@ -693,7 +679,7 @@ void TileDetDescrManager::create_elements(bool checks)
                             else if (15 == tower) rowVolume += epVolume;
 
                             volumeInRow[iRow] += rowVolume;
-                            if (m_verbose) std::cout <<" *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                            ATH_MSG_VERBOSE( " *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                           } // Module 62  35
 
                         if ( (ModuleNcp == 60) || (ModuleNcp == 37) )
@@ -731,10 +717,10 @@ void TileDetDescrManager::create_elements(bool checks)
                               }
 
                             volumeInRow[iRow] += rowVolume;
-                            if (m_verbose) std::cout <<" *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                            ATH_MSG_VERBOSE( " *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                           } // Module 60  37
 
-                        if (m_verbose) std::cout <<" *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100.<< std::endl;
+                        ATH_MSG_VERBOSE( " *** rowVolume = "<<rowVolume<<" volumeInRow = "<< volumeInRow[iRow] << " % = "<<(volumeInRow[iRow] - oldrv)/oldrv*100. );
                       } // for iRow
 
 
@@ -742,15 +728,13 @@ void TileDetDescrManager::create_elements(bool checks)
                     for (unsigned int iRow = 0; iRow < cell_dim->getNRows(); iRow++) totalVolume += volumeInRow[iRow];
                     elt->set_volume( totalVolume );
 
-                    if (m_verbose)
-                      std::cout << "\n total volume = "
-                                << elt->volume() << " cell_dim xCheck ( "
-                                <<  cell_dim->getVolume() <<" ) "
-                                << elt->volume()/oldv*100-100 << " % diff"
-                                <<std::endl;
+                    ATH_MSG_VERBOSE( "\n total volume = "
+                                     << elt->volume() << " cell_dim xCheck ( "
+                                     <<  cell_dim->getVolume() <<" ) "
+                                     << elt->volume()/oldv*100-100 << " % diff" );
 
 
-                    if ( m_verbose ) std::cout <<"-----------------------------------------------"<< std::endl;
+                    ATH_MSG_VERBOSE( "-----------------------------------------------" );
                   }
                 //
                 // ps special D4
@@ -778,20 +762,17 @@ void TileDetDescrManager::create_elements(bool checks)
                     elt->set_dz(specialD4dz);
                     elt->set_volume(newv * specialD4dz/(standardD4dz));
 
-                    if ( m_verbose && (Id4 > 3))
-                      std::cout<<"spD4 old z/dz: " << oldz << " " << standardD4dz << std::endl
-                               <<"spD4 new z/dz: " << elt->z() << " " << elt->dz() << " "
-                               << elt->z()/(oldz+1.e-10)*100-100 << " % diff"
-                               << std::endl;
+                    if (Id4 > 3) {
+                      ATH_MSG_VERBOSE( "spD4 old z/dz: " << oldz << " " << standardD4dz << std::endl
+                                       <<"spD4 new z/dz: " << elt->z() << " " << elt->dz() << " "
+                                       << elt->z()/(oldz+1.e-10)*100-100 << " % diff" );
 
-
-                    if ( m_verbose && (Id4 > 3))
-                      std::cout<<"spD4 old volume: " << oldv << std::endl
-                               <<"spD4 new volume: " << elt->volume() << " "
-                               << elt->volume()/oldv*100-100 << " % diff"
-                               << " iphi = " << iphi
-                               << " dphi = " << dphi << " phi = " << (module + 0.5)*dphi - M_PI <<" phi2 = "<<elt->phi()
-                               << std::endl;
+                      ATH_MSG_VERBOSE( "spD4 old volume: " << oldv << std::endl
+                                       <<"spD4 new volume: " << elt->volume() << " "
+                                       << elt->volume()/oldv*100-100 << " % diff"
+                                       << " iphi = " << iphi
+                                       << " dphi = " << dphi << " phi = " << (module + 0.5)*dphi - M_PI <<" phi2 = "<<elt->phi() );
+                    }
                   }
                 //
                 // ps special C10
@@ -868,39 +849,36 @@ void TileDetDescrManager::create_elements(bool checks)
                           elt->set_z(elt->z()+0.5*specialD4dz);
                         */
 
-                        if ( m_verbose ) {
-                          std::cout<<"D5    old z/dz: " << oldz << " " << standardD5dz << "  spD4 dz: " << specialD4dz << std::endl;
-                          std::cout<<"D5+D4 new z/dz: " << elt->z() << " " << elt->dz() << " " << std::endl;
-                          std::cout<<"D5+D4 old volume: " << newv << std::endl
-                                   <<"D5+D4 new volume: " << elt->volume() << " "
-                                   << elt->volume()/oldv*100-100 << " % diff"
-                                   << " iphi = " << iphi
-                                   << " dphi = " << dphi <<" Id4 = "<< Id4 <<" modType = "<<m_dbManager->GetModType()
-                                   << " phi = " << (module + 0.5)*dphi - M_PI<<" phi2 = "<<elt->phi()
-                                   << std::endl;
-                          std::cout<< "  module = "<< module
-                                   << "  sample = " << sample
-                                   << "  section = " << section
-                                   << "  tower = " << tower << std::endl;
-                        }
+                        ATH_MSG_VERBOSE( "D5    old z/dz: " << oldz << " " << standardD5dz << "  spD4 dz: " << specialD4dz );
+                        ATH_MSG_VERBOSE( "D5+D4 new z/dz: " << elt->z() << " " << elt->dz() << " " );
+                        ATH_MSG_VERBOSE( "D5+D4 old volume: " << newv << std::endl
+                                         <<"D5+D4 new volume: " << elt->volume() << " "
+                                         << elt->volume()/oldv*100-100 << " % diff"
+                                         << " iphi = " << iphi
+                                         << " dphi = " << dphi <<" Id4 = "<< Id4 <<" modType = "<<m_dbManager->GetModType()
+                                         << " phi = " << (module + 0.5)*dphi - M_PI<<" phi2 = "<<elt->phi() );
+                        ATH_MSG_VERBOSE( "  module = "<< module
+                                         << "  sample = " << sample
+                                         << "  section = " << section
+                                         << "  tower = " << tower );
                       }
                   }
 
-                if ( m_verbose &&  (0 == iphi) )
-                  std::cout<<"old volume: " << oldv << std::endl
-                           <<"new volume: " << elt->volume() << " "
-                           << elt->volume()/oldv*100-100 << " % diff"
-                           << " iphi = " << iphi
-                           << " dphi = " << dphi
-                           << std::endl;
+                if (0 == iphi) {
+                  ATH_MSG_VERBOSE( "old volume: " << oldv << std::endl
+                                   <<"new volume: " << elt->volume() << " "
+                                   << elt->volume()/oldv*100-100 << " % diff"
+                                   << " iphi = " << iphi
+                                   << " dphi = " << dphi );
+                }
               }
 
               add_cell(elt);
               ++n_cells;
             } catch ( const TileID_Exception& ) {
-              MLOG(ERROR) << "can't build cell ID from ("
-                          << section << "," << side << "," << module << ","
-                          << tower << "," << sample << ")" << endmsg;
+              ATH_MSG_ERROR( "can't build cell ID from ("
+                             << section << "," << side << "," << module << ","
+                             << tower << "," << sample << ")" );
             }
             eta += deta;
           }
@@ -908,14 +886,11 @@ void TileDetDescrManager::create_elements(bool checks)
       }
       phi += dphi;
     }
-    if ( m_verbose )
-      std::cout << std::resetiosflags(std::ios::fixed);
   }
 
-  MLOG(DEBUG) << n_cells << " cells and "
-              << n_modules << " half-modules were created for "
-              << n_regions << " Tile Regions"
-              << endmsg;
+  ATH_MSG_DEBUG( n_cells << " cells and "
+                 << n_modules << " half-modules were created for "
+                 << n_regions << " Tile Regions" );
 }
 
 
@@ -936,31 +911,26 @@ void TileDetDescrManager::add_calodescr(CaloDetDescriptor* descr)
   m_calo_descr_vec.push_back(descr);
   m_calo_descr_map[index] = descr;
 
-  if (m_verbose) {
-    std::cout << std::setiosflags(std::ios::fixed)
-              << std::setw(9) << std::setprecision(4);
-    std::cout << "new Tile CaloDetDescriptor" << std::endl;
-    std::cout << " index " << index << std::endl;
-    std::cout << " calo_sample " << descr->getSampling(0) << std::endl;
-    std::cout << " calo_sign " << descr->calo_sign() << std::endl;
-    std::cout << " layer " << descr->layer() << std::endl;
-    std::cout << " is tile " << ((descr->is_tile()) ? "true" : "false" )<< std::endl;
-    // std::cout << " is cylindric " << (descr->is_cylindric() ? "true" : "false") << std::endl;
-    // std::cout << " is ec_cylindric " << (descr->is_ec_cylindric() ? "true" : "false") << std::endl;
-    std::cout << " deta " << descr->deta() << std::endl;
-    std::cout << " dphi " << descr->dphi() << std::endl;
-    std::cout << " n_eta " << descr->n_eta() << std::endl;
-    std::cout << " n_phi " << descr->n_phi() << std::endl;
-    std::cout << " calo_eta_min " << descr->calo_eta_min() << std::endl;
-    std::cout << " calo_eta_max " << descr->calo_eta_max() << std::endl;
-    std::cout << " calo_phi_min " << descr->calo_phi_min() << std::endl;
-    std::cout << " calo_phi_max " << descr->calo_phi_max() << std::endl;
-    std::cout << " calo_r_min " << descr->calo_r_min() << std::endl;
-    std::cout << " calo_r_max " << descr->calo_r_max() << std::endl;
-    std::cout << " calo_z_min " << descr->calo_z_min() << std::endl;
-    std::cout << " calo_z_max " << descr->calo_z_max() << std::endl;
-    std::cout << std::resetiosflags(std::ios::fixed);
-  }
+  ATH_MSG_VERBOSE( "new Tile CaloDetDescriptor" );
+  ATH_MSG_VERBOSE( " index " << index );
+  ATH_MSG_VERBOSE( " calo_sample " << descr->getSampling(0) );
+  ATH_MSG_VERBOSE( " calo_sign " << descr->calo_sign() );
+  ATH_MSG_VERBOSE( " layer " << descr->layer() );
+  ATH_MSG_VERBOSE( " is tile " << ((descr->is_tile()) ? "true" : "false" ) );
+  // ATH_MSG_VERBOSE( " is cylindric " << (descr->is_cylindric() ? "true" : "false") );
+  // ATH_MSG_VERBOSE( " is ec_cylindric " << (descr->is_ec_cylindric() ? "true" : "false") );
+  ATH_MSG_VERBOSE( " deta " << descr->deta() );
+  ATH_MSG_VERBOSE( " dphi " << descr->dphi() );
+  ATH_MSG_VERBOSE( " n_eta " << descr->n_eta() );
+  ATH_MSG_VERBOSE( " n_phi " << descr->n_phi() );
+  ATH_MSG_VERBOSE( " calo_eta_min " << descr->calo_eta_min() );
+  ATH_MSG_VERBOSE( " calo_eta_max " << descr->calo_eta_max() );
+  ATH_MSG_VERBOSE( " calo_phi_min " << descr->calo_phi_min() );
+  ATH_MSG_VERBOSE( " calo_phi_max " << descr->calo_phi_max() );
+  ATH_MSG_VERBOSE( " calo_r_min " << descr->calo_r_min() );
+  ATH_MSG_VERBOSE( " calo_r_max " << descr->calo_r_max() );
+  ATH_MSG_VERBOSE( " calo_z_min " << descr->calo_z_min() );
+  ATH_MSG_VERBOSE( " calo_z_max " << descr->calo_z_max() );
 }
 
 void TileDetDescrManager::add_module(IdentifierHash idhash, CaloDetDescriptor* module)
