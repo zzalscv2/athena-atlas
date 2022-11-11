@@ -1,17 +1,17 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "GeneratorFilters/xAODChargedTracksWeightFilter.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include <algorithm>
 
 using Point = xAODChargedTracksWeightFilter::Spline::Point;
 
 xAODChargedTracksWeightFilter::xAODChargedTracksWeightFilter(const std::string& name, ISvcLocator* pSvcLocator)
-    : GenFilter(name, pSvcLocator),
-    m_randSvc("AtRndmGenSvc",name)
+    : GenFilter(name, pSvcLocator)
 {
     declareProperty("Ptcut", m_Ptmin = 50.0);
     declareProperty("Etacut", m_EtaRange = 2.5);
@@ -22,6 +22,8 @@ xAODChargedTracksWeightFilter::xAODChargedTracksWeightFilter(const std::string& 
 }
 
 StatusCode xAODChargedTracksWeightFilter::filterInitialize() {
+
+    CHECK(m_rndmSvc.retrieve());
 
     if(m_nchmin < 0) m_nchmin = 0;
 
@@ -58,6 +60,16 @@ StatusCode xAODChargedTracksWeightFilter::filterFinalize() {
     return StatusCode::SUCCESS;
 }
 
+CLHEP::HepRandomEngine* xAODChargedTracksWeightFilter::getRandomEngine(const std::string& streamName,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
+}
+
+
 StatusCode xAODChargedTracksWeightFilter::filterEvent() {
 
       // Retrieve full TruthEventContainer container
@@ -66,6 +78,14 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
     {
         ATH_MSG_ERROR("No TruthEvent collection with name " << "TruthEvents" << " found in StoreGate!");
         return StatusCode::FAILURE;
+    }
+
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    CLHEP::HepRandomEngine* rndmGen = this->getRandomEngine(name(), ctx);
+    if (!rndmGen) {
+      ATH_MSG_WARNING("Failed to retrieve random number engine " << name());
+      setFilterPassed(false);
+      return StatusCode::FAILURE;
     }
 
     int nChargedTracks = 0;
@@ -125,15 +145,6 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
         accept = true;
     } else {
         // weighting
-
-        // Grab random number engine
-        CLHEP::HepRandomEngine* rndmGen = m_randSvc->GetEngine(name());
-        if (!rndmGen) {
-            ATH_MSG_WARNING("Failed to retrieve random number engine " << name());
-            setFilterPassed(false);
-            return StatusCode::FAILURE;
-        }
-
         double rnd = rndmGen->flat();
         if(weight>rnd) {
             accept = true;
