@@ -22,8 +22,6 @@ This package provides algorithms for testing LAr Calorimeter conditions data
 
 @section LArConditionsTest_DCSTest Test DCS data
 
-  LArFecLvTempDcsTest Test FrontEnd Crate Low Voltage DCS data in Athena
-
   LArHVCommissionTest Test HV commissioning DCS data in COOL DB 
 
 

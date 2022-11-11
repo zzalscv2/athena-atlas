@@ -66,7 +66,6 @@ href="http://isscvs.cern.ch/cgi-bin/viewcvs-all.cgi/offline/LArCalorimeter/LArEl
   - LArEMEC_HVbetaP
   - LArFEBTimeOffsetDB
   - LArFEBTimeOffset
-  - LArFecLvTempDcs
   - LArfSamplComplete
   - LArfSamplDB
   - LArfSamplMC
