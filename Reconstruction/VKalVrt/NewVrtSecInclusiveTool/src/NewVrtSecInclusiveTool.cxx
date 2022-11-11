@@ -64,7 +64,7 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     m_fillHist(false),
     m_useVertexCleaning(true),
     m_multiWithOneTrkVrt(true),
-    m_calibFileName("Fake2TrVertexReject.MVA.v01.root"),
+    m_calibFileName("Fake2TrVertexReject.MVA.v02.root"),
     m_SV2T_BDT(nullptr),
     m_fitSvc("Trk::TrkVKalVrtFitter/VertexFitterTool",this)
    {
