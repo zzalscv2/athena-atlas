@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
 
 def createSecVertexingFlags():
@@ -160,7 +160,7 @@ def createPriVertexingFlags():
     flags = AthConfigFlags()
 
     # Turn on the primary vertex reconstruction
-    flags.addFlag("doVertexFinding", True)
+    flags.addFlag("doVertexFinding", lambda prevFlags: prevFlags.Beam.Type is not BeamType.Cosmics)
     flags.addFlag("maxAbsEta", 9999.0)
     flags.addFlag("maxD0", 4.0 * Units.mm)
     flags.addFlag("maxNPixelHoles", 1)

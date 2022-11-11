@@ -139,8 +139,8 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
     if doRoIBResult(flags):
       roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSDecoderTool", flags=flags, writeBS=False)
       decoderTools += [roibResultTool]
-      if flags.Trigger.EDMVersion == 2:
-        # L1Topo may be missing in some runs of Run 2 when it was under commissioning
+      if not flags.Trigger.doHLT or flags.Trigger.EDMVersion == 2:
+        # Always treat L1Topo as "maybe missing" in offline reco, and in HLT only for Run 2
         for module_id in roibResultTool.L1TopoModuleIds:
           maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, module_id)))
       if flags.Trigger.EDMVersion == 2 and not flags.Trigger.doHLT:
