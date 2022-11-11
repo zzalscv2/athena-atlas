@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 // Written by Bill Balunas (balunas@cern.ch)
 // Based on DiBjetFilter by Stephen Bienek
@@ -8,9 +8,12 @@
 #define GENERATORFILTERSMULTIBJETFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 
-//Random number generator required for accepting light jets
-class TRandom3;
+namespace CLHEP {
+  class HepRandomEngine;
+}
+
 
 class MultiBjetFilter:public GenFilter {
 
@@ -22,6 +25,9 @@ class MultiBjetFilter:public GenFilter {
     virtual StatusCode filterEvent();
 
 private:
+
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
 
     // Basic jet requirements
     double m_deltaRFromTruth;
@@ -42,7 +48,7 @@ private:
 
     // inclusive filter efficiency
     double m_inclusiveEff;
-    ServiceHandle<IAtRndmGenSvc> m_rand;  //!< Random number generator                                                                   
+    ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
     std::string m_TruthJetContainerName;
 
     // Internal bookkeeping variables

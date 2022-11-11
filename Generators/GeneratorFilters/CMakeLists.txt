@@ -13,7 +13,7 @@ atlas_add_library( GeneratorFiltersLib
                    PUBLIC_HEADERS GeneratorFilters
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaBaseComps AtlasHepMCLib GaudiKernel GeneratorModulesLib MCTruthClassifierLib xAODJet xAODTruth
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaBaseComps AtlasHepMCLib AtlasHepMCsearchLib GaudiKernel GeneratorModulesLib MCTruthClassifierLib xAODJet xAODTruth
                    PRIVATE_LINK_LIBRARIES AthLinks AthenaKernel CxxUtils GeneratorObjects StoreGateLib TruthUtils )
 
 atlas_add_component( GeneratorFilters
