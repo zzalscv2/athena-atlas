@@ -45,14 +45,6 @@ StatusCode LArAutoCorrDecoderTool::initialize()
     ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
   }
 
-  StatusCode sc=detStore()->regHandle(m_autoCorr,m_keyAutoCorr);
-  if (sc.isFailure()) {
-    ATH_MSG_ERROR( "Failed to register Datahandle<ILArAutoCorr> to SG key " << m_keyAutoCorr );
-    return sc;
-  } else {
-    ATH_MSG_INFO( "Registered Datahandle<ILArAutoCorr> to SG key " << m_keyAutoCorr );
-  }
-
 
   if (m_alwaysHighGain)
     ATH_MSG_INFO( "Will always return HIGH gain autocorrelation matrix for EM calo, MEDIUM for HEC and FCAL" );
@@ -82,9 +74,13 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACDiagonal( const HWIdentifier&  C
 
   Eigen::MatrixXd AutoCorrMatrix=Eigen::MatrixXd::Zero(nSamples,nSamples);
 
-  if ( m_autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
+  const ILArAutoCorr* autoCorr=nullptr;
+  detStore()->retrieve(autoCorr).ignore();
+  
 
-    ILArAutoCorr::AutoCorrRef_t dbcorr = m_autoCorr->autoCorr(CellID,gain);
+  if ( autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
+
+    ILArAutoCorr::AutoCorrRef_t dbcorr = autoCorr->autoCorr(CellID,gain);
 
     if ( dbcorr.size()== 0 ) { // empty AutoCorr for given channel
       ATH_MSG_WARNING( "Empty AutoCorr vector for channel " <<  m_onlineID->channel_name(CellID) << " in Gain = " << gain);
@@ -127,9 +123,12 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACPhysics( const HWIdentifier&  Ce
 
   Eigen::MatrixXd AutoCorrMatrix=Eigen::MatrixXd::Identity(nSamples,nSamples);
 
-  if ( m_autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
+  const ILArAutoCorr* autoCorr=nullptr;
+  detStore()->retrieve(autoCorr).ignore();
+  
+  if ( autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
 
-    ILArAutoCorr::AutoCorrRef_t corrdb = m_autoCorr->autoCorr(CellID,gain);
+    ILArAutoCorr::AutoCorrRef_t corrdb = autoCorr->autoCorr(CellID,gain);
    
     if ( corrdb.size()== 0 ) { // empty AutoCorr for given channel
       ATH_MSG_WARNING( "Empty AutoCorr vector for channel " << m_onlineID->channel_name(CellID) << " in Gain = " << gain);

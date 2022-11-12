@@ -15,7 +15,6 @@
 #include "LArElecCalib/ILArAutoCorr.h"
 #include <Eigen/Dense>
 
-#include "StoreGate/DataHandle.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 
@@ -59,8 +58,6 @@ class LArAutoCorrDecoderTool: public AthAlgTool,
   const LArOnlineID_Base*  m_onlineID;
 
   std::string m_keyAutoCorr;
-
-  const DataHandle<ILArAutoCorr> m_autoCorr;
 
   // Running on cells or supercells?
   bool m_isSC;
