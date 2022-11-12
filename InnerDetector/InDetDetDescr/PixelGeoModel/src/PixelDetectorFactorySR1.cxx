@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PixelDetectorFactorySR1.h"
@@ -24,7 +24,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 
 #include "PixelGeoModelAthenaComps.h"
-#include "OraclePixGeoManager.h"
+#include "DBPixelGeoManager.h"
 
 #include "InDetIdentifier/PixelID.h"
 
@@ -40,7 +40,7 @@ PixelDetectorFactorySR1::PixelDetectorFactorySR1(PixelGeoModelAthenaComps * athe
   m_detectorManager = new PixelDetectorManager(detStore());
 
   // Create the geometry manager.
-  m_geometryManager =  new OraclePixGeoManager(athenaComps);
+  m_geometryManager =  new DBPixelGeoManager(athenaComps);
   
   // Pass the switches
   m_geometryManager->SetServices(switches.services());

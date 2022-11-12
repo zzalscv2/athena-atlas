@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "OraclePixGeoManager.h"
+#include "DBPixelGeoManager.h"
 #include "PixelLegacyManager.h"
 #include "PixelMaterialMap.h"
 #include "PixelStaveTypes.h"
@@ -41,7 +41,7 @@ using InDetDD::PixelDetectorManager;
 
 using namespace std;
 
-OraclePixGeoManager::OraclePixGeoManager(PixelGeoModelAthenaComps * athenaComps)
+DBPixelGeoManager::DBPixelGeoManager(PixelGeoModelAthenaComps * athenaComps)
   : PixelGeometryManager(athenaComps), 
     m_eta(0),
     m_phi(0),
@@ -73,7 +73,7 @@ OraclePixGeoManager::OraclePixGeoManager(PixelGeoModelAthenaComps * athenaComps)
 }
 
 void
-OraclePixGeoManager::init()
+DBPixelGeoManager::init()
 {
   if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Using ORACLE PIXEL GEOMETRY MANAGER" << endmsg;
 
@@ -216,18 +216,18 @@ OraclePixGeoManager::init()
   //cout << "Endcap Version " << this->PixelEndcapMajorVersion() << "." << this->PixelEndcapMinorVersion() << endl;
 }
 
-InDetMaterialManager* OraclePixGeoManager::getMaterialManager()
+InDetMaterialManager* DBPixelGeoManager::getMaterialManager()
 {
   return m_pMatMgr;
 }
 
-PixelLegacyManager * OraclePixGeoManager::legacyManager()
+PixelLegacyManager * DBPixelGeoManager::legacyManager()
 {
   return m_legacyManager;
 }
 
 
-OraclePixGeoManager::~OraclePixGeoManager()
+DBPixelGeoManager::~DBPixelGeoManager()
 {
   delete m_placements;
   delete m_distortedMatManager;
@@ -243,42 +243,42 @@ OraclePixGeoManager::~OraclePixGeoManager()
 
 
 InDetDD::SiCommonItems * 
-OraclePixGeoManager::commonItems()
+DBPixelGeoManager::commonItems()
 {
   return m_commonItems;
 }
 
 
 const InDetDD::SiCommonItems * 
-OraclePixGeoManager::commonItems() const
+DBPixelGeoManager::commonItems() const
 {
   return m_commonItems;
 }
 
 
 void 
-OraclePixGeoManager::setCommonItems(InDetDD::SiCommonItems * commonItems)
+DBPixelGeoManager::setCommonItems(InDetDD::SiCommonItems * commonItems)
 {
   m_commonItems = commonItems;
 }
 
 
 const PixelID * 
-OraclePixGeoManager::getIdHelper() 
+DBPixelGeoManager::getIdHelper() 
 {
   return athenaComps()->getIdHelper();
 }
 
 
 const GeoTrf::Transform3D & 
-OraclePixGeoManager::partTransform(const std::string & partName) const 
+DBPixelGeoManager::partTransform(const std::string & partName) const 
 {
   return m_placements->transform(partName);
 }
 
 
 bool 
-OraclePixGeoManager::partPresent(const std::string & partName) const
+DBPixelGeoManager::partPresent(const std::string & partName) const
 {
   // First check if overridden from text file.
   if (partName == "Barrel") {
@@ -299,7 +299,7 @@ OraclePixGeoManager::partPresent(const std::string & partName) const
 // Setting of Layer/Disk and Barrel/EndCap
 //
 /////////////////////////////////////////////////////////
-void OraclePixGeoManager::SetCurrentLD(int i)
+void DBPixelGeoManager::SetCurrentLD(int i)
 {
   if(isBarrel() ) {
     if(i <= PixelBarrelNLayer()) {
@@ -330,15 +330,15 @@ void OraclePixGeoManager::SetCurrentLD(int i)
   }
 }
 
-void OraclePixGeoManager::SetBarrel() {
+void DBPixelGeoManager::SetBarrel() {
   //msg(MSG::DEBUG) << "Setting Barrel" << endmsg;
   m_BarrelEndcap = 0;
 }
-void OraclePixGeoManager::SetEndcap() {
+void DBPixelGeoManager::SetEndcap() {
   m_BarrelEndcap = 1;
   //msg(MSG::DEBUG) << "Setting Endcap" << endmsg;
 }
-void OraclePixGeoManager::SetPartsDBM() {
+void DBPixelGeoManager::SetPartsDBM() {
   m_BarrelEndcap = 2;
   //msg(MSG::DEBUG) << "Setting DBM" << endmsg;
 }
@@ -350,7 +350,7 @@ void OraclePixGeoManager::SetPartsDBM() {
 // For initial layout layer=1 and disk=1 (2nd layer and disk) is missing.
 //
 /////////////////////////////////////////////////////////
-bool OraclePixGeoManager::isLDPresent() {
+bool DBPixelGeoManager::isLDPresent() {
   if(isBarrel()) {
     if (m_initialLayout && m_currentLD == 1) return false;
     std::ostringstream A;
@@ -371,43 +371,43 @@ bool OraclePixGeoManager::isLDPresent() {
 }
 
 
-bool OraclePixGeoManager::isBarrel() {
+bool DBPixelGeoManager::isBarrel() {
   return m_BarrelEndcap == 0;
 }
-bool OraclePixGeoManager::isEndcap() {
+bool DBPixelGeoManager::isEndcap() {
   return m_BarrelEndcap == 1;
   return false;
 }
-bool OraclePixGeoManager::isDBM() {
+bool DBPixelGeoManager::isDBM() {
   return m_BarrelEndcap == 2;
 }
 
-bool OraclePixGeoManager::DoServices() {
+bool DBPixelGeoManager::DoServices() {
   return m_services;
 }
-bool OraclePixGeoManager::DoServicesOnLadder() {
+bool DBPixelGeoManager::DoServicesOnLadder() {
   return m_servicesOnLadder;
 }
 
-bool OraclePixGeoManager::InitialLayout() const {
+bool DBPixelGeoManager::InitialLayout() const {
   return m_initialLayout;
 }
 
-void OraclePixGeoManager::SetDC1Geometry(bool flag) {
+void DBPixelGeoManager::SetDC1Geometry(bool flag) {
   m_dc1Geometry = flag; 
   if (m_legacyManager) m_legacyManager->SetDC1Geometry(flag);
 }
 
-bool OraclePixGeoManager::DC1Geometry() const {
+bool DBPixelGeoManager::DC1Geometry() const {
   return m_dc1Geometry;
 }
 
-bool OraclePixGeoManager::Alignable() const {
+bool DBPixelGeoManager::Alignable() const {
   return m_alignable;
 }
 
 
-PixelDetectorManager* OraclePixGeoManager::GetPixelDDManager() {
+PixelDetectorManager* DBPixelGeoManager::GetPixelDDManager() {
   if(m_pDDmgr == nullptr) {
     //
     // retrieve the pointer to the DD manager
@@ -422,7 +422,7 @@ PixelDetectorManager* OraclePixGeoManager::GetPixelDDManager() {
 
 
 InDetDD::DistortedMaterialManager *
-OraclePixGeoManager::distortedMatManager() {
+DBPixelGeoManager::distortedMatManager() {
   return m_distortedMatManager;
 }  
 
@@ -433,7 +433,7 @@ OraclePixGeoManager::distortedMatManager() {
 // which thickness is given in % of r.l.
 //
 /////////////////////////////////////////////////////////
-double OraclePixGeoManager::CalculateThickness(double tck,const string& mat) {
+double DBPixelGeoManager::CalculateThickness(double tck,const string& mat) {
   const GeoMaterial* material =  m_pMatMgr->getMaterial(mat);
   double rl = material->getRadLength();
   material->ref();
@@ -441,7 +441,7 @@ double OraclePixGeoManager::CalculateThickness(double tck,const string& mat) {
   return -1.*rl*tck/100.;
 }
 
-int OraclePixGeoManager::moduleType()
+int DBPixelGeoManager::moduleType()
 {
   int type = 0;
   if (ibl()) {
@@ -455,7 +455,7 @@ int OraclePixGeoManager::moduleType()
   return type;
 }
 
-int OraclePixGeoManager::moduleType3D()
+int DBPixelGeoManager::moduleType3D()
 {
   int type = -1;
   if (!isBarrel()||m_currentLD>0) return type;
@@ -481,7 +481,7 @@ int OraclePixGeoManager::moduleType3D()
 // Si Boards Parameters:
 //
 /////////////////////////////////////////////////////////
-double OraclePixGeoManager::PixelBoardWidth(bool isModule3D) 
+double DBPixelGeoManager::PixelBoardWidth(bool isModule3D) 
 {
   if(ibl()&&isModule3D){
     return db()->getDouble(m_PixelModule,"BOARDWIDTH",moduleType3D())*mmcm();
@@ -490,7 +490,7 @@ double OraclePixGeoManager::PixelBoardWidth(bool isModule3D)
   return db()->getDouble(m_PixelModule,"BOARDWIDTH",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelBoardLength(bool isModule3D) 
+double DBPixelGeoManager::PixelBoardLength(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"BOARDLENGTH",moduleType3D())*mmcm();
@@ -498,7 +498,7 @@ double OraclePixGeoManager::PixelBoardLength(bool isModule3D)
   return db()->getDouble(m_PixelModule,"BOARDLENGTH",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelBoardThickness(bool isModule3D) 
+double DBPixelGeoManager::PixelBoardThickness(bool isModule3D) 
 {
   if (m_dc1Geometry && isBarrel() && (m_currentLD == 0)) {
     return 200*Gaudi::Units::micrometer;
@@ -509,7 +509,7 @@ double OraclePixGeoManager::PixelBoardThickness(bool isModule3D)
   return db()->getDouble(m_PixelModule,"BOARDTHICK",moduleType())*mmcm();
 }
 
-double  OraclePixGeoManager::PixelBoardActiveLength(bool isModule3D) 
+double  DBPixelGeoManager::PixelBoardActiveLength(bool isModule3D) 
 {
   return DesignZActiveArea(isModule3D); 
 }
@@ -520,7 +520,7 @@ double  OraclePixGeoManager::PixelBoardActiveLength(bool isModule3D)
 // Hybrid Parameters:
 //
 /////////////////////////////////////////////////////////
-double OraclePixGeoManager::PixelHybridWidth(bool isModule3D) 
+double DBPixelGeoManager::PixelHybridWidth(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"HYBRIDWIDTH",moduleType3D())*mmcm();
@@ -528,7 +528,7 @@ double OraclePixGeoManager::PixelHybridWidth(bool isModule3D)
   return db()->getDouble(m_PixelModule,"HYBRIDWIDTH",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelHybridLength(bool isModule3D) 
+double DBPixelGeoManager::PixelHybridLength(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"HYBRIDLENGTH",moduleType3D())*mmcm();
@@ -536,7 +536,7 @@ double OraclePixGeoManager::PixelHybridLength(bool isModule3D)
   return db()->getDouble(m_PixelModule,"HYBRIDLENGTH",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelHybridThickness(bool isModule3D) 
+double DBPixelGeoManager::PixelHybridThickness(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"HYBRIDTHICK",moduleType3D())*mmcm();
@@ -550,7 +550,7 @@ double OraclePixGeoManager::PixelHybridThickness(bool isModule3D)
 //
 /////////////////////////////////////////////////////////
 
-double OraclePixGeoManager::PixelChipWidth(bool isModule3D) 
+double DBPixelGeoManager::PixelChipWidth(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"CHIPWIDTH",moduleType3D())*mmcm();
@@ -558,7 +558,7 @@ double OraclePixGeoManager::PixelChipWidth(bool isModule3D)
   return db()->getDouble(m_PixelModule,"CHIPWIDTH",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelChipLength(bool isModule3D) 
+double DBPixelGeoManager::PixelChipLength(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"CHIPLENGTH",moduleType3D())*mmcm();
@@ -566,7 +566,7 @@ double OraclePixGeoManager::PixelChipLength(bool isModule3D)
   return db()->getDouble(m_PixelModule,"CHIPLENGTH",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelChipGap(bool isModule3D) 
+double DBPixelGeoManager::PixelChipGap(bool isModule3D) 
 {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"CHIPGAP",moduleType3D())*mmcm();
@@ -574,7 +574,7 @@ double OraclePixGeoManager::PixelChipGap(bool isModule3D)
   return db()->getDouble(m_PixelModule,"CHIPGAP",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelChipOffset(bool isModule3D) 
+double DBPixelGeoManager::PixelChipOffset(bool isModule3D) 
 {
    if(!ibl()||GetLD()!=0||!isBarrel()||!(db()->testField(m_PixelModule,"CHIPOFFSET"))){
      return 0.;
@@ -586,7 +586,7 @@ double OraclePixGeoManager::PixelChipOffset(bool isModule3D)
   return db()->getDouble(m_PixelModule,"CHIPOFFSET",moduleType())*mmcm();
 }
 
-double OraclePixGeoManager::PixelChipThickness(bool isModule3D)  {
+double DBPixelGeoManager::PixelChipThickness(bool isModule3D)  {
   if(ibl()&&isModule3D)
     return db()->getDouble(m_PixelModule,"CHIPTHICK",moduleType3D())*mmcm();
 
@@ -601,7 +601,7 @@ double OraclePixGeoManager::PixelChipThickness(bool isModule3D)  {
 //
 /////////////////////////////////////////////////////////
 
-int OraclePixGeoManager::PixelModuleServiceNumber()
+int DBPixelGeoManager::PixelModuleServiceNumber()
 {
   if(!ibl()||GetLD()>0||!isBarrel()) return 0;
 
@@ -610,52 +610,52 @@ int OraclePixGeoManager::PixelModuleServiceNumber()
   return 0;
 }
 
-double OraclePixGeoManager::PixelModuleServiceLength(int svc)
+double DBPixelGeoManager::PixelModuleServiceLength(int svc)
 {
   return db()->getDouble(m_PixelModuleSvc,"LENGTH",svc)*mmcm();
 }
 
-double OraclePixGeoManager::PixelModuleServiceWidth(int svc)
+double DBPixelGeoManager::PixelModuleServiceWidth(int svc)
 {
   return db()->getDouble(m_PixelModuleSvc,"WIDTH",svc)*mmcm();
 }
 
-double OraclePixGeoManager::PixelModuleServiceThick(int svc)
+double DBPixelGeoManager::PixelModuleServiceThick(int svc)
 {
   return db()->getDouble(m_PixelModuleSvc,"THICK",svc)*mmcm();
 }
 
-double OraclePixGeoManager::PixelModuleServiceOffsetX(int svc)
+double DBPixelGeoManager::PixelModuleServiceOffsetX(int svc)
 {
   return db()->getDouble(m_PixelModuleSvc,"XOFFSET",svc)*mmcm();
 }
 
-double OraclePixGeoManager::PixelModuleServiceOffsetY(int svc)
+double DBPixelGeoManager::PixelModuleServiceOffsetY(int svc)
 {
   return db()->getDouble(m_PixelModuleSvc,"YOFFSET",svc)*mmcm();
 }
 
-double OraclePixGeoManager::PixelModuleServiceOffsetZ(int svc)
+double DBPixelGeoManager::PixelModuleServiceOffsetZ(int svc)
 {
   return db()->getDouble(m_PixelModuleSvc,"ZOFFSET",svc)*mmcm();
 }
 
-int OraclePixGeoManager::PixelModuleServiceFullSize(int svc)
+int DBPixelGeoManager::PixelModuleServiceFullSize(int svc)
 {
   return db()->getInt(m_PixelModuleSvc,"FULLSIZE",svc);
 }
 
-int OraclePixGeoManager::PixelModuleServiceModuleType(int svc)
+int DBPixelGeoManager::PixelModuleServiceModuleType(int svc)
 {
   return db()->getInt(m_PixelModuleSvc,"MODULE3D",svc)*mmcm();
 }
 
-std::string OraclePixGeoManager::PixelModuleServiceName(int svc)
+std::string DBPixelGeoManager::PixelModuleServiceName(int svc)
 {
   return db()->getString(m_PixelModuleSvc,"NAME",svc);
 }
 
-std::string OraclePixGeoManager::PixelModuleServiceMaterial(int svc)
+std::string DBPixelGeoManager::PixelModuleServiceMaterial(int svc)
 {
   return db()->getString(m_PixelModuleSvc,"MATERIAL",svc);
 }
@@ -667,7 +667,7 @@ std::string OraclePixGeoManager::PixelModuleServiceMaterial(int svc)
 // Pixel Disks carbon structure
 //
 /////////////////////////////////////////////////////////
-double OraclePixGeoManager::PixelECCarbonRMin(string a) {
+double DBPixelGeoManager::PixelECCarbonRMin(string a) {
 
   int isup=0;
   if (a == "Inner") {
@@ -681,7 +681,7 @@ double OraclePixGeoManager::PixelECCarbonRMin(string a) {
   return PixelDiskSupportRMin(isup);
 }
 
-double OraclePixGeoManager::PixelECCarbonRMax(string a) {
+double DBPixelGeoManager::PixelECCarbonRMax(string a) {
   int isup=0;
   if (a == "Inner") {
     isup = 0;
@@ -693,7 +693,7 @@ double OraclePixGeoManager::PixelECCarbonRMax(string a) {
   return PixelDiskSupportRMax(isup);
 }
 
-double OraclePixGeoManager::PixelECCarbonThickness(string a) {
+double DBPixelGeoManager::PixelECCarbonThickness(string a) {
 
   int isup=0;
   if (a == "Inner") {
@@ -707,7 +707,7 @@ double OraclePixGeoManager::PixelECCarbonThickness(string a) {
 }
 
 
-int OraclePixGeoManager::PixelECCarbonMaterialTypeNum(string a) {
+int DBPixelGeoManager::PixelECCarbonMaterialTypeNum(string a) {
 
   if (dbVersion() < 3) return 0;
   int isup = 0;
@@ -739,7 +739,7 @@ int OraclePixGeoManager::PixelECCarbonMaterialTypeNum(string a) {
 // % of r.l....
 //
 
-int OraclePixGeoManager::PixelServiceElements(const std::string & type) {
+int DBPixelGeoManager::PixelServiceElements(const std::string & type) {
   // FIXME
   /*
   if (dbVersion() < 3) {
@@ -764,7 +764,7 @@ int OraclePixGeoManager::PixelServiceElements(const std::string & type) {
 }
 
 // Name used when naming G4/Geo volumes 
-std::string OraclePixGeoManager::PixelServiceName(const std::string & type, int index) {
+std::string DBPixelGeoManager::PixelServiceName(const std::string & type, int index) {
 
   if (useLegacy() || !getPixelServiceRecordTestField("VOLNAME",type,index)) {
     return "";
@@ -776,7 +776,7 @@ std::string OraclePixGeoManager::PixelServiceName(const std::string & type, int 
 
 // Flag to say whether volume should be described in both positive and
 // negative halves.
-bool OraclePixGeoManager::PixelServiceZsymm(const std::string & type, int index) {
+bool DBPixelGeoManager::PixelServiceZsymm(const std::string & type, int index) {
   if (dbVersion() < 3 || !getPixelServiceRecordTestField("ZSYMM",type,index)) {
     // If ZSYMM not defined use old logic to determine if volume is
     // duplicated in both positive and negative halves.
@@ -789,11 +789,11 @@ bool OraclePixGeoManager::PixelServiceZsymm(const std::string & type, int index)
 }
 
 
-double OraclePixGeoManager::PixelServiceRMin(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceRMin(const std::string & type, int index) {
   return std::abs(getPixelServiceRecordDouble("RIN",type,index)) * mmcm();
 }
 
-double OraclePixGeoManager::PixelServiceRMax(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceRMax(const std::string & type, int index) {
   double rtmp =  getPixelServiceRecordDouble("ROUT",type,index);
   // If this is negative this is the thickness of the cyl in % of r.l.
   double rmin = PixelServiceRMin(type,index);
@@ -807,7 +807,7 @@ double OraclePixGeoManager::PixelServiceRMax(const std::string & type, int index
   return rmax;
 }
 
-double OraclePixGeoManager::PixelServiceRMin2(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceRMin2(const std::string & type, int index) {
   if (!getPixelServiceRecordTestField("RIN2",type,index)) {
     return 0;
   } else {
@@ -815,7 +815,7 @@ double OraclePixGeoManager::PixelServiceRMin2(const std::string & type, int inde
   }
 }
 
-double OraclePixGeoManager::PixelServiceRMax2(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceRMax2(const std::string & type, int index) {
   if (!getPixelServiceRecordTestField("ROUT2",type,index)) {
     return 0;
   } else {
@@ -823,11 +823,11 @@ double OraclePixGeoManager::PixelServiceRMax2(const std::string & type, int inde
   }
 }
 
-double OraclePixGeoManager::PixelServiceZMin(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceZMin(const std::string & type, int index) {
   return getPixelServiceRecordDouble("ZIN",type,index) * mmcm();
 }
 
-double OraclePixGeoManager::PixelServiceZMax(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceZMax(const std::string & type, int index) {
   double zout =  getPixelServiceRecordDouble("ZOUT",type,index);
   double zmin  =  PixelServiceZMin(type,index);
   double zmax = 0;
@@ -842,7 +842,7 @@ double OraclePixGeoManager::PixelServiceZMax(const std::string & type, int index
   return zmax;
 }
 
-double OraclePixGeoManager::PixelServicePhiLoc(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServicePhiLoc(const std::string & type, int index) {
   if (!getPixelServiceRecordTestField("PHI",type,index)) {
     return 0;
   } else {
@@ -850,7 +850,7 @@ double OraclePixGeoManager::PixelServicePhiLoc(const std::string & type, int ind
   }
 }
 
-double OraclePixGeoManager::PixelServiceWidth(const std::string & type, int index) {
+double DBPixelGeoManager::PixelServiceWidth(const std::string & type, int index) {
   if (!getPixelServiceRecordTestField("WIDTH",type,index)) {
     return 0;
   } else {
@@ -859,7 +859,7 @@ double OraclePixGeoManager::PixelServiceWidth(const std::string & type, int inde
   }
 }
 
-int OraclePixGeoManager::PixelServiceRepeat(const std::string & type, int index) {
+int DBPixelGeoManager::PixelServiceRepeat(const std::string & type, int index) {
   if (!getPixelServiceRecordTestField("REPEAT",type,index)) {
     return 0;
   } else {
@@ -867,7 +867,7 @@ int OraclePixGeoManager::PixelServiceRepeat(const std::string & type, int index)
   }
 }
 
-std::string OraclePixGeoManager::PixelServiceShape(const std::string & type, int index) {
+std::string DBPixelGeoManager::PixelServiceShape(const std::string & type, int index) {
   if (type == "simple") return "TUBE";
   if (!getPixelServiceRecordTestField("SHAPE",type,index)) {
     return "TUBE";
@@ -877,7 +877,7 @@ std::string OraclePixGeoManager::PixelServiceShape(const std::string & type, int
 }
 
 
-int OraclePixGeoManager::PixelServiceShift(const std::string & type, int index) {
+int DBPixelGeoManager::PixelServiceShift(const std::string & type, int index) {
   if (!getPixelServiceRecordTestField("SHIFT",type,index)) {
     return 0;
   } else {
@@ -886,11 +886,11 @@ int OraclePixGeoManager::PixelServiceShift(const std::string & type, int index) 
 }
 
 
-int OraclePixGeoManager::PixelServiceLD(const std::string & type, int index) {
+int DBPixelGeoManager::PixelServiceLD(const std::string & type, int index) {
   return getPixelServiceRecordInt("LAYERNUM",type,index)-1;
 }
 
-string OraclePixGeoManager::PixelServiceMaterial(const std::string & type, int index) {
+string DBPixelGeoManager::PixelServiceMaterial(const std::string & type, int index) {
 
   int imat = 0;
   if (type != "simple") {
@@ -929,7 +929,7 @@ string OraclePixGeoManager::PixelServiceMaterial(const std::string & type, int i
 }
 
 
-int OraclePixGeoManager::PixelServiceFrameNum(const std::string & type, int index) {
+int DBPixelGeoManager::PixelServiceFrameNum(const std::string & type, int index) {
   // In older version frame num indicated "inside" or "outside"
   // 0-999:  Inside
   // >=1000: Outside
@@ -956,7 +956,7 @@ int OraclePixGeoManager::PixelServiceFrameNum(const std::string & type, int inde
 }
 
 // Access child/envelope service parameters
-int OraclePixGeoManager::PixelServiceEnvelopeNum(const std::string & type, int index) {
+int DBPixelGeoManager::PixelServiceEnvelopeNum(const std::string & type, int index) {
 
   if (type != "envelope") return 0;
 
@@ -970,7 +970,7 @@ int OraclePixGeoManager::PixelServiceEnvelopeNum(const std::string & type, int i
   return 0;
 }
 
-int OraclePixGeoManager::PixelServiceParentEnvelopeNum(const std::string & type, int index) {
+int DBPixelGeoManager::PixelServiceParentEnvelopeNum(const std::string & type, int index) {
 
   //  if (type == "envelope") return 0;
 
@@ -997,23 +997,23 @@ int OraclePixGeoManager::PixelServiceParentEnvelopeNum(const std::string & type,
   return 0;
 }
 
-std::string OraclePixGeoManager::getPixelServiceRecordString(const std::string & name, const std::string & type, int index) {
+std::string DBPixelGeoManager::getPixelServiceRecordString(const std::string & name, const std::string & type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
   return db()->getString(recordSet, name, index);
 }
 
-int OraclePixGeoManager::getPixelServiceRecordInt(const std::string & name, const std::string & type, int index) {
+int DBPixelGeoManager::getPixelServiceRecordInt(const std::string & name, const std::string & type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
   return db()->getInt(recordSet, name, index);
 }
 
 
-double OraclePixGeoManager::getPixelServiceRecordDouble(const std::string & name, const std::string & type, int index) {
+double DBPixelGeoManager::getPixelServiceRecordDouble(const std::string & name, const std::string & type, int index) {
   IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
   return db()->getDouble(recordSet, name, index);
 }
 
-bool OraclePixGeoManager::getPixelServiceRecordTestField(const std::string & name, const std::string & type, int index) {
+bool DBPixelGeoManager::getPixelServiceRecordTestField(const std::string & name, const std::string & type, int index) {
   try {
     IRDBRecordset_ptr recordSet = getPixelServiceRecordset(type);
     return db()->testField(recordSet, name, index);
@@ -1024,7 +1024,7 @@ bool OraclePixGeoManager::getPixelServiceRecordTestField(const std::string & nam
 
 
 // Returns IRDBRecordset
-IRDBRecordset_ptr  OraclePixGeoManager::getPixelServiceRecordset(const std::string & type) {
+IRDBRecordset_ptr  DBPixelGeoManager::getPixelServiceRecordset(const std::string & type) {
   // m_barrelInFrames and m_endcapInFrames should be zero in dbVersion >= 3
   IRDBRecordset_ptr recordSet;
   if (type == "simple") {
@@ -1044,7 +1044,7 @@ IRDBRecordset_ptr  OraclePixGeoManager::getPixelServiceRecordset(const std::stri
   return recordSet;
 } 
 
-double OraclePixGeoManager::PixelECCablesThickness() 
+double DBPixelGeoManager::PixelECCablesThickness() 
 {
   double tck = db()->getDouble(m_PixelDisk,"CABLETHICK",m_currentLD);
   if( tck > 0.) {
@@ -1056,21 +1056,21 @@ double OraclePixGeoManager::PixelECCablesThickness()
 }
 
 int 
-OraclePixGeoManager::PixelCableElements()
+DBPixelGeoManager::PixelCableElements()
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableElements();
   return db()->getTableSize(m_PixelBarrelCable);
 }
 
 int 
-OraclePixGeoManager::PixelCableLayerNum(int index)
+DBPixelGeoManager::PixelCableLayerNum(int index)
 {
   if (dbVersion() < 3) return 0;
   return db()->getInt(m_PixelBarrelCable,"LAYER",index);
 }
 
 int 
-OraclePixGeoManager::PixelCableBiStaveNum(int index)
+DBPixelGeoManager::PixelCableBiStaveNum(int index)
 {
   if (dbVersion() < 3) return 0;
   return db()->getInt(m_PixelBarrelCable,"BISTAVE",index);
@@ -1078,49 +1078,49 @@ OraclePixGeoManager::PixelCableBiStaveNum(int index)
 
 
 double 
-OraclePixGeoManager::PixelCableZStart(int index)
+DBPixelGeoManager::PixelCableZStart(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableZStart(index);
   return db()->getDouble(m_PixelBarrelCable,"ZSTART",index) * Gaudi::Units::mm;
 }
 
 double 
-OraclePixGeoManager::PixelCableZEnd(int index)
+DBPixelGeoManager::PixelCableZEnd(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableZEnd(index);
   return db()->getDouble(m_PixelBarrelCable,"ZEND",index) * Gaudi::Units::mm;
 }
 
 double 
-OraclePixGeoManager::PixelCableWidth(int index)
+DBPixelGeoManager::PixelCableWidth(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableWidth(index);
   return db()->getDouble(m_PixelBarrelCable,"WIDTH",index) * Gaudi::Units::mm;
 }
 
 double 
-OraclePixGeoManager::PixelCableThickness(int index)
+DBPixelGeoManager::PixelCableThickness(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableThickness(index);
   return db()->getDouble(m_PixelBarrelCable,"THICK",index) * Gaudi::Units::mm;
 }
 
 double 
-OraclePixGeoManager::PixelCableStackOffset(int index)
+DBPixelGeoManager::PixelCableStackOffset(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableStackOffset(index);
   return db()->getDouble(m_PixelBarrelCable,"STACKPOS",index) * Gaudi::Units::mm;
 }
 
 double 
-OraclePixGeoManager::PixelCableWeight(int index)
+DBPixelGeoManager::PixelCableWeight(int index)
 {
   if (dbVersion() < 3) return 0;
   return db()->getDouble(m_PixelBarrelCable,"WEIGHT",index) * GeoModelKernelUnits::g;
 }
 
 std::string
-OraclePixGeoManager::PixelCableLabel(int index)
+DBPixelGeoManager::PixelCableLabel(int index)
 {
   if (dbVersion() < 3) return m_legacyManager->PixelCableLabel(index);
   return db()->getString(m_PixelBarrelCable,"LABEL",index);
@@ -1131,7 +1131,7 @@ OraclePixGeoManager::PixelCableLabel(int index)
 // Version of the Geometry
 //
 
-int OraclePixGeoManager::determineDbVersion() {
+int DBPixelGeoManager::determineDbVersion() {
   // This determines a version depending on various changes in the database;
   int version = 0;
 
@@ -1145,12 +1145,12 @@ int OraclePixGeoManager::determineDbVersion() {
 
 
 
-std::string OraclePixGeoManager::getMaterialName(const std::string & volumeName, int layerdisk, int typenum) {
+std::string DBPixelGeoManager::getMaterialName(const std::string & volumeName, int layerdisk, int typenum) {
   return m_materialMap->getMaterial(layerdisk, typenum, volumeName);
 }
 
 
-void OraclePixGeoManager::addDefaultMaterials() {
+void DBPixelGeoManager::addDefaultMaterials() {
   // This is for backward compatibilty. Newer geometies get the
   // gets them from the database.
   m_materialMap->addMaterial(0,0,"Sensor","std::Silicon");
@@ -1174,7 +1174,7 @@ void OraclePixGeoManager::addDefaultMaterials() {
   m_materialMap->addMaterial(0,0,"EndCone","std::Carbon");
 }
 
-std::string OraclePixGeoManager::getLD_Label()
+std::string DBPixelGeoManager::getLD_Label()
 {
   std::ostringstream o;
   if(isBarrel()) {
@@ -1189,28 +1189,28 @@ std::string OraclePixGeoManager::getLD_Label()
   return o.str();
 }
  
-int OraclePixGeoManager::PixelBarrelMajorVersion()
+int DBPixelGeoManager::PixelBarrelMajorVersion()
 { 
   return static_cast<int>((*m_PixelBarrelGeneral)[0]->getDouble("VERSION"));
 }
 
-int OraclePixGeoManager::PixelBarrelMinorVersion()
+int DBPixelGeoManager::PixelBarrelMinorVersion()
 { 
   return static_cast<int>(((*m_PixelBarrelGeneral)[0]->getDouble("VERSION") - PixelBarrelMajorVersion())*10 + 0.5);
 }
 
-int OraclePixGeoManager::PixelEndcapMajorVersion()
+int DBPixelGeoManager::PixelEndcapMajorVersion()
 {
   return static_cast<int>((*m_PixelEndcapGeneral)[0]->getDouble("VERSION"));
 }
 
-int OraclePixGeoManager::PixelEndcapMinorVersion() 
+int DBPixelGeoManager::PixelEndcapMinorVersion() 
 { 
   return static_cast<int>(((*m_PixelEndcapGeneral)[0]->getDouble("VERSION") - PixelEndcapMajorVersion())*10 + 0.5);
 }
 
 
-std::string OraclePixGeoManager::versionDescription() const
+std::string DBPixelGeoManager::versionDescription() const
 {
   std::string description;
   if (db()->testField(m_PixelSwitches,"DESCRIPTION")) {
@@ -1219,7 +1219,7 @@ std::string OraclePixGeoManager::versionDescription() const
   return description;
 }
 
-std::string OraclePixGeoManager::versionName() const
+std::string DBPixelGeoManager::versionName() const
 {
   std::string name;
   if (db()->testField(m_PixelSwitches,"VERSIONNAME")) {
@@ -1228,7 +1228,7 @@ std::string OraclePixGeoManager::versionName() const
   return name;
 }
 
-std::string OraclePixGeoManager::versionLayout() const
+std::string DBPixelGeoManager::versionLayout() const
 {
   std::string layout;
   if (db()->testField(m_PixelSwitches,"LAYOUT")) {
@@ -1238,7 +1238,7 @@ std::string OraclePixGeoManager::versionLayout() const
 }
 
 
-double OraclePixGeoManager::PixelRMin() 
+double DBPixelGeoManager::PixelRMin() 
 {
   if (db()->getTableSize(m_PixelEnvelope)) {
     double rmin = PixelEnvelopeRMin(0);  
@@ -1251,7 +1251,7 @@ double OraclePixGeoManager::PixelRMin()
   }
 }
 
-double OraclePixGeoManager::PixelRMax() 
+double DBPixelGeoManager::PixelRMax() 
 {
   if (db()->getTableSize(m_PixelEnvelope)) {
     double  rmax = PixelEnvelopeRMax(0);  
@@ -1264,7 +1264,7 @@ double OraclePixGeoManager::PixelRMax()
   }
 }
 
-double OraclePixGeoManager::PixelHalfLength() 
+double DBPixelGeoManager::PixelHalfLength() 
 {
 
   if (db()->getTableSize(m_PixelEnvelope)) {
@@ -1275,7 +1275,7 @@ double OraclePixGeoManager::PixelHalfLength()
   }
 }
 
-bool OraclePixGeoManager::PixelSimpleEnvelope() 
+bool DBPixelGeoManager::PixelSimpleEnvelope() 
 {
   // Return true if the envelope can be built as a simple tube.
   // otherwise it will be built as a PCON.
@@ -1283,125 +1283,125 @@ bool OraclePixGeoManager::PixelSimpleEnvelope()
   return (!(db()->getTableSize(m_PixelEnvelope) > 1));
 }
 
-unsigned int OraclePixGeoManager::PixelEnvelopeNumPlanes() 
+unsigned int DBPixelGeoManager::PixelEnvelopeNumPlanes() 
 {
   return db()->getTableSize(m_PixelEnvelope);
 }
 
-double OraclePixGeoManager::PixelEnvelopeZ(int i) 
+double DBPixelGeoManager::PixelEnvelopeZ(int i) 
 {
   double zmin =  db()->getDouble(m_PixelEnvelope,"Z",i) * Gaudi::Units::mm;
   if (zmin < 0) msg(MSG::ERROR) << "PixelEnvelope table should only contain +ve z values" << endmsg;
   return std::abs(zmin);
 }
 
-double OraclePixGeoManager::PixelEnvelopeRMin(int i) 
+double DBPixelGeoManager::PixelEnvelopeRMin(int i) 
 {
   return db()->getDouble(m_PixelEnvelope,"RMIN",i) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelEnvelopeRMax(int i) 
+double DBPixelGeoManager::PixelEnvelopeRMax(int i) 
 {
   return db()->getDouble(m_PixelEnvelope,"RMAX",i) * Gaudi::Units::mm;
 }
 
 
-int OraclePixGeoManager::PixelBarrelNLayer() 
+int DBPixelGeoManager::PixelBarrelNLayer() 
 {
   return db()->getInt(m_PixelBarrelGeneral,"NLAYER");
 }
 
 // m_PixelBarrelGeneral
-double OraclePixGeoManager::PixelBarrelRMin() 
+double DBPixelGeoManager::PixelBarrelRMin() 
 {
   return db()->getDouble(m_PixelBarrelGeneral,"RMIN")*mmcm();
 }
 
-double OraclePixGeoManager::PixelBarrelRMax() 
+double DBPixelGeoManager::PixelBarrelRMax() 
 {
   return db()->getDouble(m_PixelBarrelGeneral,"RMAX")*mmcm();
 }
 
-double OraclePixGeoManager::PixelBarrelHalfLength() 
+double DBPixelGeoManager::PixelBarrelHalfLength() 
 {
   return db()->getDouble(m_PixelBarrelGeneral,"HALFLENGTH")*mmcm();
 }
 
 // Described in general services for later geometries.
-bool OraclePixGeoManager::oldFrame()
+bool DBPixelGeoManager::oldFrame()
 {
   if (useLegacy()) return m_legacyManager->oldFrame();
   return false;
 } 
 
 // For new geometry a detailed frame is built.
-bool OraclePixGeoManager::detailedFrame()
+bool DBPixelGeoManager::detailedFrame()
 {
   return db()->getTableSize(m_PixelFrame);
 }
   
-int OraclePixGeoManager::PixelFrameSections()
+int DBPixelGeoManager::PixelFrameSections()
 {
   return db()->getTableSize(m_PixelFrame);
 }
 
-double OraclePixGeoManager::PixelFrameRMinSide(int sectionIndex)
+double DBPixelGeoManager::PixelFrameRMinSide(int sectionIndex)
 {
   return db()->getDouble(m_PixelFrame, "RMINSIDE", sectionIndex) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFrameRMaxSide(int sectionIndex)
+double DBPixelGeoManager::PixelFrameRMaxSide(int sectionIndex)
 {
   return db()->getDouble(m_PixelFrame, "RMAXSIDE", sectionIndex) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFrameSideWidth(int sectionIndex)
+double DBPixelGeoManager::PixelFrameSideWidth(int sectionIndex)
 {
   return db()->getDouble(m_PixelFrame, "SIDEWIDTH", sectionIndex) * Gaudi::Units::mm;
 } 
  
-double OraclePixGeoManager::PixelFrameZMin(int sectionIndex)
+double DBPixelGeoManager::PixelFrameZMin(int sectionIndex)
 { 
   return db()->getDouble(m_PixelFrame, "ZMIN", sectionIndex) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFrameZMax(int sectionIndex)
+double DBPixelGeoManager::PixelFrameZMax(int sectionIndex)
 { 
   return db()->getDouble(m_PixelFrame, "ZMAX", sectionIndex) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFramePhiStart(int sectionIndex)
+double DBPixelGeoManager::PixelFramePhiStart(int sectionIndex)
 {
   return db()->getDouble(m_PixelFrame, "PHISTART", sectionIndex) * Gaudi::Units::deg;
 }
  
-int OraclePixGeoManager::PixelFrameNumSides(int sectionIndex)
+int DBPixelGeoManager::PixelFrameNumSides(int sectionIndex)
 {
   return db()->getInt(m_PixelFrame, "NUMSIDES", sectionIndex);
 }
 
-bool OraclePixGeoManager::PixelFrameMirrorSides(int sectionIndex)
+bool DBPixelGeoManager::PixelFrameMirrorSides(int sectionIndex)
 {
   return db()->getInt(m_PixelFrame, "MIRRORSIDES", sectionIndex);
 }
 									
-std::string OraclePixGeoManager::PixelFrameSideMaterial(int sectionIndex)
+std::string DBPixelGeoManager::PixelFrameSideMaterial(int sectionIndex)
 {
   return db()->getString(m_PixelFrame, "SIDEMATERIAL", sectionIndex);
 }
 
-std::string OraclePixGeoManager::PixelFrameCornerMaterial(int sectionIndex)
+std::string DBPixelGeoManager::PixelFrameCornerMaterial(int sectionIndex)
 {
   return db()->getString(m_PixelFrame, "CORNERMATERIAL", sectionIndex);
 } 
 
-int OraclePixGeoManager::PixelFrameSectionFromIndex(int sectionIndex)
+int DBPixelGeoManager::PixelFrameSectionFromIndex(int sectionIndex)
 {
   return db()->getInt(m_PixelFrame,"SECTION",sectionIndex);
 }
   
 void 
-OraclePixGeoManager::makeFrameIndexMap()
+DBPixelGeoManager::makeFrameIndexMap()
 {
   if (!m_frameElementMap) {
     m_frameElementMap = new std::map<int,std::vector<int> >;
@@ -1412,7 +1412,7 @@ OraclePixGeoManager::makeFrameIndexMap()
   }
 }
 
-int OraclePixGeoManager::getFrameElementIndex(int sectionIndex, int element)
+int DBPixelGeoManager::getFrameElementIndex(int sectionIndex, int element)
 {
   // make map if it is not already made.
   makeFrameIndexMap();
@@ -1436,7 +1436,7 @@ int OraclePixGeoManager::getFrameElementIndex(int sectionIndex, int element)
 }
 
 
-int OraclePixGeoManager::PixelFrameNumSideElements(int sectionIndex)
+int DBPixelGeoManager::PixelFrameNumSideElements(int sectionIndex)
 { 
   // make map if it is not already made.
   makeFrameIndexMap();
@@ -1453,56 +1453,52 @@ int OraclePixGeoManager::PixelFrameNumSideElements(int sectionIndex)
   return numElements;
 }
  
-double OraclePixGeoManager::PixelFrameElementZMin1(int sectionIndex, int element)
+double DBPixelGeoManager::PixelFrameElementZMin1(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
   return db()->getDouble(m_PixelFrameSect, "ZMIN1", index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFrameElementZMin2(int sectionIndex, int element)
+double DBPixelGeoManager::PixelFrameElementZMin2(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
   return db()->getDouble(m_PixelFrameSect, "ZMIN2", index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFrameElementZMax1(int sectionIndex, int element)
+double DBPixelGeoManager::PixelFrameElementZMax1(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
   return db()->getDouble(m_PixelFrameSect, "ZMAX1", index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFrameElementZMax2(int sectionIndex, int element)
+double DBPixelGeoManager::PixelFrameElementZMax2(int sectionIndex, int element)
 {
   int index = getFrameElementIndex(sectionIndex, element);
   if (index < 0) return 0; // Error message already printed in getFrameElementIndex.
   return db()->getDouble(m_PixelFrameSect, "ZMAX2", index) * Gaudi::Units::mm;
 }
 
-int OraclePixGeoManager::PixelStaveIndex(int layer)
+int DBPixelGeoManager::PixelStaveIndex(int layer)
 {
   if (!ibl()) return 0;
   if (!db()->testField(m_PixelLayer,"STAVEINDEX",layer)) return 0;
   return db()->getInt(m_PixelLayer,"STAVEINDEX",layer);
 }
 
-int OraclePixGeoManager::PixelStaveLayout()
+int DBPixelGeoManager::PixelStaveLayout()
 {
   if (!ibl()) return 0;
   int defaultLayout = 0;
   int index = PixelStaveIndex(m_currentLD);
 
-  //  if(m_currentLD==0)
-  //    std::cout<<"OraclePixGeoManager::PixelStaveLayout() : "<<m_currentLD<<" "<<index<<" "<<db()->getInt(m_PixelStave,"LAYOUT",index)<<std::endl;
-
-
   if (!db()->testField(m_PixelStave,"LAYOUT",index)) return defaultLayout;
   return db()->getInt(m_PixelStave,"LAYOUT",index);
 }
 
-int OraclePixGeoManager::PixelStaveAxe()
+int DBPixelGeoManager::PixelStaveAxe()
 {
   if (!ibl()) return 0;
   int index = PixelStaveIndex(m_currentLD);
@@ -1512,7 +1508,7 @@ int OraclePixGeoManager::PixelStaveAxe()
   return 0;
 }
 
-double OraclePixGeoManager::PixelLayerRadius() 
+double DBPixelGeoManager::PixelLayerRadius() 
 {
   double radius = db()->getDouble(m_PixelLayer,"RLAYER",m_currentLD)*mmcm();
   if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "PixelLayerRadius for layer " << m_currentLD
@@ -1521,21 +1517,21 @@ double OraclePixGeoManager::PixelLayerRadius()
   return radius;
 }
 
-double OraclePixGeoManager::PixelLayerGlobalShift() 
+double DBPixelGeoManager::PixelLayerGlobalShift() 
 {
   if (db()->testField(m_PixelLayer,"GBLSHIFT",m_currentLD))
     return db()->getDouble(m_PixelLayer,"GBLSHIFT",m_currentLD);
   return 0.;
 }
 
-double OraclePixGeoManager::PixelLadderLength() 
+double DBPixelGeoManager::PixelLadderLength() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderLength(); 
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"ENVLENGTH",index)*Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelLadderWidthClearance() 
+double DBPixelGeoManager::PixelLadderWidthClearance() 
 {
   if (useLegacy()) return 0.9*Gaudi::Units::mm; 
   int index = PixelStaveIndex(m_currentLD);
@@ -1544,7 +1540,7 @@ double OraclePixGeoManager::PixelLadderWidthClearance()
 
 // Only used if ladder thickness is automatically calculated it, ie ENVTHICK = 0
 // IBL only
-double OraclePixGeoManager::PixelLadderThicknessClearance() 
+double DBPixelGeoManager::PixelLadderThicknessClearance() 
 {
   int index = PixelStaveIndex(m_currentLD);
   if (db()->testField(m_PixelStave,"CLEARANCEX",index)) {
@@ -1553,40 +1549,40 @@ double OraclePixGeoManager::PixelLadderThicknessClearance()
   return 0.1*Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelLadderThickness() 
+double DBPixelGeoManager::PixelLadderThickness() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderThickness();  // 2*1.48972 mm
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"ENVTHICK",index)*Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelLadderTilt() 
+double DBPixelGeoManager::PixelLadderTilt() 
 {
   return db()->getDouble(m_PixelLayer,"STAVETILT",m_currentLD)*Gaudi::Units::deg;
 }
 
-double OraclePixGeoManager::PixelLadderServicesX() 
+double DBPixelGeoManager::PixelLadderServicesX() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderServicesX(); // 1.48972 mm
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"SERVICEOFFSETX",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelLadderServicesY() 
+double DBPixelGeoManager::PixelLadderServicesY() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderServicesY();  // 3mm
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"SERVICEOFFSETY",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelLadderCableOffsetX() 
+double DBPixelGeoManager::PixelLadderCableOffsetX() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderCableOffsetX(); // 0
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"CABLEOFFSETX",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelLadderCableOffsetY() 
+double DBPixelGeoManager::PixelLadderCableOffsetY() 
 {
   if (useLegacy()) return m_legacyManager->PixelLadderCableOffsetY();  // 4mm
   int index = PixelStaveIndex(m_currentLD);
@@ -1594,14 +1590,14 @@ double OraclePixGeoManager::PixelLadderCableOffsetY()
 }
 
 // IBL only
-double OraclePixGeoManager::PixelLadderSupportThickness() 
+double DBPixelGeoManager::PixelLadderSupportThickness() 
 {
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"SUPPORTTHICK",index) * Gaudi::Units::mm;
 }
 
 // IBL only
-double OraclePixGeoManager::PixelLadderSupportWidth() 
+double DBPixelGeoManager::PixelLadderSupportWidth() 
 {
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"SUPPORTWIDTH",index) * Gaudi::Units::mm;
@@ -1612,7 +1608,7 @@ double OraclePixGeoManager::PixelLadderSupportWidth()
 
 
 // IBL only
-double OraclePixGeoManager::PixelLadderBentStaveAngle() 
+double DBPixelGeoManager::PixelLadderBentStaveAngle() 
 {
   if (!db()->testFieldTxt(m_PixelConicalStave,"BENTSTAVEANGLE")) return 0;
   int index = PixelStaveIndex(m_currentLD);
@@ -1620,21 +1616,21 @@ double OraclePixGeoManager::PixelLadderBentStaveAngle()
 }
 
 // IBL only
-int OraclePixGeoManager::PixelBentStaveNModule() 
+int DBPixelGeoManager::PixelBentStaveNModule() 
 {
   if (!db()->testFieldTxt(m_PixelConicalStave,"BENTSTAVENMODULE")) return 0;
   int index = PixelStaveIndex(m_currentLD);
   return db()->getInt(m_PixelConicalStave,"BENTSTAVENMODULE",index);
 }
 
-double OraclePixGeoManager::PixelLadderModuleDeltaZ()
+double DBPixelGeoManager::PixelLadderModuleDeltaZ()
 {
   int index = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"MODULEDZ",index);
 }
 
 // IBL only
-double OraclePixGeoManager::PixelLadderSupportLength() 
+double DBPixelGeoManager::PixelLadderSupportLength() 
 {
   int index = PixelStaveIndex(m_currentLD);
   if (db()->testField(m_PixelStave,"SUPPORTHLENGTH",index)) {
@@ -1647,7 +1643,7 @@ double OraclePixGeoManager::PixelLadderSupportLength()
 
 // IBL detailed stave support only
 
-GeoTrf::Vector3D OraclePixGeoManager::IBLStaveRotationAxis() 
+GeoTrf::Vector3D DBPixelGeoManager::IBLStaveRotationAxis() 
 {
   // set layer to 0  (in order to read read IBL data)
   int currentLD_tmp = m_currentLD;
@@ -1668,7 +1664,7 @@ GeoTrf::Vector3D OraclePixGeoManager::IBLStaveRotationAxis()
 }
 
 
-double OraclePixGeoManager::IBLStaveRadius() 
+double DBPixelGeoManager::IBLStaveRadius() 
 {
   // set layer to 0  (in order to read read IBL data)
   int currentLD_tmp = m_currentLD;
@@ -1694,7 +1690,7 @@ double OraclePixGeoManager::IBLStaveRadius()
 }
 
 
-double OraclePixGeoManager::IBLStaveFacePlateThickness() 
+double DBPixelGeoManager::IBLStaveFacePlateThickness() 
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1705,7 +1701,7 @@ double OraclePixGeoManager::IBLStaveFacePlateThickness()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveMechanicalStaveWidth()
+double DBPixelGeoManager:: IBLStaveMechanicalStaveWidth()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1716,7 +1712,7 @@ double OraclePixGeoManager:: IBLStaveMechanicalStaveWidth()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveMechanicalStaveEndBlockLength()
+double DBPixelGeoManager:: IBLStaveMechanicalStaveEndBlockLength()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1727,7 +1723,7 @@ double OraclePixGeoManager:: IBLStaveMechanicalStaveEndBlockLength()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveMechanicalStaveEndBlockFixPoint()
+double DBPixelGeoManager:: IBLStaveMechanicalStaveEndBlockFixPoint()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1738,7 +1734,7 @@ double OraclePixGeoManager:: IBLStaveMechanicalStaveEndBlockFixPoint()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveMechanicalStaveEndBlockOmegaOverlap()
+double DBPixelGeoManager:: IBLStaveMechanicalStaveEndBlockOmegaOverlap()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
   try{
@@ -1753,7 +1749,7 @@ double OraclePixGeoManager:: IBLStaveMechanicalStaveEndBlockOmegaOverlap()
   return 0.;
 }
 
-double OraclePixGeoManager::IBLStaveLength()
+double DBPixelGeoManager::IBLStaveLength()
 {
  // try and catch (param availbale only if db tag > IBL-03-00-00)
   try
@@ -1773,7 +1769,7 @@ double OraclePixGeoManager::IBLStaveLength()
   return 748.0 * Gaudi::Units::mm;  
 }
 
-double OraclePixGeoManager:: IBLStaveMechanicalStaveOffset(bool isModule3D)
+double DBPixelGeoManager:: IBLStaveMechanicalStaveOffset(bool isModule3D)
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1788,7 +1784,7 @@ double OraclePixGeoManager:: IBLStaveMechanicalStaveOffset(bool isModule3D)
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveMechanicalStaveModuleOffset()
+double DBPixelGeoManager:: IBLStaveMechanicalStaveModuleOffset()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1799,7 +1795,7 @@ double OraclePixGeoManager:: IBLStaveMechanicalStaveModuleOffset()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveTubeOuterDiameter()
+double DBPixelGeoManager:: IBLStaveTubeOuterDiameter()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1810,7 +1806,7 @@ double OraclePixGeoManager:: IBLStaveTubeOuterDiameter()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveTubeInnerDiameter()
+double DBPixelGeoManager:: IBLStaveTubeInnerDiameter()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1821,7 +1817,7 @@ double OraclePixGeoManager:: IBLStaveTubeInnerDiameter()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveTubeMiddlePos()
+double DBPixelGeoManager:: IBLStaveTubeMiddlePos()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1832,7 +1828,7 @@ double OraclePixGeoManager:: IBLStaveTubeMiddlePos()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveFlexLayerThickness()
+double DBPixelGeoManager:: IBLStaveFlexLayerThickness()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1843,7 +1839,7 @@ double OraclePixGeoManager:: IBLStaveFlexLayerThickness()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveFlexBaseThickness()
+double DBPixelGeoManager:: IBLStaveFlexBaseThickness()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1854,7 +1850,7 @@ double OraclePixGeoManager:: IBLStaveFlexBaseThickness()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveFlexWidth()
+double DBPixelGeoManager:: IBLStaveFlexWidth()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1865,7 +1861,7 @@ double OraclePixGeoManager:: IBLStaveFlexWidth()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLStaveFlexOffset()
+double DBPixelGeoManager:: IBLStaveFlexOffset()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1877,7 +1873,7 @@ double OraclePixGeoManager:: IBLStaveFlexOffset()
 }
 
 
-double OraclePixGeoManager::IBLStaveOmegaThickness()
+double DBPixelGeoManager::IBLStaveOmegaThickness()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1888,7 +1884,7 @@ double OraclePixGeoManager::IBLStaveOmegaThickness()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLStaveOmegaEndCenterX()
+double DBPixelGeoManager::IBLStaveOmegaEndCenterX()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1898,7 +1894,7 @@ double OraclePixGeoManager::IBLStaveOmegaEndCenterX()
   } 
   return 0.0;
 }
-double OraclePixGeoManager::IBLStaveOmegaEndCenterY()
+double DBPixelGeoManager::IBLStaveOmegaEndCenterY()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1908,7 +1904,7 @@ double OraclePixGeoManager::IBLStaveOmegaEndCenterY()
   } 
   return 0.0;
 }
-double OraclePixGeoManager::IBLStaveOmegaEndRadius()
+double DBPixelGeoManager::IBLStaveOmegaEndRadius()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1918,7 +1914,7 @@ double OraclePixGeoManager::IBLStaveOmegaEndRadius()
   } 
   return 0.0;
 }
-double OraclePixGeoManager::IBLStaveOmegaEndAngle()
+double DBPixelGeoManager::IBLStaveOmegaEndAngle()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1929,7 +1925,7 @@ double OraclePixGeoManager::IBLStaveOmegaEndAngle()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLStaveOmegaMidCenterX()
+double DBPixelGeoManager::IBLStaveOmegaMidCenterX()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1940,7 +1936,7 @@ double OraclePixGeoManager::IBLStaveOmegaMidCenterX()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLStaveOmegaMidRadius()
+double DBPixelGeoManager::IBLStaveOmegaMidRadius()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1950,7 +1946,7 @@ double OraclePixGeoManager::IBLStaveOmegaMidRadius()
   } 
   return 0.0;
 }
-double OraclePixGeoManager::IBLStaveOmegaMidAngle()
+double DBPixelGeoManager::IBLStaveOmegaMidAngle()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1961,7 +1957,7 @@ double OraclePixGeoManager::IBLStaveOmegaMidAngle()
   return 0.0;
 }
 
-int OraclePixGeoManager::IBLStaveModuleNumber_AllPlanar()
+int DBPixelGeoManager::IBLStaveModuleNumber_AllPlanar()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1972,13 +1968,13 @@ int OraclePixGeoManager::IBLStaveModuleNumber_AllPlanar()
   return 0;
 }
 
-int OraclePixGeoManager::IBLStaveModuleNumber()
+int DBPixelGeoManager::IBLStaveModuleNumber()
 {
   return m_PlanarModuleNumber+m_3DModuleNumber;
 
 }
 
-double OraclePixGeoManager::IBLStaveModuleGap()
+double DBPixelGeoManager::IBLStaveModuleGap()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -1989,7 +1985,7 @@ double OraclePixGeoManager::IBLStaveModuleGap()
   return 0.0;
 }
 
-int OraclePixGeoManager::IBLStaveModuleType() 
+int DBPixelGeoManager::IBLStaveModuleType() 
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2000,7 +1996,7 @@ int OraclePixGeoManager::IBLStaveModuleType()
   return 0;
 }
 
-double OraclePixGeoManager::IBLStaveFacePlateGreaseThickness()
+double DBPixelGeoManager::IBLStaveFacePlateGreaseThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
   try{
@@ -2015,7 +2011,7 @@ double OraclePixGeoManager::IBLStaveFacePlateGreaseThickness()
   return 0.;
 }
 
-double OraclePixGeoManager::IBLStaveFacePlateGlueThickness()
+double DBPixelGeoManager::IBLStaveFacePlateGlueThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
   try{
@@ -2030,7 +2026,7 @@ double OraclePixGeoManager::IBLStaveFacePlateGlueThickness()
   return 0.;
 }
 
-double OraclePixGeoManager::IBLStaveTubeGlueThickness()
+double DBPixelGeoManager::IBLStaveTubeGlueThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
   try{
@@ -2045,7 +2041,7 @@ double OraclePixGeoManager::IBLStaveTubeGlueThickness()
   return 0.;
 }
 
-double OraclePixGeoManager::IBLStaveOmegaGlueThickness()
+double DBPixelGeoManager::IBLStaveOmegaGlueThickness()
 {
   // try and catch (param availbale only if db tag > IBL-03-00-00)
   try{
@@ -2061,7 +2057,7 @@ double OraclePixGeoManager::IBLStaveOmegaGlueThickness()
 }
 
 
-double OraclePixGeoManager:: IBLSupportRingWidth()
+double DBPixelGeoManager:: IBLSupportRingWidth()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2072,7 +2068,7 @@ double OraclePixGeoManager:: IBLSupportRingWidth()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLSupportRingInnerRadius()
+double DBPixelGeoManager:: IBLSupportRingInnerRadius()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2083,7 +2079,7 @@ double OraclePixGeoManager:: IBLSupportRingInnerRadius()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLSupportRingOuterRadius()
+double DBPixelGeoManager:: IBLSupportRingOuterRadius()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2095,7 +2091,7 @@ double OraclePixGeoManager:: IBLSupportRingOuterRadius()
 }
 
 
-double OraclePixGeoManager:: IBLSupportMechanicalStaveRingFixPoint()
+double DBPixelGeoManager:: IBLSupportMechanicalStaveRingFixPoint()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2106,7 +2102,7 @@ double OraclePixGeoManager:: IBLSupportMechanicalStaveRingFixPoint()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLSupportMidRingWidth()
+double DBPixelGeoManager:: IBLSupportMidRingWidth()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2117,7 +2113,7 @@ double OraclePixGeoManager:: IBLSupportMidRingWidth()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLSupportMidRingInnerRadius()
+double DBPixelGeoManager:: IBLSupportMidRingInnerRadius()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2128,7 +2124,7 @@ double OraclePixGeoManager:: IBLSupportMidRingInnerRadius()
   return 0.0;
 }
 
-double OraclePixGeoManager:: IBLSupportMidRingOuterRadius()
+double DBPixelGeoManager:: IBLSupportMidRingOuterRadius()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2139,7 +2135,7 @@ double OraclePixGeoManager:: IBLSupportMidRingOuterRadius()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLFlexMiddleGap()
+double DBPixelGeoManager::IBLFlexMiddleGap()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2150,7 +2146,7 @@ double OraclePixGeoManager::IBLFlexMiddleGap()
   return 0.0;
 }
 
-bool OraclePixGeoManager::IBLFlexAndWingDefined()
+bool DBPixelGeoManager::IBLFlexAndWingDefined()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2158,7 +2154,7 @@ bool OraclePixGeoManager::IBLFlexAndWingDefined()
 }
 
 
-double OraclePixGeoManager::IBLFlexDoglegLength()
+double DBPixelGeoManager::IBLFlexDoglegLength()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2170,7 +2166,7 @@ double OraclePixGeoManager::IBLFlexDoglegLength()
 }
 
 
-double OraclePixGeoManager::IBLStaveFlexWingWidth()
+double DBPixelGeoManager::IBLStaveFlexWingWidth()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2181,7 +2177,7 @@ double OraclePixGeoManager::IBLStaveFlexWingWidth()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLStaveFlexWingThick()
+double DBPixelGeoManager::IBLStaveFlexWingThick()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2192,7 +2188,7 @@ double OraclePixGeoManager::IBLStaveFlexWingThick()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLFlexDoglegRatio()
+double DBPixelGeoManager::IBLFlexDoglegRatio()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2203,7 +2199,7 @@ double OraclePixGeoManager::IBLFlexDoglegRatio()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLFlexDoglegHeight(int iHeight)
+double DBPixelGeoManager::IBLFlexDoglegHeight(int iHeight)
 {
   std::ostringstream lname;
   lname << "FLEXDOGLEGHEIGHT"<<iHeight;
@@ -2217,7 +2213,7 @@ double OraclePixGeoManager::IBLFlexDoglegHeight(int iHeight)
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLFlexDoglegDY()
+double DBPixelGeoManager::IBLFlexDoglegDY()
 {
   //  int index = PixelStaveIndex(m_currentLD);
   int index=0;
@@ -2228,7 +2224,7 @@ double OraclePixGeoManager::IBLFlexDoglegDY()
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLFlexPP0Z(int iPos)
+double DBPixelGeoManager::IBLFlexPP0Z(int iPos)
 {
   std::ostringstream lname;
   lname << "FLEXPP0_Z"<<iPos;
@@ -2243,7 +2239,7 @@ double OraclePixGeoManager::IBLFlexPP0Z(int iPos)
 }
 
 
-double OraclePixGeoManager::IBLFlexPP0Rmin(int iPos)
+double DBPixelGeoManager::IBLFlexPP0Rmin(int iPos)
 {
   std::ostringstream lname;
   lname << "FLEXPP0_S"<<iPos<<"RMIN";
@@ -2257,7 +2253,7 @@ double OraclePixGeoManager::IBLFlexPP0Rmin(int iPos)
   return 0.0;
 }
 
-double OraclePixGeoManager::IBLFlexPP0Rmax(int iPos)
+double DBPixelGeoManager::IBLFlexPP0Rmax(int iPos)
 {
   std::ostringstream lname;
   lname << "FLEXPP0_S"<<iPos<<"RMAX";
@@ -2272,7 +2268,7 @@ double OraclePixGeoManager::IBLFlexPP0Rmax(int iPos)
 }
 
 
-std::string OraclePixGeoManager::IBLFlexMaterial(int iPos, const std::string& flexType)
+std::string DBPixelGeoManager::IBLFlexMaterial(int iPos, const std::string& flexType)
 {
 
   int nbMaterial=db()->getTableSize(m_PixelIBLFlexMaterial);
@@ -2295,7 +2291,7 @@ std::string OraclePixGeoManager::IBLFlexMaterial(int iPos, const std::string& fl
 }
 
 
-double OraclePixGeoManager:: IBLServiceGetMinRadialPosition(const std::string& srvName, const std::string& srvType, 
+double DBPixelGeoManager:: IBLServiceGetMinRadialPosition(const std::string& srvName, const std::string& srvType, 
 							    double srvZmin, double srvZmax)
 {
   
@@ -2344,7 +2340,7 @@ double OraclePixGeoManager:: IBLServiceGetMinRadialPosition(const std::string& s
 
 }
 
-double OraclePixGeoManager:: IBLServiceGetMaxRadialPosition(const std::string& srvName, const std::string& srvType, 
+double DBPixelGeoManager:: IBLServiceGetMaxRadialPosition(const std::string& srvName, const std::string& srvType, 
 							    double srvZmin, double srvZmax)
 {
   
@@ -2394,18 +2390,18 @@ double OraclePixGeoManager:: IBLServiceGetMaxRadialPosition(const std::string& s
 
 }
 
-int OraclePixGeoManager::PixelBiStaveType(int layer, int phi)
+int DBPixelGeoManager::PixelBiStaveType(int layer, int phi)
 {
   if (m_staveTypeTable->size() == 0) return phi % 2; 
   return m_pixelStaveTypes->getBiStaveType(layer, phi) % 2;
 }
 
-int OraclePixGeoManager::NPixelSectors() 
+int DBPixelGeoManager::NPixelSectors() 
 {
   return db()->getInt(m_PixelLayer,"NSECTORS",m_currentLD);
 }
 
-double OraclePixGeoManager::PhiOfModuleZero()
+double DBPixelGeoManager::PhiOfModuleZero()
 {
   // For backward compatibilty first module is at 1/2 a module division
   if (!db()->testField(m_PixelLayer,"PHIOFMODULEZERO",m_currentLD)){
@@ -2417,7 +2413,7 @@ double OraclePixGeoManager::PhiOfModuleZero()
 }
 
 
-int OraclePixGeoManager::PixelNModule() 
+int DBPixelGeoManager::PixelNModule() 
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
   if(ibl() && PixelStaveLayout()>3 && PixelStaveLayout()<7 && m_currentLD==0)
@@ -2427,19 +2423,19 @@ int OraclePixGeoManager::PixelNModule()
 
 }
 
-double OraclePixGeoManager::PixelModuleAngle() 
+double DBPixelGeoManager::PixelModuleAngle() 
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"MODULETILT",staveIndex)*Gaudi::Units::deg;
 }
 
-double OraclePixGeoManager::PixelModuleDrDistance() 
+double DBPixelGeoManager::PixelModuleDrDistance() 
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
   return db()->getDouble(m_PixelStave,"CENTRMODULESHIFT",staveIndex)*mmcm();
 }
 
-double OraclePixGeoManager::PixelModuleZPosition(int etaModule) 
+double DBPixelGeoManager::PixelModuleZPosition(int etaModule) 
 {
   // ZPOSTYPE 0. Means equi-distant modules.
   // ZPOSTYPE != 0. Means tabulated z positions.
@@ -2458,7 +2454,7 @@ double OraclePixGeoManager::PixelModuleZPosition(int etaModule)
   }
 }
 
-double OraclePixGeoManager::PixelModuleZPositionTabulated(int etaModule, int type) 
+double DBPixelGeoManager::PixelModuleZPositionTabulated(int etaModule, int type) 
 { 
   if (!m_zPositionMap) {
     m_zPositionMap = new InDetDD::PairIndexMap;
@@ -2476,20 +2472,20 @@ double OraclePixGeoManager::PixelModuleZPositionTabulated(int etaModule, int typ
   return db()->getDouble(m_PixelStaveZ,"ZPOS",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelModuleShiftFlag(int etaModule) 
+double DBPixelGeoManager::PixelModuleShiftFlag(int etaModule) 
 {
   if (centerModule(etaModule)) return 1;
   return 0.;
 }
 
-double OraclePixGeoManager::PixelModuleStaggerDistance()
+double DBPixelGeoManager::PixelModuleStaggerDistance()
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
   if (!ibl() || !db()->testField(m_PixelStave,"STAGGERDIST",staveIndex)) return 0; 
   return db()->getDouble(m_PixelStave,"STAGGERDIST",staveIndex) * Gaudi::Units::mm;
 }
 
-int OraclePixGeoManager::PixelModuleStaggerSign(int etaModule)
+int DBPixelGeoManager::PixelModuleStaggerSign(int etaModule)
 {
   int staveIndex = PixelStaveIndex(m_currentLD);
   if (!ibl() || !db()->testField(m_PixelStave,"FIRSTSTAGGER",staveIndex)) return 0;  
@@ -2499,7 +2495,7 @@ int OraclePixGeoManager::PixelModuleStaggerSign(int etaModule)
   return firstStagger * (moduleIndex%2 ? -1 : 1);
 }
 
-bool OraclePixGeoManager::allowSkipEtaZero()
+bool DBPixelGeoManager::allowSkipEtaZero()
 {
   bool allowSkip = true;
   if (ibl()){
@@ -2511,14 +2507,14 @@ bool OraclePixGeoManager::allowSkipEtaZero()
   return allowSkip;
 }
 
-bool OraclePixGeoManager::centerModule(int etaModule) 
+bool DBPixelGeoManager::centerModule(int etaModule) 
 {
   // There is only a center module if there are an odd number
   // of modules. In that case it will be etaModule = 0.
   return (etaModule == 0 && PixelNModule()%2);
 }
 
-int OraclePixGeoManager::PixelModuleEtaFromIndex(int index) 
+int DBPixelGeoManager::PixelModuleEtaFromIndex(int index) 
 {
   int nModules = PixelNModule();
   int etaModule = index-nModules/2;
@@ -2528,7 +2524,7 @@ int OraclePixGeoManager::PixelModuleEtaFromIndex(int index)
   return etaModule;
 }
 
-int OraclePixGeoManager::PixelModuleIndexFromEta(int etaModule) 
+int DBPixelGeoManager::PixelModuleIndexFromEta(int etaModule) 
 {
   int nModules = PixelNModule();  
   int index = etaModule + nModules/2;
@@ -2539,84 +2535,84 @@ int OraclePixGeoManager::PixelModuleIndexFromEta(int etaModule)
 }
 
 
-double OraclePixGeoManager::PixelModuleAngleSign(int etaModule) 
+double DBPixelGeoManager::PixelModuleAngleSign(int etaModule) 
 {
   if (centerModule(etaModule)) return 0;
   if(etaModule < 0) return 1.;
   return -1.;
 }
 
-int OraclePixGeoManager::PixelEndcapNDisk() 
+int DBPixelGeoManager::PixelEndcapNDisk() 
 {
   return db()->getInt(m_PixelEndcapGeneral,"NDISK");
 }
 
 // Endcap container
-double  OraclePixGeoManager::PixelEndcapRMin()
+double  DBPixelGeoManager::PixelEndcapRMin()
 {
   return db()->getDouble(m_PixelEndcapGeneral,"RMIN")*mmcm();
 }
 
-double  OraclePixGeoManager::PixelEndcapRMax() 
+double  DBPixelGeoManager::PixelEndcapRMax() 
 {
   return db()->getDouble(m_PixelEndcapGeneral,"RMAX")*mmcm();
 }
 
-double  OraclePixGeoManager::PixelEndcapZMin() 
+double  DBPixelGeoManager::PixelEndcapZMin() 
 {
   return db()->getDouble(m_PixelEndcapGeneral,"ZMIN")*mmcm();
 }
 
-double  OraclePixGeoManager::PixelEndcapZMax()
+double  DBPixelGeoManager::PixelEndcapZMax()
 {
   return db()->getDouble(m_PixelEndcapGeneral,"ZMAX")*mmcm();
 }
 
-int OraclePixGeoManager::PixelEndcapNSupportFrames()
+int DBPixelGeoManager::PixelEndcapNSupportFrames()
 {
    // Obsolete - retus 0 in recent versions
  return (int) db()->getDouble(m_PixelEndcapGeneral,"NFRAME");
 }
 
 // Endcap Inner 
-double  OraclePixGeoManager::PixelDiskZPosition() 
+double  DBPixelGeoManager::PixelDiskZPosition() 
 {
   return db()->getDouble(m_PixelDisk,"ZDISK",m_currentLD)*mmcm();
 }
 
-double OraclePixGeoManager::PixelECSiDz1() 
+double DBPixelGeoManager::PixelECSiDz1() 
 {
   return db()->getDouble(m_PixelDisk,"DZCOUNTER",m_currentLD)*mmcm();
 }
 
-double OraclePixGeoManager::PixelECSiDz2() 
+double DBPixelGeoManager::PixelECSiDz2() 
 {
   return PixelECSiDz1();
 }
 
-int OraclePixGeoManager::PixelECNSectors1()
+int DBPixelGeoManager::PixelECNSectors1()
 {
   return db()->getInt(m_PixelDisk,"NMODULE",m_currentLD);
 }
 
-int OraclePixGeoManager::PixelECNSectors2() 
+int DBPixelGeoManager::PixelECNSectors2() 
 {
   return PixelECNSectors1();
 }
 
 // Endcap Cables
-double OraclePixGeoManager::PixelECCablesRMin()
+double DBPixelGeoManager::PixelECCablesRMin()
 {
   return db()->getDouble(m_PixelDisk,"RMINCABLE",m_currentLD)*mmcm();
 }
 
-double OraclePixGeoManager::PixelECCablesRMax()
+double DBPixelGeoManager::PixelECCablesRMax()
 {
   return db()->getDouble(m_PixelDisk,"RMAXCABLE",m_currentLD)*mmcm();
 }
 
 
-double OraclePixGeoManager::PixelECCablesDistance()
+double DBPixelGeoManager::PixelECCablesDistance()
 {
   return db()->getDouble(m_PixelDisk,"ZCABLE",m_currentLD)*mmcm();
 }
@@ -2624,61 +2620,61 @@ double OraclePixGeoManager::PixelECCablesDistance()
 //
 /// TMT
 //
-int OraclePixGeoManager::PixelTMTNumParts()
+int DBPixelGeoManager::PixelTMTNumParts()
 {
   if (useLegacy()) return m_legacyManager->PixelTMTNumParts();
   return db()->getTableSize(m_PixelTMT);
 }
 
-double OraclePixGeoManager::PixelTMTWidthX1(int iPart)
+double DBPixelGeoManager::PixelTMTWidthX1(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTWidthX1(iPart);
   return db()->getDouble(m_PixelTMT,"WIDTHX1",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTWidthX2(int iPart)
+double DBPixelGeoManager::PixelTMTWidthX2(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTWidthX2(iPart);
   return db()->getDouble(m_PixelTMT,"WIDTHX2",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTWidthY(int iPart)
+double DBPixelGeoManager::PixelTMTWidthY(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTWidthY(iPart);
   return db()->getDouble(m_PixelTMT,"WIDTHY",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTBaseX1(int iPart)
+double DBPixelGeoManager::PixelTMTBaseX1(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTBaseX1(iPart);
   return db()->getDouble(m_PixelTMT,"BASEX1",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTBaseX2(int iPart)
+double DBPixelGeoManager::PixelTMTBaseX2(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTBaseX2(iPart);
   return db()->getDouble(m_PixelTMT,"BASEX2",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTPosY(int iPart)
+double DBPixelGeoManager::PixelTMTPosY(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPosY(iPart);
   return db()->getDouble(m_PixelTMT,"Y",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTPosZ1(int iPart)
+double DBPixelGeoManager::PixelTMTPosZ1(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPosZ1(iPart);
   return db()->getDouble(m_PixelTMT,"Z1",iPart) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelTMTPosZ2(int iPart)
+double DBPixelGeoManager::PixelTMTPosZ2(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPosZ2(iPart);
   return db()->getDouble(m_PixelTMT,"Z2",iPart) * Gaudi::Units::mm;
 }
 
-bool OraclePixGeoManager::PixelTMTPerModule(int iPart)
+bool DBPixelGeoManager::PixelTMTPerModule(int iPart)
 {
   if (useLegacy()) return m_legacyManager->PixelTMTPerModule(iPart);
   return db()->getInt(m_PixelTMT,"PERMODULE",iPart);
@@ -2687,61 +2683,61 @@ bool OraclePixGeoManager::PixelTMTPerModule(int iPart)
 //
 // Omega parameters
 //
-double OraclePixGeoManager::PixelOmegaUpperBendX()
+double DBPixelGeoManager::PixelOmegaUpperBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaUpperBendX();
   return db()->getDouble(m_PixelOmega,"UPPERBENDX") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaUpperBendY()
+double DBPixelGeoManager::PixelOmegaUpperBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaUpperBendY();
   return db()->getDouble(m_PixelOmega,"UPPERBENDY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaUpperBendRadius()
+double DBPixelGeoManager::PixelOmegaUpperBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaUpperBendRadius();
   return db()->getDouble(m_PixelOmega,"UPPERBENDR") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaLowerBendX()
+double DBPixelGeoManager::PixelOmegaLowerBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLowerBendX();
   return db()->getDouble(m_PixelOmega,"LOWERBENDX") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaLowerBendY()
+double DBPixelGeoManager::PixelOmegaLowerBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLowerBendY();
   return db()->getDouble(m_PixelOmega,"LOWERBENDY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaLowerBendRadius()
+double DBPixelGeoManager::PixelOmegaLowerBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLowerBendRadius();
   return db()->getDouble(m_PixelOmega,"LOWERBENDR") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaWallThickness()
+double DBPixelGeoManager::PixelOmegaWallThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaWallThickness();
   return db()->getDouble(m_PixelOmega,"THICK") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaLength()
+double DBPixelGeoManager::PixelOmegaLength()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaLength();
   return db()->getDouble(m_PixelOmega,"LENGTH") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaStartY()
+double DBPixelGeoManager::PixelOmegaStartY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaStartY();
   return db()->getDouble(m_PixelOmega,"STARTY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaEndY()
+double DBPixelGeoManager::PixelOmegaEndY()
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaEndY();
   return db()->getDouble(m_PixelOmega,"ENDY") * Gaudi::Units::mm;
@@ -2751,49 +2747,49 @@ double OraclePixGeoManager::PixelOmegaEndY()
 // Al Tube
 //
 
-double OraclePixGeoManager::PixelAlTubeUpperBendX()
+double DBPixelGeoManager::PixelAlTubeUpperBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeUpperBendX();
   return db()->getDouble(m_PixelAlTube,"UPPERBENDX") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeUpperBendY()
+double DBPixelGeoManager::PixelAlTubeUpperBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeUpperBendY();
   return db()->getDouble(m_PixelAlTube,"UPPERBENDY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeUpperBendRadius()
+double DBPixelGeoManager::PixelAlTubeUpperBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeUpperBendRadius();
   return db()->getDouble(m_PixelAlTube,"UPPERBENDR") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeLowerBendX()
+double DBPixelGeoManager::PixelAlTubeLowerBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLowerBendX();
   return db()->getDouble(m_PixelAlTube,"LOWERBENDX") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeLowerBendY()
+double DBPixelGeoManager::PixelAlTubeLowerBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLowerBendY();
   return db()->getDouble(m_PixelAlTube,"LOWERBENDY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeLowerBendRadius()
+double DBPixelGeoManager::PixelAlTubeLowerBendRadius()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLowerBendRadius();
   return db()->getDouble(m_PixelAlTube,"LOWERBENDR") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeWallThickness()
+double DBPixelGeoManager::PixelAlTubeWallThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeWallThickness();
   return db()->getDouble(m_PixelAlTube,"THICK") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelAlTubeLength()
+double DBPixelGeoManager::PixelAlTubeLength()
 {
   if (useLegacy()) return m_legacyManager->PixelAlTubeLength();
   return db()->getDouble(m_PixelAlTube,"LENGTH") * Gaudi::Units::mm;
@@ -2803,49 +2799,49 @@ double OraclePixGeoManager::PixelAlTubeLength()
 // Glue
 // 
 
-int OraclePixGeoManager::PixelNumOmegaGlueElements()
+int DBPixelGeoManager::PixelNumOmegaGlueElements()
 {
   if (useLegacy()) return m_legacyManager->PixelNumOmegaGlueElements();
   return db()->getTableSize(m_PixelOmegaGlue);
 }
 
-double OraclePixGeoManager::PixelOmegaGlueStartX(int index)
+double DBPixelGeoManager::PixelOmegaGlueStartX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueStartX(index);
   return db()->getDouble(m_PixelOmegaGlue,"STARTX",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaGlueThickness(int index)
+double DBPixelGeoManager::PixelOmegaGlueThickness(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueThickness(index);
   return db()->getDouble(m_PixelOmegaGlue,"THICK",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaGlueStartY(int index)
+double DBPixelGeoManager::PixelOmegaGlueStartY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueStartY(index);
   return db()->getDouble(m_PixelOmegaGlue,"STARTY",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaGlueEndY(int index)
+double DBPixelGeoManager::PixelOmegaGlueEndY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueEndY(index);
   return db()->getDouble(m_PixelOmegaGlue,"ENDY",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaGlueLength(int index)
+double DBPixelGeoManager::PixelOmegaGlueLength(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueLength(index);
   return db()->getDouble(m_PixelOmegaGlue,"LENGTH",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelOmegaGluePosZ(int index)
+double DBPixelGeoManager::PixelOmegaGluePosZ(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGluePosZ(index);
   return db()->getDouble(m_PixelOmegaGlue,"Z",index) * Gaudi::Units::mm;
 }
 
-int OraclePixGeoManager::PixelOmegaGlueTypeNum(int index)
+int DBPixelGeoManager::PixelOmegaGlueTypeNum(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelOmegaGlueTypeNum(index);
   return db()->getInt(m_PixelOmegaGlue,"TYPENUM",index);
@@ -2855,63 +2851,63 @@ int OraclePixGeoManager::PixelOmegaGlueTypeNum(int index)
 //
 // Fluid
 // 
-double OraclePixGeoManager::PixelFluidZ1(int index)
+double DBPixelGeoManager::PixelFluidZ1(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidZ1(index);
   return db()->getDouble(m_PixelFluid,"Z1",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFluidZ2(int index)
+double DBPixelGeoManager::PixelFluidZ2(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidZ2(index);
   return db()->getDouble(m_PixelFluid,"Z2",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFluidThick1(int index)
+double DBPixelGeoManager::PixelFluidThick1(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidThick1(index);
   return db()->getDouble(m_PixelFluid,"THICK1",index) * Gaudi::Units::mm;
 }
 
 
-double OraclePixGeoManager::PixelFluidThick2(int index)
+double DBPixelGeoManager::PixelFluidThick2(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidThick2(index);
   return db()->getDouble(m_PixelFluid,"THICK2",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFluidWidth(int index)
+double DBPixelGeoManager::PixelFluidWidth(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidWidth(index);
   return db()->getDouble(m_PixelFluid,"WIDTH",index) * Gaudi::Units::mm;
 }
 
 
-double OraclePixGeoManager::PixelFluidX(int index)
+double DBPixelGeoManager::PixelFluidX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidX(index);
   return db()->getDouble(m_PixelFluid,"X",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelFluidY(int index)
+double DBPixelGeoManager::PixelFluidY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidY(index);
   return db()->getDouble(m_PixelFluid,"Y",index) * Gaudi::Units::mm;
 }
 
-int OraclePixGeoManager::PixelFluidType(int index)
+int DBPixelGeoManager::PixelFluidType(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelFluidType(index);
   return db()->getInt(m_PixelFluid,"TYPE",index);
 }
 
-int OraclePixGeoManager::PixelFluidNumTypes()
+int DBPixelGeoManager::PixelFluidNumTypes()
 {
   if (useLegacy()) return m_legacyManager->PixelFluidNumTypes();
   return db()->getTableSize(m_PixelFluid);
 }
 
-int OraclePixGeoManager::PixelFluidIndex(int type)
+int DBPixelGeoManager::PixelFluidIndex(int type)
 {
   for (int i = 0; i < PixelFluidNumTypes(); i++) {
     if (type == PixelFluidType(i)) return i;
@@ -2920,7 +2916,7 @@ int OraclePixGeoManager::PixelFluidIndex(int type)
   return -1;
 }
  
-std::string OraclePixGeoManager::PixelFluidMat(int index) {
+std::string DBPixelGeoManager::PixelFluidMat(int index) {
   int matType = 0;
   if (useLegacy()) {
     matType = m_legacyManager->PixelFluidMatType(index);
@@ -2930,7 +2926,7 @@ std::string OraclePixGeoManager::PixelFluidMat(int index) {
   return getMaterialName("Fluid", 0, matType);
 }
 
-int OraclePixGeoManager::PixelFluidOrient(int layer, int phi) 
+int DBPixelGeoManager::PixelFluidOrient(int layer, int phi) 
 {
   if (useLegacy()) return m_legacyManager->PixelFluidOrient(layer, phi);
   return m_pixelStaveTypes->getFluidType(layer,phi);
@@ -2939,86 +2935,86 @@ int OraclePixGeoManager::PixelFluidOrient(int layer, int phi)
 //
 // Pigtail
 //
-double OraclePixGeoManager::PixelPigtailThickness()
+double DBPixelGeoManager::PixelPigtailThickness()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailThickness();
   return db()->getDouble(m_PixelPigtail,"THICK") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailStartY()
+double DBPixelGeoManager::PixelPigtailStartY()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailStartY();
   return db()->getDouble(m_PixelPigtail,"STARTY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailEndY()
+double DBPixelGeoManager::PixelPigtailEndY()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailEndY();
   return db()->getDouble(m_PixelPigtail,"ENDY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailWidthZ()
+double DBPixelGeoManager::PixelPigtailWidthZ()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailWidthZ();
   return db()->getDouble(m_PixelPigtail,"WIDTHZ") * Gaudi::Units::mm;
 }
 
 // Different width from the curved section in old geometry
-double OraclePixGeoManager::PixelPigtailFlatWidthZ()
+double DBPixelGeoManager::PixelPigtailFlatWidthZ()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailFlatWidthZ();
   return PixelPigtailWidthZ();
 }
 
-double OraclePixGeoManager::PixelPigtailPosX()
+double DBPixelGeoManager::PixelPigtailPosX()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailPosX();
   return db()->getDouble(m_PixelPigtail,"X") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailPosZ()
+double DBPixelGeoManager::PixelPigtailPosZ()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailPosZ();
   return db()->getDouble(m_PixelPigtail,"Z") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailBendX()
+double DBPixelGeoManager::PixelPigtailBendX()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendX();
   return db()->getDouble(m_PixelPigtail,"BENDX") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailBendY()
+double DBPixelGeoManager::PixelPigtailBendY()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendY();
   return db()->getDouble(m_PixelPigtail,"BENDY") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailBendRMin()
+double DBPixelGeoManager::PixelPigtailBendRMin()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendRMin();
   return db()->getDouble(m_PixelPigtail,"BENDRMIN") * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelPigtailBendRMax()
+double DBPixelGeoManager::PixelPigtailBendRMax()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendRMax();
   return PixelPigtailBendRMin() + PixelPigtailThickness();
 }
 
-double OraclePixGeoManager::PixelPigtailBendPhiMin()
+double DBPixelGeoManager::PixelPigtailBendPhiMin()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendPhiMin();
   return db()->getDouble(m_PixelPigtail,"BENDPHIMIN") * Gaudi::Units::deg;
 }
 
-double OraclePixGeoManager::PixelPigtailBendPhiMax()
+double DBPixelGeoManager::PixelPigtailBendPhiMax()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailBendPhiMax();
   return db()->getDouble(m_PixelPigtail,"BENDPHIMAX") * Gaudi::Units::deg;
 }
 
-double OraclePixGeoManager::PixelPigtailEnvelopeLength()
+double DBPixelGeoManager::PixelPigtailEnvelopeLength()
 {
   if (useLegacy()) return m_legacyManager->PixelPigtailEnvelopeLength();
   return db()->getDouble(m_PixelPigtail,"ENVLENGTH") * Gaudi::Units::mm;
@@ -3027,43 +3023,43 @@ double OraclePixGeoManager::PixelPigtailEnvelopeLength()
 //
 // Connector
 //
-int OraclePixGeoManager::PixelNumConnectorElements()
+int DBPixelGeoManager::PixelNumConnectorElements()
 {
   if (useLegacy()) return m_legacyManager->PixelNumConnectorElements();
   return db()->getTableSize(m_PixelConnector);
 }
 
-double OraclePixGeoManager::PixelConnectorWidthX(int index)
+double DBPixelGeoManager::PixelConnectorWidthX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorWidthX(index);
   return db()->getDouble(m_PixelConnector,"WIDTHX",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelConnectorWidthY(int index)
+double DBPixelGeoManager::PixelConnectorWidthY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorWidthY(index);
   return db()->getDouble(m_PixelConnector,"WIDTHY",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelConnectorWidthZ(int index)
+double DBPixelGeoManager::PixelConnectorWidthZ(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorWidthZ(index);
   return db()->getDouble(m_PixelConnector,"WIDTHZ",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelConnectorPosX(int index)
+double DBPixelGeoManager::PixelConnectorPosX(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorPosX(index);
   return db()->getDouble(m_PixelConnector,"X",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelConnectorPosY(int index)
+double DBPixelGeoManager::PixelConnectorPosY(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorPosY(index);
   return db()->getDouble(m_PixelConnector,"Y",index) * Gaudi::Units::mm;
 }
 
-double OraclePixGeoManager::PixelConnectorPosZ(int index)
+double DBPixelGeoManager::PixelConnectorPosZ(int index)
 {
   if (useLegacy()) return m_legacyManager->PixelConnectorPosZ(index);
   return db()->getDouble(m_PixelConnector,"Z",index) * Gaudi::Units::mm;
@@ -3074,7 +3070,7 @@ double OraclePixGeoManager::PixelConnectorPosZ(int index)
 //
 
 
-int  OraclePixGeoManager::designType(bool isModule3D)
+int  DBPixelGeoManager::designType(bool isModule3D)
 {
   
   if(isModule3D) return designType3D();
@@ -3094,7 +3090,7 @@ int  OraclePixGeoManager::designType(bool isModule3D)
 }
 
 
-int  OraclePixGeoManager::designType3D()
+int  DBPixelGeoManager::designType3D()
 {
 
   if (dbVersion() < 2) {
@@ -3113,7 +3109,7 @@ int  OraclePixGeoManager::designType3D()
   }
 }
 
-int OraclePixGeoManager::DesignReadoutSide(bool isModule3D)
+int DBPixelGeoManager::DesignReadoutSide(bool isModule3D)
 {
   if (dbVersion() < 2) {
     return -1; 
@@ -3124,7 +3120,7 @@ int OraclePixGeoManager::DesignReadoutSide(bool isModule3D)
   }
 }
 
-int OraclePixGeoManager::DesignNumChipsPhi(bool isModule3D)
+int DBPixelGeoManager::DesignNumChipsPhi(bool isModule3D)
 {
   if (dbVersion() < 2) {  
     return m_legacyManager->DesignNumChipsPhi();
@@ -3136,7 +3132,7 @@ int OraclePixGeoManager::DesignNumChipsPhi(bool isModule3D)
 }    
 
 
-int OraclePixGeoManager::DesignNumChipsEta(bool isModule3D)
+int DBPixelGeoManager::DesignNumChipsEta(bool isModule3D)
  {
   if (dbVersion() < 2) {  
     return m_legacyManager->DesignNumChipsEta();
@@ -3147,7 +3143,7 @@ int OraclePixGeoManager::DesignNumChipsEta(bool isModule3D)
   }
 }
 
-int OraclePixGeoManager::DesignNumRowsPerChip(bool isModule3D)
+int DBPixelGeoManager::DesignNumRowsPerChip(bool isModule3D)
 {
   if (dbVersion() < 2) {  
     return m_legacyManager->DesignNumRowsPerChip(isInnermostPixelLayer());
@@ -3158,7 +3154,7 @@ int OraclePixGeoManager::DesignNumRowsPerChip(bool isModule3D)
   }
 }
 
-int OraclePixGeoManager::DesignNumColsPerChip(bool isModule3D) 
+int DBPixelGeoManager::DesignNumColsPerChip(bool isModule3D) 
 {
   if (dbVersion() < 2) {  
     return m_legacyManager->DesignNumColsPerChip(isInnermostPixelLayer());
@@ -3170,7 +3166,7 @@ int OraclePixGeoManager::DesignNumColsPerChip(bool isModule3D)
 }
 
 
-int OraclePixGeoManager::DesignDiodesPhiTotal(bool isModule3D)
+int DBPixelGeoManager::DesignDiodesPhiTotal(bool isModule3D)
 {
   if  (dbVersion() < 2) {
     return m_legacyManager->DesignDiodesPhiTotal(isInnermostPixelLayer());
@@ -3179,7 +3175,7 @@ int OraclePixGeoManager::DesignDiodesPhiTotal(bool isModule3D)
   }
 }
 
-int OraclePixGeoManager::DesignDiodesEtaTotal(bool isModule3D)
+int DBPixelGeoManager::DesignDiodesEtaTotal(bool isModule3D)
 {
   if  (dbVersion() < 2) {
     return m_legacyManager->DesignDiodesEtaTotal(isInnermostPixelLayer());
@@ -3189,27 +3185,27 @@ int OraclePixGeoManager::DesignDiodesEtaTotal(bool isModule3D)
 }
 
 
-int OraclePixGeoManager::DesignCellRowsPerCircuit(bool isModule3D)
+int DBPixelGeoManager::DesignCellRowsPerCircuit(bool isModule3D)
 {
   return DesignNumChipsPhi(isModule3D) * DesignNumRowsPerChip(isModule3D);
 }
 
-int OraclePixGeoManager::DesignCellColumnsPerCircuit(bool isModule3D)
+int DBPixelGeoManager::DesignCellColumnsPerCircuit(bool isModule3D)
 {
   return DesignNumColsPerChip(isModule3D);
 }
 
-int OraclePixGeoManager::DesignDiodeRowsPerCircuit(bool isModule3D)
+int DBPixelGeoManager::DesignDiodeRowsPerCircuit(bool isModule3D)
 {
   return DesignDiodesPhiTotal(isModule3D);
 }
 
-int OraclePixGeoManager::DesignDiodeColumnsPerCircuit(bool isModule3D)
+int DBPixelGeoManager::DesignDiodeColumnsPerCircuit(bool isModule3D)
 {
   return DesignNumColsPerChip(isModule3D);
 }
 
-int  OraclePixGeoManager::DesignNumEmptyRowsInGap(bool isModule3D)
+int  DBPixelGeoManager::DesignNumEmptyRowsInGap(bool isModule3D)
 {
   // Could determine it from m_gangedIndexMap but expect it to be filled correctly in PixelReadoutTable 
   if (dbVersion() < 2) {
@@ -3222,7 +3218,7 @@ int  OraclePixGeoManager::DesignNumEmptyRowsInGap(bool isModule3D)
 }
 
 // Ganged Pixels
-int OraclePixGeoManager::GangedType()
+int DBPixelGeoManager::GangedType()
 {
   // type 0 means no ganged pixels
   if (!ibl()) return 1;
@@ -3238,7 +3234,7 @@ int OraclePixGeoManager::GangedType()
 }
       
 
-int OraclePixGeoManager::GangedTableIndex(int index, int type)
+int DBPixelGeoManager::GangedTableIndex(int index, int type)
 {
   // There is only one type for standard ATLAS so we just return the index.
   if (!ibl()) return index; 
@@ -3270,12 +3266,12 @@ int OraclePixGeoManager::GangedTableIndex(int index, int type)
   return newIndex;
 }
  
-int OraclePixGeoManager::NumberOfEmptyRows(bool isModule3D)
+int DBPixelGeoManager::NumberOfEmptyRows(bool isModule3D)
 {
   return DesignNumEmptyRowsInGap(isModule3D);
 }
 
-int OraclePixGeoManager::EmptyRows(int index)
+int DBPixelGeoManager::EmptyRows(int index)
 {
   if (dbVersion() < 2) {
     return m_legacyManager->EmptyRows(index);
@@ -3289,7 +3285,7 @@ int OraclePixGeoManager::EmptyRows(int index)
   }
 }
 
-int OraclePixGeoManager::EmptyRowConnections(int index)
+int DBPixelGeoManager::EmptyRowConnections(int index)
 {
   if (dbVersion() < 2) {
     return m_legacyManager->EmptyRowConnections(index);
@@ -3304,7 +3300,7 @@ int OraclePixGeoManager::EmptyRowConnections(int index)
 }
 
 
-double OraclePixGeoManager::DesignRPActiveArea(bool isModule3D)
+double DBPixelGeoManager::DesignRPActiveArea(bool isModule3D)
 {
   if (dbVersion() < 2) { 
     return m_legacyManager->DesignRPActiveArea();
@@ -3314,7 +3310,7 @@ double OraclePixGeoManager::DesignRPActiveArea(bool isModule3D)
   } 
 }
 
-double OraclePixGeoManager::DesignZActiveArea(bool isModule3D)
+double DBPixelGeoManager::DesignZActiveArea(bool isModule3D)
 {
   if (dbVersion() < 2) {   
     return m_legacyManager->DesignZActiveArea();
@@ -3324,7 +3320,7 @@ double OraclePixGeoManager::DesignZActiveArea(bool isModule3D)
   }
 }
     
-double OraclePixGeoManager::DesignPitchRP(bool isModule3D)
+double DBPixelGeoManager::DesignPitchRP(bool isModule3D)
 {
   if (dbVersion() < 2) {
     return m_legacyManager->DesignPitchRP(isInnermostPixelLayer());
@@ -3334,7 +3330,7 @@ double OraclePixGeoManager::DesignPitchRP(bool isModule3D)
  } 
 }
 
-double OraclePixGeoManager::DesignPitchZ(bool isModule3D)
+double DBPixelGeoManager::DesignPitchZ(bool isModule3D)
 {
   if (dbVersion() < 2) {
     return m_legacyManager->DesignPitchZ(isInnermostPixelLayer());
@@ -3344,7 +3340,7 @@ double OraclePixGeoManager::DesignPitchZ(bool isModule3D)
   }
 }
 
-double OraclePixGeoManager::DesignPitchZLong(bool isModule3D)
+double DBPixelGeoManager::DesignPitchZLong(bool isModule3D)
 {
   // Defaults to DesignPitchZ if not specified or is zero.
   if (dbVersion() < 2) {
@@ -3357,7 +3353,7 @@ double OraclePixGeoManager::DesignPitchZLong(bool isModule3D)
   }
 }
 
-double OraclePixGeoManager::DesignPitchZLongEnd(bool isModule3D)
+double DBPixelGeoManager::DesignPitchZLongEnd(bool isModule3D)
 {
   // Defaults to DesignPitchZLongEnd if not specified or is zero.
   if (!ibl()) { // This check is not really needed once the field is in the database.
@@ -3374,7 +3370,7 @@ double OraclePixGeoManager::DesignPitchZLongEnd(bool isModule3D)
 }
 
 
-double OraclePixGeoManager::DesignGapRP(bool isModule3D)
+double DBPixelGeoManager::DesignGapRP(bool isModule3D)
 {
   if (dbVersion() < 2) {
     return m_legacyManager->DesignGapRP();
@@ -3383,7 +3379,7 @@ double OraclePixGeoManager::DesignGapRP(bool isModule3D)
   }
 }
 
-double OraclePixGeoManager::DesignGapZ(bool isModule3D)
+double DBPixelGeoManager::DesignGapZ(bool isModule3D)
 {
   if (dbVersion() < 2) {  
     return m_legacyManager->DesignGapZ();
@@ -3392,7 +3388,7 @@ double OraclePixGeoManager::DesignGapZ(bool isModule3D)
   }
 }
 
-int OraclePixGeoManager::DesignCircuitsPhi(bool /* isModule3D */)
+int DBPixelGeoManager::DesignCircuitsPhi(bool /* isModule3D */)
 {
   //
   // This should be (*pdch)[0]->getDouble("NRPCHIP"), but in the current
@@ -3401,7 +3397,7 @@ int OraclePixGeoManager::DesignCircuitsPhi(bool /* isModule3D */)
   return 1;
 }
 
-int OraclePixGeoManager::DesignCircuitsEta(bool isModule3D)
+int DBPixelGeoManager::DesignCircuitsEta(bool isModule3D)
 {
   return DesignNumChipsEta(isModule3D);
 }
@@ -3409,7 +3405,7 @@ int OraclePixGeoManager::DesignCircuitsEta(bool isModule3D)
 
 
 // Endcap 
-double  OraclePixGeoManager::PixelDiskRMin()
+double  DBPixelGeoManager::PixelDiskRMin()
 {
   return db()->getDouble(m_PixelDisk,"RIDISK",m_currentLD)*mmcm();
 }
@@ -3419,18 +3415,18 @@ double  OraclePixGeoManager::PixelDiskRMin()
 //
 // endcap rings
 //
-int OraclePixGeoManager::PixelDiskNumSupports() {
+int DBPixelGeoManager::PixelDiskNumSupports() {
   // Hardwire for now
   return 3;
 }
 
-double OraclePixGeoManager::PixelDiskSupportRMin(int isup) {
+double DBPixelGeoManager::PixelDiskSupportRMin(int isup) {
   std::ostringstream field;
   field <<"SUP"<< isup+1 <<"RMIN";
   return db()->getDouble(m_PixelDisk,field.str(),m_currentLD)*mmcm();
 }
 
-double OraclePixGeoManager::PixelDiskSupportRMax(int isup) {
+double DBPixelGeoManager::PixelDiskSupportRMax(int isup) {
   std::ostringstream field;
   field <<"SUP"<< isup+1 <<"RMAX";
   return db()->getDouble(m_PixelDisk,field.str(),m_currentLD)*mmcm();
@@ -3438,7 +3434,7 @@ double OraclePixGeoManager::PixelDiskSupportRMax(int isup) {
 
 
 // SLHC only (TODO: does not look like it)
-double OraclePixGeoManager::PixelDiskSupportThickness(int isup) {
+double DBPixelGeoManager::PixelDiskSupportThickness(int isup) {
 
   std::ostringstream prefix;
   prefix <<"SUP"<< isup+1 <<"THICK";
@@ -3471,7 +3467,7 @@ double OraclePixGeoManager::PixelDiskSupportThickness(int isup) {
 }
 
 // SLHC only (TODO: does not look like it)
-int OraclePixGeoManager::PixelDiskSupportMaterialTypeNum(int isup) {
+int DBPixelGeoManager::PixelDiskSupportMaterialTypeNum(int isup) {
  
   if (dbVersion() < 3) return 0;
 
@@ -3503,34 +3499,34 @@ int OraclePixGeoManager::PixelDiskSupportMaterialTypeNum(int isup) {
 //
 
 // return angle of the telescope
-double OraclePixGeoManager::DBMAngle() {
+double DBPixelGeoManager::DBMAngle() {
   return db()->getDouble(m_DBMTelescope,"ANGLE")*Gaudi::Units::deg;
 }
 
 // return dimension of the DBM telescope
-double OraclePixGeoManager::DBMTelescopeX() {
+double DBPixelGeoManager::DBMTelescopeX() {
    return db()->getDouble(m_DBMTelescope,"WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMTelescopeY() {
+double DBPixelGeoManager::DBMTelescopeY() {
    return db()->getDouble(m_DBMTelescope,"HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMTelescopeZ() {
+double DBPixelGeoManager::DBMTelescopeZ() {
    return db()->getDouble(m_DBMTelescope,"LENGTH")*Gaudi::Units::mm;
 }
 
 // return height and length of the module cage having a 3-layers structure
-double OraclePixGeoManager::DBMModuleCageY() {
+double DBPixelGeoManager::DBMModuleCageY() {
   return db()->getDouble(m_DBMTelescope,"CAGE_HEIGHT")*Gaudi::Units::mm;
 } 
-double OraclePixGeoManager::DBMModuleCageZ() {
+double DBPixelGeoManager::DBMModuleCageZ() {
   return db()->getDouble(m_DBMTelescope,"CAGE_LENGTH")*Gaudi::Units::mm;
 } 
 
 // return layer spacing
-double OraclePixGeoManager::DBMSpacingZ() {
+double DBPixelGeoManager::DBMSpacingZ() {
   return db()->getDouble(m_DBMCage,"ZSPACING")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMSpacingRadial() {
+double DBPixelGeoManager::DBMSpacingRadial() {
   if (m_currentLD == 0)
     return db()->getDouble(m_DBMCage,"RADIAL_SPACE_0")*Gaudi::Units::mm;
   else if (m_currentLD == 1)
@@ -3543,174 +3539,174 @@ double OraclePixGeoManager::DBMSpacingRadial() {
   }
 }
 // return dimension of bracket unit
-double OraclePixGeoManager::DBMBracketX() {
+double DBPixelGeoManager::DBMBracketX() {
   return db()->getDouble(m_DBMBracket,"WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBracketY() {
+double DBPixelGeoManager::DBMBracketY() {
   return db()->getDouble(m_DBMBracket,"HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBracketZ() {
+double DBPixelGeoManager::DBMBracketZ() {
   return db()->getDouble(m_DBMBracket,"THICKNESS")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMTrapezBackTheta() {
+double DBPixelGeoManager::DBMTrapezBackTheta() {
   return db()->getDouble(m_DBMBracket,"TRAPEZBACK_THETA")*Gaudi::Units::deg;
 }
-double OraclePixGeoManager::DBMTrapezBackX() {
+double DBPixelGeoManager::DBMTrapezBackX() {
   return db()->getDouble(m_DBMBracket,"TRAPEZBACK_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMTrapezBackY() {
+double DBPixelGeoManager::DBMTrapezBackY() {
   return db()->getDouble(m_DBMBracket,"TRAPEZBACK_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMTrapezBackShortZ() {
+double DBPixelGeoManager::DBMTrapezBackShortZ() {
   return db()->getDouble(m_DBMBracket,"TRAPEZBACK_ZSHORT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktWindowX() {
+double DBPixelGeoManager::DBMBrcktWindowX() {
   return db()->getDouble(m_DBMBracket,"WINDOW_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktWindowY() {
+double DBPixelGeoManager::DBMBrcktWindowY() {
   return db()->getDouble(m_DBMBracket,"WINDOW_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktWindowOffset() {
+double DBPixelGeoManager::DBMBrcktWindowOffset() {
   return db()->getDouble(m_DBMBracket,"WINDOW_OFFSET")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktWindowCenterZ() {
+double DBPixelGeoManager::DBMBrcktWindowCenterZ() {
   return db()->getDouble(m_DBMBracket,"WINDOW_CENTERZ")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktTopBlockZ() {
+double DBPixelGeoManager::DBMBrcktTopBlockZ() {
   return db()->getDouble(m_DBMBracket,"TOPBLOCK_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktSideBlockX() {
+double DBPixelGeoManager::DBMBrcktSideBlockX() {
   return db()->getDouble(m_DBMBracket,"SIDEBLOCK_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktSideBlockY() {
+double DBPixelGeoManager::DBMBrcktSideBlockY() {
   return db()->getDouble(m_DBMBracket,"SIDEBLOCK_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktLockZ() {
+double DBPixelGeoManager::DBMBrcktLockZ() {
   return db()->getDouble(m_DBMBracket,"LOCK_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktLockY() {
+double DBPixelGeoManager::DBMBrcktLockY() {
   return db()->getDouble(m_DBMBracket,"LOCK_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktFinLongZ() {
+double DBPixelGeoManager::DBMBrcktFinLongZ() {
   return db()->getDouble(m_DBMBracket,"COOLINGFIN_ZLONG")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktFinHeight() {
+double DBPixelGeoManager::DBMBrcktFinHeight() {
   return db()->getDouble(m_DBMBracket,"COOLINGFIN_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktFinThick() {
+double DBPixelGeoManager::DBMBrcktFinThick() {
   return db()->getDouble(m_DBMBracket,"COOLINGFIN_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMBrcktFinPos() {
+double DBPixelGeoManager::DBMBrcktFinPos() {
   return db()->getDouble(m_DBMBracket,"COOLINGFIN_POS")*Gaudi::Units::mm;
 }
 
 // return spacing between V-slide and first layer
-double OraclePixGeoManager::DBMSpace() {
+double DBPixelGeoManager::DBMSpace() {
   return db()->getDouble(m_DBMCage,"SPACING1")*Gaudi::Units::mm;
 }
 
 // return dimensions of the main plate
-double OraclePixGeoManager::DBMMainPlateX() {
+double DBPixelGeoManager::DBMMainPlateX() {
   return db()->getDouble(m_DBMCage,"MAINPLATE_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMMainPlateY() {
+double DBPixelGeoManager::DBMMainPlateY() {
   return db()->getDouble(m_DBMCage,"MAINPLATE_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMMainPlateZ() {
+double DBPixelGeoManager::DBMMainPlateZ() {
   return db()->getDouble(m_DBMCage,"MAINPLATE_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMMPlateWindowWidth() {
+double DBPixelGeoManager::DBMMPlateWindowWidth() {
   return db()->getDouble(m_DBMCage,"MPWINDOW_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMMPlateWindowHeight() {
+double DBPixelGeoManager::DBMMPlateWindowHeight() {
   return db()->getDouble(m_DBMCage,"MPWINDOW_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMMPlateWindowPos() {
+double DBPixelGeoManager::DBMMPlateWindowPos() {
   return db()->getDouble(m_DBMCage,"MPWINDOW_POS")*Gaudi::Units::mm;
 }
 // return dimensions of aluminium side plates
-double OraclePixGeoManager::DBMCoolingSidePlateX() {
+double DBPixelGeoManager::DBMCoolingSidePlateX() {
   return db()->getDouble(m_DBMCage,"SIDEPLATE_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMCoolingSidePlateY() {
+double DBPixelGeoManager::DBMCoolingSidePlateY() {
   return db()->getDouble(m_DBMCage,"SIDEPLATE_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMCoolingSidePlateZ() {
+double DBPixelGeoManager::DBMCoolingSidePlateZ() {
   return db()->getDouble(m_DBMCage,"SIDEPLATE_LENGTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMCoolingSidePlatePos() {
+double DBPixelGeoManager::DBMCoolingSidePlatePos() {
   return db()->getDouble(m_DBMCage,"SIDEPLATE_POS")*Gaudi::Units::mm;
 }
 
 // return dimension of sensor, chip and ceramic
-double OraclePixGeoManager::DBMDiamondX() {
+double DBPixelGeoManager::DBMDiamondX() {
   return db()->getDouble(m_DBMModule,"DIAMOND_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMDiamondY() {
+double DBPixelGeoManager::DBMDiamondY() {
   return db()->getDouble(m_DBMModule,"DIAMOND_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMDiamondZ() {
+double DBPixelGeoManager::DBMDiamondZ() {
   return db()->getDouble(m_DBMModule,"DIAMOND_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMFEI4X() {
+double DBPixelGeoManager::DBMFEI4X() {
   return db()->getDouble(m_DBMModule,"FEI4_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMFEI4Y() {
+double DBPixelGeoManager::DBMFEI4Y() {
   return db()->getDouble(m_DBMModule,"FEI4_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMFEI4Z() {
+double DBPixelGeoManager::DBMFEI4Z() {
   return db()->getDouble(m_DBMModule,"FEI4_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMCeramicX() {
+double DBPixelGeoManager::DBMCeramicX() {
   return db()->getDouble(m_DBMModule,"CERAMIC_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMCeramicY() {
+double DBPixelGeoManager::DBMCeramicY() {
   return db()->getDouble(m_DBMModule,"CERAMIC_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMCeramicZ() {
+double DBPixelGeoManager::DBMCeramicZ() {
   return db()->getDouble(m_DBMModule,"CERAMIC_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMAirGap() {
+double DBPixelGeoManager::DBMAirGap() {
   return db()->getDouble(m_DBMModule,"AIR_GAP")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMKaptonZ() {
+double DBPixelGeoManager::DBMKaptonZ() {
   return db()->getDouble(m_DBMModule,"KAPTONZ")*Gaudi::Units::mm;
 }
 
 // flex support
-double OraclePixGeoManager::DBMFlexSupportX() {
+double DBPixelGeoManager::DBMFlexSupportX() {
   return db()->getDouble(m_DBMCage,"FLEXSUPP_WIDTH")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMFlexSupportY() {
+double DBPixelGeoManager::DBMFlexSupportY() {
     return db()->getDouble(m_DBMCage,"FLEXSUPP_HEIGHT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMFlexSupportZ() {
+double DBPixelGeoManager::DBMFlexSupportZ() {
   return db()->getDouble(m_DBMCage,"FLEXSUPP_THICK")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMFlexSupportOffset() {
+double DBPixelGeoManager::DBMFlexSupportOffset() {
     return db()->getDouble(m_DBMCage, "FLEXSUPP_OFFSET")*Gaudi::Units::mm;
 }
 
 // return radius of supporting rod
-double OraclePixGeoManager::DBMRodRadius() {
+double DBPixelGeoManager::DBMRodRadius() {
   return db()->getDouble(m_DBMCage,"ROD_RADIUS")*Gaudi::Units::mm;
 }
 // return distance between center of rods
-double OraclePixGeoManager::DBMMPlateRod2RodY() {
+double DBPixelGeoManager::DBMMPlateRod2RodY() {
   return db()->getDouble(m_DBMCage,"ROD2ROD_VERT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMMPlateRod2RodX() {
+double DBPixelGeoManager::DBMMPlateRod2RodX() {
   return db()->getDouble(m_DBMCage,"ROD2ROD_HOR")*Gaudi::Units::mm;
 }
 
 // radius and thickness of PP0 board
-double OraclePixGeoManager::DBMPP0RIn() {
+double DBPixelGeoManager::DBMPP0RIn() {
   return db()->getDouble(m_DBMTelescope,"PP0_RIN")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMPP0ROut() {
+double DBPixelGeoManager::DBMPP0ROut() {
   return db()->getDouble(m_DBMTelescope,"PP0_ROUT")*Gaudi::Units::mm;
 }
-double OraclePixGeoManager::DBMPP0Thick() {
+double DBPixelGeoManager::DBMPP0Thick() {
   return db()->getDouble(m_DBMTelescope,"PP0_THICK")*Gaudi::Units::mm;
 }
 
