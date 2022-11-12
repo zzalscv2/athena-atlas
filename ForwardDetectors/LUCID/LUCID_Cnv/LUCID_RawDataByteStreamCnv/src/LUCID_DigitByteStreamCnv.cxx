@@ -82,14 +82,14 @@ StatusCode LUCID_DigitByteStreamCnv::fillFEA(LUCID_DigitContainer* RDO_container
 
   LUCID_DigitContainer::const_iterator it_cont     = RDO_container->begin(); 
   LUCID_DigitContainer::const_iterator it_cont_end = RDO_container->end();
-
+  LUCID_RodEncoder::Cache cache{};
   for( ; it_cont != it_cont_end; ++it_cont) {
     
     if ((*it_cont) != nullptr) {
 
       uint32_t rodId = getSourceID();
       
-      RDOEncoder_map[rodId].addDigit((*it_cont));
+      RDOEncoder_map[rodId].addDigit((*it_cont),cache);
     } 
     else ATH_MSG_WARNING(" Digit is empty, skipping digit.");
   }
@@ -102,8 +102,8 @@ StatusCode LUCID_DigitByteStreamCnv::fillFEA(LUCID_DigitContainer* RDO_container
     // (*it_map) is now a pointer of the type std::pair<const uint32_t, LUCID_RDOEncoder >
     
     theROD = m_fea.getRodData((*it_map).first);
-    
-    ((*it_map).second).encode(*theROD, msg());
+
+    ((*it_map).second).encode(*theROD, cache, msg());
 
     (*theROD).push_back(0); // add status word
   

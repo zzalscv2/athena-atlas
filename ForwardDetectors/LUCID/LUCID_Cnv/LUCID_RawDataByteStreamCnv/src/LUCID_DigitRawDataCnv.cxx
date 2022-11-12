@@ -9,7 +9,7 @@
 #include "StoreGate/WriteHandle.h"
 LUCID_DigitRawDataCnv::LUCID_DigitRawDataCnv(const std::string& name,
                                              ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
+  : AthReentrantAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -24,10 +24,9 @@ LUCID_DigitRawDataCnv::initialize()
 }
 
 StatusCode
-LUCID_DigitRawDataCnv::execute()
+LUCID_DigitRawDataCnv::execute(const EventContext& ctx) const
 {
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
+ 
   SG::ReadHandle<LUCID_DigitContainer> digitContainer(m_digitContainerKey, ctx);
 
   if (!digitContainer.isValid()) {
@@ -35,13 +34,13 @@ LUCID_DigitRawDataCnv::execute()
                     << m_digitContainerKey);
     return StatusCode::SUCCESS;
   }
-
+  LUCID_RodEncoder::Cache cache{};
   for (const LUCID_Digit* digit : *digitContainer) {
-    m_rodEncoder.addDigit(digit);
+    m_rodEncoder.addDigit(digit,cache);
   }
 
   std::vector<uint32_t> data_block;
-  m_rodEncoder.encode(data_block, msg());
+  m_rodEncoder.encode(data_block, cache,msg());
   data_block.push_back(0); // add status word
 
   auto container = std::make_unique<LUCID_RawDataContainer>();
