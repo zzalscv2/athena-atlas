@@ -13,18 +13,15 @@
 #include "TrkSegment/Segment.h"
 #include "TrkEventPrimitives/FitQuality.h"
 
-std::atomic<unsigned int> Trk::Segment::s_numberOfInstantiations{ 0 };
 
 // default constructor
 Trk::Segment::Segment()
   : Trk::MeasurementBase()
+  , Trk::ObjectCounter<Trk::Segment>()
   , m_fitQuality(nullptr)
   , m_containedMeasBases(nullptr)
   , m_author(AuthorUnknown)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 Trk::Segment::Segment(const Trk::LocalParameters& locpars,
@@ -33,18 +30,17 @@ Trk::Segment::Segment(const Trk::LocalParameters& locpars,
                       FitQuality* fitqual,
                       Author author)
   : Trk::MeasurementBase(locpars, locerr)
+  , Trk::ObjectCounter<Trk::Segment>()
   , m_fitQuality(fitqual)
   , m_containedMeasBases(measurements)
   , m_author(author)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 // copy constructor
 Trk::Segment::Segment(const Trk::Segment& seg)
   : Trk::MeasurementBase(seg)
+  , Trk::ObjectCounter<Trk::Segment>(seg)
   , m_fitQuality(seg.m_fitQuality ? seg.m_fitQuality->clone() : nullptr)
   , m_containedMeasBases(
       std::make_unique<DataVector<const Trk::MeasurementBase>>())
@@ -55,9 +51,6 @@ Trk::Segment::Segment(const Trk::Segment& seg)
        *(seg.m_containedMeasBases)) {
     m_containedMeasBases->push_back(measurement->clone());
   }
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 // move constructor
@@ -67,17 +60,11 @@ Trk::Segment::Segment(Trk::Segment&& seg) noexcept
   , m_containedMeasBases (std::move(seg.m_containedMeasBases))
   , m_author(seg.m_author)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations++; // new Segment, so increment total count
-#endif
 }
 
 // destructor - child save
 Trk::Segment::~Segment()
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations--; // delete Segment, so decrement total count
-#endif
 }
 
 // assignment operator
@@ -118,12 +105,6 @@ Trk::Segment::operator=(Trk::Segment&& seg) noexcept
     m_author = seg.m_author;
   }
   return (*this);
-}
-
-unsigned int
-Trk::Segment::numberOfInstantiations()
-{
-  return s_numberOfInstantiations;
 }
 
 std::string
