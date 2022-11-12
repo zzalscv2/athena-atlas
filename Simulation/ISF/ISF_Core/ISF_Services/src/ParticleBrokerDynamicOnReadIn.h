@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// ParticleBrokerDynamicOnReadIn.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_SERVICES_PARTICLEBROKERDYNAMICONREADIN_H
 #define ISF_SERVICES_PARTICLEBROKERDYNAMICONREADIN_H 1
@@ -55,7 +51,7 @@ namespace ISF {
   
       @author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
      */
-  class ParticleBrokerDynamicOnReadIn : public extends<AthService, IParticleBroker> {
+  class ATLAS_NOT_THREAD_SAFE ParticleBrokerDynamicOnReadIn : public extends<AthService, IParticleBroker> {
     public: 
       
       //** Constructor with parameters */

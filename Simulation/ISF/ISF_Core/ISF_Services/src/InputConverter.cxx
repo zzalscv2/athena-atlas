@@ -2,10 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// InputConverter.cxx, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 // class header include
 #include "InputConverter.h"
 
@@ -133,11 +129,11 @@ ISF::InputConverter::finalize()
 /** Convert selected particles from the given McEventCollection into ISFParticles
     and push them into the given ISFParticleContainer */
 StatusCode
-ISF::InputConverter::convert(const McEventCollection& inputGenEvents,
+ISF::InputConverter::convert(McEventCollection& inputGenEvents,
                              ISF::ISFParticleContainer& simParticles,
                              EBC_EVCOLL kindOfCollection) const
 {
-  for ( const auto eventPtr : inputGenEvents ) {
+  for ( auto eventPtr : inputGenEvents ) {
     // skip empty events
     if (eventPtr == nullptr) { continue; }
 
@@ -188,13 +184,13 @@ StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGe
 
 /** get all generator particles which pass filters */
 #ifdef HEPMC3
-std::vector<HepMC::ConstGenParticlePtr>
-ISF::InputConverter::getSelectedParticles(const HepMC::GenEvent& evnt, bool legacyOrdering) const {
+std::vector<HepMC::GenParticlePtr>
+ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering) const {
   auto allGenPartBegin = evnt.particles().begin();
   auto allGenPartEnd = evnt.particles().end();
 
   // reserve destination container with maximum size, i.e. number of particles in input event
-  std::vector<HepMC::ConstGenParticlePtr> passedGenParticles{};
+  std::vector<HepMC::GenParticlePtr> passedGenParticles{};
   size_t maxParticles = std::distance(allGenPartBegin, allGenPartEnd);
   passedGenParticles.reserve(maxParticles);
 
@@ -205,14 +201,14 @@ ISF::InputConverter::getSelectedParticles(const HepMC::GenEvent& evnt, bool lega
       std::copy_if(vtx->particles_out().begin(),
                    vtx->particles_out().end(),
                    std::back_inserter(passedGenParticles),
-                   [this](HepMC::ConstGenParticlePtr p){return this->passesFilters(p);});
+                   [this](HepMC::GenParticlePtr p){return this->passesFilters(std::const_pointer_cast<const HepMC3::GenParticle>(p));});
     }
   }
   else {
     std::copy_if(allGenPartBegin,
                  allGenPartEnd,
                  std::back_inserter(passedGenParticles),
-                 [this](HepMC::ConstGenParticlePtr p){return this->passesFilters(p);});
+                 [this](HepMC::GenParticlePtr p){return this->passesFilters(std::const_pointer_cast<const HepMC3::GenParticle>(p));});
   }
 
   passedGenParticles.shrink_to_fit();
@@ -221,7 +217,7 @@ ISF::InputConverter::getSelectedParticles(const HepMC::GenEvent& evnt, bool lega
 }
 #else
 std::vector<HepMC::GenParticlePtr>
-ISF::InputConverter::getSelectedParticles(const HepMC::GenEvent& evnt, bool legacyOrdering) const {
+ISF::InputConverter::getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering) const {
   auto allGenPartBegin = evnt.particles_begin();
   auto allGenPartEnd = evnt.particles_end();
 
@@ -259,11 +255,7 @@ ISF::InputConverter::getSelectedParticles(const HepMC::GenEvent& evnt, bool lega
 
 /** get all generator particles which pass filters */
 ISF::ISFParticle*
-#ifdef HEPMC3
-ISF::InputConverter::convertParticle(HepMC::ConstGenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection) const {
-#else
 ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection) const {
-#endif
   if (!genPartPtr) { return nullptr; }
 
   auto  pVertex = genPartPtr->production_vertex();
@@ -322,11 +314,7 @@ ISF::InputConverter::convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOL
   /// particle origin (TODO: add proper GeoID, collision/cosmics)
   DetRegionSvcIDPair origin(AtlasDetDescr::fUndefinedAtlasRegion, ISF::fEventGeneratorSimID);
   const auto pBarcode = HepMC::barcode(genPartPtr);
-#ifdef HEPMC3
-  auto tBinding = std::make_unique<ISF::TruthBinding>(std::const_pointer_cast<HepMC3::GenParticle>(genPartPtr));
-#else
   auto tBinding = std::make_unique<ISF::TruthBinding>(genPartPtr);
-#endif
   // @FIXME: set the bunch-crossing identifier for pile-up dynamically
   // rather than a constant '1' (e.g. could use GenEvent index for that?)
   const int bcid = (kindOfCollection==EBC_MAINEVCOLL) ? 0 : 1;

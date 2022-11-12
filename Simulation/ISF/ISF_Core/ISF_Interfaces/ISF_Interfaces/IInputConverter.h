@@ -51,7 +51,7 @@ namespace ISF {
 
     /** Convert selected particles from the given McEventCollection into ISFParticles
         and push them into the given ISFParticleContainer */
-    virtual StatusCode convert(const McEventCollection& inputGenEvents,
+    virtual StatusCode convert(McEventCollection& inputGenEvents,
                                ISFParticleContainer& simParticles,
                                EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const = 0;
 
