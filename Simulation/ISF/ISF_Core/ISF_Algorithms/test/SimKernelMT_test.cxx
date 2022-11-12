@@ -63,7 +63,7 @@ namespace ISFTesting {
     virtual ~MockInputConverter() { };
 
     MOCK_METHOD0(finalize, StatusCode());
-    MOCK_CONST_METHOD3(convert, StatusCode(const McEventCollection&,
+    MOCK_CONST_METHOD3(convert, StatusCode(McEventCollection&,
                                            ISF::ISFParticleContainer&,
                                            EBC_EVCOLL kindOfCollection));
     MOCK_CONST_METHOD3(convertHepMCToG4Event, StatusCode(McEventCollection&,

@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// InputConverter.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_INPUTCONVERTER_H
 #define ISF_INPUTCONVERTER_H 1
@@ -67,7 +63,7 @@ namespace ISF {
 
     /** Convert selected particles from the given McEventCollection into ISFParticles
         and push them into the given ISFParticleContainer */
-    virtual StatusCode convert(const McEventCollection& inputGenEvents,
+    virtual StatusCode convert(McEventCollection& inputGenEvents,
                                ISF::ISFParticleContainer& simParticles,
                                EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const override final;
 
@@ -105,9 +101,9 @@ namespace ISF {
 
     /** get all generator particles which pass filters */
 #ifdef HEPMC3
-    std::vector<HepMC::ConstGenParticlePtr > getSelectedParticles(const HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
+    std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
 #else
-    std::vector<HepMC::GenParticlePtr > getSelectedParticles(const HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
+    std::vector<HepMC::GenParticlePtr > getSelectedParticles(HepMC::GenEvent& evnt, bool legacyOrdering=false) const;
 #endif
 
     /** check if the given particle passes all filters */
@@ -118,11 +114,7 @@ namespace ISF {
 #endif
 
     /** convert GenParticle to ISFParticle */
-#ifdef HEPMC3
-    ISF::ISFParticle* convertParticle(HepMC::ConstGenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
-#else
     ISF::ISFParticle* convertParticle(HepMC::GenParticlePtr genPartPtr, EBC_EVCOLL kindOfCollection=EBC_MAINEVCOLL) const;
-#endif
 
     /** ParticlePropertyService and ParticleDataTable */
     ServiceHandle<IPartPropSvc>           m_particlePropSvc;          //!< particle properties svc to retrieve PDT
