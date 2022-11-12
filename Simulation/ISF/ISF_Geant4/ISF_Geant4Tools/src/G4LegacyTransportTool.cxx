@@ -235,7 +235,7 @@ void iGeant4::G4LegacyTransportTool::finalizeOnce()
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulate( const ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4LegacyTransportTool::simulate( ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
 
   // give a screen output that you entered Geant4SimSvc
   ATH_MSG_VERBOSE( "Particle " << isp << " received for simulation." );
@@ -243,7 +243,7 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate( const ISF::ISFParticle& isp
   /** Process ParticleState from particle stack */
   // wrap the given ISFParticle into a STL vector of ISFParticles with length 1
   // (minimizing code duplication)
-  const ISF::ConstISFParticleVector ispVector(1, &isp);
+  const ISF::ISFParticleVector ispVector(1, &isp);
   StatusCode success = this->simulateVector(ispVector, secondaries, mcEventCollection);
   ATH_MSG_VERBOSE( "Simulation done" );
 
@@ -252,7 +252,7 @@ StatusCode iGeant4::G4LegacyTransportTool::simulate( const ISF::ISFParticle& isp
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4LegacyTransportTool::simulateVector( const ISF::ConstISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
+StatusCode iGeant4::G4LegacyTransportTool::simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) {
 
   ATH_MSG_DEBUG (name() << ".simulateVector(...) : Received a vector of " << particles.size() << " particles for simulation.");
   /** Process ParticleState from particle stack */

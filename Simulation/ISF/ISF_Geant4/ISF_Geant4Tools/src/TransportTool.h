@@ -82,9 +82,9 @@ namespace iGeant4
     /// This is done (for now) because we get multiple tool instances in hive.
     void finalizeOnce();
 
-    virtual StatusCode simulate( const ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
+    virtual StatusCode simulate( ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
-    virtual StatusCode simulateVector( const ISF::ConstISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
+    virtual StatusCode simulateVector( const ISF::ISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
     virtual StatusCode setupEvent(const EventContext&) override;
 

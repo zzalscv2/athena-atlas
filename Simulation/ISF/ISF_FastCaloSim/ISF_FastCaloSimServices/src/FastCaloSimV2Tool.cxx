@@ -159,7 +159,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEventST()
 }
 
 /** Simulation Call */
-StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFParticleContainer& secondaries, McEventCollection*)
+StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleContainer& secondaries, McEventCollection*)
 {
 
   ATH_MSG_VERBOSE("NEW PARTICLE! FastCaloSimV2Tool called with ISFParticle: " << isfp);

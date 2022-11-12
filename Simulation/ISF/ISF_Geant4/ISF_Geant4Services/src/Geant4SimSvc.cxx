@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -38,7 +38,7 @@ StatusCode iGeant4::Geant4SimSvc::releaseEvent()
 }
 
 /** Simulation Call */
-StatusCode iGeant4::Geant4SimSvc::simulate(const ISF::ISFParticle& isp, McEventCollection* mcEventCollection)
+StatusCode iGeant4::Geant4SimSvc::simulate(ISF::ISFParticle& isp, McEventCollection* mcEventCollection)
 {
   ISF::ISFParticleContainer secondaries; // filled, but not used
   ATH_CHECK(m_simulatorTool->simulate(isp, secondaries, mcEventCollection));
@@ -46,7 +46,7 @@ StatusCode iGeant4::Geant4SimSvc::simulate(const ISF::ISFParticle& isp, McEventC
 }
 
 /** Simulation Call */
-StatusCode iGeant4::Geant4SimSvc::simulateVector(const ISF::ConstISFParticleVector& particles, McEventCollection* mcEventCollection)
+StatusCode iGeant4::Geant4SimSvc::simulateVector(const ISF::ISFParticleVector& particles, McEventCollection* mcEventCollection)
 {
   ISF::ISFParticleContainer secondaries; // filled, but not used
   ATH_CHECK (m_simulatorTool->simulateVector(particles,secondaries, mcEventCollection));

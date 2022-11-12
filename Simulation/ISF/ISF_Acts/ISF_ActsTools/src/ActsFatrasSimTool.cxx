@@ -57,7 +57,7 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
 }
 
 StatusCode ISF::ActsFatrasSimTool::simulate(
-  const ISFParticle& isp, ISFParticleContainer& secondaries,
+  ISFParticle& isp, ISFParticleContainer& secondaries,
   McEventCollection* mcEventCollection) {
   ATH_MSG_VERBOSE("Particle " << isp << " received for simulation.");
   // Check if particle passes filter, if there is one
@@ -67,14 +67,14 @@ StatusCode ISF::ActsFatrasSimTool::simulate(
   }
   // Process ParticleState from particle stack
   // Wrap the input ISFParticle in an STL vector with size of 1
-  const ISF::ConstISFParticleVector ispVector(1, &isp);
+  const ISF::ISFParticleVector ispVector(1, &isp);
   ATH_CHECK(this->simulateVector(ispVector, secondaries, mcEventCollection));
   ATH_MSG_VERBOSE("Simulation done");
   return StatusCode::SUCCESS;
 }
 
 StatusCode ISF::ActsFatrasSimTool::simulateVector(
-    const ConstISFParticleVector& particles,
+    const ISFParticleVector& particles,
     ISFParticleContainer& secondaries,
     McEventCollection* /*mcEventCollection*/) {
 

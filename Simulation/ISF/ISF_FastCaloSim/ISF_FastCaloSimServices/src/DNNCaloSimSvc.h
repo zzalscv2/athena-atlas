@@ -68,7 +68,7 @@ namespace ISF {
       StatusCode initializeNetwork();
 
       /** Simulation Call */
-    virtual StatusCode simulate(const ISFParticle& isp, McEventCollection*) override final;
+    virtual StatusCode simulate(ISFParticle& isp, McEventCollection*) override final;
       // type of input requested by lwtnn
       typedef std::map<std::string, std::map<std::string, double> >  NetworkInputs ;
       typedef std::map<std::string, double> NetworkOutputs;

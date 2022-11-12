@@ -57,7 +57,7 @@ public:
 
   virtual StatusCode initialize() override;
 
-  virtual StatusCode simulate( const ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) override;
+  virtual StatusCode simulate( ISFParticle& isp, ISFParticleContainer&, McEventCollection* ) override;
 
   virtual StatusCode setupEventST() override;
 
