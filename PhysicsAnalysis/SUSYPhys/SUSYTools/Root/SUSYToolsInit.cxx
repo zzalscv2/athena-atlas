@@ -455,18 +455,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialise JVT tool
-
-    if (!m_jetJvtUpdateTool.isUserConfigured()) {
-      toolName = "JetVertexTaggerTool";
-      m_jetJvtUpdateTool.setTypeAndName("JetVertexTaggerTool/"+toolName);
-      ATH_CHECK( m_jetJvtUpdateTool.setProperty("JetContainer", jetcoll ) );
-      ATH_CHECK( m_jetJvtUpdateTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetJvtUpdateTool.retrieve() );
-    } else  ATH_CHECK( m_jetJvtUpdateTool.retrieve() );
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet JVT efficiency tool (scale factors)
 
     m_applyJVTCut = !m_JvtWP.empty();
@@ -489,27 +477,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "jvtscalefact") ); // set decoration name
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("SFFile", m_JvtConfig_SFFile) );
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
+      ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("TaggingAlg", CP::JvtTagger::NNJvt) );
       ATH_CHECK( m_jetJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetJvtEfficiencyTool.retrieve() );
     } else if (m_jetJvtEfficiencyTool.isUserConfigured()) ATH_CHECK( m_jetJvtEfficiencyTool.retrieve() );
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    // Initialise FwdJVT tool
-
-    if (!m_jetFwdJvtTool.isUserConfigured()) {
-      toolName = m_doFwdJVT ? m_metJetSelection+"_fJVT" : m_metJetSelection+"_NOfJVT";
-      m_jetFwdJvtTool.setTypeAndName("JetForwardJvtTool/FJVTTool_"+toolName);
-
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("OutputDec", "passFJvt") ); //Output decoration
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("JetContainer", jetcoll ) );
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("UseTightOP", (m_fJvtWP=="Tight")) );
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("ForwardMaxPt", m_fJvtPtMax) ); // Max Pt to define fwdJets for JVT
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("EtaThresh", m_fJvtEtaMin) );   // Eta dividing central from forward jets
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("RecalculateFjvt", m_fJvtRecalculate) ); // athena!47481
-      ATH_CHECK( m_jetFwdJvtTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_jetFwdJvtTool.retrieve() );
-    } else ATH_CHECK( m_jetFwdJvtTool.retrieve() );
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -528,13 +499,12 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         return StatusCode::FAILURE;
       }
 
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("JetfJvtMomentName", "passFJvt") );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("TruthJetContainerName", m_defaultTruthJets ) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("ScaleFactorDecorationName", "fJVTSF") ); // set decoration name
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("WorkingPoint", m_fJvtWP) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("MaxPtForJvt", m_fJvtPtMax) );
-      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("UseMuSFFormat", true) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("SFFile", m_fJvtConfig_SFFile) );
+      ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("TaggingAlg", CP::JvtTagger::fJvt) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_jetFwdJvtEfficiencyTool.retrieve() );
     } else  ATH_CHECK( m_jetFwdJvtEfficiencyTool.retrieve() );
@@ -1500,9 +1470,6 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       // set the jet selection if default empty string is overridden through config file
       if (m_metJetSelection.size()) {
         ATH_CHECK( m_metMaker.setProperty("JetSelection", m_metJetSelection) );
-      }
-      if (m_doFwdJVT || m_metJetSelection == "Tenacious" || m_metJetSelection == "TenaciousJVT641") {
-        ATH_CHECK( m_metMaker.setProperty("JetRejectionDec", "passFJvt") );
       }
       if (m_jetInputType == xAOD::JetInput::EMPFlow) {
         ATH_CHECK( m_metMaker.setProperty("DoPFlow", true) );
