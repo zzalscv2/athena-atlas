@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/PackedContainer.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -25,8 +23,8 @@ struct inner_type
 {
   typedef T type;
 };
-template <class T>
-struct inner_type<std::vector<T> >
+template <class T, class ALLOC>
+struct inner_type<std::vector<T, ALLOC> >
 {
   typedef typename inner_type<T>::type type;
 };
@@ -38,9 +36,9 @@ struct inner_type<std::vector<T> >
  * The packing parameters will be initialized to defaults appropriate
  * for type @c T.  (See @c PackedParameters.)
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-PackedContainer<T>::PackedContainer()
+PackedContainer<T, ALLOC>::PackedContainer()
   : m_parms (static_cast<typename inner_type<T>::type>(0))
 {
 }
@@ -54,9 +52,9 @@ PackedContainer<T>::PackedContainer()
  *
  * See @c PackedParameters::setOptions for details.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-bool PackedContainer<T>::setOption (const AuxDataOption& option)
+bool PackedContainer<T, ALLOC>::setOption (const AuxDataOption& option)
 {
   return m_parms.setOption (option);
 }
@@ -71,9 +69,9 @@ bool PackedContainer<T>::setOption (const AuxDataOption& option)
  *
  * See @c PackedParameters::setOptions for details.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-bool PackedContainer<T>::setOption (const std::string& name, int val)
+bool PackedContainer<T, ALLOC>::setOption (const std::string& name, int val)
 {
   return this->setOption (SG::AuxDataOption (name, val));
 }
@@ -88,9 +86,9 @@ bool PackedContainer<T>::setOption (const std::string& name, int val)
  *
  * See @c PackedParameters::setOptions for details.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-bool PackedContainer<T>::setOption (const std::string& name, float val)
+bool PackedContainer<T, ALLOC>::setOption (const std::string& name, float val)
 {
   return this->setOption (SG::AuxDataOption (name, val));
 }
@@ -105,9 +103,9 @@ bool PackedContainer<T>::setOption (const std::string& name, float val)
  *
  * See @c PackedParameters::setOptions for details.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-bool PackedContainer<T>::setOption (const std::string& name, double val)
+bool PackedContainer<T, ALLOC>::setOption (const std::string& name, double val)
 {
   return this->setOption (SG::AuxDataOption (name, val));
 }
@@ -116,9 +114,9 @@ bool PackedContainer<T>::setOption (const std::string& name, double val)
 /**
  * @brief Return the packing parameters for this container.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-const PackedParameters& PackedContainer<T>::parms() const
+const PackedParameters& PackedContainer<T, ALLOC>::parms() const
 {
   return m_parms;
 }
@@ -128,9 +126,9 @@ const PackedParameters& PackedContainer<T>::parms() const
  * @brief Set the packing parameters.
  * @param parms The new packing parameters.
  */
-template <class T>
+template <class T, class ALLOC>
 inline
-void PackedContainer<T>::setParms (const PackedParameters& parms)
+void PackedContainer<T, ALLOC>::setParms (const PackedParameters& parms)
 {
   m_parms = parms;
 }
