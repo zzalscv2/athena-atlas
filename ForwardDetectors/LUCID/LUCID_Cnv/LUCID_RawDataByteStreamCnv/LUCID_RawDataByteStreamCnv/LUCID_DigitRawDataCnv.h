@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string>
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "LUCID_RawEvent/LUCID_DigitContainer.h"
 #include "LUCID_RawEvent/LUCID_RawData.h"
@@ -20,7 +20,7 @@
 #include "StoreGate/WriteHandleKey.h"
 class LUCID_RodEncoder;
 
-class LUCID_DigitRawDataCnv : public AthAlgorithm
+class LUCID_DigitRawDataCnv : public AthReentrantAlgorithm
 {
 
 public:
@@ -28,7 +28,7 @@ public:
   ~LUCID_DigitRawDataCnv();
 
   StatusCode initialize() override;
-  StatusCode execute()  override;
+  StatusCode execute(const EventContext& ctx) const override;
 
 private:
   SG::WriteHandleKey<LUCID_RawDataContainer> m_lucid_RawDataContainerKey{
@@ -37,12 +37,8 @@ private:
     "Lucid_RawData",
     ""
   };
-  SG::ReadHandleKey<LUCID_DigitContainer> m_digitContainerKey{
-    this,
-    "lucid_DigitContainerKey",
-    "Lucid_Digits",
-    ""
-  };
+  SG::ReadHandleKey<LUCID_DigitContainer>
+    m_digitContainerKey{ this, "lucid_DigitContainerKey", "Lucid_Digits", "" };
 
   LUCID_RodEncoder m_rodEncoder;
 };
