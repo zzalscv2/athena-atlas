@@ -126,7 +126,7 @@ namespace CP {
             m_tot_trks += thinner->size();
             std::vector<bool> thin_dec(thinner->size(), false);
             for (const TrackPtr& trk : assoc_trks) { thin_dec[trk->index()] = true; }
-            thinner.keep(thin_dec, SG::ThinningDecisionBase::Op::And);
+            thinner.keep(thin_dec);
         }
         return StatusCode::SUCCESS;
     }
