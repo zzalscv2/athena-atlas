@@ -193,7 +193,7 @@ namespace ST {
     bool IsBadJet(const xAOD::Jet& input) const override final;
 
     bool IsBJetLoose(const xAOD::Jet& input) const override final;
-    bool JetPassJVT(xAOD::Jet& input, bool update_jvt) override final;
+    bool JetPassJVT(xAOD::Jet& input) override final;
 
 
     bool IsSignalMuon(const xAOD::Muon& input, const float ptcut, const float d0sigcut, const float z0cut, const float etacut = DUMMYDEF) const override final;
@@ -747,7 +747,6 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_fatjetUncertaintiesTool;
     asg::AnaToolHandle<IJetSelector> m_jetCleaningTool;
     asg::AnaToolHandle<IJetUpdateJvt> m_jetJvtUpdateTool;
-    asg::AnaToolHandle<IJetModifier> m_jetFwdJvtTool;
     asg::AnaToolHandle<CP::IJetJvtEfficiency> m_jetJvtEfficiencyTool;
     asg::AnaToolHandle<CP::IJetJvtEfficiency> m_jetFwdJvtEfficiencyTool;
 

@@ -310,7 +310,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_fatjetUncertaintiesTool(""),
     m_jetCleaningTool(""),
     m_jetJvtUpdateTool(""),
-    m_jetFwdJvtTool(""),
     m_jetJvtEfficiencyTool(""),
     m_jetFwdJvtEfficiencyTool(""),
     //
@@ -635,7 +634,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_jetCleaningTool.declarePropertyFor( this, "JetCleaningTool", "The JetCleaningTool" );
   m_jetJvtUpdateTool.declarePropertyFor( this, "JetJvtUpdateTool", "The JetJvtUpdateTool" );
   m_jetJvtEfficiencyTool.declarePropertyFor( this, "JetJvtEfficiencyTool", "The JetJvtEfficiencyTool" );
-  m_jetFwdJvtTool.declarePropertyFor( this, "JetFwdJvtTool", "The JetFwdJvtTool" );
   m_jetFwdJvtEfficiencyTool.declarePropertyFor( this, "JetFwdJvtEfficiencyTool", "The JetFwdJvtEfficiencyTool" );
   //
   m_WTaggerTool.declarePropertyFor( this, "WTaggerTool", "The SmoothedWZTaggerTool" );
@@ -1410,7 +1408,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   //
   configFromFile(m_jetPt, "Jet.Pt", rEnv, 20000.);
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);
-  configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "Default"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
+  configFromFile(m_JvtWP, "Jet.JvtWP", rEnv, "FixedEffPt"); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
   configFromFile(m_JvtPtMax, "Jet.JvtPtMax", rEnv, 60.0e3);
   configFromFile(m_JvtConfig, "Jet.JvtConfig", rEnv, "Moriond2018/");
   configFromFile(m_jetUncertaintiesConfig, "Jet.UncertConfig", rEnv, "rel21/Summer2019/R4_SR_Scenario1_SimpleJER.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
@@ -1443,7 +1441,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_badJetCut, "BadJet.Cut", rEnv, "LooseBad");
   //
   configFromFile(m_doFwdJVT, "FwdJet.doJVT", rEnv, false); // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PileupJetRecommendations
-  configFromFile(m_fJvtWP, "FwdJet.JvtWP", rEnv, "Tight"); 
+  configFromFile(m_fJvtWP, "FwdJet.JvtWP", rEnv, "Loose"); 
   configFromFile(m_fJvtPtMax, "FwdJet.JvtPtMax", rEnv, 120e3);
   configFromFile(m_fJvtEtaMin, "FwdJet.JvtEtaMin", rEnv, 2.5);
   configFromFile(m_fJvtConfig, "FwdJet.JvtConfig", rEnv, "May2020/");

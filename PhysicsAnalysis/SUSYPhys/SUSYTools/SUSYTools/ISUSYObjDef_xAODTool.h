@@ -267,7 +267,7 @@ namespace ST {
     virtual bool IsBadJet(const xAOD::Jet& input) const = 0;
 
     virtual bool IsBJetLoose(const xAOD::Jet& input) const = 0;
-    virtual bool JetPassJVT(xAOD::Jet& input, bool update_jvt) = 0;
+    virtual bool JetPassJVT(xAOD::Jet& input) = 0;
 
     virtual bool IsHighPtMuon(const xAOD::Muon& input) const = 0;
 

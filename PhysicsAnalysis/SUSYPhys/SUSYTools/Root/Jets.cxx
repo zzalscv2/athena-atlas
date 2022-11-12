@@ -38,12 +38,13 @@ namespace ST {
 
   const static SG::AuxElement::Decorator<char>      dec_passJvt("passJvt");
   const static SG::AuxElement::ConstAccessor<char>  acc_passJvt("passJvt");
+  const static SG::AuxElement::Decorator<char>      dec_passFJvt("passFJvt");
   const static SG::AuxElement::ConstAccessor<char>  acc_passFJvt("passFJvt");
 
   const static SG::AuxElement::Decorator<float> dec_jvt("Jvt");
-  const static SG::AuxElement::ConstAccessor<float> acc_jvt("Jvt");
+  const static SG::AuxElement::ConstAccessor<float> acc_jvt("NNJvt");
   const static SG::AuxElement::Decorator<float> dec_fjvt("fJvt");
-  const static SG::AuxElement::ConstAccessor<float> acc_fjvt("fJvt");
+  const static SG::AuxElement::ConstAccessor<float> acc_fjvt("DFCommonJets_fJvt");
 
   const static SG::AuxElement::Decorator<char> dec_bjet("bjet");
   const static SG::AuxElement::ConstAccessor<char> acc_bjet("bjet");
@@ -110,15 +111,14 @@ namespace ST {
 
     // Calibrate the jets
     // Note that for PHYSLITE jets we don't need the nominal calibration
-    if (jetkey!="AnalysisJets") ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
+    if (jetkey!="AnalysisJets") {
+      ATH_CHECK(m_jetCalibTool->applyCalibration(*copy));
+      ATH_CHECK(m_jetJvtEfficiencyTool->recalculateScores(*copy));
+    } 
 
     // Update the jets
     for (const auto& jet : *copy) {
       ATH_CHECK( this->FillJet(*jet) );
-    }
-    // Tool requires a loop over all jets
-    if (m_doFwdJVT || m_treatPUJets){
-      ATH_CHECK(m_jetFwdJvtTool->modify(*copy)); //compute FwdJVT for all jets
     }
 
     for (const auto& jet : *copy) {
@@ -329,11 +329,7 @@ namespace ST {
     for (const auto& jet : *copy) {
       ATH_CHECK( this->FillJet(*jet, false) );
     }
-    // Tool requires a loop over all jets
-    if (m_doFwdJVT || m_treatPUJets){
-      ATH_CHECK(m_jetFwdJvtTool->modify(*copy)); //compute FwdJVT for all jets
-    }
-
+    
     for (const auto& jet : *copy) {
       // Update the JVT decorations if needed
       if( m_doFwdJVT && std::abs(acc_DetEta(*jet)) > m_fJvtEtaMin ){
@@ -463,13 +459,6 @@ namespace ST {
       }
       ATH_MSG_VERBOSE(  "jet (pt,eta,phi) after calibration " << input.pt() << " " << input.eta() << " " << input.phi() );
 
-      //central jvt
-      float jvt = m_jetJvtUpdateTool->updateJvt(input);
-      ATH_MSG_VERBOSE("JVT recalculation: "
-                      << acc_jvt(input) << " (before)"
-                      << jvt << " (after)");
-
-      dec_jvt(input) = jvt;
     }
 
     dec_passOR(input) = true;
@@ -520,6 +509,7 @@ namespace ST {
     ATH_MSG_VERBOSE(  "jet (pt,eta,phi) after JES correction " << input.pt() << " " << input.eta() << " " << input.phi() );
 
     dec_passJvt(input) = !m_applyJVTCut || m_jetJvtEfficiencyTool->passesJvtCut(input);
+    dec_passFJvt(input) = m_jetFwdJvtEfficiencyTool->passesJvtCut(input);
     dec_baseline(input) = ( input.pt() > m_jetPt ) || ( input.pt() > 20e3 ); // Allows for setting m_jetPt < 20e3
     dec_bad(input) = false;
     dec_signal_less_JVT(input) = false;
@@ -599,11 +589,7 @@ namespace ST {
     return isbjet_loose;
   }
 
-  bool SUSYObjDef_xAOD::JetPassJVT(xAOD::Jet& input, bool update_jvt) {
-    if(update_jvt){
-      dec_jvt(input) = m_jetJvtUpdateTool->updateJvt(input);
-    }
-
+  bool SUSYObjDef_xAOD::JetPassJVT(xAOD::Jet& input) {
     char pass_jvt = !m_applyJVTCut || m_jetJvtEfficiencyTool->passesJvtCut(input);
     dec_passJvt(input) = pass_jvt;
     return pass_jvt;
@@ -908,6 +894,8 @@ namespace ST {
     float totalSF = 1.;
     if (!m_applyJVTCut) return totalSF;
 
+    ANA_CHECK(m_jetJvtEfficiencyTool->recalculateScores(*jets));
+
     ConstDataVector<xAOD::JetContainer> jvtjets(SG::VIEW_ELEMENTS);
     for (const xAOD::Jet* jet : *jets) {
       // Only jets that were good for every cut except JVT
@@ -931,7 +919,6 @@ namespace ST {
     default:
       ATH_MSG_VERBOSE( "Retrieve SF for jet container in SUSYTools_xAOD::JVT_SF with value " << totalSF );
     }
-
     return totalSF;
   }
 
