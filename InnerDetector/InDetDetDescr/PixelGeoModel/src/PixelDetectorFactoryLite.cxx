@@ -22,7 +22,7 @@
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 
-#include "OraclePixGeoManager.h"
+#include "DBPixelGeoManager.h"
 #include "PixelGeoModelAthenaComps.h"
 
 #include "InDetIdentifier/PixelID.h"
@@ -43,7 +43,7 @@ PixelDetectorFactoryLite::PixelDetectorFactoryLite(GeoModelIO::ReadGeoModel *sql
   m_detectorManager = new PixelDetectorManager(detStore());
 
   // Create the geometry manager.
-  m_geometryManager =  std::make_unique<OraclePixGeoManager>(athenaComps);
+  m_geometryManager =  std::make_unique<DBPixelGeoManager>(athenaComps);
 
   // Pass the switches
   m_geometryManager->SetServices(switches.services());

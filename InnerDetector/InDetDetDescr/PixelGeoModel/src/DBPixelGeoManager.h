@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef OraclePixelGeoManager_H
-#define OraclePixelGeoManager_H
+#ifndef PIXELGEOMODEL_DBPIXELGEOMANAGER_H
+#define PIXELGEOMODEL_DBPIXELGEOMANAGER_H
 
 #include "PixelGeometryManager.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -30,7 +30,7 @@ namespace InDetDD {
   class SiCommonItems;
 }
 
-class OraclePixGeoManager : public PixelGeometryManager {
+class DBPixelGeoManager : public PixelGeometryManager {
  private:
 
 
@@ -171,8 +171,8 @@ class OraclePixGeoManager : public PixelGeometryManager {
 
  public:
 
-  OraclePixGeoManager(PixelGeoModelAthenaComps * athenaComps);
-  ~OraclePixGeoManager();
+  DBPixelGeoManager(PixelGeoModelAthenaComps * athenaComps);
+  ~DBPixelGeoManager();
   
   void init();
 
