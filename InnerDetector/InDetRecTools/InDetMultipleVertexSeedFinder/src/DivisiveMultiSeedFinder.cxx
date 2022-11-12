@@ -145,11 +145,11 @@ namespace InDet
    }          	 	 
 
 //looping over container
-   for(unsigned int i=0;i<indexOfSorted.size();++i)
+   for(int i : indexOfSorted)
    {
      const Trk::TrackParameters* lexPerigee =
        m_extrapolator
-         ->extrapolate(ctx, *preselectedTracks[indexOfSorted[i]], perigeeSurface, Trk::anyDirection, true, Trk::pion)
+         ->extrapolate(ctx, *preselectedTracks[i], perigeeSurface, Trk::anyDirection, true, Trk::pion)
          .release();
 
      double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
@@ -158,13 +158,13 @@ namespace InDet
      if (std::fabs(currentTrackZ0 - lastTrackZ0) < m_sepDistance) {
 
        // the distance is below separation, adding to the same cluster
-       tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
+       tmp_cluster.push_back(preselectedTracks[i]);
     }else{
     
 //the distance is above separation, starting new cluster    
      preClusters.push_back(tmp_cluster);
      tmp_cluster.clear();
-     tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
+     tmp_cluster.push_back(preselectedTracks[i]);
     }//end of gap size check  
     lastTrackZ0 = currentTrackZ0;
    }//end of loop over the sorted container
@@ -173,8 +173,7 @@ namespace InDet
    preClusters.push_back(tmp_cluster);
 
 //step 4 iterative cleaning of clusters
-   for(std::vector< std::vector<const Trk::Track *> >::const_iterator i = preClusters.begin();
-                                                              i != preClusters.end();++i)
+   for(const auto & preCluster : preClusters)
    {    
 //------------------------------Debug code -------------------------------------------------------   
 /*    std::vector<const Trk::Track *>::const_iterator cb = i->begin();
@@ -187,11 +186,11 @@ namespace InDet
 */    
 //-------------------------------end of debug code-------------------------------------------------
    
-   if(i->size()>m_nRemaining)
+   if(preCluster.size()>m_nRemaining)
     {
     
 //iterative cleaning until outlying tracks remain 
-     std::vector<const Trk::Track *> tracks_to_clean = *i;  
+     std::vector<const Trk::Track *> tracks_to_clean = preCluster;  
      bool clean_again = false;
 //     unsigned int clean_count = 1; 
      do
@@ -235,10 +234,10 @@ namespace InDet
      
      }while(clean_again);//end of loop
               
-    }else if(i->size()==2){
+    }else if(preCluster.size()==2){
     
 //case of two track cluster. accepting without cleaning  
-     result.push_back(*i);
+     result.push_back(preCluster);
 //     std::cout<<"Adding a small cluster of size: "<<i->size()<<std::endl;
     }//end of cluster size check
    }//end of loop over all the clusters
@@ -318,11 +317,11 @@ namespace InDet
    }          	 	 
     
 //looping over container
-   for(unsigned int i=0;i<indexOfSorted.size();++i)
+   for(int i : indexOfSorted)
    {
      const Trk::TrackParameters* lexPerigee =
        m_extrapolator->extrapolate(ctx,
-                                   preselectedTracks[indexOfSorted[i]]->definingParameters(),
+                                   preselectedTracks[i]->definingParameters(),
                                    perigeeSurface,
                                    Trk::anyDirection,
                                    true,
@@ -334,7 +333,7 @@ namespace InDet
      if (std::fabs(currentTrackZ0 - lastTrackZ0) < m_sepDistance) {
 
        // the distance is below separation, adding to the same cluster
-       tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
+       tmp_cluster.push_back(preselectedTracks[i]);
 
        //   std::cout<<"Adding to a cluster "<<std::endl;
     }else{
@@ -343,7 +342,7 @@ namespace InDet
 //the distance is above separation, starting new cluster    
      preClusters.push_back(tmp_cluster);
      tmp_cluster.clear();
-     tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
+     tmp_cluster.push_back(preselectedTracks[i]);
     }//end of gap size check  
     lastTrackZ0 = currentTrackZ0;
    }//end of loop over the sorted container
@@ -356,8 +355,7 @@ namespace InDet
 //step 4 iterative cleaning of clusters
  //  std::cout<<"Number of clusters before cleaning: "<<preClusters.size()<<std::endl;
 
-   for(std::vector< std::vector<const Trk::TrackParticleBase *> >::const_iterator i = preClusters.begin();
-                                                              i != preClusters.end();++i)
+   for(const auto & preCluster : preClusters)
    {    
 //------------------------------Debug code -------------------------------------------------------   
 /*    std::vector<const Trk::Track *>::const_iterator cb = i->begin();
@@ -370,11 +368,11 @@ namespace InDet
 */    
 //-------------------------------end of debug code-------------------------------------------------
    
-   if(i->size()>m_nRemaining)
+   if(preCluster.size()>m_nRemaining)
     {
     
 //iterative cleaning until outlying tracks remain 
-     std::vector<const Trk::TrackParticleBase *> tracks_to_clean = *i;  
+     std::vector<const Trk::TrackParticleBase *> tracks_to_clean = preCluster;  
      bool clean_again = false;
 //     unsigned int clean_count = 1; 
      do
@@ -421,11 +419,11 @@ namespace InDet
      
      }while(clean_again);//end of loop
               
-    }else if(i->size()==2)
+    }else if(preCluster.size()==2)
     {
     
 //case of two track cluster. accepting without cleaning  
-     result.push_back(*i);
+     result.push_back(preCluster);
     }//end of cluster size check
    }//end of loop over all the clusters
   }//end of preselection size check 
@@ -451,8 +449,8 @@ namespace InDet
   beamposition->setCovariancePosition(beamSpotHandle->beamVtx().covariancePosition());
 
 
-   for (std::vector<const xAOD::TrackParticle*>::const_iterator itr  = tracks.begin(); itr != tracks.end(); ++itr) {
-     if (m_trkFilter->decision(**itr,beamposition)) preselectedTracks.push_back(*itr);
+   for (const auto *track : tracks) {
+     if (m_trkFilter->decision(*track,beamposition)) preselectedTracks.push_back(track);
    }
    
 
@@ -515,10 +513,10 @@ namespace InDet
      }          	 	 
    
    //looping over container
-   for(unsigned int i=0;i<indexOfSorted.size();++i)
+   for(int i : indexOfSorted)
      {
      const Trk::TrackParameters* lexPerigee = m_extrapolator->extrapolate(
-       ctx, *preselectedTracks[indexOfSorted[i]], perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
+       ctx, *preselectedTracks[i], perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
 
      double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
      delete lexPerigee;
@@ -526,7 +524,7 @@ namespace InDet
      if (std::fabs(currentTrackZ0 - lastTrackZ0) < m_sepDistance) {
 
        // the distance is below separation, adding to the same cluster
-       tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
+       tmp_cluster.push_back(preselectedTracks[i]);
 
        //   std::cout<<"Adding to a cluster "<<std::endl;
 	 }else{
@@ -535,7 +533,7 @@ namespace InDet
 	 //the distance is above separation, starting new cluster    
 	 preClusters.push_back(tmp_cluster);
 	 tmp_cluster.clear();
-	 tmp_cluster.push_back(preselectedTracks[indexOfSorted[i]]);
+	 tmp_cluster.push_back(preselectedTracks[i]);
        }//end of gap size check  
        lastTrackZ0 = currentTrackZ0;
      }//end of loop over the sorted container
@@ -548,8 +546,7 @@ namespace InDet
    //step 4 iterative cleaning of clusters
    //  std::cout<<"Number of clusters before cleaning: "<<preClusters.size()<<std::endl;
    
-   for(std::vector< std::vector<const xAOD::TrackParticle *> >::const_iterator i = preClusters.begin();
-       i != preClusters.end();++i)
+   for(const auto & preCluster : preClusters)
      {    
 //------------------------------Debug code -------------------------------------------------------   
 /*    std::vector<const Trk::Track *>::const_iterator cb = i->begin();
@@ -562,11 +559,11 @@ namespace InDet
 */    
 //-------------------------------end of debug code-------------------------------------------------
    
-   if(i->size()>m_nRemaining)
+   if(preCluster.size()>m_nRemaining)
     {
     
 //iterative cleaning until outlying tracks remain 
-     std::vector<const xAOD::TrackParticle *> tracks_to_clean = *i;  
+     std::vector<const xAOD::TrackParticle *> tracks_to_clean = preCluster;  
      bool clean_again = false;
 //     unsigned int clean_count = 1; 
      do
@@ -612,12 +609,12 @@ namespace InDet
      
      }while(clean_again);//end of loop
              
-    }else if(i->size()==2)
+    }else if(preCluster.size()==2)
      {
       //case of two track cluster. accepting without cleaning  
        std::vector<const Trk::TrackParameters *> twotrack;
-       twotrack.push_back(&((*i)[0]->perigeeParameters()));
-       twotrack.push_back(&((*i)[1]->perigeeParameters()));
+       twotrack.push_back(&(preCluster[0]->perigeeParameters()));
+       twotrack.push_back(&(preCluster[1]->perigeeParameters()));
       result.push_back(twotrack);
 	
       }//end of cluster size check

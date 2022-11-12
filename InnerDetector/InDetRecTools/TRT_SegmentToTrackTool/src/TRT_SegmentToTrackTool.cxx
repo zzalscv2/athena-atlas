@@ -390,16 +390,16 @@ namespace InDet {
         float zmin = points.empty() ? 0 : points.begin()->first, zmax = 0;
         // loop over all points
 
-        for (unsigned int i = 0; i < points.size(); i++) {
-          sx += points[i].first;
-          sy += points[i].second;
-          sxy += points[i].first * points[i].second;
-          sxx += points[i].first * points[i].first;
-          if (fabs(points[i].first) > fabs(zmax)) {
-            zmax = points[i].first;
+        for (auto & point : points) {
+          sx += point.first;
+          sy += point.second;
+          sxy += point.first * point.second;
+          sxx += point.first * point.first;
+          if (std::abs(point.first) > std::abs(zmax)) {
+            zmax = point.first;
           }
-          if (fabs(points[i].first) < fabs(zmin)) {
-            zmin = points[i].first;
+          if (std::abs(point.first) < std::abs(zmin)) {
+            zmin = point.first;
           }
         }
 
@@ -641,8 +641,6 @@ namespace InDet {
       Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(
         nullptr, std::move(per), nullptr, typePattern);
       ntsos.insert(ntsos.begin(), seg_tsos);
-
-      ATH_MSG_VERBOSE("Constructed perigee at input to fit : " << (*per));
 
       //
       // ------------------------------------------------------- now refit the

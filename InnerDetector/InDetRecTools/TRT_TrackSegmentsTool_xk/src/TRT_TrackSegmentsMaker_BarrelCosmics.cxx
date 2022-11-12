@@ -120,22 +120,22 @@ std::unique_ptr<InDet::ITRT_TrackSegmentsMaker::IEventData> InDet::TRT_TrackSegm
   std::unique_ptr<TRT_TrackSegmentsMaker_BarrelCosmics::EventData>
      event_data = std::make_unique<TRT_TrackSegmentsMaker_BarrelCosmics::EventData>(trtcontainer.cptr());
 
-  for(InDet::TRT_DriftCircleContainer::const_iterator it=trtcontainer->begin(); it!=trtcontainer->end(); ++it) {
+  for(const auto *it : *trtcontainer) {
 
-    const InDet::TRT_DriftCircleCollection *colNext=&(**it);
+    const InDet::TRT_DriftCircleCollection *colNext=&(*it);
     if (!colNext) { msg(MSG::WARNING) << "newEvent(): !colNext " << endmsg; continue; }
 
-    for (DataVector<InDet::TRT_DriftCircle>::const_iterator circleit=(*colNext).begin();circleit!=(*colNext).end();++circleit){
+    for (const auto *circleit : *colNext){
 
-      if ( m_trtid->is_barrel((**circleit).identify()) ) { // TRT barrel
+      if ( m_trtid->is_barrel((*circleit).identify()) ) { // TRT barrel
 
-	event_data->m_listHits.push_back( *circleit );
+	event_data->m_listHits.push_back( circleit );
 
-        double onMyTime = (*circleit)->timeOverThreshold();
-        if ( (*circleit)->firstBinHigh()  && ((*circleit)->trailingEdge() != 24) && ((*circleit)->trailingEdge() != 0) ) onMyTime = ( (double) (*circleit)->trailingEdge() + 1 ) * 3.125;
+        double onMyTime = circleit->timeOverThreshold();
+        if ( circleit->firstBinHigh()  && (circleit->trailingEdge() != 24) && (circleit->trailingEdge() != 0) ) onMyTime = ( (double) circleit->trailingEdge() + 1 ) * 3.125;
         if (onMyTime < m_minSeedTOT) continue;
 
-        const Amg::Vector3D &center = (*circleit)->detectorElement()->surface(( *circleit )->identify()).center();
+        const Amg::Vector3D &center = circleit->detectorElement()->surface(circleit->identify()).center();
         event_data->m_listHitCenter.push_back( center );
       }
     }
@@ -170,18 +170,18 @@ InDet::TRT_TrackSegmentsMaker_BarrelCosmics::newRegion(const EventContext& ctx, 
      event_data = std::make_unique<TRT_TrackSegmentsMaker_BarrelCosmics::EventData>(trtcontainer.cptr());
 
 
-  for( std::vector<IdentifierHash>::const_iterator d=vTRT.begin(); d!=vTRT.end(); ++d ) {
-    for ( InDet::TRT_DriftCircleContainer::const_iterator w = trtcontainer->indexFind((*d)); w!=trtcontainer->end(); ++w ) {
-	  for( InDet::TRT_DriftCircleCollection::const_iterator circleit=(*w)->begin(); circleit!=(*w)->end(); ++circleit ) {
+  for(auto d : vTRT) {
+    for ( InDet::TRT_DriftCircleContainer::const_iterator w = trtcontainer->indexFind(d); w!=trtcontainer->end(); ++w ) {
+	  for(const auto *circleit : **w) {
 
-        if(std::abs(m_trtid->barrel_ec( (*circleit)->identify() ))!=1) continue;
+        if(std::abs(m_trtid->barrel_ec( circleit->identify() ))!=1) continue;
 
-        event_data->m_listHits.push_back((*circleit));
+        event_data->m_listHits.push_back(circleit);
 
-        double onMyTime = (*circleit)->timeOverThreshold();
-        if ( (*circleit)->firstBinHigh()  && ((*circleit)->trailingEdge() != 24) && ((*circleit)->trailingEdge() != 0) ) onMyTime = ( (double) (*circleit)->trailingEdge() + 1 ) * 3.125;
+        double onMyTime = circleit->timeOverThreshold();
+        if ( circleit->firstBinHigh()  && (circleit->trailingEdge() != 24) && (circleit->trailingEdge() != 0) ) onMyTime = ( (double) circleit->trailingEdge() + 1 ) * 3.125;
         if (onMyTime < m_minSeedTOT) continue;
-        const Amg::Vector3D &center = (*circleit)->detectorElement()->surface(( *circleit )->identify()).center();
+        const Amg::Vector3D &center = circleit->detectorElement()->surface(circleit->identify()).center();
         event_data->m_listHitCenter.push_back( center );
       }
     }
@@ -425,7 +425,7 @@ int InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeed(double xmin,
   double phibin = (phimax-phimin) / (1.*m_nBinsInPhi);
   int maxHits(0), index, indexmin, indexmax;
 
-  int binInX[100]; for (int i=0; i<100; i++) binInX[i] = 0;
+  int binInX[100]; for (int & i : binInX) i = 0;
 
   for (int j=0; j<m_nBinsInPhi; j++) {
 
@@ -434,8 +434,8 @@ int InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeed(double xmin,
     for (int i=0; i<m_nBinsInX; i++) binInX[i] = 0;
     double transformXMin(xmin*sinphi); xbin = (xmax-xmin)*sinphi / (1.*m_nBinsInX);
 
-    for (unsigned int k=0; k<event_data.m_listHitCenter.size(); k++) {
-      double transformX = event_data.m_listHitCenter[k].x() * sinphi - event_data.m_listHitCenter[k].y() * cosphi;
+    for (auto & k : event_data.m_listHitCenter) {
+      double transformX = k.x() * sinphi - k.y() * cosphi;
       indexmin = (int) ((transformX-transformXMin-searchWindow)/xbin);
       indexmax = (int) ((transformX-transformXMin+searchWindow)/xbin);
 
@@ -464,11 +464,11 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeedInverseR(double *par,
 
   double meanTransformY(0.);
   int countMeanTransformY(0);
-  for (unsigned int k=0; k<event_data.m_listHitCenter.size(); k++) { // first determine the mean
+  for (auto & k : event_data.m_listHitCenter) { // first determine the mean
 
-    double transformX = event_data.m_listHitCenter[k].x() * sinphi - event_data.m_listHitCenter[k].y() * cosphi;
+    double transformX = k.x() * sinphi - k.y() * cosphi;
 	if ( std::abs(transformX-parTransformX) > 2. ) continue;
-	meanTransformY += event_data.m_listHitCenter[k].x() * cosphi + event_data.m_listHitCenter[k].y() * sinphi;
+	meanTransformY += k.x() * cosphi + k.y() * sinphi;
 	countMeanTransformY++;
   }
   if (!countMeanTransformY) {
@@ -485,17 +485,17 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeedInverseR(double *par,
 
 // -> pivot at: x_pivot = meanTransformY * cosphi + parTransformX * sinphi; y_pivot = meanTransformY * sinphi - parTransformX * cosphi;		
   double mean[] = { meanTransformY * cosphi + parTransformX * sinphi, meanTransformY * sinphi - parTransformX * cosphi };  
-  int scanInverseR[101]; for (int i=0; i<101; i++)  scanInverseR[i] = 0;
+  int scanInverseR[101]; for (int & i : scanInverseR)  i = 0;
 
   double window = 10.; // parabola search window BE CAREFULL OF THIS RANGE!
 
-  for (std::vector< Amg::Vector3D >::iterator it = event_data.m_listHitCenter.begin(); it!=event_data.m_listHitCenter.end(); ++it) {
+  for (auto & it : event_data.m_listHitCenter) {
   
-    double transformX = it->x() * sinphi - it->y() * cosphi; 
+    double transformX = it.x() * sinphi - it.y() * cosphi; 
 	if ( std::abs(transformX-parTransformX) > 200. ) continue;  // search circles in a broad band
 
-	double a = (mean[0]-it->x())*sinphi+(it->y()-mean[1])*cosphi;  // TEST THAT THIS CONDITION ( if ( fabs(a) > 200. ) continue; ) IS THE SAME AS ABOVE!
-	double b = 0.5 * (std::pow(it->x()-mean[0], 2.) + std::pow(it->y()-mean[1], 2.) - std::pow(a, 2));
+	double a = (mean[0]-it.x())*sinphi+(it.y()-mean[1])*cosphi;  // TEST THAT THIS CONDITION ( if ( fabs(a) > 200. ) continue; ) IS THE SAME AS ABOVE!
+	double b = 0.5 * (std::pow(it.x()-mean[0], 2.) + std::pow(it.y()-mean[1], 2.) - std::pow(a, 2));
 
     // estimated allowed range in radius: x_1,2 = ( +- window - a ) / b -> get integer as  ((int) (ceil(x/bin-0.5))) + 50 
 	b *= 0.00004; // multiply by the bin width
@@ -594,11 +594,11 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
   }
 
   // make the linear regression fit  
-  double mean[10]; for (int i=0; i<10; i++) mean[i] = 0.; 
-  for (unsigned int i=0; i<hits.size(); i++) {  
+  double mean[10]; for (double & i : mean) i = 0.; 
+  for (auto & hit : hits) {  
 
-    mean[0] += (hits[i]->detectorElement())->surface(hits[i]->identify()).center().x();
-    mean[1] += (hits[i]->detectorElement())->surface(hits[i]->identify()).center().y();	
+    mean[0] += (hit->detectorElement())->surface(hit->identify()).center().x();
+    mean[1] += (hit->detectorElement())->surface(hit->identify()).center().y();	
   }
   for (int i=0; i<2; i++) mean[i] /= (double) hits.size();
   int iPivot(-1); double yPivot(10000000.); // choose pivot closest to the mean
@@ -646,7 +646,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
     a[1] = A[1] * mean[0] + A[3] * mean[2] + A[4] * mean[6];
     a[2] = A[2] * mean[0] + A[4] * mean[2] + A[5] * mean[6];
     discriminant *= -1.;
-    for (int i=0; i<3; i++) { a[i] /= discriminant; }
+    for (double & i : a) { i /= discriminant; }
 	
     double Xparabola = a[0];
     double cotanParabola = a[1];
@@ -700,11 +700,9 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
   
   DataVector<const Trk::MeasurementBase> *rio = new DataVector<const Trk::MeasurementBase>;
 
-  for (unsigned int i=0; i<hits.size(); i++) { // rewrite: InDet::TRT_DriftCircle -> InDet::TRT_DriftCircleOnTrack
+  for (const auto *DC : hits) { // rewrite: InDet::TRT_DriftCircle -> InDet::TRT_DriftCircleOnTrack
   // based on http://atlas-sw.cern.ch/cgi-bin/viewcvs-atlas.cgi/offline/InnerDetector/InDetRecTools/TRT_DriftCircleOnTrackTool/src/TRT_DriftCircleOnTrackNoDriftTimeTool.cxx?revision=1.11&view=markup  
   
-    const InDet::TRT_DriftCircle* DC = hits[i];
-
     // Straw identification
     const InDetDD::TRT_BaseElement* pE = DC->detectorElement(); if(!pE) {msg(MSG::ERROR) << "convert(): no detectorElement info!" << endmsg; continue; }
     Identifier     iD = DC->identify();
@@ -769,10 +767,10 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *
 
   double shift[] = {0., 0.};                                  // shift the points so that mean x = 0 and mean y = 0
   for (int i=0; i<nhits; i++) { shift[0] += measx[i]; shift[1] += measy[i]; }
-  for (int i=0; i<2; i++) shift[i] /= (double) nhits;
+  for (double & i : shift) i /= (double) nhits;
   for (int i=0; i<nhits; i++) { measx[i] -= shift[0]; measy[i] -= shift[1]; }
 
-  double mean[10]; for (int i=0; i<10; i++) mean[i] = 0.;    // calculate momenta needed for the line, circle and parabola fit
+  double mean[10]; for (double & i : mean) i = 0.;    // calculate momenta needed for the line, circle and parabola fit
   for (int i=0; i<nhits; i++) {
     double x2 = measx[i]*measx[i];
 	double y2 = measy[i]*measy[i];
@@ -787,7 +785,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *
     mean[8] += y2 * measy[i];	
 	mean[9] += y2 * y2; 
   }  
-  for (int i=0; i<10; i++)  mean[i] /= (double) nhits; 
+  for (double & i : mean)  i /= (double) nhits; 
 
   double A[6], discriminant, a[3]; 
 
@@ -803,7 +801,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::segFit(double *measx, double *
   a[1] = A[1] * mean[0] + A[3] * mean[2] + A[4] * mean[6];
   a[2] = A[2] * mean[0] + A[4] * mean[2] + A[5] * mean[6];
   discriminant *= -1.;
-  for (int i=0; i<3; i++) a[i] /= discriminant; 
+  for (double & i : a) i /= discriminant; 
   double Xparabola = a[0];
   double cotanParabola = a[1];
   double inverseSin3phi = 1. + a[1]*a[1]; inverseSin3phi *= std::sqrt(inverseSin3phi); // 1/sin^3phi

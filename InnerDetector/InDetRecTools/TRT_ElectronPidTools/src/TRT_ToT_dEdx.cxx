@@ -250,12 +250,12 @@ TRT_ToT_dEdx::dEdx(const EventContext& ctx,
   EGasType gasType;
   DataVector<const Trk::TrackStateOnSurface>::const_iterator itr  = vtsos->begin();
   DataVector<const Trk::TrackStateOnSurface>::const_iterator itre = vtsos->end();
-
+  size_t vtos_size = vtsos->size();
   double correctionFactor = 1.;
 
   if (m_toolScenario==kAlgStandard) {
     std::vector<double> vecToT;
-    vecToT.reserve(vtsos->size());
+    vecToT.reserve(vtos_size);
     double ToTsum = 0;
 
     for ( ; itr!=itre ; ++itr) {
@@ -292,7 +292,9 @@ TRT_ToT_dEdx::dEdx(const EventContext& ctx,
 
   if(m_toolScenario==kAlgReweight || m_toolScenario==kAlgReweightTrunkOne) {
     std::vector<double> vecToT_Xe;
+    vecToT_Xe.reserve(vtos_size/2);
     std::vector<double> vecToT_Ar;
+    vecToT_Ar.reserve(vtos_size/2);
     std::vector<double> vecToT_Kr;
 
     if(m_useTrackPartWithGasType!=kUnset) {
@@ -362,7 +364,6 @@ TRT_ToT_dEdx::dEdx(const EventContext& ctx,
       }
     }
 
-    // Boost speed.
     size_t nhits  = nhitsXe + nhitsAr + nhitsKr;
     if(nhits<1) return 0.0;
 
@@ -370,13 +371,13 @@ TRT_ToT_dEdx::dEdx(const EventContext& ctx,
     double ToTsumAr = 0;
     double ToTsumKr = 0;
     for (size_t i = 0; i < nhitsXe;i++) {
-      ToTsumXe+=vecToT_Xe.at(i);
+      ToTsumXe+=vecToT_Xe[i];
     }
     for (size_t i = 0; i < nhitsAr;i++) {
-      ToTsumAr+=vecToT_Ar.at(i);
+      ToTsumAr+=vecToT_Ar[i];
     }
     for (size_t i = 0; i < nhitsKr;i++) {
-      ToTsumKr+=vecToT_Kr.at(i);
+      ToTsumKr+=vecToT_Kr[i];
     }
 
     ToTsumXe = (nhitsXe>0) ? ToTsumXe/nhitsXe : 0;
@@ -384,12 +385,12 @@ TRT_ToT_dEdx::dEdx(const EventContext& ctx,
     ToTsumKr = (nhitsKr>0) ? ToTsumKr/nhitsKr : 0;
     double ToTsum = ToTsumXe*nhitsXe + ToTsumAr*nhitsAr + ToTsumKr*nhitsKr;
 
-	  if (m_correctionType == kTrackBased) {
-            correctionFactor =
-              trackOccupancyCorrection(ctx, track, true, localOccupancy);
-          } else {
-            correctionFactor = correctNormalization(ctx, nVtx);
-          }
+    if (m_correctionType == kTrackBased) {
+      correctionFactor =
+        trackOccupancyCorrection(ctx, track, true, localOccupancy);
+    } else {
+      correctionFactor = correctNormalization(ctx, nVtx);
+    }
     ToTsum *= correctionFactor;
 
     return ToTsum/nhits;

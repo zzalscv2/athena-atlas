@@ -189,29 +189,27 @@ namespace InDet
 
       const int tot = rdo->getToT();
 
-      unpacked.push_back(
-	UnpackedPixelRDO(
+      unpacked.emplace_back(
 	  defaultLabel,
 	  pixelID.phi_index(rdoID),
 	  pixelID.eta_index(rdoID),
 	  tot,
 	  lvl1,
 	  rdoID
-	)
+	
       );
 
       if (m_checkGanged) {
 	std::optional<Identifier> gangedID = isGanged(rdoID, element);
 	if (gangedID.has_value()) {
-	  unpacked.push_back(
-	    UnpackedPixelRDO(
+	  unpacked.emplace_back(
 	      defaultLabel,
 	      pixelID.phi_index(*gangedID),
 	      pixelID.eta_index(*gangedID),
 	      tot,
 	      lvl1,
 	      *gangedID
-	    )
+	    
 	  );
 	}
       }

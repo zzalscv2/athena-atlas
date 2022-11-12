@@ -82,9 +82,8 @@ void InDet::InDetTrackHoleSearchTool::countHoles(const Trk::Track& track,
   searchForHoles(track,&information,listOfHoles,partHyp);
   if (listOfHoles) {
     ATH_MSG_ERROR("listOfHoles is leaking in countHoles !!!");
-    for (std::vector<const Trk::TrackStateOnSurface*>::const_iterator it = listOfHoles->begin();
-         it != listOfHoles->end(); ++it) {
-      delete (*it);
+    for (const auto *listOfHole : *listOfHoles) {
+      delete listOfHole;
     }
     delete listOfHoles;
     listOfHoles = nullptr;
@@ -98,10 +97,8 @@ const DataVector<const Trk::TrackStateOnSurface>* InDet::InDetTrackHoleSearchToo
   searchForHoles(track, nullptr, listOfHoles,partHyp);
 
   DataVector<const Trk::TrackStateOnSurface>* output = new DataVector<const Trk::TrackStateOnSurface>;
-  for (std::vector<const Trk::TrackStateOnSurface*>::const_iterator it = listOfHoles->begin();
-       it != listOfHoles->end();
-       ++it)
-    output->push_back(*it);
+  for (const auto *listOfHole : *listOfHoles)
+    output->push_back(listOfHole);
 
   delete listOfHoles;
   listOfHoles = nullptr;
@@ -169,10 +166,9 @@ void InDet::InDetTrackHoleSearchTool::searchForHoles(const Trk::Track& track,
     ATH_MSG_DEBUG("List of hits not properly obtained, abort hole search.");
   }
 
-  for (std::map<const Identifier, std::pair<const Trk::TrackParameters*, const bool> >::iterator it = mapOfPredictions.begin();
-       it != mapOfPredictions.end(); ++it) {
-    delete (it->second).first;
-    (it->second).first = nullptr;
+  for (auto & mapOfPrediction : mapOfPredictions) {
+    delete (mapOfPrediction.second).first;
+    (mapOfPrediction.second).first = nullptr;
   }
 
   }
@@ -194,31 +190,30 @@ bool InDet::InDetTrackHoleSearchTool::getMapOfHits(const EventContext& ctx,
   int imeas = 0;
   const Trk::TrackParameters* firstsipar = nullptr;
 
-  for (DataVector<const Trk::TrackStateOnSurface>::const_iterator iterTSOS = track.trackStateOnSurfaces()->begin();
-       iterTSOS!=track.trackStateOnSurfaces()->end();++iterTSOS) {
+  for (const auto *iterTSOS : *track.trackStateOnSurfaces()) {
     // type of state is measurement, hole or outlier ?
-    if ((*iterTSOS)->type(Trk::TrackStateOnSurface::Measurement) ||
-        (*iterTSOS)->type(Trk::TrackStateOnSurface::Outlier)) {
+    if (iterTSOS->type(Trk::TrackStateOnSurface::Measurement) ||
+        iterTSOS->type(Trk::TrackStateOnSurface::Outlier)) {
       Identifier id ;
       bool hasID = false;
-      if ((*iterTSOS)->measurementOnTrack() != nullptr
-          && (*iterTSOS)->measurementOnTrack()->associatedSurface().associatedDetectorElement() != nullptr
-          && (*iterTSOS)->measurementOnTrack()->associatedSurface().associatedDetectorElement()->identify() != 0) {
-        id    = (*iterTSOS)->measurementOnTrack()->associatedSurface().associatedDetectorElement()->identify();
+      if (iterTSOS->measurementOnTrack() != nullptr
+          && iterTSOS->measurementOnTrack()->associatedSurface().associatedDetectorElement() != nullptr
+          && iterTSOS->measurementOnTrack()->associatedSurface().associatedDetectorElement()->identify() != 0) {
+        id    = iterTSOS->measurementOnTrack()->associatedSurface().associatedDetectorElement()->identify();
         hasID = true;
-      } else if ((*iterTSOS)->trackParameters() != nullptr
-                 && (*iterTSOS)->trackParameters()->associatedSurface().associatedDetectorElement() != nullptr
-                 && (*iterTSOS)->trackParameters()->associatedSurface().associatedDetectorElement()->identify() != 0) {
-        id    = (*iterTSOS)->trackParameters()->associatedSurface().associatedDetectorElement()->identify();
+      } else if (iterTSOS->trackParameters() != nullptr
+                 && iterTSOS->trackParameters()->associatedSurface().associatedDetectorElement() != nullptr
+                 && iterTSOS->trackParameters()->associatedSurface().associatedDetectorElement()->identify() != 0) {
+        id    = iterTSOS->trackParameters()->associatedSurface().associatedDetectorElement()->identify();
         hasID = true;
       }
       // copy all Si track states, including the holes and outliers
       if (hasID && (m_atlasId->is_pixel(id) || m_atlasId->is_sct(id))) {
         // sort the state according to the id
-        mapOfHits.insert(std::pair<const Identifier, const Trk::TrackStateOnSurface*>(id,*iterTSOS));
-        if (!(*iterTSOS)->type(Trk::TrackStateOnSurface::Outlier)) {
+        mapOfHits.insert(std::pair<const Identifier, const Trk::TrackStateOnSurface*>(id,iterTSOS));
+        if (!iterTSOS->type(Trk::TrackStateOnSurface::Outlier)) {
           ++imeas;
-          if (!(*iterTSOS)->trackParameters() && m_warning<10) {
+          if (!iterTSOS->trackParameters() && m_warning<10) {
             m_warning++;
             ATH_MSG_WARNING("No track parameters available for state of type measurement");
             ATH_MSG_WARNING("Don't run this tool on slimmed tracks!");
@@ -226,18 +221,18 @@ bool InDet::InDetTrackHoleSearchTool::getMapOfHits(const EventContext& ctx,
           }
         }
         // for cosmics: remember parameters of first SI TSOS
-        if (m_cosmic && !firstsipar && (*iterTSOS)->trackParameters()) firstsipar=(*iterTSOS)->trackParameters();
-        if ((*iterTSOS)->trackParameters()) {
-          ATH_MSG_VERBOSE("TSOS pos: " << (*iterTSOS)->trackParameters()->position()
-                          << "   r: " << sqrt(pow((*iterTSOS)->trackParameters()->position().x(),2)
-                                              +pow((*iterTSOS)->trackParameters()->position().y(),2))
+        if (m_cosmic && !firstsipar && iterTSOS->trackParameters()) firstsipar=iterTSOS->trackParameters();
+        if (iterTSOS->trackParameters()) {
+          ATH_MSG_VERBOSE("TSOS pos: " << iterTSOS->trackParameters()->position()
+                          << "   r: " << sqrt(pow(iterTSOS->trackParameters()->position().x(),2)
+                                              +pow(iterTSOS->trackParameters()->position().y(),2))
                           << "     Si measurement");
         }
       } else {
-        if ((*iterTSOS)->trackParameters()) {
-          ATH_MSG_VERBOSE("TSOS pos: " << (*iterTSOS)->trackParameters()->position()
-                          << "   r: " << sqrt(pow((*iterTSOS)->trackParameters()->position().x(),2)
-                                              +pow((*iterTSOS)->trackParameters()->position().y(),2))
+        if (iterTSOS->trackParameters()) {
+          ATH_MSG_VERBOSE("TSOS pos: " << iterTSOS->trackParameters()->position()
+                          << "   r: " << sqrt(pow(iterTSOS->trackParameters()->position().x(),2)
+                                              +pow(iterTSOS->trackParameters()->position().y(),2))
                           << "     TRT measurement");
         }
       }
@@ -723,10 +718,9 @@ const Trk::Track*  InDet::InDetTrackHoleSearchTool::addHolesToTrack(const Trk::T
   auto trackTSOS = DataVector<const Trk::TrackStateOnSurface>();
 
   // get states from track
-  for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it = oldTrack.trackStateOnSurfaces()->begin();
-       it != oldTrack.trackStateOnSurfaces()->end(); ++it) {
+  for (const auto *it : *oldTrack.trackStateOnSurfaces()) {
     // veto old holes
-    if (!(*it)->type(Trk::TrackStateOnSurface::Hole)) trackTSOS.push_back(new Trk::TrackStateOnSurface(**it));
+    if (!it->type(Trk::TrackStateOnSurface::Hole)) trackTSOS.push_back(new Trk::TrackStateOnSurface(*it));
   }
 
   // if we have no holes on the old track and no holes found by search, then we just copy the track
@@ -741,9 +735,8 @@ const Trk::Track*  InDet::InDetTrackHoleSearchTool::addHolesToTrack(const Trk::T
   }
 
   // add new holes
-  for (std::vector<const Trk::TrackStateOnSurface*>::const_iterator it = listOfHoles->begin();
-       it != listOfHoles->end(); ++it) {
-    trackTSOS.push_back(*it);
+  for (const auto *listOfHole : *listOfHoles) {
+    trackTSOS.push_back(listOfHole);
   }
 
   // sort

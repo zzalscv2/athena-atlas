@@ -551,9 +551,9 @@ bool InDet::TRT_TrackSegmentsMaker_ECcosmics::find_seed(int endcap,
     
 
     int muster[3][3];
-    for(int i=0;i<3;i++)
-      for(int j=0;j<3;j++)
-	muster[i][j]=0;
+    for(auto & i : muster)
+      for(int & j : i)
+	j=0;
     
     std::vector<const InDet::TRT_DriftCircle*> *seed=new std::vector<const InDet::TRT_DriftCircle*>;
     

@@ -272,7 +272,7 @@ InDet::SCT_ClusterOnTrackTool::correct
     locpar[Trk::locX] += correction;
   }
   bool isbroad = m_option_errorStrategy == 0;
-  return new InDet::SCT_ClusterOnTrack(SC, locpar, std::move(cov), iH, glob, isbroad);
+  return new InDet::SCT_ClusterOnTrack(SC, locpar, cov, iH, glob, isbroad);
 }
 
 double
