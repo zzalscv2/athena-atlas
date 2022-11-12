@@ -937,7 +937,3 @@ if (InDetTrigFlags.doPrintConfigurables()):
     print      (InDetTrigTrackSummaryToolWithHoleSearch)
 
 
-# HACK to emulate run2 behaviour
-from TrkAssociationTools.TrkAssociationToolsConf import Trk__PRDtoTrackMapExchangeTool
-InDetTrigPRDtoTrackMapExchangeTool = Trk__PRDtoTrackMapExchangeTool("InDetTrigPRDtoTrackMapExchangeTool")
-ToolSvc += InDetTrigPRDtoTrackMapExchangeTool
