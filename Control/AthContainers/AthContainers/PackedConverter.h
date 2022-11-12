@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/PackedConverter.h
  * @author scott snyder <snyder@bnl.gov>
@@ -59,9 +56,9 @@ public:
    * @param vec Vector of elements to pack.
    * @param stream Destination stream.
    */
-  template <class U, class STREAM>
+  template <class U, class ALLOC, class STREAM>
   void write (size_t nelt,
-              const std::vector<U>& vec,
+              const std::vector<U, ALLOC>& vec,
               STREAM& stream);
 
 
@@ -71,9 +68,9 @@ public:
    * @param vec Vector of elements to pack.
    * @param stream Destination stream.
    */
-  template <class U, class STREAM>
+  template <class U, class ALLOC1, class ALLOC2, class STREAM>
   void write (size_t nelt,
-              const std::vector<std::vector<U> >& vec,
+              const std::vector<std::vector<U, ALLOC1>, ALLOC2>& vec,
               STREAM& stream);
 
 
@@ -83,9 +80,9 @@ public:
    * @param vec Vector to receive the unpacked elements.
    * @param stream Source stream.
    */
-  template <class U, class STREAM>
+  template <class U, class ALLOC, class STREAM>
   void read  (size_t nelt,
-              std::vector<U>& vec,
+              std::vector<U, ALLOC>& vec,
               STREAM& stream);
 
 
@@ -95,9 +92,9 @@ public:
    * @param vec Vector to receive the unpacked elements.
    * @param stream Source stream.
    */
-  template <class U, class STREAM>
+  template <class U, class ALLOC1, class ALLOC2, class STREAM>
   void read  (size_t nelt,
-              std::vector<std::vector<U> >& vec,
+              std::vector<std::vector<U, ALLOC1>, ALLOC2>& vec,
               STREAM& stream);
 
 
@@ -108,9 +105,9 @@ private:
    * @param vec Vector of elements to pack.
    * @param stream Destination stream.
    */
-  template <template<class> class PACKER, class U, class STREAM>
+  template <template<class> class PACKER, class U, class ALLOC, class STREAM>
   void writeUnsigned (size_t nelt,
-                      const std::vector<U>& vec,
+                      const std::vector<U, ALLOC>& vec,
                       STREAM& stream);
 
 
@@ -120,9 +117,9 @@ private:
    * @param vec Vector of elements to pack.
    * @param stream Destination stream.
    */
-  template <template<class> class PACKER, class U, class STREAM>
+  template <template<class> class PACKER, class U, class ALLOC, class STREAM>
   void writeSigned (size_t nelt,
-                    const std::vector<U>& vec,
+                    const std::vector<U, ALLOC>& vec,
                     STREAM& stream);
 
 
@@ -132,9 +129,9 @@ private:
    * @param vec Vector of elements to pack.
    * @param stream Destination stream.
    */
-  template <template<class> class PACKER, class U, class STREAM>
+  template <template<class> class PACKER, class U, class ALLOC, class STREAM>
   void writeFloat (size_t nelt,
-                   const std::vector<U>& vec,
+                   const std::vector<U, ALLOC>& vec,
                    STREAM& stream);
 
 
@@ -144,9 +141,9 @@ private:
    * @param vec Vector to receive the unpacked elements.
    * @param stream Source stream.
    */
-  template <template<class> class UNPACKER, class U, class STREAM>
+  template <template<class> class UNPACKER, class U, class ALLOC, class STREAM>
   void readUnsigned (size_t nelt,
-                     std::vector<U>& vec,
+                     std::vector<U, ALLOC>& vec,
                      STREAM& stream);
 
 
@@ -156,9 +153,9 @@ private:
    * @param vec Vector to receive the unpacked elements.
    * @param stream Source stream.
    */
-  template <template<class> class UNPACKER, class U, class STREAM>
+  template <template<class> class UNPACKER, class U, class ALLOC, class STREAM>
   void readSigned (size_t nelt,
-                   std::vector<U>& vec,
+                   std::vector<U, ALLOC>& vec,
                    STREAM& stream);
 
 
@@ -169,9 +166,9 @@ private:
    * @param vec Vector to receive the unpacked elements.
    * @param stream Source stream.
    */
-  template <template<class> class UNPACKER, class U, class STREAM>
+  template <template<class> class UNPACKER, class U, class ALLOC, class STREAM>
   void readFloat (size_t nelt,
-                  std::vector<U>& vec,
+                  std::vector<U, ALLOC>& vec,
                   STREAM& stream);
 
   /// The parameters to use for the packing.

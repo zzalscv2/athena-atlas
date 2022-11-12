@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/tools/AuxTypeVector.icc
@@ -432,12 +432,12 @@ namespace DataModel_detail {
 
 
 /// Specialization for the case of types that can be packed.
-template <class T>
-std::unique_ptr<SG::IAuxTypeVector> makePacked (std::vector<T>& v, std::true_type)
+template <class T, class ALLOC>
+std::unique_ptr<SG::IAuxTypeVector> makePacked (std::vector<T, ALLOC>& v, std::true_type)
 {
   // Make the new container and move our contents.
   auto iv =
-    std::make_unique<SG::AuxTypeVector<T, SG::PackedContainer<T> > > (0, 0);
+    std::make_unique<SG::AuxTypeVector<T, SG::PackedContainer<T, ALLOC> > > (0, 0);
   iv->vec().swap (v);
 #ifdef __COVERITY__
   // Coverity gives a bogus complaint about the derived->base conversion here.
@@ -480,8 +480,8 @@ struct can_pack<long double>
 {
   typedef std::false_type type;
 };
-template <class T>
-struct can_pack<std::vector<T> >
+template <class T, class ALLOC>
+struct can_pack<std::vector<T, ALLOC> >
 {
   typedef typename can_pack<T>::type type;
 };

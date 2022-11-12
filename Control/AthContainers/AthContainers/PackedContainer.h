@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/PackedContainer.h
  * @author scott snyder <snyder@bnl.gov>
@@ -45,13 +43,13 @@ namespace SG {
  * converted to a @c PackedContainer when @c setOption is called for the
  * variable.
  */
-template <class T>
+template <class T, class ALLOC = std::allocator<T> >
 class PackedContainer
-  : public std::vector<T>, public IAuxSetOption
+  : public std::vector<T, ALLOC>, public IAuxSetOption
 {
 public:
   /// We act like this type.
-  typedef std::vector<T> vector_type;
+  typedef std::vector<T, ALLOC> vector_type;
 
 
   /**
