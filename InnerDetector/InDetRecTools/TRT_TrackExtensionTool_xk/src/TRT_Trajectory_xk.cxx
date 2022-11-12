@@ -33,7 +33,7 @@ void  InDet::TRT_Trajectory_xk::set
   m_zVertexWidth = std::abs(zvertexwidth) ;
   m_impact       = std::abs(impact      ) ;
   m_scale_error  = std::abs(scale       ) ;
-  for(int i=0; i!=400; ++i) m_elements[i].set(m,pr,up,riod,rion,m_scale_error);
+  for(auto & element : m_elements) element.set(m,pr,up,riod,rion,m_scale_error);
   m_minTRTSegmentpT = minTRTSegmentpT ;
 }
 
@@ -42,7 +42,7 @@ void  InDet::TRT_Trajectory_xk::set
 
 {
   m_fieldprop    = mp;
-  for(int i=0; i!=400; ++i) m_elements[i].set(mp, condObj);
+  for(auto & element : m_elements) element.set(mp, condObj);
 }
 
 ///////////////////////////////////////////////////////////////////

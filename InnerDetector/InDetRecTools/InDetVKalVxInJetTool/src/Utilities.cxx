@@ -78,22 +78,22 @@ namespace InDet{
 
   void InDetVKalVxInJetTool::printWrkSet(const std::vector<WrkVrt> *wrkVrtSet, const std::string& name) const {
    int nGoodV=0;
-   for(int iv=0; iv<(int)wrkVrtSet->size(); iv++) {
+   for(const auto & iv : *wrkVrtSet) {
       std::ostringstream ostr1,ostr2;
-      for(int kk=0; kk<(int)(*wrkVrtSet)[iv].selTrk.size(); kk++) {ostr1<<(*wrkVrtSet)[iv].selTrk[kk]<<", ";}
-      for(int kk=0; kk<(int)(*wrkVrtSet)[iv].selTrk.size(); kk++) {ostr2<<momAtVrt((*wrkVrtSet)[iv].trkAtVrt[kk]).Perp()<<", ";}
+      for(long kk : iv.selTrk) {ostr1<<kk<<", ";}
+      for(int kk=0; kk<(int)iv.selTrk.size(); kk++) {ostr2<<momAtVrt(iv.trkAtVrt[kk]).Perp()<<", ";}
       ATH_MSG_DEBUG(name
-      <<"= "<<(*wrkVrtSet)[iv].vertex[0]
-      <<", "<<(*wrkVrtSet)[iv].vertex[1]
-      <<", "<<(*wrkVrtSet)[iv].vertex[2]
-      <<" NTrk="<<(*wrkVrtSet)[iv].selTrk.size()
-      <<" is good="<<std::boolalpha<<(*wrkVrtSet)[iv].Good<<std::noboolalpha
-      <<"  Chi2="<<(*wrkVrtSet)[iv].chi2
-      <<"  Mass="<<(*wrkVrtSet)[iv].vertexMom.M()
-      <<"  detached="<<(*wrkVrtSet)[iv].detachedTrack
-      <<"  proj.dist="<<(*wrkVrtSet)[iv].projectedVrt
+      <<"= "<<iv.vertex[0]
+      <<", "<<iv.vertex[1]
+      <<", "<<iv.vertex[2]
+      <<" NTrk="<<iv.selTrk.size()
+      <<" is good="<<std::boolalpha<<iv.Good<<std::noboolalpha
+      <<"  Chi2="<<iv.chi2
+      <<"  Mass="<<iv.vertexMom.M()
+      <<"  detached="<<iv.detachedTrack
+      <<"  proj.dist="<<iv.projectedVrt
       <<" trk="<<ostr1.str()<<" trk Pt="<<ostr2.str());
-      if((*wrkVrtSet)[iv].Good)nGoodV++;
+      if(iv.Good)nGoodV++;
     }
    ATH_MSG_DEBUG(name<<" N="<<nGoodV);
   }
@@ -359,9 +359,9 @@ namespace InDet{
   {
      AmgVector(5) vectPerig; vectPerig.setZero();
      double px=0.,py=0.,pz=0.,ee=0.;
-     for (int i = 0; i < (int)inpTrk.size(); ++i) {
-       if(!inpTrk[i]) continue;
-       vectPerig = inpTrk[i]->parameters(); 
+     for (const auto *i : inpTrk) {
+       if(!i) continue;
+       vectPerig = i->parameters(); 
        double api=1./std::abs(vectPerig[4]);
        CxxUtils::sincos phi  (vectPerig[2]);
        CxxUtils::sincos theta(vectPerig[3]);
@@ -377,9 +377,9 @@ namespace InDet{
   
   {
      TLorentzVector sum(0.,0.,0.,0.); 
-     for (int i = 0; i < (int)InpTrk.size(); ++i) {
-       if( InpTrk[i] == nullptr ) continue; 
-       sum += InpTrk[i]->p4();
+     for (const auto *i : InpTrk) {
+       if( i == nullptr ) continue; 
+       sum += i->p4();
      }
      return sum; 
    }

@@ -80,10 +80,9 @@ StatusCode InDet::InDetDenseEnvAmbiTrackSelectionTool::finalize() {
 
 
 // @TODO move cluster "map" creation to separate algorithm
-void InDet::InDetDenseEnvAmbiTrackSelectionTool::newEvent(CacheEntry* ) const
+void InDet::InDetDenseEnvAmbiTrackSelectionTool::newEvent(CacheEntry* ) 
 {
-   return;
-}
+   }
 
 
 //============================================================================================

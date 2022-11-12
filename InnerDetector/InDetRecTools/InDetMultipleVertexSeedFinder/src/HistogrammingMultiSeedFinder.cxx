@@ -170,9 +170,9 @@ namespace InDet
   std::vector<std::vector<const Trk::Track *> > preClusters(0);
   std::vector<const Trk::Track *> tmp_cluster(0);
   unsigned int previous_bin = histo.begin()->first;
-  for(std::map<unsigned int, std::vector<const Trk::Track *> >::iterator i = histo.begin(); i != histo.end(); ++i)
+  for(auto & i : histo)
   {
-   unsigned int current_bin = i->first;
+   unsigned int current_bin = i.first;
    if((current_bin - previous_bin)>m_sepNBins )
    {
    
@@ -182,17 +182,17 @@ namespace InDet
    } 
    
 // in any case filling tracks into this bin.   
-   for(std::vector<const Trk::Track *>::const_iterator j = i->second.begin();j != i->second.end();++j) tmp_cluster.push_back(*j); 
+   for(const auto *j : i.second) tmp_cluster.push_back(j); 
    previous_bin = current_bin;
   }//end of loop over the map entries
   preClusters.push_back(tmp_cluster);
 
 //step 4 iterative cleaning of formed clusters  
-  for(std::vector<std::vector<const Trk::Track *> >::const_iterator i = preClusters.begin(); i !=preClusters.end();++i)
+  for(const auto & preCluster : preClusters)
   {
-   if(i->size()>m_nRemaining)
+   if(preCluster.size()>m_nRemaining)
    {
-    std::vector<const Trk::Track *> tracks_to_clean = *i;  
+    std::vector<const Trk::Track *> tracks_to_clean = preCluster;  
     bool clean_again = false;
     do
     {
@@ -235,10 +235,10 @@ namespace InDet
       }else  clean_again = false;//end of outlier size check  
      }//end of core cluster 0 check     
     }while(clean_again);//end of loop
-   }else if(i->size()==2){
+   }else if(preCluster.size()==2){
     
 //case of two track cluster. accepting without cleaning  
-    result.push_back(*i);
+    result.push_back(preCluster);
    }//end of cluster size check
   }//end of loop over all the preclusters
  }//end of  preselection not zero check
@@ -337,9 +337,9 @@ namespace InDet
    std::vector<std::vector<const Trk::TrackParticleBase *> > preClusters(0);
    std::vector<const Trk::TrackParticleBase *> tmp_cluster(0);
    unsigned int previous_bin = histo.begin()->first;
-   for(std::map<unsigned int, std::vector<const Trk::TrackParticleBase *> >::iterator i = histo.begin(); i != histo.end(); ++i)
+   for(auto & i : histo)
    {
-    unsigned int current_bin = i->first;
+    unsigned int current_bin = i.first;
     if((current_bin - previous_bin)>m_sepNBins )
     {
    
@@ -349,17 +349,17 @@ namespace InDet
     }  
    
 // in any case filling tracks into this bin.   
-    for(std::vector<const Trk::TrackParticleBase *>::const_iterator j = i->second.begin();j != i->second.end();++j) tmp_cluster.push_back(*j); 
+    for(const auto *j : i.second) tmp_cluster.push_back(j); 
     previous_bin = current_bin;
    }//end of loop over the map entries
    preClusters.push_back(tmp_cluster);
 
   //step 4 iterative cleaning of formed clusters  
-  for(std::vector<std::vector<const Trk::TrackParticleBase *> >::const_iterator i = preClusters.begin(); i !=preClusters.end();++i)
+  for(const auto & preCluster : preClusters)
   {
-   if(i->size()>m_nRemaining)
+   if(preCluster.size()>m_nRemaining)
    {
-    std::vector<const Trk::TrackParticleBase *> tracks_to_clean = *i;  
+    std::vector<const Trk::TrackParticleBase *> tracks_to_clean = preCluster;  
     bool clean_again = false;
     do
     {
@@ -402,10 +402,10 @@ namespace InDet
        }else  clean_again = false;//end of outlier size check  
       }//end of core cluster 0 check     
      }while(clean_again);//end of loop
-    }else if(i->size()==2){
+    }else if(preCluster.size()==2){
     
 //case of two track cluster. accepting without cleaning  
-    result.push_back(*i);
+    result.push_back(preCluster);
     }//end of cluster size check
    }//end of loop over all the preclusters
   }//end of preselected trackparticles non zero check
@@ -433,8 +433,8 @@ namespace InDet
   // if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamrecposition.position()<<endmsg;
   //Trk::Vertex* beamposition=&beamrecposition;
 
-   for (std::vector<const xAOD::TrackParticle*>::const_iterator itr  = tracks.begin(); itr != tracks.end(); ++itr) {
-     if (m_trkFilter->decision(**itr,beamposition)) preselectedTracks.push_back(*itr);
+   for (const auto *track : tracks) {
+     if (m_trkFilter->decision(*track,beamposition)) preselectedTracks.push_back(track);
    }
    
 
@@ -519,9 +519,9 @@ namespace InDet
 	std::vector<std::vector<const xAOD::TrackParticle *> > preClusters(0);
 	std::vector<const xAOD::TrackParticle *> tmp_cluster(0);
 	unsigned int previous_bin = histo.begin()->first;
-	for(std::map<unsigned int, std::vector<const xAOD::TrackParticle *> >::iterator i = histo.begin(); i != histo.end(); ++i)
+	for(auto & i : histo)
 	  {
-	    unsigned int current_bin = i->first;
+	    unsigned int current_bin = i.first;
 	    if((current_bin - previous_bin)>m_sepNBins )
 	      {
 	   
@@ -531,14 +531,13 @@ namespace InDet
 	      }  
 	    
 	    // in any case filling tracks into this bin.   
-	    for(std::vector<const xAOD::TrackParticle *>::const_iterator j = i->second.begin();j != i->second.end();++j) tmp_cluster.push_back(*j); 
+	    for(const auto *j : i.second) tmp_cluster.push_back(j); 
 	    previous_bin = current_bin;
 	  }//end of loop over the map entries
 	preClusters.push_back(tmp_cluster);
 	
    
-   for(std::vector< std::vector<const xAOD::TrackParticle *> >::const_iterator i = preClusters.begin();
-       i != preClusters.end();++i)
+   for(const auto & preCluster : preClusters)
      {    
 //------------------------------Debug code -------------------------------------------------------   
 /*    std::vector<const Trk::Track *>::const_iterator cb = i->begin();
@@ -551,11 +550,11 @@ namespace InDet
 */    
 //-------------------------------end of debug code-------------------------------------------------
    
-   if(i->size()>m_nRemaining)
+   if(preCluster.size()>m_nRemaining)
     {
     
 //iterative cleaning until outlying tracks remain 
-     std::vector<const xAOD::TrackParticle *> tracks_to_clean = *i;  
+     std::vector<const xAOD::TrackParticle *> tracks_to_clean = preCluster;  
      bool clean_again = false;
 //     unsigned int clean_count = 1; 
      do
@@ -601,12 +600,12 @@ namespace InDet
      
      }while(clean_again);//end of loop
              
-    }else if(i->size()==2)
+    }else if(preCluster.size()==2)
      {
       //case of two track cluster. accepting without cleaning  
        std::vector<const Trk::TrackParameters *> twotrack;
-       twotrack.push_back(&((*i)[0]->perigeeParameters()));
-       twotrack.push_back(&((*i)[1]->perigeeParameters()));
+       twotrack.push_back(&(preCluster[0]->perigeeParameters()));
+       twotrack.push_back(&(preCluster[1]->perigeeParameters()));
       result.push_back(twotrack);
 	
       }//end of cluster size check

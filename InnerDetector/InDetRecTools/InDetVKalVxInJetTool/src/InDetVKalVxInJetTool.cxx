@@ -490,7 +490,7 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
     }
 
     std::vector<const xAOD::IParticle*>  iparTrkFromV0(0); 
-    for(int i=0; i<(int)xaodTrkFromV0.size(); i++)iparTrkFromV0.push_back(xaodTrkFromV0[i]);
+    for(auto & i : xaodTrkFromV0)iparTrkFromV0.push_back(i);
 
     Trk::VxSecVKalVertexInfo* res=nullptr;
     try{

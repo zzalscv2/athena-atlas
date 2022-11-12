@@ -385,7 +385,7 @@ namespace InDet
     bool isEmCaloCompatible(const Trk::TrackParameters& Tp) const;
       
     /** Fill hadronic & EM cluster map*/
-    void newEvent(CacheEntry* ent) const;
+    static void newEvent(CacheEntry* ent) ;
       
     /** Returns true if accepted tracks remain about thresholds, false otherwise
         maxiShared  = max number of shared modules on an accepted shared track

@@ -449,13 +449,10 @@ TRTTrackHoleSearchTool::addHolesToTrack(
 
   // get states from track
   auto tsos = DataVector<const Trk::TrackStateOnSurface>();
-  for (DataVector<const Trk::TrackStateOnSurface>::const_iterator it =
-         track.trackStateOnSurfaces()->begin();
-       it != track.trackStateOnSurfaces()->end();
-       ++it) {
+  for (const auto *it : *track.trackStateOnSurfaces()) {
     // veto old holes
-    if (!(*it)->type(Trk::TrackStateOnSurface::Hole)) {
-      tsos.push_back(new Trk::TrackStateOnSurface(**it));
+    if (!it->type(Trk::TrackStateOnSurface::Hole)) {
+      tsos.push_back(new Trk::TrackStateOnSurface(*it));
     }
   }
 

@@ -172,7 +172,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
   if (!layer[1].empty()) {
     int nl = layer[1].size();
     int nc = 0;
-    for (unsigned int i=0; i!=layer[1].size(); ++i) nc+=layer[1].at(i).nElements();
+    for (const auto & i : layer[1]) nc+=i.nElements();
     out<<"|----------------------------------------------------------------|"
        <<"\n";
     out<<"| Barrel map containt "
@@ -204,7 +204,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
   if (!layer[0].empty()) {
     int nl = layer[0].size();
     int nc = 0;
-    for (unsigned int i=0; i!=layer[0].size(); ++i) nc+=layer[0].at(i).nElements();
+    for (const auto & i : layer[0]) nc+=i.nElements();
     out<<"|----------------------------------------------------------------|"
        <<"\n";
     out<<"| L.Endcap map containt"
@@ -236,7 +236,7 @@ MsgStream& InDet::SiDetElementsRoadMaker_xk::dumpConditions(MsgStream& out) cons
   if (!layer[2].empty()) {
     int nl = layer[2].size();
     int nc = 0;
-    for (unsigned int i=0; i!=layer[2].size(); ++i) nc+=layer[2].at(i).nElements();
+    for (const auto & i : layer[2]) nc+=i.nElements();
     out<<"|----------------------------------------------------------------|"
        <<"\n";
     out<<"| R.Endcap map containt"

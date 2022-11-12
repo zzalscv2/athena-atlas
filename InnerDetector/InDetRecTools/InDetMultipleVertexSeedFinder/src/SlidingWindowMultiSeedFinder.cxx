@@ -342,8 +342,8 @@ std::vector< std::vector<const Trk::TrackParameters *> > SlidingWindowMultiSeedF
     // if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<<"Beam spot position is: "<< beamrecposition.position()<<endmsg;
     //Trk::Vertex* beamposition=&beamrecposition;
     
-    for (std::vector<const xAOD::TrackParticle*>::const_iterator itr  = tracks.begin(); itr != tracks.end(); ++itr) {
-      if (m_trkFilter->decision(**itr,beamposition)) preselectedTracks.push_back(*itr);
+    for (const auto *track : tracks) {
+      if (m_trkFilter->decision(*track,beamposition)) preselectedTracks.push_back(track);
     }
     
     

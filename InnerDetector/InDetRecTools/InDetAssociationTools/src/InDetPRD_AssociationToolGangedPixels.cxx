@@ -253,7 +253,7 @@ InDet::InDetPRD_AssociationToolGangedPixels::getPrdsOnTrack(const Maps& maps,
   DataVector<const Trk::MeasurementBase>::const_iterator it    = track.measurementsOnTrack()->begin();
   DataVector<const Trk::MeasurementBase>::const_iterator itEnd = track.measurementsOnTrack()->end();
   for (;it!=itEnd;++it){
-    const auto  pThisMeasurement(*it);
+    const auto *const   pThisMeasurement(*it);
     if (pThisMeasurement->type(Trk::MeasurementBaseType::RIO_OnTrack)){
       const Trk::RIO_OnTrack* rot = static_cast<const Trk::RIO_OnTrack*>(pThisMeasurement);
       vec.push_back(rot->prepRawData());
