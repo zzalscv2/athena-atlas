@@ -11,12 +11,13 @@
 
 // Trk
 #include "AthContainers/DataVector.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include <atomic>
 #include <memory>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 class SegmentCnv_p1;
 
 namespace Trk {
@@ -48,7 +49,9 @@ class FitQuality;
     @author Andreas.Salzburger@cern.ch
     */
 
-class Segment : public MeasurementBase
+class Segment
+  : public MeasurementBase
+  , public Trk::ObjectCounter<Trk::Segment>
 {
 
 public:
@@ -127,9 +130,6 @@ public:
     - extends Trk::MeasurementBase */
   const FitQuality* fitQuality() const;
 
-  /**return number of Trk::Segments currently created (used in TrkEDM_Monitor)*/
-  static unsigned int numberOfInstantiations();
-
   /** return segment author */
   Author author() const;
 
@@ -145,8 +145,6 @@ protected:
   /** The vector of contained (generic) Trk::MeasurementBase objects */
   std::unique_ptr<DataVector<const MeasurementBase>> m_containedMeasBases;
 
-  /** number of objects of this type in memory */
-  static std::atomic<unsigned int> s_numberOfInstantiations;
 
   /** segment author */
   Author m_author;
