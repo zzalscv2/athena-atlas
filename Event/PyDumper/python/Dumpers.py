@@ -25,7 +25,8 @@ from functools import cmp_to_key
 from math import \
      log as math_log,\
      sqrt as math_sqrt,\
-     hypot as math_hypot
+     hypot as math_hypot, \
+     isnan as math_isnan
 
 from AthenaPython import PyAthena
 from PyUtils.fprint import fprint, fprintln, fwrite
@@ -145,6 +146,8 @@ def signalstate (o, state):
 
 
 def daz(f):
+    if math_isnan(f):
+        return 'nan'
     if abs(f) < 1e-38:
         return 0.0
     return f
