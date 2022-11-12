@@ -11,24 +11,28 @@ def ReFitTrackAlgCfg(flags, name="InDetRefitTrack", **kwargs):
 
     if "FitterTool" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
-        kwargs.setdefault("FitterTool", result.popToolsAndMerge(InDetTrackFitterCfg(flags)))
+        kwargs.setdefault("FitterTool", result.popToolsAndMerge(
+            InDetTrackFitterCfg(flags)))
 
     if "FitterToolTRT" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterTRTCfg
-        kwargs.setdefault("FitterToolTRT", result.popToolsAndMerge(InDetTrackFitterTRTCfg(flags)))
+        kwargs.setdefault("FitterToolTRT", result.popToolsAndMerge(
+            InDetTrackFitterTRTCfg(flags)))
 
     if "SummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-        kwargs.setdefault("SummaryTool", result.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags)))
+        kwargs.setdefault("SummaryTool", result.popToolsAndMerge(
+            InDetTrackSummaryToolSharedHitsCfg(flags)))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-        kwargs.setdefault("AssociationTool", result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
+        kwargs.setdefault("AssociationTool", result.popToolsAndMerge(
+            InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     kwargs.setdefault("TrackName", "CombinedInDetTracks")
     kwargs.setdefault("NewTrackName", "RefittedTracks")
     kwargs.setdefault("useParticleHypothesisFromTrack", True)
-    kwargs.setdefault("matEffects", flags.InDet.materialInteractionsType if flags.InDet.materialInteractions else 0)
+    kwargs.setdefault("matEffects", flags.InDet.Tracking.materialInteractionsType if flags.InDet.Tracking.materialInteractions else 0)
 
     result.addEventAlgo(CompFactory.Trk.ReFitTrack(name, **kwargs))
     return result

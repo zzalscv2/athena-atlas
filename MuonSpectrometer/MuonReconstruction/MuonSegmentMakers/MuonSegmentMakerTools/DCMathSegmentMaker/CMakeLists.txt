@@ -13,4 +13,4 @@ atlas_add_component( DCMathSegmentMaker
                                     MuonIdHelpersLib MuonCompetingRIOsOnTrack MuonPrepRawData MuonRIO_OnTrack MuonSegment MuonRecHelperToolsLib 
                                     MuonRecToolInterfaces MuonStationIntersectCondLib TrkGeometry TrkSurfaces TrkEventPrimitives TrkParameters 
                                     TrkPseudoMeasurementOnTrack TrkRIO_OnTrack TrkRoad TrkTrack TrkExInterfaces TrkFitterInterfaces TrkToolInterfaces
-                                    TrkDriftCircleMath MuonCondData MuonSegmentMakerToolInterfaces MuonSegmentMakerInterfacesLib FourMomUtils)
+                                    TrkDriftCircleMath MuonCondData MuonSegmentMakerToolInterfaces MuonSegmentMakerInterfacesLib FourMomUtils MuonDetDescrUtils)

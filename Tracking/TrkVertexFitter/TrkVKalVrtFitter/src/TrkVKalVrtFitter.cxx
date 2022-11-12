@@ -190,6 +190,11 @@ StatusCode TrkVKalVrtFitter::initialize()
          for(int i=0; i<(int)m_c_MassInputParticles.size(); i++) msg(MSG::DEBUG)<<m_c_MassInputParticles[i]<<", ";
          msg(MSG::DEBUG)<<endmsg; ;
        }
+       if(m_IterationNumber==0){
+         msg(MSG::DEBUG)<< "   Default iteration number limit 50 is used  " <<endmsg;
+       } else {
+         msg(MSG::DEBUG)<< "   Iteration number limit: "<< m_IterationNumber <<endmsg;
+       }
 
        if(m_isAtlasField){ msg(MSG::DEBUG)<< " ATLAS magnetic field is used!"<<endmsg;	}
        else            { msg(MSG::DEBUG)<< " Constant magnetic field is used! B="<<m_BMAG<<endmsg;	}

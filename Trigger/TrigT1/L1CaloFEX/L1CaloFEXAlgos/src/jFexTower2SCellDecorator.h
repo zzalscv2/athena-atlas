@@ -62,8 +62,8 @@ class jFexTower2SCellDecorator : public AthReentrantAlgorithm{
 
         
         //property for jFEX mapping
-        Gaudi::Property<std::string> m_jFEX2Scellmapping {this, "jFEX2SCmapping", "/afs/cern.ch/user/s/serodrig/public/L1CaloScellMapping/jfex_SCID.txt", "Text file to convert from simulation ID to SuperCell Identifier"};
-        Gaudi::Property<std::string> m_jFEX2Tilemapping {this, "jFEX2Tilemapping", "/afs/cern.ch/user/s/serodrig/public/L1CaloScellMapping/jfex_TileID.txt", "Text file to convert from simulation ID to Tile Identifier"};
+        Gaudi::Property<std::string> m_jFEX2Scellmapping {this, "jFEX2SCmapping"  , PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jfex_SCID.txt")  , "Text file to convert from simulation ID to SuperCell Identifier"};
+        Gaudi::Property<std::string> m_jFEX2Tilemapping  {this, "jFEX2Tilemapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jfex_TileID.txt"), "Text file to convert from simulation ID to Tile Identifier"};
         
         StatusCode ReadSCfromFile(const std::string& );
         StatusCode ReadTilefromFile(const std::string& );
