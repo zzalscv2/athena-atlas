@@ -60,15 +60,6 @@ def trtCondCfg(flags):
 
   return acc
 
-def beamposCondCfg(flags):
-  acc = ComponentAccumulator()
-  from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
-  acc.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Beampos", "/Indet/Beampos", className="AthenaAttributeList"))
-  BeamSpotCondAlg=CompFactory.BeamSpotCondAlg
-  acc.addCondAlgo(BeamSpotCondAlg( "BeamSpotCondAlg" ))
-
-  return acc
-
 def magFieldCfgCfg(flags):
   acc = ComponentAccumulator()
 
@@ -286,7 +277,8 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   acc.merge(magFieldCfgCfg(flags))
 
   # TODO merge it to the component needing it
-  acc.merge(beamposCondCfg(flags))
+  from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+  acc.merge(BeamSpotCondAlgCfg(flags))
 
 
   if in_view:
