@@ -191,6 +191,13 @@ def RecoSteering(flags):
         acc.merge(AFPRecCfg(flags))
         log.info("---------- Configured AFP reconstruction")
 
+    #Lucid
+    acc.flagPerfmonDomain('Lucid')
+    if flags.Detector.EnableLucid:
+        from ForwardRec.LucidRecConfig import LucidRecCfg
+        acc.merge(LucidRecCfg(flags))
+        log.info("---------- Configured Lucid reconstruction")
+
     # ZDC under construction but disabled as per APR-90
     #acc.flagPerfmonDomain('ZDC')
     #if flags.Reco.EnableZDC:

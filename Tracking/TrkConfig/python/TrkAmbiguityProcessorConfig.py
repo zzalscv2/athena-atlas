@@ -427,10 +427,12 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
     kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActivePass.minPTBrem)
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("KeepHolesFromBeforeRefit", False)
+    kwargs.setdefault(
+        "MatEffects", flags.InDet.Tracking.materialInteractionsType
+        if flags.InDet.Tracking.materialInteractions else 0)
 
-    InDetAmbiguityProcessor = CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
-        name=name+flags.InDet.Tracking.ActivePass.extension, **kwargs)
-    acc.setPrivateTools(InDetAmbiguityProcessor)
+    acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
+        name=name+flags.InDet.Tracking.ActivePass.extension, **kwargs))
     return acc
 
 
@@ -505,9 +507,6 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
     kwargs.setdefault("RefitPrds", True)
     kwargs.setdefault("KeepHolesFromBeforeRefit", False)
 
-    # DenseEnvironmentsAmbiguityProcessorTool
-    ProcessorTool = CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool
-    ITkAmbiguityProcessor = ProcessorTool(
-        name=name+flags.ITk.Tracking.ActivePass.extension, **kwargs)
-    acc.setPrivateTools(ITkAmbiguityProcessor)
+    acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
+        name=name+flags.ITk.Tracking.ActivePass.extension, **kwargs))
     return acc
