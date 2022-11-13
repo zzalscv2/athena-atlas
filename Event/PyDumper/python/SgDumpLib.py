@@ -48,7 +48,11 @@ def _gen_jobo(dct):
             inputFileSummary['geometry'] = 'ATLAS-R1-2012-02-00-00'
 
         from RecExConfig.RecFlags import rec
-        rec.AutoConfiguration = ['everything']
+        # Skip auto-config for EVNT files.
+        if inputFileSummary['stream_names'] == ['StreamEVGEN']:
+            rec.AutoConfiguration.set_Value_and_Lock ([])
+        else:
+            rec.AutoConfiguration = ['everything']
         import RecExConfig.AutoConfiguration as auto
         auto.ConfigureFromListOfKeys(rec.AutoConfiguration())
 
