@@ -15,8 +15,10 @@
 #include "ExpressionEvaluation/IProxyLoader.h"
 
 #include "AthContainers/AuxElement.h"
+#include "RootUtils/TSMethodCall.h"
 #include "TMethodCall.h"
 #include "TVirtualCollectionProxy.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <map>
 #include <string>
@@ -112,7 +114,7 @@ namespace ExpressionParsing {
       virtual std::vector<double> getVecDoubleValue(const SG::AuxVectorData *auxVectorData);
 
     private:
-      TMethodCall *m_methodCall;
+      mutable RootUtils::TSMethodCall m_methodCall ATLAS_THREAD_SAFE;
       bool m_valid;
   };
 
@@ -134,7 +136,7 @@ namespace ExpressionParsing {
 
     private:
       TVirtualCollectionProxy *m_collectionProxy;
-      TMethodCall *m_methodCall;
+      mutable RootUtils::TSMethodCall m_methodCall ATLAS_THREAD_SAFE;
       bool m_valid;
   };
 

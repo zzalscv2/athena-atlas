@@ -83,7 +83,7 @@ namespace ExpressionParsing {
 
   TMethodWrapper::TMethodWrapper(const std::type_info &elementTypeinfo, 
       const std::string &methodName)
-    : m_methodCall(NULL), m_valid(false)
+    : m_valid(false)
   {
     TClass *cls = TClass::GetClass(elementTypeinfo);
     if (!cls) {
@@ -91,24 +91,20 @@ namespace ExpressionParsing {
       if (!cls) return;
     }
 
-    m_methodCall = new TMethodCall(cls, methodName.c_str(), "");
-    if (!m_methodCall) return;
+    m_methodCall.setProto (cls, methodName.c_str(), "");
 
-    m_valid = m_methodCall->IsValid();
+    m_valid = m_methodCall.call() != nullptr;
   }
 
   TMethodWrapper::~TMethodWrapper()
   {
-    if (m_methodCall) {
-      delete m_methodCall;
-      m_methodCall = NULL;
-    }
   }
 
   IProxyLoader::VariableType TMethodWrapper::variableType()
   {
-    if (!m_methodCall) return IProxyLoader::VT_UNK;
-    switch (m_methodCall->ReturnType()) {
+    TMethodCall* mc = m_methodCall.call();
+    if (!mc) return IProxyLoader::VT_UNK;
+    switch (mc->ReturnType()) {
       case TMethodCall::kLong:
         return IProxyLoader::VT_INT;
       case TMethodCall::kDouble: 
@@ -133,14 +129,14 @@ namespace ExpressionParsing {
   int TMethodWrapper::getIntValue(const SG::AuxElement *auxElement) const
   {
     long retLong;
-    m_methodCall->Execute((void *)auxElement, retLong);
+    m_methodCall.call()->Execute((void *)auxElement, retLong);
     return (int) retLong;
   }
 
   double TMethodWrapper::getDoubleValue(const SG::AuxElement *auxElement) const
   {
     double retDouble;
-    m_methodCall->Execute((void *)auxElement, retDouble);
+    m_methodCall.call()->Execute((void *)auxElement, retDouble);
     return retDouble;
   }
 
@@ -160,7 +156,7 @@ namespace ExpressionParsing {
   TMethodCollectionWrapper::TMethodCollectionWrapper(const std::type_info &containerTypeinfo, 
       const std::string &methodName)
     : m_collectionProxy(nullptr),
-      m_methodCall(NULL), m_valid(false)
+      m_valid(false)
   {
     TClass *containerClass = TClass::GetClass(containerTypeinfo);
     if (!containerClass) {
@@ -174,24 +170,20 @@ namespace ExpressionParsing {
     TClass *elementClass = m_collectionProxy->GetValueClass();
     if (!elementClass) return;
 
-    m_methodCall = new TMethodCall(elementClass, methodName.c_str(), "");
-    if (!m_methodCall) return;
+    m_methodCall.setProto (elementClass, methodName.c_str(), "");
 
-    m_valid = m_methodCall->IsValid();
+    m_valid = m_methodCall.call() != nullptr;
   }
 
   TMethodCollectionWrapper::~TMethodCollectionWrapper()
   {
-    if (m_methodCall) {
-      delete m_methodCall;
-      m_methodCall = NULL;
-    }
   }
 
   IProxyLoader::VariableType TMethodCollectionWrapper::variableType()
   {
-    if (!m_methodCall) return IProxyLoader::VT_UNK;
-    switch (m_methodCall->ReturnType()) {
+    TMethodCall* mc = m_methodCall.call();
+    if (!mc) return IProxyLoader::VT_UNK;
+    switch (mc->ReturnType()) {
       case TMethodCall::kLong:
         return IProxyLoader::VT_VECINT;
       case TMethodCall::kDouble: 
@@ -232,7 +224,7 @@ namespace ExpressionParsing {
     std::vector<int> result(N);
     for (UInt_t i = 0; i < N; ++i) {
       void *element = (*m_collectionProxy)[i];
-      m_methodCall->Execute(element, retLong);
+      m_methodCall.call()->Execute(element, retLong);
       result[i] = (int) retLong;
     }
     m_collectionProxy->PopProxy();
@@ -248,7 +240,7 @@ namespace ExpressionParsing {
     std::vector<double> result(N);
     for (UInt_t i = 0; i < N; ++i) {
       void *element = (*m_collectionProxy)[i];
-      m_methodCall->Execute(element, retDouble);
+      m_methodCall.call()->Execute(element, retDouble);
       result[i] = (double) retDouble;
     }
     m_collectionProxy->PopProxy();

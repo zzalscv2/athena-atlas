@@ -29,39 +29,35 @@ namespace ExpressionParsing {
    template <class T_Cont,typename T_src>
    class CollectionMethodHelper {
    public:
-      CollectionMethodHelper(TMethodCall &method_call, const TVirtualCollectionProxy &collection_proxy, const void *data, unsigned int n_elements)
-         : m_methodCall( &method_call),
+      CollectionMethodHelper(RootUtils::TSMethodCall method_call, const TVirtualCollectionProxy &collection_proxy, const void *data, [[maybe_unused]] unsigned int n_elements)
+         : m_methodCall( method_call),
            m_collectionProxy( collection_proxy.Generate())
       {
-         (void) n_elements;
-         assert( m_methodCall->IsValid());
+         assert( m_methodCall.call() != nullptr );
          void* data_nc ATLAS_THREAD_SAFE = const_cast<void *>(data);  // required by TVirtualCollectionProxy
          m_collectionProxy->PushProxy(data_nc);
          assert( m_collectionProxy->Size() == n_elements);
       }
 
-      std::size_t size(const T_Cont &cont) const {
-         (void) cont;
+      std::size_t size(const T_Cont &/*cont*/) const {
          return m_collectionProxy->Size();
       }
 
       /// Get the scalar provided by the container
-      T_src get(const T_Cont &cont) const {
-         (void) cont;
+      T_src get(const T_Cont &/*cont*/) const {
          T_src ret;
          assert( m_collectionProxy->Size() == 1);
          // @TODO root/cling lock needed  ?
-         m_methodCall->Execute((*m_collectionProxy)[0], ret); // @TODO thread safe ?
+         m_methodCall.call()->Execute((*m_collectionProxy)[0], ret); // @TODO thread safe ?
          return ret;
       }
 
       /// Get the specified element of the vector provided by the container
-      T_src get(const T_Cont &cont, std::size_t idx) const {
-         (void) cont;
+      T_src get(const T_Cont &/*cont*/, std::size_t idx) const {
          T_src ret;
          // @TODO root/cling lock needed  ?
          void *element_data=(*m_collectionProxy)[idx];
-         m_methodCall->Execute(element_data, ret); // @TODO thread safe ?
+         m_methodCall.call()->Execute(element_data, ret); // @TODO thread safe ?
          return ret;
       }
 
@@ -70,22 +66,23 @@ namespace ExpressionParsing {
       class Kit {
       public:
          Kit(Kit &&) = default;
-         Kit(std::unique_ptr<TMethodCall> &&method_call, TVirtualCollectionProxy &collection_proxy)
+         Kit(RootUtils::TSMethodCall &&method_call, TVirtualCollectionProxy &collection_proxy)
             : m_methodCall(std::move(method_call)),
               m_collectionProxy(&collection_proxy)
          {}
 
-         CollectionMethodHelper<T_Cont,T_src> create(const EventContext& ctx, SG::ReadHandle<T_Cont> &handle) const {
-            (void) ctx;
-            return CollectionMethodHelper<T_Cont,T_src>(*m_methodCall,*m_collectionProxy, getVectorData(*handle), getContainerSize(*handle));
+         CollectionMethodHelper<T_Cont,T_src> create(const EventContext& /*ctx*/,
+                                                     SG::ReadHandle<T_Cont> &handle) const
+        {
+          return CollectionMethodHelper<T_Cont,T_src>(m_methodCall,*m_collectionProxy, getVectorData(*handle), getContainerSize(*handle));
          }
       private:
-         std::unique_ptr<TMethodCall>  m_methodCall;
+         mutable RootUtils::TSMethodCall  m_methodCall ATLAS_THREAD_SAFE;
          const TVirtualCollectionProxy *m_collectionProxy;
       };
 
    private:
-      TMethodCall                             *m_methodCall;
+      mutable RootUtils::TSMethodCall  m_methodCall ATLAS_THREAD_SAFE;
       std::unique_ptr<TVirtualCollectionProxy> m_collectionProxy;
    };
 
@@ -94,11 +91,11 @@ namespace ExpressionParsing {
    template <class T_Cont,typename T_src>
    class MethodHelper {
    public:
-      MethodHelper(TMethodCall &method_call, const void *data)
-         : m_methodCall( &method_call),
+      MethodHelper(RootUtils::TSMethodCall method_call, const void *data)
+         : m_methodCall( method_call),
            m_data(data)
       {
-         assert( m_methodCall->IsValid());
+         assert( m_methodCall.call() != nullptr );
       }
 
       std::size_t size(const T_Cont &cont) const {
@@ -106,22 +103,19 @@ namespace ExpressionParsing {
       }
 
       /// Get the scalar provided by the container
-      T_src get(const T_Cont &cont) const {
-         (void) cont;
+      T_src get(const T_Cont &/*cont*/) const {
          T_src ret;
          // @TODO root/cling lock needed  ?
-         m_methodCall->Execute(const_cast<void *>(m_data), ret);
+         m_methodCall.call()->Execute(const_cast<void *>(m_data), ret);
          return ret;
       }
 
       /// Get the specified element of the vector provided by the container
-      T_src get(const T_Cont &cont, std::size_t idx) const {
-         (void) cont;
-         (void) idx;
+      T_src get(const T_Cont &/*cont*/, [[maybe_unused]] std::size_t idx) const {
          T_src ret;
          assert( idx==0);
          // @TODO root/cling lock needed  ?
-         m_methodCall->Execute(const_cast<void *>(m_data), ret);
+         m_methodCall.call()->Execute(const_cast<void *>(m_data), ret);
          return ret;
       }
 
@@ -130,17 +124,16 @@ namespace ExpressionParsing {
       class Kit {
       public:
          Kit(Kit &&) = default;
-         Kit(std::unique_ptr<TMethodCall> &&method_call) : m_methodCall(std::move(method_call)) {}
+         Kit(RootUtils::TSMethodCall &&method_call) : m_methodCall(std::move(method_call)) {}
 
-         MethodHelper<T_Cont,T_src> create(const EventContext& ctx, SG::ReadHandle<T_Cont> &handle) const {
-            (void) ctx;
-            return MethodHelper<T_Cont,T_src>(*m_methodCall,handle.cptr());
+         MethodHelper<T_Cont,T_src> create(const EventContext& /*ctx*/, SG::ReadHandle<T_Cont> &handle) const {
+            return MethodHelper<T_Cont,T_src>(m_methodCall,handle.cptr());
          }
       private:
-         std::unique_ptr<TMethodCall> m_methodCall;
+         mutable RootUtils::TSMethodCall m_methodCall ATLAS_THREAD_SAFE;
       };
    private:
-      TMethodCall *m_methodCall;
+      mutable RootUtils::TSMethodCall m_methodCall ATLAS_THREAD_SAFE;
       const void  *m_data;
    };
 
@@ -153,10 +146,10 @@ namespace ExpressionParsing {
       public:
          virtual ~IMethodAccessorKit() {}
          virtual std::unique_ptr<IAccessor> create( const SG::ReadHandleKey<SG::AuxVectorBase> &key,
-                                                    std::unique_ptr<TMethodCall> &&method_call,
+                                                    RootUtils::TSMethodCall &&method_call,
                                                     TVirtualCollectionProxy *proxy=nullptr) const = 0;
          virtual std::unique_ptr<IAccessor> create( const SG::ReadHandleKey<SG::AuxElement> &key,
-                                                    std::unique_ptr<TMethodCall> &&method_call,
+                                                    RootUtils::TSMethodCall &&method_call,
                                                     TVirtualCollectionProxy *proxy=nullptr) const = 0;
       };
 
@@ -173,7 +166,7 @@ namespace ExpressionParsing {
 
          /** create an accessor which called the specified method of an AuxVectorBase.*/
          virtual std::unique_ptr<IAccessor> create( const SG::ReadHandleKey<SG::AuxVectorBase> &key,
-                                                    std::unique_ptr<TMethodCall> &&method_call,
+                                                    RootUtils::TSMethodCall &&method_call,
                                                     TVirtualCollectionProxy *proxy) const override {
             if (!proxy) {
                std::stringstream msg;
@@ -185,7 +178,7 @@ namespace ExpressionParsing {
 
          /** create an accessor which called the specified method of an AuxElement.*/
          virtual std::unique_ptr<IAccessor> create( const SG::ReadHandleKey<SG::AuxElement> &key,
-                                                    std::unique_ptr<TMethodCall> &&method_call,
+                                                    RootUtils::TSMethodCall &&method_call,
                                                     TVirtualCollectionProxy *proxy=nullptr) const override {
             if (proxy) {
                return createAccessor<SG::AuxElement,VectorHelper>(key,std::move(method_call),proxy, (!proxy ? m_scalarType : m_vectorType));
@@ -198,7 +191,7 @@ namespace ExpressionParsing {
       private:
          template <class T_Aux, class T_ScalarVectorHelper>
          std::unique_ptr<IAccessor> createAccessor( const SG::ReadHandleKey<T_Aux> &key,
-                                                    std::unique_ptr<TMethodCall> &&method_call,
+                                                    RootUtils::TSMethodCall &&method_call,
                                                     TVirtualCollectionProxy *proxy,
                                                     ExpressionParsing::IProxyLoader::VariableType variable_type) const {
             if (proxy) {
@@ -229,29 +222,29 @@ namespace ExpressionParsing {
       /** Create an accessor which calls the specified method of an AuxElement.
        */
       std::unique_ptr<IAccessor> create(const SG::ReadHandleKey<SG::AuxElement> &key,
-                                        std::unique_ptr<TMethodCall> &&method_call,
+                                        RootUtils::TSMethodCall &&method_call,
                                         TVirtualCollectionProxy *proxy=nullptr) const {
-         return getKit(*method_call).create(key,std::move(method_call), proxy);
+         return getKit(method_call).create(key,std::move(method_call), proxy);
       }
 
       /** Create an accessor which calls the specified method of an AuxVectorBase.
        */
       std::unique_ptr<IAccessor> create(const SG::ReadHandleKey<SG::AuxVectorBase> &key,
-                                        std::unique_ptr<TMethodCall> &&method_call,
+                                        RootUtils::TSMethodCall &&method_call,
                                         TVirtualCollectionProxy *proxy=nullptr) const {
-         return getKit(*method_call).create(key,std::move(method_call), proxy);
+         return getKit(method_call).create(key,std::move(method_call), proxy);
       }
 
    private:
 
       /** Get an specific class which creates the accessor for the given method.
        */
-      const IMethodAccessorKit &getKit(TMethodCall &method_call) const {
+      const IMethodAccessorKit &getKit(RootUtils::TSMethodCall &method_call) const {
          std::map<TMethodCall::EReturnType, std::unique_ptr<IMethodAccessorKit> >::const_iterator
-            iter = m_kits.find(method_call.ReturnType());
+            iter = m_kits.find(method_call.call()->ReturnType());
          if (iter == m_kits.end()) {
             std::stringstream msg;
-            msg << "ExpressionParsing::MethodAccessorFactory: no kit for return type " << method_call.GetMethod()->GetReturnTypeNormalizedName ();
+            msg << "ExpressionParsing::MethodAccessorFactory: no kit for return type " << method_call.call()->GetMethod()->GetReturnTypeNormalizedName ();
             throw std::runtime_error(msg.str());
          }
          return *(iter->second);
