@@ -241,6 +241,7 @@
 + LArCalorimeter/LArG4/LArG4SD
 + LArCalorimeter/LArG4/LArG4ShowerLib
 + LArCalorimeter/LArG4/LArG4ShowerLibSvc
++ LArCalorimeter/LArG4/LArHitAlgs
 + LArCalorimeter/LArGeoModel/LArGeoAlgsNV
 + LArCalorimeter/LArGeoModel/LArGeoBarrel
 + LArCalorimeter/LArGeoModel/LArGeoCode
