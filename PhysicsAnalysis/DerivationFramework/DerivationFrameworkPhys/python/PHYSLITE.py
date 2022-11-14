@@ -240,7 +240,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
                        AssocConfig('Muon', 'AnalysisMuons'),
                        AssocConfig('Ele', 'AnalysisElectrons'),
                        AssocConfig('Gamma', 'AnalysisPhotons'),
-                       #AssocConfig('Tau', 'AnalysisTauJets'),
+                       AssocConfig('Tau', 'AnalysisTauJets'),
                        AssocConfig('Soft', '')]
         PHYSLITE_cfg = METAssocConfig('AnalysisMET',
                                       ConfigFlags,
