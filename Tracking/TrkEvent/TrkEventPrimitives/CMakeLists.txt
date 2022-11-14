@@ -13,3 +13,11 @@ atlas_add_dictionary( TrkEventPrimitivesDict
                       TrkEventPrimitives/TrkEventPrimitivesDict.h
                       TrkEventPrimitives/selection.xml
                       LINK_LIBRARIES TrkEventPrimitives )
+
+atlas_add_test( 
+  SurfaceConsistencyCheck_test
+  SOURCES test/SurfaceConsistencyCheck_test.cxx
+  INCLUDE_DIRS  ${Boost_INCLUDE_DIRS}  
+  LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils TrkEventPrimitives
+  POST_EXEC_SCRIPT nopost.sh
+  )

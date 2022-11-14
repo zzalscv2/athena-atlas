@@ -81,7 +81,7 @@ public:
    * The relevant indices in the bitset were controlled
    * by a single enum.
    *
-   * For MT we splitted the hints from the types.
+   * For MT we split the hints from the types.
    * So we have two enums controlling two
    * bitsets.
    *
@@ -243,7 +243,7 @@ public:
   /**
    * Full constructors
    *
-   * @param[in] FitQualityOnSurface (we provide an without it) 
+   * @param[in] FitQualityOnSurface (we provide one without it) 
    * @param[in] unique pointer to a MeasurementBase, or 0 if no object is being
    *            passed.
    * @param[in] unigue trackParameter pointer to a TrackParameters, or 0 if no object

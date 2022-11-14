@@ -5,7 +5,7 @@
 #ifndef TRK_GXFTRAJECTORY_H
 #define TRK_GXFTRAJECTORY_H
 
-#include "TrkGlobalChi2Fitter/GXFTrackState.h"
+#include "TrkTrack/GXFTrackState.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 
 /**

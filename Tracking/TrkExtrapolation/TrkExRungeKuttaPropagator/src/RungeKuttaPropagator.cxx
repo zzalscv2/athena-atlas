@@ -22,7 +22,7 @@
 #include "TrkGeometry/MagneticFieldProperties.h"
 //
 #include "TrkExUtils/IntersectionSolution.h"
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 //
 #include "TrkPatternParameters/PatternTrackParameters.h"
 

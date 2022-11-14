@@ -85,7 +85,7 @@ namespace Trk {
     bool isKink() const;
     void setMeasuredEloss(bool);
     bool isMeasuredEloss() const;
-    const Surface *surface() const;
+    const Surface &associatedSurface() const;
 
     /**
      * @brief Set the surface for this material effects instance.
@@ -96,7 +96,7 @@ namespace Trk {
      * @note This method does NOT assume ownership of the passed pointer.
      */
     void setSurface(const Surface *);
-    std::unique_ptr<MaterialEffectsBase> makeMEOT();
+    std::unique_ptr<MaterialEffectsBase> makeMEOT() const;
     const MaterialProperties *materialProperties() const;
 
     /**

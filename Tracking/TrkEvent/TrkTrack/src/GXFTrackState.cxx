@@ -7,14 +7,15 @@
 // see header file for documentation.
 //////////////////////////////////////////////////////////////////
 //
-#include "TrkGlobalChi2Fitter/GXFTrackState.h"
-#include "TrkGlobalChi2Fitter/GXFMaterialEffects.h"
+#include "TrkTrack/GXFTrackState.h"
+#include "TrkTrack/GXFMaterialEffects.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 #include "TrkSurfaces/Surface.h"
-
+#include "TrkEventPrimitives/SurfaceConsistencyCheck.h"
+#include "TrkEventPrimitives/unique_clone.h"
 
 namespace Trk {
   GXFTrackState::GXFTrackState(GXFTrackState & rhs):
@@ -105,6 +106,31 @@ namespace Trk {
       setStateType(TrackStateOnSurface::Scatterer);
     }
   }
+  
+  bool
+  GXFTrackState::isSane() const{
+    if (not consistentSurfaces(m_measurement.get(),m_trackpar.get(), m_materialEffects.get() )){
+      std::cerr << "GXFTrackState::isSane. With :" << '\n';
+      std::cerr << "Types : " << m_tsType.to_string() << '\n';
+      std::cerr << "Surfaces differ! " << std::endl;
+      if (m_trackpar) {
+        std::cerr << "ParamSurf: [" << &(m_trackpar->associatedSurface())
+                  << "] " << m_trackpar->associatedSurface() << std::endl;
+      }
+      if (m_measurement) {
+        std::cerr << "measSurf: [" << &(m_measurement->associatedSurface())
+                  << "] " << m_measurement->associatedSurface()
+                  << std::endl;
+      }
+      if (m_materialEffects) {
+        std::cerr << "matSurf: ["
+                  << &(m_materialEffects->associatedSurface()) << "] "
+                  << m_materialEffects->associatedSurface() << std::endl;
+      }
+      return false;
+    }
+  return true;
+  }
 
   void GXFTrackState::setMeasurement(std::unique_ptr<const MeasurementBase> meas) {
     m_measurement = std::move(meas);
@@ -151,16 +177,18 @@ namespace Trk {
     m_sinstereo = sinstereo;
   }
 
-  const Surface *GXFTrackState::surface() const {
+  const Surface &
+  GXFTrackState::associatedSurface() const {
     if (m_measurement != nullptr) {
-      return &m_measurement->associatedSurface();
+      return m_measurement->associatedSurface();
     } if (m_trackpar != nullptr) {
-      return &m_trackpar->associatedSurface();
+      return m_trackpar->associatedSurface();
     } if (m_materialEffects != nullptr) {
-      return m_materialEffects->surface();
+      return m_materialEffects->associatedSurface();
     } else {
-      return nullptr;
+     throw std::runtime_error("GXFTrackState::associatedSurface: None of measurement, track parameters or material effects are non-null pointers");
     }
+    
   }
 
   void
@@ -234,6 +262,11 @@ namespace Trk {
     m_covariance_set = true;
     m_covariancematrix.setZero();
   }
+  void GXFTrackState::resetTrackCovariance(){
+    if (m_covariance_set) {
+      setTrackCovariance(nullptr);
+    }
+  }
 
   void GXFTrackState::resetStateType(TrackStateOnSurface::TrackStateOnSurfaceType t, bool v) {
     m_tsType.reset();
@@ -254,5 +287,61 @@ namespace Trk {
 
   void GXFTrackState::setHoles(std::vector<std::unique_ptr<TrackParameters>> && v) {
     m_holes = std::move(v);
+  }
+  
+  std::unique_ptr<const TrackStateOnSurface>
+  GXFTrackState::trackStateOnSurface() const{
+    std::unique_ptr<const TrackParameters> trackpar = unique_clone(m_trackpar.get());
+    std::unique_ptr<const MeasurementBase> measurement = unique_clone(m_measurement.get());
+
+    std::unique_ptr<const FitQualityOnSurface> fitQual =m_fitqual
+        ? std::make_unique<FitQualityOnSurface>(*(m_fitqual))
+        : nullptr;
+
+    std::unique_ptr<const MaterialEffectsBase> mateff = nullptr;
+    std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
+    if ((m_materialEffects != nullptr) && (m_tsType.test(TrackStateOnSurface::Scatterer) or m_tsType.test(TrackStateOnSurface::BremPoint))) {
+      if (m_tsType.test(TrackStateOnSurface::Scatterer)) {
+        typePattern.set(TrackStateOnSurface::Scatterer);
+      }
+      
+      if (m_materialEffects->sigmaDeltaE() > 0) {
+        if (m_materialEffects->sigmaDeltaTheta() == 0) {
+          typePattern.set(TrackStateOnSurface::CaloDeposit);
+        } else {
+          typePattern.set(TrackStateOnSurface::BremPoint);
+        }
+      }
+      
+      if (mateff == nullptr) {
+        mateff = m_materialEffects->makeMEOT();
+      }
+    } else {
+      if (m_tsType.test(TrackStateOnSurface::Measurement)) {
+        typePattern.set(TrackStateOnSurface::Measurement);        
+        if ((fitQual != nullptr) && (fitQual->chiSquared() > 1.e5 || fitQual->chiSquared() < 0)) {
+          double newchi2 = 0;
+          int ndf = fitQual->numberDoF();
+          
+          if (fitQual->chiSquared() < 0) {
+            newchi2 = 0;
+          } else if (fitQual->chiSquared() > 1.e5) {
+            newchi2 = 1.e5;
+          }
+          
+          fitQual = std::make_unique<FitQualityOnSurface>(newchi2, ndf);
+        }
+      } else if (m_tsType.test(TrackStateOnSurface::Outlier)) {
+        typePattern.set(TrackStateOnSurface::Outlier);
+      } else if (m_tsType.test(TrackStateOnSurface::Perigee)) {
+        typePattern.set(TrackStateOnSurface::Perigee);
+      }
+    }
+    return std::make_unique<const TrackStateOnSurface>(
+      (fitQual ? *fitQual : Trk::FitQualityOnSurface{}),
+      std::move(measurement),
+      std::move(trackpar),
+      std::move(mateff),
+      typePattern);
   }
 }

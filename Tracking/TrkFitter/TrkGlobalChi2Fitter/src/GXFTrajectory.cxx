@@ -3,7 +3,7 @@
 */
 
 #include "TrkGlobalChi2Fitter/GXFTrajectory.h"
-#include "TrkGlobalChi2Fitter/GXFMaterialEffects.h"
+#include "TrkTrack/GXFMaterialEffects.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -298,7 +298,7 @@ namespace Trk {
             isdownstream = true;
           }
         } else {
-          DistanceSolution distsol = (**it2).surface()->straightLineDistanceEstimate(m_refpar->position(),m_refpar->momentum().unit());
+          DistanceSolution distsol = (**it2).associatedSurface().straightLineDistanceEstimate(m_refpar->position(),m_refpar->momentum().unit());
           
           if (distsol.numberOfSolutions() == 1) {
             distance = distsol.first();
