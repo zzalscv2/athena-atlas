@@ -25,7 +25,7 @@ public:
   static std::size_t numberOfInstantiations()
   {
 #ifndef NDEBUG
-    return s_numberOfInstantiations;
+    return s_numberOfInstantiations.load();
 #endif
     return 0;
   }
@@ -35,15 +35,15 @@ protected:
 #ifndef NDEBUG
   ObjectCounter()
   {
-    s_numberOfInstantiations.fetch_add(1);
+    s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
   }
   ObjectCounter(const ObjectCounter&)
   {
-    s_numberOfInstantiations.fetch_add(1);
+    s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
   }
   ~ObjectCounter()
   {
-    s_numberOfInstantiations.fetch_sub(1);
+    s_numberOfInstantiations.fetch_sub(1, std::memory_order_relaxed);
   }
 #else
   ObjectCounter() = default;

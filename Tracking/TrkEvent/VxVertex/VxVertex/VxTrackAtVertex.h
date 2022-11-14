@@ -31,6 +31,7 @@
 #define VXVERTEX_VXTRACKATVERTEX_H
 
 #include "TrkEventPrimitives/FitQuality.h"
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrackLink/ITrackLink.h"
@@ -72,9 +73,7 @@ namespace Trk {
  * Giacinto.Piacquadio@physik.uni-freiburg.de
  */
 
-// class ParametersBase;
-
-class VxTrackAtVertex
+class VxTrackAtVertex : public Trk::ObjectCounter<Trk::VxTrackAtVertex>
 {
 
 public:
@@ -84,9 +83,27 @@ public:
   VxTrackAtVertex();
 
   /**
+   * dtor
+   */
+  virtual ~VxTrackAtVertex();
+
+  /**
+   * Copy constructor
+   */
+  VxTrackAtVertex(const VxTrackAtVertex& rhs);
+  /**
    * Move constructor operator
    */
   VxTrackAtVertex(VxTrackAtVertex&&) noexcept;
+  /**
+   * Assignment operator
+   */
+  VxTrackAtVertex& operator=(const VxTrackAtVertex&);
+
+  /**
+   * Move assignment operator
+   */
+  VxTrackAtVertex& operator=(VxTrackAtVertex&&) noexcept;
 
   /**
    * Constructor taking the perigee parameters and corresponding
@@ -144,23 +161,6 @@ public:
                   LinearizedTrack* linState = nullptr);
 
   VxTrackAtVertex(ITrackLink* trackOrParticleLink);
-
-  virtual ~VxTrackAtVertex();
-
-  /**
-   * Copy constructor
-   */
-  VxTrackAtVertex(const VxTrackAtVertex& rhs);
-
-  /**
-   * Assignment operator
-   */
-  VxTrackAtVertex& operator=(const VxTrackAtVertex&);
-
-  /**
-   * Move assignment operator
-   */
-  VxTrackAtVertex& operator=(VxTrackAtVertex&&) noexcept;
 
   /**
    * Clone method
@@ -376,10 +376,6 @@ protected:
   // new link structure
   ITrackLink* m_trackOrParticleLink;
 
-private:
-  /** number of objects of this type in memory */
-  static std::atomic_uint s_numberOfInstantiations;
-
 }; // end of class definitions
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug
@@ -388,7 +384,6 @@ MsgStream&
 operator<<(MsgStream& sl, const VxTrackAtVertex& sf);
 std::ostream&
 operator<<(std::ostream& sl, const VxTrackAtVertex& sf);
-
 
 } // end of namespace definitions
 
