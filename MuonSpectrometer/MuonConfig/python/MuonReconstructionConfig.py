@@ -161,6 +161,18 @@ def MuonReconstructionCfg(flags):
     # FIXME - this is copied from the old configuration, but I'm not sure it really belongs here. 
     # It's probably better to have as part of TrackBuilding, or Segment building...
     if flags.Input.isMC:
+        # filter TrackRecordCollection (true particles in muon spectrometer)
+        if "MuonEntryLayerFilter" not in flags.Input.Collections:
+            result.addEventAlgo( CompFactory.TrackRecordFilter())
+        if "MuonExitLayerFilter" not in flags.Input.Collections:
+            result.addEventAlgo( CompFactory.TrackRecordFilter("TrackRecordFilterMuonExitLayer",
+                                         inputName="MuonExitLayer",
+                                         outputName="MuonExitLayerFilter"))
+
+        # Segment truth association decorations
+        result.addEventAlgo( CompFactory.Muon.MuonSegmentTruthAssociationAlg("MuonSegmentTruthAssociationAlg"))
+
+        # Now tracks
         track_cols = ["MuonSpectrometerTracks"]
         track_colstp = ["MuonSpectrometerTrackParticles"]
         if flags.Muon.runCommissioningChain:
