@@ -17,10 +17,10 @@
 #include "GaudiKernel/MsgStream.h"
 
 namespace Trk {
-std::atomic_uint VxTrackAtVertex::s_numberOfInstantiations = 0;
 
 VxTrackAtVertex::VxTrackAtVertex()
-  : m_fitQuality(Trk::FitQuality(0., 2.))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(0., 2.))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(nullptr)
@@ -32,15 +32,13 @@ VxTrackAtVertex::VxTrackAtVertex()
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
                                  Trk::TrackParameters* perigeeAtVertex,
                                  Trk::NeutralParameters* neutralPerigeeAtVertex)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, 2.))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, 2.))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -52,9 +50,6 @@ VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
@@ -62,7 +57,8 @@ VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
                                  Trk::NeutralParameters* neutralPerigeeAtVertex,
                                  double ndfPerTrk,
                                  Trk::LinearizedTrack* linState)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -74,15 +70,13 @@ VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
                                  Trk::TrackParameters* perigeeAtVertex,
                                  double ndfPerTrk,
                                  Trk::LinearizedTrack* linState)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -94,9 +88,6 @@ VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 // new constructors, including initial perigee state (refitting support)
@@ -107,7 +98,8 @@ VxTrackAtVertex::VxTrackAtVertex(
   Trk::NeutralParameters* neutralPerigeeAtVertex,
   const Trk::TrackParameters* initialPerigee,
   const Trk::NeutralParameters* initialNeutralPerigee)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, 2.))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, 2.))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -119,15 +111,13 @@ VxTrackAtVertex::VxTrackAtVertex(
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
                                  Trk::TrackParameters* perigeeAtVertex,
                                  const Trk::TrackParameters* initialPerigee)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, 2.))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, 2.))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -139,9 +129,6 @@ VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 VxTrackAtVertex::VxTrackAtVertex(
@@ -152,7 +139,8 @@ VxTrackAtVertex::VxTrackAtVertex(
   const Trk::NeutralParameters* initialNeutralPerigee,
   double ndfPerTrk,
   Trk::LinearizedTrack* linState)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -164,16 +152,14 @@ VxTrackAtVertex::VxTrackAtVertex(
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
                                  Trk::TrackParameters* perigeeAtVertex,
                                  const Trk::TrackParameters* initialPerigee,
                                  double ndfPerTrk,
                                  Trk::LinearizedTrack* linState)
-  : m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(chi2PerTrk, ndfPerTrk))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(perigeeAtVertex)
@@ -185,13 +171,11 @@ VxTrackAtVertex::VxTrackAtVertex(double chi2PerTrk,
   , m_ImpactPoint3dNeutralAtaPlane(nullptr)
   , m_trackOrParticleLink(nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 VxTrackAtVertex::VxTrackAtVertex(Trk::ITrackLink* trackOrParticleLink)
-  : m_fitQuality(Trk::FitQuality(0., 2.))
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>()
+  , m_fitQuality(Trk::FitQuality(0., 2.))
   , m_trkWeight(1.)
   , m_VertexCompatibility(0.)
   , m_perigeeAtVertex(nullptr)
@@ -204,12 +188,9 @@ VxTrackAtVertex::VxTrackAtVertex(Trk::ITrackLink* trackOrParticleLink)
   , m_trackOrParticleLink(nullptr)
 {
   this->setOrigTrack(trackOrParticleLink);
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
-// destructor changed
+// destructor
 VxTrackAtVertex::~VxTrackAtVertex()
 {
     delete m_perigeeAtVertex;
@@ -218,14 +199,12 @@ VxTrackAtVertex::~VxTrackAtVertex()
     delete m_ImpactPoint3dAtaPlane;
     delete m_ImpactPoint3dNeutralAtaPlane;
     delete m_trackOrParticleLink;
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_sub(1, std::memory_order_relaxed);
-#endif
 }
 
-// copy constructor changed
+// copy constructor 
 VxTrackAtVertex::VxTrackAtVertex(const VxTrackAtVertex& rhs)
-  : m_fitQuality(rhs.m_fitQuality)
+  : Trk::ObjectCounter<Trk::VxTrackAtVertex>(rhs)
+  , m_fitQuality(rhs.m_fitQuality)
   , m_trkWeight(rhs.m_trkWeight)
   , m_VertexCompatibility(rhs.m_VertexCompatibility)
   , m_perigeeAtVertex(rhs.m_perigeeAtVertex ? rhs.m_perigeeAtVertex->clone()
@@ -235,8 +214,6 @@ VxTrackAtVertex::VxTrackAtVertex(const VxTrackAtVertex& rhs)
                                : nullptr)
   , m_linState(rhs.m_linState ? rhs.m_linState->clone() : nullptr)
   ,
-  // 	m_initialPerigee(rhs.m_initialPerigee ? rhs.m_initialPerigee->clone() :
-  // 0),
   m_initialPerigee(rhs.m_initialPerigee)
   , m_initialNeutralPerigee(rhs.m_initialNeutralPerigee)
   , m_ImpactPoint3dAtaPlane(rhs.m_ImpactPoint3dAtaPlane
@@ -249,9 +226,6 @@ VxTrackAtVertex::VxTrackAtVertex(const VxTrackAtVertex& rhs)
   , m_trackOrParticleLink(
       rhs.m_trackOrParticleLink ? rhs.m_trackOrParticleLink->clone() : nullptr)
 {
-#ifndef NDEBUG
-  s_numberOfInstantiations.fetch_add(1, std::memory_order_relaxed);
-#endif
 }
 
 // assignment operator changed
@@ -362,10 +336,6 @@ VxTrackAtVertex::operator==(const VxTrackAtVertex& data) const
 {
 
   return (this->initialPerigee() == data.initialPerigee());
-  //    return ( (this->initialPerigee()->position() -
-  //    data.initialPerigee()->position()).mag()<1e-8 &&
-  //             (this->initialPerigee()->momentum() -
-  //             data.initialPerigee()->momentum()).mag()<1e-8    ) ;
 }
 
 const TrackParameters*
@@ -413,7 +383,7 @@ VxTrackAtVertex::setImpactPoint3dNeutralAtaPlane(
   m_ImpactPoint3dNeutralAtaPlane = myIP3dNeutralAtaPlane;
 }
 
-  void
+void
 VxTrackAtVertex::setPerigeeAtVertex(TrackParameters* perigee)
 {
   if (m_perigeeAtVertex != nullptr)
@@ -520,12 +490,6 @@ std::ostream&
 operator<<(std::ostream& sl, const VxTrackAtVertex& sf)
 {
   return sf.dump(sl);
-}
-
-unsigned int
-VxTrackAtVertex::numberOfInstantiations()
-{
-  return s_numberOfInstantiations.load();
 }
 
 } // end of namespace
