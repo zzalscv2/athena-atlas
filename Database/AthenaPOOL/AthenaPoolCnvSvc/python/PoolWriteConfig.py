@@ -110,11 +110,11 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
             # Set the index and friend tree information
             PoolAttributes += [ f"DatabaseName = '{FileName}'; INDEX_MASTER = 'POOLContainer(DataHeader)'" ]
             PoolAttributes += [ f"DatabaseName = '{FileName}'; FRIEND_TREE = 'CollectionTree:CollectionTree_{streamName}'" ]
-        # By default use 20 MB AutoFlush (or 500 events for SharedWriter w/ parallel compession)
+        # By default use 20 MB AutoFlush [or 100 (10) events for DAODs (everything else) for SharedWriter w/ parallel compression]
         # for event data except for a number of select formats (see below)
         TREE_AUTO_FLUSH = -20000000
         if use_parallel_compression:
-            TREE_AUTO_FLUSH = 500
+            TREE_AUTO_FLUSH = 100 if "DAOD_" in FileName else 10
         # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
         CONTAINER_SPLITLEVEL = 0
         if "DAOD_PHYS" in FileName:

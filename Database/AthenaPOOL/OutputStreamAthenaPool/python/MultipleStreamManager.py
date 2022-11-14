@@ -596,14 +596,14 @@ class MultipleStreamManager:
         # By default use a maximum basket buffer size of 128k and minimum buffer entries of 10
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setMaxBufferSize( FileName, "131072" ) ]
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setMinBufferEntries( FileName, "10" ) ]
-        # By default use 20 MB AutoFlush (or 500 events for SharedWriter w/ parallel compession)
+        # By default use 20 MB AutoFlush [or 100 (10) events for DAODs (everything else) for SharedWriter w/ parallel compression]
         # for event data except for a number of select formats (see below)
         TREE_AUTO_FLUSH = -20000000
         from PyUtils.moduleExists import moduleExists
         if moduleExists ('AthenaMP'): # AthenaMP not in AthAnalysis project
             from AthenaMP.AthenaMPFlags import jobproperties as amjp
             if amjp.AthenaMPFlags.UseSharedWriter() and amjp.AthenaMPFlags.UseParallelCompression():
-                TREE_AUTO_FLUSH = 500
+                TREE_AUTO_FLUSH = 100 if "DAOD_" in StreamName else 10
         # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
         CONTAINER_SPLITLEVEL = 0
         if StreamName in ["StreamDAOD_PHYSVAL"]:
