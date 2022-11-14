@@ -59,6 +59,9 @@ from DerivationFrameworkBPhys.BPHY18 import BPHY18Cfg
 from DerivationFrameworkBPhys.BPHY21 import BPHY21Cfg
 from DerivationFrameworkBPhys.BPHY22 import BPHY22Cfg
 
+# STDM derivations
+from DerivationFrameworkSM.STDM7 import STDM7Cfg
+
 # TileCal derivations
 from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
 from DerivationFrameworkTileCal.TCAL2 import TCAL2Cfg
@@ -114,6 +117,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
            'BPHY16Cfg', 'BPHY18Cfg',
            'BPHY21Cfg', 'BPHY22Cfg',
+           'STDM7Cfg',
            'TCAL1Cfg', 'TCAL2Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg',
