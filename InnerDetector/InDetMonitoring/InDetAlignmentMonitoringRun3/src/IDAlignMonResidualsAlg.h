@@ -5,30 +5,27 @@
 // **********************************************************************
 // IDAlignMonResiduals.cxx
 // AUTHORS: Beate Heinemann, Tobias Golling, Ben Cooper, John Alison, Pierfrancesco Butti
-// Adapted to AthenaMT 2021 by Per Johansson
+// Adapted to AthenaMT 2021-2022 by Per Johansson
 // **********************************************************************
 
 #ifndef IDAlignMonResidualsAlg_H
 #define IDAlignMonResidualsAlg_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
-#include "AthenaMonitoringKernel/Monitored.h"
 
 #include "StoreGate/ReadHandleKey.h"
-#include "EventPrimitives/EventPrimitives.h"
-#include "GaudiKernel/EventContext.h"
-#include "CommissionEvent/ComTime.h"
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
-#include "TrkTrack/Track.h"
-#include "TrkTrack/TrackCollection.h"
-#include "TrkParameters/TrackParameters.h"
 #include "TRT_ConditionsServices/ITRT_CalDbTool.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "TrkToolInterfaces/IUpdator.h"
+#include "TrkExInterfaces/IPropagator.h"
+#include "TrkToolInterfaces/IResidualPullCalculator.h"
+#include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <vector>
 
-class ITRT_CalDbTool;
 class AtlasDetectorID;
 class PixelID;
 class SCT_ID;
@@ -40,15 +37,12 @@ namespace InDetDD{
 }
 
 namespace Trk {
-  class IUpdator;
-  class IPropagator;
-  class RIO_OnTrack;
   class Track;
   class TrackStateOnSurface;
-  class IResidualPullCalculator; 
 }
 
-class IInDetAlignHitQualSelTool; 
+class EventContext;
+class ComTime;
 
 class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
@@ -59,15 +53,12 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   virtual StatusCode initialize() override;
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
-  /** Convert from an int to a string */
-  static std::string intToString(int input);
-
  private:
-  StatusCode setupTools(); //PJ setup managers and helpers, etc.
+  void fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa) const;
+  void fillTRTBarrelHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const;
+  void fillTRTEndcapHistograms(int barrel_ec, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const;
+  StatusCode setupTools();
 	
-  bool isEdge(const Trk::RIO_OnTrack*) const;	
-  
-  std::pair<const Trk::TrackStateOnSurface*, const Trk::TrackStateOnSurface*> findOverlapHit(const Trk::Track*, const Trk::RIO_OnTrack*) const;
   StatusCode getSiResiduals(const Trk::Track*, const Trk::TrackStateOnSurface*, bool, double*) const;
   std::unique_ptr <Trk::TrackParameters> getUnbiasedTrackParameters(const Trk::Track*, const Trk::TrackStateOnSurface*) const;
 
@@ -99,8 +90,46 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
   bool m_doHitQuality = false;
   int m_checkrate {};
   bool m_doPulls {};
-  const std::string m_layers[4]{"b0", "b1", "b2", "b3"}; //
-  
+  static const int m_nSiBlayers{4}; //
+  static const int m_nPixEClayers{3}; //
+  static const int m_nTRTBlayers{3}; //
+  static const int m_nTRTEClayers{2}; //
+  std::vector<int> m_pixResidualX;
+  std::vector<int> m_pixResidualY;
+  std::vector<int> m_pixPullX;
+  std::vector<int> m_pixPullY;
+  std::vector<int> m_pixResidualXvsEta;
+  std::vector<int> m_pixResidualYvsEta;
+  std::vector<int> m_pixResidualXvsPhi;
+  std::vector<int> m_pixResidualYvsPhi;
+  std::vector<int> m_pixECAResidualX;
+  std::vector<int> m_pixECAResidualY;
+  std::vector<int> m_pixECCResidualX;
+  std::vector<int> m_pixECCResidualY;
+  std::vector<int> m_sctResidualX;
+  std::vector<int> m_sctPullX;
+  std::vector<int> m_sctResidualXvsEta;
+  std::vector<int> m_sctResidualXvsPhi;
+  std::vector<int> m_trtBPredictedR;
+  std::vector<int> m_trtBMeasuredR;
+  std::vector<int> m_trtBResidualR;
+  std::vector<int> m_trtBPullR;
+  std::vector<int> m_trtBResidualRNoTube;
+  std::vector<int> m_trtBPullRNoTube;
+  std::vector<int> m_trtBLR;
+  std::vector<std::vector<int>> m_trtBResVsEta;
+  std::vector<std::vector<int>> m_trtBResVsPhiSec;
+  std::vector<std::vector<int>> m_trtBLRVsPhiSec;
+  std::vector<int> m_trtECPredictedR;
+  std::vector<int> m_trtECMeasuredR;
+  std::vector<int> m_trtECResidualR;
+  std::vector<int> m_trtECPullR;
+  std::vector<int> m_trtECResidualRNoTube;
+  std::vector<int> m_trtECPullRNoTube;
+  std::vector<int> m_trtECLR;
+  std::vector<int> m_trtECResVsEta;
+  std::vector<int> m_trtECResVsPhiSec;
+  std::vector<int> m_trtECLRVsPhiSec;
 };
 
 #endif
