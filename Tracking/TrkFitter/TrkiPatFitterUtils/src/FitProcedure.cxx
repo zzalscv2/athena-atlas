@@ -30,7 +30,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
 #include "TrkTrack/Track.h"
-#include "TrkTrack/AEOTrackStateOnSurface.h"
+#include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkTrack/TrackInfo.h"
 #include "TrkiPatFitterUtils/FitMeasurement.h"
 #include "TrkiPatFitterUtils/FitParameters.h"
@@ -121,12 +121,12 @@ FitProcedure::constructTrack(
   std::unique_ptr<const Perigee> perigee(parameters.perigee());
   typePattern.set(TrackStateOnSurface::Perigee);
   trackStateOnSurfaces.push_back(
-    new AEOTrackStateOnSurface(fitQoS,
+    new TrackStateOnSurface(fitQoS,
                             std::move(measurementBase),
                             std::move(perigee),
-                            std::move(alignmentEffects),
                             std::move(materialEffects),
-                            typePattern));
+                            typePattern,
+                            std::move(alignmentEffects)));
   ++tsos;
 
   // append leading TSOS to perigee
@@ -170,12 +170,12 @@ FitProcedure::constructTrack(
           }
           typePattern.set(TrackStateOnSurface::Parameter);
           trackStateOnSurfaces.push_back(
-            new AEOTrackStateOnSurface(fitQoS,
+            new TrackStateOnSurface(fitQoS,
                                     std::move(measurementBase),
                                     std::move(trackParameters),
-                                    std::move(alignmentEffects),
                                     std::move(materialEffects),
-                                    typePattern));
+                                    typePattern,
+                                    std::move(alignmentEffects)));
           ++tsos;
         }
       }
@@ -210,12 +210,12 @@ FitProcedure::constructTrack(
         }
         typePattern.set(TrackStateOnSurface::Parameter);
         trackStateOnSurfaces.push_back(
-          new AEOTrackStateOnSurface(fitQoS,
-                                     std::move(measurementBase),
-                                     std::move(trackParameters),
-                                     std::move(alignmentEffects),
-                                     std::move(materialEffects),
-                                     typePattern));
+          new TrackStateOnSurface(fitQoS,
+                                  std::move(measurementBase),
+                                  std::move(trackParameters),
+                                  std::move(materialEffects),
+                                  typePattern,
+                                  std::move(alignmentEffects)));
         ++tsos;
         fitMeasurement = m;
         materialEffects.reset();
@@ -339,12 +339,12 @@ FitProcedure::constructTrack(
   }
   typePattern.set(TrackStateOnSurface::Parameter);
   trackStateOnSurfaces.push_back(
-    new AEOTrackStateOnSurface(fitQoS,
-                               std::move(measurementBase),
-                               std::move(trackParameters),
-                               std::move(alignmentEffects),
-                               std::move(materialEffects),
-                               typePattern));
+    new TrackStateOnSurface(fitQoS,
+                            std::move(measurementBase),
+                            std::move(trackParameters),
+                            std::move(materialEffects),
+                            typePattern,
+                            std::move(alignmentEffects)));
   ++tsos;
 
   // construct track

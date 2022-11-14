@@ -21,7 +21,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
 #include "TrkTrack/Track.h"
-#include "TrkTrack/AEOTrackStateOnSurface.h"
+#include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrackSummary/TrackSummary.h"
 
@@ -428,12 +428,12 @@ namespace Muon {
                       itAli.first,
                       &(tsit->measurementOnTrack()->associatedSurface()));
                     std::unique_ptr<Trk::TrackStateOnSurface> tsosAEOT =
-                      std::make_unique<Trk::AEOTrackStateOnSurface>(
+                      std::make_unique<Trk::TrackStateOnSurface>(
                         nullptr,
                         tsit->trackParameters()->uniqueClone(),
-                        std::move(aEOT),
                         nullptr,
-                        typePattern);
+                        typePattern,
+                        std::move(aEOT));
                     indexAEOTs.push_back(index);
                     tsosAEOTs.emplace_back(std::move(tsosAEOT));
                     found = true;
@@ -579,12 +579,12 @@ namespace Muon {
                           << aEOT->associatedSurface()
                           << " nr of tsos affected "
                           << indicesOfAffectedTSOS.size());
-            tsosAEOT = std::make_unique<Trk::AEOTrackStateOnSurface>(
+            tsosAEOT = std::make_unique<Trk::TrackStateOnSurface>(
               nullptr,
               tsos->trackParameters()->uniqueClone(),
-              std::move(aEOT),
               nullptr,
-              typePattern);
+              typePattern,
+              std::move(aEOT));
         }
 
         std::unique_ptr<Trk::TrackStateOnSurface> tsosAEOTInner;
@@ -598,12 +598,12 @@ namespace Muon {
               m_alignmentAngleError,
               indicesOfAffectedIdsInner,
               &(tsosInner->measurementOnTrack()->associatedSurface()));
-            tsosAEOTInner = std::make_unique<Trk::AEOTrackStateOnSurface>(
+            tsosAEOTInner = std::make_unique<Trk::TrackStateOnSurface>(
               nullptr,
               tsosInner->trackParameters()->uniqueClone(),
-              std::move(aEOTInner),
               nullptr,
-              typePattern);
+              typePattern,
+              std::move(aEOTInner));
         }
 
         Trk::TrackStates trackStateOnSurfacesAEOT{};
