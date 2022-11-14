@@ -87,6 +87,10 @@ if __name__ == '__main__':
 
     ConfigFlags.dump()
 
+    f = open("test.pkl","wb")
+    cfg.store(f)
+    f.close()
+
     # Execute and finish
     sc = cfg.run()
 
@@ -96,6 +100,3 @@ if __name__ == '__main__':
     # Success should be 0
     #os.sys.exit(not sc.isSuccess())
 
-    f = open("test.pkl","wb")
-    cfg.store(f)
-    f.close()
