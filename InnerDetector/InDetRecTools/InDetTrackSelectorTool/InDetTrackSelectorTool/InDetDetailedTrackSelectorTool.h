@@ -38,6 +38,7 @@
 namespace Trk
 {
   class ITrackSummaryTool;
+  class ITrackParticleCreatorTool;
   class IExtrapolator;
   class Vertex;
   class RecVertex;
@@ -83,9 +84,13 @@ namespace InDet
       bool decision(const Trk::Perigee* track,const AmgSymMatrix(3)* covariancePosition) const;
       bool decision(const Trk::FitQuality*  TrkQuality) const;
       bool decision(double chi2, int ndf ) const;
-      bool decision(const Trk::TrackSummary* summary,bool useSharedHitInfo,bool useTrtHitInfo, 
-                    const Trk::Perigee* track,
-                    const int nHitTrt, const int nHitTrtPlusOutliers) const;
+      bool decision(const Trk::TrackSummary* summary,
+		    const xAOD::TrackParticle* tp,
+		    bool useSharedHitInfo,
+		    bool useTrtHitInfo,
+		    const Trk::Perigee* track,
+		    const int nHitTrt,
+		    const int nHitTrtPlusOutliers) const;
 
       bool preselectionBeforeExtrapolation(const Trk::Perigee & myPerigee) const;
       Amg::Vector3D getPosOrBeamSpot(const xAOD::Vertex*) const;
@@ -151,15 +156,17 @@ namespace InDet
       bool m_useEtaDepententMinHitTrtWithOutliers;
 
       ToolHandle<Trk::ITrackSummaryTool> m_trackSumTool; //!< Track summary tool
+      ToolHandle<Trk::ITrackParticleCreatorTool> m_particleCreator; //!< TrackParticle creator tool
       ToolHandle<Trk::IExtrapolator> m_extrapolator; //!< Extrapolator tool
       SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
       ToolHandle<ITrtDriftCircleCutTool> m_trtDCTool; //!< Tool to get eta dependent cut on number of TRT hits
 
       ToolHandle< InDet::IInDetTestPixelLayerTool > m_inDetTestPixelLayerTool; //Tool to test if the track crosses a dead module on the b-layer
     // Read handle for conditions object to get the field cache
-    SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
+      SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
       bool m_trackSumToolAvailable;
+      bool m_partCreatorToolAvailable;
             
 // chnages for the pt-dependent sct cut
       bool m_usePtDependentCuts;
