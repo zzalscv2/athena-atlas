@@ -15,7 +15,7 @@
 #ifndef TrkQuickCloseComponentsMultiStateMerger_H
 #define TrkQuickCloseComponentsMultiStateMerger_H
 
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
+#include "TrkParameters/ComponentParameters.h"
 
 namespace Trk {
 namespace QuickCloseComponentsMultiStateMerger {

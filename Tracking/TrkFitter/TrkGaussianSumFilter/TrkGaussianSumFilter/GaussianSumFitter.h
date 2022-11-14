@@ -12,7 +12,7 @@
 #include "TrkGaussianSumFilter/IMultiStateExtrapolator.h"
 #include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
 //
-#include "TrkMultiComponentStateOnSurface/MultiComponentStateOnSurface.h"
+#include "TrkTrack/MultiComponentStateOnSurface.h"
 //
 #include "TrkCaloCluster_OnTrack/CaloCluster_OnTrack.h"
 #include "TrkDetElementBase/TrkDetElementBase.h"

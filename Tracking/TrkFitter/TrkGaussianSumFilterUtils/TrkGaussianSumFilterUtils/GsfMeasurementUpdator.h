@@ -13,10 +13,11 @@
 #ifndef TrkGsfMeasurementUpdator_H
 #define TrkGsfMeasurementUpdator_H
 
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 #include "TrkGaussianSumFilterUtils/MultiComponentStateAssembler.h"
+//
 #include "TrkEventPrimitives/FitQualityOnSurface.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
+#include "TrkParameters/ComponentParameters.h"
 
 namespace Trk {
 

@@ -14,9 +14,9 @@
 
 #include "TrkGaussianSumFilter/IMaterialMixtureConvolution.h"
 //
-#include "TrkGaussianSumFilterUtils/GsfMaterial.h"
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 #include "TrkGaussianSumFilterUtils/ElectronCombinedMaterialEffects.h"
+#include "TrkGaussianSumFilterUtils/GsfMaterial.h"
+#include "TrkParameters/ComponentParameters.h"
 //
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -40,8 +40,8 @@ public:
 
   //!< Constructor with AlgTool parameters
   ElectronMaterialMixtureConvolution(const std::string&,
-                                const std::string&,
-                                const IInterface*);
+                                     const std::string&,
+                                     const IInterface*);
 
   //!< Destructor
   virtual ~ElectronMaterialMixtureConvolution();
@@ -72,7 +72,6 @@ public:
                                          PropDirection direction = anyDirection,
                                          ParticleHypothesis particleHypothesis =
                                            nonInteracting) const override final;
-
 
 private:
   Trk::MultiComponentState update(std::vector<GsfMaterial::Combined>&,
