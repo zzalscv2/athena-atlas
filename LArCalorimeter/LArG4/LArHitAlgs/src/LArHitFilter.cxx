@@ -10,9 +10,9 @@
 
 #include "LArHitFilter.h"
 #include "LArSimEvent/LArHit.h"
+#include "LArSimEvent/LArIndexEnum.h"
 #include "CaloIdentifier/LArID.h"
 #include "Identifier/IdentifierHash.h"
-#include "LArDigitization/LArHitEMap.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
@@ -59,7 +59,7 @@ StatusCode LArHitFilter::initialize()
   // ......... make the Sub-detector flag vector
   //
 
-  for (int i=0; i < LArHitEMap::NUMDET ; i++)
+  for (int i=0; i < LArIndex::NUMDET ; i++)
     {
       m_SubDetFlag.push_back(false);
     }
@@ -70,56 +70,56 @@ StatusCode LArHitFilter::initialize()
 
   if ( m_SubDetectors == "LAr_All" )
     {
-      m_CaloType.push_back(LArHitEMap::EMBARREL_INDEX);
-      m_SubDetFlag[LArHitEMap::EMBARREL_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMBARREL_INDEX);
+      m_SubDetFlag[LArIndex::EMBARREL_INDEX] = true;
 
-      m_CaloType.push_back(LArHitEMap::EMENDCAP_INDEX);
-      m_SubDetFlag[LArHitEMap::EMENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMENDCAP_INDEX);
+      m_SubDetFlag[LArIndex::EMENDCAP_INDEX] = true;
 
-      m_CaloType.push_back(LArHitEMap::HADENDCAP_INDEX);
-      m_SubDetFlag[LArHitEMap::HADENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::HADENDCAP_INDEX);
+      m_SubDetFlag[LArIndex::HADENDCAP_INDEX] = true;
 
-      m_CaloType.push_back(LArHitEMap::FORWARD_INDEX);
-      m_SubDetFlag[LArHitEMap::FORWARD_INDEX] = true;
+      m_CaloType.push_back(LArIndex::FORWARD_INDEX);
+      m_SubDetFlag[LArIndex::FORWARD_INDEX] = true;
     }
   else if ( m_SubDetectors == "LAr_Em" )
     {
-      m_CaloType.push_back(LArHitEMap::EMBARREL_INDEX);
-      m_SubDetFlag[LArHitEMap::EMBARREL_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMBARREL_INDEX);
+      m_SubDetFlag[LArIndex::EMBARREL_INDEX] = true;
 
-      m_CaloType.push_back(LArHitEMap::EMENDCAP_INDEX);
-      m_SubDetFlag[LArHitEMap::EMENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMENDCAP_INDEX);
+      m_SubDetFlag[LArIndex::EMENDCAP_INDEX] = true;
     }
   else if ( m_SubDetectors == "LAr_EmBarrel" )
     {
-      m_CaloType.push_back(LArHitEMap::EMBARREL_INDEX);
-      m_SubDetFlag[LArHitEMap::EMBARREL_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMBARREL_INDEX);
+      m_SubDetFlag[LArIndex::EMBARREL_INDEX] = true;
     }
   else if ( m_SubDetectors == "LAr_EmEndCap" )
     {
-      m_CaloType.push_back(LArHitEMap::EMBARREL_INDEX);
-      m_SubDetFlag[LArHitEMap::EMENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMBARREL_INDEX);
+      m_SubDetFlag[LArIndex::EMENDCAP_INDEX] = true;
     }
   else if ( m_SubDetectors == "LAr_HEC" )
     {
-      m_CaloType.push_back(LArHitEMap::HADENDCAP_INDEX);
-      m_SubDetFlag[LArHitEMap::HADENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::HADENDCAP_INDEX);
+      m_SubDetFlag[LArIndex::HADENDCAP_INDEX] = true;
     }
   else if ( m_SubDetectors == "LAr_Fcal" )
     {
-      m_CaloType.push_back(LArHitEMap::FORWARD_INDEX);
-      m_SubDetFlag[LArHitEMap::FORWARD_INDEX] = true;
+      m_CaloType.push_back(LArIndex::FORWARD_INDEX);
+      m_SubDetFlag[LArIndex::FORWARD_INDEX] = true;
     }
   else if (m_SubDetectors == "LAr_EndCap")
     {
-      m_CaloType.push_back(LArHitEMap::EMBARREL_INDEX);
-      m_SubDetFlag[LArHitEMap::EMENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::EMBARREL_INDEX);
+      m_SubDetFlag[LArIndex::EMENDCAP_INDEX] = true;
 
-      m_CaloType.push_back(LArHitEMap::HADENDCAP_INDEX);
-      m_SubDetFlag[LArHitEMap::HADENDCAP_INDEX] = true;
+      m_CaloType.push_back(LArIndex::HADENDCAP_INDEX);
+      m_SubDetFlag[LArIndex::HADENDCAP_INDEX] = true;
 
-      m_CaloType.push_back(LArHitEMap::FORWARD_INDEX);
-      m_SubDetFlag[LArHitEMap::FORWARD_INDEX] = true;
+      m_CaloType.push_back(LArIndex::FORWARD_INDEX);
+      m_SubDetFlag[LArIndex::FORWARD_INDEX] = true;
     }
   else
     {
@@ -153,7 +153,7 @@ StatusCode LArHitFilter::execute(const EventContext& ctx) const
   unsigned int nhit_tot=0;
   unsigned int nhit_out=0;
 
-  if(m_SubDetFlag[LArHitEMap::EMBARREL_INDEX]) {
+  if(m_SubDetFlag[LArIndex::EMBARREL_INDEX]) {
     /// Filter EMB LArHitContainer
     SG::ReadHandle<LArHitContainer> inputEMBHits = SG::makeHandle(m_inputEMBHitsKey, ctx);
     if(!inputEMBHits.isValid()) {
@@ -167,7 +167,7 @@ StatusCode LArHitFilter::execute(const EventContext& ctx) const
     nhit_tot += inputEMBHits->size();
     nhit_out += outputEMBHits->size();
   }
-  if(m_SubDetFlag[LArHitEMap::EMENDCAP_INDEX]) {
+  if(m_SubDetFlag[LArIndex::EMENDCAP_INDEX]) {
     /// Filter EMEC LArHitContainer
     SG::ReadHandle<LArHitContainer> inputEMECHits = SG::makeHandle(m_inputEMECHitsKey, ctx);
     if(!inputEMECHits.isValid()) {
@@ -181,7 +181,7 @@ StatusCode LArHitFilter::execute(const EventContext& ctx) const
     nhit_tot += inputEMECHits->size();
     nhit_out += outputEMECHits->size();
   }
-  if(m_SubDetFlag[LArHitEMap::HADENDCAP_INDEX]) {
+  if(m_SubDetFlag[LArIndex::HADENDCAP_INDEX]) {
     /// Filter HEC LArHitContainer
     SG::ReadHandle<LArHitContainer> inputHECHits = SG::makeHandle(m_inputHECHitsKey, ctx);
     if(!inputHECHits.isValid()) {
@@ -195,7 +195,7 @@ StatusCode LArHitFilter::execute(const EventContext& ctx) const
     nhit_tot += inputHECHits->size();
     nhit_out += outputHECHits->size();
   }
-  if(m_SubDetFlag[LArHitEMap::FORWARD_INDEX]) {
+  if(m_SubDetFlag[LArIndex::FORWARD_INDEX]) {
     /// Filter FCAL LArHitContainer
     SG::ReadHandle<LArHitContainer> inputFCALHits = SG::makeHandle(m_inputFCALHitsKey, ctx);
     if(!inputFCALHits.isValid()) {
