@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TrkGlobalChi2Fitter/GXFMaterialEffects.h"
+#include "TrkTrack/GXFMaterialEffects.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkMaterialOnTrack/MaterialEffectsOnTrack.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
@@ -225,15 +225,15 @@ namespace Trk {
     return m_ismeasuredeloss;
   }
 
-  const Surface *GXFMaterialEffects::surface() const {
-    return m_surf;
+  const Surface &GXFMaterialEffects::associatedSurface() const {
+    return *m_surf;
   }
 
   void GXFMaterialEffects::setSurface(const Surface * surf) {
     m_surf = surf;
   }
 
-  std::unique_ptr<MaterialEffectsBase> GXFMaterialEffects::makeMEOT() {
+  std::unique_ptr<MaterialEffectsBase> GXFMaterialEffects::makeMEOT() const {
     std::optional<ScatteringAngles> scatangles;
 
     if (m_sigmascattheta != 0) {

@@ -23,7 +23,7 @@
 #include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/RungeKuttaUtils.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 #include "TrkGeometry/AlignableTrackingVolume.h"
 #include "TrkGeometry/BinnedMaterial.h"
 #include "TrkGeometry/MagneticFieldProperties.h"

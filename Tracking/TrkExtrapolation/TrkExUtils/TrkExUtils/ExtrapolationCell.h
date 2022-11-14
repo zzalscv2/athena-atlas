@@ -13,7 +13,7 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExUtils/MaterialUpdateMode.h"
-#include "TrkExUtils/TransportJacobian.h"
+#include "TrkEventPrimitives/TransportJacobian.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
 #include "TrkGeometry/MaterialProperties.h"
 #include "TrkMaterialOnTrack/EnergyLoss.h"

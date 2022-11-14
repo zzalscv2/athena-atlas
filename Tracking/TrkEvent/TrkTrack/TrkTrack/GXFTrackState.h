@@ -20,11 +20,6 @@
 #include <memory>
 #include <bitset>
 
-/**
- * These headers, as well as other headers in the TrkGlobalChi2Fitter package
- * use modern C++11 memory ownership semantics expressed through smart
- * pointers. See GlobalChi2Fitter.h for more information.
- */
 
 namespace Trk {
 
@@ -41,6 +36,8 @@ namespace Trk {
     GXFTrackState(std::unique_ptr<const TrackParameters>, TrackStateOnSurface::TrackStateOnSurfaceType);
     GXFTrackState(std::unique_ptr<GXFMaterialEffects>, std::unique_ptr<const TrackParameters>);
     GXFTrackState & operator=(GXFTrackState &) = delete;
+    bool isSane() const;
+    
 
     void setMeasurement(std::unique_ptr<const MeasurementBase>);
     const MeasurementBase *measurement(void);
@@ -49,13 +46,14 @@ namespace Trk {
     const TrackParameters *trackParameters(void) const;
     
     GXFMaterialEffects *materialEffects();
-    const Surface *surface() const;
+    const Surface & associatedSurface() const;
     void setJacobian(TransportJacobian &);
     Eigen::Matrix<double, 5, 5> & jacobian();
     Amg::MatrixX & derivatives();
     void setDerivatives(Amg::MatrixX &);
 
     void setTrackCovariance(AmgSymMatrix(5) *);
+    void resetTrackCovariance(); //!<reset covariance to nullptr
     AmgSymMatrix(5) & trackCovariance(void);
     bool hasTrackCovariance(void) const;
     void zeroTrackCovariance(void);
@@ -115,6 +113,9 @@ namespace Trk {
 
     std::optional<std::vector<std::unique_ptr<TrackParameters>>> & getHoles(void);
     void setHoles(std::vector<std::unique_ptr<TrackParameters>> &&);
+    
+    std::unique_ptr<const TrackStateOnSurface>
+    trackStateOnSurface() const;
 
   private:
     std::unique_ptr<const MeasurementBase> m_measurement;       //!< The measurement defining the track state

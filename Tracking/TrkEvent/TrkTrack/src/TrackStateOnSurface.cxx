@@ -6,6 +6,8 @@
 #include "GaudiKernel/MsgStream.h"
 #include <stdexcept>
 #include <string>
+#include "TrkEventPrimitives/SurfaceConsistencyCheck.h"
+
 
 namespace Trk {
 TrackStateOnSurface::TrackStateOnSurface() = default;
@@ -87,6 +89,7 @@ TrackStateOnSurface::TrackStateOnSurface(
 }
 
 
+
 //copy 
 TrackStateOnSurface::TrackStateOnSurface(const TrackStateOnSurface& rhs)
   : m_fitQualityOnSurface(rhs.m_fitQualityOnSurface)
@@ -147,7 +150,7 @@ std::string
 TrackStateOnSurface::dumpType() const
 {
   std::string type;
-  auto typesSet = types();
+  const auto & typesSet = types();
   if (typesSet.test(TrackStateOnSurface::Measurement)) {
     type += "Measurement ";
   }
@@ -202,28 +205,11 @@ TrackStateOnSurface::surface() const
 bool
 TrackStateOnSurface::isSane() const
 {
-  std::vector<const Surface*> surfaces;
-
-  if (m_trackParameters) {
-    surfaces.push_back(&(m_trackParameters->associatedSurface()));
-  }
-  if (m_measurementOnTrack) {
-    surfaces.push_back(&(m_measurementOnTrack->associatedSurface()));
-  }
-  if (m_materialEffectsOnTrack) {
-    surfaces.push_back(&(m_materialEffectsOnTrack->associatedSurface()));
-  }
-
-  auto surfaceIt = surfaces.begin();
-  bool surfacesDiffer = false;
-  while (surfaceIt != surfaces.end()) {
-    if (**surfaceIt != *surfaces[0]) {
-      surfacesDiffer = true;
-      break;
-    }
-    surfaceIt++;
-  }
-
+  bool surfacesDiffer = not Trk::consistentSurfaces(
+    m_trackParameters.get(), 
+    m_measurementOnTrack.get(), 
+    m_materialEffectsOnTrack.get()
+  );
   if (surfacesDiffer) {
     std::cerr << "TrackStateOnSurface::isSane. With :" << '\n';
     std::cerr << "Types : " << types().to_string() << '\n';
