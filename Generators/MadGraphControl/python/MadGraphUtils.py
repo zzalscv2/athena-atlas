@@ -1776,7 +1776,7 @@ output -f
     return full_proc
 
 
-def SUSY_Generation(runArgs = None, process=None,\
+def SUSY_Generation(runArgs = None, process=None, plugin=None,\
                     syst_mod=None, keepOutput=False, param_card=None, writeGridpack=False,\
                     madspin_card=None, run_settings={}, params={}, fixEventWeightsForBridgeMode=False, add_lifetimes_lhe=False, usePMGSettings=True):
 
@@ -1790,7 +1790,7 @@ def SUSY_Generation(runArgs = None, process=None,\
     process_dir = MADGRAPH_GRIDPACK_LOCATION
     if not is_gen_from_gridpack():
         full_proc = SUSY_process(process)
-        process_dir = new_process(full_proc, usePMGSettings=usePMGSettings)
+        process_dir = new_process(full_proc, plugin=plugin, usePMGSettings=usePMGSettings)
     mglog.info('Using process directory '+str(process_dir))
 
     # Grab the param card and move the new masses into place

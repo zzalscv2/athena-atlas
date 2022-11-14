@@ -69,7 +69,8 @@ argdict = {'runArgs'        : runArgs,
            'syst_mod'       : syst_mod,
            'param_card'     : param_card, # Only set if you *can't* modify the default param card to get your settings
            'add_lifetimes_lhe' : add_lifetimes_lhe,
-           'usePMGSettings' : usePMGSettings
+           'usePMGSettings' : usePMGSettings,
+           'plugin'         : plugin,
            }
 
 # First the standard case: No input LHE file
