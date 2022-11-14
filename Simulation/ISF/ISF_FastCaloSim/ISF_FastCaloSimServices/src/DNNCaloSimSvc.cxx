@@ -317,7 +317,7 @@ return CaloPhiRange::diff(aPhiRaw, bPhiRaw) <= 0;
 }
 
 /** Simulation Call */
-StatusCode ISF::DNNCaloSimSvc::simulate(const ISF::ISFParticle& isfp, McEventCollection*)
+StatusCode ISF::DNNCaloSimSvc::simulate(ISF::ISFParticle& isfp, McEventCollection*)
 {
 
   ATH_MSG_VERBOSE("NEW PARTICLE! DNNCaloSimSvc called with ISFParticle: " << isfp);

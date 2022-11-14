@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ namespace ISF {
       virtual void push( ISFParticle *particle, const ISFParticle *parent) = 0;
            
       /** Get vectors of ISF particles from the broker */
-      virtual const ConstISFParticleVector& popVector(size_t maxVectorSize=10240) = 0;
+      virtual const ISFParticleVector& popVector(size_t maxVectorSize=10240) = 0;
 
       /** Get the current number of particles stored */
       virtual size_t numParticles() const = 0;

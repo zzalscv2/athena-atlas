@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header include
@@ -31,7 +31,7 @@ StatusCode ISF::LegacySimSvc::releaseEvent()
 }
 
 /** Simulation Call */
-StatusCode ISF::LegacySimSvc::simulate(const ISF::ISFParticle& isfp, McEventCollection* mcEventCollection)
+StatusCode ISF::LegacySimSvc::simulate(ISF::ISFParticle& isfp, McEventCollection* mcEventCollection)
 {
   ISF::ISFParticleContainer secondaries;
   ATH_CHECK(m_simulatorTool->simulate(isfp, secondaries, mcEventCollection));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -473,13 +473,13 @@ void ISF::ParticleBrokerDynamicOnReadIn::push( ISFParticle *particlePtr, const I
 }
 
 /** Get vectors of ISF particles from the broker */
-const ISF::ConstISFParticleVector& ISF::ParticleBrokerDynamicOnReadIn::popVector(size_t maxVectorSize)
+const ISF::ISFParticleVector& ISF::ParticleBrokerDynamicOnReadIn::popVector(size_t maxVectorSize)
 {
   // delete particles from previous return vector and empty the vector
-  ISF::ConstISFParticleVector::const_iterator partIt  = m_popParticles.begin();
-  ISF::ConstISFParticleVector::const_iterator partEnd = m_popParticles.end();
+  ISF::ISFParticleVector::const_iterator partIt  = m_popParticles.begin();
+  ISF::ISFParticleVector::const_iterator partEnd = m_popParticles.end();
   for ( ; partIt != partEnd; ++partIt) {
-    ISF::ISFParticle *curPart = const_cast<ISF::ISFParticle*>(*partIt);
+    ISF::ISFParticle *curPart = (*partIt);
     delete curPart;
   }
   m_popParticles.clear();
@@ -492,7 +492,7 @@ const ISF::ConstISFParticleVector& ISF::ParticleBrokerDynamicOnReadIn::popVector
     // loop as long as we have particles in the m_particles queue
     do {
       // get the next particle from the ordered queue
-      const ISFParticle *curParticle = m_particles.top();
+      ISFParticle *curParticle = m_particles.top();
       SimSvcID           curID       = curParticle->nextSimID();
 
       // if this particle has a different SimID, or the maximum size of the return vector is reached

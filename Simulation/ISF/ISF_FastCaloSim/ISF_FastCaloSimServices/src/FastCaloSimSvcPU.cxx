@@ -481,7 +481,7 @@ StatusCode ISF::FastCaloSimSvcPU::releaseEvent()
 
 
 /** Simulation Call */
-StatusCode ISF::FastCaloSimSvcPU::simulate(const ISF::ISFParticle& isfp, McEventCollection*)
+StatusCode ISF::FastCaloSimSvcPU::simulate(ISF::ISFParticle& isfp, McEventCollection*)
 {
 
  ATH_MSG_INFO(m_screenOutputPrefix<<" now doing FastCaloSimSvcPU simulate for bcid="<<isfp.getBCID());

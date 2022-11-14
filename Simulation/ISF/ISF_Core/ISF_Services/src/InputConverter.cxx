@@ -175,8 +175,10 @@ StatusCode ISF::InputConverter::convertHepMCToG4Event(McEventCollection& inputGe
   ISF::ISFParticleContainer simParticleList{}; // particles for ISF simulation
   ATH_CHECK(this->convert(inputGenEvents, simParticleList, kindOfCollection));
   //Convert from ISFParticleContainer to ConstISFParticleVector
-  ISF::ConstISFParticleVector simParticleVector{std::make_move_iterator(std::begin(simParticleList)),
-                                                std::make_move_iterator(std::end(simParticleList))};
+  ISF::ISFParticleVector simParticleVector{
+    std::make_move_iterator(std::begin(simParticleList)),
+    std::make_move_iterator(std::end(simParticleList))
+  };
   outputG4Event = this->ISF_to_G4Event(simParticleVector, inputGenEvents.back());
   return StatusCode::SUCCESS;
 }
@@ -441,7 +443,7 @@ ISF::InputConverter::passesFilters(const HepMC::GenParticle& part) const
 
 
 //________________________________________________________________________
-G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ConstISFParticleVector& ispVector, HepMC::GenEvent *genEvent, bool useHepMC) const
+G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ISFParticleVector& ispVector, HepMC::GenEvent *genEvent, bool useHepMC) const
 {
   const int eventID(1);
   G4Event *g4evt = new G4Event(eventID);
@@ -450,8 +452,8 @@ G4Event* ISF::InputConverter::ISF_to_G4Event(const ISF::ConstISFParticleVector& 
   const G4VSolid *worldSolid = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume()->GetSolid();
 
   int n_pp=0;
-  for ( const ISF::ISFParticle *ispPtr: ispVector ) {
-    const ISF::ISFParticle &isp = *ispPtr;
+  for ( ISF::ISFParticle *ispPtr: ispVector ) {
+    ISF::ISFParticle &isp = *ispPtr;
     if ( !isInsideG4WorldVolume(isp, worldSolid) ) {
         ATH_MSG_WARNING("Unable to convert ISFParticle to G4PrimaryParticle!");
         ATH_MSG_WARNING(" ISFParticle: " << isp );
@@ -689,19 +691,19 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenPar
 
 
 //________________________________________________________________________
-G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const ISF::ISFParticle& isp, bool useHepMC) const
+G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC) const
 {
   ATH_MSG_VERBOSE("Creating G4PrimaryParticle from ISFParticle.");
 
-  const auto* truthBinding = isp.getTruthBinding();
+  auto* truthBinding = isp.getTruthBinding();
   if (!truthBinding) {
       G4ExceptionDescription description;
       description << G4String("getG4PrimaryParticle: ") + "No ISF::TruthBinding associated with ISParticle (" << isp <<")";
       G4Exception("iGeant4::TransportTool", "NoISFTruthBinding", FatalException, description);
       return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
-  HepMC::ConstGenParticlePtr        genpart = truthBinding->getTruthParticle();
-  HepMC::ConstGenParticlePtr primaryGenpart = truthBinding->getPrimaryTruthParticle();
+  HepMC::GenParticlePtr        genpart = truthBinding->getTruthParticle();
+  HepMC::ConstGenParticlePtr   primaryGenpart = truthBinding->getPrimaryTruthParticle();
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(isp.pdgCode());
 
@@ -880,9 +882,9 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const ISF::ISFParti
     }  
 
 #ifdef HEPMC3
-    auto genpart_nc = std::const_pointer_cast<HepMC3::GenParticle>(genpart);
+    auto& genpart_nc = genpart;
 #else
-    auto genpart_nc = const_cast<HepMC::GenParticlePtr>(genpart);
+    auto* genpart_nc = genpart;
 #endif
     genpart_nc->set_momentum(HepMC::FourVector(px,py,pz,pe));
   } // Truth was detected
@@ -898,7 +900,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const ISF::ISFParti
 }
 
 //________________________________________________________________________
-void ISF::InputConverter::addG4PrimaryVertex(G4Event* g4evt, const ISF::ISFParticle& isp, bool useHepMC) const
+void ISF::InputConverter::addG4PrimaryVertex(G4Event* g4evt, ISF::ISFParticle& isp, bool useHepMC) const
 {
   /*
     see conversion from PrimaryParticleInformation to TrackInformation in

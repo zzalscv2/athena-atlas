@@ -26,10 +26,10 @@ public:
   DeclareInterfaceID(ISimulatorTool, 1, 0);
 
   /** Simulation call for individual particles*/
-  virtual StatusCode simulate(const ISFParticle& isp, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) = 0;
+  virtual StatusCode simulate(ISFParticle& isp, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) = 0;
 
   /** Simulation call for vectors of particles*/
-  virtual StatusCode simulateVector(const ConstISFParticleVector &particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) = 0;
+  virtual StatusCode simulateVector(const ISFParticleVector &particles, ISFParticleContainer& secondaries, McEventCollection* mcEventCollection) = 0;
 
   /** Create data containers for an event */
   virtual StatusCode setupEvent(const EventContext&) = 0;
