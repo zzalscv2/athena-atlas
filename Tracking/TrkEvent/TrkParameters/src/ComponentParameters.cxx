@@ -8,10 +8,8 @@
  * @brief  Implementation code for MultiComponentState class
  */
 
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 //
-#include "TrkParameters/TrackParameters.h"
-#include "TrkSurfaces/Surface.h"
+#include "TrkParameters/ComponentParameters.h"
 
 Trk::MultiComponentState
 Trk::MultiComponentStateHelpers::clone(const Trk::MultiComponentState& in)
@@ -25,13 +23,12 @@ Trk::MultiComponentStateHelpers::clone(const Trk::MultiComponentState& in)
 }
 
 Trk::MultiComponentState
-Trk::MultiComponentStateHelpers::WithScaledError(
-  Trk::MultiComponentState&& in,
-  double errorScaleLocX,
-  double errorScaleLocY,
-  double errorScalePhi,
-  double errorScaleTheta,
-  double errorScaleQoverP)
+Trk::MultiComponentStateHelpers::WithScaledError(Trk::MultiComponentState&& in,
+                                                 double errorScaleLocX,
+                                                 double errorScaleLocY,
+                                                 double errorScalePhi,
+                                                 double errorScaleTheta,
+                                                 double errorScaleQoverP)
 {
   AmgSymMatrix(5) coefficients;
   coefficients(0, 0) = (errorScaleLocX * errorScaleLocX);
@@ -62,7 +59,7 @@ Trk::MultiComponentStateHelpers::WithScaledError(
     trackParameters->updateParameters(trackParameters->parameters(),
                                       newCovarianceMatrix);
   }
-  return {std::move(in)};
+  return { std::move(in) };
 }
 
 bool

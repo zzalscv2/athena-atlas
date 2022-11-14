@@ -13,12 +13,12 @@
 #ifndef TrkElectronCombinedMaterialEffects_H
 #define TrkElectronCombinedMaterialEffects_H
 
-#include "TrkGaussianSumFilterUtils/ComponentParameters.h"
 #include "TrkGaussianSumFilterUtils/GsfConstants.h"
 #include "TrkGaussianSumFilterUtils/GsfMaterial.h"
 //
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkGeometry/MaterialProperties.h"
+#include "TrkParameters/ComponentParameters.h"
 
 namespace Trk {
 
@@ -74,12 +74,11 @@ public:
 
 private:
   // Electron enrrgy loss due to Bremsstrahlung
-  void BetheHeitler(
-    GsfMaterial::EnergyLoss& cache,
-    const ComponentParameters& componentParameters,
-    const MaterialProperties& materialProperties,
-    double pathLenght,
-    PropDirection direction = anyDirection) const;
+  void BetheHeitler(GsfMaterial::EnergyLoss& cache,
+                    const ComponentParameters& componentParameters,
+                    const MaterialProperties& materialProperties,
+                    double pathLenght,
+                    PropDirection direction = anyDirection) const;
 
   int m_BHnumberOfComponents{};
   int m_BHtransformationCode{};

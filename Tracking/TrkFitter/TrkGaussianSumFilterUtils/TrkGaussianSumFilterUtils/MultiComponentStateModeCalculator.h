@@ -14,7 +14,7 @@
 #ifndef Trk_MultiComponentStateModeCalculator_H
 #define Trk_MultiComponentStateModeCalculator_H
 
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
+#include "TrkParameters/ComponentParameters.h"
 //
 #include <array>
 #include <vector>

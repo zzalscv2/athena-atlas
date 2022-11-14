@@ -28,8 +28,8 @@ description          : This class is a multi component adaptation of the
 #ifndef TrkMultiComponentStateOnSurface_H
 #define TrkMultiComponentStateOnSurface_H
 
-#include "TrkEventPrimitives/FitQualityOnSurface.h" //typedef
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
+#include "TrkEventPrimitives/FitQualityOnSurface.h"
+#include "TrkParameters/ComponentParameters.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include <iostream>
@@ -41,12 +41,11 @@ namespace Trk {
 class MaterialEffectsBase;
 class MeasurementBase;
 
-
 class MultiComponentStateOnSurface final : public TrackStateOnSurface
 {
 
-friend class ::TrackCollectionCnv;
-friend class ::TrackStateOnSurfaceCnv_p3;
+  friend class ::TrackCollectionCnv;
+  friend class ::TrackStateOnSurfaceCnv_p3;
 
 public:
   /** Default constructor for POOL. This should not be used! */
@@ -154,5 +153,5 @@ DATAVECTOR_BASE(const Trk::MultiComponentStateOnSurface,
 typedef DataVector<const Trk::MultiComponentStateOnSurface>
   TrkMultiComponentStateOnSurfaceDV;
 
-#include "TrkMultiComponentStateOnSurface/MultiComponentStateOnSurface.icc"
+#include "TrkTrack/MultiComponentStateOnSurface.icc"
 #endif

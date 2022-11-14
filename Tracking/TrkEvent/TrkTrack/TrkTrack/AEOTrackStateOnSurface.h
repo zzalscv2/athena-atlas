@@ -90,6 +90,16 @@ private:
   std::unique_ptr<const AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
 };
 
-}
+}//end of namespace Trk
+
+/// Trk::Track is constucted from  DataVector<const Trk::TrackStateOnSurface>.
+/// Let the type system know this class inherits so we can have
+/// DataVector<const Trk::MultiComponentStateOnSurface>
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE(const Trk::AEOTrackStateOnSurface,
+                const Trk::TrackStateOnSurface);
+typedef DataVector<const Trk::AEOTrackStateOnSurface>
+  TrkAEOTrackStateOnSurfaceDV;
+
 
 #endif

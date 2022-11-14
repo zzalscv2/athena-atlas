@@ -1,33 +1,26 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
- * @file MultiComponentState.h
- * @date   Friday 31st December 2004
+ * @file ComponentParameters.h
+ * @date Sunday 8th May 2005
  * @author atkinson, Anthony Morley, Christos Anastopoulos
- * @brief   Basic definitions for a track state described by more
- * than one set of Track Parameters. The resulting state is
- * a mixture of components.
- * Each component is described by a ComponentParameters
- * object which is of the type std::pair<
- * std::unique_ptr<TrackParameters>, double>.
- * The double describes the weighting of
- * the component - or its relative importance in the mixture.
+ * @brief  Definition of component parameters for use in a mixture
+ * of many components. In this regime each track parameters
+ * object comes with a weighting (double) attached
  */
 
-#ifndef TrkMultiComponentState
-#define TrkMultiComponentState
+#ifndef TrkComponentParameters
+#define TrkComponentParameters
 
-#include "TrkGaussianSumFilterUtils/ComponentParameters.h"
+#include "TrkParameters/TrackParameters.h"
+#include <utility>
 #include <vector>
-
-class MsgStream;
 namespace Trk {
-/**
- * MultiComponentState is just a typedef
- */
-typedef std::vector<ComponentParameters> MultiComponentState;
+using ComponentParameters =
+  std::pair<std::unique_ptr<Trk::TrackParameters>, double>;
+using MultiComponentState = std::vector<ComponentParameters>;
 
 namespace MultiComponentStateHelpers {
 

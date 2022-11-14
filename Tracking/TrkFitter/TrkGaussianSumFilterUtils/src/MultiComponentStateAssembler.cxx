@@ -11,7 +11,7 @@
  */
 
 #include "TrkGaussianSumFilterUtils/MultiComponentStateAssembler.h"
-#include "TrkGaussianSumFilterUtils/ComponentParameters.h"
+#include "TrkParameters/ComponentParameters.h"
 //
 #include <limits>
 

@@ -17,3 +17,10 @@ atlas_add_dictionary( TrkTrackDict
                       LINK_LIBRARIES AthLinks Identifier TrkTrack
                       ELEMENT_LINKS TrackCollection )
 
+#Executables for tests
+atlas_add_executable(TrkTrack_test
+         test/TrkTrack_test.cxx
+         LINK_LIBRARIES TrkTrack TestTools)
+#Tests
+atlas_add_test(ut_TrkTrack_test
+         SCRIPT TrkTrack_test)

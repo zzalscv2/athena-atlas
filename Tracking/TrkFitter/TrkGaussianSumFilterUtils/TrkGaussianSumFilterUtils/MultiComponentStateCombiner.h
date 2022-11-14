@@ -15,7 +15,7 @@
 #ifndef MultiComponentStateCombiner_H
 #define MultiComponentStateCombiner_H
 
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
+#include "TrkParameters/ComponentParameters.h"
 namespace Trk {
 
 namespace MultiComponentStateCombiner {

@@ -10,9 +10,7 @@
  * Implementation code for MultiComponentStateModeCalculator
  */
 
-
 #include "TrkGaussianSumFilterUtils/MultiComponentStateModeCalculator.h"
-#include "TrkGaussianSumFilterUtils/MultiComponentState.h"
 //
 #include "CxxUtils/phihelper.h"
 #include <cmath>
@@ -88,9 +86,8 @@ width(int i, const std::array<std::vector<Component>, 5>& mixture)
 }
 
 void
-fillMixture(
-  const Trk::MultiComponentState& multiComponentState,
-  std::array<std::vector<Component>, 5>& mixture)
+fillMixture(const Trk::MultiComponentState& multiComponentState,
+            std::array<std::vector<Component>, 5>& mixture)
 {
   constexpr Trk::ParamDefs parameter[5] = {
     Trk::d0, Trk::z0, Trk::phi, Trk::theta, Trk::qOverP
@@ -137,10 +134,9 @@ fillMixture(
 }
 
 double
-findMode(
-  double xStart,
-  int i,
-  const std::array<std::vector<Component>, 5>& mixture)
+findMode(double xStart,
+         int i,
+         const std::array<std::vector<Component>, 5>& mixture)
 {
 
   bool converged = false;
@@ -187,13 +183,12 @@ findMode(
 }
 
 double
-findRoot(
-  double& result,
-  double xlo,
-  double xhi,
-  double value,
-  double i,
-  const std::array<std::vector<Component>, 5>& mixture)
+findRoot(double& result,
+         double xlo,
+         double xhi,
+         double value,
+         double i,
+         const std::array<std::vector<Component>, 5>& mixture)
 {
   // Do the root finding using the Brent-Decker method. Returns a boolean
   // status and loads 'result' with our best guess at the root if true.

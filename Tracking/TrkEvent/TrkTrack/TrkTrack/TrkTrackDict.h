@@ -5,10 +5,10 @@
 #ifndef TRKTRACKDICT_H
 #define TRKTRACKDICT_H
 
-//
 // D. Costanzo. These are forward declarations in Track.h
 // #include is needed for gcc_xml to parse the header files
 #include "TrkTrack/TrackStateOnSurface.h"
+#include "TrkTrack/MultiComponentStateOnSurface.h"
 #include "TrkTrack/TrackCollection.h"
 #include "TrkTrack/LinkToTrack.h"
 #include "Identifier/Identifier.h"
@@ -20,7 +20,6 @@
 namespace Trk {
     class TrkTrackDict_Dummy
     {
-
 	      DataVector<const TrackParameters>           m_parameterVector;
 	      DataVector<const TrackStateOnSurface>       m_trackStateVector;
 	      DataVector<Identifier>                      m_identifierVector;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKTRACK_H
@@ -33,7 +33,7 @@ namespace Trk
     using TrackStates = DataVector<const TrackStateOnSurface>;
     /**
      * @brief The ATLAS Track class.
-     * 
+     *
      * This class is designed to work as a common track class, usable in a
      * wide variety of applications, whilst remaining as simple as possible.
      * As such, it has to be both flexible and fast. This is achieved by
@@ -43,57 +43,46 @@ namespace Trk
      * A Track typically is constructed via
      *
      * - A pointer to a const Trk::FitQuality  - the fit quality of a track
-     * - A pointer to a DataVector of const Trk::TrackStateOnSurface
+     * - A DataVector of const Trk::TrackStateOnSurface. The usage of DataVector
+     *   allows to constuct a track from a Datavector<DerivedFromTSOS>
+     *   where DerivedFromTSOS is a type that derives from
+     *   Trk::TrackStateOnSurface
      *
-     * A TrackStateOnSurface is a sub-container, which holds
-     * various properties defining a Track, on a particular surface.
-     * It can contain:
-     * - Trk::FitQualityOnSurface
-     * - Trk::TrackParameters 
-     * - Trk::MeasurementBase
-     * - Trk::MaterialEffectsOnTrack
-     * - Trk::ScatteringAngleOnTrack
-     * 
      * This class provides convenient helpers to retrieve and cache
-     * DataVectors (VIEW ELEMENTs) to 
+     * DataVectors (VIEW ELEMENTs) to
      * - const TrackParameters
      * - const Measurements
      * - const Outliers
      * from the const TrackStateOnSurface DataVector
      *
-     * It also allows for retrieving/caching 
+     * It also allows for retrieving/caching
      * the Track Parameter at perigee
      *
-     * The above are implemented via lazy initialization of 
+     * The above are implemented via lazy initialization of
      * the relevant cache employing  CxxUtils::CachedValue
      *
-     *  Furthermore a Track can contain 
+     *  Furthermore a Track can contain
      * - Trk::TrackInfo
-     * - Trk::TrackSummary* - used to cache the TrackSummary. Might be nullptr! 
-     * 
-     * const /non-const method overloads:
+     * - Trk::TrackSummary* - used to cache the TrackSummary. Might be nullptr!
      *
-     * None of the above can be modified for a const Trk::Track 
-     * 
+     * None of the above can be modified for a const Trk::Track
+     *
      * For a non-const Trk::Track  the non-const method overloads allow for
      * - Retrieving a non-const Trk::TrackInfo
      * - Retrieving a ptr to a non-const Trk::TrackSummary (can be nullptr)
      * - Retrieving a ptr to a non-const DataVector<const TrackStateOnSurface>.
-     *   If elements are added/removed from this DataVector 
-     *   one could possible consider calling reset() so as the previously 
+     *   If elements are added/removed from this DataVector
+     *   one could possible consider calling reset() so as the previously
      *   cached values to be cleared.
-     * 
-     * For the TrackSummary one still needs 
-     * to use the TrackSummaryTool to create it.
      *
-     * Please look at the mainpage of this package (see the link at the top
-     * of the page) for more information.
+     * For the TrackSummary one typically needs
+     * to use the TrackSummaryTool to create it.
      *
      * @author edward.moyse@cern.ch
      * @author Kirill.Prokofiev@cern.ch
      * @author Christos Anastopoulos (MT modifications)
      */
-    
+
     class Track : public Trk::ObjectCounter<Trk::Track>
     {
       public:
@@ -138,8 +127,9 @@ namespace Trk
        virtual ~Track() = default; //!< destructor
 
        /**
-        * returns true if the track has non-nullptr 
-        * fitQuality  and  DataVector<const TrackStateOnSurface>*
+        * returns true if the track has non-nullptr
+        * fitQuality  and
+        * non-empty DataVector<const TrackStateOnSurface>
         */
        bool isValid() const;
 
