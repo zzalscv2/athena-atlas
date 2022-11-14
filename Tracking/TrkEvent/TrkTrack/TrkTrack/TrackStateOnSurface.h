@@ -214,7 +214,6 @@ public:
     SingleComponent = 0,
     MultiComponent = 1,
     Align = 2,
-    AEOT = 3
   };
   /**
    * Default ctor for POOL. Do not use!
@@ -233,12 +232,14 @@ public:
     const FitQualityOnSurface& fitQoS,
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr);
+    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   explicit TrackStateOnSurface(
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
-    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr);
+    std::unique_ptr<const MaterialEffectsBase> materialEffects = nullptr,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   /**
    * Full constructors
@@ -259,13 +260,15 @@ public:
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
-    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern);
+    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   explicit TrackStateOnSurface(
     std::unique_ptr<const MeasurementBase> meas,
     std::unique_ptr<const TrackParameters> trackParameters,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
-    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern);
+    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
   /**
    * ctor with hints for slimming
@@ -276,7 +279,8 @@ public:
     std::unique_ptr<const TrackParameters> trackParameters,
     std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
     const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
-    const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern);
+    const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr);
 
  /**
    * Pseudo-constructor: needed to avoid excessive RTTI
@@ -312,7 +316,7 @@ public:
 
   /** returns 0 if there is no alignment effects, and the alignment effects
    * otherwise*/
-  virtual const AlignmentEffectsOnTrack* alignmentEffectsOnTrack() const;
+  const AlignmentEffectsOnTrack* alignmentEffectsOnTrack() const;
 
   /**
    * Use this method to find out if the TSoS is of a certain type:
@@ -373,7 +377,7 @@ private:
   std::unique_ptr<const TrackParameters> m_trackParameters{};
   std::unique_ptr<const MeasurementBase> m_measurementOnTrack{};
   std::unique_ptr<const MaterialEffectsBase> m_materialEffectsOnTrack{};
-
+  std::unique_ptr<const AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
 protected: 
   uint16_t m_typeFlags{};
   mutable std::atomic<uint8_t> m_hints{};

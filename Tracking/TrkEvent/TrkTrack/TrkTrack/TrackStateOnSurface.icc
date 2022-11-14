@@ -35,7 +35,7 @@ Trk::TrackStateOnSurface::materialEffectsOnTrack() const
 inline const Trk::AlignmentEffectsOnTrack*
 Trk::TrackStateOnSurface::alignmentEffectsOnTrack() const
 {
-  return nullptr;
+  return m_alignmentEffectsOnTrack.get();
 }
 
 inline bool
@@ -68,6 +68,10 @@ Trk::TrackStateOnSurface::setFlags()
   if(m_fitQualityOnSurface){
     m_typeFlags |= 1 << FitQuality;
   }
+  if (m_alignmentEffectsOnTrack) {
+    m_typeFlags |= 1 << Alignment;
+  }
+
 }
 
 inline const std::bitset<
