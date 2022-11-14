@@ -179,11 +179,11 @@ namespace xAOD {
    }
     
    unsigned int eFexEMRoI_v1::RhadThresholds() const {
-     return (word0() >> s_veto2Bit) & s_veto2Mask;
+     return (word0() >> s_veto3Bit) & s_veto3Mask;
    }
     
    unsigned int eFexEMRoI_v1::WstotThresholds() const {
-     return (word0() >> s_veto3Bit) & s_veto3Mask;
+     return (word0() >> s_veto2Bit) & s_veto2Mask;
    }
     
    unsigned int eFexEMRoI_v1::bcn4() const {
