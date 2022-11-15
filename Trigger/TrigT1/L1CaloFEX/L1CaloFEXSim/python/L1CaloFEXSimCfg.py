@@ -76,48 +76,53 @@ def L1CaloFEXSimCfg(flags):
     # Need also TriggerTowers as input
     acc.merge(TriggerTowersInputCfg(flags))
 
-    eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
-    eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
-    eFEXInputs.eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType)
-    eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
-    acc.addEventAlgo(eFEXInputs)
-    acc.addEventAlgo(eFEX)
+    if flags.Trigger.L1.doeFex:
+        eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
+        eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
+        eFEXInputs.eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType)
+        eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
+        acc.addEventAlgo(eFEXInputs)
+        acc.addEventAlgo(eFEX)
 
-    # jFEX part
-    jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
-    jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper', SCell=sCellType)
-    jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
-    acc.addEventAlgo(jFEX)
+    if flags.Trigger.L1.dojFex:
+        jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
+        jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper', SCell=sCellType)
+        jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
+        acc.addEventAlgo(jFEX)
 
-    gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
-    gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
-    gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
-    acc.addEventAlgo(gFEX)
+    if flags.Trigger.L1.dogFex:
+        gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
+        gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper', SCell=sCellType)
+        gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
+        acc.addEventAlgo(gFEX)
 
     if flags.Trigger.doHLT:
         # Check the RoI EDM containers are registered in HLT outputs
         from TrigEDMConfig.TriggerEDMRun3 import recordable
         def check(key):
             assert key==recordable(key), f'recordable() check failed for {key}'
-        check(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
-        check(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
-        check(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
-        check(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
-        check(jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer)
-        check(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
-        check(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
-        check(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
-        check(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
+        if flags.Trigger.L1.doeFex:
+            check(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
+            check(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
+        if flags.Trigger.L1.dojFex:
+            check(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
+            check(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
+            check(jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer)
+            check(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
+            check(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
+            check(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
+        if flags.Trigger.L1.dogFex:
+            check(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
+            check(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
     else:
         # Rename outputs for monitoring resimulation to avoid clash with standard SG keys
         def getSimHandle(key):
@@ -129,27 +134,30 @@ def L1CaloFEXSimCfg(flags):
             key.Path = keyPath
             return key
 
-        eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
-        eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
-        eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer)
-        eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
-        jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
-        gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
+        if flags.Trigger.L1.doeFex:
+            eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
+            eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
+            eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer)
+            eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer)
+        if flags.Trigger.L1.dojFex:
+            jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
+            jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
+        if flags.Trigger.L1.dogFex:
+            gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
+            gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
 
     return acc
 

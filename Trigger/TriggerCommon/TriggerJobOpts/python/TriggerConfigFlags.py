@@ -178,10 +178,18 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.L1.doCalo', True)
 
     # enable L1Calo Input ([ejg]Towers) ByteStream conversion / simulation
-    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags: prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT)
+    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT)
 
-    # enable L1Topo ByteStream conversion / simulation
+    # finer steering of phase-1 L1Calo ByteStream conversion / simulation with one flag per FEX
+    flags.addFlag('Trigger.L1.doeFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+    flags.addFlag('Trigger.L1.dojFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+    flags.addFlag('Trigger.L1.dogFex', lambda prevFlags: prevFlags.Trigger.L1.doCalo and prevFlags.Trigger.enableL1CaloPhase1)
+
+    # enable L1Topo ByteStream conversion / simulation (general flag steering both legacy and phase-1 Topo)
     flags.addFlag('Trigger.L1.doTopo', True)
+
+    # finer-grained control like for the FEXes above to disable only phase-1 Topo even when doTopo flag is True
+    flags.addFlag('Trigger.L1.doTopoPhase1', lambda prevFlags: prevFlags.Trigger.L1.doTopo and prevFlags.Trigger.enableL1CaloPhase1)
 
     # enable CTP ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doCTP', True)
