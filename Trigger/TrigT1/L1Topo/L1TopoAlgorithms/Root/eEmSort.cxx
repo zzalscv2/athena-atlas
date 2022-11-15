@@ -27,7 +27,7 @@ TCS::eEmSort::eEmSort(const std::string & name) : SortingAlg(name) {
    defineParameter( "RHadMin", 0);
    defineParameter( "WsTotMin", 0);
    defineParameter( "MinEta", 0);
-   defineParameter( "MaxEta", 63);
+   defineParameter( "MaxEta", 196);
 }
 
 

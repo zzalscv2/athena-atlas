@@ -32,17 +32,17 @@ TCS::NotMatch::NotMatch(const std::string & name) : DecisionAlg(name)
    defineParameter("NumResultBits", 2);
    defineParameter("MinET1",1,0);
    defineParameter("MinET2",1,0);
-   defineParameter("EtaMin1",0,0);
-   defineParameter("EtaMax1",49,0);
-   defineParameter("EtaMin2",0,0);
-   defineParameter("EtaMax2",49,0); 
+   defineParameter("MinEta1",0,0);
+   defineParameter("MaxEta1",49,0);
+   defineParameter("MinEta2",0,0);
+   defineParameter("MaxEta2",49,0); 
    defineParameter("DRCut",0,0);
    defineParameter("MinET1",1,1);
    defineParameter("MinET2",1,1);
-   defineParameter("EtaMin1",0,1);
-   defineParameter("EtaMax1",49,1);
-   defineParameter("EtaMin2",0,1);
-   defineParameter("EtaMax2",49,1);
+   defineParameter("MinEta1",0,1);
+   defineParameter("MaxEta1",49,1);
+   defineParameter("MinEta2",0,1);
+   defineParameter("MaxEta2",49,1);
    defineParameter("DRCut",0,1);
    setNumberOutputBits(2);
 }
@@ -62,15 +62,15 @@ TCS::NotMatch::initialize() {
     TRG_MSG_INFO("MinET1          : " << p_MinET1[i]);
     TRG_MSG_INFO("MinET2          : " << p_MinET2[i]);
 
-    p_EtaMin1[i] = parameter("EtaMin1",i).value();
-    p_EtaMin2[i] = parameter("EtaMin2",i).value();
-    TRG_MSG_INFO("MinETa1          : " << p_EtaMin1[i]);
-    TRG_MSG_INFO("MinETa2          : " << p_EtaMin2[i]);
+    p_EtaMin1[i] = parameter("MinEta1",i).value();
+    p_EtaMin2[i] = parameter("MinEta2",i).value();
+    TRG_MSG_INFO("MinEta1          : " << p_EtaMin1[i]);
+    TRG_MSG_INFO("MinEta2          : " << p_EtaMin2[i]);
 
-    p_EtaMax1[i] = parameter("EtaMax1",i).value();
-    p_EtaMax2[i] = parameter("EtaMax2",i).value();
-    TRG_MSG_INFO("MinETa1          : " << p_EtaMax1[i]);
-    TRG_MSG_INFO("MinETa2          : " << p_EtaMax2[i]);
+    p_EtaMax1[i] = parameter("MaxEta1",i).value();
+    p_EtaMax2[i] = parameter("MaxEta2",i).value();
+    TRG_MSG_INFO("MinEta1          : " << p_EtaMax1[i]);
+    TRG_MSG_INFO("MinEta2          : " << p_EtaMax2[i]);
 
     p_DRCut[i]   = parameter("DRCut",i).value();
     TRG_MSG_INFO("DRCut          : " << p_DRCut[i]);
