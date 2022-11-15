@@ -231,9 +231,9 @@ def MuonCombinedParticleCreatorCfg(flags, name="MuonCombinedParticleCreator", **
             MuonHitSummaryToolCfg(flags)))
 
     if "PixelToTPIDTool" not in kwargs and not flags.Muon.MuonTrigger and flags.GeoModel.Run < LHCPeriod.Run4:
-        from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
-        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
-            PixelToTPIDToolCfg(flags)))
+       from InDetConfig.PixelToTPIDToolConfig  import PixelToTPIDToolCfg
+       kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+           PixelToTPIDToolCfg(flags, name='CombinedMuonPixelToTPID')))
 
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("KeepAllPerigee", True)
@@ -241,7 +241,9 @@ def MuonCombinedParticleCreatorCfg(flags, name="MuonCombinedParticleCreator", **
         kwargs.setdefault("PerigeeExpression", "Origin")
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
-
+    
+ 
+    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
 
@@ -267,6 +269,8 @@ def MuonCaloParticleCreatorCfg(flags, name="MuonCaloParticleCreator", **kwargs):
     kwargs.setdefault("PerigeeExpression", "Origin")
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
+
+    kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
 
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result

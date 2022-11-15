@@ -299,10 +299,10 @@ def LRT_MuonCreatorAlgCfg(flags, name="MuonCreatorAlg_LRT", **kwargs):
     kwargs.setdefault("MuonCreatorTool", creatorTool)
     # In cases we want to switch them off we should add the flags here
     tag_maps = []
-    if flags.MuonCombined.doCaloTrkMuId: tag_maps += ["caloTagMap_LRT"]
     if flags.MuonCombined.doMuGirl: tag_maps+=["MuGirlMap_LRT"]
     if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_LRT"]
     if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_LRT"]
+    if flags.MuonCombined.doCaloTrkMuId: tag_maps += ["caloTagMap_LRT"]
     if flags.MuonCombined.doMuonSegmentTagger: tag_maps+=["segmentTagMap_LRT"]  
     kwargs.setdefault("TagMaps", tag_maps)
     kwargs.setdefault("MuonContainerLocation", "MuonsLRT")

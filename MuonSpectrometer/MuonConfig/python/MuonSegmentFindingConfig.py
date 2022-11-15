@@ -124,9 +124,9 @@ def MdtSegmentT0FitterCfg(flags, name="MdtSegmentT0Fitter", **kwargs):
     return result
 
 def DCMathSegmentMakerCfg(flags,
-                          doSegmentT0Fit=None, # Probably need to be removed, kept for now as it creates more differences in muon outputs
+                          name='DCMathSegmentMaker',
+                          doSegmentT0Fit=False,
                           **kwargs):
-    doSegmentT0Fit = kwargs.pop('doSegmentT0Fit', flags.Muon.doSegmentT0Fit)
     
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
     from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
@@ -186,8 +186,8 @@ def DCMathSegmentMakerCfg(flags,
     if doSegmentT0Fit:
         mdt_dcot_CA = MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtDriftCircleOnTrackCreatorAdjustableT0", TimingMode=3, \
                    DoTofCorrection=True, TimeWindowSetting=MdtCalibWindowNumber('Collision_data'))
-        kwargs.setdefault("MdtCreatorT0", result.getPrimaryAndMerge(mdt_dcot_CA)) # TODO - is this correct? 
-        kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags, doSegmentT0Fit=True)))
+        kwargs.setdefault("MdtCreatorT0", result.getPrimaryAndMerge(mdt_dcot_CA)) 
+        kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags, name='MdtMathT0FitSegmentFinder', doSegmentT0Fit=True)))
     else:
         kwargs.setdefault("MdtSegmentFinder", result.getPrimaryAndMerge(MdtMathSegmentFinderCfg(flags)) )
 
@@ -201,7 +201,7 @@ def DCMathSegmentMakerCfg(flags,
     
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
   
-    dc_segment_maker = CompFactory.Muon.DCMathSegmentMaker(**kwargs)
+    dc_segment_maker = CompFactory.Muon.DCMathSegmentMaker(name=name, **kwargs)
     result.setPrivateTools(dc_segment_maker)
     return result
 

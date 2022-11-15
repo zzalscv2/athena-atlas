@@ -18,19 +18,11 @@
 
 class McEventCollection;
 
-
 class LArHitEMap
 {
 
 public: 
  typedef std::vector<const LArDigit*> DIGMAP;
-
- enum { EMBARREL_INDEX  = 0
-       ,EMENDCAP_INDEX  = 1
-       ,HADENDCAP_INDEX = 2
-       ,FORWARD_INDEX   = 3
-       ,NUMDET=4
-     };
 
 private:
   std::vector<LArHitList> m_emap; 
