@@ -27,12 +27,12 @@ TCS::DeltaPhiIncl1::DeltaPhiIncl1(const std::string & name) : DecisionAlg(name)
    defineParameter("NumResultBits", 2);
    defineParameter("MinET1",0,0);
    defineParameter("MinET2",0,0);
-   defineParameter("MinDeltaPhi",  0, 0);
-   defineParameter("MaxDeltaPhi", 31, 0);
+   defineParameter("DeltaPhiMin",  0, 0);
+   defineParameter("DeltaPhiMax", 31, 0);
    defineParameter("MinET1",0,1);
    defineParameter("MinET2",0,1);
-   defineParameter("MinDeltaPhi",  0, 1);
-   defineParameter("MaxDeltaPhi", 31, 1);
+   defineParameter("DeltaPhiMin",  0, 1);
+   defineParameter("DeltaPhiMax", 31, 1);
 
    setNumberOutputBits(2);
 }
@@ -52,8 +52,8 @@ TCS::DeltaPhiIncl1::initialize() {
    }
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
-      p_DeltaPhiMin[i] = parameter("MinDeltaPhi", i).value();
-      p_DeltaPhiMax[i] = parameter("MaxDeltaPhi", i).value();
+      p_DeltaPhiMin[i] = parameter("DeltaPhiMin", i).value();
+      p_DeltaPhiMax[i] = parameter("DeltaPhiMax", i).value();
       p_MinET1[i] = parameter("MinET1",i).value();
       p_MinET2[i] = parameter("MinET2",i).value();
       
