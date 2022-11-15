@@ -310,9 +310,6 @@ public:
 
   ITrackLink* trackOrParticleLink(void);
 
-  /**return number of objects currently created*/
-  static unsigned int numberOfInstantiations();
-
 protected:
   /**
    * The chi2 and number of degrees of freedom of the track
