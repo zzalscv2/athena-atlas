@@ -40,7 +40,7 @@ namespace ISF
     /** construct the class with a given TF1 and a random engine */
     PDFcreator() {};
 
-    ~PDFcreator() { };
+    ~PDFcreator();
 
     /** all following is used to set up the class */
     void setName( const std::string & PDFname ){ m_name = PDFname; }; //get the pdf's name

@@ -43,6 +43,15 @@ ISF::PunchThroughParticle::PunchThroughParticle(int pdg, bool doAnti):
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
+ISF::PunchThroughParticle::~PunchThroughParticle()
+{
+  delete[] m_corrHistDomains;
+}
+
+/*=========================================================================
+ *  DESCRIPTION OF FUNCTION:
+ *  ==> see headerfile
+ *=======================================================================*/
 
 void ISF::PunchThroughParticle::setMinEnergy(double minEnergy)
 {
