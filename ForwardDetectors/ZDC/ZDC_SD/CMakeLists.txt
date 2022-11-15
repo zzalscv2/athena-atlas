@@ -29,10 +29,10 @@ atlas_install_joboptions( share/optionForTest.txt )
 # Tests in the package:
 atlas_add_test( ZDC_StripSD_gtest
                 SOURCES test/ZDC_StripSD_gtest.cxx
-                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib
+                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( ZDC_PixelSD_gtest
                 SOURCES test/ZDC_PixelSD_gtest.cxx
-                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib
+                LINK_LIBRARIES TestTools ZDC_SDLib G4AtlasToolsLib CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
