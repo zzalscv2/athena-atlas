@@ -180,8 +180,8 @@ namespace CP {
             }
         }
     }
-    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection(const xAOD::ElectronContainer* Electrons, const xAOD::MuonContainer* Muons,
-                                                                           const xAOD::PhotonContainer* Photons) const {
+    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection(xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
+                                                                           xAOD::PhotonContainer* Photons) const {
         if (!m_isInitialised) {
             ATH_MSG_ERROR("The IsolationCloseByCorrectionTool was not initialised!!!");
             return CorrectionCode::Error;
