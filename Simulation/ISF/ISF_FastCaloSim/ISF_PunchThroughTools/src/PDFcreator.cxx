@@ -28,6 +28,16 @@
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
+
+ISF::PDFcreator::~PDFcreator() {
+  for(auto & each_outter : m_energy_eta_hists1D) {
+    for(auto & each_inner : each_outter.second) {
+      if(each_inner.second != nullptr)
+        delete each_inner.second;
+    }
+  }
+}
+
 void ISF::PDFcreator::addToEnergyEtaHist1DMap(int energy, int etaMin, TH1 *hist) {
 
  if(m_energy_eta_hists1D.find(energy) != m_energy_eta_hists1D.end()){ //if energy entry exists, insert into inner eta map

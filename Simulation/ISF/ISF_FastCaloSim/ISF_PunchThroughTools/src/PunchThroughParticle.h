@@ -33,7 +33,7 @@ namespace ISF
   {
   public:
     PunchThroughParticle(int pdg, bool doAnti = false);           //!< set this particle's pdg code and if anti-particle should be done or not
-    ~PunchThroughParticle();
+    ~PunchThroughParticle();                                      //!< destructor
 
     /** set methods */
     void setMinEnergy(double minEnergy);                          //!< the minimum energy with which these particles should be created
