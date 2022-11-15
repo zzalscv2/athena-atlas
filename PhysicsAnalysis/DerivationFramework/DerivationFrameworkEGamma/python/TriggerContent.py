@@ -504,18 +504,20 @@ noalgTriggers['Run3'] = [
 #====================================================================
 BkgElectronTriggers = {}
 BkgElectronTriggers['Run3'] = [
+        'HLT_e5_nopid_L1EM3',
+        'HLT_e5_etcut_L1EM3',
+        'HLT_e50_etcut_L1EM22VHI',
+        'HLT_e50_etcut_L1eEM26M',
+        'HLT_e120_etcut_L1EM22VHI',
+        'HLT_e120_etcut_L1eEM26M',
+        'HLT_e250_etcut_L1EM22VHI',
+        'HLT_e250_etcut_L1eEM26M',
         'HLT_e300_etcut_L1eEM26M',
         'HLT_e300_etcut_L1EM22VHI',
-        'HLT_e50_etcut_L1EM22VHI',
-        'HLT_e120_etcut_L1EM22VHI',
-        'HLT_e250_etcut_L1EM22VHI',
-        'HLT_e50_etcut_L1eEM26M',
-        'HLT_e120_etcut_L1eEM26M',
-        'HLT_e250_etcut_L1eEM26M',
-        'HLT_g300_etcut_L1EM22VHI',
-        'HLT_g300_etcut_L1eEM26M',
         'HLT_g250_etcut_L1EM22VHI',
         'HLT_g250_etcut_L1eEM26M',
+        'HLT_g300_etcut_L1EM22VHI',
+        'HLT_g300_etcut_L1eEM26M',
         ]
 
 BkgElectronTriggers['Run2'] = [
