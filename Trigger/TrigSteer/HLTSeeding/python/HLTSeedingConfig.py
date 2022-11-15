@@ -121,64 +121,76 @@ def createLegacyCaloRoIUnpackers():
 def createCaloRoIUnpackers(flags):
     from HLTSeeding.HLTSeedingMonitoring import RoIsUnpackingMonitoring
     from TrigEDMConfig.TriggerEDMRun3 import recordable
-    maxRoICount_eFex = 150  # used for histogram range, 144 is the hardware limit
-    maxRoICount_jFex = 200  # used for histogram range
-    maxRoICount_gFex = 100  # used for histogram range
-    eFexEMUnpacker = CompFactory.eFexEMRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("eEM"),
-        DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeEM"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eEM")),
-        RoIHalfWidthEta = 0.2,
-        RoIHalfWidthPhi = 0.2,
-        MonTool = RoIsUnpackingMonitoring(prefix="eEM", maxCount=maxRoICount_eFex))
-    eFexTauUnpacker = CompFactory.eFexTauRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("eTAU"),
-        DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeTAU"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eTAU")),
-        RoIHalfWidthEta = 0.4,
-        RoIHalfWidthPhi = math.pi/8,
-        MonTool = RoIsUnpackingMonitoring(prefix="eTAU", maxCount=maxRoICount_eFex))
-    jFexTauUnpacker = CompFactory.jFexTauRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("jTAU"),
-        DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEjTAU"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jTAU")),
-        RoIHalfWidthEta = 0.4,
-        RoIHalfWidthPhi = math.pi/8,
-        MonTool = RoIsUnpackingMonitoring(prefix="jTAU", maxCount=maxRoICount_jFex))
-    cTauUnpacker = CompFactory.cTauRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("cTAU"),
-        DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEcTAU"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("cTAU")),
-        RoIHalfWidthEta = 0.4,
-        RoIHalfWidthPhi = math.pi/8,
-        MonTool = RoIsUnpackingMonitoring(prefix="cTAU", maxCount=maxRoICount_eFex))
-    jFexSRJetUnpacker = CompFactory.jFexSRJetRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("jJ"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jJ")),
-        RoIHalfWidthEta = 0.1,
-        RoIHalfWidthPhi = 0.1,
-        MonTool = RoIsUnpackingMonitoring(prefix="jJ", maxCount=maxRoICount_jFex, maxEta=5))
-    jFexLRJetUnpacker = CompFactory.jFexLRJetRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("jLJ"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jLJ")),
-        RoIHalfWidthEta = 0.1,
-        RoIHalfWidthPhi = 0.1,
-        MonTool = RoIsUnpackingMonitoring(prefix="jLJ", maxCount=maxRoICount_jFex, maxEta=5))
-    gFexSRJetUnpacker = CompFactory.gFexSRJetRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("gJ"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("gJ")),
-        RoIHalfWidthEta = 0.1,
-        RoIHalfWidthPhi = 0.1,
-        MonTool = RoIsUnpackingMonitoring(prefix="gJ", maxCount=maxRoICount_gFex, maxEta=5))
-    gFexLRJetUnpacker = CompFactory.gFexLRJetRoIsUnpackingTool(
-        Decisions = mapThresholdToL1DecisionCollection("gLJ"),
-        OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("gLJ")),
-        RoIHalfWidthEta = 0.1,
-        RoIHalfWidthPhi = 0.1,
-        MonTool = RoIsUnpackingMonitoring(prefix="gLJ", maxCount=maxRoICount_gFex, maxEta=5))
+    tools = []
 
-    tools = [eFexEMUnpacker, eFexTauUnpacker, jFexTauUnpacker, cTauUnpacker,
-             jFexSRJetUnpacker, jFexLRJetUnpacker, gFexLRJetUnpacker, gFexSRJetUnpacker]
+    if flags.Trigger.L1.doeFex:
+        maxRoICount_eFex = 150  # used for histogram range, 144 is the hardware limit
+        eFexEMUnpacker = CompFactory.eFexEMRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("eEM"),
+            DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeEM"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eEM")),
+            RoIHalfWidthEta = 0.2,
+            RoIHalfWidthPhi = 0.2,
+            MonTool = RoIsUnpackingMonitoring(prefix="eEM", maxCount=maxRoICount_eFex))
+        eFexTauUnpacker = CompFactory.eFexTauRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("eTAU"),
+            DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeTAU"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eTAU")),
+            RoIHalfWidthEta = 0.4,
+            RoIHalfWidthPhi = math.pi/8,
+            MonTool = RoIsUnpackingMonitoring(prefix="eTAU", maxCount=maxRoICount_eFex))
+        tools += [eFexEMUnpacker, eFexTauUnpacker]
+
+    if flags.Trigger.L1.dojFex:
+        maxRoICount_jFex = 200  # used for histogram range
+        jFexTauUnpacker = CompFactory.jFexTauRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("jTAU"),
+            DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEjTAU"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jTAU")),
+            RoIHalfWidthEta = 0.4,
+            RoIHalfWidthPhi = math.pi/8,
+            MonTool = RoIsUnpackingMonitoring(prefix="jTAU", maxCount=maxRoICount_jFex))
+        jFexSRJetUnpacker = CompFactory.jFexSRJetRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("jJ"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jJ")),
+            RoIHalfWidthEta = 0.1,
+            RoIHalfWidthPhi = 0.1,
+            MonTool = RoIsUnpackingMonitoring(prefix="jJ", maxCount=maxRoICount_jFex, maxEta=5))
+        jFexLRJetUnpacker = CompFactory.jFexLRJetRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("jLJ"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jLJ")),
+            RoIHalfWidthEta = 0.1,
+            RoIHalfWidthPhi = 0.1,
+            MonTool = RoIsUnpackingMonitoring(prefix="jLJ", maxCount=maxRoICount_jFex, maxEta=5))
+        tools += [jFexTauUnpacker, jFexSRJetUnpacker, jFexLRJetUnpacker]
+
+    if flags.Trigger.L1.dogFex:
+        maxRoICount_gFex = 100  # used for histogram range
+        gFexSRJetUnpacker = CompFactory.gFexSRJetRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("gJ"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("gJ")),
+            RoIHalfWidthEta = 0.1,
+            RoIHalfWidthPhi = 0.1,
+            MonTool = RoIsUnpackingMonitoring(prefix="gJ", maxCount=maxRoICount_gFex, maxEta=5))
+        gFexLRJetUnpacker = CompFactory.gFexLRJetRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("gLJ"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("gLJ")),
+            RoIHalfWidthEta = 0.1,
+            RoIHalfWidthPhi = 0.1,
+            MonTool = RoIsUnpackingMonitoring(prefix="gLJ", maxCount=maxRoICount_gFex, maxEta=5))
+        tools += [gFexSRJetUnpacker, gFexLRJetUnpacker]
+
+    # Need both eFex and jFex for cTAU
+    if flags.Trigger.L1.doeFex and flags.Trigger.L1.dojFex:
+        maxRoICount_eFex = 150  # used for histogram range
+        cTauUnpacker = CompFactory.cTauRoIsUnpackingTool(
+            Decisions = mapThresholdToL1DecisionCollection("cTAU"),
+            DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEcTAU"),
+            OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("cTAU")),
+            RoIHalfWidthEta = 0.4,
+            RoIHalfWidthPhi = math.pi/8,
+            MonTool = RoIsUnpackingMonitoring(prefix="cTAU", maxCount=maxRoICount_eFex))
+        tools += [cTauUnpacker]
 
     return tools
 
@@ -222,45 +234,57 @@ def L1TriggerResultMakerCfg(flags):
     acc = ComponentAccumulator()
     l1trMaker = CompFactory.L1TriggerResultMaker()
 
+    # Reset properties to empty by default and fill based on flags below
+    l1trMaker.MuRoIKey = ""
+    l1trMaker.eFexEMRoIKey = ""
+    l1trMaker.eFexTauRoIKey = ""
+    l1trMaker.jFexTauRoIKey = ""
+    l1trMaker.jFexSRJetRoIKey = ""
+    l1trMaker.jFexLRJetRoIKey = ""
+    l1trMaker.gFexSRJetRoIKey = ""
+    l1trMaker.gFexLRJetRoIKey = ""
+    l1trMaker.cTauRoIKey = ""
+    l1trMaker.cjTauLinkKey = ""
+    l1trMaker.ThresholdPatternTools = []
+
     # Muon RoIs
     if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
         l1trMaker.MuRoIKey = "LVL1MuonRoIs"
         from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
         l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
-    else:
-        l1trMaker.MuRoIKey = ""
 
     # L1Calo RoIs
     if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
-        l1trMaker.eFexEMRoIKey = "L1_eEMRoI"
-        l1trMaker.eFexTauRoIKey = "L1_eTauRoI"
-        l1trMaker.jFexTauRoIKey = "L1_jFexTauRoI"
-        l1trMaker.jFexSRJetRoIKey = "L1_jFexSRJetRoI"
-        l1trMaker.jFexLRJetRoIKey = "L1_jFexLRJetRoI"
-        l1trMaker.gFexSRJetRoIKey = "L1_gFexSRJetRoI"
-        l1trMaker.gFexLRJetRoIKey = "L1_gFexLRJetRoI"
-        l1trMaker.cTauRoIKey = "L1_cTauRoI"  # Note: WriteHandle
-        l1trMaker.cjTauLinkKey = "L1_cTauRoI.jTauLink"  # Note: WriteDecorHandle
-        l1trMaker.ThresholdPatternTools += [
-            CompFactory.eFexEMRoIThresholdsTool(),
-            CompFactory.eFexTauRoIThresholdsTool(),
-            CompFactory.jFexTauRoIThresholdsTool(),
-            CompFactory.cTauRoIThresholdsTool(),
-            CompFactory.jFexSRJetRoIThresholdsTool(),
-            CompFactory.jFexLRJetRoIThresholdsTool(),
-            CompFactory.gFexSRJetRoIThresholdsTool(),
-            CompFactory.gFexLRJetRoIThresholdsTool(),
-        ]
-    else:
-        l1trMaker.eFexEMRoIKey = ""
-        l1trMaker.eFexTauRoIKey = ""
-        l1trMaker.jFexTauRoIKey = ""
-        l1trMaker.jFexSRJetRoIKey = ""
-        l1trMaker.jFexLRJetRoIKey = ""
-        l1trMaker.gFexSRJetRoIKey = ""
-        l1trMaker.gFexLRJetRoIKey = ""
-        l1trMaker.cTauRoIKey = ""
-        l1trMaker.cjTauLinkKey = ""
+        if flags.Trigger.L1.doeFex:
+            l1trMaker.eFexEMRoIKey = "L1_eEMRoI"
+            l1trMaker.eFexTauRoIKey = "L1_eTauRoI"
+            l1trMaker.ThresholdPatternTools += [
+                CompFactory.eFexEMRoIThresholdsTool(),
+                CompFactory.eFexTauRoIThresholdsTool(),
+            ]
+        if flags.Trigger.L1.dojFex:
+            l1trMaker.jFexTauRoIKey = "L1_jFexTauRoI"
+            l1trMaker.jFexSRJetRoIKey = "L1_jFexSRJetRoI"
+            l1trMaker.jFexLRJetRoIKey = "L1_jFexLRJetRoI"
+            l1trMaker.ThresholdPatternTools += [
+                CompFactory.jFexTauRoIThresholdsTool(),
+                CompFactory.jFexSRJetRoIThresholdsTool(),
+                CompFactory.jFexLRJetRoIThresholdsTool(),
+            ]
+        if flags.Trigger.L1.dogFex:
+            l1trMaker.gFexSRJetRoIKey = "L1_gFexSRJetRoI"
+            l1trMaker.gFexLRJetRoIKey = "L1_gFexLRJetRoI"
+            l1trMaker.ThresholdPatternTools += [
+                CompFactory.gFexSRJetRoIThresholdsTool(),
+                CompFactory.gFexLRJetRoIThresholdsTool(),
+            ]
+        # Need both eFex and jFex for cTAU
+        if flags.Trigger.L1.doeFex and flags.Trigger.L1.dojFex:
+            l1trMaker.cTauRoIKey = "L1_cTauRoI"  # Note: WriteHandle
+            l1trMaker.cjTauLinkKey = "L1_cTauRoI.jTauLink"  # Note: WriteDecorHandle
+            l1trMaker.ThresholdPatternTools += [
+                CompFactory.cTauRoIThresholdsTool(),
+            ]
 
     # Placeholder for other L1 xAOD outputs:
     # - CTP result

@@ -163,67 +163,85 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # Run-3 L1Calo decoding
   ########################################
   if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
-    # online case in HLT
-    if flags.Trigger.doHLT:
-      eFexByteStreamTool = eFexByteStreamToolCfg("eFexBSDecoderTool",
-                                                 flags=flags,
-                                                 writeBS=False,
-                                                 multiSlice=False)
-      jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg("jFexBSDecoderTool",
-                                                       flags=flags,
-                                                       writeBS=False)
-      gFexByteStreamTool = gFexByteStreamToolCfg("gFexBSDecoderTool",
-                                                 flags=flags,
-                                                 writeBS=False)
-      decoderTools += [eFexByteStreamTool, jFexRoiByteStreamTool, gFexByteStreamTool]
-      # During commissioning of the phase-1 L1Calo (2022), allow the data to be missing
-      maybeMissingRobs += eFexByteStreamTool.ROBIDs
-      maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
-      maybeMissingRobs += gFexByteStreamTool.ROBIDs
+    #--------------------
+    # eFex
+    #--------------------
+    if flags.Trigger.L1.doeFex:
+      # Online case in HLT with TOB decoding only
+      if flags.Trigger.doHLT:
+        eFexByteStreamTool = eFexByteStreamToolCfg('eFexBSDecoderTool',
+                                                   flags=flags,
+                                                   writeBS=False,
+                                                   TOBs=True,
+                                                   xTOBs=False,
+                                                   multiSlice=False)
+      # Reco/monitoring case (either online but downstream from HLT, or at Tier-0) with xTOB, input tower and multi-slice decoding
+      else:
+        eFexByteStreamTool = eFexByteStreamToolCfg('eFexBSDecoderTool',
+                                                   flags=flags,
+                                                   writeBS=False,
+                                                   TOBs=False,
+                                                   xTOBs=True,
+                                                   multiSlice=True,
+                                                   decodeInputs=flags.Trigger.L1.doCaloInputs)
+      decoderTools += [eFexByteStreamTool]
+      maybeMissingRobs += eFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
-    # reco/monitoring case (either online but downstream from HLT, or at Tier-0)
-    else:
-      # Decode eFex and jFex xTOBs (TOBs are already decoded in HLT, gFex doesn't have xTOBs)
-      eFexByteStreamTool = eFexByteStreamToolCfg("eFexBSDecoderTool",
-                                                 flags=flags,
-                                                 writeBS=False,
-                                                 TOBs=False,
-                                                 xTOBs=True,
-                                                 multiSlice=True,
-                                                 decodeInputs=flags.Trigger.L1.doCaloInputs)
-      jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg("jFexBSDecoderTool",
-                                                       flags=flags,
-                                                       writeBS=False,
-                                                       xTOBs=True)
-      decoderTools += [eFexByteStreamTool, jFexRoiByteStreamTool]
+    #--------------------
+    # jFex
+    #--------------------
+    if flags.Trigger.L1.dojFex:
+      # Online case in HLT with TOB decoding only
+      if flags.Trigger.doHLT:
+        jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool',
+                                                         flags=flags,
+                                                         writeBS=False)
+      # Reco/monitoring case (either online but downstream from HLT, or at Tier-0) with xTOB decoding only
+      else:
+        jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg('jFexBSDecoderTool',
+                                                        flags=flags,
+                                                        writeBS=False,
+                                                        xTOBs=True)
+      decoderTools += [jFexRoiByteStreamTool]
+      maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
+      # Input towers decoding
       if flags.Trigger.L1.doCaloInputs:
-        # Decode jFex and gFex inputs (towers), eFex inputs already included in the tool above
         jFexInputByteStreamTool = jFexInputByteStreamToolCfg('jFexInputBSDecoderTool',
                                                              flags=flags,
                                                              writeBS=False)
-        gFexInputByteStreamTool = gFexInputByteStreamToolCfg('gFexInputByteStreamTool',
+        decoderTools += [jFexInputByteStreamTool]
+        maybeMissingRobs += jFexInputByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
+
+    #--------------------
+    # gFex
+    #--------------------
+    if flags.Trigger.L1.dogFex:
+      # Online case in HLT with TOB decoding (no 'else' case because gFex doesn't have xTOBs to decode offline)
+      if flags.Trigger.doHLT:
+        gFexByteStreamTool = gFexByteStreamToolCfg('gFexBSDecoderTool',
+                                                   flags=flags,
+                                                   writeBS=False)
+        decoderTools += [gFexByteStreamTool]
+        maybeMissingRobs += gFexByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
+
+      # Input towers decoding
+      if flags.Trigger.L1.doCaloInputs:
+        gFexInputByteStreamTool = gFexInputByteStreamToolCfg('gFexInputBSDecoderTool',
                                                              flags=flags,
                                                              writeBS=False)
-        decoderTools += [jFexInputByteStreamTool, gFexInputByteStreamTool]
-
-      # During commissioning of the phase-1 L1Calo (2022), allow the data to be missing
-      maybeMissingRobs += eFexByteStreamTool.ROBIDs
-      maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
-      if flags.Trigger.L1.doCaloInputs:
-        maybeMissingRobs += jFexInputByteStreamTool.ROBIDs
-        maybeMissingRobs += gFexInputByteStreamTool.ROBIDs
+        decoderTools += [gFexInputByteStreamTool]
+        maybeMissingRobs += gFexInputByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Calo (2022)
 
   ########################################
   # Run-3 L1Topo decoding
   ########################################
-  if flags.Trigger.L1.doTopo and flags.Trigger.enableL1CaloPhase1 and flags.Trigger.doHLT:
+  if flags.Trigger.L1.doTopo and flags.Trigger.enableL1CaloPhase1 and flags.Trigger.L1.doTopoPhase1 and flags.Trigger.doHLT:
     topoByteStreamTool = L1TopoPhase1ByteStreamToolCfg("L1TopoBSDecoderTool",
                                                        flags=flags,
                                                        writeBS=False)
     decoderTools += [topoByteStreamTool]
-    # During commissioning of the phase-1 L1Topo (2022), allow the data to be missing
-    maybeMissingRobs += topoByteStreamTool.ROBIDs
+    maybeMissingRobs += topoByteStreamTool.ROBIDs  # Allow the data to be missing during commissioning of the phase-1 L1Topo (2022)
 
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
                                                          DecoderTools=decoderTools,
