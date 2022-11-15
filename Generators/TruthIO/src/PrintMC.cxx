@@ -174,8 +174,9 @@ StatusCode PrintMC::execute() {
 
       // Weights
       std::cout << " Weights(" << evt->weights().size() << ")=";
-      for ( HepMC::WeightContainer::const_iterator wgt = evt->weights().begin();
-            wgt != evt->weights().end(); wgt++ ) { std::cout << *wgt << " "; }
+      for (double w :  evt->weights()) {
+        std::cout << w << " ";
+      }
       std::cout << "\n";
       std::cout << " EventScale " << evt->event_scale()
                 << " [energy] \t alphaQCD=" << evt->alphaQCD()
