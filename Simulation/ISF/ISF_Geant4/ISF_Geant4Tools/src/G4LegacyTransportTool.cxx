@@ -98,7 +98,7 @@ StatusCode iGeant4::G4LegacyTransportTool::initialize()
 }
 
 //________________________________________________________________________
-void iGeant4::G4LegacyTransportTool::initializeOnce()
+void iGeant4::G4LegacyTransportTool::initializeOnce ATLAS_NOT_THREAD_SAFE ()
 {
   // get G4AtlasRunManager
   ATH_MSG_DEBUG("initialize G4AtlasRunManager");

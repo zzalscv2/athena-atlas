@@ -73,7 +73,7 @@ namespace iGeant4
 
     /// G4 initialization called only by the first tool instance.
     /// This is done (for now) because we get multiple tool instances in hive.
-    void initializeOnce();
+    void initializeOnce ATLAS_NOT_THREAD_SAFE ();
 
     /** AlgTool finalize method */
     virtual StatusCode finalize() override final;
