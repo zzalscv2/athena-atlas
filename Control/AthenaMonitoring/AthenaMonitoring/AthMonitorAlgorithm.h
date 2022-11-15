@@ -374,11 +374,14 @@ protected:
     Gaudi::Property<int> m_detailLevel {this,"DetailLevel",0}; ///< Sets the level of detail used in the monitoring
     SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey {this,"EventInfoKey","EventInfo"}; ///< Key for retrieving EventInfo from StoreGate
 
-
 private:
-    typedef std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> MonVarVec_t;
-    std::string m_name;
-    std::unordered_map<std::string, size_t> m_toolLookupMap;
+  typedef std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> MonVarVec_t;
+  std::string m_name;
+  std::unordered_map<std::string, size_t> m_toolLookupMap;
+
+  Gaudi::Property<bool> m_isExpressStreamJob{this,
+					     "isExpressStreamJob", false,
+					     "flag to be set true if Alg is to run in the express stream"};
 };
 
 #endif

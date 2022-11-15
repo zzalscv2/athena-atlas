@@ -3,6 +3,7 @@
 */
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
+#include "TrigDecisionInterface/Conditions.h" //Express_passed bit position
 
 AthMonitorAlgorithm::AthMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
 :AthReentrantAlgorithm(name,pSvcLocator)
@@ -75,23 +76,24 @@ StatusCode AthMonitorAlgorithm::initialize() {
 
 StatusCode AthMonitorAlgorithm::execute( const EventContext& ctx ) const {
 
-    // Checks that all of the  DQ filters are passed. If any one of the filters
-    // fails, return SUCCESS code and do not fill the histograms with the event.
-    for ( const auto& filterItr : m_DQFilterTools ) {
-        if (!filterItr->accept()) {
-            ATH_MSG_DEBUG("Event rejected due to filter tool.");
-            return StatusCode::SUCCESS;
-        }
+  // Checks that all of the  DQ filters are passed. If any one of the filters
+  // fails, return SUCCESS code and do not fill the histograms with the event.
+  for ( const auto& filterItr : m_DQFilterTools ) {
+    if (!filterItr->accept()) {
+      ATH_MSG_DEBUG("Event rejected due to filter tool.");
+      return StatusCode::SUCCESS;
     }
+  }
+  
+  // Trigger: If there is a decision tool and the chains fail, skip the event.
+  if ( !m_trigDecTool.empty() && !trigChainsArePassed(m_vTrigChainNames) ) {
+    ATH_MSG_DEBUG("Event rejected due to trigger filter.");
+    return StatusCode::SUCCESS;
+  }
+  
 
-    // Trigger: If there is a decision tool and the chains fail, skip the event.
-    if ( !m_trigDecTool.empty() && !trigChainsArePassed(m_vTrigChainNames) ) {
-        ATH_MSG_DEBUG("Event rejected due to trigger filter.");
-        return StatusCode::SUCCESS;
-    }
-
-    ATH_MSG_DEBUG("Event accepted!");
-    return fillHistograms(ctx);
+  ATH_MSG_DEBUG("Event accepted!");
+  return fillHistograms(ctx);
 }
 
 
@@ -199,12 +201,42 @@ const ToolHandle<Trig::TrigDecisionTool>& AthMonitorAlgorithm::getTrigDecisionTo
 
 
 bool AthMonitorAlgorithm::trigChainsArePassed( const std::vector<std::string>& vTrigNames ) const {
+  
+  // If no triggers were given, return true.
+  if (vTrigNames.empty()) return true;
+  
+  // Check whether ANY of the triggers in the list are passed
+  
+  // PS WORK IN PROGRESS
+  // Trigger: Check if this Algorithm is being run as an Express Stream job.
+  // Events are entering the express stream are chosen randomly, and by chain,
+  // Hence an additional check should be aplied to see if the chain(s)
+  // monitored here are responsible for the event being selected for
+  // the express stream.
 
-    // If no triggers were given, return true.
-    if (vTrigNames.empty()) return true;
 
-    // Check whether ANY of the triggers in the list are passed
-    return m_trigDecTool->getChainGroup(vTrigNames)->isPassed();
+  // PS WORK IN PROGRESS
+  // If this Algorithm is running in the express stream,
+  // but trigger chain group did not cause the event to be selected,
+  // do not monitor the event.
+  /*
+  const auto group =  m_trigDecTool->getChainGroup(m_vTrigChainNames);
+  if (m_isExpressStreamJob){  
+    const auto passedBits = m_trigDecTool->isPassedBits(group);
+    bool expressPass = passedBits & TrigDefs::Express_passed; //bitwise AND
+    if(!expressPass) {
+      return false;
+    }
+  }
+  
+  // monitor the event if the chain group passes the event.
+  return group->isPassed();
+  */
+
+  
+  // Check whether ANY of the triggers in the list are passed
+  return m_trigDecTool->getChainGroup(vTrigNames)->isPassed();
+  
 }
 
 
