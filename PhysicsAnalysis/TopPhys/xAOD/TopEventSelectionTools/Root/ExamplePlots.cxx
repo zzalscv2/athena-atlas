@@ -74,9 +74,9 @@ namespace top {
     m_hists.addHist("jet_phi", ";Jet #phi;Jets", 20, -M_PI, M_PI);
     if (m_config->isMC()) {
       m_hists.addHist("jet_truthflav", ";Jet truth flavor;Jets", 20, 0., 20.);
-      m_hists.addHist("jet_btagSF_DL1r_77", ";Jet btag SF;Jets", 100, 0.5, 1.5);
+      m_hists.addHist("jet_btagSF_DL1dv01_77", ";Jet btag SF;Jets", 100, 0.5, 1.5);
     }
-    m_hists.addHist("jet_isbtagged_DL1r_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
+    m_hists.addHist("jet_isbtagged_DL1dv01_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
 
     m_hists.addHist("jet0_pt", ";Jet0 p_{T} / GeV; Events / 10 GeV", 25, 5, 505);
     m_hists.addHist("jet0_eta", ";Jet0 #eta; Jets", 25, -2.5, 2.5);
@@ -84,9 +84,9 @@ namespace top {
     m_hists.addHist("jet0_e", ";Jet0 E / GeV; Jets", 100, 0, 1000);
     if (m_config->isMC()) {
       m_hists.addHist("jet0_truthflav", ";Jet0 truth flavor;Jets", 20, 0., 20.);
-      m_hists.addHist("jet0_btagSF_DL1r_77", ";Jet0 btag SF;Jets", 100, 0.5, 1.5);
+      m_hists.addHist("jet0_btagSF_DL1dv01_77", ";Jet0 btag SF;Jets", 100, 0.5, 1.5);
     }
-    m_hists.addHist("jet0_isbtagged_DL1r_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
+    m_hists.addHist("jet0_isbtagged_DL1dv01_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
 
     m_hists.addHist("jet1_pt", ";Jet1 p_{T} / GeV; Events / 10 GeV", 25, 5, 505);
     m_hists.addHist("jet1_eta", ";Jet1 #eta; Jets", 25, -2.5, 2.5);
@@ -94,9 +94,9 @@ namespace top {
     m_hists.addHist("jet1_e", ";Jet1 E / GeV; Jets", 100, 0, 1000);
     if (m_config->isMC()) {
       m_hists.addHist("jet1_truthflav", ";Jet1 truth flavor;Jets", 20, 0., 20.);
-      m_hists.addHist("jet1_btagSF_DL1r_77", ";Jet1 btag SF;Jets", 100, 0.5, 1.5);
+      m_hists.addHist("jet1_btagSF_DL1dv01_77", ";Jet1 btag SF;Jets", 100, 0.5, 1.5);
     }
-    m_hists.addHist("jet1_isbtagged_DL1r_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
+    m_hists.addHist("jet1_isbtagged_DL1dv01_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
 
     m_hists.addHist("jet2_pt", ";Jet2 p_{T} / GeV; Events / 10 GeV", 25, 5, 505);
     m_hists.addHist("jet2_eta", ";Jet2 #eta; Jets", 25, -2.5, 2.5);
@@ -104,9 +104,9 @@ namespace top {
     m_hists.addHist("jet2_e", ";Jet2 E / GeV; Jets", 100, 0, 1000);
     if (m_config->isMC()) {
       m_hists.addHist("jet2_truthflav", ";Jet2 truth flavor;Jets", 20, 0., 20.);
-      m_hists.addHist("jet2_btagSF_DL1r_77", ";Jet2 btag SF;Jets", 100, 0.5, 1.5);
+      m_hists.addHist("jet2_btagSF_DL1dv01_77", ";Jet2 btag SF;Jets", 100, 0.5, 1.5);
     }
-    m_hists.addHist("jet2_isbtagged_DL1r_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
+    m_hists.addHist("jet2_isbtagged_DL1dv01_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
 
     m_hists.addHist("jet3_pt", ";Jet3 p_{T} / GeV; Events / 10 GeV", 25, 5, 505);
     m_hists.addHist("jet3_eta", ";Jet3 #eta; Jets", 25, -2.5, 2.5);
@@ -114,9 +114,9 @@ namespace top {
     m_hists.addHist("jet3_e", ";Jet3 E / GeV; Jets", 100, 0, 1000);
     if (m_config->isMC()) {
       m_hists.addHist("jet3_truthflav", ";Jet3 truth flavor;Jets", 20, 0., 20.);
-      m_hists.addHist("jet3_btagSF_DL1r_77", ";Jet3 btag SF;Jets", 100, 0.5, 1.5);
+      m_hists.addHist("jet3_btagSF_DL1dv01_77", ";Jet3 btag SF;Jets", 100, 0.5, 1.5);
     }
-    m_hists.addHist("jet3_isbtagged_DL1r_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
+    m_hists.addHist("jet3_isbtagged_DL1dv01_77", ";Jet is b-tagged;Jets", 2, 0., 2.);
 
     //Large-R jet
     m_hists.addHist("ljet_n", ";Large-R Jet multiplicity; Jets ", 5, 0, 5);
@@ -228,14 +228,14 @@ namespace top {
       int isbtagged = 0;
       float btagSF = 1.;
       bool hasBtagSF = false;
-      const bool hasBtag = jetPtr->isAvailable<char>("isbtagged_DL1r_FixedCutBEff_77");
+      const bool hasBtag = jetPtr->isAvailable<char>("isbtagged_DL1dv01_FixedCutBEff_77");
       if (hasBtag) {
-        isbtagged = jetPtr->auxdataConst<char>("isbtagged_DL1r_FixedCutBEff_77");
-        m_hists.hist("jet_isbtagged_DL1r_77")->Fill(isbtagged, eventWeight);
+        isbtagged = jetPtr->auxdataConst<char>("isbtagged_DL1dv01_FixedCutBEff_77");
+        m_hists.hist("jet_isbtagged_DL1dv01_77")->Fill(isbtagged, eventWeight);
         if (m_config->isMC()) {
-          if (jetPtr->isAvailable<float>("btag_SF_DL1r_FixedCutBEff_77_nom")) {
-            btagSF = jetPtr->auxdataConst<float>("btag_SF_DL1r_FixedCutBEff_77_nom");
-            m_hists.hist("jet_btagSF_DL1r_77")->Fill(btagSF, eventWeight);
+          if (jetPtr->isAvailable<float>("btag_SF_DL1dv01_FixedCutBEff_77_nom")) {
+            btagSF = jetPtr->auxdataConst<float>("btag_SF_DL1dv01_FixedCutBEff_77_nom");
+            m_hists.hist("jet_btagSF_DL1dv01_77")->Fill(btagSF, eventWeight);
             hasBtagSF = true;
           }
         }
@@ -246,9 +246,9 @@ namespace top {
         m_hists.hist(numbers[i] + "_eta")->Fill(jetPtr->eta(), eventWeight);
         m_hists.hist(numbers[i] + "_phi")->Fill(jetPtr->phi(), eventWeight);
         m_hists.hist(numbers[i] + "_e")->Fill(jetPtr->e() * toGeV, eventWeight);
-        if (hasBtag) m_hists.hist(numbers[i] + "_isbtagged_DL1r_77")->Fill(isbtagged, eventWeight);
+        if (hasBtag) m_hists.hist(numbers[i] + "_isbtagged_DL1dv01_77")->Fill(isbtagged, eventWeight);
         if (m_config->isMC()) {
-          if (hasBtagSF) m_hists.hist(numbers[i] + "_btagSF_DL1r_77")->Fill(btagSF, eventWeight);
+          if (hasBtagSF) m_hists.hist(numbers[i] + "_btagSF_DL1dv01_77")->Fill(btagSF, eventWeight);
           m_hists.hist(numbers[i] + "_truthflav")->Fill(jet_truthflav, eventWeight);
         }
       }
