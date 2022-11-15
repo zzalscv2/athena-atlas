@@ -1,10 +1,7 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #################################################################
 # Common code used for the HIGG4 jet building and calibration   #
-# Z.Zinonos                                     		#
-# zenon@cern.ch                                 		#
-# Nov 2015                                      		#
 #################################################################
 
 from DerivationFrameworkJetEtMiss.JetCommon import *
@@ -16,23 +13,26 @@ def setup(HIGG4DxName, HIGG4DxSequence, HIGG4DxSlimmingHelper):
     
     if not HIGG4DxName in OutputJets:
         reducedJetList = ["AntiKt4TruthJets",
-                          "AntiKt4TruthWZJets",
-                          "AntiKt4TruthDressedWZJets"
+                          "AntiKt4TruthWZJets"
                           ]
+
+        if HIGG4DxName in ['HIGG4D5']:
+            reducedJetList += ["AntiKt4TruthDressedWZJets"]
       
         if HIGG4DxName in ['HIGG4D2', 'HIGG4D3', 'HIGG4D6']:
-            
             reducedJetList += ["AntiKt4PV0TrackJets", 
                                "AntiKt2PV0TrackJets",
                                "AntiKt10LCTopoJets"
                                ]
-        if HIGG4DxName in ['HDBS1']:
-            
+
+        if HIGG4DxName in ['HDBS1']:            
             reducedJetList += ["AntiKt4PV0TrackJets", 
                                "AntiKt2PV0TrackJets"
                                ]                      
         replaceAODReducedJets(reducedJetList,HIGG4DxSequence,HIGG4DxName)
-        addAntiKt4TruthDressedWZJets(HIGG4DxSequence,HIGG4DxName)
+
+        if HIGG4DxName in ['HIGG4D5']:
+            addAntiKt4TruthDressedWZJets(HIGG4DxSequence,HIGG4DxName)
         
         # AntiKt4EMPFlow is not tagged by default. Need to re-tag:
         FlavorTagInit(JetCollections  = ['AntiKt4EMPFlowJets'], Sequencer = HIGG4DxSequence)
