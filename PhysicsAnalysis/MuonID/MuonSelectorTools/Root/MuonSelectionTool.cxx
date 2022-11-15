@@ -320,7 +320,7 @@ namespace CP {
         asg::AcceptData acceptData(&m_acceptInfo);
 
         // Do the eta cut:
-        if (std::abs(mu.eta()) > m_maxEta) {
+        if (std::abs(mu.eta()) >= m_maxEta) {
             ATH_MSG_VERBOSE("Failed eta cut");
             return acceptData;
         }
