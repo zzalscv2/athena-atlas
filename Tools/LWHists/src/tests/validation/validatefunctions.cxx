@@ -38,6 +38,9 @@ namespace HistValFunctions {
   //string comparisons done right:
   void test(const std::string& testname, const char* val1, const char* val2)
   {
+    if ((val1 == nullptr) or (val2==nullptr)){
+      testfailed(testname);
+    }
     if (std::string(val1)!=std::string(val2))
       testfailed(testname,val1,val2);
   }
