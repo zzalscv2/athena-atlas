@@ -123,7 +123,7 @@ namespace CP {
         for (const xAOD::IParticle* particle : *container) {
             if (m_dec_isoselection) (*m_dec_isoselection)(*particle) = true && m_selectorTool->accept(*particle);
             const IsoVector& iso_types = getIsolationTypes(particle);
-            if (iso_types.empty()) { ATH_MSG_WARNING("No isolation types have been defined for particle type " << particleName(particle)); }
+            if (iso_types.empty()) { ATH_MSG_DEBUG("No isolation types have been defined for particle type " << particleName(particle)); }
             for (const IsoType type : iso_types) {
                 IsoHelperMap::const_iterator Itr = m_isohelpers.find(type);
                 if (Itr == m_isohelpers.end() || Itr->second->backupIsolation(particle) == CorrectionCode::Error) {
