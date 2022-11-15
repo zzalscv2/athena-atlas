@@ -101,7 +101,8 @@ public:
 
 private:
 
-  StatusCode digitize(const EventContext& ctx);
+  StatusCode digitize(const EventContext& ctx,
+                      TimedHitCollection<SiHit>& thpcsi);
   bool NeighbouringClusters(const std::vector<Identifier>& potentialClusterRDOList,  const InDet::SCT_Cluster *existingCluster) const;
   void Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY ) const;
 
