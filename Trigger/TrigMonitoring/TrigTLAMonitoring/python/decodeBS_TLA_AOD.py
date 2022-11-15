@@ -43,6 +43,7 @@ def outputCfg(flags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     acc.merge(OutputStreamCfg(flags, "AOD", ItemList=ItemList))
+    
 
     return acc
 
@@ -52,41 +53,56 @@ def GetCustomAthArgs():
     parser.add_argument("--filesInput", action='append')
     return parser.parse_args()
 
-if __name__ == "__main__":
-    args = GetCustomAthArgs()
 
-    # Setup flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = args.filesInput
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.AODFileName = 'AOD.pool.root'
-    ConfigFlags.Trigger.triggerMenuSetup = 'Physics_pp_run3_v1'
-    ConfigFlags.lock()
-
+def setupDecodeCfgCA(flags):
+  
+    
     # Setup main services
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     # Setup input
 
     # ByteStream input
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    cfg.merge(ByteStreamReadCfg(ConfigFlags))
+    cfg.merge(ByteStreamReadCfg(flags))
 
     # Decoding sequence
-    cfg.merge(decodingCfg(ConfigFlags))
+    cfg.merge(decodingCfg(flags))
 
     # Trigger metadata
     from TriggerJobOpts.TriggerRecoConfig import TriggerMetadataWriterCfg
-    metadataAcc, _ = TriggerMetadataWriterCfg(ConfigFlags)
+    metadataAcc, _ = TriggerMetadataWriterCfg(flags)
+
     cfg.merge( metadataAcc )
 
     # Output
-    cfg.merge(outputCfg(ConfigFlags))
+    cfg.merge(outputCfg(flags))
     
     # Dump the pickle file
     with open("DecodeBS_TLA_AOD.pkl", "wb") as f:
         cfg.store(f)
+
+    return cfg
+
+
+if __name__ == "__main__":
+   
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+
+    args = GetCustomAthArgs()
+
+    # Setup custom input file
+    ConfigFlags.Input.Files = args.filesInput
+
+    ConfigFlags.Trigger.triggerConfig = "DB"
+    ConfigFlags.Input.isMC = False
+
+    
+    ConfigFlags.lock()
+
+    # setup CA 
+    cfg = setupDecodeCfgCA(ConfigFlags)
 
     # Execute
     import sys
