@@ -110,10 +110,10 @@ namespace ActsTrk {
              * @return TrackStateProxy::Covariance 
              */            
             typename ConstTrackStateProxy::Covariance covariance_impl(IndexType index) const {
-                return trackMeasurements().at(index)-> covMatrixEigen();
+                return trackParameters().at(index)-> covMatrixEigen();
             };        
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) covariance_impl(IndexType index) {
-                return trackMeasurements().at(index)-> covMatrixEigen();
+                return trackParameters().at(index)-> covMatrixEigen();
             }
 
             /**

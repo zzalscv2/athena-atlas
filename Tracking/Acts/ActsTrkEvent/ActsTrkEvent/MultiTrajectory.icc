@@ -50,16 +50,19 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
 
         auto addParam = [this]() -> IndexType {
             trackParameters().push_back(new xAOD::TrackParameters_v1());
+            trackParameters().back()->resize();
             return trackParameters().size() - 1;
         };
 
         auto addJacobian = [this]() -> IndexType {
             trackJacobians().push_back(new xAOD::TrackJacobian_v1());
+            trackJacobians().back()->resize();
             return trackJacobians().size() - 1;
         };
 
         auto addMeasurement = [this]() -> IndexType {
             trackMeasurements().push_back(new xAOD::TrackMeasurement_v1());
+            trackMeasurements().back()->resize();
             return trackMeasurements().size() - 1;
         };
 
