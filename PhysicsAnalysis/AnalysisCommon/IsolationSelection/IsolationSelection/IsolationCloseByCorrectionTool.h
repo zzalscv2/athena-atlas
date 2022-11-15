@@ -57,8 +57,8 @@ namespace CP {
 
         virtual asg::AcceptData acceptCorrected(const xAOD::IParticle& x, const xAOD::IParticleContainer& closePar) const override;
 
-        virtual CorrectionCode getCloseByIsoCorrection(const xAOD::ElectronContainer* Electrons, const xAOD::MuonContainer* Muons,
-                                                       const xAOD::PhotonContainer* Photons) const override;
+        virtual CorrectionCode getCloseByIsoCorrection(xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
+                                                       xAOD::PhotonContainer* Photons) const override;
         virtual CorrectionCode subtractCloseByContribution(xAOD::IParticle& x, const xAOD::IParticleContainer& closebyPar) const override;
 
         virtual float getOriginalIsolation(const xAOD::IParticle& P, IsoType type) const override;
