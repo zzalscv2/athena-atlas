@@ -267,10 +267,16 @@ StatusCode ISF::PunchThroughTool::initialize()
 
 StatusCode ISF::PunchThroughTool::finalize()
 {
-  ATH_MSG_DEBUG( "[punchthrough] finalize() successful" );
+
+  for(auto & each : m_particles) {
+    delete each.second;
+  }
+
 
   // close the file with the lookuptable
   m_fileLookupTable->Close();
+
+  ATH_MSG_DEBUG( "[punchthrough] finalize() successful" );
 
   return StatusCode::SUCCESS;
 }
