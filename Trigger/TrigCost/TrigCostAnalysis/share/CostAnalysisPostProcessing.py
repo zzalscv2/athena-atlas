@@ -28,8 +28,10 @@ def main():
     parser.add_argument('--underflowThreshold', default=0.5, help='Threshold of underflow percent value to save warning in metadata tree.')
     parser.add_argument('--overflowThreshold', default=0.1, help='Threshold of underflow percent value to save warning in metadata tree.')
     parser.add_argument('--dumpAlgorithmSummary', action='store_true', help='Print algorithm\'s mean time of execution to the log file') 
-    parser.add_argument('--maxRanges', type=int, default=5, help="Maximum number of ranges to process. Use -1 to process all.")   
+    parser.add_argument('--maxRanges', type=int, default=5, help="Maximum number of ranges to process. Use -1 to process all.")  
+    parser.add_argument('--loglevel', type=int, default=3, help='Verbosity level: 1 - VERBOSE, 2 - DEBUG, 3 - INFO') 
     args = parser.parse_args()
+    log.level = args.loglevel
     
     inputFile = ROOT.TFile(args.file, 'READ')
 
@@ -46,7 +48,7 @@ def main():
         if not warningMsg:
             log.error("Postprocessing script failed!")
         else:
-            saveMetadata(inputFile, metadata, warningMsg, args.trpDetails)
+            saveMetadata(inputFile, metadata, warningMsg, args.trpDetails, args.loglevel, args.maxRanges)
     else:
         log.error("File %s not found", args.file)
 
