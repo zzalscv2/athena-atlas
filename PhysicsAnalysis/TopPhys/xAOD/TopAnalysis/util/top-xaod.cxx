@@ -422,7 +422,7 @@ int main(int argc, char** argv) {
     topPartonHistory =
       std::unique_ptr<top::CalcTopPartonHistory>(new top::CalcTwhPartonHistory("top::CalcTwhPartonHistory"));
     top::check(topPartonHistory->setProperty("config", topConfig),
-               "Failed to setProperty of top::CalcTtttPartonHistory");
+               "Failed to setProperty of top::CalcTwhPartonHistory");
   }
 
 
