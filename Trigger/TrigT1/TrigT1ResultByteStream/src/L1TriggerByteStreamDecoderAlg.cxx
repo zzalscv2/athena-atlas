@@ -50,6 +50,18 @@ namespace {
       }
       s << "]";
   }
+  std::string robIdsToString(const std::vector<uint32_t>& robIds) {
+    std::ostringstream ss;
+    bool first{true};
+    ss << "[";
+    for (const uint32_t robId : robIds) {
+      if (first) {first=false;}
+      else {ss << ", ";}
+      ss << "0x" << std::hex << robId << std::dec;
+    }
+    ss << "]";
+    return ss.str();
+  }
 }
 
 // =============================================================================
@@ -68,10 +80,14 @@ StatusCode L1TriggerByteStreamDecoderAlg::initialize() {
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
   ATH_CHECK(m_bsMetaDataContRHKey.initialize(SG::AllowEmpty));
 
+  // Build a list of unique ROB IDs to request in each event
   for (const auto& decoderTool : m_decoderTools) {
     const std::vector<uint32_t>& ids = decoderTool->robIds();
     m_robIds.insert(m_robIds.end(), ids.begin(), ids.end());
   }
+  std::sort(m_robIds.begin(),m_robIds.end());
+  m_robIds.erase(std::unique(m_robIds.begin(),m_robIds.end()), m_robIds.end());
+  ATH_MSG_INFO("Will request " << m_robIds.size() << " ROBs per event: " << robIdsToString(m_robIds));
 
   // Parse properties
   m_maybeMissingRobs.insert(m_maybeMissingRobsProp.value().begin(), m_maybeMissingRobsProp.value().end());
