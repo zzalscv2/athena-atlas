@@ -22,12 +22,7 @@ class AtlasExtrapolationEngine( ExEngine ):
         AtlasTrackingGeometrySvc=None
         AtlasTrackingGeometryCondAlg=None
         if not TrackingGeometrySvc :
-            if TrackingCommon.use_tracking_geometry_cond_alg :
-                AtlasTrackingGeometryCondAlg = createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
-            else :
-                from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
-                from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-                AtlasTrackingGeometrySvc = svcMgr.AtlasTrackingGeometrySvc  # noqa: F811
+            AtlasTrackingGeometryCondAlg = createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
         else :
             AtlasTrackingGeometrySvc = TrackingGeometrySvc
 
