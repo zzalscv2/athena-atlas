@@ -498,7 +498,14 @@ def setupMenu():
         ChainProp(name="HLT_tau25_idperf_trackLRT_L1TAU12IM", groups=DevGroup),
         ChainProp(name="HLT_tau25_idperf_tracktwoLLP_L1TAU12IM", groups=DevGroup),
         ChainProp(name="HLT_tau80_idperf_trackLRT_L1TAU60", groups=DevGroup),
-        ChainProp(name="HLT_tau160_idperf_trackLRT_L1TAU100", groups=DevGroup),
+        ChainProp(name="HLT_tau160_idperf_trackLRT_L1TAU100", groups=DevGroup), 
+
+        
+        # [ATR-26629 ] Request of adding support tau20_idperf/perf chains
+        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1TAU8", groups=DevGroup),
+        ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1TAU8", groups=DevGroup),
+        ChainProp(name="HLT_tau20_perf_tracktwoMVA_L1eTAU12", groups=DevGroup),
+        ChainProp(name="HLT_tau20_idperf_tracktwoMVA_L1eTAU12", groups=DevGroup),
     ]
 
     chains['Bphysics'] += [
