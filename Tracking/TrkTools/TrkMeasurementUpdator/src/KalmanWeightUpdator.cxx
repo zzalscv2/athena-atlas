@@ -276,7 +276,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanWeightUpdator::combineStates ( 
     // chi^2 = (p_2 - p)^T G_2 (p_2 - p) + (p - p_1)^T G_1 (p - p_1)
     Amg::VectorX r2 = two.parameters() - p;
     Amg::VectorX r1 = p - one.parameters();
-    fitQoS = makeChi2Object(r2, G2, 31, r1, G1, 31);
+    fitQoS = new Trk::FitQualityOnSurface(makeChi2Object(r2, G2, 31, r1, G1, 31));
 
     if (m_outputlevel<=0 && comb) logResult("combineStates(TP,TP,FQ)",*comb);
     return comb;
@@ -284,7 +284,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanWeightUpdator::combineStates ( 
 
 
 // estimator for FitQuality on Surface
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanWeightUpdator::fullStateFitQuality ( const Trk::TrackParameters& trkPar,
                                                 const Amg::Vector2D& locPos,
                                                 const Amg::MatrixX& rioErr) const {
@@ -293,7 +293,7 @@ Trk::KalmanWeightUpdator::fullStateFitQuality ( const Trk::TrackParameters& trkP
     // try if Track Parameters are measured ones ?
     if (!trkPar.covariance()) {
         ATH_MSG_ERROR( "updated smoother/trajectory has no error matrix"  );
-        return nullptr;
+        return {};
     }
     // covariance matrix for prediction
     const AmgSymMatrix(5)& covTrk = *trkPar.covariance();
@@ -320,7 +320,7 @@ Trk::KalmanWeightUpdator::fullStateFitQuality ( const Trk::TrackParameters& trkP
 
 
 // estimator for FitQuality on Surface
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanWeightUpdator::fullStateFitQuality ( const Trk::TrackParameters& trkPar,
                                                 const Trk::LocalParameters& rioPar,
                                                 const Amg::MatrixX&     rioErr) const {
@@ -329,7 +329,7 @@ Trk::KalmanWeightUpdator::fullStateFitQuality ( const Trk::TrackParameters& trkP
     // try if Track Parameters are measured ones ?
     if (!trkPar.covariance()) {
       ATH_MSG_ERROR( "updated smoother/trajectory has no error matrix"  );
-      return nullptr;
+      return {};
     }
     // covariance matrix for prediction
     const AmgSymMatrix(5)& covTrk = *trkPar.covariance();
@@ -346,7 +346,7 @@ Trk::KalmanWeightUpdator::fullStateFitQuality ( const Trk::TrackParameters& trkP
 }
 
 // estimator for FitQuality on Surface
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParameters& predPar,
                                                         const Amg::Vector2D&   rioLocPos,
                                                         const Amg::MatrixX&     rioLocErr) const {
@@ -354,7 +354,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
     // try if Track Parameters are measured ones ?
     if (!predPar.covariance()) {
       ATH_MSG_ERROR( "input trajectory state has no error matrix"  );
-      return nullptr;
+      return {};
     }
     // covariance matrix for prediction
     const AmgSymMatrix(5)& covPred = *predPar.covariance();
@@ -380,7 +380,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
 }
 
 // estimator for FitQuality on Surface
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParameters& predPar,
                                                         const Trk::LocalParameters& rioPar,
                                                         const Amg::MatrixX&     rioErr) const {
@@ -389,7 +389,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
     // try if Track Parameters are measured ones ?
     if (!predPar.covariance()) {
       ATH_MSG_ERROR( "input trajectory state has no error matrix"  );
-      return nullptr;
+      return {};
     }
     // covariance matrix for prediction
     const AmgSymMatrix(5)& covPred = *predPar.covariance();
@@ -405,7 +405,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
 }
 
 // estimator for FitQuality on Surface
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParameters& one,
                                                         const Trk::TrackParameters& two ) const {
     ATH_MSG_VERBOSE( "--> entered KalmanWeightUpdator::predictedStateFitQuality(TP,TP)"  );
@@ -413,12 +413,12 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
     // remember, either one OR two might have no error, but not both !
     if (!one.covariance() && !two.covariance()) {
         ATH_MSG_WARNING( "both parameters have no errors, invalid use of Updator::fitQuality()"  );
-        return nullptr;
+        return {};
     }
     // if only one of two has an error, place a message.
     if (!one.covariance() || !two.covariance()) {
         ATH_MSG_DEBUG( "One parameter does not have uncertainties, assume initial state and return chi2=0.0"  );
-        return new FitQualityOnSurface(0.f, 5);
+        return FitQualityOnSurface(0.f, 5);
     }
 
     // covariance matrix for prediction and the state to be added
@@ -432,7 +432,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
     AmgSymMatrix(5) R = (covTrkOne + covTrkTwo).inverse();
 
     double  chiSquared = r.transpose()*R*r;
-    return new FitQualityOnSurface(chiSquared, 5);
+    return FitQualityOnSurface(chiSquared, 5);
 }
 
 std::vector<double> Trk::KalmanWeightUpdator::initialErrors() const {
@@ -536,7 +536,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanWeightUpdator::calculateFilterS
     Amg::VectorX r = m - H * pNew;
     Amg::VectorX deltaP = pNew - pOld;
     //double chiSquared = W.similarity(r) + GOld.similarity(deltaP);
-    fitQoS = makeChi2Object(r, W, 0, deltaP, GOld, 31);
+    fitQoS = new Trk::FitQualityOnSurface(makeChi2Object(r, W, 0, deltaP, GOld, 31));
   }
 
   std::unique_ptr<TrackParameters> updated = p.associatedSurface().createUniqueTrackParameters(pNew[Trk::loc1],pNew[Trk::loc2],
@@ -636,7 +636,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanWeightUpdator::calculateFilterS
     Amg::VectorX r = m - H * pNew;
     Amg::VectorX deltaP = pNew - pOld;
     //double chiSquared = W.similarity(r) + GOld.similarity(deltaP);
-    fitQoS = makeChi2Object(r, W, m.parameterKey(), deltaP, GOld, 31);
+    fitQoS = new Trk::FitQualityOnSurface(makeChi2Object(r, W, m.parameterKey(), deltaP, GOld, 31));
   }
 
   std::unique_ptr<TrackParameters> updated =
@@ -651,7 +651,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanWeightUpdator::calculateFilterS
 
 
 // chi2 calculation with weighted means formalism
-Trk::FitQualityOnSurface* Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX& residual1,
+Trk::FitQualityOnSurface  Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX& residual1,
                                                                     const Amg::MatrixX& weight1,
                                                                     const int key1,
                                                                     Amg::VectorX& residual2,
@@ -682,11 +682,11 @@ Trk::FitQualityOnSurface* Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX
 
     ATH_MSG_VERBOSE( "-U- fitQuality on surface, chi2 :" << chiSquared << " / ndof= " << numberDoF  );
 
-    return new FitQualityOnSurface(chiSquared, numberDoF);
+    return FitQualityOnSurface(chiSquared, numberDoF);
 }
 
 // chi2 calculation with gain matrix formalism and predicted states, resp.
-Trk::FitQualityOnSurface* Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX& residual,
+Trk::FitQualityOnSurface  Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX& residual,
                                                                     const Amg::MatrixX& covTrk,
                                                                     const Amg::MatrixX& covRio,
                                                                     const Amg::MatrixX& H,
@@ -700,7 +700,7 @@ Trk::FitQualityOnSurface* Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX
 
     // number of degree of freedom added
     int     numberDoF  = covRio.cols();
-    return new FitQualityOnSurface(chiSquared, numberDoF);
+    return FitQualityOnSurface(chiSquared, numberDoF);
 }
 
 

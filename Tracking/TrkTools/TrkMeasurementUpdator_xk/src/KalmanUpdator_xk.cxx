@@ -504,21 +504,21 @@ bool                        Trk::KalmanUpdator_xk::combineStates
 // Xi2 of Local position
 ///////////////////////////////////////////////////////////////////
 
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdator_xk::predictedStateFitQuality
 (const Trk::TrackParameters& T,
  const Amg::Vector2D       & P,
  const Amg::MatrixX        & E) const
 {
   const AmgSymMatrix(5)* v = T.covariance();
-  if(!v) return nullptr;
+  if(!v) return {};
 
   double t[5] = {T.parameters()[0],T.parameters()[1],
 		 (*v)(0,0),(*v)(1,0),(*v)(1,1)};
 
   int N; double x2;
-  if(predictedStateFitQuality(t,P,E,N,x2)) return new Trk::FitQualityOnSurface(x2,N);
-  return nullptr;
+  if(predictedStateFitQuality(t,P,E,N,x2)) return Trk::FitQualityOnSurface(x2,N);
+  return {};
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -545,7 +545,7 @@ bool Trk::KalmanUpdator_xk::predictedStateFitQuality
 // Xi2 of Local parameters
 ///////////////////////////////////////////////////////////////////
 
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdator_xk::predictedStateFitQuality
 (const Trk::TrackParameters& T,
  const Trk::LocalParameters& P,
@@ -554,14 +554,14 @@ Trk::KalmanUpdator_xk::predictedStateFitQuality
   // Conversion track parameters
   //
   double p[5];
-  double pv[15]; if(!trackParametersToUpdator(T,p,pv)) return nullptr;
+  double pv[15]; if(!trackParametersToUpdator(T,p,pv)) return {};
 
   // Conversion local parameters
   //
   int n;
   int k;
   double m[5];
-  double mv[15]; if(!localParametersToUpdator(P,E,n,k,m,mv)) return nullptr;
+  double mv[15]; if(!localParametersToUpdator(P,E,n,k,m,mv)) return {};
 
   // Xi2 calculation
   //
@@ -575,9 +575,9 @@ Trk::KalmanUpdator_xk::predictedStateFitQuality
 
   if(q) {
     differenceParLoc(k,m,p,r);
-    return new Trk::FitQualityOnSurface(Xi2(n,r,w),n);
+    return Trk::FitQualityOnSurface(Xi2(n,r,w),n);
   }
-  return nullptr;
+  return {};
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -620,20 +620,20 @@ bool Trk::KalmanUpdator_xk::predictedStateFitQuality
 // Xi2 of Local position
 ///////////////////////////////////////////////////////////////////
 
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdator_xk::fullStateFitQuality
 (const Trk::TrackParameters& T,
  const Amg::Vector2D       & P,
  const Amg::MatrixX        & E) const
 {
   const AmgSymMatrix(5)* v = T.covariance();
-  if(!v) return nullptr;
+  if(!v) return {};
   double t[5] = {T.parameters()[0],T.parameters()[1],
 		 (*v)(0,0),(*v)(1,0),(*v)(1,1)};
 
   int N; double x2;
-  if(fullStateFitQuality(t,P,E,N,x2)) return new Trk::FitQualityOnSurface(x2,N);
-  return nullptr;
+  if(fullStateFitQuality(t,P,E,N,x2)) return Trk::FitQualityOnSurface(x2,N);
+  return {};
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -660,7 +660,7 @@ bool Trk::KalmanUpdator_xk::fullStateFitQuality
 // Xi2 of Local parameters
 ///////////////////////////////////////////////////////////////////
 
-const Trk::FitQualityOnSurface* Trk::KalmanUpdator_xk::fullStateFitQuality
+Trk::FitQualityOnSurface Trk::KalmanUpdator_xk::fullStateFitQuality
 (const Trk::TrackParameters& T,
  const Trk::LocalParameters& P,
  const Amg::MatrixX        & E) const
@@ -668,13 +668,13 @@ const Trk::FitQualityOnSurface* Trk::KalmanUpdator_xk::fullStateFitQuality
   // Conversion track parameters
   //
   double p[5];
-  double pv[15]; if(!trackParametersToUpdator(T,p,pv)) return nullptr;
+  double pv[15]; if(!trackParametersToUpdator(T,p,pv)) return {};
   // Conversion local parameters
   //
   int n;
   int k;
   double m[5];
-  double mv[15]; if(!localParametersToUpdator(P,E,n,k,m,mv)) return nullptr;
+  double mv[15]; if(!localParametersToUpdator(P,E,n,k,m,mv)) return {};
 
   // Xi2 calculation
   //
@@ -688,9 +688,9 @@ const Trk::FitQualityOnSurface* Trk::KalmanUpdator_xk::fullStateFitQuality
 
   if(q) {
     differenceParLoc(k,m,p,r);
-    return new Trk::FitQualityOnSurface(Xi2(n,r,w),n);
+    return Trk::FitQualityOnSurface(Xi2(n,r,w),n);
   }
-  return new Trk::FitQualityOnSurface(0.,n);
+  return Trk::FitQualityOnSurface(0.,n);
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -732,16 +732,16 @@ bool Trk::KalmanUpdator_xk::fullStateFitQuality
 // Xi2 of two track parameters
 ///////////////////////////////////////////////////////////////////
 
-const Trk::FitQualityOnSurface* Trk::KalmanUpdator_xk::predictedStateFitQuality
+Trk::FitQualityOnSurface Trk::KalmanUpdator_xk::predictedStateFitQuality
 (const Trk::TrackParameters& T1,
  const Trk::TrackParameters& T2) const
 {
   const double pi2 = 2.*M_PI ;
   const double pi = M_PI;
   double m[5];
-  double mv[15]; if(!trackParametersToUpdator(T1,m,mv)) return nullptr;
+  double mv[15]; if(!trackParametersToUpdator(T1,m,mv)) return {};
   double p[5];
-  double pv[15]; if(!trackParametersToUpdator(T2,p,pv)) return nullptr;
+  double pv[15]; if(!trackParametersToUpdator(T2,p,pv)) return {};
   double r[5] = {m [ 0]-p [ 0],
 		 m [ 1]-p [ 1],
 		 m [ 2]-p [ 2],
@@ -769,8 +769,8 @@ const Trk::FitQualityOnSurface* Trk::KalmanUpdator_xk::predictedStateFitQuality
 		 mv[13]+pv[13],
 		 mv[14]+pv[14]};
 
-  if(invert(5,w,w)) return new Trk::FitQualityOnSurface(Xi2(5,r,w),5);
-  return nullptr;
+  if(invert(5,w,w)) return Trk::FitQualityOnSurface(Xi2(5,r,w),5);
+  return {};
 }
 
 ///////////////////////////////////////////////////////////////////

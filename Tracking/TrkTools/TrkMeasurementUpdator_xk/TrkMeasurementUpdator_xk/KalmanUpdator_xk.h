@@ -157,15 +157,15 @@ namespace Trk {
       // Xi2 calculation
       ///////////////////////////////////////////////////////////////////
 
-      virtual const FitQualityOnSurface* predictedStateFitQuality
+      virtual FitQualityOnSurface predictedStateFitQuality
 	(const TrackParameters&,const Amg::Vector2D&  ,const Amg::MatrixX&) const override final;
-      virtual const FitQualityOnSurface* predictedStateFitQuality
+      virtual FitQualityOnSurface predictedStateFitQuality
 	(const TrackParameters&,const LocalParameters&,const Amg::MatrixX&) const override final;
-      virtual const FitQualityOnSurface* fullStateFitQuality
+      virtual FitQualityOnSurface fullStateFitQuality
 	(const TrackParameters&,const Amg::Vector2D&,  const Amg::MatrixX&) const override final;
-      virtual const FitQualityOnSurface* fullStateFitQuality
+      virtual FitQualityOnSurface fullStateFitQuality
 	(const TrackParameters&,const LocalParameters&,const Amg::MatrixX&) const override final;
-      virtual const FitQualityOnSurface*  predictedStateFitQuality
+      virtual FitQualityOnSurface  predictedStateFitQuality
 	(const TrackParameters&,const TrackParameters&) const override final;
 
       virtual bool predictedStateFitQuality

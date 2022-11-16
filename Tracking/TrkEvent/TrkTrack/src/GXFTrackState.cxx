@@ -26,7 +26,7 @@ namespace Trk {
     m_derivs(rhs.m_derivs),
     m_covariancematrix(rhs.m_covariancematrix),
     m_covariance_set(rhs.m_covariance_set),
-    m_fitqual(rhs.m_fitqual ? std::make_unique<const FitQualityOnSurface>(*rhs.m_fitqual) : nullptr), 
+    m_fitqual(rhs.m_fitqual), 
     m_sinstereo(rhs.m_sinstereo),
     m_mType(rhs.m_mType), 
     m_recalib(rhs.m_recalib),
@@ -51,7 +51,7 @@ namespace Trk {
     m_derivs(), 
     m_covariancematrix(),
     m_covariance_set(false),
-    m_fitqual(nullptr),
+    m_fitqual(),
     m_sinstereo(0), 
     m_mType(TrackState::unidentified), 
     m_recalib(false),
@@ -71,7 +71,7 @@ namespace Trk {
     m_derivs(), 
     m_covariancematrix(), 
     m_covariance_set(false),
-    m_fitqual(nullptr),
+    m_fitqual(),
     m_sinstereo(0), 
     m_mType(TrackState::unidentified), 
     m_recalib(false),
@@ -92,7 +92,7 @@ namespace Trk {
     m_derivs(), 
     m_covariancematrix(),
     m_covariance_set(false), 
-    m_fitqual(nullptr),
+    m_fitqual(),
     m_sinstereo(0), 
     m_mType(TrackState::unidentified), 
     m_recalib(false),
@@ -201,12 +201,12 @@ namespace Trk {
     }
   }
 
-  void GXFTrackState::setFitQuality(std::unique_ptr<const FitQualityOnSurface> fitqual) {
-    m_fitqual = std::move(fitqual);
+  void GXFTrackState::setFitQuality(FitQualityOnSurface fitqual) {
+    m_fitqual = fitqual;
   }
 
-  const FitQualityOnSurface *GXFTrackState::fitQuality(void) {
-    return m_fitqual.get();
+  const FitQualityOnSurface GXFTrackState::fitQuality(void) {
+    return m_fitqual;
   }
 
   int
@@ -294,9 +294,7 @@ namespace Trk {
     std::unique_ptr<const TrackParameters> trackpar = unique_clone(m_trackpar.get());
     std::unique_ptr<const MeasurementBase> measurement = unique_clone(m_measurement.get());
 
-    std::unique_ptr<const FitQualityOnSurface> fitQual =m_fitqual
-        ? std::make_unique<FitQualityOnSurface>(*(m_fitqual))
-        : nullptr;
+    FitQualityOnSurface fitQual =m_fitqual;
 
     std::unique_ptr<const MaterialEffectsBase> mateff = nullptr;
     std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
@@ -319,17 +317,17 @@ namespace Trk {
     } else {
       if (m_tsType.test(TrackStateOnSurface::Measurement)) {
         typePattern.set(TrackStateOnSurface::Measurement);        
-        if ((fitQual != nullptr) && (fitQual->chiSquared() > 1.e5 || fitQual->chiSquared() < 0)) {
+        if ((fitQual) && (fitQual.chiSquared() > 1.e5 || fitQual.chiSquared() < 0)) {
           double newchi2 = 0;
-          int ndf = fitQual->numberDoF();
+          int ndf = fitQual.numberDoF();
           
-          if (fitQual->chiSquared() < 0) {
+          if (fitQual.chiSquared() < 0) {
             newchi2 = 0;
-          } else if (fitQual->chiSquared() > 1.e5) {
+          } else if (fitQual.chiSquared() > 1.e5) {
             newchi2 = 1.e5;
           }
           
-          fitQual = std::make_unique<FitQualityOnSurface>(newchi2, ndf);
+          fitQual = FitQualityOnSurface(newchi2, ndf);
         }
       } else if (m_tsType.test(TrackStateOnSurface::Outlier)) {
         typePattern.set(TrackStateOnSurface::Outlier);
@@ -338,7 +336,7 @@ namespace Trk {
       }
     }
     return std::make_unique<const TrackStateOnSurface>(
-      (fitQual ? *fitQual : Trk::FitQualityOnSurface{}),
+      fitQual,
       std::move(measurement),
       std::move(trackpar),
       std::move(mateff),
