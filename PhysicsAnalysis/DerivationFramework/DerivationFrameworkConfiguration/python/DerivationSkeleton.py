@@ -35,6 +35,18 @@ def fromRunArgs(runArgs):
     idx = availableInputTypes.index(True)
     ConfigFlags.Input.Files = getattr(runArgs, f'input{allowedInputTypes[idx]}File')
 
+    # Augmentations
+    if hasattr(runArgs, 'augmentations'):
+        for val in getattr(runArgs, 'augmentations'):
+            if ':' not in val or len(val.split(':')) != 2:
+                logDerivation.error('Derivation job started, but with wrong augmentation syntax - aborting')
+                raise ValueError('Invalid augmentation argument: {0}'.format(val))
+            else:
+                child, parent = val.split(':')
+                ConfigFlags.addFlag(f'Output.DAOD_{child}ParentStream',f'DAOD_{parent}')
+                ConfigFlags.addFlag(f'Output.DAOD_{parent}ChildStream',f'DAOD_{child}')
+                logDerivation.info('Setting up event augmentation as {0} => {1}'.format(child, parent))
+
     # Output formats
     formats = []
     if hasattr(runArgs, 'formats'):

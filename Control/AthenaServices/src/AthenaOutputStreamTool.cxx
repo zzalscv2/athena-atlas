@@ -115,6 +115,12 @@ StatusCode AthenaOutputStreamTool::initialize() {
    if (m_branchNameHint.value() != "0") {
       m_outputAttributes += "[SubLevelBranchName=" + m_branchNameHint.value() + "]";
    }
+   if (!m_metaDataOutputCollection.value().empty()) {
+      m_metaDataOutputAttributes += "[OutputCollection=" + m_metaDataOutputCollection.value() + "]";
+   }
+   if (!m_metaDataContainerPrefix.value().empty()) {
+      m_metaDataOutputAttributes += "[PoolContainerPrefix=" + m_metaDataContainerPrefix.value() + "]";
+   }
 
    if (m_extend) ATH_CHECK(m_decSvc.retrieve());
    return(StatusCode::SUCCESS);
@@ -409,6 +415,16 @@ StatusCode AthenaOutputStreamTool::streamObjects(const DataObjectVec& dataObject
    }
    // Connect the output file to the service
    std::string outputConnectionString = outputName;
+   const std::string defaultMetaDataString = "[OutputCollection=MetaDataHdr][PoolContainerPrefix=MetaData]";
+   if (std::string::size_type mpos = outputConnectionString.find(defaultMetaDataString); mpos!=std::string::npos) {
+     // If we're in here we're writing MetaData
+     // Now let's see if we should be overwriting the MetaData attributes
+     // For the time-being this happens when we're writing MetaData in the augmentation mode
+     if (!m_metaDataOutputAttributes.empty()) {
+       // Note: This won't work quite right if only one attribute is set though!
+       outputConnectionString.replace(mpos, defaultMetaDataString.length(), m_metaDataOutputAttributes);
+     }
+   }
    for (std::string::size_type pos = m_outputAttributes.find('['); pos != std::string::npos; pos = m_outputAttributes.find('[', ++pos)) {
       if (outputConnectionString.find(m_outputAttributes.substr(pos, m_outputAttributes.find('=', pos) + 1 - pos)) == std::string::npos) {
          outputConnectionString += m_outputAttributes.substr(pos, m_outputAttributes.find(']', pos) + 1 - pos);

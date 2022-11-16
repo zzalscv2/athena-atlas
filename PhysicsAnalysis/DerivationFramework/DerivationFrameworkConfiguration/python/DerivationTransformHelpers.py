@@ -13,6 +13,10 @@ def addDerivationArguments(parser):
                         type=argFactory(argList),
                         help='List of required D(2)AOD formats',
                         group='Derivation')
+    parser.add_argument('--augmentations', nargs='*',
+                        type=argFactory(argList),
+                        help='List of augmentations CHILD:PARENT',
+                        group='Derivation')
     parser.add_argument('--inputAODFile', nargs='+',
                         type=argFactory(argPOOLFile, io='input'),
                         help='Input AOD for DAOD building',
