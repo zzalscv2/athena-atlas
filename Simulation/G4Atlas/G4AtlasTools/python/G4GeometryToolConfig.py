@@ -112,6 +112,15 @@ def HGTDGeoDetectorToolCfg(ConfigFlags, name='HGTD', **kwargs):
     result.setPrivateTools(GeoDetectorTool(name, **kwargs))
     return result
 
+def HGTDServiceToolCfg(ConfigFlags, name='HGTDServices', **kwargs):
+    #set up geometry
+    from HGTD_GeoModelXml.HGTDServiceGeoModelConfig import HGTDServiceGeoModelCfg
+    result = HGTDServiceGeoModelCfg(ConfigFlags)
+    kwargs.setdefault("DetectorName", "HGTDServices")
+    #add the GeometryNotifierSvc
+    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(ConfigFlags)).name)
+    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
+    return result
 
 def TRTGeoDetectorToolCfg(ConfigFlags, name='TRT', **kwargs):
     #set up geometry

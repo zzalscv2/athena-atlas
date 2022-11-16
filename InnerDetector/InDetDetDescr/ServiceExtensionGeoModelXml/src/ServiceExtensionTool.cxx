@@ -26,7 +26,7 @@ StatusCode ServiceExtensionTool::create()
 
   GeoModelExperiment *theExpt = nullptr;
   ATH_CHECK(detStore()->retrieve(theExpt, "ATLAS"));
-  auto *manager = new ServiceExtensionManager();
+  auto *manager = new ServiceExtensionManager(m_ServiceExtensionManagerName);
 
   const GeoModelIO::ReadGeoModel* sqlreader = getSqliteReader();
    

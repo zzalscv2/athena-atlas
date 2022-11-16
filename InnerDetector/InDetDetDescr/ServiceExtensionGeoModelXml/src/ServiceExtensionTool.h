@@ -29,6 +29,7 @@ private:
    Gaudi::Property<std::string> m_envelopeVolumeName{this, "EnvelopeVolume", "", "Envelope volume name"};
    Gaudi::Property<std::string> m_node{this,"DataBaseNode","InnerDetector", "Node name in Geometry Database"};
    Gaudi::Property<std::string> m_table{this,"DataBaseTable","ITKSERVICESXDD", "Table name in Geometry Database"};
+   Gaudi::Property<std::string> m_ServiceExtensionManagerName{this, "ServiceExtensionManagerName", "ITkServiceExtension", "Service Extension Manager Name"};
 
 };
 } // namespace ITk
