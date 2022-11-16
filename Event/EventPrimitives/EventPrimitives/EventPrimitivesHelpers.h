@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -68,6 +68,19 @@ saneCovarianceDiagonal(const AmgSymMatrix(N) & mat)
       return false;
   }
   return true;
+}
+//// Check whether all components of a vector are finite and whether the
+//// length of the vector is still within the Geneva area, i.e. 10 km
+template<int N>
+inline bool
+saneVector(const AmgVector(N) & vec)
+{
+  constexpr double max_length2 = 1.e16;
+  for (int i = 0; i < N; ++i) {
+    if (std::isnan(vec[i]) || std::isinf(vec[i]))
+      return false;
+  }
+  return vec.dot(vec) < max_length2;
 }
 
 template<int N>
