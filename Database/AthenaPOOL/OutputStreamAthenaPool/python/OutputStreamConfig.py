@@ -29,6 +29,19 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    writingTool = CompFactory.AthenaOutputStreamTool(f"Stream{streamName}Tool",
                                                     DataHeaderKey=outputStreamName)
 
+   # If we're running in augmentation mode, configure the writing tool accordingly
+   parentStream = f"Output.{streamName}ParentStream"
+   childStream = f"Output.{streamName}ChildStream"
+   if configFlags.hasFlag(childStream):
+      writingTool.SaveDecisions = True
+   elif configFlags.hasFlag(parentStream):
+      disableEventTag = True
+      writingTool.OutputCollection = f"POOLContainer_{streamName}"
+      writingTool.PoolContainerPrefix = f"CollectionTree_{streamName}"
+      writingTool.MetaDataOutputCollection = f"MetaDataHdr_{streamName}"
+      writingTool.MetaDataPoolContainerPrefix = f"MetaData_{streamName}"
+      msg.info(f"Stream {streamName} running in augmentation mode with {configFlags._get(parentStream)} as parent")
+
    # In DAOD production the EventInfo is prepared specially by the SlimmingHelper to ensure it is written in AuxDyn form
    # So for derivations the ItemList from the SlimmingHelper alone is used without the extra EventInfo items
    finalItemList = []

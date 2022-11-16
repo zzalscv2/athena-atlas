@@ -1823,7 +1823,16 @@ class reductionFrameworkExecutor(athenaExecutor):
             for reduction in formatList:
                 if ('DAOD' in output):
                     dataType = 'DAOD_' + reduction
-                    outputName = 'DAOD_' + reduction + '.' + self.conf.argdict['outputDAODFile'].value[0]
+                    if 'augmentations' not in self.conf.argdict:
+                        outputName = 'DAOD_' + reduction + '.' + self.conf.argdict['outputDAODFile'].value[0]
+                    else:
+                        for val in self.conf.argdict['augmentations'].value:
+                            if reduction in val.split(':')[0]:
+                                outputName = 'DAOD_' + val.split(':')[1] + '.' + self.conf.argdict['outputDAODFile'].value[0]
+                                break
+                        else:
+                            outputName = 'DAOD_' + reduction + '.' + self.conf.argdict['outputDAODFile'].value[0]
+
                 if ('D2AOD' in output):
                     dataType = 'D2AOD_' + reduction
                     outputName = 'D2AOD_' + reduction + '.' + self.conf.argdict['outputD2AODFile'].value[0]

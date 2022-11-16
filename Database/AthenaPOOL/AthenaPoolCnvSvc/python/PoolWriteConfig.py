@@ -92,12 +92,24 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_" in key and "FileName" in key)]:
         # Since there may be several outputs, this has to be done in a loop 
         FileName = flags._flagdict[flag]._value 
-        # Use ZSTD w/ Level 5 for DAODs
-        PoolAttributes += [ pah.setFileCompAlg( FileName, "5" ) ]
-        PoolAttributes += [ pah.setFileCompLvl( FileName, "5" ) ]
-        # By default use a maximum basket buffer size of 128k and minimum buffer entries of 10
-        PoolAttributes += [ pah.setMaxBufferSize( FileName, "131072" ) ]
-        PoolAttributes += [ pah.setMinBufferEntries( FileName, "10" ) ]
+        # Figure out if this is an augmentation child stream
+        # If so we need to set things up a bit differently
+        # because for now augmentations do not 'own' an output file
+        # Therefore, some setting do not apply, such as file-level
+        # compression etc. This might change in the future
+        streamName = flag[7:-8] # Here we rely on the convention of Output.STREAMFileName
+        isAugmentationChild = flags.hasFlag(f"Output.{streamName}ParentStream")
+        if not isAugmentationChild:
+            # Use ZSTD w/ Level 5 for DAODs
+            PoolAttributes += [ pah.setFileCompAlg( FileName, "5" ) ]
+            PoolAttributes += [ pah.setFileCompLvl( FileName, "5" ) ]
+            # By default use a maximum basket buffer size of 128k and minimum buffer entries of 10
+            PoolAttributes += [ pah.setMaxBufferSize( FileName, "131072" ) ]
+            PoolAttributes += [ pah.setMinBufferEntries( FileName, "10" ) ]
+        else:
+            # Set the index and friend tree information
+            PoolAttributes += [ f"DatabaseName = '{FileName}'; INDEX_MASTER = 'POOLContainer(DataHeader)'" ]
+            PoolAttributes += [ f"DatabaseName = '{FileName}'; FRIEND_TREE = 'CollectionTree:CollectionTree_{streamName}'" ]
         # By default use 20 MB AutoFlush (or 500 events for SharedWriter w/ parallel compession)
         # for event data except for a number of select formats (see below)
         TREE_AUTO_FLUSH = -20000000
@@ -112,8 +124,9 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
             CONTAINER_SPLITLEVEL = 99
         if "DAOD_PHYSVAL" in FileName:
             TREE_AUTO_FLUSH = 100
-        PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree", str(TREE_AUTO_FLUSH) ) ]
-        PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree", str(CONTAINER_SPLITLEVEL) ) ]
+        CollectionTreeName = "CollectionTree" if not isAugmentationChild else f"CollectionTree_{streamName}"
+        PoolAttributes += [ pah.setTreeAutoFlush( FileName, CollectionTreeName, str(TREE_AUTO_FLUSH) ) ]
+        PoolAttributes += [ pah.setContainerSplitLevel( FileName, CollectionTreeName, str(CONTAINER_SPLITLEVEL) ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]
         # Find the maximum AutoFlush across all formats
         if use_parallel_compression and TREE_AUTO_FLUSH > max_auto_flush:
