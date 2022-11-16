@@ -22,7 +22,8 @@ from TrigMuonHypo.TrigMuonHypoMonitoring import (
     TrigL2MuonOverlapRemoverMonitoringMufast,
     TrigL2MuonOverlapRemoverMonitoringMucomb,
     TrigMuonEFInvMassHypoMonitoring,
-    TrigMuonEFIdtpInvMassHypoMonitoring
+    TrigMuonEFIdtpInvMassHypoMonitoring,
+    TrigMuonEFTrackIsolationMonitoring
 )
 
 monitorAll = False #should only be true for local debugging to have histograms from all chains
@@ -851,7 +852,15 @@ def TrigMuonEFTrackIsolationHypoToolFromDict( chainDict ) :
     else:
         thresholds = cparts[0]['isoInfo']
     config = TrigMuonEFTrackIsolationHypoConfig()
+
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
+
+    if monitorAll:
+        tool.MonTool = TrigMuonEFTrackIsolationMonitoring('TrigMuonEFTrackIsolationHypoTool/'+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMuonEFTrackIsolationMonitoring('TrigMuonEFTrackIsolationHypoTool/'+chainDict['chainName'])
+
     return tool
 
 class TrigMuonEFTrackIsolationHypoConfig(object) :

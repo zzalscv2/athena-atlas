@@ -70,10 +70,10 @@ bool TrigMuonEFTrackIsolationHypoTool::decideOnSingleObject(TrigMuonEFTrackIsola
    ATH_MSG_DEBUG("Decision ...");
 
    float ptcone20(-1), ptcone30(-1);
-   auto fex_ptcone02 = Monitored::Scalar("PtCone02", ptcone20);
-   auto fex_ptcone03 = Monitored::Scalar("PtCone03", ptcone30);
+   auto fex_ptcone03 = Monitored::Scalar("PtCone03", 0.0);
+   auto fex_ptconeRel03 = Monitored::Scalar("PtConeRel03", 0.0);
 
-   auto monitorIt    = Monitored::Group( m_monTool, fex_ptcone02, fex_ptcone03 );
+   auto monitorIt    = Monitored::Group( m_monTool, fex_ptcone03, fex_ptconeRel03 );
 
    ATH_MSG_VERBOSE( "Cut index " << cutIndex );
 
@@ -104,12 +104,12 @@ bool TrigMuonEFTrackIsolationHypoTool::decideOnSingleObject(TrigMuonEFTrackIsola
      return result;
    }
 
+   
+   bool goodmu=true;
    ptcone20 = input.ptcone20; 
    ptcone30 = input.ptcone30; 
 
-   
-   bool goodmu=true;
-   
+   fex_ptcone03=ptcone30/1000;
    if ( m_abscut ) { //absolute cut
      if ( m_ptcone02_cut > 0.0 ) {
        if ( ptcone20 >= m_ptcone02_cut ) goodmu=false;
@@ -123,6 +123,7 @@ bool TrigMuonEFTrackIsolationHypoTool::decideOnSingleObject(TrigMuonEFTrackIsola
    } else { //relative cut
      
      const double mupt = pMuon->pt();
+     fex_ptconeRel03 = ptcone30/mupt;
      ATH_MSG_DEBUG("Muon with pT " << mupt);
       
      // now we can make the cut(s)

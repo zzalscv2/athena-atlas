@@ -85,6 +85,9 @@ def addStandardRecoFiles(parser):
     parser.add_argument('--outputTXT_JIVEXMLTGZFile',
                         type = trfArgClasses.argFactory(trfArgClasses.argFile, io = 'output'),
                         help = 'Output JiveXML.tgz file', group = 'Reco Files')
+    parser.add_argument('--outputTLA_AODFile', nargs='+',
+                        type=trfArgClasses.argFactory(trfArgClasses.argPOOLFile, io='output'),
+                        help='Output AOD (TLA) file', group='Reco Files')
 
 
 ## @brief Add reconstruction substeps to a set object
@@ -104,6 +107,8 @@ def addRecoSubsteps(executorSet):
     executorSet.add(athenaExecutor(name = 'RAWtoESD', skeletonFile = 'RecJobTransforms/skeleton.RAWtoESD_tf.py',
                                    substep = 'r2e', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
                                    outData = ['ESD', 'HIST_ESD_INT', 'TXT_JIVEXMLTGZ'],))
+    executorSet.add(athenaExecutor(name = 'RAWtoTLA_AOD', skeletonCA = 'RecJobTransforms.RAWtoTLA_AOD_Skeleton',
+                                   substep = 'r2tla', inData = ['BS'], outData = ['TLA_AOD'], ))
     executorSet.add(athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
                                    substep = 'e2a', inData = ['ESD'], outData = ['AOD', 'HIST_AOD_INT']))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD_INT', 'HIST_AOD_INT'), 'HIST_R2A', 'HIST_AOD'], outData = ['HIST']))

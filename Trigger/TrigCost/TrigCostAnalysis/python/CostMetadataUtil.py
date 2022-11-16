@@ -13,10 +13,12 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger('CostAnalysisPostProcessing')
 
 
-def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails=False):
+def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails=False, loglevel=3, maxRanges=5):
     ''' @brief Save metadata from ntuple to json file
     '''
     import json
+
+    log.level = loglevel
 
     metatree = inputFile.Get("metadata")
     if metatree is None:
@@ -57,9 +59,11 @@ def saveMetadata(inputFile, argsMetadata={}, processingWarnings=[], doTRPDetails
     metadata.append({'BaseEventWeight' : metatree.BaseEventWeight})
 
     if doTRPDetails:
-        detailsPerLb = readDetailsFromTRP(inputFile, metatree.runNumber)
+        detailsPerLb = readDetailsFromTRP(inputFile, metatree.runNumber, maxRanges)
         if detailsPerLb:
-            metadata.append({"LumiblockDetails" : detailsPerLb})
+            for detail in detailsPerLb["Global"]:
+                metadata.append({detail : detailsPerLb["Global"][detail]})
+            metadata.append({"LumiblockDetails" : detailsPerLb["PerLb"]})
         else:
             log.error("Reading lumiblock details for TRP failed!")
 
@@ -289,7 +293,7 @@ def readHLTConfigKeysFromAMI(amiTag):
     return configMetadata
 
 
-def readDetailsFromTRP(inputFile, runNumber, itemName="L1_TAU8--enabled", server="https://atlasop.cern.ch"):
+def readDetailsFromTRP(inputFile, runNumber, maxRanges, itemName="L1_TAU8--enabled", server="https://atlasop.cern.ch"):
     log.info("Reading run details from TRP")
 
     import ROOT
@@ -347,6 +351,8 @@ def readDetailsFromTRP(inputFile, runNumber, itemName="L1_TAU8--enabled", server
 
     # Read details from PBeast
     lbRangeDetailsDict = {}
+    physicsDeadtimeGlobal = []
+    pileupGlobal = []
     try:
         import libpbeastpy
         pbeast = libpbeastpy.ServerProxy(server)
@@ -356,35 +362,35 @@ def readDetailsFromTRP(inputFile, runNumber, itemName="L1_TAU8--enabled", server
             lbEnd = lbRangeTsDict[lbRange]["end"]
 
             # Deadtime
-            physicsDT = pbeast.get_data('ATLAS', 'L1_Rate', 'DT', 'ISS_TRP.' + itemName, False, lbStart, lbEnd, 0, True)[0].data['ISS_TRP.' + itemName]
-
-            avgDt = 0
-            counter = 0
-            entryCounter = 1
-            # Read only values between timestamps - pbeast returns one timestamp earlier and one later
-            while physicsDT[entryCounter].ts > lbStart and physicsDT[entryCounter].ts < lbEnd:
-                if type(physicsDT[entryCounter].value) != float: # None type
-                    entryCounter += 1
+            physicsDeadtimeTRP = pbeast.get_data('ATLAS', 'L1_Rate', 'DT', 'ISS_TRP.' + itemName, False, lbStart, lbEnd, 0, True)[0].data['ISS_TRP.' + itemName]
+            physicsDeadtimeArray = []
+            for entry in physicsDeadtimeTRP:
+                # Read only values between timestamps - pbeast returns one timestamp earlier and one later
+                if entry.ts < lbStart or entry.ts > lbEnd:
                     continue
-                avgDt += physicsDT[entryCounter].value
-                counter += 1
-                entryCounter += 1
+                if type(entry.value) != float: # None type
+                    continue
+
+                physicsDeadtimeArray.append(entry.value)
+                physicsDeadtimeGlobal.append(entry.value)
                     
-            dt = avgDt/counter if counter > 0 else 1.
+            physicsDeadtimeAvg = sum(physicsDeadtimeArray)/len(physicsDeadtimeArray) if len(physicsDeadtimeArray) > 0 else 1.
 
             # Pileup
-            mu = pbeast.get_data('OLC', 'OCLumi', 'Mu', 'OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS', False, lbStart, lbEnd)[0].data['OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS']
-            muSet = []
-            entryCounter = 1
-            while mu[entryCounter].ts > lbStart and mu[entryCounter].ts < lbEnd:
-                if type(mu[entryCounter].value) != float: # None type
-                    entryCounter += 1
+            pileupPbeast = pbeast.get_data('OLC', 'OCLumi', 'Mu', 'OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS', False, lbStart, lbEnd)[0].data['OLC.OLCApp/ATLAS_PREFERRED_LBAv_PHYS']
+            pileupArr = []
+            for entry in pileupPbeast:
+                if entry.ts < lbStart or entry.ts > lbEnd:
                     continue
-                muSet.append(mu[entryCounter].value)
-                entryCounter += 1
+                if type(entry.value) != float: # None type
+                    continue
 
-            muAvg = sum(muSet)/len(muSet) if len(muSet) > 0 else -1
-            lbRangeDetailsDict[lbRange] = {"avgPileup" : round(muAvg, 3), "minPileup" : round(min(muSet), 3), "maxPileup" : round(max(muSet), 3), "deadtime" : round(dt, 3)}
+                pileupArr.append(entry.value)
+                pileupGlobal.append(entry.value)
+
+            pileupAvg = sum(pileupArr)/len(pileupArr) if len(pileupArr) > 0 else -1
+            lbRangeDetailsDict[lbRange] = {"avgPileup" : round(pileupAvg, 3), "minPileup" : round(min(pileupArr), 3), 
+                                           "maxPileup" : round(max(pileupArr), 3), "deadtime" : round(physicsDeadtimeAvg, 3)}
 
     except ImportError:
         log.error("The pbeast python library was not found! Remember to setup tdaq release!")
@@ -395,4 +401,16 @@ def readDetailsFromTRP(inputFile, runNumber, itemName="L1_TAU8--enabled", server
 
     log.debug("The final lumiblock dictionary is {0}".format(lbRangeDetailsDict))
 
-    return lbRangeDetailsDict
+    physicsDeadtimeGlobalAvg = sum(physicsDeadtimeGlobal)/len(physicsDeadtimeGlobal) if len(physicsDeadtimeGlobal) > 0 else 1.
+    pileupGlobalAvg = sum(pileupGlobal)/len(pileupGlobal) if len(pileupGlobal) > 0 else 1.
+
+    additionalDetails = {
+        "DataRangeStart" : ctime(lbRangeTsDict[min(lbRangeTsDict.keys())]["start"]/1E6),
+        "DataRangeEnd" : ctime(lbRangeTsDict[max(lbRangeTsDict.keys())]["end"]/1E6),
+        "GlobalMeanPileup" : round(pileupGlobalAvg, 3),
+        "GlobalMinPileup" : round(min(pileupGlobal), 3),
+        "GlobalMaxPileup" : round(max(pileupGlobal), 3),
+        "GlobalMeanDeadtime" : round(physicsDeadtimeGlobalAvg, 3)
+    }
+
+    return {"Global" : additionalDetails, "PerLb" : lbRangeDetailsDict}
