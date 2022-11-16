@@ -7362,7 +7362,7 @@ namespace Trk {
         hit->resetTrackCovariance();
         continue;
       }
-      assert(hit->isSane());
+      //should check hit->isSane() here with better equality check(other than ptr comparison)
       auto trackState = hit->trackStateOnSurface();
       hit->resetTrackCovariance();
       trajectory.push_back(trackState.release());
