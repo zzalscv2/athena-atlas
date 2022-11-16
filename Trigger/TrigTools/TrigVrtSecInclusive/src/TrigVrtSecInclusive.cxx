@@ -36,14 +36,12 @@ TrigVrtSecInclusive::TrigVrtSecInclusive(const std::string& name,ISvcLocator* pS
 
 StatusCode TrigVrtSecInclusive::initialize()
 {
-   const std::string header = "UTT> ";
-
    // read material maps
    if (m_doMaterialMapVeto) {
 
      std::string inFileName = PathResolver::find_file(m_materialMapInnerFileName, "DATAPATH");
      if ( inFileName.empty()) {
-        ATH_MSG_ERROR(header << "Cannot find material map inner file: " << m_materialMapInnerFileName);
+        ATH_MSG_ERROR("Cannot find material map inner file: " << m_materialMapInnerFileName);
         return StatusCode::FAILURE;
       }
      std::unique_ptr<TFile> materialMapInnerFile = std::make_unique<TFile>(inFileName.c_str(), "READ");
@@ -56,7 +54,7 @@ StatusCode TrigVrtSecInclusive::initialize()
 
      std::string outFileName = PathResolver::find_file(m_materialMapOuterFileName, "DATAPATH");
      if ( outFileName.empty()) {
-        ATH_MSG_ERROR(header << "Cannot find material map outer file: " << m_materialMapOuterFileName);
+        ATH_MSG_ERROR("Cannot find material map outer file: " << m_materialMapOuterFileName);
         return StatusCode::FAILURE;
       }
      std::unique_ptr<TFile> materialMapOuterFile = std::make_unique<TFile>(outFileName.c_str(), "READ");
@@ -65,7 +63,7 @@ StatusCode TrigVrtSecInclusive::initialize()
         if(m_materialMapOuter) m_materialMapOuter->SetDirectory(0);
      }
      materialMapOuterFile->Close();
-     ATH_MSG_INFO( header << "read material maps" );
+     ATH_MSG_DEBUG("material maps are read correctly" );
 
    }
 
@@ -84,14 +82,12 @@ StatusCode TrigVrtSecInclusive::initialize()
    ATH_CHECK(m_PrimaryVxInputName.initialize());
 
    //
-   ATH_MSG_INFO( header << "Initialization completed successfully" );
+   ATH_MSG_INFO( "Initialization completed successfully" );
    return StatusCode::SUCCESS;
 }
 
 StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
 {
-   const std::string header = "UTT> ";
-
    // Setup output container for vertex
    SG::WriteHandle<xAOD::VertexContainer> outputVertices (m_vxCandidatesOutputName, ctx);
 
@@ -117,14 +113,14 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
       privtx = vertex_container->at(0);
       if (  !( privtx->vertexType() == xAOD::VxType::PriVtx
             && privtx->nTrackParticles() >= 2 ) ){
-         ATH_MSG_WARNING( header << "Illed primary vertex, keeping null privtx" );
+         ATH_MSG_WARNING( "Illed primary vertex, keeping null privtx" );
          privtx = nullptr;
       } else {
-      	 ATH_MSG_DEBUG( header << "primary vertex successfully retrieved" );
+      	 ATH_MSG_DEBUG( "primary vertex successfully retrieved" );
       }
    }
    else {
-      ATH_MSG_WARNING( header << "couldn't retrieve primary vertex, keeping null privtx" );
+      ATH_MSG_WARNING( "couldn't retrieve primary vertex, keeping null privtx" );
    }
 
    // retrieve the tracks
@@ -133,8 +129,8 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
    SG::ReadHandle<xAOD::TrackParticleContainer> secondPassTrackParticleCollection(m_secondPassTracksName, ctx);
    bool isFirstTrackValid  = firstPassTrackParticleCollection.isValid();
    bool isSecondTrackValid = secondPassTrackParticleCollection.isValid();
-   if( ! isFirstTrackValid )  ATH_MSG_WARNING( header << "couldn't retrieve first pass tracks: "  << m_firstPassTracksName);
-   if( ! isSecondTrackValid ) ATH_MSG_WARNING( header << "couldn't retrieve second pass tracks: " << m_secondPassTracksName);
+   if( ! isFirstTrackValid )  ATH_MSG_WARNING( "couldn't retrieve first pass tracks: "  << m_firstPassTracksName);
+   if( ! isSecondTrackValid ) ATH_MSG_WARNING( "couldn't retrieve second pass tracks: " << m_secondPassTracksName);
 
    // monitoring
    //_________________________________________________________________________
@@ -217,10 +213,10 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
        }
      }
      vtxmap.lock();
-     ATH_MSG_DEBUG( header << "filled vertex map with " << trkpair_cnt << " pairs" );
+     ATH_MSG_DEBUG( "filled vertex map with " << trkpair_cnt << " pairs" );
      vtxmap.ClusterizeCells(1.,1);
      timerMapClustering.stop();
-     ATH_MSG_DEBUG( header << "vertex map clustering successfully completed : " << vtxmap.nClusters() << " clusters" );
+     ATH_MSG_DEBUG( "vertex map clustering successfully completed : " << vtxmap.nClusters() << " clusters" );
 
      // N track vertexing
      timerNTrackVertex.start();
@@ -233,7 +229,7 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
      ATH_CHECK( cleanUp(v_wrkvrt) );
      size_t n_post_clean  = v_wrkvrt.size();
      timerCleanUp.stop();
-     ATH_MSG_DEBUG( header << "cleaned up " << n_pre_clean - n_post_clean << " out of " << n_pre_clean );
+     ATH_MSG_DEBUG( "cleaned up " << n_pre_clean - n_post_clean << " out of " << n_pre_clean );
 
    } else {
      // Offline VSI like
@@ -252,7 +248,7 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
    }
 
    // record AOD object
-   ATH_MSG_DEBUG( header << "Record vertices into container." );
+   ATH_MSG_DEBUG( "Record vertices into container." );
    ATH_CHECK(outputVertices.record(std::move(theXAODContainers.first), std::move(theXAODContainers.second)));
    ATH_CHECK(outputTrkPairs.record(std::move(theXAODTrkPairContainers.first), std::move(theXAODTrkPairContainers.second)));
    ATH_MSG_DEBUG( "Recorded Vertices with key: " << m_vxCandidatesOutputName.key() );
@@ -260,7 +256,7 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
    timerWriteVertices.stop();
 
    timerOverall.stop();
-   ATH_MSG_DEBUG( header << "::execute() finished successfully." );
+   ATH_MSG_DEBUG( "::execute() finished successfully." );
 
    return StatusCode::SUCCESS;
 }
@@ -268,8 +264,6 @@ StatusCode TrigVrtSecInclusive::execute(const EventContext& ctx) const
 
 StatusCode TrigVrtSecInclusive::trackSelection( const xAOD::TrackParticleContainer* firstPassTrackParticles, const xAOD::TrackParticleContainer* secondPassTrackParticles, std::vector<const xAOD::TrackParticle*>& selectedTracks ) const
 {
-  const std::string header = "UTT> ";
-
   // Pack TrackParticleContainers to one vector
   std::vector<const xAOD::TrackParticleContainer*> v_containers;
   if( firstPassTrackParticles  != nullptr ) v_containers.push_back(firstPassTrackParticles);
@@ -283,9 +277,9 @@ StatusCode TrigVrtSecInclusive::trackSelection( const xAOD::TrackParticleContain
      for (TrackParticleDataVecIter itr  = trackParticles->begin(); itr != trackParticles->end(); ++itr) {
   if( selectTrack(*itr) ) { selectedTracks.push_back(*itr); n_trk++; }
      }
-     ATH_MSG_DEBUG(header << "Of " << trackParticles->size() << " tracks " << n_trk << " survived the preselection.");
+     ATH_MSG_DEBUG("Of " << trackParticles->size() << " tracks " << n_trk << " survived the preselection.");
   }
-  ATH_MSG_DEBUG(header << selectedTracks.size() << " tracks in total passed the selection.");
+  ATH_MSG_DEBUG(selectedTracks.size() << " tracks in total passed the selection.");
   return StatusCode::SUCCESS;
 }
 
@@ -357,8 +351,6 @@ StatusCode TrigVrtSecInclusive::fillVtxContainer( xAODContainers& theXAODContain
 StatusCode TrigVrtSecInclusive::findDiTrackVertex
 ( WrkVrtContainer& workVerticesContainer, std::vector<std::pair<size_t,size_t>>& incomp, std::vector<const xAOD::TrackParticle*>& selectedTracks, const EventContext& ctx, const xAOD::Vertex *primVertex ) const
 {
-   const std::string header = "UTT> ";
-
    // monitoring
    auto timerTwoCircIntsect = Monitored::Timer<std::chrono::nanoseconds> ("TIME_TwoCircIntsect");
    auto timerVrtFitFast     = Monitored::Timer<std::chrono::nanoseconds> ("TIME_VrtFitFast");
@@ -445,7 +437,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          Amg::Vector3D circIntersect = m_vertexPointEstimator->getCirclesIntersectionPoint(&perigee1, &perigee2, flag, errorcode, decors);
          timerTwoCircIntsect.stop();
          if (errorcode != 0) {
-            ATH_MSG_VERBOSE( header << ": two circles intersect failed");
+            ATH_MSG_VERBOSE( ": two circles intersect failed");
             wrkcuts.twoCircErrcut   = true;
             wrkvrt.param            = wrkprm;
             wrkvrt.cuts             = wrkcuts;
@@ -483,7 +475,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          StatusCode sc = m_fitSvc->VKalVrtFitFast( baseTracks, initVertex, *fitterState );
          timerVrtFitFast.stop();
          if( sc.isFailure() ) {
-            ATH_MSG_VERBOSE( header << ": fast crude estimation fails ");
+            ATH_MSG_VERBOSE( ": fast crude estimation fails ");
             wrkcuts.fastErrcut  = true;
             wrkvrt.param        = wrkprm;
             wrkvrt.cuts         = wrkcuts;
@@ -551,7 +543,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          // Chi2 cut
          mnt_vtxfit_chi2.push_back(wrkvrt.chi2);
          if( wrkvrt.chi2 > m_selVrtChi2Cut) {
-            ATH_MSG_VERBOSE( header << ": failed to pass chi2 threshold." );
+            ATH_MSG_VERBOSE( ": failed to pass chi2 threshold." );
             wrkcuts.chi2cut = true;
             wrkvrt.param    = wrkprm;
             wrkvrt.cuts     = wrkcuts;
@@ -579,16 +571,16 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          if (m_doPVCompatibilityCut) {
 
             if( std::cos( dphi1 ) < m_dphiPVCut && std::cos( dphi2 ) < m_dphiPVCut ) {
-               ATH_MSG_DEBUG( header << ": failed to pass the vPos cut. (both tracks are opposite against the vertex pos)" );
+               ATH_MSG_DEBUG( ": failed to pass the vPos cut. (both tracks are opposite against the vertex pos)" );
                continue;
             }
             if( vPosMomAngT < m_dphiPVCut ) {
-               ATH_MSG_DEBUG( header << ": failed to pass the vPos cut. (pos-mom directions are opposite)" );
+               ATH_MSG_DEBUG( ": failed to pass the vPos cut. (pos-mom directions are opposite)" );
                continue;
             }
 
             if( vPos < m_pvCompatibilityCut ) {
-               ATH_MSG_DEBUG( header << ": failed to pass the vPos cut." );
+               ATH_MSG_DEBUG( ": failed to pass the vPos cut." );
                continue;
             }
 
@@ -629,7 +621,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
          workVerticesContainer.push_back( std::move(wrkvrt) );
       }
    }
-   ATH_MSG_DEBUG(header << "Of " << nPairsAll  << " pairs : trkd0" << " / "  <<  "intersect"       << " / "  <<  "intersectPos"        <<  " / " <<  "initPos"       <<  " / " <<  "initD0Z0"          <<  " / " <<  "vtxFit"        <<  " / " <<  "vtxChi2"       <<  " / " <<  "vtxComp"       <<  " / " <<  "matVeto = "
+   ATH_MSG_DEBUG("Of " << nPairsAll  << " pairs : trkd0" << " / "  <<  "intersect"       << " / "  <<  "intersectPos"        <<  " / " <<  "initPos"       <<  " / " <<  "initD0Z0"          <<  " / " <<  "vtxFit"        <<  " / " <<  "vtxChi2"       <<  " / " <<  "vtxComp"       <<  " / " <<  "matVeto = "
                                                 << nPairsTrkd0     << " / "  <<  nPairsIntersect  << " / "  <<  nPairsIntersectPos  <<  " / " <<  nPairsInitPos <<  " / " <<  nPairsInitTrkd0z0 <<  " / " <<  nPairsVtxFit  <<  " / " <<  nPairsVtxChi2 <<  " / " <<  nPairsVtxComp <<  " / " <<  nPairsVtxMatveto);
    //
    return StatusCode::SUCCESS;
@@ -639,8 +631,6 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertex
 StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
 ( WrkVrtContainer& workVerticesContainer, std::vector<std::pair<size_t,size_t>>& incomp, std::vector<const xAOD::TrackParticle*>& selectedTracks, const EventContext& ctx, const xAOD::Vertex *primVertex ) const
 {
-   const std::string header = "UTT> ";
-
    // monitoring
    auto timerTwoCircIntsect = Monitored::Timer<std::chrono::nanoseconds> ("TIME_TwoCircIntsect");
    auto timerVrtFitFast     = Monitored::Timer<std::chrono::nanoseconds> ("TIME_VrtFitFast");
@@ -729,7 +719,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          Amg::Vector3D circIntersect = m_vertexPointEstimator->getCirclesIntersectionPoint(&perigee1, &perigee2, flag, errorcode, decors);
          timerTwoCircIntsect.stop();
          if (errorcode != 0) {
-            ATH_MSG_VERBOSE( header << ": two circles intersect failed");
+            ATH_MSG_VERBOSE( ": two circles intersect failed");
             wrkcuts.twoCircErrcut   = true;
             wrkvrt.param            = wrkprm;
             wrkvrt.cuts             = wrkcuts;
@@ -764,7 +754,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          StatusCode sc = m_fitSvc->VKalVrtFitFast( baseTracks, initVertex, *fitterState );
          timerVrtFitFast.stop();
          if( sc.isFailure() ) {
-            ATH_MSG_VERBOSE( header << ": fast crude estimation fails ");
+            ATH_MSG_VERBOSE( ": fast crude estimation fails ");
             wrkcuts.fastErrcut  = true;
             wrkvrt.param        = wrkprm;
             wrkvrt.cuts         = wrkcuts;
@@ -831,7 +821,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          // Chi2 cut
          mnt_vtxfit_chi2.push_back(wrkvrt.chi2);
          if( wrkvrt.chi2 > m_selVrtChi2Cut) {
-            ATH_MSG_VERBOSE( header << ": failed to pass chi2 threshold." );
+            ATH_MSG_VERBOSE( ": failed to pass chi2 threshold." );
             wrkcuts.chi2cut = true;
             wrkvrt.param    = wrkprm;
             wrkvrt.cuts     = wrkcuts;
@@ -857,15 +847,15 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          wrkprm.dphi2       = dphi2;
 
          if( std::cos( dphi1 ) < m_dphiPVCut && std::cos( dphi2 ) < m_dphiPVCut ) {
-                  ATH_MSG_DEBUG( header << ": failed to pass the vPos cut. (both tracks are opposite against the vertex pos)" );
+                  ATH_MSG_DEBUG( ": failed to pass the vPos cut. (both tracks are opposite against the vertex pos)" );
                   continue;
          }
          if( vPosMomAngT < m_dphiPVCut ) {
-                  ATH_MSG_DEBUG( header << ": failed to pass the vPos cut. (pos-mom directions are opposite)" );
+                  ATH_MSG_DEBUG( ": failed to pass the vPos cut. (pos-mom directions are opposite)" );
                   continue;
          }
          if( vPos < m_pvCompatibilityCut ) {
-                  ATH_MSG_DEBUG( header << ": failed to pass the vPos cut." );
+                  ATH_MSG_DEBUG( ": failed to pass the vPos cut." );
                   continue;
          }
          nPairsVtxComp++;
@@ -882,7 +872,7 @@ StatusCode TrigVrtSecInclusive::findDiTrackVertexVSI
          workVerticesContainer.push_back( std::move(wrkvrt) );
       }
    }
-   ATH_MSG_INFO(header << "Of " <<  nPairsAll  << " pairs : trkd0" << " / "  <<  "intersect"      << " / " <<  "intersectPos"         <<  " / " <<   "initPos"         <<  " / " <<  "initD0Z0"          <<  " / " <<  "vtxFit"        <<  " / " <<  "vtxChi2"       <<  " / " <<  "vtxComp = "
+   ATH_MSG_DEBUG("Of " <<  nPairsAll  << " pairs : trkd0" << " / "  <<  "intersect"      << " / " <<  "intersectPos"         <<  " / " <<   "initPos"         <<  " / " <<  "initD0Z0"          <<  " / " <<  "vtxFit"        <<  " / " <<  "vtxChi2"       <<  " / " <<  "vtxComp = "
                                                 << nPairsTrkd0     << " / "  <<  nPairsIntersect << " / " <<  nPairsIntersectPos   <<  " / " <<   nPairsInitPos   <<  " / " <<  nPairsInitTrkd0z0 <<  " / " <<  nPairsVtxFit  <<  " / " <<  nPairsVtxChi2 <<  " / " <<  nPairsVtxComp );
    //
    return StatusCode::SUCCESS;
@@ -1133,9 +1123,7 @@ template<typename VrtType, typename Coord>
 StatusCode TrigVrtSecInclusive::findNTrackVertex
 ( TrigVrtSecInclusive::WrkVrtContainer& workVerticesContainer, TrigVSI::VtxMap<VrtType,Coord>& vtxmap, const std::vector<const xAOD::TrackParticle*>& selectedTracks, const EventContext& ctx ) const
 {
-  const std::string header = "UTT> TrigVrtSecInclusive findNTrackVertex : ";
-
-  ATH_MSG_DEBUG( header << "start" );
+  ATH_MSG_DEBUG( "findNTrackVertex start" );
 
   // monitoring
   auto timerRetrvFromMap   = Monitored::Timer<std::chrono::nanoseconds>  ("TIME_RetrvFromMap");
@@ -1150,24 +1138,24 @@ StatusCode TrigVrtSecInclusive::findNTrackVertex
     auto monTimeClust = Monitored::Group(m_monTool, timerRetrvFromMap, timerMergeParGraph, timerMergeSimple);
     timerRetrvFromMap.start();
 
-    ATH_MSG_DEBUG( header << "Retrieve cluster, track indices and incompatible pairs" );
+    ATH_MSG_DEBUG( "Retrieve cluster, track indices and incompatible pairs" );
 
     auto clst = vtxmap.getCluster(i_clst);
     auto selected_track_indices = clst.getSelectedTrackIndices();
     auto incomp                 = clst.getIncompIndices();
 
-    ATH_MSG_DEBUG( header << "Convert set to vector" );
+    ATH_MSG_DEBUG( "Convert set to vector" );
 
     std::vector<size_t> v_track_indices( selected_track_indices.begin(), selected_track_indices.end() );
 
     timerRetrvFromMap.stop();
 
-    ATH_MSG_DEBUG( header << "Cluster number : " <<  i_clst << " | " << incomp.size() << " incompatible pairs | " << v_track_indices.size() << " tracks" );
-    ATH_MSG_DEBUG( header << "Pos avr : ( R: " << clst.PosCoord().at(0) << ", eta: " << clst.PosCoord().at(1) << ", phi: " << clst.PosCoord().at(2) << " )" );
-    ATH_MSG_DEBUG( header << "Number of cells : " << clst.nPoints() );
+    ATH_MSG_DEBUG( "Cluster number : " <<  i_clst << " | " << incomp.size() << " incompatible pairs | " << v_track_indices.size() << " tracks" );
+    ATH_MSG_DEBUG( "Pos avr : ( R: " << clst.PosCoord().at(0) << ", eta: " << clst.PosCoord().at(1) << ", phi: " << clst.PosCoord().at(2) << " )" );
+    ATH_MSG_DEBUG( "Number of cells : " << clst.nPoints() );
 
     if ( v_track_indices.size() > m_maxTrks ) {
-      ATH_MSG_DEBUG( header << "Skipped the cluster. Too many tracks" );
+      ATH_MSG_DEBUG( "Skipped the cluster. Too many tracks" );
       continue;
     }
 
@@ -1203,7 +1191,7 @@ StatusCode TrigVrtSecInclusive::findNTrackVertex
 
   }
 
-  ATH_MSG_DEBUG( header <<  "Partial graph method / Simple method / All vertex = " << n_vtx_pargraph << " / " << n_vtx_simple << " / "  << n_vtx_pargraph+n_vtx_simple );
+  ATH_MSG_DEBUG( "Partial graph method / Simple method / All vertex = " << n_vtx_pargraph << " / " << n_vtx_simple << " / "  << n_vtx_pargraph+n_vtx_simple );
   return StatusCode::SUCCESS;
 
 }
@@ -1230,7 +1218,7 @@ StatusCode TrigVrtSecInclusive::mergeVertexFromDiTrkVrt
 {
 
   ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": begin");
-  ATH_MSG_INFO ("UTT>    TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : start");
+  ATH_MSG_DEBUG("TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : start");
 
   // Graph method: Trk::pgraphm_()
   // used in order to find compatible sub-graphs from the incompatible graph
@@ -1275,7 +1263,7 @@ StatusCode TrigVrtSecInclusive::mergeVertexFromDiTrkVrt
   // - on output:  >0 : length of the solution stored in set; =0 : no more solutions can be found
   long int solutionSize { 0 };
 
-  ATH_MSG_INFO( "UTT>    TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : while loop start" );
+  ATH_MSG_DEBUG( "TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : while loop start" );
 
   // Main iteration
   while(true) {
@@ -1284,7 +1272,7 @@ StatusCode TrigVrtSecInclusive::mergeVertexFromDiTrkVrt
     pgraph->pgraphm_( weight.data(), nEdges, nTracks, solution.data(), &solutionSize, nth);
 
     ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": Trk::pgraphm_() output: solutionSize = " << solutionSize );
-    ATH_MSG_INFO( "UTT>    TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : Trk::pgraphm_() output: solutionSize = " << solutionSize );
+    ATH_MSG_DEBUG( "TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : Trk::pgraphm_() output: solutionSize = " << solutionSize );
 
     if(solutionSize <= 0)  break;      // No more solutions ==> Exit
     if(solutionSize == 1)  continue;   // i.e. single node  ==> Not a good solution
