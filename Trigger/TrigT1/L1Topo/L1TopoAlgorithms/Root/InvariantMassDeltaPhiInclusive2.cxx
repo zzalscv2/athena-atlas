@@ -56,18 +56,18 @@ TCS::InvariantMassDeltaPhiInclusive2::InvariantMassDeltaPhiInclusive2(const std:
    defineParameter("MaxEta1", 31);
    defineParameter("MinEta2",  0);
    defineParameter("MaxEta2", 31);
-   defineParameter("MinDeltaPhi",  0, 0);
-   defineParameter("MaxDeltaPhi", 31, 0);
-   defineParameter("MinDeltaPhi",  0, 1);
-   defineParameter("MaxDeltaPhi", 31, 1);
-   defineParameter("MinDeltaPhi",  0, 2);
-   defineParameter("MaxDeltaPhi", 31, 2);
-   defineParameter("MinDeltaPhi",  0, 3);
-   defineParameter("MaxDeltaPhi", 31, 3);
-   defineParameter("MinDeltaPhi",  0, 4);
-   defineParameter("MaxDeltaPhi", 31, 4);
-   defineParameter("MinDeltaPhi",  0, 5);
-   defineParameter("MaxDeltaPhi", 31, 5);
+   defineParameter("DeltaPhiMin",  0, 0);
+   defineParameter("DeltaPhiMax", 31, 0);
+   defineParameter("DeltaPhiMin",  0, 1);
+   defineParameter("DeltaPhiMax", 31, 1);
+   defineParameter("DeltaPhiMin",  0, 2);
+   defineParameter("DeltaPhiMax", 31, 2);
+   defineParameter("DeltaPhiMin",  0, 3);
+   defineParameter("DeltaPhiMax", 31, 3);
+   defineParameter("DeltaPhiMin",  0, 4);
+   defineParameter("DeltaPhiMax", 31, 4);
+   defineParameter("DeltaPhiMin",  0, 5);
+   defineParameter("DeltaPhiMax", 31, 5);
    //does this need to change? 
    setNumberOutputBits(6);
 }
@@ -85,8 +85,8 @@ TCS::InvariantMassDeltaPhiInclusive2::initialize() {
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
       p_InvMassMin[i] = parameter("MinMSqr", i).value();
       p_InvMassMax[i] = parameter("MaxMSqr", i).value();
-      p_DeltaPhiMin[i] = parameter("MinDeltaPhi", i).value();
-      p_DeltaPhiMax[i] = parameter("MaxDeltaPhi", i).value();
+      p_DeltaPhiMin[i] = parameter("DeltaPhiMin", i).value();
+      p_DeltaPhiMax[i] = parameter("DeltaPhiMax", i).value();
       p_MinET1[i] = parameter("MinET1",i).value();
       p_MinET2[i] = parameter("MinET2",i).value();
    }

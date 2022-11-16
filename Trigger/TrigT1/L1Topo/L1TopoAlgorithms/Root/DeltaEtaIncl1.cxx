@@ -41,14 +41,14 @@ TCS::DeltaEtaIncl1::DeltaEtaIncl1(const std::string & name) : DecisionAlg(name)
    defineParameter("MinET1",0,3);
    defineParameter("MinET2",0,3);
 
-   defineParameter("MinDeltaEta",  0, 0);
-   defineParameter("MaxDeltaEta", 127, 0);
-   defineParameter("MinDeltaEta",  0, 1);
-   defineParameter("MaxDeltaEta", 127, 1);
-   defineParameter("MinDeltaEta",  0, 2);
-   defineParameter("MaxDeltaEta", 127, 2);
-   defineParameter("MinDeltaEta",  0, 3);
-   defineParameter("MaxDeltaEta", 127, 3);
+   defineParameter("DeltaEtaMin",  0, 0);
+   defineParameter("DeltaEtaMax", 127, 0);
+   defineParameter("DeltaEtaMin",  0, 1);
+   defineParameter("DeltaEtaMax", 127, 1);
+   defineParameter("DeltaEtaMin",  0, 2);
+   defineParameter("DeltaEtaMax", 127, 2);
+   defineParameter("DeltaEtaMin",  0, 3);
+   defineParameter("DeltaEtaMax", 127, 3);
 
    setNumberOutputBits(4);
 }
@@ -68,8 +68,8 @@ TCS::DeltaEtaIncl1::initialize() {
    }
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
-      p_DeltaEtaMin[i] = parameter("MinDeltaEta", i).value();
-      p_DeltaEtaMax[i] = parameter("MaxDeltaEta", i).value();
+      p_DeltaEtaMin[i] = parameter("DeltaEtaMin", i).value();
+      p_DeltaEtaMax[i] = parameter("DeltaEtaMax", i).value();
 
       p_MinET1[i] = parameter("MinET1",i).value();
       p_MinET2[i] = parameter("MinET2",i).value();

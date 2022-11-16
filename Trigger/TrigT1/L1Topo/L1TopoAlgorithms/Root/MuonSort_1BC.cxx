@@ -25,7 +25,7 @@ TCS::MuonSort_1BC::MuonSort_1BC(const std::string & name) : SortingAlg(name) {
    defineParameter( "InnerCoinCut", 0 );
    defineParameter( "FullStationCut", 0 );
    defineParameter( "GoodMFieldCut", 0 );
-   defineParameter( "nDelayedMuons", 1 );  
+   defineParameter( "nDelayedMuons", 1 );
 
 }
 

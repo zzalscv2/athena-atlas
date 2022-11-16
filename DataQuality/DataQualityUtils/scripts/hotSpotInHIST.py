@@ -299,7 +299,8 @@ def main(args):
   #########################################################################
   runFilePath = "root://eosatlas.cern.ch/%s"%(pathExtract.returnEosHistPath(args.runNumber,args.stream,args.amiTag,args.tag)).rstrip()
   if ("FILE NOT FOUND" in runFilePath):
-    print("No merged file found...")
+    print("No merged file found for this run")
+    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/tzero/prod/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
     sys.exit()
 
   f = R.TFile.Open(runFilePath)
@@ -435,12 +436,14 @@ def main(args):
 
   lbFilePathList = pathExtract.returnEosHistPathLB(args.runNumber,args.lowerLumiBlock,args.upperLumiBlock,args.stream,args.amiTag,args.tag)
   nbHitInHot = []
-
+  if isinstance(lbFilePathList,str) and "NOT FOUND" in lbFilePathList:
+    print("Could not find per-LB files for this run")
+    print("HINT: check if there is a folder like","/eos/atlas/atlastier0/tzero/prod/"+args.tag+"/physics_CosmicCalo/00"+str(args.runNumber)+"/"+args.tag+".00"+str(args.runNumber)+".physics_CosmicCalo.*."+args.amiTag)
+    sys.exit()
 
   LBs = [int(f.split("_lb")[1].split(".")[0]) for f in lbFilePathList]
   maxLB = max(LBs)
   print("Max LB is",maxLB)
-
 
   nLB=maxLB
   nbHitInHot = {}

@@ -27,22 +27,22 @@ TCS::DeltaEtaPhiIncl1::DeltaEtaPhiIncl1(const std::string & name) : DecisionAlg(
    defineParameter("NumResultBits", 3);
    defineParameter("MinET1",1,0);
    defineParameter("MinET2",1,0);
-   defineParameter("MinDeltaEta",  0, 0);
-   defineParameter("MaxDeltaEta", 49, 0);
-   defineParameter("MinDeltaPhi",  0, 0);
-   defineParameter("MaxDeltaPhi", 63, 0);
+   defineParameter("DeltaEtaMin",  0, 0);
+   defineParameter("DeltaEtaMax", 49, 0);
+   defineParameter("DeltaPhiMin",  0, 0);
+   defineParameter("DeltaPhiMax", 63, 0);
    defineParameter("MinET1",1,1);
    defineParameter("MinET2",1,1);
-   defineParameter("MinDeltaEta",  0, 1);
-   defineParameter("MaxDeltaEta", 49, 1);
-   defineParameter("MinDeltaPhi",  0, 1);
-   defineParameter("MaxDeltaPhi", 63, 1);
+   defineParameter("DeltaEtaMin",  0, 1);
+   defineParameter("DeltaEtaMax", 49, 1);
+   defineParameter("DeltaPhiMin",  0, 1);
+   defineParameter("DeltaPhiMax", 63, 1);
    defineParameter("MinET1",1,2);
    defineParameter("MinET2",1,2);
-   defineParameter("MinDeltaEta",  0, 2);
-   defineParameter("MaxDeltaEta", 49, 2);
-   defineParameter("MinDeltaPhi",  0, 2);
-   defineParameter("MaxDeltaPhi", 63, 2);
+   defineParameter("DeltaEtaMin",  0, 2);
+   defineParameter("DeltaEtaMax", 49, 2);
+   defineParameter("DeltaPhiMin",  0, 2);
+   defineParameter("DeltaPhiMax", 63, 2);
    setNumberOutputBits(3);
 }
 
@@ -61,10 +61,10 @@ TCS::DeltaEtaPhiIncl1::initialize() {
    }
 
    for(unsigned int i=0; i<numberOutputBits(); ++i) {
-      p_DeltaPhiMin[i] = parameter("MinDeltaPhi", i).value();
-      p_DeltaPhiMax[i] = parameter("MaxDeltaPhi", i).value();
-      p_DeltaEtaMin[i] = parameter("MinDeltaEta", i).value();
-      p_DeltaEtaMax[i] = parameter("MaxDeltaEta", i).value();
+      p_DeltaPhiMin[i] = parameter("DeltaPhiMin", i).value();
+      p_DeltaPhiMax[i] = parameter("DeltaPhiMax", i).value();
+      p_DeltaEtaMin[i] = parameter("DeltaEtaMin", i).value();
+      p_DeltaEtaMax[i] = parameter("DeltaEtaMax", i).value();
       p_MinET1[i] = parameter("MinET1",i).value();
       p_MinET2[i] = parameter("MinET2",i).value();
       TRG_MSG_INFO("MinET1          : " << p_MinET1[i]);

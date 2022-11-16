@@ -420,10 +420,10 @@ class TopoAlgoDefLegacy:
                 alg.addgeneric('MaxTob', d.nleading1)
                 alg.addvariable('MinET1', d.ocut1)
                 alg.addvariable('MinET2', d.ocut2)
-                alg.addvariable('MinDeltaEta', d.minDeta)
-                alg.addvariable('MaxDeltaEta', d.maxDeta)
-                alg.addvariable('MinDeltaPhi', d.minDphi)
-                alg.addvariable('MaxDeltaPhi', d.maxDphi)
+                alg.addvariable('DeltaEtaMin', d.minDeta)
+                alg.addvariable('DeltaEtaMax', d.maxDeta)
+                alg.addvariable('DeltaPhiMin', d.minDphi)
+                alg.addvariable('DeltaPhiMax', d.maxDphi)
             else:
                 alg.addgeneric('InputWidth1', d.nleading1)
                 alg.addgeneric('InputWidth2', d.nleading2)
@@ -613,8 +613,8 @@ class TopoAlgoDefLegacy:
             alg.addgeneric('NumResultBits', 1)                        
             alg.addvariable('MinET1', str(d.ocut1), 0)
             alg.addvariable('MinET2', str(d.ocut2), 0)
-            alg.addvariable('MinDeltaEta', d.minDeta, 0)
-            alg.addvariable('MaxDeltaEta', d.maxDeta, 0)
+            alg.addvariable('DeltaEtaMin', d.minDeta, 0)
+            alg.addvariable('DeltaEtaMax', d.maxDeta, 0)
             tm.registerTopoAlgo(alg)
 
             
@@ -765,10 +765,10 @@ class TopoAlgoDefLegacy:
                 alg.addgeneric('MaxTob', d.nleading1)
                 alg.addvariable('MinET1', d.ocut1, 0)
                 alg.addvariable('MinET2', d.ocut2, 0)
-                alg.addvariable('MinDeltaEta', d.minDeta, 0)
-                alg.addvariable('MaxDeltaEta', d.maxDeta, 0)
-                alg.addvariable('MinDeltaPhi', d.minDphi, 0)
-                alg.addvariable('MaxDeltaPhi', d.maxDphi, 0)
+                alg.addvariable('DeltaEtaMin', d.minDeta, 0)
+                alg.addvariable('DeltaEtaMax', d.maxDeta, 0)
+                alg.addvariable('DeltaPhiMin', d.minDphi, 0)
+                alg.addvariable('DeltaPhiMax', d.maxDphi, 0)
             else:
                 alg.addgeneric('InputWidth1', d.nleading1)
                 alg.addgeneric('InputWidth2', d.nleading2)
@@ -806,8 +806,8 @@ class TopoAlgoDefLegacy:
             alg.addgeneric('MaxTob2', d.nleading2)
             alg.addvariable('MinET1', d.ocut1, 0)
             alg.addvariable('MinET2', d.ocut2, 0)
-            alg.addvariable('MinDeltaEta', d.minDeta, 0)
-            alg.addvariable('MaxDeltaEta', d.maxDeta, 0)
+            alg.addvariable('DeltaEtaMin', d.minDeta, 0)
+            alg.addvariable('DeltaEtaMax', d.maxDeta, 0)
             tm.registerTopoAlgo(alg)
 
 
@@ -833,8 +833,8 @@ class TopoAlgoDefLegacy:
             alg.addgeneric('MaxTob2', d.nleading2)
             alg.addvariable('MinET1', d.ocut1, 0)
             alg.addvariable('MinET2', d.ocut2, 0)
-            alg.addvariable('MinDeltaPhi', d.minDphi, 0)
-            alg.addvariable('MaxDeltaPhi', d.maxDphi, 0)
+            alg.addvariable('DeltaPhiMin', d.minDphi, 0)
+            alg.addvariable('DeltaPhiMax', d.maxDphi, 0)
             tm.registerTopoAlgo(alg)
             
         # JetMatch
@@ -859,10 +859,10 @@ class TopoAlgoDefLegacy:
         alg.addgeneric('NumResultBits', 1)
         alg.addvariable('MinET1', 10)
         alg.addvariable('MinET2', 15)
-        alg.addvariable('EtaMin1', 0)
-        alg.addvariable('EtaMax1', 49)
-        alg.addvariable('EtaMin2', 0)
-        alg.addvariable('EtaMax2', 49)
+        alg.addvariable('MinEta1', 0)
+        alg.addvariable('MaxEta1', 49)
+        alg.addvariable('MinEta2', 0)
+        alg.addvariable('MaxEta2', 49)
         alg.addvariable('DRCut', 4)
         tm.registerTopoAlgo(alg)
 
@@ -920,10 +920,10 @@ class TopoAlgoDefLegacy:
         alg.addgeneric('NumResultBits', 1)
         alg.addvariable('MinET1', 30)
         alg.addvariable('MinET2', 0)
-        alg.addvariable('EtaMin1', 0)
-        alg.addvariable('EtaMax1', 49)
-        alg.addvariable('EtaMin2', 0)
-        alg.addvariable('EtaMax2', 49)
+        alg.addvariable('MinEta1', 0)
+        alg.addvariable('MaxEta1', 49)
+        alg.addvariable('MinEta2', 0)
+        alg.addvariable('MaxEta2', 49)
         alg.addvariable('DRCut', 0)
         tm.registerTopoAlgo(alg)        
 
@@ -1461,8 +1461,8 @@ class TopoAlgoDefLegacy:
             alg.addgeneric('NumResultBits', 1)                        
             alg.addvariable('MinET1', d.ocut1 if d.ocut1 > 0 else 3, 0)
             alg.addvariable('MinET2', d.ocut2 if d.ocut2 > 0 else 3, 0)
-            alg.addvariable('MinDeltaPhi', d.minDphi, 0)
-            alg.addvariable('MaxDeltaPhi', d.maxDphi, 0)
+            alg.addvariable('DeltaPhiMin', d.minDphi, 0)
+            alg.addvariable('DeltaPhiMax', d.maxDphi, 0)
             tm.registerTopoAlgo(alg)
 
 
