@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -11,6 +11,8 @@
 namespace HepMC3 {
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  begin(const HepMC3::GenVertex& v) { return v.particles_out().begin(); }
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  end(const HepMC3::GenVertex& v) { return v.particles_out().end(); }
+inline std::vector<HepMC3::GenParticlePtr>::const_iterator  begin(HepMC3::GenVertex& v) { return v.particles_out().begin(); }
+inline std::vector<HepMC3::GenParticlePtr>::const_iterator  end(HepMC3::GenVertex& v) { return v.particles_out().end(); }
 
 /// @brief Print one-line info with idiomatic C++ printing
 /// @note More generic printing methods from HepMC3::Print should be preffered - move to PrintStreams.h?
