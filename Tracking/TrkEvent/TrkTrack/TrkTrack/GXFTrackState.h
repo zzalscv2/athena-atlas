@@ -58,8 +58,8 @@ namespace Trk {
     bool hasTrackCovariance(void) const;
     void zeroTrackCovariance(void);
 
-    void setFitQuality(std::unique_ptr<const FitQualityOnSurface>);
-    const FitQualityOnSurface *fitQuality(void);
+    void setFitQuality(FitQualityOnSurface);
+    const FitQualityOnSurface fitQuality(void);
 
     TrackState::MeasurementType measurementType();
     void setMeasurementType(TrackState::MeasurementType);
@@ -128,7 +128,7 @@ namespace Trk {
     AmgSymMatrix(5) m_covariancematrix;     //!< Covariance matrix of track parameters at this surface
     bool m_covariance_set;
 
-    std::unique_ptr<const FitQualityOnSurface> m_fitqual;
+    FitQualityOnSurface m_fitqual;
     double m_measerror[5]{};      //!< Measurement errors (corrected for stereo angle)
     double m_sinstereo;         //!< stereo angle
     TrackState::MeasurementType m_mType;      //!< Measurement type, eg pixel, SCT, ...

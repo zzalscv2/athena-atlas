@@ -133,28 +133,28 @@ public:
   //! estimator for FitQuality on Surface from a full track state, that is a
   //! state
   // which contains the current hit (expressed as Amg::Vector2D).
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
 
   //! estimator for FitQuality on Surface from a full track state, that is
   // a state which contains the current hit (expressed as LocalParameters).
-  virtual const FitQualityOnSurface* fullStateFitQuality(
+  virtual FitQualityOnSurface fullStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
   //! estimator for FitQuality on Surface from a predicted track state, that is
   //! a state
   // which contains the current hit (expressed as Amg::Vector2D).
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const Amg::Vector2D&,
     const Amg::MatrixX&) const override final;
   //! estimator for FitQuality on Surface from a predicted track state, that is
   //! a state
   // which contains the current hit (expressed as LocalParameters).
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const LocalParameters&,
     const Amg::MatrixX&) const override final;
@@ -162,7 +162,7 @@ public:
   //! fitted to
   // the parameters of another trajectory part extrapolated to the common
   // surface.
-  virtual const FitQualityOnSurface* predictedStateFitQuality(
+  virtual FitQualityOnSurface predictedStateFitQuality(
     const TrackParameters&,
     const TrackParameters&) const override final;
   //! interface for reference-track KF, not implemented.
@@ -204,7 +204,7 @@ private:
      input track state (sign=+1) or smoothed/updated input track state
      (sign=-1).
   */
-  FitQualityOnSurface* makeChi2Object(const Amg::VectorX&,
+  FitQualityOnSurface  makeChi2Object(const Amg::VectorX&,
                                       const Amg::MatrixX&,
                                       const Amg::MatrixX&,
                                       const int,
@@ -318,7 +318,7 @@ KalmanUpdator::diffThetaPhiWithinRange(const Amg::VectorX& V,
   }
 }
 
-inline FitQualityOnSurface*
+inline FitQualityOnSurface
 KalmanUpdator::makeChi2Object(const Amg::VectorX& residual,
                               const Amg::MatrixX& covTrk,
                               const Amg::MatrixX& covRio,
@@ -328,7 +328,7 @@ KalmanUpdator::makeChi2Object(const Amg::VectorX& residual,
   Amg::MatrixX R = covRio + sign * projection(covTrk, key); // .similarity(H);
   if (R.determinant() == 0) {
     ATH_MSG_DEBUG("matrix inversion failed");
-    return new FitQualityOnSurface(0.0, (int)covRio.cols());
+    return FitQualityOnSurface(0.0, (int)covRio.cols());
   }
   // get chi2 = r.T() * R^-1 * r
   double chiSquared = residual.transpose() * R.inverse() * residual;
@@ -336,7 +336,7 @@ KalmanUpdator::makeChi2Object(const Amg::VectorX& residual,
                                        << " state, chi2 :" << chiSquared
                                        << " / ndof= " << covRio.cols());
   // return the FitQualityOnSurface object
-  return new FitQualityOnSurface(chiSquared, int(covRio.cols()));
+  return  FitQualityOnSurface(chiSquared, int(covRio.cols()));
 }
 
 } // end of namespace

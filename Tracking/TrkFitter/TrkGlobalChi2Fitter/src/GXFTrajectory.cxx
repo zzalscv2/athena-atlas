@@ -381,7 +381,7 @@ namespace Trk {
       m_states[index]->resetStateType(TrackStateOnSurface::Outlier);
       m_nmeasoutl += nmeas;
       m_noutl++;
-      m_states[index]->setFitQuality(nullptr);
+      m_states[index]->setFitQuality({});
     } else {
       m_ndof += nmeas;
       m_states[index]->resetStateType(TrackStateOnSurface::Measurement);

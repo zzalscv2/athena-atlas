@@ -488,7 +488,7 @@ namespace Trk {
           continue;
         }
         
-        if ((pseudostate == nullptr) || pseudostate->fitQuality()->chiSquared() < 10) {
+        if ((pseudostate == nullptr) || pseudostate->fitQuality().chiSquared() < 10) {
           continue;
         }
         
@@ -2134,7 +2134,7 @@ namespace Trk {
         if (
           (pseudostate == nullptr) || 
           pseudostate->measurementType() != TrackState::Pseudo || 
-          pseudostate->fitQuality()->chiSquared() < 10
+          pseudostate->fitQuality().chiSquared() < 10
         ) {
           continue;
         }
@@ -8121,19 +8121,19 @@ __attribute__ ((flatten))
                                                                        std::move(trkerrmat))
         );
         state->setTrackParameters(std::move(trackpar));
-        std::unique_ptr<const FitQualityOnSurface> fitQual = nullptr;
+        FitQualityOnSurface fitQual{};
         if (state->getStateType(TrackStateOnSurface::Measurement)) {
           if (errorok && trajectory.nDOF() > 0) {
-            fitQual.reset(m_updator->fullStateFitQuality(
+            fitQual = m_updator->fullStateFitQuality(
               *state->trackParameters(),
               measurement->localParameters(),
               measurement->localCovariance()
-            ));
+            );
           } else {
-            fitQual = std::make_unique<const FitQualityOnSurface>(0, state->numberOfMeasuredParameters());
+            fitQual = FitQualityOnSurface(0, state->numberOfMeasuredParameters());
           }
         }
-        state->setFitQuality(std::move(fitQual));
+        state->setFitQuality(fitQual);
       }
       prevstate = state.get();
       hitno++;

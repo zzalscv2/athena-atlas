@@ -305,7 +305,7 @@ std::unique_ptr<Trk::TrackParameters> Trk::KalmanUpdatorAmg::combineStates (cons
 }
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::stateFitQuality (const Trk::TrackParameters& trkPar,
                                         const Amg::Vector2D& rioLocPos,
                                         const Amg::MatrixX& rioCov,
@@ -315,7 +315,7 @@ Trk::KalmanUpdatorAmg::stateFitQuality (const Trk::TrackParameters& trkPar,
    // try if Track Parameters are measured ones ?
    if (!trkPar.covariance()) {
       ATH_MSG_ERROR("updated track state has no error matrix, return 0.");
-      return nullptr;
+      return {};
    }
    // For the LocalPos. version, need to get # meas. coord. from covariance matrix.
    int nLocCoord = rioCov.cols();
@@ -327,13 +327,13 @@ Trk::KalmanUpdatorAmg::stateFitQuality (const Trk::TrackParameters& trkPar,
                            rioLocPos,rioCov.block<2,2>(0,0), 3,fullPred);
    }
       ATH_MSG_WARNING("Error in local position - must be 1D or 2D!");
-      return nullptr;
+      return {};
 
 }
 
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& predPar,
                                                  const Amg::Vector2D& rioLocPos,
                                                  const Amg::MatrixX& rioCov) const
@@ -344,7 +344,7 @@ Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& pre
 }
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::fullStateFitQuality (const Trk::TrackParameters& trkPar,
                                             const Amg::Vector2D& rioLocPos,
                                             const Amg::MatrixX& rioCov) const
@@ -355,7 +355,7 @@ Trk::KalmanUpdatorAmg::fullStateFitQuality (const Trk::TrackParameters& trkPar,
 
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::stateFitQuality (const Trk::TrackParameters& trkPar,
                                         const Trk::LocalParameters& parRio,
                                         const Amg::MatrixX& rioCov,
@@ -365,10 +365,10 @@ Trk::KalmanUpdatorAmg::stateFitQuality (const Trk::TrackParameters& trkPar,
 	// try if Track Parameters are measured ones ?
 	if (!trkPar.covariance()) {
         ATH_MSG_ERROR("updated track state has no error matrix, return 0.");
-		return nullptr;
+		return {};
 	}
     int nLocCoord = parRio.dimension();
-    if ( ! consistentParamDimensions(parRio,rioCov.cols()) ) return nullptr;
+    if ( ! consistentParamDimensions(parRio,rioCov.cols()) ) return {};
     if (nLocCoord == 1) {
       return makeChi2_1D(trkPar.parameters(),(*trkPar.covariance()),
                          parRio(0),rioCov(0,0),parRio.parameterKey(),fullPred);
@@ -390,14 +390,14 @@ Trk::KalmanUpdatorAmg::stateFitQuality (const Trk::TrackParameters& trkPar,
                            parRio.block<5,1>(0,0),rioCov.block<5,5>(0,0), parRio.parameterKey(),fullPred);
     }
     ATH_MSG_ERROR("Dimension error in KalmanUpdatorAmg::stateFitQuality(TP,LPAR,ERR).");
-    return nullptr;
+    return {};
 }
 
 
 
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::fullStateFitQuality (const Trk::TrackParameters& trkPar,
                                             const Trk::LocalParameters& parRio,
                                             const Amg::MatrixX& rioCov) const
@@ -410,7 +410,7 @@ Trk::KalmanUpdatorAmg::fullStateFitQuality (const Trk::TrackParameters& trkPar,
 
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& predPar,
                                                  const Trk::LocalParameters& parRio,
                                                  const Amg::MatrixX& rioCov) const
@@ -420,7 +420,7 @@ Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& pre
 }
 
 // estimator for FitQuality on Surface (allows for setting of LR for straws)
-const Trk::FitQualityOnSurface*
+Trk::FitQualityOnSurface
 Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& trkParOne,
                                                  const Trk::TrackParameters& trkParTwo) const
 {
@@ -431,12 +431,12 @@ Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& trk
     // remember, either one OR two might have no error, but not both !
 	if (!covOne && ! covTwo) {
 		ATH_MSG_WARNING("both parameters have no errors, invalid use of Updator::fitQuality()");
-		return nullptr;
+		return {};
 	}
 	// if only one of two has an error, place a message.
 	if (!covOne || !covTwo) {
 		ATH_MSG_DEBUG("One parameter does not have uncertainties, assume initial state and return chi2=0.0");
-		return new FitQualityOnSurface(0.f, 5);
+		return  FitQualityOnSurface(0.f, 5);
 	}
     return makeChi2_T<5>(trkParOne.parameters(),*covOne,
                          trkParTwo.parameters(),*covTwo, 31, +1);
@@ -767,7 +767,7 @@ Trk::KalmanUpdatorAmg::calculateFilterStep_5D(const AmgVector(5)& trkPar, const 
 }
 
 
-Trk::FitQualityOnSurface* Trk::KalmanUpdatorAmg::makeChi2_1D(const AmgVector(5)& trkPar,
+Trk::FitQualityOnSurface  Trk::KalmanUpdatorAmg::makeChi2_1D(const AmgVector(5)& trkPar,
                                                              const AmgSymMatrix(5)& trkCov,
                                                              double valRio, double rioCov, int paramKey,
                                                              int sign) const
@@ -780,11 +780,11 @@ Trk::FitQualityOnSurface* Trk::KalmanUpdatorAmg::makeChi2_1D(const AmgVector(5)&
   double chiSquared = rioCov + sign * trkCov(mk,mk);
   if (chiSquared == 0.0) {
     ATH_MSG_DEBUG( "inversion of the error-on-the-residual failed for 1D measurement, set chi2 to zero.");
-    return nullptr;
+    return {};
   }
     chiSquared = r*r/chiSquared;
 
-  return new FitQualityOnSurface(chiSquared, 1);
+  return FitQualityOnSurface(chiSquared, 1);
 }
 
 std::unique_ptr<Trk::TrackParameters>
