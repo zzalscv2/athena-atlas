@@ -75,19 +75,11 @@ int ISF::ISFTruthIncident::parentPdgCode() const {
 }
 
 HepMC::ConstGenParticlePtr ISF::ISFTruthIncident::parentParticle() const {
-  if ( m_parent.getTruthBinding() || m_parent.getParticleLink()) {
     return getHepMCTruthParticle(m_parent);
-  } else {
-    return updateHepMCTruthParticle(m_parent, &m_parent);
-  }
 }
 
 HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
-  if ( m_parent.getTruthBinding() || m_parent.getParticleLink()) {
     return getHepMCTruthParticle(m_parent);
-  } else {
-    return updateHepMCTruthParticle(m_parent, &m_parent);
-  }
 }
 
 Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() const {
@@ -174,26 +166,14 @@ void ISF::ISFTruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarcode bc) 
 HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFParticle& particle ) const {
   auto* truthBinding     = particle.getTruthBinding();
   HepMC::GenParticlePtr hepTruthParticle = truthBinding ? truthBinding->getTruthParticle() : nullptr;
-
-  // HepMC::GenParticle not in TruthBinding -> see if the HepMcParticleLink can retrieve it
-  if (!hepTruthParticle) {
-    const HepMcParticleLink* oldHMPL = particle.getParticleLink();
-    if (oldHMPL && oldHMPL->cptr())
-    {
-      // FIXME: const_cast!
-#ifdef HEPMC3
-      HepMC::ConstGenParticlePtr pp = oldHMPL->cptr();
-      hepTruthParticle = std::shared_ptr<HepMC3::GenParticle>(pp, 
-                                                              const_cast<HepMC3::GenParticle*>(pp.get()));
-#else
-      hepTruthParticle = const_cast<HepMC::GenParticlePtr>(oldHMPL->cptr());
-#endif
-    }
+ 
+  // We have what we want
+  if(hepTruthParticle){
+    return hepTruthParticle;
   }
-
-  return hepTruthParticle;
+  //Otherwise we need to create it
+  return updateHepMCTruthParticle(particle,&particle);
 }
-
 
 /** convert ISFParticle to GenParticle and attach to ISFParticle's TruthBinding */
 HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFParticle& particle,
