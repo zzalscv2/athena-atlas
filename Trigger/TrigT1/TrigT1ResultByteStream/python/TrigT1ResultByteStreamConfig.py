@@ -318,7 +318,7 @@ if __name__ == '__main__':
   parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
   parser.add_argument('--outputHISTFile',default="",help="if specified, will activate monitoring")
-  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
+  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jxTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
                       help="What data to decode and output.")
   args = parser.parse_args()
 
@@ -418,7 +418,17 @@ if __name__ == '__main__':
   # jFEX ROIs
   ########################################
   if 'jTOBs' in args.outputs:
-    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder', flags)
+    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder_TOB', flags)
+    for module_id in jFexTool.ROBIDs:
+        maybeMissingRobs.append(module_id)
+
+    decoderTools += [jFexTool]
+
+  ########################################
+  # jFEX xTOBs
+  ########################################
+  if 'jxTOBs' in args.outputs:
+    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder_xTOB', flags, xTOBs=True)
     for module_id in jFexTool.ROBIDs:
         maybeMissingRobs.append(module_id)
 
@@ -469,7 +479,7 @@ if __name__ == '__main__':
     maybeMissingRobs += l1topoBSTool.ROBIDs
 
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
-                                                         DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=maybeMissingRobs)
+                                                         DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=list(set(maybeMissingRobs)))
 
   acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
 
