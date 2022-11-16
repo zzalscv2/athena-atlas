@@ -381,6 +381,7 @@ StatusCode Pythia8_i::genInitialize() {
   m_pythiaToHepMC.set_print_inconsistency(  m_pythia->settings.flag("AthenaPythia8ToHepMC:print_inconsistency")  );
 
   m_pythiaToHepMC.set_store_pdf(true);
+  m_pythiaToHepMC.set_store_weights(false);
 
   return returnCode;
 }
@@ -627,17 +628,18 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 #ifdef HEPMC3
   if (!evt->run_info()) {
      evt->set_run_info(m_runinfo);
-}
+  }
   evt->run_info()->set_weight_names(m_weightNames);
 
-// for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
+  // for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
   if (m_internal_event_number == 1 && evt->run_info()->weight_names().size() == evt->weights().size()+1 ) {
      evt->weights().push_back(1.0);
-}
+  }
 
   // added conversion GeV ->  MeV to ensure correct units
   evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
+  evt->weights().resize(fWeights.size(), 1.0);
   for (auto w: fWeights) {
       evt->weight(w.first)=w.second;
   }
