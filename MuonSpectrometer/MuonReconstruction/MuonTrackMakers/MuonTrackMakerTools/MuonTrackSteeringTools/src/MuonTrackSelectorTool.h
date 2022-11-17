@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRACKSELECTOR_H
@@ -66,57 +66,46 @@ namespace Muon {
         ToolHandle<Trk::ITrackSummaryHelperTool> m_trackSummaryTool{this, "TrackSummaryHelperTool",
                                                                     "Muon::MuonTrackSummaryHelperTool/MuonTrackSummaryHelperTool"};
 
-        double m_holeHitRatioCutPerStation;
-        double m_chi2NDofCut;
-        unsigned int m_minMdtHitsPerStation;
-        unsigned int m_maxMdtHolesPerTwoStationTrack;
-        unsigned int m_maxMdtHolesPerTrack;
-        unsigned int m_minCscHitsPerStation;
+        Gaudi::Property<double> m_holeHitRatioCutPerStation{this, "HolesToHitsRatioCutPerStation", 1.1};
+        Gaudi::Property<double> m_chi2NDofCut{this, "Chi2NDofCut", 20};
+        Gaudi::Property<unsigned int> m_minMdtHitsPerStation{this, "MinimumNumberOfMdtHitsPerStation", 3};
+        Gaudi::Property<unsigned int> m_maxMdtHolesPerTwoStationTrack{this, "MaxMdtHolesOnTwoStationTrack", 5};
+        Gaudi::Property<unsigned int> m_maxMdtHolesPerTrack{this, "MaxMdtHolesOnTrack", 5};
+        Gaudi::Property<unsigned int> m_minCscHitsPerStation{this, "MinimumNumberOfCscHitsPerStation", 3 };
 
-        bool m_useRPCHoles;
-        bool m_useTGCHoles;
-        bool m_useCSCHoles;
-        bool m_useMDTHoles;
-        bool m_ignoreTriggerHolesInLayersWithHits;
-        bool m_useRPCTimeWindow;
-        bool m_removeTwoStationTrackWithoutTriggerHits;
-        bool m_countMdtOutliersAsHoles;
-        bool m_removeSingleStationTracks;
-        bool m_tightSingleStationCuts;
+        Gaudi::Property<bool> m_useRPCHoles{this, "UseRPCHoles", true};
+        Gaudi::Property<bool> m_useTGCHoles{this, "UseTGCHoles", true};
+        Gaudi::Property<bool> m_useCSCHoles{this, "UseCSCHoles", true};
+        Gaudi::Property<bool> m_useMDTHoles{this, "UseMDTHoles", true};
+        Gaudi::Property<bool> m_ignoreTriggerHolesInLayersWithHits{this, "IgnoreTriggerHolesInChamberWithHits", true};
+        Gaudi::Property<bool> m_useRPCTimeWindow{this, "ApplyRPCTimeWindow", false};
+        Gaudi::Property<bool> m_removeTwoStationTrackWithoutTriggerHits{this, "RemoveTwoStationTrackWithoutTriggerHits", false};
+        Gaudi::Property<bool> m_countMdtOutliersAsHoles{this, "CountMDTOutlierAsHoles", false};
+        Gaudi::Property<bool> m_removeSingleStationTracks{this, "RemoveSingleStationTracks", false};
+        Gaudi::Property<bool> m_tightSingleStationCuts{this, "TightSingleStationCuts", false};
+
+        Gaudi::Property<bool> m_requireSanePerigee{this,"RequireSanePerigee", true, 
+                                                  "Ensures that the covariance of the perigee parameters has a positive trace"};
 
         /** internal data structure */
         struct StationData {
-            StationData() :
-                isMdt(false),
-                isCsc(false),
-                isNSW(false),
-                isTrigger(false),
-                mdtHasHitsinMl1(false),
-                mdtHasHitsinMl2(false),
-                netaHits(0),
-                nphiHits(0),
-                netaHoles(0),
-                nphiHoles(0),
-                netaTrigHits(0),
-                nphiTrigHits(0),
-                netaTrigHoles(0),
-                nphiTrigHoles(0) {}
-            bool isMdt;
-            bool isCsc;
-            bool isNSW;
-            bool isTrigger;
-            bool mdtHasHitsinBothMl() { return mdtHasHitsinMl1 && mdtHasHitsinMl2; }
-            bool mdtHasHitsinMl1;
-            bool mdtHasHitsinMl2;
-            unsigned int netaHits;
-            unsigned int nphiHits;
-            unsigned int netaHoles;
-            unsigned int nphiHoles;
+            StationData() = default;
+            bool isMdt{false};
+            bool isCsc{false};
+            bool isNSW{false};
+            bool isTrigger{false};
+            bool mdtHasHitsinBothMl() const { return mdtHasHitsinMl1 && mdtHasHitsinMl2; }
+            bool mdtHasHitsinMl1{false};
+            bool mdtHasHitsinMl2{false};
+            unsigned int netaHits{0};
+            unsigned int nphiHits{0};
+            unsigned int netaHoles{0};
+            unsigned int nphiHoles{0};
 
-            unsigned int netaTrigHits;
-            unsigned int nphiTrigHits;
-            unsigned int netaTrigHoles;
-            unsigned int nphiTrigHoles;
+            unsigned int netaTrigHits{0};
+            unsigned int nphiTrigHits{0};
+            unsigned int netaTrigHoles{0};
+            unsigned int nphiTrigHoles{0};
         };
 
         /** counter for statistics */
