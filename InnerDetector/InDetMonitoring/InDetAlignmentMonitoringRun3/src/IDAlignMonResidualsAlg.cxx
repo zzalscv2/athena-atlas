@@ -5,7 +5,7 @@
 // ***************************************************************************************
 // IDAlignMonResidualsAlg.cxx
 // AUTHORS: Beate Heinemann, Tobias Golling, Ben Cooper, John Alison
-// Adapted to AthenaMT 2021 by Per Johansson
+// Adapted to AthenaMT 2021-2022 by Per Johansson
 // ***************************************************************************************
 
 //main header
@@ -14,7 +14,6 @@
 #include "TMath.h"
 #include <cmath>
 #include <sstream>
-
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -35,15 +34,8 @@
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/Layer.h"
 #include "TrkSurfaces/Surface.h"
-
 #include "TrkTrack/TrackCollection.h"
-#include "TrkToolInterfaces/IUpdator.h"
-#include "TrkExInterfaces/IPropagator.h"
-#include "TrkToolInterfaces/IResidualPullCalculator.h"
 
-#include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
-
-#include "TRT_ConditionsServices/ITRT_CalDbTool.h"
 #include "TRT_ConditionsServices/ITRT_ConditionsSvc.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 
@@ -97,14 +89,44 @@ StatusCode IDAlignMonResidualsAlg::initialize()
   ATH_CHECK( m_tracksName.initialize() );
   ATH_CHECK( m_tracksKey.initialize() );
   
+  m_pixResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualX", m_nSiBlayers);
+  m_pixResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualY", m_nSiBlayers);
+  m_pixPullX = Monitored::buildToolMap<int>(m_tools, "PixPullX", m_nSiBlayers);
+  m_pixPullY = Monitored::buildToolMap<int>(m_tools, "PixPullY", m_nSiBlayers);
+  m_pixResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "PixResidualXvsEta", m_nSiBlayers);
+  m_pixResidualYvsEta = Monitored::buildToolMap<int>(m_tools, "PixResidualYvsEta", m_nSiBlayers);
+  m_pixResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "PixResidualXvsPhi", m_nSiBlayers);
+  m_pixResidualYvsPhi = Monitored::buildToolMap<int>(m_tools, "PixResidualYvsPhi", m_nSiBlayers);
+  m_pixECAResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualXECA", m_nPixEClayers);
+  m_pixECAResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECA", m_nPixEClayers);
+  m_pixECCResidualX = Monitored::buildToolMap<int>(m_tools, "PixResidualXECC", m_nPixEClayers);
+  m_pixECCResidualY = Monitored::buildToolMap<int>(m_tools, "PixResidualYECC", m_nPixEClayers);
+  m_sctResidualX = Monitored::buildToolMap<int>(m_tools, "SCTResidualX", m_nSiBlayers);
+  m_sctPullX = Monitored::buildToolMap<int>(m_tools, "SCTPullX", m_nSiBlayers);
+  m_sctResidualXvsEta = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsEta", m_nSiBlayers);
+  m_sctResidualXvsPhi = Monitored::buildToolMap<int>(m_tools, "SCTResidualXvsPhi", m_nSiBlayers);
+  m_trtBPredictedR = Monitored::buildToolMap<int>(m_tools, "TRTPredictedRB", m_nTRTBlayers);
+  m_trtBMeasuredR = Monitored::buildToolMap<int>(m_tools, "TRTMeasuredRB", m_nTRTBlayers);
+  m_trtBResidualR = Monitored::buildToolMap<int>(m_tools, "TRTResidualRB", m_nTRTBlayers);
+  m_trtBPullR = Monitored::buildToolMap<int>(m_tools, "TRTPullRB", m_nTRTBlayers);
+  m_trtBResidualRNoTube = Monitored::buildToolMap<int>(m_tools, "TRTResidualRNoTubeB", m_nTRTBlayers);
+  m_trtBPullRNoTube = Monitored::buildToolMap<int>(m_tools, "TRTPullRNoTubeB", m_nTRTBlayers);
+  m_trtBLR = Monitored::buildToolMap<int>(m_tools, "TRTLRB", m_nTRTBlayers);
+  m_trtBResVsEta= Monitored::buildToolMap<std::vector<int>>(m_tools, "TRTResVsEtaB", m_nTRTBlayers,m_nTRTBlayers);
+  m_trtBResVsPhiSec= Monitored::buildToolMap<std::vector<int>>(m_tools, "TRTResVsPhiSecB", m_nTRTBlayers,m_nTRTBlayers);
+  m_trtBLRVsPhiSec= Monitored::buildToolMap<std::vector<int>>(m_tools, "TRTLRVsPhiSecB", m_nTRTBlayers,m_nTRTBlayers);
+  m_trtECPredictedR = Monitored::buildToolMap<int>(m_tools, "TRTPredictedREC", m_nTRTEClayers);
+  m_trtECMeasuredR = Monitored::buildToolMap<int>(m_tools, "TRTMeasuredREC", m_nTRTEClayers);
+  m_trtECResidualR = Monitored::buildToolMap<int>(m_tools, "TRTResidualREC", m_nTRTEClayers);
+  m_trtECPullR = Monitored::buildToolMap<int>(m_tools, "TRTPullREC", m_nTRTEClayers);
+  m_trtECResidualRNoTube = Monitored::buildToolMap<int>(m_tools, "TRTResidualRNoTubeEC", m_nTRTEClayers);
+  m_trtECPullRNoTube = Monitored::buildToolMap<int>(m_tools, "TRTPullRNoTubeEC", m_nTRTEClayers);
+  m_trtECLR = Monitored::buildToolMap<int>(m_tools, "TRTLREC", m_nTRTEClayers);
+  m_trtECResVsEta= Monitored::buildToolMap<int>(m_tools, "TRTResVsEtaEC", m_nTRTEClayers);
+  m_trtECResVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTResVsPhiEC", m_nTRTEClayers);
+  m_trtECLRVsPhiSec= Monitored::buildToolMap<int>(m_tools, "TRTLRVsPhiEC", m_nTRTEClayers);
+   
   return AthMonitorAlgorithm::initialize();
-}
-
-/** Convert from an int to a string */
-std::string IDAlignMonResidualsAlg::intToString(int input){
-  std::ostringstream stm;
-  stm << input;
-  return stm.str();
 }
 
 
@@ -135,14 +157,14 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
   if (m_extendedPlots){
     fill("residualGroup", mu_m);
   }
- 
+
   // Retrieving tracks
   auto tracks = SG::makeHandle(m_tracksName, ctx);
   if (not tracks.isValid()) {
     ATH_MSG_ERROR(m_tracksName.key() << " could not be retrieved");
     return StatusCode::RECOVERABLE;
   }
- 
+
   //looping over tracks
   ATH_MSG_DEBUG ("IDAlignMonResidual: Start loop on tracks. Number of tracks " << tracks->size());
   for (const Trk::Track* trksItr: *tracks) {
@@ -177,7 +199,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 
     int nHits =  0;//counts number of tsos from which we can define residual/pull
     int nTSOS = -1;//counts all TSOS on the track
-
+    
     //looping over the hits
     for (const Trk::TrackStateOnSurface* tsos : *trksItr->trackStateOnSurfaces()) {
 
@@ -243,10 +265,13 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       float pullY = 9999.0;
       float biasedResidualX = 9999.0;
       float biasedResidualY = 9999.0;
-      int detType    = 99;
-      int barrelEC   = 99;
-      int layerDisk  = 99;
-
+      int   detType    = 99;
+      int   barrelEC   = 99;
+      int   layerDisk  = 99;
+      int sctSide = 99;
+      int   modEta = 9999;
+      int   modPhi = 9999;
+       
       const Identifier & hitId = hit->identify();
       ATH_MSG_DEBUG("Defining hit Identifier ");
       if (m_idHelper->is_trt(hitId)) detType = 2;
@@ -254,7 +279,79 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
       else  detType = 0;
   
 
-      if (detType==0 || detType==1){ //have identified pixel or SCT hit
+      //TRT hits: detType = 2
+      if (detType == 2) {
+        ATH_MSG_DEBUG("** IDAlignMonResidualsAlg::fillHistograms() ** Hit is from the TRT, finding residuals... ");
+        bool isTubeHit = (mesh->localCovariance()(Trk::locX, Trk::locX) > 1.0);
+        const Trk::TrackParameters* trackParameter = tsos->trackParameters();
+        float hitR = hit->localParameters()[Trk::driftRadius];
+        float trketa = tsos->trackParameters()->eta();
+        float pullR = -9.9;
+
+        const Identifier& id = m_trtID->layer_id(hitId);
+        int barrel_ec = m_trtID->barrel_ec(id);
+        int layer_or_wheel = m_trtID->layer_or_wheel(id);
+        int phi_module = m_trtID->phi_module(id);
+
+        //finding residuals
+        if (!trackParameter) {
+          ATH_MSG_WARNING("No TrackParameters associated with TRT TrkSurface " << nTSOS);
+          continue;
+        }
+        ATH_MSG_DEBUG("Found Trk::TrackParameters for hit " << nTSOS << " --> TRT hit (detType= " << detType);
+
+        //getting unbiased track parameters by removing the hit from the track and refitting
+      	//std::unique_ptr <Trk::TrackParameters> trackParameterUnbiased;
+      	auto trackParameterUnbiased = getUnbiasedTrackParameters(trksItr, tsos);
+
+        if (!trackParameterUnbiased) {//updator can fail
+          ATH_MSG_WARNING("Cannot define unbiased parameters for hit, skipping it.");
+          continue;
+        }
+        ATH_MSG_DEBUG(" --> TRT UnBiased TrackParameters of hit " << nTSOS << " FOUND");
+
+        float predictR = trackParameterUnbiased->parameters()[Trk::locR];
+
+        const Trk::MeasurementBase* mesh = tsos->measurementOnTrack();
+	const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(mesh,
+                                                                                       trackParameterUnbiased.get(),
+                                                                                       Trk::ResidualPull::Unbiased);
+
+        if (residualPull) {
+          pullR = residualPull->pull()[Trk::locR];
+        } else {
+          ATH_MSG_DEBUG(" no covariance of the track parameters given, can not calculate pull!");
+        }
+
+        //delete trackParameterUnbiased;
+        delete residualPull;
+
+        float residualR = hitR - predictR;
+
+        const InDet::TRT_DriftCircleOnTrack* trtCircle =
+          dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(tsos->measurementOnTrack());
+
+	if (trtCircle != nullptr) {
+          ATH_MSG_DEBUG("** fillHistograms() ** Filling TRT HISTOS for hit/tsos " << nTSOS);
+
+          ATH_MSG_DEBUG(" fillHistograms() ** filling TRT histos:"
+                        << "  Barrel/EndCap: " << barrel_ec
+                        << "  layer/wheel: " << layer_or_wheel
+                        << "  phi: " << phi_module
+                        << "  Residual: " << residualR);
+          /** filling TRT histograms */
+          fillTRTHistograms(barrel_ec
+      	  		    , layer_or_wheel
+      	  		    , phi_module
+      	  		    , predictR
+      	  		    , hitR
+      	  		    , residualR
+      	  		    , pullR
+      	  		    , isTubeHit
+      	  		    , trketa);
+      	}
+      }
+      else {//have identified pixel or SCT hit
 	ATH_MSG_DEBUG("** fillHistograms() ** Hit is pixel or SCT, type: " << detType);
 	
 	if(m_doHitQuality) {
@@ -274,11 +371,16 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  const Identifier& id = m_pixelID->wafer_id(hitId);
 	  barrelEC  = m_pixelID -> barrel_ec(id);
 	  layerDisk = m_pixelID -> layer_disk(id);
+	  modEta = m_pixelID->eta_module(id);  //For the endcaps these are the rings
+          modPhi = m_pixelID->phi_module(id);
 	}
 	else {//sct. Since detType == 0 or detType == 1 here
 	  const Identifier& id = m_sctID->wafer_id(hitId);
 	  barrelEC  = m_sctID->barrel_ec(id);
 	  layerDisk = m_sctID->layer_disk(id);
+	  modEta = m_sctID->eta_module(id);
+          modPhi = m_sctID->phi_module(id);
+	  sctSide = m_sctID->side(id);
 	}
 
 	//finding residuals
@@ -317,33 +419,67 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  
 	  biasedResidualX = (float)biasedResXY[0];
 	  biasedResidualY = (float)biasedResXY[1];
-	}
-	else
+
+	}else
 	  ATH_MSG_DEBUG("No TrackParameters associated with Si TrkSurface "<< nTSOS << " - Hit is probably an outlier");
       }
 
+  
       //--------------------------------------------
       //
       // Filling Residual Histograms for Pixel and SCT
       //
       //--------------------------------------------
 
-      //Common for Pixel and SCT
-      auto si_residualX_m = Monitored::Scalar<float>( "m_si_residualx", 0.0);
-      auto si_b_residualX_m = Monitored::Scalar<float>( "m_si_b_residualX", 0.0);
- 
+      //Common for Pixel and SCT and other variables used
+      auto si_residualx_m = Monitored::Scalar<float>( "m_si_residualx", 0.0);
+      auto si_b_residualx_m = Monitored::Scalar<float>( "m_si_b_residualx", 0.0);
+      auto si_barrel_resX_m = Monitored::Scalar<float>( "m_si_barrel_resX", 0.0);
+      auto si_barrel_resY_m = Monitored::Scalar<float>( "m_si_barrel_resY", 0.0);
+      auto si_barrel_pullX_m = Monitored::Scalar<float>( "m_si_barrel_pullX", 0.0);
+      auto si_barrel_pullY_m = Monitored::Scalar<float>( "m_si_barrel_pullY", 0.0);
+      auto si_eca_resX_m = Monitored::Scalar<float>( "m_si_eca_resX", 0.0);
+      auto si_eca_resY_m = Monitored::Scalar<float>( "m_si_eca_resY", 0.0);
+      auto si_eca_pullX_m = Monitored::Scalar<float>( "m_si_eca_pullX", 0.0);
+      auto si_eca_pullY_m = Monitored::Scalar<float>( "m_si_eca_pullY", 0.0);
+      auto si_ecc_resX_m = Monitored::Scalar<float>( "m_si_ecc_resX", 0.0);
+      auto si_ecc_resY_m = Monitored::Scalar<float>( "m_si_ecc_resY", 0.0);
+      auto si_ecc_pullX_m = Monitored::Scalar<float>( "m_si_ecc_pullX", 0.0);
+      auto si_ecc_pullY_m = Monitored::Scalar<float>( "m_si_ecc_pullY", 0.0);
+      auto residualX_m = Monitored::Scalar<float>( "m_residualX", residualX);
+      auto residualY_m = Monitored::Scalar<float>( "m_residualY", residualY);
+      auto modEta_m = Monitored::Scalar<int>( "m_modEta", modEta );
+      auto modPhi_m = Monitored::Scalar<int>( "m_modPhi", modPhi );
+      int lb       = GetEventInfo(ctx)->lumiBlock();
+      auto lb_m    = Monitored::Scalar<int>( "m_lb", lb );
+      auto layerDisk_m = Monitored::Scalar<float>("m_layerDisk", layerDisk);
+      auto layerDisk_si_m = Monitored::Scalar<float>("m_layerDisk_si", 0);
+  
       if (detType==0) {//filling pixel histograms
-	si_residualX_m = residualX;
-	fill(residualGroup, si_residualX_m);
-	//m_si_residualx -> Fill(residualX, hweight);
 	ATH_MSG_DEBUG(" This is a PIXEL hit " << hitId  << " - filling histograms");
 
+	si_residualx_m = residualX;
+	fill(residualGroup, si_residualx_m);
+
 	if(barrelEC==0){//filling pixel barrel histograms
-
+	  int ModEtaShift[4] = {0, 30, 53, 76};
+          int ModPhiShift[4] = {0, 24, 56, 104};
+ 
 	  //common Si plots
-	  si_b_residualX_m = residualX;
-	  fill(residualGroup, si_b_residualX_m);
+	  si_b_residualx_m = residualX;
+	  fill(residualGroup, si_b_residualx_m);
 
+	  layerDisk_si_m = layerDisk;
+	  si_barrel_resX_m = residualX;
+	  fill(residualGroup, layerDisk_si_m, si_barrel_resX_m);
+	  si_barrel_resY_m = residualY;
+	  fill(residualGroup, layerDisk_si_m, si_barrel_resY_m);
+	  si_barrel_pullX_m = pullX;
+	  fill(residualGroup, layerDisk_si_m, si_barrel_pullX_m);
+	  si_barrel_pullY_m = pullY;
+	  fill(residualGroup, layerDisk_si_m, si_barrel_pullY_m);
+
+	  //Pixel Residual plots
 	  auto pix_b_residualx_m = Monitored::Scalar<float>( "m_pix_b_residualx", residualX);
 	  fill(residualGroup, pix_b_residualx_m);
 	  auto pix_b_biased_residualx_m = Monitored::Scalar<float>( "m_pix_b_biased_residualx", biasedResidualX);
@@ -352,20 +488,46 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  fill(residualGroup, pix_b_residualy_m);
 	  auto pix_b_biased_residualy_m = Monitored::Scalar<float>( "m_pix_b_biased_residualy", biasedResidualY);
 	  fill(residualGroup, pix_b_biased_residualy_m);
+	  auto pix_b_residualsx_m = Monitored::Scalar<float>("m_pix_residualsx", residualX);
+	  fill(m_tools[m_pixResidualX[layerDisk]], pix_b_residualsx_m);
+	  auto pix_b_residualsy_m = Monitored::Scalar<float>("m_pix_residualsy", residualY);
+	  fill(m_tools[m_pixResidualY[layerDisk]], pix_b_residualsy_m);
+	  auto pix_b_pullsx_m = Monitored::Scalar<float>("m_pix_pullsx", pullX);
+	  fill(m_tools[m_pixPullX[layerDisk]], pix_b_pullsx_m);
+	  auto pix_b_pullsy_m = Monitored::Scalar<float>("m_pix_pullsy", pullY);
+	  fill(m_tools[m_pixPullY[layerDisk]], pix_b_pullsy_m);
 
-	  auto pix_b_residualsx_m = Monitored::Scalar<float>("m_pix_"+m_layers[layerDisk]+"_residualsx", residualX);
-	  fill(residualGroup, pix_b_residualsx_m);
-	  auto pix_b_residualsy_m = Monitored::Scalar<float>("m_pix_"+m_layers[layerDisk]+"_residualsy", residualY);
-	  fill(residualGroup, pix_b_residualsy_m);
-	  auto pix_b_pullsx_m = Monitored::Scalar<float>("m_pix_"+m_layers[layerDisk]+"_pullsx", pullX);
-	  fill(residualGroup, pix_b_pullsx_m);
-	  auto pix_b_pullsy_m = Monitored::Scalar<float>("m_pix_"+m_layers[layerDisk]+"_pullsy", pullY);
-	  fill(residualGroup, pix_b_pullsy_m);
+	  //Residuals vs Eta and Phi
+	  fill(m_tools[m_pixResidualXvsEta[layerDisk]], modEta_m, residualX_m );
+	  fill(m_tools[m_pixResidualYvsEta[layerDisk]], modEta_m, residualY_m );
+	  fill(m_tools[m_pixResidualXvsPhi[layerDisk]], modPhi_m, residualX_m );
+	  fill(m_tools[m_pixResidualYvsPhi[layerDisk]], modPhi_m, residualY_m );
+	  
+	  auto residualX_barrel_m = Monitored::Scalar<float>( "m_residualX_barrel", residualX);
+	  auto residualY_barrel_m = Monitored::Scalar<float>( "m_residualY_barrel", residualY);
+	  auto modPhiShift_barrel_m = Monitored::Scalar<int>( "m_modPhiShift_barrel", modPhi + ModPhiShift[layerDisk] );
+	  auto modEtaShift_barrel_m = Monitored::Scalar<int>( "m_modEtaShift_barrel", modEta + ModEtaShift[layerDisk] );
+	  fill(residualGroup, modPhiShift_barrel_m, residualX_barrel_m);
+	  fill(residualGroup, modPhiShift_barrel_m, residualY_barrel_m);
+	  fill(residualGroup, modEtaShift_barrel_m, residualX_barrel_m);
+	  fill(residualGroup, modEtaShift_barrel_m, residualY_barrel_m);
 
 	}
-
 	else if(barrelEC==2){//three Pixel endcap disks from 0-2
-	  
+	  int ModPhiShift[3] = {0, 55, 110};
+
+	  //Common Si plots
+	  layerDisk_si_m = layerDisk;
+	  si_eca_resX_m = residualX;
+	  fill(residualGroup, layerDisk_si_m, si_eca_resX_m);
+	  si_eca_resY_m = residualY;
+	  fill(residualGroup, layerDisk_si_m, si_eca_resY_m);
+	  si_eca_pullX_m = pullX;
+	  fill(residualGroup, layerDisk_si_m, si_eca_pullX_m);
+	  si_eca_pullY_m = pullY;
+	  fill(residualGroup, layerDisk_si_m, si_eca_pullY_m);
+	  	  
+	  //Pixel Residual plots
 	  auto pix_eca_residualx_m = Monitored::Scalar<float>( "m_pix_eca_residualx", residualX);
 	  fill(residualGroup, pix_eca_residualx_m);
 	  auto pix_eca_residualy_m = Monitored::Scalar<float>( "m_pix_eca_residualy", residualY);
@@ -375,9 +537,31 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  auto pix_eca_pully_m = Monitored::Scalar<float>( "m_pix_eca_pully", pullY);
 	  fill(residualGroup, pix_eca_pully_m);
 
+	  //Residuals vs Eta and Phi
+	  auto residualX_eca_m = Monitored::Scalar<float>( "m_residualX_eca", residualX );
+	  auto residualY_eca_m = Monitored::Scalar<float>( "m_residualY_eca", residualY );
+	  auto modPhiShift_eca_m = Monitored::Scalar<int>( "m_modPhiShift_eca", modPhi + ModPhiShift[layerDisk]);
+	  fill(m_tools[m_pixECAResidualX[layerDisk]], modPhi_m, pix_eca_residualx_m);
+	  fill(m_tools[m_pixECAResidualY[layerDisk]], modPhi_m, pix_eca_residualy_m);
+	  fill(residualGroup, modPhiShift_eca_m, residualX_eca_m);
+	  fill(residualGroup, modPhiShift_eca_m, residualY_eca_m);
+	  
 	}
 	else if(barrelEC==-2){
+	  int ModPhiShift[3] = {0, 55, 110};
+
+	  //Common Si plots
+	  layerDisk_si_m = layerDisk;
+	  si_ecc_resX_m = residualX;
+	  fill(residualGroup, layerDisk_si_m, si_ecc_resX_m);
+	  si_ecc_resY_m = residualY;
+	  fill(residualGroup, layerDisk_si_m, si_ecc_resY_m);
+	  si_ecc_pullX_m = pullX;
+	  fill(residualGroup, layerDisk_si_m, si_ecc_pullX_m);
+	  si_ecc_pullY_m = pullY;
+	  fill(residualGroup, layerDisk_si_m, si_ecc_pullY_m);
 	  
+	  //Pixel Residual plots
 	  auto pix_ecc_residualx_m = Monitored::Scalar<float>( "m_pix_ecc_residualx", residualX);
 	  fill(residualGroup, pix_ecc_residualx_m);
 	  auto pix_ecc_residualy_m = Monitored::Scalar<float>( "m_pix_ecc_residualy", residualY);
@@ -387,45 +571,103 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
 	  auto pix_ecc_pully_m = Monitored::Scalar<float>( "m_pix_ecc_pully", pullY);
 	  fill(residualGroup, pix_ecc_pully_m);
 
+	  //Residuals vs Eta and Phi
+	  auto residualX_ecc_m = Monitored::Scalar<float>( "m_residualX_ecc", residualX);
+	  auto residualY_ecc_m = Monitored::Scalar<float>( "m_residualY_ecc", residualY);
+	  auto modPhiShift_ecc_m = Monitored::Scalar<int>( "m_modPhiShift_ecc", modPhi + ModPhiShift[layerDisk] );
+	  fill(m_tools[m_pixECCResidualX[layerDisk]], modPhi_m, pix_ecc_residualx_m);
+	  fill(m_tools[m_pixECCResidualY[layerDisk]], modPhi_m, pix_ecc_residualy_m);
+	  fill(residualGroup, modPhiShift_ecc_m, residualX_ecc_m);
+	  fill(residualGroup, modPhiShift_ecc_m, residualY_ecc_m);
+	  
 	}
-
       }
       else if (detType==1) {//filling SCT histograms
-       	si_residualX_m = residualX;
-	fill(residualGroup, si_residualX_m);
-
+	si_residualx_m = residualX;
+	fill(residualGroup, si_residualx_m);
+	
 	ATH_MSG_DEBUG(" This is an SCT hit " << hitId << " - filling histograms");
-
+	
 	if(barrelEC==0){//filling SCT barrel histograms
+	  int ModPhiShift[4] = {0, 42, 92, 150};
+	  int ModEtaShift[4] = {0, 23, 46, 69};
+	  
 	  //common Si plots
-	  si_b_residualX_m = residualX;
-	  fill(residualGroup, si_b_residualX_m);
-
+	  si_b_residualx_m = residualX;
+	  fill(residualGroup, si_b_residualx_m);
+	  
+	  layerDisk_si_m = 4 + 2 * layerDisk + sctSide;
+	  si_barrel_resX_m = residualX;
+	  fill(residualGroup, layerDisk_si_m, si_barrel_resX_m);
+	  si_barrel_pullX_m = pullX;
+	  fill(residualGroup, layerDisk_si_m, si_barrel_pullX_m);
+	  
+	  //SCT Residual plots
 	  auto sct_b_residualx_m = Monitored::Scalar<float>( "m_sct_b_residualx", residualX);
 	  fill(residualGroup, sct_b_residualx_m);
 	  auto sct_b_biased_residualx_m = Monitored::Scalar<float>( "m_sct_b_biased_residualx", biasedResidualX);
-
-	  auto sct_b_residualsx_m = Monitored::Scalar<float>("m_sct_"+m_layers[layerDisk]+"_residualsx", residualX);
-	  fill(residualGroup, sct_b_residualsx_m);
-	  auto sct_b_pullsx_m = Monitored::Scalar<float>("m_sct_"+m_layers[layerDisk]+"_pullsx", pullX);
-	  fill(residualGroup, sct_b_pullsx_m);
-
+	  auto sct_b_residualsx_m = Monitored::Scalar<float>("m_sct_residualsx", residualX);
+	  fill(m_tools[m_sctResidualX[layerDisk]], sct_b_residualsx_m);
+	  auto sct_b_pullsx_m = Monitored::Scalar<float>("m_sct_pullsx", pullX);
+	  fill(m_tools[m_sctPullX[layerDisk]], sct_b_pullsx_m);
+	  
+	  //Residuals vs Eta and Phi
+	  fill(m_tools[m_sctResidualXvsEta[layerDisk]], modEta_m, residualX_m);
+	  fill(m_tools[m_sctResidualXvsPhi[layerDisk]], modPhi_m, residualX_m);
+	  
+	  auto residualX_sct_barrel_m = Monitored::Scalar<float>( "m_residualX_sct_barrel", residualX);
+	  auto modPhiShift_sct_barrel_m = Monitored::Scalar<int>( "m_modPhiShift_sct_barrel", modPhi + ModPhiShift[layerDisk] );
+	  auto modEtaShift_sct_barrel_m = Monitored::Scalar<int>( "m_modEtaShift_sct_barrel", modEta + ModEtaShift[layerDisk] );
+	  fill(residualGroup, modPhiShift_sct_barrel_m, residualX_sct_barrel_m);
+	  fill(residualGroup, modEtaShift_sct_barrel_m, residualX_sct_barrel_m);
+	  
+	  
 	} else if(barrelEC==2){//nine SCT endcap disks from 0-8
-
+	  int Nmods = 52;
+	  int gap_sct = 10;
+	  
+	  //Common Si plots
+	  layerDisk_si_m = 3 + 2 * layerDisk + sctSide;
+	  si_eca_resX_m = residualX;
+	  fill(residualGroup, layerDisk_si_m, si_eca_resX_m);
+	  si_eca_pullX_m = pullX;
+	  fill(residualGroup, layerDisk_si_m, si_eca_pullX_m);
+	  
+	  //SCT Residual plots
 	  auto sct_eca_residualx_m = Monitored::Scalar<float>( "m_sct_eca_residualx", residualX);
 	  fill(residualGroup, sct_eca_residualx_m);
 	  auto sct_eca_pullx_m = Monitored::Scalar<float>( "m_sct_eca_pullx", pullX);
 	  fill(residualGroup, sct_eca_pullx_m);
-
-	} else if(barrelEC==-2){
 	  
+	  //Residuals vs Eta and Phi
+	  auto residualX_sct_eca_m = Monitored::Scalar<float>( "m_residualX_sct_eca", residualX);
+	  auto modPhiShift_sct_eca_m = Monitored::Scalar<int>( "m_modPhiShift_sct_eca", modPhi + layerDisk * (gap_sct + Nmods) );
+	  fill(residualGroup,  modPhiShift_sct_eca_m, residualX_sct_eca_m);
+	  
+	} else if(barrelEC==-2){
+	  int Nmods = 52;
+	  int gap_sct = 10;
+	  
+	  //Common Si plots
+	  layerDisk_si_m = 3 + 2 * layerDisk + sctSide;
+	  si_ecc_resX_m = residualX;
+	  fill(residualGroup, layerDisk_si_m, si_ecc_resX_m);
+	  si_ecc_pullX_m = pullX;
+	  fill(residualGroup, layerDisk_si_m, si_ecc_pullX_m);
+	  
+	  //SCT Residual plots
 	  auto sct_ecc_residualx_m = Monitored::Scalar<float>( "m_sct_ecc_residualx", residualX);
 	  fill(residualGroup, sct_ecc_residualx_m);
 	  auto sct_ecc_pullx_m = Monitored::Scalar<float>( "m_sct_ecc_pullx", pullX);
 	  fill(residualGroup, sct_ecc_pullx_m);
 	  
-	}
-      }
+	  //Residuals vs Eta and Phi
+	  auto residualX_sct_ecc_m = Monitored::Scalar<float>( "m_residualX_sct_ecc", residualX);
+	  auto modPhiShift_sct_ecc_m = Monitored::Scalar<int>( "m_modPhiShift_sct_ecc", modPhi + layerDisk * (gap_sct + Nmods) );
+	  fill(residualGroup,  modPhiShift_sct_ecc_m, residualX_sct_ecc_m);
+
+	} 
+      }// end of SCT
       ++nHits;
       //++nHitsEvent;
     }//end of loop on track surfaces
@@ -531,7 +773,133 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
 }
 
 
-//__________________________________________________________________________
+void IDAlignMonResidualsAlg::fillTRTHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool isTubeHit, float trketa) const {
+  bool LRcorrect = (predictR * hitR > 0);
+  
+  //Need to correct the TRT residual on the C-side.
+  if (barrel_ec == -1) {
+    residualR *= -1;
+  }
+
+  if (barrel_ec == 1 || barrel_ec == -1)
+    fillTRTBarrelHistograms(barrel_ec
+			    , layer_or_wheel
+			    , phi_module
+			    , predictR
+			    , hitR
+			    , residualR
+			    , pullR
+			    , LRcorrect
+			    , isTubeHit
+			    , trketa);
+
+  /** Filling EndCapA histograms */
+  if (barrel_ec == 2 || barrel_ec == -2)
+    fillTRTEndcapHistograms(barrel_ec
+  			    , phi_module
+  			    , predictR
+  			    , hitR
+  			    , residualR
+  			    , pullR
+  			    , LRcorrect
+  			    , isTubeHit
+  			    , trketa);
+
+  return;
+}
+
+//Filling barrel histograms
+void IDAlignMonResidualsAlg::fillTRTBarrelHistograms(int barrel_ec, int layer_or_wheel, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const {
+  
+  //Loop over the barrel sides
+  for (unsigned int side = 0; side < 3; ++side) {
+    bool doFill = false;
+    if (!side) doFill = true;
+    else if (side == 1 && barrel_ec == 1) doFill = true;
+    else if (side == 2 && barrel_ec == -1) doFill = true;
+
+    if (!doFill) continue;
+
+    auto trt_b_PredictedR_m = Monitored::Scalar<float>( "m_trt_b_PredictedR", predictR);
+    fill(m_tools[m_trtBPredictedR[side]], trt_b_PredictedR_m);
+    auto trt_b_MeasuredR_m = Monitored::Scalar<float>( "m_trt_b_MeasuredR", hitR);
+    fill(m_tools[m_trtBMeasuredR[side]], trt_b_MeasuredR_m);
+    auto trt_b_residualR_m = Monitored::Scalar<float>( "m_trt_b_residualR", residualR);
+    fill(m_tools[m_trtBResidualR[side]], trt_b_residualR_m);
+    auto trt_b_pullR_m = Monitored::Scalar<float>( "m_trt_b_pullR", pullR);
+    fill(m_tools[m_trtBPullR[side]], trt_b_pullR_m);
+    
+    if (!isTubeHit) {
+      auto trt_b_residualR_notube_m = Monitored::Scalar<float>( "m_trt_b_residualR_notube", residualR);
+      fill(m_tools[m_trtBResidualRNoTube[side]], trt_b_residualR_notube_m);
+      auto trt_b_pullR_notube_m = Monitored::Scalar<float>( "m_trt_b_pullR_notube", pullR);
+      fill(m_tools[m_trtBPullRNoTube[side]], trt_b_pullR_notube_m);
+    }
+
+    auto trt_b_lr_m = Monitored::Scalar<float>( "m_trt_b_lr", 0.0);
+    if (LRcorrect && !isTubeHit)  trt_b_lr_m = 0.5;
+    if (LRcorrect && isTubeHit)   trt_b_lr_m = 1.5;
+    if (!LRcorrect && !isTubeHit) trt_b_lr_m = 2.5;
+    if (!LRcorrect && isTubeHit)  trt_b_lr_m = 3.5;
+    fill(m_tools[m_trtBLR[side]], trt_b_lr_m);
+
+    auto trt_b_aveResVsTrackEta_m = Monitored::Scalar<float>( "m_trt_b_aveResVsTrackEta", trketa);
+    auto trt_b_PhiSec_m = Monitored::Scalar<float>( "m_trt_b_PhiSec", phi_module);
+    auto trt_b_lrVsPhiSec_m = Monitored::Scalar<float>( "m_trt_b_lrVsPhiSec", LRcorrect);
+    fill(m_tools[m_trtBResVsEta[side][layer_or_wheel]], trt_b_aveResVsTrackEta_m, trt_b_residualR_m);
+    fill(m_tools[m_trtBResVsPhiSec[side][layer_or_wheel]], trt_b_PhiSec_m, trt_b_residualR_m);
+    trt_b_lrVsPhiSec_m = LRcorrect;
+    fill(m_tools[m_trtBLRVsPhiSec[side][layer_or_wheel]], trt_b_PhiSec_m, trt_b_lrVsPhiSec_m);
+ 
+  }//Over sides
+
+  return;
+}//fillTRTBarrelHistograms
+
+void IDAlignMonResidualsAlg::fillTRTEndcapHistograms(int barrel_ec, int phi_module, float predictR, float hitR, float residualR, float pullR, bool LRcorrect, bool isTubeHit, float trketa) const {
+  for (unsigned int endcap = 0; endcap < 2; ++endcap) {
+    bool doFill = false;
+    if (!endcap && barrel_ec == 2) doFill = true;
+    else if (endcap && barrel_ec == -2) doFill = true;
+
+    if (!doFill) continue;
+    
+    auto trt_ec_PredictedR_m = Monitored::Scalar<float>( "m_trt_ec_PredictedR", predictR);
+    fill(m_tools[m_trtECPredictedR[endcap]], trt_ec_PredictedR_m);
+    auto trt_ec_MeasuredR_m = Monitored::Scalar<float>( "m_trt_ec_MeasuredR", hitR);
+    fill(m_tools[m_trtECMeasuredR[endcap]], trt_ec_MeasuredR_m);
+    auto trt_ec_residualR_m = Monitored::Scalar<float>( "m_trt_ec_residualR", residualR);
+    fill(m_tools[m_trtECResidualR[endcap]], trt_ec_residualR_m);
+    auto trt_ec_pullR_m = Monitored::Scalar<float>( "m_trt_ec_pullR", pullR);
+    fill(m_tools[m_trtECPullR[endcap]], trt_ec_pullR_m);
+    
+    if (!isTubeHit) {
+      auto trt_ec_pullR_notube_m = Monitored::Scalar<float>( "m_trt_ec_pullR_notube", pullR);
+      fill(m_tools[m_trtECPullRNoTube[endcap]], trt_ec_pullR_notube_m);
+      auto trt_ec_residualR_notube_m = Monitored::Scalar<float>( "m_trt_ec_residualR_notube", residualR);
+      fill(m_tools[m_trtECResidualRNoTube[endcap]], trt_ec_residualR_notube_m);
+    }
+    
+    auto trt_ec_lr_m = Monitored::Scalar<float>( "m_trt_ec_lr", 0.0);
+    if (LRcorrect && !isTubeHit)       trt_ec_lr_m = 0.5;
+    else if (LRcorrect && isTubeHit)   trt_ec_lr_m = 1.5;
+    else if (!LRcorrect && !isTubeHit) trt_ec_lr_m = 2.5;
+    else if (!LRcorrect && isTubeHit)  trt_ec_lr_m = 3.5;
+    fill(m_tools[m_trtECLR[endcap]], trt_ec_lr_m);
+    
+    auto trt_ec_aveResVsTrackEta_m = Monitored::Scalar<float>( "m_trt_ec_aveResVsTrackEta", trketa);
+    fill(m_tools[m_trtECResVsEta[endcap]], trt_ec_aveResVsTrackEta_m, trt_ec_residualR_m);
+    
+    auto trt_ec_phi_m = Monitored::Scalar<float>( "m_trt_ec_phi", phi_module);
+    fill(m_tools[m_trtECResVsPhiSec[endcap]], trt_ec_phi_m, trt_ec_residualR_m);
+    auto trt_ec_lrVsPhiSec_m = Monitored::Scalar<float>( "m_trt_ec_lrVsPhiSec", LRcorrect);
+    fill(m_tools[m_trtECLRVsPhiSec[endcap]], trt_ec_phi_m, trt_ec_lrVsPhiSec_m);
+  }
+
+  return;
+}
+
+//---------------------------------------------------------------------------------------
 std::unique_ptr <Trk::TrackParameters> IDAlignMonResidualsAlg::getUnbiasedTrackParameters(const Trk::Track* trkPnt, const Trk::TrackStateOnSurface* tsos) const
 {
 
@@ -674,7 +1042,6 @@ std::unique_ptr <Trk::TrackParameters> IDAlignMonResidualsAlg::getUnbiasedTrackP
 }
 
 //---------------------------------------------------------------------------------------
-
 StatusCode IDAlignMonResidualsAlg::setupTools()
 {
   //initializing tools
@@ -744,7 +1111,6 @@ StatusCode IDAlignMonResidualsAlg::setupTools()
 }
 
 //--------------------------------------------------------------------------------------------
-
 bool IDAlignMonResidualsAlg::trackRequiresRefit(const Trk::Track* track) const
 {
 
