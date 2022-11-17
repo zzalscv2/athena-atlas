@@ -12,8 +12,7 @@ if __name__=="__main__":
     from egammaConfig.egammaSteeringConfig import EGammaSteeringCfg
     acc.merge(EGammaSteeringCfg(ConfigFlags,"EGammaSteering",True))
 
-    acc.run(100)
-
     with open("config.pkl", "wb") as file:
       acc.store(file)
 
+    acc.run(100)
