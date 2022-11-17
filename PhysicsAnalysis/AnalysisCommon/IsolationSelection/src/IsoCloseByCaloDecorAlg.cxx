@@ -12,12 +12,12 @@ namespace CP {
     static const FloatDecorator dec_assocCaloEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
     static const FloatDecorator dec_assocCaloPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
     static const FloatDecorator dec_assocCaloEne{IsolationCloseByCorrectionTool::caloDecors()[2]};
-    static const BoolDecorator dec_assocCaloIsDec{IsolationCloseByCorrectionTool::caloDecors()[3]};
+    static const CharDecorator dec_assocCaloIsDec{IsolationCloseByCorrectionTool::caloDecors()[3]};
 
     static const FloatDecorator dec_assocPflowEta{IsolationCloseByCorrectionTool::pflowDecors()[0]};
     static const FloatDecorator dec_assocPflowPhi{IsolationCloseByCorrectionTool::pflowDecors()[1]};
     static const FloatDecorator dec_assocPflowEne{IsolationCloseByCorrectionTool::pflowDecors()[2]};
-    static const BoolDecorator dec_assocPflowIsDec{IsolationCloseByCorrectionTool::pflowDecors()[3]};
+    static const CharDecorator dec_assocPflowIsDec{IsolationCloseByCorrectionTool::pflowDecors()[3]};
 
     IsoCloseByCaloDecorAlg::IsoCloseByCaloDecorAlg(const std::string& name, ISvcLocator* svcLoc) : AthReentrantAlgorithm(name, svcLoc) {}
     StatusCode IsoCloseByCaloDecorAlg::initialize() {
