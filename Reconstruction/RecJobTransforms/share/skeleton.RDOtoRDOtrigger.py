@@ -75,6 +75,9 @@ preInclude = getFromRunArgs('preInclude', False)
 if preInclude:
     log.info('Executing transform preInclude')
     for fragment in preInclude:
+        if '/' not in fragment:
+            log.warning('Trying to use CA-based preInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)
 
 ##################################################
@@ -108,4 +111,7 @@ postInclude = getFromRunArgs('postInclude', failIfMissing=False)
 if postInclude:
     log.info('Executing transform postInclude')
     for fragment in postInclude:
+        if '/' not in fragment:
+            log.warning('Trying to use CA-based preInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)
