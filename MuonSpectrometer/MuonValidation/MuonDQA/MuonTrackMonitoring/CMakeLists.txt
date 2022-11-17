@@ -15,8 +15,8 @@ atlas_add_component( MuonTrackMonitoring
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib StoreGateLib GeoPrimitives EventPrimitives FourMomUtils xAODEventInfo 
                                     xAODMuon xAODTracking GaudiKernel MuonAnalysisInterfacesLib MuonPrepRawData MuonRecHelperToolsLib 
-                                    MuonHistUtils MuonResonanceToolsLib TrkEventPrimitives TrkParameters TrkTrack TrkToolInterfaces 
-                                    TrkValHistUtils TrigConfL1Data TrkMeasurementBase TrkMultiComponentStateOnSurface )
+                                    MuonHistUtils TrkEventPrimitives TrkParameters TrkTrack TrkToolInterfaces 
+                                    TrkValHistUtils TrigConfL1Data TrkMeasurementBase )
 
 
 # Install files from the package:
