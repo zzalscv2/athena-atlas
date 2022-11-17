@@ -1,4 +1,3 @@
-
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 
@@ -7,10 +6,10 @@
 dsid = ''.join(runArgs.jobConfig)
 seed = str(runArgs.randomSeed)
 
-#if runArgs.trfSubstepName == 'afterburn':
-#    from PyJobTransforms.trfLogger import msg
-#    msg.info("Running in Afterburner mode   ..... for now dsid and seed not set")
-if 'Pythia8' in evgenConfig.generators:
+if runArgs.trfSubstepName == 'afterburn':
+    from PyJobTransforms.trfLogger import msg
+    msg.info("Running in Afterburner mode   ..... for now dsid and seed not set")
+elif 'Pythia8' in evgenConfig.generators:
     genSeq.Pythia8.RandomSeedTfArg=seed
     genSeq.Pythia8.Dsid=dsid
 elif 'PythiaB' in evgenConfig.generators:
