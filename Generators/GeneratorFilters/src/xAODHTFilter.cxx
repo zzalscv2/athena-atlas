@@ -1,0 +1,244 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
+// Header for this module
+#include "GeneratorFilters/xAODHTFilter.h"
+
+// Framework Related Headers
+#include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/SystemOfUnits.h"
+
+// Used for retrieving the collection
+#include "xAODJet/JetContainer.h"
+#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
+#include "StoreGate/StoreGateSvc.h"
+
+// Other classes used by this class
+#include "TruthUtils/PIDHelpers.h"
+#include "AtlasHepMC/GenEvent.h"
+// #include "GeneratorObjects/McEventCollection.h"
+#include "TruthUtils/HepMCHelpers.h"
+
+#include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthParticleAuxContainer.h"
+#include "GeneratorObjects/xAODTruthParticleLink.h"
+
+//--------------------------------------------------------------------------
+
+xAODHTFilter::xAODHTFilter(const std::string &name, ISvcLocator *pSvcLocator)
+    : GenFilter(name, pSvcLocator), m_total(0), m_passed(0), m_ptfailed(0)
+{
+  declareProperty("MinJetPt", m_MinJetPt = 0 * Gaudi::Units::GeV);
+  declareProperty("MaxJetEta", m_MaxJetEta = 10.0);
+  declareProperty("TruthJetContainer", m_TruthJetContainerName = "AntiKt4TruthWZJets");
+  declareProperty("MinHT", m_MinHT = 20. * Gaudi::Units::GeV);
+  declareProperty("MaxHT", m_MaxHT = 14000. * Gaudi::Units::GeV);
+  declareProperty("UseNeutrinosFromWZTau", m_UseNu = false, "Include neutrinos from W/Z/tau decays in the calculation of HT");
+  declareProperty("UseLeptonsFromWZTau", m_UseLep = false, "Include e/mu from W/Z/tau decays in the HT");
+  declareProperty("MinLeptonPt", m_MinLepPt = 0 * Gaudi::Units::GeV);
+  declareProperty("MaxLeptonEta", m_MaxLepEta = 10.0);
+}
+
+//--------------------------------------------------------------------------
+
+xAODHTFilter::~xAODHTFilter()
+{
+}
+
+//---------------------------------------------------------------------------
+
+StatusCode xAODHTFilter::filterInitialize()
+{
+  m_MinJetPt /= Gaudi::Units::GeV;
+  m_MinLepPt /= Gaudi::Units::GeV;
+  m_MinHT /= Gaudi::Units::GeV;
+  m_MaxHT /= Gaudi::Units::GeV;
+  if (m_MaxHT < 0)
+    m_MaxHT = 9e9;
+
+  ATH_MSG_INFO("Configured with " << m_MinJetPt << "<p_T GeV and abs(eta)<" << m_MaxJetEta << " for jets in " << m_TruthJetContainerName);
+  ATH_MSG_INFO("Will require H_T in range " << m_MinHT << " < H_T < " << m_MaxHT);
+  if (m_UseNu)
+    ATH_MSG_INFO(" including neutrinos");
+  if (m_UseLep)
+    ATH_MSG_INFO(" including W/Z/tau leptons in range " << m_MinLepPt << "<p_T GeV and abs(eta)<" << m_MaxLepEta);
+
+  return StatusCode::SUCCESS;
+}
+
+//---------------------------------------------------------------------------
+
+StatusCode xAODHTFilter::filterFinalize()
+{
+  ATH_MSG_INFO("Total efficiency: " << 100. * double(m_passed) / double(m_total) << "% ("
+                                    << 100. * double(m_ptfailed) / double(m_total) << "% failed p_T cuts)");
+  return StatusCode::SUCCESS;
+}
+
+//---------------------------------------------------------------------------
+
+StatusCode xAODHTFilter::filterEvent()
+{
+  m_total++; // Book keeping
+
+  // Get jet container out
+  const xAOD::JetContainer *truthjetTES = 0;
+  if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||
+      evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES)
+  {
+    ATH_MSG_INFO("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
+    setFilterPassed(m_MinHT < 1.);
+    return StatusCode::SUCCESS;
+  }
+
+  // Get HT
+  double HT = -1;
+  for (xAOD::JetContainer::const_iterator it_truth = (*truthjetTES).begin(); it_truth != (*truthjetTES).end(); ++it_truth)
+  {
+    if (!(*it_truth))
+      continue;
+    if ((*it_truth)->pt() > m_MinJetPt * Gaudi::Units::GeV && std::abs((*it_truth)->eta()) < m_MaxJetEta)
+    {
+      ATH_MSG_VERBOSE("Adding truth jet with pt " << (*it_truth)->pt()
+                                                  << ", eta " << (*it_truth)->eta()
+                                                  << ", phi " << (*it_truth)->phi()
+                                                  << ", nconst = " << (*it_truth)->numConstituents());
+      HT += (*it_truth)->pt();
+    }
+  }
+
+  // If we are asked to include neutrinos or leptons...
+  if (m_UseLep || m_UseNu)
+  {
+
+    // Retrieve full TruthEventContainer container
+    const xAOD::TruthEventContainer *xTruthEventContainer = NULL;
+    if (evtStore()->retrieve(xTruthEventContainer, "TruthEvents").isFailure())
+    {
+      ATH_MSG_ERROR("No TruthEvent collection with name "
+                    << "TruthEvents"
+                    << " found in StoreGate!");
+      return StatusCode::FAILURE;
+    }
+
+    std::vector<const xAOD::TruthParticle *> WZleptons;
+    WZleptons.reserve(10);
+    
+    // Loop over full TruthParticle container
+    xAOD::TruthEventContainer::const_iterator itr;
+    for (itr = xTruthEventContainer->begin(); itr != xTruthEventContainer->end(); ++itr)
+    {
+      unsigned int nPart = (*itr)->nTruthParticles();
+      for (unsigned int iPart = 0; iPart < nPart; ++iPart)
+      {
+        const xAOD::TruthParticle *theParticle = (*itr)->truthParticle(iPart);
+        if (!theParticle)
+          continue;
+        int pdgid = theParticle->pdgId();
+
+        if (m_UseNu && MC::PID::isNeutrino(pdgid) && (MC::isGenStable(theParticle->status(), theParticle->barcode())))
+        {
+          if (fromWZ(theParticle) || fromTau(theParticle))
+          {
+            HT += theParticle->pt();
+          }
+        }
+
+        // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
+        if (m_UseLep && (std::abs(pdgid) == 11 || std::abs(pdgid) == 13) && (MC::isGenStable(theParticle->status(), theParticle->barcode())) && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
+        {
+          bool isFromWZ = fromWZ(theParticle);
+          if (isFromWZ || fromTau(theParticle))
+          {
+            ATH_MSG_VERBOSE("Adding W/Z/tau lepton with pt " << theParticle->pt()
+                                                             << ", eta " << theParticle->eta()
+                                                             << ", phi " << theParticle->phi()
+                                                             << ", status " << theParticle->status()
+                                                             << ", pdgId " << pdgid);
+            HT += theParticle->pt();
+          }
+        }
+      }
+    } // End need to access MC Event
+  }
+
+  HT /= Gaudi::Units::GeV; // Make sure we're in GeV
+  ATH_MSG_DEBUG("HT: " << HT);
+
+  if (HT < m_MinHT || HT >= m_MaxHT)
+  {
+    ATH_MSG_DEBUG("Failed filter on HT: " << HT << " is not between " << m_MinHT << " and " << m_MaxHT);
+    setFilterPassed(false);
+  }
+  else
+  {
+    // Made it to the end - success!
+    m_passed++;
+    setFilterPassed(true);
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+bool xAODHTFilter::fromWZ(const xAOD::TruthParticle *part) const
+{
+  // !!! IMPORTANT !!! This is a TEMPORARY function
+  //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
+  //  when MCTruthClassifier is made dual-use, this function should be discarded.
+  // see ATLJETMET-26
+  //
+  // Loop through parents
+  // Hit a hadron -> return false
+  // Hit a parton -> return true
+  //   This catch is important - we *cannot* look explicitly for the W or Z, because some
+  //    generators do not include the W or Z in the truth record (like Sherpa)
+  //   This code, like the code before it, really assumes one incoming particle per vertex...
+  if (!part->hasProdVtx())
+    return false;
+
+  unsigned int nIncomingParticles = part->prodVtx()->nIncomingParticles();
+  for (unsigned int iPart = 0; iPart < nIncomingParticles; iPart++)
+  {
+    const xAOD::TruthParticle *incoming_particle = part->prodVtx()->incomingParticle(iPart);
+    int parent_pdgid = incoming_particle->pdgId();
+    if (MC::PID::isW(parent_pdgid) || MC::PID::isZ(parent_pdgid))
+      return true;
+    if (MC::PID::isHadron(parent_pdgid))
+      return false;
+    if (std::abs(parent_pdgid) < 9)
+      return true;
+    if (parent_pdgid == part->pdgId())
+      return fromWZ(incoming_particle);
+  }
+  return false;
+}
+bool xAODHTFilter::fromTau(const xAOD::TruthParticle *part) const
+{
+  // !!! IMPORTANT !!! This is a TEMPORARY function
+  //  it's used in place of code in MCTruthClassifier as long as this package is not dual-use
+  //  when MCTruthClassifier is made dual-use, this function should be discarded.
+  // see ATLJETMET-26
+  //
+  // Loop through parents
+  // Find a tau -> return true
+  // Find a hadron or parton -> return false
+  //   This code, like the code before it, really assumes one incoming particle per vertex...
+  if (!part->hasProdVtx())
+    return false;
+
+  unsigned int nIncomingParticles = part->prodVtx()->nIncomingParticles();
+  for (unsigned int iPart = 0; iPart < nIncomingParticles; iPart++)
+  {
+    const xAOD::TruthParticle *incoming_particle = part->prodVtx()->incomingParticle(iPart);
+    int parent_pdgid = incoming_particle->pdgId();
+    if (std::abs(parent_pdgid) == 15 && fromWZ(incoming_particle))
+      return true;
+    if (MC::PID::isHadron(parent_pdgid) || std::abs(parent_pdgid) < 9)
+      return false;
+    if (parent_pdgid == incoming_particle->pdgId())
+      return fromTau(incoming_particle);
+  }
+  return false;
+}
