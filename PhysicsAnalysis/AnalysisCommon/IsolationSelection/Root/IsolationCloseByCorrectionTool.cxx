@@ -464,7 +464,7 @@ namespace CP {
             static const FloatAccessor acc_eta{pflowDecors()[0]};
             static const FloatAccessor acc_phi{pflowDecors()[1]};
             static const FloatAccessor acc_ene{pflowDecors()[2]};
-            static const BoolAccessor acc_isDecor{pflowDecors()[3]};
+            static const CharAccessor acc_isDecor{pflowDecors()[3]};
             for (const xAOD::IParticle* others : cache.prim_parts) {
                 if (others == primary) continue;
                 if (!acc_isDecor.isAvailable(*others) || !acc_isDecor(*others)) {
@@ -522,7 +522,7 @@ namespace CP {
             static const FloatAccessor acc_eta{caloDecors()[0]};
             static const FloatAccessor acc_phi{caloDecors()[1]};
             static const FloatAccessor acc_ene{caloDecors()[2]};
-            static const BoolAccessor acc_isDecor{caloDecors()[3]};
+            static const CharAccessor acc_isDecor{caloDecors()[3]};
              for (const xAOD::IParticle* others : cache.prim_parts) {
                 if (others == primary) continue;
                 if (!acc_isDecor.isAvailable(*others) || !acc_isDecor(*others)) {
@@ -543,7 +543,7 @@ namespace CP {
     void IsolationCloseByCorrectionTool::getExtrapEtaPhi(const xAOD::IParticle* par, float& eta, float& phi) const {
         static const FloatAccessor acc_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
         static const FloatAccessor acc_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
-        static const BoolAccessor acc_isDecor{caloDecors()[3]};
+        static const CharAccessor acc_isDecor{caloDecors()[3]};
         if (par->type() != xAOD::Type::ObjectType::Muon) {
             eta = par->eta();
             phi = par->phi();
@@ -554,7 +554,7 @@ namespace CP {
             float assoc_ene{0.f};
             static const FloatDecorator dec_assocEta{IsolationCloseByCorrectionTool::caloDecors()[0]};
             static const FloatDecorator dec_assocPhi{IsolationCloseByCorrectionTool::caloDecors()[1]};
-            static const  BoolDecorator dec_isDecor{caloDecors()[3]};
+            static const  CharDecorator dec_isDecor{caloDecors()[3]};
             associateCluster(par,eta, phi, assoc_ene);
             dec_assocEta(*par) = eta;
             dec_assocPhi(*par) = phi;
