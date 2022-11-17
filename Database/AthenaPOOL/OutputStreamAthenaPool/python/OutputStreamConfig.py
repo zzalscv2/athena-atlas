@@ -54,12 +54,18 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
       f"OutputStream{streamName}",
       StreamName=outputStreamName,
       WritingTool=writingTool,
-      ItemList = finalItemList,
-      MetadataItemList = MetadataItemList,
+      ItemList=finalItemList,
+      MetadataItemList=MetadataItemList,
       OutputFile=fileName,
    )
    outputStream.AcceptAlgs += AcceptAlgs
    outputStream.ExtraOutputs += [("DataHeader", f"StoreGateSvc+{outputStreamName}")]
+   if configFlags.Concurrency.NumThreads > 0 and configFlags.Scheduler.CheckOutputUsage:
+      outputStream.ExtraInputs = [tuple(l.split('#')) for l in finalItemList if '*' not in l and 'Aux' not in l]
+      # Ignore dependencies
+      from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
+      result.merge(OutputUsageIgnoreCfg(configFlags, outputStream.name))
+
    result.addService(CompFactory.StoreGateSvc("MetaDataStore"))
    outputStream.MetadataStore = result.getService("MetaDataStore")
    outputStream.MetadataItemList += [
@@ -155,6 +161,7 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    result.addEventAlgo(outputStream, domain='IO')
    return result
 
+
 def addToESD(configFlags, itemOrList, **kwargs):
    """
    Adds items to ESD stream
@@ -168,6 +175,7 @@ def addToESD(configFlags, itemOrList, **kwargs):
       return ComponentAccumulator()
    items = [itemOrList] if isinstance(itemOrList, str) else itemOrList
    return OutputStreamCfg(configFlags, "ESD", ItemList=items, **kwargs)
+
 
 def addToAOD(configFlags, itemOrList, **kwargs):
    """

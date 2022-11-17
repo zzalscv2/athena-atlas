@@ -83,6 +83,7 @@ def _createCfgFlags():
     acf.addFlag('Concurrency.DebugWorkers', False )
 
     acf.addFlag('Scheduler.CheckDependencies', True)
+    acf.addFlag('Scheduler.CheckOutputUsage', False)
     acf.addFlag('Scheduler.ShowDataDeps', True)
     acf.addFlag('Scheduler.ShowDataFlow', True)
     acf.addFlag('Scheduler.ShowControlFlow', True)

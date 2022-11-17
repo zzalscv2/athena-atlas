@@ -21,6 +21,27 @@ def MainServicesMiniCfg(loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'
     return cfg
 
 
+def AvalancheSchedulerSvcCfg(cfgFlags, **kwargs):
+    kwargs.setdefault("CheckDependencies", cfgFlags.Scheduler.CheckDependencies)
+    kwargs.setdefault("CheckOutputUsage", cfgFlags.Scheduler.CheckOutputUsage)
+    kwargs.setdefault("ShowDataDependencies", cfgFlags.Scheduler.ShowDataDeps)
+    kwargs.setdefault("ShowDataFlow", cfgFlags.Scheduler.ShowDataFlow)
+    kwargs.setdefault("ShowControlFlow", cfgFlags.Scheduler.ShowControlFlow)
+    kwargs.setdefault("VerboseSubSlots", cfgFlags.Scheduler.EnableVerboseViews)
+    kwargs.setdefault("ThreadPoolSize", cfgFlags.Concurrency.NumThreads)
+
+    cfg = ComponentAccumulator()
+    cfg.addService(CompFactory.AvalancheSchedulerSvc(**kwargs), primary=True)
+    return cfg
+
+
+def OutputUsageIgnoreCfg(cfgFlags, algorithm):
+    cfg = ComponentAccumulator()
+    if cfgFlags.Concurrency.NumThreads > 0 and cfgFlags.Scheduler.CheckOutputUsage:
+       cfg.merge(AvalancheSchedulerSvcCfg(cfgFlags, CheckOutputUsageIgnoreList=[algorithm]))
+    return cfg
+
+
 def AthenaEventLoopMgrCfg(cfgFlags):
 
     cfg = ComponentAccumulator()
@@ -51,14 +72,7 @@ def AthenaHiveEventLoopMgrCfg(cfgFlags):
     arp.TopAlg = ["AthMasterSeq"] #this should enable control flow
     cfg.addService( arp )
 
-    scheduler = CompFactory.AvalancheSchedulerSvc()
-    scheduler.CheckDependencies    = cfgFlags.Scheduler.CheckDependencies
-    scheduler.ShowDataDependencies = cfgFlags.Scheduler.ShowDataDeps
-    scheduler.ShowDataFlow         = cfgFlags.Scheduler.ShowDataFlow
-    scheduler.ShowControlFlow      = cfgFlags.Scheduler.ShowControlFlow
-    scheduler.VerboseSubSlots      = cfgFlags.Scheduler.EnableVerboseViews
-    scheduler.ThreadPoolSize       = cfgFlags.Concurrency.NumThreads
-    cfg.addService(scheduler)
+    scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(cfgFlags))
 
     from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
     # FailIfNoProxy=False makes it a warning, not an error, if unmet data

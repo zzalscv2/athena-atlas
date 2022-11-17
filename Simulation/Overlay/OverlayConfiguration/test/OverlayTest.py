@@ -42,6 +42,7 @@ if args.profile:
 ConfigFlags.Scheduler.AutoLoadUnmetDependencies = False
 if args.dependencies:
     ConfigFlags.Input.FailOnUnknownCollections = True
+    ConfigFlags.Scheduler.CheckOutputUsage = True
     print("Checking dependencies...")
     print()
 
@@ -64,11 +65,6 @@ if ConfigFlags.Overlay.DataOverlay:
 # Count algorithm misses
 if ConfigFlags.Concurrency.NumThreads > 0:
     acc.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True
-
-# Dependency check
-if args.dependencies:
-    acc.getEventAlgo("OutputStreamRDO").ExtraInputs += [tuple(l.split('#')) for l in acc.getEventAlgo("OutputStreamRDO").ItemList if '*' not in l and 'Aux' not in l]
-    acc.getService("AthenaHiveEventLoopMgr").DependencyCheck = True
 
 # dump pickle
 with open("ConfigOverlay.pkl", "wb") as f:
