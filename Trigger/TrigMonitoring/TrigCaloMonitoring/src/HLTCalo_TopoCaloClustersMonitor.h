@@ -43,6 +43,6 @@ private:
   bool m_match_types;
   bool m_doLC;
   float m_max_delta_r;
-  bool ifChainPassed(const std::string& chain) const;
+  std::vector<const xAOD::CaloCluster*> ifChainPassed(const std::string& chain) const;
 };
 #endif
