@@ -202,3 +202,11 @@ def TrigMuonTLAHypoMonitoring(histPath):
     montool.defineHistogram('Nmuon', type='TH1F', path='EXPERT', title="Number of copied muons/event in #TrigMuonTLAHypo; N. muons/event",
                             xbins=50, xmin=0, xmax=50)
     return montool
+
+def TrigMuonEFTrackIsolationMonitoring(histPath):
+    montool = GenericMonitoringTool(HistPath = histPath)
+    montool.defineHistogram('PtCone03', type = 'TH1F', path='EXPERT', title = "PtCone03 from #TrigMuonEFHypo;  P_{T} Cone(0.3) [GeV]",
+                            xbins=40, xmin=0.0, xmax=20.0)
+    montool.defineHistogram('PtConeRel03', type = 'TH1F', path='EXPERT', title = "PtCone03/Pt from #TrigMuonEFHypo;  P_{T} Cone(0.3)/P_{T}",
+                            xbins=20, xmin=0.0, xmax=0.5)
+    return montool
