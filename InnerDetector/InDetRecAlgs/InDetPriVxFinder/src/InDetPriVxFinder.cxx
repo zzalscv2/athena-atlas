@@ -124,11 +124,9 @@ InDetPriVxFinder::InDetPriVxFinder
         vertexContainerPair = myVertexContainerPair;
       }
       
-      if (m_doVertexSorting && vertexContainerPair.first->size() > 1) { 
+      if (m_doVertexSorting) { 
         myVertexContainerPair = m_VertexCollectionSortingTool->sortVertexContainer(*vertexContainerPair.first);
         deletePair(vertexContainerPair); 
-      } else {
-        myVertexContainerPair = vertexContainerPair;
       }
       
       if (myVertexContainerPair.first == nullptr) {
