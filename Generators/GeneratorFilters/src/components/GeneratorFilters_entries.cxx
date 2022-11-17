@@ -31,6 +31,9 @@
 #include "GeneratorFilters/xAODVBFForwardJetsFilter.h"
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
+#include "GeneratorFilters/xAODHTFilter.h"
+
+
 
 
 
@@ -129,6 +132,9 @@ DECLARE_COMPONENT( xAODTTbarWToLeptonFilter )
 DECLARE_COMPONENT( xAODVBFForwardJetsFilter )
 DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
+DECLARE_COMPONENT( xAODHTFilter )
+
+
 
 
 //slimmers accepted for 22.6
