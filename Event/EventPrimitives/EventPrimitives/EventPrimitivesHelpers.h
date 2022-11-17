@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define EVENTPRIMITIVES_EVENTPRIMITIVESHELPERS_H
 
 #include "EventPrimitives/EventPrimitives.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "cmath"
 #include <iostream>
 #include <vector>
@@ -68,6 +69,17 @@ saneCovarianceDiagonal(const AmgSymMatrix(N) & mat)
       return false;
   }
   return true;
+}
+template<int N>
+inline bool
+saneVector(const AmgVector(N) & vec)
+{
+  constexpr double max_length = (100.*Gaudi::Units::km  * 100.*Gaudi::Units::km); 
+  for (int i = 0; i < N; ++i) {
+    if (std::isnan(vec[i]) || std::isinf(vec[i]))
+      return false;
+  }
+  return vec.dot(vec) < max_length;
 }
 
 template<int N>
