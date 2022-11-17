@@ -2301,9 +2301,11 @@ Trk::STEP_Propagator::rungeKuttaStep(Cache& cache,
   double dL2 = 0.;
   double dL3 = 0.;
   double dL4 = 0.;                              // factor used for calculating dCM/dCM, P[41], in the Jacobian.
+  const Amg::Vector3D initialPos{P[0], P[1], P[2]};   // Set initial values for position
+  const Amg::Vector3D initialDir{P[3], P[4], P[5]};   // Set initial values for direction.
+  if (!Amg::saneVector(initialPos) || !Amg::saneVector(initialDir)) return false;
   double initialMomentum = std::abs(1. / P[6]); // Set initial momentum
-  Amg::Vector3D initialPos(P[0], P[1], P[2]);   // Set initial values for position
-  Amg::Vector3D initialDir(P[3], P[4], P[5]);   // Set initial values for direction.
+  
   // Directions at the different points. Used by the error propagation
   Amg::Vector3D dir1;
   Amg::Vector3D dir2;
@@ -2477,9 +2479,12 @@ Trk::STEP_Propagator::rungeKuttaStep(Cache& cache,
       for (int i = 7; i < 42; i += 7) {
 
         // POINT 1
-        Amg::Vector3D initialjPos(P[i], P[i + 1], P[i + 2]);
+        const Amg::Vector3D initialjPos(P[i], P[i + 1], P[i + 2]);
+        const Amg::Vector3D initialjDir(P[i + 3], P[i + 4], P[i + 5]);
+
+        if (!Amg::saneVector(initialjPos) || !Amg::saneVector(initialjDir)) return false;
+        
         Amg::Vector3D jPos = initialjPos;
-        Amg::Vector3D initialjDir(P[i + 3], P[i + 4], P[i + 5]);
         Amg::Vector3D jDir = initialjDir;
 
         // B-field terms
@@ -2560,8 +2565,8 @@ Trk::STEP_Propagator::rungeKuttaStep(Cache& cache,
           jdL3 = dL3 * jLambda;
           jk3 = jk3 + k3 * jLambda / lambda3;
         }
-
-        // POINT 4
+       
+        // POINT 4        
         jPos = initialjPos + distanceStepped * initialjDir + (distanceStepped * distanceStepped / 2.) * jk3;
         jDir = initialjDir + distanceStepped * jk3;
 
