@@ -35,7 +35,7 @@ def BSMonitoringConfig(inputFlags):
         #info('In BSMonitoringConfig: isOnline')
         ProcessRoIBResult = True
         InclusiveTriggerThresholds = True
-        ProcessMuctpiData = False #True
+        ProcessMuctpiData = True #True
         ProcessMuctpiDataRIO = False #True
         RunOnESD = False
         CompareRerun = False
