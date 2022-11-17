@@ -1,4 +1,4 @@
-"""Define method to configure and test SCT_ConditionsSummaryTestAlg
+"""Define method to configure VrtSecInclusive algorithm
 
 Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
@@ -15,12 +15,12 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
     from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
-    from TrkConfig.TrkVKalVrtFitterConfig import VSI_VKalVrtFitterCfg
+    from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
     from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
 
 
     kwargs.setdefault("Extrapolator"                 , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-    kwargs.setdefault("VertexFitterTool"             , acc.popToolsAndMerge(VSI_VKalVrtFitterCfg(flags, IterationNumber = 30)))
+    kwargs.setdefault("VertexFitterTool"             , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags, IterationNumber = 30)))
     kwargs.setdefault("PixelConditionsSummaryTool"   , acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags, UseByteStreamFEI4 = False, UseByteStreamFEI3 = False)))
 
     TrackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags))
