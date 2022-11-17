@@ -36,8 +36,7 @@ if __name__=="__main__":
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
     acc.merge(InDetTrackRecoCfg(ConfigFlags))
 
-    acc.run(100)
-
     with open("config.pkl", "wb") as file:
       acc.store(file)
 
+    acc.run(100)
