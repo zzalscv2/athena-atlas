@@ -19,16 +19,14 @@
 #include <memory>
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-//dummy surface to add
-struct Surface{
-};
+typedef int Surface;
 
 //convenient way to generate different types with the same methods and holding a pSurf
 template<int N>
 struct Thing{
-  Surface  * pSurf{};
-  Surface & associatedSurface() const{
-   return *pSurf;
+  Surface  surf{};
+  const Surface & associatedSurface() const{
+   return surf;
   }
   int n(){
     return N;
@@ -39,67 +37,61 @@ struct Thing{
 
 BOOST_AUTO_TEST_SUITE(ConsistentSurfacesTest)
   BOOST_AUTO_TEST_CASE(AllTheSame){
-    auto pSurf = new Surface;
+    Surface surf(1);
     {
       auto pThing1 = std::make_unique<Thing<1>>();
       auto pThing2 = std::make_unique<Thing<2>>();
       auto pThing3 = std::make_unique<Thing<3>>();
 
-      pThing1->pSurf = pSurf;
-      pThing2->pSurf = pSurf;
-      pThing3->pSurf = pSurf;
+      pThing1->surf = surf;
+      pThing2->surf = surf;
+      pThing3->surf = surf;
       BOOST_CHECK(Trk::consistentSurfaces(pThing1.get(), pThing2.get(), pThing3.get()));
     }
-    delete pSurf;
   }
   
   BOOST_AUTO_TEST_CASE(OneDifferent){
-    auto pSurf1 = new Surface;
-    auto pSurf2 = new Surface;
+    Surface surf1(1);
+    Surface surf2(2);
     {
       auto pThing1 = std::make_unique<Thing<1>>();
       auto pThing2 = std::make_unique<Thing<2>>();
       auto pThing3 = std::make_unique<Thing<3>>();
 
-      pThing1->pSurf = pSurf1;
-      pThing2->pSurf = pSurf1;
-      pThing3->pSurf = pSurf2;
+      pThing1->surf = surf1;
+      pThing2->surf = surf1;
+      pThing3->surf = surf2;
       BOOST_CHECK(Trk::consistentSurfaces(pThing1.get(), pThing2.get(), pThing3.get()) == false);
       //check order doesnt matter
       BOOST_CHECK(Trk::consistentSurfaces(pThing3.get(), pThing2.get(), pThing1.get()) == false);
     }
-    delete pSurf1;
-    delete pSurf2;
   }
   BOOST_AUTO_TEST_CASE(TheSameAndOneNullPtr){
-    auto pSurf1 = new Surface;
+    Surface surf1(1);
     {
       std::unique_ptr<Thing<1>> pThing1{}; //nullptr
       auto pThing2 = std::make_unique<Thing<2>>();
       auto pThing3 = std::make_unique<Thing<3>>();
       //
-      pThing2->pSurf = pSurf1;
-      pThing3->pSurf = pSurf1;
+      pThing2->surf = surf1;
+      pThing3->surf = surf1;
       BOOST_CHECK(Trk::consistentSurfaces(pThing1.get(), pThing2.get(), pThing3.get()));
     }
-    delete pSurf1;
   }
   BOOST_AUTO_TEST_CASE(OneDifferentAndOneNullPtr){
-    auto pSurf1 = new Surface;
-    auto pSurf2 = new Surface;
+    Surface surf1(1);
+    Surface surf2(2);
     {
       std::unique_ptr<Thing<1>> pThing1{}; //nullptr
       auto pThing2 = std::make_unique<Thing<2>>();
       auto pThing3 = std::make_unique<Thing<3>>();
 
-      pThing2->pSurf = pSurf1;
-      pThing3->pSurf = pSurf2;
+      pThing2->surf = surf1;
+      pThing3->surf = surf2;
       BOOST_CHECK(Trk::consistentSurfaces(pThing1.get(), pThing2.get(), pThing3.get()) == false);
       //check order doesnt matter
       BOOST_CHECK(Trk::consistentSurfaces(pThing3.get(), pThing2.get(), pThing1.get()) == false);
     }
-    delete pSurf1;
-    delete pSurf2;
   }
   BOOST_AUTO_TEST_CASE(AllNullPtr){
     {
@@ -111,11 +103,11 @@ BOOST_AUTO_TEST_SUITE(ConsistentSurfacesTest)
     }
   }
   BOOST_AUTO_TEST_CASE(OnlyOneNonNullPtr){
-    auto pSurf1 = new Surface;
+    Surface surf1(1);
     {
       std::unique_ptr<Thing<2>> pThing2{};
       auto pThing3 = std::make_unique<Thing<3>>();
-      pThing3->pSurf = pSurf1;
+      pThing3->surf = surf1;
       //..and just two arguments this time
       BOOST_CHECK(Trk::consistentSurfaces(pThing2.get(), pThing3.get()));
     }
