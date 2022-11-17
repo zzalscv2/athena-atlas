@@ -32,6 +32,15 @@ LArCaliWaves2Ntuple::LArCaliWaves2Ntuple(const std::string& name, ISvcLocator* p
 StatusCode LArCaliWaves2Ntuple::initialize() {
   m_ntTitle="Calibration Wave";
   m_ntpath=std::string("/NTUPLES/")+m_ntFile+std::string("/")+m_ntName;
+
+  if (! m_addCalib) {
+    //This dumper needs the calib-line-map anyway, even if the calib-line id is not dumped to the ntuple
+    //init the handle from the base-class here ... if not done by the base-class 
+    ATH_CHECK( m_calibMapSCKey.initialize(m_isSC));
+    ATH_CHECK( m_calibMapKey.initialize(!m_isSC));
+  }
+
+
   return LArWaves2Ntuple::initialize();
 }
 
@@ -84,18 +93,20 @@ StatusCode LArCaliWaves2Ntuple::stop()
     return StatusCode::FAILURE;
   }
 
-  sc=m_nt->addItem("nPulsedCalibLines",m_nPulsedCalibLines,0,4);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'nPulsedCalibLines' failed" );
-    return StatusCode::FAILURE;
-  }
+  if (m_addCalib) {
+    sc=m_nt->addItem("nPulsedCalibLines",m_nPulsedCalibLines,0,4);
+    if (sc!=StatusCode::SUCCESS) {
+      ATH_MSG_ERROR( "addItem 'nPulsedCalibLines' failed" );
+      return StatusCode::FAILURE;
+    }
     
-  sc=m_nt->addItem("pulsedCalibLines",4,m_pulsedCalibLines);
-  if (sc!=StatusCode::SUCCESS) {
-    ATH_MSG_ERROR( "addItem 'pulsedCalibLines' failed" );
-    return StatusCode::FAILURE;
+    sc=m_nt->addItem("pulsedCalibLines",4,m_pulsedCalibLines);
+    if (sc!=StatusCode::SUCCESS) {
+      ATH_MSG_ERROR( "addItem 'pulsedCalibLines' failed" );
+      return StatusCode::FAILURE;
+    }
   }
-  
+
   if (m_saveJitter) {
     sc=m_nt->addItem("Jitter",m_jitter,0.,1.);
     if (sc!=StatusCode::SUCCESS) {
@@ -246,32 +257,31 @@ bool LArCaliWaves2Ntuple::writeEntry(const HWIdentifier chid, const unsigned gai
     
 
   /// HEC calibration lines
-  if ( !m_isSC ) {
-  const std::vector<HWIdentifier>& calibLineV = clCont->calibSlotLine(chid);
-  if ( calibLineV.size()>0 ) {
-    ATH_MSG_DEBUG( "wave.getIsPulsedInt() " << wave.getIsPulsedInt()<<" : "<< calibLineV.size());
-    for(int i=0;i<4;i++)
-      m_pulsedCalibLines[i] = NOT_VALID;
-    std::vector<HWIdentifier>::const_iterator calibLineIt = calibLineV.begin();
-    unsigned iCalibLine=0;
-    m_nPulsedCalibLines=0;
-    for(calibLineIt = calibLineV.begin(); calibLineIt != calibLineV.end();++calibLineIt) {
-      if ( (wave.getIsPulsedInt()>>iCalibLine) & 1 ){
-	m_pulsedCalibLines[iCalibLine] = m_onlineId->channel(*calibLineIt);
-	if (m_pulsedCalibLines[iCalibLine]>=0) m_calibLine = m_onlineId->channel(*calibLineIt);
-	m_nPulsedCalibLines++;
+  if ( !m_isSC && m_addCalib) {
+    const std::vector<HWIdentifier>& calibLineV = clCont->calibSlotLine(chid);
+    if ( calibLineV.size()>0 ) {
+      ATH_MSG_DEBUG( "wave.getIsPulsedInt() " << wave.getIsPulsedInt()<<" : "<< calibLineV.size());
+      for(int i=0;i<4;i++) {
+	m_pulsedCalibLines[i] = NOT_VALID;
       }
-      iCalibLine++;
+      std::vector<HWIdentifier>::const_iterator calibLineIt = calibLineV.begin();
+      unsigned iCalibLine=0;
+      m_nPulsedCalibLines=0;
+      for(calibLineIt = calibLineV.begin(); calibLineIt != calibLineV.end();++calibLineIt) {
+	if ( (wave.getIsPulsedInt()>>iCalibLine) & 1 ){
+	  m_pulsedCalibLines[iCalibLine] = m_onlineId->channel(*calibLineIt);
+	  if (m_pulsedCalibLines[iCalibLine]>=0) m_calibLine = m_onlineId->channel(*calibLineIt);
+	  m_nPulsedCalibLines++;
+	}
+	iCalibLine++;
+      }
+      ATH_MSG_DEBUG( "m_pulsedCalibLines: "<<m_pulsedCalibLines[0]<<"/"<<m_pulsedCalibLines[1]<<"/"<<m_pulsedCalibLines[2]<<"/"<<m_pulsedCalibLines[3]);
+    } // else if calibLineV.size()>0
+    else { 
+      m_nPulsedCalibLines = 0 ;
+      m_pulsedCalibLines[0] = NOT_VALID;
     }
-    ATH_MSG_DEBUG( "m_pulsedCalibLines: "<<m_pulsedCalibLines[0]<<"/"<<m_pulsedCalibLines[1]<<"/"<<m_pulsedCalibLines[2]<<"/"<<m_pulsedCalibLines[3]);
-  }else { 
-    m_nPulsedCalibLines = 0 ;
-    m_pulsedCalibLines[0] = NOT_VALID;
-  }
-  }else { 
-    m_nPulsedCalibLines = 0 ;
-    m_pulsedCalibLines[0] = NOT_VALID;
-  }
+  }//end if !m_isSC && m_addCalib
 
   // Jitter
   if ( m_saveJitter ) {
