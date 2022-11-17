@@ -82,8 +82,13 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   // calculations for the clusters   //
   /////////////////////////////////////
 
+  // prepare HLT clusters
   std::vector<clus_kin> vec_hlt_clusters;
-  for (const auto hlt_cluster : *hltCluster_readHandle) {
+  std::vector<const xAOD::CaloCluster*> accepted_hlt_clusters = ifChainPassed(m_hltChainsT0);
+  
+  // For monitoring all hlt clusters
+  if(m_hltChainsT0 == "All"){
+    for (const auto hlt_cluster : *hltCluster_readHandle) {
 	auto hlt_clus_et = hlt_cluster->et();
 	if (hlt_clus_et < m_HLT_min_et) continue;
 
@@ -95,6 +100,23 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
 
 	if (!m_HLT_types.empty() && !HLT_type_match) continue;
 	vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
+    }
+  }
+  // For monitoring signature specific clusters
+  else if (accepted_hlt_clusters.size()>0){
+    for (const auto &hlt_cluster : accepted_hlt_clusters) {
+        auto hlt_clus_et = hlt_cluster->et();
+        if (hlt_clus_et < m_HLT_min_et) continue;
+
+        bool HLT_type_match = false;
+
+        for (unsigned int n = 0; n < m_HLT_types.size(); ++n) {
+                if (hlt_cluster->clusterSize() == m_HLT_types[n]) { HLT_type_match = true; break; }
+        }
+
+	if (!m_HLT_types.empty() && !HLT_type_match) continue;
+        vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
+    }
   }
 
   // prepare OFF clusters
@@ -349,34 +371,9 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   }
   const std::string chain = m_hltChainsT0;
 
-   if (m_hltChainsT0 != "All" && ifChainPassed(m_hltChainsT0)){
-	ATH_MSG_INFO("Filling for chain : "<<m_hltChainsT0);
-        ATH_MSG_INFO("ifChainPassed : "<<ifChainPassed(m_hltChainsT0));
-          fill(m_mongroup_name,
-          // HLT clusters
-          HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_time, HLT_type, HLT_size, HLT_barrel_high_et_num, HLT_bc,
-
-          // HLT cutmasks
-          HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
-
-          // OFF clusters
-          OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_time, OFF_type,
-
-          // OFF cutmasks
-          OFF_no_HLT_match, OFF_with_HLT_match,
-
-          // HLT matched to OFF
-          HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
-          OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_delta_eta, HLT_vs_OFF_delta_phi, HLT_vs_OFF_delta_time,
-
-          // OFF matched to HLT
-          OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
-          HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_delta_eta, OFF_vs_HLT_delta_phi, OFF_vs_HLT_delta_time
-         );
-     }
    if(m_hltChainsT0 == "All") {
 
-        ATH_MSG_INFO(" Filling histograms for all: "<<m_hltChainsT0);
+        ATH_MSG_DEBUG(" Filling histograms for: "<<m_hltChainsT0);
         fill(m_mongroup_name,
         // HLT clusters
         HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_time, HLT_type, HLT_size, HLT_barrel_high_et_num, HLT_bc,
@@ -399,7 +396,32 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
         HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_delta_eta, OFF_vs_HLT_delta_phi, OFF_vs_HLT_delta_time
         );
    }
+   else if(accepted_hlt_clusters.size()>0){
+     ATH_MSG_DEBUG("Filling for : "<<m_hltChainsT0);
+    
+     fill(m_mongroup_name,
+     // HLT clusters
+        HLT_num, HLT_et, HLT_eta, HLT_phi, HLT_time, HLT_type, HLT_size, HLT_barrel_high_et_num, HLT_bc,
 
+        // HLT cutmasks
+        HLT_barrel_high_et, HLT_no_OFF_match, HLT_with_OFF_match,
+
+        // OFF clusters
+        OFF_num, OFF_et, OFF_eta, OFF_phi, OFF_time, OFF_type,
+
+        // OFF cutmasks
+        OFF_no_HLT_match, OFF_with_HLT_match,
+
+        // HLT matched to OFF
+        HLT_matched_fraction, HLT_no_OFF_match_num, HLT_vs_OFF_minimum_delta_r, HLT_with_OFF_match_num,
+        OFF_match_et, HLT_vs_OFF_resolution, HLT_vs_OFF_delta_eta, HLT_vs_OFF_delta_phi, HLT_vs_OFF_delta_time,
+
+        // OFF matched to HLT
+        OFF_matched_fraction, OFF_no_HLT_match_num, OFF_vs_HLT_minimum_delta_r, OFF_with_HLT_match_num,
+        HLT_match_et, OFF_vs_HLT_resolution, OFF_vs_HLT_delta_eta, OFF_vs_HLT_delta_phi, OFF_vs_HLT_delta_time
+        );
+   
+   }
 
   return StatusCode::SUCCESS;
 }
@@ -417,19 +439,19 @@ float HLTCalo_TopoCaloClustersMonitor::calculateDeltaPhi( float phi_1, float phi
   return std::abs( std::abs( std::abs( phi_1 - phi_2 ) - TMath::Pi() ) - TMath::Pi() );
 }
 
-     
-bool HLTCalo_TopoCaloClustersMonitor::ifChainPassed(const std::string& chain) const{
-
+std::vector<const xAOD::CaloCluster*> HLTCalo_TopoCaloClustersMonitor::ifChainPassed(const std::string& chain) const{
   Trig::FeatureRequestDescriptor featureRequestDescriptor;
   featureRequestDescriptor.setChainGroup(chain);
   featureRequestDescriptor.setCondition(TrigDefs::includeFailedDecisions);
   std::vector<TrigCompositeUtils::LinkInfo<xAOD::CaloClusterContainer>> fVec = getTrigDecisionTool()->features<xAOD::CaloClusterContainer>(featureRequestDescriptor);
-  bool pass = false;
-  ATH_MSG_DEBUG("first pass: "<<pass);
+  std::vector<const xAOD::CaloCluster*> clustersToMonitorForChain;
   for (const TrigCompositeUtils::LinkInfo<xAOD::CaloClusterContainer>& f : fVec) {
-     pass = ( f.state == TrigCompositeUtils::ActiveState::ACTIVE );
-     if (pass) break;
+     if (f.state == TrigCompositeUtils::ActiveState::ACTIVE) {
+       clustersToMonitorForChain.push_back( *(f.link) );
+    }
   }
-  ATH_MSG_DEBUG("second pass: "<<pass);
-  return pass;
+  ATH_MSG_DEBUG("clustersToMonitorForChain.size(): "<<clustersToMonitorForChain.size());
+  for(auto &p: clustersToMonitorForChain) 
+    ATH_MSG_DEBUG("clustersToMonitorForChain->et(): "<<p->et());
+  return clustersToMonitorForChain;
 }
