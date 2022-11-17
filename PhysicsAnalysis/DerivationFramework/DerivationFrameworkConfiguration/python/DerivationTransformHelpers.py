@@ -9,7 +9,7 @@ from PyJobTransforms.trfExe import athenaExecutor, reductionFrameworkExecutor
 def addDerivationArguments(parser):
     """Add common derivation command-line parser arguments."""
     parser.defineArgGroup('Derivation', 'Derivation Options')
-    parser.add_argument('--formats', nargs='*',
+    parser.add_argument('--formats', nargs='+',
                         type=argFactory(argList),
                         help='List of required D(2)AOD formats',
                         group='Derivation')
