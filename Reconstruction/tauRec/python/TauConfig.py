@@ -9,10 +9,6 @@ def TauBuildAlgCfg(flags):
 
     result = ComponentAccumulator()
 
-    # Tracking
-    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    result.merge(TrackingGeometrySvcCfg(flags))
-
     # Schedule total noise cond alg
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
     result.merge(CaloNoiseCondAlgCfg(flags, "totalNoise"))
