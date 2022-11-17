@@ -377,9 +377,8 @@ def defineHistogram(varname, type='TH1F', path=None,
     settings['type'] = type
 
     # Path
-    if not _isOnline() and path is None:
+    if path is None:
         path = ''
-    assert path is not None, 'path argument in defineHistogram() is required.'
     settings['path'] = path
 
     # Title
