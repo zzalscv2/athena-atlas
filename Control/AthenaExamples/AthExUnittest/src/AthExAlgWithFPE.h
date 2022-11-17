@@ -11,7 +11,10 @@ public:
 
   using AthAlgorithm::AthAlgorithm; //Delgate c'tor
 
-  StatusCode execute();
+  virtual StatusCode execute() override;
+
+private:
+  float divide (float a, float b);
 
 };
 
