@@ -4,20 +4,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def VSI_VKalVrtFitterCfg(flags, name="VSI_TrkVKalVrtFitter", **kwargs):
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
-
-    if "Extrapolator" not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
-            AtlasExtrapolatorCfg(flags)))
-
-    kwargs.setdefault("IterationNumber", flags.InDet.SecVertex.Fitter.IterationNumber)
-
-    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
-    return acc
-
 def TrkVKalVrtFitterCfg(flags, name="TrkVKalVrtFitter", **kwargs):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
@@ -27,6 +13,10 @@ def TrkVKalVrtFitterCfg(flags, name="TrkVKalVrtFitter", **kwargs):
         kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
             AtlasExtrapolatorCfg(flags)))
 
+    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
+    return acc
+
+def SecVx_TrkVKalVrtFitterCfg(flags, name="SecVx_TrkVKalVrtFitter", **kwargs):
     kwargs.setdefault("FirstMeasuredPoint", flags.InDet.SecVertex.Fitter.FirstMeasuredPoint)
     kwargs.setdefault("FirstMeasuredPointLimit", flags.InDet.SecVertex.Fitter.FirstMeasuredPointLimit)
     kwargs.setdefault("InputParticleMasses", flags.InDet.SecVertex.Fitter.InputParticleMasses)
@@ -38,23 +28,12 @@ def TrkVKalVrtFitterCfg(flags, name="TrkVKalVrtFitter", **kwargs):
     kwargs.setdefault("CovVrtForConstraint", flags.InDet.SecVertex.Fitter.CovVrtForConstraint)
     kwargs.setdefault("VertexForConstraint", flags.InDet.SecVertex.Fitter.VertexForConstraint)
 
-    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
-    return acc
+    return TrkVKalVrtFitterCfg(flags, name, **kwargs)
 
 def BPHY_TrkVKalVrtFitterCfg(flags, name="BPHY_TrkVKalVrtFitter", **kwargs):
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
-
-    if "Extrapolator" not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
-            AtlasExtrapolatorCfg(flags)))
-
     kwargs.setdefault("FirstMeasuredPoint", False)
     kwargs.setdefault("MakeExtendedVertex", True)
-
-    acc.setPrivateTools(CompFactory.Trk.TrkVKalVrtFitter(name, **kwargs))
-    return acc
+    return TrkVKalVrtFitterCfg(flags, name, **kwargs)
 
 def BPHY_TrkVKalVrtFitter_InDetExtrapCfg(flags, name="BPHY_TrkVKalVrtFitter_InDetExtrap", **kwargs):
     acc = ComponentAccumulator()
