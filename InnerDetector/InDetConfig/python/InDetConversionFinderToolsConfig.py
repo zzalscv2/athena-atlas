@@ -91,9 +91,9 @@ def InDetConversionFinderToolsCfg(flags, name="ConversionFinderTool", **kwargs):
             InDetConversionTrackSelectorToolCfg(flags)))
 
     if "VertexFitterTool" not in kwargs:
-        from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
+        from TrkConfig.TrkVKalVrtFitterConfig import SecVx_TrkVKalVrtFitterCfg
         kwargs.setdefault("VertexFitterTool", acc.popToolsAndMerge(
-            TrkVKalVrtFitterCfg(flags)))
+            SecVx_TrkVKalVrtFitterCfg(flags)))
 
     kwargs.setdefault("TrackParticleCollection", flags.Egamma.Keys.Output.GSFTrackParticles)
     kwargs.setdefault("IsConversion", True)
