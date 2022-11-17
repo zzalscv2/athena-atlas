@@ -5,7 +5,7 @@
 # This defines DAOD_PHYSVAL, for running physics validation of
 # DAOD-level containers
 # It uses the same high-level content as DAOD_PHYS but also includes
-# It requires the reductionConf flag PHYS in Reco_tf.py   
+# It requires the reductionConf flag PHYS in Reco_tf.py
 #====================================================================
 
 from typing import Sequence
@@ -33,7 +33,7 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
 from InDetPrepRawDataToxAOD.InDetDxAODJobProperties import InDetDxAODFlags
 
 #====================================================================
-# SET UP STREAM   
+# SET UP STREAM
 #====================================================================
 streamName = derivationFlags.WriteDAOD_PHYSVALStream.StreamName
 fileName   = buildFileName( derivationFlags.WriteDAOD_PHYSVALStream )
@@ -43,7 +43,7 @@ PHYSVALStream.AcceptAlgs(["PHYSVALKernel"])
 ### Augmentation tools lists
 AugmentationTools   = []
 
-# Special sequence 
+# Special sequence
 SeqPHYSVAL = CfgMgr.AthSequencer("SeqPHYSVAL")
 DerivationFrameworkJob += SeqPHYSVAL
 
@@ -84,7 +84,7 @@ if (DerivationFrameworkIsMonteCarlo):
 
 
 #====================================================================
-# TRIGGER CONTENT   
+# TRIGGER CONTENT
 #====================================================================
 ## See https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerAPI
 ## Get single and multi mu, e, photon triggers
@@ -112,7 +112,7 @@ from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 for chain_name in GetFileMD(athenaCommonFlags.FilesInput.get_Value())['TriggerMenu']['HLTChains']:
    if chain_name in trigger_names_full_notau: trigger_names_notau.append(chain_name)
-   if chain_name in trigger_names_full_tau:   trigger_names_tau.append(chain_name) 
+   if chain_name in trigger_names_full_tau:   trigger_names_tau.append(chain_name)
 # Create trigger matching decorations
 trigmatching_helper_notau = TriggerMatchingHelper(name='PHYSVALTriggerMatchingToolNoTau',
         trigger_list = trigger_names_notau, add_to_df_job=True)
@@ -122,7 +122,7 @@ trigmatching_helper_tau = TriggerMatchingHelper(name='PHYSVALTriggerMatchingTool
 
 
 #====================================================================
-# JET/MET   
+# JET/MET
 #====================================================================
 
 AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
@@ -130,7 +130,7 @@ AntiKt4EMTopo_deriv = AntiKt4EMTopo.clone(
 )
 
 AntiKt4EMPFlow_deriv = AntiKt4EMPFlow.clone(
-   modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT")
+   modifiers = AntiKt4EMPFlow.modifiers+("JetPtAssociation","QGTagging","fJVT", "NNJVT")
 )
 
 jetList = [AntiKt4EMTopo_deriv,
@@ -158,21 +158,21 @@ addEventCleanFlags(sequence=DerivationFrameworkJob)
 scheduleStandardMETContent(sequence=DerivationFrameworkJob, algname="METAssociationAlg")
 
 #====================================================================
-# CREATE THE DERIVATION KERNEL ALGORITHM   
+# CREATE THE DERIVATION KERNEL ALGORITHM
 #====================================================================
 # Add the kernel for thinning (requires the objects be defined)
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel("PHYSVALKernel")
 
 
 #====================================================================
-# FLAVOUR TAGGING   
+# FLAVOUR TAGGING
 #====================================================================
 
 from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
 FtagJetCollections(['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets'],DerivationFrameworkJob)
 
 #====================================================================
-# TC-LVT Vertices 
+# TC-LVT Vertices
 #====================================================================
 
 # from SoftBVrtClusterTool.SoftBVrtConfig import addSoftBVrt
@@ -181,7 +181,7 @@ FtagJetCollections(['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets'],Deriv
 # addSoftBVrt(SeqPHYSVAL,'Tight')
 
 #====================================================================
-# CONTENTS   
+# CONTENTS
 #====================================================================
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper")
@@ -222,7 +222,7 @@ PHYSVALSlimmingHelper.AllVariables =  ["EventInfo",
                                        "BTagging_AntiKt4EMPFlow",
                                        "BTagging_AntiKt4EMTopo",
                                        "BTagging_AntiKtVR30Rmax4Rmin02Track",
-                                       "BTagging_AntiKt4EMPFlowJFVtx", 
+                                       "BTagging_AntiKt4EMPFlowJFVtx",
 				       "BTagging_AntiKt4EMPFlowJFVtxFlip", #Flip version of JetFitter
                                        "BTagging_AntiKt4EMPFlowSecVtx",
 				       "BTagging_AntiKt4EMPFlowSecVtxFlip", #Flip version of SV1

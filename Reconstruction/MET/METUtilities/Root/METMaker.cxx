@@ -700,9 +700,9 @@ namespace met {
           else {
             if(jet->pt()<m_JvtPtMax && std::abs(jet->eta())<m_JetEtaForw) {
               float jvt;
-              bool gotJVT = m_acc_jetRejectionDec->isAvailable(*jet);
+              bool gotJVT = m_acc_jetJvtMoment->isAvailable(*jet);
               if(gotJVT) {
-                jvt = (*m_acc_jetRejectionDec)(*jet);
+                jvt = (*m_acc_jetJvtMoment)(*jet);
                 JVT_reject = jvt<m_JvtCut;
                 if(m_JvtMediumPtMax>0.0 && jet->pt()<m_JvtMediumPtMax) JVT_reject = (jvt<m_JvtCutMedium);
                 if(m_JvtTightPtMax>0.0  && jet->pt()<m_JvtTightPtMax)  JVT_reject = (jvt<m_JvtCutTight);
