@@ -213,7 +213,7 @@ namespace G4UA {
             // ATH_MSG_DEBUG(" -> Secondary particle generated in this G4Step is returned to ISF.");
 
             // attach TrackInformation instance to the new secondary G4Track
-            const ISF::ISFParticle *parent                  = curISP;
+            ISF::ISFParticle *parent                  = curISP;
             HepMC::GenParticlePtr generationZeroTruthParticle = nullptr;
             ::iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( *aTrack_2nd,
                                                        *parent,
@@ -241,14 +241,9 @@ namespace G4UA {
         G4Exception("iGeant4::TrackProcessorUserActionPassBack", "NoTrackInformation", FatalException, description);
         return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
       }
-#ifdef HEPMC3
-      HepMC::GenParticlePtr          primaryHepParticle = std::const_pointer_cast<HepMC3::GenParticle>(trackInfo->GetPrimaryHepMCParticle());
-      HepMC::GenParticlePtr   generationZeroHepParticle = std::const_pointer_cast<HepMC3::GenParticle>(trackInfo->GetHepMCParticle());
 
-#else
-      HepMC::GenParticlePtr         primaryHepParticle = const_cast<HepMC::GenParticlePtr>(trackInfo->GetPrimaryHepMCParticle());
-      HepMC::GenParticlePtr  generationZeroHepParticle = const_cast<HepMC::GenParticlePtr>(trackInfo->GetHepMCParticle());
-#endif
+      HepMC::GenParticlePtr         primaryHepParticle = trackInfo->GetPrimaryHepMCParticle();
+      HepMC::GenParticlePtr  generationZeroHepParticle = trackInfo->GetHepMCParticle();
 
       ISF::TruthBinding* tBinding = new ISF::TruthBinding(truthParticle, primaryHepParticle, generationZeroHepParticle);
 

@@ -516,7 +516,7 @@ double SetProperTimeFromDetectorFrameDecayLength(G4PrimaryParticle& g4particle,c
 
 //________________________________________________________________________
 #ifdef HEPMC3
-G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::ConstGenParticlePtr genpart) const{
+G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticlePtr genpart) const{
  ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(genpart->pdg_id());
@@ -601,7 +601,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::ConstGenPart
   return g4particle.release();
 }
 #else
-G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(const HepMC::GenParticle& genpart) const
+G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(HepMC::GenParticle& genpart) const
 {
   ATH_MSG_VERBOSE("Creating G4PrimaryParticle from GenParticle.");
 
@@ -703,7 +703,7 @@ G4PrimaryParticle* ISF::InputConverter::getG4PrimaryParticle(ISF::ISFParticle& i
       return nullptr; //The G4Exception call above should abort the job, but Coverity does not seem to pick this up.
   }
   HepMC::GenParticlePtr        genpart = truthBinding->getTruthParticle();
-  HepMC::ConstGenParticlePtr   primaryGenpart = truthBinding->getPrimaryTruthParticle();
+  HepMC::GenParticlePtr primaryGenpart = truthBinding->getPrimaryTruthParticle();
 
   const G4ParticleDefinition *particleDefinition = this->getG4ParticleDefinition(isp.pdgCode());
 

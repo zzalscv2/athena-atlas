@@ -77,9 +77,9 @@ iGeant4::ISFG4Helper::getISFTrackInfo(const G4Track& aTrack)
 /** link the given G4Track to the given ISFParticle */
 TrackInformation*
 iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
-                                                    const ISF::ISFParticle& baseIsp,
+                                                    ISF::ISFParticle& baseIsp,
                                                     TrackClassification classification,
-                                                    HepMC::ConstGenParticlePtr nonRegeneratedTruthParticle)
+                                                    HepMC::GenParticlePtr nonRegeneratedTruthParticle)
 {
   if ( aTrack.GetUserInformation() ) {
     G4ExceptionDescription description;

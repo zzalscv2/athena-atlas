@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruth/TrackInformation.h"
@@ -11,7 +11,7 @@ TrackInformation::TrackInformation():m_regenerationNr(0),m_theParticle(0),m_theB
 {
 }
 
-TrackInformation::TrackInformation(HepMC::ConstGenParticlePtr p,const ISF::ISFParticle* baseIsp):
+TrackInformation::TrackInformation(HepMC::GenParticlePtr p, ISF::ISFParticle* baseIsp):
     m_regenerationNr(0),
     m_theParticle(p),
     m_theBaseISFParticle(baseIsp),
@@ -19,26 +19,17 @@ TrackInformation::TrackInformation(HepMC::ConstGenParticlePtr p,const ISF::ISFPa
 {
 }
 
-HepMC::ConstGenParticlePtr TrackInformation::GetHepMCParticle() const
-{
-  return m_theParticle;
-}
-const ISF::ISFParticle* TrackInformation::GetBaseISFParticle() const
-{
-  return m_theBaseISFParticle;
-}
-
 int TrackInformation::GetParticleBarcode() const
 {
   return ( m_theParticle ? HepMC::barcode(m_theParticle) : 0 );
 }
 
-void TrackInformation::SetParticle(HepMC::ConstGenParticlePtr p)
+void TrackInformation::SetParticle(HepMC::GenParticlePtr p)
 {
   m_theParticle=p;
 }
 
-void TrackInformation::SetBaseISFParticle(const ISF::ISFParticle* p)
+void TrackInformation::SetBaseISFParticle(ISF::ISFParticle* p)
 {
   m_theBaseISFParticle=p;
 }

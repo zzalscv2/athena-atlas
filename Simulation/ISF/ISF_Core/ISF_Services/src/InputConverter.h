@@ -80,9 +80,9 @@ namespace ISF {
     const G4ParticleDefinition* getG4ParticleDefinition(int pdgcode) const;
 
 #ifdef HEPMC3
-    G4PrimaryParticle* getG4PrimaryParticle(HepMC::ConstGenParticlePtr gp) const;
+    G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticlePtr gp) const;
 #else
-    G4PrimaryParticle* getG4PrimaryParticle(const HepMC::GenParticle& gp) const;
+    G4PrimaryParticle* getG4PrimaryParticle(HepMC::GenParticle& gp) const;
 #endif
 
     G4PrimaryParticle* getG4PrimaryParticle(ISF::ISFParticle& isp, bool useHepMC) const;

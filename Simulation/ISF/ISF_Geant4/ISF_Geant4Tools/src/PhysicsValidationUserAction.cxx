@@ -239,11 +239,7 @@ namespace G4UA{
 	m_scIn = creation? creation->GetProcessSubType() : -1;
 	
 	VTrackInformation * trackInfo= static_cast<VTrackInformation*>(track->GetUserInformation());
-#ifdef HEPMC3
-	HepMC::GenParticlePtr  genpart=trackInfo ? std::const_pointer_cast<HepMC3::GenParticle>(trackInfo->GetHepMCParticle()):nullptr;
-#else 
-	HepMC::GenParticlePtr genpart= trackInfo ? const_cast<HepMC::GenParticlePtr>(trackInfo->GetHepMCParticle()):0;
-#endif
+	HepMC::GenParticlePtr genpart= trackInfo ? trackInfo->GetHepMCParticle() : nullptr;
 	HepMC::GenVertexPtr vtx = genpart ? genpart->production_vertex() : 0;
 	m_gen = genpart? 0 : -1;
 	
