@@ -76,6 +76,29 @@ namespace AthONNX {
                                      sessionOptions );
    }
 
+
+/****************************Creation of ORT Session for GPU******************************/
+/*****************************************************************************************/
+
+ //template<typename T>
+ inline std::unique_ptr< Ort::Session > CreateORTSessionGPU(const std::string& modelFile){
+
+    // Set up the ONNX Runtime session.
+    Ort::SessionOptions sessionOptions;
+    OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions,0);
+    sessionOptions.SetIntraOpNumThreads( 1 );
+    sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
+
+    ServiceHandle< IONNXRuntimeSvc > svc("AthONNX::ONNXRuntimeSvc",
+                                              "AthONNX::ONNXRuntimeSvc");
+
+    return std::make_unique<Ort::Session>( svc->env(),
+                                     modelFile.c_str(),
+                                     sessionOptions );
+   }
+
+
+
 /*********************************Input Node Structure of Model*********************************/
 /***********************************************************************************************/
 
