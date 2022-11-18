@@ -34,6 +34,8 @@
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloIdManager.h"
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include "LArReadoutGeometry/FCALDetectorManager.h"
 
 #include "PathResolver/PathResolver.h"
@@ -87,7 +89,16 @@ StatusCode ISF::DNNCaloSimSvc::initialize()
       return StatusCode::FAILURE;
     }
   
-  m_caloDetDescrManager  = CaloDetDescrManager::instance();
+  m_caloDetDescrManager = detStore()->tryConstRetrieve<CaloDetDescrManager>("CaloMgrFCS");
+  if(!m_caloDetDescrManager) {
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescr(serviceLocator()
+									, Athena::getMessageSvc()
+									, nullptr
+									, nullptr);
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), "CaloMgrFCS"));
+    ATH_CHECK(detStore()->retrieve(m_caloDetDescrManager, "CaloMgrFCS"));
+  }
+
   const FCALDetectorManager * fcalManager=nullptr;
   ATH_CHECK(detStore()->retrieve(fcalManager));
 

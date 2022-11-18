@@ -23,6 +23,8 @@
 #include "IdDictParser/IdDictParser.h"
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/TileID.h"
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
+#include "AthenaKernel/getMessageSvc.h"
 //!
 
 // StoreGate
@@ -58,12 +60,24 @@ ISF::FastCaloSimV2ParamSvc::FastCaloSimV2ParamSvc(const std::string& name, ISvcL
 /** framework methods */
 StatusCode ISF::FastCaloSimV2ParamSvc::initialize()
 {
-  const CaloDetDescrManager *calo_dd_man = CaloDetDescrManager::instance();
   const FCALDetectorManager *fcalManager{};
   ATH_CHECK(detStore()->retrieve(fcalManager));
 
   m_caloGeo = std::make_unique<CaloGeometryFromCaloDDM>();
-  m_caloGeo->LoadGeometryFromCaloDDM(calo_dd_man);
+
+  const CaloDetDescrManager* caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>("CaloMgrFCS");
+  if(caloMgr) {
+    m_caloGeo->LoadGeometryFromCaloDDM(caloMgr);
+  }
+  else {
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescr(serviceLocator()
+									, Athena::getMessageSvc()
+									, nullptr
+									, nullptr);
+    m_caloGeo->LoadGeometryFromCaloDDM(caloMgrPtr.get());
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), "CaloMgr"));
+  }
+
   if (!m_caloGeo->LoadFCalChannelMapFromFCalDDM(fcalManager)) {
     ATH_MSG_FATAL("Found inconsistency between FCal_Channel map and GEO file. Please, check if they are configured properly.");
     return StatusCode::FAILURE;
