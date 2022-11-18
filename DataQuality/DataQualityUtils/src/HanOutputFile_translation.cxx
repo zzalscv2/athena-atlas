@@ -2,32 +2,33 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <iostream>          //input-output
-#include <nlohmann/json.hpp> //If you run this code as part of Athena
+#include <iostream>           //input-output
+#include <nlohmann/json.hpp>  //If you run this code as part of Athena
 // Root libraries
 #include <TFile.h>
 #include <TFolder.h>
+#include <TH1.h>
 #include <TKey.h>
 #include <TObjString.h>
-#include <TH1.h>
-#include <TROOT.h> //To use gRoot
+#include <TROOT.h>   //To use gRoot
+#include <unistd.h>  //To use usleep function
 
-#include <cstring>  //to convert string to char array (to save json file as TObjString)
 #include <chrono>   //To measure time
-#include <unistd.h> //To use usleep function
+#include <cstring>  //to convert string to char array (to save json file as TObjString)
 
 /** Instructions:
     * COMPILE
-       g++ -std=c++11 HanOutputFile_translation.cxx -O2 `root-config --cflags` `root-config --libs --glibs` -o HanOutputFile_translation
+       g++ -std=c++11 HanOutputFile_translation.cxx -O2 `root-config --cflags` `root-config --libs --glibs` -o
+HanOutputFile_translation
 
     * RUN
        ./HanOutputFile_translation
        or
-       ./HanOutputFile_translation <input_file_name_(without .root)>
+       ./HanOutputFile_translation <input_file_name>
        or
-       ./HanOutputFile_translation <input_file_name_(without .root)> <output_dir_path>
+       ./HanOutputFile_translation <input_file_name> <output_dir_path>
        or
-       ./HanOutputFile_translation <input_dir_path> <input_file_name_(without .root)> <output_dir_path>
+       ./HanOutputFile_translation <input_dir_path> <input_file_name> <output_dir_path>
 **/
 
 /** Declarations of functions protoypes **/
@@ -61,7 +62,7 @@ int main(int argc, char* argv[])
   using namespace std;
   // ATLAS Data Quality space
   TString input_file_path = "/eos/atlas/atlascerngroupdisk/data-dqm/examples/han_output_translation_example/";
-  TString input_file_name = "run_364030_lowStat_LB121-140_han"; // Example file
+  TString input_file_name = "run_364030_lowStat_LB121-140_han.root";  // Example file
   TString output_file_path = "./";
 
   if (argc == 2)
@@ -80,17 +81,17 @@ int main(int argc, char* argv[])
     output_file_path = argv[3];
   }
 
-  auto start = std::chrono::system_clock::now(); // Start time counting
+  auto start = std::chrono::system_clock::now();  // Start time counting
   // Open file from which to convert
-  TFile* f_input = new TFile(input_file_path + input_file_name + ".root");
+  TFile* f_input = new TFile(input_file_path + input_file_name);
   // Open file where to convert
   // Enter here the path where you want to store the iutput file
-  TFile* f_output = new TFile(output_file_path + input_file_name + "_converted.root", "recreate");
+  TFile* f_output = new TFile(output_file_path + input_file_name, "recreate");
   // Counting time elapsed for the translation
-  auto end = std::chrono::system_clock::now(); // Stop time counting
+  auto end = std::chrono::system_clock::now();  // Stop time counting
   std::chrono::duration<double> elapsed_seconds = end - start;
   std::cout << "elapsed time to open files: " << elapsed_seconds.count() << "s\n";
-  start = std::chrono::system_clock::now(); // Start time counting
+  start = std::chrono::system_clock::now();  // Start time counting
 
   // Convert from V1-->V2.3
   convert_file(f_input, f_output);
@@ -105,14 +106,14 @@ int main(int argc, char* argv[])
   TObjString file_version;
   file_version.Write("V.2.3");
 
-  end = std::chrono::system_clock::now(); // Stop time counting
+  end = std::chrono::system_clock::now();  // Stop time counting
   elapsed_seconds = end - start;
   std::cout << "elapsed time for algorythm implementation: " << elapsed_seconds.count() << "s\n";
   // From root forum
   // To reduce the time spent in the ‘garbage collection’ and assuming that you are 100% sure
   // that no pointer to the contained object is shared and assuming you explicitly delete the
   // TFile object, you can remove the TFile object from the list of files
-  //“gROOT->GetListOfFiles()->Remove(myfile);”
+  // “gROOT->GetListOfFiles()->Remove(myfile);”
 
   // This is a known problem with file with very large number of histograms in a file
   //(and in particular in a directory). You can work around the problem, if (and only if)
@@ -120,14 +121,14 @@ int main(int argc, char* argv[])
   // TFile *outputFile = ..... ..... gROOT->GetListOfFiles()->Remove(outputFile); delete outputFile;
 
   // start = std::chrono::system_clock::now(); // Start time counting
-  gROOT->GetListOfFiles()->Remove(f_input); // removes the file from a list of “files to cleanup”, so that the objects
-                                            //  they contain are not cleaned at the end.
+  gROOT->GetListOfFiles()->Remove(f_input);  // removes the file from a list of “files to cleanup”, so that the objects
+  //  they contain are not cleaned at the end.
   gROOT->GetListOfFiles()->Remove(f_output);
   f_output->Close();
-  f_input->Close(); // Close the file
+  f_input->Close();  // Close the file
   delete f_input;
   delete f_output;
-  end = std::chrono::system_clock::now(); // Stop time counting
+  end = std::chrono::system_clock::now();  // Stop time counting
   elapsed_seconds = end - start;
   std::cout << "elapsed time to close files: " << elapsed_seconds.count() << "s\n";
   return 0;
@@ -153,14 +154,14 @@ int convert_file(TObject* obj_input, TObject* obj_outout)
   TString name = obj_input->GetName();
 
   if (dir = dynamic_cast<TDirectory*>(obj_input))
-  { // obj_input is a TDirectory
+  {  // obj_input is a TDirectory
     TString name = dir->GetName();
     if (name == "Results")
-    { // From Results folder should be extracted Reference histogrma (in an upper level), and Results --> JSON
+    {  // From Results folder should be extracted Reference histogrma (in an upper level), and Results --> JSON
       work_with_results_dir(dir, save_to);
     }
     else if (name == "Config")
-    { // Config --> JSON
+    {  // Config --> JSON
       work_with_no_hist_dir(dir, save_to);
     }
     else
@@ -192,7 +193,7 @@ int convert_file(TObject* obj_input, TObject* obj_outout)
     }
   }
   else
-  { // If the object is not a Tdirectory (a histogram or TObjsStrin)
+  {  // If the object is not a Tdirectory (a histogram or TObjsStrin)
     // just save it as it is where it should be
     save_to->cd();
     obj_input->Write(name);
@@ -219,8 +220,8 @@ int work_with_results_dir(TObject* obj_input, TObject* obj_outout)
       key_type = obj_inside->ClassName();
       // If an element in "Results" directory is a hist, we will save it in higher level
       if (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
-        key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
-        key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
+          key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
+          key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
       {
         save_to->cd();
         obj_inside->Write(key_name);
@@ -251,7 +252,14 @@ int work_with_no_hist_dir(TObject* obj, TObject* destination_to_save)
 
   TObjString string_to_tfile;
   // string_to_tfile.SetString(cstr);//Original
-  string_to_tfile.SetString(string.data()); // Test
+  if (j.is_null())
+  {
+    string_to_tfile.SetString("{}");  // Content of a JSON string
+  }
+  else
+  {
+    string_to_tfile.SetString(string.data());  // Content of a JSON string
+  }
   TString key_name = obj->GetName();
   string_to_tfile.Write(key_name);
   return 0;
@@ -272,13 +280,14 @@ int include_hist(TObject* obj)
   {
     TObject* obj_inside;
     key_name = key->GetName();
-    obj_inside = dir->GetKey(key_name)->ReadObj(); // Get the object. This procedure is better, since it is able to read
-                                                   //  names with "/"
+    obj_inside =
+      dir->GetKey(key_name)->ReadObj();  // Get the object. This procedure is better, since it is able to read
+    //  names with "/"
     key_type = obj_inside->ClassName();
     // If the object is histogram
     if (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
-      key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
-      key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
+        key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
+        key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S")
     {
       return 1;
     }
@@ -309,13 +318,13 @@ nlohmann::ordered_json to_JSON(TObject* obj)
   json j;
 
   if (obj_type == "TObjString")
-  { // If the object type, that were passed to this function is TObjString (should be
+  {  // If the object type, that were passed to this function is TObjString (should be
     //  impossible), this means, that there is a TObjString, that is not a single file in a
     //  directory (not a usual case)
     std::cout << "WARNING: Strange case: TObjString is not a single object in a dir" << std::endl;
   }
   else if (obj_type != "TDirectoryFile" && obj_type != "TFile")
-  { // No other type than TDirectory or TFile should be
+  {  // No other type than TDirectory or TFile should be
     //  passed to this function normally
     std::cout << "WARNING: Strange type: " << obj_type << std::endl;
   }
@@ -333,32 +342,32 @@ nlohmann::ordered_json to_JSON(TObject* obj)
   {
     TObject* next_level_obj;
     key_name = key->GetName();
-    next_level_obj = dir->GetKey(key_name)->ReadObj(); // Get object. This procedure is better, since it is able to read
-                                                       //  names with "/"
+    next_level_obj =
+      dir->GetKey(key_name)->ReadObj();  // Get object. This procedure is better, since it is able to read
+    //  names with "/"
     TString key_type = next_level_obj->ClassName();
 
     if (size_next == 1 && key_type == "TObjString")
-    { // If this is a directory just before the leaf (the TObjString
+    {  // If this is a directory just before the leaf (the TObjString
       //  file)
-      j = key_name; // This is the leaf
+      j = key_name;  // This is the leaf
       if (key_name == dir_name)
       {
-        std::cout << "WARNING: The names of Directory and TObjstring inside this directory are the same: " << dir_name << std::endl;
+        std::cout << "WARNING: The names of Directory and TObjstring inside this directory are the same: " << dir_name
+                  << std::endl;
       }
     }
     // We will ignore Hists in "Results" directory, since we have already written them in a higher level
     else if ((dir_name == "Results") &&
-      (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
-        key_type == "TProfile2D" ||
-        key_type == "TProfile" || key_type == "TGraphAsymmErrors" || key_type == "TGraphErrors" ||
-        key_type == "TH1D" ||
-        key_type == "TH2S"))
+             (key_type == "TH1I" || key_type == "TH2I" || key_type == "TH1F" || key_type == "TH2F" ||
+               key_type == "TProfile2D" || key_type == "TProfile" || key_type == "TGraphAsymmErrors" ||
+               key_type == "TGraphErrors" || key_type == "TH1D" || key_type == "TH2S"))
     {
       continue;
     }
     // If inside this directory other subdirrectory
     else
-    { // Write Directory_names as keys and content of the dirrectories as a values
+    {  // Write Directory_names as keys and content of the dirrectories as a values
       // Convert TString to string
       std::string key_name_string(key_name.Data());
       // Write JSON to rootFile
