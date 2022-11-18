@@ -6,6 +6,7 @@
 #define GEO2G4_LARWHEELSOLID_H
 #ifndef PORTABLE_LAR_SHAPE
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 #endif
 #include "G4VSolid.hh"
 
@@ -86,7 +87,7 @@ inline const char *LArWheelSolidTypeString(LArWheelSolid_t type)
   return("unknown");
 }
 
-class LArWheelSolid : public G4VSolid
+class ATLAS_NOT_THREAD_SAFE LArWheelSolid : public G4VSolid
 #ifndef PORTABLE_LAR_SHAPE
 , public AthMessaging
 #endif
