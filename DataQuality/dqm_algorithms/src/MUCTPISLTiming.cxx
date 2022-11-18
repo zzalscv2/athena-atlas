@@ -49,11 +49,11 @@ MUCTPISLTiming::execute( const std::string& name, const TObject& object, const d
 {
   using namespace std;
 
-  TH2 * hist;
+  const TH2 * hist;
   //TH2 * ref; //not using reference in this case
   
   if( object.IsA()->InheritsFrom( "TH2" ) ) {
-    hist = (TH2*)&object;
+    hist = (const TH2*)&object;
     if (hist->GetDimension() != 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension != 2 " );
     }
