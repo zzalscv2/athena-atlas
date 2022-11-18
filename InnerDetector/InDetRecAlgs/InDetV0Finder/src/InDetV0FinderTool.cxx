@@ -227,7 +227,8 @@ StatusCode InDetV0FinderTool::initialize()
   ATH_CHECK( m_mDecor_gmasserr.initialize());
   ATH_CHECK( m_mDecor_gprob.initialize());
 
-  ATH_CHECK( m_eventInfo_key.initialize());
+  ATH_CHECK( m_eventInfo_key.initialize(!m_useBeamSpotCond));
+  ATH_CHECK( m_beamSpotKey  .initialize( m_useBeamSpotCond));
 
 
 // Get the track selector tool from ToolSvc
@@ -301,10 +302,14 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
   if (m_use_vertColl) {
     ATH_MSG_DEBUG("Vertex  container size " << vertColl->size());
   }
-
-  SG::ReadHandle<xAOD::EventInfo> evt { m_eventInfo_key, ctx };
-  Amg::Vector3D beamspot = Amg::Vector3D(evt->beamPosX(), evt->beamPosY(), evt->beamPosZ());
-
+  Amg::Vector3D beamspot;
+  if(m_useBeamSpotCond){
+     auto beamSpotHandle = SG::ReadCondHandle(m_beamSpotKey, ctx);
+     beamspot = beamSpotHandle->beamPos();
+  }else{
+     SG::ReadHandle<xAOD::EventInfo> evt { m_eventInfo_key, ctx };
+     beamspot = Amg::Vector3D(evt->beamPosX(), evt->beamPosY(), evt->beamPosZ());
+  }
 // track preselection
   std::vector<const xAOD::TrackParticle*> posTracks; posTracks.clear();
   std::vector<const xAOD::TrackParticle*> negTracks; negTracks.clear();

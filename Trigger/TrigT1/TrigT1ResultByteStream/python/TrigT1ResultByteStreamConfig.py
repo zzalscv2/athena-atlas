@@ -139,10 +139,9 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
     if doRoIBResult(flags):
       roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSDecoderTool", flags=flags, writeBS=False)
       decoderTools += [roibResultTool]
-      if not flags.Trigger.doHLT or flags.Trigger.EDMVersion == 2:
-        # Always treat L1Topo as "maybe missing" in offline reco, and in HLT only for Run 2
-        for module_id in roibResultTool.L1TopoModuleIds:
-          maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, module_id)))
+      # Always treat L1Topo as "maybe missing" as it was under commissioning in Run 2 and had readout issues in Run 3
+      for module_id in roibResultTool.L1TopoModuleIds:
+        maybeMissingRobs.append(int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, module_id)))
       if flags.Trigger.EDMVersion == 2 and not flags.Trigger.doHLT:
         # L1Calo occasional readout errors weren't caught by HLT in 2015 - ignore these in offline reco, see ATR-24493
         for module_id in roibResultTool.JetModuleIds:
@@ -319,7 +318,7 @@ if __name__ == '__main__':
   parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
   parser.add_argument('--outputHISTFile',default="",help="if specified, will activate monitoring")
-  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
+  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jxTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
                       help="What data to decode and output.")
   args = parser.parse_args()
 
@@ -419,7 +418,17 @@ if __name__ == '__main__':
   # jFEX ROIs
   ########################################
   if 'jTOBs' in args.outputs:
-    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder', flags)
+    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder_TOB', flags)
+    for module_id in jFexTool.ROBIDs:
+        maybeMissingRobs.append(module_id)
+
+    decoderTools += [jFexTool]
+
+  ########################################
+  # jFEX xTOBs
+  ########################################
+  if 'jxTOBs' in args.outputs:
+    jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder_xTOB', flags, xTOBs=True)
     for module_id in jFexTool.ROBIDs:
         maybeMissingRobs.append(module_id)
 
@@ -470,7 +479,7 @@ if __name__ == '__main__':
     maybeMissingRobs += l1topoBSTool.ROBIDs
 
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
-                                                         DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=maybeMissingRobs)
+                                                         DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=list(set(maybeMissingRobs)))
 
   acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
 
