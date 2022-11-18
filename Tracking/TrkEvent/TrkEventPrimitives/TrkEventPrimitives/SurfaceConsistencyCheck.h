@@ -6,7 +6,7 @@ namespace Trk{
   
   /*
    consistentSurface function takes a variable number of pointer arguments and calls associatedSurface
-   on each one, and reports whether the result is the same (pointer comparison) for all arguments.
+   on each one, and reports whether the result is the same (object equality) for all arguments.
    caveats: 
    1) If an argument is a nullptr, it is ignored in the comparison
    2) If only one argument is passed, the result is true
@@ -22,7 +22,7 @@ namespace Trk{
   bool
   consistentSurfaces( U a, T...b){
     if (a==nullptr) return (consistentSurfaces(b...));
-    return (((b!=nullptr)?(&a->associatedSurface() == &b->associatedSurface()):true) and ...);
+    return (((b!=nullptr)?(a->associatedSurface() == b->associatedSurface()):true) and ...);
   }
 
 }
