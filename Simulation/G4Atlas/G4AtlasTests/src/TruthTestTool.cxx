@@ -223,7 +223,7 @@ StatusCode TruthTestTool::processEvent()
 
       int npart_prim=0, npart_sec=0;
       for (auto currentGenParticle: *(*currentGenEventIter)) {
-
+        int barcode = HepMC::barcode(currentGenParticle);
         const HepMC::FourVector mom = currentGenParticle->momentum();
         m_px_truth->Fill( mom.x() );
         m_py_truth->Fill( mom.y() );
@@ -238,9 +238,8 @@ StatusCode TruthTestTool::processEvent()
         if(std::abs(currentGenParticle->pdg_id())==211) {
           m_pion_mass->Fill(mom.m());
         }
-        m_barcode_small->Fill(HepMC::barcode(currentGenParticle));
-        m_barcode_large->Fill(HepMC::barcode(currentGenParticle));
-        int barcode = HepMC::barcode(currentGenParticle);
+        m_barcode_small->Fill(barcode);
+        m_barcode_large->Fill(barcode);
         m_log_barcode_large->Fill( barcode > 0 ? log(barcode) : -1);
         m_particle_status->Fill(currentGenParticle->status());
 
@@ -280,14 +279,14 @@ StatusCode TruthTestTool::processEvent()
         particleType = (pdg<0) ? -particleType : particleType;
         m_particle_type->Fill( particleType );
 
-        if ( HepMC::barcode(currentGenParticle)<200000 ) {
+        if ( barcode<200000 ) {
           double momentum=std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
           m_p_gen->Fill( momentum );
           m_log_p_gen->Fill( std::log(momentum) );
           m_eta_gen->Fill( mom.eta() );
           m_phi_gen->Fill( mom.phi() );
           ++npart_prim;
-          if ( HepMC::barcode(currentGenParticle)<10000 ) {
+          if ( barcode<10000 ) {
             m_n_generations ->Fill(0);
           }
           else {
@@ -296,7 +295,7 @@ StatusCode TruthTestTool::processEvent()
         }
         else {
           ++npart_sec;
-          const int gen = HepMC::barcode(currentGenParticle)/ 1000000 +2;
+          const int gen = barcode/ 1000000 +2;
           m_n_generations ->Fill(gen);
         }
       }
