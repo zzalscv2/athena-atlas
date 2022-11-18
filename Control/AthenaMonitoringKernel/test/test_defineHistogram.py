@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 import unittest
@@ -141,13 +141,6 @@ class Test( unittest.TestCase ):
       self.assertIs(check, '')
       check = defineHistogram('var;myhist(')
       self.assertNotEqual(check, '')
-
-   def test_enforcePath( self ):
-      from AthenaConfiguration.AllConfigFlags import ConfigFlags
-      ConfigFlags.Common.isOnline=True
-      with self.assertRaises(AssertionError):
-         defineHistogram('var', 'TH1F')
-      ConfigFlags.Common.isOnline = False
 
    def test_enforceType( self ):
       from AthenaConfiguration.AllConfigFlags import ConfigFlags
