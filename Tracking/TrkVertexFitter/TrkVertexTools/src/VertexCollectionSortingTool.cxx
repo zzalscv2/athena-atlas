@@ -57,6 +57,28 @@ VertexCollectionSortingTool::sortVertexContainer(
 {
   std::vector<Vertex_pair> MyVertex_pairs;
 
+  xAOD::VertexContainer* NewContainer = new xAOD::VertexContainer();
+  xAOD::VertexAuxContainer* auxNewContainer = new xAOD::VertexAuxContainer();
+  NewContainer->setStore(auxNewContainer);
+  SG::AuxElement::Accessor<float> sigWeightDec(m_decorationName);
+
+  if(MyVxCont.size()<=1){
+    xAOD::Vertex* dummyVxCandidate = new xAOD::Vertex();
+    NewContainer->push_back(dummyVxCandidate);
+    if(MyVxCont.size()==1){
+      const xAOD::Vertex* existVtx = MyVxCont.back();
+      dummyVxCandidate->setPosition(existVtx->position());
+      dummyVxCandidate->setCovariancePosition(existVtx->covariancePosition());
+    }else{
+      dummyVxCandidate->setPosition(Amg::Vector3D(0.,0.,0.));
+      AmgSymMatrix(3) tmpCovar; tmpCovar.setIdentity();
+      dummyVxCandidate->setCovariancePosition(tmpCovar);
+    }
+    dummyVxCandidate->setVertexType(xAOD::VxType::NoVtx);
+    sigWeightDec(*dummyVxCandidate) = 0.;
+    return std::make_pair(NewContainer, auxNewContainer);
+  }
+
   xAOD::VertexContainer::const_iterator beginIter = MyVxCont.begin();
   xAOD::VertexContainer::const_iterator endIter = MyVxCont.end();
 
@@ -75,11 +97,6 @@ VertexCollectionSortingTool::sortVertexContainer(
     std::sort(MyVertex_pairs.begin(), MyVertex_pairs.end());
   }
 
-  xAOD::VertexContainer* NewContainer = new xAOD::VertexContainer();
-  xAOD::VertexAuxContainer* auxNewContainer = new xAOD::VertexAuxContainer();
-  NewContainer->setStore(auxNewContainer);
-
-  SG::AuxElement::Accessor<float> sigWeightDec(m_decorationName);
   unsigned int vtxCount(1);
   for (std::vector<Vertex_pair>::const_iterator iter = MyVertex_pairs.begin();
        iter != MyVertex_pairs.end();
