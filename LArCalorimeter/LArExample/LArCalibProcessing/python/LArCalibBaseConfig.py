@@ -4,8 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def LArCalibBaseCfg(flags):  
     result=ComponentAccumulator()
-    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    result.merge(ByteStreamReadCfg(flags))
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result.merge(LArGMCfg(flags))
