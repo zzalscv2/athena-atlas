@@ -23,7 +23,6 @@
 #include "CaloInterface/IClusterCellWeightTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloConditions/CaloLocalHadCoeff.h"
-#include "StoreGate/DataHandle.h"
 #include "GaudiKernel/ToolHandle.h" 
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "StoreGate/ReadCondHandleKey.h"
