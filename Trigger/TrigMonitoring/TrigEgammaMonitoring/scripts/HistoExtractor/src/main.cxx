@@ -81,8 +81,8 @@ int main(int argc, char* argv[]){
     //fetch date
     time_t systime = time(NULL);
     tm* loctime = localtime(&systime);
-    char datestring[8];
-    sprintf(datestring, "%04d%02d%02d", loctime->tm_year+1900, loctime->tm_mon+1, loctime->tm_mday);
+    char datestring[9];//allow for c-string terminator
+    snprintf(datestring, 9,"%04d%02d%02d", loctime->tm_year+1900, loctime->tm_mon+1, loctime->tm_mday);
     //fetch username
     std::string username = getenv("USER");
     //fetch runnumber from input file (eight digits enclosed by dots, strip leading zeros)
