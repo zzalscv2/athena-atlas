@@ -7,36 +7,38 @@
 // **********************************************************************
 
 #include "DataQualityUtils/HanOutputFile.h"
-#include "DataQualityInterfaces/HanUtils.h"
 
-#include <sstream>
-#include <fstream>
-#include <cstdlib>
-#include <boost/algorithm/string/case_conv.hpp>
-#include <boost/lexical_cast.hpp>
+#include <TBufferJSON.h>
 #include <TCanvas.h>
 #include <TDirectory.h>
+#include <TEfficiency.h>
+#include <TF1.h>
 #include <TFile.h>
 #include <TGraph.h>
+#include <TGraphAsymmErrors.h>
 #include <TH1.h>
 #include <TH2.h>
-#include <TIterator.h>
-#include <TKey.h>
-#include <TLegend.h>
-#include <TProfile.h>
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TLatex.h>
-#include <TLine.h>
-#include <TText.h>
-#include <TF1.h>
-#include <TMath.h>
 #include <THStack.h>
 #include <TImage.h>
-#include <TBufferJSON.h>
+#include <TIterator.h>
+#include <TKey.h>
+#include <TLatex.h>
+#include <TLegend.h>
+#include <TLine.h>
+#include <TMath.h>
+#include <TProfile.h>
+#include <TROOT.h>
 #include <TString.h>
-#include <TEfficiency.h>
-#include <TGraphAsymmErrors.h>
+#include <TStyle.h>
+#include <TText.h>
+
+#include <boost/algorithm/string/case_conv.hpp>
+#include <boost/lexical_cast.hpp>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
+
+#include "DataQualityInterfaces/HanUtils.h"
 #include "TPluginManager.h"
 
 #define BINLOEDGE(h, n) h->GetXaxis()->GetBinLowEdge(n)
@@ -44,9 +46,8 @@
 
 ClassImp(dqutils::HanOutputFile)
 
-namespace
+  namespace
 {
-
   // class DisableMustClean {
   // public:
   //   inline DisableMustClean() : useRecursiveDelete(gROOT->MustClean()) { gROOT->SetMustClean(false); }
@@ -55,7 +56,7 @@ namespace
   //   bool useRecursiveDelete;
   // };
 
-  Double_t getScaleVal(std::string& display)
+  Double_t getScaleVal(std::string & display)
   {
     std::size_t found = display.find("ScaleRef");
     std::size_t found2 = display.find_first_of(',', found + 1);
@@ -66,11 +67,12 @@ namespace
     }
     catch (boost::bad_lexical_cast const&)
     {
-      std::cerr << "Unable to cast scaling value " << display.substr(found + 9, found2 - found - 9) << " to double" << std::endl;
+      std::cerr << "Unable to cast scaling value " << display.substr(found + 9, found2 - found - 9) << " to double"
+                << std::endl;
       return 1.;
     }
   }
-} // end unnamed namespace
+}  // end unnamed namespace
 
 namespace dqutils
 {
@@ -81,37 +83,30 @@ namespace dqutils
 
   std::vector<int> root_color_choices = { kBlue, kRed, kGray, kOrange, kViolet, kGreen + 1 };
 
-  HanOutputFile::
-    HanOutputFile()
-    : m_file(0), m_style(0)
+  HanOutputFile::HanOutputFile() : m_file(0), m_style(0)
   {
     clearData();
     TPluginHandler* h;
     if ((h = gROOT->GetPluginManager()->FindHandler("TVirtualPS", "image")))
     {
-      if (h->LoadPlugin() == -1)
-        return;
+      if (h->LoadPlugin() == -1) return;
       h->ExecPlugin(0);
     }
   }
 
-  HanOutputFile::
-    HanOutputFile(std::string fileName)
-    : m_file(0), m_style(0)
+  HanOutputFile::HanOutputFile(std::string fileName) : m_file(0), m_style(0)
   {
     clearData();
     setFile(fileName);
     TPluginHandler* h;
     if ((h = gROOT->GetPluginManager()->FindHandler("TVirtualPS", "image")))
     {
-      if (h->LoadPlugin() == -1)
-        return;
+      if (h->LoadPlugin() == -1) return;
       h->ExecPlugin(0);
     }
   }
 
-  HanOutputFile::
-    ~HanOutputFile()
+  HanOutputFile::~HanOutputFile()
   {
     //   bool useRecursiveDelete = gROOT->MustClean();
     //   gROOT->SetMustClean(false);
@@ -121,15 +116,12 @@ namespace dqutils
     //   gROOT->SetMustClean(useRecursiveDelete);
   }
 
-  void
-    HanOutputFile::
-    getAllGroupDirs(DirMap_t& dirmap, TDirectory* dir, std::string dirName)
+  void HanOutputFile::getAllGroupDirs(DirMap_t& dirmap, TDirectory* dir, std::string dirName)
   {
-    if (dir == 0)
-      return;
+    if (dir == 0) return;
 
     if (dirName != "")
-    { // Not a file
+    {  // Not a file
       std::string name(dir->GetName());
       if (name == "Config" || name == "Results")
       {
@@ -181,16 +173,14 @@ namespace dqutils
     }
   }
 
-  void
-    HanOutputFile::
-    getAllGroupDirs_V2(DirStrMap_t& dirstrmap, TObject* obj, std::string objName)
+  void HanOutputFile::getAllGroupDirs_V2(DirStrMap_t& dirstrmap, TObject* obj, std::string objName)
   {
     if (obj == nullptr) return;
     TDirectory* dir{};
     TString obj_type = obj->ClassName();
 
     if (objName != "")
-    { // Not a file
+    {  // Not a file
       if (obj_type == "TDirectoryFile" || obj_type == "TDirectory" || obj_type == "TFile")
       {
         dir = (TDirectory*)obj;
@@ -201,7 +191,7 @@ namespace dqutils
           return;
         }
 
-        std::string::size_type i = name.find_last_of('_'); // If this dir is a histgram info
+        std::string::size_type i = name.find_last_of('_');  // If this dir is a histgram info
         if (i == (name.size() - 1))
         {
           delete dir;
@@ -217,7 +207,7 @@ namespace dqutils
       }
     }
     else
-    { // If the object is a file
+    {  // If the object is a file
       DirStrMap_t::value_type dirstrmapVal("<top_level>", obj);
       dirstrmap.insert(dirstrmapVal);
     }
@@ -235,37 +225,39 @@ namespace dqutils
         TObject* obj_in_dir = key->ReadObj();
         TString obj_in_dir_type = obj_in_dir->ClassName();
         // Check if this is node (not a histogram)
-        if (obj_in_dir_type == "TDirectoryFile" || obj_in_dir_type == "TDirectory" || obj_in_dir_type == "TFile" || obj_in_dir_type == "TObjString")
+        if (obj_in_dir_type == "TDirectoryFile" || obj_in_dir_type == "TDirectory" || obj_in_dir_type == "TFile" ||
+            obj_in_dir_type == "TObjString")
         {
           std::string obj_in_dirName;
-          obj_in_dirName = key->GetName(); // If we will read name of the string, it will actually be a content of
-                                           // the string, so that's why we read name of the key
+          obj_in_dirName = key->GetName();  // If we will read name of the string, it will actually be a content of
+          // the string, so that's why we read name of the key
           if (objName != "")
           {
             fName += objName;
             fName += "/";
           }
-          fName += obj_in_dirName; //?
+          fName += obj_in_dirName;  //?
           if (obj_in_dirName != "Config" && obj_in_dirName != "Results" && obj_in_dirName != "Version_name")
-          {                                                              // We don't save 'Config' and 'Results' in dirstrmap structure. And we don't store version flag in dirstrmap object
-            std::string::size_type i = obj_in_dirName.find_last_of('_'); // if it's an object, that stores info about histogram
+          {  // We don't save 'Config' and 'Results' in dirstrmap structure. And we don't store version flag in
+             // dirstrmap object
+            std::string::size_type i =
+              obj_in_dirName.find_last_of('_');  // if it's an object, that stores info about histogram
             if (i != (obj_in_dirName.size() - 1))
-            {                                                   // We don't store it in a dirstrmap object
-              getAllGroupDirs_V2(dirstrmap, obj_in_dir, fName); // Everything else we store in dirstrmap as it is for getAllGroupDirs method
+            {  // We don't store it in a dirstrmap object
+              getAllGroupDirs_V2(dirstrmap, obj_in_dir,
+                fName);  // Everything else we store in dirstrmap as it is for getAllGroupDirs method
             }
           }
         }
         else
-        { // in case if it isn't a node but a histogram
+        {  // in case if it isn't a node but a histogram
           delete obj_in_dir;
         }
       }
     }
   }
 
-  void
-    HanOutputFile::
-    getAllAssessments(AssMap_t& dirmap, TDirectory* dir)
+  void HanOutputFile::getAllAssessments(AssMap_t& dirmap, TDirectory* dir)
   {
     dqi::DisableMustClean disabled;
 
@@ -286,9 +278,7 @@ namespace dqutils
     }
   }
 
-  void
-    HanOutputFile::
-    printDQGroupJSON(nlohmann::json j, std::string location, const char* path_to_file)
+  void HanOutputFile::printDQGroupJSON(nlohmann::json j, std::string location, const char* path_to_file)
   {
     // Parse our JSON and get all nested Assessments
     nlohmann::json valuestring;
@@ -297,27 +287,25 @@ namespace dqutils
       std::string sName = location;
       std::string keyname = it.key();
       if (keyname != "Config" && keyname != "Results")
-      {                                                       // We are now  at subAssessments (not at Results and Config nodes)
-        std::string::size_type i = keyname.find_last_of('_'); // if it's an object, that stores info about histogram
+      {  // We are now  at subAssessments (not at Results and Config nodes)
+        std::string::size_type i = keyname.find_last_of('_');  // if it's an object, that stores info about histogram
         if (i != (keyname.size() - 1))
-        { // We don't store it in a dirstrmap object
+        {  // We don't store it in a dirstrmap object
           if (location != "")
-          {               // Path to the TObjString
-            sName += "/"; // increment the path for the nested assesment
+          {                // Path to the TObjString
+            sName += "/";  // increment the path for the nested assesment
           }
           sName += keyname;
           std::cout << "name: " << sName << ", path: " << path_to_file << sName << "\n";
-          valuestring = it.value();                           // JSON content inside the subAssessment
-          printDQGroupJSON(valuestring, sName, path_to_file); // Recursively print Results/Status, Config/name of this
-                                                              // subAssessment and looking for subsubAssessment
+          valuestring = it.value();                            // JSON content inside the subAssessment
+          printDQGroupJSON(valuestring, sName, path_to_file);  // Recursively print Results/Status, Config/name of this
+          // subAssessment and looking for subsubAssessment
         }
       }
     }
   }
 
-  std::string
-    HanOutputFile::
-    getStringName(std::string location, int file_version)
+  std::string HanOutputFile::getStringName(std::string location, int file_version)
   {
     std::string stringName("Undefined");
     if (file_version == 1)
@@ -344,20 +332,20 @@ namespace dqutils
       // Split path to TDirectories part and JSON part
       // All JSON strings are Results or Config
       std::size_t split_point = 0;
-      std::string JSON_name("");   // Results or Config
-      std::string path_inTDir(""); // Path befor Results
-      std::string path_inJSON(""); // Path after Results
+      std::string JSON_name("");    // Results or Config
+      std::string path_inTDir("");  // Path befor Results
+      std::string path_inJSON("");  // Path after Results
       if ((split_point = location.find("/Results/")) != std::string::npos)
       {
         JSON_name = "Results";
         path_inTDir = location.substr(0, split_point);
-        path_inJSON = location.substr(split_point + 8); // 8 - is the length of "/Results"
+        path_inJSON = location.substr(split_point + 8);  // 8 - is the length of "/Results"
       }
       else if ((split_point = location.find("/Config/")) != std::string::npos)
       {
         JSON_name = "Config";
         path_inTDir = location.substr(0, split_point);
-        path_inJSON = location.substr(split_point + 7); // 7 - is the length of "/Config"
+        path_inJSON = location.substr(split_point + 7);  // 7 - is the length of "/Config"
       }
       // Go to TDirectory path
       if (gROOT->cd(path_inTDir.c_str()) == 0)
@@ -366,14 +354,15 @@ namespace dqutils
       }
       // Extract JSON object
       TObjString* JSON_obj = dynamic_cast<TObjString*>(gDirectory->GetKey(JSON_name.c_str())->ReadObj());
-      if (not JSON_obj){
-        std::cerr<<"HanOutputFile::getStringName : dynamic cast failed\n";
+      if (not JSON_obj)
+      {
+        std::cerr << "HanOutputFile::getStringName : dynamic cast failed\n";
         return "Null";
       }
       std::string JSON_str = (JSON_obj->GetName());
       nlohmann::json j = nlohmann::json::parse(JSON_str);
       nlohmann::json::json_pointer JSON_ptr(path_inJSON);
-      delete JSON_obj; // Maybe should not be used
+      delete JSON_obj;  // Maybe should not be used
       try
       {
         auto val = j.at(JSON_ptr);
@@ -391,9 +380,7 @@ namespace dqutils
     return stringName;
   }
 
-  bool
-    HanOutputFile::
-    containsDir(std::string dirname, std::string maindir)
+  bool HanOutputFile::containsDir(std::string dirname, std::string maindir)
   {
     while (dirname.size() > 0 && dirname[dirname.size() - 1] == '/')
     {
@@ -432,51 +419,70 @@ namespace dqutils
     return status;
   }
 
-  bool
-    HanOutputFile::
-    containsKeyInJSON(std::string pathInJSON, std::string jsonName, std::string path_to_JSON)
+  std::optional<std::string> HanOutputFile::containsKeyInJSON(
+    std::string pathInJSON, std::string jsonName, std::string path_to_JSON)
   {
-
     gROOT->cd(path_to_JSON.c_str());
     TKey* key = gDirectory->FindKey(jsonName.c_str());
     TObject* obj(0);
-    bool status = false;
     if (key == 0)
     {
-      return false; // the JSON with this name is absent
+      return {};  // the JSON with this name is absent
     }
     else
     {
       obj = key->ReadObj();
     }
-    std::string content = obj->GetName(); // In ATLAS DQM root files GetName() actually returns the content rather
-                                          // than the name of a string
-    nlohmann::json j = nlohmann::json::parse(content);
-    nlohmann::json::json_pointer p1(pathInJSON);
+    std::string content = obj->GetName();  // In ATLAS DQM root files GetName() actually returns the content rather
+                                           // than the name of a string
+    if (pathInJSON == "")                  // If we should check just the existense of the JSON string
+    {
+      delete obj;
+      return "JSON exists";
+    }
+    if (pathInJSON == "/")  // When we need the whole JSON string
+    {
+      delete obj;
+      return content;
+    }
+    nlohmann::ordered_json j = nlohmann::ordered_json::parse(content);
+    nlohmann::ordered_json::json_pointer p1(pathInJSON);
+    std::string return_string;
     try
     {
       auto val1 = j.at(p1);
-      status = true;
+      if (val1.type() == nlohmann::json::value_t::string)
+      {
+        return_string = val1;
+      }
+      else if (val1.type() == nlohmann::json::value_t::object)
+      {
+        return_string = val1.dump();
+      }
+      else
+      {
+        std::cout << "Warning: Strange part of JSON" << std::endl;
+        delete obj;
+        return {};
+      }
     }
     catch (...)
     {
       // std::cout<<"   the path not exists\n";
       // std::cout<<"J\n";
-      status = false;
+      delete obj;
+      return {};
     }
     delete obj;
-    return status;
+    return return_string;
   }
 
-  double
-    HanOutputFile::
-    getNEntries(std::string location, std::string histname)
+  double HanOutputFile::getNEntries(std::string location, std::string histname)
   {
-
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::getNEntries(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return 0.0;
     }
 
@@ -508,9 +514,7 @@ namespace dqutils
     return Nentries;
   }
 
-  double
-    HanOutputFile::
-    getNEntries(const TObject* obj)
+  double HanOutputFile::getNEntries(const TObject* obj)
   {
     if (const TH1* h = dynamic_cast<const TH1*>(obj))
     {
@@ -527,14 +531,12 @@ namespace dqutils
     else
     {
       std::cerr << "HanOutputFile::getNEntries(): "
-        << "provided object is not a histogram or graph\n";
+                << "provided object is not a histogram or graph\n";
       return 0.0;
     }
   }
 
-  std::string
-    HanOutputFile::
-    getInfo(std::string location, int file_version)
+  std::string HanOutputFile::getInfo(std::string location, int file_version)
   {
     dqi::DisableMustClean disabled;
     std::string value("");
@@ -608,31 +610,32 @@ namespace dqutils
     else if (file_version == 2)
     {
       // Separate Tdirectory from the JSON file. JSON File starts with Results or Config Node
-      std::string JSON_name("");   // Results or Config
-      std::string TDir_path("");   // Path befor Results
-      std::string path_inJSON(""); // Path after Results
+      std::string JSON_name("");    // Results or Config
+      std::string TDir_path("");    // Path befor Results
+      std::string path_inJSON("");  // Path after Results
       std::size_t split_point = 0;
       if ((split_point = location.find("/Results")) != std::string::npos)
       {
         JSON_name = "Results";
         TDir_path = location.substr(0, split_point);
-        path_inJSON = location.substr(split_point + 8); // 8 - is the length of "/Results"
+        path_inJSON = location.substr(split_point + 8);  // 8 - is the length of "/Results"
       }
       else if ((split_point = location.find("/Config")) != std::string::npos)
       {
         JSON_name = "Config";
         TDir_path = location.substr(0, split_point);
-        path_inJSON = location.substr(split_point + 7); // 7 - is the length of "/Config"
+        path_inJSON = location.substr(split_point + 7);  // 7 - is the length of "/Config"
       }
       // Go to TDirectory path
       if (gROOT->cd(TDir_path.c_str()) == 0)
-      { // Go to Tdirectory, that contains JSON
+      {  // Go to Tdirectory, that contains JSON
         return "Undefined";
       }
       // Extract JSON object
       TObjString* JSON_obj = dynamic_cast<TObjString*>(gDirectory->GetKey(JSON_name.c_str())->ReadObj());
-      if (not JSON_obj){
-        std::cerr<<"HanOutputFile::getInfo : dynamic cast failed\n";
+      if (not JSON_obj)
+      {
+        std::cerr << "HanOutputFile::getInfo : dynamic cast failed\n";
         return "Null";
       }
       std::string JSON_str = (JSON_obj->GetName());
@@ -640,7 +643,7 @@ namespace dqutils
       nlohmann::ordered_json json_in_j;
       if (path_inJSON != "")
       {
-        nlohmann::json::json_pointer JSON_ptr(path_inJSON);
+        nlohmann::ordered_json::json_pointer JSON_ptr(path_inJSON);
         try
         {
           json_in_j = j.at(JSON_ptr);
@@ -656,50 +659,67 @@ namespace dqutils
       {
         json_in_j = j;
       }
-      for (nlohmann::ordered_json::iterator it = json_in_j.begin(); it != json_in_j.end(); ++it)
-      {                      // Search in Results/Config node
-        auto key = it.key(); // subdir name analog
-        auto val = it.value();
-        if (strcmp(val.type_name(), "object") == 0)
-        { // subsubdir analog
-          for (nlohmann::ordered_json::iterator it1 = val.begin(); it1 != val.end(); ++it1)
-          {
-            auto key1 = it1.key(); // subsubdir name analog
-            auto val1 = it1.value();
-            if (strcmp(val1.type_name(), "object") == 0)
-            { // finaldir analog
-              for (nlohmann::ordered_json::iterator it2 = val1.begin(); it2 != val1.end(); ++it2)
-              {
-                auto key2 = it2.key();                                           // finaldir name analog
-                auto val2 = it2.value();                                         // leaf
-                value += (key1 + key2 + ":  " + val2.get<std::string>() + "  "); //.get<std::string is needed to get rid of quotes in cout
-              }
-            }
-            else if (key1 != "name" && key1 != "Status" && key1 != "display")
+      value = processJSON_ingetInfo(json_in_j);
+    }
+    return value;
+  }
+
+  std::string HanOutputFile::getInfo(std::string JSON_str)
+  {
+    dqi::DisableMustClean disabled;
+    std::string value("");
+    nlohmann::ordered_json j = nlohmann::ordered_json::parse(JSON_str);
+    value = processJSON_ingetInfo(j);
+    return value;
+  }
+
+  std::string HanOutputFile::processJSON_ingetInfo(nlohmann::ordered_json j)
+  {
+    std::string value("");
+    for (nlohmann::ordered_json::iterator it = j.begin(); it != j.end(); ++it)
+    {                       // Search in Results/Config node
+      auto key = it.key();  // subdir name analog
+      auto val = it.value();
+      if (strcmp(val.type_name(), "object") == 0)
+      {  // subsubdir analog
+        for (nlohmann::ordered_json::iterator it1 = val.begin(); it1 != val.end(); ++it1)
+        {
+          auto key1 = it1.key();  // subsubdir name analog
+          auto val1 = it1.value();
+          if (strcmp(val1.type_name(), "object") == 0)
+          {  // finaldir analog
+            for (nlohmann::ordered_json::iterator it2 = val1.begin(); it2 != val1.end(); ++it2)
             {
-              value += (key1 + ":  " + val1.get<std::string>() + "  "); //.get<std::string is needed to get rid of quotes in cout
+              auto key2 = it2.key();    // finaldir name analog
+              auto val2 = it2.value();  // leaf
+              value += (key1 + key2 + ":  " + val2.get<std::string>() +
+                        "  ");  //.get<std::string is needed to get rid of quotes in cout
             }
+          }
+          else if (key1 != "name" && key1 != "Status" && key1 != "display")
+          {
+            value += (key1 + ":  " + val1.get<std::string>() +
+                      "  ");  //.get<std::string is needed to get rid of quotes in cout
           }
         }
-        else if (key != "name" && key != "Status")
+      }
+      else if (key != "name" && key != "Status")
+      {
+        if (val.is_null())
         {
-          if (val.is_null())
-          {
-            value += (key + ":  null  ");
-          }
-          else
-          {
-            value += (key + ":  " + val.get<std::string>() + "  "); //.get<std::string is needed to get rid of quotes in cout
-          }
+          value += (key + ":  null  ");
+        }
+        else
+        {
+          value +=
+            (key + ":  " + val.get<std::string>() + "  ");  //.get<std::string is needed to get rid of quotes in cout
         }
       }
     }
     return value;
   }
 
-  std::string
-    HanOutputFile::
-    getIndentation(std::string pathName, std::string leadingSpace)
+  std::string HanOutputFile::getIndentation(std::string pathName, std::string leadingSpace)
   {
     std::string space = leadingSpace;
     std::string::size_type i = pathName.find_first_of('/');
@@ -712,27 +732,22 @@ namespace dqutils
     return space;
   }
 
-  bool
-    HanOutputFile::
-    setFile(std::string fileName)
+  bool HanOutputFile::setFile(std::string fileName)
   {
     clearData();
-    if (fileName == "")
-      return false;
+    if (fileName == "") return false;
     m_file = TFile::Open(fileName.c_str());
-    if (m_file != 0)
-      return true;
+    if (m_file != 0) return true;
 
     return false;
   }
 
-  int HanOutputFile::
-    getFileVersion()
+  int HanOutputFile::getFileVersion()
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::getFileVersion(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return 0;
     }
 
@@ -764,14 +779,12 @@ namespace dqutils
     return 0;
   }
 
-  void
-    HanOutputFile::
-    printAllDQGroups()
+  void HanOutputFile::printAllDQGroups()
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::printAllGroupDirs(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return;
     }
     int file_version = getFileVersion();
@@ -800,10 +813,10 @@ namespace dqutils
       DirStrMap_t::const_iterator idirend = m_indirstrMap.end();
       for (DirStrMap_t::const_iterator idir = m_indirstrMap.begin(); idir != idirend; ++idir)
       {
-        std::string idirName = idir->first; // Actually it's a path
+        std::string idirName = idir->first;  // Actually it's a path
         TDirectory* dirobj = dynamic_cast<TDirectory*>(idir->second);
         if (dirobj != 0)
-        { // If the object is a TDirectory type
+        {  // If the object is a TDirectory type
           std::string pathname(dirobj->GetPath());
           std::cout << "name: " << idirName << ", path: " << pathname << "\n";
         }
@@ -811,42 +824,31 @@ namespace dqutils
         {
           std::cout << "name: " << idirName << ", path: " << path_to_file << idirName << "\n";
           TObjString* strobj = dynamic_cast<TObjString*>(idir->second);
-          if (not strobj){
+          if (not strobj)
+          {
             std::cerr << "HanOutputFile::printAllGroupDirs(): dynamic cast failed\n";
             continue;
           }
-          std::string content = strobj->GetName();           // In ATLAS DQM root files GetName() actually returns the
-                                                             // content rather than the name of a string
-          nlohmann::json j = nlohmann::json::parse(content); // Get JSON object from TObjString
-          printDQGroupJSON(j, idirName, path_to_file);       // Recursive parsing and print of the nested Assessment in
-                                                             // the form of TOBJString
+          std::string content = strobj->GetName();  // In ATLAS DQM root files GetName() actually returns the
+          // content rather than the name of a string
+          nlohmann::json j = nlohmann::json::parse(content);  // Get JSON object from TObjString
+          printDQGroupJSON(j, idirName, path_to_file);        // Recursive parsing and print of the nested Assessment in
+          // the form of TOBJString
         }
       }
     }
   }
 
-  void
-    HanOutputFile::
-    printAllDQAssessments()
-  {
-    streamAllDQAssessments(std::cout, false);
-  }
+  void HanOutputFile::printAllDQAssessments() { streamAllDQAssessments(std::cout, false); }
 
-  void
-    HanOutputFile::
-    printHistoAssessments()
-  {
-    streamHistoAssessments(std::cout, false);
-  }
+  void HanOutputFile::printHistoAssessments() { streamHistoAssessments(std::cout, false); }
 
-  std::string
-    HanOutputFile::
-    stringListSystemPaths(std::string location)
+  std::string HanOutputFile::stringListSystemPaths(std::string location)
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::stringListSystemPaths(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return "";
     }
 
@@ -860,7 +862,6 @@ namespace dqutils
     DirMap_t::const_iterator idirend = m_indirMap.end();
     for (DirMap_t::const_iterator idir = m_indirMap.begin(); idir != idirend; ++idir)
     {
-
       DirToAssMap_t::const_iterator aMapIter = m_assessMap.find(idir->first);
       if (aMapIter == m_assessMap.end())
       {
@@ -888,42 +889,33 @@ namespace dqutils
     return result;
   }
 
-  std::string
-    HanOutputFile::
-    stringAllDQAssessments()
+  std::string HanOutputFile::stringAllDQAssessments()
   {
     std::ostringstream result;
     streamAllDQAssessments(result, true);
     return result.str();
   }
 
-  std::string
-    HanOutputFile::
-    stringHistoAssessments()
+  std::string HanOutputFile::stringHistoAssessments()
   {
     std::ostringstream result;
     streamHistoAssessments(result, true);
     return result.str();
   }
 
-  std::string
-    HanOutputFile::
-    stringAllHistograms()
+  std::string HanOutputFile::stringAllHistograms()
   {
     std::ostringstream result;
     streamAllHistograms(result, true);
     return result.str();
   }
 
-  void
-
-    HanOutputFile::
-    streamAllDQAssessments(std::ostream& o, bool streamAll)
+  void HanOutputFile::streamAllDQAssessments(std::ostream& o, bool streamAll)
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::streamAllDQAssessments(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return;
     }
 
@@ -1038,7 +1030,8 @@ namespace dqutils
             TH1* h1;
             if ((h1 = dynamic_cast<TH1*>(h)) && h1->GetDimension() == 1)
             {
-              o << " Underflow: " << h1->GetBinContent(0) << " Overflow: " << h1->GetBinContent(h1->GetNbinsX() + 1) << " ";
+              o << " Underflow: " << h1->GetBinContent(0) << " Overflow: " << h1->GetBinContent(h1->GetNbinsX() + 1)
+                << " ";
             }
             if (info1 != "" && info2 != "")
             {
@@ -1069,14 +1062,12 @@ namespace dqutils
     }
   }
 
-  void
-    HanOutputFile::
-    streamHistoAssessments(std::ostream& o, bool streamAll)
+  void HanOutputFile::streamHistoAssessments(std::ostream& o, bool streamAll)
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::streamHistoAssessments(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return;
     }
 
@@ -1149,14 +1140,12 @@ namespace dqutils
     }
   }
 
-  void
-    HanOutputFile::
-    streamAllHistograms(std::ostream& o, bool streamAll)
+  void HanOutputFile::streamAllHistograms(std::ostream& o, bool streamAll)
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::streamAllDQAssessments(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return;
     }
 
@@ -1281,13 +1270,12 @@ namespace dqutils
     }
   }
 
-  int HanOutputFile::
-    saveAllHistograms(std::string location, bool drawRefs, std::string run_min_LB, int cnvsType)
+  int HanOutputFile::saveAllHistograms(std::string location, bool drawRefs, std::string run_min_LB, int cnvsType)
   {
     if (m_file == 0)
     {
       std::cerr << "HanOutputFile::saveAllHistograms(): "
-        << "No input file is open\n";
+                << "No input file is open\n";
       return 0;
     }
 
@@ -1322,14 +1310,12 @@ namespace dqutils
         std::string completeDir(location);
         completeDir += hisPath;
         completeDir += "/";
-        std::cout << "Saving " << completeDir << " " << hisName << "\n"
-          << std::flush;
+        std::cout << "Saving " << completeDir << " " << hisName << "\n" << std::flush;
         try
         {
-          bool isSaved = saveHistogramToFile(hisName, completeDir, idir->second, drawRefs, run_min_LB,
-            (hisPath + "/" + hisName), cnvsType);
-          if (isSaved)
-            ++nSaved;
+          bool isSaved = saveHistogramToFile(
+            hisName, completeDir, idir->second, drawRefs, run_min_LB, (hisPath + "/" + hisName), cnvsType);
+          if (isSaved) ++nSaved;
         }
         catch (std::exception& e)
         {
@@ -1346,9 +1332,11 @@ namespace dqutils
     img->GetImageBuffer(x, y, TImage::kPng);
   }
 
-  bool HanOutputFile::saveHistogramToFile(std::string nameHis, std::string location, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
+  bool HanOutputFile::saveHistogramToFile(std::string nameHis, std::string location, TDirectory* groupDir,
+    bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
   {
-    std::pair<std::string, std::string> pngAndJson = getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType);
+    std::pair<std::string, std::string> pngAndJson =
+      getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType);
     // std::string tosave = getHistogramPNG(nameHis, groupDir, drawRefs, run_min_LB, pathName);
     if (pngAndJson.first == "" && pngAndJson.second == "")
     {
@@ -1371,21 +1359,22 @@ namespace dqutils
     return saveFile(cnvsType, namePNG, pngAndJson.first, nameJSON, pngAndJson.second);
   }
 
-  std::string
-    HanOutputFile::
-    getHistogramPNG(std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName)
+  std::string HanOutputFile::getHistogramPNG(
+    std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName)
   {
     int cnvsType = 1;
     return getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType).first;
   }
 
-  std::pair<std::string, std::string> HanOutputFile::getHistogramJSON(std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName)
+  std::pair<std::string, std::string> HanOutputFile::getHistogramJSON(
+    std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName)
   {
     int cnvsType = 2;
     return getHistogram(nameHis, groupDir, drawRefs, run_min_LB, pathName, cnvsType);
   }
 
-  std::pair<std::string, std::string> HanOutputFile::getHistogram(std::string nameHis, TDirectory* groupDir, bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
+  std::pair<std::string, std::string> HanOutputFile::getHistogram(std::string nameHis, TDirectory* groupDir,
+    bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
   {
     dqi::DisableMustClean disabled;
     groupDir->cd();
@@ -1425,18 +1414,31 @@ namespace dqutils
     if (file_version == 1)
     {
       LookForDisplay = containsDir("Config/annotations/display", (pathname + "/" + nameHis + "_"));
+      if (LookForDisplay)
+      {
+        display = getStringName(pathname + "/" + nameHis + "_/Config/annotations/display", file_version);
+      }
     }
-    else
+    else if (file_version == 2)
     {
+      std::optional<std::string> JSON_content;
       LookForDisplay = containsDir((nameHis + "_"), pathname);
       if (LookForDisplay)
       {
-        LookForDisplay = containsKeyInJSON("/annotations/display", "Config", (pathname + "/" + nameHis + "_"));
+        JSON_content = containsKeyInJSON("/annotations/display", "Config", (pathname + "/" + nameHis + "_"));
+        if (JSON_content)
+        {
+          LookForDisplay = true;
+        }
+        else
+        {
+          LookForDisplay = false;
+        }
       }
-    }
-    if (LookForDisplay)
-    {
-      display = getStringName(pathname + "/" + nameHis + "_/Config/annotations/display", file_version);
+      if (LookForDisplay)
+      {
+        display = JSON_content.value();
+      }
     }
     // Plot overflows?
     bool PlotOverflows = (display.find("PlotUnderOverflow") != std::string::npos);
@@ -1518,7 +1520,7 @@ namespace dqutils
     if (hkey == 0)
     {
       std::cerr << "Did not find TKey for \"" << nameHis << "\", will not save this histogram.\n";
-      return std::pair<std::string, std::string>{"", ""};
+      return std::pair<std::string, std::string>{ "", "" };
     }
     TLegend* legend(0);
     TObject* hobj = hkey->ReadObj();
@@ -1768,18 +1770,18 @@ namespace dqutils
         if (h->GetXaxis()->GetXmin() >= h->GetXaxis()->GetXmax())
         {
           std::cerr << "HanOutputFile::saveHistogramToFile(): "
-            << "Inconsistent x-axis settings:  min=" << h->GetXaxis()->GetXmin() << ", "
-            << "max=" << h->GetXaxis()->GetXmax() << ", "
-            << "Will not save this histogram.\n";
-          return std::pair<std::string, std::string>{"", ""};
+                    << "Inconsistent x-axis settings:  min=" << h->GetXaxis()->GetXmin() << ", "
+                    << "max=" << h->GetXaxis()->GetXmax() << ", "
+                    << "Will not save this histogram.\n";
+          return std::pair<std::string, std::string>{ "", "" };
         }
         if (h->GetYaxis()->GetXmin() >= h->GetYaxis()->GetXmax())
         {
           std::cerr << "HanOutputFile::saveHistogramToFile(): "
-            << "Inconsistent y-axis settings:  min=" << h->GetYaxis()->GetXmin() << ", "
-            << "max=" << h->GetYaxis()->GetXmax() << ", "
-            << "Will not save this histogram.\n";
-          return std::pair<std::string, std::string>{"", ""};
+                    << "Inconsistent y-axis settings:  min=" << h->GetYaxis()->GetXmin() << ", "
+                    << "max=" << h->GetYaxis()->GetXmax() << ", "
+                    << "Will not save this histogram.\n";
+          return std::pair<std::string, std::string>{ "", "" };
         }
         axisOption(display, h2);
         if (drawopt == "")
@@ -1819,8 +1821,7 @@ namespace dqutils
         {
           myC->RedrawAxis();
         }
-        if (h2Ref)
-          ratioplot2D(myC.get(), h2, h2Ref, display);
+        if (h2Ref) ratioplot2D(myC.get(), h2, h2Ref, display);
 
         polynomial(myC.get(), display, h2);
         TLatex t;
@@ -1843,10 +1844,10 @@ namespace dqutils
         if (h->GetXaxis()->GetXmin() >= h->GetXaxis()->GetXmax())
         {
           std::cerr << "HanOutputFile::saveHistogramToFile(): "
-            << "Inconsistent x-axis settings:  min=" << h->GetXaxis()->GetXmin() << ", "
-            << "max=" << h->GetXaxis()->GetXmax() << ", "
-            << "Will not save this histogram.\n";
-          return std::pair<std::string, std::string>{"", ""};
+                    << "Inconsistent x-axis settings:  min=" << h->GetXaxis()->GetXmin() << ", "
+                    << "max=" << h->GetXaxis()->GetXmax() << ", "
+                    << "Will not save this histogram.\n";
+          return std::pair<std::string, std::string>{ "", "" };
         }
         h->SetLineColor(kBlack);
         h->SetMarkerColor(1);
@@ -1928,31 +1929,37 @@ namespace dqutils
               double xmin, xmax;
               if (PlotOverflows)
               {
-                xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1) ? BINLOEDGE(hRef, 1) - BINWIDTH(hRef, 1) : BINLOEDGE(h, 1) - BINWIDTH(h, 1));
-                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX())) ? BINLOEDGE(hRef, hRef->GetNbinsX()) + 2.0 * BINWIDTH(hRef, hRef->GetNbinsX()) : BINLOEDGE(h, h->GetNbinsX()) + 2.0 * BINWIDTH(h, h->GetNbinsX());
+                xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1) ? BINLOEDGE(hRef, 1) - BINWIDTH(hRef, 1)
+                                                             : BINLOEDGE(h, 1) - BINWIDTH(h, 1));
+                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) >
+                         BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()))
+                         ? BINLOEDGE(hRef, hRef->GetNbinsX()) + 2.0 * BINWIDTH(hRef, hRef->GetNbinsX())
+                         : BINLOEDGE(h, h->GetNbinsX()) + 2.0 * BINWIDTH(h, h->GetNbinsX());
               }
               else
               {
                 xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1)) ? BINLOEDGE(hRef, 1) : BINLOEDGE(h, 1);
-                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX()) ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()));
+                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX())
+                          ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX())
+                          : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()));
               }
               // 	  double y_av = (ymax + ymin)/2;
               // 	  double y_halv = (ymax-ymin)*0.6;
               bool isLogY = (display.find("LogY") != std::string::npos);
               if (isLogY)
               {
-                if (ymax <= 0.)
-                  ymax = 5.0;
+                if (ymax <= 0.) ymax = 5.0;
                 if (ymin > 0.)
                 {
                   double lymax = log(ymax);
                   double lymin = log(ymin);
-                  h->SetAxisRange(exp(lymin - (lymax - lymin) * 0.05), exp(lymax + (lymax - lymin) * 0.05), "Y"); // leave 5% gap on above and below
+                  h->SetAxisRange(exp(lymin - (lymax - lymin) * 0.05), exp(lymax + (lymax - lymin) * 0.05),
+                    "Y");  // leave 5% gap on above and below
                 }
                 else
                 {
-                  std::cerr << "ymin is <0. and LogY requested for histogram \""
-                    << pathname + "/" + nameHis << "\", ymin=" << ymin << std::endl;
+                  std::cerr << "ymin is <0. and LogY requested for histogram \"" << pathname + "/" + nameHis
+                            << "\", ymin=" << ymin << std::endl;
                 }
               }
               else
@@ -1985,7 +1992,9 @@ namespace dqutils
               {
                 scale = getScaleVal(display);
               }
-              else if (h->Integral("width") > 0.0 && hRef->Integral("width") > 0.0 && (AlgoName.find("BinContentComp") == std::string::npos) && (display.find("NoNorm") == std::string::npos))
+              else if (h->Integral("width") > 0.0 && hRef->Integral("width") > 0.0 &&
+                       (AlgoName.find("BinContentComp") == std::string::npos) &&
+                       (display.find("NoNorm") == std::string::npos))
               {
                 scale = h->Integral("width") / hRef->Integral("width");
               }
@@ -2000,13 +2009,20 @@ namespace dqutils
               double xmin, xmax;
               if (PlotOverflows)
               {
-                xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1)) ? BINLOEDGE(hRef, 1) - BINWIDTH(hRef, 1) : BINLOEDGE(h, 1) - BINWIDTH(h, 1);
-                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX())) ? BINLOEDGE(hRef, hRef->GetNbinsX()) + 2.0 * BINWIDTH(hRef, hRef->GetNbinsX()) : BINLOEDGE(h, h->GetNbinsX()) + 2.0 * BINWIDTH(h, h->GetNbinsX());
+                xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1)) ? BINLOEDGE(hRef, 1) - BINWIDTH(hRef, 1)
+                                                              : BINLOEDGE(h, 1) - BINWIDTH(h, 1);
+                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) >
+                         BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()))
+                         ? BINLOEDGE(hRef, hRef->GetNbinsX()) + 2.0 * BINWIDTH(hRef, hRef->GetNbinsX())
+                         : BINLOEDGE(h, h->GetNbinsX()) + 2.0 * BINWIDTH(h, h->GetNbinsX());
               }
               else
               {
                 xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1)) ? BINLOEDGE(hRef, 1) : BINLOEDGE(h, 1);
-                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX())) ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX());
+                xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) >
+                         BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()))
+                         ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX())
+                         : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX());
               }
 
               // 	  double y_av = (ymax + ymin)/2;
@@ -2016,8 +2032,7 @@ namespace dqutils
 
               if (isLogY)
               {
-                if (ymax <= 0.)
-                  ymax = 5.0;
+                if (ymax <= 0.) ymax = 5.0;
                 if (ymin > 0.)
                 {
                   double lymax = log(ymax);
@@ -2027,14 +2042,14 @@ namespace dqutils
                 }
                 else
                 {
-                  std::cerr << "ymin is <=0. and LogY requested for histogram \""
-                    << pathname + "/" + nameHis << "\", ymin=" << ymin << std::endl;
+                  std::cerr << "ymin is <=0. and LogY requested for histogram \"" << pathname + "/" + nameHis
+                            << "\", ymin=" << ymin << std::endl;
                 }
               }
               else
               {
                 double yDiff = ymax - ymin;
-                h->SetAxisRange(ymin - yDiff * 0.05, ymax + yDiff * 0.05, "Y"); // leave 5% gap above and below
+                h->SetAxisRange(ymin - yDiff * 0.05, ymax + yDiff * 0.05, "Y");  // leave 5% gap above and below
               }
 
               h->GetXaxis()->SetRangeUser(xmin, xmax);
@@ -2090,10 +2105,10 @@ namespace dqutils
 
         if (hRef)
         {
-          ratioplot(myC.get(), h, hRef, display); // RatioPad
+          ratioplot(myC.get(), h, hRef, display);  // RatioPad
         }
-        myC->cd();                         // might be unnecessary
-        polynomial(myC.get(), display, h); // draw polynome for TH1
+        myC->cd();                          // might be unnecessary
+        polynomial(myC.get(), display, h);  // draw polynome for TH1
 
         TLatex t;
         t.SetNDC();
@@ -2144,6 +2159,17 @@ namespace dqutils
       hasPlotted = false;
       auto myC = std::make_unique<TCanvas>(nameHis.c_str(), "myC", ww, wh);
       formatTEfficiency(myC.get(), e);
+      if (drawopt == "")
+      {
+        if (e->GetDimension() == 1)
+        {
+          drawopt = "AP";
+        }
+        else
+        {
+          drawopt = "COLZ";
+        }
+      }
       if (drawRefs)
       {
         if (file_version == 1)
@@ -2213,7 +2239,7 @@ namespace dqutils
 
           if (!hasPlotted)
           {
-            e->Draw((std::string("AP") + drawopt).c_str());
+            e->Draw(drawopt.c_str());
             hasPlotted = true;
           }
           eRef->Draw("SAME");
@@ -2235,7 +2261,7 @@ namespace dqutils
       else
       {
         myC->cd();
-        e->Draw((std::string("AP") + drawopt).c_str());
+        e->Draw(drawopt.c_str());
       }
       myC->cd();
       displayExtra(myC.get(), display);
@@ -2264,11 +2290,9 @@ namespace dqutils
     return rvPair;
   }
 
-  bool HanOutputFile::saveHistogramToFileSuperimposed(std::string nameHis, std::string location,
-    TDirectory* groupDir1, TDirectory* groupDir2,
-    bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
+  bool HanOutputFile::saveHistogramToFileSuperimposed(std::string nameHis, std::string location, TDirectory* groupDir1,
+    TDirectory* groupDir2, bool drawRefs, std::string run_min_LB, std::string pathName, int cnvsType)
   {
-
     dqi::DisableMustClean disabled;
     groupDir1->cd();
     gStyle->SetFrameBorderMode(0);
@@ -2299,19 +2323,33 @@ namespace dqutils
     if (file_version == 1)
     {
       LookForDisplay = containsDir("Config/annotations/display", (pathname + "/" + nameHis + "_"));
+      if (LookForDisplay)
+      {
+        display = getStringName(pathname + "/" + nameHis + "_/Config/annotations/display", file_version);
+      }
     }
-    else
+    else if (file_version == 2)
     {
+      std::optional<std::string> JSON_content;
       LookForDisplay = containsDir((nameHis + "_"), pathname);
       if (LookForDisplay)
       {
-        LookForDisplay = containsKeyInJSON("/annotations/display", "Config", (pathname + "/" + nameHis + "_"));
+        JSON_content = containsKeyInJSON("/annotations/display", "Config", (pathname + "/" + nameHis + "_"));
+        if (JSON_content)
+        {
+          LookForDisplay = true;
+        }
+        else
+        {
+          LookForDisplay = false;
+        }
+      }
+      if (LookForDisplay)
+      {
+        display = JSON_content.value();
       }
     }
-    if (LookForDisplay)
-    {
-      display = getStringName(pathname + "/" + nameHis + "_/Config/annotations/display", file_version);
-    }
+
     // Look for Draw Options
     std::size_t found = display.find("Draw");
     std::string drawopt = "";
@@ -2343,10 +2381,10 @@ namespace dqutils
     TObject* hobj = hkey->ReadObj();
     TObject* hobj2 = hkey2->ReadObj();
     TH1* hRef(0);
-    TH1* h(0), * hist2(0);
-    TH2* h2(0), * h2_2(0), * h2Diff(0);
-    TGraph* g(0), * g2(0);
-    TEfficiency* e(0), * e2(0);
+    TH1 *h(0), *hist2(0);
+    TH2 *h2(0), *h2_2(0), *h2Diff(0);
+    TGraph *g(0), *g2(0);
+    TEfficiency *e(0), *e2(0);
 
     std::string json;
     std::string nameJSON = nameHis;
@@ -2398,8 +2436,7 @@ namespace dqutils
         h2Diff->Add(h2, h2_2, 1.0, -1.0);
         h2Diff->SetLineColor(2);
         h2Diff->SetMarkerColor(2);
-        if (!drawH2(myC.get(), h2Diff, tmpdraw, display))
-          return false;
+        if (!drawH2(myC.get(), h2Diff, tmpdraw, display)) return false;
         TLatex t;
         t.SetNDC();
         t.SetTextSize(0.03);
@@ -2419,7 +2456,9 @@ namespace dqutils
         {
           scale = getScaleVal(display);
         }
-        else if (h->Integral("width") > 0.0 && hist2->Integral("width") > 0.0 && (AlgoName.find("BinContentComp") == std::string::npos) && (display.find("NoNorm") == std::string::npos))
+        else if (h->Integral("width") > 0.0 && hist2->Integral("width") > 0.0 &&
+                 (AlgoName.find("BinContentComp") == std::string::npos) &&
+                 (display.find("NoNorm") == std::string::npos))
         {
           scale = h->Integral("width") / hist2->Integral("width");
         }
@@ -2449,11 +2488,9 @@ namespace dqutils
           gDirectory->GetObject("Reference;1", hRef);
           groupDir1->cd();
         }
-        if (!drawH1(myC.get(), h, hRef, tmpdraw, display, AlgoName))
-          return false;
+        if (!drawH1(myC.get(), h, hRef, tmpdraw, display, AlgoName)) return false;
         tmpdraw += "same";
-        if (!drawH1(myC.get(), hist2, 0, tmpdraw, display, AlgoName))
-          return false;
+        if (!drawH1(myC.get(), hist2, 0, tmpdraw, display, AlgoName)) return false;
         legend = new TLegend(0.55, 0.77, 0.87, 0.87);
         legend->SetTextFont(62);
         legend->SetMargin(0.15);
@@ -2482,7 +2519,7 @@ namespace dqutils
 
         convertToGraphics(cnvsType, myC.get(), namePNG, nameJSON);
 
-      } // end histogram drawing
+      }  // end histogram drawing
       delete h2Diff;
       gStyle->Reset();
     }
@@ -2575,17 +2612,17 @@ namespace dqutils
     if (h2->GetXaxis()->GetXmin() >= h2->GetXaxis()->GetXmax())
     {
       std::cerr << "HanOutputFile::saveHistogramToFile(): "
-        << "Inconsistent x-axis settings:  min=" << h2->GetXaxis()->GetXmin() << ", "
-        << "max=" << h2->GetXaxis()->GetXmax() << ", "
-        << "Will not save this histogram.\n";
+                << "Inconsistent x-axis settings:  min=" << h2->GetXaxis()->GetXmin() << ", "
+                << "max=" << h2->GetXaxis()->GetXmax() << ", "
+                << "Will not save this histogram.\n";
       return false;
     }
     if (h2->GetYaxis()->GetXmin() >= h2->GetYaxis()->GetXmax())
     {
       std::cerr << "HanOutputFile::saveHistogramToFile(): "
-        << "Inconsistent y-axis settings:  min=" << h2->GetYaxis()->GetXmin() << ", "
-        << "max=" << h2->GetYaxis()->GetXmax() << ", "
-        << "Will not save this histogram.\n";
+                << "Inconsistent y-axis settings:  min=" << h2->GetYaxis()->GetXmin() << ", "
+                << "max=" << h2->GetYaxis()->GetXmax() << ", "
+                << "Will not save this histogram.\n";
       return false;
     }
     axisOption(display, h2);
@@ -2805,7 +2842,8 @@ namespace dqutils
     }
   }
 
-  bool HanOutputFile::drawH1(TCanvas* myC, TH1* h, TH1* hRef, std::string& drawopt, std::string& display, std::string& AlgoName)
+  bool HanOutputFile::drawH1(
+    TCanvas* myC, TH1* h, TH1* hRef, std::string& drawopt, std::string& display, std::string& AlgoName)
   {
     formatTH1(myC, h);
     if (display.find("StatBox") != std::string::npos)
@@ -2815,9 +2853,9 @@ namespace dqutils
     if (h->GetXaxis()->GetXmin() >= h->GetXaxis()->GetXmax())
     {
       std::cerr << "HanOutputFile::saveHistogramToFile(): "
-        << "Inconsistent x-axis settings:  min=" << h->GetXaxis()->GetXmin() << ", "
-        << "max=" << h->GetXaxis()->GetXmax() << ", "
-        << "Will not save this histogram.\n";
+                << "Inconsistent x-axis settings:  min=" << h->GetXaxis()->GetXmin() << ", "
+                << "max=" << h->GetXaxis()->GetXmax() << ", "
+                << "Will not save this histogram.\n";
       return false;
     }
     myC->cd();
@@ -2853,29 +2891,34 @@ namespace dqutils
     return true;
   }
 
-  bool HanOutputFile::drawReference(TCanvas* myC, TH1* hRef, TH1* h, std::string& drawopt, std::string& display, std::string& AlgoName)
+  bool HanOutputFile::drawReference(
+    TCanvas* myC, TH1* hRef, TH1* h, std::string& drawopt, std::string& display, std::string& AlgoName)
   {
     formatTH1(myC, hRef);
     TProfile* pRef = dynamic_cast<TProfile*>(hRef);
     if (pRef != 0)
-    { // profile reference
+    {  // profile reference
       hRef->SetMarkerColor(2);
       hRef->SetLineColor(2);
       hRef->SetLineWidth(2);
       double ymin = (hRef->GetMinimum() < h->GetMinimum()) ? hRef->GetMinimum() : h->GetMinimum();
       double ymax = (hRef->GetMaximum() > h->GetMaximum()) ? hRef->GetMaximum() : h->GetMaximum();
-      // double xmin = ( BINLOEDGE(hRef, 1) <  BINLOEDGE(h, 1)) ?   BINLOEDGE(hRef, 1)-BINWIDTH(hRef, 1) : BINLOEDGE(h, 1)-BINWIDTH(h, 1);
-      // double xmax = ( BINLOEDGE(hRef, hRef->GetNbinsX()) +  BINWIDTH(hRef, hRef->GetNbinsX()) >   BINLOEDGE(h, h->GetNbinsX()) +  BINWIDTH(h, h->GetNbinsX()) ) ?
-      //   BINLOEDGE(hRef, hRef->GetNbinsX()) +  2.0*BINWIDTH(hRef, hRef->GetNbinsX()):  BINLOEDGE(h, h->GetNbinsX()) +  2.0*BINWIDTH(h, h->GetNbinsX()) ;
+      // double xmin = ( BINLOEDGE(hRef, 1) <  BINLOEDGE(h, 1)) ?   BINLOEDGE(hRef, 1)-BINWIDTH(hRef, 1) : BINLOEDGE(h,
+      // 1)-BINWIDTH(h, 1); double xmax = ( BINLOEDGE(hRef, hRef->GetNbinsX()) +  BINWIDTH(hRef, hRef->GetNbinsX()) >
+      // BINLOEDGE(h, h->GetNbinsX()) +  BINWIDTH(h, h->GetNbinsX()) ) ?
+      //   BINLOEDGE(hRef, hRef->GetNbinsX()) +  2.0*BINWIDTH(hRef, hRef->GetNbinsX()):  BINLOEDGE(h, h->GetNbinsX())
+      //   +  2.0*BINWIDTH(h, h->GetNbinsX()) ;
       double xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1)) ? BINLOEDGE(hRef, 1) : BINLOEDGE(h, 1);
-      double xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX())) ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX());
+      double xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) >
+                      BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()))
+                      ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX())
+                      : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX());
       // 	  double y_av = (ymax + ymin)/2;
       // 	  double y_halv = (ymax-ymin)*0.6;
       bool isLogY = (display.find("LogY") != std::string::npos);
       if (isLogY)
       {
-        if (ymax <= 0.0)
-          ymax = 5.0;
+        if (ymax <= 0.0) ymax = 5.0;
         if (ymin > 0.)
         {
           double lymax = log(ymax);
@@ -2885,8 +2928,8 @@ namespace dqutils
         }
         else
         {
-          std::cerr << "ymin is <0. and LogY requested for histogram \""
-            << h->GetName() << " " << h->GetDirectory()->GetPath() << "\", ymin=" << ymin << std::endl;
+          std::cerr << "ymin is <0. and LogY requested for histogram \"" << h->GetName() << " "
+                    << h->GetDirectory()->GetPath() << "\", ymin=" << ymin << std::endl;
         }
       }
       else
@@ -2910,13 +2953,14 @@ namespace dqutils
       h->Draw(("SAME" + drawopt).c_str());
     }
     else
-    { // ordinary reference
+    {  // ordinary reference
       double scale = 1.0;
       if (display.find("ScaleRef") != std::string::npos)
       {
         scale = getScaleVal(display);
       }
-      else if (h->Integral("width") > 0.0 && hRef->Integral("width") > 0.0 && (AlgoName.find("BinContentComp") == std::string::npos) && (display.find("NoNorm") == std::string::npos))
+      else if (h->Integral("width") > 0.0 && hRef->Integral("width") > 0.0 &&
+               (AlgoName.find("BinContentComp") == std::string::npos) && (display.find("NoNorm") == std::string::npos))
       {
         scale = h->Integral("width") / hRef->Integral("width");
       }
@@ -2926,10 +2970,15 @@ namespace dqutils
       hRef->SetLineColor(15);
       double ymin = (hRef->GetMinimum() < h->GetMinimum()) ? hRef->GetMinimum() : h->GetMinimum();
       double ymax = (hRef->GetMaximum() > h->GetMaximum()) ? hRef->GetMaximum() : h->GetMaximum();
-      // double xmin = ( BINLOEDGE(hRef, 1) <  BINLOEDGE(h, 1)) ?   BINLOEDGE(hRef, 1)-BINWIDTH(hRef, 1) : BINLOEDGE(h, 1)-BINWIDTH(h, 1);
-      // double xmax = ( BINLOEDGE(hRef, hRef->GetNbinsX()) +  BINWIDTH(hRef, hRef->GetNbinsX()) >   BINLOEDGE(h, h->GetNbinsX()) +  BINWIDTH(h, h->GetNbinsX()) ) ?  BINLOEDGE(hRef, hRef->GetNbinsX()) +  2.0*BINWIDTH(hRef, hRef->GetNbinsX()):  BINLOEDGE(h, h->GetNbinsX()) +  2.0*BINWIDTH(h, h->GetNbinsX()) ;
+      // double xmin = ( BINLOEDGE(hRef, 1) <  BINLOEDGE(h, 1)) ?   BINLOEDGE(hRef, 1)-BINWIDTH(hRef, 1) : BINLOEDGE(h,
+      // 1)-BINWIDTH(h, 1); double xmax = ( BINLOEDGE(hRef, hRef->GetNbinsX()) +  BINWIDTH(hRef, hRef->GetNbinsX()) >
+      // BINLOEDGE(h, h->GetNbinsX()) +  BINWIDTH(h, h->GetNbinsX()) ) ?  BINLOEDGE(hRef, hRef->GetNbinsX())
+      // +  2.0*BINWIDTH(hRef, hRef->GetNbinsX()):  BINLOEDGE(h, h->GetNbinsX()) +  2.0*BINWIDTH(h, h->GetNbinsX()) ;
       double xmin = (BINLOEDGE(hRef, 1) < BINLOEDGE(h, 1)) ? BINLOEDGE(hRef, 1) : BINLOEDGE(h, 1);
-      double xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) > BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX())) ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX());
+      double xmax = (BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX()) >
+                      BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX()))
+                      ? BINLOEDGE(hRef, hRef->GetNbinsX()) + BINWIDTH(hRef, hRef->GetNbinsX())
+                      : BINLOEDGE(h, h->GetNbinsX()) + BINWIDTH(h, h->GetNbinsX());
       // 	  double y_av = (ymax + ymin)/2;
       // 	  double y_halv = (ymax-ymin)*0.6;
       bool isLogY = (display.find("LogY") != std::string::npos);
@@ -2937,8 +2986,7 @@ namespace dqutils
 
       if (isLogY)
       {
-        if (ymax <= 0.0)
-          ymax = 5.0;
+        if (ymax <= 0.0) ymax = 5.0;
         if (ymin > 0.)
         {
           double lymax = log(ymax);
@@ -2948,14 +2996,14 @@ namespace dqutils
         }
         else
         {
-          std::cerr << "ymin is <=0. and LogY requested for histogram \""
-            << h->GetName() << " " << h->GetDirectory()->GetPath() << "\", ymin=" << ymin << std::endl;
+          std::cerr << "ymin is <=0. and LogY requested for histogram \"" << h->GetName() << " "
+                    << h->GetDirectory()->GetPath() << "\", ymin=" << ymin << std::endl;
         }
       }
       else
       {
         double yDiff = ymax - ymin;
-        h->SetAxisRange(ymin - yDiff * 0.05, ymax + yDiff * 0.05, "Y"); // leave 5% gap above and below
+        h->SetAxisRange(ymin - yDiff * 0.05, ymax + yDiff * 0.05, "Y");  // leave 5% gap above and below
       }
 
       // h->SetAxisRange(xmin,xmax,"X");
@@ -2981,9 +3029,7 @@ namespace dqutils
   //   return false;
   // }
 
-  void
-    HanOutputFile::
-    axisOption(std::string str, TH1* h)
+  void HanOutputFile::axisOption(std::string str, TH1* h)
   {
     std::size_t found = str.find("AxisRange");
     while (found != std::string::npos)
@@ -3102,8 +3148,7 @@ namespace dqutils
     // this method creates two pads under a main canvas, upperpad with input canvas displayed, lower with ratio plot
     // Then it clears the input canvas and draws this newly created in input
     // I dont know if it is the best aproach,I used this method to minimize the changes on the main code
-    if (display.find("RatioPad") == std::string::npos)
-      return;
+    if (display.find("RatioPad") == std::string::npos) return;
     unsigned int ww = myC_upperpad->GetWw();
     unsigned int wh = myC_upperpad->GetWh();
     std::string padname = "PAD";
@@ -3171,13 +3216,11 @@ namespace dqutils
     clonehist->GetYaxis()->SetTitleSize(0.11);
     clonehist->GetYaxis()->SetLabelSize(0.11);
     myC_main->cd();
-    TPad* lowerPad = new TPad("lowerPad", "lowerPad",
-      .005, .060, .995, .250);
+    TPad* lowerPad = new TPad("lowerPad", "lowerPad", .005, .060, .995, .250);
     lowerPad->SetTopMargin(0);
     lowerPad->SetFillStyle(0);
     lowerPad->Draw();
-    TPad* upperPad = new TPad("upperPad", "upperPad",
-      .005, .250, .995, .995);
+    TPad* upperPad = new TPad("upperPad", "upperPad", .005, .250, .995, .995);
     upperPad->SetBottomMargin(0);
     upperPad->SetFillStyle(0);
     upperPad->Draw();
@@ -3207,11 +3250,10 @@ namespace dqutils
 
   void HanOutputFile::ratioplot2D(TCanvas* canvas_top, TH2* h2, TH2* h2Ref, std::string display)
   {
-    if (display.find("Ref2DRatio") == std::string::npos &&
-      display.find("Ref2DSignif") == std::string::npos)
-      return;
+    if (display.find("Ref2DRatio") == std::string::npos && display.find("Ref2DSignif") == std::string::npos) return;
 
-    auto canvas_bot = std::make_unique<TCanvas>("canvas_bottom", "canvas_bottom", canvas_top->GetWw(), canvas_top->GetWh());
+    auto canvas_bot =
+      std::make_unique<TCanvas>("canvas_bottom", "canvas_bottom", canvas_top->GetWw(), canvas_top->GetWh());
     auto canvas_all = std::make_unique<TCanvas>("canvas_all", "canvas_all", canvas_top->GetWw(), canvas_top->GetWh());
 
     canvas_bot->cd();
@@ -3226,14 +3268,12 @@ namespace dqutils
 
     if (display.find("Ref2DRatio") != std::string::npos)
     {
-
       comparison->GetZaxis()->SetTitle("ratio to ref.");
       comparison->SetAxisRange(0.0, 2.0, "Z");
     }
 
     else if (display.find("Ref2DSignif") != std::string::npos)
     {
-
       comparison->GetZaxis()->SetTitle("difference to ref. (#sigma)");
       comparison->SetAxisRange(-4.5, 4.5, "Z");
 
@@ -3247,7 +3287,6 @@ namespace dqutils
       {
         for (int biny = 0; biny <= comparison->GetNbinsY(); biny++)
         {
-
           value_a = h2->GetBinContent(binx, biny);
           value_b = h2Ref->GetBinContent(binx, biny);
 
@@ -3304,7 +3343,7 @@ namespace dqutils
     {
       std::size_t endpos = str.find_first_of(')', found + 1);
       std::cout << "found;" << found << " endpos;" << endpos << "count "
-        << " \n";
+                << " \n";
       std::string inp_str = str.substr(found + 11, endpos - found - 11);
       std::size_t found1 = 0;
       std::size_t found2 = inp_str.find_first_of(',', found1);
@@ -3328,9 +3367,7 @@ namespace dqutils
     }
   }
 
-  void
-    HanOutputFile::
-    displayExtra(TCanvas* c, std::string str)
+  void HanOutputFile::displayExtra(TCanvas* c, std::string str)
   {
     std::size_t found = str.find("TLine");
     while (found != std::string::npos)
@@ -3365,7 +3402,8 @@ namespace dqutils
               TLine* L = new TLine;
               if (NDC)
               {
-                if (x1 <= 1.0 && x1 >= 0.0 && x2 <= 1.0 && x2 >= 0.0 && y1 <= 1.0 && y1 >= 0.0 && y2 <= 1.0 && y2 >= 0.0)
+                if (x1 <= 1.0 && x1 >= 0.0 && x2 <= 1.0 && x2 >= 0.0 && y1 <= 1.0 && y1 >= 0.0 && y2 <= 1.0 &&
+                    y2 >= 0.0)
                 {
                   L->DrawLineNDC(x1, y1, x2, y2);
                 }
@@ -3468,7 +3506,8 @@ namespace dqutils
               L->SetLineStyle(2);
               if (NDC)
               {
-                if (x1 <= 1.0 && x1 >= 0.0 && x2 <= 1.0 && x2 >= 0.0 && y1 <= 1.0 && y1 >= 0.0 && y2 <= 1.0 && y2 >= 0.0)
+                if (x1 <= 1.0 && x1 >= 0.0 && x2 <= 1.0 && x2 >= 0.0 && y1 <= 1.0 && y1 >= 0.0 && y2 <= 1.0 &&
+                    y2 >= 0.0)
                 {
                   L->DrawLineNDC(x1, y1, x2, y2);
                 }
@@ -3545,12 +3584,9 @@ namespace dqutils
     }
   }
 
-  void
-    HanOutputFile::
-    formatTH1(TCanvas* c, TH1* h) const
+  void HanOutputFile::formatTH1(TCanvas* c, TH1* h) const
   {
-    if (c == 0 || h == 0)
-      return;
+    if (c == 0 || h == 0) return;
 
     c->SetLeftMargin(0.15);
     c->SetRightMargin(0.13);
@@ -3578,12 +3614,9 @@ namespace dqutils
     h->SetNdivisions(504, "Y");
   }
 
-  void
-    HanOutputFile::
-    formatTH2(TCanvas* c, TH2* h) const
+  void HanOutputFile::formatTH2(TCanvas* c, TH2* h) const
   {
-    if (c == 0 || h == 0)
-      return;
+    if (c == 0 || h == 0) return;
 
     c->SetLeftMargin(0.15);
     c->SetRightMargin(0.13);
@@ -3613,12 +3646,9 @@ namespace dqutils
     h->SetNdivisions(504, "Y");
   }
 
-  void
-    HanOutputFile::
-    formatTGraph(TCanvas* c, TGraph* g) const
+  void HanOutputFile::formatTGraph(TCanvas* c, TGraph* g) const
   {
-    if (c == 0 || g == 0)
-      return;
+    if (c == 0 || g == 0) return;
 
     c->SetLeftMargin(0.15);
     c->SetRightMargin(0.13);
@@ -3630,8 +3660,7 @@ namespace dqutils
 
   void HanOutputFile::formatTEfficiency(TCanvas* c, TEfficiency* e) const
   {
-    if (c == 0 || e == 0)
-      return;
+    if (c == 0 || e == 0) return;
     c->SetLeftMargin(0.15);
     c->SetRightMargin(0.13);
     c->SetBottomMargin(0.15);
@@ -3642,9 +3671,7 @@ namespace dqutils
   // Protected Methods
   // *********************************************************************
 
-  void
-    HanOutputFile::
-    clearData()
+  void HanOutputFile::clearData()
   {
     dqi::DisableMustClean disabled;
     //   bool useRecursiveDelete = gROOT->MustClean();
@@ -3666,9 +3693,7 @@ namespace dqutils
     //   gROOT->SetMustClean(useRecursiveDelete);
   }
 
-  bool
-    HanOutputFile::
-    writeToFile(std::string fname, std::string content)
+  bool HanOutputFile::writeToFile(std::string fname, std::string content)
   {
     std::ofstream outfile(fname);
     if (!outfile.is_open())
@@ -3681,13 +3706,11 @@ namespace dqutils
     return true;
   }
 
-  void HanOutputFile::
-    convertToGraphics(int cnvsType, TCanvas* myC, std::string& json, TImage* img, char** x, int* y)
+  void HanOutputFile::convertToGraphics(int cnvsType, TCanvas* myC, std::string& json, TImage* img, char** x, int* y)
   {
     if (cnvsType & GENERATE_PNG)
     {
-      if (img)
-        getImageBuffer(img, myC, x, y);
+      if (img) getImageBuffer(img, myC, x, y);
     }
     if (cnvsType & GENERATE_JSON)
     {
@@ -3695,8 +3718,7 @@ namespace dqutils
     }
   }
 
-  void HanOutputFile::
-    convertToGraphics(int cnvsType, TCanvas* myC, std::string namePNG, std::string nameJSON)
+  void HanOutputFile::convertToGraphics(int cnvsType, TCanvas* myC, std::string namePNG, std::string nameJSON)
   {
     if (cnvsType & GENERATE_PNG)
     {
@@ -3709,8 +3731,8 @@ namespace dqutils
     }
   }
 
-  bool HanOutputFile::
-    saveFile(int cnvsType, std::string pngfName, std::string pngContent, std::string jsonfName, std::string jsonfContent)
+  bool HanOutputFile::saveFile(
+    int cnvsType, std::string pngfName, std::string pngContent, std::string jsonfName, std::string jsonfContent)
   {
     bool png = false;
     bool json = false;
@@ -3725,4 +3747,4 @@ namespace dqutils
     return (png || json);
   }
 
-} // namespace dqutils
+}  // namespace dqutils
