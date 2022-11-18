@@ -15,6 +15,7 @@
 #include "GaudiKernel/IChronoStatSvc.h"
 #include "CaloInterface/ICaloCellMakerTool.h"
 #include "AthenaBaseComps/AthService.h"
+#include "CxxUtils/checker_macros.h"
 
 // ISF includes
 #include "ISF_Interfaces/BaseSimulationSvc.h"
@@ -51,7 +52,8 @@ namespace ISF
   @author Michael.Duehrssen -at- cern.ch
   */
   
-  class FastCaloSimSvcPU : public BaseSimulationSvc
+  class ATLAS_NOT_THREAD_SAFE FastCaloSimSvcPU : public BaseSimulationSvc
+  //    ^ use of FastShowerCellBuilderTool
   { 
     public: 
       
