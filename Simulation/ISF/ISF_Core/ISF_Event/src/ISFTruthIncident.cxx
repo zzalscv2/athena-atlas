@@ -177,7 +177,7 @@ HepMC::GenParticlePtr ISF::ISFTruthIncident::getHepMCTruthParticle( ISF::ISFPart
 
 /** convert ISFParticle to GenParticle and attach to ISFParticle's TruthBinding */
 HepMC::GenParticlePtr ISF::ISFTruthIncident::updateHepMCTruthParticle( ISF::ISFParticle& particle,
-                                                                       const ISF::ISFParticle* parent ) const {
+                                                                       ISF::ISFParticle* parent ) const {
   auto* truthBinding     = particle.getTruthBinding();
   HepMC::GenParticlePtr hepTruthParticle = ParticleHelper::convert( particle );
 

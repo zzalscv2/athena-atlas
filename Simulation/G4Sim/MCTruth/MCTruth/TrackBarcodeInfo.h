@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrackBarcodeInfo_H
@@ -13,15 +13,17 @@ namespace ISF {
 
 class TrackBarcodeInfo: public VTrackInformation {
 public:
-        TrackBarcodeInfo(int bc, const ISF::ISFParticle* baseIsp=0);
-	int GetParticleBarcode() const;
-	const ISF::ISFParticle *GetBaseISFParticle() const;
-	void SetBaseISFParticle(const ISF::ISFParticle*);
-	void SetReturnedToISF(bool returned);
-	bool GetReturnedToISF() const;
+	TrackBarcodeInfo(int bc, ISF::ISFParticle* baseIsp=0);
+	virtual int GetParticleBarcode() const override {return m_barcode;}
+	virtual const ISF::ISFParticle *GetBaseISFParticle() const override {return m_theBaseISFParticle;}
+	virtual ISF::ISFParticle *GetBaseISFParticle() override {return m_theBaseISFParticle;}
+
+	virtual void SetBaseISFParticle(ISF::ISFParticle*) override;
+	virtual void SetReturnedToISF(bool returned) override;
+	virtual bool GetReturnedToISF() const override {return m_returnedToISF;}
 
 private:
-	const ISF::ISFParticle *m_theBaseISFParticle;
+	ISF::ISFParticle *m_theBaseISFParticle;
 	int m_barcode;
 	bool m_returnedToISF;
 };
