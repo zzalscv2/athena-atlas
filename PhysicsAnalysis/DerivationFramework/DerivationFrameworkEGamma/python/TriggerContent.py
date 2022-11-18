@@ -709,6 +709,8 @@ ExtraContainersPhotonTrigger['Run3']=[
         "HLT_FastCaloEMClustersAux.",
         "HLT_CaloEMClusters_Photon",
         "HLT_CaloEMClusters_PhotonAux.",
+        "HLT_FastPhotons",
+        "HLT_FastPhotonsAux.",
         ]
 
 ExtraContainersPhotonTrigger['Run2'] = [
