@@ -1,11 +1,17 @@
 #!/bin/bash
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2017 - 2022
-# Daemon job to update daily the DQ stats
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+#
+# Script derived from DemoDaemon.exe without update of the run list and 
+# production of weekly reports.
+# Mainly meant to be used for the update of the year stats for GRL runs. 
+# As the GRL runs are updated only every 1-2 weeks, no cron job defined. 
+# The user has to run it interactively in an atlasdqm lxplus console.
+# 
 # Arguments:
 # -$1 : directory when to run the daemon (a priori ~atlasdqm/w1/DeMo)
 # -$2 : DeMo year
-# -$3 : DeMo tag
+# -$3 : DeMo tag (a priori GRL_[year])
 ##################################################################
 
 rundir=$1
@@ -30,7 +36,7 @@ do
     echo "====================================================================================="
     
 
-    # Script for updating the year stats for all runs (Tier0_2022 DeMo tag)
+    # Script for updating the year stats
     # If you want to reset the year stats, add --resetYearStats (not recommanded as much longer)
     cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
     log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
@@ -38,7 +44,7 @@ do
     eval "rm -f ${log}"
     eval "${cmd} &> ${log}"
 
-    # Creating the run YS plots
+    # Display of the year stats plots
     cmd="python DeMoStatus.py -b -s ${system} -y ${year} -t ${tag} --yearStats --savePlots"
     log="YearStats-${system}/${year}/${tag}/daemon-YSplots.out"
     echo "** ${cmd} **"

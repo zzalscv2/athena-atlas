@@ -1,11 +1,15 @@
 #!/bin/bash
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2017 - 2022
-# Daemon job to update daily the DQ stats
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+#
+# Daemon job to update daily the year stats
+# 
+# Update of the run with ATLAS ready, production of the weekly reports and
+# update of year stats
 # Arguments:
 # -$1 : directory when to run the daemon (a priori ~atlasdqm/w1/DeMo)
 # -$2 : DeMo year
-# -$3 : DeMo tag
+# -$3 : DeMo tag (a priori Tier0_[year])
 ##################################################################
 
 rundir=$1
@@ -17,10 +21,11 @@ echo "Date is ${date}"
 cd ${rundir}
 echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
-source $AtlasSetup/scripts/asetup.sh Athena,22.0.81
+source $AtlasSetup/scripts/asetup.sh Athena,master,latest
+export ScriptPath=$Athena_DIR/src/DataQuality/DataQualityUtils/scripts
 
 echo "First, looking for new runs..."
-cmd="python DeMoUpdate.py --runListUpdate -y ${year}"
+cmd="python $ScriptPath/DeMoUpdate.py --runListUpdate -y ${year}"
 echo "** ${cmd} **"
 eval "${cmd}"
 
@@ -35,30 +40,30 @@ do
     echo "====================================================================================="
     
     # Script for the weekly production
-    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weeklyReport --onlineLumiNorm --vetoLumiEvol"
+    cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weeklyReport --onlineLumiNorm --vetoLumiEvol"
     log="YearStats-${system}/${year}/${tag}/daemon-weekly.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
     eval "${cmd} &> ${log}"
 
 
-    # Script for updating the year stats for all runs (Tier0_2022 DeMo tag)
+    # Script for updating the year stats
     # If you want to reset the year stats, add --resetYearStats (not recommanded as much longer)
-    cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
+    cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
     log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
     eval "${cmd} &> ${log}"
 
-    # Creating the run YS plots
-    cmd="python DeMoStatus.py -b -s ${system} -y ${year} -t ${tag} --yearStats --savePlots"
+    # Display of the year stats plots
+    cmd="python $ScriptPath/DeMoStatus.py -b -s ${system} -y ${year} -t ${tag} --yearStats --savePlots"
     log="YearStats-${system}/${year}/${tag}/daemon-YSplots.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
     eval "${cmd} &> ${log}"
 
     # Producing the defect recap
-    cmd="python DeMoScan.py -b -y ${year} -t ${tag} -s ${system} --recapDefects"
+    cmd="python $ScriptPath/DeMoScan.py -b -y ${year} -t ${tag} -s ${system} --recapDefects"
     log="YearStats-${system}/${year}/${tag}/daemon-recapDefects.out"
     echo "** ${cmd} **"
     eval "rm -f ${log}"
