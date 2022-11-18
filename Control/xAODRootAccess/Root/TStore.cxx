@@ -43,6 +43,14 @@ namespace xAOD {
       return;
    }
 
+
+   const THolder* TStore::holder( const std::string& key ) const {
+      // Look up this object:
+      Objects_t::const_iterator itr = m_objects.find( key );
+      return (itr != m_objects.end() ? itr->second : nullptr);
+   }
+
+
    StatusCode TStore::remove( const std::string& key ) {
 
       // Look up this object:
