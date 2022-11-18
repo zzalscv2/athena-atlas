@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentCleaner/MuonSegmentAmbiCleaner.h"
@@ -50,7 +50,7 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
 {
   ATH_MSG_VERBOSE(" Executing MuonSegmentAmbiCleanerTools ");
 
-  DataVector<const Trk::MeasurementBase>* meas_keep = new DataVector<const Trk::MeasurementBase>();
+  auto meas_keep = DataVector<const Trk::MeasurementBase>();
 
 // create new surface 
   Trk::PlaneSurface* psf = (segment->associatedSurface()).clone();
@@ -125,27 +125,27 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
     Identifier id = prd->identify();
     irio++;
     if( m_idHelperSvc->isMdt( rot->identify() ) ){
-      meas_keep->push_back(rot->clone());
+      meas_keep.push_back(rot->clone());
       netamdt++;
       continue;
     }else if( m_idHelperSvc->isRpc( rot->identify() ) ){
       if( m_idHelperSvc->rpcIdHelper().measuresPhi(id) != 1) {
-	meas_keep->push_back(rot->clone());
+        meas_keep.push_back(rot->clone());
         netarpc++;
-	continue ;
+        continue ;
       }
     }else if( m_idHelperSvc->isTgc( rot->identify() ) ){
       if( m_idHelperSvc->tgcIdHelper().isStrip(id) != 1 ) {
-	meas_keep->push_back(rot->clone());
+        meas_keep.push_back(rot->clone());
         netatgc++;
 	continue;
       }
     }else if( m_idHelperSvc->isCsc( rot->identify() ) ){
-      meas_keep->push_back(rot->clone());
+      meas_keep.push_back(rot->clone());
       if( m_idHelperSvc->cscIdHelper().measuresPhi(id) != 1) {
-	  netacsc++;
+        netacsc++;
       } else {
-	nphicsc++;
+        nphicsc++;
       }
       continue;
     }
@@ -281,11 +281,11 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
 	 {
 	   if (det_phi[i] == 1) nphirpcn++;
 	   if (det_phi[i] == 2) nphitgcn++;
-	   meas_keep->push_back(rots_phi[i]->clone());
+	   meas_keep.push_back(rots_phi[i]->clone());
 	 }
        else if (selected_crots.count(crots_phi[i]) == 0) // competing measurement not yet added
 	 {
-	   meas_keep->push_back(crots_phi[i]->clone());
+	   meas_keep.push_back(crots_phi[i]->clone());
 	   selected_crots.insert(crots_phi[i]);
 	   if (det_phi[i] == 1) nphirpcn++;
 	   if (det_phi[i] == 2) nphitgcn++;
@@ -316,8 +316,13 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
   Amg::Vector2D locSegmentPos(lSegmentPos.x(),lSegmentPos.y());
   const Amg::MatrixX& locSegmenterr(segment->localCovariance());
   Trk::FitQuality* fitQuality = segment->fitQuality()->clone();
-  Muon::MuonSegment* newSegment = new Muon::MuonSegment(locSegmentPos,locSegmentDir,locSegmenterr,psf,meas_keep,fitQuality); 
-  
+  Muon::MuonSegment* newSegment = new Muon::MuonSegment(locSegmentPos,
+                                                        locSegmentDir,
+                                                        locSegmenterr,
+                                                        psf,
+                                                        std::move(meas_keep),
+                                                        fitQuality);
+
   return newSegment; 
 } // execute
 

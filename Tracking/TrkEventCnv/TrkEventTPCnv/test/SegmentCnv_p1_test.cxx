@@ -33,11 +33,11 @@ public:
   TestSegment() : m_surf(nullptr) {}
   TestSegment( const Trk::LocalParameters& locpars,
                const Amg::MatrixX& locerr,
-               DataVector<const Trk::MeasurementBase>* measurements,
+               DataVector<const Trk::MeasurementBase>&& measurements,
                Trk::FitQuality* fitq,
                Trk::Segment::Author author,
                const Trk::Surface& sf)
-    : Trk::Segment (locpars, locerr, measurements, fitq, author),
+    : Trk::Segment (locpars, locerr, std::move(measurements), fitq, author),
       m_surf (&sf)
   {}
   
@@ -164,7 +164,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   TestSegment trans1 (locpars,
                       cov,
-                      new DataVector<const Trk::MeasurementBase> (mvec),
+                      DataVector<const Trk::MeasurementBase> (mvec),
                       new Trk::FitQuality(fq),
                       Trk::Segment::Muonboy,
                       psurf);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DCMathSegmentMaker.h"
@@ -749,18 +749,29 @@ namespace Muon {
             defPars.emplace_back(gdir.theta(), Trk::theta);
             defPars.emplace_back(qoverp, Trk::qOverP);
             Trk::LocalParameters segLocPar(defPars);
-            msegment = std::make_unique<MuonSegment>(segLocPar, covMatrix, surf.release(), createROTVec(rioDistVec).release(), quality,
-                                                     Trk::Segment::DCMathSegmentMakerCurved);
-        } else {  // straight segments
-            // errors (for now no correlations)
-            Amg::MatrixX covMatrix(4, 4);
-            covMatrix.setIdentity();
-            covMatrix(0, 0) = dlocx * dlocx;
-            covMatrix(1, 1) = segment.dy0() * segment.dy0();
-            covMatrix(2, 2) = dangleXZ * dangleXZ;
-            covMatrix(3, 3) = segment.dtheta() * segment.dtheta();
-            msegment = std::make_unique<MuonSegment>(segLocPos, segLocDir, covMatrix, surf.release(), createROTVec(rioDistVec).release(), quality,
-                                                     Trk::Segment::DCMathSegmentMaker);
+            msegment = std::make_unique<MuonSegment>(
+              segLocPar,
+              covMatrix,
+              surf.release(),
+              createROTVec(rioDistVec),
+              quality,
+              Trk::Segment::DCMathSegmentMakerCurved);
+        } else { // straight segments
+          // errors (for now no correlations)
+          Amg::MatrixX covMatrix(4, 4);
+          covMatrix.setIdentity();
+          covMatrix(0, 0) = dlocx * dlocx;
+          covMatrix(1, 1) = segment.dy0() * segment.dy0();
+          covMatrix(2, 2) = dangleXZ * dangleXZ;
+          covMatrix(3, 3) = segment.dtheta() * segment.dtheta();
+          msegment =
+            std::make_unique<MuonSegment>(segLocPos,
+                                          segLocDir,
+                                          covMatrix,
+                                          surf.release(),
+                                          createROTVec(rioDistVec),
+                                          quality,
+                                          Trk::Segment::DCMathSegmentMaker);
         }
 
         if (hasFittedT0) msegment->setT0Error(fittedT0, errorFittedT0);
@@ -1997,14 +2008,14 @@ namespace Muon {
         return pointOnHit.x();
     }
 
-    std::unique_ptr<DataVector<const Trk::MeasurementBase>> DCMathSegmentMaker::createROTVec(
+    DataVector<const Trk::MeasurementBase> DCMathSegmentMaker::createROTVec(
         std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const {
         // sort hits according to they distance to the segment position
         std::sort(rioDistVec.begin(), rioDistVec.end(), SortByDistanceToSegment());
 
-        std::unique_ptr<DataVector<const Trk::MeasurementBase>> rioVec = std::make_unique<DataVector<const Trk::MeasurementBase>>(SG::OWN_ELEMENTS);
-        rioVec->reserve(rioDistVec.size());
-        for (std::pair<double, std::unique_ptr<const Trk::MeasurementBase>>& rdit : rioDistVec) { rioVec->push_back(std::move(rdit.second)); }
+        auto rioVec = DataVector<const Trk::MeasurementBase>(SG::OWN_ELEMENTS);
+        rioVec.reserve(rioDistVec.size());
+        for (std::pair<double, std::unique_ptr<const Trk::MeasurementBase>>& rdit : rioDistVec) { rioVec.push_back(std::move(rdit.second)); }
         rioDistVec.clear();
         return rioVec;
     }

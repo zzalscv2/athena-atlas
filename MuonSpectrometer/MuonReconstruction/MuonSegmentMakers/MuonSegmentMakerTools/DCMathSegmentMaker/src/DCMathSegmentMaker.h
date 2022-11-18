@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DCMATHSEGMENTMAKER_H
@@ -323,7 +323,7 @@ namespace Muon {
             const TrkDriftCircleMath::Segment& segment, const Identifier& chid, const Amg::Transform3D& gToStation, ClusterVecPair& spVecs,
             double phimin, double phimax, std::vector<std::pair<double, std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
         
-        std::unique_ptr<DataVector<const Trk::MeasurementBase>> createROTVec(
+        DataVector<const Trk::MeasurementBase> createROTVec(
             std::vector<std::pair<double,  std::unique_ptr<const Trk::MeasurementBase>> >& rioDistVec) const;
 
         double distanceToSegment(const TrkDriftCircleMath::Segment& segment, const Amg::Vector3D& hitPos,

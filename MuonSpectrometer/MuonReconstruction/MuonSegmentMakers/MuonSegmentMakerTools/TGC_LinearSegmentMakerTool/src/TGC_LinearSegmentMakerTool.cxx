@@ -255,23 +255,23 @@ TGC_LinearSegmentMakerTool::find(const Trk::TrackRoad& road,
         pcov(1, 3) = 0.0;
 
         Trk::FitQuality*                        pFitQuality = new Trk::FitQuality(dChi2, nDegf);
-        DataVector<const Trk::MeasurementBase>* pRios       = new DataVector<const Trk::MeasurementBase>;
+        auto                                    pRios       = DataVector<const Trk::MeasurementBase>();
         for (Muon::Fit2D::PointArray::const_iterator itPt = rhoPoints.begin(); itPt != rhoPoints.end(); ++itPt) {
             Muon::Fit2D::Point* pPt = *itPt;
             if (!pPt->bExclude) {
-                pRios->push_back(
+                pRios.push_back(
                     static_cast<const Trk::MeasurementBase*>(((const Muon::MuonClusterOnTrack*)(pPt->pData))->clone()));
             }
         }
         for (Muon::Fit2D::PointArray::const_iterator itPt = phiPoints.begin(); itPt != phiPoints.end(); ++itPt) {
             Muon::Fit2D::Point* pPt = *itPt;
             if (!pPt->bExclude) {
-                pRios->push_back(
+                pRios.push_back(
                     static_cast<const Trk::MeasurementBase*>(((const Muon::MuonClusterOnTrack*)(pPt->pData))->clone()));
             }
         }
         Muon::MuonSegment* pMuonSeg = new Muon::MuonSegment(
-            pSegPos, pSegDir, pcov, pSurface->clone(), pRios, pFitQuality);
+            pSegPos, pSegDir, pcov, pSurface->clone(), std::move(pRios), pFitQuality);
         if (msgLvl(MSG::DEBUG))
             //            pMuonSeg->dump(log);
             ATH_MSG_DEBUG("Created a new Muon::MuonSegment");

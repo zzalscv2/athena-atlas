@@ -533,8 +533,7 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
 
   const Trk::Surface* sur = &m_parameters.associatedSurface();
 
-  DataVector<const Trk::MeasurementBase>* rio
-      = new DataVector<const Trk::MeasurementBase>;
+  auto rio = DataVector<const Trk::MeasurementBase>{};
 
   // Pseudo-measurement production
   //
@@ -555,18 +554,18 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
         //lastbarrelsurf=&r->associatedSurface();
       }
 
-      rio->push_back(r);
+      rio.push_back(r);
     }
   }
-  if(rio->empty()) {delete rio; return nullptr;}
+  if(rio.empty()) {return nullptr;}
   int bec=0;
   if (nbarrel>0 && nendcap>0) bec=1;
   else if (nbarrel==0 && nendcap>0) bec=2;
-  pms=pseudoMeasurements(&(**rio->begin()).associatedSurface(),&(**rio->rbegin()).associatedSurface(),bec);
-  if(pms.first) rio->insert(rio->begin(),pms.first);
+  pms=pseudoMeasurements(&(**rio.begin()).associatedSurface(),&(**rio.rbegin()).associatedSurface(),bec);
+  if(pms.first) rio.insert(rio.begin(),pms.first);
   if(pms.second) {
-    if (std::abs((**rio->rbegin()).associatedSurface().center().z())<2650.) rio->push_back(pms.second);
-    else rio->insert(rio->begin()+1,pms.second);
+    if (std::abs((**rio.rbegin()).associatedSurface().center().z())<2650.) rio.push_back(pms.second);
+    else rio.insert(rio.begin()+1,pms.second);
   }
   // Track segment production
   //
@@ -577,14 +576,20 @@ Trk::TrackSegment* InDet::TRT_Trajectory_xk::convert()
 	       p[3],
 	       p[4]};
 
-  if(!m_ndf) {m_ndf = rio->size()-5; m_xi2 = 0.;}
+  if(!m_ndf) {m_ndf = rio.size()-5; m_xi2 = 0.;}
 
   if(!sur) {
     Amg::Vector3D GP(0.,0.,0.); sur = new Trk::PerigeeSurface(GP);
   }
   Trk::FitQuality * fqu = new Trk::FitQuality(m_xi2,m_ndf);
 
-  return new Trk::TrackSegment(Trk::LocalParameters(P[0],P[1],P[2],P[3],P[4]),*m_parameters.covariance(),sur,rio,fqu,Trk::Segment::TRT_SegmentMaker);
+  return new Trk::TrackSegment(
+    Trk::LocalParameters(P[0], P[1], P[2], P[3], P[4]),
+    *m_parameters.covariance(),
+    sur,
+    std::move(rio),
+    fqu,
+    Trk::Segment::TRT_SegmentMaker);
 }
 
 ///////////////////////////////////////////////////////////////////

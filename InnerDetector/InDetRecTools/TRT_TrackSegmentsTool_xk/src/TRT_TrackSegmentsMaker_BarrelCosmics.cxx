@@ -698,14 +698,18 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
   // Global direction of the track parameters
   Amg::Vector3D dir(std::cos(phi), std::sin(phi), 0.); 
   
-  DataVector<const Trk::MeasurementBase> *rio = new DataVector<const Trk::MeasurementBase>;
+  auto rio = DataVector<const Trk::MeasurementBase>{};
 
   for (const auto *DC : hits) { // rewrite: InDet::TRT_DriftCircle -> InDet::TRT_DriftCircleOnTrack
   // based on http://atlas-sw.cern.ch/cgi-bin/viewcvs-atlas.cgi/offline/InnerDetector/InDetRecTools/TRT_DriftCircleOnTrackTool/src/TRT_DriftCircleOnTrackNoDriftTimeTool.cxx?revision=1.11&view=markup  
   
     // Straw identification
-    const InDetDD::TRT_BaseElement* pE = DC->detectorElement(); if(!pE) {msg(MSG::ERROR) << "convert(): no detectorElement info!" << endmsg; continue; }
-    Identifier     iD = DC->identify();
+    const InDetDD::TRT_BaseElement* pE = DC->detectorElement();
+    if (!pE) {
+      ATH_MSG_ERROR("convert(): no detectorElement info!");
+      continue;
+    }
+    Identifier iD = DC->identify();
     IdentifierHash iH = m_trtid->straw_layer_hash(m_trtid->layer_id(iD));
  
     // TRT_DriftCircleOnTrack production
@@ -714,7 +718,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
     Amg::MatrixX cov(1,1); cov<<1.33333; 
     const InDet::TRT_DriftCircleOnTrack *element = new InDet::TRT_DriftCircleOnTrack(DC, lp, cov, iH, 1., dir, Trk::NODRIFTTIME);
 
-    rio->push_back( dynamic_cast<const Trk::MeasurementBase *>(element) ); 
+    rio.push_back( dynamic_cast<const Trk::MeasurementBase *>(element) ); 
   } // end fill rio
 
   // add pseudo measurement - follow up https://savannah.cern.ch/bugs/?41079
@@ -738,7 +742,7 @@ if (1) { // limit the scope of all these variables
   Trk::StraightLineSurface *pseudoSurface = new Trk::StraightLineSurface( faketransf, 99999., 99999. );  
 
   Trk::PseudoMeasurementOnTrack *pseudo = new Trk::PseudoMeasurementOnTrack( pseudoPar, pseudocov, *pseudoSurface );
-  rio->push_back( pseudo );
+  rio.push_back( pseudo );
   delete pseudoSurface;
 }
  
@@ -748,8 +752,9 @@ if (1) { // limit the scope of all these variables
   ATH_MSG_DEBUG( "Chi2 = " << chi2 << ", ndf = " << ndf << ", chi2/ndf = " << chi2/ndf );
   Trk::FitQuality      * fqu = new Trk::FitQuality(chi2, ndf);
 
-  Trk::TrackSegment *segment = new Trk::TrackSegment(par,cov, sur, rio, fqu, Trk::Segment::TRT_SegmentMaker);
-  
+  Trk::TrackSegment* segment = new Trk::TrackSegment(
+    par, cov, sur, std::move(rio), fqu, Trk::Segment::TRT_SegmentMaker);
+
   //add segment to list of segments
   ATH_MSG_DEBUG( "Add " << event_data.m_segments.size() << "th segment to list" );
   event_data.m_segments.push_back(segment);
