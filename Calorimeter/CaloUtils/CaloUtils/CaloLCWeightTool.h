@@ -20,7 +20,6 @@
 
 #include "CaloInterface/IClusterCellWeightTool.h"
 #include "CaloConditions/CaloLocalHadCoeff.h"
-#include "StoreGate/DataHandle.h"
 #include "GaudiKernel/ToolHandle.h" 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/IOVSvcDefs.h"
