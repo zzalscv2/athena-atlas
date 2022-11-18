@@ -44,12 +44,11 @@ class BigWheelCoincidenceLUT {
 
   bool readMap();
 
-  int8_t test(int octantId, int moduleId, int subsector,
+  int8_t test(int sideId, int octantId, int moduleId, int subsector,
               int type, int dr, int dphi) const;
 
   int   getMapType(int hlwire, int hlstrip) const;
   const std::string& getVersion() const;
-  int   getOctantId() const;
 
   const LVL1TGCTrigger::TGCArguments* tgcArgs() const;
 
@@ -71,9 +70,7 @@ class BigWheelCoincidenceLUT {
   std::unordered_map<uint32_t, char> m_lut;   // GLOBALADDR, PTCHAR
 
   std::string m_verName;
-  int m_side;
-  int m_octant;
-  bool m_fullCW;
+  bool m_fullCW{false};
   
   LVL1TGCTrigger::TGCArguments* m_tgcArgs;
 
@@ -86,10 +83,6 @@ inline const LVL1TGCTrigger::TGCArguments* BigWheelCoincidenceLUT::tgcArgs() con
 
 inline const std::string& BigWheelCoincidenceLUT::getVersion() const {
   return m_verName;
-}
-
-inline int BigWheelCoincidenceLUT::getOctantId() const {
-  return m_octant;
 }
 
 inline int BigWheelCoincidenceLUT::getTYPE(int lDR, int hDR, int lDPhi, int hDPhi) const {
