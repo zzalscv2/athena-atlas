@@ -1,9 +1,13 @@
 #! /usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2017 - 2022
-# Python 3 migration by Miaoran Lu         
-# Udpates the year stats
-##################################################################
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+# Python 3 migration by Miaoran Lu (University of Iowa)- 2022
+#
+# Queries the defect database, computes and displays the data losses.
+# On request update the year stats.
+#
+# Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
+#############################################################################################
 
 import os, sys, socket, pathlib, errno
 
@@ -12,10 +16,10 @@ import time
 from ROOT import TFile
 from ROOT import TH1F,TProfile
 from ROOT import TCanvas,TPaveText
-from ROOT import kBlack,kAzure,kBlue
+from ROOT import kBlack,kAzure,kBlue,kGreen,kRed
 from ROOT import gStyle
 from ROOT import gROOT
-from ROOT import TLatex
+from ROOT import TLatex,TText
 gROOT.SetBatch(False)
 
 import xmlrpc.client
@@ -42,8 +46,8 @@ passfile = open("/afs/cern.ch/user/l/larmon/public/atlasdqmpass.txt")
 passwd = passfile.read().strip(); passfile.close()
 dqmapi = xmlrpc.client.ServerProxy('https://%s@atlasdqm.cern.ch'%(passwd))
 
-scriptdir = str(pathlib.Path(__file__).parent.resolve())
-runListDir = scriptdir+"/RunList"
+#scriptdir = str(pathlib.Path(__file__).parent.resolve())
+runListDir = "./RunList"
 
 
 ################################################################################################################################################
@@ -215,12 +219,15 @@ def extractNamePartition(foundDefect):
 
     return defectName, defectPart
     
-def retrieveDefectsFromDB(run, defectTag, grlDef):
+def retrieveDefectsFromDB(run, defectTag, grlDef,signOffDefects):
     # Get the list of defects for this run, parse them
     defectDatabase = DQDefects.DefectsDB(tag=defectTag)
     system_defects = []
     for iPrefix in grlDef["prefix"]:
         system_defects += [d for d in (defectDatabase.defect_names | defectDatabase.virtual_defect_names) if (d.startswith(iPrefix))]
+    for iSignOff in signOffDefects.keys():
+        if (signOffDefects[iSignOff] != ""):
+            system_defects += signOffDefects[iSignOff]
     retrievedDefects = defectDatabase.retrieve((run, 1), (run+1, 0), system_defects)
     parsed_defects = {}
     for rd in retrievedDefects:
@@ -236,7 +243,7 @@ def updateRunList(year=time.localtime().tm_year):
     print("Checking run list for year",year)
 
     latestRun=dqmapi.get_latest_run()
-    recentRuns = dqmapi.get_run_beamluminfo({'low_run':str(latestRun-200),'high_run':str(latestRun)})
+    recentRuns = dqmapi.get_run_beamluminfo({'low_run':str(latestRun-1000),'high_run':str(latestRun)})
     def writeRuns(outfile, fileRuns = []):
         for r in sorted(recentRuns.keys(), key=int):
             if (recentRuns[r][2]): # ATLAS ready
@@ -365,7 +372,7 @@ grlDef = {}
 defectVeto = {}
 veto = {}
 signOff = {}
-runlist = {'filename':"",'primary':[],'toprocess':[],'roughVeto':[]}
+runlist = {'filename':"",'primary':[],'toprocess':[],'weeklyfile':[],'weekly-dqmeeting':"",'roughVeto':[]}
 
 if args.runListUpdate:
   updateRunList(year=args.year)
@@ -533,8 +540,20 @@ if options['weekly']: # Weekly report - Look for the last 7-days runs + the sign
         elif (time.time()-runinfo[run]["Run start"] < oneWeek):
             print("Run",run,"was acquired during the last seven days")
             runlist['toprocess'].append(run)
+    if (os.path.exists("RunList/weekly.dat")):
+        weeklyFile = open("RunList/weekly.dat",'r')
+        print("I found a weekly.dat file and will add some runs...")
+        for iRun in weeklyFile.readlines():
+          if runlist['weekly-dqmeeting'] == "": # The first line of the weekly file contains the date of the DQ meeting
+            runlist['weekly-dqmeeting'] = iRun
+            continue
+          runlist['weeklyfile'].append(int(iRun))
+          if (int(iRun) not in runlist['toprocess'] and int(iRun) in runlist['primary']):
+            print(iRun)
+            runlist['toprocess'].append(int(iRun))
+        weeklyFile.close()
 
-    runlist['toprocess'].reverse()
+    runlist['toprocess'].sort(reverse=False)
     print("I will process these runs :",runlist['toprocess'])
 else: # Default option (i.e. not a weekly report). The possible run range was already filtered in the runlist['primary'] list
     runlist['toprocess'] = runlist['primary']
@@ -600,6 +619,8 @@ for iper in list(periodListCurrent.keys()): # Loop on all periods found and prin
 
 if (len(runlist['toprocess']) == 0):
     print("No run to process :-). Exiting...")
+    if options['updateYearStats']:
+      os.system("rm -f %s"%tokenName)
     sys.exit()
 
 ######################################
@@ -840,7 +861,7 @@ for irun,runNb in enumerate(runlist['toprocess']):
   
   # Get defects
 
-  parsedDefects =  retrieveDefectsFromDB(runNb, options['defectTag'], grlDef)
+  parsedDefects =  retrieveDefectsFromDB(runNb, options['defectTag'], grlDef,signOff)
   retrievedDefects = list(parsedDefects.keys())
     
   runinfo[runNb]['exprSignedOff'] = True
@@ -1041,13 +1062,13 @@ if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
       continue # Protection in case of the runs was not yet signed off and removed (with Unsignedoff option) from the list
           
     if newCanvas:
-      # NewCanvas facility almost removed (50 runs cut) Size of the last TCanvas not properly computed
-      c1[canvasIndex] = TCanvas("runSummary_%s"%canvasIndex,"Run collection - %s"%canvasIndex,10,10,1000,(len(runlist['toprocess'])+2)*22)
+      # NewCanvas facility almost removed (70 runs cut) Size of the last TCanvas not properly computed
+      c1[canvasIndex] = TCanvas("runSummary_%s"%canvasIndex,"Run collection - %s"%canvasIndex,10,10,1000,(len(runlist['toprocess'])+6)*22)
       column[canvasIndex] = []
       lineNb[canvasIndex] = 0
       labels_col = ["Run","Run start / stop","LB ready","Peak lumi","Int. lumi","GRL ineff.","Veto ineff.","Period","Status"]
-      xlow_col = [0.01,0.08,0.41,0.49,0.575,0.655,0.74,0.835,0.9,0.99]
-      ylowTable = 0.99 - 0.98/(len(runlist['toprocess'])+5)*(len(runlist['toprocess'])+2)
+      xlow_col = [0.01,0.075,0.405,0.485,0.57,0.65,0.735,0.83,0.89,0.99]
+      ylowTable = 0.99 - 0.98/(len(runlist['toprocess'])+6)*(len(runlist['toprocess'])+2)
 
       for i in range(len(labels_col)):
         column[canvasIndex].append(TPaveText(xlow_col[i],ylowTable,xlow_col[i+1],0.99))
@@ -1057,6 +1078,8 @@ if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
         else:
           column[canvasIndex][i].SetFillColor(kBlue-10)
       notYetSignedOff_TPave = TPaveText(xlow_col[0],0.01,xlow_col[len(labels_col)],ylowTable)
+      if runlist['weekly-dqmeeting'] != "":
+        notYetSignedOff_TPave.AddText("#club: runs to be signed off at %s"%runlist['weekly-dqmeeting'])
       notYetSignedOff_TPave.AddText("Completed at %s"%(time.strftime("%H:%M (%d %b)", time.localtime())))
       notYetSignedOff_TPave.SetFillColor(kAzure+2)
       
@@ -1072,9 +1095,12 @@ if (len(list(runinfo.keys()))>2 and runinfo['AllRuns']['Lumi']!=0):
     column[canvasIndex][5].AddText("%.2f %%"%(runinfo[runNb]['ineffDefect_allIntol']))
     column[canvasIndex][6].AddText("%.2f %%"%(runinfo[runNb]['ineffVeto_allVeto']))
     column[canvasIndex][7].AddText("%s"%(runinfo[runNb]["period"]))
-    column[canvasIndex][8].AddText("%10s"%(runinfo[runNb]["signoff"]))
+    if (runNb in runlist['weeklyfile']):
+      column[canvasIndex][8].AddText("%8s #club"%(runinfo[runNb]["signoff"]))
+    else:
+      column[canvasIndex][8].AddText("%10s"%(runinfo[runNb]["signoff"]))
     lineNb[canvasIndex] += 1
-    if (lineNb[canvasIndex]==50 or runNb == "AllRuns"):
+    if (lineNb[canvasIndex]==70 or runNb == "AllRuns"):
       for i in range(len(column[canvasIndex])):
         column[canvasIndex][i].Draw()
       tmp = "Old runs (> 7 days) not yet signed off: "

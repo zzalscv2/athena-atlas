@@ -1,8 +1,15 @@
 #! /usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble)- 2017
-# Creates directories for new year, tag, system... Only for experts
-##################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble)- 2017 - 2022
+# Python 3 migration by Miaoran Lu (University of Iowa)- 2022
+#
+# For each year/tag/system, an output directory YearStats-[system]/[year]/[tag] is required.
+# This directory also contains some subdirectories
+# This script creates all needed directories for a new set of system/year/tag.
+# If the set already exists, the script simply exits
+#
+# Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
+#############################################################################################
 
 from __future__ import print_function
 import os

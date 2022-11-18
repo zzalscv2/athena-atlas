@@ -1,8 +1,12 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2017- 2022
-# Python 3 migration by Miaoran Lu         
-# Auxiliary libraries used DemoUpdate, DeMoStatus and DemoScan
-##################################################################
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble)- 2017 - 2022
+# Python 3 migration by Miaoran Lu (University of Iowa)- 2022
+#
+# Definition of system/year/tag characteristisc and functions used by DeMoUpdate, DeMoStatus
+# and DemoScan
+#
+# Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
+#############################################################################################
 
 from ROOT import THStack
 from ROOT import TCanvas,TLegend

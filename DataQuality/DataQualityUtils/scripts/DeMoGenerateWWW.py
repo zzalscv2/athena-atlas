@@ -1,9 +1,11 @@
 #! /usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2022
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2022
+#
 # Script used to generate to https://atlasdqm.web.cern.ch/atlasdqm/DeMo/ webpage
-# used by teh DeMoDameon.exe script running on atlasdqm account
-##################################################################
+#
+# Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
+#############################################################################################
 
 import sys, socket, pathlib, errno, re, subprocess
 
@@ -117,6 +119,7 @@ def addHeader(page):
 ################################################################
 def addFooter(page):
     page.write('''<div style="text-align:left" class="rectangle">''')
+    page.write('''Documentation available <a href="https://twiki.cern.ch/twiki/bin/view/Atlas/DataQualityDemo"> here </a> <br>''')
     page.write('''Original developer: Benjamin Trocm&eacute (LPSC Grenoble) - Maintenance: Benjamin Trocm&eacute (LPSC Grenoble)''')
     page.write('''</div></body>''')
     page.write('''<html>''')
@@ -125,13 +128,17 @@ def addFooter(page):
 ################################################################
 def addHeaderWeekly(page):
     page.write('''<div style="text-align:left" class="rectangle">''')
-    page.write('''Considered dataset: all ATLAS-ready runs taken or fully signed off in the last 7 days<br>''')
+    page.write('''Considered dataset: <br>''')
+    page.write('''- all ATLAS-ready runs acquired in the last 7 days <br>''')
+    page.write('''- all ATLAS-ready runs fully signed off in the last 7 days <br>''')
+    page.write('''- all runs considered for the upcoming wednesday formal signoff (list available <a href="RunList/weekly.dat" target="_blank"> here </a>)<br>''')
     page.write('''Plots updated daily at midnight<br>''')
     page.write('''Status meaning (based on UNCHECKED defect status):<br>''')
     page.write('''-EXPR.   : no assessment yet<br>''')
     page.write('''-BULK    : express assessment completed<br>''')
     page.write('''-DONE    : express and bulk assessment completed (but no final signoff - relevant only for LAr)<br>''')
     page.write('''-FINAL OK: assessment completed<br>''')
+    page.write('''The spade symbol after the status indicates that this run is supposed to be signed off at the upcoming DQ wednesday meeting <br>''')
     page.write('''</div>''')
     return
 

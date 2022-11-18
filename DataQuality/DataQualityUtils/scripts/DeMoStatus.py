@@ -1,9 +1,12 @@
 #! /usr/bin/env python
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2017 - 2022
-# Python 3 migration by Miaoran Lu         
-# Displays the year cumulated stats (GRL runs)
-##################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Author : Benjamin Trocme (CNRS/IN2P3 - LPSC Grenoble) - 2017 - 2022
+# Python 3 migration by Miaoran Lu (University of Iowa)- 2022
+#
+# Display the year stats
+#
+# Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
+#############################################################################################
 
 import os,sys  
 
