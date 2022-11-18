@@ -72,7 +72,7 @@ public:
   MuonSegment(const Trk::LocalParameters& locpars,
               const Amg::MatrixX& locerr,
               Trk::PlaneSurface* psf,
-              DataVector<const Trk::MeasurementBase>* cmeas,
+              DataVector<const Trk::MeasurementBase>&& cmeas,
               Trk::FitQuality* fqual,
               Segment::Author author = AuthorUnknown);
 
@@ -91,8 +91,7 @@ public:
               const Trk::LocalDirection& segLocDir, //
               const Amg::MatrixX& segLocalErr,      //
               Trk::PlaneSurface* psf, // plane surface to define frame
-              DataVector<const Trk::MeasurementBase>*
-                cmeas, // vector of contained measurements on track
+              DataVector<const Trk::MeasurementBase>&& cmeas, // vector of contained measurements on track
               Trk::FitQuality* fqual, // fit quality object
               Segment::Author author = AuthorUnknown);
 

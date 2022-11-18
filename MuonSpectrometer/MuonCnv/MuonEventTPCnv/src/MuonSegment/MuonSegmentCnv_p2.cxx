@@ -26,7 +26,7 @@ void MuonSegmentCnv_p2::persToTrans( const Muon::MuonSegment_p1 *persObj, Muon::
                                  localDirection,
                                  Amg::MatrixX(), // locErr,
                                  associatedSurface,
-                                 nullptr, // cmeas,
+                                 DataVector<const Trk::MeasurementBase>{}, // cmeas,
                                  nullptr, // qual
                                  Trk::Segment::AuthorUnknown
                                  );

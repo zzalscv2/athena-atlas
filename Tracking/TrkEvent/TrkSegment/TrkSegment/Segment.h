@@ -47,6 +47,7 @@ class FitQuality;
    identifiers have to be retrieved from the ROT itself.
 
     @author Andreas.Salzburger@cern.ch
+    @author Christos Anastopoulos Athena MT
     */
 
 class Segment
@@ -89,7 +90,7 @@ public:
   /** Constructor with parameters */
   Segment(const LocalParameters& locpars,
           const Amg::MatrixX& locerr,
-          DataVector<const MeasurementBase>* measurements,
+          DataVector<const MeasurementBase>&& measurements,
           FitQuality* fitq = nullptr,
           Author author = AuthorUnknown);
 
@@ -143,8 +144,7 @@ protected:
   std::unique_ptr<FitQuality> m_fitQuality;
 
   /** The vector of contained (generic) Trk::MeasurementBase objects */
-  std::unique_ptr<DataVector<const MeasurementBase>> m_containedMeasBases;
-
+  DataVector<const MeasurementBase> m_containedMeasBases;
 
   /** segment author */
   Author m_author;
@@ -159,26 +159,26 @@ Segment::fitQuality() const
 inline const std::vector<const MeasurementBase*>&
 Segment::containedMeasurements() const
 {
-  return m_containedMeasBases->stdcont();
+  return m_containedMeasBases.stdcont();
 }
 
 inline const DataVector<const MeasurementBase>&
 Segment::containedMeasurementsDataVector() const
 {
-  return *m_containedMeasBases;
+  return m_containedMeasBases;
 }
 
 inline bool
 Segment::hasContainedMeasurements() const
 {
-  return m_containedMeasBases != nullptr;
+  return !m_containedMeasBases.empty();
 }
 
 inline const MeasurementBase*
 Segment::measurement(unsigned int indx) const
 {
-  if (m_containedMeasBases && indx < m_containedMeasBases->size()) {
-    return std::as_const(*m_containedMeasBases)[indx];
+  if (!m_containedMeasBases.empty() && indx < m_containedMeasBases.size()) {
+    return std::as_const(m_containedMeasBases)[indx];
   }
   return nullptr;
 }
@@ -186,7 +186,7 @@ Segment::measurement(unsigned int indx) const
 inline unsigned int
 Segment::numberOfMeasurementBases() const
 {
-  return m_containedMeasBases->size();
+  return m_containedMeasBases.size();
 }
 
 inline Segment::Author

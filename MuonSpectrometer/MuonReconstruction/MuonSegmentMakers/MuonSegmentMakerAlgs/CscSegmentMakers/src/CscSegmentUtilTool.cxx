@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscSegmentUtilTool.h"
@@ -838,11 +838,11 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
     ATH_MSG_VERBOSE("                  Error: " << seg.d0 << "  " << seg.d1 << " " << seg.d01);
 
     // Build list of RIO on track objects.
-    ICscSegmentFinder::MbaseList* prios = new ICscSegmentFinder::MbaseList;
-    getRios(seg, prios, measphi, ctx);  // if hit is in outlier, error is estimated in width/sqrt(12)
+    auto prios = ICscSegmentFinder::MbaseList{};
+    getRios(seg, &prios, measphi, ctx);  // if hit is in outlier, error is estimated in width/sqrt(12)
 
     // Fit quality.
-    int ndof = int(prios->size()) - 2;
+    int ndof = int(prios.size()) - 2;
     if (m_IPconstraint) ndof = ndof + 1;
     if (use2Lay) ndof = 1;
     Trk::FitQuality* pfq = new Trk::FitQuality(seg.chsq, ndof);
@@ -867,8 +867,13 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
     cov(1, 3) = 0.0;
     cov(3, 1) = cov(1, 3);
     cov(3, 3) = 1.0;
-
-    MuonSegment* pseg_ref = new MuonSegment(pos, pdir, cov, psrf, prios, pfq, Trk::Segment::Csc2dSegmentMaker);
+    MuonSegment* pseg_ref = new MuonSegment(pos,
+                                            pdir,
+                                            cov,
+                                            psrf,
+                                            std::move(prios),
+                                            pfq,
+                                            Trk::Segment::Csc2dSegmentMaker);
     pseg_ref->setT0Error(float(seg.time), float(seg.dtime));
 
     ATH_MSG_DEBUG("  build_segment::  right after ctor*    " << pseg_ref->time());
@@ -897,13 +902,13 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
     unsigned int n_update = 0;
     while (diff_tantheta > m_fitsegment_tantheta_tolerance && n_update < nTrials) {
         // Loop over collections in the container.
-        ICscSegmentFinder::MbaseList* prios_new = new ICscSegmentFinder::MbaseList;
+        auto prios_new = ICscSegmentFinder::MbaseList{};
         ICscSegmentFinder::TrkClusters fitclus;
         ICscSegmentFinder::RioList oldrios;
         for (unsigned int irot = 0; irot < pseg_ref->numberOfContainedROTs(); irot++) oldrios.push_back(pseg_ref->rioOnTrack(irot));
 
         int cnt = 0;
-        for (ICscSegmentFinder::RioList::size_type irio = 0; irio < prios->size(); ++irio) {
+        for (ICscSegmentFinder::RioList::size_type irio = 0; irio < pseg_ref->numberOfContainedROTs(); ++irio) {
             const Trk::RIO_OnTrack* pold = oldrios[irio];
             const Trk::RIO_OnTrack* cot =
                 (seg.outlierid == cnt)
@@ -919,7 +924,7 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
                 delete cot;
                 continue;
             }
-            prios_new->push_back(cot);
+            prios_new.push_back(cot);
 
             // Create new calibrated hit to put into fitclus
             const CscPrepData* prd = pcl->prepRawData();
@@ -983,7 +988,13 @@ MuonSegment* CscSegmentUtilTool::build_segment(const ICscSegmentFinder::Segment&
         cov(3, 3) = 1.0;
 
         MuonSegment* pseg_new =
-            new MuonSegment(pos_new, pdir_new, cov, pseg->associatedSurface().clone(), prios_new, pfq_new, Trk::Segment::Csc2dSegmentMaker);
+          new MuonSegment(pos_new,
+                          pdir_new,
+                          cov,
+                          pseg->associatedSurface().clone(),
+                          std::move(prios_new),
+                          pfq_new,
+                          Trk::Segment::Csc2dSegmentMaker);
         pseg_new->setT0Error(float(seg_new.time), float(seg_new.dtime));
         ATH_MSG_DEBUG("  build_segment::  right after recreating *  " << pseg_new->time());
 
@@ -1830,7 +1841,7 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
     Amg::Vector2D pos(phiposNew, rpos);
 
     // List of RIO's.
-    ICscSegmentFinder::MbaseList* rios = new ICscSegmentFinder::MbaseList;
+    auto rios = ICscSegmentFinder::MbaseList();
     // If each orientation has four RIOS's (as expected) then order the
     // RIO's eta1 phi1 eta2 .... to make fitting easier.
 
@@ -1912,10 +1923,10 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
 
                 // create the new rots using the ROT creator
                 const Trk::RIO_OnTrack* etaRot = m_rotCreator->createRIO_OnTrack(*etapold->prepRawData(), gposnew, gdirnew);
-                rios->push_back(etaRot);
+                rios.push_back(etaRot);
 
                 const Trk::RIO_OnTrack* phiRot = m_rotCreator->createRIO_OnTrack(*phipold->prepRawData(), gposnew);
-                rios->push_back(phiRot);
+                rios.push_back(phiRot);
 
                 // debug output, to be removed
                 const Trk::Surface& surfPhi = phipold->associatedSurface();
@@ -1940,7 +1951,7 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
                 if (eta_matchcode >= 0 && eta_matchcode < 4) {
                     const Trk::RIO_OnTrack* pold = etarios[eta_matchcode];
                     Trk::RIO_OnTrack* pnew = pold->clone();
-                    rios->push_back(pnew);
+                    rios.push_back(pnew);
                 }
             }
             // This should never happen
@@ -1950,7 +1961,6 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
         } else {
             if (eta_single != 0) {
                 ATH_MSG_DEBUG("eta hit in a 2-layer segment not matched, bailing");
-                delete rios;
                 delete psrf;
                 return nullptr;
             }
@@ -1962,7 +1972,7 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
                 if (phi_matchcode >= 0 && phi_matchcode < 4) {
                     const Trk::RIO_OnTrack* pold = phirios[phi_matchcode];
                     Trk::RIO_OnTrack* pnew = pold->clone();
-                    rios->push_back(pnew);
+                    rios.push_back(pnew);
                 }
             }
             // This should never happen
@@ -1972,7 +1982,6 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
         } else {
             if (phi_single != 0) {
                 ATH_MSG_DEBUG("phi hit in a 2-layer segment not matched, bailing");
-                delete rios;
                 delete psrf;
                 return nullptr;
             }
@@ -1982,20 +1991,19 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
         for (ICscSegmentFinder::RioList::const_iterator irio = etarios.begin(); irio != etarios.end(); ++irio) {
             const Trk::RIO_OnTrack* pold = *irio;
             Trk::RIO_OnTrack* pnew = pold->clone();
-            rios->push_back(pnew);
+            rios.push_back(pnew);
         }
         for (ICscSegmentFinder::RioList::const_iterator irio = phirios.begin(); irio != phirios.end(); ++irio) {
             const Trk::RIO_OnTrack* pold = *irio;
             Trk::RIO_OnTrack* pnew = pold->clone();
-            rios->push_back(pnew);
+            rios.push_back(pnew);
         }
     }
 
     unsigned int nMinRIOsTot = 5;
     if (use2LaySegsEta || use2LaySegsPhi) nMinRIOsTot = 4;
-    if (rios->size() < nMinRIOsTot) {
-        ATH_MSG_WARNING("too few CSC hits collected, not making segment: rios " << rios->size());
-        delete rios;
+    if (rios.size() < nMinRIOsTot) {
+        ATH_MSG_WARNING("too few CSC hits collected, not making segment: rios " << rios.size());
         delete psrf;
         return nullptr;
     }
@@ -2003,9 +2011,15 @@ MuonSegment* CscSegmentUtilTool::make_4dMuonSegment(const MuonSegment& rsg, cons
     Trk::FitQuality* pfq = new Trk::FitQuality(chsq, ndof);
     // Build 4D segment.
 
-    MuonSegment* pseg = new MuonSegment(pos, pdir, cov, psrf, rios, pfq, Trk::Segment::Csc4dSegmentMaker);
+    ATH_MSG_DEBUG("Segment " << rios.size() << " : ");
+    MuonSegment* pseg = new MuonSegment(pos,
+                                        pdir,
+                                        cov,
+                                        psrf,
+                                        std::move(rios),
+                                        pfq,
+                                        Trk::Segment::Csc4dSegmentMaker);
     pseg->setT0Error(rtime, rerrorTime);
-    ATH_MSG_DEBUG("Segment " << rios->size() << " : ");
 
     return pseg;
 }
