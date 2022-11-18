@@ -6,7 +6,8 @@
 @author D. Maximov
 @author E. Bergeaas Kuutmann
 @author T. Bold
-@date 2019-06-28
+@author D. Bakshi Gupta
+@date 2022-11-17
 @brief Calorimeter trigger python configuration for the Run III AthenaMonitoring package, based on the example by E. Bergeaas Kuutmann
 '''
 
@@ -54,7 +55,6 @@ def TrigCaloMonConfig(inputFlags):
     from AthenaConfiguration.ComponentFactory import CompFactory
     # Add group
     L2CaloEMClustersMonGroup = []
-    #L2CaloEMClustersMonGroup = helper.addGroup(L2CaloEMClustersMonAlg,'TrigCaloMonitor','HLT/HLTCalo')
     
     ########################
     #     HLT_Clusters     #

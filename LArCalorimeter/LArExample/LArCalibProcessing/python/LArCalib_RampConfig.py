@@ -9,6 +9,10 @@ def LArRampCfg(flags):
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
     result=LArCalibBaseCfg(flags)
 
+    #Add ByteStream reading
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    result.merge(ByteStreamReadCfg(flags))
+
     #Calibration runs are taken in fixed gain. 
     #The SG key of the digit-container is name of the gain
     gainStrMap={0:"HIGH",1:"MEDIUM",2:"LOW"}
