@@ -6,6 +6,6 @@
 # See https://atlassoftwaredocs.web.cern.ch/guides/release_coordinators
 #
 
-# Ignore changes to Projects:
+# Ignore changes to Projects and build scripts:
 Projects/** merge=ours
-
+Build/** merge=ours
