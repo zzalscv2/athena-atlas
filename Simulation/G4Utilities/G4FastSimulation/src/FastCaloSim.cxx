@@ -33,10 +33,12 @@
 
 
 FastCaloSim::FastCaloSim(const std::string& name,
-ServiceHandle<IAthRNGSvc> rndmGenSvc, Gaudi::Property<std::string> randomEngineName,
-PublicToolHandle<IFastCaloSimCaloExtrapolation> FastCaloSimCaloExtrapolation, ServiceHandle<ISF::IFastCaloSimParamSvc> FastCaloSimSvc,
-Gaudi::Property<std::string> CaloCellContainerSDName,
-FastCaloSimTool * FastCaloSimTool)
+                         const ServiceHandle<IAthRNGSvc>& rndmGenSvc,
+                         const Gaudi::Property<std::string>& randomEngineName,
+                         const PublicToolHandle<IFastCaloSimCaloExtrapolation>& FastCaloSimCaloExtrapolation,
+                         const ServiceHandle<ISF::IFastCaloSimParamSvc>& FastCaloSimSvc,
+                         const Gaudi::Property<std::string>& CaloCellContainerSDName,
+                         FastCaloSimTool * FastCaloSimTool)
 
 : G4VFastSimulationModel(name),
   m_rndmGenSvc(rndmGenSvc), m_randomEngineName(randomEngineName),
