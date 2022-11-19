@@ -189,6 +189,8 @@ struct EmptyMTJ { // setup empty MTJ
   std::unique_ptr<ActsTrk::ConstMultiTrajectory> ro_mtj;
 };
 
+
+// cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   BOOST_CHECK(mtj->has_backends());
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
