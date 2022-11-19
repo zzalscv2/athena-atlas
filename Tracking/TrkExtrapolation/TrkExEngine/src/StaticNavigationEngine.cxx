@@ -29,11 +29,6 @@ Trk::StaticNavigationEngine::~StaticNavigationEngine()
 StatusCode Trk::StaticNavigationEngine::initialize()
 {
     
-#ifdef LEGACY_TRKGEOM
-    if (!m_trackingGeometrySvc.empty()) {
-       ATH_CHECK( m_trackingGeometrySvc.retrieve());
-    }
-#endif
     ATH_CHECK( m_trackingGeometryReadKey.initialize(!m_trackingGeometryReadKey.key().empty()) );
     if (m_propagationEngine.retrieve().isFailure()){
         EX_MSG_FATAL("", "initialize", "", "failed to retrieve propagation engine '"<< m_propagationEngine << "'. Aborting." );
