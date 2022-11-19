@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/ClassName.h
  * @author scott snyder <snyder@bnl.gov>
@@ -277,6 +275,19 @@ public:
    * @brief Return the full name of the expression.
    */
   std::string fullName() const;
+
+
+  /**
+   * @brief Return number of template arguments.
+   */
+  size_t ntargs() const;
+
+
+  /**
+   * @brief Return one template argument.
+   * @param i Index of the argument to return.
+   */
+  const ClassName& targ (size_t i) const;
 
 
   /**
