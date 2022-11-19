@@ -4,9 +4,8 @@
 
 StatusCode AthExAlgWithFPE::execute() {
 
-  float value=42;
-  float zero=0;
-  float byZero=value/zero;
+  float value = 42;
+  float byZero=divide (value, 0);
   ATH_MSG_INFO("Division of " << value << " by zero is " << byZero);
 
   return StatusCode::SUCCESS;
