@@ -64,8 +64,6 @@ class IDAlignMonResidualsAlg :  public AthMonitorAlgorithm {
 
   bool trackRequiresRefit(const Trk::Track*) const;
 
-  float m_maxPtEC{}; // threshold for low-pt EC distributions
-  
   //tools
   const AtlasDetectorID*                m_idHelper{};
   const InDetDD::PixelDetectorManager*  m_PIX_Mgr{}; 
