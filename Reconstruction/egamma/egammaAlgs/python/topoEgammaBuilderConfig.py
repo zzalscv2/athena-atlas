@@ -31,7 +31,7 @@ def topoEgammaBuilderCfg(flags, name='topoEgammaBuilder',
         emshowerbuilder = EMShowerBuilderCfg(flags)
         kwargs["EMShowerTool"] = acc.popToolsAndMerge(emshowerbuilder)
 
-    if "ObjectQualityTool" not in kwargs:
+    if "ObjectQualityTool" not in kwargs and not flags.Common.isOnline:
         oqtool = egammaOQFlagsBuilderCfg(flags)
         kwargs["ObjectQualityTool"] = acc.popToolsAndMerge(oqtool)
 
