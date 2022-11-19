@@ -37,7 +37,6 @@ namespace MuonCombined {
         SG::ReadCondHandleKey<Trk::TrackingGeometry> m_trackingGeometryReadKey{this, "TrackingGeometryReadKey", "",
                                                                                "Key of input TrackingGeometry"};
 
-        // end LEGACY_TRKGEOM
 
         double m_chi2cut;
 #ifdef MUONCOMBDEBUG
