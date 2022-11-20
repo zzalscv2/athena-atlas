@@ -9,8 +9,6 @@
 /////////////////////////////////////////////////////////////////// 
 
 
-// STL includes
-
 // FrameWork includes
 
 #include "GeneratorObjects/McEventCollection.h"

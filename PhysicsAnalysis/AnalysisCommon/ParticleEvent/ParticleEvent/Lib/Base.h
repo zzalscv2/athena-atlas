@@ -14,8 +14,6 @@
 // STL includes
 #include <iosfwd>
 
-// Gaudi includes
-
 // EventKernel includes
 #include "EventKernel/PdtPdg.h"
 #include "EventKernel/IParticle.h" // for {Charge,ParticleDataType::Data}Type
