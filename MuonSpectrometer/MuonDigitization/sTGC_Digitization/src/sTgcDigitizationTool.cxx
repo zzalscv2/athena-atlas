@@ -18,7 +18,6 @@
 
 //sTGC digitization includes
 #include "sTGC_Digitization/sTgcDigitizationTool.h"
-#include "sTGC_Digitization/sTgcVMMSim.h"
 #include "sTGC_Digitization/sTgcSimDigitData.h"
 
 //Geometry
@@ -40,10 +39,6 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-
-#include <TFile.h>
-#include <TH2.h>
-#include <TH1.h>
 
 #include <memory>
 
@@ -114,7 +109,6 @@ StatusCode sTgcDigitizationTool::initialize() {
   // getting our random numbers stream
   ATH_MSG_DEBUG("Getting random number engine : <" << m_rndmEngineName << ">");
 
-  readDeadtimeConfig();
   return StatusCode::SUCCESS;
 }
 /*******************************************************************************/
@@ -563,18 +557,23 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
         simData.setPosition(glob_hitOnSurf_wire);
         simData.setTime(globalHitTime);
 
-        Identifier elemId = m_idHelperSvc->stgcIdHelper().elementID(newDigitId);
-        if(newChannelType == 0){ //Pad Digit
+        Identifier layerID = m_idHelperSvc->stgcIdHelper().channelID(
+          newDigitId,
+          m_idHelperSvc->stgcIdHelper().multilayer(newDigitId),
+          m_idHelperSvc->stgcIdHelper().gasGap(newDigitId),
+          newChannelType, 1);
+
+        if(newChannelType == sTgcIdHelper::sTgcChannelTypes::Pad){ //Pad Digit
           //Put the hit and digit in a vector associated with the RE
-          unmergedPadDigits[elemId][newDigitId].emplace_back(simData, newDigit);
+          unmergedPadDigits[layerID][newDigitId].emplace_back(simData, newDigit);
         }
-        else if(newChannelType == 1){ //Strip Digit
+        else if(newChannelType == sTgcIdHelper::sTgcChannelTypes::Strip){ //Strip Digit
           //Put the hit and digit in a vector associated with the RE
-          unmergedStripDigits[elemId][newDigitId].emplace_back(simData, newDigit);
+          unmergedStripDigits[layerID][newDigitId].emplace_back(simData, newDigit);
         }
-        else if(newChannelType == 2){ //Wire Digit
+        else if(newChannelType == sTgcIdHelper::sTgcChannelTypes::Wire){ //Wire Digit
           //Put the hit and digit in a vector associated with the RE
-          unmergedWireDigits[elemId][newDigitId].emplace_back(simData, newDigit);
+          unmergedWireDigits[layerID][newDigitId].emplace_back(simData, newDigit);
         }
       } // end of loop digiHits
     } // end of while(i != e)
@@ -591,366 +590,79 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
   }
   const NswCalibDbThresholdData* thresholdData = readThresholds.cptr();
 
+  /*********************
+  * Process Strip Digits *
+  *********************/
+  /* Comments from Alexandre Laurier, October 2022:
+    Big update to VMM handling of digits to sTGC digitization
+    For each channel type, the digits are processed on a layer-by-layer level
+    This is done to improve the performance of strip neighborOn functionnality
+    For wires, pads, and neighborOn=false strips, the digits on each channel
+    are ordered by earlier to latest and processed in order.
+    The digits are merged according to the VMM merging time window.
+    Above threshold digits are saved to output unless a previous digit is found
+    within the deadtime window.
+    --- For neighborOn=true strips ---
+    A strip above threshold forces the VMM readout of neighbor strips, even if
+    neighbor strips are below threshold.
+    We apply the logic as above, but for strips below threshold we search for one
+    direct neighbor strip to be above VMM threshold which triggers the VMM
+    to read the strip digit.
+  */
+  std::map<Identifier, std::vector<sTgcSimDigitData> > processedDigits;
+  // Loop through strip digits on each layer
+  // unmergedStripDigits is a map of [layer ID , map[channelID, vector<sTGCSimDigitData ]   ]
+  for (auto& it_LAYER : unmergedStripDigits) { // layer ID : map[channelID, vector<sTGCSimDigitData>]
+    processedDigits = processDigitsWithVMM(ctx, m_deadtimeStrip, it_LAYER.second, thresholdData, m_doNeighborOn);
 
+    // processedDigits is a map of <Identifier, pair< vector<sTgcDigit>, vector<MuonSimData> >
+    // Need to save to output digits with identifier of the detectorElement
+    // and not layer due to logic of how outputDigits if further processed.
+    const Identifier& elemId = m_idHelperSvc->stgcIdHelper().elementID(it_LAYER.first);
+    for (const auto& strip : processedDigits){
+      for (const auto& simDigit : strip.second){
+        sdoContainer->insert( std::make_pair(strip.first, simDigit.getSimData()) );
+        outputDigits[elemId][strip.first].push_back(simDigit.getSTGCDigit());
+      }
+    }
+
+  } // end of strip digit processing
 
   /*********************
   * Process Pad Digits *
   *********************/
-  /*Comments from Jesse Heilman, Apr 12, 2017:
-   * Handing Pad digits is fairly striaghtforward: loop over the digits, merge any that are within the allowed
-   * time window, sort the digits by time and then determine if any digits fall in the deadtime window of
-   * previous digits.  This can be done in one pass because there is no interaction between pads.
-  */
-  ATH_MSG_VERBOSE("Processing Pad Digits");
-  int nPadDigits = 0;
-  for (std::map< Identifier, std::map< Identifier, std::vector<sTgcSimDigitData> > >::iterator it_DETEL = unmergedPadDigits.begin(); it_DETEL!= unmergedPadDigits.end(); ++it_DETEL) {
-    for (std::map< Identifier, std::vector<sTgcSimDigitData> >::iterator it_REID = it_DETEL->second.begin(); it_REID != it_DETEL->second.end(); ++it_REID) {  //loop on Pads
-      std::stable_sort(it_REID->second.begin(), it_REID->second.end(), sort_digitsEarlyToLate);  //Sort digits on this RE in time
+  // Loop through pads for each layer
+  // unmergedPadDigits is a map of [layer ID , map[channelID, vector<sTGCSimDigitData ]   ]
+  for (auto& it_LAYER : unmergedPadDigits) { // layer ID : map[channelID, vector<sTGCSimDigitData>]
+    processedDigits = processDigitsWithVMM(ctx, m_deadtimePad, it_LAYER.second, thresholdData, false);
 
-      /*******************
-      * Merge Pad Digits *
-      *******************/
-
-      std::vector<sTgcSimDigitData>::iterator i = it_REID->second.begin();
-      std::vector<sTgcSimDigitData>::iterator e = it_REID->second.end();
-      --e;  //decrement e to be the last element and not the beyond the last element iterator
-
-      while( i!=e ) {
-        sTgcDigit digit1 = i->getSTGCDigit();
-        sTgcDigit digit2 = (i+1)->getSTGCDigit();
-        if(digit2.time() - digit1.time() < m_hitTimeMergeThreshold ) { //two consecutive hits are close enough for merging
-          ATH_MSG_VERBOSE("Merging Digits on REID[" << it_REID->first.getString() << "]");
-          ATH_MSG_VERBOSE("digit1: " << digit1.time() << ", " << digit1.charge());
-          ATH_MSG_VERBOSE("digit2: " << digit2.time() << ", " << digit2.charge());
-
-          // Update the digit info
-          bool mergedIsPileup = (digit1.isPileup() && digit2.isPileup());
-          digit1.set_charge( digit1.charge()+digit2.charge() );
-          digit1.set_isPileup(mergedIsPileup);
-          i->setSTGCDigit(digit1);
-
-          it_REID->second.erase (i+1); //remove the later time digit
-          e = it_REID->second.end();  //update the end iterator
-          --e; //decrement e to be the last element and not the beyond the last element iterator
-          ATH_MSG_VERBOSE(it_REID->second.size() << " digits on the channel after merge step");
-        }
-        else {
-          ++i; //There was not a hit to merge: move onto the next one
-        }
-      }
-      ATH_MSG_VERBOSE("Merging complete for Pad REID[" << it_REID->first.getString() << "]");
-      ATH_MSG_VERBOSE(it_REID->second.size() << " digits on the channel after merging");
-
-      // Record SimData for pad channels and reate a temporary container
-      // to store merged digits for VMM operation
-      std::vector<sTgcDigit> merged_pad_digits;
-      for ( const sTgcSimDigitData& digit_hit: it_REID->second) {
-        // Add element to SDO container
-        Identifier channel_id = (digit_hit.getSTGCDigit()).identify();
-        sdoContainer->insert(std::make_pair(channel_id, digit_hit.getSimData()));
-
-        // List of digits for VMM
-        merged_pad_digits.push_back( digit_hit.getSTGCDigit() );
-      }
-      unsigned int size_mergedDigits = merged_pad_digits.size();
-      unsigned int size_channelDigits = it_REID->second.size();
-      if (size_mergedDigits != size_channelDigits) {
-        ATH_MSG_WARNING("Critical: Number of merged pad digits (" << size_mergedDigits << ") is not equal to the number of digits on pad channel (" << size_channelDigits << ") after merging. Please verify.");
-      }
-
-
-      /*************************
-      * Calculate Pad deadtime *
-      **************************/
-      ATH_MSG_VERBOSE("Calculating deadtime for Pad REID[" << it_REID->first.getString() << "]");
-
-      float vmmStartTime = (*(merged_pad_digits.begin())).time();
-
-      // overwrite VMM charge threshold value
-      float threshold = m_chargeThreshold;
-      if(m_useCondThresholds)
-        threshold = getChannelThreshold(ctx, it_REID->first, thresholdData);
-
-      std::unique_ptr<sTgcVMMSim> theVMM = std::make_unique<sTgcVMMSim>(std::move(merged_pad_digits), vmmStartTime, m_deadtimePad, m_readtimePad, m_produceDeadDigits, 0, threshold);  // object to simulate the VMM response
-      theVMM->setLevel(static_cast<MSG::Level>(msgLevel()));
-      theVMM->initialReport();
-
-      bool vmmControl = true;
-
-      while(vmmControl) {
-        ATH_MSG_VERBOSE("Tick on Pad REID[" << it_REID->first.getString() << "]");
-        vmmControl = theVMM->tick(); //advance the clock.  returns false if no more digits in
-        ATH_MSG_VERBOSE("Tick returned " << vmmControl);
-        if(vmmControl) {
-          ATH_MSG_VERBOSE("Tock on Pad REID[" << it_REID->first.getString() << "]");
-          theVMM->tock(); //update readout status
-          sTgcDigit* flushedDigit = theVMM->flush(); // Flush the digit buffer
-          if(flushedDigit) {
-            outputDigits[it_DETEL->first][it_REID->first].push_back(*flushedDigit);  // If a digit was in the buffer: store it to the RDO
-            ++nPadDigits;
-            ATH_MSG_VERBOSE("Flushed Digit") ;
-            ATH_MSG_VERBOSE(" BC tag = "    << flushedDigit->bcTag()) ;
-            ATH_MSG_VERBOSE(" digitTime = " << flushedDigit->time()) ;
-            ATH_MSG_VERBOSE(" charge = "    << flushedDigit->charge()) ;
-          }
-          else ATH_MSG_VERBOSE("No digit for this timestep on Pad REID[" << it_REID->first.getString() << "]");
-	}
+    const Identifier& elemId = m_idHelperSvc->stgcIdHelper().elementID(it_LAYER.first);
+    for (const auto& pad : processedDigits){
+      for (const auto& simDigit : pad.second){
+        sdoContainer->insert( std::make_pair(pad.first, simDigit.getSimData()) );
+        outputDigits[elemId][pad.first].push_back(simDigit.getSTGCDigit());
       }
     }
-  }
-  ATH_MSG_VERBOSE("There are " << nPadDigits << " flushed pad digits in this event.");
 
-  /***********************
-  * Process Strip Digits *
-  ***********************/
+  } // end of pad digit processing
 
-  /*Comments from Jesse Heilman, Apr 12, 2017:
-   * Handing Strip digits is a particular challenge due to the NeighborOn functionality of the strip Readout.
-   * This means that the deadtime for strips can not just happen simply from whenever a strip goes over the
-   * threshold, as happens in the Pads (where the threshold is any charge).  When a strip goes over threshold
-   * in NeighborOn mode, it triggers the readout of its neighboring strips at the same time.  If these strips
-   * then go over threshold, they trigger their neighbors and so on until a neighbor does not cross the
-   * threshold.  Practically this means that we must loop over all the strip digits, keeping track of their
-   * readout triggers and propogating these triggers to neighboring strips before we can assign deadtime windows
-   * and decide which digits to keep.
-  */
-  ATH_MSG_VERBOSE("Processing Strip Digits");
-  std::map< Identifier, std::map< Identifier, std::pair <bool, std::unique_ptr<sTgcVMMSim> > > > vmmArray; // map holding the VMMSim objects and a bool indicating if the channel is done processing
-  int nStripDigits = 0;
-  for (std::map< Identifier, std::map< Identifier, std::vector<sTgcSimDigitData> > >::iterator it_DETEL = unmergedStripDigits.begin(); it_DETEL!= unmergedStripDigits.end(); ++it_DETEL) {
-    for (std::map< Identifier, std::vector<sTgcSimDigitData> >::iterator it_REID = it_DETEL->second.begin(); it_REID != it_DETEL->second.end(); ++it_REID) {  //loop on Pads
-      std::stable_sort(it_REID->second.begin(), it_REID->second.end(), sort_digitsEarlyToLate);  //Sort digits on this RE in time
+  /*********************
+  * Process Wire Digits *
+  *********************/
+  // Loop through wire groups for each layer
+  // unmergedWireDigits is a map of [layer ID , map[channelID, vector<sTGCSimDigitData ]   ]
+  for (auto& it_LAYER : unmergedWireDigits) { // layer ID : map[channelID, vector<sTGCSimDigitData>]
+    processedDigits = processDigitsWithVMM(ctx, m_deadtimeWire, it_LAYER.second, thresholdData, false);
 
-      /*******************
-      * Merge Strip Digits *
-      *******************/
-
-      std::vector<sTgcSimDigitData>::iterator i = it_REID->second.begin();
-      std::vector<sTgcSimDigitData>::iterator e = it_REID->second.end();
-      --e;
-
-      while( i!=e ) {
-        sTgcDigit digit1 = i->getSTGCDigit();
-        sTgcDigit digit2 = (i+1)->getSTGCDigit();
-        if(digit2.time() - digit1.time() < m_hitTimeMergeThreshold ) { //two consecutive hits are close enough for merging
-          ATH_MSG_VERBOSE("Merging Digits on REID[" << it_REID->first.getString() << "]");
-          bool mergedIsPileup = (digit1.isPileup() && digit2.isPileup());
-          digit1.set_charge( digit1.charge()+digit2.charge() );
-          digit1.set_isPileup(mergedIsPileup);
-          i->setSTGCDigit(digit1);
-
-          it_REID->second.erase (i+1); //remove the later time digit
-          e = it_REID->second.end();  //update the end iterator
-          --e; //decrement e to be the last element and not the beyond the last element iterator
-          ATH_MSG_VERBOSE(it_REID->second.size() << " digits on the channel after merge step");
-        }
-        else {
-          ++i; //There was not a hit to merge: move onto the next one
-        }
-      }
-
-      // Record SimData for pad channels and create a temporary container
-      // to store merged digits for VMM operation
-      std::vector<sTgcDigit> merged_strip_digits;
-      for ( const sTgcSimDigitData& digit_hit: it_REID->second) {
-        // Add element to SDO container
-        Identifier channel_id = (digit_hit.getSTGCDigit()).identify();
-        sdoContainer->insert(std::make_pair(channel_id, digit_hit.getSimData()));
-
-        // Save digit for further processing with VMM
-        merged_strip_digits.push_back( digit_hit.getSTGCDigit() );
-      }
-      unsigned int size_mergedDigits = merged_strip_digits.size();
-      unsigned int size_channelDigits = it_REID->second.size();
-      if (size_mergedDigits != size_channelDigits) {
-      ATH_MSG_WARNING("Number of merged pad digits (" << size_mergedDigits << ") is not equal to the number of digits on pad channel (" << size_channelDigits << ") after merging. Please verify.");
-      }
-
-      // overwrite VMM charge threshold value
-      float threshold = m_chargeThreshold;
-      if(m_useCondThresholds)
-        threshold = getChannelThreshold(ctx, it_REID->first, thresholdData);
-
-      ATH_MSG_VERBOSE("Merging complete for Strip REID[" << it_REID->first.getString() << "]");
-      ATH_MSG_VERBOSE(it_REID->second.size() << " digits on the channel after merging");
-      vmmArray[it_DETEL->first][it_REID->first].first = true;
-      std::unique_ptr<sTgcVMMSim> vMMSimPtr = std::make_unique<sTgcVMMSim>(std::move(merged_strip_digits), (earliestEventTime-25), m_deadtimeStrip, m_readtimeStrip, m_produceDeadDigits, 1, threshold); // object to simulate the VMM response
-      vmmArray[it_DETEL->first][it_REID->first].second = std::move(vMMSimPtr);
-      vmmArray[it_DETEL->first][it_REID->first].second->setLevel(static_cast<MSG::Level>(msgLevel()));
-      ATH_MSG_VERBOSE("VMM instantiated for Strip REID[" << it_REID->first.getString() << "]");
-    }
-  }
-  for(std::map< Identifier, std::map< Identifier, std::pair <bool, std::unique_ptr<sTgcVMMSim> > > >::iterator it_DETEL = vmmArray.begin(); it_DETEL != vmmArray.end(); ++it_DETEL) {
-    bool vmmTerminateSignal = false; // when all channels are done processing this will flip true
-    while(true){
-      vmmTerminateSignal = false;
-      for (std::map< Identifier, std::pair <bool, std::unique_ptr<sTgcVMMSim> > >::iterator it_VMM = it_DETEL->second.begin(); it_VMM != it_DETEL->second.end(); ++it_VMM) { // Loop over VMM ticks
-        ATH_MSG_VERBOSE("Strip REID[" << it_VMM->first.getString() << "]");
-        if (it_VMM->second.first) it_VMM->second.first = it_VMM->second.second->tick();  // returns true if there are still digits to process as well as advances the clock
-        vmmTerminateSignal = (vmmTerminateSignal || it_VMM->second.first);  // record the presence of at least one channel with digits to process
-      }
-      vmmTerminateSignal = !vmmTerminateSignal; // flip the signal bit so it terminates if all channels reported false
-      if(vmmTerminateSignal) {
-        ATH_MSG_VERBOSE("No more digits to process.  Breaking VMM Loop.");
-        break; //Break the Loop if there are no more digits to process
-      }
-      for (std::map< Identifier, std::pair <bool,  std::unique_ptr<sTgcVMMSim> > >::iterator it_VMM = it_DETEL->second.begin(); it_VMM != it_DETEL->second.end(); ++it_VMM) { // Loop over VMM tocks
-        bool thresholdCrossed = false;
-        if (it_VMM->second.first) {
-          ATH_MSG_VERBOSE("Strip REID[" << it_VMM->first.getString() << "]");
-          thresholdCrossed = it_VMM->second.second->tock();  // returns true if an overthreshold digit was in the buffer
-        }
-
-        if(thresholdCrossed) {  // If a strip crosses threshold activate neighbor channels
-          Identifier parentId = m_idHelperSvc->stgcIdHelper().parentID(it_VMM->first);
-          int multiPlet = m_idHelperSvc->stgcIdHelper().multilayer(it_VMM->first);
-          int gasGap = m_idHelperSvc->stgcIdHelper().gasGap(it_VMM->first);
-          int channelType = m_idHelperSvc->stgcIdHelper().channelType(it_VMM->first);
-          int stripNumber = m_idHelperSvc->stgcIdHelper().channel(it_VMM->first);
-
-          bool isValid = false;
-          // Alexandre Laurier 2017-11-17: This block can create issues.
-          // We need to make sure we dont try to add out of range neighbors to the most extreme strips, ie first and last
-          // Currently, we only check to not add strip # 0
-          Identifier neighborPlusId = m_idHelperSvc->stgcIdHelper().channelID(parentId, multiPlet, gasGap, channelType, stripNumber+1, isValid);
-          if(isValid && it_DETEL->second.count(neighborPlusId) == 1) { //The neighbor strip exists and has had a vmm made for it
-            ATH_MSG_VERBOSE("Neighbor Trigger on REID[" << neighborPlusId.getString() << "]");
-            it_DETEL->second[neighborPlusId].second->neighborTrigger();
-          }
-          if (stripNumber!=1){
-            Identifier neighborMinusId = m_idHelperSvc->stgcIdHelper().channelID(parentId, multiPlet, gasGap, channelType, stripNumber-1, isValid);
-            if(isValid && it_DETEL->second.count(neighborMinusId) == 1) { //The neighbor strip exists and has had a vmm made for it
-              ATH_MSG_VERBOSE("Neighbor Trigger on REID[" << neighborMinusId.getString() << "]");
-              it_DETEL->second[neighborMinusId].second->neighborTrigger();
-            }
-          }
-        }
-      }
-
-
-      for (std::map< Identifier, std::pair <bool,  std::unique_ptr<sTgcVMMSim> > >::iterator it_VMM = it_DETEL->second.begin(); it_VMM != it_DETEL->second.end(); ++it_VMM) { // Loop over VMM flushes
-        sTgcDigit* flushedDigit = it_VMM->second.second->flush();  //Readout the digit buffer
-        if(flushedDigit) {
-          outputDigits[it_DETEL->first][it_VMM->first].push_back(*flushedDigit);  // If a digit was in the buffer: store it to the RDO
-          ++nStripDigits;
-        }
-        else ATH_MSG_VERBOSE("No digit for this timestep on Strip REID[" << it_VMM->first.getString() << "]");
+    const Identifier& elemId = m_idHelperSvc->stgcIdHelper().elementID(it_LAYER.first);
+    for (const auto& wire : processedDigits){
+      for (const auto& simDigit : wire.second){
+        sdoContainer->insert( std::make_pair(wire.first, simDigit.getSimData()) );
+        outputDigits[elemId][wire.first].push_back(simDigit.getSTGCDigit());
       }
     }
-  }
-  ATH_MSG_VERBOSE("There are " << nStripDigits << " flushed strip digits in this event.");
-  static_assert(std::is_nothrow_move_constructible<MuonSimData>::value);
-  static_assert(std::is_nothrow_move_constructible<sTgcSimDigitData>::value);//CscSimData
-  /**********************************
-   * PROCESS WIRE DIGIT *
-   *********************************/
-  /*** Comment by Chav Chhiv Chau, October 25 2017
-   * First implementation of wire response is simple.
-   * - When a wire is fired, a digit is recorded for the corresponding
-   *   wiregroup. The response implemented is similar to that for pad.
-   * TODO: a wiregroup digit should be the sum of currents read by wires
-   *       part of that wiregroup
-  */
 
-  int nWGDigits = 0;
-  for (std::map< Identifier, std::map< Identifier, std::vector<sTgcSimDigitData> > >::iterator it_DETEL = unmergedWireDigits.begin(); it_DETEL!= unmergedWireDigits.end(); ++it_DETEL) {
-    // loop on digits of same wiregroup
-    for (std::map< Identifier, std::vector<sTgcSimDigitData> >::iterator it_REID = it_DETEL->second.begin(); it_REID != it_DETEL->second.end(); ++it_REID) {
-      sort(it_REID->second.begin(), it_REID->second.end(), sort_digitsEarlyToLate);  //Sort digits on this RE in time
-
-      /*************************
-      * Merge wiregroup Digits *
-      *************************/
-      // No merging is done, just removing subsequent digits close in time
-      // to the first digit. TODO: Have to be updated
-
-      std::vector<sTgcSimDigitData>::iterator i = it_REID->second.begin();
-      std::vector<sTgcSimDigitData>::iterator e = it_REID->second.end();
-      --e;  //decrement e to be the last element and not the beyond the last element iterator
-
-      while( i!=e ) {
-        sTgcDigit digit1 = i->getSTGCDigit();
-        sTgcDigit digit2 = (i+1)->getSTGCDigit();
-        if(digit2.time() - digit1.time() < m_hitTimeMergeThreshold ) { //two consecutive hits are close enough for merging
-          ATH_MSG_VERBOSE("Merging Digits on REID[" << it_REID->first.getString() << "]");
-          ATH_MSG_VERBOSE("digit1: " << digit1.time() << ", " << digit1.charge());
-          ATH_MSG_VERBOSE("digit2: " << digit2.time() << ", " << digit2.charge());
-
-          bool mergedIsPileup = (digit1.isPileup() && digit2.isPileup());
-          digit1.set_charge( digit1.charge()+digit2.charge() );
-          digit1.set_isPileup(mergedIsPileup);
-          i->setSTGCDigit(digit1);
-
-          it_REID->second.erase (i+1); //remove the later time digit
-          e = it_REID->second.end();  //update the end iterator
-          --e; //decrement e to be the last element and not the beyond the last element iterator
-          ATH_MSG_VERBOSE(it_REID->second.size() << " digits on the channel after merge step");
-        }
-        else {
-          ++i; //There was not a hit to merge: move onto the next one
-        }
-      }
-
-      // Record SimData for pad channels and create a temporary container to
-      // store merged digits for VMM operation
-      std::vector<sTgcDigit> merged_wire_digits;
-      for ( const sTgcSimDigitData& digit_hit: it_REID->second) {
-        Identifier channel_id = (digit_hit.getSTGCDigit()).identify();
-        sdoContainer->insert(std::make_pair(channel_id, digit_hit.getSimData()));
-
-        // Save digit for further processing with VMM
-        merged_wire_digits.push_back( digit_hit.getSTGCDigit() );
-      }
-      unsigned int size_mergedDigits = merged_wire_digits.size();
-      unsigned int size_channelDigits = it_REID->second.size();
-      if (size_mergedDigits != size_channelDigits) {
-        ATH_MSG_WARNING("Number of merged pad digits (" << size_mergedDigits << ") is not equal to the number of digits on pad channel (" << size_channelDigits << ") after merging. Please verify.");
-      }
-
-
-      ATH_MSG_VERBOSE("Merging complete for Wiregroup REID[" << it_REID->first.getString() << "]");
-      ATH_MSG_VERBOSE(it_REID->second.size() << " digits on the channel after merging");
-
-      /*******************************
-      * Calculate wiregroup deadtime *
-      *******************************/
-      ATH_MSG_VERBOSE("Calculating deadtime for wiregroup REID[" << it_REID->first.getString() << "]");
-
-      float vmmStartTime = (*(merged_wire_digits.begin())).time();
-
-      // overwrite VMM charge threshold value
-      float threshold = m_chargeThreshold;
-      if(m_useCondThresholds)
-        threshold = getChannelThreshold(ctx, it_REID->first, thresholdData);
-
-      std::unique_ptr<sTgcVMMSim> theVMM = std::make_unique<sTgcVMMSim>(std::move(merged_wire_digits), vmmStartTime, m_deadtimeWire, m_readtimeWire, m_produceDeadDigits, 2, threshold);  // object to simulate the VMM response
-      theVMM->setLevel(msgLevel());
-      theVMM->initialReport();
-
-      bool vmmControl = true;
-
-      while(vmmControl) {
-        ATH_MSG_VERBOSE("Tick on wiregroup REID[" << it_REID->first.getString() << "]");
-        vmmControl = theVMM->tick(); //advance the clock.  returns false if no more digits in
-        ATH_MSG_VERBOSE("Tick returned " << vmmControl);
-        if(vmmControl) {
-          ATH_MSG_VERBOSE("Tock on wiregroup REID[" << it_REID->first.getString() << "]");
-          theVMM->tock(); //update readout status
-          sTgcDigit* flushedDigit = theVMM->flush(); // Flush the digit buffer
-          if(flushedDigit) {
-            outputDigits[it_DETEL->first][it_REID->first].push_back(*flushedDigit);  // If a digit was in the buffer: store it to the RDO
-            ++nWGDigits;
-            ATH_MSG_VERBOSE("Flushed wiregroup digit") ;
-            ATH_MSG_VERBOSE(" BC tag = "    << flushedDigit->bcTag()) ;
-            ATH_MSG_VERBOSE(" digitTime = " << flushedDigit->time()) ;
-            ATH_MSG_VERBOSE(" charge = "    << flushedDigit->charge()) ;
-          }
-          else ATH_MSG_VERBOSE("No digit for this timestep on wiregroup REID[" << it_REID->first.getString() << "]");
-        }
-      }
-    }
-  }
-  ATH_MSG_VERBOSE("There are " << nWGDigits << " flushed wiregroup digits in this event.");
+  } // end of wire digit processing
 
   /*************************************************
    * Output the digits to the StoreGate collection *
@@ -1020,78 +732,6 @@ StatusCode sTgcDigitizationTool::doDigitization(const EventContext& ctx) {
 }
 
 /*******************************************************************************/
-void sTgcDigitizationTool::readDeadtimeConfig()
-{
-  static const std::string fileName = "sTGC_Digitization_deadtime.config";
-  std::string fileWithPath = PathResolver::find_file (fileName, "DATAPATH");
-
-  ATH_MSG_INFO("Reading deadtime config file");
-
-  std::ifstream ifs;
-  if (!fileWithPath.empty()) {
-    ifs.open(fileWithPath, std::ios::in);
-  }
-  else {
-    throw std::runtime_error("readDeadtimeConfig(): Could not find file " + fileName );
-  }
-
-  if(ifs.bad()){
-    throw std::runtime_error("readDeadtimeConfig(): Could not open file " + fileName );
-  }
-
-  std::string var;
-  float value;
-
-  while(ifs.good()){
-    ifs >> var >> value;
-        if(var.compare("deadtimeON") == 0){
-          m_deadtimeON = (bool)value;
-          ATH_MSG_INFO("m_deadtimeON = " << (bool)value);
-          continue;
-        }
-        if(var.compare("produceDeadDigits") == 0){
-          m_produceDeadDigits = (bool)value;
-          ATH_MSG_INFO("m_produceDeadDigits = " << (bool)value);
-          continue;
-        }
-        if(var.compare("deadtimeStrip") == 0){
-          m_deadtimeStrip = value;
-          ATH_MSG_INFO("m_deadtimeStrip = " << value);
-          continue;
-        }
-        if(var.compare("deadtimePad") == 0){
-          m_deadtimePad = value;
-          ATH_MSG_INFO("m_deadtimePad = " << value);
-          continue;
-        }
-      if(var.compare("deadtimeWire") == 0){
-        m_deadtimeWire = value;
-        ATH_MSG_INFO("m_deadtimeWire = " << value);
-        continue;
-      }
-          if(var.compare("readtimePad") == 0){
-          m_readtimePad = value;
-          ATH_MSG_INFO("m_readtimePad = " << value);
-          continue;
-        }
-          if(var.compare("readtimeStrip") == 0){
-          m_readtimeStrip = value;
-          ATH_MSG_INFO("m_readtimeStrip = " << value);
-          continue;
-        }
-    if(var.compare("readtimeWire") == 0){
-        m_readtimeWire = value;
-        ATH_MSG_INFO("m_readtimeWire = " << value);
-        continue;
-      }
-        ATH_MSG_WARNING("Unknown value encountered reading deadtime.config");
-  }
-
-  ifs.close();
-
-}
-
-/*******************************************************************************/
 uint16_t sTgcDigitizationTool::bcTagging(const float digitTime, const int channelType) const {
 
   uint16_t bctag = 0;
@@ -1138,4 +778,156 @@ CLHEP::HepRandomEngine* sTgcDigitizationTool::getRandomEngine(const std::string&
   CLHEP::HepRandomEngine* engine = rngWrapper->getEngine(ctx);
   ATH_MSG_VERBOSE(streamName<<" rngName "<<rngName<<" "<<engine);
   return engine;
+}
+
+std::map<Identifier, std::vector<sTgcSimDigitData> > sTgcDigitizationTool::processDigitsWithVMM(const EventContext& ctx, const float vmmDeadTime, const std::map<Identifier, std::vector<sTgcSimDigitData> >& inputLayerDigits, const NswCalibDbThresholdData* thresholdData, const bool isNeighborOn) const {
+
+  std::map<Identifier, std::vector<sTgcSimDigitData> > inputChannels = inputLayerDigits;
+  std::map<Identifier, std::vector<sTgcSimDigitData> > savedDigits;
+
+  // Sort digits on every channel by earliest to latest time
+  // Also do hit merging to help with neighborOn logic
+  float threshold = m_chargeThreshold;
+  for (auto& channel : inputChannels){
+    std::stable_sort(channel.second.begin(), channel.second.end(), sort_digitsEarlyToLate);
+
+    if(m_useCondThresholds)
+      threshold = getChannelThreshold(ctx, channel.first, thresholdData);
+
+    // merge digits in time. Do weighed average to find time of
+    // digits originally below threshold. Follows what we expect from real VMM.
+    unsigned int nDigits = channel.second.size();
+    for (unsigned int i=0; i<nDigits; i++){
+      sTgcDigit digit1 = channel.second[i].getSTGCDigit();
+      float deltaT = 0.;
+      float totalCharge = digit1.charge();
+      float weightedTime = digit1.time();
+      // loop through subsequent digits that are close in time.
+      unsigned int j = i+1;
+      while (j < nDigits && deltaT < m_hitTimeMergeThreshold){
+        sTgcDigit digit2 = channel.second[j].getSTGCDigit();
+        deltaT = digit2.time() - digit1.time();
+        // If future digits are within window, digit1 absorbs its charge
+        if (deltaT < m_hitTimeMergeThreshold){
+          // If digit1 is not above threshold prior to merging, the new time is
+          // a weighted average. Do it for every merging pair.
+          weightedTime = (totalCharge >= threshold) ? weightedTime
+            : (weightedTime * totalCharge + digit2.time() * digit2.charge())
+            / (totalCharge + digit2.charge());
+          totalCharge += digit2.charge();
+        }
+        j++;
+      }
+      digit1.set_charge(totalCharge);
+      digit1.set_time(weightedTime);
+      channel.second[i].setSTGCDigit(digit1);
+    } // End of loops over the i digits
+
+  } // end of time-ordering and hit merging loop
+
+  for (const auto& channel : inputChannels){
+    const Identifier& channelID = channel.first;
+    int ChannelType = m_idHelperSvc->stgcIdHelper().channelType(channelID);
+
+    // channel.second is a vector of time-order digits
+    for (auto& simDigit : channel.second ) {
+      sTgcDigit digit1 = simDigit.getSTGCDigit();
+
+      // If the digit is within deadTimeWindow of last saved digit, skip digit
+      auto it = savedDigits.find(channelID);
+      if (it != savedDigits.end()){ // Have digits saved to VMM
+        // By construction of the method, saved digits are time ordered.
+        if (digit1.time() < it->second.back().getSTGCDigit().time()) ATH_MSG_WARNING("sTGC Digits are not time ordered like expected!");
+        if (digit1.time() - it->second.back().getSTGCDigit().time() <= vmmDeadTime) continue;
+      }
+
+      float threshold = m_chargeThreshold;
+      if(m_useCondThresholds)
+        threshold = getChannelThreshold(ctx, channelID, thresholdData);
+
+      if (digit1.charge() >= threshold)
+        savedDigits[channelID].push_back(simDigit);
+
+      else if (isNeighborOn && ChannelType == sTgcIdHelper::sTgcChannelTypes::Strip){
+
+        int stripNumber = m_idHelperSvc->stgcIdHelper().channel(channelID);
+        int maxStripNumber = m_mdManager->getsTgcReadoutElement(channelID)->numberOfStrips(channelID);
+        float neighbor_threshold = m_chargeThreshold;
+
+        int multiplet = m_idHelperSvc->stgcIdHelper().multilayer(channelID);
+        int layer = m_idHelperSvc->stgcIdHelper().gasGap(channelID);
+
+        bool neighborAboveThreshold = false;
+        // Look at above strip if stripNumber != max
+        if (stripNumber >= 1 && stripNumber < maxStripNumber){
+          const Identifier& neighborID = m_idHelperSvc->stgcIdHelper().channelID(
+            channelID, multiplet, layer, sTgcIdHelper::sTgcChannelTypes::Strip, stripNumber+1);
+
+          // Neighbor must be above its own charge threshold
+          if(m_useCondThresholds)
+            neighbor_threshold = getChannelThreshold(ctx, neighborID, thresholdData);
+
+          // If the neighbor has a strip digit within time window, trigger VMM to save
+          neighborAboveThreshold = neighborStripAboveThreshold(digit1.time(), neighborID, neighbor_threshold, savedDigits, inputLayerDigits);
+        }
+
+        // Look at below strip if stripNumber != 1
+        // Also no point in repeating if above strip is already trigging the VMM
+        if (!neighborAboveThreshold && stripNumber > 1 && stripNumber <= maxStripNumber){ // Below strip neighbor
+          // Get neighbor strip identifier
+          const Identifier& neighborID = m_idHelperSvc->stgcIdHelper().channelID(
+            channelID, multiplet, layer, sTgcIdHelper::sTgcChannelTypes::Strip, stripNumber-1);
+
+          if(m_useCondThresholds)
+            neighbor_threshold = getChannelThreshold(ctx, neighborID, thresholdData);
+
+          // If the neighbor has a strip digit within time window, trigger VMM to save
+          neighborAboveThreshold = neighborStripAboveThreshold(digit1.time(), neighborID, neighbor_threshold, savedDigits, inputLayerDigits);
+        }
+
+        if (neighborAboveThreshold)
+          savedDigits[channelID].push_back(simDigit);
+      }
+
+    } // Looping through every digit on channel
+
+  } // Looping through every channel on Layer
+
+  return savedDigits;
+}
+
+bool sTgcDigitizationTool::neighborStripAboveThreshold(const float digitTime, const Identifier& neighborID, const float neighbor_threshold, const std::map<Identifier, std::vector<sTgcSimDigitData> >& savedDigits, const std::map<Identifier, std::vector<sTgcSimDigitData> >& layerStripDigits) const {
+
+
+  auto it = savedDigits.find(neighborID);
+  // If neighbor strip has saved output digits,
+  // check if any saved digit is within time and above threshold
+  if (it != savedDigits.end()) {
+    for (const sTgcSimDigitData& simDigit : it->second){
+      if (simDigit.getSTGCDigit().charge() >= neighbor_threshold)
+        if (std::abs(digitTime - simDigit.getSTGCDigit().time()) <= m_hitTimeMergeThreshold)
+          return true;
+    }
+    // If theres a digit, it means this strip has been processed already
+    // so dont look at the unprocessed strips
+    return false;
+  }
+
+  it = layerStripDigits.find(neighborID);
+  if (it  != layerStripDigits.end()){
+    // Strip was either not processed or all digits below threshold
+    // Check if neighborstrip has any unsaved digits above threshold
+    // and make sure the strips are not dead with simple logic
+    float timeOfPreviousLiveDigit = -1000.;
+    for (const sTgcSimDigitData& simDigit : it->second){
+      if (simDigit.getSTGCDigit().charge() >= neighbor_threshold &&
+          simDigit.getSTGCDigit().time() - timeOfPreviousLiveDigit >= m_deadtimeStrip){
+        // above threshold strip not in a deadtime window
+          if ( std::abs(digitTime - simDigit.getSTGCDigit().time()) <= m_hitTimeMergeThreshold)
+            return true;
+          timeOfPreviousLiveDigit = simDigit.getSTGCDigit().time();
+      }
+    }
+  }
+  return false;
 }

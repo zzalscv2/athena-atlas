@@ -55,6 +55,7 @@ namespace CLHEP {
 }
 
 class sTgcHitIdHelper;
+class sTgcSimDigitData;
 
 /*******************************************************************************/
 class sTgcDigitizationTool : public PileUpToolBase {
@@ -134,34 +135,32 @@ private:
 
   Gaudi::Property<int> m_doChannelTypes{this,"doChannelTypes",3};
 
-  Gaudi::Property<float> m_deadtimeStrip{this,"DeadtimeElectronicsStrip",50};
-  Gaudi::Property<float> m_deadtimePad{this,"DeadtimeElectronicsPad",5};
-  Gaudi::Property<float> m_timeWindowPad{this,"timeWindowPad",30};
-  Gaudi::Property<float> m_timeWindowStrip{this,"timeWindowStrip",30};
+  // sTgc VMM configurables accessible by python steering
+  Gaudi::Property<float> m_deadtimeStrip{this,"deadtimeStrip", 250};
+  Gaudi::Property<float> m_deadtimePad{this,"deadtimePad"    , 250};
+  Gaudi::Property<float> m_deadtimeWire{this,"deadtimeWire" , 250};
+  Gaudi::Property<bool> m_doNeighborOn{this,"neighborOn", true};
 
   Gaudi::Property<double> m_energyDepositThreshold{this,"energyDepositThreshold",300.0*CLHEP::eV,"Minimum energy deposit for hit to be digitized"};
   Gaudi::Property<double> m_limitElectronKineticEnergy{this,"limitElectronKineticEnergy",5.0*CLHEP::MeV,"Minimum kinetic energy for electron hit to be digitized"};
 
-  const float m_chargeThreshold{0.02f};
+  const float m_chargeThreshold{0.03f};
 
   const float m_timeJitterElectronicsStrip{2.f}; //ns
   const float m_timeJitterElectronicsPad{2.f}; //ns
   const float m_hitTimeMergeThreshold{30.f}; //30ns = resolution of peak finding descriminator
 
-
-  bool m_deadtimeON{true};
-  bool m_produceDeadDigits{false};
-
-  float m_deadtimeWire{5.f};
-  float m_readtimeStrip{6.25f};
-  float m_readtimePad{6.25f};
-  float m_readtimeWire{6.25f};
-
-  void readDeadtimeConfig();
-
   uint16_t bcTagging(const float digittime, const int channelType) const;
 
   float getChannelThreshold(const EventContext& ctx, const Identifier& channelID, const NswCalibDbThresholdData* thresholdData) const;
+
+  std::map<Identifier, std::vector<sTgcSimDigitData> > processDigitsWithVMM(const EventContext& ctx, const float vmmDeadTime, const std::map<Identifier, std::vector<sTgcSimDigitData> >& inputLayerDigits, const NswCalibDbThresholdData* thresholdData, const bool isNeighborOn = false) const;
+
+  bool neighborStripAboveThreshold(const float digitTime, const Identifier& neighborID, const float neighbor_threshold, const std::map<Identifier, std::vector<sTgcSimDigitData> >& savedDigits, const std::map<Identifier, std::vector<sTgcSimDigitData> >& layerStripDigits) const;
+
+
+
+
 
 };
 

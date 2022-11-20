@@ -41,6 +41,11 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("CalibrationTool", result.popToolsAndMerge(NSWCalibToolCfg(flags)))
     kwargs.setdefault("SmearingTool", result.popToolsAndMerge(STgcCalibSmearingToolCfg(flags)))
+    # sTGC VMM configurables
+    kwargs.setdefault("deadtimeStrip", 250)
+    kwargs.setdefault("deadtimePad"  , 250)
+    kwargs.setdefault("deadtimeWire" , 250)
+    kwargs.setdefault("neighborOn", True)
     if flags.Digitization.PileUp:
         intervals = []
         if flags.Digitization.DoXingByXingPileUp:
