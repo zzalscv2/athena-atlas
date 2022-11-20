@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCORE_AUXCONTAINERBASE_ICC
 #define XAODCORE_AUXCONTAINERBASE_ICC
@@ -17,10 +17,10 @@
 
 namespace xAOD {
 
-   template< typename T >
+   template< typename T, typename ALLOC >
    AuxContainerBase::auxid_t
    AuxContainerBase::getAuxID( const std::string& name,
-                               std::vector< T >& /*vec*/,
+                               std::vector< T, ALLOC >& /*vec*/,
                                SG::AuxTypeRegistry::Flags flags ) {
 
       return SG::AuxTypeRegistry::instance().template getAuxID< T >( name, "",
@@ -71,10 +71,10 @@ namespace xAOD {
    /// @param name The name of the variable. Same as the C++ variable's name.
    /// @param vec A reference to the auxiliary variable inside the object
    /// @param flags Optional flags qualifying the type.  See AuxTypeRegistry.h.
-   template< typename T >
+   template< typename T, typename ALLOC >
    void AuxContainerBase::regAuxVar( const auxid_t auxid,
                                      const std::string& name,
-                                     std::vector< T >& vec ) {
+                                     std::vector< T, ALLOC >& vec ) {
      regAuxVar1<T> (auxid, name, vec);
      return;
    }
