@@ -18,11 +18,13 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "LArIdentifier/LArOnlineID.h"
+#include "CxxUtils/checker_macros.h"
+
 
 #include <vector>
 #include <string>
 
-class LArDuplicateConstants : public AthAlgorithm 
+class ATLAS_NOT_THREAD_SAFE LArDuplicateConstants : public AthAlgorithm 
 { 
  public:
   LArDuplicateConstants(const std::string& name, ISvcLocator* pSvcLocator);

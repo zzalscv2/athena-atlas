@@ -136,8 +136,6 @@ StatusCode LArCalibDigitMaker::execute() {
     return StatusCode::FAILURE;
  }
 
- const DataHandle<xAOD::EventInfo> thisEventInfo;
- ATH_CHECK( evtStore()->retrieve(thisEventInfo) );
  // Modif J. Labbe from JF. Marchand - Nov. 2009
  //  const unsigned eventNb=thisEventInfo->event_ID()->event_number();
  unsigned eventNbtmp=ctx.eventID().event_number();

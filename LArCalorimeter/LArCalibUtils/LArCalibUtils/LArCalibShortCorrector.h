@@ -7,12 +7,12 @@
 #define LARCALIBSHORTCORRECTOR_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 
 #include "LArElecCalib/ILArPedestal.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <vector>
 
@@ -22,7 +22,7 @@ class LArOnlineID;
 class HWIdentifier;
 
 
-class LArCalibShortCorrector : public AthAlgorithm//, public IIncidentListener 
+class ATLAS_NOT_THREAD_SAFE LArCalibShortCorrector : public AthAlgorithm
 {
  public:
   LArCalibShortCorrector(const std::string & name, ISvcLocator * pSvcLocator);
