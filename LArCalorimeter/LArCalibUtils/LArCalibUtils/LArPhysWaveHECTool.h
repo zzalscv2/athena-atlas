@@ -15,6 +15,8 @@
 #include "LArRawConditions/LArPhysWave.h"
 #include "LArRawConditions/LArWaveHelper.h"
 
+#include "CxxUtils/checker_macros.h"
+
 // includes from calib2physHEC.h:
 #include <stdio.h>
 #include <math.h>
@@ -33,7 +35,7 @@
 
 static const InterfaceID IID_LArPhysWaveHECTool("LArPhysWaveHECTool", 1 , 0); 
 
-class LArPhysWaveHECTool : public AthAlgTool
+class ATLAS_NOT_THREAD_SAFE LArPhysWaveHECTool : public AthAlgTool
 {
  public: 
 

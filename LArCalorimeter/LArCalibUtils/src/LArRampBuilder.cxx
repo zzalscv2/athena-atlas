@@ -62,19 +62,6 @@ StatusCode LArRampBuilder::initialize()
   unsigned int online_id_max = m_onlineHelper->channelHashMax() ; 
   m_thePedestal.resize(online_id_max,-1); 
   
-  if(m_ishec) {
-     sc = detStore()->regHandle(m_dd_rinj,m_hec_key);
-     if (sc!=StatusCode::SUCCESS) {
-       ATH_MSG_ERROR( "Cannot get register callback for HEC map" ); 
-       ATH_MSG_ERROR( "Will use default ");
-     } else {
-       ATH_MSG_INFO( " register callback for HEC map " );
-     }
-  }
- 
-  
-
-
   return StatusCode::SUCCESS;
 }
 
@@ -426,6 +413,12 @@ StatusCode LArRampBuilder::stop()
     }   
   }
 
+  
+  const ILArRinj* rinj=nullptr;
+  if(m_ishec) {
+    ATH_CHECK(detStore()->retrieve(rinj,m_hec_key));
+  }
+
   int containerCounter=0;
 
   int NRamp=0;
@@ -632,9 +625,9 @@ StatusCode LArRampBuilder::stop()
 	ramppoint.DAC        = dac_it->first; 
 
         if(m_ishec && m_onlineHelper->isHECchannel(chid)) {
-           if(m_dd_rinj) {
-              const float rinj = m_dd_rinj->Rinj(chid);
-              if(rinj < 4) ramppoint.DAC /= 2;
+           if(rinj) {
+              const float rinjval = rinj->Rinj(chid);
+              if(rinjval < 4) ramppoint.DAC /= 2;
            }
         }
 

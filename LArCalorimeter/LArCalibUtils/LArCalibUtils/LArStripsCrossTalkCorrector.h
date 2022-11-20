@@ -16,6 +16,7 @@
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArRawEvent/LArAccumulatedCalibDigit.h"
 #include "LArRecConditions/LArBadChannelMask.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <vector>
 #include <string>
@@ -51,7 +52,7 @@ private:
 
 //===================================================================================
 
-class LArStripsCrossTalkCorrector : public AthAlgorithm
+class ATLAS_NOT_THREAD_SAFE LArStripsCrossTalkCorrector : public AthAlgorithm
 {
  public:
   using AthAlgorithm::AthAlgorithm;
