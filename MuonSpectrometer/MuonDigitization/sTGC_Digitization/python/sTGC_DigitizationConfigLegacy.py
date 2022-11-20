@@ -6,21 +6,21 @@
 from Digitization.DigitizationFlags import jobproperties
 from AthenaCommon import CfgMgr
 
-# The earliest bunch crossing time for which interactions will be sent 
+# The earliest bunch crossing time for which interactions will be sent
 # to the sTGCDigitizationTool. BCID = -4
-def sTGC_FirstXing(): 
+def sTGC_FirstXing():
     return -100
- 
-# The latest bunch crossing time for which interactions will be sent 
+
+# The latest bunch crossing time for which interactions will be sent
 # to the sTGCDigitizationTool. BCID = 3
-def sTGC_LastXing(): 
+def sTGC_LastXing():
     return 100
 
 def sTgcDigitizationTool(name="sTgcDigitizationTool",**kwargs):
     kwargs.setdefault("CalibrationTool", "NSWCalibTool")
     if jobproperties.Digitization.doXingByXingPileUp():
         kwargs.setdefault("FirstXing", sTGC_FirstXing() )  # this should match the range for the sTGC in Digitization/share/MuonDigitization.py
-        kwargs.setdefault("LastXing",  sTGC_LastXing() )  # this should match the range for the sTGC in Digitization/share/MuonDigitization.py  
+        kwargs.setdefault("LastXing",  sTGC_LastXing() )  # this should match the range for the sTGC in Digitization/share/MuonDigitization.py
     from AthenaCommon.DetFlags import DetFlags
     if not DetFlags.pileup.any_on():
         kwargs.setdefault("MergeSvc", '')
@@ -38,17 +38,23 @@ def sTgcDigitizationTool(name="sTgcDigitizationTool",**kwargs):
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
     kwargs.setdefault("SmearingTool","STgcCalibSmearingTool")
+    # sTGC VMM configurables
+    kwargs.setdefault("deadtimeStrip", 250)
+    kwargs.setdefault("deadtimePad"  , 250)
+    kwargs.setdefault("deadtimeWire" , 250)
+    kwargs.setdefault("neighborOn", True)
+
     return CfgMgr.sTgcDigitizationTool(name,**kwargs)
 
-def getSTGCRange(name="sTgcRange", **kwargs): 
-    # bunch crossing range in ns 
-    kwargs.setdefault('FirstXing', sTGC_FirstXing() ) 
-    kwargs.setdefault('LastXing',  sTGC_LastXing() ) 
-    kwargs.setdefault('CacheRefreshFrequency', 1.0 ) #default 0 no dataproxy reset 
+def getSTGCRange(name="sTgcRange", **kwargs):
+    # bunch crossing range in ns
+    kwargs.setdefault('FirstXing', sTGC_FirstXing() )
+    kwargs.setdefault('LastXing',  sTGC_LastXing() )
+    kwargs.setdefault('CacheRefreshFrequency', 1.0 ) #default 0 no dataproxy reset
     if 'LegacyNSWContainers' in jobproperties.Digitization.experimentalDigi():
         kwargs.setdefault('ItemList', ["sTGCSimHitCollection#sTGCSensitiveDetector"] )
     else:
-        kwargs.setdefault('ItemList', ["sTGCSimHitCollection#sTGC_Hits"] ) 
+        kwargs.setdefault('ItemList', ["sTGCSimHitCollection#sTGC_Hits"] )
     return CfgMgr.PileUpXingFolder(name, **kwargs)
 
 def STGC_OverlayDigitizationTool(name="STGC_OverlayDigitizationTool",**kwargs):
