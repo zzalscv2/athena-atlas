@@ -13,7 +13,7 @@ atlas_add_library( ISF_Event
                    PUBLIC_HEADERS ISF_Event
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}  ${EIGEN_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AtlasHepMCsearchLib ${EIGEN_LIBRARIES} TestTools AthenaBaseComps AtlasDetDescr BarcodeEventLib GeoPrimitives GeneratorObjects GaudiKernel )
+                   LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AtlasHepMCsearchLib ${EIGEN_LIBRARIES} TestTools AthenaBaseComps AtlasDetDescr BarcodeEventLib GeoPrimitives GeneratorObjects GaudiKernel CxxUtils )
 
 foreach( name
          ISFParticle_test

@@ -12,7 +12,6 @@
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ParticleClipboard.h"
 
 #include "ISF_Interfaces/IParticleHelper.h"
 
@@ -216,11 +215,6 @@ namespace G4UA{
       // material info
       G4StepPoint *preStep=aStep->GetPreStepPoint();
       G4StepPoint *postStep=aStep->GetPostStepPoint();
-      
-      // parent
-      //const ISF::ISFParticle* parent= ISF::ParticleClipboard::getInstance().getParticle();
-      // something is seriously wrong if there is no parent particle
-      //assert(parent);
       
       G4ThreeVector mom = preStep->GetMomentum();
       const G4ThreeVector& pos = preStep->GetPosition();

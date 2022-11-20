@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,6 +8,8 @@
 
 #ifndef ISF_EVENT_PARTICLECLIPBOARD_H
 #define ISF_EVENT_PARTICLECLIPBOARD_H
+
+#include "CxxUtils/checker_macros.h"
 
 namespace ISF {
 
@@ -28,7 +30,7 @@ namespace ISF {
    @author Elmar.Ritsch -at- cern.ch
    */
 
-  class ParticleClipboard {
+  class ATLAS_NOT_THREAD_SAFE ParticleClipboard {  // mostly obsolete: ATLASSIM-128
 
     public:
       /** get the singleton instance */
