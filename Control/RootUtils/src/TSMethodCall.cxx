@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -25,6 +25,7 @@ namespace RootUtils {
  */
 TSMethodCall::TSMethodCall()
   : m_cls(nullptr),
+    m_mode (ROOT::kExactMatch),
     m_meth (std::make_unique<TMethodCall>()),
     m_initialized(false)
 {
@@ -38,6 +39,7 @@ TSMethodCall::TSMethodCall (const TSMethodCall& other)
   : m_cls (other.m_cls),
     m_fname (other.m_fname),
     m_args (other.m_args),
+    m_mode (other.m_mode),
     m_meth (std::make_unique<TMethodCall> (*other.m_meth)),
     m_initialized (false)
 {
@@ -55,6 +57,7 @@ TSMethodCall& TSMethodCall::operator= (const TSMethodCall& other)
     m_fname = other.m_fname;
     m_args = other.m_args;
     *m_meth = *other.m_meth;
+    m_mode = other.m_mode;
     m_initialized = false;
 
     // Don't copy m_tsMeth.
@@ -81,14 +84,17 @@ TSMethodCall::~TSMethodCall()
  * @param cls The class of the object we're calling.
  * @param fname The name of the function.
  * @param args Its argument list.
+ * @param mode Controls whether to allow for conversions.
  */
 void TSMethodCall::setProto (TClass* cls,
                              const std::string& fname,
-                             const std::string& args)
+                             const std::string& args,
+                             ROOT::EFunctionMatchMode mode /*=ROOT::kExactMatch*/)
 {
   m_cls = cls;
   m_fname = fname;
   m_args = args;
+  m_mode = mode;
   m_initialized = false;
 }
 
@@ -110,7 +116,7 @@ TMethodCall* TSMethodCall::call()
     // cppcheck-suppress identicalInnerCondition; false positive
     if (!m_initialized) {
       m_meth->InitWithPrototype (m_cls, m_fname.c_str(), m_args.c_str(),
-                                false, ROOT::kExactMatch);
+                                false, m_mode);
       if (!m_meth->IsValid()) {
         ::Warning ("RootUtils::Type",
                    "Can't get method for type `%s': %s (%s).",
