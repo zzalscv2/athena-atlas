@@ -189,7 +189,7 @@ StatusCode TruthTestTool::processEvent()
         m_vtx_z->Fill(z);
         m_vtx_zr_indet->Fill(z, r);
         m_vtx_xy_indet->Fill(x, y);
-        if ( HepMC::barcode(vtx)>-20000 ) {
+        if ( HepMC::barcode(vtx)>-200000 ) {
           mx+=x;
           my+=y;
           mz+=z;
