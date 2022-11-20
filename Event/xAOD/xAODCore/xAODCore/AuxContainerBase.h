@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODCORE_AUXCONTAINERBASE_H
 #define XAODCORE_AUXCONTAINERBASE_H
@@ -167,9 +167,9 @@ namespace xAOD {
 
    protected:
       /// Get the auxiliary ID for one of the persistent variables
-      template< typename T >
+      template< typename T, typename ALLOC >
       auxid_t getAuxID( const std::string& name,
-                        std::vector< T >& /*vec*/,
+                        std::vector< T, ALLOC >& /*vec*/,
                         SG::AuxTypeRegistry::Flags flags =
                         SG::AuxTypeRegistry::Flags::None );
       /// Get the auxiliary ID for one of the persistent variables
@@ -179,9 +179,9 @@ namespace xAOD {
                         SG::AuxTypeRegistry::Flags flags =
                         SG::AuxTypeRegistry::Flags::None );
       /// Register one of the persistent variables internally
-      template< typename T >
+      template< typename T, typename ALLOC >
       void regAuxVar( auxid_t auxid, const std::string& name,
-                      std::vector< T >& vec );
+                      std::vector< T, ALLOC >& vec );
 
       /// Register one of the persistent variables internally
       template< typename T >
