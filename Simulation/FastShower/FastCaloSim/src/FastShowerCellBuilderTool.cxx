@@ -1884,22 +1884,15 @@ bool FastShowerCellBuilderTool::Is_EM_Vertex(const HepMC::ConstGenVertexPtr& ver
 
 FastShowerCellBuilderTool::flag_simul_sate FastShowerCellBuilderTool::Is_below_v14_truth_cuts_Vertex(const HepMC::ConstGenVertexPtr& ver) 
 {
-  if(ver) {
-    int nin=0;
-    int id_in=0;
+    if(!ver) return zero_state;
 #ifdef HEPMC3
-    HepMC::ConstGenParticlePtr par_in;
-    for(const auto& pin:ver->particles_in()) {
-    par_in=pin;
+    if(ver->particles_in().size()!=1) return zero_state;
+    HepMC::ConstGenParticlePtr par_in = ver->particles_in().front();
 #else
-    const HepMC::GenParticle* par_in=nullptr;
-    for(HepMC::GenVertex::particles_in_const_iterator pin=ver->particles_in_const_begin();pin!=ver->particles_in_const_end();++pin) {
-      par_in=*pin;
+    if(ver->particles_in_size()!=1) return zero_state;
+    const HepMC::GenParticle* par_in = *(ver->particles_in_const_begin());
 #endif
-      id_in=par_in->pdg_id();
-      ++nin;
-    }
-    if(nin!=1) return zero_state;
+    int id_in= par_in->pdg_id();
     int nout=0;
     int nele=0;
     int ngamma=0;
@@ -1922,9 +1915,6 @@ FastShowerCellBuilderTool::flag_simul_sate FastShowerCellBuilderTool::Is_below_v
       //photon conversion to e+e-, but one e might not be stored
       if(par_in->momentum().e()<500) return v14_truth_conv;
     }
-  } else {
-    return zero_state;
-  }
   return zero_state;
 }
 
@@ -2136,16 +2126,15 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
   if (!mcCollptr->empty())
     {
 #ifdef HEPMC3
-      auto istart = mcCollptr->at(0)->particles().begin();
-      auto iend   = mcCollptr->at(0)->particles().end();
+      particles = mcCollptr->at(0)->particles();
 #else
       HepMC::GenEvent::particle_const_iterator istart = mcCollptr->at(0)->particles_begin();
       HepMC::GenEvent::particle_const_iterator iend   = mcCollptr->at(0)->particles_end();
-#endif
       for ( ; istart!= iend; ++istart)
         {
           particles.push_back(*istart);
         }
+#endif
     }
   auto last_good = std::remove_if(particles.begin(), particles.end(),[](auto & part) { return FastCaloSimIsGenSimulStable(part) == false; });
   particles.erase(last_good, particles.end());
