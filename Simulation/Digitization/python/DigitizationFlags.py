@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #=======================================================================
 # File:   DigitizationFlags.py
@@ -813,25 +813,9 @@ class Digitization(JobPropertyContainer):
         if len(f.run_numbers)>0 :
             simRunNumber = f.run_numbers[0]
         else :
-            logDigitizationFlags.debug("Old file format detected - using dumpRunNumber.py instead")
-            myCommand = 'dumpRunNumber.py '+ hitfile
-            import commands, re
-            sc,out = commands.getstatusoutput(myCommand)
-            if sc != 0:
-                logDigitizationFlags.error('ERR: problem:\n%s',str(out) )
-                raise SystemExit(sc)
-            myOutput = '0'
-            for l in out.splitlines():
-                if re.match('^run number: .', l):
-                    tempout = re.split('^run number: .',l)
-                    if len(tempout) > 1:
-                        myOutput = tempout[1].strip()
-                    del tempout
-            if len(myOutput) > 0 :
-                simRunNumber = int(myOutput)
-            else :
-                logDigitizationFlags.info("Failed to find Run Number in hits file metadata.")
-            ######################
+            logDigitizationFlags.error("Failed to find Run Number in hits file metadata.")
+            raise SystemExit(1)
+
         logDigitizationFlags.info('Found Run Number %s in hits file metadata.', str(simRunNumber) )
         return simRunNumber
 
