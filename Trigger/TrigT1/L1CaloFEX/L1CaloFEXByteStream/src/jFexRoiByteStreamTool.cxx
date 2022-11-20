@@ -103,7 +103,7 @@ StatusCode jFexRoiByteStreamTool::initialize() {
     
 
     //Reading from CVMFS TOB mapping
-    ATH_CHECK(ReadfromFile(m_TobMapping));    
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_TobMapping)));
     
     return StatusCode::SUCCESS;
 }
