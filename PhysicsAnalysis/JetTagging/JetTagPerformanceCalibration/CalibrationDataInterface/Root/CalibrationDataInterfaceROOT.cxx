@@ -802,7 +802,10 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
   }
 
   // perform out-of-bound check of jet eta
-  checkAbsEta(variables, indexSF);
+  if (!checkAbsEta(variables, indexSF)) {
+    cerr << "Jet |eta| is outside of the boundary!" << endl;
+    return Analysis::kError;
+  }
 
   // retrieve the MC/MC scale factor
   double MCMCSF = m_useMCMCSF ? getMCMCScaleFactor(variables, indexSF, indexEff) : 1;
@@ -988,7 +991,11 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
   if (! container) return Analysis::kError;
   
   // perform out-of-bound check of jet eta
-  checkAbsEta(variables, index);
+  if (!checkAbsEta(variables, index)) {
+    cerr << "Jet |eta| is outside of the boundary!" << endl;
+    return Analysis::kError;
+  }
+
 
   // always retrieve the result itself
   double value;
@@ -1546,7 +1553,10 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   checkWeightScaleFactors(indexSF, indexEff);
 
   // perform out-of-bound check of jet eta
-  checkAbsEta(variables, indexSF);
+  if (!checkAbsEta(variables, indexSF)) {
+    cerr << "Jet |eta| is outside of the boundary!" << endl;
+    return Analysis::kError;
+  }
 
   // Always retrieve the result itself 
   double value;
@@ -1900,22 +1910,28 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
 }
 
 //________________________________________________________________________________
-void
+bool
 Analysis::CalibrationDataInterfaceROOT::checkAbsEta(const CalibrationDataVariables& variables,
 						    unsigned int index)
 {
   // Check whether the jet eta value is outside the range of validity, subject to the strategy
   // specified in the configuration file.
-
-  if (m_absEtaStrategy == Ignore) return;
+  bool pass = true;
+  if (m_absEtaStrategy == Ignore) return pass; 
+ 
   switch (m_absEtaStrategy) {
   case GiveUp:
-    assert(!(std::fabs(variables.jetEta) > m_maxAbsEta)); break;
+    if (std::fabs(variables.jetEta) > m_maxAbsEta) {
+      pass = false;  
+    }
+    break;
   case Flag:
   default:
-    if (std::fabs(variables.jetEta) > m_maxAbsEta)
+    if (std::fabs(variables.jetEta) > m_maxAbsEta) {
       increaseCounter(index, Eta);
+    }
   }
+  return pass;
 }
 
 //________________________________________________________________________________
