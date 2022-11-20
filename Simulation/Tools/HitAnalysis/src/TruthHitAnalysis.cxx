@@ -266,7 +266,7 @@ StatusCode TruthHitAnalysis::execute() {
 	m_vtx_z->push_back(z);
 	m_vtx_barcode->push_back(bcode);
 
-	if (bcode > -20000) {
+	if (bcode > -200000) {
 	  m_h_vtx_prim_xy->Fill(x,y);
 	  m_h_vtx_prim_zr->Fill(z,r);
 	  ++nvtx;
