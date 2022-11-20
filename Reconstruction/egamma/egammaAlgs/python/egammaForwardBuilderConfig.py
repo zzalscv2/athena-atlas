@@ -41,7 +41,7 @@ def egammaForwardBuilderCfg(flags, name='egammaForwardElectron', **kwargs):
         acc.merge(MediumFwdElectronSelector)
         acc.merge(TightFwdElectronSelector)
 
-    if "ObjectQualityTool" not in kwargs:
+    if "ObjectQualityTool" not in kwargs and not flags.Common.isOnline:
         egOQ = egammaOQFlagsBuilderCfg(flags)
         kwargs["ObjectQualityTool"] = egOQ.popPrivateTools()
         acc.merge(egOQ)
