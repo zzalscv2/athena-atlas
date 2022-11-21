@@ -12,7 +12,6 @@
 #include <limits>
 
 #include <TFile.h>
-#include <TH1F.h>
 #include <TObjString.h>
 
 #include "PathResolver/PathResolver.h"
@@ -468,7 +467,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_alt_2012_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_alt_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_alt_2012"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo));
@@ -476,7 +475,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2012_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo));
@@ -484,7 +483,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2012_v5_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DUp(*histo));
@@ -492,7 +491,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2012_v5_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DDown(*histo));
@@ -500,7 +499,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2012_v5_errdown" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorUp(*histo));
@@ -508,7 +507,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2012_v5_errup" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
@@ -516,7 +515,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_alt_2011_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_alt_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_alt_2011"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo));
@@ -524,7 +523,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2011_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo));
@@ -532,7 +531,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2011_v5_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DUp(*histo));
@@ -540,7 +539,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2011_v5_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DDown(*histo));
@@ -548,7 +547,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2011_v5_errdown" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorUp(*histo));
@@ -556,7 +555,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2011_v5_errup" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
@@ -564,7 +563,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2010_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo));
@@ -572,7 +571,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2010_v5_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DUp(*histo));
@@ -580,7 +579,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2010_v5_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DDown(*histo));
@@ -588,7 +587,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2010_v5_errdown" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorUp(*histo));
@@ -596,7 +595,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer1_2010_v5_errup" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE1(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo));
@@ -604,7 +603,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_alt_run2_r21_v1"==tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v6/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_mu_run2_rel21_v1"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2_mu_run2_rel21_v1"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
               new GetAmountHisto1D(*histo));
@@ -612,7 +611,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_alt_run2_r21_v0"==tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v5/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2mu_2016_rel21_v1"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2mu_2016_rel21_v1"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
               new GetAmountHisto1D(*histo));
@@ -620,7 +619,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_alt_run2_v1" == tune) { 
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v3/egammaLayerRecalibTunes.root"); 
     TFile f(file.c_str()); 
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2mu_2016_v1"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2mu_2016_v1"));
     assert(histo); 
     add_scale(new ScaleE2(InputModifier::ONEBASED), 
               new GetAmountHisto1D(*histo)); 
@@ -628,7 +627,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_alt_2012_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_alt_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_alt_2012"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1D(*histo));
@@ -636,7 +635,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2012_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1D(*histo));
@@ -644,7 +643,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2012_v5_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DDown(*histo));
@@ -652,7 +651,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2012_v5_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DUp(*histo));
@@ -660,7 +659,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer2_2012_v5_errdown" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DErrorDown(*histo));
@@ -668,7 +667,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer2_2012_v5_errup" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2012"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2012"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DErrorUp(*histo));
@@ -676,7 +675,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_alt_2011_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_alt_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_alt_2011"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1D(*histo));
@@ -684,7 +683,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2011_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1D(*histo));
@@ -692,7 +691,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2011_v5_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DDown(*histo));
@@ -700,7 +699,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2011_v5_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DUp(*histo));
@@ -708,7 +707,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer2_2011_v5_errdown" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DErrorDown(*histo));
@@ -716,7 +715,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer2_2011_v5_errup" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2011"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2011"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DErrorUp(*histo));
@@ -724,7 +723,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2010_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1D(*histo));
@@ -732,7 +731,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2010_v5_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DDown(*histo));
@@ -740,7 +739,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if("layer2_2010_v5_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DUp(*histo));
@@ -748,7 +747,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer2_2010_v5_errdown" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DErrorDown(*histo));
@@ -756,7 +755,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("layer2_2010_v5_errup" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2ave_2010"));
+    TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2ave_2010"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
 	      new GetAmountHisto1DErrorUp(*histo));
@@ -764,7 +763,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2016_r21_v0" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v5/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2016_rel21"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2016_rel21"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
               new GetAmountHisto1D(*histo_ps_tot_error));
@@ -772,7 +771,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2016_v1" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v4/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2016"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2016"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo_ps_tot_error));
@@ -780,7 +779,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2012_v3" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1D* histo_ps_tot_error = static_cast<TH1D*>(f.Get("hPS_2012"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2012"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo_ps_tot_error));
@@ -788,7 +787,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2012_v3_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2012"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2012"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DUp(*histo_ps_tot_error));
@@ -796,7 +795,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2012_v3_up" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2012"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2012"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DDown(*histo_ps_tot_error));
@@ -804,7 +803,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2012_v3_errdown" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2012"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2012"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorUp(*histo_ps_tot_error));
@@ -812,7 +811,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2012_v3_errup" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2012"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2012"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo_ps_tot_error));
@@ -820,7 +819,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2011_v3" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2011"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2011"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo_ps_tot_error));
@@ -828,7 +827,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2011_v3_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2011"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2011"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DUp(*histo_ps_tot_error));
@@ -836,7 +835,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2011_v3_up" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2011"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2011"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DDown(*histo_ps_tot_error));
@@ -844,7 +843,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2011_v3_errdown" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2011"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2011"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorUp(*histo_ps_tot_error));
@@ -852,7 +851,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2011_v3_errup" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2011"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2011"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo_ps_tot_error));
@@ -861,7 +860,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2010_v3" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2010"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2010"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1D(*histo_ps_tot_error));
@@ -869,7 +868,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2010_v3_down" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2010"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2010"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DUp(*histo_ps_tot_error));
@@ -877,7 +876,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2010_v3_up" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2010"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2010"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ONEBASED_ALPHA),
 	      new GetAmountHisto1DDown(*histo_ps_tot_error));
@@ -885,7 +884,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2010_v3_errdown" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2010"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2010"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorUp(*histo_ps_tot_error));
@@ -893,7 +892,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
   else if ("ps_2010_v3_errup" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
-    TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_2010"));
+    TH1* histo_ps_tot_error = dynamic_cast<TH1*>(f.Get("hPS_2010"));
     assert(histo_ps_tot_error);
     add_scale(new ScaleE0(InputModifier::ZEROBASED_ALPHA),
 	      new GetAmountHisto1DErrorDown(*histo_ps_tot_error));
