@@ -147,7 +147,7 @@ namespace InDet
 	for (tracksToAddIter=tracksToAddBegin;tracksToAddIter!=tracksToAddEnd;++tracksToAddIter) {
 	  std::vector<Trk::VxTrackAtVertex*> temp_vector_tracksAtVertex;
 	  ElementLink<Trk::TrackParticleBaseCollection> link;
-	  link.setElement(const_cast<Trk::TrackParticleBase*>(*tracksToAddIter));
+	  link.setElement(*tracksToAddIter);
 	  Trk::LinkToTrackParticleBase * linkTT = new Trk::LinkToTrackParticleBase(link);
 	  Trk::VxTrackAtVertex* newVxTrack=new Trk::VxTrackAtVertex(linkTT);
 	  temp_vector_tracksAtVertex.push_back(newVxTrack);
@@ -243,7 +243,7 @@ namespace InDet
 	for (tracksToAddIter=tracksToAddBegin;tracksToAddIter!=tracksToAddEnd;++tracksToAddIter) {
 	  std::vector<Trk::VxTrackAtVertex*> temp_vector_tracksAtVertex;
 	  ElementLink<Trk::TrackParticleBaseCollection> link;
-	  link.setElement(const_cast<Trk::TrackParticleBase*>(*tracksToAddIter));
+	  link.setElement(*tracksToAddIter);
 	  Trk::LinkToTrackParticleBase * linkTT = new Trk::LinkToTrackParticleBase(link);
 	  Trk::VxTrackAtVertex* newVxTrack=new Trk::VxTrackAtVertex(linkTT);
 	  temp_vector_tracksAtVertex.push_back(newVxTrack);

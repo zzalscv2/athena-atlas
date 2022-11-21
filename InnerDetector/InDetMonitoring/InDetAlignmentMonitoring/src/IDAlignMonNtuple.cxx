@@ -566,7 +566,7 @@ StatusCode IDAlignMonNtuple::fillHistograms() {
       //the key for the truth std::map is an ElementLink<TrackCollection> object
       //comprises a pointer to the track and reconstructed track collection
       ElementLink<TrackCollection> trackLink;
-      trackLink.setElement(const_cast<Trk::Track*>(track));
+      trackLink.setElement(track);
       trackLink.setStorableObject(*tracks);
       const ElementLink<TrackCollection> trackLink2 = trackLink;
 

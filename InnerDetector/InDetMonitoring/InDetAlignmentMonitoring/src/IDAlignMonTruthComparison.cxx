@@ -459,7 +459,7 @@ StatusCode IDAlignMonTruthComparison::fillHistograms() {
 
     if (TruthMap.get()) {
       ElementLink<TrackCollection> tracklink;
-      tracklink.setElement(const_cast<Trk::Track*>(*trksItr));
+      tracklink.setElement(*trksItr);
       tracklink.setStorableObject(*RecCollection);
       const ElementLink<TrackCollection> tracklink2 = tracklink;
 
