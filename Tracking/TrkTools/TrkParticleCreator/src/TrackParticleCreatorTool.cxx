@@ -11,7 +11,6 @@
  changes :
 
 ***************************************************************************/
-#undef NDEBUG
 #include "TrkParticleCreator/TrackParticleCreatorTool.h"
 #include "TrkParticleCreator/DetailedHitInfo.h"
 // forward declares

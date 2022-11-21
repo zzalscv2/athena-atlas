@@ -9,16 +9,17 @@
  */
 
 
-#undef NDEBUG
-#include "CxxUtils/ubsan_suppress.h"
+#include "TrkVertexSeedFinderUtils/Mode3dFromFsmw1dFinder.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/ToolHandle.h"
+//undef NDEBUG  after EDM
+#undef NDEBUG
+#include "CxxUtils/ubsan_suppress.h"
 #include "TInterpreter.h"
 #include "TestTools/FLOATassert.h"
 #include "TestTools/expect_exception.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/random.h"
-#include "TrkVertexSeedFinderUtils/Mode3dFromFsmw1dFinder.h"
 #include <cassert>
 #include <cmath>
 #include <iostream>
