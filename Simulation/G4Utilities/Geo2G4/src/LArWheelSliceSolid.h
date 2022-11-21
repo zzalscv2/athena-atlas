@@ -6,6 +6,7 @@
 #define GEO2G4_LARWHEELSLICESOLID_H
 #ifndef PORTABLE_LAR_SHAPE
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 #endif
 #include "G4VSolid.hh"
 
@@ -38,7 +39,7 @@ class LArWheelCalculator;
 class TF1;
 class G4Polyhedra;
 struct EMECData;
-class LArWheelSliceSolid : public G4VSolid
+class ATLAS_NOT_THREAD_SAFE LArWheelSliceSolid : public G4VSolid
 #ifndef PORTABLE_LAR_SHAPE
                          , public AthMessaging
 #endif

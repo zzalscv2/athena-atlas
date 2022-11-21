@@ -1,8 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
-################################################################################
-# Package: Geo2G4
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Geo2G4 )
@@ -24,7 +20,7 @@ atlas_add_library( Geo2G4Lib
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${XERCESC_LIBRARIES} ${GEANT4_LIBRARIES} ${GEOMODEL_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasInterfaces G4AtlasToolsLib GeoModelUtilities GeoPrimitives
-                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} GeoSpecialShapes SimHelpers GeoMaterial2G4 AthenaKernel GeoModelInterfaces StoreGateLib )
+                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils GeoSpecialShapes SimHelpers GeoMaterial2G4 AthenaKernel GeoModelInterfaces StoreGateLib )
 
 atlas_add_library( Geo2G4
                    src/components/*.cxx

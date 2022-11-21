@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -20,6 +20,9 @@
 #include "CLHEP/Units/PhysicalConstants.h"
 //#define LOCAL_DEBUG 1
 #include<stdlib.h>
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // testing code
 
 static double IntPrecision = 0.0001;
 
