@@ -1,6 +1,4 @@
-################################################################################
-# Package: ISF_Algorithms
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_Algorithms )
@@ -10,7 +8,6 @@ find_package( Boost COMPONENTS filesystem thread system )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( GTest )
 find_package( GMock )
-find_package( Eigen )
 set( extra_libs )
 if( NOT SIMULATIONBASE )
    set( extra_libs EventBookkeeperToolsLib )
@@ -20,19 +17,18 @@ endif()
 atlas_add_component( ISF_Algorithms
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} GaudiKernel AtlasHepMCLib CxxUtils
    AthenaBaseComps StoreGateLib AtlasDetDescr GeneratorObjects HepMC_InterfacesLib
    ISF_Event ISF_InterfacesLib ISF_HepMC_Interfaces PmbCxxUtils InDetSimEvent
-   CaloSimEvent LArSimEvent TileSimEvent MuonSimEvent TrackRecordLib RecEvent
+   CaloSimEvent LArSimEvent TileSimEvent MuonSimEvent TrackRecordLib
    ${extra_libs} )
 
 atlas_add_test( CollectionMerger_test
    SOURCES test/CollectionMerger_test.cxx src/CollectionMerger.h
    src/CollectionMerger.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} #${GMOCK_INCLUDE_DIRS}
-   LINK_LIBRARIES TestTools GaudiKernel AthenaBaseComps AtlasDetDescr CxxUtils
-   ISF_Event ISF_InterfacesLib PmbCxxUtils InDetSimEvent CaloSimEvent LArSimEvent
-   TileSimEvent MuonSimEvent RecEvent ${GTEST_LIBRARIES} #${GMOCK_LIBRARIES}
+   LINK_LIBRARIES ${GTEST_LIBRARIES} AthenaBaseComps CxxUtils InDetSimEvent LArSimEvent
+   MuonSimEvent StoreGateLib TestTools TileSimEvent #${GMOCK_LIBRARIES}
    POST_EXEC_SCRIPT nopost.sh
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
@@ -45,19 +41,11 @@ atlas_add_test( SimKernelMT_test
                 test/SimKernelMT_test.cxx
                 src/SimKernelMT.cxx
                 INCLUDE_DIRS
-                ${EIGEN_INCLUDE_DIRS}
                 ${GTEST_INCLUDE_DIRS}
                 ${GMOCK_INCLUDE_DIRS}
-                LINK_LIBRARIES
-                ISF_Event
-                ISF_InterfacesLib
-                ${EIGEN_LIBRARIES}
-                ${GTEST_LIBRARIES}
-                ${GMOCK_LIBRARIES}
-                AthenaBaseComps
-                GeneratorObjects
-                HepMC_InterfacesLib
-                TrackRecordLib
+                LINK_LIBRARIES ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AtlasDetDescr AtlasHepMCLib
+                CxxUtils GaudiKernel GeneratorObjects GeoPrimitives HepMC_InterfacesLib ISF_Event ISF_InterfacesLib
+                StoreGateLib TrackRecordLib
                 POST_EXEC_SCRIPT nopost.sh
                 ENVIRONMENT
                 "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/test"
