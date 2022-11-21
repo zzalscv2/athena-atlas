@@ -667,10 +667,10 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
     if ((*p_stsos)->type(Trk::TrackStateOnSurface::Measurement)) siHits++;
   }
   // loop over TRT track extension
-  for (int it = 0; it < int(tS.size()); it++) {
+  for (auto & it : tS) {
     std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern;
     typePattern.set(Trk::TrackStateOnSurface::Measurement);
-    const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(tS[it]->uniqueClone(), nullptr, nullptr, typePattern);
+    const Trk::TrackStateOnSurface* seg_tsos = new Trk::TrackStateOnSurface(it->uniqueClone(), nullptr, nullptr, typePattern);
     ntsos.push_back(seg_tsos);
   }
   ///Construct the new track

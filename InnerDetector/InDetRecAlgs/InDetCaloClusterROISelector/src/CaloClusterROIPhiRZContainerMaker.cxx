@@ -26,8 +26,7 @@ CaloClusterROIPhiRZContainerMaker::CaloClusterROIPhiRZContainerMaker(const std::
 
 // ================================================================
 CaloClusterROIPhiRZContainerMaker::~CaloClusterROIPhiRZContainerMaker()
-{  
-}
+= default;
 
 // =================================================================
 StatusCode CaloClusterROIPhiRZContainerMaker::initialize()
@@ -188,7 +187,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
 }
 
 Trk::LocalParameters CaloClusterROIPhiRZContainerMaker::getClusterLocalParameters(const xAOD::CaloCluster &cluster,
-                                                                                   const Trk::Surface &surf) const
+                                                                                   const Trk::Surface &surf) 
 {
 
   Amg::Vector3D surfRefPoint = surf.globalReferencePoint();
