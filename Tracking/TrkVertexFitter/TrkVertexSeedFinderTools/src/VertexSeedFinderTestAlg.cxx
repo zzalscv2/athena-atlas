@@ -9,13 +9,14 @@
  */
 
 
+#include "TrkVertexSeedFinderUtils/IMode3dFinder.h"
+#include "GaudiKernel/SystemOfUnits.h"
+#include "StoreGate/WriteHandle.h"
+//undefine NDEBUG after EDM 
 #undef NDEBUG
 #include "VertexSeedFinderTestAlg.h"
-#include "TrkVertexSeedFinderUtils/IMode3dFinder.h"
-#include "StoreGate/WriteHandle.h"
 #include "TestTools/FLOATassert.h"
 #include "TestTools/random.h"
-#include "GaudiKernel/SystemOfUnits.h"
 #include <cassert>
 #include <cmath>
 

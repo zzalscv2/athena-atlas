@@ -8,16 +8,16 @@
  * @brief Algorithm for testing TrkVKalVrtFitter.
  */
 
-#undef NDEBUG
-#include "TrkVKalVrtFitter/VxCascadeInfo.h"
-
-#include "TrkVKalVrtFitterTestAlg.h"
-#include "TrkVKalVrtFitter/IVertexCascadeFitter.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/TrackParticle.h"
 #include "TrkTrack/Track.h"
 #include "TrkParticleBase/TrackParticleBase.h"
-#include "EventPrimitives/EventPrimitivesHelpers.h"
+//undef NDEBUG after EDM
+#undef NDEBUG
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
+#include "TrkVKalVrtFitterTestAlg.h"
+#include "TrkVKalVrtFitter/IVertexCascadeFitter.h"
 #include "TestTools/FLOATassert.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include  "TrkVKalVrtFitter/IVKalState.h" //unique_ptr needs the deleter
