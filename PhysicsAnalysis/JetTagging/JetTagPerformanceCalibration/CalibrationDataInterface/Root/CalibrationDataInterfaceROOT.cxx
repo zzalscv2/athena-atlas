@@ -804,7 +804,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
   // perform out-of-bound check of jet eta
   if (!checkAbsEta(variables, indexSF)) {
     cerr << "Jet |eta| is outside of the boundary!" << endl;
-    return Analysis::kError;
+    return Analysis::kRange;
   }
 
   // retrieve the MC/MC scale factor
@@ -993,7 +993,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
   // perform out-of-bound check of jet eta
   if (!checkAbsEta(variables, index)) {
     cerr << "Jet |eta| is outside of the boundary!" << endl;
-    return Analysis::kError;
+    return Analysis::kRange;
   }
 
 
@@ -1555,7 +1555,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   // perform out-of-bound check of jet eta
   if (!checkAbsEta(variables, indexSF)) {
     cerr << "Jet |eta| is outside of the boundary!" << endl;
-    return Analysis::kError;
+    return Analysis::kRange;
   }
 
   // Always retrieve the result itself 
