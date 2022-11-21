@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -13,6 +13,7 @@
 #include <AsgAnalysisAlgorithms/AsgViewFromSelectionAlg.h>
 
 #include <CxxUtils/fpcompare.h>
+#include <AthContainers/ConstDataVector.h>
 #include <xAODCore/AuxContainerBase.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODEgamma/ElectronContainer.h>
@@ -34,7 +35,7 @@ namespace CP
   {
     const Type *input = nullptr;
     ANA_CHECK (evtStore()->retrieve (input, m_inputHandle.getName (sys)));
-    auto viewCopy = std::make_unique<Type> (SG::VIEW_ELEMENTS);
+    auto viewCopy = std::make_unique<ConstDataVector<Type>> (SG::VIEW_ELEMENTS);
     for (const auto particle : *input)
     {
       bool keep = true;
@@ -48,9 +49,7 @@ namespace CP
       }
       if (keep)
       {
-        typename Type::value_type particleNC =
-          const_cast<typename Type::value_type>(particle);
-        viewCopy->push_back (particleNC);
+        viewCopy->push_back (particle);
       }
     }
 
