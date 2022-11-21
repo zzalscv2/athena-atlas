@@ -158,7 +158,7 @@ InDetAdaptiveMultiPriVxFinderTool::findVertex(
     }
     if (selectionPassed) {
       ElementLink<TrackCollection> link;
-      link.setElement(const_cast<Trk::Track*>(*itr));
+      link.setElement(*itr);
       Trk::LinkToTrack* linkTT = new Trk::LinkToTrack(link);
       linkTT->setStorableObject(*trackTES);
       selectedTracks.push_back(linkTT);

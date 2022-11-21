@@ -200,7 +200,7 @@ void InDet::TrackStatHelper::addEvent(const TrackCollection              * recTr
     }
     else {
       ElementLink<TrackCollection> tracklink;
-      tracklink.setElement(const_cast<Trk::Track*>(track));
+      tracklink.setElement(track);
       tracklink.setStorableObject(*recTracks);
       const ElementLink<TrackCollection> tracklink2=tracklink;
       
