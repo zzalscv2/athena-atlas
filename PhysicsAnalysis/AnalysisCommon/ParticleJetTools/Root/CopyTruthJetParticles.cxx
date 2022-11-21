@@ -297,7 +297,7 @@ int CopyTruthJetParticles::execute() const {
     // Cannot use the truth helper functions; they're written for HepMC
     // Last two switches only apply if the thing is a lepton and not a tau
     int pdgid = tp->pdgId();
-    if ((abs(pdgid)==11 || abs(pdgid)==13) && tp->hasProdVtx()){
+    if ((std::abs(pdgid)==11 || std::abs(pdgid)==13) && tp->hasProdVtx()){
       // If this is a prompt, generator stable lepton, then we can use it
       if(tp->status()==1 && tp->barcode()<m_barcodeOffset && MCTruthClassifier::isPrompt(getTCresult(tp, tc_results))) {
         promptLeptons.push_back(tp);

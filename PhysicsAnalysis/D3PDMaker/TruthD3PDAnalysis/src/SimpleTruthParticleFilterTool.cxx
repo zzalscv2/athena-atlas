@@ -44,7 +44,7 @@ SimpleTruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
        p->momentum().perp()>m_minPt ) ok = true;
 
   bool last = std::abs(p->pdg_id())==15;
-  if ( abs(p->pdg_id())==15 && p->status()!=1 && p->end_vertex() ){
+  if ( std::abs(p->pdg_id())==15 && p->status()!=1 && p->end_vertex() ){
     // Special handling for taus - take the ones that are last in the tau chain
 #ifdef HEPMC3
     for (auto pit: p->end_vertex()->particles_out()){
@@ -55,7 +55,7 @@ SimpleTruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
 #else
     for (HepMC::GenVertex::particles_out_const_iterator pit=p->end_vertex()->particles_out_const_begin(); pit!=p->end_vertex()->particles_out_const_end();++pit){
       if (!(*pit) ||
-          abs((*pit)->pdg_id())!=15) continue;
+          std::abs((*pit)->pdg_id())!=15) continue;
       last=false;
       break;
     }

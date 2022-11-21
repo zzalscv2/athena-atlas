@@ -305,10 +305,10 @@ void FastShowerCellBuilderTool::LoadParametrizationsFromFile(TDirectory& infile,
 
             m_map_ParticleShapeParametrizationMap[obj->id()][obj->calosample()][obj->E()].push_back(obj);
             ++n_shape[obj->id()].n;
-            n_shape[obj->id()].min_eta=TMath::Min(n_shape[obj->id()].min_eta,obj->eta());
-            n_shape[obj->id()].max_eta=TMath::Max(n_shape[obj->id()].max_eta,obj->eta());
-            n_shape[obj->id()].min_E  =TMath::Min(n_shape[obj->id()].min_E  ,obj->E()  );
-            n_shape[obj->id()].max_E  =TMath::Max(n_shape[obj->id()].max_E  ,obj->E()  );
+            n_shape[obj->id()].min_eta=std::min(n_shape[obj->id()].min_eta,obj->eta());
+            n_shape[obj->id()].max_eta=std::max(n_shape[obj->id()].max_eta,obj->eta());
+            n_shape[obj->id()].min_E  =std::min(n_shape[obj->id()].min_E  ,obj->E()  );
+            n_shape[obj->id()].max_E  =std::max(n_shape[obj->id()].max_E  ,obj->E()  );
           }
         }
       if(cl->InheritsFrom(ParticleEnergyParametrization::Class()))
@@ -324,10 +324,10 @@ void FastShowerCellBuilderTool::LoadParametrizationsFromFile(TDirectory& infile,
 
             m_map_ParticleEnergyParametrizationMap[obj->id()][obj->E()][obj->eta()]=obj;
             ++n_energy[obj->id()].n;
-            n_energy[obj->id()].min_eta=TMath::Min(n_energy[obj->id()].min_eta,obj->eta());
-            n_energy[obj->id()].max_eta=TMath::Max(n_energy[obj->id()].max_eta,obj->eta());
-            n_energy[obj->id()].min_E  =TMath::Min(n_energy[obj->id()].min_E  ,obj->E()  );
-            n_energy[obj->id()].max_E  =TMath::Max(n_energy[obj->id()].max_E  ,obj->E()  );
+            n_energy[obj->id()].min_eta=std::min(n_energy[obj->id()].min_eta,obj->eta());
+            n_energy[obj->id()].max_eta=std::max(n_energy[obj->id()].max_eta,obj->eta());
+            n_energy[obj->id()].min_E  =std::min(n_energy[obj->id()].min_E  ,obj->E()  );
+            n_energy[obj->id()].max_E  =std::max(n_energy[obj->id()].max_E  ,obj->E()  );
             if(msg!="") {
               ATH_MSG_WARNING("Could fix some nan in input parametrization "<<obj->GetName()<<" ("<<obj->GetTitle()<<"): "<<msg.Data());
             }
@@ -399,7 +399,7 @@ StatusCode FastShowerCellBuilderTool::initialize()
   }
 
   for(int i=0;i<CaloCell_ID_FCS::MaxSample;++i) {
-    if(fabs(m_sampling_energy_reweighting[i]-1.0)>0.001) {
+    if(std::fabs(m_sampling_energy_reweighting[i]-1.0)>0.001) {
       ATH_MSG_INFO("Apply sampling reweight factor "<<m_sampling_energy_reweighting[i]<<" to sampling "<<i);
     }
   }
@@ -413,7 +413,7 @@ StatusCode FastShowerCellBuilderTool::initialize()
 
   if(m_simul_ID_only) {
     msg(MSG::INFO) <<"Reject ID truth particle vertices outside cylinder(s): ";
-    int nc=TMath::Min(m_ID_cylinder_r.size(),m_ID_cylinder_z.size());
+    int nc=std::min(m_ID_cylinder_r.size(),m_ID_cylinder_z.size());
     for(int ic=0;ic<nc;++ic) {
       msg(MSG::INFO)<<"[r="<<m_ID_cylinder_r[ic]<<",z="<<m_ID_cylinder_z[ic]<<"] ";
     }
@@ -610,7 +610,7 @@ ParticleEnergyParametrization* FastShowerCellBuilderTool::findElower(int id,doub
       if(iter_E->first>=E && iter_E!=iter_id->second.begin()) --iter_E;
       ATH_MSG_DEBUG("E found="<<iter_E->first);
       // first para_eta > fabs_eta  !! might be wrong !!
-      double aeta=fabs(eta);
+      double aeta=std::abs(eta);
       t_map_PEP_Eta::const_iterator iter_eta=iter_E->second.lower_bound(aeta);
 
       if(iter_eta!=iter_E->second.begin())  --iter_eta;
@@ -620,13 +620,13 @@ ParticleEnergyParametrization* FastShowerCellBuilderTool::findElower(int id,doub
         if(iter_eta!=iter_E->second.end()) {
 
           t_map_PEP_Eta::const_iterator best(iter_eta);
-          double deta_best=fabs(best->first - aeta);
+          double deta_best=std::abs(best->first - aeta);
           while(iter_eta->first < aeta ) {
             ++iter_eta;
             if(iter_eta!=iter_E->second.end()) {
-              if(fabs(iter_eta->first-aeta) < deta_best) {
+              if(std::abs(iter_eta->first-aeta) < deta_best) {
                 best=iter_eta;
-                deta_best=fabs(best->first-aeta);
+                deta_best=std::abs(best->first-aeta);
               }
             } else break;
           }
@@ -683,7 +683,7 @@ ParticleEnergyParametrization* FastShowerCellBuilderTool::findEupper(int id,doub
     if(iter_E==iter_id->second.end()) --iter_E;
     if(iter_E!=iter_id->second.end()) {
       ATH_MSG_DEBUG("E found="<<iter_E->first);
-      double aeta=fabs(eta);
+      double aeta=std::abs(eta);
       t_map_PEP_Eta::const_iterator iter_eta=iter_E->second.lower_bound(aeta);
       if(iter_eta!=iter_E->second.begin())  --iter_eta;
       if(m_energy_eta_selection){
@@ -691,13 +691,13 @@ ParticleEnergyParametrization* FastShowerCellBuilderTool::findEupper(int id,doub
         if(iter_eta!=iter_E->second.end()) {
 
           t_map_PEP_Eta::const_iterator best(iter_eta);
-          double deta_best=fabs(best->first - aeta);
+          double deta_best=std::abs(best->first - aeta);
           while(iter_eta->first < aeta ) {
             ++iter_eta;
             if(iter_eta!=iter_E->second.end()) {
-              if(fabs(iter_eta->first-aeta) < deta_best) {
+              if(std::abs(iter_eta->first-aeta) < deta_best) {
                 best=iter_eta;
-                deta_best=fabs(best->first-aeta);
+                deta_best=std::abs(best->first-aeta);
               }
             } else break;
           }
@@ -758,11 +758,11 @@ const TShape_Result* FastShowerCellBuilderTool::findShape (int id,int calosample
 
       t_map_PSP_Energy::const_iterator iter_E=iter_cs->second.lower_bound(E);
       if(iter_E==iter_cs->second.end()) --iter_E;
-      double edist=fabs(iter_E->first - E);
+      double edist=std::abs(iter_E->first - E);
       if(iter_E!=iter_cs->second.begin()) {
         t_map_PSP_Energy::const_iterator iter_Etest=iter_E;
         --iter_Etest;
-        double edisttest=fabs(iter_Etest->first - E);
+        double edisttest=std::abs(iter_Etest->first - E);
         if(edisttest<edist) iter_E=iter_Etest;
       }
       if(iter_E!=iter_cs->second.end()) {
@@ -775,8 +775,8 @@ const TShape_Result* FastShowerCellBuilderTool::findShape (int id,int calosample
         TShape_Result* best_shape=nullptr;
 
         for(t_map_PSP_DistEta::const_iterator iter_disteta=iter_E->second.begin();iter_disteta<iter_E->second.end();++iter_disteta) {
-          double scoreeta=fabs(((*iter_disteta)->eta()-fabs(eta))/0.2);
-          double scoredist=fabs(((*iter_disteta)->meandist()-dist)/distrange);
+          double scoreeta=std::abs(((*iter_disteta)->eta()-std::abs(eta))/0.2);
+          double scoredist=std::abs(((*iter_disteta)->meandist()-dist)/distrange);
           double score=scoreeta+scoredist;
           if(!best_shape || score<bestscore) {
             bestscore=score;
@@ -938,7 +938,7 @@ FastShowerCellBuilderTool::get_calo_etaphi(std::vector<Trk::HitInfo>* hitVector,
         tmp_target=z;
       }
       Amg::Vector3D hitPos=t*hitPos2+(1-t)*hitPos1;
-      double dist=TMath::Min(TMath::Abs(t-0),TMath::Abs(t-1));
+      double dist=std::min(std::abs(t-0),std::abs(t-1));
       bool inside=false;
       if(t>=0 && t<=1) inside=true;
       if(!best_found || inside) {
@@ -985,8 +985,8 @@ FastShowerCellBuilderTool::get_calo_etaphi(std::vector<Trk::HitInfo>* hitVector,
     }
   }
 
-  if(isCaloBarrel((CaloCell_ID_FCS::CaloSample)sample)) rzmiddle*=cosh(letaCalo[sample]);
-  else                                                  rzmiddle= fabs(rzmiddle/tanh(letaCalo[sample]));
+  if(isCaloBarrel((CaloCell_ID_FCS::CaloSample)sample)) rzmiddle*=std::cosh(letaCalo[sample]);
+  else                                                  rzmiddle= std::abs(rzmiddle/tanh(letaCalo[sample]));
 
   dCalo[sample]=rzmiddle;
   distetaCaloBorder[sample]=distsamp;
@@ -1026,7 +1026,7 @@ FastShowerCellBuilderTool::get_calo_surface(std::vector<Trk::HitInfo>* hitVector
 
     msg(MSG::DEBUG)<<"test: entrance to calo surface : sample="<<sample<<" eta="<<etaCalo;
 
-    if (fabs(etaCalo)<900) {
+    if (std::abs(etaCalo)<900) {
       double phiCalo = hitPos.phi();
       double distsamp =deta(sample,etaCalo,cont);
 
@@ -1038,8 +1038,8 @@ FastShowerCellBuilderTool::get_calo_surface(std::vector<Trk::HitInfo>* hitVector
         sample_calo_surf=sample;
         d_calo_surf=rzent(sample,etaCalo,cont);
         msg(MSG::DEBUG)<<" r/z="<<d_calo_surf;
-        if(isCaloBarrel(sample)) d_calo_surf*=cosh(etaCalo);
-        else                     d_calo_surf= fabs(d_calo_surf/tanh(etaCalo));
+        if(isCaloBarrel(sample)) d_calo_surf*=std::cosh(etaCalo);
+        else                     d_calo_surf= std::abs(d_calo_surf/std::tanh(etaCalo));
         msg(MSG::DEBUG)<<" d="<<d_calo_surf;
         if(distsamp<0) {
           msg(MSG::DEBUG)<<endmsg;
@@ -1065,7 +1065,7 @@ FastShowerCellBuilderTool::get_calo_surface(std::vector<Trk::HitInfo>* hitVector
     d_calo_surf=surface_hitPos.mag();
 
     double pT=(*it).trackParms->momentum().perp();
-    if(TMath::Abs(eta_calo_surf)>4.9 || pT<500 || (TMath::Abs(eta_calo_surf)>4 && pT<1000) ) {
+    if(std::abs(eta_calo_surf)>4.9 || pT<500 || (std::abs(eta_calo_surf)>4 && pT<1000) ) {
       ATH_MSG_DEBUG("only entrance to calo entrance layer found, no surface : eta="<<eta_calo_surf<<" phi="<<phi_calo_surf<<" d="<<d_calo_surf<<" pT="<<pT);
     } else {
       ATH_MSG_WARNING("only entrance to calo entrance layer found, no surface : eta="<<eta_calo_surf<<" phi="<<phi_calo_surf<<" d="<<d_calo_surf<<" pT="<<pT);
@@ -1118,7 +1118,7 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
   ///////////////////////////
 
   double ptruth_eta=initMom.eta();
-  if( fabs(ptruth_eta)>6.0 ) {
+  if( std::abs(ptruth_eta)>6.0 ) {
     if(m_storeFastShowerInfo) delete fastshowerinfo;
     return StatusCode::SUCCESS;
   }
@@ -1235,7 +1235,7 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
                        d_calo_surf,
 		       cellInfoCont))
   {
-    if(TMath::Abs(ptruth_eta)>5 || EinT<500) {
+    if(std::abs(ptruth_eta)>5 || EinT<500) {
       ATH_MSG_DEBUG("Calo hit vector does not contain calo layer entry: aborting processing particle "<<particle_info_str.str());
     } else {
       ATH_MSG_WARNING("Calo hit vector does not contain calo layer entry: aborting processing particle "<<particle_info_str.str());
@@ -1251,7 +1251,7 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
   if(m_storeFastShowerInfo) fastshowerinfo->SetCaloSurface(eta_calo_surf, phi_calo_surf, d_calo_surf);
 
   // only continue if inside the calo
-  if( fabs(eta_calo_surf)> 6 ) {
+  if( std::abs(eta_calo_surf)> 6 ) {
     if(m_storeFastShowerInfo) delete fastshowerinfo;
     return StatusCode::SUCCESS;
   }
@@ -1329,12 +1329,12 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
       if (m_jo_interpolate && Eupper->E()>Elower->E()) {
         double ran = rndm.Rndm();
         double wt;
-        if(Ein>1.0e-6) wt = TMath::Log(Ein/Eupper->E())/TMath::Log(Elower->E()/Eupper->E()); //protect against E=0
+        if(Ein>1.0e-6) wt = std::log(Ein/Eupper->E())/std::log(Elower->E()/Eupper->E()); //protect against E=0
         else wt=1.0;
         if(ran<wt) Epara = Elower;
         else Epara = Eupper;
       } else {
-        if( fabs(Elower->E()-Ein) < fabs(Eupper->E()-Ein) ){
+        if( std::abs(Elower->E()-Ein) < std::abs(Eupper->E()-Ein) ){
           Epara=Elower;
         } else{
           Epara=Eupper;
@@ -1408,7 +1408,7 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
         }
       }
       p.dist000/=p.E;
-      distrange=fabs((Epara->GetDistMax()-Epara->GetDistMin())/Epara->GetNDistBins());
+      distrange=std::abs((Epara->GetDistMax()-Epara->GetDistMin())/Epara->GetNDistBins());
 
       ATH_MSG_DEBUG("Ein="<<Ein<<" Ecal/Ein="<<p.Ecal<<" E/Ein="<<p.E<<" E="<<p.E*Ein
                     <<" din="<<p.dist_in<<" dist000="<<p.dist000<<" drec="<<p.dist_rec
@@ -1436,12 +1436,12 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
       ATH_MSG_DEBUG("============= E"<<sample<<"="<<p.E_layer[sample]<<" =============");
 
       double E_orig=p.E_layer[sample];
-      double Et_orig=E_orig/cosh(eta_calo_surf);
+      double Et_orig=E_orig/std::cosh(eta_calo_surf);
       // Add energy to lost energy counter.  If all deposit goes OK, subtract it again...
       stats.m_E_lost_sample[sample]+=E_orig;
       stats.m_Et_lost_sample[sample]+=Et_orig;
 
-      if(p.E_layer[sample]>0 && (!isnan(p.E_layer[sample])) && fabs(letaCalo[sample])<5.0) {
+      if(p.E_layer[sample]>0 && (!isnan(p.E_layer[sample])) && std::abs(letaCalo[sample])<5.0) {
         ATH_MSG_DEBUG("E"<<sample<<"="<<p.E_layer[sample]<<" d="<<dCalo[sample]);
 
         // Calculate estimates for cell energy fluctuations. Should be updated with better numbers
@@ -1491,11 +1491,11 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
         double ang_alpha = truth.Angle(truth_direction);  // added (25.5.2009)
         double ang_gamma = z_direction.Angle(truth);// added (25.5.2009)
         int sign =1;// added (25.5.2009)
-        if(TMath::Abs(ang_beta) > TMath::Abs(ang_gamma)){
+        if(std::abs(ang_beta) > std::abs(ang_gamma)){
           sign= -1;// added (25.5.2009)
           ang_beta = TMath::Pi() - ang_beta;
         }
-        direction_factor = (TMath::Sin(ang_alpha)/TMath::Sin(ang_beta));
+        direction_factor = (std::sin(ang_alpha)/std::sin(ang_beta));
 
         double lookup_letaCalo=fcx;
         double lookup_lphiCalo=fcy;
@@ -1584,8 +1584,8 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
 
         if(m_storeFastShowerInfo) fastshowerinfo->SetCaloInfo(sample, fcx, fcy, letaCalo[sample], lphiCalo[sample]);
 
-        if(fabs(lookup_letaCalo)>5.0) {
-          lookup_letaCalo*=4.99/fabs(lookup_letaCalo);
+        if(std::abs(lookup_letaCalo)>5.0) {
+          lookup_letaCalo*=4.99/std::abs(lookup_letaCalo);
         }
 
         // Ugly code: does a fast lookup which cells should be considered to be filled with energy
@@ -1717,13 +1717,12 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
           }
           if(ibestcell>=0) {
             elayertot-= E_theDDE[ibestcell];
-            E_theDDE[ibestcell]*=(1+ shape->reletascale()*fabs(direction_factor));
+            E_theDDE[ibestcell]*=(1+ shape->reletascale()*std::abs(direction_factor));
             elayertot+=E_theDDE[ibestcell];
             const CaloDetDescrElement* cell=theDDE[ibestcell];
-            double eta_jakobi=TMath::Abs( 2.0*TMath::Exp(-cell->eta())/(1.0+TMath::Exp(-2*cell->eta())) );
-            //  double phi_dist2r=1.0/TMath::CosH(fcx);
+            double eta_jakobi=std::abs( 2.0*std::exp(-cell->eta())/(1.0+std::exp(-2*cell->eta())) );
             double phi_dist2r=1.0;
-            double dist000=TMath::Sqrt(cell->r()*cell->r()+cell->z()*cell->z());
+            double dist000=std::sqrt(cell->r()*cell->r()+cell->z()*cell->z());
             double celldx=cell->deta()*eta_jakobi*dist000;
             double celldy=cell->dphi()*phi_dist2r*cell->r();
             ATH_MSG_DEBUG("center cell found for calosample "<<sample<<" eta="<<letaCalo[sample]<<" phi="<<lphiCalo[sample]
@@ -1790,13 +1789,13 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
           }
         }
 
-        if(fabs(E_orig - elayertot3)>0.1) {
+        if(std::abs(E_orig - elayertot3)>0.1) {
           ATH_MSG_ERROR("calosample "<<sample<<" : energy not fully deposited, E("<<sample<<")="<<E_orig<<", Et("<<sample<<")="<<Et_orig<<", deposit="<<elayertot3);
           ATH_MSG_ERROR(" - "<<particle_info_str.str());
           if(shape) ATH_MSG_ERROR("parametrization  : "<< shape->GetTitle());
         }
 
-        double et_elayertot3=elayertot3/cosh(eta_calo_surf);
+        double et_elayertot3=elayertot3/std::cosh(eta_calo_surf);
 
         if(sample>=CaloCell_ID_FCS::PreSamplerB && sample<=CaloCell_ID_FCS::EME3) {
           stats.m_E_tot_em+=elayertot3;
@@ -1823,8 +1822,8 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
       } else {
         MSG::Level level=MSG::DEBUG;
         bool is_debug=false;
-        if(fabs(letaCalo[sample])>5 && fabs(letaCalo[sample])<10) is_debug=true;
-        if(fabs(ptruth_eta)>4.9) is_debug=true;
+        if(std::abs(letaCalo[sample])>5 && std::abs(letaCalo[sample])<10) is_debug=true;
+        if(std::abs(ptruth_eta)>4.9) is_debug=true;
         if(Et_orig>100 && (!is_debug) ) level=MSG::WARNING;
         if(Et_orig>1) {
           ATH_MSG_LVL(level,"calosample "<<sample<<" : no eta on calo found for truth impact ("<<letaCalo[sample]<<","<<lphiCalo[sample]<<"), E("<<sample<<")="<<E_orig<<", Et("<<sample<<")="<<Et_orig);
@@ -1849,8 +1848,8 @@ bool FastShowerCellBuilderTool::Is_ID_Vertex(const HepMC::ConstGenVertexPtr& ver
 {
   if(ver) {
     double inr=ver->position().perp();
-    double inz=fabs(ver->position().z());
-    int nc=TMath::Min(m_ID_cylinder_r.size(),m_ID_cylinder_z.size());
+    double inz=std::abs(ver->position().z());
+    int nc=std::min(m_ID_cylinder_r.size(),m_ID_cylinder_z.size());
     for(int ic=0;ic<nc;++ic) {
       if(inz<=m_ID_cylinder_z[ic] && inr<=m_ID_cylinder_r[ic]) return true;
     }
@@ -2167,7 +2166,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
     if((!m_simul_heavy_ions) && par->pdg_id() > 1000000000) do_simul_state[HepMC::barcode(par)]=heavy_ion;
 
     for(unsigned int i=0;i<m_invisibles.size();++i) {
-      if(abs(par->pdg_id())==m_invisibles[i]) {
+      if(std::abs(par->pdg_id())==m_invisibles[i]) {
         do_simul_state[HepMC::barcode(par)]=invisibleArray;
         break;
       }
@@ -2179,7 +2178,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
       }
     }
 
-    if(abs(par->pdg_id())==13 && MuonEnergyMap) {
+    if(std::abs(par->pdg_id())==13 && MuonEnergyMap) {
       std::pair<BarcodeEnergyDepositMap::const_iterator,BarcodeEnergyDepositMap::const_iterator> range=MuonEnergyMap->equal_range(HepMC::barcode(par));
       if(range.first==range.second) {
         do_simul_state[HepMC::barcode(par)]=0;
@@ -2345,8 +2344,8 @@ StatusCode FastShowerCellBuilderTool::releaseEvent (Stats& stats) const
                 <<" ; et="<<stats.m_Et_tot_em+stats.m_Et_tot_had<<" et(EM)="<<stats.m_Et_tot_em<<" et(HAD)="<<stats.m_Et_tot_had);
 
   for(int sample=CaloCell_ID_FCS::FirstSample;sample<CaloCell_ID_FCS::MaxSample;++sample) {
-    if(fabs(stats.m_Et_lost_sample[sample])<1E-6) stats.m_Et_lost_sample[sample]=0;
-    if(fabs(stats.m_E_lost_sample[sample])<1E-6) stats.m_E_lost_sample[sample]=0;
+    if(std::abs(stats.m_Et_lost_sample[sample])<1E-6) stats.m_Et_lost_sample[sample]=0;
+    if(std::abs(stats.m_E_lost_sample[sample])<1E-6) stats.m_E_lost_sample[sample]=0;
     if(stats.m_Et_lost_sample[sample]>5000) {
       ATH_MSG_WARNING("  Event summary sample "<<sample<<" : etlost="<<stats.m_Et_lost_sample[sample]<<" elost="<<stats.m_E_lost_sample[sample]);
     } else {
