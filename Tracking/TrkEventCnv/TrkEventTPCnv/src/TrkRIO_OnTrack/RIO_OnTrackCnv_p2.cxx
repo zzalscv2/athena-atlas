@@ -33,13 +33,6 @@ void RIO_OnTrackCnv_p2::persToTrans( const Trk::RIO_OnTrack_p2 *persObj, Trk::RI
 
 void RIO_OnTrackCnv_p2::transToPers( const Trk::RIO_OnTrack * /**transObj*/, Trk::RIO_OnTrack_p2 * /**persObj*/, MsgStream & /**log*/ )
 {
-//    // Set ELs
-//    m_eventCnvTool->prepareRIO_OnTrack(const_cast<Trk::RIO_OnTrack *>(transObj));
-// //   persObj->m_id = transObj->m_identifier;
-//    persObj->m_id = transObj->m_identifier.get_compact();
-//    persObj->m_localParams = toPersistent( &m_localParCnv, &transObj->m_localParams, log );
-//    persObj->m_localErrMat = toPersistent( &m_errorMxCnv, &transObj->m_localErrMat, log );
-   
    throw std::runtime_error("RIO_OnTrackCnv_p2::transToPers is deprecated!");
    // Take this opportunity to flatten all ROTs i.e. never use this top level convertor
 }
