@@ -87,11 +87,11 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle) con
   bool so_far_so_good = pass( particle , vertices );
 
   // Test all parent particles
-  const int barcode_of_particle = HepMC::barcode(particle);
+  const int id_of_particle = particle->id();
   if (so_far_so_good && particle->production_vertex() && m_qs){
     for (auto pit: particle->production_vertex()->particles_in()){
       // Loop breaker
-      if ( HepMC::barcode(pit) == barcode_of_particle ) continue;
+      if ( pit->id() == id_of_particle ) continue;
       // Check this particle
       vertices.clear();
       bool parent_all_clear = pass( pit , vertices );
