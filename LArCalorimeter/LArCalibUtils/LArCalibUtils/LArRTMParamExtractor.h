@@ -27,6 +27,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "tbb/blocked_range.h"
+#include "tbb/global_control.h"
 #include "LArRawConditions/LArWFParams.h"
 #include "LArCalibUtils/LArWFParamTool.h" 
 #include "LArRawConditions/LArCaliWave.h"
@@ -89,7 +90,7 @@ class LArRTMParamExtractor : public AthAlgorithm
 
    //Elements for TBB
 
-  bool m_useTBB;
+  int m_nThreads;
   mutable std::atomic<unsigned> m_counter{0};
 
   class helperParams {
