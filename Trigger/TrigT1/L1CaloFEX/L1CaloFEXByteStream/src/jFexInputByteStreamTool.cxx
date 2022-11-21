@@ -55,7 +55,7 @@ StatusCode jFexInputByteStreamTool::initialize() {
     
     //Since the mapping is constant in everyentry, better to be read in the initialize function
     //Reading from CVMFS Fiber mapping
-    ATH_CHECK(ReadfromFile(m_FiberMapping));
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_FiberMapping)));
 
     return StatusCode::SUCCESS;
 }
