@@ -48,7 +48,7 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
         for(auto part: *genEvt) {
             if(HepMC::barcode(part) > 200000) break;
             
-            int pdgid = abs(part->pdg_id());
+            int pdgid = std::abs(part->pdg_id());
             // don't loose time checking all if one found
             if (pdgid == 443) {
                if(!isLeptonDecay(part,13)) continue;
