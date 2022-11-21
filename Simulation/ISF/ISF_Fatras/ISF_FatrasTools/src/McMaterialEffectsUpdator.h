@@ -10,6 +10,7 @@
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk
 #include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
@@ -81,7 +82,7 @@ class IParticleDecayHelper;
     @author Andreas.Salzburger@cern.ch, Carsten.Magass@cern.ch
  */
 
-class McMaterialEffectsUpdator
+class ATLAS_NOT_THREAD_SAFE McMaterialEffectsUpdator  // deprecated: ATLASSIM-6020
   : public extends<AthAlgTool, Trk::ITimedMatEffUpdator>
 {
 public:

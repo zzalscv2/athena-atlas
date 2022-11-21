@@ -1,6 +1,4 @@
-################################################################################
-# Package: ISF_FatrasInterfaces
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_FatrasInterfaces )
@@ -14,5 +12,4 @@ atlas_add_library( ISF_FatrasInterfaces
                    INTERFACE
                    PUBLIC_HEADERS ISF_FatrasInterfaces
                    INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${EIGEN_LIBRARIES} AthContainers GeoPrimitives GaudiKernel ISF_Event TrkEventPrimitives TrkNeutralParameters TrkParameters TrkExInterfaces TrkExUtils )
-
+                   LINK_LIBRARIES ${EIGEN_LIBRARIES} AthContainers CxxUtils GeoPrimitives GaudiKernel ISF_Event TrkEventPrimitives TrkNeutralParameters TrkParameters TrkExInterfaces TrkExUtils )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
 #include "AthContainers/DataVector.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk
 #include "TrkEventPrimitives/ParticleHypothesis.h"
@@ -45,7 +46,7 @@ namespace iFatras
    
    */
       
-  class ISimHitCreator : virtual public IAlgTool
+  class ATLAS_NOT_THREAD_SAFE ISimHitCreator : virtual public IAlgTool  // deprecated: ATLASSIM-6020
   {
   public:
     

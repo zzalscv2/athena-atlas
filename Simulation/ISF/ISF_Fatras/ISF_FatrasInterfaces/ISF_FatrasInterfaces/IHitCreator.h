@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk
 #include "TrkParameters/TrackParameters.h"
@@ -41,7 +42,7 @@ namespace iFatras {
    @author Sarka.Todorova@cern.ch
    */
       
-  class IHitCreator : virtual public IAlgTool {
+  class ATLAS_NOT_THREAD_SAFE IHitCreator : virtual public IAlgTool {  // deprecated: ATLASSIM-6020
      public:
      
        /** Virtual destructor */

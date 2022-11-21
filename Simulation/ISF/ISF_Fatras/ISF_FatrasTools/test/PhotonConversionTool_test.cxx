@@ -15,6 +15,9 @@
 #include <cassert>
 #include <iostream>
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
+
 // TestTruthSvc class
 class TestTruthSvc 
    : public extends<AthService, ISF::ITruthSvc> 

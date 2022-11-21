@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 #include "TrkExInterfaces/ITimedExtrapolator.h"
 
 // iFatras
@@ -40,7 +41,7 @@ namespace iFatras
       @author Sharka Todorova Sarka.Todorova -at- cern.ch
   */  
   
-  class ProcessSamplingTool : public extends<AthAlgTool, IProcessSamplingTool>
+  class ATLAS_NOT_THREAD_SAFE ProcessSamplingTool : public extends<AthAlgTool, IProcessSamplingTool>  // deprecated: ATLASSIM-6020
   {
   public:
     /** Constructor */

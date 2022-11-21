@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,8 @@
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
+#include "CxxUtils/checker_macros.h"
+
 // Amg
 #include "GeoPrimitives/GeoPrimitives.h"
 
@@ -38,7 +40,7 @@ namespace iFatras
       @author Andreas.Salzburger - at- cern.ch
   */
   
-  class IParticleDecayHelper : virtual public IAlgTool
+  class ATLAS_NOT_THREAD_SAFE IParticleDecayHelper : virtual public IAlgTool  // deprecated: ATLASSIM-6020
   {
   public:
     
