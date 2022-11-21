@@ -23,6 +23,8 @@
 #include "ISF_Event/EntryLayer.h"
 #include "ISF_Interfaces/ISimulationSelector.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace ISF {
 
   class ISFParticle;
@@ -34,7 +36,7 @@ namespace ISF {
   
       @ author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
      */
-  class IParticleBroker : virtual public IInterface {
+  class ATLAS_NOT_THREAD_SAFE IParticleBroker : virtual public IInterface {
 
       /////////////////////////////////////////////////////////////////// 
       // Public methods: 

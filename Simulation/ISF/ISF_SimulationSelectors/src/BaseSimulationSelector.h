@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_SIMULATIONSELECTORS_BASESIMULATIONSELECTOR_H
@@ -14,6 +14,8 @@
 // Gaudi & Athena basics
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+
+#include "CxxUtils/checker_macros.h"
 
 
 namespace ISF {
@@ -38,14 +40,14 @@ class BaseSimulationSelector : public extends<AthAlgTool, ISimulationSelector> {
     virtual StatusCode sysInitialize() override;
 
     /** return a handle on the simulator */
-    virtual ServiceHandle<ISimulationSvc>* simulator() override;
+    virtual ServiceHandle<ISimulationSvc>* simulator ATLAS_NOT_THREAD_SAFE () override;
 
     /** return if is this a static or dynamic SimulationSelector
         (is used by fully dynamic particle routers) */
     virtual bool isDynamic() override;
 
     /** return the simulation service ID */
-    virtual SimSvcID simSvcID() override;
+    virtual SimSvcID simSvcID ATLAS_NOT_THREAD_SAFE () override;
 
     /** return the simulation flavor */
     virtual ISF::SimulationFlavor simFlavor() const override;
@@ -55,14 +57,14 @@ class BaseSimulationSelector : public extends<AthAlgTool, ISimulationSelector> {
 
     /** called at the beginning of each athena event
         (can be used for eg. resetting dynamic selectors) */
-    virtual void beginEvent() override;
+    virtual void beginEvent ATLAS_NOT_THREAD_SAFE () override;
 
     /** called at the end of each athena event
         (can be used for eg. resetting dynamic selectors) */
-    virtual void endEvent() override;
+    virtual void endEvent ATLAS_NOT_THREAD_SAFE () override;
 
     /** update internal event representation */
-    virtual void update(const ISFParticle& ) override;
+    virtual void update ATLAS_NOT_THREAD_SAFE (const ISFParticle& ) override;
 
     /** make the routing decision */
     virtual bool selfSelect(const ISFParticle& particle) const override;

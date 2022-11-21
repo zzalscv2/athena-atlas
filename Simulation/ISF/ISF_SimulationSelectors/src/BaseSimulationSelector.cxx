@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BaseSimulationSelector.h"
@@ -67,7 +67,7 @@ ISF::BaseSimulationSelector::selfSelect(const ISFParticle& particle) const
 }
 
 /** return a handle on the simulator */
-ServiceHandle<ISF::ISimulationSvc>* ISF::BaseSimulationSelector::simulator() {
+ServiceHandle<ISF::ISimulationSvc>* ISF::BaseSimulationSelector::simulator ATLAS_NOT_THREAD_SAFE () {
   return &m_simulator;
 }
 
@@ -78,7 +78,7 @@ bool ISF::BaseSimulationSelector::isDynamic() {
 }
 
 /** return the simulation service ID */
-ISF::SimSvcID ISF::BaseSimulationSelector::simSvcID() {
+ISF::SimSvcID ISF::BaseSimulationSelector::simSvcID ATLAS_NOT_THREAD_SAFE () {
   return m_simulator->simSvcID();
 }
 
@@ -92,11 +92,11 @@ void ISF::BaseSimulationSelector::initializeSelector() { }
 
 /** called at the beginning of each athena event
     (can be used for eg. resetting dynamic selectors) */
-void ISF::BaseSimulationSelector::beginEvent() { }
+void ISF::BaseSimulationSelector::beginEvent ATLAS_NOT_THREAD_SAFE () { }
 
 /** called at the end of each athena event
     (can be used for eg. resetting dynamic selectors) */
-void ISF::BaseSimulationSelector::endEvent() { }
+void ISF::BaseSimulationSelector::endEvent ATLAS_NOT_THREAD_SAFE () { }
 
 /** update internal event representation */
-void ISF::BaseSimulationSelector::update(const ISFParticle& ) { }
+void ISF::BaseSimulationSelector::update ATLAS_NOT_THREAD_SAFE (const ISFParticle& ) { }

@@ -17,12 +17,14 @@
 #include "ISF_Interfaces/ISimulatorTool.h"
 #include "ISF_Event/ISFParticleContainer.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace iGeant4 {
 
   /** @class Geant4SimSvc
 
   */
-  class Geant4SimSvc : public ISF::BaseSimulationSvc {
+  class ATLAS_NOT_THREAD_SAFE Geant4SimSvc : public ISF::BaseSimulationSvc {
 
   public:
     //** Constructor with parameters */

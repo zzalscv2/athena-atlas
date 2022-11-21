@@ -17,6 +17,8 @@
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/SimSvcID.h"
 
+#include "CxxUtils/checker_macros.h"
+
 class McEventCollection;
 
 namespace ISF {
@@ -32,7 +34,7 @@ namespace ISF {
 
       @ author Andreas.Salzburger -at- cern.ch, Michael.Duehrssen -at- cern.ch , Elmar.Ritsch -at- cern.ch
   */
-  class ISimulationSvc : virtual public IInterface {
+  class ATLAS_NOT_THREAD_SAFE ISimulationSvc : virtual public IInterface {
 
     ///////////////////////////////////////////////////////////////////
     // Public methods:
