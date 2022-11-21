@@ -68,9 +68,9 @@ StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const 
 
     SG::ReadHandle<InDet::PixelClusterContainer> inputPixelClusterContainer(m_inputPixelClusterContainerKey, ctx);
 
-    for (const auto clusterCollection : *inputPixelClusterContainer) {
+    for (const auto *const clusterCollection : *inputPixelClusterContainer) {
         if (!clusterCollection) continue;
-        for(const auto theCluster : *clusterCollection)  {
+        for(const auto *const theCluster : *clusterCollection)  {
             Identifier clusterId = theCluster->identify();
 
             const InDetDD::SiDetectorElement *element=pixElements->getDetectorElement(m_pixelID->wafer_hash(m_pixelID->wafer_id(clusterId)));
@@ -140,9 +140,9 @@ StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const 
     ATH_MSG_DEBUG( "Recorded xAOD::StripClusterContainer with key: " << m_outputStripClusterContainerKey.key()  );
 
     SG::ReadHandle<InDet::SCT_ClusterContainer> inputStripClusterContainer(m_inputStripClusterContainerKey, ctx);
-    for (const auto clusterCollection : *inputStripClusterContainer) {
+    for (const auto *const clusterCollection : *inputStripClusterContainer) {
         if (!clusterCollection) continue;
-        for(const auto theCluster : *clusterCollection)  {
+        for(const auto *const theCluster : *clusterCollection)  {
             Identifier clusterId = theCluster->identify();
 
             const InDetDD::SiDetectorElement *element=stripElements->getDetectorElement(m_stripID->wafer_hash(m_stripID->wafer_id(clusterId)));

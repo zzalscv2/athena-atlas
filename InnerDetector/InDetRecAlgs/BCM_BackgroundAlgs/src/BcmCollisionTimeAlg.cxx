@@ -96,11 +96,11 @@ StatusCode BcmCollisionTimeAlg::execute()
      } // end of loop over collections
 
      // calculate deltaTs from deltatdata now
-     for(unsigned int i=0; i < deltaTdataA_HG.size(); i++){
-       for(unsigned int j=0; j < deltaTdataC_HG.size(); j++){
-         if((deltaTdataA_HG.at(i)).m_bcid == (deltaTdataC_HG.at(j)).m_bcid){
+     for(auto & i : deltaTdataA_HG){
+       for(auto & j : deltaTdataC_HG){
+         if(i.m_bcid == j.m_bcid){
 	   //std::cout << "time diff in bins: " << ((int)(deltaTdataA_HG.at(i)).m_position - (int)(deltaTdataC_HG.at(j)).m_position) << std::endl;
-	   float deltaTtime = ((float)(deltaTdataA_HG.at(i)).m_position - (float)(deltaTdataC_HG.at(j)).m_position)/64*25;
+	   float deltaTtime = ((float)i.m_position - (float)j.m_position)/64*25;
            //std::cout << "delta t: " << deltaTtime << std::endl;
 	   deltaT.push_back(deltaTtime);
 	 }

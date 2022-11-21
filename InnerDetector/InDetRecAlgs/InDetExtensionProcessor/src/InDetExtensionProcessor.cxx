@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -214,14 +214,14 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
               else vecPrdComb.push_back(rot->prepRawData());
             }
             // merge lists
-            for (unsigned int i = 0; i < vecPrd.size(); i++) {
+            for (auto & i : vecPrd) {
               double inprod =
-                (vecPrd[i]->detectorElement()->surface(vecPrd[i]->identify()).center() - siPerigee->position()).dot(
+                (i->detectorElement()->surface(i->identify()).center() - siPerigee->position()).dot(
                   siPerigee->momentum());
               if (inprod < 0) {
-                vecPrdComb.insert(vecPrdComb.begin(), vecPrd[i]);
+                vecPrdComb.insert(vecPrdComb.begin(), i);
               } else {
-                vecPrdComb.push_back(vecPrd[i]);
+                vecPrdComb.push_back(i);
               }
             }
             //statistics
@@ -279,13 +279,13 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
               rotSet.push_back(*RIOit);
             }
             // merge RIO-on-track lists
-            for (unsigned int i = 0; i < pThisExtensionPair->second.size(); i++) {
-              double inprod = (pThisExtensionPair->second[i]->associatedSurface().center() - siPerigee->position()).dot(
+            for (const auto *i : pThisExtensionPair->second) {
+              double inprod = (i->associatedSurface().center() - siPerigee->position()).dot(
                 siPerigee->momentum());
               if (inprod < 0) {
-                rotSet.insert(rotSet.begin(), pThisExtensionPair->second[i]);
+                rotSet.insert(rotSet.begin(), i);
               } else {
-                rotSet.push_back(pThisExtensionPair->second[i]);
+                rotSet.push_back(i);
               }
             }
             ATH_MSG_DEBUG("normal fit track");

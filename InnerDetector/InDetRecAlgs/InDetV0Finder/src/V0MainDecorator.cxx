@@ -89,7 +89,7 @@ StatusCode V0MainDecorator::initialize(){
     // get the Particle Properties Service
     IPartPropSvc* partPropSvc = nullptr;
     ATH_CHECK( service("PartPropSvc", partPropSvc, true) );
-    auto particleDataTable = partPropSvc->PDT();
+    auto *particleDataTable = partPropSvc->PDT();
   
     const HepPDT::ParticleData* pd_pi = particleDataTable->particle(PDG::pi_plus);
     const HepPDT::ParticleData* pd_p  = particleDataTable->particle(PDG::p_plus);
