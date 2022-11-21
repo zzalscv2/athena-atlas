@@ -166,7 +166,7 @@ namespace Trk {
                                     const Rec::TrackParticleContainer* tpCont = dynamic_cast<const Rec::TrackParticleContainer*>(tr_part->getStorableObjectPointer());
                                     if (tpCont) {
                                         ElementLink<Rec::TrackParticleContainer> linkTruth;
-                                        linkTruth.setElement(const_cast<Rec::TrackParticle*>(tp));
+                                        linkTruth.setElement(tp);
                                         linkTruth.setStorableObject(*tpCont);
                                         ttItr = trackParticleTruthCollection->find(Rec::TrackParticleTruthKey(linkTruth));
                                     }
