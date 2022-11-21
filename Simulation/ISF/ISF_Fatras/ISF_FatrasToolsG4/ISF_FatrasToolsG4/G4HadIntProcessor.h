@@ -69,7 +69,7 @@ namespace iFatras {
     @author Andreas.Salzburger@cern.ch
     */
 
-  class G4HadIntProcessor : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {
+  class ATLAS_NOT_THREAD_SAFE G4HadIntProcessor : public extends<AthAlgTool, iFatras::IHadronicInteractionProcessor> {  // deprecated: ATLASSIM-6020
     public:      
       /** AlgTool constructor for G4HadIntProcessor*/
       G4HadIntProcessor(const std::string&,const std::string&,const IInterface*);

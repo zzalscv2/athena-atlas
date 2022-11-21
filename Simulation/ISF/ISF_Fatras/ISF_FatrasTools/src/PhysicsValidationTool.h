@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,6 +14,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 
 // iFatras
 #include "ISF_FatrasInterfaces/IPhysicsValidationTool.h"
@@ -43,7 +44,7 @@ namespace iFatras
       @author Sharka Todorova Sarka.Todorova -at- cern.ch
   */  
   
-  class PhysicsValidationTool : public extends<AthAlgTool, IPhysicsValidationTool>
+  class ATLAS_NOT_THREAD_SAFE PhysicsValidationTool : public extends<AthAlgTool, IPhysicsValidationTool>  // deprecated: ATLASSIM-6020
   {
   public:
     /** Constructor */

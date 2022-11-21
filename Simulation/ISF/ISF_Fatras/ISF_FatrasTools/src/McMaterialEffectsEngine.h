@@ -15,6 +15,7 @@
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk
 #include "TrkExInterfaces/IMaterialEffectsEngine.h"
@@ -66,7 +67,7 @@ namespace iFatras {
       @author Andreas.Salzburger@cern.ch, Noemi.Calace@cern.ch
   */
   
-  class McMaterialEffectsEngine : public extends<AthAlgTool, Trk::IMaterialEffectsEngine> { 
+  class ATLAS_NOT_THREAD_SAFE McMaterialEffectsEngine : public extends<AthAlgTool, Trk::IMaterialEffectsEngine> {  // deprecated: ATLASSIM-6020
   public:      
     /**AlgTool constructor for McMaterialEffectsEngine*/
     McMaterialEffectsEngine(const std::string&,const std::string&,const IInterface*);

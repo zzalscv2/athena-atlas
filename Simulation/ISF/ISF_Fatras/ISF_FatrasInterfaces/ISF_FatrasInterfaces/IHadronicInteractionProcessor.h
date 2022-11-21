@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 // Event primitives
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkParameters/TrackParameters.h"
@@ -35,7 +36,7 @@ namespace iFatras
       
       @author Andreas.Salzburger@cern.ch
   */
-    class IHadronicInteractionProcessor : virtual public IAlgTool {
+  class ATLAS_NOT_THREAD_SAFE IHadronicInteractionProcessor : virtual public IAlgTool {  // deprecated: ATLASSIM-6020
 
   public:
     
