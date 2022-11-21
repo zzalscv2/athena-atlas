@@ -23,6 +23,8 @@ from AthenaCommon.AthenaCommonFlags import jobproperties
 from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
 acam.athMasterSeq += xAODMaker__EventInfoCnvAlg(xAODKey="TMPEvtInfo")
 
+from AthenaPython.PyAthena import HepMC3  as HepMC
+
 theApp = acam.theApp
 acam.athMasterSeq += acas.AlgSequence("EvgenGenSeq")
 genSeq = acam.athMasterSeq.EvgenGenSeq
@@ -489,6 +491,7 @@ for item in gennames:
            gennamesvers.append(item)
 
 import EventInfoMgt.EventInfoMgtInit
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hepmc_version":os.environ['HEPMCVER']})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"mc_channel_number":str(dsid)})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"lhefGenerator": '+'.join( filter( gen_lhef, gennames ) ) })
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"generators": '+'.join(gennamesvers)})
