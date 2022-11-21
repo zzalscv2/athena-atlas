@@ -127,12 +127,9 @@ const std::map<int,int>& TruthSelector::indetKineMap() {
         || std::abs(startVertex.z())    > m_minZEndPrimary) continue;
 
     // kine/barcode map for G3 compatibility
-    int kine = 0;
+    int kine = HepMC::barcode(particle);
 
-        // temporary for G4: kine == barcode
-        kine = HepMC::barcode(particle);
-
-    m_indetKineMap[kine] = HepMC::barcode(particle);
+    m_indetKineMap[kine] = kine;
     }
     return m_indetKineMap;
 }
