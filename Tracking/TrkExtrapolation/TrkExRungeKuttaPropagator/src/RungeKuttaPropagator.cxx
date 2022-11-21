@@ -1878,6 +1878,55 @@ Trk::RungeKuttaPropagator::propagateParameters(const ::EventContext& ctx,
 }
 
 /////////////////////////////////////////////////////////////////////////////////
+// Main function for MultiComponentState propagation used by the GSF
+/////////////////////////////////////////////////////////////////////////////////
+Trk::MultiComponentState
+Trk::RungeKuttaPropagator::multiStatePropagate(
+  const ::EventContext& ctx,
+  const Trk::MultiComponentState& multiComponentState,
+  const Trk::Surface& surface,
+  const Trk::MagneticFieldProperties& fieldProperties,
+  const Trk::PropDirection direction,
+  const Trk::BoundaryCheck& boundaryCheck,
+  const Trk::ParticleHypothesis particleHypothesis) const
+{
+
+  Trk::MultiComponentState propagatedState{};
+  propagatedState.reserve(multiComponentState.size());
+  Trk::MultiComponentState::const_iterator component =
+    multiComponentState.begin();
+  double sumw(0); // sum of the weights of the propagated parameters
+  for (; component != multiComponentState.end(); ++component) {
+    const Trk::TrackParameters* currentParameters = component->first.get();
+    if (!currentParameters) {
+      continue;
+    }
+    auto propagatedParameters = propagate(ctx,
+                                          *currentParameters,
+                                          surface,
+                                          direction,
+                                          boundaryCheck,
+                                          fieldProperties,
+                                          particleHypothesis,
+                                          false,
+                                          nullptr);
+    if (!propagatedParameters) {
+      continue;
+    }
+    sumw += component->second;
+    // Propagation does not affect the weightings of the states
+    propagatedState.emplace_back(std::move(propagatedParameters),
+                                 component->second);
+  }
+  // Protect low weight propagation
+  constexpr double minPropWeight = (1./12.);
+  if (sumw < minPropWeight) {
+    propagatedState.clear();
+  }
+  return propagatedState;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 // Main function for track parameters propagation without covariance matrix
 // with transport Jacobian production
 /////////////////////////////////////////////////////////////////////////////////
