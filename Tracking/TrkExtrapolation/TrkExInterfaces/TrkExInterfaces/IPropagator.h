@@ -19,12 +19,13 @@
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkExInterfaces/HelperStructs.h"
 #include "TrkExUtils/ExtrapolationCache.h"
+#include "TrkExUtils/IntersectionSolution.h"
 #include "TrkExUtils/TargetSurfaces.h"
 #include "TrkExUtils/TrackSurfaceIntersection.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
+#include "TrkParameters/ComponentParameters.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkSurfaces/BoundaryCheck.h"
-#include "TrkExUtils/IntersectionSolution.h" //typedef
 // STL
 #include <utility>
 
@@ -78,6 +79,16 @@ public:
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr) const = 0;
 
+  /** Main propagation method for Multi Component state*/
+  virtual Trk::MultiComponentState multiStatePropagate(
+    const EventContext& ctx,
+    const MultiComponentState& multiComponentState,
+    const Surface& surface,
+    const MagneticFieldProperties& fieldProperties,
+    const PropDirection direction = Trk::anyDirection,
+    const BoundaryCheck& boundaryCheck = true,
+    const ParticleHypothesis particleHypothesis = nonInteracting) const = 0;
+
   /** Propagate parameters and covariance with search of closest surface */
   virtual std::unique_ptr<TrackParameters> propagate(
     const EventContext& ctx,
@@ -92,7 +103,7 @@ public:
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr) const = 0;
 
-  /** Propagate parameters and covariance with search of closest surface 
+  /** Propagate parameters and covariance with search of closest surface
    * time included*/
   virtual std::unique_ptr<TrackParameters> propagateT(
     const EventContext& ctx,
@@ -106,16 +117,8 @@ public:
     TimeLimit& timeLim,
     bool returnCurv,
     const TrackingVolume* tVol,
-    std::vector<Trk::HitInfo>*& hitVector) const;
+    std::vector<Trk::HitInfo>*& hitVector) const = 0;
 
-  /** Propagate parameters and covariance with search of closest surface and
-   * material collection */
-  virtual Trk::ExtrapolationCode propagate(
-    const EventContext& ctx,
-    Trk::ExCellCharged& eCell,
-    Trk::TargetSurfaces& sfs,
-    Trk::TargetSurfaceVector& solutions) const;
-  
   /** Propagation interface:
     The propagation method with internal material collection. The propagator
     finds the closest surface.
@@ -129,12 +132,13 @@ public:
     ParticleHypothesis particle,
     std::vector<unsigned int>& solutions,
     std::vector<const Trk::TrackStateOnSurface*>*& matstates,
-    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>* intersections,
+    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>*
+      intersections,
     double& path,
     bool usePathLim = false,
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr,
-    Trk::ExtrapolationCache* cache = nullptr) const;
+    Trk::ExtrapolationCache* cache = nullptr) const = 0;
 
   /** Main propagation method with transport jacobian production*/
   virtual std::unique_ptr<TrackParameters> propagate(
@@ -150,7 +154,8 @@ public:
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr) const = 0;
 
-  /** Main propagation method for parameters only. Without transport jacobian production*/
+  /** Main propagation method for parameters only. Without transport jacobian
+   * production*/
   virtual std::unique_ptr<TrackParameters> propagateParameters(
     const EventContext& ctx,
     const TrackParameters& parm,
@@ -162,7 +167,8 @@ public:
     bool returnCurv = false,
     const TrackingVolume* tVol = nullptr) const = 0;
 
-  /** Main propagation method for parameters only with transport jacobian production*/
+  /** Main propagation method for parameters only with transport jacobian
+   * production*/
   virtual std::unique_ptr<TrackParameters> propagateParameters(
     const EventContext& ctx,
     const TrackParameters& parm,
@@ -176,8 +182,8 @@ public:
     const TrackingVolume* tVol = nullptr) const = 0;
 
   /** Intersection interface:
-     The intersection interface might be used by the material service as well to
-     estimate the surfaces (sensitive and nonesensitive) while propagation
+     The intersection interface might be used by the material service as well
+     to estimate the surfaces (sensitive and nonesensitive) while propagation
     */
   virtual const IntersectionSolution* intersect(
     const EventContext& ctx,
@@ -195,7 +201,7 @@ public:
     const TrackSurfaceIntersection* trackIntersection,
     const double qOverP,
     const MagneticFieldProperties& mft,
-    ParticleHypothesis particle) const;
+    ParticleHypothesis particle) const = 0;
 
   /** GlobalPositions list interface:
      This is used mostly in pattern recognition in the road finder, the
@@ -218,14 +224,17 @@ public:
   /** Validation Action:
     Can be implemented optionally, outside access to internal validation steps
   */
+
+  virtual Trk::ExtrapolationCode propagate(
+    const EventContext& ctx,
+    Trk::ExCellCharged& eCell,
+    Trk::TargetSurfaces& sfs,
+    Trk::TargetSurfaceVector& solutions) const = 0;
+
   virtual void validationAction() const {}
-
-
 };
 
 } // end of namespace
-
-#include "TrkExInterfaces/IPropagator.icc"
 
 #endif // TRKEXINTERFACES_PROPAGATOR_H
 
