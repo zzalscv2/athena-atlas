@@ -160,6 +160,11 @@ def BeamSpotReweightingAlgCfg(flags, name="BeamSpotReweightingAlg", **kwargs):
     kwargs.setdefault("Input_beam_sigma_z", flags.Digitization.InputBeamSigmaZ)
 
     acc.addEventAlgo(CompFactory.Simulation.BeamSpotReweightingAlg(name, **kwargs))
+
+    # Ignore dependencies
+    from AthenaConfiguration.MainServicesConfig import OutputUsageIgnoreCfg
+    acc.merge(OutputUsageIgnoreCfg(flags, name))
+
     return acc
 
 
