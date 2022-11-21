@@ -140,6 +140,10 @@ if __name__ == "__main__":
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-02"
+    ConfigFlags.GeoModel.AtlasVersion="ATLAS-R3S-2021-03-00-00"
+    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
+    ConfigFlags.LAr.doAlign=False
+    ConfigFlags.Input.RunNumber=ConfigFlags.LArCalib.Input.RunNumbers[0]
     #ConfigFlags.Exec.OutputLevel=1
 
     ConfigFlags.lock()
