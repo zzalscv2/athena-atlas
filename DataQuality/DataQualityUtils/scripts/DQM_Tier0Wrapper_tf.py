@@ -47,6 +47,8 @@
 ##         ('True': run as if on Tier-0. 'False': Assume testing.)
 ##     13) 'servers': string with comma-separated server names to override normal config
 ##         (e.g. 'aiatlas009.cern.ch,aiatlas039.cern.ch,aiatlas016.cern.ch')
+##     14) 'skipMerge': string ('True'/'False', default: 'False')
+##         ('True': just process input directly without merging, postprocessing, or producing output)
 ##
 ## (C) N. Boelaert, L. Goossens, A. Nairz, P. Onyisi, S. Schaetzel, M. Wilson 
 ##     (April 2008 - July 2010)
@@ -115,14 +117,14 @@ def genmd5sum(filename):
   md5summer=hashlib.md5()
   if os.path.isfile(filename):
     try:
-      infil=open(filename,'rb')
-      while True:
-        fs=infil.read(8192)
-        if not fs:
-          break
-        md5summer.update(fs)
-    finally:
-        infil.close()
+      with open(filename,'rb') as infil:
+        while True:
+          fs=infil.read(8192)
+          if not fs:
+            break
+          md5summer.update(fs)
+    except:
+      pass
   print("md5 sum of the \"%s\" is %s"%(filename,md5summer.hexdigest()))
   return
       
@@ -162,6 +164,7 @@ def dq_combined_trf(jsonfile, outmap):
     return
 
   histtmpflist = []
+  histtmpdsname = ''
   nevts = 0
 
   try:
@@ -203,9 +206,20 @@ def dq_combined_trf(jsonfile, outmap):
     print("## STEP 2: determining job parameters...")
     print("##################################################################\n")
 
-    # output file
-    histdsname = (parmap['outputHistFile']).split('#')[0]
-    histfile = (parmap['outputHistFile']).split('#')[1]
+    skipMerge = parmap.get('skipMerge', 'False')
+    if skipMerge == 'True':
+      if nfiles != 1:
+        print("ERROR: skipMerge specified but something other than one input file specified")
+        outmap['exitCode'] = 108
+        outmap['exitAcronym'] = 'TRF_INPUTINFO'
+        outmap['exitMsg'] = 'ERROR: skipMerge specified but something other than one input file specified (STEP 1)'
+        return
+      histdsname = histtmpdsname
+      histfile = histtmpflist[0]
+    else:
+      # normal output file determination
+      histdsname = (parmap['outputHistFile']).split('#')[0]
+      histfile = (parmap['outputHistFile']).split('#')[1]
     amitag = histfile.split('.')[5]
 
 
@@ -304,6 +318,7 @@ def dq_combined_trf(jsonfile, outmap):
     print("  Post-processing: ", postproc)
     print("  COOL uploads:    ", allowCOOLUpload)
     print("  Production mode: ", productionMode)
+    print("  Skip merge:      ", skipMerge)
 
   except:
     outmap['exitCode'] = 104
@@ -312,98 +327,105 @@ def dq_combined_trf(jsonfile, outmap):
     traceback.print_exc()
     return
 
-  try:
-    print("\n##################################################################")
-    print("## STEP 3: running histogram merging procedure ...")
-    print("##################################################################\n")
+  # environment setting
+  os.environ['DQPRODUCTION'] = '1' if productionMode == 'True' else '0'
+  print("Setting env variable DQPRODUCTION to %s\n" % os.environ['DQPRODUCTION'])
+  os.environ['DQ_STREAM'] = stream
+  print("Setting env variable DQ_STREAM to %s\n" % os.environ['DQ_STREAM'])
+  os.environ['COOLUPLOADS'] = '1' if allowCOOLUpload == 'True' and productionMode == 'True' else '0'
+  print("Setting env variable COOLUPLOADS to %s\n" % os.environ['COOLUPLOADS'])
 
-    # environment setting
-    os.environ['DQPRODUCTION'] = '1' if productionMode == 'True' else '0'
-    print("Setting env variable DQPRODUCTION to %s\n" % os.environ['DQPRODUCTION'])
-    os.environ['DQ_STREAM'] = stream
-    print("Setting env variable DQ_STREAM to %s\n" % os.environ['DQ_STREAM'])
-    os.environ['COOLUPLOADS'] = '1' if allowCOOLUpload == 'True' and productionMode == 'True' else '0'
-    print("Setting env variable COOLUPLOADS to %s\n" % os.environ['COOLUPLOADS'])
-
-    if postproc == 'True' :
-      if incr == 'True':
-        cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 1 1 %d %d " % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
-      else:        
-        cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 1 0 %d %d"  % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
-    else :  
-      cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 0 0 %d %d"    % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
-    
-    print("Histogram merging command:\n")
-    print(cmd)
-    print("\n##################################################################\n")
-    
-    print("## ... logfile from DQHistogramMerge.py: ")
-    print("--------------------------------------------------------------------------------")
-    tstart = time.time()
-    # execute command
-    retcode1 = os.system(cmd)
-    print("--------------------------------------------------------------------------------")
-    t1 = time.time()
-    dt1 = int(t1 - tstart)
-    
-    print("\n## DQHistogramMerge.py finished with retcode = %s" % retcode1)
-    print("## ... elapsed time: ", dt1, " sec")
-
-    if retcode1 != 0 :
-      outmap['exitCode'] = retcode1
-      outmap['exitAcronym'] = 'TRF_DQMHISTMERGE_EXE'
-      outmap['exitMsg'] = 'ERROR: DQHistogramMerge.py execution problem! (STEP 3).'
-      print("ERROR: DQHistogramMerge.py execution problem!")
-      retcode = retcode1
-      txt = 'DQHistogramMerge.py execution problem'
-      try:
-        try:
-          infilelist=open('hist_merge.list','r')
-          for infname in infilelist:
-            genmd5sum(infname.rstrip(os.linesep))
-        finally:
-            infilelist.close()
-        genmd5sum(histfile)
-        DQResFile="DQResourceUtilization.txt"
-        if os.path.exists(DQResFile):
-          print("dumping resource utilization log")
-          with open(DQResFile) as resfile:
-            for resline in resfile:
-              print(resline, end=' ')
-      except:
-        outmap['exitMsg'] = 'ERROR: DQHistogramMerge.py execution problem + problem dumping DQResourceUtilization! (STEP 3).'
-        traceback.print_exc()
-        print("ERROR: DQHistogramMerge.py execution problem + problem dumping DQResourceUtilization!")
-      return
-
-    if postproc == 'True' and incr == 'False':
+  if skipMerge != 'True':
+    try:
       print("\n##################################################################")
-      print("## STEP 3b: copying postprocessing output to AFS ...")
+      print("## STEP 3: running histogram merging procedure ...")
       print("##################################################################\n")
 
-      cmd = "python -u `which DQFileMove.py` %s %s_%s_%s" % (dqproject, runnr, stream, procnumber)
 
-      print("File move command:\n")
+      if postproc == 'True' :
+        if incr == 'True':
+          cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 1 1 %d %d " % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
+        else:        
+          cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 1 0 %d %d"  % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
+      else :  
+        cmd = "python -u `which DQHistogramMerge.py` hist_merge.list %s 0 0 %d %d"    % (histfile,histMergeCompressionLevel,histMergeDebugLevel)
+      
+      print("Histogram merging command:\n")
       print(cmd)
       print("\n##################################################################\n")
-
-      print("## ... logfile from DQFileMove.py: ")
+      
+      print("## ... logfile from DQHistogramMerge.py: ")
       print("--------------------------------------------------------------------------------")
+      tstart = time.time()
       # execute command
-      retcode1b = os.system(cmd)
+      retcode1 = os.system(cmd)
       print("--------------------------------------------------------------------------------")
-      t1b = time.time()
-      dt1b = int(t1b - t1)
-      t1 = t1b
+      t1 = time.time()
+      dt1 = int(t1 - tstart)
+      
+      print("\n## DQHistogramMerge.py finished with retcode = %s" % retcode1)
+      print("## ... elapsed time: ", dt1, " sec")
 
-      print("\n## DQFileMove.py finished with retcode = %s" % retcode1b)
-      print("## ... elapsed time: ", dt1b, " sec")
-  except:
-      outmap['exitCode'] = 105
-      outmap['exitAcronym'] = 'TRF_DQMHISTMERGE_EXE'
-      outmap['exitMsg'] = 'ERROR: Failure in histogram merging or copying postprocessing output to AFS (STEP 3/3b).'
-      traceback.print_exc()
-      return
+      if retcode1 != 0 :
+        outmap['exitCode'] = retcode1
+        outmap['exitAcronym'] = 'TRF_DQMHISTMERGE_EXE'
+        outmap['exitMsg'] = 'ERROR: DQHistogramMerge.py execution problem! (STEP 3).'
+        print("ERROR: DQHistogramMerge.py execution problem!")
+        retcode = retcode1
+        txt = 'DQHistogramMerge.py execution problem'
+        try:
+          try:
+            infilelist=open('hist_merge.list','r')
+            for infname in infilelist:
+              genmd5sum(infname.rstrip(os.linesep))
+          finally:
+              infilelist.close()
+          genmd5sum(histfile)
+          DQResFile="DQResourceUtilization.txt"
+          if os.path.exists(DQResFile):
+            print("dumping resource utilization log")
+            with open(DQResFile) as resfile:
+              for resline in resfile:
+                print(resline, end=' ')
+        except:
+          outmap['exitMsg'] = 'ERROR: DQHistogramMerge.py execution problem + problem dumping DQResourceUtilization! (STEP 3).'
+          traceback.print_exc()
+          print("ERROR: DQHistogramMerge.py execution problem + problem dumping DQResourceUtilization!")
+        return
+
+      if postproc == 'True' and incr == 'False':
+        print("\n##################################################################")
+        print("## STEP 3b: copying postprocessing output to AFS ...")
+        print("##################################################################\n")
+
+        cmd = "python -u `which DQFileMove.py` %s %s_%s_%s" % (dqproject, runnr, stream, procnumber)
+
+        print("File move command:\n")
+        print(cmd)
+        print("\n##################################################################\n")
+
+        print("## ... logfile from DQFileMove.py: ")
+        print("--------------------------------------------------------------------------------")
+        # execute command
+        retcode1b = os.system(cmd)
+        print("--------------------------------------------------------------------------------")
+        t1b = time.time()
+        dt1b = int(t1b - t1)
+        t1 = t1b
+
+        print("\n## DQFileMove.py finished with retcode = %s" % retcode1b)
+        print("## ... elapsed time: ", dt1b, " sec")
+    except:
+        outmap['exitCode'] = 105
+        outmap['exitAcronym'] = 'TRF_DQMHISTMERGE_EXE'
+        outmap['exitMsg'] = 'ERROR: Failure in histogram merging or copying postprocessing output to AFS (STEP 3/3b).'
+        traceback.print_exc()
+        return
+  else:
+    print("\n##################################################################")
+    print("## HISTOGRAM MERGE/POSTPROCESSING SKIPPED BY USER REQUEST")
+    print("##################################################################\n")
+    t1 = time.time()
 
   try:
     retcode2 = 0
@@ -436,11 +458,11 @@ def dq_combined_trf(jsonfile, outmap):
         outmap['exitAcronym'] = 'TRF_DQMDISPLAY_EXE'
         outmap['exitMsg'] = 'ERROR: DQWebDisplay.py execution problem! (STEP 4).'
         try:
-          infilelist=open('hist_merge.list','r')
-          for infname in infilelist:
-            genmd5sum(infname.rstrip(os.linesep))
-        finally:
-          infilelist.close()
+          with open('hist_merge.list','r') as infilelist:
+            for infname in infilelist:
+              genmd5sum(infname.rstrip(os.linesep))
+        except:
+          pass
         genmd5sum(histfile)
         return
       if productionMode == 'True': 
