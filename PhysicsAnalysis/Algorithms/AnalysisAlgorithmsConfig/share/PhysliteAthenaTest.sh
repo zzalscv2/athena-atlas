@@ -29,4 +29,4 @@ inputPhyslite=/data/krumnack/test_files/DAOD_PHYSLITE.test_file.pool.root
 athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --data-type $dataType --no-physlite-broken --force-input $inputPhys --force-output test_ntuple_phys_$dataType.root "$@"
 athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --data-type $dataType --physlite --no-physlite-broken --force-input $inputPhyslite --force-output test_ntuple_physlite_$dataType.root "$@"
 
-acmd.py diff-root --enforce-leaves -t analysis test_ntuple_phys_$dataType.root test_ntuple_physlite_$dataType.root
+acmd.py diff-root -t analysis test_ntuple_phys_$dataType.root test_ntuple_physlite_$dataType.root

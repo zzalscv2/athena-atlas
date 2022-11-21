@@ -45,22 +45,22 @@ def _is_exit_early():
                   default='CollectionTree',
                   help='name of the TTree to compare')
 @acmdlib.argument('--branches-of-interest',
-                  nargs='*',
-                  default='',
+                  nargs='+',
+                  default=set(),
                   help='set of regex matching names of branches to compare; assumes all if none specified.')
 @acmdlib.argument('--ignore-leaves',
-                  nargs='*',
+                  nargs='+',
                   default=('Token', 'index_ref', r'(.*)_timings\.(.*)', r'(.*)_mems\.(.*)', r'(.*)TrigCostContainer(.*)'),
                   help='set of leaves names to ignore from comparison; can be a branch name or a partial leaf name (accepts regex)')
 @acmdlib.argument('--enforce-leaves',
-                  nargs='*',
+                  nargs='+',
                   default=('BCID',),
                   help='set of leaves names we make sure to compare')
 @acmdlib.argument('--leaves-prefix',
                   default='',
                   help='Remove prefix value from all leaves')
 @acmdlib.argument('--known-hacks',
-                  nargs='*',
+                  nargs='+',
                   default=('m_athenabarcode', 'm_token',),
                   help='set of leaves which are known to fail (but should be fixed at some point) [default: %(default)s]')
 @acmdlib.argument('--entries',

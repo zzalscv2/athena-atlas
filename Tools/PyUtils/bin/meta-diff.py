@@ -62,7 +62,7 @@ def main():
     parser.add_argument(
         "-d",
         "--drop",
-        nargs="*",
+        nargs="+",
         default=None,
         metavar="KEY",
         help="Keys to drop from metadata retrieved from file. Separe nested dictionary keys using '.'. An '*' matches any key.",
