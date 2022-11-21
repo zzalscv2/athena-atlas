@@ -9,10 +9,6 @@
 /////////////////////////////////////////////////////////////////// 
 
 
-// STL includes
-
-// FrameWork includes
-
 // McParticleKernel includes
 #include "McParticleKernel/IMcVtxFilterTool.h"
 #include "McParticleKernel/ITruthIsolationTool.h"
