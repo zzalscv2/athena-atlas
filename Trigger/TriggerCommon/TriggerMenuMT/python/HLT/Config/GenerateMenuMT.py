@@ -23,7 +23,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
 
     # Applicable to all menu instances
     calibCosmicMonSigs = ['Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias']
-    combinedSigs = ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking']
+    combinedSigs = ['MinBias','Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','UnconventionalTracking','HeavyIon']
     defaultSigs = ['Streaming']  # for noalg chains
 
     # Define which signatures (folders) are required for each slice
@@ -32,7 +32,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         allSigs = [
             'Test','Streaming','Monitor','Beamspot','Cosmic', 'Calib', 'EnhancedBias',
             'Electron','Photon','Muon','Tau','Jet', 'Bjet','MET','Bphysics',
-            'MinBias','UnconventionalTracking'
+            'MinBias','UnconventionalTracking', 'HeavyIon'
         ]
         signatureDeps = {sig:[sig] for sig in allSigs}
         # Special cases
