@@ -57,6 +57,45 @@ class argFactory(object):
         return 'argFactory for {0}, args {1}, kwargs {2}'.format(self._genclass, self._args, self._kwargs)
 
 
+## @class argAction
+class argAction(argparse.Action):
+    def __init__(self, factory, option_strings, dest, **kwargs):
+        self._factory = factory
+        super().__init__(option_strings, dest, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        msg.debug('Called action for factory=%s; values=%s', self._factory, values)
+
+        # call the factory for each value
+        if isinstance(values, list):
+            if not values:
+                # in case of empty list, run factory on None to get the default
+                setattr(namespace, self.dest, [self._factory(None)])
+            else:
+                setattr(namespace, self.dest, [self._factory(v) for v in values])
+        else:
+            setattr(namespace, self.dest, self._factory(values))
+
+
+## @class argActionFactory
+#  @brief Factory class used to generate argparse actions, actions should be used
+#  when arguments are used without value, like boolean flags
+class argActionFactory(object):
+    def __init__(self, genclass, *args, **kwargs):
+        msg.debug('Initialised action class %s with args=%s; kwargs=%s', genclass, args, kwargs)
+        self._factory = argFactory(genclass, *args, **kwargs)
+
+    @property
+    def factory(self):
+        return self._factory
+
+    def __call__(self, option_strings, dest, **kwargs):
+        return argAction(self._factory, option_strings, dest, **kwargs)
+
+    def __str__(self):
+        return 'argActionFactory for {0}'.format(self._factory)
+
+
 ## @class argument
 #  @brief Basic argument class holding a value which can be get and set
 #  @note Any argument type is supported
@@ -2097,9 +2136,9 @@ class argSubstepBool(argSubstep):
     
     @value.setter
     def value(self, value):
-        msg.debug('Attempting to set argSubstep from {0!s} (type {1}'.format(value, type(value)))
+        msg.debug('Attempting to set argSubstep from {0!s} (type {1})'.format(value, type(value)))
         if value is None:
-            self._value = {}
+            self._value = {self._defaultSubstep: True}
         elif isinstance(value, bool):
             self._value = {self._defaultSubstep: value}
         elif isinstance(value, str):
@@ -2418,7 +2457,9 @@ class trfArgParser(argparse.ArgumentParser):
             self._helpString[argName] = kwargs['help'] # if the help option is present for the argument then put it into the helpString dict key = argument name, value = help 
         else:
             self._helpString[argName] = None
-        if 'type' in kwargs:
+        if 'action' in kwargs and 'factory' in dir(kwargs['action']):
+            self._argClass[argName] = kwargs['action'].factory
+        elif 'type' in kwargs:
             self._argClass[argName] = kwargs['type']
         else:
             self._argClass[argName] = None
