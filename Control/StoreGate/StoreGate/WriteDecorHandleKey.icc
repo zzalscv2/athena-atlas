@@ -1,6 +1,6 @@
 // $Id$
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/WriteDecorHandleKey.icc
@@ -50,6 +50,26 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey (const std::string& key /*= ""*/,
 
 
 /**
+ * @brief Constructor with associated container.
+ * @param contKey WriteHandleKey of the associated container
+ * @param decorKey The decoration name.
+ * @param storeName Name to use for the store.
+ *
+ * The decoration @decorKey will be applied on the container referenced
+ * by @contKey.
+ */
+template <class T>
+WriteDecorHandleKey<T>::WriteDecorHandleKey (const WriteHandleKey<T>& contKey,
+                                             const std::string& decorKey /*= ""*/,
+                                             const std::string& storeName /*= "StoreGateSvc"*/) :
+  Base (makeContDecorKey (contKey, decorKey), storeName),
+  m_contHandleKey (contKey.key(), storeName),
+  m_contKey(&contKey)
+{
+}
+
+
+/**
  * @brief auto-declaring Property Constructor.
  * @param owner Owning component.
  * @param name name of the Property
@@ -63,17 +83,45 @@ WriteDecorHandleKey<T>::WriteDecorHandleKey (const std::string& key /*= ""*/,
  * the store named by @c storeName is used.
  */
 template <class T>
-template <class OWNER, class K,
+template <class OWNER,
           typename /*= typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type*/>
 inline
 WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
                                              const std::string& name,
-                                             const K& key /*={}*/,
+                                             const std::string& key /*={}*/,
                                              const std::string& doc /*=""*/)
   : Base (owner, name, key, doc),
     m_contHandleKey (contKeyFromKey (key), StoreID::storeName(StoreID::EVENT_STORE) )
 {
 }
+
+
+/**
+ * @brief auto-declaring Property Constructor.
+ * @param owner Owning component.
+ * @param name name of the Property
+ * @param contKey WriteHandleKey of the associated container
+ * @param decorKey name The decoration name.
+ * @param doc Documentation string.
+ *
+ * will associate the named Property with this WDHK via declareProperty
+ */
+template <class T>
+template <class OWNER,
+          typename /*= typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type*/>
+inline
+WriteDecorHandleKey<T>::WriteDecorHandleKey( OWNER* owner,
+                                             const std::string& name,
+                                             const WriteHandleKey<T>& contKey,
+                                             const std::string& decorKey /*={}*/,
+                                             const std::string& doc /*=""*/)
+  : Base (owner, name, makeContDecorKey (contKey, decorKey), doc),
+    m_contHandleKey (contKey.key(), StoreID::storeName(StoreID::EVENT_STORE)),
+    m_contKey(&contKey)
+{
+}
+
+
 
 
 /**
@@ -88,8 +136,9 @@ template <class T>
 WriteDecorHandleKey<T>&
 WriteDecorHandleKey<T>::operator= (const std::string& sgkey)
 {
-  m_contHandleKey = contKeyFromKey (sgkey);
-  Base::operator= (sgkey);
+  const std::string key = m_contKey ? makeContDecorKey(*m_contKey, sgkey) : sgkey;
+  m_contHandleKey = contKeyFromKey (key);
+  Base::operator= (key);
   return *this;
 }
 
@@ -108,12 +157,13 @@ WriteDecorHandleKey<T>::operator= (const std::string& sgkey)
 template <class T>
 StatusCode WriteDecorHandleKey<T>::assign (const std::string& sgkey)
 {
-  if (m_contHandleKey.assign (contKeyFromKey (sgkey)).isFailure())
+  const std::string key = m_contKey ? makeContDecorKey(*m_contKey, sgkey) : sgkey;
+  if (m_contHandleKey.assign (contKeyFromKey (key)).isFailure())
     return StatusCode::FAILURE;
-  return Base::assign (sgkey);
+  return Base::assign (key);
 }
 
-  
+
 /**
  * @brief If this object is used as a property, then this should be called
  *        during the initialize phase.  It will fail if the requested
@@ -125,10 +175,29 @@ StatusCode WriteDecorHandleKey<T>::assign (const std::string& sgkey)
 template <class T>
 StatusCode WriteDecorHandleKey<T>::initialize (bool used /*= true*/)
 {
+  // If a parent container is used, its key may have changed
+  if (m_contKey)
+    m_contHandleKey = m_contKey->key();
+
   detail::registerWriteDecorHandleKey (this->owner(), m_contHandleKey.fullKey());
   if (m_contHandleKey.initialize (used).isFailure())
     return StatusCode::FAILURE;
   return Base::initialize (used);
+}
+
+
+/**
+ * @brief Python representation of Handle.
+ */
+template <class T>
+std::string WriteDecorHandleKey<T>::pythonRepr() const
+{
+  std::string repr = Base::pythonRepr();
+  // With a parent container our representation becomes the decoration name only.
+  if (m_contKey) {
+    removeContFromDecorKey(*m_contKey, repr);
+  }
+  return repr;
 }
 
 

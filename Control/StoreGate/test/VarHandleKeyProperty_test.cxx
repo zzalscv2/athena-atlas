@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file StoreGate/test/VarHandleKeyProperty_test.cxx
@@ -154,12 +154,26 @@ void test3()
   assert (k5.key() == "bbb.zzz");
   assert (k5.storeHandle().name() == "FooSvc");
 
+  SG::ReadDecorHandleKey<MyObj> k5a(k2);
+  SimplePropertyRef<SG::ReadDecorHandleKey<MyObj> > p5a ("p5a.zzz", k5a);
+  assert (p5a.fromString ("zzz").isSuccess());
+  assert (k5a.clid() == 293847295);
+  assert (k5a.key() == "bbb.zzz");
+  assert (k5a.storeHandle().name() == "FooSvc");
+
   SG::WriteDecorHandleKey<MyObj> k6;
   SimplePropertyRef<SG::WriteDecorHandleKey<MyObj> > p6 ("p6.zzz", k6);
   assert (p6.fromString ("FooSvc+bbb.zzz").isSuccess());
   assert (k6.clid() == 293847295);
   assert (k6.key() == "bbb.zzz");
   assert (k6.storeHandle().name() == "FooSvc");
+
+  SG::WriteDecorHandleKey<MyObj> k6a(k3);
+  SimplePropertyRef<SG::WriteDecorHandleKey<MyObj> > p6a ("p6a.zzz", k6a);
+  assert (p6a.fromString ("zzz").isSuccess());
+  assert (k6a.clid() == 293847295);
+  assert (k6a.key() == "ccc.zzz");
+  assert (k6a.storeHandle().name() == "BarSvc");
 
   SG::ReadCondHandleKey<MyObj> k7 ("p7");
   SimplePropertyRef<SG::ReadCondHandleKey<MyObj> > p7 ("p7", k7);
@@ -223,6 +237,10 @@ void test4()
   props.push_back(ptest.mgr.declareProperty ("k3", k3));
   SG::VarHandleKey k4 (1234, "", Gaudi::DataHandle::Reader);
   props.push_back(ptest.mgr.declareProperty ("k4", k4));
+  SG::ReadDecorHandleKey<MyObj> k5;
+  props.push_back(ptest.mgr.declareProperty ("k5", k5));
+  SG::WriteDecorHandleKey<MyObj> k6;
+  props.push_back(ptest.mgr.declareProperty ("k6", k6));
 
   ServiceHandle<Gaudi::Interfaces::IOptionsSvc> jo ("JobOptionsSvc", "test");
   assert (jo.retrieve().isSuccess());
@@ -245,6 +263,35 @@ void test4()
   assert (k4.clid() == 1234);
   assert (k4.key() == "ddd");
   assert (k4.storeHandle().name() == "BazSvc");
+
+  assert (k5.clid() == 293847295);
+  assert (k5.key() == "ContR.DecorR");
+  assert (k5.contHandleKey().key() == "ContR" );
+  assert (k5.storeHandle().name() == "StoreGateSvc");
+
+  assert (k6.clid() == 293847295);
+  assert (k6.key() == "ContW.DecorW");
+  assert (k6.contHandleKey().key() == "ContW" );
+  assert (k6.storeHandle().name() == "StoreGateSvc");
+
+  // Test of DecorHandleKey depending on Read/WriteHandleKey
+  SG::ReadDecorHandleKey<MyObj> k7(k1);
+  Gaudi::Details::PropertyBase* pk7 = ptest.mgr.declareProperty ("k7", k7);
+  jo->bind("test4", pk7);
+
+  assert (k7.clid() == 293847295);
+  assert (k7.key() == "aaa.DecorR");
+  assert (k7.contHandleKey().key() == "aaa" );
+  assert (k7.storeHandle().name() == "FooSvc");  // store from k1
+
+  SG::WriteDecorHandleKey<MyObj> k8(k2);
+  Gaudi::Details::PropertyBase* pk8 = ptest.mgr.declareProperty ("k8", k8);
+  jo->bind("test4", pk8);
+
+  assert (k8.clid() == 293847295);
+  assert (k8.key() == "bbb.DecorW");
+  assert (k8.contHandleKey().key() == "bbb" );
+  assert (k8.storeHandle().name() == "StoreGateSvc");  // store from k2
 }
 
 

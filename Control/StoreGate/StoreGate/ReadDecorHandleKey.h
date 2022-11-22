@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/ReadDecorHandleKey.h
@@ -22,7 +22,7 @@
 namespace SG {
 
 
-/*
+/**
  * @brief Property holding a SG store/key/clid/attr name from which a
  *        ReadDecorHandle is made.
  *
@@ -38,15 +38,8 @@ namespace SG {
  *@code
  *  class MyAlgorithm : public AthReentrantAlgorithm {
  *    ...
- *    SG::ReadDecorHandleKey<MyCont> m_key;
+ *    SG::ReadDecorHandleKey<MyCont> m_key{this, "Key", "container.decor"};
  *  };
- *  ...
- *  MyAlgorithm::MyAlgorithm (const std::string& name, ISvcLocator* svcloc)
- *    : AthReentrantAlgorithm (name, svcloc), ...
- *  {
- *    declareProperty ("Key", m_key = "container.decor");
- *    ...
- *  }
  *
  *  StatusCode MyAlgorithm::initialize()
  *  {
@@ -60,7 +53,23 @@ namespace SG {
  *    for (const MyObj& o : *h) {  // Access the container.
  *      doSomething (h (o));  // Access the decoration.
  *      ...
- @endcode
+ *@endcode
+ *
+ * Alternatively, one can construct the key with an additional ReadHandleKey
+ * that represents the container and the key then only holds the decoration
+ * name. This is useful to avoid hard-coding the container name twice in case
+ * the algorithm also needs a @c ReadHandleKey for the container:
+ *
+ * Example:
+ *
+ *@code
+ *  class MyAlgorithm : public AthReentrantAlgorithm {
+ *    ...
+ *    SG::ReadHandleKey<MyCont> m_rhkey{this, "RHKey", "container"};
+ *    SG::ReadDecorHandleKey<MyCont> m_rdhkey{this, "Key", m_rhkey, "decor"};
+ *  };
+ *  ...
+ *@endcode
  *
  * One can run into issues with the scheduler if this is used in conjunction
  * with inheritance.  For example, if @c D derives from @c B, and one uses
@@ -94,6 +103,19 @@ public:
   ReadDecorHandleKey (const std::string& key = "",
                       const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
 
+ /**
+   * @brief Constructor with associated container.
+   * @param contKey ReadHandleKey of the associated container
+   * @param decorKey The decoration name.
+   * @param storeName Name to use for the store.
+   *
+   * The decoration @decorKey will be read from the container referenced
+   * by @contKey.
+   */
+  ReadDecorHandleKey (const ReadHandleKey<T>& contKey,
+                      const std::string& decorKey = "",
+                      const std::string& storeName = StoreID::storeName(StoreID::EVENT_STORE));
+
 
   /**
    * @brief auto-declaring Property Constructor.
@@ -108,14 +130,33 @@ public:
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.
    */
-  template <class OWNER, class K,
+  template <class OWNER,
             typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
   ReadDecorHandleKey( OWNER* owner,
                       const std::string& name,
-                      const K& key = {},
+                      const std::string& key = {},
                       const std::string& doc = "");
 
-  
+
+  /**
+   * @brief auto-declaring Property Constructor.
+   * @param owner Owning component.
+   * @param name name of the Property
+   * @param contKey ReadHandleKey of the associated container
+   * @param decorKey name The decoration name.
+   * @param doc Documentation string.
+   *
+   * will associate the named Property with this WDHK via declareProperty
+   */
+  template <class OWNER,
+            typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
+  ReadDecorHandleKey( OWNER* owner,
+                      const std::string& name,
+                      const ReadHandleKey<T>& contKey,
+                      const std::string& decorKey = {},
+                      const std::string& doc = "");
+
+
   /**
    * @brief Change the key of the object to which we're referring.
    * @param sgkey The StoreGate key for the object.
@@ -166,8 +207,23 @@ public:
 
 
 private:
+  /**
+   * @brief Python representation of Handle.
+   */
+  virtual std::string pythonRepr() const override;
+
+
   /// The container handle.
   ReadHandleKey<T> m_contHandleKey;
+
+  /**
+   * @brief Optional container from which decorations are read.
+   *
+   * If used, this is really the same as our own m_contHandleKey. So we
+   * could just keep it in a (non-)owning pointer depending on the use-case.
+   * But that would require a dedicated copy constructor for this class, etc.
+   */
+  const ReadHandleKey<T>* m_contKey{nullptr};
 };
 
 
