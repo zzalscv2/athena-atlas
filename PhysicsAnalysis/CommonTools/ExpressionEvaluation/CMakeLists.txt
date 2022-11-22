@@ -14,7 +14,7 @@ atlas_add_library( ExpressionEvaluationLib
                    PUBLIC_HEADERS ExpressionEvaluation
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers CxxUtils GaudiKernel SGTools StoreGateLib TrigDecisionToolLib AthenaBaseComps
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers CxxUtils GaudiKernel SGTools StoreGateLib TrigDecisionToolLib AthenaBaseComps RootUtils
                    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthAnalysisBaseCompsLib AthenaKernel )
 
 # Test(s) in the package

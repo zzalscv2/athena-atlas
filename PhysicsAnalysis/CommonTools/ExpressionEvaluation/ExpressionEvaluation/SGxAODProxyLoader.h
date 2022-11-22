@@ -126,7 +126,7 @@ namespace ExpressionParsing {
       * @param info the type_info of the container whose method is to be called.
       * @return a TMethodCall object and optionally collection proxy which is owned by ROOT(?)
       */
-      std::pair<std::unique_ptr<TMethodCall>, TVirtualCollectionProxy *>
+      std::pair<RootUtils::TSMethodCall, TVirtualCollectionProxy *>
       getMethodCallAccessor(const std::string &method_name, const std::type_info &info) const;
 
      /** Get an existing or create a new accessor for the given variable name.
