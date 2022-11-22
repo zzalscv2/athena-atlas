@@ -22,7 +22,6 @@ public:
   virtual StatusCode execute(const EventContext &ctx) const override;
 
 private:
-  StatusCode findElectronsLinkedToTRTHits(const EventContext &ctx, std::vector<int> *barcodes) const;
 
   SG::ReadHandleKey<McEventCollection> m_inputTruthCollectionKey {this, "InputTruthCollection", "TruthEventOLD", "Input truth collection name"};
   SG::WriteHandleKey<McEventCollection> m_outputTruthCollectionKey {this, "OutputTruthCollection", "TruthEvent", "Output truth collection name"};
