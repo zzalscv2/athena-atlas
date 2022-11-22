@@ -99,29 +99,8 @@ def LArRampCfg(flags):
         theLArRampPatcher.PatchMethod="PhiAverage"
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
-        theLArRampPatcher.UseCorrChannels=False      
+        theLArRampPatcher.UseCorrChannels=True
         result.addEventAlgo(theLArRampPatcher)
-
-
-
-
-    #ROOT ntuple writing:
-    rootfile=flags.LArCalib.Output.ROOTFile
-    if rootfile != "":
-        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
-                                                        AddFEBTempInfo = False,
-                                                        RawRamp = True,
-                                                        SaveAllSamples =  True,
-                                                    ))
-
-        import os
-        if os.path.exists(rootfile):
-            os.remove(rootfile)
-        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
-        result.setAppProperty("HistogramPersistency","ROOT")
-        pass # end if ROOT ntuple writing
-
-
 
 
     #Output (POOL + sqlite) file writing:
@@ -134,9 +113,25 @@ def LArRampCfg(flags):
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
-
-
     result.getService("IOVDbSvc").DBInstance=""
+
+
+    #ROOT ntuple writing:
+    rootfile=flags.LArCalib.Output.ROOTFile
+    if rootfile != "":
+        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
+                                                        AddFEBTempInfo = False,
+                                                        RawRamp = True,
+                                                        SaveAllSamples =  True,
+                                                        ApplyCorr=True,
+                                                    ))
+
+        import os
+        if os.path.exists(rootfile):
+            os.remove(rootfile)
+        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
+        result.setAppProperty("HistogramPersistency","ROOT")
+        pass # end if ROOT ntuple writing
 
     return result
 
