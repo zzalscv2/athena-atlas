@@ -335,7 +335,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
 
   for (ReactionProductList::iterator prod_it = aReactionProductList->begin();
        prod_it != aReactionProductList->end();
-       prod_it++){
+       ++prod_it){
     G4int secondaries = prod_it->size();
     // If the reaction is not possible we will not consider it
     /*    if(ReactionIsPossible(*prod_it,aDynamicParticle)
@@ -482,7 +482,7 @@ G4double G4ProcessHelper::ReactionProductMass(const ReactionProduct& aReaction,c
   //G4cout<<"sqrt(s) = "<<sqrts/CLHEP::GeV<<" GeV"<<G4endl;
   // Sum of rest masses after reaction:
   G4double M_after = 0;
-  for (ReactionProduct::const_iterator r_it = aReaction.begin(); r_it !=aReaction.end(); r_it++){
+  for (ReactionProduct::const_iterator r_it = aReaction.begin(); r_it !=aReaction.end(); ++r_it){
     //G4cout<<"Mass contrib: "<<(particleTable->FindParticle(*r_it)->GetPDGMass())/CLHEP::MeV<<" MeV"<<G4endl;
     auto table ATLAS_THREAD_SAFE = particleTable;  // safe because table has been loaded by now
     M_after += table->FindParticle(*r_it)->GetPDGMass();
@@ -497,7 +497,7 @@ G4bool G4ProcessHelper::ReactionIsPossible(const ReactionProduct& aReaction,cons
 }
 
 G4bool G4ProcessHelper::ReactionGivesBaryon(const ReactionProduct& aReaction) const{
-  for (ReactionProduct::const_iterator it = aReaction.begin();it!=aReaction.end();it++)
+  for (ReactionProduct::const_iterator it = aReaction.begin();it!=aReaction.end();++it)
     if(CustomPDGParser::s_isSbaryon(*it)||CustomPDGParser::s_isRBaryon(*it)) return true;
   return false;
 }

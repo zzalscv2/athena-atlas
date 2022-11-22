@@ -860,7 +860,7 @@ Hijing::set_user_params       (void)
     m_bmax       = 0.;
      
     // Set user Initialization parameters
-    for(CommandVector::iterator i = m_InitializeVector.begin(); i != m_InitializeVector.end(); i++ )
+    for(CommandVector::iterator i = m_InitializeVector.begin(); i != m_InitializeVector.end(); ++i )
     {
        ATH_MSG_INFO( " Hijing init. Command is: " << *i );
        StringParse mystring(*i);

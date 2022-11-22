@@ -80,7 +80,7 @@ StatusCode EventBoost::execute() {
 
   McEventCollection::const_iterator it;
 
-  for(it=mcCollptr->begin(); it!=mcCollptr->end(); it++) {
+  for(it=mcCollptr->begin(); it!=mcCollptr->end(); ++it) {
 
     const HepMC::GenEvent* genEvt = (*it);
     ATH_CHECK(EventCopy(genEvt));
@@ -95,7 +95,7 @@ StatusCode EventBoost::execute() {
   }
 
 
-  for(it=mcCollptrCOPY->begin(); it!=mcCollptrCOPY->end(); it++) {
+  for(it=mcCollptrCOPY->begin(); it!=mcCollptrCOPY->end(); ++it) {
 
     const HepMC::GenEvent* newEvt = (*it);
 

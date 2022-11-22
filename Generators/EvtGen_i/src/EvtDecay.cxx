@@ -114,7 +114,7 @@ StatusCode EvtDecay::execute() {
   
 	m_targetID = 0;
 	McEventCollection::iterator mcItr;
-	for( mcItr = m_McEvtColl->begin(); mcItr != m_McEvtColl->end(); mcItr++ ) {
+	for( mcItr = m_McEvtColl->begin(); mcItr != m_McEvtColl->end(); ++mcItr ) {
 
 //		std::cout << "Next event -> " << std::endl;
 //		std::cout << "EvtDecay: Before 1st Unints conversion -> " << std::endl;

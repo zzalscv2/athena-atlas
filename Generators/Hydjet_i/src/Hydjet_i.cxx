@@ -328,7 +328,7 @@ Hydjet::set_user_params	(void)
     m_pydat1.paru(14)=1.;         // tolerance parameter to adjust fragmentation
      
     // Set user Initialization parameters
-    for(CommandVector::iterator i = m_InitializeVector.begin(); i != m_InitializeVector.end(); i++ )
+    for(CommandVector::iterator i = m_InitializeVector.begin(); i != m_InitializeVector.end(); ++i )
     {
 	ATH_MSG_INFO( " Command is: " << *i );
 	StringParse mystring(*i);
