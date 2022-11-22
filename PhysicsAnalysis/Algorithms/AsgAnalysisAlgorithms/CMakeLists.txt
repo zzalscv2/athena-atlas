@@ -4,15 +4,18 @@
 
 atlas_subdir( AsgAnalysisAlgorithms )
 
+find_package( ROOT COMPONENTS Core Hist Tree )
+
 atlas_add_library( AsgAnalysisAlgorithmsLib
    AsgAnalysisAlgorithms/*.h AsgAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS AsgAnalysisAlgorithms
-   LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools CxxUtils xAODBase
-     xAODEventInfo SelectionHelpersLib SystematicsHandlesLib PATCoreLib
-     PATInterfaces AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib
+   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
+     xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
+     AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib
      EventBookkeeperToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib
-   PRIVATE_LINK_LIBRARIES xAODCore xAODCutFlow xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma xAODTracking xAODTruth
-     RootCoreUtils )
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma
+     xAODTracking xAODTruth xAODRootAccess RootCoreUtils )
 
 atlas_add_dictionary( AsgAnalysisAlgorithmsDict
    AsgAnalysisAlgorithms/AsgAnalysisAlgorithmsDict.h
@@ -22,7 +25,7 @@ atlas_add_dictionary( AsgAnalysisAlgorithmsDict
 if( NOT XAOD_STANDALONE )
    atlas_add_component( AsgAnalysisAlgorithms
       src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel AsgAnalysisAlgorithmsLib )
+      LINK_LIBRARIES AsgAnalysisAlgorithmsLib )
 endif()
 
 atlas_install_python_modules( python/*.py )
