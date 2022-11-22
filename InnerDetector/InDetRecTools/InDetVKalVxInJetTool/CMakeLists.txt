@@ -13,7 +13,7 @@ atlas_add_library( InDetVKalVxInJetToolLib
                    src/*.cxx
                    PUBLIC_HEADERS InDetVKalVxInJetTool
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AnalysisUtilsLib AthenaBaseComps BeamPipeGeoModelLib PixelReadoutGeometryLib CxxUtils InDetRecToolInterfaces MVAUtils PathResolver TrkNeutralParameters TrkToolInterfaces TrkVKalVrtFitterLib VxSecVertex xAODTracking xAODTruth xAODEventInfo)
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AnalysisUtilsLib AthenaBaseComps BeamPipeGeoModelLib PixelReadoutGeometryLib CxxUtils GeoPrimitives InDetRecToolInterfaces MVAUtils PathResolver TrkNeutralParameters TrkToolInterfaces TrkVKalVrtFitterLib VxSecVertex xAODTracking xAODTruth xAODEventInfo xAODJet TestTools)
 
 atlas_add_component( InDetVKalVxInJetTool
                      src/components/*.cxx
@@ -27,5 +27,5 @@ atlas_install_joboptions( share/*.txt )
 atlas_add_test( InDetTrkInJetType_test
                 SOURCES test/InDetTrkInJetType_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils EventPrimitives GaudiKernel MagFieldConditions TestTools TrkVertexFitterInterfaces xAODTracking
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils EventPrimitives GaudiKernel MagFieldConditions TestTools TrkVertexFitterInterfaces xAODTracking xAODJet
                 LOG_IGNORE_PATTERN "Booking|ClassIDSvc|weight file|create data set info" )
