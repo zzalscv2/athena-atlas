@@ -61,13 +61,13 @@ public:
 		double dt,
 		int DAC, 
                 int isPulsed,
-		unsigned flag=0);
+		unsigned flag);
 
     LArCaliWave(unsigned nSamples,
 		double dt,
 		int DAC, 
                 int isPulsed,
-		unsigned flag=0);
+		unsigned flag);
 
     LArCaliWave(const std::vector<double>& vAmpl, 
 		const std::vector<double>& vErr, 
@@ -75,7 +75,7 @@ public:
 		double dt,
 		int DAC, 
                 int isPulsed,
-		unsigned flag=0);
+		unsigned flag);
 
     virtual ~LArCaliWave() = default;
     //@}
