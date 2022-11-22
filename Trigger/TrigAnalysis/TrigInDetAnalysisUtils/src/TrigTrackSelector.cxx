@@ -190,7 +190,7 @@ void TrigTrackSelector::selectTracks( const TrigInDetTrackCollection* trigtracks
     TrigInDetTrackCollection::const_iterator  trackend = trigtracks->end();
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr, truthMap );
-      trackitr++;
+      ++trackitr;
     }
 }
 
@@ -347,7 +347,7 @@ void TrigTrackSelector::selectTracks( const Rec::TrackParticleContainer* trigtra
     
       selectTrack( *trackitr );
       
-      trackitr++;
+      ++trackitr;
 
     } // loop over tracks
     
@@ -366,7 +366,7 @@ void TrigTrackSelector::selectTracks( const TruthParticleContainer* truthtracks 
     
       selectTrack( *trackitr );
       
-      trackitr++;
+      ++trackitr;
 
     } // loop over tracks
     
@@ -406,7 +406,7 @@ void TrigTrackSelector::truthBeamline( const xAOD::TruthParticleContainer* truth
   xAOD::TruthParticleContainer::const_iterator  trackitr = truthtracks->begin();
   xAOD::TruthParticleContainer::const_iterator  trackend = truthtracks->end();
     
-  for ( ; trackitr!=trackend ; trackitr++ ) { 
+  for ( ; trackitr!=trackend ; ++trackitr ) { 
     
     const xAOD::TruthParticle* track = (*trackitr);
     
@@ -1074,7 +1074,7 @@ void  TrigTrackSelector::selectTracks( const TrackCollection* trigtracks ) {
    
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     } // loop over tracks
     
 }
@@ -1272,7 +1272,7 @@ void TrigTrackSelector::selectTracks( const xAOD::TrackParticleContainer* tracks
     xAOD::TrackParticleContainer::const_iterator  trackend = tracks->end();
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     } // loop over tracks     
 }
 
@@ -1285,7 +1285,7 @@ void TrigTrackSelector::selectTracks( xAOD::TrackParticleContainer::const_iterat
     //    std::cout << "\t\t\tSUTT \tTrackContainer->size() = " << trigtracks->size() << std::endl;
     while ( trackitr!=trackend ) { 
       selectTrack( *trackitr );
-      trackitr++;
+      ++trackitr;
     } // loop over tracks     
 }
 
