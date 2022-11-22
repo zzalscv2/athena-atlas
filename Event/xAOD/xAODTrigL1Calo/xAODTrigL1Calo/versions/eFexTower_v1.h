@@ -58,6 +58,12 @@ namespace xAOD {
       uint32_t had_status() const; /// getter for hadronic status bit
       /// set em status bit
       void setHad_status(uint32_t); /// setter for the above
+      
+      /// get the Simulation ID
+      uint32_t eFEXtowerID() const; /// getter for the jtower simulation ID
+      /// set the simulation ID
+      void seteFEXtowerID(uint32_t); ///setter for the above      
+      
 
       void initialize(const float Eta,const float Phi);
       void initialize(const float Eta,const float Phi,

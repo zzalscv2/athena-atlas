@@ -17,6 +17,7 @@ namespace xAOD{
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , fpga , setFpga )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, int , towerEt , setTowerEt )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, char , isSaturated , setIsSaturated )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint32_t     , gFEXtowerID , setgFEXtowerID )
   
   /// initialize
   void gFexTower_v1::initialize(const uint8_t IEta,const uint8_t IPhi)

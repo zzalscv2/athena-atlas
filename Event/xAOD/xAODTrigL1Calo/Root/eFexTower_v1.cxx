@@ -17,7 +17,8 @@ namespace xAOD{
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint8_t , module , setModule )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint8_t , fpga , setFpga )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , em_status , setEm_status )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , had_status , setHad_status )  
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , had_status , setHad_status ) 
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , eFEXtowerID , seteFEXtowerID ) 
   
   
   /// initialize

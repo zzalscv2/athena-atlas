@@ -33,6 +33,7 @@ namespace xAOD{
 
     std::vector<uint32_t> em_status;
     std::vector<uint32_t> had_status;
+    std::vector<uint32_t> eFEXtowerID;
     
   }; // class eFexTowerAuxContainer_v1 
 } // namespace xAOD
