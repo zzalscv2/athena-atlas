@@ -20,7 +20,7 @@ for using standalone Rivet. This tutorial will focus on the Athena wrapper aroun
 
 In general, the latest 22.0/22.6 releases should have the latest Rivet release supported by ATLAS.
 
-```
+```bash
 asetup 22.6.1,AthGeneration # or later 
 source setupRivet
 ```
@@ -32,7 +32,7 @@ available on the command line.
 Occasionally it might be useful to set up the latest nightly in order to benefit
 from recent merge requests that haven't made it into a proper release yet:
 
-```
+```bash
 asetup master,latest,AthGeneration
 source setupRivet
 ```
@@ -66,7 +66,7 @@ Standalone Rivet cannot deal with EVNT files, but that's why we have a `Rivet_i`
 As with everything in Athena, this requires some JOs. We've added an [example](share/example/local_jO.py) to this repo. 
 These JOs are very simple. Take a look:
 
-```
+```python
 theApp.EvtMax = -1
 
 import AthenaPoolCnvSvc.ReadAthenaPool
@@ -93,7 +93,7 @@ job += rivet
 ```
 
 One can use the analysis options as:
-```
+```python
 rivet.Analyses += [ 'ATLAS_2019_I1724098:MODE=TW' ]
 ```
 
@@ -113,7 +113,7 @@ More `Rivet_i` options are defined [here](src/Rivet_i.cxx).
 
 You can run these JobOptions like so:
 
-```
+```bash
 athena local_jO.py
 ```
 
@@ -126,7 +126,7 @@ If you generated the EVNT files locally, you typically have the generator cross-
 file in each run. In that case you can extend the JobOption as follows to feed the correct cross-section 
 directly into Rivet:
 
-```
+```python
 theApp.EvtMax = -1
 
 import re, os, glob
@@ -179,7 +179,7 @@ job += rivet
 This works pretty much the same way as above, except you don't want to specify a local file in the JOs.
 We've prepared an example for grid running to illustrate the difference:
 
-```
+```python
 theApp.EvtMax = -1
 
 import AthenaPoolCnvSvc.ReadAthenaPool
@@ -207,7 +207,7 @@ job += rivet
 
 This can be submitted like so:
 
-```
+```bash
 lsetup panda
 pathena --extOutFile=MyOutput.yoda.gz \
 --inDS=mc15_13TeV.123456.MySampleOfInterest.evgen.EVNT.e1234 \
@@ -245,7 +245,7 @@ without needing to modify the standard production jO fragment.
 The easiest and the recommended way is to use `--rivetAnas` 
 option followed by the list of rivet analysis separated by commas. One example is shown below. 
 
-```
+```bash
 Gen_tf.py --ecmEnergy=13000.0 --randomSeed=1234 --jobConfig=830011 --outputEVNTFile=tmp.EVNT.root --maxEvents=10 --rivetAnas=MC_GENERIC,ATLAS_2020_I1790256.cc
 ```
 
@@ -256,7 +256,7 @@ The other possibility is to use a `--postInclude=local_jO.py`, where `local_jO.p
 are some after-burner-like JOs to configure Rivet, similar to the standalone JOs mentioned above,
 but without the following lines (or equivalent): 
 
-```
+```python
 import AthenaPoolCnvSvc.ReadAthenaPool
 svcMgr.EventSelector.InputCollections = [ 'EVNT.root' ]
 ```
@@ -291,7 +291,7 @@ using it as a starting point.
 
 If you prefer to start from scratch, the following command will give you a skeleton routine:
 
-```
+```bash
 rivet-mkanalysis MY_ANALYSIS
 ```
 
@@ -301,7 +301,7 @@ for more information.
 
 Note: To enable the Rivet commands for merging and plotting to work with your new local routine,
 you will have to set an enviroment variable as e.g.:
-```
+```bash
 export RIVET_ANALYSIS_PATH=$PWD
 ```
 
@@ -313,7 +313,7 @@ as well.
 
 Simply run
 
-```
+```bash
 rivet-build RivetMY_ANALYSIS.so MY_ANALYSIS.cc
 ```
 
@@ -333,7 +333,7 @@ over a grid container.
 
 Rivet provides a handy script that can be used to merge yoda files:
 
-```
+```bash
 yodamerge -o my_merged_output.yoda MY_GRID_OUTPUT/*
 ```
 
@@ -342,7 +342,7 @@ to merge the grid output as shown above for each process.
 The you can stack the resulting files into a combined output
 file like so:
 
-```
+```bash
 yodamerge --add -o my_stacked_outpyt.yoda process1.yoda:12.34 process2.yoda:4.56
 ```
 
@@ -355,7 +355,7 @@ to the relevant generator cross-section.
 
 There are several options, but our favourite way is the following:
 
-```
+```bash
 rivet-mkhtml --errs -o my_plots prediction1.yoda:"Title=MC 1" prediction2.yoda:"Title=MC 2"
 ```
 
@@ -387,7 +387,7 @@ but if you _really_ need the data in ROOT format, it is
 straightforward to convert them using Python, e.g.
 
 
-```
+```python
 from array import array
 import ROOT as rt
 import yoda
@@ -435,7 +435,7 @@ using the "/femtobarn" in the routine, it assumes that the value coming out of "
 
 The correct syntax for user-defined histograms is:
 
-```
+```cpp
 book(_h_myhisto,"_h_myhisto",10,0,200);
 ```
 
@@ -448,31 +448,35 @@ from a reference yoda file, with the numbers corresponding to `d`, `x` and `y` f
 
 ### AntiKt4TruthJets
 
-```
-FinalState fs(Cuts::abseta < 4.5); 
+```cpp
+FinalState fs(Cuts::abseta < 5.0); 
 FastJets(fs, 0.4, ANTIKT, JetAlg::Muons::NONE, JetAlg::Invisibles::NONE) 
 ```
 
 ### AntiKt4TruthWZJets
 
-```
+```cpp
 // Photons
-FinalState photons(Cuts::abspid == PID::PHOTON);
+FinalState photons(Cuts::abspid == PID::PHOTON, true, true);
 
 // Muons
 PromptFinalState bare_mu(Cuts::abspid == PID::MUON, true); // true = use muons from prompt tau decays
-DressedLeptons all_dressed_mu(photons, bare_mu, 0.1, Cuts::abseta < 2.5, true);
+DressedLeptons all_dressed_mu(photons, bare_mu, 0.1);
 
 // Electrons
 PromptFinalState bare_el(Cuts::abspid == PID::ELECTRON, true); // true = use electrons from prompt tau decays
-DressedLeptons all_dressed_el(photons, bare_el, 0.1, Cuts::abseta < 2.5, true);
+DressedLeptons all_dressed_el(photons, bare_el, 0.1);
+
+// Prompt invisibles
+InvisibleFinalState prompt_invis(true, true);
 
 //Jet forming
-VetoedFinalState vfs(FinalState(Cuts::abseta < 4.5));
+VetoedFinalState vfs(FinalState(Cuts::abseta < 5.0));
 vfs.addVetoOnThisFinalState(all_dressed_el);
 vfs.addVetoOnThisFinalState(all_dressed_mu);
+vfs.addVetoOnThisFinalState(prompt_invis);
       
-FastJets jet(vfs, FastJets::ANTIKT, 0.4, JetAlg::Muons::ALL, JetAlg::Invisibles::DECAY);
+FastJets jet(vfs, FastJets::ANTIKT, 0.4, JetAlg::Muons::ALL, JetAlg::Invisibles::ALL);
 ```
 
 
@@ -489,11 +493,11 @@ Same as AntiKt4TruthWZJets, just change the radius from 0.4 to 1.0
 ### AntiKt10TruthTrimmedPtFrac5SmallR20Jets
 
 Declare in `init`:
-```
+```cpp
  _trimmer = fastjet::Filter(fastjet::JetDefinition(fastjet::kt_algorithm, 0.2), fastjet::SelectorPtFractionMin(0.05));
 ```
 Then in `execute`:
-```
+```cpp
 PseudoJets tr_ljets;
 for (const Jet& fjet : fjets) {
    tr_ljets += _trimmer(fjet);
@@ -505,11 +509,11 @@ where `fjets` are obtained from AntiKt10TruthJets.
 ### AntiKt10TruthSoftDropBeta100Zcut10Jets
 
 Include the following header:
-```
+```cpp
 #include "fastjet/contrib/SoftDrop.hh"
 ```
 In `execute`:
-```
+```cpp
 fastjet::contrib::SoftDrop sd(1.0, 0.1);
 for (const Jet& fjet : fjets) {
    sd_ljets += sd(fjet);
@@ -521,22 +525,22 @@ where `fjets` are obtained from AntiKt10TruthJets.
 ### AntiKt10TruthBottomUpSoftDropBeta100Zcut5Jets
 
 Include the following header:
-```
+```cpp
 #include "fastjet/contrib/BottomUpSoftDrop.hh"
 ```
 As above, but:
-```
+```cpp
 fastjet::contrib::BottomUpSoftDrop busd(1.0, 0.05);
 ```
 
 ### AntiKt10TruthRecursiveSoftDropBeta100Zcut5NinfJets
 
 Include the following header:
-```
+```cpp
 #include "fastjet/contrib/RecursiveSoftDrop.hh"
 ```
 As above, but:
-```
+```cpp
 fastjet::contrib::RecursiveSoftDrop rsd(1.0, 0.05);
 ```
 
@@ -584,7 +588,7 @@ For left-aligned text in the top left corner, something like the following shoul
 
 ## How to scale a yoda file?
 
-````
+````bash
 yodascale -c '.* 10x' file.yoda
 ````
 
@@ -596,7 +600,7 @@ Yes! AODs and TRUTH1 DAOD can be read in and passed onto Rivet (Unfortunately TR
 retained for TRUTH3).  For AOD files specifically, some of the events may be missing beam protons, causing Rivet to complain about a beam 
 mismatch. If you encounter this problem, you can ask Rivet_i to add some dummy protons to the reconstructed GenEvent by setting the 
 following flag in the JobOptions:
-```
+```python
 rivet.AddMissingBeamParticles = True 
 ```
 
