@@ -81,15 +81,16 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
 
   if (recordCollection->empty()) ATH_MSG_WARNING ("action required but record size is 0");
 
+  const int barcodepart = HepMC::barcode(part);
   for (TrackRecordCollection::const_iterator record = recordCollection->begin();  record != recordCollection->end();++record){
 
-    if ( (*record).GetBarCode() == HepMC::barcode(part) ) {
+    if ( (*record).GetBarCode() != barcodepart ) continue;
 
       id = (*record).GetPDGCode();
       pd = m_particleDataTable->particle(std::abs(id));
       if (!pd) {
         ATH_MSG_WARNING ("found barcode but could not digest pdg_id. " <<
-                         HepMC::barcode(part) << " , " << id);
+                         barcodepart << " , " << id);
         continue;
       }
 
@@ -101,11 +102,10 @@ const Trk::TrackParameters* Trk::TruthTrackRecordToTrack::makeProdVertexParamete
                             (*record).GetMomentum().z());
       globalMom = hv2;
 
-      ATH_MSG_DEBUG("found barcode " << HepMC::barcode(part) << " with pdg ID " <<
+      ATH_MSG_DEBUG("found barcode " << barcodepart << " with pdg ID " <<
                     id << ", momentum " << hv2 << " production " << globalPos);
 
 
-    } // if barcodes match
   }   // loop over G4 records
 
   if (pd) {
