@@ -12,6 +12,8 @@
 #include "xAODRootAccess/tools/TAuxVectorFactory.h"
 #include "xAODRootAccess/tools/TAuxVector.h"
 #include "xAODRootAccess/tools/Message.h"
+#include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/ClassName.h"
 
 namespace xAOD {
 
@@ -185,6 +187,27 @@ namespace xAOD {
    const std::type_info* TAuxVectorFactory::tiVec() const {
 
       return m_class->GetTypeInfo();
+   }
+
+   const std::type_info* TAuxVectorFactory::tiAlloc() const {
+
+      return nullptr;
+   }
+
+   std::string TAuxVectorFactory::tiAllocName() const {
+
+     std::string name = SG::normalizedTypeinfoName (*m_class->GetTypeInfo());
+     CxxUtils::ClassName cn (name);
+     std::string alloc_name;
+     if (cn.ntargs() >= 2) {
+       alloc_name = cn.targ(1).fullName();
+     }
+     else if (cn.ntargs() == 1) {
+       alloc_name = "std::allocator<" + cn.targ(0).fullName();
+       if (alloc_name[alloc_name.size()-1] == '>') alloc_name += " ";
+       alloc_name += ">";
+     }
+     return alloc_name;
    }
 
 } // namespace xAOD
