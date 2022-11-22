@@ -8,13 +8,13 @@ import logging
 msg = logging.getLogger(__name__)
 
 import PyJobTransforms.trfArgClasses as trfArgClasses
-from PyJobTransforms.trfArgClasses import argFactory
+from PyJobTransforms.trfArgClasses import argActionFactory, argFactory
 
 from PyJobTransforms.trfLogger import stdLogLevels
 
 ## Add standard transform arguments to an argparse ArgumentParser
 def addStandardTrfArgs(parser):
-    parser.add_argument('--CA', type=argFactory(trfArgClasses.argSubstepBool, runarg=False), nargs='?',
+    parser.add_argument('--CA', action=argActionFactory(trfArgClasses.argSubstepBool, runarg=False), nargs='*',
                         help='Use ComponentAccumulator base configuration')
     parser.add_argument('--verbose', '--debug', action='store_true', help='Set transform loglevel to DEBUG')
     parser.add_argument('--loglevel', choices=list(stdLogLevels), help='Set transform logging level')
