@@ -36,6 +36,8 @@ def fromRunArgs(runArgs):
     ConfigFlags.Input.Files = getattr(runArgs, f'input{allowedInputTypes[idx]}File')
 
     # Augmentations
+    # For the time being one parent (primary stream) can have multiple children (augmentations)
+    # However, an augmentation cannot have multiple parents, which will be supported in the future
     if hasattr(runArgs, 'augmentations'):
         for val in getattr(runArgs, 'augmentations'):
             if ':' not in val or len(val.split(':')) != 2:
@@ -44,7 +46,11 @@ def fromRunArgs(runArgs):
             else:
                 child, parent = val.split(':')
                 ConfigFlags.addFlag(f'Output.DAOD_{child}ParentStream',f'DAOD_{parent}')
-                ConfigFlags.addFlag(f'Output.DAOD_{parent}ChildStream',f'DAOD_{child}')
+                childStreamFlag = f'Output.DAOD_{parent}ChildStream'
+                if not ConfigFlags.hasFlag(childStreamFlag):
+                    ConfigFlags.addFlag(childStreamFlag, [f'DAOD_{child}'])
+                else:
+                    ConfigFlags._set(childStreamFlag, ConfigFlags._get(childStreamFlag) + [f'DAOD_{child}'])
                 logDerivation.info('Setting up event augmentation as {0} => {1}'.format(child, parent))
 
     # Output formats
