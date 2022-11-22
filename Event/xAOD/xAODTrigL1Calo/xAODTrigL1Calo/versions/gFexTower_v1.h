@@ -57,6 +57,13 @@ namespace xAOD {
       /// set saturation flag of gTower
       void setIsSaturated(char); ///setter for the above
 
+      /// get the Simulation ID
+      uint32_t gFEXtowerID() const; /// getter for the jtower simulation ID
+      /// set the simulation ID
+      void setgFEXtowerID(uint32_t); ///setter for the above      
+      
+      
+
       void initialize(const uint8_t IEta,const uint8_t IPhi);
       void initialize(const uint8_t IEta,const uint8_t IPhi,
                       const float Eta,const float Phi,

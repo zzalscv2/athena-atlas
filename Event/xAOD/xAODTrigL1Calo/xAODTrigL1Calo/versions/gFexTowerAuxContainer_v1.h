@@ -32,6 +32,7 @@ namespace xAOD{
     std::vector<uint8_t> fpga;
     std::vector<int> towerEt;
     std::vector<char> isSaturated;
+    std::vector<uint32_t> gFEXtowerID;
     
   }; // class gFexTowerAuxContainer_v1 
 } // namespace xAOD
