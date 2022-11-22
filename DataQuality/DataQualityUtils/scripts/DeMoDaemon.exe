@@ -21,7 +21,7 @@ echo "Date is ${date}"
 cd ${rundir}
 echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
-source $AtlasSetup/scripts/asetup.sh Athena,master,latest
+source $AtlasSetup/scripts/asetup.sh --stable 22.0,Athena,latest
 export ScriptPath=$Athena_DIR/src/DataQuality/DataQualityUtils/scripts
 
 echo "First, looking for new runs..."
@@ -72,5 +72,5 @@ do
 done
 
 echo "Generate webpage"
-cmd="python /afs/cern.ch/user/a/atlasdqm/w1/DeMo/DeMoGenerateWWW.py"
+cmd="python $ScriptPath/DeMoGenerateWWW.py"
 eval ${cmd}
