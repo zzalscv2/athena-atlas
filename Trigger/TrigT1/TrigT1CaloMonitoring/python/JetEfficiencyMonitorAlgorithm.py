@@ -5,7 +5,7 @@
 def JetEfficiencyMonitoringConfig(inputFlags):
     '''Function to configure LVL1 JetEfficiency algorithm in the monitoring system.'''
 
-    #import math 
+    #import math
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -19,12 +19,9 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     if inputFlags.Input.Format is Format.POOL and not inputFlags.Input.isMC:
         from JetRecConfig.JetRecConfig import JetRecCfg
         from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
-        from JetRecConfig.JetConfigFlags import jetInternalFlags  
+        from JetRecConfig.JetConfigFlags import jetInternalFlags
         jetInternalFlags.isRecoJob = True
-        result.merge( JetRecCfg(inputFlags,AntiKt4EMPFlow) ) 
-
-        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-        result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
+        result.merge( JetRecCfg(inputFlags,AntiKt4EMPFlow) )
 
         from METReconstruction.METAssociatorCfg import METAssociatorCfg
         result.merge(METAssociatorCfg(inputFlags, 'AntiKt4EMPFlow'))
@@ -55,14 +52,14 @@ def JetEfficiencyMonitoringConfig(inputFlags):
 
     if inputFlags.Input.isMC: emulated = False
     else: emulated = True
-    JetEfficiencyMonAlg.Emulated = emulated 
+    JetEfficiencyMonAlg.Emulated = emulated
     
     #################################################################
     #################################################################
     #################################################################
-    ################################################################# 
+    #################################################################
 
-    orthogonal_trigger = "L1_RD0_FILLED" #trigger that does not depend on depend on the jet's 
+    orthogonal_trigger = "L1_RD0_FILLED" #trigger that does not depend on depend on the jet's
 
 
     mainDir = 'L1Calo'
@@ -82,10 +79,10 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     etamin=-3.3
     etamax=3.3
 
-    # add monitoring algorithm to group, with group name and main directory 
+    # add monitoring algorithm to group, with group name and main directory
     myGroup = helper.addGroup(JetEfficiencyMonAlg, groupName , mainDir)
-    single_triggers = ['L1_J15', 'L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50', 'L1_J75', 
-                'L1_J85', 'L1_J100', 'L1_J120', 'L1_J200', 'L1_J300', 'L1_J400', 'L1_J40_XE50', 'L1_J40_XE60', 
+    single_triggers = ['L1_J15', 'L1_J20', 'L1_J25', 'L1_J30', 'L1_J40', 'L1_J50', 'L1_J75',
+                'L1_J85', 'L1_J100', 'L1_J120', 'L1_J200', 'L1_J300', 'L1_J400', 'L1_J40_XE50', 'L1_J40_XE60',
                 'L1_eEM15', 'L1_eEM22M', 'L1_eTAU20L', 'L1_jJ30', 'L1_jEM20']
     multijet_triggers = ['L1_J85_3J30', 'L1_3J50', 'L1_4J15', 'L1_4J20', 'L1_2J15_XE55', 'L1_2J50_XE40']
 
@@ -108,9 +105,9 @@ def JetEfficiencyMonitoringConfig(inputFlags):
     myGroup.defineHistogram('eta',  title='Eta Distribution of offline jets for orthogonal trigger ' + orthogonal_trigger +';#eta; Count',
                                 path=trigPath + distributionPath,xbins=etabins,xmin=etamin, xmax=etamax)
     
-    ########## Iterate through the offline l1 triggers to make histograms to fill! 
+    ########## Iterate through the offline l1 triggers to make histograms to fill!
     ########## Histograms include efficiency plots using bootstrap, orthogonal refernce and no refernce
-    ########## Also includes pt distributions of the various 
+    ########## Also includes pt distributions of the various
     #  if inputFlags.Input.isMC: JetEfficiencyMonAlg.BootstrapTrigger='L1_J15'
     # bootstrap_trigger = JetEfficiencyMonAlg.BootstrapTrigger
     for t in single_triggers:
@@ -186,7 +183,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
         ptval = max(values)
         binmax = (int(ptval)*GeV) + (200*GeV)
 
-        if emulated: title_add = " EMULATED " 
+        if emulated: title_add = " EMULATED "
         else: title_add = " "
         ##looking at the leading offline jets with gfex triggers
         myGroup.defineHistogram('pt_ortho'+t+',pt_ortho', type='TEfficiency',  title='PT Efficiency of leading offline jets for' + title_add + 'gfex SR trigger ' + trigger + ' wrt orthogonal trigger ' + orthogonal_trigger + ';Offline Jet PT [MeV]; Ratio = # of trigger jets / # of total jets  ',
@@ -205,7 +202,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
                                 path=trigPath + distributionPath,xbins=nbin,xmin=binmin, xmax=binmax)
 
 
-        ##looking at SR gfex jets with gfex triggers 
+        ##looking at SR gfex jets with gfex triggers
         myGroup.defineHistogram('pt_ortho_SR_'+t+',pt_gfex_SR_ortho', type='TEfficiency',  title= 'ET Efficiency of gFEX SR TOBs for' + title_add + 'trigger ' + trigger + ' wrt orthogonal trigger ' + orthogonal_trigger + ';gFex SR Jet TOB ET [MeV]; Ratio = # of trigger jets / # of total jets ',
                                 path=trigPath + orthogonalRefPath,xbins=nbin,xmin=binmin, xmax=binmax)
         myGroup.defineHistogram('pt:ortho_SR_'+t, title=  'ET distribution of gFEX SR TOBs for' + title_add + 'gfex trigger ' + trigger + ' wrt orthogonal trigger ' + orthogonal_trigger + ';gFex SR Jet TOB ET [MeV];Count',
@@ -246,7 +243,7 @@ def JetEfficiencyMonitoringConfig(inputFlags):
                                 path=trigPath + noRefPath,xbins=nbin,xmin=binmin, xmax=binmax)
 
 
-        ##looking at LR gfex jets with gfex triggers 
+        ##looking at LR gfex jets with gfex triggers
         myGroup.defineHistogram('pt_ortho_LR_'+t+',pt_gfex_LR_ortho', type='TEfficiency',  title= 'ET Efficiency of gFEX LR TOBs for' + title_add + 'trigger ' + trigger + ' wrt orthogonal trigger ' + orthogonal_trigger + ';gFex LR Jet TOB ET [MeV]; Ratio = # of trigger jets / # of total jets ',
                                 path=trigPath,xbins=nbin,xmin=binmin, xmax=binmax)
         myGroup.defineHistogram('pt:ortho_LR_'+t, title=  'ET distribution of gFEX LR TOBs for' + title_add + 'gfex trigger ' + trigger + ' wrt orthogonal trigger ' + orthogonal_trigger + ';gFex LR Jet TOB ET [MeV];Count',
@@ -263,14 +260,14 @@ def JetEfficiencyMonitoringConfig(inputFlags):
                                 path=trigPath + noRefPath,xbins=nbin,xmin=binmin, xmax=binmax)
 
     ######## add triggers to the list to be included in "jet of more than 100 pt", what else fired?"" histogram
-    trigger_list = ["L1_EM22VHI", "L1_EM24VHI", "L1_2EM15VHI", "L1_2EM20VH", "L1_EM20VH_3EM10VH", 
-                    "L1_TAU100", "L1_TAU60_2TAU40", "L1_TAU20IM_2TAU12IM_4J12p0ETA25", "L1_TAU25IM_2TAU20IM_2J25_3J20", 
-                    "L1_EM15VHI_2TAU12IM_XE35", "L1_EM15VHI_2TAU12IM_4J12", "L1_TAU40_2TAU12IM_XE40", "L1_J100", "L1_J120", 
-                    "L1_J45p0ETA21_3J15p0ETA25", "L1_4J15", "L1_4J20", "L1_3J15p0ETA25_XE40", "L1_J85_3J30", "L1_3J35p0ETA23", 
-                    "L1_4J15p0ETA25", "L1_5J15p0ETA25", "L1_2J15_XE55", "L1_J40_XE50", "L1_2J50_XE40", "L1_J40_XE60", "L1_XE50", 
-                    "L1_XE55", "L1_XE60", "L1_HT190-J15s5pETA21", "L1_MJJ-500-NFF", "L1_EM18VHI_MJJ-300", "L1_SC111-CJ15", 
-                    "L1_DR-TAU20ITAU12I-J25", "L1_TAU60_DR-TAU20ITAU12I", "L1_MU14FCH", "L1_MU18VFCH", "L1_EM15VH_MU8F", 
-                    "L1_MU8F_TAU20IM", "L1_MU8F_TAU12IM_XE35", "L1_3J50", "L1_J40p0ETA25_2J25_J20p31ETA49", "L1_J400", 
+    trigger_list = ["L1_EM22VHI", "L1_EM24VHI", "L1_2EM15VHI", "L1_2EM20VH", "L1_EM20VH_3EM10VH",
+                    "L1_TAU100", "L1_TAU60_2TAU40", "L1_TAU20IM_2TAU12IM_4J12p0ETA25", "L1_TAU25IM_2TAU20IM_2J25_3J20",
+                    "L1_EM15VHI_2TAU12IM_XE35", "L1_EM15VHI_2TAU12IM_4J12", "L1_TAU40_2TAU12IM_XE40", "L1_J100", "L1_J120",
+                    "L1_J45p0ETA21_3J15p0ETA25", "L1_4J15", "L1_4J20", "L1_3J15p0ETA25_XE40", "L1_J85_3J30", "L1_3J35p0ETA23",
+                    "L1_4J15p0ETA25", "L1_5J15p0ETA25", "L1_2J15_XE55", "L1_J40_XE50", "L1_2J50_XE40", "L1_J40_XE60", "L1_XE50",
+                    "L1_XE55", "L1_XE60", "L1_HT190-J15s5pETA21", "L1_MJJ-500-NFF", "L1_EM18VHI_MJJ-300", "L1_SC111-CJ15",
+                    "L1_DR-TAU20ITAU12I-J25", "L1_TAU60_DR-TAU20ITAU12I", "L1_MU14FCH", "L1_MU18VFCH", "L1_EM15VH_MU8F",
+                    "L1_MU8F_TAU20IM", "L1_MU8F_TAU12IM_XE35", "L1_3J50", "L1_J40p0ETA25_2J25_J20p31ETA49", "L1_J400",
                     "L1_J400_LAR", "L1_XE300", "L1_J50p31ETA49", "L1_J75p31ETA49", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF",
                     "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V", "L1_2EM8VH_MU8F", "L1_MU8F_TAU12IM_3J12", "L1_MU8F_2J15_J20",
                     "L1_BPH-0DR3-EM7J15_MU5VF", "L1_MU8F_2J15_J20", "L1_DR-TAU20ITAU12I", "L1_2EM15VH", "L1_TAU60",
@@ -323,7 +320,7 @@ if __name__=='__main__':
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
-    from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg = MainServicesCfg(ConfigFlags)
     cfg.merge(PoolReadCfg(ConfigFlags))
@@ -335,7 +332,7 @@ if __name__=='__main__':
 
     # message level for algorithm
     JetEfficiencyMonitorCfg.getEventAlgo('JetEfficiencyMonAlg').OutputLevel = 1 # 1/2 INFO/DEBUG
-    # options - print all details of algorithms, very short summary 
+    # options - print all details of algorithms, very short summary
     cfg.printConfig(withDetails=False, summariseProps = True)
 
     nevents=-1
