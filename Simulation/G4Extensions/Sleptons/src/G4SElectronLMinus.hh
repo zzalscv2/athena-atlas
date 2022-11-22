@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SLEPTONS_G4SElectronLMinus_H
@@ -9,13 +9,15 @@
 #include "G4ios.hh"
 #include "G4ParticleDefinition.hh"
 
+#include "CxxUtils/checker_macros.h"
+
 class G4SElectronLMinus: public G4ParticleDefinition
 {
   // singleton implementation
 
 private:
 
-  static G4SElectronLMinus* theInstance;
+  static G4SElectronLMinus* theInstance ATLAS_THREAD_SAFE; // used in single-threaded Geant4 initialization
   G4SElectronLMinus(){}
   ~G4SElectronLMinus(){}
 
