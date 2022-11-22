@@ -173,10 +173,6 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
         kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(
             MuonCombinedTrackSummaryToolCfg(flags)))
 
-    # kwargs.setdefault("CopyFloatSummaryKeys",[])
-    kwargs.setdefault("CopyUInt8SummaryKeys",[]),
-
-
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("MuonSelectionTool", "")
         kwargs.setdefault("UseCaloCells", False)       
