@@ -111,6 +111,10 @@ protected:
                                       const xAOD::TauJet& xTau,
                                       double& dEfficiencyScaleFactor) const;
 
+  static CP::CorrectionCode getValueTH1(const TObject* oObject,
+                                        double& dEfficiencyScaleFactor,
+                                        double dVars[]
+                                        );
   static CP::CorrectionCode getValueTH2(const TObject* oObject,
                                         double& dEfficiencyScaleFactor,
                                         double dVars[]
