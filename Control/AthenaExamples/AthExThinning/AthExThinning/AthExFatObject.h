@@ -93,11 +93,6 @@ private:
   AthExParticleLink_t m_particleLink;
 }; 
 
-/////////////////////////////////////////////////////////////////// 
-// Inline methods: 
-/////////////////////////////////////////////////////////////////// 
-//std::ostream& operator<<( std::ostream& out, const AthExFatObject& o );
-
 
 // for storegate
 CLASS_DEF( AthExFatObject , 166093780 , 1 )
