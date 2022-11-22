@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GAUGINOS_GMSBNEUTRALINO_H
@@ -9,11 +9,13 @@
 #include "G4ios.hh"
 #include "G4ParticleDefinition.hh"
 
+#include "CxxUtils/checker_macros.h"
+
 class GMSBNeutralino: public G4ParticleDefinition
 {
 private:
 
-  static GMSBNeutralino* s_theInstance;
+  static GMSBNeutralino* s_theInstance ATLAS_THREAD_SAFE; // used in single-threaded Geant4 initialization
   GMSBNeutralino(){}
   ~GMSBNeutralino(){}
 
