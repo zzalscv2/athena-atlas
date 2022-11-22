@@ -223,12 +223,13 @@ bool TTbarPlusHeavyFlavorFilter::isCHadron(HepMC::ConstGenParticlePtr part) cons
 
 bool TTbarPlusHeavyFlavorFilter::isInitialHadron(HepMC::ConstGenParticlePtr part) const{
 
-  auto prod = part->production_vertex();
-  if(prod){
+    auto prod = part->production_vertex();
+    if(!prod) return true;
     int type = hadronType(part->pdg_id());
+    int barcodepart = HepMC::barcode(part);
 #ifdef HEPMC3
     for(auto firstParent: prod->particles_in()){
-      if( HepMC::barcode(part) < HepMC::barcode(firstParent) ) continue; /// protection for sherpa
+      if( barcodepart < HepMC::barcode(firstParent) ) continue; /// protection for sherpa
       int mothertype = hadronType( firstParent->pdg_id() );
       if( mothertype == type ){
 	return false;
@@ -238,15 +239,13 @@ bool TTbarPlusHeavyFlavorFilter::isInitialHadron(HepMC::ConstGenParticlePtr part
     HepMC::GenVertex::particle_iterator firstParent = prod->particles_begin(HepMC::parents);
     HepMC::GenVertex::particle_iterator endParent = prod->particles_end(HepMC::parents);
     for(;firstParent!=endParent; ++firstParent){
-      if( part->barcode() < (*firstParent)->barcode() ) continue; /// protection for sherpa
+      if( barcodepart < (*firstParent)->barcode() ) continue; /// protection for sherpa
       int mothertype = hadronType( (*firstParent)->pdg_id() );
       if( mothertype == type ){
 	return false;
       }
     }
 #endif
-
-  }
 
   return true;
 }
