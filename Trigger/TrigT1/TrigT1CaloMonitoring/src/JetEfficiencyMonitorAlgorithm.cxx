@@ -23,9 +23,9 @@ StatusCode JetEfficiencyMonitorAlgorithm::initialize() {
 
   // we initialise all the containers that we need
   ATH_CHECK(m_jetKey.initialize()); //initialize offline jets
-  ATH_CHECK(m_LRjetKey.initialize()); //initialize offline LR jets 
-  ATH_CHECK(m_gFexSRJetContainerKey.initialize()); //initizlize gfex sr jets
+  ATH_CHECK(m_LRjetKey.initialize()); //initialize offline LR jets
   ATH_CHECK(m_gFexLRJetContainerKey.initialize()); //initizlize gfex lr jets
+  ATH_CHECK(m_gFexSRJetContainerKey.initialize()); //initizlize gfex sr jets
 
   return AthMonitorAlgorithm::initialize();
 }
@@ -40,7 +40,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     ATH_MSG_WARNING("Failed to retrieve Offline JetContainer");
     return StatusCode::SUCCESS;
   }
-   //  Retrieve Offline LR Jets from SG
+  //  Retrieve Offline LR Jets from SG
   SG::ReadHandle<xAOD::JetContainer> LRjets(m_LRjetKey,ctx);
   if(!LRjets.isValid()){
     ATH_MSG_WARNING("Failed to retrieve Offline LR JetContainer");
@@ -63,10 +63,10 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   //////////DEFINITIONS and extracting variables from the python config file! /////////////////////
   bool use_emulated_gfex_trig =  m_emulated; //UPDATE THE NAME OF THE HISTOGRAMS IN THE THE PYTHON FILE TO SAY EMULATED OR NOT AS THIS CHANGES
   std::string  bootstrap_trigger = m_bootstrap_trigger;
-  std::string orthogonal_trigger = "L1_RD0_FILLED"; //use the same orthogonal trigger for all kinds of jets! 
-  std::vector<std::string> unbiased_triggers = {"L1_MU14FCH", "L1_MU18VFCH",  
+  std::string orthogonal_trigger = "L1_RD0_FILLED"; //use the same orthogonal trigger for all kinds of jets!
+  std::vector<std::string> unbiased_triggers = {"L1_MU14FCH", "L1_MU18VFCH",
                 "L1_MU8F_TAU20IM", "L1_2MU8F", "L1_MU8VF_2MU5VF", "L1_3MU3VF",
-                "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V", 
+                "L1_MU5VF_3MU3VF", "L1_4MU3V", "L1_2MU5VF_3MU3V",
                 "L1_RD0_FILLED"};
   std::vector<std::string> gFex_types {"SR", "LR"};
   std::vector<std::string> ref_trig {"BS", "ortho", "none", "unbiased"};
@@ -80,7 +80,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   std::map<std::string, bool> physical_cuts_passed_type {
     {"SR", SR_gfex_physical_cuts_passed}, {"LR", LR_gfex_physical_cuts_passed}};
 
-  bool SR_delta_jets_cuts_passed = false, LR_delta_jets_cuts_passed = false; 
+  bool SR_delta_jets_cuts_passed = false, LR_delta_jets_cuts_passed = false;
   std::map<std::string, bool> delta_jets_cuts_passed {
     {"SR", SR_delta_jets_cuts_passed }, {"LR", LR_delta_jets_cuts_passed}};
 
@@ -149,7 +149,7 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
   bool unbiased_trig_decision = false;
   for (auto & u : unbiased_triggers) {if (AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(u)) {unbiased_trig_decision = true;}}
   std::map<std::string, bool> ref_trigger_decision {
-      {"BS", AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger) }, 
+      {"BS", AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(bootstrap_trigger) },
       {"ortho", AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(orthogonal_trigger) },
       {"none", true},
       {"unbiased", unbiased_trig_decision}};
@@ -177,37 +177,37 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
 
   for(unsigned int t=0; t<L1Triggeritems.size(); ++t){//iterate through all triggers of format L1_.*J.*
     auto prescale_value = AthMonitorAlgorithm::getTrigDecisionTool()->getPrescale(L1Triggeritems[t] );
-    if (prescale_value == 1){ useful_L1triggers.push_back(L1Triggeritems[t]); } // add unprescaled triggers to a list 
+    if (prescale_value == 1){ useful_L1triggers.push_back(L1Triggeritems[t]); } // add unprescaled triggers to a list
   } //close for loop iteration that looks at all triggers
 
   std::map<std::string, int> l1_trigger_flatline_vals { //this is around where the l1trigger pt effiencies flatten out
-  //in order to make eta effiency curves, its useful to isolate the pt behavior, so we want 100% pt effiency, or after 'flattening out' 
-      {"L1_J15", 35*GeV}, {"L1_J20", 40*GeV},  {"L1_J30", 60*GeV},  
-      {"L1_J40", 80*GeV}, {"L1_J50", 90*GeV}, {"L1_J75", 120*GeV}, 
+  //in order to make eta effiency curves, its useful to isolate the pt behavior, so we want 100% pt effiency, or after 'flattening out'
+      {"L1_J15", 35*GeV}, {"L1_J20", 40*GeV},  {"L1_J30", 60*GeV},
+      {"L1_J40", 80*GeV}, {"L1_J50", 90*GeV}, {"L1_J75", 120*GeV},
       {"L1_J100", 140*GeV} };
   
  /////////////////////////////////////////////////////////////
  //Create and clean up lists of LR and SR gfex triggers
   std::vector<std::string> useful_SR_gFexTriggers, useful_LR_gFexTriggers;
   std::map<std::string, double> useful_SR_gFexTriggers_val { //trigger val corresponding to the SR gfex triggers
-      {"L1_gJ20", 20*GeV}, {"L1_gJ30", 30*GeV},  {"L1_gJ40", 40*GeV},  
+      {"L1_gJ20", 20*GeV}, {"L1_gJ30", 30*GeV},  {"L1_gJ40", 40*GeV},
       {"L1_gJ50", 50*GeV}, {"L1_gJ60", 60*GeV}, {"L1_gJ100", 100*GeV},
       {"L1_gJ160", 160*GeV} };
 
   std::map<std::string, double> useful_LR_gFexTriggers_val {
-      {"L1_gLJ80", 80*GeV}, {"L1_gLJ100", 100*GeV},  
+      {"L1_gLJ80", 80*GeV}, {"L1_gLJ100", 100*GeV},
       {"L1_gLJ140", 140*GeV},  {"L1_gLJ160", 160*GeV} };
 
   std::map<std::string, std::vector<double>> multijet_triggers_val {
-      {"L1_3J50", {50*GeV, 50*GeV, 50*GeV}}, {"L1_4J15", {15*GeV, 15*GeV, 15*GeV, 15*GeV}},  
+      {"L1_3J50", {50*GeV, 50*GeV, 50*GeV}}, {"L1_4J15", {15*GeV, 15*GeV, 15*GeV, 15*GeV}},
       {"L1_4J20", {20*GeV, 20*GeV, 20*GeV, 20*GeV}}, {"L1_J85_3J30", {85*GeV, 30*GeV, 30*GeV, 30*GeV}},
     {"L1_2J15_XE55", {15*GeV, 15*GeV}}, {"L1_2J50_XE40", {50*GeV, 50*GeV}}};
 
-  for (auto & g : gFex_types){ //iterate through the gfex jet tob types (SR & LR) 
+  for (auto & g : gFex_types){ //iterate through the gfex jet tob types (SR & LR)
     std::string trigger_search;
     std::vector<std::string> excluded_gfex_triggers, plotting_gfex_trigger_list, useful_gFexTriggers;
     std::map<std::string, double> trigger_map;
-    if (g =="SR") { 
+    if (g =="SR") {
       trigger_search = "L1_gJ.*";
       trigger_map = useful_SR_gFexTriggers_val;
       plotting_gfex_trigger_list = m_SRgfexTriggerList;
@@ -226,18 +226,18 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
       std::vector<std::string> TDT_triggers = AthMonitorAlgorithm::getTrigDecisionTool()->getChainGroup(trigger_search)->getListOfTriggers();
       for(unsigned int t=0; t< TDT_triggers.size(); ++t){
         auto prescale_value = AthMonitorAlgorithm::getTrigDecisionTool()->getPrescale(TDT_triggers[t]);
-        if (prescale_value == 1){  //check if the trigger is unprescaled 
+        if (prescale_value == 1){  //check if the trigger is unprescaled
           auto itr = std::find(plotting_gfex_trigger_list.begin(), plotting_gfex_trigger_list.end(),TDT_triggers[t] );
           if (itr == plotting_gfex_trigger_list.cend() ) {
-            excluded_gfex_triggers.push_back(TDT_triggers[t]);  
-          } useful_gFexTriggers.push_back(TDT_triggers[t]); 
-        } //(close IF) prescale value == 1 
-      } //(close FOR) loop that iterates over the full list or trigger decision tool triggers 
-    } //(close ELSE )loop that means we are not loooking at emulated gfex triggers 
-  } //(close FOR) the iteration that goes through the "gfex types" -- SR and LR gfex jet tobs 
-  //define emulatedString variable so that we can have emulated in the title (or not) according to the status of the gfex triggers 
+            excluded_gfex_triggers.push_back(TDT_triggers[t]);
+          } useful_gFexTriggers.push_back(TDT_triggers[t]);
+        } //(close IF) prescale value == 1
+      } //(close FOR) loop that iterates over the full list or trigger decision tool triggers
+    } //(close ELSE )loop that means we are not loooking at emulated gfex triggers
+  } //(close FOR) the iteration that goes through the "gfex types" -- SR and LR gfex jet tobs
+  //define emulatedString variable so that we can have emulated in the title (or not) according to the status of the gfex triggers
   std::string emulatedString = " ";
-  if (use_emulated_gfex_trig) {emulatedString = " Emulated "; } 
+  if (use_emulated_gfex_trig) {emulatedString = " Emulated "; }
   std::map<std::string,  std::vector<std::string>> gFEX_triggers {
     {"SR",useful_SR_gFexTriggers}, {"LR",useful_LR_gFexTriggers}};
   std::map<std::string, std::map<std::string, double>> gFEX_triggers_val {
@@ -262,15 +262,15 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     std::vector<std::string> fired_trigger_list = m_TriggerList; //defined list of triggers we think will show up in the python config file
     std::vector<std::string> trigger_list = AthMonitorAlgorithm::getTrigDecisionTool()->getChainGroup("L1.*")->getListOfTriggers();
 
-    for (unsigned int t=0; t< trigger_list.size(); ++t){ //iterate through all L1.* triggers present for the event 
-      auto prescale_value = AthMonitorAlgorithm::getTrigDecisionTool()->getPrescale(trigger_list[t] );     
+    for (unsigned int t=0; t< trigger_list.size(); ++t){ //iterate through all L1.* triggers present for the event
+      auto prescale_value = AthMonitorAlgorithm::getTrigDecisionTool()->getPrescale(trigger_list[t] );
       if (prescale_value == 1) { unprescaled_trigger_list.push_back(trigger_list[t]); } //if unprescaled, then add to unprescaled trigger list
-    } //(close FOR) loop that iterates trhoguh the list of all L1.* triggers present for the event 
+    } //(close FOR) loop that iterates trhoguh the list of all L1.* triggers present for the event
 
-    for (unsigned int t=0; t< unprescaled_trigger_list.size(); ++t){ //iterate through unprescaled trigger list 
+    for (unsigned int t=0; t< unprescaled_trigger_list.size(); ++t){ //iterate through unprescaled trigger list
       bool passed = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(unprescaled_trigger_list[t]);
       if (passed) { //check to see if the unprescaled trigger passed
-        passed_triggers.push_back(unprescaled_trigger_list[t]); 
+        passed_triggers.push_back(unprescaled_trigger_list[t]);
         auto itr = std::find(fired_trigger_list.begin(), fired_trigger_list.end(), unprescaled_trigger_list[t]); //extract the index of this triggerin plotting list
         if (itr != fired_trigger_list.cend()) {
           int index =  std::distance(fired_trigger_list.begin(), itr);
@@ -376,29 +376,29 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
       //iterate through orthogoanl trigger as reference trigger, and no trigger for reference trigger
       std::vector<std::string> ref_trig {"ortho", "none", "unbiased"};
       for (auto & r : ref_trig){ //iterate through our different kinds of refernce triggers
-        if (ref_trigger_decision[r]){ //if the reference trigger decision is true 
+        if (ref_trigger_decision[r]){ //if the reference trigger decision is true
           for(unsigned int t=0; t< gFEX_triggers[g].size(); ++t){ // iterate through the triggers we want to fill histograms for
             std::string trigger_name = gFEX_triggers[g][t]; // define the trigger name from the triggers that were extracted
     
             bool trig_of_interest_decision = false;
             if (use_emulated_gfex_trig && jet_pt[g] > gFEX_triggers_val[g][trigger_name]) {  //check if the emulated trigger would pass, if we want to use it
-              trig_of_interest_decision = true; 
+              trig_of_interest_decision = true;
             } else if (! use_emulated_gfex_trig) {  //if we dont want to use emulated trigger, check if the trigger passses
               trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name);
             } //(close IF) loops that define the triggers decision for emulated and non emulated
 
             auto pt_ref  = Monitored::Scalar<int>("pt_"+ r, jet_pt["offline"]);
-            auto passed_pt  = Monitored::Scalar<bool>("pt_" + r + "_" + trigger_name, trig_of_interest_decision); 
-            fill(m_packageName, pt_ref, passed_pt); 
+            auto passed_pt  = Monitored::Scalar<bool>("pt_" + r + "_" + trigger_name, trig_of_interest_decision);
+            fill(m_packageName, pt_ref, passed_pt);
             
-            if (trig_of_interest_decision) { //only fill the histogram of pt if the trigger decision is passed 
+            if (trig_of_interest_decision) { //only fill the histogram of pt if the trigger decision is passed
               auto passed_pt_val = Monitored::Scalar<int>("pt:" + r +  "_" + trigger_name, jet_pt["offline"]);
-              fill(m_packageName, passed_pt_val);  
-            } //(close IF) loop that determines if we are filling the histogram 
+              fill(m_packageName, passed_pt_val);
+            } //(close IF) loop that determines if we are filling the histogram
           } //(close FOR) loop that iterates through triggers
         } //(close IF) refernce trigger decision is passed loop
       } //(close FOR) loop that iterates over reference triggers
-    } //(close IF) loop if physical cuts passed 
+    } //(close IF) loop if physical cuts passed
   } //(close FOR) loop that iterates over SR and LR jet tobs
 
 
@@ -415,28 +415,28 @@ StatusCode JetEfficiencyMonitorAlgorithm::fillHistograms( const EventContext& ct
     //define variables according to which gfex trigger type
     if (physical_cuts_passed_type[g]){ //check that the physical cuts are satisfied before flling anything
       for (auto & r : ref_trig){  //iterate through orthogoanl trigger as reference trigger, and no trigger for reference trigger
-        if (ref_trigger_decision[r]){//if the reference trigger decision is true 
+        if (ref_trigger_decision[r]){//if the reference trigger decision is true
           for(unsigned int t=0; t< gFEX_triggers[g].size(); ++t){ // iterate through the triggers we want to fill histograms for
             std::string trigger_name = gFEX_triggers[g][t]; // define the trigger name from the triggers that were extracted
             bool trig_of_interest_decision = false;
             if (use_emulated_gfex_trig && jet_pt[g] > gFEX_triggers_val[g][trigger_name]) { //check if the emulated trigger would pass, if we want to use it
               trig_of_interest_decision = true;
-            } else if (! use_emulated_gfex_trig) { //if we dont want to use emulated trigger, check if the trigger passses 
-              trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name); 
+            } else if (! use_emulated_gfex_trig) { //if we dont want to use emulated trigger, check if the trigger passses
+              trig_of_interest_decision = AthMonitorAlgorithm::getTrigDecisionTool()->isPassed(trigger_name);
             } //(close IF) loops that define the triggers decision for emulated and non emulated
 
             auto pt_orthogonal_gfex_val  = Monitored::Scalar<int>("pt_gfex_" + g + "_" + r , jet_pt[g]);
             auto passed_pt_orth_gfex  = Monitored::Scalar<bool>("pt_" + r + "_" + g + "_" + trigger_name, trig_of_interest_decision);
 
-            if (trig_of_interest_decision){ //only fill the histogram of pt if the trigger decision is passed 
+            if (trig_of_interest_decision){ //only fill the histogram of pt if the trigger decision is passed
               auto passed_pt_orth_gfex_val  = Monitored::Scalar<int>("pt:"+ r + "_" +g+"_" + trigger_name, jet_pt[g]);
-              fill(m_packageName, passed_pt_orth_gfex_val); 
-            } //(close IF) loop that determines if we are filling the histogram 
-            fill(m_packageName, pt_orthogonal_gfex_val,  passed_pt_orth_gfex);  
+              fill(m_packageName, passed_pt_orth_gfex_val);
+            } //(close IF) loop that determines if we are filling the histogram
+            fill(m_packageName, pt_orthogonal_gfex_val,  passed_pt_orth_gfex);
           } //close for loop that iterates through triggers
         } //(close IF) refernce trigger decision is passed loop
       } //(close FOR) loop that iterates over reference triggers
-    } //(close IF)loop if physical cuts passed 
+    } //(close IF)loop if physical cuts passed
   } //(close IF) loop that iterates over SR and LR jet tobs
 
   variables.clear();
