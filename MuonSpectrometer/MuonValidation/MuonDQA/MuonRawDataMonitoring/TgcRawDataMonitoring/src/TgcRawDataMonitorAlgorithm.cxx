@@ -1821,6 +1821,7 @@ return (m.muon->charge()>0);
       std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_hiteff;
       std::vector<Monitored::ObjectsCollection<std::vector<TGC::TgcHit>, double>> varowner_eachchamber;
       std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_eachchamber_double;
+      std::map<std::string,std::vector<double>> cham_and_res;
 
       if(m_fillGapByGapHistograms.value()){
 
@@ -1860,13 +1861,12 @@ return (m.muon->charge()>0);
 	    varowner_eachchamber.push_back(Monitored::Collection(Form("hit_on_%s",chanName.data()),tgcHitMap.second,[](const TGC::TgcHit&m){return m.channel();}));
 	    hit_variables.push_back(varowner_eachchamber.back());
 	  }else{ // only summed over the gaps
-	    std::vector<double> res;
 	    for(const auto&tgcHit:tgcHitMap.second){
 	      for(const auto&tgcRes:tgcHit.residuals()){
-		res.push_back(tgcRes.second);
+		cham_and_res[chanName].push_back(tgcRes.second);
 	      }
 	    }
-	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),res,[](const double&m){return m;}));
+	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),cham_and_res[chanName],[](const double&m){return m;}));
 	    hit_variables.push_back(varowner_eachchamber_double.back());
 	  }
       	}
