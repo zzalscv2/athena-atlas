@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 
 // Random Number Generation
 #include "CLHEP/Random/RandomEngine.h"
@@ -31,7 +32,7 @@ namespace ISF {
    
    */
       
-  class IParticleProcessor : virtual public IAlgTool {
+  class ATLAS_NOT_THREAD_SAFE IParticleProcessor : virtual public IAlgTool {  // deprecated: ATLASSIM-6020
      public:
      
        /** Virtual destructor */

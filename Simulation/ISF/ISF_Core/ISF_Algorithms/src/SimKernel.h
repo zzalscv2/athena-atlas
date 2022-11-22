@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGS_SIMKERNEL_H
@@ -14,6 +14,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 
 // ISF includes
 #include "ISF_Event/SimSvcID.h"
@@ -63,7 +64,7 @@ namespace ISF {
       @author Andreas.Salzburger -at- cern.ch , Elmar.Ritsch -at- cern.ch
 
      */
-  class SimKernel : public AthAlgorithm {
+  class ATLAS_NOT_THREAD_SAFE SimKernel : public AthAlgorithm {  // serial version
 
   public:
     /** Constructor with parameters */
