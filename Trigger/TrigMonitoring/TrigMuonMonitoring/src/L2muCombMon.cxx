@@ -33,9 +33,12 @@ StatusCode L2muCombMon :: fillVariablesPerChain(const EventContext &ctx, const s
 
     // get L2SA feature
     const TrigCompositeUtils::Decision* muDecision = muLinkInfo.source;
-    const TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer> saLinkInfo = TrigCompositeUtils::findLink<xAOD::L2StandAloneMuonContainer>(muDecision, "feature");
-    ATH_CHECK( saLinkInfo.isValid() );
-    const ElementLink<xAOD::L2StandAloneMuonContainer> saEL = saLinkInfo.link;
+    const std::vector<TrigCompositeUtils::LinkInfo<xAOD::L2StandAloneMuonContainer>> saLinkInfo = TrigCompositeUtils::findLinks<xAOD::L2StandAloneMuonContainer>(muDecision, "feature");
+    if(saLinkInfo.size()>1){
+       ATH_MSG_DEBUG("More than one L2SA linked to L2 comb muon");
+    }
+    ATH_CHECK( saLinkInfo.at(0).isValid());
+    const ElementLink<xAOD::L2StandAloneMuonContainer> saEL = saLinkInfo.at(0).link;
 
 
 
