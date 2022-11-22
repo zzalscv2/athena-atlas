@@ -25,6 +25,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <limits>
 
 //LWTNN
 #include "lwtnn/LightweightGraph.hh"
@@ -478,8 +479,10 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState& simulstate, const TFCS
     //delete h;
     ATH_MSG_VERBOSE("Done layer "<<layer);
   }
-  for(int ilayer=0;ilayer<CaloCell_ID_FCS::MaxSample;++ilayer) {
-    simulstate.set_Efrac(ilayer,simulstate.E(ilayer)/simulstate.E());
+  if ( simulstate.E() > std::numeric_limits<double>::epsilon() ) {
+    for(int ilayer=0;ilayer<CaloCell_ID_FCS::MaxSample;++ilayer) {
+      simulstate.set_Efrac(ilayer,simulstate.E(ilayer)/simulstate.E());
+    }
   }
 
   ATH_MSG_VERBOSE("Done particle");
