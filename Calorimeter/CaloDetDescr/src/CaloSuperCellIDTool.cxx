@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloDetDescr/src/CaloSuperCellIDTool.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -103,13 +101,18 @@ void CaloSuperCellIDTool::initIDMap ()
       int cell_ietamin = m_cell_helper->eta_min (cell_reg); 
       int cell_ietamax = m_cell_helper->eta_max (cell_reg);
       float cell_etasize = m_cell_helper->etaGranularity(cell_reg);
+      float inv_cell_etasize = 1. / cell_etasize;
+      // The condition here will never be true, but we put it in to
+      // prevent the compiler from attempting to vectorize the two divisions
+      // here.  On x86_64, the two single-precision divisions take
+      // two vector lanes leaving two unused.  The two unused ones
+      // can end up with zeros in the denominator leading to a spurious FPE.
+      if (inv_cell_etasize < 0) break;
       float cell_phisize = m_cell_helper->phiGranularity(cell_reg);
+      float inv_cell_phisize = 1. / cell_phisize;
       float cell_etamin = m_cell_helper->eta0 (cell_reg);
       float cell_etamax = cell_etamin +
         cell_etasize*(cell_ietamax - cell_ietamin + 1);
-
-      float inv_cell_etasize = 1. / cell_etasize;
-      float inv_cell_phisize = 1. / cell_phisize;
 
       // Find all overlapping supercell regions in the same sampling
       // and make table entries.  HEC supercells are summed
