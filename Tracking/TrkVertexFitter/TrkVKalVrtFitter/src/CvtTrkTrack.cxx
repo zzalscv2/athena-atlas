@@ -147,8 +147,10 @@ namespace Trk{
 				      
     const Trk::FitQuality* fitQuality = new Trk::FitQuality(10.,1);
     auto trackStateOnSurfaces = DataVector<const Trk::TrackStateOnSurface>();
+    std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern(0);
+    typePattern.set(Trk::TrackStateOnSurface::Perigee);
     const Trk::TrackStateOnSurface* trackSOS =
-      new Trk::TrackStateOnSurface(nullptr, std::move(perigee), nullptr);
+      new Trk::TrackStateOnSurface(nullptr, std::move(perigee), nullptr, typePattern);
     trackStateOnSurfaces.push_back(trackSOS);
     Trk::TrackInfo info;
     return new Trk::Track( info, std::move(trackStateOnSurfaces), fitQuality) ;

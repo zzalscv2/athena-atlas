@@ -878,6 +878,10 @@ namespace InDet{
     listSecondTracks.clear();
     std::map<int,int> trkHF; // use map with track index as key + value to get list of tracks in 2-track vertices without duplicates
     for(auto &vv : all2TrVrt){
+      if(vv.badVrt){
+        if(m_useITkMaterialRejection)continue;
+        if(!m_multiVertex && m_rejectBadVertices)continue;
+      }
       if(m_multiWithPrimary || m_multiVertex) add_edge(vv.i,vv.j,compatibilityGraph);
       trkHF[vv.i] = vv.i;
       trkHF[vv.j] = vv.j;

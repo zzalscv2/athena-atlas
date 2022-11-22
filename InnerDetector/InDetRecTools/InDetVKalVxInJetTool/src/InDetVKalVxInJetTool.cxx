@@ -67,6 +67,7 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
     m_rLayer2   (0.),
     m_useVertexCleaningPix(false),
     m_useVertexCleaningFMP(false),
+    m_rejectBadVertices(false),
     m_multiVertex(false),
     m_multiWithPrimary(false),
     m_getNegativeTail(false),
@@ -130,6 +131,8 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
     declareProperty("useVertexCleaningPix", m_useVertexCleaningPix, "Clean vertices requiring track pixel hit patterns according to vertex position" );
     declareProperty("useVertexCleaningFMP", m_useVertexCleaningFMP, "Clean vertices requiring track F(irst) M(easured) P(oints) matching to vertex position" );
+    declareProperty("rejectBadVertices", m_rejectBadVertices, "Reject V0s after checking 3D PV impact" );
+    
 
     declareProperty("MultiVertex",        m_multiVertex,       "Run Multiple Secondary Vertices in jet finder"  );
     declareProperty("MultiWithPrimary",   m_multiWithPrimary,  "Find Multiple Secondary Vertices + primary vertex in jet. MultiVertex Finder only!"  );
