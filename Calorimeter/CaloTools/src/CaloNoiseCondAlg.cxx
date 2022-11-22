@@ -152,6 +152,13 @@ StatusCode CaloNoiseCondAlg::execute(const EventContext& ctx) const {
       lumi=0.;
     }
   }//end if m_lumi0<0 
+  else if (lumi < 0) {
+    // Clang may speculatively evaluate the sqrt(lumi) below even if
+    // m_noiseType is ELEC, which can then be an issue if one looks
+    // at FPEs.  Protect against this by making sure that lumi
+    // is not negative.
+    lumi = 0;
+  }
 
 
   const size_t maxCells=m_caloCellID->calo_cell_hash_max();
