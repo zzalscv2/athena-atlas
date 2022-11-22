@@ -258,7 +258,7 @@ void RegSelLayer::getModules(const RegSelRoI& roi, std::vector<const RegSelModul
     for ( int i=roi_phiMin ; i<=roi_phiMax ; i++ ) {
       std::vector<const RegSelModule*>::const_iterator mptr(m_phimaps[i].begin());  
       std::vector<const RegSelModule*>::const_iterator eptr(m_phimaps[i].end());  
-      for ( ; mptr!=eptr ; mptr++ ) {
+      for ( ; mptr!=eptr ; ++mptr ) {
 	if ( (*mptr)->enabled() && (*mptr)->inRoI(roi) ) modules.push_back(*mptr); 
       }
     }
@@ -269,7 +269,7 @@ void RegSelLayer::getModules(const RegSelRoI& roi, std::vector<const RegSelModul
     for ( int i=0 ; i<=roi_phiMax ; i++ ) { 
       std::vector<const RegSelModule*>::const_iterator mptr(m_phimaps[i].begin());  
       std::vector<const RegSelModule*>::const_iterator eptr(m_phimaps[i].end());  
-      for ( ; mptr!=eptr ; mptr++ ) {
+      for ( ; mptr!=eptr ; ++mptr ) {
 	if ( (*mptr)->enabled() && (*mptr)->inRoI(roi) )  modules.push_back(*mptr); 
       }
     }

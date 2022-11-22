@@ -69,7 +69,7 @@ StatusCode ALFA_MDGap::Execute(const std::list<MDHIT> &ListMDHits)
 	m_MapLayers.clear();
 
 	std::list<MDHIT>::const_iterator iter;
-	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); iter++)
+	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); ++iter)
 	{
 		if (m_iRPot == (*iter).iRPot)
 		{
@@ -174,7 +174,7 @@ void ALFA_MDGap::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbR
 	for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++)
 	{
 		iIndex = 2*iLayer+iFiberSide;
-		for (intIter=m_MapLayers[iIndex].ListFibers.begin(); intIter!=m_MapLayers[iIndex].ListFibers.end(); intIter++)
+		for (intIter=m_MapLayers[iIndex].ListFibers.begin(); intIter!=m_MapLayers[iIndex].ListFibers.end(); ++intIter)
 		{
 			if (*intIter!=9999)
 			{
@@ -295,7 +295,7 @@ void ALFA_MDGap::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int
 		gFib = 9999;
 
 		iIndex = 2*iLayer+iFiberSide;
-		for (intIter=m_MapLayers[iIndex].ListFibers.begin(); intIter!=m_MapLayers[iIndex].ListFibers.end(); intIter++)
+		for (intIter=m_MapLayers[iIndex].ListFibers.begin(); intIter!=m_MapLayers[iIndex].ListFibers.end(); ++intIter)
 		{
 			if (*intIter!=9999)
 			{
@@ -621,7 +621,7 @@ Int_t ALFA_MDGap::Active_Gap(Int_t iFiberSide, Int_t (&Over)[72000], Float_t b_r
 			bHit[0]=false;
 			bHit[1]=false;
 
-			for (iHit=m_MapLayers[iIndex].ListFibers.begin(); iHit!=m_MapLayers[iIndex].ListFibers.end(); iHit++)
+			for (iHit=m_MapLayers[iIndex].ListFibers.begin(); iHit!=m_MapLayers[iIndex].ListFibers.end(); ++iHit)
 			{
 				if (*iHit==FSel[iLayer]+1) bHit[0]=true;
 				if (*iHit==FSel[iLayer]-1) bHit[1]=true;
