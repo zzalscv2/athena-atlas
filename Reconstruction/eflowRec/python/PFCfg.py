@@ -395,6 +395,11 @@ def getMuonFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
         # this is because the algorithm adds this debug container which we don't need 
         PFMuonFlowElementLinkerAlgorithm.MuonContainer_ClusterInfo_deltaR="Muons.deltaR_muon_clus_GlobalFEalg"
 
+    if kwargs['LinkNeutralFEClusters'] and not kwargs['useMuonTopoClusters']:
+       # We dereference links to cells, so make sure we have the
+       # dependency.
+       PFMuonFlowElementLinkerAlgorithm.ExtraInputs += [('CaloCellContainer', inputFlags.Egamma.Keys.Input.CaloCells)]
+
     if kwargs['LinkNeutralFEClusters']:
         if kwargs['doTCC'] or kwargs['AODTest']:
             # since the cells are deleted on AOD, if you try to run the link between NFE and Muon on AOD, it will crash. Terminate to catch this.
