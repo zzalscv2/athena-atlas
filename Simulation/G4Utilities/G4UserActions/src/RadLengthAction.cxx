@@ -94,7 +94,7 @@ namespace G4UA
       std::vector<G4LogicalVolume*>::iterator logit;
 
       // looping on logical vector of previous depth level
-      for(logit=logvec.begin() ; logit < logvec.end(); logit++ ){
+      for(logit=logvec.begin() ; logit < logvec.end(); ++logit ){
         for(unsigned int k=0; k<(*logit)->GetNoDaughters();k++){
           // dumping all logical daughters for next level
           tmplogvec.push_back((*logit)->GetDaughter(k)->GetLogicalVolume());
@@ -145,7 +145,7 @@ namespace G4UA
     // and branches which are REFERENCED to the components of the corresponding
     // entry in variables map
     std::map<std::string,TTree*>::iterator it;
-    for(it=treeMap.begin(); it!=treeMap.end(); it++){
+    for(it=treeMap.begin(); it!=treeMap.end(); ++it){
       std::string filename= "/RadLengthAction/";
       std::string treepath= filename+(*it).first;
       m_hSvc->regTree(treepath.c_str(), treeMap[(*it).first]).ignore();
@@ -192,7 +192,7 @@ namespace G4UA
 
     // reinitialize the variables vector for this event
     std::map<std::string,std::vector<double> >::iterator it;
-    for(it=variables.begin(); it!=variables.end(); it++){
+    for(it=variables.begin(); it!=variables.end(); ++it){
       for(unsigned int i=0; i< variables[(*it).first].size(); i++) variables[(*it).first].at(i)=0;
     }
   }
@@ -217,7 +217,7 @@ namespace G4UA
 
 
     std::map<std::string,TTree*>::iterator it;
-    for(it=treeMap.begin(); it!=treeMap.end(); it++){
+    for(it=treeMap.begin(); it!=treeMap.end(); ++it){
       treeMap[(*it).first]->Fill();
     }
   }
@@ -267,7 +267,7 @@ namespace G4UA
       // loop on topvolmap to search for mother of current volume on volume depth level
       // dump the variables in corresponding component of variables map
       std::map<std::string,G4VPhysicalVolume*>::iterator it;
-      for(it=topvolmap.begin(); it!=topvolmap.end(); it++){
+      for(it=topvolmap.begin(); it!=topvolmap.end(); ++it){
         if((*it).second == touchHist->GetVolume(touchHist->GetHistoryDepth()-m_config.VolumeDepthLevel) ){
           this->fillVariables(varvec, (*it).first);
         }

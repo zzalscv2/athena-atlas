@@ -209,7 +209,7 @@ StatusCode EvtInclusiveDecay::execute() {
   
 
   McEventCollection::iterator mcItr;
-  for( mcItr = m_mcEvtColl->begin(); mcItr != m_mcEvtColl->end(); mcItr++ )   {
+  for( mcItr = m_mcEvtColl->begin(); mcItr != m_mcEvtColl->end(); ++mcItr )   {
     HepMC::GenEvent* hepMC = *mcItr;
    
     // Search HepMC record for particles to be decayed by EvtGen

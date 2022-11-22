@@ -232,7 +232,7 @@ StatusCode LarEMSamplingFraction::execute()
   
   std::vector<const CaloCalibrationHitContainer * >::const_iterator it;
   int count=0;
-  for (it=v_cchc.begin();it!=v_cchc.end();it++)
+  for (it=v_cchc.begin();it!=v_cchc.end();++it)
     {
       ATH_MSG_DEBUG( "loop on "<<m_CalibrationHitContainerNames[count]);
       
@@ -357,7 +357,7 @@ StatusCode LarEMSamplingFraction::execute()
     if(evtStore()->retrieve(iter,lArKey[i])==StatusCode::SUCCESS) {
       LArHitContainer::const_iterator hi;
       int hitnumber = 0;
-      for (hi=(*iter).begin();hi!=(*iter).end();hi++) {
+      for (hi=(*iter).begin();hi!=(*iter).end();++hi) {
 	hitnumber++;
 	const LArHit* larHit = *hi;
 	const CaloDetDescrElement *hitElement = caloMgr->get_element(larHit->cellID());
@@ -379,7 +379,7 @@ StatusCode LarEMSamplingFraction::execute()
   if (evtStore()->retrieve(hitVec,"TileHitVec")==StatusCode::SUCCESS &&  m_tileID ) {
     int hitnumber = 0;
     for(TileHitVecConstIterator i_hit=hitVec->begin() ; i_hit!=hitVec->end() ; ++i_hit) {
-      hitnumber++;
+      ++hitnumber;
       Identifier pmt_id = (*i_hit).identify();
       Identifier cell_id = m_tileID->cell_id(pmt_id);
       
