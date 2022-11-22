@@ -15,7 +15,7 @@
 
 #include <type_traits>
 
-#undef NDEBUG
+//#undef NDEBUG
 
 namespace Ringer {
 
