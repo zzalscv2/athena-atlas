@@ -119,18 +119,21 @@ def HIGG1D1KernelCfg(ConfigFlags, name='HIGG1D1Kernel', **kwargs):
     from DerivationFrameworkHiggs.SkimmingToolHIGG1Config import SkimmingToolHIGG1Cfg
     
     # Requires something in this list of triggers
-    SkipTriggerRequirement= ConfigFlags.Input.isMC and float(ConfigFlags.Beam.Energy) == 4000000.0 
+    SkipTriggerRequirement = ConfigFlags.Input.isMC and float(ConfigFlags.Beam.Energy) == 4000000.0 
     # 8 TeV MC does not have trigger information
-    print( "HIGG1D1.py SkipTriggerRequirement", SkipTriggerRequirement)
+    print("HIGG1D1.py SkipTriggerRequirement", SkipTriggerRequirement)
     TriggerExp = []
     if not SkipTriggerRequirement:
         if float(ConfigFlags.Beam.Energy) == 4000000.0:
             #  8 TeV data
             TriggerExp               = ["EF_g35_loose_g25_loose"]
         if float(ConfigFlags.Beam.Energy) == 6500000.0:
-            # 13 TeV MC
+            # 13 TeV MC 
             TriggerExp               = ["HLT_2g50_loose_L12EM20VH","HLT_2g25_loose_g15_loose","HLT_g35_medium_g25_medium_L12EM20VH","HLT_2g25_tight_L12EM20VH","HLT_2g22_tight_L12EM15VHI","HLT_g35_loose_g25_loose","HLT_g35_medium_g25_medium","HLT_2g50_loose","HLT_2g20_tight","HLT_2g22_tight","HLT_2g20_tight_icalovloose_L12EM15VHI","HLT_2g20_tight_icalotight_L12EM15VHI","HLT_2g22_tight_L12EM15VHI","HLT_2g22_tight_icalovloose_L12EM15VHI","HLT_2g22_tight_icalotight_L12EM15VHI","HLT_2g22_tight_icalovloose","HLT_2g25_tight_L12EM20VH","HLT_2g20_loose","HLT_2g20_loose_L12EM15","HLT_g35_medium_g25_medium","HLT_g35_medium_g25_medium_L12EM15VH","HLT_g35_loose_g25_loose","HLT_g35_loose_g25_loose_L12EM15VH", "HLT_2g20_loose_g15_loose", "HLT_3g20_loose", "HLT_3g15_loose", "HLT_2g6_tight_icalotight_L1J100", "HLT_2g6_loose_L1J100", "HLT_2g6_tight_icalotight_L1J50", "HLT_2g6_loose_L1J50","HLT_g120_loose","HLT_g140_loose"]
-
+        if float(ConfigFlags.Beam.Energy) == 6800000.0:
+            # 13.6 TeV
+            TriggerExp               = ["HLT_2g50_loose_L12EM20VH","HLT_2g25_loose_g15_loose_L12EM20VH","HLT_g35_medium_g25_medium_L12EM20VH","HLT_2g22_tight_L12EM15VHI","HLT_2g20_tight_icaloloose_L12EM15VHI","HLT_2g20_loose_L12EM15VH","HLT_2g9_loose_25dphiAA_invmAA80_L12EM7","HLT_2g15_loose_25dphiAA_invmAA80_L12EM7","HLT_2g15_tight_25dphiAA_invmAA80_L12EM7","HLT_2g15_tight_25dphiAA_L12EM7","HLT_g120_loose_L1EM22VHI","HLT_g140_loose_L1EM22VHI","HLT_2g50_loose_L12eEM24L","HLT_2g25_loose_g15_loose_L12eEM24L","HLT_g35_medium_g25_medium_L12eEM24L","HLT_2g22_tight_L12eEM18M","HLT_2g20_tight_icaloloose_L12eEM18M","HLT_2g20_loose_L12eEM18L","HLT_2g9_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM9","HLT_2g15_loose_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M","HLT_2g15_tight_25dphiAA_L1DPHI-M70-2eEM15M","HLT_2g15_tight_L1DPHI-M70-2eEM15M","HLT_g120_loose_L1eEM26M","HLT_g140_loose_L1eEM26M"]
+    print("HIGG1D1.py Skimming Tool Triggers:", ",".join(TriggerExp))
     skimmingTool = acc.popToolsAndMerge( SkimmingToolHIGG1Cfg(ConfigFlags,RequireTrigger=not SkipTriggerRequirement,Triggers=TriggerExp) )
     acc.addPublicTool(skimmingTool)
 
