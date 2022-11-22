@@ -360,7 +360,7 @@ public:
     const TrackSurfaceIntersection*,
     const double,
     const MagneticFieldProperties&,
-    ParticleHypothesis) const
+    ParticleHypothesis) const override final
   {
     ATH_MSG_ERROR("Call to non-implemented intersectSurface");
     return nullptr;
