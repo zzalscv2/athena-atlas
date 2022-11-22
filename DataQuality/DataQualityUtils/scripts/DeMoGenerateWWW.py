@@ -7,10 +7,10 @@
 # Documentation: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/DataQualityDemo
 #############################################################################################
 
-import sys, socket, pathlib, errno, re, subprocess
+import sys, socket, pathlib, errno, re, subprocess, os
 
 maindir = "/afs/cern.ch/user/a/atlasdqm/www/DeMo"
-libdir = "/afs/cern.ch/user/a/atlasdqm/w1/DeMo"
+libdir = os.path.dirname(__file__)
 
 global run3_yt
 
