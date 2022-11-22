@@ -76,7 +76,7 @@ TrigFTF_GNN_DataStorage::~TrigFTF_GNN_DataStorage() {
 
 }
 
-int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase& sp) {
+int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase& sp, bool useML = false) {
 
   const TrigFTF_GNN_Layer* pL = m_geo.getTrigFTF_GNN_LayerByIndex(sp.layer());
   if(pL==nullptr) return -1;
@@ -90,18 +90,24 @@ int TrigFTF_GNN_DataStorage::addSpacePoint(const TrigSiSpacePointBase& sp) {
   bool isBarrel = (pL->m_layer.m_type == 0);
 
   if(isBarrel) {
-    const Trk::SpacePoint* osp = sp.offlineSpacePoint();
-    const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
-    float cluster_width = pCL->width().widthPhiRZ().y();
-    float min_tau = 6.7*(cluster_width - 0.2);
-    float max_tau = 1.6 + 0.15/(cluster_width + 0.2) + 6.1*(cluster_width - 0.2);
+    float min_tau = -100.0;
+    float max_tau =  100.0;
+    if (useML) {
+      const Trk::SpacePoint* osp = sp.offlineSpacePoint();
+      const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
+      float cluster_width = pCL->width().widthPhiRZ().y();
+      min_tau = 6.7*(cluster_width - 0.2);
+      max_tau = 1.6 + 0.15/(cluster_width + 0.2) + 6.1*(cluster_width - 0.2);
+    }
     m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_Node(sp, min_tau, max_tau));
   }
   else {
-    const Trk::SpacePoint* osp = sp.offlineSpacePoint();
-    const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
-    float cluster_width = pCL->width().widthPhiRZ().y();
-    if(cluster_width > 0.2) return -3;
+    if (useML) {
+      const Trk::SpacePoint* osp = sp.offlineSpacePoint();
+      const InDet::PixelCluster* pCL = dynamic_cast<const InDet::PixelCluster*>(osp->clusterList().first);
+      float cluster_width = pCL->width().widthPhiRZ().y();
+      if(cluster_width > 0.2) return -3;
+    }
     m_etaBins.at(binIndex).m_vn.push_back(new TrigFTF_GNN_Node(sp));
   }
 

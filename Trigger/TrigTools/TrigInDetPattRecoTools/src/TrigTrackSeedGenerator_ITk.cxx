@@ -58,7 +58,7 @@ void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePoi
 
     nPixels++;
 
-    int result = m_storage->addSpacePoint((*it));
+    int result = m_storage->addSpacePoint((*it), (m_settings.m_useTrigSeedML > 0));
     
     if(result == 0) nStored++;
     
@@ -78,6 +78,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
   const float cut_dcurv_max     = 0.001;
   const float cut_tau_ratio_min =-0.007;
   const float cut_tau_ratio_max = 0.007;
+  const float min_z0            = roiDescriptor->zedMinus();
+  const float max_z0            = roiDescriptor->zedPlus();
 
   //1. loop over stages
 
@@ -92,7 +94,6 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
   edgeStorage.resize(MaxEdges);
 
   int nEdges = 0;
-
 
   for(std::map<int, std::vector<FASTRACK_CONNECTION*> >::const_iterator it = conn.m_connMap.begin();it!=conn.m_connMap.end();++it, currentStage++) {
     
@@ -128,7 +129,11 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	if(B1.empty()) continue;
 
 	for(int b2=0;b2<nSrcBins;b2++) {//loop over bins in Layer 2
-
+	  
+	  if(m_settings.m_useEtaBinning) {
+	    if(!pL1->verifyBin(pL2, b1, b2, min_z0, max_z0)) continue;
+	  }
+	  
           const TrigFTF_GNN_EtaBin& B2 = m_storage->getEtaBin(pL2->m_bins.at(b2));
 
           if(B2.empty()) continue;
@@ -235,7 +240,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	      if(nEdges < MaxEdges) {
 
 		TrigFTF_GNN_Edge* pE = &(edgeStorage.at(nEdges));
-
+		
 		float* params = pE->m_p;//exp(-eta), curvature, phi1, phi2
 	      
 		params[0] = std::sqrt(1+tau*tau)-tau;
@@ -256,7 +261,6 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
       }
     }
   }
-
 
   std::vector<const TrigFTF_GNN_Node*> vNodes;
 
@@ -540,7 +544,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	  
 	  if (!roiDescriptor->isFullscan()) {
 	    const double uc = 2*B*pS_r - A;
-	    const double phi0 = atan2(sinA - uc*cosA, cosA + uc*sinA);
+	    const double phi0 = std::atan2(sinA - uc*cosA, cosA + uc*sinA);
 	    if ( !RoiUtil::containsPhi( *roiDescriptor, phi0 ) ) {
 	      continue;
 	    }
