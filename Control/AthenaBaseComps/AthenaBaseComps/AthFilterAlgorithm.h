@@ -97,9 +97,6 @@ class AthFilterAlgorithm
   { this, "EventInfoKey", "EventInfo", "" };
 }; 
 
-// I/O operators
-//////////////////////
-
 /////////////////////////////////////////////////////////////////// 
 // Inline methods: 
 /////////////////////////////////////////////////////////////////// 
@@ -112,16 +109,6 @@ AthFilterAlgorithm::cutFlowSvc()
 {
   return m_cutFlowSvc;
 }
-
-
-// /** @brief return the top-level @c EventBookkeeper of this filter algorithm
-//  */
-// inline
-// EventBookkeeper* 
-// AthFilterAlgorithm::ebk()
-// {
-//   return m_ebk;
-// }
 
 
 /// return the @c CutIdentifier corresponding to the top-level cut of this filter algorithm
