@@ -152,33 +152,6 @@ struct ParallelFileMerger : public TObject
       }
       return result;
    }
-
-   Bool_t BuildIndex()
-   {
-      bool updated = false;
-      TIter nextKey(fMerger.GetOutputFile()->GetListOfKeys());
-      while (TKey* key = static_cast<TKey*>(nextKey())) {
-         TClass* cl = TClass::GetClass(key->GetClassName());
-         if (cl != nullptr && cl->InheritsFrom("TTree")) {
-            TTree* outTree = static_cast<TTree*>(fMerger.GetOutputFile()->Get(key->GetName()));
-            if (outTree != nullptr && outTree->GetBranch("index_ref") != nullptr && outTree->GetEntries() > 0) {
-               TList* friendTrees(outTree->GetListOfFriends());
-               if (friendTrees != nullptr && !friendTrees->IsEmpty()) {
-                  outTree->BuildIndex("index_ref");
-                  updated = true;
-                  for (const auto&& obj: *friendTrees) {
-                     TTree* friendTree = outTree->GetFriend(obj->GetName());
-                     if (friendTree != nullptr && friendTree->GetBranch("index_ref") != nullptr && friendTree->GetEntries() > 0) {
-                        friendTree->BuildIndex("index_ref");
-                        updated = true;
-                     }
-                  }
-               }
-            }
-         }
-      }
-      return updated;
-   }
 };
 
 //___________________________________________________________________________
@@ -293,12 +266,6 @@ StatusCode AthenaRootSharedWriterSvc::share(int numClients, bool motherClient) {
                   --m_rootClientCount;
                   if (m_rootMonitor->GetActive() == 0 || m_rootClientCount == 0) {
                      if (!motherClient) {
-                        TIter nextFileMerger(m_rootMergers.MakeIterator());
-                        while (ParallelFileMerger* merger = static_cast<ParallelFileMerger*>(nextFileMerger())) {
-                           if (merger->BuildIndex()) {
-                              ATH_MSG_INFO("ROOT Monitor: build index for trees in " << merger);
-                           }
-                        }
                         anyActiveClients = false;
                         ATH_MSG_INFO("ROOT Monitor: No more active clients...");
                      } else {
