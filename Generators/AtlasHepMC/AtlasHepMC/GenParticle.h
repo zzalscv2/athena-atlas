@@ -31,6 +31,7 @@ inline int barcode(GenParticlePtr p) {
     std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
     return barcode?(barcode->value()):p->id();
 }
+inline int barcode_or_id(ConstGenParticlePtr p) { return p->id(); }
 inline int barcode(ConstGenParticlePtr p) {
     if (!p) return 0;
     auto e = p->parent_event();
@@ -62,6 +63,7 @@ typedef const GenParticle* ConstGenParticlePtr;
 inline GenParticlePtr newGenParticlePtr(const HepMC::FourVector &mom = HepMC::FourVector(0.0,0.0,0.0,0.0), int pid = 0, int status = 0) {
     return new HepMC::GenParticle(mom,pid,status);
 }
+inline int barcode_or_id(ConstGenParticlePtr p) { return p->barcode();}
 inline int barcode(ConstGenParticlePtr p) { return p->barcode();}
 inline int barcode(GenParticle p) {   return    p.barcode(); }
 namespace Print {

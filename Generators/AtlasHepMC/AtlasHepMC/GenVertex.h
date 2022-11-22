@@ -39,6 +39,7 @@ inline int barcode(GenVertexPtr p) {
     std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
     return barcode?(barcode->value()):p->id();
 }
+inline int barcode_or_id(ConstGenVertexPtr p) { return p->id();}
 inline int barcode(ConstGenVertexPtr p) {
     if (!p) return 0;
     auto e = p->parent_event();
@@ -75,6 +76,7 @@ namespace Print {
 inline void line(std::ostream& os,const GenVertex& v) {v.print(os);}
 inline void line(std::ostream& os,const GenVertex* v) {v->print(os);}
 }
+inline int barcode_or_id(ConstGenVertexPtr p) { return p->barcode();}
 inline int barcode(ConstGenVertexPtr p) { return p->barcode();}
 inline int barcode(const GenVertex p) { return p.barcode();}
 inline void* raw_pointer(GenVertexPtr p) { return p;}
