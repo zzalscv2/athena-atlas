@@ -40,7 +40,7 @@ TauEfficiencyCorrectionsTool::TauEfficiencyCorrectionsTool( const std::string& s
   declareProperty( "VarNameJetIDHadTau",           m_sVarNameJetIDHadTau           = "" );
   declareProperty( "VarNameDecayModeHadTau",       m_sVarNameDecayModeHadTau       = "" );
   declareProperty( "VarNameTriggerHadTau",         m_sVarNameTriggerHadTau         = "" );
-  declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2019-summer" );
+  declareProperty( "RecommendationTag",            m_sRecommendationTag            = "2022-prerec" );
   declareProperty( "TriggerName",                  m_sTriggerName                  = "" );
   declareProperty( "AutoTriggerYear",              m_bReadRandomRunNumber          = false );
   declareProperty( "TriggerSFMeasurement",         m_sTriggerSFMeasurement         = "combined" ); // "combined", "Ztautau" or "ttbar"
@@ -93,8 +93,8 @@ StatusCode TauEfficiencyCorrectionsTool::initializeWithTauSelectionTool(TauSelec
     m_iEleIDLevel = tauSelectionTool->m_iEleIDWP;
 
     // force m_iEleIDLevel to ELEIDNONE until RNN eVeto SFs are available  
-    if (m_iEleIDLevel != ELEIDNONE) {
-      ATH_MSG_WARNING("Scale factors for RNN eVeto are not available yet");
+    if (m_iEleIDLevel == ELEIDRNNTIGHT) {
+      ATH_MSG_WARNING("Scale factors for RNN eVeto (TIGHT) are not available yet");
       m_iEleIDLevel = ELEIDNONE;
     }
 
@@ -160,8 +160,8 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
       m_vEfficiencyCorrectionTypes.push_back(SFJetIDHadTau);
     }
     // Force m_iEleIDLevel to ELEIDNONE until RNN eVeto SFs are available  
-    if (m_iEleIDLevel != ELEIDNONE) {
-      ATH_MSG_WARNING("Scale factors for RNN eVeto are not available yet");
+    if (m_iEleIDLevel == ELEIDRNNTIGHT) {
+      ATH_MSG_WARNING("Scale factors for RNN eVeto (TIGHT) are not available yet");
       m_iEleIDLevel = ELEIDNONE;
     }
     if (m_iEleIDLevel == ELEIDRNNLOOSE || m_iEleIDLevel == ELEIDRNNMEDIUM || m_iEleIDLevel == ELEIDRNNTIGHT) {	
@@ -175,7 +175,12 @@ StatusCode TauEfficiencyCorrectionsTool::initialize()
   }
   
   if (m_sRecommendationTag == "2019-summer") {
+    ATH_MSG_WARNING("Depreciation warning: 2019-summer recommendations are superseeded by tag 2022-prerec. Switch to tag 2022-prerec for >= R22.");
     ATH_CHECK(initializeTools_2019_summer());
+  }
+  else if (m_sRecommendationTag == "2022-prerec") {
+    ATH_MSG_WARNING("2022-prerec tag are pre-recommendations and still under development.");
+    ATH_CHECK(initializeTools_2022_prerec());
   }
   else {
     ATH_MSG_ERROR("Unknown RecommendationTag " << m_sRecommendationTag);
@@ -400,6 +405,146 @@ StatusCode TauEfficiencyCorrectionsTool::applySystematicVariation ( const CP::Sy
 //______________________________________________________________________________
 // this whole block is a place holder until we get R22 Run2 recommendations
 // none of these SFs are valid for R22 MC, except possibly RNN ID to very coarse approximation
+StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
+{
+  std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
+
+  // initialise paths and SF names unless they have been configured by the user
+  for (auto iEfficiencyCorrectionType : m_vEfficiencyCorrectionTypes)
+  {
+    if (iEfficiencyCorrectionType == SFJetIDHadTau)
+    {
+      if (m_sInputFilePathJetIDHadTau.empty()) {
+        if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using FullSim");
+	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2019-summer.root";
+      }
+      if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
+
+      std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel);
+      if (sJetIDWP.empty()) {
+        ATH_MSG_WARNING("Could not find valid ID working point. Skip ID efficiency corrections.");
+        continue;
+      }
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/JetIDHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathJetIDHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameJetIDHadTau));
+      //ATH_CHECK(tTool->setProperty("UseTauSubstructure", m_bUseTauSubstructure));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
+    }
+    else if (iEfficiencyCorrectionType == SFEleIDHadTau)
+    {
+      // the path must be updated once RNN eVeto SFs are available
+      if (m_sInputFilePathEleIDHadTau.empty()) m_sInputFilePathEleIDHadTau = sDirectory + "EleOLR_TrueHadTau_2016-ichep.root";
+      if (m_sVarNameEleIDHadTau.empty()) m_sVarNameEleIDHadTau = "TauScaleFactorEleIDHadTau";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameEleIDHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+    }
+    else if (iEfficiencyCorrectionType == SFEleIDElectron)
+    {
+      // the path must be updated once RNN eVeto SFs are available
+      if (m_sInputFilePathEleIDElectron.empty()) {
+        if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for tau electron veto, using full sim");
+	m_sInputFilePathEleIDElectron = sDirectory+ "EleRNN_TrueElectron_2022-mc20-prerec.root";
+      }
+      if (m_sVarNameEleIDElectron.empty()) m_sVarNameEleIDElectron = "TauScaleFactorEleIDElectron";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/EleIDElectronTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathEleIDElectron));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameEleIDElectron));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", ConvertEleIDToString(m_iEleIDLevel)));
+      ATH_CHECK(tTool->setProperty("UseTauSubstructure", false));
+    }
+    else if (iEfficiencyCorrectionType == SFRecoHadTau)
+    {
+      if (m_sInputFilePathRecoHadTau.empty()) m_sInputFilePathRecoHadTau = sDirectory + "Reco_TrueHadTau_2019-summer.root";
+      if (m_sVarNameRecoHadTau.empty()) m_sVarNameRecoHadTau = "TauScaleFactorReconstructionHadTau";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::CommonEfficiencyTool/RecoHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathRecoHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameRecoHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+    }
+    else if (iEfficiencyCorrectionType == SFDecayModeHadTau)
+    {
+      if (m_sInputFilePathDecayModeHadTau.empty()) m_sInputFilePathDecayModeHadTau = sDirectory + "DecayModeSubstructure_TrueHadTau_2019-summer.root";
+      if (m_sVarNameDecayModeHadTau.empty()) m_sVarNameDecayModeHadTau = "TauScaleFactorDecayModeHadTau";
+
+      std::string sJetIDWP = ConvertJetIDToString(m_iJetIDLevel);
+      if (sJetIDWP.empty()) {
+        ATH_MSG_WARNING("Could not find valid ID working point. Skip ID efficiency corrections.");
+        continue;
+      }
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("DecayModeHadTauTool", this);
+      m_vCommonEfficiencyTools.push_back(tTool);
+      ATH_CHECK(ASG_MAKE_ANA_TOOL(*tTool, TauAnalysisTools::CommonEfficiencyTool));
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathDecayModeHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameDecayModeHadTau));
+      ATH_CHECK(tTool->setProperty("UseTauSubstructure", true));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", sJetIDWP));
+    }
+    else if (iEfficiencyCorrectionType == SFTriggerHadTau)
+    {
+      if (m_sTriggerName.empty()) {
+	ATH_MSG_ERROR("Property \"Trigger\" was not set, please provide a trigger name.");
+	return StatusCode::FAILURE;  
+      }
+      if (m_sInputFilePathTriggerHadTau.empty()) {
+	// Determine the input file name from the given trigger name.
+	// Triggers having "mediumRNN_tracktwoMVA are only part of 2018aftTS1.
+	// Every other trigger having "tracktwoEF" is only part of 2018.
+	// Every other trigger having "tau160_medium1" is only part of 2016.
+	// Every other trigger having "tau160" is only part of 2017/2018.
+	// Lastly check for other possible triggers, if this is not fulfilled the passed trigger is not supported.
+	if (m_sTriggerName.find("mediumRNN_tracktwoMVA") != std::string::npos) {
+	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2018aftTS1"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	}
+	else if (m_sTriggerName.find("tracktwoEF") != std::string::npos) {
+	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2018"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	}
+	else if (m_sTriggerName.find("tau160_medium1") != std::string::npos) {
+	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data2016"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	}
+	else if ((m_sTriggerName.find("tau160") != std::string::npos) || (m_sTriggerName.find("tau60") != std::string::npos)) {
+	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data1718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	}
+	else if ((m_sTriggerName.find("tau125") != std::string::npos) || (m_sTriggerName.find("tau25") != std::string::npos) || (m_sTriggerName.find("tau35") != std::string::npos) || (m_sTriggerName.find("tau50") != std::string::npos) || (m_sTriggerName.find("tau80") != std::string::npos) ) {
+	  m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_2019-summer_data161718"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+	}
+	else {
+	  ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported. Please fix \"TriggerName\" property.");        
+	  return StatusCode::FAILURE;
+	}
+      }
+      if (m_sVarNameTriggerHadTau.empty()) m_sVarNameTriggerHadTau = "TauScaleFactorTriggerHadTau";
+
+      asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>* tTool = new asg::AnaToolHandle<ITauEfficiencyCorrectionsTool>("TauAnalysisTools::TauEfficiencyTriggerTool/TriggerHadTauTool", this);
+      m_vTriggerEfficiencyTools.push_back(tTool);
+      ATH_CHECK(tTool->setProperty("InputFilePath", m_sInputFilePathTriggerHadTau));
+      ATH_CHECK(tTool->setProperty("VarName", m_sVarNameTriggerHadTau));
+      ATH_CHECK(tTool->setProperty("SkipTruthMatchCheck", m_bSkipTruthMatchCheck));
+      ATH_CHECK(tTool->setProperty("WP", ConvertTriggerIDToString(m_iJetIDLevel)));
+      ATH_CHECK(tTool->setProperty("PeriodBinning", (int)m_iTriggerPeriodBinning));
+    }
+    else {
+      ATH_MSG_WARNING("unsupported EfficiencyCorrectionsType with enum " << iEfficiencyCorrectionType);
+    }
+  }
+
+  return StatusCode::SUCCESS;
+}
+
 StatusCode TauEfficiencyCorrectionsTool::initializeTools_2019_summer()
 {
   std::string sDirectory = "TauAnalysisTools/" + std::string(sSharedFilesVersion) + "/EfficiencyCorrections/";
@@ -539,6 +684,9 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2019_summer()
 
   return StatusCode::SUCCESS;
 }
+
+
+
 
 // auto detection of simulation flavour, used to cross check configuration of tool
 //______________________________________________________________________________

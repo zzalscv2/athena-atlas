@@ -619,6 +619,12 @@ void CommonEfficiencyTool::addHistogramToSFMap(TKey* kKey, const std::string& sK
     oObject->SetDirectory(0);
     (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH3);
     ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
+  }else if (cClass->InheritsFrom("TH1"))
+  {
+    TH1* oObject = (TH1*)kKey->ReadObj();
+    oObject->SetDirectory(0);
+    (*m_mSF)[sKeyName] = tTupleObjectFunc(oObject,&getValueTH1);
+    ATH_MSG_DEBUG("added histogram with name "<<sKeyName);
   }
   else if (cClass->InheritsFrom("TF1"))
   {
@@ -663,8 +669,8 @@ void CommonEfficiencyTool::generateSystematicSets()
   else if (sTruthType=="TRUEMUON") m_eCheckTruth = TauAnalysisTools::TruthMuon;
   else if (sTruthType=="TRUEJET") m_eCheckTruth = TauAnalysisTools::TruthJet;
   else if (sTruthType=="TRUEHADDITAU") m_eCheckTruth = TauAnalysisTools::TruthHadronicDiTau;
-  // FIXME: likely not applicable for RNN eVeto, as we have a 3p eVeto, but we still need this to be measurable in T&P
-  //if (sEfficiencyType=="ELERNN") m_bNoMultiprong = true;
+  // 3p eVeto, still need this to be measurable in T&P
+  if (sEfficiencyType=="ELERNN" || sEfficiencyType=="ELEOLR") m_bNoMultiprong = true;
 
   for (auto mSF : *m_mSF)
   {
@@ -735,6 +741,36 @@ CP::CorrectionCode CommonEfficiencyTool::getValue(const std::string& sHistName,
   // finally obtain efficiency scale factor from TH1F/TH1D/TF1, by calling the
   // function pointer stored in the tuple from the scale factor map
   return  (std::get<1>(tTuple))(std::get<0>(tTuple), dEfficiencyScaleFactor, dVars);
+}
+
+/*
+  find the particular value in TH1 depending on pt (or the
+  corresponding value in case of configuration)
+  Note: In case values are outside of bin ranges, the closest bin value is used
+*/
+//______________________________________________________________________________
+CP::CorrectionCode CommonEfficiencyTool::getValueTH1(const TObject* oObject,
+    double& dEfficiencyScaleFactor, double dVars[])
+{
+  double dPt = dVars[0];
+
+  const TH1* hHist = dynamic_cast<const TH1*>(oObject);
+
+  if (!hHist)
+  {
+    // ATH_MSG_ERROR("Problem with casting TObject of type "<<oObject->ClassName()<<" to TH2F");
+    return CP::CorrectionCode::Error;
+  }
+
+  // protect values from underflow bins
+  dPt = std::max(dPt,hHist->GetXaxis()->GetXmin());
+  // protect values from overflow bins (times .999 to keep it inside last bin)
+  dPt = std::min(dPt,hHist->GetXaxis()->GetXmax() * .999);
+
+  // get bin from TH2 depending on x and y values; finally set the scale factor
+  int iBin = hHist->FindFixBin(dPt);
+  dEfficiencyScaleFactor = hHist->GetBinContent(iBin);
+  return CP::CorrectionCode::Ok;
 }
 
 /*

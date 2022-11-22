@@ -133,11 +133,11 @@ int main( int argc, char* argv[] )
   CHECK(TauSelTool->setProperty("CreateControlPlots", true ));
   CHECK(TauSelTool->setProperty("MuonOLR", true ));
   CHECK(TauSelTool->setProperty("JetIDWP", int(JETIDRNNMEDIUM) ));
-  // CHECK(TauSelTool->setProperty("EleIDWP", int(ELEIDRNNMEDIUM) ));
-  // CHECK(TauSelTool->setProperty("EleIDVersion", 1 ));
+  CHECK(TauSelTool->setProperty("EleIDWP", int(ELEIDRNNLOOSE) ));
+  CHECK(TauSelTool->setProperty("EleIDVersion", 1 ));
   CHECK(TauSelTool->setProperty("PtMin", 20. ));
   CHECK(TauSelTool->setProperty("ConfigPath", "" ));
-  CHECK(TauSelTool->setProperty("SelectionCuts", int(CutPt|CutJetIDWP) ));
+  CHECK(TauSelTool->setProperty("SelectionCuts", int(CutPt|CutJetIDWP|CutEleIDWP) ));
   CHECK(TauSelTool->initialize());
 
   ToolHandle<TauAnalysisTools::ITauSelectionTool> TauSelToolHandle = TauSelTool;
@@ -169,7 +169,7 @@ int main( int argc, char* argv[] )
   // TauEfficiencyCorrectionsTool
   // ===========================================================================
   TauAnalysisTools::TauEfficiencyCorrectionsTool TauEffCorrTool( "TauEfficiencyCorrectionsTool" );
-  TauEffCorrTool.msg().setLevel( MSG::DEBUG );
+  TauEffCorrTool.msg().setLevel( MSG::VERBOSE );
   CHECK(TauEffCorrTool.setProperty("TauSelectionTool",TauSelToolHandle));
   CHECK(TauEffCorrTool.initialize());
 
@@ -317,19 +317,24 @@ int main( int argc, char* argv[] )
       }
  
       // Select "good" taus:
-      if( ! TauSelTool->accept( *xTau ) ) continue;
+      if( ! TauSelTool->accept( *xTau ) ){
+        Info( "TauAnalysisToolsExample",
+              "Tau does not pass selection tool: pt %g ",
+              xTau->pt());
+	continue;
+      }
 
       for (auto sSystematicSet: vEfficiencyCorrectionsSystematicSet)
       {
         CHECK( TauEffCorrTool.applySystematicVariation(sSystematicSet));
         CHECK( TauEffCorrTool.applyEfficiencyScaleFactor(*xTau) );
         Info( "TauAnalysisToolsExample",
-              "SystType %s: RecoSF: %g JetIDSF: %g EleOLRSFHadTau: %g EleOLRSFElectron: %g",
+              "SystType %s: RecoSF: %g JetIDSF: %g EleOLRSFHadTau: %g EleRNNSFElectron: %g",
               sSystematicSet.name().c_str(),
               xTau->auxdata< double >( "TauScaleFactorReconstructionHadTau" ),
               xTau->auxdata< double >( "TauScaleFactorJetIDHadTau" ),
-              xTau->auxdata< double >( "TauScaleFactorEleOLRHadTau" ),
-              xTau->auxdata< double >( "TauScaleFactorEleOLRElectron" ));
+              xTau->auxdata< double >( "TauScaleFactorEleIDHadTau" ),
+              xTau->auxdata< double >( "TauScaleFactorEleIDElectron" ));
       }
 
       for (auto sSystematicSet: vEfficiencyCorrectionsTriggerSystematicSet)
