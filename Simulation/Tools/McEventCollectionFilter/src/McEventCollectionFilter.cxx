@@ -125,28 +125,29 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
 
   // electrons from TRT hits
   if (m_keepElectronsLinkedToTRTHits) {
-    std::vector<int> barcodes;
-    ATH_CHECK(findElectronsLinkedToTRTHits(ctx, &barcodes));
+    SG::ReadHandle<TRTUncompressedHitCollection> inputCollectionH(m_inputTRTHitsKey, ctx);
+    if (!inputCollectionH.isValid()) {
+      ATH_MSG_ERROR("Could not get input hits collection " << inputCollectionH.name() << " from store " << inputCollectionH.store());
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_DEBUG("Found input hits collection " << inputCollectionH.name() << " in store " << inputCollectionH.store());
 
-    for (int barcode : barcodes) {
-      HepMC::ConstGenParticlePtr particle = HepMC::barcode_to_particle(genEvt, barcode);
-      if (particle == nullptr) {
-        ATH_MSG_DEBUG("Could not find particle for barcode " << barcode);
-        continue;
-      }
+    for (const TRTUncompressedHit &hit : *inputCollectionH) {
+      HepMcParticleLink link = hit.particleLink();
+      int pdgID = hit.GetParticleEncoding();
+      if (std::abs(pdgID) != 11 || link.barcode() == 0) continue;
+      HepMC::ConstGenParticlePtr particle = link.cptr();
       HepMC::ConstGenVertexPtr vx = particle->production_vertex();
-      HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(),
-                                                                   particle->pdg_id(),
-                                                                   particle->status());
+      HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(particle->momentum(), particle->pdg_id(), particle->status());
 #ifndef HEPMC3
-      HepMC::suggest_barcode(newParticle, barcode);
+      HepMC::suggest_barcode(newParticle, link.barcode());
 #endif
       const HepMC::FourVector &position = vx->position();
       HepMC::GenVertexPtr newVertex = HepMC::newGenVertexPtr(position);
       newVertex->add_particle_out(newParticle);
       evt->add_vertex(newVertex);
 #ifdef HEPMC3
-      HepMC::suggest_barcode(newParticle, barcode);
+      HepMC::suggest_barcode(newParticle, link.barcode());
 #endif
     }
   }
@@ -160,29 +161,6 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   ATH_MSG_DEBUG("Reference barcode: " << referenceBarcode);
 
   outputCollection->push_back(evt);
-
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode McEventCollectionFilter::findElectronsLinkedToTRTHits(const EventContext &ctx, std::vector<int> *barcodes) const
-{
-  SG::ReadHandle<TRTUncompressedHitCollection> inputCollection(m_inputTRTHitsKey, ctx);
-  if (!inputCollection.isValid()) {
-    ATH_MSG_ERROR("Could not get input hits collection " << inputCollection.name() << " from store " << inputCollection.store());
-    return StatusCode::FAILURE;
-  }
-  ATH_MSG_DEBUG("Found input hits collection " << inputCollection.name() << " in store " << inputCollection.store());
-
-  std::set<int> barcodeSet;
-  for (const TRTUncompressedHit &hit : *inputCollection) {
-    const HepMcParticleLink link = hit.particleLink();
-    int pdgID = hit.GetParticleEncoding();
-    if (std::abs(pdgID) == 11 && link.barcode() != 0) {
-      barcodeSet.insert(link.barcode());
-    }
-  }
-  barcodes->assign(barcodeSet.begin(), barcodeSet.end());
 
   return StatusCode::SUCCESS;
 }
