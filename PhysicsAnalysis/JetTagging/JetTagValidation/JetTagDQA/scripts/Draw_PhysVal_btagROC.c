@@ -72,7 +72,7 @@ const float EffMax=1.;
 
 //Some global variables for plotting:
 // taggers with 'old_taggers' in their name are assumed to be in the folder called 'old_taggers' in the merged root file
-const vector<TString> taggers = {"IP2D","IP3D","RNNIP","DIPS","SV1","JetFitter","DL1dv00","DL1dv01","DL1r","GN1"};
+vector<TString> taggers = {"IP2D","IP3D","RNNIP","DIPS","SV1","JetFitter","DL1dv00","DL1dv01","DL1r","GN1"};
 //const vector<TString> taggers = {"IP2D"};
 //const vector<TString> taggers = {"IP3D"};
 //const vector<TString> taggers = {"RNNIP"};
@@ -157,7 +157,11 @@ TString getRefHistoName(TString var, TString truth_label){
     if(truth_label == "l") name = "BTag/AntiKt4EMTopoJets/SV/_" + truth_label + "/BTag_AntiKt4EMTopoJets_SV_SV1_Lxy_" + truth_label;
     else name = "BTag/AntiKt4EMTopoJets/other_histograms/histos/BTag_AntiKt4EMTopoJets_truth_Truth_Lxy_" + truth_label;
   }
-  else throw std::invalid_argument("getRefHistoName called with unknown var name: " + var + ". Only pt_ttbar, pt_Zprime and Lxy allowed. Aborting." );
+  else { 
+    TString error("getRefHistoName called with unknown var name: ");
+    std::cout << "I'm an error " << error << " " << var << "\n";
+    gSystem->Exit(1);
+  }
   return name;
 }
 
@@ -211,7 +215,7 @@ void myText(TString txt, float x, float y, Color_t color, bool drawRatio=true, f
 }
 
 
-TGraphErrors * h_RejvEff(TH1 *hsig, TH1 *hbkg, bool isSV1) {
+TGraphErrors * h_RejvEff(TH1 *hsig, TH1 *hbkg, bool isSV1, bool drawCtag=false) {
   int nbins = hsig->GetNbinsX();
   //cout <<"nbins="<<nbins<<endl;
   int inf = 0;
@@ -259,6 +263,9 @@ TGraphErrors * h_RejvEff(TH1 *hsig, TH1 *hbkg, bool isSV1) {
     rejVsEff->SetPoint(i, x.at(i), y.at(i));
     rejVsEff->SetPointError(i, ex.at(i), ey.at(i));
   }
+  std::string histoName = std::string("rejVsEff_")+hsig->GetName();
+  histoName = drawCtag ? histoName + "_ctag" : histoName;
+  rejVsEff->SetName(histoName.c_str());
   return rejVsEff;
 }
 
@@ -300,6 +307,8 @@ TGraphErrors* h_EffvsVar(TH1* histo, TH1* histo_WPcuts) {
     effVsVar->SetPoint(i, x.at(i), y.at(i));
     effVsVar->SetPointError(i, ex.at(i), ey.at(i));
   }
+  std::string histoName = std::string("effVsVar_")+histo_WPcuts->GetName();
+  effVsVar->SetName(histoName.c_str());
   return effVsVar;
 
 }
@@ -558,7 +567,7 @@ pair<double,double> GetMaxRatioTGraph(TGraphErrors* Gratio, double mineff, doubl
 } ////
 
 
-void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vector<TString> leg_entry,bool drawRatio = false, bool drawErrRatio=false, bool drawCtag=false) {
+void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vector<TString> leg_entry,bool drawRatio = false, bool drawErrRatio=false, bool drawCtag=false, bool writeHistos=false, TString outputName="myHistos") {
 
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
@@ -596,7 +605,7 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     hu.push_back(MVX_u);
     bool isSV1 = false;
     if (taggers[i]=="SV1") isSV1 = true;
-    TGraphErrors* Graphbu = h_RejvEff(MVX_b,MVX_u,isSV1);
+    TGraphErrors* Graphbu = h_RejvEff(MVX_b,MVX_u,isSV1,drawCtag);
     Graphbu->SetLineStyle(1);
     if(InputFileNames.size()>=2 && it>=1) Graphbu->SetLineStyle(lstyle);
     Graphbu->SetLineWidth(2);
@@ -639,8 +648,8 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
 	  //if (it==1) cout << " point # = " << i << " Ref: x2= " << x2 << " y2= " << y2 << " Test: x1= " << x1 << " y1= " << y1 << " y1/y2= " << y1/y2 << endl;
 
 	  bool skiplooping= false;
-	  if (y1==0 || y2==0 || isnan(y1) || isnan(y2)) skiplooping= true; 
-	  if (isinf(y1) || isinf(y2)) skiplooping= true; 
+	  if (y1==0 || y2==0 || std::isnan(y1) || std::isnan(y2)) skiplooping= true; 
+	  if (std::isinf(y1) || std::isinf(y2)) skiplooping= true; 
 	  //if (it==1) cout << " skiplooping = " << skiplooping << endl;
 
 	  if (!skiplooping) {
@@ -707,7 +716,7 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     ymax += 5.*ymax; //add 5x to ymax
     //cout << "taggers[i]=" << taggers[i] << " ymax= " << ymax << endl;
     vGraph_bu[ifirst][i]->SetMaximum(ymax);
-  
+
     TCanvas* c1 = new TCanvas("c1"+taggers[i],"c1"+taggers[i],0,0,CWidth,CHeight);
     c1->SetLogy(1);
     c1->SetGrid();
@@ -761,6 +770,24 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
     for(unsigned int it=0;it<InputFileNames.size();it++) {
       //lg->AddEntry(vGraph_bu[it][i], leg_entry[it],"LF");
       lg->AddEntry(vGraph_bu[it][i], leg_entry[it],"L");
+
+      // Guess this is always the test file.......?????????????
+      if(writeHistos && it == 1){
+        if(gSystem->AccessPathName(outputName+"_"+InputFileNames[it])) {
+          //File doesn't exist already, make it
+          TFile filerio(outputName+"_"+InputFileNames[it],"RECREATE");
+          TDirectory* d = filerio.mkdir("BTag/ROC");
+          filerio.cd(d->GetDirectory(0)->GetPath());
+          vGraph_bu[it][i]->Write(vGraph_bu[it][i]->GetName());
+          filerio.Close();
+        } else {
+          //File already exist, just open it
+          TFile filerio(outputName+"_"+InputFileNames[it],"UPDATE");
+          filerio.cd("BTag/ROC/");
+          vGraph_bu[it][i]->Write(vGraph_bu[it][i]->GetName());
+          filerio.Close();
+        }
+      }
     }
     lg->SetTextSize(0.03);
     if(drawRatio) lg->SetTextSize(0.04);
@@ -875,7 +902,7 @@ void plotGraphs(vector<TString> InputFileNames, TString MC, TString sample, vect
 // a method for ploting the efficiency vs a variable
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TString MC, TString sample, vector<TString> leg_entry,bool drawRatio = false, bool drawErrRatio=false) {
+void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TString MC, TString sample, vector<TString> leg_entry,bool drawRatio = false, bool drawErrRatio=false, bool writeHistos=false, TString outputName="myHistos") {
 
   gROOT->SetStyle("ATLAS");
   gROOT->ForceStyle();
@@ -942,7 +969,7 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
 
           // define the graph
           TGraphErrors* graph = h_EffvsVar(histo, histo_WPcuts);
-
+          if (!graph) return;
 	  //Truncate y efficiency above 0.99 first...
 	  float TruncateAtY = 0.99;
 	  float forceAroundMean=0.;
@@ -1028,8 +1055,8 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
 	      //if (it==1) cout << " point # = " << i << " Ref: x2= " << x2 << " y2= " << y2 << " Test: x1= " << x1 << " y1= " << y1 << " y2/y1= " << y2/y1 << endl;
 	      
 	      bool skiplooping = false;
-	      if (y1==0 || y2==0 || isnan(y1) || isnan(y2)) skiplooping = true; 
-	      if (isinf(y1) || isinf(y2)) skiplooping = true; 
+	      if (y1==0 || y2==0 || std::isnan(y1) || std::isnan(y2)) skiplooping = true; 
+	      if (std::isinf(y1) || std::isinf(y2)) skiplooping = true; 
 	      //if (it==1) cout << " skiplooping = " << skiplooping << endl;
 	      
 	      if (!skiplooping) {
@@ -1161,6 +1188,24 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
         for(unsigned int it=0;it<InputFileNames.size();it++) {
           //lg2->AddEntry(graphs[it][i][i_truthlabel][i_WP], leg_entry[it],"L");
           lg2->AddEntry(graphs[it][i][i_truthlabel][i_WP], leg_entry[it],"LF");
+
+          if(writeHistos && it == 1){
+            if(gSystem->AccessPathName(outputName+"_"+InputFileNames[it])) {
+             //File doesn't exist already, make it
+              TFile filerio(outputName+"_"+InputFileNames[it],"RECREATE");
+              filerio.cd();
+              TDirectory* d = filerio.mkdir("BTag/ROC");
+              filerio.cd(d->GetDirectory(0)->GetPath());
+              graphs[it][i][i_truthlabel][i_WP]->Write(graphs[it][i][i_truthlabel][i_WP]->GetName());
+              filerio.Close();
+            } else {
+              //File already exist, just open it
+              TFile filerio(outputName+"_"+InputFileNames[it],"UPDATE");
+              filerio.cd("BTag/ROC/");
+              graphs[it][i][i_truthlabel][i_WP]->Write(graphs[it][i][i_truthlabel][i_WP]->GetName());
+              filerio.Close();
+            }
+          }
         }
         lg2->SetTextSize(0.03);
         if(drawRatio) lg2->SetTextSize(0.04);
@@ -1278,24 +1323,31 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Draw_PhysVal_btagROC(){
+void Draw_PhysVal_btagROC(TString mcSample="ttbar", TString ref="files_merged/merged_NTUP_PHYSVAL_ref.root", TString test="files_merged/merged_NTUP_PHYSVAL_test.root", TString output="MyHistos", vector<TString> def_taggers= vector<TString>{"IP2D","IP3D","RNNIP","DIPS","SV1","JetFitter","DL1dv00","DL1dv01","DL1r","GN1"}, bool writeHistos=true){
   TH1::SetDefaultSumw2(true);
   fill_WP_values();
-
-  //Save histos 
-  string outputName_Histos = "MyHistos.root"; 
-  TFile *hfile = new TFile(outputName_Histos.c_str(),"RECREATE");
 
   ////////////////////////////////// 
   //      validation              //
   ////////////////////////////////// 
   //ttbar
-  TString MC = "ttbar"; TString sample = "#sqrt{s}=13 TeV, t#bar{t}";
-  TString reffile = "files_merged/merged_NTUP_PHYSVAL_ref.root";
-  TString testfile = "files_merged/merged_NTUP_PHYSVAL_test.root";
+  TString MC = mcSample; 
+  TString sample = mcSample == "ttbar" ? "#sqrt{s}=13 TeV, t#bar{t}" : "#sqrt{s}=13 TeV, Z^{'}";
+  TString reffile = ref;
+  TString testfile = test;
+  if (gSystem->AccessPathName(reffile,kFileExists)) {
+    cout << "--File not found, check that the inputs are there: " << reffile << endl;
+    gSystem->Exit(1);
+  }
+  if (gSystem->AccessPathName(testfile,kFileExists)) { 
+    cout << "--File not found, check that the inputs are there: " << testfile << endl;
+    gSystem->Exit(1);
+  }
   vector<TString> InputFilesNames = {reffile, testfile};
   vector<TString> leg_entry = {"Reference","Test"};
-
+  if (def_taggers.size() != 0){
+    taggers = def_taggers;
+  }
 
   ///////////////////
   //Plot ROC curves 
@@ -1305,22 +1357,17 @@ void Draw_PhysVal_btagROC(){
   bool drawRatio=true;
   bool drawErrRatio=false;
   bool drawCtag=true;
-  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
-  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio,drawCtag);
-  plotGraphsEffVsVar("Lxy", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
+  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, false, writeHistos, output);
+  plotGraphs(InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio,drawCtag, writeHistos, output);
+  plotGraphsEffVsVar("Lxy", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, writeHistos, output);
 
   drawRatio=true;
-  if(MC == "ttbar"){
-    //cout << "ttbar"<<endl;
-    plotGraphsEffVsVar("pt_ttbar", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
-  }
-  else if (MC == "Zprime"){
-    plotGraphsEffVsVar("pt_Zprime", InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio);
+  if( MC != "ttbar" && MC != "Zprime") {
+    std::cout << "Not a supported sample, " << MC << "\n";
+  } else {
+    plotGraphsEffVsVar("pt_"+MC, InputFilesNames,MC,sample,leg_entry,drawRatio,drawErrRatio, writeHistos, output);
   }
   ///////////////////
-
-  //Save histos
-  hfile->Write();
 
 } // end of Draw_PhysVal_btagROC()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
