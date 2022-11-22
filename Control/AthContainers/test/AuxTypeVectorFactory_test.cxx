@@ -13,6 +13,7 @@
 
 
 #include "AthContainers/tools/AuxTypeVectorFactory.h"
+#include "TestTools/TestAlloc.h"
 #include <iostream>
 #include <cassert>
 
@@ -30,16 +31,16 @@ T makeT(int x=0) { return T(x); }
 bool makeT(int x=0) { return (x&1) != 0; }
 
 
-template <class T>
+template <class T, template<typename> class ALLOC = std::allocator>
 void test_vector()
 {
-  SG::AuxTypeVectorFactory<T> fac;
+  SG::AuxTypeVectorFactory<T, ALLOC<T> > fac;
   assert (fac.getEltSize() == sizeof(T));
   assert (!fac.isDynamic());
   if (typeid(T) == typeid(bool))
-    assert (fac.tiVec() == &typeid (std::vector<char>));
+    assert (fac.tiVec() == &typeid (std::vector<char, ALLOC<char> >));
   else
-    assert (fac.tiVec() == &typeid (std::vector<T>));
+    assert (fac.tiVec() == &typeid (std::vector<T, ALLOC<T> >));
 
   std::unique_ptr<SG::IAuxTypeVector> v = fac.create (10, 20);
   T* ptr = reinterpret_cast<T*> (v->toPtr());
@@ -66,7 +67,7 @@ void test_vector()
   assert (ptr2[0] == makeT());
   assert (ptr2[1] == makeT(11));
 
-  using vector_type = typename SG::AuxDataTraits<T>::vector_type;
+  using vector_type = typename SG::AuxDataTraits<T, ALLOC<T> >::vector_type;
   vector_type* vec3 = new vector_type;
   vec3->push_back (makeT(3));
   vec3->push_back (makeT(2));
@@ -80,11 +81,11 @@ void test_vector()
 }
 
 
-template <class T>
+template <class T, template<typename> class ALLOC = std::allocator>
 void test_vector2()
 {
-  SG::AuxTypeVectorFactory<T> fac;
-  SG::PackedContainer<T>* vec4 = new SG::PackedContainer<T>;
+  SG::AuxTypeVectorFactory<T, ALLOC<T> > fac;
+  auto vec4 = new SG::PackedContainer<T, ALLOC<T> >;
   vec4->push_back (makeT(4));
   vec4->push_back (makeT(3));
   vec4->push_back (makeT(2));
@@ -107,6 +108,12 @@ void test1()
   test_vector<bool>();
   test_vector<float>();
   test_vector2<float>();
+
+  test_vector<int, Athena_test::TestAlloc>();
+  test_vector2<int, Athena_test::TestAlloc>();
+  test_vector<bool, Athena_test::TestAlloc>();
+  test_vector<float, Athena_test::TestAlloc>();
+  test_vector2<float, Athena_test::TestAlloc>();
 }
 
 

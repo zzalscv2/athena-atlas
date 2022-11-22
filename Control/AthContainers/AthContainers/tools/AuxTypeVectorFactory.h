@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/tools/AuxTypeVectorFactory.h
  * @author scott snyder <snyder@bnl.gov>
@@ -30,7 +27,7 @@ namespace SG {
  * This is an implementation of @c IAuxTypeVectorFactory that makes
  * vectors using the @c AuxTypeVector implementation.
  */
-template <class T>
+template <class T, class ALLOC = std::allocator<T> >
 class AuxTypeVectorFactory
   : public IAuxTypeVectorFactory
 {
