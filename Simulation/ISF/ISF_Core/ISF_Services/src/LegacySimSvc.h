@@ -15,11 +15,13 @@
 #include "ISF_Interfaces/BaseSimulationSvc.h"
 #include "ISF_Interfaces/ISimulatorTool.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace ISF {
 
   /** @class LegacySimSvc
   */
-  class LegacySimSvc : public BaseSimulationSvc {
+  class ATLAS_NOT_THREAD_SAFE LegacySimSvc : public BaseSimulationSvc {
   public:
 
     //** Constructor with parameters */

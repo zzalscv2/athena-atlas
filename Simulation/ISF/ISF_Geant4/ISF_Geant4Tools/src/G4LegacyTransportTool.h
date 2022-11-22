@@ -54,7 +54,7 @@ namespace iGeant4
       @author Robert Harrington
   */
 
-  class G4LegacyTransportTool : public ISF::BaseSimulatorTool {
+  class ATLAS_NOT_THREAD_SAFE G4LegacyTransportTool : public ISF::BaseSimulatorTool {
 
   public:
     /** Constructor */

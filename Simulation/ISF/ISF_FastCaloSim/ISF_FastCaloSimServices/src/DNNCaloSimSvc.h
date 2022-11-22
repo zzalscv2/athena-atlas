@@ -34,6 +34,8 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace CLHEP
 {
  class HepRandomEngine;
@@ -51,7 +53,7 @@ namespace ISF {
     @author Aishik.Ghosh -at- cern.ch, David Rousseau -at- cern.ch,
     */
   
-  class DNNCaloSimSvc final : public BaseSimulationSvc
+  class ATLAS_NOT_THREAD_SAFE DNNCaloSimSvc final : public BaseSimulationSvc
   {
     public:
       /** Constructor with parameters */

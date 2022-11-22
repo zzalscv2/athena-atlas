@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@
 #include "ISF_Interfaces/ISimulationSvc.h"
 #include "ISF_Interfaces/SimulationFlavor.h"
 
-
+#include "CxxUtils/checker_macros.h"
 
 namespace ISF {
 
@@ -39,14 +39,14 @@ class ISimulationSelector : virtual public IAlgTool {
     DeclareInterfaceID(ISimulationSelector, 1, 0);
 
     /** return a handle on the simulator */
-    virtual ServiceHandle<ISimulationSvc>* simulator() = 0;
+    virtual ServiceHandle<ISimulationSvc>* simulator ATLAS_NOT_THREAD_SAFE () = 0;
 
     /** return if is this a static or dynamic SimulationSelector
         (is used by fully dynamic partilce routers) */
     virtual bool isDynamic() = 0;
 
     /** return the simulation service ID */
-    virtual SimSvcID simSvcID() = 0;
+    virtual SimSvcID simSvcID ATLAS_NOT_THREAD_SAFE () = 0;
 
     /** return the simulation flavor */
     virtual ISF::SimulationFlavor simFlavor() const = 0;
@@ -56,14 +56,14 @@ class ISimulationSelector : virtual public IAlgTool {
 
     /** called at the beginning of each athena event
         (can be used for eg. resetting dynamic selectors) */
-    virtual void beginEvent() = 0;
+    virtual void beginEvent ATLAS_NOT_THREAD_SAFE () = 0;
 
     /** called at the end of each athena event
         (can be used for eg. resetting dynamic selectors) */
-    virtual void endEvent() = 0;
+    virtual void endEvent ATLAS_NOT_THREAD_SAFE () = 0;
 
     /** update internal event representation */
-    virtual void update(const ISFParticle& ) = 0;
+    virtual void update ATLAS_NOT_THREAD_SAFE (const ISFParticle& ) = 0;
 
     /** make the routing decision */
     virtual bool selfSelect(const ISFParticle& particle) const = 0;

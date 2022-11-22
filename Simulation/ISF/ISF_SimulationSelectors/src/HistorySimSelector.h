@@ -16,6 +16,8 @@
 #include "BaseSimulationSelector.h"
 #include "ISF_Event/SimSvcID.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace ISF
 {
 
@@ -29,7 +31,7 @@ namespace ISF
 
       @author Elmar.Ritsch -at- cern.ch
   */
-  class HistorySimSelector final : public BaseSimulationSelector
+  class ATLAS_NOT_THREAD_SAFE HistorySimSelector final : public BaseSimulationSelector
   {
 
   public:
