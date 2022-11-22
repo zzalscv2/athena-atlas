@@ -85,8 +85,7 @@ MCTruthClassifier::compareTruthParticles(HepMC::ConstGenParticlePtr genPart, con
   if (!genPart || !truthPart)
     return false;
 
-  if (HepMC::barcode(genPart) != truthPart->barcode() || genPart->pdg_id() != truthPart->pdgId() ||
-      genPart->status() != truthPart->status()) {
+  if (genPart->pdg_id() != truthPart->pdgId() || genPart->status() != truthPart->status() || HepMC::barcode(genPart) != truthPart->barcode()) {
     ATH_MSG_DEBUG("HepMC::GenParticle and xAOD::TruthParticle do not match");
     return false;
   }
@@ -2240,12 +2239,12 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
           info->mother = mother;
       }
 
-    } while ((abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24));
+    } while ((std::abs(pPDG) == nuFlav || std::abs(pPDG) == 15 || std::abs(pPDG) == 24));
 
-    if (abs(pPDG) == nuFlav || abs(pPDG) == 15 || abs(pPDG) == 24 || abs(pPDG) == 23 || abs(pPDG) == 25 ||
-        abs(pPDG) == 35 || abs(pPDG) == 36 || abs(pPDG) == 37 || abs(pPDG) == 32 || abs(pPDG) == 33 ||
-        abs(pPDG) == 34 || abs(pPDG) == 6 || abs(pPDG) == 9900024 || abs(pPDG) == 9900012 || abs(pPDG) == 9900014 ||
-        abs(pPDG) == 9900016 || (abs(pPDG) < 2000040 && abs(pPDG) > 1000001)) {
+    if (std::abs(pPDG) == nuFlav || std::abs(pPDG) == 15 || std::abs(pPDG) == 24 || std::abs(pPDG) == 23 || std::abs(pPDG) == 25 ||
+        std::abs(pPDG) == 35 || std::abs(pPDG) == 36 || std::abs(pPDG) == 37 || std::abs(pPDG) == 32 || std::abs(pPDG) == 33 ||
+        std::abs(pPDG) == 34 || std::abs(pPDG) == 6 || std::abs(pPDG) == 9900024 || std::abs(pPDG) == 9900012 || std::abs(pPDG) == 9900014 ||
+        std::abs(pPDG) == 9900016 || (std::abs(pPDG) < 2000040 && std::abs(pPDG) > 1000001)) {
       mother = MotherParent;
       if (info)
         info->mother = mother;
@@ -2296,27 +2295,27 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       NumOfgluon++;
     if (abs(DaugType) == 12)
       NumOfElNeut++;
-    if (abs(DaugType) == 14)
+    if (std::abs(DaugType) == 14)
       NumOfMuNeut++;
-    if (abs(DaugType) == 16)
+    if (std::abs(DaugType) == 16)
       NumOfTauNeut++;
     if (DaugType == 22)
       NumOfPhot++;
-    if (abs(DaugType) == 11)
+    if (std::abs(DaugType) == 11)
       NumOfEl++;
-    if (abs(DaugType) == 13)
+    if (std::abs(DaugType) == 13)
       NumOfMu++;
-    if (abs(DaugType) == 15)
+    if (std::abs(DaugType) == 15)
       NumOfTau++;
 
-    if (abs(DaugType) == 42)
+    if (std::abs(DaugType) == 42)
       NumOfLQ++;
-    if (abs(DaugType) == abs(motherPDG) && theDaug->barcode() % m_barcodeShift == motherBarcode % m_barcodeShift)
+    if (std::abs(DaugType) == std::abs(motherPDG) && theDaug->barcode() % m_barcodeShift == motherBarcode % m_barcodeShift)
       samePart = true;
     if (numOfParents == 1 &&
-        (motherPDG == 22 || abs(motherPDG) == 11 || abs(motherPDG) == 13 || abs(motherPDG) == 211) &&
-        (DaugType > 1000000000 || DaugType == 0 || DaugType == 2212 || DaugType == 2112 || abs(DaugType) == 211 ||
-         abs(DaugType) == 111))
+        (motherPDG == 22 || std::abs(motherPDG) == 11 || std::abs(motherPDG) == 13 || std::abs(motherPDG) == 211) &&
+        (DaugType > 1000000000 || DaugType == 0 || DaugType == 2212 || DaugType == 2112 || std::abs(DaugType) == 211 ||
+         std::abs(DaugType) == 111))
       NumOfNucFr++;
   } // cycle itrDaug
 
@@ -2325,10 +2324,10 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1))
     return QuarkWeakDec;
 
-  if (abs(motherPDG) == 6)
+  if (std::abs(motherPDG) == 6)
     return top;
 
-  if (abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
+  if (std::abs(motherPDG) == 24 && mothOriVert != nullptr && mothOriVert->nIncomingParticles() != 0) {
 
     const xAOD::TruthVertex* prodVert = mothOriVert;
     const xAOD::TruthParticle* ptrPart;
@@ -2361,7 +2360,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       return ZorHeavyBoson;
   }
 
-  if (abs(motherPDG) < 7 && numOfParents == 2 && numOfDaug == 2 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1) &&
+  if (std::abs(motherPDG) < 7 && numOfParents == 2 && numOfDaug == 2 && (NumOfEl == 1 || NumOfMu == 1 || NumOfTau == 1) &&
       (NumOfElNeut == 1 || NumOfMuNeut == 1 || NumOfTauNeut == 1) && partOriVert->barcode() == -5) {
     const xAOD::TruthVertex* TmpVert = partOriVert->outgoingParticle(0)->decayVtx();
     if (TmpVert->nIncomingParticles() == 2)
