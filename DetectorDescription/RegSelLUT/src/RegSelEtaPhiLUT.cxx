@@ -151,7 +151,7 @@ void RegSelEtaPhiLUT::getModules( const RegSelRoI& roi,
   
   while ( rpitr!=rpend ) { 
     hashids.push_back( rpitr->payload() );
-    rpitr++;
+    ++rpitr;
   }
   
 } 

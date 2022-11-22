@@ -393,7 +393,7 @@ bool matchdir( const std::string& s ) {
     if ( match( s, itr->first) ) matched = true;
     //    std::cerr << "\tmatchdir :" << s << "::" << itr->first << ": " << itr->second << std::endl;
     if ( matched ) return true;
-    itr++;
+    ++itr;
   }
   return false;
 }
@@ -403,7 +403,7 @@ bool matchcwd( const std::string& s ) {
   std::map<std::string,int>::const_iterator itr = dirs.begin();
   while ( itr!=dirs.end() ) { 
     if ( s.find(itr->first)!=std::string::npos ) return true;
-    itr++;
+    ++itr;
   }
   return false;
 }
@@ -415,7 +415,7 @@ std::string matchcwdstr( const std::string& s ) {
   std::map<std::string,int>::const_iterator itr = dirs.begin();
   while ( itr!=dirs.end() ) { 
     if ( s.find(itr->first)!=std::string::npos ) return itr->first;
-    itr++;
+    ++itr;
   }
   return "";
 }
@@ -426,7 +426,7 @@ std::map<std::string,int>::const_iterator matchcwditr( const std::string& s ) {
   std::map<std::string,int>::const_iterator itr = dirs.begin();
   while ( itr!=dirs.end() ) { 
     if ( s.find(itr->first)!=std::string::npos ) return itr;
-    itr++;
+    ++itr;
   }
   return dirs.end();
 }

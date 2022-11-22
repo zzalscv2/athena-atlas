@@ -559,7 +559,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 			//m_nBCId=pRawDataColl->GetBCId();
 
 			vector<bool> vecRPPattern;
-			for(iterRawData=pRawDataColl->begin();iterRawData!=pRawDataColl->end();iterRawData++)
+			for(iterRawData=pRawDataColl->begin();iterRawData!=pRawDataColl->end();++iterRawData)
 			{
 				nPotID=(*iterRawData)->GetMBId_POT();
 				(m_vecScaler)[nPotID-1]=(*iterRawData)->Get_scaler_POT();
@@ -583,7 +583,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 	sc=evtStore()->retrieve(pDigitColl, EVCOLLNAME_DIGIT);
 	if(!sc.isFailure() && pDigitColl!=nullptr)
 	{
-		for(iterDigit=pDigitColl->begin();iterDigit!=pDigitColl->end();iterDigit++)
+		for(iterDigit=pDigitColl->begin();iterDigit!=pDigitColl->end();++iterDigit)
 		{
 			nPotID=(*iterDigit)->getStation(); //in range 0-7
 			nPlateID=(*iterDigit)->getPlate(); //indexed from 0
@@ -612,7 +612,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 	sc=evtStore()->retrieve(pODDigitColl, EVCOLLNAME_ODDIGIT);
 	if(!sc.isFailure() && pODDigitColl!=nullptr)
 	{
-		for(iterODDigit=pODDigitColl->begin();iterODDigit!=pODDigitColl->end();iterODDigit++)
+		for(iterODDigit=pODDigitColl->begin();iterODDigit!=pODDigitColl->end();++iterODDigit)
 		{
 			nPotID=(*iterODDigit)->getStation(); //in range 0-7
 			nPlateID=(*iterODDigit)->getPlate(); //indexed from 0
