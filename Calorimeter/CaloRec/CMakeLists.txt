@@ -23,7 +23,7 @@ atlas_add_library( CaloRecLib
    StoreGateLib LArToolsLib LumiBlockCompsLib AthenaMonitoringKernelLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser EventKernel CaloLumiConditions
-   LArRawConditions FourMom NavFourMom )
+   LArRawConditions FourMom NavFourMom LumiBlockData )
 
 atlas_add_component( CaloRec
    src/components/*.cxx
@@ -56,7 +56,7 @@ atlas_add_test( CaloBCIDCoeffsCondAlg_test
 
 atlas_add_test( CaloBCIDLumiCondAlg_test
    SOURCES test/CaloBCIDLumiCondAlg_test.cxx
-   LINK_LIBRARIES CaloRecLib CaloLumiConditions LArRawConditions IdDictParser TestTools )
+   LINK_LIBRARIES CaloRecLib CaloLumiConditions LArRawConditions IdDictParser TestTools LumiBlockData )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
