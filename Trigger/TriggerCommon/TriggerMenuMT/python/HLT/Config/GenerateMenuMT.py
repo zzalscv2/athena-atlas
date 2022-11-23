@@ -467,22 +467,23 @@ class GenerateMenuMT(object, metaclass=Singleton):
         max_steps = max([len(cc.steps) for cc in chainConfigs], default=0)    
 
         steps_are_empty = [True for i in range(0,max_steps)]
-
+        emptySteps = []
         for cc in chainConfigs:
             for istep, the_step in enumerate(cc.steps):
                 if not the_step.isEmpty:
                     steps_are_empty[istep] = False
-        
+                else: 
+                    emptySteps.append(the_step)
+                            
         log.info("Are there any fully empty steps? %s", steps_are_empty)
-        
+        log.info("The empty step(s) and associated chain(s) are: %s", emptySteps)
         empty_step_indices = [i for i,is_empty in enumerate(steps_are_empty) if is_empty]
         
         if len(empty_step_indices) == 0:
             return chainConfigs
         
         if len(self.availableSignatures) != 1 and not (self.chainFilter and hasattr(self.chainFilter,'selectChains') and self.chainFilter.selectChains):
-            log.warning("[resolveEmptySteps] The menu you are trying to generate contains a fully empty step. This is only allowed for partial menus.")
-            #raise Exception("[resolveEmptySteps] Please find the source of this empty step and remove it from the menu.")  #ATR-25392 downgrade to warning only
+            raise Exception("[resolveEmptySteps] Please find the reason for this empty step and resolve it / remove it from the menu: %s", emptySteps)  
 
         log.info("Will now delete steps %s (indexed from zero)",empty_step_indices)
         
