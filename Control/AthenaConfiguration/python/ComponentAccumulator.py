@@ -655,6 +655,62 @@ class ComponentAccumulator:
         else:
             return self.__getOne( self._services, name, "Services")
 
+    def dropEventAlgo(self,name,sequence="AthAlgSeq"):
+        s=self.getSequence(sequence)
+        lenBefore=len(s.Members)
+        s.Members = [a for a in s.Members if not a.getName()==name]
+        lenAfter=len(s.Members)
+        if lenAfter == lenBefore:
+            self._msg.warning("Algorithm %s not found in sequence %s",name,sequence)
+        else:
+            self._msg.info("Removed algorithm %s from sequence %s",name,sequence)
+            try:
+                del self._algorithms[name]
+            except KeyError:
+                self._msg.warning("Algorithm %s not found in self._sequence ???",name)
+        return
+
+    def dropCondAlgo(self,name):
+        lenBefore=len(self._conditionsAlgs)
+        self._conditionsAlgs = [a for a in self._conditionsAlgs if a.getName()!=name]
+        lenAfter=len(self._conditionsAlgs)
+        if lenAfter == lenBefore:
+            self._msg.warning("Condition Algorithm %s not found",name)
+        else:
+            self._msg.info("Removed conditions Algorithm %s",name)
+        return
+
+    def dropService(self,name):
+        lenBefore=len(self._services)
+        self._services = [s for s in self._services if s.getName()!=name]
+        lenAfter=len(self._services)
+        if lenAfter == lenBefore:
+            self._msg.warning("Service %s not found",name)
+        else:
+            self._msg.info("Removed Service %s",name)
+        return
+    
+    def dropPublicTool(self,name):
+        lenBefore=len(self._publicTools)
+        self._publicTools = [p for p in self._publicTools if p.getName()!=name]
+        lenAfter=len(self._publicTools)
+        if lenAfter == lenBefore:
+            self._msg.warning("Public tool %s not found",name)
+        else:
+            self._msg.info("Removed public tool %s",name)
+        return
+
+    def dropAuditor(self,name):
+        lenBefore=len(self._auditors)
+        self._auditors = [a for a in self._auditors if a.getName()!=name]
+        lenAfter=len(self._auditors)
+        if lenAfter == lenBefore:
+            self._msg.warning("Auditor %s not found",name)
+        else:
+            self._msg.info("Removed auditor %s",name)
+        return
+            
+
     def getAppProps(self):
         return self._theAppProps
 
@@ -994,9 +1050,9 @@ class ComponentAccumulator:
         for alg in self._conditionsAlgs:
             getCompsToBeAdded(alg)
             condalgseq.append(alg.getFullName())
-            bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
             if isinstance(alg, PyAlg):
                 alg.setup2()
+        bshPropsToSet.append(("AthCondSeq", "Members", str(condalgseq)))
 
         for pt in self._publicTools:
             pt.name = "ToolSvc." + pt.name
