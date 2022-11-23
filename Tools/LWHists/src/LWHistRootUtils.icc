@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace LWHistRootUtilsInternals {
@@ -7,7 +7,7 @@ namespace LWHistRootUtilsInternals {
   template <class THX_LW, class THX>
   inline THX* allocate1DRootHisto(THX_LW* lwhist,unsigned &arraysize) {
     arraysize = lwhist->GetNbinsX()+2;
-    float * xbins = const_cast<float*>(LWHistInt::getVarBins(lwhist));
+    float * xbins = LWHistInt::getVarBins(lwhist);
     return xbins
       ? MP_NEW(THX)(lwhist->GetName(), lwhist->GetTitle(), lwhist->GetNbinsX(), xbins)
       : MP_NEW(THX)(lwhist->GetName(), lwhist->GetTitle(), 1, lwhist->getXMin(), lwhist->getXMax());
@@ -187,7 +187,7 @@ inline TProfile * LWHistRootUtils::createRootProfileHisto(TProfile_LW* lwhist, F
   double * contents = LWPools::acquire<double>(n);
   double * errors = LWPools::acquire<double>(n);
   flexHist->copyContents(entries,contents,errors);
-  float * xbins = const_cast<float*>(LWHistInt::getVarBins(lwhist));
+  float * xbins = LWHistInt::getVarBins(lwhist);
   double ylow(flexHist->getProfParMin()), yup(flexHist->getProfParMax());
   TProfile * hRoot(0);
   const unsigned nbinsx(lwhist->GetNbinsX());

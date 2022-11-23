@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -157,13 +157,13 @@ void HistValProfile2D::compareBinContents() const
 }
 
 //____________________________________________________________________
-void HistValProfile2D::compareMetaData() const
+void HistValProfile2D::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
-void HistValProfile2D::compareTH1s() const
+void HistValProfile2D::compareTH1s()
 {
   std::string name1(m_h1->GetName());
   TH1 * th1_gen(0);
@@ -230,7 +230,7 @@ void HistValProfile2D::compareTH1s() const
 }
 
 //____________________________________________________________________
-void HistValProfile2D::compareFastLoop() const
+void HistValProfile2D::compareFastLoop()
 {
 }
 

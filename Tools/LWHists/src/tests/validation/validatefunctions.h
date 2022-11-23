@@ -156,7 +156,7 @@ namespace HistValFunctions {
   //____________________________________________________________________
   // Disable ubsan to turn off warnings about casting TH1F to TH1_FieldsAccess.
   template <class TH, class THLW>
-  static inline void compareMetaData NO_SANITIZE_UNDEFINED (const TH* hroot, const THLW * hlw, bool ignorename = false)
+  static inline void compareMetaData NO_SANITIZE_UNDEFINED (const TH* hroot, THLW * hlw, bool ignorename = false)
   {
     assert (hroot&&hlw);
     if (!hroot||!hlw)

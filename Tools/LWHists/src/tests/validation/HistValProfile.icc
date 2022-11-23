@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -155,13 +155,13 @@ void HistValProfile::compareBinContents() const
 }
 
 //____________________________________________________________________
-void HistValProfile::compareMetaData() const
+void HistValProfile::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
-void HistValProfile::compareTH1s() const
+void HistValProfile::compareTH1s()
 {
   if (converted())
     {
@@ -235,7 +235,7 @@ void HistValProfile::compareTH1s() const
 }
 
 //____________________________________________________________________
-void HistValProfile::compareFastLoop() const
+void HistValProfile::compareFastLoop()
 {
 }
 

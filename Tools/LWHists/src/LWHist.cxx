@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -307,40 +307,46 @@ bool LWHist::apply(TH1*h) const
 }
 
 //____________________________________________________________________
-LWHist::LWHistAxis * LWHist::GetXaxis() const
+LWHist::LWHistAxis * LWHist::GetXaxis()
 {
-  const_cast<LWHist *>(this)->ensureInitDecorations();
+  this->ensureInitDecorations();
   if (!m_decorations->m_xAxis)
-    const_cast<LWHist *>(this)->m_decorations->m_xAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
+    this->m_decorations->m_xAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
 
   return m_decorations->m_xAxis;
 }
 
 //____________________________________________________________________
-LWHist::LWHistAxis * LWHist::GetYaxis() const
+LWHist::LWHistAxis * LWHist::GetYaxis()
 {
-  const_cast<LWHist *>(this)->ensureInitDecorations();
+  this->ensureInitDecorations();
   if (!m_decorations->m_yAxis)
-    const_cast<LWHist *>(this)->m_decorations->m_yAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
+    this->m_decorations->m_yAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
   return m_decorations->m_yAxis;
 }
 
 //____________________________________________________________________
-LWHist::LWHistAxis * LWHist::GetZaxis() const
+LWHist::LWHistAxis * LWHist::GetZaxis()
 {
-  const_cast<LWHist *>(this)->ensureInitDecorations();
+  this->ensureInitDecorations();
   if (!m_decorations->m_zAxis)
-    const_cast<LWHist *>(this)->m_decorations->m_zAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
+    this->m_decorations->m_zAxis = usingROOTBackend() ? new LWHistAxis(this) : MP_NEW(LWHistAxis)(this);
   return m_decorations->m_zAxis;
 }
 
 //Axis implementation:
 //Constructor and destructor should do nothing due to our use of the mem-pool.
-LWHist::LWHistAxis::LWHistAxis(const LWHist *hist) : m_hist(hist), m_labelSize(0.035),
-						     m_title(0),m_binLabels(0) {}
-TAxis * LWHist::LWHistAxis::rootAxis() const
+LWHist::LWHistAxis::LWHistAxis(LWHist *hist) : m_hist(hist), m_labelSize(0.035),
+                                               m_title(0),m_binLabels(0) {}
+const TAxis * LWHist::LWHistAxis::rootAxis() const
 {
-  TH1*hroot=m_hist->getROOTHistBaseNoAlloc();
+  const TH1* hroot=std::as_const(m_hist)->getROOTHistBaseNoAlloc();
+  return hroot ? (isXAxis() ? hroot->GetXaxis() : (isYAxis() ? hroot->GetYaxis():hroot->GetZaxis())) : 0;
+}
+
+TAxis * LWHist::LWHistAxis::rootAxis()
+{
+  TH1* hroot=m_hist->getROOTHistBaseNoAlloc();
   return hroot ? (isXAxis() ? hroot->GetXaxis() : (isYAxis() ? hroot->GetYaxis():hroot->GetZaxis())) : 0;
 }
 
@@ -377,7 +383,7 @@ bool LWHist::LWHistAxis::isYAxis() const { return this==m_hist->m_decorations->m
 
 unsigned LWHist::LWHistAxis::GetNbins() const
 {
-  TAxis*a=rootAxis();
+  const TAxis*a=rootAxis();
   if (a)
     return a->GetNbins();
   return isXAxis() ? m_hist->actualGetNBinsX() : (isYAxis()?m_hist->actualGetNBinsY():0);
@@ -385,7 +391,7 @@ unsigned LWHist::LWHistAxis::GetNbins() const
 
 double LWHist::LWHistAxis::GetBinCenter(int bin) const
 {
-  TAxis*a=rootAxis();
+  const TAxis*a=rootAxis();
   if (a)
     return a->GetBinCenter(bin);
   return isXAxis()
@@ -395,7 +401,7 @@ double LWHist::LWHistAxis::GetBinCenter(int bin) const
 
 const char * LWHist::LWHistAxis::GetBinLabel(unsigned bin) const
 {
-  TAxis*a=rootAxis();
+  const TAxis*a=rootAxis();
   if (a)
     return a->GetBinLabel(bin);
   if (!m_binLabels)

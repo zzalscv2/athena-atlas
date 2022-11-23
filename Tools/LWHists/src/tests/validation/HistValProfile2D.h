@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,9 +64,9 @@ public:
   void setBinInfo(unsigned, unsigned, const double& entries, const double& content,const double& error);
 
   void compareBinContents() const;
-  void compareMetaData() const;
-  void compareTH1s() const;
-  void compareFastLoop() const;
+  void compareMetaData();
+  void compareTH1s();
+  void compareFastLoop();
 
   void triggerConversionToROOTHist()
   {

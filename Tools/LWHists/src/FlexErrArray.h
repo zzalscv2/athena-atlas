@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -81,20 +81,20 @@ private:
   //of groups (super-groups).
 
   //Data members:
-  const FlexErrArrayGroup<T> *** superGroups() const
+  const FlexErrArrayGroup<T> * const* const* superGroups() const
   {
     assert(!small());
-    return reinterpret_cast<const FlexErrArrayGroup<T> ***>(const_cast<void*>(m_indices));
+    return reinterpret_cast<const FlexErrArrayGroup<T> * const* const*>(m_indices);
   }
   FlexErrArrayGroup<T> *** superGroups()
   {
     assert(!small());
     return reinterpret_cast<FlexErrArrayGroup<T> ***>(m_indices);
   }
-  const FlexErrArrayGroup<T> ** groups() const
+  const FlexErrArrayGroup<T> *const* groups() const
   {
     assert(small());
-    return reinterpret_cast<const FlexErrArrayGroup<T> **>(const_cast<void*>(m_indices));
+    return reinterpret_cast<const FlexErrArrayGroup<T> * const*>(m_indices);
   }
   FlexErrArrayGroup<T> ** groups()
   {
@@ -129,7 +129,7 @@ private:
       return groups()[iGroup(bin)];
     } else {
       assert(iSuperGroup(bin)<nSuperGroups(m_nbins));
-      const FlexErrArrayGroup<T> ** supergroup = superGroups()[iSuperGroup(bin)];
+      const FlexErrArrayGroup<T> * const* supergroup = superGroups()[iSuperGroup(bin)];
       return supergroup ? supergroup[superGroupBin(bin)] : 0;
     }
   }
