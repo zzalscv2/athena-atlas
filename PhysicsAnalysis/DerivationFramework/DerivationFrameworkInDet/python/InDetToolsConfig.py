@@ -163,3 +163,12 @@ def JetTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
     acc.addPublicTool(JetTrackParticleThinning(name,**kwargs),
             primary = True)
     return acc
+
+# Track to vertex wrapper
+def TrackToVertexWrapperCfg(ConfigFlags, name, **kwargs):
+    """Configure the TrackToVertexWrapper tool"""
+    acc = ComponentAccumulator()
+    TrackToVertexWrapper = CompFactory.DerivationFramework.TrackToVertexWrapper
+    acc.addPublicTool(TrackToVertexWrapper(name, **kwargs),
+                      primary = True)
+    return acc
