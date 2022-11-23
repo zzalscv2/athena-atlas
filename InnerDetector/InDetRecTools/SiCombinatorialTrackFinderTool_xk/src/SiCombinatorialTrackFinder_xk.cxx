@@ -820,6 +820,7 @@ Trk::Track* InDet::SiCombinatorialTrackFinder_xk::convertToTrack(SiCombinatorial
 
   Trk::TrackInfo info = data.trackinfo();
   info.setPatternRecognitionInfo(Trk::TrackInfo::SiSPSeededFinderSimple);
+  info.setParticleHypothesis(Trk::pion);
   if( !data.flagToReturnFailedTrack() ) {
      return new Trk::Track(info,
 			   data.trajectory().convertToSimpleTrackStateOnSurface(data.cosmicTrack()),
