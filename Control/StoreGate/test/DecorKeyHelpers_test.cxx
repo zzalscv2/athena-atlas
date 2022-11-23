@@ -12,7 +12,7 @@
 
 
 #undef NDEBUG
-#include "StoreGate/tools/DecorKeyHelpers.h"
+#include "StoreGate/DecorKeyHelpers.h"
 #include <cassert>
 #include <iostream>
 

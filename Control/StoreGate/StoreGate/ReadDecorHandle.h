@@ -16,7 +16,7 @@
 
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "StoreGate/ReadHandle.h"
-#include "StoreGate/tools/DecorKeyHelpers.h"
+#include "StoreGate/DecorKeyHelpers.h"
 #include "AthContainers/AuxElement.h"
 #include "GaudiKernel/EventContext.h"
 #include <type_traits>
