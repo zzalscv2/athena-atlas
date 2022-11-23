@@ -115,7 +115,7 @@ def getHistoInfo(objectType, runNumber):
     histoType = "2d_etaPhi_Occupancy"
     histoName = "Occupancy of AntiKt4EMTopoJets"
 
-  elif objectType == "AntiKt4EMTopoJets_Pt": # Release 22 : OK
+  elif objectType == "AntiKt4EMTopoJets_pt": # Release 22 : OK
     histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/standardHistos/phi_eta_pt"}
     histoLegend = {"noCut":"No cut"}
     histoType = "2d_etaPhi_MeanPt"
@@ -311,7 +311,7 @@ def main(args):
       nSteps = 1000
       subStep = 2*args.deltaSpot/nSteps
       regionBins[iHisto] = []
-      if histoType == "2d_etaPhi_Occupancy":
+      if histoType == "2d_etaPhi_Occupancy" or histoType == "2d_etaPhi_MeanPt":
         for ix in range(nSteps):# Assume that eta is on x axis
           iEta = args.etaSpot - args.deltaSpot + ix * subStep 
           for iy in range (nSteps):
@@ -369,7 +369,7 @@ def main(args):
       #print(iHisto, histo[iHisto].GetEntries())
       histo[iHisto].Draw("COLZ")
       if not b_wholeHisto:
-        if histoType == "2d_etaPhi_Occupancy":
+        if histoType == "2d_etaPhi_Occupancy" or histoType == "2d_etaPhi_MeanPt":
           box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,args.phiSpot-args.deltaSpot,args.etaSpot+args.deltaSpot,args.phiSpot+args.deltaSpot)
         elif (histoType == "2d_xy_Occupancy"):
           box[iHisto] = R.TBox(args.xSpot-args.deltaSpot,args.ySpot-args.deltaSpot,args.xSpot+args.deltaSpot,args.ySpot+args.deltaSpot)
