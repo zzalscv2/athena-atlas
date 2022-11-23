@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# art-description: Run FastChain with Simulation (ATLFAST3F_G4MS) and MC-Overlay in one job for MC20a, ttbar
+# art-description: Run FastChain with Simulation (ATLFAST3F_G4MS) and Track-Overlay in one job for MC20a, ttbar
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -12,10 +12,10 @@
 
 events=25
 EVNT_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1"
-RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1713/RDO.26811885._035498.pool.root.1"
-RDO_File="MC_plus_MC.RDO.pool.root"
-AOD_File="MC_plus_MC.AOD.pool.root"
-NTUP_File="MC_plus_MC.NTUP.pool.root"
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO.26811885._035498_TrackOverlay_Run2.pool.root.1"
+RDO_File="TrackOverlay.RDO.pool.root"
+AOD_File="TrackOverlay.AOD.pool.root"
+NTUP_File="TrackOverlay.NTUP.pool.root"
 
 
 FastChain_tf.py \
@@ -29,12 +29,14 @@ FastChain_tf.py \
   --outputRDOFile ${RDO_File} \
   --maxEvents ${events} \
   --skipEvents 0 \
+  --skipSecondaryEvents 0 \
   --digiSeedOffset1 511 \
   --digiSeedOffset2 727 \
   --conditionsTag OFLCOND-MC16-SDR-RUN2-09  \
   --geometryVersion ATLAS-R2-2016-01-00-01 \
   --preInclude 'all:Campaigns/MC16SimulationNoIoV.py,Campaigns/MC20a.py' \
   --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
+  --preExec "from OverlayCommonAlgs.OverlayFlags import overlayFlags;overlayFlags.doTrackOverlay=True;" \
   --DataRunNumber '284500' \
   --imf False
 
