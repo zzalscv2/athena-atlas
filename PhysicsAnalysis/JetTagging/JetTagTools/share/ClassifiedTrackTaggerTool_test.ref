@@ -21,7 +21,7 @@ JetTagTools/ClassifiedTrackTaggerTool_test record
 ClassIDSvc           INFO getRegistryEntries: read 9344 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO getRegistryEntries: read 1961 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO getRegistryEntries: read 67 CLIDRegistry entries for module ALL
-ToolSvc.Analysi...   INFO TrkVKalVrtFitter initialize() successful
+JetTagTools/ClassifiedTrackTaggerTool_test retrieve tool 
 test CTT with default TCT training
 [INFO]: Creating test track particle 1
 [INFO]: Creating test track particle 2
