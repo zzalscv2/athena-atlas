@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,15 +14,16 @@
 
 #include "LWHists/LWHistControls.h"
 #include "LWPools.h"
+#include <atomic>
 
 //____________________________________________________________________
 class LWHistControls::Imp {
 public:
-  static bool s_cleanupOnGetROOT;
-  static bool s_rootBackend;
+  static std::atomic<bool> s_cleanupOnGetROOT;
+  static std::atomic<bool> s_rootBackend;
 };
-bool LWHistControls::Imp::s_cleanupOnGetROOT = true;
-bool LWHistControls::Imp::s_rootBackend = false;
+std::atomic<bool> LWHistControls::Imp::s_cleanupOnGetROOT = true;
+std::atomic<bool> LWHistControls::Imp::s_rootBackend = false;
 
 //____________________________________________________________________
 void LWHistControls::setCleanupOnGetROOT(bool b)

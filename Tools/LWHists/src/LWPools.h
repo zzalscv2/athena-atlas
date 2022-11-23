@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -20,6 +20,7 @@
 #include "LWPoolSelector.h"
 #include "LWPool.h"
 #include <cassert>
+#include <atomic>
 
 #define MP_NEW(Class) new(LWPools::acquire(sizeof(Class))) Class
 #define MP_DELETE(Ptr) LWPools::deleteObject(Ptr)
@@ -54,7 +55,7 @@ private:
 private:
   class PoolList;
   static PoolList s_pools;
-  static long long s_bytesDynAlloc;
+  static std::atomic<long long> s_bytesDynAlloc;
   static LWPool * initPool(unsigned poolIndex,unsigned length);
   static LWPool * getPool(unsigned length);
   LWPools( const LWPools & );
