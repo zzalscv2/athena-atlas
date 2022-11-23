@@ -379,6 +379,11 @@ private:
     typedef std::vector<std::reference_wrapper<Monitored::IMonitoredVariable>> MonVarVec_t;
     std::string m_name;
     std::unordered_map<std::string, size_t> m_toolLookupMap;
+
+  
+   Gaudi::Property<bool> m_isExpressStreamJob{this,
+                          "isExpressStreamJob", false,
+                          "flag to be set true if Alg is to run in the express stream"};
 };
 
 #endif
