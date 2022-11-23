@@ -181,19 +181,14 @@ def MuonRotCreatorCfg(flags, name="MuonRotCreator", **kwargs):
     result = ComponentAccumulator()
 
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import (
-        MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg, MMClusterOnTrackCreatorCfg)
+        MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg)
     mdt_rot_creator = result.popToolsAndMerge(
         MdtDriftCircleOnTrackCreatorCfg(flags))
     cluster_rot_creator = result.popToolsAndMerge(
         MuonClusterOnTrackCreatorCfg(flags))
 
     kwargs.setdefault("ToolMuonDriftCircle", mdt_rot_creator)
-    kwargs.setdefault("ToolMuonCluster", cluster_rot_creator)
-    
-    if flags.GeoModel.Run >= LHCPeriod.Run3:
-        kwargs.setdefault("ToolMuonMMCluster", result.popToolsAndMerge(
-                                        MMClusterOnTrackCreatorCfg(flags)))
-    
+    kwargs.setdefault("ToolMuonCluster", cluster_rot_creator)    
     kwargs.setdefault("ToolPixelCluster", None)
     kwargs.setdefault("ToolSCT_Cluster", None)
     kwargs.setdefault("ToolTRT_DriftCircle", None)

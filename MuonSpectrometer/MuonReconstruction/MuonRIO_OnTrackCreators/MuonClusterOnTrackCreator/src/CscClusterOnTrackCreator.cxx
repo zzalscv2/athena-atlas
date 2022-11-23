@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscClusterOnTrackCreator.h"
@@ -340,6 +340,11 @@ namespace Muon {
         return createRIO_OnTrack(RIO, TP.position(), TP.momentum().unit());
     }
 
+    ///////
+    const MuonClusterOnTrack* CscClusterOnTrackCreator::correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const {
+        return createRIO_OnTrack(RIO, GP, GD);
+    }
+                
     /// These functions are provided from the interface
     const ToolHandle<ICscStripFitter>& CscClusterOnTrackCreator::GetICscStripFitter() const { return m_stripFitter; }
     const ToolHandle<ICscClusterFitter>& CscClusterOnTrackCreator::GetICscClusterFitter() const { return m_clusterFitter; }

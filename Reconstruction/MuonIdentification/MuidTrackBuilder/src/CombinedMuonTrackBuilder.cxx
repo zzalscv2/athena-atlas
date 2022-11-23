@@ -77,7 +77,7 @@ namespace Rec {
         if (m_reallocateMaterial) ATH_MSG_DEBUG(" ReallocateMaterial");
         if (!m_cscRotCreator.empty()) ATH_MSG_DEBUG("Redo CscRots");
         if (!m_mdtRotCreator.empty()) ATH_MSG_DEBUG("Redo MdtRots");
-        if (!m_mmRotCreator.empty()) ATH_MSG_DEBUG("Redo MicroMegaRots");
+        if (!m_muClusterRotCreator.empty()) ATH_MSG_DEBUG("Redo NswRots");
         if (!m_muonErrorOptimizer.empty()) ATH_MSG_DEBUG(" ErrorOptimisation");
         if (!m_muonHoleRecovery.empty()) ATH_MSG_DEBUG(" HoleRecovery");
 
@@ -148,10 +148,10 @@ namespace Rec {
             ATH_CHECK(m_cscRotCreator.retrieve());
             ATH_MSG_DEBUG("Retrieved tool " << m_cscRotCreator);
         }
-        if (!m_mmRotCreator.empty()) {
+        if (!m_muClusterRotCreator.empty()) {
             m_redoRots = true;
-            ATH_CHECK(m_mmRotCreator.retrieve());
-            ATH_MSG_DEBUG("Retrieved tool " << m_mmRotCreator);
+            ATH_CHECK(m_muClusterRotCreator.retrieve());
+            ATH_MSG_DEBUG("Retrieved tool " << m_muClusterRotCreator);
         }
 
         ATH_CHECK(m_extrapolator.retrieve());
@@ -1064,8 +1064,8 @@ namespace Rec {
                     updatedRot.reset(m_cscRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
                 } else if (!m_mdtRotCreator.empty() && m_idHelperSvc->isMdt(id)) {
                     updatedRot.reset(m_mdtRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
-                } else if (!m_mmRotCreator.empty() && m_idHelperSvc->isMM(id)) {
-                    updatedRot.reset(m_mmRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
+                } else if (!m_muClusterRotCreator.empty() && (m_idHelperSvc->isMM(id) || m_idHelperSvc->issTgc(id))) {
+                    updatedRot.reset(m_muClusterRotCreator->correct(*rot->prepRawData(), *(*t).trackParameters()));
                 }
 
                 if (updatedRot) {
