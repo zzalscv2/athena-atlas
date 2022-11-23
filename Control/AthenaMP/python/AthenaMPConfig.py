@@ -148,10 +148,6 @@ def AthenaMPCfg(configFlags):
                                                          Debug=debug_worker)
             mpevtloop.Tools += [ shared_writer ]
 
-    elif configFlags.MP.Strategy=='FileScheduling':
-        mpevtloop.Tools += [ CompFactory.FileSchedulingTool(IsPileup=mpevtloop.IsPileup,
-                                                            Debug=debug_worker) ]
-
     elif configFlags.MP.Strategy=='EventService':
         channelScatterer2Processor = "AthenaMP_Scatterer2Processor"
         channelProcessor2EvtSel = "AthenaMP_Processor2EvtSel"

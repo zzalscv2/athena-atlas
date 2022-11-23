@@ -112,11 +112,6 @@ class MpEvtLoopMgr(AthMpEvtLoopMgr):
             if not use_shared_reader:
                 setupEvtSelForSeekOps()
 
-        elif strategy=='FileScheduling':
-            from AthenaMPTools.AthenaMPToolsConf import FileSchedulingTool
-            self.Tools += [ FileSchedulingTool(IsPileup=pileup,
-                                               Debug=debug_worker) ]
-
         elif strategy=='EventService':
             channelScatterer2Processor = "AthenaMP_Scatterer2Processor"
             channelProcessor2EvtSel = "AthenaMP_Processor2EvtSel"

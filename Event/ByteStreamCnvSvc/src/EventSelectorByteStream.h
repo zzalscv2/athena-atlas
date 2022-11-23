@@ -198,7 +198,6 @@ private: // properties
 
    bool m_firstFileFired{};
    bool m_beginFileFired{};
-   bool m_inputCollectionsFromIS{};
 
    /// HelperTools, vector of names of AlgTools that are executed by the EventSelector
    ToolHandleArray<IAthenaSelectorTool> m_helperTools{this};

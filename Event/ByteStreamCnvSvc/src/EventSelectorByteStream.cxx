@@ -1070,20 +1070,6 @@ StatusCode EventSelectorByteStream::io_reinit() {
       ATH_MSG_FATAL("IoComponentMgr does not know about myself !");
       return(StatusCode::FAILURE);
    }
-   if (m_inputCollectionsFromIS) {
-      /*   MN: don't copy the FullFileName again - rely on FileSchedulingTool
-           to modify the EventSelector Input property directly
-      IProperty* propertyServer = dynamic_cast<IProperty*>(m_eventSource);
-      std::vector<std::string> vect;
-      StringArrayProperty inputFileList("FullFileName", vect);
-      StatusCode sc = propertyServer->getProperty(&inputFileList);
-      if(sc.isFailure()) {
-         ATH_MSG_FATAL("Unable to retrieve ByteStreamInputSvc");
-         return(StatusCode::FAILURE);
-      }
-      m_inputCollectionsProp = inputFileList;
-      */
-   }
    std::vector<std::string> inputCollections = m_inputCollectionsProp.value();
    for (std::size_t i = 0, imax = inputCollections.size(); i != imax; ++i) {
       ATH_MSG_INFO("I/O reinitialization, file = "  << inputCollections[i]);
