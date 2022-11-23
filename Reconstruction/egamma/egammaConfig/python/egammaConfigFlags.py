@@ -47,6 +47,9 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.slimGSFTrkTracks",
                  lambda prevFlags: prevFlags.Egamma.doTracking)
 
+    # Egamma runs in low <mu> mode (e.g UPC )
+    egcf.addFlag("Egamma.doLowMu", False)
+
     # The cluster corrections/calib
     egcf.addFlag("Egamma.Calib.ClusterCorrectionVersion",
                  'v12phiflip_noecorrnogap')
@@ -91,8 +94,11 @@ def createEgammaConfigFlags():
                  '-topoetconeCorrBitset')
 
     egcf.addFlag("Egamma.Keys.Output.Electrons", 'Electrons')
-    #Remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and electrons/photons. Since these transient FE containers are not in the ESD/AOD, we should not write out these links.
-    gpf_vars='-chargedGlobalFELinks.-neutralGlobalFELinks.'
+    # Remove GlobalFELinks - these are links between FlowElement (FE)
+    # containers created in jet finding and electrons/photons.
+    # Since these transient FE containers are not in the ESD/AOD,
+    # we should not write out these links.
+    gpf_vars = '-chargedGlobalFELinks.-neutralGlobalFELinks.'
     egcf.addFlag("Egamma.Keys.Output.ElectronsSuppESD", gpf_vars)
     egcf.addFlag("Egamma.Keys.Output.ElectronsSuppAOD",
                  lambda prevFlags: (
@@ -137,7 +143,7 @@ def createEgammaConfigFlags():
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.TruthParticlesSuppESD))
 
-    # not xAOD
+    # Not written in AOD
     egcf.addFlag("Egamma.Keys.Output.GSFTracks", 'GSFTracks')
 
     # These are the clusters that are used to determine
@@ -154,8 +160,6 @@ def createEgammaConfigFlags():
 
 
 # self test
-
-
 class TestEgammaConfigFlags(unittest.TestCase):
 
     def runTest(self):

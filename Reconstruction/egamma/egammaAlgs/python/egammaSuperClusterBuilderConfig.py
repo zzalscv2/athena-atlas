@@ -16,14 +16,14 @@ from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
 
 def electronSuperClusterBuilderCfg(flags,
                                    name='electronSuperClusterBuilder',
-                                   sequenceName = None,
+                                   sequenceName=None,
                                    **kwargs):
 
     mlog = logging.getLogger(name)
     mlog.debug('Start configuration')
 
     seqkw = {'sequence': sequenceName} if sequenceName else {}
-    acc = ComponentAccumulator (**seqkw)
+    acc = ComponentAccumulator(**seqkw)
 
     if "TrackMatchBuilderTool" not in kwargs:
         emtrkmatch = EMTrackMatchBuilderCfg(flags)
@@ -47,7 +47,7 @@ def electronSuperClusterBuilderCfg(flags,
         "egammaCheckEnergyDepositTool",
         CompFactory.egammaCheckEnergyDepositTool())
     kwargs.setdefault("EtThresholdCut", 1000)
-    kwargs.setdefault("UseExtendedTG3",flags.GeoModel.Run is LHCPeriod.Run3)
+    kwargs.setdefault("UseExtendedTG3", flags.GeoModel.Run is LHCPeriod.Run3)
     elscAlg = CompFactory.electronSuperClusterBuilder(name, **kwargs)
 
     acc.addEventAlgo(elscAlg)
@@ -57,11 +57,11 @@ def electronSuperClusterBuilderCfg(flags,
 def photonSuperClusterBuilderCfg(
         flags,
         name='photonSuperClusterBuilder',
-        sequenceName = None,
+        sequenceName=None,
         **kwargs):
 
     seqkw = {'sequence': sequenceName} if sequenceName else {}
-    acc = ComponentAccumulator (**seqkw)
+    acc = ComponentAccumulator(**seqkw)
 
     photonSuperClusterBuilder = CompFactory.photonSuperClusterBuilder
     egammaCheckEnergyDepositTool = CompFactory.egammaCheckEnergyDepositTool
@@ -87,7 +87,11 @@ def photonSuperClusterBuilderCfg(
     kwargs.setdefault(
         "egammaCheckEnergyDepositTool",
         egammaCheckEnergyDepositTool())
-    kwargs.setdefault("UseExtendedTG3",flags.GeoModel.Run is LHCPeriod.Run3)
+    kwargs.setdefault("UseExtendedTG3", flags.GeoModel.Run is LHCPeriod.Run3)
+
+    kwargs.setdefault(
+        "EtThresholdCut",
+        1500 if not flags.Egamma.doLowMu else 300)
     phscAlg = photonSuperClusterBuilder(name, **kwargs)
 
     acc.addEventAlgo(phscAlg)
