@@ -6,7 +6,8 @@
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
-HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
+HistVal2D<TH_2D,THLW_2D>::HistVal2D( bool trigger_conversion_all,
+                                     const std::string& name,
                                      const std::string& title,
                                      int nbinsx, const double& xmin, const double& xmax,
                                      int nbinsy, const double& ymin, const double& ymax )
@@ -15,14 +16,15 @@ HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
   m_h1 = new TH_2D(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   m_h2 = THLW_2D::create(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
 template <class TFloat>
-HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
+HistVal2D<TH_2D,THLW_2D>::HistVal2D( bool trigger_conversion_all,
+                                     const std::string& name,
                                      const std::string& title,
                                      int nbinsx, const TFloat* xbins,
                                      int nbinsy, const TFloat* ybins )
@@ -31,14 +33,15 @@ HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
   m_h1 = new TH_2D(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins);
   m_h2 = THLW_2D::create(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins);
   compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
 template <class TFloat>
-HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
+HistVal2D<TH_2D,THLW_2D>::HistVal2D( bool trigger_conversion_all,
+                                     const std::string& name,
                                      const std::string& title,
                                      int nbinsx, const TFloat* xbins,
                                      int nbinsy, const double& ymin, const double& ymax )
@@ -47,14 +50,15 @@ HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
   m_h1 = new TH_2D(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ymin,ymax);
   m_h2 = THLW_2D::create(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ymin,ymax);
   compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
 template <class TFloat>
-HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
+HistVal2D<TH_2D,THLW_2D>::HistVal2D( bool trigger_conversion_all,
+                                     const std::string& name,
                                      const std::string& title,
                                      int nbinsx, const double& xmin, const double& xmax,
                                      int nbinsy, const TFloat* ybins )
@@ -63,7 +67,7 @@ HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
   m_h1 = new TH_2D(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ybins);
   m_h2 = THLW_2D::create(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ybins);
   compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 

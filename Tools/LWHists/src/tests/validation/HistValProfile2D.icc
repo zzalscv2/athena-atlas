@@ -6,7 +6,8 @@
 
 
 //____________________________________________________________________
-HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& title,
+HistValProfile2D::HistValProfile2D( bool trigger_conversion_all,
+                                    const std::string& name, const std::string& title,
                                     int nbinsx, const double& xmin, const double& xmax,
                                     int nbinsy, const double& ymin, const double& ymax,
                                     const double& profparmin, const double& profparmax)
@@ -16,12 +17,13 @@ HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& 
   m_h2 = TProfile2D_LW::create(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax,profparmin, profparmax,profile_test_erroroption());
   compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 //____________________________________________________________________
-HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& title,
+HistValProfile2D::HistValProfile2D( bool trigger_conversion_all,
+                                    const std::string& name, const std::string& title,
                                     int nbinsx, const double* xbins,
                                     int nbinsy, const double* ybins)
   : HistValBase()
@@ -30,7 +32,7 @@ HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& 
   m_h2 = TProfile2D_LW::create(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins,profile_test_erroroption());
   compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 

@@ -23,8 +23,6 @@
 #include <cassert>
 #include "LWHists/LWHistControls.h"
 
-static bool HistVal_trigger_conversion_all = false;
-
 class HistValBase {
 public:
 
@@ -90,7 +88,7 @@ protected:
   bool converted() const { return m_triggeredConversionToROOTHist; }
   std::string convertedRootName(const std::string& n)
   {
-    static std::string prefix="::trigger::";
+    static const std::string prefix="::trigger::";
     //To avoid name clashes
     if (m_triggeredConversionToROOTHist)
       return prefix+n;

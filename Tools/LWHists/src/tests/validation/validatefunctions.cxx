@@ -1,15 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "validatefunctions.h"
 #include <cstdlib>
 
 namespace HistValFunctions {
-
-  static bool cfg_verbose=false;
-  bool verbose() { return cfg_verbose; }
-  void setVerbose(bool b) { cfg_verbose=b; }
 
   void testfailed(const std::string& testname)
   {

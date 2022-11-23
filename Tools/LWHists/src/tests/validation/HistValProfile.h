@@ -22,11 +22,13 @@
 class HistValProfile : public HistValBase {
 public:
 
-  HistValProfile( const std::string& name, const std::string& title,
+  HistValProfile( bool trigger_conversion_all,
+                  const std::string& name, const std::string& title,
                   int nbins, const double& xmin, const double& xmax,
-                  const double& profparmin=0, const double& profparmax=0 );
+                  const double& profparmin=0, const double& profparmax=0);
   template <class TFloat>
-  HistValProfile( const std::string& name, const std::string& title,
+  HistValProfile( bool trigger_conversion_all,
+                  const std::string& name, const std::string& title,
                   int nbins, const TFloat* xbins );
 
   virtual ~HistValProfile();

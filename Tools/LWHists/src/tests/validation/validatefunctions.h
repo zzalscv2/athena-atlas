@@ -26,9 +26,6 @@
 
 namespace HistValFunctions {
 
-  bool verbose();
-  void setVerbose(bool);
-
   template <class T> inline std::string toString(const T& t) { std::ostringstream s;s<<t;return s.str(); }
   template <class T1,class T2>
   inline std::string toString(const std::pair<T1,T2>& p) {

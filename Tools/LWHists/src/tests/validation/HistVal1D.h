@@ -22,10 +22,12 @@ class HistVal1D : public HistValBase {
 public:
   typedef typename THLW_1D::bin_type_t bin_type_t;
 
-  HistVal1D( const std::string& name, const std::string& title,
+  HistVal1D( bool trigger_conversion_all,
+             const std::string& name, const std::string& title,
 	     int nbins, const double& xmin, const double& xmax );
   template <class TFloat>
-  HistVal1D( const std::string& name, const std::string& title,
+  HistVal1D( bool trigger_conversion_all,
+             const std::string& name, const std::string& title,
 	     int nbins, const TFloat* xbins );
   virtual ~HistVal1D();
 

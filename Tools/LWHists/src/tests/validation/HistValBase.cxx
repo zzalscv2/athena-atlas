@@ -19,8 +19,6 @@ HistValBase::HistValBase()
   : m_compareBinContentsOnEachFill(true),
     m_triggeredConversionToROOTHist(false)
 {
-  if (HistVal_trigger_conversion_all)
-    {}//do nothing - just avoid compilation warning for this unit 
 }
 
 //____________________________________________________________________

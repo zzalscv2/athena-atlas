@@ -22,11 +22,13 @@
 class HistValProfile2D : public HistValBase {
 public:
 
-  HistValProfile2D( const std::string& name, const std::string& title,
+  HistValProfile2D( bool trigger_conversion_all,
+                    const std::string& name, const std::string& title,
                     int nbinsx, const double& xmin, const double& xmax,
                     int nbinsy, const double& ymin, const double& ymax,
                     const double& profparmin=0, const double& profparmax=0 );
-  HistValProfile2D( const std::string& name, const std::string& title,
+  HistValProfile2D( bool trigger_conversion_all,
+                    const std::string& name, const std::string& title,
                     int nbinsx, const double* xbins,
                     int nbinsy, const double* ybins );
   virtual ~HistValProfile2D();
