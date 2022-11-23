@@ -47,12 +47,6 @@ elif ( DetFlags.detdescr.ID_on() ):
         from TRT_GeoModel.TRT_GeoModelConf import TRT_DetectorTool
         trtDetectorTool = TRT_DetectorTool()
         trtDetectorTool.useDynamicAlignFolders = InDetGeometryFlags.useDynamicAlignFolders()
-        # disable alternative active gas in geometry when not in simulation - reco, digi, etc. use conditions data independent of geometry
-        from AthenaConfiguration.Enums import Project, ProductionStep
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        if ConfigFlags.Common.Project is not Project.AthSimulation and ConfigFlags.Common.ProductionStep is not ProductionStep.Simulation:
-            trtDetectorTool.DoXenonArgonMixture = False
-            trtDetectorTool.DoKryptonMixture = False
         GeoModelSvc.DetectorTools += [ trtDetectorTool ]
 
     from InDetServMatGeoModel.InDetServMatGeoModelConf import InDetServMatTool
