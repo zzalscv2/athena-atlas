@@ -130,12 +130,22 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
   else:
     auxScaleFactor = totalIntegratedLumi/100.
 
+  tmpColor = [kBlue-4,kOrange-7,kTeal+1,kMagenta-4,kPink-3,kGreen+3,kSpring-3,kViolet+4,kAzure-8,kCyan+1]
+  tmpColorIndex = 0
+
   for iIndex in sorted(index,reverse=True):
     if first: # Create a recoverable histograms just in case of
       resStack["%s__recov"%name] = MakeTH1("h1_%s__recovTotal"%(name),"Recoverable","",-0.5,-0.5+nBinsX,nBinsX,1)
       resStack["%s__recov"%name].SetMarkerStyle(23)  
       first = False
     iIndexName = iIndex.split("_")[0]
+
+    # Define a "temporary" color for the defect histogram for which it was not yet defined
+    # Mandatory for defect that are not yet known as impacting the system (i.e. with a loss-[defect].dat file
+    # Especially useful for weekly reports with a new type of defect affecting the system
+    if (histo[iIndex].GetFillColor() == kBlack and tmpColorIndex < len(tmpColor) and histo[iIndex].GetBinContent(histo[iIndex].GetNbinsX()) != 0):
+      histo[iIndex].SetFillColor(tmpColor[tmpColorIndex])
+      tmpColorIndex = tmpColorIndex + 1
 
     # Fill histo["%s_toStack"] the main histo
     # and histo["%s_aux"] the complementary one used only for TLegend
@@ -241,86 +251,32 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
 
 #########################################################################################
 #########################################################################################
-def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year = "2017",tag =""):
+def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year = "2017",tag = "",runlist = {}):
+
+  # Path of the file containing the list of runs
+  if tag == "Tier0_%s"%year:
+     runlist["filename"] = "all-%s.dat"%year
+  if tag == "GRL_%s"%year:
+     runlist["filename"] = "grl-%s.dat"%year
+  
 
   # Description used in TLegend and TAxis
-  yearTag["description"] = {"Tier0_2015":"/Tier0",
-                            "Optimal_2015":"/Run 2 final",
-                            "Reproc_2016":"/2016 reproc.",
-                            "Tier0_2016":"/Tier0",
-                            "Optimal_2016":"/Run 2 final",
-                            "Reproc_2017":"/2017 reproc.",
-                            "Tier0_2017":"/Tier0",
-                            "Optimal_2017":"/Run 2 final",
-                            "Reproc_2018":"/2017 reproc.",
-                            "Tier0_2018":"/Tier0",
-                            "Optimal_2018":"/Run 2 final",
+  yearTag["description"] = {"DQPaper_2015":"/Run 2 final",
+                            "DQPaper_2016":"/Run 2 final",
+                            "DQPaper_2017":"/Run 2 final",
+                            "DQPaper_2018":"/Run 2 final",
                             "Tier0_2022":"/Tier0",
                             "GRL_2022":"/GRL runs"}
 
-  yearTag["description"]["Run2_2015"] = yearTag["description"]["Optimal_2015"]
-  yearTag["description"]["Run2_2016"] = yearTag["description"]["Optimal_2016"]
-  yearTag["description"]["Run2_2017"] = yearTag["description"]["Optimal_2017"]
-  yearTag["description"]["Run2_2018"] = yearTag["description"]["Optimal_2018"]
-
-  yearTag["description"]["DQPaper_2015"] = yearTag["description"]["Optimal_2015"]
-  yearTag["description"]["DQPaper_2016"] = yearTag["description"]["Optimal_2016"]
-  yearTag["description"]["DQPaper_2016_HLThacked"] = yearTag["description"]["Optimal_2016"]
-  yearTag["description"]["DQPaper_2017"] = yearTag["description"]["Optimal_2017"]
-  yearTag["description"]["DQPaper_2018"] = yearTag["description"]["Optimal_2018"]
-
   # DB tag for the defect database - Common to all systems
-  # This tag is associated to a set of frozen defects. 
-  # The "Tier0" tags correspond to the original primary GRL - The year suffix corresponds necessarily to the data taking year
-  # The "Reproc" tags correspond to different reprocessing - The year suffix corresponds to the year of reprocessing
-  # The "Optimal" tags correspond to the best GRL so far - The year suffix corresponds necessarily to the data taking year
-
-  yearTag["defect"] = {"Tier0_2015":"DetStatus-v73-pro19-08",
-                       "Optimal_2015":"DetStatus-v89-pro21-02",
-                       "DQPaper_2015":"DetStatus-v105-pro22-13",
-                       "Reproc_2016":"DetStatus-v75-repro20-01",
-                       "Tier0_2016":"DetStatus-v84-pro20-16",
-                       "Optimal_2016":"DetStatus-v89-pro21-01",
-                       "DQPaper_2016":"DetStatus-v105-pro22-13",
-                       "Reproc_2017":"DetStatus-v89-pro21-01",
-                       "Tier0_2017":"DetStatus-v97-pro21-13",
-                       "Optimal_2017":"DetStatus-v99-pro22-01",
-                       "DQPaper_2017":"DetStatus-v105-pro22-13",
-                       "Reproc_2018":"HEAD",
-                       "Tier0_2018":"HEAD",
-                       "Optimal_2018":"DetStatus-v102-pro22-04",
-                       "DQPaper_2018":"DetStatus-v105-pro22-13",
-                       "Tier0_2022":"HEAD"
-                       }
-
-  yearTag["defect"]["Run2_2015"] = yearTag["defect"]["Optimal_2015"]
-  yearTag["defect"]["Run2_2016"] = yearTag["defect"]["Optimal_2016"]
-  yearTag["defect"]["DQPaper_2016_HLThacked"] = yearTag["defect"]["DQPaper_2016"]
-  yearTag["defect"]["Run2_2017"] = yearTag["defect"]["Optimal_2017"]
-  yearTag["defect"]["Run2_2018"] = yearTag["defect"]["Optimal_2018"]
-  yearTag["defect"]["GRL_2022"] = yearTag["defect"]["Tier0_2022"]
+  # Please keep the definition below organised as it is. It is mandatory to extract the database tag by the DeMoGenerateWWW.py script
+  yearTag["defect"] = {"DQPaper_2015":"DetStatus-v105-pro22-13","DQPaper_2016":"DetStatus-v105-pro22-13","DQPaper_2017":"DetStatus-v105-pro22-13","DQPaper_2018":"DetStatus-v105-pro22-13","Tier0_2022":"HEAD","GRL_2022":"HEAD"}
 
   # Condition tag for the veto database - defined later per system when relevant
   yearTag["veto"] = {}
 
-  # Tags below are derived from the regular ones. 
-  # They have the same defect/veto tags but have different options/GRL
-  # The defect/veto tags are derived from the ones defined in the standard tags given before "."
-  # These tags are common to all system but some additional ones may be defined later.
-  # This is why the defect/veto tags are defined after the system definitions
-  similarTags = {"Tier0_2015.onlDelivNorm":"/Tier0 (onl. deliv. lumi.)",
-                 "Reproc_2016.onlDelivNorm":"/2016 reproc. (onl. deliv. lumi.)",
-                 "Tier0_2016.onlDelivNorm":"/Tier0 (onl. deliv. lumi.)",
-                 "Reproc_2017.onlDelivNorm":"/2017 reproc. (onl. deliv. lumi.)",
-                 "Tier0_2017.onlDelivNorm":"/Tier0 (onl. deliv. lumi.)",
-                 "Reproc_2018.onlDelivNorm":"/2018 reproc. (onl. deliv. lumi.)",
-                 "Tier0_2018.onlDelivNorm":"/Tier0 (onl. deliv. lumi.)",
-                 "Tier0_2022.onlDelivNorm":"/Tier0 (onl. deliv. lumi.)"}
-
-
-  # 2018 low mu : 13TeV-010 is slightly wrong. The optimal one is 001 
-  yearTag["offlineLumiTag"] = {"preliminary":"OflPrefLumi-RUN2-UPD4-12",
-                               "grl":{"2015":"OflLumi-13TeV-004","2016":"OflLumi-13TeV-009","2017":"OflLumi-13TeV-010","2018":"OflLumi-13TeV-010","2018_pbpb":"OflLumi-13TeV-001","2022":"OflPrefLumi-RUN2-UPD4-12"}}
+  yearTag["offlineLumiTag"] = {"OflLumi":{"2015":"OflLumi-13TeV-004","2016":"OflLumi-13TeV-009","2017":"OflLumi-13TeV-010","2018":"OflLumi-13TeV-010","2018_pbpb":"OflLumi-13TeV-001","2022":"OflLumi-Run3-002"},
+                               "OflLumiAcct":{"2022":"OflLumiAcct-Run3-002"}}
 
 #################################### NEWSYSTEM defects
 ###  if system == "NEWSYSTEM":
@@ -329,11 +285,13 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
 ###
 ###    defects0["prefix"] = ["NEWSYSTEM"]
 ###    # Partition intolerable and tolerable defects - Order determines what defect is proeminent
-###    defects0["partIntol"] = []
-###    defects0["partTol"] = []
+###    # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
+###    defects0["partIntol"] = [] # NEWSYSTEM system
+###    defects0["partTol"] = [] # NEWSYSTEM system
 ###    # Global intolerable and tolerable defects
-###    defects0["globIntol"] = [""] 
-###    defects0["globTol"] = [] 
+###    # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
+###    defects0["globIntol"] = []  # NEWSYSTEM system
+###    defects0["globTol"] = []  # NEWSYSTEM system
 ###    
 ###    veto["all"] = [] # Veto name as defined in the COOL database
 ###    veto["COOL"] = {} # Veto name as defined in the COOL database
@@ -463,35 +421,9 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
 # can be found with the twiki: https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/CoolProdTags#Tags_for_RUN_2_Bulk_Data_Process
   if system == "LAr":
     # This tag is associated to conditions used in a processing
-    # The "Tier0" tags correspond to the processing - The year suffix corresponds necessarily to the data taking year
-    # The "Reproc" tags correspond to different reprocessing - The year suffix corresponds to the year of reprocessing
-    # The "Optimal" tags correspond to the best processing so far - The year suffix corresponds necessarily to the data taking year
-    yearTag["veto"] = {"Tier0_2015":"LARBadChannelsOflEventVeto-RUN2-UPD4-04",
-                       "Reproc_2016":"LARBadChannelsOflEventVeto-RUN2-UPD4-04",
-                       "Tier0_2016":"LARBadChannelsOflEventVeto-RUN2-UPD4-04",
-                       "Reproc_2017":"LARBadChannelsOflEventVeto-RUN2-UPD4-06",
-                       "Tier0_2017":"LARBadChannelsOflEventVeto-RUN2-UPD4-06",
-                       "Reproc_2018":"LARBadChannelsOflEventVeto-RUN2-UPD4-08",
-                       "Tier0_2018":"LARBadChannelsOflEventVeto-RUN2-UPD4-10",
-                       "Tier0_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
+    yearTag["veto"] = {"Tier0_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
                        "GRL_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11"
                        }
-    yearTag["veto"]["Optimal_2015"] = yearTag["veto"]["Reproc_2017"]
-    yearTag["veto"]["Optimal_2016"] = yearTag["veto"]["Reproc_2017"]
-    yearTag["veto"]["Optimal_2017"] = yearTag["veto"]["Reproc_2018"]
-    yearTag["veto"]["Optimal_2018"] = yearTag["veto"]["Tier0_2018"]
-    yearTag["veto"]["GRL_2022"] = yearTag["veto"]["Tier0_2022"]
-    yearTag["veto"]["Run2_2015"] = yearTag["veto"]["Optimal_2015"]
-    yearTag["veto"]["Run2_2016"] = yearTag["veto"]["Optimal_2016"]
-    yearTag["veto"]["Run2_2017"] = yearTag["veto"]["Optimal_2017"]
-    yearTag["veto"]["Run2_2018"] = yearTag["veto"]["Optimal_2018"]
-    yearTag["veto"]["DQPaper_2015"] = yearTag["veto"]["Optimal_2015"]
-    yearTag["veto"]["DQPaper_2016"] = yearTag["veto"]["Optimal_2016"]
-    yearTag["veto"]["DQPaper_2017"] = yearTag["veto"]["Optimal_2017"]
-    yearTag["veto"]["DQPaper_2018"] = yearTag["veto"]["Optimal_2018"]
-
-    # Additional similar tags specific to LAr
-    similarTags["Reproc_2018.roughVeto"]="/2018 Reproc. (rough veto)"
 
     partitions["color"] = { 'EMBA':kYellow-9,'EMBC':kYellow,'EMECA':kOrange,'EMECC':kOrange-3,'HECA':kRed-3,'HECC':kRed+2,'FCALA':kBlue-3,'FCALC':kBlue+2}
     partitions["list"] = list(partitions["color"].keys())
@@ -636,7 +568,7 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     # Partition intolerable and tolerable defects - Order determines what defect is proeminent
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
     defects0["partIntol"] = ["STANDBY_HV","PROBLEM","PROBLEM_10to15percent","PROBLEM_MoreThan15percent","OutOfSync_3orMore","LowEfficiency_MoreThan10percent","DISABLED"] # RPC system
-    defects0["partTol"] = ["LowEfficiency_5to10percent","OutOfSync_2","OutOfSync_1","PROBLEM_1","PROBLEM_5to10percent"] # RPC system
+    defects0["partTol"] = ["LowEfficiency_5to10percent","OutOfSync_2","OutOfSync_1","ROD_PROBLEM_1","PROBLEM_5to10percent"] # RPC system
     # Global intolerable and tolerable defects
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
     defects0["globIntol"] = [] 
@@ -877,7 +809,7 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     defects0["partTol"] = []
     # Global intolerable and tolerable defects
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
-    defects0["globIntol"] = ["BJT_beam_spot_flag","BJT_no_secvtx","BJT_no_tracking","BJT_INACCURATE_ONLINE_BEAMSPOT","BJT_NO_MULTIBJET","BPH_no_muon","BPH_no_tracking","CAL_LAR_SourceMajor","CAL_TILE_SourceMajor","CAL_missing_data","CAL_no_primaries","ELE_no_clustering","ELE_no_tracking","ELE_primary_chain_misconfigured","ELE_unknown","ELE_tracking_issue","GAM_no_clustering","GAM_partial_clustering","GAM_primary_chain_misconfigured","GAM_unknown","GENERAL_debugstream","GENERAL_no_primaries","GENERAL_prescale_problem","GENERAL_standby","GENERAL_xpu_misconf","IDT_EF_FAIL","IDT_IDS_FAIL","IDT_SIT_FAIL","IDT_PRIVX_INEFF","JET_algo_problem","JET_menu_misconf","JET_unknown","MBI_no_tracking","MET_missing_data","MUO_Upstream_Barrel_problem","MUO_Upstream_Endcap_problem","TAU_misconf","TAU_caloIssue","TAU_nocalo","TAU_no_tracking","TRG_HLT_TAU_tracking_issue","TAU_dbIssue_BeamSpot","IDT PIX DATA ERROR","MUO chain disabled"] # Trig_HLT system
+    defects0["globIntol"] = ["BJT_beam_spot_flag","BJT_no_secvtx","BJT_no_tracking","BJT_INACCURATE_ONLINE_BEAMSPOT","BJT_NO_MULTIBJET","BPH_no_muon","BPH_no_tracking","CAL_LAR_SourceMajor","CAL_TILE_SourceMajor","CAL_missing_data","CAL_no_primaries","ELE_no_clustering","ELE_no_tracking","ELE_primary_chain_misconfigured","ELE_unknown","ELE_tracking_issue","GAM_no_clustering","GAM_partial_clustering","GAM_primary_chain_misconfigured","GAM_unknown","GENERAL_debugstream","GENERAL_no_primaries","GENERAL_prescale_problem","GENERAL_standby","GENERAL_xpu_misconf","IDT_EF_FAIL","IDT_IDS_FAIL","IDT_SIT_FAIL","IDT_PRIVX_INEFF","JET_algo_problem","JET_menu_misconf","JET_unknown","MBI_no_tracking","MET_missing_data","MUO_Upstream_Barrel_problem","MUO_Upstream_Endcap_problem","TAU_misconf","TAU_caloIssue","TAU_nocalo","TAU_no_tracking","TRG_HLT_TAU_tracking_issue","TAU_dbIssue_BeamSpot","IDT_PIX_DATA_ERROR","MUO_chain_disabled"] # Trig_HLT system
     defects0["globTol"] = ["BJT_partial_tracking","BJT_unknown","BJT_ONLINE_BEAMSPOT_GT1p6MM","BJT_ONLINE_BEAMSPOT_GT2MM","BPH_algcrash","BPH_misconf","BPH_partial_muon","BPH_partial_tracking","BPH_unknown","CAL_LAR_SourceMinor","CAL_ROI_EXCESS","CAL_TILE_SourceMinor","CAL_partial_missing_data","CAL_spike","CAL_incorrect_BCID_correction","CAL_unknown","ELE_chain_misconfigured","ELE_clustering_issue","ELE_lowEfficiency_all_electrons","ELE_non_primary_poor_performance_e15_HLTtighter","ELE_non_primary_poor_performance_e15_tight","ELE_nonprimary_misconfigured","ELE_partial_clustering","ELE_partial_tracking","ELE_primary_poor_performance_e20_medium1","ELE_primary_poor_performance_e22_medium1","ELE_tracking_issue_Tolerable","GAM_chain_misconfigured","GAM_clustering_issue","GAM_nonprimary_misconfigured","GENERAL_streaming","GENERAL_tolerableDebugstream","GENERAL_no_1e34_primaries","GENERAL_no_12e33_primaries","GENERAL_no_15e33_primaries","GENERAL_no_17e33_primaries","IDT_BSPOT_FAILUR","IDT_BSPOT_INVALID_STATUS","IDT_BSPOT_INVALIDATOR_PROBLEM","IDT_EFT_FAIL","IDT_LOWSTAT","IDT_SCT_OUTOFTIMEHITS","IDT_TRT_DATA_LOST","IDT_TRT_OUTOFTIMEHITS","IDT_TSF_FAIL","IDT_unknown","JET_calib_issue","JET_energy_excess","JET_GSC_BEAMSPOT_PROBLEM","JET_hotspot","JET_partialscan_issue","MBI_HI_time_shift_mbts","MBI_partial_tracking","MBI_unknown","MBI_spacepoint_noise","MET_XS_Triggers_OFF","MET_missingEt_spike","MET_partial_missing_data","MET_phi_spike","MET_sumEt_spike","MET_unknown","MUO_EFMSonly_problem","MUO_Fullscan_problem","MUO_L2Iso_problem","MUO_L2muonSA_problem","MUO_MSonly_Barrel_problem","MUO_MSonly_Endcapl_problem","MUO_MuComb_problem","MUO_MuGirl_problem","MUO_Multi_Muon_problemchains","MUO_MuonEFTrackIso_problem","MUO_MuonEF_problem","MUO_Slow_problem","MUO_unknown","MUO_chain_misconfigured","TAU_unknown","TAU_dbIssue_mu","TAU_tracking_issue_Tolerable"] # Trig_HLT system
     
     veto["all"] = [] # Veto name as defined in the COOL database
@@ -1097,13 +1029,5 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
   defectVeto["color"]["allIntol_recov"] = kBlack
   defectVeto["description"]["allVeto"] = "Dummy"
   defectVeto["color"]["allVeto"] = kBlack
-
-# Similar tags
-  for iSimilar in list(similarTags.keys()):
-    baseTag = iSimilar.split(".")[0]
-    yearTag["description"][iSimilar] = similarTags[iSimilar]
-    yearTag["defect"][iSimilar] = yearTag["defect"][baseTag] 
-    if (baseTag in yearTag["veto"]):
-      yearTag["veto"][iSimilar] = yearTag["veto"][baseTag] 
 
   return True
