@@ -47,10 +47,10 @@ public:
   void SetBinEntries(unsigned bin, const double& );
   void SetBinContent(unsigned bin, const double& );
   void SetBinError(unsigned bin, const double& );
-  unsigned GetEntries() const;
-  void SetEntries(unsigned);
+  virtual unsigned GetEntries() const override;
+  virtual void SetEntries(unsigned) override;
 
-  void Reset();
+  virtual void Reset() override;
 
   double getXMin() const;
   double getXMax() const;
@@ -68,16 +68,16 @@ public:
 		const double& sumWY, const double& sumWY2 );
 
   TProfile* getROOTHist();
-  TH1* getROOTHistBase();
+  virtual TH1* getROOTHistBase() override;
 
 
-  double Integral() const;
+  virtual double Integral() const override;
 private:
   friend class LWHistInt;
   friend class LWHistVal;
-  void clear();
-  TH1* getROOTHistBaseNoAlloc() const;
-  void clearKeptROOTHist();//Does nothing if root-backend.
+  virtual void clear() override;
+  virtual TH1* getROOTHistBaseNoAlloc() const override;
+  virtual void clearKeptROOTHist() override;//Does nothing if root-backend.
   const float * getVarBins() const;//null if fixed bin-widths
   float * getVarBins();//null if fixed bin-widths
 
@@ -96,12 +96,12 @@ private:
   TProfile_LW & operator= ( const TProfile_LW & );
   Flex1DProfileHisto * m_flexHisto;
   TProfile * m_rootHisto;
-  virtual double actualGetBinCenterX(int bin) const;
-  virtual double actualGetBinCenterY(int) const { return 0; }
-  virtual unsigned actualFindBinX(const double&) const;
-  virtual unsigned actualFindBinY(const double&) const { return 0; }
-  virtual unsigned actualGetNBinsX() const { return GetNbinsX(); }
-  virtual unsigned actualGetNBinsY() const { return 0; }
+  virtual double actualGetBinCenterX(int bin) const override;
+  virtual double actualGetBinCenterY(int) const override { return 0; }
+  virtual unsigned actualFindBinX(const double&) const override;
+  virtual unsigned actualFindBinY(const double&) const override { return 0; }
+  virtual unsigned actualGetNBinsX() const override { return GetNbinsX(); }
+  virtual unsigned actualGetNBinsY() const override { return 0; }
 
 };
 

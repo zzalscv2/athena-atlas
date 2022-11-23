@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -54,10 +54,10 @@ public:
   //  void SetBinEntries(unsigned binx, unsigned biny, const double& ); (not provided in ROOT)
   void SetBinContent(unsigned binx, unsigned biny, const double& );
   void SetBinError(unsigned binx, unsigned biny, const double& );
-  unsigned GetEntries() const;
-  void SetEntries(unsigned);
+  virtual unsigned GetEntries() const override;
+  virtual void SetEntries(unsigned) override;
 
-  void Reset();
+  virtual void Reset() override;
 
   double getXMin() const;
   double getXMax() const;
@@ -82,16 +82,16 @@ public:
 		const double& sumWXY,
 		const double& sumWZ, const double&sumWZ2 );
 
-  TProfile2D* getROOTHist();
-  TH1* getROOTHistBase();
+   TProfile2D* getROOTHist();
+  virtual TH1* getROOTHistBase() override;
 
-  double Integral() const;
+  virtual double Integral() const override;
 private:
   friend class LWHistInt;
   friend class LWHistVal;
-  void clear();
-  TH1* getROOTHistBaseNoAlloc() const;
-  void clearKeptROOTHist();//Does nothing if root-backend.
+  virtual void clear() override;
+  virtual TH1* getROOTHistBaseNoAlloc() const override;
+  virtual void clearKeptROOTHist() override;//Does nothing if root-backend.
   const float * getVarBinsX() const;//null if fixed bin-widths
   const float * getVarBinsY() const;//null if fixed bin-widths
   static TProfile2D_LW * actualcreate( const char* name, const char* title,
@@ -107,12 +107,12 @@ private:
   TProfile2D_LW & operator= ( const TProfile2D_LW & );
   Flex2DProfileHisto * m_flexHisto;
   TProfile2D * m_rootHisto;
-  virtual double actualGetBinCenterX(int bin) const;
-  virtual double actualGetBinCenterY(int) const;
-  virtual unsigned actualFindBinX(const double&) const;
-  virtual unsigned actualFindBinY(const double&) const;
-  virtual unsigned actualGetNBinsX() const { return GetNbinsX(); }
-  virtual unsigned actualGetNBinsY() const { return GetNbinsY(); }
+  virtual double actualGetBinCenterX(int bin) const override;
+  virtual double actualGetBinCenterY(int) const override;
+  virtual unsigned actualFindBinX(const double&) const override;
+  virtual unsigned actualFindBinY(const double&) const override;
+  virtual unsigned actualGetNBinsX() const override { return GetNbinsX(); }
+  virtual unsigned actualGetNBinsY() const override { return GetNbinsY(); }
 };
 
 #endif
