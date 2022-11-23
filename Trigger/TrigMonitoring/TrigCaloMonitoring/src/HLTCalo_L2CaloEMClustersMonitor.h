@@ -39,6 +39,6 @@ private:
   float m_OFF_min_et;
   std::vector<int> m_OFF_types;
   float m_max_delta_r;
-  std::vector<const xAOD::TrigEMCluster_v1*> ifChainPassed(const std::string& chain) const;
+  std::vector<const xAOD::TrigEMCluster*> ifStepPassed(const std::string& chain) const;
 };
 #endif

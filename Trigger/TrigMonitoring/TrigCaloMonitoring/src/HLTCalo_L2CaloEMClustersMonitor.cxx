@@ -81,7 +81,7 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::fillHistograms( const EventContext& 
 
   // prepare HLT clusters
   std::vector<clus_kin<const xAOD::TrigEMCluster*> > vec_hlt_clusters;
-  std::vector<const xAOD::TrigEMCluster_v1*> accepted_hlt_clusters = ifChainPassed(m_hltChainsT0);
+  std::vector<const xAOD::TrigEMCluster*> accepted_hlt_clusters = ifStepPassed(m_hltChainsT0);
 
   // For monitoring all hlt clusters
   if(m_hltChainsT0 == "All"){  
@@ -93,7 +93,7 @@ StatusCode HLTCalo_L2CaloEMClustersMonitor::fillHistograms( const EventContext& 
   }
   // For monitoring signature specific clusters
   else if (accepted_hlt_clusters.size()>0){
-    for (const auto &hlt_cluster : accepted_hlt_clusters) {
+    for (const auto* hlt_cluster : accepted_hlt_clusters) {
         auto hlt_clus_et = hlt_cluster->et();
         if (hlt_clus_et < m_HLT_min_et) continue;
         vec_hlt_clusters.push_back({hlt_clus_et*0.001, hlt_cluster->eta(), hlt_cluster->phi(), hlt_cluster});
@@ -383,7 +383,7 @@ float HLTCalo_L2CaloEMClustersMonitor::calculateDeltaR( float max_deltar, float 
   return sqrt( ((eta_1-eta_2)*(eta_1-eta_2)) + (DeltaPhi*DeltaPhi) );
 }
 
-std::vector<const xAOD::TrigEMCluster_v1*> HLTCalo_L2CaloEMClustersMonitor::ifChainPassed(const std::string& chain) const{
+std::vector<const xAOD::TrigEMCluster*> HLTCalo_L2CaloEMClustersMonitor::ifStepPassed(const std::string& chain) const{
   Trig::FeatureRequestDescriptor featureRequestDescriptor;
   featureRequestDescriptor.setChainGroup(chain);
   featureRequestDescriptor.setCondition(TrigDefs::includeFailedDecisions);

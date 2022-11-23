@@ -74,7 +74,7 @@ LArOFCAlg::LArOFCAlg(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("UseDelta",          m_useDelta=0); // 0= not use Delta, 1=only EMECIW/HEC/FCAL, 2=all , 3 = only EMECIW/HEC/FCAL1+high eta FCAL2-3
   declareProperty("UseDeltaV2",        m_useDeltaV2=0); // 0= not use Delta, 1=only EMECIW/HEC/FCAL, 2=all , 3 = only EMECIW/HEC/FCAL1+high eta FCAL2-3
 
-  declareProperty("RunThreaded",       m_runThreaded=false);
+  declareProperty("nThreads",          m_nThreads=-1,"-1: No TBB, 0: Let TBB decide, >0 number of threads");
 
   declareProperty("ReadDSPConfig",     m_readDSPConfig=false);
   declareProperty("DSPConfigFolder",   m_DSPConfigFolder="/LAR/Configuration/DSPConfiguration");
@@ -227,7 +227,7 @@ StatusCode LArOFCAlg::stop()
   }
 
   ////////////
-  if (m_runThreaded) {
+  if (m_nThreads>-1) {
     //There are sone external tools, etc. that potentially cached stuff.
     //We need to call them at least once to make sure all caches are filled before we go multi-threaded
     perChannelData_t& chanData=m_allChannelData[0];
@@ -243,7 +243,16 @@ StatusCode LArOFCAlg::stop()
 
     m_onlineID->isFCALchannel(chanData.chid);
 
-    m_larPhysWaveBin->bin(chanData.chid,(CaloGain::CaloGain)chanData.gain);
+
+    if (m_larPhysWaveBinKey.size()) {
+    	m_larPhysWaveBin->bin(chanData.chid,(CaloGain::CaloGain)chanData.gain);
+    }
+    /// TBB global control parameter
+    std::unique_ptr<tbb::global_control> tbbgc;
+
+    if (m_nThreads>0) {
+      tbbgc=std::make_unique<tbb::global_control>( tbb::global_control::max_allowed_parallelism, m_nThreads);
+    }
 
     //Instanciated the functor and start parallel_for
     Looper looper(&m_allChannelData,cabling, this);

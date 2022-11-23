@@ -78,4 +78,7 @@ def createBTaggingConfigFlags():
     btagcf.addFlag("BTagging.Trackless", False)
     btagcf.addFlag("BTagging.Pseudotrack", False)
 
+    # track classification tool flags
+    btagcf.addFlag("BTagging.TrkClassFiveBinMode",False)
+
     return btagcf

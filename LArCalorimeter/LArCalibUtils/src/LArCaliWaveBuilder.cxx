@@ -304,8 +304,7 @@ StatusCode LArCaliWaveBuilder::executeWithAccumulatedDigits(const LArCalibParams
      WaveMap::iterator itm = waveMap.find(index);
      
      if ( itm == waveMap.end() ) { // A new LArCaliWave is booked
-       LArCaliWave wave(samplesum.size()*m_NStep, m_dt, dac, pulsed);
-       wave.setFlag( LArWave::meas );
+       LArCaliWave wave(samplesum.size()*m_NStep, m_dt, dac, pulsed, LArWave::meas);
        itm = (waveMap.insert(WaveMap::value_type(index,wave))).first;
        ATH_MSG_DEBUG("index: "<<index<<" new wave inserted");
      }
@@ -381,9 +380,8 @@ StatusCode LArCaliWaveBuilder::executeWithStandardDigits(const LArCalibParams* c
      WaveMap::iterator itm = waveMap.find(dac);
      
      if ( itm == waveMap.end() ) { // A new LArCaliWave is booked     
-       LArCaliWave wave(samples.size()*m_NStep, m_dt, dac,0x1);
-       wave.setFlag( LArWave::meas );
-       itm = (waveMap.insert(WaveMap::value_type(dac,wave))).first;
+       LArCaliWave wave(samples.size()*m_NStep, m_dt, (*it)->DAC(), 0x1, LArWave::meas );
+       itm = (waveMap.insert(WaveMap::value_type((*it)->DAC(),wave))).first;
      }
      
      (*itm).second.addEvent((int)roundf(delay/deltaDelay), m_NStep, samples);
@@ -527,11 +525,12 @@ StatusCode LArCaliWaveBuilder::stop()
 		    continue ;
 		} else {
                     dacWaves.emplace_back(((thisWave)+(-pedAve)).getWave() ,
-		                         thisWave.getErrors(),
-					 thisWave.getTriggers(),
-					 thisWave.getDt(), 
-					 (thisWave.getDAC() + (thisWave.getIsPulsedInt()<<24)), 
-					 thisWave.getFlag() );
+					  thisWave.getErrors(),
+					  thisWave.getTriggers(),
+					  thisWave.getDt(), 
+					  thisWave.getDAC(), 
+					  thisWave.getIsPulsedInt(),
+					  thisWave.getFlag() );
        
 		    NCaliWave++;
 		}

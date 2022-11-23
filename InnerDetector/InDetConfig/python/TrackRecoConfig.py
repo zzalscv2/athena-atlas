@@ -81,6 +81,10 @@ def CombinedTrackingPassFlagSets(flags):
     return flags_set
 
 def ClusterSplitProbabilityContainerName(flags):
+    if flags.Detector.GeometryITk:
+        from InDetConfig.ITkTrackRecoConfig import ITkClusterSplitProbabilityContainerName
+        return ITkClusterSplitProbabilityContainerName(flags)
+
     flags_set = CombinedTrackingPassFlagSets(flags)
     extension = flags_set[-1].InDet.Tracking.ActivePass.extension
     ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + extension

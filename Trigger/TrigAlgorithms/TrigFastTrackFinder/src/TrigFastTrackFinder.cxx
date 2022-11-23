@@ -183,7 +183,8 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
 
   // Phase II
   declareProperty("ITkMode",           m_ITkMode = false);
-  declareProperty("StandaloneMode",           m_standaloneMode = false);
+  declareProperty("StandaloneMode",    m_standaloneMode = false);
+  declareProperty("UseEtaBinning",     m_tcs.m_useEtaBinning = false,"Split layers into eta bins");
 }
 
 //--------------------------------------------------------------------------

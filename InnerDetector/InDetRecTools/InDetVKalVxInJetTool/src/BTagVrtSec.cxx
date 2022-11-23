@@ -626,7 +626,7 @@ namespace InDet{
 	  h.m_curTup->pTvsJet[i] = TLV.Perp(jetDir.Vect());
 	  TLorentzVector normJ;
 	  normJ.SetPtEtaPhiM(1.,jetDir.Eta(),jetDir.Phi(),0.);
-	  h.m_curTup->prodTJ[i] = std::sqrt(TLV.Dot(normJ));
+	  h.m_curTup->prodTJ[i] = std::sqrt(TMath::Abs(TLV.Dot(normJ)));
 	  h.m_curTup->nVrtT[i] = 0;
 	}
       }

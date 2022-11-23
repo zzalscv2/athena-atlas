@@ -34,7 +34,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "EventKernel/PdtPdg.h"
 #include "StoreGate/WriteDecorHandle.h"
-
+#include "StoreGate/ReadDecorHandle.h"
 #include <vector>
 #include <cmath>
 
@@ -229,7 +229,12 @@ StatusCode InDetV0FinderTool::initialize()
 
   ATH_CHECK( m_eventInfo_key.initialize(!m_useBeamSpotCond));
   ATH_CHECK( m_beamSpotKey  .initialize( m_useBeamSpotCond));
-
+  if(!m_useBeamSpotCond){
+    for (const std::string beam : {"beamPosX", "beamPosY", "beamPosZ"}) {
+        m_beamSpotDecoKey.emplace_back(m_eventInfo_key.key() + "."+beam);
+    }
+  }
+  ATH_CHECK( m_beamSpotDecoKey.initialize(!m_useBeamSpotCond));
 
 // Get the track selector tool from ToolSvc
   ATH_CHECK( m_trkSelector.retrieve() );
@@ -307,8 +312,10 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
      auto beamSpotHandle = SG::ReadCondHandle(m_beamSpotKey, ctx);
      beamspot = beamSpotHandle->beamPos();
   }else{
-     SG::ReadHandle<xAOD::EventInfo> evt { m_eventInfo_key, ctx };
-     beamspot = Amg::Vector3D(evt->beamPosX(), evt->beamPosY(), evt->beamPosZ());
+     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosX(m_beamSpotDecoKey[0], ctx);
+     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosY(m_beamSpotDecoKey[1], ctx);
+     SG::ReadDecorHandle<xAOD::EventInfo, float> beamPosZ(m_beamSpotDecoKey[2], ctx);
+     beamspot = Amg::Vector3D(beamPosX(0), beamPosY(0), beamPosZ(0));
   }
 // track preselection
   std::vector<const xAOD::TrackParticle*> posTracks; posTracks.clear();

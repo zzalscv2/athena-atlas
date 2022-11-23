@@ -200,7 +200,12 @@ bool BigWheelCoincidenceLUT::readMap()
                   uint32_t theaddr = octaddr + modaddr + cwaddr + draddr + iphi;
                   char pt = buf[iphi-lDPhi-TGCTriggerLUTs::DPHI_HIGH_RANGE];
                   if (pt == 'X') continue;   // not opened
-                  m_lut[theaddr] = pt;
+		  if(m_lut.count(theaddr)==0){
+		    m_lut[theaddr] = pt;
+		  }else{
+		    log << MSG::ERROR
+			<< " Problem with loading TGC BW Trigger LUT: duplicated entry at address=" << theaddr << " with pt=" << pt << endmsg;
+		  }
                 }
               }
             }   // if (tag == "#")
