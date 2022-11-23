@@ -211,8 +211,11 @@ namespace MuonGM {
 
             m_etaDesign[il].type        = MuonChannelDesign::ChannelType::etaStrip;
             m_etaDesign[il].detType     = MuonChannelDesign::DetType::STGC;
-            m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
-            m_etaDesign[il].yCutout     = yCutout;
+            if (yCutout == 0.)
+                m_etaDesign[il].defineTrapezoid(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame));
+            else 
+                m_etaDesign[il].defineDiamond(0.5 * roParam.sStripWidth, 0.5 * roParam.lStripWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
+
             m_etaDesign[il].inputPitch  = stgc->stripPitch();
             m_etaDesign[il].inputWidth  = stgc->stripWidth();
             m_etaDesign[il].thickness   = tech->gasThickness;
@@ -241,8 +244,10 @@ namespace MuonGM {
         for (int il = 0; il < m_nlayers; il++) {
             m_phiDesign[il].type        = MuonChannelDesign::ChannelType::phiStrip;
             m_phiDesign[il].detType     = MuonChannelDesign::DetType::STGC;
-            m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
-            m_etaDesign[il].yCutout     = yCutout;
+            if (yCutout == 0.)
+                m_phiDesign[il].defineTrapezoid(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame) );
+            else 
+                m_phiDesign[il].defineDiamond(0.5 * roParam.sPadWidth, 0.5 * roParam.lPadWidth, 0.5 * (m_lengthChamber - ysFrame - ylFrame), yCutout);
             m_phiDesign[il].inputPitch  = stgc->wirePitch();
             m_phiDesign[il].inputWidth  = 0.015;
             m_phiDesign[il].thickness   = m_tckChamber;
@@ -350,7 +355,7 @@ namespace MuonGM {
 
             if (m_diamondShape) {
                 m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::RotatedDiamondBounds>(
-                    m_minHalfY[layer], m_maxHalfY[layer], m_maxHalfY[layer], m_halfX[layer] - m_etaDesign[layer].yCutout / 2, m_etaDesign[layer].yCutout / 2));  // strips
+                    m_minHalfY[layer], m_maxHalfY[layer], m_maxHalfY[layer], m_halfX[layer] - m_etaDesign[layer].yCutout() / 2, m_etaDesign[layer].yCutout() / 2));  // strips
                 m_surfaceData->m_surfBounds.push_back(std::make_unique<Trk::DiamondBounds>(
                     m_PadminHalfY[layer], m_PadmaxHalfY[layer], m_PadmaxHalfY[layer], m_PadhalfX[layer] - m_padDesign[layer].yCutout / 2, m_padDesign[layer].yCutout / 2));  // pad and wires
                     
@@ -774,7 +779,7 @@ namespace MuonGM {
         //*********************
         // B-Lines
         //*********************
-        /*if (has_BLines()) {
+        if (has_BLines()) {
           // go to the multilayer reference frame if we are not already there
           if (!conditionsApplied) {
              trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
@@ -784,7 +789,7 @@ namespace MuonGM {
              conditionsApplied = true; 
           }
           posOnDefChamber(pos);
-        }*/
+        }
         
         // back to the layer reference frame from where we started
         if (conditionsApplied) pos = trfToML.inverse()*pos;
