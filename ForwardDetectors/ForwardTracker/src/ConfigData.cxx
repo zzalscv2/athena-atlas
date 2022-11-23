@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/ConfigData.h"
@@ -9,15 +9,15 @@
 
 namespace ForwardTracker {
 
-  ConfigData::ConfigData() {
-    
-    twissFile1 = "/afs/cern.ch/atlas/offline/external/TwissFiles/v001/0090.00m/8TeV/alfaTwiss1.txt"; // LHC twiss file for beam1
-    twissFile2 = "/afs/cern.ch/atlas/offline/external/TwissFiles/v001/0090.00m/8TeV/alfaTwiss2.txt"; // LHC twiss file for beam2
-    positionC1 = 149;                                                                                // Z position [ m] of collimator1
-    positionC2 = 184;                                                                                // Z position [ m] of collimator2
-    apertureC1 = 999;                                                                                // X aperture [mm] of collimator1
-    apertureC2 = 999;                                                                                // X aperture [mm] of collimator2
-    endMarker  = 236.888;                                                                            // Z position [ m] of the detector
+  ConfigData::ConfigData() :
+    twissFile1 ("/afs/cern.ch/atlas/offline/external/TwissFiles/v001/0090.00m/8TeV/alfaTwiss1.txt"), // LHC twiss file for beam1
+    twissFile2 ("/afs/cern.ch/atlas/offline/external/TwissFiles/v001/0090.00m/8TeV/alfaTwiss2.txt"), // LHC twiss file for beam2
+    positionC1 (149), // Z position [ m] of collimator1
+    positionC2 (184), // Z position [ m] of collimator2
+    apertureC1 (999), // X aperture [mm] of collimator1
+    apertureC2 (999), // X aperture [mm] of collimator2
+    endMarker  (236.888) // Z position [ m] of the detector
+  {
   }
 
   std::string ConfigData::str() const {

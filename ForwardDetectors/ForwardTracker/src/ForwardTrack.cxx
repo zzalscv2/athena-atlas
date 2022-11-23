@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardTracker/BeamlineSetup.h"
@@ -7,12 +7,8 @@
 
 #include <iostream>
 
-ForwardTrack::ForwardTrack() {
-
-  m_fBeamline1 = ForwardTracker::Beamline();
-  m_fBeamline2 = ForwardTracker::Beamline();
-  m_fPosition  = ForwardTracker::Point();
-  m_fMomentum  = ForwardTracker::Point();
+ForwardTrack::ForwardTrack()
+{
 }
 
 void ForwardTrack::initialize(ForwardTracker::ConfigData cData) {
