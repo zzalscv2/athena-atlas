@@ -100,9 +100,7 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
                         'given their own value or glob matched.')
     parser.add_argument('--athenaMPStrategy', type=trfArgClasses.argFactory(trfArgClasses.argSubstep, runarg=False), 
                         nargs='+', metavar='substep:Strategy', group='Athena',
-                        help='Set the AthenaMP scheduling strategy for a particular substep. Default is unset, '
-                        'except when n_inputFiles = n_workers, when it is "FileScheduling" (useful for '
-                        'ephemeral outputs).')
+                        help='Set the AthenaMP scheduling strategy for a particular substep. Default is unset.')
     parser.add_argument('--athenaMPUseEventOrders', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena',
                         help='Change AthenaMP setup to read event numbers from event orders files')

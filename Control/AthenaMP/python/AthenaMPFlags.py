@@ -35,7 +35,7 @@ class Strategy(JobProperty):
     """ Switch to choose event scheduling strategy"""
     statusOn = True
     allowedTypes = ['str']
-    allowedValues = ['SharedQueue','FileScheduling','EventService','RoundRobin']    
+    allowedValues = ['SharedQueue','EventService','RoundRobin']
     StoredValue = 'SharedQueue'
 
 class CollectSubprocessLogs(JobProperty):
