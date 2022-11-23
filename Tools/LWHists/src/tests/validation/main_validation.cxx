@@ -31,6 +31,7 @@
 #include "LWHists/TProfile2D_LW.h"
 
 #include "CxxUtils/ubsan_suppress.h"
+#include "CxxUtils/checker_macros.h"
 #include "TInterpreter.h"
 
 #include <cstdlib>
@@ -1043,14 +1044,14 @@ void basicValidation_Profile2D(bool trigger_conversion_all,
   hvb.fill(1.2,1.0, 2.0);hvb.compareAll();
 }
 
-void usage(char**argv,int exitcode) {
+void usage ATLAS_NOT_THREAD_SAFE (char**argv,int exitcode) {
   std::cout << "Usage:"<<std::endl;
   std::cout << ""<<std::endl;
   std::cout << argv[0]<<" [-h|--help] [-v|--verbose] [--no1d] [--no2d] [--noprofile] [--quick|--noquick] [--rootbackend] [--triggerconv] [--seed=XXX]"<<std::endl;
   std::cout <<""<<std::endl;
   exit(exitcode);
 }
-int main (int argc, char** argv) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, char** argv) {
 
   // Suppress ubsan warnings from cling.
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
