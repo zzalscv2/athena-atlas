@@ -4,7 +4,6 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
 # art-output: run_*
 # art-output: pkldiff.log
 # art-architecture: '#x86_64-intel'

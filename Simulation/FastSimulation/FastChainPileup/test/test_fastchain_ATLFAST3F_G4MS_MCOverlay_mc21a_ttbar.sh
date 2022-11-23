@@ -1,14 +1,13 @@
 #!/bin/sh
 
-# art-description: Run FastChain with Simulation (ATLFAST3F_G4MS) and MC+MC Overlay in one job without reco for MC21a (RUN3), ttbar
+# art-description: Run FastChain with Simulation (ATLFAST3F_G4MS) and MC-Overlay in one job for MC21a (RUN3), ttbar
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-include: 22.0-mc20/Athena
 # art-output: *.root
 # art-output: config.txt
-# art-output: RAWtoESD_config.txt
-# art-output: ESDtoAOD_config.txt
+# art-output: RAWtoALL_config.txt
+# art-output: RDOtoRDOTrigger_config.txt
 # art-architecture: '#x86_64-intel'
 
 events=50
@@ -55,9 +54,9 @@ then
     Reco_tf.py --inputRDOFile ${RDO_File} --maxEvents '-1' \
                --autoConfiguration=everything \
                --outputAODFile ${AOD_File} \
-               --steering 'doRDO_TRIG' \
+               --steering 'doRDO_TRIG' 'doTRIGtoALL' \
                --athenaopts "all:--threads=1" \
-               --postExec 'RAWtoESD:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoESD_config.txt")' 'ESDtoAOD:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("ESDtoAOD_config.txt")' \
+               --postExec 'RDOtoRDOTrigger:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RDOtoRDOTrigger_config.txt")' 'RAWtoALL:from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("RAWtoALL_config.txt")' \
                --imf False
 
      rc2=$?
