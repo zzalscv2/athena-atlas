@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -1585,73 +1585,6 @@ void CaloDetDescrManager_Base::decode_sample (CaloCell_ID::SUBCALO& subCalo,
     sampling_or_module = 0;
   }
 
-}
-
-const CaloDetDescrManager* CaloDetDescrManager::instance()
-{
-  // The following code can be removed once all usage  has
-  // been removed and replaced by accessing this object via the transient
-  // detector store. Use the instance that's in the transient detector
-  // store if it exists. Otherwise create a new instance, register it in
-  // the store and return that. First, locate the StoreGate instance that's
-  // managing the transient detector store.
-  StoreGateSvc* detStore = nullptr;
-  IMessageSvc* msgSvc;
-  const CaloDetDescrManager* theMgr =nullptr;
-
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service("MessageSvc", msgSvc);
-  if (status.isSuccess()) {
-    MsgStream log(msgSvc, "CaloDetDescrManager");
-    status = svcLoc->service("DetectorStore", detStore);
-    if (status.isSuccess()) {
-      // Test whether the instance already exists in the transient
-      // detector store
-      if (detStore->contains<CaloDetDescrManager>("CaloMgr")) {
-        // The instance already exists - retrieve it and save it locally.
-        status = detStore->retrieve(theMgr);
-      }
-    } else {
-      log << MSG::ERROR << "Could not locate DetectorStore" << endmsg;
-    }
-  } else {
-    std::cerr << "CaloDetDescrManager: Could not locate the MessageSvc!!!\n";
-  }
-  return theMgr;
-}
-
-const CaloSuperCellDetDescrManager* CaloSuperCellDetDescrManager::instance()
-{
-  // The following code can be removed once all usage has
-  // been removed and replaced by accessing this object via the transient
-  // detector store. Use the instance that's in the transient detector
-  // store if it exists. Otherwise create a new instance, register it in
-  // the store and return that. First, locate the StoreGate instance that's
-  // managing the transient detector store.
-  StoreGateSvc* detStore = nullptr;
-  IMessageSvc* msgSvc;
-  const CaloSuperCellDetDescrManager* theMgr = nullptr;
-
-  ISvcLocator* svcLoc = Gaudi::svcLocator();
-  StatusCode status = svcLoc->service("MessageSvc", msgSvc);
-  if (status.isSuccess()) {
-    MsgStream log(msgSvc, "CaloSuperCellDetDescrManager");
-    status = svcLoc->service("DetectorStore", detStore);
-
-    if (status.isSuccess()) {
-      // Test whether the instance already exists in the transient
-      // detector store
-      if (detStore->contains<CaloSuperCellDetDescrManager>("CaloSuperCellMgr")) {
-        // The instance already exists - retrieve it and save it locally.
-        status = detStore->retrieve(theMgr);
-      }
-    } else {
-      log << MSG::ERROR << "Could not locate DetectorStore" << endmsg;
-    }
-  } else {
-    std::cerr << "CaloSuperCellDetDescrManager: Could not locate the MessageSvc!!!\n";
-  }
-  return theMgr;
 }
 
 const CaloCell_ID* CaloDetDescrManager::getCaloCell_ID() const
