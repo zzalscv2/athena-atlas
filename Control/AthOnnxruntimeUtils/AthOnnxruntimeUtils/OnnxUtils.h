@@ -1,5 +1,5 @@
 // Dear emacs, this is -*- c++ -*-
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #ifndef ONNX_UTILS_H
 #define ONNX_UTILS_H
 
@@ -85,7 +85,7 @@ namespace AthONNX {
 
     // Set up the ONNX Runtime session.
     Ort::SessionOptions sessionOptions;
-    OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions,0);
+    Ort::ThrowOnError (OrtSessionOptionsAppendExecutionProvider_CUDA(sessionOptions,0));
     sessionOptions.SetIntraOpNumThreads( 1 );
     sessionOptions.SetGraphOptimizationLevel( ORT_ENABLE_BASIC );
 
