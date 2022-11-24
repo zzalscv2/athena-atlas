@@ -78,7 +78,7 @@ public:
   child ROTs
   */
   CompetingMuonClustersOnTrack(
-    std::vector<const MuonClusterOnTrack*>* childrots,
+    std::vector<const MuonClusterOnTrack*>&& childrots,
     std::vector<AssignmentProb>&& assgnProb);
 
   /** constructor taking the local parameters + error matrix + associated
@@ -94,29 +94,10 @@ public:
   child ROTs
   */
   CompetingMuonClustersOnTrack(
-    const Trk::LocalParameters* locPars,
-    const Amg::MatrixX* error,
+    Trk::LocalParameters&& locPars,
+    Amg::MatrixX&& error,
     const Trk::Surface* assSurf,
-    std::vector<const MuonClusterOnTrack*>* childrots,
-    std::vector<AssignmentProb>&& assgnProb);
-
-  /** constructor taking the local parameters + error matrix + associated
-  surface directly, instead of using the base-class to recalculate them
-  @param locPars   the Trk::LocalParameters of the new
-  CompetingMuonClustersOnTrack
-  @param error     the Amg::MatrixX of the new CompetingMuonClustersOnTrack
-  @param assSurf   the surface at which the local parameters and erro are
-  expressed
-  @param childrots  a vector of MuonClusterOnTrack objects that form the
-  CompetingMuonClustersOnTrack
-  @param assgnProb  a vector with the assignment probabilities for each of the
-  child ROTs
-  */
-  CompetingMuonClustersOnTrack(
-    const Trk::LocalParameters& locPars,
-    const Amg::MatrixX& error,
-    const Trk::Surface* assSurf,
-    std::vector<const MuonClusterOnTrack*>* childrots,
+    std::vector<const MuonClusterOnTrack*>&& childrots,
     std::vector<AssignmentProb>&& assgnProb);
 
   /** Destructor */
@@ -160,7 +141,7 @@ private:
   CxxUtils::CachedUniquePtr<const Amg::Vector3D> m_globalPosition;
 
   /** The vector of contained Muon::MuonClusterOnTrack objects */
-  std::vector<const MuonClusterOnTrack*>* m_containedChildRots;
+  std::vector<const MuonClusterOnTrack*> m_containedChildRots;
 
   /** Have all the contained ROTs a common associated surface?
   If withNonVanishingAssignProb==true just the ROTs with non-vanishing
@@ -183,7 +164,8 @@ CompetingMuonClustersOnTrack::associatedSurface() const
   if (m_associatedSurface) {
     return *m_associatedSurface;
   }
-  return ((*(std::as_const(*m_containedChildRots).begin()))->associatedSurface());
+  return (
+    (*(std::as_const(m_containedChildRots).begin()))->associatedSurface());
 }
 
 inline const Trk::Surface*
@@ -195,19 +177,19 @@ CompetingMuonClustersOnTrack::associatedSurfaceRaw() const
 inline unsigned int
 CompetingMuonClustersOnTrack::numberOfContainedROTs() const
 {
-  return m_containedChildRots->size();
+  return m_containedChildRots.size();
 }
 
 inline const std::vector<const MuonClusterOnTrack*>&
 CompetingMuonClustersOnTrack::containedROTs() const
 {
-  return (*m_containedChildRots);
+  return m_containedChildRots;
 }
 
 inline const MuonClusterOnTrack&
 CompetingMuonClustersOnTrack::rioOnTrack(unsigned int indx) const
 {
-  return *std::as_const(*m_containedChildRots)[indx];
+  return *std::as_const(m_containedChildRots)[indx];
 }
 
 inline const Amg::Vector3D&

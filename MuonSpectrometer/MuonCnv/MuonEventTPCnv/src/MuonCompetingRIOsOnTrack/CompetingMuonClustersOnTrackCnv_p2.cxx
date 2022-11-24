@@ -32,7 +32,7 @@ CompetingMuonClustersOnTrackCnv_p2::persToTrans( const Muon::CompetingMuonCluste
   *transObj = Muon::CompetingMuonClustersOnTrack (Trk::LocalParameters(),
                                                   Amg::MatrixX(),
                                                   associatedSurface,
-                                                  containedChildRots.release(),
+                                                  std::move(*containedChildRots),
                                                   {} // assgnProb
                                                   );
 
