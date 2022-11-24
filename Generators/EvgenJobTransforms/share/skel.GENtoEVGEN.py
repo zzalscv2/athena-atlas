@@ -23,8 +23,6 @@ from AthenaCommon.AthenaCommonFlags import jobproperties
 from xAODEventInfoCnv.xAODEventInfoCnvConf import xAODMaker__EventInfoCnvAlg
 acam.athMasterSeq += xAODMaker__EventInfoCnvAlg(xAODKey="TMPEvtInfo")
 
-from AthenaPython.PyAthena import HepMC3  as HepMC
-
 theApp = acam.theApp
 acam.athMasterSeq += acas.AlgSequence("EvgenGenSeq")
 genSeq = acam.athMasterSeq.EvgenGenSeq
