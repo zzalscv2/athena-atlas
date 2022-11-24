@@ -423,7 +423,7 @@ void HGTD_DigitizationTool::createAndStoreSDO(
       const HepMcParticleLink &trkLink = charge_list_itr->particleLink();
       const int barcode = trkLink.barcode();
 
-      if ((barcode == 0) or (barcode == crazyParticleBarcode)) { // crazyParticleBarcode now defined in PileUpToolBase.h
+      if ((barcode == 0) or (barcode == m_vetoThisBarcode)) {
         continue;
       }
       if (!real_particle_hit) {

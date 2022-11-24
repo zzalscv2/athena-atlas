@@ -9,9 +9,6 @@
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <GeneratorObjects/McEventCollection.h>
 #include <InDetSimEvent/TRTUncompressedHitCollection.h>
-#include <climits>
-
-static constexpr unsigned int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 
 class McEventCollectionFilter : public AthReentrantAlgorithm
 {
