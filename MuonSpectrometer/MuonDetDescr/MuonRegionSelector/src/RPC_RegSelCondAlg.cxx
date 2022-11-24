@@ -74,7 +74,7 @@ std::unique_ptr<RegSelSiLUT> RPC_RegSelCondAlg::createTable( const EventContext&
  
  
   //loop over modules (PrepRawData collections)
-  for ( std::vector<Identifier>::const_iterator itr=idfirst  ;  itr!=idlast  ;  itr++  )  {
+  for ( std::vector<Identifier>::const_iterator itr=idfirst  ;  itr!=idlast  ;  ++itr  )  {
 
     Identifier prdId = *itr;
     IdentifierHash prdHashId;

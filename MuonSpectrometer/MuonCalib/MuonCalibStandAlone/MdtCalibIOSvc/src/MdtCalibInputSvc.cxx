@@ -130,7 +130,7 @@ void MdtCalibInputSvc::create_mean_rts() {
     std::list<MuonCalib::NtupleStationId> matching_ids;
     // loop over all rts
     for (std::map<MuonCalib::NtupleStationId, MuonCalib::IRtRelation *>::const_iterator it = m_rt_relation.begin();
-         it != m_rt_relation.end(); it++) {
+         it != m_rt_relation.end(); ++it) {
         MuonCalib::MuonFixedId id;
         // if the rt relation is stored per chamber, check both multilayers
         if (it->first.GetMl() == 0) {

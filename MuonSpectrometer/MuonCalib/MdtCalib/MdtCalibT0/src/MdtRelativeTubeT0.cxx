@@ -37,7 +37,7 @@ namespace MuonCalib {
     inline void MdtRelativeTubeT0 ::calculate_relative_t0s(const TubeGroup &grp) {
         // calculate mean t0 per group
         std::map<unsigned int, std::pair<double, int> > mean_t0;
-        for (std::map<MuonFixedId, double>::const_iterator it = m_tube_t0.begin(); it != m_tube_t0.end(); it++) {
+        for (std::map<MuonFixedId, double>::const_iterator it = m_tube_t0.begin(); it != m_tube_t0.end(); ++it) {
             unsigned int grp_id(get_group_id(it->first, grp));
             std::map<unsigned int, std::pair<double, int> >::iterator it2 = mean_t0.find(grp_id);
             if (it2 == mean_t0.end()) {
@@ -54,7 +54,7 @@ namespace MuonCalib {
         // calculate tube offsets
         std::map<MuonFixedId, double> &offsets(m_relative_offset[grp]);
         offsets.clear();
-        for (std::map<MuonFixedId, double>::const_iterator it = m_tube_t0.begin(); it != m_tube_t0.end(); it++) {
+        for (std::map<MuonFixedId, double>::const_iterator it = m_tube_t0.begin(); it != m_tube_t0.end(); ++it) {
             unsigned int grp_id(get_group_id(it->first, grp));
             offsets[it->first] = it->second - mean_t0[grp_id].first;
         }

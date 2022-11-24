@@ -55,7 +55,7 @@ namespace MuonCalib {
     }
 
     CalibDbConnection::~CalibDbConnection() {
-        for (std::set<coral::IQuery*>::iterator it = m_queries.begin(); it != m_queries.end(); it++) {
+        for (std::set<coral::IQuery*>::iterator it = m_queries.begin(); it != m_queries.end(); ++it) {
             if (*it) { delete (*it); }
             m_queries.clear();
         }
