@@ -2,10 +2,7 @@
 
 ######################################################
 # AtlasExtrapolationEngine module
-#
-# it inherits from Trk__Extrapolator and uses
-# the AtlasTrackingGeometrySvc
-#
+# it inherits from  Trk__ExtrapolationEngine
 ######################################################
 
 # import the ExtrapolationEngine configurable

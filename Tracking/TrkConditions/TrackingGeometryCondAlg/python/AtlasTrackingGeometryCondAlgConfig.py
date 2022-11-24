@@ -18,12 +18,12 @@ def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
     version = 21
     sub_version = ''
 
-    AtlasMaterialTag = materialTagBase+str(version)+sub_version
+    AtlasMaterialTag = materialTagBase + str(version) + sub_version
     if flags.Detector.GeometryITk:
         AtlasMaterialTag = flags.ITk.trackingGeometry.materialTag + \
             str(flags.ITk.trackingGeometry.version)
     cfolder = CoolDataBaseFolder + '<tag>TagInfoMajor/' + \
-        AtlasMaterialTag+'_/GeoAtlas</tag>'
+        AtlasMaterialTag + '_/GeoAtlas</tag>'
 
     if flags.Detector.GeometryITk and flags.ITk.trackingGeometry.loadLocalDbForMaterialMaps:
         DataBaseName = flags.ITk.trackingGeometry.localDatabaseName
@@ -31,11 +31,7 @@ def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
         from IOVDbSvc.IOVDbSvcConfig import addFolders
         result.merge(addFolders(flags, "/GLOBAL/TrackingGeo/LayerMaterialITK",
                                 detDb=DataBaseName, tag=AtlasMaterialTag))
-        cfolder = CoolDataBaseFolder + '<tag>TagInfoMajor/'+AtlasMaterialTag+'</tag>'
-
-    # if not quiet:
-    #   print('[ TrackingGeometrySvc ]     base material tag : ' + AtlasMaterialTag)
-    #   print('[ TrackingGeometrySvc ]     translated to COOL: ' + cfolder)
+        cfolder = CoolDataBaseFolder + '<tag>TagInfoMajor/' + AtlasMaterialTag + '</tag>'
 
     # load the right folders
     result.merge(addFoldersSplitOnline(
@@ -56,7 +52,7 @@ def _getInDetTrackingGeometryBuilder(name, flags,
     result.merge(BeamPipeGeometryCfg(flags))
     InDet__BeamPipeBuilder = CompFactory.InDet.BeamPipeBuilderCond
     beamPipeBuilder = InDet__BeamPipeBuilder(
-        name=namePrefix+'BeamPipeBuilder'+nameSuffix)
+        name=namePrefix + 'BeamPipeBuilder' + nameSuffix)
 
     result.addPublicTool(beamPipeBuilder)
     layerbuilders = []
@@ -79,7 +75,7 @@ def _getInDetTrackingGeometryBuilder(name, flags,
 
         InDet__SiLayerBuilder = CompFactory.InDet.SiLayerBuilderCond
         PixelLayerBuilder = InDet__SiLayerBuilder(
-            name=namePrefix+'PixelLayerBuilder'+nameSuffix)
+            name=namePrefix + 'PixelLayerBuilder' + nameSuffix)
         PixelLayerBuilder.PixelCase = True
         PixelLayerBuilder.Identification = 'Pixel'
         PixelLayerBuilder.SiDetManagerLocation = 'Pixel'
@@ -116,7 +112,7 @@ def _getInDetTrackingGeometryBuilder(name, flags,
         # SCT building
         InDet__SiLayerBuilder = CompFactory.InDet.SiLayerBuilderCond
         SCT_LayerBuilder = InDet__SiLayerBuilder(
-            name=namePrefix+'SCT_LayerBuilder'+nameSuffix)
+            name=namePrefix + 'SCT_LayerBuilder' + nameSuffix)
         SCT_LayerBuilder.PixelCase = False
         SCT_LayerBuilder.Identification = 'SCT'
         SCT_LayerBuilder.SiDetManagerLocation = 'SCT'
@@ -151,15 +147,18 @@ def _getInDetTrackingGeometryBuilder(name, flags,
 
         InDet__TRT_LayerBuilder = CompFactory.InDet.TRT_LayerBuilderCond
         TRT_LayerBuilder = InDet__TRT_LayerBuilder(
-            name=namePrefix+'TRT_LayerBuilder'+nameSuffix)
+            name=namePrefix + 'TRT_LayerBuilder' + nameSuffix)
         # TRT barrel specifications - assume defaults
         # SCT endcap specifications - assume defaults
 
-        # set the binning from bi-aequidistant to arbitrary for complex TRT volumes
+        # set the binning from bi-aequidistant to arbitrary for complex TRT
+        # volumes
         TRT_LayerBinning = 1
         from AthenaConfiguration.Enums import ProductionStep
         from SimulationConfig.SimEnums import SimulationFlavour
-        if buildTrtStrawLayers or (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator not in [SimulationFlavour.ATLFASTIIMT]):
+        if (buildTrtStrawLayers or
+            (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain]
+             and flags.Sim.ISF.Simulator not in [SimulationFlavour.ATLFASTIIMT])):
             TRT_LayerBinning = 2
             TRT_LayerBuilder.ModelLayersOnly = False
         # TRT -> ToolSvc
@@ -173,7 +172,7 @@ def _getInDetTrackingGeometryBuilder(name, flags,
     # helpers for the InDetTrackingGeometry Builder : layer array creator
     Trk__LayerArrayCreator = CompFactory.Trk.LayerArrayCreator
     InDetLayerArrayCreator = Trk__LayerArrayCreator(
-        name=namePrefix+'InDetLayerArrayCreator'+nameSuffix)
+        name=namePrefix + 'InDetLayerArrayCreator' + nameSuffix)
     # deletes empty material layers from arrays
     InDetLayerArrayCreator.EmptyLayerMode = 2
     # add to ToolSvc
@@ -182,14 +181,15 @@ def _getInDetTrackingGeometryBuilder(name, flags,
     # helpers for the InDetTrackingGeometry Builder : volume array creator
     Trk__TrackingVolumeArrayCreator = CompFactory.Trk.TrackingVolumeArrayCreator
     InDetTrackingVolumeArrayCreator = Trk__TrackingVolumeArrayCreator(
-        name=namePrefix+'InDetTrackingVolumeArrayCreator'+nameSuffix)
+        name=namePrefix + 'InDetTrackingVolumeArrayCreator' + nameSuffix)
     # add to ToolSvc
     result.addPublicTool(InDetTrackingVolumeArrayCreator)
 
-    # helpers for the InDetTrackingGeometry Builder : tracking volume helper for gluing
+    # helpers for the InDetTrackingGeometry Builder : tracking volume helper
+    # for gluing
     Trk__TrackingVolumeHelper = CompFactory.Trk.TrackingVolumeHelper
     InDetTrackingVolumeHelper = Trk__TrackingVolumeHelper(
-        name=namePrefix+'InDetTrackingVolumeHelper'+nameSuffix)
+        name=namePrefix + 'InDetTrackingVolumeHelper' + nameSuffix)
     # the material bins - assume defaults
     # add to ToolSvc
     result.addPublicTool(InDetTrackingVolumeHelper)
@@ -197,20 +197,20 @@ def _getInDetTrackingGeometryBuilder(name, flags,
     # helpers for the InDetTrackingGeometry Builder : cylinder volume creator
     Trk__CylinderVolumeCreator = CompFactory.Trk.CylinderVolumeCreator
     InDetCylinderVolumeCreator = Trk__CylinderVolumeCreator(
-        name=namePrefix+'InDetCylinderVolumeCreator'+nameSuffix)
+        name=namePrefix + 'InDetCylinderVolumeCreator' + nameSuffix)
     # give it the layer array creator
     InDetCylinderVolumeCreator.LayerArrayCreator = InDetLayerArrayCreator
     # specifiy the binning, passive layers, entry layers - assume defaults
     # add to ToolSvc
     result.addPublicTool(InDetCylinderVolumeCreator)
 
-    if (namePrefix+name+nameSuffix).find('CondCond') >= 0:
+    if (namePrefix + name + nameSuffix).find('CondCond') >= 0:
         raise Exception('Invalid name composition %s + %s + %s ' %
                         (namePrefix, name, nameSuffix))
     # the tracking geometry builder
     InDet__RobustTrackingGeometryBuilder = CompFactory.InDet.RobustTrackingGeometryBuilderCond
     return InDet__RobustTrackingGeometryBuilder(
-        namePrefix+name+nameSuffix,
+        namePrefix + name + nameSuffix,
         BeamPipeBuilder=beamPipeBuilder,
         LayerBuilders=layerbuilders,
         LayerBinningType=binnings,
@@ -244,14 +244,14 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
     result.merge(BeamPipeGeometryCfg(flags))
     InDet__BeamPipeBuilder = CompFactory.InDet.BeamPipeBuilderCond
     beamPipeBuilder = InDet__BeamPipeBuilder(
-        name=namePrefix+'BeamPipeBuilder'+nameSuffix)
+        name=namePrefix + 'BeamPipeBuilder' + nameSuffix)
     beamPipeBuilder.BeamPipeMaterialBinsZ = flags.ITk.trackingGeometry.beampipeMatZbins
     result.addPublicTool(beamPipeBuilder)
     BeamPipeBinning = 2
 
     Trk__LayerProvider = CompFactory.Trk.LayerProviderCond
     beamPipeProvider = Trk__LayerProvider(
-        name=namePrefix+'BeamPipeProvider'+nameSuffix)
+        name=namePrefix + 'BeamPipeProvider' + nameSuffix)
     beamPipeProvider.LayerBuilder = beamPipeBuilder
     result.addPublicTool(beamPipeProvider)
 
@@ -267,7 +267,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
 
         InDet__SiLayerBuilder = CompFactory.InDet.SiLayerBuilderCond
         PixelLayerBuilderInner = InDet__SiLayerBuilder(
-            name=namePrefix+'PixelLayerBuilderInner'+nameSuffix)
+            name=namePrefix + 'PixelLayerBuilderInner' + nameSuffix)
         PixelLayerBuilderInner.PixelCase = True
         PixelLayerBuilderInner.Identification = 'ITkPixelInner'
         PixelLayerBuilderInner.SiDetManagerLocation = 'ITkPixel'
@@ -281,7 +281,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
         PixelLayerBuilderInner.BarrelLayerBinsPhi = flags.ITk.trackingGeometry.pixelBarrelMatPhiBins
         PixelLayerBuilderInner.EndcapLayerBinsR = flags.ITk.trackingGeometry.pixelEndcapMatRbins
         PixelLayerBuilderInner.EndcapLayerBinsPhi = flags.ITk.trackingGeometry.pixelEndcapMatPhiBins
-        #adding one passive layer to map PLR material
+        # adding one passive layer to map PLR material
         PixelLayerBuilderInner.EndcapAdditionalLayerPositionsZ = [-2250., 2250.]
         PixelLayerBuilderInner.EndcapAdditionalLayerType = [1, 1]
 
@@ -294,7 +294,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
         result.addPublicTool(PixelLayerBuilderInner)
 
         pixelProviderInner = Trk__LayerProvider(
-            name=namePrefix+'PixelProviderInner'+nameSuffix)
+            name=namePrefix + 'PixelProviderInner' + nameSuffix)
         pixelProviderInner.LayerBuilder = PixelLayerBuilderInner
         result.addPublicTool(pixelProviderInner)
         # put them to the caches
@@ -304,7 +304,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
         colors += [3]
 
         PixelLayerBuilderOuter = InDet__SiLayerBuilder(
-            name=namePrefix+'PixelLayerBuilderOuter'+nameSuffix)
+            name=namePrefix + 'PixelLayerBuilderOuter' + nameSuffix)
         PixelLayerBuilderOuter.PixelCase = True
         PixelLayerBuilderOuter.Identification = 'ITkPixelOuter'
         PixelLayerBuilderOuter.SiDetManagerLocation = 'ITkPixel'
@@ -329,7 +329,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
         result.addPublicTool(PixelLayerBuilderOuter)
 
         pixelProviderOuter = Trk__LayerProvider(
-            name=namePrefix+'PixelProviderOuter'+nameSuffix)
+            name=namePrefix + 'PixelProviderOuter' + nameSuffix)
         pixelProviderOuter.LayerBuilder = PixelLayerBuilderOuter
         result.addPublicTool(pixelProviderOuter)
         # put them to the caches
@@ -344,7 +344,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
 
         # Strip building
         StripLayerBuilder = InDet__SiLayerBuilder(
-            name=namePrefix+'StripLayerBuilder'+nameSuffix)
+            name=namePrefix + 'StripLayerBuilder' + nameSuffix)
         StripLayerBuilder.PixelCase = False
         StripLayerBuilder.Identification = 'ITkStrip'
         StripLayerBuilder.SiDetManagerLocation = 'ITkStrip'
@@ -364,7 +364,7 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
         result.addPublicTool(StripLayerBuilder)
 
         stripProvider = Trk__LayerProvider(
-            name=namePrefix+'StripProvider'+nameSuffix)
+            name=namePrefix + 'StripProvider' + nameSuffix)
         stripProvider.LayerBuilder = StripLayerBuilder
         result.addPublicTool(stripProvider)
 
@@ -390,7 +390,8 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
     # add to ToolSvc
     result.addPublicTool(InDetTrackingVolumeArrayCreator)
 
-    # helpers for the InDetTrackingGeometry Builder : tracking volume helper for gluing
+    # helpers for the InDetTrackingGeometry Builder : tracking volume helper
+    # for gluing
     Trk__TrackingVolumeHelper = CompFactory.Trk.TrackingVolumeHelper
     InDetTrackingVolumeHelper = Trk__TrackingVolumeHelper(
         name='InDetTrackingVolumeHelper')
@@ -418,14 +419,14 @@ def _getITkTrackingGeometryBuilder(name, flags, result,
     # add to ToolSvc
     result.addPublicTool(InDetCylinderVolumeCreator)
 
-    if (namePrefix+name+nameSuffix).find('CondCond') >= 0:
+    if (namePrefix + name + nameSuffix).find('CondCond') >= 0:
         raise Exception('Invalid name composition %s + %s + %s ' %
                         (namePrefix, name, nameSuffix))
 
     # the tracking geometry builder
     InDet__StagedTrackingGeometryBuilder = CompFactory.InDet.StagedTrackingGeometryBuilderCond
     return InDet__StagedTrackingGeometryBuilder(
-        namePrefix+name+nameSuffix,
+        namePrefix + name + nameSuffix,
         LayerBuilders=layerProviders,
         LayerBinningTypeCenter=binnings_barrel,
         LayerBinningTypeEndcap=binnings_endcap,
@@ -446,27 +447,29 @@ def _getCaloTrackingGeometryBuilder(name, flags, result,
                                     envelopeDefinitionSvc, trackingVolumeHelper,
                                     namePrefix='', nameSuffix=''):
 
-    # The following replaces LArCalorimeter/LArTrackingGeometry/python/ConfiguredLArVolumeBuilder.py
+    # The following replaces
+    # LArCalorimeter/LArTrackingGeometry/python/ConfiguredLArVolumeBuilder.py
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     result.merge(LArGMCfg(flags))
     LAr__LArVolumeBuilder = CompFactory.LAr.LArVolumeBuilder
     lArVolumeBuilder = LAr__LArVolumeBuilder(
-        namePrefix+'LArVolumeBuilder'+nameSuffix,
+        namePrefix + 'LArVolumeBuilder' + nameSuffix,
         TrackingVolumeHelper=trackingVolumeHelper)
     result.addPublicTool(lArVolumeBuilder)
 
-    # The following replaces TileCalorimeter/TileTrackingGeometry/python/ConfiguredTileVolumeBuilder.py
+    # The following replaces
+    # TileCalorimeter/TileTrackingGeometry/python/ConfiguredTileVolumeBuilder.py
     from TileGeoModel.TileGMConfig import TileGMCfg
     result.merge(TileGMCfg(flags))
     Tile__TileVolumeBuilder = CompFactory.Tile.TileVolumeBuilder
     tileVolumeBuilder = Tile__TileVolumeBuilder(
-        namePrefix+'TileVolumeBuilder'+nameSuffix,
+        namePrefix + 'TileVolumeBuilder' + nameSuffix,
         TrackingVolumeHelper=trackingVolumeHelper)
     result.addPublicTool(tileVolumeBuilder)
 
     Calo__CaloTrackingGeometryBuilder = CompFactory.Calo.CaloTrackingGeometryBuilderCond
     return Calo__CaloTrackingGeometryBuilder(
-        namePrefix+name+nameSuffix,
+        namePrefix + name + nameSuffix,
         LArVolumeBuilder=lArVolumeBuilder,
         TileVolumeBuilder=tileVolumeBuilder,
         TrackingVolumeHelper=trackingVolumeHelper,
@@ -486,7 +489,7 @@ def _getHGTD_TrackingGeometryBuilder(name, flags, result,
 
     # layer builder for HGTD
     HGTD_LayerBuilder = CompFactory.HGTD_LayerBuilderCond(
-        namePrefix+'HGTD_LayerBuilder'+nameSuffix)
+        namePrefix + 'HGTD_LayerBuilder' + nameSuffix)
     HGTD_LayerBuilder.Identification = 'HGTD'
     HGTD_LayerBuilder.SetLayerAssociation = setLayerAssociation
     result.addPublicTool(HGTD_LayerBuilder)
@@ -507,7 +510,8 @@ def _getHGTD_TrackingGeometryBuilder(name, flags, result,
     # add to ToolSvc
     result.addPublicTool(HGTD_TrackingVolumeArrayCreator)
 
-    # helpers for the InDetTrackingGeometry Builder : tracking volume helper for gluing
+    # helpers for the InDetTrackingGeometry Builder : tracking volume helper
+    # for gluing
     Trk__TrackingVolumeHelper = CompFactory.Trk.TrackingVolumeHelper
     HGTD_TrackingVolumeHelper = Trk__TrackingVolumeHelper(
         name='HGTD_TrackingVolumeHelper')
@@ -533,12 +537,12 @@ def _getHGTD_TrackingGeometryBuilder(name, flags, result,
 
     result.addPublicTool(HGTD_CylinderVolumeCreator)
 
-    if (namePrefix+name+nameSuffix).find('CondCond') >= 0:
+    if (namePrefix + name + nameSuffix).find('CondCond') >= 0:
         raise Exception('Invalid name composition %s + %s + %s ' %
                         (namePrefix, name, nameSuffix))
     # the hgtd tracking geometry builder
     HGTD_TrackingGeometryBuilder = CompFactory.HGTD_TrackingGeometryBuilderCond
-    return HGTD_TrackingGeometryBuilder(namePrefix+name+nameSuffix,
+    return HGTD_TrackingGeometryBuilder(namePrefix + name + nameSuffix,
                                         LayerBuilder=HGTD_LayerBuilder,
                                         EnvelopeDefinitionSvc=envelopeDefinitionSvc,
                                         TrackingVolumeCreator=HGTD_CylinderVolumeCreator)
@@ -547,8 +551,10 @@ def _getHGTD_TrackingGeometryBuilder(name, flags, result,
 # and TrkDetFlags.MaterialValidation().
 # For new configuration, (temporarily?) pass as parameters.
 
+
 @AccumulatorCache
-def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg', doMaterialValidation=False):
+def TrackingGeometryCondAlgCfg(
+        flags, name='AtlasTrackingGeometryCondAlg', doMaterialValidation=False):
     """
     Sets up the Tracking Geometry Conditions Algorithm
     """
@@ -569,11 +575,10 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg', doMat
     atlas_env_def_service = envelopSvcCfg.getPrimary()
     result.merge(envelopSvcCfg)
 
-    # Depending on the job configuration, setup the various detector builders, and add to atlas_geometry_builder
+    # Depending on the job configuration, setup the various detector builders,
+    # and add to atlas_geometry_builder
     if flags.Detector.GeometryID:
-        # TODO Not sure how to handle TrkDetFlags, specifically
-        # ISF_FatrasCustomGeometry, XMLFastCustomGeometry
-        # So, here we only setup the default InDet geometry builder!
+        # Here we only setup the default InDet geometry builder!
         inDetTrackingGeometryBuilder = _getInDetTrackingGeometryBuilder(
             name='InDetTrackingGeometryBuilder',
             flags=flags,
@@ -596,23 +601,23 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg', doMat
         atlas_geometry_builder.InDetTrackingGeometryBuilder = inDetTrackingGeometryBuilder
 
     if flags.Detector.GeometryHGTD:
-        hgtdTrackingGeometryBuilder = _getHGTD_TrackingGeometryBuilder(name ='HGTD_TrackingGeometryBuilder',
-                                                                     flags=flags,
-                                                                     result=result,
-                                                                     envelopeDefinitionSvc=atlas_env_def_service,
-                                                                     namePrefix=namePrefix,
-                                                                     nameSuffix=nameSuffix)
+        hgtdTrackingGeometryBuilder = _getHGTD_TrackingGeometryBuilder(name='HGTD_TrackingGeometryBuilder',
+                                                                       flags=flags,
+                                                                       result=result,
+                                                                       envelopeDefinitionSvc=atlas_env_def_service,
+                                                                       namePrefix=namePrefix,
+                                                                       nameSuffix=nameSuffix)
         atlas_geometry_builder.HGTD_TrackingGeometryBuilder = hgtdTrackingGeometryBuilder
-    
+
     if flags.Detector.GeometryCalo:
         Trk__CylinderVolumeCreator = CompFactory.Trk.CylinderVolumeCreator
         caloVolumeCreator = Trk__CylinderVolumeCreator(
-            namePrefix+"CaloVolumeCreator"+nameSuffix)
+            namePrefix + "CaloVolumeCreator" + nameSuffix)
         result.addPublicTool(caloVolumeCreator)
 
         Trk__TrackingVolumeHelper = CompFactory.Trk.TrackingVolumeHelper
         trackingVolumeHelper = Trk__TrackingVolumeHelper(
-            name=namePrefix+'TrackingVolumeHelper')
+            name=namePrefix + 'TrackingVolumeHelper')
         result.addPublicTool(trackingVolumeHelper)
 
         caloTrackingGeometryBuilder = _getCaloTrackingGeometryBuilder(
@@ -636,16 +641,16 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg', doMat
 
         Muon__MuonStationBuilder = CompFactory.Muon.MuonStationBuilderCond
         muonStationBuilder = Muon__MuonStationBuilder(
-            name=namePrefix+'MuonStationBuilder'+nameSuffix)
+            name=namePrefix + 'MuonStationBuilder' + nameSuffix)
         muonStationBuilder.StationTypeBuilder = muonStationTypeBuilder
 
         Muon__MuonInertMaterialBuilder = CompFactory.Muon.MuonInertMaterialBuilderCond
         muonInertMaterialBuilder = Muon__MuonInertMaterialBuilder(
-            name=namePrefix+'MuonInertMaterialBuilder'+nameSuffix)
+            name=namePrefix + 'MuonInertMaterialBuilder' + nameSuffix)
 
         Muon__MuonTrackingGeometryBuilder = CompFactory.Muon.MuonTrackingGeometryBuilderCond
         muonTrackingGeometryBuilder = Muon__MuonTrackingGeometryBuilder(
-            name=namePrefix+'MuonTrackingGeometryBuilder'+nameSuffix,
+            name=namePrefix + 'MuonTrackingGeometryBuilder' + nameSuffix,
             EnvelopeDefinitionSvc=atlas_env_def_service,
             MuonStationBuilder=muonStationBuilder,
             InertMaterialBuilder=muonInertMaterialBuilder
@@ -698,9 +703,6 @@ def TrackingGeometryCondAlgCfg(flags, name='AtlasTrackingGeometryCondAlg', doMat
     # due to conflicts.
     # "all" can include forward detectors
     # when enabled (the module below check for this internally)
-    #
-    # Also we need this only when called via
-    # CAtoGlobalWrapper
     import inspect
     stack = inspect.stack()
     if len(stack) >= 2:

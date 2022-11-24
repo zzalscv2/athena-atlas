@@ -2,18 +2,13 @@
 
 ######################################################
 # AtlasExtrapolator module
-#
-# it inherits from Trk__Extrapolator and uses
-# the AtlasTrackingGeometrySvc
-#
+# it inherits from Trk__Extrapolator
 ######################################################
 
 # import the Extrapolator configurable
 from TrkExTools.TrkExToolsConf import Trk__Extrapolator
 
 # define the class
-
-
 class AtlasExtrapolator(Trk__Extrapolator):
     # constructor
     def __init__(self, name='AtlasExtrapolator'):
