@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# art-description: Run FastChain with Simulation (ATLFAST3F_G4MS) and MC-Overlay in one job for MC20a, ttbar
+# art-description: Run FastChain with Track-overlay for MC21a, ttbar
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -11,35 +11,30 @@
 # art-architecture: '#x86_64-intel'
 
 events=25
-EVNT_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1"
-RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1713/RDO.26811885._035498.pool.root.1"
-RDO_File="MC_plus_MC.RDO.pool.root"
-AOD_File="MC_plus_MC.AOD.pool.root"
-NTUP_File="MC_plus_MC.NTUP.pool.root"
+HITS_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/HITS.29625925._010619_100evts.pool.root.1"
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/FastChainPileup/TrackOverlay/RDO.29482411._003778_TrackOverlay.pool.root.1"
+RDO_File="TrackOverlay.RDO.pool.root"
+AOD_File="TrackOverlay.AOD.pool.root"
+NTUP_File="TrackOverlay.NTUP.pool.root"
 
-
-FastChain_tf.py \
-  --simulator ATLFAST3F_G4MS \
-  --steering doFCwOverlay \
-  --physicsList FTFP_BERT_ATL \
-  --useISF True \
-  --randomSeed 123 \
-  --inputEVNTFile ${EVNT_File} \
+Overlay_tf.py \
+  --inputHITSFile ${HITS_File} \
   --inputRDO_BKGFile ${RDO_BKG_File} \
   --outputRDOFile ${RDO_File} \
   --maxEvents ${events} \
   --skipEvents 0 \
+  --skipSecondaryEvents 0 \
   --digiSeedOffset1 511 \
   --digiSeedOffset2 727 \
-  --conditionsTag OFLCOND-MC16-SDR-RUN2-09  \
-  --geometryVersion ATLAS-R2-2016-01-00-01 \
-  --preInclude 'all:Campaigns/MC16SimulationNoIoV.py,Campaigns/MC20a.py' \
-  --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' 'from IOVDbSvc.CondDB import conddb;conddb.addOverride("/TILE/OFL02/CALIB/SFR","TileOfl02CalibSfr-SIM-05")' \
-  --DataRunNumber '284500' \
-  --imf False
+  --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+  --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
+  --preInclude 'all:Campaigns/MC21a.py' \
+  --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' \
+  --preExec "from OverlayCommonAlgs.OverlayFlags import overlayFlags;overlayFlags.doTrackOverlay=True;" \
+  --imf False 
 
 rc=$?
-echo "art-result: ${rc} EVNTtoRDOwOverlay"
+echo "art-result: ${rc} HITStoRDO"
 
 
 rc2=999
@@ -48,7 +43,8 @@ rc4=999
 if [ ${rc} -eq 0 ]
 then
     # Reconstruction
-    Reco_tf.py --inputRDOFile ${RDO_File} --maxEvents '-1' \
+    Reco_tf.py --inputRDOFile ${RDO_File} \
+               --maxEvents '-1' \
                --autoConfiguration=everything \
                --outputAODFile ${AOD_File} \
                --steering 'doRDO_TRIG' 'doTRIGtoALL' \
@@ -60,7 +56,8 @@ then
      if [ ${rc2} -eq 0 ]
      then
          # NTUP prod.
-         Reco_tf.py --inputAODFile ${AOD_File} --maxEvents '-1' \
+         Reco_tf.py --inputAODFile ${AOD_File} \
+                    --maxEvents '-1' \
                     --outputNTUP_PHYSVALFile ${NTUP_File} \
                     --ignoreErrors True \
                     --validationFlags 'doInDet' \
@@ -72,8 +69,6 @@ then
          rc4=$?
      fi
 fi
-
-
 echo  "art-result: ${rc2} RDOtoAOD"
 echo  "art-result: ${rc3} AODtoNTUP"
 echo  "art-result: ${rc4} regression"
