@@ -517,7 +517,7 @@ Trk::KalmanUpdator_xk::predictedStateFitQuality
 		 (*v)(0,0),(*v)(1,0),(*v)(1,1)};
 
   int N; double x2;
-  if(predictedStateFitQuality(t,P,E,N,x2)) return Trk::FitQualityOnSurface(x2,N);
+  if(predictedStateFitQuality(t,P,E,N,x2)) return {x2,N};
   return {};
 }
 
@@ -575,7 +575,7 @@ Trk::KalmanUpdator_xk::predictedStateFitQuality
 
   if(q) {
     differenceParLoc(k,m,p,r);
-    return Trk::FitQualityOnSurface(Xi2(n,r,w),n);
+    return {Xi2(n,r,w),n};
   }
   return {};
 }
@@ -632,7 +632,7 @@ Trk::KalmanUpdator_xk::fullStateFitQuality
 		 (*v)(0,0),(*v)(1,0),(*v)(1,1)};
 
   int N; double x2;
-  if(fullStateFitQuality(t,P,E,N,x2)) return Trk::FitQualityOnSurface(x2,N);
+  if(fullStateFitQuality(t,P,E,N,x2)) return {x2,N};
   return {};
 }
 
@@ -688,9 +688,9 @@ Trk::FitQualityOnSurface Trk::KalmanUpdator_xk::fullStateFitQuality
 
   if(q) {
     differenceParLoc(k,m,p,r);
-    return Trk::FitQualityOnSurface(Xi2(n,r,w),n);
+    return {Xi2(n,r,w),n};
   }
-  return Trk::FitQualityOnSurface(0.,n);
+  return {0.,n};
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -769,7 +769,7 @@ Trk::FitQualityOnSurface Trk::KalmanUpdator_xk::predictedStateFitQuality
 		 mv[13]+pv[13],
 		 mv[14]+pv[14]};
 
-  if(invert(5,w,w)) return Trk::FitQualityOnSurface(Xi2(5,r,w),5);
+  if(invert(5,w,w)) return {Xi2(5,r,w),5};
   return {};
 }
 

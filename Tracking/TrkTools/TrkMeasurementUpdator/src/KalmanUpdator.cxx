@@ -416,7 +416,7 @@ Trk::KalmanUpdator::predictedStateFitQuality (const Trk::TrackParameters& one,
   if (!one.covariance() || !two.covariance()) {
     ATH_MSG_DEBUG( "One parameter does not have uncertainties, "
                    << "assume initial state and return chi2=0.0"  );
-    return FitQualityOnSurface(0.f, 5);
+    return {0.f, 5};
   }
 
   // covariance matrix for prediction and the state to be added
@@ -427,7 +427,7 @@ Trk::KalmanUpdator::predictedStateFitQuality (const Trk::TrackParameters& one,
   AmgSymMatrix(5) R = (covTrkOne + covTrkTwo).inverse();
   // chi2 calculation
   double  chiSquared = r.transpose()*R*r;
-  return FitQualityOnSurface(chiSquared, 5);
+  return {chiSquared, 5};
 }
 
 std::vector<double> Trk::KalmanUpdator::initialErrors() const {

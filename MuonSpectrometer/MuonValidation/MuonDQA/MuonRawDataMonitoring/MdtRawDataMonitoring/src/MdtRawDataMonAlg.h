@@ -124,15 +124,15 @@ private:
     virtual StatusCode fillMDTSegmentHistograms(const MDTSegmentHistogramStruct (&vects)[4][4][16]) const;
 
     // MDTRawDataUtils_cxx
-    bool AinB(int A, std::vector<int>& B) const;
+    static bool AinB(int A, std::vector<int>& B) ;
     virtual StatusCode binMdtGlobal(TH2*, char ecap);
     virtual StatusCode binMdtRegional(TH2*, std::string_view xAxis);
     virtual StatusCode binMdtGlobal_byLayer(TH2*, TH2*, TH2*);
     virtual StatusCode binMdtOccVsLB(TH2*& h, int region, int layer);
     virtual StatusCode binMdtOccVsLB_Crate(TH2*& h, int region, int crate);
-    void ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers) const;
-    void CorrectTubeMax(const std::string& hardware_name, int& numTubes) const;
-    void CorrectLayerMax(const std::string& hardware_name, int& numLayers) const;
+    static void ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers) ;
+    static void CorrectTubeMax(const std::string& hardware_name, int& numTubes) ;
+    static void CorrectLayerMax(const std::string& hardware_name, int& numLayers) ;
     virtual StatusCode fillMDTMaskedTubes(IdentifierHash, const std::string&, TH1F_LW*& h);  // DEV not used at moment, should be revised
     int get_bin_for_LB_hist(int region, int layer, int phi, int eta, bool isBIM) const;
     int get_bin_for_LB_crate_hist(int region, int layer, int phi, int eta, std::string_view chamber) const;

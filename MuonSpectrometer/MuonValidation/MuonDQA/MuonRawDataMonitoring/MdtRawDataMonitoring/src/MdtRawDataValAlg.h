@@ -129,25 +129,25 @@ private:
     virtual StatusCode fillMDTOverviewHistograms(const Muon::MdtPrepData*, bool& isNoiseBurstCandidate);
     StatusCode handleEvent_effCalc(const Trk::SegmentCollection* segms);  //, const Muon::MdtPrepDataContainer* mdt_container );
 
-    bool AinB(int A, std::vector<int>& B);
+    static bool AinB(int A, std::vector<int>& B);
     virtual StatusCode binMdtGlobal(TH2*, char ecap);
     virtual StatusCode binMdtRegional(TH2*, std::string_view xAxis);
     virtual StatusCode binMdtGlobal_byLayer(TH2*, TH2*, TH2*);
     virtual StatusCode binMdtOccVsLB(TH2*& h, int region, int layer);
     virtual StatusCode binMdtOccVsLB_Crate(TH2*& h, int region, int crate);
-    void TubeID_to_ID_L_ML(int& tubeID, std::string_view hardware_name, int& tube, int& layer, int& ML, int max);
-    void ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers);
-    void CorrectTubeMax(const std::string& hardware_name, int& numTubes);
-    void CorrectLayerMax(const std::string& hardware_name, int& numLayers);
+    static void TubeID_to_ID_L_ML(int& tubeID, std::string_view hardware_name, int& tube, int& layer, int& ML, int max);
+    static void ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers);
+    static void CorrectTubeMax(const std::string& hardware_name, int& numTubes);
+    static void CorrectLayerMax(const std::string& hardware_name, int& numLayers);
     virtual StatusCode bookMDTHisto_overview(TH1*&, TString, TString, TString, int, float, float, MonGroup&);
     virtual StatusCode bookMDTHisto_chambers(TH1F_LW*&, TString, TString, TString, int, float, float, MonGroup&);
     virtual StatusCode bookMDTHisto_overview_2D(TH2*& h, TString, TString, TString, int, float, float, int, float, float, MonGroup&);
     virtual StatusCode bookMDTHisto_chambers_2D(TH2F_LW*& h, TString, TString, TString, int, float, float, int, float, float, MonGroup&);
     virtual StatusCode bookMDTHisto_OccVsLB(TH2*& h, TString, TString, TString, int, float, float, int, float, float, MonGroup&);
     virtual StatusCode fillMDTMaskedTubes(IdentifierHash, const std::string&, TH1F_LW*& h);
-    void putBox(TH2* h, float x1, float y1, float x2, float y2);
-    void putLine(TH2* h, float x1, float y1, float x2, float y2, Color_t c = kBlack);
-    int get_bin_for_LB_hist(int region, int layer, int phi, int eta, bool isBIM);
+    static void putBox(TH2* h, float x1, float y1, float x2, float y2);
+    static void putLine(TH2* h, float x1, float y1, float x2, float y2, Color_t c = kBlack);
+    static int get_bin_for_LB_hist(int region, int layer, int phi, int eta, bool isBIM);
     int get_bin_for_LB_crate_hist(int region, int layer, int phi, int eta, std::string_view chamber);
     // private function to initialize the selection of a certain region
     void mdtchamberId();

@@ -307,7 +307,6 @@ void Muon::MdtDriftCircleOnTrackCreator::updateSign(
   caliDriftCircle.setLocalParameters( lpos );
   caliDriftCircle.m_status = Trk::DECIDED;
   ATH_MSG_VERBOSE( "MDT DriftCircleOnTrack made with radius = "<< lpos );
-  return ;
 } 
 
 Muon::MdtDriftCircleOnTrackCreator::CalibrationOutput 
@@ -337,7 +336,7 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
       Amg::MatrixX  localCov(1,1);
       localCov(0,0) = 0.0;
  
-      return CalibrationOutput(Amg::Vector2D(),localCov,0.,false);
+      return {Amg::Vector2D(),localCov,0.,false};
     }
     
     // call calibration Service
@@ -441,7 +440,7 @@ Muon::MdtDriftCircleOnTrackCreator::getLocalMeasurement(const MdtPrepData& DC,
   newLocalCov(0,0) = sigmaR2;
   
   // return new values
-  return CalibrationOutput( Trk::LocalParameters(radiusPar), newLocalCov, driftTime, ok );
+  return { Trk::LocalParameters(radiusPar), newLocalCov, driftTime, ok };
 }
 
 Muon::MdtDriftCircleOnTrack* Muon::MdtDriftCircleOnTrackCreator::correct(
@@ -646,7 +645,7 @@ double Muon::MdtDriftCircleOnTrackCreator::timeOfFlight(const Amg::Vector3D& pos
   return (pos.mag() * m_inverseSpeedOfLight / beta + tTrack + tShift);
 }
 
-double Muon::MdtDriftCircleOnTrackCreator::parametrisedSigma( double r ) const {
+double Muon::MdtDriftCircleOnTrackCreator::parametrisedSigma( double r ) {
   return 0.23*std::exp(-std::abs(r)/6.06)+0.0362;
 }
 

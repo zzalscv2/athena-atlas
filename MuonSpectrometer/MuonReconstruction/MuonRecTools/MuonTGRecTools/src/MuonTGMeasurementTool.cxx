@@ -1123,13 +1123,13 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, Am
     const Trk::DetachedTrackingVolume* station = nullptr;
     if (staticVol && !staticVol->confinedDetachedVolumes().empty()) {
         Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>  detTV = staticVol->confinedDetachedVolumes();
-        for (unsigned int i = 0; i < detTV.size(); i++) {
-            if (detTV[i]->layerRepresentation() && detTV[i]->layerRepresentation()->layerType() > 0) {
-                Identifier stId(detTV[i]->layerRepresentation()->layerType());
+        for (const auto *i : detTV) {
+            if (i->layerRepresentation() && i->layerRepresentation()->layerType() > 0) {
+                Identifier stId(i->layerRepresentation()->layerType());
                 if (m_idHelperSvc->mdtIdHelper().stationName(stId) == m_idHelperSvc->mdtIdHelper().stationName(id) &&
                     m_idHelperSvc->mdtIdHelper().stationEta(stId) == m_idHelperSvc->mdtIdHelper().stationEta(id) &&
                     m_idHelperSvc->mdtIdHelper().stationPhi(stId) == m_idHelperSvc->mdtIdHelper().stationPhi(id)) {
-                    station = detTV[i];
+                    station = i;
                     break;
                 }
             }

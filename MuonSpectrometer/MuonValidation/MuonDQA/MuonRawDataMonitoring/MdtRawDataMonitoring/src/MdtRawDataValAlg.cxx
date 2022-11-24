@@ -148,7 +148,7 @@ StatusCode MdtRawDataValAlg::initialize()
         m_mdthitsperchamber_InnerMiddleOuter_HighOcc[i] = nullptr;
         m_mdthitsperchamber_onSegm_InnerMiddleOuterLumi[i] = nullptr;
     }
-    for (unsigned int i = 0; i < 16; i++) { m_mdtchamberstatphislice[i] = nullptr; }
+    for (auto & i : m_mdtchamberstatphislice) { i = nullptr; }
 
     // init message stream
     ATH_MSG_INFO("initialize MdtRawDataValAlg");
@@ -376,12 +376,12 @@ StatusCode MdtRawDataValAlg::fillHistograms()
     std::map<std::string, float> evnt_hitsperchamber_map;
     std::set<std::string> chambers_from_tracks;
 
-    if (m_doMdtESD == true) {
+    if (m_doMdtESD) {
         if (m_environment == AthenaMonManager::tier0 || m_environment == AthenaMonManager::tier0ESD ||
             m_environment == AthenaMonManager::online) {
             SG::ReadHandle<xAOD::MuonContainer> muons(m_muonKey);
 
-            for (const auto mu : *muons) {
+            for (const auto *const mu : *muons) {
                 if (!(mu->muonType() == xAOD::Muon::Combined)) continue;
                 xAOD::Muon::Quality quality = m_muonSelectionTool->getQuality(*mu);
                 if (!(quality <= xAOD::Muon::Medium)) continue;
@@ -414,23 +414,22 @@ StatusCode MdtRawDataValAlg::fillHistograms()
             // loop in MdtPrepDataContainer
             for (Muon::MdtPrepDataContainer::const_iterator containerIt = mdt_container->begin(); containerIt != mdt_container->end();
                  ++containerIt) {
-                if (containerIt == mdt_container->end() || (*containerIt)->size() == 0) continue;  // check if there are counts
+                if (containerIt == mdt_container->end() || containerIt->empty()) continue;  // check if there are counts
                 nColl++;
 
                 bool isHit_above_ADCCut = false;
                 // loop over hits
-                for (Muon::MdtPrepDataCollection::const_iterator mdtCollection = (*containerIt)->begin();
-                     mdtCollection != (*containerIt)->end(); ++mdtCollection) {
+                for (const auto *mdtCollection : **containerIt) {
                     nPrd++;
-                    hardware_name = getChamberName(*mdtCollection);
-                    float adc = (*mdtCollection)->adc();
+                    hardware_name = getChamberName(mdtCollection);
+                    float adc = mdtCollection->adc();
                     if (hardware_name.compare(0, 3, "BMG") == 0) adc /= 4.;
                     if (adc > m_ADCCut) {
                         nPrdcut++;
                         isHit_above_ADCCut = true;
                     }
 
-                    sc = fillMDTOverviewHistograms(*mdtCollection, isNoiseBurstCandidate);
+                    sc = fillMDTOverviewHistograms(mdtCollection, isNoiseBurstCandidate);
                     if (sc.isSuccess()) {
                         ATH_MSG_DEBUG("Filled MDTOverviewHistograms");
                     } else {
@@ -438,7 +437,7 @@ StatusCode MdtRawDataValAlg::fillHistograms()
                         return sc;
                     }
 
-                    sc = fillMDTSummaryHistograms(*mdtCollection, chambers_from_tracks, isNoiseBurstCandidate);
+                    sc = fillMDTSummaryHistograms(mdtCollection, chambers_from_tracks, isNoiseBurstCandidate);
                     if (sc.isSuccess()) {
                         ATH_MSG_DEBUG("Filled MDTSummaryHistograms ");
                     } else {
@@ -447,7 +446,7 @@ StatusCode MdtRawDataValAlg::fillHistograms()
                     }
 
                     if (m_doChamberHists) {
-                        if (isATLASReady()) sc = fillMDTHistograms(*mdtCollection);
+                        if (isATLASReady()) sc = fillMDTHistograms(mdtCollection);
                         if (sc.isSuccess()) {
                             ATH_MSG_DEBUG("Filled MDThistograms (chamber by chamber histos)");
                         } else {
@@ -1424,8 +1423,8 @@ StatusCode MdtRawDataValAlg::bookMDTOverviewHistograms(/* bool isNewEventsBlock,
         // Histo Path for Number_of_MDT_hits_per_chamber
         sc = bookMDTHisto_overview(m_mdtchamberstat, "Number_of_MDT_hits_per_chamber_ADCCut", "MDTChamber", "Counts/Chamber", 1, 0., 1.,
                                    m_mg->mongroup_overview_expert);
-        for (std::vector<Identifier>::const_iterator itr = m_chambersId.begin(); itr != m_chambersId.end(); ++itr) {
-            std::string hardware_name = getChamberName(*itr);
+        for (auto itr : m_chambersId) {
+            std::string hardware_name = getChamberName(itr);
             // Skip Chambers That Do NOT Exist
             if (hardware_name == "BML6A13" || hardware_name == "BML6C13") continue;
             m_mdtchamberstat->Fill(hardware_name.c_str(), 0.0);
@@ -1741,8 +1740,8 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
     }
 
     // LOOP OVER SEGMENTS
-    for (Trk::SegmentCollection::const_iterator s = segms->begin(); s != segms->end(); ++s) {
-        const Muon::MuonSegment* segment = dynamic_cast<const Muon::MuonSegment*>(*s);
+    for (const auto *segm : *segms) {
+        const Muon::MuonSegment* segment = dynamic_cast<const Muon::MuonSegment*>(segm);
         if (segment == nullptr) {
             ATH_MSG_DEBUG("no pointer to segment!!!");
             break;
@@ -1869,8 +1868,7 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
                     MuonCalib::MTStraightLine(segPosL, segDirL, Amg::Vector3D(0, 0, 0), Amg::Vector3D(0, 0, 0));
 
                 // Loop over tubes in chamber, find those along segment
-                for (unsigned i_ML = 0; i_ML < unique_chambers_ML.at(i_chamber).size(); i_ML++) {
-                    int ML = unique_chambers_ML.at(i_chamber).at(i_ML);
+                for (int ML : unique_chambers_ML.at(i_chamber)) {
                     Identifier newId = m_idHelperSvc->mdtIdHelper().channelID(
                         hardware_name.substr(0, 3), m_idHelperSvc->mdtIdHelper().stationEta(station_id),
                         m_idHelperSvc->mdtIdHelper().stationPhi(station_id), ML, 1, 1);
@@ -1973,17 +1971,16 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(
 
     // Fill effentries/effcounts hists for efficiency calculation
     if (m_doChamberHists) {  // Don't perform this block if not doing chamber by chamber hists
-        for (std::set<TubeTraversedBySegment, TubeTraversedBySegment_cmp>::iterator it = store_effTubes.begin(); it != store_effTubes.end();
-             it++) {
+        for (const auto & store_effTube : store_effTubes) {
             // GET HISTS
             MDTChamber* chamber;
-            sc = getChamber((*it).idHash, chamber);
+            sc = getChamber(store_effTube.idHash, chamber);
             if (!sc.isSuccess()) {
-                ATH_MSG_ERROR("Could Not Retrieve MDTChamber w/ ID " << (*it).idHash);
+                ATH_MSG_ERROR("Could Not Retrieve MDTChamber w/ ID " << store_effTube.idHash);
                 return sc;
             }
-            if (chamber->mdt_effEntries) chamber->mdt_effEntries->Fill((*it).tubeBin);
-            if ((*it).isHit && chamber->mdt_effCounts) { chamber->mdt_effCounts->Fill((*it).tubeBin); }
+            if (chamber->mdt_effEntries) chamber->mdt_effEntries->Fill(store_effTube.tubeBin);
+            if (store_effTube.isHit && chamber->mdt_effCounts) { chamber->mdt_effCounts->Fill(store_effTube.tubeBin); }
         }
     }
 
@@ -2029,5 +2026,4 @@ void MdtRawDataValAlg::initDeadChannels(const MuonGM::MdtReadoutElement* mydetEl
     }
     std::sort(deadTubes.begin(), deadTubes.end());
     m_DeadChannels[detElId] = deadTubes;
-    return;
 }
