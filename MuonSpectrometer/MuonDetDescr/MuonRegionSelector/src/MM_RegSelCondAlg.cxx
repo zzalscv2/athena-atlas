@@ -90,7 +90,7 @@ std::unique_ptr<RegSelSiLUT> MM_RegSelCondAlg::createTable( const EventContext& 
   std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>();
 
 
-  for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; i++ ) {
+  for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; ++i ) {
 
       Identifier     Id = *i;
       IdentifierHash hashId;

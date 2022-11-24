@@ -756,7 +756,7 @@ bool Interface::data(const std::vector<unsigned int>& hashes,const EventData& ev
       delete history;
     m_neighborHistories.clear();
     m_neighborHistoryPos.clear();
-    for (std::vector<unsigned int>::const_iterator hash = hashes.begin(); hash != hashes.end(); hash++) {
+    for (std::vector<unsigned int>::const_iterator hash = hashes.begin(); hash != hashes.end(); ++hash) {
       const History* history = AbsLArCells::newCellHistory(*hash);// bypasses history caching in order not to invalidate cell
       m_neighborHistories.push_back(history);
       m_neighborHistoryPos.push_back(*hash);

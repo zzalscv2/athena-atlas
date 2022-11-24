@@ -166,7 +166,7 @@ namespace MuonCalib {
             }
             // create output class
             MdtTubeFitContainer *ret = new MdtTubeFitContainer(id.regionId(), n_ml, n_layers, n_tubes);
-            for (std::map<MuonFixedId, MdtTubeFitContainer::SingleTubeFit>::const_iterator it = fits.begin(); it != fits.end(); it++) {
+            for (std::map<MuonFixedId, MdtTubeFitContainer::SingleTubeFit>::const_iterator it = fits.begin(); it != fits.end(); ++it) {
                 int ml = it->first.mdtMultilayer() - 1;
                 int ly = it->first.mdtTubeLayer() - 1;
                 int tb = it->first.mdtTube() - 1;

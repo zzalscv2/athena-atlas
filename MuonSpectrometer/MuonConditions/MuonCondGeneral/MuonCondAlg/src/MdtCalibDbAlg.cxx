@@ -527,7 +527,7 @@ StatusCode MdtCalibDbAlg::loadRt() {
         MuonCalib::IRtResolution *reso = getRtResolutionInterpolation(ts_points);
         if (msgLvl(MSG::VERBOSE)) {
             ATH_MSG_VERBOSE("Resolution points :");
-            for (std::vector<MuonCalib::SamplePoint>::const_iterator it = tr_points.begin(); it != tr_points.end(); it++) {
+            for (std::vector<MuonCalib::SamplePoint>::const_iterator it = tr_points.begin(); it != tr_points.end(); ++it) {
                 ATH_MSG_VERBOSE(it->x1() << "|" << it->x2() << "|" << it->error());
             }
 
@@ -546,7 +546,7 @@ StatusCode MdtCalibDbAlg::loadRt() {
                 } else {
                     if (rt->par(1) == 0.) {
                         ATH_MSG_WARNING("Bin size is 0");
-                        for (std::vector<MuonCalib::SamplePoint>::const_iterator it = tr_points.begin(); it != tr_points.end(); it++)
+                        for (std::vector<MuonCalib::SamplePoint>::const_iterator it = tr_points.begin(); it != tr_points.end(); ++it)
                             ATH_MSG_WARNING(it->x1() << " " << it->x2() << " " << it->error());
                     }
                     // Save ML difference if it is available
