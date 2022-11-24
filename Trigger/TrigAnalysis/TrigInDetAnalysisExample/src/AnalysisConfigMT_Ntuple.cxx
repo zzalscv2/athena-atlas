@@ -924,7 +924,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		    chain.back().addUserData(beamline_);
 		  }
 	  
-		  if ( roi_tmp ) delete roi_tmp;
+		  delete roi_tmp;
 		  roi_tmp = 0;
 
 		}
