@@ -1,21 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CALOREC_CALOTOWERBUILDERTOOLBASE_H
-#define CALOREC_CALOTOWERBUILDERTOOLBASE_H
-///////////////////////////////////////////////////////////////////////////////
-/// \brief CaloTowerBuilderToolBase is abstract base class for tower builders
-///
-/// CaloTowerBuilderToolBase is an abstract base class for a tower builder 
-/// tool.
-///
-/// \author Peter Loch <loch@physics.arizona.edu>
-/// \date April 30, 2004 - first implementation
-///
-///////////////////////////////////////////////////////////////////////////////
+#ifndef CALOUTILS_CALOTOWERBUILDERTOOLBASE_H
+#define CALOUTILS_CALOTOWERBUILDERTOOLBASE_H
 
-#include "GaudiKernel/ToolHandle.h"
+/**
+ *  @brief CaloTowerBuilderToolBase is abstract base class for tower builders
+ *
+ *  @author Peter Loch <loch@physics.arizona.edu>
+ *  @date April 30, 2004 - first implementation
+ */
+
 #include "CaloInterface/ICaloTowerBuilderToolBase.h"
 #include "CaloEvent/CaloTowerSeg.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -29,11 +25,9 @@
 
 #include "CxxUtils/checker_macros.h"
 class CaloTowerContainer;
-class CaloCellContainer;
-class IGeoAlignTool;
 
 class CaloTowerBuilderToolBase: public AthAlgTool,
-    virtual public ICaloTowerBuilderToolBase
+  virtual public ICaloTowerBuilderToolBase
 {
   public:
 
@@ -95,21 +89,13 @@ class CaloTowerBuilderToolBase: public AthAlgTool,
      */
     const CaloCellContainer* getCells() const;
 
-
-    ////////////////
-    // Properties //
-    ////////////////
-
     SG::ReadHandleKey<CaloCellContainer> m_cellContainerName;
+
     // ReadHandle to CaloDetDescr CDO in CondStore
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager"};
 
 
-private:
-    ////////////////////////
-    // Store and Services //
-    ////////////////////////
-
+ private:
     CaloTowerSeg m_theTowerSeg;
 
 };

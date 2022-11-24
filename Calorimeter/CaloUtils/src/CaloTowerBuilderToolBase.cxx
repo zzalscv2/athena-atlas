@@ -8,10 +8,8 @@
 #include "GaudiKernel/ListItem.h"
 
 #include "AthenaKernel/errorcheck.h"
-#include "GeoModelInterfaces/IGeoAlignTool.h"
 
 #include "CaloUtils/CaloTowerBuilderToolBase.h"
-
 
 CaloTowerBuilderToolBase::CaloTowerBuilderToolBase(const std::string& name,
     const std::string& type, const IInterface* parent)
