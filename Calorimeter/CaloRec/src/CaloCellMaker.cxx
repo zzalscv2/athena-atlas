@@ -21,7 +21,6 @@
 
 // Athena includes
 #include "AthenaKernel/errorcheck.h"
-#include "NavFourMom/INavigable4MomentumCollection.h"
 #include "StoreGate/WriteHandle.h"
 
 // Calo includes

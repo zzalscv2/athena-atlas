@@ -22,8 +22,8 @@ atlas_add_library( CaloRecLib
    Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib
    StoreGateLib LArToolsLib LumiBlockCompsLib AthenaMonitoringKernelLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
-   ${EIGEN_LIBRARIES} AthAllocators IdDictParser EventKernel CaloLumiConditions
-   LArRawConditions FourMom NavFourMom LumiBlockData )
+   ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions
+   LArRawConditions FourMom LumiBlockData )
 
 atlas_add_component( CaloRec
    src/components/*.cxx
