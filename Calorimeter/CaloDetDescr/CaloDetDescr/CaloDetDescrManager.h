@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -56,13 +56,6 @@ constexpr static const char* caloMgrStaticKey = "CaloMgrStatic";
    essentially upstream of CaloCell building.
 
    MAJOR FUNCTIONALITIES :
-
-   0) Access via instance() method :
-
-   The CaloDetDescrManager used to be a singleton. It is now in StoreGate, but the
-   instance() static method was kept for backward compatibility + because it is more 
-   compact in client's code.
-
 
    1) 2 enums and 3 coordinate systems :
 
@@ -479,11 +472,6 @@ class CaloDetDescrManager
   : public CaloDetDescrManager_Base
 {
 public:
-  /** @brief for backwards compatibility, provides access to the Calo DD manager 
-      which is actually kept in DS. 
-   */
-  static const CaloDetDescrManager* instance();
-
   /** @brief get calo cell ID helper
    */
   const CaloCell_ID*   getCaloCell_ID() const;
@@ -502,11 +490,6 @@ class CaloSuperCellDetDescrManager
 {
 public:
   virtual ~CaloSuperCellDetDescrManager();
-
-  /** @brief provides access to the Calo DD manager 
-      which is actually kept in DS
-   */
-  static const CaloSuperCellDetDescrManager* instance();
 
   /** @brief get calo cell ID helper
    */
