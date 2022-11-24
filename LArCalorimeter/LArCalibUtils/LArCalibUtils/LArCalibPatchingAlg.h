@@ -28,6 +28,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 
+#include "CxxUtils/checker_macros.h"
 
 
 /** 
@@ -48,7 +49,7 @@
 
 
 template<class CONDITIONSCONTAINER>
-class LArCalibPatchingAlg:public AthAlgorithm {
+class ATLAS_NOT_THREAD_SAFE LArCalibPatchingAlg:public AthAlgorithm {
  
 public:
   /**

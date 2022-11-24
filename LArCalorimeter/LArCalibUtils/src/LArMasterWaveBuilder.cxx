@@ -487,7 +487,7 @@ StatusCode LArMasterWaveBuilder::stop()
           int channel = onlineHelper->channel(chId) ;
           int slot    = onlineHelper->slot(chId) ;
           int FT      = onlineHelper->feedthrough(chId) ;
-          static char gainName[3][3] = { "HG" , "MG" , "LG" } ;
+          const char gainName[3][3] = { "HG" , "MG" , "LG" } ;
           char formOut[200] ;
           int ich = chId.get_identifier32().get_compact() ;
           sprintf( formOut, "%2s 0x%8x [%1d;%1d;%3d;%2d] [%2d;%3d;%3d;%3d]",

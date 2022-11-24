@@ -33,10 +33,14 @@
 #include "LArRawConditions/LArCaliWave.h"
 #include <memory>
 
+#include "CxxUtils/checker_macros.h"
+
+
 class LArWFParamTool;
 
-class LArRTMParamExtractor : public AthAlgorithm
-{
+class ATLAS_NOT_THREAD_SAFE LArRTMParamExtractor : public AthAlgorithm {
+  //Acutally this algo can do internal multi-threading at finalize 
+  //but not the way regular athenaMT works, so the thread-safety checker complains 
 
  public:
 
@@ -108,8 +112,8 @@ class LArRTMParamExtractor : public AthAlgorithm
     bool success=true;
   };
 
-  class Looper
-  { 
+  class ATLAS_NOT_THREAD_SAFE Looper {
+    //The way this class gets used is actually thread-safe
   public:
     //Looper() = delete;
     Looper(std::vector<helperParams>* p, const LArOnOffIdMapping* cabling, const LArWFParamTool* t, 

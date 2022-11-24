@@ -37,12 +37,15 @@
 
 #include <memory>
 
+#include "CxxUtils/checker_macros.h"
+
 class LArOnlineID_Base; 
 class CaloDetDescrManager_Base; 
 
 
-class LArOFCAlg:public AthAlgorithm {
- 
+class ATLAS_NOT_THREAD_SAFE LArOFCAlg:public AthAlgorithm {
+  //Acutally this algo can do internal multi-threading at finalize 
+  //but not the way regular athenaMT works, so the thread-safety checker complains 
 public:
  
   LArOFCAlg (const std::string& name, ISvcLocator* pSvcLocator);
@@ -181,7 +184,8 @@ private:
 
 
   //Functor for processing with TBB
-  class Looper {
+  class  ATLAS_NOT_THREAD_SAFE Looper {
+    //The way this class gets used is actually thread-safe
   public:
     Looper(std::vector<perChannelData_t>* p, const LArOnOffIdMapping* cabling, const LArOFCAlg* a) : m_perChanData(p), m_cabling(cabling), m_ofcAlg(a) {};
     void operator() (tbb::blocked_range<size_t>& r) const {

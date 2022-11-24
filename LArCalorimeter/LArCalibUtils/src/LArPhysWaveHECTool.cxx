@@ -13,6 +13,8 @@
 #include <vector>
 #include <cmath>
 
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 using std::cout;
 using std::endl;
 
