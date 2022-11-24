@@ -15,8 +15,6 @@
 
 #include "PileUpTools/PileUpToolBase.h"
 
-#include "AthenaKernel/IAtRndmGenSvc.h"
-
 #include "HitManagement/TimedHitCollection.h"
 #include "InDetSimEvent/SiHit.h"
 #include "InDetSimEvent/SiHitCollection.h"
@@ -33,6 +31,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 
 #include "InDetCondTools/ISiLorentzAngleTool.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 
 // Gaudi
 #include "GaudiKernel/ToolHandle.h"
@@ -116,8 +115,7 @@ private:
   int                       m_HardScatterSplittingMode; /**< Process all SiHit or just those from signal or background events */
   bool                      m_HardScatterSplittingSkipper;
 
-  ServiceHandle <IAtRndmGenSvc> m_rndmSvc;             //!< Random number service
-  CLHEP::HepRandomEngine       *m_randomEngine;        //!< Pointer to the random number Engine
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
   std::string                   m_randomEngineName;    //!< Name of the random number stream
 
   TimedHitCollection<SiHit>* m_thpcsi;

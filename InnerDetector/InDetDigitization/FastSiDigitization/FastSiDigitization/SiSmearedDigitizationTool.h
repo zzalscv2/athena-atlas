@@ -19,7 +19,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/AlgTool.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODEventInfo/EventAuxInfo.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -34,6 +33,7 @@
 
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "EventPrimitives/EventPrimitives.h"
 
@@ -104,7 +104,7 @@ public:
  private:
 
   TimedHitCollection<SiHit>* m_thpcsi;
-  ServiceHandle <IAtRndmGenSvc> m_rndmSvc;             //!< Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
@@ -112,7 +112,6 @@ public:
   const PixelID* m_pixel_ID;                             //!< Handle to the ID helper
   const SCT_ID* m_sct_ID;                             //!< Handle to the ID helper
 
-  CLHEP::HepRandomEngine*           m_randomEngine;
   std::string                m_randomEngineName;         //!< Name of the random number stream
 
   float m_pitch_X;

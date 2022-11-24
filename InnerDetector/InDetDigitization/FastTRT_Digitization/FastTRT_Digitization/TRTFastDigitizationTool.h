@@ -14,6 +14,7 @@
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
 #include "TRT_DriftFunctionTool/ITRT_DriftFunctionTool.h"
@@ -23,7 +24,6 @@
 #include "GaudiKernel/RndmGenerators.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
 #include "TrkParameters/TrackParameters.h"
 
@@ -45,7 +45,6 @@
 #include <map>
 #include <cmath>
 
-class IAtRndmGenSvc;
 class TRT_ID;
 class TRTUncompressedHit;
 
@@ -93,12 +92,12 @@ private:
   StatusCode initializeNumericalConstants();    // once per run 
   StatusCode setNumericalConstants();    // once per event (pileup-dependent constants) 
 
-  StatusCode produceDriftCircles(const EventContext& ctx);
+  StatusCode produceDriftCircles(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine);
   StatusCode createOutputContainers();
 
   Identifier getIdentifier( int hitID, IdentifierHash &hash, Identifier &layer_id, bool &status ) const;
 
-  StatusCode createAndStoreRIOs();
+  StatusCode createAndStoreRIOs(CLHEP::HepRandomEngine* rndmEngine);
 
   static double getDriftRadiusFromXYZ( const TimedHitPtr< TRTUncompressedHit > &hit );
   HepGeom::Point3D< double > getGlobalPosition( const TimedHitPtr< TRTUncompressedHit > &hit );
@@ -119,8 +118,7 @@ private:
   ToolHandle< Trk::ITRT_ElectronPidTool > m_trtElectronPidTool;
   ToolHandle< ITRT_StrawStatusSummaryTool > m_trtStrawStatusSummaryTool; // Argon / Xenon
   ServiceHandle< PileUpMergeSvc > m_mergeSvc;                             // PileUp Merge service
-  ServiceHandle< IAtRndmGenSvc > m_atRndmGenSvc;                          // Random number service
-  CLHEP::HepRandomEngine *m_randomEngine;
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
   std::string m_randomEngineName;                                         // Name of the random number stream
 
   // INPUT
