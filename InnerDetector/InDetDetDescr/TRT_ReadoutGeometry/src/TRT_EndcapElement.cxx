@@ -181,46 +181,6 @@ TRT_EndcapElement::calculateLocalStrawTransform(int straw) const
   return rc;
 }
 
-HepGeom::Transform3D
-TRT_EndcapElement::defStrawTransform(int straw) const
-{
-  // Same as calculateStrawTransform, except we use getDefAbsoluteTransform()
-  // rather than  getAbsoluteTransform()
-
-  // NB The tranformation to a straw is reconstructed here precisely as
-  // it was ... hopefully... in the factory.  One could eliminate this
-  // requirement and make the code a little more robust in this regard but
-  // at the cost of doubling the descriptors.  (One descriptor now suffices
-  // for both positive and negative endcaps).
-
-  const GeoXF::Function* f = m_descriptor->getStrawTransform();
-
-  if (f) {
-
-    int istraw = m_code.isPosZ() ? straw : m_descriptor->nStraws() - 1 - straw;
-
-    size_t offsetInto = m_descriptor->getStrawTransformOffset();
-    return Amg::EigenTransformToCLHEP(
-      getMaterialGeom()->getDefAbsoluteTransform() *
-      ((*f)(istraw + offsetInto)));
-
-  } else {
-
-    double phi = m_descriptor->startPhi() + m_descriptor->strawPitch() * straw;
-    double r = m_descriptor->innerRadius() + 0.5 * m_descriptor->strawLength();
-    CLHEP::Hep3Vector pos(r * cos(phi),
-                          r * sin(phi),
-                          (Amg::EigenTransformToCLHEP(
-                             getMaterialGeom()->getDefAbsoluteTransform()) *
-                           HepGeom::Point3D<double>())
-                            .z());
-    CLHEP::HepRotation rot;
-    rot.rotateY(-0.5 * M_PI); // Make it point along -ve X.
-    rot.rotateZ(phi);
-    return HepGeom::Transform3D(rot, pos);
-  }
-}
-
 const Trk::SurfaceBounds&
 TRT_EndcapElement::strawBounds() const
 {

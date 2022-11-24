@@ -62,9 +62,6 @@ namespace InDetDD {
       /** Type information: */
       virtual TRT_BaseElement::Type type() const override final;
 
-      /** Default Local -> global transform of the straw (ie before alignment corrections) */
-      virtual HepGeom::Transform3D defStrawTransform(int straw) const override final;
-
       /** Active straw length */
       virtual const double & strawLength() const override;
 
