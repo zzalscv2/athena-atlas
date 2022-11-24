@@ -3,6 +3,9 @@
 */
 
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
 
 #include "xAODForward/ALFAData.h"
 #include "xAODForward/ALFADataContainer.h"
@@ -12,7 +15,7 @@
 using namespace std;
 
 ALFA_CLinkAlg::ALFA_CLinkAlg(const std::string& name, ISvcLocator* pSvcLocator)
-	: AthAlgorithm(name, pSvcLocator), m_iovSvc( "IOVDbSvc", name )//, m_incidentSvc( "IncidentSvc", name )
+	: AthAlgorithm(name, pSvcLocator)
 {
 	// data type using in the local reconstruction
 	// for the simulation data the value is 0, for the real data the value is 1. Unset value is -1
@@ -20,8 +23,6 @@ ALFA_CLinkAlg::ALFA_CLinkAlg(const std::string& name, ISvcLocator* pSvcLocator)
 	declareProperty("ProcessingMode", m_nProcessingMode=2, "Processing mode, 1=offline, 2=online");
 
 	m_nMaxTrackCnt=0;
-	memset(&m_CurrentDCSId,0,sizeof(DCSID));
-
 }
 
 
@@ -33,69 +34,48 @@ ALFA_CLinkAlg::~ALFA_CLinkAlg()
 StatusCode ALFA_CLinkAlg::initialize()
 {
 	ATH_MSG_DEBUG ("ALFA_CLinkAlg::initialize()");
-	StatusCode sc=StatusCode::FAILURE;
 
-	if((sc=m_iovSvc.retrieve())!=StatusCode::SUCCESS)
-	{
-		return sc;
-	}
+        ATH_CHECK( m_BLMKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_HVChannelKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_localMonitoringKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_movementKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_radmonKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_triggerRatesKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_FEConfigurationKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_triggerSettingsKey.initialize (m_nDataType==1) );
 
-	if (m_nDataType==1)
-	{
-		memset(&m_CurrentDCSId,0,sizeof(DCSID));
+        ATH_CHECK( m_rawDataContKey.initialize (m_nDataType==1) );
+        ATH_CHECK( m_digitCollKey.initialize() );
+        ATH_CHECK( m_ODDigitCollKey.initialize() );
+        ATH_CHECK( m_locRecEvCollKey.initialize() );
+        ATH_CHECK( m_locRecODEvCollKey.initialize() );
+        ATH_CHECK( m_locRecCorrEvCollKey.initialize() );
+        ATH_CHECK( m_locRecCorrODEvCollKey.initialize() );
 
-		//register IOV/COOL callbacks
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_BLM));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_HVCHANNEL));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_LOCALMONITORING));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_MOVEMENT));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_RADMON));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_TRIGGERRATES));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_FECONFIGURATION));
-		CHECK(AddCOOLFolderCallback(DCSCOLLNAME_TRIGGERSETTINGS));
-	}
+        ATH_CHECK( m_clinkEventKey.initialize() );
+        ATH_CHECK( m_xaodDataKey.initialize() );
 
-	return sc;
+	return StatusCode::SUCCESS;
 }
 
 StatusCode ALFA_CLinkAlg::execute()
 {
 	ATH_MSG_DEBUG ("ALFA_CLinkAlg::execute()");
 
-	StatusCode sc=StatusCode::SUCCESS;
+        const EventContext& ctx = Gaudi::Hive::currentContext();
 
-	ALFA_CLinkEvent* pDataEvent=new ALFA_CLinkEvent();
+	auto pDataEvent = std::make_unique<ALFA_CLinkEvent>();
 
-	if(pDataEvent)
-	{
-		sc=LoadAllEventData(pDataEvent);
-		if(sc!=StatusCode::SUCCESS)
-		{
-			delete pDataEvent;
-			sc=StatusCode::FAILURE;
-		}
-		else
-		{
-			if (m_nDataType==1) pDataEvent->SetDCSFolderIDs(&m_CurrentDCSId);
-			sc=evtStore()->record(pDataEvent, "ALFA_CLinkEvent");
+        ATH_CHECK( LoadAllEventData(ctx, *pDataEvent) );
+        if (m_nDataType==1) {
+          DCSID DCSIds;
+          ATH_CHECK( CalcAllDCSIds (ctx, DCSIds) );
+          pDataEvent->SetDCSFolderIDs(&DCSIds);
+        }
+        SG::WriteHandle<ALFA_CLinkEvent> clinkEventH (m_clinkEventKey, ctx);
+        ATH_CHECK( clinkEventH.record (std::move (pDataEvent)) );
 
-			if(sc!=StatusCode::SUCCESS)
-			{
-				delete pDataEvent;
-				sc=StatusCode::FAILURE;
-			}
-			else
-			{
-				sc=GenerateXAOD();
-			}
-		}
-	}
-	else
-	{
-		sc=StatusCode::FAILURE;
-	}
-
-	return sc;
+        return StatusCode::SUCCESS;
 }
 
 StatusCode ALFA_CLinkAlg::finalize()
@@ -105,197 +85,93 @@ StatusCode ALFA_CLinkAlg::finalize()
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_CLinkAlg::LoadAllEventData(ALFA_CLinkEvent* pDataEvent)
+StatusCode ALFA_CLinkAlg::LoadAllEventData(const EventContext& ctx,
+                                           ALFA_CLinkEvent& dataEvent) const
 {
-	StatusCode sc;
-
 	//RawDataContainer
 	if (m_nDataType==1)
 	{
-		const ALFA_RawDataContainer* pAuxRawDataColl=nullptr;
-		sc = evtStore()->retrieve(pAuxRawDataColl, EVCOLLNAME_RAWDATA);
-		if(sc.isFailure() || !pAuxRawDataColl)
+                SG::ReadHandle<ALFA_RawDataContainer> rawDataCont (m_rawDataContKey, ctx);
+		if(!rawDataCont.isValid())
 		{
-			msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_RAWDATA<<"' not found" << endmsg;
+                        ATH_MSG_WARNING( "Container '"<<EVCOLLNAME_RAWDATA<<"' not found" );
 			//return StatusCode::FAILURE;
 		}
-		else CHECK(pDataEvent->AddLink(EDVT_RAWDATAEVCOLLECTION, pAuxRawDataColl));
+		else ATH_CHECK(dataEvent.AddLink(EDVT_RAWDATAEVCOLLECTION, rawDataCont.cptr()));
 	}
 
 	//DigitCollection
-	const ALFA_DigitCollection* pAuxDigitColl;
-	sc = evtStore()->retrieve(pAuxDigitColl, EVCOLLNAME_DIGIT);
-	if(sc.isFailure() || !pAuxDigitColl) {
-		msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_DIGIT<<"' not found" << endmsg;
+        SG::ReadHandle<ALFA_DigitCollection> digitColl (m_digitCollKey, ctx);
+	if(!digitColl.isValid()) {
+                ATH_MSG_WARNING( "Container '"<<EVCOLLNAME_DIGIT<<"' not found" );
 		//return StatusCode::FAILURE;
 	}
-	else CHECK(pDataEvent->AddLink(EDVT_DIGITCOLLECTION, pAuxDigitColl));
+	else ATH_CHECK(dataEvent.AddLink(EDVT_DIGITCOLLECTION, digitColl.cptr()));
 
 	//ODDigitCollection
-	const ALFA_ODDigitCollection* pAuxODDigitColl;
-	sc = evtStore()->retrieve(pAuxODDigitColl, EVCOLLNAME_ODDIGIT);
-	if(sc.isFailure() || !pAuxODDigitColl) {
-		msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_ODDIGIT<<"' not found" << endmsg;
+        SG::ReadHandle<ALFA_ODDigitCollection> odDigitColl (m_ODDigitCollKey, ctx);
+	if(!odDigitColl.isValid()) {
+                ATH_MSG_WARNING( "Container '"<<EVCOLLNAME_ODDIGIT<<"' not found" );
 		//return StatusCode::FAILURE;
 	}
-	else CHECK(pDataEvent->AddLink(EDVT_ODDIGITCOLLECTION, pAuxODDigitColl));
+	else ATH_CHECK(dataEvent.AddLink(EDVT_ODDIGITCOLLECTION, odDigitColl.cptr()));
 
 	//LocRecEvCollection
-	const ALFA_LocRecEvCollection* pAuxLocRecEvColl;
-	sc = evtStore()->retrieve(pAuxLocRecEvColl, EVCOLLNAME_LOCREC);
-	if(sc.isFailure() || !pAuxLocRecEvColl) {
-		msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_LOCREC<<"' not found" << endmsg;
+        SG::ReadHandle<ALFA_LocRecEvCollection> locRecEvColl (m_locRecEvCollKey, ctx);
+	if(!locRecEvColl.isValid()) {
+                ATH_MSG_WARNING( "Container '"<<EVCOLLNAME_LOCREC<<"' not found" );
 		//return StatusCode::FAILURE;
 	}
-	else CHECK(pDataEvent->AddLink(EDVT_LOCRECEVCOLLECTION, pAuxLocRecEvColl));
+	else ATH_CHECK(dataEvent.AddLink(EDVT_LOCRECEVCOLLECTION, locRecEvColl.cptr()));
 
 	//LocRecODEvCollection
-	const ALFA_LocRecODEvCollection* pAuxLocRecODEvColl;
-	sc = evtStore()->retrieve(pAuxLocRecODEvColl, EVCOLLNAME_LOCRECOD);
-	if(sc.isFailure() || !pAuxLocRecODEvColl) {
-		msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_LOCRECOD<<"' not found" << endmsg;
+        SG::ReadHandle<ALFA_LocRecODEvCollection> locRecODEvColl (m_locRecODEvCollKey, ctx);
+	if(!locRecODEvColl.isValid()) {
+                ATH_MSG_WARNING( "Container '"<<EVCOLLNAME_LOCRECOD<<"' not found" );
 		//return StatusCode::FAILURE;
 	}
-	else CHECK(pDataEvent->AddLink(EDVT_LOCRECODEVCOLLECTION, pAuxLocRecODEvColl));
+	else CHECK(dataEvent.AddLink(EDVT_LOCRECODEVCOLLECTION, locRecODEvColl.cptr()));
 
 	//LocRecCorrEvCollection
-	const ALFA_LocRecCorrEvCollection* pAuxLocRecCorrEvColl;
-	sc = evtStore()->retrieve(pAuxLocRecCorrEvColl, EVCOLLNAME_LOCRECCORR);
-	if(sc.isFailure() || !pAuxLocRecCorrEvColl) {
-		msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_LOCRECCORR<<"' not found" << endmsg;
+        SG::ReadHandle<ALFA_LocRecCorrEvCollection> locRecCorrEvColl (m_locRecCorrEvCollKey, ctx);
+	if(!locRecCorrEvColl.isValid()) {
+                ATH_MSG_WARNING( "Container '"<<EVCOLLNAME_LOCRECCORR<<"' not found" );
 		//return StatusCode::FAILURE;
 	}
-	else CHECK(pDataEvent->AddLink(EDVT_LOCRECCORREVCOLLECTION, pAuxLocRecCorrEvColl));
+	else CHECK(dataEvent.AddLink(EDVT_LOCRECCORREVCOLLECTION, locRecCorrEvColl.cptr()));
 
 	//LocRecCorrODEvCollection
-	const ALFA_LocRecCorrODEvCollection* pAuxLocRecCorrODEvColl;
-	sc = evtStore()->retrieve(pAuxLocRecCorrODEvColl, EVCOLLNAME_LOCRECCORROD);
-	if(sc.isFailure() || !pAuxLocRecCorrODEvColl) {
-		msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_LOCRECCORROD<<"' not found" << endmsg;
+        SG::ReadHandle<ALFA_LocRecCorrODEvCollection> locRecCorrODEvColl (m_locRecCorrODEvCollKey, ctx);
+	if(!locRecCorrODEvColl.isValid()) {
+                ATH_MSG_WARNING("Container '"<<EVCOLLNAME_LOCRECCORROD<<"' not found" );
 		//return StatusCode::FAILURE;
 	}
-	else CHECK(pDataEvent->AddLink(EDVT_LOCRECCORRODEVCOLLECTION, pAuxLocRecCorrODEvColl));
-
-	//GloRecEvCollection
-	//const ALFA_GloRecEvCollection* pAuxGloRecEvColl;
-	//sc = evtStore()->retrieve(pAuxGloRecEvColl, EVCOLLNAME_GLOREC);
-	//if(sc.isFailure() || !pAuxGloRecEvColl) {
-	//	msg(MSG::WARNING) << "Container '"<<EVCOLLNAME_GLOREC<<"' not found" << endmsg;
-	//	return StatusCode::FAILURE;
-	//}
-	//else CHECK(pDataEvent->AddLink(EDVT_GLORECEVCOLLECTION, pAuxGloRecEvColl));
+	else CHECK(dataEvent.AddLink(EDVT_LOCRECCORRODEVCOLLECTION, locRecCorrODEvColl.cptr()));
 
 	return StatusCode::SUCCESS;
 
 }
 
-StatusCode ALFA_CLinkAlg::AddCOOLFolderCallback(const string& Folder)
-{
-	StatusCode sc=StatusCode::FAILURE;
-
-	const DataHandle<CondAttrListCollection> DataPtr;
-	sc=detStore()->regFcn(&ALFA_CLinkAlg::COOLUpdate, this, DataPtr, Folder, true);
-	if(sc!=StatusCode::SUCCESS){
-		msg(MSG::ERROR) << "Cannot register COOL callback for folder '"<<Folder<<"'" << endmsg;
-	}
-
-	return sc;
-}
-
-//StatusCode ALFA_CLinkAlg::COOLUpdate(IOVSVC_CALLBACK_ARGS_P(/*I*/, keys))
-StatusCode ALFA_CLinkAlg::COOLUpdate(IOVSVC_CALLBACK_ARGS_K(keys))
-{
-	list<string>::const_iterator iter;
-
-	for(iter=keys.begin();iter!=keys.end();++iter){
-		if((*iter)==DCSCOLLNAME_BLM){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_BLM<<"'" << endmsg;
-			m_CurrentDCSId.ullBlmID=CalcDCSId(EDCSI_BLM);
-		}
-		else if((*iter)==DCSCOLLNAME_HVCHANNEL){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_HVCHANNEL<<"'" << endmsg;
-			m_CurrentDCSId.ullHVChannelID=CalcDCSId(EDCSI_HVCHANNEL);
-		}
-		else if((*iter)==DCSCOLLNAME_LOCALMONITORING){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_LOCALMONITORING<<"'" << endmsg;
-			m_CurrentDCSId.ullLocalMonitoringID=CalcDCSId(EDCSI_LOCALMONITORING);
-		}
-		else if((*iter)==DCSCOLLNAME_MOVEMENT){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_MOVEMENT<<"'" << endmsg;
-			m_CurrentDCSId.ullMovementID=CalcDCSId(EDCSI_MOVEMENT);
-		}
-		else if((*iter)==DCSCOLLNAME_RADMON){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_RADMON<<"'" << endmsg;
-			m_CurrentDCSId.ullRadMonID=CalcDCSId(EDCSI_RADMON);
-		}
-		else if((*iter)==DCSCOLLNAME_TRIGGERRATES){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_TRIGGERRATES<<"'" << endmsg;
-			m_CurrentDCSId.ullTriggerRatesID=CalcDCSId(EDCSI_TRIGGERRATES);
-		}
-		else if((*iter)==DCSCOLLNAME_FECONFIGURATION){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_FECONFIGURATION<<"'" << endmsg;
-			m_CurrentDCSId.ullFEConfigurationID=CalcDCSId(EDCSI_FECONFIGURATION);
-		}
-		else if((*iter)==DCSCOLLNAME_TRIGGERSETTINGS){
-			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_TRIGGERSETTINGS<<"'" << endmsg;
-			m_CurrentDCSId.ullTriggerSettingsID=CalcDCSId(EDCSI_TRIGGERSETTINGS);
-		}
-	}
-
-	return StatusCode::SUCCESS;
-}
-
-unsigned long long ALFA_CLinkAlg::CalcDCSId(eDCSItem eItem)
+unsigned long long
+ALFA_CLinkAlg::CalcDCSId (const EventContext& ctx,
+                          const SG::ReadCondHandleKey<CondAttrListCollection>& key) const
 {
 	unsigned long long ullID;
-	string Folder;
+        std::string Folder;
 
-	switch(eItem)
-	{
-	case EDCSI_BLM:
-		Folder=DCSCOLLNAME_BLM;
-		break;
-	case EDCSI_HVCHANNEL:
-		Folder=DCSCOLLNAME_HVCHANNEL;
-		break;
-	case EDCSI_LOCALMONITORING:
-		Folder=DCSCOLLNAME_LOCALMONITORING;
-		break;
-	case EDCSI_MOVEMENT:
-		Folder=DCSCOLLNAME_MOVEMENT;
-		break;
-	case EDCSI_RADMON:
-		Folder=DCSCOLLNAME_RADMON;
-		break;
-	case EDCSI_TRIGGERRATES:
-		Folder=DCSCOLLNAME_TRIGGERRATES;
-		break;
-	case EDCSI_FECONFIGURATION:
-		Folder=DCSCOLLNAME_FECONFIGURATION;
-		break;
-	case EDCSI_TRIGGERSETTINGS:
-		Folder=DCSCOLLNAME_TRIGGERSETTINGS;
-		break;
-	default:
-		break;
-	}
-
-	const CondAttrListCollection* pAttrListCol=nullptr;
-    IIOVDbSvc::KeyInfo info;
-	CHECK(detStore()->retrieve(pAttrListCol,Folder), 0);
-	if(!m_iovSvc->getKeyInfo(Folder,info)) {
-		msg(MSG::ERROR)<<"Couldn't get IOV data about folder: "<<Folder<<endmsg;
-		return 0;
-	}
+        SG::ReadCondHandle<CondAttrListCollection> h (key, ctx);
+        EventIDRange range;
+        if (!h.range (range)) return 0;
 
 	// Construct the ID:
-	IOVTime time=info.range.start();
-	if(time.isRunEvent()){
-		ullID=static_cast<unsigned long long>(((time.run()&0xffff)<<16)|(time.event()&0xffff));
+        EventIDBase time = range.start();
+	if(time.isRunLumi()){
+		ullID=static_cast<unsigned long long>(((time.run_number()&0xffff)<<16)|(time.lumi_block()&0xffff));
 	}
-	else if(time.isTimestamp()){
-		//ullID=static_cast<unsigned long long>(time.timestamp()&0xffffffff);
-		ullID=static_cast<unsigned long long>(time.timestamp());
+	else if(time.isTimeStamp()){
+                ullID = time.time_stamp();
+                ullID <<= 32;
+                ullID |= time.time_stamp_ns_offset();
 	}
 	else{
 		ullID=0;
@@ -304,72 +180,63 @@ unsigned long long ALFA_CLinkAlg::CalcDCSId(eDCSItem eItem)
 	return ullID;
 }
 
-StatusCode ALFA_CLinkAlg::CalcAllDCSIds(PDCSID pDCSIds)
+StatusCode ALFA_CLinkAlg::CalcAllDCSIds (const EventContext& ctx,
+                                         DCSID& DCSIds) const
 {
 	bool bRes=true;
 
-	if(pDCSIds!=nullptr){
-		memset(pDCSIds,0,sizeof(DCSID));
-		bRes&=(pDCSIds->ullBlmID=CalcDCSId(EDCSI_BLM))>0;
-		bRes&=(pDCSIds->ullHVChannelID=CalcDCSId(EDCSI_HVCHANNEL))>0;
-		bRes&=(pDCSIds->ullLocalMonitoringID=CalcDCSId(EDCSI_LOCALMONITORING))>0;
-		bRes&=(pDCSIds->ullMovementID=CalcDCSId(EDCSI_MOVEMENT))>0;
-		bRes&=(pDCSIds->ullRadMonID=CalcDCSId(EDCSI_RADMON))>0;
-		bRes&=(pDCSIds->ullTriggerRatesID=CalcDCSId(EDCSI_TRIGGERRATES))>0;
-		bRes&=(pDCSIds->ullFEConfigurationID=CalcDCSId(EDCSI_FECONFIGURATION))>0;
-		bRes&=(pDCSIds->ullTriggerSettingsID=CalcDCSId(EDCSI_TRIGGERSETTINGS))>0;
-	}
-	else bRes=false;
-
+        bRes&=(DCSIds.ullBlmID=CalcDCSId(ctx, m_BLMKey))>0;
+        bRes&=(DCSIds.ullHVChannelID=CalcDCSId(ctx, m_HVChannelKey))>0;
+        bRes&=(DCSIds.ullLocalMonitoringID=CalcDCSId(ctx, m_localMonitoringKey))>0;
+        bRes&=(DCSIds.ullMovementID=CalcDCSId(ctx, m_movementKey))>0;
+        bRes&=(DCSIds.ullRadMonID=CalcDCSId(ctx, m_radmonKey))>0;
+        bRes&=(DCSIds.ullTriggerRatesID=CalcDCSId(ctx, m_triggerRatesKey))>0;
+        bRes&=(DCSIds.ullFEConfigurationID=CalcDCSId(ctx, m_FEConfigurationKey))>0;
+        bRes&=(DCSIds.ullTriggerSettingsID=CalcDCSId(ctx, m_triggerSettingsKey))>0;
 	return bRes? StatusCode::SUCCESS:StatusCode::FAILURE;
 }
 
-StatusCode ALFA_CLinkAlg::GenerateXAOD()
+StatusCode ALFA_CLinkAlg::GenerateXAOD(const EventContext& ctx)
 {
-	StatusCode sc=StatusCode::SUCCESS;
+	auto pxAODContainer = std::make_unique<xAOD::ALFADataContainer>();
+	auto pxAODAuxContainer = std::make_unique<xAOD::ALFADataAuxContainer>();
+	pxAODContainer->setStore(pxAODAuxContainer.get());
 
-	xAOD::ALFADataContainer* pxAODContainer=new xAOD::ALFADataContainer();
-	CHECK(evtStore()->record(pxAODContainer,EVCOLLNAME_XAODALFADATACONTAINER));
-	xAOD::ALFADataAuxContainer* pxAODAuxContainer=new xAOD::ALFADataAuxContainer();
-	CHECK(evtStore()->record(pxAODAuxContainer,EVCOLLNAME_XAODALFADATAAUXCONTAINER));
-	pxAODContainer->setStore(pxAODAuxContainer);
+	CHECK(FillXAOD_TrackingData(ctx, *pxAODContainer));
+	CHECK(FillXAOD_HeaderData(ctx, *pxAODContainer));
 
-	CHECK(FillXAOD_TrackingData(pxAODContainer));
-	CHECK(FillXAOD_HeaderData(pxAODContainer));
+        SG::WriteHandle<xAOD::ALFADataContainer> xaodData (m_xaodDataKey, ctx);
+        ATH_CHECK( xaodData.record (std::move(pxAODContainer),
+                                    std::move(pxAODAuxContainer)) );
 
-	return sc;
+	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODContainer)
+StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(const EventContext& ctx,
+                                                xAOD::ALFADataContainer& xAODContainer)
 {
-	StatusCode sc=StatusCode::SUCCESS, sc2=StatusCode::SUCCESS;
-
 	unsigned int i;
 	int nPotID, nSideID, nODSign;
 	int arrTrackCntPerRPot[RPOTSCNT];
 	vector<int> vecFiberSel;
 
 	//LocRecEvCollection & LocRecODEvCollection
-	const ALFA_LocRecEvCollection* pLocRecEvColl;
-	const ALFA_LocRecODEvCollection* pLocRecODEvColl;
-	ALFA_LocRecEvCollection::const_iterator iterLocRec;
-	ALFA_LocRecODEvCollection::const_iterator iterLocRecOD;
-	sc=evtStore()->retrieve(pLocRecEvColl, EVCOLLNAME_LOCREC);
-	sc2=evtStore()->retrieve(pLocRecODEvColl, EVCOLLNAME_LOCRECOD);
+        SG::ReadHandle<ALFA_LocRecEvCollection> locRecEvColl (m_locRecEvCollKey, ctx);
+        SG::ReadHandle<ALFA_LocRecODEvCollection> locRecODEvColl (m_locRecODEvCollKey, ctx);
 
-	if(!sc.isFailure() && !sc2.isFailure() && pLocRecEvColl!=nullptr && pLocRecODEvColl!=nullptr)
+	if(locRecEvColl.isValid() && locRecODEvColl.isValid())
 	{
 		m_nMaxTrackCnt=1;
 		// resolve max track count from LocRecEvCollection
 		memset(&arrTrackCntPerRPot[0],0,sizeof(arrTrackCntPerRPot));
-		for(iterLocRec=pLocRecEvColl->begin();iterLocRec!=pLocRecEvColl->end();++iterLocRec)
+		for(const ALFA_LocRecEvent* locRecEvent : *locRecEvColl)
 		{
-			nPotID=(*iterLocRec)->getPotNum();
+			nPotID=locRecEvent->getPotNum();
 			arrTrackCntPerRPot[nPotID]++;
 		}
-		for(iterLocRecOD=pLocRecODEvColl->begin();iterLocRecOD!=pLocRecODEvColl->end();++iterLocRecOD)
+		for(const ALFA_LocRecODEvent* locRecODEvent : *locRecODEvColl)
 		{
-			nPotID=(*iterLocRecOD)->getPotNum();
+			nPotID=locRecODEvent->getPotNum();
 			arrTrackCntPerRPot[nPotID]++;
 		}
 		for(i=0;i<RPOTSCNT;i++){
@@ -381,20 +248,20 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 
 		//fill data - LocRecEvCollection
 		vecFiberSel.clear();
-		for(iterLocRec=pLocRecEvColl->begin();iterLocRec!=pLocRecEvColl->end();++iterLocRec)
+		for(const ALFA_LocRecEvent* locRecEvent : *locRecEvColl)
 		{
-			nPotID=(*iterLocRec)->getPotNum();
+			nPotID=locRecEvent->getPotNum();
 
 			(m_vecDetectorPartID)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=1;
-			(m_vecXDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRec)->getXposition();
-			(m_vecYDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRec)->getYposition();
+			(m_vecXDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecEvent->getXposition();
+			(m_vecYDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecEvent->getYposition();
 
-			(m_vecOverU)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRec)->getOverU();
-			(m_vecOverV)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRec)->getOverV();
-			(m_vecNumU)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRec)->getNumU();
-			(m_vecNumV)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRec)->getNumV();
+			(m_vecOverU)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecEvent->getOverU();
+			(m_vecOverV)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecEvent->getOverV();
+			(m_vecNumU)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecEvent->getNumU();
+			(m_vecNumV)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecEvent->getNumV();
 
-			vecFiberSel=(*iterLocRec)->getFibSel();
+			vecFiberSel=locRecEvent->getFibSel();
 			for(i=0;i<vecFiberSel.size();i++)
 			{
 				(m_vecMDFibSel)[nPotID*m_nMaxTrackCnt*MDLAYERSCNT*MDPLATESCNT+arrTrackCntPerRPot[nPotID]*MDLAYERSCNT*MDPLATESCNT+i]=vecFiberSel[i];
@@ -405,19 +272,19 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 
 		//fill data - LocRecODEvCollection
 		vecFiberSel.clear();
-		for(iterLocRecOD=pLocRecODEvColl->begin();iterLocRecOD!=pLocRecODEvColl->end();++iterLocRecOD)
+		for(const ALFA_LocRecODEvent* locRecODEvent : *locRecODEvColl)
 		{
-			nPotID=(*iterLocRecOD)->getPotNum();
-			nSideID=(*iterLocRecOD)->getSide();
+			nPotID=locRecODEvent->getPotNum();
+			nSideID=locRecODEvent->getSide();
 
 			nODSign=(nSideID==0)? -1:1;
 			(m_vecDetectorPartID)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(nSideID==0)? 3:2;
 			(m_vecXDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=nODSign*22.0;
-			(m_vecYDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecOD)->getYposition();
-			(m_vecOverY)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecOD)->getOverY();
-			(m_vecNumY)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecOD)->getNumY();
+			(m_vecYDetCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecODEvent->getYposition();
+			(m_vecOverY)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecODEvent->getOverY();
+			(m_vecNumY)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecODEvent->getNumY();
 
-			vecFiberSel=(*iterLocRecOD)->getFibSel();
+			vecFiberSel=locRecODEvent->getFibSel();
 			for(i=0;i<vecFiberSel.size();i++)
 			{
 				(m_vecODFibSel)[nPotID*m_nMaxTrackCnt*ODPLATESCNT+arrTrackCntPerRPot[nPotID]*ODPLATESCNT+i]=vecFiberSel[i];
@@ -429,75 +296,70 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 	}
 	else
 	{
-		msg(MSG::WARNING) << "Cannot find '"<< EVCOLLNAME_LOCREC <<"' or '"<<EVCOLLNAME_LOCRECOD<<"' collection"<<endmsg;
+                ATH_MSG_WARNING( "Cannot find '"<< EVCOLLNAME_LOCREC <<"' or '"<<EVCOLLNAME_LOCRECOD<<"' collection" );
 		//return StatusCode::FAILURE;
 	}
 
 	//LocRecCorrEvCollection && LocRecCorrODEvCollection
-	const ALFA_LocRecCorrEvCollection* pLocRecCorrEvColl;
-	const ALFA_LocRecCorrODEvCollection* pLocRecCorrODEvColl;
-	ALFA_LocRecCorrEvCollection::const_iterator iterLocRecCorr;
-	ALFA_LocRecCorrODEvCollection::const_iterator iterLocRecCorrOD;
-	sc=evtStore()->retrieve(pLocRecCorrEvColl, EVCOLLNAME_LOCRECCORR);
-	sc2=evtStore()->retrieve(pLocRecCorrODEvColl, EVCOLLNAME_LOCRECCORROD);
+        SG::ReadHandle<ALFA_LocRecCorrEvCollection> locRecCorrEvColl (m_locRecCorrEvCollKey, ctx);
+        SG::ReadHandle<ALFA_LocRecCorrODEvCollection> locRecCorrODEvColl (m_locRecCorrODEvCollKey, ctx);
 
-	if(!sc.isFailure() && !sc2.isFailure() && pLocRecCorrEvColl!=nullptr && pLocRecCorrODEvColl!=nullptr)
+	if(locRecCorrEvColl.isValid() && locRecCorrODEvColl.isValid())
 	{
 		memset(&arrTrackCntPerRPot[0],0,sizeof(arrTrackCntPerRPot));
 		ClearXAODTrackingData(m_nMaxTrackCnt,ERC_LOCCORRECTED);
 
 		//fill data - LocRecCorrEvCollection - ONLY DetCS for now (TODO rest)
-		for(iterLocRecCorr=pLocRecCorrEvColl->begin();iterLocRecCorr!=pLocRecCorrEvColl->end();++iterLocRecCorr)
+		for(const ALFA_LocRecCorrEvent* locRecCorrEvent : *locRecCorrEvColl)
 		{
-			nPotID=(*iterLocRecCorr)->getPotNum();
+			nPotID=locRecCorrEvent->getPotNum();
 
-			(m_vecXLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getXpositionLHC();
-			(m_vecYLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getYpositionLHC();
-			(m_vecZLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getZpositionLHC();
+			(m_vecXLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getXpositionLHC();
+			(m_vecYLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getYpositionLHC();
+			(m_vecZLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getZpositionLHC();
 
-			(m_vecXRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getXpositionPot();
-			(m_vecYRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getYpositionPot();
+			(m_vecXRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getXpositionPot();
+			(m_vecYRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getYpositionPot();
 
-			(m_vecXStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getXpositionStat();
-			(m_vecYStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getYpositionStat();
+			(m_vecXStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getXpositionStat();
+			(m_vecYStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getYpositionStat();
 
-			(m_vecXBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getXpositionBeam();
-			(m_vecYBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorr)->getYpositionBeam();
+			(m_vecXBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getXpositionBeam();
+			(m_vecYBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrEvent->getYpositionBeam();
 
 			arrTrackCntPerRPot[nPotID]++;
 		}
 
 		//fill data - LocRecCorrODEvCollection - ONLY DetCS for now (TODO rest)
-		for(iterLocRecCorrOD=pLocRecCorrODEvColl->begin();iterLocRecCorrOD!=pLocRecCorrODEvColl->end();++iterLocRecCorrOD)
+		for(const ALFA_LocRecCorrODEvent* locRecCorrODEvent : *locRecCorrODEvColl)
 		{
-			nPotID=(*iterLocRecCorrOD)->getPotNum();
-			nSideID=(*iterLocRecCorrOD)->getSide();
+			nPotID=locRecCorrODEvent->getPotNum();
+			nSideID=locRecCorrODEvent->getSide();
 
 			nODSign=(nSideID==0)? -1:1;
 			(m_vecXLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=nODSign*22.0;
-			(m_vecYLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorrOD)->getYpositionLHC();
-			(m_vecZLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorrOD)->getZpositionLHC();
+			(m_vecYLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrODEvent->getYpositionLHC();
+			(m_vecZLhcCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrODEvent->getZpositionLHC();
 
 			(m_vecXRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=nODSign*22.0;
-			(m_vecYRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorrOD)->getYpositionPot();
+			(m_vecYRPotCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrODEvent->getYpositionPot();
 
 			(m_vecXStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=nODSign*22.0;
-			(m_vecYStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorrOD)->getYpositionStat();
+			(m_vecYStatCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrODEvent->getYpositionStat();
 
 			(m_vecXBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=nODSign*22.0;
-			(m_vecYBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=(*iterLocRecCorrOD)->getYpositionBeam();
+			(m_vecYBeamCS)[nPotID*m_nMaxTrackCnt+arrTrackCntPerRPot[nPotID]]=locRecCorrODEvent->getYpositionBeam();
 
 			arrTrackCntPerRPot[nPotID]++;
 		}
 	}
 	else
 	{
-		msg(MSG::WARNING) << "Cannot find '"<< EVCOLLNAME_LOCRECCORR <<"' or '"<<EVCOLLNAME_LOCRECCORROD<<"' collection"<<endmsg;
+                ATH_MSG_WARNING( "Cannot find '"<< EVCOLLNAME_LOCRECCORR <<"' or '"<<EVCOLLNAME_LOCRECCORROD<<"' collection" );
 		//return StatusCode::FAILURE;
 	}
 
-	xAOD::ALFAData* pData=new xAOD::ALFAData();
-	pxAODContainer->push_back(pData);
+	auto pData = std::make_unique<xAOD::ALFAData>();
 
 	//LocRecEvCollection & LocRecODEvCollection
 	pData->setXDetCS(m_vecXDetCS);
@@ -524,13 +386,14 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 	pData->setXBeamCS(m_vecXBeamCS);
 	pData->setYBeamCS(m_vecYBeamCS);
 
+	xAODContainer.push_back(std::move(pData));
+
 	return StatusCode::SUCCESS;
 }
 
-StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODContainer)
+StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(const EventContext& ctx,
+                                              xAOD::ALFADataContainer& xAODContainer)
 {
-	StatusCode sc=StatusCode::SUCCESS;
-
 	unsigned int i;
 	int nPotID, nPlateID, nFiberID, nSideID;
 	ClearXAODHeaderData();
@@ -549,22 +412,20 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 		*m_pullDCSTriggerSettingsID=DataEvent.GetDCSFolderID(EDCSI_TRIGGERSETTINGS);*/
 
 		//RawDataContainer
-		const ALFA_RawDataContainer* pRawDataColl;
-		ALFA_RawDataContainer::const_iterator iterRawData;
-		sc=evtStore()->retrieve(pRawDataColl, EVCOLLNAME_RAWDATA);
-		if(!sc.isFailure() && pRawDataColl!=nullptr)
+                SG::ReadHandle<ALFA_RawDataContainer> rawDataCont (m_rawDataContKey, ctx);
+		if(rawDataCont.isValid())
 		{
 			//m_nTimeStamp=pRawDataColl->GetTimeStamp();
 			//m_nTimeStamp_ns=pRawDataColl->GetTimeStampns();
 			//m_nBCId=pRawDataColl->GetBCId();
 
 			vector<bool> vecRPPattern;
-			for(iterRawData=pRawDataColl->begin();iterRawData!=pRawDataColl->end();++iterRawData)
+                        for (const ALFA_RawDataCollection* rawDataColl : *rawDataCont)
 			{
-				nPotID=(*iterRawData)->GetMBId_POT();
-				(m_vecScaler)[nPotID-1]=(*iterRawData)->Get_scaler_POT();
+				nPotID=rawDataColl->GetMBId_POT();
+				(m_vecScaler)[nPotID-1]=rawDataColl->Get_scaler_POT();
 
-				vecRPPattern=(*iterRawData)->Get_pattern_POT();
+				vecRPPattern=rawDataColl->Get_pattern_POT();
 				for(i=0;i<vecRPPattern.size();i++){
 					if(i<RPOTSCNT*TRIGPATCNT) (m_vecTrigPat)[(nPotID-1)*TRIGPATCNT+i]=vecRPPattern[vecRPPattern.size()-(i+1)];
 				}
@@ -572,22 +433,20 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 		}
 		else
 		{
-			msg(MSG::WARNING) << "Cannot find '"<< EVCOLLNAME_RAWDATA <<"' collection"<<endmsg;
+                        ATH_MSG_WARNING( "Cannot find '"<< EVCOLLNAME_RAWDATA <<"' collection" );
 			//return StatusCode::FAILURE;
 		}
 	}
 
 	//DigitCollection
-	const ALFA_DigitCollection* pDigitColl;
-	ALFA_DigitCollection::const_iterator iterDigit;
-	sc=evtStore()->retrieve(pDigitColl, EVCOLLNAME_DIGIT);
-	if(!sc.isFailure() && pDigitColl!=nullptr)
+        SG::ReadHandle<ALFA_DigitCollection> digitColl (m_digitCollKey, ctx);
+	if(digitColl.isValid())
 	{
-		for(iterDigit=pDigitColl->begin();iterDigit!=pDigitColl->end();++iterDigit)
+                for (const ALFA_Digit* digit : *digitColl)
 		{
-			nPotID=(*iterDigit)->getStation(); //in range 0-7
-			nPlateID=(*iterDigit)->getPlate(); //indexed from 0
-			nFiberID=(*iterDigit)->getFiber(); //indexed from 0
+			nPotID=digit->getStation(); //in range 0-7
+			nPlateID=digit->getPlate(); //indexed from 0
+			nFiberID=digit->getFiber(); //indexed from 0
 
 			if(nPotID<RPOTSCNT && nPlateID<(MDLAYERSCNT*MDPLATESCNT) && nFiberID<MDFIBERSCNT)
 			{
@@ -596,28 +455,26 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 			}
 			else
 			{
-				msg(MSG::ERROR) << "Index exceed array size for [RPotID, nPlateID, nFiberID]= ["<<nPotID<<", "<<nPlateID<<", "<<nFiberID<<"]"<<endmsg;
+                                ATH_MSG_ERROR( "Index exceed array size for [RPotID, nPlateID, nFiberID]= ["<<nPotID<<", "<<nPlateID<<", "<<nFiberID<<"]" );
 				//return StatusCode::FAILURE;
 			}
 		}
 	}
 	else{
-		msg(MSG::WARNING) << "Cannot find '"<< EVCOLLNAME_DIGIT <<"' collection"<<endmsg;
+                ATH_MSG_WARNING( "Cannot find '"<< EVCOLLNAME_DIGIT <<"' collection" );
 		//return StatusCode::FAILURE;
 	}
 
 	//ODDigitCollection
-	const ALFA_ODDigitCollection* pODDigitColl;
-	ALFA_ODDigitCollection::const_iterator iterODDigit;
-	sc=evtStore()->retrieve(pODDigitColl, EVCOLLNAME_ODDIGIT);
-	if(!sc.isFailure() && pODDigitColl!=nullptr)
+        SG::ReadHandle<ALFA_ODDigitCollection> odDigitColl (m_ODDigitCollKey, ctx);
+	if(odDigitColl.isValid())
 	{
-		for(iterODDigit=pODDigitColl->begin();iterODDigit!=pODDigitColl->end();++iterODDigit)
+                for (const ALFA_ODDigit* oddigit : *odDigitColl)
 		{
-			nPotID=(*iterODDigit)->getStation(); //in range 0-7
-			nPlateID=(*iterODDigit)->getPlate(); //indexed from 0
-			nSideID=(*iterODDigit)->getSide();   //indexed from 0
-			nFiberID=(*iterODDigit)->getFiber(); //indexed from 0
+			nPotID=oddigit->getStation(); //in range 0-7
+			nPlateID=oddigit->getPlate(); //indexed from 0
+			nSideID=oddigit->getSide();   //indexed from 0
+			nFiberID=oddigit->getFiber(); //indexed from 0
 
 			if(nPotID<RPOTSCNT && nPlateID<(ODPLATESCNT) && nFiberID<ODLAYERSCNT*ODFIBERSCNT)
 			{
@@ -632,19 +489,18 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 			}
 			else
 			{
-				msg(MSG::ERROR) << "Index exceed array size for [RPotID, nPlateID, nFiberID, nSideID]= ["<<nPotID<<", "<<nPlateID<<", "<<nFiberID<<", "<<nSideID<<"]"<<endmsg;
+                                ATH_MSG_ERROR( "Index exceed array size for [RPotID, nPlateID, nFiberID, nSideID]= ["<<nPotID<<", "<<nPlateID<<", "<<nFiberID<<", "<<nSideID<<"]" );
 				//return StatusCode::FAILURE;
 			}
 		}
 	}
 	else
 	{
-		msg(MSG::WARNING) << "Cannot find '"<< EVCOLLNAME_ODDIGIT <<"' collection"<<endmsg;
+                ATH_MSG_WARNING( "Cannot find '"<< EVCOLLNAME_ODDIGIT <<"' collection" );
 		//return StatusCode::FAILURE;
 	}
 
-	xAOD::ALFAData* pData=new xAOD::ALFAData();
-	pxAODContainer->push_back(pData);
+	auto pData = std::make_unique<xAOD::ALFAData>();
 
 	//RawDataContainer
 	pData->setScaler(m_vecScaler);
@@ -662,6 +518,8 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 	pData->setODFiberHitsNeg(m_vecODFiberHitsNeg);
 	pData->setODMultiplicityPos(m_vecODMultiplicityPos);
 	pData->setODMultiplicityNeg(m_vecODMultiplicityNeg);
+
+	xAODContainer.push_back(std::move(pData));
 
 	return StatusCode::SUCCESS;
 }

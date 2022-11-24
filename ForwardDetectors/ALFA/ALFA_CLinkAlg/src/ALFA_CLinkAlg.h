@@ -6,15 +6,19 @@
 #define ALFA_CLINKALG_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/MsgStream.h"
-#include "AthLinks/DataLink.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "AthenaBaseComps/AthService.h"
-#include "AthenaKernel/IIOVSvc.h"
-#include "AthenaKernel/IIOVDbSvc.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 
 #include "ALFA_CLinkEv/ALFA_CLinkEvent.h"
 #include "xAODForward/ALFADataContainer.h"
+#include "ALFA_RawEv/ALFA_RawDataContainer.h"
+#include "ALFA_RawEv/ALFA_DigitCollection.h"
+#include "ALFA_RawEv/ALFA_ODDigitCollection.h"
+#include "ALFA_LocRecEv/ALFA_LocRecEvCollection.h"
+#include "ALFA_LocRecEv/ALFA_LocRecODEvCollection.h"
+#include "ALFA_LocRecCorrEv/ALFA_LocRecCorrEvCollection.h"
+#include "ALFA_LocRecCorrEv/ALFA_LocRecCorrODEvCollection.h"
 
 #define EVCOLLNAME_XAODALFADATACONTAINER "ALFADataContainer"
 #define EVCOLLNAME_XAODALFADATAAUXCONTAINER "ALFADataContainerAux."
@@ -49,32 +53,29 @@ class ALFA_CLinkAlg : public AthAlgorithm
 {
 public:
 	ALFA_CLinkAlg (const std::string& name, ISvcLocator* pSvcLocator);
-	~ALFA_CLinkAlg();
+	virtual ~ALFA_CLinkAlg();
 
 private:
-	DCSID m_CurrentDCSId{};
-	ServiceHandle< IIOVDbSvc > m_iovSvc;
-
 	int m_nDataType; //data type (simulation or real data) using in the local reconstruction
 	int m_nProcessingMode; //1=offline, 2=online
 
 public:
-	StatusCode initialize();
-	StatusCode execute();
-	StatusCode finalize();
+	virtual StatusCode initialize() override;
+	virtual StatusCode execute() override;
+	virtual StatusCode finalize() override;
 
 public:
-	StatusCode LoadAllEventData(ALFA_CLinkEvent* pDataEvent);
+	StatusCode LoadAllEventData(const EventContext& ctx, ALFA_CLinkEvent& dataEvent) const;
 private:
-	StatusCode COOLUpdate(IOVSVC_CALLBACK_ARGS_P(I, keys));
-	StatusCode AddCOOLFolderCallback(const std::string& szFolder);
-	unsigned long long CalcDCSId(eDCSItem eItem);
-	StatusCode CalcAllDCSIds(PDCSID pDCSIds);
+        unsigned long long CalcDCSId (const EventContext& ctx,
+                                      const SG::ReadCondHandleKey<CondAttrListCollection>& key) const;
+	StatusCode CalcAllDCSIds (const EventContext& ctx,
+                                  DCSID& pDCSIds) const;
 
 private:
-	StatusCode GenerateXAOD();
-	StatusCode FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODContainer);
-	StatusCode FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODContainer);
+	StatusCode GenerateXAOD(const EventContext& ctx);
+	StatusCode FillXAOD_TrackingData(const EventContext& ctx, xAOD::ALFADataContainer& xAODContainer);
+        StatusCode FillXAOD_HeaderData(const EventContext& ctx, xAOD::ALFADataContainer& xAODContainer);
 	void ClearXAODTrackingData(const int nMaxTrackCnt, eRecType eType);
 	void ClearXAODHeaderData();
 
@@ -120,6 +121,43 @@ private:
 	std::vector<int> m_vecODFiberHitsNeg;
 	std::vector<int> m_vecODMultiplicityPos;
 	std::vector<int> m_vecODMultiplicityNeg;
+
+        SG::ReadCondHandleKey<CondAttrListCollection> m_BLMKey
+          { this, "BLMKey", DCSCOLLNAME_BLM, "BLM conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_HVChannelKey
+          { this, "HVChannelKey", DCSCOLLNAME_HVCHANNEL, "HV channel conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_localMonitoringKey
+          { this, "LocalMonitoringKey", DCSCOLLNAME_LOCALMONITORING, "Local monitoring conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_movementKey
+          { this, "MovementKey", DCSCOLLNAME_LOCALMONITORING, "Movement conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_radmonKey
+          { this, "RadmonKey", DCSCOLLNAME_RADMON, "Radmon conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_triggerRatesKey
+          { this, "TriggerRatesKey", DCSCOLLNAME_TRIGGERRATES, "Trigger rates conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_FEConfigurationKey
+          { this, "FEConfigurationKey", DCSCOLLNAME_FECONFIGURATION, "FE configuration conditions key" };
+        SG::ReadCondHandleKey<CondAttrListCollection> m_triggerSettingsKey
+          { this, "TriggerSettingsKey", DCSCOLLNAME_TRIGGERSETTINGS, "Trigger settings conditions key" };
+
+        SG::ReadHandleKey<ALFA_RawDataContainer> m_rawDataContKey
+          { this, "RawDataContKey", EVCOLLNAME_RAWDATA, "SG key for raw data container" };
+        SG::ReadHandleKey<ALFA_DigitCollection> m_digitCollKey
+          { this, "DigitCollKey", EVCOLLNAME_DIGIT, "SG key for digit collection" };
+        SG::ReadHandleKey<ALFA_ODDigitCollection> m_ODDigitCollKey
+          { this, "ODDigitCollKey", EVCOLLNAME_ODDIGIT, "SG key for OD digit collection" };
+        SG::ReadHandleKey<ALFA_LocRecEvCollection> m_locRecEvCollKey
+          { this, "LocRecEvCollectionKey", EVCOLLNAME_LOCREC, "SG key for LocRecEv collection" };
+        SG::ReadHandleKey<ALFA_LocRecODEvCollection> m_locRecODEvCollKey
+          { this, "LocRecEvODCollectionKey", EVCOLLNAME_LOCRECOD, "SG key for LocRecEvOD collection" };
+        SG::ReadHandleKey<ALFA_LocRecCorrEvCollection> m_locRecCorrEvCollKey
+          { this, "LocRecCorrEvCollectionKey", EVCOLLNAME_LOCRECCORR, "SG key for LocRecCorrEv collection" };
+        SG::ReadHandleKey<ALFA_LocRecCorrODEvCollection> m_locRecCorrODEvCollKey
+          { this, "LocRecCorrODEvCollectionKey", EVCOLLNAME_LOCRECCORROD, "SG key for LocRecCorrODEv collection" };
+
+        SG::WriteHandleKey<ALFA_CLinkEvent> m_clinkEventKey
+          { this, "CLinkEventKey", "ALFA_CLinkEvent", "SG key for output CLinkEvent" };
+        SG::WriteHandleKey<xAOD::ALFADataContainer> m_xaodDataKey
+          { this, "xAODDataKey", EVCOLLNAME_XAODALFADATACONTAINER, "SG key for output xAOD::ALFADataContainer" };
 };
 
 #endif // ALFA_CLINKALG_H
