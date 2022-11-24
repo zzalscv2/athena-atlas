@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/tools/AuxDataTraits.h
  * @author scott snyder <snyder@bnl.gov>
@@ -30,23 +28,26 @@ namespace SG {
  * @c T here is the type that the user requests, eg in the template
  * argument of a decorator.
  */
-template <class T>
+template <class T, class ALLOC = std::allocator<T> >
 class AuxDataTraits
 {
 public:
   /// The type the user sees.
-  typedef T element_type;
+  using element_type = T;
 
   /// Reference types returned by aux data accessors.
-  typedef T& reference_type;
-  typedef const T& const_reference_type;
+  using reference_type = element_type&;
+  using const_reference_type =  const element_type&;
+
+  /// Allocator type used to store this variable.
+  using allocator_type = ALLOC;
 
   /// Container type used to store this variable.
-  typedef std::vector<T> vector_type;
+  using vector_type = std::vector<T, allocator_type>;
 
   /// Pointers to the data within the container.
-  typedef typename vector_type::pointer container_pointer_type;
-  typedef typename vector_type::const_pointer const_container_pointer_type;
+  using container_pointer_type = typename vector_type::pointer;
+  using const_container_pointer_type = typename vector_type::const_pointer;
 
   /// Look up an element in the container by index.
   /// ptr is a pointer to the start of the container's data.
@@ -73,23 +74,26 @@ public:
  * @c T here is the type that the user requests, eg in the template
  * argument of a decorator.
  */
-template <>
-class AuxDataTraits<bool>
+template <class ALLOC>
+class AuxDataTraits<bool, ALLOC>
 {
 public:
   /// The type the user sees.
-  typedef bool element_type;
+  using element_type = bool;
 
   /// Reference types returned by aux data accessors.
-  typedef bool& reference_type;
-  typedef const bool& const_reference_type;
+  using reference_type = element_type&;
+  using const_reference_type =  const element_type&;
+
+  /// Allocator type used to store this variable.
+  using allocator_type = typename std::allocator_traits<ALLOC>::template rebind_alloc<char>;
 
   /// Container type used to store this variable.
-  typedef std::vector<char> vector_type;
+  using vector_type = std::vector<char, allocator_type>;
 
   /// Pointers to the data within the container.
-  typedef vector_type::pointer container_pointer_type;
-  typedef vector_type::const_pointer const_container_pointer_type;
+  using container_pointer_type = typename vector_type::pointer;
+  using const_container_pointer_type = typename vector_type::const_pointer;
 
   /// Look up an element in the container by index.
   /// ptr is a pointer to the start of the container's data.
