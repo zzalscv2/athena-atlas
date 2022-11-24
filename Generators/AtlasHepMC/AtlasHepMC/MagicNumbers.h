@@ -5,6 +5,9 @@
 
 #ifndef ATLASHEPMC_MAGICNUMBERS_H
 #define ATLASHEPMC_MAGICNUMBERS_H
+
+#include <limits>
+
 namespace HepMC {
 /// @brief Constant defining the barcode threshold distinguishing generator record entries from detector sim ones
 /// @todo The sim barcodes start at 1M in MC15, so we should update the 200k threshold,
@@ -16,6 +19,10 @@ constexpr int PARTONPDGMAX = 43;
 constexpr int NPPDGMIN = 1000000;
 constexpr int NPPDGMAX = 8999999;
 constexpr int PHOTOSMIN = 10000;
+
+/// @brief This barcode is used by objects matched to particles from pile-up
+/// interactions in standard MC Production
+constexpr int crazyParticleBarcode(std::numeric_limits<int32_t>::max());
 
 template <class T>  inline bool is_simulation_particle(T p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
 template <>  inline bool is_simulation_particle(int b){ return (b>SIM_BARCODE_THRESHOLD);}

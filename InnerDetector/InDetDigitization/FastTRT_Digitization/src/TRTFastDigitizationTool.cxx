@@ -47,9 +47,6 @@
 
 #include <memory>
 
-//static constexpr unsigned int crazyParticleBarcode( std::numeric_limits< int32_t >::max() );
-// Barcodes at the HepMC level are int
-
 // select the High threshold bits of TRT RDO words
 static const unsigned int maskHT=0x04020100;
 
@@ -71,7 +68,6 @@ TRTFastDigitizationTool::TRTFastDigitizationTool( const std::string &type,
     m_trt_id( nullptr ),
     m_HardScatterSplittingMode( 0 ),
     m_HardScatterSplittingSkipper( false ),
-    m_vetoThisBarcode( crazyParticleBarcode ),
     m_useEventInfo( false ),
     m_NCollPerEvent( 30 ),
     m_trtHighProbabilityBoostBkg(1.), 
@@ -86,7 +82,6 @@ TRTFastDigitizationTool::TRTFastDigitizationTool( const std::string &type,
   declareProperty( "trtDriftCircleContainer",     m_trtDriftCircleContainer );
   declareProperty( "trtPrdMultiTruthCollection",  m_trtPrdTruth );
   declareProperty( "HardScatterSplittingMode",    m_HardScatterSplittingMode, "Control pileup & signal splitting" );
-  declareProperty( "ParticleBarcodeVeto",         m_vetoThisBarcode, "Barcode of particle to ignore");
   declareProperty( "useEventInfo",                m_useEventInfo);
   declareProperty( "NCollPerEvent",               m_NCollPerEvent);
 }
