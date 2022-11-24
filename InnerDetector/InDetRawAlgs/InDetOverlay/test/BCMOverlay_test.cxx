@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @class BCMOverlay_test
@@ -9,6 +9,8 @@
 
 */
 
+// Need to include this before the #undef NDEBUG to avoid odr violations.
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #undef NDEBUG
 
 // Framework

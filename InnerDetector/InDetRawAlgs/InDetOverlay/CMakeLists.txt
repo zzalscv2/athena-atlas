@@ -17,26 +17,26 @@ set( _jobOPath "${_jobOPath}:$ENV{JOBOPTSEARCHPATH}" )
 atlas_add_test( BCMOverlay_test
                 SOURCES test/BCMOverlay_test.cxx src/BCMOverlay.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} AthenaBaseComps CxxUtils InDetBCM_RawData StoreGateLib TestTools
+                LINK_LIBRARIES ${GTEST_LIBRARIES} AthenaBaseComps CxxUtils InDetBCM_RawData StoreGateLib TestTools TrkEventPrimitives
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( PixelOverlay_test
                 SOURCES test/PixelOverlay_test.cxx src/PixelOverlay.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils IDC_OverlayBase InDetRawData StoreGateLib TestTools
+                LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils IDC_OverlayBase InDetRawData StoreGateLib TestTools TrkEventPrimitives
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( SCTOverlay_test
                 SOURCES test/SCTOverlay_test.cxx src/SCTOverlay.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils GaudiKernel IDC_OverlayBase IdDictParser InDetIdentifier InDetRawData StoreGateLib TestTools
+                LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils GaudiKernel IDC_OverlayBase IdDictParser InDetIdentifier InDetRawData StoreGateLib TestTools TrkEventPrimitives
                 ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}"
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( TRTOverlay_test
                 SOURCES test/TRTOverlay_test.cxx src/TRTOverlay.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib CxxUtils GaudiKernel GeneratorObjects IDC_OverlayBase IdDictParser InDetIdentifier InDetRawData InDetSimData StoreGateLib TRT_ConditionsServicesLib TRT_ElectronPidToolsLib
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib CxxUtils GaudiKernel GeneratorObjects IDC_OverlayBase IdDictParser InDetIdentifier InDetRawData InDetSimData StoreGateLib TRT_ConditionsServicesLib TRT_ElectronPidToolsLib TrkEventPrimitives
                 ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}"
                 POST_EXEC_SCRIPT nopost.sh )
 
