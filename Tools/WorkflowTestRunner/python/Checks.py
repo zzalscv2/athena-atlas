@@ -117,7 +117,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
             reference_path = cvmfs_path / self.setup.release_ID / test.ID / reference_revision
             diff_rules_path = cvmfs_path / self.setup.release_ID / test.ID
             if not reference_path.exists():
-                self.logger.error("CVMFS reference location does not exist!")
+                self.logger.error(f"CVMFS reference location {reference_path} does not exist!")
                 return False
 
         self.logger.info(f"Reading the reference file from location {reference_path}")
