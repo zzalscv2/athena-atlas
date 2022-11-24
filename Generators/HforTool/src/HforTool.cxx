@@ -218,16 +218,14 @@ void HforTool::findHFQuarks() {
 
   // if we don't know yet which store gate key to use, find it here
   if ( !m_McEventCollectionKey.size() ) {
-    for ( std::vector<std::string>::const_iterator ikey = m_McEventCollectionKeys.begin();
-	  !m_McEventCollectionKey.size() && ikey != m_McEventCollectionKeys.end();
-	  ikey++ ) {
-      ATH_MSG_DEBUG("SG key " << (*ikey));
+    for (const std::string& key : m_McEventCollectionKeys) {
+      ATH_MSG_DEBUG("SG key " << key);
       const McEventCollection * mymcevent{nullptr};
-      if(evtStore()->retrieve(mymcevent, (*ikey)).isFailure()) {
-	ATH_MSG_DEBUG("no McEventCollection found with key " << (*ikey));
+      if(evtStore()->retrieve(mymcevent, key).isFailure()) {
+	ATH_MSG_DEBUG("no McEventCollection found with key " << key);
       }
       else {
-	m_McEventCollectionKey = (*ikey) ;
+	m_McEventCollectionKey = key ;
 	ATH_MSG_INFO("McEventCollection found with key " << m_McEventCollectionKey);
       }
     }
@@ -919,10 +917,7 @@ void HforTool::jetBasedRemoval()
   ATH_MSG_DEBUG(" Size of Jet Collection " << aod_jets->size());
 
   ATH_MSG_DEBUG("There are " << m_jets->size()<<" jets in this event");
-  for ( JetCollection::const_iterator jetItr  = m_jets->begin(); jetItr != m_jets->end(); ++jetItr ) {
-
-
-    const Jet* thisjet = *jetItr;
+  for (const Jet* thisjet : *m_jets) {
     if (thisjet->pt() > m_minjetpt) {
 
       int match = 0;
