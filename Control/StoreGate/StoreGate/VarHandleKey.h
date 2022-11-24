@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -202,6 +202,12 @@ public:
    */
   SG::sgkey_t hashedKey() const;
 
+protected:
+  /**
+   * @brief Python representation of Handle.
+   */
+  virtual std::string pythonRepr() const override;
+
 private:
   /// Set the owning handle.  Only callable from VarHandleBase.
   friend class VarHandleBase;
@@ -233,11 +239,6 @@ private:
    * @param name The new store name.
    */
   void updateHandle (const std::string& name);
-
-  /**
-   * @brief Python representation of Handle.
-   */
-  virtual std::string pythonRepr() const override;
 
   /// Handle to the referenced store.
   ServiceHandle<IProxyDict> m_storeHandle;
