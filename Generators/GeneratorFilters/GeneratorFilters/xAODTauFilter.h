@@ -1,15 +1,20 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef GENERATORFILTERS_XAODTAUFILTER_H
 #define GENERATORFILTERS_XAODTAUFILTER_H
 
 #include "GeneratorModules/GenFilter.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthMetaDataContainer.h"
-class IAtRndmGenSvc;
+
+namespace CLHEP {
+  class HepRandomEngine;
+}
 
 /// @author Michael Heldmann, Jan 2003
 /// updated by Xin Chen, Nov. 2016
@@ -27,7 +32,10 @@ public:
 
 private:
 
-  ServiceHandle<IAtRndmGenSvc> m_rand; // Random number generator
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName,
+                                          const EventContext& ctx) const;
+
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};// Random number generator
 
   int m_Ntau;
   double m_etaMaxe;
