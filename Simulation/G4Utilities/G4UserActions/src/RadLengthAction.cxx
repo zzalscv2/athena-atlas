@@ -90,17 +90,14 @@ namespace G4UA
       // create tmplogvec to be filled with (logical) daughters of counter depth level
       std::vector<G4LogicalVolume*> tmplogvec;
 
-      // iterator for logical
-      std::vector<G4LogicalVolume*>::iterator logit;
-
       // looping on logical vector of previous depth level
-      for(logit=logvec.begin() ; logit < logvec.end(); ++logit ){
-        for(unsigned int k=0; k<(*logit)->GetNoDaughters();k++){
+      for(G4LogicalVolume* logvol : logvec) {
+        for(unsigned int k=0; k<logvol->GetNoDaughters();k++){
           // dumping all logical daughters for next level
-          tmplogvec.push_back((*logit)->GetDaughter(k)->GetLogicalVolume());
+          tmplogvec.push_back(logvol->GetDaughter(k)->GetLogicalVolume());
           // dumping the corresponding physical if not made of gas or last depth level where all are dumped
-          if(((*logit)->GetDaughter(k)->GetLogicalVolume()->GetMaterial()->GetRadlen()<100*CLHEP::cm) || (counter == m_config.VolumeDepthLevel)){
-            physvec.push_back((*logit)->GetDaughter(k));
+          if((logvol->GetDaughter(k)->GetLogicalVolume()->GetMaterial()->GetRadlen()<100*CLHEP::cm) || (counter == m_config.VolumeDepthLevel)){
+            physvec.push_back(logvol->GetDaughter(k));
           }
         }
       }
@@ -113,16 +110,15 @@ namespace G4UA
 
     // loop on physvec to put the volumes in the topvolmap using their name
     // for comparison in Stepping and initializing all other maps
-    std::vector<G4VPhysicalVolume*>::iterator physit;
-    for( physit=physvec.begin() ; physit < physvec.end(); physit++ ){
-      std::string fulldaughtername = (*physit)->GetName();
+    for (G4VPhysicalVolume* physvol : physvec) {
+      std::string fulldaughtername = physvol->GetName();
       std::string daughtername;
       std::string::size_type npos;
       npos=fulldaughtername.find("::");
       // nicer naming for depth level =1
       if(npos!=std::string::npos && m_config.VolumeDepthLevel==1) daughtername = fulldaughtername.substr(0,npos);
       else daughtername = fulldaughtername;
-      topvolmap[daughtername]= (*physit);
+      topvolmap[daughtername]=physvol;
     }
 
     // adding by hand two additional names to topvolmap (without volume)
@@ -132,10 +128,9 @@ namespace G4UA
 
     // using topvolmap to initialize treemap (trees with volumenames)
     // and variables map of vectors with FIXED SIZE TO NUMBER OF VARIABLES TO BE DUMPED
-    std::map<std::string,G4VPhysicalVolume*>::iterator volit;
-    for(volit=topvolmap.begin(); volit!=topvolmap.end(); volit++){
-      treeMap[(*volit).first]=new TTree(TString((*volit).first), TString((*volit).first));
-      variables[(*volit).first].resize(12);
+    for (auto& p : topvolmap) {
+      treeMap[p.first]=new TTree(TString(p.first), TString(p.first));
+      variables[p.first].resize(12);
     }
 
     // get the THistoSvc
@@ -144,24 +139,23 @@ namespace G4UA
     // using already initialized treeMap to register the trees with volname
     // and branches which are REFERENCED to the components of the corresponding
     // entry in variables map
-    std::map<std::string,TTree*>::iterator it;
-    for(it=treeMap.begin(); it!=treeMap.end(); ++it){
+    for (auto& p : treeMap) {
       std::string filename= "/RadLengthAction/";
-      std::string treepath= filename+(*it).first;
-      m_hSvc->regTree(treepath.c_str(), treeMap[(*it).first]).ignore();
-      //if (!hSvc) log()<< MSG::ERROR << "Cannot register Tree!" << (*it).first << endreq;
-      treeMap[(*it).first]->Branch("EnergyLoss",  &variables[(*it).first].at(0), "EnergyLoss/D");
-      treeMap[(*it).first]->Branch("RadLength",   &variables[(*it).first].at(1),  "RadLength/D");
-      treeMap[(*it).first]->Branch("Intlength",   &variables[(*it).first].at(2),  "Intlength/D");
-      treeMap[(*it).first]->Branch("InitialEta",  &variables[(*it).first].at(3), "InitialEta/D");
-      treeMap[(*it).first]->Branch("InitialPhi",  &variables[(*it).first].at(4), "InitialPhi/D");
-      treeMap[(*it).first]->Branch("PointEta",    &variables[(*it).first].at(5),   "PointEta/D");
-      treeMap[(*it).first]->Branch("PointPhi",    &variables[(*it).first].at(6),   "PointPhi/D");
-      treeMap[(*it).first]->Branch("PointX",      &variables[(*it).first].at(7),     "PointX/D");
-      treeMap[(*it).first]->Branch("PointY",      &variables[(*it).first].at(8),     "PointY/D");
-      treeMap[(*it).first]->Branch("PointZ",      &variables[(*it).first].at(9),     "PointZ/D");
-      treeMap[(*it).first]->Branch("PointR",     &variables[(*it).first].at(10),     "PointR/D");
-      treeMap[(*it).first]->Branch("Charge",     &variables[(*it).first].at(11),     "Charge/D");
+      std::string treepath= filename+p.first;
+      m_hSvc->regTree(treepath.c_str(), treeMap[p.first]).ignore();
+      //if (!hSvc) log()<< MSG::ERROR << "Cannot register Tree!" << p.first << endreq;
+      treeMap[p.first]->Branch("EnergyLoss",  &variables[p.first].at(0), "EnergyLoss/D");
+      treeMap[p.first]->Branch("RadLength",   &variables[p.first].at(1),  "RadLength/D");
+      treeMap[p.first]->Branch("Intlength",   &variables[p.first].at(2),  "Intlength/D");
+      treeMap[p.first]->Branch("InitialEta",  &variables[p.first].at(3), "InitialEta/D");
+      treeMap[p.first]->Branch("InitialPhi",  &variables[p.first].at(4), "InitialPhi/D");
+      treeMap[p.first]->Branch("PointEta",    &variables[p.first].at(5),   "PointEta/D");
+      treeMap[p.first]->Branch("PointPhi",    &variables[p.first].at(6),   "PointPhi/D");
+      treeMap[p.first]->Branch("PointX",      &variables[p.first].at(7),     "PointX/D");
+      treeMap[p.first]->Branch("PointY",      &variables[p.first].at(8),     "PointY/D");
+      treeMap[p.first]->Branch("PointZ",      &variables[p.first].at(9),     "PointZ/D");
+      treeMap[p.first]->Branch("PointR",     &variables[p.first].at(10),     "PointR/D");
+      treeMap[p.first]->Branch("Charge",     &variables[p.first].at(11),     "Charge/D");
     }
   }
 
@@ -191,9 +185,8 @@ namespace G4UA
     MuTriggerPassed = false;
 
     // reinitialize the variables vector for this event
-    std::map<std::string,std::vector<double> >::iterator it;
-    for(it=variables.begin(); it!=variables.end(); ++it){
-      for(unsigned int i=0; i< variables[(*it).first].size(); i++) variables[(*it).first].at(i)=0;
+    for (auto& p : variables) {
+      for(unsigned int i=0; i< variables[p.first].size(); i++) variables[p.first].at(i)=0;
     }
   }
 
@@ -216,9 +209,8 @@ namespace G4UA
     }
 
 
-    std::map<std::string,TTree*>::iterator it;
-    for(it=treeMap.begin(); it!=treeMap.end(); ++it){
-      treeMap[(*it).first]->Fill();
+    for (auto& p : treeMap) {
+      treeMap[p.first]->Fill();
     }
   }
 
@@ -266,10 +258,9 @@ namespace G4UA
 
       // loop on topvolmap to search for mother of current volume on volume depth level
       // dump the variables in corresponding component of variables map
-      std::map<std::string,G4VPhysicalVolume*>::iterator it;
-      for(it=topvolmap.begin(); it!=topvolmap.end(); ++it){
-        if((*it).second == touchHist->GetVolume(touchHist->GetHistoryDepth()-m_config.VolumeDepthLevel) ){
-          this->fillVariables(varvec, (*it).first);
+      for (auto& p : topvolmap) {
+        if(p.second == touchHist->GetVolume(touchHist->GetHistoryDepth()-m_config.VolumeDepthLevel) ){
+          this->fillVariables(varvec, p.first);
         }
       }
 
