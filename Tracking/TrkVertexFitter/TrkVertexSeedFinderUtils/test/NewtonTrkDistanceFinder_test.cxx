@@ -9,6 +9,7 @@
  */
 
 
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #undef NDEBUG
 #include "CxxUtils/ubsan_suppress.h"
 #include "GaudiKernel/EventContext.h"

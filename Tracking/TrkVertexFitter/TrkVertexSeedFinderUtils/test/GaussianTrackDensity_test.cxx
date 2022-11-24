@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexSeedFinderUtils/test/GaussianTrackDensity_test.cxx
@@ -9,6 +9,7 @@
  */
 
 
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #undef NDEBUG
 #include "CxxUtils/ubsan_suppress.h"
 #include "GaudiKernel/SystemOfUnits.h"
