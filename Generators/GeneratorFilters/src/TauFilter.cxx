@@ -4,12 +4,11 @@
 */
 #include "GeneratorFilters/TauFilter.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 
 TauFilter::TauFilter( const std::string& name, ISvcLocator* pSvcLocator)
   : GenFilter( name,pSvcLocator ),
-    m_rand("AtRndmGenSvc", name),
     m_eventse(0), m_eventsmu(0), m_eventshad(0), 
     m_eventseacc(0), m_eventsmuacc(0), m_eventshadacc(0)
 {
@@ -59,11 +58,8 @@ StatusCode TauFilter::filterInitialize() {
     m_events[i] = 0; m_events_sel[i] = 0;
   }
 
-  if (m_rand.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve AtRndmGenSvc " << m_rand);
-    return StatusCode::FAILURE;
-  }
-  
+  CHECK(m_rndmSvc.retrieve());
+
   return StatusCode::SUCCESS;
 }
 
@@ -107,9 +103,10 @@ CLHEP::HepLorentzVector TauFilter::sumDaughterNeutrinos( HepMC::ConstGenParticle
 
 StatusCode TauFilter::filterEvent() {
   // Get random number engine
-  CLHEP::HepRandomEngine* rndm(0);
+  CLHEP::HepRandomEngine* rndm{};
   if(m_HasTightRegion) {
-    rndm = m_rand->GetEngine("TauFilter");
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    rndm = this->getRandomEngine(name(), ctx);
     if (!rndm) {
       ATH_MSG_ERROR("Failed to retrieve random number engine for TauFilter");
       setFilterPassed(false);
@@ -336,4 +333,14 @@ StatusCode TauFilter::filterEvent() {
 	setFilterPassed(pass);
   
   return StatusCode::SUCCESS;
+}
+
+
+CLHEP::HepRandomEngine* TauFilter::getRandomEngine(const std::string& streamName,
+                                                                const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
 }

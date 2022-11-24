@@ -5,7 +5,7 @@
 // Header for this module
 #include "GeneratorFilters/xAODM4MuIntervalFilter.h"
 
-#include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 
 
@@ -17,10 +17,9 @@ xAODM4MuIntervalFilter::xAODM4MuIntervalFilter(const std::string& name, ISvcLoca
 }
 
 StatusCode xAODM4MuIntervalFilter::filterInitialize() {
-  if (m_rand.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Unable to retrieve AtRndmGenSvc " << m_rand);
-    return StatusCode::FAILURE;
-  }
+
+  CHECK(m_rndmSvc.retrieve());
+
   ATH_MSG_DEBUG( "MaxEta           "  << m_maxEta);
   ATH_MSG_DEBUG( "MinPt          "  << m_minPt);
   ATH_MSG_DEBUG( "LowM4muProbability         "  << m_prob2low);
@@ -38,7 +37,8 @@ StatusCode xAODM4MuIntervalFilter::filterFinalize() {
 
 StatusCode xAODM4MuIntervalFilter::filterEvent() {
   // Get random number engine
-  CLHEP::HepRandomEngine* rndm = m_rand->GetEngine("xAODM4MuIntervalFilter");
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
   if (!rndm) {
     ATH_MSG_ERROR("Failed to retrieve random number engine xAODM4MuIntervalFilter");
     setFilterPassed(false);
@@ -144,4 +144,14 @@ double xAODM4MuIntervalFilter::getEventWeight(double mass) {
     }
   ATH_MSG_DEBUG("WEIGHTING:: " << mass << "\t" << weight);
   return weight;
+}
+
+
+CLHEP::HepRandomEngine* xAODM4MuIntervalFilter::getRandomEngine(const std::string& streamName,
+                                                                const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
 }

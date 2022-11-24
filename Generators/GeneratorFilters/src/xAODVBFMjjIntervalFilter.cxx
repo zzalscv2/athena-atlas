@@ -5,7 +5,7 @@
 // Header for this module
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 
-#include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -21,7 +21,6 @@ public:
 
 xAODVBFMjjIntervalFilter::xAODVBFMjjIntervalFilter(const std::string &name, ISvcLocator *pSvcLocator)
     : GenFilter(name, pSvcLocator),
-      m_rand("AtRndmGenSvc", name),
       m_norm(1.) //< @todo Scalefactor always set to 1.0! Remove?
 {
     declareProperty("RapidityAcceptance", m_yMax = 5.0);
@@ -52,11 +51,8 @@ xAODVBFMjjIntervalFilter::xAODVBFMjjIntervalFilter(const std::string &name, ISvc
 StatusCode xAODVBFMjjIntervalFilter::filterInitialize()
 {
     ATH_MSG_INFO("Configured for jets in " << m_TruthJetContainerName << " inside |y|<" << m_yMax);
-    if (m_rand.retrieve().isFailure())
-    {
-        ATH_MSG_ERROR("Unable to retrieve AtRndmGenSvc " << m_rand);
-        return StatusCode::FAILURE;
-    }
+
+    CHECK(m_rndmSvc.retrieve());
 
     m_alpha = log(m_prob2low / m_prob2high) / log(m_mjjlow / m_mjjhigh);
     ATH_MSG_INFO("m_alpha set to" << m_alpha);
@@ -66,7 +62,8 @@ StatusCode xAODVBFMjjIntervalFilter::filterInitialize()
 StatusCode xAODVBFMjjIntervalFilter::filterEvent()
 {
     // Get random number engine
-    CLHEP::HepRandomEngine *rndm = m_rand->GetEngine("xAODVBFMjjIntervalFilter");
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    CLHEP::HepRandomEngine* rndm = this->getRandomEngine(name(), ctx);
     if (!rndm)
     {
         ATH_MSG_ERROR("Failed to retrieve random number engine xAODVBFMjjIntervalFilter");
@@ -414,4 +411,14 @@ TLorentzVector xAODVBFMjjIntervalFilter::sumDaughterNeutrinos(const xAOD::TruthP
         nu += sumDaughterNeutrinos(daughterparticle);
     }
     return nu;
+}
+
+
+CLHEP::HepRandomEngine* xAODVBFMjjIntervalFilter::getRandomEngine(const std::string& streamName,
+                                                                const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
 }
