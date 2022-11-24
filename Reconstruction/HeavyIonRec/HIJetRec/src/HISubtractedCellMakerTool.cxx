@@ -50,8 +50,8 @@ StatusCode HISubtractedCellMakerTool::process (CaloCellContainer* theCells,
     return StatusCode::SUCCESS;
   }
 
-  const auto *modtool_nc = m_modulatorTool.get();
-  CHECK(modtool_nc->retrieveShape());
+  const xAOD::HIEventShape* modShape = nullptr;
+  ATH_CHECK( m_modulatorTool->getShape (modShape) );
 
   for(auto pCell : *theCells)
   {
@@ -73,7 +73,7 @@ StatusCode HISubtractedCellMakerTool::process (CaloCellContainer* theCells,
     float nCells=s->nCells();
     float rho=0;
     if(nCells!=0.) rho=s->rho()/nCells;
-    rho*=m_modulatorTool->getModulation(phi);
+    rho*=m_modulatorTool->getModulation(phi, modShape);
     float ue=rho*HICaloCellHelper::getAreaEtaPhi(pCell)*std::cosh(eta);
     pCell->setEnergy(pCell->energy()-ue);
   }
