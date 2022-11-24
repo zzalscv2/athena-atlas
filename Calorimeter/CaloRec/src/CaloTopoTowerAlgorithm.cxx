@@ -2,16 +2,6 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GaudiKernel/MsgStream.h"
-#include "Gaudi/Property.h"
-#include "GaudiKernel/Algorithm.h"
-#include "GaudiKernel/ListItem.h"
-#include "GaudiKernel/IToolSvc.h"
-
-#include "EventKernel/INavigable4Momentum.h"
-#include "NavFourMom/INavigable4MomentumCollection.h"
-
-#include "CaloUtils/CaloCollectionHelper.h"
 
 #include "CaloEvent/CaloTowerSeg.h"
 #include "CaloEvent/CaloTowerContainer.h"
@@ -80,14 +70,6 @@ CaloTopoTowerAlgorithm::~CaloTopoTowerAlgorithm()
 
 StatusCode CaloTopoTowerAlgorithm::initialize()
 {
-  ///////////////////////
-  // Allocate Services //
-  ///////////////////////
-
-  // tool service
-  IToolSvc* myToolSvc = nullptr;
-  ATH_CHECK( service("ToolSvc",myToolSvc) );
-
   ATH_CHECK(m_cellContainerKey.initialize());
   ATH_CHECK(m_clusterKey.initialize());
   ATH_CHECK(m_cellToClusterMapKey.initialize());
@@ -324,25 +306,6 @@ StatusCode CaloTopoTowerAlgorithm::execute (const EventContext& ctx) const
 	  ++firstITool;
 	}
     }
-
-
-
-
-  ///////////////////
-  // Record Output //
-  ///////////////////
-     
-  // record towers
-    //  if ( m_genericLink )
-    //    { 
-    //      INavigable4MomentumCollection* theNav4Coll = 
-    //	new INavigable4MomentumCollection(SG::VIEW_ELEMENTS);
-    //      return 
-    //	CaloCollectionHelper::
-    //	recordStorable<CaloTopoTowerContainer,
-    //	INavigable4MomentumCollection>(evtStore(),theTowers,
-    //				       m_newTowerContainerName,theNav4Coll);
-    //    }
 
   return StatusCode::SUCCESS;
 }
