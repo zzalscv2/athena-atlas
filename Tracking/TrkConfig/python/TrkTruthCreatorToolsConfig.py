@@ -22,5 +22,12 @@ def ITkTruthMatchToolCfg(flags, name='ITkTruthMatchTool', **kwargs) :
     acc.setPrivateTools(CompFactory.Trk.TruthMatchRatio(name, **kwargs))
     return acc
 
+def TruthToTrackToolCfg(flags, name="TruthToTrack", **kwargs):
+    acc = ComponentAccumulator()
 
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.Trk.TruthToTrack(name, **kwargs))
+    return acc
 
