@@ -78,13 +78,8 @@ StatusCode EventBoost::execute() {
     return StatusCode::FAILURE;
 
 
-  McEventCollection::const_iterator it;
-
-  for(it=mcCollptr->begin(); it!=mcCollptr->end(); ++it) {
-
-    const HepMC::GenEvent* genEvt = (*it);
+  for (const HepMC::GenEvent* genEvt : *mcCollptr) {
     ATH_CHECK(EventCopy(genEvt));
-
   }
 
   
@@ -95,10 +90,7 @@ StatusCode EventBoost::execute() {
   }
 
 
-  for(it=mcCollptrCOPY->begin(); it!=mcCollptrCOPY->end(); ++it) {
-
-    const HepMC::GenEvent* newEvt = (*it);
-
+  for (const HepMC::GenEvent* newEvt : *mcCollptrCOPY) {
     //Call user analysis for this genevent:
     if (AnalyseGenEvent(newEvt).isFailure())
       return StatusCode::FAILURE;
