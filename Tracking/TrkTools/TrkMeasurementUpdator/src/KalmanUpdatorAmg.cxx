@@ -436,7 +436,7 @@ Trk::KalmanUpdatorAmg::predictedStateFitQuality (const Trk::TrackParameters& trk
 	// if only one of two has an error, place a message.
 	if (!covOne || !covTwo) {
 		ATH_MSG_DEBUG("One parameter does not have uncertainties, assume initial state and return chi2=0.0");
-		return  FitQualityOnSurface(0.f, 5);
+		return  {0.f, 5};
 	}
     return makeChi2_T<5>(trkParOne.parameters(),*covOne,
                          trkParTwo.parameters(),*covTwo, 31, +1);
@@ -784,7 +784,7 @@ Trk::FitQualityOnSurface  Trk::KalmanUpdatorAmg::makeChi2_1D(const AmgVector(5)&
   }
     chiSquared = r*r/chiSquared;
 
-  return FitQualityOnSurface(chiSquared, 1);
+  return {chiSquared, 1};
 }
 
 std::unique_ptr<Trk::TrackParameters>

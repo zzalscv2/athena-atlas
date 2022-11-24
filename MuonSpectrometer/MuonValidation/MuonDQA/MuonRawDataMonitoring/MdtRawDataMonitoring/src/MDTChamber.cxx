@@ -169,7 +169,7 @@ MDTChamber::MDTChamber(std::string_view name) :
     }
 }
 
-MDTChamber::~MDTChamber() {}
+MDTChamber::~MDTChamber() = default;
 
 void MDTChamber::SetMDTHitsPerChamber_IMO_Bin(TH2F* h) {
     // Plots BEE Chambers at the edge BIS plots, and EES/EEL on EIS/EIL plots

@@ -214,19 +214,19 @@ Trk::ExtrapolationCode Trk::StepEngine::extrapolate(ExCellNeutral& ecNeutral,
   }  
 
   // loop over intersections
-  for (unsigned int ii=0; ii<ts.size(); ii++) {
+  for (auto & t : ts) {
 
   
     ////// STEP ACROSS FRAME BOUNDARY  ///////////////  TO DO:TEMPLATE //////////////////////////
-    if ( ts[ii].sfType == Trk::SurfNavigType::BoundaryFrame ) {  
+    if ( t.sfType == Trk::SurfNavigType::BoundaryFrame ) {  
       const auto &bounds = ecNeutral.leadVolume->boundarySurfaces();
-      const Trk::TrackingVolume* nextVolume = bounds[ts[ii].index]->attachedVolume(ts[ii].intersection, 
+      const Trk::TrackingVolume* nextVolume = bounds[t.index]->attachedVolume(t.intersection, 
 											    ecNeutral.leadParameters->momentum(), 
 											    ecNeutral.propDirection);  
 
       if (!nextVolume) return Trk::ExtrapolationCode::SuccessBoundaryReached;
 
-      ecNeutral.leadParameters = new Trk::NeutralCurvilinearParameters(ts[ii].intersection,ecNeutral.leadParameters->momentum(),0.); 
+      ecNeutral.leadParameters = new Trk::NeutralCurvilinearParameters(t.intersection,ecNeutral.leadParameters->momentum(),0.); 
 
       // - geometrySignature change and configuration to stop then triggers a Success 
       bool stopAtThisBoundary = ecNeutral.checkConfigurationMode(Trk::ExtrapolationMode::StopAtBoundary) 

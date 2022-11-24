@@ -418,7 +418,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
     // if only one of two has an error, place a message.
     if (!one.covariance() || !two.covariance()) {
         ATH_MSG_DEBUG( "One parameter does not have uncertainties, assume initial state and return chi2=0.0"  );
-        return FitQualityOnSurface(0.f, 5);
+        return {0.f, 5};
     }
 
     // covariance matrix for prediction and the state to be added
@@ -432,7 +432,7 @@ Trk::KalmanWeightUpdator::predictedStateFitQuality (    const Trk::TrackParamete
     AmgSymMatrix(5) R = (covTrkOne + covTrkTwo).inverse();
 
     double  chiSquared = r.transpose()*R*r;
-    return FitQualityOnSurface(chiSquared, 5);
+    return {chiSquared, 5};
 }
 
 std::vector<double> Trk::KalmanWeightUpdator::initialErrors() const {
@@ -682,7 +682,7 @@ Trk::FitQualityOnSurface  Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX
 
     ATH_MSG_VERBOSE( "-U- fitQuality on surface, chi2 :" << chiSquared << " / ndof= " << numberDoF  );
 
-    return FitQualityOnSurface(chiSquared, numberDoF);
+    return {chiSquared, numberDoF};
 }
 
 // chi2 calculation with gain matrix formalism and predicted states, resp.
@@ -700,7 +700,7 @@ Trk::FitQualityOnSurface  Trk::KalmanWeightUpdator::makeChi2Object( Amg::VectorX
 
     // number of degree of freedom added
     int     numberDoF  = covRio.cols();
-    return FitQualityOnSurface(chiSquared, numberDoF);
+    return {chiSquared, numberDoF};
 }
 
 

@@ -264,7 +264,7 @@ StatusCode MdtRawDataMonAlg::binMdtGlobal_byLayer(TH2* nHits_In, TH2* nHits_Mid,
 }
 
 // Correct for CutOuts
-void MdtRawDataMonAlg::ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers) const {
+void MdtRawDataMonAlg::ChamberTubeNumberCorrection(int& tubeNum, std::string_view hardware_name, int tubePos, int numLayers) {
     // numLayers should be mdt_layer-1 so numLayers = 0 implies layer 1 ML 1 or mdt_layer==1
     if (hardware_name.substr(0, 4) == "BMS4" || hardware_name.substr(0, 4) == "BMS6") {  // layer 1-4 tubeId 41-48 cut out
         if (numLayers <= 2) tubeNum = tubePos + numLayers * 48;
@@ -283,12 +283,12 @@ void MdtRawDataMonAlg::ChamberTubeNumberCorrection(int& tubeNum, std::string_vie
 }
 
 // Correct for F@#!ing mdtIdHelper
-void MdtRawDataMonAlg::CorrectTubeMax(const std::string& hardware_name, int& numTubes) const {
+void MdtRawDataMonAlg::CorrectTubeMax(const std::string& hardware_name, int& numTubes) {
     if (hardware_name == "EEL1A05" || hardware_name == "EEL1C05") numTubes = 48;
 }
 
 // Correct for F@#!ing mdtIdHelper
-void MdtRawDataMonAlg::CorrectLayerMax(const std::string& hardware_name, int& numLayers) const {
+void MdtRawDataMonAlg::CorrectLayerMax(const std::string& hardware_name, int& numLayers) {
     if (hardware_name == "EEL1A05" || hardware_name == "EEL1C05") numLayers = 3;
 }
 
@@ -362,8 +362,7 @@ StatusCode MdtRawDataMonAlg::fillMDTMaskedTubes(IdentifierHash idHash, const std
     }
 
     std::set<Identifier> noisyTubes = m_masked_tubes->getNoiseList(idHash);
-    for (std::set<Identifier>::const_iterator itr = noisyTubes.begin(); itr != noisyTubes.end(); ++itr) {
-        Identifier digcoll_id = *itr;
+    for (auto digcoll_id : noisyTubes) {
         int mdtlayer = m_idHelperSvc->mdtIdHelper().tubeLayer(digcoll_id);
         if (m_idHelperSvc->mdtIdHelper().multilayer(digcoll_id) == 2) {
             if (hardware_name.at(1) == 'I' && hardware_name.at(3) != '8')
@@ -405,8 +404,7 @@ void MdtRawDataMonAlg::mdtchamberId() {
         }
     }
 
-    return;
-}
+    }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 int MdtRawDataMonAlg::mezzmdt(
@@ -453,9 +451,9 @@ int MdtRawDataMonAlg::GetTubeMax(const Identifier& digcoll_id, std::string_view 
     return tubeMax;
 }
 
-bool MdtRawDataMonAlg::AinB(int A, std::vector<int>& B) const {
-    for (unsigned int i = 0; i < B.size(); ++i) {
-        if (B.at(i) == A) return true;
+bool MdtRawDataMonAlg::AinB(int A, std::vector<int>& B) {
+    for (int i : B) {
+        if (i == A) return true;
     }
     return false;
 }

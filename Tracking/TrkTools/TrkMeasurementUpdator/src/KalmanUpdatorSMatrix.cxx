@@ -532,7 +532,7 @@ Trk::KalmanUpdatorSMatrix::predictedStateFitQuality (const Trk::TrackParameters&
 	// if only one of two has an error, place a message.
 	if (!covOne || ! covTwo) {
 		ATH_MSG_DEBUG( "One parameter does not have uncertainties, assume initial state and return chi2=0.0");
-		return FitQualityOnSurface(0.f, 5);
+		return {0.f, 5};
 	}
     return makeChi2_5D(SParVector5(&trkParOne.parameters()[0],5),
                        *covOne,
@@ -1098,7 +1098,7 @@ Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2_1D(const SParVector
   }
     chiSquared = r*r/chiSquared;
 
-  return FitQualityOnSurface(chiSquared, 1);
+  return {chiSquared, 1};
 }
 
 Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_2D(const SParVector5& parTrk,
@@ -1124,7 +1124,7 @@ Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_2D(const SParVecto
     ATH_MSG_VERBOSE( "-U- fitQuality of "<< (sign>0?"predicted":"updated")
             <<" state, chi2 :" << chiSquared << " / ndof= 2" );
   }
-  return FitQualityOnSurface(chiSquared, 2);
+  return {chiSquared, 2};
 }
 
 Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_5D(const SParVector5& parOne,
@@ -1151,7 +1151,7 @@ Trk::FitQualityOnSurface  Trk::KalmanUpdatorSMatrix::makeChi2_5D(const SParVecto
     ATH_MSG_VERBOSE( "-U- fitQuality of "<< (sign>0?"predicted":"updated")
             <<" state, chi2 :" << chiSquared << " / ndof= 2" );
   }
-  return FitQualityOnSurface(chiSquared, 5);
+  return {chiSquared, 5};
 }
 
 std::unique_ptr<Trk::TrackParameters>
@@ -1303,7 +1303,7 @@ Trk::FitQualityOnSurface Trk::KalmanUpdatorSMatrix::makeChi2Object(const Amg::Ve
     // number of degree of freedom added
     int		numberDoF  = covRio.cols();
 
-   return FitQualityOnSurface(chiSquared, numberDoF);
+   return {chiSquared, numberDoF};
 }
 
 bool Trk::KalmanUpdatorSMatrix::consistentParamDimensions(const Trk::LocalParameters& P,
