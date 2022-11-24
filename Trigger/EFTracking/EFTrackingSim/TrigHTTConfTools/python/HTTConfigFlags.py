@@ -1,7 +1,32 @@
 #Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 def createHTTConfigFlags():
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+    cf = AthConfigFlags()
+    cf.addFlag('algoTag', '')
 
+    def __httHough1DFlags():
+        """Additional function delays import"""
+        from TrigHTTConfTools.HTTConfigFlags import createHough1dHTTConfigFlags
+        return createHough1dHTTConfigFlags()
+    cf.addFlagsCategory("Hough1D", __httHough1DFlags, prefix=True )
+
+    def __httHoughFlags():
+        """Additional function delays import"""
+        from TrigHTTConfTools.HTTConfigFlags import createHoughHTTConfigFlags
+        return createHoughHTTConfigFlags()
+    cf.addFlagsCategory("Hough", __httHoughFlags, prefix=True )
+
+    def __httDev21_02_15Flags():
+        """Additional function delays import"""
+        from TrigHTTConfTools.HTTConfigFlags import createDev21_02_15_HTTConfigFlags
+        return createDev21_02_15_HTTConfigFlags()
+    cf.addFlagsCategory("Dev21_02_15", __httDev21_02_15Flags, prefix=True )
+
+    return cf
+
+
+def createBasicHTTConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     cf = AthConfigFlags()
 
@@ -98,7 +123,7 @@ def createHTTConfigFlags():
 
 
 def createHough1dHTTConfigFlags():
-    cf = createHTTConfigFlags()
+    cf = createBasicHTTConfigFlags()
 
     cf.name = 'hough_1d'
 
@@ -117,7 +142,7 @@ def createHough1dHTTConfigFlags():
 
 
 def createHoughHTTConfigFlags():
-    cf = createHTTConfigFlags()
+    cf = createBasicHTTConfigFlags()
 
     cf.name = 'hough'
     cf.hough = True
@@ -161,7 +186,7 @@ def createHoughHTTConfigFlags():
 
 
 def createDev21_02_15_HTTConfigFlags():
-    cf = createHTTConfigFlags()
+    cf = createBasicHTTConfigFlags()
 
     cf.name = 'dev_21-02-15'
     cf.phiMin = 0.3
