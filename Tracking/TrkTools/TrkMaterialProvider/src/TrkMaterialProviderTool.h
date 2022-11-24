@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrkMaterialProviderTool_H
 #define TrkMaterialProviderTool_H
-#define LEGACY_TRKGEOM
 
 //#define protected public
 #include "TrkExInterfaces/IEnergyLossUpdator.h"
@@ -24,9 +23,7 @@
 #include "TrkDetDescrInterfaces/ITrackingVolumesSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "TrkGeometry/TrackingGeometry.h"
-#ifdef LEGACY_TRKGEOM
 #include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
-#endif
 #include "TrkExInterfaces/IMultipleScatteringUpdator.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/MagneticFieldProperties.h"
@@ -176,14 +173,16 @@ namespace Trk{
 
     void throwFailedToGetTrackingGeomtry() const;
     const TrackingGeometry* retrieveTrackingGeometry(const EventContext& ctx) const {
-#ifdef LEGACY_TRKGEOM
-       if (m_trackingGeometryReadKey.key().empty()) {
-          return m_trackingGeometrySvc->trackingGeometry();
-       }
-#endif
-       SG::ReadCondHandle<TrackingGeometry>  handle(m_trackingGeometryReadKey,ctx);
-       if (!handle.isValid()) {throwFailedToGetTrackingGeomtry(); }
-       return handle.cptr();
+
+      if (m_trackingGeometryReadKey.key().empty()) {
+        return m_trackingGeometrySvc->trackingGeometry();
+      }
+      SG::ReadCondHandle<TrackingGeometry> handle(m_trackingGeometryReadKey,
+                                                  ctx);
+      if (!handle.isValid()) {
+        throwFailedToGetTrackingGeomtry();
+      }
+      return handle.cptr();
     }
 
     PublicToolHandle<Trk::IExtrapolator>                m_muonExtrapolator
@@ -191,9 +190,7 @@ namespace Trk{
     PublicToolHandle<Trk::IEnergyLossUpdator>           m_elossupdator
        {this,"EnergyLossUpdator","Trk::EnergyLossUpdator/AtlasEnergyLossUpdator",""};
     ServiceHandle<Trk::ITrackingVolumesSvc>       m_trackingVolumesSvc;
-#ifdef LEGACY_TRKGEOM
-     ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "",""};
-#endif
+    ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc {this, "TrackingGeometrySvc", "",""};
 
     SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey
        {this, "TrackingGeometryReadKey", "", "Key of the TrackingGeometry conditions data."};

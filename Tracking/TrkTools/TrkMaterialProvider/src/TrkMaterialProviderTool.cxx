@@ -129,12 +129,9 @@ Trk::TrkMaterialProviderTool::initialize()
     return StatusCode::FAILURE;
   }
 
-#ifdef LEGACY_TRKGEOM
-  
   if (m_trackingGeometryReadKey.key().empty()) {
      ATH_CHECK(m_trackingGeometrySvc.retrieve());
   } else
-#endif
   ATH_CHECK( m_trackingGeometryReadKey.initialize() );
 
   return StatusCode::SUCCESS;
