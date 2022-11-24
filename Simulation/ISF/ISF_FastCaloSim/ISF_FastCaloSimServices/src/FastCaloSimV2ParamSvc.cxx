@@ -65,17 +65,15 @@ StatusCode ISF::FastCaloSimV2ParamSvc::initialize()
 
   m_caloGeo = std::make_unique<CaloGeometryFromCaloDDM>();
 
-  const CaloDetDescrManager* caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>("CaloMgrFCS");
+  const CaloDetDescrManager* caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
   if(caloMgr) {
     m_caloGeo->LoadGeometryFromCaloDDM(caloMgr);
   }
   else {
-    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescr(serviceLocator()
-									, Athena::getMessageSvc()
-									, nullptr
-									, nullptr);
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+									       , Athena::getMessageSvc());
     m_caloGeo->LoadGeometryFromCaloDDM(caloMgrPtr.get());
-    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), "CaloMgr"));
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
   }
 
   if (!m_caloGeo->LoadFCalChannelMapFromFCalDDM(fcalManager)) {

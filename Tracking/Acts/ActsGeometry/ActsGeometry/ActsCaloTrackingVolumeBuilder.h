@@ -11,8 +11,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
-#include "CaloDetDescr/CaloDetDescrManager.h"
-
 #include "ActsGeometryInterfaces/IActsTrackingVolumeBuilder.h"
 
 #include <memory>
@@ -22,6 +20,7 @@
 #include "Acts/Geometry/AbstractVolume.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 
+class CaloDetDescrManager;
 
 namespace Acts {
 class TrackingVolume;
@@ -63,8 +62,7 @@ private:
                        std::shared_ptr<const Acts::TrackingVolume> insideVolume) const;
 
 
-
-  SG::ReadHandleKey<CaloDetDescrManager> m_caloDDMgrKey{this,"CaloDetDescrManager","DetectorStore+CaloMgr", "The CaloDetDescManager to build the geometry from."};
+  const CaloDetDescrManager* m_caloMgr{nullptr};
 };
 
 #endif

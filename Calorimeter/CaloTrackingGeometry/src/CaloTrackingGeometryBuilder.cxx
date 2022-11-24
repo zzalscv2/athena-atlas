@@ -20,6 +20,7 @@
 #include "TrkDetDescrUtils/BinUtility.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkGeometry/GlueVolumesDescriptor.h"
@@ -332,11 +333,20 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
     
   // PART 1 : Liquid Argon Volumes ===========================================================================================
   // get the Tracking Volumes from the LAr Builder
-  const CaloDetDescrManager* caloDDM = nullptr;
-  if (detStore()->retrieve(caloDDM,"CaloMgr").isFailure()) {
-    ATH_MSG_WARNING("Failed to retrieve calo Det Descr manager");
-    return nullptr;
+  const CaloDetDescrManager* caloDDM = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
+  if(!caloDDM) {
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+                                                                               , Athena::getMessageSvc());
+    if(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey)!=StatusCode::SUCCESS) {
+      ATH_MSG_WARNING("Failed to record CaloDetDescrManager with the key " << caloMgrStaticKey << " in DetStore");
+      return nullptr;
+    }
+    if(detStore()->retrieve(caloDDM, caloMgrStaticKey)!=StatusCode::SUCCESS) {
+      ATH_MSG_WARNING("Failed to retrieve CaloDetDescrManager with the key " << caloMgrStaticKey << " from DetStore");
+      return nullptr;
+    }
   }
+
   const std::vector<Trk::TrackingVolume*>* lArVolumes = m_lArVolumeBuilder->trackingVolumes(*caloDDM);
 
   ATH_MSG_INFO( lArVolumes->size() << " volumes retrieved from " << m_lArVolumeBuilder.name() );   

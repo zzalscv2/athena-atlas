@@ -30,6 +30,7 @@ atlas_add_library( ActsGeometryLib
                    AthenaBaseComps
                    AthenaKernel
                    CaloDetDescrLib
+		   CaloDetDescrUtils
                    GaudiKernel
                    GeoModelUtilities
                    GeoPrimitives

@@ -97,7 +97,7 @@ StatusCode CaloAlignTool::align(IOVSVC_CALLBACK_ARGS)
   // Get CaloDetDescrManager
   const CaloDetDescrManager* caloMgr_const;
 
-  status = detStore()->retrieve(caloMgr_const);
+  status = detStore()->retrieve(caloMgr_const,"CaloMgr");
   if (status.isFailure()) {
     log << MSG::WARNING << "Unable to retrieve CaloDetDescrManager from DetectorStore. No alignments&sagging for Calo." << endmsg;
     return StatusCode::SUCCESS;
