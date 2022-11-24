@@ -1,6 +1,5 @@
 #include "CaloUtils/CaloCellWeightCorrection.h"
 #include "CaloUtils/CaloLCClassificationTool.h"
-#include "CaloUtils/EstimEMClusterClassificationTool.h"
 #include "CaloUtils/CaloLCWeightTool.h"
 #include "CaloUtils/CaloLCOutOfClusterTool.h"
 #include "CaloUtils/CaloLCDeadMaterialTool.h"
@@ -14,7 +13,6 @@
 
 DECLARE_COMPONENT( CaloCellWeightCorrection )
 DECLARE_COMPONENT( CaloLCClassificationTool )
-DECLARE_COMPONENT( EstimEMClusterClassificationTool )
 DECLARE_COMPONENT( CaloLCWeightTool )
 DECLARE_COMPONENT( CaloLCOutOfClusterTool )
 DECLARE_COMPONENT( CaloLCDeadMaterialTool )
