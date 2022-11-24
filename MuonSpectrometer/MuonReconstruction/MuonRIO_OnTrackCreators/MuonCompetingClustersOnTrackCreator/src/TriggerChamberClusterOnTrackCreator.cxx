@@ -78,7 +78,7 @@ TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Tr
 
     // create a rot for each prd (which gets weight zero)
     std::vector<const Muon::MuonClusterOnTrack*>* rots = createPrdRots(prds);
-    std::vector<double>* assProbs = new std::vector<double>(rots->size(), 0.);
+    auto assocProbs = std::vector<double>(rots->size(), 0.);
     
 
     // for each surface, find the first and last rot forming the cluster
@@ -100,7 +100,8 @@ TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Tr
     
     // return the competingMuonClusterOnTrack object containing the final parameters,
     // error matrix, surface, list of rots and weights
-    return std::make_unique<const CompetingMuonClustersOnTrack>(parameters,errorMatrix,surface,rots,assProbs);
+    return std::make_unique<const CompetingMuonClustersOnTrack>(
+      parameters, errorMatrix, surface, rots, std::move(assocProbs));
 }
 
 void

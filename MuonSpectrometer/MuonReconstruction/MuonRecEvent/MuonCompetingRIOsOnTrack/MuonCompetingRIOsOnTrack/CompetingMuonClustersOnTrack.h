@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -79,7 +79,7 @@ public:
   */
   CompetingMuonClustersOnTrack(
     std::vector<const MuonClusterOnTrack*>* childrots,
-    std::vector<AssignmentProb>* assgnProb);
+    std::vector<AssignmentProb>&& assgnProb);
 
   /** constructor taking the local parameters + error matrix + associated
   surface directly, instead of using the base-class to recalculate them
@@ -98,7 +98,7 @@ public:
     const Amg::MatrixX* error,
     const Trk::Surface* assSurf,
     std::vector<const MuonClusterOnTrack*>* childrots,
-    std::vector<AssignmentProb>* assgnProb);
+    std::vector<AssignmentProb>&& assgnProb);
 
   /** constructor taking the local parameters + error matrix + associated
   surface directly, instead of using the base-class to recalculate them
@@ -117,7 +117,7 @@ public:
     const Amg::MatrixX& error,
     const Trk::Surface* assSurf,
     std::vector<const MuonClusterOnTrack*>* childrots,
-    std::vector<AssignmentProb>* assgnProb);
+    std::vector<AssignmentProb>&& assgnProb);
 
   /** Destructor */
   virtual ~CompetingMuonClustersOnTrack();

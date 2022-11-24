@@ -22,7 +22,7 @@ CompetingSCT_ClustersOnTrackCnv_p1::persToTrans( const InDet::CompetingSCT_Clust
    }
 
    *transObj = InDet::CompetingSCT_ClustersOnTrack (std::move(containedChildRots),
-                                                    nullptr);
+                                                    std::vector<double>{});
    fillTransFromPStore( &m_cRotCnv, persObj->m_competingROT, transObj, log );
 }
 

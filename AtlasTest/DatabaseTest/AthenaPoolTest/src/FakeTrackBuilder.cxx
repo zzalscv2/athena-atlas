@@ -135,17 +135,16 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
       fakePix2->m_localParams = Trk::LocalParameters(locpos);
       locCov(0,0) = 0.001; locCov(1,1)=0.0135;
       fakePix2->m_localCovariance = locCov;
-      std::vector<const InDet::PixelClusterOnTrack*>* childrots
-        = new std::vector<const InDet::PixelClusterOnTrack*>;
-      childrots->push_back(fakePix1);
-      childrots->push_back(fakePix2);
-      std::vector<double>* assgnProb
-        = new std::vector<double>;
-      assgnProb->push_back(0.4);
-      assgnProb->push_back(0.6);
-      auto cProt= std::make_unique<InDet::CompetingPixelClustersOnTrack>(childrots,assgnProb);
-      trackStateOnSurfaces.push_back( new TrackStateOnSurface(
-        std::move(cProt),nullptr,nullptr));
+      auto childrots = std::vector<const InDet::PixelClusterOnTrack*>();
+      childrots.push_back(fakePix1);
+      childrots.push_back(fakePix2);
+      auto assgnProb = std::vector<double>();
+      assgnProb.push_back(0.4);
+      assgnProb.push_back(0.6);
+      auto cProt = std::make_unique<InDet::CompetingPixelClustersOnTrack>(
+        std::move(childrots), std::move(assgnProb));
+      trackStateOnSurfaces.push_back(
+        new TrackStateOnSurface(std::move(cProt), nullptr, nullptr));
     }
   }
   //std::cout<<counter++<<std::endl;

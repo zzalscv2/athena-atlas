@@ -173,7 +173,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
                                              cov,
                                              new Trk::PerigeeSurface(Amg::Vector3D (50, 100, 150)),
                                              childrots,
-                                             new std::vector<double> (probs));
+                                             std::vector<double> (probs));
 
   testit (trans1);
   Athena_test::Leakcheck check;

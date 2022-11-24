@@ -21,20 +21,20 @@ CompetingTRT_DriftCirclesOnTrackCnv_p1::persToTrans( const InDet::CompetingTRT_D
                                                      InDet::CompetingTRT_DriftCirclesOnTrack *transObj, 
                                                        MsgStream &log )
 {
-   auto containedChildRots = new std::vector< const InDet::TRT_DriftCircleOnTrack * >;
+   auto containedChildRots = std::vector< const InDet::TRT_DriftCircleOnTrack * >{};
    
    for (const TPObjRef& ref : persObj->m_containedChildRots) {
        ITPConverterFor<Trk::MeasurementBase>  *rotCnv = nullptr;
        const InDet::TRT_DriftCircleOnTrack* mcot = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*>(createTransFromPStore(&rotCnv, ref, log));
-       containedChildRots->push_back( mcot );
+       containedChildRots.push_back( mcot );
    }
    
    ITPConverterFor<Trk::Surface>  *surfaceCnv = nullptr;
    Trk::Surface* associatedSurface    = createTransFromPStore(&surfaceCnv, persObj->m_associatedSurface, log);
 
    *transObj = InDet::CompetingTRT_DriftCirclesOnTrack (associatedSurface,
-                                                        containedChildRots,
-                                                        nullptr,
+                                                        std::move(containedChildRots),
+                                                        std::vector<double>{},
                                                         {},
                                                         {},
                                                         0);
