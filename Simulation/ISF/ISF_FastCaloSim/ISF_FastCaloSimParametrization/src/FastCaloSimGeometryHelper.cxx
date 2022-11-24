@@ -24,14 +24,12 @@ FastCaloSimGeometryHelper::~FastCaloSimGeometryHelper()
 StatusCode FastCaloSimGeometryHelper::initialize()
 {
   ATH_MSG_INFO("Initializing FastCaloSimGeometryHelper");
-  m_caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>("CaloMgrFCS");
+  m_caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
   if(!m_caloMgr) {
-    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescr(serviceLocator()
-									, Athena::getMessageSvc()
-									, nullptr
-									, nullptr);
-    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), "CaloMgrFCS"));
-    ATH_CHECK(detStore()->retrieve(m_caloMgr, "CaloMgrFCS"));
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+									       , Athena::getMessageSvc());
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
+    ATH_CHECK(detStore()->retrieve(m_caloMgr, caloMgrStaticKey));
   }
   LoadGeometryFromCaloDDM();  
   return StatusCode::SUCCESS;

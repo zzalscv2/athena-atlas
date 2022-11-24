@@ -29,6 +29,21 @@ class Identifier;
 class IdentifierHash;
 class CaloIdManager;
 
+/*
+  Detector Store Key for the manager which gets built by one of the clients which
+  still need to access it at initialization. The number of such clients is very limited.
+
+  If such a manager is built in a simulation job, then at this point the initial set
+  of alignment corrections has already been applied to the GeoModel tree. Therefore these 
+  alignments will be applied to the Calo DD too. No more alignment corrections will be
+  applied to the Calo DD through the rest of the simulation job.
+
+  If one of the clients builds such a manager in some other type of job (e.g., Reconstruction),
+  then at this point no alignment corrections have been applied to Calo DD. Therefore the
+  clients get an ideal Calo DD, which, again, will not change through the rest of the given job.
+ */
+constexpr static const char* caloMgrStaticKey = "CaloMgrStatic";
+
 /** @class CaloDetDescrManager
 
    @brief This class provides the client interface for accessing the

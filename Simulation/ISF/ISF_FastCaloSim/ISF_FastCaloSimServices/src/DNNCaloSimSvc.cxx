@@ -89,14 +89,12 @@ StatusCode ISF::DNNCaloSimSvc::initialize()
       return StatusCode::FAILURE;
     }
   
-  m_caloDetDescrManager = detStore()->tryConstRetrieve<CaloDetDescrManager>("CaloMgrFCS");
+  m_caloDetDescrManager = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
   if(!m_caloDetDescrManager) {
-    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescr(serviceLocator()
-									, Athena::getMessageSvc()
-									, nullptr
-									, nullptr);
-    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), "CaloMgrFCS"));
-    ATH_CHECK(detStore()->retrieve(m_caloDetDescrManager, "CaloMgrFCS"));
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+									       , Athena::getMessageSvc());
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
+    ATH_CHECK(detStore()->retrieve(m_caloDetDescrManager, caloMgrStaticKey));
   }
 
   const FCALDetectorManager * fcalManager=nullptr;

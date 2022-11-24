@@ -8,6 +8,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
+#include "CaloDetDescrUtils/CaloDetDescrBuilder.h"
 
 #include "Acts/Geometry/TrackingVolume.hpp"
 #include "Acts/Geometry/VolumeBounds.hpp"
@@ -38,10 +39,16 @@ ActsCaloTrackingVolumeBuilder::ActsCaloTrackingVolumeBuilder(const std::string& 
 
 }
 
-StatusCode
+StatusCode 
 ActsCaloTrackingVolumeBuilder::initialize()
 {
-  ATH_CHECK( m_caloDDMgrKey.initialize() );
+  m_caloMgr = detStore()->tryConstRetrieve<CaloDetDescrManager>(caloMgrStaticKey);
+  if(!m_caloMgr) {
+    std::unique_ptr<CaloDetDescrManager> caloMgrPtr = buildCaloDetDescrNoAlign(serviceLocator()
+                                                                               , Athena::getMessageSvc());
+    ATH_CHECK(detStore()->record(std::move(caloMgrPtr), caloMgrStaticKey));
+    ATH_CHECK(detStore()->retrieve(m_caloMgr, caloMgrStaticKey));
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -672,13 +679,11 @@ ActsCaloTrackingVolumeBuilder::cellFactory() const
   size_t calosample;
   float  scale;
 
-  SG::ReadHandle<CaloDetDescrManager> caloMgr(m_caloDDMgrKey);
-
   // storage of cells we will produce
   std::vector<std::unique_ptr<Acts::AbstractVolume>> cells;
-  cells.reserve(caloMgr->element_size());  // about 180k
+  cells.reserve(m_caloMgr->element_size());  // about 180k
 
-  for(auto it = caloMgr->element_begin();it < caloMgr->element_end();++it) {
+  for(auto it = m_caloMgr->element_begin();it < m_caloMgr->element_end();++it) {
     const CaloDetDescrElement* cde = *it;
 
     z = cde->z();
