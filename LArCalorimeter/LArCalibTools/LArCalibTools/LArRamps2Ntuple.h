@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,9 +22,10 @@
 #include "LArCalibTools/LArCond2NtupleBase.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArElecCalib/ILArRamp.h"
-#include "LArRawConditions/LArRampSym.h"
 
-class LArRamps2Ntuple : public LArCond2NtupleBase 
+#include "CxxUtils/checker_macros.h"
+
+class ATLAS_NOT_THREAD_SAFE LArRamps2Ntuple : public LArCond2NtupleBase 
 {
  public:
   LArRamps2Ntuple(const std::string & name, ISvcLocator * pSvcLocator);
@@ -43,7 +44,6 @@ class LArRamps2Ntuple : public LArCond2NtupleBase
   std::vector<std::string> m_contKey;
   SG::ReadCondHandleKey<ILArRamp> m_rampKey;
   std::string m_ntName;
-  bool m_isMC;
 
 };
 

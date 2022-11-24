@@ -79,7 +79,8 @@ LArCaliWave makeWave (int x)
                       std::vector<int> { 30+x, 31+x, 32+x, 33+x, 34+x },
                       1.5 + x,
                       0x12345678 + x,
-                      x*2);
+                      x*2,
+                      LArWave::unknown);
 }
 
 

@@ -567,7 +567,7 @@ namespace MuonCombined {
         if (std::abs(fitChiSq1 - fitChiSq2) > m_badFitChi2) {
             if (fitChiSq1 < m_badFitChi2) {
                 if (matchChiSq1 > matchChiSq2 && matchChiSq2 < m_matchChiSquaredCut) {  // may want to suppress this warning!
-                    ATH_MSG_WARNING("bestMatchChooser: choose worse, but acceptable, matchChiSq as better fitChiSq. "
+                    ATH_MSG_DEBUG("bestMatchChooser: choose worse, but acceptable, matchChiSq as better fitChiSq. "
                                     << " matchChiSq 1,2 " << matchChiSq1 << ", " << matchChiSq2 << "   fitChiSq/DoF 1,2 " << fitChiSq1
                                     << "/" << numberDoF1 << ", " << fitChiSq2 << "/" << numberDoF2);
                 }
@@ -575,7 +575,7 @@ namespace MuonCombined {
             }
             if (fitChiSq2 < m_badFitChi2) {
                 if (matchChiSq1 < matchChiSq2 && matchChiSq1 < m_matchChiSquaredCut) {  // may want to suppress this warning!
-                    ATH_MSG_WARNING("bestMatchChooser: choose worse, but acceptable, matchChiSq as better fitChiSq. "
+                    ATH_MSG_DEBUG("bestMatchChooser: choose worse, but acceptable, matchChiSq as better fitChiSq. "
                                     << " matchChiSq 1,2 " << matchChiSq1 << ", " << matchChiSq2 << "   fitChiSq/DoF 1,2 " << fitChiSq1
                                     << "/" << numberDoF1 << ", " << fitChiSq2 << "/" << numberDoF2);
                 }
@@ -612,7 +612,7 @@ namespace MuonCombined {
                     if (significance1 < significanceCut) {
                         if (matchChiSq1 > matchChiSq2 && matchChiSq2 < m_matchChiSquaredCut) {
                             // NOT choosing bestMatchChi2:
-                            ATH_MSG_WARNING("bestMatchChooser: choose worse, but acceptable, matchChiSq as better momentum balance. "
+                            ATH_MSG_DEBUG("bestMatchChooser: choose worse, but acceptable, matchChiSq as better momentum balance. "
                                             << " matchChiSq 1,2 " << matchChiSq1 << ", " << matchChiSq2
                                             << "   momentumBalanceSignificance 1,2 " << curTag.momentumBalanceSignificance() << ", "
                                             << bestTag.momentumBalanceSignificance());
@@ -622,7 +622,7 @@ namespace MuonCombined {
                     if (significance2 < significanceCut) {
                         if (matchChiSq1 < matchChiSq2 && matchChiSq1 < m_matchChiSquaredCut) {
                             // NOT choosing bestMatchChi2:
-                            ATH_MSG_WARNING("bestMatchChooser: choose worse, but acceptable, matchChiSq as better momentum balance. "
+                            ATH_MSG_DEBUG("bestMatchChooser: choose worse, but acceptable, matchChiSq as better momentum balance. "
                                             << " matchChiSq 1,2 " << matchChiSq1 << ", " << matchChiSq2
                                             << "   momentumBalanceSignificance 1,2 " << curTag.momentumBalanceSignificance() << ", "
                                             << bestTag.momentumBalanceSignificance());
@@ -653,7 +653,7 @@ namespace MuonCombined {
             if (fitChiSq1 < 0.5 * m_badFitChi2) {
                 if (matchChiSq1 > matchChiSq2 && matchChiSq2 < m_matchChiSquaredCut) {
                     // NOT choosing bestMatchChi2:
-                    ATH_MSG_WARNING("bestMatchChooser: choose worse, but acceptable, matchChiSq according to overall quality. "
+                    ATH_MSG_DEBUG("bestMatchChooser: choose worse, but acceptable, matchChiSq according to overall quality. "
                                     << " matchChiSq 1,2 " << matchChiSq1 << ", " << matchChiSq2 << "   fitChiSq/DoF 1,2 " << fitChiSq1
                                     << "/" << numberDoF1 << ", " << fitChiSq2 << "/" << numberDoF2);
                 }
@@ -662,7 +662,7 @@ namespace MuonCombined {
             if (fitChiSq2 < 0.5 * m_badFitChi2) {
                 if (matchChiSq1 < matchChiSq2 && matchChiSq1 < m_matchChiSquaredCut) {
                     // NOT choosing bestMatchChi2:
-                    ATH_MSG_WARNING("bestMatchChooser: choose worse, but acceptable, matchChiSq according to overall quality. "
+                    ATH_MSG_DEBUG("bestMatchChooser: choose worse, but acceptable, matchChiSq according to overall quality. "
                                     << " matchChiSq 1,2 " << matchChiSq1 << ", " << matchChiSq2 << "   fitChiSq/DoF 1,2 " << fitChiSq1
                                     << "/" << numberDoF1 << ", " << fitChiSq2 << "/" << numberDoF2);
                 }

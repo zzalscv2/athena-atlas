@@ -346,7 +346,8 @@ LArCaliWave LArCaliWaveAverage::WaveAverage(std::vector<LArCaliWave> ToBeAverage
 				    ToBeAveraged[0].getErrors(),
 				    ToBeAveraged[0].getTriggers(),
 				    ToBeAveraged[0].getDt(), 
-				   (ToBeAveraged[0].getDAC() + (ToBeAveraged[0].getIsPulsedInt()<<16)), 
+				    ToBeAveraged[0].getDAC(),
+				    ToBeAveraged[0].getIsPulsedInt(),
 				    ToBeAveraged[0].getFlag() );
     
     return theCaliWaveAverage;

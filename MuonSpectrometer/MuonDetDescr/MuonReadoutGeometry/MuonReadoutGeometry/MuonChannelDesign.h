@@ -168,7 +168,7 @@ namespace MuonGM {
         Amg::Vector2D cen{Amg::Vector2D::Zero()};
         if (!center(chNum, cen)) return std::numeric_limits<float>::max();
         
-        return (cen - pos).x();
+        return (pos - cen).x();
     }
     
 

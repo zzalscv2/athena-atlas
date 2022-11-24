@@ -238,6 +238,14 @@ def setupMenu():
         ChainProp(name='HLT_mu4_j60_ion_dRAB04_L1MU3V_jJ40', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[HardProbesStream], groups=PrimaryPhIGroup+SingleBjetGroup),
         ChainProp(name='HLT_mu4_j20_ion_dRAB04_L1MU3V_jJ30', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[HardProbesStream], groups=SupportPhIGroup+SingleBjetGroup),
         ChainProp(name='HLT_mu4_j35_ion_dRAB04_L1MU3V_jJ40', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[HardProbesStream], groups=SupportPhIGroup+SingleBjetGroup),
+
+        #----------- mu + UPC Fgap
+        ChainProp(name='HLT_mu4_hi_FgapAC3_L1MU3V_VTE50', l1SeedThresholds=['MU3V','FSNOSEED'], stream=[UPCStream], groups=SingleMuonGroup+PrimaryLegGroup),
+
+        #----------- UPC HMT Fgap #FIXME: currently ChainMerging fails due to EmptyMbts step in mb part (?)
+        #ChainProp(name='HLT_mb_sp300_trk20_hmt_hi_FgapA5_L1TE3_VTE50', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        #ChainProp(name='HLT_mb_sp300_trk20_hmt_hi_FgapC5_L1TE3_VTE50', l1SeedThresholds=['FSNOSEED']*2, stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+
     ]
 
 
@@ -265,6 +273,17 @@ def setupMenu():
 
         #----Physics streamer for 2022 Nov HI test run, ATR-26405
         ChainProp(name='HLT_mb_sptrk_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
+    ]
+
+
+    chains['HeavyIon'] += [
+        #----------- UPC Fgap
+        ChainProp(name='HLT_hi_FgapAC3_L1VTE50',                    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_hi_FgapAC5_L1VTE50',                    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_hi_FgapAC10_L1VTE50',                    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_hi_FgapA10_L1VTE50',                    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_hi_FgapC10_L1VTE50',                    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+
     ]
 
     chains['Streaming'] += [

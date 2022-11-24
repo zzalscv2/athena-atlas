@@ -19,6 +19,7 @@ namespace {
   /// End of the barrel region
   constexpr double barrel_end = 1.05;
   constexpr double eifi_boundary = 1.3;
+  constexpr double endcap_end = 1.9;
   constexpr double trigger_end = 2.4;
 
   // offset for better drawing
@@ -857,6 +858,11 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	if ( muon2->author() > xAOD::Muon::Author::MuidSA )continue;
 	if ( muon2->muonType() > xAOD::Muon::MuonType::MuonStandAlone )continue;
 
+	// tag muon to be only in the other region, barrel or endcap, to remove possible bias from the same region
+	if( m_tagMuonInDifferentSystem.value() &&
+	    ( (std::abs(muon->eta()) < barrel_end && std::abs(muon2->eta()) < barrel_end) ||
+	      (std::abs(muon->eta()) > barrel_end && std::abs(muon2->eta()) > barrel_end) ) )continue;
+
 	// isolation calculation
 	double dr_muons = xAOD::P4Helpers::deltaR(muon,muon2,false);
 	deltaR_muons.push_back(dr_muons);
@@ -1098,6 +1104,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     oflmuon_variables.push_back(oflmuon_phi);
 
 
+    auto muon_charge = Monitored::Collection("muon_charge",mymuons,[](const MyMuon& m){
+	return m.muon->charge();
+      });
+    oflmuon_variables.push_back(muon_charge);
+    auto muon_chargePos = Monitored::Collection("muon_chargePos",mymuons,[](const MyMuon& m){
+return (m.muon->charge()>0);
+      });
+    oflmuon_variables.push_back(muon_chargePos);
+    auto muon_chargeNeg = Monitored::Collection("muon_chargeNeg",mymuons,[](const MyMuon& m){
+	return (m.muon->charge()<0);
+      });
+    oflmuon_variables.push_back(muon_chargeNeg);
     auto muon_eta4gev = Monitored::Collection("muon_eta4gev",mymuons,[](const MyMuon& m){
     	return (m.muon->pt()>pt_4_cut)?m.muon->eta():-10;
       });
@@ -1154,6 +1172,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->pt() > pt_4_cut && m.muon->eta() < 0) ? m.muon->phi() : -10;
       });
     oflmuon_variables.push_back(muon_phi4gev_tgcC);
+    auto muon_phi0gev_tgc = Monitored::Collection("muon_phi0gev_tgc",mymuons,[](const MyMuon& m){
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end) ? m.muon->phi() : -10;
+      });
+    oflmuon_variables.push_back(muon_phi0gev_tgc);
+    auto muon_phi0gev_tgcA = Monitored::Collection("muon_phi0gev_tgcA",mymuons,[](const MyMuon& m){
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->eta() > 0) ? m.muon->phi() : -10;
+      });
+    oflmuon_variables.push_back(muon_phi0gev_tgcA);
+    auto muon_phi0gev_tgcC = Monitored::Collection("muon_phi0gev_tgcC",mymuons,[](const MyMuon& m){
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end && m.muon->eta() < 0) ? m.muon->phi() : -10;
+      });
+    oflmuon_variables.push_back(muon_phi0gev_tgcC);
     auto muon_eta = Monitored::Collection("muon_eta", mymuons, [](const MyMuon &m) {
     	return (m.muon->pt() > pt_30_cut) ? m.muon->eta() : -10;
       });
@@ -1194,6 +1224,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < trigger_end) ? m.muon->pt() / Gaudi::Units::GeV : -10;
       });
     oflmuon_variables.push_back(muon_pt_tgc);
+    auto muon_barrel = Monitored::Collection("muon_barrel", mymuons, [](const MyMuon &m) {
+	return (std::abs(m.muon->eta()) < barrel_end);
+      });
+    oflmuon_variables.push_back(muon_barrel);
+    auto muon_endcap = Monitored::Collection("muon_endcap", mymuons, [](const MyMuon &m) {
+	return (std::abs(m.muon->eta()) > barrel_end && std::abs(m.muon->eta()) < endcap_end);
+      });
+    oflmuon_variables.push_back(muon_endcap);
+    auto muon_forward = Monitored::Collection("muon_forward", mymuons, [](const MyMuon &m) {
+	return (std::abs(m.muon->eta()) > endcap_end && std::abs(m.muon->eta()) < trigger_end);
+      });
+    oflmuon_variables.push_back(muon_forward);
     auto muon_l1passThr1TGC = Monitored::Collection("muon_l1passThr1TGC", mymuons, [](const MyMuon &m) {
     	return m.matchedL1ThrInclusiveTGC.find(1) != m.matchedL1ThrInclusiveTGC.end();
       });
@@ -1779,6 +1821,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
       std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_hiteff;
       std::vector<Monitored::ObjectsCollection<std::vector<TGC::TgcHit>, double>> varowner_eachchamber;
       std::vector<Monitored::ObjectsCollection<std::vector<double>, double>> varowner_eachchamber_double;
+      std::map<std::string,std::vector<double>> cham_and_res;
 
       if(m_fillGapByGapHistograms.value()){
 
@@ -1818,13 +1861,12 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	    varowner_eachchamber.push_back(Monitored::Collection(Form("hit_on_%s",chanName.data()),tgcHitMap.second,[](const TGC::TgcHit&m){return m.channel();}));
 	    hit_variables.push_back(varowner_eachchamber.back());
 	  }else{ // only summed over the gaps
-	    std::vector<double> res;
 	    for(const auto&tgcHit:tgcHitMap.second){
 	      for(const auto&tgcRes:tgcHit.residuals()){
-		res.push_back(tgcRes.second);
+		cham_and_res[chanName].push_back(tgcRes.second);
 	      }
 	    }
-	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),res,[](const double&m){return m;}));
+	    varowner_eachchamber_double.push_back(Monitored::Collection(Form("hit_residual_on_%s",chanName.data()),cham_and_res[chanName],[](const double&m){return m;}));
 	    hit_variables.push_back(varowner_eachchamber_double.back());
 	  }
       	}
@@ -2164,7 +2206,7 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoinEff(const std::string & type,
       double deltaR = vec.Mod() - TVector2(ext.extPos.x(), ext.extPos.y()).Mod();
       if( std::abs(deltaPhi) > m_dPhiCutOnM3 || std::abs(deltaR) > m_dRCutOnM3 )continue;
       matched |= 1;
-      int charge = (tgcTrig.isPositiveDeltaR==0) ? (+1) : (-1);
+      int charge = (tgcTrig.isPositiveDeltaR==0) ? (-1) : (+1);
       matchedQ |= (ext.muon->charge()*charge>0);
       matchedF |= (tgcTrig.pt>>CoinFlagF) & 0x1;
       matchedC |= (tgcTrig.pt>>CoinFlagC) & 0x1;

@@ -95,6 +95,7 @@ void LArDeltaRespTool::compute_deltaresp()
   m_gDelta = LArCaliWave( gDelta.getWave() ,
 			  m_gCali.getDt() ,
 	  	          deltaRespDAC ,
+			  m_gCali.getIsPulsedInt(),
 		          m_gCali.getFlag() );
 			 
 }

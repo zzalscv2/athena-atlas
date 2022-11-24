@@ -13,13 +13,13 @@
 
 #include "xAODTrigger/gFexJetRoI.h"
 #include "xAODTrigger/gFexJetRoIContainer.h"
-#include "xAODTrigger/gFexGlobalRoI.h" 
+#include "xAODTrigger/gFexGlobalRoI.h"
 #include "xAODTrigger/gFexGlobalRoIContainer.h"
 
 using Athena::Units::GeV;
  
 // #include "TrigDecisionTool/TrigDecisionTool.h"
-//#include "TrigT1Interfaces/TrigT1CaloDefs.h" 
+//#include "TrigT1Interfaces/TrigT1CaloDefs.h"
 
 class JetEfficiencyMonitorAlgorithm : public AthMonitorAlgorithm {
 public:JetEfficiencyMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
@@ -38,9 +38,8 @@ private:
 
   
   // container keys including steering parameter and description
-  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4EMPFlowJets", ""}; //offline jets git 
-  SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets", ""}; //LR offline jets 
-  // SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalib", ""}; //LR offline jets for Run3
+  SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4EMPFlowJets", ""}; //offline jets git
+   SG::ReadHandleKey<xAOD::JetContainer> m_LRjetKey{ this, "LRJetKey" , "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_nojcalib", ""}; //LR offline jets for Run3
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexSRJetContainerKey{ this, "mygFexSRJetRoIContainer" , "L1_gFexSRJetRoI" , ""}; //gfex SR jets
   SG::ReadHandleKey<xAOD::gFexJetRoIContainer> m_gFexLRJetContainerKey{ this, "mygFexLRJetRoIContainer" , "L1_gFexLRJetRoI" , ""}; //gfex LR jets
 

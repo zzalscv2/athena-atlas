@@ -64,8 +64,8 @@ LArRTMParamExtractor::LArRTMParamExtractor (const std::string& name, ISvcLocator
 
   declareProperty("calibLineSelection", m_Calibselection = false);
   declareProperty("cLineGroup",         m_Cline=0);
-  
-  declareProperty("useTBB",            m_useTBB = false);
+  declareProperty("nThreads",          m_nThreads=-1,"-1: No TBB, 0: Let TBB decide, >0 number of threads");
+
 }
 
 LArRTMParamExtractor::~LArRTMParamExtractor() {}
@@ -566,12 +566,19 @@ StatusCode LArRTMParamExtractor::stop()
   }//end loop over input containers (SG keys)
 
 
-  if (!m_useTBB) { //traditional, serial processing:
+  if (m_nThreads == -1) { //traditional, serial processing:
     Looper looper(&inputParams,cabling,m_larWFParamTool.operator->(),msg(),m_counter);
     tbb::blocked_range<size_t> r(0,inputParams.size());
     looper(r);
   }
   else {
+     /// TBB global control parameter
+    std::unique_ptr<tbb::global_control> tbbgc;
+
+    if (m_nThreads>0) {
+      tbbgc=std::make_unique<tbb::global_control>( tbb::global_control::max_allowed_parallelism, m_nThreads);
+    }
+
     ATH_MSG_INFO("Now calling TBB parallel_for");
     // NOW CALL TBB PARALLEL FOR
     tbb::parallel_for(tbb::blocked_range<size_t>(0, inputParams.size()),Looper(&inputParams,cabling,

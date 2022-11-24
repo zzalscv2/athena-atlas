@@ -85,7 +85,7 @@ public:
   TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry&, float);
   ~TrigFTF_GNN_DataStorage();
 
-  int addSpacePoint(const TrigSiSpacePointBase&);
+  int addSpacePoint(const TrigSiSpacePointBase&, bool);
   unsigned int numberOfNodes() const;
   void getConnectingNodes(std::vector<const TrigFTF_GNN_Node*>&);
   void sortByPhi();

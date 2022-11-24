@@ -308,7 +308,7 @@ if InDetFlags.doV0Finder():
                                             lamin                   = 900,
                                             lamax                   = 1300,
                                             d0_cut                  = 0.,
-                                            UseBeamSpotCond         = True,
+                                            UseBeamSpotCond         = False,
                                             V0Tools                 = v0_tools,
                                             TrackToVertexTool       = TrackingCommon.getInDetTrackToVertexTool(),
                                             Extrapolator            = v0_InDetExtrapolator)
@@ -331,7 +331,7 @@ if InDetFlags.doV0Finder():
                                             #useTRTplusSi            = True,
                                             useVertexCollection     = True,
                                             #trkSelPV                = True,
-                                            UseBeamSpotCond         = True,
+                                            UseBeamSpotCond         = False,
                                             V0Tools                 = v0_tools,
                                             TrackToVertexTool       = TrackingCommon.getInDetTrackToVertexTool(),
                                             Extrapolator            = v0_InDetExtrapolator)
