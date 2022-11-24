@@ -74,7 +74,7 @@ def createMuonConfigFlags():
     
     mcf.addFlag("Muon.useSegmentMatching", lambda prevFlags : prevFlags.Beam.Type is BeamType.Collisions) # Do not use for cosmics or singlebeam 
     mcf.addFlag("Muon.useTrackSegmentMatching", True )
-    mcf.addFlag("Muon.runCommissioningChain", lambda prevFlags: ( (prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC) \
+    mcf.addFlag("Muon.runCommissioningChain", lambda prevFlags: ( False and (prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC) \
                                                                  and prevFlags.Beam.Type is BeamType.Collisions) )
     
     mcf.addFlag("Muon.applyMMPassivation", lambda prevFlags: prevFlags.GeoModel.Run>=LHCPeriod.Run3 and not prevFlags.Common.isOnline )
