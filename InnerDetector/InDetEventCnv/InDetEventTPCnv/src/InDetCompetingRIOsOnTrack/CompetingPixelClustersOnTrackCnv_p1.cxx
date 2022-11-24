@@ -19,16 +19,16 @@ CompetingPixelClustersOnTrackCnv_p1::persToTrans( const InDet::CompetingPixelClu
                                                        InDet::CompetingPixelClustersOnTrack *transObj, 
                                                        MsgStream &log )
 {
-   auto containedChildRots = new std::vector< const InDet::PixelClusterOnTrack * >;
+   auto containedChildRots = std::vector< const InDet::PixelClusterOnTrack * >{};
    
    for (const TPObjRef& ref : persObj->m_containedChildRots) {
        ITPConverterFor<Trk::MeasurementBase>  *rotCnv = nullptr;
        const InDet::PixelClusterOnTrack* mcot = dynamic_cast<const InDet::PixelClusterOnTrack*>(createTransFromPStore(&rotCnv, ref, log));
-       containedChildRots->push_back( mcot );
+       containedChildRots.push_back( mcot );
    }
 
-   *transObj = InDet::CompetingPixelClustersOnTrack (containedChildRots,
-                                                     nullptr);
+   *transObj = InDet::CompetingPixelClustersOnTrack (std::move(containedChildRots),
+                                                     std::vector<double>{});
    fillTransFromPStore( &m_cRotCnv, persObj->m_competingROT, transObj, log );
 }
 

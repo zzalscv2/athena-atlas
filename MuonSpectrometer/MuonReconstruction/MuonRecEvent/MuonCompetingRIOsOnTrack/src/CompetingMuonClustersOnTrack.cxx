@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -48,8 +48,8 @@ CompetingMuonClustersOnTrack::CompetingMuonClustersOnTrack(
 // explicit constructor
 CompetingMuonClustersOnTrack::CompetingMuonClustersOnTrack(
   std::vector<const MuonClusterOnTrack*>* childrots,
-  std::vector<AssignmentProb>* assgnProb)
-  : Trk::CompetingRIOsOnTrack(assgnProb)
+  std::vector<AssignmentProb>&& assgnProb)
+  : Trk::CompetingRIOsOnTrack(std::move(assgnProb))
   , Trk::SurfacePtrHolderDetEl()
   , m_globalPosition()
   , m_containedChildRots(childrots)
@@ -62,8 +62,8 @@ CompetingMuonClustersOnTrack::CompetingMuonClustersOnTrack(
   const Amg::MatrixX* error,
   const Trk::Surface* assSurf,
   std::vector<const MuonClusterOnTrack*>* childrots,
-  std::vector<AssignmentProb>* assgnProb)
-  : Trk::CompetingRIOsOnTrack(assgnProb)
+  std::vector<AssignmentProb>&& assgnProb)
+  : Trk::CompetingRIOsOnTrack(std::move(assgnProb))
   , Trk::SurfacePtrHolderDetEl(assSurf)
   , m_globalPosition()
   , m_containedChildRots(childrots)
@@ -79,8 +79,8 @@ CompetingMuonClustersOnTrack::CompetingMuonClustersOnTrack(
   const Amg::MatrixX& error,
   const Trk::Surface* assSurf,
   std::vector<const MuonClusterOnTrack*>* childrots,
-  std::vector<AssignmentProb>* assgnProb)
-  : Trk::CompetingRIOsOnTrack(assgnProb)
+  std::vector<AssignmentProb>&& assgnProb)
+  : Trk::CompetingRIOsOnTrack(std::move(assgnProb))
   , Trk::SurfacePtrHolderDetEl(assSurf)
   , m_globalPosition()
   , m_containedChildRots(childrots)

@@ -19,29 +19,18 @@ void CompetingRIOsOnTrackCnv_p1::persToTrans( const Trk::CompetingRIOsOnTrack_p1
   EigenHelpers::vectorToEigenMatrix(dummy.values, transObj->m_localCovariance, "CompetingRIOsOnTrackCnv_p1");
 
   #ifdef UseFloatsIn_CompetingRIOsOnTrack
-  std::vector<double> *tmpVector = new std::vector<double>();
-  tmpVector->reserve(persObj->m_assignProb.size());
+  auto tmpVector = std::vector<double>();
+  tmpVector.reserve(persObj->m_assignProb.size());
   for (std::vector<float>::const_iterator itr  = persObj->m_assignProb.begin() ; 
   itr != persObj->m_assignProb.end()   ; ++itr)
   {
-    tmpVector->push_back((double)(*itr));
+    tmpVector.push_back((double)(*itr));
   }
-  transObj->m_assignProb = tmpVector;
+  transObj->m_assignProb = std::move(tmpVector);
   #else
-  transObj->m_assignProb = new std::vector<double>(persObj->m_assignProb);
+  transObj->m_assignProb = std::vector<double>(persObj->m_assignProb);
   #endif
 
-    // find max assignment index again
-  double maxAssgnProb = 0;
-  unsigned int max = transObj->m_assignProb->size();
-  using t_probVec = std::vector<Trk::CompetingRIOsOnTrack::AssignmentProb>;
-  const t_probVec& tProbVec = *(transObj->m_assignProb);
-  for (unsigned int i=0; i<max; i++) {
-    if ( tProbVec[i] >= maxAssgnProb) {
-      transObj->m_indexMaxAssignProb=i;
-      maxAssgnProb = tProbVec[i];
-    }
-  }
 }
 
 void CompetingRIOsOnTrackCnv_p1::transToPers( const Trk::CompetingRIOsOnTrack * transObj, Trk::CompetingRIOsOnTrack_p1 * persObj, MsgStream & log )
@@ -52,6 +41,6 @@ void CompetingRIOsOnTrackCnv_p1::transToPers( const Trk::CompetingRIOsOnTrack * 
     EigenHelpers::eigenMatrixToVector(pMat.values, transObj->m_localCovariance, "CompetingRIOsOnTrackCnv_p1");
     persObj->m_localErrorMatrix = toPersistent( &m_errorMxCnv, &pMat, log ); 
 
-    persObj->m_assignProb.assign (transObj->m_assignProb->begin(),
-                                  transObj->m_assignProb->end());
+    persObj->m_assignProb.assign (transObj->m_assignProb.begin(),
+                                  transObj->m_assignProb.end());
 }

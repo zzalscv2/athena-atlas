@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -20,9 +20,10 @@ InDet::CompetingTRT_DriftCirclesOnTrack::CompetingTRT_DriftCirclesOnTrack()
   : Trk::CompetingRIOsOnTrack()
   , Trk::SurfacePtrHolderDetEl(nullptr)
   , m_globalPosition{}
-  , m_containedChildRots(nullptr)
+  , m_containedChildRots()
   , m_ROTsHaveCommonSurface(8)
-{}
+{
+}
 
 // copy constructor
 InDet::CompetingTRT_DriftCirclesOnTrack::CompetingTRT_DriftCirclesOnTrack(
@@ -30,14 +31,13 @@ InDet::CompetingTRT_DriftCirclesOnTrack::CompetingTRT_DriftCirclesOnTrack(
   : Trk::CompetingRIOsOnTrack(compROT)
   , Trk::SurfacePtrHolderDetEl(compROT)
   , m_globalPosition{}
-  , m_containedChildRots(nullptr)
+  , m_containedChildRots{}
   , m_ROTsHaveCommonSurface(compROT.m_ROTsHaveCommonSurface)
 {
-  m_containedChildRots = new std::vector<const InDet::TRT_DriftCircleOnTrack*>;
   std::vector<const InDet::TRT_DriftCircleOnTrack*>::const_iterator rotIter =
-    compROT.m_containedChildRots->begin();
-  for (; rotIter != compROT.m_containedChildRots->end(); ++rotIter) {
-    m_containedChildRots->push_back((*rotIter)->clone());
+    compROT.m_containedChildRots.begin();
+  for (; rotIter != compROT.m_containedChildRots.end(); ++rotIter) {
+    m_containedChildRots.push_back((*rotIter)->clone());
   }
   if (compROT.m_globalPosition) {
     m_globalPosition.store(
@@ -48,17 +48,17 @@ InDet::CompetingTRT_DriftCirclesOnTrack::CompetingTRT_DriftCirclesOnTrack(
 // explicit constructor
 InDet::CompetingTRT_DriftCirclesOnTrack::CompetingTRT_DriftCirclesOnTrack(
   const Trk::Surface* sf,
-  std::vector<const InDet::TRT_DriftCircleOnTrack*>* childrots,
-  std::vector<AssignmentProb>* assgnProb,
+  std::vector<const InDet::TRT_DriftCircleOnTrack*>&& childrots,
+  std::vector<AssignmentProb>&& assgnProb,
   const Trk::LocalParameters& effecLocalPars,
   const Amg::MatrixX& effecLocalErrMat,
   int ROTsHaveComSrfc // meaning of the values are described in the definition
                       // of ROTsHaveCommonSurface()
   )
-  : Trk::CompetingRIOsOnTrack(assgnProb)
+  : Trk::CompetingRIOsOnTrack(std::move(assgnProb))
   , Trk::SurfacePtrHolderDetEl(sf)
   , m_globalPosition{}
-  , m_containedChildRots(childrots)
+  , m_containedChildRots(std::move(childrots))
   , m_ROTsHaveCommonSurface(ROTsHaveComSrfc)
 {
   m_localParams = effecLocalPars;
@@ -76,9 +76,7 @@ InDet::CompetingTRT_DriftCirclesOnTrack::operator=(
 
     // clear rots
     clearChildRotVector();
-    delete m_containedChildRots;
-    m_containedChildRots =
-      new std::vector<const InDet::TRT_DriftCircleOnTrack*>;
+    m_containedChildRots.clear();
 
     if (compROT.m_globalPosition) {
       m_globalPosition.store(
@@ -90,9 +88,9 @@ InDet::CompetingTRT_DriftCirclesOnTrack::operator=(
     m_ROTsHaveCommonSurface = compROT.m_ROTsHaveCommonSurface;
     //
     std::vector<const InDet::TRT_DriftCircleOnTrack*>::const_iterator rotIter =
-      compROT.m_containedChildRots->begin();
-    for (; rotIter != compROT.m_containedChildRots->end(); ++rotIter)
-      m_containedChildRots->push_back((*rotIter)->clone());
+      compROT.m_containedChildRots.begin();
+    for (; rotIter != compROT.m_containedChildRots.end(); ++rotIter)
+      m_containedChildRots.push_back((*rotIter)->clone());
   }
   return (*this);
 }
@@ -102,30 +100,29 @@ InDet::CompetingTRT_DriftCirclesOnTrack::operator=(
   InDet::CompetingTRT_DriftCirclesOnTrack&& compROT) noexcept
 {
   if (this != &compROT) {
+    // base class move
+    Trk::CompetingRIOsOnTrack::operator=(compROT);
+    Trk::SurfacePtrHolderDetEl::operator=(compROT);
     // rots
     clearChildRotVector();
-    *m_containedChildRots = std::move(*compROT.m_containedChildRots);
+    m_containedChildRots = std::move(compROT.m_containedChildRots);
     m_globalPosition = std::move(compROT.m_globalPosition);
     m_ROTsHaveCommonSurface = compROT.m_ROTsHaveCommonSurface;
-    // base class move
-    Trk::CompetingRIOsOnTrack::operator=(std::move(compROT));
-    Trk::SurfacePtrHolderDetEl::operator=(std::move(compROT));
-  }
+ }
   return (*this);
 }
 
 InDet::CompetingTRT_DriftCirclesOnTrack::~CompetingTRT_DriftCirclesOnTrack()
 {
   clearChildRotVector();
-  delete m_containedChildRots;
 }
 
 void
 InDet::CompetingTRT_DriftCirclesOnTrack::clearChildRotVector()
 {
   std::vector<const InDet::TRT_DriftCircleOnTrack*>::const_iterator rotIter =
-    m_containedChildRots->begin();
-  for (; rotIter != m_containedChildRots->end(); ++rotIter) {
+    m_containedChildRots.begin();
+  for (; rotIter != m_containedChildRots.end(); ++rotIter) {
     delete (*rotIter);
   }
 }
@@ -201,23 +198,24 @@ InDet::CompetingTRT_DriftCirclesOnTrack::globalPosition() const
   // assignment probabilities
   double assgnProbSum = 0.;
   std::vector<AssignmentProb>::const_iterator assgnProbIter =
-    m_assignProb->begin();
-  for (; assgnProbIter != m_assignProb->end(); ++assgnProbIter) {
+    m_assignProb.begin();
+  for (; assgnProbIter != m_assignProb.end(); ++assgnProbIter) {
     assgnProbSum += (*assgnProbIter);
   }
 
   Amg::Vector3D globalPos(0., 0., 0.);
   if (assgnProbSum > 0.) {
     std::vector<const InDet::TRT_DriftCircleOnTrack*>::const_iterator rotIter =
-      std::as_const(*m_containedChildRots).begin();
-    assgnProbIter = m_assignProb->begin();
-    for (; rotIter != std::as_const(*m_containedChildRots).end(); ++rotIter, ++assgnProbIter) {
+      std::as_const(m_containedChildRots).begin();
+    assgnProbIter = m_assignProb.begin();
+    for (; rotIter != std::as_const(m_containedChildRots).end();
+         ++rotIter, ++assgnProbIter) {
       globalPos +=
         (((*assgnProbIter) / assgnProbSum) * ((*rotIter)->globalPosition()));
     }
 
   } else {
-    globalPos = std::as_const(*m_containedChildRots)[0]->globalPosition();
+    globalPos = std::as_const(m_containedChildRots)[0]->globalPosition();
   }
   m_globalPosition.set(std::make_unique<const Amg::Vector3D>(globalPos));
   return *m_globalPosition;
