@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           eFEXCompression.h  -  description
@@ -49,9 +49,9 @@ public:
  
 private: 
   /** Maximum ET value that can be encoded */
-  static const int s_maxET = 1019200;
+  static const int s_maxET = 144800;
   /** Number of ranges */
-  static const unsigned int s_nRanges = 6;
+  static const unsigned int s_nRanges = 4;
   /** Step sizes in each range, MeV */
   static const int s_steps[s_nRanges];
   /** Minimum ET values in each range, MeV */
