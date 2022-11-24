@@ -8,13 +8,11 @@
 #include "GaudiKernel/ListItem.h"
 
 #include "CaloUtils/CaloTopoTowerBuilderToolBase.h"
-#include "GeoModelInterfaces/IGeoAlignTool.h"
 
 CaloTopoTowerBuilderToolBase::CaloTopoTowerBuilderToolBase(const std::string& name,
 						   const std::string& type,
 						   const IInterface* parent)
-  : AthAlgTool(name,type,parent),
-    m_caloAlignTool("CaloAlignTool")
+  : AthAlgTool(name,type,parent)
 {
   // common properties
   declareInterface<ICaloTopoTowerBuilderToolBase>(this);

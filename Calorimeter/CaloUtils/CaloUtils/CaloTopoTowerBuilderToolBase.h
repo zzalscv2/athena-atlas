@@ -24,7 +24,6 @@
 
 class CaloTowerContainer;
 class CaloCellContainer;
-class IGeoAlignTool;
 
 class CaloTopoTowerBuilderToolBase : public AthAlgTool,
 				 virtual public ICaloTopoTowerBuilderToolBase,
@@ -66,9 +65,6 @@ class CaloTopoTowerBuilderToolBase : public AthAlgTool,
   CaloTowerSeg m_theTowerSeg;
 
   //bool m_cacheValid;
-
-  ToolHandle<IGeoAlignTool> m_caloAlignTool;
-  
 
   /////////////////////////////
   // Specific Initialization //
