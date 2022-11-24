@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4UserActions_ScoringPlane_H
@@ -10,6 +10,7 @@
 #include "G4UserEventAction.hh"
 
 #include <string>
+#include <memory>
 
 // Forward declarations
 class TTree;
@@ -34,6 +35,7 @@ namespace G4UA
       };
 
       ScoringPlane(const Config& config);
+      ~ScoringPlane();
       virtual void BeginOfRunAction(const G4Run*) override;
       virtual void EndOfRunAction(const G4Run*) override;
       virtual void UserSteppingAction(const G4Step*) override;
@@ -42,8 +44,8 @@ namespace G4UA
     private:
       Config m_config;
 
-      TTree* m_tree0;
-      TTree* m_tree1;
+      std::unique_ptr<TTree> m_tree0;
+      std::unique_ptr<TTree> m_tree1;
 
       int    m_evt;
       int    m_ntr;
