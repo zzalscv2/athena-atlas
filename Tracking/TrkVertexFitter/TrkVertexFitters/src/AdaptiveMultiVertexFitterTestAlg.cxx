@@ -9,6 +9,7 @@
  */
 
 
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #undef NDEBUG
 #include "AdaptiveMultiVertexFitterTestAlg.h"
 #include "xAODTracking/Vertex.h"
