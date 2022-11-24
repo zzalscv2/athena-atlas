@@ -20,6 +20,7 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 
 // Random numbers
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandLandau.h"
@@ -40,7 +41,6 @@
 #include "InDetPrepRawData/PixelGangedClusterAmbiguities.h"
 #include "InDetPrepRawData/SiClusterContainer.h"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -70,8 +70,6 @@ PixelFastDigitizationTool::PixelFastDigitizationTool(const std::string &type, co
 
   PileUpToolBase(type, name, parent),
   m_thpcsi(nullptr),
-  m_rndmSvc("AtRndmGenSvc",name),
-  m_randomEngine(nullptr),
   m_randomEngineName("FastPixelDigitization"),
   m_pixel_ID(nullptr),
   m_clusterMaker("InDet::ClusterMakerTool/FatrasClusterMaker"),
@@ -107,7 +105,6 @@ PixelFastDigitizationTool::PixelFastDigitizationTool(const std::string &type, co
   m_ambiguitiesMap(nullptr),
   m_digitizationStepper("Trk::PlanarModuleStepper")
 {
-  declareProperty("RndmSvc"                        , m_rndmSvc,                  "Random Number Service used in Pixel digitization" );
   declareProperty("RndmEngine"                     , m_randomEngineName,         "Random engine name");
   declareProperty("ClusterMaker"                   , m_clusterMaker);
   declareProperty("PixelUseClusterMaker"           , m_pixUseClusterMaker);
@@ -161,13 +158,6 @@ StatusCode PixelFastDigitizationTool::initialize()
 
   if (detStore()->retrieve(m_pixel_ID, "PixelID").isFailure()) {
     ATH_MSG_ERROR ( "Could not get Pixel ID helper" );
-    return StatusCode::FAILURE;
-  }
-
-  //Get own engine with own seeds:
-  m_randomEngine = m_rndmSvc->GetEngine(m_randomEngineName);
-  if (!m_randomEngine) {
-    ATH_MSG_ERROR( "Could not get random engine '" << m_randomEngineName << "'" );
     return StatusCode::FAILURE;
   }
 
@@ -472,6 +462,12 @@ StatusCode PixelFastDigitizationTool::mergeEvent(const EventContext& ctx)
 
 StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
 {
+  // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(*pixelDetEleHandle);
   if (not pixelDetEleHandle.isValid() or elements==nullptr) {
@@ -663,8 +659,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
         if ( m_pixSmearPathLength > 0. ) {
           // create the smdar parameter
           double sPar = m_pixSmearLandau ?
-            m_pixSmearPathLength*CLHEP::RandLandau::shoot(m_randomEngine) :
-            m_pixSmearPathLength*CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
+            m_pixSmearPathLength*CLHEP::RandLandau::shoot(rndmEngine) :
+            m_pixSmearPathLength*CLHEP::RandGaussZiggurat::shoot(rndmEngine);
           pathlength *=  (1.+sPar);
         }
 

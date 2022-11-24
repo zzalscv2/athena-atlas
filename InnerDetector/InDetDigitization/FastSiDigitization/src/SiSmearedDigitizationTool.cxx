@@ -6,7 +6,6 @@
 // SiSmearedDigitizationTool.cxx
 //   Implementation file for class SiSmearedDigitizationTool
 ////////////////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
 
 // Pixel digitization includes
 #include "FastSiDigitization/SiSmearedDigitizationTool.h"
@@ -22,6 +21,7 @@
 #include "InDetSimData/InDetSimDataCollection.h"
 
 // Random numbers
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
@@ -66,10 +66,8 @@ SiSmearedDigitizationTool::SiSmearedDigitizationTool(const std::string &type, co
                                                      const IInterface* parent):
   PileUpToolBase(type, name, parent),
   m_thpcsi(nullptr),
-  m_rndmSvc("AtRndmGenSvc",name),
   m_pixel_ID(nullptr),
   m_sct_ID(nullptr),
-  m_randomEngine(nullptr),
   m_randomEngineName("SiSmearedDigitization"),
   m_pitch_X(0),
   m_pitch_Y(0),
@@ -118,7 +116,6 @@ SiSmearedDigitizationTool::SiSmearedDigitizationTool(const std::string &type, co
   m_Err_x_SCT(0),
   m_Err_y_SCT(0)
 {
-  declareProperty("RndmSvc",                      m_rndmSvc, "Random Number Service used in SCT & Pixel digitization" );
   declareProperty("RndmEngine",                   m_randomEngineName, "Random engine name");
   declareProperty("InputObjectName",              m_inputObjectName="PixelHits", "Input Object name" );
   declareProperty("pitch_X",                      m_pitch_X);
@@ -165,13 +162,6 @@ StatusCode SiSmearedDigitizationTool::initialize()
   // Initialize ReadCondHandleKeys
   ATH_CHECK(m_pixelDetEleCollKey.initialize(m_SmearPixel));
   ATH_CHECK(m_SCTDetEleCollKey.initialize(not m_SmearPixel));
-
-  //Get own engine with own seeds:
-  m_randomEngine = m_rndmSvc->GetEngine(m_randomEngineName);
-  if (!m_randomEngine) {
-    ATH_MSG_ERROR( "Could not get random engine '" << m_randomEngineName << "'" );
-    return StatusCode::FAILURE;
-  }
 
   if (m_inputObjectName=="")
     {
@@ -734,6 +724,12 @@ StatusCode SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map * clu
 
 StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
 {
+  // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+
   ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: in SiSmearedDigizationTool::digitize() ---" );
 
   // Get PixelDetectorElementCollection
@@ -943,13 +939,13 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
       int elementY = timesY+1;
 
       if(m_SmearPixel) {
-        if (CLHEP::RandFlat::shoot(m_randomEngine, 0.0, 1.0) < ProbY) { // number of crossed pixel is (timesY+1)+1
+        if (CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0) < ProbY) { // number of crossed pixel is (timesY+1)+1
           sigmaY = (double)(timesY+2)*m_pitch_Y/sqrt(12.);
           elementY++;
         } else // number of crossed pixel is (timesY+1)
           sigmaY = (double)(timesY+1)*m_pitch_Y/sqrt(12.);
 
-        if (CLHEP::RandFlat::shoot(m_randomEngine, 0.0, 1.0) < ProbX) { // number of crossed pixel is (timesY+1)+1
+        if (CLHEP::RandFlat::shoot(rndmEngine, 0.0, 1.0) < ProbX) { // number of crossed pixel is (timesY+1)+1
           sigmaX = (double)(timesX+2)*m_pitch_X/sqrt(12.);
           elementX++;
         } else // number of crossed pixel is (timesY+1)

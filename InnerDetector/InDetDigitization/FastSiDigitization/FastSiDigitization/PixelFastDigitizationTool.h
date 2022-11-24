@@ -27,6 +27,7 @@
 #include "PixelConditionsData/PixelDistortionData.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 
 //New digi
 #include "TrkDigEvent/DigitizationModule.h"
@@ -43,7 +44,6 @@
 
 class PixelID;
 class PRD_MultiTruthCollection;
-class IAtRndmGenSvc;
 
 namespace InDetDD{
   class SiDetectorElement;
@@ -88,8 +88,8 @@ private:
 
   TimedHitCollection<SiHit>* m_thpcsi;
 
-  ServiceHandle <IAtRndmGenSvc> m_rndmSvc;             //!< Random number service
-  CLHEP::HepRandomEngine*           m_randomEngine;
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
+
   std::string                m_randomEngineName;         //!< Name of the random number stream
 
   const PixelID* m_pixel_ID;                             //!< Handle to the ID helper

@@ -39,6 +39,7 @@
 #include "AtlasHepMC/GenParticle.h"
 
 // CLHEP
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "CLHEP/Random/RandLandau.h"
@@ -59,8 +60,6 @@ SCT_FastDigitizationTool::SCT_FastDigitizationTool(const std::string& type,
   m_mergeSvc("PileUpMergeSvc",name),
   m_HardScatterSplittingMode(0),
   m_HardScatterSplittingSkipper(false),
-  m_rndmSvc("AtRndmGenSvc",name),
-  m_randomEngine(nullptr),
   m_randomEngineName("FastSCT_Digitization"),
   m_thpcsi(nullptr),
   m_clusterMaker("InDet::ClusterMakerTool"),
@@ -83,7 +82,6 @@ SCT_FastDigitizationTool::SCT_FastDigitizationTool(const std::string& type,
 {
   declareProperty("InputObjectName"               , m_inputObjectName,          "Input Object name" );
   declareProperty("MergeSvc"                      , m_mergeSvc,                 "Merge service" );
-  declareProperty("RndmSvc"                       , m_rndmSvc,                  "Random Number Service used in SCT & Pixel digitization" );
   declareProperty("RndmEngine"                    , m_randomEngineName,         "Random Number Engine used in SCT digitization" );
   declareProperty("ClusterMaker"                  , m_clusterMaker);
   declareProperty("SCT_ClusterContainerName"      , m_sctClusterContainer);
@@ -111,13 +109,6 @@ StatusCode SCT_FastDigitizationTool::initialize()
 
   //locate the AtRndmGenSvc and initialize our local ptr
   CHECK(m_rndmSvc.retrieve());
-  //Get own engine with own seeds:
-  m_randomEngine = m_rndmSvc->GetEngine(m_randomEngineName);
-  if (!m_randomEngine)
-    {
-      ATH_MSG_ERROR( "Could not get random engine '" << m_randomEngineName << "'" );
-      return StatusCode::FAILURE;
-    }
 
   CHECK(detStore()->retrieve(m_sct_ID, "SCT_ID"));
 
@@ -313,6 +304,12 @@ StatusCode SCT_FastDigitizationTool::mergeEvent(const EventContext& ctx)
 
 StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
 {
+   // Set the RNG to use for this event.
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
+  const std::string rngName = name()+m_randomEngineName;
+  rngWrapper->setSeed( rngName, ctx );
+  CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
+
   // Get SCT_DetectorElementCollection
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEle(m_SCTDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(sctDetEle.retrieve());
@@ -759,8 +756,8 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
                 {
                   // create the smdar parameter
                   const double sPar = m_sctSmearLandau ?
-                    m_sctSmearPathLength*CLHEP::RandLandau::shoot(m_randomEngine) :
-                    m_sctSmearPathLength*CLHEP::RandGaussZiggurat::shoot(m_randomEngine);
+                    m_sctSmearPathLength*CLHEP::RandLandau::shoot(rndmEngine) :
+                    m_sctSmearPathLength*CLHEP::RandGaussZiggurat::shoot(rndmEngine);
                   chargeWeight *=  (1.+sPar);
                 }
 
