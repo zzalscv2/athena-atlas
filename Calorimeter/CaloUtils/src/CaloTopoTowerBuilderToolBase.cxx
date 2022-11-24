@@ -2,19 +2,13 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GaudiKernel/AlgTool.h"
-
-#include "GaudiKernel/Service.h"
-#include "GaudiKernel/ListItem.h"
-
 #include "CaloUtils/CaloTopoTowerBuilderToolBase.h"
 
-CaloTopoTowerBuilderToolBase::CaloTopoTowerBuilderToolBase(const std::string& name,
-						   const std::string& type,
-						   const IInterface* parent)
+CaloTopoTowerBuilderToolBase::CaloTopoTowerBuilderToolBase(const std::string& name
+							   , const std::string& type
+							   , const IInterface* parent)
   : AthAlgTool(name,type,parent)
 {
-  // common properties
   declareInterface<ICaloTopoTowerBuilderToolBase>(this);
 }
 
@@ -32,12 +26,4 @@ void CaloTopoTowerBuilderToolBase::setTowerSeg(const CaloTowerSeg& theTowerSeg)
   m_theTowerSeg = theTowerSeg;
   ATH_MSG_DEBUG("   neta,nphi,etamin,etamax " << theTowerSeg.neta() << " " << theTowerSeg.nphi() 
 		<< " " << theTowerSeg.etamin() << " " << theTowerSeg.etamax());
-}
-
-StatusCode CaloTopoTowerBuilderToolBase::LoadCalibration(IOVSVC_CALLBACK_ARGS)
-{
-  /* MsgStream log(msgSvc(),name());
-  log << MSG::DEBUG << " in CaloTopoTowerBuilderToolBase::LoadCalibration " << endmsg;
-  m_cacheValid=false;*/
-  return StatusCode::SUCCESS;
 }
