@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTools/LArRamps2Ntuple.h"
 #include "LArRawConditions/LArRawRampContainer.h"
 #include "LArRawConditions/LArRampComplete.h"
-#include "LArRawConditions/LArRampSym.h"
 
 #include <math.h>
 
@@ -22,7 +21,6 @@ LArRamps2Ntuple::LArRamps2Ntuple(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("SaveAllSamples", m_saveAllSamples = false);
   declareProperty("ApplyCorr",      m_applyCorr=false);
   declareProperty("AddCorrUndo",    m_addCorrUndo=true);
-  declareProperty("IsMC",           m_isMC=false);
 }
 
 StatusCode LArRamps2Ntuple::initialize() {
@@ -100,7 +98,8 @@ StatusCode LArRamps2Ntuple::stop() {
    SG::ReadCondHandle<ILArRamp> readHandle{m_rampKey};
    ramp = *readHandle;
  }
-
+ 
+ LArRampComplete* rampComplete_nc=nullptr; //for (potential) applyCorr
 
  if (ramp==nullptr) {
    ATH_MSG_WARNING( "Unable to retrieve ILArRamp with key: "<<m_rampKey << " from DetectorStore" );
@@ -243,7 +242,6 @@ StatusCode LArRamps2Ntuple::stop() {
      }// end-if Save all samples
    }//end if rawRampContainer
 
- //if (rampComplete || rampMC) {
  if (ramp) {
    sc=m_nt->addItem("Xi",coeffIndex,0,7);
    if (sc!=StatusCode::SUCCESS)
@@ -264,8 +262,27 @@ StatusCode LArRamps2Ntuple::stop() {
         return StatusCode::FAILURE;
        }
    }
- }//end-if rampComplete
- 
+
+   if (m_applyCorr) {
+     const LArRampComplete* rampComplete=dynamic_cast<const LArRampComplete*>(ramp);
+     if (!rampComplete) {
+       ATH_MSG_WARNING("Failed to dyn-cast to ILArRamp to LArRampComplete. Cannot apply corrections");
+       m_applyCorr=false;
+     }
+     if (!rampComplete->correctionsApplied()) {
+	rampComplete_nc=const_cast<LArRampComplete*>(rampComplete);
+	sc=rampComplete_nc->applyCorrections();
+	if (sc.isFailure()) {
+	  ATH_MSG_ERROR( "Failed to apply corrections to LArRampComplete!" );
+	}
+	else
+	  ATH_MSG_INFO( "Applied corrections to LArRampComplete" );
+      }
+      else {
+	ATH_MSG_WARNING( "Corrections already applied. Can't apply twice!" );
+      }
+    }// end if applyCorr
+ }//end-if ramp 
 
  const LArOnOffIdMapping *cabling=0;
  if(m_isSC) {
@@ -440,6 +457,10 @@ StatusCode LArRamps2Ntuple::stop() {
    }//end loop over gains
  }//end if add corrections
 
+ if (rampComplete_nc) {
+   ATH_CHECK(rampComplete_nc->undoCorrections());
+   ATH_MSG_INFO("Reverted corrections of LArRampComplete container");
+ }
 
  ATH_MSG_INFO( "LArRamps2Ntuple has finished." );
  return StatusCode::SUCCESS;

@@ -9,6 +9,10 @@ def LArRampCfg(flags):
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
     result=LArCalibBaseCfg(flags)
 
+    #Add ByteStream reading
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    result.merge(ByteStreamReadCfg(flags))
+
     #Calibration runs are taken in fixed gain. 
     #The SG key of the digit-container is name of the gain
     gainStrMap={0:"HIGH",1:"MEDIUM",2:"LOW"}
@@ -95,29 +99,8 @@ def LArRampCfg(flags):
         theLArRampPatcher.PatchMethod="PhiAverage"
    
         theLArRampPatcher.ProblemsToPatch=["deadCalib","deadReadout","deadPhys","almostDead","short"]
-        theLArRampPatcher.UseCorrChannels=False      
+        theLArRampPatcher.UseCorrChannels=True
         result.addEventAlgo(theLArRampPatcher)
-
-
-
-
-    #ROOT ntuple writing:
-    rootfile=flags.LArCalib.Output.ROOTFile
-    if rootfile != "":
-        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
-                                                        AddFEBTempInfo = False,
-                                                        RawRamp = True,
-                                                        SaveAllSamples =  True,
-                                                    ))
-
-        import os
-        if os.path.exists(rootfile):
-            os.remove(rootfile)
-        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
-        result.setAppProperty("HistogramPersistency","ROOT")
-        pass # end if ROOT ntuple writing
-
-
 
 
     #Output (POOL + sqlite) file writing:
@@ -130,9 +113,25 @@ def LArRampCfg(flags):
 
     #RegistrationSvc    
     result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = False))
-
-
     result.getService("IOVDbSvc").DBInstance=""
+
+
+    #ROOT ntuple writing:
+    rootfile=flags.LArCalib.Output.ROOTFile
+    if rootfile != "":
+        result.addEventAlgo(CompFactory.LArRamps2Ntuple(ContainerKey = ["LArRamp"+digKey], #for RawRamp
+                                                        AddFEBTempInfo = False,
+                                                        RawRamp = True,
+                                                        SaveAllSamples =  True,
+                                                        ApplyCorr=True,
+                                                    ))
+
+        import os
+        if os.path.exists(rootfile):
+            os.remove(rootfile)
+        result.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+rootfile+"' OPT='NEW'" ]))
+        result.setAppProperty("HistogramPersistency","ROOT")
+        pass # end if ROOT ntuple writing
 
     return result
 

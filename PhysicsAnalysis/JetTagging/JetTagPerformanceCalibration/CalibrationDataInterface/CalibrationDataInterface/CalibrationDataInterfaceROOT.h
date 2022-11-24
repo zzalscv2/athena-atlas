@@ -461,7 +461,7 @@ namespace Analysis
       double               m_maxAbsEta;
       OutOfBoundsStrategy  m_absEtaStrategy;
       OutOfBoundsStrategy  m_otherStrategy;
-      void                 checkAbsEta(const CalibrationDataVariables& variables, unsigned int index);
+      [[nodiscard]] bool                 checkAbsEta(const CalibrationDataVariables& variables, unsigned int index);
       /** counters for flagging out-of-bound cases */
       std::vector<unsigned int> m_etaCounters;
       std::vector<unsigned int> m_mainCounters;

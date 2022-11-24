@@ -175,19 +175,6 @@ bool TrigFTF_GNN_Layer::verifyBin(const TrigFTF_GNN_Layer* pL, int b1, int b2, f
     return true;
   }
 
-  
-  if(m_layer.m_type != 0 && pL->m_layer.m_type != 0) {//endcap -> endcap
-    
-     
-    float r1min = m_minBinCoord.at(b1);
-    float r2max = pL->m_maxBinCoord.at(b2);
-
-    if(r2max <= r1min) return false;
-    
-     return true;
-   }
-  
-
    return true;
 }
 
@@ -211,10 +198,8 @@ int TrigFTF_GNN_Layer::getEtaBin(float zh, float rh) const {
 
 float TrigFTF_GNN_Layer::getBinRadius(int idx) const {
   if(idx >= static_cast<int>(m_radii.size())) idx = idx-1;
-  if(idx >= static_cast<int>(m_radii.size())){
-    std::cout << "TrigFTF_GNN_Layer::getBinRadius Elliot idx = " << idx << ">= static_cast<int>(m_radii.size()) = " << static_cast<int>(m_radii.size()) << " returning 0" << std::endl;
-    return 0;
-  }
+  if(idx < 0) return 0;
+  
   return m_radii.at(idx);
 }
 

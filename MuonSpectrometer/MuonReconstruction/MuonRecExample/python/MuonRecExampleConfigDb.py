@@ -31,7 +31,6 @@ if setup_stgcs or setup_mm:
 
 if setup_mm:
     addTool("MuonRecExample.NSWTools.SimpleMMClusterBuilderTool","SimpleMMClusterBuilderTool")
-    addTool("MuonRecExample.MuonRecTools.MMClusterOnTrackCreator", "MMClusterOnTrackCreator")
 
 addTool( "MuonRecExample.MuonRecTools.MuonPRDSelectionTool", "MuonPRDSelectionTool" )
 

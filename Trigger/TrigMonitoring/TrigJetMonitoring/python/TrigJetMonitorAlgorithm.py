@@ -1003,15 +1003,17 @@ def jetChainMonitoringConfig(inputFlags,jetcoll,chain,athenaMT,onlyUsePassingJet
 
 
    trigConf = JetMonAlgSpec( # the usual JetMonAlgSpec 
-       jetMonAlgSpecName,
-       JetContainerName = jetcoll,
-       TriggerChain = chain,
-       defaultPath = chainFolder,
-       topLevelDir="HLT/JetMon/Online/",
-       bottomLevelDir=jetcollFolder,
-       failureOnMissingContainer=True,
-       onlyPassingJets=onlyUsePassingJets,
-       )
+     jetMonAlgSpecName,
+     JetContainerName = jetcoll,
+     TriggerChain = chain,
+     defaultPath = chainFolder,
+     topLevelDir="HLT/JetMon/Online/",
+     bottomLevelDir=jetcollFolder,
+     failureOnMissingContainer=True,
+     onlyPassingJets=onlyUsePassingJets,
+     isExpressStreamJob=inputFlags.Common.doExpressProcessing,
+   )
+   
    trigConf.appendHistos(
            "pt",
            "m",

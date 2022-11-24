@@ -1096,7 +1096,7 @@ namespace MuonCombined {
                 if (tag->author() == xAOD::Muon::MuidCo) {
                     const CombinedFitTag* cmb_tag = dynamic_cast<const CombinedFitTag*>(tag);
                     used_candidates.insert(&cmb_tag->muonCandidate());
-                } else if (indet_cand.second.size() == 1 && tag->author() == xAOD::Muon::STACO) {
+                } else if (tag->author() == xAOD::Muon::STACO && indet_cand.second[0] == tag) {
                     const StacoTag* staco_tag = dynamic_cast<const StacoTag*>(tag);
                     used_candidates.insert(&staco_tag->muonCandidate());
                 }

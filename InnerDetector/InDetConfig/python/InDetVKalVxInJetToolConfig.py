@@ -5,9 +5,23 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 
+def TCTDecorCheckInToolCfg(flags, name="TCTDecorCheckInTool", **kwargs):
+    
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("JetCollection","AntiKt4EMPFlowJets")
+    
+    from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
+    VertexFitterTool = acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags,"VertexFitterTool"))
+    kwargs.setdefault("TrackClassificationTool",acc.popToolsAndMerge(InDetTrkInJetTypeCfg(flags,name="TrkInJetType",JetCollection=kwargs["JetCollection"],VertexFitterTool=VertexFitterTool)))
+                 
+    acc.addEventAlgo(CompFactory.TCTDecorCheckInTool(name, **kwargs))
+    return acc
+
 def InDetTrkInJetTypeCfg(flags, name="TrkInJetType", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("trkSctHits", 4 if flags.GeoModel.Run <= LHCPeriod.Run3 else -1)
+    kwargs.setdefault("useFivePtJetBinVersion", flags.BTagging.TrkClassFiveBinMode)
     acc.setPrivateTools(CompFactory.InDet.InDetTrkInJetType(name, **kwargs))
     return acc
 

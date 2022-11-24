@@ -328,6 +328,20 @@ def DFCommonTruthDressedWZQGLabelToolCfg():
                                     JetCollection = "AntiKt4TruthDressedWZJets")
 
 #==============================================================================
+# Truth thinning
+#==============================================================================
+
+# Menu truth thinning: removes truth particles on the basis of a menu of 
+# options (rather than a string)
+def MenuTruthThinningCfg(ConfigFlags, name, **kwargs):
+    """Configure the menu truth thinning tool"""
+    acc = ComponentAccumulator()
+    MenuTruthThinning = CompFactory.DerivationFramework.MenuTruthThinning
+    acc.addPublicTool(MenuTruthThinning(name, **kwargs),
+                      primary = True)
+    return acc
+
+#==============================================================================
 # Other tools 
 #==============================================================================
 # Truth links on some objects point to the main truth particle container. 

@@ -647,7 +647,7 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
        nCells++;
     }
     for(idx=0; idx<patch.size(); ++idx) {
-         patch[idx] = LArCaliWave( patch_wave[idx].getWave(), patch[idx].getDt(), patch[idx].getDAC(), patch[idx].getFlag());
+      patch[idx] = LArCaliWave( patch_wave[idx].getWave(), patch[idx].getDt(), patch[idx].getDAC(), patch[idx].getIsPulsedInt(), patch[idx].getFlag());
     }
   }
   if (nCells==0) {

@@ -366,7 +366,7 @@ StatusCode LArRampBuilder::execute()
 	    continue;
 	  }
 
-	  ATH_MSG_DEBUG(" channel,pedestal " << chid_hash << " " 
+	  ATH_MSG_DEBUG(" channel,pedestal " <<  m_onlineHelper->channel_name(chid) << " " 
 	      << m_thePedestal[chid_hash]);
 
 	} // m_ipassPedestal 	 
@@ -650,7 +650,7 @@ StatusCode LArRampBuilder::stop()
 	}
 	else if ((m_maxADC > 0)&&(MaxADC >= m_maxADC)) { 
 	  isADCsat = true; // if ADC saturated at least once, it should be notified
-	  ATH_MSG_DEBUG("Saturated: "<<chid<<" "<<dac_it->first<<" "<<m_minDAC<<" "<<ramppoint.ADC<<" "<<MaxADC<<" "<<m_maxADC);
+	  ATH_MSG_DEBUG("Saturated: "<<m_onlineHelper->channel_name(chid)<<" at DAC "<<dac_it->first<<" ADC "<< MaxADC);
 	}else{
 	  ATH_MSG_DEBUG("Fail ramp selection: "<<chid<<" "<<dac_it->first<<" "<<m_minDAC<<" "<<ramppoint.ADC<<" "<<MaxADC<<" "<<m_maxADC);
 	} 

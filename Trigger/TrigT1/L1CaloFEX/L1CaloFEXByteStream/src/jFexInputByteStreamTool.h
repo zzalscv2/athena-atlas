@@ -54,7 +54,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
         
         // FiberMapping property required by the interface
-        Gaudi::Property<std::string> m_FiberMapping {this, "jFexTowerMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-10-19/jFexTowerMap.txt"), "Text file to convert from hardware fiber to eta-phi location"};
+        Gaudi::Property<std::string> m_FiberMapping {this, "jFexTowerMapping", "L1CaloFEXByteStream/2022-10-19/jFexTowerMap.txt", "Text file to convert from hardware fiber to eta-phi location"};
 
         //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
         SG::WriteHandleKey< xAOD::jFexTowerContainer> m_jTowersWriteKey   {this,"jTowersWriteKey"  ,"L1_jFexDataTowers","Write jFexEDM Trigger Tower container"};

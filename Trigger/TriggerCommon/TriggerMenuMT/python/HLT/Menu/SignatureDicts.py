@@ -799,9 +799,9 @@ HeavyIonChainParts = {
     'pileupInfo'     : [],
     'hypoEFInfo'     : [],
     'hypoEFsumEtInfo': [],
+    'hypoFgapInfo'   : ['FgapAC3', 'FgapAC5', 'FgapAC10', 'FgapA3', 'FgapA5', 'FgapA10', 'FgapC3', 'FgapC5', 'FgapC10'],
     'recoAlg'        : [],
     'addInfo'        : [],
-    'gap'            : [],
     'sigFolder'     : ['HeavyIon'],
     'subSigs'       : ['HeavyIon'],
     'chainPartIndex': list(range(0,10))
@@ -825,9 +825,9 @@ HeavyIonChainParts_Default = {
     'pileupInfo'     : '',
     'hypoEFInfo'     : '',
     'hypoEFsumEtInfo': '',
+    'hypoFgapInfo'   : [],
     'recoAlg'        : [],
     'addInfo'        : [],
-    'gap'            : '',
     'sigFolder'     : ['HeavyIon'],
     'subSigs'       : ['HeavyIon'],
     'chainPartIndex': 0

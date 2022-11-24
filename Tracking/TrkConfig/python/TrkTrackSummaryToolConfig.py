@@ -249,7 +249,7 @@ def MuonCombinedTrackSummaryToolCfg(flags,
     if "InDetSummaryHelperTool" not in kwargs:
         from InDetConfig.InDetTrackSummaryHelperToolConfig import AtlasTrackSummaryHelperToolCfg
         from InDetConfig.InDetTrackHoleSearchConfig import CombinedMuonIDHoleSearchCfg
-        #from InDetConfig.TrackRecoConfig import ClusterSplitProbabilityContainerName
+        from InDetConfig.TrackRecoConfig import ClusterSplitProbabilityContainerName
         atlasHoleSearchTool = result.popToolsAndMerge(
             CombinedMuonIDHoleSearchCfg(flags))
         result.addPublicTool(atlasHoleSearchTool)
@@ -257,9 +257,10 @@ def MuonCombinedTrackSummaryToolCfg(flags,
             AtlasTrackSummaryHelperToolCfg(
                 flags, name="CombinedMuonIDSummaryHelper", 
                 AssoTool='', HoleSearch = atlasHoleSearchTool,
-                RunningTIDE_Ambi=False)))
-        #ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags) ,
-        # TODO Add this back once the issue on !57767 is resolved
+                RunningTIDE_Ambi=False,
+                ClusterSplitProbabilityName = '' if flags.Muon.MuonTrigger else \
+                ClusterSplitProbabilityContainerName(flags) )))
+
     if "MuonSummaryHelperTool" not in kwargs:
         from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg
         kwargs.setdefault("MuonSummaryHelperTool", result.popToolsAndMerge(

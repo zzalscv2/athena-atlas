@@ -23,6 +23,8 @@ atlas_add_library( JetTagToolsLib
     src/MultiSVTag.cxx
     src/MultivariateTagManager.cxx
     src/TagNtupleDumper.cxx
+    src/ClassifiedTrackTaggerTool.cxx
+    src/CTTDecorCheckInTool.cxx
 
     PUBLIC_HEADERS JetTagTools
     INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -30,11 +32,11 @@ atlas_add_library( JetTagToolsLib
     PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel
     GeoPrimitives ITrackToVertex InDetRecToolInterfaces JetTagCalibrationLib JetTagInfo
-    MVAUtils xAODBTagging xAODJet xAODTracking
+    MVAUtils xAODBTagging xAODJet xAODTracking InDetVKalVxInJetToolLib
     PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} InDetTrackSelectionToolLib
     Navigation Particle ParticleJetToolsLib TrkEventPrimitives TrkLinks TrkNeuralNetworkUtilsLib
     TrkParameters TrkTrack TrkTrackLink TrkTrackSummary TrkVertexFitterInterfaces VxJetVertex
-    VxSecVertex VxVertex )
+    VxSecVertex VxVertex TestTools)
 
 atlas_add_component( JetTagTools
     src/components/*.cxx
@@ -43,3 +45,12 @@ atlas_add_component( JetTagTools
 # Install files from the package:
 atlas_install_runtime( share/*.root share/*.txt )
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+
+# Test(s) in the package:
+atlas_add_test( ClassifiedTrackTaggerTool_test
+                SOURCES test/ClassifiedTrackTaggerTool_test.cxx
+                INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils EventPrimitives GaudiKernel MagFieldConditions TestTools TrkVertexFitterInterfaces xAODTracking InDetVKalVxInJetToolLib xAODJet
+                LOG_IGNORE_PATTERN "Booking|ClassIDSvc|weight file|create data set info" )
+atlas_install_joboptions( share/*.txt )

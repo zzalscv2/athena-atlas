@@ -4,36 +4,33 @@
 
 #include "DataQualityInterfaces/HanOutput.h"
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <map>
-
-#include <string.h> // strncmp()
-
 #include <TDirectory.h>
+#include <TEfficiency.h>
 #include <TFile.h>
+#include <TGraph.h>
+#include <TH1.h>
 #include <TKey.h>
 #include <TList.h>
-#include <TObjArray.h>
 #include <TNamed.h>
-#include <TObject.h>
+#include <TObjArray.h>
 #include <TObjString.h>
+#include <TObject.h>
 #include <TROOT.h>
-#include <TH1.h>
-#include <TGraph.h>
-#include <TEfficiency.h>
+#include <string.h>  // strncmp()
 
-#include "dqm_core/exceptions.h"
+#include <boost/algorithm/string.hpp>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <sstream>
+
+#include "DataQualityInterfaces/HanConfig.h"
+#include "DataQualityInterfaces/HanUtils.h"
 #include "dqm_core/OutputListener.h"
 #include "dqm_core/Parameter.h"
 #include "dqm_core/Region.h"
 #include "dqm_core/Result.h"
-
-#include "DataQualityInterfaces/HanConfig.h"
-#include "DataQualityInterfaces/HanUtils.h"
-
-#include <boost/algorithm/string.hpp>
+#include "dqm_core/exceptions.h"
 
 namespace
 {
@@ -75,7 +72,8 @@ namespace dqi
         TMethod* klm = kl->GetMethod("SetName", "\"Reference\"");
         if (!klm)
         {
-          std::cerr << "Error: attempt to change object name to " << name << " failed as its name is not settable" << std::endl;
+          std::cerr << "Error: attempt to change object name to " << name << " failed as its name is not settable"
+                    << std::endl;
         }
         else
         {
@@ -94,9 +92,12 @@ namespace dqi
   // Public Methods
   // *********************************************************************
 
-  HanOutput::
-    HanOutput(const std::string& rootFileName, DQOutputMap_t* outMap, TSeqCollection* outList)
-    : m_fileName(rootFileName), m_file(TFile::Open(rootFileName.c_str(), "RECREATE")), m_retainUnpubData(false), m_config(0), m_input(0)
+  HanOutput::HanOutput(const std::string& rootFileName, DQOutputMap_t* outMap, TSeqCollection* outList)
+    : m_fileName(rootFileName),
+      m_file(TFile::Open(rootFileName.c_str(), "RECREATE")),
+      m_retainUnpubData(false),
+      m_config(0),
+      m_input(0)
   {
     m_outputMap = outMap;
     m_outputList = outList;
@@ -106,8 +107,7 @@ namespace dqi
     }
   }
 
-  HanOutput::
-    ~HanOutput()
+  HanOutput::~HanOutput()
   {
     DQResultMap_t::const_iterator rend = m_dqResults.end();
     for (DQResultMap_t::const_iterator i = m_dqResults.begin(); i != rend; ++i)
@@ -118,13 +118,10 @@ namespace dqi
     m_file->Close();
   }
 
-  void
-    HanOutput::
-    addListener(const std::string& name, dqm_core::OutputListener* listener)
+  void HanOutput::addListener(const std::string& name, dqm_core::OutputListener* listener)
   {
     dqm_core::Region* region = dynamic_cast<dqm_core::Region*>(listener);
-    if (region == 0)
-      return;
+    if (region == 0) return;
 
     DQParMap_t::const_iterator i = m_dqPars.find(name);
     if (i != m_dqPars.end())
@@ -148,16 +145,12 @@ namespace dqi
     m_unpublishedDQPars.insert(name);
   }
 
-  void
-    HanOutput::
-    addListener(const dqm_core::Parameter& parameter, dqm_core::OutputListener* listener)
+  void HanOutput::addListener(const dqm_core::Parameter& parameter, dqm_core::OutputListener* listener)
   {
     addListener(parameter.getName(), listener);
   }
 
-  void
-    HanOutput::
-    publishResult(const std::string& name, const dqm_core::Result& result)
+  void HanOutput::publishResult(const std::string& name, const dqm_core::Result& result)
   {
     //  std::cout << "Publish " << name << std::endl;
     delete m_dqResults[name];
@@ -181,9 +174,7 @@ namespace dqi
     }
   }
 
-  void
-    HanOutput::
-    flushResults()
+  void HanOutput::flushResults()
   {
     // store regex lists
     DQOutputMap_t tmpRegex;
@@ -213,9 +204,7 @@ namespace dqi
 
     // replay results
     DQResultMap_t::const_iterator rEnd = m_dqResults.end();
-    for (DQResultMap_t::const_iterator r = m_dqResults.begin();
-      r != rEnd;
-      ++r)
+    for (DQResultMap_t::const_iterator r = m_dqResults.begin(); r != rEnd; ++r)
     {
       const std::string name(r->first);
       const dqm_core::Result& result(*(r->second));
@@ -298,7 +287,8 @@ namespace dqi
           if (key != 0)
           {
             const char* className = key->GetClassName();
-            if ((strncmp(className, "TH", 2) == 0) || (strncmp(className, "TGraph", 6) == 0) || (strncmp(className, "TProfile", 8) == 0) || (strncmp(className, "TEfficiency", 11) == 0))
+            if ((strncmp(className, "TH", 2) == 0) || (strncmp(className, "TGraph", 6) == 0) ||
+                (strncmp(className, "TProfile", 8) == 0) || (strncmp(className, "TEfficiency", 11) == 0))
             {
               TNamed* transobj = dynamic_cast<TNamed*>(key->ReadObj());
               if (transobj != NULL)
@@ -318,8 +308,7 @@ namespace dqi
               }
               else
               {
-                std::cerr << "TNamed* cast failed for "
-                  << storename << std::endl;
+                std::cerr << "TNamed* cast failed for " << storename << std::endl;
               }
             }
           }
@@ -425,21 +414,12 @@ namespace dqi
     }
   }
 
-  void
-    HanOutput::
-    activate()
-  {
-    gROOT->cd();
-  }
+  void HanOutput::activate() { gROOT->cd(); }
 
-  void
-    HanOutput::
-    setInput(TDirectory* input)
-  {
-    m_input = input;
-  }
+  void HanOutput::setInput(TDirectory* input) { m_input = input; }
 
-  static void WriteListToDirectory(TDirectory* dir, TSeqCollection* list, TFile* file, int level, int HanOutput_FileVersion)
+  static void WriteListToDirectory(
+    TDirectory* dir, TSeqCollection* list, TFile* file, int level, int HanOutput_FileVersion)
   {
     TIter nextElem(list);
     TObject* obj{};
@@ -452,21 +432,19 @@ namespace dqi
       if (hhl != 0)
       {
         obj = hhl->getObject();
-        if (!obj)
-          continue;
+        if (!obj) continue;
         delete_when_done = true;
-        if(not setNameGeneral(obj, hhl->GetName())){
-          std::cerr<<"HanOutput.cxx, WriteListToDirectory : setNameGeneral failed\n";
+        if (not setNameGeneral(obj, hhl->GetName()))
+        {
+          std::cerr << "HanOutput.cxx, WriteListToDirectory : setNameGeneral failed\n";
           delete obj;
           continue;
         };
       }
-      if (strncmp(obj->GetName(), "Reference", 9) == 0 ||
-        strncmp(obj->GetName(), "ResultObject", 12) == 0)
+      if (strncmp(obj->GetName(), "Reference", 9) == 0 || strncmp(obj->GetName(), "ResultObject", 12) == 0)
       {
         dir->WriteTObject(obj);
-        if (delete_when_done)
-          delete obj;
+        if (delete_when_done) delete obj;
         continue;
       }
       tmpList = dynamic_cast<TSeqCollection*>(obj);
@@ -476,7 +454,8 @@ namespace dqi
         std::vector<std::string> dirs;
         std::string str;
         boost::split(dirs, tmpList->GetName(), boost::is_any_of("/"));
-        if (!dirs.empty()) {
+        if (!dirs.empty())
+        {
           if (dirs.back().empty()) dirs.pop_back();  // empty item if trailing "/"
           str = dirs.back();
         }
@@ -485,7 +464,7 @@ namespace dqi
         {
           TString listname = tmpList->GetName();
           if (listname == "Config" || listname == "Results")
-          { // Convert them to JSON
+          {  // Convert them to JSON
             nlohmann::ordered_json j = to_JSON(tmpList);
             // Then, save JSON to file as TObjString
             // Convert json to string
@@ -520,7 +499,8 @@ namespace dqi
           delete daughter;
         }
       }
-      else if ((strncmp(obj->ClassName(), "TH", 2) == 0) || (strncmp(obj->ClassName(), "TGraph", 6) == 0) || (strncmp(obj->ClassName(), "TProfile", 8) == 0) || (strncmp(obj->ClassName(), "TEfficiency", 11) == 0))
+      else if ((strncmp(obj->ClassName(), "TH", 2) == 0) || (strncmp(obj->ClassName(), "TGraph", 6) == 0) ||
+               (strncmp(obj->ClassName(), "TProfile", 8) == 0) || (strncmp(obj->ClassName(), "TEfficiency", 11) == 0))
       {
         dir->GetMotherDir()->WriteTObject(obj);
       }
@@ -529,8 +509,7 @@ namespace dqi
         // anything else put it in current directory
         dir->WriteTObject(obj);
       }
-      if (delete_when_done)
-        delete obj;
+      if (delete_when_done) delete obj;
     }
   }
 
@@ -545,28 +524,27 @@ namespace dqi
     {
       TSeqCollection* tmpList = dynamic_cast<TSeqCollection*>(obj);
       if (tmpList != 0)
-      { // Nested object
+      {  // Nested object
         // Write TSeqCollection_names as keys and content of them as a values
         // Convert TString to string
         std::string key_name_string(obj->GetName());
         j.emplace(key_name_string, to_JSON(tmpList));
       }
       else
-      { // leaf
+      {  // leaf
         j = obj->GetName();
       }
     }
     return j;
   }
 
-  void
-    HanOutput::
-    deactivate()
+  void HanOutput::deactivate()
   {
     flushResults();
     m_file->SetBit(TFile::kDevNull);
 
-    WriteListToDirectory(m_file.get(), dynamic_cast<TSeqCollection*>(m_outputList->First()), m_file.get(), 4, HanOutput_FileVersion);
+    WriteListToDirectory(
+      m_file.get(), dynamic_cast<TSeqCollection*>(m_outputList->First()), m_file.get(), 4, HanOutput_FileVersion);
 
     if (HanOutput_FileVersion == 2)
     {
@@ -582,17 +560,13 @@ namespace dqi
     m_file->Flush();
   }
 
-  void
-    HanOutput::
-    setConfig(HanConfig* config)
+  void HanOutput::setConfig(HanConfig* config)
   {
     m_config = config;
     config->GetRegexList(m_regexlist);
   }
 
-  void
-    HanOutput::
-    publishMissingDQPars()
+  void HanOutput::publishMissingDQPars()
   {
     m_retainUnpubData = true;
 
@@ -631,38 +605,24 @@ namespace dqi
   // Protected Methods
   // *********************************************************************
 
-  HanOutput::Result::
-    Result(TDirectory* dir)
+  HanOutput::Result::Result(TDirectory* dir)
     : m_result(new TTree("result", "Assessment Result")), m_status(new char[s_charArrSize])
   {
     m_result->SetDirectory(dir);
     m_result->Branch("Status", m_status, "Status/C");
   }
 
-  HanOutput::Result::
-    ~Result()
-  {
-    delete[] m_status;
-  }
+  HanOutput::Result::~Result() { delete[] m_status; }
 
-  void
-    HanOutput::Result::
-    fill(const dqm_core::Result& result)
+  void HanOutput::Result::fill(const dqm_core::Result& result)
   {
     copyString(m_status, StatusToStr(result.status_));
     m_result->Fill();
   }
 
-  void
-    HanOutput::Result::
-    write()
-  {
-    m_result->Write();
-  }
+  void HanOutput::Result::write() { m_result->Write(); }
 
-  void
-    HanOutput::Result::
-    copyString(char* to, const std::string& from)
+  void HanOutput::Result::copyString(char* to, const std::string& from)
   {
     int i = 0;
     const char* f = from.c_str();
@@ -674,9 +634,7 @@ namespace dqi
     }
   }
 
-  bool
-    HanOutput::RegionNameComp::
-    operator()(const dqm_core::Region* a, const dqm_core::Region* b) const
+  bool HanOutput::RegionNameComp::operator()(const dqm_core::Region* a, const dqm_core::Region* b) const
   {
     return (a->getName() < b->getName());
   }
@@ -685,16 +643,9 @@ namespace dqi
   // Private Methods
   // *********************************************************************
 
-  HanOutput::
-    HanOutput() : m_retainUnpubData(false),
-    m_outputMap(0),
-    m_outputList(0),
-    m_config(0),
-    m_input(0)
-  {
-  }
+  HanOutput::HanOutput() : m_retainUnpubData(false), m_outputMap(0), m_outputList(0), m_config(0), m_input(0) {}
 
-} // namespace dqi
+}  // namespace dqi
 
 namespace
 {
@@ -703,18 +654,18 @@ namespace
   {
     switch (status)
     {
-    case dqm_core::Result::Red:
-      return "Red";
-    case dqm_core::Result::Yellow:
-      return "Yellow";
-    case dqm_core::Result::Green:
-      return "Green";
-    case dqm_core::Result::Disabled:
-      return "Disabled";
-    case dqm_core::Result::Undefined:
-    default:
-      return "Undefined";
+      case dqm_core::Result::Red:
+        return "Red";
+      case dqm_core::Result::Yellow:
+        return "Yellow";
+      case dqm_core::Result::Green:
+        return "Green";
+      case dqm_core::Result::Disabled:
+        return "Disabled";
+      case dqm_core::Result::Undefined:
+      default:
+        return "Undefined";
     }
   }
 
-}
+}  // namespace

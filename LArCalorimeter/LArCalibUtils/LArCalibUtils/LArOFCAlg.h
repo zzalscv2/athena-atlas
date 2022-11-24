@@ -33,6 +33,8 @@
 #include <Eigen/Dense>
 
 #include "tbb/blocked_range.h"
+#include "tbb/global_control.h"
+
 #include <memory>
 
 class LArOnlineID_Base; 
@@ -159,7 +161,7 @@ private:
   int                      m_useDelta;
   int                      m_useDeltaV2;
   bool                     m_computeV2;
-  bool                     m_runThreaded;
+  int                      m_nThreads;
 
   bool                     m_readDSPConfig;
   std::string              m_DSPConfigFolder;

@@ -27,43 +27,6 @@ import ROOT as R
 def lbStr(lb):
   """Return formatted lumiblock string"""
   return "_lb"+lb.zfill(5) 
-
-### The method below was added by someone unknown in 2016-2022 period but never really used
-### It was commented by B.Trocme on March 2022 - Kept here just in case but should be deleted in upcoming months
-### 
-###def getStruct(r_in):
-###  """Produce a list containing the paths of all histograms in the file"""
-###  # r_in = R.TFile(infile, "READ")
-###  t_in = r_in.Get(r_in.GetListOfKeys()[0].GetName())
-###  keys = [k for k in t_in.GetListOfKeys()]
-###  keynames = [ k.GetName() for k in keys ]
-###
-###  def itdir(thisdir, histPathList):
-###    keys = thisdir.GetListOfKeys()
-###    keynames = [ k.GetName() for k in keys ]
-###    if any([ k.GetClassName() == "TDirectoryFile" for k in keys ]):
-###      return [ k.ReadObj() for k in keys if k.GetClassName() == "TDirectoryFile" ]
-###    else:
-###      hists = []
-###      for k in keys:
-###        if isinstance(k.ReadObj(), R.TH1):
-###          hists.append(thisdir.GetPathStatic().split(":/")[1]+"/"+k.GetName())
-###      histPathList.extend(hists)
-###      return ""
-###  
-###  histPathList = []
-###  for key in keys:
-###    if "lb_" in key.GetName() or "_LB" in key.GetName(): continue                                                                                                       
-###    #if "Calo" not in key.GetName() and "Jet" not in key.GetName(): continue
-###    if key.GetClassName() == "TDirectoryFile":
-###      d = key.ReadObj()
-###      while not isinstance(d, str): #d != None:                                                                                                                        
-###        if isinstance(d, list):
-###          for di in d:
-###            d = itdir(di, histPathList)
-###        else:
-###          d = itdir(d, histPathList)
-###  return histPathList
   
 def getHistoInfo(objectType, runNumber):
   """Histo path definition base on object type"""
@@ -72,11 +35,13 @@ def getHistoInfo(objectType, runNumber):
   # histoColor  : Colors for the final summary plot
   # histoName   : Name of object
   # Types of plot
-  # 2d_etaPhiHotSpot   : 2D occupancy plots: (eta/phi) required
-  # 2d_xyHotSpot       : any 2D plots: (x/y) required
-  # 1d_etaHotSpot      : 1D occupancy plot along eta: (eta) required
-  # 1d_phiHotSpot      : 1D occupancy plot along phi: (phi) required
-  # 1d_integralAbove   : integral between (integralAbove) and infinity. (integralAbove) required
+  # 2d_etaPhi_Occupancy        : 2D occupancy plots: (eta/phi) required
+  # 2d_etaPhi_MeanPt           : 2D mean Pt plots: (eta/phi) required
+  # 2d_xy_Occupancy            : any 2D plots: (x/y) required
+  # 1d_eta_Occupancy           : 1D occupancy plot along eta: (eta) required
+  # 1d_phi_Occupancy           : 1D occupancy plot along phi: (phi) required
+  # 1d_integralAbove_Occupancy : integral between (integralAbove) and infinity. (integralAbove) required
+  # NB : if the required arguments are not provided, consider the whole histogram
 
   runstr = "run_"+str(runNumber)
 
@@ -99,7 +64,7 @@ def getHistoInfo(objectType, runNumber):
                    "BAR_thr1":"BAR - Et > 10 GeV",
                    "BAR_thr2":"BAR - Et > 15 GeV",
                    "BAR_thr3":"BAR - Et > 25 GeV"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "TopoClusters occupancy"
 
   elif objectType == "EMTopoClusters": # Release 22 : OK
@@ -127,7 +92,7 @@ def getHistoInfo(objectType, runNumber):
                    "BAR_thr1":"BAR - Et > 4 GeV",
                    "BAR_thr2":"BAR - Et > 10 GeV",
                    "BAR_thr3":"BAR - Et > 15 GeV"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "EMTopoClusters occupancy"
 
   elif objectType == "EMTopoJet": # Release 22 : Missing histograms
@@ -141,25 +106,25 @@ def getHistoInfo(objectType, runNumber):
                    "cut2":"500GeV-1TeV",
                    "cut3":"1TeV-2TeV",
                    "cut4":"2TeV-8TeV"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "EMTopoJets"
 
   elif objectType == "AntiKt4EMTopoJets": # Release 22 : OK
     histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/standardHistos/phi_eta"}
     histoLegend = {"noCut":"No cut"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "Occupancy of AntiKt4EMTopoJets"
 
-  elif objectType == "AntiKt4EMTopoJets_Pt": # Release 22 : OK
+  elif objectType == "AntiKt4EMTopoJets_pt": # Release 22 : OK
     histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/standardHistos/phi_eta_pt"}
     histoLegend = {"noCut":"No cut"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_MeanPt"
     histoName = "Mean Pt of AntiKt4EMTopoJets"
 
   elif objectType == "MET_Topo_phi": # Release 22 : OK
     histoPath  = {"MET":runstr+"/MissingEt/AllTriggers/MET_Calo/EMTopo/MET_Topo_phi"}
     histoLegend = {"MET":"MET"}
-    histoType = "1d_phiHotSpot"
+    histoType = "1d_phi_Occupancy"
     histoName = "MET phi"
 
   elif objectType == "Tau": # Release 22 : OK
@@ -167,56 +132,62 @@ def getHistoInfo(objectType, runNumber):
                   "Et15GeV":runstr+"/Tau/tauPhiVsEta_et15"}
     histoLegend = {"NoCut":"Et > 0 GeV (tbc)",
                    "Et15GeV":"Et > 15 GeV"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "Tau occupancy"
 
   elif objectType == "Tau_phi": # Release 22 : OK
     histoPath  = {"single":runstr+"/Tau/tauPhi"}
     histoLegend = {"single":"All candidates"}
-    histoType = "1d_phiHotSpot"
+    histoType = "1d_phi_Occupancy"
     histoName = "Tau"
 
   elif objectType == "Tau_eta": # Release 22 : OK
     histoPath  = {"single":runstr+"/Tau/tauEta"}
     histoLegend = {"single":"All candidates"}
-    histoType = "1d_etaHotSpot"
+    histoType = "1d_eta_Occupancy"
     histoName = "Tau phi"
 
   elif objectType == "NumberTau": # Release 22 : OK
     histoPath  = {"highPt":runstr+"/Tau/nHightPtTauCandidates"}
     histoLegend = {"highPt":"High Pt (>100GeV) candidates"}
-    histoType = "1d_integralAbove"
+    histoType = "1d_integralAbove_Occupancy"
     histoName = "Number of Tau candidates"
 
   elif objectType == "TightFwdElectrons": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronTightEtaPhi"}
     histoLegend = {"single":"10GeV"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "Tight electrons"
 
   elif objectType == "LoosePhotons": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/CBLoosePhotons/Eta_Phi_distribution_with_Pt.gt.4GeV"}
     histoLegend = {"single":"4GeV"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "Loose photons"
 
   elif objectType == "NumberTightFwdElectrons": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronTightN"}
     histoLegend = {"single":"All candidates"}
-    histoType = "1d_integralAbove"
+    histoType = "1d_integralAbove_Occupancy"
     histoName = "Number of tight forward electrons"
 
   elif objectType == "forwardElectronEtaPhi": # Release 22 : Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronEtaPhi"}
     histoLegend = {"single":"All candidates"}
-    histoType = "2d_etaPhiHotSpot"
+    histoType = "2d_etaPhi_Occupancy"
     histoName = "Forward electrons"
 
   elif objectType == "NumberHLTJet": # Release 22 : Missing histogram
     histoPath  = {"HLTJet":runstr+"/HLT/JetMon/HLT/10j40_L14J20/HLTJet_n"}
     histoLegend = {"HLTJet":"All candidates"}
-    histoType = "1d_integralAbove"
+    histoType = "1d_integralAbove_Occupancy"
     histoName = "Number of HLT jets - 10J40_L14J20 trigger"
+
+  elif objectType == "HLT_ConfigConsistency": # Missing histogram
+    histoPath  = {"HLTJet":runstr+"/HLT/ResultMon/ConfigConsistency_HLT"}
+    histoLegend = {"HLTJet":"Configuration consistency"}
+    histoType = "1d_integralAbove_Occupancy"
+    histoName = "Number of HLT config inconsistencies"
 
   elif objectType == "LArDigits": # Release 22 : not tested
     histoPath  = {"Null-EMBA":runstr+"/LAr/Digits/Barrel/NullDigitChan_BarrelA",
@@ -228,8 +199,9 @@ def getHistoInfo(objectType, runNumber):
                    "Satu-EMBA":"Saturated digit - EMBA",
                    "Null-EMBC":"Null digit - EMBC",
                    "Satu-EMBC":"Saturated digit - EMBC",}
-    histoType = "2d_xyHotSpot"
+    histoType = "2d_xy_Occupancy"
     histoName = "LAr saturated/null digits"
+    
   else:
     print("Object type:",objectType,"not recognised!")
     sys.exit()
@@ -252,13 +224,19 @@ def main(args):
   b_wholeHisto = False
   b_ValueNotEntries = False
 
-  if histoType == "2d_etaPhiHotSpot":
-    summaryTitle = "Nb of hits in a region of %.2f around the position (%.2f,%.2f) - %s"%(args.deltaSpot,args.etaSpot,args.phiSpot,histoName)
+  if histoType == "2d_etaPhi_Occupancy" or histoType == "2d_etaPhi_MeanPt":
+    if histoType == "2d_etaPhi_Occupancy":
+      summaryTitle = "Nb of hits in a region of %.2f around the position (%.2f,%.2f) - %s"%(args.deltaSpot,args.etaSpot,args.phiSpot,histoName)
+    else:
+      summaryTitle = "Mean Pt in a region of %.2f around the position (%.2f,%.2f) - %s"%(args.deltaSpot,args.etaSpot,args.phiSpot,histoName)
+      if (args.deltaSpot != 0):
+        print("Warning: you have been summing over several bins a variable that may be not summable (different from summing hits!)")
+
     statement = "I have looked for LBs with at least %.0f entries at position (%.2f,%.2f) in %s histogram"%(args.minInLB,args.etaSpot,args.phiSpot,histoName)
     if (args.etaSpot==-999. or args.phiSpot==-999.):
       print("No eta/phi defined -> whole histogram considered!")
       b_wholeHisto = True
-  if histoType == "2d_xyHotSpot":
+  if histoType == "2d_xy_Occupancy":
     b_ValueNotEntries = True
     if (args.deltaSpot != 0):
       print("Warning: you have been summing over several bins a variable that may be not summable (different from summing hits!)")
@@ -268,23 +246,23 @@ def main(args):
       print("No x/y defined -> whole histogram considered!")
       print("Warning: you have been summing over several bins a variable that may be not summable (different from summing hits!)")
       b_wholeHisto = True
-  elif histoType == "1d_etaHotSpot":
+  elif histoType == "1d_eta_Occupancy":
     summaryTitle = "Nb of hits in a region of %.2f around the eta position %.2f - %s"%(args.deltaSpot,args.etaSpot,histoName)
     statement = "I have looked for LBs with at least %.0f entries at eta position %.2f in %s histogram"%(args.minInLB,args.etaSpot,histoName)
     if (args.etaSpot==-999.):
       print("No eta/phi -> whole histogram considered!")
       b_wholeHisto = True
-  elif histoType == "1d_phiHotSpot":
+  elif histoType == "1d_phi_Occupancy":
     summaryTitle = "Nb of hits in a region of %.2f around the phi position %.2f - %s"%(args.deltaSpot,args.phiSpot,histoName)
     statement = "I have looked for LBs with at least %.0f entries at phi position %.2f in %s histogram"%(args.minInLB,args.phiSpot,histoName)
     if (args.phiSpot==-999.):
       print("No eta/phi defined -> whole histogram considered!")
       b_wholeHisto = True
-  elif histoType == "1d_integralAbove":
+  elif histoType == "1d_integralAbove_Occupancy":
     summaryTitle = "Nb of hits in the band above %.2f - %s"%(args.integralAbove,histoName)
     statement = "I have looked for LBs with at least %.0f entries in band above %.2f in %s histogram"%(args.minInLB,args.integralAbove,histoName)
     if (args.integralAbove==-999.):
-      print("No lwoer bound defined -> whole histogram considered!")
+      print("No lower bound defined -> whole histogram considered!")
       b_wholeHisto = True
 
   # Definition of Canvas option depending on histogram type
@@ -333,7 +311,7 @@ def main(args):
       nSteps = 1000
       subStep = 2*args.deltaSpot/nSteps
       regionBins[iHisto] = []
-      if histoType == "2d_etaPhiHotSpot":
+      if histoType == "2d_etaPhi_Occupancy" or histoType == "2d_etaPhi_MeanPt":
         for ix in range(nSteps):# Assume that eta is on x axis
           iEta = args.etaSpot - args.deltaSpot + ix * subStep 
           for iy in range (nSteps):
@@ -341,7 +319,7 @@ def main(args):
             tmpBin = histo[iHisto].FindBin(iEta,iPhi)
             if (tmpBin not in regionBins[iHisto]):
               regionBins[iHisto].append(tmpBin)
-      elif histoType == "2d_xyHotSpot":
+      elif histoType == "2d_xy_Occupancy":
         for ix in range(nSteps):
           iX = args.xSpot - args.deltaSpot + ix * subStep 
           for iy in range (nSteps):
@@ -349,19 +327,19 @@ def main(args):
             tmpBin = histo[iHisto].FindBin(iX,iY)
             if (tmpBin not in regionBins[iHisto]):
               regionBins[iHisto].append(tmpBin)
-      elif histoType == "1d_etaHotSpot":
+      elif histoType == "1d_eta_Occupancy":
         for ix in range(nSteps):
           iEta = args.etaSpot - args.deltaSpot + ix * subStep
           tmpBin = histo[iHisto].FindBin(iEta)
           if (tmpBin not in regionBins[iHisto]):
               regionBins[iHisto].append(tmpBin)
-      elif histoType == "1d_phiHotSpot":
+      elif histoType == "1d_phi_Occupancy":
         for ix in range(nSteps):
           iPhi = args.phiSpot - args.deltaSpot + ix * subStep
           tmpBin = histo[iHisto].FindBin(iPhi)
           if (tmpBin not in regionBins[iHisto]):
               regionBins[iHisto].append(tmpBin)
-      elif (histoType == "1d_integralAbove"):
+      elif (histoType == "1d_integralAbove_Occupancy"):
         for iBin in range(histo[iHisto].FindBin(args.integralAbove),histo[iHisto].GetNbinsX()):
           regionBins[iHisto].append(iBin)          
 
@@ -391,9 +369,9 @@ def main(args):
       #print(iHisto, histo[iHisto].GetEntries())
       histo[iHisto].Draw("COLZ")
       if not b_wholeHisto:
-        if histoType == "2d_etaPhiHotSpot":
+        if histoType == "2d_etaPhi_Occupancy" or histoType == "2d_etaPhi_MeanPt":
           box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,args.phiSpot-args.deltaSpot,args.etaSpot+args.deltaSpot,args.phiSpot+args.deltaSpot)
-        elif (histoType == "2d_xyHotSpot"):
+        elif (histoType == "2d_xy_Occupancy"):
           box[iHisto] = R.TBox(args.xSpot-args.deltaSpot,args.ySpot-args.deltaSpot,args.xSpot+args.deltaSpot,args.ySpot+args.deltaSpot)
         box[iHisto].SetLineColor(R.kRed+1)
         box[iHisto].SetLineWidth(3)
@@ -403,23 +381,23 @@ def main(args):
     elif histoType.startswith("1d"):
       maxH = histo[iHisto].GetMaximum()*1.2
       histo[iHisto].SetMaximum(maxH)
-      if histoType == "1d_etaHotSpot" or histoType == "1d_phiHotSpot":
+      if histoType == "1d_eta_Occupancy" or histoType == "1d_phi_Occupancy":
         minH = histo[iHisto].GetMinimum()*0.8
         histo[iHisto].SetMinimum(minH)
       histo[iHisto].Draw()
 
       if not b_wholeHisto:
-        if histoType == "1d_etaHotSpot" or histoType == "1d_phiHotSpot":
+        if histoType == "1d_eta_Occupancy" or histoType == "1d_phi_Occupancy":
           if maxH >0.:
-            if histoType == "1d_etaHotSpot": 
+            if histoType == "1d_eta_Occupancy": 
               box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,minH,args.etaSpot+args.deltaSpot,maxH)
-            if histoType == "1d_phiHotSpot": 
+            if histoType == "1d_phi_Occupancy": 
               box[iHisto] = R.TBox(args.phiSpot-args.deltaSpot,minH,args.phiSpot+args.deltaSpot,maxH)
             box[iHisto].SetLineColor(R.kRed+1)
             box[iHisto].SetLineWidth(3)
             box[iHisto].SetFillStyle(0)
             box[iHisto].Draw()
-        elif histoType == "1d_integralAbove":
+        elif histoType == "1d_integralAbove_Occupancy":
           line[iHisto] = R.TLine(args.integralAbove,0,args.integralAbove,maxH)
           line[iHisto].SetLineColor(R.kRed+1)
           line[iHisto].SetLineWidth(3)
@@ -567,7 +545,7 @@ def main(args):
   if (upperLB>=lowerLB): # check that at least one noisy LB was found
     c0 = R.TCanvas("c0","Evolution vs LB",1400,550)
     R.gStyle.SetOptStat("")
-    if histoType != "2d_xyHotSpot":
+    if histoType != "2d_xy_Occupancy":
       c0.SetLogy(1)
     c0.SetLeftMargin(.045)
     c0.SetRightMargin(.15)
@@ -587,7 +565,7 @@ def main(args):
 
       if first:
         h0Evol[iHisto].Draw("P HIST")
-        if histoType != "2d_xyHotSpot":
+        if histoType != "2d_xy_Occupancy":
           h0Evol[iHisto].SetMinimum(args.minInLB-0.8)
           h0Evol[iHisto].SetMaximum(maxNbInHot*1.5)
         first = False
@@ -608,7 +586,7 @@ def main(args):
   if (len(affectedLB_forSummaryBinning)>0):
     c0_2 = R.TCanvas("c0_2","Most affected LB summary", 1400,550)
     R.gStyle.SetOptStat("")
-    if histoType != "2d_xyHotSpot":
+    if histoType != "2d_xy_Occupancy":
       c0_2.SetLogy(1)
     c0_2.SetLeftMargin(.045)
     c0_2.SetRightMargin(.15)
@@ -636,7 +614,7 @@ def main(args):
         
       if first:
         h_affectedLB[iHisto].Draw("P HIST")
-        if histoType != "2d_xyHotSpot":
+        if histoType != "2d_xy_Occupancy":
           h_affectedLB[iHisto].SetMinimum(args.minInLB-0.8)
           h_affectedLB[iHisto].SetMaximum(maxNbInHot*1.5)
         first = False

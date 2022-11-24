@@ -21,8 +21,6 @@
 #include "../LArRampBuilder.h"
 #include "LArCalibUtils/LArRTMParamExtractor.h"
 #include "LArCalibUtils/LArStripsCrossTalkCorrector.h"
-#include "LArCalibUtils/LArTCMFitterTool.h"
-#include "LArCalibUtils/LArTCMPhysWavePredictor.h"
 #include "LArCalibUtils/LArPhysWavePredictor.h"
 #include "LArCalibUtils/LArTimeTuning.h"
 #include "LArCalibUtils/LArTimeTuningNtuple.h"
@@ -76,7 +74,6 @@ DECLARE_COMPONENT( LArPhysWaveBuilder )
 DECLARE_COMPONENT( LArPhysWaveShifter )
 DECLARE_COMPONENT( LArRampBuilder )
 DECLARE_COMPONENT( LArRTMParamExtractor )
-DECLARE_COMPONENT( LArTCMPhysWavePredictor )
 DECLARE_COMPONENT( LArStripsCrossTalkCorrector )
 DECLARE_COMPONENT( LArPhysWavePredictor )
 DECLARE_COMPONENT( LArTimeTuning )
@@ -104,7 +101,6 @@ DECLARE_COMPONENT( LArDigitOscillationCorrTool )
 DECLARE_COMPONENT( LArDeltaRespTool )
 DECLARE_COMPONENT( LArPhysWaveTool )
 DECLARE_COMPONENT( LArPhysWaveHECTool )
-DECLARE_COMPONENT( LArTCMFitterTool )
 DECLARE_COMPONENT( LArWFParamTool )
 DECLARE_COMPONENT( LArPhaseToolConst )
 DECLARE_COMPONENT( LArPhaseToolMC )

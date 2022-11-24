@@ -103,7 +103,7 @@ StatusCode jFexRoiByteStreamTool::initialize() {
     
 
     //Reading from CVMFS TOB mapping
-    ATH_CHECK(ReadfromFile(m_TobMapping));    
+    ATH_CHECK(ReadfromFile(PathResolver::find_calib_file(m_TobMapping)));
     
     return StatusCode::SUCCESS;
 }
@@ -516,7 +516,8 @@ std::array<float,2> jFexRoiByteStreamTool::getEtaPhi  (unsigned int jfex, unsign
     
     auto it = m_TobPos_map.find(index);
     if(it == m_TobPos_map.end()){
-        ATH_MSG_WARNING("No index found for "<< obj <<" word, jFex:"<<jfex << " Fpga:"<<fpga<< " iEta:"<<+iEta<< " iPhi:"<<+iPhi<< " for 32-bit word: 0x"<<std::hex<<word<<std::dec);
+        //This should be a WARNING.. masked until jFEX firmware bug is fixed
+        ATH_MSG_DEBUG("No index found for "<< obj <<" word, jFex:"<<jfex << " Fpga:"<<fpga<< " iEta:"<<+iEta<< " iPhi:"<<+iPhi<< " for 32-bit word: 0x"<<std::hex<<word<<std::dec);
         return {-99, -99};
     }
     

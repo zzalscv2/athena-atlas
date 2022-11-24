@@ -84,7 +84,7 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
 
   // prepare HLT clusters
   std::vector<clus_kin> vec_hlt_clusters;
-  std::vector<const xAOD::CaloCluster*> accepted_hlt_clusters = ifChainPassed(m_hltChainsT0);
+  std::vector<const xAOD::CaloCluster*> accepted_hlt_clusters = ifStepPassed(m_hltChainsT0);
   
   // For monitoring all hlt clusters
   if(m_hltChainsT0 == "All"){
@@ -104,7 +104,7 @@ StatusCode HLTCalo_TopoCaloClustersMonitor::fillHistograms( const EventContext& 
   }
   // For monitoring signature specific clusters
   else if (accepted_hlt_clusters.size()>0){
-    for (const auto &hlt_cluster : accepted_hlt_clusters) {
+    for (const auto* hlt_cluster : accepted_hlt_clusters) {
         auto hlt_clus_et = hlt_cluster->et();
         if (hlt_clus_et < m_HLT_min_et) continue;
 
@@ -439,7 +439,7 @@ float HLTCalo_TopoCaloClustersMonitor::calculateDeltaPhi( float phi_1, float phi
   return std::abs( std::abs( std::abs( phi_1 - phi_2 ) - TMath::Pi() ) - TMath::Pi() );
 }
 
-std::vector<const xAOD::CaloCluster*> HLTCalo_TopoCaloClustersMonitor::ifChainPassed(const std::string& chain) const{
+std::vector<const xAOD::CaloCluster*> HLTCalo_TopoCaloClustersMonitor::ifStepPassed(const std::string& chain) const{
   Trig::FeatureRequestDescriptor featureRequestDescriptor;
   featureRequestDescriptor.setChainGroup(chain);
   featureRequestDescriptor.setCondition(TrigDefs::includeFailedDecisions);

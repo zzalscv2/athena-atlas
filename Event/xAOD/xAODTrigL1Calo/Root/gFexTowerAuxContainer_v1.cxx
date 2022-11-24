@@ -18,6 +18,7 @@ namespace xAOD {
     AUX_VARIABLE( fpga );
     AUX_VARIABLE( towerEt );
     AUX_VARIABLE( isSaturated );
+    AUX_VARIABLE( gFEXtowerID );
     }
 
 } // namespace xAOD

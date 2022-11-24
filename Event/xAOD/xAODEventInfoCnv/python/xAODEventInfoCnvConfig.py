@@ -112,7 +112,8 @@ def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg"
     acc.merge(BeamSpotCondAlgCfg(flags))
 
     kwargs.setdefault("SignalInputKey", "Input_EventInfo")
-    kwargs.setdefault("OutputKey", f"{flags.Overlay.SigPrefix}EventInfo" if flags.Overlay.FastChain else "EventInfo")
+    from AthenaConfiguration.Enums import ProductionStep
+    kwargs.setdefault("OutputKey", f"{flags.Overlay.SigPrefix}EventInfo" if flags.Common.ProductionStep == ProductionStep.FastChain and flags.Overlay.FastChain else "EventInfo")
 
     if flags.Input.MCChannelNumber > 0:
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)

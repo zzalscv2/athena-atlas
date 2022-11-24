@@ -257,14 +257,14 @@ StatusCode ZdcNtuple :: initialize ()
   ANA_MSG_INFO("enableTrigger = " << enableTrigger);
   ANA_MSG_INFO("zdcCalib = " << zdcCalib);
   ANA_MSG_INFO("zdcLaser = " << zdcLaser);
+  ANA_MSG_INFO("zdcConfig = " << zdcConfig);
   ANA_MSG_INFO("reprocZdc = " << reprocZdc);
+  ANA_MSG_INFO("auxSuffix = " << auxSuffix );
   ANA_MSG_INFO("zdcLowGainOnly = " << zdcLowGainOnly);
   ANA_MSG_INFO("enableClusters = " << enableClusters);
   ANA_MSG_INFO("trackLimit = " << trackLimit);
   ANA_MSG_INFO("trackLimitReject = " << trackLimitReject);
-  ANA_MSG_INFO("auxSuffix = " << auxSuffix );
 
-  if (auxSuffix != "") auxSuffix = "_" + auxSuffix; // prepend "_"
   ANA_MSG_DEBUG("initialize: Initialize!");
 
 
@@ -291,6 +291,7 @@ StatusCode ZdcNtuple :: initialize ()
   // ZDC re-reco tool
   if (reprocZdc)
   {
+    ANA_MSG_INFO("Trying to configure ZDC Analysis Tool!");
 
     ANA_CHECK(m_zdcAnalysisTool.setProperty("FlipEMDelay", flipDelay));
     ANA_CHECK(m_zdcAnalysisTool.setProperty("LowGainOnly", zdcLowGainOnly));
@@ -299,6 +300,7 @@ StatusCode ZdcNtuple :: initialize ()
     ANA_CHECK(m_zdcAnalysisTool.setProperty("AuxSuffix", auxSuffix));
     ANA_CHECK(m_zdcAnalysisTool.setProperty("ForceCalibRun", -1));
     
+    ANA_MSG_INFO("Setting up zdcConfig=" << zdcConfig);
     if (zdcConfig=="LHCf2022")
       {
 	ANA_CHECK(m_zdcAnalysisTool.setProperty("DoTrigEff", false)); // for now
@@ -322,9 +324,10 @@ StatusCode ZdcNtuple :: initialize ()
       ANA_MSG_INFO("FLIP ZDC DELAY IN EM MODULES");
     else
       ANA_MSG_INFO("NO FLIP ZDC DELAY IN EM MODULES");
-    
+
+    ANA_MSG_INFO("Trying to initialize ZDC Analysis Tool!");
+
     ANA_CHECK(m_zdcAnalysisTool.initialize());
-    ANA_CHECK(m_trigDecisionTool.initialize());
     
   }
   
@@ -386,7 +389,7 @@ StatusCode ZdcNtuple :: execute ()
       ANA_MSG_DEBUG ("No reprocessing");
 
     m_zdcSums = 0;
-    ANA_CHECK( evtStore()->retrieve( m_zdcSums, "ZdcSums" + auxSuffix) );
+    ANA_CHECK( evtStore()->retrieve( m_zdcSums, "ZdcSums" ) );
 
     m_zdcModules = 0;
     ANA_CHECK(evtStore()->retrieve( m_zdcModules, "ZdcModules" ) ); // ZDC modules keep same name, but the aux data get different suffix during reprocessing
@@ -449,10 +452,10 @@ void ZdcNtuple::processZdcNtupleFromModules()
   if (m_zdcSums)
   {
 
-    ANA_MSG_DEBUG ("Sum 0 = " << m_zdcSums->at(0)->auxdataConst<float>("CalibEnergy")
-                   << ", Sum 1 = " << m_zdcSums->at(1)->auxdataConst<float>("CalibEnergy"));
-    ANA_MSG_DEBUG ("Final 0 = " << m_zdcSums->at(0)->auxdataConst<float>("FinalEnergy")
-                   << ", Final 1 = " << m_zdcSums->at(1)->auxdataConst<float>("FinalEnergy"));
+    ANA_MSG_DEBUG ("Sum 0 = " << m_zdcSums->at(0)->auxdataConst<float>("CalibEnergy"+auxSuffix)
+                   << ", Sum 1 = " << m_zdcSums->at(1)->auxdataConst<float>("CalibEnergy"+auxSuffix));
+    ANA_MSG_DEBUG ("Final 0 = " << m_zdcSums->at(0)->auxdataConst<float>("FinalEnergy"+auxSuffix)
+                   << ", Final 1 = " << m_zdcSums->at(1)->auxdataConst<float>("FinalEnergy"+auxSuffix));
 
   }
   else
@@ -488,17 +491,17 @@ void ZdcNtuple::processZdcNtupleFromModules()
       //static SG::AuxElement::ConstAccessor< float > acc( "CalibEnergy" );
       //t_ZdcEnergy[iside] = acc(*zdcSum);
 
-      t_ZdcEnergy[iside] = zdcSum->auxdataConst<float>("CalibEnergy");
-      t_ZdcEnergyErr[iside] = zdcSum->auxdataConst<float>("CalibEnergyErr");
+      t_ZdcEnergy[iside] = zdcSum->auxdataConst<float>("CalibEnergy"+auxSuffix);
+      t_ZdcEnergyErr[iside] = zdcSum->auxdataConst<float>("CalibEnergyErr"+auxSuffix);
 
-      t_ZdcAmp[iside] = zdcSum->auxdataConst<float>("UncalibSum");
-      t_ZdcAmpErr[iside] = zdcSum->auxdataConst<float>("UncalibSumErr");
+      t_ZdcAmp[iside] = zdcSum->auxdataConst<float>("UncalibSum"+auxSuffix);
+      t_ZdcAmpErr[iside] = zdcSum->auxdataConst<float>("UncalibSumErr"+auxSuffix);
       t_ZdcLucrodTriggerSideAmp[iside] = zdcSum->auxdataConst<uint16_t>("LucrodTriggerSideAmp");
       ANA_MSG_VERBOSE("processZdcNtupleFromModules: ZdcSum energy = " << t_ZdcEnergy[iside]);
 
-      t_ZdcTime[iside] = zdcSum->auxdataConst<float>("AverageTime");
-      t_ZdcStatus[iside] = zdcSum->auxdataConst<unsigned int>("Status");
-      t_ZdcModuleMask += (zdcSum->auxdataConst<unsigned int>("ModuleMask") << 4 * iside);
+      t_ZdcTime[iside] = zdcSum->auxdataConst<float>("AverageTime"+auxSuffix);
+      t_ZdcStatus[iside] = zdcSum->auxdataConst<unsigned int>("Status"+auxSuffix);
+      t_ZdcModuleMask += (zdcSum->auxdataConst<unsigned int>("ModuleMask"+auxSuffix) << 4 * iside);
     }
   }
 
@@ -532,7 +535,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
       t_ZdcModulePresample[iside][imod] = zdcMod->auxdataConst<float>("Presample" + auxSuffix);
       t_ZdcModulePreSampleAmp[iside][imod] = zdcMod->auxdataConst<float>("PreSampleAmp" + auxSuffix);
       t_ZdcLucrodTriggerAmp[iside][imod] = zdcMod->auxdataConst<uint16_t>("LucrodTriggerAmp");
-      //t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<uint16_t>("MaxADC");
+      t_ZdcModuleMaxADC[iside][imod] = zdcMod->auxdataConst<float>("MaxADC");
 
       if (enableOutputSamples)
         {
