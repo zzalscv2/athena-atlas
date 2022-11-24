@@ -26,8 +26,6 @@
 #include "LArSimEvent/LArHitContainer.h"
 #include "LArDigitization/LArHitList.h"
 
-#include "CaloDetDescr/CaloDetDescrManager.h"
-
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/LArID.h"
 #include "CaloIdentifier/CaloID_Exception.h"
@@ -35,7 +33,6 @@
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloDetDescr/ICaloSuperCellIDTool.h"
 #include "CaloEvent/CaloCellContainer.h"
 //
 // ........ Gaudi needed includes
@@ -67,7 +64,6 @@ LArSCL1Maker::LArSCL1Maker(const std::string& name, ISvcLocator* pSvcLocator) :
   , m_scHelper(0)
   , m_OnlSCHelper(0)
   , m_incSvc("IncidentSvc",name)
-  , m_sem_mgr(nullptr)
 {
 //
 // ........ default values of private data
@@ -215,8 +211,6 @@ StatusCode LArSCL1Maker::initialize()
 
   CHECK( m_atRndmGenSvc.retrieve() );
   
-  CHECK( detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
-
   return StatusCode::SUCCESS;
 
 }

@@ -41,8 +41,6 @@ class CaloCell_SuperCell_ID;
 class CaloCell_ID;
 class LArOnline_SuperCellID;
 
-class CaloSuperCellDetDescrManager;
-
 /**
    @brief The aim of this algorithm is the simulation of the LAr analogue Super-Cell sums. 
 
@@ -226,8 +224,6 @@ class LArSCL1Maker : public AthReentrantAlgorithm
   unsigned int m_firstSample;
 
    std::string m_saveHitsContainer;
-
-   const CaloSuperCellDetDescrManager* m_sem_mgr;
 
 };
 
