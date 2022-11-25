@@ -4651,7 +4651,7 @@ namespace Trk {
     }
     
     if (trajectory.nDOF() < 0) {
-      ATH_MSG_WARNING("Not enough measurements, reject track");
+      ATH_MSG_DEBUG("Not enough measurements, reject track");
       return nullptr;
     }
 
