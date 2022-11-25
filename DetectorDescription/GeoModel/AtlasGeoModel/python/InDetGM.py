@@ -43,10 +43,15 @@ elif ( DetFlags.detdescr.ID_on() ):
 
         GeoModelSvc.DetectorTools['SCT_DetectorTool'].useDynamicAlignFolders = InDetGeometryFlags.useDynamicAlignFolders()
 
-    if ( DetFlags.detdescr.TRT_on() ):
+    if (DetFlags.detdescr.TRT_on()):
         from TRT_GeoModel.TRT_GeoModelConf import TRT_DetectorTool
         trtDetectorTool = TRT_DetectorTool()
         trtDetectorTool.useDynamicAlignFolders = InDetGeometryFlags.useDynamicAlignFolders()
+        # Use default TRT active gas in geo model unless in simulation.
+        if not DetFlags.simulate.TRT_on():
+            trtDetectorTool.DoXenonArgonMixture = False
+            trtDetectorTool.DoKryptonMixture = False
+
         GeoModelSvc.DetectorTools += [ trtDetectorTool ]
 
     from InDetServMatGeoModel.InDetServMatGeoModelConf import InDetServMatTool
