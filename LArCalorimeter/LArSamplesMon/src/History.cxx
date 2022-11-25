@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/History.h"
@@ -308,7 +308,7 @@ const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErro
   }
   
   if (shapeErrorType == CellShapeError) {
-    const ShapeErrorData* sed = shapeErrorGetter()->shapeErrorData(hash(), gain, res);
+    ShapeErrorData* sed = shapeErrorGetter()->shapeErrorData(hash(), gain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(CellShapeError);
     return sed;
@@ -317,14 +317,14 @@ const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErro
   if (shapeErrorType == LowGainCellShapeError || shapeErrorType == MedGainCellShapeError || shapeErrorType == HighGainCellShapeError) {
     CaloGain::CaloGain fbGain = (shapeErrorType == LowGainCellShapeError ? CaloGain::LARLOWGAIN :
                                 (shapeErrorType == MedGainCellShapeError ? CaloGain::LARMEDIUMGAIN :CaloGain::LARHIGHGAIN));
-    const ShapeErrorData* sed = shapeErrorGetter()->shapeErrorData(hash(), fbGain, res);
+    ShapeErrorData* sed = shapeErrorGetter()->shapeErrorData(hash(), fbGain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(shapeErrorType);
     return sed;
   }
   
   if (shapeErrorType == RingShapeError) {
-    const ShapeErrorData* sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), gain, res);
+    ShapeErrorData* sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), gain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(RingShapeError);
     return sed;
@@ -333,7 +333,7 @@ const ShapeErrorData* History::shapeErrorData(CaloGain::CaloGain gain, ShapeErro
   if (shapeErrorType == LowGainRingShapeError || shapeErrorType == MedGainRingShapeError || shapeErrorType == HighGainRingShapeError) {
     CaloGain::CaloGain fbGain = (shapeErrorType == LowGainRingShapeError ? CaloGain::LARLOWGAIN :
                                 (shapeErrorType == MedGainRingShapeError ? CaloGain::LARMEDIUMGAIN :CaloGain::LARHIGHGAIN));
-    const ShapeErrorData* sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), fbGain, res);
+    ShapeErrorData* sed = shapeErrorGetter()->phiSymShapeErrorData(cellInfo()->globalPhiRing(), fbGain, res);
     if (!sed) return nullptr;
     sed->setShapeErrorType(shapeErrorType);
     return sed;
