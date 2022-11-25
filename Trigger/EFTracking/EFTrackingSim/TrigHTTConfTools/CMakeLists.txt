@@ -31,3 +31,7 @@ atlas_add_test( HTTRegionSlices_test
 atlas_add_test( HTTEventSelectionSvc_test
                 SCRIPT python -m TrigHTTConfTools.HTTConfigCompInit
                 POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( HTTConfigFlags_test
+                SCRIPT python -m TrigHTTConfTools.HTTConfigFlags
+                POST_EXEC_SCRIPT noerror.sh )
