@@ -6,7 +6,7 @@
 #include "RHadronPythiaDecayer.h"
 
 // The actual decayers.  Singleton classes, not toolhandles
-#include "G4ExternalDecay/Pythia8ForDecays.h"
+
 
 // For passing things around
 #include "CLHEP/Vector/LorentzVector.h"
@@ -17,8 +17,6 @@
 RHadronPythiaDecayer::RHadronPythiaDecayer( const std::string& s )
  : G4VExtDecayer(s)
 {
-  // In the constructor, make a decayer instance, so that it's initialized here and not in the event loop
-  Pythia8ForDecays::Instance();
 }
 
 G4DecayProducts* RHadronPythiaDecayer::ImportDecayProducts(const G4Track& aTrack){
@@ -33,7 +31,7 @@ G4DecayProducts* RHadronPythiaDecayer::ImportDecayProducts(const G4Track& aTrack
   std::vector<G4DynamicParticle*> particles;
 
   // Pythia8 decay the particle and import the decay products
-  Pythia8ForDecays::Instance()->Py1ent(aTrack, particles);
+  m_pythia.Py1ent(aTrack, particles);
 
   G4cout << "Decayed an RHadron with ID " << pdgEncoding << " and momentum " << aTrack.GetMomentum() << " in Pythia.  Decay products are:" << G4endl;
   double totalE=0.0;
