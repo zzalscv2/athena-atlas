@@ -14,7 +14,7 @@ set( ATLAS_PYTHON_CHECKER ""
    CACHE STRING "Python checker command to run during Python module compilation" )
 
 # Set the versions of the TDAQ externals to pick up for the build:
-set( TDAQ-COMMON_VERSION "04-04-00" CACHE STRING
+set( TDAQ-COMMON_VERSION "09-05-00" CACHE STRING
    "The version of tdaq-common to use for the build" )
 set( TDAQ-COMMON_ATROOT
    "$ENV{TDAQ_RELEASE_BASE}/tdaq-common/tdaq-common-${TDAQ-COMMON_VERSION}"
