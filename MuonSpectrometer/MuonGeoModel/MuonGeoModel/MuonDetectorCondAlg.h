@@ -30,6 +30,8 @@ class MuonDetectorCondAlg : public AthAlgorithm {
 
     Gaudi::Property<bool> m_isData{this, "IsData", true};
     Gaudi::Property<bool> m_applyMmPassivation{this, "applyMmPassivation", false};
+    Gaudi::Property<bool> m_applyAsBuiltMM{this, "applyAsBuiltMM", true};     // flag to allow turning off MM as-built for tests
+    Gaudi::Property<bool> m_applyAsBuiltSTGC{this, "applyAsBuiltSTGC", true}; // flag to allow turning off sTGC as-built for tests
     Gaudi::Property<bool> m_applyALines{this, "applyALines", true};
     Gaudi::Property<bool> m_applyBLines{this, "applyBLines", true};
 
