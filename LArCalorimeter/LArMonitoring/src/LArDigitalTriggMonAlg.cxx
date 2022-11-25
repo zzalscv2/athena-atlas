@@ -39,7 +39,6 @@
 
 #include "LArRawEvent/LArSCDigit.h"
 #include "LArRawEvent/LArLATOMEHeaderContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "LArTrigStreamMatching.h"
 
@@ -103,6 +102,7 @@ LArDigitalTriggMonAlg::initialize()
   ATH_CHECK(m_digitBaselineContainerKey.initialize());
   ATH_CHECK(m_rawSCEtIdContainerKey.initialize());
   ATH_CHECK(m_keyPedestalSC.initialize());
+  ATH_CHECK(m_caloSuperCellMgrKey.initialize());
   ATH_CHECK(m_rawSCContainerKey.initialize());  
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_cablingKey.initialize());
@@ -175,6 +175,9 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
   SG::ReadCondHandle<ILArPedestal>    pedestalHdl{m_keyPedestalSC, ctx};
   const LArPedestalSC* pedestals=dynamic_cast<const LArPedestalSC*>(pedestalHdl.cptr());
  
+  SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,ctx};
+  const CaloSuperCellDetDescrManager* ddman = *caloSuperCellMgrHandle;
+
   if (pLArDigitContainer && pLArDigitContainer->size()>0 && (hLArDigitBaselineContainer.isValid() || hLArDigitContainer.isValid()) ){
 
     /** Define iterators to loop over Digits containers*/
@@ -229,8 +232,6 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
       if(!cabling->isOnlineConnected(id)) continue;   
 
       const Identifier offlineID=cabling->cnvToIdentifier(id);
-      const CaloSuperCellDetDescrManager* ddman = nullptr;
-      ATH_CHECK( detStore()->retrieve (ddman) );
 
       const CaloDetDescrElement* caloDetElement = ddman->get_element(offlineID);
       
