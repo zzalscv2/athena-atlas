@@ -3,7 +3,7 @@
 import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import FlagEnum, Format
+from AthenaConfiguration.Enums import FlagEnum, Format, LHCPeriod
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaCommon.Logging import logging
 
@@ -33,8 +33,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags: prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC)
 
     # Enable Run-3 LVL1 calo simulation and/or decoding
-    # TODO: when Fex decoders work reliably, change it to: "lambda prevFlags: (prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3) and not prevFlags.Trigger.doHLT"
-    flags.addFlag('Trigger.enableL1CaloPhase1', False)
+    flags.addFlag('Trigger.enableL1CaloPhase1', lambda prevFlags: (prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3) and not prevFlags.Trigger.doHLT)
 
     # Enable L1Topo simulation to write inputs to txt
     flags.addFlag('Trigger.enableL1TopoDump', False)
