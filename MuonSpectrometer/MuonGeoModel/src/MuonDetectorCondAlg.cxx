@@ -142,7 +142,8 @@ StatusCode MuonDetectorCondAlg::execute() {
             return StatusCode::FAILURE;
         }
         writeHandle.addDependency(readNswAsBuilt);
-        MuonMgrData->setMMAsBuiltCalculator(*readNswAsBuilt);
+        if (m_applyAsBuiltMM)   MuonMgrData->setMMAsBuiltCalculator(*readNswAsBuilt);
+        if (m_applyAsBuiltSTGC) MuonMgrData->setStgcAsBuiltCalculator(*readNswAsBuilt);
     }
 
     // =======================
