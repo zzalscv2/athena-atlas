@@ -4,8 +4,6 @@
 #include <algorithm>
 #include <regex>
 
-#include<boost/algorithm/string.hpp>
-
 #include "GaudiKernel/IIncidentSvc.h"
 #include "Gaudi/Property.h"
 #include "AthenaInterprocess/Incidents.h"
@@ -532,7 +530,7 @@ void TrigSignatureMoni::RateHistogram::fill(const double x, const double y) cons
 void TrigSignatureMoni::RateHistogram::startTimer(unsigned int duration, unsigned int intervals) {
   m_duration = duration;
   m_timeDivider = std::make_unique<TimeDivider>(intervals, duration, TimeDivider::seconds);
-  m_timer = std::make_unique<Athena::AlgorithmTimer>(duration*50, boost::bind(&RateHistogram::callback, this), Athena::AlgorithmTimer::DELIVERYBYTHREAD);
+  m_timer = std::make_unique<Athena::AlgorithmTimer>(duration*50, std::bind(&RateHistogram::callback, this));
 }
 
 void TrigSignatureMoni::RateHistogram::stopTimer() {
