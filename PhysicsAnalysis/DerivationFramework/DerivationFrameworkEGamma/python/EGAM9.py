@@ -264,13 +264,9 @@ def EGAM9Cfg(ConfigFlags):
     # it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run
     # multiple times in a train.
-    # DODO: restrict it to relevant triggers
+    # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     EGAM9TriggerListsHelper = TriggerListsHelper()
-    #EGAM9TriggerListsHelper.Run3TriggerNames = EGAM9TriggerListsHelper.Run3TriggerNamesNoTau
-    #EGAM9TriggerListsHelper.Run3TriggerNamesTau = []
-    EGAM9TriggerListsHelper.Run2TriggerNames = EGAM9TriggerListsHelper.Run2TriggerNamesNoTau
-    EGAM9TriggerListsHelper.Run2TriggerNamesTau = []
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM9KernelCfg(ConfigFlags,

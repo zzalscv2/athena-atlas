@@ -315,10 +315,6 @@ def EGAM7Cfg(ConfigFlags):
     # DODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
     EGAM7TriggerListsHelper = TriggerListsHelper()
-    #EGAM7TriggerListsHelper.Run3TriggerNames = EGAM7TriggerListsHelper.Run3TriggerNamesNoTau
-    #EGAM7TriggerListsHelper.Run3TriggerNamesTau = []
-    EGAM7TriggerListsHelper.Run2TriggerNames = EGAM7TriggerListsHelper.Run2TriggerNamesNoTau
-    EGAM7TriggerListsHelper.Run2TriggerNamesTau = []
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM7KernelCfg(ConfigFlags,
