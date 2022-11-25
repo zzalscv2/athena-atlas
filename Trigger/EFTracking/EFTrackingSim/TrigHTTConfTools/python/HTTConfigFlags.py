@@ -136,7 +136,7 @@ def createHough1dHTTConfigFlags():
     cf.addFlag('phiRangeCut', True)
     cf.addFlag('splitpt', 1)
 
-    cf.outputHitTxt = None
+    cf.outputHitTxt = ""
 
     return cf
 
@@ -217,11 +217,13 @@ def createDev21_02_15_HTTConfigFlags():
 if __name__ == "__main__":
 
   flags = createHTTConfigFlags()
-
-  assert flags.firstInputToolN == 1 , "default firstInputToolN  is wrong"
-  assert flags.barcodeFracMatch == 0.5, "default barcodeFracMatch  is wrong"
-  assert flags.fastMon is False , "default fastMon is wrong"
-  assert flags.lrtMonZ0Range ==  (-300,300), "default lrtMonZ0Rang is wrong"
+  flags.loadAllDynamicFlags()
+  flags.initAll()
+  flags.dump()
+  assert flags.Hough.firstInputToolN == 1 , "default firstInputToolN  is wrong"
+  assert flags.Hough.barcodeFracMatch == 0.5, "default barcodeFracMatch  is wrong"
+  assert flags.Hough.fastMon is False , "default fastMon is wrong"
+  assert flags.Hough.lrtMonZ0Range ==  (-300,300), "default lrtMonZ0Rang is wrong"
 
   print( "allok" )   
 
