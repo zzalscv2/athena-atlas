@@ -75,14 +75,9 @@ private:
     };
     ToolHandle<Muon::IMuonClusterOnTrackCreator> m_clusterCreator{
         this,
-        "ClusterCreator",
+        "MuonClusterCreator",
         "Muon::MuonClusterOnTrackCreator/MuonClusterOnTrackCreator",
     };  //<! pointer to muon cluster rio ontrack creator
-    ToolHandle<Muon::IMuonClusterOnTrackCreator> m_mmClusterCreator{
-        this,
-        "MMClusterCreator",
-        "",
-    };  //<! pointer to mm cluster rio ontrack creator
     ToolHandle<Muon::IMuonClusterSegmentFinderTool> m_clusterSegMakerNSW{
         this,
         "MuonClusterSegmentFinderTool",

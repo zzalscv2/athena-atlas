@@ -125,6 +125,7 @@ namespace MuonGM {
 
         /** read A-line parameters and include the chamber rotation/translation 
             in the local-to-global (ATLAS) reference frame transformaton */
+        const Amg::Transform3D& getDelta() const { return m_delta; }
         void setDelta(const ALinePar& aline);
         void setDelta(MuonDetectorManager* mgr);
 

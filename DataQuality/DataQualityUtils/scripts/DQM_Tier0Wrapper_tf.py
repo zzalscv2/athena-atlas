@@ -297,7 +297,8 @@ def dq_combined_trf(jsonfile, outmap):
       while n_xmlrpc_tries <= MAX_XMLRPC_TRIES :
         procnumber = 99
         try :
-          xmlrpcserver = xmlrpclib.ServerProxy('http://atlasdqm.cern.ch:8888')
+          xmlrpcserver = xmlrpclib.ServerProxy('http://proc-pass-atlasdqm.app.cern.ch')
+          #xmlrpcserver = xmlrpclib.ServerProxy('http://atlasdqm.cern.ch:8888') ##old server
           procnumber = xmlrpcserver.get_next_proc_pass(runnr, stream, 'tier0')
           break 
         except :

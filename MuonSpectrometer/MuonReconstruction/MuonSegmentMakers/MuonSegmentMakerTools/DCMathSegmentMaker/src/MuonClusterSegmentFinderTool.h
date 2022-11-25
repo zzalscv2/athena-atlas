@@ -179,8 +179,7 @@ namespace Muon {
             "Trk::TrackSummaryTool/MuidTrackSummaryTool",
         };
 
-        ToolHandle<IMuonClusterOnTrackCreator> m_mmClusterCreator{this, "MMClusterCreator", ""};
-        ToolHandle<IMuonClusterOnTrackCreator> m_stgcClusterCreator{this, "MuonClusterCreator", ""};
+        ToolHandle<IMuonClusterOnTrackCreator> m_muonClusterCreator{this, "MuonClusterCreator", ""};
 
         Gaudi::Property<bool> m_ipConstraint{this, "IPConstraint", true};  // use a ip perigee(0,0) constraint in the segment fit
         Gaudi::Property<double> m_maxClustDist{this, "ClusterDistance", 5.};

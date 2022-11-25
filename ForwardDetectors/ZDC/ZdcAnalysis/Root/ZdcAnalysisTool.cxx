@@ -1085,7 +1085,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     
     m_zdcDataAnalyzer->FinishEvent();
     
-    ATH_MSG_DEBUG("Adding variables");
+    ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
     
     for (const auto zdcModule : moduleContainer)
     {
@@ -1258,7 +1258,7 @@ StatusCode ZdcAnalysisTool::reprocessZdc()
         return StatusCode::FAILURE;
     }
     m_eventReady = false;
-    ATH_MSG_INFO ("Trying to retrieve " << m_zdcModuleContainerName);
+    ATH_MSG_DEBUG ("Trying to retrieve " << m_zdcModuleContainerName);
 
     m_zdcModules = 0;
     ATH_CHECK(evtStore()->retrieve(m_zdcModules, m_zdcModuleContainerName));

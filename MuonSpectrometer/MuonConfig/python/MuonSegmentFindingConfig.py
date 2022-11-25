@@ -483,24 +483,21 @@ def MuonClusterSegmentFinderToolCfg(flags, name='MuonClusterSegmentFinderTool', 
     kwargs.setdefault("TrackToSegmentTool", result.popToolsAndMerge( MuonTrackToSegmentToolCfg(flags) ) )
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
 
-    kwargs.setdefault('TrackCleaner', result.popToolsAndMerge( 
-        MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) ) ) 
+    kwargs.setdefault('TrackCleaner', result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) ) ) 
     kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonCombinedTrackSummaryToolCfg(flags, name='CombinedMuonTrackSummary') ) ) 
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MMClusterOnTrackCreatorCfg
-        
-    if flags.Detector.EnableMM: kwargs.setdefault("MMClusterCreator", result.popToolsAndMerge(MMClusterOnTrackCreatorCfg(flags)))
-    if flags.Detector.EnablesTGC: kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)) )
+    
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
+    kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)) )
+
     result.setPrivateTools(CompFactory.Muon.MuonClusterSegmentFinderTool(name,**kwargs))
     return result
 
 def MuonPRDSelectionToolCfg( flags, name="MuonPRDSelectionTool", **kwargs):
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg, MMClusterOnTrackCreatorCfg
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg
     # Won't explicitly configure MuonIdHelperSvc
     result = ComponentAccumulator()
     kwargs.setdefault("MdtDriftCircleOnTrackCreator", result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
-    kwargs.setdefault("MuonClusterOnTrackCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
-    if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
-        kwargs.setdefault("MmClusterOnTrackCreator", result.popToolsAndMerge(MMClusterOnTrackCreatorCfg(flags)))
+    kwargs.setdefault("MuonClusterOnTrackCreator",    result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
     # Won't explicitly configure MuonRecoValidationTool (but it would need configuration if used)
     the_tool = CompFactory.Muon.MuonPRDSelectionTool(name, **kwargs)
     result.setPrivateTools(the_tool)
@@ -671,19 +668,17 @@ def MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker", **kwargs):
     kwargs.setdefault('SegmentMaker', segment_maker)
     kwargs.setdefault("MuonClusterSegmentFinder", result.popToolsAndMerge(MuonClusterSegmentFinderCfg(flags, name = "MuonClusterSegmentFinder")))
     # Not yet configuring MuonSegmentOverlapRemovalTool
-    kwargs.setdefault("ClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
+    
     if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
-        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MMClusterOnTrackCreatorCfg
-        kwargs.setdefault("MMClusterCreator", result.popToolsAndMerge(MMClusterOnTrackCreatorCfg(flags)))
+        kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
 
-    # Configure subtools needed by MuonClusterSegmentFinderTool
-    extrapolator = result.getPrimaryAndMerge(MuonStraightLineExtrapolatorCfg(flags))
-    result.addPublicTool(extrapolator)
-    cleaner = result.popToolsAndMerge( 
-        MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) )
-    segment_finder = result.getPrimaryAndMerge(MuonClusterSegmentFinderToolCfg(flags, name ="MuonClusterSegmentFinderTool", 
-                                          TrackCleaner = cleaner))
-    kwargs.setdefault("MuonClusterSegmentFinderTool", segment_finder)
+        # Configure subtools needed by MuonClusterSegmentFinderTool
+        extrapolator = result.getPrimaryAndMerge(MuonStraightLineExtrapolatorCfg(flags))
+        result.addPublicTool(extrapolator)
+        cleaner = result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) )
+        segment_finder = result.getPrimaryAndMerge(MuonClusterSegmentFinderToolCfg(flags, name ="MuonClusterSegmentFinderTool", TrackCleaner = cleaner))
+        kwargs.setdefault("MuonClusterSegmentFinderTool", segment_finder)
+
     ### we check whether the layout contains any CSC chamber and if yes, we check that the user also wants to use the CSCs in reconstruction    
     if flags.Detector.EnableCSC:
         kwargs.setdefault("Csc2dSegmentMaker", result.popToolsAndMerge(Csc2dSegmentMakerCfg(flags)))

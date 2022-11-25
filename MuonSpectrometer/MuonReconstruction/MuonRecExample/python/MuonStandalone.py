@@ -132,8 +132,7 @@ def MuonSegmentFinderAlg( name="MuonSegmentMaker", **kwargs):
     reco_stgc = muonRecFlags.dosTGCs() and MuonGeometryFlags.hasSTGC()
     kwargs.setdefault("Csc2dSegmentMaker",  getPublicTool("Csc2dSegmentMaker") if reco_cscs else "")
     kwargs.setdefault("Csc4dSegmentMaker",  getPublicTool("Csc4dSegmentMaker") if reco_cscs else "")
-    
-    kwargs.setdefault("MMClusterCreator",  getPublicTool("MMClusterOnTrackCreator") if reco_mircomegas else "")
+    kwargs.setdefault("MuonClusterCreator", getPublicTool("MuonClusterOnTrackCreator") if reco_mircomegas or reco_stgc else "" )
     kwargs.setdefault("MuonClusterSegmentFinderTool", getPublicTool("MuonClusterSegmentFinderTool") if reco_mircomegas or reco_stgc else "" )
     kwargs.setdefault("SegmentCollectionName",SegmentLocation)
     kwargs.setdefault("MuonPatternCalibration", getPublicTool("MuonPatternCalibration"))

@@ -184,3 +184,12 @@ def EgammaTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
     acc.addPublicTool(EgammaTrackParticleThinning(name, **kwargs),
                       primary = True)
     return acc
+
+# Track to vertex wrapper
+def TrackToVertexWrapperCfg(ConfigFlags, name, **kwargs):
+    """Configure the TrackToVertexWrapper tool"""
+    acc = ComponentAccumulator()
+    TrackToVertexWrapper = CompFactory.DerivationFramework.TrackToVertexWrapper
+    acc.addPublicTool(TrackToVertexWrapper(name, **kwargs),
+                      primary = True)
+    return acc

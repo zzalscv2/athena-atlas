@@ -266,6 +266,7 @@ def CombinedMuonTrackBuilderFit( name='CombinedMuonTrackBuilderFit', **kwargs ):
     kwargs.setdefault("CaloTSOS"                      , getPublicTool("MuidCaloTrackStateOnSurface") )
     kwargs.setdefault("MaterialAllocator"             , getPublicTool("MuidMaterialAllocator") )
     kwargs.setdefault("MdtRotCreator"                 , getPublicTool("MdtDriftCircleOnTrackCreator") )
+    kwargs.setdefault("MuonRotCreator"                , getPublicTool("MuonClusterOnTrackCreator") )
     kwargs.setdefault("AlignmentUncertToolPhi"        , getPublicTool("MuonAlignmentUncertToolPhi") )
     kwargs.setdefault("AlignmentUncertToolTheta"      , getPublicTool("MuonAlignmentUncertToolTheta") )
     kwargs.setdefault("CaloMaterialProvider"          , getPublicTool("MuonTrkMaterialProviderTool"))
@@ -325,6 +326,7 @@ def CombinedMuonTrackBuilderFit( name='CombinedMuonTrackBuilderFit', **kwargs ):
 
     if beamFlags.beamType() == 'cosmics':
         kwargs.setdefault("MdtRotCreator" ,  "" )
+        kwargs.setdefault("MuonRotCreator"  ,  "" )
         kwargs.setdefault("LowMomentum"   ,  1.5*GeV )
         kwargs.setdefault("ReallocateMaterial", False )
         kwargs.setdefault("Vertex2DSigmaRPhi" , 100.*mm )
@@ -342,7 +344,7 @@ def CombinedMuonTrackBuilderFit( name='CombinedMuonTrackBuilderFit', **kwargs ):
 def CombinedTrackBuilderFit_EMEO(name = "CombinedTrackBuilderFit_EMEO", **kwargs):
     return CombinedMuonTrackBuilderFit(name = name,
                                        MuonHoleRecovery = getPublicTool("MuonChamberRecovery_EMEO") if not ConfigFlags.Muon.MuonTrigger else "",
-                                       MMRotCreator = "")
+                                       MuonRotCreator = "")
     
 
 def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
@@ -353,7 +355,8 @@ def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
     kwargs.setdefault("CaloTSOS"                      , getPublicTool("MuidCaloTrackStateOnSurface") )
     kwargs.setdefault("MaterialAllocator"             , getPublicTool("MuidMaterialAllocator") )
     kwargs.setdefault("MdtRotCreator"                 , getPublicTool("MdtDriftCircleOnTrackCreator") )
-    
+    kwargs.setdefault("MuonRotCreator"                , getPublicTool("MuonClusterOnTrackCreator") )
+
     kwargs.setdefault("CleanCombined"                 , True )
     kwargs.setdefault("CleanStandalone"               , True )
     kwargs.setdefault("BadFitChi2"                    , 2.5 )
@@ -392,7 +395,7 @@ def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
         kwargs.setdefault("SLFitter"                      , getPublicToolClone("TrigiPatSLFitter_"+suffix, "iPatSLFitter", TrackSummaryTool=trackSummary) )
         kwargs.setdefault("MuonErrorOptimizer", "")
         kwargs.setdefault("CscRotCreator"                 , "" )
-        kwargs.setdefault("MMRotCreator"                  , "" )
+        kwargs.setdefault("MuonRotCreator"                  , "" )
         kwargs.setdefault("Cleaner"                       , getPrivateToolClone("TrigMuidTrackCleaner_"+suffix, "MuidTrackCleaner", Fitter=getPublicToolClone("TrigiPatFitterClean_"+suffix, "iPatFitter", TrackSummaryTool=trackSummary, MaxIterations=4)))
     else:
         import MuonCombinedRecExample.CombinedMuonTrackSummary  # noqa: F401 (import side-effects)
@@ -408,6 +411,7 @@ def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
 
     if beamFlags.beamType() == 'cosmics':
         kwargs.setdefault("MdtRotCreator" ,  "" )
+        kwargs.setdefault("MuonRotCreator"  ,  "" )
         kwargs.setdefault("LowMomentum"   ,  1.5*GeV )
         kwargs.setdefault("ReallocateMaterial", False )
         kwargs.setdefault("Vertex2DSigmaRPhi" , 100.*mm )
@@ -421,7 +425,8 @@ def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
 
     if muonRecFlags.doSegmentT0Fit():
         kwargs.setdefault("MdtRotCreator"                 , "" )
-  
+        kwargs.setdefault("MuonRotCreator"                  ,  "" )
+          
     cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
     kwargs.setdefault('TrackingGeometryReadKey', cond_alg.TrackingGeometryWriteKey)
        
@@ -430,7 +435,7 @@ def CombinedMuonTrackBuilder( name='CombinedMuonTrackBuilder', **kwargs ):
 def CombinedMuonTrackBuilder_EMEO(name = "MuonCombinedTrackBuilder_EMEO"):
     return CombinedMuonTrackBuilder(name = name,
                                     MuonHoleRecovery = getPublicTool("MuonSegmentRegionRecoveryTool_EMEO"),
-                                    MMRotCreator = "")
+                                    MuonRotCreator = "")
 
 
 def MuidErrorOptimisationTool(name='MuidErrorOptimisationTool', **kwargs):
