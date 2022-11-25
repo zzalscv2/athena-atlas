@@ -47,17 +47,15 @@ namespace ExpressionParsing {
       T_src get(const T_Cont &/*cont*/) const {
          T_src ret;
          assert( m_collectionProxy->Size() == 1);
-         // @TODO root/cling lock needed  ?
-         m_methodCall.call()->Execute((*m_collectionProxy)[0], ret); // @TODO thread safe ?
+         m_methodCall.call()->Execute((*m_collectionProxy)[0], ret);
          return ret;
       }
 
       /// Get the specified element of the vector provided by the container
       T_src get(const T_Cont &/*cont*/, std::size_t idx) const {
          T_src ret;
-         // @TODO root/cling lock needed  ?
          void *element_data=(*m_collectionProxy)[idx];
-         m_methodCall.call()->Execute(element_data, ret); // @TODO thread safe ?
+         m_methodCall.call()->Execute(element_data, ret);
          return ret;
       }
 
@@ -105,8 +103,8 @@ namespace ExpressionParsing {
       /// Get the scalar provided by the container
       T_src get(const T_Cont &/*cont*/) const {
          T_src ret;
-         // @TODO root/cling lock needed  ?
-         m_methodCall.call()->Execute(const_cast<void *>(m_data), ret);
+         void* data_nc ATLAS_THREAD_SAFE = const_cast<void *>(m_data);  // required by TMethodCall
+         m_methodCall.call()->Execute(data_nc, ret);
          return ret;
       }
 
@@ -114,8 +112,8 @@ namespace ExpressionParsing {
       T_src get(const T_Cont &/*cont*/, [[maybe_unused]] std::size_t idx) const {
          T_src ret;
          assert( idx==0);
-         // @TODO root/cling lock needed  ?
-         m_methodCall.call()->Execute(const_cast<void *>(m_data), ret);
+         void* data_nc ATLAS_THREAD_SAFE = const_cast<void *>(m_data);  // required by TMethodCall
+         m_methodCall.call()->Execute(data_nc, ret);
          return ret;
       }
 

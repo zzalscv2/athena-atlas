@@ -129,14 +129,16 @@ namespace ExpressionParsing {
   int TMethodWrapper::getIntValue(const SG::AuxElement *auxElement) const
   {
     long retLong;
-    m_methodCall.call()->Execute((void *)auxElement, retLong);
+    auto aux_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxElement*>(auxElement);  // required by TMethodCall
+    m_methodCall.call()->Execute(aux_nc, retLong);
     return (int) retLong;
   }
 
   double TMethodWrapper::getDoubleValue(const SG::AuxElement *auxElement) const
   {
     double retDouble;
-    m_methodCall.call()->Execute((void *)auxElement, retDouble);
+    auto aux_nc ATLAS_THREAD_SAFE = const_cast<SG::AuxElement*>(auxElement);  // required by TMethodCall
+    m_methodCall.call()->Execute(aux_nc, retDouble);
     return retDouble;
   }
 
