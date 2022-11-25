@@ -149,7 +149,7 @@ Geo2G4SolidFactory::Geo2G4SolidFactory() :
 {
 }
 
-G4VSolid *Geo2G4SolidFactory::Build (const GeoShape* geoShape, std::string name)
+G4VSolid *Geo2G4SolidFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoShape* geoShape, std::string name)
 {
   G4VSolid* theSolid(nullptr);
 
@@ -606,7 +606,7 @@ for(int i=0; i<nVertices; i++)
   return theSolid;
 }
 
-G4VSolid* Geo2G4SolidFactory::createLArWheelSolid(const std::string& name, const LArWheelSolidDef_t & lwsdef, const EMECData & emecData) const { // LArWheelSolid_t wheelType, int zside
+G4VSolid* Geo2G4SolidFactory::createLArWheelSolid ATLAS_NOT_THREAD_SAFE (const std::string& name, const LArWheelSolidDef_t & lwsdef, const EMECData & emecData) const { // LArWheelSolid_t wheelType, int zside
         LArWheelSolid_t wheelType = lwsdef.first;
         int zside = lwsdef.second;
 
@@ -621,7 +621,7 @@ G4VSolid* Geo2G4SolidFactory::createLArWheelSolid(const std::string& name, const
         return theLWS;
 }
 
-G4VSolid* Geo2G4SolidFactory::createLArWheelSliceSolid(const GeoUnidentifiedShape* customShape, const EMECData & emecData) const
+G4VSolid* Geo2G4SolidFactory::createLArWheelSliceSolid ATLAS_NOT_THREAD_SAFE (const GeoUnidentifiedShape* customShape, const EMECData & emecData) const
 {
   LArWheelSliceSolid *theLWS = new LArWheelSliceSolid(customShape->asciiData(),&emecData);
 
