@@ -24,7 +24,6 @@
 // ********************************************************************
 //
 //
-// $Id: G4mplAtlasTransportation.cxx 729653 2016-03-14 15:55:47Z jchapman $
 // GEANT4 tag $Name: geant4-09-03-patch-01 $
 //
 // ------------------------------------------------------------
@@ -93,6 +92,7 @@ G4mplAtlasTransportation::G4mplAtlasTransportation( const CustomMonopole* mpl, G
     fMomentumChanged( false ),
     //fEnergyChanged( false ), // Not used?
     fParticleIsLooping( false ),
+    fCurrentTouchableHandle(),  // Points to (G4VTouchable*) 0
     fGeometryLimitedStep( false ),
     fPreviousSftOrigin (0.,0.,0.),
     fPreviousSafety    ( 0.0 ),
@@ -132,9 +132,6 @@ G4mplAtlasTransportation::G4mplAtlasTransportation( const CustomMonopole* mpl, G
   // Create object which sets up the equation of motion for monopole
   // or usual matter
   fEquationSetup= G4mplEquationSetup::GetInstance();
-
-  static G4TouchableHandle nullTouchableHandle;  // Points to (G4VTouchable*) 0
-  fCurrentTouchableHandle = nullTouchableHandle;
 
   fEndGlobalTimeComputed  = false;
   fCandidateEndGlobalTime = 0;
@@ -408,7 +405,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
          G4double  startEnergy= track.GetKineticEnergy();
          G4double  endEnergy= fTransportEndKineticEnergy;
 
-         static G4int no_inexact_steps=0, no_large_ediff;
+         static std::atomic<G4int> no_inexact_steps=0, no_large_ediff;
          G4double absEdiff = std::fabs(startEnergy- endEnergy);
          if( absEdiff > CLHEP::perMillion * endEnergy )
            {
@@ -419,7 +416,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
            {
              if( std::fabs(startEnergy- endEnergy) > CLHEP::perThousand * endEnergy )
                {
-                 static G4int no_warnings= 0, warnModulo=1,  moduloFactor= 10;
+                 static std::atomic<G4int> no_warnings= 0, warnModulo=1,  moduloFactor= 10;
                  no_large_ediff ++;
                  if( (no_large_ediff% warnModulo) == 0 )
                    {
@@ -445,7 +442,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
                             << no_large_ediff << " times." << G4endl;
                      if( no_large_ediff == warnModulo * moduloFactor )
                        {
-                         warnModulo *= moduloFactor;
+                         warnModulo = warnModulo * moduloFactor;
                        }
                    }
                }
@@ -541,13 +538,15 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
 G4VParticleChange* G4mplAtlasTransportation::AlongStepDoIt( const G4Track& track,
                                                     const G4Step&  stepData )
 {
-  static G4int noCalls=0;
-  static const G4ParticleDefinition* fOpticalPhoton =
+#ifdef G4VERBOSE
+  static std::atomic<G4int> noCalls=0;
+  noCalls++;
+#endif
+
+  static const G4ParticleDefinition* const fOpticalPhoton =
            G4ParticleTable::GetParticleTable()->FindParticle("opticalphoton");
 
   //  G4cout << "SB:  G4mplAtlasTransportation:  AlongStepDoIt" << G4endl;
-
-  noCalls++;
 
   fParticleChange.Initialize(track) ;
 
@@ -756,8 +755,8 @@ G4VParticleChange* G4mplAtlasTransportation::PostStepDoIt( const G4Track& track,
   }         // endif ( fGeometryLimitedStep )
 
   const G4VPhysicalVolume* pNewVol = retCurrentTouchable->GetVolume() ;
-  const G4Material* pNewMaterial   = 0 ;
-  const G4VSensitiveDetector* pNewSensitiveDetector   = 0 ;
+  G4Material* pNewMaterial   = 0 ;
+  G4VSensitiveDetector* pNewSensitiveDetector   = 0 ;
 
   if( pNewVol != 0 )
   {
@@ -768,8 +767,8 @@ G4VParticleChange* G4mplAtlasTransportation::PostStepDoIt( const G4Track& track,
   // ( <const_cast> pNewMaterial ) ;
   // ( <const_cast> pNewSensitiveDetector) ;
 
-  fParticleChange.SetMaterialInTouchable( (G4Material *) pNewMaterial ) ;
-  fParticleChange.SetSensitiveDetectorInTouchable( (G4VSensitiveDetector *) pNewSensitiveDetector ) ;
+  fParticleChange.SetMaterialInTouchable( pNewMaterial ) ;
+  fParticleChange.SetSensitiveDetectorInTouchable( pNewSensitiveDetector ) ;
 
   const G4MaterialCutsCouple* pNewMaterialCutsCouple = 0;
   if( pNewVol != 0 )
@@ -836,8 +835,7 @@ G4mplAtlasTransportation::StartTracking(G4Track* aTrack)
   }
 
   // Make sure to clear the chord finders of all fields (ie managers)
-  static G4FieldManagerStore* fieldMgrStore= G4FieldManagerStore::GetInstance();
-  fieldMgrStore->ClearAllChordFindersState();
+  G4FieldManagerStore::GetInstance()->ClearAllChordFindersState();
 
   // Set up the Field Propagation to integrate time in case of magnetic charge
   G4double   particleMagCharge = mplParticle->MagneticCharge();

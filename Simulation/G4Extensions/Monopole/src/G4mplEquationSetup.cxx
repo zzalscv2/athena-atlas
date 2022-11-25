@@ -26,7 +26,6 @@
 /// \file Derived from example exoticphysics G4MonopolFieldSetup.cc
 /// \brief Implementation of the G4mplEquationSetup class
 //
-// $Id: G4mplEquationSetup.cxx 684372 2015-07-20 15:34:53Z jchapman $
 //
 //
 // G4mplEquationSetup is responsible for switching between two different
@@ -154,7 +153,7 @@ G4mplEquationSetup::InitialiseForField(G4FieldManager* fieldManager )
 
   const G4MagneticField* magField = dynamic_cast<const G4MagneticField*>(fieldManager->GetDetectorField());
 
-  G4MagneticField* magFieldNC = const_cast<G4MagneticField*>(magField);
+  G4MagneticField* magFieldNC ATLAS_THREAD_SAFE = const_cast<G4MagneticField*>(magField);  // fieldManager only allow const access despite being non-const
 
   delete fEquation;
   fEquation = new G4Mag_UsualEqRhs(magFieldNC);
@@ -189,7 +188,7 @@ void G4mplEquationSetup::SwitchStepperAndChordFinder(G4bool useMonopoleEq,
   //   - potentially after a change of 'field' object in this field manager (tbc)
 
   const G4MagneticField* magField = dynamic_cast<const G4MagneticField*>(fieldManager->GetDetectorField());
-  G4MagneticField* magFieldNC= const_cast<G4MagneticField*>(magField);
+  G4MagneticField* magFieldNC ATLAS_THREAD_SAFE = const_cast<G4MagneticField*>(magField);  // fieldManager only allow const access despite being non-const
 
   if ( magField )
     {
