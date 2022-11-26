@@ -118,11 +118,11 @@ then
   echo "Merging histograms"
   hadd NTUP_PHYS.root art_core_*/NTUP_PHYSVAL.root
   $idpvm_merge_script NTUP_PHYSVAL.root
-  python $ftag_merge_script --input art_core_*/* --pattern "*BTAG_PHYSVAL*" --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
+  python $ftag_merge_DQA/$ftag_merge_script --input art_core_*/* --pattern "*BTAG_PHYSVAL*" --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
   root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC\",\{\"IP2D\",\"IP3D\"\}\)
   hadd NTUP_MERGE_PHYSVAL.root NTUP_PHYSVAL.root NTUP_BTAG_MERGE_PHYSVAL.root ROC_NTUP_BTAG_MERGE_PHYSVAL.root
 else
-  python $ftag_merge_script --pattern "*BTAG_PHYSVAL*"  --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
+  python $ftag_merge_DQA/$ftag_merge_script --pattern "*BTAG_PHYSVAL*"  --output NTUP_BTAG_MERGE_PHYSVAL.root -d BTag
   root -l -b -q $ftag_merge_DQA/$ftag_roc_script\(\"ttbar\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"NTUP_BTAG_MERGE_PHYSVAL.root\",\"ROC\",\{\"IP2D\",\"IP3D\"\}\)
   hadd NTUP_MERGE_PHYSVAL.root NTUP_PHYSVAL.root NTUP_BTAG_MERGE_PHYSVAL.root ROC_NTUP_BTAG_MERGE_PHYSVAL.root
 fi
