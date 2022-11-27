@@ -34,6 +34,7 @@ def MuidMaterialAllocator( name='MuidMaterialAllocator', **kwargs):
     kwargs.setdefault("AggregateMaterial",True)
     kwargs.setdefault("AllowReordering",False)
     kwargs.setdefault("Extrapolator", getPublicTool('AtlasExtrapolator') )
+    kwargs.setdefault("TrackingGeometrySvc", "")
 
     cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
     kwargs.setdefault("TrackingGeometryReadKey",cond_alg.TrackingGeometryWriteKey)
