@@ -51,6 +51,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_add_test( ClassifiedTrackTaggerTool_test
                 SOURCES test/ClassifiedTrackTaggerTool_test.cxx
                 INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils EventPrimitives GaudiKernel MagFieldConditions TestTools TrkVertexFitterInterfaces xAODTracking InDetVKalVxInJetToolLib xAODJet
+                LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils EventPrimitives 
+                GaudiKernel MagFieldConditions TestTools TrkVertexFitterInterfaces xAODTracking InDetVKalVxInJetToolLib xAODJet
                 LOG_IGNORE_PATTERN "Booking|ClassIDSvc|weight file|create data set info" )
 atlas_install_joboptions( share/*.txt )
