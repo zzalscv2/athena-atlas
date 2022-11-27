@@ -115,6 +115,9 @@ if hasattr(runArgs, "preExec"):
 ## Pre-include
 if hasattr(runArgs, "preInclude"):
     for fragment in runArgs.preInclude:
+        if '/' not in fragment:
+            atlasG4log.warning('Trying to use CA-based preInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)
 
 ## Include common skeleton after the preExec/preInclude
@@ -280,6 +283,9 @@ if athenaCommonFlags.PoolHitsOutput():
 ## Post-include
 if hasattr(runArgs, "postInclude"):
     for fragment in runArgs.postInclude:
+        if '/' not in fragment:
+            atlasG4log.warning('Trying to use CA-based postInclude, trying to fallback to legacy equivalent')
+            fragment = f"{fragment.replace('.', '/')}.py"
         include(fragment)
 
 if hasattr(runArgs, "outputEVNT_TRFile"):
