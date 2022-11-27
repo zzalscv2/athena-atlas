@@ -16,6 +16,8 @@
 #include "MuonRIO_OnTrack/MuonClusterOnTrack.h"
 #include "MuonRecToolInterfaces/IMuonClusterOnTrackCreator.h"
 #include "TrkParameters/TrackParameters.h"
+#include "NSWCalibTools/INSWCalibTool.h"
+#include "MMClusterization/IMMClusterBuilderTool.h"
 #include "TrkPrepRawData/PrepRawDataCLASS_DEF.h"
 
 /** @class MuonClusterOnTrackCreator
@@ -65,18 +67,25 @@ namespace Muon {
         virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override;
 
 
-        /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a predicted Trk::TrackParameter.
+        /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a prediction of the global position and direction.
             @param RIO Trk::PrepRawData object to be calibrated
             @param GP  Predicted intersect position of the muon with the measurement plane
+            @param GD  Predicted direction at the intersect position of the muon with the measurement plane
             @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
             The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
         */
-        virtual const MuonClusterOnTrack* calibratedCluster(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const override;
-
+        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
+        
      
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
+        ToolHandle<Muon::INSWCalibTool> m_calibToolNSW{this, "NSWCalibTool", ""};
+        ToolHandle<Muon::IMMClusterBuilderTool> m_clusterBuilderToolMM{this, "SimpleMMClusterBuilder", "Muon::SimpleMMClusterBuilderTool/SimpleMMClusterBuilderTool"};
+
+        const MuonClusterOnTrack* calibratedClusterMMG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
+        const MuonClusterOnTrack* calibratedClusterSTG(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
+        
         bool m_doFixedErrorTgcEta;
         bool m_doFixedErrorRpcEta;
         bool m_doFixedErrorCscEta;

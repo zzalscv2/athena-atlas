@@ -119,6 +119,18 @@ validation_jpsi = [
 
 validationTP_jpsiee = ['HLT_e5_lhtight_L1EM3']
 
+monitoring_electron_cosmic=['HLT_e5_etcut_L1EM3']
+monitoring_photon_cosmic=['HLT_g3_etcut_LArPEB_L1EM3']
+monitoring_bootstrap_cosmic = {
+    'HLT_g3_etcut_LArPEB_L1EM3' : 'HLT_g3_etcut_LArPEB_L1EM3'
+     }
+
+monitoring_electron_hi=['HLT_e5_etcut_L1EM3']
+monitoring_photon_hi=['HLT_g18_etcut_L1EM10']
+monitoring_bootstrap_hi = {
+    'HLT_g18_etcut_L1EM10' : 'HLT_g18_etcut_L1EM10'
+     }
+
 
 validation_Zee = [
         'HLT_e26_lhtight_e15_etcut_Zee_L1EM22VHI',

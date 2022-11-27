@@ -339,19 +339,12 @@ def MuonChamberHoleRecoveryToolCfg(flags, name="MuonChamberHoleRecoveryTool", **
         kwargs.setdefault("CscPrepDataContainer","")
     
     kwargs.setdefault("ClusterRotCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
-    if flags.Detector.GeometryMM:
-        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MMClusterOnTrackCreatorCfg
-        kwargs.setdefault("MmClusterRotCreator", result.popToolsAndMerge(MMClusterOnTrackCreatorCfg(flags)))
     
     if not flags.Detector.GeometrysTGC:
         kwargs.setdefault("sTgcPrepDataContainer","")
     
     if not flags.Detector.GeometryMM:
         kwargs.setdefault("MMPrepDataContainer","")
-    
-    if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
-        from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MMClusterOnTrackCreatorCfg
-        kwargs.setdefault("MmClusterRotCreator", result.popToolsAndMerge(MMClusterOnTrackCreatorCfg(flags)))
 
     kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')    
     kwargs.setdefault("EDMPrinter", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))

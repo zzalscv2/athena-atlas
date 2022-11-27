@@ -180,7 +180,7 @@ namespace Rec {
             "",
         };
 
-        ToolHandle<Muon::IMuonClusterOnTrackCreator> m_mmRotCreator{this, "MMRotCreator", ""};
+        ToolHandle<Muon::IMuonClusterOnTrackCreator> m_muClusterRotCreator{this, "MuonRotCreator", ""};
 
         ToolHandle<Trk::IExtrapolator> m_extrapolator{
             this,

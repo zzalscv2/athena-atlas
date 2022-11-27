@@ -529,6 +529,7 @@ class JetMonAlgSpec(ConfigDict):
         args.setdefault('failureOnMissingContainer', True)
         args.setdefault('onlyPassingJets', True)
         args.setdefault('eventFiresAnyJetChain',False)
+        args.setdefault('isExpressStreamJob', False)
         ConfigDict.__init__(self, defaultPath=defaultPath, TriggerChain=TriggerChain, **args)
         tmpL = self.FillerTools
         self.FillerTools = []
@@ -546,6 +547,7 @@ class JetMonAlgSpec(ConfigDict):
         alg.FailureOnMissingContainer = self.failureOnMissingContainer
         alg.OnlyPassingJets = self.onlyPassingJets
         alg.EventFiresAnyJetChain = self.eventFiresAnyJetChain
+        alg.isExpressStreamJob = self.isExpressStreamJob
 
         path = self.defaultPath
         tools = []

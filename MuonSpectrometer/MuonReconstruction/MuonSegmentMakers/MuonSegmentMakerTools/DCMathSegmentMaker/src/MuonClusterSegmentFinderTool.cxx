@@ -262,8 +262,7 @@ namespace Muon {
         ATH_CHECK(m_trackCleaner.retrieve());
         ATH_CHECK(m_trackSummary.retrieve());
         if (m_idHelperSvc->recoMM() || m_idHelperSvc->recosTgc()) {
-            ATH_CHECK(m_stgcClusterCreator.retrieve());
-            ATH_CHECK(m_mmClusterCreator.retrieve());
+            ATH_CHECK(m_muonClusterCreator.retrieve());
         }
         ATH_MSG_DEBUG(" Max cut " << m_maxClustDist);
         return StatusCode::SUCCESS;
@@ -1327,11 +1326,11 @@ namespace Muon {
 
             if (m_idHelperSvc->isMM(hitID)) {
                 // build a  new MM cluster on track with correct position
-                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_mmClusterCreator->calibratedCluster(*clus->prepRawData(), intersect.position, seed.dir())};
+                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_muonClusterCreator->correct(*clus->prepRawData(), intersect.position, seed.dir())};
                 calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));
             } else if (m_idHelperSvc->issTgc(hitID)) {
                 // build a  new sTGC cluster on track with correct position
-                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_stgcClusterCreator->calibratedCluster(*clus->prepRawData(), intersect.position, seed.dir())};
+                std::unique_ptr<const Muon::MuonClusterOnTrack> newClus {m_muonClusterCreator->correct(*clus->prepRawData(), intersect.position, seed.dir())};
                 calibratedClusters.emplace_back(seed.newCalibClust(std::move(newClus)));                             
             }
         }

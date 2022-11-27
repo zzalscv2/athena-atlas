@@ -73,6 +73,12 @@ def fromRunArgs(runArgs):
         ConfigFlags.DQ.doMonitoring = True
         log.info("---------- Configured HIST_R2A output")
 
+    if hasattr(runArgs, 'outputDAOD_IDTIDEFile'):
+        flagString = 'Output.DAOD_IDTIDEFileName'
+        ConfigFlags.addFlag(flagString, runArgs.outputDAOD_IDTIDEFile)
+        ConfigFlags.Output.doWriteDAOD = True
+        log.info("---------- Configured DAOD_IDTIDE output")
+
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep=ProductionStep.Reconstruction
 
@@ -110,6 +116,14 @@ def fromRunArgs(runArgs):
     # Main reconstruction steering
     from RecJobTransforms.RecoSteering import RecoSteering
     cfg = RecoSteering(ConfigFlags)
+
+    # Performance DPDs 
+    cfg.flagPerfmonDomain('PerfDPD')
+    # IDTIDE
+    for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DAOD_IDTIDEFileName" in key)]:
+        from DerivationFrameworkInDet.IDTIDE import IDTIDECfg
+        cfg.merge(IDTIDECfg(ConfigFlags))
+        log.info("---------- Configured IDTIDE perfDPD")
 
     # Special message service configuration
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg

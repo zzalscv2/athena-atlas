@@ -122,7 +122,7 @@ class TrigEgammaMonAlgBuilder:
   def get_monitoring_mode(self):
 
     self.__logger.info("TrigEgammaMonAlgBuilder.get_monitoring_mode()")
-    self.data_type = dqflags.monManDataType()
+    self.data_type = dqflags.monManDataType()    
     if self.data_type == 'monteCarlo': 
       self.mc_mode = True
       return True
@@ -167,9 +167,11 @@ class TrigEgammaMonAlgBuilder:
 
 
 
+
+
   def setDefaultProperties(self):
    
-    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import monitoring_bootstrap, monitoring_photon, monitoring_electron, monitoringTP_electron, monitoring_topo, validation_photon , validation_electron, validationTP_electron, validation_jpsi, validationTP_jpsiee, monitoring_tags, validationTP_electron_eEM 
+    from TrigEgammaMonitoring.TrigEgammaMonitCategoryMT import monitoring_bootstrap, monitoring_photon, monitoring_electron, monitoringTP_electron, monitoring_topo, validation_photon , validation_electron, validationTP_electron, validation_jpsi, validationTP_jpsiee, monitoring_tags, validationTP_electron_eEM, monitoring_photon_cosmic, monitoring_electron_cosmic, monitoring_bootstrap_cosmic, monitoring_photon_hi, monitoring_electron_hi, monitoring_bootstrap_hi
     
     if self.pp_mode:
         self.electronList = monitoring_electron
@@ -181,12 +183,21 @@ class TrigEgammaMonAlgBuilder:
     elif self.mc_mode:
         self.electronList = validation_electron # + validation_Zee (no T&P chains yet)
         self.photonList   = validation_photon
-        self.bootstrapMap = {}
+        self.bootstrapMap = monitoring_bootstrap
         self.tpList       = validationTP_electron + validationTP_electron_eEM 
         self.jpsiList     = validation_jpsi
         self.jpsitagItems = validationTP_jpsiee
         self.tagItems     = monitoring_tags
         self.topoList     = monitoring_topo
+    elif self.cosmic_mode:
+        self.electronList = monitoring_electron_cosmic 
+        self.photonList   = monitoring_photon_cosmic
+        self.bootstrapMap = monitoring_bootstrap_cosmic
+    elif self.HI_mode or self.pPb_mode:
+        self.electronList = monitoring_electron_hi
+        self.photonList   = monitoring_photon_hi
+        self.bootstrapMap = monitoring_bootstrap_hi
+
 
 
   #
@@ -424,6 +435,8 @@ class TrigEgammaMonAlgBuilder:
       self.phMonAlg.ForcePidSelection=True
       self.phMonAlg.DoUnconverted=False
       self.phMonAlg.DoEmulation = False
+
+
 
       if self.emulator:
         self.phMonAlg.DoEmulation = True
