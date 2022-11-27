@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -34,10 +34,10 @@ namespace LArSamples {
     virtual ~Chi2Calc() { }
 
     TVectorD deltas(const AbsShape& data, const AbsShape& reference, CovMatrix& errors, const ScaledErrorData* shapeError = 0, 
-                    int lwb = -1, int upb = -1, bool noDataError = false) const;
+                    int lwb = -1, int upb = -1, bool noDataError = false);
 
     double chi2(const AbsShape& data, const AbsShape& reference, const ScaledErrorData* shapeError = 0, 
-                int lwb = -1, int upb = -1) const;
+                int lwb = -1, int upb = -1);
 
     // From AbsShape
     double scalarProduct(const TVectorD& values1, const TVectorD& values2, const CovMatrix& invCovMat) const;
@@ -55,7 +55,7 @@ namespace LArSamples {
     
     int m_pars;
     
-    mutable int m_lwb, m_upb;
+    int m_lwb, m_upb;
   };
 }
 #endif

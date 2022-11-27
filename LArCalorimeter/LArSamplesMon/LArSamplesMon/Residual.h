@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -46,8 +46,6 @@ namespace LArSamples
       
       int lwb() const { return m_deltas.GetLwb(); }
       int upb() const { return m_deltas.GetUpb(); }
-
-      static short comparisonSample;
 
       static bool test();
     

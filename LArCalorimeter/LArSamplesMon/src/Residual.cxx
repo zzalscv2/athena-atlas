@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/Residual.h"
@@ -20,10 +20,7 @@ using std::endl;
 using namespace LArSamples;
 
 
-short Residual::comparisonSample = 0;
-
-
-Residual::Residual(const TVectorD& deltas, int run, int event, double adcMax, double time) 
+Residual::Residual(const TVectorD& deltas, int run, int event, double adcMax, double time)
   : m_deltas(deltas), m_run(run), m_event(event), 
     m_adcMax(adcMax), m_time(time) 
 {
@@ -74,7 +71,7 @@ bool ResidualCompare::operator()(const Residual& r1, const Residual& r2) const
   // both true, which will confuse std::sort and cause it to crash... so add this safety (lesson of 2 days of debugging)
   // Note: if we write a<<b iff a < b - epsilon, then << is indeed a strict weak ordering so all is fine. It does mean there
   // will be "sorting errors", i.e. residuals that differ by less than epsilon may be sorted the wrong way. But that's fine for our usage.
-  static double epsilon = 1E-5;
+  const double epsilon = 1E-5;
 //   cout << "Comparing sample " << m_sampling << ", = " 
 //        << (m_sampling == r1.upb() + 1 ? r1.time() : r1.scaledDelta(m_sampling)) << " >/< "
 //        << (m_sampling == r2.upb() + 1 ? r2.time() : r2.scaledDelta(m_sampling)) << " " 

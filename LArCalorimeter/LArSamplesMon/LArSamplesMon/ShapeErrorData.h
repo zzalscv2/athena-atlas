@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -56,7 +56,7 @@ namespace LArSamples {
     ShapeErrorData* add(const ShapeErrorData& other) const;
   
     ShapeErrorType shapeErrorType() const { return m_shapeErrorType; }
-    void setShapeErrorType(ShapeErrorType type) const { m_shapeErrorType = type; }
+    void setShapeErrorType(ShapeErrorType type) { m_shapeErrorType = type; }
     
     private:
 
@@ -64,7 +64,7 @@ namespace LArSamples {
     CovMatrix m_xiErr, m_xipErr;
     double m_tbar;
     int m_n;
-    mutable ShapeErrorType m_shapeErrorType;
+    ShapeErrorType m_shapeErrorType;
   };
 }
 
