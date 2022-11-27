@@ -8,7 +8,7 @@
  * @brief Simple unit test for the ClassifiedTrackTaggerTool. Adopted from InDetTrkInJetType_test.cxx (Scott Synder, synder@bnl.gov)
  */
 
-
+#include "TrkEventPrimitives/TrkObjectCounter.h"
 #undef NDEBUG
 #include "JetTagTools/ClassifiedTrackTaggerTool.h"
 #include "xAODTracking/Vertex.h"
