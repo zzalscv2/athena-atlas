@@ -269,7 +269,7 @@ StatusCode LArRamps2Ntuple::stop() {
        ATH_MSG_WARNING("Failed to dyn-cast to ILArRamp to LArRampComplete. Cannot apply corrections");
        m_applyCorr=false;
      }
-     if (!rampComplete->correctionsApplied()) {
+     if (rampComplete and !rampComplete->correctionsApplied()) {
 	rampComplete_nc=const_cast<LArRampComplete*>(rampComplete);
 	sc=rampComplete_nc->applyCorrections();
 	if (sc.isFailure()) {
