@@ -147,14 +147,23 @@ namespace CP
                 if (sgCode != CorrectionCode::Ok) return sgCode;
             }
 
-            // SAF, and Calo specifics, reset to original pT
-            if (!(mu.muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) && !(mu.muonType() == xAOD::Muon::CaloTagged) && !(mu.muonType() == xAOD::Muon::SegmentTagged)) 
+            // Override combined momentum for special cases
+            if (std::abs(muonObj.ME.calib_pt) == 0) muonObj.CB.calib_pt = muonObj.ID.calib_pt;
+            if (std::abs(muonObj.ID.calib_pt) == 0) muonObj.CB.calib_pt = muonObj.ME.calib_pt;
+
+            // Only for combined set it
+            if (mu.muonType() == xAOD::Muon::Combined) 
             {
                 mu.setP4(muonObj.CB.calib_pt * GeVtoMeV, muonObj.CB.eta, muonObj.CB.phi);
             }
 
+
             dec_idPt(mu) = muonObj.ID.calib_pt * GeVtoMeV;
             dec_mePt(mu) = muonObj.ME.calib_pt * GeVtoMeV;
+
+            ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_ID: " << acc_id_pt(mu));
+            ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_MS: " << acc_me_pt(mu));
+            ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_CB: " << mu.pt());
 
             return CorrectionCode::Ok;
         }
