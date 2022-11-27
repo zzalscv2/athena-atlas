@@ -12,7 +12,6 @@
 #include "CaloIdentifier/CaloIdManager.h"
 
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
 #include "LArRawEvent/LArDigitContainer.h"
@@ -45,7 +44,6 @@ StatusCode LArNNRawChannelBuilder::initialize() {
     const LArOnline_SuperCellID* ll;
     ATH_CHECK(detStore()->retrieve(ll, "LArOnline_SuperCellID"));
     m_onlineId = (const LArOnlineID_Base*)ll;
-    ATH_CHECK( detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
   }
   else {
     const LArOnlineID* ll;

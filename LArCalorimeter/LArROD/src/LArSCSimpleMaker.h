@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARROD_LARSCSIMPLEMAKER_H
@@ -81,8 +81,9 @@ private:
   // compensate for BCID effect
   Gaudi::Property<bool> m_addBCID{this,"addBCID",true,"Add BCID compensation back to cells prior to sum them up"};
 
-  /// Geometry manager.
-  const CaloSuperCellDetDescrManager* m_sem_mgr;
+  // Super Cell DD manager key
+  SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{
+    this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager","SG key of the resulting CaloSuperCellDetDescrManager"};
 
   /// Entry point for calorimeter ID helpers.
   const CaloIdManager* m_calo_id_manager;

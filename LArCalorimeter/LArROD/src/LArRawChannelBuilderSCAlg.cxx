@@ -12,7 +12,7 @@
 #include <cmath>
 
 LArRawChannelBuilderSCAlg::LArRawChannelBuilderSCAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthReentrantAlgorithm(name, pSvcLocator), m_sem_mgr(0) {}
+  AthReentrantAlgorithm(name, pSvcLocator) {}
   
 StatusCode LArRawChannelBuilderSCAlg::initialize() {
   ATH_CHECK(m_digitKey.initialize());	 
@@ -24,8 +24,8 @@ StatusCode LArRawChannelBuilderSCAlg::initialize() {
   ATH_CHECK(m_cablingKey.initialize() );
  
   ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnline_SuperCellID"));
-  ATH_CHECK(detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
-  
+  ATH_CHECK(m_caloSuperCellMgrKey.initialize());  
+
   return StatusCode::SUCCESS;
 }     
 
@@ -63,7 +63,9 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
   const ILArShape* shapes=*shapeHdl;
 
   SG::ReadCondHandle<LArOnOffIdMapping> cabling(m_cablingKey,ctx);
-  
+
+  SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,ctx};
+  const CaloSuperCellDetDescrManager* caloMgr = *caloSuperCellMgrHandle;
 
   //Loop over digits:
   for (const LArDigit* digit : *inputContainer) {
@@ -201,7 +203,7 @@ StatusCode LArRawChannelBuilderSCAlg::execute(const EventContext& ctx) const {
     CaloCell* ss = dataPool.nextElementPtr();
     Identifier offId = cabling->cnvToIdentifier(id);
     
-    const CaloDetDescrElement* dde = m_sem_mgr->get_element (offId);
+    const CaloDetDescrElement* dde = caloMgr->get_element (offId);
     ss->setCaloDDE(dde);
     ss->setEnergy(E);
     ss->setTime(tau);

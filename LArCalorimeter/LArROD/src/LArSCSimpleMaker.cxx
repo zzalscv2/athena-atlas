@@ -31,7 +31,6 @@
 LArSCSimpleMaker::LArSCSimpleMaker(const std::string& name,
                                    ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator),
-    m_sem_mgr(0),
     m_calo_id_manager(0)
 {
 }
@@ -40,7 +39,7 @@ StatusCode LArSCSimpleMaker::initialize(){
 	ATH_CHECK( m_cellContainerKey.initialize() );
 	ATH_CHECK( m_sCellContainerKey.initialize() );
 	ATH_CHECK( m_scidtool.retrieve() );
-	ATH_CHECK( detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
+	ATH_CHECK( m_caloSuperCellMgrKey.initialize() );
 	ATH_CHECK( detStore()->retrieve (m_calo_id_manager, "CaloIdManager") );
 	ATH_CHECK( m_noise_per_cell_Key.initialize(m_compNoise) );
   ATH_CHECK( m_bcidAvgKey.initialize(m_addBCID) );
@@ -181,12 +180,15 @@ StatusCode LArSCSimpleMaker::execute(const EventContext& context) const
   SG::WriteHandle<CaloCellContainer> scellContainerHandle( m_sCellContainerKey, context);
   auto superCellContainer = std::make_unique<CaloCellContainer> ();
 
+  SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey, context};
+  const CaloSuperCellDetDescrManager* caloMgr = *caloSuperCellMgrHandle;
+
   superCellContainer->reserve(energies.size());
 
   std::default_random_engine generator;
   for (unsigned int i=0; i < energies.size(); i++) {
 
-    const CaloDetDescrElement* dde = m_sem_mgr->get_element (i);
+    const CaloDetDescrElement* dde = caloMgr->get_element (i);
     if (!dde) {
       // ATH_MSG_WARNING( " Not valid DDE, hash index =  "<< i  );
       continue;
@@ -203,7 +205,7 @@ StatusCode LArSCSimpleMaker::execute(const EventContext& context) const
 
     //CaloCell* ss = dataPool.nextElementPtr();
     CaloCell* ss = new CaloCell();
-    ss->setCaloDDE( m_sem_mgr->get_element (i));
+    ss->setCaloDDE( caloMgr->get_element (i));
     ss->setEnergy( energies[i] );
     uint16_t prov (0);
     if ( timeDef[i]  ){
