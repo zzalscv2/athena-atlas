@@ -33,10 +33,10 @@ template <class TYPE> class SvcFactory;
 struct ItemModifier
 {
   EventID::number_type runnbr;
-  uint64_t             evtnbr;
+  EventID::event_number_t evtnbr;
   EventID::number_type timestamp;
   EventID::number_type lbknbr;
-  EventID::number_type nevts;
+  EventID::event_number_t nevts;
   int mod_bit;
   ItemModifier() :
     runnbr(0),
@@ -88,7 +88,7 @@ class EvtIdModifierSvc
 
   /** @brief return the current evt-nbr (after modification)
    */
-  virtual uint64_t event_number() const;
+  virtual EventID::event_number_t event_number() const;
 
   /** @brief return the current time-stamp (after modification)
    */
@@ -140,13 +140,13 @@ class EvtIdModifierSvc
   EvtIdModifierSvc();
 
   /// first event number at which we begin to modify event ids
-  unsigned int m_firstEvtIdx;
+  EventID::event_number_t m_firstEvtIdx;
 
   /// total number of events inspected so-far
-  unsigned int m_allEvtsCounter;
+  EventID::event_number_t m_allEvtsCounter;
 
   /// lumi block counter (per evt)
-  unsigned int m_evtCounter;
+  EventID::event_number_t m_evtCounter;
 
   /// (prop) list of n-plets
   /// (run-nbr, evt-nbr, time-stamp, lbk-nbr, nbr-of-events-per-lbk, mod-bit)
