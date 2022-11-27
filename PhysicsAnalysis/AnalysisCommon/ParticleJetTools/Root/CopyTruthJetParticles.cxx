@@ -56,7 +56,7 @@ CopyTruthJetParticles::CopyTruthJetParticles(const std::string& name)
 
   declareProperty("MCTruthClassifier", m_classif);
 
-  declareProperty("FSRPhotonCone", m_photonCone);
+  declareProperty("FSRPhotonCone", m_photonCone = -1.0);
 
   declareProperty("VetoPDG_IDs", m_vetoPDG_IDs, "List of PDG IDs (python list) to veto.  Will ignore these and all children of these.");
 
@@ -70,11 +70,11 @@ StatusCode CopyTruthJetParticles::initialize() {
   ATH_CHECK(m_outTruthPartKey.initialize());
 
   // Ensure consistency in the photon dressing treatment
-  if (m_photonCone>0 && !m_dressingName.empty()){
-    ATH_MSG_ERROR("Requested both dR and decoration based photon dressing. This is unphysical; please choose one.");
+  if (m_photonCone>0) {
+    ATH_MSG_ERROR("The FSRPhotonCone option is not supported anymore. Please use the TruthDressingTool"); 
     return StatusCode::FAILURE;
   }
-
+  
   return StatusCode::SUCCESS;
 }
 
@@ -126,21 +126,6 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp, int 
   // for SM jets: ignore dark particles - probably unnecessary bc of status requirement above
   if (!m_includeDark && (abs(tp->pdgId()) >= 4.9e6) && (abs(tp->pdgId()) < 5e6)) return false;
   // ----------------------------------- //
-
-  if(!m_includePromptLeptons && abs(pdgid)==22 && MCTruthClassifier::isPrompt(tc_res)) {
-    // Only exclude photons within deltaR of leptons (if m_photonCone<0, exclude all photons)
-    if(m_photonCone>0) {
-      for(const auto& lep : promptLeptons) {
-          double deltaR = tp->p4().DeltaR(lep->p4());
-          // if photon within deltaR of lepton, remove along with lepton
-          if( deltaR < m_photonCone ) {
-            ATH_MSG_VERBOSE("Veto photon with pt " << tp->pt() << " with dR=" << deltaR
-                       << " near to a " << lep->pdgId() << " with pt " << lep->pt());
-            return false;
-          }
-      }
-    }
-  }
 
   if (!m_includePromptPhotons && MC::PID::isPhoton(pdgid) && tp->hasProdVtx()){
     //ParticleOrigin orig = getPartOrigin(tp, originMap);

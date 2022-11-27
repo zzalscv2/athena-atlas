@@ -453,7 +453,7 @@ FinalState fs(Cuts::abseta < 5.0);
 FastJets(fs, 0.4, ANTIKT, JetAlg::Muons::NONE, JetAlg::Invisibles::NONE) 
 ```
 
-### AntiKt4TruthWZJets
+### AntiKt4TruthDressedWZJets
 
 ```cpp
 // Photons
