@@ -346,7 +346,11 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
       return nullptr;
     }
   }
-
+  //if caloDD is still null, we;re in trouble because it gets dereferenced after this
+  if(!caloDDM){
+    ATH_MSG_WARNING("caloDDM is a null pointer in CaloTrackingGeometryBuilder");
+    return nullptr;
+  }
   const std::vector<Trk::TrackingVolume*>* lArVolumes = m_lArVolumeBuilder->trackingVolumes(*caloDDM);
 
   ATH_MSG_INFO( lArVolumes->size() << " volumes retrieved from " << m_lArVolumeBuilder.name() );   
