@@ -20,7 +20,7 @@ atlas_add_library( CaloRecLib
    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent CaloGeoHelpers
    CaloIdentifier AthenaBaseComps AthenaKernel CxxUtils AthenaPoolUtilities
    Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib
-   StoreGateLib LArToolsLib LumiBlockCompsLib AthenaMonitoringKernelLib
+   StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions
    LArRawConditions FourMom LumiBlockData )

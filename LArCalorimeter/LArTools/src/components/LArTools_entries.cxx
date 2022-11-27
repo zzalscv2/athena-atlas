@@ -1,4 +1,4 @@
-#include "LArTools/LArHVPathologyDbTool.h"
+#include "../LArHVPathologyDbTool.h"
 
 
 DECLARE_COMPONENT( LArHVPathologyDbTool )

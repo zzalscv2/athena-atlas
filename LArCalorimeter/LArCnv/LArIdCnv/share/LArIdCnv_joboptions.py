@@ -2,8 +2,6 @@ include.block("LArIdCnv/LArIdCnv_joboptions.py")
 #
 #  Joboptions for the loading of the of LArID converters
 #
-# add the LArCablingService DLL:
-include( "LArTools/LArTools_jobOptions.py" )
+include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 
-# DLLs 
-theApp.Dlls += [ "LArIdCnv" ]
+
