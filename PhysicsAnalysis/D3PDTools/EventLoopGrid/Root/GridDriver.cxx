@@ -417,9 +417,9 @@ doManagerStep (Detail::ManagerData& data) const
            sample != data.job->sampleHandler().end(); ++sample) {
         std::string sampleOutDs = getStrValues(gangaMsg, (*sample)->name() + ": ");
         if (*sampleOutDs.rbegin() == '\n')
-          sampleOutDs  = sampleOutDs.substr(0, sampleOutDs.size()-1);
+          sampleOutDs.pop_back();
         if (*sampleOutDs.rbegin() == ' ')
-          sampleOutDs  = sampleOutDs.substr(0, sampleOutDs.size()-1);
+          sampleOutDs.pop_back();
 
         //Create a sample for each output and add it to that output's handler 
         for (EL::Job::outputIter out=data.job->outputBegin();
