@@ -1,8 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from ISF_Config.ISF_jobProperties import ISF_Flags
-
-
 def FastCaloSimFactory(name="FastCaloSimFactory", **kwargs):
 
     from AthenaCommon.Logging import logging
@@ -17,26 +14,13 @@ def FastCaloSimFactory(name="FastCaloSimFactory", **kwargs):
     ToolSvc += niPropagator
     mlog.info("configure nono-interacting propagator finished")
 
-    from TrkExTools.TrkExToolsConf import Trk__Navigator
-    navigator = None
-
     from AthenaCommon.AlgSequence import AthSequencer
     condSeq = AthSequencer("AthCondSeq")
 
-    if ISF_Flags.UseTrackingGeometryCond:
-        if not hasattr(condSeq, 'AtlasTrackingGeometryCondAlg'):
-            from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlg import (
-                ConfiguredTrackingGeometryCondAlg)
-            TrkGeoCondAlg = ConfiguredTrackingGeometryCondAlg(
-                'AtlasTrackingGeometryCondAlg')
-            condSeq += TrkGeoCondAlg
-
-        navigator = Trk__Navigator(
-            name="FCSNavigator",
-            TrackingGeometryKey=condSeq.AtlasTrackingGeometryCondAlg.TrackingGeometryWriteKey)
-    else:
-        navigator = Trk__Navigator(name="FCSNavigator", TrackingGeometryKey="")
-
+    # use NI navigator method checks for 
+    # ISF_Flags.UseTrackingGeometryCond
+    from TrkExTools.TimedExtrapolator import getNINavigator
+    navigator =  getNINavigator (name="FCSNavigator")
     ToolSvc += navigator
 
     mlog.info("now configure the TimedExtrapolator...")
