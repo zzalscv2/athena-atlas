@@ -213,25 +213,25 @@ namespace ExpressionParsing {
       }
    }
 
-  int SGxAODProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int SGxAODProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadInt(ctx));
   }
 
-  double SGxAODProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double SGxAODProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadDouble(ctx));
   }
 
-  std::vector<int> SGxAODProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> SGxAODProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadVecInt(ctx));
   }
 
-  std::vector<double> SGxAODProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
+  std::vector<double> SGxAODProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     return dump(varname,getAccessor(ctx, varname).loadVec(ctx));

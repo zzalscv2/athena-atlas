@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -58,23 +58,23 @@ namespace ExpressionParsing {
     return result;
   }
 
-  int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadIntVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadIntVariableFromString(varname);
   }
 
-  double MultipleProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double MultipleProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadDoubleVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadDoubleVariableFromString(varname);
   }
 
-  std::vector<int> MultipleProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> MultipleProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadVecIntVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadVecIntVariableFromString(varname);
   }
 
-  std::vector<double> MultipleProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
+  std::vector<double> MultipleProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
   {
-    return m_varnameToProxyLoader[varname]->loadVecDoubleVariableFromString(varname);
+    return m_varnameToProxyLoader.at(varname)->loadVecDoubleVariableFromString(varname);
   }
 }

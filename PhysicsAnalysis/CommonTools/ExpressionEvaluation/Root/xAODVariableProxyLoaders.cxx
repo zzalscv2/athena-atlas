@@ -288,22 +288,22 @@ namespace ExpressionParsing {
     return VT_UNK;
   }
 
-  int xAODElementProxyLoader::loadIntVariableFromString(const std::string &varname)
+  int xAODElementProxyLoader::loadIntVariableFromString(const std::string &varname) const
   {
-    return m_accessorCache[varname]->getIntValue(m_auxElement);
+    return m_accessorCache.at(varname)->getIntValue(m_auxElement);
   }
 
-  double xAODElementProxyLoader::loadDoubleVariableFromString(const std::string &varname)
+  double xAODElementProxyLoader::loadDoubleVariableFromString(const std::string &varname) const
   {
-    return m_accessorCache[varname]->getDoubleValue(m_auxElement);
+    return m_accessorCache.at(varname)->getDoubleValue(m_auxElement);
   }
 
-  std::vector<int> xAODElementProxyLoader::loadVecIntVariableFromString(const std::string &)
+  std::vector<int> xAODElementProxyLoader::loadVecIntVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODElementProxyLoader can't load vector types");
   }
 
-  std::vector<double> xAODElementProxyLoader::loadVecDoubleVariableFromString(const std::string &)
+  std::vector<double> xAODElementProxyLoader::loadVecDoubleVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODElementProxyLoader can't load vector types");
   }
@@ -360,25 +360,25 @@ namespace ExpressionParsing {
     return VT_UNK;
   }
 
-  int xAODVectorProxyLoader::loadIntVariableFromString(const std::string &)
+  int xAODVectorProxyLoader::loadIntVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODVectorProxyLoader can't load scalar types");
   }
 
-  double xAODVectorProxyLoader::loadDoubleVariableFromString(const std::string &)
+  double xAODVectorProxyLoader::loadDoubleVariableFromString(const std::string &) const
   {
     throw std::runtime_error("xAODVectorProxyLoader can't load scalar types");
   }
 
-  std::vector<int> xAODVectorProxyLoader::loadVecIntVariableFromString(const std::string &varname)
+  std::vector<int> xAODVectorProxyLoader::loadVecIntVariableFromString(const std::string &varname) const
   {
-    return m_accessorCache[varname]->getVecIntValue(m_auxVectorData);
+    return m_accessorCache.at(varname)->getVecIntValue(m_auxVectorData);
   }
 
-  std::vector<double> xAODVectorProxyLoader::loadVecDoubleVariableFromString(const std::string &varname)
-  {
+  std::vector<double> xAODVectorProxyLoader::loadVecDoubleVariableFromString(const std::string &varname) const
+  {/*
      // Check whether we have an accessor already:
-     std::map< std::string, BaseAccessorWrapper* >::iterator itr;
+     std::map< std::string, BaseAccessorWrapper* >::const_iterator itr;
      if( ( itr = m_accessorCache.find( varname ) ) == m_accessorCache.end() ) {
         // For an empty container let's not bother too much:
         if( m_auxVectorData->size_v() == 0 ) {
@@ -396,7 +396,8 @@ namespace ExpressionParsing {
      // Now do the "regular thing". Note that even if the type turns out
      // to be an integer type, the accessor wrapper does the conversion
      // reasonably anyway, behind the scenes.
-     return itr->second->getVecDoubleValue(m_auxVectorData);
+     return itr->second->getVecDoubleValue(m_auxVectorData);*/
+    return m_accessorCache.at(varname)->getVecDoubleValue(m_auxVectorData);
   }
 
 }

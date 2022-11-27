@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -31,10 +31,10 @@ namespace ExpressionParsing {
 
       virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
 
-      virtual int loadIntVariableFromString(const std::string &varname);
-      virtual double loadDoubleVariableFromString(const std::string &varname);
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname);
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname);
+      virtual int loadIntVariableFromString(const std::string &varname) const;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
       StoreGateSvc_t m_evtStore;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -26,10 +26,10 @@ namespace ExpressionParsing {
 
       virtual VariableType variableTypeFromString(const std::string &varname) = 0;
 
-      virtual int loadIntVariableFromString(const std::string &varname) = 0;
-      virtual double loadDoubleVariableFromString(const std::string &varname) = 0;
-      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) = 0;
-      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) = 0;
+      virtual int loadIntVariableFromString(const std::string &varname) const = 0;
+      virtual double loadDoubleVariableFromString(const std::string &varname) const = 0;
+      virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const = 0;
+      virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const = 0;
   };
 }
 
