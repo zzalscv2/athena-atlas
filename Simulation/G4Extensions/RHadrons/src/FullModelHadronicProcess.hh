@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FullModelHadronicProcess_h
@@ -67,7 +67,7 @@ private:
 
   const G4DynamicParticle* FindRhadron(G4ParticleChange*);
 
-  G4ProcessHelper* m_theHelper;
+  const G4ProcessHelper* m_theHelper;
   G4double m_cache;
   G4ThreeVector m_what;
 
