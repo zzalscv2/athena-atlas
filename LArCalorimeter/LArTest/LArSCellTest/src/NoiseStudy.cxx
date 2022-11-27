@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,7 +15,6 @@
 #include "NoiseStudy.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloIdManager.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "TFile.h"
 #include "TH1F.h"
 #include "TH2F.h"
@@ -45,10 +44,8 @@ StatusCode NoiseStudy::initialize(){
 	if ( m_scidtool.retrieve().isFailure() ){
 		ATH_MSG_ERROR("cannot perform comparisons between cell and SuperCells");
 	}
-        const CaloIdManager* caloMgr;
-	const CaloSuperCellDetDescrManager* sem_mgr;
-	ATH_CHECK( detStore()->retrieve (sem_mgr, "CaloSuperCellMgr") );
-      
+
+        const CaloIdManager* caloMgr;      
         CHECK( detStore()->retrieve(caloMgr) );
       
         //
@@ -70,6 +67,7 @@ StatusCode NoiseStudy::initialize(){
 	ATH_CHECK( m_cellContainerInKey.initialize() );
 	ATH_CHECK( m_evtInKey.initialize() );
 	ATH_CHECK( m_truthInKey.initialize() );
+	ATH_CHECK( m_caloSuperCellMgrKey.initialize() );
 
 	return StatusCode::SUCCESS;
 }
@@ -84,8 +82,8 @@ StatusCode NoiseStudy::finalize(){
 StatusCode NoiseStudy::execute(const EventContext& context) const{
 
 	ATH_MSG_DEBUG ("execute NoiseStudy" );
-	const CaloSuperCellDetDescrManager* sem_mgr;
-	ATH_CHECK( detStore()->retrieve (sem_mgr, "CaloSuperCellMgr") );
+	SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,context};
+	const CaloSuperCellDetDescrManager* sem_mgr = *caloSuperCellMgrHandle;
 	std::default_random_engine generator;
 	// Not really a condition, but almost
 	const CaloBCIDAverage* caloLumiBCID = nullptr;
