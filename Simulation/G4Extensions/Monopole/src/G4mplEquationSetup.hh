@@ -23,8 +23,6 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// $Id: $
-//
 // G4mplEquationSetup is responsible for switching between two different
 // equation of motions, one for monopoles and another for the rest of the
 // particles.
@@ -54,6 +52,8 @@
 // Geant4 headers
 #include "G4MagneticField.hh"
 
+#include "CxxUtils/checker_macros.h"
+
 class G4FieldManager;
 class G4ChordFinder;
 class G4Mag_UsualEqRhs;
@@ -82,7 +82,7 @@ private:
      // Thread-to-EquationSetup concurrent map type
      using ESThreadMap_t = tbb::concurrent_unordered_map< std::thread::id, G4mplEquationSetup*, std::hash<std::thread::id> >;
      // Concurrent map of EquationsSetup, one for each thread
-     static ESThreadMap_t m_ESThreadMap;
+     static ESThreadMap_t m_ESThreadMap ATLAS_THREAD_SAFE;
      //@brief Search inside m_ESThreadMap the element with the current threadID 
      // and return it or return a null pointer if the element is not found
      static G4mplEquationSetup* getES();
