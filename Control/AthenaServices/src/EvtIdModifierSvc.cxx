@@ -177,7 +177,7 @@ EvtIdModifierSvc::run_number() const
 
 /** @brief return the current evt-nbr (after modification)
  */
-uint64_t
+EventID::event_number_t
 EvtIdModifierSvc::event_number() const
 {
   return m_current.evtnbr;
