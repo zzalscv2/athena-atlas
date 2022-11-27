@@ -253,6 +253,9 @@ def simulationRunArgsToFlags(runArgs, flags):
         flags.Input.OverrideRunNumber = True
         flags.Input.LumiBlockNumber = [1] # dummy value
 
+    if hasattr(runArgs, "jobNumber"):
+        flags.Input.JobNumber = runArgs.jobNumber
+
     if hasattr(runArgs, "physicsList"):
         flags.Sim.PhysicsList = runArgs.physicsList
 
