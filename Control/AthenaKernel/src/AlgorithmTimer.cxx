@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -28,9 +28,6 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
-
-#include <boost/bind/bind.hpp>
-#include <boost/lexical_cast.hpp>
 
 using namespace Athena;
 
@@ -71,7 +68,7 @@ AlgorithmTimer::AlgorithmTimer(unsigned int milliseconds,
   m_sigevent.sigev_value.sival_ptr = this;
 
   if (m_onAlarm == NULL)
-    m_onAlarm = boost::bind(&AlgorithmTimer::abortJob,this);
+    m_onAlarm = std::bind(&AlgorithmTimer::abortJob,this);
 
   m_sigevent.sigev_notify = SIGEV_THREAD;
   m_sigevent.sigev_signo  = 0;
