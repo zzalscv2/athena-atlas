@@ -8,6 +8,7 @@
 // Create dressed (i.e. including FSR photons) 4-vectors of truth objects
 
 #include "DerivationFrameworkMCTruth/TruthDressingTool.h"
+#include "MCTruthClassifier/MCTruthClassifier.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
@@ -32,6 +33,9 @@ DerivationFramework::TruthDressingTool::TruthDressingTool(const std::string& t,
     declareProperty ("usePhotonsFromHadrons",
             m_usePhotonsFromHadrons = false,
             "Add photons coming from hadron decays while dressing particles?");
+    declareProperty ("useLeptonsFromHadrons",
+            m_useLeptonsFromHadrons = false,
+            "Consider leptons coming from hadron decays?");
     declareProperty ("dressingConeSize", m_coneSize = 0.1,
             "Size of dR cone in which to include FSR photons in dressing");
     declareProperty ("particleIDsToDress", m_listOfPIDs = std::vector<int>{11,13},
@@ -87,6 +91,8 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
 
     const static SG::AuxElement::Decorator< int > decorator_nphoton("nPhotons_dressed");
 
+    static const SG::AuxElement::ConstAccessor<unsigned int> acc_origin("Classification");
+
     // One for the photons as well
     std::string decorationName = m_decorationName.empty()?"unusedPhotonDecoration":m_decorationName;
     const static SG::AuxElement::Decorator< char > dressDec (decorationName);
@@ -106,14 +112,18 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     std::vector<xAOD::TruthParticle::FourMom_t> listOfDressedParticles;
     std::vector<int> dressedParticlesNPhot;
 
-    // when dressing only truth taus, it is assumed that the truth tau container has
-    // been built beforehand and is used as input
     if(m_listOfPIDs.size()==1 && abs(m_listOfPIDs[0])==15) {
+      // when dressing only truth taus, it is assumed that the truth tau container has
+      // been built beforehand and is used as input
       for (auto pItr = importedDressTruthParticles->begin(); pItr != importedDressTruthParticles->end(); ++pItr) {
         listOfParticlesToDress.push_back(*pItr);
       }
-    } else {
-      decayHelper.constructListOfFinalParticles(importedDressTruthParticles, listOfParticlesToDress, m_listOfPIDs);
+    } 
+    else {
+      // non-prompt particles are still included here to ensure all particles
+      // will get the decoration; however further down only the prompt particles
+      // are actually dressed depending on the value of m_useLeptonsFromHadrons
+      decayHelper.constructListOfFinalParticles(importedDressTruthParticles, listOfParticlesToDress, m_listOfPIDs, true);
     }
 
     //initialize list of dressed particles
@@ -125,7 +135,11 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
     //fill the photon list
     std::vector<const xAOD::TruthParticle*>  photonsFSRList;
     std::vector<int> photonPID{22};
-    decayHelper.constructListOfFinalParticles(importedTruthParticles, photonsFSRList, photonPID, m_usePhotonsFromHadrons);
+    const bool pass = decayHelper.constructListOfFinalParticles(importedTruthParticles, photonsFSRList, 
+                                                                photonPID, m_usePhotonsFromHadrons);
+    if (!pass) {
+      ATH_MSG_ERROR("MCTruthClassifier \"Classification\" not available, cannot apply notFromHadron veto!");
+    }
 
     // Do dR-based photon dressing (default)
     if (!m_useAntiKt){
@@ -135,6 +149,14 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
         int idx = -1;
   
         for (size_t i = 0; i < listOfParticlesToDress.size(); ++i) {
+          if (!m_useLeptonsFromHadrons) {
+            if (!acc_origin.isAvailable(*listOfParticlesToDress[i])) {
+              ATH_MSG_ERROR("MCTruthClassifier \"Classification\" not available, cannot apply notFromHadron veto!");
+            }
+            unsigned int result = acc_origin(*listOfParticlesToDress[i]);
+            const bool isPrompt = MCTruthClassifier::isPrompt(result, true);
+            if (!isPrompt)  continue;
+          }
           xAOD::TruthParticle::FourMom_t bare_part;
           if(abs(listOfParticlesToDress[i]->pdgId())==15) {
   
@@ -207,7 +229,10 @@ StatusCode DerivationFramework::TruthDressingTool::addBranches() const
           }
 
           TLorentzVector tauvis;
-          tauvis.SetPtEtaPhiM(part->auxdata<double>("pt_vis"), part->auxdata<double>("eta_vis"), part->auxdata<double>("phi_vis"), part->auxdata<double>("m_vis"));
+          tauvis.SetPtEtaPhiM(part->auxdata<double>("pt_vis"), 
+                              part->auxdata<double>("eta_vis"), 
+                              part->auxdata<double>("phi_vis"), 
+                              part->auxdata<double>("m_vis"));
           fj_particles.emplace_back(tauvis.Px(), tauvis.Py(), tauvis.Pz(), tauvis.E());
         }
         else {
