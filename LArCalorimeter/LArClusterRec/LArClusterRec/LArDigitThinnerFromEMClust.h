@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -12,7 +12,7 @@
 #ifndef LARCLUSTERREC_LArDigitThinnerFromEMClust_H
 #define LARCLUSTERREC_LArDigitThinnerFromEMClust_H
 
-#include "GaudiKernel/ToolHandle.h"
+
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
