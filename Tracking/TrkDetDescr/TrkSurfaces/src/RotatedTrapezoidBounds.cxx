@@ -50,6 +50,77 @@ Trk::RotatedTrapezoidBounds::operator==(const Trk::SurfaceBounds& sbo) const
   return (m_boundValues == trabo->m_boundValues);
 }
 
+bool
+Trk::RotatedTrapezoidBounds::inside(const Amg::Vector2D& pos,
+                                    const BoundaryCheck& bchk) const
+{
+  const Amg::Vector2D locpo = m_rotMat * pos;
+  if (bchk.bcType == 0)
+    return RotatedTrapezoidBounds::inside(
+      locpo, bchk.toleranceLoc1, bchk.toleranceLoc2);
+
+  // a fast FALSE
+  const double fabsX = std::abs(locpo[Trk::locX]);
+  double max_ell = bchk.lCovariance(0, 0) > bchk.lCovariance(1, 1)
+                     ? bchk.lCovariance(0, 0)
+                     : bchk.lCovariance(1, 1);
+  double limit = bchk.nSigmas * sqrt(max_ell);
+  if (fabsX > (m_boundValues[RotatedTrapezoidBounds::bv_halfX] + limit))
+    return false;
+  // a fast FALSE
+  const double fabsY = std::abs(locpo[Trk::locY]);
+  if (fabsY > (m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] + limit))
+    return false;
+  // a fast TRUE
+  double min_ell = bchk.lCovariance(0, 0) < bchk.lCovariance(1, 1)
+                     ? bchk.lCovariance(0, 0)
+                     : bchk.lCovariance(1, 1);
+  limit = bchk.nSigmas * sqrt(min_ell);
+  if (fabsY < (m_boundValues[RotatedTrapezoidBounds::bv_minHalfY] + limit) &&
+      fabsX < (m_boundValues[RotatedTrapezoidBounds::bv_halfX] + limit))
+    return true;
+
+  // compute KDOP and axes for surface polygon
+  std::vector<KDOP> elementKDOP(3);
+  std::vector<Amg::Vector2D> elementP(4);
+  float theta =
+    (bchk.lCovariance(1, 0) != 0 &&
+     (bchk.lCovariance(1, 1) - bchk.lCovariance(0, 0)) != 0)
+      ? .5 * bchk.FastArcTan(2 * bchk.lCovariance(1, 0) /
+                             (bchk.lCovariance(1, 1) - bchk.lCovariance(0, 0)))
+      : 0.;
+  sincosCache scResult = bchk.FastSinCos(theta);
+  AmgMatrix(2, 2) rotMatrix;
+  rotMatrix << scResult.cosC, scResult.sinC, -scResult.sinC, scResult.cosC;
+  AmgMatrix(2, 2) normal;
+  // cppcheck-suppress constStatement
+  normal << 0, -1, 1, 0;
+  // ellipse is always at (0,0), surface is moved to ellipse position and then
+  // rotated
+  Amg::Vector2D p =
+    Amg::Vector2D(-m_boundValues[RotatedTrapezoidBounds::bv_halfX],
+                  m_boundValues[RotatedTrapezoidBounds::bv_minHalfY]);
+  elementP[0] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (-m_boundValues[RotatedTrapezoidBounds::bv_halfX],
+                     -m_boundValues[RotatedTrapezoidBounds::bv_minHalfY]);
+  elementP[1] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (m_boundValues[RotatedTrapezoidBounds::bv_halfX],
+                     m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY]);
+  elementP[2] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (m_boundValues[RotatedTrapezoidBounds::bv_halfX],
+                     -m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY]);
+  elementP[3] = (rotMatrix * (p - locpo));
+  std::vector<Amg::Vector2D> axis = { normal * (elementP[1] - elementP[0]),
+                                      normal * (elementP[3] - elementP[1]),
+                                      normal * (elementP[2] - elementP[0]) };
+  bchk.ComputeKDOP(elementP, axis, elementKDOP);
+  // compute KDOP for error ellipse
+  std::vector<KDOP> errelipseKDOP(3);
+  bchk.ComputeKDOP(bchk.EllipseToPoly(3), axis, errelipseKDOP);
+  // check if KDOPs overlap and return result
+  return bchk.TestKDOPKDOP(elementKDOP, errelipseKDOP);
+}
+
 // checking if inside bounds
 bool
 Trk::RotatedTrapezoidBounds::inside(const Amg::Vector2D& pos, double tol1, double tol2) const
