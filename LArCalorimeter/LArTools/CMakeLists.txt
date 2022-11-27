@@ -1,24 +1,16 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArTools )
 
 # External dependencies:
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
-find_package( ROOT COMPONENTS RIO Core Tree MathCore Hist pthread )
+find_package( CORAL COMPONENTS CoralBase CoralKernel )
+find_package( ROOT COMPONENTS RIO Core )
 
 # Component(s) in the package:
-atlas_add_library( LArToolsLib
-                   src/*.cxx
-                   PUBLIC_HEADERS LArTools
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthenaBaseComps AthenaKernel CxxUtils Identifier GaudiKernel LArElecCalib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CaloIdentifier AthenaPoolUtilities LArCablingLib LArRecConditions )
 
 atlas_add_component( LArTools
-                     src/components/*.cxx
-                     LINK_LIBRARIES LArToolsLib )
-
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
+                     src/*.cxx src/components/*.cxx 
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils Identifier LArElecCalib
+		     ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CaloIdentifier AthenaPoolUtilities LArRecConditions )
 
