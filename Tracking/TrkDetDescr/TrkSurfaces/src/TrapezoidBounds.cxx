@@ -28,9 +28,9 @@ Trk::TrapezoidBounds::TrapezoidBounds(double minhalex, double maxhalex, double h
   , m_alpha(0.)
   , m_beta(0.)
 {
-  m_boundValues[TrapezoidBounds::bv_minHalfX] = fabs(minhalex);
-  m_boundValues[TrapezoidBounds::bv_maxHalfX] = fabs(maxhalex);
-  m_boundValues[TrapezoidBounds::bv_halfY] = fabs(haley);
+  m_boundValues[TrapezoidBounds::bv_minHalfX] = std::abs(minhalex);
+  m_boundValues[TrapezoidBounds::bv_maxHalfX] = std::abs(maxhalex);
+  m_boundValues[TrapezoidBounds::bv_halfY] = std::abs(haley);
   if (m_boundValues[TrapezoidBounds::bv_minHalfX] > m_boundValues[TrapezoidBounds::bv_maxHalfX])
     swap(m_boundValues[TrapezoidBounds::bv_minHalfX], m_boundValues[TrapezoidBounds::bv_maxHalfX]);
 }
@@ -43,11 +43,10 @@ Trk::TrapezoidBounds::TrapezoidBounds(double minhalex, double haley, double alph
 {
   double gamma = (alpha > beta) ? (alpha - 0.5 * M_PI) : (beta - 0.5 * M_PI);
   // now fill them
-  m_boundValues[TrapezoidBounds::bv_minHalfX] = fabs(minhalex);
+  m_boundValues[TrapezoidBounds::bv_minHalfX] = std::abs(minhalex);
   m_boundValues[TrapezoidBounds::bv_maxHalfX] = minhalex + (2. * m_boundValues[TrapezoidBounds::bv_halfY]) * tan(gamma);
-  m_boundValues[TrapezoidBounds::bv_halfY] = fabs(haley);
+  m_boundValues[TrapezoidBounds::bv_halfY] = std::abs(haley);
 }
-
 
 
 bool
@@ -58,6 +57,81 @@ Trk::TrapezoidBounds::operator==(const Trk::SurfaceBounds& sbo) const
   if (!trabo)
     return false;
   return (m_boundValues == trabo->m_boundValues);
+}
+
+bool
+Trk::TrapezoidBounds::inside(const Amg::Vector2D& locpo,
+                             const BoundaryCheck& bchk) const
+{
+  if (bchk.bcType == 0)
+    return TrapezoidBounds::inside(
+      locpo, bchk.toleranceLoc1, bchk.toleranceLoc2);
+
+  // a fast FALSE
+  double fabsY = std::abs(locpo[Trk::locY]);
+  double max_ell = bchk.lCovariance(0, 0) > bchk.lCovariance(1, 1)
+                     ? bchk.lCovariance(0, 0)
+                     : bchk.lCovariance(1, 1);
+  double limit = bchk.nSigmas * sqrt(max_ell);
+  if (fabsY > (m_boundValues[TrapezoidBounds::bv_halfY] + limit))
+    return false;
+  // a fast FALSE
+  double fabsX = std::abs(locpo[Trk::locX]);
+  if (fabsX > (m_boundValues[TrapezoidBounds::bv_maxHalfX] + limit))
+    return false;
+  // a fast TRUE
+  double min_ell = bchk.lCovariance(0, 0) < bchk.lCovariance(1, 1)
+                     ? bchk.lCovariance(0, 0)
+                     : bchk.lCovariance(1, 1);
+  limit = bchk.nSigmas * sqrt(min_ell);
+  if (fabsX < (m_boundValues[TrapezoidBounds::bv_minHalfX] + limit) &&
+      fabsY < (m_boundValues[TrapezoidBounds::bv_halfY] + limit))
+    return true;
+
+  // compute KDOP and axes for surface polygon
+  std::vector<KDOP> elementKDOP(3);
+  std::vector<Amg::Vector2D> elementP(4);
+  float theta =
+    (bchk.lCovariance(1, 0) != 0 &&
+     (bchk.lCovariance(1, 1) - bchk.lCovariance(0, 0)) != 0)
+      ? .5 * bchk.FastArcTan(2 * bchk.lCovariance(1, 0) /
+                             (bchk.lCovariance(1, 1) - bchk.lCovariance(0, 0)))
+      : 0.;
+  sincosCache scResult = bchk.FastSinCos(theta);
+  AmgMatrix(2, 2) rotMatrix;
+  rotMatrix << scResult.cosC, scResult.sinC, -scResult.sinC, scResult.cosC;
+  AmgMatrix(2, 2) normal;
+  // cppcheck-suppress constStatement
+  normal << 0, -1, 1, 0;
+  // ellipse is always at (0,0), surface is moved to ellipse position and then
+  // rotated
+  Amg::Vector2D p = Amg::Vector2D(m_boundValues[TrapezoidBounds::bv_minHalfX],
+                                  -m_boundValues[TrapezoidBounds::bv_halfY]);
+  elementP[0] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (-m_boundValues[TrapezoidBounds::bv_minHalfX],
+                     -m_boundValues[TrapezoidBounds::bv_halfY]);
+  elementP[1] = (rotMatrix * (p - locpo));
+  scResult = bchk.FastSinCos(m_beta);
+  p = Amg::Vector2D (m_boundValues[TrapezoidBounds::bv_minHalfX] +
+                     (2. * m_boundValues[TrapezoidBounds::bv_halfY]) *
+                     (scResult.sinC / scResult.cosC),
+                     m_boundValues[TrapezoidBounds::bv_halfY]);
+  elementP[2] = (rotMatrix * (p - locpo));
+  scResult = bchk.FastSinCos(m_alpha);
+  p = Amg::Vector2D (-(m_boundValues[TrapezoidBounds::bv_minHalfX] +
+                       (2. * m_boundValues[TrapezoidBounds::bv_halfY]) *
+                       (scResult.sinC / scResult.cosC)),
+                     m_boundValues[TrapezoidBounds::bv_halfY]);
+  elementP[3] = (rotMatrix * (p - locpo));
+  std::vector<Amg::Vector2D> axis = { normal * (elementP[1] - elementP[0]),
+                                      normal * (elementP[3] - elementP[1]),
+                                      normal * (elementP[2] - elementP[0]) };
+  bchk.ComputeKDOP(elementP, axis, elementKDOP);
+  // compute KDOP for error ellipse
+  std::vector<KDOP> errelipseKDOP(3);
+  bchk.ComputeKDOP(bchk.EllipseToPoly(3), axis, errelipseKDOP);
+  // check if KDOPs overlap and return result
+  return bchk.TestKDOPKDOP(elementKDOP, errelipseKDOP);
 }
 
 // checking if inside bounds
@@ -74,8 +148,8 @@ bool
 Trk::TrapezoidBounds::insideFull(const Amg::Vector2D& locpo, double tol1, double tol2) const
 {
   // the cases:
-  double fabsX = fabs(locpo[Trk::locX]);
-  double fabsY = fabs(locpo[Trk::locY]);
+  double fabsX = std::abs(locpo[Trk::locX]);
+  double fabsY = std::abs(locpo[Trk::locY]);
   // (1) a fast FALSE
   if (fabsY > (m_boundValues[TrapezoidBounds::bv_halfY] + tol2))
     return false;
@@ -93,7 +167,7 @@ Trk::TrapezoidBounds::insideFull(const Amg::Vector2D& locpo, double tol1, double
              (m_boundValues[TrapezoidBounds::bv_maxHalfX] - m_boundValues[TrapezoidBounds::bv_minHalfX]) *
              ((locpo[Trk::locX] > 0.) ? 1.0 : -1.0);
   double d =
-    -fabs(k) * 0.5 * (m_boundValues[TrapezoidBounds::bv_maxHalfX] + m_boundValues[TrapezoidBounds::bv_minHalfX]);
+    -std::abs(k) * 0.5 * (m_boundValues[TrapezoidBounds::bv_maxHalfX] + m_boundValues[TrapezoidBounds::bv_minHalfX]);
   return (isAbove(locpo, tol1, tol2, k, d));
 }
 

@@ -55,6 +55,88 @@ Trk::DiamondBounds::inside(const Amg::Vector2D& locpo, double tol1, double tol2)
   return this->insideFull(locpo, tol1, tol2);
 }
 
+bool
+Trk::DiamondBounds::inside(const Amg::Vector2D& locpo,
+                           const BoundaryCheck& bchk) const
+{
+  if (bchk.bcType == 0)
+    return DiamondBounds::inside(locpo, bchk.toleranceLoc1, bchk.toleranceLoc2);
+
+  // a fast FALSE
+  double max_ell = bchk.lCovariance(0, 0) > bchk.lCovariance(1, 1)
+                     ? bchk.lCovariance(0, 0)
+                     : bchk.lCovariance(1, 1);
+  double limit = bchk.nSigmas * sqrt(max_ell);
+  if (locpo[Trk::locY] < -2 * m_boundValues[DiamondBounds::bv_halfY1] - limit)
+    return false;
+  if (locpo[Trk::locY] > 2 * m_boundValues[DiamondBounds::bv_halfY2] + limit)
+    return false;
+  // a fast FALSE
+  double fabsX = std::abs(locpo[Trk::locX]);
+  if (fabsX > (m_boundValues[DiamondBounds::bv_medHalfX] + limit))
+    return false;
+  // a fast TRUE
+  double min_ell = bchk.lCovariance(0, 0) < bchk.lCovariance(1, 1)
+                     ? bchk.lCovariance(0, 0)
+                     : bchk.lCovariance(1, 1);
+  limit = bchk.nSigmas * sqrt(min_ell);
+  if (fabsX < (fmin(m_boundValues[DiamondBounds::bv_minHalfX],
+                    m_boundValues[DiamondBounds::bv_maxHalfX]) -
+               limit))
+    return true;
+  // a fast TRUE
+  if (std::abs(locpo[Trk::locY]) < (fmin(m_boundValues[DiamondBounds::bv_halfY1],
+                                     m_boundValues[DiamondBounds::bv_halfY2]) -
+                                limit))
+    return true;
+
+  // compute KDOP and axes for surface polygon
+  std::vector<KDOP> elementKDOP(5);
+  std::vector<Amg::Vector2D> elementP(6);
+  float theta =
+    (bchk.lCovariance(1, 0) != 0 &&
+     (bchk.lCovariance(1, 1) - bchk.lCovariance(0, 0)) != 0)
+      ? .5 * bchk.FastArcTan(2 * bchk.lCovariance(1, 0) /
+                             (bchk.lCovariance(1, 1) - bchk.lCovariance(0, 0)))
+      : 0.;
+  sincosCache scResult = bchk.FastSinCos(theta);
+  AmgMatrix(2, 2) rotMatrix;
+  rotMatrix << scResult.cosC, scResult.sinC, -scResult.sinC, scResult.cosC;
+  AmgMatrix(2, 2) normal;
+  // cppcheck-suppress constStatement
+  normal << 0, -1, 1, 0;
+  // ellipse is always at (0,0), surface is moved to ellipse position and then
+  // rotated
+  Amg::Vector2D p =
+    Amg::Vector2D(-m_boundValues[DiamondBounds::bv_minHalfX],
+                  -2. * m_boundValues[DiamondBounds::bv_halfY1]);
+  elementP[0] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (-m_boundValues[DiamondBounds::bv_medHalfX], 0.);
+  elementP[1] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (-m_boundValues[DiamondBounds::bv_maxHalfX],
+                     2. * m_boundValues[DiamondBounds::bv_halfY2]);
+  elementP[2] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (m_boundValues[DiamondBounds::bv_maxHalfX],
+                     2. * m_boundValues[DiamondBounds::bv_halfY2]);
+  elementP[3] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (m_boundValues[DiamondBounds::bv_medHalfX], 0.);
+  elementP[4] = (rotMatrix * (p - locpo));
+  p = Amg::Vector2D (m_boundValues[DiamondBounds::bv_minHalfX],
+                     -2. * m_boundValues[DiamondBounds::bv_halfY1]);
+  elementP[5] = (rotMatrix * (p - locpo));
+  std::vector<Amg::Vector2D> axis = { normal * (elementP[1] - elementP[0]),
+                                      normal * (elementP[2] - elementP[1]),
+                                      normal * (elementP[3] - elementP[2]),
+                                      normal * (elementP[4] - elementP[3]),
+                                      normal * (elementP[5] - elementP[4]) };
+  bchk.ComputeKDOP(elementP, axis, elementKDOP);
+  // compute KDOP for error ellipse
+  std::vector<KDOP> errelipseKDOP(5);
+  bchk.ComputeKDOP(bchk.EllipseToPoly(3), axis, errelipseKDOP);
+  // check if KDOPs overlap and return result
+  return bchk.TestKDOPKDOP(elementKDOP, errelipseKDOP);
+}
+
 // checking if inside bounds (Full symmetrical Diamond)
 bool
 Trk::DiamondBounds::insideFull(const Amg::Vector2D& locpo, double tol1, double tol2) const
