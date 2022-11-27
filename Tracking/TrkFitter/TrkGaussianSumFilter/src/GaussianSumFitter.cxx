@@ -942,9 +942,11 @@ Trk::GaussianSumFitter::smootherFit(
   Trk::MultiComponentState smoothedStateWithScaledError =
     MultiComponentStateHelpers::WithScaledError(
       std::move(firstSmoothedState), 15., 5., 15., 5., 15.);
+  Trk::FitQualityOnSurface fitQualityWithScaledErrors;
   Trk::MultiComponentState updatedState = Trk::GsfMeasurementUpdator::update(
     std::move(smoothedStateWithScaledError),
-    *(updatedFirstStateOnSurface->measurementOnTrack()));
+    *(updatedFirstStateOnSurface->measurementOnTrack()),
+    fitQualityWithScaledErrors);
   if (updatedState.empty()) {
     ATH_MSG_WARNING("Smoother prediction could not be determined");
     return MultiTrajectory();
