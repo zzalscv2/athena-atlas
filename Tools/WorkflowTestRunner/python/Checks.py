@@ -156,7 +156,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
 
         # TODO: temporary due to issues with some tests
         extra_args = ""
-        if test.type == WorkflowType.MCReco or test.type == WorkflowType.DataReco or test.type == WorkflowType.Derivation:
+        if test.type != WorkflowType.AF3:
             extra_args = "--order-trees"
 
         comparison_command = f"acmd.py diff-root {reference_file} {validation_file} {extra_args} --nan-equal --mode semi-detailed --error-mode resilient --ignore-leaves {exclusion_list} --entries {self.max_events} > {log_file} 2>&1"

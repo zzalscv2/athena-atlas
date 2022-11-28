@@ -62,6 +62,8 @@ class WorkflowRun(Enum):
 class WorkflowType(Enum):
     FullSim = "FullSim"
     AF3 = "AF3"
+    HitsMerge = "HitsMerge"
+    HitsFilter = "HitsFilter"
     MCOverlay = "MCOverlay"
     DataOverlay = "DataOverlay"
     MCReco = "MCReco"

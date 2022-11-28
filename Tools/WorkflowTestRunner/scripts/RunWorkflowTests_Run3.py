@@ -23,10 +23,16 @@ def main():
     tests_to_run = []
     if options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
-            ami_tag = "s3760" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --postInclude Campaigns/postInclude.MC21BirksConstantTune.py"))
-        if not options.workflow or options.workflow is WorkflowType.AF3:
+            ami_tag = "s4006" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
+        if options.workflow is WorkflowType.AF3:
             log.error("AF3 not supported yet")
+        if options.workflow is WorkflowType.HitsMerge:
+            ami_tag = "s4007" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsMerge, ["HITSMerge"], setup, options.extra_args))
+        if options.workflow is WorkflowType.HitsFilter:
+            ami_tag = "s4008" if not options.ami_tag else options.ami_tag
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.HitsFilter, ["FilterHitTf"], setup, options.extra_args))
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
             tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229"))

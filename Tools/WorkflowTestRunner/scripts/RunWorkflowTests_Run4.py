@@ -18,8 +18,6 @@ def main():
     parser = setup_parser()
     options = parser.parse_args()
     setup = get_test_setup(name, options, log)
-    # disable output checks for Run 4
-    setup.disable_output_checks = True
 
     # Define which tests to run
     tests_to_run = []
