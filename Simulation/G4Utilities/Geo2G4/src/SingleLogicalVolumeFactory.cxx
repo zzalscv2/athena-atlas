@@ -17,7 +17,7 @@ SingleLogicalVolumeFactory::SingleLogicalVolumeFactory(): AthMessaging("SingleLo
 
 typedef std::map<std::string, G4LogicalVolume*, std::less<std::string> > vMap;
 
-G4LogicalVolume *SingleLogicalVolumeFactory::Build(const GeoLogVol* theLog) const
+G4LogicalVolume *SingleLogicalVolumeFactory::Build ATLAS_NOT_THREAD_SAFE (const GeoLogVol* theLog)
 {
   static Geo2G4SolidFactory theSolidFactory;
   static Geo2G4MaterialFactory theMaterialFactory;
