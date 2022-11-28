@@ -12,9 +12,11 @@ from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPixelPrepDataToxAODCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+
 def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
+
     acc = ComponentAccumulator()
-        
+   
     acc.merge(
         InDetPixelPrepDataToxAODCfg(
             flags,
@@ -30,11 +32,12 @@ def JetHitAssociationCfg(flags, name="JetHitAssociation", **kwargs):
 
     acc.addEventAlgo(
         CompFactory.JetHitAssociation(
-                "JetHitAssociation",
-                jetCollectionName = "AntiKt4EMPFlowJets",
-                jetPtThreshold = 300 * Units.GeV,
-                dRmatchHitToJet = 0.4
+            "JetHitAssociation",
+            jetCollectionName = flags.BTagging.Trackless_JetCollection,
+            jetPtThreshold = flags.BTagging.Trackless_JetPtMin * Units.GeV,
+            dRmatchHitToJet = flags.BTagging.Trackless_dR
         )
     )
-    
+
     return acc
+

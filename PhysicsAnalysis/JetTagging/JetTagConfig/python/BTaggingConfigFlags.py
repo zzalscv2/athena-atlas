@@ -74,8 +74,13 @@ def createBTaggingConfigFlags():
     # Run the flip taggers
     btagcf.addFlag("BTagging.RunFlipTaggers", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation and prevFlags.GeoModel.Run < LHCPeriod.Run4)
 
-    # experimental flags
+   # Trackless approach                                                                                                                                                                                                                   
     btagcf.addFlag("BTagging.Trackless", False)
+    btagcf.addFlag("BTagging.Trackless_JetCollection", "AntiKt4EMPFlowJets")
+    btagcf.addFlag("BTagging.Trackless_JetPtMin", 300) #in GeV                                                                                                                                                                            
+    btagcf.addFlag("BTagging.Trackless_dR", 0.4)
+
+    # experimental flags
     btagcf.addFlag("BTagging.Pseudotrack", False)
 
     # track classification tool flags
