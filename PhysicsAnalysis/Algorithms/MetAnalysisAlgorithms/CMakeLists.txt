@@ -20,10 +20,8 @@ atlas_depends_on_subdirs(
 atlas_add_library( MetAnalysisAlgorithmsLib
    MetAnalysisAlgorithms/*.h MetAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS MetAnalysisAlgorithms
-   LINK_LIBRARIES xAODMissingET
-   SystematicsHandlesLib AnaAlgorithmLib METInterface
-   SelectionHelpersLib METUtilitiesLib
-   PRIVATE_LINK_LIBRARIES  )
+   LINK_LIBRARIES AnaAlgorithmLib METInterface SystematicsHandlesLib SelectionHelpersLib xAODBase xAODMissingET
+   PRIVATE_LINK_LIBRARIES METUtilitiesLib xAODEventInfo )
 
 atlas_add_dictionary( MetAnalysisAlgorithmsDict
    MetAnalysisAlgorithms/MetAnalysisAlgorithmsDict.h

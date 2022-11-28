@@ -68,8 +68,8 @@ import DerivationFrameworkHiggs.HIGG4DxJets
 # Truth thinning 
 ################
 #Truth tau/nutau and their ancestors and descendants
-truth_cond_tau = " ((abs(TruthParticles.pdgId) == 15 || abs(TruthParticles.pdgId) == 16) && (TruthParticles.pt > 0.01*GeV))" #&& (TruthParticles.barcode<200000)) "
-truth_cond_lep = " ((abs(TruthParticles.pdgId) >= 11 && abs(TruthParticles.pdgId) <= 14) && (TruthParticles.pt > 4.0*GeV) && (TruthParticles.status == 1))"# && (TruthParticles.barcode<200000)) "
+truth_cond_tau = " ((abs(TruthParticles.pdgId) == 15 || abs(TruthParticles.pdgId) == 16) && (TruthParticles.pt > 0.01*GeV))"
+truth_cond_lep = " ((abs(TruthParticles.pdgId) >= 11 && abs(TruthParticles.pdgId) <= 14) && (TruthParticles.pt > 4.0*GeV) && (TruthParticles.status == 1))"
 truth_photon = " ((abs(TruthParticles.pdgId) == 22) && (TruthParticles.pt > 1*GeV)) "
 truth_cond_comb = "("+truth_cond_lep+"||"+truth_cond_tau+"||"+truth_photon+")"
 
@@ -80,7 +80,7 @@ from DerivationFrameworkMCTruth.DerivationFrameworkMCTruthConf import Derivation
 HIGG4D5TruthTool1 = DerivationFramework__GenericTruthThinning(name                         = "HIGG4D5TruthTool1",
                                                               ThinningService              = HIGG4D5ThinningHelper.ThinningSvc(),
                                                               ParticleSelectionString      = truth_cond_comb,
-                                                              PreserveDescendants          = True, # False
+                                                              PreserveDescendants          = True, 
                                                               PreserveGeneratorDescendants = False,
                                                               PreserveAncestors            = True,
                                                               TauHandling                  = False)
@@ -90,7 +90,6 @@ HIGG4D5TruthTool1 = DerivationFramework__GenericTruthThinning(name              
 from DerivationFrameworkMCTruth.DerivationFrameworkMCTruthConf import DerivationFramework__MenuTruthThinning
 HIGG4D5TruthTool2 = DerivationFramework__MenuTruthThinning(name                      = "HIGG4D5TruthTool2",
                                                            ThinningService            = HIGG4D5ThinningHelper.ThinningSvc(),
-                                                           #WritePartons               = True,
                                                            WritePartons               = False,
                                                            WriteHadrons               = False,
                                                            WriteBHadrons              = False,
@@ -106,10 +105,6 @@ HIGG4D5TruthTool2 = DerivationFramework__MenuTruthThinning(name                 
                                                            WriteEverything            = False,
                                                            WriteAllLeptons            = True,
                                                            WriteStatus3               = False,
-                                                           #WritettHFHadrons           = True,
-                                                           #PreserveGeneratorDescendants = True,
-                                                           #PreserveDescendants       = True,
-                                                           #PreserveAncestors         = True,
                                                            PreserveParentsSiblingsChildren = True,
                                                            WriteFirstN                = -1)
 

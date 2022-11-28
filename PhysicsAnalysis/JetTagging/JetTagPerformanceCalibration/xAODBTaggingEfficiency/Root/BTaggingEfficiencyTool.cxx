@@ -294,6 +294,14 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   if (m_systStrategy != "Envelope" && std::find(excludeFromEVCov["T"].begin(), excludeFromEVCov["T"].end(), "extrapolation from charm") == excludeFromEVCov["T"].end())
     excludeFromEVCov["T"].push_back("extrapolation from charm");
 
+  //high pt extrapolation uncertainties
+  if((m_OP.find("Continuous") != std::string::npos) && (m_jetAuthor.find("AntiKtVR30Rmax4Rmin02TrackJets") != std::string::npos)){
+    excludeFromEVCov["B"].push_back("extrapolation_pt_b_Eigen*");
+    excludeFromEVCov["C"].push_back("extrapolation_pt_c_Eigen*");
+    excludeFromEVCov["Light"].push_back("extrapolation_pt_l_Eigen*");
+    excludeFromEVCov["T"].push_back("extrapolation_pt_c_Eigen*");
+  }
+
   // Use the PathResolver to find the full pathname (behind the scenes this can also be used to download the file),
   // if the file cannot be found directly.
   // For consistency with the PathResolver code, use the Boost library to check on this first possibility.

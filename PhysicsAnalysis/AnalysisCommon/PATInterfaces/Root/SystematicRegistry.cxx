@@ -7,7 +7,7 @@
 
 #include <PATInterfaces/SystematicRegistry.h>
 
-#include <PATInterfaces/ISystematicsTool.h>
+#include <PATInterfaces/IReentrantSystematicsTool.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <PATInterfaces/SystematicCode.h>
 
@@ -39,7 +39,7 @@ namespace CP
 
 
   SystematicCode SystematicRegistry ::
-  registerSystematics (const ISystematicsTool& tool)
+  registerSystematics (const IReentrantSystematicsTool& tool)
   {
     registerSystematics (tool.affectingSystematics());
     return addSystematicsToRecommended (tool.recommendedSystematics());

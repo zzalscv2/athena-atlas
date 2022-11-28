@@ -7,13 +7,15 @@ from AnaAlgorithm.DualUseConfig import addPrivateTool, createAlgorithm, createPu
 
 def makeTriggerAnalysisSequence( dataType,
                                  triggerChains = [],
-                                 prescaleLumiCalcFiles = []):
+                                 prescaleLumiCalcFiles = [],
+                                 noFilter = False):
     """Create a basic trigger analysis algorithm sequence
 
     Keyword arguments:
       dataType -- The data type to run on ("data", "mc" or "afii")
       triggerChains -- a list of trigger chains
       prescaleLumiCalcFiles -- a list of lumicalc files to calculate trigger prescales
+      noFilter -- do not apply an event filter (i.e. don't skip any events)
     """
 
     if dataType not in ["data", "mc", "afii"] :
@@ -38,6 +40,7 @@ def makeTriggerAnalysisSequence( dataType,
             ( decisionTool.getType(), decisionTool.getName() )
         alg.triggers = list(triggerChains)
         alg.selectionDecoration = 'trigPassed'
+        alg.noFilter = noFilter
 
         seq.append( alg, inputPropName = None )
 

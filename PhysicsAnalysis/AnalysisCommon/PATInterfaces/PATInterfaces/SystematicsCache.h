@@ -114,6 +114,10 @@ namespace CP
     SystematicCode get (const CP::SystematicSet& sys, const CalibData*& result) const;
 
 
+    /// add an individual systematic variation
+    StatusCode add (const CP::SystematicSet& sys, CalibData value);
+    StatusCode add (const SystematicVariation& variation, CalibData value);
+
 
     /// Private Members
     /// ===============
@@ -244,6 +248,36 @@ namespace CP
     m_cache.emplace (sys, mycalib);
     result = mycalib.get();
     return SystematicCode::Ok;
+  }
+
+
+
+  template<typename CalibData>
+  StatusCode SystematicsCache<CalibData> ::
+  add (const CP::SystematicSet& sys, CalibData value)
+  {
+    auto emplace_result = m_cache.emplace (sys, std::make_shared<CalibData> (std::move (value)));
+    if (emplace_result.second == false)
+    {
+      ANA_MSG_ERROR ("failed to add systematic, already present: " << sys.name());
+      return StatusCode::FAILURE;
+    }
+
+    for (const auto& var : sys)
+      m_affectingSystematics.insert (var);
+
+    return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename CalibData>
+  StatusCode SystematicsCache<CalibData> ::
+  add (const SystematicVariation& variation, CalibData value)
+  {
+    SystematicSet sys;
+    sys.insert (variation);
+    return add (sys, std::move (value));
   }
 }
 

@@ -1,6 +1,6 @@
 #********************************************************************
-# EXOT28.py 
-# reductionConf flag EXOT28 in Reco_tf.py   
+# EXOT28.py
+# reductionConf flag EXOT28 in Reco_tf.py
 #********************************************************************
 from DerivationFrameworkCore.DerivationFrameworkMaster import *
 from DerivationFrameworkJetEtMiss.JetCommon import *
@@ -11,7 +11,7 @@ from DerivationFrameworkMuons.MuonsCommon import *
 from DerivationFrameworkCore.WeightMetadata import *
 
 #====================================================================
-# SET UP STREAM   
+# SET UP STREAM
 #====================================================================
 streamName = derivationFlags.WriteDAOD_EXOT28Stream.StreamName
 fileName   = buildFileName( derivationFlags.WriteDAOD_EXOT28Stream )
@@ -26,6 +26,22 @@ EXOT28Seq = CfgMgr.AthSequencer("EXOT28Sequence")
 #=====================
 # TRIGGER NAV THINNING
 #=====================
+
+MultiElectron_2018 = [
+    'HLT_2e17_lhvloose_nod0_L12EM15VHI',
+    'HLT_2e24_lhvloose_nod0',
+]
+MultiElectron_2017 = [
+    'HLT_2e17_lhvloose_nod0_L12EM15VHI',
+    'HLT_2e24_lhvloose_nod0',
+]
+MultiElectron_2016 = [
+    'HLT_2e17_lhvloose_nod0',
+    'HLT_2e15_lhvloose_nod0_L12EM13VH',
+]
+MultiElectron_2015 = [
+    'HLT_2e12_lhloose_L12EM10VH',
+]
 
 SingleLepton_2018 = [
     'HLT_e26_lhtight_nod0_ivarloose',
@@ -54,22 +70,22 @@ SingleLepton_2016 = [
     'HLT_e300_etcut',
     'HLT_e26_lhtight_nod0_ivarloose',
     'HLT_e60_lhmedium_nod0',
-    'HLT_e60_medium', 
-    'HLT_e140_lhloose_nod0', 
+    'HLT_e60_medium',
+    'HLT_e140_lhloose_nod0',
     'HLT_e300_etcut',
-    'HLT_mu24_iloose', 
+    'HLT_mu24_iloose',
     'HLT_mu24_iloose_L1MU15',
-    'HLT_mu24_ivarloose', 
+    'HLT_mu24_ivarloose',
     'HLT_mu24_ivarloose_L1MU15',
     'HLT_mu40',
     'HLT_mu50',
-    'HLT_mu24_ivarmedium', 
-    'HLT_mu24_imedium', 
+    'HLT_mu24_ivarmedium',
+    'HLT_mu24_imedium',
     'HLT_mu26_imedium',
-    'HLT_mu26_ivarmedium', 
+    'HLT_mu26_ivarmedium',
 ]
 SingleLepton_2015 = [
-    'HLT_e24_lhmedium_L1EM20VH',  
+    'HLT_e24_lhmedium_L1EM20VH',
     'HLT_e60_lhmedium',
     'HLT_e120_lhloose',
     'HLT_mu20_iloose_L1MU15',
@@ -78,10 +94,10 @@ SingleLepton_2015 = [
 ]
 
 MultiMuon_2018 = [
-    'HLT_2mu14' , 
-    'HLT_mu22_mu8noL1', 
-    'HLT_mu20_2mu4noL1', 
-    'HLT_3mu6', 
+    'HLT_2mu14' ,
+    'HLT_mu22_mu8noL1',
+    'HLT_mu20_2mu4noL1',
+    'HLT_3mu6',
 ]
 MultiMuon_2017 = [
     'HLT_2mu14',
@@ -93,21 +109,21 @@ MultiMuon_2017 = [
     'HLT_4mu4',
 ]
 MultiMuon_2016 = [
-    'HLT_2mu10', 
-    'HLT_2mu10_nomucomb', 
-    'HLT_mu20_mu8noL1', 
-    'HLT_mu20_2mu4noL1', 
-    'HLT_3mu4', 
-    'HLT_mu6_2mu4', 
-    'HLT_mu20_nomucomb_mu6noL1_nscan03', 
-    'HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6', 
-    'HLT_mu20_msonly_mu10noL1_msonly_nscan05_noComb', 
+    'HLT_2mu10',
+    'HLT_2mu10_nomucomb',
+    'HLT_mu20_mu8noL1',
+    'HLT_mu20_2mu4noL1',
+    'HLT_3mu4',
+    'HLT_mu6_2mu4',
+    'HLT_mu20_nomucomb_mu6noL1_nscan03',
+    'HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6',
+    'HLT_mu20_msonly_mu10noL1_msonly_nscan05_noComb',
     'HLT_mu11_nomucomb_2mu4noL1_nscan03_L1MU11_2MU6_bTau',
-    'HLT_mu11_nomucomb_mu6noL1_nscan03_L1MU11_2MU6_bTau', 
-    'HLT_mu6_nomucomb_2mu4_nomucomb_bTau_L1MU6_3MU4', 
+    'HLT_mu11_nomucomb_mu6noL1_nscan03_L1MU11_2MU6_bTau',
+    'HLT_mu6_nomucomb_2mu4_nomucomb_bTau_L1MU6_3MU4',
     'HLT_2mu6_nomucomb_mu4_nomucomb_bTau_L12MU6_3MU4',
-    'HLT_2mu14', 
-    'HLT_2mu14_nomucomb', 
+    'HLT_2mu14',
+    'HLT_2mu14_nomucomb',
     'HLT_3mu6',
     'HLT_mu22_mu8noL1',
     'HLT_3mu6_msonly',
@@ -130,7 +146,7 @@ MET_2018 = [
     'HLT_xe110_pufit_xe70_L1XE50',
 ]
 MET_2017 = [
-    'HLT_xe90_pufit_L1XE50', 
+    'HLT_xe90_pufit_L1XE50',
     'HLT_xe110_pufit_L1XE55',
     'HLT_xe100_pufit_L1XE55',
     'HLT_xe100_pufit_L1XE50',
@@ -138,13 +154,13 @@ MET_2017 = [
     'HLT_xe110_pufit_L1XE50',
 ]
 MET_2016 = [
-    'HLT_xe90_mht_L1XE50', 
+    'HLT_xe90_mht_L1XE50',
     'HLT_xe80_tc_lcw_L1XE50',
     'HLT_xe90_tc_lcw_wEFMu_L1XE50',
-    'HLT_xe90_mht_wEFMu_L1XE50', 
-    'HLT_xe100_L1XE50', 
-    'HLT_xe100_tc_em_L1XE50', 
-    'HLT_xe120_pueta', 
+    'HLT_xe90_mht_wEFMu_L1XE50',
+    'HLT_xe100_L1XE50',
+    'HLT_xe100_tc_em_L1XE50',
+    'HLT_xe120_pueta',
     'HLT_xe120_pufit',
     'HLT_xe120_tc_lcw_L1XE50',
     'HLT_xe110_pueta_L1XE50',
@@ -152,9 +168,9 @@ MET_2016 = [
     'HLT_xe110_mht_L1XE50',
 ]
 MET_2015 = [
-    'HLT_xe70_mht', 
-    'HLT_xe70_tc_lcw', 
-    'HLT_xe70', 
+    'HLT_xe70_mht',
+    'HLT_xe70_tc_lcw',
+    'HLT_xe70',
 ]
 
 HT_2018 = [
@@ -169,7 +185,7 @@ HT_2016 = [
     'HLT_ht1000_L1J100',
 ]
 HT_2015 = [
-    'HLT_ht700_L1J75',  
+    'HLT_ht700_L1J75',
     'HLT_ht850_L1J100',
 ]
 
@@ -190,13 +206,14 @@ JET_2015 = [
     'HLT_j360',
 ]
 
+MultiElectron = list(set(MultiElectron_2018+MultiElectron_2017+MultiElectron_2016+MultiElectron_2015))
 SingleLepton = list(set(SingleLepton_2018+SingleLepton_2017+SingleLepton_2016+SingleLepton_2015))
 JET = list(set(JET_2018+JET_2017+JET_2016+JET_2015))
 HT = list(set(HT_2018+HT_2017+HT_2016+HT_2015))
 MET = list(set(MET_2018+MET_2017+MET_2016+MET_2015))
 MultiMuon = list(set(MultiMuon_2018+MultiMuon_2017+MultiMuon_2016+MultiMuon_2015))
 
-triggersNavThin = (MultiMuon + SingleLepton + HT + MET + JET)
+triggersNavThin = (MultiElectron + MultiMuon + SingleLepton + HT + MET + JET)
 triggersNavThin_OR = ' || '.join(triggersNavThin)
 from DerivationFrameworkCore.ThinningHelper import ThinningHelper
 EXOT28ThinningHelper = ThinningHelper("EXOT28ThinningHelper")
@@ -204,7 +221,7 @@ EXOT28ThinningHelper.TriggerChains = ' | '.join(triggersNavThin)
 EXOT28ThinningHelper.AppendToStream(EXOT28Stream)
 
 #=======================================
-# SKIMMING   
+# SKIMMING
 #=======================================
 expression_skimming = triggersNavThin_OR
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
@@ -219,9 +236,9 @@ from DerivationFrameworkInDet.InDetCommon import *
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__TrackParticleThinning
 EXOT28TPThinningTool = DerivationFramework__TrackParticleThinning(name                    = "EXOT28TPThinningTool",
                                                                   ThinningService         = EXOT28ThinningHelper.ThinningSvc(),
-                                                                  SelectionString         = "InDetTrackParticles.eta > -2.7 && InDetTrackParticles.eta < 2.7 && " + 
+                                                                  SelectionString         = "InDetTrackParticles.eta > -2.7 && InDetTrackParticles.eta < 2.7 && " +
                                                                                             "InDetTrackParticles.pt > 0.4*GeV && " +
-                                                                                            "abs(DFCommonInDetTrackZ0AtPV) < 10*mm", 
+                                                                                            "abs(DFCommonInDetTrackZ0AtPV) < 10*mm",
                                                                   InDetTrackParticlesKey  = "InDetTrackParticles")
 ToolSvc += EXOT28TPThinningTool
 thinningTools.append(EXOT28TPThinningTool)
@@ -241,7 +258,7 @@ EXOT28JetsThinningTool = DerivationFramework__GenericObjectThinning(name        
                                                                          ThinningService = EXOT28ThinningHelper.ThinningSvc(),
                                                                          ContainerName   = "AntiKt4EMPFlowJets",
                                                                          ApplyAnd        = False,
-                                                                         SelectionString = "AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && " + 
+                                                                         SelectionString = "AntiKt4EMPFlowJets.DFCommonJets_Calib_pt > 15*GeV && " +
                                                                                            "AntiKt4EMPFlowJets.DFCommonJets_Calib_eta >-4.5 && " +
                                                                                            "AntiKt4EMPFlowJets.DFCommonJets_Calib_eta <4.5")
 ToolSvc += EXOT28JetsThinningTool
@@ -261,7 +278,7 @@ from DerivationFrameworkFlavourTag.FlavourTagCommon import FlavorTagInit
 FlavorTagInit(JetCollections  = ['AntiKt4EMPFlowJets'],Sequencer = EXOT28Seq)
 
 #=======================================
-# CREATE THE DERIVATION KERNEL ALGORITHM   
+# CREATE THE DERIVATION KERNEL ALGORITHM
 #=======================================
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
@@ -275,13 +292,13 @@ EXOT28Seq += CfgMgr.DerivationFramework__DerivationKernel("EXOT28Kernel", Thinni
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 from DerivationFrameworkExotics.EXOT28ContentList import *
 EXOT28SlimmingHelper = SlimmingHelper("EXOT28SlimmingHelper")
-EXOT28SlimmingHelper.SmartCollections = EXOT28SmartContent 
-EXOT28SlimmingHelper.AllVariables = EXOT28AllVariablesContent 
-EXOT28SlimmingHelper.StaticContent = EXOT28UnslimmedContent 
+EXOT28SlimmingHelper.SmartCollections = EXOT28SmartContent
+EXOT28SlimmingHelper.AllVariables = EXOT28AllVariablesContent
+EXOT28SlimmingHelper.StaticContent = EXOT28UnslimmedContent
 EXOT28SlimmingHelper.ExtraVariables = EXOT28ExtraVariables
 EXOT28SlimmingHelper.IncludeMuonTriggerContent = True
 EXOT28SlimmingHelper.IncludeEGammaTriggerContent = True
 EXOT28SlimmingHelper.IncludeEtMissTriggerContent = True
-EXOT28SlimmingHelper.IncludeJetTriggerContent = True # this will cover HT too? 
+EXOT28SlimmingHelper.IncludeJetTriggerContent = True # this will cover HT too?
 
 EXOT28SlimmingHelper.AppendContentToStream(EXOT28Stream)

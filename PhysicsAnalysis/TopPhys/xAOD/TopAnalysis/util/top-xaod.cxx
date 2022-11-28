@@ -51,6 +51,7 @@
 #include "TopObjectSelectionTools/EventCleaningSelection.h"
 
 #include "TopPartons/CalcTtbarPartonHistory.h"
+#include "TopPartons/CalcTwhPartonHistory.h"
 #include "TopPartons/CalcTtbarLightPartonHistory.h"
 #include "TopPartons/CalcTbbarPartonHistory.h"
 #include "TopPartons/CalcWtbPartonHistory.h"
@@ -417,7 +418,13 @@ int main(int argc, char** argv) {
       std::unique_ptr<top::CalcTopPartonHistory>(new top::CalcTtttPartonHistory("top::CalcTtttPartonHistory"));
     top::check(topPartonHistory->setProperty("config", topConfig),
                "Failed to setProperty of top::CalcTtttPartonHistory");
+  } else if (settings->value("TopPartonHistory") == "tWH") {
+    topPartonHistory =
+      std::unique_ptr<top::CalcTopPartonHistory>(new top::CalcTwhPartonHistory("top::CalcTwhPartonHistory"));
+    top::check(topPartonHistory->setProperty("config", topConfig),
+               "Failed to setProperty of top::CalcTwhPartonHistory");
   }
+
 
 
   //LHAPDF SF calculation
