@@ -7,7 +7,6 @@ KG Tan, 04/12/2012
 
 from AthenaCommon.CfgGetter import getService
 from AthenaCommon import CfgMgr
-from ISF_Config.ISF_jobProperties import ISF_Flags
 from ISF_FastCaloSimServices.ISF_FastCaloSimJobProperties import ISF_FastCaloSimFlags
 from ISF_Algorithms.collection_merger_helpers import generate_mergeable_collection_name
 
@@ -700,30 +699,8 @@ def getNIPropagator(name="ISF_NIPropagator", **kwargs):
 
 
 def getNINavigator(name="ISF_NINavigator", **kwargs):
-
-    # Decide if we want to use the Tracking Geometry
-    # from conditions or not
-    if (ISF_Flags.UseTrackingGeometryCond
-            and 'TrackingGeometryKey' not in kwargs):
-        from AthenaCommon.AlgSequence import AthSequencer
-        condSeq = AthSequencer("AthCondSeq")
-        if not hasattr(condSeq, 'AtlasTrackingGeometryCondAlg'):
-            from InDetCondFolders import InDetAlignFolders_FATRAS  # noqa: F401
-            from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlg import (
-                ConfiguredTrackingGeometryCondAlg)
-            TrkGeoCondAlg = ConfiguredTrackingGeometryCondAlg(
-                'AtlasTrackingGeometryCondAlg')
-            condSeq += TrkGeoCondAlg
-
-        kwargs.setdefault('TrackingGeometryKey',
-                          condSeq.AtlasTrackingGeometryCondAlg.TrackingGeometryWriteKey)
-    elif 'TrackingGeometrySvc' not in kwargs:
-        from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
-        kwargs.setdefault('TrackingGeometrySvc', AtlasTrackingGeometrySvc)
-        kwargs.setdefault('TrackingGeometryKey', '')
-
-    from TrkExTools.TrkExToolsConf import Trk__Navigator
-    return Trk__Navigator(name, **kwargs)
+    from TrkExTools.TimedExtrapolator import getNINavigator as navigatorConfig
+    return navigatorConfig(name, **kwargs)
 
 
 def getNITimedExtrapolator(name="ISF_NITimedExtrapolator", **kwargs):
