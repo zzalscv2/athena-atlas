@@ -7,6 +7,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "HepPID/ParticleIDMethods.hh"
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -66,7 +67,7 @@ SimpleTruthParticleFilterTool::isAccepted (HepMC::ConstGenParticlePtr p)
   if ( !last && // is it the last tau? (not a tau or not last -> last=false )
        p->status()%1000 != 1 &&
        !(p->status()%1000 == 2 && p->status()>1000) &&
-       !(p->status()==2 && (!p->end_vertex() || HepMC::barcode(p->end_vertex())<-200000) ) ) {
+       !(p->status()==2 && (!p->end_vertex() || HepMC::is_simulation_vertex(p->end_vertex())) ) ) {
     return false;
   }
 

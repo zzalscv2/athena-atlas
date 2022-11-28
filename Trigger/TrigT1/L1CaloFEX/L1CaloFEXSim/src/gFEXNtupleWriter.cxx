@@ -27,6 +27,7 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 
+#include "AtlasHepMC/MagicNumbers.h"
 
 LVL1::gFEXNtupleWriter::gFEXNtupleWriter(const std::string& name, ISvcLocator* pSvcLocator): AthAlgorithm(name, pSvcLocator) { }
 

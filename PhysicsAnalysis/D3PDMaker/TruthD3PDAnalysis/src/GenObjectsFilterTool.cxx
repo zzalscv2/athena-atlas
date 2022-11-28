@@ -19,6 +19,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 // Local include(s):
@@ -131,7 +132,7 @@ bool GenObjectsFilterTool::pass( const HepMC::GenEvent* evt,
 
 bool GenObjectsFilterTool::isBCHadron(HepMC::ConstGenParticlePtr part) const{
 
-  if(HepMC::barcode(part) >= 200000) return false;
+  if(HepMC::is_simulation_particle(part)) return false;
   int type = HadronClass::type(part->pdg_id()).second;
   if(type == 5 || type == 4)  return true;
 
@@ -306,7 +307,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
    }
 
    if(m_keepLeptonicWZBosonDecayChains){
-     if(barcode < 200000){
+     if(!HepMC::is_simulation_particle(barcode)){
 
        bool isleptonicWZ=false;
 #ifdef HEPMC3
@@ -356,7 +357,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
 
    if(m_keepStatusOneLeptonsFromWZ){
      if(abs(pdg) == 11 || abs(pdg) == 13 || abs(pdg) == 15 ){
-       if(barcode < 200000 && status == 1){
+       if(!HepMC::is_simulation_particle(barcode) && status == 1){
 
 	 bool isleptonicWZ=false;
 #ifdef HEPMC3
@@ -423,7 +424,7 @@ bool GenObjectsFilterTool::pass( HepMC::ConstGenParticlePtr part,
    // If we don't want to specifically select charged truth tracks, then this
    // is already good enough:
    if( ! m_selectTruthTracks ) return true;
-   if (HepMC::barcode(part) < 200000) {
+   if (!HepMC::is_simulation_particle(part)) {
      if( ! TruthHelper::IsGenStable()( part ) ) return false;
      if( ! TruthHelper::IsGenInteracting()( part ) ) return false;
    }

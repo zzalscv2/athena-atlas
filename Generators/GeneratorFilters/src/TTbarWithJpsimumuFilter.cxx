@@ -4,6 +4,7 @@
 #include "GeneratorFilters/TTbarWithJpsimumuFilter.h"
 
 #include "GaudiKernel/MsgStream.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 //--------------------------------------------------------------------------
 TTbarWithJpsimumuFilter::TTbarWithJpsimumuFilter(const std::string& fname,
@@ -46,7 +47,7 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
         // Loop over all truth particles in the event
         // ===========================================
         for(auto part: *genEvt) {
-            if(HepMC::barcode(part) > 200000) break;
+            if(HepMC::is_simulation_particle(part)) break;
             
             int pdgid = std::abs(part->pdg_id());
             // don't loose time checking all if one found

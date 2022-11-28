@@ -24,6 +24,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 // Needed for FourVector
 #include "AtlasHepMC/SimpleVector.h"
@@ -325,8 +326,6 @@ StatusCode CompactHardTruth::execute() {
   // Remove and delete Geant vertices and particles
   // All Geant particles should have Geant parent vertex
 
-  static const int cutG4 = 200000;
-
 #ifdef HEPMC3
   for (auto hadv:thinEvt->vertices()) {
     // Empth vertices
@@ -335,14 +334,14 @@ StatusCode CompactHardTruth::execute() {
       deleteV.push_back(hadv);
     }
     // Geant vertices/particles
-    if (HepMC::barcode(hadv) > -cutG4) continue;
+    if (!HepMC::is_simulation_vertex(hadv)) continue;
     for (auto  pin: hadv->particles_in()) {
       removePV.push_back(vpPair(hadv, pin));
-      if (HepMC::barcode(pin) > cutG4) { deleteP.push_back(pin); }
+      if (HepMC::is_simulation_particle(pin)) { deleteP.push_back(pin); }
     }
     for (auto  pout: hadv->particles_out()) {
       removePV.push_back(vpPair(hadv, pout));
-      if ( HepMC::barcode(pout) > cutG4) { deleteP.push_back(pout); }
+      if (HepMC::is_simulation_particle(pout)) { deleteP.push_back(pout); }
     }
     removeV.push_back(hadv);
     deleteV.push_back(hadv);
@@ -357,18 +356,18 @@ StatusCode CompactHardTruth::execute() {
     }
 
     // Geant vertices/particles
-    if (HepMC::barcode(*hadv) > -cutG4) continue;
+    if (!HepMC::is_simulation_vertex(*hadv)) continue;
     HepMC::GenVertex::particles_in_const_iterator pin = (*hadv)->particles_in_const_begin();
     HepMC::GenVertex::particles_in_const_iterator pinE = (*hadv)->particles_in_const_end();
     for (; pin != pinE; ++pin) {
       removePV.emplace_back(*hadv, *pin);
-      if ((*pin)->barcode() > cutG4) { deleteP.push_back(*pin); }
+      if (HepMC::is_simulation_particle(*pin)) { deleteP.push_back(*pin); }
     }
     HepMC::GenVertex::particles_out_const_iterator pout = (*hadv)->particles_out_const_begin();
     HepMC::GenVertex::particles_out_const_iterator poutE = (*hadv)->particles_out_const_end();
     for (; pout != poutE; ++pout) {
       removePV.emplace_back(*hadv, *pout);
-      if ((*pout)->barcode() > cutG4) { deleteP.push_back(*pout); }
+      if (HepMC::is_simulation_particle(*pout)) { deleteP.push_back(*pout); }
     }
     removeV.push_back(*hadv);
     deleteV.push_back(*hadv);

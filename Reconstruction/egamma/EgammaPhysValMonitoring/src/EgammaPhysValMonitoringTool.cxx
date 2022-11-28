@@ -31,6 +31,8 @@
 
 #include <iostream>
 
+#include "AtlasHepMC/MagicNumbers.h"
+
 using CLHEP::GeV;
 using namespace std;
 using namespace MCTruthPartClassifier;
@@ -136,14 +138,14 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
       //--electrons
       if (std::abs(truthParticle->pdgId()) == 11 &&
-          truthParticle->status() == 1 && truthParticle->barcode() < 1000000) {
+          truthParticle->status() == 1 && truthParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
         m_oElectronValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                          *eventInfo);
       } //-- end electrons
 
       //--photons
       if (std::abs(truthParticle->pdgId()) == 22 &&
-          truthParticle->status() == 1 && truthParticle->barcode() < 1000000) {
+          truthParticle->status() == 1 && truthParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
         m_oPhotonValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                        *eventInfo);
         //-- filling conversions
@@ -245,7 +247,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
       //--electrons
       if (std::abs(truthallParticle->pdgId()) == 11 &&
           truthallParticle->status() == 1 &&
-          truthallParticle->barcode() < 1000000) {
+          truthallParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
 
 #ifdef MCTRUTHCLASSIFIER_CONST
         auto type =
@@ -276,7 +278,7 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
       //--photons
       if (std::abs(truthallParticle->pdgId()) == 22 &&
           truthallParticle->status() == 1 &&
-          truthallParticle->barcode() < 1000000) {
+          truthallParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
 
 #ifdef MCTRUTHCLASSIFIER_CONST
         auto type =

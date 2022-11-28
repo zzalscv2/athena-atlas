@@ -146,7 +146,7 @@ namespace MC {
     // Retrieving the barcode is relatively expensive with HepMC3,
     // so test status first.
     if (p->status() != 1) return false;
-    return HepMC::barcode(p) < SIM_BARCODE_THRESHOLD;
+    return !HepMC::is_simulation_particle(p);
   }
 
 

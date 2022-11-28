@@ -6,6 +6,7 @@
 
 // Section of includes for Truth tests
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "TH1.h"
@@ -266,7 +267,7 @@ StatusCode TruthHitAnalysis::execute() {
 	m_vtx_z->push_back(z);
 	m_vtx_barcode->push_back(bcode);
 
-	if (bcode > -200000) {
+	if (!HepMC::is_simulation_vertex(bcode)) {
 	  m_h_vtx_prim_xy->Fill(x,y);
 	  m_h_vtx_prim_zr->Fill(z,r);
 	  ++nvtx;
@@ -308,7 +309,7 @@ StatusCode TruthHitAnalysis::execute() {
 	int pdg = currentGenParticle->pdg_id();
 	m_pdgid->push_back(pdg);
 	
-	if (currentGenParticlebarcode < 200000) {
+	if (!HepMC::is_simulation_particle(currentGenParticlebarcode)) {
 	  m_h_part_pdgid->Fill(pdg);
 	  m_h_part_p->Fill(std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z()));
 	  m_h_part_eta->Fill(mom.eta());
@@ -324,7 +325,7 @@ StatusCode TruthHitAnalysis::execute() {
 	else {
 	  m_h_part_pdgid_sec->Fill(pdg);
 	  ++npart_sec;
-	  const int gen = HepMC::barcode(currentGenParticle)/1000000 + 2;
+	  const int gen = currentGenParticlebarcode/1000000 + 2;
 	  m_h_n_generations->Fill(gen);    
 	}
       } // End iteration over particles

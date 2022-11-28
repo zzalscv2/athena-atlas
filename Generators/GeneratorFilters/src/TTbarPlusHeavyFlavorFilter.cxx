@@ -4,6 +4,7 @@
 
 #include "GeneratorFilters/TTbarPlusHeavyFlavorFilter.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GaudiKernel/MsgStream.h"
 
 //--------------------------------------------------------------------------
@@ -65,7 +66,7 @@ StatusCode TTbarPlusHeavyFlavorFilter::filterEvent() {
     // ===========================================
     for(auto  part: *genEvt) {
 
-      if(HepMC::barcode(part) > 200000) break;
+      if(HepMC::is_simulation_particle(part)) break;
 
       bool isbquark=false;
       bool iscquark=false;
@@ -200,7 +201,7 @@ int TTbarPlusHeavyFlavorFilter::hadronType(int pdgid) const{
 
 bool TTbarPlusHeavyFlavorFilter::isBHadron(HepMC::ConstGenParticlePtr part) const{
 
-  if(HepMC::barcode(part) >= 200000) return false;
+  if(HepMC::is_simulation_particle(part)) return false;
   int type = hadronType(part->pdg_id());
   if(type == 5)  return true;
 
@@ -211,7 +212,7 @@ bool TTbarPlusHeavyFlavorFilter::isBHadron(HepMC::ConstGenParticlePtr part) cons
 
 bool TTbarPlusHeavyFlavorFilter::isCHadron(HepMC::ConstGenParticlePtr part) const{
 
-  if(HepMC::barcode(part) >= 200000) return false;
+  if(HepMC::is_simulation_particle(part)) return false;
   int type = hadronType(part->pdg_id());
   if(type == 4)  return true;
 

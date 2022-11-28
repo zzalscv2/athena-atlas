@@ -3,6 +3,7 @@
 */
 
 #include "TrigT1NSWSimTools/MMLoadVariables.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 MMLoadVariables::MMLoadVariables(StoreGateSvc* evtStore, const MuonGM::MuonDetectorManager* detManager, const MmIdHelper* idhelper):
    AthMessaging(Athena::getMessageSvc(), "MMLoadVariables") {
@@ -44,13 +45,14 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           const HepMC::GenParticle *particle = pit;
 #endif
           const HepMC::FourVector momentum = particle->momentum();
-          if(HepMC::barcode(particle) < 1e06 && std::abs(particle->pdg_id())==13){
+          int barcodeparticle = HepMC::barcode(particle);
+          if( barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT && std::abs(particle->pdg_id())==13){
             thePart.SetCoordinates(momentum.perp(),momentum.eta(),momentum.phi(),momentum.e());
             if(trackRecordCollection!=nullptr){
             for(const auto & mit : *trackRecordCollection ) {
               const CLHEP::Hep3Vector mumomentum = mit.GetMomentum();
               const CLHEP::Hep3Vector muposition = mit.GetPosition();
-              if(!trackRecordCollection->empty() && HepMC::barcode(particle)==mit.GetBarCode()) {
+              if(!trackRecordCollection->empty() && barcodeparticle ==mit.GetBarCode()) {
                 pdg_tmp         = HepMC::barcode(particle);
                 phiEntry_tmp    = mumomentum.getPhi();
                 etaEntry_tmp    = mumomentum.getEta();
@@ -75,7 +77,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
             }
             j++;
 
-            if(thePart.Pt() > 0. && HepMC::barcode(particle) < 1e06){
+            if(thePart.Pt() > 0. && barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT){
               bool addIt = true;
               for(unsigned int ipart=0; ipart < truthParticles.size(); ipart++){
                 if( std::abs(thePart.Pt()-truthParticles[ipart].Pt()) < 0.001 ||

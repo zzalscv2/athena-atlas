@@ -19,6 +19,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GaudiKernel/IPartPropSvc.h"
 
@@ -229,7 +230,7 @@ namespace Trk
     if( ! pass( part->parent_event(), coll ) ) return false;
 
     // Now check for stable particles
-    if (HepMC::barcode(part) < 200000) {
+    if (!HepMC::is_simulation_particle(part)) {
       if( ! TruthHelper::IsGenStable()( part ) ) return false;
       if( ! TruthHelper::IsGenInteracting()( part ) ) return false;
     }

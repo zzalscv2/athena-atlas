@@ -6,6 +6,7 @@
 //
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "StoreGate/ReadHandle.h"
@@ -81,13 +82,13 @@ StatusCode TruthResetAlg::execute() {
      std::vector<HepMC::GenParticlePtr> p_to_remove;
      std::vector<HepMC::GenVertexPtr> v_to_remove;
      for (auto particle: outputEvent->particles()) {
-       if (HepMC::barcode(particle) > 200000) { 
+       if (HepMC::is_simulation_particle(particle)) { // TODO Consider making the threshold for this check configurable.
          p_to_remove.push_back(particle);
        }
      }
      for (auto particle: p_to_remove) outputEvent->remove_particle(particle);
      for (auto vertex: outputEvent->vertices()) {
-       if (HepMC::barcode(vertex) < -200000 || vertex->particles_out().empty() ) { 
+       if (HepMC::is_simulation_vertex(vertex) || vertex->particles_out().empty() ) {  // TODO Consider making the threshold for this check configurable.
          v_to_remove.push_back(vertex);
        }
      }
@@ -125,7 +126,7 @@ StatusCode TruthResetAlg::execute() {
   ATH_MSG_VERBOSE( "Starting a vertex loop ... " );
   for (; currentVertexIter != endOfCurrentListOfVertices; ++currentVertexIter) {
     const HepMC::GenVertex *pCurrentVertex(*currentVertexIter);
-    if (pCurrentVertex->barcode()<-200000) { // FIXME configurable constant
+    if (HepMC::is_simulation_vertex(pCurrentVertex)) { // TODO Consider making the threshold for this check configurable.
       continue; // skip vertices created by the simulation
     }
     std::unique_ptr<HepMC::GenVertex> copyOfGenVertex =
@@ -150,7 +151,7 @@ StatusCode TruthResetAlg::execute() {
   for ( HepMC::GenEvent::particle_const_iterator particleIter = inputEvent.particles_begin();
         particleIter != inputEvent.particles_end(); ++particleIter ) {
     const HepMC::GenParticle* currentParticle = *particleIter;
-    if (currentParticle->barcode()>200000) { // FIXME configurable constant
+    if (HepMC::is_simulation_particle(currentParticle)) { // TODO Consider making the threshold for this check configurable.
       continue; // skip particles created by the simulation
     }
     std::unique_ptr<HepMC::GenParticle> copyOfGenParticle = std::make_unique<HepMC::GenParticle>(*currentParticle);
