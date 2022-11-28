@@ -2,7 +2,9 @@
 /*
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
-#include "TrkGaussianSumFilterUtils/MultiComponentStateModeCalculator.h"
+
+// since we are testing an "internal" /implementation method of the .cxx
+#include "src/MultiComponentStateModeCalculator.cxx"
 #include <iostream>
 
 int
@@ -66,8 +68,7 @@ main()
     vec0, vec1, vec2, vec3, vec4
   };
 
-  std::array<double, 10> result =
-    Trk::MultiComponentStateModeCalculator::calculateMode(mixture);
+  std::array<double, 10> result = evaluateMode(mixture);
   for (double i : result) {
     std::cout << i << '\n';
   }

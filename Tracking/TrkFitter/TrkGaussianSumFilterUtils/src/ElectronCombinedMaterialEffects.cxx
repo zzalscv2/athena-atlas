@@ -28,6 +28,35 @@ constexpr double s_xOverRange = 0.10;
 constexpr double s_upperRange = 0.20;
 constexpr double s_componentMeanCut = 0.0;
 
+/**
+ * use Horner's method to evaluate Polynomials
+ * We unroll up to order 5
+ */
+template<size_t N>
+inline double
+hornerEvaluate(const std::array<double, N>& a, const double& x)
+{
+  constexpr size_t order = N - 1;
+  if constexpr (order == 0) {
+    return a[0];
+  } else if constexpr (order == 1) {
+    return a[0] * x + a[1];
+  } else if constexpr (order == 2) {
+    return (a[0] * x + a[1]) * x + a[2];
+  } else if constexpr (order == 3) {
+    return ((a[0] * x + a[1]) * x + a[2]) * x + a[3];
+  } else if constexpr (order == 4) {
+    return (((a[0] * x + a[1]) * x + a[2]) * x + a[3]) * x + a[4];
+  } else if constexpr (order == 5) {
+    return ((((a[0] * x + a[1]) * x + a[2]) * x + a[3]) * x + a[4]) * x + a[5];
+  } else { // leave the fallback for now
+    double result = 0;
+    for (size_t i = 0; i < N; ++i) {
+      result = result * x + a[i];
+    }
+    return result;
+  }
+}
 inline bool
 inRange(int var, int lo, int hi)
 {
@@ -41,8 +70,8 @@ logisticFunction(const double x)
   return 1. / (1. + std::exp(-x));
 }
 
-// Correct weights of components
 using BH = Trk::ElectronCombinedMaterialEffects;
+// Correct weights of components
 void
 correctWeights(BH::MixtureParameters& mixture, const int numberOfComponents)
 {
@@ -73,9 +102,12 @@ getTranformedMixtureParameters(
 {
   BH::MixtureParameters mixture{};
   for (int i = 0; i < numberOfComponents; ++i) {
-    const double updatedWeight = polynomialWeights[i](pathlengthInX0);
-    const double updatedMean = polynomialMeans[i](pathlengthInX0);
-    const double updatedVariance = polynomialVariances[i](pathlengthInX0);
+    const double updatedWeight =
+      hornerEvaluate(polynomialWeights[i], pathlengthInX0);
+    const double updatedMean =
+      hornerEvaluate(polynomialMeans[i], pathlengthInX0);
+    const double updatedVariance =
+      hornerEvaluate(polynomialVariances[i], pathlengthInX0);
     mixture[i] = { logisticFunction(updatedWeight),
                    logisticFunction(updatedMean),
                    std::exp(updatedVariance) };
@@ -96,9 +128,12 @@ getMixtureParameters(
 {
   BH::MixtureParameters mixture{};
   for (int i = 0; i < numberOfComponents; ++i) {
-    const double updatedWeight = polynomialWeights[i](pathlengthInX0);
-    const double updatedMean = polynomialMeans[i](pathlengthInX0);
-    const double updatedVariance = polynomialVariances[i](pathlengthInX0);
+    const double updatedWeight =
+      hornerEvaluate(polynomialWeights[i], pathlengthInX0);
+    const double updatedMean =
+      hornerEvaluate(polynomialMeans[i], pathlengthInX0);
+    const double updatedVariance =
+      hornerEvaluate(polynomialVariances[i], pathlengthInX0);
     mixture[i] = { updatedWeight,
                    updatedMean,
                    updatedVariance * updatedVariance };
@@ -152,7 +187,7 @@ readPolynomial(std::ifstream& fin)
     if (!fin) {
       throw std::logic_error("Reached end of stream but still expecting data.");
     }
-    fin >> poly.coefficients[i];
+    fin >> poly[i];
   }
   return poly;
 }
@@ -164,10 +199,8 @@ Trk::ElectronCombinedMaterialEffects::ElectronCombinedMaterialEffects(
   const std::string& parameterisationFileName,
   const std::string& parameterisationFileNameHighX0)
 {
-
   // The following is a bit repetitive code
   // we could consider refactoring
-  //
   // The low X0 polynomials
   {
     std::string resolvedFileName =
@@ -321,7 +354,7 @@ Trk::ElectronCombinedMaterialEffects::compute(
    * 3. Combine the multiple scattering with each of the  energy loss components
    */
   // Cache is to be filled so 0 entries here
-  cache.numEntries=0;
+  cache.numEntries = 0;
   for (int i = 0; i < cache_energyLoss.numElements; ++i) {
     double combinedWeight = cache_energyLoss.elements[i].weight;
     double combinedDeltaP = cache_energyLoss.elements[i].deltaP;

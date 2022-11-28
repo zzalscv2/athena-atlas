@@ -35,20 +35,7 @@ public:
   using MixtureParameters =
     std::array<ComponentValues, GSFConstants::maxNumberofMatComponents>;
 
-  /** Helper struct for construction and evaluation of polynomial */
-  struct Polynomial
-  {
-    // Evaluation of the polynomial for given material thickness (t)
-    double operator()(const double& t) const
-    {
-      double sum(0.);
-      for (size_t i = 0; i < GSFConstants::polynomialCoefficients; ++i) {
-        sum = t * sum + coefficients[i];
-      }
-      return sum;
-    }
-    std::array<double, GSFConstants::polynomialCoefficients> coefficients;
-  };
+  using Polynomial = std::array<double, GSFConstants::polynomialCoefficients>;
 
   // ctor with arguments
   ElectronCombinedMaterialEffects(

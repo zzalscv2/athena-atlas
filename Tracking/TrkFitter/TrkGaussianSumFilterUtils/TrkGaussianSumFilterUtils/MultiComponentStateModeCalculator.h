@@ -47,10 +47,6 @@ struct Component
 std::array<double, 10>
 calculateMode(const MultiComponentState&);
 
-/** @brief  Method to calculate mode*/
-std::array<double, 10>
-calculateMode(const std::array<std::vector<Component>, 5>& mixture);
-
 } // namespace MultiComponentStateModeCalculator
 
 } // namespace Trk

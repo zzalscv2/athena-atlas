@@ -293,26 +293,11 @@ findRoot(double& result,
   return false;
 }
 
-} // end of anonymous namespace
-
+/**
+ * @ brief method to evaluate the Mode
+ */
 std::array<double, 10>
-Trk::MultiComponentStateModeCalculator::calculateMode(
-  const Trk::MultiComponentState& multiComponentState)
-{
-  // Check to see if the multi-component state is measured
-  if (!MultiComponentStateHelpers::isMeasured(multiComponentState)) {
-    return {};
-  }
-
-  std::array<std::vector<Component>, 5> mixture;
-
-  fillMixture(multiComponentState, mixture);
-  return calculateMode(mixture);
-}
-
-std::array<double, 10>
-Trk::MultiComponentStateModeCalculator::calculateMode(
-  const std::array<std::vector<Component>, 5>& mixture)
+evaluateMode(const std::array<std::vector<Component>, 5>& mixture)
 {
   std::array<double, 10> modes{};
   /* loop over the 5 direction , d0,z0,phi,theta,qOverP*/
@@ -380,3 +365,20 @@ Trk::MultiComponentStateModeCalculator::calculateMode(
   }
   return modes;
 }
+} // end of anonymous namespace
+
+std::array<double, 10>
+Trk::MultiComponentStateModeCalculator::calculateMode(
+  const Trk::MultiComponentState& multiComponentState)
+{
+  // Check to see if the multi-component state is measured
+  if (!MultiComponentStateHelpers::isMeasured(multiComponentState)) {
+    return {};
+  }
+
+  std::array<std::vector<Component>, 5> mixture;
+
+  fillMixture(multiComponentState, mixture);
+  return evaluateMode(mixture);
+}
+
