@@ -20,6 +20,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
+#include "AtlasHepMC/MagicNumbers.h"
 
 using Gaudi::Units::GeV;
 using Gaudi::Units::MeV;

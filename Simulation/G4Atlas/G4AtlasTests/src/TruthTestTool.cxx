@@ -5,6 +5,7 @@
 #include "TruthTestTool.h"
 
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include "GeneratorObjects/McEventCollection.h"
 #include <TH1.h>
@@ -189,7 +190,7 @@ StatusCode TruthTestTool::processEvent()
         m_vtx_z->Fill(z);
         m_vtx_zr_indet->Fill(z, r);
         m_vtx_xy_indet->Fill(x, y);
-        if ( HepMC::barcode(vtx)>-200000 ) {
+        if ( !HepMC::is_simulation_vertex(vtx) ) {
           mx+=x;
           my+=y;
           mz+=z;
@@ -279,7 +280,7 @@ StatusCode TruthTestTool::processEvent()
         particleType = (pdg<0) ? -particleType : particleType;
         m_particle_type->Fill( particleType );
 
-        if ( barcode<200000 ) {
+        if ( !HepMC::is_simulation_particle(barcode) ) {
           double momentum=std::sqrt(mom.x()*mom.x()+mom.y()*mom.y()+mom.z()*mom.z());
           m_p_gen->Fill( momentum );
           m_log_p_gen->Fill( std::log(momentum) );

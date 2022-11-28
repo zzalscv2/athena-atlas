@@ -15,6 +15,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "boost/range/iterator_range_core.hpp"
 #include <utility>
@@ -23,17 +24,6 @@
 using CLHEP::HepLorentzVector;
 
 
-namespace {
-
-
-const int PARTONPDGMAX = 43;
-const int NPPDGMIN = 1000000;
-const int NPPDGMAX = 9999999;
-const int PHOTOSMIN = 10000;
-const int GEANTMIN = 200000;
-
-
-} // anonymous namespace
 
 
 namespace D3PD {
@@ -413,7 +403,7 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
   int status = p->status();
   int barcode = HepMC::barcode(p);
 
-	if (barcode > GEANTMIN && !m_writeGeant)
+	if ( !m_writeGeant && HepMC::is_simulation_particle(barcode))
 		return false;
 
 	if (m_excludeWZdecays) {
@@ -490,24 +480,24 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
 	}
 
 	// are we at parton/hadron level?
-	if ( status!=3 && pdg_id > PARTONPDGMAX && !m_haveSeenAHadron ) {
+	if ( status!=3 && pdg_id > HepMC::PARTONPDGMAX && !m_haveSeenAHadron ) {
 		m_haveSeenAHadron = true;
 		m_firstHadronBarcode = barcode;
 	}
 
 	// OK if we select partons and are at beginning of event record
 	if( m_writePartons /*&& !m_haveSeenAHadron */ &&
-			(pdg_id <= PARTONPDGMAX || (pdg_id >= NPPDGMIN && pdg_id <= NPPDGMAX) ))
+			(pdg_id <= HepMC::PARTONPDGMAX || (pdg_id >= HepMC::NPPDGMIN && pdg_id <= HepMC::NPPDGMAX) ))
 		ok = true;
 	
 	//  OK if we should select hadrons and are in hadron range 
-  if( m_writeHadrons && m_haveSeenAHadron && barcode < PHOTOSMIN )
+  if( m_writeHadrons && m_haveSeenAHadron && barcode < HepMC::PHOTOSMIN )
     ok = true;
  
   // PHOTOS range: check whether photons come from parton range or 
   // hadron range
   int motherBarcode = 999999999;
-  if( barcode > PHOTOSMIN && barcode < GEANTMIN && p->production_vertex() ) {
+  if( barcode > HepMC::PHOTOSMIN && !HepMC::is_simulation_particle(barcode) && p->production_vertex() ) {
     HepMC::ConstGenVertexPtr vprod = p->production_vertex();
     if ( HepMC::particles_in_size(vprod) > 0) {
 #ifdef HEPMC3
@@ -526,7 +516,7 @@ TruthJetFilterTool::acceptParticle (HepMC::ConstGenParticlePtr p)
   }
 
   // OK if we should select G4 particles and are in G4 range
-  if( m_writeGeant && barcode > GEANTMIN )
+  if( m_writeGeant && HepMC::is_simulation_particle(barcode) )
     ok = true;
 
   return ok;

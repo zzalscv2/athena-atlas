@@ -16,22 +16,24 @@
 
 #include "JetUtils/JetDistances.h"
 
+#include "AtlasHepMC/MagicNumbers.h"
+
 namespace {
   // TEMPORARY recopy some helper from TruthHelper and GeneratorUtils packages. 
   // We'll have to use this package when they work properly with xAOD.
 
   inline bool isStable(const xAOD::TruthParticle* p) {
-    if (p->barcode() >= 200000) return false; // This particle is from G4
+    if (HepMC::is_simulation_particle(p->barcode())) return false; // This particle is from G4
     if (p->pdgId() == 21 && p->p4().E() == 0) return false; //< Workaround for a gen bug?
     return ((p->status() % 1000 == 1) || //< Fully stable, even if marked that way by G4
-            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != NULL && p->decayVtx()->barcode() < -200000)); //< Gen-stable with G4 decay
+            (p->status() % 1000 == 2 && p->hasDecayVtx() && p->decayVtx() != NULL && HepMC::is_simulation_vertex(p->decayVtx()->barcode()))); //< Gen-stable with G4 decay
     /// @todo Add a no-descendants-from-G4 check?
   }
   
 
   bool isInteracting( const xAOD::TruthParticle* const p){
       if (! isStable(p)) return false;
-      const int apid = abs(p->pdgId() );
+      const int apid = std::abs(p->pdgId() );
       if (apid == 12 || apid == 14 || apid == 16) return false;
       if (p->status() % 1000 == 1 &&
           (apid == 1000022 || apid == 1000024 || apid == 5100022 ||
