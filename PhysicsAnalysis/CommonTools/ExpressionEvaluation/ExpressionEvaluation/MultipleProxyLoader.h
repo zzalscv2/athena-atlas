@@ -12,6 +12,9 @@
 #ifndef MULTIPLE_PROXY_LOADER_H
 #define MULTIPLE_PROXY_LOADER_H
 
+#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 #include "ExpressionEvaluation/IProxyLoader.h"
 
 #include <vector>
@@ -20,14 +23,14 @@
 namespace ExpressionParsing {
   class MultipleProxyLoader : public IProxyLoader {
     public:
-      MultipleProxyLoader() { }
+      MultipleProxyLoader();
       virtual ~MultipleProxyLoader();
 
       void push_back(IProxyLoader *proxyLoader);
 
       virtual void reset();
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
 
       virtual int loadIntVariableFromString(const std::string &varname) const;
       virtual double loadDoubleVariableFromString(const std::string &varname) const;
@@ -36,7 +39,9 @@ namespace ExpressionParsing {
 
     private:
       std::vector<IProxyLoader *> m_proxyLoaders;
-      std::map<std::string, IProxyLoader *> m_varnameToProxyLoader;
+
+      using proxyCache_t = CxxUtils::ConcurrentStrMap<IProxyLoader*, CxxUtils::SimpleUpdater>;
+      mutable proxyCache_t m_varnameToProxyLoader ATLAS_THREAD_SAFE;
   };
 }
 

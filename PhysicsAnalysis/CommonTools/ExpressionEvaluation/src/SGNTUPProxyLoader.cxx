@@ -42,7 +42,7 @@ namespace ExpressionParsing {
   {
   }
 
-  IProxyLoader::VariableType SGNTUPProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType SGNTUPProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     if      (m_evtStore->contains<int>(varname))                        return VT_INT;
     else if (m_evtStore->contains<bool>(varname))                       return VT_INT;

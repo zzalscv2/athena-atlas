@@ -24,7 +24,7 @@ namespace ExpressionParsing {
 
       virtual void reset() = 0;
 
-      virtual VariableType variableTypeFromString(const std::string &varname) = 0;
+      virtual VariableType variableTypeFromString(const std::string &varname) const = 0;
 
       virtual int loadIntVariableFromString(const std::string &varname) const = 0;
       virtual double loadDoubleVariableFromString(const std::string &varname) const = 0;

@@ -19,6 +19,8 @@
 #include "TMethodCall.h"
 #include "TVirtualCollectionProxy.h"
 #include "CxxUtils/checker_macros.h"
+#include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 
 #include <unordered_map>
 #include <string>
@@ -143,17 +145,24 @@ namespace ExpressionParsing {
 
   class xAODProxyLoader : public IProxyLoader {
   public:
+    xAODProxyLoader();
     virtual ~xAODProxyLoader();
+
+    /// Disallow copy construction and assignment.
+    xAODProxyLoader(const xAODProxyLoader&) = delete;
+    xAODProxyLoader& operator=(const xAODProxyLoader&) = delete;
+
     virtual void reset();
 
   protected:
     template<class TYPE, class AUX>
-    bool try_type(const std::string& varname, const std::type_info* ti, const AUX* data);
+    bool try_type(const std::string& varname, const std::type_info* ti, const AUX* data) const;
 
     template<class AUX>
-    IProxyLoader::VariableType try_all_known_types(const std::string& varname, const AUX* data, bool isVector);
+    IProxyLoader::VariableType try_all_known_types(const std::string& varname, const AUX* data, bool isVector) const;
 
-    std::unordered_map<std::string, BaseAccessorWrapper*> m_accessorCache;
+    using accessorCache_t = CxxUtils::ConcurrentStrMap<BaseAccessorWrapper*, CxxUtils::SimpleUpdater>;
+    mutable accessorCache_t m_accessorCache ATLAS_THREAD_SAFE;
   };
 
 
@@ -164,7 +173,7 @@ namespace ExpressionParsing {
 
       void setData(const SG::AuxElement *auxElement);
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
       virtual int loadIntVariableFromString(const std::string &varname) const;
       virtual double loadDoubleVariableFromString(const std::string &varname) const;
       virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
@@ -182,7 +191,7 @@ namespace ExpressionParsing {
 
       void setData(const SG::AuxVectorData *auxElement);
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
       virtual int loadIntVariableFromString(const std::string &varname) const;
       virtual double loadDoubleVariableFromString(const std::string &varname) const;
       virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;
