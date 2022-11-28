@@ -76,7 +76,9 @@ def setup_parser() -> ArgumentParser:
                                  reference files stored in the directory
                                  {references_CVMFS_path}
                                  and performance comparison tests will not be run.""")
-    common.add_argument("-c", "--check-only", type=str, dest="unique_ID", default=None,
+    common.add_argument("--run-only", action="store_true", dest="run_only", default=False,
+                        help="Run only the main command(s).")
+    common.add_argument("--checks-only", type=str, dest="unique_ID", nargs="?", default=None, const='local',
                         help="Re-run only the checks.")
 
     advanced = parser.add_argument_group("advanced")
@@ -88,6 +90,8 @@ def setup_parser() -> ArgumentParser:
                           help="Define a particular reference release.")
     advanced.add_argument("--val", type=str, dest="validation_release", default=None,
                           help="Define a particular validation release")
+    advanced.add_argument("--output-path", type=str, dest="validation_run_path", default="",
+                          help="Specify the head directory for running the validation tests. The default is ${PWD}")
     advanced.add_argument("--reference-path", type=str, dest="reference_run_path", default="",
                           help="Specify the head directory for running the reference tests. The default is /tmp/${USER}")
     advanced.add_argument("-z", "--exclusion-lists", type=str, dest="diff_rules_path", default=None,
@@ -123,10 +127,12 @@ def setup_parser() -> ArgumentParser:
 def get_test_setup(name: str, options: Namespace, log: logging.Logger) -> TestSetup:
     # define test setup
     setup = TestSetup(log)
+    setup.validation_run_path = Path(options.validation_run_path) if options.validation_run_path else Path.cwd()
     setup.reference_run_path = Path(options.reference_run_path) if options.reference_run_path else Path(f"/tmp/{environ['USER']}")
     setup.diff_rules_path = Path(options.diff_rules_path) if options.diff_rules_path is not None else None
     setup.disable_release_setup = options.ci_mode
     setup.validation_only = options.validation_only
+    setup.run_only = options.run_only
     if options.unique_ID:
         setup.checks_only = True
         setup.unique_ID = options.unique_ID
@@ -217,36 +223,38 @@ def get_standard_performance_checks(setup: TestSetup) -> List[WorkflowCheck]:
 
 
 def run_tests(setup: TestSetup, tests: List[WorkflowTest]) -> None:
-    if not setup.checks_only:
-        threads = {}
-        setup.logger.info("------------------ Run Athena workflow test jobs---------------")
-        if setup.parallel_execution and not setup.validation_only:
-            for test in tests:
-                threads[f"{test.ID}_reference"]   = threading.Thread(target=lambda test=test: test.run_reference())
-                threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
-                threads[f"{test.ID}_reference"].start()
-                threads[f"{test.ID}_validation"].start()
+    if setup.checks_only:
+        return
 
+    threads = {}
+    setup.logger.info("------------------ Run Athena workflow test jobs---------------")
+    if setup.parallel_execution and not setup.validation_only:
+        for test in tests:
+            threads[f"{test.ID}_reference"]   = threading.Thread(target=lambda test=test: test.run_reference())
+            threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
+            threads[f"{test.ID}_reference"].start()
+            threads[f"{test.ID}_validation"].start()
+
+        for thread in threads:
+            threads[thread].join()
+    elif setup.validation_only:
+        for test in tests:
+            threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
+            threads[f"{test.ID}_validation"].start()
+            if not setup.parallel_execution:
+                threads[f"{test.ID}_validation"].join()
+
+        if setup.parallel_execution:
             for thread in threads:
                 threads[thread].join()
-        elif setup.validation_only:
-            for test in tests:
-                threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
-                threads[f"{test.ID}_validation"].start()
-                if not setup.parallel_execution:
-                    threads[f"{test.ID}_validation"].join()
-
-            if setup.parallel_execution:
-                for thread in threads:
-                    threads[thread].join()
-        else:
-            for test in tests:
-                threads[f"{test.ID}_reference"]   = threading.Thread(target=lambda test=test: test.run_reference())
-                threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
-                threads[f"{test.ID}_reference"].start()
-                threads[f"{test.ID}_validation"].start()
-                threads[f"{test.ID}_reference"].join()
-                threads[f"{test.ID}_validation"].join()
+    else:
+        for test in tests:
+            threads[f"{test.ID}_reference"]   = threading.Thread(target=lambda test=test: test.run_reference())
+            threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
+            threads[f"{test.ID}_reference"].start()
+            threads[f"{test.ID}_validation"].start()
+            threads[f"{test.ID}_reference"].join()
+            threads[f"{test.ID}_validation"].join()
 
 
 def run_checks(setup: TestSetup, tests: List[WorkflowTest], performance_checks: List[WorkflowCheck]) -> bool:
@@ -256,7 +264,9 @@ def run_checks(setup: TestSetup, tests: List[WorkflowTest], performance_checks: 
     fpe_check = FPECheck(setup)
     # run checks
     for test in tests:
-        all_passed = test.run_checks(main_check, fpe_check, performance_checks) and all_passed
+        all_passed = main_check.run(test) and all_passed
+        if not setup.run_only:
+            all_passed = test.run_checks(fpe_check, performance_checks) and all_passed
     return all_passed
 
 

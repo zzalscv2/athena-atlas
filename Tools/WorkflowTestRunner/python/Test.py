@@ -7,7 +7,7 @@ from typing import List
 from uuid import uuid4
 import subprocess
 
-from .Helpers import get_pwd, get_release_setup, list_changed_packages
+from .Helpers import get_release_setup, list_changed_packages
 
 
 class TestSetup:
@@ -15,12 +15,13 @@ class TestSetup:
 
     def __init__(self, logger: Logger) -> None:
         self.logger = logger
-        self.pwd = get_pwd()
+        self.validation_run_path = Path.cwd()
         self.reference_run_path = Path("/tmp")
         self.diff_rules_path = None
         self.unique_ID = str(uuid4())
         self.disable_release_setup = False
         self.validation_only = False
+        self.run_only = False
         self.checks_only = False
         self.release_reference = ""
         self.release_validation = ""
@@ -110,8 +111,8 @@ class WorkflowTest:
         self.type = type
         self.setup = setup
         self.logger = setup.logger
-        self.validation_path: Path = Path(f"run_{self.ID}")
-        self.reference_path: Path = self.setup.reference_run_path / self.validation_path
+        self.validation_path: Path = self.setup.validation_run_path / f"run_{self.ID}"
+        self.reference_path: Path = self.setup.reference_run_path / f"run_{self.ID}"
 
     def run_reference(self) -> None:
         self.logger.info(f"Running reference in rel {self.setup.release_reference}")
@@ -134,7 +135,7 @@ class WorkflowTest:
 
         self.validation_path.mkdir(parents=True, exist_ok=True)
 
-        cmd = f"cd {self.setup.pwd};"
+        cmd = f"cd {self.validation_path};"
         if self.setup.disable_release_setup or not self.setup.release_validation:
             pass
         elif "WorkDir_DIR" in environ:
@@ -143,7 +144,6 @@ class WorkflowTest:
                     f"source {cmake_build_dir}/setup.sh;")
         else:
             cmd += f"source $AtlasSetup/scripts/asetup.sh {self.setup.release_validation} >& /dev/null;"
-        cmd += f"cd run_{self.ID};"
         cmd += f"TRF_NOECHO=1 {self.command} > {self.ID}.log 2>&1"
 
         subprocess.call(cmd, shell=True)
@@ -151,15 +151,10 @@ class WorkflowTest:
         self.logger.info(f"Finished validation in rel {self.setup.release_validation}")
         self.logger.info(f"\"{self.command}\"")
 
-    def run_checks(self, main_check: WorkflowCheck, fpe_check: WorkflowCheck, performance_checks: List[WorkflowCheck]) -> bool:
+    def run_checks(self, fpe_check: WorkflowCheck, performance_checks: List[WorkflowCheck]) -> bool:
         self.logger.info("-----------------------------------------------------")
         self.logger.info(f"----------- Post-processing of {self.ID} Test -----------")
         result = True
-
-        # HAZ: Open question -- is there a cleaner way to do this?
-        # HAZ: adding a decorator to `logging` would be nicest (require 0 errors)...
-        if not main_check.run(self):
-            return False
 
         # FPE check
         if fpe_check:
