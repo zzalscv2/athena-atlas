@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef G4AT_SCT_RDOSTESTTOOL
-#define G4AT_SCT_RDOSTESTTOOL
+#ifndef DIGITIZATIONTESTS_SCT_RDOSTESTTOOL
+#define DIGITIZATIONTESTS_SCT_RDOSTESTTOOL
 
 #include "DigiTestToolBase.h"
 
@@ -14,8 +14,8 @@ class SCT_RDOsTestTool : public DigiTestToolBase {
 public:
 
   SCT_RDOsTestTool(const std::string& name,
-         const std::string& type,
-         const IInterface* parent);
+                    const std::string& type,
+                    const IInterface* parent);
 
   StatusCode initialize();
 
