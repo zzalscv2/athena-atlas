@@ -101,15 +101,14 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
         makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
-                                  enableCutflow=True, btagger = btagger, btagWP = btagWP )
-        if not forCompare :
+                                  enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+        vars += [
+            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+        ]
+        if dataType != 'data' :
             vars += [
-                'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
             ]
-            if dataType != 'data' :
-                vars += [
-                    'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
-                ]
 
     jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
 
@@ -561,6 +560,20 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
         vars += [
             'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
         ]
+
+    if not noPhysliteBroken :
+        from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
+        btagger = "DL1r"
+        btagWP = "FixedCutBEff_77"
+        makeFTagAnalysisConfig( configSeq, 'AnaJets', noEfficiency = False, legacyRecommendations = True,
+                                btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+        vars += [
+            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+        ]
+        if dataType != 'data' :
+            vars += [
+                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+            ]
 
 
     if dataType != 'data' :

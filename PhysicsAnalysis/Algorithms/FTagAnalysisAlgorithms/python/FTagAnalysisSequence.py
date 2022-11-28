@@ -13,7 +13,8 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
                               noEfficiency = False,
                               legacyRecommendations = False,
                               enableCutflow = False,
-                              minPt = None ):
+                              minPt = None,
+                              makeViewContainer = False):
     """Create a ftag analysis algorithm sequence
 
     for now the sequence is passed in, I'm unsure if I can concatenate
@@ -41,6 +42,10 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
             minPt = 20e3
         elif "VRTrack" in jetCollection:
             minPt = 10e3
+
+    preselectionList = []
+    if preselection is not None and preselection != '' :
+        preselectionList.append (preselection)
 
     if dataType not in ["data", "mc", "afii"] :
         raise ValueError ("invalid data type: " + dataType)
@@ -88,15 +93,18 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         alg.selectionTool.minPt = minPt
         alg.selectionTool.maxEta = 2.5
         alg.selectionDecoration = 'ftag_kin_select_' + btagger + '_' + btagWP
+        alg.preselection = '&&'.join (preselectionList)
+        preselectionList.append (alg.selectionDecoration)
         seq.append( alg, inputPropName = 'particles' )
 
-        # Set up an algorithm that makes a view container using the selections
-        # performed previously:
-        alg = createAlgorithm( 'CP::AsgViewFromSelectionAlg',
-                               'FTagKinViewFromSelectionAlg'+postfix )
-        alg.selection = [ 'ftag_kin_select_' + btagger + '_' + btagWP ]
-        seq.append( alg, inputPropName = 'input', outputPropName = 'output',
-                    stageName = 'selection' )
+        if makeViewContainer :
+            # Set up an algorithm that makes a view container using the selections
+            # performed previously:
+            alg = createAlgorithm( 'CP::AsgViewFromSelectionAlg',
+                                   'FTagKinViewFromSelectionAlg'+postfix )
+            alg.selection = [ 'ftag_kin_select_' + btagger + '_' + btagWP ]
+            seq.append( alg, inputPropName = 'input', outputPropName = 'output',
+                        stageName = 'selection' )
 
     # Set up the ftag selection algorithm(s):
     alg = createAlgorithm( 'CP::AsgSelectionAlg', 'FTagSelectionAlg' + btagger + btagWP + postfix )
@@ -106,8 +114,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
     alg.selectionTool.JetAuthor = jetCollection
     alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
     alg.selectionTool.MinPt = minPt
-    if preselection is not None:
-        alg.preselection = preselection
+    alg.preselection = '&&'.join (preselectionList)
     alg.selectionDecoration = 'ftag_select_' + btagger + '_' + btagWP + ',as_char'
     seq.append( alg, inputPropName = 'particles',
                 stageName = 'selection' )
@@ -120,8 +127,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         alg.selectionTool.JetAuthor = jetCollection
         alg.selectionTool.FlvTagCutDefinitionsFileName = bTagCalibFile
         alg.selectionTool.MinPt = minPt
-        if preselection is not None:
-            alg.preselection = preselection
+        alg.preselection = '&&'.join (preselectionList)
         alg.quantileDecoration = 'ftag_quantile_' + btagger
         seq.append( alg, inputPropName = 'jets',
                     stageName = 'selection' )
@@ -148,8 +154,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
         alg.onlyEfficiency = btagWP == 'Continuous'
         alg.outOfValidity = 2
         alg.outOfValidityDeco = 'no_ftag_' + btagger + '_' + btagWP
-        if preselection is not None:
-            alg.preselection = preselection
+        alg.preselection = '&&'.join (preselectionList)
         seq.append( alg, inputPropName = 'jets',
                     stageName = 'efficiency' )
         pass

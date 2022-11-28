@@ -27,9 +27,9 @@ class PreJetAnalysisConfig (ConfigBlock) :
     def makeAlgs (self, config) :
 
         if config.isPhyslite() :
-            config.setSourceName (self.containerName, "AnalysisJets")
+            config.setSourceName (self.containerName, "AnalysisJets", originalName = self.jetCollection)
         else :
-            config.setSourceName (self.containerName, self.jetCollection)
+            config.setSourceName (self.containerName, self.jetCollection, originalName = self.jetCollection)
 
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink :
