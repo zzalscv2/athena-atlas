@@ -29,6 +29,7 @@
 #include "G4Gamma.hh"
 #include "G4Neutron.hh"
 
+#include "CxxUtils/checker_macros.h"
 
 namespace G4UA
 {
@@ -68,9 +69,6 @@ namespace G4UA
       return fKill;
     }
 
-    // TODO: this terrible, evil code should REALLY be changed!!!
-    G4Track* mutableTrack = const_cast<G4Track*> (track);
-
     // TODO: Why is this here? Can I remove it?
     G4Event* ev = G4EventManager::GetEventManager()->GetNonconstCurrentEvent();
     AtlasG4EventUserInfo* atlasG4EvtUserInfo __attribute__ ((unused)) =
@@ -85,6 +83,10 @@ namespace G4UA
         // Kill (w-1)/w neutrons
         return fKill;
       }
+      // TODO There may be another way to set the weights via
+      // another G4 interface avoiding the const_cast, but the
+      // changes are more major and will need more careful validation.
+      G4Track* mutableTrack ATLAS_THREAD_SAFE = const_cast<G4Track*> (track);
       // Weight the rest 1/w neutrons with a weight of w
       mutableTrack->SetWeight(m_config.russianRouletteNeutronWeight);
     }
@@ -99,6 +101,10 @@ namespace G4UA
         // Kill (w-1)/w photons
         return fKill;
       }
+      // TODO There may be another way to set the weights via
+      // another G4 interface avoiding the const_cast, but the
+      // changes are more major and will need more careful validation.
+      G4Track* mutableTrack ATLAS_THREAD_SAFE = const_cast<G4Track*> (track);
       // Weight the rest 1/w neutrons with a weight of w
       mutableTrack->SetWeight(m_config.russianRoulettePhotonWeight);
     }
@@ -118,13 +124,19 @@ namespace G4UA
             ti->SetRegenerationNr(0);
             ti->SetClassification(Primary);
             // regNr=0 and classify=Primary are default values anyway
-            mutableTrack->SetUserInformation(ti.release()); /// Pass ownership to mutableTrack
+            /// Pass ownership to track. The G4VUserTrackInformation*
+            /// fpUserInformation member variable set by this method
+            /// is mutable. G4Tracks are thread-local.
+            track->SetUserInformation(ti.release());
           }
           // What does this condition mean?
           else if(ppi->GetParticleBarcode() >= 0) {
             // PrimaryParticleInformation should at least provide a barcode
             std::unique_ptr<TrackBarcodeInfo> bi = std::make_unique<TrackBarcodeInfo>(ppi->GetParticleBarcode());
-            mutableTrack->SetUserInformation(bi.release()); /// Pass ownership to mutableTrack
+            /// Pass ownership to track. The G4VUserTrackInformation*
+            /// fpUserInformation member variable set by this method
+            /// is mutable. G4Tracks are thread-local.
+            track->SetUserInformation(bi.release());
           }
         } // no ISFParticle attached
       } // has PrimaryParticleInformation
