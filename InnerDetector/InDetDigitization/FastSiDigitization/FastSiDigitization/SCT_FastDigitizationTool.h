@@ -2,7 +2,7 @@
 
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FASTSIDIGITZATION_SCT_FASTDIGITZATIONTOOL_H
@@ -102,48 +102,47 @@ public:
 private:
 
   StatusCode digitize(const EventContext& ctx);
-  StatusCode createOutputContainers();
   bool NeighbouringClusters(const std::vector<Identifier>& potentialClusterRDOList,  const InDet::SCT_Cluster *existingCluster) const;
   void Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY ) const;
 
-  std::string m_inputObjectName;     //! name of the sub event  hit collections.
+  StringProperty m_inputObjectName{this, "InputObjectName", "SCT_Hits", "Input Object name"};     //! name of the sub event  hit collections.
 
   std::vector<SiHitCollection*> m_siHitCollList;
 
-  const SCT_ID* m_sct_ID;                              //!< Handle to the ID helper
-  ServiceHandle<PileUpMergeSvc> m_mergeSvc;            //!< PileUp Merge service
-  int                       m_HardScatterSplittingMode; /**< Process all SiHit or just those from signal or background events */
-  bool                      m_HardScatterSplittingSkipper;
+  const SCT_ID* m_sct_ID{};                              //!< Handle to the ID helper
+  ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "MergeSvc", "PileUpMergeSvc", "Merge service"};            //!< PileUp Merge service
+  IntegerProperty      m_HardScatterSplittingMode{this, "HardScatterSplittingMode", 0, "Control pileup & signal splitting"}; /**< Process all SiHit or just those from signal or background events */
+  bool                      m_HardScatterSplittingSkipper{false};
 
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
-  std::string                   m_randomEngineName;    //!< Name of the random number stream
+  StringProperty      m_randomEngineName{this, "RndmEngine", "FastSCT_Digitization"};    //!< Name of the random number stream
 
-  TimedHitCollection<SiHit>* m_thpcsi;
+  TimedHitCollection<SiHit>* m_thpcsi{};
 
-  ToolHandle<InDet::ClusterMakerTool>  m_clusterMaker;
+  PublicToolHandle<InDet::ClusterMakerTool>  m_clusterMaker{this, "ClusterMaker", "InDet::ClusterMakerTool"};
   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle"};
 
   typedef std::multimap<IdentifierHash, InDet::SCT_Cluster*> SCT_detElement_RIO_map;
-  SCT_detElement_RIO_map* m_sctClusterMap;
+  SCT_detElement_RIO_map* m_sctClusterMap{};
 
-  SG::WriteHandle<InDet::SCT_ClusterContainer>  m_sctClusterContainer; //!< the SCT_ClusterContainer
-  SG::WriteHandle<PRD_MultiTruthCollection>     m_sctPrdTruth;         //!< the PRD truth map for SCT measurements
+  SG::WriteHandleKey<InDet::SCT_ClusterContainer>  m_sctClusterContainerKey{this, "SCT_ClusterContainerName", "SCT_Clusters"}; //!< the SCT_ClusterContainer
+  SG::WriteHandleKey<PRD_MultiTruthCollection>     m_sctPrdTruthKey{this, "TruthNameSCT", "PRD_MultiTruthSCT"};         //!< the PRD truth map for SCT measurements
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
 
-  double m_sctSmearPathLength;       //!< the 2. model parameter: smear the path
-  bool m_sctSmearLandau;           //!< if true : landau else: gauss
-  bool m_sctEmulateSurfaceCharge;  //!< emulate the surface charge
-  double m_sctTanLorentzAngleScalor; //!< scale the lorentz angle effect
-  bool m_sctAnalogStripClustering; //!< not being done in ATLAS: analog strip clustering
-  int m_sctErrorStrategy;         //!< error strategy for the  ClusterMaker
-  bool m_sctRotateEC;
+  DoubleProperty m_sctSmearPathLength{this, "SCT_SmearPathSigma", 0.01};       //!< the 2. model parameter: smear the path
+  BooleanProperty m_sctSmearLandau{this, "SCT_SmearLandau", true};           //!< if true : landau else: gauss
+  BooleanProperty m_sctEmulateSurfaceCharge{this, "EmulateSurfaceCharge", true};  //!< emulate the surface charge
+  DoubleProperty m_sctTanLorentzAngleScalor{this, "SCT_ScaleTanLorentzAngle", 1.}; //!< scale the lorentz angle effect
+  BooleanProperty m_sctAnalogStripClustering{this, "SCT_AnalogClustering", false}; //!< not being done in ATLAS: analog strip clustering
+  IntegerProperty m_sctErrorStrategy{this, "SCT_ErrorStrategy", 2};         //!< error strategy for the  ClusterMaker
+  BooleanProperty m_sctRotateEC{this, "SCT_RotateEndcapClusters", true};
 
-  bool m_mergeCluster; //!< enable the merging of neighbour SCT clusters >
-  double m_DiffusionShiftX_barrel;
-  double m_DiffusionShiftY_barrel;
-  double m_DiffusionShiftX_endcap;
-  double m_DiffusionShiftY_endcap;
-  double m_sctMinimalPathCut;        //!< the 1. model parameter: minimal 3D path in strip
+  bool m_mergeCluster{true}; //!< enable the merging of neighbour SCT clusters >
+  DoubleProperty m_DiffusionShiftX_barrel{this, "DiffusionShiftX_barrel",4 };
+  DoubleProperty m_DiffusionShiftY_barrel{this, "DiffusionShiftY_barrel", 4};
+  DoubleProperty m_DiffusionShiftX_endcap{this, "DiffusionShiftX_endcap", 15};
+  DoubleProperty m_DiffusionShiftY_endcap{this, "DiffusionShiftY_endcap", 15};
+  DoubleProperty m_sctMinimalPathCut{this, "SCT_MinimalPathLength", 90.};        //!< the 1. model parameter: minimal 3D path in strip
 
   Amg::Vector3D stepToStripBorder(const InDetDD::SiDetectorElement& sidetel,
                                   //const Trk::Surface& surface,

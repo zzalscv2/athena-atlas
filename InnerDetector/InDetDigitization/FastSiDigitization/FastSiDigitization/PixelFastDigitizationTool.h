@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -86,58 +86,58 @@ public:
 private:
 
 
-  TimedHitCollection<SiHit>* m_thpcsi;
+  TimedHitCollection<SiHit>* m_thpcsi{};
 
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
 
-  std::string                m_randomEngineName;         //!< Name of the random number stream
+  StringProperty                m_randomEngineName{this, "RndmEngine", "FastPixelDigitization"};         //!< Name of the random number stream
 
-  const PixelID* m_pixel_ID;                             //!< Handle to the ID helper
+  const PixelID* m_pixel_ID{};                             //!< Handle to the ID helper
 
-  ToolHandle<InDet::ClusterMakerTool>  m_clusterMaker;   //!< ToolHandle to ClusterMaker
+  PublicToolHandle<InDet::ClusterMakerTool>  m_clusterMaker{this, "ClusterMaker", "InDet::ClusterMakerTool/FatrasClusterMaker"};   //!< ToolHandle to ClusterMaker
   ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "PixelLorentzAngleTool", "Tool to retreive Lorentz angle"};
-  bool                                  m_pixUseClusterMaker; //!< use the pixel cluster maker or not
+  BooleanProperty                                  m_pixUseClusterMaker{this, "PixelUseClusterMaker", true}; //!< use the pixel cluster maker or not
 
-  InDet::PixelClusterContainer*         m_pixelClusterContainer;               //!< the PixelClusterContainer
-  std::string                           m_pixel_SiClustersName;
+  InDet::PixelClusterContainer*         m_pixelClusterContainer{};               //!< the PixelClusterContainer
+  StringProperty                           m_pixel_SiClustersName{this, "PixelClusterContainerName", "PixelClusters"};
 
-  ServiceHandle<PileUpMergeSvc> m_mergeSvc;      /**< PileUp Merge service */
-  int                       m_HardScatterSplittingMode; /**< Process all SiHit or just those from signal or background events */
-  bool                      m_HardScatterSplittingSkipper;
+  ServiceHandle<PileUpMergeSvc> m_mergeSvc{this, "MergeSvc", "PileUpMergeSvc"};      /**< PileUp Merge service */
+  IntegerProperty    m_HardScatterSplittingMode{this, "HardScatterSplittingMode", 0, "Control pileup & signal splitting"}; /**< Process all SiHit or just those from signal or background events */
+  bool                      m_HardScatterSplittingSkipper{false};
 
   typedef std::multimap<IdentifierHash, InDet::PixelCluster*> Pixel_detElement_RIO_map;
-  Pixel_detElement_RIO_map* m_pixelClusterMap;
+  Pixel_detElement_RIO_map* m_pixelClusterMap{};
 
-  std::string                           m_prdTruthNamePixel;
-  PRD_MultiTruthCollection*             m_pixPrdTruth;              //!< the PRD truth map for Pixel measurements
+  StringProperty                           m_prdTruthNamePixel{this, "TruthNamePixel", "PRD_MultiTruthPixel"};
+  PRD_MultiTruthCollection*             m_pixPrdTruth{};              //!< the PRD truth map for Pixel measurements
 
-  ToolHandle< InDet::PixelGangedAmbiguitiesFinder > m_gangedAmbiguitiesFinder;
+  PublicToolHandle< InDet::PixelGangedAmbiguitiesFinder > m_gangedAmbiguitiesFinder{this, "gangedAmbiguitiesFinder", "InDet::PixelGangedAmbiguitiesFinder"};
 
-  std::string m_inputObjectName;     //! name of the sub event  hit collections.
+  StringProperty m_inputObjectName{this, "InputObjectName", "PixelHits"};     //! name of the sub event  hit collections.
 
-  std::vector<SiHitCollection*> m_siHitCollList;
+  std::vector<SiHitCollection*> m_siHitCollList{};
 
-  double                                m_pixTanLorentzAngleScalor; //!< scale the lorentz angle effect
-  bool                                  m_pixEmulateSurfaceCharge;  //!< emulate the surface charge
-  double                                m_pixSmearPathLength;       //!< the 2. model parameter: smear the path
-  bool                                  m_pixSmearLandau;           //!< if true : landau else: gauss
-  double                                m_pixMinimalPathCut;        //!< the 1. model parameter: minimal 3D path in pixel
-  double                                m_pixPathLengthTotConv;     //!< from path length to tot
-  bool                                  m_pixModuleDistortion;       //!< simulationn of module bowing
-  std::vector<double>                   m_pixPhiError;              //!< phi error when not using the ClusterMaker
-  std::vector<double>                   m_pixEtaError;              //!< eta error when not using the ClusterMaker
-  int                                   m_pixErrorStrategy;         //!< error strategy for the  ClusterMaker
-  double                                m_pixDiffShiftBarrX; //Shift of the track to improve cluster size description
-  double                                m_pixDiffShiftBarrY; //Shift of the track to improve cluster size description
-  double                                m_pixDiffShiftEndCX; //Shift of the track to improve cluster size description
-  double                                m_pixDiffShiftEndCY; //Shift of the track to improve cluster size description
-  double                                m_ThrConverted;
+  double                                m_pixTanLorentzAngleScalor{1.}; //!< scale the lorentz angle effect
+  BooleanProperty                m_pixEmulateSurfaceCharge{this, "PixelEmulateSurfaceCharge", true};  //!< emulate the surface charge
+  DoubleProperty                  m_pixSmearPathLength{this, "PixelSmearPathSigma", 0.01};       //!< the 2. model parameter: smear the path
+  BooleanProperty                m_pixSmearLandau{this, "PixelSmearLandau", true};           //!< if true : landau else: gauss
+  DoubleProperty                  m_pixMinimalPathCut{this, "PixelMinimalPathLength", 0.06};        //!< the 1. model parameter: minimal 3D path in pixel
+  DoubleProperty                  m_pixPathLengthTotConv{this, "PixelPathLengthTotConversion", 125.};     //!< from path length to tot
+  BooleanProperty                m_pixModuleDistortion{this, "PixelEmulateModuleDistortion", true};       //!< simulationn of module bowing
+  DoubleArrayProperty         m_pixPhiError{this, "PixelErrorPhi", {} };              //!< phi error when not using the ClusterMaker
+  DoubleArrayProperty         m_pixEtaError{this, "PixelErrorEta", {} };              //!< eta error when not using the ClusterMaker
+  IntegerProperty                  m_pixErrorStrategy{this, "PixelErrorStrategy", 2};         //!< error strategy for the  ClusterMaker
+  DoubleProperty                  m_pixDiffShiftBarrX{this, "PixDiffShiftBarrX", 0.005}; //Shift of the track to improve cluster size description
+  DoubleProperty                  m_pixDiffShiftBarrY{this, "PixDiffShiftBarrY", 0.005}; //Shift of the track to improve cluster size description
+  DoubleProperty                  m_pixDiffShiftEndCX{this, "PixDiffShiftEndCX", 0.008}; //Shift of the track to improve cluster size description
+  DoubleProperty                  m_pixDiffShiftEndCY{this, "PixDiffShiftEndCY", 0.008}; //Shift of the track to improve cluster size description
+  DoubleProperty                  m_ThrConverted{this, "ThrConverted", 50000};
 
-  bool m_mergeCluster; //!< enable the merging of neighbour Pixel clusters >
-  short m_splitClusters; //!< merging parameter used to define two clusters as neighbour >
-  bool m_acceptDiagonalClusters; //!< merging parameter used to define two clusters as neighbour >
-  std::string                           m_pixelClusterAmbiguitiesMapName;
-  InDet::PixelGangedClusterAmbiguities* m_ambiguitiesMap;
+  bool m_mergeCluster{true}; //!< enable the merging of neighbour Pixel clusters >
+  short m_splitClusters{0}; //!< merging parameter used to define two clusters as neighbour >
+  bool m_acceptDiagonalClusters{true}; //!< merging parameter used to define two clusters as neighbour >
+  StringProperty                    m_pixelClusterAmbiguitiesMapName{this, "PixelClusterAmbiguitiesMapName", "PixelClusterAmbiguitiesMap"};
+  InDet::PixelGangedClusterAmbiguities* m_ambiguitiesMap{};
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };
 
@@ -157,7 +157,7 @@ private:
 
   PixelFastDigitizationTool& operator=(const PixelFastDigitizationTool&);
 
-  ToolHandle<Trk::IModuleStepper>       m_digitizationStepper;
+  PublicToolHandle<Trk::IModuleStepper>       m_digitizationStepper{this, "DigitizationStepper", "Trk::PlanarModuleStepper"};
 
   Trk::DigitizationModule * buildDetectorModule(const InDetDD::SiDetectorElement* ) const;
 

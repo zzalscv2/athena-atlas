@@ -68,69 +68,8 @@ using namespace InDet;
 PixelFastDigitizationTool::PixelFastDigitizationTool(const std::string &type, const std::string &name,
                                                      const IInterface* parent):
 
-  PileUpToolBase(type, name, parent),
-  m_thpcsi(nullptr),
-  m_randomEngineName("FastPixelDigitization"),
-  m_pixel_ID(nullptr),
-  m_clusterMaker("InDet::ClusterMakerTool/FatrasClusterMaker"),
-  m_pixUseClusterMaker(true),
-  m_pixelClusterContainer(nullptr),
-  m_pixel_SiClustersName("PixelClusters"),
-  m_mergeSvc("PileUpMergeSvc",name),
-  m_HardScatterSplittingMode(0),
-  m_HardScatterSplittingSkipper(false),
-  m_pixelClusterMap(nullptr),
-  m_prdTruthNamePixel("PRD_MultiTruthPixel"),
-  m_pixPrdTruth(nullptr),
-  //  m_pixelCondSummarySvc("PixelConditionsSummarySvc", name),
-  m_gangedAmbiguitiesFinder("InDet::PixelGangedAmbiguitiesFinder"),
-  m_inputObjectName("PixelHits"),
-  m_pixTanLorentzAngleScalor(1.),
-  m_pixEmulateSurfaceCharge(true),
-  m_pixSmearPathLength(0.01),
-  m_pixSmearLandau(true),
-  m_pixMinimalPathCut(0.06),// Optimized choice of threshold (old 0.02)
-  m_pixPathLengthTotConv(125.),
-  m_pixModuleDistortion(true), // default: false
-  m_pixErrorStrategy(2),
-  m_pixDiffShiftBarrX(0.005),
-  m_pixDiffShiftBarrY(0.005),
-  m_pixDiffShiftEndCX(0.008),
-  m_pixDiffShiftEndCY(0.008),
-  m_ThrConverted(50000),
-  m_mergeCluster(true),
-  m_splitClusters(0),
-  m_acceptDiagonalClusters(true),
-  m_pixelClusterAmbiguitiesMapName("PixelClusterAmbiguitiesMap"),
-  m_ambiguitiesMap(nullptr),
-  m_digitizationStepper("Trk::PlanarModuleStepper")
+  PileUpToolBase(type, name, parent)
 {
-  declareProperty("RndmEngine"                     , m_randomEngineName,         "Random engine name");
-  declareProperty("ClusterMaker"                   , m_clusterMaker);
-  declareProperty("PixelUseClusterMaker"           , m_pixUseClusterMaker);
-  declareProperty("PixelClusterContainerName"      , m_pixel_SiClustersName);
-  declareProperty("MergeSvc"                       , m_mergeSvc,                 "Merge service" );
-  declareProperty("TruthNamePixel"                 , m_prdTruthNamePixel);
-  //declareProperty("PixelConditionsSummarySvc"      , m_pixelCondSummarySvc,      "Name of the pixel conditions service");
-  declareProperty("gangedAmbiguitiesFinder"        , m_gangedAmbiguitiesFinder);
-  declareProperty("InputObjectName"                , m_inputObjectName,          "Input Object name" );
-  declareProperty("PixelEmulateSurfaceCharge"      , m_pixEmulateSurfaceCharge);
-  declareProperty("PixelSmearPathSigma"            , m_pixSmearPathLength);
-  declareProperty("PixelSmearLandau"               , m_pixSmearLandau);
-  declareProperty("PixelMinimalPathLength"         , m_pixMinimalPathCut);
-  declareProperty("PixelPathLengthTotConversion"   , m_pixPathLengthTotConv);
-  declareProperty("PixelEmulateModuleDistortion"   , m_pixModuleDistortion);
-  declareProperty("PixelErrorPhi"                  , m_pixPhiError);
-  declareProperty("PixelErrorEta"                  , m_pixEtaError);
-  declareProperty("PixelErrorStrategy"             , m_pixErrorStrategy);
-  declareProperty("PixelClusterAmbiguitiesMapName" , m_pixelClusterAmbiguitiesMapName);
-  declareProperty("HardScatterSplittingMode"       , m_HardScatterSplittingMode, "Control pileup & signal splitting" );
-  declareProperty("DigitizationStepper",     m_digitizationStepper);
-  declareProperty("PixDiffShiftBarrX", m_pixDiffShiftBarrX);
-  declareProperty("PixDiffShiftBarrY", m_pixDiffShiftBarrY);
-  declareProperty("PixDiffShiftEndCX", m_pixDiffShiftEndCX);
-  declareProperty("PixDiffShiftEndCY", m_pixDiffShiftEndCY);
-  declareProperty("ThrConverted", m_ThrConverted);
 }
 
 PixelFastDigitizationTool::~PixelFastDigitizationTool() {

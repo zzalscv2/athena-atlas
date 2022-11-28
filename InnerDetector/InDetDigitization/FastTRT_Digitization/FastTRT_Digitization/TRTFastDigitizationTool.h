@@ -93,11 +93,10 @@ private:
   StatusCode setNumericalConstants();    // once per event (pileup-dependent constants) 
 
   StatusCode produceDriftCircles(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine);
-  StatusCode createOutputContainers();
 
   Identifier getIdentifier( int hitID, IdentifierHash &hash, Identifier &layer_id, bool &status ) const;
 
-  StatusCode createAndStoreRIOs(CLHEP::HepRandomEngine* rndmEngine);
+  StatusCode createAndStoreRIOs(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine);
 
   static double getDriftRadiusFromXYZ( const TimedHitPtr< TRTUncompressedHit > &hit );
   HepGeom::Point3D< double > getGlobalPosition( const TimedHitPtr< TRTUncompressedHit > &hit );
@@ -113,43 +112,43 @@ private:
   double particleMass( int i ) const;
 
   // Tools and Services
-  ToolHandle< ITRT_DriftFunctionTool > m_trtDriftFunctionTool;
-  bool m_useTrtElectronPidTool;                                           // false: use Tina's parametrization
-  ToolHandle< Trk::ITRT_ElectronPidTool > m_trtElectronPidTool;
-  ToolHandle< ITRT_StrawStatusSummaryTool > m_trtStrawStatusSummaryTool; // Argon / Xenon
-  ServiceHandle< PileUpMergeSvc > m_mergeSvc;                             // PileUp Merge service
+  PublicToolHandle< ITRT_DriftFunctionTool > m_trtDriftFunctionTool{this, "TRT_DriftFunctionTool", "TRT_DriftFunctionTool/FatrasTrtDriftFunctionTool"};
+  bool m_useTrtElectronPidTool{true};                                           // false: use Tina's parametrization
+  PublicToolHandle< Trk::ITRT_ElectronPidTool > m_trtElectronPidTool{this, "TRT_ElectronPidTool", "InDet::TRT_ElectronPidToolRun2/InDetTRT_ElectronPidTool"};
+  ToolHandle< ITRT_StrawStatusSummaryTool > m_trtStrawStatusSummaryTool{this, "TRT_StrawStatusSummaryTool", "InDetTRTStrawStatusSummaryTool"}; // Argon / Xenon
+  ServiceHandle< PileUpMergeSvc > m_mergeSvc{this, "MergeSvc", "PileUpMergeSvc"};                             // PileUp Merge service
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};  //!< Random number service
-  std::string m_randomEngineName;                                         // Name of the random number stream
+  StringProperty m_randomEngineName{this, "RandomStreamName", "FatrasRnd"};                                         // Name of the random number stream
 
   // INPUT
-  std::string m_trtHitCollectionKey;
+  StringProperty m_trtHitCollectionKey{this, "trtHitCollectionName", "TRTUncompressedHits"};
   std::vector< TRTUncompressedHitCollection * > m_trtHitCollList;
 
   // OUTPUT 
-  SG::WriteHandle< InDet::TRT_DriftCircleContainer > m_trtDriftCircleContainer;
-  SG::WriteHandle< PRD_MultiTruthCollection > m_trtPrdTruth;
+  SG::WriteHandleKey< InDet::TRT_DriftCircleContainer > m_trtDriftCircleContainerKey{this, "trtDriftCircleContainer", "TRT_DriftCircles"};
+  SG::WriteHandleKey< PRD_MultiTruthCollection > m_trtPrdTruthKey{this, "trtPrdMultiTruthCollection", "PRD_MultiTruthTRT"};
 
-  TimedHitCollection< TRTUncompressedHit > *m_thpctrt;
+  TimedHitCollection< TRTUncompressedHit > *m_thpctrt{};
   std::multimap< Identifier, InDet::TRT_DriftCircle * > m_driftCircleMap;
 
   // Helpers
-  const InDetDD::TRT_DetectorManager *m_trt_manager;
-  const TRT_ID *m_trt_id;                                                 // TRT Id Helper
+  const InDetDD::TRT_DetectorManager *m_trt_manager{};
+  const TRT_ID *m_trt_id{};                                                 // TRT Id Helper
 
   // Split configuration
-  int m_HardScatterSplittingMode;                                         // Process all TRT_Hits or just those from signal or background events
-  bool m_HardScatterSplittingSkipper;
+  IntegerProperty m_HardScatterSplittingMode{this, "HardScatterSplittingMode", 0, "Control pileup & signal splitting"};                                         // Process all TRT_Hits or just those from signal or background events
+  bool m_HardScatterSplittingSkipper{false};
 
-  bool m_useEventInfo;  // get mu from EventInfo ?
+  BooleanProperty m_useEventInfo{this, "useEventInfo", false};  // get mu from EventInfo ?
   SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey
     { this, "EventInfoKey", "EventInfo", "SG key for EventInfo" };
-  float m_NCollPerEvent;
+  FloatProperty m_NCollPerEvent{this, "NCollPerEvent", 30};
 
   // numerical constants. Might wish to move these to a DB in the future
-  double m_trtTailFraction = 0.0;            // fraction in tails 
-  double m_trtSigmaDriftRadiusTail = 0.0;    // sigma of one TRT straw in R
-  double m_trtHighProbabilityBoostBkg;
-  double m_trtHighProbabilityBoostEle;
+  double m_trtTailFraction{0.0};            // fraction in tails 
+  double m_trtSigmaDriftRadiusTail{0.0};    // sigma of one TRT straw in R
+  double m_trtHighProbabilityBoostBkg{1.};
+  double m_trtHighProbabilityBoostEle{1.};
   double m_cFit[ 8 ][ 5 ]{};             // efficiency and resolution
 
 };

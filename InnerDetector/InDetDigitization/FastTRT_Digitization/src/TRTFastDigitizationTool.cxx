@@ -53,37 +53,8 @@ static const unsigned int maskHT=0x04020100;
 TRTFastDigitizationTool::TRTFastDigitizationTool( const std::string &type,
                                                   const std::string &name,
                                                   const IInterface *parent )
-  : PileUpToolBase( type, name, parent ),
-    m_trtDriftFunctionTool( "TRT_DriftFunctionTool/FatrasTrtDriftFunctionTool" ),
-    m_useTrtElectronPidTool( true ),
-    m_trtElectronPidTool( "InDet::TRT_ElectronPidToolRun2/InDetTRT_ElectronPidTool" ),
-    m_trtStrawStatusSummaryTool( "InDetTRTStrawStatusSummaryTool", this ),
-    m_mergeSvc( "PileUpMergeSvc", name ),
-    m_randomEngineName( "FatrasRnd" ),
-    m_trtHitCollectionKey( "TRTUncompressedHits" ),
-    m_trtDriftCircleContainer( "TRT_DriftCircles" ),
-    m_trtPrdTruth( "PRD_MultiTruthTRT" ),
-    m_thpctrt( nullptr ),
-    m_trt_manager( nullptr ),
-    m_trt_id( nullptr ),
-    m_HardScatterSplittingMode( 0 ),
-    m_HardScatterSplittingSkipper( false ),
-    m_useEventInfo( false ),
-    m_NCollPerEvent( 30 ),
-    m_trtHighProbabilityBoostBkg(1.), 
-    m_trtHighProbabilityBoostEle(1.)
+  : PileUpToolBase( type, name, parent )
 {
-  declareProperty( "TRT_DriftFunctionTool",       m_trtDriftFunctionTool );
-  declareProperty( "TRT_ElectronPidTool",         m_trtElectronPidTool );
-  declareProperty( "TRT_StrawStatusSummaryTool",   m_trtStrawStatusSummaryTool );
-  declareProperty( "MergeSvc",                    m_mergeSvc );
-  declareProperty( "RandomStreamName",            m_randomEngineName );
-  declareProperty( "trtHitCollectionName",        m_trtHitCollectionKey );
-  declareProperty( "trtDriftCircleContainer",     m_trtDriftCircleContainer );
-  declareProperty( "trtPrdMultiTruthCollection",  m_trtPrdTruth );
-  declareProperty( "HardScatterSplittingMode",    m_HardScatterSplittingMode, "Control pileup & signal splitting" );
-  declareProperty( "useEventInfo",                m_useEventInfo);
-  declareProperty( "NCollPerEvent",               m_NCollPerEvent);
 }
 
 
@@ -114,6 +85,9 @@ StatusCode TRTFastDigitizationTool::initialize()
   } else {
     ATH_MSG_DEBUG( "Input hits: " << m_trtHitCollectionKey );
   }
+
+  ATH_CHECK(m_trtPrdTruthKey.initialize());
+  ATH_CHECK(m_trtDriftCircleContainerKey.initialize());
 
   CHECK( m_trtDriftFunctionTool.retrieve() );
 
@@ -278,6 +252,15 @@ StatusCode TRTFastDigitizationTool::setNumericalConstants() {
 
 StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine) {
 
+  // Create OUTPUT PRD_MultiTruthCollection for TRT measurements
+  SG::WriteHandle< PRD_MultiTruthCollection > trtPrdTruth(m_trtPrdTruthKey, ctx);
+  trtPrdTruth = std::make_unique< PRD_MultiTruthCollection >();
+  if ( !trtPrdTruth.isValid() ) {
+    ATH_MSG_FATAL( "Could not record collection " << trtPrdTruth.name() );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "PRD_MultiTruthCollection " << trtPrdTruth.name() << " registered in StoreGate" );
+
   if(m_useEventInfo){
 
      SG::ReadHandle<xAOD::EventInfo> eventInfoContainer(m_EventInfoKey, ctx);
@@ -422,7 +405,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
       if ( hit->particleLink().isValid() ) {
         const int barcode( hit->particleLink().barcode() );
         if ( barcode !=0 && barcode != m_vetoThisBarcode ) {
-          m_trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), hit->particleLink() ) );
+          trtPrdTruth->insert( std::make_pair( trtDriftCircle->identify(), hit->particleLink() ) );
           ATH_MSG_DEBUG( "Truth map filled with cluster " << trtDriftCircle << " and link = " << hit->particleLink() );
         }
       }
@@ -440,8 +423,6 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
 StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "TRTFastDigitizationTool::processAllSubEvents()" );
-
-  CHECK( this->createOutputContainers() );
 
   using HitCollectionTimedList = PileUpMergeSvc::TimedList<TRTUncompressedHitCollection>::type;
 
@@ -473,38 +454,10 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
   CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  CHECK( this->produceDriftCircles(ctx, rndmEngine) );
+  CHECK( this->produceDriftCircles(ctx, rndmEngine ) );
 
-  CHECK( this->createAndStoreRIOs(rndmEngine) );
+  CHECK( this->createAndStoreRIOs(ctx, rndmEngine) );
   ATH_MSG_DEBUG ( "createAndStoreRIOs() succeeded" );
-
-  return StatusCode::SUCCESS;
-}
-
-
-StatusCode TRTFastDigitizationTool::createOutputContainers() {
-
-  ATH_MSG_DEBUG( "TRTFastDigitizationTool::createOutputContainers()" );
-
-  // Create OUTPUT TRT_DriftCircleContainer and register it in StoreGate
-  if ( !m_trtDriftCircleContainer.isValid() ) {
-    m_trtDriftCircleContainer = std::make_unique< InDet::TRT_DriftCircleContainer >( m_trt_id->straw_layer_hash_max() );
-    if ( !m_trtDriftCircleContainer.isValid() ) {
-      ATH_MSG_FATAL( "Could not create TRT_DriftCircleContainer" );
-      return StatusCode::FAILURE;
-    }
-  }
-  ATH_MSG_DEBUG( "InDet::TRT_DriftCircleContainer " << m_trtDriftCircleContainer.name() << " registered in StoreGate" );
-
-  // Create OUTPUT PRD_MultiTruthCollection for TRT measurements
-  if ( !m_trtPrdTruth.isValid() ) {
-    m_trtPrdTruth = std::make_unique< PRD_MultiTruthCollection >();
-    if ( !m_trtPrdTruth.isValid() ) {
-      ATH_MSG_FATAL( "Could not record collection " << m_trtPrdTruth.name() );
-      return StatusCode::FAILURE;
-    }
-  }
-  ATH_MSG_DEBUG( "PRD_MultiTruthCollection " << m_trtPrdTruth.name() << " registered in StoreGate" );
 
   return StatusCode::SUCCESS;
 }
@@ -513,8 +466,6 @@ StatusCode TRTFastDigitizationTool::createOutputContainers() {
 StatusCode TRTFastDigitizationTool::mergeEvent(const EventContext& ctx) {
 
   ATH_MSG_DEBUG( "TRTFastDigitizationTool::mergeEvent()" );
-
-  CHECK( this->createOutputContainers() );
 
   // Set the RNG to use for this event.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
@@ -532,15 +483,24 @@ StatusCode TRTFastDigitizationTool::mergeEvent(const EventContext& ctx) {
   for(TRTUncompressedHitCollection* ptr : m_trtHitCollList) delete ptr;
   m_trtHitCollList.clear();
 
-  CHECK( this->createAndStoreRIOs(rndmEngine) );
+  CHECK( this->createAndStoreRIOs(ctx, rndmEngine) );
   ATH_MSG_DEBUG ( "createAndStoreRIOs() succeeded" );
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode TRTFastDigitizationTool::createAndStoreRIOs(CLHEP::HepRandomEngine* rndmEngine)
+StatusCode TRTFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine)
 {
+  // Create OUTPUT TRT_DriftCircleContainer and register it in StoreGate
+  SG::WriteHandle<InDet::TRT_DriftCircleContainer > trtDriftCircleContainer(m_trtDriftCircleContainerKey, ctx);
+  trtDriftCircleContainer = std::make_unique< InDet::TRT_DriftCircleContainer >( m_trt_id->straw_layer_hash_max() );
+  if ( !trtDriftCircleContainer.isValid() ) {
+    ATH_MSG_FATAL( "Could not create TRT_DriftCircleContainer" );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "InDet::TRT_DriftCircleContainer " << trtDriftCircleContainer.name() << " registered in StoreGate" );
+
   using DriftCircleMapItr = std::multimap<Identifier, InDet::TRT_DriftCircle *>::iterator;
   using HashMapItr = std::multimap<IdentifierHash, InDet::TRT_DriftCircle *>::iterator;
 
@@ -611,7 +571,7 @@ StatusCode TRTFastDigitizationTool::createAndStoreRIOs(CLHEP::HepRandomEngine* r
       trtDriftCircleCollection->push_back( trtDriftCircle );
     }
 
-    if ( m_trtDriftCircleContainer->addCollection( trtDriftCircleCollection, hash ).isFailure() ) {
+    if ( trtDriftCircleContainer->addCollection( trtDriftCircleCollection, hash ).isFailure() ) {
       ATH_MSG_WARNING( "Could not add collection to Identifyable container" );
     }
   }
