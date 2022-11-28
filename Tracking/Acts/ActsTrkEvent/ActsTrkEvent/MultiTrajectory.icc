@@ -225,8 +225,39 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
 
     	}
 
+    // Implementation of unset
+    template<bool RWState>
+    void ActsTrk::MultiTrajectory<RWState>::unset_impl(Acts::TrackStatePropMask target, ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
+
+    using PM = Acts::TrackStatePropMask;
+    // set kInvalid
+    using Acts::MultiTrajectoryTraits::kInvalid;    
     
+    switch (target) {
+        case PM::Predicted:
+            (*m_trackStates)[istate]->setPredicted(kInvalid);
+            break;
+        case PM::Filtered:
+            (*m_trackStates)[istate]->setFiltered(kInvalid);
+            break;
+        case PM::Smoothed:
+            (*m_trackStates)[istate]->setSmoothed(kInvalid);
+            break;
+        case PM::Jacobian:
+            (*m_trackStates)[istate]->setJacobian(kInvalid);
+            break;
+        case PM::Calibrated:
+            (*m_trackStates)[istate]->setCalibrated(kInvalid);
+            // TODO here m_measOffset[istate] and m_measCovOffset[istate] should be set to kInvalid
+
+            break;
+        default:
+            throw std::domain_error{"Unable to unset this component"};
+    }
     
+    }
+    
+
     template<bool RWState>
     template<typename T>
     void ActsTrk::MultiTrajectory<RWState>::enableDecoration(const std::string& name) {
