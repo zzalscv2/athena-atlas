@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -20,7 +20,7 @@ namespace jet {
     jet::JetCellAccessor::const_iterator it = jet::JetCellAccessor::begin(jet);
     jet::JetCellAccessor::const_iterator itE = jet::JetCellAccessor::end(jet);
 
-    for( ; it != itE ; it++) {
+    for( ; it != itE ; ++it) {
       processCell(*it, it.weight());
     }    
     return jetCalculation();
@@ -56,7 +56,7 @@ namespace jet {
     // navigate from cell
     jet::JetCellAccessor::const_iterator it = jet::JetCellAccessor::begin(jet);
     jet::JetCellAccessor::const_iterator itE = jet::JetCellAccessor::end(jet);
-    for( ; it != itE ; it++) {
+    for( ; it != itE ; ++it) {
       double w= it.weight();
       const CaloCell* cell = *it;
       for( JetCaloCellCalculator *calc : clonedCalc) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -24,7 +24,7 @@ namespace jet {
 
     if( ! endIt ) { 
       // setup the iterator
-      m_constitIt--;
+      --m_constitIt;
       nextConstituent();      
       //if (m_cellIt!=m_endCellItinConstit) std::cout << "   ---> building begin   cellIT" << (*m_cellIt)<<std::endl;
 
@@ -59,13 +59,13 @@ namespace jet {
   }
 
   void JetCellAccessor::const_iterator::nextConstituent(){
-    m_constitIt++;
+    ++m_constitIt;
     if(m_constitIt == m_constitItE) return;
     if( setCellIteratorFromConstit(**m_constitIt) ){
       //      if (m_cellIt!=m_endCellItinConstit) std::cout << "   nextConstituent cell= " << (*m_cellIt)<<std::endl;
 
       // Use prefetching technique to speed up the loop over cells.
-      for (auto it=m_cellIt; it !=m_endCellItinConstit; it++)
+      for (auto it=m_cellIt; it !=m_endCellItinConstit; ++it)
 	    CxxUtils::prefetchObj (*it);      
 
       CaloPrefetch::nextDDE( m_cellIt, m_endCellItinConstit ); 
