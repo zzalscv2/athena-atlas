@@ -52,8 +52,8 @@ namespace Muon {
     public:
         CscClusterOnTrackCreator(const std::string&, const std::string&, const IInterface*);
         virtual ~CscClusterOnTrackCreator();
-        virtual StatusCode initialize();
-        virtual StatusCode finalize();
+        virtual StatusCode initialize() override;
+        virtual StatusCode finalize() override;
 
         /** @brief Create new Muon::MuonClusterOnTrack from a Trk::PrepRawData and a predicted Trk::TrackParameter.
             @param RIO Trk::PrepRawData object to be calibrated
@@ -84,9 +84,9 @@ namespace Muon {
         virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Trk::TrackParameters& TP) const override;
         virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const override;
         
-        virtual const ToolHandle<ICscStripFitter>& GetICscStripFitter() const;
-        virtual const ToolHandle<ICscClusterFitter>& GetICscClusterFitter() const;
-        virtual const ToolHandle<ICscClusterUtilTool>& GetICscClusterUtilTool() const;
+        virtual const ToolHandle<ICscStripFitter>& GetICscStripFitter() const override;
+        virtual const ToolHandle<ICscClusterFitter>& GetICscClusterFitter() const override;
+        virtual const ToolHandle<ICscClusterUtilTool>& GetICscClusterUtilTool() const override;
 
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
