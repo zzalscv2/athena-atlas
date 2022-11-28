@@ -87,6 +87,15 @@ namespace ActsTrk {
 
             constexpr bool has_impl(Acts::HashedString key, IndexType istate) const;
 
+            /**
+             * @brief unsets a given state 
+             * 
+             * @param target - property 
+             * @param istate - index in the 
+             */
+
+            void unset_impl(Acts::TrackStatePropMask target, ActsTrk::MultiTrajectory<RWState>::IndexType istate);
+
             
 
             /**
@@ -117,6 +126,19 @@ namespace ActsTrk {
             }
 
             /**
+             * @brief obtain measurement covariances for a state at given index
+             * 
+             * @param index 
+             * @return TrackStateProxy::Covariance 
+             */
+            typename ConstTrackStateProxy::Covariance trackMeasurementsCov(IndexType index) const {
+                return trackMeasurements().at(index)-> covMatrixEigen();
+            };        
+            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) trackMeasurementsCov(IndexType index) {
+                return trackMeasurements().at(index)-> covMatrixEigen();
+            }
+
+            /**
              * @brief obtain jacobian for a state at given index
              * 
              * @param index 
@@ -129,7 +151,34 @@ namespace ActsTrk {
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) jacobian_impl(IndexType index) {
                 return trackJacobians().at(index)-> jacEigen();
             }
+
+            /**
+             * @brief obtain measurements for a state at given index
+             * 
+             * @param index 
+             * @return TrackStateProxy::Measurement
+             */
             
+            inline typename ConstTrackStateProxy::Measurement measurement_impl(IndexType index) const {
+                return trackMeasurements().at(index)-> measEigen();
+            };
+            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Measurement) measurement_impl(IndexType index) {
+                return trackMeasurements().at(index)-> measEigen();
+            }
+           /**
+             * @brief obtain measurements covariance for a state at given index
+             * 
+             * @param index 
+             * @return TrackStateProxy::Covariance
+             */
+            
+            inline typename ConstTrackStateProxy::Covariance measurementCovariance_impl(IndexType index) const {
+                return trackMeasurements().at(index)-> covMatrixEigen();
+            };
+            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) measurementCovariance_impl(IndexType index) {
+                return trackMeasurements().at(index)-> covMatrixEigen();
+            }
+                        
             /**
              * @brief size of the MTJ
              * 
@@ -169,8 +218,8 @@ namespace ActsTrk {
             // bare pointers to the backend (need to be fast and we do not claim ownership anyways)
             TrackStateContainerBackendPtr m_trackStates = nullptr;
 
-            // inline const xAOD::TrackStateContainer& trackStates() const { return *m_trackStates; }
-            // inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
+            inline const xAOD::TrackStateContainer& trackStates() const { return *m_trackStates; }
+            inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
             
             TrackParametersContainerBackendPtr m_trackParameters = nullptr;
 
