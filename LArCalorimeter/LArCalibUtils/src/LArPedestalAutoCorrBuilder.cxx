@@ -113,16 +113,23 @@ StatusCode LArPedestalAutoCorrBuilder::execute()
 
 
   const LArAccumulatedDigitContainer* container = nullptr;
-  
   //Outermost loop goes over all gains (different containers).
+  int foundkey = 0;
+
   for (const std::string& key : m_keylist) {
-    
     sc= evtStore()->retrieve(container,key);
     if (sc.isFailure() || !container) {
       ATH_MSG_DEBUG("Cannot read LArAccumulatedDigitContainer from StoreGate! key=" << key);
-      return StatusCode::SUCCESS; 
+      if ( ( (&key == &m_keylist.back()) ) && foundkey==0 ){
+	ATH_MSG_ERROR("None of the provided LArAccumulatedDigitContainer keys could be read");
+	return StatusCode::FAILURE;
+	//return StatusCode::SUCCESS; 
+      }else{
+	continue;
+      }
     }
-    
+    foundkey+=1;
+
     // check that container is not empty
     if(container->size()==0 ) {
       ATH_MSG_DEBUG("LArAccumulatedDigitContainer (key=" << key << ") is empty ");
@@ -130,7 +137,7 @@ StatusCode LArPedestalAutoCorrBuilder::execute()
     }else{
       ATH_MSG_DEBUG("LArAccumulatedDigitContainer (key=" << key << ") has length " << container->size());
     }
-    
+
     HWIdentifier  lastFailedFEB(0);
     //Inner loop goes over the cells.
     for (const LArAccumulatedDigit* dg : *container) {  //Loop over all cells
@@ -201,7 +208,10 @@ StatusCode LArPedestalAutoCorrBuilder::stop() {
     //Loop over cells
     ACCU::ConditionsMapIterator cell_it=m_accu.begin(gain);
     ACCU::ConditionsMapIterator cell_it_e=m_accu.end(gain);
-    if (cell_it==cell_it_e) continue; //No data for this gain
+    
+    if (cell_it==cell_it_e){
+      continue; //No data for this gain
+    }
     for (;cell_it!=cell_it_e;cell_it++) {
       const LArAccumulatedDigit& dg=*cell_it;
       n_cur = dg.nTrigger();

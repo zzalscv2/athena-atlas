@@ -221,19 +221,19 @@ StatusCode LArBadChannelHunter::stop() {
 
 ////////////////////////////////
   //Keep track to bad cells ...
-  typedef LArBadChannelEnum::ProblemType PROB_t;
+  typedef LArBadChannel::LArBadChannelEnum::ProblemType PROB_t;
   typedef std::vector<std::pair<HWIdentifier,LArBadChannel> > BCV_t;
   
   BCV_t badChanVec;
   LArBadChanBitPacking packing;
   PROB_t lownoiseProb[CaloGain::LARNGAIN], highnoiseProb[CaloGain::LARNGAIN];
-  lownoiseProb[CaloGain::LARHIGHGAIN]=LArBadChannelEnum::lowNoiseHGBit; 
-  lownoiseProb[CaloGain::LARMEDIUMGAIN]=LArBadChannelEnum::lowNoiseMGBit; 
-  lownoiseProb[CaloGain::LARLOWGAIN]=LArBadChannelEnum::lowNoiseLGBit; 
+  lownoiseProb[CaloGain::LARHIGHGAIN]=LArBadChannel::LArBadChannelEnum::lowNoiseHGBit; 
+  lownoiseProb[CaloGain::LARMEDIUMGAIN]=LArBadChannel::LArBadChannelEnum::lowNoiseMGBit; 
+  lownoiseProb[CaloGain::LARLOWGAIN]=LArBadChannel::LArBadChannelEnum::lowNoiseLGBit; 
 
-  highnoiseProb[CaloGain::LARHIGHGAIN]=LArBadChannelEnum::highNoiseHGBit; 
-  highnoiseProb[CaloGain::LARMEDIUMGAIN]=LArBadChannelEnum::highNoiseMGBit; 
-  highnoiseProb[CaloGain::LARLOWGAIN]=LArBadChannelEnum::highNoiseLGBit; 
+  highnoiseProb[CaloGain::LARHIGHGAIN]=LArBadChannel::LArBadChannelEnum::highNoiseHGBit; 
+  highnoiseProb[CaloGain::LARMEDIUMGAIN]=LArBadChannel::LArBadChannelEnum::highNoiseMGBit; 
+  highnoiseProb[CaloGain::LARLOWGAIN]=LArBadChannel::LArBadChannelEnum::highNoiseLGBit; 
 
   typedef std::pair<unsigned,std::vector<size_t> > goodAndBad_t;
   typedef std::map<HWIdentifier,goodAndBad_t> goodAndBadMap_t; //the key is the calibLineID
@@ -331,21 +331,21 @@ StatusCode LArBadChannelHunter::stop() {
 
 	if (ampl==-1 || wid==-1) {
 	  ATH_MSG_INFO ( "No Amplitude or Width found for " << channelDescription(chid,cabling,0) ) ;
-	  packing.setBit(LArBadChannelEnum::deadReadoutBit,problem);
+	  packing.setBit(LArBadChannel::LArBadChannelEnum::deadReadoutBit,problem);
 	}
 	else {
 	  ATH_MSG_VERBOSE ( "Ampl gain: "<< 0<< ":"<< ampl<< " Average: " << avreg.m_avAmpl[0]) ; 
 	  //// larger deviation: dead
 	  if (fabs(ampl-avreg.m_avAmpl[0])>higCut_amp || fabs(wid-avreg.m_avWid[0])>higCut_wid) { 
-	    packing.setBit(LArBadChannelEnum::deadReadoutBit,problem);
+	    packing.setBit(LArBadChannel::LArBadChannelEnum::deadReadoutBit,problem);
 	  } 
 	  /// smaller deviation: distorted
 	  else if (fabs(ampl-avreg.m_avAmpl[0])>lowCut_amp || fabs(wid-avreg.m_avWid[0])>lowCut_wid){ 
-            packing.setBit(LArBadChannelEnum::distortedBit,problem);
+            packing.setBit(LArBadChannel::LArBadChannelEnum::distortedBit,problem);
 	  }
 	  /// checking TmaxAmp, Not mixed with MaxAmp and Width 
 	  else if (fabs(tmax-avreg.m_avTmax[0])>Cut_tmax) {
-            packing.setBit(LArBadChannelEnum::distortedBit,problem);	  
+            packing.setBit(LArBadChannel::LArBadChannelEnum::distortedBit,problem);	  
 //	    std::string my_status=(bc.good()) ? "NEW " : "BC ";
 //            log << MSG::INFO << my_status << channelDescription(chid,cabling,0) << " Tmax: " << tmax << " ( " << avreg.m_avTmax[0] << " , " 
 //	    	<< float(int(10000*(tmax-avreg.m_avTmax[0])/avreg.m_avTmax[0]))/100 << " %) "
@@ -402,9 +402,9 @@ StatusCode LArBadChannelHunter::stop() {
     if (gb.first==0) {
       ATH_MSG_INFO ( "All channels belonging to calibLine " << channelDescription(badChanVec[gb.second[i]].first, cabling) 
                      << " don't respond to pulses. Assume bad calib line." ) ;
-	packing.setBit(LArBadChannelEnum::deadReadoutBit,badChanVec[gb.second[i]].second,false);
-	packing.setBit(LArBadChannelEnum::distortedBit,badChanVec[gb.second[i]].second,false);
-	packing.setBit(LArBadChannelEnum::deadCalibBit,badChanVec[gb.second[i]].second,true);
+	packing.setBit(LArBadChannel::LArBadChannelEnum::deadReadoutBit,badChanVec[gb.second[i]].second,false);
+	packing.setBit(LArBadChannel::LArBadChannelEnum::distortedBit,badChanVec[gb.second[i]].second,false);
+	packing.setBit(LArBadChannel::LArBadChannelEnum::deadCalibBit,badChanVec[gb.second[i]].second,true);
       }//end loop over all channels belonging to this calibline
     }
   }//end loop over calibline vector

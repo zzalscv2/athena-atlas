@@ -45,7 +45,7 @@ LArCalibDigitMaker::~LArCalibDigitMaker()
 StatusCode LArCalibDigitMaker::initialize()
 {
 
-  m_oldeventNb=-999;
+  //m_oldeventNb=-999;
   m_eventNb=-1;
 
   ATH_MSG_DEBUG ( "======== LArCalibDigitMaker Initialize ========" );
@@ -140,12 +140,14 @@ StatusCode LArCalibDigitMaker::execute() {
  ATH_CHECK( evtStore()->retrieve(thisEventInfo) );
  // Modif J. Labbe from JF. Marchand - Nov. 2009
  //  const unsigned eventNb=thisEventInfo->event_ID()->event_number();
- unsigned eventNbtmp=ctx.eventID().event_number();
- if((int)eventNbtmp!=m_oldeventNb){
-   m_oldeventNb=eventNbtmp;
-   m_eventNb++;
- }
- const unsigned eventNb=(int)m_eventNb;
+ //unsigned eventNbtmp=ctx.eventID().event_number();
+ //if((int)eventNbtmp!=m_oldeventNb){
+ //  m_oldeventNb=eventNbtmp;
+ //  m_eventNb++;
+ //}
+ //const unsigned eventNb=(int)m_eventNb;
+ 
+ const unsigned eventNb=(ctx.eventID().event_number())&0xffffff ;        // Are we sure?
 
  ATH_MSG_DEBUG ( "======== executing event "<< eventNb << " ========" );
  

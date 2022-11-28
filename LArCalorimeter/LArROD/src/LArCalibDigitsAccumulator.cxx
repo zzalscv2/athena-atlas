@@ -24,6 +24,7 @@ LArCalibDigitsAccumulator::LArCalibDigitsAccumulator (const std::string& name, I
   declareProperty("DelayScale",m_delayScale=1*ns);
   declareProperty("KeepOnlyPulsed",m_keepPulsed=false);
   declareProperty("KeepFullyPulsedSC",m_keepFullyPulsedSC=false);
+  declareProperty("DropPercentTrig",m_DropPercentTrig=10);
   declareProperty("isSC",m_isSC=false);
   declareProperty("SampleShift",m_sampleShift=0);
   m_delay=-1;
@@ -63,16 +64,6 @@ StatusCode LArCalibDigitsAccumulator::initialize(){
         ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
      }
   } //m_isSC
-
-  
-
-  m_Accumulated.resize(m_onlineHelper->channelHashMax());
-
-  for (const std::string& key : m_keylist) {
-    std::map<int,std::vector<int>*>* map_forKey = new std::map<int,std::vector<int>*>();
-    m_readingsMap[key] = map_forKey;
-  }
-
 
   return StatusCode::SUCCESS;
 }
@@ -125,8 +116,6 @@ StatusCode LArCalibDigitsAccumulator::execute()
   const DataHandle<xAOD::EventInfo> thisEventInfo;
   ATH_CHECK( evtStore()->retrieve(thisEventInfo) );
   unsigned eventNb = thisEventInfo->eventNumber();
-  eventNb=m_eventNb;
-  ++m_eventNb;
   // retrieve calibration settings
   const LArCalibParams* calibParams;
   sc=detStore()->retrieve(calibParams,"LArCalibParams");
@@ -142,15 +131,6 @@ StatusCode LArCalibDigitsAccumulator::execute()
   //Loop over all containers that are to be processed (e.g. different gains)
   for (const std::string& key : m_keylist) {
 
-    std::map<int,std::vector<int>*>* readingsMap_pointer = 0;
-    m_readingsMap_it = m_readingsMap.find(key);
-    if (m_readingsMap_it == m_readingsMap.end()) {
-      ATH_MSG_INFO("Did not find corresponding map for key " << key);
-    } else {
-      readingsMap_pointer = m_readingsMap_it->second;
-    }
-
-
     sc=evtStore()->retrieve(calibDigitContainer,key);
     if(sc.isFailure()) {
       ATH_MSG_ERROR( "Can't retrieve LArCalibDigitContainer with key " << key << "from StoreGate." );
@@ -158,12 +138,6 @@ StatusCode LArCalibDigitsAccumulator::execute()
     }else{
       ATH_MSG_DEBUG( "Retrieved LArCalibDigitContainer with key " << key << " from StoreGate." );
     }
-
-    // store LArAccumulatedDigits
-    ACCUMDIGIT_VEC& vAccum = m_my_vec;
-    if(vAccum.size()==0) vAccum.resize(m_onlineHelper->channelHashMax());
-
-    // Loop over CalibDigitContainer
 
     if(calibDigitContainer->empty()) {
       ATH_MSG_DEBUG( "LArCalibDigitContainer with key=" << key << " is empty " );
@@ -200,11 +174,21 @@ StatusCode LArCalibDigitsAccumulator::execute()
       unsigned numPulsedLeg = 0;
       unsigned numCL = 0;
       if( m_isSC ){
+
+	///first check if there is a -1 and continue
+	bool hasInvalid=false;
+	for(auto s : digit->samples()){
+	  if(s<0){
+	    hasInvalid=true;
+	    break;
+	  }
+	}
+	if(hasInvalid) continue;
+
 	Identifier myofflineID = cabling->cnvToIdentifier(digit->hardwareID()) ;
 	ccellIds = m_sc2ccMappingTool->superCellToOfflineID( myofflineID );
         for (Identifier id : ccellIds) {// loop cells in sc
 	  HWIdentifier cellLegHWID  = cablingLeg->createSignalChannelID(id);
-	  //ATH_MSG_WARNING( "oi " << id << cellLegHWID);
 	  const std::vector<HWIdentifier>& calibLineLeg = clcabling->calibSlotLine(cellLegHWID);
 	  numCL += calibLineLeg.size();
           for (HWIdentifier calibLineHWID : calibLineLeg) {// loop legacy calib lines
@@ -222,27 +206,12 @@ StatusCode LArCalibDigitsAccumulator::execute()
 	    continue;
 	  }
 	}
-
 	ATH_MSG_DEBUG("SC "<<chid<<" pulsed cells "<< numPulsedLeg <<" or "<< ccellIds.size()<<", "<<numCL<<" calibration lines");
       } // end m_isSC
 
       //// ############################
-      
-
-      m_channelMap_it = readingsMap_pointer->find(chid.get_identifier32().get_compact());
-      std::vector<int>* cellStorage;
-      if (m_channelMap_it == readingsMap_pointer->end()) {
-	std::vector<int>* cellVector = new std::vector<int>();
-        (*readingsMap_pointer)[chid.get_identifier32().get_compact()] = cellVector;
-        
-        cellStorage = cellVector;
-      } else {
-        cellStorage = m_channelMap_it->second;
-      }
-
 
       // BELOW: DIRTY HACK BECAUSE THERE SEEMS TO BE A BUG IN THE CABLINGSVC CONCERNING THE CALIBLINES.
-
       // get calibration settings
       const std::vector<HWIdentifier>& calibLineID=clcabling->calibSlotLine(chid);
       HWIdentifier calibModuleID;
@@ -260,16 +229,24 @@ StatusCode LArCalibDigitsAccumulator::execute()
       bool isPulsed = digit->isPulsed();
       
       //First cell to be processed, set delay
-      if (m_delay==-1) { 
+      if (m_delay==-1) { /// why this is not reset to -1 each event, does not make sense
 	m_delay=digit->delay();
       }
-      else
+      else{
 	// next cells: should be the same delay
 	if (m_delay!=digit->delay()) {
 	  ATH_MSG_DEBUG( "Delay is changing to " << digit->delay() << " from " << m_delay << ": book a new LArAccumulatedCalibDigitContainer" );
 	  m_delay=digit->delay();
 	}
+      }
       
+      std::string patternName = getPatternName(key, isPulsed, m_delay, digit->DAC());
+
+      std::map<std::string, std::vector<LArAccumulated> >::iterator accIter=m_Accumulated_map.find(patternName);
+      if(accIter==m_Accumulated_map.end()){
+	accIter=m_Accumulated_map.insert(std::make_pair(patternName,std::vector<LArAccumulated>(m_onlineHelper->channelHashMax()))).first;
+      }
+
       CaloGain::CaloGain gain=digit->gain();
       if (gain<0 || gain>CaloGain::LARNGAIN)
 	{ATH_MSG_ERROR( "Found not-matching gain number ("<< (int)gain <<")" );
@@ -278,8 +255,10 @@ StatusCode LArCalibDigitsAccumulator::execute()
 	}
       
       // object to be filled for each cell
-      LArAccumulated& cellAccumulated = m_Accumulated[hashid];
-      
+      //LArAccumulated& cellAccumulated = m_Accumulated[hashid];
+      LArAccumulated& cellAccumulated = accIter->second[hashid];
+      cellAccumulated.m_onlineId=chid.get_identifier32().get_compact();
+
       // trigger counter for each cell
       cellAccumulated.m_ntrigger++;
       ATH_MSG_INFO( "chid = " << chid << ", trigger = " << cellAccumulated.m_ntrigger << ", DAC = " << digit->DAC()<<", Delay = "<<digit->delay()<<", isPulsed? "<<digit->isPulsed() );
@@ -288,88 +267,53 @@ StatusCode LArCalibDigitsAccumulator::execute()
       unsigned int sizeSamples = digit->samples().size();
       ATH_MSG_DEBUG( "sizeSteps = " << sizeSteps << ", # of samples = " << sizeSamples );
 
-      LArAccumulatedCalibDigit* accuCalibDigit;
-
       if(cellAccumulated.m_ntrigger==1){
 	cellAccumulated.m_sum.clear();
 	cellAccumulated.m_sum2.clear();
 	cellAccumulated.m_sum.resize(sizeSamples,0);
 	cellAccumulated.m_sum2.resize(sizeSamples,0);
+      }    
 
-	// first time, put new LArAccumulatedCalibDigit	
-	// Modif J. Labbe from JF. Marchand - Nov. 2009
-	//	accuCalibDigit = new LArAccumulatedCalibDigit(chid,gain,sizeSamples,0,m_nStepTrigger,(uint16_t)digit->DAC(),(uint16_t)m_delay,isPulsed);
-	
-	if ( m_isSC ){	  
-	  ATH_MSG_DEBUG("Channel "<<chid<<" DAC "<< digit->DAC()<< " will multiply by "<<numPulsedLeg<< " = "<<digit->DAC()*numPulsedLeg<<" is pulsed??? "<<isPulsed);
-	  accuCalibDigit = new LArAccumulatedCalibDigit(chid,gain,sizeSamples,(int32_t)(digit->DAC()*numPulsedLeg),(uint16_t)m_delay,isPulsed,0,0);
-	  //}
-	}else{
-	  accuCalibDigit = new LArAccumulatedCalibDigit(chid,gain,sizeSamples,(uint16_t)digit->DAC(),(uint16_t)m_delay,isPulsed,0,0);
-	}
-	vAccum[hashid]=accuCalibDigit;
-
-      }else{
-
-	// other times, retrieve the pointer to LArAccumulatedCalibDigit
-	accuCalibDigit = m_my_vec[hashid];
-
-      }
-      
-
+      /// assuming sizeSamples>m_sampleShift, is there a protection for this somehwere?
       for(unsigned int j=0;j<sizeSamples;j++){
-	cellStorage->push_back(digit->samples()[j]);
-	cellAccumulated.m_sum[j] += digit->samples()[j];
-	cellAccumulated.m_sum2[j] += digit->samples()[j]*digit->samples()[j];
+	int digis;
+	if(j-m_sampleShift >= sizeSamples){
+	  digis=digit->samples()[sizeSamples-1];
+	  cellAccumulated.m_sum[j] += digis;
+	  cellAccumulated.m_sum2[j] += digis*digis;
+	}
+	else if((int)j-m_sampleShift<0){
+	  digis=digit->samples()[0];
+	  cellAccumulated.m_sum[j] += digis;
+	  cellAccumulated.m_sum2[j] += digis*digis;
+	} else{
+	  digis=digit->samples()[j-m_sampleShift];
+	  cellAccumulated.m_sum[j] += digis;
+	  cellAccumulated.m_sum2[j] += digis*digis;
+	}
+      }
+     
+      // when reached total number of triggers for this step, fill LArAccumulatedCalibDigit and reset number of triggers
+      unsigned int ntrigUsed = nTriggerPerStep[febhash];
+      if ( m_isSC && m_DropPercentTrig != 0 ){
+	ntrigUsed -= ntrigUsed*(m_DropPercentTrig/100);
       }
 
-
-      // when reached total number of triggers for this step, fill LArAccumulatedCalibDigit and reset number of triggers
-
-      if(cellAccumulated.m_ntrigger==nTriggerPerStep[febhash]){
+      if(cellAccumulated.m_ntrigger==ntrigUsed){ 
 	ATH_MSG_DEBUG( "filling LArAccumulatedCalibDigit " );
 	ATH_MSG_DEBUG( "chid = " << chid << ", gain = " << gain << ", DAC = " << digit->DAC() << ", isPulsed = " << isPulsed << ", delay = " << m_delay << ", trigPerStep = " << nTriggerPerStep[febhash] << ", istep = " << iStepTrigger[febhash] );
 
 
+	LArAccumulatedCalibDigit* accuCalibDigit;
+	if ( m_isSC ){	  
+      	  ATH_MSG_DEBUG("Channel "<<chid<<" DAC "<< digit->DAC()<< " will multiply by "<<numPulsedLeg<< " = "<<digit->DAC()*numPulsedLeg<<" is pulsed??? "<<isPulsed);
+      	  accuCalibDigit = new LArAccumulatedCalibDigit(chid,gain,sizeSamples,(int32_t)(digit->DAC()*numPulsedLeg),(uint16_t)m_delay,isPulsed,0,0);
+      	}else{
+      	  accuCalibDigit = new LArAccumulatedCalibDigit(chid,gain,sizeSamples,(uint16_t)digit->DAC(),(uint16_t)m_delay,isPulsed,0,0);
+      	}
 
-	if ( m_sampleShift != 0 ){
-	  
-	  // First loop to find "allGood" samplings and their mean values
-	  for (unsigned int sample = 0; sample < sizeSamples; ++sample) {
-	    std::vector<int> sampleVector;
-	    uint64_t sum  = 0;
-	    uint64_t sum2 = 0;
-	    
-	    for (unsigned int trig = 0; trig < nTriggerPerStep[febhash]; ++trig) {
-              if ( m_sampleShift < 0 ){
-		if (sample >= sizeSamples+m_sampleShift){
-		  sampleVector.push_back(cellStorage->at(trig*sizeSamples+sizeSamples-1)); 
-		}else{
-		  sampleVector.push_back(cellStorage->at(trig*sizeSamples-m_sampleShift+sample));
-		}
-	      }else{
-		if ( sample < static_cast<unsigned>(std::abs(m_sampleShift)) ){
-		  sampleVector.push_back(cellStorage->at(trig*sizeSamples));
-		}else{		  
-		  sampleVector.push_back(cellStorage->at(trig*sizeSamples-m_sampleShift+sample));
-		}
-	      }
-	    }// trig
 
-	    sort(sampleVector.begin(), sampleVector.end());
-	    
-	    for (unsigned int trig = 0; trig < nTriggerPerStep[febhash]; ++trig) {
-              sum  += sampleVector.at(trig);
-	      sum2 += sampleVector.at(trig) * sampleVector.at(trig);
-	    }
-
-            cellAccumulated.m_sum[sample]  = sum;
-	    cellAccumulated.m_sum2[sample] = sum2;
-
-	  }//sample
-	}//m_sampleShift
-	
-	accuCalibDigit->setAddSubStep(cellAccumulated.m_sum,cellAccumulated.m_sum2,nTriggerPerStep[febhash]);
+	accuCalibDigit->setAddSubStep(cellAccumulated.m_sum,cellAccumulated.m_sum2,ntrigUsed);
 	iStepTrigger[febhash]++;
 	
 	std::vector<float> mean =  accuCalibDigit->mean();
@@ -382,11 +326,8 @@ StatusCode LArCalibDigitsAccumulator::execute()
 
 	larAccuCalibDigitContainer->push_back(accuCalibDigit);
 
+	cellAccumulated.m_nused = cellAccumulated.m_ntrigger;
 	cellAccumulated.m_ntrigger = 0;
-
-	delete cellStorage;
-	(*readingsMap_pointer).erase(chid.get_identifier32().get_compact());
-	
       }
       
     }// loop over cells in container
@@ -411,4 +352,26 @@ StatusCode LArCalibDigitsAccumulator::execute()
   return StatusCode::SUCCESS;
 }
   
+std::string LArCalibDigitsAccumulator::getPatternName(std::string gain, bool isPulsed, int delay, int dac){
+  std::ostringstream ss;
+  ss<<gain<<"_"<<isPulsed<<"_"<<delay<<"_"<<dac;
+  return ss.str();
+}
 
+
+StatusCode LArCalibDigitsAccumulator::finalize(){
+
+  if ( !m_isSC ) return StatusCode::SUCCESS;
+  int ntrigUsed = 100 - 100*(m_DropPercentTrig/100); /// assuming 100 per step
+  for(auto &acc : m_Accumulated_map){
+    std::string pattern=acc.first;
+    for(auto &sc : acc.second){
+      if(sc.m_onlineId && sc.m_nused != ntrigUsed){
+	ATH_MSG_WARNING("Not enough triggers for pattern " << pattern << " channel OnlineID " << sc.m_onlineId << " ntriggers " << sc.m_ntrigger );
+      }
+    }
+  }
+
+  return StatusCode::SUCCESS;
+
+}

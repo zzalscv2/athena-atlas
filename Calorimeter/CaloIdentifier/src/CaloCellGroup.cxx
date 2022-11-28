@@ -20,7 +20,7 @@ CaloCellGroup::CaloCellGroup() :
 }
 
 
-bool CaloCellGroup::setDefinition(const CaloCell_ID* caloCellId, const std::string& definition, MsgStream& logStr) {
+bool CaloCellGroup::setDefinition(const CaloCell_Base_ID* caloCellId, const std::string& definition, MsgStream& logStr) {
   m_caloCellId=caloCellId;
   m_fieldBoundaries.clear();
   m_values.clear();
@@ -223,7 +223,7 @@ void CaloCellGroup::complain(MsgStream& logStr, const std::string& problem) cons
 
 
 
-bool CaloCellGroupList::setDefinition(const CaloCell_ID* caloCellId, const std::vector<std::string>& definitions, 
+bool CaloCellGroupList::setDefinition(const CaloCell_Base_ID* caloCellId, const std::vector<std::string>& definitions, 
 				       MsgStream& logStr){
 
   m_groups.clear();
@@ -281,7 +281,7 @@ const std::vector<float>& CaloCellGroupList::valuesForCell(const Identifier id) 
   return *result;
 }
 
-void CaloCellGroupList::dump(const CaloCell_ID* caloCellId) {
+void CaloCellGroupList::dump(const CaloCell_Base_ID* caloCellId) {
 
   std::cout << "Definitions: " << std::endl;
   for (size_t i=0;i<m_groups.size();i++) {

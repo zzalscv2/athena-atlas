@@ -56,7 +56,6 @@ class LArAutoCorrAlgToDB : public AthAlgorithm
   unsigned int m_nGains = 0U; 
 
   float m_nMinbias=20.0;
-  
 };
 
 #endif
