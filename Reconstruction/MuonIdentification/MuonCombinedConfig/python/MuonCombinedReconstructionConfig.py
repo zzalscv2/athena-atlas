@@ -6,18 +6,17 @@ from AthenaConfiguration.Enums import BeamType
 
 
 def MuonCaloTagAlgCfg(flags, name="MuonCaloTagAlg", **kwargs):
+    result = ComponentAccumulator()
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCaloTagToolCfg
-    tools = []
-    result = MuonCaloTagToolCfg(flags)
-    tools.append(result.popPrivateTools())
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
-    result.addPublicTool(kwargs['MuonCombinedInDetExtensionTools'][0])  # Ugh
+    tool = result.popToolsAndMerge(MuonCaloTagToolCfg(flags))
+    # needs to be made public for some reason?
+    result.addPublicTool(tool)
+    kwargs.setdefault("MuonCombinedInDetExtensionTools", [tool])
     kwargs.setdefault("TagMap", "caloTagMap")
     kwargs.setdefault("CombinedTrackCollection", "")
     kwargs.setdefault("METrackCollection", "")
     kwargs.setdefault("usePRDs", False)
-    alg = CompFactory.MuonCombinedInDetExtensionAlg(name, **kwargs)
-    result.addEventAlgo(alg, primary=True)
+    result.addEventAlgo(CompFactory.MuonCombinedInDetExtensionAlg(name, **kwargs))
     return result
 
 
