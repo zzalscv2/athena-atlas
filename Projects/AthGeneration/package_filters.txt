@@ -152,7 +152,6 @@
 + Event/xAOD/xAODTruthCnv
 + External/AtlasDataArea
 + External/Pythia8
-- Generators/GenzModuleEvent
 - Generators/MCTester_i
 - Generators/ProtosLHEF_i
 - Generators/TrackRecordGenerator
