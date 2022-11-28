@@ -29,6 +29,11 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from TrigInDetConfig.TrigInDetConfig import InDetCacheNames
   from AthenaCommon.GlobalFlags import globalflags
 
+  #make flags and CAtoGlobalWrapper available for CA migration
+  from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper,conf2toConfigurable
+  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
+
   # Load RDOs if we aren't loading bytestream                                                                                       
   from AthenaCommon.AlgSequence import AlgSequence
   topSequence = AlgSequence()
@@ -304,6 +309,14 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   #FIXME have a flag for now set for True( as most cases call FTF) but potentially separate
   #do not add if the config is LRT
   if doFTF:
+    
+      from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
+      ca = CAtoGlobalWrapper(InDetTrigTrackSummaryToolCfg,flags)
+      TST = ca.popPrivateTools()
+      trackSummaryTool = conf2toConfigurable(TST)
+      
+      from AthenaCommon.AppMgr import ToolSvc
+      ToolSvc += trackSummaryTool
 
       if config is None:
             raise ValueError('makeInDetTrigFastTracking() No signature config specified')
@@ -312,8 +325,6 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
         # use SiSPSeededTrackFinder for fast tracking
         from InDetRecExample.ConfiguredNewTrackingCuts import ConfiguredNewTrackingCuts
         trackingCuts = ConfiguredNewTrackingCuts( "R3LargeD0" )
-        from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryTool
-        summaryTool = InDetTrigTrackSummaryTool
         # --- Loading Pixel, SCT conditions
         from AthenaCommon.AlgSequence import AthSequencer
         condSeq = AthSequencer("AthCondSeq")
@@ -340,7 +351,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                                                trackingCuts          = trackingCuts,
                                                                usePrdAssociationTool = False,
                                                                nameSuffix            = config.input_name,
-                                                               trackSummaryTool      = summaryTool )
+                                                               trackSummaryTool      = trackSummaryTool )
 
 
         viewAlgs.append( siSPSeededTrackFinder )
