@@ -239,12 +239,13 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
   McAod::EtIsolations pxi = etIsol;
   McAod::EtIsolations pyi = etIsol;
 
+  int barcodepart = HepMC::barcode(part);
   for ( GenParticles_t::const_iterator
 	  i    = particles.begin(),
 	  iEnd = particles.end(); 
 	i != iEnd; 
 	++i ) {
-    if ( HepMC::barcode(*i) == HepMC::barcode(part) ) {
+    if ( HepMC::barcode(*i) == barcodepart ) {
       continue;
     }
     if( partSel == ITruthIsolationTool::UseChargedOnly ) {

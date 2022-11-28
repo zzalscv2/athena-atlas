@@ -101,7 +101,7 @@ Trk::InDetReconstructableSelector::selectGenSignal (const McEventCollection* Sim
 
         int   pdgCode         = particle->pdg_id();
         if (std::abs(pdgCode) > 1000000000 ) continue; // ignore nuclei from hadronic interactions
-        const HepPDT::ParticleData* pd = m_particleDataTable->particle(abs(pdgCode));
+        const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
 
         if (!pd) { // nuclei excluded, still problems with a given type?
           ATH_MSG_INFO ("Could not get particle data for particle with pdgCode="<<pdgCode<< ", status=" << particle->status() << ", barcode=" << HepMC::barcode(particle));
