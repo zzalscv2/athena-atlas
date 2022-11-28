@@ -15,6 +15,7 @@
 ########################################################################
 from .JetDefinition import xAODType,  JetInputConstitSeq, JetInputExternal, JetConstitModifier, JetInputConstit
 from .StandardJetContext import inputsFromContext
+from .JetRecConfig import isAnalysisRelease 
 from AthenaConfiguration.Enums import BeamType
 
 # Prepare dictionnaries to hold all of our standard definitions.
@@ -56,7 +57,6 @@ def standardReco(input):
     """
 
     doNothingFunc = lambda *l:None # noqa: E731
-    from .JetRecConfig import isAnalysisRelease 
     if isAnalysisRelease():
         return doNothingFunc
 
@@ -78,9 +78,10 @@ def standardReco(input):
             return MuonReconstructionCfg(flags) if flags.Jet.doUpstreamDependencies else None     
     elif input=="PFlow":
         def f(jetdef,spec):
+            if not jetdef._cflags.Jet.doUpstreamDependencies:
+                return None            
             from eflowRec.PFRun3Config import PFCfg
-            flags = jetdef._cflags
-            return PFCfg(flags) if flags.Jet.doUpstreamDependencies else None
+            return PFCfg(jetdef._cflags)
         
     else:
         f = doNothingFunc
@@ -200,7 +201,9 @@ _stdInputList = [
 
 
     JetInputExternal("UFOCSSK", xAODType.FlowElement,
-                     prereqs = ['input:GPFlowCSSK'],
+                     # in analysis releases, we can't build UFO anyways, so don't even try to declare dependencies,
+                     prereqs =lambda parentjdef :  [] if isAnalysisRelease() else ['input:GPFlowCSSK'], 
+                     filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK'])
                      ),
 
