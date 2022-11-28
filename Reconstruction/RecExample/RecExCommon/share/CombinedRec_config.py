@@ -150,14 +150,6 @@ if (jetOK or rec.readESD()) and rec.doBTagging() and  DetFlags.ID_on() and DetFl
     from BTagging.BTagRun3Config import BTagRecoSplitCfg
     CAtoGlobalWrapper(BTagRecoSplitCfg, ConfigFlags)
 
-# Hits associated with high-pt jets for trackless b-tagging
-from BTagging.BTaggingFlags import BTaggingFlags
-if (jetOK or rec.readESD()) and DetFlags.ID_on() and rec.doWriteAOD() and BTaggingFlags.DoJetHitAssociation:
-    try:
-        include("JetHitAssociation/jetHitAssociation_config.py")
-    except Exception:
-        treatException("Could not set up jet hit association")
-
 #
 # functionality : tau reconstruction
 #

@@ -139,16 +139,17 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
     if inputFlags.Output.doWriteESD:
      result.merge(addBTagToOutput(inputFlags, JetCollection, toAOD=False, toESD=True))
     
-    # Hits should be written out if Trackless flag is used
+    # Invoking the alhorithm saving hits in the vicinity of jets, with proper flags
     if inputFlags.BTagging.Trackless:
+        BTaggingFlags.DoJetHitAssociation=True
         from JetHitAssociation.JetHitAssociationConfig import JetHitAssociationCfg
-        result.merge(JetHitAssociationCfg(inputFlags))        	
+        result.merge(JetHitAssociationCfg(inputFlags))
         BTaggingAODList = ['xAOD::TrackMeasurementValidationContainer#JetAssociatedPixelClusters',
                            'xAOD::TrackMeasurementValidationAuxContainer#JetAssociatedPixelClustersAux.']
         BTaggingAODList += ['xAOD::TrackMeasurementValidationContainer#JetAssociatedSCTClusters',
-                           'xAOD::TrackMeasurementValidationAuxContainer#JetAssociatedSCTClustersAux.']
+                            'xAOD::TrackMeasurementValidationAuxContainer#JetAssociatedSCTClustersAux.']
         result.merge(addToAOD(inputFlags, BTaggingAODList))
-      
+
     return result
 
 
