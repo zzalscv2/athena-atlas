@@ -213,7 +213,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   if (m_slices["fjet"]) {
     //same for fat groomed jets
     fatjetcoll = m_fatJets;
-    if (fatjetcoll.size()>3) fatjetcoll = fatjetcoll.substr(0,fatjetcoll.size()-4); //remove "Jets" suffix
+    if (fatjetcoll.size()>3)fatjetcoll.erase(fatjetcoll.size()-4,4);
     if (!m_jetFatCalibTool.isUserConfigured() && !m_fatJets.empty()) {
       toolName = "JetFatCalibTool_" + m_fatJets;
       m_jetFatCalibTool.setTypeAndName("JetCalibrationTool/"+toolName);
