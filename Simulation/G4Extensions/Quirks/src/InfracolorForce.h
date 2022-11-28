@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INFRACOLORFORCE_H
@@ -16,7 +16,8 @@ public:
     InfracolorForce();
     ~InfracolorForce();
     void SetReactionForce(InfracolorForce* reactionForce);
-    InfracolorForce* GetReactionForce() const;
+    const InfracolorForce* GetReactionForce() const;
+    InfracolorForce* GetReactionForce();
     void SetFirstStringLength(G4double firstStringLength);
     void StartTracking(const G4Track* dest);
     void TrackKilled();
@@ -60,7 +61,11 @@ inline void InfracolorForce::SetReactionForce(InfracolorForce* reactionForce) {
     m_reactionForce = reactionForce;
 }
 
-inline InfracolorForce* InfracolorForce::GetReactionForce() const {
+inline const InfracolorForce* InfracolorForce::GetReactionForce() const {
+    return m_reactionForce;
+}
+
+inline InfracolorForce* InfracolorForce::GetReactionForce() {
     return m_reactionForce;
 }
 
