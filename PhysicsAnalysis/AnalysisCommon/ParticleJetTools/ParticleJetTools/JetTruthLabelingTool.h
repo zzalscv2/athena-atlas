@@ -128,6 +128,7 @@ protected:
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit12_recoKey{this, "TruthSplit12_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthSplit23_recoKey{this, "TruthSplit23_RecoKey", "", "Do not configure manually!"};
   SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthJetMass_recoKey{this, "TruthJetMass_RecoKey", "", "Do not configure manually!"};
+  SG::WriteDecorHandleKey<xAOD::JetContainer> m_truthJetPt_recoKey{this, "TruthJetPt_RecoKey", "", "Do not configure manually!"};
 };
 
 #endif
