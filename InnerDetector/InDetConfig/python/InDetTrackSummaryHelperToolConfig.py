@@ -53,12 +53,13 @@ def InDetSummaryHelperSharedHitsCfg(flags, name='InDetSummaryHelperSharedHits', 
   acc.setPrivateTools(InDetSummaryHelper)
   return acc
 
+
 def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs):
-  """
-  based on: InnerDetector/InDetExample/InDetTrigRecExample/python/InDetTrigConfigRecLoadTools.py
-  """
 
   result = ComponentAccumulator()
+
+  kwargs.setdefault("DoSharedHits", False)
+  kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
 
   if 'AssoTool' not in kwargs :
     from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
@@ -66,6 +67,7 @@ def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs
     result.addPublicTool(associationTool)
     kwargs.setdefault("AssoTool", associationTool)
 
+  #can always set HoleSearchTool - the actual search is controlled by TrackSummaryTool cfg
   if "HoleSearch" not in kwargs:
     from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
     holeSearchTool = result.popToolsAndMerge( TrigHoleSearchToolCfg(flags) )
@@ -83,13 +85,26 @@ def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs
     TestPixellayerTool = result.popToolsAndMerge(InDetTrigTestPixelLayerToolInnerCfg(flags))
     kwargs.setdefault("TestPixelLayerTool", TestPixellayerTool)
 
-  kwargs.setdefault("DoSharedHits", True)
   kwargs.setdefault("usePixel", flags.Detector.EnablePixel)
   kwargs.setdefault("useSCT", flags.Detector.EnableSCT)
-  kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
 
-  result.setPrivateTools(CompFactory.InDet.InDetTrackSummaryHelperTool(name, **kwargs))
+  result.setPrivateTools(CompFactory.InDet.InDetTrackSummaryHelperTool(name=name, **kwargs))
   return result
+
+def TrigTrackSummaryHelperToolSharedHitsCfg(flags, name="InDetTrigSummaryHelperSharedHits", **kwargs):
+  return TrigTrackSummaryHelperToolCfg(flags, 
+                                       name,
+                                       DoSharedHits = True,
+                                       **kwargs)
+
+def TrigTrackSummaryHelperToolSiOnlyCfg(flags, name="InDetTrigSummaryHelperSiOnly", **kwargs):
+  return TrigTrackSummaryHelperToolCfg(flags, 
+                                       name,
+                                       useTRT = False,
+                                       TRTStrawSummarySvc = None,
+                                       TestPixelLayerTool = None,
+                                       **kwargs)
+                                       
 
 def ITkTrackSummaryHelperToolCfg(flags, name='ITkSummaryHelper', **kwargs):
   result = ComponentAccumulator()
