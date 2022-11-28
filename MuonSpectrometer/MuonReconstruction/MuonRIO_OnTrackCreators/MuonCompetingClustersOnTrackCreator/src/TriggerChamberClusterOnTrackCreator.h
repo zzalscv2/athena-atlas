@@ -57,7 +57,7 @@ private:
 	std::list<int>&						limitingChannels,
 	std::list<const Muon::MuonClusterOnTrack*>&		limitingRots) const;
 
-    std::vector<const Muon::MuonClusterOnTrack*>*	createPrdRots(
+    std::vector<const Muon::MuonClusterOnTrack*>	createPrdRots(
 	const std::list<const Trk::PrepRawData*>&		prds) const;
   
     void						makeClustersBySurface(
@@ -66,12 +66,12 @@ private:
 	const std::list<const Trk::PrepRawData*>&		prds,
 	const std::vector<const Muon::MuonClusterOnTrack*>&	rots) const;
 
-    void						makeOverallParameters(
-	Trk::LocalParameters*&					parameters,
-	Amg::MatrixX*&						errorMatrix,
-	Trk::Surface*&						surface,
-	std::list<int>&						limitingChannels,
-	std::list<const Muon::MuonClusterOnTrack*>&		limitingRots) const; 
+    void makeOverallParameters(
+      Trk::LocalParameters& parameters,
+      Amg::MatrixX& errorMatrix,
+      Trk::Surface*& surface,
+      std::list<int>& limitingChannels,
+      std::list<const Muon::MuonClusterOnTrack*>& limitingRots) const;
 };
 
 }	// end of namespace

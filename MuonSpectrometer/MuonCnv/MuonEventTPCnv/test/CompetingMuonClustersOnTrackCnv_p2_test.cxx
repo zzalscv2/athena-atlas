@@ -163,16 +163,15 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
 
   std::vector<double> probs { 5, 3, 10.5, 3, 1 };
 
-  std::vector<const Muon::MuonClusterOnTrack*>* childrots =
-    new std::vector<const Muon::MuonClusterOnTrack*>;
+  auto childrots = std::vector<const Muon::MuonClusterOnTrack*>();
 
-  childrots->push_back (make_csccluster (muo_dd));
-  childrots->push_back (make_rpccluster (muo_dd));
+  childrots.push_back (make_csccluster (muo_dd));
+  childrots.push_back (make_rpccluster (muo_dd));
 
-  Muon::CompetingMuonClustersOnTrack trans1 (locpars,
-                                             cov,
+  Muon::CompetingMuonClustersOnTrack trans1 (std::move(locpars),
+                                             std::move(cov),
                                              new Trk::PerigeeSurface(Amg::Vector3D (50, 100, 150)),
-                                             childrots,
+                                             std::move(childrots),
                                              std::vector<double> (probs));
 
   testit (trans1);

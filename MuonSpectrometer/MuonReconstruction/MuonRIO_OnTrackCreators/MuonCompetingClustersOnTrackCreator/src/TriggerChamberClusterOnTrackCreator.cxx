@@ -77,21 +77,21 @@ TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Tr
     }
 
     // create a rot for each prd (which gets weight zero)
-    std::vector<const Muon::MuonClusterOnTrack*>* rots = createPrdRots(prds);
-    auto assocProbs = std::vector<double>(rots->size(), 0.);
+    std::vector<const Muon::MuonClusterOnTrack*> rots = createPrdRots(prds);
+    auto assocProbs = std::vector<double>(rots.size(), 0.);
     
 
     // for each surface, find the first and last rot forming the cluster
     std::list<int>				limitingChannels;
     std::list<const Muon::MuonClusterOnTrack*>	limitingRots;
-    makeClustersBySurface(limitingChannels,limitingRots,prds,*rots);
+    makeClustersBySurface(limitingChannels,limitingRots,prds,rots);
 
     // cluster consistency - discard any surfaces not contributing to the final cluster
     applyClusterConsistency(limitingChannels,limitingRots);
 
     // overall localPosition, error matrix and surface
-    Trk::LocalParameters* parameters	= nullptr;
-    Amg::MatrixX* errorMatrix 	= nullptr;
+    Trk::LocalParameters parameters{};
+    Amg::MatrixX errorMatrix{};
     Trk::Surface* surface		= nullptr;
     makeOverallParameters(parameters,errorMatrix,surface,limitingChannels,limitingRots);
     
@@ -101,7 +101,7 @@ TriggerChamberClusterOnTrackCreator::createBroadCluster(const std::list<const Tr
     // return the competingMuonClusterOnTrack object containing the final parameters,
     // error matrix, surface, list of rots and weights
     return std::make_unique<const CompetingMuonClustersOnTrack>(
-      parameters, errorMatrix, surface, rots, std::move(assocProbs));
+     std::move(parameters), std::move(errorMatrix), surface, std::move(rots), std::move(assocProbs));
 }
 
 void
@@ -150,9 +150,9 @@ TriggerChamberClusterOnTrackCreator::applyClusterConsistency(
     }
 }
 
-std::vector<const Muon::MuonClusterOnTrack*>* TriggerChamberClusterOnTrackCreator::createPrdRots(const std::list<const Trk::PrepRawData*>& prds) const {
+std::vector<const Muon::MuonClusterOnTrack*> TriggerChamberClusterOnTrackCreator::createPrdRots(const std::list<const Trk::PrepRawData*>& prds) const {
     // create clusterRot for each PRD
-    std::vector<const Muon::MuonClusterOnTrack*>* rots = new std::vector<const Muon::MuonClusterOnTrack*>;
+    auto rots = std::vector<const Muon::MuonClusterOnTrack*>();
     if (!prds.size()) {
         ATH_MSG_WARNING("empty PRD list ");
         return rots;
@@ -170,7 +170,7 @@ std::vector<const Muon::MuonClusterOnTrack*>* TriggerChamberClusterOnTrackCreato
         const Trk::TrkDetElementBase* detectorElement = (**p).detectorElement();
         const Amg::Vector3D globalPosition = detectorElement->center(id);
         const Muon::MuonClusterOnTrack* cluster = m_clusterCreator->createRIO_OnTrack(**p,globalPosition);
-        rots->push_back(cluster);
+        rots.push_back(cluster);
     }
     return rots;
 }
@@ -308,8 +308,8 @@ TriggerChamberClusterOnTrackCreator::makeClustersBySurface(std::list<int>& limit
 
 void
 TriggerChamberClusterOnTrackCreator::makeOverallParameters(
-	Trk::LocalParameters*&					parameters,
-	Amg::MatrixX*&					errorMatrix,
+	Trk::LocalParameters&			parameters,
+	Amg::MatrixX&				      errorMatrix,
 	Trk::Surface*&						surface,
 	std::list<int>&						limitingChannels,
 	std::list<const Muon::MuonClusterOnTrack*>&		limitingRots) const
@@ -319,7 +319,7 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
     std::list<const Muon::MuonClusterOnTrack*>::const_iterator r = limitingRots.begin();
     Amg::Vector3D centre		= (**r).associatedSurface().center();
     Amg::MatrixX covariance	= (**r).localCovariance();
-    parameters				= new Trk::LocalParameters((**r).localParameters());
+    parameters				= Trk::LocalParameters((**r).localParameters());
     Identifier channelId = (**r).identify();
     bool isRpc = m_idHelperSvc->isRpc(channelId);
     
@@ -328,9 +328,9 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
 	 r != limitingRots.end();
 	 ++r, ++pair)
     {
-	centre		+= (**r).associatedSurface().center();
-	covariance	+= (**r).localCovariance();
-	*parameters	+= (**r).localParameters();
+      centre		+= (**r).associatedSurface().center();
+      covariance	+= (**r).localCovariance();
+      parameters	+= (**r).localParameters();
     }
     double norm			= 1.;
     if(limitingRots.size()>0) norm /= static_cast<double>(limitingRots.size());
@@ -339,25 +339,22 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
     double width		= static_cast<double>(1 + abs(*(++l) - firstChannel));
     if (limitingRots.size() > 2)
     {
-	int offset	= abs(*(++l) - firstChannel);
-	if (! isRpc && offset < 2)
-	{
-	    width *= 0.5;
-	}
-	else
-	{
-	    width += static_cast<double>(offset);
-	}
+      int offset = abs(*(++l) - firstChannel);
+      if (!isRpc && offset < 2) {
+        width *= 0.5;
+      } else {
+        width += static_cast<double>(offset);
+      }
     }
 
     // get parameter means
     centre	*= norm;
     covariance	*= width*width*norm;
-    *parameters	*= norm;
+    parameters	*= norm;
 
     // finally create the mean ErrorMatrix and the average Surface
     // note the cluster surfaces are assumed to have identical orientation and bounds
-    errorMatrix			= new Amg::MatrixX(covariance);
+    errorMatrix			= Amg::MatrixX(covariance);
     const Trk::Surface& surf	= (**limitingRots.begin()).associatedSurface();
     Amg::Transform3D rotation  = surf.transform();
     std::string shape		= "";
@@ -389,8 +386,8 @@ TriggerChamberClusterOnTrackCreator::makeOverallParameters(
     // debug
     if ( msgLvl(MSG::DEBUG) )
     {
-	ATH_MSG_DEBUG(shape << "  width " << width << "   localParameters " << (*parameters)[Trk::locX]);
-	if (covariance.cols() > 1) ATH_MSG_DEBUG(" " << (*parameters)[Trk::locY]);
+	ATH_MSG_DEBUG(shape << "  width " << width << "   localParameters " << (parameters)[Trk::locX]);
+	if (covariance.cols() > 1) ATH_MSG_DEBUG(" " << (parameters)[Trk::locY]);
 	ATH_MSG_DEBUG("   covariance " << std::sqrt(covariance(Trk::locX,Trk::locX)));
 	if (covariance.cols() > 1) ATH_MSG_DEBUG(" " << std::sqrt(covariance(Trk::locY,Trk::locY)));
 	ATH_MSG_DEBUG("   channel range (cluster) ");

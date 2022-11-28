@@ -33,7 +33,7 @@ CompetingMuonClustersOnTrackCnv_p1::persToTrans( const Muon::CompetingMuonCluste
   *transObj = Muon::CompetingMuonClustersOnTrack (Trk::LocalParameters(),
                                                   Amg::MatrixX(),
                                                   associatedSurface,
-                                                  containedChildRots.release(),
+                                                  std::move(*containedChildRots),
                                                   {}// assgnProb
                                                   );
 
@@ -41,8 +41,8 @@ CompetingMuonClustersOnTrackCnv_p1::persToTrans( const Muon::CompetingMuonCluste
 }
 
 void 
-CompetingMuonClustersOnTrackCnv_p1::transToPers( const Muon::CompetingMuonClustersOnTrack */*transObj*/,
-                                                 Muon::CompetingMuonClustersOnTrack_p1 */*persObj*/, 
+CompetingMuonClustersOnTrackCnv_p1::transToPers( const Muon::CompetingMuonClustersOnTrack* /*transObj*/,
+                                                 Muon::CompetingMuonClustersOnTrack_p1* /*persObj*/, 
                                                  MsgStream &/*log*/ ) 
 {
   throw std::runtime_error( "CompetingMuonClustersOnTrackCnv_p1::transToPers is deprecated!" );
