@@ -754,7 +754,7 @@ def isComponentPassingConditions(component, configflags, prereqDic):
 
 def isAnalysisRelease():
     from AthenaConfiguration.Enums import Project
-    return Project.determine() is Project.AnalysisBase
+    return Project.determine() in( Project.AnalysisBase, Project.AthAnalysis)
 
 
 def reOrderAlgs(algs):

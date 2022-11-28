@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PFlowUtils )
@@ -20,6 +20,13 @@ if( NOT XAOD_ANALYSIS )
       src/*.h src/*.cxx src/components/*.cxx
       LINK_LIBRARIES AthContainers AthenaBaseComps xAODJet xAODPFlow xAODTruth
       xAODCore PFlowUtilsLib CaloCalibHitRecLib CaloSimEvent StoreGateLib )
+endif()
+
+if(  XAOD_ANALYSIS AND NOT XAOD_STANDALONE )
+   atlas_add_component( PFlowUtils
+     src/components/*.cxx
+     LINK_LIBRARIES AthContainers AthenaBaseComps xAODJet xAODPFlow xAODTruth
+     xAODCore PFlowUtilsLib )
 endif()
 
 # Install files from the package:
