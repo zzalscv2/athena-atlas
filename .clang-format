@@ -1,0 +1,10 @@
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+
+BasedOnStyle: Google
+Language: Cpp
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+KeepEmptyLinesAtTheStartOfBlocks: true
