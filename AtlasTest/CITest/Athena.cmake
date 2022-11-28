@@ -48,7 +48,7 @@ atlas_add_citest( OverlayRun3MC_CAConfig
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' --no-output-checks )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' )
 
 atlas_add_citest( RecoRun2Data_CAConfig
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA --maxEvents 25' --no-output-checks )
@@ -66,7 +66,7 @@ atlas_add_citest( RecoRun2Data_DAODPHYSLite
    DEPENDS_SUCCESS RecoRun2Data )
 
 atlas_add_citest( RecoRun2MC
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--maxEvents 25' --threads 0 --no-output-checks )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25' )
 
 atlas_add_citest( RecoRun2MC_CAConfig
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco -e '--CA --maxEvents 25' --no-output-checks )
@@ -80,11 +80,11 @@ atlas_add_citest( RecoRun2MC_PileUp
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --run-only --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --run-only
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Checks
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --checks-only --output-path ../RecoRun3Data --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --checks-only --output-path ../RecoRun3Data
    DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_CAConfig

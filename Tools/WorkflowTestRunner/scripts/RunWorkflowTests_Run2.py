@@ -38,7 +38,7 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.PileUpPresampling:
             tests_to_run.append(PileUpTest("d1730", run, WorkflowType.PileUpPresampling, ["HITtoRDO"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.MCPileUpReco:
-            tests_to_run.append(QTest("q444", run, WorkflowType.MCPileUpReco, ["RAWtoESD", "ESDtoAOD"], setup, options.extra_args))
+            tests_to_run.append(QTest("q444", run, WorkflowType.MCPileUpReco, ["Overlay", "RAWtoALL"], setup, options.extra_args + " --steering doOverlay doRAWtoALL"))
     elif options.derivation:
         tests_to_run.append(DerivationTest("p5205", run, WorkflowType.Derivation, ["Derivation"], setup, options.extra_args))
     else:
@@ -46,7 +46,7 @@ def main():
             if "--CA" in options.extra_args:
                 tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering doRAWtoALL"))
             else:
-                tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoESD", "ESDtoAOD"], setup, options.extra_args))
+                tests_to_run.append(QTest("q443", run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args + " --steering doRDO_TRIG doTRIGtoALL"))
         if not options.workflow or options.workflow is WorkflowType.DataReco:
             tests_to_run.append(QTest("q442", run, WorkflowType.DataReco, ["RAWtoALL"], setup, options.extra_args))
 
