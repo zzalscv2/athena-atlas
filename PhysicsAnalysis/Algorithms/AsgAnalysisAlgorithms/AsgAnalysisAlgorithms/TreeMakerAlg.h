@@ -6,8 +6,7 @@
 #define ASGANALYSISALGORITHMS_TREEMAKERALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-
-class TTree;
+#include "AsgTools/PropertyWrapper.h"
 
 namespace CP {
 
@@ -29,35 +28,27 @@ namespace CP {
 
    public:
       /// Algorithm constructor
-      TreeMakerAlg( const std::string& name, ISvcLocator* svcLoc );
+      using EL::AnaAlgorithm::AnaAlgorithm;
 
       /// @name Functions inherited from @c EL::AnaAlgorithm
       /// @{
+      virtual StatusCode initialize() override;
 
       /// Function executed once per event
-      StatusCode execute() override;
+      StatusCode execute() override { return StatusCode::SUCCESS; }
 
       /// @}
 
    private:
-      /// Function setting up the internal data structures on the first event
-      StatusCode setupTree();
-
       /// @name Algorithm properties
       /// @{
 
       /// The name of the output tree to write
-      std::string m_treeName;
-      /// Flust setting for the output tree
-      int m_treeAutoFlush;
-
-      /// @}
-
-      /// @name Helper variables
-      /// @{
-
-      /// Configured tree status
-      bool m_treeConfigured{false};
+      Gaudi::Property<std::string> m_treeName{
+          this, "TreeName", "physics", "Name of the tree to write"};
+      /// Flush setting for the output tree
+      Gaudi::Property<int> m_treeAutoFlush{
+          this, "TreeAutoFlush", 200, "AutoFlush value for the output tree"};
 
       /// @}
 
