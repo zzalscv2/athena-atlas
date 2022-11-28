@@ -53,7 +53,7 @@ StatusCode LArRampBuilder::initialize()
 
   //Intermediate ramp object (DAC/ADC pairs)
   m_ramps=std::make_unique<LArConditionsContainer<ACCRAMP> >();
-  m_ramps->setGroupingType(LArConditionsContainerBase::SingleGroup); 
+  ATH_CHECK(m_ramps->setGroupingType(m_groupingType,msg())); 
   ATH_CHECK(m_ramps->initialize()); 
   
   chooseRecoMode() ;
@@ -294,7 +294,11 @@ StatusCode LArRampBuilder::execute()
     ++foundkey;
     HWIdentifier  lastFailedFEB(0);
     
-    if(larAccumulatedCalibDigitContainer->empty()) ATH_MSG_DEBUG("LArAccumulatedCalibDigitContainer with key=" << *key_it << " is empty ");
+    if(larAccumulatedCalibDigitContainer->empty()) {
+       ATH_MSG_DEBUG("LArAccumulatedCalibDigitContainer with key=" << *key_it << " is empty ");
+    } else {
+       ATH_MSG_DEBUG("LArAccumulatedCalibDigitContainer with key=" << *key_it << " has size " << larAccumulatedCalibDigitContainer->size());
+    }
 
     for (const LArAccumulatedCalibDigit* digit : *larAccumulatedCalibDigitContainer) {  //Loop over all cells
     

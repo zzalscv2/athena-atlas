@@ -59,6 +59,29 @@ def _larLatomeCfg(configFlags,algo,folder,outkey):
     #print (result)
     return result
 
+def _larLatomeCfg(configFlags,algo,folder,outkey):
+    result=ComponentAccumulator()
+
+    result.merge(IOVDbSvcCfg(configFlags))
+
+    #MC folder-tag hack 
+    tagsperFolder={"/LAR/IdentifierSC/LatomeMapping":"LARIdentifierSCLatomeMapping-UPD1-00"
+                   }
+
+    if configFlags.Input.isMC:
+        db='LAR_OFL'
+        if folder in tagsperFolder:
+            ft=tagsperFolder[folder]
+            folderwithtag=folder+"<tag>"+ft+"</tag>"
+    else:
+        db='LAR_ONL'
+        folderwithtag=folder
+
+    result.addCondAlgo(algo(ReadKey=folder,WriteKey=outkey),primary=True)
+    result.merge(addFolders(configFlags,folderwithtag,className="CondAttrListCollection",detDb=db))
+    #print (result)
+    return result
+
 
 def LArOnOffIdMappingCfg(configFlags):
     return _larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap")

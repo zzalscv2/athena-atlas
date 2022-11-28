@@ -42,6 +42,12 @@ if not 'OverwriteEventNumber' in dir():
 
 if not 'BSConverter_Add_BCID_LATOMEID' in dir():
    BSConverter_Add_BCID_LATOMEID=False
+
+if not 'SCIgnoreBarrelChannels' in dir():
+   SCIgnoreBarrelChannels=False
+
+if not 'SCIgnoreEndcapChannels' in dir():
+   SCIgnoreEndcapChannels=False
    
 if not 'FullFileName' in dir():
    if not 'Trigger' in dir():
@@ -217,12 +223,20 @@ else:
    LArRawSCDataReadingAlg.LATOMEDecoder.DumpFile = SC_DumpFile
    LArRawSCDataReadingAlg.LATOMEDecoder.RawDataFile = SC_RawDataFile
    LArRawSCDataReadingAlg.LATOMEDecoder.ProtectSourceId = SCProtectSourceId
+   LArRawSCDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
+   LArRawSCDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
    topSequence+=LArRawSCDataReadingAlg
 
 from LArCalibTools.LArCalibToolsConf import LArDigits2Ntuple
 
 LArDigits2Ntuple=LArDigits2Ntuple("LArDigits2Ntuple")
 contkeys = GainList
+
+if 'rawChannels' not in dir():
+   rawChannels = False
+if rawChannels is True:
+   contkeys.append("LArRawChannels")
+
 
 LArDigits2Ntuple.ContainerKey = contkeys[0]
 LArDigits2Ntuple.AddFEBTempInfo=False

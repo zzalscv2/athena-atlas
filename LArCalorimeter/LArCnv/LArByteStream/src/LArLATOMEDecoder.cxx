@@ -12,6 +12,8 @@
 #include "LArByteStream/Mon.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
+
 static const InterfaceID IID_ILArLATOMEDecoder("LArLATOMEDecoder", 1, 0);
 
 using namespace OFFLINE_FRAGMENTS_NAMESPACE;
@@ -22,6 +24,8 @@ LArLATOMEDecoder::LArLATOMEDecoder(const std::string& type, const std::string& n
   declareInterface<LArLATOMEDecoder>(this);
   declareProperty("DumpFile", m_detailDumpFileName);
   declareProperty("RawDataFile", m_ADCDumpFileName);
+  declareProperty("IgnoreBarrelChannels", m_ignoreBarrelChannels=false);
+  declareProperty("IgnoreEndcapChannels", m_ignoreEndcapChannels=false);
   declareProperty("ProtectSourceId", m_protectSourceId); // discard main readout sourceID, should be false for reading all files from the mon path with old source IDs
 }
 
@@ -38,6 +42,7 @@ StatusCode LArLATOMEDecoder::initialize() {
   m_ADCDumpFile = new std::ofstream(m_ADCDumpFileName);
 #endif
 
+  ATH_CHECK(detStore()->retrieve(m_onlineId,"LArOnline_SuperCellID"));
   return StatusCode::SUCCESS;
 }
 
@@ -58,6 +63,7 @@ StatusCode LArLATOMEDecoder::convert(const RawEvent* re, const LArLATOMEMapping 
 				     LArRawSCContainer* et_coll,
 				     LArRawSCContainer* et_id_coll,
 				     LArLATOMEHeaderContainer* header_coll) const {
+  
   bool ret = false;
   // Check fragment validity:
   try {ret = re->check();}
@@ -446,6 +452,10 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
   MonDataType type0 = MonDataType::Invalid;
   MonDataType type1 = MonDataType::Invalid;
 
+  if(m_at1nBC==0){ /// recipe does not have at1, set at1 mux to invalid
+    m_at1type=(Word)MonDataType::Invalid;
+  }
+
   if(m_at0type!=(Word)MonDataType::Invalid && m_at1type!=(Word)MonDataType::Invalid){
     if(m_at0nBC>=m_at1nBC){
       nBC=m_at0nBC;
@@ -690,6 +700,9 @@ void LArLATOMEDecoder::EventProcess::fillRaw(const LArLATOMEMapping *map) {
       m_decoder->msg(MSG::DEBUG) << "No mapping for ch: " << std::dec << ch << endmsg;
       continue;
     }
+    if( m_decoder->m_ignoreBarrelChannels && m_decoder->m_onlineId->barrel_ec(SCID)==0) continue;
+    if( m_decoder->m_ignoreEndcapChannels && m_decoder->m_onlineId->barrel_ec(SCID)==1) continue;
+
     std::vector<short> adcValues_inChannel_inEvent;
 
     if(m_hasRawAdc){ /// don't copy vectors for nothing
