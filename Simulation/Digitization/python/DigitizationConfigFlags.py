@@ -132,6 +132,8 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.PU.NumberOfCavern", 0.0)
     # Repeating pattern to determine which events to simulate when using Stepping Cache
     flags.addFlag("Digitization.PU.SignalPatternForSteppingCache", [])
+    # Which sub-systems should use Fast Digitization
+    flags.addFlag("Digitization.DoFastDigi", [])
 
     return flags
 

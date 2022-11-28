@@ -54,51 +54,8 @@ SCT_FastDigitizationTool::SCT_FastDigitizationTool(const std::string& type,
                                                    const std::string& name,
                                                    const IInterface* parent) :
 
-  PileUpToolBase(type, name, parent),
-  m_inputObjectName("SCT_Hits"),
-  m_sct_ID(nullptr),
-  m_mergeSvc("PileUpMergeSvc",name),
-  m_HardScatterSplittingMode(0),
-  m_HardScatterSplittingSkipper(false),
-  m_randomEngineName("FastSCT_Digitization"),
-  m_thpcsi(nullptr),
-  m_clusterMaker("InDet::ClusterMakerTool"),
-  m_sctClusterMap(nullptr),
-  m_sctClusterContainer("SCT_Clusters"),
-  m_sctPrdTruth("PRD_MultiTruthSCT"),
-  m_sctSmearPathLength(0.01),
-  m_sctSmearLandau(true),
-  m_sctEmulateSurfaceCharge(true),
-  m_sctTanLorentzAngleScalor(1.),
-  m_sctAnalogStripClustering(false),
-  m_sctErrorStrategy(2),
-  m_sctRotateEC(true),
-  m_mergeCluster(true),
-  m_DiffusionShiftX_barrel(4),
-  m_DiffusionShiftY_barrel(4),
-  m_DiffusionShiftX_endcap(15),
-  m_DiffusionShiftY_endcap(15),
-  m_sctMinimalPathCut(90.)
+  PileUpToolBase(type, name, parent)
 {
-  declareProperty("InputObjectName"               , m_inputObjectName,          "Input Object name" );
-  declareProperty("MergeSvc"                      , m_mergeSvc,                 "Merge service" );
-  declareProperty("RndmEngine"                    , m_randomEngineName,         "Random Number Engine used in SCT digitization" );
-  declareProperty("ClusterMaker"                  , m_clusterMaker);
-  declareProperty("SCT_ClusterContainerName"      , m_sctClusterContainer);
-  declareProperty("TruthNameSCT"                  , m_sctPrdTruth);
-  declareProperty("SCT_SmearPathSigma"            , m_sctSmearPathLength);
-  declareProperty("SCT_SmearLandau"               , m_sctSmearLandau);
-  declareProperty("EmulateSurfaceCharge"          , m_sctEmulateSurfaceCharge);
-  declareProperty("SCT_ScaleTanLorentzAngle"      , m_sctTanLorentzAngleScalor);
-  declareProperty("SCT_AnalogClustering"          , m_sctAnalogStripClustering);
-  declareProperty("SCT_ErrorStrategy"             , m_sctErrorStrategy);
-  declareProperty("SCT_RotateEndcapClusters"      , m_sctRotateEC);
-  declareProperty("SCT_MinimalPathLength"         , m_sctMinimalPathCut);
-  declareProperty("DiffusionShiftX_barrel", m_DiffusionShiftX_barrel);
-  declareProperty("DiffusionShiftY_barrel", m_DiffusionShiftY_barrel);
-  declareProperty("DiffusionShiftX_endcap", m_DiffusionShiftX_endcap);
-  declareProperty("DiffusionShiftY_endcap", m_DiffusionShiftY_endcap);
-  declareProperty("HardScatterSplittingMode"      , m_HardScatterSplittingMode, "Control pileup & signal splitting" );
 }
 
 //----------------------------------------------------------------------
@@ -121,6 +78,8 @@ StatusCode SCT_FastDigitizationTool::initialize()
     {
       ATH_MSG_DEBUG ( "Input objects: '" << m_inputObjectName << "'" );
     }
+  ATH_CHECK(m_sctClusterContainerKey.initialize());
+  ATH_CHECK(m_sctPrdTruthKey.initialize());
 
   // retrieve the offline cluster maker : for pixel and/or sct
   if (!m_clusterMaker.empty())
@@ -192,43 +151,7 @@ StatusCode SCT_FastDigitizationTool::processBunchXing(int bunchXing,
 }
 
 
-StatusCode SCT_FastDigitizationTool::createOutputContainers()
-{
-  if (!m_sctClusterContainer.isValid())
-    {
-      m_sctClusterContainer = std::make_unique<InDet::SCT_ClusterContainer>(m_sct_ID->wafer_hash_max());
-      if(!m_sctClusterContainer.isValid())
-        {
-          ATH_MSG_FATAL( "[ --- ] Could not create SCT_ClusterContainer");
-          return StatusCode::FAILURE;
-        }
-    }
-  m_sctClusterContainer->cleanup();
-
-  // --------------------------------------
-  // symlink the SCT Container
-  InDet::SiClusterContainer* symSiContainer=nullptr;
-  CHECK(evtStore()->symLink(m_sctClusterContainer.ptr(),symSiContainer));
-  ATH_MSG_DEBUG( "[ hitproc ] SCT_ClusterContainer symlinked to SiClusterContainer in StoreGate" );
-  // --------------------------------------
-
-  // truth info
-  if (!m_sctPrdTruth.isValid())
-    {
-      m_sctPrdTruth = std::make_unique<PRD_MultiTruthCollection>();
-      if (!m_sctPrdTruth.isValid())
-        {
-          ATH_MSG_FATAL("Could not record collection " << m_sctPrdTruth.name());
-          return StatusCode::FAILURE;
-        }
-    }
-
-  return StatusCode::SUCCESS;
-}
-
 StatusCode SCT_FastDigitizationTool::processAllSubEvents(const EventContext& ctx) {
-
-  CHECK(this->createOutputContainers());
 
   //  get the container(s)
   using TimedHitCollList = PileUpMergeSvc::TimedList<SiHitCollection>::type;
@@ -281,8 +204,6 @@ StatusCode SCT_FastDigitizationTool::processAllSubEvents(const EventContext& ctx
 
 StatusCode SCT_FastDigitizationTool::mergeEvent(const EventContext& ctx)
 {
-  CHECK(this->createOutputContainers());
-
   if (m_thpcsi != nullptr)
     {
       CHECK(this->digitize(ctx));
@@ -304,7 +225,16 @@ StatusCode SCT_FastDigitizationTool::mergeEvent(const EventContext& ctx)
 
 StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
 {
-   // Set the RNG to use for this event.
+  // truth info
+  SG::WriteHandle< PRD_MultiTruthCollection > sctPrdTruth(m_sctPrdTruthKey, ctx);
+  sctPrdTruth = std::make_unique< PRD_MultiTruthCollection >();
+  if ( !sctPrdTruth.isValid() ) {
+    ATH_MSG_FATAL( "Could not record collection " << sctPrdTruth.name() );
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG( "PRD_MultiTruthCollection " << sctPrdTruth.name() << " registered in StoreGate" );
+
+  // Set the RNG to use for this event.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
   const std::string rngName = name()+m_randomEngineName;
   rngWrapper->setSeed( rngName, ctx );
@@ -825,13 +755,13 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
 
 
                     //Store HepMcParticleLink connected to the cluster removed from the collection
-                    std::pair<PRD_MultiTruthCollection::iterator,PRD_MultiTruthCollection::iterator> saved_hit = m_sctPrdTruth->equal_range(existingCluster->identify());
+                    std::pair<PRD_MultiTruthCollection::iterator,PRD_MultiTruthCollection::iterator> saved_hit = sctPrdTruth->equal_range(existingCluster->identify());
                     for (PRD_MultiTruthCollection::iterator this_hit = saved_hit.first; this_hit != saved_hit.second; ++this_hit)
                       {
                         hit_vector.push_back(this_hit->second);
                       }
                     //Delete all the occurency of the currentCluster from the multi map
-                    if (saved_hit.first != saved_hit.second) m_sctPrdTruth->erase(existingCluster->identify());
+                    if (saved_hit.first != saved_hit.second) sctPrdTruth->erase(existingCluster->identify());
 
                     delete existingCluster;
                     ATH_MSG_VERBOSE("Merged two clusters.");
@@ -924,7 +854,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
               const int barcode( currentSiHit->particleLink().barcode());
               if ( barcode !=0 && barcode != m_vetoThisBarcode )
                 {
-                  m_sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentSiHit->particleLink()));
+                  sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), currentSiHit->particleLink()));
                   ATH_MSG_DEBUG("Truth map filled with cluster" << potentialCluster << " and link = " << currentSiHit->particleLink());
                 }
             }
@@ -935,7 +865,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
 
 
           for(const HepMcParticleLink& p: hit_vector){
-            m_sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), p ));
+            sctPrdTruth->insert(std::make_pair(potentialCluster->identify(), p ));
           }
 
           hit_vector.clear();
@@ -951,6 +881,21 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
 
 StatusCode SCT_FastDigitizationTool::createAndStoreRIOs(const EventContext& ctx)
 {
+  SG::WriteHandle<InDet::SCT_ClusterContainer> sctClusterContainer(m_sctClusterContainerKey, ctx);
+  sctClusterContainer = std::make_unique<InDet::SCT_ClusterContainer>(m_sct_ID->wafer_hash_max());
+  if(!sctClusterContainer.isValid()) {
+    ATH_MSG_FATAL( "[ --- ] Could not create SCT_ClusterContainer");
+    return StatusCode::FAILURE;
+  }
+  sctClusterContainer->cleanup();
+
+  // --------------------------------------
+  // symlink the SCT Container
+  InDet::SiClusterContainer* symSiContainer=nullptr;
+  CHECK(evtStore()->symLink(sctClusterContainer.ptr(),symSiContainer));
+  ATH_MSG_DEBUG( "[ hitproc ] SCT_ClusterContainer symlinked to SiClusterContainer in StoreGate" );
+  // --------------------------------------
+
   // Get SCT_DetectorElementCollection
   SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEle(m_SCTDetEleCollKey, ctx);
   const InDetDD::SiDetectorElementCollection* elements(sctDetEle.retrieve());
@@ -978,7 +923,7 @@ StatusCode SCT_FastDigitizationTool::createAndStoreRIOs(const EventContext& ctx)
               sctCluster->setHashAndIndex(clusterCollection->identifyHash(),clusterCollection->size());
               clusterCollection->push_back(sctCluster);
             }
-          if (m_sctClusterContainer->addCollection(clusterCollection, clusterCollection->identifyHash()).isFailure())
+          if (sctClusterContainer->addCollection(clusterCollection, clusterCollection->identifyHash()).isFailure())
             {
               ATH_MSG_WARNING( "Could not add collection to Identifiable container !" );
             }
