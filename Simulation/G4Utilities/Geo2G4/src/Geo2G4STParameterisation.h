@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_Geo2G4STParameterisation_H
@@ -35,8 +35,6 @@ public:
   Geo2G4STParameterisation(const GeoXF::Function* func,
                            unsigned int copies);
 
-  virtual ~Geo2G4STParameterisation();
-
   void ComputeTransformation (const G4int copyNo,
                               G4VPhysicalVolume* physVol) const;
 
@@ -64,7 +62,6 @@ private:
   void ComputeDimensions (G4Ellipsoid&,const G4int,const G4VPhysicalVolume*) const {}
 
   const GeoXF::Function *m_function;
-  G4RotationMatrix* m_rotation;
   unsigned int m_nCopies;
 };
 
