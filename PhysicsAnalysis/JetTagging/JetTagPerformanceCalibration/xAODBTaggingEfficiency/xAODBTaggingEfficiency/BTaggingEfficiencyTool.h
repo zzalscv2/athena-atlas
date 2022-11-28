@@ -347,6 +347,8 @@ private:
   bool m_ignoreOutOfValidityRange;
   /// if false, suppress any non-error/warning printout from the underlying tool
   bool m_verboseCDITool;
+  /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
+  bool m_useCTag = false;
   /// if this string is empty, the onnx tool won't be created
   std::string m_pathToONNX;
   /// @}

@@ -156,14 +156,14 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("OldConeFlavourLabel",                 m_oldConeFlavourLabel = false, "when using cone-based flavour labelling, specify whether or not to use the (deprecated) Run-1 legacy labelling");
   declareProperty("IgnoreOutOfValidityRange",            m_ignoreOutOfValidityRange = false, "ignore out-of-extrapolation-range errors as returned by the underlying tool");
   declareProperty("VerboseCDITool",                      m_verboseCDITool = true,       "specify whether or not to retain 'normal' printout from the underlying tool");
-  
+  declareProperty( "useCTagging",                        m_useCTag=false,       "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
   // if it is empty, the onnx tool won't be initialised
-  declareProperty( "pathToONNX",                         m_pathToONNX = "",             "path to the onnx file that will be used for inference");
+  declareProperty( "pathToONNX",                         m_pathToONNX = "",      "path to the onnx file that will be used for inference");
   
   // initialise some variables needed for caching
   // TODO : add configuration of the mapIndices - rather than just using the default of 0
   //m_mapIndices["Light"] = m_mapIndices["T"] = m_mapIndices["C"] = m_mapIndices["B"] = 0;
-  m_initialised = false;
+  m_initialised    = false;
   m_applySyst      = false;
   m_isContinuous   = false;
   m_isContinuous2D = false;
@@ -174,23 +174,6 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
 BTaggingEfficiencyTool::~BTaggingEfficiencyTool() {
   delete m_CDI;
 }
-
-// /// Silly copy constructor for the benefit of dictionary generation
-// BTaggingEfficiencyTool::BTaggingEfficiencyTool(const BTaggingEfficiencyTool& other) :
-//   IBTaggingEfficiencyTool(other), CP::ISystematicsTool(other), asg::AsgTool(other.name()+"_copy"),
-//   m_path(other.m_path), m_SFFile(other.m_SFFile), m_EffFile(other.m_EffFile),
-//   m_SFBName(other.m_SFBName), m_SFCName(other.m_SFCName), m_SFTName(other.m_SFTName), m_SFLightName(other.m_SFLightName),
-//   m_EffBName(other.m_EffBName), m_EffCName(other.m_EffCName), m_EffTName(other.m_EffTName), m_EffLightName(other.m_EffLightName),
-//   m_excludeFromEV(other.m_excludeFromEV), m_useDevFile(other.m_useDevFile), m_coneFlavourLabel(other.m_coneFlavourLabel),
-//   m_initialised(other.m_initialised), m_applySyst(other.m_applySyst),
-//   m_applyThisSyst(other.m_applyThisSyst), m_systematicsInfo(other.m_systematicsInfo), m_systematics(other.m_systematics),
-//   m_OP(other.m_OP), m_jetAuthor(other.m_jetAuthor), m_isContinuous(other.m_isContinuous), m_getTagWeight(other.m_getTagWeight),
-//   m_mapIndices(other.m_mapIndices), m_SFIndices(other.m_SFIndices), m_EffIndices(other.m_EffIndices) {
-
-//   // The one dynamically allocated data member is the CDI
-//   m_CDI = new Analysis::CalibrationDataInterfaceROOT(*(other.m_CDI));
-//   ATH_MSG_INFO( "Instantiated copy CalibrationDataInterfaceROOT object at " << m_CDI);
-// }
 
 StatusCode BTaggingEfficiencyTool::initialize() {
 
@@ -239,11 +222,6 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     //    CalibrationDataInterfaceROOT::getWeightScaleFactor() instead of
     //    CalibrationDataInterfaceROOT::getScaleFactor() must be used
     m_isContinuous = true;
-    // if (m_taggerName == "MV1")
-    //   m_getTagWeight = &xAOD::BTagging::MV1_discriminant;
-    // else {
-    //   ATH_MSG_FATAL( "No tag weight retrieval function defined for tagger = " << m_taggerName);
-    // }
   }
   else if  (m_OP.find("Continuous2D")  != std::string::npos) {
     m_isContinuous2D = true;
@@ -506,6 +484,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_CHECK( m_selectionTool.setProperty("OperatingPoint",               m_OP) );
     ATH_CHECK( m_selectionTool.setProperty("JetAuthor",                    m_jetAuthor) );
     ATH_CHECK( m_selectionTool.setProperty("MinPt",                        m_minPt) );
+    ATH_CHECK( m_selectionTool.setProperty("useCTagging",                  m_useCTag) );
     ATH_CHECK( m_selectionTool.retrieve() );
  }
 
@@ -1053,20 +1032,19 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
   x.jetEta = jet.eta();
   x.jetTagWeight = 0.;
   x.jetAuthor = m_jetAuthor;
-  //bool weightOK = true;
-  if (m_isContinuous) {
+
+  if (m_isContinuous2D){
+    x.jetTagWeight = m_selectionTool->getQuantile(jet)+0.5;
+  }
+  else if (m_isContinuous) {
     const xAOD::BTagging* tagInfo = jet.btagging();
     if (!tagInfo) return false;
     // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
     if (m_taggerName.find("DL1") != std::string::npos) {
-      return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight) == CP::CorrectionCode::Ok);
+      return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
     } else {
       return tagInfo->MVx_discriminant(m_taggerName, x.jetTagWeight);
     }
-  }
-  else if (m_isContinuous2D){
-    x.jetTagWeight = m_selectionTool->getQuantile(jet)+0.5;
-    //    std::cout <<"inside fill variables in EffTool: " <<x.jetTagWeight <<" " <<x.jetAuthor <<std::endl;
   }
 
   return true;

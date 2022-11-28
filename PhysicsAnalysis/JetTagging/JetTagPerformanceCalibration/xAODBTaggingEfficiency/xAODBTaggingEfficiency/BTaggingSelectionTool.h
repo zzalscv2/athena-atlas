@@ -13,8 +13,8 @@
   @author C. Lüdtke, M. Ughetto
   @contact cluedtke@cern.ch, mughetto@cern.ch
 
-  Note for getTaggerWeight and getCutValue: the LAST defaulted argument
-  is now 'useCTag', but before AB 21.2.221 it was 'useVetoWP', which has the 
+  Note for getTaggerWeight: the LAST defaulted argument
+  is now 'getCTagW', but before AB 21.2.221 it was 'useVetoWP', which has the 
   **opposite** meaning when set to true. 
 
 */
@@ -69,8 +69,14 @@ class BTaggingSelectionTool: public asg::AsgTool,
   virtual int getQuantile(double /*pT*/, double /*eta*/, double /*tag_weight_b*/, double /*tag_weight_c*/ ) const;
 
   virtual CP::CorrectionCode getCutValue(double /* jet pt */, double & cutval) const;
-  virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & weight ,bool useCTag = false) const;
-  virtual CP::CorrectionCode getTaggerWeight( double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */ , double & weight,bool useCTag = false) const;
+
+  //1D tagging wrapper
+  virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & tagweight) const;
+  virtual CP::CorrectionCode getTaggerWeight( double pb, double pc, double pu , double & tagweight) const;
+
+  //flexibility for Continuous2D
+  virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & weight ,bool getCTagW) const;
+  virtual CP::CorrectionCode getTaggerWeight( double /* dl1pb */, double /* dl1pc  */ , double /* dl1pu  */ , double & weight, bool getCTagW) const;
 
 private:
   /// Helper function that decides whether a jet belongs to the correct jet selection for b-tagging
@@ -84,6 +90,7 @@ private:
   bool m_StoreNConstituents = false;
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
+  bool m_useCTag = false; //use c-tagging or b-tagging in 1D
    /// Object used to store the last decision
   mutable Root::TAccept m_accept;
 
