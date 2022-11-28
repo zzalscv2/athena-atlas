@@ -8,76 +8,7 @@
 
 #include "TClass.h"
 
-#define TRY_TYPE(DATANAME, VT_PREFIX, TYPE, VT_TYPE) do { \
-  if (*ti == typeid(TYPE)) { \
-    BaseAccessorWrapper *accWrap = new AccessorWrapper<TYPE>(varname); \
-    if (accWrap && accWrap->isValid(DATANAME)) { \
-      m_accessorCache[varname] = accWrap;  \
-      return VT_PREFIX ## VT_TYPE; \
-    } else if (accWrap) { \
-      accessorNotAvailableForThisContainer = true; \
-      delete accWrap; \
-    } \
-  } \
-} while(0)
-
-#define TRY_ALL_KNOWN_TYPES(DATANAME, VT_PREFIX) do { \
-  SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance(); \
-  SG::auxid_t auxid = r.findAuxID(varname); \
-  if (auxid != SG::null_auxid) { \
-    bool accessorNotAvailableForThisContainer = false; \
-    const std::type_info *ti = r.getType(auxid); \
-    TRY_TYPE(DATANAME, VT_PREFIX, int, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, bool, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, unsigned int, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, char, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, uint8_t, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, unsigned short, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, short, INT); \
-    TRY_TYPE(DATANAME, VT_PREFIX, float, DOUBLE); \
-    TRY_TYPE(DATANAME, VT_PREFIX, double, DOUBLE); \
-    if (!accessorNotAvailableForThisContainer) { \
-      throw std::runtime_error("Unsupported aux element type '"+r.getTypeName(auxid)+"' for '"+varname+"'"); \
-    } \
-  } \
-} while(0)
-
-#define TRY_TMETHOD_WRAPPER() do { \
-  auto container = m_auxElement->container(); \
-  const std::type_info &containerTypeinfo = typeid(*container); \
-  TClass *containerClass = TClass::GetClass(containerTypeinfo); \
-  if (!containerClass) { \
-    containerClass = TClass::GetClass(SG::normalizedTypeinfoName(containerTypeinfo).c_str()); \
-  } \
-  if (containerClass) { \
-    TMethodWrapper* accWrap(0);						\
-    if( !strcmp(containerClass->GetName(),"SG::AuxElementStandaloneData") ) { /* special case where the element type is the aux element */ \
-      accWrap = new TMethodWrapper( typeid(*m_auxElement) , varname ); \
-    } else {							\
-      TVirtualCollectionProxy* collProxy = containerClass->GetCollectionProxy(); \
-      if(collProxy) { \
-	const std::type_info &elementTypeinfo = *(collProxy->GetValueClass()->GetTypeInfo()); \
-	std::cout << " element type = " << System::typeinfoName( elementTypeinfo ) << std::endl; \
-	accWrap = new TMethodWrapper(elementTypeinfo, varname); \
-      }									\
-    }								\
-    if (accWrap && accWrap->isValid(m_auxElement)) { \
-      m_accessorCache[varname] = accWrap;  \
-      return accWrap->variableType(); \
-    } \
-    else if(accWrap) delete accWrap;		\
-  } \
-} while(0)
-
-#define TRY_TMETHOD_COLLECTION_WRAPPER() do { \
-  TMethodCollectionWrapper *accWrap = new TMethodCollectionWrapper(typeid(*m_auxVectorData), varname); \
-  if (accWrap && accWrap->isValid(m_auxVectorData)) { \
-    m_accessorCache[varname] = accWrap;  \
-    return accWrap->variableType(); \
-  } \
-  else delete accWrap; \
-} while(0)
-
+#include <memory>
 
 namespace ExpressionParsing {
 
@@ -154,7 +85,7 @@ namespace ExpressionParsing {
 
 
 
-
+  // ********************************************************************************
   TMethodCollectionWrapper::TMethodCollectionWrapper(const std::type_info &containerTypeinfo, 
       const std::string &methodName)
     : m_collectionProxy(nullptr),
@@ -251,31 +182,68 @@ namespace ExpressionParsing {
 
 
 
-
-  xAODElementProxyLoader::xAODElementProxyLoader()
-    : m_auxElement(NULL)
+  // ********************************************************************************
+  xAODProxyLoader::~xAODProxyLoader()
   {
+    reset();
   }
 
+  void xAODProxyLoader::reset()
+  {
+    for (auto &x : m_accessorCache) delete x.second;
+    m_accessorCache.clear();
+  }
+
+  template <class TYPE, class AUX>
+  bool xAODProxyLoader::try_type(const std::string& varname, const std::type_info* ti, const AUX* data)
+  {
+    if (*ti == typeid(TYPE)) {
+      auto accWrap = std::make_unique<AccessorWrapper<TYPE>>(varname);
+      if (accWrap && accWrap->isValid(data)) {
+        m_accessorCache[varname] = accWrap.release();
+        return true;
+      } else if (accWrap) {
+        const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+        const SG::auxid_t auxid = r.findAuxID(varname);
+        throw std::runtime_error("Unsupported aux element type '"+r.getTypeName(auxid)+"' for '"+varname+"'");
+      }
+    }
+    return false;
+  }
+
+  template <class AUX>
+  IProxyLoader::VariableType xAODProxyLoader::try_all_known_types(const std::string& varname,
+                                                                  const AUX* data, bool isVector)
+  {
+    const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
+    const SG::auxid_t auxid = r.findAuxID(varname);
+    if (auxid != SG::null_auxid) {
+      const std::type_info *ti = r.getType(auxid);
+      // Try integer types:
+      if ( try_type<int>(varname, ti, data) ||
+           try_type<bool>(varname, ti, data) ||
+           try_type<unsigned int>(varname, ti, data) ||
+           try_type<char>(varname, ti, data) ||
+           try_type<uint8_t>(varname, ti, data) ||
+           try_type<unsigned short>(varname, ti, data) ||
+           try_type<short>(varname, ti, data) ) {
+        return isVector ? IProxyLoader::VT_VECINT : IProxyLoader::VT_INT;
+      }
+      // Try floating point types:
+      if ( try_type<float>(varname, ti, data) ||
+           try_type<double>(varname, ti, data) ) {
+        return isVector ? IProxyLoader::VT_VECDOUBLE : IProxyLoader::VT_DOUBLE;
+      }
+    }
+    return VT_UNK;
+  }
+
+
+
+  // ********************************************************************************
   xAODElementProxyLoader::xAODElementProxyLoader(const SG::AuxElement *auxElement)
     : m_auxElement(auxElement)
   {
-  }
-
-  xAODElementProxyLoader::~xAODElementProxyLoader()
-  {
-    xAODElementProxyLoader::reset();
-  }
-
-  void xAODElementProxyLoader::reset()
-  {
-    for (auto &x : m_accessorCache) {
-      if (x.second != NULL) {
-        delete x.second;
-      }
-      x.second = NULL;
-    }
-    m_accessorCache.clear();
   }
 
   void xAODElementProxyLoader::setData(const SG::AuxElement *auxElement)
@@ -285,9 +253,32 @@ namespace ExpressionParsing {
 
   IProxyLoader::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname)
   {
-    TRY_TMETHOD_WRAPPER();
-    TRY_ALL_KNOWN_TYPES(m_auxElement, VT_);
-    return VT_UNK;
+    // Try TMethodWrapper
+    auto container = m_auxElement->container();
+    const std::type_info &containerTypeinfo = typeid(*container);
+    TClass *containerClass = TClass::GetClass(containerTypeinfo);
+    if (!containerClass) {
+      containerClass = TClass::GetClass(SG::normalizedTypeinfoName(containerTypeinfo).c_str());
+    }
+    if (containerClass) {
+      std::unique_ptr<TMethodWrapper> accWrap;
+      if( !strcmp(containerClass->GetName(),"SG::AuxElementStandaloneData") ) { /* special case where the element type is the aux element */
+        accWrap = std::make_unique<TMethodWrapper>( typeid(*m_auxElement) , varname );
+      } else {
+        TVirtualCollectionProxy* collProxy = containerClass->GetCollectionProxy();
+        if(collProxy) {
+          const std::type_info &elementTypeinfo = *(collProxy->GetValueClass()->GetTypeInfo());
+          accWrap = std::make_unique<TMethodWrapper>(elementTypeinfo, varname);
+        }
+      }
+      if (accWrap && accWrap->isValid(m_auxElement)) {
+        const IProxyLoader::VariableType vtype = accWrap->variableType();
+        m_accessorCache[varname] = accWrap.release();
+        return vtype;
+      }
+    }
+
+    return try_all_known_types(varname, m_auxElement, false);
   }
 
   int xAODElementProxyLoader::loadIntVariableFromString(const std::string &varname) const
@@ -312,31 +303,10 @@ namespace ExpressionParsing {
 
 
 
-
-  xAODVectorProxyLoader::xAODVectorProxyLoader()
-    : m_auxVectorData(NULL)
-  {
-  }
-
+  // ********************************************************************************
   xAODVectorProxyLoader::xAODVectorProxyLoader(const SG::AuxVectorData *auxVectorData)
     : m_auxVectorData(auxVectorData)
   {
-  }
-
-  xAODVectorProxyLoader::~xAODVectorProxyLoader()
-  {
-    xAODVectorProxyLoader::reset();
-  }
-
-  void xAODVectorProxyLoader::reset()
-  {
-    for (auto &x : m_accessorCache) {
-      if (x.second != NULL) {
-        delete x.second;
-      }
-      x.second = NULL;
-    }
-    m_accessorCache.clear();
   }
 
   void xAODVectorProxyLoader::setData(const SG::AuxVectorData *auxVectorData)
@@ -346,20 +316,26 @@ namespace ExpressionParsing {
 
   IProxyLoader::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname)
   {
-    TRY_TMETHOD_COLLECTION_WRAPPER();
-    TRY_ALL_KNOWN_TYPES(m_auxVectorData, VT_VEC);
+    auto accWrap = std::make_unique<TMethodCollectionWrapper>(typeid(*m_auxVectorData), varname);
+    if (accWrap && accWrap->isValid(m_auxVectorData)) {
+      const IProxyLoader::VariableType vtype = accWrap->variableType();
+      m_accessorCache[varname] = accWrap.release();
+      return vtype;
+    }
+
+    IProxyLoader::VariableType vtype = try_all_known_types(varname, m_auxVectorData, true);
 
     // Before giving up completely, check the size of the vector. If it's
     // 0, it may be that it's empty on *all* events of the current input
     // file. Meaning that dynamic variables will be missing from each event.
-    if( m_auxVectorData->size_v() == 0 ) {
+    if( vtype==VT_UNK && m_auxVectorData->size_v() == 0 ) {
        // Let's claim a vector<double> type, that seems to be the safest bet.
        // Even if the variable should actually be vector<int>, this is a
        // simple conversion at least.
-       return VT_VECDOUBLE;
+       vtype = VT_VECDOUBLE;
     }
 
-    return VT_UNK;
+    return vtype;
   }
 
   int xAODVectorProxyLoader::loadIntVariableFromString(const std::string &) const

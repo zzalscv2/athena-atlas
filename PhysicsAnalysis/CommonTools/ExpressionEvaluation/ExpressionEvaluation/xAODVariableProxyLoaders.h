@@ -20,7 +20,7 @@
 #include "TVirtualCollectionProxy.h"
 #include "CxxUtils/checker_macros.h"
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <typeinfo>
 
@@ -141,13 +141,26 @@ namespace ExpressionParsing {
   };
 
 
-  class xAODElementProxyLoader : public IProxyLoader {
-    public:
-      xAODElementProxyLoader();
-      xAODElementProxyLoader(const SG::AuxElement *auxElement);
+  class xAODProxyLoader : public IProxyLoader {
+  public:
+    virtual ~xAODProxyLoader();
+    virtual void reset();
 
-      virtual ~xAODElementProxyLoader();
-      virtual void reset();
+  protected:
+    template<class TYPE, class AUX>
+    bool try_type(const std::string& varname, const std::type_info* ti, const AUX* data);
+
+    template<class AUX>
+    IProxyLoader::VariableType try_all_known_types(const std::string& varname, const AUX* data, bool isVector);
+
+    std::unordered_map<std::string, BaseAccessorWrapper*> m_accessorCache;
+  };
+
+
+  class xAODElementProxyLoader : public xAODProxyLoader {
+    public:
+      xAODElementProxyLoader() = default;
+      xAODElementProxyLoader(const SG::AuxElement *auxElement);
 
       void setData(const SG::AuxElement *auxElement);
 
@@ -158,18 +171,14 @@ namespace ExpressionParsing {
       virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
-      const SG::AuxElement *m_auxElement;
-      std::map<std::string, BaseAccessorWrapper*> m_accessorCache;
+      const SG::AuxElement *m_auxElement{nullptr};
   };
 
 
-  class xAODVectorProxyLoader : public IProxyLoader {
+  class xAODVectorProxyLoader : public xAODProxyLoader {
     public:
-      xAODVectorProxyLoader();
+      xAODVectorProxyLoader() = default;
       xAODVectorProxyLoader(const SG::AuxVectorData *auxVectorData);
-
-      virtual ~xAODVectorProxyLoader();
-      virtual void reset();
 
       void setData(const SG::AuxVectorData *auxElement);
 
@@ -180,9 +189,7 @@ namespace ExpressionParsing {
       virtual std::vector<double> loadVecDoubleVariableFromString(const std::string &varname) const;
 
     private:
-      const SG::AuxVectorData *m_auxVectorData;
-      std::map<std::string, BaseAccessorWrapper*> m_accessorCache;
-
+      const SG::AuxVectorData *m_auxVectorData{nullptr};
   };
 
 }
