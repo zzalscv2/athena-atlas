@@ -104,6 +104,10 @@ atlas_add_test( test_keyStore
 atlas_add_test( test_handleTest
                 SCRIPT athena.py AthExStoreGateExample/HandleTest_jobOptions.py )
 
+atlas_add_test( test_decorHandleTest
+                SCRIPT athena.py AthExStoreGateExample/DecorHandleTest_jobOptions.py
+                LOG_SELECT_PATTERN "testalg.testool" )
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/StoreGateTestCommon.txt share/*.py )
