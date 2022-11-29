@@ -10,6 +10,8 @@
 #include <map>
 #include <mutex>
 
+#include "CxxUtils/checker_macros.h"
+
 class ICaloGeometry;
 class TFCSSimulationState;
 class TFCSTruthState;
@@ -63,7 +65,6 @@ class TFCSExtrapolationState;
   #include "GaudiKernel/MsgStream.h"
   #include "AthenaBaseComps/AthMsgStreamMacros.h"
   #include "AthenaKernel/getMessageSvc.h"
-  #include "CxxUtils/checker_macros.h"
   #include <boost/thread/tss.hpp>
 #endif
 
