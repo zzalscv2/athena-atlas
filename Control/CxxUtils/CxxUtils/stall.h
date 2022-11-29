@@ -1,8 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file CxxUtils/stall.h
  * @author scott snyder <snyder@bnl.gov>
@@ -31,7 +30,7 @@ namespace CxxUtils {
  * within the loop on x86(_64) targets.  This function provides a portable
  * way of doing this.
  *
- * Currently a no-op for anything other than x86(_64).  Support for other
+ * Currently a no-op for anything other than x86(_64) + arm.  Support for other
  * architectures can be added if it is useful.
  */
 inline
@@ -39,6 +38,8 @@ void stall()
 {
 #if defined(__i386__) || defined(__x86_64__)
   _mm_pause();
+#elif defined(__aarch64__) && defined(__GNUC__)
+  asm volatile("yield" ::: "memory");
 #endif
 }
 
