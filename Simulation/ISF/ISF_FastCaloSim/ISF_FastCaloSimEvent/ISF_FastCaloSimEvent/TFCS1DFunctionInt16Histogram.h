@@ -5,9 +5,7 @@
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionInt16Histogram_h
 #define ISF_FASTCALOSIMEVENT_TFCS1DFunctionInt16Histogram_h
 
-#ifndef __FastCaloSimStandAlone__ 
-  #include "CxxUtils/checker_macros.h"  
-#endif
+#include "CxxUtils/checker_macros.h"
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
 #include <vector>
