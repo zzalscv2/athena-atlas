@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
@@ -25,6 +24,7 @@ bool EventInfoBranch::fill(const EventContext& ctx) {
     m_evtNumber = evt_info->eventNumber();
     m_runNumber = evt_info->runNumber();
     m_lbNumber = evt_info->lumiBlock();
+    m_l1id = evt_info->extendedLevel1ID();
     if (m_ismc) {
         m_mcChannel = evt_info->mcChannelNumber();
         m_weight = evt_info->mcEventWeight(0);
