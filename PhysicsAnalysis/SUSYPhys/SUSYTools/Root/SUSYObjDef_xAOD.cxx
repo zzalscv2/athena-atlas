@@ -1244,6 +1244,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   }
 
   //load config file to Properties map  (only booleans for now)
+  m_conf_to_prop["IsRun3"] = "IsRun3";
   m_conf_to_prop["StrictConfigCheck"] = "StrictConfigCheck";
   m_conf_to_prop["Btag.enable"] = "UseBtagging";
   m_conf_to_prop["BtagTrkJet.enable"] = "UseBtaggingTrkJet";
