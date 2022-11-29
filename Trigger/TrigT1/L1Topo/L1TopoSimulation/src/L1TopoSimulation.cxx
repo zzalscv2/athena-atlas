@@ -197,13 +197,13 @@ L1TopoSimulation::execute() {
    inputEvent.dump();
    
    if(m_fillHistogramsBasedOnHardwareDecision){
-       if(m_scaler->decision(m_prescaleForDAQROBAccess) and
-          retrieveHardwareDecision(m_isLegacyTopo, ctx)){
-           m_topoSteering->propagateHardwareBitsToAlgos();
-           m_topoSteering->setOutputAlgosSkipHistograms(false);
-       } else {
-           m_topoSteering->setOutputAlgosSkipHistograms(true);
-       }
+     if (retrieveHardwareDecision(m_isLegacyTopo, ctx).isSuccess()) {
+       m_topoSteering->propagateHardwareBitsToAlgos();
+       m_topoSteering->setOutputAlgosSkipHistograms(false);
+     }
+     if (!m_scaler->decision(m_prescaleForDAQROBAccess) and m_prescaleForDAQROBAccess>1) {
+       m_topoSteering->setOutputAlgosSkipHistograms(true);
+     }
    }
 
    // execute the toposteering
@@ -406,6 +406,10 @@ L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
   for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
     const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
     size_t nWords = dataWords.size();
+    if (nWords!=50) {
+      ATH_MSG_WARNING("Expected data word container size is 50, but found " << nWords);
+      return StatusCode::FAILURE;
+    }
     uint32_t rodTrailer2 = dataWords[--nWords];
     uint32_t rodTrailer1 = dataWords[--nWords];
 
@@ -432,8 +436,8 @@ L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
 	    uint32_t topo = l1topoFPGA->topoNumber();
 	    uint32_t fpga = l1topoFPGA->fpgaNumber();
 	    unsigned int index = L1Topo::triggerBitIndexPhase1(topo, fpga, iBit);
-	    hardwareDaqRobTriggerBits[index] = (overflowWord>>iBit)&1;
-	    hardwareDaqRobOvrflowBits[index] = (triggerWord>>iBit)&1;
+	    hardwareDaqRobTriggerBits[index] = (triggerWord>>iBit)&1;
+	    hardwareDaqRobOvrflowBits[index] = (overflowWord>>iBit)&1;
 	  }
 	  ATH_MSG_DEBUG("trigger word: " << std::hex << std::showbase << triggerWord << std::dec);
 	  ATH_MSG_DEBUG("overflow word: " << std::hex << std::showbase << overflowWord << std::dec);
