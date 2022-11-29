@@ -41,8 +41,8 @@ def IDTR2Cfg(ConfigFlags):
     MaterialSVFinderTool = acc.popToolsAndMerge(MaterialSVFinderToolCfg(ConfigFlags))
     acc.addPublicTool(MaterialSVFinderTool)
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(name = "NewVrtSecInclusive_Material", 
-                                                       TrackContainerName = "InDetWithLRTTrackParticles",
-                                                       PVContainerName = "PrimaryVertices",
+                                                       TrackParticleContainer = "InDetWithLRTTrackParticles",
+                                                       PrimaryVertexContainer = "PrimaryVertices",
                                                        BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices_Material",  
                                                        BVertexTool = MaterialSVFinderTool
                                                        ))
@@ -50,8 +50,8 @@ def IDTR2Cfg(ConfigFlags):
     DVFinderToolCfg = acc.popToolsAndMerge(DVFinderToolCfg(ConfigFlags))
     acc.addPublicTool(DVFinderToolCfg)
     acc.addEventAlgo(CompFactory.Rec.NewVrtSecInclusiveAlg(name = "NewVrtSecInclusive_DV", 
-                                                       TrackContainerName = "InDetWithLRTTrackParticles",
-                                                       PVContainerName = "PrimaryVertices",
+                                                       TrackParticleContainer = "InDetWithLRTTrackParticles",
+                                                       PrimaryVertexContainer = "PrimaryVertices",
                                                        BVertexContainerName = "NewVrtSecInclusive_SecondaryVertices_DV",  
                                                        BVertexTool = DVFinderToolCfg
                                                        ))
@@ -81,7 +81,7 @@ def IDTR2Cfg(ConfigFlags):
                                                                               maxTrtD0            = 99999.,
                                                                               maxSiZ0             = 99999.,
                                                                               maxTrtZ0            = 99999.,
-                                                                              minPt               = 1000.0,
+                                                                              minPt               = 500.0,
                                                                               significanceD0_Si   = 0.,
                                                                               significanceD0_Trt  = 0.,
                                                                               significanceZ0_Trt  = 0.,
