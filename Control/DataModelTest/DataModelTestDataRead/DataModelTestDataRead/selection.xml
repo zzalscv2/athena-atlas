@@ -39,4 +39,11 @@
   <class name="DMTest::HAuxContainer_v2" id="2BDBFB04-C1C2-4B14-A977-3A61B8054700"/>
   <class name="DMTest::HView_v2" id="17849966-6667-4732-A1C7-096FBC778CF3"/>
   <class name="DMTest::HView_v2::Pers_t" id="802ED4CE-124D-4E5D-9C1E-47CE6297B453"/>
+
+  <class name="DMTest::AllocTest_v1" id="7815C202-15C6-48A9-AD01-F2B915CC3672"/>
+  <class name="DMTest::AllocTestContainer_v1" id="967B1326-A877-4C9A-B734-5E0629D6534E"/>
+  <class name="DMTest::AllocTestAuxContainer_v1" id="155016C7-A9B8-4E2E-B2FE-B4A98A28BECF"/>
+
+  <class name="std::vector<int, Athena_test::TestAlloc<int> >"/>
+
 </lcgdict>
