@@ -11,7 +11,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #include "TF1.h"
 #include <iostream>
 
-void LarEMSamplingFraction_barrel(std::string filebarrel="LArEM_SF_barrel.root")
+void LarEMSamplingFraction_barrel(std::string filebarrel="LArEM_SF_barrel.root") // cppcheck-suppress passedByValue
 {
   std::cout<<"Opening : "<<filebarrel<<std::endl;
   TFile* file = TFile::Open(filebarrel.c_str());
@@ -127,7 +127,7 @@ void LarEMSamplingFraction_barrel(std::string filebarrel="LArEM_SF_barrel.root")
   c->SaveAs(".pdf");
 }
 
-void LarEMSamplingFraction_endcap(std::string fileendcap="LArEM_SF_endcap.root")
+void LarEMSamplingFraction_endcap(std::string fileendcap="LArEM_SF_endcap.root") // cppcheck-suppress passedByValue
 {
   TFile* file = TFile::Open(fileendcap.c_str());
   if(!file || !file->IsOpen()) {
@@ -238,7 +238,7 @@ void LarEMSamplingFraction_endcap(std::string fileendcap="LArEM_SF_endcap.root")
   c->SaveAs(".pdf");
 }
 
-void LarEMSamplingFraction_analysis(std::string filebarrel="LArEM_SF_barrel.root", std::string fileendcap="LArEM_SF_endcap.root")
+void LarEMSamplingFraction_analysis(std::string filebarrel="LArEM_SF_barrel.root", std::string fileendcap="LArEM_SF_endcap.root") // cppcheck-suppress passedByValue
 {
   LarEMSamplingFraction_barrel(filebarrel);
   LarEMSamplingFraction_endcap(fileendcap);

@@ -560,12 +560,10 @@ StatusCode LArFCalSamplingFraction::doCalib()
     ATH_MSG_DEBUG("Starting FCal Calibration Analysis");
 
     // Get the calibration hit containers (if any)
-    for (m_calibHitMap_ptr_t i = m_calibHitMap.begin();
-         i != m_calibHitMap.end();
-         i++)
+    for (auto& kv : m_calibHitMap)
     {
-        std::string name = (*i).first;
-        const CaloCalibrationHitContainer *container = 0;
+        std::string name = kv.first;
+        const CaloCalibrationHitContainer *container{};
         sc = evtStore()->retrieve(container, name);
 
         if (sc.isFailure() || container == 0) {
@@ -573,14 +571,14 @@ StatusCode LArFCalSamplingFraction::doCalib()
             m_numHitsActive = 0;
             m_numHitsInactive = 0;
             m_numHitsDead = 0;
-            (*i).second = 0;
+            kv.second = 0;
 
             return StatusCode::FAILURE;
         }
 
         ATH_MSG_DEBUG("CaloCalibrationHit container successfully retrieved");
 
-        (*i).second = container;
+        kv.second = container;
     }
 
     // Get the number of hits in each container
@@ -611,12 +609,10 @@ StatusCode LArFCalSamplingFraction::doCalib()
     }
 
     // Loop over all the hit containers, inspecting each hit within the collection
-    for (m_calibHitMap_ptr_t i = m_calibHitMap.begin();
-         i != m_calibHitMap.end();
-         i++)
+    for (const auto& kv : m_calibHitMap)
     {
-        std::string name = (*i).first;
-        const CaloCalibrationHitContainer *container = (*i).second;
+        std::string name = kv.first;
+        const CaloCalibrationHitContainer *container = kv.second;
 
         // Skip rest of loop if it's a null container.
         if (container == 0)
@@ -739,9 +735,9 @@ void LArFCalSamplingFraction::FCalCalibAnalysis(const std::string& name, const C
 ///////////////////////////////////////////////////////////////////////////////
 /// Calculate truth impact position
 
-void LArFCalSamplingFraction::TruthImpactPosition(McEventCollection::const_iterator e)
+void LArFCalSamplingFraction::TruthImpactPosition(const HepMC::GenEvent *e)
 {
-    for (auto theParticle: **e)
+  for (const auto theParticle: *e)
     {
         // Note: old GenParticles used HepLorentzVectors, now they use HepMC::FourVectors
 
@@ -824,18 +820,15 @@ StatusCode LArFCalSamplingFraction::doFCal()
     ATH_MSG_INFO("Run " << m_runNumber << ", event " << m_eventNumber);
 
     // How to access MC Truth information:
-    const McEventCollection *mcEventCollection;
+    const McEventCollection *mcEventCollection{};
     sc = evtStore()->retrieve(mcEventCollection, "TruthEvent");
 
     if (sc.isSuccess()) {
         // There can potentially be more than one MC event in the collection.
         McEventCollection::const_iterator mcEvent;
-        int numMcEvent = 0;
-
-        for (mcEvent = mcEventCollection->begin();
-             mcEvent != mcEventCollection->end();
-             mcEvent++, numMcEvent++)
-            TruthImpactPosition(mcEvent);
+        for (const HepMC::GenEvent * mcEvent : *mcEventCollection) {
+          TruthImpactPosition(mcEvent);
+        }
     } // retrieved MC event collection
     else {
         ATH_MSG_DEBUG("Run " << m_runNumber << ", event " << m_eventNumber
@@ -875,7 +868,7 @@ StatusCode LArFCalSamplingFraction::doFCal()
     for (const LArHit* hit : *container) {
 
         // Added by JPA to get particle id for each hit
-        const McEventCollection *mcEventCollection;
+      const McEventCollection *mcEventCollection{};
         sc = evtStore()->retrieve(mcEventCollection, "TruthEvent");
 
         if (sc.isSuccess()) {
@@ -883,17 +876,15 @@ StatusCode LArFCalSamplingFraction::doFCal()
             McEventCollection::const_iterator mcEvent;
             int numParticles = 0;
 
-            for (mcEvent = mcEventCollection->begin();
-                 mcEvent != mcEventCollection->end();
-                 mcEvent++)
-            {
+            for (const HepMC::GenEvent * mcEvent : *mcEventCollection)
+              {
                 // There may be many particles per event
-                for (auto theParticle: **mcEvent)
-                {
+                for (auto theParticle: *mcEvent)
+                  {
                     m_pdg_id->push_back(theParticle->pdg_id());
                     numParticles++;
-                }
-            }
+                  }
+              }
         } // retrieved MC event collection
 
         // End JPA particle id
