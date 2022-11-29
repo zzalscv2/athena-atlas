@@ -247,7 +247,7 @@ def MuonCombinedTrackSummaryToolCfg(flags,
                 flags, name="CombinedMuonIDSummaryHelper", 
                 AssoTool='', HoleSearch = atlasHoleSearchTool,
                 RunningTIDE_Ambi=False,
-                ClusterSplitProbabilityName = '' if flags.Muon.MuonTrigger else \
+                ClusterSplitProbabilityName = '' if flags.Muon.MuonTrigger or flags.ITk.Tracking.doFastTracking else \
                 ClusterSplitProbabilityContainerName(flags) )))
 
     if "MuonSummaryHelperTool" not in kwargs:
