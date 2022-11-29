@@ -1,4 +1,3 @@
-
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
@@ -26,6 +25,7 @@ private:
     ScalarBranch<unsigned long long>& m_evtNumber{m_parent.newScalar<unsigned long long>("evtNumber")};
     ScalarBranch<uint32_t>& m_runNumber{m_parent.newScalar<uint32_t>("runNumber")};
     ScalarBranch<uint32_t>& m_lbNumber{m_parent.newScalar<uint32_t>("lbNumber")};
+    ScalarBranch<uint32_t>& m_l1id{m_parent.newScalar<uint32_t>("l1id")};
 
     ScalarBranch<uint32_t>& m_mcChannel{m_parent.newScalar<uint32_t>("mcChanneNumber")};
     ScalarBranch<double>& m_weight{m_parent.newScalar<double>("evtWeight")};
