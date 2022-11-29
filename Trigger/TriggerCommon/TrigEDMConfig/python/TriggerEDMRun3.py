@@ -470,15 +470,15 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_GSFAux.parameterPX.parameterPY.parameterPZ.parameterPosition',        'BS ESD AODFULL', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo step
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',               'BS ESD AODFULL', 'Egamma', 'inViews:precisionCaloElectronViews'),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',    'BS ESD AODFULL', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Electron',               'BS ESD AODFULL AODSLIM', 'Egamma', 'inViews:precisionCaloElectronViews'),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_ElectronAux.',    'BS ESD AODFULL AODSLIM', 'Egamma'),
 
-    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon',               'BS ESD AODFULL', 'Egamma', 'inViews:precisionCaloPhotonViews'),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS ESD AODFULL', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_Photon',               'BS ESD AODFULL AODSLIM', 'Egamma', 'inViews:precisionCaloPhotonViews'),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_CaloEMClusters_PhotonAux.',    'BS ESD AODFULL AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionHICalo step
-    ('xAOD::CaloClusterContainer#HLT_HICaloEMClusters',               'BS ESD AODCOMM', 'Egamma', 'inViews:precisionHICaloElectronViews'),
-    ('xAOD::CaloClusterTrigAuxContainer#HLT_HICaloEMClustersAux.',    'BS ESD AODCOMM', 'Egamma'),
+    ('xAOD::CaloClusterContainer#HLT_HICaloEMClusters',               'BS ESD AODCOMM AODSLIM', 'Egamma', 'inViews:precisionHICaloElectronViews'),
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_HICaloEMClustersAux.',    'BS ESD AODCOMM AODSLIM', 'Egamma'),
 
     # these two corresponds to the output of the precisionCalo_LRT step
     ('xAOD::CaloClusterContainer#HLT_CaloEMClusters_LRT',               'BS ESD AODCOMM', 'Egamma', 'inViews:precisionCaloElectronViews_LRT'),
