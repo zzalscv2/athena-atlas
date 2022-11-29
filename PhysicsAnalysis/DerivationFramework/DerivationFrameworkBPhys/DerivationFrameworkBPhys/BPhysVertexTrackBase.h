@@ -20,6 +20,7 @@
 #define DERIVATIONFRAMEWORK_BPhysVertexTrackBase_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -52,7 +53,7 @@ namespace DerivationFramework {
   typedef std::vector<const xAOD::Muon*>          MuonBag;
   typedef InDet::IInDetTrackSelectionTool         TrkSelTool;
   
-  class BPhysVertexTrackBase : public AthAlgTool,
+  class ATLAS_NOT_THREAD_SAFE BPhysVertexTrackBase : public AthAlgTool,
     virtual public IAugmentationTool {
 
   protected:

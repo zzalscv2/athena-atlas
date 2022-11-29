@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ namespace Trk {
  */
 namespace DerivationFramework {
 
-  class Bmumu_reco_mumu : public CfAthAlgTool, public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE Bmumu_reco_mumu : public CfAthAlgTool, public IAugmentationTool {
     public: 
       Bmumu_reco_mumu(const std::string& t, const std::string& n,
 		      const IInterface* p);
