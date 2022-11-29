@@ -30,8 +30,8 @@ public:
     StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    ToolHandleArray<MuonCombined::IMuonCombinedInDetExtensionTool> m_muonCombinedInDetExtensionTools{
-        this, "MuonCombinedInDetExtensionTools", {}};
+    ToolHandle<MuonCombined::IMuonCombinedInDetExtensionTool> m_muonCombinedInDetExtensionTool{
+        this, "MuonCombinedInDetExtensionTool", ""};
     SG::ReadHandleKey<InDetCandidateCollection> m_indetCandidateCollectionName{
         this,
         "InDetCandidateLocation",

@@ -11,7 +11,7 @@ MuonCombinedInDetExtensionAlg::MuonCombinedInDetExtensionAlg(const std::string& 
 
 StatusCode MuonCombinedInDetExtensionAlg::initialize() {
     ATH_MSG_VERBOSE(" usePRDs = " << m_usePRDs);
-    ATH_CHECK(m_muonCombinedInDetExtensionTools.retrieve());
+    ATH_CHECK(m_muonCombinedInDetExtensionTool.retrieve());
     ATH_CHECK(m_indetCandidateCollectionName.initialize());
     ATH_CHECK(m_MDT_ContainerName.initialize(m_usePRDs));
     ATH_CHECK(m_RPC_ContainerName.initialize(m_usePRDs));
@@ -83,13 +83,11 @@ StatusCode MuonCombinedInDetExtensionAlg::execute(const EventContext& ctx) const
         prdData.rpcPrds = rpcPRDContainer.cptr();
         SG::ReadHandle<Muon::TgcPrepDataContainer> tgcPRDContainer(m_TGC_ContainerName, ctx);
         prdData.tgcPrds = tgcPRDContainer.cptr();
-        for (const auto& tool : m_muonCombinedInDetExtensionTools) {
-            tool->extendWithPRDs(*indetCandidateCollection, tagMap.ptr(), prdData, combTracks, meTracks, segments, ctx);
-        }
+        m_muonCombinedInDetExtensionTool->extendWithPRDs(*indetCandidateCollection, tagMap.ptr(), prdData, combTracks, meTracks, segments, ctx);
+        
     } else {
-        for (const auto& tool : m_muonCombinedInDetExtensionTools) {
-            tool->extend(*indetCandidateCollection, tagMap.ptr(), combTracks, meTracks, segments, ctx);
-        }
+        m_muonCombinedInDetExtensionTool->extend(*indetCandidateCollection, tagMap.ptr(), combTracks, meTracks, segments, ctx);
+        
     }
     return StatusCode::SUCCESS;
 }

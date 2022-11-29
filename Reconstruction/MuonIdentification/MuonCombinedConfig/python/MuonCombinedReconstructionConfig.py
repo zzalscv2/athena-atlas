@@ -7,16 +7,14 @@ from AthenaConfiguration.Enums import BeamType
 
 def MuonCaloTagAlgCfg(flags, name="MuonCaloTagAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCaloTagToolCfg
-    tools = []
-    result = MuonCaloTagToolCfg(flags)
-    tools.append(result.popPrivateTools())
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
-    result.addPublicTool(kwargs['MuonCombinedInDetExtensionTools'][0])  # Ugh
+    result = ComponentAccumulator()
+    kwargs.setdefault("MuonCombinedInDetExtensionTool", 
+                      result.popToolsAndMerge(MuonCaloTagToolCfg(flags)))
     kwargs.setdefault("TagMap", "caloTagMap")
     kwargs.setdefault("CombinedTrackCollection", "")
     kwargs.setdefault("METrackCollection", "")
     kwargs.setdefault("usePRDs", False)
-    alg = CompFactory.MuonCombinedInDetExtensionAlg(name, **kwargs)
+    alg = CompFactory.MuonCombinedInDetExtensionAlg(name ,**kwargs)
     result.addEventAlgo(alg, primary=True)
     return result
 
@@ -48,13 +46,9 @@ def LRT_MuonSegmentTagAlgCfg(flags, name="MuonSegmentTagAlg_LRT", **kwargs):
 
 def MuonInsideOutRecoAlgCfg(flags, name="MuonInsideOutRecoAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonInsideOutRecoToolCfg
-
-    tools = []
-    result = MuonInsideOutRecoToolCfg(flags)
-    insideoutrecotool = result.popPrivateTools()
-    tools.append(insideoutrecotool)
-
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
+    result = ComponentAccumulator()
+    kwargs.setdefault("MuonCombinedInDetExtensionTool", 
+                      result.popToolsAndMerge(MuonInsideOutRecoToolCfg(flags)))
     kwargs.setdefault("usePRDs", True)
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
@@ -84,9 +78,9 @@ def LRT_MuGirlAlgCfg(flags, name="MuGirlAlg_LRT", **kwargs):
 
 def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonStauRecoToolCfg
-    result = MuonStauRecoToolCfg(flags)
-    tools = [result.popPrivateTools()]
-    kwargs.setdefault("MuonCombinedInDetExtensionTools", tools)
+    result = ComponentAccumulator()    
+    kwargs.setdefault("MuonCombinedInDetExtensionTool", 
+                       result.popToolsAndMerge(MuonStauRecoToolCfg(flags)))
     kwargs.setdefault("TagMap", "stauTagMap")
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
     kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
