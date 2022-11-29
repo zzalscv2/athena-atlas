@@ -42,6 +42,7 @@ namespace InDet
     , m_trtDCTool("InDet::InDetTrtDriftCircleCutTool", this)
     , m_inDetTestPixelLayerTool("", this)
     , m_trackSumToolAvailable(true)
+    , m_partCreatorToolAvailable(false)
     , m_usePtDependentCuts(false)
     , m_useEventInfoBs(false)
 
