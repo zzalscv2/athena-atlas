@@ -48,7 +48,7 @@ public:
     virtual StatusCode execute() override;
     virtual StatusCode initEvent();
     StatusCode doFCal();
-    void TruthImpactPosition(McEventCollection::const_iterator);
+    void TruthImpactPosition(const HepMC::GenEvent *e);
 
     void FCalCalibAnalysis(const std::string& name, const CaloCalibrationHit *CalibHit);
     void FCalClusterCenter(const LArHitContainer *container, const CaloDetDescrManager* caloMgr);

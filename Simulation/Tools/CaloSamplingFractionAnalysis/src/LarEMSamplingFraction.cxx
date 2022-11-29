@@ -122,19 +122,18 @@ StatusCode LarEMSamplingFraction::execute()
   const CaloCalibrationHitContainer* cchc;
   std::vector<const CaloCalibrationHitContainer *> v_cchc;
   std::vector<std::string>::iterator iter;
-  for (iter=m_CalibrationHitContainerNames.begin();iter!=m_CalibrationHitContainerNames.end();iter++)
-  {
-    if ( !evtStore()->contains<CaloCalibrationHitContainer>(*iter))
+  for (const std::string& containerName : m_CalibrationHitContainerNames) {
+    if ( !evtStore()->contains<CaloCalibrationHitContainer>(containerName))
     {
-      ATH_MSG_ERROR("SG does not contain calibration hit container " << *iter);
+      ATH_MSG_ERROR("SG does not contain calibration hit container " << containerName);
       return StatusCode::FAILURE;
     }
     else
       {
-	StatusCode sc = evtStore()->retrieve(cchc,*iter);
+	StatusCode sc = evtStore()->retrieve(cchc,containerName);
 	if (sc.isFailure() )
 	  {
-	    ATH_MSG_ERROR("Cannot retrieve calibration hit container " << *iter);
+	    ATH_MSG_ERROR("Cannot retrieve calibration hit container " << containerName);
 	    return sc;
 	  } 
 	else
@@ -144,7 +143,7 @@ StatusCode LarEMSamplingFraction::execute()
       }
   }
 	
-  const McEventCollection* truthEvent=0;
+  const McEventCollection* truthEvent{};
   StatusCode sc = evtStore()->retrieve(truthEvent, "TruthEvent");
   if (sc.isFailure()||!truthEvent)
     {
@@ -232,22 +231,18 @@ StatusCode LarEMSamplingFraction::execute()
   
   std::vector<const CaloCalibrationHitContainer * >::const_iterator it;
   int count=0;
-  for (it=v_cchc.begin();it!=v_cchc.end();++it)
+  for (const CaloCalibrationHitContainer* calibHitContainer: v_cchc)
     {
       ATH_MSG_DEBUG( "loop on "<<m_CalibrationHitContainerNames[count]);
-      
-      CaloCalibrationHitContainer::const_iterator chIter  = (*it)->begin();
-      CaloCalibrationHitContainer::const_iterator chIterE = (*it)->end();
-      
-      for(;chIter!=chIterE;chIter++)
+      for(const CaloCalibrationHit* calibHit : *calibHitContainer)
 	{
-	  Identifier id=(*chIter)->cellID();
+	  Identifier id=calibHit->cellID();
 	  
-	  double Etot   = (*chIter)->energyTotal();
-	  double Eem    = (*chIter)->energyEM();
-	  double Enonem = (*chIter)->energyNonEM();
-	  double Einv   = (*chIter)->energyInvisible();
-	  double Eesc   = (*chIter)->energyEscaped();
+	  double Etot   = calibHit->energyTotal();
+	  double Eem    = calibHit->energyEM();
+	  double Enonem = calibHit->energyNonEM();
+	  double Einv   = calibHit->energyInvisible();
+	  double Eesc   = calibHit->energyEscaped();
 	  
 	  double Efactor=1.0;
 	    
@@ -314,7 +309,7 @@ StatusCode LarEMSamplingFraction::execute()
     }
   
   //Get reco cells if available
-  const CaloCellContainer *cellColl = 0;
+  const CaloCellContainer *cellColl{};
   sc = evtStore()->retrieve(cellColl, "AllCalo");
   
   if (sc.isFailure()) {
@@ -322,15 +317,13 @@ StatusCode LarEMSamplingFraction::execute()
     //return NULL;
   } else {
     ATH_MSG_DEBUG( "Found: "<<cellColl->size()<<" calorimeter cells");
-    CaloCellContainer::const_iterator itrCell = cellColl->begin();
-    CaloCellContainer::const_iterator itrLastCell = cellColl->end();
-    for ( ; itrCell!=itrLastCell; ++itrCell) {
-      Identifier id=(*itrCell)->ID();
+    for (const CaloCell* cell : *cellColl) {
+      Identifier id=cell->ID();
       const CaloDetDescrElement* caloDDE = caloMgr->get_element(id);
       int sampling=-1;
       if(caloDDE) {
 	sampling = caloDDE->getSampling();
-	m_energy_reco->at(sampling)+=(*itrCell)->energy();
+	m_energy_reco->at(sampling)+=cell->energy();
 	if((sampling>=12 && sampling<=20)) {
 	  Identifier cell_id = m_tileID->cell_id(id);
 	  if(caloMgr->get_element(cell_id)) {
@@ -343,23 +336,21 @@ StatusCode LarEMSamplingFraction::execute()
 	cell_info_map[id.get_compact()].cell_sampling=sampling;
 	cell_info_map[id.get_compact()].cell_eta=caloDDE->eta_raw();
 	cell_info_map[id.get_compact()].cell_phi=caloDDE->phi_raw();
-	cell_info_map[id.get_compact()].cell_energy_reco+=(*itrCell)->energy();
+	cell_info_map[id.get_compact()].cell_energy_reco+=cell->energy();
       }  
     }
   } //calorimeter cells
   
   
   //Get all G4Hits (from CaloHitAnalysis)
-  std::string  lArKey [4] = {"LArHitEMB", "LArHitEMEC", "LArHitFCAL", "LArHitHEC"};
-  for (unsigned int i=0;i<4;i++) {
-    const LArHitContainer* iter;
-    ATH_MSG_DEBUG( "Checking G4Hits: "<<lArKey[i]);
-    if(evtStore()->retrieve(iter,lArKey[i])==StatusCode::SUCCESS) {
-      LArHitContainer::const_iterator hi;
+  const std::vector<std::string>  lArKeys = {"LArHitEMB", "LArHitEMEC", "LArHitFCAL", "LArHitHEC"};
+  for (const std::string& containerName: lArKeys) {
+    const LArHitContainer* larContainer{};
+    ATH_MSG_DEBUG( "Checking G4Hits: "<<containerName);
+    if(evtStore()->retrieve(larContainer,containerName)==StatusCode::SUCCESS) {
       int hitnumber = 0;
-      for (hi=(*iter).begin();hi!=(*iter).end();++hi) {
+      for (const LArHit* larHit : *larContainer) {
 	hitnumber++;
-	const LArHit* larHit = *hi;
 	const CaloDetDescrElement *hitElement = caloMgr->get_element(larHit->cellID());
 	if(!hitElement) continue;
 	Identifier larhitid = hitElement->identify();
@@ -368,29 +359,29 @@ StatusCode LarEMSamplingFraction::execute()
 	  m_energy_hit->at(larlayer)+=larHit->energy();
 	}
       } // End while LAr hits
-      ATH_MSG_DEBUG( "Read "<<hitnumber<<" G4Hits from "<<lArKey[i]);
+      ATH_MSG_DEBUG( "Read "<<hitnumber<<" G4Hits from "<<containerName);
     }
     else {
       ATH_MSG_INFO( "Can't retrieve LAr hits");
     }// End statuscode success upon retrieval of hits
   }// End detector type loop
   
-  const TileHitVector * hitVec;
+  const TileHitVector * hitVec{};
   if (evtStore()->retrieve(hitVec,"TileHitVec")==StatusCode::SUCCESS &&  m_tileID ) {
     int hitnumber = 0;
-    for(TileHitVecConstIterator i_hit=hitVec->begin() ; i_hit!=hitVec->end() ; ++i_hit) {
+    for(const TileHit& hit : *hitVec) {
       ++hitnumber;
-      Identifier pmt_id = (*i_hit).identify();
+      Identifier pmt_id = hit.identify();
       Identifier cell_id = m_tileID->cell_id(pmt_id);
       
       if (caloMgr->get_element(cell_id)) {
 	CaloCell_ID::CaloSample layer = caloMgr->get_element(cell_id)->getSampling();
 	
 	//could there be more subhits??
-	for (int tilesubhit_i = 0; tilesubhit_i<(*i_hit).size(); tilesubhit_i++) {
+	for (int tilesubhit_i = 0; tilesubhit_i<hit.size(); tilesubhit_i++) {
 	  //!!
-	  ATH_MSG_DEBUG( "Tile subhit: "<<tilesubhit_i<<"/"<<(*i_hit).size()<< " E: "<<(*i_hit).energy(tilesubhit_i) );
-	  m_energy_hit->at(layer) += (*i_hit).energy(tilesubhit_i);
+	  ATH_MSG_DEBUG( "Tile subhit: "<<tilesubhit_i<<"/"<<hit.size()<< " E: "<<hit.energy(tilesubhit_i) );
+	  m_energy_hit->at(layer) += hit.energy(tilesubhit_i);
 	}
       }
     }
