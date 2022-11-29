@@ -7,7 +7,8 @@
 #define ATLASHEPMC_MAGICNUMBERS_H
 
 #include <limits>
-
+#include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/GenVertex.h"
 namespace HepMC {
 /// @brief Constant defining the barcode threshold distinguishing generator record entries from detector sim ones
 /// @todo The sim barcodes start at 1M in MC15, so we should update the 200k threshold,
