@@ -539,7 +539,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     if (!m_muonCalibTool.isUserConfigured()) {
       m_muonCalibTool.setTypeAndName("CP::MuonCalibTool/ST_MuonCalibrationTool");
-      if (m_isRun3) ATH_CHECK( m_muonSelectionTool.setProperty("IsRun3Geo", true ));
+      if (m_isRun3) ATH_CHECK( m_muonCalibTool.setProperty("IsRun3Geo", true ));
       ATH_CHECK( m_muonCalibTool.setProperty("calibMode", m_muCalibrationMode) );
       ATH_CHECK( m_muonCalibTool.setProperty("OutputLevel", this->msg().level()) );
       int IdBaselineInt = m_muIdBaseline;
