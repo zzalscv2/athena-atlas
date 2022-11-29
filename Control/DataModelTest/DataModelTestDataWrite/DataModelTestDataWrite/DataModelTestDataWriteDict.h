@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DataModelTestDataWriteDict.h,v 1.3 2008-04-18 03:33:11 ssnyder Exp $
@@ -28,6 +28,9 @@
 #include "DataModelTestDataWrite/HVec.h"
 #include "DataModelTestDataWrite/HView.h"
 #include "DataModelTestDataWrite/HAuxContainer.h"
+#include "DataModelTestDataWrite/AllocTest.h"
+#include "DataModelTestDataWrite/AllocTestContainer.h"
+#include "DataModelTestDataWrite/AllocTestAuxContainer.h"
 
 
 struct GCCXML_DUMMY_INSTANTIATION_DATAMODELTESTDATAWRITE {

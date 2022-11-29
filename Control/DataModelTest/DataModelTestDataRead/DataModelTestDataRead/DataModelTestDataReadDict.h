@@ -1,11 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DataModelTestDataReadDict.h,v 1.3 2008-04-18 03:42:12 ssnyder Exp $
-
 /**
  * @file  DataModelTestDataRead/DataModelTestDataReadDict.h
  * @author snyder@bnl.gov
@@ -28,6 +24,9 @@
 #include "DataModelTestDataRead/HVec.h"
 #include "DataModelTestDataRead/HView.h"
 #include "DataModelTestDataRead/HAuxContainer.h"
+#include "DataModelTestDataRead/AllocTest.h"
+#include "DataModelTestDataRead/AllocTestContainer.h"
+#include "DataModelTestDataRead/AllocTestAuxContainer.h"
 #include "DataModelTestDataRead/versions/H_v1.h"
 #include "DataModelTestDataRead/versions/HVec_v1.h"
 #include "DataModelTestDataRead/versions/HView_v1.h"

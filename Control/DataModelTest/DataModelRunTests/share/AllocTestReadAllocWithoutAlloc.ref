@@ -1,0 +1,155 @@
+Tue Nov 15 23:10:46 EST 2022
+Py:Athena            INFO using release [?-22.0.0] [?] [?/?] -- built on [?]
+Py:Athena            INFO including file "AthenaCommon/Preparation.py"
+Py:Athena            INFO including file "AthenaCommon/Atlas.UnixStandardJob.py"
+Py:Athena            INFO executing ROOT6Setup
+Py:Athena            INFO including file "AthenaCommon/Execution.py"
+Py:Athena            INFO including file "/ssd/sss/atlas/dvtest/../share/AllocTestReadWithoutAlloc_jo.py"
+Py:ConfigurableDb    INFO Read module info for 1142 configurables from 2 genConfDb files
+Py:ConfigurableDb    INFO No duplicates have been found: that's good !
+Py:Athena            INFO including file "DataModelRunTests/loadWriteDicts.py"
+Py:Athena            INFO including file "DataModelRunTests/commonTrailer.py"
+Py:Athena            INFO including file "DataModelRunTests/setCatalog.py"
+Py:Athena            INFO including file "AthenaCommon/runbatch.py"
+# setting LC_ALL to "C"
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Tue Nov 15 23:10:54 2022
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+AthDictLoaderSvc     INFO in initialize...
+AthDictLoaderSvc     INFO acquired Dso-registry
+ClassIDSvc           INFO getRegistryEntries: read 3158 CLIDRegistry entries for module ALL
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
+ClassIDSvc           INFO getRegistryEntries: read 10507 CLIDRegistry entries for module ALL
+PyComponentMgr       INFO Initializing PyComponentMgr...
+LoadWriteDicts       INFO Initializing LoadWriteDicts...
+MetaDataSvc          INFO Initializing MetaDataSvc
+PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
+PoolSvc              INFO Frontier compression level set to 5
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO No specific match for domain found - use default fallback
+DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
+PoolSvc              INFO Successfully setup replica sorting algorithm
+PoolSvc              INFO Setting up APR FileCatalog and Streams
+PoolSvc              INFO POOL WriteCatalog is file:AllocTestReadWithoutAllocalloctestWithAlloc_catalog.xml
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool'])
+EventSelector        INFO EventSelection with query 
+PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 7D2BB6EF-FDCA-BA18-3A0E-3877C24DE71F
+Domain[ROOT_All]     INFO                           alloctestWithAlloc.root
+RootDatabase.open    INFO alloctestWithAlloc.root File version:62606
+alloctestWithAl...   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 7D2BB6EF-FDCA-BA18-3A0E-3877C24DE71F
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 7D2BB6EF-FDCA-BA18-3A0E-3877C24DE71F
+Domain[ROOT_All]     INFO                           alloctestWithAlloc.root
+RootDatabase.open    INFO alloctestWithAlloc.root File version:62606
+alloctestWithAl...   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 7D2BB6EF-FDCA-BA18-3A0E-3877C24DE71F
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 27CF8F77-25DA-714F-AA6D-C43676D5CF98
+Domain[ROOT_All]     INFO                           alloctestWithAlloc.root
+RootDatabase.open    INFO alloctestWithAlloc.root File version:62606
+ClassIDSvc           INFO getRegistryEntries: read 1596 CLIDRegistry entries for module ALL
+EventPersistenc...   INFO Added successfully Conversion service:AthenaPoolCnvSvc
+ClassIDSvc           INFO getRegistryEntries: read 23 CLIDRegistry entries for module ALL
+MetaDataSvc          INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
+AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
+ApplicationMgr       INFO Application Manager Initialized successfully
+alloctestWithAl...   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 27CF8F77-25DA-714F-AA6D-C43676D5CF98
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+DbSession            INFO     Open     DbSession    
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 27CF8F77-25DA-714F-AA6D-C43676D5CF98
+Domain[ROOT_All]     INFO                           alloctestWithAlloc.root
+RootDatabase.open    INFO alloctestWithAlloc.root File version:62606
+ApplicationMgr       INFO Application Manager Started successfully
+AlgResourcePool      INFO TopAlg list empty. Recovering the one of Application Manager
+AthenaPoolConve...   INFO massageEventInfo: unable to get OverrideRunNumberFromInput property from EventSelector 
+AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
+AllocTest 0 10 1 11 2 12 3 13 4 14 5 15 6 16 7 17 8 18 9 19 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
+ClassIDSvc           INFO getRegistryEntries: read 65 CLIDRegistry entries for module ALL
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
+AllocTest 100 110 101 111 102 112 103 113 104 114 105 115 106 116 107 117 108 118 109 119 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
+AllocTest 200 210 201 211 202 212 203 213 204 214 205 215 206 216 207 217 208 218 209 219 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
+AllocTest 300 310 301 311 302 312 303 313 304 314 305 315 306 316 307 317 308 318 309 319 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
+AllocTest 400 410 401 411 402 412 403 413 404 414 405 415 406 416 407 417 408 418 409 419 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
+AllocTest 500 510 501 511 502 512 503 513 504 514 505 515 506 516 507 517 508 518 509 519 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
+AllocTest 600 610 601 611 602 612 603 613 604 614 605 615 606 616 607 617 608 618 609 619 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
+AllocTest 700 710 701 711 702 712 703 713 704 714 705 715 706 716 707 717 708 718 709 719 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
+AllocTest 800 810 801 811 802 812 803 813 804 814 805 815 806 816 807 817 808 818 809 819 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
+AllocTest 900 910 901 911 902 912 903 913 904 914 905 915 906 916 907 917 908 918 909 919 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
+AllocTest 1000 1010 1001 1011 1002 1012 1003 1013 1004 1014 1005 1015 1006 1016 1007 1017 1008 1018 1009 1019 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
+AllocTest 1100 1110 1101 1111 1102 1112 1103 1113 1104 1114 1105 1115 1106 1116 1107 1117 1108 1118 1109 1119 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
+AllocTest 1200 1210 1201 1211 1202 1212 1203 1213 1204 1214 1205 1215 1206 1216 1207 1217 1208 1218 1209 1219 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
+AllocTest 1300 1310 1301 1311 1302 1312 1303 1313 1304 1314 1305 1315 1306 1316 1307 1317 1308 1318 1309 1319 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
+AllocTest 1400 1410 1401 1411 1402 1412 1403 1413 1404 1414 1405 1415 1406 1416 1407 1417 1408 1418 1409 1419 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
+AllocTest 1500 1510 1501 1511 1502 1512 1503 1513 1504 1514 1505 1515 1506 1516 1507 1517 1508 1518 1509 1519 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
+AllocTest 1600 1610 1601 1611 1602 1612 1603 1613 1604 1614 1605 1615 1606 1616 1607 1617 1608 1618 1609 1619 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
+AllocTest 1700 1710 1701 1711 1702 1712 1703 1713 1704 1714 1705 1715 1706 1716 1707 1717 1708 1718 1709 1719 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
+AllocTest 1800 1810 1801 1811 1802 1812 1803 1813 1804 1814 1805 1815 1806 1816 1807 1817 1808 1818 1809 1819 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
+AllocTest 1900 1910 1901 1911 1902 1912 1903 1913 1904 1914 1905 1915 1906 1916 1907 1917 1908 1918 1909 1919 
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
+alloctestWithAl...   INFO Database being retired...
+Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 27CF8F77-25DA-714F-AA6D-C43676D5CF98
+ApplicationMgr       INFO Application Manager Stopped successfully
+LoadWriteDicts       INFO Finalizing LoadWriteDicts...
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+XMLCatalog           INFO File 'AllocTestReadWithoutAllocalloctestWithAlloc_catalog.xml' does not exist. New file created.
+PyComponentMgr       INFO Finalizing PyComponentMgr...
+AthDictLoaderSvc     INFO in finalize...
+ToolSvc              INFO Removing all tools created by ToolSvc
+ChronoStatSvc.f...   INFO  Service finalized successfully 
+ApplicationMgr       INFO Application Manager Finalized successfully
+ApplicationMgr       INFO Application Manager Terminated successfully
+Py:Athena            INFO leaving with code 0: "successful run"
