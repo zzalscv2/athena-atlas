@@ -84,8 +84,12 @@ atlas_add_citest( RecoRun2MC_PileUp
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
 atlas_add_citest( RecoRun3Data
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 -e '--maxEvents 100' --threads 8 --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --run-only --no-output-checks
    PROPERTIES PROCESSORS 8 )
+
+atlas_add_citest( RecoRun3Data_Checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --checks-only --output-path ../RecoRun3Data --no-output-checks
+   DEPENDS_SUCCESS RecoRun3Data )
 
 atlas_add_citest( RecoRun3Data_CAConfig
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -e '--CA --maxEvents 100' --threads 8 --no-output-checks )
@@ -95,8 +99,12 @@ atlas_add_citest( RecoRun3Data_LegacyVsCA
    DEPENDS_SUCCESS RecoRun3Data RecoRun3Data_CAConfig )
 
 atlas_add_citest( RecoRun3Data_Bulk
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1262 -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --postExec="all:FPEAuditor.NStacktracesOnFPE=20"' --threads 8 --no-output-checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1262 --threads 8 -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --postExec="all:FPEAuditor.NStacktracesOnFPE=20"' --run-only --no-output-checks
    PROPERTIES PROCESSORS 8 )
+
+atlas_add_citest( RecoRun3Data_Bulk_Checks
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1262 --threads 8 -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data --postExec="all:FPEAuditor.NStacktracesOnFPE=20"' --checks-only --output-path ../RecoRun3Data_Bulk --no-output-checks
+   DEPENDS_SUCCESS RecoRun3Data_Bulk )
 
 atlas_add_citest( RecoRun3Data_Express
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x686 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --no-output-checks )
