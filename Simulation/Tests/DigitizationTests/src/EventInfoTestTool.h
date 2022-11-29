@@ -1,17 +1,18 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef G4AT_EVENTINFOTESTTOOL
-#define G4AT_EVENTINFOTESTTOOL
+#ifndef DIGITIZATIONTESTS_EVENTINFOTESTTOOL
+#define DIGITIZATIONTESTS_EVENTINFOTESTTOOL
 
 #include "DigiTestToolBase.h"
 #include "xAODEventInfo/EventInfo.h"
 
 class EventInfoTestTool : public DigiTestToolBase {
  public:
-  EventInfoTestTool(const std::string& name, const std::string& type,
-                    const IInterface* parent);
+  EventInfoTestTool( const std::string& type,
+                    const std::string& name,
+                    const IInterface* parent );
 
   StatusCode initialize();
 

@@ -24,9 +24,10 @@ class DigiTestToolBase : public extends<AthAlgTool, IDigiTestTool> {
 public:
  /// \name structors and AlgTool implementation
  //@{
-  DigiTestToolBase(const std::string& name, 
-         const std::string& type,
-         const IInterface* parent);
+  DigiTestToolBase( const std::string& type,
+                    const std::string& name,
+                    const IInterface* parent );
+
   virtual StatusCode initialize() {
 
     CHECK( m_histSvc.retrieve() );

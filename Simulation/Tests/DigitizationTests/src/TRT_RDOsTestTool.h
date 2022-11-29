@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef G4AT_TRT_RDOSTESTTOOL
-#define G4AT_TRT_RDOSTESTTOOL
+#ifndef DIGITIZATIONTESTS_TRT_RDOSTESTTOOL
+#define DIGITIZATIONTESTS_TRT_RDOSTESTTOOL
 
 #include "DigiTestToolBase.h"
 

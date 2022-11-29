@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef G4AT_MCEVENTCOLLECTIONTESTTOOL
-#define G4AT_MCEVENTCOLLECTIONTESTTOOL
+#ifndef DIGITIZATIONTESTS_MCEVENTCOLLECTIONTESTTOOL
+#define DIGITIZATIONTESTS_MCEVENTCOLLECTIONTESTTOOL
 
 #include "DigiTestToolBase.h"
 
@@ -13,9 +13,9 @@ class McEventCollectionTestTool : public DigiTestToolBase {
 
 public:
 
-  McEventCollectionTestTool(const std::string& name,
-                            const std::string& type,
-                            const IInterface* parent);
+  McEventCollectionTestTool( const std::string& type,
+                             const std::string& name,
+                             const IInterface* parent );
 
   StatusCode initialize();
 
