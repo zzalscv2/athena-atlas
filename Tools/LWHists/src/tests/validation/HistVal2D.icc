@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //____________________________________________________________________
@@ -289,14 +289,14 @@ void HistVal2D<TH_2D,THLW_2D>::compareBinContents() const
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
-void HistVal2D<TH_2D,THLW_2D>::compareMetaData() const
+void HistVal2D<TH_2D,THLW_2D>::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
-void HistVal2D<TH_2D,THLW_2D>::compareTH1s() const
+void HistVal2D<TH_2D,THLW_2D>::compareTH1s()
 {
   std::string name1(m_h1->GetName());
   TH1 * th1_gen(0);
@@ -360,7 +360,7 @@ void HistVal2D<TH_2D,THLW_2D>::compareTH1s() const
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
-void HistVal2D<TH_2D,THLW_2D>::compareFastLoop() const
+void HistVal2D<TH_2D,THLW_2D>::compareFastLoop()
 {
   const unsigned nbinsx = m_h2->GetNbinsX();
   const unsigned nbinsy = m_h2->GetNbinsY();

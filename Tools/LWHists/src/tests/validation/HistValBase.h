@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,14 +59,14 @@ public:
   { return m_compareBinContentsOnEachFill; }
 
   virtual void compareBinContents() const = 0;//bin contents (incl. over/underflow)
-  virtual void compareMetaData() const = 0;
-  void compareAllContents() const;//both of the above
-  virtual void compareTH1s() const = 0;//compare the TH1 and the TH1
-                                       //created from the light weight instance
-                                       //Extend in derived.
+  virtual void compareMetaData() = 0;
+  void compareAllContents();//both of the above
+  virtual void compareTH1s() = 0;//compare the TH1 and the TH1
+                                 //created from the light weight instance
+                                 //Extend in derived.
 
-  virtual void compareFastLoop() const = 0;
-  void compareAll() const;//compareAllContents(), compareTH1Fs() and compareFastLoop()
+  virtual void compareFastLoop() = 0;
+  void compareAll();//compareAllContents(), compareTH1Fs() and compareFastLoop()
 
   virtual void triggerConversionToROOTHist() = 0;
 

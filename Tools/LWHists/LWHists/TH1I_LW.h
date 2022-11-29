@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -72,6 +72,7 @@ private:
   TH1* getROOTHistBaseNoAlloc() const;
   void clearKeptROOTHist();//Does nothing if root-backend.
   const float * getVarBins() const;//null if fixed bin-widths
+  float * getVarBins();//null if fixed bin-widths
 
   TH1I_LW( const char* name, const char* title,
 	   unsigned nbinsx, const double& xlow, const double& xup, bool rootbackend );

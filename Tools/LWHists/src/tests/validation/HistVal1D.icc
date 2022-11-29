@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <vector>
@@ -295,14 +295,14 @@ void HistVal1D<TH_1D,THLW_1D>::compareBinContents() const
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-void HistVal1D<TH_1D,THLW_1D>::compareMetaData() const
+void HistVal1D<TH_1D,THLW_1D>::compareMetaData()
 {
   HistValFunctions::compareMetaData(m_h1, m_h2);
 }
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-void HistVal1D<TH_1D,THLW_1D>::compareTH1s() const
+void HistVal1D<TH_1D,THLW_1D>::compareTH1s()
 {
   assert(m_h1->GetMarkerStyle()==m_h2->GetMarkerStyle());
   std::string name1(m_h1->GetName());
@@ -368,7 +368,7 @@ void HistVal1D<TH_1D,THLW_1D>::compareTH1s() const
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
-void HistVal1D<TH_1D,THLW_1D>::compareFastLoop() const
+void HistVal1D<TH_1D,THLW_1D>::compareFastLoop()
 {
   const unsigned nbins = m_h2->GetNbinsX();
   std::vector<std::pair<unsigned,std::pair<double,double> > > active_bins_direct, active_bins_fastloop;

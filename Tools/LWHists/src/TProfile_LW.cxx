@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,6 +17,7 @@
 #include "Flex1DProfileHisto.h"
 #include "LWHistRootUtils.h"
 #include "TProfile.h"
+#include <utility>
 
 #define CALL(x,y) m_rootHisto ? m_rootHisto-> x : m_flexHisto-> y
 #ifdef LW_DEBUG_HEAVY_USERS
@@ -190,6 +191,12 @@ void TProfile_LW::SetErrorOption(Option_t *option) { CALL(SetErrorOption(option)
 const char* TProfile_LW::GetErrorOption() const { return CALL(GetErrorOption(),getErrorOptionAsString()); }
 
 const float * TProfile_LW::getVarBins() const
+{
+  assert(!m_rootHisto);
+  return std::as_const(m_flexHisto)->getVarBins();
+}
+
+float * TProfile_LW::getVarBins()
 {
   assert(!m_rootHisto);
   return m_flexHisto->getVarBins();

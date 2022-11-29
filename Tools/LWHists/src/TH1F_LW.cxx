@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "LWHistRootUtils.h"
 #include "TH1F.h"
 #include <iostream>
+#include <utility>
 
 #define FLEXHIST() ((reinterpret_cast<Flex1DHisto<float>*>(m_flexHisto)))
 #define CALL(x,y) m_rootHisto ? m_rootHisto-> x : reinterpret_cast<Flex1DHisto<float>*>(m_flexHisto)-> y
@@ -207,6 +208,15 @@ void TH1F_LW::SetBins(unsigned nbins,double xmin,double xmax)
 }
 
 const float * TH1F_LW::getVarBins() const
+{
+  if (m_rootHisto) {
+    assert(false);
+    return 0;
+  }
+  return std::as_const(*FLEXHIST()).getVarBins();
+}
+
+float * TH1F_LW::getVarBins()
 {
   if (m_rootHisto) {
     assert(false);
