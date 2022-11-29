@@ -6,16 +6,26 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def TRT_DetElementsRoadCondAlgCfg(flags, name="TRT_DetElementsRoadCondAlg_xk", **kwargs):
     acc = ComponentAccumulator()
-    acc.addCondAlgo(CompFactory.InDet.TRT_DetElementsRoadCondAlg_xk(name, **kwargs))
+    acc.addCondAlgo(
+        CompFactory.InDet.TRT_DetElementsRoadCondAlg_xk(name, **kwargs))
     return acc
 
-def TRT_DetElementsRoadMaker_xkCfg(flags, name='InDetTRT_RoadMaker', **kwargs):
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+def TRT_DetElementsRoadMaker_xkCfg(flags, name='TRT_DetElementsRoadMaker', **kwargs):
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags)
     acc.merge(TRT_DetElementsRoadCondAlgCfg(flags)) # To produce the input TRT_DetElementsRoadData_xk CondHandle
-    
-    kwargs.setdefault("RoadWidth", 20.)
-    from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
-    kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(RungeKuttaPropagatorCfg(flags)))
-    acc.setPrivateTools(CompFactory.InDet.TRT_DetElementsRoadMaker_xk(name, **kwargs))
+
+    if "PropagatorTool" not in kwargs:
+        from TrkConfig.TrkExRungeKuttaPropagatorConfig import (
+            RungeKuttaPropagatorCfg)
+        kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
+            RungeKuttaPropagatorCfg(flags)))
+
+    acc.setPrivateTools(
+        CompFactory.InDet.TRT_DetElementsRoadMaker_xk(name, **kwargs))
     return acc
+
+def TRT_DetElementsRoadMaker_xk_TRTExtensionCfg(flags, name='TRT_DetElementsRoadMaker_TRTExtension', **kwargs):
+    kwargs.setdefault("RoadWidth", 20.)
+    return TRT_DetElementsRoadMaker_xkCfg(flags, name, **kwargs)
