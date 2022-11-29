@@ -74,7 +74,7 @@ namespace Muon {
             @return a pointer to a new Muon::MuonClusterOnTrack object, zero if calibration failed.
             The ownership of the new Muon::MuonClusterOnTrack is passed to the client calling the tool
         */
-        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const;
+        virtual const MuonClusterOnTrack* correct(const Trk::PrepRawData& RIO, const Amg::Vector3D& GP, const Amg::Vector3D& GD) const override;
         
      
     private:
