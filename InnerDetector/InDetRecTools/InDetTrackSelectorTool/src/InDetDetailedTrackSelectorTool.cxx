@@ -150,31 +150,24 @@ namespace InDet
   // ---------------------------------------------------------------------
   StatusCode  
   InDetDetailedTrackSelectorTool::initialize(){
-    m_trackSumToolAvailable=false;
-    if (!m_trackSumTool.empty()) {  
-      if(m_trackSumTool.retrieve().isFailure()){
-	ATH_MSG_INFO(" Unable to retrieve TrackSummaryTool. OK if running on AOD. "<<m_trackSumTool);
-      }else{
-	ATH_MSG_INFO("Track summary tool retrieved");
-	m_trackSumToolAvailable=true;
-      }
+    if(m_trackSumTool.empty()){
+      ATH_MSG_INFO("No TrackSummaryTool set. OK if running on AOD.");
     }
+    m_trackSumToolAvailable = !m_trackSumTool.empty();
+    ATH_CHECK(m_trackSumTool.retrieve(DisableTool{!m_trackSumToolAvailable}));
 
-    if(m_useSharedHitInfo && !m_particleCreator.empty()){
-      if(m_particleCreator.retrieve().isFailure()){
-	ATH_MSG_INFO(" Unable to retrieve TrackParticleCreatorTool. OK if running on AOD. "<<m_particleCreator);
-      }else{
-	ATH_MSG_INFO("Track particle creator tool retrieved");
-	m_partCreatorToolAvailable = true;
-      }
+    if(m_useSharedHitInfo && m_particleCreator.empty()){
+      ATH_MSG_INFO("No TrackParticleCreatorTool set but shared hit selection used. OK if running on AOD.");
     }
+    m_partCreatorToolAvailable = m_useSharedHitInfo && !m_particleCreator.empty();
+    ATH_CHECK(m_particleCreator.retrieve(DisableTool{!m_partCreatorToolAvailable}));
 
     ATH_CHECK( m_extrapolator.retrieve() );
     ATH_CHECK(m_beamSpotKey.initialize(!m_useEventInfoBs));
     ATH_CHECK(m_eventInfo_key.initialize(m_useEventInfoBs));
     if (m_useEtaDepententMinHitTrt || m_useEtaDepententMinHitTrtWithOutliers){
 	    if(m_trtDCTool.empty()) {
-	      ATH_MSG_ERROR(" Eta delendent cut on number of TRT hits requested but TrtDCCutTool not specified. ");
+	      ATH_MSG_ERROR(" Eta dependent cut on number of TRT hits requested but TrtDCCutTool not specified. ");
 	      return StatusCode::FAILURE;
 	    } else if(m_trtDCTool.retrieve().isFailure()) {
 	      ATH_MSG_ERROR(" Unable to retrieve tool "<<m_trtDCTool);
