@@ -1,6 +1,8 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
+from PyCool import cool
+import copy
 import sys
 
 
@@ -37,8 +39,37 @@ class AtlCoolTriggerTool:
 
         return True
 
+
+    def MergeRanges(self, listOfRanges):
+        newRR=[]
+        for rr in listOfRanges:
+            if len(newRR)==0:
+                newRR.append(copy.deepcopy(rr))
+            else:
+                if rr[0]-1<=newRR[-1][1]:
+                    newRR[-1][1] = max(rr[1],newRR[-1][1])
+                else:
+                    newRR.append(copy.deepcopy(rr))
+        return newRR
+
+
+    def GetRunRanges(self, runRange):
+        listOfRanges = []
+        runRanges = runRange.split(',')
+        for rr in runRanges:
+            startend = rr.split('-')
+            if len(startend)==1: startend += [startend[0]]
+            firstlast = [0, (cool.ValidityKeyMax>>32)-1]
+            if startend[0]: firstlast[0] = int(startend[0])
+            if startend[1]: firstlast[1]  = int(startend[1])
+            firstlast.sort()
+            listOfRanges += [firstlast]
+        listOfRanges.sort()
+        return self.MergeRanges(listOfRanges)
+
+
     def init(self):
-        self.runlist = TriggerCoolUtil.GetRunRanges(self.opt.runlist)
+        self.runlist = self.GetRunRanges(self.opt.runlist)
         self.dbconn  = TriggerCoolUtil.GetConnection(self.opt.db,self.opt.verbosity)
 
 
