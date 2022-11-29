@@ -316,7 +316,7 @@ namespace Muon {
                 wedge_segs = findStereoSegments(ctx, muonClusters, iWedge);
             } else {
                 std::vector<std::unique_ptr<Muon::MuonSegment>> etaSegs = findPrecisionSegments(ctx, muonClusters, iWedge);
-                wedge_segs = find3DSegments(ctx, segmentInput, etaSegs);
+                wedge_segs = find3DSegments(ctx, segmentInput, etaSegs, iWedge);
             }
             for (std::unique_ptr<Muon::MuonSegment>& seg : wedge_segs) segPerQuadColl->push_back(std::move(seg));
         }
@@ -568,8 +568,11 @@ namespace Muon {
                 MeasVec etaHitsCalibrated = getCalibratedClusters(seed2D);
 
                 // fit
-                if (hitsToTrack(ctx, etaHitsCalibrated, phiHitVec, *startpar, segTrkColl)) is3Dseg = true;
-
+                if (hitsToTrack(ctx, etaHitsCalibrated, phiHitVec, *startpar, segTrkColl)) {
+                    is3Dseg = true;
+                    ATH_MSG_VERBOSE("Segment successfully fitted for wedge "<<singleWedge<<std::endl<<
+                                   m_printer->print(segTrkColl.back()->measurementsOnTrack()->stdcont()));
+                }
             }  // end loop on phi seeds
 
             // if we failed to combine the eta segment with phi measurements,
