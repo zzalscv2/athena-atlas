@@ -9,28 +9,39 @@ def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
                                InputCollections = None,
                                **kwargs):
 
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags)
 
     if "SegmentsMakerTool" not in kwargs:
         if flags.Beam.Type is BeamType.Cosmics:
-            from InDetConfig.TRT_TrackSegmentsToolConfig import TRT_TrackSegmentsMaker_BarrelCosmicsCfg
+            from InDetConfig.TRT_TrackSegmentsToolConfig import (
+                TRT_TrackSegmentsMaker_BarrelCosmicsCfg)
             InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
-                TRT_TrackSegmentsMaker_BarrelCosmicsCfg(flags, name='InDetTRTSegmentsMaker'+extension,
-                                                        TRT_ClustersContainer = 'TRT_DriftCircles'))
+                TRT_TrackSegmentsMaker_BarrelCosmicsCfg(flags, name='InDetTRTSegmentsMaker'+extension))
         else:
-            from InDetConfig.TRT_TrackSegmentsToolConfig import TRT_TrackSegmentsMaker_ATLxkCfg
+            from InDetConfig.TRT_TrackSegmentsToolConfig import (
+                TRT_TrackSegmentsMaker_ATLxkCfg)
             InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
                 TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker'+extension, 
                                                 extension = extension,
                                                 InputCollections = InputCollections))
         kwargs.setdefault("SegmentsMakerTool", InDetTRT_TrackSegmentsMaker)
 
+    if "RoadTool" not in kwargs:
+        from InDetConfig.TRT_DetElementsRoadToolConfig import (
+            TRT_DetElementsRoadMaker_xkCfg)
+        kwargs.setdefault("RoadTool", acc.popToolsAndMerge(
+            TRT_DetElementsRoadMaker_xkCfg(flags)))
+
     if flags.InDet.Tracking.ActivePass.RoISeededBackTracking:
-        from InDetConfig.InDetCaloClusterROISelectorConfig import CaloClusterROIPhiRZContainerMakerCfg
+        from InDetConfig.InDetCaloClusterROISelectorConfig import (
+            CaloClusterROIPhiRZContainerMakerCfg)
         acc.merge(CaloClusterROIPhiRZContainerMakerCfg(flags))
         kwargs.setdefault("useCaloSeeds", True)
-        kwargs.setdefault("EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % (flags.InDet.Tracking.ActivePass.minRoIClusterEt/Units.GeV))
+        kwargs.setdefault("EMROIPhiRZContainer",
+                          "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % \
+                          (flags.InDet.Tracking.ActivePass.minRoIClusterEt/Units.GeV))
 
     acc.addEventAlgo(CompFactory.InDet.TRT_TrackSegmentsFinder(name, **kwargs))
     return acc
