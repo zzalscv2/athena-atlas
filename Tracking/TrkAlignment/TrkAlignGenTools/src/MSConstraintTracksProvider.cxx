@@ -484,7 +484,11 @@ StatusCode MSConstraintTracksProvider::trackCollection(const TrackCollection*& o
           type.set(Trk::TrackStateOnSurface::Measurement);
 
           const Perigee* IDPerigeeParameters  = muon->inDetTrackParticle()->originalTrack()->perigeeParameters();
-          std::unique_ptr<const  Perigee> IDPerigeeParametersClone=(IDPerigeeParameters) ? IDPerigeeParameters->uniqueClone(): nullptr;
+
+          auto IDPerigeeParametersClone =
+              (IDPerigeeParameters)
+                  ? std::make_unique<const Perigee>(*IDPerigeeParameters)
+                  : nullptr;
 
           if(IDPerigeeParameters && IDPerigeeParametersClone ){
             trackStateOnSurfaces.push_back(new const Trk::TrackStateOnSurface(std::move(pmot), std::move(IDPerigeeParametersClone), nullptr, type));

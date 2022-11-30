@@ -611,7 +611,7 @@ namespace Rec {
         const Trk::TrackStateOnSurface* outerTSOS = track.trackStateOnSurfaces()->back();
         if (!perigee->covariance()) {
             ATH_MSG_WARNING(" perigee has no covariance");
-            return perigee->uniqueClone();
+            return std::make_unique<Trk::Perigee>(*perigee);
         }
 
         if (outerTSOS->trackParameters() == perigee && perigee->momentum().dot(perigee->position()) <= 0.) {
@@ -621,7 +621,7 @@ namespace Rec {
             return std::make_unique<Trk::Perigee>(perigee->position(), -perigee->momentum(), -perigee->charge(), surface, perigeeCov);
         }
 
-        return perigee->uniqueClone();
+        return std::make_unique<Trk::Perigee>(*perigee);
     }
     ScatteringAngleSignificance MuonTrackQuery::scatteringAngleSignificance(const Trk::Track& track, const EventContext& ctx) const {
         const Trk::TrackingVolume* calorimeterVolume = getVolume("Calo::Container", ctx);
