@@ -28,5 +28,5 @@ atlas_install_joboptions( share/optionForTest.txt )
 # Test(s) in the package:
 atlas_add_test( ALFA_SensitiveDetector_gtest
                 SOURCES test/ALFA_SensitiveDetector_gtest.cxx
-                LINK_LIBRARIES ALFA_G4_SDLib G4AtlasToolsLib TestTools
+                LINK_LIBRARIES ALFA_G4_SDLib G4AtlasToolsLib TestTools CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
