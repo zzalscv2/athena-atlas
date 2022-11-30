@@ -21,6 +21,8 @@
 
 // Athena includes
 #include "AtlasDetDescr/AtlasRegion.h"
+#include "CxxUtils/checker_macros.h"
+#include "StoreGate/StoreGateSvc.h"
 
 // MCTruth includes
 #include "MCTruth/TrackBarcodeInfo.h"
@@ -28,8 +30,6 @@
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/TrackInformation.h"
 #include "MCTruth/VTrackInformation.h"
-
-#include "StoreGate/StoreGateSvc.h"
 
 // Geant4 includes
 #include "G4ParticleDefinition.hh"
@@ -186,7 +186,7 @@ namespace G4UA {
       // loop over new secondaries
       for ( auto* aConstTrack_2nd : *secondaryVector ) {
         // get a non-const G4Track for current secondary (nasty!)
-        G4Track *aTrack_2nd = const_cast<G4Track*>( aConstTrack_2nd );
+        G4Track *aTrack_2nd ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstTrack_2nd ); // imposed by Geant4 interface
 
         // check if new secondary position is behind boundary
         const G4ThreeVector&             pos_2nd = aTrack_2nd->GetPosition();
@@ -286,10 +286,11 @@ namespace G4UA {
       trackInfo->SetBaseISFParticle( newISP );
 
       // push the particle back to ISF via the particle broker
-      // in MT mode there is no broker
       if ( m_particleBrokerQuick )
       {
-         m_particleBrokerQuick->push(newISP, parentISP);
+        [&] ATLAS_NOT_THREAD_SAFE () {  // suppress checker warning, in MT mode there is no broker
+          m_particleBrokerQuick->push(newISP, parentISP);
+        }();
       }
       else
       {

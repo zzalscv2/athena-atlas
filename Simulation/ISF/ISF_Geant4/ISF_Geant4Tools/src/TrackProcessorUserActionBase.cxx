@@ -20,6 +20,7 @@
 
 // Athena includes
 #include "AtlasDetDescr/AtlasRegion.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "MCTruth/AtlasG4EventUserInfo.h"
 #include "MCTruth/PrimaryParticleInformation.h"
@@ -86,7 +87,7 @@ void TrackProcessorUserActionBase::UserSteppingAction(const G4Step* aStep)
   const std::vector<const G4Track*>  *secondaryVector = aStep->GetSecondaryInCurrentStep();
   for ( auto* aConstSecondaryTrack : *secondaryVector ) {
     // get a non-const G4Track for current secondary (nasty!)
-    G4Track* aSecondaryTrack = const_cast<G4Track*>( aConstSecondaryTrack );
+    G4Track* aSecondaryTrack ATLAS_THREAD_SAFE = const_cast<G4Track*>( aConstSecondaryTrack ); // imposed by Geant4 interface
 
     auto *trackInfo = ::iGeant4::ISFG4Helper::getISFTrackInfo(*aSecondaryTrack);
 
@@ -108,7 +109,7 @@ void TrackProcessorUserActionBase::PreUserTrackingAction(const G4Track* aTrack)
 {
   bool isPrimary = ! aTrack->GetParentID();
   if (isPrimary) {
-    G4Track* nonConstTrack = const_cast<G4Track*> (aTrack); // love it :)
+    G4Track* nonConstTrack ATLAS_THREAD_SAFE = const_cast<G4Track*> (aTrack); // imposed by Geant4 interface
     setupPrimary(*nonConstTrack);
   } else {
     setupSecondary(*aTrack);
