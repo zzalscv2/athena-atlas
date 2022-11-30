@@ -23,7 +23,7 @@ def main():
     tests_to_run = []
     if options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
-            tests_to_run.append(SimulationTest("s3759", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
+            tests_to_run.append(SimulationTest("s4005", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.AF3:
             tests_to_run.append(SimulationTest("s3779", run, WorkflowType.AF3, ["EVNTtoHITS"], setup, options.extra_args))
     elif options.overlay:

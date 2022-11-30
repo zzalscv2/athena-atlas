@@ -3,6 +3,7 @@ from typing import List
 
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck
 from .Inputs import input_EVNT, input_EVNT_AF3, input_HITS, \
+    input_HITS_unfiltered, \
     input_HITS_MC_overlay, input_RDO_BKG, \
     input_HITS_data_overlay, input_BS_SKIM, \
     input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino
@@ -29,8 +30,8 @@ class QTest(WorkflowTest):
         threads_argument = '--multithreaded'
         if setup.custom_threads is not None:
             threads = setup.custom_threads
-            if threads <= 0:
-                threads_argument = ''
+        if threads <= 0:
+            threads_argument = ''
 
         self.command = \
             (f"ATHENA_CORE_NUMBER={threads} Reco_tf.py {threads_argument} --AMIConfig {ID}"
@@ -58,17 +59,42 @@ class SimulationTest(WorkflowTest):
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 20"
 
-        if type == WorkflowType.AF3:
-            input_file = input_EVNT_AF3[run]
+        if "jobNumber" not in extra_args and run is WorkflowRun.Run3 and type is WorkflowType.FullSim:
+            extra_args += " --jobNumber 5"
+
+        input_argument = ""
+        if "inputEVNTFile" not in extra_args and "inputHITSFile" not in extra_args:
+            if type is WorkflowType.HitsFilter:
+                input_argument = f"--inputHITSFile {input_HITS_unfiltered[run]}"
+            elif type is WorkflowType.HitsMerge:
+                input_argument = f"--inputHITSFile {input_HITS[run]}"
+            elif type is WorkflowType.AF3:
+                input_argument = f"--inputEVNTFile {input_EVNT_AF3[run]}"
+            else:
+                input_argument = f"--inputEVNTFile {input_EVNT[run]}"
+
+        threads = 0
+        threads_argument = '--multithreaded'
+        if setup.custom_threads is not None:
+            threads = setup.custom_threads
+        if threads <= 0:
+            threads_argument = ''
+
+        if type is WorkflowType.HitsMerge:
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} HITSMerge_tf.py {threads_argument} --AMIConfig {ID}"
+                f" {input_argument} --outputHITS_MRGFile myHITS.pool.root"
+                f" --imf False {extra_args}")
+        elif type is WorkflowType.HitsFilter:
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} FilterHit_tf.py {threads_argument} --AMIConfig {ID}"
+                f" {input_argument} --outputHITS_FILTFile myHITS.pool.root"
+                f" --imf False {extra_args}")
         else:
-            input_file = input_EVNT[run]
-
-        self.command = \
-            (f"Sim_tf.py --AMIConfig {ID}"
-             f" --inputEVNTFile {input_file} --outputHITSFile myHITS.pool.root"
-             f" --imf False {extra_args}")
-
-            #  " --postExec 'ServiceMgr.AuditorSvc.FPEAuditor.NStacktracesOnFPE=500'"
+            self.command = \
+                (f"ATHENA_CORE_NUMBER={threads} Sim_tf.py {threads_argument} --AMIConfig {ID}"
+                f" {input_argument} --outputHITSFile myHITS.pool.root"
+                f" --imf False {extra_args}")
 
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "HITS", 10)
