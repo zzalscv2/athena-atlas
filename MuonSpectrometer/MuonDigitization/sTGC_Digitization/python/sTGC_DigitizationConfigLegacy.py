@@ -43,6 +43,9 @@ def sTgcDigitizationTool(name="sTgcDigitizationTool",**kwargs):
     kwargs.setdefault("deadtimePad"  , 250)
     kwargs.setdefault("deadtimeWire" , 250)
     kwargs.setdefault("neighborOn", True)
+    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
+    # Every 100V increase roughly doubles the total electric charge per hit
+    kwargs.setdefault("operatingHVinkV", 2.8)
 
     return CfgMgr.sTgcDigitizationTool(name,**kwargs)
 

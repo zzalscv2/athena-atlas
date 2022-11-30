@@ -59,6 +59,10 @@ def sTGC_DigitizationToolCfg(flags, name="sTgcDigitizationTool", **kwargs):
     kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
+    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
+    # Every 100V increase roughly doubles the total electric charge per hit
+    kwargs.setdefault("operatingHVinkV", 2.8)
+
     if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.TypedCollections:
         kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")
     else:
@@ -80,6 +84,10 @@ def sTGC_OverlayDigitizationToolCfg(flags, name="STGC_OverlayDigitizationTool", 
     acc = ComponentAccumulator()
     kwargs.setdefault("doToFCorrection", True)
     kwargs.setdefault("doEfficiencyCorrection", False)
+    # Operating voltage in the sTGC in kV. Sets the gas gain from electron avalance
+    # Every 100V increase roughly doubles the total electric charge per hit
+    kwargs.setdefault("operatingHVinkV", 2.8)
+
     kwargs.setdefault("OnlyUseContainerName", False)
     if 'sTGCSimHitCollection#sTGCSensitiveDetector' in flags.Input.SecondaryTypedCollections:
         kwargs.setdefault("InputObjectName", "sTGCSensitiveDetector")
