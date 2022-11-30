@@ -92,7 +92,6 @@ def TrigTrackSummaryHelperToolSiOnlyCfg(flags, name="InDetTrigSummaryHelperSiOnl
                                        name,
                                        useTRT = False,
                                        TRTStrawSummarySvc = None,
-                                       TestPixelLayerTool = None,
                                        **kwargs)
                                        
 
