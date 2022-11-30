@@ -431,6 +431,7 @@ StatusCode MergeMcEventCollTool::processTruthFilteredEvent(const McEventCollecti
   ATH_CHECK(this->saveHeavyIonInfo(pMcEvtColl));
   m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)=new HepMC::GenEvent(**(pMcEvtColl->begin()));
   HepMC::GenEvent& currentBackgroundEvent(*(m_pOvrlMcEvColl->at(m_startingIndexForBackground+m_nBkgEventsReadSoFar)));
+  HepMC::fillBarcodesAttribute(&currentBackgroundEvent);
   currentBackgroundEvent.set_event_number(currentBkgEventIndex);
   puType currentGenEventClassification(RESTOFMB);
   if ( std::abs(currentEventTime)<51.0 ) {
