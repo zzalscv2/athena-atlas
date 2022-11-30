@@ -6,15 +6,12 @@
 #include <sstream>
 #include <string>
 
-#include "ers/ers.h"
-
 #include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
 
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
 #include "MuonNSWCommonDecode/NSWTriggerMML1AElink.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
-
-#include <bitset>
+#include "MuonNSWCommonDecode/MMARTPacket.h"
 
 Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const uint32_t remaining):
   NSWTriggerElink (bs, remaining)
@@ -75,22 +72,17 @@ Muon::nsw::NSWTriggerMML1AElink::NSWTriggerMML1AElink (const uint32_t *bs, const
 
   }
 
-
-  //will uncomment this once a dedicated ART Packet class has been created
-  /*
-  for (int i=0; i<m_stream_data.size(); i++){
+  for (uint i=0; i<m_stream_data.size(); i++){
     if (m_stream_head_streamID[i]!=0xAAA4){
       //the it's an ART packet
-      for (int j = 0; j < m_stream_data[i].size(); j++){
-          ARTPacket packet = ARTPacket(m_stream_data[i][j]); //arg will be a vector<uint32_t> of size 3
-          //will see if it's will be preferred to add a list of arts as class members or directly art attributes unpacked
+      for (uint j = 0; j < m_stream_data[i].size(); j++){
+	m_art_packets.push_back( std::make_shared<Muon::nsw::MMARTPacket>(m_stream_data[i][j]) ); //arg will be a vector<uint32_t> of size 3
       }
     }
+    //if 0xAAA4 then it's a trigger packet; format not yet defined
   }
-  */
 
   //warning: how the swROD is behaving if the last work is a uint16 only? Just 0-padding?
-  m_trailer_CRC = bit_slice<uint64_t,uint32_t>(bs, pp, Muon::nsw::MMTPL1A::size_trailer_CRC-1); pp+= Muon::nsw::MMTPL1A::size_trailer_CRC;
+  m_trailer_CRC = bit_slice<uint64_t,uint32_t>(bs, pp, pp+Muon::nsw::MMTPL1A::size_trailer_CRC-1); pp+= Muon::nsw::MMTPL1A::size_trailer_CRC;
 
 }
-

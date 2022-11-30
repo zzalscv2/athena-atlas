@@ -21,18 +21,18 @@ namespace Muon
      public:
       explicit NSWTriggerCommonDecoder (const eformat::read::ROBFragment &rob, const std::string triggerType);
       //will use trigger type for stgc/mm/pad specialization?
-      virtual ~NSWTriggerCommonDecoder ();
+      virtual ~NSWTriggerCommonDecoder () = default;
 
       //it's up to the user dynamic casting to needed elink type
       //or we can make this a template but then loosing the ability to change trigger type at run time
-      const std::vector <Muon::nsw::NSWTriggerElink *> &get_elinks () const {return m_elinks;};
+      const std::vector<std::shared_ptr<Muon::nsw::NSWTriggerElink>>& get_elinks () const {return m_elinks;};
 
       bool has_error () {return m_has_error;};
 
      private:
       bool m_has_error;
       std::string m_triggerType;
-      std::vector <Muon::nsw::NSWTriggerElink *> m_elinks;
+      std::vector<std::shared_ptr<Muon::nsw::NSWTriggerElink>> m_elinks;
     };
 
   }

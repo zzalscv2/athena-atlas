@@ -10,7 +10,6 @@
 
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
 #include "MuonNSWCommonDecode/NSWMMTPDecodeBitmaps.h"
-//will include all the bitmaps
 
 namespace Muon
 {
@@ -19,6 +18,8 @@ namespace Muon
     class NSWResourceId;
 
     class NSWTriggerElinkException;
+
+    class MMARTPacket;
 
     class NSWTriggerMML1AElink : public NSWTriggerElink
     {
@@ -46,12 +47,14 @@ namespace Muon
       uint32_t head_cfg_wdw_close_offset () const {return m_head_cfg_wdw_close_offset;};
       uint32_t head_cfg_timeout () const {return m_head_cfg_timeout;};
       uint32_t head_link_const () const {return m_head_link_const;};
-      std::vector<uint32_t> stream_head_nbits () const {return  m_stream_head_nbits;};
-      std::vector<uint32_t> stream_head_nwords () const {return  m_stream_head_nwords;};
-      std::vector<uint32_t> stream_head_fifo_size () const {return  m_stream_head_fifo_size;};
-      std::vector<uint32_t> stream_head_streamID () const {return m_stream_head_streamID;};
-      std::vector<std::vector<std::vector<uint32_t>>> stream_data () const {return  m_stream_data;};
+      const std::vector<uint32_t>& stream_head_nbits () const {return  m_stream_head_nbits;};
+      const std::vector<uint32_t>& stream_head_nwords () const {return  m_stream_head_nwords;};
+      const std::vector<uint32_t>& stream_head_fifo_size () const {return  m_stream_head_fifo_size;};
+      const std::vector<uint32_t>& stream_head_streamID () const {return m_stream_head_streamID;};
+      const std::vector<std::vector<std::vector<uint32_t>>> stream_data () const {return  m_stream_data;};
       uint32_t trailer_CRC () const {return  m_trailer_CRC;};
+
+      const std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>>& art_packets () const {return m_art_packets;};
 
      private:
 
@@ -83,23 +86,7 @@ namespace Muon
       //third vector used because stream data size (m_stream_head_nwords) can exceed maximum compiler size (uint64_t)
       uint32_t m_trailer_CRC;
 
-
-      template <typename T, typename X>
-      T bit_slice(const X words[], int start, int end){
-      	//start and end are the positions in the entire stream
-      	//start and end included;
-      	int wordSize = sizeof(X)*8;
-      	T s = 0;
-      	int n = end / wordSize;
-      	for(int i= 0; i <= n; ++i){
-      		s = (s << wordSize) + words[i]; //if T is too small, does not care, it's user fault
-      		//when a fragment is split between N words, T should be at least of the size of N*words (in order to accommodate it)
-      	}
-      	s >>= (n+1) * wordSize - (end+1);
-      	T mask = (((T)1) << (end - start + 1))- 1; //len = end - start + 1
-      	s &= mask;
-      	return s;
-      }
+      std::vector<std::shared_ptr<Muon::nsw::MMARTPacket>> m_art_packets;
 
     };
   }

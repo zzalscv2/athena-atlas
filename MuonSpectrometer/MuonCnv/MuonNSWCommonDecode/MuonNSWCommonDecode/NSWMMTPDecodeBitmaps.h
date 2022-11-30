@@ -75,9 +75,33 @@ namespace Muon
       constexpr int size_fitter_rBin =                        8;
       constexpr int size_trailer_CRC =                       16;
     };
+
+    namespace MMART {
+      constexpr int size_art_BCID =             11;
+      constexpr int size_art_pipeID =            2;
+      constexpr int size_art_fiberID =           3;
+      constexpr int size_art_VMMmap =           32;
+      constexpr int size_art_ARTs =              6;
+    };
+
   }
 }
 
-
+template <typename T, typename X>
+T bit_slice(const X words[], int start, int end){
+  //start and end are the positions in the entire stream                                                                                                
+  //start and end included;                                                                                                                             
+  int wordSize = sizeof(X)*8;
+  T s = 0;
+  int n = end / wordSize;
+  for(int i= 0; i <= n; ++i){
+    s = (s << wordSize) + words[i]; //if T is too small, does not care, it's user fault                                                                 
+    //when a fragment is splitted between N words, T should be at least of the size of N*words (in order to accomodate it)                              
+  }
+  s >>= (n+1) * wordSize - (end+1);
+  T mask = (((T)1) << (end - start + 1))- 1; //len = end - start + 1                                                                                    
+  s &= mask;
+  return s;
+}
 
 #endif // _MUON_NSW_MMTP_DECODE_BITMAPS_H_
