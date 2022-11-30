@@ -2466,13 +2466,10 @@ std::vector<Trk::HitInfo>* FastShowerCellBuilderTool::caloHits(const HepMC::GenP
                                                            m_caloEntrance.get());
     }
   } else {
+    ATH_MSG_DEBUG("Use clone of inputPar as caloEntry");
     caloEntry = inputPar.uniqueClone();
   }
 
-  if(caloEntry.get()==&inputPar) {
-    ATH_MSG_DEBUG("Use clone of inputPar as caloEntry");
-    caloEntry=inputPar.uniqueClone();
-  }
 
   if ( caloEntry ) {
     ATH_MSG_DEBUG("caloEntry="<<caloEntry.get()<<" nextGeoID="<<nextGeoID<<" charge="<<charge);

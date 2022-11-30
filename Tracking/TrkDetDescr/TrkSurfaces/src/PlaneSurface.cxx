@@ -49,7 +49,7 @@ Trk::PlaneSurface::PlaneSurface(const PlaneSurface& psf, const Amg::Transform3D&
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+[[gnu::flatten]]
 #endif
 // constructor from CurvilinearUVT
 Trk::PlaneSurface::PlaneSurface(const Amg::Vector3D& position, const CurvilinearUVT& curvUVT)
@@ -183,6 +183,62 @@ Trk::PlaneSurface::operator==(const Trk::Surface& sf) const
   bool boundsEqual = bounds() == psf->bounds();
   return transfEqual && centerEqual && boundsEqual;
 }
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueTrackParameters(
+  double l1,
+  double l2,
+  double phi,
+  double theta,
+  double qop,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
+    l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueTrackParameters(
+  const Amg::Vector3D& position,
+  const Amg::Vector3D& momentum,
+  double charge,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Charged, PlaneSurface>>(
+    position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueNeutralParameters(
+  double l1,
+  double l2,
+  double phi,
+  double theta,
+  double oop,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
+    l1, l2, phi, theta, oop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::PlaneSurface::createUniqueNeutralParameters(
+  const Amg::Vector3D& position,
+  const Amg::Vector3D& momentum,
+  double charge,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Neutral, PlaneSurface>>(
+    position, momentum, charge, *this, std::move(cov));
+}
+
 #if defined(__GNUC__)
 [[gnu::flatten]]
 // Avoid out-of-line Eigen calls
