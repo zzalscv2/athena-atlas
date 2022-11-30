@@ -56,7 +56,14 @@ VP1EtaPhiCutWidget::VP1EtaPhiCutWidget(QWidget * parent,IVP1System * sys)
   // -> allowedPhi
   connect(m_d->ui.checkBox_cut_phi,SIGNAL(toggled(bool)),this,SLOT(possibleChange_allowedPhi()));
   connect(m_d->ui.phisectionwidget,SIGNAL(enabledPhiRangesChanged(const QList<VP1Interval>&)),
-	  this,SLOT(possibleChange_allowedPhi()));
+	  this,SLOT(possibleChange_allowedPhi())); 
+
+  connect(m_d->ui.checkBox_cut_phi,SIGNAL(toggled(bool)),this,SLOT(togglePhiCheckboxes()));
+  connect(m_d->ui.checkBox_phiCuts,SIGNAL(toggled(bool)),this,SLOT(togglePhiCheckboxes()));
+  
+  connect(m_d->ui.checkBox_phiCuts,SIGNAL(toggled(bool)),this,SLOT(possibleChange_allowedPhi()));
+  connect(m_d->ui.dsb_phiCuts_min,SIGNAL(valueChanged(double)),this,SLOT(possibleChange_allowedPhi()));
+  connect(m_d->ui.dsb_phiCuts_max,SIGNAL(valueChanged(double)),this,SLOT(possibleChange_allowedPhi()));
 
 }
 
@@ -100,21 +107,32 @@ VP1Interval VP1EtaPhiCutWidget::allowedEta() const
 QList<VP1Interval> VP1EtaPhiCutWidget::allowedPhi() const
 {
   QList<VP1Interval> l;
-  if (!m_d->ui.checkBox_cut_phi)
-    return l;
-  if (!m_d->ui.checkBox_cut_phi->isChecked()) {
-    l << VP1Interval(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
-    return l;
-  }
-  if (!m_d->ui.phisectionwidget||m_d->ui.phisectionwidget->allSectorsOff())
+  
+  if (!m_d->ui.checkBox_cut_phi && !m_d->ui.checkBox_phiCuts)
     return l;
 
-  if (!m_d->ui.checkBox_cut_phi->isChecked()||m_d->ui.phisectionwidget->allSectorsOn()) {
+
+  if ( !m_d->ui.checkBox_cut_phi->isChecked() && !m_d->ui.checkBox_phiCuts->isChecked() ) {
     l << VP1Interval(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
     return l;
-  } else {
+  }
+
+  if (  m_d->ui.checkBox_cut_phi->isChecked() && ( !m_d->ui.phisectionwidget || m_d->ui.phisectionwidget->allSectorsOff() ) )
+    return l;
+
+  if ( m_d->ui.checkBox_cut_phi->isChecked() && m_d->ui.phisectionwidget->allSectorsOn() ) {
+    l << VP1Interval(-std::numeric_limits<double>::infinity(),std::numeric_limits<double>::infinity());
+    return l;
+  } else if ( m_d->ui.checkBox_cut_phi->isChecked() ) { 
     return m_d->ui.phisectionwidget->enabledPhiRanges();
   }
+  if ( m_d->ui.checkBox_phiCuts->isChecked() ) {
+      double phi_min = m_d->ui.dsb_phiCuts_min->value();
+      double phi_max = m_d->ui.dsb_phiCuts_max->value();
+    return m_d->ui.phisectionwidget->enabledPhiRanges(phi_min, phi_max);
+  }
+
+  return l; // we should not get here
 
 }
 
@@ -169,9 +187,23 @@ void VP1EtaPhiCutWidget::possibleChange_allowedEta()
   emit allowedEtaChanged(newAllowedEta);
 }
 
+
+void VP1EtaPhiCutWidget::togglePhiCheckboxes() {
+
+  // If 'range' is checked, then 'cuts' must be unchecked; and viceversa
+  // We only use one option at a time: or we use the dots/ranges, or the numerical values
+    if (sender()==m_d->ui.checkBox_phiCuts) {
+        if ( m_d->ui.checkBox_phiCuts->isChecked() ) m_d->ui.checkBox_cut_phi->setChecked(false);
+    } else if (sender()==m_d->ui.checkBox_cut_phi) {
+        if ( m_d->ui.checkBox_cut_phi->isChecked() ) m_d->ui.checkBox_phiCuts->setChecked(false);
+    }
+}
+
 //____________________________________________________________________
 void VP1EtaPhiCutWidget::possibleChange_allowedPhi()
 {
+
+
   QList<VP1Interval> newAllowedPhi = allowedPhi();
   if ( m_d->last_allowedPhi == newAllowedPhi )
     return;

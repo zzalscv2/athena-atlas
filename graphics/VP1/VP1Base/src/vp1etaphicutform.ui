@@ -329,38 +329,5 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>checkBox_phiCuts</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>checkBox_cut_phi</receiver>
-   <slot>toggle()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>73</x>
-     <y>229</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>59</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_cut_phi</sender>
-   <signal>stateChanged(int)</signal>
-   <receiver>checkBox_phiCuts</receiver>
-   <slot>toggle()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>59</x>
-     <y>154</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>73</x>
-     <y>229</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>
