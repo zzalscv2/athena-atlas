@@ -183,6 +183,11 @@ namespace ExpressionParsing {
 
 
   // ********************************************************************************
+  xAODProxyLoader::xAODProxyLoader() :
+    m_accessorCache(accessorCache_t::Updater_t())
+  {
+  }
+
   xAODProxyLoader::~xAODProxyLoader()
   {
     reset();
@@ -191,16 +196,16 @@ namespace ExpressionParsing {
   void xAODProxyLoader::reset()
   {
     for (auto &x : m_accessorCache) delete x.second;
-    m_accessorCache.clear();
+    // m_accessorCache.clear();  // not supported by ConcurrentStrMap
   }
 
   template <class TYPE, class AUX>
-  bool xAODProxyLoader::try_type(const std::string& varname, const std::type_info* ti, const AUX* data)
+  bool xAODProxyLoader::try_type(const std::string& varname, const std::type_info* ti, const AUX* data) const
   {
     if (*ti == typeid(TYPE)) {
       auto accWrap = std::make_unique<AccessorWrapper<TYPE>>(varname);
       if (accWrap && accWrap->isValid(data)) {
-        m_accessorCache[varname] = accWrap.release();
+        m_accessorCache.insert_or_assign(varname, accWrap.release());
         return true;
       } else if (accWrap) {
         const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -213,7 +218,7 @@ namespace ExpressionParsing {
 
   template <class AUX>
   IProxyLoader::VariableType xAODProxyLoader::try_all_known_types(const std::string& varname,
-                                                                  const AUX* data, bool isVector)
+                                                                  const AUX* data, bool isVector) const
   {
     const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
     const SG::auxid_t auxid = r.findAuxID(varname);
@@ -251,7 +256,7 @@ namespace ExpressionParsing {
     m_auxElement = auxElement;
   }
 
-  IProxyLoader::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType xAODElementProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     // Try TMethodWrapper
     auto container = m_auxElement->container();
@@ -273,7 +278,7 @@ namespace ExpressionParsing {
       }
       if (accWrap && accWrap->isValid(m_auxElement)) {
         const IProxyLoader::VariableType vtype = accWrap->variableType();
-        m_accessorCache[varname] = accWrap.release();
+        m_accessorCache.insert_or_assign(varname, accWrap.release());
         return vtype;
       }
     }
@@ -314,12 +319,12 @@ namespace ExpressionParsing {
     m_auxVectorData = auxVectorData;
   }
 
-  IProxyLoader::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType xAODVectorProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     auto accWrap = std::make_unique<TMethodCollectionWrapper>(typeid(*m_auxVectorData), varname);
     if (accWrap && accWrap->isValid(m_auxVectorData)) {
       const IProxyLoader::VariableType vtype = accWrap->variableType();
-      m_accessorCache[varname] = accWrap.release();
+      m_accessorCache.insert_or_assign(varname, accWrap.release());
       return vtype;
     }
 

@@ -23,7 +23,7 @@ namespace ExpressionParsing {
   {
   }
 
-  IProxyLoader::VariableType TriggerDecisionProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType TriggerDecisionProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     static const std::set<std::string> knownPrefixes{"L1", "L2", "EF", "HLT"};
 

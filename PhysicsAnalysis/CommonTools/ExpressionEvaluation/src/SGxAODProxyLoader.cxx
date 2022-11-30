@@ -190,7 +190,7 @@ namespace ExpressionParsing {
     return *(accessor_iter->second);
   }
 
-  IProxyLoader::VariableType SGxAODProxyLoader::variableTypeFromString(const std::string &varname) {
+  IProxyLoader::VariableType SGxAODProxyLoader::variableTypeFromString(const std::string &varname) const {
      const EventContext& ctx = Gaudi::Hive::currentContext();
      return getAccessor(ctx, varname).variableType();
   }

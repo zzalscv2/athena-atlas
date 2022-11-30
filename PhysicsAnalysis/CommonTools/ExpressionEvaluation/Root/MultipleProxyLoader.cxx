@@ -16,6 +16,11 @@
 #include <iostream>
 
 namespace ExpressionParsing {
+  MultipleProxyLoader::MultipleProxyLoader() :
+    m_varnameToProxyLoader(proxyCache_t::Updater_t())
+  {
+  }
+
   MultipleProxyLoader::~MultipleProxyLoader()
   {
   }
@@ -33,14 +38,14 @@ namespace ExpressionParsing {
     }
   }
 
-  IProxyLoader::VariableType MultipleProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType MultipleProxyLoader::variableTypeFromString(const std::string &varname) const
   {
-    if (m_varnameToProxyLoader.find(varname) != m_varnameToProxyLoader.end()) {
-      return m_varnameToProxyLoader[varname]->variableTypeFromString(varname);
+    auto itr = m_varnameToProxyLoader.find(varname);
+    if (itr != m_varnameToProxyLoader.end()) {
+      return itr->second->variableTypeFromString(varname);
     }
 
     IProxyLoader::VariableType result;
-    bool foundProxyLoader(false);
     for (const auto &proxyLoader : m_proxyLoaders) {
       try {
         result = proxyLoader->variableTypeFromString(varname);
@@ -48,14 +53,11 @@ namespace ExpressionParsing {
       } catch (const std::runtime_error &) {
         continue;
       }
-      foundProxyLoader = true;
-      m_varnameToProxyLoader[varname] = proxyLoader;
-      break;
+      m_varnameToProxyLoader.emplace(varname, proxyLoader);
+      return result;
     }
-    if (!foundProxyLoader) {
-      throw std::runtime_error("MultipleProxyLoader: unable to find valid proxy loader for "+varname);
-    }
-    return result;
+
+    throw std::runtime_error("MultipleProxyLoader: unable to find valid proxy loader for "+varname);
   }
 
   int MultipleProxyLoader::loadIntVariableFromString(const std::string &varname) const

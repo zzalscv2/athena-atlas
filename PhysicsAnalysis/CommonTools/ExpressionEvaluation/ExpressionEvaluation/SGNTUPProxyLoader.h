@@ -29,7 +29,7 @@ namespace ExpressionParsing {
 
       virtual void reset();
 
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
 
       virtual int loadIntVariableFromString(const std::string &varname) const;
       virtual double loadDoubleVariableFromString(const std::string &varname) const;

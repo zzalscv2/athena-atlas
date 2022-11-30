@@ -25,7 +25,7 @@ namespace ExpressionParsing {
       TriggerDecisionProxyLoader(ToolHandle<Trig::TrigDecisionTool>& trigDecTool) : m_trigDec(trigDecTool) { }
       virtual ~TriggerDecisionProxyLoader();
       virtual void reset();
-      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname);
+      virtual IProxyLoader::VariableType variableTypeFromString(const std::string &varname) const;
       virtual int loadIntVariableFromString(const std::string &varname) const;
       virtual double loadDoubleVariableFromString(const std::string &varname) const;
       virtual std::vector<int> loadVecIntVariableFromString(const std::string &varname) const;

@@ -23,7 +23,7 @@ namespace ExpressionParsing {
     m_intAccessCount = 0;
   }
 
-  IProxyLoader::VariableType TestProxyLoader::variableTypeFromString(const std::string &varname)
+  IProxyLoader::VariableType TestProxyLoader::variableTypeFromString(const std::string &varname) const
   {
     if (varname == "intTEST") return VT_INT;
     else if (varname == "int_TEST") return VT_INT;
