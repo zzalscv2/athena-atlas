@@ -32,9 +32,10 @@ class ContainerConfig :
     This tracks the naming of all temporary containers, as well as all the
     selection decorations."""
 
-    def __init__ (self, name, sourceName) :
+    def __init__ (self, name, sourceName, *, originalName = None) :
         self.name = name
         self.sourceName = sourceName
+        self.originalName = originalName
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
@@ -141,16 +142,23 @@ class ConfigAccumulator :
             DualUseConfig.addPrivateTool (self._currentAlg, type, name)
 
 
-    def setSourceName (self, containerName, sourceName) :
-        """set the (default) name of the original container
+    def setSourceName (self, containerName, sourceName,
+                       *, originalName = None) :
+        """set the (default) name of the source/original container
 
         This is essentially meant to allow using e.g. the muon
         configuration and the user not having to manually specify that
         they want to use the Muons/AnalysisMuons container from the
         input file.
+
+        In addition it allows to set the original name of the
+        container (which may be different from the source name), which
+        is mostly/exclusively used for jet containers, so that
+        subsequent configurations know which jet container they
+        operate on.
         """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, originalName = originalName)
 
 
     def readName (self, containerName) :
@@ -183,6 +191,21 @@ class ConfigAccumulator :
         if containerName not in self._containerConfig :
             raise Exception ("no source container for: " + containerName)
         return self._containerConfig[containerName].index == 0
+
+
+    def originalName (self, containerName) :
+        """get the "original" name of the given container
+
+        This is mostly/exclusively used for jet containers, so that
+        subsequent configurations know which jet container they
+        operate on.
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        result = self._containerConfig[containerName].originalName
+        if result is None :
+            raise Exception ("no original name for: " + containerName)
+        return result
 
 
     def nextPass (self) :
