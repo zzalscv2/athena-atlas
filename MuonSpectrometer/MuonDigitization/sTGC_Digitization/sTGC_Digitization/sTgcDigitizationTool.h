@@ -124,6 +124,10 @@ private:
   Gaudi::Property<bool> m_doToFCorrection{this,"doToFCorrection",false};
   Gaudi::Property<bool> m_doEfficiencyCorrection{this,"doEfficiencyCorrection",false};
 
+  // voltage applied to gas gaps: Nominal condition in RUN3 as of Nov 2022 is 2.8 kV
+  // this value serves to modify the gas gain caused by the electric field in the sTGC
+  Gaudi::Property<double> m_runVoltage{this,"operatingHVinkV",2.8};
+
   Gaudi::Property<std::string> m_rndmEngineName{this,"RndmEngine","MuonDigitization","Random engine name"};
 
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};

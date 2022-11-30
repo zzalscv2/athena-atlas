@@ -101,7 +101,17 @@ StatusCode sTgcDigitizationTool::initialize() {
   ATH_CHECK(m_outputSDO_CollectionKey.initialize());
 
   // initialize sTgcDigitMaker class to digitize hits
-  m_digitizer = std::make_unique<sTgcDigitMaker>(m_hitIdHelper, m_mdManager, m_doEfficiencyCorrection);
+  // meanGasGain is the mean value of the polya gas gain function describing the
+  // avalanche of electrons caused by the electric field
+  // Parameterization is obtained from ATL-MUON-PUB-2014-001 and the corrected
+  // fit to data to parameterize gain vs HV in kV
+  // m_runVoltage MUST BE in kV!
+  if (m_runVoltage < 2.3 || m_runVoltage > 3.2){
+    ATH_MSG_ERROR("STGC run voltage must be in kV and within fit domain of 2.3 kV to 3.2 kV");
+    return StatusCode::FAILURE;
+  }
+  double meanGasGain = 2.15 * 1E-4 * exp(6.88*m_runVoltage);
+  m_digitizer = std::make_unique<sTgcDigitMaker>(m_hitIdHelper, m_mdManager, m_doEfficiencyCorrection, meanGasGain);
   m_digitizer->setLevel(static_cast<MSG::Level>(msgLevel()));
   ATH_CHECK(m_digitizer->initialize(m_doChannelTypes));
 
