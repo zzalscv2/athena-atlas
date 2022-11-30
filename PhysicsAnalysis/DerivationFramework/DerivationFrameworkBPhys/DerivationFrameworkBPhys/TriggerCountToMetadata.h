@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 //============================================================================
 // 
@@ -32,7 +32,7 @@ namespace Trig{
 
 namespace DerivationFramework {
 
-  class TriggerCountToMetadata : virtual public CfAthAlgTool, virtual public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE TriggerCountToMetadata : virtual public CfAthAlgTool, virtual public IAugmentationTool {
 
     public: 
       TriggerCountToMetadata(const std::string& t, const std::string& n, const IInterface* p);
