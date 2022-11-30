@@ -39,8 +39,8 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkPixelSeedingLiveMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingLiveMonitoringCfg(flags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
     return acc
@@ -76,8 +76,8 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkStripSeedingLiveMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingLiveMonitoringCfg(flags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
     return acc
@@ -110,8 +110,8 @@ def ActsTrkITkPixelSeedingCfg(flags,
     kwargs.setdefault('SeedTool', seedTool)
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkPixelSeedingLiveMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingLiveMonitoringCfg(flags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelSeedingMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
@@ -133,8 +133,8 @@ def ActsTrkITkStripSeedingCfg(flags,
     kwargs.setdefault('SeedTool', seedTool)
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkStripSeedingLiveMonitoringCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingLiveMonitoringCfg(flags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripSeedingMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc

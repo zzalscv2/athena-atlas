@@ -34,8 +34,8 @@ def ActsTrkPixelSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("PixelSpacePointData", "ITkPixelSpacePointData")
 
     if ConfigFlags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg
-        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg(ConfigFlags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkPixelSpacePointFormationMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkPixelSpacePointFormationMonitoringToolCfg(ConfigFlags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
     return acc
@@ -61,8 +61,8 @@ def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("ProcessOverlapForStrip", True)
 
     if ConfigFlags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg
-        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg(ConfigFlags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkStripSpacePointFormationMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkStripSpacePointFormationMonitoringToolCfg(ConfigFlags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc

@@ -2,15 +2,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def ActsTrkLiveMonitoringHistSvcCfg(flags) -> ComponentAccumulator:
+def ActsTrkMonitoringHistSvcCfg(flags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     histSvc = CompFactory.THistSvc(Output = ["EXPERT DATAFILE='acts-expert-monitoring.root', OPT='RECREATE'"])
     acc.addService(histSvc)
     return acc
 
-def ActsTrkITkPixelClusterizationLiveMonitoringToolCfg(flags,
-                                                       name: str = "ActsTrkItkPixelClusterizationLiveMonitoringTool",
-                                                       **kwargs) -> ComponentAccumulator:
+def ActsTrkITkPixelClusterizationMonitoringToolCfg(flags,
+                                                   name: str = "ActsTrkItkPixelClusterizationMonitoringTool",
+                                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -20,12 +20,12 @@ def ActsTrkITkPixelClusterizationLiveMonitoringToolCfg(flags,
                             xbins=100, xmin=0, xmax=10000)
     
     acc.setPrivateTools(monTool)
-    acc.merge(ActsTrkLiveMonitoringHistSvcCfg(flags))
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
     return acc
 
-def ActsTrkITkStripClusterizationLiveMonitoringToolCfg(flags,
-                                                       name: str = "ActsTrkItkStripClusterizationLiveMonitoringTool",
-                                                       **kwargs) -> ComponentAccumulator:
+def ActsTrkITkStripClusterizationMonitoringToolCfg(flags,
+                                                   name: str = "ActsTrkItkStripClusterizationMonitoringTool",
+                                                   **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -35,13 +35,13 @@ def ActsTrkITkStripClusterizationLiveMonitoringToolCfg(flags,
                             xbins=100, xmin=0, xmax=10000)
     
     acc.setPrivateTools(monTool)
-    acc.merge(ActsTrkLiveMonitoringHistSvcCfg(flags))
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
     return acc
 
 
-def ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg(flags,
-                                                        name: str = "ActsTrkPixelSpacePointFormatioLiveMonitoringTool",
-                                                        **kwargs) -> ComponentAccumulator:
+def ActsTrkPixelSpacePointFormationMonitoringToolCfg(flags,
+                                                     name: str = "ActsTrkPixelSpacePointFormatioMonitoringTool",
+                                                     **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -53,12 +53,12 @@ def ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg(flags,
                             xbins=100, xmin=0, xmax=1000000)    
 
     acc.setPrivateTools(monTool)
-    acc.merge(ActsTrkLiveMonitoringHistSvcCfg(flags))
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
     return acc
 
-def ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg(flags,
-                                                        name: str = "ActsTrkStripSpacePointFormatioLiveMonitoringTool",
-                                                        **kwargs) -> ComponentAccumulator:
+def ActsTrkStripSpacePointFormationMonitoringToolCfg(flags,
+                                                     name: str = "ActsTrkStripSpacePointFormationMonitoringTool",
+                                                     **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -72,12 +72,12 @@ def ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg(flags,
                             xbins=100, xmin=0, xmax=100000)
     
     acc.setPrivateTools(monTool)
-    acc.merge(ActsTrkLiveMonitoringHistSvcCfg(flags))
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))
     return acc
 
-def ActsTrkITkPixelSeedingLiveMonitoringCfg(flags,
-                                            name: str = "ActsTrkITkPixelSeedingLiveMonitoring",
-                                            **kwargs) -> ComponentAccumulator:
+def ActsTrkITkPixelSeedingMonitoringCfg(flags,
+                                        name: str = "ActsTrkITkPixelSeedingMonitoring",
+                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -87,12 +87,12 @@ def ActsTrkITkPixelSeedingLiveMonitoringCfg(flags,
                             xbins=100, xmin=0, xmax=50000)
     
     acc.setPrivateTools(monTool)
-    acc.merge(ActsTrkLiveMonitoringHistSvcCfg(flags))     
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))     
     return acc
     
-def ActsTrkITkStripSeedingLiveMonitoringCfg(flags,
-                                            name: str = "ActsTrkITkStripSeedingLiveMonitoring",
-                                            **kwargs) -> ComponentAccumulator:
+def ActsTrkITkStripSeedingMonitoringCfg(flags,
+                                        name: str = "ActsTrkITkStripSeedingMonitoring",
+                                        **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -102,6 +102,6 @@ def ActsTrkITkStripSeedingLiveMonitoringCfg(flags,
                             xbins=100, xmin=0, xmax=50000)
     
     acc.setPrivateTools(monTool)
-    acc.merge(ActsTrkLiveMonitoringHistSvcCfg(flags))     
+    acc.merge(ActsTrkMonitoringHistSvcCfg(flags))     
     return acc
     

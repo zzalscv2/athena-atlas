@@ -12,8 +12,8 @@ def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizati
     kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsTrkITkPixelClusteringToolCfg(flags)))
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkPixelClusterizationLiveMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelClusterizationLiveMonitoringToolCfg(flags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkPixelClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelClusterizationMonitoringToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
     return acc
@@ -29,7 +29,7 @@ def ActsTrkITkStripClusterizationAlgCfg(flags, name='ActsTrkItkStripClusterizati
     acc.addEventAlgo(CompFactory.ActsTrk.StripClusterizationAlg(name, **kwargs))
 
     if flags.Acts.doMonitoring:
-        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkStripClusterizationLiveMonitoringToolCfg
-        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripClusterizationLiveMonitoringToolCfg(flags)))
+        from ActsTrkAnalysis.ActsTrkMonitoringConfig import ActsTrkITkStripClusterizationMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripClusterizationMonitoringToolCfg(flags)))
 
     return acc
