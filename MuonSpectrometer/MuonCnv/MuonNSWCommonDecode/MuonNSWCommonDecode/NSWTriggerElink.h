@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <vector>
 #include <exception>
+#include <memory>
 
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 
@@ -42,8 +43,7 @@ namespace Muon
 
       // Detector Logical ID and components
       uint32_t elinkWord  () const {return m_elinkWord;};
-      const Muon::nsw::NSWResourceId *elinkId () const {return m_elinkId.get();};
-      Muon::nsw::NSWResourceId *elinkId () {return m_elinkId.get();};
+      const std::shared_ptr<Muon::nsw::NSWResourceId>& elinkId () const {return m_elinkId;};
 
      protected:
       unsigned int m_wordCount;
@@ -52,7 +52,7 @@ namespace Muon
 
       //decoding felix header
       uint32_t m_elinkWord;
-      std::unique_ptr<Muon::nsw::NSWResourceId> m_elinkId;
+      std::shared_ptr<Muon::nsw::NSWResourceId> m_elinkId;
 
     };
   }
