@@ -243,14 +243,14 @@ egammaTrkRefitterTool::provideVotFromBeamspot(const EventContext& ctx,
   // calculate perigee parameters wrt. beam-spot
   std::unique_ptr<const Trk::Perigee> perigee = nullptr;
   std::unique_ptr<const Trk::TrackParameters> tmp =
-    m_extrapolator->extrapolate(ctx, *track, surface);
+      m_extrapolator->extrapolate(ctx, *track, surface);
   if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
     perigee.reset(static_cast<const Trk::Perigee*>(tmp.release()));
   }
-  if (!perigee) { // if failure
+  if (!perigee) {  // if failure
     const Trk::Perigee* trackPerigee = track->perigeeParameters();
     if (trackPerigee && ((trackPerigee->associatedSurface())) == surface)
-      perigee = trackPerigee->uniqueClone();
+      perigee = std::make_unique<const Trk::Perigee>(*trackPerigee);
   }
 
   Eigen::Matrix<double, 1, 2> Jacobian;
