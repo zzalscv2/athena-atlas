@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATE_READCONDHANDLEKEY_H
@@ -39,11 +39,11 @@ namespace SG {
    * separated by a "+":  "MyStore+Obj".  If no "+" is present
    * the store named by @c storeName is used.   
    */
-  template <class OWNER, class K,
+  template <class OWNER,
             typename = typename std::enable_if<std::is_base_of<IProperty, OWNER>::value>::type>
   inline ReadCondHandleKey( OWNER* owner,
                             std::string name,
-                            const K& key={},
+                            const std::string& key={},
                             std::string doc="") :
     ReadCondHandleKey<T>( key ) {
     auto p = owner->declareProperty(std::move(name), *this, std::move(doc));
