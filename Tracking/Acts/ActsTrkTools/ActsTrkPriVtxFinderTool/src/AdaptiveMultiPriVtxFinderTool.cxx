@@ -143,7 +143,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
   typedef DataVector<Trk::Track>::const_iterator TrackDataVecIter;
 
   bool selectionPassed;
-  for (TrackDataVecIter itr = (*trackTES).begin(); itr != (*trackTES).end(); itr++) {
+  for (TrackDataVecIter itr = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
     if (m_useBeamConstraint) {
       selectionPassed = static_cast<bool>(m_trkFilter->accept(**itr, &beamposition));
     } else {

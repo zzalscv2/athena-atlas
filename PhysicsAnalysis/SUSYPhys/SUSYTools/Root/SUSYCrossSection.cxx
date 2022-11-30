@@ -64,7 +64,7 @@ void SUSY::CrossSectionDB::loadFile(const std::string& txtfilename){
 
 // Convenient accessor for finding based on *only* a process ID
 SUSY::CrossSectionDB::xsDB_t::iterator SUSY::CrossSectionDB::my_find( const int proc ) {
-  for (SUSY::CrossSectionDB::xsDB_t::iterator it = m_xsectDB.begin(); it!=m_xsectDB.end();it++){
+  for (SUSY::CrossSectionDB::xsDB_t::iterator it = m_xsectDB.begin(); it!=m_xsectDB.end();++it){
     if (it->second.ID()==proc) return it;
   }
   return m_xsectDB.end();

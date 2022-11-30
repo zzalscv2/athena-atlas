@@ -773,7 +773,7 @@ StatusCode JetTagMonitoring::fillHistograms() {
   uint8_t nBLayerHits = 0; // IBL hits in Run-2, old b-layer in Run-1
   uint8_t nTRTHits    = 0;
 
-  for ( ; trackParticleItr != trackParticleEnd; trackParticleItr++) { 
+  for ( ; trackParticleItr != trackParticleEnd; ++trackParticleItr) { 
       
     if ((*trackParticleItr)->summaryValue(nBLayerHits, xAOD::numberOfBLayerHits)) { m_global_BLayerHits->Fill((float) nBLayerHits); } // IBL hits in Run-2, old b-layer in Run-1
     if ((*trackParticleItr)->summaryValue(nPixHits, xAOD::numberOfPixelHits))     { m_global_PixelHits->Fill((float) nPixHits); }
@@ -916,7 +916,7 @@ bool JetTagMonitoring::isTopEvent() { // added by SARA for 2017 data taking
 
   // loop over electron container
   int n_isoElectrons = 0;
-  for ( ; electronItr != electronEnd; electronItr++) {
+  for ( ; electronItr != electronEnd; ++electronItr) {
     //select electrons which passed author and pT cut
     if (!(*electronItr)->author(xAOD::EgammaParameters::AuthorElectron)) continue; 
     if ((*electronItr) -> pt() / Gaudi::Units::GeV < m_ElectronPtCut) continue;

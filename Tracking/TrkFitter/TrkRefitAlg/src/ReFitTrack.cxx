@@ -170,7 +170,7 @@ StatusCode Trk::ReFitTrack::execute()
   std::vector<std::unique_ptr<Trk::Track> > new_tracks;
 
   // loop over tracks
-  for (TrackCollection::const_iterator itr  = (*tracks).begin(); itr < (*tracks).end(); itr++){
+  for (TrackCollection::const_iterator itr  = (*tracks).begin(); itr < (*tracks).end(); ++itr){
 
     ATH_MSG_VERBOSE ("input track:" << **itr);
 

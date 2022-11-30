@@ -49,7 +49,7 @@ StatusCode ActsReFitterAlg::execute(const EventContext &ctx) const {
   new_tracks.reserve((*tracks).size());
 
   // Perform the fit for each input track
-  for (TrackCollection::const_iterator track  = (*tracks).begin(); track < (*tracks).end(); track++){
+  for (TrackCollection::const_iterator track  = (*tracks).begin(); track < (*tracks).end(); ++track){
 
     auto newtrack = m_actsKalmanFitter->fit(ctx, (**track));
 
