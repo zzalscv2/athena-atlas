@@ -7,6 +7,7 @@
 
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "MuonTesterTree/MuonTesterTreeDict.h"
 #include "StoreGate/ReadDecorHandleKey.h"
@@ -37,7 +38,7 @@
  */
 
 namespace CP {
-    class TestIsolationCloseByCorrAlg : public AthHistogramAlgorithm {
+    class ATLAS_NOT_THREAD_SAFE TestIsolationCloseByCorrAlg : public AthHistogramAlgorithm {
     public:
         TestIsolationCloseByCorrAlg(const std::string& name, ISvcLocator* svcLoc);
         virtual ~TestIsolationCloseByCorrAlg() = default;

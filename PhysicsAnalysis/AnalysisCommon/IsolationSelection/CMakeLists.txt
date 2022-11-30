@@ -19,9 +19,9 @@ atlas_add_library( IsolationSelectionLib
   IsolationSelection/*.h Root/*.cxx
   PUBLIC_HEADERS IsolationSelection
   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-  LINK_LIBRARIES AthContainers AsgTools xAODBase xAODEgamma xAODMuon xAODEventInfo xAODPFlow ${extra_libs} AsgDataHandlesLib
+  LINK_LIBRARIES AthContainers AsgTools xAODBase xAODEgamma xAODMuon xAODEventInfo xAODPFlow ${extra_libs} AsgDataHandlesLib CxxUtils
   xAODPrimitives PATCoreLib PATInterfaces InDetTrackSelectionToolLib xAODTracking ${ROOT_LIBRARIES} TrackVertexAssociationToolLib InDetTrackSelectionToolLib
-  PRIVATE_LINK_LIBRARIES CxxUtils PathResolver FourMomUtils  )
+  PRIVATE_LINK_LIBRARIES PathResolver FourMomUtils  )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( IsolationSelection

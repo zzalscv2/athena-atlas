@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -9,6 +9,7 @@
 #define ASG_ANALYSIS_ALGORITHMS__ISOLATION_CLOSE_BY_CORRECTION_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <CxxUtils/checker_macros.h>
 #include <IsolationSelection/IIsolationCloseByCorrectionTool.h>
 #include <SelectionHelpers/OutOfValidityEventHelper.h>
 #include <SystematicsHandles/SysCopyHandle.h>
@@ -18,7 +19,8 @@ namespace CP
 {
   /// \brief an algorithm for calling \ref IIsolationCloseByCorrectionTool
 
-  class IsolationCloseByCorrectionAlg final : public EL::AnaAlgorithm
+  class ATLAS_NOT_THREAD_SAFE IsolationCloseByCorrectionAlg final : public EL::AnaAlgorithm
+  //    ^ use of IsolationCloseByCorrectionTool
   {
     /// \brief the standard constructor
   public:
