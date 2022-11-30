@@ -24,7 +24,7 @@ idpvm_merge_script="postProcessIDPVMHistos.py"
 #References for producing the output dcube pages
 lastref_dir=last_results
 # TODO: This one needs to be moved to CVMFS once it's cleaned up by the different domains (~5000 histograms right now)
-dcube_xml="${Athena_DIR}/src/Tools/CampaignsARTTest/config/dcube_config_all_domains_reduced.xml"
+dcube_xml="${Athena_DIR}/src/Tools/CampaignsARTTests/config/dcube_config_all_domains_reduced.xml"
 
 run () {
   name="${1}"
