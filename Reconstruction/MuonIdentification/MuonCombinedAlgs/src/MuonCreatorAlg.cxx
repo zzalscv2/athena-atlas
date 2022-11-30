@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCreatorAlg.h"
@@ -173,7 +173,7 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
         auto muon_phi = Monitored::Collection("muon_phi", *(wh_muons.ptr()), &xAOD::Muon_v1::phi);
 
         std::vector<float> MDT_R, MDT_dR;
-        for( const auto &mu : *wh_muons ) {
+        for( const auto mu : *wh_muons ) {
             if (!(mu->muonType() == xAOD::Muon::CaloTagged || mu->muonType() == xAOD::Muon::SegmentTagged)) {
                 const Trk::Track* trk = mu->primaryTrackParticle()->track();
                 for (const Trk::TrackStateOnSurface* tsos : *trk->trackStateOnSurfaces()) {
