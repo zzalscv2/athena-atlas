@@ -118,13 +118,13 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
     if(m_decoratorMethod=="decorateTrack")
     {
         ATH_MSG_DEBUG("Using decorateTrack method ");
-        for(trackItr = trackTES->begin(); trackItr != trackItrE; trackItr++){
+        for(trackItr = trackTES->begin(); trackItr != trackItrE; ++trackItr){
         const xAOD::TrackParticle* itrk = (*trackItr);
         //first decorate the track with the InDetTrkInJetType method
         //find closest jet to the track in Delta R 
         float minDeltaR=1.0; 
         const xAOD::Jet* closestJet = *(jetTES->begin());
-        for(jetItr = jetTES->begin(); jetItr != jetItrE; jetItr++){
+        for(jetItr = jetTES->begin(); jetItr != jetItrE; ++jetItr){
           const xAOD::Jet* curJet = (*jetItr);
           float curDeltaR = (itrk)->p4().DeltaR(curJet->p4());
           if(curDeltaR < minDeltaR) {minDeltaR = curDeltaR; closestJet = curJet;}
@@ -133,7 +133,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
         }
       
        //loop over tracks and check if decoration was correctly added (using either decorateTrack)
-      for(trackItr = trackTES->begin(); trackItr != trackItrE; trackItr++){
+      for(trackItr = trackTES->begin(); trackItr != trackItrE; ++trackItr){
         const xAOD::TrackParticle* itrk = (*trackItr);
         std::vector<float> v_tctScoresDeco = trackReadDecorHandleTCTScore(*itrk);
         ElementLink<xAOD::JetContainer> v_jetLinks = trackReadDecorHandleJetLink(*itrk);
@@ -149,10 +149,10 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
     else if(m_decoratorMethod=="decorateJet")
     {
       ATH_MSG_DEBUG("Using decorateJets method ");
-      for(jetItr = jetTES->begin(); jetItr != jetItrE; jetItr++){
+      for(jetItr = jetTES->begin(); jetItr != jetItrE; ++jetItr){
         const xAOD::Jet* ijet = (*jetItr);
         std::vector<const xAOD::TrackParticle*> trkparticles(0);
-        for(trackItr = trackTES->begin(); trackItr != trackItrE; trackItr++){
+        for(trackItr = trackTES->begin(); trackItr != trackItrE; ++trackItr){
           const xAOD::TrackParticle* itrk = (*trackItr);
           if((itrk)->p4().DeltaR(ijet->p4()) < 0.4) {trkparticles.push_back(itrk); }
         }
@@ -160,7 +160,7 @@ TCTDecorCheckInTool::TCTDecorCheckInTool( const std::string& name,
       }
       
       //loop over jets and check if decoration was correctly added 
-      for(jetItr = jetTES->begin(); jetItr != jetItrE; jetItr++){
+      for(jetItr = jetTES->begin(); jetItr != jetItrE; ++jetItr){
         const xAOD::Jet* ijet = (*jetItr);
         std::vector<std::vector<float>> v_tctScoresDeco = jetReadDecorHandleTCTScore(*ijet);
         std::vector<ElementLink<xAOD::TrackParticleContainer>> v_trackLinks = jetReadDecorHandleTrackLink(*ijet);

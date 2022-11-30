@@ -1059,7 +1059,7 @@ void MdtRawDataValAlg::mdtchamberId() {
     IdContext mdtModuleContext = m_idHelperSvc->mdtIdHelper().module_context();
     Identifier Id;
     IdentifierHash Idhash;
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Id = *i;
         int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtModuleContext);
         m_chambersId.push_back(Id);

@@ -150,7 +150,7 @@ void ClassifiedTrackTaggerTool::decorateJets(const std::vector<const xAOD::Track
   xAOD::JetContainer::const_iterator jetItr  = jets.begin();
   xAOD::JetContainer::const_iterator jetItrE = jets.end();
 
-  for(jetItr  = jets.begin(); jetItr != jetItrE;  jetItr++) {
+  for(jetItr  = jets.begin(); jetItr != jetItrE;  ++jetItr) {
   /// this Jet
     const xAOD::Jet* curjet = ( *jetItr );
     ATH_MSG_DEBUG( " Jet  pt: " << curjet->pt()<<" eta: "<<curjet->eta()<<" phi: "<< curjet->phi() );

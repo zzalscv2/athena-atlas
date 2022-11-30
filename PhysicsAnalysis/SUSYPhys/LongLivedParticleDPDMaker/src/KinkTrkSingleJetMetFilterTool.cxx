@@ -121,7 +121,7 @@ bool DerivationFramework::KinkTrkSingleJetMetFilterTool::eventPassesFilter() con
   ATH_MSG_DEBUG("retrieved jet collection size "<< jetContainer->size());
 
   std::vector<const xAOD::Jet *> sortedJetContainer;
-  for(xAOD::JetContainer::const_iterator jet = jetContainer->begin(); jet!= jetContainer->end(); jet++){
+  for(xAOD::JetContainer::const_iterator jet = jetContainer->begin(); jet!= jetContainer->end(); ++jet){
     sortedJetContainer.push_back(*jet);
   }
 

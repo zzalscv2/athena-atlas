@@ -75,7 +75,7 @@ StatusCode RPVLLTestRates::execute() {
       for (unsigned int i=0; i< m_filterPassed.size(); ++i) m_filterPassed[i]=0;
       SkimDecisionCollection::const_iterator itr=SDcoll->begin(), itrEnd = SDcoll->end();
       int filterCount = 0;
-      for(; itr != itrEnd; itr++) {
+      for(; itr != itrEnd; ++itr) {
 	filterCount++;
 	std::string name = (*itr)->getName();
 	const char* cname = name.c_str();

@@ -108,7 +108,7 @@ CTTDecorCheckInTool::CTTDecorCheckInTool( const std::string& name,
     xAOD::JetContainer::const_iterator jetItr  = jetTES->begin();
     xAOD::JetContainer::const_iterator jetItrE = jetTES->end();
 
-    for(jetItr  = jetTES->begin(); jetItr != jetItrE;  jetItr++) {
+    for(jetItr  = jetTES->begin(); jetItr != jetItrE;  ++jetItr) {
      /// this Jet
       const xAOD::Jet* curjet = ( *jetItr );
       ATH_MSG_DEBUG( " Jet  pt: " << curjet->pt()<<" eta: "<<curjet->eta()<<" phi: "<< curjet->phi() );

@@ -63,7 +63,7 @@ namespace JiveXML {
       
       //Loop over the segments
       Trk::SegmentCollection::const_iterator SegmentItr;
-      for (SegmentItr=(*CollectionItr).begin(); SegmentItr!=(*CollectionItr).end(); SegmentItr++) {
+      for (SegmentItr=(*CollectionItr).begin(); SegmentItr!=(*CollectionItr).end(); ++SegmentItr) {
         
         //Retrive primite variabels
         x.push_back(DataType((*SegmentItr)->globalPosition().x()/10.));

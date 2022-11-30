@@ -268,7 +268,7 @@ StatusCode HGTD_DigitizationTool::digitizeHitsPerDetectorElement(const EventCont
     ///////////////// LOOP TO FILL A COLLECTION /////////////////
     // Loop over the hits on the selected detector element and created charged
     // diodes
-    for (; coll_itr != coll_itr_end; coll_itr++) {
+    for (; coll_itr != coll_itr_end; ++coll_itr) {
 
       const TimedHitPtr<SiHit> &current_hit = *coll_itr;
 
