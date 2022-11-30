@@ -8,9 +8,7 @@
 // STL includes
 #include <vector>
 
-#ifndef __FastCaloSimStandAlone__ 
-  #include "CxxUtils/checker_macros.h"  
-#endif
+#include "CxxUtils/checker_macros.h"  
 
 #include "ISF_FastCaloSimEvent/TFCSFunction.h"
 
