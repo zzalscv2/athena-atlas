@@ -9,7 +9,10 @@
 //                                                            //
 //  Author: Thomas H. Kittelmann (Thomas.Kittelmann@cern.ch)  //
 //  Initial version: July 2008                                //
-//                                                            //
+//
+//  Updates: 
+//  - 2022 Nov, Riccardo Maria BIANCHI - added numerical phi cuts
+//
 ////////////////////////////////////////////////////////////////
 
 #include "VP1Base/VP1EtaPhiCutWidget.h"

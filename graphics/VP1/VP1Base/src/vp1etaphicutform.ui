@@ -279,6 +279,43 @@
         </item>
        </layout>
       </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="checkBox_phiCuts">
+          <property name="text">
+           <string>Phi cuts:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="dsb_phiCuts_min">
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-6.283000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>6.283000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="dsb_phiCuts_max">
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="minimum">
+           <double>-6.283000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>6.283000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
      </layout>
     </widget>
    </item>
@@ -292,5 +329,38 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>checkBox_phiCuts</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>checkBox_cut_phi</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>73</x>
+     <y>229</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>59</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_cut_phi</sender>
+   <signal>stateChanged(int)</signal>
+   <receiver>checkBox_phiCuts</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>154</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>73</x>
+     <y>229</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
