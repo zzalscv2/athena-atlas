@@ -80,8 +80,11 @@ def fromRunArgs(runArgs):
         cfg.merge(ITkStripReadoutGeometryCfg(ConfigFlags))
 
     if ConfigFlags.Detector.EnableHGTD:
-        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
-        cfg.merge(HGTD_ReadoutGeometryCfg(ConfigFlags))
+        if ConfigFlags.HGTD.Geometry.useGeoModelXml:
+            from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+        else:
+            from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg    
+    cfg.merge(HGTD_ReadoutGeometryCfg(ConfigFlags))
 
     if ConfigFlags.Detector.EnableLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg

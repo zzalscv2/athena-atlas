@@ -484,7 +484,10 @@ def _getHGTD_TrackingGeometryBuilder(name, flags, result,
                                      envelopeDefinitionSvc, namePrefix='',
                                      nameSuffix='', setLayerAssociation=True):
     # for hgtd DetectorElement conditions data :
-    from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
     result.merge(HGTD_ReadoutGeometryCfg(flags))
 
     # layer builder for HGTD
