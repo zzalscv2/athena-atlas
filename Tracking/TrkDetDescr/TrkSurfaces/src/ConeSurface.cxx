@@ -94,6 +94,45 @@ Trk::ConeSurface::operator=(const ConeSurface& csf)
   return *this;
 }
 
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::ConeSurface::createUniqueTrackParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, ConeSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::ConeSurface::createUniqueTrackParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Charged, ConeSurface>>(
+      position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::ConeSurface::createUniqueNeutralParameters(
+    double l1, double l2, double phi, double theta, double qop,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, ConeSurface>>(
+      l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::ConeSurface::createUniqueNeutralParameters(
+    const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge,
+    std::optional<AmgSymMatrix(5)> cov) const {
+  return std::make_unique<ParametersT<5, Neutral, ConeSurface>>(
+    position, momentum, charge, *this, std::move(cov));
+}
+
 // TODO: is the 0 always the cone center?
 const Amg::Vector3D&
 Trk::ConeSurface::globalReferencePoint() const

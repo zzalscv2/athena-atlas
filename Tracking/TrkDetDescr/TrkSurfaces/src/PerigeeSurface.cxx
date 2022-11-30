@@ -46,7 +46,7 @@ Trk::PerigeeSurface::PerigeeSurface(const Amg::Transform3D& tTransform)
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__ ((flatten))
+[[gnu::flatten]]
 #endif
 Trk::PerigeeSurface::PerigeeSurface(const PerigeeSurface& pesf)
   : Surface(pesf)
@@ -94,6 +94,61 @@ Trk::PerigeeSurface::operator==(const Trk::Surface& sf) const
     return true;
   }
   return (center() == persf->center());
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * charged */
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::PerigeeSurface::createUniqueTrackParameters(
+  double l1,
+  double l2,
+  double phi,
+  double theta,
+  double qop,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Charged, PerigeeSurface>>(
+    l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * charged*/
+Trk::Surface::ChargedTrackParametersUniquePtr
+Trk::PerigeeSurface::createUniqueTrackParameters(
+  const Amg::Vector3D& position,
+  const Amg::Vector3D& momentum,
+  double charge,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Charged, PerigeeSurface>>(
+    position, momentum, charge, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from local parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::PerigeeSurface::createUniqueNeutralParameters(
+  double l1,
+  double l2,
+  double phi,
+  double theta,
+  double qop,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Neutral, PerigeeSurface>>(
+    l1, l2, phi, theta, qop, *this, std::move(cov));
+}
+
+/** Use the Surface as a ParametersBase constructor, from global parameters -
+ * neutral */
+Trk::Surface::NeutralTrackParametersUniquePtr
+Trk::PerigeeSurface::createUniqueNeutralParameters(
+  const Amg::Vector3D& position,
+  const Amg::Vector3D& momentum,
+  double charge,
+  std::optional<AmgSymMatrix(5)> cov) const
+{
+  return std::make_unique<ParametersT<5, Neutral, PerigeeSurface>>(
+    position, momentum, charge, *this, std::move(cov));
 }
 
 // simple local to global - from LocalParameters /

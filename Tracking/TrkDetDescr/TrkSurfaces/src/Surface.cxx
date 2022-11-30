@@ -34,7 +34,7 @@ Trk::Surface::Surface()
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__((flatten))
+[[gnu::flatten]]
 #endif
 Trk::Surface::Surface(const Amg::Transform3D& tform)
   : Trk::ObjectCounter<Trk::Surface>()
@@ -76,7 +76,7 @@ Trk::Surface::Surface(const Trk::TrkDetElementBase& detelement,
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__((flatten))
+[[gnu::flatten]]
 #endif
 // copy constructor - Attention! sets the associatedDetElement to 0 and the
 // identifier to invalid
@@ -97,7 +97,7 @@ Trk::Surface::Surface(const Surface& sf)
 // to out-of-line Eigen code that is linked from other DSOs; in that case,
 // it would not be optimized.  Avoid this by forcing all Eigen code
 // to be inlined here if possible.
-__attribute__((flatten))
+[[gnu::flatten]]
 #endif
 // copy constructor with shift - Attention! sets the associatedDetElement to 0
 // and the identifier to invalid also invalidates the material layer
