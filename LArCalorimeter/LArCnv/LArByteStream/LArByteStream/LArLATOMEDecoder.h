@@ -31,6 +31,9 @@
 #include <string>
 #include <fstream>
 #include "eformat/index.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
+
+using namespace OFFLINE_FRAGMENTS_NAMESPACE;
 
 
 /**
@@ -38,6 +41,8 @@
  *
  * This tool decodes LATOME data and outputs ADC values and BCIDs.
  */
+
+class LArOnline_SuperCellID;
 
 enum class MonDataType {
   RawADC=1,
@@ -204,6 +209,9 @@ private:
   Path m_detailDumpFileName;
   Path m_ADCDumpFileName;  
   bool m_protectSourceId;
+  bool m_ignoreBarrelChannels;
+  bool m_ignoreEndcapChannels;
+  const LArOnline_SuperCellID* m_onlineId;
   
   /** @brief Detail dump file*/
   std::ofstream* ATH_UNUSED_MEMBER(m_detailDumpFile) = nullptr;

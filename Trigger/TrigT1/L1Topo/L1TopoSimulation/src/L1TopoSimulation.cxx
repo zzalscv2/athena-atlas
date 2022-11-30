@@ -29,6 +29,7 @@
 
 // xAOD
 #include "xAODTrigger/L1TopoSimResults.h"
+#include "xAODTrigger/L1TopoSimResultsAuxContainer.h"
 
 using namespace LVL1;
 
@@ -154,11 +155,6 @@ StatusCode
 L1TopoSimulation::execute() {
    const EventContext& ctx = Gaudi::Hive::currentContext();
 
-   // prepare container
-   m_l1topoContainer = std::make_unique<xAOD::L1TopoSimResultsContainer> ();
-   m_l1topoAuxContainer = std::make_unique<xAOD::L1TopoSimResultsAuxContainer> ();
-   m_l1topoContainer->setStore(m_l1topoAuxContainer.get());
-
    if (m_prescale>1 && not m_scaler->decision(m_prescale)){
       ATH_MSG_DEBUG( "This event not processed due to prescale");
       return StatusCode::SUCCESS;
@@ -201,13 +197,13 @@ L1TopoSimulation::execute() {
    inputEvent.dump();
    
    if(m_fillHistogramsBasedOnHardwareDecision){
-       if(m_scaler->decision(m_prescaleForDAQROBAccess) and
-          retrieveHardwareDecision(m_isLegacyTopo, ctx)){
-           m_topoSteering->propagateHardwareBitsToAlgos();
-           m_topoSteering->setOutputAlgosSkipHistograms(false);
-       } else {
-           m_topoSteering->setOutputAlgosSkipHistograms(true);
-       }
+     if (retrieveHardwareDecision(m_isLegacyTopo, ctx).isSuccess()) {
+       m_topoSteering->propagateHardwareBitsToAlgos();
+       m_topoSteering->setOutputAlgosSkipHistograms(false);
+     }
+     if (!m_scaler->decision(m_prescaleForDAQROBAccess) and m_prescaleForDAQROBAccess>1) {
+       m_topoSteering->setOutputAlgosSkipHistograms(true);
+     }
    }
 
    // execute the toposteering
@@ -235,6 +231,11 @@ L1TopoSimulation::execute() {
    ATH_CHECK( detStore()->retrieve(l1menu) );
 
 
+   SG::WriteHandle<xAOD::L1TopoSimResultsContainer> outputHandle(m_isLegacyTopo ? m_legacyL1topoKey : m_l1topoKey, ctx);
+   ATH_MSG_DEBUG("  write: " << outputHandle.key() << " = " << "..." );
+   ATH_CHECK(outputHandle.record(std::make_unique<xAOD::L1TopoSimResultsContainer>(), std::make_unique<xAOD::L1TopoSimResultsAuxContainer>()));
+    
+   
    if( m_isLegacyTopo ) {
      // set electrical connectors 
      std::string conn1 = l1menu->board("LegacyTopo0").connectorNames()[0];
@@ -243,18 +244,14 @@ L1TopoSimulation::execute() {
        topoOutput2CTP->setCableWord0( clock, 0 ); // ALFA
        ATH_MSG_DEBUG("Word 1 " << conn1 << " clock " << clock << "  " << globalOutput.decision_field( conn1, clock) );
        topoOutput2CTP->setCableWord1( clock, globalOutput.decision_field( conn1, clock) );  // TOPO 0
-       WriteEDM(m_l1topoContainer,conn1,clock,globalOutput.decision_field( conn1, clock));
+       WriteEDM(outputHandle,conn1,clock,globalOutput.decision_field( conn1, clock));
        ATH_MSG_DEBUG("Word 2 " << conn2 << " clock " << clock << "  " << globalOutput.decision_field( conn2, clock) );
        topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) );  // TOPO 1
-       WriteEDM(m_l1topoContainer,conn2,clock,globalOutput.decision_field( conn2, clock));
+       WriteEDM(outputHandle,conn2,clock,globalOutput.decision_field( conn2, clock));
        // topoOverflow2CTP->setCableWord0( clock, 0 ); // ALFA
        // topoOverflow2CTP->setCableWord1( clock, dec.overflow( 0, clock) );  // TOPO 0
        // topoOverflow2CTP->setCableWord2( clock, dec.overflow( 1, clock) );  // TOPO 1
      }    
-
-     SG::WriteHandle<xAOD::L1TopoSimResultsContainer> outputHandle(m_legacyL1topoKey/*, ctx*/);
-     ATH_MSG_DEBUG("  write: " << outputHandle.key() << " = " << "..." );
-     ATH_CHECK(outputHandle.record(std::move(m_l1topoContainer),std::move(m_l1topoAuxContainer)));
     
      CHECK(SG::makeHandle(m_legacyTopoCTPLocation)        .record(std::move(topoOutput2CTP)));
      CHECK(SG::makeHandle(m_legacyTopoOverflowCTPLocation).record(std::move(topoOverflow2CTP)));
@@ -266,10 +263,10 @@ L1TopoSimulation::execute() {
      for(unsigned int clock=0; clock<2; ++clock) {
        ATH_MSG_DEBUG("Word 1 " << conn1 << " clock " << clock << "  " << globalOutput.decision_field( conn1, clock) );
        topoOutput2CTP->setCableWord1( clock, globalOutput.decision_field( conn1, clock) );  // TOPO 0
-       WriteEDM(m_l1topoContainer,conn1,clock,globalOutput.decision_field( conn1, clock));
+       WriteEDM(outputHandle,conn1,clock,globalOutput.decision_field( conn1, clock));
        ATH_MSG_DEBUG("Word 2 " << conn2 << " clock " << clock << "  " << globalOutput.decision_field( conn2, clock) );
        topoOutput2CTP->setCableWord2( clock, globalOutput.decision_field( conn2, clock) );  // TOPO 1
-       WriteEDM(m_l1topoContainer,conn2,clock,globalOutput.decision_field( conn2, clock));
+       WriteEDM(outputHandle,conn2,clock,globalOutput.decision_field( conn2, clock));
        // topoOverflow2CTP->setCableWord0( clock, 0 ); // ALFA
        // topoOverflow2CTP->setCableWord1( clock, dec.overflow( 0, clock) );  // TOPO 0
        // topoOverflow2CTP->setCableWord2( clock, dec.overflow( 1, clock) );  // TOPO 1
@@ -281,13 +278,9 @@ L1TopoSimulation::execute() {
        std::bitset<64> outputOpt_1(outputOpt.to_string());
        std::bitset<64> outputOpt_2((outputOpt<<64).to_string());
        topoOutput2CTP->setOptCableWord( connOpt, outputOpt );
-       WriteEDM(m_l1topoContainer,connOpt,1,outputOpt_1.to_ulong());
-       WriteEDM(m_l1topoContainer,connOpt,0,outputOpt_2.to_ulong());
+       WriteEDM(outputHandle,connOpt,1,outputOpt_1.to_ulong());
+       WriteEDM(outputHandle,connOpt,0,outputOpt_2.to_ulong());
      }
-     
-     SG::WriteHandle<xAOD::L1TopoSimResultsContainer> outputHandle(m_l1topoKey/*, ctx*/);
-     ATH_MSG_DEBUG("  write: " << outputHandle.key() << " = " << "..." );
-     ATH_CHECK(outputHandle.record(std::move(m_l1topoContainer),std::move(m_l1topoAuxContainer)));
     
      CHECK(SG::makeHandle(m_topoCTPLocation)        .record(std::move(topoOutput2CTP)));
      CHECK(SG::makeHandle(m_topoOverflowCTPLocation).record(std::move(topoOverflow2CTP)));
@@ -304,29 +297,27 @@ L1TopoSimulation::finalize() {
 }
 
 void
-L1TopoSimulation::WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &container, const std::string &name, unsigned int clock, uint32_t word) {
+L1TopoSimulation::WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint32_t word) {
 
-  xAOD::L1TopoSimResults *l1topo_dec = new xAOD::L1TopoSimResults();
-  container->push_back(l1topo_dec);
-  l1topo_dec->setConnectionId(TCS::outputType(name));
-  l1topo_dec->setClock(clock);
-  l1topo_dec->setBitWidth(32);
-  l1topo_dec->setTopoWord(word);
+  handle->push_back(std::make_unique<xAOD::L1TopoSimResults>());
+  handle->back()->setConnectionId(TCS::outputType(name));
+  handle->back()->setClock(clock);
+  handle->back()->setBitWidth(32);
+  handle->back()->setTopoWord(word);
 
-  ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << l1topo_dec->connectionId() << " Clock: " << l1topo_dec->clock() << " Decision: " << l1topo_dec->topoWord() );
+  ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << handle->back()->connectionId() << " Clock: " << handle->back()->clock() << " Decision: " << handle->back()->topoWord() );
 }
 
 void
-L1TopoSimulation::WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &container, const std::string &name, unsigned int clock, uint64_t word) {
+L1TopoSimulation::WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint64_t word) {
   
-  xAOD::L1TopoSimResults *l1topo_dec = new xAOD::L1TopoSimResults();
-  container->push_back(l1topo_dec);
-  l1topo_dec->setConnectionId(TCS::outputType(name));
-  l1topo_dec->setClock(clock);
-  l1topo_dec->setBitWidth(64);
-  l1topo_dec->setTopoWord64(word);
+  handle->push_back(std::make_unique<xAOD::L1TopoSimResults>());
+  handle->back()->setConnectionId(TCS::outputType(name));
+  handle->back()->setClock(clock);
+  handle->back()->setBitWidth(64);
+  handle->back()->setTopoWord64(word);
 
-  ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << l1topo_dec->connectionId() << " Clock: " << l1topo_dec->clock() << " Decision: " << l1topo_dec->topoWord() );
+  ATH_MSG_DEBUG( "L1Topo EDM:: Connection Id: " << handle->back()->connectionId() << " Clock: " << handle->back()->clock() << " Decision: " << handle->back()->topoWord() );
 }
 
 StatusCode
@@ -415,6 +406,10 @@ L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
   for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
     const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
     size_t nWords = dataWords.size();
+    if (nWords!=50) {
+      ATH_MSG_WARNING("Expected data word container size is 50, but found " << nWords);
+      return StatusCode::FAILURE;
+    }
     uint32_t rodTrailer2 = dataWords[--nWords];
     uint32_t rodTrailer1 = dataWords[--nWords];
 
@@ -441,8 +436,8 @@ L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
 	    uint32_t topo = l1topoFPGA->topoNumber();
 	    uint32_t fpga = l1topoFPGA->fpgaNumber();
 	    unsigned int index = L1Topo::triggerBitIndexPhase1(topo, fpga, iBit);
-	    hardwareDaqRobTriggerBits[index] = (overflowWord>>iBit)&1;
-	    hardwareDaqRobOvrflowBits[index] = (triggerWord>>iBit)&1;
+	    hardwareDaqRobTriggerBits[index] = (triggerWord>>iBit)&1;
+	    hardwareDaqRobOvrflowBits[index] = (overflowWord>>iBit)&1;
 	  }
 	  ATH_MSG_DEBUG("trigger word: " << std::hex << std::showbase << triggerWord << std::dec);
 	  ATH_MSG_DEBUG("overflow word: " << std::hex << std::showbase << overflowWord << std::dec);

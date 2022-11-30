@@ -402,9 +402,11 @@ def computeCorrelations(inputs):
     #check that the inputs are ok    
     assert len(inputs)==2 , len(inputs)
     
-    assert ((inputs[0][0]['name']=='average' and inputs[1][0]['name']=='partialSum') or (inputs[1][0]['name']=='average' and inputs[0][0]['name']=='partialSum')) , "Wrong inputs"
+    #assert ((inputs[0][0]['name']=='average' and inputs[1][0]['name']=='partialSum') or (inputs[1][0]['name']=='average' and inputs[0][0]['name']=='partialSum')) , "Wrong inputs"
+    assert ((inputs[0][0]['name']=='av' and inputs[1][0]['name']=='sum') or (inputs[1][0]['name']=='av' and inputs[0][0]['name']=='sum')) , "Wrong inputs"
 
-    if inputs[1][0]['name']=='partialSum':
+    #if inputs[1][0]['name']=='partialSum':
+    if inputs[1][0]['name']=='sum':
         i_parSum=1
         i_av=0
     else:

@@ -265,6 +265,7 @@ setModifiers = ['noLArCalibFolders',
                 'enableCostMonitoring',
                 'useOracle',
                 'BunchSpacing25ns',
+                'disableInDetDCS',
 ]
 
 if ConfigFlags.Input.isMC:  # MC modifiers

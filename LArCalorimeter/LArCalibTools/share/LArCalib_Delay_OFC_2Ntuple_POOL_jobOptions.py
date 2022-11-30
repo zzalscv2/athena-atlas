@@ -15,35 +15,38 @@
 CWOFC2NtupleLog = logging.getLogger( "CWOFC2NtupleLog" )
 
 if not 'PoolFileName' in dir():
-	CWOFC2NtupleLog.fatal("Please setup the input POOL file ('PoolFileName')!")
-	theApp.exit(-1)
+        CWOFC2NtupleLog.fatal("Please setup the input POOL file ('PoolFileName')!")
+        theApp.exit(-1)
 
 if not 'WaveType' in dir():
-	WaveType = "Cali" # (Cali, Phys)
+        WaveType = "Cali" # (Cali, Phys)
 
 if not 'ContainerKey' in dir():
-	if (WaveType == "Cali"):
-		ContainerKey = "LArCaliWave"
-	if (WaveType == "Phys"):
-		ContainerKey = "LArPhysWave"
+        if (WaveType == "Cali"):
+                ContainerKey = "LArCaliWave"
+        if (WaveType == "Phys"):
+                ContainerKey = "LArPhysWave"
 
 if not 'DACSaturSkip' in dir():
-	DACSaturSkip = False
+        DACSaturSkip = False
 
 if not 'SaveDerivedInfo' in dir():
-	SaveDerivedInfo = True
+        SaveDerivedInfo = True
 
 if not 'SaveJitter' in dir():
-	SaveJitter = True
+        SaveJitter = True
 
 if not 'CaliWaveRootFileName' in dir():
-	CaliWaveRootFileName = "LArWaves2Ntuple_POOL.root"
+        CaliWaveRootFileName = "LArWaves2Ntuple_POOL.root"
 
 if not 'OFCRootFileName' in dir():
-	OFCRootFileName = "LArWaves2Ntuple_POOL.root"
+        OFCRootFileName = "LArWaves2Ntuple_POOL.root"
 
 if not 'RunNumber' in dir():
         RunNumber = 393960
+
+if not 'SuperCells' in dir():
+        SuperCells = False
 
 ###########################################################################
 
@@ -51,10 +54,26 @@ include("LArCalibProcessing/LArCalib_Flags.py")
 
 include("LArCalibProcessing/LArCalib_MinimalSetup.py")
 
+from LArCabling.LArCablingAccess import LArOnOffIdMapping
+LArOnOffIdMapping()
+
+if SuperCells:
+   from LArCabling.LArCablingAccess import LArOnOffIdMappingSC,LArCalibIdMappingSC,LArLATOMEMappingSC
+   LArOnOffIdMappingSC()
+   LArCalibIdMappingSC()
+   LArLATOMEMappingSC()
 
 ## get a handle to the default top-level algorithm sequence
 from AthenaCommon.AlgSequence import AlgSequence 
 topSequence = AlgSequence()
+
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
+
+#from LArAlignmentAlgs.LArAlignmentAlgsConf import LArAlignCondAlg
+#condSeq += LArAlignCondAlg("LArAlignCondAlg")
+#from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloAlignCondAlg
+#condSeq += CaloAlignCondAlg("CaloAlignCondAlg")
 
 ## get a handle to the ApplicationManager, to the ServiceManager and to the ToolSvc
 from AthenaCommon.AppMgr import (theApp, ServiceMgr as svcMgr,ToolSvc)
@@ -75,6 +94,12 @@ svcMgr.IOVDbSvc.forceRunNumber=RunNumber
 from IOVDbSvc.CondDB import conddb
 PoolFileList     = []
 
+# Temperature folder
+#conddb.addFolder("DCS_OFL","/LAR/DCS/FEBTEMP")
+
+#conddb.addFolder("LAR_ONL","/LAR/Align",className="DetCondKeyTrans")
+#conddb.addFolder("LAR_ONL","/LAR/LArCellPositionShift",className="CaloRec::CaloCellPositionShift")
+
 if 'InputBadChannelSQLiteFile' in dir():
    from string import *
    InputDBConnectionBadChannel = "sqlite://;schema="+InputBadChannelSQLiteFile+";dbname=CONDBR2"
@@ -82,12 +107,16 @@ else:
    InputDBConnectionBadChannel = DBConnectionCOOL
 
 if ( not 'InputBadChannelSQLiteFile' in dir()) and ("ONL" in DBConnectionCOOL):
-   BadChannelsFolder="/LAR/BadChannels/BadChannels"
+   if 'BadChannelsFolder' not in dir():
+      BadChannelsFolder="/LAR/BadChannels/BadChannels"
+   conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    MissingFEBsFolder="/LAR/BadChannels/MissingFEBs"
    conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    conddb.addFolder("",MissingFEBsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="AthenaAttributeList")
 else:   
-   BadChannelsFolder="/LAR/BadChannelsOfl/BadChannels"
+   if 'BadChannelsFolder' not in dir():
+      BadChannelsFolder="/LAR/BadChannelsOfl/BadChannels"
+   conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    MissingFEBsFolder="/LAR/BadChannelsOfl/MissingFEBs"
    conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    conddb.addFolder("",MissingFEBsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="AthenaAttributeList")
@@ -109,37 +138,57 @@ svcMgr += getConfigurable( "CondProxyProvider" )()
 svcMgr.CondProxyProvider.InputCollections += [ PoolFileName ]
 
 if ( WaveType == "Cali" ):
-	
-	from LArCalibTools.LArCalibToolsConf import LArCaliWaves2Ntuple
-	LArCaliWaves2Ntuple = LArCaliWaves2Ntuple( "LArCaliWaves2Ntuple" )
-	LArCaliWaves2Ntuple.NtupleName   = "CALIWAVE"
-	LArCaliWaves2Ntuple.KeyList      = [ ContainerKey ]
-	LArCaliWaves2Ntuple.DACSaturSkip = DACSaturSkip
-	LArCaliWaves2Ntuple.SaveDerivedInfo = SaveDerivedInfo
-	LArCaliWaves2Ntuple.SaveJitter      = SaveJitter
-	LArCaliWaves2Ntuple.AddFEBTempInfo  = False
-	LArCaliWaves2Ntuple.OutputLevel = INFO
-	LArCaliWaves2Ntuple.NtupleFile = "FILE1"
+        
+        from LArCalibTools.LArCalibToolsConf import LArCaliWaves2Ntuple
+        LArCaliWaves2Ntuple = LArCaliWaves2Ntuple( "LArCaliWaves2Ntuple" )
+        LArCaliWaves2Ntuple.NtupleName   = "CALIWAVE"
+        LArCaliWaves2Ntuple.KeyList      = [ ContainerKey ]
+        LArCaliWaves2Ntuple.DACSaturSkip = DACSaturSkip
+        LArCaliWaves2Ntuple.SaveDerivedInfo = SaveDerivedInfo
+        LArCaliWaves2Ntuple.SaveJitter      = SaveJitter
+        LArCaliWaves2Ntuple.AddFEBTempInfo  = False
+        LArCaliWaves2Ntuple.RealGeometry =  False
+        LArCaliWaves2Ntuple.OffId = True
+        LArCaliWaves2Ntuple.AddCalib = True
+        LArCaliWaves2Ntuple.OutputLevel = INFO
+        LArCaliWaves2Ntuple.isSC  = SuperCells 
+        LArCaliWaves2Ntuple.NtupleFile = "FILE1"
+        #if SuperCells:
+        #   LArCaliWaves2Ntuple.CalibMapKey = "LArCalibIdMapSC"
+        #   from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
+        #   condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg")
+        #   LArCaliWaves2Ntuple.ExtraInputs += (('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
 
-	topSequence += LArCaliWaves2Ntuple
+        topSequence += LArCaliWaves2Ntuple
 
 
 if ( WaveType == "Phys" ):
-	from LArCalibTools.LArCalibToolsConf import LArPhysWaves2Ntuple
-	LArPhysWaves2Ntuple = LArPhysWaves2Ntuple( "LArPhysWaves2Ntuple" )
-	LArPhysWaves2Ntuple.NtupleName   = "PHYSWAVE" 
-	LArPhysWaves2Ntuple.KeyList      = [ ContainerKey ]
-	LArPhysWaves2Ntuple.SaveDerivedInfo = SaveDerivedInfo
-	LArPhysWaves2Ntuple.AddFEBTempInfo  = False
-	LArPhysWaves2Ntuple.OutputLevel = INFO
-	LArPhysWaves2Ntuple.NtupleFile = "FILE1"
+        from LArCalibTools.LArCalibToolsConf import LArPhysWaves2Ntuple
+        LArPhysWaves2Ntuple = LArPhysWaves2Ntuple( "LArPhysWaves2Ntuple" )
+        LArPhysWaves2Ntuple.NtupleName   = "PHYSWAVE" 
+        LArPhysWaves2Ntuple.KeyList      = [ ContainerKey ]
+        LArPhysWaves2Ntuple.SaveDerivedInfo = SaveDerivedInfo
+        LArPhysWaves2Ntuple.AddFEBTempInfo  = False
+        LArPhysWaves2Ntuple.OutputLevel = INFO
+        LArPhysWaves2Ntuple.isSC  = SuperCells 
+        LArPhysWaves2Ntuple.RealGeometry =  False
+        LArPhysWaves2Ntuple.OffId = True
+        LArPhysWaves2Ntuple.AddCalib = True
+        LArPhysWaves2Ntuple.NtupleFile = "FILE1"
+        #if SuperCells:
+        #   LArPhysWaves2Ntuple.CalibMapKey = "LArCalibIdMapSC"
+        #   from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
+        #   condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg")
+        #   LArPhysWaves2Ntuple.ExtraInputs += (('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
 
-	topSequence += LArPhysWaves2Ntuple
+
+        topSequence += LArPhysWaves2Ntuple
 
 from LArCalibTools.LArCalibToolsConf import LArOFC2Ntuple
 LArOFC2Ntuple = LArOFC2Ntuple( "LArOFC2Ntuple" )
 LArOFC2Ntuple.OutputLevel = INFO
 LArOFC2Ntuple.NtupleFile = "FILE2"
+LArOFC2Ntuple.isSC = SuperCells 
 topSequence += LArOFC2Ntuple
 
 theApp.HistogramPersistency = "ROOT"

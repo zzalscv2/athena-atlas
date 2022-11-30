@@ -52,6 +52,14 @@ class BunchSpacing25ns(_modifier):
         from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
         InDetTrigFlags.InDet25nsec.set_Value_and_Lock(True)
 
+class disableInDetDCS(_modifier):
+    """
+    disable access to DCS state info which is in general not available 
+    """
+
+    def preSetup(self, flags):
+        flags.InDet.useDCS = False
+
 class BunchSpacing50ns(_modifier):
     """
     ID (and other settings) related to 50ns bunch spacing

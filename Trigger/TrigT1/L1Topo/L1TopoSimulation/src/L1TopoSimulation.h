@@ -16,7 +16,6 @@
 #include "TrigT1Interfaces/FrontPanelCTP.h"
 
 #include "xAODTrigger/L1TopoSimResultsContainer.h"
-#include "xAODTrigger/L1TopoSimResultsAuxContainer.h"
 #include "xAODTrigL1Calo/L1TopoRawDataContainer.h"
 
 #include "CxxUtils/checker_macros.h"
@@ -58,14 +57,11 @@ namespace LVL1 {
       StatusCode hardwareDecisionPhase1(const EventContext& ctx);
       StatusCode hardwareDecisionLegacy();
      
-      void WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &container, const std::string &name, unsigned int clock, uint32_t word);
-      void WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &container, const std::string &name, unsigned int clock, uint64_t word);
+      void WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint32_t word);
+      void WriteEDM(SG::WriteHandle<xAOD::L1TopoSimResultsContainer> &handle, const std::string &name, unsigned int clock, uint64_t word);
 
       std::unique_ptr<TCS::TopoSteering>  m_topoSteering; //!< the topo steering
       std::unique_ptr<LVL1::PeriodicScaler> m_scaler {nullptr}; //! prescale decision tool
-
-      std::unique_ptr< xAOD::L1TopoSimResultsContainer > m_l1topoContainer;
-      std::unique_ptr< xAOD::L1TopoSimResultsAuxContainer > m_l1topoAuxContainer;
 
      // Services and input tools
       ServiceHandle<ITHistSvc> m_histSvc { this, "HistSvc", "THistSvc/THistSvc", "Histogramming service for L1Topo algorithms" };

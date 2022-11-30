@@ -460,13 +460,28 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
           self.zVertexResolution = 1
 
         if not config.doZFinderOnly:
-
-          from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigFastTrackSummaryTool
-          self.TrackSummaryTool = InDetTrigFastTrackSummaryTool
-
+          from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+          from AthenaConfiguration.AllConfigFlags import ConfigFlags
+          flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
+          
+          from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg, InDetTrigFastTrackSummaryToolCfg
           if config.holeSearch_FTF :
-              from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTrackSummaryToolWithHoleSearch
-              self.TrackSummaryTool = InDetTrigTrackSummaryToolWithHoleSearch
+            kwargs = {}
+            kwargs['name'] = 'InDetTrigTrackSummaryTool'
+            ca = CAtoGlobalWrapper(InDetTrigTrackSummaryToolCfg,flags,**kwargs)
+            TST = ca.popPrivateTools()
+          else:
+            kwargs = {}
+            kwargs['name'] = 'InDetTrigFastTrackSummaryTool'
+            ca = CAtoGlobalWrapper(InDetTrigFastTrackSummaryToolCfg,flags,**kwargs)
+            TST = ca.popPrivateTools()
+
+          from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+          tracksummarytool = conf2toConfigurable(TST)
+
+          from AthenaCommon.AppMgr import ToolSvc
+          ToolSvc += tracksummarytool
+          self.TrackSummaryTool = tracksummarytool
 
           self.doCloneRemoval = config.doCloneRemoval
           self.TracksName     = config.trkTracks_FTF()

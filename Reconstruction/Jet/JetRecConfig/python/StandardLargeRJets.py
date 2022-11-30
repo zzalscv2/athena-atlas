@@ -95,7 +95,7 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
-                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000","JetGhostLabel")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD,
+                                      modifiers = ("JetGhostLabel",)+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD,
                                       Beta = 1., ZCut= 0.1,
                                      )
 

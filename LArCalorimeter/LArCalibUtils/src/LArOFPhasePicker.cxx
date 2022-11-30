@@ -79,7 +79,7 @@ StatusCode LArOFPhasePicker::initialize()
       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
     }
   }
-
+  
   return StatusCode::SUCCESS;
 }
 
@@ -94,19 +94,19 @@ StatusCode LArOFPhasePicker::stop() {
 
   ATH_MSG_DEBUG(" In stop() ");
 
-  m_inputPhase=NULL;
   if (m_keyPhase.size()) {
     StatusCode sc=detStore()->retrieve(m_inputPhase,m_keyPhase);
     if (sc.isFailure()) {
       ATH_MSG_ERROR( "Failed to get input OFC phase with key " << m_keyPhase );
       ATH_MSG_ERROR( "Will use default phase !!" );
       m_inputPhase=NULL;
+    } else {
+      ATH_MSG_INFO( "Got OFC phase with key " << m_keyPhase );
     }
   }
   else {
     ATH_MSG_INFO( "No StoreGate key for OFC bin given. Will use default phase=" << m_defaultPhase );
   }
-
 
   if (m_doOFC) {
     ATH_CHECK(pickOFC());
@@ -150,11 +150,13 @@ StatusCode LArOFPhasePicker::pickOFC() {
 	ATH_MSG_DEBUG("Got empty OFC object for channel " << m_onlineID->channel_name(id) << " (disconnected?)");
 	continue;
       }
+      ATH_MSG_VERBOSE("nPhases=" << nPhases);
       count++;
       std::size_t phase=std::min(m_defaultPhase,nPhases-1);
 
       if(m_inputPhase) {
 	 const int p = m_inputPhase->bin(id, gain);
+        ATH_MSG_VERBOSE("OFC picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) <<", p=" << p);
 	 if (p>0 && p<nPhases) phase=p;
        }
       ATH_MSG_VERBOSE("OFC picking, gain=" << gain << ", channel "  << m_onlineID->channel_name(id) <<", phase=" << phase);

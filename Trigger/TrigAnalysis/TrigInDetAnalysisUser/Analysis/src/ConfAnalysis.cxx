@@ -1588,15 +1588,23 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
 
 
       /// fill them all the resplots from a loop ...
-      double resfiller[8] = { ipTt, pTt, etat, z0t, double(NvtxCount), double(Nvtxtracks), phit, mu_val };
+      double resfiller[8] = { std::fabs(ipTt), std::fabs(pTt), etat, z0t, double(NvtxCount), double(Nvtxtracks), phit, mu_val };
       
+      double Delta_ipt =  1.0/pTr - 1.0/pTt;
+      double Delta_pt  =  pTr - pTt;
+
+      if ( pTt<0 ) { 
+	Delta_ipt *= -1;
+	Delta_pt  *= -1;
+      }
+
       for ( int irfill=0 ; irfill<8 ; irfill++ ) { 
         retares[irfill]->Fill( resfiller[irfill],  etar-etat );
         rphires[irfill]->Fill( resfiller[irfill],  phir-phit );
         rzedres[irfill]->Fill( resfiller[irfill],  z0r-z0t );
         rzedthetares[irfill]->Fill( resfiller[irfill],  z0r*std::sin(thetar)-z0t*std::sin(thetat) );
-        riptres[irfill]->Fill( resfiller[irfill],  1/pTr-1/pTt );
-        rptres[irfill]->Fill(  resfiller[irfill],  pTr-pTt );
+        riptres[irfill]->Fill( resfiller[irfill],  Delta_ipt );
+        rptres[irfill]->Fill(  resfiller[irfill], Delta_pt );
         rd0res[irfill]->Fill(  resfiller[irfill],  a0r-a0t );
       }
       
@@ -1609,7 +1617,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       for ( int irfill=0 ; irfill<6 ; irfill++ ) { 
         rphiresPull[irfill]->Fill( resfiller[irfill], (phir - phit) / sqrt( (dphit*dphit) + (dphir*dphir) ) );
         retaresPull[irfill]->Fill( resfiller[irfill], (etar - etat) / sqrt( (detat*detat) + (detar*detar) ) );
-        rptresPull[irfill]->Fill(  resfiller[irfill], (pTr - pTt) / sqrt( (dpTt*dpTt) + (dpTr*dpTr) ) );
+        rptresPull[irfill]->Fill(  resfiller[irfill], Delta_pt / sqrt( (dpTt*dpTt) + (dpTr*dpTr) ) );
         rzedresPull[irfill]->Fill( resfiller[irfill], (z0r - z0t) / sqrt( (dz0t*dz0t) + (dz0r*dz0r) ) );
         rd0resPull[irfill]->Fill(  resfiller[irfill], (a0r - a0t) / sqrt( (da0t*da0t) + (da0r*da0r) ) );	
       }
@@ -1706,13 +1714,9 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       eff_vs_nvtx->Fill( NvtxCount );
       n_vtx->Fill( NvtxCount );
 
-      //std::cout << "<mu>\t" <<  mu_val << std::endl;
       eff_vs_mu->Fill( mu_val );
 
-      //    hnpix_v_sct->Fill( nsctt*0.5, npixt*0.5 );
-
-
-      double vres[6] = { 1.0/std::fabs(pTr)-1.0/std::fabs(pTt), etar-etat, phir-phit, z0r-z0t, d0r-d0t, a0r-a0t };
+      double vres[6] = { Delta_ipt, etar-etat, phir-phit, z0r-z0t, d0r-d0t, a0r-a0t };
       for ( int it=0 ; it<6 ; it++ ) { 
 	if ( it==0 ) { 
 	  find("ipT_res")->Fill( vres[0] ); 
@@ -1802,7 +1806,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
  
 
       // pull stats                                                                                                                                               
-      double pull_pt  = (pTr - pTt) / std::sqrt( (dpTt*dpTt) + (dpTr*dpTr) );
+      double pull_pt  = Delta_pt / std::sqrt( (dpTt*dpTt) + (dpTr*dpTr) );
       double pull_eta = (etar - etat) / std::sqrt( (detat*detat) + (detar*detar) );
       double pull_phi = (phir - phit) / std::sqrt( (dphit*dphit) + (dphir*dphir) );
       double pull_z0  = (z0r - z0t) / std::sqrt( (dz0t*dz0t) + (dz0r*dz0r) );
@@ -1817,7 +1821,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       if ( TH1F* hptr = find("a0_pull")) hptr->Fill(pull_a0);
 
       // pull stats - SIMPLE VERSION                                                                                                                             
-      double pull_pt_simp  = (pTr - pTt) / sqrt( dpTr*dpTr );
+      double pull_pt_simp  = Delta_pt / sqrt( dpTr*dpTr );
       double pull_eta_simp = (etar - etat) / sqrt( detar*detar );
       double pull_phi_simp = (phir - phit) / sqrt( dphir*dphir );
       double pull_z0_simp  = (z0r - z0t) / sqrt( dz0r*dz0r );
@@ -1846,7 +1850,7 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       hDeltaR->Fill(DeltaR);
 
       mdeltaR_v_eta->Fill(etat, DeltaR);
-      mdeltaR_v_pt->Fill(pTt, DeltaR);
+      mdeltaR_v_pt->Fill(std::fabs(pTt), DeltaR);
 
       // in this loop over the reference tracks, could fill efficiency 
       // histograms
@@ -1858,9 +1862,9 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       /// matched track distributions
 
 
-      rChi2prob_rec->Fill( pTr, TMath::Prob(matchedreco->chi2(),matchedreco->dof()) ); 
-      rChi2_rec->Fill( pTr, matchedreco->chi2() ); 
-      rChi2dof_rec->Fill( pTr, matchedreco->chi2()/matchedreco->dof() );
+      rChi2prob_rec->Fill( std::fabs(pTr), TMath::Prob(matchedreco->chi2(),matchedreco->dof()) ); 
+      rChi2_rec->Fill( std::fabs(pTr), matchedreco->chi2() ); 
+      rChi2dof_rec->Fill( std::fabs(pTr), matchedreco->chi2()/matchedreco->dof() );
 
       rChi2d_vs_Chi2d->Fill( reftracks[i]->chi2()/reftracks[i]->dof(),
 			     matchedreco->chi2()/matchedreco->dof() );
@@ -1877,9 +1881,9 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
       rnsct_pt_bad->Fill( std::fabs(pTt), nsctt*1.0 );
       rntrt_pt_bad->Fill( std::fabs(pTt), nstrawt*1.0 );
       
-      rChi2prob_bad->Fill( pTt, TMath::Prob(reftracks[i]->chi2(),reftracks[i]->dof()) ); 
-      rChi2_bad->Fill( pTt, reftracks[i]->chi2() ); 
-      rChi2dof_bad->Fill( pTt, reftracks[i]->chi2()/reftracks[i]->dof() );
+      rChi2prob_bad->Fill( std::fabs(pTt), TMath::Prob(reftracks[i]->chi2(),reftracks[i]->dof()) ); 
+      rChi2_bad->Fill( std::fabs(pTt), reftracks[i]->chi2() ); 
+      rChi2dof_bad->Fill( std::fabs(pTt), reftracks[i]->chi2()/reftracks[i]->dof() );
       
 
       // fill efficiencies with unmatched histos
@@ -2022,7 +2026,8 @@ void ConfAnalysis::execute( const std::vector<TIDA::Track*>& reftracks,
     //    double ts_scale = (ts-1260400000)*3000.0/(1260700000-1260400000); 
 
     //    z_vs_lb->Fill( rmap[r]+lb, z0r );
-    z_vs_lb->Fill( ts, z0r );
+    //    z_vs_lb->Fill( ts, z0r );
+    z_vs_lb->Fill( gevent->lumi_block(), z0r );
 
     //    hnpix_v_sct_rec->Fill( nsctr*0.5, npixr*1.0 );
 

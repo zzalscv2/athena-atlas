@@ -157,7 +157,11 @@ LArBadChannelDecoder::constructStatus( const std::vector<std::string>& vec, MsgS
 {
   LArBadChannel result;
   for(std::vector<std::string>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
-    bool ok = m_packing.setBit( *it, result);
+    bool ok = false;
+    if(m_isSC)
+       ok = m_SCpacking.setBit( *it, result);
+    else
+       ok = m_packing.setBit( *it, result);
     if (!ok) { 
       log << MSG::WARNING << "LArBadChannelDecoder REJECTED line with " 
 	  << ":\t unrecognized problem status: " << *it << endmsg;

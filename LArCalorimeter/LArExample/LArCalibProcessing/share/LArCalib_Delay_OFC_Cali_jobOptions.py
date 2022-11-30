@@ -27,6 +27,12 @@ if "SuperCells" not in dir():
 if 'SC_SampleShift' not in dir():
    SC_SampleShift=0
    
+if not 'SCIgnoreBarrelChannels' in dir():
+   SCIgnoreBarrelChannels=False
+
+if not 'SCIgnoreEndcapChannels' in dir():
+   SCIgnoreEndcapChannels=False
+
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
@@ -448,6 +454,9 @@ if ( runAccumulator ) :
       larRawSCDataReadingAlg.etCollKey = ""
       larRawSCDataReadingAlg.etIdCollKey = ""
       larRawSCDataReadingAlg.LATOMEDecoder = theLArLATOMEDecoder
+      larRawSCDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
+      larRawSCDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
+
       topSequence += larRawSCDataReadingAlg
 
    else:
@@ -536,6 +545,8 @@ if 'MissingFEBsFolder' in dir():
    
 from LArBadChannelTool.LArBadChannelToolConf import LArBadChannelCondAlg, LArBadFebCondAlg
 theLArBadChannelCondAlg=LArBadChannelCondAlg(ReadKey=BadChannelsFolder)
+if SuperCells:
+   theLArBadChannelCondAlg.isSC=True
 condSeq+=theLArBadChannelCondAlg
 
 theLArBadFebCondAlg=LArBadFebCondAlg(ReadKey=MissingFEBsFolder)
@@ -581,7 +592,12 @@ if ( doLArCalibDataQuality  ) :
    if StripsXtalkCorr:
       conddb.addFolder("",LArCalib_Flags.LArCaliWaveFolderXtlk+"<key>LArCaliWaveRef</key><dbConnection>"+DBConnectionCOOL+"</dbConnection>"+ChannelSelection)
    else:
-      conddb.addFolder("",LArCalib_Flags.LArCaliWaveFolder+"<key>LArCaliWaveRef</key><dbConnection>"+DBConnectionCOOL+"</dbConnection>"+ChannelSelection)
+      #conddb.addFolder("",LArCalib_Flags.LArCaliWaveFolder+"<key>LArCaliWaveRef</key><dbConnection>"+DBConnectionCOOL+"</dbConnection>"+ChannelSelection)
+      #FIXME once the calib. constants for SC will be in the oracle
+      if not SuperCells:
+         conddb.addFolder("",LArCalib_Flags.LArCaliWaveFolder+"<key>LArCaliWaveRef</key><dbConnection>"+DBConnectionCOOL+"</dbConnection>"+ChannelSelection)
+      else:  
+         conddb.addFolder("",LArCalib_Flags.LArCaliWaveFolder+"<key>LArCaliWaveRef</key><dbConnection>sqlite://;schema=/eos/atlas/atlascerngroupdisk/det-larg/SuperCells/CalibData/poolFiles/LATOMERun_EndcapWeekly_220411-182904/db_00417648_00417649_00417650.db;dbname=CONDBR2</dbConnection><tag>LARElecCalibOflSCCaliWavesCaliWave-UPD3-00</tag>"+ChannelSelection)
 
 if (SubtractPed):
    if ( ReadPedFromCOOL ):
@@ -697,10 +713,17 @@ if CorrectBadChannels:
    theLArCaliWavePatcher.ContainerKey=KeyOutput
    #theLArCaliWavePatcher.PatchMethod="PhiNeighbor" ##take the first neigbour
    theLArCaliWavePatcher.PatchMethod="PhiAverage" ##do an aveage in phi after removing bad and empty event
-   theLArCaliWavePatcher.OutputLevel=INFO
+   theLArCaliWavePatcher.OutputLevel=DEBUG
    theLArCaliWavePatcher.ProblemsToPatch=[
       "deadCalib","deadReadout","deadPhys","almostDead","short",
       ]
+   if SuperCells:
+      theLArCaliWavePatcher.OnOffMap="LArOnOffIdMapSC"
+      theLArCaliWavePatcher.CalibLineKey="LArCalibIdMapSC"   
+      theLArCaliWavePatcher.SuperCell=True
+   ## block standard patching for this CB
+   theLArCaliWavePatcher.DoNotPatchCBs=[0x3e198000]
+
    topSequence+=theLArCaliWavePatcher
  
 
@@ -750,14 +773,19 @@ if ( doLArCalibDataQuality  ) :
    theCaliWaveValidationAlg.AmplitudeToleranceFEB=cwAmpThrFEB
    theCaliWaveValidationAlg.CaliWaveFWHMToleranceFEB=cwFWHMThrFEB
    theCaliWaveValidationAlg.TimeShiftDetection=True
-   theCaliWaveValidationAlg.PatchMissingFEBs=True
+   theCaliWaveValidationAlg.SuperCells=SuperCells
+   if not SuperCells:
+      theCaliWaveValidationAlg.PatchMissingFEBs=True
+   else:   
+      theCaliWaveValidationAlg.PatchMissingFEBs=False
+      theCaliWaveValidationAlg.CablingKey="LArOnOffIdMapSC"
+      theCaliWaveValidationAlg.CalibLineKey="LArCalibIdMapSC"
+
    theCaliWaveValidationAlg.UseCorrChannels=False  
+   theCaliWaveValidationAlg.OutputLevel=DEBUG
    ##in case of CalibBoard patching, please uncomment:
    ## adding new patching
-   #theCaliWaveValidationAlg.PatchCBs=[0x3e198000]
-   ## block standard patching for this CB
-   #if CorrectBadChannels:
-   #   topSequence.LArCaliWavePatcher.DoNotPatchCBs=[0x3e198000]
+   theCaliWaveValidationAlg.PatchCBs=[0x3e198000]
 
    topSequence+=theCaliWaveValidationAlg
    
@@ -775,6 +803,7 @@ if ( doLArCalibDataQuality  ) :
    theBadCaliWave.CaliWaveFWHMToleranceFEB=["80,80,80"]
    theBadCaliWave.TimeShiftDetection=True
    theBadCaliWave.UseCorrChannels=False
+   theBadCaliWave.SuperCells=SuperCells
    topSequence+=theBadCaliWave
    
 
@@ -815,6 +844,7 @@ if (WriteNtuple):
    LArCaliWaves2Ntuple = LArCaliWaves2Ntuple( "LArCaliWaves2Ntuple" )
    LArCaliWaves2Ntuple.RealGeometry = True
    LArCaliWaves2Ntuple.OffId = True
+   LArCaliWaves2Ntuple.AddCalib = True
    LArCaliWaves2Ntuple.NtupleName  = "CALIWAVE"
    LArCaliWaves2Ntuple.SaveDerivedInfo = SaveDerivedInfo
    LArCaliWaves2Ntuple.AddFEBTempInfo = False
@@ -823,7 +853,9 @@ if (WriteNtuple):
    LArCaliWaves2Ntuple.isSC = SuperCells
    if SuperCells:
       LArCaliWaves2Ntuple.CalibMapKey = "LArCalibIdMapSC"
-   
+      from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
+      condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg") 
+      LArCaliWaves2Ntuple.ExtraInputs += (('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
    topSequence+=LArCaliWaves2Ntuple
    
    theApp.HistogramPersistency = "ROOT"
