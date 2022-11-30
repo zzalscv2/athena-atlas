@@ -53,6 +53,8 @@ StatusCode LArDigitsAccumulator::initialize()
      }
   } //m_isSC
 
+  ATH_CHECK( m_calibMapKey.initialize() );
+
   m_Accumulated.resize(m_onlineHelper->channelHashMax());
   return StatusCode::SUCCESS;
 }
@@ -122,7 +124,6 @@ StatusCode LArDigitsAccumulator::execute()
 
       // object to be filled for each cell
       LArAccumulated& cellAccumulated = m_Accumulated[hashid];
-      cellAccumulated.m_onlineId=chid.get_identifier32().get_compact();
       
       // trigger counter for each cell
       cellAccumulated.m_ntrigger++;
@@ -168,7 +169,9 @@ StatusCode LArDigitsAccumulator::execute()
       
       unsigned int ntrigUsed = m_NtriggersPerStep;
       if ( m_isSC && m_DropPercentTrig != 0 ){
-	ntrigUsed -= ntrigUsed*(m_DropPercentTrig/100);	
+	ntrigUsed -= ntrigUsed*(m_DropPercentTrig/100);
+      if ( m_event_counter%100==0 ) ATH_MSG_WARNING("Only requiring "<<ntrigUsed<<" triggers for accumulation out of "<<m_NtriggersPerStep<<" (= "<<m_NtriggersPerStep<<" - "<<m_NtriggersPerStep*(m_DropPercentTrig/100)<<")");
+	
       }
 
       if(cellAccumulated.m_ntrigger==ntrigUsed){
@@ -180,7 +183,6 @@ StatusCode LArDigitsAccumulator::execute()
       
 	larAccuDigitContainer->push_back(accuDigit);
 
-	cellAccumulated.m_nused = cellAccumulated.m_ntrigger;
 	cellAccumulated.m_ntrigger = 0;
 
       }
@@ -199,16 +201,3 @@ StatusCode LArDigitsAccumulator::execute()
 }
   
 
-StatusCode LArDigitsAccumulator::finalize(){
-
-  if ( !m_isSC ) return StatusCode::SUCCESS;
-  int ntrigUsed = m_NtriggersPerStep - m_NtriggersPerStep*(m_DropPercentTrig/100);
-  for(auto &sc : m_Accumulated){
-    if(sc.m_onlineId && sc.m_nused != ntrigUsed){
-      ATH_MSG_WARNING("Not enough triggers for channel OnlineID " << sc.m_onlineId << " ntriggers " << sc.m_ntrigger );
-    }
-  }
-
-  return StatusCode::SUCCESS;
-
-}

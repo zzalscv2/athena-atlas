@@ -49,7 +49,7 @@ StatusCode CaloCellGroup2Ntuple::stop () {
     return StatusCode::FAILURE;
   }
   
-  bool stat=m_cellGroupList.setDefinition(dynamic_cast<const CaloCell_Base_ID*>(caloCellId),m_groupInit,msg());
+  bool stat=m_cellGroupList.setDefinition(caloCellId,m_groupInit,msg());
   if (!stat) {
     ATH_MSG_ERROR( "CaloCellGroupList::setDefinition failed!" );
     return StatusCode::FAILURE;

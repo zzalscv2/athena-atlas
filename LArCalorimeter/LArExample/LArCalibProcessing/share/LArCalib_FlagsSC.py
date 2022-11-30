@@ -26,7 +26,7 @@ class LArCalib_Flags:
 
     LArPhysCaliTdiffFolder       = "/LAR/ElecCalibOflSC/PhysCaliTdiff"
 
-    LArOFCPhysFolder             = "/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/4samples" # 5samples
+    LArOFCPhysFolder             = "/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/5samples" # 5samples
     LArOFCCaliFolder             = "/LAR/ElecCalibOflSC/OFC/CaliWave"
     LArOFCCaliFolderXtlk         = "/LAR/ElecCalibOflSC/OFC/CaliWave"
     LArOFCMasterWaveFolder       = "/LAR/ElecCalibOflSC/OFC/MasterWave"
@@ -37,7 +37,7 @@ class LArCalib_Flags:
     LArShapeCaliWaveFolderXtlk   = "/LAR/ElecCalibOflSC/Shape/CaliWaveXtalkCorr"
     LArShapeMasterWaveFolder     = "/LAR/ElecCalibOflSC/Shape/MasterWave"
     LArShapeMasterWaveFolderXtlk = "/LAR/ElecCalibOflSC/Shape/MasterWaveXtalkCorr"   
-    LArShapeRTMSamplesFolder         = "/LAR/ElecCalibOflSC/Shape/RTM/4samples"
+    LArShapeRTMSamplesFolder         = "/LAR/ElecCalibOflSC/Shape/RTM/5samples"
                               
     LArRampFolder                = "/LAR/ElecCalibOflSC/Ramps/RampLinea"
 
@@ -54,7 +54,7 @@ class LArCalib_Flags:
 
     PhysWaveShiftFolder          = "/LAR/ElecCalibOflSC/OFCBin/PhysWaveShifts"
     OFCBinFolder                 = "/LAR/ElecCalibOflSC/OFCBin/Dummy"
-    ShapeResidualsFolder         = "/LAR/ElecCalibOflSC/Shape/Residuals/4samples"
+    ShapeResidualsFolder         = "/LAR/ElecCalibOflSC/Shape/Residuals/5samples"
 
  
     IOVBegin=0

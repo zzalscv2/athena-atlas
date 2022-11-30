@@ -5,7 +5,7 @@
 #ifndef CALOCELLGROUP_H
 #define CALOCELLGROUP_H 
 #include "GaudiKernel/MsgStream.h"
-#include "CaloIdentifier/CaloCell_Base_ID.h"
+#include "CaloIdentifier/CaloCell_ID.h"
 #include <bitset>
 
 class CaloCellGroup {
@@ -15,7 +15,7 @@ class CaloCellGroup {
 
   //Format: 
   //[EMEC,EMB/A/Layer/Region/Eta/Phi] value1, value2, ...
-  bool setDefinition(const CaloCell_Base_ID* caloCellId, const std::string& definition, MsgStream& logStr);
+  bool setDefinition(const CaloCell_ID* caloCellId, const std::string& definition, MsgStream& logStr);
   bool inGroup(const Identifier id) const;
   const std::vector<float>& getValue() const {return m_values;}
 
@@ -52,7 +52,7 @@ class CaloCellGroup {
   std::vector<std::pair<int,int> > m_fieldBoundaries;
   std::vector<float> m_values;
 
-  const CaloCell_Base_ID *m_caloCellId;
+  const CaloCell_ID *m_caloCellId;
   
 };
 
@@ -61,9 +61,9 @@ class CaloCellGroupList {
   CaloCellGroupList():m_initialized(false) {};
 
   //Convention: First element of vector has default values, following elements as defined above
-  bool setDefinition(const CaloCell_Base_ID* caloCellId, const std::vector<std::string>& definitions, MsgStream& logStr);
+  bool setDefinition(const CaloCell_ID* caloCellId, const std::vector<std::string>& definitions, MsgStream& logStr);
 
-  void dump(const CaloCell_Base_ID* caloCellId); // for debugging
+  void dump(const CaloCell_ID* caloCellId); // for debugging
 
    void printDef() const;
   

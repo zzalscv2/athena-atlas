@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [[ $# < 3 ]];
+if [[ $# < 4 ]];
 then
-  echo "Syntax: $0 [-append] [-offline] [-onerun] <Run> <LBb> [<LBe>] File1 [Folder] ..."
+  echo "Syntax: $0 [-append] [-offline] [-onerun] <Run> <LBb> <LBe> File1 File2 ..."
   exit
 fi
 
@@ -60,20 +60,17 @@ else
     exit
 fi
 
-#if [ $onerun == 1 ]
-#then
+if [ $onerun == 1 ]
+then
   if echo $1 | grep -q "^[0-9]*$";
   then
     lbnumbere=$1
     shift
-  else  
-    lbnumbere=-1
-  fi  
-#  else
-#    echo "ERROR: Expected a lumi-block-number, got $1"
-#    exit
-#  fi
-#fi
+  else
+    echo "ERROR: Expected a lumi-block-number, got $1"
+    exit
+  fi
+fi
 
 if ! which AtlCoolCopy 1>/dev/null 2>&1
 then
@@ -117,90 +114,52 @@ then
     rm -f ${outputSqlite}.tmp
 fi
 
-echo "Left parameters: " $# $1
+while [[ $# >0 ]]
+do
+  if [ ! -f $1 ];
+      then
+      echo "ERROR File $1 not found!"
+      exit
+  fi
+  echo "Adding $1"
+  catfiles="${catfiles} $1"
+  shift
+done
 
-if [ ! -f $1 ];
-    then
-    echo "ERROR File $1 not found!"
-    exit
-fi
-echo "Adding $1"
-catfiles="${catfiles} ${1%%:}"
-shift
-
-echo "Left parameters: " $# $1
-if [[ $# > 0 ]]
-then
-   Folder=$1
-else   
-   Folder="/LAR/BadChannelsOfl/MissingFEBs"
-fi
 
 #Get UPD4-nn tag connected to 'current':
-echo "Resolving current folder-level tag suffix for ${Folder} ...."
-fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" $Folder` 
+echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/MissingFEBs...."
+fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/MissingFEBs` 
 upd4TagName=`echo $fulltag | grep -o "RUN2-UPD4-[0-9][0-9]"` 
 echo "Found $upd4TagName"
-fulltages=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" $Folder True` 
-gtages=`echo $fulltages | grep ES1PA | awk '{print $2}'`
-upd1TagName=`echo $fulltages | grep -o "RUN2-UPD1-[0-9][0-9]"` 
-echo "Found $upd1TagName"
 
-#create a tag string from folder
-IFS='/' 
-read -r -a array <<< "$Folder"
-fldtag=""
-for i in ${array[@]}
-do
-  fldtag+=$i
-done
-IFS=' ' 
 
 
 
 echo "Running athena to read current database content..."
-athena.py -c "OutputFile=\"${oldTextFile}\";RunNumber=${runnumber};LBNumber=${lbnumber};Folder=\"${Folder}\";GlobalTag=\"${gtages}\"" LArBadChannelTool/LArMissingFebs2Ascii.py > oracle2ascii.log 2>&1
+athena.py -c "OutputFile=\"${oldTextFile}\";tag=\"${BaseTagName}\";" LArBadChannelTool/LArMissingFebs2Ascii.py > oracle2ascii.log 2>&1
 if [ $? -ne 0 ];  then
     echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii.log!"
     exit
 fi
 
-echo "cat the files:"$catfiles":to " $inputTextFile
-if [ ! -f "mf_previous.txt" ];
-    then
-    echo "ERROR File mf_previous.txt not found!"
-    exit
-fi
-if [ ! -f "new.txt" ];
-    then
-    echo "ERROR File new.txt not found!"
-    exit
-fi
-#cat $catfiles > $inputTextFile
-#cat mf_previous.txt new.txt > $inputTextFile
-cp mf_previous.txt $inputTextFile
-cat new.txt >> $inputTextFile
+
+cat $catfiles > $inputTextFile
 if [ $? -ne 0 ];  then
     echo "Failed to concatinate input files!"
     exit
 fi
 
 if [ $onerun -eq 1 ]; then
- if [ $lbnumbere -ge 0 ]; then
-   endlb=$[ $lbnumbere + 1]
-   prefix="IOVEndRun=${runnumber};IOVEndLB=$endlb;"
- else
-   prefix=$[ $runnumber + 1]
-   prefix="IOVEndRun=${prefix};IOVEndLB=0;"
- fi  
+ #prefix=$[ $runnumber + 1]
+ #prefix="IOVEndRun=${prefix};IOVEndLB=0;"
+ endlb=$[ $lbnumbere + 1]
+ prefix="IOVEndRun=${runnumber};IOVEndLB=$endlb;"
 else 
  prefix=""
 fi
-
-echo "TagSuffix: " $upd4TagName
 echo "Running athena to build sqlite database file ..."
-prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\";Folder=\"${Folder}\";GlobalTag=\"${gtages}\";"
-echo "prefix: ${prefix}"
+prefix="${prefix}IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};sqlite=\"${outputSqlite}.tmp\""
 athena.py -c $prefix LArBadChannelTool/LArMissingFebDbAlg.py > ascii2sqlite.log 2>&1
 
 if [ $? -ne 0 ];  then
@@ -223,12 +182,12 @@ fi
 
 cp ${outputSqlite}.tmp ${outputSqlite}
 
-if [ $onerun -eq 1 ] || [ $lbnumbere -ge 0 ]; then
+if [ $onerun -eq 1 ]; then
    pref="RunNumber=${runnumber};LBNumber=${lbnumber};"
 else   
    pref=""
 fi
-pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";Folder=\"${Folder}\";GlobalTag=\"${gtages}\";"
+pref="${pref}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";tag=\"${BaseTagName}\";"
 echo "Running athena to test readback of sqlite database file"
 athena.py  -c ${pref} LArBadChannelTool/LArMissingFebs2Ascii.py > sqlite2ascii.log 2>&1
 
@@ -246,7 +205,7 @@ fi
 
 if [ $online -eq 1 ]; then
    echo "Copying UPD3 to UPD1 tag..."
-   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-RUN2-UPD3-01 -ot ${fldtag}-${upd1TagName} -r 2147483647 -a  > AtlCoolCopy.upd3.log 2>&1
+   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f /LAR/BadChannelsOfl/MissingFEBs -t LARBadChannelsOflMissingFEBs-RUN2-UPD3-01 -ot LARBadChannelsOflMissingFEBs-RUN2-UPD1-01 -r 2147483647 -a  > AtlCoolCopy.upd3.log 2>&1
 
    if [ $? -ne 0 ];  then
        echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd3.log!"
@@ -255,7 +214,7 @@ if [ $online -eq 1 ]; then
 fi
 
 echo "Copying UPD3 to UPD4 tag..."
-AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-RUN2-UPD3-01 -ot ${fldtag}-$upd4TagName  > AtlCoolCopy.upd4.log 2>&1
+AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqlite};dbname=CONDBR2" -f /LAR/BadChannelsOfl/MissingFEBs -t LARBadChannelsOflMissingFEBs-RUN2-UPD3-01 -ot LARBadChannelsOflMissingFEBs-$upd4TagName  > AtlCoolCopy.upd4.log 2>&1
 
 if [ $? -ne 0 ];  then
     echo "AtlCoolCopy reported an error! Please check AtlCoolCopy.upd4.log!"
@@ -270,31 +229,7 @@ fi
 
 if [ $online -eq 1 ]; then
    echo "Copying to for online database..."
-   #create a online folder name
-   IFS='/' 
-   read -r -a array1 <<< "$Folder"
-   onlfld=""
-   for i in ${array1[@]}
-   do
-     if [[ $i == "BadChannelsOfl" ]] 
-     then 
-         onlfld+="/BadChannels"
-         continue
-     fi    
-     onlfld+="/"$i
-   done
-   onlfld=${onlfld##/}
-   #create the online tag
-   read -r -a array2 <<< "$onlfld"
-   onlfldtag=""
-   for i in ${array2[@]}
-   do
-     onlfldtag+=$i
-   done
-   IFS=' ' 
-
-   echo "Copying to the: "${onlfld} " with tag " ${onlfldtag}-${upd1TagName}
-   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f ${Folder} -t ${fldtag}-RUN2-UPD3-01 -of ${onlfld} -ot ${onlfldtag}-${upd1TagName} -r 2147483647 -a -c > AtlCoolCopy.onl.log 2>&1
+   AtlCoolCopy "sqlite://;schema=${outputSqlite}.tmp;dbname=CONDBR2" "sqlite://;schema=${outputSqliteOnl};dbname=CONDBR2" -f /LAR/BadChannelsOfl/MissingFEBs -t LARBadChannelsOflMissingFEBs-RUN2-UPD3-01 -of  /LAR/BadChannels/MissingFEBs -ot LARBadChannelsMissingFEBs-RUN2-UPD1-01 -r 2147483647 -a -c > AtlCoolCopy.onl.log 2>&1
 
 
    if [ $? -ne 0 ];  then

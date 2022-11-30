@@ -1,118 +1,67 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LArBadChannel_H
 #define LArBadChannel_H
 
-template <class T> class TLArBadChanBitPackingBase;
+#include "LArRecConditions/LArBadChannelEnum.h"
+#include "LArRecConditions/LArBadChanBitPacking.h"
 
-class  LArBadChannel {
+class  LArBadChannel : public LArBadChannelEnum {
  public:
-  typedef unsigned int      PosType;
-  typedef unsigned int      BitWord;
 
+ LArBadChannel() : m_word(0) {}
 
-  class LArBadChannelEnum {
-    public:
-
-    enum ProblemType {
-       deadReadoutBit = 0, 
-       deadCalibBit = 1, 
-       deadPhysBit = 2, 
-       almostDeadBit = 3, 
-       shortBit = 4, 
-       unstableBit = 5,
-       distortedBit = 6,
-       lowNoiseHGBit = 7,
-       highNoiseHGBit = 8,
-       unstableNoiseHGBit = 9,
-       lowNoiseMGBit = 10,
-       highNoiseMGBit = 11,
-       unstableNoiseMGBit = 12,
-       lowNoiseLGBit = 13,
-       highNoiseLGBit = 14,
-       unstableNoiseLGBit = 15,
-       missingFEBBit = 16,
-       peculiarCalibrationLineBit = 17,
-       problematicForUnknownReasonBit = 18,
-       sporadicBurstNoiseBit = 19,
-       deadSCACellBit = 20,
-       badFirstSampleBit = 21,
-       unflaggedByLADIeSBit = 22
-    };
-
-  };
-
-  class LArBadChannelSCEnum : public LArBadChannelEnum{
-    public:
-
-    enum ProblemType {
-       maskedOSUMBit = 0, 
-       deadReadoutBit = 1, 
-       deadCalibBit = 2, 
-       deadPhysBit = 3, 
-       lowNoiseBit = 4,
-       highNoiseBit = 5,
-       problematicForUnknownReasonBit = 6,
-       sporadicBurstNoiseBit = 7,
-       DeformedTailBit = 8,
-       DeformedPulseBit = 9,
-       NonLinearRampBit = 10,
-       ADCJumpBit = 11,
-       SCAProblemBit = 12,
-       OffOFCsBit=13,
-       OffAmplitudeBit=14,
-       OffScaleBit=15,
-       unflaggedByLADIeSBit = 30,
-       reflaggedByLADIeSBit = 31
-    };
-
-  };
-
-
-  explicit LArBadChannel( BitWord rawStatus=0, bool isSC=false) : m_word(rawStatus), m_isSC(isSC)  {}
+  explicit LArBadChannel( BitWord rawStatus) : m_word(rawStatus) {}
 	
   /// Returns true if corresponding status bit its set		
-  bool statusBad(PosType  pb) const {
-    BitWord mask = 1 << pb;
+  bool statusBad( ProblemType pb) const {
+    BitWord mask = 1 << bitPosition(pb);
     return ((m_word & mask) != 0);
   }
 
   /// Returns true if there is no problem in corresponding status bit
-  bool statusOK( PosType pb) const {return !statusBad(pb);}
+  bool statusOK( ProblemType pb) const {return !statusBad(pb);}
 	
   /// Returns true if no problems at all (all bits at zero)
   bool good() const {return m_word == 0;}
 	
-  bool deadReadout() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::deadReadoutBit); else return statusBad( LArBadChannelEnum::deadReadoutBit);}
-  bool deadCalib() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::deadCalibBit); else return statusBad( LArBadChannelEnum::deadCalibBit);} 
-  bool deadPhys() const { if(m_isSC) return statusBad( LArBadChannelSCEnum::deadPhysBit); else return statusBad( LArBadChannelEnum::deadPhysBit);} 
-  bool almostDead() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::almostDeadBit);} 
-  bool shortProblem() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::shortBit);} 
-  bool unstable() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unstableBit);}
-  bool distorted() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::distortedBit);}
-  bool lowNoiseHG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::lowNoiseHGBit);}
-  bool highNoiseHG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::highNoiseHGBit);}
-  bool unstableNoiseHG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unstableNoiseHGBit);}
-  bool lowNoiseMG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::lowNoiseMGBit);}
-  bool highNoiseMG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::highNoiseMGBit);}
-  bool unstableNoiseMG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unstableNoiseMGBit);}
-  bool lowNoiseLG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::lowNoiseLGBit);}
-  bool highNoiseLG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::highNoiseLGBit);}
-  bool unstableNoiseLG() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unstableNoiseLGBit);}
-  bool missingFEB() const { if(m_isSC) return false; else  return statusBad( LArBadChannelEnum::missingFEBBit);}
-  bool peculiarCalibrationLine() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::peculiarCalibrationLineBit);}
-  bool problematicForUnknownReason() const { if(m_isSC) return false; else return statusBad( LArBadChannelEnum::problematicForUnknownReasonBit);}
-  bool sporadicBurstNoise() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::sporadicBurstNoiseBit);}
-  bool deadSCACell() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::deadSCACellBit);}
-  bool badFirstSample() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::badFirstSampleBit);}
-  bool unflaggedByLADIeS() const {if(m_isSC) return false; else return statusBad( LArBadChannelEnum::unflaggedByLADIeSBit);}
+  bool deadReadout() const { return statusBad( deadReadoutBit);}
+  bool deadCalib() const { return statusBad( deadCalibBit);} 
+  bool deadPhys() const { return statusBad( deadPhysBit);} 
+  bool almostDead() const { return statusBad( almostDeadBit);} 
+  bool shortProblem() const { return statusBad( shortBit);} 
+  bool unstable() const { return statusBad( unstableBit);}
+  bool distorted() const { return statusBad( distortedBit);}
+  bool lowNoiseHG() const { return statusBad( lowNoiseHGBit);}
+  bool highNoiseHG() const { return statusBad( highNoiseHGBit);}
+  bool unstableNoiseHG() const { return statusBad( unstableNoiseHGBit);}
+  bool lowNoiseMG() const { return statusBad( lowNoiseMGBit);}
+  bool highNoiseMG() const { return statusBad( highNoiseMGBit);}
+  bool unstableNoiseMG() const { return statusBad( unstableNoiseMGBit);}
+  bool lowNoiseLG() const { return statusBad( lowNoiseLGBit);}
+  bool highNoiseLG() const { return statusBad( highNoiseLGBit);}
+  bool unstableNoiseLG() const { return statusBad( unstableNoiseLGBit);}
+  bool missingFEB() const { return statusBad( missingFEBBit);}
+  bool peculiarCalibrationLine() const { return statusBad( peculiarCalibrationLineBit);}
+  bool problematicForUnknownReason() const { return statusBad( problematicForUnknownReasonBit);}
+  bool sporadicBurstNoise() const {return statusBad( sporadicBurstNoiseBit);}
+  bool deadSCACell() const {return statusBad( deadSCACellBit);}
+  bool badFirstSample() const {return statusBad( badFirstSampleBit);}
+  bool unflaggedByLADIeS() const {return statusBad( unflaggedByLADIeSBit);}
+  bool reflaggedByLADIeS() const {return statusBad( reflaggedByLADIeSBit);}
 	
   bool reallyNoisy() const {return (highNoiseHG() || highNoiseMG() || highNoiseLG() ||
 				    unstableNoiseHG() || unstableNoiseMG() || unstableNoiseLG());}
   bool noisy() const {return (reallyNoisy() || lowNoiseHG() || lowNoiseMG() || lowNoiseLG());}
 				
+  static PosType bitPosition( ProblemType pb)
+  {
+    // use enumerators as bit positions
+    return static_cast<PosType>(pb);
+  }
+
   bool operator!=(BitWord other) {return m_word != other;}
   bool operator!=(LArBadChannel other) {return m_word != other.packedData();}
   bool operator==(BitWord other) {return m_word == other;}
@@ -125,12 +74,10 @@ class  LArBadChannel {
  private:
 
 	
+
   BitWord m_word;
   BitWord& packedDataRef() {return m_word;}	
-  bool m_isSC;
-
-  friend class TLArBadChanBitPackingBase<LArBadChannel::LArBadChannelSCEnum>;
-  friend class TLArBadChanBitPackingBase<LArBadChannel::LArBadChannelEnum>;
+  friend class LArBadChanBitPacking;
 };
 
 

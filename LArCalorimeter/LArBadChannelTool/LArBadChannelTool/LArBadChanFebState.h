@@ -7,8 +7,6 @@
 
 #include "LArRecConditions/LArBadChannel.h"
 #include "LArRecConditions/LArBadFeb.h"
-#include "LArRecConditions/LArBadChanBitPacking.h"
-#include <vector>
 
 /**
    A class that stores the bad channels of a single FEB
@@ -44,7 +42,7 @@ public:
 
   /// Returns an OR of the channel status and the missing FEB status
   LArBadChannel status( unsigned int chan) const {
-    static LArBadChannel goodState(0);
+    static LArBadChannel goodState;
     static LArBadChannel badState = setBadState(); // initialized only at first call
 
     if (empty()) {
@@ -68,7 +66,7 @@ private:
   LArBadChannel setBadState() const {
     LArBadChanBitPacking packing;
     LArBadChannel bs;
-    packing.setBit( LArBadChannel::LArBadChannelEnum::missingFEBBit, bs);
+    packing.setBit( LArBadChanBitPacking::missingFEBBit, bs);
     return bs;
   }
 

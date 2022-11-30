@@ -1,11 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArBadChannelTool/LArBadChannel2Ascii.h"
 #include "LArRecConditions/LArBadFeb.h"
-#include "LArRecConditions/LArBadChanBitPacking.h"
-#include "LArIdentifier/LArOnline_SuperCellID.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include <fstream>
@@ -24,7 +22,6 @@ LArBadChannel2Ascii::LArBadChannel2Ascii(const std::string& name, ISvcLocator* p
   declareProperty("WithMissing",m_wMissing=false);
   declareProperty("SkipDisconnected",m_skipDisconnected=false);
   declareProperty("ExecutiveSummaryFile",m_executiveSummaryFile="");
-  declareProperty("SuperCell",m_isSC=false);
 }
 
 LArBadChannel2Ascii::~LArBadChannel2Ascii() {}
@@ -43,6 +40,11 @@ StatusCode LArBadChannel2Ascii::initialize() {
   return StatusCode::SUCCESS;
 }
 
+StatusCode LArBadChannel2Ascii::stop() 
+{return StatusCode::SUCCESS;}
+
+StatusCode LArBadChannel2Ascii::finalize() 
+{return StatusCode::SUCCESS;}
 
 StatusCode LArBadChannel2Ascii::execute() {
 
@@ -63,28 +65,8 @@ StatusCode LArBadChannel2Ascii::execute() {
     badFebCont=(*badFebHdl);
   }
 
-  const LArOnlineID_Base* larOnlineID;
-  if ( m_isSC ){
-     const LArOnline_SuperCellID* ll;
-     StatusCode sc = detStore()->retrieve(ll, "LArOnline_SuperCellID");
-     if (sc.isFailure()) {
-       ATH_MSG_ERROR( "Could not get LArOnlineID helper !" );
-       return StatusCode::FAILURE;
-     } else {
-       larOnlineID = ll;
-       ATH_MSG_DEBUG("Found the LArOnlineID helper");
-     }
-   } else { // m_isSC
-     const LArOnlineID* ll;
-     StatusCode sc = detStore()->retrieve(ll, "LArOnlineID");
-     if (sc.isFailure()) {
-       ATH_MSG_ERROR( "Could not get LArOnlineID helper !");
-       return StatusCode::FAILURE;
-     } else {
-       larOnlineID = ll;
-       ATH_MSG_DEBUG(" Found the LArOnlineID helper. ");
-     }
-  } 
+  const LArOnlineID* larOnlineID;
+  ATH_CHECK( detStore()->retrieve(larOnlineID,"LArOnlineID") );
   
   std::ostream *out = &(std::cout); 
   std::ofstream outfile;
@@ -99,13 +81,12 @@ StatusCode LArBadChannel2Ascii::execute() {
   }
 
   const LArBadChanBitPacking packing;
-  const LArBadChanSCBitPacking SCpacking;
 
   //std::vector<std::vector<unsigned> > problemMatrix(nParts,std::vector<unsigned>(nProblemTypes) );
   std::vector<std::vector<unsigned> > problemMatrix(nProblemTypes,std::vector<unsigned>(nParts) );
   
   
-  const LArBadChannel::BitWord missingFEBMask= ~(0x1<<LArBadChannel::LArBadChannelEnum::missingFEBBit);
+  const LArBadChannelEnum::BitWord missingFEBMask= ~(0x1<<LArBadChannelEnum::missingFEBBit);
   //std::cout << std::hex << "Mask=" << missingFEBMask << std::dec << std::endl;
     
 
@@ -119,7 +100,7 @@ StatusCode LArBadChannel2Ascii::execute() {
     ++nConnected;
 
     LArBadChannel bc1 = badChannelCont->status(chid);
-    LArBadChannel::BitWord bcw=bc1.packedData();
+    LArBadChannelEnum::BitWord bcw=bc1.packedData();
     if (!m_wMissing) bcw&=missingFEBMask; //Supress missingFEB bit
     LArBadChannel bc(bcw);
     
@@ -131,11 +112,7 @@ StatusCode LArBadChannel2Ascii::execute() {
 	     << larOnlineID->slot(chid) << " "
 	     << larOnlineID->channel(chid) << " "
 	     << "0 "; //Dummy 0 for calib-line
-      if(m_isSC) {
-         (*out) << SCpacking.stringStatus(bc);
-      } else {
-         (*out) << packing.stringStatus(bc);
-      }
+      (*out) << packing.stringStatus(bc);
 
       (*out) << "  # 0x" << std::hex << chid.get_identifier32().get_compact();
       if (cabling) {

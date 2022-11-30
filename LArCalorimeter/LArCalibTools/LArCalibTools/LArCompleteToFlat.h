@@ -79,7 +79,6 @@ class LArCompleteToFlat: public AthAlgorithm
   std::string m_RampInput;
   std::string m_MphysOverMcalInput;
   std::string m_OFCInput;
-  std::string m_OFCCaliInput;
   std::string m_ShapeInput;
   std::string m_DSPThresholdsInput;
 

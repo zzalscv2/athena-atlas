@@ -29,9 +29,6 @@ if "IOVEndLB" not in dir():
 if "sqlite" not in dir():
     sqlite="BadChannels.db"
 
-if "isSC" not in dir():
-   isSC=False
-
 import AthenaCommon.AtlasUnixGeneratorJob
 
 from AthenaCommon.GlobalFlags import  globalflags
@@ -41,7 +38,7 @@ if "OFLP" not in DBInstance:
    globalflags.DatabaseInstance=DBInstance
 
 from AthenaCommon.JobProperties import jobproperties
-jobproperties.Global.DetDescrVersion = "ATLAS-R2-2016-01-00-01"
+jobproperties.Global.DetDescrVersion = "ATLAS-R2-2015-04-00-00"
 
 from AthenaCommon.DetFlags import DetFlags
 DetFlags.Calo_setOn()
@@ -57,16 +54,13 @@ from AtlasGeoModel import GeoModelInit
 from AtlasGeoModel import SetupRecoGeometry
 
 #Get identifier mapping
-if isSC:
-   from LArCabling.LArCablingAccess import LArOnOffIdMappingSC
-   LArOnOffIdMappingSC()
-else:
-   from LArCabling.LArCablingAccess import LArOnOffIdMapping
-   LArOnOffIdMapping()
+include( "LArConditionsCommon/LArIdMap_comm_jobOptions.py" )
+include( "LArIdCnv/LArIdCnv_joboptions.py" )
 
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
 include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
 
+#include( "ByteStreamCnvSvc/BSEventStorageEventSelector_jobOptions.py" )
 
 theApp.EvtMax = 1
 
@@ -75,7 +69,7 @@ svcMgr.EventSelector.FirstEvent        = 1
 #svcMgr.EventSelector.InitialTimeStamp  = 0
 #svcMgr.EventSelector.TimeStampInterval = 5
 #svcMgr.IOVDbSvc.GlobalTag="COMCOND-ES1P-003-00"
-svcMgr.IOVDbSvc.GlobalTag="CONDBR2-ES1PA-2022-06"
+svcMgr.IOVDbSvc.GlobalTag="CONDBR2-ES1PA-2014-01"
 
 
 ## get a handle to the default top-level algorithm sequence
@@ -91,18 +85,11 @@ from LArBadChannelTool.LArBadChannelToolConf import LArBadChannelDBAlg
 theLArDBAlg=LArBadChannelDBAlg()
 theLArDBAlg.WritingMode = 0
 theLArDBAlg.DBFolder=Folder
-if isSC:
-   theLArDBAlg.BadChanKey="LArBadChannelSC"
-   theLArDBAlg.SuperCell=isSC
-
 theLArDBAlg.OutputLevel=DEBUG
 topSequence += theLArDBAlg
 
 from LArBadChannelTool.LArBadChannelToolConf import LArBadChannelCondAlg
-if isSC:
-  theLArBadChannelCondAlg=LArBadChannelCondAlg(ReadKey="", InputFileName=InputFile, WriteKey="LArBadChannelSC", CablingKey="LArOnOffIdMapSC", isSC=isSC, OutputLevel=DEBUG)
-else:
-  theLArBadChannelCondAlg=LArBadChannelCondAlg(ReadKey="", InputFileName=InputFile, OutputLevel=DEBUG)
+theLArBadChannelCondAlg=LArBadChannelCondAlg(ReadKey="", InputFileName=InputFile, OutputLevel=DEBUG)
 from AthenaCommon.AlgSequence import AthSequencer
 condSeq = AthSequencer("AthCondSeq")
 condSeq+=theLArBadChannelCondAlg

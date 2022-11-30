@@ -101,6 +101,7 @@ def LArLATOMEMappingSC():
     condSequence = AthSequencer("AthCondSeq")
     if hasattr(condSequence,"LArLATOMEMappingAlg") and condSequence.LArLATOMEMappingAlg.ReadKey==folder:
         return #Already there....
+
     if conddb.isMC:
         dbname="LAR_OFL"
         folder=""

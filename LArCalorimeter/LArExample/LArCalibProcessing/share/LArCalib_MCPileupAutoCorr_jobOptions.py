@@ -329,7 +329,6 @@ from LArCalibUtils.LArCalibUtilsConf import LArAutoCorrAlgToDB
 theLArAutoCorrAlgToDB=LArAutoCorrAlgToDB()
 theLArAutoCorrAlgToDB.LArAutoCorrTotal=KeyOutputAC
 theLArAutoCorrAlgToDB.isSC = SuperCells
-theLArAutoCorrAlgToDB.NMinbias = NColl
 theLArAutoCorrAlgToDB.GroupingType = GroupingType
 theLArAutoCorrAlgToDB.OutAutoCorrKey = KeyOutputAC
 topSequence += theLArAutoCorrAlgToDB

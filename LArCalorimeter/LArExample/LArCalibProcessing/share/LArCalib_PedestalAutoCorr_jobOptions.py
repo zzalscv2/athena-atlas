@@ -21,12 +21,6 @@ if not "realGeometry" in dir():
    realGeometry=False
 
 
-if not 'SCIgnoreBarrelChannels' in dir():
-   SCIgnoreBarrelChannels=False
-
-if not 'SCIgnoreEndcapChannels' in dir():
-   SCIgnoreEndcapChannels=False
-   
 if not SuperCells: include("LArCalibProcessing/LArCalib_Flags.py")
 if SuperCells:     include("LArCalibProcessing/LArCalib_FlagsSC.py")
 include("LArCalibProcessing/GetInputFiles.py")
@@ -95,8 +89,6 @@ if not 'SkipEvents' in dir():
 
 if not 'doBadCatcher' in dir():
    doBadCatcher=True
-
-
 
 from string import *
 def DBConnectionFile(sqlitefile):
@@ -274,13 +266,6 @@ PedestalAutoCorrLog.info( " ====================================================
 
 #######################################################################################
 include ("LArConditionsCommon/LArMinimalSetup.py")
-
-## get a handle to the default top-level algorithm sequence
-from AthenaCommon.AlgSequence import AlgSequence 
-topSequence = AlgSequence()
-from AthenaCommon.AlgSequence import AthSequencer
-condSeq = AthSequencer("AthCondSeq")
-
 # new way to configure mapping:
 # we need standard mapping for BadChannelAlg, there is no SC bad channel DB yet
 from LArCabling.LArCablingAccess import LArCalibIdMapping,LArOnOffIdMapping
@@ -291,12 +276,17 @@ if SuperCells:
    LArOnOffIdMappingSC()
    LArCalibIdMappingSC()
    LArLATOMEMappingSC()
-   from CaloAlignmentAlgs.CaloAlignmentAlgsConf import CaloSuperCellAlignCondAlg
-   condSeq += CaloSuperCellAlignCondAlg("CaloSuperCellAlignCondAlg")   
 
 #
 # Provides ByteStreamInputSvc name of the data file to process in the offline context
 #
+
+## get a handle to the default top-level algorithm sequence
+from AthenaCommon.AlgSequence import AlgSequence 
+topSequence = AlgSequence()
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
+
 
 ## get a handle to the ApplicationManager, to the ServiceManager and to the ToolSvc
 from AthenaCommon.AppMgr import theApp, ServiceMgr, ToolSvc
@@ -357,9 +347,6 @@ if runAccumulator:
    larRawSCDataReadingAlg.etIdCollKey = ""
    larRawSCDataReadingAlg.LATOMEDecoder = theLArLATOMEDecoder
    larRawSCDataReadingAlg.OutputLevel = INFO
-   larRawSCDataReadingAlg.LATOMEDecoder.IgnoreBarrelChannels = SCIgnoreBarrelChannels
-   larRawSCDataReadingAlg.LATOMEDecoder.IgnoreEndcapChannels = SCIgnoreEndcapChannels
-
    topSequence += larRawSCDataReadingAlg
 
  else:
@@ -373,8 +360,6 @@ if runAccumulator:
  larDigitsAccumulator.KeyList = [Gain]
  larDigitsAccumulator.LArAccuDigitContainerName = ""
  larDigitsAccumulator.NTriggersPerStep = 100
- larDigitsAccumulator.isSC = SuperCells
- if SuperCells: larDigitsAccumulator.DropPercentTrig = 20
  larDigitsAccumulator.OutputLevel = INFO
 
  topSequence += larDigitsAccumulator
@@ -732,7 +717,6 @@ if ( WriteNtuple ) :
       if SuperCells:
          LArAutoCorr2Ntuple.CablingKey = "LArOnOffIdMapSC"
          LArAutoCorr2Ntuple.CalibMapKey = "LArCalibIdMapSC"
-         LArAutoCorr2Ntuple.ExtraInputs = [('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager')]
       topSequence += LArAutoCorr2Ntuple
 
    theApp.HistogramPersistency = "ROOT"

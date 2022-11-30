@@ -7,11 +7,34 @@
 template<class CONDITIONSCONTAINER>
 LArCalibPatchingAlg<CONDITIONSCONTAINER>::LArCalibPatchingAlg (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
+  m_useCorrChannel(true),
+  m_patchAllMissing(false),
   m_onlineHelper(0),
+  m_emId(0),
+  m_hecId(0),
+  m_fcalId(0),
   m_caloId(0),
   m_contIn(0),
   m_contOut(0),
-  m_patchMethod(PhiAverage) { }
+  m_patchMethod(PhiAverage) {
+  declareProperty("ContainerKey",m_containerKey="",
+		  "SG key of the LArConditionsContainer to be patched");
+  declareProperty("PatchMethod",m_patchMethodProp="FEBNeighbor",
+		  "Method to patch conditions for channels with broken calibration line");
+  declareProperty("NewContainerKey",m_newContainerKey="",
+		  "If the corrections go in a separate container put SG key here");
+  declareProperty("UseCorrChannels",m_useCorrChannel,
+		  "True: Use separate correction COOL channel, False: Correction + data in the same channel");
+  declareProperty("PatchAllMissing",m_patchAllMissing,
+		  "True: Patch missing calibration constants regardless of their bad-channel status");
+  declareProperty("Unlock",m_unlock=false,
+		  "Modify input container");
+
+}
+
+template<class CONDITIONSCONTAINER>
+LArCalibPatchingAlg<CONDITIONSCONTAINER>::~LArCalibPatchingAlg() {
+}
 
 
 template<class CONDITIONSCONTAINER>
@@ -30,6 +53,11 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::initialize() {
     return StatusCode::SUCCESS;
   }
   else if (m_patchMethodProp=="PhiAverage") {
+//    if (typeid(CONDITIONSCONTAINER)==typeid(LArCaliWaveContainer)) {
+//      (*m_log) << MSG::ERROR << "PhiAverage not implemented for CaliWaveContainer." 
+//	       << "Please choose FEBNeighbor or PhiNeighbor as patching strategy" << endmsg;
+//      return StatusCode::FAILURE;
+//    }
     m_patchMethod=PhiAverage;
     return StatusCode::SUCCESS;
   }
@@ -41,18 +69,10 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::initialize() {
     }
     m_patchMethod=FEBAverage;
     return StatusCode::SUCCESS;
-  } else if (m_patchMethodProp=="SetZero") {
-    if (typeid(CONDITIONSCONTAINER)==typeid(LArCaliWaveContainer)) {
-      ATH_MSG_ERROR ( "SetZero not implemented for CaliWaveContainer." 
-                      << "Please choose other patching strategy" );
-      return StatusCode::FAILURE;
-    }
-    m_patchMethod=SetZero;
-    return StatusCode::SUCCESS;
   }
 
   ATH_MSG_ERROR ( "Unknown patching method: " << m_patchMethodProp );
-  ATH_MSG_ERROR ( "Allowed values: [Empty, FEBNeighbor, PhiNeighbor, PhiAverage, SetZero]" );
+  ATH_MSG_ERROR ( "Allowed values: [Empty, FEBNeighbor, PhiNeighbor, PhiAverage]" );
   
   return StatusCode::FAILURE; 
 }
@@ -60,21 +80,11 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::initialize() {
 template<class CONDITIONSCONTAINER>
 StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
   ATH_MSG_INFO ( "Entering LArCalibPatchingAlg" );
-  if(m_isSC) {
-     const LArOnline_SuperCellID *onlHelper=nullptr;
-     ATH_CHECK( detStore()->retrieve(onlHelper, "LArOnline_SuperCellID") );
-     m_onlineHelper=dynamic_cast<const LArOnlineID_Base*>(onlHelper);
-     const CaloCell_SuperCell_ID *caloid=nullptr;
-     ATH_CHECK( detStore()->retrieve(caloid, "CaloCell_SuperCell_ID") );
-     m_caloId = dynamic_cast<const CaloCell_Base_ID*>(caloid); 
-  } else {
-     const LArOnlineID *onlHelper=nullptr;
-     ATH_CHECK( detStore()->retrieve(onlHelper, "LArOnlineID") );
-     m_onlineHelper=dynamic_cast<const LArOnlineID_Base*>(onlHelper);
-     const CaloCell_ID *caloid=nullptr;
-     ATH_CHECK( detStore()->retrieve(caloid, "CaloCell_ID") );
-     m_caloId = dynamic_cast<const CaloCell_Base_ID*>(caloid); 
-  }
+  ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
+  ATH_CHECK( detStore()->retrieve(m_emId, "LArEM_ID") );
+  ATH_CHECK( detStore()->retrieve(m_hecId, "LArHEC_ID") );
+  ATH_CHECK( detStore()->retrieve(m_fcalId, "LArFCAL_ID") );
+  ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_ID") );
 
   ATH_CHECK(m_bcMask.buildBitMask(m_problemsToPatch,msg()));
 
@@ -127,10 +137,8 @@ StatusCode LArCalibPatchingAlg<CONDITIONSCONTAINER>::stop() {
 
   LArBadChanBitPacking packing;
 
-  unsigned maxgain;
-  if(m_isSC) maxgain=CaloGain::LARMEDIUMGAIN; else maxgain=CaloGain::LARNGAIN;
   for (unsigned igain=CaloGain::LARHIGHGAIN; 
-       igain<maxgain ; ++igain ) {
+       igain<CaloGain::LARNGAIN ; ++igain ) {
     CONTIT it=m_contIn->begin(igain);
     CONTIT it_e=m_contIn->end(igain);
     for (;it!=it_e;it++) {
@@ -307,17 +315,6 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::patch(const HWIdentifier chid, co
     ATH_CHECK( m_contOut->insertCorrection(chid,patch,gain,m_useCorrChannel), false );
     return true;
   }
-  else if (m_patchMethod==SetZero) {
-    LArCondObj patch;
-    if (!setZero(chid, gain, patch)){
-      ATH_MSG_ERROR ( "Failed set Zero!" );
-      return false;
-    } else {
-      ATH_MSG_DEBUG ( "Set zero ..." );
-    }
-    ATH_CHECK( m_contOut->insertCorrection(chid,patch,gain,m_useCorrChannel), false );
-    return true;
-  }
   else //failed...
     ATH_MSG_ERROR ( "Unknown correction method." );
   return false;
@@ -382,6 +379,18 @@ std::vector<HWIdentifier>& LArCalibPatchingAlg<CONDITIONSCONTAINER>::getFEBChans
   for (int i=0;i<128;++i) {
       HWIdentifier fchan = m_onlineHelper->channel_Id(febid,i);
       if(fchan == chid) continue;
+      //try {
+        //const Identifier id=cabling->cnvToIdentifier(chid);
+        //if(m_onlineHelper->isEMBchannel(chid) || m_onlineHelper->isEMECchannel(chid)) {
+        //   if(!m_emId->is_connected(id)) continue;
+        //} else if (m_onlineHelper->isHECchannel(chid)) {
+        //   if(!m_hecId->is_connected(id)) continue;
+        //} else {
+        //   if(!m_fcalId->is_connected(id)) continue;
+        //}
+      //} catch(LArID_Exception& except) {
+      //  ATH_MSG_ERROR ( "LArID_Exception caught!" );
+      //}
       ATH_MSG_VERBOSE  ( " Adding channel =" << i );
       if (bcCont->status(fchan).good()) {
 	m_idList.push_back(fchan);
@@ -393,6 +402,13 @@ std::vector<HWIdentifier>& LArCalibPatchingAlg<CONDITIONSCONTAINER>::getFEBChans
   return m_idList;
 }
 
+/*
+template<class CONDITIONSCONTAINER>
+bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier, const int gain, LArCondObj&) {
+  (*m_log) << MSG::ERROR << " getAverage not implemented for this data type" << endmsg;
+  return false;
+}
+*/
 
 template<class CONDITIONSCONTAINER>
 bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chid, const int gain, LArRampP1& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool isphi) {
@@ -461,7 +477,7 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
     return false;
   }
   const size_t nSamples=m_contIn->get(symCells[0],gain).mvOFC_a[0].size();
-  if (!nSamples) {
+  if (!nPhases) {
     ATH_MSG_ERROR ( "OFC of neighbor nSamples=0!" );
     return false;
   }
@@ -696,52 +712,7 @@ bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::getAverage(const HWIdentifier chi
 }
 #endif
 
-template<class CONDITIONSCONTAINER>
-bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(const HWIdentifier chid, const int gain, LArRampP1& patch) {
 
-  size_t s=m_contIn->get(chid,gain).m_vRamp.size();
-  patch.m_vRamp.clear();
-  patch.m_vRamp.resize(s);
-  for (size_t i=0; i<s; ++i) patch.m_vRamp[i] = 0.;
-  return true;
-}
-
-template<class CONDITIONSCONTAINER>
-bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(const HWIdentifier chid, const int gain, LArOFCP1& patch) {
-
-  const size_t nPhases=m_contIn->get(chid,gain).m_vOFC_a.size();
-  if (!nPhases) {
-    ATH_MSG_ERROR ( "OFC of nPhase=0 !" );
-    return false;
-  }
-  const size_t nSamples=m_contIn->get(chid,gain).mvOFC_a[0].size();
-  if (!nSamples) {
-    ATH_MSG_ERROR ( "OFC of nSamples=0 !" );
-    return false;
-  }
-
-  for (size_t iPhase=0;iPhase<nPhases;++iPhase) {
-    for (size_t iSample=0;iSample<nSamples;++iSample) {
-      patch.m_waves[0][iPhase][iSample]=0.;
-      patch.m_waves[1][iPhase][iSample]=0.;
-    }
-  }
-  return true;
-}
-
-template<class CONDITIONSCONTAINER>
-bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(const HWIdentifier /*chid*/, const int /*gain*/, LArCaliWaveVec& /*patch*/) {
-  ATH_MSG_ERROR ( "Not implemented, should not come here !!!");
-  return false;
-}
-
-#ifdef LARRAWCONDITIONS_LARSINGLEFLOATP
-template<class CONDITIONSCONTAINER>
-bool LArCalibPatchingAlg<CONDITIONSCONTAINER>::setZero(LArSingleFloatP& patch) {
-  patch.m_data=0.;
-  return true;
-}
-#endif
 
 
 template<class CONDITIONSCONTAINER>

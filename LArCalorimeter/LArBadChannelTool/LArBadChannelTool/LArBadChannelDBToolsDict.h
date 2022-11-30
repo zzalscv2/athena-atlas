@@ -10,11 +10,11 @@
 #include "LArRecConditions/LArBadChannel.h"
 #include "LArRecConditions/LArBadFeb.h"
 #include "LArBadChannelTool/LArBadChannelDBTools.h"
+#include "LArRecConditions/LArBadChannelEnum.h"
 #include "LArRecConditions/LArBadChanBitPacking.h"
 
 
-std::pair<bool,LArBadChannel::LArBadChannelEnum::ProblemType> dummy1;
-std::pair<bool,LArBadChannel::LArBadChannelSCEnum::ProblemType> dummy11;
+std::pair<bool,LArBadChannelEnum::ProblemType> dummy1;
 std::pair<HWIdentifier,LArBadFeb> dummy2;
 std::pair<HWIdentifier32,LArBadFeb> dummy22;
 std::pair<HWIdentifier32,LArBadChannel> dummy4;

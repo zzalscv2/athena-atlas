@@ -59,6 +59,7 @@ def _larLatomeCfg(configFlags,algo,folder,outkey):
     #print (result)
     return result
 
+
 def LArOnOffIdMappingCfg(configFlags):
     return _larCablingCfg(configFlags,LArOnOffMappingAlg,"/LAR/Identifier/OnOffIdMap")
 

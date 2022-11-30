@@ -16,14 +16,13 @@
 #include "LArIdentifier/LArOnlineID.h"
 
 LArBadChannelDBAlg::LArBadChannelDBAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm( name, pSvcLocator), m_BCKey("LArBadChannel"), m_BFKey("LArBadFeb"), m_isSC(false)
+  AthAlgorithm( name, pSvcLocator), m_BCKey("LArBadChannel"), m_BFKey("LArBadFeb")
 {
   declareProperty("BadChanKey",m_BCKey);
   declareProperty("MissingFEBKey",m_BFKey);
   declareProperty("DBFolder",m_dbFolder="/LAR/BadChannels/BadChannels");
   declareProperty("FEBFolder",m_dbFebFolder="/LAR/BadChannels/MissingFEBs");
   declareProperty("WritingMode",m_mode=0,"selects information written to DB: 0 for bad channels, 1 for missing febs");
-  declareProperty("SuperCell",m_isSC);
 }
 
 LArBadChannelDBAlg::~LArBadChannelDBAlg() {}
@@ -43,14 +42,8 @@ StatusCode LArBadChannelDBAlg::execute()
 {return StatusCode::SUCCESS;}
 
 StatusCode LArBadChannelDBAlg::finalize() {
-  const LArOnlineID *onlineID=nullptr; 
-  if(!m_isSC) {
-     ATH_CHECK( detStore()->retrieve(onlineID, "LArOnlineID") ); 
-     if(!onlineID) {
-        ATH_MSG_ERROR("Failed to retrieve LArOnlineID");
-        return StatusCode::FAILURE;
-     }
-  }
+  const LArOnlineID* onlineID = nullptr;
+  ATH_CHECK( detStore()->retrieve(onlineID, "LArOnlineID") ); 
   if (m_mode == 0) {
     SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
     const LArBadChannelCont *bcCont {*readHandle};
@@ -63,43 +56,40 @@ StatusCode LArBadChannelDBAlg::finalize() {
     LArBadChannelState::CoolChannelEnum coolchan;
     for (const auto& entry : bcCont->fullCont()) {
       const HWIdentifier hid=HWIdentifier(entry.first);
-      if(m_isSC) coolchan = LArBadChannelState::CoolChannelEnum::EMBA;
-      else {
-         if (onlineID->isEMBchannel(hid)) {
-           if (onlineID->pos_neg(hid))
-             coolchan = LArBadChannelState::CoolChannelEnum::EMBC; 
-           else
-             coolchan = LArBadChannelState::CoolChannelEnum::EMBA; 
-         } else if (onlineID->isEMECchannel(hid)) {
-           if (onlineID->pos_neg(hid))
-             coolchan = LArBadChannelState::CoolChannelEnum::EMECC; 
-           else
-             coolchan = LArBadChannelState::CoolChannelEnum::EMECA; 
-         } else if (onlineID->isHECchannel(hid)) {
-           if (onlineID->pos_neg(hid))
-             coolchan = LArBadChannelState::CoolChannelEnum::HECC; 
-           else
-             coolchan = LArBadChannelState::CoolChannelEnum::HECA; 
-         } else if (onlineID->isFCALchannel(hid)) {
-           if (onlineID->pos_neg(hid))
-             coolchan = LArBadChannelState::CoolChannelEnum::FCALC; 
-           else
-             coolchan = LArBadChannelState::CoolChannelEnum::FCALA; 
-         } else {
-            ATH_MSG_WARNING ( "Wrong bad channel Id" << hid );
-            continue;
-         }
+      if (onlineID->isEMBchannel(hid)) {
+        if (onlineID->pos_neg(hid))
+          coolchan = LArBadChannelState::CoolChannelEnum::EMBC; 
+        else
+          coolchan = LArBadChannelState::CoolChannelEnum::EMBA; 
+      } else if (onlineID->isEMECchannel(hid)) {
+        if (onlineID->pos_neg(hid))
+          coolchan = LArBadChannelState::CoolChannelEnum::EMECC; 
+        else
+          coolchan = LArBadChannelState::CoolChannelEnum::EMECA; 
+      } else if (onlineID->isHECchannel(hid)) {
+        if (onlineID->pos_neg(hid))
+          coolchan = LArBadChannelState::CoolChannelEnum::HECC; 
+        else
+          coolchan = LArBadChannelState::CoolChannelEnum::HECA; 
+      } else if (onlineID->isFCALchannel(hid)) {
+        if (onlineID->pos_neg(hid))
+          coolchan = LArBadChannelState::CoolChannelEnum::FCALC; 
+        else
+          coolchan = LArBadChannelState::CoolChannelEnum::FCALA; 
+      } else {
+         ATH_MSG_WARNING ( "Wrong bad channel Id" << hid );
+         continue;
       }
+
       bcState.add(LArBadChannelDBTools::BadChanEntry(hid,entry.second),coolchan);
    }
 
-   CondAttrListCollection* attrListColl = 
-   LArBadChannelDBTools::createCoolCollection(bcState);
+    CondAttrListCollection* attrListColl = 
+      LArBadChannelDBTools::createCoolCollection(bcState);
 
-   ATH_CHECK( detStore()->record( attrListColl, m_dbFolder) );
-   ATH_MSG_INFO ( "Creating AthenaAttributeList in folder " << m_dbFebFolder );
+    ATH_CHECK( detStore()->record( attrListColl, m_dbFolder) );
+    ATH_MSG_INFO ( "Creating AthenaAttributeList in folder " << m_dbFebFolder );
   }
-
   if (m_mode == 1) {
 
     SG::ReadCondHandle<LArBadFebCont> readHandle{m_BFKey};

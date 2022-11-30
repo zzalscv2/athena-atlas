@@ -27,7 +27,7 @@
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
-#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+
 
 
 /** 
@@ -59,7 +59,7 @@ public:
   /**
    * @brief Destructor
    */
-  ~LArCalibPatchingAlg(){};
+  ~LArCalibPatchingAlg();
 
   /**
    * @brief Initialize method.
@@ -110,9 +110,6 @@ private:
    */
   bool getAverage(const HWIdentifier chid, const int gain, LArOFCP1& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool isphi=true); 
 
-  bool setZero(const HWIdentifier chid, const int gain, LArRampP1& patch); 
-  bool setZero(const HWIdentifier chid, const int gain, LArOFCP1& patch); 
-  bool setZero(const HWIdentifier chid, const int gain, LArCaliWaveVec& patch); 
 
 
 
@@ -142,7 +139,6 @@ private:
    * @patch [OUT] Reference to be filled by the average
    */
   bool getAverage(const HWIdentifier chid, const int gain, LArSingleFloatP& patch, const LArBadChannelCont* bcCont, const LArOnOffIdMapping* cabling, bool isphi=true);
-  bool setZero(LArSingleFloatP& patch);
 #endif
 
 
@@ -172,8 +168,7 @@ private:
     FEBNeighbor,
     PhiNeighbor,
     PhiAverage,
-    FEBAverage,
-    SetZero
+    FEBAverage
   };
 
   SG::ReadCondHandleKey<LArBadChannelCont> m_BCKey {this, "BadChanKey", "LArBadChannel", "SG key for LArBadChan object"};
@@ -183,22 +178,23 @@ private:
   Gaudi::Property<std::vector<std::string> > m_problemsToPatch{this,"ProblemsToPatch",{}, "Bad-Channel categories to patch"};
   Gaudi::Property<std::vector<unsigned int> > m_doNotPatchCBs{this, "DoNotPatchCBs", {}, "Do not patch channels from this CalibBoard"};
 
+  bool m_useCorrChannel;
+  bool m_patchAllMissing;
+  bool m_unlock;
 
-  BooleanProperty m_useCorrChannel{this, "UseCorrChannels", true, "True: Use separate correction COOL channel, False: Correction + data in the same channel"};
-  BooleanProperty m_patchAllMissing{this, "PatchAllMissing", false, "True: Patch missing calibration constants regardless of their bad-channel status"};
-  BooleanProperty m_unlock{this, "Unlock", false, "Modify input container"};
-  BooleanProperty m_isSC{this, "SuperCell", false, "Working on the SuperCells ?"};
-
-  const LArOnlineID_Base* m_onlineHelper;
-  const CaloCell_Base_ID* m_caloId;
+  const LArOnlineID* m_onlineHelper;
+  const LArEM_ID   * m_emId;
+  const LArHEC_ID  * m_hecId;
+  const LArFCAL_ID * m_fcalId;
+  const CaloCell_ID* m_caloId;
 
   const CONDITIONSCONTAINER* m_contIn;  
   CONDITIONSCONTAINER* m_contOut;  
 
   patchMethod    m_patchMethod;
-  StringProperty m_containerKey{this, "ContainerKey", "", "SG key of the LArConditionsContainer to be patched"};
-  StringProperty m_newContainerKey{this, "NewContainerKey", "", "If the corrections go in a separate container put SG key here"};
-  StringProperty m_patchMethodProp{this, "PatchMethod", "FEBNeighbor", "Method to patch conditions for channels with broken calibration line"};
+  std::string    m_containerKey;
+  std::string    m_newContainerKey;
+  std::string    m_patchMethodProp;
 
   std::vector<HWIdentifier> m_idList;
 

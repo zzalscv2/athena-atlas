@@ -676,7 +676,7 @@ if 'StoreResOscill' in dir():
    theLArWFParamTool.StoreResOscill = StoreResOscill
 
 LArRTMParamExtractor.LArWFParamTool=theLArWFParamTool
-topSequence += LArRTMParamExtractor
+
 
 ###########################################################################
 

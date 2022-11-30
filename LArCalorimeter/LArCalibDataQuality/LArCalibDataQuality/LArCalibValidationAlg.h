@@ -151,7 +151,7 @@ typedef std::vector<std::pair<std::pair<HWIdentifier,unsigned>, unsigned > > CBA
     * Inserts the corresponding channel from the reference container 
     * as correction channel to the validation container
     */
-  bool patchMissingCalibBoards(const CBANDCHANANDGAIN_t& CBAndGain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont);
+  bool patchMissingCalibBoards(const CBANDCHANANDGAIN_t& CBAndGain, const LArOnOffIdMapping *cabling, const LArCalibLineMapping *clCont);
 
   void febOutput(const HWIdentifier& febid, const unsigned gain, const unsigned nGood, const unsigned nBad);
 
@@ -171,15 +171,14 @@ protected:
   LArBadChannelMask m_bcMask;
   Gaudi::Property<std::vector<std::string> > m_problemsToMask{this,"ProblemsToMask",{}, "Bad-Channel categories to mask"};
   Gaudi::Property<std::vector<unsigned int> > m_patchCBs{this, "PatchCBs", {}, "List of missing CalibBoards to patch using values from reference container."};
-  BooleanProperty m_isSC{this, "SuperCells", false, "Working on SuperCells ?"};
 
   // Pointers to various identifier helper classes, not used her, but
   // probably useful for deriving algorithm
-  const LArOnlineID_Base* m_onlineHelper; 
+  const LArOnlineID* m_onlineHelper; 
   const LArEM_ID   * m_emId;  
   const LArHEC_ID  * m_hecId; 
   const LArFCAL_ID * m_fcalId;
-  const CaloCell_Base_ID* m_caloId;
+  const CaloCell_ID* m_caloId;
 
 
   /** Pointer to container with reference values */

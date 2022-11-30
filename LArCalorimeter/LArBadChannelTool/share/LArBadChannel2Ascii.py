@@ -33,8 +33,6 @@ if 'folderStr' not in dir():
 if 'ExecutiveSummaryFile' not in dir():
     ExecutiveSummaryFile=""
 
-if 'isSC' not in dir():
-    isSC=False
 
 import AthenaCommon.AtlasUnixGeneratorJob
 
@@ -45,7 +43,7 @@ if 'OFLP' not in DBInstance:
    globalflags.DatabaseInstance=DBInstance
 
 from AthenaCommon.JobProperties import jobproperties
-jobproperties.Global.DetDescrVersion = "ATLAS-R2-2016-01-00-01"
+jobproperties.Global.DetDescrVersion = "ATLAS-R2-2015-04-00-00"
 
 from AthenaCommon.DetFlags import DetFlags
 DetFlags.Calo_setOff()
@@ -97,15 +95,11 @@ if not hasattr (condSeq, "CondInputLoader"):
 import StoreGate.StoreGateConf as StoreGateConf
 svcMgr += StoreGateConf.StoreGateSvc("ConditionStore")
 
-if isSC:
-   from LArCabling.LArCablingAccess import LArOnOffIdMappingSC
-   LArOnOffIdMappingSC()
-else:
-   from LArCabling.LArCablingAccess import LArOnOffIdMapping
-   LArOnOffIdMapping()
+from LArCabling.LArCablingAccess import LArOnOffIdMapping
+LArOnOffIdMapping()
 
 from LArBadChannelTool.LArBadChannelAccess import LArBadChannelAccess
-LArBadChannelAccess(dbString=folderStr+dbStr+tagStr, isSC=isSC)
+LArBadChannelAccess(dbString=folderStr+dbStr+tagStr)
 
 if len(ExecutiveSummaryFile):
     from LArBadChannelTool.LArBadFebAccess import LArBadFebAccess
@@ -116,10 +110,6 @@ theLArBadChannels2Ascii=LArBadChannel2Ascii(SkipDisconnected=True)
 theLArBadChannels2Ascii.FileName=OutputFile
 theLArBadChannels2Ascii.WithMissing=False
 theLArBadChannels2Ascii.ExecutiveSummaryFile=ExecutiveSummaryFile
-theLArBadChannels2Ascii.SuperCell=isSC
-if isSC:
-  theLArBadChannels2Ascii.BCKey="LArBadChannelSC"
-  theLArBadChannels2Ascii.LArOnOffIdMapKey="LArOnOffIdMapSC"
 topSequence+=theLArBadChannels2Ascii
 
-svcMgr.IOVDbSvc.GlobalTag="CONDBR2-ES1PA-2022-06" 
+svcMgr.IOVDbSvc.GlobalTag="CONDBR2-ES1PA-2018-06" 

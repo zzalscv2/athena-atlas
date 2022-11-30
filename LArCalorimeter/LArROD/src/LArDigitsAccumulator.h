@@ -19,7 +19,6 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArAccumulatedDigitContainer.h"
 #include "LArIdentifier/LArOnlineID_Base.h"
-//#include "LArIdentifier/LArOnlineID.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 #include "StoreGate/StoreGateSvc.h"
 
@@ -30,7 +29,7 @@ public:
   LArDigitsAccumulator (const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
   StatusCode execute();
-  StatusCode finalize();
+  StatusCode finalize(){return StatusCode::SUCCESS;}
 
  /** 
    * @brief Class of intermediate accumulations.
@@ -41,22 +40,19 @@ public:
   class LArAccumulated{
   public:
     unsigned int m_ntrigger;
-    int m_nused;
-    unsigned int m_onlineId;
     std::vector<uint64_t>     m_samplesum;
     std::vector<uint64_t>     m_matrix;
-    LArAccumulated() : m_ntrigger(0), m_nused(0), m_onlineId(0) {};
+    LArAccumulated() : m_ntrigger(0) {};
   };
 
 private:
 
-  //const LArOnlineID* m_onlineHelper;
   const LArOnlineID_Base* m_onlineHelper;
 
   typedef std::vector<LArAccumulatedDigit*> ACCUMDIGIT_VEC;
   ACCUMDIGIT_VEC m_my_vec;
 
-  //SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibMapKey","LArCalibLineMap","SG Key of calib line mapping object"};
+  SG::ReadCondHandleKey<LArCalibLineMapping> m_calibMapKey{this,"CalibMapKey","LArCalibLineMap","SG Key of calib line mapping object"};
 
  /** 
    * @brief LArAccumulatedDigitContainer name.

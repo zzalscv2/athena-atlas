@@ -67,18 +67,6 @@ StatusCode LArDigits2Ntuple::initialize()
        ATH_MSG_ERROR( "addItem 'ELVL1Id' failed" );
        return sc;
     }
-  }else{
-    sc   = m_nt->addItem("ELVL1Id",m_ELVL1Id);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'ELVL1Id' failed" );
-      return sc;
-    }
-
-    sc	   = m_nt->addItem("Gain",m_gain,-1,3);
-    if (sc!=StatusCode::SUCCESS) {
-      ATH_MSG_ERROR( "addItem 'Gain' failed" );
-      return sc;
-    }
   }
 
   ATH_CHECK(m_contKey.initialize(m_contKey.key().size()) );

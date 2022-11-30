@@ -254,7 +254,7 @@ if not 'OutputOFCPoolFileDir' in dir():
    OutputOFCPoolFileDir = subprocess.getoutput("pwd")
 
 OFCFileTag = str(RunNumber)+"_"+Partition.replace("*","")
-OFCFileTag += str(Nsamples)+"samples"
+OFCFileTag += "_"+str(Nsamples)+"samples"
 
 if not 'OutputOFCRootFileName' in dir():
    OutputOFCRootFileName = "LArOFCPhys_"+OFCFileTag + ".root"
@@ -285,20 +285,20 @@ if "OFCBinFolder" not in dir():
 
 #output Folders:
 if "FolderOFC" not in dir():
-   if not SuperCells: FolderOFC   = "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+str(Nsamples)+"samples3bins17phases"
-   if SuperCells:     FolderOFC   = "/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/"+str(Nsamples)+"samples3bins17phases"
+   if not SuperCells: FolderOFC   = "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/5samples3bins17phases"
+   if SuperCells:     FolderOFC   = "/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/5samples3bins17phases"
 
 if "FolderShape" not in dir():
-   if not SuperCells: FolderShape = "/LAR/ElecCalibOfl/Shape/RTM/"+str(Nsamples)+"samples3bins17phases"
-   if SuperCells:     FolderShape = "/LAR/ElecCalibOflSC/Shape/RTM/"+str(Nsamples)+"samples3bins17phases"
+   if not SuperCells: FolderShape = "/LAR/ElecCalibOfl/Shape/RTM/5samples3bins17phases"
+   if SuperCells:     FolderShape = "/LAR/ElecCalibOflSC/Shape/RTM/5samples3bins17phases"
 
 if "FolderOFC2" not in dir():
-   if not SuperCells: FolderOFC2   = "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+str(Nsamples2)+"samples"
-   if SuperCells:     FolderOFC2   = "/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/"+str(Nsamples2)+"samples"
+   if not SuperCells: FolderOFC2   = "/LAR/ElecCalibOfl/OFC/PhysWave/RTM/5samples"
+   if SuperCells:     FolderOFC2   = "/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/5samples"
 
 if "FolderShape2" not in dir():
-   if not SuperCells: FolderShape2 = "/LAR/ElecCalibOfl/Shape/RTM/"+str(Nsamples2)+"samples"
-   if SuperCells:     FolderShape2 = "/LAR/ElecCalibOflSC/Shape/RTM/"+str(Nsamples2)+"samples"
+   if not SuperCells: FolderShape2 = "/LAR/ElecCalibOfl/Shape/RTM/5samples"
+   if SuperCells:     FolderShape2 = "/LAR/ElecCalibOflSC/Shape/RTM/5samples"
 
 
 rs=FolderTagResover()
@@ -796,8 +796,6 @@ if ( WriteNtuple ) :
    from LArCalibTools.LArCalibToolsConf import LArOFC2Ntuple 
    
    LArOFC2Ntuple1 = LArOFC2Ntuple("LArOFC2Ntuple1")
-   #LArOFC2Ntuple1.RealGeometry = True
-   #LArOFC2Ntuple1.OffId = True
    LArOFC2Ntuple1.ContainerKey = OFCKey
    LArOFC2Ntuple1.NtupleName   = OFCTreeName	   
    LArOFC2Ntuple1.AddFEBTempInfo   = False   
@@ -805,8 +803,6 @@ if ( WriteNtuple ) :
    topSequence+=LArOFC2Ntuple1
 
    LArOFC2Ntuple2 = LArOFC2Ntuple("LArOFC2Ntuple2")
-   #LArOFC2Ntuple2.RealGeometry = True
-   #LArOFC2Ntuple2.OffId = True
    LArOFC2Ntuple2.ContainerKey = OFCKey2
    LArOFC2Ntuple2.NtupleName   = OFCTreeName2 	   
    LArOFC2Ntuple2.AddFEBTempInfo   = False 	   
@@ -815,8 +811,6 @@ if ( WriteNtuple ) :
 
    if NColl > 0:
       LArOFC2Ntuple1mu = LArOFC2Ntuple("LArOFC2Ntuple1mu")
-      #LArOFC2Ntuple1mu.RealGeometry = True
-      #LArOFC2Ntuple1mu.OffId = True
       LArOFC2Ntuple1mu.ContainerKey = OFCKey+"_mu"
       LArOFC2Ntuple1mu.NtupleName   = OFCTreeName+"_mu"
       LArOFC2Ntuple1mu.AddFEBTempInfo   = False   
@@ -824,8 +818,6 @@ if ( WriteNtuple ) :
       topSequence+=LArOFC2Ntuple1mu
  
       LArOFC2Ntuple2mu = LArOFC2Ntuple("LArOFC2Ntuple2mu")
-      #LArOFC2Ntuple2mu.RealGeometry = True
-      #LArOFC2Ntuple2mu.OffId = True
       LArOFC2Ntuple2mu.ContainerKey = OFCKey2+"_mu"
       LArOFC2Ntuple2mu.NtupleName   = OFCTreeName2+"_mu"
       LArOFC2Ntuple2mu.AddFEBTempInfo   = False 	
