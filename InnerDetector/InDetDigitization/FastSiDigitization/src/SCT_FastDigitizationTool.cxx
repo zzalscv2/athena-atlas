@@ -189,10 +189,9 @@ StatusCode SCT_FastDigitizationTool::processAllSubEvents(const EventContext& ctx
       ATH_MSG_DEBUG ( "SiHitCollection found with " << p_collection->size() << " hits" );
       ++iColl;
     }
-  m_thpcsi = &thpcsi;
 
   // Process the Hits
-  CHECK(this->digitize(ctx));
+  CHECK(this->digitize(ctx, thpcsi));
 
   CHECK(this->createAndStoreRIOs(ctx));
   ATH_MSG_DEBUG ( "createAndStoreRIOs() succeeded" );
@@ -206,7 +205,7 @@ StatusCode SCT_FastDigitizationTool::mergeEvent(const EventContext& ctx)
 {
   if (m_thpcsi != nullptr)
     {
-      CHECK(this->digitize(ctx));
+      CHECK(this->digitize(ctx, *m_thpcsi));
     }
 
   //-----------------------------------------------------------------------
@@ -223,7 +222,8 @@ StatusCode SCT_FastDigitizationTool::mergeEvent(const EventContext& ctx)
 }
 
 
-StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
+StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
+                                              TimedHitCollection<SiHit>& thpcsi)
 {
   // truth info
   SG::WriteHandle< PRD_MultiTruthCollection > sctPrdTruth(m_sctPrdTruthKey, ctx);
@@ -251,7 +251,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx)
   TimedHitCollection<SiHit>::const_iterator i, e;
   if(!m_sctClusterMap) { m_sctClusterMap = new SCT_detElement_RIO_map; }
   else { m_sctClusterMap->clear(); }
-  while (m_thpcsi->nextDetectorElement(i, e))
+  while (thpcsi.nextDetectorElement(i, e))
     {
       SCT_detElement_RIO_map SCT_DetElClusterMap;
       std::vector<int> trkNo;
