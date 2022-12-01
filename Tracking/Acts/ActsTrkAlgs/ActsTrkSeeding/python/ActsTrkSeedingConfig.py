@@ -89,6 +89,12 @@ def ActsTrkSeedingFromAthenaCfg(flags):
         acc.merge(ActsTrkITkPixelSeedingFromAthenaCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsTrkITkStripSeedingFromAthenaCfg(flags))
+
+    if flags.Acts.doAnalysis:
+        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSeedAnalysisCfg, ActsTrkEstimatedTrackParamsAnalysisCfg
+        acc.merge(ActsTrkSeedAnalysisCfg(flags))
+        acc.merge(ActsTrkEstimatedTrackParamsAnalysisCfg(flags))
+
     return acc
 
 
@@ -145,5 +151,11 @@ def ActsTrkSeedingCfg(flags):
         acc.merge(ActsTrkITkPixelSeedingCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ActsTrkITkStripSeedingCfg(flags))
+
+    if flags.Acts.doAnalysis:
+        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSeedAnalysisCfg, ActsTrkEstimatedTrackParamsAnalysisCfg
+        acc.merge(ActsTrkSeedAnalysisCfg(flags))
+        acc.merge(ActsTrkEstimatedTrackParamsAnalysisCfg(flags))
+
     return acc
 

@@ -90,51 +90,67 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         acc.merge(BCM_ZeroSuppressionCfg(flags))
 
     #
-    # -- Pixel Clusterization
+    # --- Deducing flags
     #
-    if flags.Detector.EnableITkPixel:
-        #
-        # --- PixelClusterization algorithm
-        #
-        from InDetConfig.InDetPrepRawDataFormationConfig import ITkPixelClusterizationCfg
-        acc.merge(ITkPixelClusterizationCfg(flags))
+    doAthenaClustering = False
+    doActsClustering = False
+    doAthenaSpacePointFormation = False
+    doActsSpacePointFormation = False
+
+    from InDetConfig.ITkConfigFlags import TrackingComponent
+    if TrackingComponent.AthenaChain in flags.ITk.Tracking.recoChain:
+        doAthenaClustering = True
+        doAthenaSpacePointFormation = True
+    if TrackingComponent.ActsChain in flags.ITk.Tracking.recoChain:
+        doActsClustering = True
+        doActsSpacePointFormation = True
+    if TrackingComponent.ValidateActsClusters in flags.ITk.Tracking.recoChain:
+        doActsClustering = True
+        doAthenaSpacePointFormation = True
+    if TrackingComponent.ValidateActsSpacePoints in flags.ITk.Tracking.recoChain:
+        doAthenaClustering = True
+        doActsSpacePointFormation = True
+    if TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain:
+        doAthenaClustering = True
+        doActsSpacePointFormation = True
+
+    convertInDetClusters = doAthenaClustering and not doActsClustering and doActsSpacePointFormation
+    convertXAODClusters = doActsClustering and not doAthenaClustering and doAthenaSpacePointFormation
+    # TO-DO: flags for Space Point convertions [not available right now]
 
     #
-    # --- Strip Clusterization
+    # -- Configuration check (dependencies) is done by the scheduler
+    # -- We may want to put it here in the future as well
     #
-    if flags.Detector.EnableITkStrip:
-        #
-        # --- Strip Clusterization algorithm
-        #
-        from InDetConfig.InDetPrepRawDataFormationConfig import ITkStripClusterizationCfg
-        acc.merge(ITkStripClusterizationCfg(flags))
+         
+    #
+    # -- Clusterization Algorithms
+    #
+    if doAthenaClustering:
+        from InDetConfig.InDetPrepRawDataFormationConfig import AthenaTrkClusterizationCfg
+        acc.merge(AthenaTrkClusterizationCfg(flags))
+        
+    if doActsClustering:
+        from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkClusterizationCfg
+        acc.merge(ActsTrkClusterizationCfg(flags))
 
-
-    if flags.ITk.Tracking.convertInDetClusters and flags.ITk.Tracking.EnableNativexAODclusters:
-        raise RuntimeError(
-            "Competing flags ITk.Tracking.convertInDetClusters and ITk.Tracking.EnableNativexAODclusters both True!"
-        )
-
-    if flags.ITk.Tracking.convertInDetClusters and flags.Detector.EnableITkPixel and flags.Detector.EnableITkStrip:
+    #
+    # ---  Cluster EDM converters
+    #
+    if convertInDetClusters:
+        if not flags.Detector.EnableITkPixel or not flags.Detector.EnableITkStrip:
+            raise RuntimeError("Cluster EDM converter (InDet -> xAOD) must be activated for both Pixel and Strips")
         #
-        # --- Conversion algorithm for InDet clusters to xAOD clusters
+        # --- InDet -> xAOD Cluster EDM converter
         #
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkInDetToXAODClusterConversionCfg
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
 
-    if flags.ITk.Tracking.EnableNativexAODclusters:
-        if flags.Detector.EnableITkPixel:
-            from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkPixelClusterizationAlgCfg
-            acc.merge(ActsTrkITkPixelClusterizationAlgCfg(flags))
-
-        if flags.Detector.EnableITkStrip:
-            from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkStripClusterizationAlgCfg
-            acc.merge(ActsTrkITkStripClusterizationAlgCfg(flags))
-
-
-    if flags.ITk.Tracking.convertXAODClusters and flags.Detector.EnableITkPixel and flags.Detector.EnableITkStrip:
+    if convertXAODClusters:
+        if not flags.Detector.EnableITkPixel or not flags.Detector.EnableITkStrip:
+            raise RuntimeError("Cluster EDM converter (xAOD -> InDet) must be activated for both Pixel and Strips")
         #
-        # --- Conversion algorithm for xAOD clusters to xAOD clusters
+        # --- xAOD -> InDet Cluster EDM converter
         #
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkXAODToInDetClusterConversionCfg
         acc.merge(ITkXAODToInDetClusterConversionCfg(flags))
@@ -143,16 +159,18 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
     #
     # ----------- form SpacePoints from clusters in SCT and Pixels
     #
+    if doAthenaSpacePointFormation:
+        from InDetConfig.SiSpacePointFormationConfig import ITkSiTrackerSpacePointFinderCfg
+        acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
+
+    if doActsSpacePointFormation:
+        from TrkConfig.ActsTrkSpacePointFormationConfig import ActsTrkSpacePointFormationCfg
+        acc.merge(ActsTrkSpacePointFormationCfg(flags))
+
+
     #
-    from InDetConfig.SiSpacePointFormationConfig import ITkSiTrackerSpacePointFinderCfg
-    acc.merge(ITkSiTrackerSpacePointFinderCfg(flags))
-    if flags.ITk.Tracking.produceNewSpacePointContainer:
-        if flags.Detector.EnableITkPixel:
-            from TrkConfig.ActsTrkSpacePointFormationConfig import ActsTrkPixelSpacePointFormationCfg
-            acc.merge(ActsTrkPixelSpacePointFormationCfg(flags))
-        if flags.Detector.EnableITkStrip:
-            from TrkConfig.ActsTrkSpacePointFormationConfig import ActsTrkStripSpacePointFormationCfg
-            acc.merge(ActsTrkStripSpacePointFormationCfg(flags))
+    # --- Space Point EDM converters
+    #
 
     # this truth must only be done if you do PRD and SpacePointformation
     # If you only do the latter (== running on ESD) then the needed input (simdata)

@@ -252,3 +252,18 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     
     acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name+"_"+flags.InDet.Tracking.ActivePass.name, **kwargs))
     return acc
+
+def AthenaTrkClusterizationCfg(flags):
+    acc = ComponentAccumulator()
+    #
+    # -- Pixel Clusterization
+    #
+    if flags.Detector.EnableITkPixel:
+        acc.merge(ITkPixelClusterizationCfg(flags))
+    #
+    # --- Strip Clusterization
+    #
+    if flags.Detector.EnableITkStrip:
+        acc.merge(ITkStripClusterizationCfg(flags))
+
+    return acc

@@ -27,13 +27,58 @@ def ITkTrackingSiPatternCfg(flags,
     #
     # ------------------------------------------------------------
 
-    from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
-    SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
-    if flags.ITk.Tracking.ActivePass.extension == "ConversionFinding":
-        from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderROIConvCfg
-        SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
-    acc.merge(SiSPSeededTrackFinderCfg(flags,
-                                       TracksLocation = SiSPSeededTrackCollectionKey))
+    #
+    # --- Deducing flags
+    #
+    doSeedingActs = False
+    doTrackFindingAthena = False
+    doTrackFindingActs = False
+
+    from InDetConfig.ITkConfigFlags import TrackingComponent
+    if TrackingComponent.AthenaChain in flags.ITk.Tracking.recoChain:
+        doTrackFindingAthena = True
+    if TrackingComponent.ActsChain in flags.ITk.Tracking.recoChain:
+        doSeedingActs = True
+        doTrackFindingActs = True
+    if TrackingComponent.ValidateActsClusters in flags.ITk.Tracking.recoChain:
+        doTrackFindingAthena = True        
+    if TrackingComponent.ValidateActsSpacePoints in flags.ITk.Tracking.recoChain:
+        doSeedingActs = True
+        doTrackFindingAthena = True
+    if TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain:
+        doSeedingActs = True
+        doTrackFindingAthena = True
+
+    # Seeding does not have a real EDM converter (nor we want it!)
+    # There is however an Acts-based SiSpacePointSeedMaker that acts the same way (Acts -> Athena EDM converter)
+    # this is used in ITkSiSPSeededTrackFinderCfg
+    # No Athena -> Acts EDM converter is possible
+
+    if doTrackFindingAthena:
+        from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
+        SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
+        if flags.ITk.Tracking.ActivePass.extension == "ConversionFinding":
+            from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderROIConvCfg
+            SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
+        acc.merge(SiSPSeededTrackFinderCfg(flags,
+                                           TracksLocation = SiSPSeededTrackCollectionKey))
+
+    # Not schedule the following if doTrackFindingActs is False
+    # this is needed in case we are scheduling the Acts-based SiSpacePointSeedMaker but not the Acts track finding
+    doSeedingActs = doSeedingActs and doTrackFindingActs
+    if doSeedingActs:
+        from ActsTrkSeeding.ActsTrkSeedingConfig import ActsTrkSeedingFromAthenaCfg
+        acc.merge(ActsTrkSeedingFromAthenaCfg(flags))
+
+        if flags.ITk.Tracking.ActivePass.extension == "ConversionFinding":
+            from AthenaCommon.Logging import logging 
+            log = logging.getLogger( 'ITkTrackingSiPattern' )
+            log.warning('ROI-based track-finding is not available yet in ACTS, so the default one is used')
+
+    if doTrackFindingActs:
+        # To be added
+        pass
+
     # ------------------------------------------------------------
     #
     # ---------- Ambiguity solving
