@@ -363,6 +363,12 @@ def createTriggerRecoFlags():
         return createHTTConfigFlags()
     flags.addFlagsCategory("Trigger.HTT", __httFlags, prefix=True )
 
+    # L1 MUCTPI trigger flags
+    def __muctpiFlags():
+        from TrigT1MuctpiPhase1.TrigMUCTPIConfigFlags import createTrigMUCTPIConfigFlags
+        return createTrigMUCTPIConfigFlags()
+    flags.addFlagsCategory('Trigger.MUCTPI', __muctpiFlags )
+
     return flags
 
 if __name__ == "__main__":
