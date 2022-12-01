@@ -616,7 +616,7 @@ ExtraVariables = ["Photons.pt.eta.phi.m",
 ExtraVariables += ["Muons.etaLayer1Hits.etaLayer2Hits.etaLayer3Hits.etaLayer4Hits.phiLayer1Hits.phiLayer2Hits.phiLayer3Hits.phiLayer4Hits",
                    "Muons.numberOfTriggerEtaLayers.numberOfPhiLayers",
                    "CombinedMuonTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits", 
-                   "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz",
+                   "InDetTrackParticles.numberOfTRTHits.numberOfTRTHighThresholdHits.vx.vy.vz.radiusOfFirstHit",
                    "PrimaryVertices.chiSquared.covariance"]
 
 

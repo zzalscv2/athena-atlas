@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #############################################
 # Heavy flavour from tt tools
@@ -255,6 +255,12 @@ DSIDList=[
   601227,
   601239,
   601240,
+  601491,
+  601492,
+  601495,
+  601496,
+  601497,
+  601498,
   ]
 
 import PyUtils.AthFile as af

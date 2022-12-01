@@ -133,13 +133,13 @@ namespace top {
     if (v_status155_top.size() == 1 && v_status3_top.size() == 0) {
       top = v_status155_top[0];
     }
-    // If there are tops with other status this must be a Pythia8 event, so use them.
-    if (v_statusOther_top.size() == 1 && v_status155_top.size() == 0 && v_status3_top.size() == 0) {
-      top = v_statusOther_top[0];
-    }
-    // If there are status 155 tops this must be a Herwig event, so use the status 155s.
+    // If there are status 11 tops this must be a Herwig event, so use the status 11s.
     if (v_status11_top.size() == 1 && v_status3_top.size() == 0) {
       top = v_status11_top[0];
+    }
+    // If there are tops with other status this must be a Pythia8 event, so use them.
+    if (v_statusOther_top.size() == 1 && v_status155_top.size() == 0 && v_status3_top.size() == 0  && v_status11_top.size() == 0) {
+      top = v_statusOther_top[0];
     }
 
     /// Step5: if everything worked, set the 4-vector to its value and return true

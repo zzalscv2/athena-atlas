@@ -12,6 +12,8 @@
 
 namespace CP
 {
+  class IReentrantSystematicsTool;
+
 
   class SystematicRegistry
   {
@@ -33,7 +35,7 @@ namespace CP
     // Interface methods for editing the registry
 
     /// effects: register all the systematics from the tool
-    SystematicCode registerSystematics (const ISystematicsTool& tool);
+    SystematicCode registerSystematics (const IReentrantSystematicsTool& tool);
 
     /// description: add a systematic to the global registry set
     void registerSystematic(const SystematicVariation& systematic);

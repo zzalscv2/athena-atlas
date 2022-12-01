@@ -30,7 +30,7 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
 
   if (!m_selectionDecoration.empty()) {
     for (const std::string &chain : m_trigList) {
-      m_selectionAccessors.emplace_back(m_selectionDecoration + "_" + RCU::substitute (chain, "-", "_"));
+      m_selectionAccessors.emplace_back(m_selectionDecoration + "_" + RCU::substitute(RCU::substitute(chain, ".", "p"), "-", "_"));
     }
   }
 
@@ -41,7 +41,7 @@ StatusCode CP::TrigEventSelectionAlg::initialize()
 
 StatusCode CP::TrigEventSelectionAlg::execute()
 {
-  EL::FilterReporter filter (m_filterParams, false);
+  EL::FilterReporter filter (m_filterParams, m_noFilter.value());
 
   if (m_trigList.empty()) {
     filter.setPassed(true);
