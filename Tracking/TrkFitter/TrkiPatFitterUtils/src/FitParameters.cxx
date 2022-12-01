@@ -7,6 +7,11 @@
  ***************************************************************************/
 
 #include "TrkiPatFitterUtils/FitParameters.h"
+
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "TrkEventPrimitives/ParamDefs.h"
@@ -15,39 +20,35 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkiPatFitterUtils/ExtrapolationType.h"
 #include "TrkiPatFitterUtils/ParameterType.h"
-#include <cmath>
-#include <iomanip>
-#include <iostream>
 
 namespace Trk {
 
 FitParameters::FitParameters(const Perigee& perigee)
-  : m_cosPhi1(0.)
-  , m_cosTheta1(0.)
-  , m_d0(perigee.parameters()[Trk::d0])
-  , m_differences(nullptr)
-  , m_extremeMomentum(false)
-  , m_finalCovariance(nullptr)
-  , m_firstAlignmentParameter(0)
-  , m_firstScatteringParameter(0)
-  , m_fitEnergyDeposit(false)
-  , m_fitMomentum(true)
-  , m_fullCovariance(nullptr)
-  , m_minEnergyDeposit(0.)
-  , m_numberAlignments(0)
-  , m_numberOscillations(0)
-  , m_numberParameters(0)
-  , m_numberScatterers(0)
-  , m_oldDifference(0.)
-  , m_perigee(&perigee)
-  , m_phiInstability(false)
-  , m_qOverP1(0.)
-  , m_sinPhi1(0.)
-  , m_sinTheta1(0.)
-  , m_surface(&perigee.associatedSurface())
-  , m_vertex(perigee.associatedSurface().center())
-  , m_z0(perigee.position().z())
-{
+    : m_cosPhi1(0.),
+      m_cosTheta1(0.),
+      m_d0(perigee.parameters()[Trk::d0]),
+      m_differences(nullptr),
+      m_extremeMomentum(false),
+      m_finalCovariance(nullptr),
+      m_firstAlignmentParameter(0),
+      m_firstScatteringParameter(0),
+      m_fitEnergyDeposit(false),
+      m_fitMomentum(true),
+      m_fullCovariance(nullptr),
+      m_minEnergyDeposit(0.),
+      m_numberAlignments(0),
+      m_numberOscillations(0),
+      m_numberParameters(0),
+      m_numberScatterers(0),
+      m_oldDifference(0.),
+      m_perigee(&perigee),
+      m_phiInstability(false),
+      m_qOverP1(0.),
+      m_sinPhi1(0.),
+      m_sinTheta1(0.),
+      m_surface(&perigee.associatedSurface()),
+      m_vertex(perigee.associatedSurface().center()),
+      m_z0(perigee.position().z()) {
   Amg::Vector3D momentum = perigee.momentum();
   double ptInv0 = 1. / momentum.perp();
   m_cosPhi = ptInv0 * momentum.x();
@@ -56,106 +57,98 @@ FitParameters::FitParameters(const Perigee& perigee)
   m_sinTheta = 1. / std::sqrt(1. + m_cotTheta * m_cotTheta);
   m_cosTheta = m_cotTheta * m_sinTheta;
   m_qOverP = perigee.charge() * ptInv0 * m_sinTheta;
-  m_position = Amg::Vector3D(
-    m_vertex.x() - m_d0 * m_sinPhi, m_vertex.y() + m_d0 * m_cosPhi, m_z0);
+  m_position = Amg::Vector3D(m_vertex.x() - m_d0 * m_sinPhi,
+                             m_vertex.y() + m_d0 * m_cosPhi, m_z0);
 }
 
-FitParameters::FitParameters(double d0,
-                             double z0,
-                             double cosPhi,
-                             double sinPhi,
-                             double cotTheta,
-                             double ptInv0,
+FitParameters::FitParameters(double d0, double z0, double cosPhi, double sinPhi,
+                             double cotTheta, double ptInv0,
                              const PerigeeSurface& surface)
-  : m_cosPhi(cosPhi)
-  , m_cosPhi1(0.)
-  , m_cosTheta1(0.)
-  , m_cotTheta(cotTheta)
-  , m_d0(d0)
-  , m_differences(nullptr)
-  , m_extremeMomentum(false)
-  , m_finalCovariance(nullptr)
-  , m_firstAlignmentParameter(0)
-  , m_firstScatteringParameter(0)
-  , m_fitEnergyDeposit(false)
-  , m_fitMomentum(true)
-  , m_fullCovariance(nullptr)
-  , m_minEnergyDeposit(0.)
-  , m_numberAlignments(0)
-  , m_numberOscillations(0)
-  , m_numberParameters(0)
-  , m_numberScatterers(0)
-  , m_oldDifference(0.)
-  , m_perigee(nullptr)
-  , m_phiInstability(false)
-  , m_qOverP1(0.)
-  , m_sinPhi(sinPhi)
-  , m_sinPhi1(0.)
-  , m_sinTheta1(0.)
-  , m_surface(&surface)
-  , m_vertex(surface.center())
-  , m_z0(z0)
-{
+    : m_cosPhi(cosPhi),
+      m_cosPhi1(0.),
+      m_cosTheta1(0.),
+      m_cotTheta(cotTheta),
+      m_d0(d0),
+      m_differences(nullptr),
+      m_extremeMomentum(false),
+      m_finalCovariance(nullptr),
+      m_firstAlignmentParameter(0),
+      m_firstScatteringParameter(0),
+      m_fitEnergyDeposit(false),
+      m_fitMomentum(true),
+      m_fullCovariance(nullptr),
+      m_minEnergyDeposit(0.),
+      m_numberAlignments(0),
+      m_numberOscillations(0),
+      m_numberParameters(0),
+      m_numberScatterers(0),
+      m_oldDifference(0.),
+      m_perigee(nullptr),
+      m_phiInstability(false),
+      m_qOverP1(0.),
+      m_sinPhi(sinPhi),
+      m_sinPhi1(0.),
+      m_sinTheta1(0.),
+      m_surface(&surface),
+      m_vertex(surface.center()),
+      m_z0(z0) {
   m_sinTheta = 1. / std::sqrt(1. + m_cotTheta * m_cotTheta);
   m_cosTheta = m_cotTheta * m_sinTheta;
   m_qOverP = ptInv0 * m_sinTheta;
   m_z0 = z0;
-  m_position = Amg::Vector3D(
-    m_vertex.x() - m_d0 * m_sinPhi, m_vertex.y() + m_d0 * m_cosPhi, m_z0);
+  m_position = Amg::Vector3D(m_vertex.x() - m_d0 * m_sinPhi,
+                             m_vertex.y() + m_d0 * m_cosPhi, m_z0);
 }
 
 FitParameters::FitParameters(const FitParameters& parameters)
-  : m_alignmentAngle(parameters.m_alignmentAngle)
-  , m_alignmentAngleConstraint(parameters.m_alignmentAngleConstraint)
-  , m_alignmentOffset(parameters.m_alignmentOffset)
-  , m_alignmentOffsetConstraint(parameters.m_alignmentOffsetConstraint)
-  , m_cosPhi(parameters.m_cosPhi)
-  , m_cosPhi1(parameters.m_cosPhi1)
-  , m_cosTheta(parameters.m_cosTheta)
-  , m_cosTheta1(parameters.m_cosTheta1)
-  , m_cotTheta(parameters.m_cotTheta)
-  , m_d0(parameters.m_d0)
-  , m_differences(nullptr)
-  , m_extremeMomentum(parameters.m_extremeMomentum)
-  , m_finalCovariance(parameters.m_finalCovariance)
-  , m_firstAlignmentParameter(parameters.m_firstAlignmentParameter)
-  , m_firstScatteringParameter(parameters.m_firstScatteringParameter)
-  , m_fitEnergyDeposit(parameters.m_fitEnergyDeposit)
-  , m_fitMomentum(parameters.m_fitMomentum)
-  , m_fullCovariance(parameters.m_fullCovariance)
-  , m_minEnergyDeposit(parameters.m_minEnergyDeposit)
-  , m_numberAlignments(parameters.m_numberAlignments)
-  , m_numberOscillations(parameters.m_numberOscillations)
-  , m_numberParameters(parameters.m_numberParameters)
-  , m_numberScatterers(parameters.m_numberScatterers)
-  , m_oldDifference(parameters.m_oldDifference)
-  , m_perigee(parameters.m_perigee)
-  , m_phiInstability(parameters.m_phiInstability)
-  , m_position(parameters.m_position)
-  , m_qOverP(parameters.m_qOverP)
-  , m_qOverP1(parameters.m_qOverP1)
-  , m_scattererPhi(parameters.m_scattererPhi)
-  , m_scattererTheta(parameters.m_scattererTheta)
-  , m_sinPhi(parameters.m_sinPhi)
-  , m_sinPhi1(parameters.m_sinPhi1)
-  , m_sinTheta(parameters.m_sinTheta)
-  , m_sinTheta1(parameters.m_sinTheta1)
-  , m_surface(parameters.m_surface)
-  , m_vertex(parameters.m_vertex)
-  , m_z0(parameters.m_z0)
-{
+    : m_alignmentAngle(parameters.m_alignmentAngle),
+      m_alignmentAngleConstraint(parameters.m_alignmentAngleConstraint),
+      m_alignmentOffset(parameters.m_alignmentOffset),
+      m_alignmentOffsetConstraint(parameters.m_alignmentOffsetConstraint),
+      m_cosPhi(parameters.m_cosPhi),
+      m_cosPhi1(parameters.m_cosPhi1),
+      m_cosTheta(parameters.m_cosTheta),
+      m_cosTheta1(parameters.m_cosTheta1),
+      m_cotTheta(parameters.m_cotTheta),
+      m_d0(parameters.m_d0),
+      m_differences(nullptr),
+      m_extremeMomentum(parameters.m_extremeMomentum),
+      m_finalCovariance(parameters.m_finalCovariance),
+      m_firstAlignmentParameter(parameters.m_firstAlignmentParameter),
+      m_firstScatteringParameter(parameters.m_firstScatteringParameter),
+      m_fitEnergyDeposit(parameters.m_fitEnergyDeposit),
+      m_fitMomentum(parameters.m_fitMomentum),
+      m_fullCovariance(parameters.m_fullCovariance),
+      m_minEnergyDeposit(parameters.m_minEnergyDeposit),
+      m_numberAlignments(parameters.m_numberAlignments),
+      m_numberOscillations(parameters.m_numberOscillations),
+      m_numberParameters(parameters.m_numberParameters),
+      m_numberScatterers(parameters.m_numberScatterers),
+      m_oldDifference(parameters.m_oldDifference),
+      m_perigee(parameters.m_perigee),
+      m_phiInstability(parameters.m_phiInstability),
+      m_position(parameters.m_position),
+      m_qOverP(parameters.m_qOverP),
+      m_qOverP1(parameters.m_qOverP1),
+      m_scattererPhi(parameters.m_scattererPhi),
+      m_scattererTheta(parameters.m_scattererTheta),
+      m_sinPhi(parameters.m_sinPhi),
+      m_sinPhi1(parameters.m_sinPhi1),
+      m_sinTheta(parameters.m_sinTheta),
+      m_sinTheta1(parameters.m_sinTheta1),
+      m_surface(parameters.m_surface),
+      m_vertex(parameters.m_vertex),
+      m_z0(parameters.m_z0) {
   if (parameters.m_differences)
     m_differences = new Amg::VectorX(*(parameters.m_differences));
 }
 
-FitParameters::~FitParameters(void)
-{
+FitParameters::~FitParameters(void) {
   delete m_differences;
 }
 
-void
-FitParameters::addAlignment(bool constrained, double angle, double offset)
-{
+void FitParameters::addAlignment(bool constrained, double angle,
+                                 double offset) {
   m_alignmentAngle[m_numberAlignments] = angle;
   m_alignmentOffset[m_numberAlignments] = offset;
   if (constrained) {
@@ -165,70 +158,52 @@ FitParameters::addAlignment(bool constrained, double angle, double offset)
   ++m_numberAlignments;
 }
 
-void
-FitParameters::addScatterer(double phi, double theta)
-{
+void FitParameters::addScatterer(double phi, double theta) {
   m_scattererPhi[m_numberScatterers] = phi;
   m_scattererTheta[m_numberScatterers] = theta;
   ++m_numberScatterers;
 }
 
-const Surface*
-FitParameters::associatedSurface(void) const
-{
+const Surface* FitParameters::associatedSurface(void) const {
   if (!m_perigee)
     return nullptr;
   return &m_perigee->associatedSurface();
 }
 
-void
-FitParameters::covariance(Amg::MatrixX* finalCovariance,
-                          const Amg::MatrixX* fullCovariance)
-{
+void FitParameters::covariance(Amg::MatrixX* finalCovariance,
+                               const Amg::MatrixX* fullCovariance) {
   m_finalCovariance = finalCovariance;
   m_fullCovariance = fullCovariance;
 }
 
-void
-FitParameters::d0(double value)
-{
+void FitParameters::d0(double value) {
   m_d0 = value;
-  m_position = Amg::Vector3D(
-    m_vertex.x() - m_d0 * m_sinPhi, m_vertex.y() + m_d0 * m_cosPhi, m_z0);
+  m_position = Amg::Vector3D(m_vertex.x() - m_d0 * m_sinPhi,
+                             m_vertex.y() + m_d0 * m_cosPhi, m_z0);
 }
 
-void
-FitParameters::extremeMomentum(bool value)
-{
+void FitParameters::extremeMomentum(bool value) {
   m_extremeMomentum = value;
   m_fitEnergyDeposit = !value;
 }
 
-void
-FitParameters::fitEnergyDeposit(double minEnergyDeposit)
-{
+void FitParameters::fitEnergyDeposit(double minEnergyDeposit) {
   m_fitEnergyDeposit = true;
   m_minEnergyDeposit = minEnergyDeposit;
 }
 
-void
-FitParameters::fitMomentum(bool value)
-{
+void FitParameters::fitMomentum(bool value) {
   m_fitMomentum = value;
 }
 
-TrackSurfaceIntersection*
-FitParameters::intersection(void) const
-{
+TrackSurfaceIntersection* FitParameters::intersection(void) const {
   return new TrackSurfaceIntersection(
-    m_position,
-    Amg::Vector3D(m_cosPhi * m_sinTheta, m_sinPhi * m_sinTheta, m_cosTheta),
-    0.);
+      m_position,
+      Amg::Vector3D(m_cosPhi * m_sinTheta, m_sinPhi * m_sinTheta, m_cosTheta),
+      0.);
 }
 
-void
-FitParameters::numberAlignments(int numberAlignments)
-{
+void FitParameters::numberAlignments(int numberAlignments) {
   m_numberAlignments = 0;
   if (!numberAlignments)
     return;
@@ -238,18 +213,14 @@ FitParameters::numberAlignments(int numberAlignments)
   m_alignmentOffsetConstraint = std::vector<double>(numberAlignments, 0.);
 }
 
-void
-FitParameters::numberParameters(int numberParameters)
-{
+void FitParameters::numberParameters(int numberParameters) {
   m_numberParameters = numberParameters;
   m_firstAlignmentParameter = numberParameters - 2 * m_numberAlignments - 1;
   m_firstScatteringParameter =
-    m_firstAlignmentParameter - 2 * m_numberScatterers;
+      m_firstAlignmentParameter - 2 * m_numberScatterers;
 }
 
-void
-FitParameters::numberScatterers(int numberScatterers)
-{
+void FitParameters::numberScatterers(int numberScatterers) {
   m_numberScatterers = 0;
   if (!numberScatterers)
     return;
@@ -257,9 +228,8 @@ FitParameters::numberScatterers(int numberScatterers)
   m_scattererTheta = std::vector<double>(numberScatterers, 0.);
 }
 
-const Amg::MatrixX
-FitParameters::parameterDifference(const Amg::VectorX& parameters) const
-{
+const Amg::MatrixX FitParameters::parameterDifference(
+    const Amg::VectorX& parameters) const {
   Amg::MatrixX difference(1, 5);
   difference(0, 0) = parameters(0) - m_d0;
   difference(0, 1) = parameters(1) - m_z0;
@@ -267,15 +237,13 @@ FitParameters::parameterDifference(const Amg::VectorX& parameters) const
 
   // FIXME: diff is now delta(theta) : check sign
   // difference[0][3] = parameters[4] - m_cotTheta;
-  difference(0, 3) =
-    std::sin(parameters(4)) * m_cosTheta - std::cos(parameters(4)) * m_sinTheta;
+  difference(0, 3) = std::sin(parameters(4)) * m_cosTheta -
+                     std::cos(parameters(4)) * m_sinTheta;
   difference(0, 4) = (parameters(5) - m_qOverP) * Gaudi::Units::TeV;
   return difference;
 }
 
-void
-FitParameters::performCutStep(double cutStep)
-{
+void FitParameters::performCutStep(double cutStep) {
   // revert parameters to previous parameter change with cutStep*value
   // i.e. 0 < cutstep < 1 such that cutStep = 0 gives complete reversion
 
@@ -300,9 +268,7 @@ FitParameters::performCutStep(double cutStep)
   // std::cout << " after cutstep " << std::endl;
 }
 
-Perigee*
-FitParameters::perigee(void) const
-{
+Perigee* FitParameters::perigee(void) const {
   // copy 'final' covariance
   AmgSymMatrix(5) covMatrix = AmgSymMatrix(5)(*m_finalCovariance);
   double pT = std::abs(m_sinTheta / m_qOverP);
@@ -312,25 +278,20 @@ FitParameters::perigee(void) const
   Amg::Vector3D momentum(pT * m_cosPhi, pT * m_sinPhi, pT * m_cotTheta);
 
   if (m_surface) {
-    return new Perigee(m_position,
-                       momentum,
-                       charge,
+    return new Perigee(m_position, momentum, charge,
                        dynamic_cast<const Trk::PerigeeSurface&>(*m_surface),
                        std::move(covMatrix));
   } else {
-    return new Perigee(m_position, momentum, charge, m_vertex, std::move(covMatrix));
+    return new Perigee(m_position, momentum, charge, m_vertex,
+                       std::move(covMatrix));
   }
 }
 
-bool
-FitParameters::phiInstability(void) const
-{
+bool FitParameters::phiInstability(void) const {
   return m_phiInstability;
 }
 
-void
-FitParameters::print(MsgStream& log) const
-{
+void FitParameters::print(MsgStream& log) const {
   log << std::setiosflags(std::ios::fixed | std::ios::right) << std::setw(16)
       << std::setprecision(1) << m_position.perp() << " perigee radius"
       << std::setw(10) << std::setprecision(3) << m_d0 << " d0" << std::setw(11)
@@ -341,9 +302,7 @@ FitParameters::print(MsgStream& log) const
       << m_sinTheta / (m_qOverP * Gaudi::Units::GeV) << " pT (GeV)";
 }
 
-void
-FitParameters::printCovariance(MsgStream& log) const
-{
+void FitParameters::printCovariance(MsgStream& log) const {
   double error00 = 0.;
   const Amg::MatrixX& cov = *m_finalCovariance;
   if (cov(0, 0) > 0.)
@@ -380,9 +339,7 @@ FitParameters::printCovariance(MsgStream& log) const
       << " Cz0theta" << std::endl;
 }
 
-void
-FitParameters::printVerbose(MsgStream& log) const
-{
+void FitParameters::printVerbose(MsgStream& log) const {
   log << std::endl;
 
   if (m_differences && m_differences->size()) {
@@ -475,21 +432,15 @@ FitParameters::printVerbose(MsgStream& log) const
   log << std::endl;
 }
 
-void
-FitParameters::qOverP(double value)
-{
+void FitParameters::qOverP(double value) {
   m_qOverP = value;
 }
 
-void
-FitParameters::qOverP1(double value)
-{
+void FitParameters::qOverP1(double value) {
   m_qOverP1 = value;
 }
 
-void
-FitParameters::reset(const FitParameters& parameters)
-{
+void FitParameters::reset(const FitParameters& parameters) {
   // method is needed to complement copy in places where design uses
   // a reference to a FitParameter pointer
   // essentially a copy, with history of previous iteration removed
@@ -547,34 +498,26 @@ FitParameters::reset(const FitParameters& parameters)
   m_oldDifference = 0.;
 }
 
-ScatteringAngles
-FitParameters::scatteringAngles(const FitMeasurement& fitMeasurement,
-                                int scatterer) const
-{
+ScatteringAngles FitParameters::scatteringAngles(
+    const FitMeasurement& fitMeasurement, int scatterer) const {
   // scattering sigma used in chi2 computation
   double scattererSigmaTheta = 1. / fitMeasurement.weight();
   double scattererSigmaPhi =
-    scattererSigmaTheta /
-    fitMeasurement.intersection(FittedTrajectory).direction().perp();
+      scattererSigmaTheta /
+      fitMeasurement.intersection(FittedTrajectory).direction().perp();
   if (scatterer < 0) {
     return {0., 0., scattererSigmaPhi, scattererSigmaTheta};
   } else {
-    return {m_scattererPhi[scatterer],
-                            m_scattererTheta[scatterer],
-                            scattererSigmaPhi,
-                            scattererSigmaTheta};
+    return {m_scattererPhi[scatterer], m_scattererTheta[scatterer],
+            scattererSigmaPhi, scattererSigmaTheta};
   }
 }
 
-void
-FitParameters::setPhiInstability(void)
-{
+void FitParameters::setPhiInstability(void) {
   m_phiInstability = true;
 }
 
-Perigee*
-FitParameters::startingPerigee(void) const
-{
+Perigee* FitParameters::startingPerigee(void) const {
   // create momentum
   double pT = std::abs(m_sinTheta / m_qOverP);
   double charge = 1.;
@@ -585,11 +528,8 @@ FitParameters::startingPerigee(void) const
   return new Perigee(m_position, momentum, charge, m_vertex);
 }
 
-const TrackParameters*
-FitParameters::trackParameters(MsgStream& log,
-                               const FitMeasurement& measurement,
-                               bool withCovariance)
-{
+const TrackParameters* FitParameters::trackParameters(
+    MsgStream& log, const FitMeasurement& measurement, bool withCovariance) {
   // make checks necessary for the TrackParameters to be computed
   //   1) a Surface is required
   if (!measurement.surface()) {
@@ -608,10 +548,10 @@ FitParameters::trackParameters(MsgStream& log,
 
   //   3) the intersection position has to lie sufficiently close to the Surface
   const TrackSurfaceIntersection& intersection =
-    measurement.intersection(FittedTrajectory);
+      measurement.intersection(FittedTrajectory);
   Amg::Vector2D localPos;
   if (!measurement.surface()->globalToLocal(
-        intersection.position(), intersection.direction(), localPos)) {
+          intersection.position(), intersection.direction(), localPos)) {
     log << MSG::WARNING
         << "FitParameters::trackParameters - globalToLocal failure" << endmsg;
     return nullptr;
@@ -655,9 +595,9 @@ FitParameters::trackParameters(MsgStream& log,
       double sinTheta = direction.perp();
       if (m_fitEnergyDeposit && measurement.afterCalo()) {
         double deltaPhi =
-          (direction.y() * m_cosPhi1 - direction.x() * m_sinPhi1) / sinTheta;
+            (direction.y() * m_cosPhi1 - direction.x() * m_sinPhi1) / sinTheta;
         double deltaTheta =
-          (sinTheta * m_cosTheta1 - direction.z() * m_sinTheta1);
+            (sinTheta * m_cosTheta1 - direction.z() * m_sinTheta1);
         jacobian(0, 5) *= Gaudi::Units::TeV;
         jacobian(1, 5) *= Gaudi::Units::TeV;
         jacobian(2, 5) = deltaPhi / measurement.qOverP();
@@ -665,9 +605,9 @@ FitParameters::trackParameters(MsgStream& log,
         jacobian(4, 5) = measurement.qOverP() / m_qOverP1;
       } else {
         double deltaPhi =
-          (direction.y() * m_cosPhi - direction.x() * m_sinPhi) / sinTheta;
+            (direction.y() * m_cosPhi - direction.x() * m_sinPhi) / sinTheta;
         double deltaTheta =
-          (sinTheta * m_cosTheta - direction.z() * m_sinTheta);
+            (sinTheta * m_cosTheta - direction.z() * m_sinTheta);
         jacobian(0, 4) *= Gaudi::Units::TeV;
         jacobian(1, 4) *= Gaudi::Units::TeV;
         jacobian(2, 4) = deltaPhi / measurement.qOverP();
@@ -680,8 +620,8 @@ FitParameters::trackParameters(MsgStream& log,
 
     // similarity transform
     covMatrix = AmgSymMatrix(5)(
-      jacobian * m_fullCovariance->block(0, 0, lastParameter, lastParameter) *
-      jacobian.transpose());
+        jacobian * m_fullCovariance->block(0, 0, lastParameter, lastParameter) *
+        jacobian.transpose());
   }
 
   double phi = intersection.direction().phi();
@@ -698,67 +638,45 @@ FitParameters::trackParameters(MsgStream& log,
   // finally can create the appropriate 'concrete' TrackParameters
   const TrackParameters* parameters = nullptr;
   const StraightLineSurface* line =
-    dynamic_cast<const StraightLineSurface*>(measurement.surface());
+      dynamic_cast<const StraightLineSurface*>(measurement.surface());
   if (line) {
-    parameters = new AtaStraightLine(localPos[locR],
-                                     localPos[locZ],
-                                     phi,
-                                     theta,
-                                     measurement.qOverP(),
-                                     *line,
-                                     std::move(covMatrix));
+    parameters =
+        new AtaStraightLine(localPos[locR], localPos[locZ], phi, theta,
+                            measurement.qOverP(), *line, std::move(covMatrix));
     return parameters;
   }
 
   const PlaneSurface* plane =
-    dynamic_cast<const PlaneSurface*>(measurement.surface());
+      dynamic_cast<const PlaneSurface*>(measurement.surface());
   if (plane) {
-    parameters = new AtaPlane(localPos[locR],
-                              localPos[locZ],
-                              phi,
-                              theta,
-                              measurement.qOverP(),
-                              *plane,
-                              std::move(covMatrix));
+    parameters =
+        new AtaPlane(localPos[locR], localPos[locZ], phi, theta,
+                     measurement.qOverP(), *plane, std::move(covMatrix));
     return parameters;
   }
 
   const CylinderSurface* cylinder =
-    dynamic_cast<const CylinderSurface*>(measurement.surface());
+      dynamic_cast<const CylinderSurface*>(measurement.surface());
   if (cylinder) {
-    parameters = new AtaCylinder(localPos[locR],
-                                 localPos[locZ],
-                                 phi,
-                                 theta,
-                                 measurement.qOverP(),
-                                 *cylinder,
-                                 std::move(covMatrix));
+    parameters =
+        new AtaCylinder(localPos[locR], localPos[locZ], phi, theta,
+                        measurement.qOverP(), *cylinder, std::move(covMatrix));
     return parameters;
   }
 
   const DiscSurface* disc =
-    dynamic_cast<const DiscSurface*>(measurement.surface());
+      dynamic_cast<const DiscSurface*>(measurement.surface());
   if (disc) {
-    parameters = new AtaDisc(localPos[locR],
-                             localPos[locZ],
-                             phi,
-                             theta,
-                             measurement.qOverP(),
-                             *disc,
-                             std::move(covMatrix));
+    parameters = new AtaDisc(localPos[locR], localPos[locZ], phi, theta,
+                             measurement.qOverP(), *disc, std::move(covMatrix));
     return parameters;
   }
 
   const PerigeeSurface* peri =
-    dynamic_cast<const PerigeeSurface*>(measurement.surface());
+      dynamic_cast<const PerigeeSurface*>(measurement.surface());
   if (peri) {
-    parameters = new Perigee(localPos[locR],
-                             localPos[locZ],
-                             phi,
-                             theta,
-                             measurement.qOverP(),
-                             *peri,
-                             std::move(covMatrix));
+    parameters = new Perigee(localPos[locR], localPos[locZ], phi, theta,
+                             measurement.qOverP(), *peri, std::move(covMatrix));
     return parameters;
   }
 
@@ -767,9 +685,7 @@ FitParameters::trackParameters(MsgStream& log,
   return nullptr;
 }
 
-void
-FitParameters::update(const Amg::VectorX& differences)
-{
+void FitParameters::update(const Amg::VectorX& differences) {
   // keep update values in case of cutStep procedure
   if (m_numberOscillations && m_oldDifference * differences(4) < 0.) {
     ++m_numberOscillations;
@@ -835,16 +751,13 @@ FitParameters::update(const Amg::VectorX& differences)
   m_d0 += differences(0);
   m_sinTheta = 1. / std::sqrt(1. + m_cotTheta * m_cotTheta);
   m_cosTheta = m_cotTheta * m_sinTheta;
-  m_position = Amg::Vector3D(
-    m_vertex.x() - m_d0 * m_sinPhi, m_vertex.y() + m_d0 * m_cosPhi, m_z0);
+  m_position = Amg::Vector3D(m_vertex.x() - m_d0 * m_sinPhi,
+                             m_vertex.y() + m_d0 * m_cosPhi, m_z0);
 }
 
-void
-FitParameters::update(Amg::Vector3D position,
-                      Amg::Vector3D direction,
-                      double qOverP,
-                      const Amg::MatrixX& leadingCovariance)
-{
+void FitParameters::update(Amg::Vector3D position, Amg::Vector3D direction,
+                           double qOverP,
+                           const Amg::MatrixX& leadingCovariance) {
   // update parameters after leading material corrections
   m_position = position;
   m_sinTheta = direction.perp();
@@ -868,4 +781,4 @@ FitParameters::update(Amg::Vector3D position,
   }
 }
 
-} // end of namespace
+}  // namespace Trk

@@ -7,29 +7,27 @@
  ***************************************************************************/
 
 #ifndef TRKIPATFITTERUTILS_EXTRAPOLATIONTYPE_H
-# define TRKIPATFITTERUTILS_EXTRAPOLATIONTYPE_H
+#define TRKIPATFITTERUTILS_EXTRAPOLATIONTYPE_H
 
 //<<<<<< INCLUDES                                                       >>>>>>
 //<<<<<< PUBLIC DEFINES                                                 >>>>>>
 
 class MsgStream;
 
-namespace Trk
-{
-    enum  ExtrapolationType
-    {
-	FittedTrajectory,
-	DeltaD0,
-	DeltaZ0,
-	DeltaPhi0,
-	DeltaTheta0,
-	DeltaQOverP0,
-	DeltaQOverP1,
-	ExtrapolationTypes
-    };
+namespace Trk {
+enum ExtrapolationType {
+  FittedTrajectory,
+  DeltaD0,
+  DeltaZ0,
+  DeltaPhi0,
+  DeltaTheta0,
+  DeltaQOverP0,
+  DeltaQOverP1,
+  ExtrapolationTypes
+};
 
-    MsgStream& operator<< (MsgStream& log, ExtrapolationType type);
+MsgStream& operator<<(MsgStream& log, ExtrapolationType type);
 
-}	// end of namespace
+}  // namespace Trk
 
-#endif	// TRKIPATFITTERUTILS_EXTRAPOLATIONTYPE_H
+#endif  // TRKIPATFITTERUTILS_EXTRAPOLATIONTYPE_H

@@ -11,13 +11,14 @@ scattering for brevity (mis-)named alignment and scatterer
 #ifndef TRKIPATFITTERUTILS_FITPARAMETERS_H
 #define TRKIPATFITTERUTILS_FITPARAMETERS_H
 
+#include <utility>
+#include <vector>
+
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkiPatFitterUtils/FitMeasurement.h"
-#include <vector>
-#include <utility>
 
 class MsgStream;
 
@@ -25,23 +26,17 @@ namespace Trk {
 class Surface;
 class TrackSurfaceIntersection;
 
-class FitParameters
-{
-public:
+class FitParameters {
+ public:
   FitParameters(const Perigee& perigee);
 
-  FitParameters(double d0,
-                double z0,
-                double cosPhi,
-                double sinPhi,
-                double cotTheta,
-                double ptInv0,
-                const PerigeeSurface& surface);
+  FitParameters(double d0, double z0, double cosPhi, double sinPhi,
+                double cotTheta, double ptInv0, const PerigeeSurface& surface);
 
-  FitParameters(const FitParameters& parameters); // copy constructor
+  FitParameters(const FitParameters& parameters);  // copy constructor
   // forbidden assignment operator
 
-  ~FitParameters(void); // destructor
+  ~FitParameters(void);  // destructor
 
   void addAlignment(bool constrained, double localAngle, double localOffset);
   void addScatterer(double phi, double theta);
@@ -108,14 +103,12 @@ public:
                                          const FitMeasurement& measurement,
                                          bool withCovariance = false);
   void update(const Amg::VectorX& differences);
-  void update(Amg::Vector3D position,
-              Amg::Vector3D direction,
-              double qOverP,
+  void update(Amg::Vector3D position, Amg::Vector3D direction, double qOverP,
               const Amg::MatrixX& leadingCovariance);
   const Amg::Vector3D& vertex(void) const;
   double z0(void) const;
 
-private:
+ private:
   // assignment: no semantics, no implementation
   FitParameters& operator=(const FitParameters&);
 
@@ -162,207 +155,142 @@ private:
 
 //<<<<<< INLINE PUBLIC MEMBER FUNCTIONS                                 >>>>>>
 
-inline double
-FitParameters::alignmentAngle(int alignment) const
-{
+inline double FitParameters::alignmentAngle(int alignment) const {
   return m_alignmentAngle[alignment];
 }
 
-inline double
-FitParameters::alignmentAngleConstraint(int alignment) const
-{
+inline double FitParameters::alignmentAngleConstraint(int alignment) const {
   return m_alignmentAngleConstraint[alignment];
 }
 
-inline double
-FitParameters::alignmentOffset(int alignment) const
-{
+inline double FitParameters::alignmentOffset(int alignment) const {
   return m_alignmentOffset[alignment];
 }
 
-inline double
-FitParameters::alignmentOffsetConstraint(int alignment) const
-{
+inline double FitParameters::alignmentOffsetConstraint(int alignment) const {
   return m_alignmentOffsetConstraint[alignment];
 }
 
-inline double
-FitParameters::cosPhi(void) const
-{
+inline double FitParameters::cosPhi(void) const {
   return m_cosPhi;
 }
 
-inline double
-FitParameters::cosTheta(void) const
-{
+inline double FitParameters::cosTheta(void) const {
   return m_cosTheta;
 }
 
-inline double
-FitParameters::cotTheta(void) const
-{
+inline double FitParameters::cotTheta(void) const {
   return m_cotTheta;
 }
 
-inline double
-FitParameters::d0(void) const
-{
+inline double FitParameters::d0(void) const {
   return m_d0;
 }
 
-inline double
-FitParameters::difference(int param) const
-{
-   if (! m_differences)  return 0.;
-   /// Use as_const to avoid compiler warning
+inline double FitParameters::difference(int param) const {
+  if (!m_differences)
+    return 0.;
+  /// Use as_const to avoid compiler warning
   return std::as_const(*m_differences)(param);
 }
 
-inline const Amg::VectorX&
-FitParameters::differences(void) const
-{
+inline const Amg::VectorX& FitParameters::differences(void) const {
   return *m_differences;
 }
 
-inline Amg::Vector3D
-FitParameters::direction(void) const
-{
-  return Amg::Vector3D(
-    m_cosPhi * m_sinTheta, m_sinPhi * m_sinTheta, m_cosTheta);
+inline Amg::Vector3D FitParameters::direction(void) const {
+  return Amg::Vector3D(m_cosPhi * m_sinTheta, m_sinPhi * m_sinTheta,
+                       m_cosTheta);
 }
 
-inline bool
-FitParameters::extremeMomentum(void) const
-{
+inline bool FitParameters::extremeMomentum(void) const {
   return m_extremeMomentum;
 }
 
-inline const Amg::MatrixX*
-FitParameters::finalCovariance(void) const
-{
+inline const Amg::MatrixX* FitParameters::finalCovariance(void) const {
   return m_finalCovariance;
 }
 
-inline int
-FitParameters::firstAlignmentParameter(void) const
-{
+inline int FitParameters::firstAlignmentParameter(void) const {
   return m_firstAlignmentParameter;
 }
 
-inline int
-FitParameters::firstScatteringParameter(void) const
-{
+inline int FitParameters::firstScatteringParameter(void) const {
   return m_firstScatteringParameter;
 }
 
-inline bool
-FitParameters::fitEnergyDeposit(void) const
-{
+inline bool FitParameters::fitEnergyDeposit(void) const {
   return m_fitEnergyDeposit;
 }
 
-inline bool
-FitParameters::fitMomentum(void) const
-{
+inline bool FitParameters::fitMomentum(void) const {
   return m_fitMomentum;
 }
 
-inline const Amg::MatrixX*
-FitParameters::fullCovariance(void) const
-{
+inline const Amg::MatrixX* FitParameters::fullCovariance(void) const {
   return m_fullCovariance;
 }
 
-inline int
-FitParameters::numberAlignments(void) const
-{
+inline int FitParameters::numberAlignments(void) const {
   return m_numberAlignments;
 }
 
-inline int
-FitParameters::numberOscillations(void) const
-{
+inline int FitParameters::numberOscillations(void) const {
   return m_numberOscillations;
 }
 
-inline int
-FitParameters::numberParameters(void) const
-{
+inline int FitParameters::numberParameters(void) const {
   return m_numberParameters;
 }
 
-inline int
-FitParameters::numberScatterers(void) const
-{
+inline int FitParameters::numberScatterers(void) const {
   return m_numberScatterers;
 }
 
-inline double
-FitParameters::ptInv0(void) const
-{
+inline double FitParameters::ptInv0(void) const {
   return m_qOverP / m_sinTheta;
 }
 
-inline const Amg::Vector3D&
-FitParameters::position(void) const
-{
+inline const Amg::Vector3D& FitParameters::position(void) const {
   return m_position;
 }
 
-inline double
-FitParameters::qOverP(void) const
-{
+inline double FitParameters::qOverP(void) const {
   return m_qOverP;
 }
 
-inline double
-FitParameters::qOverP1(void) const
-{
+inline double FitParameters::qOverP1(void) const {
   return m_qOverP1;
 }
 
-inline double
-FitParameters::scattererPhi(int scatterer) const
-{
+inline double FitParameters::scattererPhi(int scatterer) const {
   return m_scattererPhi[scatterer];
 }
 
-inline double
-FitParameters::scattererTheta(int scatterer) const
-{
+inline double FitParameters::scattererTheta(int scatterer) const {
   return m_scattererTheta[scatterer];
 }
 
-inline double
-FitParameters::sinPhi(void) const
-{
+inline double FitParameters::sinPhi(void) const {
   return m_sinPhi;
 }
 
-inline double
-FitParameters::sinTheta(void) const
-{
+inline double FitParameters::sinTheta(void) const {
   return m_sinTheta;
 }
 
-inline void
-FitParameters::resetOscillations(void)
-{
+inline void FitParameters::resetOscillations(void) {
   m_numberOscillations = 0;
 }
 
-inline const Amg::Vector3D&
-FitParameters::vertex(void) const
-{
+inline const Amg::Vector3D& FitParameters::vertex(void) const {
   return m_vertex;
 }
 
-inline double
-FitParameters::z0(void) const
-{
+inline double FitParameters::z0(void) const {
   return m_position.z();
 }
 
-} // end of namespace
+}  // namespace Trk
 
-#endif // TRKIPATFITTERUTILS_FITPARAMETERS_H
+#endif  // TRKIPATFITTERUTILS_FITPARAMETERS_H
