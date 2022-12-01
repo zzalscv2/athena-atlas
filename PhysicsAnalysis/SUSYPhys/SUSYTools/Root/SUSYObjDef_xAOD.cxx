@@ -98,7 +98,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_force_noElId(false),
     m_force_noMuId(false),
     m_doTTVAsf(true),
-    m_doModifiedEleId(false),
     m_upstreamTriggerMatching(false),
     m_trigMatchingPrefix(""),
     m_useBtagging(false),
@@ -507,7 +506,6 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "EleBaselineId", m_eleIdBaseline);
   declareProperty( "EleBaselineConfig", m_eleConfigBaseline);
   declareProperty( "EleBaselineCrackVeto", m_eleBaselineCrackVeto);
-  declareProperty( "EleModifiedId", m_doModifiedEleId );
   declareProperty( "EleId", m_eleId);
   declareProperty( "EleConfig", m_eleConfig);
   declareProperty( "EleIso", m_eleIso_WP);
@@ -712,10 +710,14 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   //disable m_orToolbox.declarePropertyFor( this, "OverlapRemovalTool", "The overlap removal tool");
 
   //load supported WPs (by tightness order)
+  m_el_id_support.push_back("VeryLooseNoPix");    // WPs for LRT Electron
   m_el_id_support.push_back("VeryLooseLLH");
+  m_el_id_support.push_back("LooseNoPix");        // WPs for LRT Electron
   m_el_id_support.push_back("LooseLLH");
   m_el_id_support.push_back("LooseAndBLayerLLH");
+  m_el_id_support.push_back("MediumNoPix");       // WPs for LRT Electron
   m_el_id_support.push_back("MediumLLH");
+  m_el_id_support.push_back("TightNoPix");        // WPs for LRT Electron
   m_el_id_support.push_back("TightLLH");
 
   m_ph_id_support.push_back("Loose");
@@ -1251,7 +1253,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   m_conf_to_prop["Ele.CrackVeto"] = "EleCrackVeto";
   m_conf_to_prop["EleBaseline.CrackVeto"] = "EleBaselineCrackVeto";
   m_conf_to_prop["Ele.ForceNoId"] = "EleForceNoId";
-  m_conf_to_prop["Ele.DoModifiedId"] = "EleModifiedId";
   m_conf_to_prop["Muon.ForceNoId"] = "MuonForceNoId";
   m_conf_to_prop["Muon.TTVASF"] = "MuonTTVASF";
   m_conf_to_prop["Muon.passedHighPt"] = "MuonRequireHighPtCuts";
@@ -1326,7 +1327,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_eleChID_WP, "Ele.CFT", rEnv, "None"); // Loose is the only one supported for the moment, and not many clients yet.
   configFromFile(m_eleChIso, "Ele.CFTIso", rEnv, true); // use charge ID SFs without iso applied
   configFromFile(m_eleChID_signal, "Ele.CFTSignal", rEnv, !m_eleChID_WP.empty()); // Require ECID as part of the signal lepton definition
-  configFromFile(m_doModifiedEleId, "Ele.DoModifiedId", rEnv, false);
   configFromFile(m_eleId, "Ele.Id", rEnv, "TightLLH");
   configFromFile(m_eleConfig, "Ele.Config", rEnv, "None");
   configFromFile(m_eled0sig, "Ele.d0sig", rEnv, 5.);
