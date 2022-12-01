@@ -721,21 +721,19 @@ if rec.doFileMetaData():
         ToolSvc += CfgMgr.xAODMaker__FileMetaDataTool( "FileMetaDataTool" )
         svcMgr.MetaDataSvc.MetaDataTools += [ ToolSvc.FileMetaDataTool ]
 
+        try:
+            # we want ByteStreamMetadata to propagate only through ESD and AOD
+            from ByteStreamCnvSvc.ByteStreamCnvSvcConf import ByteStreamMetadataTool
+            if not hasattr (svcMgr.ToolSvc, "ByteStreamMetadataTool"):
+                ToolSvc += ByteStreamMetadataTool()
+                if "ByteStreamMetadataTool" not in str(svcMgr.MetaDataSvc.MetaDataTools):
+                    svcMgr.MetaDataSvc.MetaDataTools += [ ToolSvc.ByteStreamMetadataTool ]
+        except Exception:
+            treatException("Could not load ByteStreamMetadataTool")
+
     else:
         # Create LumiBlock meta data containers *before* creating the output StreamESD/AOD
         include ("LumiBlockComps/CreateLumiBlockFromFile_jobOptions.py")
-        pass
-
-    try:
-        # ByteStreamMetadata
-        from ByteStreamCnvSvc.ByteStreamCnvSvcConf import ByteStreamMetadataTool
-        if not hasattr (svcMgr.ToolSvc, 'ByteStreamMetadataTool'):
-            ToolSvc += ByteStreamMetadataTool()
-        svcMgr.MetaDataSvc.MetaDataTools += [ ToolSvc.ByteStreamMetadataTool ]
-    except Exception:
-        treatException("Could not load ByteStreamMetadataTool")
-    pass
-
 
 ##--------------------------------------------------------
 ###=== Only run reco on events that pass selected triggers
