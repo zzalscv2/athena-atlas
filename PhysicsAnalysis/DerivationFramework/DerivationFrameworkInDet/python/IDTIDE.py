@@ -11,7 +11,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-#from AthenaCommon.CFElements import (seqAND, parOR)
+from AthenaCommon.CFElements import seqAND
 from AthenaCommon.Constants import INFO
 
 # Main algorithm config
@@ -23,7 +23,7 @@ def IDTIDEKernelCfg(configFlags, name='IDTIDEKernel', **kwargs):
     # Sequence for skimming kernel (if running on data) -> PrepDataToxAOD -> ID TIDE kernel
     # sequence to be used for algorithm which should run before the IDTIDEPresel
     # Disabled as currently blocks decoration of Z0 and thus crashes thinning
-    #acc.addSequence( seqAND('IDTIDESequence') )
+    acc.addSequence( seqAND('IDTIDESequence') )
     # sequence for algorithms which should run after the preselection but which can run in parallel
     #acc.addSequence( parOR('IDTIDESeqAfterPresel'), parentName = 'IDTIDESequence')
     # Sequence for skimming after pre-selection
@@ -185,7 +185,7 @@ def IDTIDEKernelCfg(configFlags, name='IDTIDEKernel', **kwargs):
     # End of: if not configFlags.Input.isMC    
     
     IDTIDEKernelPresel = DerivationKernel("IDTIDEKernelPresel", SkimmingTools = skimmingTools)
-    acc.addEventAlgo( IDTIDEKernelPresel) #, sequenceName="IDTIDESequence" )   
+    acc.addEventAlgo( IDTIDEKernelPresel, sequenceName="IDTIDESequence" )   
 
     #Setup decorators tools
     #if configFlags.Detector.EnableTRT:
@@ -282,7 +282,7 @@ def IDTIDEKernelCfg(configFlags, name='IDTIDEKernel', **kwargs):
         SkimmingTools = skimmingTools,
         ThinningTools = [],
         RunSkimmingFirst = True,
-        OutputLevel =INFO)) 
+        OutputLevel =INFO), sequenceName="IDTIDESequence")   
     #sequenceName = "IDTIDESkimmingSequence" )
 
     # shared between IDTIDE and IDTRKVALID
@@ -290,14 +290,14 @@ def IDTIDEKernelCfg(configFlags, name='IDTIDEKernel', **kwargs):
         name = "DFTSOSKernel",
         AugmentationTools = tsos_augmentationTools,
         ThinningTools = [],
-        OutputLevel =INFO))
+        OutputLevel =INFO), sequenceName="IDTIDESequence")
     #sequenceName = "IDTIDEPostProcSequence" )
    
     acc.addEventAlgo(DerivationKernel(
         name = "IDTIDEThinningKernel",
         AugmentationTools = [],
         ThinningTools = thinningTools,
-        OutputLevel =INFO))
+        OutputLevel =INFO), sequenceName="IDTIDESequence")
     #sequenceName = "IDTIDEPostProcSequence")
 
     ## Decorate if jet passed JVT criteria
@@ -335,7 +335,9 @@ def IDTIDECfg(configFlags):
     SmartCollections = []
     ExtraVariables = []
 
-    IDTIDESlimmingHelper.AppendToDictionary.update ({"Muons":"xAOD::MuonContainer", "MuonsAux":"xAOD::MuonAuxContainer", 
+    IDTIDESlimmingHelper.AppendToDictionary.update ({
+        "EventInfo":"xAOD::EventInfo", "EventInfoAux":"xAOD::EventAuxInfo",
+        "Muons":"xAOD::MuonContainer", "MuonsAux":"xAOD::MuonAuxContainer", 
         "Electrons":"xAOD::ElectronContainer", "ElectronsAux":"xAOD::ElectronAuxContainer",
         "Photons":"xAOD::PhotonContainer", "PhotonsAux":"xAOD::PhotonAuxContainer",
         "JetETMissNeutralParticleFlowObjects":"xAOD::FlowElementContainer", "JetETMissNeutralParticleFlowObjectsAux":"xAOD::FlowElementAuxContainer",

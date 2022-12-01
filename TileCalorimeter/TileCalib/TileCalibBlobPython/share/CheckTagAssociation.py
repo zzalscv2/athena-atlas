@@ -64,9 +64,8 @@ if help:
 
 
 from TileCalibBlobPython import TileCalibTools
-from AtlCoolBKLib import resolveAlias
-current = resolveAlias.getCurrent()
-nexttag = resolveAlias.getNext()
+current = TileCalibTools.getAliasFromFile('Current')
+nexttag = TileCalibTools.getAliasFromFile('Next')
 #--------------------------------
 from TileCalibBlobPython.TileCalibLogger import getLogger
 log = getLogger("TileCalibTools")

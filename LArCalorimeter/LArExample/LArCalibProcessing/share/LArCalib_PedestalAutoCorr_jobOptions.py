@@ -717,10 +717,6 @@ if ( WriteNtuple ) :
       if SuperCells:
          LArAutoCorr2Ntuple.CablingKey = "LArOnOffIdMapSC"
          LArAutoCorr2Ntuple.CalibMapKey = "LArCalibIdMapSC"
-      if realGeometry:
-         LArAutoCorr2Ntuple.RealGeometry = True
-         LArAutoCorr2Ntuple.OffId = True
-
       topSequence += LArAutoCorr2Ntuple
 
    theApp.HistogramPersistency = "ROOT"

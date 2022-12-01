@@ -513,7 +513,7 @@ ServiceMgr.PoolSvc.ReadCatalog += larCalibCatalogs
 
 if ( doLArCalibDataQuality  ) :
    ## The reference is the Oracle DB
-   conddb.addFolder("LAR_ONL","/LAR/ElecCalibOnl/Ramp<key>LArRampRef</key>"+ChannelSelection,className="LArRampComplete")
+   conddb.addFolder("LAR_ONL","/LAR/ElecCalibOnl/Ramp<key>LArRampRef</key>"+ChannelSelection)
 
 #if (CorrectBadChannels or StripsXtalkCorr):
 #   conddb.addFolder("LAR","/LAR/BadChannelsOfl/BadChannels")

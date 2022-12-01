@@ -75,6 +75,9 @@ svcMgr.IOVDbSvc.forceRunNumber=RunNumber
 from IOVDbSvc.CondDB import conddb
 PoolFileList     = []
 
+# Temperature folder
+#conddb.addFolder("DCS_OFL","/LAR/DCS/FEBTEMP")
+
 if 'InputBadChannelSQLiteFile' in dir():
    from string import *
    InputDBConnectionBadChannel = "sqlite://;schema="+InputBadChannelSQLiteFile+";dbname=CONDBR2"
@@ -83,11 +86,13 @@ else:
 
 if ( not 'InputBadChannelSQLiteFile' in dir()) and ("ONL" in DBConnectionCOOL):
    BadChannelsFolder="/LAR/BadChannels/BadChannels"
+   conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    MissingFEBsFolder="/LAR/BadChannels/MissingFEBs"
    conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    conddb.addFolder("",MissingFEBsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="AthenaAttributeList")
 else:   
    BadChannelsFolder="/LAR/BadChannelsOfl/BadChannels"
+   conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    MissingFEBsFolder="/LAR/BadChannelsOfl/MissingFEBs"
    conddb.addFolder("",BadChannelsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="CondAttrListCollection")
    conddb.addFolder("",MissingFEBsFolder+"<dbConnection>"+InputDBConnectionBadChannel+"</dbConnection>",className="AthenaAttributeList")

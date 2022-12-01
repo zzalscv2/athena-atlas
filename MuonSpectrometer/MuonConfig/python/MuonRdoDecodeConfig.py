@@ -306,8 +306,10 @@ def CscClusterBuildCfg(flags, name="CscThresholdClusterBuilder"):
 
 
 def MuonPRD_MultiTruthMakerCfg(flags, name="MuonPRD_MultiTruthMaker", **kwargs):
-    acc = ComponentAccumulator()
-    # TODO: properly declare dependencies
+    from MuonConfig.MuonGeometryConfig import MuonIdHelperSvcCfg
+    acc = MuonIdHelperSvcCfg(flags)
+    kwargs.setdefault("TGC_PrepRawDataContainer", 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+    # The availability of the other containers, e.g. CSC is controlled in MuonPRD_MultiTruthMaker::initialize() by checking m_idHelperSvc
     acc.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker(name, **kwargs))
     return acc
 

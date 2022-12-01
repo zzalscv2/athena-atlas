@@ -101,10 +101,14 @@ def InDetTrackSummaryToolNoHoleSearchCfg(flags,
     return InDetTrackSummaryToolCfg(flags, name, **kwargs)
 
 
-def InDetTrigTrackSummaryToolCfg(flags,
-                                 name="InDetTrigTrackSummaryTool",
-                                 **kwargs):
+def InDetTrigTrackSummaryToolCfg(flags,name="InDetTrigTrackSummaryTool",**kwargs):
+    """
+    instance with hole search but no shared hits
+    """
     acc = ComponentAccumulator()
+
+    kwargs.setdefault("doSharedHits", False)
+    kwargs.setdefault("doHolesInDet", True)
 
     if 'InDetSummaryHelperTool' not in kwargs:
         from InDetConfig.InDetTrackSummaryHelperToolConfig import (
@@ -113,12 +117,26 @@ def InDetTrigTrackSummaryToolCfg(flags,
             TrigTrackSummaryHelperToolCfg(flags))
         kwargs.setdefault("InDetSummaryHelperTool", summaryHelperTool)
 
-    kwargs.setdefault("doSharedHits", True)
-    kwargs.setdefault("doHolesInDet", True)
-
-    acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
+    acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name = name, **kwargs))
     return acc
 
+def InDetTrigFastTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool", **kwargs):
+    """
+    faster instance without hole search, shared hits and TRT 
+    """
+
+    acc = ComponentAccumulator()
+    from InDetConfig.InDetTrackSummaryHelperToolConfig import TrigTrackSummaryHelperToolSiOnlyCfg
+    summaryHelperTool = acc.popToolsAndMerge(
+        TrigTrackSummaryHelperToolSiOnlyCfg(flags,
+                                            ))
+        
+    return InDetTrigTrackSummaryToolCfg(flags,
+                                        name = name,
+                                        doSharedHits = False,
+                                        doHolesInDet = False,
+                                        InDetSummaryHelperTool=summaryHelperTool,
+                                        **kwargs)
 
 def ITkTrackSummaryToolCfg(flags, name='ITkTrackSummaryTool', **kwargs):
     acc = ComponentAccumulator()

@@ -397,13 +397,14 @@ if __name__ == '__main__':
   if args.algoHdwMon:
       acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
+  outputEDM += addEDM('xAOD::L1TopoSimResultsContainer','L1_LegacyTopoSimResults')
 
   acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM,doMuons=('Muons' in subsystem)), sequenceName='AthAlgSeq')
   if args.algoHdwMon:
       acc.getEventAlgo('L1TopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1TopoSimulation').PrescaleDAQROBAccess = 1
-  outputEDM += ['xAOD::L1TopoSimResultsContainer#L1_TopoSimResults']
-
+  outputEDM += addEDM('xAOD::L1TopoSimResultsContainer','L1_TopoSimResults')
+  
   # phase1 mon
   from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
   acc.addEventAlgo(

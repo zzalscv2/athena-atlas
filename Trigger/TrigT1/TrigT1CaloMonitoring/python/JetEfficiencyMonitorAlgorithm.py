@@ -22,6 +22,12 @@ def JetEfficiencyMonitoringConfig(inputFlags):
         from JetRecConfig.JetConfigFlags import jetInternalFlags
         jetInternalFlags.isRecoJob = True
         result.merge( JetRecCfg(inputFlags,AntiKt4EMPFlow) )
+        
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        if inputFlags.DQ.Environment == "AOD":
+          result.merge(PFGlobalFlowElementLinkingCfg(inputFlags, useMuonTopoClusters=True))
+        else:
+          result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
 
         from METReconstruction.METAssociatorCfg import METAssociatorCfg
         result.merge(METAssociatorCfg(inputFlags, 'AntiKt4EMPFlow'))

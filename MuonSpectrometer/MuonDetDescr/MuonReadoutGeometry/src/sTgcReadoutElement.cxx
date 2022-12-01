@@ -390,8 +390,7 @@ namespace MuonGM {
             // Strips
             //-------------------
 
-            double shift{0.01};
-            if (layer % 2) shift = -shift;  // In layers indexed 1 and 3, order is reversed
+            const double shift{layer%2 == 0 ? 0.01 : -0.01}; // 1st layer gets +0.01; layer numbering starts from 0 here!
 
             // identifier of the first channel - strip plane
             id = manager()->stgcIdHelper()->channelID(getStationName(), getStationEta(), getStationPhi(), m_ml, layer + 1, 1, 1);
@@ -766,8 +765,10 @@ namespace MuonGM {
             }
 
             // get the position coordinates, in the chamber frame, from NswAsBuilt.
+            // applying the 10um shift along the beam axis for strips (see fillCache()).
             NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y());
             pos = calcPos.pos;
+            pos[0] += (strip_id.ilayer%2) ? 0.01 : -0.01; // 1st layer gets +0.01; layer numbering starts from 1
 
             // signal that pos is now in the chamber reference frame
             // (don't go back to the layer frame yet, since we may apply b-lines later on)

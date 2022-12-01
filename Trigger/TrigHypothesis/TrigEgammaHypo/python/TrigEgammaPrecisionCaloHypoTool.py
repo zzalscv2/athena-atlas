@@ -47,14 +47,8 @@ def _IncTool(name, monGroups, threshold, sel, tool=None):
         tool.dETACLUSTERthr = 9999.
         tool.dPHICLUSTERthr = 9999.
 
-    if sel == 'etcut' or sel == 'nopid':
+    if sel == 'etcut' or sel == 'nopid' or sel == 'ion':
         tool.ETthr          = same( float( threshold )*GeV )
-        tool.dETACLUSTERthr = 9999.
-        tool.dPHICLUSTERthr = 9999.
-
-    elif sel in ('ion'):
-        tool.ETthr          = same( ( float( threshold ) -  3 )*GeV ) 
-        # No other cuts applied
         tool.dETACLUSTERthr = 9999.
         tool.dPHICLUSTERthr = 9999.
 

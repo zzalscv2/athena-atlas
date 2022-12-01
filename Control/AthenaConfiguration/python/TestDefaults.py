@@ -21,6 +21,7 @@ class defaultTestFiles:
     ]
     HITS_DATA_OVERLAY = [f"{d}/OverlayTests/DataOverlaySimulation/22.0/v1/mc16_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.HITS.pool.root"]
     RAW = [f"{d}/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"]
+    RAW_RUN3 = [f"{d}/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"]
     RAW_BKG = [f"{d}/OverlayTests/mc15_valid.00200010.overlay_streamsAll_2016_pp_1.skim.DRAW.r8381/DRAW.09331084._000146.pool.root.1"]
     RDO_RUN2 = [f"{d}/WorkflowReferences/master/q443/v1/myRDO.pool.root"]
     RDO_BKG_RUN2 = [f"{d}/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1715/RDO.26811908._031801.pool.root.1"]

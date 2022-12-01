@@ -32,21 +32,27 @@ def InDetTrackHoleSearchToolCfg(flags, name = 'InDetHoleSearchTool', **kwargs):
 def TrigHoleSearchToolCfg(flags, name="InDetTrigHoleSearchTool", **kwargs):
   result = ComponentAccumulator()
 
-# a possible change in HoleSearchTool impl? - This two tools do not seem to be needed now, leaving them commented out  TODO - decide if can be removed ( also func above creting the config )
-#  from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
-#  sctCondSummaryTool = result.popToolsAndMerge( SCT_ConditionsSummaryToolCfg( flags,withFlaggedCondTool=False, withTdaqTool=False ) )
-
-#  result.merge( InDetTestPixelLayerToolCfg( flags, **kwargs ) )
-
   if 'Extrapolator' not in kwargs:
       from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
       extrapolatorTool = result.popToolsAndMerge( InDetExtrapolatorCfg( flags, name="InDetTrigExtrapolator" ) )
       result.addPublicTool(extrapolatorTool)
       kwargs.setdefault("Extrapolator", extrapolatorTool)
 
+  from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
+  sctCondTool = result.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withByteStreamErrorsTool=False))
+
+  from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolCfg
+  pixelLayerTool = result.popToolsAndMerge(InDetTrigTestPixelLayerToolCfg(flags))
+
+  #create InDetTrigBoundaryCheckToolCfg with these settings
   if 'BoundaryCheckTool' not in kwargs:
     from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
-    BoundaryCheckTool = result.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags))
+    BoundaryCheckTool = result.popToolsAndMerge(InDetBoundaryCheckToolCfg(flags,
+                                                                          "InDetTrigBoundaryCheckTool",
+                                                                          SCTDetElStatus="",
+                                                                          SctSummaryTool=sctCondTool,
+                                                                          PixelLayerTool=pixelLayerTool,
+                                                                          ))
     kwargs.setdefault('BoundaryCheckTool', BoundaryCheckTool)
 
   indet_hole_search_tool = CompFactory.InDet.InDetTrackHoleSearchTool(name, **kwargs)

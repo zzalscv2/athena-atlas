@@ -43,6 +43,12 @@ def InDetTestPixelLayerToolInnerCfg(flags, name = "InDetTestPixelLayerToolInner"
   kwargs.setdefault("OuterRadius", 100.) # To allow for extrapolation up to B-layer = next-to-innermost
   return InDetTestPixelLayerToolCfg(flags, name, **kwargs)
 
+def InDetTrigTestPixelLayerToolCfg(flags, name = "InDetTrigTestPixelLayerTool", **kwargs):
+  kwargs.setdefault("CheckActiveAreas", True)
+  kwargs.setdefault("CheckDeadRegions", True)
+  kwargs.setdefault("PixelDetElStatus", "")
+  return InDetTestPixelLayerToolCfg(flags, name, **kwargs)
+
 def InDetTrigTestPixelLayerToolInnerCfg(flags, name = "InDetTrigTestPixelLayerToolInner", **kwargs):
   kwargs.setdefault("CheckActiveAreas", True)
   kwargs.setdefault("PixelDetElStatus", "")

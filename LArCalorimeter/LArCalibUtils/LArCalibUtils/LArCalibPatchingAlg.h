@@ -28,7 +28,6 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 
-#include "CxxUtils/checker_macros.h"
 
 
 /** 

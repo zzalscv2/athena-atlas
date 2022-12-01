@@ -12,6 +12,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory # CompFactory creates old or new configs depending on the enva
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+from AthenaCommon.Logging import logging
+_log = logging.getLogger(__name__)
     
 def _condAlgName(detector):
     return "RegSelCondAlg_"+detector
@@ -319,3 +321,75 @@ def regSelTool_TILE_Cfg(flags):
     from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
     return regSelToolCfg(flags, "TILE", CompFactory.RegSelCondAlg_Tile,
                          conditions=TileHid2RESrcIDCondAlgCfg(flags, ForHLT=True))
+
+
+def regSelToolsCfg(flags, detNames):
+    '''
+    Get a list of RegionSelector tools for given detector look-up tables if the corresponding Detector flags are enabled
+    '''
+    acc = ComponentAccumulator()
+    regSelTools = []
+    for det in detNames:
+        flagName = det
+        if det in ['TTEM', 'TTHEC', 'FCALEM', 'FCALHAD']:
+            flagName = 'LAr'
+        elif det == 'TILE':
+            flagName = 'Tile'
+        elif det == 'STGC':
+            flagName = 'sTGC'
+        detFlag = f'Enable{flagName}'
+        detFlagCont = getattr(flags, 'Detector')
+        detEnabled = getattr(detFlagCont, detFlag)
+        if not detEnabled:
+            _log.debug('regSelToolsCfg: skip adding detector "%s" because the flag Detector.%s is False', det, detFlag)
+            continue
+        funcName = f'regSelTool_{det}_Cfg'
+        func = globals().get(funcName, None)
+        if func is None:
+            raise RuntimeError('regSelToolsCfg: cannot add detector "' + det + '", RegSelToolConfig does not have a function ' + funcName)
+        regSelTools += [acc.popToolsAndMerge(func(flags))]
+    acc.setPrivateTools(regSelTools)
+    return acc
+
+
+# unit test
+if __name__=='__main__':
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration import DetectorConfigFlags
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    import sys
+
+    flags.Input.Files = defaultTestFiles.RAW_RUN3
+    flags.Exec.MaxEvents = 1
+    flags.Concurrency.NumThreads = 1
+
+    # Strict dependency checking
+    flags.Input.FailOnUnknownCollections = True
+    flags.Scheduler.AutoLoadUnmetDependencies = False
+
+    detNames = sys.argv[1:]
+    DetectorConfigFlags.disableDetectors(flags, DetectorConfigFlags.allDetectors + list(DetectorConfigFlags.allGroups.keys()), True)
+    DetectorConfigFlags.enableDetectors(flags, detNames, True)
+    flags.lock()
+
+    acc = MainServicesCfg(flags)
+    acc.merge(ByteStreamReadCfg(flags))
+    alg = CompFactory.RegSelToolTester()
+
+    if 'LAr' in detNames:
+        detNames.remove('LAr')
+        detNames += ['TTEM', 'TTHEC', 'FCALEM', 'FCALHAD']
+    if 'Tile' in detNames:
+        detNames.remove('Tile')
+        detNames.append('TILE')
+    if 'sTGC' in detNames:
+        detNames.remove('sTGC')
+        detNames.append('STGC')
+
+    toolsCfg = regSelToolsCfg(flags, detNames)
+    alg.RegionSelectorTools += acc.popToolsAndMerge(toolsCfg)
+    acc.addEventAlgo(alg, sequenceName='AthAlgSeq')
+
+    acc.run()

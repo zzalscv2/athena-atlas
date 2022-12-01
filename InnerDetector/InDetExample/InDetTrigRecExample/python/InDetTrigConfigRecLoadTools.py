@@ -509,7 +509,7 @@ if InDetTrigFlags.loadSummaryTool():
   #
   from InDetTrackHoleSearch.InDetTrackHoleSearchConf import InDet__InDetTrackHoleSearchTool
 
-  InDetTrigHoleSearchTool = InDet__InDetTrackHoleSearchTool(name = "InDetTrigHoleSearchTool",
+  InDetTrigHoleSearchTool = InDet__InDetTrackHoleSearchTool(name = "InDetTrigLegacyHoleSearchTool",
                                                             Extrapolator = InDetTrigExtrapolator,
                                                             BoundaryCheckTool=InDetTrigBoundaryCheckTool
                                                             )

@@ -44,7 +44,7 @@ public:
   void lumi_block(unsigned lb)    { m_lumi_block     = lb; }  
   void time_stamp(unsigned t)     { m_time_stamp     = t; }  
   void bunch_crossing_id(unsigned b) { m_bunch_crossing_id = b; }  
-	void mu(double m) { m_mu = m;}
+  void mu(double m) { m_mu = m;}
 
   unsigned run_number()               const { return m_run_number;   } 
   unsigned long long event_number()   const { return m_event_number; }  
@@ -131,7 +131,8 @@ inline std::ostream& operator<<( std::ostream& s, const TIDA::Event& t ) {
     << "\tevent: "   << t.event_number() 
     << "\tlb: "      << t.lumi_block() 
     << "\tbc: "      << t.bunch_crossing_id()
-    << "\ttime: "    << t.time_stamp();
+    << "\ttime: "    << t.time_stamp()
+    << "\tmu: "      << t.mu();
   for ( unsigned i=0 ; i<t.vertices().size() ; i++ ) s << "\n" << t.vertices()[i];
   for ( unsigned i=0 ; i<t.chains().size()   ; i++ ) s << "\n" << t.chains()[i];
   return s;

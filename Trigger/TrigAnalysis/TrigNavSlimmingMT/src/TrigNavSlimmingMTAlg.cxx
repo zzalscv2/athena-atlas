@@ -32,7 +32,8 @@ StatusCode TrigNavSlimmingMTAlg::doRepack(TrigCompositeUtils::Decision* decision
   ElementLink<xAOD::IParticleContainer> currentEL = decision->objectLink<xAOD::IParticleContainer>(edgeName); // Note: IParticle
 
   if (!currentEL.isValid()) {
-    ATH_MSG_WARNING("Unable to repack '" << edgeName << "' of container type xAOD::IParticleContainer for '"
+    // TODO: Upgrade this first message to a WARNING once the TriggerAPI for Run3 is filtering on the chains whose final-features get saved into the DAOD_PHYS
+    ATH_MSG_DEBUG("Unable to repack '" << edgeName << "' of container type xAOD::IParticleContainer for '"
       << decision->name() << "' node, the link is invalid.");
     ATH_MSG_DEBUG("Dump of DecisionObject: " << *decision);
     return StatusCode::SUCCESS;
