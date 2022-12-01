@@ -33,10 +33,10 @@ def MUCTPI_AthToolCfg(flags, name):
   logger = logging.getLogger( "MUCTPI_AthTool" )
 
   # Set properties of the LUT overlap handling:
-  tool.OverlapStrategyName = "LUT"
+  tool.OverlapStrategyName = flags.Trigger.MUCTPI.OverlapStrategy
   
   # Decide which LUT to use, based on which run we are simulating:
-  tool.LUTXMLFile = "TrigConfMuctpi/overlapRun3_20201214.xml"
+  tool.LUTXMLFile = flags.Trigger.MUCTPI.LUTXMLFile 
   logger.info( "Configuring MuCTPI simulation with configuration file: %s", tool.LUTXMLFile )
 
   if flags.Trigger.doHLT:
@@ -85,7 +85,7 @@ class L1MuctpiPhase1_on_Data( LVL1MUCTPIPHASE1__MUCTPI_AthAlg ):
     self.RDOOutputLocID = "MUCTPI_RDO+"
     self.RoIOutputLocID = "not_used_1"
     self.CTPOutputLocID = "/Run/L1MuCTPItoCTPLocation"
-    self.OverlapStrategyName = "LUT"
-    self.LUTXMLFile = "TrigConfMuctpi/overlapRun3_20201214.xml"
+    self.OverlapStrategyName = ConfigFlags.Trigger.MUCTPI.OverlapStrategy
+    self.LUTXMLFile = ConfigFlags.Trigger.MUCTPI.OverlapStrategy
     self.IsData=1
     self.FlaggingMode = False
