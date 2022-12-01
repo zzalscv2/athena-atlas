@@ -23,6 +23,7 @@
 #include "xAODTrigger/gFexGlobalRoIContainer.h"
 #include "xAODTrigger/gFexGlobalRoIAuxContainer.h"
 #include "TrigConfData/L1Menu.h"
+#include "TrigConfData/L1ThrExtraInfo.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -41,6 +42,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
 
         // ------------------------- IAlgTool methods --------------------------------
         virtual StatusCode initialize() override;
+        virtual StatusCode start() override;
 
         // ------------------------- IL1TriggerByteStreamTool methods ----------------------
         /// BS->xAOD conversion
@@ -60,6 +62,11 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
         Gaudi::Property<bool> m_saveExtendedTOBs {this, "SaveExtendedTOBs", false, "Decode and write xTOBs instead of TOBs"};
 
+        int m_gJ_scale = 0;
+        int m_gLJ_scale = 0;
+        int m_gXE_scale = 0;
+        int m_gTE_scale = 0;
+    
         // Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
         SG::WriteHandleKey< xAOD::gFexJetRoIContainer    > m_gFexRhoWriteKey                {this,"gFexRhoOutputContainerWriteKey","L1_gFexRhoRoI","Write gFEX EDM gFexRho container"};
         SG::WriteHandleKey< xAOD::gFexJetRoIContainer    > m_gFexBlockWriteKey              {this,"gFexSRJetOutputContainerWriteKey","L1_gFexSRJetRoI","Write gFEX EDM gFexBlock container"};
