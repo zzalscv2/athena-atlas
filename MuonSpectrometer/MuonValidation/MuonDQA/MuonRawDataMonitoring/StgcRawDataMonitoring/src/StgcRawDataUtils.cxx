@@ -13,3 +13,8 @@
 int sTgcRawDataMonAlg::getSectors(const Identifier& id) const { 
   return m_idHelperSvc -> sector(id)*(m_idHelperSvc -> stationEta(id) > 0 ? 1. : -1.);
 }
+
+int sTgcRawDataMonAlg::getLayer(int multiplet, int gasGap) const {
+  return 4*(multiplet -1 ) + gasGap;
+}
+
