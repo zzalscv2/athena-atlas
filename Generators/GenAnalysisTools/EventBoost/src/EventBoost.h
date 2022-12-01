@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////
@@ -22,12 +22,13 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/SimpleVector.h"
-
+#include "CxxUtils/checker_macros.h"
 
 #include <string>
 
 
-class EventBoost: public AthAlgorithm {
+class ATLAS_NOT_THREAD_SAFE EventBoost: public AthAlgorithm {
+//    ^ const_cast in AnalyseGenEvent
 public:
 
   //Standard algorithm methods:
@@ -35,25 +36,21 @@ public:
   EventBoost( const std::string& name,
 			ISvcLocator* pSvcLocator) ;
 			 
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override;
+  virtual StatusCode finalize() override;
 
+private:
   StatusCode Analyse_BeginEvent();
   StatusCode Analyse_EndEvent();
   StatusCode GenAnalysis_initialize();
   StatusCode GenAnalysis_finalize();
-  StatusCode AnalyseGenEvent(const HepMC::GenEvent*);
+  StatusCode AnalyseGenEvent ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const HepMC::GenEvent*);
   StatusCode EventCopy(const HepMC::GenEvent* evt) const;
 
   bool doModification(HepMC::GenParticlePtr part, double& pxsum);
   bool doVertexModification(HepMC::GenVertexPtr ver, double rand_x, double rand_y, double rand_z); 
 
-private:
-
-  //////////// INTERNALS ////////////
-
-  
   int m_nModifiedEvent;
   int m_nFailedEvent;
   int m_nModifiedTotal;
