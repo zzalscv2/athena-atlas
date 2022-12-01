@@ -230,7 +230,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   // Random number service
   ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGServec", "AthRNGSvc"};
-  ATHRNG::RNGWrapper* m_randomEngine ATLAS_THREAD_SAFE {};
+  ATHRNG::RNGWrapper* m_randomEngine {};
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomEngineName",
     "RandomEngineName", "Name of random number stream"};
 
