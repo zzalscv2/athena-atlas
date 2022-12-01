@@ -737,7 +737,7 @@ void LArFCalSamplingFraction::FCalCalibAnalysis(const std::string& name, const C
 
 void LArFCalSamplingFraction::TruthImpactPosition(const HepMC::GenEvent *e)
 {
-  for (const auto theParticle: *e)
+  for (const auto& theParticle: *e)
     {
         // Note: old GenParticles used HepLorentzVectors, now they use HepMC::FourVectors
 
