@@ -31,6 +31,7 @@ class ElectronPlots:public PlotBase {
       Egamma::ShowerShapesPlots   m_oShowerShapesAllRecoPlots;
       Egamma::IsolationPlots      m_oIsolationAllRecoPlots;
       Egamma::TrackPlots          m_oTrackAllRecoPlots;
+    
       Egamma::KinematicsPlots     m_oKinIsoRecoPlots;
       Egamma::ShowerShapesPlots   m_oShowerShapesIsoRecoPlots;
       Egamma::IsolationPlots      m_oIsolationIsoRecoPlots;
@@ -40,15 +41,37 @@ class ElectronPlots:public PlotBase {
       Egamma::ShowerShapesPlots   m_oShowerShapesIsoLHLoosePlots;
       Egamma::IsolationPlots      m_oIsolationIsoLHLoosePlots;
       Egamma::TrackPlots          m_oTrackIsoLHLoosePlots;
+    
       Egamma::KinematicsPlots     m_oKinIsoLHMediumPlots;
       Egamma::ShowerShapesPlots   m_oShowerShapesIsoLHMediumPlots;
       Egamma::IsolationPlots      m_oIsolationIsoLHMediumPlots;
       Egamma::TrackPlots          m_oTrackIsoLHMediumPlots;
+    
       Egamma::KinematicsPlots     m_oKinIsoLHTightPlots;
       Egamma::ShowerShapesPlots   m_oShowerShapesIsoLHTightPlots;
       Egamma::IsolationPlots      m_oIsolationIsoLHTightPlots;
       Egamma::TrackPlots          m_oTrackIsoLHTightPlots;
-   
+
+      Egamma::KinematicsPlots     m_oKinPromptRecoPlots;
+      Egamma::ShowerShapesPlots   m_oShowerShapesPromptRecoPlots;
+      Egamma::IsolationPlots      m_oIsolationPromptRecoPlots;
+      Egamma::TrackPlots          m_oTrackPromptRecoPlots;
+    
+      Egamma::KinematicsPlots     m_oKinPromptLHLoosePlots;
+      Egamma::ShowerShapesPlots   m_oShowerShapesPromptLHLoosePlots;
+      Egamma::IsolationPlots      m_oIsolationPromptLHLoosePlots;
+      Egamma::TrackPlots          m_oTrackPromptLHLoosePlots;
+    
+      Egamma::KinematicsPlots     m_oKinPromptLHMediumPlots;
+      Egamma::ShowerShapesPlots   m_oShowerShapesPromptLHMediumPlots;
+      Egamma::IsolationPlots      m_oIsolationPromptLHMediumPlots;
+      Egamma::TrackPlots          m_oTrackPromptLHMediumPlots;
+    
+      Egamma::KinematicsPlots     m_oKinPromptLHTightPlots;
+      Egamma::ShowerShapesPlots   m_oShowerShapesPromptLHTightPlots;
+      Egamma::IsolationPlots      m_oIsolationPromptLHTightPlots;
+      Egamma::TrackPlots          m_oTrackPromptLHTightPlots;
+      
       TH1* nParticles;
       TH1* nParticles_weighted;
       TH1* nTypeParticles;

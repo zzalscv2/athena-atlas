@@ -20,15 +20,10 @@ class IsolationPlots:public PlotBase {
      
       std::string m_sParticleType;
 
-      TH1* etcone20;
-      TH1* etcone30;
-      TH1* etcone40;
       TH1* ptcone20;
       TH1* ptcone30;
-      TH1* ptcone40;
       TH1* ptvarcone20;
       TH1* ptvarcone30;
-      TH1* ptvarcone40;
       TH1* topoetcone20;
       TH1* topoetcone30;
       TH1* topoetcone40;

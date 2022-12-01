@@ -141,6 +141,8 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
           truthParticle->status() == 1 && truthParticle->barcode() < HepMC::SIM_REGENERATION_INCREMENT) {
         m_oElectronValidationPlots.m_oTruthIsoPlots.fill(*truthParticle,
                                                          *eventInfo);
+        m_oElectronValidationPlots.m_oTruthPromptElecPlots.fill(*truthParticle,
+                                                           *eventInfo);
       } //-- end electrons
 
       //--photons
@@ -269,10 +271,12 @@ StatusCode EgammaPhysValMonitoringTool::fillHistograms()
 
         m_oElectronValidationPlots.m_oTruthAllPlots.fill(*truthallParticle,
                                                          *eventInfo);
-        if (elecPrompt)
-          m_oElectronValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle,
-                                                              *eventInfo);
-
+          if (elecPrompt) {
+              m_oElectronValidationPlots.m_oTruthAllIsoPlots.fill(*truthallParticle,
+                                                                  *eventInfo);
+              m_oElectronValidationPlots.m_oTruthAllPromptPlots.fill(*truthallParticle,
+                                                                  *eventInfo);
+          }
       } //-- end electrons
 
       //--photons
@@ -385,10 +389,12 @@ StatusCode EgammaPhysValMonitoringTool::fillRecoElecHistograms(const xAOD::Truth
             float EtLin = (electron->pt()-thePart->pt())/thePart->pt();
 	    m_oElectronValidationPlots.res_et->Fill(thePart->pt()/GeV,EtLin,weight);
 	    m_oElectronValidationPlots.res_eta->Fill(thePart->eta(),EtLin,weight);
-	    if (thePart->pt()/GeV>20.) {
-	      m_oElectronValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
-	      m_oElectronValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
-	    }
+          if (thePart->pt()/GeV>20.) {
+              m_oElectronValidationPlots.res_et_cut->Fill(thePart->pt()/GeV,EtLin,weight);
+              m_oElectronValidationPlots.res_eta_cut->Fill(thePart->eta(),EtLin,weight);
+              m_oElectronValidationPlots.res_et_cut_pt_20->Fill(thePart->pt()/GeV,EtLin,weight);
+              m_oElectronValidationPlots.res_eta_cut_pt_20->Fill(thePart->eta(),EtLin,weight);
+          }
 	    m_oElectronValidationPlots.matrix->Fill(electron->pt()/GeV,thePart->pt()/GeV);
            }else {
 	cout<<"Truth particle associated not in egamma truth collection"<<endl;
