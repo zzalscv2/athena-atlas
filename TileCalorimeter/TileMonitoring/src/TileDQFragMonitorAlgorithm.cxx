@@ -18,6 +18,7 @@ StatusCode TileDQFragMonitorAlgorithm::initialize() {
 
   ATH_MSG_INFO("in initialize()");
 
+  ATH_CHECK( detStore()->retrieve(m_tileID) );
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
   ATH_CHECK(  m_tileBadChanTool.retrieve() );
@@ -27,6 +28,7 @@ StatusCode TileDQFragMonitorAlgorithm::initialize() {
 
   ATH_CHECK( m_DQstatusKey.initialize() );
   ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
+  ATH_CHECK( m_emScaleKey.initialize() );
   ATH_CHECK( m_digitsContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_rawChannelContainerKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_eventInfoTileStatusKey.initialize() );
@@ -46,6 +48,7 @@ StatusCode TileDQFragMonitorAlgorithm::initialize() {
   m_badChannelNegNotMaskGroups = Monitored::buildToolMap<int>(m_tools, "TileBadChannelsNegNotMaskMap", Tile::MAX_ROS - 1);
 
   m_badPulseQualityGroups = Monitored::buildToolMap<int>(m_tools, "TileBadPulseQualityMap", Tile::MAX_ROS - 1);
+  m_negativeEnergyGroups = Monitored::buildToolMap<int>(m_tools, "TileNegativeEnergyMap", Tile::MAX_ROS - 1);
 
   ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
   m_ADCmaxMinusEps = m_tileInfo->ADCmax() - 0.01;
@@ -66,6 +69,8 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
   const TileDQstatus* dqStatus = SG::makeHandle (m_DQstatusKey, ctx).get();
   const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   auto lumiBlock = Monitored::Scalar<int>("lumiBlock", eventInfo->lumiBlock());
 
@@ -118,9 +123,10 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
         int fragId = rawChannelCollection->identify();
         int drawer = (fragId & 0x3F); // range 0-63
         int ros = fragId >> 8;  // range 1-4
+        unsigned int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 
         monitoredModule = drawer;
-
+        clearDigiError(dmus, errors);
         for (const TileRawChannel* rawChannel : *rawChannelCollection) {
 
           HWIdentifier adcId = rawChannel->adc_HWID();
@@ -129,18 +135,44 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
 
           // By convetion errors are saved in pedestal as 100000 + 10000*error
           float pedestal = rawChannel->pedestal();
-          float quality = rawChannel->quality();
+          float quality = std::abs(rawChannel->quality());
+          float amplitude = rawChannel->amplitude();
+          float time = rawChannel->uncorrTime(); // take uncorrected time (if available)
 
           monitoredChannel = channel;
 
-          if ((pedestal > 80000. || quality > m_qualityCut)
-              && !(m_tileBadChanTool->getAdcStatus(adcId, ctx).isBad()
-                   || (m_checkDCS && dcsState->isStatusBad(ros, drawer, channel)))) {
+          if (dqStatus->isChanDQgood(ros, drawer, channel)
+               && !(m_tileBadChanTool->getAdcStatus(adcId, ctx).isBad()
+                    || (m_checkDCS && dcsState->isStatusBad(ros, drawer, channel)))) {
 
-            fill(m_tools[m_badPulseQualityGroups[ros - 1]], monitoredModule, monitoredChannel);
+            if (pedestal > 80000. || quality > m_qualityCut) {
+              fill(m_tools[m_badPulseQualityGroups[ros - 1]], monitoredModule, monitoredChannel);
+            }
+
+            int pmt;
+            int index;
+            Identifier cell_id = m_cabling->h2s_cell_id_index (ros, drawer, channel, index, pmt);
+            if (index >= 0) { // connected channel, exluding MBTS and E4'
+
+              if (quality > m_qualityCut) {
+                bool overflow = (pedestal > 10000. + m_ADCmaskValueMinusEps);
+                if (!(overflow && gain == TileID::LOWGAIN && amplitude > 0.
+                      && time > m_timeMinThresh && time < m_timeMaxThresh)) { // overflow in low gain is not masked
+                  int dmu = channel / 3;
+                  setDigiError(dmus, errors, dmu, MAX_DIGI_ERROR + BAD_QUALITY);
+                }
+              }
+
+              float minEnergy = (m_tileID->sample(cell_id) == TileID::SAMP_E) ? m_minGapEnergy : m_minChannelEnergy;
+              float energy = emScale->calibrateChannel(drawerIdx, channel, gain, amplitude, rawChannelUnit, TileRawChannelUnit::MegaElectronVolts);
+              if (energy < minEnergy) {
+                int dmu = channel / 3;
+                setDigiError(dmus, errors, dmu, MAX_DIGI_ERROR + BIG_NEGATIVE_AMPLITUDE);
+
+                fill(m_tools[m_negativeEnergyGroups[ros - 1]], monitoredModule, monitoredChannel);
+              }
+            }
           }
-
-          float amplitude = rawChannel->amplitude();
 
           if (amplitude < ((gain) ? m_negativeAmplitudeCutHG : m_negativeAmplitudeCutLG)) {
 
@@ -190,6 +222,9 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
               }
             }
           }
+        }
+        if (!errors.empty()) {
+          fill(m_tools[m_errorsGroups[ros - 1][drawer]], drawerDMUs, errorsInDMUs);
         }
       }
     }

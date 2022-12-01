@@ -19,9 +19,9 @@ TCS::eEmSelect::eEmSelect(const std::string & name) : SortingAlg(name) {
    defineParameter( "InputWidth1stStage", 30 ); // for fw
    defineParameter( "OutputWidth", 6 );
    defineParameter( "MinET", 0 );
-   defineParameter( "REtaMin", 0);
-   defineParameter( "RHadMin", 0);
-   defineParameter( "WsTotMin", 0);
+   defineParameter( "REtaMin", 0 );
+   defineParameter( "RHadMin", 0 );
+   defineParameter( "WsTotMin", 0 );
 }
 
 

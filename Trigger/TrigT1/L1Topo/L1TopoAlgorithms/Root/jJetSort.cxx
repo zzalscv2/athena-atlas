@@ -26,7 +26,7 @@ TCS::jJetSort::jJetSort(const std::string & name) :
    defineParameter( "InputWidth1stStage", 16 ); // for FW
    defineParameter( "OutputWidth", 10 );
    defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 31);
+   defineParameter( "MaxEta", 196 );
 }
 
 

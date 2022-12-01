@@ -1,6 +1,5 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-import copy
 import sys
 from re import match
 from time import ctime
@@ -8,35 +7,29 @@ from time import ctime
 from PyCool import cool
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 
+def iterate_runlist(runlist):
+    """Helper to iterate through runlist. The format is:
+    runlist: [[run1,run2], [run3,run4], ... ]
+    In addition each "run" can be a tuple of format (run,LB)
+    """
+    def makeRunLumi(rl):
+        """Create (Run,Lumi) tuple"""
+        return rl if isinstance(rl,tuple) else (rl,0)
+
+    for (a,b) in runlist:
+        (r1,l1) = makeRunLumi(a)
+        (r2,l2) = makeRunLumi(b)
+
+        limmin = (r1 << 32) + l1
+        if isinstance(b,tuple):
+            limmax = (r2 << 32) + l2
+        else:
+            limmax = ((r2+1) << 32) - 1  # full run
+
+        yield (limmin, limmax)
+
+
 class TriggerCoolUtil:
-
-    @staticmethod
-    def MergeRanges(listOfRanges):
-        newRR=[]
-        for rr in listOfRanges:
-            if len(newRR)==0:
-                newRR.append(copy.deepcopy(rr))
-            else:
-                if rr[0]-1<=newRR[-1][1]:
-                    newRR[-1][1] = max(rr[1],newRR[-1][1])
-                else:
-                    newRR.append(copy.deepcopy(rr))
-        return newRR
-
-    @staticmethod
-    def GetRunRanges(runRange):
-        listOfRanges = []
-        runRanges = runRange.split(',')
-        for rr in runRanges:
-            startend = rr.split('-')
-            if len(startend)==1: startend += [startend[0]]
-            firstlast = [0, (cool.ValidityKeyMax>>32)-1]
-            if startend[0]: firstlast[0] = int(startend[0])
-            if startend[1]: firstlast[1]  = int(startend[1])
-            firstlast.sort()
-            listOfRanges += [firstlast]
-        listOfRanges.sort()
-        return TriggerCoolUtil.MergeRanges(listOfRanges)
 
     @staticmethod
     def GetConnection(dbconn,verbosity=0):
@@ -61,9 +54,7 @@ class TriggerCoolUtil:
     def getHLTConfigKeys(db,runlist):
         configKeys = {}
         f = db.getFolder( "/TRIGGER/HLT/HltConfigKeys" )
-        for rr in runlist:
-            limmin=(rr[0] << 32)+0
-            limmax=((rr[1]+1) << 32)-1
+        for (limmin,limmax) in iterate_runlist(runlist):
             objs = f.browseObjects( limmin, limmax, cool.ChannelSelection(0))
             while objs.goToNext():
                 obj=objs.currentRef()
@@ -83,101 +74,40 @@ class TriggerCoolUtil:
         return configKeys
 
     @staticmethod
-    def getHLTPrescaleKeys(db,runlist):
+    def _getKeys(db, runlist, folder, in_name, out_name):
+        """Helper to retrieve run/LB-index configuration keys"""
         lbmask = 0xFFFFFFFF
         configKeys = {}
-        f = db.getFolder( "/TRIGGER/HLT/PrescaleKey" )
-        for rr in runlist:
-            limmin=(rr[0] << 32)+0
-            limmax=((rr[1]+1) << 32)-1
+        f = db.getFolder( folder )
+        for (limmin,limmax) in iterate_runlist(runlist):
             objs = f.browseObjects( limmin, limmax, cool.ChannelSelection(0))
             while objs.goToNext():
                 obj=objs.currentRef()
                 runNr   = obj.since()>>32
                 if runNr>1000000: continue
                 payload = obj.payload()
-                hltpsk  = payload['HltPrescaleKey']
+                key  = payload[in_name]
                 firstLB = obj.since() & lbmask
                 until = (obj.until() & lbmask)
                 lastLB =  until-1 if until>0 else lbmask
-                configKeys.setdefault(runNr,{}).setdefault( "HLTPSK2", [] ).append((hltpsk,firstLB,lastLB))
+                configKeys.setdefault(runNr,{}).setdefault( out_name, [] ).append((key,firstLB,lastLB))
+
         return configKeys
+
+    @staticmethod
+    def getHLTPrescaleKeys(db,runlist):
+        return TriggerCoolUtil._getKeys(db, runlist, "/TRIGGER/HLT/PrescaleKey",
+                                        "HltPrescaleKey", "HLTPSK2")
 
     @staticmethod
     def getL1ConfigKeys(db,runlist):
-        lbmask = 0xFFFFFFFF
-        configKeys = {}
-        f = db.getFolder( "/TRIGGER/LVL1/Lvl1ConfigKey" )
-        for rr in runlist:
-            limmin=(rr[0] << 32)+0
-            limmax=((rr[1]+1) << 32)-1
-            objs = f.browseObjects( limmin, limmax, cool.ChannelSelection(0))
-            while objs.goToNext():
-                obj=objs.currentRef()
-                runNr  = obj.since()>>32
-                if runNr>1000000: continue
-                payload=obj.payload()
-                firstLB = obj.since() & lbmask
-                until = (obj.until() & lbmask)
-                lastLB =  until-1 if until>0 else lbmask
-                l1psk = payload['Lvl1PrescaleConfigurationKey']
-                configKeys.setdefault(runNr,{}).setdefault( "LVL1PSK", [] ).append((l1psk,firstLB,lastLB))
-        return configKeys
-    
+        return TriggerCoolUtil._getKeys(db, runlist, "/TRIGGER/LVL1/Lvl1ConfigKey",
+                                        "Lvl1PrescaleConfigurationKey", "LVL1PSK")
+
     @staticmethod
     def getBunchGroupKey(db,runlist):
-        lbmask = 0xFFFFFFFF
-        configKeys = {}
-        f = db.getFolder( "/TRIGGER/LVL1/BunchGroupKey" )
-        for rr in runlist:
-            limmin=(rr[0] << 32)+0
-            limmax=((rr[1]+1) << 32)+0
-            objs = f.browseObjects( limmin, limmax, cool.ChannelSelection(0))
-            while objs.goToNext():
-                obj=objs.currentRef()
-                runNr  = obj.since()>>32
-                if runNr>1000000: continue
-                payload=obj.payload()
-                firstLB = obj.since() & lbmask
-                until = (obj.until() & lbmask)
-                lastLB =  until-1 if until>0 else lbmask
-                bgkey = payload['Lvl1BunchGroupConfigurationKey']
-                configKeys.setdefault(runNr,{}).setdefault( "BGKey", [] ).append((bgkey,firstLB,lastLB))
-        return configKeys
-
-    @staticmethod
-    def merge(l1, hlt):
-        split = list(set([b[1] for b in l1] + [b[1] for b in hlt]))
-        split.sort()
-        c = []
-        print ("merging:", split)
-        for i,startlb in enumerate(split):
-            if i<len(split)-1:
-                endlb = split[i+1]-1
-            else:
-                endlb = -1
-            for k,s,e in l1:
-                if startlb>=s:
-                    l1key = k
-            for k,s,e in hlt:
-                if startlb>=s:
-                    hltkey = k
-            c.append((startlb,endlb,l1key,hltkey))
-        return c
-
-    @staticmethod
-    def combinedKeys(l1keys, hltkeys):
-        runs = set(l1keys.keys())
-        runs.update( set(hltkeys.keys()) )
-        comb={}
-        for r in runs:
-            if r in l1keys:  l1  = l1keys[r]['LVL1PSK']
-            else:            l1  = [(0, 1, -1)]
-            if r in hltkeys: hlt = hltkeys[r]['HLTPSK2']
-            else:            hlt = [(0, 1, -1)]
-            comb[r] = TriggerCoolUtil.merge(l1,hlt)
-        return comb
-    
+        return TriggerCoolUtil._getKeys(db, runlist, "/TRIGGER/LVL1/BunchGroupKey",
+                                        "Lvl1BunchGroupConfigurationKey", "BGKey")
 
     @staticmethod
     def getRunStartTime(db,runlist, runs):
@@ -310,3 +240,30 @@ class TriggerCoolUtil:
                 streams.add(streamname)
         for s in sorted(list(streams)):
             print (s)
+
+
+# Testing
+if __name__ == "__main__":
+    from pprint import pprint
+
+    db = TriggerCoolUtil.GetConnection('CONDBR2')
+    run = 435333
+
+    print("Full run:")
+    pprint(TriggerCoolUtil.getHLTConfigKeys(db, [[run,run]]))
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,run]]))
+    pprint(TriggerCoolUtil.getL1ConfigKeys(db, [[run,run]]))
+    pprint(TriggerCoolUtil.getBunchGroupKey(db, [[run,run]]))
+
+    print("\nLB range within run:")
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[(run,266),(run,400)]]))
+
+    print("\nRun range:")
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,435349]]))
+
+    print("\nMultiple run ranges:")
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,435349],[435831,435927]]))
+
+    print("\nMultiple run/LB ranges:")
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[(run,266),(435349,10)],
+                                                   [(435831,466),435927]]))
