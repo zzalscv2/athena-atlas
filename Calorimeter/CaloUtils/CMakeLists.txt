@@ -27,6 +27,11 @@ set( _jobOPath "${_jobOPath}:${CMAKE_JOBOPT_OUTPUT_DIRECTORY}" )
 set( _jobOPath "${_jobOPath}:$ENV{JOBOPTSEARCHPATH}" )
 
 # Test(s) in the package:
+atlas_add_test( CaloClusterProcessor_test
+   SOURCES test/CaloClusterProcessor_test.cxx
+   LINK_LIBRARIES CaloUtilsLib xAODCaloEvent TestTools AthenaBaseComps )
+
+
 atlas_add_test( CaloLayerCalculator_test
    SOURCES test/CaloLayerCalculator_test.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}

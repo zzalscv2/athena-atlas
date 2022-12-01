@@ -14,7 +14,7 @@
 #define CALOREC_TOOLCONSTANTSCONDALG_H
 
 
-#include "CaloRec/Blob2ToolConstants.h"
+#include "Blob2ToolConstants.h"
 #include "CaloConditions/ToolConstants.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"

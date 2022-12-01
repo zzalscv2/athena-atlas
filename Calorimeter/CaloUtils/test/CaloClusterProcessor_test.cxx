@@ -12,7 +12,7 @@
 
 #undef NDEBUG
 
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
 #include "TestTools/initGaudi.h"

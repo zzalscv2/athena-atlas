@@ -21,7 +21,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "GaudiKernel/ToolHandle.h"

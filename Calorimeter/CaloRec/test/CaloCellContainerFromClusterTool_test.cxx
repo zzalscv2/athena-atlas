@@ -29,7 +29,7 @@
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloDetDescr/CaloDetectorElements.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloRec/Blob2ToolConstants.h"
+#include "../src/Blob2ToolConstants.h"
 #include "StoreGate/setupStoreGate.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/ExtendedEventContext.h"

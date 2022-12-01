@@ -10,7 +10,7 @@ atlas_subdir( IsolationTool )
 set( extra_lib )
 set( extra_lib_private )
 if( NOT XAOD_STANDALONE )
-  set( extra_lib TrkParametersIdentificationHelpers CaloRecLib ParticlesInConeToolsLib)
+  set( extra_lib TrkParametersIdentificationHelpers CaloUtilsLib ParticlesInConeToolsLib)
   set( extra_lib_private CaloEvent CaloUtilsLib TrkCaloExtension TrkParameters TrackToCaloLib )
 endif()
 

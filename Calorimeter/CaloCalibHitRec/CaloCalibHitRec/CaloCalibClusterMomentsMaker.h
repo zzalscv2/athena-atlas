@@ -19,7 +19,7 @@ class CaloCell_ID;
 class CaloDM_ID;
 class CaloDmDescrManager;
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 #include <string>

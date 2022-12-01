@@ -21,7 +21,7 @@
 //#include "CaloRec/CaloClusterPrinter.h"
 //#include "CaloRec/CaloClusterLockVars.h"
 #include "../CaloTopoTowerAlg.h"
-#include "CaloRec/Blob2ToolConstants.h"
+#include "../Blob2ToolConstants.h"
 #include "../CaloCellFastCopyTool.h"
 #include "../CaloTowerxAODFromCells.h"
 #include "../CaloTowerxAODFromClusters.h"

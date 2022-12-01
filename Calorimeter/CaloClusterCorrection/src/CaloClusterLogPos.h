@@ -9,7 +9,7 @@
 #define CALOUTILS_CALOCLUSTERLOGPOS_H 
 
 
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloEvent/CaloCluster.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 

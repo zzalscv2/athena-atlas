@@ -7,7 +7,7 @@
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "CaloRecGPU/StandaloneDataIO.h"
 #include "StoreGate/DataHandle.h"
-#include "CaloRec/CaloBadCellHelper.h"
+#include "CaloUtils/CaloBadCellHelper.h"
 
 using namespace CaloRecGPU;
 

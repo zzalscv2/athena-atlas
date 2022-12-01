@@ -6,7 +6,7 @@
 #define CALOCLUSTERVERTEXFRACTIONMAKER_H
 
 #include "GaudiKernel/ToolHandle.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include <string>
 #include <vector>
 

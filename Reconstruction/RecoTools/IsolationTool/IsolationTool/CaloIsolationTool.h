@@ -17,7 +17,7 @@
 #include "RecoToolInterfaces/IParticleCaloCellAssociationTool.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "TrkCaloExtension/CaloExtensionCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"

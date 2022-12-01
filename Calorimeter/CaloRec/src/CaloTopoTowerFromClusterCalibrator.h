@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h" 
 
-#include "CaloRec/CaloTowerCollectionProcessor.h"
+#include "CaloTowerCollectionProcessor.h"
 
 #include <string>
 

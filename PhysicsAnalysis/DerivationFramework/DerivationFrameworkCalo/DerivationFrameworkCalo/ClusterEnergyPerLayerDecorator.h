@@ -13,7 +13,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloClusterCorrection/CaloFillRectangularCluster.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/EventContext.h"

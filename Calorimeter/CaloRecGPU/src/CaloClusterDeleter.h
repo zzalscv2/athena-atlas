@@ -8,7 +8,7 @@
 #define CALORECGPU_CALOCLUSTERDELETER_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 
 /**
  * @class CaloClusterDeleter
