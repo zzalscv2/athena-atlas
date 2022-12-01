@@ -6,7 +6,7 @@
 //	McAddress.h
 //--------------------------------------------------------------------
 //
-//	Package    : McEventSelector 
+//	Package    : McEventSelector
 //
 //  Description: Definition of Mc address object
 //
@@ -25,34 +25,34 @@
 
 class McAddress   : public GenericAddress   {
 public:
-  /// Standard Destructor
-  virtual ~McAddress() {}; //doesn't own event
+    /// Standard Destructor
+    virtual ~McAddress() {}; //doesn't own event
 
-  /// Standard Constructor
-  McAddress(const CLID& clid, const std::string& fname,
-		  const std::string& cname);
-  McAddress(const CLID& clid, const std::string& fname,
-	    const unsigned int& run, const uint64_t& event, const unsigned int& LB, const unsigned int& time);
+    /// Standard Constructor
+    McAddress(const CLID& clid, const std::string& fname,
+              const std::string& cname);
+    McAddress(const CLID& clid, const std::string& fname,
+              const unsigned int& run, const uint64_t& event, const unsigned int& LB, const unsigned int& time);
 
-  ///Event accessors
-  inline void setRunEvt(unsigned int run, uint64_t evt, 
-			unsigned int LB, unsigned int time) {
-    m_runNo     = run;
-    m_eventNo   = evt;
-    m_LBNo      = LB;
-    m_timeStamp = time;
-  }
+    ///Event accessors
+    inline void setRunEvt(unsigned int run, uint64_t evt,
+                          unsigned int LB, unsigned int time) {
+        m_runNo     = run;
+        m_eventNo   = evt;
+        m_LBNo      = LB;
+        m_timeStamp = time;
+    }
 
-  unsigned int runNumber()   const { return m_runNo; }
-  uint64_t     eventNumber() const { return m_eventNo; }
-  unsigned int lumiBlock()   const { return m_LBNo; }
-  unsigned int timeStamp()   const { return m_timeStamp; }
+    unsigned int runNumber()   const { return m_runNo; }
+    uint64_t     eventNumber() const { return m_eventNo; }
+    unsigned int lumiBlock()   const { return m_LBNo; }
+    unsigned int timeStamp()   const { return m_timeStamp; }
 
 private:
-  unsigned int m_runNo;
-  uint64_t     m_eventNo;
-  unsigned int m_LBNo;
-  unsigned int m_timeStamp;
+    unsigned int m_runNo;
+    uint64_t     m_eventNo;
+    unsigned int m_LBNo;
+    unsigned int m_timeStamp;
 };
 #endif // MCEVENTSELECTOR_MCADDRESS_H
 

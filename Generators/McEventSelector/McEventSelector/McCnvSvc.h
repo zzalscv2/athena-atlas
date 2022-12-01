@@ -6,7 +6,7 @@
 //	McCnvSvc.h
 //	------------------------------------------------------------
 //
-//	Package   : McEventSelector 
+//	Package   : McEventSelector
 //
 //	Author    : Marjorie Shapiro
 //      Modified Nov 10 I.H.
@@ -14,35 +14,35 @@
 #ifndef MCEVENTSELECTOR_MCCNVSVC_H
 #define MCEVENTSELECTOR_MCCNVSVC_H 1
 
-#include "GaudiKernel/ConversionSvc.h"  
+#include "GaudiKernel/ConversionSvc.h"
 
 // Forward declarations
 template <class TYPE> class SvcFactory;
 
 class McCnvSvc : public ConversionSvc	{
-  /// Allow the factory class access to the constructor
-  friend class SvcFactory<McCnvSvc>;
+    /// Allow the factory class access to the constructor
+    friend class SvcFactory<McCnvSvc>;
 public:
-  /**@name: Object implementation     */
-  //@{
-  /// Standard Constructor
-  McCnvSvc(const std::string& name, ISvcLocator* svc);
+    /**@name: Object implementation     */
+    //@{
+    /// Standard Constructor
+    McCnvSvc(const std::string& name, ISvcLocator* svc);
 
-  /// Standard Destructor
-  virtual ~McCnvSvc();
-  
-  /**@name McCnvSvc overrides     */
-  //@{
-  /// Initialize the service.
-  virtual StatusCode initialize();
+    /// Standard Destructor
+    virtual ~McCnvSvc();
 
-  /// Update state of the service
-  virtual StatusCode updateServiceState(IOpaqueAddress* pAddress);
-  //@}
+    /**@name McCnvSvc overrides     */
+    //@{
+    /// Initialize the service.
+    virtual StatusCode initialize();
 
-  /// storage type
-  static long storageType() ;
-  virtual long repSvcType() const;
+    /// Update state of the service
+    virtual StatusCode updateServiceState(IOpaqueAddress* pAddress);
+    //@}
+
+    /// storage type
+    static long storageType() ;
+    virtual long repSvcType() const;
 };
 
 #endif // MCEVENTSELECTOR_MCCNVSVC_H
