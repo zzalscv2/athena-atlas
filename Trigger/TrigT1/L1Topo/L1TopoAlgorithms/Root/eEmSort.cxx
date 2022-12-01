@@ -22,12 +22,10 @@ bool SortByEtLargesteEm(TCS::GenericTOB* tob1, TCS::GenericTOB* tob2)
 TCS::eEmSort::eEmSort(const std::string & name) : SortingAlg(name) {
    defineParameter( "InputWidth", 120 ); // for FW
    defineParameter( "InputWidth1stStage", 30 ); // for FW
-   defineParameter( "OutputWidth", 6);
-   defineParameter( "REtaMin", 0);
-   defineParameter( "RHadMin", 0);
-   defineParameter( "WsTotMin", 0);
-   defineParameter( "MinEta", 0);
-   defineParameter( "MaxEta", 196);
+   defineParameter( "OutputWidth", 6 );
+   defineParameter( "REtaMin", 0 );
+   defineParameter( "RHadMin", 0 );
+   defineParameter( "WsTotMin", 0 );
 }
 
 
@@ -38,8 +36,6 @@ TCS::eEmSort::~eEmSort() {}
 TCS::StatusCode
 TCS::eEmSort::initialize() {
    m_numberOfeEms = parameter("OutputWidth").value();
-   m_minEta = parameter("MinEta").value();
-   m_maxEta = parameter("MaxEta").value();
    m_minREta = parameter("REtaMin").value();
    m_minRHad = parameter("RHadMin").value();
    m_minWsTot = parameter("WsTotMin").value();
@@ -54,9 +50,6 @@ TCS::eEmSort::sort(const InputTOBArray & input, TOBArray & output) {
 
    // fill output array with GenericTOB buildt from eEms
    for(eEmTOBArray::const_iterator eem = eems.begin(); eem!= eems.end(); ++eem ) {
-
-      if (parType_t(std::abs((*eem)-> eta())) < m_minEta) continue; 
-      if (parType_t(std::abs((*eem)-> eta())) > m_maxEta) continue;
 
       // isolation cut
       if ( !isocut(m_minREta, (*eem)-> Reta()) ) {continue;}

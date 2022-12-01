@@ -134,6 +134,18 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
    vector<string> confMultAlgorithms; // Stores algorithm names that have been configured in L1Menu to be used for setting the multiplicity thresholds
    // Loop over boards in L1Menu and skip the ones that are not TOPO. Use Run-2 boards if legacy flag is on
 
+   string AvailableMultAlgs[] = { "eEmMultiplicity", 
+				  "jEmMultiplicity", 
+				  "eTauMultiplicity", 
+				  "jTauMultiplicity",
+				  "cTauMultiplicity",
+				  "jJetMultiplicity",
+				  "jLJetMultiplicity",
+				  "gJetMultiplicity",
+				  "gLJetMultiplicity",
+				  "EnergyThreshold",
+                                  "LArSaturation" };
+
    for (const string & boardName : l1menu.boardNames() ){
      
      auto & l1board = l1menu.board(boardName);
@@ -235,6 +247,8 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
                     algo.inputs().at(0) != "gXENC" && algo.inputs().at(0) != "gXERHO" &&
                     algo.inputs().at(0) != "jTE" && algo.inputs().at(0) != "gTE") ) continue;
      
+              if ( algo_klass == "LArSaturation" ) continue;
+ 
               auto it = find(storedConn.begin(), storedConn.end(), algo.name());
 	      if (it == storedConn.end()) { // Algorithm/Connector does not exist: create and store it
 
@@ -371,6 +385,8 @@ TCS::TopoSteeringStructure::setupFromMenu ATLAS_NOT_THREAD_SAFE (const TrigConf:
             l1algo.inputs().at(0) != "gXENC" && l1algo.inputs().at(0) != "gXERHO" &&
             l1algo.inputs().at(0) != "jTE" && l1algo.inputs().at(0) != "gTE") ) continue;
 
+      if ( l1algo.klass() == "LArSaturation" ) continue;
+ 
       ConfigurableAlg * alg = AlgFactory::mutable_instance().algorithm(l1algo.name());
 
       // Get L1Threshold object and pass it to CountingAlg, from where it will be propagated to and decoded in each algorithm

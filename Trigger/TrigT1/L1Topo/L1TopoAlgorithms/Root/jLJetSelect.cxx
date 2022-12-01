@@ -23,7 +23,7 @@ TCS::jLJetSelect::jLJetSelect(const std::string & name) :
    defineParameter( "OutputWidth", 10 );
    defineParameter( "MinET", 0 );
    defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 31);
+   defineParameter( "MaxEta", 196 );
 }
 
 
