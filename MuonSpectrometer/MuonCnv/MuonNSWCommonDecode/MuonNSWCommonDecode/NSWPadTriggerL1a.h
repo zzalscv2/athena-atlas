@@ -237,6 +237,11 @@ namespace Muon
       uint32_t checkSize(const std::vector<uint32_t>& words) const;
 
       /*
+        Checks the payload for any non-null words
+      */
+      bool isNullPayload(const std::vector<uint32_t>& words) const;
+
+      /*
         Gets the index of the last data byte
       */
       uint32_t lastValidByteIndex(const std::vector<uint32_t>& words) const;

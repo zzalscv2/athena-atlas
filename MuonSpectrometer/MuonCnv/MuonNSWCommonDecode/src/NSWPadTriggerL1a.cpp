@@ -4,6 +4,7 @@
 
 #include "ers/ers.h"
 #include "MuonNSWCommonDecode/NSWPadTriggerL1a.h"
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
@@ -47,6 +48,11 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   ERS_DEBUG(1, "l1id:    " << m_decoded.l1id);
   ERS_DEBUG(1, "orbitid: " << m_decoded.orbitid);
   ERS_DEBUG(1, "orbit1:  " << m_decoded.orbit1);
+
+  // null
+  if (isNullPayload(words)) {
+    return;
+  }
 
   // decompression
   auto relbcid = uint32_t{0};
@@ -108,6 +114,19 @@ uint32_t Muon::nsw::NSWPadTriggerL1a::checkSize(const std::vector<uint32_t>& wor
     return 1;
   }
   return 0;
+}
+
+bool Muon::nsw::NSWPadTriggerL1a::isNullPayload(const std::vector<uint32_t>& words) const
+{
+  constexpr std::array<uint32_t, 3> nulls{0x0, 0xf000, 0xf0000000};
+  constexpr size_t padding = 1;
+  const auto first = words.begin()
+    + Muon::nsw::Constants::SIZE_HEADER_BYTES / Muon::nsw::Constants::N_BYTES_IN_WORD32
+    + padding;
+  const auto last  = words.end() - padding;
+  return std::all_of(first, last, [&nulls](const uint32_t word){
+    return std::find(nulls.begin(), nulls.end(), word) != nulls.end();
+  });
 }
 
 uint32_t Muon::nsw::NSWPadTriggerL1a::lastValidByteIndex(const std::vector<uint32_t>& words) const
