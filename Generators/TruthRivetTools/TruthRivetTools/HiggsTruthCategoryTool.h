@@ -11,6 +11,7 @@
 #ifndef TRUTHRIVETTOOLS_HIGGSTRUTHCATEGORYTOOL_H
 #define TRUTHRIVETTOOLS_HIGGSTRUTHCATEGORYTOOL_H 1
 
+#include "CxxUtils/checker_macros.h"
 #include "Rivet/AnalysisHandler.hh"
 #include "TruthRivetTools/HiggsTemplateCrossSections.h"
 
@@ -49,6 +50,7 @@ class HiggsTruthCategoryTool
    StatusCode finalize () override;
    HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const override;
  private:
+   mutable std::atomic_flag m_isInitialized ATLAS_THREAD_SAFE = ATOMIC_FLAG_INIT;
    bool m_outHistos;
 };
 

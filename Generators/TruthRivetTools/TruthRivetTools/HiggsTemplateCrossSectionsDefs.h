@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONSDEFS_H
@@ -19,7 +19,8 @@ namespace HTXS {
     HS_VTX_IDENTIFICATION = 5, ///< failed to identify hard scatter vertex
     VH_IDENTIFICATION = 6,     ///< failed to identify associated vector boson
     VH_DECAY_IDENTIFICATION = 7,     ///< failed to identify associated vector boson decay products
-    TOP_W_IDENTIFICATION = 8   ///< failed to identify top decay
+    TOP_W_IDENTIFICATION = 8,  ///< failed to identify top decay
+    NUM_ERRORCODES             ///< number of error codes (keep this unnumbered and last)
   };
 
   /// Higgs production modes, corresponding to input sample
