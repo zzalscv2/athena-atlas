@@ -80,6 +80,9 @@ DbStatus RootDatabase::onOpen(DbDatabase& dbH, DbAccessMode mode)  {
   DbPrint log("RootDatabase.onOpen");
   if ( !dbH.param("FORMAT_VSN", par_val).isSuccess() )  {
     if ( mode&pool::CREATE || mode&pool::UPDATE ) {
+      if ( dynamic_cast<TMemFile*>(m_file) != nullptr )  {
+        m_file->Write();
+      }
       return dbH.addParam("FORMAT_VSN", m_version);
     }
     log << DbPrintLvl::Warning << "No ROOT data format parameter present "
