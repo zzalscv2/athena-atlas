@@ -858,7 +858,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     //-- get KEYS supported by egamma SF tools
     std::vector<std::string> eSF_keys = getElSFkeys(m_eleEffMapFilePath);
 
-    if (m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Loose" || m_eleId == "Medium" || m_eleId == "Tight") {
+    if (m_eleId.find("NoPix") != std::string::npos || m_eleId == "VeryLooseLLH" || m_eleId == "LooseLLH" || m_eleId == "Loose" || m_eleId == "Medium" || m_eleId == "Tight") {
       ATH_MSG_WARNING("Not configuring electron ID and trigger scale factors for " << m_eleId);
     }
     else {

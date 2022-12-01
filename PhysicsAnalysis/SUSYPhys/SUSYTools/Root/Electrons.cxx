@@ -57,11 +57,6 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_topoetcone20("topoetcone20");
   const static SG::AuxElement::ConstAccessor<char> acc_passECIDS("DFCommonElectronsECIDS"); // Loose 97% WP
 
-  //--- Hard-coded DF variables names for Egamma ID fix
-  const static SG::AuxElement::ConstAccessor<char> acc_EG_Loose("DFCommonElectronsLHLoose");
-  const static SG::AuxElement::ConstAccessor<char> acc_EG_Medium("DFCommonElectronsLHMedium");
-  const static SG::AuxElement::ConstAccessor<char> acc_EG_Tight("DFCommonElectronsLHTight");
-
 StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& elekey, const xAOD::ElectronContainer* containerToBeCopied)
 {
   if (!m_tool_init) {
@@ -177,17 +172,7 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
     passBaseID = bool(m_elecSelLikelihoodBaseline->accept(&input));
   } else {
     if (m_acc_eleIdBaseline.isAvailable(input)) {
-
-      if (m_doModifiedEleId){ // HAZ: Needed due to affect of the egamma bug (ATLSUSYSW-445)
-
-	if(m_eleIdBaselineDFName == "DFCommonElectronsLHTight"){
-	  passBaseID = acc_EG_Medium(input) && acc_EG_Tight(input);
-	} else if(m_eleIdBaselineDFName == "DFCommonElectronsLHMedium"){
-	  passBaseID = ( acc_EG_Loose(input) && acc_EG_Medium(input) ) || acc_EG_Tight(input);
-	} else if (m_eleIdBaselineDFName == "DFCommonElectronsLHLoose") {
-	  passBaseID = acc_EG_Medium(input) || acc_EG_Loose(input);
-	} else { passBaseID = m_acc_eleIdBaseline(input); }
-      } else { passBaseID = m_acc_eleIdBaseline(input); }
+      passBaseID = m_acc_eleIdBaseline(input); 
     } else {
       ATH_MSG_VERBOSE ("DFCommonElectronsLHxxx variables are not found. Calculating the ID from LH tool..");
       passBaseID = bool(m_elecSelLikelihoodBaseline->accept(&input));
@@ -260,27 +245,14 @@ bool SUSYObjDef_xAOD::IsSignalElectron(const xAOD::Electron & input, float etcut
 
   if (m_eleIdExpert) {
     if ( !m_elecSelLikelihood.empty() && m_elecSelLikelihood->accept(&input) ) dec_passSignalID(input) = true;
-  } else {
+    } 
+  else {
     if (m_acc_eleId.isAvailable(input)) {
-
-      if (m_doModifiedEleId) {	// HAZ: Needed due to affect of the egamma bug (ATLSUSYSW-445)
-
-	if(m_eleIdDFName == "DFCommonElectronsLHTight"){
-	  dec_passSignalID(input) = acc_EG_Medium(input) && acc_EG_Tight(input);
-	} else if(m_eleIdDFName == "DFCommonElectronsLHMedium"){
-	  dec_passSignalID(input) = ( acc_EG_Loose(input) && acc_EG_Medium(input) ) || acc_EG_Tight(input);
-	} else if (m_eleIdDFName == "DFCommonElectronsLHLoose") {
-	  dec_passSignalID(input) = acc_EG_Medium(input) || acc_EG_Loose(input);
-	} else { dec_passSignalID(input) = m_acc_eleId(input); }
-      } else { dec_passSignalID(input) = m_acc_eleId(input); }
-
+      dec_passSignalID(input) = m_acc_eleId(input); 
     } else {
       ATH_MSG_VERBOSE ("DFCommonElectronsLHxxx variables are not found. Calculating the ID from LH tool..");
       if ( !m_elecSelLikelihood.empty() && m_elecSelLikelihood->accept(&input) ) dec_passSignalID(input) = true;
     }
-
-
-
   }
 
   //overwrite ID selection if forced by user
