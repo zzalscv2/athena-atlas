@@ -137,7 +137,7 @@ def createTriggerFlags(doTriggerRecoFlags):
                 _log.warning("All input files seem to be empty, cannot determine EDM version. Guessing EDMVersion=3")
                 return 3
 
-        _log.warning("Could not determine EDM version from the input file. Return default EDMVersion=%d",
+        _log.info("Could not determine EDM version from the input file. Return default EDMVersion=%d",
                      default_version)
         return default_version
 

@@ -15,6 +15,12 @@ log = logging.getLogger('TriggerRecoConfig')
 
 
 def TriggerRecoCfg(flags):
+    if flags.Input.isMC:
+        return TriggerRecoCfgMC(flags)
+    else:
+        return TriggerRecoCfgData(flags)
+
+def TriggerRecoCfgData(flags):
     """ Configures trigger data decoding
     Run 3 data:
     HLTResultMTByteStreamDecoderAlg -> TriggerEDMDeserialiserAlg
@@ -25,6 +31,7 @@ def TriggerRecoCfg(flags):
     Run 1 data:
     as for Run 2 + Run 1 EDM to xAOD conversion
     """
+    log.debug("TriggerRecoCfgData: Preparing the trigger handling of reconstruction of data")
     acc = ComponentAccumulator()
     acc.merge( ByteStreamReadCfg(flags) )
     if flags.Trigger.L1.doMuon or flags.Trigger.L1.doCalo or flags.Trigger.L1.doTopo or flags.Trigger.L1.doCTP:
@@ -35,15 +42,13 @@ def TriggerRecoCfg(flags):
 
     # Run 3+
     if flags.Trigger.EDMVersion >= 3:
-        if flags.Trigger.DecodeHLT:
-            acc.merge(Run3TriggerBSUnpackingCfg(flags))
+        acc.merge(Run3TriggerBSUnpackingCfg(flags))
 
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run3DecisionMakerCfg
         acc.merge(Run3DecisionMakerCfg(flags))
 
-        if flags.Trigger.DecodeHLT and flags.Trigger.doNavigationSlimming:
-            from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
-            acc.merge(TrigNavSlimmingMTCfg(flags))
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
+        acc.merge(TrigNavSlimmingMTCfg(flags))
 
     # Run 1+2
     elif flags.Trigger.EDMVersion in [1, 2]:
@@ -52,8 +57,7 @@ def TriggerRecoCfg(flags):
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run1Run2DecisionMakerCfg
         acc.merge (Run1Run2DecisionMakerCfg(flags) )
 
-        if flags.Trigger.DecodeHLT and flags.Trigger.doNavigationSlimming:
-            acc.merge(Run2Run1NavigationSlimingCfg(flags))
+        acc.merge(Run2Run1NavigationSlimingCfg(flags))
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
 
@@ -67,8 +71,35 @@ def TriggerRecoCfg(flags):
             from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
             acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
 
-    if flags.Output.doWriteESD or flags.Output.doWriteAOD:
-        acc.merge(TriggerEDMCfg(flags))
+    acc.merge(TriggerEDMCfg(flags))
+
+    return acc
+
+def TriggerRecoCfgMC(flags):
+    """ Configures trigger MC handing during reconstruction
+    Run 3 MC:
+    Propagation of HLT collections from input RDO_TRIG to output POOL files
+    Execution of reconstruction-level trigger navigation slimming
+
+    RDO_TRIG containing simulation of the Run 1, Run 2 trigger:
+    Not currently supported.
+    """
+
+    # Check for currently unsuported operational modes, these may be supported in the future if needed
+    if flags.Input.Format is Format.BS:
+        log.warning("TriggerRecoCfgMC does not currently support MC files encoded as bytestream. Switching off handling of trigger inputs.")
+        return ComponentAccumulator()
+    if flags.Trigger.EDMVersion in [1, 2]:
+        log.warning("TriggerRecoCfgMC does not currently support MC files with Run 1 or Run 2 trigger payload. Switching off handling of trigger inputs.")
+        return ComponentAccumulator()
+
+    log.debug("TriggerRecoCfgMC: Preparing the trigger handling of reconstruction of MC")
+    acc = ComponentAccumulator()
+
+    from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
+    acc.merge(TrigNavSlimmingMTCfg(flags))
+
+    acc.merge(TriggerEDMCfg(flags))
 
     return acc
 
@@ -88,6 +119,12 @@ def TriggerMetadataWriterCfg(flags):
 def TriggerEDMCfg(flags):
     """Configures which trigger collections are recorded"""
     acc = ComponentAccumulator()
+
+    # Check if we have anything to do
+    if flags.Output.doWriteESD is False and flags.Output.doWriteAOD is False:
+        log.debug("TriggerEDMCfg: Nothing to do as both Output.doWriteAOD and Output.doWriteESD are False")
+        return acc
+
     # standard collections & metadata
     # TODO consider unifying with TriggerConfig.triggerPOOLOutputCfg - there the assumption is that Run3 
     # metadata
@@ -140,6 +177,15 @@ def TriggerEDMCfg(flags):
 def Run2Run1NavigationSlimingCfg(flags):
     """Configures legacy Run1/2 navigation slimming"""
     acc = ComponentAccumulator()
+
+    if flags.Trigger.DecodeHLT is False:
+        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.DecodeHLT is False")
+        return acc
+
+    if flags.Trigger.doNavigationSlimming is False:
+        log.debug("Run2Run1NavigationSlimingCfg: Nothing to do as Trigger.doNavigationSlimming is False")
+        return acc
+
     def _flatten(edm):
         return list(y.split('-')[0] for x in edm.values() for y in x)
     from TrigNavTools.TrigNavToolsConfig import TrigNavigationThinningSvcCfg
@@ -285,6 +331,11 @@ def Run1xAODConversionCfg(flags):
 def Run3TriggerBSUnpackingCfg(flags):
     """Configures conversions BS -> HLTResultMT -> Collections """
     acc = ComponentAccumulator()
+
+    if flags.Trigger.DecodeHLT is False:
+        log.debug("Run3TriggerBSUnpackingCfg: Nothing to do as Trigger.DecodeHLT is False")
+        return acc
+
     from AthenaCommon.CFElements import seqAND
     decoder = CompFactory.HLTResultMTByteStreamDecoderAlg()
     deserialiser = CompFactory.TriggerEDMDeserialiserAlg("TrigDeserialiser")
