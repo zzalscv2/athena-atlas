@@ -21,7 +21,7 @@ TCS::MuonSort_1BC::MuonSort_1BC(const std::string & name) : SortingAlg(name) {
    defineParameter( "InputWidth1stStage", 16 ); // for FW
    defineParameter( "OutputWidth", 6 );
    defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 7); 
+   defineParameter( "MaxEta", 196 ); 
    defineParameter( "InnerCoinCut", 0 );
    defineParameter( "FullStationCut", 0 );
    defineParameter( "GoodMFieldCut", 0 );
