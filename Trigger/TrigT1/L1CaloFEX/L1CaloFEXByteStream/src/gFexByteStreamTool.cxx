@@ -118,6 +118,35 @@ StatusCode gFexByteStreamTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
+StatusCode gFexByteStreamTool::start() {
+    // Retrieve the L1 menu configuration
+    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey);
+    ATH_CHECK(l1Menu.isValid());
+
+    try {
+        const auto & l1Menu_gJ = l1Menu->thrExtraInfo().gJ();
+        const auto & l1Menu_gLJ = l1Menu->thrExtraInfo().gLJ();
+        const auto & l1Menu_gXE = l1Menu->thrExtraInfo().gXE();
+        const auto & l1Menu_gTE = l1Menu->thrExtraInfo().gTE();
+
+        ATH_CHECK(l1Menu_gJ.isValid());
+        ATH_CHECK(l1Menu_gLJ.isValid());
+        ATH_CHECK(l1Menu_gXE.isValid());
+        ATH_CHECK(l1Menu_gTE.isValid());
+
+        m_gJ_scale = l1Menu_gJ.resolutionMeV(); 
+        m_gLJ_scale = l1Menu_gLJ.resolutionMeV(); 
+        m_gXE_scale = l1Menu_gXE.resolutionMeV(); 
+        m_gTE_scale = l1Menu_gTE.resolutionMeV();
+    } catch (const std::exception& e) {
+        ATH_MSG_ERROR("Exception reading L1Menu: " << e.what());
+        return StatusCode::FAILURE;
+    }
+
+    return StatusCode::SUCCESS;
+
+}
+
 // BS->xAOD conversion
 StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vrobf, const EventContext& ctx) const {
         
@@ -177,25 +206,6 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
     SG::WriteHandle<xAOD::gFexGlobalRoIContainer> gScalarERmsContainer(m_gScalarERmsWriteKey, ctx);
     ATH_CHECK(gScalarERmsContainer.record(std::make_unique<xAOD::gFexGlobalRoIContainer>(), std::make_unique<xAOD::gFexGlobalRoIAuxContainer>()));
     ATH_MSG_DEBUG("Recorded gFexJetGlobalContainer with key " << gScalarERmsContainer.key());
-
-
-    // Retrieve the L1 menu configuration
-    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey,ctx);
-    ATH_CHECK(l1Menu.isValid());
-
-    auto & l1Menu_gJ = l1Menu->thrExtraInfo().gJ();
-    auto & l1Menu_gLJ = l1Menu->thrExtraInfo().gLJ();
-    auto & l1Menu_gXE = l1Menu->thrExtraInfo().gXE();
-    auto & l1Menu_gTE = l1Menu->thrExtraInfo().gTE();
-
-    int gJ_scale = 0;
-    int gLJ_scale = 0;
-    int gXE_scale = 0;
-    int gTE_scale = 0;
-    gJ_scale = l1Menu_gJ.resolutionMeV(); 
-    gLJ_scale = l1Menu_gLJ.resolutionMeV(); 
-    gXE_scale = l1Menu_gXE.resolutionMeV(); 
-    gTE_scale = l1Menu_gTE.resolutionMeV();
 
 
     // Iterate over ROBFragments to decode
@@ -287,19 +297,19 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                             if (iWord == gPos::GRHO_POSITION){
                                 std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
                                 gRhoContainer->push_back(std::move(myEDM));
-                                gRhoContainer->back()->initialize(dataArray[index+iWord], gJ_scale);
+                                gRhoContainer->back()->initialize(dataArray[index+iWord], m_gJ_scale);
                             }
                             //Saving gBlock TOBs into the EDM container
                             if (std::find(gPos::GBLOCK_POSITION.begin(),gPos::GBLOCK_POSITION.end(),iWord)!=gPos::GBLOCK_POSITION.end()){
                                 std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
                                 gSJContainer->push_back(std::move(myEDM));
-                                gSJContainer->back()->initialize(dataArray[index+iWord], gJ_scale);
+                                gSJContainer->back()->initialize(dataArray[index+iWord], m_gJ_scale);
                             }
                             //Saving gJet TOBs into the EDM container
                             if (std::find(gPos::GJET_POSITION.begin(),gPos::GJET_POSITION.end(),iWord)!=gPos::GJET_POSITION.end()){
                                 std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
                                 gLJContainer->push_back(std::move(myEDM));
-                                gLJContainer->back()->initialize(dataArray[index+iWord], gLJ_scale);
+                                gLJContainer->back()->initialize(dataArray[index+iWord], m_gLJ_scale);
                             }
 
                         }
@@ -317,49 +327,49 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
                             if (iWord == gPos::JWOJ_MHT_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gMHTComponentsJwojContainer->push_back(std::move(myEDM));
-                                gMHTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gMHTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving jwoj MST TOBs into the EDM container
                             if (iWord == gPos::JWOJ_MST_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gMSTComponentsJwojContainer->push_back(std::move(myEDM));
-                                gMSTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gMSTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving jwoj MET TOBs into the EDM container
                             if (iWord == gPos::JWOJ_MET_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gMETComponentsJwojContainer->push_back(std::move(myEDM));
-                                gMETComponentsJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gMETComponentsJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving jwoj Scalar TOBs into the EDM container
                             if (iWord == gPos::JWOJ_SCALAR_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gScalarEJwojContainer->push_back(std::move(myEDM));
-                                gScalarEJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gScalarEJwojContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving Noise Cut MET TOBs into the EDM container
                             if (iWord == gPos::NC_MET_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gMETComponentsNoiseCutContainer->push_back(std::move(myEDM));
-                                gMETComponentsNoiseCutContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gMETComponentsNoiseCutContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving Noise Cut Scalar TOBs into the EDM container
                             if (iWord == gPos::NC_SCALAR_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gScalarENoiseCutContainer->push_back(std::move(myEDM));
-                                gScalarENoiseCutContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gScalarENoiseCutContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving Rho+RMS MET TOBs into the EDM container
                             if (iWord == gPos::RMS_MET_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gMETComponentsRmsContainer->push_back(std::move(myEDM));
-                                gMETComponentsRmsContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gMETComponentsRmsContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
                             //Saving Rho+RMS Scalar TOBs into the EDM container
                             if (iWord == gPos::RMS_SCALAR_POSITION){
                                 std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
                                 gScalarERmsContainer->push_back(std::move(myEDM));
-                                gScalarERmsContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                                gScalarERmsContainer->back()->initialize(dataArray[index+iWord], m_gXE_scale, m_gTE_scale);
                             }
 
                         }
