@@ -160,7 +160,7 @@ StatusCode EventBoost::GenAnalysis_finalize(){
 
 //______________________________________________________________________________
 
-StatusCode EventBoost::AnalyseGenEvent(const HepMC::GenEvent* genEvt) {
+StatusCode EventBoost::AnalyseGenEvent ATLAS_ARGUMENT_NOT_CONST_THREAD_SAFE (const HepMC::GenEvent* genEvt) {
 
   msg(MSG::VERBOSE) << "EventBoost begin AnalyseGenEvent()" << endmsg;
 
