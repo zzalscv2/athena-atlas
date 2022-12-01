@@ -17,6 +17,7 @@
 <!-- bins for hits -->
 <!ENTITY PIXHIT "20">
 <!ENTITY SCTHIT "20">
+<!ENTITY SIHIT "30">
 <!-- bins for resolutions -->
 <!ENTITY D0RES "2.00">
 <!ENTITY Z0RES "10.0">
