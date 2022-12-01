@@ -64,9 +64,6 @@ public:
 
 
 private:
-  static const int PARTONPDGMAX = 40;
-  static const int PHOTOSMIN = 10000;
-  static const int GEANTMIN = 200000;
 
   /// Property: Should we fill partons?
   bool m_doPartons;
