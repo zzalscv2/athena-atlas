@@ -40,7 +40,7 @@ namespace Rec {
     private:
 
       SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tpContainerKey{this,"TrackParticleContainer","InDetTrackParticles","Read TrackParticle container"};
-      SG::ReadHandleKey<xAOD::VertexContainer>        m_pvContainerKey{this,"PrimaryVertexContained","PrimaryVertices","Read PrimaryVertices container"};
+      SG::ReadHandleKey<xAOD::VertexContainer>        m_pvContainerKey{this,"PrimaryVertexContainer","PrimaryVertices","Read PrimaryVertices container"};
 
       SG::WriteHandleKey<xAOD::VertexContainer>  m_foundVerticesKey{this,"BVertexContainerName","AllBVertices","Found vertices container"};
       ToolHandle < Rec::IVrtInclusive >          m_bvertextool;
