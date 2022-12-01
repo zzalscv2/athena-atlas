@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/tools/AuxTypeVector.h
  * @author scott snyder <snyder@bnl.gov>
@@ -47,7 +44,7 @@ class AuxDataOption;
  * For a version that holds the vector internally, see the derived
  * class @c AuxTypeVector.
  */
-template <class T, class CONT = typename AuxDataTraits<T>::vector_type>
+template <class T, class CONT>
 class AuxTypeVectorHolder
   : public IAuxTypeVector
 {
@@ -328,7 +325,9 @@ private:
  * This is a derived class of @c AuxTypeVectorHolder that holds the vector
  * instance as a member variable (and thus manages memory internally).
  */
-template <class T, class CONT = typename AuxDataTraits<T>::vector_type>
+template <class T,
+          class ALLOC = std::allocator<T>,
+          class CONT = typename AuxDataTraits<T, ALLOC>::vector_type>
 class AuxTypeVector
   : public AuxTypeVectorHolder<T, CONT>
 {

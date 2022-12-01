@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxBaseRegistry_test.cxx
@@ -181,7 +181,7 @@ void test_makeVector (const std::string& name)
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = r.getAuxID<T> (name);
 
-  typedef typename SG::AuxTypeVectorHolder<T>::vector_type vector_type;
+  using vector_type = typename SG::AuxDataTraits<T>::vector_type;
   vector_type* vec1 = new vector_type;
   vec1->push_back (makeT(1));
   vec1->push_back (makeT(2));

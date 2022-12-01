@@ -437,7 +437,7 @@ std::unique_ptr<SG::IAuxTypeVector> makePacked (std::vector<T, ALLOC>& v, std::t
 {
   // Make the new container and move our contents.
   auto iv =
-    std::make_unique<SG::AuxTypeVector<T, SG::PackedContainer<T, ALLOC> > > (0, 0);
+    std::make_unique<SG::AuxTypeVector<T, ALLOC, SG::PackedContainer<T, ALLOC> > > (0, 0);
   iv->vec().swap (v);
 #ifdef __COVERITY__
   // Coverity gives a bogus complaint about the derived->base conversion here.
@@ -591,8 +591,8 @@ void AuxTypeVectorHolder<T, CONT>::clear (void* dst, size_t dst_index)
  * @param size Initial size of the new vector.
  * @param capacity Initial capacity of the new vector.
  */
-template <class T, class CONT>
-AuxTypeVector<T, CONT>::AuxTypeVector (size_t size, size_t capacity)
+template <class T, class ALLOC, class CONT>
+AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (size_t size, size_t capacity)
   : Base (&m_vec, false)
 {
   m_vec.reserve (capacity * Base::SCALE);
@@ -603,8 +603,8 @@ AuxTypeVector<T, CONT>::AuxTypeVector (size_t size, size_t capacity)
 /**
  * @brief Copy constructor.
  */
-template <class T, class CONT>
-AuxTypeVector<T, CONT>::AuxTypeVector (const AuxTypeVector& other)
+template <class T, class ALLOC, class CONT>
+AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (const AuxTypeVector& other)
   : Base (&m_vec, false),
     m_vec (other.m_vec)
 {
@@ -614,8 +614,8 @@ AuxTypeVector<T, CONT>::AuxTypeVector (const AuxTypeVector& other)
 /**
  * @brief Move constructor.
  */
-template <class T, class CONT>
-AuxTypeVector<T, CONT>::AuxTypeVector (AuxTypeVector&& other)
+template <class T, class ALLOC, class CONT>
+AuxTypeVector<T, ALLOC, CONT>::AuxTypeVector (AuxTypeVector&& other)
   : Base (&m_vec, false),
     m_vec (std::move (other.m_vec))
 {
@@ -625,9 +625,9 @@ AuxTypeVector<T, CONT>::AuxTypeVector (AuxTypeVector&& other)
 /**
  * @brief Assignment.
  */
-template <class T, class CONT>
-AuxTypeVector<T, CONT>&
-AuxTypeVector<T, CONT>::operator= (const AuxTypeVector& other)
+template <class T, class ALLOC, class CONT>
+AuxTypeVector<T, ALLOC, CONT>&
+AuxTypeVector<T, ALLOC, CONT>::operator= (const AuxTypeVector& other)
 {
   if (this != &other) {
     m_vec = other.m_vec;
@@ -639,9 +639,9 @@ AuxTypeVector<T, CONT>::operator= (const AuxTypeVector& other)
 /**
  * @brief Move assignment.
  */
-template <class T, class CONT>
-AuxTypeVector<T, CONT>&
-AuxTypeVector<T, CONT>::operator= (AuxTypeVector&& other)
+template <class T, class ALLOC, class CONT>
+AuxTypeVector<T, ALLOC, CONT>&
+AuxTypeVector<T, ALLOC, CONT>::operator= (AuxTypeVector&& other)
 {
   if (this != &other) {
     m_vec = std::move (other.m_vec);
@@ -655,11 +655,11 @@ AuxTypeVector<T, CONT>::operator= (AuxTypeVector&& other)
 /**
  * @brief Make a copy of this vector.
  */
-template <class T, class CONT>
+template <class T, class ALLOC, class CONT>
 inline
-std::unique_ptr<IAuxTypeVector> AuxTypeVector<T, CONT>::clone() const
+std::unique_ptr<IAuxTypeVector> AuxTypeVector<T, ALLOC, CONT>::clone() const
 {
-  return std::make_unique<AuxTypeVector<T, CONT> > (*this);
+  return std::make_unique<AuxTypeVector<T, ALLOC, CONT> > (*this);
 }
 
 

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/AuxTypeVectorFactory_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -68,7 +66,7 @@ void test_vector()
   assert (ptr2[0] == makeT());
   assert (ptr2[1] == makeT(11));
 
-  typedef typename SG::AuxTypeVectorHolder<T>::vector_type vector_type;
+  using vector_type = typename SG::AuxDataTraits<T>::vector_type;
   vector_type* vec3 = new vector_type;
   vec3->push_back (makeT(3));
   vec3->push_back (makeT(2));
