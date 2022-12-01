@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -41,62 +41,62 @@ public:
 			   unsigned nbinsx, const float* xbins,
 			   unsigned nbinsy, const float* ybins );
 
-  void Fill(const double& x, const double& y);
-  void Fill(const double& x, const double& y, const double& w);
-  unsigned GetNbinsX() const;
-  unsigned GetNbinsY() const;
-  double GetBinContent(unsigned binx, unsigned biny) const;
-  double GetBinError(unsigned binx, unsigned biny) const;
-  void SetBinContent(unsigned binx, unsigned biny, const double& );
-  void SetBinError(unsigned binx, unsigned biny, const double& );
-  unsigned GetEntries() const;
-  void SetEntries(unsigned);
-  void SetBins(unsigned nbinsx,double xmin,double xmax,
-	       unsigned nbinsy,double ymin,double ymax);
+  virtual void Fill(const double& x, const double& y) override;
+  virtual void Fill(const double& x, const double& y, const double& w) override;
+  virtual unsigned GetNbinsX() const override;
+  virtual unsigned GetNbinsY() const override;
+  virtual double GetBinContent(unsigned binx, unsigned biny) const override;
+  virtual double GetBinError(unsigned binx, unsigned biny) const override;
+  virtual void SetBinContent(unsigned binx, unsigned biny, const double& ) override;
+  virtual void SetBinError(unsigned binx, unsigned biny, const double& ) override;
+  virtual unsigned GetEntries() const override;
+  virtual void SetEntries(unsigned) override;
+  virtual void SetBins(unsigned nbinsx,double xmin,double xmax,
+                       unsigned nbinsy,double ymin,double ymax) override;
 
-  void GetBinContentAndError(unsigned binx, unsigned biny,double& content, double&error) const;
-  void SetBinContentAndError(unsigned binx, unsigned biny,const double& content, const double& error);
-  double getXMin() const;
-  double getXMax() const;
-  double getYMin() const;
-  double getYMax() const;
+  virtual void GetBinContentAndError(unsigned binx, unsigned biny,double& content, double&error) const override;
+  virtual void SetBinContentAndError(unsigned binx, unsigned biny,const double& content, const double& error) override;
+  virtual double getXMin() const override;
+  virtual double getXMax() const override;
+  virtual double getYMin() const override;
+  virtual double getYMax() const override;
 
-  void Reset();
+  virtual void Reset() override;
 
-  void getSums( double& sumW, double& sumW2,
-		double& sumWX,double& sumWX2,
-		double& sumWY, double& sumWY2,
-		double& sumWXY) const;
-  void setSums( const double& sumW, const double&sumW2,
-		const double& sumWX, const double& sumWX2,
-		const double& sumWY, const double& sumWY2,
-		const double& sumWXY );
+  virtual void getSums( double& sumW, double& sumW2,
+                        double& sumWX,double& sumWX2,
+                        double& sumWY, double& sumWY2,
+                        double& sumWXY) const override;
+  virtual void setSums( const double& sumW, const double&sumW2,
+                        const double& sumWX, const double& sumWX2,
+                        const double& sumWY, const double& sumWY2,
+                        const double& sumWXY ) override;
 
-  TH2F* getROOTHist();
-  TH1* getROOTHistBase();
+         TH2F* getROOTHist();
+  virtual TH1* getROOTHistBase() override;
 
-  double Integral() const;
+  virtual double Integral() const override;
 
   //For fast looping, skipping bins where (content,error)==(0,0):
-  void resetActiveBinLoop();
-  bool getNextActiveBin(unsigned& binx, unsigned& biny, double& content, double& error);
+  virtual void resetActiveBinLoop() override;
+  virtual bool getNextActiveBin(unsigned& binx, unsigned& biny, double& content, double& error) override;
 
-  void scaleContentsAndErrors( const double& fact );//C.f. comment in LWHist1D.h
+  virtual void scaleContentsAndErrors( const double& fact ) override;//C.f. comment in LWHist1D.h
 
 private:
   friend class LWHistInt;
   friend class LWHistVal;
-  void clear();
+  virtual void clear() override;
   double getBinCenterX(int bin) const;
   double getBinCenterY(int bin) const;
-  TH1* getROOTHistBaseNoAlloc() const;
-  void clearKeptROOTHist();//Does nothing if root-backend.
+  virtual TH1* getROOTHistBaseNoAlloc() const override;
+  virtual void clearKeptROOTHist() override;//Does nothing if root-backend.
   const float * getVarBinsX() const;//null if fixed bin-widths
   const float * getVarBinsY() const;//null if fixed bin-widths
-  virtual double actualGetBinCenterX(int bin) const;
-  virtual double actualGetBinCenterY(int bin) const;
-  virtual unsigned actualFindBinX(const double&) const;
-  virtual unsigned actualFindBinY(const double&) const;
+  virtual double actualGetBinCenterX(int bin) const override;
+  virtual double actualGetBinCenterY(int bin) const override;
+  virtual unsigned actualFindBinX(const double&) const override;
+  virtual unsigned actualFindBinY(const double&) const override;
   TH2F_LW( const char* name, const char* title,
 	   unsigned nbinsx, const double& xmin, const double& xmax,
 	   unsigned nbinsy, const double& ymin, const double& ymax, bool rootbackend );
