@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/hexdump_test.cxx
@@ -13,6 +13,7 @@
 #include "CxxUtils/hexdump.h"
 #include <iostream>
 #include <cassert>
+#include <cstdint>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/mman.h>
