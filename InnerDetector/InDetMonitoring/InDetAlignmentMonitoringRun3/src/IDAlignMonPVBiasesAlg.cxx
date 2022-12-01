@@ -29,7 +29,9 @@
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 
 #include "InDetAlignGenTools/IInDetAlignHitQualSelTool.h"
+
 #include <cmath>
+#include <memory>
 
 // *********************************************************************
 // Public Methods
@@ -108,11 +110,10 @@ StatusCode IDAlignMonPVBiasesAlg::fillHistograms( const EventContext& ctx ) cons
     // require at least 10 tracks associated
     if (foundVertex->nTrackParticles() < 10) continue;
 
-    const Trk::ImpactParametersAndSigma* myIPandSigma(nullptr);
-    myIPandSigma = m_trackToVertexIPEstimator->estimate(trackPart, foundVertex, true);
+    std::unique_ptr<const Trk::ImpactParametersAndSigma> myIPandSigma(m_trackToVertexIPEstimator->estimate(trackPart, foundVertex, true));
 
     // require d0_pv to be smaller than 4
-    if(std::abs(myIPandSigma->IPd0) > 4.0) continue;
+    if(myIPandSigma.get()==nullptr || std::abs(myIPandSigma->IPd0) > 4.0) continue;
  
     double charge = trackPart->charge();
 
