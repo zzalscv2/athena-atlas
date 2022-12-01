@@ -133,7 +133,7 @@ namespace CP {
                 }
             }
             if (!passSelectionQuality(particle)) continue;
-            cache.prim_parts.insert(const_cast<xAOD::IParticle*>(particle));
+            cache.prim_parts.insert(particle);
         }
     }
     void IsolationCloseByCorrectionTool::loadAssociatedObjects(const EventContext& ctx, ObjectCache& cache) const {
@@ -148,7 +148,7 @@ namespace CP {
     }
     PflowSet IsolationCloseByCorrectionTool::getAssocFlowElements(const EventContext& ctx, const xAOD::IParticle* particle) const {
         ObjectCache cache{};
-        cache.prim_parts = {const_cast<xAOD::IParticle*>(particle)};
+        cache.prim_parts = {particle};
         loadAssociatedObjects(ctx, cache);
         return cache.flows;
     }
@@ -180,7 +180,9 @@ namespace CP {
             }
         }
     }
-    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection(xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
+
+    /// not thread-safe because of const_cast
+    CorrectionCode IsolationCloseByCorrectionTool::getCloseByIsoCorrection ATLAS_NOT_THREAD_SAFE (xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
                                                                            xAOD::PhotonContainer* Photons) const {
         if (!m_isInitialised) {
             ATH_MSG_ERROR("The IsolationCloseByCorrectionTool was not initialised!!!");
@@ -203,9 +205,10 @@ namespace CP {
 
         return performCloseByCorrection(ctx, cache);
     }
-    CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection(const EventContext& ctx, ObjectCache& cache) const {
-        for (xAOD::IParticle* Particle : cache.prim_parts) {
-            if (subtractCloseByContribution(ctx, Particle, cache) == CorrectionCode::Error) {
+    CorrectionCode IsolationCloseByCorrectionTool::performCloseByCorrection ATLAS_NOT_THREAD_SAFE (const EventContext& ctx, ObjectCache& cache) const {
+        for (const xAOD::IParticle* Particle : cache.prim_parts) {
+            auto Particle_nc = const_cast<xAOD::IParticle*>(Particle); // this needs to be fixed
+            if (subtractCloseByContribution(ctx, Particle_nc, cache) == CorrectionCode::Error) {
                 ATH_MSG_ERROR("Failed to correct the isolation of particle with pt: " << Particle->pt() * MeVtoGeV << " GeV"
                                                                                       << " eta: " << Particle->eta()
                                                                                       << " phi: " << Particle->phi());

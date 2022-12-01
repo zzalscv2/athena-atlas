@@ -10,6 +10,7 @@
 #include <AsgTools/AsgTool.h>
 #include <AsgTools/PropertyWrapper.h>
 #include <AsgTools/ToolHandle.h>
+#include <CxxUtils/checker_macros.h>
 #ifndef XAOD_STANDALONE
 #include <StoreGate/ReadDecorHandleKeyArray.h>
 #endif
@@ -57,7 +58,8 @@ namespace CP {
 
         virtual asg::AcceptData acceptCorrected(const xAOD::IParticle& x, const xAOD::IParticleContainer& closePar) const override;
 
-        virtual CorrectionCode getCloseByIsoCorrection(xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
+        /// not thread-safe because of const_cast
+        virtual CorrectionCode getCloseByIsoCorrection ATLAS_NOT_THREAD_SAFE (xAOD::ElectronContainer* Electrons, xAOD::MuonContainer* Muons,
                                                        xAOD::PhotonContainer* Photons) const override;
         virtual CorrectionCode subtractCloseByContribution(xAOD::IParticle& x, const xAOD::IParticleContainer& closebyPar) const override;
 
@@ -75,7 +77,7 @@ namespace CP {
                                   float& energy) const override;
 
         /// Helper struct to collect all relevant objects for the procedure
-        using PrimaryCollection = std::set<xAOD::IParticle*>;
+        using PrimaryCollection = std::set<const xAOD::IParticle*>;
         struct ObjectCache {
             ObjectCache() = default;
             const xAOD::Vertex* prim_vtx{nullptr};
@@ -97,7 +99,7 @@ namespace CP {
 
         // Function to pipe each container given by the interfaces through. It loops over all
         // particles and removes the isolation overlap between the objects
-        CorrectionCode performCloseByCorrection(const EventContext& ctx, ObjectCache& cache) const;
+        CorrectionCode performCloseByCorrection ATLAS_NOT_THREAD_SAFE (const EventContext& ctx, ObjectCache& cache) const;
 
         // Helper function to obtain the isolation cones to use for a given particle
         const IsoVector& getIsolationTypes(const xAOD::IParticle* particle) const;
