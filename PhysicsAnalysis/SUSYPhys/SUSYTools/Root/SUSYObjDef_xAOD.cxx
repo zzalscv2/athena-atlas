@@ -623,6 +623,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
 
   //For electron trigger SF tools
   declareProperty( "ElectronTriggerSFStringSingle",      m_electronTriggerSFStringSingle);
+  //For tau trigger SF tools
+  declareProperty( "TauTriggerSFFile", m_tauTriggerSFFile);
 
   //--- Tool pointers    /MT : we may want to improve the descriptions :)
   m_jetCalibTool.declarePropertyFor( this, "JetCalibTool", "The JetCalibTool" );
@@ -1401,6 +1403,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_tauIdBaseline, "TauBaseline.Id", rEnv, "Medium");
   configFromFile(m_tauConfigPathBaseline, "TauBaseline.ConfigPath", rEnv, "default");
   configFromFile(m_tauDoTTM, "Tau.DoTruthMatching", rEnv, false);
+  configFromFile(m_tauTriggerSFFile, "Tau.TriggerSFFile", rEnv, "SUSYTools/tau_trigger.conf");
   //
   configFromFile(m_jetPt, "Jet.Pt", rEnv, 20000.);
   configFromFile(m_jetEta, "Jet.Eta", rEnv, 2.8);
@@ -1629,6 +1632,9 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   v_trigs16_cache_multiLep = GetTriggerOR(m_trig2016combination_multiLep);
   v_trigs17_cache_multiLep = GetTriggerOR(m_trig2017combination_multiLep);
   v_trigs18_cache_multiLep = GetTriggerOR(m_trig2018combination_multiLep);
+
+  //** cache config for tau trigger SF
+  GetTriggerTokensTau(m_tauTriggerSFFile, m_tau_trig_support);
 
   return StatusCode::SUCCESS;
 }
