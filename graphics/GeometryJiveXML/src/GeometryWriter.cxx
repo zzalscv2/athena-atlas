@@ -277,7 +277,7 @@ namespace JiveXML {
 
     InDetDD::SiDetectorElementCollection::const_iterator it;
 
-    for (it=m_pixel_manager->getDetectorElementBegin(); it<m_pixel_manager->getDetectorElementEnd(); it++) {
+    for (it=m_pixel_manager->getDetectorElementBegin(); it<m_pixel_manager->getDetectorElementEnd(); ++it) {
 
       const InDetDD::SiDetectorElement *element = *it;
 
@@ -358,7 +358,7 @@ namespace JiveXML {
 
     InDetDD::SiDetectorElementCollection::const_iterator it;
  
-    for (it=m_silicon_manager->getDetectorElementBegin(); it<m_silicon_manager->getDetectorElementEnd(); it++) {
+    for (it=m_silicon_manager->getDetectorElementBegin(); it<m_silicon_manager->getDetectorElementEnd(); ++it) {
 
       const InDetDD::SiDetectorElement *element = *it;
 
@@ -457,7 +457,7 @@ namespace JiveXML {
 
     InDetDD::TRT_DetElementCollection::const_iterator it;
     
-    for (it=m_trt_manager->getDetectorElementBegin(); it<m_trt_manager->getDetectorElementEnd(); it++) {
+    for (it=m_trt_manager->getDetectorElementBegin(); it<m_trt_manager->getDetectorElementEnd(); ++it) {
       
       const InDetDD::TRT_BaseElement *elementIn = *it;
       // Just an extra precaution to avoid crashes.
@@ -556,7 +556,7 @@ namespace JiveXML {
 
     const TileID *tileIdHelper = m_tile_manager->get_id();
     TileDetDescrManager::tile_descr_const_iterator tileIt;
-    for (tileIt=m_tile_manager->tile_descriptors_begin(); tileIt!=m_tile_manager->tile_descriptors_end(); tileIt++) {
+    for (tileIt=m_tile_manager->tile_descriptors_begin(); tileIt!=m_tile_manager->tile_descriptors_end(); ++tileIt) {
       const TileDetDescriptor *descriptor = *tileIt;
       if (!descriptor) continue;
 
@@ -626,7 +626,7 @@ namespace JiveXML {
 	  double minEta = 0.0;
 	  const CaloDetDescrElement *oneSuchElement = 0;
 
-	  for (it=m_calo_manager->element_begin(); it<m_calo_manager->element_end(); it++) {
+	  for (it=m_calo_manager->element_begin(); it<m_calo_manager->element_end(); ++it) {
 
 	    const CaloDetDescrElement *element = *it;
 	    int etaIndex, phiIndex;

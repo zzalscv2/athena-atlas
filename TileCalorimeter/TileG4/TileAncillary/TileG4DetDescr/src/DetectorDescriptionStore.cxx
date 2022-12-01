@@ -138,9 +138,9 @@ namespace FADS {
     NameSpaces::const_iterator ns;
     std::cout << std::endl;
     std::cout << "  Listing all detector description objects currently defined" << std::endl;
-    for (ns = m_nameSpaces.begin(); ns != m_nameSpaces.end(); ns++) {
+    for (ns = m_nameSpaces.begin(); ns != m_nameSpaces.end(); ++ns) {
       std::cout << std::endl << "- NameSpace " << (*ns).first << std::endl << std::endl;
-      for (it = ( (*ns).second)->begin(); it != ( (*ns).second)->end(); it++) {
+      for (it = ( (*ns).second)->begin(); it != ( (*ns).second)->end(); ++it) {
         std::cout << "--->  ";
         if ( (*it).second->IsPointed()) std::cout << "\t\t";
         else std::cout << " * ";
