@@ -38,16 +38,16 @@ class AlignmentBarrelLUT: public AthAlgTool
     static const int s_phi = 30;
     static const int s_etaQ = 2;
 
-    double m_dZ[s_saddress][s_innerR][s_eta][s_phi][s_etaQ];
+    double m_dZ[s_saddress][s_innerR][s_eta][s_phi][s_etaQ]{};
 
-    int m_NbinEta[s_saddress][s_innerR];
-    float m_EtaMin[s_saddress][s_innerR];
-    float m_EtaMax[s_saddress][s_innerR];
-    float m_EtaStep[s_saddress][s_innerR];
-    int m_NbinPhi[s_saddress][s_innerR];
-    float m_PhiMin[s_saddress][s_innerR];
-    float m_PhiMax[s_saddress][s_innerR];
-    float m_PhiStep[s_saddress][s_innerR];
+    int m_NbinEta[s_saddress][s_innerR]{};
+    float m_EtaMin[s_saddress][s_innerR]{};
+    float m_EtaMax[s_saddress][s_innerR]{};
+    float m_EtaStep[s_saddress][s_innerR]{};
+    int m_NbinPhi[s_saddress][s_innerR]{};
+    float m_PhiMin[s_saddress][s_innerR]{};
+    float m_PhiMax[s_saddress][s_innerR]{};
+    float m_PhiStep[s_saddress][s_innerR]{};
 
   };
 

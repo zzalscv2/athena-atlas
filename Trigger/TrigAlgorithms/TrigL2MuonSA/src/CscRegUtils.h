@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGL2MUONSA_CSCREGUTILS_H
@@ -81,8 +81,8 @@ class CscRegDict: public AthAlgTool{
 
  private:
   Gaudi::Property< bool >  m_isMC { this, "MCFlag", true, "" };
-  CscRegion m_reg_dict[32];//dictionary of CSC regions
-  int m_module_hashes[2][2][8];//dictionary of hashIds
+  CscRegion m_reg_dict[32]{};//dictionary of CSC regions
+  int m_module_hashes[2][2][8]{};//dictionary of hashIds
 
 
   ReturnCode initializeHashDictionary();

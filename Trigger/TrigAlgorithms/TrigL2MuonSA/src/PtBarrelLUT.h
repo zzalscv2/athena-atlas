@@ -46,8 +46,8 @@ class PtBarrelLUT: public AthAlgTool
 		       const std::string& lutSP_fileName);
     
   private:
-    LUT    m_lut;
-    LUTsp  m_lutSP;
+    LUT    m_lut{};
+    LUTsp  m_lutSP{};
 
 };
 
