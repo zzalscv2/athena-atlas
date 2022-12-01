@@ -272,7 +272,7 @@ StatusCode LarEMSamplingFraction::execute()
 		cell_info_map[id.get_compact()].cell_eta=caloDDE->eta_raw();
 		cell_info_map[id.get_compact()].cell_phi=caloDDE->phi_raw();
 	      }  
-	      
+
 	      if(m_CalibrationHitContainerNames[count]=="LArCalibrationHitInactive" || m_CalibrationHitContainerNames[count]=="TileCalibHitInactiveCell")
 		{
 		  m_energy_inactive_total->at(sampling)+=Etot;
@@ -283,7 +283,7 @@ StatusCode LarEMSamplingFraction::execute()
 		    
 		    if(m_docells) cell_info_map[id.get_compact()].cell_energy_inactive_total+=Etot;
 		}
-	      
+
 	      if(m_CalibrationHitContainerNames[count]=="LArCalibrationHitActive" || m_CalibrationHitContainerNames[count]=="TileCalibHitActiveCell")
 		{
 		  m_energy_active_total_corrected->at(sampling)+=Etot*Efactor;

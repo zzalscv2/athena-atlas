@@ -47,7 +47,7 @@ namespace JiveXML {
     }
 
     //Loop over segment collections
-    for (; CollectionItr!=CollectionsEnd; CollectionItr++) {
+    for (; CollectionItr!=CollectionsEnd; ++CollectionItr) {
 
       //Get number of segments in this collection
       Trk::SegmentCollection::size_type NSegs=(*CollectionItr).size();

@@ -130,7 +130,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
   typedef DataVector<Trk::Track>::const_iterator TrackDataVecIter;
 
   bool selectionPassed;
-  for (TrackDataVecIter itr = (*trackTES).begin(); itr != (*trackTES).end(); itr++) {
+  for (TrackDataVecIter itr = (*trackTES).begin(); itr != (*trackTES).end(); ++itr) {
     if (m_useBeamConstraint) {
       selectionPassed = static_cast<bool>(m_trkFilter->accept(**itr, &beamposition));
     } else {
@@ -166,7 +166,7 @@ ActsTrk::IterativePriVtxFinderTool::findVertex(const EventContext& ctx,
   typedef DataVector<xAOD::TrackParticle>::const_iterator TrackParticleDataVecIter;
 
   bool selectionPassed;
-  for (TrackParticleDataVecIter itr = (*trackParticles).begin(); itr != (*trackParticles).end(); itr++) {
+  for (TrackParticleDataVecIter itr = (*trackParticles).begin(); itr != (*trackParticles).end(); ++itr) {
     if (m_useBeamConstraint) {
       selectionPassed = static_cast<bool>(m_trkFilter->accept(**itr, &beamposition));
     } else {
