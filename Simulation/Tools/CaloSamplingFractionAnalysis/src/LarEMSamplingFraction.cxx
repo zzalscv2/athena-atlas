@@ -121,7 +121,6 @@ StatusCode LarEMSamplingFraction::execute()
 
   const CaloCalibrationHitContainer* cchc;
   std::vector<const CaloCalibrationHitContainer *> v_cchc;
-  std::vector<std::string>::iterator iter;
   for (const std::string& containerName : m_CalibrationHitContainerNames) {
     if ( !evtStore()->contains<CaloCalibrationHitContainer>(containerName))
     {
@@ -229,7 +228,6 @@ StatusCode LarEMSamplingFraction::execute()
       m_energy_active_esc  ->push_back(0.0);
     }
   
-  std::vector<const CaloCalibrationHitContainer * >::const_iterator it;
   int count=0;
   for (const CaloCalibrationHitContainer* calibHitContainer: v_cchc)
     {
