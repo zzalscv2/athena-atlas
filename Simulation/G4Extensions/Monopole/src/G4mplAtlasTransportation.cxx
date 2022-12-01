@@ -104,7 +104,8 @@ G4mplAtlasTransportation::G4mplAtlasTransportation( const CustomMonopole* mpl, G
     fNoLooperTrials(0),
     fSumEnergyKilled( 0.0 ), fMaxEnergyKilled( 0.0 ),
     fShortStepOptimisation(false),    // Old default: true (=fast short steps)
-    fVerboseLevel( verboseLevel )
+    fVerboseLevel( verboseLevel ),
+    accumLength (0.0)
 {
 
   mplParticle = mpl;
@@ -112,8 +113,6 @@ G4mplAtlasTransportation::G4mplAtlasTransportation( const CustomMonopole* mpl, G
   G4TransportationManager* transportMgr ;
 
   G4cout << "!!! G4mplAtlasTransportation constructor " << G4endl;
-
-  accumLength = 0.0;
 
   transportMgr = G4TransportationManager::GetTransportationManager() ;
 
