@@ -156,7 +156,8 @@ class PerfMonMTSvc : virtual public IPerfMonMTSvc, virtual public IIncidentListe
   /// In the future this might be converted to a inclusion set
   /// which would allow user to monitor only a set of algorithms...
   const std::set<std::string> m_exclusionSet = {"AthMasterSeq", "AthAlgEvtSeq", "AthAllAlgSeq", "AthAlgSeq", "AthOutSeq",
-    "AthCondSeq", "AthBeginSeq", "AthEndSeq", "AthenaEventLoopMgr", "AthenaHiveEventLoopMgr", "AthMpEvtLoopMgr", "PerfMonMTSvc"};
+    "AthCondSeq", "AthBeginSeq", "AthEndSeq", "AthenaEventLoopMgr", "AthenaHiveEventLoopMgr", "AthMpEvtLoopMgr", "AthenaMtesEventLoopMgr",
+    "PerfMonMTSvc"};
 
   /// Snapshots data
   int m_motherPID;
@@ -181,6 +182,9 @@ class PerfMonMTSvc : virtual public IPerfMonMTSvc, virtual public IIncidentListe
 
   // The last event-level measurement time in seconds
   std::atomic<double> m_checkPointTime;
+
+  // This flag protects against double stopping the event loop measurement
+  std::atomic<bool> m_isEvtLoopStopped;
 
   /*
    * Data structure  to store component level measurements
