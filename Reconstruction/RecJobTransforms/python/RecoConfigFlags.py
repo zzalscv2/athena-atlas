@@ -1,7 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import Format
-
 
 _all_domains = [
     "Calo", "Tracking",
@@ -66,9 +64,10 @@ def createRecoConfigFlags():
                   lambda prevFlags: prevFlags.Detector.EnableCalo and
                   prevFlags.Reco.EnableTracking)
 
-    # this flags enables trigger data decoding (not trigger simulation)
+    # This flags enables trigger data decoding (not trigger simulation)
+    # EDMVersion > 0 check prevents this flag being true in jobs before the trigger has executed, or where it was not executed.
     flags.addFlag("Reco.EnableTrigger",
-                  lambda prevFlags: prevFlags.Input.Format is Format.BS)
+                  lambda prevFlags: prevFlags.Trigger.EDMVersion > 0)
 
     # enable automatically for HI data
     flags.addFlag("Reco.EnableHI",
