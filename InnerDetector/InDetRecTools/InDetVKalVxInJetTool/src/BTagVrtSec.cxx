@@ -505,7 +505,7 @@ namespace InDet{
 			       errorMatrix, Chi2PerTrk, TrkAtVrt, Chi2,
 			       *state, true);
 	   if(sc.isFailure()) continue;
-	   if(projSV_PV(tmpVertex,primVrt,jetDir)<0.) continue; // Drop negative direction
+	   if((projSV_PV(tmpVertex,primVrt,jetDir)<0. &&(!m_getNegativeTag)) || (projSV_PV(tmpVertex,primVrt,jetDir)>0. &&(m_getNegativeTag))) continue; // Drop negative direction
 
 	   if(m_useTrackClassificator) Chi2 += trkRank[it];     // Remove preferably non-HF-tracks
 
@@ -713,7 +713,7 @@ namespace InDet{
 		       tmpVrt.fitVertex.y()-primVrt.y(),
 		       tmpVrt.fitVertex.z()-primVrt.z());
 	tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(SVmPV, 1.)); //DeltaR SV-PV vs jet
-	if(tmpVrt.dRSVPV > m_coneForTag ) continue;  // SV is outside of the jet cone
+	if( tmpVrt.dRSVPV > m_coneForTag && (!m_getNegativeTag) ) continue;  // SV is outside of the jet cone
 
 	double jetVrtDir = SVmPV.Dot(jetDir.Vect());
 	double vPos = SVmPV.Dot(tmpVrt.momentum.Vect())/tmpVrt.momentum.Rho();

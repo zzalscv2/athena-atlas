@@ -44,6 +44,8 @@ def SV1TagCfg( flags, name = 'SV1Tag', scheme = '', useBTagFlagsDefaults = True,
         'UseCHypo'           : True,
         'LikelihoodTool'     : likelihood
     }
+    if 'Flip' in name:
+        defaults['SecVxFinderName'] = 'SV1Flip'
     for option in defaults:
         options.setdefault(option, defaults[option])
     acc.setPrivateTools(CompFactory.Analysis.SVTag(**options))
