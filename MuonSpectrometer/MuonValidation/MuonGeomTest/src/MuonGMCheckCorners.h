@@ -14,7 +14,6 @@
 #include "GaudiKernel/NTuple.h"
 #include "MuonReadoutGeometry/MuonReadoutElement.h"
 
-using namespace MuonGM;
 
 class MuonGMCheckCorners : public AthAlgorithm {
 public:
