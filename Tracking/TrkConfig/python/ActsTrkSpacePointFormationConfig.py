@@ -67,3 +67,28 @@ def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
     acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc
 
+def ActsTrkSpacePointFormationCfg(flags):
+    acc = ComponentAccumulator()
+    if flags.Detector.EnableITkPixel:
+        acc.merge(ActsTrkPixelSpacePointFormationCfg(flags))
+    if flags.Detector.EnableITkStrip:
+        # Need to schedule this here in case the Athena space point formation is not schedule
+        # This is because as of now requires at least ITkSiElementPropertiesTableCondAlgCfg
+        # This may be because the current strip space point formation algorithm is not using Acts
+        # May be not necessary once the Acts-based strip space point maker is ready
+        from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
+        acc.merge(ITkStripReadoutGeometryCfg(flags))
+        
+        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+        acc.merge(BeamSpotCondAlgCfg(flags))
+        
+        from InDetConfig.SiSpacePointFormationConfig import ITkSiElementPropertiesTableCondAlgCfg
+        acc.merge(ITkSiElementPropertiesTableCondAlgCfg(flags))
+        
+        acc.merge(ActsTrkStripSpacePointFormationCfg(flags))
+
+    if flags.Acts.doAnalysis:
+        from ActsTrkAnalysis.ActsTrkAnalysisConfig import ActsTrkSpacePointAnalysisCfg
+        acc.merge(ActsTrkSpacePointAnalysisCfg(flags))
+        
+    return acc

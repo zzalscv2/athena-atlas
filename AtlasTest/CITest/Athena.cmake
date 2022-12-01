@@ -172,12 +172,20 @@ atlas_add_citest( ACTS_Propagation_ITk
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
 
-atlas_add_citest( ACTS_SiSpacePointSeedMaker
-    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsSiSpacePointSeedMaker.sh 
-    LOG_IGNORE_PATTERN "WARNING FPE INVALID" ) #Ignore FPEs in ITkSiSpTrackFinder 
-
 atlas_add_citest( ACTS_Workflow
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsWorkflow.sh 
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+
+atlas_add_citest( ACTS_ValidateClusters
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateClusters.sh
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+
+atlas_add_citest( ACTS_ValidateSpacePoints
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateSpacePoints.sh
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+
+atlas_add_citest( ACTS_ValidateSeeds
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateSeeds.sh
     LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
 #################################################################################

@@ -1,8 +1,16 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, FlagEnum
 from InDetConfig.InDetConfigFlags import TrackFitterType
+
+class TrackingComponent(FlagEnum):
+    AthenaChain = "AthenaChain"  # full Athena Chain (default)
+    ActsChain = "ActsChain"  # full Acts Chain 
+    # Validation options
+    ValidateActsClusters = "ValidateActsClusters"
+    ValidateActsSpacePoints = "ValidateActsSpacePoints" 
+    ValidateActsSeeds = "ValidateActsSeeds"
 
 # TODO : Add some exta levels?
 
@@ -78,9 +86,7 @@ def createITkConfigFlags():
   from InDetConfig.VertexFindingFlags import createITkPriVertexingFlags
   itkcf.addFlagsCategory("ITk.PriVertex", createITkPriVertexingFlags, prefix=True)
 
-  itkcf.addFlag("ITk.Tracking.convertInDetClusters", False) # Turn on conversion of InDet clusters to xAOD clusters
-  itkcf.addFlag("ITk.Tracking.convertXAODClusters", False) # Turn on conversion of xAOD clusters to InDet clusters
-  itkcf.addFlag("ITk.Tracking.EnableNativexAODclusters", False) # Turn on native xAOD clusters creation. Incompatible with convertInDetClusters!
-  itkcf.addFlag("ITk.Tracking.produceNewSpacePointContainer", False) # Turn on to produce ActsTrk::SpacePointContainers
+  # enable reco steps 
+  itkcf.addFlag("ITk.Tracking.recoChain", [TrackingComponent.AthenaChain])
 
   return itkcf

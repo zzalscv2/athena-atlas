@@ -4,8 +4,9 @@
 input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/inputs/601237_ttbar_allhad_PU200_ITk_master_v1.RDO.root
 n_events=10
 
-Reco_tf.py --CA --steering doRAWtoALL \
-   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsWorkflowFlags" \
+Reco_tf.py --CA --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsValidateSeedsFlags" \
+  --steering doRAWtoALL \
   --inputRDOFile ${input_rdo} \
-  --outputAODFile AOD.pool.root \
+  --outputAODFile test.AOD.pool.root  \
   --maxEvents ${n_events}
+
