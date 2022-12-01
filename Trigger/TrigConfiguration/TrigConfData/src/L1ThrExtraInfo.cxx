@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigConfData/L1ThrExtraInfo.h"
@@ -797,15 +797,20 @@ TrigConf::L1ThrExtraInfo_MU::exclusionList(const std::string & listName) const
 void
 TrigConf::L1ThrExtraInfo_MU::load()
 {
-   for( auto & x : m_extraInfo["roads"].getObject("rpc").data() ) {
-      m_rpcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
-                          boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+   {
+      DataStructure ds = m_extraInfo["roads"].getObject("rpc");
+      for( const auto & x : ds.data() ) {
+         m_rpcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
+                             boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+     }
    }
-   for( auto & x : m_extraInfo["roads"].getObject("tgc").data() ) {
-      m_tgcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
-                          boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+   {
+      DataStructure ds = m_extraInfo["roads"].getObject("tgc");
+      for( auto & x : ds.data() ) {
+         m_tgcPtMap.emplace( boost::lexical_cast<unsigned int, std::string>(x.first),
+                             boost::lexical_cast<unsigned int, std::string>(x.second.data()));
+      }
    }
-
    for( auto & x : m_extraInfo["exclusionLists"].data() ) {
       const std::string & listName = x.first;
       std::map<std::string, std::vector<unsigned int>> roisBySector;
