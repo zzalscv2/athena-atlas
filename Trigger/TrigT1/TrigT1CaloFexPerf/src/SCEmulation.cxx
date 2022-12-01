@@ -1,13 +1,12 @@
-/**
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
- */
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
 
 #include "SCEmulation.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "PathResolver/PathResolver.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include <memory>
 #include <TFile.h>
@@ -96,7 +95,7 @@ namespace LVL1
     ATH_CHECK(m_caloBCIDAverageKey.initialize(m_useBCID));
     ATH_CHECK(m_caloNoiseSigmaDiffKey.initialize(m_useNoise));
 
-    ATH_CHECK(detStore()->retrieve(m_scellMgr));
+    ATH_CHECK(m_caloSuperCellMgrKey.initialize()); 
     ATH_CHECK(detStore()->retrieve(m_caloIdMgr));
 
     std::unique_ptr<TFile> timingFile(TFile::Open(PathResolver::find_calib_file(m_cellTimingFile).c_str()));
@@ -240,6 +239,9 @@ namespace LVL1
       caloNoiseSigmaDiff = handle.cptr();
     }
 
+    SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,ctx};
+    const CaloSuperCellDetDescrManager* scellMgr = *caloSuperCellMgrHandle;
+
     auto evtInfo = SG::makeHandle(m_evtInfoKey, ctx);
     if (!evtInfo.isValid())
     {
@@ -365,7 +367,7 @@ namespace LVL1
 
     for (std::size_t idx = 0; idx < energies.size(); ++idx)
     {
-      const CaloDetDescrElement *dde = m_scellMgr->get_element(idx);
+      const CaloDetDescrElement *dde = scellMgr->get_element(idx);
       if (!dde)
       {
         ATH_MSG_WARNING("Invalid DDE for hash index " << idx);
