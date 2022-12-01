@@ -2,8 +2,8 @@
    Copyright (C) 2022 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef LARNNRAWCHANNELBUILDER_H
-#define LARNNRAWCHANNELBUILDER_H
+#ifndef LARROD_LARNNRAWCHANNELBUILDER_H
+#define LARROD_LARNNRAWCHANNELBUILDER_H
 
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -14,7 +14,6 @@
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArRawConditions/LArADC2MeV.h"
@@ -67,9 +66,6 @@ Gaudi::Property<bool>m_isSC{this, "IsSuperCell", false, "code should produce Sup
 
 //Identifier helper
 const LArOnlineID_Base* m_onlineId = nullptr;
-
-/// Geometry manager.
-const CaloSuperCellDetDescrManager* m_sem_mgr = 0;
 
 Gaudi::Property<std::string>m_nn_json{this, "NNJsonPath", "",
                                               "Path to json containing the lwtnn network"};
