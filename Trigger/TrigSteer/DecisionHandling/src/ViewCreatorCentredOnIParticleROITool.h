@@ -53,7 +53,7 @@ public:
   Gaudi::Property< double > m_roiZedSinThetaFlag{this,"RoIZedSinThetaFlag", false,
     "use a delta zed/sin\theta width rather than just a zed width"};
 
-  Gaudi::Property< bool > m_useBeamspot{this,"UseBeamSpot", false,
+  Gaudi::Property< bool > m_useBeamspot{this,"UseBeamSpot", true,
     "correct for the pointlessly adjusted average beamspot z"};
 
 };
