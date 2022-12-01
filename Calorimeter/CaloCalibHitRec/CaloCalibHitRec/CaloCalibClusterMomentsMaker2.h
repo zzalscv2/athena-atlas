@@ -23,7 +23,7 @@ class TruthParticleContainer;
 
 #include "GaudiKernel/ToolHandle.h" 
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDmDetDescr/CaloDmDescrManager.h"

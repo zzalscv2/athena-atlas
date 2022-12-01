@@ -21,7 +21,7 @@
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "StoreGate/ReadCondHandleKey.h"

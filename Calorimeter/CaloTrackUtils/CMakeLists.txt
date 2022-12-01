@@ -7,7 +7,7 @@ atlas_subdir( CaloTrackUtils )
 atlas_add_library( CaloTrackUtilsLib
                    src/*.cxx
                    PUBLIC_HEADERS CaloTrackUtils
-                   LINK_LIBRARIES GaudiKernel CaloRecLib
+                   LINK_LIBRARIES GaudiKernel CaloUtilsLib
                    PRIVATE_LINK_LIBRARIES GeoPrimitives Particle TrkExInterfaces TrkParameters TrkParticleBase TrkSurfaces TrkTrackLink VxVertex xAODCaloEvent )
 
 atlas_add_component( CaloTrackUtils

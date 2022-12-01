@@ -24,8 +24,8 @@
 #include "CaloInterface/ISetCaloCellContainerName.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 
 #include "TrigCaloClusterMaker.h"
 

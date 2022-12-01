@@ -16,7 +16,7 @@
 #include "egammaInterfaces/IegammaSwTool.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "GaudiKernel/EventContext.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 

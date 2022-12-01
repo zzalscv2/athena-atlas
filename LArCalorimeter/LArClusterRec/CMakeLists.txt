@@ -9,6 +9,7 @@ atlas_add_component( LArClusterRec
                      src/components/*.cxx
                      LINK_LIBRARIES CaloEvent AthenaBaseComps xAODCaloEvent LArIdentifier LArRecEvent LArCablingLib AthContainers Identifier LArRawEvent )
 
+
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_joboptions( share/*.py )

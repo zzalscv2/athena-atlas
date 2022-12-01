@@ -36,7 +36,7 @@
 
 class CaloCell_ID;
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloDetDescr/CaloDepthTool.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloInterface/ILArHVFraction.h"

@@ -8,7 +8,7 @@
 #define CALORECGPU_CALOCPUOUTPUT_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include <string>
 
 #include "StoreGate/ReadCondHandleKey.h"

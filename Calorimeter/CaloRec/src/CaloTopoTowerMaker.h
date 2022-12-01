@@ -27,8 +27,8 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 // -- interfaces
-#include "CaloRec/CaloClusterCollectionProcessor.h"
-#include "CaloRec/CaloTowerCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
+#include "CaloTowerCollectionProcessor.h"
 #include "CaloEvent/CaloCellClusterWeights.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"

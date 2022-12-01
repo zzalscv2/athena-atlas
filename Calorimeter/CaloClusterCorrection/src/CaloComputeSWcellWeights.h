@@ -26,7 +26,7 @@ PURPOSE:  - Compute simple cell weights for Sliding Window
 ********************************************************************/
 
 // INCLUDE HEADER FILES:
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 
 class CaloComputeSWcellWeights : public AthAlgTool, virtual public CaloClusterCollectionProcessor
 {

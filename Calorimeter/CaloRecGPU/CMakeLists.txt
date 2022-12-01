@@ -21,7 +21,7 @@ find_package( ROOT COMPONENTS Core MathCore Hist Gpad Graf )
 atlas_add_library( CaloRecGPULib
    CaloRecGPU/*.h src/*.cxx src/*.cu src/*.h
    PUBLIC_HEADERS CaloRecGPU
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel CaloEvent CaloRecLib CaloInterfaceLib TrigT2CaloCommonLib CxxUtils
+   LINK_LIBRARIES AthenaBaseComps GaudiKernel CaloEvent CaloInterfaceLib TrigT2CaloCommonLib CxxUtils
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS})
 
 atlas_add_component( CaloRecGPU

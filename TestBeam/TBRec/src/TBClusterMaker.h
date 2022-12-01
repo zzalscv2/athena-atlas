@@ -19,7 +19,7 @@
 class CaloDetDescrElement;
 
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloConditions/CaloNoise.h"
 #include "StoreGate/ReadCondHandleKey.h"

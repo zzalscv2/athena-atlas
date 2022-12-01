@@ -9,7 +9,7 @@
 
 #include "CaloInterface/ICellWeightTool.h"
 
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 
 class CaloCluster;
 

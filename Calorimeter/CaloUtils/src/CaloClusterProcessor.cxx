@@ -11,7 +11,7 @@
  *        @c CaloClusterMaker that operate on individual clusters.
  */
 
-#include "CaloRec/CaloClusterProcessor.h"
+#include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloEvent/CaloClusterContainer.h"
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/ThreadLocalContext.h"

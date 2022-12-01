@@ -42,7 +42,7 @@ class Identifier;
 
 #include "Identifier/IdentifierHash.h"
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 
 class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterCollectionProcessor
 {

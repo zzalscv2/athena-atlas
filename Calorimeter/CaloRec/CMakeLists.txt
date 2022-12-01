@@ -10,53 +10,40 @@ find_package( Eigen )
 find_package( ROOT COMPONENTS Core MathCore MathMore Minuit Minuit2 Matrix )
 
 # Component(s) in the package:
-atlas_add_library( CaloRecLib
-   CaloRec/*.h CaloRec/*.icc src/*.cxx
-   PUBLIC_HEADERS CaloRec
-   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
-   DEFINITIONS ${CLHEP_DEFINITIONS}
+
+atlas_add_component( CaloRec
+   src/components/*.cxx src/*.cxx  CaloRec/*.h
+   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${CLHEP_LIBRARIES} CaloConditions CaloEvent CaloGeoHelpers
    CaloIdentifier AthenaBaseComps AthenaKernel CxxUtils AthenaPoolUtilities
    Identifier xAODCaloEvent GaudiKernel CaloDetDescrLib CaloUtilsLib
    StoreGateLib LumiBlockCompsLib AthenaMonitoringKernelLib
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
+   ${ROOT_LIBRARIES} ${CORAL_LIBRARIES}
    ${EIGEN_LIBRARIES} AthAllocators IdDictParser CaloLumiConditions
    LArRawConditions FourMom LumiBlockData )
 
-atlas_add_component( CaloRec
-   src/components/*.cxx
-   LINK_LIBRARIES CaloRecLib CaloLumiConditions )
 
-atlas_add_dictionary( CaloRecDict
-                      CaloRec/CaloRecDict.h
-                      CaloRec/selection.xml
-                      LINK_LIBRARIES CaloRecLib )
 
 # Test(s) in the package:
-atlas_add_test( CaloClusterProcessor_test
-   SOURCES test/CaloClusterProcessor_test.cxx
-   LINK_LIBRARIES CaloRecLib xAODCaloEvent TestTools AthenaBaseComps )
-
 atlas_add_test( CaloCellFastCopyTool_test
-   SOURCES test/CaloCellFastCopyTool_test.cxx
-   LINK_LIBRARIES CaloRecLib CaloEvent CaloDetDescrLib CaloIdentifier
+   SOURCES test/CaloCellFastCopyTool_test.cxx src/CaloCellFastCopyTool.cxx
+   LINK_LIBRARIES CaloEvent CaloDetDescrLib CaloIdentifier CaloInterfaceLib CaloUtilsLib
    IdDictParser AthenaBaseComps StoreGateLib CxxUtils GaudiKernel
    LOG_IGNORE_PATTERN "@0x[0-9a-f]{4,}|Retrieved const pointer|Retrieved const handle|object not modifiable" )
 
 atlas_add_test( CaloCellContainerFromClusterTool_test
-   SOURCES test/CaloCellContainerFromClusterTool_test.cxx
-   LINK_LIBRARIES CaloRecLib 
+   SOURCES test/CaloCellContainerFromClusterTool_test.cxx src/CaloCellContainerFromClusterTool.cxx src/Blob2ToolConstants.cxx
+   LINK_LIBRARIES xAODCaloEvent CaloInterfaceLib CaloUtilsLib
+   #LINK_LIBRARIES CaloRecLib 
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
 atlas_add_test( CaloBCIDCoeffsCondAlg_test
-   SOURCES test/CaloBCIDCoeffsCondAlg_test.cxx
-   LINK_LIBRARIES CaloRecLib CaloLumiConditions LArRawConditions IdDictParser TestTools )
+   SOURCES test/CaloBCIDCoeffsCondAlg_test.cxx src/CaloBCIDCoeffsCondAlg.cxx
+   LINK_LIBRARIES CaloLumiConditions LArRawConditions IdDictParser TestTools )
 
 atlas_add_test( CaloBCIDLumiCondAlg_test
-   SOURCES test/CaloBCIDLumiCondAlg_test.cxx
-   LINK_LIBRARIES CaloRecLib CaloLumiConditions LArRawConditions IdDictParser TestTools LumiBlockData )
+   SOURCES test/CaloBCIDLumiCondAlg_test.cxx src/CaloBCIDLumiCondAlg.cxx
+   LINK_LIBRARIES CaloLumiConditions LArRawConditions IdDictParser TestTools LumiBlockData )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

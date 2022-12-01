@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "eflowRec/IPFBaseTool.h"
 #include "eflowRec/IPFClusterCollectionTool.h"
 

@@ -24,7 +24,7 @@
 #include "CaloTopoTmpHashCell.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloTopoTmpHashCellSort.h"
-#include "CaloRec/CaloBadCellHelper.h"
+#include "CaloUtils/CaloBadCellHelper.h"
 #include "CaloEvent/CaloCell.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 #include "AthAllocators/ArenaPoolAllocator.h"

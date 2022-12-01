@@ -13,7 +13,7 @@
 
 #include "CxxUtils/checker_macros.h"
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloRecGPU/CaloClusterGPUTransformers.h"
 #include "CaloRecGPU/CaloClusterGPUProcessor.h"
 #include "CaloRecGPU/CaloGPUTimed.h"

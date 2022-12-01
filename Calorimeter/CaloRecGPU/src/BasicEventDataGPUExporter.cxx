@@ -9,7 +9,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/DataHandle.h"
-#include "CaloRec/CaloBadCellHelper.h"
+#include "CaloUtils/CaloBadCellHelper.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 
 #include "boost/chrono/chrono.hpp"

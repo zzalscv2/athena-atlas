@@ -23,7 +23,7 @@
 #define CALOREC_CALOCLUSTERPROCESSOR_H
 
 
-#include "CaloRec/CaloClusterCollectionProcessor.h"
+#include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "GaudiKernel/EventContext.h"
 
