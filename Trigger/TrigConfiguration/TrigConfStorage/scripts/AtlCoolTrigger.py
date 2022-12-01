@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from optparse import OptionParser
 from TrigConfStorage.AtlCoolTriggerTool import AtlCoolTriggerTool
@@ -19,9 +19,9 @@ if __name__ == '__main__':
     
     p.add_option( "-c",
                   "--dbconn",
-                  default = "COMP",
+                  default = "CONDBR2",
                   dest = "db",
-                  help = "The cool db [default: COMP]" )
+                  help = "The cool db [default: CONDBR2]" )
 
     p.add_option( "-t",
                   "--time",
