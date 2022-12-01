@@ -82,12 +82,8 @@ def AthenaMonitoringCfg(flags):
         #Need to create links between global FE, created in jet finding, and other objects
         #MET monitoring will need these in some workflows (but not in tier0ESD)
         if flags.DQ.Environment != 'tier0ESD':
-            from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-            # AOD do not have calorimeter cells for CaloCalTopoCluster
-            if flags.DQ.Environment == 'AOD':
-                result.merge(PFGlobalFlowElementLinkingCfg(flags, useMuonTopoClusters=True))
-            else:
-                result.merge(PFGlobalFlowElementLinkingCfg(flags))
+            from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg            
+            result.merge(PFGlobalFlowElementLinkingCfg(flags))
         
     if flags.DQ.Steering.doJetInputsMon:
         info('Set up Jet Inputs monitoring')

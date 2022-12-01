@@ -23,6 +23,9 @@ def JetEfficiencyMonitoringConfig(inputFlags):
         jetInternalFlags.isRecoJob = True
         result.merge( JetRecCfg(inputFlags,AntiKt4EMPFlow) )
 
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
+
         from METReconstruction.METAssociatorCfg import METAssociatorCfg
         result.merge(METAssociatorCfg(inputFlags, 'AntiKt4EMPFlow'))
 

@@ -51,11 +51,10 @@ def AthenaMonitoringAODRecoCfg(flags):
             from METUtilities.METMakerConfig import getMETMakerAlg
             for container in jet_collections & met_jet_collections:
                 if container == 'AntiKt4EMPFlow':
-                    # build links between FlowElements and electrons, photons, muons and taus
-                    # set 'useMuonTopoClusters=True' as AOD do not have calorimeter cells for CaloCalTopoCluster
+                    # build links between FlowElements and electrons, photons, muons and taus                    
                     info('Scheduling FlowElement linking')
                     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-                    result.merge(PFGlobalFlowElementLinkingCfg(flags, useMuonTopoClusters=True))
+                    result.merge(PFGlobalFlowElementLinkingCfg(flags))
                 result.merge(METAssociatorCfg(flags, container))
                 result.addEventAlgo(getMETMakerAlg(container))
             from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg

@@ -147,9 +147,7 @@ addDAODJets(jetList,DerivationFrameworkJob)
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-#AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use
-#this special setting for the muon-FE links.
-CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags,useMuonTopoClusters=True)
+CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags)
 
 
 # Event cleaning flags
