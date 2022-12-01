@@ -19,6 +19,8 @@
 #ifndef TRKIPATFITTERUTILS_FITPROCEDURE_H
 #define TRKIPATFITTERUTILS_FITPROCEDURE_H
 
+#include <vector>
+
 #include "AthContainers/DataVector.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -26,7 +28,6 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 #include "TrkiPatFitterUtils/FitMatrices.h"
 #include "TrkiPatFitterUtils/FitProcedureQuality.h"
-#include <vector>
 
 class MsgStream;
 
@@ -40,38 +41,36 @@ class TrackInfo;
 class TrackStateOnSurface;
 class Volume;
 
-class FitProcedure
-{
-public:
+class FitProcedure {
+ public:
   // Cache to be passed by the caller
-  struct Cache
-  {
+  struct Cache {
     Cache(bool constrainedAlignmentEffects)
-      : chRatio1(0.)
-      , chRatio2(0.)
-      , chiSq(0.)
-      , chiSqCut(20.)
-      , chiSqMin(0.)
-      , chiSqOld(0.)
-      , chiSqWorst(0.)
-      , convergence(false)
-      , cutStep(false)
-      , cutTaken(0)
-      , debug(false)
-      , driftSum(0.)
-      , driftSumLast(0.)
-      , fitMatrices(std::make_unique<FitMatrices>(constrainedAlignmentEffects))
-      , fitProbability(0.)
-      , fitQuality(nullptr)
-      , iteration(0)
-      , log(nullptr)
-      , nearConvergence(false)
-      , nCuts(0)
-      , numberDoF(0)
-      , numberParameters(0)
-      , verbose(false)
-      , worstMeasurement(0)
-    {}
+        : chRatio1(0.),
+          chRatio2(0.),
+          chiSq(0.),
+          chiSqCut(20.),
+          chiSqMin(0.),
+          chiSqOld(0.),
+          chiSqWorst(0.),
+          convergence(false),
+          cutStep(false),
+          cutTaken(0),
+          debug(false),
+          driftSum(0.),
+          driftSumLast(0.),
+          fitMatrices(
+              std::make_unique<FitMatrices>(constrainedAlignmentEffects)),
+          fitProbability(0.),
+          fitQuality(nullptr),
+          iteration(0),
+          log(nullptr),
+          nearConvergence(false),
+          nCuts(0),
+          numberDoF(0),
+          numberParameters(0),
+          verbose(false),
+          worstMeasurement(0) {}
     ~Cache() = default;
     // delete the rest as should not be needed.
     Cache(const Cache&) = delete;
@@ -105,18 +104,15 @@ public:
     int worstMeasurement = 0;
   };
 
-  FitProcedure(bool constrainedAlignmentEffects,
-               bool extendedDebug,
-               bool lineFit,
-               ToolHandle<IIntersector>& rungeKuttaIntersector,
+  FitProcedure(bool constrainedAlignmentEffects, bool extendedDebug,
+               bool lineFit, ToolHandle<IIntersector>& rungeKuttaIntersector,
                ToolHandle<IIntersector>& solenoidalIntersector,
                ToolHandle<IIntersector>& straightLineIntersector,
                const ToolHandle<IPropagator>& stepPropagator,
-               const Volume* indetVolume = 0,
-               int maxIterations = 25,
+               const Volume* indetVolume = 0, int maxIterations = 25,
                int useStepPropagator = 0);
 
-  ~FitProcedure(void) = default; // destructor
+  ~FitProcedure(void) = default;  // destructor
   // forbidden copy constructor
   // forbidden assignment operator
 
@@ -125,33 +121,30 @@ public:
 
   // retrieve result
   static Track* constructTrack(
-    FitProcedure::Cache& cache,
-    const std::vector<FitMeasurement*>& measurements,
-    FitParameters& parameters,
-    const TrackInfo& trackInfo,
-    const DataVector<const TrackStateOnSurface>* leadingTSOS = nullptr) ;
+      FitProcedure::Cache& cache,
+      const std::vector<FitMeasurement*>& measurements,
+      FitParameters& parameters, const TrackInfo& trackInfo,
+      const DataVector<const TrackStateOnSurface>* leadingTSOS = nullptr);
 
   // perform fit procedure
   const FitProcedureQuality& execute(FitProcedure::Cache& cache,
-                                     bool asymmetricCaloEnergy,
-                                     MsgStream& log,
+                                     bool asymmetricCaloEnergy, MsgStream& log,
                                      std::vector<FitMeasurement*>& measurements,
                                      FitParameters*& parameters,
                                      const FitQuality* perigeeQuality = 0,
                                      bool for_iPatTrack = false) const;
 
   // for IGlobalTrackFit interface
-  static Amg::MatrixX* fullCovariance() ;
+  static Amg::MatrixX* fullCovariance();
 
   // set minimum number of iterations to perform (IGlobalTrackFit friends)
   void setMinIterations(int minIter);
 
-  bool constrainedAlignmentEffects() const
-  {
+  bool constrainedAlignmentEffects() const {
     return m_constrainedAlignmentEffects;
   }
 
-private:
+ private:
   // copy, assignment: no semantics, no implementation
   FitProcedure(const FitProcedure&) = delete;
   FitProcedure& operator=(const FitProcedure&) = delete;
@@ -162,12 +155,12 @@ private:
                       std::vector<FitMeasurement*>& measurements) const;
 
   const ToolHandle<IIntersector>& chooseIntersector(
-    std::vector<FitMeasurement*>& measurements,
-    const FitParameters& parameters) const;
+      std::vector<FitMeasurement*>& measurements,
+      const FitParameters& parameters) const;
 
   static void reportQuality(FitProcedure::Cache& cache,
-                     const std::vector<FitMeasurement*>& measurements,
-                     const FitParameters& parameters) ;
+                            const std::vector<FitMeasurement*>& measurements,
+                            const FitParameters& parameters);
 
   bool m_constrainedAlignmentEffects;
   bool m_extendedDebug;
@@ -184,6 +177,6 @@ private:
   const ToolHandle<IPropagator>& m_stepPropagator;
   int m_useStepPropagator;
 };
-} // end of namespace
+}  // namespace Trk
 
-#endif // TRKIPATFITTERUTILS_FITPROCEDURE_H
+#endif  // TRKIPATFITTERUTILS_FITPROCEDURE_H
