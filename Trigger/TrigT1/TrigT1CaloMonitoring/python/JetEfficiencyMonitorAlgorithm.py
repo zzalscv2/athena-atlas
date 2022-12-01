@@ -29,6 +29,9 @@ def JetEfficiencyMonitoringConfig(inputFlags):
         else:
           result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
 
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        result.merge(PFGlobalFlowElementLinkingCfg(inputFlags))
+
         from METReconstruction.METAssociatorCfg import METAssociatorCfg
         result.merge(METAssociatorCfg(inputFlags, 'AntiKt4EMPFlow'))
 
