@@ -130,26 +130,24 @@ double SUSYObjDef_xAOD::GetSignalTauSF(const xAOD::TauJet& tau,
                                       const bool triggerSF, 
                                       const std::string& trigExpr)
 {
-
   double sf(1.);
 
-  if(idSF){
-    if (acc_baseline(tau)) {
+  if (acc_signal(tau)) {
+    if (idSF) {
       if (m_tauEffTool->getEfficiencyScaleFactor(tau, sf) != CP::CorrectionCode::Ok) {
         ATH_MSG_WARNING("Failed to retrieve tau efficiency scale factor.");
       }
       ATH_MSG_VERBOSE(" Retrieved tau SF  " << sf);
     }
-  }
 
-  if(triggerSF){
-    double trig_sf(1.);
-    trig_sf = GetTauTriggerEfficiencySF(tau, trigExpr);
-    
-    if(trig_sf > -90){
-      sf *= trig_sf;
-      ATH_MSG_VERBOSE(" Retrieved tau trig SF  " << trig_sf);
-    } 
+    if (triggerSF) {
+      double trig_sf = GetTauTriggerEfficiencySF(tau, trigExpr);
+
+      if (trig_sf > -90) {
+        sf *= trig_sf;
+        ATH_MSG_VERBOSE(" Retrieved tau trig SF  " << trig_sf);
+      }
+    }
   }
 
   dec_effscalefact(tau) = sf;
@@ -254,6 +252,12 @@ double SUSYObjDef_xAOD::GetTotalTauSF(const xAOD::TauJetContainer& taus, const b
   double sf(1.);
 
   for (const xAOD::TauJet* tau : taus) {
+    // check existence of OR information
+    if (!acc_passOR.isAvailable(*tau)) {
+      ATH_MSG_WARNING("Tau does not have Overlap Removal decision set. You should only call GetTotalTauSF with taus that have been passed through OR. SF will NOT be applied!");
+      break;
+    }
+
     // Call this for all taus, which will add the decoration
     double tmpSF = GetSignalTauSF(*tau, idSF, triggerSF, trigExpr);
     if (acc_signal(*tau) && acc_passOR(*tau)) {

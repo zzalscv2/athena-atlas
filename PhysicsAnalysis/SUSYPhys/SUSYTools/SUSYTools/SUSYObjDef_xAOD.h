@@ -327,6 +327,7 @@ namespace ST {
     const Trig::ChainGroup* GetTrigChainGroup(const std::string&) const override final;
     std::vector<std::string> GetTriggerOR(std::string trigExpr) const;
     void GetTriggerTokens(std::string, std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& , std::vector<std::string>& ) const;
+    void GetTriggerTokensTau(std::string, std::map<std::string, std::string>& ) const;
     Trig::FeatureContainer GetTriggerFeatures(const std::string& chainName = "EF_.*", unsigned int condition = TrigDefs::Physics) const;
 
     float GetPileupWeight() override final;
@@ -568,6 +569,7 @@ namespace ST {
     // strings needed for dealing with 2015+2016 electron trigger SFs
     std::string m_electronTriggerSFStringSingle;
 
+    std::string m_tauTriggerSFFile;
     std::map<std::string, std::string> m_tau_trig_support;
 
     std::string m_eleId;
