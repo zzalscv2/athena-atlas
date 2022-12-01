@@ -156,6 +156,11 @@ def TrigMinBiasEff(flags):
     # L1 transverse energy
     triggerAndRef += [_c("L1_TE{}".format(i), 'HLT_mb_sptrk_L1RD0_FILLED', xmin=0, xmax=100) for i in [3, 5, 10, 40]]
 
+    # HI UPC chains (2022)
+    triggerAndRef += [_c('HLT_mb_excl_1trk2_pt1_L1TRT_VTE20', 'HLT_noalg_L1TRT_VTE20')]
+    triggerAndRef += [_c('HLT_mb_sptrk_L1MBTS_1_VTE5', 'HLT_noalg_L1MBTS_1_VTE5')]
+    triggerAndRef += [_c('HLT_mb_sptrk_L1VTE5', 'HLT_noalg_L1VTE5')]
+
     # add here all the special cases
     return _TrigEff(flags, triggerAndRef)
 
