@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -17,6 +17,7 @@
 
 // C/C++ include files
 #include <string>
+#include <cstdint>
 
 // Framework include files
 #include "GaudiKernel/Kernel.h"
