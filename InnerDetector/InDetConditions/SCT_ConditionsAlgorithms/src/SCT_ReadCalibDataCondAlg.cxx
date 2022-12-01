@@ -45,9 +45,11 @@ SCT_ReadCalibDataCondAlg::SCT_ReadCalibDataCondAlg(const std::string& name, ISvc
   m_ignoreDefectParameters.value().push_back(1.);
   // 1. means 100%. Only NO_HI defects with >100% are considered, i.e., all NO_HI defects are ignored.
 
-  m_ignoreDefects.value().push_back("LO_GAIN_ABSOLUTE");
+  m_ignoreDefects.value().push_back("LO_GAIN");
   m_ignoreDefectParameters.value().push_back(-1000.);
-  // New defect added for Run 3, but for now we ignore it.
+
+  m_ignoreDefects.value().push_back("HI_GAIN");
+  m_ignoreDefectParameters.value().push_back(-1000.);
 }
 
 StatusCode SCT_ReadCalibDataCondAlg::initialize() {
