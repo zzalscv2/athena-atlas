@@ -339,13 +339,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
     # Add the sequence to the job:
     algSeq += metSequence
-    if not forCompare :
-        vars += [
-            'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
-            'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
-            'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
-            'AnaMET_%SYS%.name  -> met_name_%SYS%',
-        ]
+    vars += [
+        'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
+        'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
+        'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
+        'AnaMET_%SYS%.name  -> met_name_%SYS%',
+    ]
 
 
     # Make view containers holding as inputs for OR
@@ -611,6 +610,24 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     makePtEtaSelectionConfig (configSeq, 'AnaJets',
                               selectionDecoration='selectPtEta',
                               minPt=jetMinPt, maxEta=jetMaxEta)
+
+
+    # Include, and then set up the met analysis algorithm config:
+    from MetAnalysisAlgorithms.MetAnalysisConfig import makeMetAnalysisConfig
+
+    makeMetAnalysisConfig (configSeq,
+                           containerName = 'AnaMET',
+                           jets = 'AnaJets',
+                           taus = 'AnaTauJets.tight',
+                           muons = 'AnaMuons.medium',
+                           electrons = 'AnaElectrons.loose',
+                           photons = 'AnaPhotons.tight')
+    vars += [
+        'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
+        'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
+        'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
+        'AnaMET_%SYS%.name  -> met_name_%SYS%',
+    ]
 
 
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
