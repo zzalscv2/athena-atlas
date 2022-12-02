@@ -205,11 +205,11 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::findHitSectors(const EventContext&
                 for (const std::shared_ptr<MuonHough::Hit>& hough_hit : hough_maximum->hits) {
                     const Trk::PrepRawData* prep = prepData(hough_hit);
                     const Identifier chId = prep->identify();
-                    if (masked_hits.count(chId)) {
+                    if (masked_hits.count(chId) || (m_excludeNSW && (m_idHelperSvc->isMM(chId) || m_idHelperSvc->issTgc(chId)))) {
                         ATH_MSG_VERBOSE("Do not reuse hit " << m_idHelperSvc->toString(chId));
                         continue;
                     }
-                    ATH_MSG_VERBOSE("Count houg hit " << m_idHelperSvc->toString(chId));
+                    ATH_MSG_VERBOSE("Count hough hit " << m_idHelperSvc->toString(chId));
                     // Split the seeds into the chambers
                     hough_chamber& chamber = chamber_counts[m_idHelperSvc->chamberId(chId)];
                     ++chamber.nhits;
@@ -270,12 +270,18 @@ StatusCode MuonInDetToMuonSystemExtensionAlg::findSegments(const EventContext& c
             continue;
         }
         // Check if the segment satisfies the quality criteria
-        // if (m_segmentSelector->quality(*muon_segment) < m_segmentQuality) continue;
+        if (m_segmentSelector->quality(*muon_segment) < m_segmentQuality) continue;
         /// Check if the segment is part of a MuidCo muon
         if (output_cache.combined_segs.count(muon_segment)) {
             ATH_MSG_VERBOSE("Segment was already used in combined fit");
             continue;
         }
+        if (m_excludeNSW && std::find_if(muon_segment->containedMeasurements().begin(),muon_segment->containedMeasurements().end(),
+                [this](const Trk::MeasurementBase* meas ){
+                    const Identifier meas_id = m_edmHelperSvc->getIdentifier(*meas);
+                     return meas_id.is_valid() && (m_idHelperSvc->isMM(meas_id) || m_idHelperSvc->issTgc(meas_id));
+                })!= muon_segment->containedMeasurements().end()) continue;
+        
         /// Mask all hits from the Hough seeds
         maskHits(muon_segment, output_cache);
         output_cache.candidate_segments.push_back(muon_segment);
