@@ -3,7 +3,7 @@
 */
 
 // --------------------------------------------------
-// 
+//
 // File:  Generators/Hydjet.h
 // Description:
 //    This code is used to get a HYDJET Monte Carlo event.
@@ -43,66 +43,59 @@ typedef std::vector<std::string> CommandVector;
 
 class Hydjet:public GenModule {
 public:
-    Hydjet(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~Hydjet();
-    
-    virtual StatusCode	genInitialize	();
-    virtual StatusCode 	callGenerator	();
-    virtual StatusCode 	genFinalize	();
-    virtual StatusCode 	fillEvt		(HepMC::GenEvent* evt);
+  Hydjet(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~Hydjet() = default;
+
+  virtual StatusCode genInitialize();
+  virtual StatusCode callGenerator();
+  virtual StatusCode genFinalize();
+  virtual StatusCode fillEvt(HepMC::GenEvent* evt);
 
 protected:
 
-    // inputs to HYINIT (Hydjet event generation) 
-    double	m_e;
-    double 	m_a;
-    int 	m_ifb;
-    double	m_bmin;
-    double	m_bmax;
-    double	m_bfix;
-    int 	m_nh;
+  // inputs to HYINIT (Hydjet event generation)
+  double   m_e{0.};
+  double   m_a{0.};
+  int          m_ifb{0};
+  double   m_bmin{0.};
+  double   m_bmax{0.};
+  double   m_bfix{0.};
+  int          m_nh{0};
 
-    // Random numbers seed
-    std::vector<long int> m_seeds;
+  // Random numbers seed
+  std::vector<long int> m_seeds;
 
-    // event counter
-    int m_events;
+  // event counter
+  int m_events{0};
 
-    // Commands to setup hydjet
-    CommandVector m_InitializeVector;
+  // Commands to setup hydjet
+  CommandVector m_InitializeVector;
 
-    // Accessor to HYDJET Options and parameters COMMONs
-    HyiPar	m_hyipar;
-    HyjPar	m_hyjpar;
-    HyfPar	m_hyfpar;
-    HyFlow	m_hyflow;
+  // Accessor to HYDJET Options and parameters COMMONs
+  HyiPar m_hyipar;
+  HyjPar m_hyjpar;
+  HyfPar m_hyfpar;
+  HyFlow m_hyflow;
 
-    // Accessor to PYTHIA parameters COMMON
-    PyPars	m_pypars;
-    PySubs	m_pysubs;
-    PyDat1	m_pydat1;
+  // Accessor to PYTHIA parameters COMMON
+  PyPars m_pypars;
+  PySubs m_pysubs;
+  PyDat1 m_pydat1;
 
-    // Accessor to PYQUEN parameters COMMON
-    PyqPar	m_pyqpar;
+  // Accessor to PYQUEN parameters COMMON
+  PyqPar m_pyqpar;
 
-    // Accessor to JETSET Random number seed COMMON
-    LuDatr	m_ludatr;
-    
-    // Accessors to Event information COMMONS
-    LuJets	m_lujets;
-    HyJets	m_hyjets;
-    
-    void       	set_user_params	(void);
+  // Accessor to JETSET Random number seed COMMON
+  LuDatr m_ludatr;
 
-  // new to store Hijing event parameters
-  // ------------------------------------
-  /// Access to event store
-  StoreGateSvc* m_storeGate;
-  
-  /// Pointer to object with hijing event parameters
-  HijingEventParams* m_event_params;
+  // Accessors to Event information COMMONS
+  LuJets m_lujets;
+  HyJets m_hyjets;
+
+  void        set_user_params(void);
+
+  SG::WriteHandleKey<HijingEventParams> m_event_paramsKey{this, "HijingOutputKey", "Hijing_event_params"};
   //--------------------------------
 };
 
 #endif
-
