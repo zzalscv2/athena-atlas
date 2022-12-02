@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // emacs this is -*-C++-*-
@@ -181,7 +181,7 @@ float polygon_area(T& line){
   float a=0;
   for(; it != itE; ++it){
     it_t itp=it;
-    itp++;
+    ++itp;
     if(itp == itE) itp =  line.begin();
     a += ( (*it).first*(*itp).second - (*itp).first*(*it).second );
   }
@@ -196,7 +196,7 @@ float polygon_lenght(T &line){
   float a=0;
   for(; it != itE; ++it){
     it_t itp=it;
-    itp++;
+    ++itp;
     if(itp == itE) itp =  line.begin();
     a += deltaR(*it,*itp);
   }
@@ -366,11 +366,11 @@ void _findConvexHull(point_set_t &inSet, T &outSet ){
   if(point00 == point01 ){ // make sure point is in both list
     lowPoints.push_back(point00);
     upPoints.push_back(point00);
-    s_it++;
+    ++s_it;
   }
   //std::cout << " lp size =" << lowPoints.size() << std::endl;
   point_set_t::iterator s_itE = inSet.end(); 
-  s_itE--; // we'll deal ws_ith the end by hand
+  --s_itE; // we'll deal ws_ith the end by hand
   for(; s_it!= s_itE; ++s_it){
     point_t p = *s_it;
     //std::cout << " point "<< p.first << " , "<< p.second << std::endl;
@@ -387,7 +387,7 @@ void _findConvexHull(point_set_t &inSet, T &outSet ){
   if(point11 == point10 ){ // make sure point is in both list
     lowPoints.push_back(point11);
     upPoints.push_front(point11);
-    s_it++;
+    ++s_it;
   }else{
     lowPoints.push_back(point10);
     upPoints.push_front(point00);

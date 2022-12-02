@@ -101,7 +101,7 @@ namespace jet {
 
     virtual std::string name() const {return m_name;}
   
-    void setName(std::string n){m_name = n;}
+    void setName(const std::string& n){m_name = n;}
 
 
     void setExtractor(const CaloConstitHelpers::CaloConstitExtractor* ex){m_constitExtractor = ex;}
