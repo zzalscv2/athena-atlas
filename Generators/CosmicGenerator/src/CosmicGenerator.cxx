@@ -82,68 +82,7 @@ CosmicGenerator::CosmicGenerator(const std::string& name,
   : GenModule(name,pSvcLocator)
 //--------------------------------------------------------------------------
 {
-  //
-  // Migration to MeV and mm units: all conversions are done in this interface
-  // to the CosmicGun. The CosmicGun itself uses GeV units internally - to call
-  // the fortran code.
-  //
-
-  m_GeV = 1000;
-  m_mm  = 10;
-  m_readfile = false;
-
-  m_events = 0;
-  m_rejected = 0;
-  m_accepted = 0;
-  m_selection = 0;
-
-  declareProperty("eventfile",  m_infile = "NONE" );
-  declareProperty("emin",       m_emin =10.*m_GeV );
-  declareProperty("emax",       m_emax =100*m_GeV );
-  declareProperty("xvert_low",  m_xlow =0. *m_mm);
-  declareProperty("xvert_hig",  m_xhig =10.*m_mm );
-  declareProperty("zvert_low",  m_zlow =0. *m_mm);
-  declareProperty("zvert_hig",  m_zhig =10.*m_mm );
-  declareProperty("yvert_val",  m_yval = 81*m_mm );
-  declareProperty("tmin",       m_tmin =0. );
-  declareProperty("tmax",       m_tmax =0. );
-
-  declareProperty("IPx",  m_IPx =0. );
-  declareProperty("IPy",  m_IPy =0. );
-  declareProperty("IPz",  m_IPz =0. );
-  declareProperty("Radius",  m_radius =0. );
-  declareProperty("ExzCut",  m_exzCut = false );
-  declareProperty("OptimizeForCavern",  m_cavOpt = false );
-  declareProperty("OptimizeForSR1", m_srOneOpt = 0);
-  declareProperty("OptimizeForSR1PixelEndCap", m_srOnePixECOpt = false);
-  declareProperty("SwapYZAxis", m_swapYZAxis = false);
-  declareProperty("OptimizeForMuonEndCap", m_muonECOpt = false);
-  declareProperty("ctcut",      m_ctcut =0.35 );
-  declareProperty("PrintEvent", m_printEvent=10);
-  declareProperty("PrintMod",   m_printMod=100);
-  declareProperty("RMax",       m_rmax = 10000000. );
-  declareProperty("ThetaMin", m_thetamin = 0.);
-  declareProperty("ThetaMax", m_thetamax = 1.);
-  declareProperty("PhiMin", m_phimin = -1*M_PI);
-  declareProperty("PhiMax", m_phimax = M_PI);
-  declareProperty("Zposition", m_zpos = 14500);
-
-  // Job options for new optimzation options (November 2007)
-  declareProperty("doPathLengthCut",m_doPathlengthCut = false);
-  declareProperty("doAimedAtPixelsCut",m_doAimedAtPixelsCut = false);
-  declareProperty("doReweighting",m_doReweighting = false);
-  declareProperty("energyCutThreshold",m_energyCutThreshold = 1.0);
-  declareProperty("ysurface",m_ysurface = 81*m_mm);
-  declareProperty("rvert_max",m_rvertmax = 300*m_mm);   // replaces rectangle in case of reweighting
-  declareProperty("pixelplane_maxx",m_pixelplanemaxx = 1150);
-  declareProperty("pixelplane_maxz",m_pixelplanemaxz = 1650);
-
 }
-
-//--------------------------------------------------------------------------
- CosmicGenerator::~CosmicGenerator()
-//--------------------------------------------------------------------------
-{}
 
 //---------------------------------------------------------------------------
 StatusCode CosmicGenerator::genInitialize() {
@@ -156,7 +95,7 @@ StatusCode CosmicGenerator::genInitialize() {
   m_accepted=0;
   m_rejected=0;
 
-  if(m_infile=="NONE") {
+  if(m_infile.value()=="NONE") {
     COSMIC_RANDOM_ENGINE = getRandomEngineDuringInitialize("COSMICS", m_randomSeed, m_dsid); // NOT THREAD-SAFE
     CosmicGun* gun = CosmicGun::GetCosmicGun();
 
@@ -176,7 +115,7 @@ StatusCode CosmicGenerator::genInitialize() {
   }
   else {
     ATH_MSG_INFO( "Cosmics are read from file " << m_infile );
-    m_ffile.open(m_infile.c_str());
+    m_ffile.open(m_infile.value().c_str());
     if(!m_ffile) {
       ATH_MSG_FATAL( "Could not open input file - stop! " );
       return StatusCode::FAILURE;
