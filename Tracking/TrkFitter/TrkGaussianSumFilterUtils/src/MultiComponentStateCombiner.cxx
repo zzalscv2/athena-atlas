@@ -74,9 +74,10 @@ computeImpl(const Trk::MultiComponentState* uncombinedState,
 
     // Ensure that we don't have any problems with the cyclical nature of phi
     // Use first state as reference poin
+    // Ensure that we don't have any problems with the cyclical nature of phi
+    // Use first state as reference poin
     double deltaPhi =
-      (*uncombinedState->begin()).first->parameters()[2] - parameters[2];
-
+        (*uncombinedState->begin()).first->parameters()[2] - parameters[2];
     if (deltaPhi > M_PI) {
       parameters[2] += 2 * M_PI;
     } else if (deltaPhi < -M_PI) {
@@ -249,17 +250,12 @@ Trk::MultiComponentStateCombiner::combineWithWeight(
     finalParameters, finalWeight, secondParameters, secondWeight);
 
   const AmgSymMatrix(5)* firstMeasuredCov = firstTrackParameters->covariance();
-  const AmgSymMatrix(5)* secondMeasuredCov =
-    secondTrackParameters->covariance();
+  const AmgSymMatrix(5)* secondMeasuredCov = secondTrackParameters->covariance();
   // Check to see if first track parameters are measured or not
   if (firstMeasuredCov && secondMeasuredCov) {
     AmgSymMatrix(5) finalMeasuredCov(*firstMeasuredCov);
-    combineCovWithWeight(firstParameters,
-                         finalMeasuredCov,
-                         firstWeight,
-                         secondParameters,
-                         *secondMeasuredCov,
-                         secondWeight);
+    combineCovWithWeight(firstParameters, finalMeasuredCov, firstWeight,
+                         secondParameters, *secondMeasuredCov, secondWeight);
     mergeTo.first->updateParameters(finalParameters, finalMeasuredCov);
     mergeTo.second = finalWeight;
   } else {
@@ -267,7 +263,20 @@ Trk::MultiComponentStateCombiner::combineWithWeight(
     mergeTo.second = finalWeight;
   }
 }
+/**
+ * Moment-preserving merge of two 5D components
+ * for example see
+ * Runnalls, Andrew R.(2007)
+ * Kullback-Leibler approach to Gaussian mixture reduction
+ * equations (2),(3),(4)
+ */
 
+// The following does heave use of Eigen
+// for covariance. Avoid out-of-line calls
+// to Eigen
+#if defined(__GNUC__)
+[[gnu::flatten]]
+#endif
 void
 Trk::MultiComponentStateCombiner::combineParametersWithWeight(
   AmgVector(5) & firstParameters,
@@ -275,10 +284,7 @@ Trk::MultiComponentStateCombiner::combineParametersWithWeight(
   const AmgVector(5) & secondParameters,
   const double secondWeight)
 {
-
   double totalWeight = firstWeight + secondWeight;
-  // Ensure that we don't have any problems with the cyclical nature of phi
-  // Use first state as reference poin
   double deltaPhi = firstParameters[2] - secondParameters[2];
   if (deltaPhi > M_PI) {
     firstParameters[2] -= 2 * M_PI;
@@ -286,8 +292,8 @@ Trk::MultiComponentStateCombiner::combineParametersWithWeight(
     firstParameters[2] += 2 * M_PI;
   }
   firstParameters =
-    firstWeight * firstParameters + secondWeight * secondParameters;
-  firstParameters /= totalWeight;
+      (firstWeight * firstParameters + secondWeight * secondParameters) /
+      totalWeight;
   // Ensure that phi is between -pi and pi
   firstParameters[2] = CxxUtils::wrapToPi(firstParameters[2]);
   firstWeight = totalWeight;
@@ -312,9 +318,9 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
   AmgVector(5) parameterDifference = firstParameters - secondParameters;
   parameterDifference[2] = CxxUtils::wrapToPi(parameterDifference[2]);
   parameterDifference /= totalWeight;
-  firstMeasuredCov *= firstWeight;
-  firstMeasuredCov += secondWeight * secondMeasuredCov;
-  firstMeasuredCov /= totalWeight;
+  firstMeasuredCov =
+      (firstWeight * firstMeasuredCov + secondWeight * secondMeasuredCov) /
+      totalWeight;
   firstMeasuredCov += firstWeight * secondWeight * parameterDifference *
                       parameterDifference.transpose();
 }
@@ -410,4 +416,3 @@ Trk::MultiComponentStateCombiner::combine(
 
   return mergedState;
 }
-
