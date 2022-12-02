@@ -22,6 +22,7 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenRanges.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace Rivet {
   
@@ -44,7 +45,7 @@ namespace Rivet {
     /// @{
 
     /// follow a "propagating" particle and return its last instance
-    Particle getLastInstance(Particle ptcl) {
+    Particle getLastInstance(Particle ptcl) const {
       if ( ptcl.genParticle()->end_vertex() ) {
         if ( !hasChild(ptcl.genParticle(),ptcl.pid()) ) return ptcl;
         else return getLastInstance(ptcl.children()[0]);
@@ -53,7 +54,7 @@ namespace Rivet {
     }
     
     /// @brief Whether particle p originate from any of the ptcls
-    bool originateFrom(const Particle& p, const Particles& ptcls ) {
+    bool originateFrom(const Particle& p, const Particles& ptcls ) const {
       auto prodVtx = p.genParticle()->production_vertex();
       if (prodVtx == nullptr) return false;
       // for each ancestor, check if it matches any of the input particles
@@ -66,33 +67,33 @@ namespace Rivet {
     }
     
     /// @brief Whether particle p originates from p2
-    bool originateFrom(const Particle& p, const Particle& p2 ) { 
+    bool originateFrom(const Particle& p, const Particle& p2 ) const {
       Particles ptcls = {p2}; return originateFrom(p,ptcls);
     }
     
     /// @brief Checks whether the input particle has a child with a given PDGID 
-    bool hasChild(HepMC::ConstGenParticlePtr ptcl, int pdgID) {
+    bool hasChild(HepMC::ConstGenParticlePtr ptcl, int pdgID) const {
       for (const Particle& child:Particle(*ptcl).children())
         if (child.pid()==pdgID) return true;
       return false;
     }
     
     /// @brief Checks whether the input particle has a parent with a given PDGID 
-    bool hasParent(HepMC::ConstGenParticlePtr ptcl, int pdgID) {
+    bool hasParent(HepMC::ConstGenParticlePtr ptcl, int pdgID) const {
       for (auto parent:Rivet::HepMCUtils::particles(ptcl->production_vertex(),Relatives::PARENTS))
         if (parent->pdg_id()==pdgID) return true;
       return false;
     }
 
     /// @brief Return true is particle decays to quarks
-    bool quarkDecay(const Particle &p) {
+    bool quarkDecay(const Particle &p) const {
       for (const Particle& child:p.children())
         if (PID::isQuark(child.pid())) return true;
       return false;
     }
 
     /// @brief Return true if particle decays to charged leptons.
-    bool ChLeptonDecay(const Particle &p) {
+    bool ChLeptonDecay(const Particle &p) const {
       for (const Particle& child:p.children())
         if (PID::isChLepton(child.pid())) return true;
       return false;
@@ -101,7 +102,7 @@ namespace Rivet {
     /// @brief Returns the classification object with the error code set.
     ///        Prints an warning message, and keeps track of number of errors
     HiggsClassification error(HiggsClassification &cat, HTXS::ErrorCode err, 
-                              std::string msg="", int NmaxWarnings=20) {
+                              std::string msg="", int NmaxWarnings=20) const {
       // Set the error, and keep statistics
       cat.errorCode = err;
       ++m_errorCount[err];
@@ -116,10 +117,8 @@ namespace Rivet {
     /// @}
 
     /// @brief Main classificaion method.
-    HiggsClassification classifyEvent(const Event& event, const HTXS::HiggsProdMode prodMode ) {
+    HiggsClassification classifyEvent(const Event& event, const HTXS::HiggsProdMode prodMode ) const {
 
-      if (m_HiggsProdMode==HTXS::UNKNOWN) m_HiggsProdMode = prodMode; 
-      
       // the classification object
       HiggsClassification cat;
       cat.prodMode = prodMode;
@@ -310,7 +309,7 @@ namespace Rivet {
     /// @{
     
     /// @brief Return bin index of x given the provided bin edges. 0=first bin, -1=underflow bin.
-    int getBin(double x, std::vector<double> bins) {
+    int getBin(double x, std::vector<double> bins) const {
       if (bins.size()==0||x<bins[0]) return -1; // should not happen!
       for (size_t i=1;i<bins.size();++i)
         if (x<bins[i]) return i-1;
@@ -320,7 +319,7 @@ namespace Rivet {
     /// @brief VBF topolog selection
     /// 0 = fail loose selction: m_jj > 400 GeV and Dy_jj > 2.8
     /// 1 pass loose, but fail additional cut pT(Hjj)<25. 2 pass tight selection
-    int vbfTopology(const Jets &jets, const Particle &higgs) {
+    int vbfTopology(const Jets &jets, const Particle &higgs) const {
       if (jets.size()<2) return 0;
       const FourMomentum &j1=jets[0].momentum(), &j2=jets[1].momentum();
       bool VBFtopo = (j1+j2).mass() > 400.0 && std::abs(j1.rapidity()-j2.rapidity()) > 2.8;
@@ -330,7 +329,7 @@ namespace Rivet {
     /// 0 = fail loose selection: m_jj > 350 GeV
     /// 1 pass loose, but fail additional cut pT(Hjj)<25. 2 pass pT(Hjj)>25 selection
     /// 3 pass tight (m_jj>700 GeV), but fail additional cut pT(Hjj)<25. 4 pass pT(Hjj)>25 selection
-    int vbfTopology_Stage1_2(const Jets &jets, const Particle &higgs) {
+    int vbfTopology_Stage1_2(const Jets &jets, const Particle &higgs) const {
       if (jets.size()<2) return 0;
       const FourMomentum &j1=jets[0].momentum(), &j2=jets[1].momentum();
       double mjj = (j1+j2).mass();
@@ -344,7 +343,7 @@ namespace Rivet {
     /// 3 pass 700<m_jj<1000 GeV, but fail additional cut pT(Hjj)<25. 4 pass pT(Hjj)>25 selection
     /// 5 pass 1000<m_jj<1500 GeV, but fail additional cut pT(Hjj)<25. 6 pass pT(Hjj)>25 selection
     /// 7 pass m_jj>1500 GeV, but fail additional cut pT(Hjj)<25. 8 pass pT(Hjj)>25 selection
-    int vbfTopology_Stage1_2_Fine(const Jets &jets, const Particle &higgs) {
+    int vbfTopology_Stage1_2_Fine(const Jets &jets, const Particle &higgs) const {
       if (jets.size()<2) return 0;
       const FourMomentum &j1=jets[0].momentum(), &j2=jets[1].momentum();
       double mjj = (j1+j2).mass();
@@ -356,12 +355,12 @@ namespace Rivet {
     }
 
     /// @brief Whether the Higgs is produced in association with a vector boson (VH)
-    bool isVH(HTXS::HiggsProdMode p) { return p==HTXS::WH || p==HTXS::QQ2ZH || p==HTXS::GG2ZH; }
+    bool isVH(HTXS::HiggsProdMode p) const { return p==HTXS::WH || p==HTXS::QQ2ZH || p==HTXS::GG2ZH; }
     
     /// @brief Stage-0 HTXS categorization
     HTXS::Stage0::Category getStage0Category(const HTXS::HiggsProdMode prodMode,
                                              const Particle &higgs,
-                                             const Particle &V) {
+                                             const Particle &V) const {
       using namespace HTXS::Stage0;
       int ctrlHiggs = std::abs(higgs.rapidity())<2.5;
       // Special cases first, qq→Hqq
@@ -378,7 +377,7 @@ namespace Rivet {
     HTXS::Stage1::Category getStage1Category(const HTXS::HiggsProdMode prodMode,
                                              const Particle &higgs,
                                              const Jets &jets,
-                                             const Particle &V) {
+                                             const Particle &V) const {
       using namespace HTXS::Stage1;
       int Njets=jets.size(), ctrlHiggs = std::abs(higgs.rapidity())<2.5, fwdHiggs = !ctrlHiggs;
       double pTj1 = jets.size() ? jets[0].momentum().pt() : 0;
@@ -444,7 +443,7 @@ namespace Rivet {
     HTXS::Stage1_2::Category getStage1_2_Category(const HTXS::HiggsProdMode prodMode,
                          const Particle &higgs,
                          const Jets &jets,
-                         const Particle &V) {
+                         const Particle &V) const {
       using namespace HTXS::Stage1_2;
       int Njets=jets.size(), ctrlHiggs = std::abs(higgs.rapidity())<2.5, fwdHiggs = !ctrlHiggs;
       int vbfTopo = vbfTopology_Stage1_2(jets,higgs);
@@ -521,7 +520,7 @@ namespace Rivet {
     HTXS::Stage1_2_Fine::Category getStage1_2_Fine_Category(const HTXS::HiggsProdMode prodMode,
                          const Particle &higgs,
                          const Jets &jets,
-                         const Particle &V) {
+                         const Particle &V) const {
       using namespace HTXS::Stage1_2_Fine;
       int Njets=jets.size(), ctrlHiggs = std::abs(higgs.rapidity())<2.5, fwdHiggs = !ctrlHiggs;
       int vbfTopo = vbfTopology_Stage1_2_Fine(jets,higgs);
@@ -766,7 +765,7 @@ namespace Rivet {
   private:
     double m_sumw;
     HTXS::HiggsProdMode m_HiggsProdMode;
-    std::map<HTXS::ErrorCode,size_t> m_errorCount;
+    mutable std::array<std::atomic<size_t>, HTXS::NUM_ERRORCODES> m_errorCount ATLAS_THREAD_SAFE {};
     Histo1DPtr m_hist_stage0;
     Histo1DPtr m_hist_stage1_pTjet25, m_hist_stage1_pTjet30;
     Histo1DPtr m_hist_stage1_2_pTjet25, m_hist_stage1_2_pTjet30;
