@@ -33,7 +33,7 @@ ATLAS_CHECK_FILE_THREAD_SAFETY;
  * Constructor
  */
 PerfMonMTSvc::PerfMonMTSvc(const std::string& name, ISvcLocator* pSvcLocator)
-    : AthService(name, pSvcLocator), m_isFirstEvent{false}, m_eventCounter{0}, m_eventLoopMsgCounter{0}, m_checkPointTime{0} {
+    : AthService(name, pSvcLocator), m_isFirstEvent{false}, m_eventCounter{0}, m_eventLoopMsgCounter{0}, m_checkPointTime{0}, m_isEvtLoopStopped{false} {
   // Five main snapshots : Configure, Initialize, FirstEvent, Execute, and Finalize
   m_motherPID = getpid();
   m_snapshotData.resize(NSNAPSHOTS); // Default construct
@@ -74,6 +74,7 @@ StatusCode PerfMonMTSvc::initialize() {
   const long lowestPriority = 0;
   incSvc->addListener(this, IncidentType::BeginEvent, highestPriority);
   incSvc->addListener(this, "EndAlgorithms", lowestPriority);
+  incSvc->addListener(this, "EndEvtLoop", highestPriority);
   incSvc->addListener(this, IncidentType::SvcPostFinalize);
 
   // Check if /proc exists, if not memory statistics are not available
@@ -176,6 +177,12 @@ void PerfMonMTSvc::handle(const Incident& inc) {
       m_isFirstEvent = false;
     }
   }
+  // This incident is fired by only some loop managers to signal the end of event processing
+  else if (inc.type() == "EndEvtLoop") {
+    m_isEvtLoopStopped = true;
+    m_measurementSnapshots.capture();
+    m_snapshotData[EXECUTE].addPointStop(m_measurementSnapshots);
+  }
   // Finalize ourself and print the metrics in SvcPostFinalize
   else if (inc.type() == IncidentType::SvcPostFinalize) {
     // Final capture upon post-finalization
@@ -250,7 +257,9 @@ void PerfMonMTSvc::stopSnapshotAud(const std::string& stepName, const std::strin
   }
 
   // First thing to be called after the event loop ends
-  if (compName == "AthMasterSeq" && stepName == "Stop" && m_eventCounter > 0) {
+  // Some loop managers fire a dedicated incident to signal the end of the event loop
+  // That preceeds the AthMasterSeq Stop and if it is already handled we don't do anything here
+  if (compName == "AthMasterSeq" && stepName == "Stop" && m_eventCounter > 0 && !m_isEvtLoopStopped) {
     m_measurementSnapshots.capture();
     m_snapshotData[EXECUTE].addPointStop(m_measurementSnapshots);
   }
