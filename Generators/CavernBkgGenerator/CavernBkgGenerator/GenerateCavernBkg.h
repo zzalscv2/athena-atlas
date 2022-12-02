@@ -45,7 +45,7 @@ private:
 
   /// @name Settable properties
   //@{
-  std::string            m_infile;
+  StringProperty   m_infile{this, "InputFile", "fvpn21n.dat"};
   IntegerProperty m_dsid{this, "DSID", 999999, "Dataset ID number"};
   //@}
 
