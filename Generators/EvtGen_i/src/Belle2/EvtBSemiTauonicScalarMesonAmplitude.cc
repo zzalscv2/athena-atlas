@@ -25,12 +25,9 @@ namespace Belle2 {
                                                     EvtBSemiTauonicHelicityAmplitudeCalculator* CalcHelAmp)
   {
 
-    static EvtId EM = EvtPDL::getId("e-");
-    static EvtId MUM = EvtPDL::getId("mu-");
-    static EvtId TAUM = EvtPDL::getId("tau-");
-//  static EvtId EP = EvtPDL::getId("e+");
-//  static EvtId MUP = EvtPDL::getId("mu+");
-//  static EvtId TAUP = EvtPDL::getId("tau+");
+    static const EvtId EM = EvtPDL::getId("e-");
+    static const EvtId MUM = EvtPDL::getId("mu-");
+    static const EvtId TAUM = EvtPDL::getId("tau-");
 
     // calculate w and costau
 

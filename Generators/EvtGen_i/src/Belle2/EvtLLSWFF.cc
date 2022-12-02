@@ -77,12 +77,12 @@ void EvtLLSWFF::getvectorff(EvtId parent, EvtId daughter,
   double m = EvtPDL::getMeanMass(parent);
   double w = ((m * m) + (mass * mass) - t) / (2.0 * m * mass);
 
-  static EvtId D3P1P = EvtPDL::getId("D'_1+");
-  static EvtId D3P1N = EvtPDL::getId("D'_1-");
-  static EvtId D3P10 = EvtPDL::getId("D'_10");
-  static EvtId D3P1B = EvtPDL::getId("anti-D'_10");
-  static EvtId D3P1SP = EvtPDL::getId("D'_s1+");
-  static EvtId D3P1SN = EvtPDL::getId("D'_s1-");
+  static const EvtId D3P1P = EvtPDL::getId("D'_1+");
+  static const EvtId D3P1N = EvtPDL::getId("D'_1-");
+  static const EvtId D3P10 = EvtPDL::getId("D'_10");
+  static const EvtId D3P1B = EvtPDL::getId("anti-D'_10");
+  static const EvtId D3P1SP = EvtPDL::getId("D'_s1+");
+  static const EvtId D3P1SN = EvtPDL::getId("D'_s1-");
 
   // Form factors have a general form, with parameters passed in
   // from the arguements.
