@@ -16,7 +16,7 @@ atlas_add_component( Tauolapp_i
    Tauolapp_i/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${TAUOLAPP_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
    LINK_LIBRARIES ${TAUOLAPP_LIBRARIES} AtlasHepMCLib ${CLHEP_LIBRARIES}
-   AthenaBaseComps AthenaKernel AthenaPoolUtilities GaudiKernel
+   AthenaBaseComps AthenaKernel AthenaPoolUtilities CxxUtils GaudiKernel
    GeneratorObjects )
 
 # Install files from the package:
