@@ -52,6 +52,10 @@ class ExternalMadSpin(ExternalBase):
         self.add_keyword("width_t")
         self.add_keyword("width_W")
         self.add_keyword("width_Z")
+        self.add_keyword("Wolfenstein_lambda") # for madspin decays with ckm-changing models
+        self.add_keyword("Wolfenstein_A") # for madspin decays with ckm-changing models
+        self.add_keyword("Wolfenstein_rho") # for madspin decays with ckm-changing models
+        self.add_keyword("Wolfenstein_eta") # for madspin decays with ckm-changing models
 
     def needs_scheduling(self, process):
         """! Report whether the MadSpin process should be scheduled.
