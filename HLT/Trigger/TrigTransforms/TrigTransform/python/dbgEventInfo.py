@@ -336,7 +336,7 @@ class dbgEventInfo:
             Char_t  Stream_Tag_Name[80];\
             Char_t  Stream_Tag_Type[80];\
             UInt_t  Lvl1_ID;\
-            Int_t   Global_ID;\
+            ULong_t Global_ID;\
             Int_t   Lumiblock;\
             Int_t   Node_ID;\
             Int_t   SuperMasterKey;\
