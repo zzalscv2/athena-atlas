@@ -75,7 +75,7 @@ namespace NswAsBuilt {
        * [-1,+1]
        *
        */
-      Amg::Vector3D getPositionAlongStgcStrip(ParameterClass iclass, int stripNumber, double s) const;
+      Amg::Vector3D getPositionAlongStgcStrip(ParameterClass iclass, int stripNumber, double sx, double sy) const;
 
     private:
       stgcStripConfiguration_t m_config_stgc;

@@ -748,32 +748,46 @@ namespace MuonGM {
         // As-Built (MuonNswAsBuilt is not included in AthSimulation)
         //*********************
         const NswAsBuilt::StgcStripCalculator* sc = manager()->getStgcAsBuiltCalculator();
-        if (sc) {
+        if (sc && design->type == MuonChannelDesign::ChannelType::etaStrip) {
+
             Amg::Vector2D lpos(locXpos, locYpos);
- 
+            
+            // express the local position w.r.t. the nearest active strip
+            Amg::Vector2D rel_pos;
+            int istrip = design->positionRelativeToStrip(lpos, rel_pos);
+            if (istrip < 0) {
+                MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+                log << MSG::WARNING << "As-built corrections are provided only for eta strips within the active area. Returning." << endmsg;
+                return;
+            }
+
             // setup strip calculator
             NswAsBuilt::stripIdentifier_t strip_id;
             strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::STL : NswAsBuilt::quadrupletIdentifier_t::STS), getStationEta(), getStationPhi(), m_ml };
             strip_id.ilayer     = manager()->stgcIdHelper()->gasGap(layerId);
-            strip_id.istrip     = stripNumber(lpos, layerId); // nearest strip to locXpos 
-
-            Amg::Vector2D rel_pos;
-            if (!design->positionWithinStrip(lpos, rel_pos)) {
-                MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
-                log << MSG::WARNING << "Position corrections can be provided for eta strips and only within the active area. Returning." << endmsg;
-                return;
-            }
+            strip_id.istrip     = istrip;
 
             // get the position coordinates, in the chamber frame, from NswAsBuilt.
             // applying the 10um shift along the beam axis for strips (see fillCache()).
-            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y());
-            pos = calcPos.pos;
-            pos[0] += (strip_id.ilayer%2) ? 0.01 : -0.01; // 1st layer gets +0.01; layer numbering starts from 1
+            NswAsBuilt::StgcStripCalculator::position_t calcPos = sc->getPositionAlongStgcStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y(), rel_pos.x());
+            
+            if (calcPos.isvalid == NswAsBuilt::StgcStripCalculator::IsValid::VALID) {
+                pos = calcPos.pos;
+                pos[0] += (strip_id.ilayer%2) ? 0.01 : -0.01; // 1st layer gets +0.01; layer numbering starts from 1
 
-            // signal that pos is now in the chamber reference frame
-            // (don't go back to the layer frame yet, since we may apply b-lines later on)
-            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);   
-            conditionsApplied = true;
+                // signal that pos is now in the chamber reference frame
+                // (don't go back to the layer frame yet, since we may apply b-lines later on)
+                trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);   
+                conditionsApplied = true;
+            }
+#ifndef NDEBUG
+            else {
+                MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+                if (log.level() <= MSG::DEBUG) {    
+                    log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<<" layer: "<<strip_id.ilayer<< endmsg;
+                }
+            }
+#endif
         }
 #endif 
 
