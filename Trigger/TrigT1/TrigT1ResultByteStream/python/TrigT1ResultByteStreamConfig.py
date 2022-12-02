@@ -393,7 +393,7 @@ if __name__ == '__main__':
   flags.Concurrency.NumConcurrentEvents = 1
   flags.Output.HISTFileName = args.outputHISTFile
 
-  if any(["data22" in f for f in args.filesInput]):
+  if any(["data" in f for f in args.filesInput]):
     s=args.filesInput[0].replace('*','').replace('.data','')
     flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
   else:

@@ -189,6 +189,11 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
         // jFEX to ROD trailer position after the ROD trailer
         unsigned int trailers_pos = rob->rod_ndata() - jBits::ROD_WORDS;
         
+        if(vec_words.size() < (jBits::ROD_WORDS+jBits::jFEX2ROD_WORDS) || trailers_pos < (jBits::ROD_WORDS+jBits::jFEX2ROD_WORDS) ){
+            ATH_MSG_WARNING("Not enough jFEX TOB words to decode (<4). Number of word to decode: "<<vec_words.size()<< ". Position within the vector: "<<trailers_pos);
+            continue;
+        }
+        
         while(READ_TOBS){
             
             //printf("----------------------------------------------------------------------------------------------------------------------\n");
@@ -213,8 +218,20 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             
             if(payload != (total_tobs + jBits::TOB_TRAILERS + paddingWord)){
                 //printf("%s !! ERROR Payload=%-4d is different from TOBs+Trailers=%-4d -> SKIPPED %s\n",C.RED.c_str(),payload,(total_tobs + jBits::TOB_TRAILERS),C.END.c_str());
-                ATH_MSG_WARNING("Payload="<< payload<<" is different from TOBs+Trailers+padding words="<< total_tobs + jBits::TOB_TRAILERS + paddingWord <<". FPGA: "<< fpga << " in jFEX: "<< jfex <<" SKIPPED!");
-                trailers_pos -= (payload+2);
+                ATH_MSG_WARNING("Payload="<< payload<<" is different from TOBs+Trailers+padding words="<< total_tobs + jBits::TOB_TRAILERS + paddingWord <<" in FPGA: "<< fpga << " and jFEX: "<< jfex <<". SKIPPED!");
+                
+                //Checking if we can continue decoding data for the rest of FPGAs. No negative positions
+                int neg_positions = trailers_pos - (payload + jBits::TOB_TRAILERS);
+                //If negative, whole event must be discarded!
+                if(neg_positions < 0){
+                    ATH_MSG_DEBUG("jFEX TOB decoder has discarded the whole event");
+                    break;
+                }
+                
+                //Jumping to next FPGA
+                trailers_pos -= (payload+jBits::TOB_TRAILERS);
+                
+                //Is it 0? then we finish the loop, next event
                 if(trailers_pos == 0) {
                     READ_TOBS = false;
                 }

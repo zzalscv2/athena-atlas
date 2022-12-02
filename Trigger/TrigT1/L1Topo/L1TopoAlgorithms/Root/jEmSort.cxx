@@ -26,10 +26,10 @@ TCS::jEmSort::jEmSort(const std::string & name) :
    defineParameter( "InputWidth1stStage", 16 ); // for FW
    defineParameter( "OutputWidth", 10 );
    defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 0);
-   defineParameter( "IsoMin", 0);
-   defineParameter( "Frac1Min", 0);
-   defineParameter( "Frac2Min", 0);
+   defineParameter( "MaxEta", 196 );
+   defineParameter( "IsoMin", 0 );
+   defineParameter( "Frac1Min", 0 );
+   defineParameter( "Frac2Min", 0 );
 }
 
 

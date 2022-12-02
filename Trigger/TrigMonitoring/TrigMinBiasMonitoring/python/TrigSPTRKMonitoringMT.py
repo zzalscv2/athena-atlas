@@ -7,6 +7,34 @@
 """
 import math
 
+
+def HI_chains(configFlags):
+    """ Add chains used in HI runs streamed to MinBias and UPC streams. """
+    from TrigConfigSvc.TriggerConfigAccess import getHLTMenuAccess
+    allChains = getHLTMenuAccess(configFlags)
+
+    def is_noalg(chain, *args):
+        return '_noalg_' in chain and all(map(lambda x: x in chain, args))
+
+    def not_EB_OVERLAY(chain):
+        return '_eb_' not in chain and 'OVERLAY' not in chain
+
+    chains = []
+
+    # 2022 HI run
+    chains += [c for c in allChains if '_excl_' in c]  # UPC
+    chains += [c for c in allChains if is_noalg(c, 'L1TRT', 'VTE')]  # UPC
+    chains += [c for c in allChains if is_noalg(c, 'L1TAU1', 'VTE')]  # UPC
+    chains += [c for c in allChains if is_noalg(c, 'L12TAU1', 'VTE')]  # UPC
+    chains += [c for c in allChains if is_noalg(c, 'L1TE')]  # UPC + MB
+    chains += ['HLT_noalg_L1VTE5', 'HLT_noalg_L1MBTS_1_VTE5']  # UPC
+
+    # Remove Enhanced Bias and Overlay chains
+    chains = [c for c in chains if not_EB_OVERLAY(c)]
+
+    return chains
+
+
 def TrigSPTRK(configFlags, highGranularity=False):
 
     from AthenaMonitoring import AthMonitorCfgHelper
@@ -31,6 +59,10 @@ def TrigSPTRK(configFlags, highGranularity=False):
     detailed = ["HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED"]
     alg.triggerListTrackingMon = [c for c in getHLTMenuAccess(configFlags) if 'HLT_mb_sptrk_L1' in c]
     alg.triggerListTrackingMon += [c for c in getHLTMenuAccess(configFlags) if 'HLT_mb_sptrk_pt2_L1' in c]
+    # HI chains
+    alg.triggerListTrackingMon += HI_chains(configFlags)
+
+    detailed += [c for c in getHLTMenuAccess(configFlags) if 'HLT_mb_sp_pix' in c]
     alg.triggerListSpacePointsMon = detailed
 
     for chain in alg.triggerListTrackingMon:
@@ -51,7 +83,6 @@ def TrigSPTRK(configFlags, highGranularity=False):
             mbEffGroup.defineHistogram( "nTrkOfflineVtx,nTrkOnlineVtx", type="TH2F", title=";N offline tracks with Vtx cut;N online tracks with Vtx cut;", xbins=nbins, xmin=0, xmax=400, ybins=nbins, ymin=0, ymax=400 )
             mbEffGroup.defineHistogram( "onlineOfflineVtxDelta", title=";(offline - online) vertex z[mm]", xbins=200, xmin=-200, xmax=200 )
 
-
             mbEffGroup.defineHistogram( "nTrkOnline", title="Number of tracks reconstructed online;track counts", xbins=200, xmin=-1, xmax=400 )
             mbEffGroup.defineHistogram( "nTrkRatio", title="Number of tracks reconstructed online/offline;track counts online/offline", xbins=200, xmin=-1, xmax=4 )
             mbEffGroup.defineHistogram( "trkSelOfflineRatio", title="Number of tracks reconstructed offline(selected)/offline; N sel/all", xbins=200, xmin=0.1, xmax=1.9 )
@@ -71,6 +102,7 @@ def TrigSPTRK(configFlags, highGranularity=False):
 
             mbEffGroup.defineHistogram( "countsOnlineNames,countsOnline;onlineCounters", type="TProfile", title=";cuts;counts/evt", xbins=10, xmin=0, xmax=10, ybins=10, ymin=0, ymax=10)
 
+        # 1D distributions
         mbEffGroup.defineHistogram( "trkPt", cutmask="trkMask", title="Offline selected tracks pt;p_{T} [GeV]", xbins=100, xmin=0, xmax=5)
         mbEffGroup.defineHistogram( "trkEta", cutmask="trkMask", title="Offline selected tracks eta;#eta", xbins=50, xmin=-2.5, xmax=2.5)
         mbEffGroup.defineHistogram( "trkPhi", cutmask="trkMask", title="Offline selected tracks phi;#phi", xbins=64, xmin=-math.pi, xmax=math.pi)
@@ -86,6 +118,13 @@ def TrigSPTRK(configFlags, highGranularity=False):
         mbEffGroup.defineHistogram( "trkD0", cutmask="trkMask", title="Offline selected tracks D0;d_{0} [mm]", xbins=40, xmin=-20, xmax=20)
         mbEffGroup.defineHistogram( "trkZ0wrtPV", cutmask="trkMask", title="Offline selected tracks Z0 wrt PV;z_{0}[mm]", xbins=40, xmin=-20, xmax=20)
         mbEffGroup.defineHistogram( "trkZ0", cutmask="trkMask", title="Offline selected tracks Z0;z_{0}[mm]", xbins=40, xmin=-200, xmax=200)
+
+        # 2D maps
+        mbEffGroup.defineHistogram('trkEta,trkPt', cutmask='trkMask', type='TH2F', title='Offline selected tracks pT/eta correlation;#eta;p_{T} [GeV]', xbins=50, xmin=-2.5, xmax=2.5, ybins=50, ymin=0, ymax=5)
+        mbEffGroup.defineHistogram('onlTrkEta,onlTrkPt', type='TH2F', title='Online tracks pT/eta correlation;#eta;p_{T} [GeV]', xbins=50, xmin=-2.5, xmax=2.5, ybins=50, ymin=0, ymax=5)
+
+        mbEffGroup.defineHistogram('trkEta,trkPhi', cutmask='trkMask', type='TH2F', title='Offline selected tracks eta/phi correlation;#eta;#varphi', xbins=50, xmin=-2.5, xmax=2.5, ybins=50, ymin=-math.pi, ymax=math.pi)
+        mbEffGroup.defineHistogram('onlTrkEta,onlTrkPhi', type='TH2F', title='Online tracks eta/phi correlation;#eta;#varphi', xbins=50, xmin=-2.5, xmax=2.5, ybins=50, ymin=-math.pi, ymax=math.pi)
 
     for chain in alg.triggerListSpacePointsMon:
         mbSpGroup = monConfig.addGroup(

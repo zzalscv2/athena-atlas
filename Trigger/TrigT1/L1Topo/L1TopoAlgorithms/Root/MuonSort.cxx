@@ -33,9 +33,9 @@ bool SortByEtLargestM(TCS::GenericTOB* tob1, TCS::GenericTOB* tob2)
 TCS::MuonSort::MuonSort(const std::string & name) : SortingAlg(name) {
    defineParameter( "InputWidth", 32 ); // for FW
    defineParameter( "InputWidth1stStage", 16 ); // for FW
-   defineParameter( "OutputWidth", 6);
-   defineParameter( "MinEta", 0);
-   defineParameter( "MaxEta", 7);
+   defineParameter( "OutputWidth", 6 );
+   defineParameter( "MinEta", 0 );
+   defineParameter( "MaxEta", 196 );
    defineParameter( "InnerCoinCut", 0 );
    defineParameter( "FullStationCut", 0 );
    defineParameter( "GoodMFieldCut", 0 );
