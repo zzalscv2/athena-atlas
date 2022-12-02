@@ -10,6 +10,7 @@
 #define THEPEG_powhegLesHouchesFileReader_H
 // This is the declaration of the powhegLesHouchesFileReader class.
 
+#include "CxxUtils/checker_macros.h"
 #include "ThePEG/LesHouches/LesHouchesReader.h"
 #include "Herwig7_i/PowhegLesHouchesFileReader.fh"
 #include "ThePEG/PDT/Decayer.h"
@@ -128,7 +129,7 @@ public:
   /**
    * Standard Init function used to initialize the interfaces.
    */
-  static void Init();
+  static void Init ATLAS_NOT_THREAD_SAFE ();
 
 
   /** 
@@ -276,7 +277,7 @@ private:
   /**
    * Describe an abstract base class with persistent data.
    */
-  static ClassDescription<powhegLesHouchesFileReader> m_initpowhegLesHouchesFileReader;
+  static const ClassDescription<powhegLesHouchesFileReader> m_initpowhegLesHouchesFileReader;
 
   /**
    * Private and non-existent assignment operator.

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( Herwig7_i )
@@ -24,7 +24,7 @@ atlas_add_library ( powhegHerwig
    NO_PUBLIC_HEADERS
    SHARED
    INCLUDE_DIRS ${THEPEG_INCLUDE_DIRS} ${GSL_INCLUDE_DIRS}
-   LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} )
+   LINK_LIBRARIES ${THEPEG_LIBRARIES} ${GSL_LIBRARIES} CxxUtils )
 
 # Component(s) in the package:
 if (HEPMC3_USE)

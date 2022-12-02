@@ -829,11 +829,11 @@ void powhegLesHouchesFileReader::persistentInput(PersistentIStream & is, int) {
   m_ieve = 0;
 }
 
-ClassDescription<powhegLesHouchesFileReader>
+const ClassDescription<powhegLesHouchesFileReader>
 powhegLesHouchesFileReader::m_initpowhegLesHouchesFileReader;
 // Definition of the static class description member.
 
-void powhegLesHouchesFileReader::Init() {
+void powhegLesHouchesFileReader::Init ATLAS_NOT_THREAD_SAFE () {
 
   static ClassDocumentation<powhegLesHouchesFileReader> documentation
     ("ThePEG::powhegLesHouchesFileReader is an base class to be used for objects "
