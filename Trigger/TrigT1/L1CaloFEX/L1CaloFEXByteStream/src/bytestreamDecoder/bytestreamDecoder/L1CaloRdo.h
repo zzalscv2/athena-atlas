@@ -5,6 +5,7 @@
 #include <vector>
 #include <list>
 #include <string>
+#include <cstdint>
 
 
 #include "channelMappings/L1CaloDetectorRegion.h"
