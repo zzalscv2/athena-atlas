@@ -193,7 +193,7 @@ StatusCode TruthParticleCnvTool::execute (const EventContext& ctx) const
 
   ATH_MSG_DEBUG(" Found McEventCollection iterators : "<< (fEvt-mcEventsReadHandle->begin()) << " to "<< (lEvt-mcEventsReadHandle->begin()) );
 
-  for(McEventCollection::const_iterator it=fEvt ; it != lEvt; it++){
+  for(McEventCollection::const_iterator it=fEvt ; it != lEvt; ++it){
     const HepMC::GenEvent* evt = *it;
     // there are holes in a McEventCollection when pile-up is enabled
     // so deal with it
