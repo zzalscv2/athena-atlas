@@ -481,30 +481,43 @@ namespace MuonGM {
         const NswAsBuilt::StripCalculator* sc = manager()->getMMAsBuiltCalculator();
         if (sc) {
 
+            // express the local position w.r.t. the nearest active strip
+            Amg::Vector2D rel_pos;
+            int istrip = design->positionRelativeToStrip(lpos, rel_pos); 
+            if (istrip < 0) {
+                MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+                log << MSG::WARNING << "As-built corrections are provided only within the active area. Returning." << endmsg;                
+                return false;
+            } 
+
             // setup strip calculator
             NswAsBuilt::stripIdentifier_t strip_id;
             strip_id.quadruplet = { (largeSector() ? NswAsBuilt::quadrupletIdentifier_t::MML : NswAsBuilt::quadrupletIdentifier_t::MMS), getStationEta(), getStationPhi(), m_ml };
             strip_id.ilayer     = manager()->mmIdHelper()->gasGap(layerId);
-            strip_id.istrip     = stripNumber(lpos, layerId); // nearest strip to lpos
-
-            Amg::Vector2D rel_pos;
-            if (!design->positionWithinStrip(lpos, rel_pos)) {
-                MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
-                log << MSG::WARNING << "Position corrections can be provided for eta strips and only within the active area. Returning." << endmsg;
-                return false;
-            } 
+            strip_id.istrip     = istrip;
 
             // get the position coordinates, in the chamber frame, from NswAsBuilt.
             // Applying a 2.75mm correction along the layer normal, since NswAsBuilt considers the layer 
             // on the readout strips, whereas Athena wants it at the middle of the drift gap.
             NswAsBuilt::StripCalculator::position_t calcPos = sc->getPositionAlongStrip(NswAsBuilt::Element::ParameterClass::CORRECTION, strip_id, rel_pos.y(), rel_pos.x());
-            pos     = calcPos.pos;
-            pos[0] += strip_id.ilayer%2 ? -2.75 : 2.75;
             
-            // signal that pos is now in the chamber reference frame
-            // (don't go back to the layer frame yet, since we may apply b-lines later on)
-            trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
-            conditionsApplied = true;
+            if (calcPos.isvalid == NswAsBuilt::StripCalculator::IsValid::VALID) {
+                pos     = calcPos.pos;
+                pos[0] += strip_id.ilayer%2 ? -2.75 : 2.75;
+            
+                // signal that pos is now in the chamber reference frame
+                // (don't go back to the layer frame yet, since we may apply b-lines later on)
+                trfToML = m_delta.inverse()*absTransform().inverse()*transform(layerId);
+                conditionsApplied = true;
+            } 
+#ifndef NDEBUG
+            else {
+                MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
+                if (log.level() <= MSG::DEBUG) {    
+                    log << MSG::DEBUG << "No as-built corrections provided for stEta: "<<getStationEta() << " stPhi: "<<getStationPhi()<<" ml: "<<m_ml<<" layer: "<<strip_id.ilayer<< endmsg;
+                }
+            }
+#endif
         }
 #endif 
 
