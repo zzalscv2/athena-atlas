@@ -65,9 +65,7 @@ import MagFieldServices.SetupField
 #
 
 #
-print (' == ElectronEoverPTracking.py == setting up geometry (new cond alg, rel22)')  
-geom_svc=None
-geom_cond_key=''
+print (' == ElectronEoverPTracking.py == setting up geometry')  
 cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
 geom_cond_key = cond_alg.TrackingGeometryWriteKey
 
@@ -88,10 +86,8 @@ ToolSvc += ElectronTrkStepPropagator
 #
 from TrkExTools.TrkExToolsConf import Trk__Navigator
 ElectronTrkNavigator = Trk__Navigator(name = 'ElectronTrkNavigator',
-                                      TrackingGeometrySvc = geom_svc,
                                       TrackingGeometryKey = geom_cond_key
-                                      #TrackingGeometrySvc = AtlasTrackingGeometrySvc
-                                  )
+                                      )
 ToolSvc += ElectronTrkNavigator
 #
 # Setup the MaterialEffectsUpdator
