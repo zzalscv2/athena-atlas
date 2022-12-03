@@ -123,7 +123,7 @@ namespace MuonGM {
         /// expresses it w.r.t. the center of the strip (intersection for stereo strips):
         /// relative x within [-0.5, 0.5] (*pitch), relative y within [-1, 1].
         /// These coordinates can be fed to the NswAsBuilt::StripCalculator        
-        bool positionWithinStrip(const Amg::Vector2D& lpos, Amg::Vector2D& rel_pos) const;
+        int positionRelativeToStrip(const Amg::Vector2D& lpos, Amg::Vector2D& rel_pos) const;
 
     private:
         /// calculate local channel position for a given channel number 
@@ -277,26 +277,31 @@ namespace MuonGM {
 
 
     //============================================================================
-    inline bool MuonChannelDesign::positionWithinStrip(const Amg::Vector2D& lpos, Amg::Vector2D& rel_pos) const {
+    inline int MuonChannelDesign::positionRelativeToStrip(const Amg::Vector2D& lpos, Amg::Vector2D& rel_pos) const {
 
-        if (type != ChannelType::etaStrip) return false;
+        if (type != ChannelType::etaStrip) return -1;
 
-        const int istrip = channelNumber(lpos);
-        if (istrip < 0) return false;
+        // if the lpos is out of bounds, express it w.r.t. the nearest active strip. 
+        // it's not our job to boundary check. 
+        int istrip = channelNumber(lpos);
+        if (istrip < 0) return istrip;
+        istrip = std::max (istrip, numberOfMissingBottomStrips() +   1);
+        istrip = std::min (istrip, numberOfMissingBottomStrips() + nch);
 
         // get the intersection of the eta and stereo strips in the local reference frame
         Amg::Vector2D chan_pos{Amg::Vector2D::Zero()};
-        if (!channelPosition(istrip, chan_pos)) return false;
+        channelPosition(istrip, chan_pos);
         chan_pos = rotation() * chan_pos;    
 
         // strip edge in the local reference frame (note that the uncapped option is set to true)
         Amg::Vector2D edge_pos{Amg::Vector2D::Zero()}; 
-        if ( !((lpos.y() > 0) ? rightInterSect(istrip, edge_pos, true) : leftInterSect(istrip, edge_pos, true)) ) return false;
+        (lpos.y() > 0) ? rightInterSect(istrip, edge_pos, true) : leftInterSect(istrip, edge_pos, true);
         edge_pos = rotation() * edge_pos;
 
-        rel_pos[0] = (lpos - chan_pos).x() / inputWidth;
+        rel_pos[0] = (lpos - chan_pos).x() / channelWidth();
         rel_pos[1] = (lpos - chan_pos).y() / std::abs( edge_pos.y() - chan_pos.y() );
-        return true;
+
+        return istrip;
     }
 
     

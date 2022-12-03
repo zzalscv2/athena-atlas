@@ -156,7 +156,7 @@ namespace Rec {
 
         void dumpCaloEloss(const Trk::Track* track, const std::string& txt) const;
         int countAEOTs(const Trk::Track* track, const std::string& txt) const;
-        bool checkTrack(const std::string& txt, const Trk::Track* newTrack, const Trk::Track* track) const;
+        bool checkTrack(std::string_view txt, const Trk::Track* newTrack) const;
 
         // helpers, managers, tools
         ToolHandle<Rec::IMuidCaloEnergy> m_caloEnergyParam{

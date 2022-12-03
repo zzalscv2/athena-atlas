@@ -62,10 +62,10 @@ namespace TrigL2MuonSA {
     virtual StatusCode initialize() override;
 
     std::string instanceName() const {return m_algInstanceName;}
-    void setInstanceName(std::string name) { m_algInstanceName = name; }
+    void setInstanceName(const std::string& name) { m_algInstanceName = name; }
 
     // set the properties
-    void setBufferName(std::string buffName) {m_calBufferName=buffName;}
+    void setBufferName(const std::string& buffName) {m_calBufferName=buffName;}
 
     std::vector<int>* getLocalBuffer()   {return &m_localBuffer;}
     int getLocalBufferSize() const {return m_localBuffer.size();}
