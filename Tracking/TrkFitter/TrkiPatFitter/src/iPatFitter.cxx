@@ -581,7 +581,7 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
   std::unique_ptr<const TrackSurfaceIntersection> intersection{
       parameters.intersection()};
 
-  const TrackSurfaceIntersection* startIntersection = intersection.get();
+  const TrackSurfaceIntersection* startIntersection{intersection.get()};
   int hit = measurements.size();
   for (MeasurementSet::const_iterator m = measurementSet.begin();
        m != measurementSet.end(); ++m, ++hit) {
@@ -621,7 +621,7 @@ void iPatFitter::addMeasurements(const EventContext& ctx,
       // FIXME
       // no intersection to MeasurementSet
       m_messageHelper->printWarning(15);
-      intersection = std::make_unique<TrackSurfaceIntersection>(*intersection);
+      continue;      
     }
     auto measurement = std::make_unique<FitMeasurement>(hit, nullptr, *m);
     measurement->intersection(type, intersection.release());
