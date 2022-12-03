@@ -83,14 +83,13 @@ public:
     std::cerr << "=================================\n";
     std::cerr << "HERE I CAN PUT SOME ERROR MESSAGE\n";
     std::cerr << "=================================\n";
-    ThePEG::Repository::cleanup();
-    exit( EXIT_FAILURE );
+    quit();
   }
 
   /// Bail out and be quiet
   virtual void quit() const {
     ThePEG::Repository::cleanup();
-    exit( EXIT_FAILURE );
+    std::abort();
   }
 
   /// Return the standard out stream to be used
