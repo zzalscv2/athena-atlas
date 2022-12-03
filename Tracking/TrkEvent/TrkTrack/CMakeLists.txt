@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkTrack )
@@ -21,7 +21,7 @@ atlas_add_dictionary( TrkTrackDict
 #Executables for tests
 atlas_add_executable(TrkTrack_test
          test/TrkTrack_test.cxx
-         LINK_LIBRARIES TrkTrack TestTools)
+         LINK_LIBRARIES TrkTrack TestTools CxxUtils)
 #Tests
 atlas_add_test(ut_TrkTrack_test
          SCRIPT TrkTrack_test)
