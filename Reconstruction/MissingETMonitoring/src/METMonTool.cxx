@@ -351,7 +351,7 @@ StatusCode METMonTool::bookSourcesHistograms(std::string& metName, MonGroup& met
   hTitle << "SumEt Distribution (" << metName << ")";
   hxTitle << "SumEt (GeV)";
   hyTitle << "Events";
-  if (metName == "MET_Cryo" || metName == "MET_MuonBoy" || metName == "MET_Cryo" || metName == "MET_CellOut_em")
+  if (metName == "MET_Cryo" || metName == "MET_MuonBoy" || metName == "MET_CellOut_em")
     sumetmax = m_etrange*m_etrangeSumFactor*0.25;
   h = new TH1F(hName.c_str(), hTitle.str().c_str(), m_etbin, sumetmin, sumetmax);
   h->GetXaxis()->SetTitle(hxTitle.str().c_str());
