@@ -39,6 +39,14 @@ Trk::RotatedTrapezoidBounds::RotatedTrapezoidBounds(double halex, double minhale
   RotatedTrapezoidBounds::initCache();
 }
 
+void Trk::RotatedTrapezoidBounds::initCache() {
+  m_kappa = 0.5 *
+            (m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] -
+             m_boundValues[RotatedTrapezoidBounds::bv_minHalfY]) /
+            m_boundValues[RotatedTrapezoidBounds::bv_halfX];
+  m_delta = 0.5 * (m_boundValues[RotatedTrapezoidBounds::bv_minHalfY] +
+                   m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY]);
+}
 
 bool
 Trk::RotatedTrapezoidBounds::operator==(const Trk::SurfaceBounds& sbo) const

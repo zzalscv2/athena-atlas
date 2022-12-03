@@ -36,12 +36,12 @@ Trk::ConeBounds::ConeBounds(double alpha, bool symm, double halfphi, double avph
   ConeBounds::initCache();
 }
 
-Trk::ConeBounds::ConeBounds(double alpha, double zmin, double zmax, double halfphi, double avphi)
-  : m_boundValues(ConeBounds::bv_length, 0.)
-  , m_tanAlpha(0.)
-  , m_sinAlpha(0.)
-  , m_cosAlpha(0.)
-{
+Trk::ConeBounds::ConeBounds(double alpha, double zmin, double zmax,
+                            double halfphi, double avphi)
+    : m_boundValues(ConeBounds::bv_length, 0.),
+      m_tanAlpha(0.),
+      m_sinAlpha(0.),
+      m_cosAlpha(0.) {
   m_boundValues[ConeBounds::bv_alpha] = alpha;
   m_boundValues[ConeBounds::bv_minZ] = zmin;
   m_boundValues[ConeBounds::bv_maxZ] = zmax;
@@ -50,9 +50,19 @@ Trk::ConeBounds::ConeBounds(double alpha, double zmin, double zmax, double halfp
   ConeBounds::initCache();
 }
 
-bool
-Trk::ConeBounds::operator==(const SurfaceBounds& sbo) const
-{
+void Trk::ConeBounds::initCache() {
+  m_tanAlpha = tan(m_boundValues[ConeBounds::bv_alpha]);
+  m_sinAlpha = sin(m_boundValues[ConeBounds::bv_alpha]);
+  m_cosAlpha = cos(m_boundValues[ConeBounds::bv_alpha]);
+  // validate the halfphi
+  if (m_boundValues[ConeBounds::bv_halfPhiSector] < 0.)
+    m_boundValues[ConeBounds::bv_halfPhiSector] =
+        -m_boundValues[ConeBounds::bv_halfPhiSector];
+  if (m_boundValues[ConeBounds::bv_halfPhiSector] > M_PI)
+    m_boundValues[ConeBounds::bv_halfPhiSector] = M_PI;
+}
+
+bool Trk::ConeBounds::operator==(const SurfaceBounds& sbo) const {
   // check the type first not to compare apples with oranges
   const Trk::ConeBounds* conebo = dynamic_cast<const Trk::ConeBounds*>(&sbo);
   if (!conebo)
