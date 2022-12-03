@@ -195,7 +195,7 @@ namespace ExpressionParsing {
 
   void xAODProxyLoader::reset()
   {
-    for (auto &x : m_accessorCache) delete x.second;
+    for (auto x : m_accessorCache) delete x.second;
     // m_accessorCache.clear();  // not supported by ConcurrentStrMap
   }
 
