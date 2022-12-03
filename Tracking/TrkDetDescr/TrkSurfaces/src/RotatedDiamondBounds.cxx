@@ -42,6 +42,15 @@ Trk::RotatedDiamondBounds::RotatedDiamondBounds(double minhalex,
   RotatedDiamondBounds::initCache();
 }
 
+void Trk::RotatedDiamondBounds::initCache() {
+  m_alpha1 = atan2(m_boundValues[RotatedDiamondBounds::bv_medHalfX] -
+                       m_boundValues[RotatedDiamondBounds::bv_minHalfX],
+                   2. * m_boundValues[RotatedDiamondBounds::bv_halfY1]);
+  m_alpha2 = atan2(m_boundValues[RotatedDiamondBounds::bv_medHalfX] -
+                       m_boundValues[RotatedDiamondBounds::bv_maxHalfX],
+                   2. * m_boundValues[RotatedDiamondBounds::bv_halfY2]);
+}
+
 bool
 Trk::RotatedDiamondBounds::operator==(const Trk::SurfaceBounds& sbo) const
 {

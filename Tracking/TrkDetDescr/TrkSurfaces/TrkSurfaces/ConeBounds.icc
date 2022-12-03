@@ -136,19 +136,5 @@ ConeBounds::halfPhiSector() const
   return m_boundValues[ConeBounds::bv_halfPhiSector];
 }
 
-inline void
-ConeBounds::initCache()
-{
-  m_tanAlpha = tan(m_boundValues[ConeBounds::bv_alpha]);
-  m_sinAlpha = sin(m_boundValues[ConeBounds::bv_alpha]);
-  m_cosAlpha = cos(m_boundValues[ConeBounds::bv_alpha]);
-  // validate the halfphi
-  if (m_boundValues[ConeBounds::bv_halfPhiSector] < 0.)
-    m_boundValues[ConeBounds::bv_halfPhiSector] =
-      -m_boundValues[ConeBounds::bv_halfPhiSector];
-  if (m_boundValues[ConeBounds::bv_halfPhiSector] > M_PI)
-    m_boundValues[ConeBounds::bv_halfPhiSector] = M_PI;
-}
-
 }
 

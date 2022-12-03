@@ -63,16 +63,5 @@ DiamondBounds::insideLoc2(const Amg::Vector2D& locpo, double tol2) const
     (locpo[locY] < 2. * m_boundValues[DiamondBounds::bv_halfY2] + tol2));
 }
 
-inline void
-DiamondBounds::initCache()
-{
-  m_alpha1 = atan2(m_boundValues[DiamondBounds::bv_medHalfX] -
-                     m_boundValues[DiamondBounds::bv_minHalfX],
-                   2. * m_boundValues[DiamondBounds::bv_halfY1]);
-  m_alpha2 = atan2(m_boundValues[DiamondBounds::bv_medHalfX] -
-                     m_boundValues[DiamondBounds::bv_maxHalfX],
-                   2. * m_boundValues[DiamondBounds::bv_halfY2]);
-}
-
 } // end of namespace
 

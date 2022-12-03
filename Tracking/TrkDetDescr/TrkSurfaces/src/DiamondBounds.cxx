@@ -23,19 +23,27 @@ Trk::DiamondBounds::DiamondBounds()
 {}
 
 // constructor from arguments I
-Trk::DiamondBounds::DiamondBounds(double minhalex, double medhalex, double maxhalex, double haley1, double haley2)
-  : m_boundValues(DiamondBounds::bv_length, 0.)
-  , m_alpha1(0.)
-  , m_alpha2(0.)
-{
+Trk::DiamondBounds::DiamondBounds(double minhalex, double medhalex,
+                                  double maxhalex, double haley1, double haley2)
+    : m_boundValues(DiamondBounds::bv_length, 0.), m_alpha1(0.), m_alpha2(0.) {
   m_boundValues[DiamondBounds::bv_minHalfX] = minhalex;
   m_boundValues[DiamondBounds::bv_medHalfX] = medhalex;
   m_boundValues[DiamondBounds::bv_maxHalfX] = maxhalex;
   m_boundValues[DiamondBounds::bv_halfY1] = haley1;
   m_boundValues[DiamondBounds::bv_halfY2] = haley2;
   if (minhalex > maxhalex)
-    swap(m_boundValues[DiamondBounds::bv_minHalfX], m_boundValues[DiamondBounds::bv_maxHalfX]);
+    swap(m_boundValues[DiamondBounds::bv_minHalfX],
+         m_boundValues[DiamondBounds::bv_maxHalfX]);
   DiamondBounds::initCache();
+}
+
+void Trk::DiamondBounds::initCache() {
+  m_alpha1 = atan2(m_boundValues[DiamondBounds::bv_medHalfX] -
+                       m_boundValues[DiamondBounds::bv_minHalfX],
+                   2. * m_boundValues[DiamondBounds::bv_halfY1]);
+  m_alpha2 = atan2(m_boundValues[DiamondBounds::bv_medHalfX] -
+                       m_boundValues[DiamondBounds::bv_maxHalfX],
+                   2. * m_boundValues[DiamondBounds::bv_halfY2]);
 }
 
 bool
