@@ -25,6 +25,7 @@ bool EventInfoBranch::fill(const EventContext& ctx) {
     m_runNumber = evt_info->runNumber();
     m_lbNumber = evt_info->lumiBlock();
     m_l1id = evt_info->extendedLevel1ID();
+    m_bcid = evt_info->bcid();
     if (m_ismc) {
         m_mcChannel = evt_info->mcChannelNumber();
         m_weight = evt_info->mcEventWeight(0);

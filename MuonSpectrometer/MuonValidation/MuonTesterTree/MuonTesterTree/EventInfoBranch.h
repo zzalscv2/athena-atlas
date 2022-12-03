@@ -26,6 +26,7 @@ private:
     ScalarBranch<uint32_t>& m_runNumber{m_parent.newScalar<uint32_t>("runNumber")};
     ScalarBranch<uint32_t>& m_lbNumber{m_parent.newScalar<uint32_t>("lbNumber")};
     ScalarBranch<uint32_t>& m_l1id{m_parent.newScalar<uint32_t>("l1id")};
+    ScalarBranch<uint32_t>& m_bcid{m_parent.newScalar<uint32_t>("bcid")};
 
     ScalarBranch<uint32_t>& m_mcChannel{m_parent.newScalar<uint32_t>("mcChanneNumber")};
     ScalarBranch<double>& m_weight{m_parent.newScalar<double>("evtWeight")};
