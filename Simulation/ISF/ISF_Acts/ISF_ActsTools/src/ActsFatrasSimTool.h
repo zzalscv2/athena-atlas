@@ -159,8 +159,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       if (not result.ok()) {
         return result.error();
       }
-      auto &value = result.value().template get<Result>();
-      return std::move(value);
+      return result.value().template get<Result>();
     }
   };// end of SingleParticleSimulation
 
