@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
@@ -39,32 +39,6 @@ PerigeeSurface::createUniqueParameters(
   std::optional<AmgSymMatrix(DIM)> cov) const
 {
   return std::make_unique<ParametersT<DIM, T, PerigeeSurface>>(
-    position, momentum, charge, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from local parameters */
-template<int DIM, class T>
-ParametersT<DIM, T, PerigeeSurface>
-PerigeeSurface::createParameters(double l1,
-                                 double l2,
-                                 double phi,
-                                 double theta,
-                                 double qop,
-                                 std::optional<AmgSymMatrix(DIM)> cov) const
-{
-  return ParametersT<DIM, T, PerigeeSurface>(
-    l1, l2, phi, theta, qop, *this, std::move(cov));
-}
-
-/** Use the Surface as a ParametersBase constructor, from global parameters */
-template<int DIM, class T>
-ParametersT<DIM, T, PerigeeSurface>
-PerigeeSurface::createParameters(const Amg::Vector3D& position,
-                                 const Amg::Vector3D& momentum,
-                                 double charge,
-                                 std::optional<AmgSymMatrix(DIM)> cov) const
-{
-  return ParametersT<DIM, T, PerigeeSurface>(
     position, momentum, charge, *this, std::move(cov));
 }
 
