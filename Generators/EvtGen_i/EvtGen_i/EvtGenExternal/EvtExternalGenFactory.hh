@@ -21,6 +21,7 @@
 #ifndef EVT_I_EXTERNALGENFACTORY_HH
 #define EVT_I_EXTERNALGENFACTORY_HH
 
+#include "CxxUtils/checker_macros.h"
 #include "EvtGenModels/EvtAbsExternalGen.hh"
 
 #include <map>
@@ -37,9 +38,11 @@ class EvtExternalGenFactory {
         TauolaGenId
     };
 
-    static EvtExternalGenFactory* getInstance();
+    static const EvtExternalGenFactory* getInstance();
 
-    EvtAbsExternalGen* getGenerator( int genId = 0 );
+    static EvtExternalGenFactory* getInstance_mutable ATLAS_NOT_THREAD_SAFE ();
+
+    EvtAbsExternalGen* getGenerator( int genId = 0 ) const;
 
     void initialiseAllGenerators();
 

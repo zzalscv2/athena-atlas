@@ -100,7 +100,7 @@ void EvtPythia::fixPolarisations( EvtParticle* p )
     int nDaug = p->getNDaug();
     int i( 0 );
 
-    static EvtId Jpsi = EvtPDL::getId( "J/psi" );
+    static const EvtId Jpsi = EvtPDL::getId( "J/psi" );
 
     for ( i = 0; i < nDaug; i++ ) {
         EvtParticle* theDaug = p->getDaug( i );

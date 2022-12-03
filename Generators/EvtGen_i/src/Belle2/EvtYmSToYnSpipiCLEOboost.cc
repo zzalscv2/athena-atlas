@@ -75,9 +75,9 @@ EvtDecayBase* EvtYmSToYnSpipiCLEOboost::clone()
 void EvtYmSToYnSpipiCLEOboost::init()
 {
 
-  static EvtId PIP = EvtPDL::getId("pi+");
-  static EvtId PIM = EvtPDL::getId("pi-");
-  static EvtId PI0 = EvtPDL::getId("pi0");
+  static const EvtId PIP = EvtPDL::getId("pi+");
+  static const EvtId PIM = EvtPDL::getId("pi-");
+  static const EvtId PI0 = EvtPDL::getId("pi0");
 
   // check that there are 2 arguments
   checkNArg(2);

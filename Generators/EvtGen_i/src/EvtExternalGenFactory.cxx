@@ -48,15 +48,15 @@ EvtExternalGenFactory::~EvtExternalGenFactory()
     m_extGenMap.clear();
 }
 
-EvtExternalGenFactory* EvtExternalGenFactory::getInstance()
+const EvtExternalGenFactory* EvtExternalGenFactory::getInstance()
 {
-    static EvtExternalGenFactory* theFactory = 0;
+    static const EvtExternalGenFactory theFactory;
+    return &theFactory;
+}
 
-    if ( theFactory == 0 ) {
-        theFactory = new EvtExternalGenFactory();
-    }
-
-    return theFactory;
+EvtExternalGenFactory* EvtExternalGenFactory::getInstance_mutable ATLAS_NOT_THREAD_SAFE ()
+{
+    return const_cast<EvtExternalGenFactory*>(getInstance());
 }
 
 void EvtExternalGenFactory::definePythiaGenerator( std::string xmlDir,
@@ -110,11 +110,11 @@ void EvtExternalGenFactory::defineTauolaGenerator( bool useEvtGenRandom )
     m_extGenMap[genId] = tauolaGenerator;
 }
 
-EvtAbsExternalGen* EvtExternalGenFactory::getGenerator( int genId )
+EvtAbsExternalGen* EvtExternalGenFactory::getGenerator( int genId ) const
 {
     EvtAbsExternalGen* theGenerator( 0 );
 
-    ExtGenMap::iterator iter;
+    ExtGenMap::const_iterator iter;
 
     if ( ( iter = m_extGenMap.find( genId ) ) != m_extGenMap.end() ) {
         // Retrieve the external generator engine
