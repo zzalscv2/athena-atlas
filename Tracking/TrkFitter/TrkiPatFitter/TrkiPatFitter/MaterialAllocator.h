@@ -12,7 +12,7 @@
 #ifndef TRKIPATFITTER_MATERIALALLOCATOR_H
 #define TRKIPATFITTER_MATERIALALLOCATOR_H
 
-//<<<<<< INCLUDES                                                       >>>>>>
+//<<<<<< INCLUDES a>>>>>>
 
 #include <memory>
 #include <mutex>
@@ -32,7 +32,7 @@
 #include "TrkParameters/TrackParameters.h"
 #include "TrkiPatFitterUtils/IMaterialAllocator.h"
 
-//<<<<<< CLASS DECLARATIONS                                             >>>>>>
+//<<<<<< CLASS DECLARATIONS >>>>>>
 
 class MessageHelper;
 namespace Trk {
@@ -144,8 +144,7 @@ class MaterialAllocator : public AthAlgTool, virtual public IMaterialAllocator {
       this, "Intersector", "Trk::RungeKuttaIntersector/RungeKuttaIntersector",
       ""};
   ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc{
-      this, "TrackingGeometrySvc",
-      "TrackingGeometrySvc/AtlasTrackingGeometrySvc", ""};
+      this, "TrackingGeometrySvc","", ""};
   ServiceHandle<ITrackingVolumesSvc> m_trackingVolumesSvc{
       this, "TrackingVolumesSvc", "Trk::TrackingVolumesSvc/TrackingVolumesSvc",
       ""};
@@ -153,7 +152,7 @@ class MaterialAllocator : public AthAlgTool, virtual public IMaterialAllocator {
       this, "STEP_Propagator", "Trk::STEP_Propagator/AtlasSTEP_Propagator", ""};
 
   SG::ReadCondHandleKey<TrackingGeometry> m_trackingGeometryReadKey{
-      this, "TrackingGeometryReadKey", "",
+      this, "TrackingGeometryReadKey", "AtlasTrackingGeometry",
       "Key of the TrackingGeometry conditions data."};
 
   inline const Trk::TrackingVolume* getSpectrometerEntrance() const {
