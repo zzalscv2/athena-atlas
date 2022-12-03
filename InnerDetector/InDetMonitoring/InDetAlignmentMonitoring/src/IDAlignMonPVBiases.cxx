@@ -589,7 +589,7 @@ StatusCode IDAlignMonPVBiases::fillHistograms() {
     // require at least 10 tracks associated
     if (foundVertex->nTrackParticles() < 10) continue;
 
-    const Trk::ImpactParametersAndSigma* myIPandSigma(nullptr);
+    std::unique_ptr<Trk::ImpactParametersAndSigma> myIPandSigma(nullptr);
     myIPandSigma = m_trackToVertexIPEstimatorTool->estimate(*track_itr, foundVertex, true);
 
     // require d0_pv to be smaller than 4

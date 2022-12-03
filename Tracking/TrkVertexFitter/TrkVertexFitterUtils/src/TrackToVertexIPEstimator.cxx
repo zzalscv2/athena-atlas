@@ -59,7 +59,7 @@ namespace Trk
  }//end of initialize method
 
 
- const  ImpactParametersAndSigma * TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track, const xAOD::Vertex * vtx, bool doRemoval) const
  {
   if(track && vtx)
   {
@@ -70,7 +70,7 @@ namespace Trk
   //end of track particle validity check
  }//end of method using track particles
 
- const  ImpactParametersAndSigma * TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track, const xAOD::TrackParticle * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track, const xAOD::TrackParticle * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
  {
   if(track && vtx)
   {
@@ -84,7 +84,7 @@ namespace Trk
 
 
 
- const  ImpactParametersAndSigma * TrackToVertexIPEstimator::estimate(const TrackParameters * track, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const TrackParameters * track, const xAOD::Vertex * vtx, bool doRemoval) const
  {
    if(track && vtx){
      return estimate(track,track,vtx,doRemoval);
@@ -95,7 +95,7 @@ namespace Trk
 
  }//end of parameterBase estimate method
 
- const  ImpactParametersAndSigma * TrackToVertexIPEstimator::estimate(const TrackParameters * track, const TrackParameters * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const TrackParameters * track, const TrackParameters * newtrack, const xAOD::Vertex * vtx, bool doRemoval) const
  {
 
    if (vtx==nullptr)
@@ -114,7 +114,7 @@ namespace Trk
      }
    }
 
-   const ImpactParametersAndSigma  *  IPandSigma=calculate(newtrack,*newVertex);
+   std::unique_ptr<ImpactParametersAndSigma>  IPandSigma=calculate(newtrack,*newVertex);
 
    if (doRemoval)
    {
@@ -127,7 +127,7 @@ namespace Trk
  }//end of parameterBase estimate method
 
 
- const  ImpactParametersAndSigma * TrackToVertexIPEstimator::calculate(const TrackParameters * track, const xAOD::Vertex& vtx) const
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::calculate(const TrackParameters * track, const xAOD::Vertex& vtx) const
  {
   //estimating the d0 and its significance by propagating the trajectory state towards
   //the vertex position. By this time the vertex should NOT contain this trajectory anymore
@@ -151,19 +151,14 @@ namespace Trk
 
     AmgSymMatrix(2) vrtXYCov = vtx.covariancePosition().block<2,2>(0,0);
 
-    //   std::cout<<"Vertex covariance: "<<vtx.errorPosition().covariance()<<std::endl;
-    //   std::cout<<"Vertex covariance sub: "<<vrtXYCov<<std::endl;
-
     const AmgSymMatrix(5) & perigeeCov = *(extrapolatedParameters->covariance());
     //   std::cout<<"Perigee covariance: "<<perigeeCov<<std::endl;
 
     //d0phi->cartesian Jacobian
     Amg::Vector2D d0JacXY(-sin(phi), cos(phi));
 
-    //  std::cout<<"To cartesian jacobian "<<d0PhiCart<<std::endl;
-    //  std::cout<<" - d0*cos(phi)"<< - d0*cos(phi)<<std::endl;
 
-    ImpactParametersAndSigma* newIPandSigma=new ImpactParametersAndSigma;
+    auto newIPandSigma=std::make_unique<ImpactParametersAndSigma>();
     newIPandSigma->IPd0=d0;
     double d0_PVcontrib=d0JacXY.transpose()*(vrtXYCov*d0JacXY);
     if (d0_PVcontrib>=0)
@@ -199,7 +194,7 @@ namespace Trk
    }
    else
    {
-     msg(MSG::WARNING) << " The contribution to z0_err: " << vrtZZCov << " from PV is negative: critical error in PV error matrix! Removing contribution from PV ... "  << endmsg;
+     ATH_MSG_WARNING(" The contribution to z0_err: " << vrtZZCov << " from PV is negative: critical error in PV error matrix! Removing contribution from PV ... ");
      newIPandSigma->IPz0SinTheta=z0*sin(theta);
      double temp = (IPz0JacZ0Theta.transpose()*(covPerigeeZ0Theta*IPz0JacZ0Theta));
      newIPandSigma->sigmaz0SinTheta=sqrt(temp);
@@ -210,15 +205,6 @@ namespace Trk
      newIPandSigma->PVsigmaz0 = 0;
    }
 
-   //   std::cout<<"Calculated sigma: "<<sqrt(sigmaM)<<std::endl;
-
-   //checking the other way of calculating the errors
-   // Calculation using the projection
-   //   double  s_d0_test = extrapolatedParameters->localErrorMatrix().covValue(Trk::d0)+
-   //   sin(phi) * sin(phi) * vtx.errorPosition().covValue(Trk::x) +
-   //   cos(phi) * cos(phi) * vtx.errorPosition().covValue(Trk::y) -
-   //   2.* sin(phi) * cos(phi) * vtx.errorPosition().covValue(Trk::x, Trk::y);
-   //   std::cout<<"new sigma: "<<sqrt(s_d0_test)<<std::endl;
 
    delete extrapolatedParameters;
    return newIPandSigma;
@@ -449,7 +435,7 @@ xAOD::Vertex * TrackToVertexIPEstimator::getUnbiasedVertex(const TrackParameters
 
 
 
- const ImpactParametersAndSigma  * TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track,
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const xAOD::TrackParticle * track,
                                                                       const xAOD::Vertex* vtx)const
  {
 
@@ -460,7 +446,7 @@ xAOD::Vertex * TrackToVertexIPEstimator::getUnbiasedVertex(const TrackParameters
 
  }
 
- const ImpactParametersAndSigma  * TrackToVertexIPEstimator::estimate(const TrackParameters * track,
+ std::unique_ptr<ImpactParametersAndSigma> TrackToVertexIPEstimator::estimate(const TrackParameters * track,
                                                                       const xAOD::Vertex* vtx)const
  {
 

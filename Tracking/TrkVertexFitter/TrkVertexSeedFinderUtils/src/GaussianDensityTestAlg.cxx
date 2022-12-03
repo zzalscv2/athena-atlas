@@ -322,14 +322,13 @@ GaussianDensityTestAlg::findTruth(double mode,
     v.setFitQuality(0., 0.);
 
     double significance = 0.0;
-    const ImpactParametersAndSigma* ipas = m_ipEstimator->estimate( params, &v );
+    std::unique_ptr<ImpactParametersAndSigma> ipas = m_ipEstimator->estimate( params, &v );
     if ( ipas != nullptr )
     {  
       if ( ipas->sigmad0 > 0 && ipas->sigmaz0 > 0)
       {
-	significance = sqrt( pow(ipas->IPd0/ipas->sigmad0,2) + pow(ipas->IPz0/ipas->sigmaz0,2) );
+        significance = sqrt( pow(ipas->IPd0/ipas->sigmad0,2) + pow(ipas->IPz0/ipas->sigmaz0,2) );
       }
-      delete ipas;
     }
     return significance;
   }
