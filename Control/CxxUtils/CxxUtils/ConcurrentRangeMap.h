@@ -480,6 +480,13 @@ public:
 
 
   /**
+   * @brief Remove all entries in the container.
+   *        Mostly for testing --- should not normally be used.
+   */
+  void clear();
+
+
+  /**
    * @brief Return the current number of elements in the map.
    */
   size_t size() const;

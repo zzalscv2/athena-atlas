@@ -869,6 +869,34 @@ void test1c()
 }
 
 
+// Test clear();
+void test1d()
+{
+  std::cout << "test1d\n";
+  Payload::Hist phist;
+  TestMap map (TestMap::Updater_t(), std::make_shared<PayloadDeleter>(), 3);
+  assert (map.emplace (Range (10, 20), std::make_unique<Payload> (10, &phist)) ==
+          TestMap::EmplaceResult::SUCCESS);
+  assert (map.emplace (Range (20, 30), std::make_unique<Payload> (20, &phist)) ==
+          TestMap::EmplaceResult::SUCCESS);
+  assert (map.size() == 2);
+  assert (phist.size() == 2);
+  map.clear();
+  assert (map.size() == 0);
+  assert (phist.size() == 2);
+  for (int i=0; i < nslots; i++) {
+    map.quiescent (i);
+  }
+  assert (map.size() == 0);
+  assert (phist.size() == 0);
+
+  assert (map.emplace (Range (40, 50), std::make_unique<Payload> (40, &phist)) ==
+          TestMap::EmplaceResult::SUCCESS);
+  assert (map.size() == 1);
+  assert (phist.size() == 1);
+}
+
+
 //***************************************************************************
 // Threaded test.
 //
@@ -1088,6 +1116,7 @@ int main()
   test1a();
   test1b();
   test1c();
+  test1d();
   test2();
   return 0;
 }
