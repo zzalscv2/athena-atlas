@@ -1724,7 +1724,7 @@ StatusCode IDPerfMonZmumu::FillRecParametersTP(const xAOD::TrackParticle* trackp
   }
 
   if (m_doIP && vertex != nullptr && m_trackToVertexIPEstimator){
-    const Trk::ImpactParametersAndSigma* iPandSigma(nullptr);
+    std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma(nullptr);
     ATH_MSG_DEBUG("-- using the trackToVertexIPEstimator --");
     
     //Calling the estimate(trackp,newtrackp,vertex,doRemoval)
@@ -1900,7 +1900,7 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
   float z0bscorr = trkz0 - bsZ;
   
   if(m_doIP && vertex && track->perigeeParameters()){ //I assume that the vertex is the same of the original track
-    const Trk::ImpactParametersAndSigma* iPandSigma(nullptr);
+    std::unique_ptr<Trk::ImpactParametersAndSigma> iPandSigma(nullptr);
     if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(trk_for_unbiasPerigee,trkPerigee,vertex,m_doRemoval);
     else iPandSigma = m_trackToVertexIPEstimator->estimate(trkPerigee,vertex);
     if( iPandSigma==0 ){
