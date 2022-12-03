@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,7 +16,7 @@
 
 //____________________________________________________________________
 LWPools::PoolList LWPools::s_pools;
-long long LWPools::s_bytesDynAlloc = 0;
+std::atomic<long long> LWPools::s_bytesDynAlloc = 0;
 
 //____________________________________________________________________
 LWPools::PoolList::PoolList()
