@@ -24,10 +24,10 @@ public:
    virtual StatusCode getLockedEvent(void** target, unsigned int& status) const = 0;
    virtual StatusCode lockEvent(long eventNumber) const = 0;
 
-   virtual StatusCode putObject(const void* source, size_t nbytes, int num = 0) const = 0;
-   virtual StatusCode getObject(void** target, size_t& nbytes, int num = 0) const = 0;
-   virtual StatusCode clearObject(const char** tokenString, int& num) const = 0;
-   virtual StatusCode lockObject(const char* tokenString, int num = 0) const = 0;
+   virtual StatusCode putObject(const void* source, size_t nbytes, int num = 0) = 0;
+   virtual StatusCode getObject(void** target, size_t& nbytes, int num = 0) = 0;
+   virtual StatusCode clearObject(const char** tokenString, int& num) = 0;
+   virtual StatusCode lockObject(const char* tokenString, int num = 0) = 0;
 };
 
 #endif

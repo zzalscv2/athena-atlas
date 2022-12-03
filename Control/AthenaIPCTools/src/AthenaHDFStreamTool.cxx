@@ -150,7 +150,7 @@ StatusCode AthenaHDFStreamTool::lockEvent(long eventNumber) const {
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes, int/* num*/) const {
+StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes, int/* num*/) {
    if (nbytes == 0 || m_token.empty()) {
       return(StatusCode::SUCCESS);
    }
@@ -311,7 +311,7 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, int/* num*/) const {
+StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, int/* num*/) {
    if (m_token.empty()) {
       return(StatusCode::SUCCESS);
    }
@@ -411,7 +411,7 @@ StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, in
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num*/) const {
+StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num*/) {
    std::size_t firstU, firstL;
    long long unsigned int second;
    ::sscanf(m_token.substr(m_token.find("[OID="), 40).c_str(), fmt_oid, &firstU, &firstL, &second);
@@ -450,7 +450,7 @@ StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num
 }
 
 //___________________________________________________________________________
-StatusCode AthenaHDFStreamTool::lockObject(const char* tokenString, int/* num*/) const {
+StatusCode AthenaHDFStreamTool::lockObject(const char* tokenString, int/* num*/) {
    m_token = tokenString;
    delete [] m_read_data; m_read_data = nullptr;
    m_read_size = 0;

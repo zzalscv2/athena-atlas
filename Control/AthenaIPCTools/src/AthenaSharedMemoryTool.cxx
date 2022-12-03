@@ -285,7 +285,7 @@ StatusCode AthenaSharedMemoryTool::lockEvent(long eventNumber) const {
 }
 
 //___________________________________________________________________________
-StatusCode AthenaSharedMemoryTool::putObject(const void* source, size_t nbytes, int num) const {
+StatusCode AthenaSharedMemoryTool::putObject(const void* source, size_t nbytes, int num) {
    if (nbytes > m_maxSize) {
       ATH_MSG_ERROR("Object size = " << nbytes << " greater than maximum for client = " << num);
       return(StatusCode::FAILURE);
@@ -328,7 +328,7 @@ StatusCode AthenaSharedMemoryTool::putObject(const void* source, size_t nbytes, 
 }
 
 //___________________________________________________________________________
-StatusCode AthenaSharedMemoryTool::getObject(void** target, size_t& nbytes, int num) const {
+StatusCode AthenaSharedMemoryTool::getObject(void** target, size_t& nbytes, int num) {
    if (target == nullptr) {
       return(StatusCode::SUCCESS);
    }
@@ -376,7 +376,7 @@ StatusCode AthenaSharedMemoryTool::getObject(void** target, size_t& nbytes, int 
 }
 
 //___________________________________________________________________________
-StatusCode AthenaSharedMemoryTool::clearObject(const char** tokenString, int& num) const {
+StatusCode AthenaSharedMemoryTool::clearObject(const char** tokenString, int& num) {
    if (m_isClient) {
       ShareEventHeader* evtH = static_cast<ShareEventHeader*>(m_status->get_address());
       if (evtH->evtProcessStatus != ShareEventHeader::CLEARED) {
@@ -472,7 +472,7 @@ StatusCode AthenaSharedMemoryTool::clearObject(const char** tokenString, int& nu
 }
 
 //___________________________________________________________________________
-StatusCode AthenaSharedMemoryTool::lockObject(const char* tokenString, int num) const {
+StatusCode AthenaSharedMemoryTool::lockObject(const char* tokenString, int num) {
    if (strlen(tokenString) >= maxTokenLength) {
       ATH_MSG_ERROR("Token = " << tokenString << ", too long for AthenaSharedMemoryTool");
       return(StatusCode::FAILURE);

@@ -55,11 +55,11 @@ public:
    std::string getElemName(SG::auxid_t auxid);
 
    /// Receive dynamic aux store variables from streaming tool
-   StatusCode receiveStore(const IAthenaSerializeSvc* serSvc, const IAthenaIPCTool* ipcTool, void* obj, int num = 0);
+   StatusCode receiveStore(const IAthenaSerializeSvc* serSvc, IAthenaIPCTool* ipcTool, void* obj, int num = 0);
 
    /// Send dynamic aux store variables to streaming tool
    StatusCode sendStore(const IAthenaSerializeSvc* serSvc,
-	   const IAthenaIPCTool* ipcTool,
+	   IAthenaIPCTool* ipcTool,
 	   const void* obj,
 	   const Guid& classId,
 	   const std::string& contName,
