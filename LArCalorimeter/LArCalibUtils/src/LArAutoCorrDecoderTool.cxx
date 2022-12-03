@@ -1,32 +1,11 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibUtils/LArAutoCorrDecoderTool.h"
-
-#include "GaudiKernel/MsgStream.h"
 #include "AthenaKernel/errorcheck.h"
 
-#include "LArElecCalib/LArConditionsException.h"
-
-
-LArAutoCorrDecoderTool::LArAutoCorrDecoderTool(const std::string& type, 
-					       const std::string& name, 
-					       const IInterface* parent) 
-  : 
-  AthAlgTool(type, name, parent),
-  m_onlineID(0)
-{
-  declareInterface<ILArAutoCorrDecoderTool>(this);
-  declareProperty("KeyAutoCorr",m_keyAutoCorr="LArAutoCorr");
-  declareProperty("DecodeMode", m_decodemode=0);
-  declareProperty("UseAlwaysHighGain", m_alwaysHighGain=false);
-  declareProperty("isSC",       m_isSC=false);
-}
-
-
-LArAutoCorrDecoderTool::~LArAutoCorrDecoderTool() 
-{}
+LArAutoCorrDecoderTool::~LArAutoCorrDecoderTool() {};
 
 StatusCode LArAutoCorrDecoderTool::initialize() 
 {
