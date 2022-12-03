@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteCondHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "TrigT1CaloFexPerf/JGTowerMappingData.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -27,6 +28,8 @@ namespace LVL1
   private:
     SG::WriteCondHandleKey<JGTowerMappingData> m_outputKey{
         this, "MappingData", ""};
+    SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{
+      this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager","SG key of the resulting CaloSuperCellDetDescrManager"};
     Gaudi::Property<bool> m_mapTileCells{this, "MapTileCells", false};
 
   protected:

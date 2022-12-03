@@ -1,7 +1,10 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "JGTowerMappingDataCondAlgBase.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
 #include "StoreGate/WriteCondHandle.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "TMath.h"
 #include "TVector2.h"
@@ -22,6 +25,7 @@ namespace LVL1
   StatusCode JGTowerMappingDataCondAlgBase::initialize()
   {
     ATH_CHECK(m_outputKey.initialize());
+    ATH_CHECK(m_caloSuperCellMgrKey.initialize());
     ATH_CHECK(detStore()->retrieve(m_ccid));
     ATH_CHECK(detStore()->retrieve(m_scid));
     return StatusCode::SUCCESS;
@@ -37,8 +41,8 @@ namespace LVL1
       return StatusCode::SUCCESS;
     }
     const JGTowerBase_ID *jgTowerID = getJGTowerID();
-    const CaloSuperCellDetDescrManager *scDetMgr{nullptr};
-    ATH_CHECK(detStore()->retrieve(scDetMgr));
+    SG::ReadCondHandle<CaloSuperCellDetDescrManager> caloSuperCellMgrHandle{m_caloSuperCellMgrKey,ctx};
+    const CaloSuperCellDetDescrManager *scDetMgr = *caloSuperCellMgrHandle;
     // JGTowerMappingData is typedef of std::vector<JGTowerHelper>
     auto data = std::make_unique<JGTowerMappingData>();
 

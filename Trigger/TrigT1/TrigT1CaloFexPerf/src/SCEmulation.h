@@ -1,6 +1,6 @@
-/**
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
- */
+/*
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+*/
 
 #ifndef TRIGT1CALOFEXPERF_SCEMULATION_H
 #define TRIGT1CALOFEXPERF_SCEMULATION_H
@@ -41,6 +41,9 @@ namespace LVL1
         this, "CaloBCIDAverage", "CaloBCIDAverage"};
     SG::ReadCondHandleKey<CaloNoiseSigmaDiff> m_caloNoiseSigmaDiffKey{
         this, "CaloNoiseSigmaDiff", "CaloNoiseSigmaDiff"};
+    /// Super cell manager key
+    SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloSuperCellMgrKey{
+      this,"CaloSuperCellDetDescrManager","CaloSuperCellDetDescrManager","SG key of the resulting CaloSuperCellDetDescrManager"};
     SG::WriteHandleKey<CaloCellContainer> m_outputSuperCellsKey;
 
     /// Offline<->supercell mapping tool
@@ -61,8 +64,6 @@ namespace LVL1
     // Map keys are sampling, eta bin, phi bin
     std::map<std::tuple<CaloSampling::CaloSample, std::size_t, std::size_t>, std::map<float, float>> m_timingSamples;
 
-    /// Super cell manager
-    const CaloSuperCellDetDescrManager *m_scellMgr{nullptr};
     /// Calo ID helpers
     const CaloIdManager *m_caloIdMgr{nullptr};
 
