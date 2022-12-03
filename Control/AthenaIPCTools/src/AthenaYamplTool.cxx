@@ -219,21 +219,21 @@ StatusCode AthenaYamplTool::lockEvent(long) const {
 }
 
 //___________________________________________________________________________
-StatusCode AthenaYamplTool::putObject(const void*, size_t, int) const {
+StatusCode AthenaYamplTool::putObject(const void*, size_t, int) {
   return(StatusCode::FAILURE);
 }
 
 //___________________________________________________________________________
-StatusCode AthenaYamplTool::getObject(void**, size_t&, int) const {
+StatusCode AthenaYamplTool::getObject(void**, size_t&, int) {
   return(StatusCode::FAILURE);
 }
 
 //___________________________________________________________________________
-StatusCode AthenaYamplTool::clearObject(const char**, int&) const {
+StatusCode AthenaYamplTool::clearObject(const char**, int&) {
   return(StatusCode::FAILURE);
 }
 
 //___________________________________________________________________________
-StatusCode AthenaYamplTool::lockObject(const char*, int) const {
+StatusCode AthenaYamplTool::lockObject(const char*, int) {
    return(StatusCode::SUCCESS);
 }

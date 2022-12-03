@@ -49,7 +49,8 @@ namespace H5 {
  *
  **/
 
-class AthenaHDFStreamTool : public ::AthAlgTool, virtual public IAthenaIPCTool {
+// Mark class as not thread-safe: Initial demonstrator/prototype not used in production workflows
+class ATLAS_NOT_THREAD_SAFE AthenaHDFStreamTool : public ::AthAlgTool, virtual public IAthenaIPCTool {
 public: 
    /// Standard Service Constructor
    AthenaHDFStreamTool(const std::string& type, const std::string& name, const IInterface* parent);
@@ -69,10 +70,10 @@ public:
    StatusCode getLockedEvent(void** target, unsigned int& status) const;
    StatusCode lockEvent(long eventNumber) const;
 
-   StatusCode putObject(const void* source, std::size_t nbytes, int num = 0) const;
-   StatusCode getObject(void** target, std::size_t& nbytes, int num = 0) const;
-   StatusCode clearObject(const char** tokenString, int& num) const;
-   StatusCode lockObject(const char* tokenString, int num = 0) const;
+   StatusCode putObject(const void* source, std::size_t nbytes, int num = 0);
+   StatusCode getObject(void** target, std::size_t& nbytes, int num = 0);
+   StatusCode clearObject(const char** tokenString, int& num);
+   StatusCode lockObject(const char* tokenString, int num = 0);
 
 private:
    H5::H5File* m_file;

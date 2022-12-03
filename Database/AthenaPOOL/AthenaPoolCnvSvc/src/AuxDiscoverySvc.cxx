@@ -155,7 +155,7 @@ std::string AuxDiscoverySvc::getTypeName(SG::auxid_t auxid) {
 std::string AuxDiscoverySvc::getElemName(SG::auxid_t auxid) {
    return SG::AuxTypeRegistry::instance().getTypeName(auxid);
 }
-StatusCode AuxDiscoverySvc::receiveStore(const IAthenaSerializeSvc* serSvc, const IAthenaIPCTool* ipcTool, void* obj, int num) {
+StatusCode AuxDiscoverySvc::receiveStore(const IAthenaSerializeSvc* serSvc, IAthenaIPCTool* ipcTool, void* obj, int num) {
    void* buffer = nullptr;
    size_t nbytes = 0;
    StatusCode sc = ipcTool->getObject(&buffer, nbytes, num);
@@ -202,7 +202,7 @@ StatusCode AuxDiscoverySvc::receiveStore(const IAthenaSerializeSvc* serSvc, cons
 }
 
 StatusCode AuxDiscoverySvc::sendStore(const IAthenaSerializeSvc* serSvc,
-		const IAthenaIPCTool* ipcTool,
+		IAthenaIPCTool* ipcTool,
 		const void* obj,
 		const Guid& classId,
 		const std::string& contName,
