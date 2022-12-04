@@ -109,7 +109,8 @@ private:
     Gaudi::Property<int> m_houghMin{this, "minHoughHits", 4, "Minimum number of hits required for a hough maximum to be accepted"};
 
     Gaudi::Property<int> m_segmentQuality{this, "segQuality", 1, "Quality cut on the segment."};
-
+    /// Prelimnary studies have shown that the NSWs generate a massive amount of fake candidates
+    Gaudi::Property<bool> m_excludeNSW{this, "noNSWforSeeding", false, "Ignore hits/segments from the NSW"};
     /// Minimum pt threshold of the IdCandidate to be extrapolated through the spectrometer
     Gaudi::Property<float> m_extThreshold{this, "ExtensionPtThreshold", 2500};
     /// Shall SAF tracks  be equiped with a muon system extension used by MuGirl later

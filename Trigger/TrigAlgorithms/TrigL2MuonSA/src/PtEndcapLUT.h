@@ -38,12 +38,12 @@ class PtEndcapLUT: public AthAlgTool
     double lookup(int side, int charge, DataType type, int iEta, int iPhi, double value) const;
     double ptcombined(int iEta, int iPhi, double ApT, double BpT, double &CApT, double &CBpT) const;
 private:
-    double m_meana[ETAS1][PHIS1][PTS1];
-    double m_meanb[ETAS1][PHIS1][PTS1];
-    double m_meanc[ETAS1][PHIS1][PTS1];
-    double m_sigmaa[ETAS1][PHIS1][PTS1];
-    double m_sigmab[ETAS1][PHIS1][PTS1];
-    double m_sigmac[ETAS1][PHIS1][PTS1];
+    double m_meana[ETAS1][PHIS1][PTS1]{};
+    double m_meanb[ETAS1][PHIS1][PTS1]{};
+    double m_meanc[ETAS1][PHIS1][PTS1]{};
+    double m_sigmaa[ETAS1][PHIS1][PTS1]{};
+    double m_sigmab[ETAS1][PHIS1][PTS1]{};
+    double m_sigmac[ETAS1][PHIS1][PTS1]{};
 
     enum sizes { ETAS = 30, PHIS = 12, PHISEE = 192};
 
