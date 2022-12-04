@@ -53,7 +53,7 @@ KnownCollisionsProjects=frozenset(["data08","data08_coll900","data09","data09_co
                                    "data24_comm","data24_13TeV","data24_13p6TeV","data24_14TeV","data24_900GeV","data24_1beam","data24_1p8TeV"
                                    ])
 
-KnownHeavyIonProjects=frozenset(["data10_hi","data11_hi","data15_hi","data16_hi","data17_hi","data18_hi","data21_hi","data22_hi"])
+KnownHeavyIonProjects=frozenset(["data10_hi","data11_hi","data15_hi","data16_hi","data17_hi","data18_hi","data21_hi","data22_hi","data23_hi"])
 
 KnownHeavyIonProtonProjects=frozenset(["data12_hip","data13_hip","data16_hip","data16_hip5TeV","data16_hip8TeV"])
 
