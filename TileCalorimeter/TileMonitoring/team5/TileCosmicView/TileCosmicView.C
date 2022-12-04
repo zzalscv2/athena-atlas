@@ -546,8 +546,8 @@ void MyMainFrame::Selected()
 
 	ss << "-------------- #Event " << evt << " --------------" << endl << endl;
 
-	ss << "Module           : " <<  sec_name.c_str() << drawer << endl;
-	ss << "Cell             : " << cell_name.c_str() << endl;
+	ss << "Module           : " <<  sec_name << drawer << endl;
+	ss << "Cell             : " << cell_name << endl;
 	ss << "PMT    right     : " << pmt1    << endl;
 	ss << "PMT    left      : " << pmt2    << endl;
 	ss << "Energy right(MeV): " << en_pmt1 << endl;
@@ -657,7 +657,7 @@ void MyMainFrame::Samples()
 
 	// canvas
 	stringstream title;
-	title << "Module " << sec_name.c_str() << drawer << " - Cell " << cell_name.c_str() << " - #Event " << evt; 
+	title << "Module " << sec_name << drawer << " - Cell " << cell_name << " - #Event " << evt; 
 	cSamples = new TCanvas("Samples", title.str().c_str(), 500, 500);
 	cSamples->Divide(1,2);
 
