@@ -58,7 +58,7 @@ namespace LVL1 {
 
     int get_rho(const gTowersCentral &twrs);
 
-    int get_sigma(const gTowersCentral &twrs, const int rho);
+    int get_sigma(const gTowersCentral &twrs);
 
     void rho_MET(const gTowersCentral &twrs, int & MET_x, int & MET_y, const int rho, const int sigma);
 
