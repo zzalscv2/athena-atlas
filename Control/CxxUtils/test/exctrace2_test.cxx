@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -18,7 +18,7 @@ int main (int /*argc*/, char** argv)
   std::string cmd = argv[0];
   std::string::size_type pos = cmd.rfind ('/');
   if (pos != std::string::npos)
-    cmd = cmd.substr (0, pos+1);
+    cmd.resize (pos+1);
   else
     cmd = "./";
   cmd = "LD_PRELOAD=libexctrace_collector.so " + cmd;
