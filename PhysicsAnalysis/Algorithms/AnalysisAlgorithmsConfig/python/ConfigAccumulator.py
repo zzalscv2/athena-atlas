@@ -43,6 +43,8 @@ class ContainerConfig :
 
     def currentName (self) :
         if self.index == 0 :
+            if self.sourceName is None :
+                raise Exception ("should not get here, reading container name before created: " + self.name)
             return self.sourceName
         if self.maxIndex and self.index == self.maxIndex :
             return mapUserName(self.name)
@@ -161,6 +163,19 @@ class ConfigAccumulator :
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, originalName = originalName)
 
 
+    def writeName (self, containerName) :
+        """register that the given container will be made and return
+        its name"""
+        if containerName not in self._containerConfig :
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None)
+        if self._containerConfig[containerName].sourceName is not None :
+            raise Exception ("trying to write container configured for input: " + containerName)
+        if self._containerConfig[containerName].index != 0 :
+            raise Exception ("trying to write container twice: " + containerName)
+        self._containerConfig[containerName].index += 1
+        return self._containerConfig[containerName].currentName()
+
+
     def readName (self, containerName) :
         """get the name of the "current copy" of the given container
 
@@ -206,6 +221,26 @@ class ConfigAccumulator :
         if result is None :
             raise Exception ("no original name for: " + containerName)
         return result
+
+
+    def readNameAndSelection (self, containerName) :
+        """get the name of the "current copy" of the given container, and the
+        selection string
+
+        This is mostly meant for MET and OR for whom the actual object
+        selection is relevant, and which as such allow to pass in the
+        working point as "ObjectName.WorkingPoint".
+        """
+        split = containerName.split (".")
+        if len(split) == 1 :
+            objectName = split[0]
+            selectionName = ''
+        elif len(split) == 2 :
+            objectName = split[0]
+            selectionName = split[1]
+        else :
+            raise Exception ('invalid object selection name: ' + containerName)
+        return self.readName (objectName), self.getFullSelection (objectName, selectionName)
 
 
     def nextPass (self) :
