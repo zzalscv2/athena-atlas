@@ -42,7 +42,7 @@ class IActsExtrapolationTool : virtual public IAlgTool {
                    Trk::ParticleHypothesis particleHypo = Trk::pion) const = 0;
 
   virtual
-  std::unique_ptr<const Acts::CurvilinearTrackParameters>
+  std::optional<const Acts::CurvilinearTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             Acts::NavigationDirection navDir = Acts::NavigationDirection::Forward,
@@ -59,7 +59,7 @@ class IActsExtrapolationTool : virtual public IAlgTool {
                    Trk::ParticleHypothesis particleHypo = Trk::pion) const = 0;
 
   virtual
-  std::unique_ptr<const Acts::BoundTrackParameters>
+  std::optional<const Acts::BoundTrackParameters>
   propagate(const EventContext& ctx,
             const Acts::BoundTrackParameters& startParameters,
             const Acts::Surface& target,

@@ -39,7 +39,7 @@ ActsGeantFollowerHelper::ActsGeantFollowerHelper(const std::string& t, const std
   m_extrapolateDirectly(true),
   m_extrapolateIncrementally(true),
   m_parameterCache(nullptr),
-  m_actsParameterCache(nullptr),
+  m_actsParameterCache(std::nullopt),
   m_tX0Cache(0.),
   m_tX0NonSensitiveCache(0.),
   m_tNonSensitiveCache(0.),
@@ -209,7 +209,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 
     Acts::Vector4 actsStart(pos.x(),pos.y(),pos.z(),0);
     Acts::Vector3 dir = nmom.normalized();
-    m_actsParameterCache = std::make_unique<const Acts::BoundTrackParameters>(Acts::BoundTrackParameters::create(surface, gctx.context(), actsStart, dir, mom.mag()/1000, charge).value());
+    m_actsParameterCache = std::make_optional<Acts::BoundTrackParameters>(Acts::BoundTrackParameters::create(surface, gctx.context(), actsStart, dir, mom.mag()/1000, charge).value());
   }
 
   // Store material in cache
@@ -256,12 +256,12 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
 
   // create a Acts::Surface that correspond to the Trk::Surface
   auto destinationSurfaceActs = Acts::Surface::makeShared<Acts::PlaneSurface>(destinationSurface.center(), destinationSurface.normal());
-  std::unique_ptr<const Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
-                                                                                                   *m_actsParameterCache, 
-                                                                                                   *destinationSurfaceActs, 
-                                                                                                   Acts::NavigationDirection::Forward,
-                                                                                                   std::numeric_limits<double>::max(),
-                                                                                                   particleHypo);
+  std::optional<Acts::BoundTrackParameters> actsParameters = m_actsExtrapolator->propagate(ctx, 
+											   *m_actsParameterCache, 
+											   *destinationSurfaceActs, 
+											   Acts::NavigationDirection::Forward,
+											   std::numeric_limits<double>::max(),
+											   particleHypo);
 
   float X0Acts = m_actsExtrapolator->propagationSteps(ctx,
                                                        *m_actsParameterCache, 
@@ -270,7 +270,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
                                                        std::numeric_limits<double>::max(),
                                                        particleHypo).second.materialInX0;
                                                        
-  if(actsParameters == nullptr){
+  if(not actsParameters.has_value()){
     ATH_MSG_ERROR("Error in the Acts extrapolation, skip the current step");  
     return;
   }
@@ -357,7 +357,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
     delete m_parameterCache;
     m_actsParameterCache.reset();
     m_parameterCache = trkParameters;
-    m_actsParameterCache = std::move(actsParameters);
+    m_actsParameterCache = actsParameters;
   }
   // delete cache and increment
   delete g4Parameters;

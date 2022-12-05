@@ -213,7 +213,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
 
 
 
-std::unique_ptr<const Acts::CurvilinearTrackParameters>
+std::optional<const Acts::CurvilinearTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  Acts::NavigationDirection navDir /*= Acts::NavigationDirection::Forward*/,
@@ -254,14 +254,14 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   mInteractor.energyLoss = m_interactionEloss;
   mInteractor.recordInteractions = m_interactionRecord;
 
-  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::unique_ptr<const Acts::CurvilinearTrackParameters> {
+  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::CurvilinearTrackParameters> {
       auto result = propagator.propagate(startParameters, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation:" << result.error()
         << ". Returning empty parameters.");
-        return nullptr;
+        return std::nullopt;
       }
-      return std::move(result.value().endParameters);
+      return result.value().endParameters;
     }, *m_varProp);
 
   return parameters;
@@ -338,7 +338,7 @@ ActsExtrapolationTool::propagationSteps(const EventContext& ctx,
   return output;
 }
 
-std::unique_ptr<const Acts::BoundTrackParameters>
+std::optional<const Acts::BoundTrackParameters>
 ActsExtrapolationTool::propagate(const EventContext& ctx,
                                  const Acts::BoundTrackParameters& startParameters,
                                  const Acts::Surface& target,
@@ -380,14 +380,14 @@ ActsExtrapolationTool::propagate(const EventContext& ctx,
   mInteractor.energyLoss = m_interactionEloss;
   mInteractor.recordInteractions = m_interactionRecord;
 
-  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::unique_ptr<const Acts::BoundTrackParameters> {
+  auto parameters = boost::apply_visitor([&](const auto& propagator) -> std::optional<const Acts::BoundTrackParameters> {
       auto result = propagator.propagate(startParameters, target, options);
       if (!result.ok()) {
         ATH_MSG_ERROR("Got error during propagation: " << result.error()
         << ". Returning empty parameters.");
-        return nullptr;
+        return std::nullopt;
       }
-      return std::move(result.value().endParameters);
+      return result.value().endParameters;
     }, *m_varProp);
 
   return parameters;

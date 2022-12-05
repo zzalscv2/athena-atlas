@@ -336,8 +336,8 @@ StatusCode Trk::ExtrapolatorComparisonTest::execute(const EventContext& ctx) con
 
          // Construct wrappers for Acts track parameters
          const ActsTrackWrapper* startWrapper = new ActsTrackWrapper(startParameters, anygctx);
-         const ActsTrackWrapper* destWrapper = new ActsTrackWrapper(destParameters.release(), anygctx);
-         const ActsTrackWrapper* finalWrapper = new ActsTrackWrapper(finalperigee.release(), anygctx);
+         const ActsTrackWrapper* destWrapper = new ActsTrackWrapper(&destParameters.value(), anygctx);
+         const ActsTrackWrapper* finalWrapper = new ActsTrackWrapper(&finalperigee.value(), anygctx);
 
          m_actsPropResultWriterSvc->write<ActsTrackWrapper>(startWrapper, destWrapper, ms_fwd, finalWrapper, ms_bkw);
 
