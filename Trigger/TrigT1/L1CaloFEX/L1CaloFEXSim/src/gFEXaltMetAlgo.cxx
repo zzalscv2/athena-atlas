@@ -78,8 +78,8 @@ void gFEXaltMetAlgo::altMetAlgo(const gTowersCentral &Atwr, const gTowersCentral
 
   int A_rho{get_rho(Atwr)};
   int B_rho{get_rho(Btwr)};
-  int A_sigma{3*get_sigma(Atwr, A_rho)};
-  int B_sigma{3*get_sigma(Btwr, B_rho)};
+  int A_sigma{3*get_sigma(Atwr)};
+  int B_sigma{3*get_sigma(Btwr)};
 
   rho_MET(Atwr, A_MET_x_rms, A_MET_y_rms, A_rho, A_sigma);
   rho_MET(Btwr, B_MET_x_rms, B_MET_y_rms, B_rho, B_sigma);
@@ -179,7 +179,7 @@ int gFEXaltMetAlgo::get_rho(const gTowersCentral &twrs){
 }
 
 //Function calculates standard deviation of the gtowers
-int gFEXaltMetAlgo::get_sigma(const gTowersCentral &twrs, const int rho) {
+int gFEXaltMetAlgo::get_sigma(const gTowersCentral &twrs) {
 
   int rows = twrs.size();
   int cols = twrs[0].size();
@@ -187,8 +187,8 @@ int gFEXaltMetAlgo::get_sigma(const gTowersCentral &twrs, const int rho) {
   int sigma = 0;
   for(int i = 0; i < rows; ++i) {
     for(int j = 0; j < cols; ++j) {
-      const int diff{twrs[i][j]-rho};
-      sigma += twrs[i][j] < m_rhoPlusThr ? diff*diff: 0;
+      const int towers{twrs[i][j]};
+      sigma += twrs[i][j] < m_rhoPlusThr ? towers*towers: 0;
     }  
   }    
 
