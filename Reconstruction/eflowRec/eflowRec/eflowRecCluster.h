@@ -86,9 +86,9 @@ public:
   {
     return m_cellsWeightMap;
   }
-
-  int getClusterType();
-  const bool& isTouchable() { return m_isTouchable; }
+  /** Specifies if we have a cluster mainly in ECAL, HCAL or FCAL  */
+  int getClusterType() const;
+  bool isTouchable() const { return m_isTouchable; }
 
 private:
   /** ENUM that defines calorimeter regions as ECAL, HCAL or FCAL  */
@@ -109,8 +109,6 @@ private:
   ElementLink<xAOD::CaloClusterContainer> m_clusElementLink;
   bool m_isTouchable;
 
-  /** Specifies if we have a cluster mainly in ECAL, HCAL or FCAL  */
-  CalorimeterType m_calorimeterType;
 
   /* for EM mode, LC weight for cells are retrieved before doing any
    * subtraction; they will be used after subtraction */
