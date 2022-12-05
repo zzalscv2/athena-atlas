@@ -20,36 +20,41 @@ namespace MCP {
    /// Basic object to cache all relevant information from the track
    struct TrackCalibObj{
         TrackCalibObj() = default;
-        TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge, DataYear year, bool isData):
-          type{t},
-          is_valid{ track != nullptr},
-          uncalib_pt{ is_valid? track->pt()*MeVtoGeV : 0},
-          calib_pt{uncalib_pt},
-          eta{is_valid? track->eta() : FLT_MAX},
-          phi{is_valid? track->phi() : FLT_MAX},
-          mass{is_valid? track->m() : 0},
-          charge{charge},
-          year{year},
-          isData{isData},
-          pars {is_valid? track->definingParameters() : AmgVector(5)()},
-          covariance{is_valid ? track->definingParametersCovMatrix() : AmgSymMatrix(5)()}
-          {}
+        TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge,
+                      DataYear year, bool isData)
+            : type{t},
+              is_valid{track != nullptr},
+              uncalib_pt{(track != nullptr) ? track->pt() * MeVtoGeV : 0},
+              calib_pt{uncalib_pt},
+              eta{(track != nullptr) ? track->eta() : FLT_MAX},
+              phi{(track != nullptr) ? track->phi() : FLT_MAX},
+              mass{(track != nullptr) ? track->m() : 0},
+              charge{charge},
+              year{year},
+              isData{isData},
+              pars{(track != nullptr) ? track->definingParameters()
+                                      : AmgVector(5)()},
+              covariance{(track != nullptr)
+                             ? track->definingParametersCovMatrix()
+                             : AmgSymMatrix(5)()} {}
 
-        TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge, double eta, double phi, DataYear year, bool isData):
-          type{t},
-          is_valid{ track != nullptr},
-          uncalib_pt{ is_valid? track->pt()*MeVtoGeV : 0},
-          calib_pt{uncalib_pt},
-          eta{eta},
-          phi{phi},
-          mass{is_valid? track->m() : 0},
-          charge{charge},
-          year{year},
-          isData{isData},
-          pars {is_valid? track->definingParameters() : AmgVector(5)()},
-          covariance{is_valid ? track->definingParametersCovMatrix() : AmgSymMatrix(5)()}
-          {}
-
+        TrackCalibObj(const xAOD::TrackParticle* track, TrackType t, int charge,
+                      double eta, double phi, DataYear year, bool isData)
+            : type{t},
+              is_valid{track != nullptr},
+              uncalib_pt{(track != nullptr) ? track->pt() * MeVtoGeV : 0},
+              calib_pt{uncalib_pt},
+              eta{eta},
+              phi{phi},
+              mass{(track != nullptr) ? track->m() : 0},
+              charge{charge},
+              year{year},
+              isData{isData},
+              pars{(track != nullptr) ? track->definingParameters()
+                                      : AmgVector(5)()},
+              covariance{(track != nullptr)
+                             ? track->definingParametersCovMatrix()
+                             : AmgSymMatrix(5)()} {}
 
         TrackCalibObj(TrackType t, int charge, double pt, double eta, double phi, double mass, AmgVector(5) pars, AmgSymMatrix(5) cov, DataYear year, bool isData):
           type{t},
