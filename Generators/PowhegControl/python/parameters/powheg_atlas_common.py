@@ -135,6 +135,23 @@ class EW_parameters(object):
 
     ## sin(theta_Cabibbo) ^ 2
     sin2cabibbo = 0.051
+
+class WS_parameters(object):
+    """! Wolfenstein parameters."""
+    """ would be used i"""
+    """ NB: no recalculation is made at the moment if usePDGvalues() is used"""
+
+    ## Wolfenstein lambda parameter
+    lam = 2.257000e-01
+
+    ## Wolfenstein A parameter
+    A = 8.140000e-01
+
+    ## Wolfenstein rho parameter
+    rho = 1.350000e-01
+
+    ## Wolfenstein eta parameter
+    eta = 3.490000e-01
     
 def usePDGvalues():
     ## electron mass
