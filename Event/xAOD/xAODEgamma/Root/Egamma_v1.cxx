@@ -25,7 +25,7 @@ namespace MatrixHelpers{
 template <int N>
 
 void compress(const Eigen::Matrix<float,N,N,0,N,N>& covMatrix, std::vector<float>& vec ) {
-  vec.reserve(Amg::CalculateCompressedSize<N>::value);
+  vec.reserve(Amg::CalculateCompressedSize(N));
   for (unsigned int i = 0; i < N ; ++i){
     for (unsigned int j = 0; j <= i; ++j){
       vec.push_back(covMatrix(i,j));
