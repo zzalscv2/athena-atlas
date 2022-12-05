@@ -76,7 +76,7 @@ def makeLRTEGammaDF():
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="Electrons",
-        StoreTResult=False)
+        StoreTResult=True)
     ToolSvc += ElectronPassLHVeryLooseNoPix
 
     ElectronPassLHVeryLooseNoPixLRT = DerivationFramework__EGElectronLikelihoodToolWrapper(
@@ -86,7 +86,7 @@ def makeLRTEGammaDF():
         CutType="",
         StoreGateEntryName="DFCommonElectronsLHVeryLooseNoPix",
         ContainerName="LRTElectrons",
-        StoreTResult=False)
+        StoreTResult=True)
     ToolSvc += ElectronPassLHVeryLooseNoPixLRT
 
     # Decorate lrt electrons with the output of LH loose no pix
