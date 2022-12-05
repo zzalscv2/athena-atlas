@@ -38,18 +38,6 @@ extern "C" double phoranc_(int *idum) {
 ////////////////////////////////////////////////////////////////////////////////
 Photospp_i::Photospp_i(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator) {
-
-    declareProperty("MCEventKey", m_genEventKey="GEN_EVENT");
-    declareProperty("ExponentiationMode", m_exponentiation = true);
-    declareProperty("InfraRedCutOff", m_infraRedCutOff=-1.);//1.e-07);//0.01/91.187);
-    declareProperty("AlphaQED", m_alphaQED = 0.00729735039);
-    declareProperty("WtInterference", m_maxWtInterference=3.);
-    declareProperty("CreateHistory", m_createHistory = false); //AV: we don't need those particles in our events.
-    declareProperty("StopCriticalErrors", m_stopCritical=false);
-    declareProperty("DelayInitialisation", m_delayInitialisation = false);
-    declareProperty("ZMECorrection", m_ZMECorrection = false);
-    declareProperty("WMECorrection", m_WMECorrection = false);
-    declareProperty("PhotonSplitting", m_photonSplitting = false);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +141,7 @@ StatusCode Photospp_i::execute() {
     reseedRandomEngine("PHOTOSPP", ctx);
 
     // Get the event collection
+    // FIXME should be using Read/WriteHandles here
     McEventCollection* eventCollection;
     StatusCode sc = evtStore()->retrieve(eventCollection, m_genEventKey);
     if (sc.isFailure() || eventCollection == 0) {
@@ -198,9 +187,3 @@ StatusCode Photospp_i::execute() {
 
     return StatusCode::SUCCESS;
 }
-
-StatusCode Photospp_i::finalize() {
-
-    return StatusCode::SUCCESS;
-}
-
