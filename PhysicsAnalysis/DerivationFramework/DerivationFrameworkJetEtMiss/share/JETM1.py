@@ -198,6 +198,12 @@ addSoftDropJets("AntiKt", 1.0, "UFOCSSK", beta=1.0, zcut=0.1, algseq=jetm1Seq, o
 addRecursiveSoftDropJets('AntiKt', 1.0, 'UFOCSSK', beta=1.0, zcut=0.05, N=-1,  mods="tcc_groomed", algseq=jetm1Seq, outputGroup="JETM1", writeUngroomed=False)
 addBottomUpSoftDropJets('AntiKt', 1.0, 'UFOCSSK', beta=1.0, zcut=0.05, mods="tcc_groomed", algseq=jetm1Seq, outputGroup="JETM1", writeUngroomed=False)
 
+#===============================================
+# Large-R truth label precision label
+#===============================================
+if DerivationFrameworkHasTruth:
+    addJetTruthLabel(jetalg="AntiKt10UFOCSSKSoftDropBeta100Zcut10",sequence=jetm1Seq,algname="JetTruthLabelingPrecAlg",labelname="R10TruthLabel_R21Precision")
+    addJetTruthLabel(jetalg="AntiKt10UFOCSSKSoftDropBeta100Zcut10",sequence=jetm1Seq,algname="JetTruthLabelingAlg",labelname="R10TruthLabel_R21Precision_2022v1")
 
 #############################################################################################################################################
 
