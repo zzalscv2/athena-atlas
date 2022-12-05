@@ -55,7 +55,7 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
 {
 
   for (unsigned int iCluster = 0; iCluster < energyFlowCaloObject.nClusters(); ++iCluster){
-    eflowRecCluster* thisEfRecCluster = energyFlowCaloObject.efRecCluster(iCluster);
+    const eflowRecCluster* thisEfRecCluster = energyFlowCaloObject.efRecCluster(iCluster);
     
     /* Skip empty clusters (presumably subtraction remnants) */
     const CaloClusterCellLink* theCellLink = energyFlowCaloObject.efRecCluster(iCluster)->getCluster()->getCellLinks();

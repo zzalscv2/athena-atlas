@@ -42,7 +42,7 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
   /* Loop over all tracks in the eflowCaloObject */
   for (unsigned int iTrack = 0; iTrack < energyFlowCaloObject.nTracks(); ++iTrack) {
 
-    eflowRecTrack* efRecTrack = energyFlowCaloObject.efRecTrack(iTrack);
+    const eflowRecTrack* efRecTrack = energyFlowCaloObject.efRecTrack(iTrack);
 
     /* Skip tracks that haven't been subtracted */
     if (!m_eOverPMode && !efRecTrack->isSubtracted()){continue;}

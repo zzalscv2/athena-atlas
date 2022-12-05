@@ -18,7 +18,6 @@ PURPOSE:  Calorimeter Object data class
 
 #include <vector>
 #include <memory>
-#include <map>
 #include "AthLinks/ElementLink.h"
 
 class eflowRecCluster;
@@ -33,26 +32,14 @@ An internal EDM object which stores information about systems of associated trac
 class eflowCaloObject {
 public:
 
-  eflowCaloObject() { m_eflowRecClusters.clear(); m_trackClusterLinks.clear(); m_eflowRecTracks.clear(); }
+  eflowCaloObject()=default;
   ~eflowCaloObject();
   
   void addTrack(eflowRecTrack* track) { m_eflowRecTracks.push_back(track); }
   void addCluster(eflowRecCluster* cluster) { m_eflowRecClusters.push_back(cluster); }
-  void addTrackClusterLinks(std::vector<eflowTrackClusterLink*> trackClusterLink) {
-    for (unsigned int i=0; i<trackClusterLink.size(); ++i) {
-      addTrackClusterLink(trackClusterLink.at(i));
-    }
-  }
-  void addTracks(std::vector<eflowRecTrack*> tracks) {
-    for (unsigned int i=0; i<tracks.size(); ++i) {
-      addTrack(tracks.at(i));
-    }
-  }
-  void addClusters(std::vector<eflowRecCluster*> clusters) {
-    for (unsigned int i=0; i<clusters.size(); ++i) {
-      addCluster(clusters.at(i));
-    }
-  }
+  void addTrackClusterLinks(const std::vector<eflowTrackClusterLink*> &trackClusterLink);
+  void addTracks(const std::vector<eflowRecTrack*> &tracks);
+  void addClusters(const std::vector<eflowRecCluster*> &clusters);
 
   /* For a specific eflowTrackClusterLink indicate whether or not it has been fully/partially subtracted by setting the energy ratio
   ** of subtracted cluster energy to original cluster enegry (first float). A value other than nan indicates it has been fully or partially subtracted. 
@@ -60,12 +47,14 @@ public:
   void setTrackClusterLinkSubtractionStatus(unsigned int index, std::pair<float,float> energyRatio_energyValPair) { m_trackClusterLinks[index].second = energyRatio_energyValPair; }
   
   /* Track accessor methods */
-  eflowRecTrack* efRecTrack(int i) const { return m_eflowRecTracks[i]; }
+  const eflowRecTrack* efRecTrack(int i) const { return m_eflowRecTracks[i]; }
+  eflowRecTrack* efRecTrack(int i)  { return m_eflowRecTracks[i]; }
   unsigned nTracks() const{ return m_eflowRecTracks.size(); }
   void clearTracks() { m_eflowRecTracks.clear(); }
 
   /* Cluster accessor methods */
-  eflowRecCluster* efRecCluster(int i) const { return m_eflowRecClusters[i]; }
+  const eflowRecCluster* efRecCluster(int i) const { return m_eflowRecClusters[i]; }
+  eflowRecCluster* efRecCluster(int i)  { return m_eflowRecClusters[i]; }
   unsigned nClusters() const{ return m_eflowRecClusters.size(); }
   void clearClusters() { m_eflowRecClusters.clear(); }
 

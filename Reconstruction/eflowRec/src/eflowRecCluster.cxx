@@ -15,7 +15,7 @@
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 
 eflowRecCluster::eflowRecCluster(const ElementLink<xAOD::CaloClusterContainer>& clusElementLink, xAOD::CaloClusterContainer& newClusContainer) :
-  m_clusterId(-1), m_originalClusElementLink(clusElementLink), m_isTouchable(false),m_calorimeterType(UNASSIGNED) , m_matchCluster(nullptr) {
+  m_clusterId(-1), m_originalClusElementLink(clusElementLink), m_isTouchable(false), m_matchCluster(nullptr) {
   const xAOD::CaloCluster* originalCluster = *clusElementLink;
   m_cluster = new xAOD::CaloCluster();
   newClusContainer.push_back(m_cluster);
@@ -42,7 +42,6 @@ eflowRecCluster::eflowRecCluster(const eflowRecCluster& originalEflowRecCluster)
   m_clusElementLink = originalEflowRecCluster.m_clusElementLink;
   m_originalClusElementLink = originalEflowRecCluster.m_originalClusElementLink;
   m_isTouchable = originalEflowRecCluster.m_isTouchable;
-  m_calorimeterType = originalEflowRecCluster.m_calorimeterType;
   m_matchCluster = std::make_unique<eflowMatchCluster>(this);
 }
 
@@ -54,7 +53,6 @@ eflowRecCluster& eflowRecCluster::operator=(const eflowRecCluster& originalEflow
     m_clusElementLink = originalEflowRecCluster.m_clusElementLink;
     m_originalClusElementLink = originalEflowRecCluster.m_originalClusElementLink;
     m_isTouchable = originalEflowRecCluster.m_isTouchable;
-    m_calorimeterType = originalEflowRecCluster.m_calorimeterType;
     m_matchCluster = std::make_unique<eflowMatchCluster>(this);
     return *this;
   }//if not assigning to self, then we have copied the data to the new object
@@ -95,10 +93,8 @@ double eflowRecCluster::getVarianceOfSumExpectedEnergy() {
   return varianceExpectedEnergy;
 }
 
-int eflowRecCluster::getClusterType() {
-  if(m_calorimeterType!=UNASSIGNED) {
-    return m_calorimeterType;
-  }
+int eflowRecCluster::getClusterType() const {
+
   CaloClusterKineHelper::calculateKine(m_cluster, true, true);
 
   double EMB_E = m_cluster->eSample(xAOD::CaloCluster::CaloSample::PreSamplerB)
@@ -134,18 +130,18 @@ int eflowRecCluster::getClusterType() {
   double ratioEM = (EMB_E+EME_E)/totalEnergy;
   double ratioHCAL = (HEC_E+Tile_E)/totalEnergy;
   double ratioFCAL = (FCAL_E + MiniFCAL_E)/totalEnergy;
-
+  int calorimeterType = UNASSIGNED;
   if(ratioEM > 0.5) {
-    m_calorimeterType = ECAL;
+    calorimeterType = ECAL;
   } else if (ratioHCAL > 0.5) {
-    m_calorimeterType = HCAL;
+    calorimeterType = HCAL;
   } else if (ratioFCAL > 0.5) {
-    m_calorimeterType = FCAL;
+    calorimeterType = FCAL;
   } else {
-    m_calorimeterType = UNKNOWN;
+    calorimeterType = UNKNOWN;
   }
 
-  assert(m_calorimeterType!=UNASSIGNED);
-  return m_calorimeterType;
+  assert(calorimeterType!=UNASSIGNED);
+  return calorimeterType;
 
 }
