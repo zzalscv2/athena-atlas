@@ -33,8 +33,9 @@ std::vector<TIDA::Vertex> TIDAVertexBuilder::select(
         const std::vector< ElementLink< xAOD::TrackParticleContainer > >& xAODtracks = (*vtxitr)->trackParticleLinks();
 
         for ( const auto& track : xAODtracks ) {
-          unsigned long id = getTrackId( *track );
-          trackIds.push_back( id );
+          unsigned long id = 0;
+          if (track.isValid()) id = getTrackId( *track );
+          trackIds.push_back( id ); 
         }
 
         vertex.selectTracks( *trackCollection, trackIds );
