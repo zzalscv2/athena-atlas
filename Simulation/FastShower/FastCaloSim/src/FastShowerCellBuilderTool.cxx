@@ -85,13 +85,11 @@ using MCparticleCollection = std::vector<HepMC::ConstGenParticlePtr> ;
 bool FastCaloSimIsGenSimulStable(const HepMC::ConstGenParticlePtr&  p) {
   int status=p->status();
   auto vertex = p->end_vertex();
-  // we want to keep primary particle with status==2 but without vertex in HepMC
-  int vertex_barcode=-999999;
-  if (vertex) vertex_barcode=HepMC::barcode(vertex);
-
   return (status%1000 == 1) ||
           (status%1000 == 2 && status > 1000) ||
-          (status==2 && vertex_barcode<-200000);
+          (status==2 && !vertex) ||
+          (status==2 && HepMC::is_simulation_vertex(vertex))
+          ;
 }
 
 
@@ -2012,7 +2010,7 @@ void FastShowerCellBuilderTool::MC_remove_out_of_EM(MCdo_simul_state& do_simul_s
 
       auto outver =par_out->end_vertex();
       if(outver) {
-        if(HepMC::barcode(outver)>=-200000) continue;
+        if(!HepMC::is_simulation_vertex(outver)) continue;
 
         if(!Is_EM_Vertex(outver)) {
           MC_recursive_remove_out_particles(do_simul_state,outver,non_EM_vertex);
@@ -2030,7 +2028,7 @@ void FastShowerCellBuilderTool::MC_remove_below_v14_truth_cuts(MCdo_simul_state&
 
       auto outver =par_out->end_vertex();
       if(outver) {
-        if(HepMC::barcode(outver)>=-200000) continue;
+        if(!HepMC::is_simulation_vertex(outver)) continue;
 
         flag_simul_sate reason=Is_below_v14_truth_cuts_Vertex(outver);
         if(reason<0) {
@@ -2161,9 +2159,10 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
   ATH_MSG_DEBUG("start finding partilces n="<<particles.size());
 
   for(const auto& par: particles){
-    if(par->pdg_id()==0) do_simul_state[HepMC::barcode(par)]=pdg_id_unkown;
+    int barcodepar = HepMC::barcode_or_id(par);
+    if(par->pdg_id()==0) do_simul_state[barcodepar]=pdg_id_unkown;
     // Do not treat nuclei
-    if((!m_simul_heavy_ions) && par->pdg_id() > 1000000000) do_simul_state[HepMC::barcode(par)]=heavy_ion;
+    if((!m_simul_heavy_ions) && par->pdg_id() > 1000000000) do_simul_state[barcodepar]=heavy_ion;
 
     for(unsigned int i=0;i<m_invisibles.size();++i) {
       if(std::abs(par->pdg_id())==m_invisibles[i]) {
@@ -2172,7 +2171,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
       }
       if(m_invisibles[i]==0) {
         if(MC::isNonInteracting(par)) {
-          do_simul_state[HepMC::barcode(par)]=invisibleTruthHelper;
+          do_simul_state[barcodepar]=invisibleTruthHelper;
           break;
         }
       }
@@ -2181,7 +2180,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
     if(std::abs(par->pdg_id())==13 && MuonEnergyMap) {
       std::pair<BarcodeEnergyDepositMap::const_iterator,BarcodeEnergyDepositMap::const_iterator> range=MuonEnergyMap->equal_range(HepMC::barcode(par));
       if(range.first==range.second) {
-        do_simul_state[HepMC::barcode(par)]=0;
+        do_simul_state[barcodepar]=0;
         ATH_MSG_DEBUG("#="<<indpar<<": id="<<par->pdg_id()<<" stat="<<par->status()<<" bc="<<HepMC::barcode(par)
                       <<" pt="<<par->momentum().perp()<<" eta="<<par->momentum().eta()<<" phi="<<par->momentum().phi()
                       << " : no calo energy deposit");
@@ -2201,16 +2200,16 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
 
     if(msgLvl(MSG::DEBUG)) {
       std::string reason="---";
-      if(do_simul_state[HepMC::barcode(par)]<=0) {
-        if(do_simul_state[HepMC::barcode(par)]==out_of_ID) reason="-ID";
-        if(do_simul_state[HepMC::barcode(par)]==non_EM_vertex) reason="-EM";
-        if(do_simul_state[HepMC::barcode(par)]==heavy_ion) reason="-HI";
-        if(do_simul_state[HepMC::barcode(par)]==pdg_id_unkown) reason="-PI";
-        if(do_simul_state[HepMC::barcode(par)]==invisibleArray) reason="-IA";
-        if(do_simul_state[HepMC::barcode(par)]==invisibleTruthHelper) reason="-IT";
-        if(do_simul_state[HepMC::barcode(par)]==mother_particle) reason="-MO";
-        if(do_simul_state[HepMC::barcode(par)]==v14_truth_brems) reason="-BR";
-        if(do_simul_state[HepMC::barcode(par)]==v14_truth_conv) reason="-CO";
+      if(do_simul_state[barcodepar]<=0) {
+        if(do_simul_state[barcodepar]==out_of_ID) reason="-ID";
+        if(do_simul_state[barcodepar]==non_EM_vertex) reason="-EM";
+        if(do_simul_state[barcodepar]==heavy_ion) reason="-HI";
+        if(do_simul_state[barcodepar]==pdg_id_unkown) reason="-PI";
+        if(do_simul_state[barcodepar]==invisibleArray) reason="-IA";
+        if(do_simul_state[barcodepar]==invisibleTruthHelper) reason="-IT";
+        if(do_simul_state[barcodepar]==mother_particle) reason="-MO";
+        if(do_simul_state[barcodepar]==v14_truth_brems) reason="-BR";
+        if(do_simul_state[barcodepar]==v14_truth_conv) reason="-CO";
       } else {
         reason="+OK";
       }
@@ -2252,7 +2251,7 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
       msg()<<endmsg;
     }
 
-    if(do_simul_state[HepMC::barcode(par)]<=0) {
+    if(do_simul_state[barcodepar]<=0) {
       continue;
     }
 
