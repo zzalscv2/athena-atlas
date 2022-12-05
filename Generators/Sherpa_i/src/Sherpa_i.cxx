@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AtlasHepMC/GenEvent.h"
@@ -93,9 +93,9 @@ namespace SHERPA {
 
     double GetMEWeight(const ATOOLS::Cluster_Amplitude &ampl,const int mode=0) const;
 
-    inline Initialization_Handler * GetInitHandler() const
+    inline const Initialization_Handler * GetInitHandler() const
     { return p_inithandler; }
-    inline Event_Handler * GetEventHandler() const
+    inline const Event_Handler * GetEventHandler() const
     { return p_eventhandler; }
 
   };
@@ -307,8 +307,9 @@ StatusCode Sherpa_i::callGenerator() {
     ATH_MSG_DEBUG("Trying to generate event with Sherpa");
   } while (p_sherpa->GenerateOneEvent()==false);
 
-  if (ATOOLS::rpa->gen.NumberOfGeneratedEvents()%1000==0) {
-    ATH_MSG_INFO("Passed "<<ATOOLS::rpa->gen.NumberOfGeneratedEvents()<<" events.");
+  const size_t genEvents = ATOOLS::rpa->gen.NumberOfGeneratedEvents();
+  if (genEvents%1000==0) {
+    ATH_MSG_INFO("Passed "<<genEvents<<" events.");
   }
 
   return StatusCode::SUCCESS;
