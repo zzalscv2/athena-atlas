@@ -472,9 +472,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     # it produces strange errors in CutFlowSvc in Athena
     if not forCompare or dataType == 'data' :
         # Skip events with no primary vertex:
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makePrimaryVertexConfig
-        makePrimaryVertexConfig (configSeq)
+        from AsgAnalysisAlgorithms.EventCleaningConfig import \
+            makeEventCleaningConfig
+        makeEventCleaningConfig (configSeq)
 
 
     # Include, and then set up the electron analysis algorithm sequence:
