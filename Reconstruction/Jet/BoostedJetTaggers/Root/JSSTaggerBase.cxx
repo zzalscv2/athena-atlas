@@ -20,7 +20,7 @@ JSSTaggerBase::JSSTaggerBase(const std::string &name) :
 {
 
   /// Tagger configuration properties
-  declareProperty( "ContainerName", m_containerName = "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",     "Name of jet container" );
+  declareProperty( "ContainerName", m_containerName = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",     "Name of jet container" );
   declareProperty( "ConfigFile",    m_configFile = "",        "Name of config file" );
   declareProperty( "CalibArea",     m_calibArea = "",         "Path to config file" );
   declareProperty( "CalcSF",        m_calcSF = false,         "Flag to calculate the efficiency SF"  );

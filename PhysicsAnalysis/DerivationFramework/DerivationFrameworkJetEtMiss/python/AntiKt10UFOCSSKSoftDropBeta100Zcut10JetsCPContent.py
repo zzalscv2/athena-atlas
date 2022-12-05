@@ -11,7 +11,7 @@ AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent = [
 "AntiKt10UFOCSSKJets",
 "AntiKt10UFOCSSKJetsAux.NumTrkPt500.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets",
 "AntiKt10TruthSoftDropBeta100Zcut10Jets",
-"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
+"AntiKt10TruthSoftDropBeta100Zcut10JetsAux.pt.eta.phi.m.Parent.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
 "AntiKt10TruthJets",
 "AntiKt10TruthJetsAux.pt.eta.phi.m.Split12.Split23.GhostCHadronsFinalCount.GhostBHadronsFinalCount"
 ]

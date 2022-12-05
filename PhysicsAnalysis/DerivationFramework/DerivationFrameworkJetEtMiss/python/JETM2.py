@@ -133,11 +133,13 @@ def JETM2Cfg(ConfigFlags):
                                         "TruthParticles","TruthVertices","TruthEvents"]
 
     JETM2SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.GhostTower",
-                                          "UFOCSSK.pt.eta.phi.m.signalType",
-                                          "UFO.pt.eta.phi.m.signalType",
-                                          "InDetTrackParticles.particleHypothesis.vx.vy.vz",
+                                          "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter",
+                                          "AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter",
+                                          "UFOCSSK.pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks",
+                                          "UFO.pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks",
+                                          "InDetTrackParticles.particleHypothesis.vx.vy.vz.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_z0SinTheta.btagIp_trackMomentum.btagIp_trackDisplacement.btagIp_invalidIp",
                                           "GSFTrackParticles.particleHypothesis.vx.vy.vz",
-                                          "PrimaryVertices.x.y.z",
+                                          "PrimaryVertices.x.y.z.covariance.trackWeights",
                                           "TauJets.clusterLinks",
                                           "Muons.energyLossType.EnergyLoss.ParamEnergyLoss.MeasEnergyLoss.EnergyLossSigma.MeasEnergyLossSigma.ParamEnergyLossSigmaPlus.ParamEnergyLossSigmaMinus.clusterLinks.FSR_CandidateEnergy",
                                           "MuonSegments.x.y.z.px.py.pz",

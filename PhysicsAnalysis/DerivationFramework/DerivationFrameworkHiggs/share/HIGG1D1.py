@@ -479,7 +479,7 @@ from JetCalibTools import JetCalibToolsConfig
 def getJetCalibToolFromStringCustomVtx(jetdef, modspec):
     calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = JetCalibToolsConfig.getCalibSpecsFromString(modspec)
     rhoname = "Kt4EMPFlowCustomVtxEventShape"
-    return JetCalibToolsConfig.getJetCalibTool(jetdef.basename,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)
+    return JetCalibToolsConfig.getJetCalibTool(jetdef,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)
 
 
 stdJetModifiers.update(
