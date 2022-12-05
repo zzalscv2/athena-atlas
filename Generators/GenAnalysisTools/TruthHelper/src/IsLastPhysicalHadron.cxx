@@ -14,14 +14,14 @@
 namespace TruthHelper {
 
 
-  bool IsLastPhysicalHadron::operator()(HepMC::ConstGenParticlePtr  p ) const {
+bool IsLastPhysicalHadron::operator()(HepMC::ConstGenParticlePtr  p ) const {
     return IsGenStable()(p) && IsPhysicalHadron()(p);
-  }
+}
 
 
-  GenIMCselector* IsLastPhysicalHadron::create() const {
+GenIMCselector* IsLastPhysicalHadron::create() const {
     return new IsLastPhysicalHadron(*this);
-  }
+}
 
 
 }

@@ -11,10 +11,10 @@
 namespace TruthHelper {
 
 
-  /// @brief Identify if the particle is non interacting, e.g. a neutrino
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsGenNonInteracting : public GenIMCselector {
-  public:
+/// @brief Identify if the particle is non interacting, e.g. a neutrino
+/// @deprecated Use the functions in TruthUtils instead
+class IsGenNonInteracting : public GenIMCselector {
+public:
 
     IsGenNonInteracting() {}
 
@@ -22,7 +22,7 @@ namespace TruthHelper {
 
     bool operator()(HepMC::ConstGenParticlePtr  p ) const;
 
-  };
+};
 
 
 }

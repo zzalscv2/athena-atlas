@@ -11,9 +11,9 @@
 namespace TruthHelper {
 
 
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsPhysicalHadron: public GenIMCselector {
-  public:
+/// @deprecated Use the functions in TruthUtils instead
+class IsPhysicalHadron: public GenIMCselector {
+public:
 
     IsPhysicalHadron() { }
 
@@ -21,7 +21,7 @@ namespace TruthHelper {
 
     bool operator()(HepMC::ConstGenParticlePtr  p ) const;
 
-  };
+};
 
 
 }

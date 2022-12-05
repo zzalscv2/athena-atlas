@@ -24,15 +24,15 @@ typedef std::vector<HepMC::ConstGenParticlePtr>::const_iterator MCParticleCollec
 namespace TruthHelper {
 
 
-  /// @todo Can we convert to an Athena AthTool or similar? Or just replace with calls to MC::particles()
-  /// @deprecated Use the functions in TruthUtils instead
-  class GenAccessIO {
-  public:
+/// @todo Can we convert to an Athena AthTool or similar? Or just replace with calls to MC::particles()
+/// @deprecated Use the functions in TruthUtils instead
+class GenAccessIO {
+public:
 
     GenAccessIO() : m_sgSvc(0) {
-      if (Gaudi::svcLocator()->service("StoreGateSvc", m_sgSvc).isFailure()) {
-        throw StatusCode::FAILURE;
-      }
+        if (Gaudi::svcLocator()->service("StoreGateSvc", m_sgSvc).isFailure()) {
+            throw StatusCode::FAILURE;
+        }
     }
 
     StatusCode getMC(MCParticleCollection& mc, const std::string& key="GEN_EVENT") const;
@@ -40,23 +40,23 @@ namespace TruthHelper {
                      const GenIMCselector* selector, const std::string& key="GEN_EVENT") const;
 
     StatusCode getDH(const McEventCollection*& dh) const {
-      return m_sgSvc->retrieve(dh);
+        return m_sgSvc->retrieve(dh);
     }
 
     StatusCode getDH(const McEventCollection*& dh, const std::string& key) const {
-      return m_sgSvc->retrieve(dh, key);
+        return m_sgSvc->retrieve(dh, key);
     }
 
     StatusCode store (McEventCollection* storee, const std::string& key) const {
-      return m_sgSvc->record(storee, key);
+        return m_sgSvc->record(storee, key);
     }
 
 
-  private:
+private:
 
     StoreGateSvc* m_sgSvc;
 
-  };
+};
 
 
 }

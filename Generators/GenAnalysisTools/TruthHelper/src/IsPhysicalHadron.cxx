@@ -8,14 +8,14 @@
 namespace TruthHelper {
 
 
-  bool IsPhysicalHadron::operator()(HepMC::ConstGenParticlePtr p ) const {
+bool IsPhysicalHadron::operator()(HepMC::ConstGenParticlePtr p ) const {
     return MC::isPhysicalHadron(p);
-  }
+}
 
 
-  GenIMCselector* IsPhysicalHadron::create() const {
+GenIMCselector* IsPhysicalHadron::create() const {
     return new IsPhysicalHadron(*this);
-  }
+}
 
 
 }

@@ -8,14 +8,14 @@
 namespace TruthHelper {
 
 
-  bool IsGenStable::operator()(const HepMC::ConstGenParticlePtr p ) const {
+bool IsGenStable::operator()(const HepMC::ConstGenParticlePtr p ) const {
     return MC::isGenStable(p);
-  }
+}
 
 
-  GenIMCselector* IsGenStable::create() const {
+GenIMCselector* IsGenStable::create() const {
     return new IsGenStable(*this);
-  }
+}
 
 
 }

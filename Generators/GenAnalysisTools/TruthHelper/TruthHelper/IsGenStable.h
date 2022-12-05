@@ -11,10 +11,10 @@
 namespace TruthHelper {
 
 
-  /// @brief Identify if the particle is considered stable before input to G4
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsGenStable: public GenIMCselector {
-  public:
+/// @brief Identify if the particle is considered stable before input to G4
+/// @deprecated Use the functions in TruthUtils instead
+class IsGenStable: public GenIMCselector {
+public:
 
     IsGenStable() {}
 
@@ -22,7 +22,7 @@ namespace TruthHelper {
 
     bool operator()(HepMC::ConstGenParticlePtr p ) const;
 
-  };
+};
 
 
 }
