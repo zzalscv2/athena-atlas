@@ -33,23 +33,11 @@ double AthenaRandomGenerator ATLAS_NOT_THREAD_SAFE ()
   return CLHEP::RandFlat::shoot(TauolaPP::p_rndmEngine);
 }
 
+
 // Constructor
 TauolaPP::TauolaPP(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
 {
-  //Key to HepMC record
-  declareProperty("McEventKey", m_key="GEN_EVENT");
-
-  //TAUOLA configurables
-  //TAUOLA decay mode of particles with same/opposite charge as "decay_particle"
-  declareProperty("decay_mode_same", m_decay_mode_same=1);
-  declareProperty("decay_mode_opposite", m_decay_mode_opp=2);
-  declareProperty("decay_particle",m_decay_particle=15);
-  declareProperty("tau_mass",m_tau_mass=1.77684);
-  declareProperty("spin_correlation",m_spin_correlation=true);
-  declareProperty("setRadiation",m_setRadiation=true);
-  declareProperty("setRadiationCutOff",m_setRadiationCutOff=0.01); 
-
 }
 
 
@@ -96,6 +84,7 @@ void TauolaPP::reseedRandomEngine(const std::string& streamName, const EventCont
   ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
   p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 }
+
 
 CLHEP::HepRandomEngine* TauolaPP::getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset,
                                                              const EventContext& ctx) const
