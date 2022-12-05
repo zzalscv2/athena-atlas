@@ -1,5 +1,14 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+class ConfigBlockOption:
+    """the information for a single option on a configuration block"""
+
+    def __init__ (self, type, info) :
+        self.type = type
+        self.info = info
+
+
+
 class ConfigBlock:
     """the base class for classes implementing individual blocks of
     configuration
@@ -47,5 +56,64 @@ class ConfigBlock:
 
     """
 
-    def __init__ (self) :
-        pass
+    def __init__ (self, groupName = '') :
+        self._groupName = groupName
+        self._properties = {}
+
+
+    def groupName (self) :
+        """the configuration group we belong to
+
+        This is generally either 'ObjectName' or
+        'ObjectName.SelectionName', and can be used to identify blocks
+        on which to set properties.  This name should not change after
+        the block has been created, i.e. not depend on any properties
+        itself.
+
+        WARNING: The backend to option handling is slated to be
+        replaced at some point.  This particular function may change
+        behavior, interface or be removed/replaced entirely.
+        """
+        return self._groupName
+
+
+    def addOption (self, name, defaultValue,
+                   *, type, info='') :
+        """declare the given option on the configuration block
+
+        This should only be called in the constructor of the
+        configuration block.
+
+        NOTE: The backend to option handling is slated to be replaced
+        at some point.  This particular function should essentially
+        stay the same, but some behavior may change.
+        """
+        if name in self._properties :
+            raise KeyError ('duplicate option: ' + name)
+        if type not in [str, bool, int, float] :
+            raise TypeError ('unknown option type: ' + str (type))
+        setattr (self, name, defaultValue)
+        self._properties[name] = ConfigBlockOption (type=type, info=info)
+
+
+    def setOptionValue (self, name, value) :
+        """set the given option on the configuration block
+
+        NOTE: The backend to option handling is slated to be replaced
+        at some point.  This particular function should essentially
+        stay the same, but some behavior may change.
+        """
+
+        if name not in self._properties :
+            raise KeyError ('unknown option: ' + name)
+        setattr (self, name, value)
+
+
+    def hasOption (self, name) :
+        """whether the configuration block has the given option
+
+        WARNING: The backend to option handling is slated to be
+        replaced at some point.  This particular function may change
+        behavior, interface or be removed/replaced entirely.
+        """
+        return name in self._properties

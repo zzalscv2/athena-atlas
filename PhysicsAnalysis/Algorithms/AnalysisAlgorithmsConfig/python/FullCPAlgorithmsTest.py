@@ -504,8 +504,10 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     # Include, and then set up the photon analysis algorithm sequence:
     from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
 
-    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False)
-    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight', recomputeIsEM=False)
+    makePhotonCalibrationConfig (configSeq, 'AnaPhotons')
+    configSeq.setOptionValue ('.recomputeIsEM', False)
+    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight')
+    configSeq.setOptionValue ('.recomputeIsEM', False)
     vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
               'OutPhotons_NOSYS.phi -> ph_phi',
               'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
