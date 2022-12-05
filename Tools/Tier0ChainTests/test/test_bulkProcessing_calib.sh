@@ -6,10 +6,6 @@
 # art-include: 22.0/Athena
 # art-athena-mt: 8
 
-# There was a database connection problem reported in ATR-24782. Rodney Walker's solution is to use the following export to fix the problem:
-export TNS_ADMIN=/cvmfs/atlas.cern.ch/repo/sw/database/DBRelease/current/oracle-admin
-
-
 Reco_tf.py  \
 --AMI f1287  \
 --preExec="all:from RecExConfig.RecFlags import rec; rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.triggerConfig='DB'; DQMonFlags.useTrigger=False; DQMonFlags.doHLTMon=False;" \

@@ -6,10 +6,6 @@
 # art-include: 22.0/Athena
 # art-athena-mt: 8
 
-# There was a database connection problem reported in ATR-24782. Rodney Walker's solution is to use the following export to fix the problem:
-export TNS_ADMIN=/cvmfs/atlas.cern.ch/repo/sw/database/DBRelease/current/oracle-admin
-
-
 Reco_tf.py  \
 --AMI x701  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_cos.00421739.express_express.merge.RAW._lb0534._SFO-12._0001.1" \
