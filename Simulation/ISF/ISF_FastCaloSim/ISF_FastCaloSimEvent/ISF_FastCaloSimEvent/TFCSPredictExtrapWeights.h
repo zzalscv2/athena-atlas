@@ -52,6 +52,15 @@ public:
   // Print()
   void Print(Option_t *option = "") const override;
 
+  // Use extrapWeight=0.5 or r and z when constructing a hit?
+  enum TFCSPredictExtrapWeightsStatusBits {
+     kUseHardcodedWeight = BIT(15)
+  };
+  bool UseHardcodedWeight() const {return TestBit(kUseHardcodedWeight);};
+  void set_UseHardcodedWeight() {SetBit(kUseHardcodedWeight);};
+  void reset_UseHardcodedWeight() {ResetBit(kUseHardcodedWeight);};
+
+
 private:
   
   // Persistify configuration in string m_input. A custom Streamer(...) builds m_nn on the fly when reading from file.
