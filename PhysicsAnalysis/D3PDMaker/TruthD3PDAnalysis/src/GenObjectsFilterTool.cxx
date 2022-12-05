@@ -68,7 +68,6 @@ GenObjectsFilterTool::GenObjectsFilterTool( const std::string& type,
    declareProperty( "BCHadronsDescendantsBarcodeCut",m_bcHadronsDescendantsBarcodeCut=-1); /// -1 for no cut
    declareProperty( "BCHadronsDescendantsEtaCut",m_bcHadronsDescendantsEtaCut=-1);/// -1 for no cut
    declareProperty( "KeepParticleWithPdgId",m_keepParticleWithPdgId);
-   declareProperty( "KeepFirstParticles", m_keepFirstParticles=-1);
 
    declareProperty( "KeepLeptonicWZBosons",m_keepLeptonicWZBosons=false);
    declareProperty( "KeepLeptonicWZBosonDecayChains",m_keepLeptonicWZBosonDecayChains=false);
@@ -185,12 +184,8 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
    double pt = p4.perp();
    double eta = p4.eta();
 
-   int barcode = HepMC::barcode(part);
    int pdg = part->pdg_id();
    int status = part->status();
-
-   //// keep first m_keepFirstParticles particles
-   if(barcode<m_keepFirstParticles) return true;
 
    /// always keep these pdgids
    if(isKeep(pdg)) return true;
@@ -267,7 +262,7 @@ bool GenObjectsFilterTool::isRequested( HepMC::ConstGenParticlePtr part) const{
      }
 #endif
    }
-
+   int barcode = HepMC::barcode(part);
    if(m_keepbcHadronDecayChain){
      //// keep particles from b/c hadron decay
 
