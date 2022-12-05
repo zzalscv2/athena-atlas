@@ -40,16 +40,17 @@ class PileupReweightingBlock (ConfigBlock):
                 else:
                     log.info('Campaign could not be determined.')
 
-            if campaign:
-                if self.userPileupConfigs is None:
-                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
-                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig)
-                    log.info('Setting PRW configuration based on input files')
+        if campaign:
+            if self.userPileupConfigs is None:
+                from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig,
+                                                        data_type=config.dataType())
+                log.info('Setting PRW configuration based on input files')
 
-                    if toolConfigFiles:
-                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
-                else:
-                    log.info('Using user provided PRW configuration')
+                if toolConfigFiles:
+                    log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
+            else:
+                log.info('Using user provided PRW configuration')
 
         if self.userPileupConfigs is not None:
             toolConfigFiles = self.userPileupConfigs[:]
