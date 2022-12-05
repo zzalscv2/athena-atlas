@@ -45,6 +45,7 @@
 
 TFCSPredictExtrapWeights::TFCSPredictExtrapWeights(const char* name, const char* title):TFCSLateralShapeParametrizationHitBase(name,title) {
   set_freemem();
+  set_UseHardcodedWeight();
 }
 
 // Destructor
@@ -186,7 +187,14 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate
   for (unsigned int i = 0; i < m_relevantLayers->size(); i++) {
     const int ilayer = std::as_const(m_relevantLayers)->at(i);
     ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: " << ilayer << " weight: " << outputs["extrapWeight_"+std::to_string(ilayer)]);
-    simulstate.setAuxInfo<float>(ilayer,outputs["extrapWeight_"+std::to_string(ilayer)]);
+    float weight = outputs["extrapWeight_"+std::to_string(ilayer)];
+    // Protections
+    if(weight < 0){
+      weight = 0;
+    } else if(weight > 1){
+      weight = 1;
+    }
+    simulstate.setAuxInfo<float>(ilayer, weight);
   }
   return FCSSuccess;
 }
@@ -206,11 +214,18 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationSta
      return FCSFatal;
    }
 
-   double r = (1.-extrapWeight)*extrapol->r(cs, SUBPOS_ENT) + extrapWeight*extrapol->r(cs, SUBPOS_EXT);
-   double z = (1.-extrapWeight)*extrapol->z(cs, SUBPOS_ENT) + extrapWeight*extrapol->z(cs, SUBPOS_EXT);
    double eta = (1.-extrapWeight)*extrapol->eta(cs, SUBPOS_ENT) + extrapWeight*extrapol->eta(cs, SUBPOS_EXT);
    double phi = (1.-extrapWeight)*extrapol->phi(cs, SUBPOS_ENT) + extrapWeight*extrapol->phi(cs, SUBPOS_EXT);
-   
+   float extrapWeight_for_r_z = extrapWeight;
+   if(UseHardcodedWeight()){
+     extrapWeight_for_r_z = 0.5;
+     ATH_MSG_DEBUG("Will use extrapWeight=0.5 for r and z when constructing a hit");
+   } else {
+     ATH_MSG_DEBUG("Will use predicted extrapWeight also for r and z when constructing a hit");
+   }
+   double r = (1.-extrapWeight_for_r_z)*extrapol->r(cs, SUBPOS_ENT) + extrapWeight_for_r_z*extrapol->r(cs, SUBPOS_EXT);
+   double z = (1.-extrapWeight_for_r_z)*extrapol->z(cs, SUBPOS_ENT) + extrapWeight_for_r_z*extrapol->z(cs, SUBPOS_EXT);
+
    if(!std::isfinite(r) || !std::isfinite(z) || !std::isfinite(eta) || !std::isfinite(phi)) {
      ATH_MSG_WARNING("Extrapolator contains NaN or infinite number.\nSetting center position to calo boundary.");
      ATH_MSG_WARNING("Before fix: center_r: " << r << " center_z: " << z << " center_phi: " << phi << " center_eta: " << eta << " weight: " << extrapWeight << " cs: " << cs);
@@ -227,8 +242,8 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationSta
    hit.setCenter_eta( eta );
    hit.setCenter_phi( phi );
    
-   ATH_MSG_DEBUG("TFCSCenterPositionCalculation: center_r: " << hit.center_r() << " center_z: " << hit.center_z() << " center_phi: " << hit.center_phi() << " center_eta: " << hit.center_eta() << " weight: " << extrapWeight << " cs: " << cs);
-   
+   ATH_MSG_DEBUG("TFCSPredictExtrapWeights: center_r: " << hit.center_r() << " center_z: " << hit.center_z() << " center_phi: " << hit.center_phi() << " center_eta: " << hit.center_eta() << " weight: " << extrapWeight << " cs: " << cs);
+
    return FCSSuccess;
 }
 
