@@ -92,7 +92,7 @@ namespace top {
 
     declareProperty("JetUpdateJvtTool", m_jetUpdateJvtTool);
     declareProperty("JetSelectfJvtTool", m_jetSelectfJvtTool);
-    declareProperty("TruthJetCollectionForHSTagging", m_truthJetCollForHS = "AntiKt4TruthJets");
+    declareProperty("TruthJetCollectionForHSTagging", m_truthJetCollForHS = "AntiKt4TruthDressedWZJets");
 
     declareProperty("JES_data2016_data2015_Recommendation_Dec2016.config", m_jetAntiKt4_MCFS_ConfigFile);
     declareProperty("JetCalibrationSequenceFS", m_jetAntiKt4_MCFS_CalibSequence);
@@ -110,10 +110,6 @@ namespace top {
     if (m_config->isTruthDxAOD()) {
       ATH_MSG_INFO("top::JetMETCPTools: no need to initialise anything on truth DxAOD");
       return StatusCode::SUCCESS;
-    }
-
-    if (m_config->getDerivationStream() == "PHYS") {
-      m_truthJetCollForHS = "AntiKt4TruthDressedWZJets";
     }
 
     if (m_config->useJets()) {
