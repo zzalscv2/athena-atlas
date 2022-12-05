@@ -8,6 +8,9 @@
 
 // EDM include(s):
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/ConcurrentStrMap.h"
+#include "CxxUtils/SimpleUpdater.h"
 
 // Local include(s):
 #include "xAODRootAccess/TStore.h"
@@ -223,8 +226,11 @@ namespace xAOD {
                                const std::string& classname,
                                ::Bool_t isOwner ) {
 
+      // Cache
+      using clCache_t = CxxUtils::ConcurrentStrMap<::TClass*, CxxUtils::SimpleUpdater>;
+      static clCache_t clMap ATLAS_THREAD_SAFE {clCache_t::Updater_t()};
+
       // First check if we have this dictionary cached already:
-      static std::map< std::string, ::TClass* > clMap;
       ::TClass* cl = 0;
       auto clItr = clMap.find( classname );
       if( clItr != clMap.end() ) {
@@ -239,7 +245,7 @@ namespace xAOD {
       // If it's not cached, ask ROOT for it:
       if( ! cl ) {
          cl = ::TClass::GetClass( classname.c_str(), kTRUE, kTRUE );
-         clMap[ classname ] = cl;
+         clMap.emplace( classname, cl );
       }
       if( ( ! cl ) || ( ! cl->IsLoaded() ) ) {
          return StatusCode::RECOVERABLE;
