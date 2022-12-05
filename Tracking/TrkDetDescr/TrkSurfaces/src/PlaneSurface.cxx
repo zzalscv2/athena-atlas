@@ -253,11 +253,32 @@ Trk::PlaneSurface::localToGlobal(const Amg::Vector2D& locpos,
 }
 
 bool
-Trk::PlaneSurface::globalToLocal(const Amg::Vector3D& glopos, const Amg::Vector3D&, Amg::Vector2D& locpos) const
-{
+Trk::PlaneSurface::globalToLocal(const Amg::Vector3D& glopos,
+                                      const Amg::Vector3D&,
+                                      Amg::Vector2D& locpos) const {
   Amg::Vector3D loc3Dframe = inverseTransformMultHelper(glopos);
   locpos = Amg::Vector2D(loc3Dframe.x(), loc3Dframe.y());
-  return (loc3Dframe.z() * loc3Dframe.z() <= s_onSurfaceTolerance * s_onSurfaceTolerance);
+  return (loc3Dframe.z() * loc3Dframe.z() <=
+          s_onSurfaceTolerance * s_onSurfaceTolerance);
+}
+
+Trk::Intersection
+Trk::PlaneSurface::straightLineIntersection(const Amg::Vector3D& pos,
+                                            const Amg::Vector3D& dir,
+                                            bool forceDir,
+                                            Trk::BoundaryCheck bchk) const {
+  double denom = dir.dot(normal());
+  if (denom) {
+    double u = (normal().dot((center() - pos))) / (denom);
+    Amg::Vector3D intersectPoint(pos + u * dir);
+    // evaluate the intersection in terms of direction
+    bool isValid = forceDir ? (u > 0.) : true;
+    // evaluate (if necessary in terms of boundaries)
+    isValid = bchk ? (isValid && isOnSurface(intersectPoint)) : isValid;
+    // return the result
+    return Trk::Intersection(intersectPoint, u, isValid);
+  }
+  return Trk::Intersection(pos, 0., false);
 }
 
 void
