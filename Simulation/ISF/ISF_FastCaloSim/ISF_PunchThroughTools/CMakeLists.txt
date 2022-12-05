@@ -11,6 +11,7 @@ find_package( Eigen )
 find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( LibXml2 REQUIRED)
+find_package( lwtnn )
 
 
 # Component(s) in the package:
