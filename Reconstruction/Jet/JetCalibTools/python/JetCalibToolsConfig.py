@@ -10,6 +10,7 @@
 # Author: TJ Khoo                                                      #
 #                                                                      #
 ########################################################################
+from AthenaConfiguration.Enums import LHCPeriod
 
 from AthenaCommon import Logging
 jetcaliblog = Logging.logging.getLogger('JetCalibToolsConfig')
@@ -35,6 +36,7 @@ topocontexts = {
     "TrigRun2GSC":("JES_data2016_data2015_Recommendation_Dec2016_rel21.config","00-04-77","JetArea_EtaJES_GSC_Insitu"),
     "TrigLS2":("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
     "Trigger":("JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21_Trigger.config","00-04-82","JetArea_Residual_EtaJES_GSC_Insitu"),
+    "HLLHC":("HLLHC/JES_MC16_HLLHC_Aug2021_rel21.config","00-04-82","JetArea_Residual_EtaJES"),
 }
 
 rscanlc2 = {
@@ -89,7 +91,10 @@ hasInSitu = ["AntiKt4LCTopo", "AntiKt4EMTopo", "AntiKt4EMPFlow", "TrigAntiKt4EMT
 # then forwards the configuration to defineJetCalibTool, returning the output.
 # At present the interface allows for the calibseq to be chosen freely, other
 # than checking that the data source is data for the in situ correction.
-def getJetCalibTool(jetcollection, context, data_type, calibseq = "", rhoname = "", pvname = "PrimaryVertices", gscdepth = "auto"):
+def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvname = "PrimaryVertices", gscdepth = "auto"):
+
+    jetcollection = jetdef.basename
+
     # In principle we could autoconfigure
     if data_type not in ['data','mc','afii']:
         jetcaliblog.error("JetCalibConfig accepts data_type values: 'data', 'mc', 'afii'")
@@ -102,6 +107,11 @@ def getJetCalibTool(jetcollection, context, data_type, calibseq = "", rhoname = 
     jetcaliblog.debug("Preparing calibration for {0}, in context {1} on sample type {2}".format(jetcollection,context,data_type))
 
     jetcontexts = calibcontexts[jetcollection]
+
+    if jetcollection == "AntiKt4EMTopo" and context == "T0":
+        if jetdef._cflags.GeoModel.Run >= LHCPeriod.Run4:
+            context = "HLLHC"
+
     try:
         configfile, calibarea, calibseq_def = jetcontexts[context]        
         _calibseq = calibseq if calibseq else calibseq_def
@@ -200,4 +210,4 @@ def getCalibSpecsFromString(modspec):
 # This method instantiates the JetCalibTool given the input mod specification
 def getJetCalibToolFromString(jetdef, modspec):
     calibcontext, data_type, calibseq, rhoname, pvname, gscdepth = getCalibSpecsFromString(modspec)
-    return getJetCalibTool(jetdef.basename,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)
+    return getJetCalibTool(jetdef,calibcontext,data_type,calibseq,rhoname,pvname,gscdepth)

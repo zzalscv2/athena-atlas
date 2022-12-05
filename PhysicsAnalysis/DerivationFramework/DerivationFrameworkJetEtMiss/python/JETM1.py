@@ -332,8 +332,7 @@ def JETM1Cfg(ConfigFlags):
                                            "HLT_xAOD__JetContainer_GSCJet.pt.eta.phi.m"]
 
     JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",
-                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
-                                         "CaloCalFwdTopoTowers"]
+                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
     
     # Truth containers
     if ConfigFlags.Input.isMC:
