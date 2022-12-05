@@ -228,6 +228,31 @@ Trk::PerigeeSurface::globalToLocal(const Amg::Vector3D& glopos,
   return true;
 }
 
+Trk::Intersection
+Trk::PerigeeSurface::straightLineIntersection(const Amg::Vector3D& pos,
+                                              const Amg::Vector3D& dir,
+                                              bool forceDir,
+                                              Trk::BoundaryCheck) const {
+  // following nominclature found in header file and doxygen documentation
+  // line one is the straight track
+  const Amg::Vector3D& ma = pos;
+  const Amg::Vector3D& ea = dir;
+  // line two is the line surface
+  const Amg::Vector3D& mb = center();
+  const Amg::Vector3D& eb = lineDirection();
+  // now go ahead
+  Amg::Vector3D mab(mb - ma);
+  double eaTeb = ea.dot(eb);
+  double denom = 1 - eaTeb * eaTeb;
+  if (std::abs(denom) > 10e-7) {
+    double lambda0 = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
+    // evaluate the direction, bounds are always true for Perigee
+    bool isValid = forceDir ? (lambda0 > 0.) : true;
+    return Trk::Intersection((ma + lambda0 * ea), lambda0, isValid);
+  }
+  return Trk::Intersection(pos, 0., false);
+}
+
 // return the measurement frame - this is the frame where the covariance is defined
 Amg::RotationMatrix3D
 Trk::PerigeeSurface::measurementFrame(const Amg::Vector3D&, const Amg::Vector3D& glomom) const

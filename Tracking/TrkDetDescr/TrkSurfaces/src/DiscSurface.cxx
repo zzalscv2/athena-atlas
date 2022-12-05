@@ -260,6 +260,25 @@ Trk::DiscSurface::globalToLocal(const Amg::Vector3D& glopos,
   return (std::fabs(loc3Dframe.z()) <= s_onSurfaceTolerance);
 }
 
+Trk::Intersection
+Trk::DiscSurface::straightLineIntersection(const Amg::Vector3D& pos,
+                                           const Amg::Vector3D& dir,
+                                           bool forceDir,
+                                           Trk::BoundaryCheck bchk) const {
+  double denom = dir.dot(normal());
+  if (denom) {
+    double u = (normal().dot((center() - pos))) / (denom);
+    Amg::Vector3D intersectPoint(pos + u * dir);
+    // evaluate the intersection in terms of direction
+    bool isValid = forceDir ? (u > 0.) : true;
+    // evaluate (if necessary in terms of boundaries)
+    isValid = bchk ? (isValid && isOnSurface(intersectPoint)) : isValid;
+    // return the result
+    return Trk::Intersection(intersectPoint, u, isValid);
+  }
+  return Trk::Intersection(pos, 0., false);
+}
+
 Amg::Vector2D
 Trk::DiscSurface::localPolarToLocalCartesian(const Amg::Vector2D& locpol) const
 {

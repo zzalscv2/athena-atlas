@@ -93,32 +93,6 @@ PerigeeSurface::bounds() const
   return s_perigeeBounds;
 }
 
-inline Intersection
-PerigeeSurface::straightLineIntersection(const Amg::Vector3D& pos,
-                                         const Amg::Vector3D& dir,
-                                         bool forceDir,
-                                         Trk::BoundaryCheck) const
-{
-  // following nominclature found in header file and doxygen documentation
-  // line one is the straight track
-  const Amg::Vector3D& ma = pos;
-  const Amg::Vector3D& ea = dir;
-  // line two is the line surface
-  const Amg::Vector3D& mb = center();
-  const Amg::Vector3D& eb = lineDirection();
-  // now go ahead
-  Amg::Vector3D mab(mb - ma);
-  double eaTeb = ea.dot(eb);
-  double denom = 1 - eaTeb * eaTeb;
-  if (fabs(denom) > 10e-7) {
-    double lambda0 = (mab.dot(ea) - mab.dot(eb) * eaTeb) / denom;
-    // evaluate the direction, bounds are always true for Perigee
-    bool isValid = forceDir ? (lambda0 > 0.) : true;
-    return Trk::Intersection((ma + lambda0 * ea), lambda0, isValid);
-  }
-  return Trk::Intersection(pos, 0., false);
-}
-
 inline const Amg::Vector3D&
 PerigeeSurface::lineDirection() const
 {
@@ -134,6 +108,7 @@ PerigeeSurface::lineDirection() const
   }
   return Trk::s_zAxis;
 }
+
 /** the pathCorrection for derived classes with thickness */
 inline double
 PerigeeSurface::pathCorrection(const Amg::Vector3D&, const Amg::Vector3D&) const
