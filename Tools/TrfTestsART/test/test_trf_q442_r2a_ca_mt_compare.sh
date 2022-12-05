@@ -79,3 +79,8 @@ echo "============ diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
 acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --order-trees --entries 50 --mode semi-detailed
 rc9=$?
 echo "art-result: ${rc9} diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+
+echo "============ meta-diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+meta-diff --ordered --mode full --diff-format diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root --drop file_guid file_size
+rc10=$?
+echo "art-result: ${rc10} meta-diff def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
