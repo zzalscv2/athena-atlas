@@ -32,7 +32,7 @@ main()
   // Track from TSOS
   Trk::Track track1(info,
                     DataVector<const Trk::TrackStateOnSurface>(tsvec1),
-                    new Trk::FitQuality(fq));
+                    std::make_unique<Trk::FitQuality>(fq));
 
   std::cout << "Track from TSOS" << '\n';
   std::cout << track1.isValid() << '\n';
@@ -44,7 +44,7 @@ main()
   // Track from MTSOS
   Trk::Track track2(info,
                     DataVector<const Trk::MultiComponentStateOnSurface>(tsvec2),
-                    new Trk::FitQuality(fq));
+                    std::make_unique<Trk::FitQuality>(fq));
 
   std::cout << "Track from MTSOS" << '\n';
   std::cout << track2.isValid() << '\n';

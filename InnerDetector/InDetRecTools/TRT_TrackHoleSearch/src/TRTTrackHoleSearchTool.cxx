@@ -463,7 +463,7 @@ TRTTrackHoleSearchTool::addHolesToTrack(
     const Trk::Track* new_track = new Trk::Track(
       track.info(),
       std::move(tsos),
-      track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+      track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
     return new_track;
   }
 
@@ -494,7 +494,7 @@ TRTTrackHoleSearchTool::addHolesToTrack(
   const Trk::Track* new_track =
     new Trk::Track(track.info(),
                    std::move(tsos),
-                   track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                   track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
 
   return new_track;
 }

@@ -148,7 +148,7 @@ StatusCode MuonSegContainerMergerAlg::execute(const EventContext& ctx) const {
                 tsos.push_back(Muon::MuonTSOSHelper::createMeasTSOS(meas->uniqueClone(), nullptr, Trk::TrackStateOnSurface::Measurement));
             }
             std::unique_ptr<Trk::Track> trk =
-                std::make_unique<Trk::Track>(dummy_info, std::move(tsos), seg->fitQuality() ? seg->fitQuality()->clone() : nullptr);
+                std::make_unique<Trk::Track>(dummy_info, std::move(tsos), seg->fitQuality() ? seg->fitQuality()->uniqueClone() : nullptr);
             track_seg_map[trk.get()] = seg;
             ambi_tracks.push_back(std::move(trk));
         }

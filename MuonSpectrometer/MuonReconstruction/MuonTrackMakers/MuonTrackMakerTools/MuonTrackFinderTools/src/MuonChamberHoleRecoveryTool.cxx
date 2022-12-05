@@ -176,7 +176,7 @@ namespace Muon {
 
         for (std::unique_ptr<const Trk::TrackStateOnSurface>& nit : newStates) { trackStateOnSurfaces.push_back(nit.release()); }
         std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
         return newTrack;
     }
 

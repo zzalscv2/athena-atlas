@@ -147,7 +147,7 @@ namespace InDet {
       ATH_MSG_DEBUG("Segment has no fit quality ! Discard...");
       return nullptr;
     }
-    const Trk::FitQuality* fq = tS.fitQuality()->clone();
+    auto fq = tS.fitQuality()->uniqueClone();
 
     //
     // Get the track segment information about the initial track parameters
@@ -169,8 +169,6 @@ namespace InDet {
     } else {
       ATH_MSG_DEBUG("Could not get initial TRT segment parameters! ");
       // clean up
-      delete fq;
-      fq = nullptr;
       return nullptr;
     }
 
@@ -202,8 +200,6 @@ namespace InDet {
         ntsos.clear();
         delete segPar;
         segPar = nullptr;
-        delete fq;
-        fq = nullptr;
         return nullptr;
       }
 
@@ -337,7 +333,7 @@ namespace InDet {
 
     // create new track candidate
     if (!m_doRefit) {
-      return new Trk::Track(info, std::move(ntsos), fq);
+      return new Trk::Track(info, std::move(ntsos), std::move(fq));
     } else {
       //
       // ----------------------------- this is a horrible hack to make the
@@ -647,7 +643,7 @@ namespace InDet {
       // track
       //
 
-      Trk::Track newTrack (info, std::move(ntsos), fq);
+      Trk::Track newTrack (info, std::move(ntsos), std::move(fq));
       Trk::Track* fitTrack =
         m_fitterTool->fit(ctx,newTrack, true, Trk::nonInteracting).release();
 

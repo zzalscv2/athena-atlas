@@ -1146,10 +1146,10 @@ Trk::DistributedKalmanFilter::fit(
         }
       }
       ATH_MSG_DEBUG("Total Chi2: " << chi2 << " DoF=" << ndof);
-      Trk::FitQuality* pFQ = new Trk::FitQuality(chi2, ndof);
+      auto pFQ = std::make_unique<Trk::FitQuality>(chi2, ndof);
       ATH_MSG_DEBUG(pvTS.size() << " new RIO_OnTrack(s) created");
       TrackInfo info(TrackInfo::DistributedKalmanFilter, matEffects);
-      fittedTrack = new Track(info, std::move(pvTS), pFQ);
+      fittedTrack = new Track(info, std::move(pvTS), std::move(pFQ));
     } else {
       fittedTrack = nullptr;
     }

@@ -245,7 +245,7 @@ Trk::Track* Trk::TruthTrackBuilder::createTrack(const PRD_TruthTrajectory& prdTr
        }
        refittedtrack2 = new Trk::Track(refittedtrack->info(),
                                        std::move(traj2),
-                                       refittedtrack->fitQuality()->clone());
+                                       refittedtrack->fitQuality()->uniqueClone());
      }
      else for (int j=0;j<(int)measset.size();j++) delete measset[j];
    } else if(!refittedtrack){

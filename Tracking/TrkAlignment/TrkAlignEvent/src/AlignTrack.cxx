@@ -477,7 +477,7 @@ namespace Trk {
       
       m_trackWithoutScattering.set(std::make_unique<Trk::Track>( this->info(), std::move(newTrackStateOnSurfaces), 
                                                                  this->fitQuality() ? 
-                                                                 this->fitQuality()->clone() : nullptr ));
+                                                                 this->fitQuality()->uniqueClone() : nullptr ));
     }
     return m_trackWithoutScattering.get();
   }

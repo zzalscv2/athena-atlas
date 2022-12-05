@@ -212,14 +212,6 @@ private:
   mutable std::atomic<unsigned long int> m_FitPRD{};
   // Number of Fit MeasurementBase Calls
   mutable std::atomic<unsigned long int> m_FitMeasurementBase{};
-  // Number of Foward Fit Failures
-  mutable std::atomic<unsigned long int> m_ForwardFailure{};
-  // Number of Smoother Failures
-  mutable std::atomic<unsigned long int> m_SmootherFailure{};
-  // Number of MakePerigee Failures
-  mutable std::atomic<unsigned long int> m_PerigeeFailure{};
-  // Number of Tracks that fail fit Quailty test
-  mutable std::atomic<unsigned long int> m_fitQualityFailure{};
   // Number of Tracks that are successfull
   mutable std::atomic<unsigned long int> m_fitSuccess{};
 };

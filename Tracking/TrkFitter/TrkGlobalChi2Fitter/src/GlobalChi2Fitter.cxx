@@ -7368,7 +7368,7 @@ namespace Trk {
       trajectory.push_back(trackState.release());
     }
 
-    std::unique_ptr<const FitQuality> qual = std::make_unique<const FitQuality>(tmptrajectory.chi2(), tmptrajectory.nDOF());
+    auto qual = std::make_unique<FitQuality>(tmptrajectory.chi2(), tmptrajectory.nDOF());
 
     ATH_MSG_VERBOSE("making Trk::Track...");
     
@@ -7389,7 +7389,7 @@ namespace Trk {
       info.setTrackProperties(TrackInfo::StraightTrack);
     }
 
-    std::unique_ptr<Track> rv = std::make_unique<Track>(info, std::move(trajectory), qual.release());
+    std::unique_ptr<Track> rv = std::make_unique<Track>(info, std::move(trajectory), std::move(qual));
 
     /*
      * Here, we create a track summary and attach it to our newly created

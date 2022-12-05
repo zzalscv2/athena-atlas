@@ -1164,7 +1164,7 @@ namespace MuonCombined {
         Trk::TrackInfo::TrackPatternRecoInfo author = Trk::TrackInfo::MuTag;
         info.setPatternRecognitionInfo(author);
         std::unique_ptr<Trk::Track> newtrack =
-            std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), (indetTrack.fitQuality())->clone());
+            std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), (indetTrack.fitQuality())->uniqueClone());
 
         // create a track summary for this track
         if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*newtrack, nullptr, false); }

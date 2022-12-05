@@ -180,7 +180,7 @@ std::unique_ptr<Trk::Track> ExtrapolateMuonToIPTool::extrapolate(const Trk::Trac
     info.setPatternRecognitionInfo(Trk::TrackInfo::MuidStandAlone);
     // create new track
     std::unique_ptr<Trk::Track> extrapolateTrack =
-        std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+        std::make_unique<Trk::Track>(info, std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
     // create track summary
     m_trackSummary->updateTrack(ctx, *extrapolateTrack);
     return extrapolateTrack;

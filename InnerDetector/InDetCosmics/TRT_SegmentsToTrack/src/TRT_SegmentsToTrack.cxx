@@ -321,7 +321,7 @@ StatusCode InDet::TRT_SegmentsToTrack::execute()
           std::unique_ptr<Trk::Track> track =
             std::make_unique<Trk::Track>(fittedTrack->info(),
                                          std::move(trajectory),
-                                         fittedTrack->fitQuality()->clone());
+                                         fittedTrack->fitQuality()->uniqueClone());
           fittedTrack = std::move(track);
         }
       }
