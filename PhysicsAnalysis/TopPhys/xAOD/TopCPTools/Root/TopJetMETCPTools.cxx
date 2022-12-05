@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopCPTools/TopJetMETCPTools.h"
@@ -528,36 +528,40 @@ namespace top {
           calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config";
         } else if (calibChoice == "TCCMass") {
           calibConfigLargeR = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config";
-	} else if (calibChoice == "UFOSDMass") {
-	  calibConfigLargeR = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config";
+        } else if (calibChoice == "UFOSDMass") {
+          calibConfigLargeR = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config";
         } else {
           ATH_MSG_ERROR(
-            "Unknown largeRJESJMSConfig (Available options: TAMass, CaloMass, CombMass, TCCMass and UFOSDMass)) : " + calibChoice);
+            "Unknown largeRJESJMSConfig (Available options: TAMass, CaloMass, CombMass, TCCMass and UFOSDMass) : " + calibChoice);
           return StatusCode::FAILURE;
         }
-      } else { //Insitu calibration for Data
+      } else {  // Insitu calibration for Data
         if ((calibChoice == "CombMass") || (calibChoice == "TAMass") || (calibChoice == "CaloMass")) {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"; //Data has only one
+          calibConfigLargeR = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config";  // Data has only one
                                                                                                   // config file
         } else if (calibChoice == "TCCMass") {
-          calibConfigLargeR = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"; //There's no insitu
-                                                                                             // calibration yet
+          calibConfigLargeR = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config";  // There's no insitu
+                                                                                              // calibration yet
         } else if (calibChoice == "UFOSDMass") {
-	  calibConfigLargeR = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config"; //There's no insitu
-	                                                                                     // calibration yet
-	} else {
+          calibConfigLargeR = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_Insitu_30Sep2022.config";
+        } else {
           ATH_MSG_ERROR(
             "Unknown largeRJESJMSConfig (Available options: TAMass, CaloMass, CombMass, TCCMass and UFOSDMass) : " + calibChoice);
           return StatusCode::FAILURE;
         }
       }
       std::string calibSequenceLargeR = "EtaJES_JMS";
-      if ((!m_config->isMC()) &&
-          (calibChoice != "TCCMass") &&
-	  (calibChoice != "UFOSDMass")) calibSequenceLargeR = "EtaJES_JMS_Insitu_InsituCombinedMass"; //For data, there's
-                                                                                                    // is insitu
-                                                                                                    // calibration for
-                                                                                                    // lc-topo jets
+      // Change calib sequence to insitu if one is available for data
+      // (MC calib sequence does not change between objects)
+      if (!m_config->isMC()) {
+        if ((calibChoice == "CombMass") || (calibChoice == "TAMass") || (calibChoice == "CaloMass")) {
+          calibSequenceLargeR = "EtaJES_JMS_Insitu_InsituCombinedMass";  // For data, there's a insitu calibration for
+                                                                         // lc-topo jets
+        } else if (calibChoice == "UFOSDMass") {
+          calibSequenceLargeR = "EtaJES_JMS_Insitu";  // Calib sequence for UFO jets to go with insitu config
+        }
+      }
+
       const std::string calibAreaLargeR = "00-04-82";
       JetCalibrationTool* jetCalibrationToolLargeR
         = new JetCalibrationTool("JetCalibrationToolLargeR");

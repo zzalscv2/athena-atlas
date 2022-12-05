@@ -51,7 +51,8 @@ BTaggingSelectionTool::BTaggingSelectionTool( const std::string & name)
   declareProperty( "OperatingPoint",                m_OP="",            "operating point");
   declareProperty( "JetAuthor",                     m_jetAuthor="",     "jet collection");
   declareProperty( "ErrorOnTagWeightFailure",       m_ErrorOnTagWeightFailure=true, "optionally ignore cases where the tagweight cannot be retrived. default behaviour is to give an error, switching to false will turn it into a warning");
-  declareProperty( "CutBenchmarksContinuousWP",        m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
+  declareProperty( "CutBenchmarksContinuousWP",     m_ContinuousBenchmarks="", "comma separated list of tag bins that will be accepted as tagged: 1,2,3 etc.. ");
+  declareProperty( "useCTagging",                   m_useCTag=false, "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
 }
 
 StatusCode BTaggingSelectionTool::initialize() {
@@ -106,6 +107,7 @@ StatusCode BTaggingSelectionTool::initialize() {
    ATH_MSG_INFO("Working with Continuous2D WP.");
    m_continuous   = true;
    m_continuous2D = true; 
+   m_useCTag      = false; //important for backward compatibility in getTaggerWeight methods.
    cutname = m_taggerName+"/"+m_jetAuthor+"/Continuous2D/cutvalue";
    m_tagger.name = m_taggerName;
    TMatrixD* matrix = (TMatrixD*) m_inf->Get(cutname);
@@ -139,7 +141,10 @@ StatusCode BTaggingSelectionTool::initialize() {
  } //Continuous2D
  else if ("Continuous"==cutname(0,10))  // For continuous tagging load all flat-cut WPs
    {
-     //100% efficiency => MVXWP=-infinity
+
+     if(m_useCTag)
+       ATH_MSG_WARNING( "Running in Continuous WP and using 1D c-tagging");
+
      m_continuous   = true;
      m_continuouscuts[0] = -1.e4;
      cutname = m_taggerName+"/"+m_jetAuthor+"/FixedCutBEff_85/cutvalue";
@@ -170,6 +175,9 @@ StatusCode BTaggingSelectionTool::initialize() {
      ExtractTaggerProperties(m_tagger,m_taggerName, "FixedCutBEff_60");
    }
  else {  // FixedCut Working Point: load only one WP
+   if(m_useCTag)
+     ATH_MSG_WARNING( "Running in FixedCut WP and using c-tagging");
+
    ExtractTaggerProperties(m_tagger,m_taggerName, m_OP);
  }
 
@@ -220,13 +228,17 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, st
     TString fraction_data_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction";
     TVector *fraction_data = (TVector*) m_inf->Get(fraction_data_name);
 
+    double fraction = -1;
     if(fraction_data!=nullptr){
-      tagger.fraction_c = fraction_data[0](0);
+      fraction = fraction_data[0](0);
     }else{
-      if("DL1"    ==taggerName){ tagger.fraction_c = 0.08; }
-      if("DL1mu"  ==taggerName){ tagger.fraction_c = 0.08; }
-      if("DL1rnn" ==taggerName){ tagger.fraction_c = 0.03; }
+      if("DL1"    ==taggerName){ fraction = 0.08; }
+      if("DL1mu"  ==taggerName){ fraction = 0.08; }
+      if("DL1rnn" ==taggerName){ fraction = 0.03; }
     }
+    tagger.fraction_c = fraction;
+    tagger.fraction_b = fraction;
+
     delete fraction_data;
   }
 }
@@ -236,10 +248,19 @@ const Root::TAccept& BTaggingSelectionTool::getTAccept() const {
   return m_accept;
 }
 
-CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, double & tagweight, bool useCTag) const{
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, double & tagweight) const{
+  return getTaggerWeight(jet, tagweight, m_useCTag);
+}
+
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, double & tagweight, bool getCTagW) const{
 
   std::string taggerName = m_tagger.name;
   tagweight = -100.;
+
+  if(!m_continuous2D && (getCTagW != m_useCTag) ){
+    ATH_MSG_ERROR("Difference between initialisation and getTaggerWeight request! useCTagging property set to " <<m_useCTag <<" while getTaggerWeight use c-tag is set to " <<getCTagW <<".");
+    return CorrectionCode::Error;
+  }
 
   if ( m_taggerEnum == Tagger::MV2c10 ){
 
@@ -281,11 +302,8 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
        return CorrectionCode::Ok;
      }
   }
-  ATH_MSG_VERBOSE( "pb " <<  dl1_pb );
-  ATH_MSG_VERBOSE( "pc " <<  dl1_pc );
-  ATH_MSG_VERBOSE( "pu " <<  dl1_pu );
 
-  return getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, tagweight, useCTag);
+  return getTaggerWeight(dl1_pb, dl1_pc, dl1_pu, tagweight, getCTagW);
 
   }
 
@@ -295,9 +313,18 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 
 }
 
-CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu , double & tagweight, bool useCTag) const {
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu , double & tagweight) const{
+  return getTaggerWeight(pb, pc, pu, tagweight, m_useCTag);
+}
+
+CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, double pu , double & tagweight, bool getCTagW) const {
 
   std::string taggerName = m_tagger.name;
+
+  if(!m_continuous2D && (getCTagW != m_useCTag) ){
+    ATH_MSG_ERROR("Difference between initialisation and getTaggerWeight request! useCTagging property set to " <<m_useCTag <<" while getTaggerWeight use c-tag is set to " <<getCTagW <<".");
+    return CorrectionCode::Error;
+  }
 
   tagweight = -100.;
   if( (m_taggerEnum == Tagger::DL1) || (m_taggerEnum == Tagger::DL1r)){
@@ -314,12 +341,17 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
       }
     }
 
-    if(useCTag){
+    if(getCTagW){
      tagweight = log(pc / (m_tagger.fraction_b * pb + (1. - m_tagger.fraction_b) * pu));
     }
     else{
      tagweight = log(pb / (m_tagger.fraction_c * pc + (1. - m_tagger.fraction_c) * pu) );
     }
+    ATH_MSG_VERBOSE( "pb " <<  pb );
+    ATH_MSG_VERBOSE( "pc " <<  pc );
+    ATH_MSG_VERBOSE( "pu " <<  pu );
+    ATH_MSG_VERBOSE( "tagweight " <<  tagweight );
+
     return CorrectionCode::Ok;
   }
 
@@ -368,21 +400,22 @@ const Root::TAccept& BTaggingSelectionTool::accept( const xAOD::Jet& jet ) const
   double pT = jet.pt();
   double eta = jet.eta();
 
-  //for all other taggers, use the same method to extrach b-tag score
-  double taggerweight_b(-100);
-  if( getTaggerWeight( jet ,taggerweight_b)!=CorrectionCode::Ok)
-    return m_accept;
-  
   if(m_continuous2D){
+    double taggerweight_b(-100);
     double taggerweight_c(-100);
-    //compute c-tagging score
-    if( getTaggerWeight( jet, taggerweight_c, true)!=CorrectionCode::Ok)
+    if( (getTaggerWeight( jet, taggerweight_b, false)!=CorrectionCode::Ok) ||
+	(getTaggerWeight( jet, taggerweight_c, true )!=CorrectionCode::Ok) )
       return m_accept;
     
     return accept(pT, eta, taggerweight_b,taggerweight_c);
   }
-  //if here, we are in 1D mode:
-  return accept(pT, eta, taggerweight_b);
+  else{ //if here, we are in 1D mode
+    double taggerweight(-100);
+    if( getTaggerWeight( jet ,taggerweight, m_useCTag)!=CorrectionCode::Ok)
+      return m_accept;
+    
+    return accept(pT, eta, taggerweight);
+  }
 }
 
 const Root::TAccept& BTaggingSelectionTool::accept(double pT, double eta, double tag_weight) const
@@ -485,7 +518,6 @@ const Root::TAccept& BTaggingSelectionTool::accept(double pT, double eta, double
    }
 
    eta = std::abs(eta);
-
    if (! checkRange(pT, eta))
      return m_accept;
 
@@ -497,19 +529,24 @@ const Root::TAccept& BTaggingSelectionTool::accept(double pT, double eta, double
     return m_accept;
    }
 
-   double tagger_weight(-100);
-
-   if( getTaggerWeight(pb, pc, pu, tagger_weight)!=CorrectionCode::Ok){
-      return m_accept;
+   if(m_continuous2D){
+     double tagger_weight_b(-100);
+     double tagger_weight_c(-100);
+     if( ( getTaggerWeight(pb, pc, pu, tagger_weight_b, false)!=CorrectionCode::Ok) ||
+	 ( getTaggerWeight(pb, pc, pu, tagger_weight_c, true )!=CorrectionCode::Ok) )
+       return m_accept;
+     return accept(pT, eta, tagger_weight_b, tagger_weight_c);
    }
-
-   if ( tagger_weight < cutvalue ){
+   else{
+     double tagger_weight(-100);
+     if( getTaggerWeight(pb, pc, pu, tagger_weight, m_useCTag)!=CorrectionCode::Ok)
+       return m_accept;
+   if ( tagger_weight < cutvalue )
      return m_accept;
    }
-
+   
    //if you made it here, the jet is tagged
    m_accept.setCutResult( "WorkingPoint", true );
-
    return m_accept;
  }
 
@@ -534,26 +571,28 @@ int BTaggingSelectionTool::getQuantile( const xAOD::IParticle* p ) const {
 int BTaggingSelectionTool::getQuantile( const xAOD::Jet& jet ) const{
   double pT = jet.pt();
   double eta = std::abs( jet.eta() );
-  // Retrieve the tagger weight which was assigned to the jet
-  double tag_weight_b(-10.);
-  if (getTaggerWeight(jet, tag_weight_b)==CorrectionCode::Error){
-    ATH_MSG_WARNING("getQuantile: Failed to retrieve "+m_taggerName+" weight!");
-    return -1;
-  }
-  ATH_MSG_VERBOSE( m_taggerName << " " <<  tag_weight_b );
   int quantile = -1;
-  
+
   if (m_continuous2D){
-    double tag_weight_c(-10.);
-    if (getTaggerWeight(jet, tag_weight_c, true) == CP::CorrectionCode::Error){
-      ATH_MSG_WARNING("getQuantile: Failed to retrieve tag weight veto!");
+    double tag_weight_b(-100.);
+    double tag_weight_c(-100.);
+    if ( (getTaggerWeight(jet, tag_weight_b, false) == CP::CorrectionCode::Error) ||
+	 (getTaggerWeight(jet, tag_weight_c, true ) == CP::CorrectionCode::Error) ){
+      ATH_MSG_WARNING("getQuantile: Failed to retrieve tag weight for Continuous2D!");
       return -1;
     }
     quantile = getQuantile(pT, eta, tag_weight_b, tag_weight_c );
   }
-  else
-    quantile = getQuantile(pT, eta, tag_weight_b );
-
+  else{
+    // Retrieve the tagger weight which was assigned to the jet
+    double tag_weight(-100.);
+    if (getTaggerWeight(jet, tag_weight, m_useCTag)==CorrectionCode::Error){
+      ATH_MSG_WARNING("getQuantile: Failed to retrieve "+m_taggerName+" weight!");
+      return -1;
+    }
+    ATH_MSG_VERBOSE( m_taggerName << " " <<  tag_weight);
+    quantile = getQuantile(pT, eta, tag_weight);
+  }
   return quantile;
 }
 

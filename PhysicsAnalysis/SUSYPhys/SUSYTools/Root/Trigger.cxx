@@ -8,6 +8,9 @@
 // Local include(s):
 #include "SUSYTools/SUSYObjDef_xAOD.h"
 
+#include "PathResolver/PathResolver.h"
+#include "THashList.h"
+
 #include "TrigConfInterfaces/ITrigConfigTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
@@ -369,6 +372,30 @@ const Trig::ChainGroup* SUSYObjDef_xAOD::GetTrigChainGroup(const std::string& tr
     v_trigs16_cache = GetTriggerOR(token16);
     v_trigs17_cache = GetTriggerOR(token17);
     v_trigs18_cache = GetTriggerOR(token18);
+  }
+
+  void SUSYObjDef_xAOD::GetTriggerTokensTau(std::string confFile, std::map<std::string, std::string>& tau_trig_support) const {
+    // load config file as env
+    TEnv rEnv;
+    auto filename = PathResolverFindCalibFile(confFile);
+    ATH_MSG_DEBUG("Reading tau trigger config from " << filename);
+    rEnv.ReadFile(filename.c_str(), kEnvAll);
+
+    // get list of entries
+    std::vector<std::string> filekeys;
+    auto l = rEnv.GetTable();
+    for( Int_t i = 0; i < l->GetEntries(); ++i ) {
+      filekeys.push_back( l->At(i)->GetName() );
+    }
+
+    // loop over entries
+    for (auto key : filekeys) {
+      std::string legs = rEnv.GetValue(key.c_str(), "");
+      if (!legs.empty()) {
+         tau_trig_support[key] = legs;
+         ATH_MSG_DEBUG("Added for " << key << " : " << legs);
+      }
+    }
   }
 
   Trig::FeatureContainer SUSYObjDef_xAOD::GetTriggerFeatures(const std::string& chainName, unsigned int condition) const
