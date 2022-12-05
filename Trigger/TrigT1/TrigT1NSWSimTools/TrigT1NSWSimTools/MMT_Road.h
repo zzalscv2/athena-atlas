@@ -58,6 +58,7 @@ class MMT_Road {
     double getB() const { return m_B; }
     double getPitch() const { return m_pitch; }
     const ROOT::Math::XYZVector& getPlaneCoordinate(const unsigned int index) const { return m_planeCoordinates[index]; }
+    const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
     int getRoadSizeUpX() const { return m_roadSizeUpX; }
     int getRoadSizeDownX() const { return m_roadSizeDownX; }
