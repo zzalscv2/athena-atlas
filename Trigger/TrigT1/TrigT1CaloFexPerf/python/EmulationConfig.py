@@ -84,4 +84,7 @@ def emulateSC_Cfg(flags, CellsIn="SeedLessFS", SCOut="EmulatedSCell"):
     #The default input to LARSuperCellBCIDEmAlg (which applies the BCID correction) is the same: SCellContainer
         acc.merge(LArSuperCellBCIDEmAlgCfg(flags, **larSCargs))
 
+    # Given this function emulates supercells, we should also configure the supercell alignment Cond alg
+    acc.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
+
     return acc
