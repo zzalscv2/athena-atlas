@@ -45,17 +45,17 @@ namespace CP
     SysListHandle m_systematicsList {this};
 
   private:
-    SysCopyHandle<xAOD::ElectronContainer> m_electronsHandle {
+    SysCopyHandle<const xAOD::ElectronContainer> m_electronsHandle {
       this, "electrons", "", "the electrons container to use"};
-    SysCopyHandle<xAOD::MuonContainer> m_muonsHandle {
+    SysCopyHandle<const xAOD::MuonContainer> m_muonsHandle {
       this, "muons", "", "the muons container to use"};
-    SysCopyHandle<xAOD::JetContainer> m_jetsHandle {
+    SysCopyHandle<const xAOD::JetContainer> m_jetsHandle {
       this, "jets", "", "the jets container to use"};
-    SysCopyHandle<xAOD::TauJetContainer> m_tausHandle {
+    SysCopyHandle<const xAOD::TauJetContainer> m_tausHandle {
       this, "taus", "", "the taus container to use"};
-    SysCopyHandle<xAOD::PhotonContainer> m_photonsHandle {
+    SysCopyHandle<const xAOD::PhotonContainer> m_photonsHandle {
       this, "photons", "", "the photons container to use"};
-    SysCopyHandle<xAOD::JetContainer> m_fatJetsHandle {
+    SysCopyHandle<const xAOD::JetContainer> m_fatJetsHandle {
       this, "fatJets", "", "the fat jets container to use"};
 
     /// \brief the decoration for the overlap removal status
