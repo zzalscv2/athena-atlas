@@ -11,6 +11,9 @@
 #include "EventPrimitives/EventPrimitives.h"
 
 
+static const SG::AuxElement::Accessor<std::vector<double>> measAcc("meas");
+static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
+
 namespace xAOD {
     /**
      * @brief Track Measurements for Acts MultiTrajectory
@@ -18,20 +21,21 @@ namespace xAOD {
 
     class TrackMeasurement_v1 : public SG::AuxElement {
     public:
-        using ConstVectorMap = Eigen::Map<const Eigen::Matrix<double, 6, 1>>;
-        using VectorMap = Eigen::Map<Eigen::Matrix<double, 6, 1>>;
-        using ConstMatrixMap = Eigen::Map<const Eigen::Matrix<double, 6, 6>>;
-        using MatrixMap = Eigen::Map<Eigen::Matrix<double, 6, 6>>;
-
         TrackMeasurement_v1() = default;
         /**
          * access track Measurements vector of const element
          **/
-        ConstVectorMap measEigen() const;
+	template<std::size_t measdim = 6>
+	  Eigen::Map<const Eigen::Matrix<double, measdim, 1>> measEigen() const {
+	  return Eigen::Map<const Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()}; 
+	}
         /**
          * access Measurements of non const element
          **/
-        VectorMap measEigen();
+	template<std::size_t measdim = 6>
+	  Eigen::Map<Eigen::Matrix<double, measdim, 1>> measEigen() {
+	  return Eigen::Map<Eigen::Matrix<double, measdim, 1>>{measAcc(*this).data()}; 
+	}
 
         /**
          * access track Measurements as plain vector
@@ -46,12 +50,18 @@ namespace xAOD {
         /**
          * access track covariance matrix (flattened, rows layout) of const element
          **/
-        ConstMatrixMap covMatrixEigen() const;
+	template<std::size_t measdim = 6>
+	  Eigen::Map<const Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() const {
+	  return Eigen::Map<const Eigen::Matrix<double, measdim, measdim>>{covMatrixAcc(*this).data()};
+	}
 
         /**
          * access track covariance matrix (flattened, rows layout)
          **/
-        MatrixMap covMatrixEigen();
+	template<std::size_t measdim = 6>
+	  Eigen::Map<Eigen::Matrix<double, measdim, measdim>> covMatrixEigen() {
+	  return Eigen::Map<Eigen::Matrix<double, measdim, measdim>> {covMatrixAcc(*this).data()};
+	}
 
         /**
          * access track covariance as plain vector

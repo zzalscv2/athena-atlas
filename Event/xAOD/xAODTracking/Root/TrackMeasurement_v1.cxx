@@ -12,27 +12,10 @@ namespace xAOD {
                                         meas,
                                         setMeas)
 
-    static const SG::AuxElement::Accessor<std::vector<double>> measAcc("meas");
-    TrackMeasurement_v1::VectorMap TrackMeasurement_v1::measEigen() {
-        return VectorMap{measAcc(*this).data()};
-    }
-
-    TrackMeasurement_v1::ConstVectorMap TrackMeasurement_v1::measEigen() const {
-        return ConstVectorMap{measAcc(*this).data()};
-    }
-
     AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
                                         std::vector<double>,
                                         covMatrix,
                                         setCovMatrix)
-    static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
-    TrackMeasurement_v1::MatrixMap TrackMeasurement_v1::covMatrixEigen() {
-        return MatrixMap{covMatrixAcc(*this).data()};
-    }
-
-    TrackMeasurement_v1::ConstMatrixMap TrackMeasurement_v1::covMatrixEigen() const {
-        return ConstMatrixMap{covMatrixAcc(*this).data()};
-    }
 
     AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurement_v1,
                                         ElementLink<xAOD::UncalibratedMeasurementContainer>,

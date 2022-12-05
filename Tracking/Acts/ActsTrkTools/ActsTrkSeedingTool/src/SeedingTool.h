@@ -16,10 +16,10 @@
 #include "Acts/Seeding/SpacePointGrid.hpp"
 #include "Acts/Seeding/BinFinder.hpp"
 #include "Acts/Seeding/BinnedSPGroup.hpp"
-#include "Acts/Seeding/SeedfinderConfig.hpp"
+#include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/Seedfinder.hpp"
+#include "Acts/Seeding/SeedFinder.hpp"
 #include "Acts/Seeding/Seed.hpp"
 
 #include <cmath> //for M_PI
@@ -42,7 +42,7 @@ namespace ActsTrk {
 		  const std::vector<const ActsTrk::SpacePoint*>& spContainer,
 		  const Acts::Vector3& beamSpotPos,
 		  const Acts::Vector3& bField,
-		  ActsTrk::SeedContainer& seedContainer ) const override;
+		  ActsTrk::SeedContainer& seedContainer) const override;
     
   private:        
     // metafunction to obtain correct type in iterated container given the iterator type
@@ -66,13 +66,14 @@ namespace ActsTrk {
     template< typename external_spacepoint_t >
       const std::pair< 
                    Acts::SpacePointGridConfig, 
-                   Acts::SeedfinderConfig< external_spacepoint_t > 
+                   Acts::SeedFinderConfig< external_spacepoint_t > 
       > 
-      prepareConfiguration( const Acts::Vector2& beamPos, 
-			    const Acts::Vector3& bField ) const;
+      prepareConfiguration(const Acts::Vector2& beamPos, 
+			   const Acts::Vector3& bField) const;
     
     // *********************************************************************
     // *********************************************************************
+
   private:
 
     // Properties to set SpacePointGridConfig
@@ -215,12 +216,6 @@ namespace ActsTrk {
       "use deltaR (top radius - middle radius) instead of top radius"};
     Gaudi::Property<float> m_deltaInvHelixDiameter {this, "deltaInvHelixDiameter", 0.00003 * 1. / Acts::UnitConstants::mm, 
       "the allowed delta between two inverted seed radii for them to be considered compatible"};
-    Gaudi::Property<float> m_seedConfMinBottomRadius {this, "seedConfMinBottomRadius", 60. * Acts::UnitConstants::mm,
-      "increment in seed weight if the number of compatible seeds is larger than numSeedIncrement, this is used in case of high occupancy scenarios if we want to increase the weight of the seed by seedWeightIncrement when the number of compatible seeds is higher than a certain value"};
-    Gaudi::Property<float> m_seedConfMaxZOrigin {this, "seedConfMaxZOrigin", 150. * Acts::UnitConstants::mm, 
-      "maximum zOrigin in seed confirmation"};
-    Gaudi::Property<float> m_minImpactSeedConf {this, "minImpactSeedConf", 1. * Acts::UnitConstants::mm,
-      "minimum impact parameter for seed confirmation"};
 
     // Properties to set other objects used in
     // seeding algorithm

@@ -9,8 +9,10 @@
 #include "Acts/Seeding/BinFinder.hpp"
 #include "Acts/Seeding/BinnedSPGroup.hpp"
 #include "Acts/Seeding/SeedFilter.hpp"
-#include "Acts/Seeding/Seedfinder.hpp"
+#include "Acts/Seeding/SeedFinder.hpp"
+#include "Acts/Seeding/SeedFinderConfig.hpp"
 #include "Acts/Definitions/Units.hpp"
+#include "Acts/Seeding/SeedConfirmationRangeConfig.hpp"
 
 namespace ActsTrk {
 
@@ -42,7 +44,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_bFieldInZ);
     ATH_MSG_DEBUG("   " << m_phiBinDeflectionCoverage);
 
-    ATH_MSG_DEBUG(" * Used by SeedfinderConfig:");
+    ATH_MSG_DEBUG(" * Used by SeedFinderConfig:");
     ATH_MSG_DEBUG("   " << m_minPt);
     ATH_MSG_DEBUG("   " << m_cotThetaMax);
     ATH_MSG_DEBUG("   " << m_impactMax);
@@ -121,9 +123,6 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_seedWeightIncrement);
     ATH_MSG_DEBUG("   " << m_numSeedIncrement);
     ATH_MSG_DEBUG("   " << m_deltaInvHelixDiameter);
-    ATH_MSG_DEBUG("   " << m_seedConfMinBottomRadius);
-    ATH_MSG_DEBUG("   " << m_seedConfMaxZOrigin);
-    ATH_MSG_DEBUG("   " << m_minImpactSeedConf);
 
     if (m_zBinEdges.size() - 1 !=
       m_zBinNeighborsTop.size() and
@@ -198,7 +197,7 @@ namespace ActsTrk {
       return StatusCode::SUCCESS;
 
     auto [gridCfg, finderCfg] = prepareConfiguration< external_spacepoint_t >(Acts::Vector2(beamSpotPos[Amg::x], beamSpotPos[Amg::y]),
-                                                                              bField);
+									      bField); 
         
     auto extractCovariance = [&beamSpotPos](const external_spacepoint_t& sp, float,
                                             float, float) -> std::pair<Acts::Vector3, Acts::Vector2> {
@@ -208,6 +207,9 @@ namespace ActsTrk {
       return std::make_pair(position, covariance);
     };
 
+
+    Acts::Extent rRangeSPExtent;
+
     std::shared_ptr< Acts::BinFinder< external_spacepoint_t > > bottomBinFinder =
       std::make_shared< Acts::BinFinder< external_spacepoint_t > >(m_zBinNeighborsBottom, m_numPhiNeighbors);
     std::shared_ptr< Acts::BinFinder< external_spacepoint_t > > topBinFinder =
@@ -215,28 +217,25 @@ namespace ActsTrk {
 
     std::unique_ptr< Acts::SpacePointGrid< external_spacepoint_t > > grid =
       Acts::SpacePointGridCreator::createGrid< external_spacepoint_t >(gridCfg);
-    Acts::BinnedSPGroup< external_spacepoint_t > spacePointsGrouping(spBegin, spEnd, extractCovariance,
-      bottomBinFinder, topBinFinder, std::move(grid), finderCfg);
+    Acts::BinnedSPGroup< external_spacepoint_t > spacePointsGrouping(spBegin, spEnd, extractCovariance,								     
+      bottomBinFinder, topBinFinder, std::move(grid), rRangeSPExtent, finderCfg);
 
-    Acts::Seedfinder< external_spacepoint_t > finder(finderCfg);
+    Acts::SeedFinder< external_spacepoint_t > finder(finderCfg);
+
+    // variable middle SP radial region of interest
+    const Acts::Range1D<float> rMiddleSPRange(std::floor(rRangeSPExtent.min(Acts::binR) / 2) * 2 +
+					      finderCfg.deltaRMiddleMinSPRange,
+					      std::floor(rRangeSPExtent.max(Acts::binR) / 2) * 2 -
+					      finderCfg.deltaRMiddleMaxSPRange);
 
     //TODO POSSIBLE OPTIMISATION come back here: see MR !52399 ( i.e. use static thread_local)
-    typename decltype(finder)::State state;
-
-    Acts::Extent rRangeSPExtent;
-
-    for (auto it = spBegin; it != spEnd; ++it) {
-      const auto& sp = *it;
-      rRangeSPExtent.extend({sp->x(), sp->y(), sp->z()});
-    }
-
-
+    typename decltype(finder)::SeedingState state;
 
     auto group = spacePointsGrouping.begin();
     auto groupEnd = spacePointsGrouping.end();
     for (; group != groupEnd; ++group) {
       finder.createSeedsForGroup(state, std::back_inserter(seeds), group.bottom(),
-        group.middle(), group.top(), rRangeSPExtent);
+				 group.middle(), group.top(), rMiddleSPRange);
     }
 
     return StatusCode::SUCCESS;
@@ -245,12 +244,12 @@ namespace ActsTrk {
 
 
   template< typename external_spacepoint_t >
-  const std::pair< Acts::SpacePointGridConfig, Acts::SeedfinderConfig< external_spacepoint_t > >
-    SeedingTool::prepareConfiguration(const Acts::Vector2& beamPos,
-      const Acts::Vector3& bField) const {
-
+  const std::pair< Acts::SpacePointGridConfig, Acts::SeedFinderConfig< external_spacepoint_t > >
+  SeedingTool::prepareConfiguration(const Acts::Vector2& beamPos,
+				    const Acts::Vector3& bField) const {
+    
     //TODO POSSIBLE OPTIMISATION
-    // do not create for each call SpacePointGridConfig, SeedfinderConfig and SeedFilterConfig.
+    // do not create for each call SpacePointGridConfig, SeedFinderConfig and SeedFilterConfig.
     // They only two quantities that depend on the event context are
     // finderCfg.bFieldInZ and finderCfg.beamPos.
     // The rest of the configuration stays the same.
@@ -276,7 +275,7 @@ namespace ActsTrk {
     // Configuration for Acts::SeedFinder
     // These values will not be changed during execution
     // B Field and Beam Spot position will be updated for each event (finderCfg.bFieldInZ and finderCfg.beamPos)
-    Acts::SeedfinderConfig< external_spacepoint_t > finderCfg;
+    Acts::SeedFinderConfig< external_spacepoint_t > finderCfg;
     finderCfg.bFieldInZ = bField[2];
     finderCfg.beamPos = beamPos;
     finderCfg.minPt = m_minPt;
@@ -372,10 +371,6 @@ namespace ActsTrk {
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
     filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
-    filterCfg.seedConfMinBottomRadius = m_seedConfMinBottomRadius;
-    filterCfg.seedConfMaxZOrigin = m_seedConfMaxZOrigin;
-    filterCfg.minImpactSeedConf = m_minImpactSeedConf;
-
     finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< external_spacepoint_t > >(filterCfg);
 
     return std::make_pair(gridCfg, finderCfg);

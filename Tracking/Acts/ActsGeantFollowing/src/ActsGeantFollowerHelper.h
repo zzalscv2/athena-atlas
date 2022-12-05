@@ -61,7 +61,7 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
     bool                                 m_extrapolateIncrementally;
 
     Trk::TrackParameters* m_parameterCache;
-    std::unique_ptr<const Acts::BoundTrackParameters> m_actsParameterCache;
+    std::optional<Acts::BoundTrackParameters> m_actsParameterCache;
     std::unique_ptr<std::vector<Acts::SurfaceHit>> m_actsSurfaceCache;
     std::vector<Acts::SurfaceHit>::iterator m_actsSurfaceIterator;
     // Hypothesis to pdg converter

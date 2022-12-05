@@ -5,6 +5,7 @@
 #define ActsTrkEvent_MultiTrajectory_h
 #include <type_traits>
 #include "CxxUtils/concepts.h"
+#include "Acts/EventData/VectorMultiTrajectory.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackStatePropMask.hpp"
 #include "Acts/Utilities/HashedString.hpp"
@@ -18,13 +19,23 @@
 #include "ActsTrkEvent/SourceLink.h"
 
 namespace ActsTrk {
+  template<bool RWState>
+    class MultiTrajectory;
 
-    namespace detail { struct Decoration; }
+  namespace detail { struct Decoration; }
+  
+  constexpr static bool IsReadOnly = true;
+  constexpr static bool IsReadWrite = false;
+}
 
-    constexpr static bool IsReadOnly = true;
-    constexpr static bool IsReadWrite = false;
+namespace Acts {
+  template <>
+    struct isReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>> : std::true_type {};
+  template <>
+    struct isReadOnlyMultiTrajectory<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> : std::false_type {};
+}
 
-
+namespace ActsTrk {
     /**
      * @brief Athena implementation of ACTS::MultiTrajectory
      * 
@@ -32,7 +43,7 @@ namespace ActsTrk {
      */
     template<bool RWState>
     class MultiTrajectory final 
-    : public Acts::MultiTrajectory<ActsTrk::MultiTrajectory<RWState>>{ // TODO select other variant of the interface for UNMODIFIABLE (needs next ACTS version)
+    : public Acts::MultiTrajectory<ActsTrk::MultiTrajectory<RWState>>{ 
         public:
 
             using TrackStateContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackStateContainer*, xAOD::TrackStateContainer*>::type;
@@ -107,7 +118,7 @@ namespace ActsTrk {
 
             typename ConstTrackStateProxy::Parameters parameters_impl(IndexType index) const {
                 return trackParameters().at(index)-> paramsEigen();
-            };
+            }
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Parameters) parameters_impl(IndexType index){
                 return trackParameters().at(index)-> paramsEigen();
             }
@@ -120,7 +131,7 @@ namespace ActsTrk {
              */            
             typename ConstTrackStateProxy::Covariance covariance_impl(IndexType index) const {
                 return trackParameters().at(index)-> covMatrixEigen();
-            };        
+            }        
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) covariance_impl(IndexType index) {
                 return trackParameters().at(index)-> covMatrixEigen();
             }
@@ -133,7 +144,7 @@ namespace ActsTrk {
              */
             typename ConstTrackStateProxy::Covariance trackMeasurementsCov(IndexType index) const {
                 return trackMeasurements().at(index)-> covMatrixEigen();
-            };        
+            }        
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) trackMeasurementsCov(IndexType index) {
                 return trackMeasurements().at(index)-> covMatrixEigen();
             }
@@ -147,7 +158,7 @@ namespace ActsTrk {
             
             inline typename ConstTrackStateProxy::Covariance jacobian_impl(IndexType index) const {
                 return trackJacobians().at(index)-> jacEigen();
-            };
+            }
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) jacobian_impl(IndexType index) {
                 return trackJacobians().at(index)-> jacEigen();
             }
@@ -159,11 +170,14 @@ namespace ActsTrk {
              * @return TrackStateProxy::Measurement
              */
             
-            inline typename ConstTrackStateProxy::Measurement measurement_impl(IndexType index) const {
-                return trackMeasurements().at(index)-> measEigen();
-            };
-            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Measurement) measurement_impl(IndexType index) {
-                return trackMeasurements().at(index)-> measEigen();
+	    template<std::size_t measdim>
+            inline typename ConstTrackStateProxy::Measurement<measdim> measurement_impl(IndexType index) const {
+                return trackMeasurements().at(index)->template measEigen<measdim>();
+            }
+	    template<std::size_t measdim, bool Enable = true>
+	      std::enable_if_t<Enable && (RWState==IsReadWrite), typename TrackStateProxy::Measurement<measdim>>
+	      measurement_impl(IndexType index) {
+                return trackMeasurements().at(index)->template measEigen<measdim>();
             }
            /**
              * @brief obtain measurements covariance for a state at given index
@@ -172,11 +186,14 @@ namespace ActsTrk {
              * @return TrackStateProxy::Covariance
              */
             
-            inline typename ConstTrackStateProxy::Covariance measurementCovariance_impl(IndexType index) const {
-                return trackMeasurements().at(index)-> covMatrixEigen();
-            };
-            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, typename TrackStateProxy::Covariance) measurementCovariance_impl(IndexType index) {
-                return trackMeasurements().at(index)-> covMatrixEigen();
+	    template<std::size_t measdim>
+	      inline typename ConstTrackStateProxy::MeasurementCovariance<measdim> measurementCovariance_impl(IndexType index) const {
+                return trackMeasurements().at(index)->template covMatrixEigen<measdim>();
+            }
+	    template<std::size_t measdim, bool Enable = true>
+	      std::enable_if_t<Enable && (RWState==IsReadWrite), typename TrackStateProxy::MeasurementCovariance<measdim>>
+	      measurementCovariance_impl(IndexType index) {
+                return trackMeasurements().at(index)->template covMatrixEigen<measdim>();
             }
                         
             /**
@@ -187,7 +204,7 @@ namespace ActsTrk {
 
             inline size_t size_impl() const {
             	return m_trackStates->size();
-            };
+            }
 
             /**
              * @brief clears backends
@@ -198,7 +215,7 @@ namespace ActsTrk {
                 m_trackParameters->clear();
                 m_trackJacobians->clear();
                 m_trackMeasurements->clear();
-            };              
+            }              
 
             /**
              * @brief checks if the backends are connected (i.e. is safe to use, else any other call will cause segfaults)
@@ -252,16 +269,15 @@ namespace ActsTrk {
             std::vector<SourceLinkType*> m_sourceLinks;
 
     };
-
+    
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>  ConstMultiTrajectory;
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite> MutableMultiTrajectory;
 
-
     namespace detail {
         struct Decoration {
-            using SetterType = std::function<std::any(MultiTrajectory<true>::IndexType, const std::string&)>;
-            using GetterType = std::function<const std::any(MultiTrajectory<true>::IndexType, const std::string&)>;
-
+	    using SetterType = std::function<std::any(ActsTrk::MultiTrajectory<true>::IndexType, const std::string&)>;
+	    using GetterType = std::function<const std::any(ActsTrk::MultiTrajectory<true>::IndexType, const std::string&)>;
+	  
             Decoration(const std::string& n, SetterType s, GetterType g)
                 : name(n), hash(Acts::hashString(name)), setter(s), getter(g) {}
             std::string name; // xAOD API needs this
@@ -271,10 +287,7 @@ namespace ActsTrk {
     };
     }
 
-
-
 } // EOF namespace ActsTrk
-
                
                 
 #include "MultiTrajectory.icc"
