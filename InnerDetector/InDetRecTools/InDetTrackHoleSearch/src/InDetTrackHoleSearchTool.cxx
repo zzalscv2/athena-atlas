@@ -730,7 +730,7 @@ const Trk::Track*  InDet::InDetTrackHoleSearchTool::addHolesToTrack(const Trk::T
     const Trk::Track* newTrack = new Trk::Track(
       oldTrack.info(),
       std::move(trackTSOS),
-      oldTrack.fitQuality() ? oldTrack.fitQuality()->clone() : nullptr);
+      oldTrack.fitQuality() ? oldTrack.fitQuality()->uniqueClone() : nullptr);
     return newTrack;
   }
 
@@ -766,7 +766,7 @@ const Trk::Track*  InDet::InDetTrackHoleSearchTool::addHolesToTrack(const Trk::T
   const Trk::Track* newTrack = new Trk::Track(
     oldTrack.info(),
     std::move(trackTSOS),
-    oldTrack.fitQuality() ? oldTrack.fitQuality()->clone() : nullptr);
+    oldTrack.fitQuality() ? oldTrack.fitQuality()->uniqueClone() : nullptr);
 
   return newTrack;
 }

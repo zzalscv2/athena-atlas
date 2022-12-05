@@ -236,7 +236,7 @@ namespace InDet {
   {
 
     // fitQuality from track
-    const Trk::FitQuality* fq = track->fitQuality()->clone();
+    auto fq = track->fitQuality()->uniqueClone();
     if(!fq) return nullptr;
 
     // output datavector of TSOS
@@ -257,7 +257,7 @@ namespace InDet {
 
     //Construct the new track
     Trk::TrackInfo info;
-    Trk::Track* newTrk = new Trk::Track(info, std::move(ntsos), fq);
+    Trk::Track* newTrk = new Trk::Track(info, std::move(ntsos), std::move(fq));
     return newTrk;
   }
 

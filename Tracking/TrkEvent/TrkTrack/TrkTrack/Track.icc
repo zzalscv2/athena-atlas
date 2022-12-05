@@ -1,49 +1,47 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 namespace Trk {
 
-inline bool
-Track::isValid() const
-{
+inline bool Track::isValid() const {
   return (m_fitQuality && !m_trackStateVector.empty());
 }
 
-inline const FitQuality*
-Track::fitQuality() const
-{
+inline const FitQuality* Track::fitQuality() const {
   return m_fitQuality.get();
 }
 
+inline void Track::setFitQuality(std::unique_ptr<FitQuality> quality) {
+  m_fitQuality = std::move(quality);
+}
+
 inline const DataVector<const TrackStateOnSurface>*
-Track::trackStateOnSurfaces() const
-{
+Track::trackStateOnSurfaces() const {
   return &m_trackStateVector;
 }
 
-inline const TrackInfo&
-Track::info() const
-{
+inline const TrackInfo& Track::info() const {
   return m_trackInfo;
 }
 
-inline TrackInfo&
-Track::info()
-{
+inline TrackInfo& Track::info() {
   return m_trackInfo;
 }
+inline void Track::setInfo(const TrackInfo& input) {
+  m_trackInfo = input;
+}
 
-inline const Trk::TrackSummary*
-Track::trackSummary() const
-{
+inline const TrackSummary* Track::trackSummary() const {
   return m_trackSummary.get();
 }
 
-inline Trk::TrackSummary*
-Track::trackSummary()
-{
+inline TrackSummary* Track::trackSummary() {
   return m_trackSummary.get();
 }
 
+inline void Track::setTrackSummary(std::unique_ptr<Trk::TrackSummary> input) {
+  m_trackSummary = std::move(input);
 }
+
+}  // namespace Trk

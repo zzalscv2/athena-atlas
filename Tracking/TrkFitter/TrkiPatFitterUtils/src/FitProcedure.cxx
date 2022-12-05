@@ -320,7 +320,7 @@ Track* FitProcedure::constructTrack(
   // construct track
   double chiSquared = cache.chiSq * static_cast<double>(cache.numberDoF);
   Track* track = new Track(trackInfo, std::move(trackStateOnSurfaces),
-                           new FitQuality(chiSquared, cache.numberDoF));
+                           std::make_unique<FitQuality>(chiSquared, cache.numberDoF));
 
   if (cache.verbose)
     *cache.log << MSG::VERBOSE << " track with " << tsos << " TSOS " << endmsg;

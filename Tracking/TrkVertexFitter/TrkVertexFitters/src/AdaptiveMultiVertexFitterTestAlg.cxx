@@ -111,7 +111,7 @@ TrackUVec_t makeTracks (const PerigeeUVec_t& perigees)
     tsos.push_back(std::make_unique<Trk::TrackStateOnSurface>(
       nullptr, p->uniqueClone(), nullptr, typePattern));
     tracks.push_back(
-      std::make_unique<Trk::Track>(info, std::move(tsos), fqual.release()));
+      std::make_unique<Trk::Track>(info, std::move(tsos), std::move(fqual)));
   }
 
   return tracks;

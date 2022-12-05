@@ -101,10 +101,6 @@ Trk::GaussianSumFitter::GaussianSumFitter(const std::string& type,
   , m_cutChiSquaredPerNumberDOF(50.)
   , m_FitPRD{ 0 }
   , m_FitMeasurementBase{ 0 }
-  , m_ForwardFailure{ 0 }
-  , m_SmootherFailure{ 0 }
-  , m_PerigeeFailure{ 0 }
-  , m_fitQualityFailure{ 0 }
   , m_fitSuccess{ 0 }
 {
   declareInterface<ITrackFitter>(this);
@@ -148,22 +144,17 @@ StatusCode
 Trk::GaussianSumFitter::finalize()
 {
   ATH_MSG_INFO(
-    "-----------------------------------------------"
-    << '\n'
-    << "            Some Brief GSF Statistics          " << '\n'
-    << "-----------------------------------------------" << '\n'
-    << "Number of Fit PrepRawData Calls:          " << m_FitPRD << '\n'
-    << "Number of Fit MeasurementBase Calls:      " << m_FitMeasurementBase
-    << '\n'
-    << "Number of Forward Fit Failures:           " << m_ForwardFailure << '\n'
-    << "Number of Smoother Failures:              " << m_SmootherFailure << '\n'
-    << "Number of MakePerigee Failures:           " << m_PerigeeFailure << '\n'
-    << "Number of Trks that fail fitquality test: " << m_fitQualityFailure
-    << '\n'
-    << "Number of successful fits:                " << m_fitSuccess << '\n'
-    << '\n'
-    << "-----------------------------------------------" << '\n'
-    << "Finalisation of " << name() << " was successful");
+      "-----------------------------------------------"
+      << '\n'
+      << "            Some Brief GSF Statistics          " << '\n'
+      << "-----------------------------------------------" << '\n'
+      << "Number of Fit PrepRawData Calls:          " << m_FitPRD << '\n'
+      << "Number of Fit MeasurementBase Calls:      " << m_FitMeasurementBase
+      << '\n'
+      << "Number of successful fits:                " << m_fitSuccess << '\n'
+      << '\n'
+      << "-----------------------------------------------" << '\n'
+      << "Finalisation of " << name() << " was successful");
   return StatusCode::SUCCESS;
 }
 
@@ -300,21 +291,18 @@ Trk::GaussianSumFitter::fit(
                                              particleHypothesis);
 
   if (forwardTrajectory.empty()) {
-    m_ForwardFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
   // Perform GSF smoother operation
   MultiTrajectory smoothedTrajectory =
     smootherFit(ctx, extrapolatorCache, forwardTrajectory, particleHypothesis);
   if (smoothedTrajectory.empty()) {
-    m_SmootherFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
   // Fit quality
   std::unique_ptr<FitQuality> fitQuality = buildFitQuality(smoothedTrajectory);
   if (!fitQuality) {
-    m_fitQualityFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
@@ -324,7 +312,6 @@ Trk::GaussianSumFitter::fit(
   if (perigeeMultiStateOnSurface) {
     smoothedTrajectory.push_back(perigeeMultiStateOnSurface.release());
   } else {
-    m_PerigeeFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
@@ -338,7 +325,7 @@ Trk::GaussianSumFitter::fit(
   info.setTrackProperties(TrackInfo::BremFitSuccessful);
   m_fitSuccess.fetch_add(1, std::memory_order_relaxed);
   return std::make_unique<Track>(
-    info, std::move(smoothedTrajectory), fitQuality.release());
+    info, std::move(smoothedTrajectory), std::move(fitQuality));
 }
 
 /*
@@ -404,7 +391,6 @@ Trk::GaussianSumFitter::fit(
                     particleHypothesis);
 
   if (forwardTrajectory.empty()) {
-    m_ForwardFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
@@ -412,14 +398,12 @@ Trk::GaussianSumFitter::fit(
   MultiTrajectory smoothedTrajectory = smootherFit(
     ctx, extrapolatorCache, forwardTrajectory, particleHypothesis, ccot);
   if (smoothedTrajectory.empty()) {
-    m_SmootherFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
   // fit quality
   std::unique_ptr<FitQuality> fitQuality = buildFitQuality(smoothedTrajectory);
   if (!fitQuality) {
-    m_fitQualityFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
@@ -429,7 +413,6 @@ Trk::GaussianSumFitter::fit(
   if (perigeeMultiStateOnSurface) {
     smoothedTrajectory.push_back(perigeeMultiStateOnSurface.release());
   } else {
-    m_PerigeeFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
   }
 
@@ -442,7 +425,7 @@ Trk::GaussianSumFitter::fit(
   info.setTrackProperties(TrackInfo::BremFitSuccessful);
   m_fitSuccess.fetch_add(1, std::memory_order_relaxed);
   return std::make_unique<Track>(
-    info, std::move(smoothedTrajectory), fitQuality.release());
+    info, std::move(smoothedTrajectory), std::move(fitQuality));
 }
 
 /*

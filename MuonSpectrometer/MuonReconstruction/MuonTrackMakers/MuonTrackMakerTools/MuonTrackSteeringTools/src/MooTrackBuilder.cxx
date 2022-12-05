@@ -736,7 +736,7 @@ namespace Muon {
             trackStateOnSurfaces.push_back(std::move(new_state));
         }
         return std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                            track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                            track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
     }
 
     Trk::TrackStates::const_iterator MooTrackBuilder::insertClustersWithCompetingRotCreation(const EventContext& ctx,

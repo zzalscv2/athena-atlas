@@ -147,60 +147,19 @@ Trk::Track* FakeTrackBuilder::buildTrack(const InDetDD::SiDetectorElementCollect
         new TrackStateOnSurface(std::move(cProt), nullptr, nullptr));
     }
   }
-  //std::cout<<counter++<<std::endl;
 
   //create Track and add to collection
-  FitQuality* fitQuality = new FitQuality(1.0, 2);
+  auto fitQuality = std::make_unique<FitQuality>(1.0, 2);
 
   Trk::TrackInfo info( TrackInfo::Unknown, Trk::undefined);
   //std::cout<<counter++<<std::endl;
-  return new Trk::Track(info,  std::move(trackStateOnSurfaces), fitQuality);
+  return new Trk::Track(info,  std::move(trackStateOnSurfaces), std::move(fitQuality));
 }
 
 Trk::Track* FakeTrackBuilder::buildBrokenTrack(const InDetDD::SiDetectorElementCollection* /*elements*/) {
-  // using namespace Trk;
-  //
-  // DataVector<const Trk::TrackStateOnSurface>* trackStateOnSurfaces = new DataVector<const Trk::TrackStateOnSurface>;
-  //
-  // if (elements) {
-  //   unsigned int pix1 = 2832011902UL; // CLHEP::bar l1 mod(6,0) index(274,125)
-  //   Identifier idPix1(pix1);
-  //   InDet::PixelClusterOnTrack* fakePix1
-  //     = new InDet::PixelClusterOnTrack(); // make PRD-less ROT
-  //   fakePix1->m_detEl = 0;
-  //   fakePix1->m_identifier = idPix1;
-  //   Trk::LocalPosition locpos = Trk::LocalPosition( 5.559011, 22.613205);
-  // //2           Trk::LocalPosition locpos = Trk::LocalPosition( 7.315356, 21.303871);
-  //   fakePix1->m_localParams = Trk::LocalParameters(locpos);
-  //   Trk::CovarianceMatrix*  locCov = new Trk::CovarianceMatrix(2);
-  //   locCov->fast(1,1) = 0.001; locCov->fast(2,2)=0.0135;
-  //   fakePix1->m_localErrMat = Trk::ErrorMatrix(locCov);
-  //
-  //   // AtaPlane - no surface
-  //   CLHEP::HepRotation rotation;
-  //   CLHEP::Hep3Vector pos(10.0,20.0,30.0);
-  //   PlaneSurface planeSf(new HepGeom::Transform3D(rotation,pos));
-  //   AtaPlane* trackParameter = new AtaPlane(4.0, 3.0, 2.0, 1.0, 0.001, planeSf );
-  //   delete trackParameter->m_associatedSurface;
-  //   trackParameter->m_associatedSurface=0;
-  // std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type1(0);
-  // type1.set(Trk::TrackStateOnSurface::BremPoint);
-  // trackStateOnSurfaces->push_back( new TrackStateOnSurface(0, trackParameter, 0,  0,type1) );
-  //
-  //   trackStateOnSurfaces->push_back( new TrackStateOnSurface(
-  //     fakePix1,0,0,0));
-  //
-  // }
-  //                 //create Track and add to collection
-  // FitQuality* fitQuality = new FitQuality(1.0, 2);
-  //
-  // Trk::TrackInfo info( TrackInfo::Unknown, Trk::undefined);
-  //         //  Trk::Track* track = new Trk::Track(Track::unknown,  trackStateOnSurfaces, fitQuality);
-  // return new Trk::Track(info,  trackStateOnSurfaces, fitQuality);
     return nullptr;
 }
 
 Rec::TrackParticle* FakeTrackBuilder::buildTrackParticle(const InDetDD::SiDetectorElementCollection* /*elements*/) {
-  //FIXME - complete
   return nullptr;
 }

@@ -694,7 +694,7 @@ namespace Muon {
 
             for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : toBeSorted) { trackStateOnSurfaces.push_back(sorted.release()); }
             std::unique_ptr<Trk::Track> trackWithHoles = std::make_unique<Trk::Track>(
-                track.info(), std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                track.info(), std::move(trackStateOnSurfaces), track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
             // generate a track summary for this track
             if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *trackWithHoles, nullptr, false); }
             ATH_MSG_DEBUG("Track with holes " << m_printer->print(*trackWithHoles) << std::endl
@@ -930,7 +930,7 @@ namespace Muon {
             for (std::unique_ptr<const Trk::TrackStateOnSurface>& sorted : states) { trackStateOnSurfaces.push_back(sorted.release()); }
             ATH_MSG_DEBUG("Creating new Track " << states.size());
             std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track.info(), std::move(trackStateOnSurfaces),
-                                                                                track.fitQuality() ? track.fitQuality()->clone() : nullptr);
+                                                                                track.fitQuality() ? track.fitQuality()->uniqueClone() : nullptr);
             std::unique_ptr<Trk::Track> refittedTrack;
             if (m_onlyEO)
                 refittedTrack = std::unique_ptr<Trk::Track>(m_fitter->fit(ctx, *newTrack, m_useFitterOutlierLogic, Trk::muon));

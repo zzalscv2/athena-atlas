@@ -284,11 +284,9 @@ InDet::SiTrajectory_xk::convertToSimpleTrackStateOnSurfaceForDisTrackTrigger()
 // FitQuality production
 ///////////////////////////////////////////////////////////////////
 
-Trk::FitQuality*  
-InDet::SiTrajectory_xk::convertToFitQuality()
-{
+std::unique_ptr<Trk::FitQuality> InDet::SiTrajectory_xk::convertToFitQuality() {
   double xi2 = m_elements[m_elementsMap[m_firstElement]].xi2totalB();
-  return  new Trk::FitQuality(xi2,(m_ndf-5));
+  return std::make_unique<Trk::FitQuality>(xi2, (m_ndf - 5));
 }
 
 ///////////////////////////////////////////////////////////////////

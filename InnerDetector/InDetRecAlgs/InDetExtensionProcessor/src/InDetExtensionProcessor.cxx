@@ -455,7 +455,7 @@ InDet::InDetExtensionProcessor::trackPlusExtension(
   nExtStates += pExtendedTrajectory.size();
   const auto& pFitQuality {siTrack->fitQuality()};
   Trk::Track* extTrack =
-    new Trk::Track(siTrack->info(), std::move(pExtendedTrajectory), (pFitQuality ? pFitQuality->clone() : nullptr));
+    new Trk::Track(siTrack->info(), std::move(pExtendedTrajectory), (pFitQuality ? pFitQuality->uniqueClone() : nullptr));
   if (m_trackSummaryTool.isEnabled()) {
     m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*extTrack, nullptr, m_suppressHoleSearch);
   }

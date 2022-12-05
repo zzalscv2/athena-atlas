@@ -48,13 +48,13 @@ namespace AmbiguityProcessor{
         }
       }
     }
-    Trk::FitQuality* fq = new Trk::FitQuality(reXi2,nDF-5);
+    auto fq = std::make_unique<Trk::FitQuality>(reXi2,nDF-5);
     Trk::TrackInfo info;
     info.addPatternRecoAndProperties(track.info());
     Trk::TrackInfo newInfo;
     newInfo.setPatternRecognitionInfo(Trk::TrackInfo::SimpleAmbiguityProcessorTool);
     info.addPatternReco(newInfo); 
-    return std::make_unique<Trk::Track>(info, std::move(vecTsos), fq);
+    return std::make_unique<Trk::Track>(info, std::move(vecTsos), std::move(fq));
   }
   //
   int getUid() {

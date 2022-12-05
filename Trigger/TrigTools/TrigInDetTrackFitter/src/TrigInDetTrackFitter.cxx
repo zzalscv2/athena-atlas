@@ -778,15 +778,15 @@ std::pair<Trk::Track*,Trk::Track*> TrigInDetTrackFitter::fitTrack(const Trk::Tra
       ATH_MSG_VERBOSE("Fitted parameters: d0="<<d0<<" phi0="<<phi0<<" z0="<<z0
           <<" eta0="<<eta<<" pt="<<pt);
       }
-      Trk::FitQuality* pFQ=new Trk::FitQuality(chi2tot,ndoftot);
+      auto pFQ= std::make_unique<Trk::FitQuality>(chi2tot,ndoftot);
       Trk::TrackInfo info(recoTrack.info());
       info.setParticleHypothesis(matEffects);
-      fittedTrack = new Trk::Track(info, std::move(pParVec), pFQ);//fittedTrack now owns pParVec and pFQ
+      fittedTrack = new Trk::Track(info, std::move(pParVec), std::move(pFQ));//fittedTrack now owns pParVec and pFQ
       if( addTPtoTSoS ) {
-        Trk::FitQuality* pFQwTP=new Trk::FitQuality(chi2tot,ndoftot);
+        auto pFQwTP=std::make_unique<Trk::FitQuality>(chi2tot,ndoftot);
         Trk::TrackInfo infowTP(recoTrack.info());
         infowTP.setParticleHypothesis(matEffects);
-        fittedTrackwTP = new Trk::Track(infowTP, std::move(pParVecwTP), pFQwTP);//fittedTrack now owns pParVecwTP and pFQwTP
+        fittedTrackwTP = new Trk::Track(infowTP, std::move(pParVecwTP), std::move(pFQwTP));//fittedTrack now owns pParVecwTP and pFQwTP
       }
     }
 	}

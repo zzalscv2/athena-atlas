@@ -987,8 +987,8 @@ Trk::Track* InDet::TRT_Trajectory_xk::convert(const Trk::Track& Tr)
     m_xi2+= fqo->chiSquared();
     m_ndf+= fqo->numberDoF ();
   }
-  Trk::FitQuality* fq = new Trk::FitQuality(m_xi2,m_ndf);
-  return new Trk::Track (Tr.info(),std::move(tsosn),fq);
+  auto fq = std::make_unique<Trk::FitQuality>(m_xi2,m_ndf);
+  return new Trk::Track (Tr.info(),std::move(tsosn),std::move(fq));
 }
 
 ///////////////////////////////////////////////////////////////////

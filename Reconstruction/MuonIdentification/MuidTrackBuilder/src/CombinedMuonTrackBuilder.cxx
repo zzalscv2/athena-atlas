@@ -3557,10 +3557,10 @@ namespace Rec {
 
         // replace track
         Trk::TrackInfo trackInfo = track->info();
-        Trk::FitQuality* fitQuality = nullptr;
-        if (track->fitQuality()) { fitQuality = new Trk::FitQuality(*track->fitQuality()); }
+        std::unique_ptr<Trk::FitQuality> fitQuality = nullptr;
+        if (track->fitQuality()) { fitQuality = std::make_unique<Trk::FitQuality>(*track->fitQuality()); }
 
-        track = std::make_unique<Trk::Track>(trackInfo, std::move(trackStateOnSurfaces), fitQuality);
+        track = std::make_unique<Trk::Track>(trackInfo, std::move(trackStateOnSurfaces), std::move(fitQuality));
     }
 
     std::unique_ptr<Trk::PseudoMeasurementOnTrack> CombinedMuonTrackBuilder::vertexOnTrack(const Trk::TrackParameters& parameters,

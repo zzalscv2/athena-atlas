@@ -539,7 +539,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
   // TSOS from the track
   const DataVector<const Trk::TrackStateOnSurface>* stsos = tT.trackStateOnSurfaces();
   // fitQuality from track
-  const Trk::FitQuality* fq = tT.fitQuality()->clone();
+  auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
   auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
   int siHits = 0;
@@ -569,7 +569,7 @@ Trk::Track* InDet::TRT_SeededTrackFinder::mergeSegments(const Trk::Track& tT, co
   ///Construct the new track
   Trk::TrackInfo info;
   info.setPatternRecognitionInfo(Trk::TrackInfo::TRTSeededTrackFinder);
-  std::unique_ptr<Trk::Track> newTrack(std::make_unique<Trk::Track>(info, std::move(ntsos), fq));
+  std::unique_ptr<Trk::Track> newTrack(std::make_unique<Trk::Track>(info, std::move(ntsos), std::move(fq)));
 
   //Careful refitting at the end
   if (m_doRefit) {
@@ -656,7 +656,7 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   // TSOS from the track
   const DataVector<const Trk::TrackStateOnSurface>* stsos = tT.trackStateOnSurfaces();
   // fitQuality from track
-  const Trk::FitQuality* fq = tT.fitQuality()->clone();
+  auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
   auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
   int siHits = 0;
@@ -676,7 +676,7 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   ///Construct the new track
   Trk::TrackInfo info;
   info.setPatternRecognitionInfo(Trk::TrackInfo::TRTSeededTrackFinder);
-  std::unique_ptr<Trk::Track> newTrack( std::make_unique<Trk::Track>(info, std::move(ntsos), fq) );
+  std::unique_ptr<Trk::Track> newTrack( std::make_unique<Trk::Track>(info, std::move(ntsos), std::move(fq)) );
   //Careful refitting at the end
   if (m_doRefit) {
     newTrack = (m_fitterTool->fit(Gaudi::Hive::currentContext(),*newTrack, false, Trk::pion) ) ;
