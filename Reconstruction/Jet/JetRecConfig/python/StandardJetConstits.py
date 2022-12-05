@@ -201,8 +201,8 @@ _stdInputList = [
 
 
     JetInputExternal("UFOCSSK", xAODType.FlowElement,
-                     # in analysis releases, we can't build UFO anyways, so don't even try to declare dependencies,
-                     prereqs =lambda parentjdef :  [] if isAnalysisRelease() else ['input:GPFlowCSSK'], 
+                     # in analysis releases, or if we have UFOCSSK in inputs don't  declare unneeded dependencies which could fail the config.
+                     prereqs =lambda parentjdef :  [] if (isAnalysisRelease() or 'UFOCSSK' in parentjdef._cflags.Input.Collections ) else ['input:GPFlowCSSK'], 
                      filterfn =  lambda flag : ( (not isAnalysisRelease() or 'UFOCSSK' in flag.Input.Collections),  "Can't build UFO in Analysis projects and not UFOCSSK in input") ,
                      algoBuilder = lambda jdef,_ : tcccfg.runUFOReconstruction(jdef._cflags, stdConstitDic['GPFlowCSSK'])
                      ),
