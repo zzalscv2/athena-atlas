@@ -11,7 +11,7 @@
 #include <set>
 #include <unordered_map>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
 class CaloDetDescrElement;
 class TFCSParametrizationBase;
