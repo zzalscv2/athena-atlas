@@ -441,6 +441,16 @@ def createITkFastTrackingPassFlags():
 
     return icf
 
+### ITk with FTF standalone mode ####
+def createITkFTFPassFlags():
+
+    icf = createITkTrackingPassFlags()
+
+    icf.extension = "_FTF"
+
+    return icf
+
+
 ### ITk LRT mode ####################
 def createITkLargeD0TrackingPassFlags():
 
