@@ -11,17 +11,17 @@
 namespace TruthHelper {
 
 
-  /// @brief Returns true if the particle has a user-set status code
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsStatus : public GenIMCselector {
-  public:
+/// @brief Returns true if the particle has a user-set status code
+/// @deprecated Use the functions in TruthUtils instead
+class IsStatus : public GenIMCselector {
+public:
 
     IsStatus(int stat)
-      : m_stat(stat)
+        : m_stat(stat)
     { }
 
     IsStatus(const IsStatus& rhs)
-      : GenIMCselector(), m_stat(rhs.m_stat)
+        : GenIMCselector(), m_stat(rhs.m_stat)
     { }
 
     IsStatus& operator=(const IsStatus& rhs);
@@ -31,11 +31,11 @@ namespace TruthHelper {
     bool operator()(HepMC::ConstGenParticlePtr  p ) const;
 
 
-  private:
+private:
 
     int m_stat;
 
-  };
+};
 
 }
 

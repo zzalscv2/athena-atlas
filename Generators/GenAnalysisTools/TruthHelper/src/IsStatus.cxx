@@ -8,19 +8,19 @@
 namespace TruthHelper {
 
 
-  bool IsStatus::operator()(HepMC::ConstGenParticlePtr  p ) const {
+bool IsStatus::operator()(HepMC::ConstGenParticlePtr  p ) const {
     return p->status() == m_stat;
-  }
+}
 
-  IsStatus& IsStatus::operator=(const IsStatus& rhs){
+IsStatus& IsStatus::operator=(const IsStatus& rhs) {
     m_stat = rhs.m_stat;
     return *this;
 }
 
 
-  GenIMCselector* IsStatus::create() const {
+GenIMCselector* IsStatus::create() const {
     return new IsStatus(*this);
-  }
+}
 
 
 }

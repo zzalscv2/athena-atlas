@@ -12,38 +12,38 @@
 namespace TruthHelper {
 
 
-  /// @brief Allows the chaining of a number of GenParticle selectors
-  /// @deprecated Use the functions in TruthUtils instead
-  class NCutter : public GenIMCselector {
-  public:
+/// @brief Allows the chaining of a number of GenParticle selectors
+/// @deprecated Use the functions in TruthUtils instead
+class NCutter : public GenIMCselector {
+public:
 
     NCutter() {
-      m_selectors.push_back( new GenAll() );
+        m_selectors.push_back( new GenAll() );
     }
 
     NCutter(const std::vector<GenIMCselector*>& selectors) {
-      std::vector<GenIMCselector*>::const_iterator i = selectors.begin();
-      for (; i != selectors.end(); ++i) {
-        m_selectors.push_back((*i)->create());
-      }
+        std::vector<GenIMCselector*>::const_iterator i = selectors.begin();
+        for (; i != selectors.end(); ++i) {
+            m_selectors.push_back((*i)->create());
+        }
     }
 
     NCutter(const GenIMCselector* selector) {
-      m_selectors.push_back(selector->create() );
+        m_selectors.push_back(selector->create() );
     }
 
     NCutter( const NCutter& src) {
-      std::vector<GenIMCselector*>::const_iterator i = src.m_selectors.begin();
-      for (; i != (src.m_selectors).end(); ++i) {
-        m_selectors.push_back((*i)->create());
-      }
+        std::vector<GenIMCselector*>::const_iterator i = src.m_selectors.begin();
+        for (; i != (src.m_selectors).end(); ++i) {
+            m_selectors.push_back((*i)->create());
+        }
     }
 
     NCutter& operator=(const NCutter& rhs) ;
 
     ~NCutter() {
-      std::vector<GenIMCselector*>::iterator i = m_selectors.begin();
-      for (; i != m_selectors.end(); ++i) delete(*i);
+        std::vector<GenIMCselector*>::iterator i = m_selectors.begin();
+        for (; i != m_selectors.end(); ++i) delete(*i);
     }
 
     GenIMCselector* create() const;
@@ -51,11 +51,11 @@ namespace TruthHelper {
     bool operator() (HepMC::ConstGenParticlePtr ) const;
 
 
-  private:
+private:
 
     std::vector<GenIMCselector*> m_selectors;
 
-  };
+};
 
 
 }

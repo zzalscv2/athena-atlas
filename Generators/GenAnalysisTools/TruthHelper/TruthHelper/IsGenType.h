@@ -11,10 +11,10 @@
 namespace TruthHelper {
 
 
-  /// @brief Identify particles of specified PDG ID
-  /// @deprecated Use the functions in TruthUtils instead
-  class IsGenType: public GenIMCselector {
-  public:
+/// @brief Identify particles of specified PDG ID
+/// @deprecated Use the functions in TruthUtils instead
+class IsGenType: public GenIMCselector {
+public:
 
     IsGenType(int ParticleType);
 
@@ -29,11 +29,11 @@ namespace TruthHelper {
     bool operator()(HepMC::ConstGenParticlePtr p ) const;
 
 
-  private:
+private:
 
     std::vector<int> m_TypeList;
 
-  };
+};
 
 
 }
