@@ -53,7 +53,7 @@ def AddJetsFilter(filtSeq,ecmEnergy, jetR, mods=""):
        include("GeneratorFilters/QCDJetFilter.py")
 #    from QCDJetFilter import AddJetFilter
        AddJetFilter(filtSeq,ecmEnergy)
-       jetcollname = 'AntiKt{0}{1}TruthJets'.format(int(jetR*10),mods)
+       jetcollname = 'AntiKt{0}Truth{1}Jets'.format(int(jetR*10),mods)
        filtSeq.QCDTruthJetFilter.TruthJetContainer = jetcollname
 
 def JZSlice(x,filtSeq):
