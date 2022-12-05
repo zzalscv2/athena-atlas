@@ -101,6 +101,12 @@ namespace NSWL1 {
       m_trigger_trueThe      = new std::vector<double>();
       m_trigger_truePhi      = new std::vector<double>();
       m_trigger_trueDth      = new std::vector<double>();
+      m_trigger_trueEtaEnt   = new std::vector<double>();
+      m_trigger_trueTheEnt   = new std::vector<double>();
+      m_trigger_truePhiEnt   = new std::vector<double>();
+      m_trigger_trueEtaPos   = new std::vector<double>();
+      m_trigger_trueThePos   = new std::vector<double>();
+      m_trigger_truePhiPos   = new std::vector<double>();
       m_trigger_mxl          = new std::vector<double>();
       m_trigger_mx           = new std::vector<double>();
       m_trigger_my           = new std::vector<double>();
@@ -202,6 +208,12 @@ namespace NSWL1 {
         m_tree->Branch(TString::Format("%s_trigger_trueThe",n).Data(),    &m_trigger_trueThe);
         m_tree->Branch(TString::Format("%s_trigger_truePhi",n).Data(),    &m_trigger_truePhi);
         m_tree->Branch(TString::Format("%s_trigger_trueDth",n).Data(),    &m_trigger_trueDth);
+        m_tree->Branch(TString::Format("%s_trigger_trueEtaEnt",n).Data(),    &m_trigger_trueEtaEnt);
+        m_tree->Branch(TString::Format("%s_trigger_trueTheEnt",n).Data(),    &m_trigger_trueTheEnt);
+        m_tree->Branch(TString::Format("%s_trigger_truePhiEnt",n).Data(),    &m_trigger_truePhiEnt);
+        m_tree->Branch(TString::Format("%s_trigger_trueEtaPos",n).Data(),    &m_trigger_trueEtaPos);
+        m_tree->Branch(TString::Format("%s_trigger_trueThePos",n).Data(),    &m_trigger_trueThePos);
+        m_tree->Branch(TString::Format("%s_trigger_truePhiPos",n).Data(),    &m_trigger_truePhiPos);
         m_tree->Branch(TString::Format("%s_trigger_mxl",n).Data(),    &m_trigger_mxl);
         m_tree->Branch(TString::Format("%s_trigger_mx",n).Data(),    &m_trigger_mx);
         m_tree->Branch(TString::Format("%s_trigger_my",n).Data(),    &m_trigger_my);
@@ -311,6 +323,12 @@ namespace NSWL1 {
       m_trigger_trueThe->clear();
       m_trigger_truePhi->clear();
       m_trigger_trueDth->clear();
+      m_trigger_trueEtaEnt->clear();
+      m_trigger_trueTheEnt->clear();
+      m_trigger_truePhiEnt->clear();
+      m_trigger_trueEtaPos->clear();
+      m_trigger_trueThePos->clear();
+      m_trigger_truePhiPos->clear();
       m_trigger_mxl->clear();
       m_trigger_mx->clear();
       m_trigger_my->clear();

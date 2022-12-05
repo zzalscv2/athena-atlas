@@ -36,6 +36,52 @@ MMT_Hit::MMT_Hit(char wedge, hitData_entry entry, const MuonGM::MuonDetectorMana
   m_R = -1.;
   m_Ri = -1.;
   m_isNoise = false;
+  m_time = entry.gtime;
+
+  if(m_strip > 8191 || m_strip<0){
+    m_strip = 0;
+  }
+
+  // region represent the index of the mmfe8 in the plane
+  int region = int(float(m_strip)/(64*8));
+  // map of mmfe8s layer,radius(MMFE8 index on sector)
+  unsigned int mmfe8s[8][16];
+  unsigned int R;
+  // loop on layers
+  for( unsigned int L=0; L<8; L++){
+    // loop on pcbs
+    for(unsigned int p=1; p<9; p++){
+      // loop on sides
+      for(unsigned int s=0; s<2; s++){ //loop on 0 (Left) and 1 (Right), same convention used also later
+	if(L%2==s){
+	  R=(p-1)*2;
+	}
+	else{
+	  R=(p-1)*2+1;
+	}
+	mmfe8s[L][R]=s;
+      }
+    }
+  }
+  // art asic id
+  if(!int(m_plane/2.)%2){
+    if (mmfe8s[m_plane][region]==1){ //Right
+      m_ART_ASIC = 1-int(region/8);
+    }else{
+      m_ART_ASIC = int(region/8);
+    }
+  }else{
+    if (mmfe8s[m_plane][region]==0){ //Left
+      m_ART_ASIC = 1-int(region/8);
+    }else{
+      m_ART_ASIC = int(region/8);
+    }
+  }
+ 
+  // if Right side add 2 to the ART Asic Index
+  if(mmfe8s[m_plane][region]==0){
+    m_ART_ASIC+=2;
+  }
 
   Identifier strip_id = detManager->mmIdHelper()->channelID(m_station_name, m_station_eta, m_station_phi, m_multiplet, m_gasgap, m_strip);
   const MuonGM::MMReadoutElement* readout = detManager->getMMReadoutElement(strip_id);
@@ -81,6 +127,7 @@ MMT_Hit::MMT_Hit(const MMT_Hit* hit) {
   m_RZslope = hit->m_RZslope;
   m_YZslope = hit->m_YZslope;
   m_isNoise = hit->m_isNoise;
+  m_time = hit->m_time;
 }
 
 bool MMT_Hit::isX() const {

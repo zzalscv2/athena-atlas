@@ -134,7 +134,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
             std::vector<int>    MMFE_VMM = digit->MMFE_VMM_idForTrigger();
             std::vector<int>    VMM = digit->VMM_idForTrigger();
 
-            bool isValid;
+            bool isValid = false;
             histDigVars.NSWMM_dig_stationName.push_back(stName);
             histDigVars.NSWMM_dig_stationEta.push_back(stationEta);
             histDigVars.NSWMM_dig_stationPhi.push_back(stationPhi);
@@ -150,6 +150,8 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
 
             int nstrip = 0; //counter of the number of firing strips
             for (const auto &i: stripPosition) {
+
+	      isValid = false; //reset
               // take strip index form chip information
               int cr_strip = i;
               localPosX.push_back (0.);
@@ -279,7 +281,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           int special_time = thisTime + (event+1)*100;
 
           hitData_entry hit_entry(event,
-                               -1.,
+                               thisTime,
                                thisCharge,
                                thisVMM,
                                thisMMFE_VMM,

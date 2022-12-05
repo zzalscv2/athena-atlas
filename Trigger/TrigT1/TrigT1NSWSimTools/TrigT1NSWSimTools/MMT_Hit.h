@@ -37,6 +37,7 @@ class MMT_Hit {
     double getX() const { return m_localX; }
     double getY() const { return m_Y; }
     double getZ() const { return m_Z; }
+    float getTime() const { return m_time; }
     bool isNoise() const { return m_isNoise; }
     bool isX() const;
     bool isU() const;
@@ -68,5 +69,6 @@ class MMT_Hit {
     int m_BC_time, m_age;
     double m_Y, m_Z, m_R, m_Ri;
     bool m_isNoise;
+    float m_time;
 };
 #endif

@@ -72,8 +72,8 @@ namespace NSWL1 {
     Gaudi::Property<bool>  m_trapShape            {this, "TrapezoidalShape",         true, "Consider the quadruplet as a trapezoid"};
     Gaudi::Property<int>   m_diamRoadSize         {this, "DiamondRoadSize",          8,    "Number of strips to create a road"};
     Gaudi::Property<bool>  m_uv                   {this, "DiamondUV",                true, "Include Stereo planes for tracking"};
-    Gaudi::Property<int>   m_diamXthreshold       {this, "DiamondEtaThreshold",      2,    "Number of Eta planes for coincidences"};
-    Gaudi::Property<int>   m_diamUVthreshold      {this, "DiamondStereoThreshold",   2,    "Number of Stereo planes for coincidences"};
+    Gaudi::Property<int>   m_diamXthreshold       {this, "DiamondEtaThreshold",      3,    "Number of Eta planes for coincidences"};
+    Gaudi::Property<int>   m_diamUVthreshold      {this, "DiamondStereoThreshold",   3,    "Number of Stereo planes for coincidences"};
     Gaudi::Property<int>   m_diamOverlapEtaUp     {this, "DiamondEtaUpOverlap",      4,    "Number of Eta strips for upper road overlap"};
     Gaudi::Property<int>   m_diamOverlapEtaDown   {this, "DiamondEtaDownOverlap",    0,    "Number of Eta strips for lower road overlap"};
     Gaudi::Property<int>   m_diamOverlapStereoUp  {this, "DiamondStereoUpOverlap",   4,    "Number of Stereo strips for upper road overlap"};
@@ -182,6 +182,12 @@ namespace NSWL1 {
     std::vector<double>* m_trigger_trueThe ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_truePhi ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_trueDth ATLAS_THREAD_SAFE;
+    std::vector<double>* m_trigger_trueEtaEnt ATLAS_THREAD_SAFE;
+    std::vector<double>* m_trigger_trueTheEnt ATLAS_THREAD_SAFE;
+    std::vector<double>* m_trigger_truePhiEnt ATLAS_THREAD_SAFE;
+    std::vector<double>* m_trigger_trueEtaPos ATLAS_THREAD_SAFE;
+    std::vector<double>* m_trigger_trueThePos ATLAS_THREAD_SAFE;
+    std::vector<double>* m_trigger_truePhiPos ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_mxl ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_mx ATLAS_THREAD_SAFE;
     std::vector<double>* m_trigger_my ATLAS_THREAD_SAFE;
