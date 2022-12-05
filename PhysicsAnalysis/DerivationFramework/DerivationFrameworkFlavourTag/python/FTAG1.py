@@ -21,9 +21,10 @@ def FTAG1KernelCfg(ConfigFlags, name='FTAG1Kernel', **kwargs):
     acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
 
-    # Finally the kernel itself
+    # thinning tools
     thinningTools = []
-    
+
+    # Finally the kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
     acc.addEventAlgo(DerivationKernel(name, ThinningTools = thinningTools))       
     return acc
@@ -75,6 +76,11 @@ def FTAG1Cfg(ConfigFlags):
             "BTagging_AntiKt4EMPFlowSecVtx",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
+            "CaloCalTopoClusters",
+            "GlobalChargedParticleFlowObjects",
+            "GlobalNeutralParticleFlowObjects",
+            "CHSGChargedParticleFlowObjects",
+            "CHSGNeutralParticleFlowObjects",
             "TruthParticles",
             "TruthVertices",
             "TruthBottom", "TruthElectrons","TruthMuons","TruthTaus",
@@ -88,6 +94,17 @@ def FTAG1Cfg(ConfigFlags):
                 "JetAssociatedPixelClusters",
                 "JetAssociatedSCTClusters",
                 ]
+
+    # Append to dictionary
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+    FTAG1SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
+
 
     from DerivationFrameworkFlavourTag import FtagBaseContent
 
