@@ -132,6 +132,9 @@ try:
     if "StreamHITS" in f.infos["stream_names"]:
         from Digitization.DigitizationFlags import digitizationFlags
         simdict = digitizationFlags.specialConfiguration.get_Value()
+        if simdict is None:
+            # Here we are in a ReSim job, so the input is a HITS file
+            raise ValueError
         doG4SimConfig = False
     else:
         from G4AtlasApps.SimFlags import simFlags
