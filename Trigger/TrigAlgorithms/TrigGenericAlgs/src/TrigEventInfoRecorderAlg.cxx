@@ -2,6 +2,9 @@
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "TrigEventInfoRecorderAlg.h"
 
@@ -16,7 +19,12 @@ TrigEventInfoRecorderAlg::TrigEventInfoRecorderAlg(const std::string & name, ISv
 StatusCode TrigEventInfoRecorderAlg::initialize()
 {
     ATH_CHECK( m_TrigEventInfoKey.initialize() );
-    
+
+    ATH_CHECK( m_rhoDecor.initialize() );
+    ATH_CHECK( m_rhoEMTDecor.initialize() );
+    ATH_CHECK( m_muDecor.initialize() );
+    ATH_CHECK( m_numPVDecor.initialize() );
+
     // initialize only the ReadHandleKeys needed by the sequence that called this algorithm
     // initialize(false) for variables not used in the present instantiation
     ATH_CHECK(m_rhoKeyPF.initialize(m_decorateTLA));
@@ -45,19 +53,13 @@ StatusCode TrigEventInfoRecorderAlg::execute(const EventContext& context) const
     xAOD::TrigComposite * trigEI = new xAOD::TrigComposite();
     trigEventInfoContainer->push_back(trigEI);
     
-    
-    // Retrieve TLA variables and decorate the TrigComposite object with them
-    if ( m_decorateTLA ) 
-    {   
-        ATH_MSG_DEBUG("Calling decorateTLA...");
-        ATH_CHECK( decorateTLA(context, trigEI) );
-    }
-   
-
     SG::WriteHandle<xAOD::TrigCompositeContainer> trigEventInfoHandle(m_TrigEventInfoKey, context);
+    ATH_CHECK(trigEventInfoHandle.record( std::move( trigEventInfoContainer ),
+                                          std::move( trigEventInfoContainerAux ) ) );
 
-    ATH_CHECK(trigEventInfoHandle.record( std::move( trigEventInfoContainer ), std::move( trigEventInfoContainerAux ) ) );    
-    
+    // Retrieve TLA variables and decorate the TrigComposite object with them
+    if ( m_decorateTLA ) ATH_CHECK( decorateTLA(context, trigEI) );
+
     return StatusCode::SUCCESS;
 }
 
@@ -131,15 +133,14 @@ StatusCode TrigEventInfoRecorderAlg::decorateTLA(const EventContext& context, xA
 
 
     // Now decorate the TrigComposite object with the variables retrieved above
-
     ATH_MSG_DEBUG("Setting PF JetDensity to " << rho);
-    trigEI->setDetail("JetDensityEMPFlow", rho);
+    SG::makeHandle<double>(m_rhoDecor, context)(*trigEI) = rho;
     ATH_MSG_DEBUG("Setting EMT JetDensity to " << rho_EMT);
-    trigEI->setDetail("JetDensityEMTopo", rho_EMT);
+    SG::makeHandle<double>(m_rhoEMTDecor, context)(*trigEI) = rho_EMT;
     ATH_MSG_DEBUG("Setting AverageMu to " << avgmu);
-    trigEI->setDetail("AvgMu", avgmu);
+    SG::makeHandle<float>(m_muDecor, context)(*trigEI) = avgmu;
     ATH_MSG_DEBUG("Setting NPV to " << NPV);
-    trigEI->setDetail("NumPV", NPV);
+    SG::makeHandle<int>(m_numPVDecor, context)(*trigEI) = NPV;
 
     return StatusCode::SUCCESS;
 }
