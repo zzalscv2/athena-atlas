@@ -135,8 +135,6 @@ private:
   float m_err_x_hit;
   float m_err_y_hit;
 
-  static constexpr unsigned int m_crazy_bc =
-      std::numeric_limits<int32_t>::max();
 };
 
 #endif // HGTD_FASTSIDIGITIZATION_HGTD_SMEAREDDIGITIZATIONTOOL_H

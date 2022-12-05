@@ -14,6 +14,7 @@
 #include <vector>
 // HepMC includes
 #include "AtlasHepMC/GenEvent.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 // CLHEP includes
 #include "CLHEP/Vector/LorentzVector.h"
@@ -65,7 +66,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
   genPart->set_pdg_id(999); //Geantino
   genPart->set_status(1); //!< set decay status
-  HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max() );
+  HepMC::suggest_barcode(genPart, HepMC::crazyParticleBarcode );
 
   HepMC::GenVertexPtr genVertex=HepMC::newGenVertexPtr();
   genVertex->add_particle_out(genPart);
