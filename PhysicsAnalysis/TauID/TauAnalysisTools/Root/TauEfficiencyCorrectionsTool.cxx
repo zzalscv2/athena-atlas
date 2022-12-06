@@ -218,9 +218,13 @@ StatusCode TauEfficiencyCorrectionsTool::firstEvent()
   ATH_CHECK(evtStore()->retrieve(xEventInfo, "EventInfo"));
 
   if (xEventInfo->runNumber() != 284500 && xEventInfo->runNumber() != 300000 && xEventInfo->runNumber() != 310000)  // mc21/2022: 410000
-  {
-    ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (" << xEventInfo->runNumber() << "). Will only print this warning once." );
-  }
+    {
+      ANA_MSG_WARNING( "Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (" << xEventInfo->runNumber() << "). Will only print this warning once." );
+    }
+  if (xEventInfo->runNumber() < 410000 && m_sRecommendationTag == "2022-prerec")  // mc21/2022: 410000
+    {
+      ANA_MSG_WARNING( "TauEfficiency callibrations from 2022-prerec are not recommended for Run2 MC. Will only print this warning once." );
+    }
   return StatusCode::SUCCESS;
 }
 
@@ -416,7 +420,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2022_prerec()
     {
       if (m_sInputFilePathJetIDHadTau.empty()) {
         if (m_sAFII) ATH_MSG_WARNING("No fast-sim recommendation for Tau RNN, using FullSim");
-	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2019-summer.root";
+	m_sInputFilePathJetIDHadTau = sDirectory + "RNNID_TrueHadTau_2022-prerecommendation.root";
       }
       if (m_sVarNameJetIDHadTau.empty()) m_sVarNameJetIDHadTau = "TauScaleFactorJetIDHadTau";
 
