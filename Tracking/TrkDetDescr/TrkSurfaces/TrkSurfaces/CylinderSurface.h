@@ -120,7 +120,6 @@ public:
   /**Implicit Constructor*/
   virtual CylinderSurface* clone() const override;
   
-  std::unique_ptr<CylinderSurface> uniqueClone() const;
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
   virtual Surface::ChargedTrackParametersUniquePtr createUniqueTrackParameters(
