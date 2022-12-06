@@ -160,7 +160,7 @@ StatusCode Starlight_i::callGenerator()
     std::vector<starlightParticle>::const_iterator part = 
       (m_event->getParticles())->begin();
     for (part = m_event->getParticles()->begin(); 
-	 part != m_event->getParticles()->end(); part++, ipart++) {
+	 part != m_event->getParticles()->end(); ++part, ++ipart) {
       ATH_MSG_DEBUG( "TRACK: " << " " 
                      << starlightParticleCodes::jetsetToGeant((*part).getCharge() * (*part).getPdgCode()) << " "
                      << (*part).GetPx() << " " << (*part).GetPy() << " "<< (*part).GetPz() 
@@ -203,7 +203,7 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     std::vector<starlightParticle>::const_iterator part =
       (m_event->getParticles())->begin();
     for (part = m_event->getParticles()->begin();
-         part != m_event->getParticles()->end(); part++, ipart++) 
+         part != m_event->getParticles()->end(); ++part, ++ipart) 
       {
 	int pid = (*part).getPdgCode();
 	int charge = (*part).getCharge();
@@ -273,7 +273,7 @@ Starlight_i::starlight2lhef()
       CLHEP::HepLorentzVector photon_system(0);
       double ptscale =0;
       std::vector<starlightParticle>::const_iterator part = (uevent->getParticles())->begin();
-      for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); part++, ipart++)
+      for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); ++part, ++ipart)
       {
          CLHEP::HepLorentzVector particle_sl((*part).GetPx(), (*part).GetPy(), (*part).GetPz(), (*part).GetE());
          photon_system += particle_sl;
@@ -306,7 +306,7 @@ Starlight_i::starlight2lhef()
                   <<"  0.0000000000e+00 0. 9.\n";
       }
       
-      for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); part++, ipart++)
+      for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); ++part, ++ipart)
       {
         int pid = (*part).getPdgCode();
         int charge = (*part).getCharge();
@@ -365,7 +365,7 @@ bool Starlight_i::prepare_params_file()
 {
     // Write initialization parameters to tmp file
 
-    for(CommandVector::iterator i = m_InitializeVector.begin(); i != m_InitializeVector.end(); i++ )
+    for(CommandVector::iterator i = m_InitializeVector.begin(); i != m_InitializeVector.end(); ++i )
     {
         ATH_MSG_INFO( "  Command is: " << *i  );
 

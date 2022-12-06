@@ -82,7 +82,7 @@ namespace MuonCalib {
 
     template <typename T> inline void clearall(T &container) {
         typename T::iterator it = container.begin();
-        for (; it != container.end(); it++) {
+        for (; it != container.end(); ++it) {
             delete *it;
             *it = NULL;
         }

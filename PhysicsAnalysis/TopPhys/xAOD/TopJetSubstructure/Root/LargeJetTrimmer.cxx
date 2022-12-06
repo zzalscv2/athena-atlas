@@ -32,7 +32,7 @@ void top::LargeJetTrimmer::correctJet(xAOD::Jet& jet) {
 
   xAOD::JetConstituentVector::iterator it = vec.begin();
   xAOD::JetConstituentVector::iterator itE = vec.end();
-  for (; it != itE; it++) {
+  for (; it != itE; ++it) {
     PseudoJet p(0, 0, 0, 0);
     float pt = (*it)->pt();
     float y = (*it)->rapidity();

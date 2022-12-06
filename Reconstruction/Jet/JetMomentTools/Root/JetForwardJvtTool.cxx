@@ -144,7 +144,7 @@
     SG::ReadDecorHandle<xAOD::JetContainer, float> widthHandle(m_widthKey);
     Width = widthHandle(*jet);
     xAOD::JetConstituentVector constvec = jet->getConstituents();
-    for (xAOD::JetConstituentVector::iterator it = constvec.begin(); it != constvec.end(); it++) {
+    for (xAOD::JetConstituentVector::iterator it = constvec.begin(); it != constvec.end(); ++it) {
       const xAOD::CaloCluster *cl = static_cast<const xAOD::CaloCluster*>((*it)->rawConstituent());
       float secondR = cl->getMomentValue(xAOD::CaloCluster::MomentType::SECOND_R);
       float centermag = cl->getMomentValue(xAOD::CaloCluster::MomentType::CENTER_MAG);

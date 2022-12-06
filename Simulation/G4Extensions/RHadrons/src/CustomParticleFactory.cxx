@@ -136,7 +136,7 @@ std::set<G4ParticleDefinition *> CustomParticleFactory::load()
   decayFile.close();
 
   // Looping over custom particles to add decays
-  for (std::set<G4ParticleDefinition *>::iterator part=particles.begin();part!=particles.end();part++) {
+  for (std::set<G4ParticleDefinition *>::iterator part=particles.begin();part!=particles.end();++part) {
     name=(*part)->GetParticleName();
     std::vector<std::vector<std::string> > mydecays;
     for (unsigned int i = 0; i!= decays.size(); i++){
