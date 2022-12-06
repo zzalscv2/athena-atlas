@@ -34,9 +34,9 @@ class EvtRangeProcessor final : public AthenaMPToolBase
   virtual StatusCode finalize() override;
 
   // _________IAthenaMPTool_________   
-  virtual int makePool(int maxevt, int nprocs, const std::string& topdir) override;
-  virtual StatusCode exec() override;
-  virtual StatusCode wait_once(pid_t& pid) override;
+  virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) override;
+  virtual StatusCode exec ATLAS_NOT_THREAD_SAFE () override;
+  virtual StatusCode wait_once ATLAS_NOT_THREAD_SAFE (pid_t& pid) override;
 
   virtual void reportSubprocessStatuses() override;
   virtual void subProcessLogs(std::vector<std::string>&) override;
@@ -44,7 +44,7 @@ class EvtRangeProcessor final : public AthenaMPToolBase
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() override;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () override;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:
@@ -52,7 +52,7 @@ class EvtRangeProcessor final : public AthenaMPToolBase
   EvtRangeProcessor(const EvtRangeProcessor&);
   EvtRangeProcessor& operator= (const EvtRangeProcessor&);
 
-  StatusCode startProcess();
+  StatusCode startProcess ATLAS_NOT_THREAD_SAFE();
   StatusCode setNewInputFile(const std::string& newFile);
   void reportError(yampl::ISocket* socket,AthenaMPToolBase::ESRange_Status status);
 

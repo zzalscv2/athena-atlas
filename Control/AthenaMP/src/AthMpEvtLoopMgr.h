@@ -14,7 +14,7 @@
 class IAthenaMPTool;
 class ISvcLocator;
 
-class AthMpEvtLoopMgr
+class ATLAS_NOT_THREAD_SAFE AthMpEvtLoopMgr
    :virtual public ::IEventProcessor 
    , public AthService
 {

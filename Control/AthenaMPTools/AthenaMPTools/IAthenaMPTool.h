@@ -7,6 +7,7 @@
 
 #include "GaudiKernel/IAlgTool.h"
 #include "AthenaInterprocess/FdsRegistry.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <memory>
 #include <vector>
@@ -35,12 +36,12 @@ class IAthenaMPTool : virtual public IAlgTool
   static const InterfaceID& interfaceID() { return IID_IAthenaMPTool; }
 
   // Returns number of children processes in the pool. -1 in case of failure
-  virtual int makePool(int maxevt, int nprocs, const std::string& topdir) = 0;
+  virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) = 0;
 
-  virtual StatusCode exec() = 0;
+  virtual StatusCode exec ATLAS_NOT_THREAD_SAFE () = 0;
 
   // Pid of the finished process, 0 if no process finished, <0 if wait on the group failed
-  virtual StatusCode wait_once(pid_t& pid) = 0;
+  virtual StatusCode wait_once ATLAS_NOT_THREAD_SAFE (pid_t& pid) = 0;
 
   virtual void reportSubprocessStatuses() = 0;
   virtual void subProcessLogs(std::vector<std::string>&) = 0;

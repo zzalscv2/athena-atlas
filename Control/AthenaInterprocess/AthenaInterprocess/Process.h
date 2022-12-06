@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAINTERPROCESS_PROCESS_H
@@ -30,7 +30,7 @@ public:
    bool connectOut( const IdentifiedSharedQueue& queue );
    bool schedule(const IMessageDecoder* func, const ScheduledWork* args);
 
-   int mainloop();
+   int mainloop ATLAS_NOT_THREAD_SAFE ();
 
 private:
    SharedQueue           m_inbox;
