@@ -131,7 +131,6 @@ int main( int argc, char* argv[] )
   // preparation for control hisograms
   TauSelTool->setOutFile( fOutputFile.get() );
   CHECK(TauSelTool->setProperty("CreateControlPlots", true ));
-  CHECK(TauSelTool->setProperty("MuonOLR", true ));
   CHECK(TauSelTool->setProperty("JetIDWP", int(JETIDRNNMEDIUM) ));
   CHECK(TauSelTool->setProperty("EleIDWP", int(ELEIDRNNLOOSE) ));
   CHECK(TauSelTool->setProperty("EleIDVersion", 1 ));
@@ -157,13 +156,6 @@ int main( int argc, char* argv[] )
     vSmearingSystematicSet.push_back(CP::SystematicSet());
     vSmearingSystematicSet.back().insert(SystematicsVariation);
   }
-
-  CP::SystematicSet sTESAFIIDown;
-  sTESAFIIDown.insert(CP::SystematicVariation("TAUS_TRUEHADTAU_SME_TES_AFII",-1));
-  vSmearingSystematicSet.push_back(sTESAFIIDown);
-  CP::SystematicSet sTESAFIIUp;
-  sTESAFIIUp.insert(CP::SystematicVariation("TAUS_TRUEHADTAU_SME_TES_AFII",1));
-  vSmearingSystematicSet.push_back(sTESAFIIUp);
 
   // ===========================================================================
   // TauEfficiencyCorrectionsTool
