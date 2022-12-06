@@ -18,12 +18,11 @@
 #include <TStreamerInfo.h>
 #include <TStreamerElement.h>
 
-// EDM include(s):
+// Athena include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
-
-// xAOD include(s):
+#include "CxxUtils/checker_macros.h"
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 
@@ -304,8 +303,9 @@ namespace xAOD {
       // if needed:
       if( ( auxid >= m_vecs.size() ) || ( ! m_vecs[ auxid ] ) ||
           ( auxid >= m_branches.size() ) || ( ! m_branches[ auxid ] ) ) {
-         if( ( ! setupInputData( auxid ).isSuccess() ) ||
-             ( ! setupOutputData( auxid ).isSuccess() ) ) {
+         auto this_nc ATLAS_THREAD_SAFE = const_cast<TAuxStore*>(this);  // locked above
+         if( ( ! this_nc->setupInputData( auxid ).isSuccess() ) ||
+             ( ! this_nc->setupOutputData( auxid ).isSuccess() ) ) {
             return 0;
          }
       }
@@ -725,7 +725,8 @@ namespace xAOD {
       }
 
       // If not, try connecting to it now:
-      if( ! setupInputData( auxid ).isSuccess() ) {
+      auto this_nc ATLAS_THREAD_SAFE = const_cast<TAuxStore*>(this);  // locked above
+      if( ! this_nc->setupInputData( auxid ).isSuccess() ) {
          // This is not actually an error condition anymore. We can end up here
          // when we decorate constant objects coming from the input file, but
          // on one event we can't set any decorations. For instance when the
@@ -768,7 +769,8 @@ namespace xAOD {
       }
 
       // If not, try connecting to it now:
-      if( ! setupInputData( auxid ).isSuccess() ) {
+      auto this_nc ATLAS_THREAD_SAFE = const_cast<TAuxStore*>(this);  // locked above
+      if( ! this_nc->setupInputData( auxid ).isSuccess() ) {
          ::Error( "xAOD::TAuxStore::getIOType",
                   XAOD_MESSAGE( "Couldn't connect to auxiliary variable "
                                 "%i %s" ),
@@ -851,7 +853,7 @@ namespace xAOD {
    /// @returns <code>kTRUE</code> if the operation was successful,
    ///          <code>kFALSE</code> if not
    ///
-   StatusCode TAuxStore::setupInputData( auxid_t auxid ) const {
+   StatusCode TAuxStore::setupInputData( auxid_t auxid ) {
 
       // Return right away if we already know that the branch is missing:
       if( ( auxid < m_missingBranches.size() ) && m_missingBranches[ auxid ] ) {
@@ -1107,7 +1109,7 @@ namespace xAOD {
    /// @returns <code>kTRUE</code> if the operation was successful,
    ///          <code>kFALSE</code> if not
    ///
-   StatusCode TAuxStore::setupOutputData( auxid_t auxid ) const {
+   StatusCode TAuxStore::setupOutputData( auxid_t auxid ) {
 
       // Check whether we need to do anything:
       if( ! m_outTree ) return StatusCode::SUCCESS;
