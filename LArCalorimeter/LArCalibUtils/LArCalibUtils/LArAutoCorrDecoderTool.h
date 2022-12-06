@@ -44,10 +44,10 @@ class LArAutoCorrDecoderTool:
  private:
 
   //Properties:
-  Gaudi::Property<unsigned> m_decodemode{"DecodeMode",0};
-  Gaudi::Property<bool> m_alwaysHighGain{"UseAlwaysHighGain",false};
-  Gaudi::Property<bool> m_isSC{"isSC",false};
-  Gaudi::Property<std::string> m_keyAutoCorr{"KeyAutoCorr","LArAutoCorr"};
+  Gaudi::Property<unsigned> m_decodemode{this,"DecodeMode",0};
+  Gaudi::Property<bool> m_alwaysHighGain{this,"UseAlwaysHighGain",false};
+  Gaudi::Property<bool> m_isSC{this,"isSC",false};
+  Gaudi::Property<std::string> m_keyAutoCorr{this,"KeyAutoCorr","LArAutoCorr"};
 
   const Eigen::MatrixXd ACDiagonal( const HWIdentifier&  CellID, int gain, unsigned nSamples) const;
   const Eigen::MatrixXd ACPhysics( const HWIdentifier&  CellID, int gain, unsigned nSamples) const;

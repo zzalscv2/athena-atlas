@@ -52,8 +52,7 @@ def LArPileUpAutoCorrCfg(flags):
     result.merge(LArElecCalibDbCfg(flags,requiredConditions))
     result.addCondAlgo(CompFactory.LArADC2MeVCondAlg(UseFEBGainTresholds=False))
     theLArAutoCorrTotalCondAlg=CompFactory.LArAutoCorrTotalCondAlg()
-    theLArAutoCorrTotalCondAlg.Nminbias=nColl
-    theLArAutoCorrTotalCondAlg.Nsamples=flags.LArCalib.OFC.Nsamples
+    theLArAutoCorrTotalCondAlg.Nsamples=5 #Hardcoded ... 
     from AthenaCommon.SystemOfUnits import ns
     theLArAutoCorrTotalCondAlg.deltaBunch=int(flags.Beam.BunchSpacing/( 25.*ns)+0.5)
     theLArAutoCorrTotalCondAlg.isSuperCell=flags.LArCalib.isSC
@@ -62,13 +61,14 @@ def LArPileUpAutoCorrCfg(flags):
     theLArAutoCorrTotalCondAlg.LArAutoCorrTotalObjKey="LArPhysAutoCorr"  
     result.addCondAlgo(theLArAutoCorrTotalCondAlg)
     
-    result.addEventAlgo(CompFactory.LArAutoCorrAlgToDB(NMinbias=nColl))
+    result.addEventAlgo(CompFactory.LArAutoCorrAlgToDB(GroupingType=flags.LArCalib.GroupingType,
+                                                       NMinbias=nColl))
 
     
     #Ntuple writing
     rootfile=flags.LArCalib.Output.ROOTFile
     if rootfile != "":
-        result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr"))
+        result.addEventAlgo(CompFactory.LArAutoCorr2Ntuple(ContainerKey="LArPhysAutoCorr",OffId=True))
         import os
         if os.path.exists(rootfile):
             os.remove(rootfile)
@@ -99,6 +99,10 @@ def LArPileUpAutoCorrCfg(flags):
                                     FirstEvent	      = 1,
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
+
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
 
     return result
 
