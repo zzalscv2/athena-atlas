@@ -649,7 +649,10 @@ def ImpactPoint3dEstimatorCfg(flags):
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     Trk__ImpactPoint3dEstimator = CompFactory.Trk.ImpactPoint3dEstimator
-    TauInDetImpactPoint3dEstimator = Trk__ImpactPoint3dEstimator(name = sPrefix+'TauTrkImpactPoint3dEstimator', Extrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)) )
+    AtlasExtrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    #This is a public tool, so we explicitly must add it to the ToolSvc
+    result.addPublicTool(AtlasExtrapolator) 
+    TauInDetImpactPoint3dEstimator = Trk__ImpactPoint3dEstimator(name = sPrefix+'TauTrkImpactPoint3dEstimator', Extrapolator = AtlasExtrapolator   )
 
     result.setPrivateTools(TauInDetImpactPoint3dEstimator)
     return result
