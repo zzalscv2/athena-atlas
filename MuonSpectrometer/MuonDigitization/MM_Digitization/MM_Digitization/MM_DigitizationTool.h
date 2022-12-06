@@ -64,6 +64,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "xAODEventInfo/EventAuxInfo.h"  // SubEventIterator
 #include "xAODEventInfo/EventInfo.h"     // SubEventIterator
+#include "MuonCondData/NswCalibDbTimeChargeData.h"
 
 /*******************************************************************************/
 
@@ -143,7 +144,7 @@ private:
     Gaudi::Property<bool> m_needsMcEventCollHelper{this, "UseMcEventCollectionHelper", false};
     Gaudi::Property<bool> m_checkMMSimHits{this, "CheckSimHits", true, "Control on the hit validity"};
     Gaudi::Property<bool> m_useTimeWindow{this, "UseTimeWindow", true};
-    Gaudi::Property<bool> m_vmmNeighborLogic{this, "VMMNeighborLogic", false};
+    Gaudi::Property<bool> m_vmmNeighborLogic{this, "VMMNeighborLogic", true};
     Gaudi::Property<bool> m_doSmearing{this, "doSmearing", false,
                                        "set the usage or not of the smearing tool for realistic detector performance"};
     // Constants vars for the MM_StripsResponseSimulation class
@@ -157,7 +158,7 @@ private:
     Gaudi::Property<float> m_crossTalk1{this, "crossTalk1", 0.3, "Strip Cross Talk with Nearest Neighbor"};
     Gaudi::Property<float> m_crossTalk2{this, "crossTalk2", 0.09, "Strip Cross Talk with 2nd Nearest Neighbor"};
 
-    Gaudi::Property<float> m_avalancheGain{this, "AvalancheGain", 8.0e3, "avalanche Gain for rach gas mixture"};
+    Gaudi::Property<float> m_avalancheGain{this, "AvalancheGain", 6.0e3, "avalanche Gain for rach gas mixture"};
 
     // Constants vars for the MM_ElectronicsResponseSimulation
     Gaudi::Property<float> m_electronicsThreshold{this, "electronicsThreshold", 15000,
@@ -176,7 +177,7 @@ private:
                                               "Use conditions data to get thresholds, overrules useThresholdScaling"};
     Gaudi::Property<bool> m_useThresholdScaling{this, "useThresholdScaling", true,
                                                 "Use a strip length dependent threshold in MM digitiation"};
-    Gaudi::Property<float> m_thresholdScaleFactor{this, "thresholdScaleFactor", 9.0,
+    Gaudi::Property<float> m_thresholdScaleFactor{this, "thresholdScaleFactor", 10.0,
                                                   "Use x times the strip length dependent noise as MM threshold"};
     Gaudi::Property<float> m_vmmDeadtime{
         this, "vmmDeadtime", 200, "Specifies how much before the lower time limit the VMM simulation should start evaluating the signal"};
@@ -195,8 +196,10 @@ private:
     std::unique_ptr<MM_StripsResponseSimulation> m_StripsResponseSimulation{};
     std::unique_ptr<MM_ElectronicsResponseSimulation> m_ElectronicsResponseSimulation{};
 
-    double m_noiseSlope{0.};
-    double m_noiseIntercept{0.};
+    using NoiseCalibConstants = NswCalibDbTimeChargeData::CalibConstants;
+    /// Define a map to cache the noise parameters individually
+    /// Key: stationName * std::abs(stationEta)
+    std::map<int, NoiseCalibConstants> m_noiseParams{};
 };
 
 #endif  // MM_DigitizationTool
