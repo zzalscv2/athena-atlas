@@ -23,7 +23,7 @@ class defaultTestFiles:
     RAW = [f"{d}/TrigP1Test/data17_13TeV.00327265.physics_EnhancedBias.merge.RAW._lb0100._SFO-1._0001.1"]
     RAW_RUN3 = [f"{d}/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data"]
     RAW_BKG = [f"{d}/OverlayTests/mc15_valid.00200010.overlay_streamsAll_2016_pp_1.skim.DRAW.r8381/DRAW.09331084._000146.pool.root.1"]
-    RDO_RUN2 = [f"{d}/WorkflowReferences/master/q443/v1/myRDO.pool.root"]
+    RDO_RUN2 = [f"{d}/CampaignInputs/mc20/RDO/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/100events.RDO.pool.root"]
     RDO_BKG_RUN2 = [f"{d}/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1715/RDO.26811908._031801.pool.root.1"]
     RDO_BKG_RUN3 = [f"{d}/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/50events.RDO.pool.root"]
     RDO_BKG_RUN4 = [f"{d}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/mu200.50events.RDO.pool.root"]
