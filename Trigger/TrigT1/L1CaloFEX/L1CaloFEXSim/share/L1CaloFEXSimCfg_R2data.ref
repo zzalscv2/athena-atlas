@@ -44,6 +44,7 @@ ApplicationMgr                                               0 SUCCESS          
 ApplicationMgr                                               0 SUCCESS                     CaloBCIDLumiCondAlg/CaloBCIDLumiCondAlg
 ApplicationMgr                                               0 SUCCESS                     CaloNoiseCondAlg/Calo_electronicNoiseAlg
 ApplicationMgr                                               0 SUCCESS                     CaloNoiseSigmaDiffCondAlg/CaloNoiseSigmaDiffCondAlg
+ApplicationMgr                                               0 SUCCESS                     CaloSuperCellAlignCondAlg/CaloSuperCellAlignCondAlg
 ApplicationMgr                                               0 SUCCESS           AthSequencer/AthEndSeq
 ApplicationMgr                                               0 SUCCESS                AthIncFirerAlg/EndIncFiringAlg
 ApplicationMgr                                               0 SUCCESS                IncidentProcAlg/IncidentProcAlg2
