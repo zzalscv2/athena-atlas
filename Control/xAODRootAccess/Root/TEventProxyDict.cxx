@@ -22,12 +22,22 @@
 #   include "GaudiKernel/GenericAddress.h"
 #endif // NOT XAOD_STANDALONE
 
-// Local include(s):
+#include "AthContainers/tools/threading.h"
 #include "CxxUtils/checker_macros.h"
 #include "xAODRootAccess/TEvent.h"
 #include "xAODRootAccess/tools/Message.h"
 #include "xAODRootAccess/tools/THolder.h"
 #include "xAODRootAccess/tools/TObjectManager.h"
+
+
+
+namespace {
+   /// Mutex type for multithread synchronization
+   typedef AthContainers_detail::mutex mutex_t;
+   /// Guard type for multithreaded synchronisation
+   typedef AthContainers_detail::lock_guard< mutex_t > guard_t;
+}
+
 
 #ifndef XAOD_STANDALONE
 namespace xAODPrivate {
@@ -236,8 +246,10 @@ namespace xAOD {
       // Get the object describing this branch/object:
       const BranchInfo* bi = getBranchInfo( sgkey );
       if( ! bi ) {
-         static SG::SGKeyMap< int > missingSGKeys;
-         if( missingSGKeys.emplace( sgkey, 0 ).second ) {
+         static SG::SGKeySet missingSGKeys ATLAS_THREAD_SAFE;
+         static mutex_t mutex;
+         guard_t lock(mutex);
+         if( missingSGKeys.emplace( sgkey ).second ) {
             ::Warning( "xAOD::TEvent::proxy_exact",
                        "Can't find BranchInfo for %d.",
                        sgkey );
@@ -336,12 +348,16 @@ namespace xAOD {
       if( ! efe ) {
          efe = m_inputEventFormat.get( sgkey, QUIET );
       }
-      static SG::SGKeyMap< int > missingSGKeys;
-      if( ( ! efe ) && missingSGKeys.emplace( sgkey, 0 ).second ) {
-         ::Warning( "xAOD::TEvent::getEventFormatElement",
-                    "Can't find EventFormatElement for hashed "
-                    "SG key %d", sgkey );
-         return 0;
+      if ( ! efe ) {
+         static SG::SGKeySet missingSGKeys ATLAS_THREAD_SAFE;
+         static mutex_t mutex;
+         guard_t lock(mutex);
+         if( missingSGKeys.emplace( sgkey ).second ) {
+            ::Warning( "xAOD::TEvent::getEventFormatElement",
+                       "Can't find EventFormatElement for hashed "
+                       "SG key %d", sgkey );
+            return 0;
+         }
       }
       return efe;
    }
