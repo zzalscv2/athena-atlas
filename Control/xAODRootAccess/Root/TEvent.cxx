@@ -373,7 +373,11 @@ namespace xAOD {
       }
       m_inputObjects.clear();
       m_inputMissingObjects.clear();
-      m_branches.clear();
+      {
+        upgrading_lock_t lock(m_branchesMutex);
+        lock.upgrade();
+        m_branches.clear();
+      }
 
       // Clear the cached input meta-objects:
       itr = m_inputMetaObjects.begin();

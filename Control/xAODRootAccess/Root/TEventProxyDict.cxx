@@ -266,11 +266,18 @@ namespace xAOD {
 
    const TEvent::BranchInfo* TEvent::getBranchInfo( SG::sgkey_t sgkey ) const {
 
-      // If the object already exists, return it:
-      auto it = m_branches.find( sgkey );
-      if( it != m_branches.end() ) {
+     {
+       // We can only hold the lock (even though it's a shared lock) for
+       // this limited scope because the call to getInputObject below
+       // leads to a recursion and dead-lock if not released immediately.
+       upgrading_lock_t lock(m_branchesMutex);
+
+       // If the object already exists, return it:
+       auto it = m_branches.find( sgkey );
+       if( it != m_branches.end() ) {
          return &( it->second );
-      }
+       }
+     }
 
       // If not, construct it now:
       BranchInfo bi;
@@ -331,6 +338,8 @@ namespace xAOD {
 #endif // not XAOD_STANDALONE
 
       // Add the branch info to our list:
+      upgrading_lock_t lock(m_branchesMutex);
+      lock.upgrade();
       auto ret = m_branches.insert( std::make_pair( sgkey, std::move( bi ) ) );
 
       // Return a pointer to the branch info:
@@ -372,8 +381,9 @@ namespace xAOD {
    ///
    StatusCode TEvent::addToStore( CLID clid, SG::DataProxy* proxy ) {
 
-      // Warn the user that the function got called:
+      upgrading_lock_t lock(m_branchesMutex);
 
+      // Warn the user that the function got called:
       static std::atomic_flag warningPrinted ATLAS_THREAD_SAFE = ATOMIC_FLAG_INIT;
       if ( ! warningPrinted.test_and_set() ) {
           ::Warning( "xAOD::TEvent::addToStore",
@@ -386,6 +396,7 @@ namespace xAOD {
                                                      m_branches.size() );
       BranchInfo bi;
       bi.m_proxy.reset( proxy );
+      lock.upgrade();
       m_branches.insert( std::make_pair( stringToKey( uniqueKey.Data(),
                                                       clid ),
                                          std::move( bi ) ) );
@@ -395,6 +406,8 @@ namespace xAOD {
    }
 
    std::vector< const SG::DataProxy* > TEvent::proxies() const {
+
+      upgrading_lock_t lock(m_branchesMutex);
 
       std::vector< const SG::DataProxy* > ret;
       for( const auto& p : m_branches ) {
