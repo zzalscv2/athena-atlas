@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TPrimitiveAuxBranchManager.cxx 783066 2016-11-08 19:39:32Z ssnyder $
 
 // ROOT include(s):
 #include <TBranch.h>
@@ -133,11 +132,7 @@ namespace xAOD {
       return;
    }
 
-   ::Bool_t TPrimitiveAuxBranchManager::isSet( ::Bool_t forceSet ) const {
-
-      // If we can't use default objects, let's just return the
-      // actual state that the object is in:
-      if( ! forceSet ) return m_isSet;
+   ::Bool_t TPrimitiveAuxBranchManager::create() {
 
       // If we already have it set, let's stop here:
       if( m_isSet ) return kTRUE;
@@ -157,6 +152,11 @@ namespace xAOD {
 
       // We are now "set":
       return kTRUE;
+   }
+
+   ::Bool_t TPrimitiveAuxBranchManager::isSet() const {
+
+     return m_isSet;
    }
 
    void TPrimitiveAuxBranchManager::reset() {

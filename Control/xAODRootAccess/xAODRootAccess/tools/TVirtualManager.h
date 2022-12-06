@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TVirtualManager.h 595278 2014-05-03 09:31:05Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TVIRTUALMANAGER_H
 #define XAODROOTACCESS_TOOLS_TVIRTUALMANAGER_H
 
@@ -22,9 +21,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 595278 $
-   /// $Date: 2014-05-03 11:31:05 +0200 (Sat, 03 May 2014) $
-   ///
    class TVirtualManager {
 
    public:
@@ -39,8 +35,10 @@ namespace xAOD {
       /// Function replacing the object being handled
       virtual void setObject( void* obj ) = 0;
 
+      /// Create the object for the current event
+      virtual ::Bool_t create() = 0;
       /// Check if the object was set for the current event
-      virtual ::Bool_t isSet( ::Bool_t forceSet = kTRUE ) const = 0;
+      virtual ::Bool_t isSet() const = 0;
       /// Reset the object at the end of processing of an event
       virtual void reset() = 0;
 
