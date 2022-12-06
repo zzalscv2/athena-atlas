@@ -102,7 +102,7 @@ StatusCode RPVLLTestRates::execute() {
   if (SDcoll.isValid()) {
     SkimDecisionCollection::const_iterator itr=SDcoll->begin(), itrEnd = SDcoll->end();
     int filterCount = 0;
-    for(; itr != itrEnd; itr++) {
+    for(; itr != itrEnd; ++itr) {
       isAc = (*itr)->isAccepted();
       m_skimPassHist->Fill((float)filterCount+0.5,isAc);
       m_filterPassed[filterCount] = isAc;
@@ -112,7 +112,7 @@ StatusCode RPVLLTestRates::execute() {
       if (isAc>0) {
 	int filterCount2=0;
 	SkimDecisionCollection::const_iterator itr2=SDcoll->begin(), itrEnd2 = SDcoll->end();
-	for(; itr2 != itrEnd2; itr2++) {
+	for(; itr2 != itrEnd2; ++itr2) {
 	  int isAc2 = (*itr2)->isAccepted();
 	  m_twoDskimHist->Fill((float)filterCount+0.5,filterCount2+0.5,isAc2);
 	  filterCount2++;

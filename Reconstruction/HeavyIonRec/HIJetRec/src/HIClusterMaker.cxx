@@ -71,7 +71,7 @@ StatusCode HIClusterMaker::execute()
 
     if ( cellToken.size() == 0 ) continue;
     for(NavigationToken<CaloCell,double,CaloCellIDFcn>::const_iterator cellItr = cellToken.begin();
-	cellItr != cellToken.end(); cellItr++ )
+	cellItr != cellToken.end(); ++cellItr )
     {
       //Bad cell policy - to be kept
       //if(m_bad_cell_tool->SkipCell(*cellItr))
@@ -167,7 +167,7 @@ StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
 {
   msg(MSG::INFO) << "Dumping PseudoJets" << endmsg;
   for(xAOD::CaloClusterContainer::iterator clusCollIter= clusColl->begin();
-      clusCollIter!= clusColl->end(); clusCollIter++)
+      clusCollIter!= clusColl->end(); ++clusCollIter)
   {
     xAOD::CaloCluster* cl = (*clusCollIter);
 
@@ -191,7 +191,7 @@ StatusCode HIClusterMaker::dumpClusters(xAOD::CaloClusterContainer* clusColl)
     // {
     xAOD::CaloCluster::cell_iterator cellIterEnd = cl->cell_end();
     for(xAOD::CaloCluster::cell_iterator cellIter= cl->cell_begin();
-    	cellIter != cellIterEnd; cellIter++ )
+    	cellIter != cellIterEnd; ++cellIter )
     {
       CxxUtils::prefetchNext (cellIter, cellIterEnd);
       const CaloCell* pCell=(*cellIter);

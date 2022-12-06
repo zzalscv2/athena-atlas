@@ -798,7 +798,7 @@ void EvtPythiaEngine::updatePhysicsParameters()
         EvtExtGeneratorCommandsTable::getInstance()->getCommands( "PYTHIA" );
     GeneratorCommands::iterator it = commands.begin();
 
-    for ( ; it != commands.end(); it++ ) {
+    for ( ; it != commands.end(); ++it ) {
         Command command = *it;
         std::vector<std::string> commandStrings;
 

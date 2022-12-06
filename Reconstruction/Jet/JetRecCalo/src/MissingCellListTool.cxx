@@ -135,7 +135,7 @@ int MissingCellListTool::execute() const {
     }
     std::vector<Identifier>::const_iterator idItr = calo_id->cell_begin();
     std::vector<Identifier>::const_iterator idItrE = calo_id->cell_end();
-    for(; idItr!=idItrE; idItr++){
+    for(; idItr!=idItrE; ++idItr){
 
       // check if needs insertion.
       bool insert = false;

@@ -844,7 +844,7 @@ JetTagMonitoring::Jet_t JetTagMonitoring::getTaggabilityLabel(const xAOD::Jet *j
 
   std::vector<const xAOD::IParticle*>::const_iterator trkItr;
 
-  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; trkItr++ ) {
+  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; ++trkItr ) {
 
     const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*trkItr);
     if ( ! trackPart ) continue;
@@ -1220,7 +1220,7 @@ void JetTagMonitoring::fillTrackInJetHistograms(const xAOD::Jet *jet) {
   ATH_MSG_DEBUG("examining " << nTrkInJet << " tracks.");
 
   // loop over tracks in a jet // 
-  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; trkItr++ ) {
+  for ( trkItr = trackVector.begin(); trkItr != trackVector.end() ; ++trkItr ) {
 
     const xAOD::TrackParticle* trackPart = dynamic_cast<const xAOD::TrackParticle*>(*trkItr);
     if ( ! trackPart ) continue;

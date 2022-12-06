@@ -92,7 +92,7 @@ std::unique_ptr<RegSelSiLUT> MDT_RegSelCondAlg::createTable( const EventContext&
   std::vector<Identifier>::const_iterator  itr    = helper->module_begin();
   std::vector<Identifier>::const_iterator  idlast = helper->module_end();
   
-  for ( ; itr!=idlast; itr++ )  {
+  for ( ; itr!=idlast; ++itr )  {
 
     Identifier Id = *itr;
     IdentifierHash Idhash;

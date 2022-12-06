@@ -289,7 +289,7 @@ void Jet::copy_from_jet( const Jet* pJet, CopyDataMembers cdm0, CopyDataMembers 
       //std::cout<< "copy constituent "<< std::endl;
       const_iterator firstConst = pJet->firstConstituent();
       const_iterator lastConst  = pJet->lastConstituent();
-      for ( ; firstConst != lastConst; firstConst++ )
+      for ( ; firstConst != lastConst; ++firstConst )
 	{
 	  Jet::index_type theIndex;
 	  if ( pJet->getIndex(firstConst,theIndex) ) // getIndex by iterator more efficient ?

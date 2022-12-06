@@ -326,7 +326,7 @@ JetTruthParticleSelectorTool::finalize()
       msg(MSG::INFO) << "Counts of PDGs of all stable particles :" << endmsg;
       msg(MSG::INFO) << "========================================" << endmsg;
       msg(MSG::INFO) << "|    PDG    |  # particles  |" << endmsg;
-      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); it++ )
+      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); ++it )
         {
           msg(MSG::INFO) << "|"
                          << std::setw(10) << it->first << " |"
@@ -334,7 +334,7 @@ JetTruthParticleSelectorTool::finalize()
                          << endmsg;
         }
       msg(MSG::INFO) << "|    PDG    |    <p>    |    rms    |    <pt>    |    rms    |    <eta>    |    rms    |" << endmsg;
-      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); it++ )
+      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); ++it )
         {
           int n=it->second;
           double p=m_avP[it->first]/n;
@@ -357,7 +357,7 @@ JetTruthParticleSelectorTool::finalize()
                          << endmsg;
         }
       msg(MSG::INFO) << "|    PDG    |   <phi>   |    rms    |     <m>     |     rms    |" << endmsg;
-      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); it++ )
+      for ( PDGList::iterator it = m_pdgList.begin(); it != m_pdgList.end(); ++it )
         {
           int n=it->second;
           double phi=m_avPhi[it->first]/n;
