@@ -128,13 +128,15 @@ def LArDelay_OFCCaliCfg(flags):
                                                             NtupleName  = "CALIWAVE",
                                                             AddFEBTempInfo = False,
                                                             SaveDerivedInfo = True,
-                                                            ApplyCorrection = True
+                                                            ApplyCorrection = True,
+                                                            OffId=True
                                                         ))
 
         if rootfile2 == "":
            result.addEventAlgo(CompFactory.LArOFC2Ntuple(ContainerKey = "LArOFC",
-                                                      AddFEBTempInfo  = False
-                                                  ))
+                                                         AddFEBTempInfo  = False,
+                                                         OffId=True
+                                                     ))
 
         import os
         if os.path.exists(rootfile):
@@ -182,6 +184,9 @@ def LArDelay_OFCCaliCfg(flags):
 
 
     result.getService("IOVDbSvc").DBInstance=""
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
 
     return result
 

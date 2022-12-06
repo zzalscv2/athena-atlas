@@ -133,6 +133,10 @@ def LArRampCfg(flags):
         result.setAppProperty("HistogramPersistency","ROOT")
         pass # end if ROOT ntuple writing
 
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
     return result
 
 

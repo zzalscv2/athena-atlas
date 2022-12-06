@@ -29,8 +29,6 @@ def LArRTMParamsCfg(flags):
     
     LArRTMParamExtractor = CompFactory.LArRTMParamExtractor()
 
-    LArRTMParamExtractor.useTBB=True
-
     LArRTMParamExtractor.KeyList        = ["LArCaliWave"]
     LArRTMParamExtractor.TestMode       = False
     LArRTMParamExtractor.GroupingType   = flags.LArCalib.GroupingType
@@ -120,6 +118,9 @@ def LArRTMParamsCfg(flags):
                                     FirstEvent	      = 1,
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
+
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
 
     return result
 

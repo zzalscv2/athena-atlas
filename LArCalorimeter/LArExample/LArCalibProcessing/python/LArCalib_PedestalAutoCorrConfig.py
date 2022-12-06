@@ -198,6 +198,10 @@ def LArPedestalAutoCorrCfg(flags):
 
         result.getService("IOVDbSvc").DBInstance=""
 
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
+
     return result
 
 

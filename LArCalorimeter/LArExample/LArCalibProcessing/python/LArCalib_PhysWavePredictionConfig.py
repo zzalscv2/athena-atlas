@@ -134,6 +134,9 @@ def LArPhysWavePredictionCfg(flags):
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
 
+    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+    result.merge(PerfMonMTSvcCfg(flags))
+
     return result
 
 
