@@ -79,7 +79,7 @@ namespace xAOD {
       return *this;
    }
 
-   ::TBranch* TPrimitiveAuxBranchManager::branch() const {
+   ::TBranch* TPrimitiveAuxBranchManager::branch() {
 
       return m_branch;
    }

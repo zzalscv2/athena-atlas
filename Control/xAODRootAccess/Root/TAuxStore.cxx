@@ -1829,11 +1829,11 @@ namespace xAOD {
    ::Bool_t TAuxStore::isRegisteredType( auxid_t auxid ) {
 
       // Cache some data:
-      static SG::AuxTypeRegistry& registry =
+      static SG::AuxTypeRegistry& registry ATLAS_THREAD_SAFE =
          SG::AuxTypeRegistry::instance();
       static const auxid_t sauxid =
          registry.getAuxID< SG::AuxTypePlaceholder >( "AuxTypePlaceholder" );
-      static const std::type_info* sti = registry.getVecType( sauxid );
+      static const std::type_info* const sti = registry.getVecType( sauxid );
 
       // Check if the types match:
       return ( *sti != *( registry.getVecType( auxid ) ) );

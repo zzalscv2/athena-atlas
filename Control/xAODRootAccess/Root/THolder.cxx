@@ -4,10 +4,11 @@
 #include <TClass.h>
 #include <TError.h>
 
-// EDM include(s):
+// Athena include(s):
 #include "AthContainers/normalizedTypeinfoName.h"
 #include "AthContainers/AuxVectorBase.h"
 #include "AthContainers/AuxElement.h"
+#include "CxxUtils/checker_macros.h"
 
 // Local include(s):
 #include "xAODRootAccess/tools/THolder.h"
@@ -302,8 +303,13 @@ namespace xAOD {
          return 0;
       }
 
-      // Check if the user requested a valid base class for the held type:
-      const Int_t offset = m_type->GetBaseClassOffset( userClass.second );
+      // Check if the user requested a valid base class for the held type.
+      //
+      // Calling GetBaseClassOffset is in general not thread-safe as it could
+      // trigger the loading and parsing of StreamerInfo. However, we assume
+      // that this has already been done once we get here.
+      TClass* cl ATLAS_THREAD_SAFE = m_type;
+      const Int_t offset = cl->GetBaseClassOffset( userClass.second );
       if( offset < 0 ) {
          if( ! silent ) {
             ::Warning( "xAOD::THolder::getAs",
