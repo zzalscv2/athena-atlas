@@ -390,7 +390,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
     # Include, and then set up the overlap analysis algorithm sequence:
     from AsgAnalysisAlgorithms.OverlapAnalysisSequence import \
         makeOverlapAnalysisSequence
-    overlapSequence = makeOverlapAnalysisSequence( dataType, doTaus=False, enableCutflow=True, shallowViewOutput = False, inputLabel = 'preselectOR', outputLabel = 'passesOR' )
+    overlapSequence = makeOverlapAnalysisSequence( dataType, doTaus=True, enableCutflow=True, shallowViewOutput = False, inputLabel = 'preselectOR', outputLabel = 'passesOR' )
     overlapSequence.configure(
         inputName = {
             'electrons' : 'AnaElectrons_%SYS%',
@@ -402,14 +402,13 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         outputName = { } )
 
     algSeq += overlapSequence
-    if not forCompare :
-        vars += [
-            'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
-            'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
-            'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
-            'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
-            'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
-        ]
+    vars += [
+        'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
+        'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
+        'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
+        'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
+        'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
+    ]
 
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
@@ -627,6 +626,27 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
         'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
         'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
         'AnaMET_%SYS%.name  -> met_name_%SYS%',
+    ]
+
+
+    # Include, and then set up the overlap analysis algorithm config:
+    from AsgAnalysisAlgorithms.OverlapAnalysisConfig import \
+        makeOverlapAnalysisConfig
+    makeOverlapAnalysisConfig( configSeq,
+                               electrons = 'AnaElectrons.loose',
+                               photons   = 'AnaPhotons.tight',
+                               muons     = 'AnaMuons.medium',
+                               jets      = 'AnaJets',
+                               taus      = 'AnaTauJets.tight',
+                               inputLabel = 'preselectOR',
+                               outputLabel = 'passesOR' )
+
+    vars += [
+        'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
+        'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
+        'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
+        'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
+        'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
     ]
 
 
