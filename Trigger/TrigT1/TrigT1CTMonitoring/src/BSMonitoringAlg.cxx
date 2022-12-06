@@ -1637,9 +1637,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doCtp(const CTP_RDO* theCTP_RDO,
 			 << freqFromCool << " Hz => t_BC = " << bcDurationInNs << " ns"); 
 	}
 	else {
-	  //ATH_MSG_WARNING( "No valid frequency measurements found in COOL, will use hardcoded BC interval: t_BC = "
- 	  ATH_MSG_INFO( "No valid frequency measurements found in COOL, will use hardcoded BC interval: t_BC = " 
-			 << bcDurationInNs << " ns");
+      ATH_MSG_DEBUG( "No valid frequency measurements found in COOL, will use hardcoded BC interval: t_BC = " << bcDurationInNs << " ns");
 	}
 
 	uint32_t lumiBlockOfPreviousEvent = eventInfo->lumiBlock() -1 ; 
