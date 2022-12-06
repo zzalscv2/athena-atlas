@@ -76,9 +76,6 @@ public:
   /**Virtual constructor*/
   virtual PerigeeSurface* clone() const override final;
   
-  /** NVI unique_ptr method **/
-  std::unique_ptr<PerigeeSurface> uniqueClone() const;
-
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;
 

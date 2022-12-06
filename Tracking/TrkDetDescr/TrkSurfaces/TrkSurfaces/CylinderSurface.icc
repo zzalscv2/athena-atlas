@@ -49,11 +49,6 @@ CylinderSurface::clone() const
   return new CylinderSurface(*this);
 }
 
-inline std::unique_ptr<CylinderSurface> 
-CylinderSurface::uniqueClone() const{
-  return std::unique_ptr<CylinderSurface>(clone());
-}
-
 inline Amg::Vector3D
 CylinderSurface::normal(const Amg::Vector2D& lp) const
 {

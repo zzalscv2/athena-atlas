@@ -95,9 +95,6 @@ public:
   /** Implicit constructor*/
   virtual StraightLineSurface* clone() const override final;
   
-  /** NVI uniqueClone **/
-  std::unique_ptr<StraightLineSurface> uniqueClone() const;
-
   /** Use the Surface as a ParametersBase constructor, from local parameters -
    * charged */
   virtual Surface::ChargedTrackParametersUniquePtr createUniqueTrackParameters(
