@@ -51,7 +51,7 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceOld (dataType, algSeq, vars, metVars, forCompare, isPhyslite, noPhysliteBroken) :
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
@@ -339,11 +339,10 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
     # Add the sequence to the job:
     algSeq += metSequence
-    vars += [
+    metVars += [
         'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
         'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
         'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
-        'AnaMET_%SYS%.name  -> met_name_%SYS%',
     ]
 
 
@@ -448,7 +447,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
 
 
-def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite, noPhysliteBroken) :
 
     configSeq = ConfigSequence ()
 
@@ -621,11 +620,10 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
                            muons = 'AnaMuons.medium',
                            electrons = 'AnaElectrons.loose',
                            photons = 'AnaPhotons.tight')
-    vars += [
+    metVars += [
         'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
         'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
         'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
-        'AnaMET_%SYS%.name  -> met_name_%SYS%',
     ]
 
 
@@ -699,11 +697,12 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
         sysService.sigmaRecommended = 1
 
     vars = []
+    metVars = []
     if not useBlocks :
-        makeSequenceOld (dataType, algSeq, vars=vars, forCompare=forCompare,
+        makeSequenceOld (dataType, algSeq, vars=vars, metVars=metVars, forCompare=forCompare,
                          isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
     else :
-        makeSequenceBlocks (dataType, algSeq, vars=vars, forCompare=forCompare,
+        makeSequenceBlocks (dataType, algSeq, vars=vars, metVars=metVars, forCompare=forCompare,
                             isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
 
 
@@ -718,6 +717,12 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
     ntupleMaker.Branches = vars
     # ntupleMaker.OutputLevel = 2  # For output validation
     algSeq += ntupleMaker
+    if len (metVars) > 0:
+        ntupleMaker = createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' )
+        ntupleMaker.TreeName = 'analysis'
+        ntupleMaker.Branches = metVars
+        #ntupleMaker.OutputLevel = 2  # For output validation
+        algSeq += ntupleMaker
     treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
     treeFiller.TreeName = 'analysis'
     algSeq += treeFiller

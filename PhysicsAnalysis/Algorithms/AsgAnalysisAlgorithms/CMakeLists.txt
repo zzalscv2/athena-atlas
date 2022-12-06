@@ -14,7 +14,7 @@ atlas_add_library( AsgAnalysisAlgorithmsLib
      xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
      AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib
      EventBookkeeperToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma xAODMissingET
      xAODTracking xAODTruth xAODRootAccess RootCoreUtils )
 
 atlas_add_dictionary( AsgAnalysisAlgorithmsDict
