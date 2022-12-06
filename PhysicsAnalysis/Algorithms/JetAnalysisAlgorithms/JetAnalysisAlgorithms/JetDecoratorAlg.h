@@ -42,7 +42,7 @@ namespace CP
 
     /// \brief the jet collection we run on
   private:
-    SysCopyHandle<xAOD::JetContainer> m_jetHandle {
+    SysCopyHandle<const xAOD::JetContainer> m_jetHandle {
       this, "jets", "", "the jet collection to run on"};
 
   };

@@ -65,42 +65,42 @@ namespace CP
     {
       std::unordered_map<const xAOD::IParticleContainer *, const SysWriteSelectionHandle *> decorationsMap;
 
-      xAOD::ElectronContainer *electrons {nullptr};
+      const xAOD::ElectronContainer *electrons {nullptr};
       if (m_electronsHandle)
       {
         ANA_CHECK (m_electronsHandle.getCopy (electrons, sys));
         if (m_electronsSelectionHandle)
           decorationsMap.emplace(electrons, &m_electronsSelectionHandle);
       }
-      xAOD::MuonContainer *muons {nullptr};
+      const xAOD::MuonContainer *muons {nullptr};
       if (m_muonsHandle)
       {
         ANA_CHECK (m_muonsHandle.getCopy (muons, sys));
         if (m_muonsSelectionHandle)
           decorationsMap.emplace(muons, &m_muonsSelectionHandle);
       }
-      xAOD::JetContainer *jets {nullptr};
+      const xAOD::JetContainer *jets {nullptr};
       if (m_jetsHandle)
       {
         ANA_CHECK (m_jetsHandle.getCopy (jets, sys));
         if (m_jetsSelectionHandle)
           decorationsMap.emplace(jets, &m_jetsSelectionHandle);
       }
-      xAOD::TauJetContainer *taus {nullptr};
+      const xAOD::TauJetContainer *taus {nullptr};
       if (m_tausHandle)
       {
         ANA_CHECK (m_tausHandle.getCopy (taus, sys));
         if (m_tausSelectionHandle)
           decorationsMap.emplace(taus, &m_tausSelectionHandle);
       }
-      xAOD::PhotonContainer *photons {nullptr};
+      const xAOD::PhotonContainer *photons {nullptr};
       if (m_photonsHandle)
       {
         ANA_CHECK (m_photonsHandle.getCopy (photons, sys));
         if (m_photonsSelectionHandle)
           decorationsMap.emplace(photons, &m_photonsSelectionHandle);
       }
-      xAOD::JetContainer *fatJets {nullptr};
+      const xAOD::JetContainer *fatJets {nullptr};
       if (m_fatJetsHandle)
       {
         ANA_CHECK (m_fatJetsHandle.getCopy (fatJets, sys));
