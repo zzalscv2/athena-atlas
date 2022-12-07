@@ -1438,7 +1438,7 @@ namespace xAOD {
       Object_t outputObjectsCopy = m_outputObjects;
       for( auto& itr : outputObjectsCopy ) {
          // Check that a new object was provided in the event:
-         if( ! itr.second->isSet() ) {
+         if( ! itr.second->create() ) {
             // We are now going to fail. But let's collect the names of
             // all the unset objects:
             if( unsetObjects.size() ) {
@@ -1982,7 +1982,7 @@ namespace xAOD {
       }
 
       // If the object is not set in this event yet, we can't continue:
-      if( ! itr->second->isSet( false ) ) {
+      if( ! itr->second->isSet() ) {
          return 0;
       }
 

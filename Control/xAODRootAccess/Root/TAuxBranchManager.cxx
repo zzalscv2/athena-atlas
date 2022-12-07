@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TBranch.h>
@@ -122,11 +122,7 @@ namespace xAOD {
       return;
    }
 
-   ::Bool_t TAuxBranchManager::isSet( ::Bool_t forceSet ) const {
-
-      // If we can't use default objects, let's just return the
-      // actual state that the object is in:
-      if( ! forceSet ) return m_isSet;
+   ::Bool_t TAuxBranchManager::create() {
 
       // If we already have it set, let's stop here:
       if( m_isSet ) return kTRUE;
@@ -145,6 +141,10 @@ namespace xAOD {
 
       // We are now "set":
       return kTRUE;
+   }
+
+   ::Bool_t TAuxBranchManager::isSet() const {
+      return m_isSet;
    }
 
    void TAuxBranchManager::reset() {

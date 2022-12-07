@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TAuxManager.cxx 607344 2014-07-18 13:27:49Z krasznaa $
 
 // ROOT include(s):
 #include <TError.h>
@@ -61,14 +60,18 @@ namespace xAOD {
       return;
    }
 
+   /// There is no need for a default object.
+   ///
+   ::Bool_t TAuxManager::create() {
+
+      return kTRUE;
+   }
+
    /// The state of a TAuxStore object is always "set". So this
    /// interface unfortunately doesn't make much sense for this
    /// manager class...
    ///
-   /// @param forceSet Ignored as it does not apply
-   /// @returns <code>kTRUE</code>
-   ///
-   ::Bool_t TAuxManager::isSet( ::Bool_t /*forceSet*/ ) const {
+   ::Bool_t TAuxManager::isSet() const {
 
       return kTRUE;
    }

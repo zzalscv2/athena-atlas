@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TObjectManager.cxx 731792 2016-03-23 10:27:41Z krasznaa $
 
 // ROOT include(s):
 #include <TBranch.h>
@@ -155,12 +154,17 @@ namespace xAOD {
       return;
    }
 
-   /// @param forceSet Ignored, as full objects can't be missing
+   /// Dummy implementation as full objects can't be missing
    ///
+   ::Bool_t TObjectManager::create() {
+
+      return m_isSet;
+   }
+
    /// @returns <code>kTRUE</code> if the object for this event was set,
    ///          <code>kFALSE</code> otherwise
    ///
-   ::Bool_t TObjectManager::isSet( Bool_t /*forceSet*/ ) const {
+   ::Bool_t TObjectManager::isSet() const {
 
       return m_isSet;
    }
