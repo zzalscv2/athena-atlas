@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/AddFlowByShifting.h
@@ -25,9 +25,10 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include <CLHEP/Random/RandomEngine.h>
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "AtlasHepMC/Relatives.h"
+#include "GeneratorObjects/HijingEventParams.h"
 
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_math.h>
@@ -37,8 +38,6 @@
 
 
 class TGraph;
-class StoreGateSvc;
-class HijingEventParams;
 
 class AddFlowByShifting:public AthAlgorithm {
 public:
@@ -53,9 +52,11 @@ public:
 
 
 private:
-  double SetParentToRanPhi(HepMC::GenParticlePtr parent);
-  double AddFlowToParent(HepMC::GenParticlePtr parent, 
-			 const HijingEventParams *hijing_pars);
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, const EventContext& ctx) const;
+
+  double SetParentToRanPhi(HepMC::GenParticlePtr parent, CLHEP::HepRandomEngine *rndmEngine);
+  double AddFlowToParent(HepMC::GenParticlePtr parent,
+                         const HijingEventParams *hijing_pars);
   void   MoveDescendantsToParent(HepMC::GenParticlePtr parent, double phishift);
 
 
@@ -71,13 +72,10 @@ private:
   void p_Pb_cent_eta_indep    (double b, double eta, double pt); //for p_Pb
 
   TGraph *m_graph_fluc;//TGraph storing the v2_RP/delta Vs b_imp
-  void Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr mainvtx, float b);
+  void Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr mainvtx, float b, CLHEP::HepRandomEngine *rndmEngine);
 
-
-
-  StoreGateSvc*    m_sgSvc;
-  IAtRndmGenSvc*   p_AtRndmGenSvc;
-  CLHEP::HepRandomEngine* p_engine;
+  // Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
 
   // Setable Properties:-
   std::string m_inkey, m_outkey;

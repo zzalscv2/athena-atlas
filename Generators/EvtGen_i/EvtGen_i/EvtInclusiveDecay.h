@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -38,38 +38,44 @@
 //#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ISvcLocator.h"
 
-//#include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
 
-
-class IAtRndmGenSvc;
+namespace CLHEP {
+  class HepRandomEngine;
+};
 
 class EvtInclusiveAtRndmGen : public EvtRandomEngine {
-	public:
-  EvtInclusiveAtRndmGen(IAtRndmGenSvc* atRndmGenSvc, std::string streamName);
-		virtual ~EvtInclusiveAtRndmGen();
-		double random();
-	
-	private:
-		IAtRndmGenSvc*    m_atRndmGenSvc;
-		std::string            m_streamName;
+public:
+  EvtInclusiveAtRndmGen(CLHEP::HepRandomEngine* engine);
+  virtual ~EvtInclusiveAtRndmGen() = default;
+  double random();
+  CLHEP::HepRandomEngine* getEngine() { return m_engine; }
+private:
+  CLHEP::HepRandomEngine* m_engine{};
 };
 
 
 
 class EvtInclusiveDecay:public GenBase {
-	
-        public:
-		EvtInclusiveDecay(const std::string& name, ISvcLocator* pSvcLocator);
-		virtual ~EvtInclusiveDecay();
 
-		StatusCode initialize();
-		StatusCode execute();
-		StatusCode finalize();
-		std::string xmlpath(void); 		
-	private:
-	
+public:
+  EvtInclusiveDecay(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~EvtInclusiveDecay();
+
+  StatusCode initialize();
+  StatusCode execute();
+  StatusCode finalize();
+  std::string xmlpath(void);
+private:
+
+  /// @name Features for derived classes to use internally
+  //@{
+  void reseedRandomEngine(const std::string& streamName, const EventContext& ctx);
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset, const EventContext& ctx) const;
+  CLHEP::HepRandomEngine* getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun=1, unsigned int lbn=1) const;
+  //@}
+
 #ifdef HEPMC3
 		StatusCode traverseDecayTree(HepMC::GenParticlePtr p,
 					     bool isToBeRemoved,
@@ -105,15 +111,21 @@ class EvtInclusiveDecay:public GenBase {
 		std::string pdgName(HepMC::ConstGenParticlePtr p, bool statusHighlighting = false, std::set<int>* barcodeList = nullptr);
 #endif
       
-		// StoreGate access
-		//		StoreGateSvc* m_sgSvc;
+  // Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
+
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
+
+  /// Seed for random number engine
+  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
+
 		McEventCollection* m_mcEvtColl;
   
 		// Particle properties service
 		//const HepPDT::ParticleDataTable* m_pdt;
 
 		// EvtGen interface
-		IAtRndmGenSvc*          m_atRndmGenSvc;
 		EvtInclusiveAtRndmGen*  m_evtAtRndmGen;
 		EvtGen*                 m_myEvtGen;
 	

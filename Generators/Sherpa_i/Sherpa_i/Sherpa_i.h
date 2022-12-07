@@ -68,8 +68,7 @@ protected:
   bool m_cleanup;
 
 //Gen_tf run args.
-  std::string m_dsid;
-  std::string m_seed_from_tf_arg;
+  int m_dsid;
 };
 
 

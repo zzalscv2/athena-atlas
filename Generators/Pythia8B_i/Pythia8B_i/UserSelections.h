@@ -468,8 +468,7 @@ bool Pythia8B_i::userSelection(Pythia8::Event &event, std::string userString,
 
 		BsJpsiPhiAngles angles(v_Kplus, v_Muplus, v_Phi, v_Jpsi, v_Bs);
 
-		CLHEP::HepRandomEngine* Rdmengine =
-                Pythia8B_i::p_AtRndmGenSvc->GetEngine(Pythia8_i::pythia_stream());
+		CLHEP::HepRandomEngine* Rdmengine = Pythia8B_i::p_rndmEngine;
 		const double gentau = Pythia8_i::m_pythia->particleData.tau0(531);
 		const double correctionfactor = 0.299792458;
 		const double gentauCorrect = gentau / correctionfactor;
@@ -674,8 +673,7 @@ bool Pythia8B_i::userSelection(Pythia8::Event &event, std::string userString,
 
 		BsJpsiPhiAngles angles(v_Kplus, v_Muplus, v_Kstar, v_Jpsi, v_Bd);
 
-		CLHEP::HepRandomEngine* Rdmengine =
-                Pythia8B_i::p_AtRndmGenSvc->GetEngine(Pythia8_i::pythia_stream());
+		CLHEP::HepRandomEngine* Rdmengine = Pythia8B_i::p_rndmEngine;
 		const double gentau = Pythia8_i::m_pythia->particleData.tau0(511);
 		const double correctionfactor = 0.299792458;
 		const double gentauCorrect = gentau / correctionfactor;

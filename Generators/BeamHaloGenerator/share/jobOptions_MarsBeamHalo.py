@@ -16,10 +16,6 @@ theApp.EvtMax = 150000
 
 ServiceMgr.MessageSvc.OutputLevel = INFO
 
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc()
-ServiceMgr.AtRndmGenSvc.Seeds = ["BeamHalo 3524752 2645932"]
-
 from BeamHaloGenerator.BeamHaloGeneratorConf import BeamHaloGeneratorAlg
 BeamHaloGenerator = BeamHaloGeneratorAlg()
 BeamHaloGenerator.inputType="MARS-NM"

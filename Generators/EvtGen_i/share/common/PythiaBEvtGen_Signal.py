@@ -49,7 +49,6 @@ from GeneratorFilters.GeneratorFiltersConf import BSignalFilter
 topAlg += BSignalFilter()
 BSignalFilter = topAlg.BSignalFilter
 
-theApp.ExtSvc += ["AtRndmGenSvc"]
 #--------------------------------------------------------------
 # Number of events to be accepted !! (default is 10)
 # re-written if use B job submition script
@@ -58,14 +57,6 @@ theApp.ExtSvc += ["AtRndmGenSvc"]
 theApp.EvtMax = 12
 svcMgr.EventSelector.RunNumber   = 1
 svcMgr.EventSelector.FirstEvent  = 1
-#--------------------------------------------------------------
-#User random number seeds - re-written if use B job submition script
-# Note that EvtGen uses the PYTHIA random seed
-#--------------------------------------------------------------
-from RngComps.RngCompsConf import AtRndmGenSvc
-svcMgr += AtRndmGenSvc()
-svcMgr.AtRndmGenSvc.Seeds = ["PYTHIA 5489899 989240512", "PYTHIA_INIT 820021 2347532", "EVTGEN 4789899 821000366" ]
-# svcMgr.AtRndmGenSvc.ReadFromFile = true;
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 svcMgr.MessageSvc.OutputLevel               = 2
 #--------------------------------------------------------------				 

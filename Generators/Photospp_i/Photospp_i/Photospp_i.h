@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOR_PHOTOSPP_H
@@ -8,7 +8,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-class IAtRndmGenSvc;
+#include "AthenaKernel/IAthRNGSvc.h"
+#include "CLHEP/Random/RandomEngine.h"
 
 extern "C" double phoranc_(int *idum);
 
@@ -38,19 +39,27 @@ public:
   /// This external fortran function is the PHOTOS++ random number generator
   /// We make it a friend so it can access our AtRndmGenSvc
   friend double ::phoranc_(int *idum);
-  
+
+  static CLHEP::HepRandomEngine* p_rndmEngine;
+
 private:
-  
-  /// Rather than a static pointer to the AtRndmGenSvc, we use a static member function.
-  /// This allows access to the extern fortran function above, and is anyway nicer since
-  /// it follows the "construct on first use" idiom for static members (although in this case the 
-  /// service is useless before an instance of Photospp_i has been initialised) and provides nicer 
-  /// encapsulation than a global static pointer.
-  static IAtRndmGenSvc* &atRndmGenSvc();
-  
-  /// This is the name of the random number stream.  Static function returning reference for the same reasons as above
-  static std::string &photospp_stream();
-  
+
+  /// @name Features for derived classes to use internally
+  //@{
+  void reseedRandomEngine(const std::string& streamName, const EventContext& ctx);
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset, const EventContext& ctx) const;
+  CLHEP::HepRandomEngine* getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun=1, unsigned int lbn=1) const;
+  //@}
+
+  // Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
+
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
+
+  /// Seed for random number engine
+  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
+
   /// The GenEvent StoreGate key (default "GEN_EVENT")
   std::string m_genEventKey;
   

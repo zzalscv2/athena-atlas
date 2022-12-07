@@ -5,6 +5,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include "Sherpa_i/Sherpa_i.h"
 
@@ -117,9 +118,8 @@ namespace SHERPA {
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
-CLHEP::HepRandomEngine* p_rndEngine;
+CLHEP::HepRandomEngine* p_rndEngine{};
 
 Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
   : GenModule(name, pSvcLocator), p_sherpa(NULL)
@@ -141,7 +141,6 @@ Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("CrossSectionScaleFactor", m_xsscale=1.0);
   declareProperty("CleanupGeneratedFiles", m_cleanup=true);
 
-  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
   declareProperty("Dsid", m_dsid);
 }
 
@@ -175,11 +174,7 @@ StatusCode Sherpa_i::genInitialize(){
   }
 
   ATH_MSG_DEBUG("... seeding Athena random number generator");
-  p_rndEngine = atRndmGenSvc().GetEngine("SHERPA");
-  const long* sip = p_rndEngine->getSeeds();
-  long int si1 = sip[0];
-  long int si2 = sip[1];
-  atRndmGenSvc().CreateStream(si1, si2, "SHERPA");
+  p_rndEngine = getRandomEngineDuringInitialize("SHERPA", m_randomSeed, m_dsid); // NOT THREAD-SAFE
 
   #ifdef IS_SHERPA_3
   ATH_MSG_DEBUG("... adapting output level");
@@ -302,6 +297,11 @@ StatusCode Sherpa_i::genInitialize(){
 
 StatusCode Sherpa_i::callGenerator() {
   ATH_MSG_DEBUG("Sherpa_i in callGenerator()");
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, "SHERPA",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  p_rndEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
 
   do {
     ATH_MSG_DEBUG("Trying to generate event with Sherpa");

@@ -2,31 +2,52 @@
 
 
 ## Propagate random seed and dsid arguments to the generators
-
-dsid = ''.join(runArgs.jobConfig)
-seed = str(runArgs.randomSeed)
-
+import os
+dsid = os.path.basename(runArgs.jobConfig[0])
+if not dsid.isdigit():
+    dsid = "999999"
+dsid = int(dsid)
+seed = int(runArgs.randomSeed)
 if runArgs.trfSubstepName == 'afterburn':
     from PyJobTransforms.trfLogger import msg
     msg.info("Running in Afterburner mode   ..... for now dsid and seed not set")
-elif 'Pythia8' in evgenConfig.generators:
-    genSeq.Pythia8.RandomSeedTfArg=seed
+else:
+  if 'Pythia8' in evgenConfig.generators:
+    genSeq.Pythia8.RandomSeed=seed
     genSeq.Pythia8.Dsid=dsid
-elif 'PythiaB' in evgenConfig.generators:
-    genSeq.Pythia8B.RandomSeedTfArg=seed
+  if 'PythiaB' in evgenConfig.generators:
+    genSeq.Pythia8B.RandomSeed=seed
     genSeq.Pythia8B.Dsid=dsid
-elif 'Herwig7' in evgenConfig.generators:
-    genSeq.Herwig7.RandomSeedTfArg=seed
+  if 'Herwig7' in evgenConfig.generators:
+    genSeq.Herwig7.RandomSeed=seed
     genSeq.Herwig7.Dsid=dsid
-elif 'Sherpa' in evgenConfig.generators:
-    genSeq.Sherpa_i.RandomSeedTfArg=seed              
+  if 'Sherpa' in evgenConfig.generators:
+    genSeq.Sherpa_i.RandomSeed=seed
     genSeq.Sherpa_i.Dsid=dsid
-elif 'Epos' in evgenConfig.generators:
-    genSeq.Epos.RandomSeedTfArg=seed              
+  if 'Epos' in evgenConfig.generators:
+    genSeq.Epos.RandomSeed=seed
     genSeq.Epos.Dsid=dsid
-elif 'QGSJet' in evgenConfig.generators:
-    genSeq.QGSJet.RandomSeedTfArg = seed
+  if 'QGSJet' in evgenConfig.generators:
+    genSeq.QGSJet.RandomSeed = seed
     genSeq.QGSJet.Dsid=dsid
+  if 'EvtGen' in evgenConfig.generators:
+    genSeq.EvtInclusiveDecay.RandomSeed=seed
+    genSeq.EvtInclusiveDecay.Dsid=dsid
+  if 'Photospp' in evgenConfig.generators:
+    genSeq.Photospp.RandomSeed=seed
+    genSeq.Photospp.Dsid=dsid
+  if 'TauplaPP' in evgenConfig.generators:
+    genSeq.TauolaPP.RandomSeed=seed
+    genSeq.TauolaPP.Dsid=dsid
+  if 'Hijing' in evgenConfig.generators:
+    genSeq.Hijing.RandomSeed=seed
+    genSeq.Hijing.Dsid=dsid
+  if 'Starlight' in evgenConfig.generators:
+    genSeq.Starlight.RandomSeed=seed
+    genSeq.Starlight.Dsid=dsid
+  if 'CosmicGenerator' in evgenConfig.generators:
+    genSeq.CosmicGenerator.RandomSeed=seed
+    genSeq.CosmicGenerator.Dsid=dsid
 
 del dsid,seed
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/RNGWrapper.h"
@@ -7,6 +7,58 @@
 #include "CxxUtils/MurmurHash2.h"
 #include "CxxUtils/crc64.h"
 #include "crc_combine.h"
+
+  /// Set the random seed using a string (e.g. algorithm name) and
+  /// the current slot, event, and run numbers and an optional
+  /// offset. - MC16 Legacy Version attempting to reproduce seeds from
+  /// thread-unsafe random number services
+size_t ATHRNG::calculateSeedMC16(const std::string& algName, uint64_t ev, uint64_t run, uint32_t offset) {
+  uint32_t theHash = static_cast<uint32_t>(ev);
+  if (0 != offset) theHash=crc_combine(theHash, offset);
+  uint32_t runNumber = static_cast<uint32_t>(run);
+  theHash=crc_combine(theHash, runNumber);
+  theHash=crc_combine(theHash, algName);
+  return theHash;
+}
+
+/// Set the random seed using a string (e.g. algorithm name) and the
+/// current slot, event, and run numbers. MC20 seeding algorithm
+size_t ATHRNG::calculateSeedMC20(const std::string& algName, uint64_t ev, uint64_t run) {
+  auto algHash = std::hash<std::string>{}(algName);
+  auto evHash = std::hash<uint64_t>{}(ev);
+  auto runHash = std::hash<uint64_t>{}(run);
+  auto hsh = evHash ^ (runHash + (evHash << 6) + (evHash >> 2));
+  hsh = hsh ^ (algHash + (hsh << 6) + (hsh >> 2));
+  return hsh;
+}
+
+  /// Set the random seed using a string (e.g. algorithm name) and the
+  /// current slot, event, and run numbers. MC21 seeding algorithm
+void ATHRNG::calculateSeedsMC21(long* seeds, const std::string& algName, uint64_t ev, uint64_t run, uint64_t offset) {
+  //RanecuEngine only takes the first seed, so the first seed should be good on it's own
+  //using 64bit crc which is already performing quite well on it's own
+  uint64_t theHash = CxxUtils::crc64(algName);
+  theHash = CxxUtils::crc64addint(theHash,ev);
+  theHash = CxxUtils::crc64addint(theHash,offset);
+  theHash = CxxUtils::crc64addint(theHash,run);
+
+  size_t iseed=0;
+  seeds[iseed]=(long)theHash; //CLHEP takes a zero terminated array for seeding. Avoid 0
+  if(seeds[iseed]!=0) ++iseed; //if zero, make the seed vector shorter, which should in itself already cause a different seeding
+  seeds[iseed]=(long)ev; //CLHEP takes a zero terminated array for seeding. Avoid ev==0
+  if(seeds[iseed]!=0) ++iseed; //Avoid 0
+  seeds[iseed]=(long)(ev >> 32); //explicitly split out the upper 32bit as dSFMTEngine only takes 32bits. 
+  if(seeds[iseed]!=0) ++iseed; //Avoid 0
+  seeds[iseed]=(long)run; 
+  if(seeds[iseed]!=0) ++iseed; //Avoid 0
+  uint64_t algHash = CxxUtils::MurmurHash64A ( algName.data(), algName.size(), 0 );
+  seeds[iseed]=(long)algHash;
+  if(seeds[iseed]!=0) ++iseed; //Avoid 0
+  seeds[iseed]=(long)offset; 
+  if(seeds[iseed]!=0) ++iseed; //Avoid 0
+  seeds[iseed]=0; //CLHEP takes a zero terminated array for seeding, so end with 0
+  return;
+}
 
 ATHRNG::RNGWrapper::RNGWrapper(const factoryFunc& genFact, size_t nSlots)
 {
@@ -30,12 +82,7 @@ void ATHRNG::RNGWrapper::setSeedMC20(const std::string& algName, size_t slot,
                                      uint64_t ev, uint64_t run,
                                      EventContext::ContextEvt_t evt /*= EventContext::INVALID_CONTEXT_EVT*/)
 {
-  auto algHash = std::hash<std::string>{}(algName);
-  auto evHash = std::hash<uint64_t>{}(ev);
-  auto runHash = std::hash<uint64_t>{}(run);
-  auto hsh = evHash ^ (runHash + (evHash << 6) + (evHash >> 2));
-  hsh = hsh ^ (algHash + (hsh << 6) + (hsh >> 2));
-
+  auto hsh = calculateSeedMC20(algName, ev, run);
   setSeed(slot, hsh, evt);
 }
 
@@ -44,30 +91,7 @@ void ATHRNG::RNGWrapper::setSeedMC21(const std::string& algName, size_t slot,
                                      EventContext::ContextEvt_t evt /*= EventContext::INVALID_CONTEXT_EVT*/)
 {
   long seeds[7]; //CLHEP uses long for seeding
-  
-  //RanecuEngine only takes the first seed, so the first seed should be good on it's own
-  //using 64bit crc which is already performing quite well on it's own
-  uint64_t theHash = CxxUtils::crc64(algName);
-  theHash = CxxUtils::crc64addint(theHash,ev);
-  theHash = CxxUtils::crc64addint(theHash,offset);
-  theHash = CxxUtils::crc64addint(theHash,run);
-
-  size_t iseed=0;
-  seeds[iseed]=(long)theHash; //CLHEP takes a zero terminated array for seeding. Avoid 0
-  if(seeds[iseed]!=0) ++iseed; //if zero, make the seed vector shorter, which should in itself already cause a different seeding
-  seeds[iseed]=(long)ev; //CLHEP takes a zero terminated array for seeding. Avoid ev==0
-  if(seeds[iseed]!=0) ++iseed; //Avoid 0
-  seeds[iseed]=(long)(ev >> 32); //explicitly split out the upper 32bit as dSFMTEngine only takes 32bits. 
-  if(seeds[iseed]!=0) ++iseed; //Avoid 0
-  seeds[iseed]=(long)run; 
-  if(seeds[iseed]!=0) ++iseed; //Avoid 0
-  uint64_t algHash = CxxUtils::MurmurHash64A ( algName.data(), algName.size(), 0 );
-  seeds[iseed]=(long)algHash;
-  if(seeds[iseed]!=0) ++iseed; //Avoid 0
-  seeds[iseed]=(long)offset; 
-  if(seeds[iseed]!=0) ++iseed; //Avoid 0
-  seeds[iseed]=0; //CLHEP takes a zero terminated array for seeding, so end with 0
-
+  calculateSeedsMC21(seeds, algName, ev, run, offset);
   setSeeds(slot, seeds, evt);
 }
 
@@ -92,12 +116,7 @@ void ATHRNG::RNGWrapper::setSeedLegacy(const std::string& algName, size_t slot,
 void ATHRNG::RNGWrapper::setSeedMC16(const std::string& algName, size_t slot, uint64_t ev, uint64_t run, uint32_t offset,
                                      EventContext::ContextEvt_t evt /*= EventContext::INVALID_CONTEXT_EVT*/)
 {
-  uint32_t theHash = static_cast<uint32_t>(ev);
-  if (0 != offset) theHash=crc_combine(theHash, offset);
-  uint32_t runNumber = static_cast<uint32_t>(run);
-  theHash=crc_combine(theHash, runNumber);
-  theHash=crc_combine(theHash, algName);
- 
+  uint32_t theHash = calculateSeedMC16(algName, ev, run, offset);
   setSeed(slot, theHash, evt);
 }
 

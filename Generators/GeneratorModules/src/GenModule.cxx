@@ -1,26 +1,20 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorModules/GenModule.h"
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/Incident.h"
-#include "CLHEP/Random/Ranlux64Engine.h"
+#include "AthenaKernel/RNGWrapper.h"
+#include "CLHEP/Random/RandomEngine.h"
 #include <fstream>
 
 
 GenModule::GenModule(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenBase(name, pSvcLocator),
-    m_rndmGenSvc("AtRndmGenSvc", name),
-    m_incidentSvc("IncidentSvc", name)
+  : GenBase(name, pSvcLocator)
 {
   m_mkMcEvent = true;
-  //declareProperty("MakeMcEvent", m_mkMcEvent=true, "Create a new MC event collection if it doesn't exist");
-  declareProperty("RandomSeed", m_randomSeed=1234567, "Random seed for the built-in random engine");
-  declareProperty("IsAfterburner", m_isAfterburner=false, "Set true if generator modifies existing events rather than creating new ones");
-  declareProperty("AtRndmGenSvc", m_rndmGenSvc);
-  declareProperty("IncidentSvc", m_incidentSvc);
 }
 
 
@@ -28,30 +22,66 @@ StatusCode GenModule::initialize() {
   // Base class initializations
   CHECK(GenBase::initialize());
   // Get the random number service
-  if (m_rndmGenSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Could not initialize ATLAS Random Generator Service");
-    return StatusCode::FAILURE;
-  }
+  CHECK(m_rndmSvc.retrieve());
   // Get the incident service
-  if (m_incidentSvc.retrieve().isFailure()) {
-    ATH_MSG_ERROR("Could not initialize Incident Service");
-    return StatusCode::FAILURE;
-  }
+  CHECK(m_incidentSvc.retrieve());
   CHECK(genInitialize());
   CHECK(genuserInitialize());
   return StatusCode::SUCCESS;
 }
 
 
-CLHEP::HepRandomEngine& GenModule::randomEngine() {
-  if (m_pRandomEngine.get() == 0) {
-    m_pRandomEngine.reset( new CLHEP::Ranlux64Engine(m_randomSeed) );
-  }
-  return *m_pRandomEngine;
+CLHEP::HepRandomEngine* GenModule::getRandomEngine(const std::string& streamName,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
+}
+
+
+CLHEP::HepRandomEngine* GenModule::getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  rngWrapper->setSeed( streamName, ctx.slot(), randomSeedOffset, ctx.eventID().run_number() );
+  return rngWrapper->getEngine(ctx);
+}
+
+
+CLHEP::HepRandomEngine* GenModule::getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun, unsigned int lbn) const
+{
+  const size_t slot=0;
+  EventContext ctx;
+  ctx.setSlot( slot );
+  ctx.setEventID (EventIDBase (conditionsRun,
+               EventIDBase::UNDEFEVT,  // event
+               EventIDBase::UNDEFNUM,  // timestamp
+               EventIDBase::UNDEFNUM,  // timestamp ns
+               lbn));
+  Atlas::setExtendedEventContext(ctx,
+                                 Atlas::ExtendedEventContext( evtStore()->hiveProxyDict(),
+                                                              conditionsRun) );
+  return getRandomEngine(streamName, randomSeedOffset, ctx);
 }
 
 
 StatusCode GenModule::execute() {
+  // Examples of how to retrieve the random number engine for a given
+  // stream.
+  // NB getRandomEngine should only be called once per event for a
+  // given stream, as it causes the stream to be re-seeded each time
+  // it is called.
+
+  // Example 1 - seeded based on the current event number (+ slot, run, streamName)
+  //const EventContext& ctx = Gaudi::Hive::currentContext();
+  //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", ctx);
+
+  // Example 2 - seeded based on the m_randomSeed property (+ slot, run, streamName)
+  //const EventContext& ctx = Gaudi::Hive::currentContext();
+  //CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine("MyStream", m_randomSeed.value(), ctx);
+
   // Call the code that generates an event
   CHECK(this->callGenerator());
 
@@ -60,20 +90,21 @@ StatusCode GenModule::execute() {
   CHECK(this->fillEvt(evt));
 
   // Add the event to the MC event collection
-   if (events()) {
+  if (events()) {
     // If this is an "afterburner" generator, replace the last event rather than add a new one
     /// @todo Remove hard-coded alg name checking (already incomplete)
-        if (m_isAfterburner || name() == "Tauola" || name() == "Photos") {
-         events()->pop_back();
-     }
+    if (m_isAfterburner.value() || name() == "Tauola" || name() == "Photos") {
+      events()->pop_back();
+    }
     // Add the event to the end of the collection
     events()->push_back(evt);
     ATH_MSG_DEBUG("MC event added to McEventCollection");
 
-   // remove the empty event in case of ParticleDecayer
-    if (name() == "ParticleDecayer")
-        events()->pop_back();
-      }
+    // remove the empty event in case of ParticleDecayer
+    if (name() == "ParticleDecayer") {
+      events()->pop_back();
+    }
+  }
 
   // Call the incident service to notify that an event has been made
   m_incidentSvc->fireIncident( Incident(name(), "McEventGenerated") );

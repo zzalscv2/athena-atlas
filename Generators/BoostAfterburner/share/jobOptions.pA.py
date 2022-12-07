@@ -90,7 +90,6 @@ BoostEvent.OutputLevel=2
 #topAlg+=AANTupleStream
 
 
-theApp.ExtSvc += ["AtRndmGenSvc"]
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 svcMgr.MessageSvc.OutputLevel  = 4
 svcMgr.MessageSvc.defaultLimit = 100000
@@ -107,8 +106,3 @@ svcMgr.EventSelector.RunNumber = 12345
 #--------------------------------------------------------------
 # Algorithms Private Options
 #--------------------------------------------------------------
-if not hasattr(svcMgr, 'AtRndmGenSvc'):
-    from RngComps.RngCompsConf import AtRndmGenSvc
-    svcMgr += AtRndmGenSvc()
-    
-svcMgr.AtRndmGenSvc.Seeds = ["HIJING 4789899 989240512", "HIJING_INIT 889223465 78782321"]

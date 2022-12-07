@@ -34,17 +34,17 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/McEventCollection.h"
 
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
 
-EvtDecay::EvtDecay(const std::string& name, ISvcLocator* pSvcLocator):Algorithm( name, pSvcLocator ) {
+EvtDecay::EvtDecay(const std::string& name, ISvcLocator* pSvcLocator)
+  : AthAlgorithm( name, pSvcLocator ) {
+}
+
 
 	// These can be used to specify alternative locations or filenames
 	// for the EvtGen particle and channel definition files
@@ -64,26 +64,19 @@ EvtDecay::EvtDecay(const std::string& name, ISvcLocator* pSvcLocator):Algorithm(
         m_evtAtRndmGen = 0;
 	m_targetID = 0;
 
-	m_AtRndmGenSvc = 0;
 	m_McEvtColl  = 0;
-	m_atRndmGenSvc = 0;
 	m_myGen = 0;
-	m_sgSvc = 0;
 }
 
 
 StatusCode EvtDecay::initialize() {
 
-	MsgStream log(messageService(), name());
-	log << MSG::INFO << "EvtDecay initialize" << endmsg;
+  ATH_MSG_INFO ("EvtDecay initialize");
 
-	static const bool CREATEIFNOTTHERE(true);
-	StatusCode scRndm = service("AtRndmGenSvc", m_AtRndmGenSvc, CREATEIFNOTTHERE);
-	if (!scRndm.isSuccess() || 0 == m_AtRndmGenSvc) {
-		log << MSG::ERROR << " Could not initialize Random Number Service" << endmsg;
-		return scRndm;
-	}
-	m_evtAtRndmGen = new EvtCLHepRandom(m_AtRndmGenSvc,m_randomStreamName);
+  ATH_CHECK(m_rndmSvc.retrieve());
+  CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(m_randomStreamName, m_randomSeed, m_dsid);
+  // Obtain random number generator for EvtGen
+  m_evtAtRndmGen = new EvtCLHepRandom(rndmEngine);
 
 	// Open an interface to EvtGen
 	m_myGen = new EvtGen(m_DecayDec.c_str(), m_PdtTable.c_str(), m_evtAtRndmGen);
@@ -101,17 +94,51 @@ StatusCode EvtDecay::initialize() {
 }
 
 
+void EvtDecay::reseedRandomEngine(const std::string& streamName,
+                                           const EventContext& ctx) const
+{
+  long seeds[7];
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  m_evtAtRndmGen->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
+}
+
+
+CLHEP::HepRandomEngine* EvtDecay::getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  rngWrapper->setSeed( streamName, ctx.slot(), randomSeedOffset, ctx.eventID().run_number() );
+  return rngWrapper->getEngine(ctx);
+}
+
+
+CLHEP::HepRandomEngine* EvtDecay::getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun, unsigned int lbn) const
+{
+  const size_t slot=0;
+  EventContext ctx;
+  ctx.setSlot( slot );
+  ctx.setEventID (EventIDBase (conditionsRun,
+               EventIDBase::UNDEFEVT,  // event
+               EventIDBase::UNDEFNUM,  // timestamp
+               EventIDBase::UNDEFNUM,  // timestamp ns
+               lbn));
+  Atlas::setExtendedEventContext(ctx,
+                                 Atlas::ExtendedEventContext( evtStore()->hiveProxyDict(),
+                                                              conditionsRun) );
+  return getRandomEngine(streamName, randomSeedOffset, ctx);
+}
+
+
 StatusCode EvtDecay::execute() {
  
-	MsgStream log(messageService(), name());
-	log << MSG::DEBUG << "EvtDecay executing" << endmsg;
+  ATH_MSG_DEBUG ("EvtDecay executing");
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  reseedRandomEngine(m_randomStreamName, ctx);
 
 	// Retrieve event from Transient Store (Storegate)
-	if ( m_sgSvc->retrieve(m_McEvtColl, m_inputKeyName).isFailure() ) {
-		log << MSG::ERROR << "Could not retrieve McEventCollection" << endmsg;
-		return StatusCode::FAILURE;
-	}
-  
+  ATH_CHECK(evtStore()->retrieve(m_McEvtColl, m_inputKeyName));
+
 	m_targetID = 0;
 	McEventCollection::iterator mcItr;
 	for( mcItr = m_McEvtColl->begin(); mcItr != m_McEvtColl->end(); ++mcItr ) {
@@ -398,17 +425,15 @@ bool EvtDecay::isGoodB(const int pID, const int stat ) const {
 
 // EvtCLHepRandom class implementation, basically CLHEP -> EvtGen random engine interface
 
-EvtCLHepRandom::EvtCLHepRandom(IAtRndmGenSvc* atRndmGenSvc, string streamName)
-  : m_atRndmGenSvc(atRndmGenSvc)
-  , m_streamName(streamName)
+EvtCLHepRandom::EvtCLHepRandom(CLHEP::HepRandomEngine* engine)
+  : m_engine(engine)
 {}
 
 EvtCLHepRandom::~EvtCLHepRandom()
 {}
 
 double EvtCLHepRandom::random() {
-  CLHEP::HepRandomEngine* engine = m_atRndmGenSvc->GetEngine(m_streamName);
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(m_engine);
 }
 
 

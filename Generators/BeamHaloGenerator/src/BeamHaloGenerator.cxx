@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/BeamHaloGenerator.h"
@@ -14,11 +14,9 @@
 #include <cmath>
 
 BeamHaloGenerator::BeamHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
-				     CLHEP::HepRandomEngine* engine, 
 				     const std::string& inputFile,
 				     const std::vector<std::string>& generatorSettings):
   m_particleTable(particleTable),
-  m_engine(engine),
   m_inputFile(inputFile),
   m_interfacePlane(0.),
   m_enableFlip(false),
@@ -79,11 +77,11 @@ int BeamHaloGenerator::genFinalize() {
 
 //------------------------------------------------------------------
 
-bool BeamHaloGenerator::flipEvent() {
+bool BeamHaloGenerator::flipEvent(CLHEP::HepRandomEngine* engine) {
   if(!m_enableFlip) return false;
 
   // Check to see if the event should be flipped or not
-  if(CLHEP::RandFlat::shoot(m_engine) <= m_flipProbability) {
+  if(CLHEP::RandFlat::shoot(engine) <= m_flipProbability) {
     if(m_debug) std::cout << "Debug: Flipping event" << std::endl;
     return true;
   }
@@ -94,9 +92,10 @@ bool BeamHaloGenerator::flipEvent() {
 //------------------------------------------------------------------
 
 int BeamHaloGenerator::convertEvent(std::vector<BeamHaloParticle>* beamHaloEvent,
-				    HepMC::GenEvent* evt) {
+                                    HepMC::GenEvent* evt,
+                                    CLHEP::HepRandomEngine* engine) {
   double pz;
-  bool flipFlag = flipEvent();
+  bool flipFlag = flipEvent(engine);
   HepMC::GenParticlePtr genParticle;
   HepMC::GenVertexPtr genVertex;
   const double c = 2.99792458E+11; // speed of light in mm/s

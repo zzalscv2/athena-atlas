@@ -10,7 +10,6 @@
 
 // calls to fortran routines
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "Pythia8_i/UserHooksFactory.h"
 
@@ -37,7 +36,6 @@ typedef HepMC3::Pythia8ToHepMC3 Pythia8ToHepMC;
  *  Author: James Monk (jmonk@cern.ch)
 */
 
-class IAtRndmGenSvc;
 class IPythia8Custom;
 
 namespace Pythia8{
@@ -47,24 +45,20 @@ namespace Pythia8{
 
 class customRndm : public Pythia8::RndmEngine {
 public:
-  
+
   // Constructor.
-  customRndm():
-    m_engine(0), m_RndmGenSvc(0) {}
-  
+  customRndm() {}
+
   // Routine for generating a random number.
-  inline double flat(){    
-    m_engine=m_RndmGenSvc->GetEngine(m_stream);
+  inline double flat(){
     return CLHEP::RandFlat::shoot(m_engine);
   };
-  
-  // Initialisation Routine 
-  inline void init(IAtRndmGenSvc &RndmGenSvc, std::string RndmStream){m_RndmGenSvc=&RndmGenSvc; m_stream=RndmStream;};
-  std::string m_stream; 
-  
+
+  // Initialisation Routine
+  inline void init(CLHEP::HepRandomEngine* engine) {m_engine=engine;};
+  inline CLHEP::HepRandomEngine* getEngine() { return m_engine; }
 private:
-  CLHEP::HepRandomEngine* m_engine;
-  IAtRndmGenSvc* m_RndmGenSvc;
+  CLHEP::HepRandomEngine* m_engine{};
 };
 
 
@@ -103,6 +97,9 @@ protected:
   HepMC::Pythia8ToHepMC m_pythiaToHepMC;
   unsigned int m_maxFailures;
 
+  bool m_useRndmGenSvc;
+  customRndm *m_atlasRndmEngine;
+
 private:
 
   static std::string findValue(const std::string &command, const std::string &key);
@@ -119,15 +116,11 @@ private:
   enum PDGID {PROTON=2212, ANTIPROTON=-2212, LEAD=1000822080, NEUTRON=2112, ANTINEUTRON=-2112, MUON=13, ANTIMUON=-13, ELECTRON=11, POSITRON=-11, INVALID=0};
 
   double m_collisionEnergy;
-  bool m_useRndmGenSvc;
-  customRndm *m_atlasRndmEngine; 
-
   
   std::string m_beam1;
   std::string m_beam2;
  
-  std::string m_dsid;
-  std::string m_seed_from_tf_arg;
+  int m_dsid;
 
   std::string m_lheFile;
 

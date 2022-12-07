@@ -23,7 +23,6 @@ theAuditorSvc.Auditors  = [ "ChronoAuditor" ]
 # Algorithms
 #--------------------------------------------------------------
 theApp.TopAlg = ["PythiaB" , "EvtLbPolDecay",  "LambdabFilter"]
-theApp.ExtSvc += ["AtRndmGenSvc"]
 #--------------------------------------------------------------
 # Number of events to be accepted !! (default is 10)
 # re-written if use B job submition script
@@ -32,12 +31,6 @@ theApp.ExtSvc += ["AtRndmGenSvc"]
 theApp.EvtMax = 1000
 EventSelector.RunNumber   = 1
 EventSelector.FirstEvent  = 1
-#--------------------------------------------------------------
-# User random number seeds - re-written if use B job submition script
-# EvtGen now uses the "PYTHIA" value as the random seed
-#--------------------------------------------------------------
-AtRndmGenSvc = Service( "AtRndmGenSvc" )
-AtRndmGenSvc.Seeds = ["PYTHIA 4789899 250053", "PYTHIA_INIT 820021 2347532", "EVTGEN 4789899 821000366"]
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 MessageSvc.OutputLevel               = 3
 #--------------------------------------------------------------                                                                                                                     #              PARAMETERS  SPECIFIC  TO   PYTHIAB

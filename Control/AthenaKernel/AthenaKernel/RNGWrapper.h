@@ -19,6 +19,23 @@ namespace CLHEP{
 
 namespace ATHRNG{
 
+  /// Helper methods
+
+  /// Set the random seed using a string (e.g. algorithm name) and
+  /// the current slot, event, and run numbers and an optional
+  /// offset. - MC16 Legacy Version attempting to reproduce seeds from
+  /// thread-unsafe random number services
+  size_t calculateSeedMC16(const std::string& algName, uint64_t ev, uint64_t run, uint32_t offset=0);
+
+  /// Set the random seed using a string (e.g. algorithm name) and the
+  /// current slot, event, and run numbers. MC20 seeding algorithm
+  size_t calculateSeedMC20(const std::string& algName, uint64_t ev, uint64_t run);
+
+  /// Set the random seed using a string (e.g. algorithm name) and the
+  /// current slot, event, and run numbers. MC21 seeding algorithm
+ void calculateSeedsMC21(long* seeds, const std::string& algName, uint64_t ev, uint64_t run, uint64_t offset=0);
+
+
   /// @class RNGWrapper
   /// @brief A wrapper class for event-slot-local random engines.
   ///

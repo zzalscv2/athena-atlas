@@ -28,7 +28,7 @@
 class Epos: public GenModule {
 public:
   Epos(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~Epos();
+  virtual ~Epos() = default;
   
   virtual StatusCode genInitialize();
   virtual StatusCode callGenerator();
@@ -56,8 +56,8 @@ protected:
   int         m_nEvents;
   double      m_degymx;
 
-  std::string m_dsid;
-  std::string m_seed_from_tf_arg;
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
 
     // max number of particles MUST BE EQUAL TO THE NUMBER SET IN crmc-aaa.f! (it is max. number allowed by HepMC2.6 now)
 // static const size_t kMaxParticles = HEPEVT_EntriesAllocation; 

@@ -27,7 +27,6 @@ topAlg += Hijing()
 from TruthExamples.TruthExamplesConf import DumpMC
 topAlg += DumpMC()
 
-theApp.ExtSvc += ["AtRndmGenSvc"]
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 svcMgr.MessageSvc.OutputLevel  = 4
 svcMgr.MessageSvc.defaultLimit = 100000
@@ -43,13 +42,6 @@ svcMgr.EventSelector.RunNumber = 12345
 #--------------------------------------------------------------
 # Algorithms Private Options
 #--------------------------------------------------------------
-if not hasattr(svcMgr, 'AtRndmGenSvc'):
-    from RngComps.RngCompsConf import AtRndmGenSvc
-    svcMgr += AtRndmGenSvc()
-    
-svcMgr.AtRndmGenSvc.Seeds = ["HIJING 4789899 989240512", "HIJING_INIT 889223465 78782321"]
-#svcMgr.AtRndmGenSvc.ReadFromFile = True
-
 # Hijing = Algorithm( "Hijing" )
 # Hijing.Initialize = ["efrm 200", "frame CMS", "proj A", "targ A", 
 #                      "iap 197", "izp 79", "iat 197", "izt 79"]

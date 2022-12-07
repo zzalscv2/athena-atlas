@@ -54,9 +54,8 @@ perfmonjp.PerfMonFlags.doMonitoring = True
 perfmonjp.PerfMonFlags.doSemiDetailedMonitoring = True
 
 ## Random number services
-from RngComps.RngCompsConf import AtRndmGenSvc, AtRanluxGenSvc
-svcMgr += AtRndmGenSvc()
-svcMgr += AtRanluxGenSvc()
+from RngComps.RngCompsConf import AthRNGSvc
+svcMgr += AthRNGSvc()
 
 ## Jobs should stop if an include fails.
 jobproperties.AthenaCommonFlags.AllowIgnoreConfigError = False

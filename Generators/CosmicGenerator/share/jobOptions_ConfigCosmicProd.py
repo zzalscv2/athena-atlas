@@ -25,11 +25,6 @@ job = AlgSequence()
 from CosmicGenerator.CosmicGeneratorConf import CosmicGenerator
 job += CosmicGenerator()
 
-if hasattr(simFlags, 'RandomSvc'):
-    ##Only for MC12 onwards
-    job.CosmicGenerator.AtRndmGenSvc = simFlags.RandomSvc.get_Value()
-    simFlags.RandomSeedList.addSeed( "COSMICS", 2040160768, 443921183 )
-    
 job.CosmicGenerator.emin = 10000;  # default =10000 #10 GeV
 job.CosmicGenerator.emax = 5000*1000; # 2 TeV
 

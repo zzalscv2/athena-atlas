@@ -22,14 +22,6 @@ topSequence = AlgSequence()
 # Private Application Configuration options
 #--------------------------------------------------------------
 
-# The following is needed to load the Athena Random
-# Number Generation Service.
-# Creating and configuring the service in one go
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc(
-    Seeds = ["SINGLE 2040160768 443921183"]
-    )
-
 ## adding the CosmicGenerator alg. to the list of algorithms to be run
 from CosmicGenerator.CosmicGeneratorConf import CosmicGenerator
 topSequence += CosmicGenerator()

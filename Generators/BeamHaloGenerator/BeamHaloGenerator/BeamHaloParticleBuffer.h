@@ -44,9 +44,8 @@ class BinnedInterval {
 
 class BeamHaloParticleBuffer {
  public:
-  BeamHaloParticleBuffer(const std::string& fileName, 
-			 CLHEP::HepRandomEngine *engine);
-  ~BeamHaloParticleBuffer();
+  BeamHaloParticleBuffer(const std::string& fileName);
+  ~BeamHaloParticleBuffer() = default;
   int openForWriting();
   int openForReading();
   int close();
@@ -55,7 +54,7 @@ class BeamHaloParticleBuffer {
   int writeParticle(BeamHaloParticle *particle);
 
   /** A member function to read a random particle from the binary file. */
-  BeamHaloParticle* readRandomParticle(void);
+  BeamHaloParticle* readRandomParticle(CLHEP::HepRandomEngine* engine);
   
  private:
 
@@ -71,10 +70,6 @@ class BeamHaloParticleBuffer {
 
   /** A data member to store the input file stream */
   std::ifstream m_ifstream;
-
-  /** A pointer to a random number engine used for randomly selecting
-      particles from the binary file. */
-  CLHEP::HepRandomEngine* m_engine;
 
   /** The size of 1 binary data record. */
   int m_recordSize;

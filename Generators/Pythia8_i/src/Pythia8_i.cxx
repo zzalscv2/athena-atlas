@@ -13,8 +13,7 @@
 #include <boost/lexical_cast.hpp>
 
 // calls to fortran routines
-#include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include <sstream>
 // For limits
@@ -22,7 +21,7 @@
 
 
 namespace {
-  // Name of AtRndmGenSvc stream
+  // Name of random number stream
   std::string s_pythia_stream{"PYTHIA8_INIT"};
 }
 
@@ -75,9 +74,9 @@ std::string py8version()
 ////////////////////////////////////////////////////////////////////////////////
 Pythia8_i::Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator)
 : GenModule(name, pSvcLocator),
+m_atlasRndmEngine(0),
 m_internal_event_number(0),
 m_version(-1.),
-m_atlasRndmEngine(0),
 m_nAccepted(0.),
 m_nMerged(0.),
 m_sigmaTotal(0.),
@@ -106,7 +105,6 @@ m_athenaTool("")
   declareProperty("OutputParticleData",m_outputParticleDataFile="ParticleData.local.xml");
   declareProperty("ShowerWeightNames",m_showerWeightNames);
   declareProperty("CustomInterface",m_athenaTool);
-  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
   declareProperty("Dsid", m_dsid);
 
 
@@ -251,30 +249,20 @@ StatusCode Pythia8_i::genInitialize() {
   if(m_useRndmGenSvc){
 
     ATH_MSG_INFO(" !!!!!!!!!!!!  WARNING ON PYTHIA RANDOM NUMBERS !!!!!!!!!! ");
-    ATH_MSG_INFO("           THE ATHENA SERVICE AtRndmGenSvc IS USED.");
+    ATH_MSG_INFO("           THE ATHENA SERVICE AthRNGenSvc IS USED.");
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
 
     if(m_atlasRndmEngine) delete m_atlasRndmEngine;
     m_atlasRndmEngine = new customRndm();
 
-    m_atlasRndmEngine->init(atRndmGenSvc(), s_pythia_stream);
+    CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(s_pythia_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    m_atlasRndmEngine->init(rndmEngine);
     m_pythia->setRndmEnginePtr(m_atlasRndmEngine);
-
-    // Save the PYTHIA_INIT stream seeds....
-    CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine(s_pythia_stream);
-
-    const long*   sip     =       engine->getSeeds();
-    long  int     si1     =       sip[0];
-    long  int     si2     =       sip[1];
-
-    atRndmGenSvc().CreateStream(si1, si2, s_pythia_stream);
     s_pythia_stream = "PYTHIA8";
-    m_atlasRndmEngine->m_stream = s_pythia_stream;
-
   }else{
     ATH_MSG_INFO(" !!!!!!!!!!!!  WARNING ON PYTHIA RANDOM NUMBERS !!!!!!!!!! ");
     ATH_MSG_INFO("    THE STANDARD PYTHIA8 RANDOM NUMBER SERVICE IS USED.");
-    ATH_MSG_INFO("    THE ATHENA SERVICE AtRndmGenSvc IS ***NOT*** USED.");
+    ATH_MSG_INFO("    THE ATHENA SERVICE AthRNGSvc IS ***NOT*** USED.");
     ATH_MSG_INFO(" !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ");
   }
 
@@ -392,12 +380,14 @@ StatusCode Pythia8_i::callGenerator(){
   ATH_MSG_DEBUG(">>> Pythia8_i from callGenerator");
 
   if(m_useRndmGenSvc){
-    // Save the random number seeds in the event
-    CLHEP::HepRandomEngine*  engine  = atRndmGenSvc().GetEngine(s_pythia_stream);
-    const long* s =  engine->getSeeds();
+    //Re-seed the random number stream
+    long seeds[7];
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    ATHRNG::calculateSeedsMC21(seeds, s_pythia_stream,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    m_atlasRndmEngine->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
     m_seeds.clear();
-    m_seeds.push_back(s[0]);
-    m_seeds.push_back(s[1]);
+    m_seeds.push_back(seeds[0]);
+    m_seeds.push_back(seeds[1]);
   }
 
   bool status = m_pythia->next();

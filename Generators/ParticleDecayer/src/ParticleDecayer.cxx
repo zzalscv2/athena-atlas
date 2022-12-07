@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUMMARY: This code implements a "particle decayer" to allow us to augment the standard 
@@ -28,19 +28,14 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //function to generate a lifetime (actually decay-length) according to the proper lifetime of the particle particle 
-double ParticleDecayer::rnd_ExpLifetime(double ct) {
-  //Get random number seeds from Atlas RNG service
-  CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine("ParticleDecayer");
+double ParticleDecayer::rnd_ExpLifetime(CLHEP::HepRandomEngine* engine, double ct) {
   double r = engine->flat(); //< Return random num in [0,1]
   return ((-ct)*(double)log((double)1.-r));
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //function to generate a uniform distribution in (a,b)
-double ParticleDecayer::rnd_DoubleRange(double a, double b) {
-  //Get random number seeds from Atlas RNG service
-  CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine("ParticleDecayer");
-  //const long* seeds = engine->getSeeds();
+double ParticleDecayer::rnd_DoubleRange(CLHEP::HepRandomEngine* engine, double a, double b) {
   double r = engine->flat(); //< Return random num in [0,1]
   return a + r*(b-a);
 }
@@ -48,12 +43,12 @@ double ParticleDecayer::rnd_DoubleRange(double a, double b) {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //function to generate a cos theta valua according to angular distribution
-double ParticleDecayer::cosgen(int itype){
+double ParticleDecayer::cosgen(CLHEP::HepRandomEngine* engine, int itype){
   double x,fx,hit;
   x=0;	
 
   if(itype==0){  // flat
-    x=rnd_DoubleRange(-1.,1.);
+    x=rnd_DoubleRange(engine,-1.,1.);
     return x;
   }
 	
@@ -61,8 +56,8 @@ double ParticleDecayer::cosgen(int itype){
     hit=1.5;
     fx=0;
      while(hit>fx){
-       x=rnd_DoubleRange(-1.,1.);
-       hit=rnd_DoubleRange(0.,1.5);
+       x=rnd_DoubleRange(engine,-1.,1.);
+       hit=rnd_DoubleRange(engine,0.,1.5);
        fx=1.5*x*x;
      }
     return x;
@@ -72,8 +67,8 @@ double ParticleDecayer::cosgen(int itype){
     hit=0.75;
     fx=0;
     while(hit>fx){
-      x=rnd_DoubleRange(-1.,1.);
-      hit=rnd_DoubleRange(0.,0.75);
+      x=rnd_DoubleRange(engine,-1.,1.);
+      hit=rnd_DoubleRange(engine,0.,0.75);
       fx=0.375*(1+x*x);
     }
     return x;
@@ -83,8 +78,8 @@ double ParticleDecayer::cosgen(int itype){
     hit=1.5;
     fx=0;
     while(hit>fx){
-      x=rnd_DoubleRange(-1.,1.);
-      hit=rnd_DoubleRange(0.,1.5);
+      x=rnd_DoubleRange(engine,-1.,1.);
+      hit=rnd_DoubleRange(engine,0.,1.5);
       fx=0.75*(1-x*x);
     }
     return x;
@@ -119,7 +114,7 @@ StatusCode ParticleDecayer::changeMass( HepMC::GenParticlePtr genpart, double ne
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-StatusCode ParticleDecayer::setDecayPosition( HepMC::GenParticlePtr genpart, HepMC::GenEvent* event, bool doScalarDecay )
+StatusCode ParticleDecayer::setDecayPosition( CLHEP::HepRandomEngine* engine, HepMC::GenParticlePtr genpart, HepMC::GenEvent* event, bool doScalarDecay )
 {
    HepMC::GenVertexPtr vtxp = genpart->production_vertex();
    if(!vtxp) {
@@ -170,19 +165,19 @@ StatusCode ParticleDecayer::setDecayPosition( HepMC::GenParticlePtr genpart, Hep
                   }
                double Limit  = distanceToEdge / gamma; // ctau is enhanced by factor gamma in lab frame
                double lambda = -1.*Limit/log(1. - m_expDecayFractionToKeep);
-               ctau = rnd_ExpLifetime(lambda);
+               ctau = rnd_ExpLifetime(engine,lambda);
                if (m_expDecayDoTruncateLongDecays)
                   {
                      while ( ctau > Limit )  // If decay is outside detector, let's sample again (Produces a truncated exponential)
                         {
-                           ctau = rnd_ExpLifetime(lambda);
+                          ctau = rnd_ExpLifetime(engine, lambda);
                         }
                   }
             }
          else if( m_particleLifeTime > 0 ) // Fixed proper lifetime distribution. Note that if m_particleLifeTime <= 0. ctau remains 0
             {
                ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set lifetime of the dark photon according to ctau = " << m_particleLifeTime);
-               ctau = rnd_ExpLifetime(m_particleLifeTime);
+               ctau = rnd_ExpLifetime(engine,m_particleLifeTime);
             }
       }else if (m_doUniformDecay)
       {         
@@ -191,10 +186,10 @@ StatusCode ParticleDecayer::setDecayPosition( HepMC::GenParticlePtr genpart, Hep
             {
                double outerLength = std::abs(m_endCapDistance/cos(theta));
                double outerRadius = outerLength*sin(theta);
-               decayRadius        = rnd_DoubleRange(0., std::min(outerRadius, std::abs(m_barrelRadius)) );
+               decayRadius        = rnd_DoubleRange(engine,0., std::min(outerRadius, std::abs(m_barrelRadius)) );
             }else // Particle escapes through barrel
             {
-               decayRadius = rnd_DoubleRange(0., std::abs(m_barrelRadius));
+               decayRadius = rnd_DoubleRange(engine,0., std::abs(m_barrelRadius));
             }
 
          double decayLength = decayRadius/sin(theta);
@@ -291,13 +286,12 @@ StatusCode ParticleDecayer::genInitialize()
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-ParticleDecayer::~ParticleDecayer() {}
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
 
   ATH_MSG_DEBUG("ParticleDecayer::fillEvt: -- EventCounter: " << m_eventCounter);
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* engine = this->getRandomEngine("ParticleDecayer", ctx);
 
   StatusCode status = StatusCode::SUCCESS;
 
@@ -335,7 +329,7 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
            CHECK( changeMass( genpart, m_particleMass ) ); 
 
            //Add decay position to the event
-           CHECK( setDecayPosition( genpart, event ) );
+           CHECK( setDecayPosition( engine, genpart, event ) );
 
            //assign the new PDG_ID of the particle
            ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new PDG ID =  " << m_particlePDGID);
@@ -349,7 +343,7 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
            ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- set the new momentum");
            
            ///*** Now allow the two-body decay of the particle
-           CHECK( DFTwoBodyDecay( genpart, m_particlePolarization ) );
+           CHECK( DFTwoBodyDecay( engine, genpart, m_particlePolarization ) );
 
         }
      }else if (m_LJType == 2) {
@@ -377,14 +371,14 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
 
            //set the decay vertex position of the scalar
            //Create a HepMC vertex at the decay position of the scalar 
-           CHECK( setDecayPosition( genpart, event, true ) ); 
+           CHECK( setDecayPosition( engine, genpart, event, true ) );
            
            ///*** Now allow the two-body decay of the scalar
            ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- allow the two-body decay of the dark scalar to dark photons...");
            ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- dark photon has PDG ID = " << m_particlePDGID);
 
            std::vector<CLHEP::HepLorentzVector> darkPhotonLVs; 
-           CHECK( getDecayProducts( CLHEP::HepLorentzVector( genpart->momentum().px(), genpart->momentum().py(), genpart->momentum().pz(), genpart->momentum().e() ),
+           CHECK( getDecayProducts( engine, CLHEP::HepLorentzVector( genpart->momentum().px(), genpart->momentum().py(), genpart->momentum().pz(), genpart->momentum().e() ),
                                     m_particleMass,
                                     darkPhotonLVs) );
 
@@ -407,10 +401,10 @@ StatusCode ParticleDecayer::fillEvt(HepMC::GenEvent* event) {
            for ( auto pIt=pItBegin ; pIt != pItEnd; ++pIt )
               {
                  //Add decay position to the event
-                 CHECK( setDecayPosition( *pIt, event ) );
+                 CHECK( setDecayPosition( engine, *pIt, event ) );
                  //And perform two-body decay
                  ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- Now allow the two-body decay of the dark photons");
-                 CHECK( DFTwoBodyDecay( *pIt, polarizationSwitch*m_particlePolarization ) );
+                 CHECK( DFTwoBodyDecay( engine, *pIt, polarizationSwitch*m_particlePolarization ) );
                  if(m_oppositePolarization)
                     {
                        polarizationSwitch = -polarizationSwitch;
@@ -473,7 +467,7 @@ double ParticleDecayer::getParticleMass(int pid) {
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-StatusCode ParticleDecayer::DFTwoBodyDecay( HepMC::GenParticlePtr genpart, int Polarization ) {
+StatusCode ParticleDecayer::DFTwoBodyDecay( CLHEP::HepRandomEngine* engine, HepMC::GenParticlePtr genpart, int Polarization ) {
 
 
    ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- allow the two-body decay of the dark photon...");
@@ -483,7 +477,7 @@ StatusCode ParticleDecayer::DFTwoBodyDecay( HepMC::GenParticlePtr genpart, int P
 
    //Given branching fractions, pick decay mode
    int ModeOfDecay;
-   double unif = rnd_DoubleRange(0.,1.);
+   double unif = rnd_DoubleRange(engine, 0.,1.);
    if (unif<=m_BRElectron) {
       ModeOfDecay = 11;
    } else if (unif<=(m_BRElectron+m_BRMuon) && unif>m_BRElectron) {
@@ -516,7 +510,7 @@ StatusCode ParticleDecayer::DFTwoBodyDecay( HepMC::GenParticlePtr genpart, int P
 
    //Now we are ready to decay the dark photon
    std::vector<CLHEP::HepLorentzVector> daughterLVs; 
-   CHECK( getDecayProducts( boostDF, decayPartMass, daughterLVs, type) );
+   CHECK( getDecayProducts( engine, boostDF, decayPartMass, daughterLVs, type) );
    
    //Add the daughters to the pool file
    ATH_MSG_DEBUG("ParticleDecayer::fillEvt:   -- Add the daughters to the pool file");
@@ -530,7 +524,7 @@ StatusCode ParticleDecayer::DFTwoBodyDecay( HepMC::GenParticlePtr genpart, int P
 }
 
 
-StatusCode ParticleDecayer::getDecayProducts( CLHEP::HepLorentzVector parentLV,
+StatusCode ParticleDecayer::getDecayProducts( CLHEP::HepRandomEngine* engine, CLHEP::HepLorentzVector parentLV,
                                               double decayPartMass,
                                               std::vector<CLHEP::HepLorentzVector>& daughterLVs,
                                               int decayType)
@@ -544,8 +538,8 @@ StatusCode ParticleDecayer::getDecayProducts( CLHEP::HepLorentzVector parentLV,
          return StatusCode::FAILURE;
       }
    //Get the angles in the rest frame
-   double phi_rf   = rnd_DoubleRange(-CLHEP::pi, CLHEP::pi); 
-   double ct_rf    = cosgen(decayType);
+   double phi_rf   = rnd_DoubleRange(engine, -CLHEP::pi, CLHEP::pi);
+   double ct_rf    = cosgen(engine, decayType);
    double theta_rf = std::acos(ct_rf);
 
    //construct p1 particle momentum in rest-frame (_rf)

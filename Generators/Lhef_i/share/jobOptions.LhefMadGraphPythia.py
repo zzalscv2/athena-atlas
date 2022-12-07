@@ -25,9 +25,6 @@ evgenMsgLevel = INFO
 # other includes needed by the physics file
 include( "PartPropSvc/PartPropSvc.py" )
 
-from RngComps.RngCompsConf import AtRndmGenSvc
-svcMgr += AtRndmGenSvc()
-
 # get a handle on topalg
 from AthenaCommon.AlgSequence import AlgSequence
 topAlg = AlgSequence("TopAlg")
@@ -36,8 +33,6 @@ svcMgr.MessageSvc.OutputLevel = evgenMsgLevel
 #--------------------------------------------------------------
 # Private Application Configuration options
 #--------------------------------------------------------------
-atRndmGenSvc = svcMgr.AtRndmGenSvc
-AtRndmGenSvc.Seeds = ["PYTHIA 330020611 841000366", "PYTHIA_INIT 824021 3247532"]
 
 from Pythia_i.Pythia_iConf import Pythia
 topAlg += Pythia()

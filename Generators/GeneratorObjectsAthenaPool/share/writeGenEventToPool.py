@@ -29,11 +29,6 @@ svcMgr.MessageSvc.OutputLevel = Lvl.DEBUG
 #--------------------------------------------------------------
 # Event related parameters
 #--------------------------------------------------------------
-svcMgr += CfgMgr.AtRndmGenSvc()
-svcMgr.AtRndmGenSvc.Seeds = [
-    "PYTHIA 4789899 989240512", "PYTHIA_INIT 820021 2347532"
-    ]
-
 Pythia = job.Pythia
 Pythia.PythiaCommand = ["pysubs msel 13","pysubs ckin 3 18.","pypars mstp 43 2"]
 

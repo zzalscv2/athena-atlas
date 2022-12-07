@@ -9,11 +9,6 @@ theApp.EvtMax = 3
 #--------------------------------------------------------------
 # Algorithms Private Options
 #--------------------------------------------------------------
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc()
-ServiceMgr.AtRndmGenSvc.Seeds = ["PYTHIA8 4789899 989240512",
-                                 "PYTHIA8_INIT 820021 2347532"]
-
 svcMgr.MessageSvc.OutputLevel = INFO
 
 from AthenaCommon.AlgSequence import AlgSequence
