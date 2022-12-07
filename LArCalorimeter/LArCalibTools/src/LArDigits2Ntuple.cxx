@@ -69,6 +69,30 @@ StatusCode LArDigits2Ntuple::initialize()
     }
   }
 
+  if(m_fillLB){
+    NTuplePtr nt(ntupleSvc(),m_ntpath+"Evnt");
+    if (!nt) {
+       nt=ntupleSvc()->book(m_ntpath+"Evnt",CLID_ColumnWiseTuple,m_ntTitle+"Evnt");
+    }
+    if (!nt){
+       ATH_MSG_ERROR( "Booking of NTuple at "<< m_ntpath << " and name " << m_ntTitle << " failed" );
+       return StatusCode::FAILURE;
+    }
+
+    m_evt_nt=nt;
+
+    sc = m_evt_nt->addItem("IEvent",m_IEventEvt);
+    if (sc!=StatusCode::SUCCESS) {
+       ATH_MSG_ERROR( "addItem 'IEvent' failed" );
+       return sc;
+    }
+
+    sc=m_evt_nt->addItem("LB",m_LB);
+    if (sc.isFailure()) {
+        ATH_MSG_ERROR( "addItem 'LB' failed" );
+        return sc;
+    }
+  }
   ATH_CHECK(m_contKey.initialize(m_contKey.key().size()) );
   ATH_CHECK(m_LArFebHeaderContainerKey.initialize(!m_isSC) );
 
@@ -130,7 +154,7 @@ StatusCode LArDigits2Ntuple::execute()
   unsigned cellCounter=0;
   for( const LArDigit *digi : DigitContainer ){
 
-    if(m_fillBCID) m_bcid	   = thisbcid; 
+    if(m_fillBCID) m_bcid	= thisbcid; 
     m_IEvent	   = thisevent;
 
     unsigned int trueMaxSample	   = digi->nsamples();
@@ -170,6 +194,18 @@ StatusCode LArDigits2Ntuple::execute()
     cellCounter++;
   }// over cells 
    
+
+  if(m_fillLB) {
+     m_IEventEvt   = thisevent;
+     m_LB       = ctx.eventID().lumi_block();
+
+     sc   = ntupleSvc()->writeRecord(m_evt_nt);
+     if (sc != StatusCode::SUCCESS) {
+       ATH_MSG_ERROR( "writeRecord failed" );
+       return sc;
+     }
+  }
+
   ATH_MSG_DEBUG( "LArDigits2Ntuple has finished." );
   return StatusCode::SUCCESS;
 }// end finalize-method.

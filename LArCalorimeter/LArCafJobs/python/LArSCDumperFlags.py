@@ -22,3 +22,4 @@ def addSCDumpFlags(flags):
     flags.addFlag("LArSCDump.overwriteEvN",False)
     flags.addFlag("LArSCDump.outputNtup","SCDigits.root")
     flags.addFlag("LArSCDump.doRawChan",False)
+    flags.addFlag("LArSCDump.fillNoisyRO",False)
