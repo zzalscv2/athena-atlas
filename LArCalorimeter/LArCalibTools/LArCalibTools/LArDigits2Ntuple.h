@@ -29,13 +29,20 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   Gaudi::Property< unsigned int >  m_Nsamples{this, "NSamples", 32, "number of samples to store"};
   Gaudi::Property< std::vector<unsigned int> > m_FTlist{this, "FTlist", {}, "which FT to dump"};
   Gaudi::Property< bool > m_fillBCID{this, "FillBCID", false, "if to fill BCID"};
+  Gaudi::Property< bool > m_fillLB{this, "FillLB", false, "if to fill LB in Evnt tree"};
 
   NTuple::Item<long> m_ntNsamples;
   NTuple::Item<short> m_gain;
+  NTuple::Item<short> m_bcid;
   NTuple::Item<short> m_ELVL1Id;
   NTuple::Item<unsigned long long> m_IEvent;
   NTuple::Array<short>  m_samples;
-  NTuple::Item<short> m_bcid;
+  //
+  //Event based ntuple pointer
+  NTuple::Tuple* m_evt_nt;
+
+  NTuple::Item<unsigned long long> m_IEventEvt;
+  NTuple::Item<short> m_LB;
 
   SG::ReadHandleKey<LArDigitContainer> m_contKey{this, "ContainerKey", "FREE", "key for LArDigitContainer"};
   SG::ReadHandleKey<LArFebHeaderContainer> m_LArFebHeaderContainerKey { this, "LArFebHeaderKey", "LArFebHeader" };

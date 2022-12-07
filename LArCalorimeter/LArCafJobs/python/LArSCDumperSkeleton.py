@@ -8,6 +8,33 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from LArCalibProcessing.LArSC2NtupleConfig import LArSC2NtupleCfg
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
+def L1CaloMenuCfg(flags):
+
+
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+
+    acc=ComponentAccumulator()
+    from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg, HLTConfigSvcCfg, L1PrescaleCondAlgCfg, HLTPrescaleCondAlgCfg
+    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
+
+    acc.merge( L1TriggerByteStreamDecoderCfg(flags) )
+    acc.merge( L1ConfigSvcCfg(flags) )
+    acc.merge( HLTConfigSvcCfg(flags) )
+    acc.merge( L1PrescaleCondAlgCfg(flags) )
+    acc.merge( HLTPrescaleCondAlgCfg(flags) )
+
+
+    from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
+    acc.merge( BunchGroupCondAlgCfg( flags ) )
+
+    from AthenaConfiguration.ComponentFactory import CompFactory
+    tdm = CompFactory.getComp('TrigDec::TrigDecisionMakerMT')()
+    tdm.doL1 = True
+    tdm.doHLT = False
+    acc.addEventAlgo( tdm, 'AthAlgSeq' )
+
+    return acc
+
 
 def fromRunArgs(runArgs):
 
@@ -60,13 +87,28 @@ def fromRunArgs(runArgs):
                 
     finally:
        ConfigFlags.LArSCDump.doRawChan=True
+       ConfigFlags.LArSCDump.fillNoisyRO=False
        CKeys+=["LArRawChannels"]
 
     mlog_SCD.debug("CKeys generated %s",str(CKeys))   
 
+    ConfigFlags.Trigger.triggerConfig = 'DB'
+    ConfigFlags.Trigger.L1.doCTP = True
+    ConfigFlags.Trigger.L1.doMuon = False
+    ConfigFlags.Trigger.L1.doCalo = False
+    ConfigFlags.Trigger.L1.doTopo = False
+
+    ConfigFlags.Trigger.enableL1CaloLegacy = True
+    ConfigFlags.Trigger.enableL1CaloPhase1 = True
+
     ConfigFlags.lock()
     
     cfg=MainServicesCfg(ConfigFlags)
+    cfg.merge(L1CaloMenuCfg(ConfigFlags))
+
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    tdt = cfg.getPrimaryAndMerge(TrigDecisionToolCfg(ConfigFlags))
+
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     cfg.merge(LArGMCfg(ConfigFlags))
 
@@ -80,7 +122,9 @@ def fromRunArgs(runArgs):
                             OffId=ConfigFlags.LArSCDump.doOfflineId, AddHash=ConfigFlags.LArSCDump.doHash, AddCalib=ConfigFlags.LArSCDump.doCalib, RealGeometry=ConfigFlags.LArSCDump.doGeom, ExpandId=ConfigFlags.LArSCDump.expandId, # from LArCond2NtupleBase 
                             NSamples=ConfigFlags.LArSCDump.nSamples, FTlist={}, FillBCID=ConfigFlags.LArSCDump.doBCID, ContainerKey=ConfigFlags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = ConfigFlags.LArSCDump.overwriteEvN, Net=ConfigFlags.LArSCDump.nEt, # from LArSC2Ntuple
-                            FillRODEnergy = ConfigFlags.LArSCDump.doRawChan,
+                            FillRODEnergy = ConfigFlags.LArSCDump.doRawChan, FillLB = True, FillTriggerType = True,
+                            TrigNames=["L1_EM3","L1_EM7","L1_EM15","L1_EM22VHI","L1_eEM5","L1_eEM15","L1_eEM22M"],
+                            TrigDecisionTool=tdt,
                             OutputLevel=3))
 
     if os.path.exists(ConfigFlags.LArSCDump.outputNtup):
@@ -89,13 +133,14 @@ def fromRunArgs(runArgs):
     cfg.addService(CompFactory.NTupleSvc(Output = [ "FILE1 DATAFILE='"+ConfigFlags.LArSCDump.outputNtup+"' OPT='NEW'" ]))
     cfg.setAppProperty("HistogramPersistency","ROOT")
 
+
     processPostInclude(runArgs, ConfigFlags, cfg)
     processPostExec(runArgs, ConfigFlags, cfg)
 
     #example how to dump the stores
     #cfg.getService("StoreGateSvc").Dump=True
     #from AthenaCommon.Constants import DEBUG
-    #cfg.getService("StoreGateSvc").OutputLevel=DEBUG
+    #cfg.getService("MessageSvc").OutputLevel=DEBUG
     # Run the final accumulator
     sc = cfg.run()
     sys.exit(not sc.isSuccess())
