@@ -158,9 +158,6 @@ def getInput_GenericCosmicGenerator(name="GenericCosmicGenerator", **kwargs):
     from AthenaCommon.AppMgr import ServiceMgr
     from PartPropSvc.PartPropSvcConf import PartPropSvc
     ServiceMgr += PartPropSvc()
-    if not simFlags.RandomSeedList.checkForExistingSeed( "COSMICS"):
-        simFlags.RandomSeedList.addSeed( "COSMICS", 2040160768, 443921183 )
-    kwargs.setdefault('AtRndmGenSvc', simFlags.RandomSvc.get_Value())
 
     from CosmicGenerator.CosmicGeneratorConfigLegacy import CavernPropertyCalculator
     theCavern = CavernPropertyCalculator()

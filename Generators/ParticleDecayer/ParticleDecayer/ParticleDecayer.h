@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_PARTICLEDECAYER_H
@@ -29,7 +29,7 @@ class ParticleDecayer: public GenModule {
   
   ParticleDecayer(const std::string& name, ISvcLocator* pSvcLocator);
 
-  ~ParticleDecayer();
+  ~ParticleDecayer() = default;
   
   StatusCode genInitialize();
   StatusCode fillEvt(HepMC::GenEvent*);
@@ -79,14 +79,14 @@ class ParticleDecayer: public GenModule {
   double     getParticleMass(int pdgID); //retrieve tha particle mass given the PDG ID 
   void       addParticle   (HepMC::GenVertexPtr, int pdg, HepMC::FourVector, int statusCode); //add particles to the evgen file
 
-  double rnd_ExpLifetime(double ct);
-  double rnd_DoubleRange(double a, double b);
-  double cosgen(int itype);
+  double rnd_ExpLifetime(CLHEP::HepRandomEngine* engine, double ct);
+  double rnd_DoubleRange(CLHEP::HepRandomEngine* engine, double a, double b);
+  double cosgen(CLHEP::HepRandomEngine* engine, int itype);
 
-  StatusCode DFTwoBodyDecay( HepMC::GenParticlePtr, int );
-  StatusCode setDecayPosition ( HepMC::GenParticlePtr, HepMC::GenEvent*, bool doScalarDecay=false );
+  StatusCode DFTwoBodyDecay( CLHEP::HepRandomEngine* engine, HepMC::GenParticlePtr, int );
+  StatusCode setDecayPosition ( CLHEP::HepRandomEngine* engine, HepMC::GenParticlePtr, HepMC::GenEvent*, bool doScalarDecay=false );
   StatusCode changeMass( HepMC::GenParticlePtr, double );
-  StatusCode getDecayProducts( CLHEP::HepLorentzVector, double, std::vector<CLHEP::HepLorentzVector>&, int decayType = 0);
+  StatusCode getDecayProducts( CLHEP::HepRandomEngine* engine, CLHEP::HepLorentzVector, double, std::vector<CLHEP::HepLorentzVector>&, int decayType = 0);
 
   //four momentum of the dark photon
   CLHEP::HepLorentzVector m_boostLV;

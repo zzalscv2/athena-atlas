@@ -18,7 +18,7 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/HeavyIon.h"
@@ -31,13 +31,12 @@
 
 namespace{
   static std::string epos_rndm_stream = "EPOS_INIT";
-  static IAtRndmGenSvc* p_AtRndmGenSvcEpos = 0;
+  static CLHEP::HepRandomEngine* p_rndmEngine{};
 }
 
 extern "C" double atl_epos_rndm_( int* ) 
 {
-  CLHEP::HepRandomEngine* engine = p_AtRndmGenSvcEpos->GetEngine(epos_rndm_stream);
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(p_rndmEngine);
 }
 // ---------------------------------------------------------------------- 
 // Epos Fortran bindings.
@@ -77,9 +76,6 @@ Epos::Epos( const std::string &name, ISvcLocator *pSvcLocator ):
   declareProperty( "nEvents",         m_nEvents    = 5500 );
   declareProperty( "maxCMEnergy",     m_degymx     = 13000.0 ); // maximum center-of-mass energy which will be call in the run [GeV]
 
-  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
-  declareProperty("Dsid", m_dsid);
-
   m_events = 0; // current event number (counted by interface)
   m_ievent = 0;  // current event number counted by Epos
   m_iout = 0; // output type (output)
@@ -102,27 +98,14 @@ Epos::Epos( const std::string &name, ISvcLocator *pSvcLocator ):
 }
 
 // ----------------------------------------------------------------------
-Epos::~Epos()
-{}
-
-// ----------------------------------------------------------------------
 StatusCode Epos::genInitialize() 
 {
   ATH_MSG_INFO( " CRMC INITIALISING.\n" );
   ATH_MSG_INFO( "signal_rocess_id 101-ND, 105-DD, 102-CD, 103 AB->XB, 104 AB->AX \n");
 
-  static const bool CREATEIFNOTTHERE = true;
-  
-  StatusCode RndmStatus = service("AtRndmGenSvc", p_AtRndmGenSvcEpos, CREATEIFNOTTHERE);
-  if ( !RndmStatus.isSuccess() || 0 == p_AtRndmGenSvcEpos ) {
-    ATH_MSG_ERROR( " Could not initialize Random Number Service!" );
-    return RndmStatus;
-  }
-   
-  CLHEP::HepRandomEngine *engine = p_AtRndmGenSvcEpos->GetEngine(epos_rndm_stream);
-  const long *sip = engine->getSeeds();
+  p_rndmEngine = getRandomEngineDuringInitialize(epos_rndm_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+  const long *sip = p_rndmEngine->getSeeds();
   long int si1 = sip[0];
-  long int si2 = sip[1];
 
   int iSeed = si1%1000000000;     // FIXME ?
   int lout = 50;     //lenght of the output string (useful only for LHE output)
@@ -130,9 +113,6 @@ StatusCode Epos::genInitialize()
 
     crmc_init_f_( m_degymx, iSeed, m_model, m_itab, m_ilheout, (m_paramFile + " ").c_str(), m_lheout.c_str() , lout);
     crmc_set_f_(m_nEvents,m_beamMomentum, m_targetMomentum, m_primaryParticle, m_targetParticle);
-
-    // ... and set them back to the stream for proper save
-  p_AtRndmGenSvcEpos->CreateStream( si1, si2, epos_rndm_stream );
 
   epos_rndm_stream = "EPOS";
 
@@ -146,13 +126,17 @@ StatusCode Epos::callGenerator()
 {
   // ATH_MSG_INFO( " EPOS Generating." );
 
+    //Re-seed the random number stream
+    long seeds[7];
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    ATHRNG::calculateSeedsMC21(seeds, epos_rndm_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
+
     // save the random number seeds in the event
-    CLHEP::HepRandomEngine* engine = p_AtRndmGenSvcEpos->GetEngine( epos_rndm_stream );
-   const long *s = engine->getSeeds();
-  
-   m_seeds.clear();
-   m_seeds.push_back(s[0]);
-   m_seeds.push_back(s[1]);
+    const long *s = p_rndmEngine->getSeeds();
+    m_seeds.clear();
+    m_seeds.push_back(s[0]);
+    m_seeds.push_back(s[1]);
 
    ++m_events;
   

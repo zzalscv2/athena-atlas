@@ -27,7 +27,7 @@
 class QGSJet: public GenModule {
 public:
   QGSJet(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~QGSJet();
+  virtual ~QGSJet() = default;
   
   virtual StatusCode genInitialize();
   virtual StatusCode callGenerator();
@@ -52,8 +52,8 @@ protected:
   int         m_ilheout;
   int         m_nEvents;
 
-  std::string m_dsid;
-  std::string m_seed_from_tf_arg;
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
 
   static const size_t kMaxParticles = HEPEVT_EntriesAllocation; 
   std::vector<int>    m_partID;

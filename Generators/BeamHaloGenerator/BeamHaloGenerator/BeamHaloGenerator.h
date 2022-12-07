@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BEAMHALOGENERATOR_H
@@ -32,7 +32,6 @@ class BeamHaloGenerator {
  public:
 
   BeamHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
-		    CLHEP::HepRandomEngine* engine, 
 		    const std::string& inputFile,
 		    const std::vector<std::string>& generatorSettings);
 
@@ -45,12 +44,14 @@ class BeamHaloGenerator {
   virtual int genFinalize();
 
   /** A function to create one event in HepMC format. */
-  virtual int fillEvt(HepMC::GenEvent* evt) = 0;
+  virtual int fillEvt(HepMC::GenEvent* evt,
+		    CLHEP::HepRandomEngine* engine) = 0;
   
  protected:
 
   /** A function to read one event in a simplified format. */
-  virtual int readEvent(std::vector<BeamHaloParticle> *beamHaloEvent) = 0;
+  virtual int readEvent(std::vector<BeamHaloParticle> *beamHaloEvent,
+                        CLHEP::HepRandomEngine* engine) = 0;
 
   /** A function to read one particle from the input ASCII file. */
   virtual int readParticle(BeamHaloParticle *beamHaloParticle) = 0;
@@ -92,19 +93,17 @@ class BeamHaloGenerator {
 
 
   /** A member function to check if the event should be flipped */
-  bool flipEvent();
+  bool flipEvent(CLHEP::HepRandomEngine* engine);
 
   /** A member function to convert a vector of beam halo particles
       into a GenEvent */
   int convertEvent(std::vector<BeamHaloParticle>* beamHaloEvent,
-		   HepMC::GenEvent* evt);
+                   HepMC::GenEvent* evt,
+                   CLHEP::HepRandomEngine* engine);
 
   /** A pointer to the particle data table. */
   const HepPDT::ParticleDataTable* m_particleTable;
 
-  /** Random number engine */
-  CLHEP::HepRandomEngine *m_engine;
-  
   /** Input file name */
   std::string m_inputFile;
 

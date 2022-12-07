@@ -17,7 +17,7 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "CLHEP/Random/RandFlat.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include "AtlasHepMC/IO_HEPEVT.h"
 
@@ -28,13 +28,12 @@
 
 namespace{
   static std::string qgsjet_rndm_stream = "QGSJET_INIT";
-  static IAtRndmGenSvc* p_AtRndmGenSvcQGSJet = 0;
+  static CLHEP::HepRandomEngine* p_rndmEngine{};
 }
 
 extern "C" double atl_qgsjet_rndm_( int* ) 
 {
-  CLHEP::HepRandomEngine* engine = p_AtRndmGenSvcQGSJet->GetEngine(qgsjet_rndm_stream);
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(p_rndmEngine);
 }
 
 // ---------------------------------------------------------------------- 
@@ -190,9 +189,6 @@ QGSJet::QGSJet( const std::string &name, ISvcLocator *pSvcLocator ):
   declareProperty( "TabCreate",       m_itab       = 0 );
   declareProperty( "nEvents",         m_nEvents    = 5500 );
 
-  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
-  declareProperty("Dsid", m_dsid);
-
   m_events = 0; // current event number (counted by interface)
   m_ievent = 0;  // current event number counted by QGSJet
   m_iout = 0; // output type (output)
@@ -214,24 +210,12 @@ QGSJet::QGSJet( const std::string &name, ISvcLocator *pSvcLocator ):
 }
 
 // ----------------------------------------------------------------------
-QGSJet::~QGSJet()
-{}
-
-// ----------------------------------------------------------------------
 StatusCode QGSJet::genInitialize() 
 {
   ATH_MSG_INFO( " CRMC INITIALISING.\n" );
 
-  static const bool CREATEIFNOTTHERE = true;
-  
-  StatusCode RndmStatus = service("AtRndmGenSvc", p_AtRndmGenSvcQGSJet, CREATEIFNOTTHERE);
-  if ( !RndmStatus.isSuccess() || 0 == p_AtRndmGenSvcQGSJet ) {
-    ATH_MSG_ERROR( " Could not initialize Random Number Service!" );
-    return RndmStatus;
-  }
-   
-  CLHEP::HepRandomEngine *engine = p_AtRndmGenSvcQGSJet->GetEngine(qgsjet_rndm_stream);
-  const long *sip = engine->getSeeds();
+  p_rndmEngine = getRandomEngineDuringInitialize(qgsjet_rndm_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+  const long *sip = p_rndmEngine->getSeeds();
   long int si1 = sip[0];
   long int si2 = sip[1];
 
@@ -252,9 +236,6 @@ StatusCode QGSJet::genInitialize()
     // initialize QGSJet
   //  crmc_init_f_( iSeed, m_beamMomentum, m_targetMomentum, m_primaryParticle, m_targetParticle, m_model, m_paramFile.c_str() );
   crmc_init_f_();
-
-    // ... and set them back to the stream for proper save
-  p_AtRndmGenSvcQGSJet->CreateStream( si1, si2, qgsjet_rndm_stream );
 
   qgsjet_rndm_stream = "QGSJet";
 
@@ -279,15 +260,19 @@ StatusCode QGSJet::callGenerator()
 {
   // ATH_MSG_INFO( " QGSJet Generating." );
 
-    // save the random number seeds in the event
-    CLHEP::HepRandomEngine* engine = p_AtRndmGenSvcQGSJet->GetEngine( qgsjet_rndm_stream );
-   const long *s = engine->getSeeds();
-
-   std:: cout << "eA seed s : " << s[0] << " " << s[1] << std::endl;
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, qgsjet_rndm_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
   
-   m_seeds.clear();
-   m_seeds.push_back(s[0]);
-   m_seeds.push_back(s[1]);
+  // save the random number seeds in the event
+  const long *s = p_rndmEngine->getSeeds();
+
+  std:: cout << "eA seed s : " << s[0] << " " << s[1] << std::endl;
+  m_seeds.clear();
+  m_seeds.push_back(s[0]);
+  m_seeds.push_back(s[1]);
 
    ++m_events;
   

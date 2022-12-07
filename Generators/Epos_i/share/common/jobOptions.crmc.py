@@ -38,10 +38,6 @@ else:
 
 # ----------------------------------------------------------------------
 from AthenaCommon.AppMgr import ServiceMgr
-from RngComps.RngCompsConf import AtRndmGenSvc
-
-ServiceMgr += AtRndmGenSvc()
-ServiceMgr.AtRndmGenSvc.Seeds = ["EPOS 174947321 159267993", "EPOS_INIT 820021 2347532"]
 
 from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
@@ -62,8 +58,6 @@ eps.LheOutput         = 0 # yes=1 no-0
 epos.LheFile          = "epos.lhe"
 epos.TabCreate        = 0   # force tab creation yes-1 no-0
 job += epos
-
-genSeq.ExtSvc += ["AtRndmGenSvc"]
 
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 MessageSvc = Service( "MessageSvc" )

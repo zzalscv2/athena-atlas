@@ -7,12 +7,14 @@
 #define TAUOLAPP_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
+
+#include "CLHEP/Random/RandomEngine.h"
 
 
 /// @brief This Algorithm provides an easy interface to Tauola C++ interface
@@ -30,11 +32,29 @@ public:
   /// Pass each event in the McEventCollection to Tauola to (re)decay the taus
   virtual StatusCode execute() override;
 
+  static CLHEP::HepRandomEngine* p_rndmEngine;
 
 private:
 
+  /// @name Features for derived classes to use internally
+  //@{
+  void reseedRandomEngine(const std::string& streamName, const EventContext& ctx);
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset, const EventContext& ctx) const;
+  CLHEP::HepRandomEngine* getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun=1, unsigned int lbn=1) const;
+  //@}
+
   /// Event record container key
   std::string m_key;
+
+  // Random number service
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
+
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
+
+  /// Seed for random number engine
+  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
+
 
   /// @name Variables used to configure Tauola
   //@{
@@ -59,13 +79,6 @@ private:
 
   /// TAUOLA cut-off for radiative corrections
   double m_setRadiationCutOff;
-  //@}
-
-  /// Random number generator
-  ServiceHandle<IAtRndmGenSvc> m_atRndmGenSvc;
-
-  /// Random number generator stream name
-  std::string m_tauolapp_stream;
 
 };
 

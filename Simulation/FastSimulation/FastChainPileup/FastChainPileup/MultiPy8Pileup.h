@@ -33,7 +33,7 @@ class MultiPy8Pileup : public Pythia8_i {
     virtual StatusCode fillEvt( HepMC::GenEvent *event );
 
   private:
-    int nPileupEvents();                // decide how much pileup events will be generated
+    int nPileupEvents(CLHEP::HepRandomEngine* rndmEngine);                // decide how much pileup events will be generated
     // parameters
     int m_ncollevent;                  // fixed number of collisions per event
     std::vector< int > m_pileupProfile;  // pileup mu-profile
@@ -45,8 +45,6 @@ class MultiPy8Pileup : public Pythia8_i {
     // int m_evnumber;                     // event sequence number
 
     std::vector< HepMC::GenEvent * > m_evts;   // vector of generated minbias events
-
-    CLHEP::HepRandomEngine *m_randomEngine;
 
     std::vector< double > m_pileupProfileIntegral;
 

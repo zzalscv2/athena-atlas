@@ -61,6 +61,7 @@
 #include "CLHEP/Geometry/Normal3D.h"
 #include "CLHEP/Units/PhysicalConstants.h"
 #include "CLHEP/Random/RandFlat.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include <limits>
 #include <cmath>
@@ -69,12 +70,10 @@
 #include <fstream>
 
 
-// Pointer On AtRndmGenSvc
-IAtRndmGenSvc*         CosmicGenerator::p_AtRndmGenSvc = 0;
+CLHEP::HepRandomEngine* CosmicGenerator::COSMIC_RANDOM_ENGINE{};
 extern "C" float cosmicrndm_(int* /*dummy*/)
 {
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(CosmicGenerator::COSMIC_RANDOM_ENGINE);
 }
 
 //--------------------------------------------------------------------------
@@ -157,38 +156,33 @@ StatusCode CosmicGenerator::genInitialize() {
   m_accepted=0;
   m_rejected=0;
 
-  if(m_infile=="NONE")
+  if(m_infile=="NONE") {
+    COSMIC_RANDOM_ENGINE = getRandomEngineDuringInitialize("COSMICS", m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    CosmicGun* gun = CosmicGun::GetCosmicGun();
 
-    {
-      // Get the random number service
-      CosmicGenerator::p_AtRndmGenSvc = &(GenModule::atRndmGenSvc());
-      CosmicGun* gun = CosmicGun::GetCosmicGun();
+    gun->SetEnergyRange(m_emin/m_GeV,m_emax/m_GeV);
+    gun->SetCosCut(m_ctcut);
+    gun->PrintLevel(m_printEvent, m_printMod);
+    float flux_withCT = gun->InitializeGenerator();
 
-      gun->SetEnergyRange(m_emin/m_GeV,m_emax/m_GeV);
-      gun->SetCosCut(m_ctcut);
-      gun->PrintLevel(m_printEvent, m_printMod);
-      float flux_withCT = gun->InitializeGenerator();
-
-      ATH_MSG_INFO( "Initialisation cosmic gun done." );
-      ATH_MSG_INFO( "Accepted diff  flux after E and cos(theta) cuts = " << flux_withCT << " /cm^2/s" );
-      if (! m_doReweighting) {
-        // The following is only correct w/o reweighting
+    ATH_MSG_INFO( "Initialisation cosmic gun done." );
+    ATH_MSG_INFO( "Accepted diff  flux after E and cos(theta) cuts = " << flux_withCT << " /cm^2/s" );
+    if (! m_doReweighting) {
+      // The following is only correct w/o reweighting
         ATH_MSG_INFO( "Accepted total flux after E and cos(theta) cuts = " <<
-          flux_withCT*(m_xhig-m_xlow)/m_mm*(m_zhig-m_zlow)/m_mm << " /s" );
-      }
+                      flux_withCT*(m_xhig-m_xlow)/m_mm*(m_zhig-m_zlow)/m_mm << " /s" );
+    }
 
+  }
+  else {
+    ATH_MSG_INFO( "Cosmics are read from file " << m_infile );
+    m_ffile.open(m_infile.c_str());
+    if(!m_ffile) {
+      ATH_MSG_FATAL( "Could not open input file - stop! " );
+      return StatusCode::FAILURE;
     }
-  else
-    {
-      ATH_MSG_INFO( "Cosmics are read from file " << m_infile );
-      m_ffile.open(m_infile.c_str());
-      if(!m_ffile)
-        {
-          ATH_MSG_FATAL( "Could not open input file - stop! " );
-          return StatusCode::FAILURE;
-        }
-      m_readfile = true;
-    }
+    m_readfile = true;
+  }
 
   m_center=CLHEP::Hep3Vector(m_IPx, m_IPy, m_IPz);
 
@@ -200,7 +194,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertex(void) {
 
   // Get the pointer to the engine of the stream named SINGLE. If the
   // stream does not exist is created automaticaly
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
+  CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 
   // Generate a random number according to the distribution.
 
@@ -226,7 +220,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertexReweighted(void) {
 
   // Get the pointer to the engine of the stream named SINGLE. If the
   // stream does not exist is created automaticaly
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
+  CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 
   // Generate non-uniform distribution of vertices to reflect azimuthal
   // angle subtended by the sphere of radiusm m_radius
@@ -284,7 +278,13 @@ StatusCode CosmicGenerator::callGenerator() {
   ++m_events;
   ATH_MSG_DEBUG( "Event #" << m_events);
 
-  CLHEP::HepRandomEngine* engine = CosmicGenerator::p_AtRndmGenSvc->GetEngine("COSMICS");
+  assert(COSMIC_RANDOM_ENGINE != 0);
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, "COSMICS",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  COSMIC_RANDOM_ENGINE->setSeeds(seeds, 0); // NOT THREAD-SAFE
+  CLHEP::HepRandomEngine* engine = COSMIC_RANDOM_ENGINE;
 
   // clear up the vectors
   m_fourPos.clear();

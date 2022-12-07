@@ -150,9 +150,8 @@ def CosmicGeneratorCfg(flags, name="CosmicGenerator", **kwargs):
     result.addService(CompFactory.PartPropSvc(InputFile="PDGTABLE.MeV"))
 
     ## Set up random seeds FIXME
-    seed = 'COSMICS OFFSET 1234 2040160768 443921183'
-    from RngComps.RandomServices import dSFMT
-    kwargs.setdefault('AtRndmGenSvc', result.getPrimaryAndMerge(dSFMT(seed)).name)
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault('RndmSvc', result.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
     from CosmicGenerator.CosmicGeneratorConfig import CavernPropertyCalculator
     theCavern = CavernPropertyCalculator()

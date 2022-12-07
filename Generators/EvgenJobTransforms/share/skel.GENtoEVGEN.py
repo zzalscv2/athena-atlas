@@ -56,10 +56,9 @@ from PerfMonComps.PerfMonFlags import jobproperties as perfmonjp
 perfmonjp.PerfMonFlags.doMonitoring = True
 perfmonjp.PerfMonFlags.doSemiDetailedMonitoring = True
 
-## Random number services
-from RngComps.RngCompsConf import AtRndmGenSvc, AtRanluxGenSvc
-svcMgr += AtRndmGenSvc()
-svcMgr += AtRanluxGenSvc()
+## Random number service
+from RngComps.RngCompsConf import AthRNGSvc
+svcMgr += AthRNGSvc()
 
 ## Jobs should stop if an include fails.
 jobproperties.AthenaCommonFlags.AllowIgnoreConfigError = False
@@ -515,7 +514,7 @@ include("EvgenJobTransforms/Generate_ecmenergies.py")
 include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
 ## Process random seed arg and pass to generators
-include("EvgenJobTransforms/Generate_randomseeds.py")
+#include("EvgenJobTransforms/Generate_randomseeds.py")
 
 ## Propagate debug output level requirement to generators
 if (hasattr( runArgs, "VERBOSE") and runArgs.VERBOSE ) or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "DEBUG") or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "VERBOSE"):

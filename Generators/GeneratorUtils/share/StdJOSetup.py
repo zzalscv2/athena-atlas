@@ -19,10 +19,6 @@ if "EVTMAX" in dir():
 ## Set up the particle property service
 include("PartPropSvc/PartPropSvc.py")
 
-## Set up the random number service
-from RngComps.RngCompsConf import AtRndmGenSvc
-svcMgr += AtRndmGenSvc()
-
 ## Get a handle on the top level algorithm sequence
 ## Several common aliases are provided, but "topAlg" is preferred
 from AthenaCommon.AlgSequence import AlgSequence
@@ -38,7 +34,6 @@ svcMgr = ServiceMgr
 ## Provide convenience handles for various services
 msgSvc = svcMgr.MessageSvc
 sgSvc = svcMgr.StoreGateSvc
-rngSvc = svcMgr.AtRndmGenSvc
 ppSvc = svcMgr.PartPropSvc
 
 ## Pull in general Athena job property flags

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/MarsHaloGenerator.h"
@@ -14,15 +14,9 @@
 #include "CLHEP/Units/PhysicalConstants.h"
 
 MarsHaloGenerator::MarsHaloGenerator(const HepPDT::ParticleDataTable* particleTable,
-				     CLHEP::HepRandomEngine* engine, 
 				     const std::string& inputFile,
 				     const std::vector<std::string>& generatorSettings):
-  BeamHaloGenerator(particleTable, engine, inputFile, generatorSettings) {
-}
-
-//------------------------------------------------------------------
-
-MarsHaloGenerator::~MarsHaloGenerator() {
+  BeamHaloGenerator(particleTable, inputFile, generatorSettings) {
 }
 
 //------------------------------------------------------------------
@@ -42,7 +36,7 @@ int MarsHaloGenerator::genInitialize() {
   // the ASCII file open for the event loop. 
   if(!m_enableSampling) return 0;
 
-  m_beamHaloParticleBuffer = new BeamHaloParticleBuffer(m_bufferFileName, m_engine);
+  m_beamHaloParticleBuffer = new BeamHaloParticleBuffer(m_bufferFileName);
   if(m_beamHaloParticleBuffer->openForWriting()) {
     std::cout << "Error: Could not open binary buffer file " << m_bufferFileName << " for writing." << std::endl;
     return 1;
@@ -74,16 +68,17 @@ int MarsHaloGenerator::genInitialize() {
 
 //------------------------------------------------------------------
 
-int MarsHaloGenerator::fillEvt(HepMC::GenEvent* evt) {
+int MarsHaloGenerator::fillEvt(HepMC::GenEvent* evt,
+                               CLHEP::HepRandomEngine* engine) {
   std::vector<BeamHaloParticle> beamHaloEvent;
   int ret_val;
 
   // Read one MARS event which passes the generator settings.
-  if((ret_val = readEvent(&beamHaloEvent)) != 0) return ret_val;
+  if((ret_val = readEvent(&beamHaloEvent, engine)) != 0) return ret_val;
 
   // Convert the particles to GenParticles and attach them to the
   // event.  Flip the event if needed.
-  if((ret_val = BeamHaloGenerator::convertEvent(&beamHaloEvent, evt)) != 0) return ret_val;
+  if((ret_val = BeamHaloGenerator::convertEvent(&beamHaloEvent, evt, engine)) != 0) return ret_val;
 
   // Set the event number
   evt->set_event_number(m_eventNumber);
@@ -165,7 +160,8 @@ int MarsHaloGenerator::readParticle(BeamHaloParticle *beamHaloParticle) {
 
 //------------------------------------------------------------------
 
-int MarsHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent) {
+int MarsHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent,
+                                 CLHEP::HepRandomEngine* engine) {
   BeamHaloParticle *beamHaloParticle;
   int ret_val;
 
@@ -186,7 +182,7 @@ int MarsHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent) {
     // Read one particle at random from the binary buffer.  This uses
     // the particle weights to produce a flat distribution rather than a
     // weighted one, but may generate the same particle twice.
-    beamHaloParticle = m_beamHaloParticleBuffer->readRandomParticle();
+    beamHaloParticle = m_beamHaloParticleBuffer->readRandomParticle(engine);
     if(!beamHaloParticle) {
       std::cout << "Error: readRandomParticle failed." << std::endl;
       return 1;

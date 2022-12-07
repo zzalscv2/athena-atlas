@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/BeamHaloGeneratorAlg.h"
@@ -142,19 +142,16 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
   // Check the input type string
   if (m_inputTypeStr == "MARS-NM") {
     m_beamHaloGenerator = new MarsHaloGenerator(&particleTable(),
-						&randomEngine(), 
-						m_inputFile,
-						m_generatorSettings);
+                                                m_inputFile,
+                                                m_generatorSettings);
   }
   else if (m_inputTypeStr == "FLUKA-VT") {
     m_beamHaloGenerator = new FlukaHaloGenerator(1, &particleTable(),
-						 &randomEngine(), 
-						 m_inputFile,
-						 m_generatorSettings);
+                                                 m_inputFile,
+                                                 m_generatorSettings);
   }
   else if (m_inputTypeStr == "FLUKA-RB") {
     m_beamHaloGenerator = new FlukaHaloGenerator(0, &particleTable(),
-                                                 &randomEngine(),
                                                  m_inputFile,
                                                  m_generatorSettings);
   }
@@ -182,13 +179,17 @@ StatusCode BeamHaloGeneratorAlg::genInitialize() {
 
 StatusCode BeamHaloGeneratorAlg::callGenerator() {
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine* rndmEngine = this->getRandomEngine(m_randomStream, ctx);
+
+
   // Clear the event ready for it to be filled with the next beam halo event.
   m_evt.clear();
 
   // Fill an event with particles from the converted ASCII input file.
   // (If the end of file has already been reached this will return a
   // non-zero value.)
-  if(m_beamHaloGenerator->fillEvt(&m_evt) != 0) return StatusCode::FAILURE;
+  if(m_beamHaloGenerator->fillEvt(&m_evt, rndmEngine) != 0) return StatusCode::FAILURE;
 
   // Fill monitoring plots if requested
   if(m_doMonitoringPlots) {

@@ -1,18 +1,19 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CavernBkgGenerator/GenerateCavernBkg.h"
 
 #include "HepPDT/ParticleData.hh"
 #include "CLHEP/Random/RandFlat.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 #include <cassert>
 
 
 // Random number generator stream name and static pointer to the RNG engine
 namespace { const std::string CAVBKG_RANDOM_STREAM = "CAVERN_BKG"; }
-CLHEP::HepRandomEngine* GenerateCavernBkg::CAVBKG_RANDOM_ENGINE = 0;
+CLHEP::HepRandomEngine* GenerateCavernBkg::CAVBKG_RANDOM_ENGINE{};
 extern "C" float cav_rndm_( int* /*idummy*/ ) {
   return CLHEP::RandFlat::shoot(GenerateCavernBkg::CAVBKG_RANDOM_ENGINE);
 }
@@ -31,7 +32,7 @@ GenerateCavernBkg::GenerateCavernBkg(const std::string& name, ISvcLocator* pSvcL
 
 StatusCode
 GenerateCavernBkg::genInitialize() {
-  CAVBKG_RANDOM_ENGINE = atRndmGenSvc().GetEngine(CAVBKG_RANDOM_STREAM);
+  CAVBKG_RANDOM_ENGINE = getRandomEngineDuringInitialize(CAVBKG_RANDOM_STREAM, m_randomSeed, m_dsid); // NOT THREAD-SAFE
   return StatusCode::SUCCESS;
 }
 
@@ -40,9 +41,14 @@ StatusCode
 GenerateCavernBkg::callGenerator() {
   ATH_MSG_INFO("GenerateCavernBkg GENERATING.");
 
-  // Get the random number seeds
   assert(CAVBKG_RANDOM_ENGINE != 0);
-  const long* s = CAVBKG_RANDOM_ENGINE->getSeeds();
+  //Re-seed the random number stream
+  long seeds[7];
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  ATHRNG::calculateSeedsMC21(seeds, CAVBKG_RANDOM_STREAM,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  CAVBKG_RANDOM_ENGINE->setSeeds(seeds, 0); // NOT THREAD-SAFE
+  // Get the random number seeds
+  const long* s = CAVBKG_RANDOM_ENGINE->getSeeds(); // TODO check whether "seeds" can be used directly
   m_seeds.clear();
   m_seeds.push_back(s[0]);
   m_seeds.push_back(s[1]);

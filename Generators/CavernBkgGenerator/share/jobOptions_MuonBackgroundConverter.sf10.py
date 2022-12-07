@@ -25,17 +25,6 @@ topSequence += MuonBackgroundConverter( "MuonBackgroundConverter" )
 
 MuonCavern = topSequence.MuonBackgroundConverter
 
-# The following is needed to load the Athena Random
-# Number Generation Service.
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc(
-    "AtRndmGenSvc",
-    Seeds = [ "SINGLE 2040160768 790101" ]
-    )
-
-# AtRndmGenSvc.ReadFromFile = true;
-ServiceMgr.AtRndmGenSvc.OutputLevel = DEBUG
-
 #--------------------------------------------------------------
 # Set output level threshold (1=VERBOSE, 2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 #--------------------------------------------------------------

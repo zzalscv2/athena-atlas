@@ -17,10 +17,6 @@ theApp.EvtMax = 1000
 
 ServiceMgr.MessageSvc.OutputLevel = INFO
 
-from RngComps.RngCompsConf import AtRndmGenSvc
-ServiceMgr += AtRndmGenSvc()
-ServiceMgr.AtRndmGenSvc.Seeds = ["BeamHalo 4894721 4639635"]
-
 from BeamHaloGenerator.BeamHaloGeneratorConf import BeamHaloGeneratorAlg
 BeamHaloGenerator = BeamHaloGeneratorAlg()
 BeamHaloGenerator.inputType="FLUKA-RB"

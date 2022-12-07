@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// ------------------------------------------------------------- 
+// -------------------------------------------------------------
 // Generators/Hijing.cxx Description: Allows the user
 // to generate hijing events and store the result in the
 // Transient Store.
@@ -36,14 +36,11 @@
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Geometry/Point3D.h"
 
-#include "AthenaKernel/IAtRndmGenSvc.h"
-
-#include "StoreGate/StoreGateSvc.h"
-#include "GeneratorObjects/HijingEventParams.h"
+#include "AthenaKernel/RNGWrapper.h"
 
 namespace {
     // pointer On AtRndmGenSvc
-  static IAtRndmGenSvc *p_AtRndmGenSvc;
+  static CLHEP::HepRandomEngine *p_Engine;
   static std::string hijing_stream = "HIJING_INIT";
 }
 
@@ -52,10 +49,9 @@ extern "C"
 {
   float atl_ran_( int* )
   {
-    CLHEP::HepRandomEngine* engine = p_AtRndmGenSvc->GetEngine(hijing_stream);
-    return (float) CLHEP::RandFlat::shoot(engine);
+    return (float) CLHEP::RandFlat::shoot(p_Engine);
   }
-   
+
   void hijset_(float*,
               const char*,
               const char*,
@@ -117,25 +113,10 @@ StatusCode Hijing::genInitialize()
     //BPK
     if( m_prand ) ATH_MSG_INFO( "===> Random Momentum Mirroring enabled" );
 
-    StatusCode sc = service("StoreGateSvc", m_storeGate);
-    if (sc.isFailure()) {
-      ATH_MSG_ERROR( "Unable to get pointer to StoreGate Service" );
-      return sc;
-    }
-    
-    static const bool CREATEIFNOTTHERE(true);
-    StatusCode RndmStatus = service("AtRndmGenSvc", p_AtRndmGenSvc, CREATEIFNOTTHERE);
-    if (!RndmStatus.isSuccess() || 0 == p_AtRndmGenSvc) {
-      ATH_MSG_ERROR( " Could not initialize Random Number Service" );
-      return RndmStatus;
-    }       
+    //CLHEP::HepRandomEngine* engine
+    p_Engine = getRandomEngineDuringInitialize(hijing_stream, m_randomSeed, m_dsid); // NOT THREAD-SAFE
+    hijing_stream       =       "HIJING";
 
-    // Save the HIJING_INIT stream seeds....
-    CLHEP::HepRandomEngine* engine = p_AtRndmGenSvc->GetEngine(hijing_stream);
-    const long*       sip       =       engine->getSeeds();
-    long       int       si1       =       sip[0];
-    long       int       si2       =       sip[1];
-  
     // Set the users' initialisation parameters choices
     set_user_params();
     
@@ -169,14 +150,9 @@ StatusCode Hijing::genInitialize()
 //     for (int i = 1; i <= m_hiparnt.lenIhnt2(); ++i)
 //       std::cout << i << ":" << m_hiparnt.ihnt2(i) << ", ";
 //     std::cout << std::endl;
-    
+
 //     std::cout << " NSEED = " << m_ranseed.nseed() << std::endl;
 
-    // ... and set them back to the stream for proper save
-    p_AtRndmGenSvc->CreateStream(si1, si2, hijing_stream);
-
-    hijing_stream       =       "HIJING";
-    
     return StatusCode::SUCCESS;
 }
 
@@ -185,11 +161,14 @@ StatusCode Hijing::callGenerator()
     ATH_MSG_INFO( " HIJING generating.  \n" );
 
     // Save the random number seeds in the event
-    CLHEP::HepRandomEngine*       engine       =       p_AtRndmGenSvc->GetEngine(hijing_stream);
-    const long*              s       =       engine->getSeeds();
+    //Re-seed the random number stream
+    long seeds[7];
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    ATHRNG::calculateSeedsMC21(seeds, hijing_stream, ctx.eventID().event_number(), m_dsid, m_randomSeed);
+    p_Engine->setSeeds(seeds, 0); // NOT THREAD-SAFE
     m_seeds.clear();
-    m_seeds.push_back(s[0]);
-    m_seeds.push_back(s[1]);
+    m_seeds.push_back(seeds[0]);
+    m_seeds.push_back(seeds[1]);
 
     // Generate event
     const char* frame       = m_frame.c_str();
@@ -339,7 +318,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     CLHEP::HepLorentzVector newVertex;
     newVertex = CLHEP::HepLorentzVector(0.,0.,0.,0.);  
 
-    if( m_rand )newVertex = randomizeVertex(); // Create a random vertex along the pipe
+    if( m_rand )newVertex = randomizeVertex(p_Engine); // Create a random vertex along the pipe
     else if(m_sel) newVertex = CLHEP::HepLorentzVector(m_x, m_y, m_z, 0.); // Create vertex at selected point - preempted by m_rand
 
     HepMC::GenVertexPtr v1 = HepMC::newGenVertexPtr(HepMC::FourVector(newVertex.x(),newVertex.y(),newVertex.z(),newVertex.t()));
@@ -775,14 +754,13 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     }
 
     // Convert CLHEP::cm->CLHEP::mm and CLHEP::GeV->CLHEP::MeV
-    // 
+    //
     GeVToMeV(evt);
 
     //BPK-> Loop over the particles in the event, if p needs to be mirrored:
     if( m_prand ){
-      HepMC::FourVector tmpmom(0.,0.,0.,0.); 
-      CLHEP::HepRandomEngine* engine = p_AtRndmGenSvc->GetEngine(hijing_stream);
-      double ranz = CLHEP::RandFlat::shoot(engine);
+      HepMC::FourVector tmpmom(0.,0.,0.,0.);
+      double ranz = CLHEP::RandFlat::shoot(p_Engine);
       //      std::cout <<"random="<<ranz <<std::endl;
       if (ranz < 0.5) {
        //      std::cout <<"flip="<<ranz <<std::endl;
@@ -802,16 +780,13 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
 }
 
 CLHEP::HepLorentzVector
-Hijing::randomizeVertex()
+Hijing::randomizeVertex(CLHEP::HepRandomEngine* engine)
 {
   // Check the range in Z for the correct pipe diameter
   // Definitions of constants are in VertexShift.h
 
   using namespace VertexShift;
 
-//  MsgStream log(messageService(), name());
-  CLHEP::HepRandomEngine* engine = p_AtRndmGenSvc->GetEngine(hijing_stream);
-  
   double ranx, rany, xmax, ymax;
   double ranz = CLHEP::RandFlat::shoot(engine, -Zmax, Zmax);
   if( m_wide ){ // Allow the whole pipe

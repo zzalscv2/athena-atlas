@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamHaloGenerator/FlukaHaloGenerator.h"
@@ -14,20 +14,13 @@
 
 FlukaHaloGenerator::FlukaHaloGenerator(int type,
                                        const HepPDT::ParticleDataTable* particleTable,
-                                       CLHEP::HepRandomEngine* engine,
                                        const std::string& inputFile,
                                        const std::vector<std::string>& generatorSettings):
-  BeamHaloGenerator(particleTable, engine, inputFile, generatorSettings),
+  BeamHaloGenerator(particleTable, inputFile, generatorSettings),
   m_sameEvent(true),
   m_firstEvent(true),
   m_flukaParticle(type),
   m_lastFlukaParticle() {
-}
-
-//--------------------------------------------------------------------------
-
-
-FlukaHaloGenerator::~FlukaHaloGenerator() {
 }
 
 //--------------------------------------------------------------------------
@@ -52,16 +45,17 @@ int FlukaHaloGenerator::genInitialize() {
 //--------------------------------------------------------------------------
 
 
-int FlukaHaloGenerator::fillEvt(HepMC::GenEvent* evt) {
+int FlukaHaloGenerator::fillEvt(HepMC::GenEvent* evt,
+                                CLHEP::HepRandomEngine* engine) {
   std::vector<BeamHaloParticle> beamHaloEvent;
   int ret_val;
 
   // Read one FLUKA event which passes the generator settings.
-  if((ret_val = readEvent(&beamHaloEvent)) != 0) return ret_val;
+  if((ret_val = readEvent(&beamHaloEvent, engine)) != 0) return ret_val;
 
   // Convert the particles to GenParticles and attach them to the
   // event.  Flip the event if needed.
-  if((ret_val = BeamHaloGenerator::convertEvent(&beamHaloEvent, evt)) != 0) return ret_val;
+  if((ret_val = BeamHaloGenerator::convertEvent(&beamHaloEvent, evt, engine)) != 0) return ret_val;
 
   // Set the event number
   evt->set_event_number(m_eventNumber);
@@ -98,7 +92,8 @@ int FlukaHaloGenerator::readParticle(BeamHaloParticle *beamHaloParticle) {
 
 //--------------------------------------------------------------------------
 
-int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent) {
+int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent,
+                                  CLHEP::HepRandomEngine* engine) {
   BeamHaloParticle beamHaloParticle;
 
   // Clear the event
@@ -211,7 +206,7 @@ int FlukaHaloGenerator::readEvent(std::vector<BeamHaloParticle> *beamHaloEvent) 
   // WARNING.
   if(!passed) {
     int ret_val;
-    if((ret_val = readEvent(beamHaloEvent)) != 0) return ret_val;
+    if((ret_val = readEvent(beamHaloEvent, engine)) != 0) return ret_val;
   }
 
   return 0;

@@ -39,10 +39,7 @@
 typedef std::vector<std::string> CommandVector;
 
 // new to store hydjet event parameters
-// ------------------------------------
-class StoreGateSvc;
-class HijingEventParams;
-// ---------------------
+#include "GeneratorObjects/HijingEventParams.h"
 
 class Hydjet:public GenModule {
 public:

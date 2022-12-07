@@ -8,7 +8,6 @@ include( "PartPropSvc/PartPropSvc.py" )
 theApp.Dlls  += [ "CavernBkgGenerator", "TruthExamples" ]
 theApp.TopAlg = ["GenerateCavernBkg", "DumpMC"]
 #theApp.TopAlg = ["GenerateCavernBkg"]
-theApp.ExtSvc += ["AtRndmGenSvc"]
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 MessageSvc = Service( "MessageSvc" )
 MessageSvc.OutputLevel               = 3
@@ -20,8 +19,6 @@ theApp.EvtMax = 10
 #--------------------------------------------------------------
 # Algorithms Private Options
 #--------------------------------------------------------------
-AtRndmGenSvc = Service( "AtRndmGenSvc" )
-AtRndmGenSvc.Seeds = ["CAVERN_BKG 563256 2843267"]
 
 #bkg = Algorithm( "GenerateCavernBkg" )
 #bkg.InputFile = "fvpn22n.dat"

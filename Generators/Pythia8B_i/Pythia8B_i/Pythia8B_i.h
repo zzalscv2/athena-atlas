@@ -38,7 +38,7 @@ public:
     bool userSelection(Pythia8::Event&, std::string, std::vector<double>);
     void printSignalSelections(const std::vector<int>&,const std::vector<double>&, const std::vector<double>&, unsigned int) const;
     
-    static IAtRndmGenSvc* p_AtRndmGenSvc;
+  static CLHEP::HepRandomEngine* p_rndmEngine;
     
 private:
     
@@ -63,9 +63,6 @@ private:
     bool m_sameAlphaSAsMPI;
     Pythia8::SuppressSmallPT *m_SuppressSmallPT;
     unsigned int m_failureCount;
-
-    std::string m_dsid;
-    std::string m_seed_from_tf_arg;
 };
 
 #endif

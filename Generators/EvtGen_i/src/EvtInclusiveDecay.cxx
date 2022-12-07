@@ -39,12 +39,13 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/IPartPropSvc.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/DataHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "HepPDT/ParticleData.hh"
 #include "HepPID/ParticleName.hh"
+
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
@@ -100,10 +101,7 @@ EvtInclusiveDecay::EvtInclusiveDecay(const std::string& name, ISvcLocator* pSvcL
   declareProperty("userSelMu2MaxEta", m_userSelMu2MaxEta=102.5);
   declareProperty("userSelMinDimuMass", m_userSelMinDimuMass=0.);
   declareProperty("userSelMaxDimuMass", m_userSelMaxDimuMass=-1.); // set to negative to not apply cut
-  declareProperty("isfHerwig", m_isfHerwig=false); 
-
-  m_atRndmGenSvc = 0;
-  m_mcEvtColl = 0;
+  declareProperty("isfHerwig", m_isfHerwig=false);
 
   // We have decided to blacklist Tau decays because we are not sure whether the polarization
   // would be properly passed to EvtGen
@@ -122,6 +120,8 @@ EvtInclusiveDecay::~EvtInclusiveDecay() {
 StatusCode EvtInclusiveDecay::initialize() {
 
   ATH_CHECK( GenBase::initialize() );
+  // Get the random number service
+  CHECK(m_rndmSvc.retrieve());
 
   msg(MSG::INFO) << "EvtInclusiveDecay initialize" << endmsg;
   msg(MSG::INFO) << "Particle properties definition file = " << m_pdtFile << endmsg;
@@ -160,10 +160,9 @@ StatusCode EvtInclusiveDecay::initialize() {
     msg(MSG::INFO) << (*i) << " ";
   msg(MSG::INFO) << endmsg;
 
+  CLHEP::HepRandomEngine* rndmEngine = getRandomEngineDuringInitialize(m_randomStreamName, m_randomSeed, m_dsid);
   // Obtain random number generator for EvtGen
-  static const bool CREATEIFNOTTHERE(true);
-  CHECK(service("AtRndmGenSvc", m_atRndmGenSvc, CREATEIFNOTTHERE));
-  m_evtAtRndmGen = new EvtInclusiveAtRndmGen(m_atRndmGenSvc,m_randomStreamName);
+  m_evtAtRndmGen = new EvtInclusiveAtRndmGen(rndmEngine);
 
   // Create an instance of EvtGen and read particle properties and decay files
   EvtExternalGenList genList(true,xmlpath(),"gamma");
@@ -185,12 +184,48 @@ StatusCode EvtInclusiveDecay::initialize() {
 }
 
 
+void EvtInclusiveDecay::reseedRandomEngine(const std::string& streamName,
+                                           const EventContext& ctx)
+{
+  long seeds[7];
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  m_evtAtRndmGen->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
+}
+
+
+CLHEP::HepRandomEngine* EvtInclusiveDecay::getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  rngWrapper->setSeed( streamName, ctx.slot(), randomSeedOffset, ctx.eventID().run_number() );
+  return rngWrapper->getEngine(ctx);
+}
+
+
+CLHEP::HepRandomEngine* EvtInclusiveDecay::getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun, unsigned int lbn) const
+{
+  const size_t slot=0;
+  EventContext ctx;
+  ctx.setSlot( slot );
+  ctx.setEventID (EventIDBase (conditionsRun,
+               EventIDBase::UNDEFEVT,  // event
+               EventIDBase::UNDEFNUM,  // timestamp
+               EventIDBase::UNDEFNUM,  // timestamp ns
+               lbn));
+  Atlas::setExtendedEventContext(ctx,
+                                 Atlas::ExtendedEventContext( evtStore()->hiveProxyDict(),
+                                                              conditionsRun) );
+  return getRandomEngine(streamName, randomSeedOffset, ctx);
+}
+
 
 StatusCode EvtInclusiveDecay::execute() {
   ATH_MSG_DEBUG("EvtInclusiveDecay executing");
 
-  std::string   key = m_inputKeyName;
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  reseedRandomEngine(m_randomStreamName, ctx);
 
+  std::string   key = m_inputKeyName;
   // retrieve event from Transient Store (Storegate)
   
   const McEventCollection* oldmcEvtColl=0;
@@ -862,17 +897,12 @@ std::string EvtInclusiveDecay::pdgName(HepMC::ConstGenParticlePtr p, bool status
 //
 // Interface between Athena random number service and EvtGen's EvtRandomEngine class
 //
-EvtInclusiveAtRndmGen::EvtInclusiveAtRndmGen(IAtRndmGenSvc* atRndmGenSvc, std::string streamName)
-  : m_atRndmGenSvc(atRndmGenSvc)
-  , m_streamName(streamName)
+EvtInclusiveAtRndmGen::EvtInclusiveAtRndmGen(CLHEP::HepRandomEngine* engine)
+  : m_engine(engine)
 {}
 
-EvtInclusiveAtRndmGen::~EvtInclusiveAtRndmGen() {
-}
-
 double EvtInclusiveAtRndmGen::random() {
-  CLHEP::HepRandomEngine* engine = m_atRndmGenSvc->GetEngine(m_streamName);
-  return CLHEP::RandFlat::shoot(engine);
+  return CLHEP::RandFlat::shoot(m_engine);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

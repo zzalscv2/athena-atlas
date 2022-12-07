@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULESHIJING_H
@@ -21,10 +21,8 @@
 typedef std::vector<std::string> CommandVector;
 
 // new to store hijing event parameters
-// ------------------------------------
-class StoreGateSvc;
-class HijingEventParams;
-// ---------------------
+#include "GeneratorObjects/HijingEventParams.h"
+
 /**
 @class  Generators/Hijing.h
 
@@ -51,9 +49,12 @@ public:
     virtual StatusCode 	callGenerator	();
     virtual StatusCode 	genFinalize	();
     virtual StatusCode 	fillEvt		(HepMC::GenEvent* evt);
-    virtual CLHEP::HepLorentzVector randomizeVertex();
 
 protected:
+    virtual CLHEP::HepLorentzVector randomizeVertex(CLHEP::HepRandomEngine* engine);
+
+  //Gen_tf run args.
+  IntegerProperty m_dsid{this, "Dsid", 999999};
 
     // inputs to HIJSET (Hijing initialization) ...
     float	m_efrm;

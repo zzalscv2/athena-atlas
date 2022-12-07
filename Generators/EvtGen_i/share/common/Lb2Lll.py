@@ -66,8 +66,6 @@ from GeneratorFilters.GeneratorFiltersConf import BSignalFilter
 topAlg += BSignalFilter()
 BSignalFilter = topAlg.BSignalFilter
 
-theApp.ExtSvc += [ "AtRndmGenSvc" ]
-
 #--------------------------------------------------------------
 # Number of events to be accepted,
 # rewritten if use B job submition script
@@ -87,13 +85,9 @@ svcMgr.EventSelector.FirstEvent  = 1
 #User random number seeds - re-written if use B job submition script
 #--------------------------------------------------------------
 
-from RngComps.RngCompsConf import AtRndmGenSvc
-svcMgr += AtRndmGenSvc()
-svcMgr.AtRndmGenSvc.Seeds = [ "PYTHIA 4789899 1890000001", "PYTHIA_INIT 820021 3347532", "EVTGEN 4789899 1890000001" ]
-#AtRndmGenSvc.Seeds = [ "PYTHIA 4789899 989240512", "PYTHIA_INIT 820021 2347532", "EVTGEN 4789899 821000366" ]
-#AtRndmGenSvc.Seeds = [ "PYTHIA 4789899 MYDSNMYRAN", "PYTHIA_INIT 820021 2347532", "EVTGEN 4789899 MYDSNMYRAN" ]
 if readRndFromFile:
-    svcMgr.AtRndmGenSvc.ReadFromFile = true;
+    print("ERROR readRndFromFile not currently supported -- ignoring.")
+    pass
 
 #--------------------------------------------------------------
 # Output level (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL)

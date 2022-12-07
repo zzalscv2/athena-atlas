@@ -55,7 +55,6 @@ Herwig7::Herwig7(const std::string& name, ISvcLocator* pSvcLocator) :
 
   declareProperty("CleanupHerwigScratch", m_cleanup_herwig_scratch);
 
-  declareProperty("RandomSeedTfArg", m_seed_from_tf_arg);
   declareProperty("Dsid", m_dsid);
 }
 
@@ -71,7 +70,7 @@ StatusCode Herwig7::genInitialize() {
 
   // Get random number seeds from Atlas RNG service, and pass them as Hw7 RNG
   // default seeds (they can be overridden with an explicit Hw7 set command in the JO)
-  CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine("Herwig7");
+  CLHEP::HepRandomEngine* engine = this->getRandomEngineDuringInitialize("Herwig7", m_randomSeed); // conditionsRun=1, lbn=1
   const long* seeds = engine->getSeeds();
   // The RNG service supplies two seeds, but Hw7 only uses one. To avoid the situation
   // where varying one seed has no effect (this already stung us in pre-production
@@ -191,7 +190,8 @@ StatusCode Herwig7::fillEvt(HepMC::GenEvent* evt) {
   evt->set_event_number(evtInfo->eventNumber());
 
   // Fill event with random seeds from Atlas RNG service
-  const long* s = atRndmGenSvc().GetEngine("Herwig7")->getSeeds();
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  const long* s = this->getRandomEngine("Herwig7", ctx)->getSeeds();
   std::vector<long> seeds(s, s+2);
   ATH_MSG_DEBUG("Random seeds: " << seeds[0] << ", " << seeds[1]);
   HepMC::set_random_states(evt,seeds);

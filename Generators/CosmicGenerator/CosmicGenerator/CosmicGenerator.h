@@ -59,7 +59,6 @@ in the vertical position (the way it is positioned in the ATLAS detector)
 #define GENERATORMODULESCOSMICGEN_H
 
 #include "GeneratorModules/GenModule.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
 
 #include "CLHEP/Vector/LorentzVector.h"
 #include "AtlasHepMC/Polarization.h"
@@ -86,9 +85,11 @@ public:
   CLHEP::HepLorentzVector generateVertex(void);
   CLHEP::HepLorentzVector generateVertexReweighted(void);
 
-  static IAtRndmGenSvc*         p_AtRndmGenSvc;
+  /// Static pointer to random number generator for use by
+  static CLHEP::HepRandomEngine* COSMIC_RANDOM_ENGINE;
 
 private:
+  IntegerProperty m_dsid{this, "DSID", 999999, "Dataset ID number"};
   // event counter, used for event ID
   int m_events, m_rejected,m_accepted;
   std::vector<int> m_pdgCode;

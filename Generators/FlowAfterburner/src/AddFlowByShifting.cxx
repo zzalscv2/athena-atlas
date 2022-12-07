@@ -11,23 +11,21 @@
 // Andrzej Olszewski: Initial Code February 2006
 // 11.10.2006: Add predefined flow function by name
 
+#include "FlowAfterburner/AddFlowByShifting.h"
+
 #include <set>
 #include <cmath>
 
 // For the Athena-based random numbers
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGaussQ.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
-#include "FlowAfterburner/AddFlowByShifting.h"
 #include "TruthUtils/GeneratorName.h"
 
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/DataSvc.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include "StoreGate/StoreGateSvc.h"
-#include "GeneratorObjects/HijingEventParams.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "TGraph.h"
@@ -85,11 +83,6 @@ AddFlowByShifting::AddFlowByShifting(const std::string& name, ISvcLocator* pSvcL
   declareProperty("custom_v5"         , m_custom_v5 =0                         );
   declareProperty("custom_v6"         , m_custom_v6 =0                         );
   declareProperty("FlowBSwitch"       , m_flowb_sw  =0                         );//currently not used
-
-  m_sgSvc = 0;
-  p_AtRndmGenSvc = 0;
-  p_engine = 0;
-
   m_flow_function= NULL;
   m_flow_implementation_type = 0;
   m_particles_processed = 0;
@@ -103,20 +96,10 @@ AddFlowByShifting::AddFlowByShifting(const std::string& name, ISvcLocator* pSvcL
 }
 
 
-
-
 StatusCode AddFlowByShifting::initialize(){
   ATH_MSG_INFO(">>> AddFlowByShifting from Initialize <<<");
 
-  static const bool CREATEIFNOTTHERE(true);
-  StatusCode RndmStatus = service("AtRndmGenSvc", p_AtRndmGenSvc, CREATEIFNOTTHERE);
-  if (!RndmStatus.isSuccess() || 0 == p_AtRndmGenSvc){
-      ATH_MSG_ERROR("Could not initialize Random Number Service");
-      return RndmStatus;
-  }
-
-  // getting our random numbers stream
-  p_engine  =  p_AtRndmGenSvc->GetEngine("FLOW");
+  ATH_CHECK(m_rndmSvc.retrieve());
 
   ATH_MSG_INFO("**********Settings for Afterburner************");
   ATH_MSG_INFO("McTruthKey         : " << m_inkey              );
@@ -185,17 +168,22 @@ StatusCode AddFlowByShifting::initialize(){
 }
 
 
-
-
-
-
-
+CLHEP::HepRandomEngine* AddFlowByShifting::getRandomEngine(const std::string& streamName,
+                                                           const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  std::string rngName = name()+streamName;
+  rngWrapper->setSeed( rngName, ctx );
+  return rngWrapper->getEngine(ctx);
+}
 
 
 StatusCode AddFlowByShifting::execute() {
   ATH_MSG_INFO(">>> AddFlowByShifting from execute");
 
- // Get hijing event parameters
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  CLHEP::HepRandomEngine *rndmEngine = getRandomEngine("FLOW", ctx);
+  // Get hijing event parameters
   const HijingEventParams *hijing_pars;
   if( evtStore()->retrieve(hijing_pars, "Hijing_event_params").isFailure() ) {
     ATH_MSG_ERROR("Could not retrieve Hijing_event_params");
@@ -229,7 +217,7 @@ StatusCode AddFlowByShifting::execute() {
   //Geneate the event-plane angles (some of them may or may not be used later on)
   //Store the angles into the hijing event parameters
   for(int ihar=0;ihar<6;ihar++){
-    m_psi_n[ihar] =(CLHEP::RandFlat::shoot(p_engine)-0.5)*2*M_PI / (ihar+1);   //Principal value must be within -PI/n to PI/n
+    m_psi_n[ihar] =(CLHEP::RandFlat::shoot(rndmEngine)-0.5)*2*M_PI / (ihar+1);   //Principal value must be within -PI/n to PI/n
     hijing_pars_nc->set_psi(ihar+1,m_psi_n[ihar]);
   }
   m_psi_n[1]=hijing_pars->get_bphi()                   ;//the psi2 plane is aligned with the impact parameter
@@ -246,7 +234,7 @@ StatusCode AddFlowByShifting::execute() {
 
 
     auto mainvtx=HepMC::barcode_to_vertex(*itr,-1);
-    if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b());
+    if(m_flow_fluctuations) Set_EbE_Fluctuation_Multipliers(mainvtx,hijing_pars->get_b(),rndmEngine);
 
 #ifdef HEPMC3
     int particles_in_event = (*itr)->particles().size();
@@ -257,12 +245,11 @@ StatusCode AddFlowByShifting::execute() {
     m_particles_processed = 0;
     for ( auto parent: *mainvtx) {
 #endif
-
       // Process particles from main vertex
       CLHEP::HepLorentzVector momentum(parent->momentum().px(),
-				parent->momentum().py(),
-				parent->momentum().pz(),
-				parent->momentum().e());
+                               parent->momentum().py(),
+                               parent->momentum().pz(),
+                               parent->momentum().e());
       ATH_MSG_DEBUG("Parent particle: " << HepMC::barcode(parent)        <<
                     " PID = "           << parent->pdg_id()         <<
                     " Status = "        << parent->status()         <<
@@ -283,14 +270,14 @@ StatusCode AddFlowByShifting::execute() {
 
       // Randomize phi if explicitely requested
       if(m_ranphi_sw) {
-	double phishift = SetParentToRanPhi(parent);
-	MoveDescendantsToParent(parent, phishift)  ;// adjust decsandants to parent position
+        double phishift = SetParentToRanPhi(parent, rndmEngine);
+        MoveDescendantsToParent(parent, phishift)  ;// adjust decsandants to parent position
       }
 
-      // Add flow to particles from main vertex
-      double phishift = AddFlowToParent(parent, hijing_pars);
-      MoveDescendantsToParent(parent, phishift);// adjust decsandants to parent position
-    }
+        // Add flow to particles from main vertex
+        double phishift = AddFlowToParent(parent, hijing_pars);
+        MoveDescendantsToParent(parent, phishift);// adjust decsandants to parent position
+      }
 
     // correct for double counting
     if(m_ranphi_sw) m_particles_processed /= 2;
@@ -318,7 +305,8 @@ StatusCode AddFlowByShifting::finalize() {
 
 
 
-double AddFlowByShifting::SetParentToRanPhi(HepMC::GenParticlePtr parent)
+double AddFlowByShifting::SetParentToRanPhi(HepMC::GenParticlePtr parent,
+                                            CLHEP::HepRandomEngine *rndmEngine)
 {
   // Set particle to random phi
   // Return phi shift
@@ -326,12 +314,12 @@ double AddFlowByShifting::SetParentToRanPhi(HepMC::GenParticlePtr parent)
 
   double phi, phishift;
   CLHEP::HepLorentzVector momentum(parent->momentum().px(),
-			    parent->momentum().py(),
-			    parent->momentum().pz(),
-			    parent->momentum().e());
+                                   parent->momentum().py(),
+                                   parent->momentum().pz(),
+                                   parent->momentum().e());
   phi = momentum.phi();
 
-  double rannum = CLHEP::RandFlat::shoot(p_engine);
+  double rannum = CLHEP::RandFlat::shoot(rndmEngine);
   double ranphi = (rannum-0.5)*2*M_PI;
   phishift = ranphi - phi;
 
@@ -657,7 +645,7 @@ void AddFlowByShifting::p_Pb_cent_eta_indep(double /*b*/, double /*eta*/, double
 
 
 
-void AddFlowByShifting::Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr mainvtx,float b){
+void AddFlowByShifting::Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr mainvtx,float b, CLHEP::HepRandomEngine *rndmEngine){
     int Total_Multiplicity=0;
     double EbE_Vn[6];
     for(int ihar=0;ihar<6;ihar++){m_EbE_Multiplier_vn[ihar]=1.0;EbE_Vn[ihar]=0.0;}
@@ -673,33 +661,32 @@ void AddFlowByShifting::Set_EbE_Fluctuation_Multipliers(HepMC::GenVertexPtr main
     }
 
 
-    for(int ihar = 0; ihar< 6; ihar++){m_v_n  [ihar]=0.0;}//keep vn as zero before we return from function
-    if(Total_Multiplicity<=0) return; 
+      for(int ihar = 0; ihar< 6; ihar++){m_v_n  [ihar]=0.0;}//keep vn as zero before we return from function
+      if(Total_Multiplicity<=0) return;
 
 
-    for(int ihar=0;ihar<6;ihar++){
-      EbE_Vn[ihar]/=Total_Multiplicity;
-      float vn_rp=0,delta=0;//BG parameterizations
+      for(int ihar=0;ihar<6;ihar++){
+        EbE_Vn[ihar]/=Total_Multiplicity;
+        float vn_rp=0,delta=0;//BG parameterizations
 
-      //in the following we assume that the vn in the event is sqrt(<vn^2>)
-      //This is because the vn(pT) were tuned to 2PC/EP measurements
-      //then : vn_evt=vn_rp^2 + 2*(delta^2)
-      //which is used together with the "alpha" to get the "vn_rp" and "delta"
-      if(ihar==0) continue; //No EbE fluctuation for v1
-      else if(ihar==1) {    //v2
-        float alpha=1.0/m_graph_fluc->Eval(b);// ratio of V2_RP over delta (from Fig 15 of EbE vn paper)
-        delta=EbE_Vn[ihar]/sqrt(2.0+alpha*alpha);
-        vn_rp=alpha*delta;
+        //in the following we assume that the vn in the event is sqrt(<vn^2>)
+        //This is because the vn(pT) were tuned to 2PC/EP measurements
+        //then : vn_evt=vn_rp^2 + 2*(delta^2)
+        //which is used together with the "alpha" to get the "vn_rp" and "delta"
+        if(ihar==0) continue; //No EbE fluctuation for v1
+        else if(ihar==1) {    //v2
+          float alpha=1.0/m_graph_fluc->Eval(b);// ratio of V2_RP over delta (from Fig 15 of EbE vn paper)
+          delta=EbE_Vn[ihar]/sqrt(2.0+alpha*alpha);
+          vn_rp=alpha*delta;
+        }
+        else if(ihar>=2) { //v3-v6
+          vn_rp =0;
+          delta=EbE_Vn[ihar]/sqrt(2.0);
+        }
+        if(EbE_Vn[ihar]==0) {ATH_MSG_WARNING("Zero EbeV"<<ihar+1); continue;}
+        float X=CLHEP::RandGaussQ::shoot(rndmEngine,vn_rp,delta);
+        float Y=CLHEP::RandGaussQ::shoot(rndmEngine,0.0  ,delta);
+        m_EbE_Multiplier_vn[ihar]=sqrt(X*X+ Y*Y)/EbE_Vn[ihar];
+        ATH_MSG_INFO("EbE_Multiplier_v"<<ihar+1<<"="<<m_EbE_Multiplier_vn[ihar]);
       }
-      else if(ihar>=2) { //v3-v6
-        vn_rp =0;
-        delta=EbE_Vn[ihar]/sqrt(2.0);
-      }
-      if(EbE_Vn[ihar]==0) {ATH_MSG_WARNING("Zero EbeV"<<ihar+1); continue;}
-      float X=CLHEP::RandGaussQ::shoot(p_engine,vn_rp,delta);
-      float Y=CLHEP::RandGaussQ::shoot(p_engine,0.0  ,delta);
-      m_EbE_Multiplier_vn[ihar]=sqrt(X*X+ Y*Y)/EbE_Vn[ihar]; 
-      ATH_MSG_INFO("EbE_Multiplier_v"<<ihar+1<<"="<<m_EbE_Multiplier_vn[ihar]);
-    }
 }
-

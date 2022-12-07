@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// ------------------------------------------------------------- 
+// -------------------------------------------------------------
 // Generators/Hydjet.cxx Description: Allows the user
 // to generate Hydjet events and store the result in the
 // Transient Store.
@@ -10,9 +10,6 @@
 // AuthorList:
 //   Andrzej Olszewski:  Initial Code February 2007
 //
-// Random seed initialized via nseed property
-// AtRndmGenSvc not used. Random numbers not saved event by event.
-// 
 // m_hyipar used only for stoing precalculated AW nad RA
 
 #include "Hydjet_i/Hydjet_i.h"
@@ -30,10 +27,6 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
-
-#include "StoreGate/StoreGateSvc.h"
-#include "GeneratorObjects/HijingEventParams.h"
 
 // calls to fortran routines
 extern "C"

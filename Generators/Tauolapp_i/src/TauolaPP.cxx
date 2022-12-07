@@ -21,22 +21,21 @@ using TauolaHepMCParticle=TauolaHepMC3Particle;
 
 #include "Tauola/f_Variables.h"
 
-#include "CLHEP/Random/RandFlat.h" // for proper seeding
-#include "CLHEP/Random/Randomize.h" //for Ranlux
+// for proper seeding
+#include "CLHEP/Random/RandFlat.h"
+#include "AthenaKernel/RNGWrapper.h"
 
+// Pointer to random engine
+CLHEP::HepRandomEngine*  TauolaPP::p_rndmEngine = nullptr;
 
-CLHEP::RanluxEngine theRanluxEngine(123456,1);
-
-double RanluxGenerator ATLAS_NOT_THREAD_SAFE ()
+double AthenaRandomGenerator ATLAS_NOT_THREAD_SAFE ()
 {
-  return CLHEP::RandFlat::shoot(&theRanluxEngine);
+  return CLHEP::RandFlat::shoot(TauolaPP::p_rndmEngine);
 }
 
 // Constructor
 TauolaPP::TauolaPP(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_atRndmGenSvc("AtRndmGenSvc", name),
-    m_tauolapp_stream("TAUOLAPP_INIT")
+  : AthAlgorithm(name, pSvcLocator)
 {
   //Key to HepMC record
   declareProperty("McEventKey", m_key="GEN_EVENT");
@@ -56,17 +55,9 @@ TauolaPP::TauolaPP(const std::string& name, ISvcLocator* pSvcLocator)
 
 StatusCode TauolaPP::initialize(){
 
-  ATH_CHECK( m_atRndmGenSvc.retrieve() );
-
-  CLHEP::HepRandomEngine* engine = m_atRndmGenSvc->GetEngine(m_tauolapp_stream);
-  const long*   sip     =       engine->getSeeds();
-  long  int     si1     =       sip[0];
-  long  int     si2     =       sip[1];
-	 
-
-  m_atRndmGenSvc->CreateStream(si1, si2, m_tauolapp_stream);
-  m_tauolapp_stream = "TAUOLAPP";
-
+  ATH_CHECK(m_rndmSvc.retrieve());
+  p_rndmEngine = getRandomEngineDuringInitialize("TAUOLAPP_INIT", m_randomSeed, m_dsid);
+  const long*  sip  =  p_rndmEngine->getSeeds();
 
   // Setup and intialise Tauola Interface
   using Tauolapp::Tauola;
@@ -86,14 +77,11 @@ StatusCode TauolaPP::initialize(){
   Tauola::setRadiationCutOff(m_setRadiationCutOff);
 
   //call RanLux generator for ++ part of Tauola
-  Tauola::setRandomGenerator(RanluxGenerator);
+  Tauola::setRandomGenerator(AthenaRandomGenerator);
 
   //seeding tauola-fortran generator
   // See tauola.f: the first parameter should be positive int <900000000
   Tauola::setSeed(int(std::abs(sip[0])%(900000000)),0,0);
-
-  //seeding tauola++ generator
-  theRanluxEngine.setSeed(si2,1);
 
   //setting tau mass
   Tauolapp::parmas_.amtau=m_tau_mass;
@@ -102,22 +90,49 @@ StatusCode TauolaPP::initialize(){
 }
 
 
+void TauolaPP::reseedRandomEngine(const std::string& streamName, const EventContext& ctx)
+{
+  long seeds[7];
+  ATHRNG::calculateSeedsMC21(seeds, streamName,  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+  p_rndmEngine->setSeeds(seeds, 0); // NOT THREAD-SAFE
+}
+
+CLHEP::HepRandomEngine* TauolaPP::getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset,
+                                                             const EventContext& ctx) const
+{
+  ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, streamName);
+  rngWrapper->setSeed( streamName, ctx.slot(), randomSeedOffset, ctx.eventID().run_number() );
+  return rngWrapper->getEngine(ctx);
+}
+
+
+CLHEP::HepRandomEngine* TauolaPP::getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun, unsigned int lbn) const
+{
+  const size_t slot=0;
+  EventContext ctx;
+  ctx.setSlot( slot );
+  ctx.setEventID (EventIDBase (conditionsRun,
+               EventIDBase::UNDEFEVT,  // event
+               EventIDBase::UNDEFNUM,  // timestamp
+               EventIDBase::UNDEFNUM,  // timestamp ns
+               lbn));
+  Atlas::setExtendedEventContext(ctx,
+                                 Atlas::ExtendedEventContext( evtStore()->hiveProxyDict(),
+                                                              conditionsRun) );
+  return getRandomEngine(streamName, randomSeedOffset, ctx);
+}
+
+
 StatusCode TauolaPP::execute() {
 
+  //Re-seed the random number stream
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  reseedRandomEngine("TAUOLAPP", ctx);
+
   // Load HepMC info
+  // FIXME should be using Read/WriteHandles here
   const McEventCollection* mcCollptr_const;
   ATH_CHECK( evtStore()->retrieve(mcCollptr_const, m_key) );
-
-  CLHEP::HepRandomEngine* engine = m_atRndmGenSvc->GetEngine(m_tauolapp_stream);
-  const long*    sip     =       engine->getSeeds();
-  const long int si2     =       sip[1];
-	 
-  // We leave the Fortran random engine as it is.
-
-  //seeding tauola++ generator
-  theRanluxEngine.setSeed(si2,1);
-
-
   // Const_cast to make an event possible to update
   McEventCollection* mcCollptr =  const_cast<McEventCollection*>(mcCollptr_const);
 

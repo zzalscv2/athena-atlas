@@ -29,24 +29,18 @@ BinnedInterval::~BinnedInterval() {
 
 //------------------------------------------------------------------------------
 
-BeamHaloParticleBuffer::BeamHaloParticleBuffer(const std::string& fileName,
-		   CLHEP::HepRandomEngine* engine): m_fileName(fileName),
-						    m_ofstream(),
-						    m_ifstream(),
-						    m_engine(engine),
-						    m_numberOfParticles(0), 
-						    m_binnedIntervals(),
-						    m_upperBinEdge(0.),
-						    m_intervalUpperBinEdges(),
-						    m_intervalUpperBinEdge(0),
-						    m_writeFlag(false) {
+BeamHaloParticleBuffer::BeamHaloParticleBuffer(const std::string& fileName)
+  : m_fileName(fileName)
+  , m_ofstream()
+  , m_ifstream()
+  , m_numberOfParticles(0)
+  , m_binnedIntervals()
+  , m_upperBinEdge(0.)
+  , m_intervalUpperBinEdges()
+  , m_intervalUpperBinEdge(0)
+  , m_writeFlag(false) {
   m_recordSize = sizeof(long) + sizeof(double)*8;
   m_particlesPerInterval = 1000;
-}
-
-//------------------------------------------------------------------------------
-
-BeamHaloParticleBuffer::~BeamHaloParticleBuffer() {  
 }
 
 //------------------------------------------------------------------------------
@@ -174,7 +168,7 @@ int BeamHaloParticleBuffer::writeParticle(BeamHaloParticle *particle) {
 
 //------------------------------------------------------------------------------
 
-BeamHaloParticle* BeamHaloParticleBuffer::readRandomParticle(void) {
+BeamHaloParticle* BeamHaloParticleBuffer::readRandomParticle(CLHEP::HepRandomEngine* engine) {
   double generatedWeightSum;
   bool found;
   BeamHaloParticle *beamHaloParticle;
@@ -184,7 +178,7 @@ BeamHaloParticle* BeamHaloParticleBuffer::readRandomParticle(void) {
     return 0;
   }
 
-  if(!m_engine) { 
+  if (!engine) {
     std::cerr << "Error: the RandomEngine pointer is null." << std::endl;
     return 0;
   }
@@ -192,7 +186,7 @@ BeamHaloParticle* BeamHaloParticleBuffer::readRandomParticle(void) {
   long particleIndex = 0;
 
   // Generate a number between 0 and the total weight sum.
-  generatedWeightSum = CLHEP::RandFlat::shoot(m_engine)*m_upperBinEdge;
+  generatedWeightSum = CLHEP::RandFlat::shoot(engine)*m_upperBinEdge;
 
   //std::cout << "Total weight sum = " << m_upperBinEdge << ", generated weight sum = " <<  generatedWeightSum << std::endl;
 
@@ -225,7 +219,7 @@ BeamHaloParticle* BeamHaloParticleBuffer::readRandomParticle(void) {
   
   
   // Generate a number between 0 and the total weight in this interval
-  generatedWeightSum = CLHEP::RandFlat::shoot(m_engine)*intervalWeightSum;
+  generatedWeightSum = CLHEP::RandFlat::shoot(engine)*intervalWeightSum;
 
   //std::cout << "Interval weight sum = " << intervalWeightSum << ", generated weight sum = " <<  generatedWeightSum << std::endl;
 

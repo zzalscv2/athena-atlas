@@ -28,7 +28,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "CLHEP/Random/RandFlat.h"
+#include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
 namespace{
@@ -102,11 +102,9 @@ StatusCode Starlight_i::genInitialize()
     ATH_MSG_INFO( "===> January 20 2011 STARLIGHT INTERFACE VERSION. \n"   );
     ATH_MSG_INFO( "===> STARLIGHT INITIALISING. \n"   );
 
-    // Save seeds
-    CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine(starlight_stream);
-    const long* sip = engine->getSeeds();
-    m_randomSeed = sip[0];
-    
+    //Re-seed the random number stream
+    long seeds[7];
+    ATHRNG::calculateSeedsMC21(seeds, starlight_stream,  0, m_dsid, m_randomSeed);
 
     // Create inputParameters and
     // set the users' initialisation parameters choices
@@ -119,7 +117,7 @@ StatusCode Starlight_i::genInitialize()
     m_starlight = new starlight();
     // Set random generator to prevent crash in tests.
     m_randomGenerator = std::make_shared<randomGenerator>();
-    m_randomGenerator->SetSeed(m_randomSeed);
+    m_randomGenerator->SetSeed(seeds[0]);
     m_starlight->setRandomGenerator(m_randomGenerator.get());
     // set input parameters
     m_starlight->setInputParameters(&m_inputParameters);
@@ -139,6 +137,13 @@ StatusCode Starlight_i::callGenerator()
 {
     if(m_lheOutput) return StatusCode::SUCCESS;
     ATH_MSG_DEBUG( " STARLIGHT generating. \n"   );
+
+    //Re-seed the random number stream
+    long seeds[7];
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    ATHRNG::calculateSeedsMC21(seeds, starlight_stream,  ctx.eventID().event_number(),
+                               m_dsid, m_randomSeed);
+    m_randomGenerator->SetSeed(seeds[0]);
 
     // Generate event
     m_event = new upcEvent; 

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_GENMODULE_H
 #define GENERATORMODULES_GENMODULE_H
 
 #include "GeneratorModules/GenBase.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandPoisson.h"
 #include <memory>
@@ -76,33 +77,30 @@ protected:
 
   /// @name Features for derived classes to use internally
   //@{
-  /// Get the ATLAS random number service
-  IAtRndmGenSvc& atRndmGenSvc() { return *m_rndmGenSvc; }
-  /// Get the random number generator engine
-  CLHEP::HepRandomEngine& randomEngine();
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, const EventContext& ctx) const;
+  CLHEP::HepRandomEngine* getRandomEngine(const std::string& streamName, unsigned long int randomSeedOffset, const EventContext& ctx) const;
+  CLHEP::HepRandomEngine* getRandomEngineDuringInitialize(const std::string& streamName, unsigned long int randomSeedOffset, unsigned int conditionsRun=1, unsigned int lbn=1) const;
   //@}
 
   /// Seed for random number engine
-  int m_randomSeed;
+  IntegerProperty m_randomSeed{this, "RandomSeed", 1234567, "Random seed for the built-in random engine"}; // FIXME make this into an unsigned long int?
 
   /// Flag for normal vs. afterburner generators
-  int m_isAfterburner;
+  BooleanProperty m_isAfterburner{this, "IsAfterburner", false, "Set true if generator modifies existing events rather than creating new ones"};
 
 #ifdef HEPMC3
   /// The run info for HepMC3
-  std::shared_ptr<HepMC3::GenRunInfo> m_runinfo;  
+  std::shared_ptr<HepMC3::GenRunInfo> m_runinfo{};
 #endif
 
 private:
 
   /// Data members
   //@{
-  /// Random number generator objects
-  std::unique_ptr<CLHEP::HepRandomEngine> m_pRandomEngine;
   // Random number service
-  ServiceHandle<IAtRndmGenSvc> m_rndmGenSvc;
+  ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc"};
   /// Handle on the incident service
-  ServiceHandle<IIncidentSvc> m_incidentSvc;
+  ServiceHandle<IIncidentSvc> m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};
   //@}
 
 };
