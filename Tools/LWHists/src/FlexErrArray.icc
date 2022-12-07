@@ -232,7 +232,7 @@ inline void FlexErrArray<T>::setBinContent(unsigned bin, const T& content)
   assert(bin<m_nbins);
   FlexErrArrayGroup<T> * gr;
   if (content==0) {
-    gr = const_cast<FlexErrArrayGroup<T> *>(getGroupNoAlloc(bin));
+    gr = getGroupNoAlloc(bin);
     if (!gr)
       return;
   } else {
@@ -254,7 +254,7 @@ inline void FlexErrArray<T>::setBinError(unsigned bin, const double& error )
 #endif
   FlexErrArrayGroup<T> * gr;
   if (error==0) {
-    gr = const_cast<FlexErrArrayGroup<T> *>(getGroupNoAlloc(bin));
+    gr = getGroupNoAlloc(bin);
     if (!gr)
       return;
   } else {
@@ -277,7 +277,7 @@ inline void FlexErrArray<T>::setBinContentAndError(unsigned bin, const T& conten
   FlexErrArrayGroup<T> * gr;
   if (content==0&&error==0) {
     //Special case: Maybe we do not need an allocation:
-    gr = const_cast<FlexErrArrayGroup<T> *>(getGroupNoAlloc(bin));
+    gr = getGroupNoAlloc(bin);
     if (!gr)
       return;
   } else {

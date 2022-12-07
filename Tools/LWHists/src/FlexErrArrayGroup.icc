@@ -97,6 +97,17 @@ inline const FlexBinChunk<T>* FlexErrArrayGroup<T>::getChunkNoAlloc(unsigned igr
 
 //____________________________________________________________________
 template <class T>
+inline FlexBinChunk<T>* FlexErrArrayGroup<T>::getChunkNoAlloc(unsigned igroup)
+{
+  //returns null if not allocated:
+  if (!LWHistBitUtils::bitIsSet<uint8_t>(m_chunksallocated,igroup))
+    return 0;
+  else
+    return reinterpret_cast<FlexBinChunk<T>*>(m_indices[LWHistBitUtils::countSetBitsBefore<uint8_t>(m_chunksallocated,igroup)]);
+}
+
+//____________________________________________________________________
+template <class T>
 inline FlexBinChunk<T>* FlexErrArrayGroup<T>::getChunk(unsigned igroup)
 {
   if (!LWHistBitUtils::bitIsSet<uint8_t>(m_chunksallocated,igroup)) {
@@ -329,7 +340,7 @@ inline void FlexErrArrayGroup<T>::setBinContent( unsigned bin,
   assert(bin<m_nbins);
   const unsigned igroup(getGroupIndex(bin));
   if (val==0) {
-    FlexBinChunk<T>*  chunk = const_cast<FlexBinChunk<T>*>(getChunkNoAlloc(igroup));
+    FlexBinChunk<T>*  chunk = getChunkNoAlloc(igroup);
     if (chunk) {
       chunk->setBinContent(getChunkBin(bin),val);
       assert(chunk->getBinContent(getChunkBin(bin))==val);
@@ -387,7 +398,7 @@ inline void FlexErrArrayGroup<T>::setBinContentAndError( unsigned bin,
   const unsigned igroup(getGroupIndex(bin));
   bool seterror(true);
   if (content==0) {
-    FlexBinChunk<T>* chunk = const_cast<FlexBinChunk<T>*>(getChunkNoAlloc(igroup));
+    FlexBinChunk<T>* chunk = getChunkNoAlloc(igroup);
     if (chunk)
       chunk->setBinContent(getChunkBin(bin),0);
     if (error==0&&(!m_sumw2allocated||!LWHistBitUtils::bitIsSet<uint8_t>(m_sumw2allocated,igroup)))

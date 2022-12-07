@@ -150,7 +150,11 @@ TProfile2D_LW::~TProfile2D_LW()
 }
 
 //____________________________________________________________________
-TH1* TProfile2D_LW::getROOTHistBaseNoAlloc() const
+const TH1* TProfile2D_LW::getROOTHistBaseNoAlloc() const
+{
+  return m_rootHisto;
+}
+TH1* TProfile2D_LW::getROOTHistBaseNoAlloc()
 {
   return m_rootHisto;
 }

@@ -3,6 +3,7 @@
 */
 
 #include <vector>
+#include <utility>
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
@@ -49,14 +50,14 @@ HistVal1D<TH_1D,THLW_1D>::~HistVal1D()
 template <class TH_1D, class THLW_1D>
 unsigned HistVal1D<TH_1D,THLW_1D>::getXAxis_NBins() const
 {
-  return m_h1->GetXaxis()->GetNbins();
+  return std::as_const(*m_h1).GetXaxis()->GetNbins();
 }
 
 //____________________________________________________________________
 template <class TH_1D, class THLW_1D>
 unsigned HistVal1D<TH_1D,THLW_1D>::getYAxis_NBins() const
 {
-  return m_h1->GetYaxis()->GetNbins();
+  return std::as_const(*m_h1).GetYaxis()->GetNbins();
 }
 
 //____________________________________________________________________
