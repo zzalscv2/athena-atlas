@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTTPCNV_EVENTTYPE_P3_H
@@ -13,6 +13,7 @@
 
 #include <vector>
 #include <string>
+#include <cstdint>
 
 class EventType_p3 {
 public:
