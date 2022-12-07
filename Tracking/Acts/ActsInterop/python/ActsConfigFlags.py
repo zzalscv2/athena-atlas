@@ -1,7 +1,12 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.Enums import FlagEnum
 
+class SeedingStrategy(FlagEnum):
+    Default = "Default"
+    Orthogonal = "Orthogonal"
+    
 def createActsConfigFlags():
     actscf = AthConfigFlags()
 
@@ -13,5 +18,8 @@ def createActsConfigFlags():
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)
+
+    # Seeding
+    actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, enum=SeedingStrategy)  # Define Seeding Strategy
 
     return actscf

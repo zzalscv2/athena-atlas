@@ -3,14 +3,15 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
+from ActsInterop.ActsConfigFlags import SeedingStrategy 
 
-def ActsTrkITkPixelSeedingToolCfg(ConfigFlags):
+def ActsTrkITkPixelSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::SeedingTool
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel"))
     return acc
 
-def ActsTrkITkStripSeedingToolCfg(ConfigFlags):
+def ActsTrkITkStripSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
     kwargs = {}
@@ -45,6 +46,40 @@ def ActsTrkITkStripSeedingToolCfg(ConfigFlags):
     kwargs.setdefault("zBinNeighborsBottom" , [(0,1),(0,1),(0,1),(0,2),(0,1),(0,0),(-1,0),(-2,0),(-1,0),(-1,0),(-1,0)])
 
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkStrip", **kwargs))
+    return acc
+
+def ActsTrkITkPixelOrthogonalSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool 
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel"))
+    return acc
+
+def ActsTrkITkStripOrthogonalSeedingToolCfg(ConfigFlags) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    ## For ITkStrip, change properties that have to be modified w.r.t. the default values 
+    kwargs = {}
+    kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
+    kwargs.setdefault('rMax', 1200. * UnitConstants.mm)
+    kwargs.setdefault("deltaRMinTopSP" , 20. * UnitConstants.mm)
+    kwargs.setdefault("deltaRMaxTopSP" , 300. * UnitConstants.mm)
+    kwargs.setdefault("deltaRMinBottomSP" , 20. * UnitConstants.mm)
+    kwargs.setdefault("deltaRMaxBottomSP" , 300. * UnitConstants.mm)
+    kwargs.setdefault("maxSeedsPerSpMConf" , 10e6)
+    kwargs.setdefault("deltaZMax" , 900. * UnitConstants.mm)
+    kwargs.setdefault("interactionPointCut" , False)
+    kwargs.setdefault("skipPreviousTopSP", False)
+    kwargs.setdefault("impactWeightFactor" , 1.)
+    kwargs.setdefault("compatSeedLimit" , 4)
+    kwargs.setdefault("seedWeightIncrement" , 10100.)
+    kwargs.setdefault("numSeedIncrement" , 1.)
+    kwargs.setdefault("seedConfirmationInFilter" , False)
+    kwargs.setdefault("maxSeedsPerSpMConf" , 10e6)
+    kwargs.setdefault("maxQualitySeedsPerSpMConf" , 10e6)
+    kwargs.setdefault("useDeltaRorTopRadius" , False)
+    kwargs.setdefault("rMinMiddle", 33. * UnitConstants.mm)
+    kwargs.setdefault("rMaxMiddle", 1200. * UnitConstants.mm)
+
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkStrip", **kwargs))
     return acc
 
 def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
@@ -83,11 +118,17 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
     # Do not overwrite if already present in `kwargs`
     seedTool_pixel = None
     if 'SeedToolPixel' not in kwargs:
-        seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(ConfigFlags))
+        if ConfigFlags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(ConfigFlags))
+        else:
+            seedTool_pixel = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(ConfigFlags))
 
     seedTool_strip = None
     if 'SeedToolStrip' not in kwargs:
-        seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(ConfigFlags))
+        if ConfigFlags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(ConfigFlags))
+        else:
+            seedTool_strip = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(ConfigFlags))
 
     kwargs.setdefault('SeedToolPixel', seedTool_pixel)
     kwargs.setdefault('SeedToolStrip', seedTool_strip)
