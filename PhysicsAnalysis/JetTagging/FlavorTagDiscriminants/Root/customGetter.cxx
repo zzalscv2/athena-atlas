@@ -127,7 +127,6 @@ namespace {
 
     using Tp = xAOD::TrackParticle;
     using Jet = xAOD::Jet;
-    typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
     if (name == "pt") {
       return TJGetter([](const Tp& t, const Jet&) {
