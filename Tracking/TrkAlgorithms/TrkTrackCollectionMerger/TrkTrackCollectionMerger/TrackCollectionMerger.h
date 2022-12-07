@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ namespace Trk {
         "InDet::InDetPRDtoTrackMapToolGangedPixels"
       };
 
-      /** summary tool with shared hits enabled */
+      /** summary tool */
       ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool;
 
       ///////////////////////////////////////////////////////////////////
@@ -118,7 +118,6 @@ namespace Trk {
 
     private:
      
-      bool m_updateSharedHits; //!< do not create the track summary again, but only update shared hits
       bool  m_updateAdditionalInfo;     //!< do not create the track summary again, but only update necessary things
       bool m_doTrackOverlay; //doing track overlay: needed to initialize the background PRD containers
 

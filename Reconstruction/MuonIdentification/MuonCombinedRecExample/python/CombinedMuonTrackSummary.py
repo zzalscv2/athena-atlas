@@ -73,13 +73,10 @@ if beamFlags.beamType() == 'cosmics':
 from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
 ToolSvc += InDet__InDetTrackSummaryHelperTool( \
   name            = "CombinedMuonIDSummaryHelper",
-  AssoTool        = None,
-  DoSharedHits    = False,
   HoleSearch      = ToolSvc.CombinedMuonIDHoleSearch,
   usePixel        = DetFlags.haveRIO.pixel_on(),
   useSCT          = DetFlags.haveRIO.SCT_on(),
-  useTRT          = DetFlags.haveRIO.TRT_on(),
-  ClusterSplitProbabilityName = TrackingCommon.combinedClusterSplitProbName())
+  useTRT          = DetFlags.haveRIO.TRT_on())
 
 #@TODO the value of the ClusterSplitProbabilityName depends on the input ID tracks that have been used
 #      for the combined muons. So, this tool is not universally usable. For example online muons are
@@ -90,7 +87,6 @@ ToolSvc += InDet__InDetTrackSummaryHelperTool( \
 # @TODO doHolesMuon = False correct ?
 from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
 ToolSvc += Trk__TrackSummaryTool( 'CombinedMuonTrackSummary',
-                                  doSharedHits             = False,
                                   doHolesInDet             = True,
                                   doHolesMuon              = False,
                                   AddDetailedMuonSummary   = True,

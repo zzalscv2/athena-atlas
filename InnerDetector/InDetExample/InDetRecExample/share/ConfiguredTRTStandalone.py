@@ -138,7 +138,7 @@ class ConfiguredTRTStandalone:
                                                         InputSegmentsCollection   = BarrelSegments,
                                                         OutputTrackCollection     = self.__TRTStandaloneTracks,
                                                         TrackFitter               = CfgGetter.getPublicTool('InDetTrackFitter'),
-                                                        SummaryTool               = TrackingCommon.getInDetTrackSummaryToolTRTTracks(),
+                                                        SummaryTool               = TrackingCommon.getInDetTrackSummaryTool(),
                                                         AssociationTool           = TrackingCommon.getInDetPRDtoTrackMapToolGangedPixels() if prd_to_track_map !='' else None,
                                                         InputAssociationMapName   = prd_to_track_map,
                                                         MinNHit                   = NewTrackingCuts.minTRTonly(),

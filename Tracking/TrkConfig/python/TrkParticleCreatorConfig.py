@@ -21,28 +21,39 @@ def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kw
     result = BeamSpotCondAlgCfg(flags) # To produce InDet::BeamSpotData CondHandle
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
-        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
+        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(
+            TrackToVertexCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-        TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags))
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+        TrackSummaryTool = result.popToolsAndMerge(
+            InDetTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
     if "TRT_ElectronPidTool" not in kwargs :
         from InDetConfig.TRT_ElectronPidToolsConfig import TRT_ElectronPidToolCfg
-        kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
+        kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
+            TRT_ElectronPidToolCfg(flags, name="InDetTRT_ElectronPidTool")))
 
     if 'PixelToTPIDTool' not in kwargs :
         from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
-        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(PixelToTPIDToolCfg(flags)))
+        kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+            PixelToTPIDToolCfg(flags)))
 
     if 'TestPixelLayerTool' not in kwargs and flags.Detector.EnablePixel:
         from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolInnerCfg
-        InDetTestPixelLayerTool = result.popToolsAndMerge(InDetTestPixelLayerToolInnerCfg(flags))
-        kwargs.setdefault("TestPixelLayerTool", InDetTestPixelLayerTool)
+        kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(
+            InDetTestPixelLayerToolInnerCfg(flags)))
 
     kwargs.setdefault("ComputeAdditionalInfo", True)
+    kwargs.setdefault("AssociationMapName", "")
+    kwargs.setdefault("DoSharedSiHits", flags.InDet.Tracking.doSharedHits
+                      and kwargs["AssociationMapName"]!="")
+    kwargs.setdefault("DoSharedTRTHits", flags.InDet.Tracking.doSharedHits and flags.Detector.EnableTRT
+                      and kwargs["AssociationMapName"]!="")
+    kwargs.setdefault("RunningTIDE_Ambi", flags.InDet.Tracking.doTIDE_Ambi)
+
     kwargs.setdefault("BadClusterID", 3) # Select the mode to identify suspicous pixel cluster
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
@@ -96,6 +107,8 @@ def InDetTrigParticleCreatorToolFTFCfg(flags, name="InDetTrigParticleCreatorTool
     kwargs.setdefault("TestPixelLayerTool", None)
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("ComputeAdditionalInfo", True)
+    kwargs.setdefault("AssociationMapName", "")
+    kwargs.setdefault("DoSharedSiHits", kwargs["AssociationMapName"]!="")
 
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
@@ -106,20 +119,27 @@ def ITkTrackParticleCreatorToolCfg(flags, name="ITkTrackParticleCreatorTool", **
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
-        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
+        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(
+            TrackToVertexCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolSharedHitsCfg
-        TrackSummaryTool = result.popToolsAndMerge(ITkTrackSummaryToolSharedHitsCfg(flags))
+        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
+        TrackSummaryTool = result.popToolsAndMerge(
+            ITkTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
     if "TestPixelLayerTool" not in kwargs and flags.Detector.EnableITkPixel:
         from InDetConfig.InDetTestPixelLayerConfig import ITkTestPixelLayerToolInnerCfg
-        ITkTestPixelLayerTool = result.popToolsAndMerge(ITkTestPixelLayerToolInnerCfg(flags))
-        kwargs.setdefault("TestPixelLayerTool", ITkTestPixelLayerTool)
+        kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(
+            ITkTestPixelLayerToolInnerCfg(flags)))
 
     kwargs.setdefault("ComputeAdditionalInfo", True)
+    kwargs.setdefault("AssociationMapName", "")
+    kwargs.setdefault("DoSharedSiHits", flags.ITk.Tracking.doSharedHits \
+                      and kwargs["AssociationMapName"]!="")
+    kwargs.setdefault("RunningTIDE_Ambi", True)
+
     kwargs.setdefault("BadClusterID", 3) # Select the mode to identify suspicous pixel cluster
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
@@ -217,8 +237,6 @@ def MuonCombinedParticleCreatorCfg(flags, name="MuonCombinedParticleCreator", **
         else:
             from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
             kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonCombinedTrackSummaryToolCfg(flags)))
-            from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolInnerCfg
-            kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(InDetTestPixelLayerToolInnerCfg(flags)))
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
@@ -230,18 +248,33 @@ def MuonCombinedParticleCreatorCfg(flags, name="MuonCombinedParticleCreator", **
         kwargs.setdefault("MuonSummaryTool", result.popToolsAndMerge(
             MuonHitSummaryToolCfg(flags)))
 
-    if "PixelToTPIDTool" not in kwargs and not flags.Muon.MuonTrigger and flags.GeoModel.Run < LHCPeriod.Run4:
-       from InDetConfig.PixelToTPIDToolConfig  import PixelToTPIDToolCfg
-       kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
-           PixelToTPIDToolCfg(flags, name='CombinedMuonPixelToTPID')))
+    if not flags.Muon.MuonTrigger:
 
-    kwargs.setdefault("ComputeAdditionalInfo", True)
+        if 'PixelToTPIDTool' not in kwargs and flags.Detector.EnablePixel:
+            from InDetConfig.PixelToTPIDToolConfig import PixelToTPIDToolCfg
+            kwargs.setdefault("PixelToTPIDTool", result.popToolsAndMerge(
+                PixelToTPIDToolCfg(flags)))
+
+        if 'TestPixelLayerTool' not in kwargs and \
+           (flags.Detector.EnablePixel or flags.Detector.EnableITkPixel):
+            from InDetConfig.InDetTestPixelLayerConfig import (
+                InDetTestPixelLayerToolInnerCfg)
+            kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(
+                InDetTestPixelLayerToolInnerCfg(flags)))
+
+        if "TRT_ElectronPidTool" not in kwargs and flags.Detector.EnableTRT:
+            from InDetConfig.TRT_ElectronPidToolsConfig import (
+                TRT_ElectronPidToolCfg)
+            kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
+                TRT_ElectronPidToolCfg(flags)))
+
+        kwargs.setdefault("ComputeAdditionalInfo", True)
+
     kwargs.setdefault("KeepAllPerigee", True)
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("PerigeeExpression", "Origin")
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
-    
  
     kwargs.setdefault("TrackingVolumesSvc", "TrackingVolumesSvc")
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))

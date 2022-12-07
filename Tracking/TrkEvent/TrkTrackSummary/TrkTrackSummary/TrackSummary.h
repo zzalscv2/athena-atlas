@@ -51,36 +51,20 @@ enum SummaryType
   numberOfBLayerHits = 0,
   //!< number of blayer outliers
   numberOfBLayerOutliers = 31,
-  //!< number of Pixel b-layer hits shared by several tracks.
-  numberOfBLayerSharedHits = 16,
-  //!< number of Pixel b-layer hits split by cluster splitting
-  numberOfBLayerSplitHits = 43,
   //!< these are the hits in the 0th pixel layer?
   numberOfInnermostPixelLayerHits = 53,
   //!< number of 0th layer outliers
   numberOfInnermostPixelLayerOutliers = 54,
-  //!< number of Pixel 0th layer hits shared by several tracks.
-  numberOfInnermostPixelLayerSharedHits = 55,
-  //!< number of Pixel 0th layer hits split by cluster splitting
-  numberOfInnermostLayerSplitHits = 56,
   //!< these are the hits in the 1st pixel layer
   numberOfNextToInnermostPixelLayerHits = 58,
   //!< number of 1st pixel layer outliers
   numberOfNextToInnermostPixelLayerOutliers = 59,
-  //!< number of Pixel 1st layer hits shared by several tracks.
-  numberOfNextToInnermostPixelLayerSharedHits = 60,
-  //!< number of Pixel 1st layer hits split by cluster splitting
-  numberOfNextToInnermostLayerSplitHits = 61,
   //!< these are the pixel hits, including the b-layer
   numberOfPixelHits = 2,
   //!< these are the pixel outliers, including the b-layer
   numberOfPixelOutliers = 41,
   //!< number of pixel layers on track with absence of hits
   numberOfPixelHoles = 1,
-  //!< number of Pixel all-layer hits shared by several tracks.
-  numberOfPixelSharedHits = 17,
-  //!< number of Pixel all-layer hits split by cluster splitting
-  numberOfPixelSplitHits = 44,
   //!< number of pixels which have a ganged ambiguity.
   numberOfGangedPixels = 14,
   //!< number of Ganged Pixels flagged as fakes
@@ -99,8 +83,6 @@ enum SummaryType
   numberOfSCTHoles = 4,
   //!< number of Holes in both sides of a SCT module
   numberOfSCTDoubleHoles = 28,
-  //!< number of SCT hits shared by several tracks.
-  numberOfSCTSharedHits = 18,
   numberOfSCTDeadSensors = 34,
   //!< number of TRT hits
   numberOfSCTSpoiltHits = 36,
@@ -125,8 +107,6 @@ enum SummaryType
   numberOfTRTTubeHits = 38,
   //!< number of TRT hits on track in straws with xenon
   numberOfTRTXenonHits = 46,
-  //!< number of TRT hits used by more than one track
-  numberOfTRTSharedHits = 62,
 
   // --- Muon Spectrometer
   //!< number of mdt hits
@@ -182,19 +162,31 @@ enum SummaryType
   // reserved: added to keep synchronisation with xAOD::TrackSummary in
   // anticipation of the two being merged
   // in the past used to store  pixel and TRT PID information:
-  unused_eProbabilityComb_res = 47,
-  unused_eProbabilityHT_res = 48,
-  unused_eProbabilityToT_res = 49,
-  unused_eProbabilityBrem_res = 50,
-  unused_pixeldEdx_res = 51,
-  unused_eProbabilityNN_res = 73,
-  unused_TRTTrackOccupancy_res = 74,
-  unused_TRTdEdx_res = 75,
+  legacy_eProbabilityComb_res = 47,
+  legacy_eProbabilityHT_res = 48,
+  legacy_eProbabilityToT_res = 49,
+  legacy_eProbabilityBrem_res = 50,
+  legacy_pixeldEdx_res = 51,
+  legacy_eProbabilityNN_res = 73,
+  legacy_TRTTrackOccupancy_res = 74,
+  legacy_TRTdEdx_res = 75,
 
   // in the past used to store expected inner layer hits
-  unused_expectBLayerHit = 42,
-  unused_expectInnermostPixelLayerHit = 52,
-  unused_expectNextToInnermostPixelLayerHit = 57,
+  legacy_expectBLayerHit = 42,
+  legacy_expectInnermostPixelLayerHit = 52,
+  legacy_expectNextToInnermostPixelLayerHit = 57,
+
+  // in the past used to store shared hits
+  legacy_numberOfBLayerSharedHits = 16,
+  legacy_numberOfPixelSharedHits = 17,
+  legacy_numberOfSCTSharedHits = 18,
+  legacy_numberOfBLayerSplitHits = 43,
+  legacy_numberOfPixelSplitHits = 44,
+  legacy_numberOfInnermostPixelLayerSharedHits = 55,
+  legacy_numberOfInnermostLayerSplitHits = 56,
+  legacy_numberOfNextToInnermostPixelLayerSharedHits = 60,
+  legacy_numberOfNextToInnermostLayerSplitHits = 61,
+  legacy_numberOfTRTSharedHits = 62,
 
   // -- numbers...
   numberOfTrackSummaryTypes = 76
@@ -202,10 +194,15 @@ enum SummaryType
 
 // summary types that are stored as float values or filled in TrackParticleCreatorTool
 static const std::vector<unsigned int> unusedSummaryTypes = {
-  unused_eProbabilityComb_res,  unused_eProbabilityHT_res, unused_eProbabilityToT_res,
-  unused_eProbabilityBrem_res,  unused_pixeldEdx_res,      unused_eProbabilityNN_res,
-  unused_TRTTrackOccupancy_res, unused_TRTdEdx_res,
-  unused_expectBLayerHit, unused_expectInnermostPixelLayerHit, unused_expectNextToInnermostPixelLayerHit,
+  legacy_eProbabilityComb_res,  legacy_eProbabilityHT_res, legacy_eProbabilityToT_res,
+  legacy_eProbabilityBrem_res,  legacy_pixeldEdx_res,      legacy_eProbabilityNN_res,
+  legacy_TRTTrackOccupancy_res, legacy_TRTdEdx_res,
+  legacy_expectBLayerHit, legacy_expectInnermostPixelLayerHit, legacy_expectNextToInnermostPixelLayerHit,
+  legacy_numberOfBLayerSharedHits, legacy_numberOfPixelSharedHits, legacy_numberOfSCTSharedHits,
+  legacy_numberOfBLayerSplitHits, legacy_numberOfPixelSplitHits,
+  legacy_numberOfInnermostPixelLayerSharedHits, legacy_numberOfInnermostLayerSplitHits,
+  legacy_numberOfNextToInnermostPixelLayerSharedHits, legacy_numberOfNextToInnermostLayerSplitHits,
+  legacy_numberOfTRTSharedHits,
 };
 
 // Troels.Petersen@cern.ch:

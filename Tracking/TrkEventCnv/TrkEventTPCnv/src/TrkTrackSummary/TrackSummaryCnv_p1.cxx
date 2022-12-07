@@ -17,9 +17,9 @@ void TrackSummaryCnv_p1::persToTrans( const Trk::TrackSummary_p1 *persObj,
         transObj->m_information[Trk::numberOfBLayerHits];
     }
 
-    if (persObj->m_information.size() <= Trk::numberOfInnermostPixelLayerSharedHits) {
-      transObj->m_information[Trk::numberOfInnermostPixelLayerSharedHits] =
-        transObj->m_information[Trk::numberOfBLayerSharedHits];
+    if (persObj->m_information.size() <= Trk::legacy_numberOfInnermostPixelLayerSharedHits) {
+      transObj->m_information[Trk::legacy_numberOfInnermostPixelLayerSharedHits] =
+        transObj->m_information[Trk::legacy_numberOfBLayerSharedHits];
     }
 
    transObj->m_idHitPattern      = persObj->m_idHitPattern;

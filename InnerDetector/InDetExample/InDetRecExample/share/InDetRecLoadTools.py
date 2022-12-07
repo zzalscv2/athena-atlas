@@ -288,10 +288,9 @@ if InDetFlags.loadSummaryTool():
     InDetHoleSearchTool     = TrackingCommon.getInDetHoleSearchTool()
 
     #
-    # Configurable version of TrkTrackSummaryTool: no TRT_PID tool needed here (no shared hits)
+    # Configurable version of TrkTrackSummaryTool: no TRT_PID tool needed here
     #
     InDetTrackSummaryTool           = TrackingCommon.getInDetTrackSummaryTool()
-    InDetTrackSummaryToolSharedHits = TrackingCommon.getInDetTrackSummaryToolSharedHits()
 
 # ------------------------------------------------------------
 #

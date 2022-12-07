@@ -46,7 +46,6 @@ namespace Muon {
 
         using IExtendedTrackSummaryHelperTool::addDetailedTrackSummary;
         using IExtendedTrackSummaryHelperTool::analyse;
-        using IExtendedTrackSummaryHelperTool::updateSharedHitCount;
         virtual void analyse(const Trk::Track& trk, const Trk::RIO_OnTrack* rot, const Trk::TrackStateOnSurface* tsos,
                              std::vector<int>& information, std::bitset<Trk::numberOfDetectorTypes>& hitPattern) const override final;
 
@@ -55,8 +54,6 @@ namespace Muon {
 
         virtual void searchForHoles(const Trk::Track& track, std::vector<int>& information,
                                     Trk::ParticleHypothesis hyp) const override final;
-
-        virtual void updateSharedHitCount(const Trk::Track&, const Trk::PRDtoTrackMap*, Trk::TrackSummary&) const override final {}
 
         virtual void addDetailedTrackSummary(const Trk::Track& track, Trk::TrackSummary& summary) const override final;
 

@@ -1,6 +1,6 @@
 from InDetRecExample.InDetJobProperties import InDetFlags
 from InDetRecExample.InDetKeys import InDetKeys
-from InDetRecExample.TrackingCommon import getInDetxAODParticleCreatorTool, makePublicTool, makeName
+from InDetRecExample.TrackingCommon import getInDetxAODParticleCreatorTool, pixelClusterSplitProbName, makePublicTool, makeName
 
 def getCollectionNameIfInFile(coll_type,coll_name) :
     from RecExConfig.AutoConfiguration import IsInInputFile
@@ -50,31 +50,43 @@ if InDetFlags.doSplitReco()  and is_mc:
     xAODTruthCnvPU.MetaObjectName = "TruthMetaData_PU" #output
     topSequence += xAODTruthCnvPU
 
-def getTrackCollectionCnvTool(prd_to_track_map=None, suffix="",trt_pid_tool=True, pixel_dedx=True) :
+def getTrackCollectionCnvTool(prd_to_track_map="", clusterSplitProbabilityName="", suffix="",trt_pid_tool=True, pixel_dedx=True) :
     from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__TrackCollectionCnvTool
     return xAODMaker__TrackCollectionCnvTool("TrackCollectionCnvTool"+suffix,
                                              TrackParticleCreator = getInDetxAODParticleCreatorTool(prd_to_track_map,
+                                                                                                    clusterSplitProbabilityName,
                                                                                                     suffix,
                                                                                                     trt_pid_tool=trt_pid_tool,
                                                                                                     pixel_dedx=pixel_dedx))
 
-def getRecTrackParticleContainerCnvTool(prd_to_track_map=None, suffix="") :
+def getRecTrackParticleContainerCnvTool(prd_to_track_map=None, clusterSplitProbabilityName="", suffix="") :
     from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__RecTrackParticleContainerCnvTool
     return xAODMaker__RecTrackParticleContainerCnvTool("RecTrackParticleContainerCnvTool"+suffix,
-                                                       TrackParticleCreator = getInDetxAODParticleCreatorTool(prd_to_track_map, suffix))
+                                                       TrackParticleCreator = getInDetxAODParticleCreatorTool(prd_to_track_map,
+                                                                                                              clusterSplitProbabilityName,
+                                                                                                              suffix))
 
 def isValid(name) :
     return name is not None and name != ""
 
-def createTrackParticles(track_in, track_particle_truth_in,track_particle_out, topSequence, prd_to_track_map=None, suffix="",trt_pid_tool=True, pixel_dedx=True) :
+def createTrackParticles(track_in,
+                         track_particle_truth_in,
+                         track_particle_out,
+                         topSequence,
+                         prd_to_track_map="",
+                         clusterSplitProbabilityName="",
+                         suffix="",
+                         trt_pid_tool=True,
+                         pixel_dedx=True) :
     '''
     create algorithm to convert the input tracks into track xAOD track particles.
     @param track_in the name of the input TrackCollection
     @param track_particle_truth_in optional truth track collection to link to
     @param track_particle_out the name of the output xAOD track particle collection
     @param topSequence the sequence to which the algorithm is added
-    @param prd_to_track_map None or if shared hits are to be recomputed a PRDtoTrackMap filled by a preceding
+    @param prd_to_track_map empty string or if shared hits are to be recomputed a PRDtoTrackMap filled by a preceding
            algorithms e.g. a TrackCollectionMerger.
+    @param ClusterSplitProbabilityName empty string or if split hits are to be recomputed the cluster split probability container
     @param suffix which makes the names of the particle creator tool and sub-tools unique in case a prd_to_track_map
            is provided.
     @param trt_pid_tool if true run TRT_ElectronPidTool for each track and decorate track particle with the results
@@ -93,8 +105,16 @@ def createTrackParticles(track_in, track_particle_truth_in,track_particle_out, t
         xAODTrackParticleCnvAlg.xAODContainerName = ""
         xAODTrackParticleCnvAlg.xAODTrackParticlesFromTracksContainerName = track_particle_out
         xAODTrackParticleCnvAlg.TrackContainerName = track_in
-        xAODTrackParticleCnvAlg.TrackParticleCreator = getInDetxAODParticleCreatorTool(prd_to_track_map, suffix,trt_pid_tool=trt_pid_tool, pixel_dedx=pixel_dedx)
-        xAODTrackParticleCnvAlg.TrackCollectionCnvTool = getTrackCollectionCnvTool(prd_to_track_map, suffix, trt_pid_tool=trt_pid_tool, pixel_dedx=pixel_dedx)
+        xAODTrackParticleCnvAlg.TrackParticleCreator = getInDetxAODParticleCreatorTool(prd_to_track_map,
+                                                                                       clusterSplitProbabilityName,
+                                                                                       suffix,
+                                                                                       trt_pid_tool=trt_pid_tool,
+                                                                                       pixel_dedx=pixel_dedx)
+        xAODTrackParticleCnvAlg.TrackCollectionCnvTool = getTrackCollectionCnvTool(prd_to_track_map,
+                                                                                   clusterSplitProbabilityName,
+                                                                                   suffix,
+                                                                                   trt_pid_tool=trt_pid_tool,
+                                                                                   pixel_dedx=pixel_dedx)
         xAODTrackParticleCnvAlg.AODContainerName = ""
         xAODTrackParticleCnvAlg.AODTruthContainerName = ""
         xAODTrackParticleCnvAlg.ConvertTrackParticles = False
@@ -136,19 +156,29 @@ if (doCreation or doConversion):# or InDetFlags.useExistingTracksAsInput()) : <-
     if 'InputTrackCollectionTruth' not in dir():
         InputTrackCollectionTruth = InDetKeys.TracksTruth()
     if doCreation :
-        createTrackParticles(InputTrackCollection, InputTrackCollectionTruth, InDetKeys.xAODTrackParticleContainer(),topSequence,
-                            trt_pid_tool=True, pixel_dedx=True)
+        createTrackParticles(InputTrackCollection,
+                             InputTrackCollectionTruth,
+                             InDetKeys.xAODTrackParticleContainer(),
+                             topSequence,
+                             prd_to_track_map="PRDtoTrackMap" + InDetKeys.UnslimmedTracks(),
+                             clusterSplitProbabilityName=pixelClusterSplitProbName(),
+                             trt_pid_tool=True,
+                             pixel_dedx=True)
         from  InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags
         from  InDetPhysValMonitoring.ConfigUtils import extractCollectionPrefix
         for col in InDetPhysValFlags.validateExtraTrackCollections() :
             prefix=extractCollectionPrefix(col)
-            createTrackParticles(col,"", prefix+"TrackParticles", topSequence,
-                                trt_pid_tool=False, pixel_dedx=False)
+            createTrackParticles(col,
+                                 "",
+                                 prefix+"TrackParticles",
+                                 topSequence,
+                                 trt_pid_tool=False,
+                                 pixel_dedx=False)
     if doConversion :
         convertTrackParticles(getRecTrackParticleNameIfInFile(InDetKeys.TrackParticles()),
-                            InDetKeys.TrackParticlesTruth() ,
-                            InDetKeys.xAODTrackParticleContainer(),
-                            topSequence)
+                              InDetKeys.TrackParticlesTruth() ,
+                              InDetKeys.xAODTrackParticleContainer(),
+                              topSequence)
 
 if not InDetFlags.doVertexFinding():
     if (not IsInInputFile ('xAOD::VertexContainer', InDetKeys.xAODVertexContainer()) and

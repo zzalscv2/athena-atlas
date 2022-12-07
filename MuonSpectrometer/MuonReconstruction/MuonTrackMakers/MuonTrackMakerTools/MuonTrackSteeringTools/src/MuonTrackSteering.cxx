@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackSteering.h"
@@ -523,7 +523,7 @@ namespace Muon {
 
                         // generate a track summary for this track
                         if (m_trackSummaryTool.isEnabled()) {
-                            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *segmentTrack, nullptr, false);
+                            m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *segmentTrack, false);
                         }
 
                         std::unique_ptr<MuPatTrack> can = m_candidateTool->createCandidate(*sit, segmentTrack, trash_bin);
@@ -671,7 +671,7 @@ namespace Muon {
             else
                 track = &thisTrack;
             // add track summary to this track
-            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*track, nullptr, false); }
+            if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*track, false); }
             result->push_back(track);
         }
         return result;

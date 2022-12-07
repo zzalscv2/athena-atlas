@@ -59,6 +59,15 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
         trtAlgs = trtExtension_builder( signature, config, rois, summaryTool, inputTracks=ambiTrackCollection, outputTracks=outTrkTracks, prefix=prefix ) 
         ptAlgs.extend( trtAlgs )
   
+    #
+    #  Track PRD association algorithm, can be enabled to restore shared hit computation in TrackParticleCreatorTool
+    #
+    # from .InDetTrigCommon import trackPRD_Association_builder
+    # trackPRD_AssociationAlg = trackPRD_Association_builder(name = prefix+'trackPRD_AssociationAlg'+config.input_name+'_IDTrig',
+    #                                                        inTrackCollections = [finalTrackCollection],
+    #                                                        associationMapName = "TrigInDetPRDtoTrackMap")
+
+    # ptAlgs.append( trackPRD_AssociationAlg )
 
     #
     #  Track particle conversion algorithm

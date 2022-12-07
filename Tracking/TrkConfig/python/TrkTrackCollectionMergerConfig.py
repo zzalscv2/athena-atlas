@@ -7,7 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
                                 InputCombinedTracks=None,
                                 OutputCombinedTracks="",
-                                CombinedInDetClusterSplitProbContainer="",
                                 **kwargs):
     result = ComponentAccumulator()
 
@@ -24,14 +23,12 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         kwargs.setdefault("AssociationTool", result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    kwargs.setdefault("UpdateSharedHits", True)
     kwargs.setdefault("UpdateAdditionalInfo", True)
     kwargs.setdefault("DoTrackOverlay",flags.Overlay.doTrackOverlay)
 
     if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-        TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags, name=OutputCombinedTracks+"SummaryToolSharedHits"))
-        TrackSummaryTool.InDetSummaryHelperTool.ClusterSplitProbabilityName = CombinedInDetClusterSplitProbContainer
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+        TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("SummaryTool", TrackSummaryTool)
 
@@ -42,7 +39,6 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
 def ITkTrackCollectionMergerAlgCfg(flags, name="ITkTrackCollectionMerger",
                                    InputCombinedTracks=None,
                                    OutputCombinedTracks="CombinedITkTracks",
-                                   CombinedITkClusterSplitProbContainer="",
                                    **kwargs):
     result = ComponentAccumulator()
 
@@ -54,13 +50,11 @@ def ITkTrackCollectionMergerAlgCfg(flags, name="ITkTrackCollectionMerger",
         kwargs.setdefault("AssociationTool", result.popToolsAndMerge(ITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     kwargs.setdefault("AssociationMapName", "ITkPRDToTrackMapCombinedITkTracks")
-    kwargs.setdefault("UpdateSharedHits", True)
     kwargs.setdefault("UpdateAdditionalInfo", True)
 
     if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolSharedHitsCfg
-        TrackSummaryTool = result.popToolsAndMerge(ITkTrackSummaryToolSharedHitsCfg(flags, name="CombinedITkSplitProbTrackSummaryToolSharedHits"))
-        TrackSummaryTool.InDetSummaryHelperTool.ClusterSplitProbabilityName = CombinedITkClusterSplitProbContainer
+        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
+        TrackSummaryTool = result.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("SummaryTool", TrackSummaryTool)
 

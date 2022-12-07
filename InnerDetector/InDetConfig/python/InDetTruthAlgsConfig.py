@@ -167,8 +167,8 @@ def InDetTruthTrackCreationCfg(flags, name='InDetTruthTrackCreation', **kwargs):
     InDetPRDtoTrackMapToolGangedPixels = acc.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags))
     kwargs.setdefault('AssociationTool', InDetPRDtoTrackMapToolGangedPixels)
 
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-    TrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags, name='InDetTruthTrackCreationSummaryToolSharedHits'))
+    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
+    TrackSummaryTool = acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
     acc.addPublicTool(TrackSummaryTool)
     kwargs.setdefault('TrackSummaryTool', TrackSummaryTool)
 

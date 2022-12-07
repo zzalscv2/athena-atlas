@@ -175,7 +175,8 @@ def MuonCreatorToolCfg(flags, name="MuonCreatorTool", **kwargs):
 
     if flags.Muon.MuonTrigger:
         kwargs.setdefault("MuonSelectionTool", "")
-        kwargs.setdefault("UseCaloCells", False)       
+        kwargs.setdefault("UseCaloCells", False)
+        kwargs.setdefault("CopyUInt8SummaryKeys", [])
     else:
         from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
         kwargs.setdefault("MuonSelectionTool", result.popToolsAndMerge(MuonSelectionToolCfg(flags, name='MuonRecoSelTool')))

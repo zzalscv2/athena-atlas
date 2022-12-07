@@ -143,7 +143,6 @@ StatusCode Trk::TruthTrackCreation::execute()
         if (m_trackSummaryTool.isEnabled()){
             ATH_MSG_VERBOSE("Updating the TrackSummary.");
             m_trackSummaryTool->computeAndReplaceTrackSummary(*truthTrack,
-                                                              prd_to_track_map.get(),
                                                               false /* DO NOT suppress hole search*/);
 
         }
@@ -175,7 +174,7 @@ StatusCode Trk::TruthTrackCreation::execute()
         outputTrackCollection->reserve(tmp_track_collection.size());
         for (std::unique_ptr<Trk::Track> &track : tmp_track_collection) {
             ATH_MSG_VERBOSE("Updating the TrackSummary with shared hits.");
-            m_trackSummaryTool->computeAndReplaceTrackSummary(*track, prd_to_track_map.get(), false /* DO NOT suppress hole search*/);
+            m_trackSummaryTool->computeAndReplaceTrackSummary(*track, false /* DO NOT suppress hole search*/);
             outputTrackCollection->push_back(std::move(track));
         }
     }

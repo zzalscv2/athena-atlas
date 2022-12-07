@@ -10,7 +10,6 @@
 
 #include "TRT_ConditionsServices/ITRT_StrawStatusSummaryTool.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
-#include "TrkToolInterfaces/IPRD_AssociationTool.h"
 #include "TrkToolInterfaces/IPixelToTPIDTool.h"
 #include "TrkToolInterfaces/ITrackHoleSearchTool.h"
 #include "TrkTrackSummary/TrackSummary.h" // defines the Trk::numberOfDetectorTypes enum
@@ -65,7 +64,6 @@ public:
   virtual void analyse(
     const EventContext& ctx,
     const Trk::Track& track,
-    const Trk::PRDtoTrackMap* prd_to_track_map,
     const Trk::RIO_OnTrack* rot,
     const Trk::TrackStateOnSurface* tsos,
     std::vector<int>& information,
@@ -74,7 +72,6 @@ public:
   virtual void analyse(
     const EventContext& ctx,
     const Trk::Track& track,
-    const Trk::PRDtoTrackMap* prd_to_track_map,
     const Trk::CompetingRIOsOnTrack* crot,
     const Trk::TrackStateOnSurface* tsos,
     std::vector<int>& information,
@@ -100,29 +97,9 @@ public:
     std::vector<int>& information,
     const Trk::ParticleHypothesis partHyp = Trk::pion) const override final;
 
-  /** this method simply updaes the shared hit content - it is
-   * designed/optimised for track collection merging */
-  virtual void updateSharedHitCount(
-    const Trk::Track& track,
-    const Trk::PRDtoTrackMap* prd_to_track_map,
-    Trk::TrackSummary& summary) const override final;
 
 private:
-  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
-  getClusterSplittingProbability(const EventContext& ctx,
-                                 const InDet::PixelCluster* pix) const
-  {
-    if (!pix || m_clusterSplitProbContainer.key().empty()) {
-      return Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
-    }
-    SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer(
-      m_clusterSplitProbContainer, ctx);
-    if (!splitProbContainer.isValid()) {
-      ATH_MSG_FATAL("Failed to get cluster splitting probability container "
-                    << m_clusterSplitProbContainer);
-    }
-    return splitProbContainer->splitProbability(pix);
-  }
+
   /**ID pixel helper*/
   const PixelID* m_pixelId{ nullptr };
 
@@ -132,21 +109,12 @@ private:
   /**ID TRT helper*/
   const TRT_ID* m_trtId{ nullptr };
 
-  /**Association tool - used to work out which (if any)
-   * PRDs are shared between tracks*/
-  PublicToolHandle<Trk::IPRD_AssociationTool> m_assoTool{
-    this,
-    "AssoTool",
-    "InDet::InDetPRD_AssociationToolGangedPixels"
-  };
   PublicToolHandle<Trk::ITrackHoleSearchTool> m_holeSearchTool{
     this,
     "HoleSearch",
     "InDet::InDetTrackHoleSearchTool"
   };
-  ToolHandle<Trk::IPixelToTPIDTool> m_pixeldedxtool{ this,
-                                                     "PixelToTPIDTool",
-                                                     "" };
+
   ToolHandle<ITRT_StrawStatusSummaryTool> m_TRTStrawSummaryTool{
     this,
     "TRTStrawSummarySvc",
@@ -154,17 +122,10 @@ private:
     "The ConditionsSummaryTool"
   };
 
-  SG::ReadHandleKey<Trk::ClusterSplitProbabilityContainer>
-    m_clusterSplitProbContainer{ this, "ClusterSplitProbabilityName", "", "" };
-
   BooleanProperty m_usePixel{ this, "usePixel", true };
   BooleanProperty m_useSCT{ this, "useSCT", true };
   BooleanProperty m_useTRT{ this, "useTRT", true };
-  BooleanProperty m_doSharedHits{ this, "DoSharedHits", false };
-  BooleanProperty m_doSharedHitsTRT{ this, "DoSharedHitsTRT", false };
-  BooleanProperty m_doSplitPixelHits{ this, "DoSplitHits", true };
   BooleanProperty m_overwriteidsummary{ this, "OverwriteIDSummary", false };
-  BooleanProperty m_runningTIDE_Ambi{ this, "RunningTIDE_Ambi", false };
 };
 
 }

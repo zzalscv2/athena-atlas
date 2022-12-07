@@ -9,7 +9,7 @@ include.block ('InDetRecExample/ConfiguredxAODTrackParticleCreation.py')
 
 class ConfiguredxAODTrackParticleCreation:
 
-     def __init__(self, InputTrackCollection = None, InputTrackTruthCollection = None, OutputTrackParticleContainer = None):
+     def __init__(self, InputTrackCollection = None, InputTrackTruthCollection = None, OutputTrackParticleContainer = None, ClusterSplitProbabilityName = "", AssociationMapName = ""):
 
 
          from InDetRecExample.InDetJobProperties import InDetFlags
@@ -41,7 +41,9 @@ class ConfiguredxAODTrackParticleCreation:
                                                                       BadClusterID            = InDetFlags.pixelClusterBadClusterID(),
                                                                       KeepParameters          = True,
                                                                       KeepFirstParameters     = InDetFlags.KeepFirstParameters(),
-                                                                      PerigeeExpression       = _perigee_expression)
+                                                                      PerigeeExpression       = _perigee_expression,
+                                                                      ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                                                                      AssociationMapName = AssociationMapName)
 
          ToolSvc += InDetxAODParticleCreatorTool
          if (InDetFlags.doPrintConfigurables()):

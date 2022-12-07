@@ -629,15 +629,13 @@ class  ConfiguredNewTrackingSiPattern:
 
          if doTrackOverlay:
             MergingTrackCollections=[self.__SiTrackCollection, overlayFlags.bkgPrefix()+ResolvedTrackCollectionKey]
-            merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryToolSharedHits(namePrefix                 = NewTrackingCuts.extension()+'SplitProb',
-                                                                                          ClusterSplitProbabilityName= 'InDetAmbiguityProcessorSplitProb'+NewTrackingCuts.extension())
+            merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryTool(namePrefix = NewTrackingCuts.extension())
             from InDetRecExample.TrackingCommon                        import getInDetPRDtoTrackMapToolGangedPixels
             from TrkTrackCollectionMerger.TrkTrackCollectionMergerConf import Trk__TrackCollectionMerger
             TrkTrackCollectionMerger = Trk__TrackCollectionMerger(name                    = "InDetTrackCollectionMerger_"+NewTrackingCuts.extension(),
                                                                   TracksLocation          = MergingTrackCollections,
                                                                   OutputTracksLocation    = ResolvedTrackCollectionKey,
                                                                   AssociationTool         = getInDetPRDtoTrackMapToolGangedPixels(),
-                                                                  UpdateSharedHits        = True,
                                                                   UpdateAdditionalInfo    = True,
                                                                   DoTrackOverlay          = True,
                                                                   SummaryTool             = merger_track_summary_tool)

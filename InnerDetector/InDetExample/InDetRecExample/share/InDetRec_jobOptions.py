@@ -881,7 +881,7 @@ else:
                                                           TruthTrackBuilder          = InDetTruthTrackBuilder,
                                                           OutputTrackCollection      = InDetKeys.PseudoTracks(),
                                                           AssociationTool            = getInDetPRDtoTrackMapToolGangedPixels(),
-                                                          TrackSummaryTool           = TrackingCommon.getInDetTrackSummaryToolSharedHits(),
+                                                          TrackSummaryTool           = TrackingCommon.getInDetTrackSummaryTool(),
                                                           PRD_TruthTrajectorySelectors  = PRD_TruthTrajectorySelector )
         topSequence += InDetTruthTrackCreation
 
@@ -939,9 +939,7 @@ else:
 
       from TrkTrackCollectionMerger.TrkTrackCollectionMergerConf import Trk__TrackCollectionMerger
       from InDetRecExample.TrackingCommon                        import getInDetPRDtoTrackMapToolGangedPixels
-      merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryToolSharedHits(namePrefix                 = 'CombinedInDetSplitProb',
-                                                                                    ClusterSplitProbabilityName= CombinedInDetClusterSplitProbContainer)
-      assert( TrackingCommon.combinedClusterSplitProbName() == CombinedInDetClusterSplitProbContainer)
+      merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryTool(namePrefix = 'CombinedInDetSplitProb')
       if overlayFlags.doTrackOverlay():
         InputCombinedInDetTracks += ["Bkg_CombinedInDetTracks"]
       TrkTrackCollectionMerger = Trk__TrackCollectionMerger(name                    = "InDetTrackCollectionMerger",
@@ -949,7 +947,6 @@ else:
                                                             OutputTracksLocation    = InDetKeys.UnslimmedTracks(),
                                                             AssociationTool         = getInDetPRDtoTrackMapToolGangedPixels(),
                                                             AssociationMapName      = "PRDtoTrackMap" + InDetKeys.UnslimmedTracks(),
-                                                            UpdateSharedHits        = True,
                                                             UpdateAdditionalInfo    = True,
                                                             DoTrackOverlay          = overlayFlags.doTrackOverlay(),
                                                             SummaryTool             = merger_track_summary_tool)
@@ -992,14 +989,12 @@ else:
           DummyCollection += [ InDetKeys.ExtendedTracksDisappearing()]
         if overlayFlags.doTrackOverlay():
           DummyCollection += ["Bkg_DisappearingTracks"]
-        merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryToolSharedHits(namePrefix                 = 'DisappearingSplitProb',
-                                                                                    ClusterSplitProbabilityName= DisappearingClusterSplitProbContainer)
+        merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryTool(namePrefix = 'DisappearingSplitProb')
         from InDetRecExample.TrackingCommon                        import getInDetPRDtoTrackMapToolGangedPixels
         TrkTrackCollectionMerger_pix = Trk__TrackCollectionMerger(name                    = "InDetTrackCollectionMerger_pix",
                                                                   TracksLocation          = DummyCollection,
                                                                   OutputTracksLocation    = InDetKeys.DisappearingTracks(),
                                                                   AssociationTool         = getInDetPRDtoTrackMapToolGangedPixels(),
-                                                                  UpdateSharedHits        = True,
                                                                   UpdateAdditionalInfo    = True,
                                                                   DoTrackOverlay          = overlayFlags.doTrackOverlay(),
                                                                   SummaryTool             = merger_track_summary_tool)
@@ -1049,7 +1044,7 @@ else:
       InDetReFitTrack = Trk__ReFitTrack (name           = "InDetRefitTrack",
                                          FitterTool     = CfgGetter.getPublicTool('InDetTrackFitter'),
                                          FitterToolTRT  = CfgGetter.getPublicTool('InDetTrackFitterTRT'),
-                                         SummaryTool    = TrackingCommon.getInDetTrackSummaryToolSharedHits(),
+                                         SummaryTool    = TrackingCommon.getInDetTrackSummaryTool(),
                                          AssociationTool= getInDetPRDtoTrackMapToolGangedPixels(),
                                          TrackName      = InputTrackCollection,
                                          NewTrackName   = InDetKeys.RefittedTracks(),

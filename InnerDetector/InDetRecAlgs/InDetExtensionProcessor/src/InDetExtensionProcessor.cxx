@@ -311,7 +311,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
         }
       } else {
         if (m_trackSummaryTool.isEnabled()) {
-          m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*newtrack, nullptr, m_suppressHoleSearch);
+          m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newtrack, m_suppressHoleSearch);
         }
         // score old and new tool and decide which one to push back
         Trk::TrackScore oldScore = m_scoringTool->score(*thisTrack, m_suppressHoleSearch);
@@ -337,7 +337,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
             // score again
             // @TODO should score newBremTrack
             if (m_trackSummaryTool.isEnabled()) {
-              m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*newBremTrack, nullptr, m_suppressHoleSearch);
+              m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *newBremTrack, m_suppressHoleSearch);
             }
             newScore = m_scoringTool->score(*newtrack, m_suppressHoleSearch);
             ATH_MSG_DEBUG("recovered new track has score      : " << newScore);
@@ -457,7 +457,7 @@ InDet::InDetExtensionProcessor::trackPlusExtension(
   Trk::Track* extTrack =
     new Trk::Track(siTrack->info(), std::move(pExtendedTrajectory), (pFitQuality ? pFitQuality->uniqueClone() : nullptr));
   if (m_trackSummaryTool.isEnabled()) {
-    m_trackSummaryTool->computeAndReplaceTrackSummary(ctx,*extTrack, nullptr, m_suppressHoleSearch);
+    m_trackSummaryTool->computeAndReplaceTrackSummary(ctx, *extTrack, m_suppressHoleSearch);
   }
   Trk::TrackScore extScore = m_scoringTool->score(*extTrack, m_suppressHoleSearch);
   ATH_MSG_DEBUG("rejected extension saved as Trk::Track with " << nSiStates <<

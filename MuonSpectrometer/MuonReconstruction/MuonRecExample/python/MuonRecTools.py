@@ -267,7 +267,6 @@ class MuonTrackSummaryTool(Trk__TrackSummaryTool,ConfiguredBase):
     def __init__(self,name="MuonTrackSummaryTool",**kwargs):
         self.applyUserDefaults(kwargs,name)
         kwargs.setdefault("MuonSummaryHelperTool", "MuonTrackSummaryHelperTool" )
-        kwargs.setdefault("doSharedHits", False )
         kwargs.setdefault("AddDetailedMuonSummary", True )
         super(MuonTrackSummaryTool,self).__init__(name,**kwargs)
 # end of class MuonTrackSummaryTool

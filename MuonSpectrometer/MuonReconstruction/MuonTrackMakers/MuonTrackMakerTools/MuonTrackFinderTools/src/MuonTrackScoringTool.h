@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSCORINGTOOL_H
@@ -13,7 +13,7 @@
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 #include "TrkEventPrimitives/TrackScore.h"
 #include "TrkToolInterfaces/ITrackScoringTool.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 
 namespace Trk {
     class Track;
@@ -37,7 +37,7 @@ namespace Muon {
 
     private:
         /**\todo make this const, once createSummary method is const*/
-        ToolHandle<Trk::ITrackSummaryTool> m_trkSummaryTool{this, "SumHelpTool", "Trk::TrackSummaryTool"};
+        ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool{this, "SumHelpTool", "Trk::TrackSummaryTool"};
         PublicToolHandle<MuonEDMPrinterTool> m_printer{this, "EDMPrinter", "Muon::MuonEDMPrinterTool/MuonEDMPrinterTool",
                                                        "helper to nicely print out tracks"};
 
