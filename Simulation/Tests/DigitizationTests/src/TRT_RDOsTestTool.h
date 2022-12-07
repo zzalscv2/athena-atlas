@@ -14,8 +14,8 @@ class TRT_RDOsTestTool : public DigiTestToolBase {
 
 public:
 
-  TRT_RDOsTestTool(const std::string& name,
-                   const std::string& type,
+  TRT_RDOsTestTool(const std::string& type,
+                   const std::string& name,
                    const IInterface* parent);
 
   StatusCode initialize();
