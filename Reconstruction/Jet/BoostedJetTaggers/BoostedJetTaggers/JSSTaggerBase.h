@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETSTAGGERS_JSSTAGGERBASE_H
@@ -13,6 +13,7 @@
 #include "xAODJet/Jet.h"
 #include "xAODJet/JetContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTracking/VertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "BoostedJetTaggers/TagResultEnum.h"
@@ -176,6 +177,10 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECFG311Key{this, "ECFG311Name", "ECFG_3_1_1", "SG key for ECFG_3_1_1"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readECFG212Key{this, "ECFG212Name", "ECFG_2_1_2", "SG key for ECFG_2_1_2"};
 
+    SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readParentKey{this, "ParentName", "Parent", "SG key for Parent"};
+    SG::WriteDecorHandleKey<xAOD::JetContainer> m_decNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
+    SG::ReadDecorHandleKey<xAOD::JetContainer>  m_readNtrk500Key{this, "Ntrk500Name", "ParentJetNTrkPt500", "SG key for Ntrk500 from ungroomed jet"};
+
     /// Strings for cut functions
     std::string m_strMassCutLow;
     std::string m_strMassCutHigh;
@@ -242,6 +247,12 @@ class JSSTaggerBase :   public asg::AsgTool ,
     /// Calculate JSS moment ratios in case they are not already saved
     /// TODO: Remove this once JSSMomentTools is modified to take const jets
     int calculateJSSRatios( const xAOD::Jet &jet ) const;
+
+    /// Find the PV (to be used for Ntrk)
+    int findPV() const;
+
+    /// Retrieve Ntrk variable from the ungroomed parent jet
+    StatusCode GetUnGroomTracks( const xAOD::Jet &jet , int indexPV) const;
 
     /// Get SF weight
     StatusCode getWeight( const xAOD::Jet& jet, bool passSel, asg::AcceptData &acceptData ) const;

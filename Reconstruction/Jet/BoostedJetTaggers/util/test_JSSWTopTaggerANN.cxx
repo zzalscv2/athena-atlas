@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -42,12 +42,12 @@ int main( int argc, char* argv[] ) {
   char* APP_NAME = argv[ 0 ];
 
   // arguments
-  TString fileName = "/eos/atlas/atlascerngroupdisk/perf-jets/ReferenceFiles/mc16_13TeV.361028.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ8W.deriv.DAOD_FTAG1.e3569_s3126_r9364_r9315_p3260/DAOD_FTAG1.12133096._000074.pool.root.1";
+  TString fileName = "/eos/atlas/atlascerngroupdisk/perf-jets/ReferenceFiles/DAOD_JETM2.Wprime.pool.root";
   int  ievent=-1;
   int  nevents=-1;
   bool m_isMC=true;
   bool verbose=false;
-
+  bool runSystematics=true;
 
   Info( APP_NAME, "==============================================" );
   Info( APP_NAME, "Usage: $> %s [xAOD file name]", APP_NAME );
@@ -57,6 +57,7 @@ int main( int argc, char* argv[] ) {
   Info( APP_NAME, " $> %s -e X  | X = specific number of the event to run on - for debugging", APP_NAME );
   Info( APP_NAME, " $> %s -d X  | X = dataset ID", APP_NAME );
   Info( APP_NAME, " $> %s -m X  | X = isMC", APP_NAME );
+  Info( APP_NAME, " $> %s -noSys | Run without systematics", APP_NAME );
   Info( APP_NAME, " $> %s -v    | run in verbose mode   ", APP_NAME );
   Info( APP_NAME, "==============================================" );
 
@@ -114,6 +115,11 @@ int main( int argc, char* argv[] ) {
     }
   }
 
+  if(options.find("-noSys")!=std::string::npos){
+    runSystematics=false;
+    Info( APP_NAME, "Argument (-noSys) : Setting runSystematics");
+  }
+
   if(options.find("-v")!=std::string::npos){
     verbose=true;
     Info( APP_NAME, "Argument (-v) : Setting verbose");
@@ -156,21 +162,23 @@ int main( int argc, char* argv[] ) {
   Tree->Branch( "idx", &idx, "idx/I" );
   Tree->Branch( "truthLabel", &truthLabel, "truthLabel/I" );
 
-  std::unique_ptr<JetUncertaintiesTool> m_jetUncToolSF(new JetUncertaintiesTool(("JetUncProvider_SF")));
-  ANA_CHECK( m_jetUncToolSF->setProperty("JetDefinition", "AntiKt10LCTopoTrimmedPtFrac5SmallR20") );
-  ANA_CHECK( m_jetUncToolSF->setProperty("Path", "/eos/user/g/gang/public/BoostedJetTaggers/JSSWTopTaggerANN/") );
-  ANA_CHECK( m_jetUncToolSF->setProperty("ConfigFile", "TagSFUncert_JSSANNTagger_AntiKt10LCTopoTrimmed.config") );
-  ANA_CHECK( m_jetUncToolSF->setProperty("MCType", "MC16a") );
-  ANA_CHECK( m_jetUncToolSF->initialize() );
-
-  std::vector<std::string> pulls = {"__1down", "__1up"};
-  CP::SystematicSet jetUnc_sysSet = m_jetUncToolSF->recommendedSystematics();
-  const std::set<std::string> sysNames = jetUnc_sysSet.getBaseNames();
-  std::vector<CP::SystematicSet> m_jetUnc_sysSets;
-  for (std::string sysName: sysNames) {
-    for (std::string pull : pulls) {
-      std::string sysPulled = sysName + pull;
-      m_jetUnc_sysSets.push_back(CP::SystematicSet(sysPulled));
+  std::unique_ptr<JetUncertaintiesTool> jetUncToolSF(new JetUncertaintiesTool(("JetUncProvider_SF")));
+  std::vector<CP::SystematicSet> jetUnc_sysSets;
+  if(runSystematics){
+    ANA_CHECK( jetUncToolSF->setProperty("JetDefinition", "AntiKt10LCTopoTrimmedPtFrac5SmallR20") );
+    ANA_CHECK( jetUncToolSF->setProperty("Path", "/eos/user/g/gang/public/BoostedJetTaggers/JSSWTopTaggerANN/") );
+    ANA_CHECK( jetUncToolSF->setProperty("ConfigFile", "TagSFUncert_JSSANNTagger_AntiKt10LCTopoTrimmed.config") );
+    ANA_CHECK( jetUncToolSF->setProperty("MCType", "MC16a") );
+    ANA_CHECK( jetUncToolSF->initialize() );
+    
+    std::vector<std::string> pulls = {"__1down", "__1up"};
+    CP::SystematicSet jetUnc_sysSet = jetUncToolSF->recommendedSystematics();
+    const std::set<std::string> sysNames = jetUnc_sysSet.getBaseNames();
+    for (std::string sysName: sysNames) {
+      for (std::string pull : pulls) {
+	std::string sysPulled = sysName + pull;
+	jetUnc_sysSets.push_back(CP::SystematicSet(sysPulled));
+      }
     }
   }
 
@@ -187,9 +195,8 @@ int main( int argc, char* argv[] ) {
   asg::StandaloneToolHandle<JSSWTopTaggerANN> m_Tagger; //!
   m_Tagger.setTypeAndName("JSSWTopTaggerANN/MyTagger");
   if(verbose) ANA_CHECK( m_Tagger.setProperty("OutputLevel", MSG::DEBUG) );
-  ANA_CHECK( m_Tagger.setProperty( "CalibArea",    "/eos/user/g/gang/public/BoostedJetTaggers/JSSWTopTaggerANN/") );
-  ANA_CHECK( m_Tagger.setProperty( "ConfigFile",   "JSSANNTagger_test.dat") );
-  ANA_CHECK( m_Tagger.setProperty("TruthJetContainerName", "AntiKt10TruthTrimmedPtFrac5SmallR20Jets") );
+  ANA_CHECK( m_Tagger.setProperty( "CalibArea",    "JSSWTopTaggerANN/Rel21/February2022/") );
+  ANA_CHECK( m_Tagger.setProperty( "ConfigFile",   "JSSANN80Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat") );
   ANA_CHECK( m_Tagger.setProperty("IsMC", m_isMC) );
   ANA_CHECK( m_Tagger.retrieve() );
 
@@ -216,7 +223,7 @@ int main( int argc, char* argv[] ) {
 
     // Get the jets
     const xAOD::JetContainer* myJets = 0;
-    if( event.retrieve( myJets, "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" ) != StatusCode::SUCCESS)
+    if( event.retrieve( myJets, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets" ) != StatusCode::SUCCESS)
       continue ;
 
     // Loop over jet container
@@ -230,32 +237,35 @@ int main( int argc, char* argv[] ) {
       if(verbose) {
         std::cout << "Testing ANN Tagger " << std::endl;
         std::cout << "jet pt              = " << jetSC->pt() << std::endl;
-        std::cout << "RunningTag : " << jetSC->getAttribute<bool>("ANNTagger_Tagged") << std::endl;
-        std::cout << "Printing jet score : " << jetSC->auxdata<float>("ANNTagger_Score") << std::endl;
-        std::cout << "result masspass     = " << jetSC->getAttribute<bool>("ANNTagger_PassMass") << std::endl;
+        std::cout << "RunningTag : " << jetSC->getAttribute<bool>("ANNWContained80_Tagged") << std::endl;
+        std::cout << "Printing jet score : " << jetSC->auxdata<float>("ANNWContained80_PassScore") << std::endl;
+        std::cout << "result masspass     = " << jetSC->getAttribute<bool>("ANNWContained80_PassMass") << std::endl;
       }
-      truthLabel = jetSC->auxdata<int>("R10TruthLabel_R21Consolidated");
+      truthLabel = jetSC->auxdata<int>("R10TruthLabel_R21Precision_2022v1");
 
-      pass = jetSC->getAttribute<bool>("ANNTagger_Tagged");
-      sf = jetSC->auxdata<float>("ANNTagger_SF");
+      pass = jetSC->getAttribute<bool>("ANNWContained80_Tagged");
+      sf = jetSC->auxdata<float>("ANNWContained80_SF");
       pt = jetSC->pt();
       m  = jetSC->m();
       eta = jetSC->eta();
 
       Tree->Fill();
       idx++;
-      if ( m_isMC ){
-	if ( pt/1.e3 > 350 && std::abs(eta) < 2.0 && pass ) {
-	  bool validForUncTool = ( pt/1.e3 >= 150 && pt/1.e3 < 2500 );
-	  validForUncTool &= ( m/pt >= 0 && m/pt <= 1 );
-	  validForUncTool &= ( std::abs(eta) < 2 );
-	  std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb)" << std::endl;
-	  if( validForUncTool ){
-	    for ( CP::SystematicSet sysSet : m_jetUnc_sysSets ){
-	      ANA_CHECK( m_Tagger->tag( *jetSC ) );
-	      ANA_CHECK( m_jetUncToolSF->applySystematicVariation(sysSet) );
-	      ANA_CHECK( m_jetUncToolSF->applyCorrection(*jetSC) );
-	      std::cout << sysSet.name() << " " << jetSC->auxdata<float>("ANNTagger_SF") << std::endl;
+
+      if(runSystematics){
+	if ( m_isMC ){
+	  if ( pt/1.e3 > 350 && std::abs(eta) < 2.0 && pass ) {
+	    bool validForUncTool = ( pt/1.e3 >= 150 && pt/1.e3 < 2500 );
+	    validForUncTool &= ( m/pt >= 0 && m/pt <= 1 );
+	    validForUncTool &= ( std::abs(eta) < 2 );
+	    std::cout << "Nominal SF=" << sf << " truthLabel=" << truthLabel << " (1: t->qqb)" << std::endl;
+	    if( validForUncTool ){
+	      for ( CP::SystematicSet sysSet : jetUnc_sysSets ){
+		ANA_CHECK( m_Tagger->tag( *jetSC ) );
+		ANA_CHECK( jetUncToolSF->applySystematicVariation(sysSet) );
+		ANA_CHECK( jetUncToolSF->applyCorrection(*jetSC) );
+		std::cout << sysSet.name() << " " << jetSC->auxdata<float>("ANNTagger_SF") << std::endl;
+	      }
 	    }
 	  }
 	}
