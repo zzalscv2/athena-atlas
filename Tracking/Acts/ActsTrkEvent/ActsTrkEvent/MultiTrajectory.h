@@ -171,11 +171,11 @@ namespace ActsTrk {
              */
             
 	    template<std::size_t measdim>
-            inline typename ConstTrackStateProxy::Measurement<measdim> measurement_impl(IndexType index) const {
+            inline typename ConstTrackStateProxy::template Measurement<measdim> measurement_impl(IndexType index) const {
                 return trackMeasurements().at(index)->template measEigen<measdim>();
             }
 	    template<std::size_t measdim, bool Enable = true>
-	      std::enable_if_t<Enable && (RWState==IsReadWrite), typename TrackStateProxy::Measurement<measdim>>
+	      std::enable_if_t<Enable && (RWState==IsReadWrite), typename TrackStateProxy::template Measurement<measdim>>
 	      measurement_impl(IndexType index) {
                 return trackMeasurements().at(index)->template measEigen<measdim>();
             }
@@ -187,11 +187,11 @@ namespace ActsTrk {
              */
             
 	    template<std::size_t measdim>
-	      inline typename ConstTrackStateProxy::MeasurementCovariance<measdim> measurementCovariance_impl(IndexType index) const {
+	      inline typename ConstTrackStateProxy::template MeasurementCovariance<measdim> measurementCovariance_impl(IndexType index) const {
                 return trackMeasurements().at(index)->template covMatrixEigen<measdim>();
             }
 	    template<std::size_t measdim, bool Enable = true>
-	      std::enable_if_t<Enable && (RWState==IsReadWrite), typename TrackStateProxy::MeasurementCovariance<measdim>>
+	      std::enable_if_t<Enable && (RWState==IsReadWrite), typename TrackStateProxy::template MeasurementCovariance<measdim>>
 	      measurementCovariance_impl(IndexType index) {
                 return trackMeasurements().at(index)->template covMatrixEigen<measdim>();
             }
