@@ -32,6 +32,24 @@ def JfexMonitoringConfig(inputFlags):
     FPGA_names = ["U1","U2","U4","U3"]
     Modules_names = ["jFEX 0","jFEX 1","jFEX 2","jFEX 3","jFEX 4","jFEX 5"]
     
+    from ROOT import TMath
+    
+    x_phi = []
+    for i in range(67):
+        phi = (-TMath.Pi()- TMath.Pi()/32) + TMath.Pi()/32*i 
+        x_phi.append(phi)
+    x_phi = sorted(x_phi)
+    
+    phi_bins = {
+        'xbins': x_phi
+    }
+    
+    eta_phi_bins = {
+        'xbins': 100, 'xmin': -5, 'xmax': 5,
+        'ybins': x_phi
+    }
+
+    
     ######  jJ  ######  
     myGroup.defineHistogram('jJ_jFexNumber;h_jJ_jFexNumber', title='jFex SRJet Module;Module number;Counts',
                             type='TH1I', path=trigPath+'jJ/', xbins=6,xmin=0,xmax=6)
@@ -49,10 +67,10 @@ def JfexMonitoringConfig(inputFlags):
                             type='TH1F', path=trigPath+'jJ/',xbins=100,xmin=-5.0,xmax=5.0)
 
     myGroup.defineHistogram('jJ_Phi;h_jJ_Phi', title='jFex SRJet #phi;#phi;Counts',
-                            type='TH1F', path=trigPath+'jJ/',xbins=67,xmin=-math.pi,xmax=math.pi)
+                            type='TH1F', path=trigPath+'jJ/',**phi_bins)
                             
     myGroup.defineHistogram('jJ_Eta,jJ_Phi;h_jJ_EtaPhiMap', title="jFex SRJet #eta vs #phi;#eta;#phi",
-                            type='TH2F',path=trigPath+'jJ/', xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)                            
+                            type='TH2F',path=trigPath+'jJ/', **eta_phi_bins)                            
 
     myGroup.defineHistogram('jJ_GlobalEta;h_jJ_GlobalEta', title='jFex SRJet Global #eta;#eta;Counts',
                             type='TH1F', path=trigPath+'jJ/',xbins=100,xmin=-50,xmax=50)
@@ -80,10 +98,10 @@ def JfexMonitoringConfig(inputFlags):
                             type='TH1F', path=trigPath+'jLJ/',xbins=100,xmin=-5.0,xmax=5.0)
 
     myGroup.defineHistogram('jLJ_Phi;h_jLJ_Phi', title='jFex LRJet #phi;#phi;Counts',
-                            type='TH1F', path=trigPath+'jLJ/',xbins=67,xmin=-math.pi,xmax=math.pi)
+                            type='TH1F', path=trigPath+'jLJ/',**phi_bins)
                             
     myGroup.defineHistogram('jLJ_Eta,jLJ_Phi;h_jLJ_EtaPhiMap', title="jFEX LRJet #eta vs #phi;#eta;#phi",
-                            type='TH2F',path=trigPath+'jLJ/', xbins=100,xmin=-5.0,xmax=5.0,ybins=67,ymin=-math.pi,ymax=math.pi)                             
+                            type='TH2F',path=trigPath+'jLJ/', **eta_phi_bins)                             
 
     myGroup.defineHistogram('jLJ_GlobalEta;h_jLJ_GlobalEta', title='jFex LRJet Global #eta;#eta;Counts',
                             type='TH1F', path=trigPath+'jLJ/',xbins=100,xmin=-50,xmax=50)
@@ -113,10 +131,10 @@ def JfexMonitoringConfig(inputFlags):
                             type='TH1F', path=trigPath+'jTau/',xbins=100,xmin=-5.0,xmax=5.0)
 
     myGroup.defineHistogram('jTau_Phi;h_jTau_Phi', title='jFex Tau #phi;#phi;Counts',
-                            type='TH1F', path=trigPath+'jTau/',xbins=67,xmin=-math.pi,xmax=math.pi)
+                            type='TH1F', path=trigPath+'jTau/',**phi_bins)
                             
     myGroup.defineHistogram('jTau_Eta,jTau_Phi;h_jTau_EtaPhiMap', title="jFex Tau #eta vs #phi;#eta;#phi",
-                            type='TH2F',path=trigPath+'jTau/', xbins=100,xmin=-5.0,xmax=5.0,ybins=67,ymin=-math.pi,ymax=math.pi)          
+                            type='TH2F',path=trigPath+'jTau/', **eta_phi_bins)          
 
     myGroup.defineHistogram('jTau_GlobalEta;h_jTau_GlobalEta', title='jFex Tau Global #eta;#eta;Counts',
                             type='TH1F', path=trigPath+'jTau/',xbins=100,xmin=-50,xmax=50)
@@ -143,7 +161,7 @@ def JfexMonitoringConfig(inputFlags):
                             type='TH1F', path=trigPath+'jEM/',xbins=100,xmin=-5.0,xmax=5.0)
 
     myGroup.defineHistogram('jEM_Phi;h_jEM_Phi', title='jFex EM #phi;#phi;Counts',
-                            type='TH1F', path=trigPath+'jEM/',xbins=67,xmin=-math.pi,xmax=math.pi)
+                            type='TH1F', path=trigPath+'jEM/',**phi_bins)
 
     em_labels = ['None','loose','medium','tight']
     myGroup.defineHistogram('jEM_Iso;h_jEM_Iso', title='jFex EM Isolation;tobIso;Counts',
@@ -156,7 +174,7 @@ def JfexMonitoringConfig(inputFlags):
                             type='TH1I', path=trigPath+'jEM/',xbins=4,xmin=0,xmax=4,xlabels=em_labels)
                             
     myGroup.defineHistogram('jEM_Eta,jEM_Phi;h_jEM_EtaPhiMap', title="jFex EM #eta vs #phi;#eta;#phi",
-                            type='TH2F',path=trigPath+'jEM/', xbins=100,xmin=-5.0,xmax=5.0,ybins=67,ymin=-math.pi,ymax=math.pi) 
+                            type='TH2F',path=trigPath+'jEM/',  **eta_phi_bins) 
 
     myGroup.defineHistogram('jEM_GlobalEta;h_jEM_GlobalEta', title='jFex EM Global #eta;#eta;Counts',
                             type='TH1F', path=trigPath+'jEM/',xbins=100,xmin=-50,xmax=50)
@@ -200,8 +218,8 @@ if __name__=='__main__':
     # set input file and config options
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     import glob
-    inputs = glob.glob('/eos/user/t/thompson/ATLAS/LVL1_mon/MC_ESD/valid1.601189.PhPy8EG_AZNLO_Zee.recon.ESD.e8392_e7400_s3775_r13717_r13737/ESD.29453686._000286.pool.root.1')
-
+    inputs = glob.glob('../../Monitoring/run/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_e8455_s3873_s3874_r14022/*.root*')
+    
     ConfigFlags.Input.Files = inputs
     ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
