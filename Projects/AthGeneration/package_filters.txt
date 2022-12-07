@@ -152,6 +152,7 @@
 + Event/xAOD/xAODTruthCnv
 + External/AtlasDataArea
 + External/Pythia8
+- Generators/CavernBkgGenerator
 - Generators/MCTester_i
 - Generators/ProtosLHEF_i
 - Generators/TrackRecordGenerator
