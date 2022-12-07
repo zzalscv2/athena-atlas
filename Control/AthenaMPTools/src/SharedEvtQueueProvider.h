@@ -22,8 +22,8 @@ class SharedEvtQueueProvider final : public AthenaMPToolBase
   virtual ~SharedEvtQueueProvider() override;
   
   // _________IAthenaMPTool_________   
-  virtual int makePool(int maxevt, int nprocs, const std::string& topdir) override;
-  virtual StatusCode exec() override;
+  virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) override;
+  virtual StatusCode exec ATLAS_NOT_THREAD_SAFE() override;
 
   virtual void subProcessLogs(std::vector<std::string>&) override;
   virtual AthenaMP::AllWorkerOutputs_ptr generateOutputReport() override;
@@ -33,7 +33,7 @@ class SharedEvtQueueProvider final : public AthenaMPToolBase
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() override;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () override;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ATHENAMPTOOLS_TOKENSCATTERER_H
-#define ATHENAMPTOOLS_TOKENSCATTERER_H
+#ifndef ATHENAMPTOOLS_EVTRANGESCATTERER_H
+#define ATHENAMPTOOLS_EVTRANGESCATTERER_H
 
 #include "AthenaMPToolBase.h"
 #include "yampl/Exceptions.h"
@@ -28,15 +28,15 @@ class EvtRangeScatterer final : public AthenaMPToolBase
   virtual StatusCode finalize() override;
 
   // _________IAthenaMPTool_________   
-  virtual int makePool(int maxevt, int nprocs, const std::string& topdir) override;
-  virtual StatusCode exec() override;
+  virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) override;
+  virtual StatusCode exec ATLAS_NOT_THREAD_SAFE () override;
 
   virtual void subProcessLogs(std::vector<std::string>&) override;
   virtual AthenaMP::AllWorkerOutputs_ptr generateOutputReport() override;
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() override;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () override;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:
@@ -51,9 +51,9 @@ class EvtRangeScatterer final : public AthenaMPToolBase
 
   // Helper functuion for receiving new messages from the socket2Processor channel
   // If this is an output file report, then it is forwarded to the pilot and an empty string is returned to the caller
-  std::string getNewRangeRequest(yampl::ISocket* socket2Processor
-				 , yampl::ISocket* socket2Pilot
-				 , int& procReportPending);
+  std::string getNewRangeRequest ATLAS_NOT_THREAD_SAFE (yampl::ISocket* socket2Processor
+							, yampl::ISocket* socket2Pilot
+							, int& procReportPending);
 
   // Poll the failed PID queue to see if any of the Processors has failed
   pid_t pollFailedPidQueue(AthenaInterprocess::SharedQueue*  sharedFailedPidQueue

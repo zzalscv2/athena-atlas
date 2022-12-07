@@ -31,16 +31,16 @@ class SharedEvtQueueConsumer final : public AthenaMPToolBase
   virtual StatusCode finalize() override;
 
   // _________IAthenaMPTool_________   
-  virtual int makePool(int maxevt, int nprocs, const std::string& topdir) override;
-  virtual StatusCode exec() override;
-  virtual StatusCode wait_once(pid_t& pid) override;
+  virtual int makePool ATLAS_NOT_THREAD_SAFE (int maxevt, int nprocs, const std::string& topdir) override;
+  virtual StatusCode exec ATLAS_NOT_THREAD_SAFE () override;
+  virtual StatusCode wait_once ATLAS_NOT_THREAD_SAFE (pid_t& pid) override;
 
   virtual void reportSubprocessStatuses() override;
   virtual void subProcessLogs(std::vector<std::string>&) override;
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() override;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () override;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() override;
 
  private:
@@ -51,7 +51,7 @@ class SharedEvtQueueConsumer final : public AthenaMPToolBase
   // Decode process results
   // 1. Store number of processed events for FUNC_EXEC
   // 2. If doFinalize flag is set then serialize process finalizations
-  int decodeProcessResult(const AthenaInterprocess::ProcessResult* presult, bool doFinalize);
+  int decodeProcessResult ATLAS_NOT_THREAD_SAFE (const AthenaInterprocess::ProcessResult* presult, bool doFinalize);
 
   // Properties
   bool m_useSharedReader; // Work in pair with a SharedReader

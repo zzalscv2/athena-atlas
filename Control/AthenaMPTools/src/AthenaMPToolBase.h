@@ -34,7 +34,7 @@ class AthenaMPToolBase : public AthAlgTool
   virtual StatusCode finalize() override;
 
   // _________IAthenaMPTool_________   
-  virtual StatusCode wait_once(pid_t& pid) override;
+  virtual StatusCode wait_once ATLAS_NOT_THREAD_SAFE (pid_t& pid) override;
 
   virtual void reportSubprocessStatuses() override;
   virtual AthenaMP::AllWorkerOutputs_ptr generateOutputReport() override;
@@ -45,11 +45,11 @@ class AthenaMPToolBase : public AthAlgTool
   virtual void killChildren() override;
 
   // _________IMessageDecoder_________
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> operator()(const AthenaInterprocess::ScheduledWork&) override;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> operator() ATLAS_NOT_THREAD_SAFE (const AthenaInterprocess::ScheduledWork&) override;
 
   // _____ Actual working horses ________
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> bootstrap_func() = 0;
-  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func() = 0;
+  virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> exec_func ATLAS_NOT_THREAD_SAFE () = 0;
   virtual std::unique_ptr<AthenaInterprocess::ScheduledWork> fin_func() = 0;
 
  protected:
@@ -68,7 +68,7 @@ class AthenaMPToolBase : public AthAlgTool
     , FUNC_FIN
   };
 
-  int mapAsyncFlag(Func_Flag flag, pid_t pid=0);
+  int mapAsyncFlag ATLAS_NOT_THREAD_SAFE(Func_Flag flag, pid_t pid=0);
   int redirectLog(const std::string& rundir, bool addTimeStamp = true);
   int updateIoReg(const std::string& rundir);
   std::string fmterror(int errnum);
