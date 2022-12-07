@@ -10,13 +10,12 @@ import ROOT
 
 
 class PreJetAnalysisConfig (ConfigBlock) :
-    """the ConfigBlock for the small-r jet sequence"""
+    """the ConfigBlock for the common preprocessing of jet sequences"""
 
-    def __init__ (self, containerName, jetCollection, jetInput, postfix = '') :
+    def __init__ (self, containerName, jetCollection, postfix = '') :
         super (PreJetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.jetCollection = jetCollection
-        self.jetInput = jetInput
         self.postfix = postfix
         if self.postfix != '' and self.postfix[0] != '_' :
             self.postfix = '_' + self.postfix
@@ -26,8 +25,10 @@ class PreJetAnalysisConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
-        if config.isPhyslite() :
+        if config.isPhyslite() and self.jetCollection == 'AntiKt4EMPFlowJets' :
             config.setSourceName (self.containerName, "AnalysisJets", originalName = self.jetCollection)
+        elif config.isPhyslite() and self.jetCollection == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' :
+            config.setSourceName (self.containerName, "AnalysisLargeRJets", originalName = self.jetCollection)
         else :
             config.setSourceName (self.containerName, self.jetCollection, originalName = self.jetCollection)
 
@@ -50,7 +51,11 @@ class PreJetAnalysisConfig (ConfigBlock) :
             if config.wantCopy (self.containerName) :
                 alg.jetsOut = config.copyName (self.containerName)
 
-
+        # Set up shallow copy if needed and not yet done
+        if config.wantCopy (self.containerName) :
+            alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.postfix )
+            alg.input = config.readName (self.containerName)
+            alg.output = config.copyName (self.containerName)
 
 
 
@@ -275,13 +280,14 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
     """the ConfigBlock for the large-r jet sequence"""
 
     def __init__ (self, containerName, jetCollection, jetInput, postfix = '') :
-        super (RScanJetAnalysisConfig, self).__init__ ()
+        super (LargeRJetAnalysisConfig, self).__init__ ()
         self.containerName = containerName
         self.jetCollection = jetCollection
         self.postfix = postfix
         if self.postfix != '' and self.postfix[0] != '_' :
             self.postfix = '_' + self.postfix
         self.largeRMass = "Comb"
+        self.jetInput = jetInput
 
 
     def makeAlgs (self, config) :
@@ -404,9 +410,17 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = '',
 
     #AntiKt10UFO CSSKSoftDropBeta100Zcut10Jets
 
+    if jetCollectionName == 'AntiKtVR30Rmax4Rmin02PV0TrackJets' :
+        # don't to anything on track jets
+        config = PreJetAnalysisConfig (containerName, jetCollection, postfix)
+        config.runOriginalObjectLink = False
+        config.runGhostMuonAssociation = False
+        seq.append (config)
+        return
+
     # interpret the jet collection
     collection_pattern = re.compile(
-        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
+        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO|Track)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
     match = collection_pattern.match(jetCollectionName)
     if not match:
         raise ValueError(
@@ -417,7 +431,7 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = '',
     jetInput = match.group(2)
 
 
-    config = PreJetAnalysisConfig (containerName, jetCollection, jetInput, postfix)
+    config = PreJetAnalysisConfig (containerName, jetCollection, postfix)
     config.runOriginalObjectLink = (btIndex != -1)
     config.runGhostMuonAssociation = runGhostMuonAssociation
     seq.append (config)
