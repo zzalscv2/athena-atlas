@@ -83,14 +83,11 @@ InDet::InDetNNScoringTool::InDetNNScoringTool(const std::string& t,
 
   //set values for scores
   m_summaryTypeScore[Trk::numberOfPixelHits]            =  20;
-  m_summaryTypeScore[Trk::numberOfPixelSharedHits]      = -10;  // NOT USED --- a shared hit is only half the weight
   m_summaryTypeScore[Trk::numberOfPixelHoles]           = -10;  // a hole is bad
   m_summaryTypeScore[Trk::numberOfInnermostPixelLayerHits]           =  10;  // addition for being b-layer
-  m_summaryTypeScore[Trk::numberOfInnermostPixelLayerSharedHits]     =  -5;  // NOT USED --- a shared hit is only half the weight
   m_summaryTypeScore[Trk::numberOfGangedPixels]         =  -5;  // decrease for being ganged
   m_summaryTypeScore[Trk::numberOfGangedFlaggedFakes]   = -10;  // decrease for being ganged fake
   m_summaryTypeScore[Trk::numberOfSCTHits]              =  10;  // half of a pixel, since only 1dim
-  m_summaryTypeScore[Trk::numberOfSCTSharedHits]        =  -5;  // NOT USED -- a shared hit is only half the weight
   m_summaryTypeScore[Trk::numberOfSCTHoles]             =  -5;  // a hole is bad !
   m_summaryTypeScore[Trk::numberOfSCTDoubleHoles]       = -15;  // a double hole is even worse !
   m_summaryTypeScore[Trk::numberOfTRTHits]              =   1;  // 10 straws ~ 1 SCT

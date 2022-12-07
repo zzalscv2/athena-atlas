@@ -103,24 +103,12 @@ void
 Trk::TrackSummaryTool::computeAndReplaceTrackSummary(
   const EventContext& ctx,
   Trk::Track& track,
-  const Trk::PRDtoTrackMap* pPrdToTrackMap,
   bool suppress_hole_search) const
 {
   track.setTrackSummary(createSummary(ctx,
                                       track,
-                                      pPrdToTrackMap,
                                       m_doHolesInDet & !suppress_hole_search,
                                       m_doHolesMuon & !suppress_hole_search));
-}
-/*
- * method that creates a new summary from const track.
- * It does not modify the const Track
- */
-std::unique_ptr<Trk::TrackSummary>
-Trk::TrackSummaryTool::summary(const EventContext& ctx,
-                               const Track& track) const
-{
-  return createSummary(ctx, track, nullptr, m_doHolesInDet, m_doHolesMuon);
 }
 
 /*
@@ -129,11 +117,10 @@ Trk::TrackSummaryTool::summary(const EventContext& ctx,
  */
 std::unique_ptr<Trk::TrackSummary>
 Trk::TrackSummaryTool::summary(const EventContext& ctx,
-                               const Track& track,
-                               const Trk::PRDtoTrackMap* pPrdToTrackMap) const
+                               const Track& track) const
 {
   return createSummary(
-    ctx, track, pPrdToTrackMap, m_doHolesInDet, m_doHolesMuon);
+    ctx, track, m_doHolesInDet, m_doHolesMuon);
 }
 
 /*
@@ -145,21 +132,7 @@ std::unique_ptr<Trk::TrackSummary>
 Trk::TrackSummaryTool::summaryNoHoleSearch(const EventContext& ctx,
                                            const Track& track) const
 {
-  return createSummary(ctx, track, nullptr, false, false);
-}
-
-/*
- * method that creates a new summary from const track.
- * It does not modify the const Track
- * It never does a search for holes
- */
-std::unique_ptr<Trk::TrackSummary>
-Trk::TrackSummaryTool::summaryNoHoleSearch(
-  const EventContext& ctx,
-  const Track& track,
-  const Trk::PRDtoTrackMap* pPrdToTrackMap) const
-{
-  return createSummary(ctx, track, pPrdToTrackMap, false, false);
+  return createSummary(ctx, track, false, false);
 }
 
 /*
@@ -169,7 +142,6 @@ Trk::TrackSummaryTool::summaryNoHoleSearch(
 std::unique_ptr<Trk::TrackSummary>
 Trk::TrackSummaryTool::createSummary(const EventContext& ctx,
                                      const Track& track,
-                                     const Trk::PRDtoTrackMap* pPrdToTrackMap,
                                      bool doHolesInDet,
                                      bool doHolesMuon) const
 {
@@ -181,7 +153,7 @@ Trk::TrackSummaryTool::createSummary(const EventContext& ctx,
     ts = std::make_unique<Trk::TrackSummary>();
   }
   // fill the summary
-  fillSummary(ctx, *ts, track, pPrdToTrackMap, doHolesInDet, doHolesMuon);
+  fillSummary(ctx, *ts, track, doHolesInDet, doHolesMuon);
   return ts;
 }
 
@@ -195,7 +167,6 @@ void
 Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
                                    Trk::TrackSummary& ts,
                                    const Trk::Track& track,
-                                   const Trk::PRDtoTrackMap* prdToTrackMap,
                                    bool doHolesInDet,
                                    bool doHolesMuon) const
 {
@@ -208,7 +179,7 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
   if (!m_idTool.empty()) {
     if (m_pixelExists) {
       // Pixel counters set to 0
-      constexpr size_t numberOfPixelCounters{ 14 };
+      constexpr size_t numberOfPixelCounters{ 11 };
       constexpr std::array<size_t, numberOfPixelCounters> atPixelIndices{
         numberOfContribPixelLayers,
         numberOfInnermostPixelLayerHits,
@@ -220,17 +191,14 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
         numberOfGangedPixels,
         numberOfGangedFlaggedFakes,
         numberOfPixelSpoiltHits,
-        numberOfGangedFlaggedFakes,
-        numberOfPixelSplitHits,
-        numberOfInnermostLayerSplitHits,
-        numberOfNextToInnermostLayerSplitHits
+        numberOfGangedFlaggedFakes
       };
       setTheseElements(information, atPixelIndices, toZero);
       information[Trk::numberOfDBMHits] = 0;
 
     }
     // SCT and TRT counters set to 0
-    constexpr size_t numberOfSctOrTrtCounters{ 11 };
+    constexpr size_t numberOfSctOrTrtCounters{ 10 };
     constexpr std::array<size_t, numberOfSctOrTrtCounters> atSctOrTrtIndices{
       numberOfSCTHits,
       numberOfSCTSpoiltHits,
@@ -241,23 +209,11 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
       numberOfTRTHighThresholdHitsTotal,
       numberOfTRTOutliers,
       numberOfTRTHighThresholdOutliers,
-      numberOfTRTTubeHits,
-      numberOfTRTSharedHits
+      numberOfTRTTubeHits
     };
     setTheseElements(information, atSctOrTrtIndices, toZero);
   }
 
-  if (m_doSharedHits) {
-    // Shared hits counters set to 0
-    information[numberOfSCTSharedHits] = 0;
-    if (m_pixelExists) {
-      setTheseElements(information,
-                       { numberOfInnermostPixelLayerSharedHits,
-                         numberOfNextToInnermostPixelLayerSharedHits,
-                         numberOfPixelSharedHits },
-                       toZero);
-    }
-  }
   if (!m_muonTool.empty()) {
     // Muon counters set to 0
     constexpr size_t numberOfMuonRelatedCounters{ 15 };
@@ -287,7 +243,6 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
     information[Trk::numberOfOutliersOnTrack] = 0;
     processTrackStates(ctx,
                        track,
-                       prdToTrackMap,
                        track.trackStateOnSurfaces(),
                        information,
                        hitPattern,
@@ -326,27 +281,12 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
 }
 
 /*
- * Method to update the shared hits count in the summary
- */
-void
-Trk::TrackSummaryTool::updateSharedHitCount(
-  const Track& track,
-  const Trk::PRDtoTrackMap* prdToTrackMap,
-  TrackSummary& summary) const
-{
-  if (m_idTool) {
-    m_idTool->updateSharedHitCount(track, prdToTrackMap, summary);
-  }
-}
-
-/*
  * Internal helper processing the Track State on Surfaces
  */
 void
 Trk::TrackSummaryTool::processTrackStates(
   const EventContext& ctx,
   const Track& track,
-  const Trk::PRDtoTrackMap* prdToTrackMap,
   const DataVector<const TrackStateOnSurface>* tsos,
   std::vector<int>& information,
   std::bitset<numberOfDetectorTypes>& hitPattern,
@@ -375,7 +315,7 @@ Trk::TrackSummaryTool::processTrackStates(
           ++information[Trk::numberOfOutliersOnTrack]; // increment outlier
                                                        // counter
         processMeasurement(
-          ctx, track, prdToTrackMap, measurement, *it, information, hitPattern);
+          ctx, track, measurement, *it, information, hitPattern);
       } // if have measurement pointer
     }   // if type measurement, scatterer or outlier
 
@@ -435,7 +375,6 @@ void
 Trk::TrackSummaryTool::processMeasurement(
   const EventContext& ctx,
   const Track& track,
-  const Trk::PRDtoTrackMap* prdToTrackMap,
   const Trk::MeasurementBase* meas,
   const Trk::TrackStateOnSurface* tsos,
   std::vector<int>& information,
@@ -453,7 +392,7 @@ Trk::TrackSummaryTool::processMeasurement(
       ATH_MSG_WARNING("Cannot find tool to match ROT. Skipping.");
     } else {
       tool->analyse(
-        ctx, track, prdToTrackMap, rot, tsos, information, hitPattern);
+        ctx, track, rot, tsos, information, hitPattern);
     }
   } else {
     // check if the measurement type is CompetingRIOsOnTrack
@@ -470,7 +409,7 @@ Trk::TrackSummaryTool::processMeasurement(
         ATH_MSG_WARNING("Cannot find tool to match cROT. Skipping.");
       } else {
         tool->analyse(
-          ctx, track, prdToTrackMap, compROT, tsos, information, hitPattern);
+          ctx, track, compROT, tsos, information, hitPattern);
       }
     }
   }

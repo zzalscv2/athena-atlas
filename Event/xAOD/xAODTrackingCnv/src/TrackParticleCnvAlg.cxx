@@ -307,9 +307,6 @@ TrackParticleCnvAlg::convert(
 	  ntrt = ts->get(Trk::numberOfTRTHits);
 	  nscth= ts->get(Trk::numberOfSCTHoles);
 	  npixh= ts->get(Trk::numberOfPixelHoles);
-	  npixshim = ts->get(Trk::numberOfInnermostPixelLayerSharedHits);
-	  npixsplit= ts->get(Trk::numberOfPixelSplitHits);
-	  
 	}
       }
       msg() << MSG::DEBUG << "REGTEST: " << std::setw(5) << trackCounter
@@ -319,7 +316,6 @@ TrackParticleCnvAlg::convert(
 	    << "  d0:  " << particle->d0()
 	    << "  z0:  " << particle->z0()
 	    << "\t" << npix << "/" << nsct << "/" << ntrt << "/holes/" << npixh << "/" << nscth
-	    << "/sharedIM/" << npixshim << "/pixsplit/" << npixsplit 
 	    << endmsg;
 
     }

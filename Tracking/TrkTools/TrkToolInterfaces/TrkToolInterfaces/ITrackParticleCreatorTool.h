@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,7 +30,6 @@ class BeamSpotData;
 namespace Trk {
 class Track;
 class VxCandidate;
-class PRDtoTrackMap;
 
 /** @brief Interface for constructing TrackParticles from complete tracks.
 
@@ -70,7 +69,6 @@ public:
      particle will be added to store which takes ownership
       @param xAOD::Vertex Pointer to a  vxCandidate . Ownership is not taken
       @param prtOrigin
-      @param prd_to_track_map an optional PRD-to-track map to compute shared
      hits.
   */
   virtual xAOD::TrackParticle* createParticle(
@@ -78,22 +76,19 @@ public:
     const Trk::Track& track,
     xAOD::TrackParticleContainer* container = nullptr,
     const xAOD::Vertex* vxCandidate = nullptr,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
-    const Trk::PRDtoTrackMap* prd_to_track_map = nullptr) const = 0;
+    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const = 0;
 
   xAOD::TrackParticle* createParticle(
     const Trk::Track& track,
     xAOD::TrackParticleContainer* container = nullptr,
     const xAOD::Vertex* vxCandidate = nullptr,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
-    const Trk::PRDtoTrackMap* prd_to_track_map = nullptr) const
+    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const
   {
     return createParticle(Gaudi::Hive::currentContext(),
                           track,
                           container,
                           vxCandidate,
-                          prtOrigin,
-                          prd_to_track_map);
+                          prtOrigin);
   }
 
   /** Method to construct a TrackParticle from a passed Track.
@@ -102,30 +97,25 @@ public:
      particle will be added to store which takes ownership
       @param xAOD::Vertex Pointer to a  vxCandidate.
       @param prtOrigin
-      @param prd_to_track_map an optional PRD-to-track map to compute shared
-     hits.
   */
   virtual xAOD::TrackParticle* createParticle(
     const EventContext& ctx,
     const ElementLink<TrackCollection>& trackLink,
     xAOD::TrackParticleContainer* container = nullptr,
     const xAOD::Vertex* vxCandidate = nullptr,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
-    const Trk::PRDtoTrackMap* prd_to_track_map = nullptr) const = 0;
+    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const = 0;
 
   xAOD::TrackParticle* createParticle(
     const ElementLink<TrackCollection>& trackLink,
     xAOD::TrackParticleContainer* container = nullptr,
     const xAOD::Vertex* vxCandidate = nullptr,
-    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
-    const Trk::PRDtoTrackMap* prd_to_track_map = nullptr) const
+    xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis) const
   {
     return createParticle(Gaudi::Hive::currentContext(),
                           trackLink,
                           container,
                           vxCandidate,
-                          prtOrigin,
-                          prd_to_track_map);
+                          prtOrigin);
   }
 
   /** create a xAOD::TrackParticle out of constituents (please don't use this
@@ -139,8 +129,7 @@ public:
     const std::vector<const Trk::TrackParameters*>& parameters,
     const std::vector<xAOD::ParameterPosition>& positions,
     xAOD::ParticleHypothesis prtOrigin = xAOD::noHypothesis,
-    xAOD::TrackParticleContainer* container = nullptr,
-    bool addInfoIfMuon = false) const = 0;
+    xAOD::TrackParticleContainer* container = nullptr) const = 0;
 
   xAOD::TrackParticle* createParticle(
     const Perigee* perigee,

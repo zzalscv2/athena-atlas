@@ -96,14 +96,10 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfContribPixelLayers) << "\n";
   out << " * Number of Innermost Pixel layer hits        : "
       << trackSum.get(numberOfInnermostPixelLayerHits) << "\n";
-  out << " * Number of Innermost Pixel layer shared hits : "
-      << trackSum.get(numberOfInnermostPixelLayerSharedHits) << "\n";
   out << " * Number of Innermost Pixel layer outliers    : "
       << trackSum.get(numberOfInnermostPixelLayerOutliers) << "\n";
   out << " * Number of Next-To-Innermost Pixel layer hits        : "
       << trackSum.get(numberOfNextToInnermostPixelLayerHits) << "\n";
-  out << " * Number of Next-To-Innermost Pixel layer shared hits : "
-      << trackSum.get(numberOfNextToInnermostPixelLayerSharedHits) << "\n";
   out << " * Number of Next-To-Innermost Pixel layer outliers    : "
       << trackSum.get(numberOfNextToInnermostPixelLayerOutliers) << "\n";
   out << " * Number of pixel hits          : "
@@ -114,8 +110,6 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfPixelSpoiltHits) << "\n";
   out << " * Number of pixel holes         : "
       << trackSum.get(numberOfPixelHoles) << "\n";
-  out << " * Number of pixel shared hits   : "
-      << trackSum.get(numberOfPixelSharedHits) << "\n";
   out << " * Number of GangedPixels        : "
       << trackSum.get(numberOfGangedPixels) << "\n";
   out << " * Number of GangedFlaggedFakes  : "
@@ -130,8 +124,6 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << "\n";
   out << " * Number of SCT double Holes    : "
       << trackSum.get(numberOfSCTDoubleHoles) << "\n";
-  out << " * Number of SCT shared hits     : "
-      << trackSum.get(numberOfSCTSharedHits) << "\n";
   out << " * Number of dead SCT sensors    : "
       << trackSum.get(numberOfSCTDeadSensors) << "\n";
   out << " * Number of spoilt SCT hits     : "
@@ -152,8 +144,6 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << "\n";
   out << " * Number of TRT tube hits       : "
       << trackSum.get(numberOfTRTTubeHits) << "\n";
-  out << " * Number of TRT Shared hits     : "
-      << trackSum.get(numberOfTRTSharedHits) << "\n";
   out << " * Number of dead TRT straws     : "
       << trackSum.get(numberOfTRTDeadStraws) << "\n";
   out << " * Number of MDT hits            : " << trackSum.get(numberOfMdtHits)

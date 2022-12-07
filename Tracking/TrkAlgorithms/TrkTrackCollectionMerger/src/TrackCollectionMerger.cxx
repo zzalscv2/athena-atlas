@@ -19,7 +19,6 @@
 Trk::TrackCollectionMerger::TrackCollectionMerger(const std::string& name,
                                                   ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_updateSharedHits(true)
   , m_updateAdditionalInfo(false)
   , m_doTrackOverlay(false)
 {
@@ -27,7 +26,6 @@ Trk::TrackCollectionMerger::TrackCollectionMerger(const std::string& name,
   declareProperty("TracksLocation", m_tracklocation);
   declareProperty("OutputTracksLocation", m_outtracklocation);
   declareProperty("SummaryTool", m_trkSummaryTool);
-  declareProperty("UpdateSharedHits", m_updateSharedHits);
   declareProperty("UpdateAdditionalInfo", m_updateAdditionalInfo);
   declareProperty("DoTrackOverlay", m_doTrackOverlay);
 }
@@ -87,25 +85,17 @@ Trk::TrackCollectionMerger::execute(){
   ATH_MSG_DEBUG("Size of combined tracks " << outputCol->size());
   if (m_trkSummaryTool) {
     ATH_MSG_DEBUG("Update summaries");
-    // now loop over all tracks and update summaries with new shared hit counts
-    const bool createTrackSummary = not(m_updateAdditionalInfo or m_updateSharedHits);
+    // now loop over all tracks
     for (Trk::Track const* trk : *outputCol) {
       // Here we need to const cast the track
       // as we create or update summaries.
       Trk::Track* mutableTrack = const_cast<Trk::Track*>(trk);
-      if (createTrackSummary) {
+      if (not m_updateAdditionalInfo) {
         m_trkSummaryTool->computeAndReplaceTrackSummary(
           *mutableTrack,
-          pPrdToTrackMap.get(),
           false /* DO NOT suppress hole search*/);
-      } else {
-        if (m_updateAdditionalInfo) {
+      } else if (m_updateAdditionalInfo) {
           m_trkSummaryTool->updateAdditionalInfo(*mutableTrack);
-        }
-        if (m_updateSharedHits) {
-          m_trkSummaryTool->updateSharedHitCount(*mutableTrack,
-                                                 pPrdToTrackMap.get());
-        }
       }
     }
   } else {

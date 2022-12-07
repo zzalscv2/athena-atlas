@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AmbiguityProcessorBase_h
@@ -92,7 +92,6 @@ namespace Trk {
     void
     addTrack(Trk::Track* in_track, const bool fitted,
              TrackScoreMap &trackScoreTrackMap,
-             Trk::PRDtoTrackMap &prdToTrackMap,
              std::vector<std::unique_ptr<const Trk::Track> >& trackDustbin,
              Counter &stat,
              int parentTrackId) const;

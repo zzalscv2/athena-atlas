@@ -225,7 +225,7 @@ Trk::SimpleAmbiguityProcessorTool::solveTracks(TrackScoreMap& trackScoreTrackMap
       ATH_MSG_DEBUG ("Good track, but need to fit this track first, score, add it into map again and retry !");
       auto *pRefittedTrack = refitTrack(atrack.track(), prdToTrackMap, stat, -1, -1);
       if(pRefittedTrack) {
-         addTrack( pRefittedTrack, true , trackScoreTrackMap, prdToTrackMap, trackDustbin, stat, -1);    
+         addTrack( pRefittedTrack, true , trackScoreTrackMap, trackDustbin, stat, -1);
       }
       if (atrack.newTrack()) {
         trackDustbin.emplace_back(atrack.release());
@@ -242,7 +242,7 @@ Trk::SimpleAmbiguityProcessorTool::solveTracks(TrackScoreMap& trackScoreTrackMap
       // statistic
       stat.incrementCounterByRegion(CounterIndex::kNsubTrack,cleanedTrack.get());
       // track needs fitting !
-      addTrack( cleanedTrack.release(), false, trackScoreTrackMap, prdToTrackMap, trackDustbin, stat, -1);
+      addTrack( cleanedTrack.release(), false, trackScoreTrackMap, trackDustbin, stat, -1);
     } else {
       // track should be discarded
       ATH_MSG_DEBUG ("Track "<< atrack.track() << " is excluded, no subtrack, reject");

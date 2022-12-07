@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ namespace MuonCombined {
                 std::unique_ptr<Trk::TrackSummary> msTrackSummary;
                 // If reading from an ESD, the track will not have a track summary yet
                 if (!msTrack.trackSummary()) {
-                    msTrackSummary = m_trackSummaryTool->summary(msTrack, nullptr);
+                    msTrackSummary = m_trackSummaryTool->summary(msTrack);
                     msMuonTrackSummary = msTrackSummary->muonTrackSummary();
                 } else
                     msMuonTrackSummary = msTrack.trackSummary()->muonTrackSummary();

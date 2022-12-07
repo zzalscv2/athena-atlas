@@ -13,36 +13,35 @@
 ***************************************************************************/
 #include "TrkParticleCreator/TrackParticleCreatorTool.h"
 #include "TrkParticleCreator/DetailedHitInfo.h"
+
 // forward declares
 #include "Particle/TrackParticle.h"
 #include "TrkTrack/Track.h"
 #include "VxVertex/VxCandidate.h"
+
 // normal includes
 #include "AthContainers/DataVector.h"
-#include "TrkEventPrimitives/CurvilinearUVT.h"
-#include "TrkEventPrimitives/FitQuality.h"
-#include "TrkEventPrimitives/JacobianLocalToCurvilinear.h"
-#include "TrkParameters/TrackParameters.h"
-#include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
-#include "TrkSurfaces/PerigeeSurface.h"
-#include "TrkTrack/TrackStateOnSurface.h"
-#include "TrkTrackSummary/TrackSummary.h"
-#include "TrkGeometry/TrackingVolume.h"
 
+#include "AtlasDetDescr/AtlasDetectorID.h"
+#include "EventPrimitives/EventPrimitivesToStringConverter.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "IdDictDetDescr/IdDictManager.h"
 
 #include "InDetPrepRawData/PixelCluster.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SiCluster.h"
+#include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SiClusterOnTrack.h"
 #include "InDetRIO_OnTrack/TRT_DriftCircleOnTrack.h"
 
-#include "AtlasDetDescr/AtlasDetectorID.h"
-#include "EventPrimitives/EventPrimitivesToStringConverter.h"
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/TrackParticleContainer.h"
-#include "xAODTracking/TrackingPrimitives.h"
+#include "TrkEventPrimitives/CurvilinearUVT.h"
+#include "TrkEventPrimitives/FitQuality.h"
+#include "TrkEventPrimitives/JacobianLocalToCurvilinear.h"
+#include "TrkGeometry/TrackingVolume.h"
+#include "TrkPseudoMeasurementOnTrack/PseudoMeasurementOnTrack.h"
+#include "TrkSurfaces/PerigeeSurface.h"
+#include "TrkTrack/TrackStateOnSurface.h"
+
 #include "xAODTracking/Vertex.h"
 
 #include <algorithm>
@@ -113,6 +112,8 @@ TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
   : base_class(t, n, p)
   , m_detID(nullptr)
   , m_pixelID(nullptr)
+  , m_sctID(nullptr)
+  , m_trtID(nullptr)
   , m_copyExtraSummaryName{ "eProbabilityComb",  "eProbabilityHT", "eProbabilityNN",
                             "TRTTrackOccupancy", "TRTdEdx",        "TRTdEdxUsedHits" }
   , m_copyEProbabilities{}
@@ -127,6 +128,9 @@ TrackParticleCreatorTool::TrackParticleCreatorTool(const std::string& t,
 {
   declareProperty("DoITk" , m_doITk = false);
   declareProperty("ComputeAdditionalInfo", m_computeAdditionalInfo);
+  declareProperty("DoSharedSiHits", m_doSharedSiHits = false);
+  declareProperty("DoSharedTRTHits", m_doSharedTRTHits = false);
+  declareProperty("RunningTIDE_Ambi", m_runningTIDE_Ambi = false);
   declareProperty("KeepParameters", m_keepParameters);
   declareProperty("KeepFirstParameters", m_keepFirstParameters);
   declareProperty("KeepAllPerigee", m_keepAllPerigee);
@@ -171,6 +175,16 @@ TrackParticleCreatorTool::initialize()
 
   if (detStore()->retrieve(m_pixelID, "PixelID").isFailure()) {
     ATH_MSG_FATAL("Could not get PixelID ");
+    return StatusCode::FAILURE;
+  }
+
+  if (detStore()->retrieve(m_sctID, "SCT_ID").isFailure()) {
+    ATH_MSG_FATAL("Could not get SCT_ID ");
+    return StatusCode::FAILURE;
+  }
+
+  if (detStore()->retrieve(m_trtID, "TRT_ID").isFailure()) {
+    ATH_MSG_FATAL("Could not get TRT_ID ");
     return StatusCode::FAILURE;
   }
 
@@ -255,6 +269,11 @@ TrackParticleCreatorTool::initialize()
 
   ATH_CHECK(  m_eProbabilityTool.retrieve( DisableTool{m_eProbabilityTool.empty()} ) );
   ATH_CHECK(  m_dedxtool.retrieve( DisableTool{m_dedxtool.empty()} ) );
+  ATH_CHECK(  m_testPixelLayerTool.retrieve( DisableTool{m_testPixelLayerTool.empty()} ) );
+
+  ATH_CHECK(m_assoMapContainer.initialize(!m_assoMapContainer.key().empty()));
+  ATH_CHECK(m_clusterSplitProbContainer.initialize(m_runningTIDE_Ambi &&
+						   !m_clusterSplitProbContainer.key().empty()));
 
   ATH_MSG_VERBOSE(" initialize successful.");
   return sc;
@@ -265,8 +284,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
                                          const Trk::Track& track,
                                          xAOD::TrackParticleContainer* container,
                                          const xAOD::Vertex* vxCandidate,
-                                         xAOD::ParticleHypothesis prtOrigin,
-                                         const Trk::PRDtoTrackMap* prd_to_track_map) const
+                                         xAOD::ParticleHypothesis prtOrigin) const
 {
   const Trk::Perigee* aPer = nullptr;
   const Trk::TrackParameters* parsToBeDeleted = nullptr;
@@ -331,7 +349,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
   const Trk::TrackSummary* summary = track.trackSummary();
   if (m_trackSummaryTool.get() != nullptr) {
     if (!track.trackSummary()) {
-      updated_summary = m_trackSummaryTool->summary(ctx, track, prd_to_track_map);
+      updated_summary = m_trackSummaryTool->summary(ctx, track);
       summary = updated_summary.get();
     }
   } else {
@@ -650,12 +668,11 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
                                          const ElementLink<TrackCollection>& trackLink,
                                          xAOD::TrackParticleContainer* container,
                                          const xAOD::Vertex* vxCandidate,
-                                         xAOD::ParticleHypothesis prtOrigin,
-                                         const Trk::PRDtoTrackMap* prd_to_track_map) const
+                                         xAOD::ParticleHypothesis prtOrigin) const
 {
 
   xAOD::TrackParticle* trackparticle =
-    createParticle(ctx, **trackLink, container, vxCandidate, prtOrigin, prd_to_track_map);
+    createParticle(ctx, **trackLink, container, vxCandidate, prtOrigin);
 
   if (!trackparticle) {
     ATH_MSG_WARNING("WARNING: Problem creating TrackParticle - Returning 0");
@@ -676,9 +693,8 @@ inline xAOD::TrackParticle* TrackParticleCreatorTool::createParticle(
                       const std::vector<const Trk::TrackParameters*>& parameters,
                       const std::vector<xAOD::ParameterPosition>& positions,
                       xAOD::ParticleHypothesis prtOrigin,
-                      xAOD::TrackParticleContainer* container,
-		      bool addInfoIfMuon) const {
-   return createParticle(ctx,perigee, fq, trackInfo, summary, parameters,  positions, prtOrigin, container, nullptr, addInfoIfMuon);
+                      xAOD::TrackParticleContainer* container) const {
+   return createParticle(ctx,perigee, fq, trackInfo, summary, parameters,  positions, prtOrigin, container, nullptr);
 }
 
 xAOD::TrackParticle*
@@ -691,8 +707,7 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
                                          const std::vector<xAOD::ParameterPosition>& positions,
                                          xAOD::ParticleHypothesis prtOrigin,
                                          xAOD::TrackParticleContainer* container,
-                                         const Trk::Track *track,
-					 bool addInfoIfMuon) const
+                                         const Trk::Track *track) const
 {
 
   xAOD::TrackParticle* trackparticle = new xAOD::TrackParticle;
@@ -729,13 +744,9 @@ TrackParticleCreatorTool::createParticle(const EventContext& ctx,
     if(m_doITk) addDetailedHitInformation(track->trackStateOnSurfaces(), *trackparticle);
   }
 
-  if (m_computeAdditionalInfo) {
-    if(prtOrigin==xAOD::muon){
-      if(addInfoIfMuon && perigee) addExpectedHitInformation(perigee, *trackparticle);
-    }
-    else if(track){
-      addExpectedHitInformation(track->perigeeParameters(), *trackparticle);
-    }
+  if (m_computeAdditionalInfo && track!=nullptr) {
+    addExpectedHitInformation(track->perigeeParameters(), *trackparticle);
+    if(m_doSharedSiHits || m_doSharedTRTHits) addSharedHitInformation(track, *trackparticle);
   }
 
   const auto* beamspot = CacheBeamSpotData(ctx);
@@ -897,8 +908,8 @@ TrackParticleCreatorTool::setTrackSummary(xAOD::TrackParticle& tp, const TrackSu
   constexpr unsigned int xAodReferenceEnum1 = static_cast<unsigned int>(xAOD::numberOfTRTXenonHits);
   constexpr unsigned int TrkReferenceEnum1 = static_cast<unsigned int>(Trk::numberOfTRTXenonHits);
   static_assert(xAodReferenceEnum1 == TrkReferenceEnum1, "Trk and xAOD enums differ in their indices");
-  constexpr unsigned int xAodReferenceEnum2 = static_cast<unsigned int>(xAOD::numberOfTRTSharedHits);
-  constexpr unsigned int TrkReferenceEnum2 = static_cast<unsigned int>(Trk::numberOfTRTSharedHits);
+  constexpr unsigned int xAodReferenceEnum2 = static_cast<unsigned int>(xAOD::numberOfTRTTubeHits);
+  constexpr unsigned int TrkReferenceEnum2 = static_cast<unsigned int>(Trk::numberOfTRTTubeHits);
   static_assert(xAodReferenceEnum2 == TrkReferenceEnum2, "Trk and xAOD enums differ in their indices");
 
   for (unsigned int i = 0; i < Trk::numberOfTrackSummaryTypes; i++) {
@@ -1062,51 +1073,163 @@ void
 TrackParticleCreatorTool::addExpectedHitInformation(const Perigee *perigee, xAOD::TrackParticle& tp) const
 {
 
-  if(not m_testPixelLayerTool.empty()){
+  if(m_testPixelLayerTool.empty() || perigee==nullptr) return;
 
-    uint8_t zero = static_cast<uint8_t>(0);
-    uint8_t nContribPixLayers, nInPixHits, nNextInPixHits;
-    if(!tp.summaryValue(nContribPixLayers, xAOD::numberOfContribPixelLayers)){
-      nContribPixLayers = zero;
-    }
-    if(nContribPixLayers==0){
-      ATH_MSG_DEBUG("No pixels on track, so wo do not expect hit in inner layers");
-      tp.setSummaryValue(zero, xAOD::expectInnermostPixelLayerHit);
-      tp.setSummaryValue(zero, xAOD::expectNextToInnermostPixelLayerHit);
-    }
-
-    else {
-
-      // Innermost pixel layer
-      if(!tp.summaryValue(nInPixHits, xAOD::numberOfInnermostPixelLayerHits)){
-	nInPixHits = zero;
-      }
-      if(nInPixHits>0){
-        ATH_MSG_DEBUG("Innermost pixel Layer hit on track, so we expect an innermost pixel layer hit");
-	uint8_t one = static_cast<uint8_t>(1);
-	tp.setSummaryValue(one, xAOD::expectInnermostPixelLayerHit);
-      } else {
-	uint8_t expectHit = static_cast<uint8_t>(m_testPixelLayerTool->expectHitInInnermostPixelLayer(perigee));
-	tp.setSummaryValue(expectHit, xAOD::expectInnermostPixelLayerHit);
-      }
-
-      // Next-to-innermost pixel layer
-      if(!tp.summaryValue(nNextInPixHits, xAOD::numberOfNextToInnermostPixelLayerHits)){
-	nNextInPixHits = zero;
-      }
-      if(nNextInPixHits>0){
-        ATH_MSG_DEBUG("Next-to-innermost pixel Layer hit on track, so we expect an next-to-innermost pixel layer hit");
-	uint8_t one = static_cast<uint8_t>(1);
-	tp.setSummaryValue(one, xAOD::expectNextToInnermostPixelLayerHit);
-      } else {
-	uint8_t expectHit = static_cast<uint8_t>(m_testPixelLayerTool->expectHitInNextToInnermostPixelLayer(perigee));
-	tp.setSummaryValue(expectHit, xAOD::expectNextToInnermostPixelLayerHit);
-      }
-
-    } // end else if nContribPixLayers>0
+  uint8_t zero = static_cast<uint8_t>(0);
+  uint8_t nContribPixLayers, nInPixHits, nNextInPixHits;
+  if(!tp.summaryValue(nContribPixLayers, xAOD::numberOfContribPixelLayers)){
+    nContribPixLayers = zero;
+  }
+  if(nContribPixLayers==0){
+    ATH_MSG_DEBUG("No pixels on track, so wo do not expect hit in inner layers");
+    tp.setSummaryValue(zero, xAOD::expectInnermostPixelLayerHit);
+    tp.setSummaryValue(zero, xAOD::expectNextToInnermostPixelLayerHit);
   }
 
+  else {
+
+    // Innermost pixel layer
+    if(!tp.summaryValue(nInPixHits, xAOD::numberOfInnermostPixelLayerHits)){
+      nInPixHits = zero;
+    }
+    if(nInPixHits>0){
+      ATH_MSG_DEBUG("Innermost pixel Layer hit on track, so we expect an innermost pixel layer hit");
+      uint8_t one = static_cast<uint8_t>(1);
+      tp.setSummaryValue(one, xAOD::expectInnermostPixelLayerHit);
+    } else {
+      uint8_t expectHit = static_cast<uint8_t>(m_testPixelLayerTool->expectHitInInnermostPixelLayer(perigee));
+      tp.setSummaryValue(expectHit, xAOD::expectInnermostPixelLayerHit);
+    }
+
+    // Next-to-innermost pixel layer
+    if(!tp.summaryValue(nNextInPixHits, xAOD::numberOfNextToInnermostPixelLayerHits)){
+      nNextInPixHits = zero;
+    }
+    if(nNextInPixHits>0){
+      ATH_MSG_DEBUG("Next-to-innermost pixel Layer hit on track, so we expect an next-to-innermost pixel layer hit");
+      uint8_t one = static_cast<uint8_t>(1);
+      tp.setSummaryValue(one, xAOD::expectNextToInnermostPixelLayerHit);
+    } else {
+      uint8_t expectHit = static_cast<uint8_t>(m_testPixelLayerTool->expectHitInNextToInnermostPixelLayer(perigee));
+      tp.setSummaryValue(expectHit, xAOD::expectNextToInnermostPixelLayerHit);
+    }
+
+  } // end else if nContribPixLayers>0
+
 }
+
+
+void
+TrackParticleCreatorTool::addSharedHitInformation(const Track *track, xAOD::TrackParticle& tp) const
+{
+
+  uint8_t nPixSharedHits = 0, nInPixSharedHits = 0, nNInPixSharedHits = 0, nSCTSharedHits = 0, nTRTSharedHits = 0;
+  uint8_t nPixSplitHits = 0, nInPixSplitHits = 0, nNInPixSplitHits = 0;
+
+  const DataVector<const Trk::MeasurementBase>* measurements = track->measurementsOnTrack();
+  if(!measurements){
+    ATH_MSG_DEBUG("No measurement on track");
+    return;
+  }
+
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  SG::ReadHandle<Trk::PRDtoTrackMap> prd_to_track_map(m_assoMapContainer, ctx);
+
+  for(const auto* const ms : *measurements){
+    // check if it's a rot
+    const Trk::RIO_OnTrack* rot = nullptr;
+    if(ms->type(Trk::MeasurementBaseType::RIO_OnTrack)){
+      rot = static_cast<const Trk::RIO_OnTrack*>(ms);
+    }
+    if(!rot){
+      ATH_MSG_DEBUG("Cannot cast measurement to RIO_OnTrack");
+      continue;
+    }
+
+    const Identifier& id = rot->identify();
+
+    if(m_doSharedSiHits && m_pixelID->is_pixel(id)){
+      // check if split, when running TIDE
+      bool hitIsSplit(false);
+      if(m_runningTIDE_Ambi){
+	const InDet::PixelClusterOnTrack* pix = nullptr;
+	if(rot->rioType(Trk::RIO_OnTrackType::PixelCluster)){
+	  pix = static_cast<const InDet::PixelClusterOnTrack*>(rot);
+	}
+	if(pix){
+	  const InDet::PixelCluster* pixPrd = pix->prepRawData();
+	  const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
+	    splitProb = getClusterSplittingProbability(pixPrd);
+	  if(pixPrd and splitProb.isSplit()){
+	    ATH_MSG_DEBUG("split Pixel hit found");
+	    hitIsSplit = true;
+	    nPixSplitHits++;
+	    if(m_pixelID->is_barrel(id)){
+	      if(m_pixelID->layer_disk(id) == 0)      nInPixSplitHits++;
+	      else if(m_pixelID->layer_disk(id) == 1) nNInPixSplitHits++;
+	    }
+	  }
+	}
+      }
+
+      // check if shared
+      // if we are running the TIDE ambi don't count split hits as shared
+      if(!hitIsSplit){
+	if(prd_to_track_map->isShared(*(rot->prepRawData()))){
+	  ATH_MSG_DEBUG("shared Pixel hit found");
+	  nPixSharedHits++;
+	  if(m_pixelID->is_barrel(id)){
+	    if(m_pixelID->layer_disk(id) == 0)      nInPixSharedHits++;
+	    else if(m_pixelID->layer_disk(id) == 1) nNInPixSharedHits++;
+	  }
+	}
+      }
+
+    } // end pixel
+
+    else if(m_doSharedSiHits && m_sctID->is_sct(id)){
+      if(prd_to_track_map->isShared(*(rot->prepRawData()))){
+	ATH_MSG_DEBUG("shared SCT hit found");
+	nSCTSharedHits++;
+      }
+    }
+
+    else if(m_doSharedTRTHits && m_trtID->is_trt(id)){
+      if(prd_to_track_map->isShared(*(rot->prepRawData()))){
+	ATH_MSG_DEBUG("shared TRT hit found");
+	nTRTSharedHits++;
+      }
+    }
+
+  }
+
+  tp.setSummaryValue(nPixSplitHits,     xAOD::numberOfPixelSplitHits);
+  tp.setSummaryValue(nInPixSplitHits,   xAOD::numberOfInnermostPixelLayerSplitHits);
+  tp.setSummaryValue(nNInPixSplitHits,  xAOD::numberOfNextToInnermostPixelLayerSplitHits);
+
+  tp.setSummaryValue(nPixSharedHits,    xAOD::numberOfPixelSharedHits);
+  tp.setSummaryValue(nInPixSharedHits,  xAOD::numberOfInnermostPixelLayerSharedHits);
+  tp.setSummaryValue(nNInPixSharedHits, xAOD::numberOfNextToInnermostPixelLayerSharedHits);
+  tp.setSummaryValue(nSCTSharedHits,    xAOD::numberOfSCTSharedHits);
+  tp.setSummaryValue(nTRTSharedHits,    xAOD::numberOfTRTSharedHits);
+
+}
+
+const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
+TrackParticleCreatorTool::getClusterSplittingProbability(const InDet::PixelCluster* pix) const
+{
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  if (!pix || m_clusterSplitProbContainer.key().empty()) {
+    return Trk::ClusterSplitProbabilityContainer::getNoSplitProbability();
+  }
+  SG::ReadHandle<Trk::ClusterSplitProbabilityContainer> splitProbContainer(m_clusterSplitProbContainer, ctx);
+  if (!splitProbContainer.isValid()) {
+    ATH_MSG_FATAL("Failed to get cluster splitting probability container "
+		  << m_clusterSplitProbContainer);
+  }
+  return splitProbContainer->splitProbability(pix);
+}
+
 
 const InDet::BeamSpotData*
 TrackParticleCreatorTool::CacheBeamSpotData(const EventContext& ctx) const

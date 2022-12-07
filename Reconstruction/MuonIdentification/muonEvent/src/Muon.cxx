@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -562,12 +562,12 @@ int Muon::numberOfTRTHighThresholdHits() const {
 /** number of shared hits at pixel b-layer */
 int Muon::numberOfInnermostPixelLayerSharedHits() const {
   if ( this->hasCombinedMuonTrackParticle() || this->hasInDetTrackParticle() )
-      return (*m_inDetTrackParticle)->trackSummary()->get( Trk::numberOfInnermostPixelLayerSharedHits );
+      return (*m_inDetTrackParticle)->trackSummary()->get( Trk::legacy_numberOfInnermostPixelLayerSharedHits );
   else return -1;
 }
 int Muon::numberOfPixelSharedHits() const {   
   if ( this->hasCombinedMuonTrackParticle() || this->hasInDetTrackParticle() )
-      return (*m_inDetTrackParticle)->trackSummary()->get( Trk::numberOfPixelSharedHits );
+      return (*m_inDetTrackParticle)->trackSummary()->get( Trk::legacy_numberOfPixelSharedHits );
   else return -1;
 }
 
@@ -579,7 +579,7 @@ int Muon::numberOfPixelHoles() const {
 
 int Muon::numberOfSCTSharedHits() const {   
   if ( this->hasCombinedMuonTrackParticle() || this->hasInDetTrackParticle() )
-      return (*m_inDetTrackParticle)->trackSummary()->get( Trk::numberOfSCTSharedHits );
+      return (*m_inDetTrackParticle)->trackSummary()->get( Trk::legacy_numberOfSCTSharedHits );
   else return -1;
 }
 

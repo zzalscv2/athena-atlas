@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -25,8 +25,7 @@ from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTStrawSta
 InDetTrigTrackSummaryHelperToolCosmics = \
     InDet__InDetTrackSummaryHelperTool(name = "InDetTrigSummaryHelperCosmics",
                                        HoleSearch   = InDetTrigHoleSearchTool,
-                                       TRTStrawSummarySvc=InDetTrigTRTStrawStatusSummaryTool,
-                                       DoSharedHits = False)
+                                       TRTStrawSummarySvc=InDetTrigTRTStrawStatusSummaryTool)
 ToolSvc += InDetTrigTrackSummaryHelperToolCosmics
 
 if (InDetTrigFlags.doPrintConfigurables()):

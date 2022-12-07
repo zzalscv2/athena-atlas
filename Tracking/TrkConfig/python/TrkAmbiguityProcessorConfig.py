@@ -58,10 +58,9 @@ def SimpleAmbiguityProcessorToolCfg(flags,
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrackSummaryToolAmbiCfg)
+            InDetTrackSummaryToolCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolAmbiCfg(flags, 
-            name="InDetAmbiguityProcessorSplitProbTrackSummaryTool" + flags.InDet.Tracking.ActivePass.extension)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
@@ -131,17 +130,10 @@ def SimpleAmbiguityProcessorTool_TRT_Cfg(
         kwargs.setdefault("ScoringTool", InDetTRT_SeededScoringTool)
 
     if "TrackSummaryTool" not in kwargs:
-        if flags.Beam.Type is BeamType.Cosmics:
-            from TrkConfig.TrkTrackSummaryToolConfig import (
-                InDetTrackSummaryToolSharedHitsCfg)
-            InDetTRT_SeededSummaryTool = acc.popToolsAndMerge(
-                InDetTrackSummaryToolSharedHitsCfg(flags))
-        else:
-            from TrkConfig.TrkTrackSummaryToolConfig import (
-                InDetTrackSummaryToolCfg)
-            InDetTRT_SeededSummaryTool = acc.popToolsAndMerge(
-                InDetTrackSummaryToolCfg(flags))
-        kwargs.setdefault("TrackSummaryTool", InDetTRT_SeededSummaryTool)
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            InDetTrackSummaryToolCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
@@ -305,7 +297,8 @@ def ITkDenseEnvironmentsAmbiguityScoreProcessorToolCfg(
         else:
             from InDetConfig.InDetTrackScoringToolsConfig import (
                 ITkAmbiScoringToolCfg)
-            ITkAmbiScoringTool = acc.popToolsAndMerge(ITkAmbiScoringToolCfg(flags))
+            ITkAmbiScoringTool = acc.popToolsAndMerge(
+                ITkAmbiScoringToolCfg(flags))
         kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
 
     if "SplitProbTool" not in kwargs:
@@ -399,11 +392,9 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import (
-            InDetTrackSummaryToolAmbiCfg)
+            InDetTrackSummaryToolCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolAmbiCfg(
-                flags,
-                name="InDetAmbiguityProcessorSplitProbTrackSummaryTool" + flags.InDet.Tracking.ActivePass.extension)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
@@ -445,15 +436,18 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
     #
     # --- set up different Scoring Tool for collisions and cosmics
     #
-    if flags.Beam.Type is BeamType.Cosmics:
-        from InDetConfig.InDetTrackScoringToolsConfig import (
-            ITkCosmicsScoringToolCfg)
-        ITkAmbiScoringTool = acc.popToolsAndMerge(
-            ITkCosmicsScoringToolCfg(flags))
-    else:
-        from InDetConfig.InDetTrackScoringToolsConfig import (
-            ITkAmbiScoringToolCfg)
-        ITkAmbiScoringTool = acc.popToolsAndMerge(ITkAmbiScoringToolCfg(flags))
+    if "ScoringTool" not in kwargs:
+        if flags.Beam.Type is BeamType.Cosmics:
+            from InDetConfig.InDetTrackScoringToolsConfig import (
+                ITkCosmicsScoringToolCfg)
+            ITkAmbiScoringTool = acc.popToolsAndMerge(
+                ITkCosmicsScoringToolCfg(flags))
+        else:
+            from InDetConfig.InDetTrackScoringToolsConfig import (
+                ITkAmbiScoringToolCfg)
+            ITkAmbiScoringTool = acc.popToolsAndMerge(
+                ITkAmbiScoringToolCfg(flags))
+        kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
 
     if "Fitter" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import (
@@ -466,30 +460,26 @@ def ITkDenseEnvironmentsAmbiguityProcessorToolCfg(
         fitter_list.append(ITkTrackFitterAmbi)
         kwargs.setdefault("Fitter", fitter_list)
 
+    if "AssociationTool" not in kwargs:
+        from InDetConfig.InDetAssociationToolsConfig import (
+            ITkPRDtoTrackMapToolGangedPixelsCfg)
+        kwargs.setdefault("AssociationTool", acc.popToolsAndMerge(
+            ITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    from InDetConfig.InDetAssociationToolsConfig import (
-        ITkPRDtoTrackMapToolGangedPixelsCfg)
-    ITkPRDtoTrackMapToolGangedPixels = acc.popToolsAndMerge(
-        ITkPRDtoTrackMapToolGangedPixelsCfg(flags))
+    if "TrackSummaryTool" not in kwargs:
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            ITkTrackSummaryToolCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            ITkTrackSummaryToolCfg(flags)))
 
-    from TrkConfig.TrkTrackSummaryToolConfig import (
-        ITkTrackSummaryToolAmbiCfg)
-    ambi_track_summary_tool = acc.getPrimaryAndMerge(
-        ITkTrackSummaryToolAmbiCfg(
-            flags,
-            name="ITkAmbiguityProcessorSplitProbTrackSummaryTool" + flags.ITk.Tracking.ActivePass.extension))
+    if "SelectionTool" not in kwargs:
+        from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
+            ITkAmbiTrackSelectionToolCfg)
+        kwargs.setdefault("SelectionTool", acc.popToolsAndMerge(
+            ITkAmbiTrackSelectionToolCfg(flags)))
 
-    from InDetConfig.InDetAmbiTrackSelectionToolConfig import (
-        ITkAmbiTrackSelectionToolCfg)
-    ITkAmbiTrackSelectionTool = acc.popToolsAndMerge(
-        ITkAmbiTrackSelectionToolCfg(flags))
-
-    kwargs.setdefault("AssociationTool", ITkPRDtoTrackMapToolGangedPixels)
     kwargs.setdefault("AssociationMapName", 'ITkPRDToTrackMap' +
                       flags.ITk.Tracking.ActivePass.extension)
-    kwargs.setdefault("TrackSummaryTool", ambi_track_summary_tool)
-    kwargs.setdefault("ScoringTool", ITkAmbiScoringTool)
-    kwargs.setdefault("SelectionTool", ITkAmbiTrackSelectionTool)
     kwargs.setdefault("InputClusterSplitProbabilityName",
                       'SplitProb'+flags.ITk.Tracking.ActivePass.extension)
     kwargs.setdefault("OutputClusterSplitProbabilityName",

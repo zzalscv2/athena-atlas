@@ -394,7 +394,6 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
                 // add it to output list
                 if (m_trackSummaryTool.isEnabled()) {
                   m_trackSummaryTool->computeAndReplaceTrackSummary(*trtSeg,
-                                      combinatorialData.PRDtoTrackMap(),
                                       false /* DO NOT suppress hole search*/);
                 }
                 outTracks->push_back(trtSeg);
@@ -406,7 +405,6 @@ InDet::TRT_SeededTrackFinder::execute(const EventContext& ctx) const{
               // add it to output list
               if (m_trackSummaryTool.isEnabled()) {
                 m_trackSummaryTool->computeAndReplaceTrackSummary(*globalTrackNew,
-                                    combinatorialData.PRDtoTrackMap(),
                                     false /* DO NOT suppress hole search*/);
               }
               outTracks->push_back(globalTrackNew);

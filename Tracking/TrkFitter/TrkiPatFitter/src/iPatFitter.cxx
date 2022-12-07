@@ -1139,8 +1139,7 @@ std::unique_ptr<Trk::Track> iPatFitter::performFit(
 
   // generate a track summary for this candidate
   if ((m_trackSummaryTool.isEnabled()) && (fittedTrack != nullptr)) {
-    m_trackSummaryTool->computeAndReplaceTrackSummary(*fittedTrack, nullptr,
-                                                      false);
+    m_trackSummaryTool->computeAndReplaceTrackSummary(*fittedTrack, false);
   }
 
   return fittedTrack;

@@ -17,9 +17,9 @@ def TRT_SegmentsToTrackCfg(flags, name ='InDetTRT_SegmentsToTrack_Barrel', **kwa
             InDetTrackFitterCfg(flags)))
 
     if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
         kwargs.setdefault("SummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolSharedHitsCfg(flags)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "AssociationTool" not in kwargs \
        and "InputAssociationMapName" in kwargs \

@@ -14,7 +14,8 @@ def RecTrackParticleContainerCnvToolCfg(flags, name="RecTrackParticleContainerCn
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
-        TrackParticleCreator = result.popToolsAndMerge(TrackParticleCreatorToolCfg(flags))
+        TrackParticleCreator = result.popToolsAndMerge(
+            TrackParticleCreatorToolCfg(flags))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -26,7 +27,8 @@ def MuonRecTrackParticleContainerCnvToolCfg(flags, name = "MuonRecTrackParticleC
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import MuonCombinedParticleCreatorCfg
-        TrackParticleCreator = result.popToolsAndMerge(MuonCombinedParticleCreatorCfg(flags))
+        TrackParticleCreator = result.popToolsAndMerge(
+            MuonCombinedParticleCreatorCfg(flags))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -47,7 +49,8 @@ def TrackCollectionCnvToolCfg(flags, name="TrackCollectionCnvTool", **kwargs):
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
-        TrackParticleCreator = result.popToolsAndMerge(TrackParticleCreatorToolCfg(flags))
+        TrackParticleCreator = result.popToolsAndMerge(
+            TrackParticleCreatorToolCfg(flags))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -59,7 +62,8 @@ def ITkTrackCollectionCnvToolCfg(flags, name="ITkTrackCollectionCnvTool", **kwar
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
-        TrackParticleCreator = result.popToolsAndMerge(ITkTrackParticleCreatorToolCfg(flags))
+        TrackParticleCreator = result.popToolsAndMerge(
+            ITkTrackParticleCreatorToolCfg(flags))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -71,7 +75,8 @@ def MuonTrackCollectionCnvToolCfg(flags, name = "MuonTrackCollectionCnvTool", **
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import MuonCombinedParticleCreatorCfg
-        TrackParticleCreator = result.popToolsAndMerge(MuonCombinedParticleCreatorCfg(flags))
+        TrackParticleCreator = result.popToolsAndMerge(
+            MuonCombinedParticleCreatorCfg(flags))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -82,11 +87,17 @@ def MuonTrackCollectionCnvToolCfg(flags, name = "MuonTrackCollectionCnvTool", **
 ###   TrackParticleCnvAlg
 ######################################
 
-def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg", **kwargs):
+def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
+                           ClusterSplitProbabilityName = "",
+                           AssociationMapName = "",
+                           **kwargs):
     if flags.Detector.GeometryITk:
         name = name.replace("InDet", "ITk")
         from InDetConfig.ITkTrackRecoConfig import ITkTrackParticleCnvAlgCfg
-        return ITkTrackParticleCnvAlgCfg(flags, name, **kwargs)
+        return ITkTrackParticleCnvAlgCfg(flags, name,
+                                         ClusterSplitProbabilityName,
+                                         AssociationMapName,
+                                         **kwargs)
 
     result = ComponentAccumulator()
 
@@ -97,29 +108,41 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg", **kwargs):
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
-        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(TrackParticleCreatorToolCfg(flags)))
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            TrackParticleCreatorToolCfg(flags,
+                                        ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                                        AssociationMapName = AssociationMapName)))
 
     if "TrackCollectionCnvTool" not in kwargs:
-        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(TrackCollectionCnvToolCfg(flags)))
+        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
+            TrackCollectionCnvToolCfg(flags)))
 
     if flags.InDet.doTruth:
-        kwargs.setdefault("TrackTruthContainerName", kwargs["TrackContainerName"]+"TruthCollection")
+        kwargs.setdefault("TrackTruthContainerName",
+                          kwargs["TrackContainerName"]+"TruthCollection")
         kwargs.setdefault("AddTruthLink", True)
         if "MCTruthClassifier" not in kwargs:
             from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
-            kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(MCTruthClassifierCfg(flags)))
+            kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(
+                MCTruthClassifierCfg(flags)))
     else:
         kwargs.setdefault("AddTruthLink", False)
 
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
     return result
 
-def TrackParticleCnvAlgPIDCheckCfg(flags, name, **kwargs):
+def TrackParticleCnvAlgPIDCheckCfg(flags, name,
+                                   ClusterSplitProbabilityName = "",
+                                   AssociationMapName = "",
+                                   **kwargs):
     result = ComponentAccumulator()
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolPIDCheckCfg
-        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(TrackParticleCreatorToolPIDCheckCfg(flags)))
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            TrackParticleCreatorToolPIDCheckCfg(flags,
+                                                ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                                                AssociationMapName = AssociationMapName)))
 
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
@@ -129,12 +152,16 @@ def TrackParticleCnvAlgNoPIDCfg(flags, name, **kwargs):
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolNoPIDCfg
-        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(TrackParticleCreatorToolNoPIDCfg(flags)))
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            TrackParticleCreatorToolNoPIDCfg(flags)))
 
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
 
-def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg", **kwargs):
+def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
+                              ClusterSplitProbabilityName = "",
+                              AssociationMapName = "",
+                              **kwargs):
     result = ComponentAccumulator()
 
     kwargs.setdefault("ConvertTracks", True)
@@ -144,17 +171,23 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg", **kwargs):
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import ITkTrackParticleCreatorToolCfg
-        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(ITkTrackParticleCreatorToolCfg(flags)))
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+            ITkTrackParticleCreatorToolCfg(flags,
+                                           ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                                           AssociationMapName = AssociationMapName)))
 
     if "TrackCollectionCnvTool" not in kwargs:
-        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(ITkTrackCollectionCnvToolCfg(flags)))
+        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
+            ITkTrackCollectionCnvToolCfg(flags)))
 
     if flags.ITk.Tracking.doTruth:
-        kwargs.setdefault("TrackTruthContainerName", kwargs["TrackContainerName"]+"TruthCollection")
+        kwargs.setdefault("TrackTruthContainerName",
+                          kwargs["TrackContainerName"]+"TruthCollection")
         kwargs.setdefault("AddTruthLink", True)
         if "MCTruthClassifier" not in kwargs:
             from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
-            kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(MCTruthClassifierCfg(flags)))
+            kwargs.setdefault("MCTruthClassifier", result.popToolsAndMerge(
+                MCTruthClassifierCfg(flags)))
     else:
         kwargs.setdefault("AddTruthLink", False)
 

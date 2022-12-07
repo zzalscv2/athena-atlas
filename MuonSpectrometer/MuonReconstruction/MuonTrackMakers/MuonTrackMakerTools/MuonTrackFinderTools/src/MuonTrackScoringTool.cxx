@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackScoringTool.h"
@@ -20,16 +20,13 @@ namespace Muon {
 
         // set some test values
         m_summaryTypeScore[Trk::numberOfPixelHits] = 20;
-        m_summaryTypeScore[Trk::numberOfPixelSharedHits] = -10;  // a shared hit is only half the weight
         m_summaryTypeScore[Trk::numberOfPixelHoles] = -10;       // a hole is bad
 
         m_summaryTypeScore[Trk::numberOfInnermostPixelLayerHits] = 10;        // addition for being b-layer
-        m_summaryTypeScore[Trk::numberOfInnermostPixelLayerSharedHits] = -5;  // a shared hit is only half the weight
 
         m_summaryTypeScore[Trk::numberOfGangedPixels] = -5;  // decrease for being ganged
 
         m_summaryTypeScore[Trk::numberOfSCTHits] = 10;        // half of a pixel, since only 1dim
-        m_summaryTypeScore[Trk::numberOfSCTSharedHits] = -5;  // a shared hit is only half the weight
         m_summaryTypeScore[Trk::numberOfSCTHoles] = -5;       // a hole is bad !
 
         m_summaryTypeScore[Trk::numberOfTRTHits] = 2;               // 5 straws ~ 1 SCT

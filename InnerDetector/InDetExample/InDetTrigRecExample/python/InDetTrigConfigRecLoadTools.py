@@ -542,8 +542,6 @@ if InDetTrigFlags.loadSummaryTool():
   from InDetTrigRecExample.InDetTrigCommonTools import InDetTrigTRTStrawStatusSummaryTool
   InDetTrigTrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(name          = "InDetTrigSummaryHelper",
                                                                        HoleSearch    = InDetTrigHoleSearchTool,
-                                                                       AssoTool      = InDetTrigPrdAssociationTool,
-                                                                       DoSharedHits  = False,
                                                                        TRTStrawSummarySvc=InDetTrigTRTStrawStatusSummaryTool,
                                                                        usePixel      = DetFlags.haveRIO.pixel_on(),
                                                                        useSCT        = DetFlags.haveRIO.SCT_on(),
@@ -555,8 +553,6 @@ if InDetTrigFlags.loadSummaryTool():
 
   InDetTrigTrackSummaryHelperToolSi = InDet__InDetTrackSummaryHelperTool(name          = "InDetTrigSummaryHelperSi",
                                                                          HoleSearch    = InDetTrigHoleSearchTool,
-                                                                         AssoTool      = InDetTrigPrdAssociationTool,
-                                                                         DoSharedHits  = False,
                                                                          TRTStrawSummarySvc=None,
                                                                          usePixel      = DetFlags.haveRIO.pixel_on(),
                                                                          useSCT        = DetFlags.haveRIO.SCT_on(),
@@ -598,44 +594,12 @@ if InDetTrigFlags.loadSummaryTool():
   from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
   InDetTrigTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryTool",
                                                     InDetSummaryHelperTool = InDetTrigTrackSummaryHelperTool,
-                                                    doSharedHits           = False,
                                                     doHolesInDet           = True,
                                                     #this may be temporary #61512 (and used within egamma later)
                                                     )
   ToolSvc += InDetTrigTrackSummaryTool
   if (InDetTrigFlags.doPrintConfigurables()):
      print (     InDetTrigTrackSummaryTool)
-
-  if InDetTrigFlags.doSharedHits():
-    #
-    # Configrable version of loading the InDetTrackSummaryHelperTool
-    #
-    from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
-    InDetTrigTrackSummaryHelperToolSharedHits = InDet__InDetTrackSummaryHelperTool(name         = "InDetTrigSummaryHelperSharedHits",
-                                                                                   AssoTool     = InDetTrigPrdAssociationTool,
-                                                                                   DoSharedHits = InDetTrigFlags.doSharedHits(),
-                                                                                   HoleSearch   = InDetTrigHoleSearchTool,
-                                                                                   TRTStrawSummarySvc = InDetTrigTRTStrawStatusSummaryTool)
-
-    ToolSvc += InDetTrigTrackSummaryHelperToolSharedHits
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print (     InDetTrigTrackSummaryHelperToolSharedHits)
-    #
-    # Configurable version of TrkTrackSummaryTool
-    #
-    from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
-    InDetTrigTrackSummaryToolSharedHits = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryToolSharedHits",
-                                                                InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSharedHits,
-                                                                doSharedHits           = InDetTrigFlags.doSharedHits(),
-                                                                doHolesInDet           = True)
-
-    ToolSvc += InDetTrigTrackSummaryToolSharedHits
-    if (InDetTrigFlags.doPrintConfigurables()):
-      print (     InDetTrigTrackSummaryToolSharedHits)
-
-
-  else:   
-    InDetTrigTrackSummaryToolSharedHits        = InDetTrigTrackSummaryTool   
 
 #
 # ----------- control loading of tools which are needed by new tracking and backtracking
@@ -918,8 +882,7 @@ ToolSvc += InDetTrigTRTRodDecoder
 from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
 InDetTrigFastTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrigFastTrackSummaryTool",
                                                       InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSi,
-                                                      doHolesInDet           = False,
-                                                      doSharedHits           = False
+                                                      doHolesInDet           = False
                                                       )
 ToolSvc += InDetTrigFastTrackSummaryTool
 if (InDetTrigFlags.doPrintConfigurables()):
@@ -929,8 +892,7 @@ if (InDetTrigFlags.doPrintConfigurables()):
 from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigHoleSearchTool
 InDetTrigTrackSummaryToolWithHoleSearch = Trk__TrackSummaryTool(name = "InDetTrigTrackSummaryToolWithHoleSearch",
                                                                 InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSi,
-                                                                doHolesInDet           = True,
-                                                                doSharedHits           = False
+                                                                doHolesInDet           = True
                                                       )
 ToolSvc += InDetTrigTrackSummaryToolWithHoleSearch
 if (InDetTrigFlags.doPrintConfigurables()):

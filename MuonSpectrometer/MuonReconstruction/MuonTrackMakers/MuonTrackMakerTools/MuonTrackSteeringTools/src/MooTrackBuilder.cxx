@@ -98,7 +98,7 @@ namespace Muon {
                                                   << m_printer->printStations(*finalTrack));
 
         // generate a track summary for this track
-        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*finalTrack, nullptr, false); }
+        if (m_trackSummaryTool.isEnabled()) { m_trackSummaryTool->computeAndReplaceTrackSummary(*finalTrack, false); }
 
         bool recalibrateMDTHits = m_recalibrateMDTHits;
         bool recreateCompetingROTs = true;

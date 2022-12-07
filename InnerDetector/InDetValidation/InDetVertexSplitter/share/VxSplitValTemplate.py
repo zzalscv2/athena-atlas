@@ -257,8 +257,6 @@ if InDetFlags.doPrintConfigurables: print      InDetHoleSearchTool
 
 from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
 InDetTrackSummaryHelperTool = InDet__InDetTrackSummaryHelperTool(name         = "InDetSummaryHelper",
-                                                                 AssoTool     = InDetPrdAssociationTool,
-                                                                 DoSharedHits = False,
                                                                  HoleSearch   = InDetHoleSearchTool)
 ToolSvc += InDetTrackSummaryHelperTool
 if InDetFlags.doPrintConfigurables: print      InDetTrackSummaryHelperTool                                                                   
@@ -286,7 +284,6 @@ if InDetFlags.doPrintConfigurables: print      InDetMagField
 from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
 InDetTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrackSummaryTool",
                                               InDetSummaryHelperTool = InDetTrackSummaryHelperTool,
-                                              doSharedHits           = False,
                                               doHolesInDet           = True)
 #InDetTrackSummaryTool.OutputLevel = DEBUG
 ToolSvc += InDetTrackSummaryTool

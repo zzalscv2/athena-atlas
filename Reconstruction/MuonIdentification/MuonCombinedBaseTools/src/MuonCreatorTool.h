@@ -198,7 +198,8 @@ namespace MuonCombined {
            {this,"CopyFloatSummaryKeys",{"TRTTrackOccupancy","eProbabilityComb","eProbabilityHT","pixeldEdx","TRTdEdx","eProbabilityNN"},
             "List of float aux element names to copy over from ID track particle summaries."};
         Gaudi::Property< std::vector<std::string> >  m_copyCharSummaryKeys
-           {this,"CopyUInt8SummaryKeys",{"numberOfUsedHitsdEdx","numberOfIBLOverflowsdEdx","TRTdEdxUsedHits"},
+	  {this,"CopyUInt8SummaryKeys",{"numberOfUsedHitsdEdx","numberOfIBLOverflowsdEdx","TRTdEdxUsedHits",
+		"expectInnermostPixelLayerHit", "expectNextToInnermostPixelLayerHit"},
             "List of uint8_t aux element names to copy over from ID track particle summaries."};
 
         std::vector< std::unique_ptr<SG::AuxElement::Accessor<float> > >    m_copyFloatSummaryAccessors;

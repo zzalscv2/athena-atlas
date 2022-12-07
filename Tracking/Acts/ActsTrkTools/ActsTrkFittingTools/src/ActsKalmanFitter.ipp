@@ -126,7 +126,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx, Acts::GeometryContext& tgCo
         newtrack->trackSummary()->update(Trk::numberOfPixelDeadSensors, numberOfDeadPixel);
         newtrack->trackSummary()->update(Trk::numberOfSCTDeadSensors, numberOfDeadSCT);
       }
-      m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, nullptr, true);
+      m_trkSummaryTool->updateTrackSummary(ctx, *newtrack, true);
     }
   }
   return newtrack;

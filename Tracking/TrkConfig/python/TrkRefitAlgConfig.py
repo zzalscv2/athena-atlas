@@ -20,9 +20,9 @@ def ReFitTrackAlgCfg(flags, name="InDetRefitTrack", **kwargs):
             InDetTrackFitterTRTCfg(flags)))
 
     if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
         kwargs.setdefault("SummaryTool", result.popToolsAndMerge(
-            InDetTrackSummaryToolSharedHitsCfg(flags)))
+            InDetTrackSummaryToolCfg(flags)))
 
     if "AssociationTool" not in kwargs:
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg

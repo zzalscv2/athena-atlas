@@ -193,7 +193,7 @@ StatusCode Trk::ReFitTrack::execute()
          n_trt_hits = (*itr)->trackSummary()->get(numberOfTRTHits);
       }
       else {
-         std::unique_ptr<const Trk::TrackSummary> summary(  m_trkSummaryTool->summaryNoHoleSearch(**itr, prd_to_track_map.get()));
+         std::unique_ptr<const Trk::TrackSummary> summary(  m_trkSummaryTool->summaryNoHoleSearch(**itr));
          n_trt_hits = summary->get(numberOfTRTHits);
       }
       if ( (**itr).measurementsOnTrack()->size() - n_trt_hits<3 )
@@ -295,7 +295,7 @@ StatusCode Trk::ReFitTrack::execute()
   std::unique_ptr<TrackCollection> new_track_collection = std::make_unique<TrackCollection>();
   new_track_collection->reserve(new_tracks.size());
   for(std::unique_ptr<Trk::Track> &new_track : new_tracks ) {
-    m_trkSummaryTool->computeAndReplaceTrackSummary(*new_track, prd_to_track_map.get(), false /* DO NOT suppress hole search*/);
+    m_trkSummaryTool->computeAndReplaceTrackSummary(*new_track, false /* DO NOT suppress hole search*/);
     new_track_collection->push_back(std::move(new_track));
   }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKITRACKSUMMARYTOOL_H
@@ -53,7 +53,6 @@ public:
   /** Same behavious as
    * IExtendedTrackSummaryTool:computeAndReplaceTrackSummary
    * but without the need to pass
-   * Trk::PRDtoTrackMap
    * Does hole search
    */
   virtual void updateTrack(const EventContext& ctx, Track& track) const = 0;
@@ -67,10 +66,6 @@ public:
   virtual void updateTrackSummary(const EventContext& ctx,
                                   Track& track) const = 0;
   void updateTrackSummary(Track& track) const;
-
-  /** method to update the shared hit content only, this is optimised for track
-   * collection merging. */
-  virtual void updateSharedHitCount(Track& track) const = 0;
 
   /** method to update additional information (PID,shared hits, dEdX), this is
    * optimised for track collection merging. */

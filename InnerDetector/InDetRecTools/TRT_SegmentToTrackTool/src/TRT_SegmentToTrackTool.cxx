@@ -849,7 +849,6 @@ namespace InDet {
     ATH_MSG_DEBUG ("Add track to the scoring multimap...");
     if (m_trackSummaryTool.isEnabled()) {
        m_trackSummaryTool->computeAndReplaceTrackSummary(*trk,
-                                                         nullptr,
                                                          m_suppressHoleSearch);
     }
 

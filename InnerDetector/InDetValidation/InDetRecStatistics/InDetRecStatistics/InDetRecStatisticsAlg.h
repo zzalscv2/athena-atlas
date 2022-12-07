@@ -105,8 +105,6 @@ namespace InDet {
       const IdDictManager * m_idDictMgr;
       ToolHandle<Trk::ITruthToTrack>              m_truthToTrack; //!< tool to create track parameters from a gen particle
       ToolHandle<Trk::IExtendedTrackSummaryTool>  m_trkSummaryTool;  //!< tool to get track summary information from track 
-      ToolHandle<Trk::IPRDtoTrackMapTool>         m_assoTool
-         {this, "AssociationTool", "InDet::InDetPRDtoTrackMapToolGangedPixels" };
 
       ToolHandle<Trk::IUpdator>                   m_updatorHandle;            //!< Tool handle of updator for unbiased states
       Trk::IUpdator*                              m_updator;                  //!< updator for unbiased states
@@ -116,7 +114,6 @@ namespace InDet {
       SG::ReadHandleKey<McEventCollection>  m_McTrackCollection_key;
       ToolHandle<Trk::ITrackSelectorTool> m_trackSelectorTool;
      
-      bool          m_doSharedHits;//!< 
       bool          m_UseTrackSummary;//!< Flag to print detailed statistics for each track collection
       bool          m_printSecondary; //!< Flag to print hit information for secondary tracks
       float         m_minPt;//!< Minimum Pt cut for tracks used by the algorithm

@@ -198,6 +198,14 @@ def trackParticleCnv_builder(name, config, inTrackCollectionKey, outTrackParticl
                                            #---------------------------------------------------------------------------------
                                          )
 
+def trackPRD_Association_builder(name, inTrackCollections, associationMapName):
+      from InDetRecExample.TrackingCommon import getInDetTrackPRD_Association
+      associationTool = associationTool_getter()
+      return getInDetTrackPRD_Association(name,
+                                          TracksName = inTrackCollections,
+                                          AssociationTool = associationTool,
+                                          AssociationMapName = associationMapName)
+
 
 #--------------------------------------------------------------------------------------
 ## Scoring tools

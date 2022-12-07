@@ -226,10 +226,10 @@ class ConfiguredBackTracking:
          #
          if InDetFlags.doCosmics():
             InDetTRT_SeededScoringTool = TrackingCommon.getInDetCosmicScoringTool_TRT(NewTrackingCuts)
-            InDetTRT_SeededSummaryTool = TrackingCommon.getInDetTrackSummaryToolSharedHits()
          else:
             InDetTRT_SeededScoringTool = TrackingCommon.getInDetTRT_SeededScoringTool(NewTrackingCuts)
-            InDetTRT_SeededSummaryTool = TrackingCommon.getInDetTrackSummaryTool()
+
+         InDetTRT_SeededSummaryTool = TrackingCommon.getInDetTrackSummaryTool()
 
          #
          # --- Load selection tool

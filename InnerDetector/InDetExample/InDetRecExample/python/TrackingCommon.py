@@ -1233,11 +1233,8 @@ def getInDetTRT_ElectronPidTool(name = "InDetTRT_ElectronPidTool", **kwargs) :
 @makePublicTool
 def getInDetSummaryHelper(name='InDetSummaryHelper',**kwargs) :
     the_name = makeName( name, kwargs)
-    isHLT=kwargs.pop("isHLT",False)
     # Configrable version of loading the InDetTrackSummaryHelperTool
     #
-    if 'AssoTool' not in kwargs :
-        kwargs = setDefaults( kwargs, AssoTool = getInDetPrdAssociationTool_setup()   if not isHLT else   getInDetTrigPrdAssociationTool())
     if 'HoleSearch' not in kwargs :
         kwargs = setDefaults( kwargs, HoleSearch = getInDetHoleSearchTool()) # @TODO trigger specific hole search tool ?
 
@@ -1245,11 +1242,8 @@ def getInDetSummaryHelper(name='InDetSummaryHelper',**kwargs) :
     if not DetFlags.haveRIO.TRT_on() :
         kwargs = setDefaults( kwargs, TRTStrawSummarySvc = "")
 
-    from InDetRecExample.InDetJobProperties import InDetFlags
     from AthenaCommon.DetFlags              import DetFlags
     kwargs = setDefaults( kwargs,
-                          RunningTIDE_Ambi = InDetFlags.doTIDE_Ambi(),
-                          DoSharedHits    = False,
                           usePixel        = DetFlags.haveRIO.pixel_on(),
                           useSCT          = DetFlags.haveRIO.SCT_on(),
                           useTRT          = DetFlags.haveRIO.TRT_on())
@@ -1263,23 +1257,11 @@ def getInDetSummaryHelperNoHoleSearch(name='InDetSummaryHelperNoHoleSearch',**kw
     return getInDetSummaryHelper(name,**kwargs)
 
 
-def getInDetSummaryHelperSharedHits(name='InDetSummaryHelperSharedHits',**kwargs) :
-    from InDetRecExample.InDetJobProperties import InDetFlags
-    kwargs = setDefaults( kwargs,     DoSharedHits    = InDetFlags.doSharedHits())
-
-    from AthenaCommon.DetFlags    import DetFlags
-    if DetFlags.haveRIO.TRT_on() :
-        from InDetRecExample.InDetJobProperties import InDetFlags
-        kwargs = setDefaults( kwargs, DoSharedHitsTRT = InDetFlags.doSharedHits())
-
-    return getInDetSummaryHelper(name, **kwargs)
-
-
 @makePublicTool
 def getInDetTrackSummaryTool(name='InDetTrackSummaryTool',**kwargs) :
     # makeName will remove the namePrefix in suffix from kwargs, so copyArgs has to be first
     hlt_args = copyArgs(kwargs,['isHLT','namePrefix'])
-    id_helper_args = copyArgs(kwargs,['ClusterSplitProbabilityName','namePrefix','nameSuffix']) if 'ClusterSplitProbabilityName' in kwargs else {}
+    id_helper_args = {}
     kwargs.pop('ClusterSplitProbabilityName',None)
     kwargs.pop('isHLT',None)
     the_name = makeName( name, kwargs)
@@ -1290,37 +1272,15 @@ def getInDetTrackSummaryTool(name='InDetTrackSummaryTool',**kwargs) :
         kwargs = setDefaults( kwargs, InDetSummaryHelperTool = getInDetSummaryHelper(**id_helper_args) if do_holes else getInDetSummaryHelperNoHoleSearch(**id_helper_args))
 
     #
-    # Configurable version of TrkTrackSummaryTool: no TRT_PID tool needed here (no shared hits)
+    # Configurable version of TrkTrackSummaryTool: no TRT_PID tool needed here
     #
     kwargs = setDefaults(kwargs,
-                         doSharedHits           = False,
                          doHolesInDet           = do_holes)         # we don't want to use those tools during pattern
     from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
     return Trk__TrackSummaryTool(name = the_name, **kwargs)
 
 def getInDetTrackSummaryToolNoHoleSearch(name='InDetTrackSummaryToolNoHoleSearch',**kwargs) :
     return getInDetTrackSummaryTool(name, **setDefaults(kwargs, doHolesInDet           = False))
-
-def getInDetTrackSummaryToolSharedHits(name='InDetTrackSummaryToolSharedHits',**kwargs) :
-
-    if 'InDetSummaryHelperTool' not in kwargs :
-        copy_args=['ClusterSplitProbabilityName','namePrefix','nameSuffix']
-        do_holes=kwargs.get("doHolesInDet",True)
-        if do_holes :
-            copy_args += ['isHLT']
-        id_helper_args = copyArgs(kwargs,copy_args) if 'ClusterSplitProbabilityName' in kwargs else {}
-        kwargs.pop('ClusterSplitProbabilityName',None)
-        kwargs = setDefaults( kwargs, InDetSummaryHelperTool = getInDetSummaryHelperSharedHits(**id_helper_args))
-
-    from InDetRecExample.InDetJobProperties import InDetFlags
-    kwargs = setDefaults(kwargs,
-                         doSharedHits           = InDetFlags.doSharedHits())
-
-    return getInDetTrackSummaryTool( name, **kwargs)
-
-def getInDetTrackSummaryToolTRTTracks(name='InDetTrackSummaryToolTRTTracks',**kwargs) :
-    # @TODO should switch off PixelToTPID, shared hits (setDefaults(kwargs,doSharedHits=False))
-    return getInDetTrackSummaryToolSharedHits(name, **setDefaults(kwargs,doSharedHits=True))
 
 def getInDetTrigTrackSummaryTool(name='InDetTrackSummaryTool',**kwargs) :
     return getInDetTrackSummaryTool(name,**setDefaults(kwargs,
@@ -1779,8 +1739,9 @@ def getV0Tools(name='V0Tools', **kwargs) :
     from TrkVertexAnalysisUtils.TrkVertexAnalysisUtilsConf import Trk__V0Tools
     return Trk__V0Tools(the_name, **kwargs)
 
-def getInDetxAODParticleCreatorTool(prd_to_track_map=None, suffix="", trt_pid_tool=True, pixel_dedx=True) :
+def getInDetxAODParticleCreatorTool(prd_to_track_map="", clusterSplitProbabilityName="", suffix="", trt_pid_tool=True, pixel_dedx=True) :
     from AthenaCommon.AppMgr import ToolSvc
+    from AthenaCommon.DetFlags import DetFlags
     from InDetRecExample.InDetJobProperties import InDetFlags
     if hasattr(ToolSvc,'InDetxAODParticleCreatorTool'+suffix) :
         return getattr(ToolSvc,'InDetxAODParticleCreatorTool'+suffix)
@@ -1793,17 +1754,6 @@ def getInDetxAODParticleCreatorTool(prd_to_track_map=None, suffix="", trt_pid_to
     if perigee_expression == 'Vertex' :
         perigee_expression = 'BeamLine'
 
-    if prd_to_track_map is None :
-        track_summary_tool = getInDetTrackSummaryToolSharedHits()
-    else :
-        prop_args          = setDefaults({}, nameSuffix = suffix)
-        asso_tool          = getConstPRD_AssociationTool(**setDefaults(prop_args,
-                                                                                      PRDtoTrackMap = prd_to_track_map))
-        helper_tool        = getInDetSummaryHelperSharedHits(**setDefaults(prop_args,
-                                                                                          AssoTool = asso_tool) )
-        track_summary_tool = getInDetTrackSummaryToolSharedHits(**setDefaults(prop_args,
-                                                                                             InDetSummaryHelperTool=helper_tool))
-
     TRT_ElectronPidTool    = getInDetTRT_ElectronPidTool(MinimumTrackPtForNNPid = 2000.) if trt_pid_tool else None
     PixelToTPIDTool        = getInDetPixelToTPIDTool()                                   if pixel_dedx   else None
     LayerToolInner         = getInDetTestPixelLayerToolInner()                           if pixel_dedx   else None
@@ -1811,13 +1761,18 @@ def getInDetxAODParticleCreatorTool(prd_to_track_map=None, suffix="", trt_pid_to
     from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
     InDetxAODParticleCreatorTool = Trk__TrackParticleCreatorTool(name = "InDetxAODParticleCreatorTool"+suffix,
                                                                  TrackToVertex           = getInDetTrackToVertexTool(),
-                                                                 TrackSummaryTool        = track_summary_tool,
+                                                                 TrackSummaryTool        = getInDetTrackSummaryTool(),
                                                                  TestPixelLayerTool      = LayerToolInner,
                                                                  ComputeAdditionalInfo   = True,
                                                                  BadClusterID            = InDetFlags.pixelClusterBadClusterID(),
                                                                  KeepParameters          = True,
                                                                  KeepFirstParameters     = InDetFlags.KeepFirstParameters(),
                                                                  PerigeeExpression       = perigee_expression,
+                                                                 ClusterSplitProbabilityName = clusterSplitProbabilityName,
+                                                                 AssociationMapName      = prd_to_track_map,
+                                                                 DoSharedSiHits = InDetFlags.doSharedHits() and prd_to_track_map!="",
+                                                                 DoSharedTRTHits = InDetFlags.doSharedHits() and DetFlags.haveRIO.TRT_on() and prd_to_track_map!="",
+                                                                 RunningTIDE_Ambi = InDetFlags.doTIDE_Ambi(),
                                                                  TRT_ElectronPidTool     = TRT_ElectronPidTool,
                                                                  PixelToTPIDTool         = PixelToTPIDTool)
 

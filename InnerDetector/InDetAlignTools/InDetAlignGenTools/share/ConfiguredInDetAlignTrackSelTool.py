@@ -72,9 +72,7 @@ class ConfiguredInDetAlignTrackSelTool :
         # summary
         from InDetTrackSummaryHelperTool.InDetTrackSummaryHelperToolConf import InDet__InDetTrackSummaryHelperTool
         InDetAlignTrackSelSummaryTool = InDet__InDetTrackSummaryHelperTool(name         = "InDetAlignTrackSelSummaryTool",
-                                                                           Extrapolator = InDetAlignTrackSelExtrapolator,
-                                                                           AssoTool     = InDetAlignTrackSelAssociationTool,
-                                                                           DoSharedHits = True)
+                                                                           Extrapolator = InDetAlignTrackSelExtrapolator)
         ToolSvc += InDetAlignTrackSelSummaryTool
         print InDetAlignTrackSelSummaryTool          
              

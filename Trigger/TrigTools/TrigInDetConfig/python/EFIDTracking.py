@@ -240,6 +240,18 @@ def ambiguitySolverForIDPatternRecognition( config, summaryTool, inputTracks,ver
    ptAlgs.append( ambiguitySolverAlg )
    
    #-----------------------------------------------------------------------------
+   #                      TrackPRD particle conversion algorithm, can be enabled to restore shared hit computation in TrackParticleCreatorTool
+
+   #-----------------------------------------------------------------------------
+
+   # from TrigInDetConfig.InDetTrigCommon import trackPRD_Association_builder
+   # trackPRD_AssociationAlg = trackPRD_Association_builder(name = add_prefix( 'trackPRD_AssociationAlg', config.name + '_IDTrig' ),
+   #                                                        inTrackCollections = [config.trkTracks_IDTrig()+"_Amb"],
+   #                                                        associationMapName = "TrigInDetPRDtoTrackMap")
+
+   # ptAlgs.append( trackPRD_AssociationAlg )
+
+   #-----------------------------------------------------------------------------
    #                      Track particle conversion algorithm
    from .InDetTrigCommon import trackParticleCnv_builder
    from InDetTrigRecExample.InDetTrigConfigRecLoadToolsPost import InDetTrigParticleCreatorToolWithSummary

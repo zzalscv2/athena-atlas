@@ -185,7 +185,6 @@ StatusCode InDet::SiSPSeededTrackFinder::oldStrategy(const EventContext& ctx) co
     ++counter[kNTracks];
     if (m_trackSummaryTool.isEnabled()) {
        m_trackSummaryTool->computeAndReplaceTrackSummary(*(qualityAndTrack.second),
-                                                         trackEventData.combinatorialData().PRDtoTrackMap(),
                                                          false /* DO NOT suppress hole search*/);
     }
     outputTracks->push_back(qualityAndTrack.second);
@@ -358,7 +357,6 @@ StatusCode InDet::SiSPSeededTrackFinder::newStrategy(const EventContext& ctx) co
       /// Note that for run-3 the tool here is configured to not perform a hole search,
       /// regardless of the 'false' argument below
        m_trackSummaryTool->computeAndReplaceTrackSummary(*qualityAndTrack.second,
-                                                         trackEventData.combinatorialData().PRDtoTrackMap(),
                                                          false /* DO NOT suppress hole search*/);
        InDet::PatternHoleSearchOutcome theOutcome; 
        /// Check if we have a hole search result for this guy
@@ -605,7 +603,6 @@ StatusCode InDet::SiSPSeededTrackFinder::itkConvStrategy(const EventContext& ctx
       /// Note that for run-3 the tool here is configured to not perform a hole search,
       /// regardless of the 'false' argument below
       m_trackSummaryTool->computeAndReplaceTrackSummary(*qualityAndTrack.second,
-							trackEventData.combinatorialData().PRDtoTrackMap(),
 							false /* DO NOT suppress hole search*/);
       InDet::PatternHoleSearchOutcome theOutcome;
       /// Check if we have a hole search result for this guy

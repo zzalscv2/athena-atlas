@@ -150,7 +150,7 @@ if makeSplitTracks:
     from TrkParticleCreator.TrkParticleCreatorConf import Trk__TrackParticleCreatorTool
     InDetxAODSplitParticleCreatorTool = Trk__TrackParticleCreatorTool(name = "InDetSplitxAODParticleCreatorTool",
                                                                       TrackToVertex           = TrackingCommon.getInDetTrackToVertexTool(),
-                                                                      TrackSummaryTool        = TrackingCommon.getInDetTrackSummaryToolSharedHits(),
+                                                                      TrackSummaryTool        = TrackingCommon.getInDetTrackSummaryTool(),
                                                                       TestPixelLayerTool      = TrackingCommon.getInDetTestPixelLayerToolInner(),
                                                                       ComputeAdditionalInfo   = True,
                                                                       KeepParameters          = True)

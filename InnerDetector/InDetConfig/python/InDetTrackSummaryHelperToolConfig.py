@@ -10,12 +10,6 @@ def InDetTrackSummaryHelperToolCfg(flags, name='InDetSummaryHelper', **kwargs):
 
   result = ComponentAccumulator()
 
-  if 'AssoTool' not in kwargs :
-    from InDetConfig.InDetAssociationToolsConfig import InDetPrdAssociationTool_setupCfg
-    InDetPrdAssociationTool_setup = result.popToolsAndMerge(InDetPrdAssociationTool_setupCfg(flags))
-    result.addPublicTool(InDetPrdAssociationTool_setup)
-    kwargs.setdefault("AssoTool", InDetPrdAssociationTool_setup)
-
   if "HoleSearch" not in kwargs:
     from InDetConfig.InDetTrackHoleSearchConfig import InDetTrackHoleSearchToolCfg
     InDetTrackHoleSearchTool = result.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags))
@@ -25,8 +19,6 @@ def InDetTrackSummaryHelperToolCfg(flags, name='InDetSummaryHelper', **kwargs):
   if not flags.Detector.EnableTRT:
     kwargs.setdefault("TRTStrawSummarySvc", "")
 
-  kwargs.setdefault("RunningTIDE_Ambi", flags.InDet.Tracking.doTIDE_Ambi)
-  kwargs.setdefault("DoSharedHits", False)
   kwargs.setdefault("usePixel", flags.Detector.EnablePixel)
   kwargs.setdefault("useSCT", flags.Detector.EnableSCT)
   kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
@@ -38,29 +30,11 @@ def InDetSummaryHelperNoHoleSearchCfg(flags, name='InDetSummaryHelperNoHoleSearc
   kwargs.setdefault("HoleSearch", None)
   return InDetTrackSummaryHelperToolCfg(flags, name, **kwargs)
 
-def InDetSummaryHelperSharedHitsCfg(flags, name='InDetSummaryHelperSharedHits', **kwargs):
-  acc = ComponentAccumulator()
-
-  kwargs.setdefault("DoSharedHits", flags.InDet.Tracking.doSharedHits)
-  kwargs.setdefault("DoSharedHitsTRT", flags.InDet.Tracking.doSharedHits and flags.Detector.EnableTRT)
-
-  InDetSummaryHelper = acc.popToolsAndMerge(InDetTrackSummaryHelperToolCfg(flags, name, **kwargs))
-  acc.setPrivateTools(InDetSummaryHelper)
-  return acc
-
-
 def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs):
 
   result = ComponentAccumulator()
 
-  kwargs.setdefault("DoSharedHits", False)
   kwargs.setdefault("useTRT", flags.Detector.EnableTRT)
-
-  if 'AssoTool' not in kwargs :
-    from InDetConfig.InDetAssociationToolsConfig import TrigPrdAssociationToolCfg
-    associationTool = result.popToolsAndMerge( TrigPrdAssociationToolCfg(flags) )
-    result.addPublicTool(associationTool)
-    kwargs.setdefault("AssoTool", associationTool)
 
   #can always set HoleSearchTool - the actual search is controlled by TrackSummaryTool cfg
   if "HoleSearch" not in kwargs:
@@ -98,12 +72,6 @@ def TrigTrackSummaryHelperToolSiOnlyCfg(flags, name="InDetTrigSummaryHelperSiOnl
 def ITkTrackSummaryHelperToolCfg(flags, name='ITkSummaryHelper', **kwargs):
   result = ComponentAccumulator()
 
-  if 'AssoTool' not in kwargs :
-    from InDetConfig.InDetAssociationToolsConfig import ITkPrdAssociationTool_setupCfg
-    assoTool = result.popToolsAndMerge(ITkPrdAssociationTool_setupCfg(flags))
-    result.addPublicTool(assoTool)
-    kwargs.setdefault("AssoTool", assoTool)
-
   if "HoleSearch" not in kwargs:
     from InDetConfig.InDetTrackHoleSearchConfig import ITkTrackHoleSearchToolCfg
     ITkTrackHoleSearchTool = result.popToolsAndMerge(ITkTrackHoleSearchToolCfg(flags))
@@ -111,8 +79,6 @@ def ITkTrackSummaryHelperToolCfg(flags, name='ITkSummaryHelper', **kwargs):
     kwargs.setdefault("HoleSearch", ITkTrackHoleSearchTool)
 
   kwargs.setdefault("TRTStrawSummarySvc", "")
-  kwargs.setdefault("RunningTIDE_Ambi", True)
-  kwargs.setdefault("DoSharedHits", False)
   kwargs.setdefault("usePixel", flags.Detector.EnableITkPixel)
   kwargs.setdefault("useSCT", flags.Detector.EnableITkStrip)
   kwargs.setdefault("useTRT", False)
@@ -124,26 +90,14 @@ def ITkSummaryHelperNoHoleSearchCfg(flags, name='ITkSummaryHelperNoHoleSearch', 
   kwargs.setdefault("HoleSearch", None)
   return ITkTrackSummaryHelperToolCfg(flags, name, **kwargs)
 
-def ITkSummaryHelperSharedHitsCfg(flags, name='ITkSummaryHelperSharedHits', **kwargs):
-  kwargs.setdefault("DoSharedHits", flags.ITk.Tracking.doSharedHits)
-  return ITkTrackSummaryHelperToolCfg(flags, name = name, **kwargs)
-
 def AtlasTrackSummaryHelperToolCfg(flags, name='AtlasTrackSummaryHelperTool', **kwargs):
   result = ComponentAccumulator()
-
-  if "AssoTool" not in kwargs:
-    from InDetConfig.InDetAssociationToolsConfig import InDetPrdAssociationTool_noTRTCfg
-    atlasPrdAssociationTool = result.popToolsAndMerge(InDetPrdAssociationTool_noTRTCfg(flags, name='AtlasPrdAssociationTool'))
-    result.addPublicTool(atlasPrdAssociationTool)
-    kwargs.setdefault("AssoTool", atlasPrdAssociationTool)
 
   if "HoleSearch" not in kwargs:
     from InDetConfig.InDetTrackHoleSearchConfig import AtlasTrackHoleSearchToolCfg
     atlasHoleSearchTool = result.popToolsAndMerge(AtlasTrackHoleSearchToolCfg(flags))
     result.addPublicTool(atlasHoleSearchTool)
     kwargs.setdefault("HoleSearch", atlasHoleSearchTool)
-
-  kwargs.setdefault("DoSharedHits", False)
 
   result.setPrivateTools(result.popToolsAndMerge(InDetTrackSummaryHelperToolCfg(flags, name, **kwargs)))
   return result

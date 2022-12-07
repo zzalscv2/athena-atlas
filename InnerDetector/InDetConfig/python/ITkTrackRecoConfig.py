@@ -87,7 +87,9 @@ def ITkTrackRecoCfg(flags):
             result.merge(ITkTrackParticleCnvAlgCfg(current_flags,
                                                    name = extension + "TrackParticleCnvAlg",
                                                    TrackContainerName = TrackContainer,
-                                                   xAODTrackParticlesFromTracksContainerName = "InDet" + extension + "TrackParticles")) # Need specific handling for R3LargeD0 not to break downstream configs
+                                                   xAODTrackParticlesFromTracksContainerName = "InDet" + extension + "TrackParticles", # Need specific handling for R3LargeD0 not to break downstream configs
+                                                   ClusterSplitProbabilityName = ClusterSplitProbContainer,
+                                                   AssociationMapName = ""))
         else:
             ClusterSplitProbContainer = "ITkAmbiguityProcessorSplitProb" + extension
             InputCombinedITkTracks += [TrackContainer]
@@ -97,12 +99,18 @@ def ITkTrackRecoCfg(flags):
     from TrkConfig.TrkTrackCollectionMergerConfig import ITkTrackCollectionMergerAlgCfg
     result.merge(ITkTrackCollectionMergerAlgCfg(flags,
                                                 InputCombinedTracks = InputCombinedITkTracks,
-                                                CombinedITkClusterSplitProbContainer = ITkClusterSplitProbabilityContainerName(flags) if not flags.ITk.Tracking.doFastTracking else ""))
+                                                OutputCombinedTracks="CombinedITkTracks",
+                                                AssociationMapName = "PRDtoTrackMapCombinedITkTracks" \
+                                                if not flags.ITk.Tracking.doFastTracking else ""))
 
     if flags.ITk.Tracking.doTruth:
         result.merge(ITkTrackTruthCfg(flags))
 
-    result.merge(ITkTrackParticleCnvAlgCfg(flags))
+    result.merge(ITkTrackParticleCnvAlgCfg(flags,
+                                           ClusterSplitProbabilityName = ITkClusterSplitProbabilityContainerName(flags) \
+                                           if not flags.ITk.Tracking.doFastTracking else "",
+                                           AssociationMapName = "PRDtoTrackMapCombinedITkTracks" \
+                                           if not flags.ITk.Tracking.doFastTracking else ""))
 
     if flags.ITk.PriVertex.doVertexFinding:
         from InDetConfig.VertexFindingConfig import primaryVertexFindingCfg
