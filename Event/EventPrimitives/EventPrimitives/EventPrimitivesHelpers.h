@@ -64,8 +64,9 @@ inline bool saneCovarianceDiagonal(const AmgSymMatrix(N) & mat) {
 //// length of the vector is still within the Geneva area, i.e. 10 km
 template <int N>
 inline bool saneVector(const AmgVector(N) & vec) {
-  if (vec.hasNaN() || !vec.allFinite()) {
-    return false;
+  for (int i = 0; i < N; ++i) {
+    if (std::isnan(vec[i]) || std::isinf(vec[i]))
+      return false;
   }
   constexpr double max_length2 = 1.e16;
   return vec.dot(vec) < max_length2;
