@@ -75,6 +75,7 @@ TSMethodCall::~TSMethodCall()
   TInterpreter* cling ATLAS_THREAD_SAFE = gCling;
   if (!cling) {
     m_meth.release();
+    m_tsMeth.release();
   }
 }
 
