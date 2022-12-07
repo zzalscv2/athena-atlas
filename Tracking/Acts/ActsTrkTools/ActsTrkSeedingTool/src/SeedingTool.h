@@ -94,7 +94,7 @@ namespace ActsTrk {
       "enable non equidistant binning in z"}; // Used in SeedfinderConfig as well
     Gaudi::Property< float > m_gridRMax {this, "gridRMax", 320. * Acts::UnitConstants::mm,
       "radial extension of subdetector to be used in grid building"};
-    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", 0.,
+    Gaudi::Property< float > m_gridPhiMin {this, "gridPhiMin", 0,
       "phi min for space point grid formation"};
     Gaudi::Property< float > m_gridPhiMax {this, "gridPhiMax", 2*M_PI,
       "phi max for space point grid formation"};
@@ -106,7 +106,7 @@ namespace ActsTrk {
     // Properties to set SeedfinderConfig
     Gaudi::Property< float > m_rMax {this, "rMax", 320. * Acts::UnitConstants::mm,
       "limiting location of measurements"};
-    Gaudi::Property< float > m_binSizeR {this, "binSizeR", 2. * Acts::UnitConstants::mm,
+    Gaudi::Property< float > m_binSizeR {this, "binSizeR", 1. * Acts::UnitConstants::mm,
       "defining radial bin for space point sorting"};
     Gaudi::Property< bool > m_forceRadialSorting {this, "forceRadialSorting", true,
       "enable radial sorting in space point grid"};
@@ -120,7 +120,7 @@ namespace ActsTrk {
       "minimum distance in r between middle and top SP"};
     Gaudi::Property< float > m_deltaRMaxBottomSP {this, "deltaRMaxBottomSP", 120. * Acts::UnitConstants::mm,
       "maximum distance in r between middle and top SP"};
-    Gaudi::Property< float > m_deltaZMax {this, "deltaZMax",  10e6,
+    Gaudi::Property< float > m_deltaZMax {this, "deltaZMax",  600,
       "maximum distance in z between two measurements within one seed"};
     Gaudi::Property< float > m_collisionRegionMin {this, "collisionRegionMin", -200. * Acts::UnitConstants::mm,
       "limiting location of collision region in z"};
@@ -130,7 +130,7 @@ namespace ActsTrk {
       "how many sigmas of scattering angle should be considered"};
     Gaudi::Property< float > m_maxPtScattering {this, "maxPtScattering", 10e6,
       "Upper pt limit for scattering calculation"};
-    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.09804522341059585,
+    Gaudi::Property< float > m_radLengthPerSeed {this, "radLengthPerSeed", 0.1,
       "average radiation lengths of material on the length of a seed. used for scattering"};
     Gaudi::Property< int > m_maxSeedsPerSpM {this, "maxSeedsPerSpM", 4,
       "In dense environments many seeds may be found per middle space point. Only seeds with the highest weight will be kept if this limit is reached."}; // Used in SeedFilterConfig as well
@@ -165,6 +165,15 @@ namespace ActsTrk {
       // Used in SeedFilterConfig as well
     Gaudi::Property< size_t > m_seedConfCentralNTopSmallR {this, "seedConfCentralNTopSmallR", 2,
       "nTop for small R central seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfCentralMinBottomRadius {this, "seedConfCentralMinBottomRadius", 60 * Acts::UnitConstants::mm,
+	"Minimum radius for bottom SP in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfCentralMaxZOrigin {this, "seedConfCentralMaxZOrigin", 150 * Acts::UnitConstants::mm,
+	"Maximum zOrigin in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfCentralMinImpact {this, "seedConfCentralMinImpact", 1. * Acts::UnitConstants::mm,
+	"Minimum impact parameter for seed confirmation"};
       // Used in SeedFilterConfig as well
     Gaudi::Property< float > m_seedConfForwardZMin {this, "seedConfForwardZMin", -3000. * Acts::UnitConstants::mm,
       "minimum z for forward seed confirmation "};
@@ -180,13 +189,22 @@ namespace ActsTrk {
       // Used in SeedFilterConfig as well
     Gaudi::Property< size_t > m_seedConfForwardNTopSmallR {this, "seedConfForwardNTopSmallR", 2,
       "nTop for small R forward seed confirmation"};
-      // Used in SeedFilterConfig as well
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfForwardMinBottomRadius {this, "seedConfForwardMinBottomRadius", 60 * Acts::UnitConstants::mm,
+	"Minimum radius for bottom SP in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfForwardMaxZOrigin {this, "seedConfForwardMaxZOrigin", 150 * Acts::UnitConstants::mm,
+	"Maximum zOrigin in seed confirmation"};
+    // Used in SeedFilterConfig as well 
+    Gaudi::Property< float > m_seedConfForwardMinImpact {this, "seedConfForwardMinImpact", 1. * Acts::UnitConstants::mm,
+	"Minimum impact parameter for seed confirmation"};
+    // Used in SeedFilterConfig as well 
     Gaudi::Property< bool > m_useDetailedDoubleMeasurementInfo {this, "useDetailedDoubleMeasurementInfo", false,
       "enable use of double measurement details"};
 
     Gaudi::Property<float> m_toleranceParam {this, "toleranceParam", 1.1 * Acts::UnitConstants::mm, 
       "tolerance parameter used to check the compatibility of SPs coordinates in xyz"};
-    Gaudi::Property<float> m_phiMin {this, "phiMin", -M_PI, ""};
+    Gaudi::Property<float> m_phiMin {this, "phiMin", - M_PI, ""};
     Gaudi::Property<float> m_phiMax {this, "phiMax", M_PI, ""};
     Gaudi::Property<float> m_rMin {this, "rMin", 33 * Acts::UnitConstants::mm, ""};    
     Gaudi::Property<float> m_zAlign {this, "zAlign", 0 * Acts::UnitConstants::mm, ""};

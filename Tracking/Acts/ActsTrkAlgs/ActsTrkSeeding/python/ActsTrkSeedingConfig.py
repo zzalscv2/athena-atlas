@@ -3,10 +3,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelSeedingToolCfg, ActsTrkITkStripSeedingToolCfg
+from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkITkPixelOrthogonalSeedingToolCfg, ActsTrkITkStripOrthogonalSeedingToolCfg
 from ActsTrkTrackParamsEstimationTool.ActsTrkTrackParamsEstimationToolConfig import TrackParamsEstimationToolCfg
 from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
 from ActsGeometry.ActsGeometryConfig import ActsATLASConverterToolCfg
-
+from ActsInterop.ActsConfigFlags import SeedingStrategy
         
 # ACTS algorithm using Athena objects upstream
 def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
@@ -26,7 +27,10 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
 
     seedTool = None
     if "SeedTool" not in kwargs:
-        seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
+        else:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
 
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
@@ -63,7 +67,10 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
 
     seedTool = None
     if "SeedTool" not in kwargs:
-        seedTool = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(flags))
+        else:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
 
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
@@ -109,7 +116,10 @@ def ActsTrkITkPixelSeedingCfg(flags,
     # and make sure it is not a None
     seedTool = None
     if "SeedTool" not in kwargs:
-        seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelOrthogonalSeedingToolCfg(flags))
+        else:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkPixelSeedingToolCfg(flags))
         
     kwargs.setdefault('InputSpacePoints', ['ITkPixelSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
@@ -132,7 +142,10 @@ def ActsTrkITkStripSeedingCfg(flags,
     # and make sure it is not a None
     seedTool = None
     if "SeedTool" not in kwargs:
-        seedTool = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
+        if flags.Acts.SeedingStrategy is SeedingStrategy.Orthogonal:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkStripOrthogonalSeedingToolCfg(flags))
+        else:
+            seedTool = acc.popToolsAndMerge(ActsTrkITkStripSeedingToolCfg(flags))
         
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')

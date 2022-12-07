@@ -29,3 +29,9 @@ def actsValidateSeedsFlags(flags):
     flags.Reco.EnableHGTDExtension = False
     flags.ITk.Tracking.recoChain = [TrackingComponent.ValidateActsSeeds]
     flags.ITk.Tracking.writeSeedValNtuple = True
+
+def actsValidateOrthogonalSeedsFlags(flags):
+    """flags for Reco_tf with CA used in CI tests: use SiSpacePointSeedMaker tool during reconstruction (orthogonal seeding)"""
+    from ActsInterop.ActsConfigFlags import SeedingStrategy
+    flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
+    actsValidateSeedsFlags(flags)

@@ -82,11 +82,17 @@ namespace ActsTrk {
       ATH_MSG_DEBUG("   " << m_seedConfCentralRMax);
       ATH_MSG_DEBUG("   " << m_seedConfCentralNTopLargeR);
       ATH_MSG_DEBUG("   " << m_seedConfCentralNTopSmallR);
+      ATH_MSG_DEBUG("   " << m_seedConfCentralMinBottomRadius);
+      ATH_MSG_DEBUG("   " << m_seedConfCentralMaxZOrigin);
+      ATH_MSG_DEBUG("   " << m_seedConfCentralMinImpact);
       ATH_MSG_DEBUG("   " << m_seedConfForwardZMin);
       ATH_MSG_DEBUG("   " << m_seedConfForwardZMax);
       ATH_MSG_DEBUG("   " << m_seedConfForwardRMax);
       ATH_MSG_DEBUG("   " << m_seedConfForwardNTopLargeR);
       ATH_MSG_DEBUG("   " << m_seedConfForwardNTopSmallR);
+      ATH_MSG_DEBUG("   " << m_seedConfForwardMinBottomRadius);
+      ATH_MSG_DEBUG("   " << m_seedConfForwardMaxZOrigin);
+      ATH_MSG_DEBUG("   " << m_seedConfForwardMinImpact);
     }
     ATH_MSG_DEBUG("   " << m_useDetailedDoubleMeasurementInfo);
     ATH_MSG_DEBUG("   " << m_toleranceParam);
@@ -111,11 +117,17 @@ namespace ActsTrk {
       ATH_MSG_DEBUG("   " << m_seedConfCentralRMax);
       ATH_MSG_DEBUG("   " << m_seedConfCentralNTopLargeR);
       ATH_MSG_DEBUG("   " << m_seedConfCentralNTopSmallR);
+      ATH_MSG_DEBUG("   " << m_seedConfCentralMinBottomRadius);
+      ATH_MSG_DEBUG("   " << m_seedConfCentralMaxZOrigin);
+      ATH_MSG_DEBUG("   " << m_seedConfCentralMinImpact);
       ATH_MSG_DEBUG("   " << m_seedConfForwardZMin);
       ATH_MSG_DEBUG("   " << m_seedConfForwardZMax);
       ATH_MSG_DEBUG("   " << m_seedConfForwardRMax);
       ATH_MSG_DEBUG("   " << m_seedConfForwardNTopLargeR);
       ATH_MSG_DEBUG("   " << m_seedConfForwardNTopSmallR);
+      ATH_MSG_DEBUG("   " << m_seedConfForwardMinBottomRadius);
+      ATH_MSG_DEBUG("   " << m_seedConfForwardMaxZOrigin);
+      ATH_MSG_DEBUG("   " << m_seedConfForwardMinImpact);
     }
     ATH_MSG_DEBUG("   " << m_impactWeightFactor);
     ATH_MSG_DEBUG("   " << m_compatSeedWeight);
@@ -124,6 +136,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_numSeedIncrement);
     ATH_MSG_DEBUG("   " << m_deltaInvHelixDiameter);
 
+ 
     if (m_zBinEdges.size() - 1 !=
       m_zBinNeighborsTop.size() and
       not m_zBinNeighborsTop.empty()) {
@@ -313,11 +326,17 @@ namespace ActsTrk {
     finderCfg.centralSeedConfirmationRange.rMaxSeedConf = m_seedConfCentralRMax;
     finderCfg.centralSeedConfirmationRange.nTopForLargeR = m_seedConfCentralNTopLargeR;
     finderCfg.centralSeedConfirmationRange.nTopForSmallR = m_seedConfCentralNTopSmallR;
+    finderCfg.centralSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfCentralMinBottomRadius;
+    finderCfg.centralSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfCentralMaxZOrigin;
+    finderCfg.centralSeedConfirmationRange.minImpactSeedConf = m_seedConfCentralMinImpact;
     finderCfg.forwardSeedConfirmationRange.zMinSeedConf = m_seedConfForwardZMin;
     finderCfg.forwardSeedConfirmationRange.zMaxSeedConf = m_seedConfForwardZMax;
     finderCfg.forwardSeedConfirmationRange.rMaxSeedConf = m_seedConfForwardRMax;
     finderCfg.forwardSeedConfirmationRange.nTopForLargeR = m_seedConfForwardNTopLargeR;
     finderCfg.forwardSeedConfirmationRange.nTopForSmallR = m_seedConfForwardNTopSmallR;
+    finderCfg.forwardSeedConfirmationRange.seedConfMinBottomRadius = m_seedConfForwardMinBottomRadius;
+    finderCfg.forwardSeedConfirmationRange.seedConfMaxZOrigin = m_seedConfForwardMaxZOrigin;
+    finderCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
     finderCfg.useDetailedDoubleMeasurementInfo = m_useDetailedDoubleMeasurementInfo;
     finderCfg.toleranceParam = m_toleranceParam;
     finderCfg.phiMin = m_phiMin;
