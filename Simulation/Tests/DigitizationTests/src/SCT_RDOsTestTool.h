@@ -13,8 +13,8 @@ class SCT_RDOsTestTool : public DigiTestToolBase {
 
 public:
 
-  SCT_RDOsTestTool(const std::string& name,
-                    const std::string& type,
+  SCT_RDOsTestTool(const std::string& type,
+                    const std::string& name,
                     const IInterface* parent);
 
   StatusCode initialize();
