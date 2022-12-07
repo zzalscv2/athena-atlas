@@ -63,6 +63,7 @@ def testCfg (configFlags):
 
     tool1 = CompFactory.CaloUtils.ToolWithConstantsTestTool \
             ('tool1',
+             RunNumber = 310000,
              prefix = 'test.',
              cf1 = 2.5,
              ci1 = 10,
@@ -73,6 +74,7 @@ def testCfg (configFlags):
 
     tool2 = CompFactory.CaloUtils.ToolWithConstantsTestTool \
             ('tool2',
+             RunNumber = 310000,
              CondKey = 'test2Cond',
              DBHandleKey = 'test2Cond',
              prefix = 'test.',
