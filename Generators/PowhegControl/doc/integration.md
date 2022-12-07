@@ -7,13 +7,12 @@
 Using the default settings, the **approximate** time taken to generate
 5000 events (including the integration, event generation and
 hadronisation steps) is given below. As described in
-[PowhegForATLAS#Re_using_integration_files](powheg_for_atlas#Re_using_integration_files),
+[PowhegControl/doc#re-using-integration-files](https://gitlab.cern.ch/jkretz/athena/-/tree/jk_update/Generators/PowhegControl/doc#re-using-integration-files),
 the integration step can be skipped by re-using the integration grids.
-If the integration step is takes longer than **3 hours** to run this
-should be considered. If this step takes longer than **6 hours** it
-might become mandatory in future to re-use the integration files in
-production. Anything that takes longer than **24 hours** may well be
-impossible to run in production without re-use of the integration grids.
+If the integration step is takes longer than **1 hour**, this
+should be considered the default. If integration takes longer than 
+**6 hours** it is mandatory to provide and re-use the integration files in
+central production.
 
 Before generating events, POWHEG-BOX performs an integration over a
 multi-dimensional parameter space. This can be quite slow and so the
@@ -43,8 +42,11 @@ Py:PowhegControl INFO Integration test :: cross-section uncertainty : 0.30%
 19:25:39 Py:PowhegControl INFO -> in generation of radiation : 0.00%
 ```
 
-In the table below, you can see the results of each of these tests for
-each supported process. In each case, if the test result is less than 1%
+In the table below, you can see some *indicative* results of each of
+these tests for each supported process. As all processes can be
+configured further, this should just be considered indicative.
+
+In each case, if the test result is less than 1%
 this is indicated by a :white_check_mark:, if it's between 1% and 10%
 then it's preceded by a :exclamation:, while those greater than 10%
 are preceded by a :bangbang:. If you generate events with
