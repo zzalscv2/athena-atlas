@@ -48,6 +48,7 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
 
         // ------------------------- IAlgTool methods --------------------------------
         virtual StatusCode initialize() override;
+        virtual StatusCode start() override;
 
         // ------------------------- IL1TriggerByteStreamTool methods ----------------------
         /// BS->xAOD conversion
@@ -102,6 +103,13 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         static const int s_phiBit   = 1;
         static const int s_etaMask  = 0x1f;
         static const int s_phiMask  = 0xf;
+        
+        int m_jTauRes = 0;
+        int m_jJRes   = 0;
+        int m_jLJRes  = 0;
+        int m_jEMRes  = 0;
+        int m_jXERes  = 0;
+        int m_jTERes  = 0;
 
         
                 
