@@ -64,24 +64,25 @@ def create_reference():
   print(last3)
   sort_dict = {}
   golden_dict = {}
-
+#The following is truly horrible; it parses the .h file to read module names.
   golden_modules = []
-  module_file = open('pixelMapping.h', 'r')
+  module_file = open('../common/pixelMapping.h', 'r')
   module_data = module_file.read()
   module_lines = module_data.splitlines()
-
+  found_names=False
   for modules in module_lines:
     modulename = ""
     modules = modules.split()
     if len(modules) != 0:
-      if modules[0] == "else" and modules[1] == "if":
-        geographicalID = modules[2].split('"')
+      if found_names:
+        if "};" in modules: #end of list in code
+          break
+        geographicalID = modules[0].split('"')
         modulename = geographicalID[1]
-      elif modules[0] == "if":
-        geographicalID = modules[1].split('"')
-        modulename = geographicalID[1]
-    if modulename:
-      golden_modules.append(modulename)
+        golden_modules.append(modulename)
+        print(modulename)
+      if "names" in modules: #beginning of list in code
+        found_names=True
 
   # seek the latest run
   run_numbers = []
