@@ -179,6 +179,7 @@ TileMuStream.AddItem(["MuCTPI_RDO#MUCTPI_RDO"])
 
 TileMuStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionPriorBC"])
 TileMuStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextBC"])
+TileMuStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollectionNextNextBC"])
 TileMuStream.AddItem(["Muon::TgcCoinDataContainer#TrigT1CoinDataCollection"])
 
 TileMuStream.AddItem(["TileDigitsContainer#MuRcvDigitsCnt"])
