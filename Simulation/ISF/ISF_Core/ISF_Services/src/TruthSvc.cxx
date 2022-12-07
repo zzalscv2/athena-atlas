@@ -276,8 +276,8 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       auto tmpVtx = newVtx;
       mcEvent->add_vertex( newVtx);
       HepMC::suggest_barcode(newVtx, this->maxGeneratedVertexBarcode(mcEvent)-1 );
-      auto vtx_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
-      if (vtx_weights) newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(vtx_weights->value()));
+      auto vtx_weights=vtx->attribute<HepMC3::VectorFloatAttribute>("weights");
+      if (vtx_weights) newVtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(vtx_weights->value()));
 #else
       std::unique_ptr<HepMC::GenVertex> newVtx = std::make_unique<HepMC::GenVertex>( vtx->position(), vtx->id(), vtx->weights() );
       HepMC::GenEvent *mcEvent = parentBeforeIncident->parent_event();
@@ -404,9 +404,9 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
   Barcode::PhysicsProcessCode processCode = ti.physicsProcessCode();
   Barcode::ParticleBarcode       parentBC = ti.parentBarcode();
 
-  std::vector<double> weights(1);
+  std::vector<float> weights(1);
   Barcode::ParticleBarcode primaryBC = parentBC % m_barcodeSvc->particleGenerationIncrement();
-  weights[0] = static_cast<double>( primaryBC );
+  weights[0] = static_cast<float>( primaryBC );
 
   // Check for a previous end vertex on this particle.  If one existed, then we should put down next to this
   //  a new copy of the particle.  This is the agreed upon version of the quasi-stable particle truth, where
@@ -460,7 +460,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
       ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << vtx );
       mcEvent->add_vertex(vtx);
       HepMC::suggest_barcode( vtx, vtxbcode );
-      vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+      vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(weights));
 #else
       ATH_MSG_VERBOSE("createGVfromTI Replacement QS GenVertex: " << vtx.get() );
       mcEvent->add_vertex( vtx.release() );
@@ -490,7 +490,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
       }  
 #ifdef HEPMC3
       oldVertex->set_status( vtxID );
-      oldVertex->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+      oldVertex->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(weights));
 #else
       oldVertex->set_id( vtxID );
       oldVertex->weights() = weights;
@@ -516,7 +516,7 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
 #ifdef HEPMC3
     mcEvent->add_vertex(vtx);
     HepMC::suggest_barcode( vtx, vtxbcode );
-    vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
+    vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(weights));
 #else
     mcEvent->add_vertex( vtx.release() );
 #endif
