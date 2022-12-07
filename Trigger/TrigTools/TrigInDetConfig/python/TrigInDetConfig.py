@@ -103,6 +103,7 @@ def pixelDataPrepCfg(flags, roisKey, signature):
                                                      isRoI_Seeded = True,
                                                      RoIs         = roisKey,
                                                      RDOCacheKey  = InDetCacheNames.PixRDOCacheKey,
+                                                     BSErrorsCacheKey = InDetCacheNames.PixBSErrCacheKey,
                                                      RegSelTool   = RegSelTool_Pixel)
 
     acc.addEventAlgo(InDetPixelRawDataProvider)
@@ -124,6 +125,7 @@ def sctDataPrepCfg(flags, roisKey, signature):
     sctProviderArgs["isRoI_Seeded"] = True
     sctProviderArgs["RoIs"] = roisKey
     sctProviderArgs["RDOCacheKey"] = InDetCacheNames.SCTRDOCacheKey
+    sctProviderArgs["BSErrCacheKey"] = InDetCacheNames.SCTBSErrCacheKey
     sctProviderArgs["RegSelTool"] = RegSelTool_SCT
     acc.merge(SCTRawDataProviderCfg(flags, suffix=signature, **sctProviderArgs))
     # load the SCTEventFlagWriter
@@ -173,8 +175,8 @@ def trtDataPrep(flags, roisKey, signature):
 def ftfCfg(flags, roisKey, signature, signatureName):
   acc = ComponentAccumulator()
 
-  from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-  TrackSummaryTool = acc.popToolsAndMerge( InDetTrigTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool") )
+  from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigFastTrackSummaryToolCfg
+  TrackSummaryTool = acc.popToolsAndMerge( InDetTrigFastTrackSummaryToolCfg(flags) )
   acc.addPublicTool(TrackSummaryTool)
 
   from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
@@ -284,15 +286,15 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   if in_view:
     verifier = CompFactory.AthViews.ViewDataVerifier( name = 'VDVInDetFTF'+signature,
                                                       DataObjects= [('xAOD::EventInfo', 'StoreGateSvc+EventInfo'),
-                                                                    ('InDet::PixelClusterContainerCache', 'PixelTrigClustersCache'),
-                                                                    ('PixelRDO_Cache', 'PixRDOCache'),
-                                                                    ('InDet::SCT_ClusterContainerCache', 'SCT_ClustersCache'),
-                                                                    ('SCT_RDO_Cache', 'SctRDOCache'),
+                                                                    ('InDet::PixelClusterContainerCache', InDetCacheNames.Pixel_ClusterKey),
+                                                                    ('PixelRDO_Cache', InDetCacheNames.PixRDOCacheKey),
+                                                                    ('InDet::SCT_ClusterContainerCache', InDetCacheNames.SCT_ClusterKey),
+                                                                    ('SCT_RDO_Cache', InDetCacheNames.SCTRDOCacheKey),
+                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCachePix),
+                                                                    ('SpacePointCache', InDetCacheNames.SpacePointCacheSCT),
                                                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.PixBSErrCacheKey ),
                                                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTBSErrCacheKey ),
                                                                     ( 'IDCInDetBSErrContainer_Cache' , InDetCacheNames.SCTFlaggedCondCacheKey ),
-                                                                    ('SpacePointCache', 'PixelSpacePointCache'),
-                                                                    ('SpacePointCache', 'SctSpacePointCache'),
                                                                     ('xAOD::EventInfo', 'EventInfo'),
                                                                     ('TrigRoiDescriptorCollection', str(roisKey)),
                                                                     ( 'TagInfo' , 'DetectorStore+ProcessingTags' )] )

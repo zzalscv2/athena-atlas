@@ -65,7 +65,7 @@ def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs
   #can always set HoleSearchTool - the actual search is controlled by TrackSummaryTool cfg
   if "HoleSearch" not in kwargs:
     from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
-    holeSearchTool = result.popToolsAndMerge( TrigHoleSearchToolCfg(flags) )
+    holeSearchTool = result.popToolsAndMerge( TrigHoleSearchToolCfg(flags))
     result.addPublicTool(holeSearchTool)
     kwargs.setdefault("HoleSearch", holeSearchTool)
 
@@ -74,7 +74,7 @@ def TrigTrackSummaryHelperToolCfg(flags, name="InDetTrigSummaryHelper", **kwargs
     from TRT_ConditionsServices.TRT_ConditionsServicesConfig import TRT_StrawStatusSummaryToolCfg
     TRT_StrawStatusSummaryTool = result.popToolsAndMerge( TRT_StrawStatusSummaryToolCfg(flags) )
     kwargs.setdefault("TRTStrawSummarySvc", TRT_StrawStatusSummaryTool)
-
+      
   kwargs.setdefault("usePixel", flags.Detector.EnablePixel)
   kwargs.setdefault("useSCT", flags.Detector.EnableSCT)
 

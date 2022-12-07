@@ -88,8 +88,8 @@ def InDetTrigParticleCreatorToolFTFCfg(flags, name="InDetTrigParticleCreatorTool
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-        TrackSummaryTool = result.popToolsAndMerge( InDetTrigTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool") )
+        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigFastTrackSummaryToolCfg
+        TrackSummaryTool = result.popToolsAndMerge( InDetTrigFastTrackSummaryToolCfg(flags) )
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
