@@ -115,6 +115,7 @@ class PtEtaSelectionBlock (ConfigBlock):
         self.minPt = minPt
         self.maxEta = maxEta
         self.selectionDecoration = selectionDecoration
+        self.selectionName = ''
 
     def makeAlgs (self, config) :
 
@@ -136,7 +137,7 @@ class PtEtaSelectionBlock (ConfigBlock):
         alg.selectionDecoration = self.selectionDecoration
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration,
+        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration,
                              bits=bits)
 
 
@@ -222,7 +223,7 @@ def makeGeneratorAnalysisConfig( seq,
 
 def makePtEtaSelectionConfig( seq, containerName,
                               *, postfix = '', minPt = None, maxEta = None,
-                              selectionDecoration):
+                              selectionDecoration, selectionName = None):
     """Create a pt-eta kinematic selection config
 
     Keyword arguments:
@@ -234,11 +235,14 @@ def makePtEtaSelectionConfig( seq, containerName,
       minPt -- minimum pt value
       maxEta -- maximum eta value
       selectionDecoration -- the name of the decoration to set
+      selectionName -- the name of the selection to append this to
     """
 
     config = PtEtaSelectionBlock (containerName, postfix=postfix,
                                   minPt=minPt,maxEta=maxEta,
                                   selectionDecoration=selectionDecoration)
+    if selectionName is not None :
+        config.selectionName = selectionName
     seq.append (config)
 
 
