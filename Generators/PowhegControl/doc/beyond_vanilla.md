@@ -1,18 +1,34 @@
-# Multi-scale improved NLO (MiNLO)
+# Multi-scale improved NLO (MiNLO) and MiNNLOPS
 
 Multi-scale improved NLO ([MiNLO](http://arxiv.org/abs/1206.3572)) is a
-method for achieving NLO-accurate predictions for processes with
-associated jets. It is enabled by default for all supported processes.
+method for simultaneously achieving NLO-accurate predictions for processes two
+different jet multiplicities. Example: a MiNLO `Zj` sample is NLO accurate for `Z+0j` and `Z+1j` at the same time
+(and LO accurate for `Z+2j`).
+
+It is enabled by default for all supported processes (and in fact we enable the so-called MiNLO' by default).
 The list of processes for which MiNLO is enabled is: `Hj`, `Hjj`, `HWj`,
 `HZj`, `jjj`, `Wbbj`, `Wj`, `Wjj`, `Zj`, `Zjj`
 
-# NNLO reweighting (V2 processes only)
+As extension to MiNLO, recently processes have appeared that make the lower multiplicity NNLO accurate.
+Example: a MiNNLO `Zj` sample is NNLO accurate for `Z+0j`, NLO accurate for `Z+1j`, and LO accurate for `Z+2j`.
+The list of all existing processes can be found on the [Powheg Homepage, section MiNNLOPS](https://powhegbox.mib.infn.it/#MiNNLOps).
+We are currently testing `Hj_MiNNLO`, `Zj_MiNNLO`, `Wj_MiNNLO`, `ttj_MiNNLO`.
+
+It appears the newly available MiNNLO diboson processes require a very large installation, which has not been tackled yet.
+
+## NNLO reweighting (V2 processes only)
+
 
 Some processes (currently only `Hj`, `Wj` and `Zj`) come with external
 reweighting programs which can take the LHE events and provide
 event-by-event weights which approximate the full NNLO distribution. The
 syntax is slightly different for NNLOPS for `Hj` and DYNNLO for `Wj` and
 `Zj`
+
+*Warning: the only existing large-scale NNLOPS production has been the Run 2 ggH sample.
+Since the move away from the /afs installation, this has been broken and apparently not fixed.
+So what follows is a mostly historical description.
+We are currently commissioning the MiNNLOPS version, which should supersede NNLOPS by a single-step generation.*
 
 **NNLOPS for Hj** needs two input commands. The first,
 `NNLO_reweighting_inputs` needs arguments which map `name` to
@@ -113,7 +129,7 @@ ways.
 
 # Particle spin and decays with MadSpin
 
-For some processes involving tops, it may be interesting to run MadSpin
+For some processes involving top quarks, it may be interesting to run MadSpin
 over the (undecayed) tops from Powheg to correctly model their spins.
 PowhegControl provides a convenient interface for doing this, which must
 be enabled by setting the tops as undecayed (for example
