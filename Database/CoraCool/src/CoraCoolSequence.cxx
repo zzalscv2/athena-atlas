@@ -87,8 +87,8 @@ int CoraCoolSequence::fetch(const int inc) {
 	 "Unexpected number of rows locked in keytable",
 	 "CoraCoolSequence::CoraCoolSequence");
   } else {
-    throw ("Problem generating next key value for "+m_seqname,
-	   "CoraCoolSequence::fetch");
+    throw CoraCoolException ("Problem generating next key value for "+m_seqname,
+                             "CoraCoolSequence::fetch");
   }
   return key;
 }
