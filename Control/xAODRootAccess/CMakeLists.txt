@@ -30,7 +30,7 @@ atlas_add_library( xAODRootAccess
    PUBLIC_HEADERS xAODRootAccess
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers xAODCore xAODEventFormat
-   xAODRootAccessInterfaces AsgMessagingLib CxxUtils ${extra_libs}
+   xAODRootAccessInterfaces AsgMessagingLib CxxUtils RootUtils ${extra_libs}
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} )
 

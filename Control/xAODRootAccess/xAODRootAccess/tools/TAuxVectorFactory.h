@@ -5,11 +5,10 @@
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
 
-// ROOT include(s):
-#include <TMethodCall.h>
-
-// EDM include(s):
+// Athena include(s):
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
+#include "CxxUtils/checker_macros.h"
+#include "RootUtils/TSMethodCall.h"
 
 // Forward declaration(s):
 class TClass;
@@ -84,7 +83,7 @@ namespace xAOD {
       /// ROOT's description of the vector type
       ::TVirtualCollectionProxy* m_proxy;
       /// Assignment operator
-      mutable ::TMethodCall* m_assign = nullptr;
+      mutable RootUtils::TSMethodCall m_assign ATLAS_THREAD_SAFE;
       /// Pointer to a default element object in memory
       void* m_defElt;
 
