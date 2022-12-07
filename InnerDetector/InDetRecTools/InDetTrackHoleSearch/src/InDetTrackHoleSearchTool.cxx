@@ -16,7 +16,6 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkEventUtils/TrackStateOnSurfaceComparisonFunction.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkGeometry/TrackingVolume.h"
@@ -35,7 +34,7 @@ InDet::InDetTrackHoleSearchTool::InDetTrackHoleSearchTool(const std::string& t,
                                                           const IInterface*  p) :
   AthAlgTool(t,n,p),
   m_atlasId(nullptr),
-  m_extrapolator("Trk::Extrapolator"),
+  m_extrapolator("Trk::Extrapolator/InDetExtrapolator"),
   m_extendedListOfHoles(false),
   m_cosmic(false),
   m_warning(0) {
@@ -59,8 +58,8 @@ StatusCode InDet::InDetTrackHoleSearchTool::initialize() {
   ATH_CHECK(detStore()->retrieve(m_atlasId, "AtlasID"));
 
   // Get TrkExtrapolator from ToolService
+  ATH_MSG_INFO("Retrieving tool " << m_extrapolator);
   ATH_CHECK(m_extrapolator.retrieve());
-  ATH_MSG_INFO("Retrieved tool " << m_extrapolator);
 
   if (m_extendedListOfHoles) ATH_MSG_INFO("Search for extended list of holes ");
 

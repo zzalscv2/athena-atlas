@@ -33,17 +33,17 @@ def TrigHoleSearchToolCfg(flags, name="InDetTrigHoleSearchTool", **kwargs):
   result = ComponentAccumulator()
 
   if 'Extrapolator' not in kwargs:
-      from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-      extrapolatorTool = result.popToolsAndMerge( InDetExtrapolatorCfg( flags, name="InDetTrigExtrapolator" ) )
-      result.addPublicTool(extrapolatorTool)
-      kwargs.setdefault("Extrapolator", extrapolatorTool)
+    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+    extrapolator = result.popToolsAndMerge(InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator"))  
+    result.addPublicTool(extrapolator)
+    kwargs.setdefault("Extrapolator", extrapolator)
 
   from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ConditionsSummaryToolCfg
   sctCondTool = result.popToolsAndMerge(SCT_ConditionsSummaryToolCfg(flags, withFlaggedCondTool=False, withByteStreamErrorsTool=False))
 
   from InDetConfig.InDetTestPixelLayerConfig import InDetTrigTestPixelLayerToolCfg
   pixelLayerTool = result.popToolsAndMerge(InDetTrigTestPixelLayerToolCfg(flags))
-
+  
   #create InDetTrigBoundaryCheckToolCfg with these settings
   if 'BoundaryCheckTool' not in kwargs:
     from InDetConfig.InDetBoundaryCheckToolConfig import InDetBoundaryCheckToolCfg
@@ -54,6 +54,8 @@ def TrigHoleSearchToolCfg(flags, name="InDetTrigHoleSearchTool", **kwargs):
                                                                           PixelLayerTool=pixelLayerTool,
                                                                           ))
     kwargs.setdefault('BoundaryCheckTool', BoundaryCheckTool)
+
+  kwargs.setdefault("CountDeadModulesAfterLastHit", True)
 
   indet_hole_search_tool = CompFactory.InDet.InDetTrackHoleSearchTool(name, **kwargs)
   result.setPrivateTools(indet_hole_search_tool)
@@ -114,4 +116,4 @@ def CombinedMuonIDHoleSearchCfg(flags, name = 'CombinedMuonIDHoleSearch', **kwar
     kwargs.setdefault('BoundaryCheckTool', BoundaryCheckTool)
   result.setPrivateTools(result.popToolsAndMerge(InDetTrackHoleSearchToolCfg(flags, name, **kwargs)))
   return result
- 
+
