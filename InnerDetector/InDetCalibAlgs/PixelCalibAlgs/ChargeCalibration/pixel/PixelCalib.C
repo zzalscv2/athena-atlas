@@ -19,7 +19,7 @@
 //                                  eta
 //======================================================================
 
-#include "pixelMapping.h"
+#include "../common/pixelMapping.h"
 
 double funcTot(double* x, double* par) {
   double ret = 9.9e10;

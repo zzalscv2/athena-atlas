@@ -40,7 +40,7 @@
 #include "TVectorT.h"
 #include "THStack.h"
 #include "TRandom3.h"
-#include "./pixelMapping.h"
+#include "../common/pixelMapping.h"
 
 using namespace std; 
 
