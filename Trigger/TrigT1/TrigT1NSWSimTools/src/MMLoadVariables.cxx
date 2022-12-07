@@ -53,7 +53,7 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
               const CLHEP::Hep3Vector mumomentum = mit.GetMomentum();
               const CLHEP::Hep3Vector muposition = mit.GetPosition();
               if(!trackRecordCollection->empty() && barcodeparticle ==mit.GetBarCode()) {
-                pdg_tmp         = HepMC::barcode(particle);
+                pdg_tmp         = particle->pdg_id();
                 phiEntry_tmp    = mumomentum.getPhi();
                 etaEntry_tmp    = mumomentum.getEta();
                 phiPosition_tmp = muposition.getPhi();
