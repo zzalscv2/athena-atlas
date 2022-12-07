@@ -4,7 +4,6 @@
 def JfexInputMonitoringConfig(inputFlags):
     '''Function to configure LVL1 JfexInput algorithm in the monitoring system.'''
 
-    import math 
     # get the component factory - used for getting the algorithms
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -28,12 +27,24 @@ def JfexInputMonitoringConfig(inputFlags):
     mainDir = 'L1Calo'
     trigPath = 'JfexInput/'
     Calosource_names = ["Barrel","Tile","EMEC","HEC","FCAL1","FCAL2","FCAL3"]
-    # See if the file contains xTOBs else use TOBs
-    #hasXtobs = True if "L1_eFexTower" in inputFlags.Input.Collections else False
-    #if not hasXtobs:
-    #    EfexInputMonAlg.eFexTowerContainer = "L1_eEMRoI"
-
-    #tobStr = "TOB"
+    FPGA_names = ["U1","U2","U4","U3"]
+    
+    from math import pi
+    
+    x_phi = []
+    for i in range(67):
+        phi = (-pi- pi/32) + pi/32*i 
+        x_phi.append(phi)
+    x_phi = sorted(x_phi)
+    
+    phi_bins = {
+        'xbins': x_phi
+    }
+    
+    eta_phi_bins = {
+        'xbins': 100, 'xmin': -5, 'xmax': 5,
+        'ybins': x_phi
+    }
 
     # add monitoring algorithm to group, with group name and main directory 
     myGroup = helper.addGroup(JfexInputMonAlg, groupName , mainDir)
@@ -46,61 +57,64 @@ def JfexInputMonitoringConfig(inputFlags):
                             type='TH1F', path=trigPath, xbins=100,xmin=-5.0,xmax=5.0)
 
     myGroup.defineHistogram('TowerPhi;h_TowerPhi', title='jFex Tower Phi',
-                            type='TH1F', path=trigPath, xbins=66,xmin=-math.pi,xmax=math.pi)
+                            type='TH1F', path=trigPath, **phi_bins)
 
     myGroup.defineHistogram('TowerEta,TowerPhi;h_TowerEtaPhiMap', title='jFex Tower Eta vs Phi',
-                            type='TH2F',path=trigPath, xbins=100,xmin=-5.0,xmax=5.0,ybins=66,ymin=-math.pi,ymax=math.pi)
+                            type='TH2F',path=trigPath, **eta_phi_bins)
+
+    myGroup.defineHistogram('TowerEtaInvalid,TowerPhiInvalid;h_TowerEtaPhiInvalids', title='jFex Tower Invalid Et codes; Eta vs Phi Map',
+                            type='TH2F',path=trigPath, **eta_phi_bins)
 
     myGroup.defineHistogram('TowerGlobalEta;h_TowerGlobalEta', title='jFex Tower Global Eta',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-50,xmax=50)
+                            type='TH1I', path=trigPath, xbins=100,xmin=-50,xmax=50)
 
     myGroup.defineHistogram('TowerGlobalPhi;h_TowerGlobalPhi', title='jFex Tower Global Phi',
                             type='TH1F', path=trigPath, xbins=67,xmin=-1,xmax=65)
 
     myGroup.defineHistogram('TowerGlobalEta,TowerGlobalPhi;h_TowerGlobalEtaPhiMap', title='jFex Tower Global Eta vs Phi',
-                            type='TH2F',path=trigPath, xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
+                            type='TH2I',path=trigPath, xbins=100,xmin=-50,xmax=50,ybins=67,ymin=-1,ymax=65)
 
     myGroup.defineHistogram('TowerModule;h_TowerModule', title='jFex Tower Module Number',
-                            type='TH1F', path=trigPath, xbins=6,xmin=0,xmax=6.0)
+                            type='TH1I', path=trigPath, xbins=6,xmin=0,xmax=6)
   
     myGroup.defineHistogram('TowerFpga;h_TowerFpga', title='jFex Tower FPGA Number',
-                            type='TH1F', path=trigPath, xbins=4,xmin=0,xmax=4.0)
+                            type='TH1I', path=trigPath, xbins=4,xmin=0,xmax=4,xlabels=FPGA_names)
 
     myGroup.defineHistogram('TowerChannel;h_TowerChannel', title='jFex Tower Channel Number',
-                            type='TH1F', path=trigPath, xbins=62,xmin=0,xmax=62.0)
+                            type='TH1I', path=trigPath, xbins=60,xmin=0,xmax=60)
 
     myGroup.defineHistogram('TowerDataID;h_TowerDataID', title='jFex Tower Data ID',
-                            type='TH1F', path=trigPath, xbins=16,xmin=0,xmax=16.0)
+                            type='TH1I', path=trigPath, xbins=16,xmin=0,xmax=16)
 
     myGroup.defineHistogram('TowerSimulationID;h_TowerSimulationID', title='jFex Tower Simulation ID',
                             type='TH1F', path=trigPath, xbins=1000,xmin=0,xmax=1500000.0)
 
     myGroup.defineHistogram('TowerCalosource;h_TowerCalosource', title='jFex Tower Calo Source',
-                            type='TH1F', path=trigPath, xbins=7,xmin=0,xmax=7.0,xlabels=Calosource_names)
+                            type='TH1I', path=trigPath, xbins=7,xmin=0,xmax=7,xlabels=Calosource_names)
 
     myGroup.defineHistogram('TowerEtcount_barrel;h_TowerEtcount_barrel', title='jFex Tower Et Barrel',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_tile;h_TowerEtcount_tile', title='jFex Tower Et Tile',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_emec;h_TowerEtcount_emec', title='jFex Tower Et EMEC',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_hec;h_TowerEtcount_hec', title='jFex Tower Et HEC',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_fcal1;h_TowerEtcount_fcal1', title='jFex Tower Et FCAL1',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_fcal2;h_TowerEtcount_fcal2', title='jFex Tower Et FCAL2',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerEtcount_fcal3;h_TowerEtcount_fcal3', title='jFex Tower Et FCAL3',
-                            type='TH1F', path=trigPath, xbins=100,xmin=-10,xmax=500.0)
+                            type='TH1I', path=trigPath, xbins=4096,xmin=0,xmax=4096)
 
     myGroup.defineHistogram('TowerSaturationflag;h_TowerSaturationflag', title='jFex Tower Saturation FLag',
-                            type='TH1F', path=trigPath, xbins=2,xmin=0,xmax=2.0)
+                            type='TH1I', path=trigPath, xbins=2,xmin=0,xmax=2)
 
   
     acc = helper.result()
@@ -113,7 +127,7 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     import glob
 
-    inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
+    inputs = glob.glob('data22_13p6TeV.00440613.physics_Main.daq.RAW._lb0180-0189.data')
 
     ConfigFlags.Input.Files = inputs
     ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'

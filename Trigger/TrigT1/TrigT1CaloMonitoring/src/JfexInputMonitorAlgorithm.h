@@ -24,6 +24,8 @@ private:
 
   // container keys including steering parameter and description
   SG::ReadHandleKey<xAOD::jFexTowerContainer> m_jFexTowerContainerKey{this, "jFexTowerContainer","L1_jFexDataTowers","SG key of the input jFex Tower container"};  
+  
+  unsigned int m_InvalidCode = 4095;
 
 };
 #endif
