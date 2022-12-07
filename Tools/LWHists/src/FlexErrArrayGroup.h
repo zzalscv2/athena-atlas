@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -99,6 +99,7 @@ private:
 
   FlexBinChunk<T>* getChunk(unsigned igroup);
   const FlexBinChunk<T>* getChunkNoAlloc(unsigned igroup) const;//returns 0 if no allocated
+  FlexBinChunk<T>* getChunkNoAlloc(unsigned igroup);//returns 0 if no allocated
   double* getErrChunk(unsigned igroup);
   const double* getErrChunkNoAlloc(unsigned igroup) const;//returns 0 if no allocated
 };

@@ -133,7 +133,11 @@ TH1D_LW::~TH1D_LW()
 }
 
 //____________________________________________________________________
-TH1* TH1D_LW::getROOTHistBaseNoAlloc() const
+const TH1* TH1D_LW::getROOTHistBaseNoAlloc() const
+{
+  return m_rootHisto;
+}
+TH1* TH1D_LW::getROOTHistBaseNoAlloc()
 {
   return m_rootHisto;
 }
@@ -228,14 +232,14 @@ float * TH1D_LW::getVarBins()
 double TH1D_LW::getXMin() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmin();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmin();
   return FLEXHIST()->getXMin();
 }
 
 double TH1D_LW::getXMax() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmax();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmax();
   return FLEXHIST()->getXMax();
 }
 

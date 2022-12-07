@@ -2,6 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 
 //____________________________________________________________________
 HistValProfile2D::HistValProfile2D( const std::string& name, const std::string& title,
@@ -43,13 +45,13 @@ HistValProfile2D::~HistValProfile2D()
 //____________________________________________________________________
 unsigned HistValProfile2D::getXAxis_NBins() const
 {
-  return m_h1->GetXaxis()->GetNbins();
+  return std::as_const(*m_h1).GetXaxis()->GetNbins();
 }
 
 //____________________________________________________________________
 unsigned HistValProfile2D::getYAxis_NBins() const
 {
-  return m_h1->GetYaxis()->GetNbins();
+  return std::as_const(*m_h1).GetYaxis()->GetNbins();
 }
 
 //____________________________________________________________________

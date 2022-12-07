@@ -76,7 +76,8 @@ private:
   friend class LWHistInt;
   friend class LWHistVal;
   virtual void clear() override;
-  virtual TH1* getROOTHistBaseNoAlloc() const override;
+  virtual const TH1* getROOTHistBaseNoAlloc() const override;
+  virtual       TH1* getROOTHistBaseNoAlloc() override;
   virtual void clearKeptROOTHist() override;//Does nothing if root-backend.
   const float * getVarBins() const;//null if fixed bin-widths
   float * getVarBins();//null if fixed bin-widths

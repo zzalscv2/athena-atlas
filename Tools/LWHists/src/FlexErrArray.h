@@ -133,6 +133,18 @@ private:
       return supergroup ? supergroup[superGroupBin(bin)] : 0;
     }
   }
+  FlexErrArrayGroup<T> * getGroupNoAlloc(unsigned bin)
+  {
+    assert(bin<m_nbins);
+    if (small()) {
+      assert(iGroup(bin)<nGroupsNeeded(m_nbins));
+      return groups()[iGroup(bin)];
+    } else {
+      assert(iSuperGroup(bin)<nSuperGroups(m_nbins));
+      FlexErrArrayGroup<T> ** supergroup = superGroups()[iSuperGroup(bin)];
+      return supergroup ? supergroup[superGroupBin(bin)] : 0;
+    }
+  }
   FlexErrArrayGroup<T> * getGroup(unsigned bin);
 
   static unsigned nGroupsNeeded(unsigned nbins) { return nbins/FLEXERRARRAYGROUP_MAXBINS+(nbins%FLEXERRARRAYGROUP_MAXBINS?1:0); }

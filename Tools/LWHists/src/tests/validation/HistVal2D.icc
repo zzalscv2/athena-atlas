@@ -2,6 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <utility>
+
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
 HistVal2D<TH_2D,THLW_2D>::HistVal2D( const std::string& name,
@@ -78,14 +80,14 @@ HistVal2D<TH_2D,THLW_2D>::~HistVal2D()
 template <class TH_2D, class THLW_2D>
 unsigned HistVal2D<TH_2D,THLW_2D>::getXAxis_NBins() const
 {
-  return m_h1->GetXaxis()->GetNbins();
+  return std::as_const(*m_h1).GetXaxis()->GetNbins();
 }
 
 //____________________________________________________________________
 template <class TH_2D, class THLW_2D>
 unsigned HistVal2D<TH_2D,THLW_2D>::getYAxis_NBins() const
 {
-  return m_h1->GetYaxis()->GetNbins();
+  return std::as_const(*m_h1).GetYaxis()->GetNbins();
 }
 
 //____________________________________________________________________

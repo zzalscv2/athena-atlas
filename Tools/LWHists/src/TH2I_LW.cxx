@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -17,6 +17,7 @@
 #include "LWHistRootUtils.h"
 #include "TH2I.h"
 #include <iostream>
+#include <utility>
 
 #define FLEXHIST() ((reinterpret_cast<Flex2DHisto<int>*>(m_flexHisto)))
 #define CALL(x,y) m_rootHisto ? m_rootHisto-> x : reinterpret_cast<Flex2DHisto<int>*>(m_flexHisto)-> y
@@ -203,7 +204,11 @@ TH2I_LW::~TH2I_LW()
 }
 
 //____________________________________________________________________
-TH1* TH2I_LW::getROOTHistBaseNoAlloc() const
+const TH1* TH2I_LW::getROOTHistBaseNoAlloc() const
+{
+  return m_rootHisto;
+}
+TH1* TH2I_LW::getROOTHistBaseNoAlloc()
 {
   return m_rootHisto;
 }
@@ -295,28 +300,28 @@ const float * TH2I_LW::getVarBinsY() const
 double TH2I_LW::getXMin() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmin();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmin();
   return FLEXHIST()->getXMin();
 }
 
 double TH2I_LW::getXMax() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetXaxis()->GetXmax();
+    return std::as_const(*m_rootHisto).GetXaxis()->GetXmax();
   return FLEXHIST()->getXMax();
 }
 
 double TH2I_LW::getYMin() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetYaxis()->GetXmin();
+    return std::as_const(*m_rootHisto).GetYaxis()->GetXmin();
   return FLEXHIST()->getYMin();
 }
 
 double TH2I_LW::getYMax() const
 {
   if (m_rootHisto)
-    return m_rootHisto->GetYaxis()->GetXmax();
+    return std::as_const(*m_rootHisto).GetYaxis()->GetXmax();
   return FLEXHIST()->getYMax();
 }
 

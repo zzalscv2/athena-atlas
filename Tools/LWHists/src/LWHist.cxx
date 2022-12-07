@@ -94,7 +94,7 @@ void LWHist::ensureInitDecorations()
 
 short LWHist::GetMarkerColor() const
 {
-  TH1 * hroot= getROOTHistBaseNoAlloc();
+  const TH1 * hroot= getROOTHistBaseNoAlloc();
   if (hroot)
     return hroot->GetMarkerColor();
 
@@ -103,7 +103,7 @@ short LWHist::GetMarkerColor() const
 
 short LWHist::GetMarkerStyle() const
 {
-  TH1 * hroot= getROOTHistBaseNoAlloc();
+  const TH1 * hroot= getROOTHistBaseNoAlloc();
   if (hroot)
     return hroot->GetMarkerStyle();
   return m_decorations ? m_decorations->m_markerStyle : DEFAULT_MARKERSTYLE;
@@ -111,7 +111,7 @@ short LWHist::GetMarkerStyle() const
 
 float LWHist::GetMarkerSize() const
 {
-  TH1 * hroot= getROOTHistBaseNoAlloc();
+  const TH1 * hroot= getROOTHistBaseNoAlloc();
   if (hroot)
     return hroot->GetMarkerSize();
   return m_decorations ? m_decorations->m_markerSize : DEFAULT_MARKERSIZE;
@@ -366,13 +366,13 @@ void LWHist::LWHistAxis::SetTitle(const char*t)
 
 const char* LWHist::GetName() const
 {
-  TH1 * hroot = getROOTHistBaseNoAlloc();
+  const TH1 * hroot = getROOTHistBaseNoAlloc();
   return hroot ? hroot->GetName() : m_name;
 }
 
 const char* LWHist::GetTitle() const
 {
-  TH1 * hroot = getROOTHistBaseNoAlloc();
+  const TH1 * hroot = getROOTHistBaseNoAlloc();
   return hroot ? hroot->GetTitle() : m_title;
 }
 

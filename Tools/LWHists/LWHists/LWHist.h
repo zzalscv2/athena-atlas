@@ -78,7 +78,8 @@ protected:
   virtual ~LWHist();
   virtual bool apply(TH1*) const;
   virtual void clearKeptROOTHist() = 0;
-  virtual TH1* getROOTHistBaseNoAlloc() const = 0;
+  virtual const TH1* getROOTHistBaseNoAlloc() const = 0;
+  virtual TH1* getROOTHistBaseNoAlloc() = 0;
 
   virtual void clear();//releases all held memory, apart from any held ROOT histograms.
   virtual double actualGetBinCenterX(int bin) const = 0;
