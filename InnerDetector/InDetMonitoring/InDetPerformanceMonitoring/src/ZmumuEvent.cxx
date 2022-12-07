@@ -51,6 +51,8 @@ ZmumuEvent::ZmumuEvent()
   m_MassWindowHigh = 120.0;
   m_OpeningAngleCut = 0.2; // in radians
   m_Z0GapCut = 5.0; // in mm
+  m_minGoodLumiBlock = 0;
+  m_maxGoodLumiBlock = 0;
   m_SelectMuonByIso = true;
   m_SelectMuonByIP = true;
   m_analyzedEventCount = 0;
@@ -67,7 +69,10 @@ ZmumuEvent::ZmumuEvent()
   m_eventselectioncount_masswindow = 0;
   m_eventselectioncount_openingangle = 0;
   m_eventselectioncount_dimuoncharge = 0;
+  m_eventselectioncount_goodlumiblock = 0;
   m_skipMScheck = false;
+
+  return;
 }
 
 //==================================================================================
@@ -78,8 +83,6 @@ ZmumuEvent::~ZmumuEvent()
 //==================================================================================
 void ZmumuEvent::Init()
 {
-  
-
   m_xMuonID.Init();
   
   PARENT::Init();
@@ -104,7 +107,7 @@ const std::string ZmumuEvent::getRegion() const{
 
 
 //==================================================================================
-bool ZmumuEvent::Reco()
+bool ZmumuEvent::Reco (int theLumiBlock)
 {
   if (m_doDebug) { std::cout << " * ZmumuEvent * ZmumuEvent::Reco() starting " << std::endl; }
   m_analyzedEventCount++;
@@ -112,6 +115,15 @@ bool ZmumuEvent::Reco()
   // Clear out the previous events record.
   this->Clear();
 
+  // before getting into bsiness, check lumiblock is in requested range
+  if (m_maxGoodLumiBlock > m_minGoodLumiBlock) {
+    // lumiblock range is requested
+    if ( theLumiBlock < m_minGoodLumiBlock) return false;
+    if ( theLumiBlock > m_maxGoodLumiBlock) return false;
+  }
+  m_eventselectioncount_goodlumiblock++;
+
+  // retrieve muons
   const xAOD::MuonContainer* pxMuonContainer = PerfMonServices::getContainer<xAOD::MuonContainer>( m_container );
 
   // START patch by Anthony to avoid crash when MuonSpetrometer::Pt was not defined mainly for data16 
@@ -657,6 +669,7 @@ void ZmumuEvent::finalize()
   
   std::cout << " ** ZmumuEvent ** -- STATS -- " << std::endl
 	    << "    Analyzed events           : " << m_analyzedEventCount << std::endl
+            << "    Events passing LumiBlock  : " << m_eventselectioncount_goodlumiblock << std::endl
 	    << "    Tested muons              : " << m_testedMuonCount << std::endl
 	    << "    Accepted muons            : " << m_acceptedMuonCount << std::endl
 	    << "    Events without enough muon: " << m_eventsWithoutEnoughMuonsCount << std::endl

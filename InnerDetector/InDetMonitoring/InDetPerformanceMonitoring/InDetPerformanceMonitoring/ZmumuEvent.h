@@ -58,7 +58,7 @@ class ZmumuEvent : public EventAnalysis
 
   virtual void Init();
   // virtual bool Reco ATLAS_NOT_REENTRANT ();
-  virtual bool Reco ();
+  virtual bool Reco (int theLumiBlock = 0);
 
   // Public access methods
   inline void                        doIsoSelection (bool doIso)          { m_xMuonID.doIsoSelection(doIso);  }
@@ -69,6 +69,7 @@ class ZmumuEvent : public EventAnalysis
   inline unsigned int                getAcceptedEvents ()                 { return m_acceptedEventCount; }      
   const xAOD::Muon*                  getCombMuon(  unsigned int uPart )   { return (uPart < NUM_MUONS) ? m_pxRecMuon[uPart] : NULL;  }
   const xAOD::TrackParticle*         getIDTrack (  unsigned int uPart )   { return (uPart < NUM_MUONS) ? m_pxIDTrack[uPart] : NULL;  }
+  inline double                      GetInvMass ()                        {return m_DiMuonPairInvMass;}
   const float&                       getLeptonOpeningAngle( ZTYPE eType ) { return m_fMuonDispersion[eType]; }
   const xAOD::TrackParticle*         getLooseIDTk ATLAS_NOT_REENTRANT ( unsigned int uPart );
   const xAOD::TrackParticle*         getMSTrack (  unsigned int uPart )   { return (uPart < NUM_MUONS) ? m_pxMSTrack[uPart] : NULL;  }
@@ -84,7 +85,9 @@ class ZmumuEvent : public EventAnalysis
   const float&                       getZPhi(  ZTYPE eType )              { return m_fZPhiDir[eType];        }
   const float&                       getZPt(   ZTYPE eType )              { return m_fZPt[eType];            }
   void                               OrderMuonList ();
-  inline void                        setDebugMode(bool debug)             { m_doDebug=debug; }
+  inline void                        setDebugMode (bool debug)            { m_doDebug=debug; }
+  inline void                        SetMaxLumiBlock (int newlumiblock)   { m_maxGoodLumiBlock = newlumiblock; }
+  inline void                        SetMinLumiBlock (int newlumiblock)   { m_minGoodLumiBlock = newlumiblock; }
   inline void                        SetMuonPtCut (double newvalue)       { m_xMuonID.SetPtCut(newvalue); }
   inline void                        SetMuonQuality (std::string newname) { m_xMuonID.SetMuonQualityRequirement(newname); }
 
@@ -97,7 +100,6 @@ class ZmumuEvent : public EventAnalysis
   inline void                        SetSkipMSCheck (bool value)          {m_skipMScheck = value;}
 
   inline void                        setContainer ( PerfMonServices::CONTAINERS container) { m_container = container; };
-  inline double                      GetInvMass ()                        {return m_DiMuonPairInvMass;}
   inline void SetMuonSelectionTool ( ToolHandle<CP::IMuonSelectionTool> mst ) { m_muonSelectionTool = mst;  m_xMuonID.SetCustomMuonSelectionTool (mst); };
 
  protected:
@@ -130,7 +132,9 @@ class ZmumuEvent : public EventAnalysis
   double m_MassWindowHigh;
   double m_OpeningAngleCut;
   double m_Z0GapCut;
-  bool m_skipMScheck;
+  bool   m_skipMScheck;
+  int    m_minGoodLumiBlock;
+  int    m_maxGoodLumiBlock;
  
   bool m_doDebug;
   // Member variables : Mostly to store relevant muon data for quick access.
@@ -150,6 +154,7 @@ class ZmumuEvent : public EventAnalysis
   unsigned int     m_eventselectioncount_masswindow{};
   unsigned int     m_eventselectioncount_openingangle{};
   unsigned int     m_eventselectioncount_dimuoncharge{};
+  unsigned int     m_eventselectioncount_goodlumiblock{};
 
 
   const            xAOD::Muon*      m_pxRecMuon[NUM_MUONS]{};
@@ -178,6 +183,7 @@ class ZmumuEvent : public EventAnalysis
   // selected muon identifiers
   int m_muon1 = 0;
   int m_muon2 = 0;
+
 };
 //==============================================================================
 #endif

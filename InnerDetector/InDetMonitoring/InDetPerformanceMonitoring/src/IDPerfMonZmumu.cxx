@@ -152,6 +152,11 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   declareProperty("skipMS", m_skipMS = false);
   declareProperty("useCustomMuonSelector", m_useCustomMuonSelector = false );
   declareProperty("MuonSelector", m_muonSelector );
+
+  declareProperty( "MinLumiBlock", m_minGoodLumiBlock = 0, "minimum lumiblock number to be accepted");
+  declareProperty( "MaxLumiBlock", m_maxGoodLumiBlock = 0, "maximum lumiblock number to be accepted");
+
+  return;
 }
 
 
@@ -223,7 +228,10 @@ StatusCode IDPerfMonZmumu::initialize()
     ATH_CHECK (m_trackToVertexIPEstimator.retrieve());
   }
 
-  ATH_CHECK( m_extrapolator.retrieve());
+
+  ATH_CHECK (m_EventInfoKey.initialize());   // initializing the eventInfo "accessor"
+
+  ATH_CHECK (m_extrapolator.retrieve());
   
   ATH_CHECK (m_vertexKey.initialize());
   
@@ -248,6 +256,8 @@ StatusCode IDPerfMonZmumu::initialize()
   m_xZmm.setDebugMode       (m_doDebug);
   m_xZmm.SetMuonQuality     (m_MuonQualityName);
   m_xZmm.SetSkipMSCheck     (m_skipMS);
+  m_xZmm.SetMinLumiBlock    (m_minGoodLumiBlock);
+  m_xZmm.SetMaxLumiBlock    (m_maxGoodLumiBlock);
 
   if (m_useCustomMuonSelector) {
     m_xZmm.SetMuonSelectionTool (m_muonSelector);    
@@ -971,7 +981,7 @@ StatusCode IDPerfMonZmumu::execute()
 
   // check if the muon-pair passed the resonance selection cuts:
   ATH_MSG_DEBUG(" ** IDPerfMonZmumu::execute ** calling dimuon analysis m_xZmm.Reco()...");
-  if( m_xZmm.Reco() ){
+  if( m_xZmm.Reco( m_lumi_block ) ){
     ATH_MSG_INFO(   "  Run: " << m_runNumber 
 		 << "  event: " << m_evtNumber 
 		 << "  Lumiblock: " << m_lumi_block 
@@ -991,10 +1001,10 @@ StatusCode IDPerfMonZmumu::execute()
 
   StatusCode isTriggerPassed = CheckTriggerStatusAndPrescale ();
   if (isTriggerPassed == StatusCode::SUCCESS) {
-    ATH_MSG_INFO("Trigger passed -> accept event");
+    ATH_MSG_DEBUG("Trigger passed -> accept event");
   }
   else{
-    ATH_MSG_INFO("Trigger Failed -> reject event --> leave event");
+    ATH_MSG_DEBUG("Trigger Failed -> reject event --> leave event");
     return StatusCode::SUCCESS;
   }
 
@@ -1037,7 +1047,7 @@ StatusCode IDPerfMonZmumu::execute()
 
     // double check
     if (p1_comb && p2_comb) {
-      ATH_MSG_INFO("** IDPerfMonZmumu::execute ** successfull retrieval of muons as " << m_trackParticleName << ". p1_comb & p2_comb both exist");
+      ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** successfull retrieval of muons as " << m_trackParticleName << ". p1_comb & p2_comb both exist");
     }
     else {
       ATH_MSG_WARNING("** IDPerfMonZmumu::execute ** problems retrieving muons as " << m_trackParticleName <<". p1_comb or p2_comb are not available");
@@ -2201,7 +2211,7 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
     return StatusCode::FAILURE;
   }
   else {
-    ATH_MSG_INFO("retrieved tool: " << m_triggerDecision );
+    ATH_MSG_DEBUG("retrieved tool: " << m_triggerDecision );
   }
 
   float thisEventTriggerPrescale = 999999.9;

@@ -123,6 +123,9 @@ class IDPerfMonZmumu : public AthAlgorithm
   bool m_storeZmumuNtuple;
   bool m_skipMS;
   bool m_useCustomMuonSelector;
+  int  m_minGoodLumiBlock;
+  int  m_maxGoodLumiBlock;
+
 
   /** @brief The track refitter */
   ToolHandle<IegammaTrkRefitterTool>  m_TrackRefitter1;
