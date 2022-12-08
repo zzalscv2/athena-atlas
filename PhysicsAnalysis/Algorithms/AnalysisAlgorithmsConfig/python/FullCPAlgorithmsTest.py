@@ -450,6 +450,11 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
 def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
 
+    # it seems the right containers are in the test input files so far
+    largeRJets = False
+    # there are no track jets in PHYSLITE, or in the sequence configuration
+    trackJets = not isPhyslite and not forCompare
+
     configSeq = ConfigSequence ()
 
 
@@ -574,6 +579,22 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
             ]
 
 
+    if largeRJets :
+        makeJetAnalysisConfig( configSeq, 'AnaLargeRJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets', postfix = 'largeR_jets' )
+        vars += ['OutLargeRJets_%SYS%.pt  -> larger_jet_pt_%SYS%',
+                 'OutLargeRJets_NOSYS.phi -> larger_jet_phi',
+                 'OutLargeRJets_NOSYS.eta -> larger_jet_eta',
+                 'OutLargeRJets_NOSYS.m   -> larger_jet_m', ]
+
+
+    if trackJets :
+        makeJetAnalysisConfig( configSeq, 'AnaTrackJets', 'AntiKtVR30Rmax4Rmin02PV0TrackJets', postfix = 'track_jets' )
+        vars += ['OutTrackJets_%SYS%.pt  -> track_jet_pt_%SYS%',
+                 'OutTrackJets_NOSYS.phi -> track_jet_phi',
+                 'OutTrackJets_NOSYS.eta -> track_jet_eta',
+                 'OutTrackJets_NOSYS.m   -> track_jet_m', ]
+
+
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
@@ -609,6 +630,14 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     makePtEtaSelectionConfig (configSeq, 'AnaJets',
                               selectionDecoration='selectPtEta',
                               minPt=jetMinPt, maxEta=jetMaxEta)
+    if largeRJets :
+        makePtEtaSelectionConfig (configSeq, 'AnaLargeRJets',
+                                  selectionDecoration='selectPtEta',
+                                  minPt=jetMinPt, maxEta=jetMaxEta)
+    if trackJets :
+        makePtEtaSelectionConfig (configSeq, 'AnaTrackJets',
+                                  selectionDecoration='selectPtEta',
+                                  minPt=jetMinPt, maxEta=jetMaxEta)
 
 
     # Include, and then set up the met analysis algorithm config:
@@ -667,6 +696,14 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     makeOutputThinningConfig (configSeq, 'AnaJets',
                               selectionName='',
                               outputName='OutJets')
+    if largeRJets :
+        makeOutputThinningConfig (configSeq, 'AnaLargeRJets',
+                                  selection='selectPtEta',
+                                  outputName='OutLargeRJets')
+    if trackJets :
+        makeOutputThinningConfig (configSeq, 'AnaTrackJets',
+                                  selection='selectPtEta',
+                                  outputName='OutTrackJets')
 
 
 
