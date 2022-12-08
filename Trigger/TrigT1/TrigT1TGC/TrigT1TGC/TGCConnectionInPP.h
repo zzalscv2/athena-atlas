@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-//  Table of connection between input channel and output channel
-// of PatchPanel.
+// Table of connection between input channel and output channel of PatchPanel
 #ifndef TGCConnectionInPP_hh
 #define TGCConnectionInPP_hh
 
@@ -24,9 +23,6 @@ public:
   TGCPatchPanel* getOredPPIn(int connectorOut, int chOut);
   int getNumberOfChannel(int i)const{return m_nCh[i];};
 
-  void setConnection(int connectorOut, int chOut,
-  int connectorIn, int chIn, TGCPatchPanel* PP);
-  //  void setNumberOfPPOutputConnectorChannel(int nConnector, int nPPOutCh);
   // test whether there are ored channels.
   bool existOredSignal() const;
   void readConnectionTable(TGCPatchPanel* PP);
@@ -51,7 +47,6 @@ private:
   int* m_oredConnectorIn[NumberOfPPOutputConnector];
 }; 
 
-
-} //end of namespace bracket
+}  // end of namespace
 
 #endif // TGCConnectionInPP_hh
