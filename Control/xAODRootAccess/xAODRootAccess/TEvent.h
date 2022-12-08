@@ -19,6 +19,7 @@
 // EDM include(s):
 #include "xAODEventFormat/EventFormat.h"
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
+#include "CxxUtils/checker_macros.h"
 #include "CxxUtils/sgkey_t.h"
 
 // Interface include(s):
@@ -60,7 +61,7 @@ namespace xAOD {
    class TEvent;
    class TTreeMgr;
    class THolder;
-   ::TTree* MakeTransientTree( TEvent&, const char* );
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( TEvent&, const char* );
 
    /// @short Tool for accessing xAOD files outside of Athena
    ///
