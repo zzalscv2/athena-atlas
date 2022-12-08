@@ -874,7 +874,6 @@ StatusCode LArFCalSamplingFraction::doFCal()
         if (sc.isSuccess()) {
             // There can potentially be more than one MC event in the collection
             McEventCollection::const_iterator mcEvent;
-            int numParticles = 0;
 
             for (const HepMC::GenEvent * mcEvent : *mcEventCollection)
               {
@@ -882,7 +881,6 @@ StatusCode LArFCalSamplingFraction::doFCal()
                 for (auto theParticle: *mcEvent)
                   {
                     m_pdg_id->push_back(theParticle->pdg_id());
-                    numParticles++;
                   }
               }
         } // retrieved MC event collection
