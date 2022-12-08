@@ -78,7 +78,7 @@ G4bool CSCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
     if ((npos = volName.find("station")) != std::string::npos && (!isAssembly)) {
 
       /** station name, station eta and station phi */
-      volName       = volName.substr(0,npos-2);
+      volName.resize(npos-2);
       int volCopyNo = touchHist->GetVolume(i)->GetCopyNo();
       stationName   = volName;
       //stationEta    = volCopyNo/100;
