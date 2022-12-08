@@ -103,9 +103,8 @@ namespace Trk {
     //ToolHandle<ITrackSelectorTool>    m_BSTrackSelector; //!< track selector tool for tracks to be used with beam-spot constraint
     ToolHandle<InDet::IInDetTrackSelectionTool> m_BSTrackSelector; //!< new track selector tool for tracks to be used with beam-spot constraint
     //MD:
-    PublicToolHandle<ITrackToVertexIPEstimator>        m_ITrackToVertexIPEstimator
-       {this,"TrackToVertexIPEstimator","Trk::TrackToVertexIPEstimator",""};  //!< vertex updating tool, such as reomving one track from vertex
-
+    ToolHandle<ITrackToVertexIPEstimator>        m_trackToVertexIPEstimatorTool; 
+    
     /** Pointer to AlignModuleTool*/
     ToolHandle <Trk::IAlignModuleTool> m_alignModuleTool;
     
