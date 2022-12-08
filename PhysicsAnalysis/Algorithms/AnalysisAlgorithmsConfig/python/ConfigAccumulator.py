@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import AnaAlgorithm.DualUseConfig as DualUseConfig
+import re
 
 
 def mapUserName (name) :
@@ -87,6 +88,7 @@ class ConfigAccumulator :
         self._pass = 0
         self._algorithms = {}
         self._currentAlg = None
+        self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
 
 
     def dataType (self) :
@@ -262,6 +264,8 @@ class ConfigAccumulator :
         """get the preselection string for the given selection on the given
         container
         """
+        if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
+            raise ValueError ('invalid selection name: ' + selectionName)
         if containerName not in self._containerConfig :
             return ""
         config = self._containerConfig[containerName]
@@ -273,17 +277,58 @@ class ConfigAccumulator :
         return '&&'.join (decorations)
 
 
-    def getFullSelection (self, containerName, selectionName) :
+    def getFullSelection (self, containerName, selectionName,
+                          *, skipBase = False) :
 
         """get the preselection string for the given selection on the given
         container
+
+        This can handle both individual selections or selection
+        expressions (e.g. `loose||tight`) with the later being
+        properly expanded.  Either way the base selection (i.e. the
+        selection without a name) will always be applied on top.
+
+        containerName --- the container the selection is defined on
+        selectionName --- the name of the selection, or a selection
+                          expression based on multiple named selections
+        skipBase --- will avoid the base selection, and should normally
+                     not be used by the end-user.
+
         """
         if containerName not in self._containerConfig :
             return ""
+
+        # Check if this is actually a selection expression,
+        # e.g. `A||B` and if so translate it into a complex expression
+        # for the user.  I'm not trying to do any complex syntax
+        # recognition, but instead just produce an expression that the
+        # C++ parser ought to be able to read.
+        if selectionName != '' and \
+           not self._selectionNameExpr.fullmatch (selectionName) :
+            result = ''
+            while selectionName != '' :
+                match = self._selectionNameExpr.match (selectionName)
+                if not match :
+                    result += selectionName[0]
+                    selectionName = selectionName[1:]
+                else :
+                    subname = match.group(0)
+                    subresult = self.getFullSelection (containerName, subname, skipBase = True)
+                    if subresult != '' :
+                        result += '(' + subresult + ')'
+                    else :
+                        result += 'true'
+                    selectionName = selectionName[len(subname):]
+            subresult = self.getFullSelection (containerName, '')
+            if subresult != '' :
+                result = subresult + '&&(' + result + ')'
+            return result
+
         config = self._containerConfig[containerName]
         decorations = []
         for selection in config.selections :
-            if (selection.name == '' or selection.name == selectionName) :
+            if ((selection.name == '' and not skipBase) or
+                selection.name == selectionName) :
                 decorations += [selection.decoration]
         return '&&'.join (decorations)
 
@@ -295,6 +340,8 @@ class ConfigAccumulator :
 
         This also takes the number of bits in the selection decoration,
         which is needed to make object cut flows."""
+        if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
+            raise ValueError ('invalid selection name: ' + selectionName)
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, containerName)
         config = self._containerConfig[containerName]

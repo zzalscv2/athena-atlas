@@ -643,11 +643,17 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     # Include, and then set up the met analysis algorithm config:
     from MetAnalysisAlgorithms.MetAnalysisConfig import makeMetAnalysisConfig
 
+    # Note that the configuration for the muons is not what you'd
+    # normally do.  This is specifically here because this is a unit
+    # test and I wanted to make sure that selection expressions work.
+    # For an actual analysis that would just be `AnaMuons.medium`, but
+    # since `tight` is a strict subset of `medium` it doesn't matter
+    # if we do an "or" of the two.
     makeMetAnalysisConfig (configSeq,
                            containerName = 'AnaMET',
                            jets = 'AnaJets',
                            taus = 'AnaTauJets.tight',
-                           muons = 'AnaMuons.medium',
+                           muons = 'AnaMuons.medium || tight',
                            electrons = 'AnaElectrons.loose',
                            photons = 'AnaPhotons.tight')
     vars += [
@@ -664,7 +670,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     makeOverlapAnalysisConfig( configSeq,
                                electrons = 'AnaElectrons.loose',
                                photons   = 'AnaPhotons.tight',
-                               muons     = 'AnaMuons.medium',
+                               muons     = 'AnaMuons.medium||tight',
                                jets      = 'AnaJets',
                                taus      = 'AnaTauJets.tight',
                                inputLabel = 'preselectOR',
