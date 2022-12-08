@@ -74,5 +74,14 @@ lcg_generate_env(
 install( FILES ${CMAKE_BINARY_DIR}/env_setup_install.sh
    DESTINATION . RENAME env_setup.sh )
 
+# Setup IDE integration:
+set( ATLAS_ENABLE_IDE_HELPERS OFF CACHE BOOL "Enable IDE helpers" )
+if( ATLAS_ENABLE_IDE_HELPERS )
+   set( ATLAS_IDEHELPERSCRIPTS_SETUP
+      "${CMAKE_SOURCE_DIR}/../../.vscode/IDEHelperScripts/Setup.cmake"
+      CACHE FILEPATH "Setup file for the IDE / VS Code helpers" )
+   include( "${ATLAS_IDEHELPERSCRIPTS_SETUP}" )
+endif()
+
 # Set up the release packaging:
 atlas_cpack_setup()
