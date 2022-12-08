@@ -361,8 +361,14 @@ def JetRoITrackJetTagSequence(dummyFlags,jetsIn,trkopt,RoIs):
     viewAlgs, viewVerify = makeInDetTrigFastTracking( config = IDTrigConfig, rois=RoIs)
     viewVerify.DataObjects += [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs ),( 'xAOD::JetContainer' , 'StoreGateSvc+%s' % jetsIn)]
 
-    IDTrigConfig = getInDetTrigConfig('jetSuper')
+    vtxAlgs = makeInDetTrigVertices( "jetSuper", IDTrigConfig.tracks_FTF(), IDTrigConfig.vertex, IDTrigConfig, IDTrigConfig.adaptiveVertex )
+
     tracksIn = IDTrigConfig.tracks_FTF()
+
+    # leave this here as a reminder since we should pass this into 
+    # the getFastFlavourTaggingSequnce(), bit don't for now to avoid 
+    # changing the output 
+    # vtxIn    = IDTrigConfig.vertex
 
     jetTrkSeq=getFastFlavourTaggingSequence(
         dummyFlags,
@@ -370,7 +376,7 @@ def JetRoITrackJetTagSequence(dummyFlags,jetsIn,trkopt,RoIs):
         jetsIn,
         "",
         tracksIn,
-        addAlgs=viewAlgs,
+        addAlgs=viewAlgs+vtxAlgs,
     )
 
     return jetTrkSeq
