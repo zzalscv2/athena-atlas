@@ -42,6 +42,10 @@ def _run(input):
 
     from RecJobTransforms.RecoSteering import RecoSteering
     acc = RecoSteering(flags)
+
+    from AthenaConfiguration.Utils import setupLoggingLevels
+    setupLoggingLevels(flags, acc)
+
     confStamp = datetime.datetime.now()
     log.info("configured in %d seconds", (confStamp-startStamp).seconds )
     acc.printConfig(withDetails=True)

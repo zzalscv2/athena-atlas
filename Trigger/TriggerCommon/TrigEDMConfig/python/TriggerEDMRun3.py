@@ -849,10 +849,12 @@ TriggerHLTListRun3 = [
 
     # FS vertices
     ('xAOD::VertexContainer#HLT_IDVertex_FS',                  'BS ESD AODFULL AODSLIM', 'Jet'),
-    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.',          'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSAux.',           'BS ESD AODFULL AODSLIM', 'Jet'),
 
     ('xAOD::VertexContainer#HLT_IDVertex_FSJet',                  'BS ESD AODFULL', 'Jet'),
     ('xAOD::VertexAuxContainer#HLT_IDVertex_FSJetAux.',           'BS ESD AODFULL', 'Jet'),
+
+
 
     #FSLRT
     ('xAOD::TrackParticleContainer#HLT_IDTrack_FSLRT_FTF',                  'BS ESD AODFULL', 'UTT'),
@@ -1009,6 +1011,9 @@ TriggerHLTListRun3 = [
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_JetSuper_FTF',          'BS ESD AODFULL', 'Jet', 'inViews:JetSuperRoIViews'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_JetSuper_FTFAux.',   'BS ESD AODFULL', 'Jet'),
+
+    ('xAOD::VertexContainer#HLT_IDVertex_JetSuper',                  'BS ESD AODFULL AODSLIM', 'Jet', 'inViews:JetSuperRoIViews'),
+    ('xAOD::VertexAuxContainer#HLT_IDVertex_JetSuperAux.',           'BS ESD AODFULL AODSLIM', 'Jet'),
 
 
 
