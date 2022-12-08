@@ -74,6 +74,7 @@ def getTrackingInputMaker(trkopt):
                 RoisWriteHandleKey  = recordable( IDTrigConfig.roi ),
                 RoIEtaWidth = IDTrigConfig.etaHalfWidth,
                 RoIPhiWidth = IDTrigConfig.phiHalfWidth,
+                RoIZWidth   = IDTrigConfig.zedHalfWidth,
             ),
             Views = "JetSuperRoIViews",
             InViewRoIs = "InViewRoIs",
