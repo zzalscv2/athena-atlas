@@ -28,8 +28,7 @@ McEventCollectionCnv::createPersistent( McEventCollection* transCont )
 {
   MsgStream msg( msgSvc(), "McEventCollectionCnv" );
 
-  McEventCollectionCnv_p5 cnv;
-// v6  McEventCollectionCnv_p6 cnv;
+  McEventCollectionCnv_p6 cnv;
   McEventCollection_PERS *persObj = cnv.createPersistent( transCont, msg );
 
   msg << MSG::DEBUG << "::createPersistent [Success]" << endmsg;
