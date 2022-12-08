@@ -109,7 +109,12 @@ def setup_parser() -> ArgumentParser:
                        help="Override the AMI tag of the test.")
     tests.add_argument("-w", "--workflow", type=WorkflowType, dest="workflow", choices=list(WorkflowType), default=None,
                        help="Specify the workflow that is being run (required for AMI tags or if you want to run only one workflow)")
+    tests.add_argument("--dsid", type=str, dest="dsid", default=None,
+                       help="Override the DSID of the test (only for generation).")
+
     # shortcuts
+    tests.add_argument("-g", "--gen", action="store_true", dest="generation", default=False,
+                       help="Run generation test using Gen_tf.py")
     tests.add_argument("-s", "--sim", action="store_true", dest="simulation", default=False,
                        help="Run simulation test using Sim_tf.py")
     tests.add_argument("-o", "--overlay", action="store_true", dest="overlay", default=False,

@@ -192,3 +192,28 @@ class DerivationTest(WorkflowTest):
             ]
 
         super().__init__(ID, run, type, steps, setup)
+
+
+class GenerationTest(WorkflowTest):
+    """Generation test."""
+
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+        if "maxEvents" not in extra_args:
+            extra_args += " --maxEvents 10"
+
+        if "ecmEnergy" not in extra_args:
+            if run is WorkflowRun.Run2:
+                extra_args += " --ecmEnergy 13000"
+            elif run is WorkflowRun.Run3:
+                extra_args += " --ecmEnergy 13600"
+            else:
+                extra_args += " --ecmEnergy 14000"
+
+        dsid = ID.replace("gen", "")
+
+        self.command = \
+            (f"Gen_tf.py --jobConfig {dsid}"
+             " --outputEVNTFile myEVNT.pool.root"
+             f" --imf False {extra_args}")
+
+        super().__init__(ID, run, type, steps, setup)

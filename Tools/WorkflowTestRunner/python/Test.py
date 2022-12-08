@@ -60,6 +60,7 @@ class WorkflowRun(Enum):
 
 
 class WorkflowType(Enum):
+    Generation = "Generation"
     FullSim = "FullSim"
     AF3 = "AF3"
     HitsMerge = "HitsMerge"
