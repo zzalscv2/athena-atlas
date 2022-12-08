@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Set up the project.
 cmake_minimum_required( VERSION 3.10 )
@@ -18,7 +18,7 @@ set( TDAQ-COMMON_ATROOT
 find_package( AtlasCMake QUIET )
 
 # Build the project against LCG:
-set( LCG_VERSION_POSTFIX ""   # Needs to match tdaq release (NO layer, ATLINFR-3977)
+set( LCG_VERSION_POSTFIX "b"   # Needs to match tdaq release (NO layer, ATLINFR-3977)
    CACHE STRING "Version postfix for the LCG release to use" )
 set( LCG_VERSION_NUMBER 102
    CACHE STRING "Version number for the LCG release to use" )
