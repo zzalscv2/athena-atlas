@@ -135,6 +135,9 @@ def fromRunArgs(runArgs):
     # Post-exec
     processPostExec(runArgs, ConfigFlags, cfg)
 
+    from AthenaConfiguration.Utils import setupLoggingLevels
+    setupLoggingLevels(ConfigFlags, cfg)
+
     timeConfig = time.time()
     log.info("configured in %d seconds", timeConfig - timeStart)
 
