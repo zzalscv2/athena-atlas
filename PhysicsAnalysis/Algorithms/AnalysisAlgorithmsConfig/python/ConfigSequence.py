@@ -84,3 +84,32 @@ class ConfigSequence:
                 used = True
         if not used :
             raise KeyError ('unknown option: ' + name)
+
+
+    def __iadd__( self, sequence, index = None ):
+        """Add another sequence to this one
+
+        This function is used to add another sequence to this sequence
+        using the '+=' operator.
+        """
+
+        # Check that the received object is of the right type:
+        if not isinstance( sequence, ConfigSequence ):
+            raise TypeError( 'The received object is not of type ConfigSequence' )
+
+        for block in sequence._blocks :
+            self._blocks.append (block)
+
+        # Return the modified object:
+        return self
+
+    def __iter__( self ):
+        """Create an iterator over all the configurations in this sequence
+
+        This is to allow for a Python-like iteration over all
+        configuration blocks that are part of the sequence.
+
+        """
+
+        # Create the iterator to process the internal list of algorithms:
+        return self._blocks.__iter__()

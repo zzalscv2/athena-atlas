@@ -85,7 +85,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.addOption ('isolation', None, type=str)
         self.addOption ('isRun3Geo', False, type=bool,
                         info='use run 3 geometry for the muon selection tool')
-        self.addOption ('qualitySelectionOutput', False, type=bool)
+        self.addOption ('qualitySelectionOutput', True, type=bool)
 
     def makeAlgs (self, config) :
 
@@ -192,8 +192,8 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 
 def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                qualitySelectionOutput = True,
-                                isRun3Geo = False):
+                                qualitySelectionOutput = None,
+                                isRun3Geo = None):
     """Create muon analysis algorithms for a single working point
 
     Keyword arguments:
@@ -207,13 +207,16 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
       isRun3Geo -- switches the muon selection tool to run 3 geometry
     """
 
-    splitWP = workingPoint.split ('.')
-    if len (splitWP) != 2 :
-        raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
 
     config = MuonWorkingPointConfig (containerName, postfix)
-    config.setOptionValue ('quality', splitWP[0])
-    config.setOptionValue ('isolation', splitWP[1])
-    config.setOptionValue ('isRun3Geo', isRun3Geo)
-    config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput)
+    if workingPoint is not None :
+        splitWP = workingPoint.split ('.')
+        if len (splitWP) != 2 :
+            raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
+        config.setOptionValue ('quality', splitWP[0])
+        config.setOptionValue ('isolation', splitWP[1])
+    if isRun3Geo is not None :
+        config.setOptionValue ('isRun3Geo', isRun3Geo)
+    if qualitySelectionOutput is not None :
+        config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput)
     seq.append (config)
