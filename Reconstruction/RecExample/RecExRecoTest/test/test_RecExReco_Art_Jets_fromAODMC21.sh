@@ -6,7 +6,7 @@
 # art-include: master/Athena
 # art-output: *.log   
 
-python $Athena_DIR/python/RecExRecoTest/Jets_ESDMC21.py | tee temp.log
+python $Athena_DIR/python/RecExRecoTest/Jets_AODMC21.py | tee temp.log
 echo "art-result: ${PIPESTATUS[0]}"
 test_postProcessing_Errors.sh temp.log
 
