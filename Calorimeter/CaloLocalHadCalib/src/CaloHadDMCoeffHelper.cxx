@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -91,7 +91,6 @@ CaloHadDMCoeff2 *CaloHadDMCoeffHelper::InitDataFromFile(std::string &filename)
   }
 
   int offset = 0;
-  int indx = 0;
 
   std::string sLine;
   std::string sdummy;
@@ -170,7 +169,6 @@ CaloHadDMCoeff2 *CaloHadDMCoeffHelper::InitDataFromFile(std::string &filename)
 
     data->addHadDMArea(dmArea);
     offset += length; // ofset for next DM area
-    indx++;
     // putting zero parameters
     CaloHadDMCoeff2::HadDMCoeff pars;
     pars.resize(dmArea.m_nPars, 0.0);
