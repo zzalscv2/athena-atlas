@@ -27,7 +27,6 @@ def getTrigConfFromCool(runNumber, lumiBlock):
     db = TriggerCoolUtil.GetConnection('CONDBR2' if runNumber > 230000 else 'COMP200')
     runRange = [[runNumber,runNumber]]
     d = {key: value for key, value in TriggerCoolUtil.getHLTConfigKeys(db, runRange)[runNumber].items() if  key in ["SMK", "DB"]}
-    d["DB"] = d["DB"].split(';')[0]
     for (hltpsk, firstlb, lastlb) in TriggerCoolUtil.getHLTPrescaleKeys(db, runRange)[runNumber]['HLTPSK2']:
         if firstlb<=lumiBlock and lumiBlock<=lastlb:
             d['HLTPSK'] = hltpsk
