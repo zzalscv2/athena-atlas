@@ -89,7 +89,7 @@ public:
   static CLHEP::HepRandomEngine* COSMIC_RANDOM_ENGINE;
 
 private:
-  IntegerProperty m_dsid{this, "DSID", 999999, "Dataset ID number"};
+  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
   // event counter, used for event ID
   int m_events, m_rejected,m_accepted;
   std::vector<int> m_pdgCode;
