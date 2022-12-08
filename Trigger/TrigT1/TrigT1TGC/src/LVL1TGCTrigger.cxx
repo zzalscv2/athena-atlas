@@ -48,6 +48,10 @@
 #include "PathResolver/PathResolver.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
+// DetMask stuff
+#include "eformat/DetectorMask.h"
+#include "eformat/SourceIdentifier.h"
+
 namespace LVL1TGCTrigger {
 
 LVL1TGCTrigger::LVL1TGCTrigger(const std::string& name, ISvcLocator* pSvcLocator)
@@ -113,6 +117,7 @@ StatusCode LVL1TGCTrigger::initialize()
     ATH_CHECK(m_keyBIS78TrigOut.initialize(tgcArgs()->USE_BIS78())); // to be updated as well
     ATH_CHECK(m_muctpiPhase1Key.initialize(tgcArgs()->useRun3Config()));
     ATH_CHECK(m_keyTgcRdo.initialize(tgcArgs()->useRun3Config()));
+    ATH_CHECK(m_bsMetaDataContRHKey.initialize(SG::AllowEmpty));
 
     // clear mask channel map
     m_MaskedChannel.clear();
@@ -1146,6 +1151,30 @@ StatusCode LVL1TGCTrigger::getMaskedChannel()
     return StatusCode::SUCCESS;
 }
 
+/////////////////////////////////////////
+StatusCode LVL1TGCTrigger::start() {
+  if (m_bsMetaDataContRHKey.key().empty()) return StatusCode::SUCCESS;
+
+  ATH_MSG_DEBUG("Retrieving Detector Mask from ByteStream metadata container");
+  auto bsmdc = SG::makeHandle(m_bsMetaDataContRHKey);
+  if (bsmdc.isValid() && !bsmdc->empty()) {
+    const ByteStreamMetadata* metadata = bsmdc->front();
+    uint64_t detMaskLeast = metadata->getDetectorMask();
+    uint64_t detMaskMost = metadata->getDetectorMask2();
+
+    std::vector<eformat::SubDetector> subDetOff;
+    eformat::helper::DetectorMask(~detMaskLeast, ~detMaskMost).sub_detectors(subDetOff);
+    auto sideA = std::find_if(subDetOff.begin(), subDetOff.end(), [](const eformat::SubDetector &s) {
+        return (s == eformat::MUON_MMEGA_ENDCAP_A_SIDE || s == eformat::MUON_STGC_ENDCAP_A_SIDE); });
+    auto sideC = std::find_if(subDetOff.begin(), subDetOff.end(), [](const eformat::SubDetector &s) {
+        return (s == eformat::MUON_MMEGA_ENDCAP_C_SIDE || s == eformat::MUON_STGC_ENDCAP_C_SIDE); });
+
+    if (sideA != std::end(subDetOff)) tgcArgs()->set_NSWSideInfo(m_NSWSideInfo.value().erase(0,1));
+    else if (sideC != std::end(subDetOff)) tgcArgs()->set_NSWSideInfo(m_NSWSideInfo.value().erase(1,1));
+    else if (sideA != std::end(subDetOff) && sideC != std::end(subDetOff)) tgcArgs()->set_NSWSideInfo("");
+  }
+  return StatusCode::SUCCESS;
+}
 
 /////////////////////////////////////////
 void LVL1TGCTrigger::extractFromString(std::string str, std::vector<int> & v) {

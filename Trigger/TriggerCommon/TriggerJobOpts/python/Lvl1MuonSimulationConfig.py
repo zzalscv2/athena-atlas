@@ -198,7 +198,7 @@ def MuonRdoToMuonDigitToolCfg(flags, name="MuonRdoToMuonDigitTool", **kwargs ):
     kwargs.setdefault( "stgcRdoDecoderTool", result.popToolsAndMerge(STgcRdoDecoderCfg(flags))
                          if flags.Detector.GeometrysTGC else "" )
     kwargs.setdefault("mmRdoDecoderTool", result.popToolsAndMerge(MMRdoDecoderCfg(flags))
-                         if flags.Detector.GeometryMM else "" )    
+                         if flags.Detector.GeometryMM else "" )
     kwargs.setdefault("mdtRdoDecoderTool", result.popToolsAndMerge(MdtRdoDecoderCfg(flags)))
     the_tool = CompFactory.MuonRdoToMuonDigitTool (name, **kwargs)
     result.setPrivateTools(the_tool)
@@ -246,7 +246,7 @@ def MuonRdo2DigitConfig(flags):
                                                                  RpcDigitContainer = "RPC_DIGITS_L1",
                                                                  TgcDigitContainer = "TGC_DIGITS_L1"))
 
-   
+
 
     acc.addPublicTool(MuonRdoToMuonDigitTool)
     rdo2digit = CompFactory.MuonRdoToMuonDigit( "MuonRdoToMuonDigit",
@@ -339,7 +339,14 @@ def TGCTriggerConfig(flags):
     if flags.Trigger.L1MuonSim.EmulateNSW:
         tgcAlg.MuctpiPhase1LocationTGC = "L1MuctpiStoreTGCint"
 
+    if flags.Input.Format is Format.BS:
+        from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
+        readBSConfig = ByteStreamReadCfg(flags, ['ByteStreamMetadataContainer/ByteStreamMetadata'])
+        acc.merge(readBSConfig)
+    else:
+        tgcAlg.ByteStreamMetadataRHKey = ''
     acc.addEventAlgo(tgcAlg)
+
     from PathResolver import PathResolver
     bwCW_Run3_filePath=PathResolver.FindCalibFile("TrigT1TGC_CW/BW/CW_BW_Run3.v01.db")
     acc.merge(addFolders(flags, '<db>sqlite://;schema={0};dbname=OFLP200</db> /TGC/TRIGGER/CW_BW_RUN3'.format(bwCW_Run3_filePath),

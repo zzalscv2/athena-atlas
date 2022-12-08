@@ -28,6 +28,8 @@
 #include "MuonCondSvc/TGCTriggerData.h"
 #include "TGCTriggerCondSvc/TGCTriggerLUTs.h"
 
+// BS metadata container
+#include "ByteStreamData/ByteStreamMetadataContainer.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -73,6 +75,7 @@ class LVL1TGCTrigger : public AthAlgorithm
     
     // standard algorithm methods:
     virtual StatusCode initialize() override;
+    virtual StatusCode start() override;
     virtual StatusCode execute() override;
     virtual StatusCode finalize() override;
     
@@ -176,6 +179,9 @@ class LVL1TGCTrigger : public AthAlgorithm
     SG::ReadCondHandleKey<TGCTriggerData> m_readCondKey{this,"ReadCondKey","TGCTriggerData"};
     SG::ReadCondHandleKey<TGCTriggerLUTs> m_readLUTs_CondKey{this,"ReadLUTCondKey","TGCTriggerLUTs"};
     SG::WriteHandleKey<LVL1MUONIF::Lvl1MuCTPIInputPhase1> m_muctpiPhase1Key{this, "MuctpiPhase1LocationTGC", "L1MuctpiStoreTGC", "Location of muctpiPhase1 for Tgc"};
+
+    //StoreGate key for the ByteStreamMetadata container to retrieve detector mask
+    SG::ReadHandleKey<ByteStreamMetadataContainer> m_bsMetaDataContRHKey {this, "ByteStreamMetadataRHKey", "ByteStreamMetadata", "Location to retrieve the detector mask"};
 
     /// mask channel map
     std::map<Identifier, int> m_MaskedChannel;

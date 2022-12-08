@@ -384,8 +384,8 @@ void TGCSectorLogic::doInnerCoincidence(int SSCId, TGCRPhiCoincidenceOut* coinci
 void TGCSectorLogic::doTGCNSWCoincidence(TGCRPhiCoincidenceOut* coincidenceOut){
   std::shared_ptr<const NSWTrigOut> pNSWOut = m_nsw->getOutput(m_region,m_sideId,m_sectorId);
 
-  // for now, if there is a hit at NSW, turn on the inner coin flag
-  coincidenceOut->setInnerCoincidenceFlag( pNSWOut->getNSWeta().size()>0 );
+  // for now, if there is a hit at NSW and the side is included in the detector mask, turn on the inner coin flag
+  coincidenceOut->setInnerCoincidenceFlag( pNSWOut->getNSWeta().size()>0 && m_nswSide);
   return;
 
   // will implement NSW pT calculation later
