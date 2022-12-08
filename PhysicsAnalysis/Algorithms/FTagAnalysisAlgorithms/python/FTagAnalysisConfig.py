@@ -7,17 +7,17 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 class FTagConfig (ConfigBlock):
     """the ConfigBlock for the flavor tagging config"""
 
-    def __init__ (self, containerName) :
-        super (FTagConfig, self).__init__ ()
+    def __init__ (self, containerName, postfix) :
+        super (FTagConfig, self).__init__ (containerName + '.' + postfix)
         self.containerName = containerName
-        self.btagWP = "FixedCutBEff_77"
-        self.btagger = "DL1r"
-        self.generator = "default"
-        self.postfix = ""
-        self.kinematicSelection = True
-        self.noEfficiency = False
-        self.legacyRecommendations = False
-        self.minPt = None
+        self.postfix = postfix
+        self.addOption ('btagWP', "FixedCutBEff_77", type=str)
+        self.addOption ('btagger', "DL1r", type=str)
+        self.addOption ('generator', "default", type=str)
+        self.addOption ('kinematicSelection', True, type=bool)
+        self.addOption ('noEfficiency', False, type=bool)
+        self.addOption ('legacyRecommendations', False, type=bool)
+        self.addOption ('minPt', None, type=float)
 
     def makeAlgs (self, config) :
 
@@ -137,13 +137,13 @@ class FTagConfig (ConfigBlock):
 
 
 def makeFTagAnalysisConfig( seq, containerName,
-                            btagWP = "FixedCutBEff_77",
-                            btagger = "DL1r",
-                            generator = "default",
-                            postfix = "",
-                            kinematicSelection = True,
-                            noEfficiency = False,
-                            legacyRecommendations = False,
+                            postfix,
+                            btagWP = None,
+                            btagger = None,
+                            generator = None,
+                            kinematicSelection = None,
+                            noEfficiency = None,
+                            legacyRecommendations = None,
                             minPt = None ):
     """Create a ftag analysis algorithm config
 
@@ -157,13 +157,19 @@ def makeFTagAnalysisConfig( seq, containerName,
       minPt -- Kinematic selection for jet calibration validity (depending on jet collection)
     """
 
-    config = FTagConfig (containerName)
-    config.btagWP = btagWP
-    config.btagger = btagger
-    config.generator = generator
-    config.postfix = postfix
-    config.kinematicSelection = kinematicSelection
-    config.noEfficiency = noEfficiency
-    config.legacyRecommendations = legacyRecommendations
-    config.minPt = minPt
+    config = FTagConfig (containerName, postfix)
+    if btagWP is not None :
+        config.setOptionValue ('btagWP', btagWP)
+    if btagger is not None :
+        config.setOptionValue ('btagger', btagger)
+    if generator is not None :
+        config.setOptionValue ('generator', generator)
+    if kinematicSelection is not None :
+        config.setOptionValue ('kinematicSelection', kinematicSelection)
+    if noEfficiency is not None :
+        config.setOptionValue ('noEfficiency', noEfficiency)
+    if legacyRecommendations is not None :
+        config.setOptionValue ('legacyRecommendations', legacyRecommendations)
+    if minPt is not None :
+        config.setOptionValue ('minPt', minPt)
     seq.append (config)

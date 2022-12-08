@@ -90,13 +90,14 @@ class ConfigBlock:
         """
         if name in self._properties :
             raise KeyError ('duplicate option: ' + name)
-        if type not in [str, bool, int, float] :
+        if type not in [str, bool, int, float, None] :
             raise TypeError ('unknown option type: ' + str (type))
         setattr (self, name, defaultValue)
         self._properties[name] = ConfigBlockOption (type=type, info=info)
 
 
-    def setOptionValue (self, name, value) :
+    def setOptionValue (self, name, value,
+                        *, noneAction='error') :
         """set the given option on the configuration block
 
         NOTE: The backend to option handling is slated to be replaced
@@ -104,9 +105,21 @@ class ConfigBlock:
         stay the same, but some behavior may change.
         """
 
+        noneActions = ['error', 'set', 'ignore']
+        if noneAction not in noneActions :
+            raise ValueError ('invalid noneAction: ' + noneAction + ' [allowed values: ' + str (noneActions) + ']')
+
         if name not in self._properties :
             raise KeyError ('unknown option: ' + name)
-        setattr (self, name, value)
+
+        if value is not None or noneAction == 'set' :
+            setattr (self, name, value)
+        elif noneAction == 'ignore' :
+            pass
+        elif noneAction == 'error' :
+            raise ValueError ('passed None for setting option ' + name + ' with noneAction=error')
+        else :
+            raise Exception ('should not get here')
 
 
     def hasOption (self, name) :

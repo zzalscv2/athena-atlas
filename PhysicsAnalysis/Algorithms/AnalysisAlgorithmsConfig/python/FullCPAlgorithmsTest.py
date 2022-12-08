@@ -459,9 +459,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
             makePileupReweightingConfig
-        makePileupReweightingConfig (configSeq,
-                                     userPileupConfigs=prwfiles,
-                                     userLumicalcFiles=lumicalcfiles)
+        makePileupReweightingConfig (configSeq)
+        configSeq.setOptionValue ('.userPileupConfigs', prwfiles)
+        configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles)
 
     vars += [ 'EventInfo.runNumber     -> runNumber',
               'EventInfo.eventNumber   -> eventNumber', ]
@@ -487,8 +487,8 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     if noPhysliteBroken :
         workingpoint = workingpoint.split('.')[0] + '.NonIso'
     makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
-    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose',
-                                    recomputeLikelihood=recomputeLikelihood)
+    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose')
+    configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
     vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
               'OutElectrons_NOSYS.phi -> el_phi',
               'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
@@ -536,7 +536,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
 
     makeTauCalibrationConfig (configSeq, 'AnaTauJets')
-    makeTauWorkingPointConfig (configSeq, 'AnaTauJets', workingPoint='Tight', postfix='tight')
+    makeTauWorkingPointConfig (configSeq, 'AnaTauJets', 'Tight', postfix='tight')
     vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
               'OutTauJets_NOSYS.phi -> tau_phi',
               'OutTauJets_NOSYS.charge -> tau_charge',
@@ -548,13 +548,15 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
     jetContainer = 'AntiKt4EMPFlowJets'
-    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer, runJvtUpdate = True, runNNJvtUpdate = True )
+    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer)
+    configSeq.setOptionValue ('.runJvtUpdate', True)
+    configSeq.setOptionValue ('.runNNJvtUpdate', True )
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta', ]
 
     from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
-    makeJetJvtAnalysisConfig( configSeq, 'AnaJets', jetContainer )
+    makeJetJvtAnalysisConfig( configSeq, 'AnaJets' )
     if dataType != 'data':
         vars += [
             'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
@@ -564,8 +566,12 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
-        makeFTagAnalysisConfig( configSeq, 'AnaJets', noEfficiency = False, legacyRecommendations = True,
-                                btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+        makeFTagAnalysisConfig( configSeq, 'AnaJets', postfix = btagger + '_' + btagWP)
+        configSeq.setOptionValue ('.noEfficiency', False)
+        configSeq.setOptionValue ('.legacyRecommendations', True)
+        configSeq.setOptionValue ('.btagger', btagger)
+        configSeq.setOptionValue ('.btagWP', btagWP)
+        configSeq.setOptionValue ('.kinematicSelection', True )
         vars += [
             'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
         ]
@@ -602,7 +608,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     # Include, and then set up the trigger analysis sequence:
     from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
         makeTriggerAnalysisConfig
-    makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
+    makeTriggerAnalysisConfig( configSeq )
+    configSeq.setOptionValue ('.triggerChains', triggerChains )
+    configSeq.setOptionValue ('.noFilter', True )
     vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
@@ -636,19 +644,18 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     # Include, and then set up the met analysis algorithm config:
     from MetAnalysisAlgorithms.MetAnalysisConfig import makeMetAnalysisConfig
 
+    makeMetAnalysisConfig (configSeq, containerName = 'AnaMET')
+    configSeq.setOptionValue ('.jets', 'AnaJets')
+    configSeq.setOptionValue ('.taus', 'AnaTauJets.tight')
+    configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
+    configSeq.setOptionValue ('.photons', 'AnaPhotons.tight')
     # Note that the configuration for the muons is not what you'd
     # normally do.  This is specifically here because this is a unit
     # test and I wanted to make sure that selection expressions work.
     # For an actual analysis that would just be `AnaMuons.medium`, but
     # since `tight` is a strict subset of `medium` it doesn't matter
     # if we do an "or" of the two.
-    makeMetAnalysisConfig (configSeq,
-                           containerName = 'AnaMET',
-                           jets = 'AnaJets',
-                           taus = 'AnaTauJets.tight',
-                           muons = 'AnaMuons.medium || tight',
-                           electrons = 'AnaElectrons.loose',
-                           photons = 'AnaPhotons.tight')
+    configSeq.setOptionValue ('.muons', 'AnaMuons.medium||tight')
     metVars += [
         'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
         'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
@@ -659,14 +666,14 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     # Include, and then set up the overlap analysis algorithm config:
     from AsgAnalysisAlgorithms.OverlapAnalysisConfig import \
         makeOverlapAnalysisConfig
-    makeOverlapAnalysisConfig( configSeq,
-                               electrons = 'AnaElectrons.loose',
-                               photons   = 'AnaPhotons.tight',
-                               muons     = 'AnaMuons.medium||tight',
-                               jets      = 'AnaJets',
-                               taus      = 'AnaTauJets.tight',
-                               inputLabel = 'preselectOR',
-                               outputLabel = 'passesOR' )
+    makeOverlapAnalysisConfig( configSeq )
+    configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
+    configSeq.setOptionValue ('.photons',     'AnaPhotons.tight')
+    configSeq.setOptionValue ('.muons',       'AnaMuons.medium||tight')
+    configSeq.setOptionValue ('.jets',        'AnaJets')
+    configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
+    configSeq.setOptionValue ('.inputLabel',  'preselectOR')
+    configSeq.setOptionValue ('.outputLabel', 'passesOR' )
 
     vars += [
         'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',

@@ -165,7 +165,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
 
 def makeMuonCalibrationConfig( seq, containerName,
-                               postfix = '', ptSelectionOutput = False):
+                               postfix = None, ptSelectionOutput = None):
     """Create muon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -183,8 +183,8 @@ def makeMuonCalibrationConfig( seq, containerName,
     """
 
     config = MuonCalibrationConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
+    config.setOptionValue ('postfix', postfix, noneAction='ignore')
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
     seq.append (config)
 
 
@@ -215,8 +215,6 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
             raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
         config.setOptionValue ('quality', splitWP[0])
         config.setOptionValue ('isolation', splitWP[1])
-    if isRun3Geo is not None :
-        config.setOptionValue ('isRun3Geo', isRun3Geo)
-    if qualitySelectionOutput is not None :
-        config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput)
+    config.setOptionValue ('isRun3Geo', isRun3Geo, noneAction='ignore')
+    config.setOptionValue ('qualitySelectionOutput', qualitySelectionOutput, noneAction='ignore')
     seq.append (config)

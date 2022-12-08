@@ -7,22 +7,22 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 class OverlapAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
-    def __init__ (self) :
-        super (OverlapAnalysisConfig, self).__init__ ()
-        self.inputLabel = ''
-        self.outputLabel = 'passesOR'
-        self.linkOverlapObjects = False
-        self.doEleEleOR = False
-        self.enableUserPriority = False
-        self.bJetLabel = ''
-        self.boostedLeptons = False
-        self.postfix = ''
-        self.jets = ""
-        self.fatJets = ""
-        self.electrons = ""
-        self.muons = ""
-        self.photons = ""
-        self.taus = ""
+    def __init__ (self, configName) :
+        super (OverlapAnalysisConfig, self).__init__ (configName)
+        self.addOption ('inputLabel', '', type=str)
+        self.addOption ('outputLabel', 'passesOR', type=str)
+        self.addOption ('linkOverlapObjects', False, type=bool)
+        self.addOption ('doEleEleOR', False, type=bool)
+        self.addOption ('enableUserPriority', False, type=bool)
+        self.addOption ('bJetLabel', '', type=str)
+        self.addOption ('boostedLeptons', False, type=bool)
+        self.addOption ('postfix', '', type=str)
+        self.addOption ('jets', "", type=str)
+        self.addOption ('fatJets', "", type=str)
+        self.addOption ('electrons', "", type=str)
+        self.addOption ('muons', "", type=str)
+        self.addOption ('photons', "", type=str)
+        self.addOption ('taus', "", type=str)
 
 
     def makeAlgs (self, config) :
@@ -246,15 +246,16 @@ class OverlapAnalysisConfig (ConfigBlock):
 
 
 def makeOverlapAnalysisConfig( seq,
-                               inputLabel = 'preselectOR', outputLabel = 'passesOR',
-                               linkOverlapObjects = False,
-                               doEleEleOR = False, electrons = "",
-                               muons = "", jets = "", taus = "",
-                               photons = "", fatJets = "",
-                               enableUserPriority = False,
-                               bJetLabel = '',
-                               boostedLeptons = False,
-                               postfix = '' ):
+                               inputLabel = None, outputLabel = None,
+                               linkOverlapObjects = None,
+                               doEleEleOR = None, electrons = None,
+                               muons = None, jets = None, taus = None,
+                               photons = None, fatJets = None,
+                               enableUserPriority = None,
+                               bJetLabel = None,
+                               boostedLeptons = None,
+                               postfix = None,
+                               configName = 'OverlapRemoval'):
     """Function creating the overlap removal algorithm sequence
 
     The function sets up a multi-input/multi-output analysis algorithm sequnce,
@@ -277,19 +278,19 @@ def makeOverlapAnalysisConfig( seq,
       boostedLeptons -- Set to True to enable boosted lepton overlap removal
     """
 
-    config = OverlapAnalysisConfig ()
-    config.inputLabel = inputLabel
-    config.outputLabel = outputLabel
-    config.linkOverlapObjects = linkOverlapObjects
-    config.doEleEleOR = doEleEleOR
-    config.electrons = electrons
-    config.muons = muons
-    config.jets = jets
-    config.taus = taus
-    config.photons = photons
-    config.fatJets = fatJets
-    config.enableUserPriority = enableUserPriority
-    config.bJetLabel = bJetLabel
-    config.boostedLeptons = boostedLeptons
-    config.postfix = postfix
+    config = OverlapAnalysisConfig (configName)
+    config.setOptionValue ('inputLabel', inputLabel, noneAction='ignore')
+    config.setOptionValue ('outputLabel', outputLabel, noneAction='ignore')
+    config.setOptionValue ('linkOverlapObjects', linkOverlapObjects, noneAction='ignore')
+    config.setOptionValue ('doEleEleOR', doEleEleOR, noneAction='ignore')
+    config.setOptionValue ('electrons', electrons, noneAction='ignore')
+    config.setOptionValue ('muons', muons, noneAction='ignore')
+    config.setOptionValue ('jets', jets, noneAction='ignore')
+    config.setOptionValue ('taus', taus, noneAction='ignore')
+    config.setOptionValue ('photons', photons, noneAction='ignore')
+    config.setOptionValue ('fatJets', fatJets, noneAction='ignore')
+    config.setOptionValue ('enableUserPriority', enableUserPriority, noneAction='ignore')
+    config.setOptionValue ('bJetLabel', bJetLabel, noneAction='ignore')
+    config.setOptionValue ('boostedLeptons', boostedLeptons, noneAction='ignore')
+    config.setOptionValue ('postfix', postfix, noneAction='ignore')
     seq.append (config)

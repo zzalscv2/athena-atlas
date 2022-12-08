@@ -46,7 +46,7 @@ class ConfigSequence:
         self.makeAlgs (config)
 
 
-    def setOptionValue (self, name, value) :
+    def setOptionValue (self, name, value, **kwargs) :
         """set the given option on the sequence
 
         The name should generally be of the form
@@ -80,7 +80,7 @@ class ConfigSequence:
         for block in self._blocks :
             if block.groupName() == groupName and \
                block.hasOption (optionName):
-                block.setOptionValue (optionName, value)
+                block.setOptionValue (optionName, value, **kwargs)
                 used = True
         if not used :
             raise KeyError ('unknown option: ' + name)
