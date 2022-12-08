@@ -225,10 +225,8 @@
     {
       const LArHitContainer* hit_container ;
       ATH_CHECK(evtStore()->retrieve(hit_container,HitContainer[iHitContainer]));
-      int ihit = 0;
       for (const LArHit* hit : *hit_container)
       {       
-          ihit++; 
           Identifier cellID=hit->cellID();
           double energy = hit->energy(); 
           double time =hit->time();
