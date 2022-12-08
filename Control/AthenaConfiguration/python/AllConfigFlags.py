@@ -25,6 +25,13 @@ def _createCfgFlags():
     acf.addFlag('Exec.SkipEvents',0)
     acf.addFlag('Exec.DebugStage','')
 
+    #Custom messaging for components, see Utils.setupLoggingLevels
+    acf.addFlag('Exec.VerboseMessageComponents',[])
+    acf.addFlag('Exec.DebugMessageComponents',[])
+    acf.addFlag('Exec.InfoMessageComponents',[])
+    acf.addFlag('Exec.WarningMessageComponents',[])
+    acf.addFlag('Exec.ErrorMessageComponents',[])
+
     acf.addFlag('ExecutorSplitting.TotalSteps', 0)
     acf.addFlag('ExecutorSplitting.Step', -1)
     acf.addFlag('ExecutorSplitting.TotalEvents', -1)
