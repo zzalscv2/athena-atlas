@@ -203,7 +203,7 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
                            'MuonSelectionAlg' + postfix )
     addPrivateTool( alg, 'selectionTool', 'CP::MuonSelectionTool' )
     alg.selectionTool.MuQuality = quality
-    alg.selectionTool.IsRun3Geo = isRun3Geo 
+    alg.selectionTool.IsRun3Geo = isRun3Geo
     alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
     alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
     seq.append( alg, inputPropName = 'muons',
@@ -236,6 +236,8 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
     alg.outOfValidity = 2 #silent
     alg.outOfValidityDeco = 'bad_eff' + postfix
     alg.efficiencyScaleFactorTool.WorkingPoint = sfWorkingPoint
+    if isRun3Geo:
+        alg.efficiencyScaleFactorTool.CalibrationRelease = '220817_Preliminary_r22run3'
     if dataType != 'data':
         seq.append( alg, inputPropName = 'muons',
                     stageName = 'efficiency',
