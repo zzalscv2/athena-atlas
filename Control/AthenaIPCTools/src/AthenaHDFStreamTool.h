@@ -66,7 +66,7 @@ public:
    StatusCode makeClient(int num, std::string& streamPortSuffix);
    bool isClient() const;
 
-   StatusCode putEvent(long eventNumber, const void* source, std::size_t nbytes, unsigned int status) const;
+   StatusCode putEvent ATLAS_NOT_THREAD_SAFE (long eventNumber, const void* source, std::size_t nbytes, unsigned int status) const;
    StatusCode getLockedEvent(void** target, unsigned int& status) const;
    StatusCode lockEvent(long eventNumber) const;
 

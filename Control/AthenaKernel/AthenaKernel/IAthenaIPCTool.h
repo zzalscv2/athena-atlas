@@ -8,6 +8,7 @@
 #include <string>
 
 #include "GaudiKernel/IAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 
 static const InterfaceID IID_IAthenaIPCTool( "IAthenaIPCTool", 1, 0 );
 
@@ -20,7 +21,7 @@ public:
    virtual StatusCode makeClient(int num, std::string& streamPortSuffix) = 0;
    virtual bool isClient() const = 0;
 
-   virtual StatusCode putEvent(long eventNumber, const void* source, size_t nbytes, unsigned int status) const = 0;
+   virtual StatusCode putEvent ATLAS_NOT_THREAD_SAFE (long eventNumber, const void* source, size_t nbytes, unsigned int status) const = 0;
    virtual StatusCode getLockedEvent(void** target, unsigned int& status) const = 0;
    virtual StatusCode lockEvent(long eventNumber) const = 0;
 

@@ -455,7 +455,7 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) { // For SharedReader Server, put event into SHM
       const RawEvent* pre = 0;
       pre = m_eventSource->currentEvent();
-      StatusCode sc = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus());
+      StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus()); // Only called single-threaded
       while (sc.isRecoverable()) {
          usleep(1000);
          sc = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus());
@@ -994,7 +994,7 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
          return(StatusCode::FAILURE);
       }
       if (m_eventStreamingTool->isServer()) {
-         StatusCode sc = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus());
+         StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus()); // Only called single-threaded
          while (sc.isRecoverable()) {
             usleep(1000);
             sc = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus());
@@ -1006,7 +1006,7 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
       }
    }
    // End of file, wait for last event to be taken
-   StatusCode sc = m_eventStreamingTool->putEvent(0, 0, 0, 0);
+   StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(0, 0, 0, 0); // Only called single-threaded
    while (sc.isRecoverable()) {
       usleep(1000);
       sc = m_eventStreamingTool->putEvent(0, 0, 0, 0);
