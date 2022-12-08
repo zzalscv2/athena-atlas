@@ -6,9 +6,9 @@
 #include <boost/test/included/unit_test.hpp>
 
 #include "Acts/EventData/Measurement.hpp"
+#include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
-#include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 
 #include "ActsTrkEvent/MultiTrajectory.h"
@@ -19,7 +19,7 @@
 
 #include "CommonHelpers/GenerateParameters.hpp"
 #include "CommonHelpers/TestSourceLink.hpp"
- 
+
 namespace {
 
 using namespace Acts;
@@ -52,7 +52,8 @@ struct TestTrackState {
         // set bogus parameters first since they are not default-constructible
         predicted(surface, BoundVector::Zero()),
         filtered(surface, BoundVector::Zero()),
-        smoothed(surface, BoundVector::Zero()), jacobian(Jacobian::Identity()),
+        smoothed(surface, BoundVector::Zero()),
+        jacobian(Jacobian::Identity()),
         chi2(std::chi_squared_distribution<double>(nMeasurements)(rng)),
         pathLength(
             std::uniform_real_distribution<ActsScalar>(1_mm, 10_mm)(rng)) {
@@ -106,8 +107,9 @@ template <typename track_state_t>
 void fillTrackState(const TestTrackState &pc, TrackStatePropMask mask,
                     track_state_t &ts) {
   // always set the reference surface
-  //TODO
-  // referenceSurface component not implemented: ts.setReferenceSurface(pc.predicted.referenceSurface().getSharedPtr());
+  // TODO
+  // referenceSurface component not implemented:
+  // ts.setReferenceSurface(pc.predicted.referenceSurface().getSharedPtr());
 
   if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
     ts.predicted() = pc.predicted.parameters();
@@ -143,12 +145,11 @@ const GeometryContext gctx;
 // fixed seed for reproducible tests
 std::default_random_engine rng(31415);
 
-} // namespace
-
+}  // namespace
 
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
-struct EmptyMTJ { // setup empty MTJ
+struct EmptyMTJ {  // setup empty MTJ
   EmptyMTJ() {
     trackStateBackend = std::make_unique<xAOD::TrackStateContainer>();
     trackStateBackendAux = std::make_unique<xAOD::TrackStateAuxContainer>();
@@ -188,7 +189,6 @@ struct EmptyMTJ { // setup empty MTJ
   std::unique_ptr<ActsTrk::MutableMultiTrajectory> mtj;
   std::unique_ptr<ActsTrk::ConstMultiTrajectory> ro_mtj;
 };
-
 
 // cppcheck-suppress syntaxError
 BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
@@ -233,13 +233,20 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
 BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
   using namespace Acts::HashedStringLiteral;
   BOOST_CHECK(mtj->has_backends());
-  mtj->enableDecoration<short>("author");
+  BOOST_CHECK_EQUAL(mtj->hasColumn_impl("jacobian"_hash),
+                    true);  // not dynamic column
+  BOOST_CHECK_EQUAL(mtj->hasColumn_impl("author"_hash),
+                    false);              // dynamic column absent initially
+  mtj->addColumn_impl<short>("author");  // add dynamic column
+  BOOST_CHECK_EQUAL(mtj->hasColumn_impl("author"_hash),
+                    true);  // dynamic column present now
+
   constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
   auto i0 = mtj->addTrackState(kMask);
   auto i1 = mtj->addTrackState(kMask, i0);
   auto i2 = mtj->addTrackState(kMask, i1);
   // dynamic column enabled late
-  mtj->enableDecoration<float>("mcprob");
+  mtj->addColumn_impl<float>("mcprob");
   auto ts0 = mtj->getTrackState(i0);
   auto ts1 = mtj->getTrackState(i1);
   auto ts2 = mtj->getTrackState(i2);
@@ -279,7 +286,7 @@ BOOST_FIXTURE_TEST_CASE(UncalibratedSourceLink, EmptyMTJ) {
   BOOST_CHECK_EQUAL((ts0.component<Acts::SourceLink *, "uncalibrated"_hash>()),
                     link1.get());
 
-  // TODO 
+  // TODO
   // add test for an instantiation of MTJ with eager SourceLinks creation
 }
 
@@ -366,8 +373,8 @@ BOOST_FIXTURE_TEST_CASE(BitmaskOperators, EmptyMTJ) {
     return static_cast<std::underlying_type<PM>::type>(a);
   };
 
-  BOOST_CHECK(cnv(PM::All).all());   // all ones
-  BOOST_CHECK(cnv(PM::None).none()); // all zeros
+  BOOST_CHECK(cnv(PM::All).all());    // all ones
+  BOOST_CHECK(cnv(PM::None).none());  // all zeros
 
   // test orthogonality
   std::array<PM, 5> values{PM::Predicted, PM::Filtered, PM::Smoothed,
@@ -534,19 +541,18 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyCrossTalk, EmptyMTJ) {
     BOOST_CHECK_EQUAL(tsb.smoothedCovariance(), cov);
   }
 
- 
   // TODO problem with a link tsa.uncalibrated()
   // https://github.com/acts-project/acts/blob/980f9ef66ce2df426be87e611f9a8c813904ad7c/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L479
 
-  
-  //TODO 
-  //allocateCalibrated(eBoundSize) is not implemented yet
+  // TODO
+  // allocateCalibrated(eBoundSize) is not implemented yet
   // https://github.com/acts-project/acts/blob/980f9ef66ce2df426be87e611f9a8c813904ad7c/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L488
 
   // TODO
-  // re-enable this test as soon as the allocateCalibrated(eBoundSize) is implemented in the ActsTrk::Multitrajectory
-  // as of now the calibratedSize is 0 and this makes the test fail
-  /* 
+  // re-enable this test as soon as the allocateCalibrated(eBoundSize) is
+  // implemented in the ActsTrk::Multitrajectory as of now the calibratedSize is
+  // 0 and this makes the test fail
+  /*
   {
     // reset only the effective measurements
     auto [measPar, measCov] = generateBoundParametersCovariance(rng);
@@ -591,11 +597,10 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyCrossTalk, EmptyMTJ) {
 // Missing tests from here to be added:
 // https://github.com/acts-project/acts/blob/fa7bd8248f55e030f117f450ea315f60b2ce4335/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L559
 
-
-
 // TODO
-// The test below has few lines to be added after fixing ReferenceSurface, allocateCalibrated etc.
-// See: https://github.com/acts-project/acts/blob/fa7bd8248f55e030f117f450ea315f60b2ce4335/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L641
+// The test below has few lines to be added after fixing ReferenceSurface,
+// allocateCalibrated etc. See:
+// https://github.com/acts-project/acts/blob/fa7bd8248f55e030f117f450ea315f60b2ce4335/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L641
 BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   using namespace Acts::HashedStringLiteral;
   std::default_random_engine rng(12345);
@@ -603,8 +608,8 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
 
   // this should allocate for all components in the trackstate, plus filtered
   size_t i = mtj->addTrackState(TrackStatePropMask::Predicted |
-                             TrackStatePropMask::Filtered |
-                             TrackStatePropMask::Jacobian);
+                                TrackStatePropMask::Filtered |
+                                TrackStatePropMask::Jacobian);
   auto tso = mtj->getTrackState(i);
   fillTrackState(pc, TrackStatePropMask::Predicted, tso);
   fillTrackState(pc, TrackStatePropMask::Filtered, tso);
@@ -616,7 +621,8 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   BOOST_CHECK(!tso.hasCalibrated());
   BOOST_CHECK(tso.hasJacobian());
 
-  auto tsnone = mtj->getTrackState(mtj->addTrackState(TrackStatePropMask::None));
+  auto tsnone =
+      mtj->getTrackState(mtj->addTrackState(TrackStatePropMask::None));
   BOOST_CHECK(!tsnone.has<"predicted"_hash>());
   BOOST_CHECK(!tsnone.has<"filtered"_hash>());
   BOOST_CHECK(!tsnone.has<"smoothed"_hash>());
@@ -631,28 +637,27 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   // should be here BOOST_CHECK(tsnone.has<"referenceSurface"_hash>());
   BOOST_CHECK(tsnone.has<"measdim"_hash>());
   BOOST_CHECK(tsnone.has<"chi2"_hash>());
-  // TODO pathLength and typeFlags not implemented 
-  
+  // TODO pathLength and typeFlags not implemented
 
   auto tsall = mtj->getTrackState(mtj->addTrackState(TrackStatePropMask::All));
   BOOST_CHECK(tsall.has<"predicted"_hash>());
   BOOST_CHECK(tsall.has<"filtered"_hash>());
   BOOST_CHECK(tsall.has<"smoothed"_hash>());
   BOOST_CHECK(tsall.has<"jacobian"_hash>());
-  // TODO we create a trackState already with "calibrated" and allocateCalibrated not implemented
-  
+  // TODO we create a trackState already with "calibrated" and
+  // allocateCalibrated not implemented
+
   BOOST_CHECK(tsall.has<"calibrated"_hash>());
   BOOST_CHECK(tsall.has<"projector"_hash>());
   // TODO We always set the uncalibrated, see MultiTrajectory.icc l84
   BOOST_CHECK(tsall.has<"uncalibrated"_hash>());  // separate optional
-                                                   // mechanism: nullptr
+                                                  // mechanism: nullptr
   BOOST_CHECK(tsall.has<"calibratedSourceLink"_hash>());
   // TODO referenceSurface not implemented
- 
+
   BOOST_CHECK(tsall.has<"measdim"_hash>());
   BOOST_CHECK(tsall.has<"chi2"_hash>());
-  // TODO pathLength and typeFlags not implemented 
-
+  // TODO pathLength and typeFlags not implemented
 
   tsall.unset(TrackStatePropMask::Predicted);
   BOOST_CHECK(!tsall.has<"predicted"_hash>());
@@ -665,7 +670,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
   tsall.unset(TrackStatePropMask::Calibrated);
   BOOST_CHECK(!tsall.has<"calibrated"_hash>());
 }
-
 
 // TODO remaining tests
 }
