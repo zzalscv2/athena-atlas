@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdlib>
@@ -261,7 +261,8 @@ int main(int argc, char** argv) {
             fileLoader.loadFile( fn, jo);
             cout << "Loaded job options with " << jo.getObject("properties").getKeys().size() << " entries " << endl;
             if( cfg.detail ) {
-               for( const auto& alg : jo.getObject("properties").data()) {
+               TrigConf::DataStructure ds = jo.getObject("properties");
+               for( const auto& alg : ds.data()) {
                   std::cout << alg.first << std::endl;
                   for( const auto& prop : alg.second ) {
                      std::cout << "      " << prop.first << " -> " << prop.second.data() << std::endl;
@@ -325,7 +326,8 @@ int main(int argc, char** argv) {
       if (jo) {
          cout << "Loaded job options with " << jo.getObject("properties").getKeys().size() << " entries " << endl;
          if( cfg.detail ) {
-            for( const auto& alg : jo.getObject("properties").data()) {
+            TrigConf::DataStructure ds = jo.getObject("properties");
+            for( const auto& alg : ds.data()) {
                std::cout << alg.first << std::endl;
                for( const auto& prop : alg.second ) {
                   std::cout << "      " << prop.first << " -> " << prop.second.data() << std::endl;
