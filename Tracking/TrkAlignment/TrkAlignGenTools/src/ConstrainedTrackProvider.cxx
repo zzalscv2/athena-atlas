@@ -37,6 +37,9 @@ namespace Trk {
     , m_etaphiMap_d0(nullptr)
     , m_constraintInputFile_z0(nullptr)
     , m_etaphiMap_z0(nullptr)
+    , m_CorrectMeanD0()
+    , m_SelectByCharge()
+    , m_SelectPositive(false)
    {
     declareInterface<ITrackCollectionProvider>(this);
     declareProperty("doTrackSelection",         m_doTrackSelection                 );
@@ -47,6 +50,8 @@ namespace Trk {
     declareProperty("UseConstrainedTrkOnly",    m_useConstrainedTrkOnly  = false   );
     declareProperty("MinPt",                    m_minPt         = 15.0             );        
     declareProperty("MaxPt",                    m_maxPt         = 100.0            );        
+    declareProperty("SelectByCharge",           m_SelectByCharge = false           );
+    declareProperty("SelectPositive",           m_SelectPositive = true            ); 
     declareProperty("MinPIXHits",               m_minPIXHits    = 0                ); //1
     declareProperty("MinSCTHits",               m_minSCTHits    = 0                ); //6
     declareProperty("MinTRTHits",               m_minTRTHits    = 0                );
@@ -56,6 +61,7 @@ namespace Trk {
     declareProperty("MomentumConstraintFileName", m_constraintFileName_P  = "Constraint.root" ); 
     declareProperty("MomentumConstraintHistName", m_constraintHistName_P  = "EtaPhiMap"       ); 
     declareProperty("CorrectD0",                  m_CorrectD0             = false             );
+    declareProperty("CorrectMeanD0",              m_CorrectMeanD0         = false             );
     declareProperty("d0ConstraintFileName",       m_constraintFileName_d0 = "Constraint.root" ); 
     declareProperty("d0ConstraintHistName",       m_constraintHistName_d0 = "EtaPhiMap"       ); 
     declareProperty("CorrectZ0",                  m_CorrectZ0             = false             );
@@ -63,6 +69,7 @@ namespace Trk {
     declareProperty("z0ConstraintHistName",       m_constraintHistName_z0 = "EtaPhiMap"       ); 
     declareProperty("UseConstraintError",         m_useConstraintError = true   ,"Bla bla "   ); 
     declareProperty("ReduceConstraintUncertainty",m_reduceConstraintUncertainty = 1., "Reduce the uncertainty on teh track parmater constraint by this amount"  ); 
+    declareProperty("ReduceConstraintUncert_z0"  ,m_reduceConstraintUncert_z0 = 1.,   "Reduce the uncertainty on z0 track parameter constraint by this amount"  );
     declareProperty("DeltaScaling",               m_deltaScaling = 1.);
     declareProperty("ScalePMapToGeV"             ,m_scalepmaptogev);
   }
@@ -86,6 +93,7 @@ namespace Trk {
 
     ATH_MSG_INFO( "Init m_reduceConstraintUncertainty " << m_reduceConstraintUncertainty );
 
+    ATH_MSG_INFO( "Init m_reduceConstraintUncert_z0 " << m_reduceConstraintUncert_z0 );
 
     if(m_CorrectMomentum){
  
@@ -144,12 +152,14 @@ namespace Trk {
     
     }
     
-    
-    if(m_reduceConstraintUncertainty<=0){
+    /* Commented to enable the scaling of the uncertainty
+     *
+     if(m_reduceConstraintUncertainty<=0){
       ATH_MSG_FATAL( " reduceConstraintUncertainty  is  <= 0 it must be >0 . Currently  " << m_reduceConstraintUncertainty );
       return StatusCode::FAILURE;
     }
-    
+    */
+
     return StatusCode::SUCCESS;
   }
 
@@ -316,6 +326,9 @@ namespace Trk {
 			  << "  z0: " << constrainedPerigee->parameters()[Trk::z0] );          
           }
   
+	  const Track* track = *trackIt;
+	  constrainedFittedTrack->setTrackSummary( std::make_unique<Trk::TrackSummary> (*track->trackSummary()) );
+
           trackCollection->push_back(constrainedFittedTrack);
           ++m_constrainedTracks;
         } else{
@@ -391,10 +404,31 @@ namespace Trk {
     if ( qoverP != 0 ) pt = fabs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
     
     ATH_MSG_DEBUG( "== TrackSelection == track pt  : "<< pt );
-    
+    double charge(0);
+    if( qoverP > 0)
+      charge = 1.;
+    else 
+      charge = -1.;
+    ATH_MSG_DEBUG( " pt  : "<< pt << " ; Charge : "<< charge);
+
     if(pt < m_minPt ||  pt > m_maxPt   ){
-      ATH_MSG_VERBOSE("== TrackSelection == Track fails pt cut [ "<<m_minPt<<", "<< m_maxPt << "] " << pt );      
+      ATH_MSG_DEBUG("== TrackSelection == Track fails pt cut [ "<<m_minPt<<", "<< m_maxPt << "] " << pt );
       return false;
+    }
+
+    if (m_SelectByCharge) {
+      if (m_SelectPositive){
+	if (charge<0){
+	  ATH_MSG_DEBUG("Track fails charge cut: negative charge " << charge );
+	  return false;
+	}
+      }
+      if (not m_SelectPositive){
+	if (charge>0) {
+	  ATH_MSG_DEBUG("Track fails charge cut: positive charge " << charge);
+	  return false;
+	}
+      }
     }
 
     ATH_MSG_VERBOSE("== TrackSelection == Track N PIX hits: " << nPixHits << "  requested: "<< m_minPIXHits );      
@@ -408,8 +442,8 @@ namespace Trk {
         nTRTHits < m_minTRTHits ||
         d0 > m_maxd0    ||
         z0 > m_maxz0    ) {          
-      ATH_MSG_VERBOSE("This track did not pass cuts --- nPixHits: " << nPixHits << " nSCTHits: " << nSCTHits << 
-                   " nTRTHits: " << nTRTHits << " idd0atIP: " << d0 << " idz0atIP: " << z0  );
+      ATH_MSG_DEBUG("This track did not pass cuts --- nPixHits: " << nPixHits << " nSCTHits: " << nSCTHits <<
+		    " nTRTHits: " << nTRTHits << " idd0atIP: " << d0 << " idz0atIP: " << z0  );
      return false;
     }
 
@@ -460,6 +494,11 @@ namespace Trk {
     ATH_MSG_DEBUG(" == getCorrectedValues_d0 == STARTED ==");
     // scale d0
   
+    double charge(0);
+    if( measuredPerigee->parameters()[Trk::qOverP] > 0)
+      charge = 1.;
+    else
+      charge = -1.;  
     
     double d0  = measuredPerigee->parameters()[Trk::d0];
     double eta = -log(tan(measuredPerigee->parameters()[Trk::theta]/2.));
@@ -471,9 +510,11 @@ namespace Trk {
     double constraintErr = m_etaphiMap_d0->GetBinError(binNumber);
     double delta = m_etaphiMap_d0->GetBinContent(binNumber) * m_deltaScaling;
        
-    correctedD0 = d0 + delta;
+    correctedD0 = d0 - charge * delta * 0.5 ; // delta d0 = d0_pos - d0_neg . To make the difference null, substract half to the pos and add half to the neg track.   
+    if (m_CorrectMeanD0) {correctedD0 = d0 + delta;}
     correctedD0Error = d0err;
-    
+    ATH_MSG_DEBUG("Correcting d0 by delta =  " << delta << "\t, corrected d0 = "<< correctedD0 << "\t, original d0 = "<< d0 ) ;
+
     if(m_useConstraintError){
       correctedD0Error = d0err + pow( constraintErr, 2 );
     }
@@ -489,6 +530,12 @@ namespace Trk {
   
     // scale z0
     
+    double charge(0);
+    if( measuredPerigee->parameters()[Trk::qOverP] > 0)
+      charge = 1.;
+    else
+      charge = -1.;    
+    
     double z0  = measuredPerigee->parameters()[Trk::z0];
     double eta = -log(tan(measuredPerigee->parameters()[Trk::theta]/2.));
     double phi = measuredPerigee->parameters()[Trk::phi];
@@ -498,7 +545,7 @@ namespace Trk {
     double constraintErr = m_etaphiMap_z0->GetBinError(binNumber);
     double delta = m_etaphiMap_z0->GetBinContent(binNumber) * m_deltaScaling;
        
-    correctedZ0 = z0 + delta;
+    correctedZ0 = z0 - charge * delta * 0.5 ; // delta z0 = z0_pos - z0_neg . To make the difference null, substract half to the pos and add half to the neg track.
     correctedZ0Error = z0err;
 
     if(m_useConstraintError){
@@ -506,6 +553,8 @@ namespace Trk {
     }
     ATH_MSG_DEBUG("Scaling by 1/m_reduceConstraintUncertainty  " << m_reduceConstraintUncertainty << '\t'<< pow( m_reduceConstraintUncertainty,-2)) ;    
     correctedZ0Error = correctedZ0Error * pow( m_reduceConstraintUncertainty,-2); 
+    ATH_MSG_DEBUG("Scaling by 1/m_reduceConstraintUncert_z0  " << m_reduceConstraintUncert_z0 << '\t'<< pow( m_reduceConstraintUncert_z0,-2)) ;
+    correctedZ0Error = correctedZ0Error * pow( m_reduceConstraintUncert_z0,-2);
     ATH_MSG_DEBUG(" == input z0: " << z0 << "  deltaz0: " << delta << "  final z0: " << correctedZ0 << " +- " << correctedZ0Error);  
  }
 

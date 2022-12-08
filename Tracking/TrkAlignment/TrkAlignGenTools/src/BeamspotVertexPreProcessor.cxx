@@ -31,6 +31,7 @@
 #include "TrkTrackSummary/TrackSummary.h"
 #include "TrkTrack/LinkToTrack.h"
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
+#include "TrkTrackSummary/TrackSummary.h"
 #include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkParameters/TrackParameters.h"
@@ -87,6 +88,7 @@ BeamspotVertexPreProcessor::BeamspotVertexPreProcessor(const std::string & type,
   declareProperty("SLTrackFitter",             m_SLTrackFitter      );
   declareProperty("UseSingleFitter",           m_useSingleFitter    );
   declareProperty("Extrapolator",              m_extrapolator             );
+  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool);
   declareProperty("RunOutlierRemoval",         m_runOutlierRemoval        );
   declareProperty("AlignModuleTool",           m_alignModuleTool          );
   declareProperty("ParticleNumber",            m_particleNumber           );
@@ -149,14 +151,14 @@ StatusCode BeamspotVertexPreProcessor::initialize()
       ATH_MSG_INFO("Retrieved " << m_SLTrackFitter);
     }
 
-     // TrackToVertexIPEstimator
-    if (m_ITrackToVertexIPEstimator.retrieve().isFailure()) {
-      if(msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Can not retrieve TrackToVertexIPEstimator of type " << m_ITrackToVertexIPEstimator.typeAndName() << endmsg;
-        return StatusCode::FAILURE;
+    // TrackToVertexIPEstimator
+    if (m_trackToVertexIPEstimatorTool.retrieve().isFailure()) {
+      if(msgLvl(MSG::FATAL)) msg(MSG::FATAL) << "Can not retrieve TrackToVertexIPEstimator of type " << m_trackToVertexIPEstimatorTool.typeAndName() << endmsg;
+      return StatusCode::FAILURE;
     } else {
-      ATH_MSG_INFO ( "Retrieved TrackToVertexIPEstimator Tool " << m_ITrackToVertexIPEstimator.typeAndName() );
+      ATH_MSG_INFO ( "Retrieved TrackToVertexIPEstimator Tool " << m_trackToVertexIPEstimatorTool.typeAndName() );
     }
-
+   
     // configure Atlas extrapolator
     if (m_extrapolator.retrieve().isFailure()) {
       msg(MSG::FATAL) << "Failed to retrieve tool "<<m_extrapolator<<endmsg;
@@ -420,7 +422,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
     } else {
       tmpVtx = new xAOD::Vertex(*vtx);
       //tmpVtx = vtx->clone();  // no clone option for xAODvertex
-      updatedVtx = m_ITrackToVertexIPEstimator->getUnbiasedVertex(track->perigeeParameters(), vtx ); // MD: new function call
+      updatedVtx = m_trackToVertexIPEstimatorTool->getUnbiasedVertex(track->perigeeParameters(), vtx ); // MD: new function call
     }
 
 
