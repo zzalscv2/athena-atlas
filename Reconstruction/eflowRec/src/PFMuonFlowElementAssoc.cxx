@@ -226,7 +226,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     const CaloClusterCellLink* CellLink = FE_cluster->getCellLinks();
                     // build the iterator(s) for the looping over the elements inside the CellLink
                     if (!CellLink && !m_useMuonTopoClusters) {  // safety check if no celll link and we're doing the cell based matching only
-                       ATH_MSG_WARNING("Flow Element cluster link is nullptr");
+                       ATH_MSG_WARNING("Flow Element CaloCluster CaloClusterCellLink is nullptr");
                         continue;
                     }
 

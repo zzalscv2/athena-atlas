@@ -41,7 +41,7 @@ if __name__=='__main__':
     
     # default input if nothing specified
     ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/AthenaMonitoring/q431/21.0/f946/myESD.pool.root']
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'    
     if args.dqOffByDefault:
         from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff
         allSteeringFlagsOff()

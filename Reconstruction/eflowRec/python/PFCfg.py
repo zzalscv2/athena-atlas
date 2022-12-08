@@ -260,8 +260,8 @@ def getMuonFlowElementAssocAlgorithm(inputFlags, algName="", **kwargs):
     useMuonTopoClusters = False
     from AthenaConfiguration.Enums import ProductionStep
     # set 'useMuonTopoClusters=True' if running on AOD, as do not have calorimeter cells for CaloCalTopoCluster
-    # Assumes that in production workflows this only happens in "Derivation"
-    if inputFlags.Common.ProductionStep in [ProductionStep.Derivation]:
+    # Assumes that in production workflows this only happens in "Derivation" or if DQ environment is AOD
+    if inputFlags.Common.ProductionStep in [ProductionStep.Derivation] or inputFlags.DQ.Environment == "AOD":
         useMuonTopoClusters = True
 
 
