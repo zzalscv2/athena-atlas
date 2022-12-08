@@ -44,3 +44,43 @@ class ConfigSequence:
         self.makeAlgs (config)
         config.nextPass ()
         self.makeAlgs (config)
+
+
+    def setOptionValue (self, name, value) :
+        """set the given option on the sequence
+
+        The name should generally be of the form
+        "groupName.optionName" to identify what group the option
+        belongs to.
+
+        For simplicity I also allow a ".optionName" here, which will
+        then set the property in the last group added.  That makes it
+        fairly straightforward to add new blocks, set options on them,
+        and then move on to the next blocks.  Please note that this
+        mechanism ought to be viewed as strictly as a temporary
+        convenience, and this short cut may go away once better
+        alternatives are available.
+
+        WARNING: The backend to option handling is slated to be
+        replaced at some point.  This particular function may change
+        behavior, interface or be removed/replaced entirely.
+
+        """
+
+        nameSplit = name.split ('.')
+        groupName = '.'.join (nameSplit[0:-1])
+        optionName = nameSplit[-1]
+
+        # option names of the form ".option" are used to set the
+        # option on the last set group of blocks configured
+        if groupName == '' and len(nameSplit)==2 :
+            groupName = self._blocks[-1].groupName()
+
+        used = False
+        for block in self._blocks :
+            if block.groupName() == groupName and \
+               block.hasOption (optionName):
+                block.setOptionValue (optionName, value)
+                used = True
+        if not used :
+            raise KeyError ('unknown option: ' + name)
