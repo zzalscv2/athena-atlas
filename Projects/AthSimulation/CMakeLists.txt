@@ -7,6 +7,9 @@ string( STRIP ${_version} _version )
 project( AthSimulation VERSION ${_version} LANGUAGES C CXX Fortran )
 unset( _version )
 
+# HepMC3
+set( HEPMC3_USE TRUE CACHE BOOL "Build with HepMC3" )
+
 # Configure flake8:
 set( ATLAS_FLAKE8 flake8_atlas --select ATL,ATL902,F,E101,E7,E9,W6
                                --ignore ATL9,E701,E702,E704,E741

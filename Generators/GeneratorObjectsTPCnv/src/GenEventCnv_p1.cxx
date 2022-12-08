@@ -156,7 +156,11 @@ GenEventCnv_p1::createGenVertex( const GenEvent_p1& persEvt,
   if (parent) parent->add_vertex(vtx);
 #ifdef HEPMC3
   vtx->set_position( HepMC::FourVector(persVtx.m_x,persVtx.m_y,persVtx.m_z,persVtx.m_t) );
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(persVtx.m_weights));
+  std::vector<float> weights;
+  for ( const double& weight : persVtx.m_weights) {
+    weights.push_back(static_cast<float>(weight));
+  }
+  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   
   // handle the in-going (orphans) particles

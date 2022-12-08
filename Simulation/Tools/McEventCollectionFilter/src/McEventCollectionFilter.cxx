@@ -85,8 +85,14 @@ StatusCode McEventCollectionFilter::execute(const EventContext &ctx) const
   //......copy GenEvent to the new one and remove all vertex
   HepMC::GenEvent* evt = HepMC::copyemptyGenEvent(genEvt);
 #ifdef HEPMC3
-  for (const auto &bp : evt->beams()) {
+  for (const auto &oldbp : genEvt->beams()) {
+    // Would be good to have a helper function here like:
+    // GenParticlePtr copyGenParticleToNewGenEvent(ConstGenParticlePtr particleToBeCopied, GenEvent* newGenEvent);
+    // This would copy GenParticle Attributes as well
+    HepMC::GenParticlePtr bp=std::make_shared<HepMC::GenParticle>(oldbp->data());
     evt->add_beam_particle(bp);
+    HepMC::suggest_barcode(bp, HepMC::barcode(oldbp) );
+    // Possibly also add a call to genVertex->add_particle_in(bp); ?
   }
   if (genEvt->cross_section()) {
     auto cs = std::make_shared<HepMC3::GenCrossSection>(*genEvt->cross_section().get());
