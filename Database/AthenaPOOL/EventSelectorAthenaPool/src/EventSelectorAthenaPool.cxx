@@ -548,7 +548,7 @@ StatusCode EventSelectorAthenaPool::next(IEvtSelector::Context& ctxt) const {
       {
          if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) {
             std::string token = m_headerIterator->eventRef().toString();
-            StatusCode sc = m_eventStreamingTool->putEvent(m_evtCount - 1, token.c_str(), token.length() + 1, 0);
+            StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(m_evtCount - 1, token.c_str(), token.length() + 1, 0); // Only called single-threaded
             while (sc.isRecoverable()) {
                while (m_athenaPoolCnvSvc->readData().isSuccess()) {
                   ATH_MSG_VERBOSE("Called last readData, while putting next event in next()");
@@ -993,7 +993,7 @@ StatusCode EventSelectorAthenaPool::readEvent(int maxevt) {
    }
    delete ctxt; ctxt = nullptr;
    // End of file, wait for last event to be taken
-   StatusCode sc = m_eventStreamingTool->putEvent(0, 0, 0, 0);
+   StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(0, 0, 0, 0); // Only called single-threaded
    while (sc.isRecoverable()) {
       while (m_athenaPoolCnvSvc->readData().isSuccess()) {
          ATH_MSG_VERBOSE("Called last readData, while marking last event in readEvent()");
