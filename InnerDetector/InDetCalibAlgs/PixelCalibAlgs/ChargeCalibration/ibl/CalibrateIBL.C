@@ -105,7 +105,8 @@ int main() {
 
   // Shall we try this later ?
   const int finerToT = 1 ;  //  smaller bin size for ToT if doing fit
-  const bool moreFE = false ;     const int npsFEs = moreFE ? 8 : 2 ;
+  constexpr bool moreFE = false ;     
+  constexpr int npsFEs = moreFE ? 8 : 2 ;
 
   gStyle->SetOptFit( 1100 ) ;
 
@@ -248,10 +249,8 @@ int main() {
   // ****************************** Threshold IBL ****************************** 
 
   Double_t THR_avg[2][ npsFEs ], ThrSig_avg[2][ npsFEs ] ;
-  vector < TH2F * > h2_Thr ;
-  h2_Thr.reserve( npsFEs ) ;
-  vector < TH2F * > h2_ThrSig ;
-  h2_ThrSig.reserve( npsFEs ) ;
+  array < TH2F *,  npsFEs> h2_Thr{} ;
+  array < TH2F * , npsFEs> h2_ThrSig{} ;
 
   std::multimap < float, TString, std::greater<float>  > badThr_Order ;
 
@@ -332,15 +331,11 @@ int main() {
 	TH2F* h2dSig = (TH2F*)((TKey*)sigHistDir->GetListOfKeys()->First())->ReadObj();
 	sigHistMap[modName] = h2dSig;
 
-        vector< TH1F * > h1_ThrNorm ;
-        h1_ThrNorm.reserve( npsFEs ) ;
-        vector< TH1F * > h1_ThrSigNorm ;
-        h1_ThrSigNorm.reserve( npsFEs ) ;
-        vector< TH1F * > h1_ThrLong ;
-        h1_ThrLong.reserve( npsFEs ) ;
-        vector< TH1F * > h1_ThrSigLong ;
-        h1_ThrSigLong.reserve( npsFEs ) ;
-        float IlledThr[ npsFEs ] ; for ( int sfe = 0 ; sfe < npsFEs ; sfe ++ )  IlledThr[sfe] = 0. ;
+        array< TH1F * , npsFEs> h1_ThrNorm{} ;
+        array< TH1F * , npsFEs> h1_ThrSigNorm{} ;
+        array< TH1F * , npsFEs> h1_ThrLong{} ;
+        array< TH1F * , npsFEs> h1_ThrSigLong{} ;
+        array<float , npsFEs > IlledThr{}; 
 
         for ( int sfe = 0 ; sfe < npsFEs ; sfe ++ ) 
         {
@@ -357,45 +352,38 @@ int main() {
           h1_ThrSigLong[ sfe ] = new TH1F( hname.c_str(), "", 200, 0,500 );
         }
 
-	for ( int col = 1; col <= ncol; col++ ) 
-        {
-	  for ( int row = 1; row <= nrow; row++ ) {
-	    float chi2 = h2dChi2->GetBinContent(col,row);
-	    float thr = h2dThr->GetBinContent(col,row);
-	    float sig = h2dSig->GetBinContent(col,row);
+        for ( int col = 1; col <= ncol; col++ ) {
+          for ( int row = 1; row <= nrow; row++ ) {
+            float chi2 = h2dChi2->GetBinContent(col,row);
+            float thr = h2dThr->GetBinContent(col,row);
+            float sig = h2dSig->GetBinContent(col,row);
 
-	    h1dChi2->Fill(chi2);
-	    h1dThr->Fill(thr);
-	    h1dSig->Fill(sig);
-//  Shall we measure/count the goodness of THR scan here ?   
+            h1dChi2->Fill(chi2);
+            h1dThr->Fill(thr);
+            h1dSig->Fill(sig);
+            //  Shall we measure/count the goodness of THR scan here ?   
             bool filled = true ;
-	    if ( thr == 0 || thr > 10000 || sig == 0 || sig > 1000 || chi2 > 0.5 || chi2 <= 0 ) filled = false ;
-
+            if ( thr == 0 || thr > 10000 || sig == 0 || sig > 1000 || chi2 > 0.5 || chi2 <= 0 ){
+              filled = false ;
+            }
             int circ = -1 ;
-            if ( filled )
-            {
-              if ( col == 1 || col == ncol/2 || col == ncol/2+1 || col == ncol ) 
-              {
-                if ( moreFE )
-                {
+            if ( filled ) {
+              if ( col == 1 || col == ncol/2 || col == ncol/2+1 || col == ncol ) {
+                if ( moreFE ){
                   circ=(int)( row/84.) ;
                   if ( col > 80 ) { circ = 7 - circ ; } 
-                } else
-                {
-	          if (col <= ncol/2) circ = 0 ;
+                } else {
+                  if (col <= ncol/2) circ = 0 ;
                   else circ = 1 ;
                 }
 
                 h1_ThrLong[ circ ]->Fill(thr);
-	        h1_ThrSigLong[ circ ]->Fill(sig);
-	      } else 
-              {
-                if ( moreFE )
-                {
+                h1_ThrSigLong[ circ ]->Fill(sig);
+              } else {
+                if ( moreFE ){
                   circ=(int)( row/84. ) ;
                   if ( col > 80 ) { circ = 7 - circ ; }
-                } else
-                {
+                } else {
                   if (col <= ncol/2) circ = 0 ;
                   else circ = 1 ;
                 }
@@ -403,13 +391,13 @@ int main() {
                 h1_ThrNorm[ circ ]->Fill(thr);
                 h1_ThrSigNorm[ circ ]->Fill(sig);
               }
-	    } else 
-            {
-              IlledThr[ circ ] ++ ;
+            } else {
+              // Note: what is the intention? circ is -1 here
+              //IlledThr[ circ ] ++ ;
               continue ;
             } 
           }
-	}
+        }
         delete h2dSig ;
         delete sigHistDir ;
         delete h2dThr ;
@@ -425,7 +413,7 @@ int main() {
           float THRnorm = h1_ThrNorm[ sfe ]->GetMean();
           bool valid = THRnorm > 100. ;
           pcdMap[modStr][ feName ]["ThrNorm"] = THRnorm ;
-	  pcdMap[modStr][ feName ]["ThrRmsNorm"] = h1_ThrNorm[ sfe ]->GetRMS();
+	        pcdMap[modStr][ feName ]["ThrRmsNorm"] = h1_ThrNorm[ sfe ]->GetRMS();
           float THRnormSig = h1_ThrSigNorm[ sfe ]->GetMean();
           pcdMap[modStr][ feName ]["ThrSigNorm"] = THRnormSig ;
           float THRlong = h1_ThrLong[ sfe ]->GetMean();
@@ -472,10 +460,11 @@ int main() {
     ThrSig_avg[0][ sfe ] = h2_ThrSig[sfe]->ProjectionY( hName.c_str(), 1, 1 )->GetMean();
     hName = "thrSigLong" + ss.str() ;
     ThrSig_avg[1][ sfe ] = h2_ThrSig[sfe]->ProjectionY( hName.c_str(), 2, 2 )->GetMean();
-    if ( h2_Thr[sfe] != nullptr ) delete h2_Thr[sfe] ;
-    if ( h2_ThrSig[sfe] != nullptr ) delete h2_ThrSig[sfe] ;
+    delete h2_Thr[sfe] ;
+    delete h2_ThrSig[sfe] ;
   }
-  h2_Thr.clear() ;  h2_ThrSig.clear() ;
+  h2_Thr.fill(nullptr) ;  
+  h2_ThrSig.fill(nullptr);
 
   // ****************************** End - Threshold IBL ****************************** 
 
@@ -612,10 +601,8 @@ int main() {
 //      bool debugPlot_Module = ( hashID%3 == 0 ? true : false ) ;
       bool debugPlot_Module = true ;
 //  a stack of Charge-ToT data for ToT-charge converting
-      vector< TH2D * > h2d_XchrgYtot ;
-      h2d_XchrgYtot.reserve( npsFEs ) ;
-      vector< TH2D * > h2d_XchrgYToTSig ;
-      h2d_XchrgYToTSig.reserve( npsFEs ) ;
+      array< TH2D *, npsFEs > h2d_XchrgYtot{} ;
+      array< TH2D *,  npsFEs> h2d_XchrgYToTSig{} ;
 
       for ( int sfe = 0 ; sfe < npsFEs ; sfe ++ ) 
       {
@@ -725,7 +712,7 @@ int main() {
 
         delete h2dTotSig ;
         delete totSigHistDir ;
-        if ( h2dTotAux!= nullptr ) delete h2dTotAux ;
+        delete h2dTotAux ;
         delete totHistDirAux ;
         delete  h2dTot ;
         delete totHistDir ;
@@ -737,8 +724,7 @@ int main() {
 
       Double_t paraToT[ npsFEs ][ 5 ], paraChrg[ npsFEs ][ 10 ], paraToTRes[ npsFEs ][ 3 ] ;
 
-      vector< TDirectory* > dirFE ;
-      dirFE.reserve( npsFEs ) ;
+      array< TDirectory*, npsFEs> dirFE ;
 
       Int_t idxMod = cntRod*16*npsFEs + cntMod*npsFEs ;
 
@@ -827,7 +813,7 @@ int main() {
             }
           if ( errToT_overChrg[t] == 0. ) errToT_overChrg[t] = 1.1 ;
 
-          if ( h_chrg != nullptr ) delete h_chrg ;
+          delete h_chrg ;
 
         }
 
@@ -840,8 +826,8 @@ int main() {
         }
 #endif
 
-        if ( prfl_TotsFE != nullptr ) delete prfl_TotsFE ;
-        if ( prfl_ChrgsFE != nullptr ) delete prfl_ChrgsFE ;
+        delete prfl_TotsFE ;
+        delete prfl_ChrgsFE ;
 
         //  try a correction upon dumb FE
         if ( dumbFE > 5 )
@@ -937,7 +923,7 @@ int main() {
         Double_t parP2 = ToTres.GetParameter(2);
     
         dirFE[ sfe ]->WriteTObject( grTotSprd ) ;
-        if ( grTotSprd != nullptr ) delete grTotSprd ;
+        delete grTotSprd ;
 
   //  Lets' keep the bad 2-para fit untill the dataBase will be updated someday
 /**
@@ -1003,9 +989,9 @@ int main() {
         }
         fitQltChrg[ cntMod*npsFEs + sfe ] = 0.5*( f1ChargefromToTLeft->GetChisquare() + f1ChargefromToTRight->GetChisquare() ) ;
 
-        if ( f1ToTfromCharge != nullptr ) delete f1ToTfromCharge ;
-        if ( f1ChargefromToTRight != nullptr ) delete f1ChargefromToTRight ;
-        if ( f1ChargefromToTLeft != nullptr ) delete f1ChargefromToTLeft ;
+        delete f1ToTfromCharge ;
+        delete f1ChargefromToTRight ;
+        delete f1ChargefromToTLeft ;
 
         TMultiGraph *mg_Chrg = new TMultiGraph( "grCharges", "Charges along ToT" );
         mg_Chrg->Add( grChrg ) ;
@@ -1013,7 +999,7 @@ int main() {
 
         dirFE[sfe]->WriteTObject( mg_Chrg );
 
-        if ( grChrg != nullptr ) delete grChrg ;
+        delete grChrg ;
         dirFE[sfe]->WriteTObject( grTot );
         dirFE[sfe]->WriteTObject( grTotSig );
         dirFE[sfe]->WriteTObject( h2d_XchrgYtot[sfe] ) ;
@@ -1083,8 +1069,8 @@ int main() {
         delete mg_Chrg;
       }  // end 1'st loop over FrontEnds
 
-      h2d_XchrgYtot.clear() ;
-      h2d_XchrgYToTSig.clear() ;
+      h2d_XchrgYtot.fill(nullptr) ;
+      h2d_XchrgYToTSig.fill(nullptr) ;
 
       cntMod ++ ;
     }   // end of loop over Mods
@@ -1100,7 +1086,7 @@ int main() {
              h1d_totSprd[b]->GetBinLowEdge( upper ) + h1d_totSprd[b]->GetBinWidth( upper ) , "X" ) ;
 
       dirToTSprd->WriteTObject( h1d_totSprd[b] ) ;
-      if ( h1d_totSprd[b] != nullptr ) delete h1d_totSprd[b] ; 
+      delete h1d_totSprd[b] ; 
     }
     h1d_totSprd.clear() ;
 
@@ -1167,8 +1153,8 @@ int main() {
       dirRod->WriteTObject( h2_badToT, "", "WriteDelete" ) ;
     }
 
-    if ( h2_badChrgs != nullptr ) delete h2_badChrgs ;
-    if ( h2_badToT != nullptr ) delete h2_badToT ;
+    delete h2_badChrgs ;
+    delete h2_badToT ;
 
 #endif
 
@@ -1200,16 +1186,16 @@ int main() {
     logout << h1_ChrgEntry[t]->GetMean() << ",  ";
     if ( t == nToTibl - 1 ) logout << std::endl ;
     roTotDir->WriteTObject( h1_ChrgEntry[t] ) ;
-    if (  h1_ChrgEntry[t] != nullptr ) delete h1_ChrgEntry[t] ;
+    delete h1_ChrgEntry[t] ;
   }
   h1_ChrgEntry.clear() ;
 
   for (  std::map< float, TString >::const_iterator itr = devChrg_Order.begin() ;
-         itr != devChrg_Order.end() ;  itr ++ )
+         itr != devChrg_Order.end() ;  ++itr  )
     logout <<" Charge dev order : " << itr->second <<" : " << itr->first << endl; 
 
   for (  std::map< float, TString >::const_iterator itr = devToT_Order.begin() ;
-         itr != devToT_Order.end() ;  itr ++ )
+         itr != devToT_Order.end() ;  ++itr  )
     logout <<" ToT dev order : " << itr->second <<" : " << itr->first << endl; 
 
   logout << "ToTRes (spread) & its RMS  @ ToT from 1 to 16 : " << endl ;
@@ -1219,7 +1205,7 @@ int main() {
     logout << "[ " << h1d_totSprdAll[t]->GetMean() <<" , "<< h1d_totSprdAll[t]->GetStdDev() <<" ] ";
     if ( t < nToTibl - 2 ) logout <<" , " << endl ;
     if ( t == nToTibl - 2 ) logout << " ] " << endl ;
-    if ( h1d_totSprdAll[t] != nullptr ) delete h1d_totSprdAll[t] ;
+    delete h1d_totSprdAll[t] ;
   }
   h1d_totSprdAll.clear() ;
 #endif
@@ -1272,16 +1258,16 @@ int main() {
  
   // statistics for BAD frontends, only for ELOG reports 
   logout << " modules lacking in RD during Threshold scan : " << std::endl; 
-  for ( std::multimap< float, TString, std::greater<float> >::const_iterator itr = badThr_Order.begin() ; itr != badThr_Order.end() ; itr ++ )
+  for ( std::multimap< float, TString, std::greater<float> >::const_iterator itr = badThr_Order.begin() ; itr != badThr_Order.end() ; ++itr  )
       logout << " " << itr->second <<"   "<< (itr->first)*100. <<"%" << endl;
 
   logout << " modules lacking in RD during ToT scan : " << std::endl; 
-  for ( std::multimap< float, TString, std::greater<float> >::const_iterator itr = badModules_Order.begin() ; itr != badModules_Order.end() ; itr ++ )
+  for ( std::multimap< float, TString, std::greater<float> >::const_iterator itr = badModules_Order.begin() ; itr != badModules_Order.end() ; ++itr  )
       logout << " " << itr->second <<"   "<< (itr->first)*100. <<"%" << endl;
 
   logout << " modules lacking in RD at certain charges during ToT scan : " << std::endl; 
   for ( std::multimap< float, TString, std::greater<float> >::const_iterator itr = badModules_Order_detailed.begin() ; 
-                                itr != badModules_Order_detailed.end() ; itr ++ )
+                                itr != badModules_Order_detailed.end() ; ++itr  )
       logout << " " << itr->second <<"   "<< (itr->first)*100. <<"%" << endl;
 
   roFile.Close();
