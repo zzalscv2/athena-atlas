@@ -627,6 +627,10 @@ def BSMonitoringConfig(inputFlags):
         myGroup.defineHistogram('candSliceVsSLBAX,candSliceVsSLBAY;candSliceVsSLBA',title='SL (BA) slice vs SL', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
         myGroup.defineHistogram('candSliceVsSLECX,candSliceVsSLECY;candSliceVsSLEC',title='SL (EC) slice vs SL', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
         myGroup.defineHistogram('candSliceVsSLFWX,candSliceVsSLFWY;candSliceVsSLFW',title='SL (FW) slice vs SL', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        #same histos, but aiming to fill only for specific BG (FirstInTrain) for better profiles
+        myGroup.defineHistogram('candSliceVsSLBAFirstInTrainX,candSliceVsSLBAFirstInTrainY;candSliceVsSLBAFirstInTrain',title='SL (BA) slice vs SL (BG=FirstInTrain)', type='TH2F', path=monPath, xbins=64, xmin=-0.5, xmax=63.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLECFirstInTrainX,candSliceVsSLECFirstInTrainY;candSliceVsSLECFirstInTrain',title='SL (EC) slice vs SL (BG=FirstInTrain)', type='TH2F', path=monPath, xbins=96, xmin=-0.5, xmax=95.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
+        myGroup.defineHistogram('candSliceVsSLFWFirstInTrainX,candSliceVsSLFWFirstInTrainY;candSliceVsSLFWFirstInTrain',title='SL (FW) slice vs SL (BG=FirstInTrain)', type='TH2F', path=monPath, xbins=48, xmin=-0.5, xmax=47.5, ybins=len(candSliceVsSLMUCTPIBinLabels), ymin=0., ymax=7., ylabels=candSliceVsSLMUCTPIBinLabels, opt='kAlwaysCreate')
 
 
 
