@@ -11,6 +11,7 @@ endif()
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree RIO Net MathCore )
+find_package( Boost )
 
 # Generate a CINT dictionary source file:
 atlas_add_root_dictionary( xAODRootAccess xAODRootAccessDictSource
@@ -29,7 +30,9 @@ atlas_add_library( xAODRootAccess
    PUBLIC_HEADERS xAODRootAccess
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers xAODCore xAODEventFormat
-   xAODRootAccessInterfaces AsgMessagingLib CxxUtils ${extra_libs} )
+   xAODRootAccessInterfaces AsgMessagingLib CxxUtils ${extra_libs}
+   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} )
 
 # Build a (Reflex) dictionary library:
 atlas_add_dictionary( xAODRootAccessDict
