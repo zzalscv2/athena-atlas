@@ -27,10 +27,10 @@ ATH_ENABLE_VECTORIZATION;
  * Implementation of KLGaussianMixtureReduction
  */
 
-namespace {
+namespace KLGaussianMixtureReductionImpl {
 
 /**
- * The methods in the anonymous namespace
+ * The methods in this namespace
  * are used once in the findMerges.
  * Typically they are getting inlined.
  * But we want to enforce that as much we can.
@@ -507,9 +507,10 @@ findMergesImpl(const Component1DArray& componentsIn,
   return result;
 }
 
-} // anonymous namespace
+} // namespace KLGaussianMixtureReductionImpl
 
 namespace GSFUtils {
+using namespace KLGaussianMixtureReductionImpl;
 
 MergeArray
 findMerges(const Component1DArray& componentsIn, const int8_t reducedSize)
@@ -521,4 +522,15 @@ findMerges(const Component1DArray& componentsIn, const int8_t reducedSize)
   }
   return findMergesImpl(componentsIn, n, reducedSize);
 }
+
+// Clang15 seems to have trouble with implicit template instantiation
+// from multiversioned functions.  Need to explictly instantiate
+// this to prevent link failures.
+template struct AlignedDynArray<float, GSFConstants::alignment>;
+
 } // end namespace GSFUtils
+
+
+// Same with this.
+// We also have problems if triangularToIJ is in an anonymous namespace.
+template class std::vector<GSFUtils::triangularToIJ>;
