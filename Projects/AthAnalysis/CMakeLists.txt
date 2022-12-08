@@ -28,6 +28,7 @@ find_package( PNG )
 find_package( BLAS )
 find_package( VDT )
 find_package( requests )
+find_package( libffi )
 
 # Compile flag(s).
 add_definitions( -DXAOD_ANALYSIS )

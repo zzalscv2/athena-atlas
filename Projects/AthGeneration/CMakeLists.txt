@@ -29,6 +29,7 @@ find_package( PNG )
 find_package( BLAS )
 find_package( AIDA )
 find_package( VDT )
+find_package( libffi )
 
 # Set the project into "GENERATIONBASE mode".
 set( GENERATIONBASE TRUE CACHE BOOL

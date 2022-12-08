@@ -37,6 +37,7 @@ find_package( tdaq-common REQUIRED )
 # Additional externals needed for the build/runtime:
 find_package( Frontier_Client )
 find_package( VDT )
+find_package( libffi )
 
 # Set up where to find the AthenaPoolUtilitiesTest CMake code.
 set( AthenaPoolUtilitiesTest_DIR

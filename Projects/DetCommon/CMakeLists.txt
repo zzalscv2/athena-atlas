@@ -33,6 +33,7 @@ find_package( tdaq-common REQUIRED )
 
 # Find some auxiliary packages:
 find_package( XercesC )
+find_package( libffi )
 
 # Set up the build/runtime environment:
 set( DetCommonReleaseEnvironment_DIR ${CMAKE_SOURCE_DIR}/cmake CACHE PATH

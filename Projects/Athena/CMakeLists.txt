@@ -93,6 +93,7 @@ find_package( PNG )
 find_package( VDT )
 find_package( TIFF )
 find_package( heaptrack )
+find_package( libffi )
 
 # (Hopefully) Temporary global dependence on cuDNN, as described
 # in ATLASRECTS-6680.

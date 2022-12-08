@@ -33,6 +33,7 @@ find_package( GSL )
 find_package( PNG )
 find_package( TBB )
 find_package( TIFF )
+find_package( libffi )
 
 # Disable flake8.
 set( ATLAS_FLAKE8 true   # <- this is the shell builtin `true`
