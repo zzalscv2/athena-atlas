@@ -225,7 +225,6 @@ def readHLTConfigKeysFromCOOL(runNumber):
         SMK - Super Master Key
         HLTPSK - HLT Prescale keys
         LVL1PSK - L1 Prescale keys
-        AtlasProject - Atlas project
     '''
 
     configMetadata = []
@@ -237,18 +236,10 @@ def readHLTConfigKeysFromCOOL(runNumber):
     if configKeys and runNumber in configKeys.keys():
         configKeys = configKeys[runNumber]
 
+        configMetadata.append({'DB' : configKeys['DB']})
         configMetadata.append({'Release' : configKeys['REL']})
         configMetadata.append({'SMK' : configKeys['SMK']})
         
-        # Split Run 3 db info into dbalias and atlas project,
-        #  for example TRIGGERDBDEV1;22.0.20;Athena -> TRIGGERDBDEV1
-        dbInfo = configKeys['DB'].split(';')
-        
-        configMetadata.append({'DB' : dbInfo[0]})
-        if len(dbInfo) == 3:
-            # Run 3 format
-            configMetadata.append({'AtlasProject' : dbInfo[2]})
-
         configMetadata.append({'HLTPSK' : str(TriggerCoolUtil.getHLTPrescaleKeys(dbconn, [[runNumber, runNumber]])[runNumber]['HLTPSK2'])})
         configMetadata.append({'LVL1PSK' : str(TriggerCoolUtil.getL1ConfigKeys(dbconn, [[runNumber, runNumber]])[runNumber]['LVL1PSK'])})
 
