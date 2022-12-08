@@ -43,7 +43,7 @@ public:
     virtual StatusCode 	fillEvt		(HepMC::GenEvent* evt);
 
 protected:
-    IntegerProperty m_dsid{this, "DSID", 999999, "Dataset ID number"};
+    IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
     // event counter
     int              m_events;
     starlight*       m_starlight;         // pointer to starlight instance
