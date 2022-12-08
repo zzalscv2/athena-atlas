@@ -41,7 +41,7 @@ namespace xAOD {
       TObjectManager& operator=( const TObjectManager& parent );
 
       /// Accessor to the branch
-      ::TBranch* branch() const;
+      ::TBranch* branch();
       /// Pointer to the branch's pointer
       ::TBranch** branchPtr();
       /// Accessor to the Holder object

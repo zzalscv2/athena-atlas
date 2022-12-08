@@ -60,7 +60,7 @@ namespace xAOD {
       return *this;
    }
 
-   ::TBranch* TObjectManager::branch() const {
+   ::TBranch* TObjectManager::branch() {
 
       return m_branch;
    }
