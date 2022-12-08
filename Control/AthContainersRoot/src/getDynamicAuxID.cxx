@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainersRoot/src/getDynamicAuxID.h
@@ -14,6 +14,7 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "TClass.h"
 #include "TROOT.h"
+#include "boost/algorithm/string/predicate.hpp"
 
 
 namespace SG {
@@ -72,11 +73,18 @@ SG::auxid_t getDynamicAuxID (const std::type_info& ti,
   auxid = r.getAuxID (ti, name);
   if (auxid != SG::null_auxid) return auxid;
 
+  // Be careful --- if we don't exactly match the name
+  // in TClassTable, then we may trigger autoparsing.  Besides the
+  // resource usage that implies, that can lead to crashes in dbg
+  // builds due to cling bugs.
+  std::string tn = elementTypeName;
+  if (boost::starts_with (tn, "std::vector<"))
+    tn.erase (0, 5);
   std::string fac_class_name = "SG::AuxTypeVectorFactory<" +
-    elementTypeName;
+    tn + ",allocator<" + tn;
   if (fac_class_name[fac_class_name.size()-1] == '>')
     fac_class_name += ' ';
-  fac_class_name += '>';
+      fac_class_name += "> >";
   TClass* fac_class = getClassIfDictionaryExists (fac_class_name);
   if (fac_class)
   {

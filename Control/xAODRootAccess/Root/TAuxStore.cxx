@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sstream>
 #include <stdexcept>
+#include "boost/algorithm/string/predicate.hpp"
 
 // ROOT include(s):
 #include <TError.h>
@@ -1568,12 +1569,19 @@ namespace xAOD {
       if( auxid == SG::null_auxid ) {
 
          // Construct the name of the factory's class:
+         // But be careful --- if we don't exactly match the name
+         // in TClassTable, then we may trigger autoparsing.  Besides the
+         // resource usage that implies, that can lead to crashes in dbg
+         // builds due to cling bugs.
+         std::string tn = Utils::getTypeName( *ti );
+         if (boost::starts_with (tn, "std::vector<"))
+           tn.erase (0, 5);
          std::string fac_class_name = "SG::AuxTypeVectorFactory<" +
-            Utils::getTypeName( *ti );
+             tn + ",allocator<" + tn;
          if( fac_class_name[ fac_class_name.size() - 1 ] == '>' ) {
             fac_class_name += ' ';
          }
-         fac_class_name += '>';
+         fac_class_name += "> >";
 
          // Look for the dictionary of this type:
          ::TClass* fac_class = TClass::GetClass( fac_class_name.c_str() );
