@@ -653,19 +653,19 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
 
     makeOutputThinningConfig (configSeq, 'AnaElectrons',
-                              selection='selectPtEta&&baselineSelection_loose,as_char',
+                              selectionName='loose',
                               outputName='OutElectrons')
     makeOutputThinningConfig (configSeq, 'AnaPhotons',
-                              selection='selectPtEta&&baselineSelection_tight,as_char',
+                              selectionName='tight',
                               outputName='OutPhotons')
     makeOutputThinningConfig (configSeq, 'AnaMuons',
-                              selection='selectPtEta&&baselineSelection_medium,as_char',
+                              selectionName='medium',
                               outputName='OutMuons')
     makeOutputThinningConfig (configSeq, 'AnaTauJets',
-                              selection='selectPtEta&&baselineSelection_tight,as_char',
+                              selectionName='tight',
                               outputName='OutTauJets')
     makeOutputThinningConfig (configSeq, 'AnaJets',
-                              selection='selectPtEta',
+                              selectionName='',
                               outputName='OutJets')
 
 

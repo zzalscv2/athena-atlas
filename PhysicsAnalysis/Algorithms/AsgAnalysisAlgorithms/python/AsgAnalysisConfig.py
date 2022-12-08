@@ -148,7 +148,8 @@ class OutputThinningBlock (ConfigBlock):
         super (OutputThinningBlock, self).__init__ ()
         self.containerName = containerName
         self.postfix = postfix
-        self.selection = None
+        self.selection = ''
+        self.selectionName = ''
         self.outputName = None
 
     def makeAlgs (self, config) :
@@ -157,7 +158,7 @@ class OutputThinningBlock (ConfigBlock):
         if postfix != '' and postfix[0] != '_' :
             postfix = '_' + postfix
 
-        selection = config.getPreselection (self.containerName, '')
+        selection = config.getFullSelection (self.containerName, self.selectionName)
         if selection == '' :
             selection = self.selection
         elif self.selection != '' :
@@ -244,7 +245,7 @@ def makePtEtaSelectionConfig( seq, containerName,
 
 
 def makeOutputThinningConfig( seq, containerName,
-                              *, postfix = '', selection = None, outputName = None):
+                              *, postfix = '', selection = None, selectionName = None, outputName = None):
     """Create an output thinning config
 
     This will do a consistent selection of output containers (if there
@@ -263,6 +264,9 @@ def makeOutputThinningConfig( seq, containerName,
     """
 
     config = OutputThinningBlock (containerName, postfix=postfix)
-    config.selection = selection
+    if selection is not None :
+        config.selection = selection
+    if selectionName is not None :
+        config.selectionName = selectionName
     config.outputName = outputName
     seq.append (config)
