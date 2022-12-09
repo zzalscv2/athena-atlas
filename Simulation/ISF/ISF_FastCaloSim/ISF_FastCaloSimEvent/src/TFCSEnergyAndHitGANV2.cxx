@@ -322,9 +322,6 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
                   if (CLHEP::RandFlat::shoot(simulstate.randomEngine(), -TMath::Pi() , TMath::Pi()) < 0){
                     alpha = -alpha;            
                   }
-                  else{
-                     ATH_MSG_WARNING(alpha<<" should be positive and will NOT become negative (half of the times)");
-                  }
                }
             }
 
