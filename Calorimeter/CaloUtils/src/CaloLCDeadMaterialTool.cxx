@@ -542,7 +542,6 @@ CaloLCDeadMaterialTool::prepare_for_cluster
 
   // Finding of energy and noise in different "areas" of cluster. Some of these
   // areas correspond to CaloSamplings, others are special.
-  int cell_index = 0;
   CaloCluster::const_cell_iterator itrCell = theCluster->cell_begin();
   CaloCluster::const_cell_iterator itrCellEnd = theCluster->cell_end();
   cls_unweighted_energy = 0;
@@ -590,7 +589,6 @@ CaloLCDeadMaterialTool::prepare_for_cluster
 
     } // cell_ener > cell_min_energy
     cells.push_back (cell);
-    cell_index++;
   } // itrCell
 
 //   Realculate sampling energy as the abs value of the original cluster, if you summed up energies, fluctuations wouldn't cancel and sample energy would be huge   

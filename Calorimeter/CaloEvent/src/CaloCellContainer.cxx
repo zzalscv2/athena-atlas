@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //--------------------------------------------------------------
@@ -173,16 +173,10 @@ void CaloCellContainer::setHasTotalSize(const bool hasTotalSize){
 bool CaloCellContainer::checkOrdered() const {
   CaloCellContainer::const_iterator itr=this->begin(),itrEnd=this->end();
   unsigned int hashPrev=0;
-  unsigned int index=0;
   
   for (;itr!=itrEnd;++itr){
 
     const CaloCell * theCell=*itr;
-
-    /* std::cout << "DRDR checking cell " << index << " " << hashPrev 
-	      << " add itr  " << &(*itr) 
-	      << " add cell " << theCell 
-	      << std::endl; */
 
     const CaloDetDescrElement * theDDE = nullptr;
     
@@ -202,9 +196,6 @@ bool CaloCellContainer::checkOrdered() const {
       }
       
     }
-    
-    ++index;
-    
   }
 	
   return true;
