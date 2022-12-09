@@ -1554,8 +1554,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   else if (m_showerType == 3) MCshowerID = "410250"; // Sherpa 221 or 222
   else if (m_showerType == 4) MCshowerID = "410464"; // aMC@NLO+Pythia8
   else if (m_showerType == 5) MCshowerID = "421152"; // Sherpa 228
-  else if (m_showerType == 6) MCshowerID = "700122"; // Sherpa 228
-
+  else if (m_showerType == 6) MCshowerID = "700122"; // Sherpa 2210 
+  else if (m_showerType == 7) MCshowerID = "700122"; // Sherpa 2211 -> FallBack to Sherpa 2210
+  else if (m_showerType == 8) MCshowerID = "700122"; // Sherpa 2212 -> FallBack to Sherpa 2210
 
   // btagEfficiencyTool
   if (m_useBtagging && !m_btagEffTool.isUserConfigured() && !m_BtagWP.empty()) {
