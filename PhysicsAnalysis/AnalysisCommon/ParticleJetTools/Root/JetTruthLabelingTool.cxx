@@ -668,10 +668,6 @@ int JetTruthLabelingTool::getNGhostParticles( const xAOD::Jet &jet, std::string 
 
 int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matchW, bool matchZ, bool matchTop ) const {
 
-  /// get extended ghost associated truth label
-  int extended_GA_label = -1;
-  jet.getAttribute("HadronGhostExtendedTruthLabelID", extended_GA_label); 
-
   // store GhostBHadronsFinal count
   int nMatchB = getNGhostParticles( jet, "GhostBHadronsFinal" );
   SG::WriteDecorHandle<xAOD::JetContainer, int> nbHandle(m_NB_truthKey);
@@ -713,6 +709,12 @@ int JetTruthLabelingTool::getLabel( const xAOD::Jet &jet, bool matchH, bool matc
 
   // Use R10TruthLabel_R22v1 definition
   if ( m_truthLabelName == "R10TruthLabel_R22v1" ) {
+    // get extended ghost associated truth label
+    int extended_GA_label = -1;
+    if (not jet.getAttribute("HadronGhostExtendedTruthLabelID", extended_GA_label)) {
+      ATH_MSG_ERROR( "HadronGhostExtendedTruthLabelID not available for " + m_truthJetCollectionName.key() );
+    }
+
     SG::ReadDecorHandle<xAOD::JetContainer, float> split23Handle(m_split23_truthKey);
     SG::ReadDecorHandle<xAOD::JetContainer, float> split12Handle(m_split12_truthKey);
     is_bb = ( extended_GA_label == 55 );

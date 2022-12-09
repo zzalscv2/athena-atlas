@@ -103,19 +103,19 @@ AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
 
 AntiKt10Truth = JetDefinition("AntiKt",1.0,cst.Truth,
                                ghostdefs = flavourghosts , 
-                               modifiers = ("Sort", "Filter:50000","ktsplitter"),
+                               modifiers = ("Sort", "Filter:50000","ktsplitter","JetGhostLabel"),
                                standardRecoMode = True,                               
                                lock = True
 )
 
 
 AntiKt10TruthTrimmed = JetTrimming(AntiKt10Truth,
-                                   modifiers = ("Sort",)+substrmods+truthmods,
+                                   modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                    PtFrac = 0.05, RClus = 0.2,                                    
                                    )
 
 AntiKt10TruthSoftDrop = JetSoftDrop(AntiKt10Truth,
-                                    modifiers = ("Sort",)+substrmods+truthmods,
+                                    modifiers = ("Sort","JetGhostLabel")+substrmods+truthmods,
                                     Beta = 1., ZCut= 0.1,
                                     )
 
