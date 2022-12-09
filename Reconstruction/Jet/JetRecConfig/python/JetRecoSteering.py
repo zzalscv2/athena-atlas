@@ -5,11 +5,27 @@ from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_noVR
 from JetRecConfig.JetRecConfig import JetRecCfg
 
 
+def addTruthPileupJetsToOutputCfg(flags, toAOD=True, toESD=True):
+    result = ComponentAccumulator()
+
+    jetdefs = ["InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets"]
+
+    jetList = []
+    for jetdef in jetdefs:
+        if f"xAOD::JetContainer#{jetdef}" in flags.Input.TypedCollections:
+            jetList += [ f"xAOD::JetContainer#{jetdef}" ,
+                         f"xAOD::AuxContainerBase!#{jetdef}Aux.-PseudoJet.-constituentLinks.-constituentWeights"]
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    if toESD:
+        result.merge(addToESD(flags, jetList))
+    if toAOD:
+        result.merge(addToAOD(flags, jetList))
+
+    return result
 
 
-
-
-def addJetsToOutput(flags,jetdefs, toAOD=True, toESD=True):
+def addJetsToOutputCfg(flags,jetdefs, toAOD=True, toESD=True):
     """Write out the jet containers as defined by jetdefs (a list of JetDefinition).
     
     In Run3 we don't write out jets in AOD : this function is left for convenience and testing purpose.
@@ -63,8 +79,8 @@ def JetRecoSteeringCfg(flags):
         result.merge(JetRecCfg(flags, jd))
 
     if flags.Output.doWriteAOD and flags.Jet.WriteToAOD:
-        result.merge(addJetsToOutput(flags, jetdefs, toAOD=True, toESD=False))
+        result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=True, toESD=False))
     if flags.Output.doWriteESD:
-        result.merge(addJetsToOutput(flags, jetdefs, toAOD=False, toESD=True))
+        result.merge(addJetsToOutputCfg(flags, jetdefs, toAOD=False, toESD=True))
 
     return result

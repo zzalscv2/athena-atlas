@@ -38,12 +38,18 @@ def RecoSteering(flags):
             acc.merge(EventInfoCnvAlgCfg(flags))
         log.info("---------- Configured POOL reading")
 
-    # AOD2xAOD Truth conversion
     acc.flagPerfmonDomain('Truth')
     if flags.Input.isMC:
+        # AOD2xAOD Truth conversion
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
         acc.merge(GEN_AOD2xAODCfg(flags))
         log.info("---------- Configured AODtoxAOD Truth Conversion")
+
+        # We always want to write pileup truth jets to AOD, irrespective of whether we write jets to AOD in general
+        # This is because we cannot rebuild jets from pileup truth particles from the AOD
+        from JetRecConfig.JetRecoSteering import addTruthPileupJetsToOutputCfg
+        acc.merge(addTruthPileupJetsToOutputCfg(flags))
+        log.info("---------- Configured Truth pileup jet writing")
 
     # trigger
     acc.flagPerfmonDomain('Trigger')
