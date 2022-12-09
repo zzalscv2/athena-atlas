@@ -9,7 +9,7 @@
  * objects in the Interval of Validity (IOV) database
  * 
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
- * @author Antoine Pérus <perus@lal.in2p3.fr>
+ * @author Antoine PÃ©rus <perus@lal.in2p3.fr>
  * 
  */
 
