@@ -5,7 +5,7 @@ from sys import exit
 
 from WorkflowTestRunner.ScriptUtils import setup_logger, setup_parser, get_test_setup, get_standard_performance_checks, \
     run_tests, run_checks, run_summary
-from WorkflowTestRunner.StandardTests import QTest, SimulationTest, OverlayTest, DataOverlayTest, PileUpTest, DerivationTest
+from WorkflowTestRunner.StandardTests import QTest, GenerationTest, SimulationTest, OverlayTest, DataOverlayTest, PileUpTest, DerivationTest
 from WorkflowTestRunner.Test import WorkflowRun, WorkflowType
 
 
@@ -21,7 +21,10 @@ def main():
 
     # Define which tests to run
     tests_to_run = []
-    if options.simulation:
+    if options.generation:
+        dsid = "421356" if not options.dsid else options.dsid
+        tests_to_run.append(GenerationTest(f"gen{dsid}", run, WorkflowType.Generation, ["generate"], setup, options.extra_args))
+    elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
             tests_to_run.append(SimulationTest("s4005", run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.AF3:
