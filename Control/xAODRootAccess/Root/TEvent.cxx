@@ -391,7 +391,7 @@ namespace xAOD {
       TDirectoryReset dr;
 
       // Set up the file access tracer:
-      static TFileAccessTracer tracer;
+      static TFileAccessTracer tracer ATLAS_THREAD_SAFE;
       tracer.add( *file );
 
       // Look for the metadata tree:
@@ -764,13 +764,13 @@ namespace xAOD {
    ///
    void TEvent::setActive() const {
 
-      // Do the deed. Since this needs both a static and a const cast at
-      // the same time, let's just do the "brutal" cast instead of writing
-      // way too much for the same thing...
-      TActiveEvent::setEvent( ( TVirtualEvent* ) this );
+      // The active event and current store are thread-local globals:
+      TEvent* nc_this ATLAS_THREAD_SAFE = const_cast<TEvent*>(this);
+
+      TActiveEvent::setEvent( static_cast<TVirtualEvent*>( nc_this ) );
 
 #ifndef XAOD_STANDALONE
-      SG::CurrentEventStore::setStore( const_cast< TEvent* >( this ) );
+      SG::CurrentEventStore::setStore( nc_this );
 #endif // not XAOD_STANDALONE
 
       // Return gracefully:

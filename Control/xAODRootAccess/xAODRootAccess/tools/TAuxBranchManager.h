@@ -49,7 +49,7 @@ namespace xAOD {
       TAuxBranchManager& operator=( const TAuxBranchManager& rhs );
 
       /// Accessor to the branch
-      ::TBranch* branch() const;
+      ::TBranch* branch();
       /// Pointer to the branch's pointer
       ::TBranch** branchPtr();
       /// Accessor to the Holder object (constant version)

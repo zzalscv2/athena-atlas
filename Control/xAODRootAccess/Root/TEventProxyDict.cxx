@@ -61,7 +61,8 @@ namespace xAODPrivate {
          }
 
          // Return the pointer:
-         return const_cast< void* >( result );
+         void* nc_result ATLAS_THREAD_SAFE = const_cast< void* >( result ); //DataBucketBase interface
+         return nc_result;
       }
 
       /// Return the type_info of the stored object
@@ -107,7 +108,8 @@ namespace xAODPrivate {
          }
 
          // Return the pointer:
-         return const_cast< void* >( result );
+         void* nc_result ATLAS_THREAD_SAFE = const_cast< void* >( result ); //DataBucketBase interface
+         return nc_result;
       }
 
       /// Return the object, cast to type.

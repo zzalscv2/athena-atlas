@@ -52,7 +52,7 @@ namespace xAOD {
       operator=( const TPrimitiveAuxBranchManager& rhs );
 
       /// Accessor to the branch
-      ::TBranch* branch() const;
+      ::TBranch* branch();
       /// Pointer to the branch's pointer
       ::TBranch** branchPtr();
       /// Accessor to the Holder object (constant version)

@@ -1,11 +1,12 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_MAKETRANSIENTTREE_H
 #define XAODROOTACCESS_MAKETRANSIENTTREE_H
 
-// Local include(s):
+// Athena include(s):
+#include "CxxUtils/checker_macros.h"
 #include "xAODRootAccess/tools/TTransTrees.h"
 #include "xAODRootAccess/TEvent.h"
 
@@ -32,7 +33,7 @@ namespace xAOD {
    /// @param treeName Optional name of the event tree in the input file
    /// @param mode     Access mode of the internal TEvent object
    /// @returns 
-   TTransTrees MakeTransientTrees( ::TFile* ifile,
+   TTransTrees MakeTransientTrees ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                    const char* treeName = "CollectionTree",
                                    TEvent::EAuxMode mode =
                                       TEvent::kUndefinedAccess );
@@ -44,7 +45,7 @@ namespace xAOD {
    /// valgrind. Users don't need to use this function in an interactive/PyROOT
    /// session.
    ///
-   void ClearTransientTrees();
+   void ClearTransientTrees ATLAS_NOT_THREAD_SAFE ();
 
    /// Function creating a transient TTree object using an input file that
    /// was opened by the user.
@@ -63,7 +64,7 @@ namespace xAOD {
    /// @returns A pointer to the created transient event tree if successful, or
    ///          a null pointer if not
    ///
-   ::TTree* MakeTransientTree( ::TFile* ifile,
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                const char* treeName = "CollectionTree",
                                TEvent::EAuxMode mode =
                                   TEvent::kUndefinedAccess );
@@ -84,7 +85,7 @@ namespace xAOD {
    /// @returns A pointer to the created transient event tree if successful, or
    ///          a null pointer if not
    ///
-   ::TTree* MakeTransientTree( ::TChain* ichain,
+   ::TTree* MakeTransientTree ATLAS_NOT_THREAD_SAFE ( ::TChain* ichain,
                                TEvent::EAuxMode mode = TEvent::kClassAccess );
 
    /// Function creating a transient TTree object representing the input file's
@@ -100,7 +101,7 @@ namespace xAOD {
    /// @returns A pointer to the created transient metadata tree if successful,
    ///          or a null pointer if not
    ///
-   ::TTree* MakeTransientMetaTree( ::TFile* ifile,
+   ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( ::TFile* ifile,
                                    const char* eventTreeName = "CollectionTree",
                                    TEvent::EAuxMode mode =
                                       TEvent::kUndefinedAccess );
@@ -123,7 +124,7 @@ namespace xAOD {
    /// @returns A pointer to the created transient metadata tree if successful,
    ///          or a null pointer if not
    ///
-   ::TTree* MakeTransientMetaTree( ::TChain* ichain,
+   ::TTree* MakeTransientMetaTree ATLAS_NOT_THREAD_SAFE ( ::TChain* ichain,
                                    const char* eventTreeName =
                                       "CollectionTree",
                                    TEvent::EAuxMode mode =

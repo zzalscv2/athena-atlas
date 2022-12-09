@@ -77,7 +77,7 @@ namespace xAOD {
       return *this;
    }
 
-   ::TBranch* TAuxBranchManager::branch() const {
+   ::TBranch* TAuxBranchManager::branch() {
 
       return m_branch;
    }
