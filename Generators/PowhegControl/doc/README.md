@@ -6,7 +6,7 @@ This file contains the most relevant documentation for users. Further documentat
 
 * [Systematic variations (PDF, QCD scales, and beyond)](Generators/PowhegControl/doc/variations.md)
 * [Phase space integration parameters and event generation times](Generators/PowhegControl/doc/integration.md)
-* [Advanced physics features: MiNLO, NNLO, electroweak corrections, etc.](Generators/PowhegControl/doc/beyond_vanilla.md)
+* [Advanced physics features: MiNLO, MiNNLO, NNLOPS, MadSpin](Generators/PowhegControl/doc/beyond_vanilla.md)
 * [Non-standard ways of using PowhegControl](Generators/PowhegControl/doc/experimental.md)
 * [Legacy documentation for old ATLAS software releases](Generators/PowhegControl/doc/legacy.md)
 
@@ -21,6 +21,7 @@ The current Powheg experts in ATLAS and maintainers of Powheg installations and 
 * **Dan Hayden** (@dhayden) — mostly handles Powheg source code and installation
 * **Stefan Richter** (@strichte) — mostly maintains PowhegControl interface, i.e. the Athena user interface to Powheg
 * **Timothée Theveneaux-Pelzer** (@tpelzer) — mostly maintains PowhegControl interface
+* **Jan Kretzschmar** (@jkretz) — Powheg 'power user' happy to share his knowledge or help out with simple code changes
 * All of us provide help with software usage and physics questions to our best availability and ability
 
 For any questions about Powheg or PowhegControl, please **contact** the experts at [**atlas-generators-powhegcontrol-experts@cern.ch**](mailto:atlas-generators-powhegcontrol-experts@cern.ch)!
@@ -31,42 +32,43 @@ If you're interested in getting news about Powheg(Control) in general, you can s
 
 # Supported processes
 
-The currently installed processes are listed, together with the first Athena release with that process included. If the version is of the form `PowhegControl-XX-XX-XX`, the process has been available since before release series 21 and will be **available in any 21.6 release**.
+The currently installed processes are listed. If the version is of the form `PowhegControl-XX-XX-XX`, the process has been available since long and will be available for any future releases. In case the form is `ATLASOTF-XX-XX-YY`, you may cross-check with [these tables](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_release_21_6_AthGenerat) - generally you want the latest release if starting fresh.
 
 We try to make the naming of processes consistent in Athena. Therefore some processes are **named differently** than they are in Powheg Box wherever shown in the table.
 
 | PowhegControl name | Powheg Box name           | Process description           | Available since                                                          | Citation(s)                                          | Remarks              |
 | :----------------- | :------------------------ | :---------------------------- | :----------------------------------------------------------------------- | :--------------------------------------------------- | :------------------- |
-| `bb`               | `hvq`                     | bbbar                         | `PowhegControl-00-00-08`                                                 | [0707.3088](https://arxiv.org/abs/0707.3088)   |                      |
+| `bb`               | `hvq`                     | bbbar                         | `PowhegControl-00-00-08`                                                 | [0707.3088](https://arxiv.org/abs/0707.3088)   | Can also be used for ccbar production, [Process-specific documentation](process_specific/bb.md) |
 | `bbH`              | -                         | bbbar+Higgs                   | `PowhegControl-00-03-10`                                                 | [1509.05843](https://arxiv.org/abs/1509.05843) |                      |
-| `bblvlv`           | `b_bbar_4l`               | ttbar / Wt interference       | `PowhegControl-00-03-00`                                                 | [1607.04538](https://arxiv.org/abs/1607.04538) |                      |
+| `bblvlv`           | `b_bbar_4l`               | ttbar / Wt interference       | `PowhegControl-00-03-00`                                                 | [1607.04538](https://arxiv.org/abs/1607.04538) | [Process-specific documentation](process_specific/bblvlv.md)             |
 | `chi0chi0`         | `weakinos/neuIneuJ`       | neutralino pair               | `PowhegControl-00-03-00`                                                 | [1605.06509](https://arxiv.org/abs/1605.06509) |                      |
 | `chi0chi1`         | `weakinos/neuIchaJ`       | neutralino + chargino         | `PowhegControl-00-03-00`                                                 | [1605.06509](https://arxiv.org/abs/1605.06509) |                      |
 | `chi1chi1`         | `weakinos/chaIchaJ`       | chargino pair                 | `PowhegControl-00-03-00`                                                 | [1605.06509](https://arxiv.org/abs/1605.06509) |                      |
 | `DMGG`             | -                         | dark matter                   | `PowhegControl-00-02-08`                                                 | [1310.4491](https://arxiv.org/abs/1310.4491)   |                      |
 | `DMS_tloop`        | -                         | dark matter                   | `PowhegControl-00-02-08`                                                 | [1503.00691](https://arxiv.org/abs/1503.00691) |                      |
 | `DMV`              | -                         | dark matter                   | `PowhegControl-00-02-08`                                                 | [1310.4491](https://arxiv.org/abs/1310.4491)   |                      |
-| `ggF_H`            | `ggH_quark-mass-effects`  | gg → H                        | `PowhegControl-00-02-00`                                                 | [1111.2854](https://arxiv.org/abs/1111.2854)   |                      |
+| `ggF_H`            | `ggH_quark-mass-effects`  | gg → H                        | `PowhegControl-00-02-00`                                                 | [1111.2854](https://arxiv.org/abs/1111.2854)   | in principle superseded by `Hj_MiNNLO`  |
 | `ggF_HH`           | `ggHH`                    | gg → HH                       | `PowhegControl-00-03-12`                                                 | [1703.09252](https://arxiv.org/abs/1703.09252) |                      |
 | `ggF_HZ`           | `ggHZ`                    | gg → H+Z                      | `PowhegControl-00-02-00`                                                 | no citation                                          |                      |
-| `Hj`               | `HJ`                      | Higgs+1 jet                   | `PowhegControl-00-02-05`                                                 | [1202.5475](https://arxiv.org/abs/1202.5475)   |                      |
-| `Hj_MiNNLO`        | `HJMiNNLO`                | TODO                          | TODO                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
+| `Hj`               | `HJ`                      | Higgs+1 jet                   | `PowhegControl-00-02-05`                                                 | [1202.5475](https://arxiv.org/abs/1202.5475)   | can (could?) also do NNLOPS                     |
+| `Hj_MiNNLO`        | `HJMiNNLO`                | Higgs at NNLO                 | `ATLASOTF-05-01`                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
 | `Hjj`              | `HJJ`                     | Higgs+2 jets                  | `PowhegControl-00-02-05`                                                 | [1202.5475](https://arxiv.org/abs/1202.5475)   |                      |
 | `HWj`              | `HWJ`                     | Higgs+W+1 jet                 | `PowhegControl-00-02-00`                                                 | [1306.2542](https://arxiv.org/abs/1306.2542)   |                      |
 | `HWj_EW`           | `HWJ_EW`                  | Higgs+W+1 jet with EW effects | `PowhegControl-00-03-10`                                                 | [1706.03522](https://arxiv.org/abs/1706.03522) |                      |
 | `HZj`              | `HZJ`                     | Higgs+Z+1 jet with EW effects | `PowhegControl-00-02-00`                                                 | [1306.2542](https://arxiv.org/abs/1306.2542)   |                      |
 | `HZj_EW`           | `HZJ_EW`                  | Higgs+Z+1 jet                 | `PowhegControl-00-03-10`                                                 | [1706.03522](https://arxiv.org/abs/1706.03522) |                      |
-| `jj`               | `dijet`                   | dijet                         | `PowhegControl-00-00-08`                                                 | [1012.3380](https://arxiv.org/abs/1012.3380)   |                      |
-| `jjj`              | `trijet`                  | trijet                        | `PowhegControl-00-00-12`                                                 | [1402.4001](https://arxiv.org/abs/1402.4001)   |                      |
+| `jj`               | `dijet`                   | dijet                         | `PowhegControl-00-00-08`                                                 | [1012.3380](https://arxiv.org/abs/1012.3380)   | [Process-specific documentation](process_specific/jj.md)      |
+| `jjj`              | `trijet`                  | trijet                        | `PowhegControl-00-00-12`                                                 | [1402.4001](https://arxiv.org/abs/1402.4001)   | [Process-specific documentation](process_specific/jjj.md)  |
 | `ssWWjj`           | `Wp_Wp_J_J`               | same-sign WW+2 jets           | `PowhegControl-00-02-14`                                                 | [1102.4846](https://arxiv.org/abs/1102.4846)   |                      |
 | `t_sch`            | `ST_sch`                  | single t (s-channel)          | `PowhegControl-00-02-09`                                                 | [0907.4076](https://arxiv.org/abs/0907.4076)   |                      |
 | `t_tch_4FS`        | `ST_tch_4f`               | single t (s-channel) 4FS      | `PowhegControl-00-03-00`                                                 | [1207.5391](https://arxiv.org/abs/1207.5391)   |                      |
 | `tj`               | `STJ`                     | single t + jet                | TODO                                                                     | [1805.09855](https://arxiv.org/abs/1805.09855) |                      |
 | `tt`               | `hvq`                     | ttbar                         | `PowhegControl-00-00-10`                                                 | [0707.3088](https://arxiv.org/abs/0707.3088)   |                      |
 | `tt_NLOdecays`     | `ttb_NLO_dec`             | ttbar with NLO decays         | `PowhegControl-00-03-00`                                                 | [1412.1828](https://arxiv.org/abs/1412.1828)   |                      |
-| `ttbb`             | -                         | $`\mathrm{t}\bar{\mathrm{t}}\mathrm{b}\bar{\mathrm{b}}`$  | TODO                                         | [1802.00426](https://arxiv.org/abs/1802.00426) | [Process-specific documentation](process_specific/ttbb.md) |
+| `ttbb`             | -                         | $`\mathrm{t}\bar{\mathrm{t}}\mathrm{b}\bar{\mathrm{b}}`$  | `ATLASOTF-05-01`                                         | [1802.00426](https://arxiv.org/abs/1802.00426) | [Process-specific documentation](process_specific/ttbb.md) |
 | `ttH`              | -                         | ttbar+Higgs                   | `PowhegControl-00-02-09`                                                 | [1501.04498](https://arxiv.org/abs/1501.04498) |                      |
 | `ttj`              | `ttJ`                     | ttbar+1 jet                   | `PowhegControl-00-02-14`                                                 | [1110.5251](https://arxiv.org/abs/1110.5251)   |                      |
+| `ttj_MiNNLO`       | `ttJ_MiNNLO`              | ttbar at NNLO                 | `ATLASOTF-05-05?`                                                 | [2012.14267](https://arxiv.org/abs/2012.14267), [2112.12135](https://arxiv.org/abs/2112.12135)   | being commissioned                     |
 | `ttWm_EW`          | `Wtt_dec/pp_ttWm_EW`      | $`\mathrm{t}\bar{\mathrm{t}}\mathrm{W}^{-}`$, NLO electroweak | `ATLASOTF-04-05-02`                      | [2101.11808](https://arxiv.org/abs/2101.11808) | [Process-specific documentation](process_specific/ttW.md). :hot_pepper: : **Physics validation ongoing.** |
 | `ttWm_QCD`         | `Wtt_dec/pp_ttWm_QCD`     | $`\mathrm{t}\bar{\mathrm{t}}\mathrm{W}^{-}`$, NLO QCD | `ATLASOTF-04-05-02`                              | [2101.11808](https://arxiv.org/abs/2101.11808) | [Process-specific documentation](process_specific/ttW.md). :hot_pepper: : **Physics validation ongoing.** |
 | `ttWp_EW`          | `Wtt_dec/pp_ttWp_EW`      | $`\mathrm{t}\bar{\mathrm{t}}\mathrm{W}^{+}`$, NLO electroweak | `ATLASOTF-04-05-02`                      | [2101.11808](https://arxiv.org/abs/2101.11808) | [Process-specific documentation](process_specific/ttW.md). :hot_pepper: : **Physics validation ongoing.** |
@@ -74,27 +76,27 @@ We try to make the naming of processes consistent in Athena. Therefore some proc
 | `VBF_H`            | -                         | VBF Higgs                     | `PowhegControl-00-02-00`                                                 | [0911.5299](https://arxiv.org/abs/0911.5299)   |                      |
 | `VBF_osWW`         | `VBF_Wp_Wm`               | VBF $`\mathrm{W}^+\mathrm{W}^-`$ | In testing phase                                                      | [1301.1695](https://arxiv.org/abs/1301.1695)   | [Process-specific documentation](process_specific/VBF_osWW.md). PDF/scale reweighting broken, being investigated |
 | `VBF_ssWW`         | `Wp_Wp_J_J`               | VBF $`\mathrm{W}^{\pm}\mathrm{W}^{\pm}`$ | `PowhegControl-00-02-14`                                      | [1108.0864](https://arxiv.org/abs/1108.0864)   |                      |
-| `VBF_W`            | `VBF_W-Z`                 | VBF W                         | `PowhegControl-00-02-17`                                                 | [1302.2884](https://arxiv.org/abs/1302.2884)   |                      |
-| `VBF_Z`            | `VBF_W-Z`                 | VBF Z                         | `PowhegControl-00-02-17`                                                 | [1302.2884](https://arxiv.org/abs/1302.2884)   |                      |
-| `W`                | -                         | W                             | `PowhegControl-00-00-09`                                                 | [0805.4802](https://arxiv.org/abs/0805.4802)   |                      |
-| `W_EW`             | `W_ew-BMNNP`              | W with EW effects             | `PowhegControl-00-02-18`                                                 | [1202.0465](https://arxiv.org/abs/1202.0465)   |                      |
+| `VBF_W`            | `VBF_W-Z`                 | VBF W                         | `PowhegControl-00-02-17`                                                 | [1302.2884](https://arxiv.org/abs/1302.2884)   | [Process-specific documentation](process_specific/VBF_W-Z.md) |
+| `VBF_Z`            | `VBF_W-Z`                 | VBF Z                         | `PowhegControl-00-02-17`                                                 | [1302.2884](https://arxiv.org/abs/1302.2884)   | [Process-specific documentation](process_specific/VBF_W-Z.md) |
+| `W`                | -                         | W                             | `PowhegControl-00-00-09`                                                 | [0805.4802](https://arxiv.org/abs/0805.4802)   | in principle superseded by `W_EW`  |
+| `W_EW`             | `W_ew-BMNNP`              | W with/without NLO EW effects             | `PowhegControl-00-02-18`                                                 | [1202.0465](https://arxiv.org/abs/1202.0465)   | [Process-specific documentation](process_specific/W_Z-EW.md) |
 | `W_SMEFT`          | `W_smeft`                 | W in Standard Model Effective Field Theory | TODO                                                        | [1804.07407](https://arxiv.org/abs/1804.07407), see also [1703.04751](https://arxiv.org/abs/1703.04751) |                      |
 | `Wbb`              | `Wbb_dec`                 | W ( → l nu) + bbbar           | `PowhegControl-00-03-00`                                                 | [1502.01213](https://arxiv.org/abs/1502.01213) |                      |
 | `Wbbj`             | `Wbbj`                    | W ( → l nu) + bbbar + jet     | `PowhegControl-00-03-00`                                                 | [1502.01213](https://arxiv.org/abs/1502.01213) |                      |
 | `Wj`               | -                         | W+1 jet                       | `PowhegControl-00-00-09`                                                 | [1009.5594](https://arxiv.org/abs/1009.5594)   |                      |
-| `Wj_MiNNLO`        | `WjMiNNLO`                | TODO                          | TODO                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
+| `Wj_MiNNLO`        | `WjMiNNLO`                | W at NNLO                     | `ATLASOTF-05-01`                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
 | `Wjj`              | -                         | W+2 jets                      | `PowhegControl-00-02-17`                                                 | [1303.5447](https://arxiv.org/abs/1303.5447)   |                      |
 | `Wt_DR`            | `ST_wtch_DR`              | W+t (diagram removal)         | `PowhegControl-00-02-01`                                                 | [1009.2450](https://arxiv.org/abs/1009.2450)   |                      |
 | `Wt_DS`            | `ST_wtch_DS`              | W+t (diagram subtraction)     | `PowhegControl-00-02-09`                                                 | [1009.2450](https://arxiv.org/abs/1009.2450)   |                      |
 | `WW`               | -                         | W+W-                          | `PowhegControl-00-00-08`                                                 | [1311.1365](https://arxiv.org/abs/1311.1365)   |                      |
 | `Wy`               | `Wgamma`                  | W+gamma                       | `PowhegControl-00-03-10`                                                 | [1410.3802](https://arxiv.org/abs/1410.3802)   |                      |
 | `WZ`               | -                         | WZ                            | `PowhegControl-00-00-08`                                                 | [1311.1365](https://arxiv.org/abs/1311.1365)   | [Process-specific documentation](process_specific/WZ.md) |
-| `yj`               | `directphoton`            | γ + jet                       | In testing phase                                                         | [1610.02275](https://arxiv.org/abs/1610.02275), see also [1709.04154](https://arxiv.org/abs/1709.04154) |                      |
-| `Z`                | -                         | Z                             | `PowhegControl-00-00-09`                                                 | [0805.4802](https://arxiv.org/abs/0805.4802)   |                      |
-| `Z_EW`             | `Z_ew-BMNNPV`             | Z with EW effects             | `PowhegControl-00-02-18`                                                 | [1302.4606](https://arxiv.org/abs/1302.4606)   |                      |
+| `yj`               | `directphoton`            | γ + jet                       | In testing phase (crashing)                                              | [1610.02275](https://arxiv.org/abs/1610.02275), see also [1709.04154](https://arxiv.org/abs/1709.04154) |                      |
+| `Z`                | -                         | Z                             | `PowhegControl-00-00-09`                                                 | [0805.4802](https://arxiv.org/abs/0805.4802)   | in principle superseded by `Z_EW`    |
+| `Z_EW`             | `Z_ew-BMNNPV`             | Z with/without NLO EW effects             | `PowhegControl-00-02-18`                                                 | [1302.4606](https://arxiv.org/abs/1302.4606)   | [Process-specific documentation](process_specific/W-Z_EW.md)   |
 | `Z_SMEFT`          | `Z_smeft`                 | Z in Standard Model Effective Field Theory | TODO                                                        | [1804.07407](https://arxiv.org/abs/1804.07407) |                      |
 | `Zj`               | -                         | Z+1 jet                       | `PowhegControl-00-00-09`                                                 | [1009.5594](https://arxiv.org/abs/1009.5594)   |                      |
-| `Zj_MiNNLO`        | `ZjMiNNLO`                | TODO                          | TODO                                                                     | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
+| `Zj_MiNNLO`        | `ZjMiNNLO`                | Z/gamma* at NNLO                 | `ATLASOTF-05-01`                                                      | [2006.04133](https://arxiv.org/abs/2006.04133) |                      |
 | `Zjj`              | -                         | Z+2 jets                      | `PowhegControl-00-02-17`                                                 | [1303.5447](https://arxiv.org/abs/1303.5447)   |                      |
 | `ZZ`               | -                         | ZZ                            | `PowhegControl-00-00-08`                                                 | [1311.1365](https://arxiv.org/abs/1311.1365)   |
 
@@ -123,22 +125,25 @@ The standard steps needed are:
 
 # Usage instructions
 
-All of the following instructions assume that you are working in ATLAS software release 21. In the rare event that you need instructions for earlier (or later) releases, please [contact the Powheg experts](mailto:atlas-generators-powhegcontrol-experts@cern.ch).
+All of the following instructions assume that you are working in ATLAS generator software release 21.6. In the rare event that you need instructions for earlier (or later) releases, please [contact the Powheg experts](mailto:atlas-generators-powhegcontrol-experts@cern.ch).
+Most instructions will directly apply as well to the release 22.6 series.
 
 ## Setting up
 
-Powheg for ATLAS is available in the **release series 21.6** (`AthGeneration` releases). The recommendation is to use the most recent release, unless
+Powheg for ATLAS is available in the **release series 21.6 and 22.6** (`AthGeneration` releases). The recommendation is to use [the most recent release](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_release_21_6_AthGenerat), unless
 specifically noted otherwise. To set up, do the following on any machine with access to the ATLAS software (CERN LXPlus, your institute's cluster, …):
 
 ```bash
 setupATLAS # = source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
-asetup AthGeneration 21.6.57 # or whichever release number you want
+asetup AthGeneration 21.6.99 # or whichever release number you want
 ```
 
 #### Side note about releases and versioning
 
-While PowhegControl is part of Athena and therefore automatically versioned with the release, the Powheg Box installations are versioned and installed on CVMFS separately from Athena. To ensure compatibility, each Athena release points to a specific ATLAS Powheg installation version. Normally you don't need to know their version, but if you ever want to check it, you can find it in the PowhegControl source at `https://gitlab.cern.ch/atlas/athena/-/blob/<release of interest>/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in`
-Just replace `<release of interest>` by whatever release you're interested in. E.g. for release 21.6.31 you would substitute in `release/21.6.31` to get [this URL](https://gitlab.cern.ch/atlas/athena/-/blob/release/21.6.31/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in) and then you can see that the Powheg installation version for that release is `ATLASOTF-00-04-04`.
+While PowhegControl is part of Athena and therefore automatically versioned with the release, the Powheg Box installations are versioned and installed on CVMFS separately from Athena. The install path is contained in the environment variable `$POWHEGPATH` - this may be handy also for very advanced users to have a look at the Powheg documentation or source code of your process.
+
+To ensure compatibility, each Athena release points to a specific ATLAS Powheg installation version. Normally you don't need to know their version, but if you ever want to check it, you can find it in the PowhegControl source at `https://gitlab.cern.ch/atlas/athena/-/blob/<release of interest>/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in`
+Just replace `<release of interest>` by whatever release you're interested in. E.g. for release 21.6.99 you would substitute in `release/21.6.99` to get [this URL](https://gitlab.cern.ch/atlas/athena/-/blob/release/21.6.99/Generators/PowhegControl/cmake/PowhegEnvironmentConfig.cmake.in) and then you can see that the Powheg installation version for that release is `ATLASOTF-00-05-05`.
 
 
 ## Running event generation
@@ -154,7 +159,7 @@ Gen_tf.py --jobConfig foo --ecmEnergy 13000 --runNumber 999999 --firstEvent 1 --
 [You can find example job option directories for all Powheg processes supported in ATLAS here](https://gitlab.cern.ch/atlas/athena/-/tree/21.6/Generators/PowhegControl/share/example/processes).
 
 
-**Powheg generates only the hard scattering process** (typically $`2 \to 1`$ or $`2 \to 2`$ at leading order) **plus NLO QCD corrections** (and sometimes other higher-order corrections) to it, **including real-emission corrections** involving the emission of an additional coloured parton (quark or gluon). These hard events are stored in the text-based [Les Houches Event format](https://arxiv.org/abs/hep-ph/0609017) (LHE). These Les Houches event may then be read by a suitably configured general-purpose MC generator, most commonly Pythia 8 or Herwig 7, which can generate
+**Powheg generates only the hard scattering process** (typically $`2 \to 1`$ or $`2 \to 2`$ or $`2 \to 3`$ at Born level) **plus NLO QCD corrections** (and sometimes other higher-order corrections). This includes the **virtual corrections** as well as the **real-emission correction** that involves the emission of an additional coloured parton (quark or gluon). These hard events are stored in the text-based [Les Houches Event format](https://arxiv.org/abs/hep-ph/0609017) (LHE). These Les Houches event may then be read by a suitably configured general-purpose MC generator, most commonly Pythia 8 or Herwig 7, which then generate
 
 * additional parton emissions in the [parton shower formalism](http://www.scholarpedia.org/article/Parton_shower_Monte_Carlo_event_generators),
 * (additional electroweak radiation,)
@@ -165,19 +170,19 @@ Gen_tf.py --jobConfig foo --ecmEnergy 13000 --runNumber 999999 --firstEvent 1 --
 
 For some processes, PowhegControl implements a few special features that go beyond this simple picture, e.g. performing more sophisticated resonance decays using MadSpin before handing the events over to Pythia or Herwig. For more information, see the [process-specific instructions](#supported-processes).
 
-Since Powheg Box does not provide an [application programming interface](https://en.wikipedia.org/wiki/API), but only *executables*, event generation with Powheg is done quite differently in Athena than for most other generators: PowhegControl simply writes out a config file that Powheg understands and then calls the right Powheg process executable with that input file. So the entire Powheg run is finished and the LHE events written out before any other MC generator comes into play.
+Since Powheg Box only provides *executables*, event generation with Powheg is done quite differently in Athena than for most other generators: PowhegControl simply writes out a config file that Powheg understands and then calls the right Powheg process executable with that input file. So the entire Powheg run is finished and the LHE events written out before any other MC generator comes into play.
 
 #### Setting the number of events
 
-**Use the `Gen_tf.py` argument `--maxEvents` to request the number of events you want.** If you are generating showered events, i.e. not just [LHE-level events](#generating-lhe-only-events), PowhegControl applies a **default safety factor of 1.1 to your requested number of events**. This is to prevent the parton shower MC from "running out" of events **in cases where a generator filter is used** that rejects some of your events. The optimal safety factor is $`1.0 / \mathrm{filter\,efficiency}`$ with an extra safety buffer.
+**Use the `Gen_tf.py` argument `--maxEvents` to request the number of events you want.** If you are generating showered events, i.e. not just [LHE-level events](#generating-lhe-only-events), PowhegControl applies a **default safety factor of 1.1 to your requested number of events**. This is to prevent the parton shower MC from "running out" of events in case some events are discarded. **In cases where a generator filter is used** that rejects a significant fraction of your events, you will have to test and set this factor around $`1.1 / \mathrm{filter\,efficiency} `$, where again an 10% safety buffer is included here. E.g. in the case your filter only keeps 10% of the events, you will produce 11 times more LHE events than will eventually be available in the EVNT (and passed to simulation).
 
-If your parton shower MC does run out of events (you should see a line similar to: `Abort from Pythia::next: reached end of Les Houches Events File...` in the `log.generate` file), you can increase the safety factor in your job option like this:
+If your parton shower MC does run out of events (you should see a line similar to: `Abort from Pythia::next: reached end of Les Houches Events File...` in the `log.generate` file), you need to understand why and potentially increase this factor in your job option like this:
 
 ```py
-PowhegConfig.nEvents *= 1.2 # or whatever factor
+PowhegConfig.nEvents *= 5 # or whatever factor
 ```
 
-This gets applied on top of the 1.1 default factor, so the overall safety factor in this example would be $`1.1 \times 1.2`$.
+This gets applied on top of the 1.1 default factor, so the overall safety factor in this example would be $`1.1 \times 5`$.
 
 **If `--maxEvents` is not provided, Powheg defaults to 10000 events**. Also in this case a default safety factor of 1.1 is applied automatically if showering is done, i.e. you actually get 11000 events from Powheg.
 
@@ -197,7 +202,7 @@ name is specified by this option. **See the PMG's full instructions [here](https
 
 ### Existing official job options
 
-Official MC16 campaign job options can be found [here](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions). Information about them can be found [in this PMG Twiki](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware). The job options containing [MC IDs in the range 600000–699999 correspond to Powheg](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware#DSID_blocks).
+Official MC16/MC20/MC21 campaign job options can be found [here](https://gitlab.cern.ch/atlas-physics/pmg/mcjoboptions). Information about them can be found [in this PMG Twiki](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware). The job options containing [MC IDs in the range 600000–699999 correspond to Powheg](https://twiki.cern.ch/twiki/bin/view/AtlasProtected/PmgMcSoftware#DSID_blocks).
 
 Even when you want to make your own job options, say to study varying some parameter, it's often easiest to find an official job option that is close to what you want to do and then modify it.
 
@@ -207,7 +212,7 @@ Most Powheg parameters exist for multiple processes. Important ones are listed h
 
 | Parameter name | Meaning | Allowed values | Notes and examples |
 | :------------: | :-----: | :------------: |:----------------: |
-| `PDF`          | Choice of nominal and (optionally) variation PDF sets | A single LHAPDF ID (`int`) or a `list` of LHAPDF IDs. You can find a table of all available LHAPDF sets and their IDs [here](https://lhapdf.hepforge.org/pdfsets). Some more unusual ones might not be installed in the ATLAS setup, so be aware of that. Ask experts for help if necessary.
+| `PDF`          | Choice of nominal and (optionally) variation PDF sets | A single LHAPDF ID (`int`) or a `list` of LHAPDF IDs. You can find a table of all available LHAPDF sets and their IDs [here](https://lhapdf.hepforge.org/pdfsets). By default PDFs are taken from the central repository `/cvmfs/sft.cern.ch/lcg/external/lhapdfsets/current` that will contain basically all sets although the LHAPDF team may need a bit of time to get the latest sets installed. Ask experts for help if necessary.
 
 
 
@@ -298,27 +303,25 @@ makes use of the A14 parton shower tune of Pythia8, and the line
 include("Pythia8_i/Pythia8_Powheg_Main31.py")
 ```
 instructs Pythia8 to use the events in the produced LHE file assuming they
-are events produced by Powheg, using the main31 routine which is appropriate
-for ttbar events. Other tunes and/or other routines may be more appropriate
-to your case; in doubt, ask your MC expert.
+are events produced by Powheg, using the main31 routine which is the 
+appropriate 'matching routine' for the majority of Powheg processes.
+Other tunes and/or other routines may be preferable or needed for some cases; in doubt, ask your MC expert.
 
 
 
 
 # PowhegControl interface: more details
 
-## External/Powheg - :warning: section may contain outdated information and will be revised soon :warning:
+## External/Powheg
 
-Currently, only some of the processes available in Powheg Box have been
-implemented in the on-the-fly Athena package. Processes are installed on
-afs and migrated to cvmfs, so they should be available to anyone setting
+Processes are installed on cvmfs, so they should be available to anyone setting
 up Athena in the standard way. It is often useful to know the specific
 version of a PowhegControl process that was used to generate a particular
 dataset (for example, for correct citation in a paper). Currently a
 mixture of Powheg Box V1, Powheg Box V2 and Powheg Box-RES processes are
-used - migration to V2 is dependent on the process authors updating
-their code, so if you need V2 features (such as PDF reweighting) in a V1
-process, a request might need to be made to the process authors.
+used, although V1 processes are by now deprecated and generally replaced by V2,
+which also allows features such as PDF reweighting.
+Contact the experts in case your desired process is not available in V2, a request might need to be made to the process authors.
 
 **Powheg Box SVN revisions for the processes used in each
 `External/Powheg` tag are listed [HERE](https://docs.google.com/spreadsheets/d/16XvI5k2I2On4TkkIWJC9MXr0fMaRU2SvOkgBucRPzs0)
@@ -365,17 +368,25 @@ Py:PowhegControl INFO Integration test :: cross-section uncertainty : 0.26%
 
 If any of the integration tests have failed, the INFO messages will be
 WARNING messages, and you should increase the appropriate integration
-parameters. In particular, changes to any of the following parameters
-will invalidate the checks made in `PowhegControl` validation:
+parameters. Few considerations:
+* The integration speed scales typically with `ncall1*itmx1` and `ncall2*itmx2`, if
+  integrations become too slow to do, consider reusing integration grids and going multicore.
+* Both integration and unweighting (event generation) speed scale typically `foldx*foldy*foldphi`, where values of 1,2,5,10 are permissible for each of the three parameters.
+  E.g. the speed difference between `1*1*1` and `10*10*10` will be roughly a factor of 1000, i.e. massive.
+  It may not be feasible to push the negative weight fraction below 1%, in that case it is advisable to
+  find a compromise between generation speed and negative weight fraction, see also [TWiki PmgNegativeWeights](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgNegativeWeights).
+
+In case you change any of the parameters, you will need to reintegrate 
+the process and re-check the `PowhegControl` validation:
 `bornktmin`, `bornsuppfact`, `foldx`, `foldy`, `foldphi`, `itmx1`,
-`itmx2`, `ncall1`, `ncall2`, `nubound`, `xupbound`. In addition, changes
+`itmx2`, `ncall1`, `ncall2`, `nubound`, `xupbound`. Changes
 to the phase space under consideration (for example changing pT cuts or
-masses of particles) can also invalidate these checks.
+masses of particles) will generally also change the performance.
 
 If you make any changes from the defaults for a particular process,
 **YOU** are responsible for ensuring that the output passes these tests.
 
-### Automatic optimisation of integration parameters - :warning: section contains outdated information and will be revised soon :warning:
+### Automatic optimisation of integration parameters - :warning: section contains outdated information :warning:
 
 ***Please contact the Powheg experts if you need this feature. The tool has been updated and we still need to add it to the documentation.***
 
@@ -388,44 +399,52 @@ find out how to use this if you want to test several parameter sets.
 An example where this has been done and documented is here:
 <https://twiki.cern.ch/twiki/bin/view/AtlasProtected/DMProductionRun2#MC15_pilot_request>
 
-### Generating integration grids - :warning: section contains outdated information and will be revised soon :warning:
+### Generating integration grids
 
-***Please contact the Powheg experts if you need this feature. The tool has been updated and we still need to add it to the documentation.***
-
-The easiest way to generate and test grids for long-running jobs is to
+The best way to generate and test grids for long-running jobs is to
 run on a batch system. A convenience script
-(PowhegIntegrationGridGenerator) for doing this is available
-[here](https://svnweb.cern.ch/cern/wsvn/atlas-jrobinso/PowhegIntegrationGridGenerator).
-Please use the latest tag (currently
-PowhegIntegrationGridGenerator-00-01-05). Instructions are contained in
-the package.
+for doing this is available
+[powhegintegrator](https://gitlab.cern.ch/atlas-physics/pmg/tools/powhegintegrator) and here is the [QT report](https://cds.cern.ch/record/2718541)
+describing the development. Instructions are contained in the git package.
 
-TODO update PowhegIntegrationGridGenerator reference above!
+*Note*: in case you have no access to a batch system or cannot get the above package to work,
+there is also the option to simply run the desired process/setup from the command line and
+collect the file `integration_grids.tar.gz` that will be produced at the end.
+Make sure you have measures in place to allow the job to take the required CPU cores and time, e.g.
+when running for a prolonged time on lxplus your jobs may just get killed.
 
-### Event weights: Born-level suppression and negative weights - :warning: section may contain outdated information and will be revised soon :warning:
 
-Despite the name, POWHEG does generate negative weight events. The
-default in ATLAS before `PowhegControl-00-02-09` was to reject these,
-but now they are accepted by default in all processes. Allowing negative
-weights can, in some cases, allow unphysical negative numbers of events
-in poorly understood areas of phase space. Additionally, if the
-`bornsuppfact` parameter is used to enable Born-level suppression,
-`Powheg` will generate weighted events for which the average weight is
-equal to the cross-section of the process in question. This can lead to
-**very** large event weights in the case of events which have a
-particularly low transverse momenta at the Born level, and then pick up
-hard jets from the parton shower.
+
+### Event weights: Born-level suppression and negative weights
+
+Despite the name, POWHEG does generate negative weight events, although
+generally much less than NLO setups based on MC@NLO matching. These
+are accepted by default in all processes, this would otherwise result in biases.
+Negative weights can, in some cases, lead to unphysical negative weight integrals (=events)
+in poorly populated areas of phase space and in general they may incur a significant penalty in statistical accuracy,
+see also [TWiki PmgNegativeWeights](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgNegativeWeights).
+
+The `bornsuppfact` parameter can be used to suppress regions of the phase space (typically
+low pT regions) and bias the event generation towards the region of interest.
+`Powheg` will 'compensate' for the bias by generating weighted events.
+The average weight is equal to the cross-section of the process in question.
+
+If the resulting spread of weights is large and events with very different weights end up in the same
+phase space, the events with large weights may disturb distributions
+as well as cross section (and filter efficiency) calculations. A typical case are
+low pT events that pick up hard jets from the parton shower. (Although by definition this
+should generally not happen, as `Powheg` is supposed to generate the hardest emission.)
 
 | Born-level suppression by default     | Negative weights by default | No weighting by default |
 | :------------------------------------ | :-------------------------- | :---------------------- |
 | `jjj`, `ssWWjj`, `ttj`, `Wbbj`, `Wbb` | All processes               | None                    |
 
 
-If either Born-level suppression or negative weights are used (which is
-the case for all processes by default) then the cross-section reported
-by Powheg Box will be incorrect. Please use the one printed by
-PowhegControl in the log file instead. See the caveats here:
-NegativeWeightPowheg
+If either Born-level suppression or negative weights are used (i.e.
+for all processes by default), the cross-section reported by the
+Powheg Box executable will be incorrect. Instead, PowhegControl will
+recompute the cross section as the average event weight (over the
+generated LHE events) and print this to the log file.
 
 ### Using a particular version of PowhegControl
 
@@ -440,20 +459,21 @@ experts' fork of Athena, use the following in a clean directory:
 setupATLAS
 lsetup git
 git clone ssh://git@gitlab.cern.ch:7999/atlas-physics/pmg/mcexperts/powheg-experts/athena.git
-# It's probably not a bad idea to use the Powheg expert's fork of Athena, which
+# It's probably a good idea to use the Powheg expert's fork of Athena, which
 # you get with the above command. This is where the development of PowhegControl
 # is done; any important changes are then regularly merged into central Athena.
 # If you want to use central Athena, just replace the line above with:
 # git clone ssh://git@gitlab.cern.ch:7999/atlas/athena.git
 cd athena
 git checkout 21.6 # or whichever branch/commit you wish to use!
-# Branch 21.6 is the "master" for things related to MC event generation
+# Branch 21.6 is the "master" for things related to MC16/20 event generation
+# Branch 22.6/master is used for MC21+ event generation
 cd ..
 echo "+ Generators/PowhegControl" > package_filters.txt
 echo "- .*" >> package_filters.txt
 mkdir build
 cd build
-asetup AthGeneration,21.6.40 # or whichever release you want to use
+asetup AthGeneration,21.6.99 # or whichever release you want to use
 cmake -DATLAS_PACKAGE_FILTER_FILE=../package_filters.txt ../athena/Projects/WorkDir
 cmake --build ./ # or just use the command "make" instead
 source */setup.sh
@@ -484,26 +504,28 @@ installation, **you need to also manually update the shell environment variable
 location, e.g.:
 
 ```bash
-export POWHEGPATH=/afs/cern.ch/atlas/offline/external/powhegbox/ATLASOTF-00-04-04
+export POWHEGPATH=/cvmfs/atlas.cern.ch/repo/sw/Generators/powheg/ATLASOTF-05-05
 ```
 
 Hint: use `ls $POWHEGPATH/..` to list the available ATLAS Powheg installations.
 
 
 
-### Re-using integration files - :warning: section contains outdated information and will be revised soon :warning:
+### Re-using integration files
 
-:warning: :warning: :warning: Also, the needed files are (or should be, if everything works) put by PowhegControl in a tarball called integration_grids.tar.gz at the end of the run. So if you want to re-use them later in a clean directory, you just need to either (in releases older than 21) use it as argument of the --inputGenConfFile option of the transform, or (from release 21, which uses the new workflow for MC production) rename it according to the convention explained here (i.e. mc_13TeV.[physicsShort].GRID.tar.gz) and put it in the directory where the joboption is (and this directory would be your argument for --jobConfig).
-
-
+See also the above section `Generating integration grids`.
 
 If the integration step (before events are generated) is lengthy, the
-integration step can be skipped by re-using the Powheg integration
-grids. Please note that there are usually three or four steps in PowhegControl
+integration step can be performed once beforehand and then 
+skipped during event generation by re-using the Powheg integration
+grids. **You** will have to ensure that appropriate grids are used, i.e. those matching
+the setup.
+
+Please note that there are usually four steps in PowhegControl
 event generation:
 
 - Powheg integration
-- Powheg event generation
+- Powheg event generation (and generation of weights)
 - Athena-based event hadronisation (eg. with Pythia or Herwig)
 - (optional) event filtering.
 
@@ -518,45 +540,27 @@ needed:
 |        3         | `pwgfullgrid*.dat`, `pwgubound*.dat` | `pwgfullgrid*.dat`, `pwgubound*.dat` | `pwgfullgrid*.dat`, `pwgubound*.dat` |
 
 
-For local running/testing it is sufficient that they are in the local
-working directory. For production both files should be put into a tar
-file using the following command:
+If you want to re-use integration grids later, simply put the file
+renamed to mc_[SQRTS]TeV.[physicsShort].GRID.tar.gz into the job
+option directory, where `SQRTS` is similar to what the MC production system
+and rucio use for dataset scopes, e.g. `5` (5.02 TeV), `7`, `8`, `13`, `13p6` (13.6 TeV), `14`.
+For production, the integration grids will be registered together with the job options, see
+[McSampleRequestProcedure](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/McSampleRequestProcedure)
+ and look for "If you are using input tarballs".
 
-```bash
-group.phys-gener.powheg_<version>.<RunNumber>.<ProcessDescription>_<CoMEnergy>.TXT.<CampaignName>_v1._00001.tar.gz <FileList>
-```
-
-where `version` is the External/Powheg version, `RunNumber` is the
-intended run number and `ProcessDescription` a short process
-description, similar to the physics short description of the JO name.
-Please update the centre of mass energy and the campaign name (eg.
-`mc15`) accordingly. This tar ball needs to be uploaded to the grid.
-
-An automated generator for these integration grids, which takes Powheg
-OTF jobOptions as input and provides an integration grid tarball as
-output is here:
-<https://svnweb.cern.ch/cern/wsvn/atlas-jrobinso/PowhegIntegrationGridGenerator/tags/>.
-Please use the latest tag (currently
-`PowhegIntegrationGridGenerator-00-01-04/`). There are instructions on
-usage in the README provided with the code.
-
-The integration grid tar ball needs to be passed to `Generate_tf.py` via
-the `inputGenConfFile` argument. Contact your group production contact
-for details and help. Most details given at
-AtlasProtected.PreparingLesHouchesEven also apply for integration grids,
-although only one file is needed here.
-
-Please check that the use of integration grids give a significant speed
-up. Sometimes most time is spend in the athena based hadronisation
-process, especially if low efficiency filters are used. For example,
-plain ttbar or single gauge boson processes do not need pre-made
-integration grids.
+Please check the Powheg log file that the use of integration grids give a significant speed
+up. Simple processes like (NLO inclusive) ttbar or single W,Z boson processes 
+may run the integrations on the fly on a single CPU core in minutes and thus do not 
+necessarily need pre-made integration grids. On the other hand, many more complex processes may need
+days on multiple CPU cores to perform the integrations and will not be feasible to run
+in central production without.
 
 Please note that integration grids generated in either single-core or
-multi-core mode can be re-used. However, **if integration files are
-provided as input to a multi-core generation job, they will not be
-used** - only single core
-Powheg makes the appropriate check for existing integration grids.
+multi-core mode can be re-used.
+
+*Old and possibly wrong:* however, if integration files are provided as input to a multi-core
+generation job, they will not be used - only single core Powheg
+makes the appropriate check for existing integration grids.
 
 
 ### Running in multicore mode
@@ -567,13 +571,8 @@ enable this, simple set the following environment variable `ATHENA_PROC_NUMBER`
 to the desired number of cores to use, e.g.:
 
 ```bash
-export ATHENA_PROC_NUMBER=4
+export ATHENA_PROC_NUMBER=8
 ```
-
-**Running event generation in
-multicore mode ignores any integration files that are provided by the
-user.**
-
 
 
 
