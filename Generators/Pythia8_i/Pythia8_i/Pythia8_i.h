@@ -15,13 +15,7 @@
 
 //#include "Pythia8/../Pythia8Plugins/HepMC2.h"
 #ifdef HEPMC3
-  #ifdef PYTHIA_VERSION_INTEGER 
-     #if PYTHIA_VERSION_INTEGER > 8299
-        #include "Pythia8Plugins/HepMC3.h"
-     #else
-        #include "Pythia8ToHepMC3.h"
-     #endif
-  #endif
+#include "Pythia8Plugins/HepMC3.h"
 namespace HepMC {
 typedef HepMC3::Pythia8ToHepMC3 Pythia8ToHepMC;
 }

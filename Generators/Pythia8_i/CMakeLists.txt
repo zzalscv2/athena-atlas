@@ -32,17 +32,6 @@ atlas_add_component( Pythia8_i
    src/components/*.cxx
    LINK_LIBRARIES Pythia8_iLib )
 
-# If we use HepMC3, make sure that we use it correctly.
-if( HEPMC3_USE )
-   list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-   find_package( hepmc3 )
-   find_package( HepMC3Pythia8Interface )
-   target_include_directories( Pythia8_iLib PUBLIC
-      ${HEPMC3_INCLUDE_DIRS} ${HEPMC3PYTHIA8INTERFACE_INCLUDE_DIRS} )
-   target_link_libraries( Pythia8_iLib PUBLIC
-      ${HEPMC3_LIBRARIES} ${HEPMC3PYTHIA8INTERFACE_LIBRARIES} )
-endif()
-
 # Install files from the package:
 atlas_install_joboptions( share/common/*.py
                           share/example/*.py )
