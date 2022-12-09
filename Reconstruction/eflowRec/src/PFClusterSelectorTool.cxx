@@ -56,7 +56,7 @@ PFClusterSelectorTool::execute(
       std::map<IdentifierHash,double> cellsWeightMap;
       retrieveLCCalCellWeight(caloClustersReadHandle->at(iCluster)->e(), iCluster, cellsWeightMap, *calclusters,**caloMgrHandle);
 
-      thisEFRecCluster->setCellsWeight(cellsWeightMap);
+      thisEFRecCluster->setCellsWeight(std::move(cellsWeightMap));
     }
 
     thisEFRecCluster->setClusterId(iCluster);
