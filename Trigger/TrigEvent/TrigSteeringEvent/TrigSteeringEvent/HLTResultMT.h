@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTEERINGEVENT_HLTResultMT_H
@@ -23,6 +23,7 @@
 #include <vector>
 #include <unordered_map>
 #include <utility>
+#include <cstdint>
 
 namespace HLT {
 

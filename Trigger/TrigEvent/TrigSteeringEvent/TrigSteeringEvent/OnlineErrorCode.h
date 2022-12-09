@@ -5,6 +5,7 @@
 #ifndef TRIGSTEERINGEVENT_OnlineErrorCode_H
 #define TRIGSTEERINGEVENT_OnlineErrorCode_H
 #include <ostream>
+#include <cstdint>
 
 namespace HLT {
   /**

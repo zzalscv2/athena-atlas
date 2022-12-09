@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigConf_Random
@@ -9,6 +9,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <cstdint>
 #include "TrigConfL1Data/L1DataBaseclass.h"
 
 namespace TrigConf {
