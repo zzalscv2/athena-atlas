@@ -4,74 +4,44 @@
 atlas_subdir( Pythia8_i )
 
 # External dependencies:
-find_package( Boost COMPONENTS filesystem thread system )
+find_package( Boost )
 find_package( CLHEP )
-find_package( Lhapdf )
 find_package( Pythia8 )
-
-# The _VERSION variable is unreliable.
-add_definitions(-DPY8INCLUDE_DIR=\"${PYTHIA8_INCLUDE_DIR}\")
 
 # Remove the --as-needed linker flags:
 atlas_disable_as_needed()
-if (HEPMC3_USE)
-set( HEPMC_PYTHIA8_INTERFACE_DIR ${HEPMC3_INCLUDE_DIR}/../share/HepMC3/interfaces/pythia8/include/Pythia8)
-else()
-set( HEPMC_PYTHIA8_INTERFACE_DIR ${PYTHIA8_INCLUDE_DIRS})
-endif()
+
 # Component(s) in the package:
 atlas_add_library( Pythia8_iLib
-                   src/Pythia8_i.cxx
-                   src/UserProcessFactory.cxx
-                   src/UserHooksFactory.cxx
-                   src/UserResonanceFactory.cxx
-                   src/UserProcesses/Sigma2qqbar2emu.cxx
-                   src/UserProcesses/Sigma2qqbar2lStarlBar.cxx
-                   src/UserProcesses/Sigma2qqbar2lStarlStarBar.cxx
-                   src/UserHooks/WZVetoedShower.cxx
-                   src/UserHooks/QCDVetoedShower.cxx   
-                   src/UserHooks/PoWHEGVetoedShower.cxx
-                   src/UserHooks/GravFlat.cxx
-                   src/UserHooks/JetMatchingMadGraphHook.cxx
-                   src/UserHooks/JetMergingaMCatNLO.cxx
-                   src/UserHooks/SuppressMPI.cxx
-                   src/UserHooks/EnhanceMPI.cxx
-                   src/UserHooks/ISRVetoedShower.cxx
-                   src/UserHooks/PTRelVetoedShower.cxx
-                   src/UserHooks/WprimeFlat.cxx
-                   src/UserHooks/ZprimeFlatpT.cxx
-                   src/UserHooks/WprimeWZFlat.cxx
-                   src/UserHooks/WZPolarization.cxx
-                   src/UserHooks/mHatReweight.cxx
-                   src/UserHooks/DecayToSUEP.cxx   
-                   src/UserHooks/suep_shower.cxx
-                   src/UserHooks/main31.cxx
-                   src/UserHooks/EnhanceSplittings.cxx
-                   src/UserHooks/EnhanceTest.cxx
-                   src/UserHooks/SettableColourReconnection.cxx
-                   src/UserHooks/PowhegV_EW.cxx
-                   src/UserHooks/PowhegBB4L.cxx
-                   src/UserHooks/PowhegBB4Ltms.cxx
-                   src/UserHooks/TopRecoilHook.cxx
-
-                   src/UserResonances/ResonanceExcitedCI.cxx
-                   src/UserResonances/ResonanceLQ.cxx  
-                   src/Pythia8Custom/CheckForFinalPartons.cxx
-                   src/Pythia8Custom/HllgamRepeatTimeShower.cxx
-                   src/Pythia8Custom/UserPhotonFlux.cxx
-                   PUBLIC_HEADERS Pythia8_i
-                   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${PYTHIA8_INCLUDE_DIRS} ${HEPMC_PYTHIA8_INTERFACE_DIR}
-                   DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${LHAPDF_LIBRARIES} ${CLHEP_LIBRARIES} ${PYTHIA8_LIBRARIES} AthenaKernel GeneratorModulesLib
-                   PRIVATE_LINK_LIBRARIES GaudiKernel GeneratorObjects PathResolver )
+   Pythia8_i/*.h src/*.cxx
+   src/Pythia8Custom/*.h src/Pythia8Custom/*.cxx
+   src/UserHooks/*.h src/UserHooks/*.cxx
+   src/UserProcesses/*.cxx
+   src/UserResonances/*.cxx
+   PUBLIC_HEADERS Pythia8_i
+   DEFINITIONS ${CLHEP_DEFINITIONS}
+   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${PYTHIA8_INCLUDE_DIRS}
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${PYTHIA8_LIBRARIES} GaudiKernel
+                  GeneratorModulesLib
+   PRIVATE_DEFINITIONS PY8INCLUDE_DIR=\"${PYTHIA8_INCLUDE_DIR}\"
+   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} AthenaKernel GeneratorObjects
+                          PathResolver )
 
 atlas_add_component( Pythia8_i
-                     src/components/*.cxx
-                     INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${PYTHIA8_INCLUDE_DIRS} ${HEPMC_PYTHIA8_INTERFACE_DIR}
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${LHAPDF_LIBRARIES} ${CLHEP_LIBRARIES} ${PYTHIA8_LIBRARIES} AthenaKernel GeneratorModulesLib GaudiKernel GeneratorObjects PathResolver Pythia8_iLib )
+   src/components/*.cxx
+   LINK_LIBRARIES Pythia8_iLib )
 
-# Install python modules
-# atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+# If we use HepMC3, make sure that we use it correctly.
+if( HEPMC3_USE )
+   list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+   find_package( hepmc3 )
+   find_package( HepMC3Pythia8Interface )
+   target_include_directories( Pythia8_iLib PUBLIC
+      ${HEPMC3_INCLUDE_DIRS} ${HEPMC3PYTHIA8INTERFACE_INCLUDE_DIRS} )
+   target_link_libraries( Pythia8_iLib PUBLIC
+      ${HEPMC3_LIBRARIES} ${HEPMC3PYTHIA8INTERFACE_LIBRARIES} )
+endif()
 
 # Install files from the package:
 atlas_install_joboptions( share/common/*.py
@@ -80,4 +50,3 @@ atlas_install_joboptions( share/common/*.py
 set( Pythia8Environment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
    CACHE PATH "Location of Pythia8Environment.cmake" )
 find_package( Pythia8Environment )
-
