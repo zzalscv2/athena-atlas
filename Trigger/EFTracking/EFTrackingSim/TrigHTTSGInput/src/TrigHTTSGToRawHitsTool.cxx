@@ -30,6 +30,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include "InDetRIO_OnTrack/SiClusterOnTrack.h"
 
@@ -699,7 +700,7 @@ TrigHTTSGToRawHitsTool::readTruthTracks(std::vector <HTTTruthTrack>& truth, cons
       // categorize particle (prompt, secondary, etc.) based on InDetPerformanceRTT/detector paper criteria.
       bool isPrimary = true;
       if (std::abs(truth_d0corr) > 2.) { isPrimary = false; }
-      if (HepMC::barcode(particle) > m_simBarcodeOffset || HepMC::barcode(particle) == 0) { isPrimary = false; }
+      if (HepMC::is_simulation_particle(particle) || HepMC::barcode(particle) == 0) { isPrimary = false; }
 
       if (isPrimary && particle->production_vertex()) {
         const HepGeom::Point3D<double> startVertex(particle->production_vertex()->position().x(), particle->production_vertex()->position().y(), particle->production_vertex()->position().z());

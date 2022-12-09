@@ -14,6 +14,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 InDet::PRD_TruthTrajectoryManipulatorID::PRD_TruthTrajectoryManipulatorID(const std::string& t, const std::string& n, const IInterface* p) :
 AthAlgTool(t,n,p)
@@ -38,7 +39,7 @@ StatusCode InDet::PRD_TruthTrajectoryManipulatorID::finalize() {
 
 bool InDet::PRD_TruthTrajectoryManipulatorID::manipulateTruthTrajectory( Trk::PRD_TruthTrajectory &prdvec) const {
 
-  if( HepMC::barcode(*prdvec.genParticle) < m_simBarcodeOffset){
+  if( !HepMC::is_simulation_particle(*prdvec.genParticle)){
       srand( static_cast< unsigned int >( time( nullptr ) ) ); // FIXME reproducibility issue?
       const int pdg_id = (*prdvec.genParticle).pdg_id();
       const double prob_pix = pdg_id == 2212 ? 4. : 0;

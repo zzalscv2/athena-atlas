@@ -17,7 +17,7 @@ namespace DerivationFramework {
   using namespace MCTruthPartClassifier;
 
   static bool isNonInteracting(int pid) {
-    const int apid = abs(pid);
+    const int apid = std::abs(pid);
     if (apid == 12 || apid == 14 || apid == 16) return true; //< neutrinos
     if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
     if (apid == 39 || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK

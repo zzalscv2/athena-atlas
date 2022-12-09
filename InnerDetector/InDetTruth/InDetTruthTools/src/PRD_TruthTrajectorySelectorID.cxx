@@ -14,6 +14,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 
 InDet::PRD_TruthTrajectorySelectorID::PRD_TruthTrajectorySelectorID(const std::string& t, const std::string& n, const IInterface* p) :
@@ -165,7 +166,7 @@ bool InDet::PRD_TruthTrajectorySelectorID::pass( const Trk::PRD_TruthTrajectory 
   
   ThreePointCircle circle(pos);
   // trajectory only selected when within cuts
-  if( ( std::abs(circle.d0()) <= 15 && HepMC::barcode(*prdvec.genParticle)<= m_simBarcodeOffset )  )  return true;
+  if( ( std::abs(circle.d0()) <= 15 && !HepMC::is_simulation_particle(*prdvec.genParticle)  ))  return true;
   
   return false;
 }
