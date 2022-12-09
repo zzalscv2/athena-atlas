@@ -59,6 +59,9 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
 }
 
 bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
+
+  if (this->getSector() != hit->getSector()) return false;
+
   int iroad = 0;
   if (hit->isX()) iroad = this->iRoadx();
   else if (hit->isU()) iroad = this->iRoadu();
@@ -85,7 +88,6 @@ bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
   double shigh = (R + (this->getRoadSize()*(iroad+1))*this->getPitch() + shift + this->getPitch()/2. + ohigh)/Z;
 
   double slope = hit->getRZSlope();
-  if (this->getSector() != hit->getSector()) return false;
 
   if (slope > 0.) return (slope >= slow && slope < shigh);
   else return (slope >= shigh && slope < slow);
@@ -125,7 +127,7 @@ bool MMT_Road::checkCoincidences(const int &bcwind) const {
   bool passHorizontalCheck = this->horizontalCheck();
   bool passStereoCheck = this->stereoCheck();
   bool passMatureCheck = this->matureCheck(bcwind);
-  return (passHorizontalCheck && passStereoCheck && passMatureCheck) ? true : false;
+  return (passHorizontalCheck && passStereoCheck && passMatureCheck);
 }
 
 unsigned int MMT_Road::countRealHits() const {
@@ -165,7 +167,7 @@ bool MMT_Road::evaluateLowRes() const {
     if (hit->getPlane() < 4 && !hit->isNoise()) nhits1++;
     else if (hit->getPlane() > 3 && !hit->isNoise()) nhits2++;
   }
-  return (nhits1 < 4 || nhits2 < 4) ? true : false;
+  return (nhits1 < 4 || nhits2 < 4);
 }
 
 bool MMT_Road::horizontalCheck() const {
@@ -216,12 +218,15 @@ void MMT_Road::reset() {
 }
 
 bool MMT_Road::stereoCheck() const {
+
+  if (this->getUVthreshold() == 0) return true;
+
   int nu = 0, nv = 0;
   for (const auto &hit : m_road_hits) {
     if (hit->getPlane() == 2 || hit->getPlane() == 4) nu++;
     if (hit->getPlane() == 3 || hit->getPlane() == 5) nv++;
   }
-  if (this->getUVthreshold() == 0) return true;
+
   if (nu > 0 && nv > 0 && (nu+nv) >= this->getUVthreshold()) return true;
   return false;
 }
