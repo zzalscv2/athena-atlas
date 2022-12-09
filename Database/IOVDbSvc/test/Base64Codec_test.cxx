@@ -21,6 +21,7 @@
 
 #include "../src/Base64Codec.h"
 #include "CoralBase/Blob.h"
+#include <cstring>
 
 
 BOOST_AUTO_TEST_SUITE(Base64CodecTest)
@@ -29,5 +30,14 @@ BOOST_AUTO_TEST_SUITE(Base64CodecTest)
     coral::Blob helloWorld(13);//omit the terminating null
     memcpy(helloWorld.startingAddress(),rawString,13);
     BOOST_TEST(IOVDbNamespace::base64Encode(helloWorld) == "SGVsbG8sIHdvcmxkIQ==");
+  }
+  
+  BOOST_AUTO_TEST_CASE(decode){
+    const std::string base64String="SGVsbG8sIHdvcmxkIQ==";
+    coral::Blob blob = IOVDbNamespace::base64Decode(base64String);
+    std::string result;
+    result.resize(13);
+    memcpy(result.data(),blob.startingAddress(),13);
+    BOOST_TEST(result == "Hello, world!");
   }
 BOOST_AUTO_TEST_SUITE_END()
