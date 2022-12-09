@@ -107,14 +107,19 @@ class GeneratorAnalysisBlock (ConfigBlock):
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
-    def __init__ (self, containerName) :
-        super (PtEtaSelectionBlock, self).__init__ (containerName + '.SelectPtEta')
+    def __init__ (self, containerName, selectionName) :
+        groupName = containerName
+        if selectionName != '' :
+            groupName += '.' + selectionName
+        super (PtEtaSelectionBlock, self).__init__ (groupName)
         self.containerName = containerName
+        self.selectionName = selectionName
         self.addOption ('postfix', '', type=str)
-        self.addOption ('minPt', None, type=float)
-        self.addOption ('maxEta', None, type=float)
+        self.addOption ('minPt', None, type=float,
+                        duplicateAction='skip')
+        self.addOption ('maxEta', None, type=float,
+                        duplicateAction='skip')
         self.addOption ('selectionDecoration', 'selectPtEta', type=str)
-        self.addOption ('selectionName', '', type=str)
 
     def makeAlgs (self, config) :
 
@@ -223,7 +228,7 @@ def makeGeneratorAnalysisConfig( seq,
 
 def makePtEtaSelectionConfig( seq, containerName,
                               *, postfix = None, minPt = None, maxEta = None,
-                              selectionDecoration = None, selectionName = None):
+                              selectionDecoration = None, selectionName = ''):
     """Create a pt-eta kinematic selection config
 
     Keyword arguments:
@@ -238,11 +243,10 @@ def makePtEtaSelectionConfig( seq, containerName,
       selectionName -- the name of the selection to append this to
     """
 
-    config = PtEtaSelectionBlock (containerName)
+    config = PtEtaSelectionBlock (containerName, selectionName)
     config.setOptionValue ('postfix',postfix, noneAction='ignore')
     config.setOptionValue ('minPt',minPt, noneAction='ignore')
     config.setOptionValue ('maxEta',maxEta, noneAction='ignore')
-    config.setOptionValue ('selectionName',selectionName, noneAction='ignore')
     config.setOptionValue ('selectionDecoration',selectionDecoration, noneAction='ignore')
     seq.append (config)
 

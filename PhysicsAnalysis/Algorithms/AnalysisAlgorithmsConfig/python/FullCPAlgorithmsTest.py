@@ -457,9 +457,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         # Include, and then set up the pileup analysis sequence:
         prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makePileupReweightingConfig
-        makePileupReweightingConfig (configSeq)
+        configSeq += makeConfig ('Event.PileupReweighting', None)
         configSeq.setOptionValue ('.userPileupConfigs', prwfiles)
         configSeq.setOptionValue ('.userLumicalcFiles', lumicalcfiles)
 
@@ -468,26 +466,25 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
 
     # Skip events with no primary vertex:
-    from AsgAnalysisAlgorithms.EventCleaningConfig import \
-        makeEventCleaningConfig
-    makeEventCleaningConfig (configSeq)
+    configSeq += makeConfig ('Event.Cleaning', None)
 
 
     # Include, and then set up the electron analysis algorithm sequence:
-    from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig, makeElectronWorkingPointConfig
 
     likelihood = True
     recomputeLikelihood=False
+    configSeq += makeConfig ('Electrons', 'AnaElectrons')
+    configSeq += makeConfig ('Electrons.Selection', 'AnaElectrons.loose')
     if likelihood:
-        workingpoint = 'LooseLHElectron.Loose_VarRad'
+        configSeq.setOptionValue ('.likelihoodWP', 'LooseLHElectron')
     else:
-        workingpoint = 'LooseDNNElectron.Loose_VarRad'
+        configSeq.setOptionValue ('.likelihoodWP', 'LooseDNNElectron')
     # FIXME: fails for PHYSLITE with missing data item
     # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
-    if noPhysliteBroken :
-        workingpoint = workingpoint.split('.')[0] + '.NonIso'
-    makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
-    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose')
+    if not noPhysliteBroken :
+        configSeq.setOptionValue ('.isolationWP', 'Loose_VarRad')
+    else :
+        configSeq.setOptionValue ('.isolationWP', 'NonIso')
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
     vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
               'OutElectrons_NOSYS.phi -> el_phi',
@@ -533,10 +530,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
 
     # Include, and then set up the tau analysis algorithm sequence:
-    from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
-
-    makeTauCalibrationConfig (configSeq, 'AnaTauJets')
-    makeTauWorkingPointConfig (configSeq, 'AnaTauJets', 'Tight', postfix='tight')
+    configSeq += makeConfig ('TauJets', 'AnaTauJets')
+    configSeq += makeConfig ('TauJets.Selection', 'AnaTauJets.tight')
+    configSeq.setOptionValue ('.quality', 'Tight')
     vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
               'OutTauJets_NOSYS.phi -> tau_phi',
               'OutTauJets_NOSYS.charge -> tau_charge',
@@ -546,27 +542,23 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
     # Include, and then set up the jet analysis algorithm sequence:
-    from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
-    jetContainer = 'AntiKt4EMPFlowJets'
-    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer)
+    configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', True)
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta', ]
 
-    from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
-    makeJetJvtAnalysisConfig( configSeq, 'AnaJets' )
+    configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
     if dataType != 'data':
         vars += [
             'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
         ]
 
     if not noPhysliteBroken :
-        from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
-        makeFTagAnalysisConfig( configSeq, 'AnaJets', postfix = btagger + '_' + btagWP)
+        configSeq += makeConfig( 'FlavorTagging', 'AnaJets.' + btagger + '_' + btagWP)
         configSeq.setOptionValue ('.noEfficiency', False)
         configSeq.setOptionValue ('.legacyRecommendations', True)
         configSeq.setOptionValue ('.btagger', btagger)
@@ -582,7 +574,8 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
 
     if largeRJets :
-        makeJetAnalysisConfig( configSeq, 'AnaLargeRJets', 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets', postfix = 'largeR_jets' )
+        configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
+        configSeq.setOptionValue ('.postfix', 'largeR_jets' )
         vars += ['OutLargeRJets_%SYS%.pt  -> larger_jet_pt_%SYS%',
                  'OutLargeRJets_NOSYS.phi -> larger_jet_phi',
                  'OutLargeRJets_NOSYS.eta -> larger_jet_eta',
@@ -590,7 +583,8 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
 
     if trackJets :
-        makeJetAnalysisConfig( configSeq, 'AnaTrackJets', 'AntiKtVR30Rmax4Rmin02PV0TrackJets', postfix = 'track_jets' )
+        configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
+        configSeq.setOptionValue ('.postfix', 'track_jets' )
         vars += ['OutTrackJets_%SYS%.pt  -> track_jet_pt_%SYS%',
                  'OutTrackJets_NOSYS.phi -> track_jet_phi',
                  'OutTrackJets_NOSYS.eta -> track_jet_eta',
@@ -599,52 +593,54 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
-        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
-            makeGeneratorAnalysisConfig
-        makeGeneratorAnalysisConfig( configSeq, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
+        configSeq += makeConfig( 'Event.Generator', None)
+        configSeq.setOptionValue ('.saveCutBookkeepers', True)
+        configSeq.setOptionValue ('.runNumber', 284500)
+        configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
     # Include, and then set up the trigger analysis sequence:
-    from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
-        makeTriggerAnalysisConfig
-    makeTriggerAnalysisConfig( configSeq )
+    configSeq += makeConfig( 'Trigger.Chains', None )
     configSeq.setOptionValue ('.triggerChains', triggerChains )
     configSeq.setOptionValue ('.noFilter', True )
     vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
-    from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
-
-    makePtEtaSelectionConfig (configSeq, 'AnaElectrons',
-                              selectionDecoration='selectPtEta',
-                              minPt=electronMinPt, maxEta=electronMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaPhotons',
-                              selectionDecoration='selectPtEta',
-                              minPt=photonMinPt, maxEta=photonMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaMuons',
-                              selectionDecoration='selectPtEta',
-                              minPt=muonMinPt, maxEta=muonMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaTauJets',
-                              selectionDecoration='selectPtEta',
-                              minPt=tauMinPt, maxEta=tauMaxEta)
-    makePtEtaSelectionConfig (configSeq, 'AnaJets',
-                              selectionDecoration='selectPtEta',
-                              minPt=jetMinPt, maxEta=jetMaxEta)
+    configSeq += makeConfig ('Selection.PtEta', 'AnaElectrons')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', electronMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', electronMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaPhotons')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', photonMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', photonMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaMuons')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', muonMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', muonMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaTauJets')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', tauMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', tauMaxEta, noneAction='ignore')
+    configSeq += makeConfig ('Selection.PtEta', 'AnaJets')
+    configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+    configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
+    configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
     if largeRJets :
-        makePtEtaSelectionConfig (configSeq, 'AnaLargeRJets',
-                                  selectionDecoration='selectPtEta',
-                                  minPt=jetMinPt, maxEta=jetMaxEta)
+        configSeq += makeConfig ('Selection.PtEta', 'AnaLargeRJets')
+        configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+        configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
+        configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
     if trackJets :
-        makePtEtaSelectionConfig (configSeq, 'AnaTrackJets',
-                                  selectionDecoration='selectPtEta',
-                                  minPt=jetMinPt, maxEta=jetMaxEta)
+        configSeq += makeConfig ('Selection.PtEta', 'AnaTrackJets')
+        configSeq.setOptionValue ('.selectionDecoration', 'selectPtEta')
+        configSeq.setOptionValue ('.minPt', jetMinPt, noneAction='ignore')
+        configSeq.setOptionValue ('.maxEta', jetMaxEta, noneAction='ignore')
 
 
     # Include, and then set up the met analysis algorithm config:
-    from MetAnalysisAlgorithms.MetAnalysisConfig import makeMetAnalysisConfig
-
-    makeMetAnalysisConfig (configSeq, containerName = 'AnaMET')
+    configSeq += makeConfig ('MissingET', 'AnaMET')
     configSeq.setOptionValue ('.jets', 'AnaJets')
     configSeq.setOptionValue ('.taus', 'AnaTauJets.tight')
     configSeq.setOptionValue ('.electrons', 'AnaElectrons.loose')
@@ -664,9 +660,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
 
     # Include, and then set up the overlap analysis algorithm config:
-    from AsgAnalysisAlgorithms.OverlapAnalysisConfig import \
-        makeOverlapAnalysisConfig
-    makeOverlapAnalysisConfig( configSeq )
+    configSeq += makeConfig( 'OverlapRemoval', None )
     configSeq.setOptionValue ('.electrons',   'AnaElectrons.loose')
     configSeq.setOptionValue ('.photons',     'AnaPhotons.tight')
     configSeq.setOptionValue ('.muons',       'AnaMuons.medium||tight')
@@ -684,32 +678,26 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     ]
 
 
-    from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
-
-    makeOutputThinningConfig (configSeq, 'AnaElectrons',
-                              selectionName='loose',
-                              outputName='OutElectrons')
-    makeOutputThinningConfig (configSeq, 'AnaPhotons',
-                              selectionName='tight',
-                              outputName='OutPhotons')
-    makeOutputThinningConfig (configSeq, 'AnaMuons',
-                              selectionName='medium',
-                              outputName='OutMuons')
-    makeOutputThinningConfig (configSeq, 'AnaTauJets',
-                              selectionName='tight',
-                              outputName='OutTauJets')
-    makeOutputThinningConfig (configSeq, 'AnaJets',
-                              selectionName='',
-                              outputName='OutJets')
+    configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'loose')
+    configSeq.setOptionValue ('.outputName', 'OutElectrons')
+    configSeq += makeConfig ('Output.Thinning', 'AnaPhotons.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.outputName', 'OutPhotons')
+    configSeq += makeConfig ('Output.Thinning', 'AnaMuons.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'medium')
+    configSeq.setOptionValue ('.outputName', 'OutMuons')
+    configSeq += makeConfig ('Output.Thinning', 'AnaTauJets.Thinning')
+    configSeq.setOptionValue ('.selectionName', 'tight')
+    configSeq.setOptionValue ('.outputName', 'OutTauJets')
+    configSeq += makeConfig ('Output.Thinning', 'AnaJets.Thinning')
+    configSeq.setOptionValue ('.outputName', 'OutJets')
     if largeRJets :
-        makeOutputThinningConfig (configSeq, 'AnaLargeRJets',
-                                  selection='selectPtEta',
-                                  outputName='OutLargeRJets')
+        configSeq += makeConfig ('Output.Thinning', 'AnaLargeRJets.Thinning')
+        configSeq.setOptionValue ('.outputName', 'OutLargeRJets')
     if trackJets :
-        makeOutputThinningConfig (configSeq, 'AnaTrackJets',
-                                  selection='selectPtEta',
-                                  outputName='OutTrackJets')
-
+        configSeq += makeConfig ('Output.Thinning', 'AnaTrackJets.Thinning')
+        configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
 
     configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)

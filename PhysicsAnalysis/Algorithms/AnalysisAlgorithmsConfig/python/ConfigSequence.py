@@ -80,7 +80,7 @@ class ConfigSequence:
         for block in self._blocks :
             if block.groupName() == groupName and \
                block.hasOption (optionName):
-                block.setOptionValue (optionName, value, **kwargs)
+                block.setOptionValue (optionName, value, isDuplicate=used, **kwargs)
                 used = True
         if not used :
             raise KeyError ('unknown option: ' + name)

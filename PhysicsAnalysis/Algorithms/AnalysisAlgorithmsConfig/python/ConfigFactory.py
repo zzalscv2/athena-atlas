@@ -16,29 +16,145 @@
 
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 
-def makeConfig (factoryName, groupName) :
+def makeConfig (factoryName, groupName,
+                *, jetCollection = None) :
+
+    if jetCollection is not None and factoryName != 'Jets' :
+        raise ValueError ('specifying jetCollection only allowed for Jets factory, not: ' + factoryName)
 
     configSeq = ConfigSequence ()
+
     if factoryName == 'Muons' :
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig
         makeMuonCalibrationConfig (configSeq, groupName)
+
     elif factoryName == 'Muons.Selection' :
         from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonWorkingPointConfig
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
         makeMuonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+
+
+    elif factoryName == 'Electrons' :
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig
+        makeElectronCalibrationConfig (configSeq, groupName)
+
+    elif factoryName == 'Electrons.Selection' :
+        from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronWorkingPointConfig
+        groupSplit = groupName.split ('.')
+        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
+            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
+        makeElectronWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+
+
     elif factoryName == 'Photons' :
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig
         makePhotonCalibrationConfig (configSeq, groupName)
+
     elif factoryName == 'Photons.Selection' :
         from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonWorkingPointConfig
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
             raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
         makePhotonWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+
+
+    elif factoryName == 'TauJets' :
+        from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig
+        makeTauCalibrationConfig (configSeq, groupName)
+
+    elif factoryName == 'TauJets.Selection' :
+        from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauWorkingPointConfig
+        groupSplit = groupName.split ('.')
+        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
+            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
+        makeTauWorkingPointConfig (configSeq, groupSplit[0], workingPoint=None, postfix=groupSplit[1])
+
+
+    elif factoryName == 'Jets' :
+        if jetCollection is None :
+            raise ValueError ('need to specify jetCollection for Jets configuration')
+        from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
+        makeJetAnalysisConfig( configSeq, groupName, jetCollection)
+
+    elif factoryName == 'Jets.Jvt' :
+        from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
+        makeJetJvtAnalysisConfig( configSeq, groupName )
+
+
+    elif factoryName == 'FlavorTagging' :
+        from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
+        groupSplit = groupName.split ('.')
+        if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
+            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
+        makeFTagAnalysisConfig( configSeq, groupSplit[0], postfix = groupSplit[1])
+
+
+    elif factoryName == 'MissingET' :
+        from MetAnalysisAlgorithms.MetAnalysisConfig import makeMetAnalysisConfig
+
+        makeMetAnalysisConfig (configSeq, containerName = groupName)
+
+
+    elif factoryName == 'OverlapRemoval' :
+        from AsgAnalysisAlgorithms.OverlapAnalysisConfig import \
+            makeOverlapAnalysisConfig
+        makeOverlapAnalysisConfig( configSeq )
+
+
+    elif factoryName == 'Event.PileupReweighting' :
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
+            makePileupReweightingConfig
+        makePileupReweightingConfig (configSeq)
+
+    elif factoryName == 'Event.Cleaning' :
+        # Skip events with no primary vertex:
+        from AsgAnalysisAlgorithms.EventCleaningConfig import \
+            makeEventCleaningConfig
+        makeEventCleaningConfig (configSeq)
+
+    elif factoryName == 'Event.Generator' :
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
+            makeGeneratorAnalysisConfig
+        makeGeneratorAnalysisConfig( configSeq )
+
+
+    elif factoryName == 'Trigger.Chains' :
+        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
+            makeTriggerAnalysisConfig
+        makeTriggerAnalysisConfig( configSeq )
+
+
+    elif factoryName == 'Selection.PtEta' :
+        groupSplit = groupName.split ('.')
+        if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
+            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
+
+        if len (groupSplit) == 2 :
+            selection = groupSplit[1]
+        else :
+            selection = ''
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
+        makePtEtaSelectionConfig (configSeq, groupSplit[0],
+                                  selectionName=selection)
+
+
+    elif factoryName == 'Output.Thinning' :
+        groupSplit = groupName.split ('.')
+        if len (groupSplit) == 0 or len (groupSplit) > 2 or groupSplit[0] == '' :
+            raise ValueError ('invalid groupName for ' + factoryName + ': ' + groupName)
+        if len (groupSplit) == 2 :
+            configName = groupSplit[1]
+        else :
+            configName = ''
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
+        makeOutputThinningConfig (configSeq, groupSplit[0], configName = configName)
+
+
     else :
         raise ValueError ('unknown factory: ' + factoryName)
+
 
     if groupName is not None :
         for config in configSeq :
