@@ -48,5 +48,23 @@ genseeds = {
 
 ## Decide whether to use the RanLux or standard random number service
 # TODO: Is this necessary or can we just provide the seeds to both services and the alg chooses which to use?
-ranluxlist = ["ParticleGenerator"]
 assert evgenConfig.generators
+atRndmGenSvc = svcMgr.AtRndmGenSvc
+atRndmGenSvc.EventReseeding = False
+printfunc("Events will not be reseeded (RndmGenSvc) ")
+
+## Pass the random seed from the transform command line into each used generator's seed config string
+seedstrs = []
+for gen in evgenConfig.generators:
+    if gen in genseeds:
+        for seedtemplate in genseeds[gen]:
+            seed = runArgs.randomSeed
+            if runArgs.trfSubstepName == 'afterburn':
+              seed = seed + 140280
+            seedstr = seedtemplate.format(rnd=seed)
+            evgenLog.info("Adding %s random seed config: %s" % (gen, seedstr))
+            seedstrs.append(seedstr)
+svcMgr.AtRndmGenSvc.Seeds = seedstrs
+
+
+

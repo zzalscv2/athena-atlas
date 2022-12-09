@@ -510,11 +510,14 @@ svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": 'collisions'})
 # TODO: Standardise energy setting in the GenModule interface
 include("EvgenJobTransforms/Generate_ecmenergies.py")
 
+if 'ParticleGun' in evgenConfig.generators:
+## old (AtRndmGenSvc) Random number service
+   from RngComps.RngCompsConf import AtRndmGenSvc
+   svcMgr += AtRndmGenSvc()
+   include("EvgenJobTransforms/Generate_randomseeds.py")
+else:
 # Propagate DSID and seed to the generators
-include("EvgenJobTransforms/Generate_dsid_ranseed.py")
-
-## Process random seed arg and pass to generators
-#include("EvgenJobTransforms/Generate_randomseeds.py")
+   include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
 ## Propagate debug output level requirement to generators
 if (hasattr( runArgs, "VERBOSE") and runArgs.VERBOSE ) or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "DEBUG") or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "VERBOSE"):
