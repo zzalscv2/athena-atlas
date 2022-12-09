@@ -4,7 +4,7 @@
 atlas_subdir( InDetGeoModelUtils )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml GeoModelRead ExpressionEvaluator )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelXml GeoModelRead ExpressionEvaluator GeoModelDBManager )
 find_package( XercesC  )
 
 # Component(s) in the package:
