@@ -116,6 +116,17 @@ def MessageSvcCfg(cfgFlags):
         # Migrated code from AtlasThreadedJob.py
         msgsvc.defaultLimit = 0
         msgsvc.Format = "% F%{:d}W%C%6W%R%e%s%8W%R%T %0W%M".format(cfgFlags.Common.MsgSourceLength)
+    if cfgFlags.Exec.VerboseMessageComponents:
+        msgsvc.verboseLimit=0
+    if cfgFlags.Exec.DebugMessageComponents:
+        msgsvc.debugLimit=0
+    if cfgFlags.Exec.InfoMessageComponents:
+        msgsvc.infoLimit=0
+    if cfgFlags.Exec.WarningMessageComponents:
+        msgsvc.warningLimit=0
+    if cfgFlags.Exec.ErrorMessageComponents:
+        msgsvc.errorLimit=0
+
     cfg.addService(msgsvc)
     return cfg
 

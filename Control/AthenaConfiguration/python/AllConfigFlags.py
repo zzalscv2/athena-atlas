@@ -26,6 +26,13 @@ def _createCfgFlags():
     acf.addFlag('Exec.DebugStage','')
     acf.addFlag('Exec.FPE',0) #-2: No FPE check at all, -1: Abort with core-dump, 0: FPE Auditor w/o stack-tace (default) , >0: number of stack-trace printed by the job
 
+    #Custom messaging for components, see Utils.setupLoggingLevels
+    acf.addFlag('Exec.VerboseMessageComponents',[])
+    acf.addFlag('Exec.DebugMessageComponents',[])
+    acf.addFlag('Exec.InfoMessageComponents',[])
+    acf.addFlag('Exec.WarningMessageComponents',[])
+    acf.addFlag('Exec.ErrorMessageComponents',[])
+
     acf.addFlag('ExecutorSplitting.TotalSteps', 0)
     acf.addFlag('ExecutorSplitting.Step', -1)
     acf.addFlag('ExecutorSplitting.TotalEvents', -1)
