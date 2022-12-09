@@ -3316,7 +3316,7 @@ namespace xAOD {
                leaflist << brName << "/" << rootType;
 
                // Let's create a holder for this property:
-               THolder* hldr = new THolder( ( void* ) aux->getIOData( id ),
+               THolder* hldr = new THolder( aux->getIOData( id ),
                                             0, kFALSE );
                TPrimitiveAuxBranchManager* auxmgr =
                   new TPrimitiveAuxBranchManager( id, 0, hldr );
@@ -3362,7 +3362,7 @@ namespace xAOD {
                brProperTypeName = cl->GetName();
 
                // Let's create a holder for this property:
-               THolder* hldr = new THolder( ( void* ) aux->getIOData( id ),
+               THolder* hldr = new THolder( aux->getIOData( id ),
                                             cl, kFALSE );
                TAuxBranchManager* auxmgr =
                   new TAuxBranchManager( id, 0, hldr );
