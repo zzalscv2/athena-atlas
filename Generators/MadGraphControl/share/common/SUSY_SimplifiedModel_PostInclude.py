@@ -99,7 +99,7 @@ else:
             for aline in events_file:
                 # Note that because this was directly extracted, we have a binary file, not a text file!
                 if b'ktdurham' in aline and b'=' in aline:
-                    ktdurham = float(aline.split('=')[0].strip())
+                    ktdurham = float(aline.split(b'=')[0].strip())
                     break
         myTarball.close()
     else:
