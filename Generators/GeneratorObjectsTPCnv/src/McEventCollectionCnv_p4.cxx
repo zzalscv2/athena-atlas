@@ -407,7 +407,9 @@ McEventCollectionCnv_p4::createGenVertex( const McEventCollection_p4& persEvt,
 #ifdef HEPMC3
   vtx->set_position(HepMC::FourVector( persVtx.m_x , persVtx.m_y , persVtx.m_z ,persVtx.m_t ));
   vtx->set_status(persVtx.m_id);
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
+  // cast from std::vector<float> to std::vector<double>
+  std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
+  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
 
   // handle the in-going (orphans) particles
@@ -582,11 +584,12 @@ void McEventCollectionCnv_p4::writeGenVertex( HepMC::ConstGenVertexPtr vtx,
                                               McEventCollection_p4& persEvt ) const
 {
   const HepMC::FourVector& position = vtx->position();
-  auto A_weights=vtx->attribute<HepMC3::VectorFloatAttribute>("weights");
+  auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
   auto A_barcode=vtx->attribute<HepMC3::IntAttribute>("barcode");
   std::vector<float> weights;
   if (A_weights) {
-    weights = A_weights->value();
+    auto weights_d = A_weights->value();
+    for (auto& w: weights_d) weights.push_back(w); 
   }
   persEvt.m_genVertices.push_back(
                                   GenVertex_p4( position.x(),
