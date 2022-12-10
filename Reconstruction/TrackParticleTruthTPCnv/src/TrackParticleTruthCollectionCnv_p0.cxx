@@ -31,7 +31,7 @@ void TrackParticleTruthCollectionCnv_p0::persToTrans( const Rec::TrackParticleTr
     //static (const) DataLink<Rec::TrackParticleContainer>                 = 
     TrackParticleTruthCollectionAccessor::trackParticleContainerLink(trans) = dynamic_cast<const Rec::TrackParticleContainer*>((*pers)[0].first.getStorableObjectPointer());
 
-    for(Rec::TrackParticleTruthCollection_p0::const_iterator i=pers->begin(); i!=pers->end(); i++) {
+    for(Rec::TrackParticleTruthCollection_p0::const_iterator i=pers->begin(); i!=pers->end(); ++i) {
       trans->insert(trans->end(), std::make_pair(i->first, i->second));
     }
   }

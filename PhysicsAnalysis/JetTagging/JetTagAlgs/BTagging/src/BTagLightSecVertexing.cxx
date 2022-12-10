@@ -137,7 +137,7 @@ namespace Analysis {
 	for (std::vector<xAOD::Vertex*>::const_iterator verticesIter = verticesBegin; verticesIter!=verticesEnd;++verticesIter) { 
 	  std::vector<ElementLink<xAOD::TrackParticleContainer> > theseTracks = (*verticesIter)->trackParticleLinks();
 	  npsec += theseTracks.size();
-	  for (std::vector<ElementLink<xAOD::TrackParticleContainer> >::iterator itr=theseTracks.begin();itr!=theseTracks.end();itr++){
+	  for (std::vector<ElementLink<xAOD::TrackParticleContainer> >::iterator itr=theseTracks.begin();itr!=theseTracks.end();++itr){
 	    TrkList.push_back(*itr);
 	  }
 	}

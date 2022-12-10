@@ -243,7 +243,7 @@ void eflowObject::navigateClusters(const cluster_type& theClusters,
     {
       cluster_iterator first = theClusters.begin();
       cluster_iterator last  = theClusters.end();
-      for ( ; first != last; first++ )
+      for ( ; first != last; ++first )
 	{
 	  (*first)->fillToken(thisToken,weight);
 	}
@@ -363,7 +363,7 @@ eflowObject::toToken(const CONT&  theData,
 {
   typename CONT::const_iterator first = theData.begin();
   typename CONT::const_iterator last  = theData.end();
-  for ( ; first != last; first++ )
+  for ( ; first != last; ++first )
     {
       theToken->setObject((*first),weight);
     }
@@ -376,7 +376,7 @@ eflowObject::toToken(const CONT&  theData,
 {
   typename CONT::const_iterator first = theData.begin();
   typename CONT::const_iterator last  = theData.end();
-  for ( ; first != last; first++ )
+  for ( ; first != last; ++first )
     {
       theToken->setObject(*first);
     }

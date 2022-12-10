@@ -58,7 +58,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(const INavig
 {
   //loop on towers
   for (INavigable4MomentumCollection::const_iterator towerItr = navInColl->begin();
-    towerItr != navInColl->end(); towerItr++)
+    towerItr != navInColl->end(); ++towerItr)
   {
     //navigate back to cells
     //Default is to sort the cells by either pointer values leading to irreproducible output

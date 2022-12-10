@@ -505,7 +505,7 @@ bool Jet::addJet(const Jet* pJet, double wght)
 {
   const_iterator fC(pJet->begin());
   const_iterator lC(pJet->end());
-  for ( ; fC != lC ; fC++ )
+  for ( ; fC != lC ; ++fC )
     {
       index_t ind(index_t(-1));
       if ( pJet->getIndex(fC,ind) )
@@ -534,7 +534,7 @@ bool Jet::cleanUp()
     {
       const_iterator fC(this->begin());
       const_iterator lC(this->end());
-      for ( ; fC != lC; fC++ )
+      for ( ; fC != lC; ++fC )
 	{
 	  double weight(this->getWeight(fC));
 	  if ( fabs(weight)< m_ignoreWeight )
@@ -669,7 +669,7 @@ Jet* Jet::getOverlap(const Jet* pJet, bool /*noKine = false*/) const
   // de-compose Jet
   const_iterator fC(pJet->begin());
   const_iterator lC(pJet->end());
-  for ( ; fC != lC; fC++ )
+  for ( ; fC != lC; ++fC )
     {
       const constituent_type* c = *fC;
       if ( std::find (constituents.begin(), constituents.end(), c) != 
