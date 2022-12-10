@@ -1152,7 +1152,7 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, co
         while (!lay && iter != subVols.end()) {
             lay = associatedLayer(id, *iter);
             if (lay) break;
-            iter++;
+            ++iter;
         }
         if (lay) return lay;
     }
@@ -1163,7 +1163,7 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, co
         while (!lay && iter != ordLay.end()) {
             lay = match(id, *iter);
             if (lay) break;
-            iter++;
+            ++iter;
         }
         if (lay) return lay;
     }
@@ -1174,7 +1174,7 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, co
         while (!lay && iter != unOrdLay.end()) {
             lay = match(id, *iter);
             if (lay) break;
-            iter++;
+            ++iter;
         }
         if (lay) return lay;
     }

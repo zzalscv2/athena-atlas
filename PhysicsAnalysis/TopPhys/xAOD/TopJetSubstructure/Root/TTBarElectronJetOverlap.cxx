@@ -252,7 +252,7 @@ void TTBarElectronJetOverlap::RecalcJVF() {
         fJetJVFs[iJet] < 0) continue;
 
     for (set<int>::iterator iEl = fJetAssocElCls[iJet].begin();
-         iEl != fJetAssocElCls[iJet].end(); iEl++) {
+         iEl != fJetAssocElCls[iJet].end(); ++iEl) {
       ElIdx = *iEl;
 
       trk.SetPtEtaPhiE(m_electrons->at(ElIdx)->trackParticle()->pt(),

@@ -253,7 +253,7 @@ namespace Rec{
    const
    {
       std::deque<long int>::iterator trk=test.begin();
-      for(trk=test.begin(); trk!=test.end(); trk++)
+      for(trk=test.begin(); trk!=test.end(); ++trk)
          if(std::find(base.begin(), base.end(), (*trk)) == base.end()) return false;  //element not found => test is not part of base
       return true;
    }

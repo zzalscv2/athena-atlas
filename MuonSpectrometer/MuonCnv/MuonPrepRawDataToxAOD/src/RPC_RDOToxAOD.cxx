@@ -104,7 +104,7 @@ StatusCode RPC_RDOToxAOD::execute()
        // loop over Fired Channels
        ATH_MSG_DEBUG("Looping over Coincidence Matrix...");
        RpcCoinMatrix::const_iterator itchan = (*itmat)->begin(), itchanE = (*itmat)->end();
-       for (; itchan != itchanE; itchan++) {
+       for (; itchan != itchanE; ++itchan) {
 
 	 const RpcFiredChannel *aChan = *itchan;
 
