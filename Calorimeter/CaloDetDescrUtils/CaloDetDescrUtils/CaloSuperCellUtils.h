@@ -11,7 +11,7 @@
  *  @brief This is a collection of helper functions for building Calo Super Cell 
  *         detector manager, and for updating it with alignment corrections.
  *         The functions previously existed in two packages: 
- *         CaloSuperCellMgrDetDescrCnv and CaloDetDescr.
+ *         CaloDetMgrDetDescrCnv and CaloDetDescr.
  *         They have been moved over to the CaloDetDescrUtils so that now they
  *         can also be used by the CaloSuperCellAlignCondAlg.
  */
