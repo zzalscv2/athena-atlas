@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstdlib>
@@ -217,9 +217,18 @@ int EMDatabaseID::setRunOrMCSWV(std::string n)
   if (n.substr(0, 3)=="Run")
     {
       n=n.erase(0, 3);
-      int tag=0;
-      for (unsigned int j=0; j<n.size(); j++)	if (n[j]=='-') tag=j;
-      run(atoi((n.substr(1,tag-1)).c_str()),atoi((n.substr(tag+1,n.size())).c_str()));
+      int start = 0;
+      int end = 0;
+      std::string::size_type pos = n.find ('-');
+      if (pos != std::string::npos) {
+        start = atoi (n.substr(1, pos-1).c_str());
+        end = atoi (n.substr(pos+1, n.size()).c_str());
+      }
+      else {
+        pos = 0;
+        end = atoi (n.c_str());
+      }
+      run(start,end);
       return 2;
     }
   return 0;
