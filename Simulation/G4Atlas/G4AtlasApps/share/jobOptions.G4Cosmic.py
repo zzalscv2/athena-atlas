@@ -30,7 +30,6 @@ jobproperties.Beam.beamType.set_Value_and_Lock('cosmics')
 from G4AtlasApps.SimFlags import simFlags
 simFlags.load_atlas_flags()
 simFlags.load_cosmics_flags()
-simFlags.RandomSvc = 'AtDSFMTGenSvc'
 ## Use the default layout:
 simFlags.SimLayout.set_On()
 ## Set a specific layout tag:
@@ -46,7 +45,8 @@ athenaCommonFlags.PoolEvgenInput.set_Off()
 athenaCommonFlags.SkipEvents.set_Off()
 include('CosmicGenerator/SetCosmicGenerator.py')
 if hasattr(topSeq, 'CosmicGenerator'):
-    topSeq.CosmicGenerator.AtRndmGenSvc = simFlags.RandomSvc.get_Value()
+    topSeq.CosmicGenerator.Dsid = simFlags.RunNumber.get_Value()
+    topSeq.CosmicGenerator.RandomSeed = simFlags.RandomSeedOffset.get_Value()
 
 ## 2) Use the cosmics generator to make a track truth record for input to (3)
 #from AthenaCommon.AthenaCommonFlags import athenaCommonFlags

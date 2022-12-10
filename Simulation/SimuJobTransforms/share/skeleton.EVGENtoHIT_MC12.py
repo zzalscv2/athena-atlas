@@ -220,6 +220,8 @@ if jobproperties.Beam.beamType.get_Value() == 'cosmics':
         if hasattr(runArgs, "outputEVNT_TRFile"):
             simFlags.WriteTR = runArgs.outputEVNT_TRFile
         include( 'CosmicGenerator/jobOptions_ConfigCosmicProd.py' )
+        job.CosmicGenerator.Dsid = simFlags.RunNumber.get_Value()
+
 
 ## Add filters for non-cosmics simulation
 ## FIXME: This block should be moved out of the skeleton into job options.

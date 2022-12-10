@@ -208,6 +208,10 @@ def getInput_GenericCosmicGenerator(name="GenericCosmicGenerator", **kwargs):
         print ("Configuring cosmic pT slice: %s" % simFlags.CosmicPtSlice.get_Value())
         theCavern.reconfigureCavernGeometry()
 
+    # Random seeding
+    kwargs.setdefault("Dsid", simFlags.RunNumber.get_Value()) # Could (should?) set this independently of the RunNumber
+    #kwargs.setdefault("RandomSeed", simFlags.RandomSeedOffset.get_Value()) # leaving commented out to allow agreement with CA-based config
+
     from AthenaCommon import CfgMgr
     algorithm = CfgMgr.CosmicGenerator(**kwargs)
     from AthenaCommon.AlgSequence import AlgSequence

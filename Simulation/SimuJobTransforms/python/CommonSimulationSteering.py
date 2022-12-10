@@ -90,12 +90,13 @@ def CommonSimulationCfg(ConfigFlags, log):
         # add BeamEffectsAlg
         from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
         cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
-        if "xAOD::EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections:
-            from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-            cfg.merge(EventInfoCnvAlgCfg(ConfigFlags)) ## TODO: update config so that ReSim can use the same xAOD::EventInfo
-        else:
-            from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
-            cfg.merge(EventInfoUpdateFromContextAlgCfg(ConfigFlags))
+        if ConfigFlags.Input.Files:
+            if "xAOD::EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections:
+                from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
+                cfg.merge(EventInfoCnvAlgCfg(ConfigFlags)) ## TODO: update config so that ReSim can use the same xAOD::EventInfo
+            else:
+                from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
+                cfg.merge(EventInfoUpdateFromContextAlgCfg(ConfigFlags))
 
     AcceptAlgNames=[]
     if ConfigFlags.Sim.ISFRun:
