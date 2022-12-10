@@ -1416,21 +1416,21 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_jetUncertaintiesAnalysisFile, "Jet.AnalysisFile", rEnv, "default"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
   configFromFile(m_jetUncertaintiesCalibArea, "Jet.UncertCalibArea", rEnv, "default"); // Defaults to default area set by tool
   configFromFile(m_jetUncertaintiesPDsmearing, "Jet.UncertPDsmearing", rEnv, false); // for non "SimpleJER" config, run the PDSmear systematics. This are labelled with an __2 if they are being used, but otherwise will have the same tree name as the JET_JER systematic trees.
-  configFromFile(m_fatJets, "Jet.LargeRcollection", rEnv, "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"); // set to "None" to turn off large jets 
-  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, "rel21/Spring2019/R10_GlobalReduction.config"); // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Moriond2018LargeR
+  configFromFile(m_fatJets, "Jet.LargeRcollection", rEnv, "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"); // set to "None" to turn off large jets 
+  configFromFile(m_fatJetUncConfig, "Jet.LargeRuncConfig", rEnv, ""); // waiting for rec
   configFromFile(m_fatJetUncVars, "Jet.LargeRuncVars", rEnv, "default"); // do all if not specified
-  configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedInclWTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_SUSYOpt_MC16_20210129.dat");
-  configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedInclZTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_SUSYOpt_MC16_20210129.dat");
-  configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "SmoothedWZTaggers/Rel21/");
-  configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkInclusive_MC16d_20190405_80Eff.dat");
-  configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Consolidated");
-  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/");
+  configFromFile(m_WtagConfig, "Jet.WtaggerConfig", rEnv, "SmoothedContainedWTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
+  configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedContainedZTagger_AntiKt10UFOCSSKSoftDrop_FixedSignalEfficiency80_20220221.dat");
+  configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "SmoothedWZTaggers/Rel21/February2022/");
+  configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "DNNTagger_AntiKt10UFOSD_TopInclusive80_Oct30.dat");
+  configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Precision_2022v1");
+  configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/February2022/");
   configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigJMS, "Jet.JESConfigJMS", rEnv, "JES_JMS_MC16Recommendation_Consolidated_MC_only_EMTopo_July2019_Rel21.config");
   configFromFile(m_jesConfigJMSData, "Jet.JESConfigJMSData", rEnv, "JES_JMS_MC16Recommendation_Consolidated_data_only_EMTopo_Sep2019_Rel21.config");
-  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config");
-  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_3April2019.config");
+  configFromFile(m_jesConfigFat, "Jet.JESConfigFat", rEnv, "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config");
+  configFromFile(m_jesConfigFatData, "Jet.JESConfigFatData", rEnv, "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config");
   configFromFile(m_jesCalibSeq, "Jet.CalibSeq", rEnv, "JetArea_Residual_EtaJES_GSC_Insitu");
   configFromFile(m_jesCalibSeqJMS, "Jet.CalibSeqJMS", rEnv, "JetArea_Residual_EtaJES_GSC");
   configFromFile(m_jesCalibSeqFat, "Jet.CalibSeqFat", rEnv, "EtaJES_JMS");
@@ -1583,10 +1583,10 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   std::string TopTagEff = "";
   std::string TopTagType = "";
   if (!m_ToptagConfig.empty()) {
-    if (m_ToptagConfig.find("50Eff") != std::string::npos){
+    if (m_ToptagConfig.find("50") != std::string::npos){
       TopTagEff = "50";
     }
-    else if (m_ToptagConfig.find("80Eff") != std::string::npos){
+    else if (m_ToptagConfig.find("80") != std::string::npos){
       TopTagEff = "80";
     }
     else {
