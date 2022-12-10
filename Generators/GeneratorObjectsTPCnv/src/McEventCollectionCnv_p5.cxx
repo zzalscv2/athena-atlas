@@ -583,7 +583,9 @@ McEventCollectionCnv_p5::createGenVertex( const McEventCollection_p5& persEvt,
   vtx->set_position(HepMC::FourVector( persVtx.m_x , persVtx.m_y , persVtx.m_z ,persVtx.m_t ));
   //AV ID cannot be assigned in HepMC3. And its meaning in HepMC2 is not clear.
   vtx->set_status(persVtx.m_id);
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
+  // cast from std::vector<float> to std::vector<double>
+  std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
+  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   // handle the in-going (orphans) particles
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
@@ -744,11 +746,12 @@ void McEventCollectionCnv_p5::writeGenVertex( HepMC::ConstGenVertexPtr vtx,
                                               McEventCollection_p5& persEvt ) const
 {
   const HepMC::FourVector& position = vtx->position();
-  auto A_weights=vtx->attribute<HepMC3::VectorFloatAttribute>("weights");
+  auto A_weights=vtx->attribute<HepMC3::VectorDoubleAttribute>("weights");
   auto A_barcode=vtx->attribute<HepMC3::IntAttribute>("barcode");
   std::vector<float> weights;
   if (A_weights) {
-    weights = A_weights->value();
+    auto weights_d = A_weights->value();
+    for (auto& w: weights_d) weights.push_back(w); 
   }
   persEvt.m_genVertices.push_back(
                                   GenVertex_p5( position.x(),

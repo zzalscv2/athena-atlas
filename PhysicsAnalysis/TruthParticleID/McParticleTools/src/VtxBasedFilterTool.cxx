@@ -173,7 +173,7 @@ StatusCode VtxBasedFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx) );
-    vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorFloatAttribute> ("weights"));
+    vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorDoubleAttribute> ("weights"));
   }
 
   ////////////////////////////

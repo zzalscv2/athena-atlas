@@ -216,7 +216,7 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
       out << buf.str();
       out << "#";
       std::string svertexeights("1.0"); 
-      auto vertexeights=v->attribute<HepMC3::VectorFloatAttribute>("weights");
+      auto vertexeights=v->attribute<HepMC3::VectorDoubleAttribute>("weights");
       if (vertexeights) vertexeights->to_string(svertexeights);
       out << svertexeights;
       out << '\n';

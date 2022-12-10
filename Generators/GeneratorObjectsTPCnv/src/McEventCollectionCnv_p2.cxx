@@ -202,7 +202,9 @@ McEventCollectionCnv_p2::createGenVertex( const McEventCollection_p2& persEvt,
 #ifdef HEPMC3
   vtx->set_position( HepMC::FourVector(persVtx.m_x,persVtx.m_y, persVtx.m_z, persVtx.m_t) );
   vtx->set_status(persVtx.m_id);
-  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
+  // cast from std::vector<float> to std::vector<double>
+  std::vector<double> weights( persVtx.m_weights.begin(), persVtx.m_weights.end() );
+  vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(weights));
   HepMC::suggest_barcode(vtx,persVtx.m_barcode);
 
   // handle the in-going (orphans) particles
