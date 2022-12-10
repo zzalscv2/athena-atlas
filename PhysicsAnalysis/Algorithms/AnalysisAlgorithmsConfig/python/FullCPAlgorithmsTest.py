@@ -74,14 +74,11 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
              'EventInfo.eventNumber   -> eventNumber', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Skip events with no primary vertex:
-        algSeq += createAlgorithm( 'CP::VertexSelectionAlg',
-                                   'PrimaryVertexSelectorAlg' )
-        algSeq.PrimaryVertexSelectorAlg.VertexContainer = 'PrimaryVertices'
-        algSeq.PrimaryVertexSelectorAlg.MinVertices = 1
+    # Skip events with no primary vertex:
+    algSeq += createAlgorithm( 'CP::VertexSelectionAlg',
+                               'PrimaryVertexSelectorAlg' )
+    algSeq.PrimaryVertexSelectorAlg.VertexContainer = 'PrimaryVertices'
+    algSeq.PrimaryVertexSelectorAlg.MinVertices = 1
 
 
     # Include, and then set up the jet analysis algorithm sequence:
@@ -419,15 +416,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Include, and then set up the trigger analysis sequence:
-        from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
-            makeTriggerAnalysisSequence
-        triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
-        algSeq += triggerSequence
-        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # Include, and then set up the trigger analysis sequence:
+    from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
+        makeTriggerAnalysisSequence
+    triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
+    algSeq += triggerSequence
+    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
 
@@ -472,13 +466,10 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
               'EventInfo.eventNumber   -> eventNumber', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Skip events with no primary vertex:
-        from AsgAnalysisAlgorithms.EventCleaningConfig import \
-            makeEventCleaningConfig
-        makeEventCleaningConfig (configSeq)
+    # Skip events with no primary vertex:
+    from AsgAnalysisAlgorithms.EventCleaningConfig import \
+        makeEventCleaningConfig
+    makeEventCleaningConfig (configSeq)
 
 
     # Include, and then set up the electron analysis algorithm sequence:
@@ -605,14 +596,11 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # FIX ME: this algorithm should be run on both data and MC, but in MC
-    # it produces strange errors in CutFlowSvc in Athena
-    if not forCompare or dataType == 'data' :
-        # Include, and then set up the trigger analysis sequence:
-        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
-            makeTriggerAnalysisConfig
-        makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
-        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # Include, and then set up the trigger analysis sequence:
+    from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
+        makeTriggerAnalysisConfig
+    makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
+    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
@@ -742,6 +730,17 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
     if not noSystematics :
         sysService.sigmaRecommended = 1
+
+    # Need to explicitly instantiate the CutFlowSvc in Athena to allow
+    # the event filters to run.  In AnalysisBase that is (currently)
+    # not necessary, but we may need a CutFlowSvc instance to report
+    # cutflows to the user.
+    try :
+        from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
+        CreateCutFlowSvc( seq=algSeq )
+    except ModuleNotFoundError :
+        # must be in AnalysisBase
+        pass
 
     vars = []
     if not useBlocks :
