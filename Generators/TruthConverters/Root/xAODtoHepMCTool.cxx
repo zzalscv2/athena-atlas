@@ -128,8 +128,8 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
       continue;
     }
 
-    // skip particles with barcode > 200000 --> Geant4 secondaries
-    if (xPart->barcode() > 200000)
+    // skip particles with barcode which are Geant4 secondaries
+    if (HepMC::is_simulation_particle(xPart->barcode()))
       continue;
 
       // Create GenParticle
@@ -149,8 +149,8 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
     if (xPart->hasProdVtx())
     {
       const xAOD::TruthVertex *xAODProdVtx = xPart->prodVtx();
-      // skip production vertices with barcode > 200000 --> Geant4 secondaries
-      if (std::abs(xAODProdVtx->barcode()) > 200000)
+      // skip production vertices which are Geant4 secondaries
+      if (HepMC::is_simulation_vertex(xAODProdVtx->barcode()))
         continue;
       bool prodVtxSeenBefore(false); // is this new?
       auto hepmcProdVtx = vertexHelper(xAODProdVtx, vertexMap, prodVtxSeenBefore);
@@ -185,8 +185,8 @@ HepMC::GenEvent xAODtoHepMCTool::createHepMCEvent(const xAOD::TruthEvent *xEvt, 
     if (xPart->hasDecayVtx())
     {
       const xAOD::TruthVertex *xAODDecayVtx = xPart->decayVtx();
-      // skip decay vertices with barcode > 200000 --> Geant4 secondaries
-      if (std::abs(xAODDecayVtx->barcode()) > 200000)
+      // skip decay vertices which are Geant4 secondaries
+      if (HepMC::is_simulation_vertex(xAODDecayVtx->barcode()))
       {
 /// Avoid double deletion
 #ifndef HEPMC3
