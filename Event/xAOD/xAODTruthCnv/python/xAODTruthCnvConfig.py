@@ -34,9 +34,14 @@ def GEN_AOD2xAODCfg(flags, name="GEN_AOD2xAOD", **kwargs):
              "xAOD::TruthParticleContainer#TruthParticles", "xAOD::TruthParticleAuxContainer#TruthParticlesAux.",
     ]
 
+    if "xAOD::TruthParticleContainer#TruthPileupParticles" in flags.Input.TypedCollections:
+        toAOD.append("xAOD::TruthParticleContainer#TruthPileupParticles")
+        toAOD.append("xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux.")
+
     if writeInTimePileUpTruth:
         toAOD.append("xAOD::TruthPileupEventContainer#TruthPileupEvents")
         toAOD.append("xAOD::TruthPileupEventAuxContainer#TruthPileupEventsAux.")
+
     toESD = []
 
     if flags.Output.doWriteESD:
