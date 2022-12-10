@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -317,7 +317,7 @@ int CaloLocalHadCoeff::bin2indexes(const int iBin, std::vector<int> &v_dim_indx)
 bool CaloLocalHadCoeff::getInterpArrays(const int n_area, const std::vector<int> &dim, std::vector<float> &x, 
                                         std::vector<double> &xadj, std::vector<unsigned int> &gbin) const {
   // sanity check
-  if(n_area<0 || n_area > (int)m_AreaSet.size()) return false;
+  if(n_area<0 || n_area >= (int)m_AreaSet.size()) return false;
   const LocalHadArea *area=&(m_AreaSet[n_area]);
   if(dim.empty()) {
     std::cout << "CaloLocalHadCoeff::getInterpArrays() -> Error! Empty dimension list" << std::endl;
