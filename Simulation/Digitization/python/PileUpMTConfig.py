@@ -46,15 +46,16 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
 
     if kind == PUBkgKind.LOWPT:
         acc.merge(LowPtMinBiasEventSelectorCfg(flags))
-        kwargs.setdefault("OnDemandMB", False)
+        kwargs.setdefault("OnDemandMB", True)
         kwargs.setdefault("MBBatchSize", 10000)
         # kwargs.setdefault("MBBatchSize", 1.3 * flags.Digitization.PU.NumberOfLowPtMinBias * n_bc)
         kwargs.setdefault("NSimultaneousBatches", 1)
-        kwargs.setdefault("HSBatchSize", flags.Concurrency.NumConcurrentEvents)
+        kwargs.setdefault("SkippedHSEvents", skip)
+        kwargs.setdefault("HSBatchSize", 16)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [skip % evt_per_batch]
+            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
             + (n_evt // evt_per_batch) * [evt_per_batch]
             + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
         )
@@ -70,11 +71,12 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
             "MBBatchSize", 8 * flags.Digitization.PU.NumberOfHighPtMinBias * n_bc
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
+        kwargs.setdefault("SkippedHSEvents", skip)
         kwargs.setdefault("HSBatchSize", 1)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [skip % evt_per_batch]
+            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
             + (n_evt // evt_per_batch) * [evt_per_batch]
             + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
         )
@@ -87,11 +89,12 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
         kwargs.setdefault("OnDemandMB", False)
         kwargs.setdefault("MBBatchSize", flags.Digitization.PU.NumberOfCavern * n_bc)
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
+        kwargs.setdefault("SkippedHSEvents", skip)
         kwargs.setdefault("HSBatchSize", 1)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [skip % evt_per_batch]
+            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
             + (n_evt // evt_per_batch) * [evt_per_batch]
             + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
         )
@@ -104,11 +107,12 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
             "MBBatchSize", 8 * flags.Digitization.PU.NumberOfBeamGas * n_bc
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
+        kwargs.setdefault("SkippedHSEvents", skip)
         kwargs.setdefault("HSBatchSize", 1)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [skip % evt_per_batch]
+            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
             + (n_evt // evt_per_batch) * [evt_per_batch]
             + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
         )
@@ -121,11 +125,12 @@ def BatchedMinbiasSvcCfg(flags, name="LowPtMinbiasSvc", kind=PUBkgKind.LOWPT, **
             "MBBatchSize", 8 * flags.Digitization.PU.NumberOfBeamHalo * n_bc
         )
         kwargs.setdefault("NSimultaneousBatches", flags.Concurrency.NumConcurrentEvents)
+        kwargs.setdefault("SkippedHSEvents", skip)
         kwargs.setdefault("HSBatchSize", 1)
         evt_per_batch = kwargs["HSBatchSize"]
         actualNHSEventsPerBatch = (
             (skip // evt_per_batch) * [0]
-            + (skip % evt_per_batch != 0) * [skip % evt_per_batch]
+            + (skip % evt_per_batch != 0) * [evt_per_batch - (skip % evt_per_batch)]
             + (n_evt // evt_per_batch) * [evt_per_batch]
             + (n_evt % evt_per_batch != 0) * [n_evt % evt_per_batch]
         )
@@ -210,6 +215,7 @@ def PileUpMTAlgCfg(flags, **kwargs):
         kwargs.setdefault("BeamHaloMinbiasSvc", svc)
         kwargs.setdefault("NumBeamHalo", flags.Digitization.PU.NumberOfBeamHalo)
 
+    kwargs.setdefault("SkippedHSEvents", flags.Exec.SkipEvents)
     kwargs.setdefault("BCSpacing", flags.Digitization.PU.BunchSpacing)
     kwargs.setdefault("EarliestDeltaBC", flags.Digitization.PU.InitialBunchCrossing)
     kwargs.setdefault("LatestDeltaBC", flags.Digitization.PU.FinalBunchCrossing)

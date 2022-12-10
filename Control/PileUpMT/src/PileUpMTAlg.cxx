@@ -58,29 +58,25 @@ PileUpMTAlg::PileUpMTAlg(const std::string& name, ISvcLocator* pSvcLocator)
 PileUpMTAlg::~PileUpMTAlg() {}
 
 StatusCode PileUpMTAlg::get_ei(StoreGateSvc& sg, std::unique_ptr<const xAOD::EventInfo>& ei_,
-                               bool pileup) const {
-    const xAOD::EventInfo* ei = nullptr;
-    ei = sg.tryConstRetrieve<xAOD::EventInfo>();
-    if (ei != nullptr) {
-        ei_.reset(ei);
-        return StatusCode::SUCCESS;
-    }
-    const ::EventInfo* ei2 = nullptr;
-    ei2 = sg.tryConstRetrieve<::EventInfo>();
-    if (ei2 == nullptr) {
-        // Just in case
-        ATH_MSG_INFO("Got null ::EventInfo from " << sg.name());
-        return StatusCode::FAILURE;
-    }
+                               bool /* pileup */) const {
     xAOD::EventInfo* newEi = new xAOD::EventInfo();
     xAOD::EventAuxInfo* eiAux = new xAOD::EventAuxInfo();
     newEi->setStore(eiAux);
-    if (pileup) {
-        ATH_CHECK(m_xAODEICnvTool->convert(ei2, newEi, true));
+    SG::ReadHandle<xAOD::EventInfo> ei_h("EventInfo", sg.name());
+    const xAOD::EventInfo* ei = ei_h.get();
+    if (ei != nullptr) {
+        *newEi = *ei;
     }
     else {
-        ATH_MSG_INFO("Converting");
-        ATH_CHECK(m_xAODEICnvTool->convert(ei2, newEi, false));
+        SG::ReadHandle<::EventInfo> ei2_h("EventInfo", sg.name());
+        const ::EventInfo* ei2 = ei2_h.get();
+        if (ei2 == nullptr) {
+            // Just in case
+            ATH_MSG_ERROR("Got null ::EventInfo from " << sg.name());
+            ATH_MSG_ERROR(sg.dump());
+            return StatusCode::FAILURE;
+        }
+        ATH_CHECK(m_xAODEICnvTool->convert(ei2, newEi, true));
     }
     newEi->setEvtStore(&sg);
     ei_.reset(newEi);
@@ -102,7 +98,7 @@ StatusCode PileUpMTAlg::add_subevt(const std::vector<std::uint32_t>& bcid,
     mb_to_modify.setBCID(bcid[bc_idx]);
     try {
         addSubEvent(overlaidEvt.ptr(), &mb_to_modify, bc * m_BCSpacing, puType, puCont.ptr(),
-                    m_evtInfoContKey.key());
+                    m_evtInfoContKey.key(), sg);
     }
     catch (const std::exception& e) {
         ATH_MSG_ERROR("Caught exception adding subevent: " << e.what());
@@ -137,7 +133,7 @@ StatusCode PileUpMTAlg::initialize() {
     for (const ToolHandle<IPileUpTool>& tool : m_puTools) {
         const IProperty* tool_p = dynamic_cast<const IProperty*>(tool.get());
         std::vector<std::string>
-              prop_names = !tool_p
+              prop_names = tool_p == nullptr
                                  ? std::vector{std::string("NOT IProperty")}
                                  : tool_p->getProperties()
                                          | rv::transform([](const Gaudi::Details::PropertyBase* p) {
@@ -145,9 +141,6 @@ StatusCode PileUpMTAlg::initialize() {
                                                                   p->toString());
                                            })
                                          | ranges::to<std::vector>;
-        ATH_MSG_INFO("TOOL INFO for "
-                     << tool.typeAndName()
-                     << fmt::format(" PROPERTIES [{}]", fmt::join(prop_names, ", ")));
     }
 
     // Figure out actual earliest and latest delta bunch crossing
@@ -179,7 +172,6 @@ StatusCode PileUpMTAlg::initialize() {
             }
         }
     }
-    ATH_MSG_INFO("Considering BCs from " << m_earliestDeltaBC << " to " << m_latestDeltaBC);
     m_evtInfoContKey = fmt::format("{}Container", m_evtInfoKey.key());
     ATH_CHECK(m_evtInfoKey.initialize());
     ATH_CHECK(m_evtInfoContKey.initialize());
@@ -200,7 +192,7 @@ StatusCode PileUpMTAlg::execute() {
     ATH_MSG_DEBUG("Executing " << name() << "...");
     // Gaudi::Hive::setCurrentContext(ctx);
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    const long long hs_id = ctx.evt();
+    const long long hs_id = ctx.evt() + m_skippedHSEvents.value();
     ATH_CHECK(evtStore().retrieve());
     if (m_fracLowPt != 0) {
         ATH_CHECK(m_lowptMBSvc->beginHardScatter(hs_id));
@@ -224,13 +216,13 @@ StatusCode PileUpMTAlg::execute() {
     // Read hard scatter
     std::unique_ptr<const xAOD::EventInfo> hsEvt = nullptr;
     ATH_CHECK(get_ei(*evtStore(), hsEvt));
-    ATH_MSG_INFO(hs_id << " READ EVT " << hsEvt->eventNumber());
 
     // Setup overlaid event
     SG::WriteHandle<xAOD::EventInfo> overlaidEvt(m_evtInfoKey, ctx);
     ATH_CHECK(overlaidEvt.record(std::make_unique<xAOD::EventInfo>(),
                                  std::make_unique<xAOD::EventAuxInfo>()));
     *overlaidEvt = *hsEvt; // copy in hard scatter
+    overlaidEvt->setEvtStore(evtStore().get());
     overlaidEvt->clearSubEvents();
 
     // Pileup container
@@ -251,18 +243,18 @@ StatusCode PileUpMTAlg::execute() {
     float cur_avg_mu = lumi_sf * m_avgMu;
     overlaidEvt->setAverageInteractionsPerCrossing(cur_avg_mu);
     overlaidEvt->setActualInteractionsPerCrossing(m_beamInt->normFactor(0) * cur_avg_mu);
-    ATH_MSG_INFO("m_avgMu = " << m_avgMu << ", sf = " << lumi_sf << " ∴ mu = " << cur_avg_mu);
 
     // Copy subevents
     if (!hsEvt->subEvents().empty()) {
         for (const SubEvent& se : hsEvt->subEvents()) {
-            addSubEvent(overlaidEvt.ptr(), se, puCont.ptr(), m_evtInfoContKey.key());
+            addSubEvent(overlaidEvt.ptr(), se, puCont.ptr(), m_evtInfoContKey.key(),
+                        evtStore().get());
         }
     }
     else {
         // if no subevents, add original event
         addSubEvent(overlaidEvt.ptr(), hsEvt.get(), 0, xAOD::EventInfo::Signal, puCont.ptr(),
-                    m_evtInfoContKey.key());
+                    m_evtInfoContKey.key(), evtStore().get());
     }
 
     // Get PRNG
@@ -498,8 +490,8 @@ StatusCode PileUpMTAlg::execute() {
             setFilterPassed(false);
         }
     }
-    ATH_MSG_INFO(fmt::format("***** Took {:%OMm %OSs} to process all subevents",
-                             std::chrono::high_resolution_clock::now() - now));
+    ATH_MSG_DEBUG(fmt::format("***** Took {:%OMm %OSs} to process all subevents",
+                              std::chrono::high_resolution_clock::now() - now));
     //
     // Save hash (direct copy from PileUpEventLoopMgr)
     PileUpHashHelper pileUpHashHelper;
