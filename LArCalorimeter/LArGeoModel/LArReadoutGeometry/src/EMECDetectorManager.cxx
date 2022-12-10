@@ -161,6 +161,7 @@ const EMECPresamplerHVManager& EMECDetectorManager::getPresamplerHVManager () co
     if (detStore->retrieve(manager)==StatusCode::SUCCESS) {
       m_presamplerHVManager.set (&(manager->getEMECPresamplerHVManager()));
     }
-  } 
+  }
+  // cppcheck-suppress nullPointerRedundantCheck; false positive
   return *m_presamplerHVManager.get();
 }
