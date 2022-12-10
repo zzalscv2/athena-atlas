@@ -62,7 +62,7 @@ StatusCode xAODTTbarWithJpsimumuFilter::filterEvent()
         {
             const xAOD::TruthParticle *pitr = (*itr)->truthParticle(iPart);
 
-            if (pitr->barcode() > 200000)
+            if (HepMC::is_simulation_particle(pitr->barcode()))
                 break;
             int pdgid = abs(pitr->pdgId());
             // don't loose time checking all if one found
