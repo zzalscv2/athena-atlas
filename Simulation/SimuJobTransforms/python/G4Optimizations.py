@@ -31,3 +31,10 @@ def enableG4Optimizations(flags):
     # to fix the creator process of secondary tracks.
     flags.Sim.G4Commands+=["/process/em/UseGeneralProcess true"]
     flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FixG4CreatorProcessToolCfg']
+
+    # Activate the Woodcock Tracking in the EMEC
+    # Please note that the Woodcock tracking enables
+    # the G4GammaGeneralProcess therefore the FixG4CreatorProcessTool
+    # must be added if it's not done before (see lines above) 
+    # More info: https://its.cern.ch/jira/browse/ATLASSIM-5079
+    flags.Sim.G4Commands+=["/process/em/useWoodcockTracking EMECPara"]

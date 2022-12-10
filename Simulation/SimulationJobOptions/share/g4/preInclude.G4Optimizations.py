@@ -98,3 +98,15 @@ simFlags.G4Commands+=["/process/em/UseGeneralProcess true"];
 simFlags.OptionalUserActionList.addAction("G4UA::FixG4CreatorProcessTool")
 
 
+##########################################################
+#
+# Activate the Woodcock Tracking in the EMEC
+# Please note that the Woodcock tracking enables
+# the G4GammaGeneralProcess therefore the FixG4CreatorProcessTool
+# must be added if it's not done before (see lines above) 
+# For more info see: https://its.cern.ch/jira/browse/ATLASSIM-5079
+#  
+##########################################################
+
+from G4AtlasApps.SimFlags import simFlags
+simFlags.G4Commands+=["/process/em/useWoodcockTracking EMECPara"];
