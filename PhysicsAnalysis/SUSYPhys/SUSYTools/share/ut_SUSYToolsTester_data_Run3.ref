@@ -48,16 +48,7 @@ CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCu
 
 ToolSvc.TauEffTool_MediumWARNING Could not determine MC campaign from run number! The mu dependent systematic of the trigger scale factors should not be trusted. Current (430542). Will only print this warning once.
 Info in <CP::TPileupReweighting::GetLumiBlockMu>: Initializing the subtool..
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
 Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
 Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
 Warning in <SUSYToolsTester>: No PV found for this event! Skipping...

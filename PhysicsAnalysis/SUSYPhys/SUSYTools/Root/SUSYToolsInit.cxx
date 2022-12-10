@@ -213,19 +213,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   if (m_slices["fjet"]) {
     //same for fat groomed jets
     fatjetcoll = m_fatJets;
-    if (fatjetcoll.size()>3)fatjetcoll.erase(fatjetcoll.size()-4,4);
+    if (fatjetcoll.size()>3)fatjetcoll.erase(fatjetcoll.size()-4,4); 
     if (!m_jetFatCalibTool.isUserConfigured() && !m_fatJets.empty()) {
       toolName = "JetFatCalibTool_" + m_fatJets;
       m_jetFatCalibTool.setTypeAndName("JetCalibrationTool/"+toolName);
   
       std::string jesConfigFat = m_jesConfigFat;
       std::string jesCalibSeqFat = m_jesCalibSeqFat;
-      // add Insitu if data
-      if (isData()) {
-        jesConfigFat = m_jesConfigFatData;
-        jesCalibSeqFat += "_Insitu_InsituCombinedMass";
-      }
-  
+      // add Insitu if data (currently missing)
+      
       // now instantiate the tool
       ATH_CHECK( m_jetFatCalibTool.setProperty("JetCollection", fatjetcoll) );
       ATH_CHECK( m_jetFatCalibTool.setProperty("ConfigFile", jesConfigFat) );
@@ -275,9 +271,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_TopTaggerTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTaggerTool.retrieve() );
     } else if (m_TopTaggerTool.isUserConfigured()) ATH_CHECK(m_TopTaggerTool.retrieve());
-  }
 
-  if (m_slices["jet"] || m_slices["fjet"]) {
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise JetTruthLabelingTool: https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR#AnalysisBase_21_2_114_and_newer
     if(!isData()){
@@ -296,6 +290,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_jetTruthLabelingTool.retrieve() );
     } else if (m_jetTruthLabelingTool.isUserConfigured()) ATH_CHECK(m_jetTruthLabelingTool.retrieve());
 
+  }
+
+  if (m_slices["jet"] || m_slices["fjet"]) {
+    
 
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise jet uncertainty tool
@@ -357,9 +355,9 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   }
 
   if (m_slices["fjet"]) {
-    ATH_MSG_INFO("Set up FatJet Uncertainty tool if using...");
-    // Initialise jet uncertainty tool for fat jets
-    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR
+    ATH_MSG_INFO("Won't initialise jet uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise jet uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_fatjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_fatJetUncConfig.empty()) {
 
       toolName = "JetUncertaintiesTool_" + m_fatJets;
@@ -393,10 +391,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_fatjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_fatjetUncertaintiesTool.retrieve() );
     } else if (m_fatjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_fatjetUncertaintiesTool.retrieve());
-
-    ATH_MSG_INFO("Set up FatJet tagger Uncertainty tool if using...");
-    // Initialise jet uncertainty tool for fat jets
-    // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetUncertaintiesRel21Summer2019LargeR
+    */
+    ATH_MSG_INFO(" Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise Wtagger uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_WTagjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_WtagConfig.empty() && !m_WTagUncConfig.empty()) {
       
       toolName = "WTagJetUncertaintiesTool_" + m_fatJets;
@@ -408,7 +406,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_WTagjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_WTagjetUncertaintiesTool.retrieve() );
     } else if (m_WTagjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_WTagjetUncertaintiesTool.retrieve());
-    
+    */
+    ATH_MSG_INFO(" Won't initialise Ztagger uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise Ztagger uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_ZTagjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_ZtagConfig.empty() && !m_ZTagUncConfig.empty()) {
       
       toolName = "ZTagJetUncertaintiesTool_" + m_fatJets;
@@ -420,7 +421,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_ZTagjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_ZTagjetUncertaintiesTool.retrieve() );
     } else if (m_ZTagjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_ZTagjetUncertaintiesTool.retrieve());
-  
+    */
+    ATH_MSG_INFO(" Won't initialise top-tagger uncertainty tool for fat jets until we get rec for UFO");
+    // Won't initialise top-tagger uncertainty tool for fat jets until we get rec for UFO
+    /*
     if (!m_TopTagjetUncertaintiesTool.isUserConfigured() && !m_fatJets.empty() && !m_ToptagConfig.empty() && !m_TopTagUncConfig.empty()) {
      
       toolName = "TopTagJetUncertaintiesTool_" + m_fatJets;
@@ -432,7 +436,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_TopTagjetUncertaintiesTool.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_TopTagjetUncertaintiesTool.retrieve() );
     } else if (m_TopTagjetUncertaintiesTool.isUserConfigured()) ATH_CHECK(m_TopTagjetUncertaintiesTool.retrieve());
-
+    */
   }
 
 

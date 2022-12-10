@@ -181,7 +181,7 @@ int main( int argc, char* argv[] ) {
   bool hasTrkJets(false), hasFatJets(false);
   for (auto& x : containers) {
     if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos) hasTrkJets = true;
-    if (x.first.find("AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets")!=std::string::npos) hasFatJets = true;
+    if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
   }
   if (debug>0) {
     ANA_MSG_INFO("Checking file contents (containers):");
@@ -337,7 +337,7 @@ int main( int argc, char* argv[] ) {
   ANA_MSG_INFO( "Config file opened" );
 
   std::map<std::string,std::string> configDict = {};
-  configDict["Jet.LargeRcollection"] = rEnv.GetValue("Jet.LargeRcollection", "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets" );
+  configDict["Jet.LargeRcollection"] = rEnv.GetValue("Jet.LargeRcollection", "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets" );
   configDict["TrackJet.Collection"]  = rEnv.GetValue("TrackJet.Collection", "AntiKtVR30Rmax4Rmin02TrackJets" );
   configDict["Jet.WtaggerConfig"]    = rEnv.GetValue("Jet.WtaggerConfig", "None");
   configDict["Jet.ZtaggerConfig"]    = rEnv.GetValue("Jet.ZtaggerConfig", "None");
