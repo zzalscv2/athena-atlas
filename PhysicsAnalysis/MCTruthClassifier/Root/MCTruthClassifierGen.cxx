@@ -2265,7 +2265,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
 
   int NumOfPhot(0);
 
-  int NumOfNucFr(0);
   int NumOfquark(0);
 
   int NumOfgluon(0);
@@ -2312,11 +2311,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer* mcTruth
       NumOfLQ++;
     if (std::abs(DaugType) == std::abs(motherPDG) && theDaug->barcode() % m_barcodeShift == motherBarcode % m_barcodeShift)
       samePart = true;
-    if (numOfParents == 1 &&
-        (motherPDG == 22 || std::abs(motherPDG) == 11 || std::abs(motherPDG) == 13 || std::abs(motherPDG) == 211) &&
-        (DaugType > 1000000000 || DaugType == 0 || DaugType == 2212 || DaugType == 2112 || std::abs(DaugType) == 211 ||
-         std::abs(DaugType) == 111))
-      NumOfNucFr++;
   } // cycle itrDaug
 
   // Quark weak decay
@@ -2901,7 +2895,6 @@ MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, Info* inf
 
   int NumOfElecNeut(0);
 
-  int NumOfTauNeut(0);
   int NumOfMuon(0);
 
   int NumOfMuonNeut(0);
@@ -2925,8 +2918,6 @@ MCTruthClassifier::defOutComeOfTau(const xAOD::TruthParticle* thePart, Info* inf
       NumOfElecNeut++;
     else if (abs(pdg) == 14)
       NumOfMuonNeut++;
-    else if (abs(pdg) == 16)
-      NumOfTauNeut++;
     else if (MC::PID::isPhoton(pdg))
       NumOfPhot++;
     else if (abs(pdg) == 211)
