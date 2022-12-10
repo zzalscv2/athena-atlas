@@ -83,10 +83,10 @@ PFNeutralFlowElementCreatorAlgorithm::createNeutralFlowElement(
 
     std::vector<ElementLink<xAOD::IParticleContainer>> theClusters;
     if (theSisterClusterLink.isValid()){
-      theClusters.emplace_back(ElementLink<xAOD::IParticleContainer>(theSisterClusterLink));
+      theClusters.emplace_back(theSisterClusterLink);
     }
     else{
-      theClusters.emplace_back(ElementLink<xAOD::IParticleContainer>(theOriginalClusterLink));
+      theClusters.emplace_back(theOriginalClusterLink);
     }
     thisFE->setOtherObjectLinks(theClusters);
 

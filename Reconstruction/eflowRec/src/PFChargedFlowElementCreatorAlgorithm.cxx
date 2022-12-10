@@ -143,8 +143,8 @@ void PFChargedFlowElementCreatorAlgorithm::createChargedFlowElements(const eflow
             ElementLink<xAOD::CaloClusterContainer> theOriginalClusterLink = efRecCluster->getOriginalClusElementLink();
             ElementLink<xAOD::CaloClusterContainer> theSisterClusterLink = (*theOriginalClusterLink)->getSisterClusterLink();
             ATH_MSG_DEBUG("Will add cluster with E, ratio and absolute subtracted energy " << (*theOriginalClusterLink)->e() << ", " << 1.0 << ", " << 0.0);
-            if (theSisterClusterLink.isValid()) vectorClusterToSubtractedEnergies.emplace_back(std::pair(theSisterClusterLink,0.0));
-            else vectorClusterToSubtractedEnergies.emplace_back(std::pair(theOriginalClusterLink,0.0));
+            if (theSisterClusterLink.isValid()) vectorClusterToSubtractedEnergies.emplace_back(theSisterClusterLink,0.0);
+            else vectorClusterToSubtractedEnergies.emplace_back(theOriginalClusterLink,0.0);
           }
         }
       }
