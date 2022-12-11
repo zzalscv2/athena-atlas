@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Identifier/Identifier.h"
@@ -35,7 +35,7 @@ class TileCablingSvcMock {
  public:
   static void init_idhelpers ATLAS_NOT_THREAD_SAFE
     (IdDictParser& parser,
-     std::string idDictFile = "IdDictTileCalorimeter.xml",
+     const std::string& idDictFile = "IdDictTileCalorimeter.xml",
      TileCablingService::TileCablingType cablingType = TileCablingService::RUN2aCabling)
   {
 
