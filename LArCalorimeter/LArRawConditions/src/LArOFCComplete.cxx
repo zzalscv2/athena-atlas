@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -89,7 +89,7 @@ float LArOFCComplete::timeBinWidth(const HWIdentifier&  CellID, int gain) const 
 #include <stdio.h>
 // dump entire LArOFCComplete structure to an ascii file dumpOFC.txt
 // useful for debug
-void LArOFCComplete::dumpOFC(std::string output_file_name) const {
+void LArOFCComplete::dumpOFC(const std::string& output_file_name) const {
   FILE* f = fopen( output_file_name.c_str() , "w" ) ;
   if (!f) {
     std::cerr << "Can't open output file: " << output_file_name << "\n";

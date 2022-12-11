@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARRAWCONDITIONS_LAROFCCOMPLETE_H
@@ -60,7 +60,7 @@ class LArOFCComplete: public ILArOFC,
 	   const std::vector<std::vector<float> >& vOFC_b,
 	   float timeOffset=0, float timeBinWidth=25./24.);
 
-  void dumpOFC(std::string output_file_name) const ;
+  void dumpOFC(const std::string& output_file_name) const ;
 
 
  private: 
