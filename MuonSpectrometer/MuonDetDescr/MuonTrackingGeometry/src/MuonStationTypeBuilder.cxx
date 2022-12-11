@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Muon
@@ -1145,19 +1145,20 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
     // spacers: one level below, assumed boxes
     std::vector<Trk::Layer*> layers;
     // resolve child volumes
-    std::vector<const GeoVPhysVol*>::iterator vIter = gv.begin();
-    std::vector<Amg::Transform3D>::iterator tIter = transf.begin();
-    while (vIter != gv.end()) {
-        if ((*vIter)->getNChildVols()) {
-            for (unsigned int ich = 0; ich < (*vIter)->getNChildVols(); ++ich) {
-                gv.push_back(&(*((*vIter)->getChildVol(ich))));
-                transf.push_back(Amg::Transform3D((*tIter) * (*vIter)->getXToChildVol(ich)));
+    // Don't use iterators; they'll be invalidated by the push_back's.
+    size_t idx = 0;
+    while (idx < gv.size()) {
+        const GeoVPhysVol* vol = gv[idx];
+        const Amg::Transform3D& tf = transf[idx];
+        if (vol->getNChildVols()) {
+            for (unsigned int ich = 0; ich < vol->getNChildVols(); ++ich) {
+                gv.push_back(&(*(vol->getChildVol(ich))));
+                transf.emplace_back(tf * vol->getXToChildVol(ich));
             }
-            vIter = gv.erase(vIter);
-            tIter = transf.erase(tIter);
+            gv.erase(gv.begin() + idx);
+            transf.erase (transf.begin() + idx);
         } else {
-            ++vIter;
-            ++tIter;
+            ++idx;
         }
     }
     // translate into layers
@@ -2527,7 +2528,6 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
     }
 
     Trk::Layer* layRepr = nullptr;
-    if (!trVol) return layRepr;
 
     // retrieve volume envelope
 
