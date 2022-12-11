@@ -404,7 +404,7 @@ StatusCode
 CscCondDbData::layerHashToOnlineId(const unsigned int & layerHash, unsigned int & onlineId) const {
     // copy-paste from CscCoolStrSvc
 
-    if(layerHash > m_onlineChannelIdsFromLayerHash.size()) {
+    if(layerHash >= m_onlineChannelIdsFromLayerHash.size()) {
         MsgStream log(Athena::getMessageSvc(),"CscCondDbData");
         log << MSG::INFO << "Tried to lookup online id from layer hash " << layerHash <<". Max is " << m_onlineChannelIdsFromLayerHash.size() << endmsg;
         return StatusCode::SUCCESS;
