@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCablingTools/dbline.h"
@@ -406,7 +406,7 @@ std::istream& operator>>(std::istream& stream, DBline& db) {
 }
 
 std::ostream& operator<<(std::ostream& stream, DBline& db) {
-    stream << db.m_data.c_str();
+    stream << db.m_data;
     return stream;
 }
 
