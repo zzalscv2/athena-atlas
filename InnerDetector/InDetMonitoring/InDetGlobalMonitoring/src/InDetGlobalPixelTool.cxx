@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file InDetGlobalPixelTool.cxx
@@ -132,7 +132,6 @@ StatusCode InDetGlobalPixelTool::fillHistograms()
 
   //Filling of histograms (loop over collections) :
   m_tracks=m_combined_tracks;
-  int nPixelHits=0;
 
 
   std::vector<Identifier> myRDOIDs;
@@ -167,7 +166,6 @@ StatusCode InDetGlobalPixelTool::fillHistograms()
 	  //if the cluster is a pixel cluster (not SCT) get the pixel information
 	  if (RawDataClus->detectorElement()->isPixel())
 	    {
-	      nPixelHits++;//add another pixel hit 
 	      m_Pixel_track_clus_groupsize->Fill(RawDataClus->rdoList().size());  //cluster sizea
 	      for(unsigned int loopSize=0;loopSize < RawDataClus->rdoList().size(); loopSize++)
 		{
