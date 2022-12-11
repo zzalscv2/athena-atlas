@@ -419,11 +419,9 @@ StatusCode IDAlignMonTruthComparison::fillHistograms() {
   float ptlast = 0;
   int chargefirst = 0;
 
-  int nTracks = 0;
   DataVector<Trk::Track>::const_iterator trksItr = trks->begin();
   DataVector<Trk::Track>::const_iterator trksItrE = trks->end();
   for (; trksItr != trksItrE; ++trksItr) {
-    nTracks++;
 
     float trkd0 = -999;
     float trkz0 = -999;

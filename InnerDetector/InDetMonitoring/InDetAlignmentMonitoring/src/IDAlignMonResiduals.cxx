@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // ***************************************************************************************
@@ -1209,7 +1209,6 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
                                                                  << "  has size =" << tracks->size());
 
   int nTracks = 0;
-  int nHitsEvent = 0;
 
   for (DataVector<Trk::Track>::const_iterator trackItr = tracks->begin(); trackItr != tracks->end(); ++trackItr) { //looping
                                                                                                                    // over
@@ -2382,7 +2381,6 @@ StatusCode IDAlignMonResiduals::fillHistograms() {
         }
       }
       ++nHits;
-      ++nHitsEvent;
     }//end of loop on track surfaces
 
     // filling of residuals completed
