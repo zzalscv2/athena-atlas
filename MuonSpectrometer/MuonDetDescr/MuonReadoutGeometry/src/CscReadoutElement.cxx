@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/CscReadoutElement.h"
@@ -478,7 +478,7 @@ namespace MuonGM {
 
     //****************************************************************************
     Amg::Vector3D CscReadoutElement::localStripLayerPos(int /*chamberLayer*/, int wireLayer, int measPhi, int /*strip*/) const {
-        if (!(measPhi == 0 || measPhi == 1)) throw;
+        if (!(measPhi == 0 || measPhi == 1)) throw std::runtime_error ("CscReadoutElement::localStripLayerPos bad measPhi");
         Amg::Vector3D wireLayerPosition = localWireLayerPos(wireLayer);
         double anodeCathodeDis = anodeCathodeDistance();
         double x = wireLayerPosition.x();
