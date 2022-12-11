@@ -76,7 +76,6 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
     std::vector<unsigned int> uintvector;
     const InDet::SiCluster* keyPixelCluster(nullptr);
     const InDet::SiCluster* gangedPixelCluster(nullptr);
-    unsigned int count(1);
     for( ; itr != itrE ; ++itr ) {
     
       // for clarity assign the elements
@@ -93,10 +92,6 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
 	}
       previous_itr = itr;
       
-      //    std::cout << count << "\t" << (itr->first)->identify() << "\tGangedPixel: " << (itr->second)->identify() << std::endl;
-      count++;
-      //     std::cout << "TPCnv Writ " << keyPixelCluster->getHashAndIndex().hashAndIndex() << "\t" << keyPixelCluster->localPosition()[Trk::x] 
-      //               << "\tGangedPixel: " << gangedPixelCluster->getHashAndIndex().hashAndIndex() << "\t" << gangedPixelCluster->localPosition()[Trk::x] << std::endl;
     }
     // pushback the last one!
     persObj->m_ambiguityMap.emplace_back(keyPixelCluster->getHashAndIndex().hashAndIndex(), uintvector);
@@ -105,7 +100,6 @@ void PixelGangedClusterAmbiguitiesCnv_p1::transToPers
 
 void  PixelGangedClusterAmbiguitiesCnv_p1::persToTrans(const InDet::PixelGangedClusterAmbiguities_p1* persObj, InDet::PixelGangedClusterAmbiguities* transObj, MsgStream &log) 
 {
-//   if (log.level() <= MSG::DEBUG) log << MSG::DEBUG  << " ***  Reading InDet::PixelGangedClusterAmbiguities" << endmsg;
   
   if(!m_isInitialized) {
     if (this->initialize(log) != StatusCode::SUCCESS) {
