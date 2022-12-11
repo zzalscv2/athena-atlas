@@ -283,28 +283,30 @@ class Layer {
                                         double envelope = 1.) = 0;
 
  protected:
-   SurfaceArray* m_surfaceArray; //!< SurfaceArray on this layer Surface
-   //!< MaterialPoperties of this layer Surface
-   SharedObject<LayerMaterialProperties> m_layerMaterialProperties;
-   //!< thickness of the Layer
-   double m_layerThickness;
-   //!< descriptor for overlap/next surface
-   OverlapDescriptor* m_overlapDescriptor;
+  //!< SurfaceArray on this layer Surface (owning ptr)
+  SurfaceArray* m_surfaceArray;
+  //!< MaterialPoperties of this layer Surface
+  SharedObject<LayerMaterialProperties> m_layerMaterialProperties;
+  //!< thickness of the Layer
+  double m_layerThickness;
+  //!< descriptor for overlap/next surface (owning ptr)
+  OverlapDescriptor* m_overlapDescriptor;
 
-   // These are stored by pointers and never deleted as they belong to the
-   // Volume
-   //!< the previous Layer according to BinGenUtils
-   const Layer* m_previousLayer;
-   const Layer* m_nextLayer;       //!< next Layer according to BinGenUtils
-   const BinUtility* m_binUtility; //!< BinUtility for next/previous decission
-   //!< Enclosing TrackingVolume
-   const TrackingVolume* m_enclosingTrackingVolume;
-   //!< Enclosing DetachedTrackingVolume
-   const DetachedTrackingVolume* m_enclosingDetachedTrackingVolume;
-   LayerIndex m_index;                 //!< LayerIndex
-   int m_layerType;                    //!< active passive layer
-   const Volume* m_representingVolume; //!< Representing Volume
-   double m_ref; //!< reference measure for local coordinate convertors
+  // These are stored by not owning pointers belong to the  Volume
+  //!< the previous Layer according to BinGenUtils
+  const Layer* m_previousLayer;
+  //!< next Layer according to BinGenUtils
+  const Layer* m_nextLayer;
+  //!< BinUtility for next/previous decision
+  const BinUtility* m_binUtility;
+  //!< Enclosing TrackingVolume
+  const TrackingVolume* m_enclosingTrackingVolume;
+  //!< Enclosing DetachedTrackingVolume
+  const DetachedTrackingVolume* m_enclosingDetachedTrackingVolume;
+
+  LayerIndex m_index;  //!< LayerIndex
+  int m_layerType;     //!< active passive layer
+  double m_ref;        //!< reference measure for local coordinate convertors
 };
 
 }  // namespace Trk

@@ -182,14 +182,6 @@ inline const LayerIndex &Layer::layerIndex() const { return m_index; }
 inline int Layer::layerType() const { return m_layerType; }
 inline void Layer::setLayerType(int id) { m_layerType = id; }
 
-
-inline const Volume *Layer::representingVolume() const {
-  return m_representingVolume;
-}
-inline void Layer::registerRepresentingVolume(const Volume *theVol) {
-  m_representingVolume = theVol;
-}
-
 inline void Layer::registerLayerIndex(const LayerIndex &lIdx) {
   m_index = lIdx;
 }
