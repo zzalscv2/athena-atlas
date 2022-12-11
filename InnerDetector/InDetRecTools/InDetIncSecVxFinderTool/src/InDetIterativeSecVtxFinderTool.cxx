@@ -1157,7 +1157,6 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
 
     float pt2 = 0.0 ;
     std::vector<float> xdoe ;
-    int ntrk = 0 ;
 
     std::vector<Trk::VxTrackAtVertex>::iterator tracksBegin=myVxTracksAtVtx->begin();
     std::vector<Trk::VxTrackAtVertex>::iterator tracksEnd=myVxTracksAtVtx->end();
@@ -1178,8 +1177,6 @@ InDetIterativeSecVtxFinderTool::findVertex(const std::vector<Trk::ITrackLink*> &
         {
 
           found=true;
-
-          if ( (*tracksIter).weight() > m_minWghtAtVtx ) ntrk ++ ;
 
           const Trk::TrackParameters * svperigee =  (*tracksIter).perigeeAtVertex()  ;
 
