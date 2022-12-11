@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AmdcCore/AmdcIlineStore.h"
@@ -74,15 +74,16 @@ void AmdcIlineStore::Sort(){
   
   
   int jtyp_Max = m_AmdcIlineSet[1].Getjtyp() ;
-  int jtyp_Min = m_AmdcIlineSet[1].Getjtyp() ;
   int jff_Max  = m_AmdcIlineSet[1].Getjff()  ;
-  int jff_Min  = m_AmdcIlineSet[1].Getjff()  ;
   int jzz_Max  = m_AmdcIlineSet[1].Getjzz()  ;
-  int jzz_Min  = m_AmdcIlineSet[1].Getjzz()  ;
   int job_Max  = m_AmdcIlineSet[1].Getjob()  ;
-  int job_Min  = m_AmdcIlineSet[1].Getjob()  ;
   int jlay_Max = m_AmdcIlineSet[1].Getjlay() ;
-  int jlay_Min = m_AmdcIlineSet[1].Getjlay() ;
+
+  int jtyp_Min = jtyp_Max;
+  int jff_Min  = jff_Max;
+  int jzz_Min  = jzz_Max;
+  int job_Min  = job_Max;
+  int jlay_Min = jlay_Max;
 
   for (int Index= 0 ; Index <TheSize ; Index++){
     int jtyp = m_AmdcIlineSet[Index].Getjtyp() ;
