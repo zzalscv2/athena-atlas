@@ -657,12 +657,10 @@ mergeExtension(const Trk::Track& tT, std::vector<const Trk::MeasurementBase*>& t
   auto fq = tT.fitQuality()->uniqueClone();
   // output datavector of TSOS
   auto ntsos = DataVector<const Trk::TrackStateOnSurface>();
-  int siHits = 0;
   // copy track Si states into track
   DataVector<const Trk::TrackStateOnSurface>::const_iterator p_stsos;
   for (p_stsos = stsos->begin(); p_stsos != stsos->end(); ++p_stsos) {
     ntsos.push_back((*p_stsos)->clone());
-    if ((*p_stsos)->type(Trk::TrackStateOnSurface::Measurement)) siHits++;
   }
   // loop over TRT track extension
   for (auto & it : tS) {
@@ -704,17 +702,15 @@ InDet::TRT_SeededTrackFinder::Analyze(TrackCollection* tC) const{
   if(msgLvl(MSG::DEBUG)) {
     ATH_MSG_DEBUG( "Analyzing tracks..." );
     ATH_MSG_DEBUG( "Number of back tracks " << (tC->size()) );
-    int tc = 0; //Track counter
     int nsct1{}, nsct2{}, nsct3{}, nsct4{}; //SCT layer counters
     int nsctTot1{}, nsctTot2{}, nsctTot3{}, nsctTot4{}; //SCT layer counters
     int npix1{}, npix2{}, npix3{}; //Pixel layer counters
     int npixTot1{}, npixTot2{}, npixTot3{}; //Pixel layer counters
-    int nhits{}, nholes{}, noutl{};
     ///Loop over tracks in track collection
     TrackCollection::const_iterator r    = tC->begin();
     TrackCollection::const_iterator re = tC->end();
     for (; r != re ; ++r){
-      tc++; nsct1=nsct2=nsct3=nsct4=0; npix1=npix2=npix3=0; nhits=nholes=noutl=0;
+      nsct1=nsct2=nsct3=nsct4=0; npix1=npix2=npix3=0; 
       const DataVector<const Trk::TrackStateOnSurface>* newtsos = (*r)->trackStateOnSurfaces();
       if(!newtsos) continue;
       DataVector<const Trk::TrackStateOnSurface>::const_iterator itp, itpe=newtsos->end();
@@ -730,13 +726,6 @@ InDet::TRT_SeededTrackFinder::Analyze(TrackCollection* tC) const{
           if((340.<=rc)&&(rc<390.)){nsct2++;}  //2nd SCT layer
           if((390.<=rc)&&(rc<460.)){nsct3++;}  //3rd SCT layer
           if((460.<=rc)&&(rc<550.)){nsct4++;}  //4th SCT layer
-          nhits++;
-        }
-        if(clus && ((*itp)->type(Trk::TrackStateOnSurface::Outlier))){  //Count the total number of outliers per track
-          noutl++;
-        }
-        if(clus && ((*itp)->type(Trk::TrackStateOnSurface::Hole))){     //Count the total number of holes per track
-          nholes++;
         }
       }
       nsctTot1+=nsct1; nsctTot2+=nsct2; nsctTot3+=nsct3; nsctTot4+=nsct4;
