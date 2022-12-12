@@ -670,6 +670,7 @@ void test5 (TestRCUSvc& rcusvc)
   exp1 << "{[2,t:120,l:10] - [2,t:130,l:20]} " << bptrs[5] << "\n";
   //std::cout << "ss1: " << ss1.str() << "\nexp1: " << exp1.str() << "\n";
   assert (ss1.str() == exp1.str());
+  assert (cc.entries() == 6);
 
 
   // Ranges

@@ -1033,6 +1033,12 @@ public:
 
 
   /**
+   * @brief Return the number of conditions objects in the container.
+   */
+  virtual size_t entries() const override final;
+
+
+  /**
    * @brief Return all IOV validity ranges defined in this container.
    */
   virtual

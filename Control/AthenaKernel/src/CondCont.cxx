@@ -909,7 +909,7 @@ CondContMixedBase::CondContMixedBase (Athena::IRCUSvc& rcusvc,
 void CondContMixedBase::list (std::ostream& ost) const
 {
   ost << "id: " << id() << "  proxy: " << proxy() << " ["
-      << entries() << "] run+lbn entries" << std::endl;
+      << CondContBase::entries() << "] run+lbn entries" << std::endl;
   forEach ([&] (const CondContSet::value_type& ent)
            {
              const CondContSet* tsmap =
@@ -918,6 +918,21 @@ void CondContMixedBase::list (std::ostream& ost) const
                ost << ent2.first.m_range << " " << ent2.second << std::endl;
              }
            });
+}
+
+
+/**
+ * @brief Return the number of conditions objects in the container.
+ */
+size_t CondContMixedBase::entries() const
+{
+  size_t nent = 0;
+  forEach ([&] (const CondContSet::value_type& ent) {
+    const CondContSet* tsmap =
+      reinterpret_cast<const CondContSet*> (ent.second);
+    nent += tsmap->size();
+  });
+  return nent;
 }
 
 
