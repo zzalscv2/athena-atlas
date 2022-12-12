@@ -81,10 +81,10 @@ StatusCode ISF::FastCaloSimV2Tool::setupEventST()
 {
   ATH_MSG_DEBUG ("setupEventST");
 
-  m_theContainer = new CaloCellContainer(SG::VIEW_ELEMENTS);
-
-  ATH_CHECK(evtStore()->record(m_theContainer, m_caloCellsOutputName));
-
+  m_theContainer = std::make_unique<CaloCellContainer>(SG::VIEW_ELEMENTS);
+  m_theContainerPtr = m_theContainer.get();
+  ATH_CHECK(evtStore()->record(std::move(m_theContainer), m_caloCellsOutputName));
+  // NB: m_theContainer is now nullptr
   const EventContext& ctx = Gaudi::Hive::currentContext();
   return this->commonSetup(ctx);
 }
@@ -93,8 +93,8 @@ StatusCode ISF::FastCaloSimV2Tool::setupEvent(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ("setupEvent");
 
-  m_theContainer = new CaloCellContainer(SG::VIEW_ELEMENTS);
-
+  m_theContainer = std::make_unique<CaloCellContainer>(SG::VIEW_ELEMENTS);
+  m_theContainerPtr = m_theContainer.get();
   return this->commonSetup(ctx);
 }
 
@@ -109,7 +109,7 @@ StatusCode ISF::FastCaloSimV2Tool::commonSetup(const EventContext& ctx)
     {
       std::string chronoName=this->name()+"_"+ tool.name();
       if (m_chrono) m_chrono->chronoStart(chronoName);
-      StatusCode sc = tool->process(m_theContainer, ctx);
+      StatusCode sc = tool->process(m_theContainerPtr, ctx);
       if (m_chrono) {
         m_chrono->chronoStop(chronoName);
         ATH_MSG_DEBUG( "Chrono stop : delta " << m_chrono->chronoDelta (chronoName,IChronoStatSvc::USER) * CLHEP::microsecond / CLHEP::second << " second " );
@@ -135,7 +135,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEvent(const EventContext& ctx)
 
     // Record with WriteHandle
     SG::WriteHandle< CaloCellContainer > caloCellHandle( m_caloCellKey, ctx );
-    ATH_CHECK( caloCellHandle.record( std::make_unique< CaloCellContainer >( *m_theContainer ) ) );
+    ATH_CHECK( caloCellHandle.record( std::move( m_theContainer ) ) );
     return StatusCode::SUCCESS;
   }
   return StatusCode::FAILURE;
@@ -151,7 +151,7 @@ StatusCode ISF::FastCaloSimV2Tool::releaseEventST()
     {
       ATH_MSG_VERBOSE( "Calling tool " << tool.name() );
 
-      ATH_CHECK(tool->process(m_theContainer, ctx));
+      ATH_CHECK(tool->process(m_theContainerPtr, ctx));
     }
 
   return StatusCode::SUCCESS;
@@ -207,7 +207,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(ISF::ISFParticle& isfp, ISFParticleC
 
     //Now deposit all cell energies into the CaloCellContainer
     for(const auto& iter : simulstate.cells()) {
-      CaloCell* theCell = (CaloCell*)m_theContainer->findCell(iter.first->calo_hash());
+      CaloCell* theCell = (CaloCell*)m_theContainerPtr->findCell(iter.first->calo_hash());
       theCell->addEnergy(iter.second);
     }
 

@@ -77,7 +77,8 @@ namespace ISF {
 
     PublicToolHandle<IFastCaloSimCaloExtrapolation> m_FastCaloSimCaloExtrapolation{this, "FastCaloSimCaloExtrapolation", "", ""};
 
-    CaloCellContainer*        m_theContainer{};
+    std::unique_ptr<CaloCellContainer>        m_theContainer{};
+    CaloCellContainer*                                    m_theContainerPtr{};
     SG::WriteHandleKey< CaloCellContainer > m_caloCellKey{ this, "CaloCells", "DefaultCaloCellContainer", "The name of the output CaloCellContainer" };
 
     ServiceHandle<IAthRNGSvc> m_rndmGenSvc{this, "RandomSvc", "AthRNGSvc", ""};
