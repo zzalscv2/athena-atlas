@@ -850,7 +850,6 @@ std::vector<IdentifierHash> & ids)
 
 
        int phiModule = phi;
-       int made_collections = 0;
 
        for (int ring = 0; ring < m_numberOfRings; ++ring)
        {
@@ -863,8 +862,7 @@ std::vector<IdentifierHash> & ids)
 
 	      if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	      {
-		 ids.push_back(idHash);
-		 made_collections++;
+          ids.push_back(idHash);
 	      }
 	      else
 		 ATH_MSG_FATAL( " Unable to get hash for id " << m_TRTHelper->show_to_string(id) );
@@ -879,8 +877,7 @@ std::vector<IdentifierHash> & ids)
 
 	      if (!m_TRTHelper->get_hash(id, idHash, &m_cntx))
 	      {
-		 ids.push_back(idHash);
-		 made_collections++;
+          ids.push_back(idHash);
 	      }
 	      else  
 		 ATH_MSG_FATAL( " Unable to get hash for id " << m_TRTHelper->show_to_string(id) );
@@ -895,8 +892,7 @@ std::vector<IdentifierHash> & ids)
 
 	      if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	      {
-		 ids.push_back(idHash);
-		 made_collections++;
+          ids.push_back(idHash);
 	      }
 	      else 
 		 ATH_MSG_FATAL( " Unable to get hash for id " << m_TRTHelper->show_to_string(id) );
@@ -913,7 +909,6 @@ std::vector<IdentifierHash> & ids)
        int EndLayer=0;
 
        int phiModule = phi;
-       int made_collections = 0;
 
        bool done = !((my_map->SubDet == barrelId) && (my_map->Phi == phi));
        while ( !done && (it != GCM.end()) )
@@ -970,7 +965,6 @@ std::vector<IdentifierHash> & ids)
 	   if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	   {
 	     ids.push_back(idHash);
-	     made_collections++;
 	   }
 	   else
 	     ATH_MSG_FATAL( " Unable to get hash for id " << m_TRTHelper->show_to_string(id) );

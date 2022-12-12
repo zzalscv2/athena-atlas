@@ -1042,7 +1042,6 @@ void TRT_FillCablingData_DC3::defineCollID()
 void TRT_FillCablingData_DC3::fillCollID(uint32_t rob_id,  
 std::vector<IdentifierHash> & ids)
 {
-   int made_collections = 0;
    IdentifierHash idHash;
   
    int phi;
@@ -1085,7 +1084,6 @@ std::vector<IdentifierHash> & ids)
 	    if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	    {
 	       ids.push_back(idHash);
-	       made_collections++;
 	    }
 	    else
 	       ATH_MSG_FATAL( " Unable to get hash for id "
@@ -1126,7 +1124,6 @@ std::vector<IdentifierHash> & ids)
 	 if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	 {
 	   ids.push_back(idHash);
-	   made_collections++;
 	 }
 	 else
 	   ATH_MSG_FATAL( " EC: Unable to get hash for id "
@@ -1821,7 +1818,6 @@ void TRT_FillCablingData_DC3::defineCollID_broken_FDR()
 void TRT_FillCablingData_DC3::fillCollID_broken_FDR(uint32_t rob_id,  
 std::vector<IdentifierHash> & ids)
 {
-   int made_collections = 0;
    IdentifierHash idHash;
   
    int phi;
@@ -1863,7 +1859,6 @@ std::vector<IdentifierHash> & ids)
 	    if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	    {
 	       ids.push_back(idHash);
-	       made_collections++;
 	    }
 	    else
 	       ATH_MSG_FATAL( " Unable to get hash for id " \
@@ -1928,11 +1923,10 @@ std::vector<IdentifierHash> & ids)
 
 	     if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	     {
-		ids.push_back(idHash);
-		made_collections++;
+         ids.push_back(idHash);
 	     }
 	     else
-		ATH_MSG_FATAL( " A: Unable to get hash for id " \
+         ATH_MSG_FATAL( " A: Unable to get hash for id " \
 		      << m_TRTHelper->show_to_string(id) << " " << barrelId << " " << phi << " " \
 		      << wheel << " " << layer );
 	  }  // loop over layer
@@ -1956,8 +1950,7 @@ std::vector<IdentifierHash> & ids)
 
 	     if (!m_TRTHelper->get_hash(id, idHash, &m_cntx)) 
 	     {
-		ids.push_back(idHash);
-		made_collections++;
+         ids.push_back(idHash);
 	     }
 	     else
 		ATH_MSG_FATAL( " B: Unable to get hash for id " \
