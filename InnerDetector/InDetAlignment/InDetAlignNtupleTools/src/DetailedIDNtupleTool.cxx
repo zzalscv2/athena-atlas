@@ -104,7 +104,7 @@ namespace InDet {
   }
 
 //________________________________________________________________________
-  void DetailedIDNtupleTool::dumpTrack(int itrk, const Trk::AlignTrack* alignTrack) {
+  void DetailedIDNtupleTool::dumpTrack(int /* itrk*/, const Trk::AlignTrack* alignTrack) {
     ATH_MSG_DEBUG("In dumpTrack()");
     Trk::AlignTrack::AlignTrackType type = alignTrack->type();
     const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -345,7 +345,6 @@ namespace InDet {
     m_tree->Fill();
     ATH_MSG_DEBUG("tree filled");
 
-    ++itrk;
     return;
   }
 
