@@ -135,13 +135,7 @@ TRT_RodEncoder::fillROD3( std::vector<uint32_t>&  v32rod )
        bitstowrite.push_back( 1 );
    }
 
-   int BufferLength;
-			 
-   BufferLength = bitstowrite.size() / 32;
-   if ( bitstowrite.size() % 32 )
-     BufferLength++;
-
-   //   v32rod.resize( BufferLength );             // Make sure vector is big enough
+   
 
    int bit_in_word = 0;
    int out_word = 0;
