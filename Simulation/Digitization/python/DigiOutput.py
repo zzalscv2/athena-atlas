@@ -87,18 +87,18 @@ def getStreamRDO_ItemList(log):
             from OverlayCommonAlgs.OverlayFlags import overlayFlags
             prefix = overlayFlags.bkgPrefix()
 
+        dropped_jet_vars = ['constituentLinks',
+                            'constituentWeights',
+                            'ConeExclBHadronsFinal',
+                            'ConeExclCHadronsFinal',
+                            'ConeExclTausFinal',
+                            'GhostPartons',
+                            'GhostBHadronsFinal',
+                            'GhostCHadronsFinal',
+                            'GhostTausFinal']
+        jet_var_str = '.-'.join ([''] + dropped_jet_vars)
+
         if 'PileUpAntiKt4TruthJets' in digitizationFlags.experimentalDigi():
-            dropped_jet_vars = ['constituentLinks',
-                                'constituentWeights',
-                                'ConeExclBHadronsFinal',
-                                'ConeExclCHadronsFinal',
-                                'ConeExclTausFinal',
-                                'GhostPartons',
-                                'GhostBHadronsFinal',
-                                'GhostCHadronsFinal',
-                                'GhostTausFinal']
-            jet_var_str = '.-'.join ([''] + dropped_jet_vars)
-                                
             StreamRDO_ItemList+=[f"xAOD::JetContainer#{prefix}InTimeAntiKt4TruthJets"]
             StreamRDO_ItemList+=[f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt4TruthJetsAux" + jet_var_str]
             StreamRDO_ItemList+=[f"xAOD::JetContainer#{prefix}OutOfTimeAntiKt4TruthJets"]

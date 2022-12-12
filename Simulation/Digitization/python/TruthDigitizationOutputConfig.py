@@ -24,19 +24,31 @@ def TruthDigitizationOutputCfg(flags):
 
     from RunDependentSimComps.PileUpUtils import pileupInputCollections
     puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
+
+    dropped_jet_vars = ['constituentLinks',
+                        'constituentWeights',
+                        'ConeExclBHadronsFinal',
+                        'ConeExclCHadronsFinal',
+                        'ConeExclTausFinal',
+                        'GhostPartons',
+                        'GhostBHadronsFinal',
+                        'GhostCHadronsFinal',
+                        'GhostTausFinal']
+    jet_var_str = '.-'.join ([''] + dropped_jet_vars)
+
     if "AntiKt4TruthJets" in puCollections:
         ItemList += [
             f"xAOD::JetContainer#{prefix}InTimeAntiKt4TruthJets",
-            f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
+            f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt4TruthJetsAux" + jet_var_str,
             f"xAOD::JetContainer#{prefix}OutOfTimeAntiKt4TruthJets",
-            f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
+            f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt4TruthJetsAux" + jet_var_str,
         ]
     if "AntiKt6TruthJets" in puCollections:
         ItemList += [
             f"xAOD::JetContainer#{prefix}InTimeAntiKt6TruthJets",
-            f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt6TruthJetsAux.-constituentLinks.-constituentWeights",
+            f"xAOD::AuxContainerBase!#{prefix}InTimeAntiKt6TruthJetsAux" + jet_var_str,
             f"xAOD::JetContainer#{prefix}OutOfTimeAntiKt6TruthJets",
-            f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt6TruthJetsAux.-constituentLinks.-constituentWeights",
+            f"xAOD::AuxContainerBase!#{prefix}OutOfTimeAntiKt6TruthJetsAux" + jet_var_str,
         ]
     if "TruthPileupParticles" in puCollections:
         ItemList += [
