@@ -131,6 +131,12 @@ namespace top {
         "MUON_EFF_RECO_SYS",
         "MUON_EFF_RECO_TRUTH",
         "MUON_EFF_RECO_TRUTH_LOWPT",
+        "MUON_EFF_RECO_CR1",
+        "MUON_EFF_RECO_CR2",
+        "MUON_EFF_RECO_CR3",
+        "MUON_EFF_RECO_HIGHETA_PROBEIP",
+        "MUON_EFF_RECO_HIGHETA_PROBEISO",
+        "MUON_EFF_RECO_TAGPT",
         "MUON_EFF_TTVA_BKGFRACTION",
         "MUON_EFF_TTVA_LUMIUNCERT",
         "MUON_EFF_TTVA_MCXSEC",
@@ -464,8 +470,12 @@ namespace top {
                                                          std::set<std::string>& recommended_systematics) {
     top::check(tool.retrieve(), "Failed to retrieve " + tool.name());
     // Add all recommended systematics to set
+    ATH_MSG_INFO("retrieved systematics from tool "<<tool.name());
     for (auto s : tool->recommendedSystematics().getBaseNames())
+    {
+      ATH_MSG_INFO("---> "<<std::string(s));
       recommended_systematics.insert(std::string(s));
+    }
   }
 
   template<typename T>
@@ -838,11 +848,40 @@ namespace top {
     const static SG::AuxElement::Decorator<float> id_sf_loose_decor_truth_lowpt_down(m_decor_idSF_loose + "_TRUTH_LOWPT_DOWN");
     
     const static SG::AuxElement::Decorator<float> id_sf_decor_bad_muon_veto_up(m_decor_idSF + "_BAD_MUON_VETO_UP");
-    const static SG::AuxElement::Decorator<float> id_sf_decor_bad_muon_veto_down(m_decor_idSF + "_BAD_MUON_VETO_DOWN");
     const static SG::AuxElement::Decorator<float> id_sf_loose_decor_bad_muon_veto_up(m_decor_idSF_loose + "_BAD_MUON_VETO_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_bad_muon_veto_down(m_decor_idSF + "_BAD_MUON_VETO_DOWN");
     const static SG::AuxElement::Decorator<float> id_sf_loose_decor_bad_muon_veto_down(m_decor_idSF_loose + "_BAD_MUON_VETO_DOWN");
-
-
+    
+    const static SG::AuxElement::Decorator<float> id_sf_decor_cr1_up(m_decor_idSF + "_CR1_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_cr1_up(m_decor_idSF_loose + "_CR1_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_cr1_down(m_decor_idSF + "_CR1_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_cr1_down(m_decor_idSF_loose + "_CR1_DOWN");
+    
+    const static SG::AuxElement::Decorator<float> id_sf_decor_cr2_up(m_decor_idSF + "_CR2_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_cr2_up(m_decor_idSF_loose + "_CR2_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_cr2_down(m_decor_idSF + "_CR2_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_cr2_down(m_decor_idSF_loose + "_CR2_DOWN");
+    
+    const static SG::AuxElement::Decorator<float> id_sf_decor_cr3_up(m_decor_idSF + "_CR3_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_cr3_up(m_decor_idSF_loose + "_CR3_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_cr3_down(m_decor_idSF + "_CR3_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_cr3_down(m_decor_idSF_loose + "_CR3_DOWN");
+    
+    const static SG::AuxElement::Decorator<float> id_sf_decor_higheta_probeip_up(m_decor_idSF + "_HIGHETA_PROBEIP_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_higheta_probeip_up(m_decor_idSF_loose + "_HIGHETA_PROBEIP_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_higheta_probeip_down(m_decor_idSF + "_HIGHETA_PROBEIP_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_higheta_probeip_down(m_decor_idSF_loose + "_HIGHETA_PROBEIP_DOWN");
+    
+    const static SG::AuxElement::Decorator<float> id_sf_decor_higheta_probeiso_up(m_decor_idSF + "_HIGHETA_PROBEISO_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_higheta_probeiso_up(m_decor_idSF_loose + "_HIGHETA_PROBEISO_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_higheta_probeiso_down(m_decor_idSF + "_HIGHETA_PROBEISO_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_higheta_probeiso_down(m_decor_idSF_loose + "_HIGHETA_PROBEISO_DOWN");
+    
+    const static SG::AuxElement::Decorator<float> id_sf_decor_tagpt_up(m_decor_idSF + "_TAGPT_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_tagpt_up(m_decor_idSF_loose + "_TAGPT_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_tagpt_down(m_decor_idSF + "_TAGPT_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_tagpt_down(m_decor_idSF_loose + "_TAGPT_DOWN");
+    
     if (m_config->muonBreakDownSystematics()) {
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_stat_UP, muon,
@@ -1025,7 +1064,84 @@ namespace top {
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
                                    m_reco_truth_lowpt_DOWN, muon,
                                    id_sf_loose_decor_truth_lowpt_down);
-
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_cr1_UP, muon,
+                                   id_sf_decor_cr1_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_cr1_UP, muon,
+                                   id_sf_loose_decor_cr1_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_cr1_DOWN, muon,
+                                   id_sf_decor_cr1_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_cr1_DOWN, muon,
+                                   id_sf_loose_decor_cr1_down);
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_cr2_UP, muon,
+                                   id_sf_decor_cr2_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_cr2_UP, muon,
+                                   id_sf_loose_decor_cr2_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_cr2_DOWN, muon,
+                                   id_sf_decor_cr2_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_cr2_DOWN, muon,
+                                   id_sf_loose_decor_cr2_down);
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_cr3_UP, muon,
+                                   id_sf_decor_cr3_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_cr3_UP, muon,
+                                   id_sf_loose_decor_cr3_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_cr3_DOWN, muon,
+                                   id_sf_decor_cr3_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_cr3_DOWN, muon,
+                                   id_sf_loose_decor_cr3_down);
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_higheta_probeip_UP, muon,
+                                   id_sf_decor_higheta_probeip_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_higheta_probeip_UP, muon,
+                                   id_sf_loose_decor_higheta_probeip_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_higheta_probeip_DOWN, muon,
+                                   id_sf_decor_higheta_probeip_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_higheta_probeip_DOWN, muon,
+                                   id_sf_loose_decor_higheta_probeip_down);
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_higheta_probeiso_UP, muon,
+                                   id_sf_decor_higheta_probeiso_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_higheta_probeiso_UP, muon,
+                                   id_sf_loose_decor_higheta_probeiso_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_higheta_probeiso_DOWN, muon,
+                                   id_sf_decor_higheta_probeiso_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_higheta_probeiso_DOWN, muon,
+                                   id_sf_loose_decor_higheta_probeiso_down);
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_tagpt_UP, muon,
+                                   id_sf_decor_tagpt_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_tagpt_UP, muon,
+                                   id_sf_loose_decor_tagpt_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_tagpt_DOWN, muon,
+                                   id_sf_decor_tagpt_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_tagpt_DOWN, muon,
+                                   id_sf_loose_decor_tagpt_down);
     } else {
       ///-- Stat UP --///
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,

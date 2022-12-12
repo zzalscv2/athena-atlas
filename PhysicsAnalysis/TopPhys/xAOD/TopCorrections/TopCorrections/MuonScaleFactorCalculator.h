@@ -216,6 +216,18 @@ namespace top {
     CP::SystematicSet m_reco_truth_DOWN;
     CP::SystematicSet m_reco_truth_lowpt_UP;
     CP::SystematicSet m_reco_truth_lowpt_DOWN;
+    CP::SystematicSet m_reco_cr1_UP;
+    CP::SystematicSet m_reco_cr1_DOWN;
+    CP::SystematicSet m_reco_cr2_UP;
+    CP::SystematicSet m_reco_cr2_DOWN;
+    CP::SystematicSet m_reco_cr3_UP;
+    CP::SystematicSet m_reco_cr3_DOWN;
+    CP::SystematicSet m_reco_higheta_probeip_UP;
+    CP::SystematicSet m_reco_higheta_probeip_DOWN;
+    CP::SystematicSet m_reco_higheta_probeiso_UP;
+    CP::SystematicSet m_reco_higheta_probeiso_DOWN;
+    CP::SystematicSet m_reco_tagpt_UP;
+    CP::SystematicSet m_reco_tagpt_DOWN;
 
     CP::SystematicSet m_reco_stat_lowpt_UP;
     CP::SystematicSet m_reco_stat_lowpt_DOWN;

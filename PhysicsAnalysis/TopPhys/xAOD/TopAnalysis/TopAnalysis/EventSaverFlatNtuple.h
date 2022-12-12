@@ -285,6 +285,7 @@ namespace top {
     float m_weight_leptonSF_MU_SF_ID_STAT_LOWPT_DOWN;
     float m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP;
     float m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_DOWN;
+    //Muon breakdown systematics
     float m_weight_leptonSF_MU_SF_ID_BKG_FRACTION_UP;
     float m_weight_leptonSF_MU_SF_ID_BKG_FRACTION_DOWN;
     float m_weight_leptonSF_MU_SF_ID_FIT_MODEL_LOWPT_UP;
@@ -311,6 +312,18 @@ namespace top {
     float m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_DOWN;
     float m_weight_leptonSF_MU_SF_ID_BAD_MUON_VETO_UP;
     float m_weight_leptonSF_MU_SF_ID_BAD_MUON_VETO_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_CR1_UP;
+    float m_weight_leptonSF_MU_SF_ID_CR1_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_CR2_UP;
+    float m_weight_leptonSF_MU_SF_ID_CR2_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_CR3_UP;
+    float m_weight_leptonSF_MU_SF_ID_CR3_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_UP;
+    float m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_UP;
+    float m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN;
+    float m_weight_leptonSF_MU_SF_ID_TAGPT_UP;
+    float m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN;
     // Muon isolation SF systematics
     float m_weight_leptonSF_MU_SF_Isol_STAT_UP;
     float m_weight_leptonSF_MU_SF_Isol_STAT_DOWN;
