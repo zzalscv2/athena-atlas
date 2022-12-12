@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # @brief: Pre and Post debug_stream analysis operations for trigger transform
 # @details: Code to carry out operations that are needed for running
 #   the trigger debug_stream analysis in transform
 # @author: Carlos Chavez
 
-from __future__ import print_function
-
 import os
-import re
 import eformat
 from TrigTransform.dbgEventInfo import dbgEventInfo
 from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
@@ -87,13 +84,8 @@ def dbgPreRun(inputFileList, outputFileList, argdict = None):
 
     # Check release format, if relInfo is 'unknown' then print error
     if 'REL' in configKeys:
-        release = configKeys['REL']
-        if not re.match(r'(\d+\.{0,1})+$', release):
-            msg.error('Not able to find release from DB (or it was badly formatted), release : {0}'.format(release))
-            msg.error('Problem with DB configuration in COOL DB, most likely during data-taking')        
-
         # Returns the local asetupString from runs in input files and to be used by asetup
-        return getAsetupString(configKeys['REL'], configKeys['PROJ']), dbAlias
+        return getAsetupString(configKeys['REL']), dbAlias
     else:
         msg.warn("Release not found in configuration - asetup string won't be created")
 
@@ -199,18 +191,9 @@ def TriggerDBInfo(dbalias = None, smk = None):
     return (l1Info, hltInfo)
 
 
-def getAsetupString(release, AtlasProject = ''):
-    # From release and os.environ, set asetupString for runwrapper.BSRDOtoRAW.sh
-    if not AtlasProject:
-        msg.warn('Atlas Project not available in TRIGGERDB - reading env variable')
+def getAsetupString(release):
 
-        if os.environ['AtlasProject']:
-            AtlasProject = os.environ['AtlasProject'].rstrip()
-            msg.info('Found Atlas Project %s', AtlasProject)
-        else:
-            msg.error("Couldn't find Atlas Project!")
-
-    asetupString = AtlasProject + ',' + release
+    asetupString = release
 
     # If TestArea is for tzero (tzero/software/patches/AtlasP1HLT-RELEASE),
     #   then returns tzero/software/patches/AtlasP1HLT-release where release is
@@ -232,7 +215,6 @@ def getHLTConfigKeys(runNumber = None, args = None):
         REL - release
         SMK - Super Master Key
         HLTPSK - HLT Prescale key
-        PROJ - Atlas project
     '''
 
     dbconn = TriggerCoolUtil.GetConnection("CONDBR2")
@@ -241,12 +223,6 @@ def getHLTConfigKeys(runNumber = None, args = None):
     if configKeys and runNumber in configKeys.keys():
         configKeys = configKeys[runNumber]
 
-        # Split db info into dbalias and atlas project,
-        #  for example TRIGGERDBDEV1;22.0.20;Athena -> TRIGGERDBDEV1
-        dbInfo = configKeys['DB'].split(';')
-
-        configKeys['DB'] = dbInfo[0]
-        configKeys['PROJ'] = dbInfo[2]
         configKeys['HLTPSK'] = TriggerCoolUtil.getHLTPrescaleKeys(dbconn, [[runNumber, runNumber]])[runNumber]['HLTPSK2']
 
         msg.info("Found config keys %s", configKeys)

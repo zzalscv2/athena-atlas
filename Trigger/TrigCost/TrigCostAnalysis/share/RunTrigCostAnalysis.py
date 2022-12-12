@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -160,8 +160,7 @@ def readConfigFromCool(smk, dbAlias):
       smk = configKeys[runNumber]['SMK']
 
     if not dbAlias:
-      # For example TRIGGERDBDEV1;22.0.20;Athena -> TRIGGERDBDEV1
-      dbAlias = configKeys[runNumber]['DB'].split(";")[0]
+      dbAlias = configKeys[runNumber]['DB']
 
     log.debug("Config keys are SMK: {0} DB alias: {1}".format(smk, dbAlias))
 

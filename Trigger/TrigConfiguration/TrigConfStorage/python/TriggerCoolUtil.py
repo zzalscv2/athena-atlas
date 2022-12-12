@@ -59,13 +59,21 @@ class TriggerCoolUtil:
             while objs.goToNext():
                 obj=objs.currentRef()
                 runNr   = obj.since()>>32
-                if runNr>1000000: continue
+                if runNr>1e9: continue  # test runs in COOL
                 payload=obj.payload()
                 smk     = payload['MasterConfigurationKey']
                 hltpsk  = payload['HltPrescaleConfigurationKey']
-                confsrc = payload['ConfigSource'].split(',')
+                # Format for ConfigSource (see ATR-21550):
+                #   Run-2: TRIGGERDBR2R,21.1.24,AthenaP1
+                #   Run-3: TRIGGERDB_RUN3;22.0.101;Athena,22.0.101 --extra_args ...
                 release = 'unknown'
-                if len(confsrc)>1: release = confsrc[1]
+                if runNr>379000:
+                    confsrc = payload['ConfigSource'].split(';')
+                    if len(confsrc)>2: release = confsrc[2].split()[0]
+                else:
+                    confsrc = payload['ConfigSource'].split(',', maxsplit=1)
+                    if len(confsrc)>1: release = confsrc[1]
+
                 dbalias = confsrc[0]
                 configKeys[runNr] = { "REL"     : release,
                                       "SMK"     : smk,
@@ -84,7 +92,7 @@ class TriggerCoolUtil:
             while objs.goToNext():
                 obj=objs.currentRef()
                 runNr   = obj.since()>>32
-                if runNr>1000000: continue
+                if runNr>1e9: continue  # test runs in COOL
                 payload = obj.payload()
                 key  = payload[in_name]
                 firstLB = obj.since() & lbmask
@@ -247,23 +255,26 @@ if __name__ == "__main__":
     from pprint import pprint
 
     db = TriggerCoolUtil.GetConnection('CONDBR2')
-    run = 435333
+    run2 = 363947  # Run-2
+    run3 = 435333  # Run-3
 
-    print("Full run:")
-    pprint(TriggerCoolUtil.getHLTConfigKeys(db, [[run,run]]))
-    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,run]]))
-    pprint(TriggerCoolUtil.getL1ConfigKeys(db, [[run,run]]))
-    pprint(TriggerCoolUtil.getBunchGroupKey(db, [[run,run]]))
+    for run in [run2, run3]:
+        print("\nFull run:")
+        pprint(TriggerCoolUtil.getHLTConfigKeys(db, [[run,run]]))
+        pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,run]]))
+        pprint(TriggerCoolUtil.getL1ConfigKeys(db, [[run,run]]))
+        pprint(TriggerCoolUtil.getBunchGroupKey(db, [[run,run]]))
 
+    # Detailed tests for Run-3:
     print("\nLB range within run:")
-    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[(run,266),(run,400)]]))
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[(run3,266),(run3,400)]]))
 
     print("\nRun range:")
-    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,435349]]))
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run3,435349]]))
 
     print("\nMultiple run ranges:")
-    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run,435349],[435831,435927]]))
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[run3,435349],[435831,435927]]))
 
     print("\nMultiple run/LB ranges:")
-    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[(run,266),(435349,10)],
+    pprint(TriggerCoolUtil.getHLTPrescaleKeys(db, [[(run3,266),(435349,10)],
                                                    [(435831,466),435927]]))
