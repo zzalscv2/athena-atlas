@@ -50,9 +50,23 @@ void TrackCnv_p4::persToTrans( const Trk::Track_p4 *persObj,
    // Should always be a FQ so let's just go ahead and make it...
   transObj->m_fitQuality   = std::make_unique<FitQuality>(persObj->m_chiSquared, persObj->m_numberDoF);
 
-  std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(
-    m_trackStateVectorCnv.createTransient(&persObj->m_trackState, log));
-  transObj->m_trackStateVector = std::move(*sink);
+  bool isMulti = false;
+  if (!persObj->m_trackState.empty()) {
+    ITPConverter* cnv = m_topCnv->converterForRef(persObj->m_trackState[0]);
+    isMulti =
+        (dynamic_cast<ITPConverterFor<Trk::MultiComponentStateOnSurface>*>(
+             cnv) != nullptr);
+  }
+
+  if (isMulti) {
+    std::unique_ptr<DataVector<const Trk::MultiComponentStateOnSurface>> sink(
+        m_multiStateVectorCnv.createTransient(&persObj->m_trackState, log));
+    transObj->m_trackStateVector = std::move(*sink);
+  } else {
+    std::unique_ptr<DataVector<const Trk::TrackStateOnSurface>> sink(
+        m_trackStateVectorCnv.createTransient(&persObj->m_trackState, log));
+    transObj->m_trackStateVector = std::move(*sink);
+  }
 }
 
 //-----------------------------------------------------------------------------

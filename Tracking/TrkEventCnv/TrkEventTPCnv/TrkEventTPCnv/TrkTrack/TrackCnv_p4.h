@@ -33,26 +33,27 @@ public:
 
   virtual void  initPrivateConverters( AthenaPoolTopLevelTPCnvBase *topCnv )
   {
-    // std::cout<<"initPrivateConverters for TrackCnv_p4="<<this<<" with topCnv="<<topCnv<<" and tscnv="<<m_trackSummaryCnv<<std::endl;
    m_trackStateVectorCnv.setTopConverter( topCnv, 0 );
    m_multiStateVectorCnv.setTopConverter( topCnv, 0 );
-   // m_trackSummaryCnv.setTopConverter( topCnv, 0);
-
+   m_topCnv  = topCnv;
   }
-  
-protected:
-  typedef T_AthenaPoolTPPtrVectorCnv< DataVector<const Trk::TrackStateOnSurface>,
-    std::vector<TPObjRef>,
-    TrackStateOnSurfaceCnv_p3 >   TrackStateOSVectorCnv_p3;
-    
-  TrackStateOSVectorCnv_p3       m_trackStateVectorCnv;
+
+ protected:
+  typedef T_AthenaPoolTPPtrVectorCnv<DataVector<const Trk::TrackStateOnSurface>,
+                                     std::vector<TPObjRef>,
+                                     TrackStateOnSurfaceCnv_p3>
+      TrackStateOSVectorCnv_p3;
+
+  TrackStateOSVectorCnv_p3 m_trackStateVectorCnv;
 
   typedef T_AthenaPoolTPPtrVectorCnv<TrkMultiComponentStateOnSurfaceDV,
-    std::vector<TPObjRef>,
-    MultiComponentStateOnSurfaceCnv_p1 >   MultiStateOSVectorCnv_p1;
+                                     std::vector<TPObjRef>,
+                                     MultiComponentStateOnSurfaceCnv_p1>
+      MultiStateOSVectorCnv_p1;
 
-  MultiStateOSVectorCnv_p1  m_multiStateVectorCnv;
- 
+  MultiStateOSVectorCnv_p1 m_multiStateVectorCnv;
+
+  AthenaPoolTopLevelTPCnvBase *m_topCnv;
 };
 
 #endif // TRACK_CNV_P3_H
