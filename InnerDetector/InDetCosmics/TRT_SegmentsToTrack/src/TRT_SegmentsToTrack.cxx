@@ -482,7 +482,6 @@ int InDet::TRT_SegmentsToTrack::nHTHits(const Trk::Track *track) const
 {
 
   int nHT=0;
-  int nLT=0;
 
   //loop over the hits
   for (const Trk::TrackStateOnSurface* tsos : *track->trackStateOnSurfaces()) {
@@ -497,8 +496,6 @@ int InDet::TRT_SegmentsToTrack::nHTHits(const Trk::Track *track) const
         if(trtcirc) {
           if(trtcirc->highLevel()){
             nHT++;
-          }else{
-            nLT++;
           }
         }
       }
