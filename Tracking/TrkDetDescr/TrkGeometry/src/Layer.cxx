@@ -27,7 +27,6 @@ Trk::Layer::Layer()
       m_enclosingDetachedTrackingVolume(nullptr),
       m_index(-1),
       m_layerType(Trk::active),
-      m_representingVolume(nullptr),
       m_ref(0.) {}
 
 Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
@@ -44,7 +43,6 @@ Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
       m_enclosingDetachedTrackingVolume(nullptr),
       m_index(-1),
       m_layerType(laytyp),
-      m_representingVolume(nullptr),
       m_ref(0.) {}
 
 Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray, double thickness,
@@ -60,7 +58,6 @@ Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray, double thickness,
       m_enclosingDetachedTrackingVolume(nullptr),
       m_index(-1),
       m_layerType(laytyp),
-      m_representingVolume(nullptr),
       m_ref(0.) {}
 
 Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray,
@@ -78,7 +75,6 @@ Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray,
       m_enclosingDetachedTrackingVolume(nullptr),
       m_index(-1),
       m_layerType(laytyp),
-      m_representingVolume(nullptr),
       m_ref(0.) {}
 
 Trk::Layer::Layer(const Trk::Layer& lay)
@@ -95,15 +91,11 @@ Trk::Layer::Layer(const Trk::Layer& lay)
       m_enclosingDetachedTrackingVolume(nullptr),
       m_index(-1),
       m_layerType(lay.m_layerType),
-      m_representingVolume(lay.m_representingVolume
-                               ? lay.m_representingVolume->clone()
-                               : nullptr),
       m_ref(lay.m_ref) {}
 
 Trk::Layer::~Layer() {
   delete m_surfaceArray;
   delete m_overlapDescriptor;
-  delete m_representingVolume;
 }
 
 Trk::Layer& Trk::Layer::operator=(const Trk::Layer& lay) {
@@ -124,9 +116,6 @@ Trk::Layer& Trk::Layer::operator=(const Trk::Layer& lay) {
     m_binUtility = lay.m_binUtility;
     m_index = lay.m_index;
     m_layerType = lay.m_layerType;
-    m_representingVolume = (lay.m_representingVolume)
-                               ? lay.m_representingVolume->clone()
-                               : nullptr;
     m_ref = lay.m_ref;
   }
   return (*this);
