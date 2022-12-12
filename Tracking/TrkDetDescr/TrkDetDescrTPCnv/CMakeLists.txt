@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrkDetDescrTPCnv )
@@ -10,6 +10,11 @@ atlas_add_tpcnv_library( TrkDetDescrTPCnv
                    src/TrkGeometry/*.cxx
                    PUBLIC_HEADERS TrkDetDescrTPCnv
                    LINK_LIBRARIES AthenaPoolUtilities TrkDetDescrUtils TrkGeometry AthenaPoolCnvSvcLib )
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+  # Don't allow clang to make optimizations that may introduce FPEs.
+  # Fixes some FPEs observed in the clang15 build.
+  set_target_properties( TrkDetDescrTPCnv PROPERTIES COMPILE_FLAGS "-ffp-exception-behavior=strict" )
+endif()
 
 atlas_add_dictionary( TrkDetDescrTPCnvDict
                       TrkDetDescrTPCnv/TrkDetDescrTPCnvDict.h
