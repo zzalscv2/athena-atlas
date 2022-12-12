@@ -769,11 +769,11 @@ namespace Trk {
           cache.m_idmat = false;
         }
         
-        const auto pBaseMEOT = (*itStates)->materialEffectsOnTrack();
+        const auto *const pBaseMEOT = (*itStates)->materialEffectsOnTrack();
         const bool itsAnMEOT = (pBaseMEOT->derivedType() == MaterialEffectsBase::MATERIAL_EFFECTS_ON_TRACK);
         
         if (itsAnMEOT ){
-          const auto pMEOT =static_cast<const MaterialEffectsOnTrack *>((*itStates)->materialEffectsOnTrack());
+          const auto *const pMEOT =static_cast<const MaterialEffectsOnTrack *>((*itStates)->materialEffectsOnTrack());
           if ((pMEOT->scatteringAngles() == nullptr) or (pMEOT->energyLoss() == nullptr)) {
             cache.m_getmaterialfromtrack = true;  // always take calorimeter layers
           }
@@ -2729,7 +2729,7 @@ namespace Trk {
           if (m_DetID->is_pixel(hitid)) {
             hittype = TrackState::Pixel;
           } else if (m_DetID->is_sct(hitid)) {
-            if (not (covmat.cols() == 1 || covmat(1, 0) == 0)) {
+            if (covmat.cols() != 1 && covmat(1, 0) != 0) {
               rotated = true;
             }
             hittype = TrackState::SCT;
@@ -4985,7 +4985,7 @@ namespace Trk {
           (runOutlier || m_trtrecal) && 
           ntrthits > 0
         ) {
-          if (!(it == 1 && nsihits == 0 && trajectory.nDOF() > 0 && trajectory.chi2() / trajectory.nDOF() > 3)) {
+          if (it != 1 || nsihits != 0 || trajectory.nDOF() <= 0 || trajectory.chi2() / trajectory.nDOF() <= 3) {
             ATH_MSG_DEBUG("Running TRT cleaner");
             runTrackCleanerTRT(cache, trajectory, a, b, lu, runOutlier, m_trtrecal, it);
             if (cache.m_fittercode != FitterStatusCode::Success) {
@@ -7997,11 +7997,6 @@ __attribute__ ((flatten))
 
     std::vector<std::unique_ptr<GXFTrackState>> & states = trajectory.trackStates();
     int nstatesupstream = trajectory.numberOfUpstreamStates();
-    int nscatupstream = trajectory.numberOfUpstreamScatterers();
-    int nbremupstream = trajectory.numberOfUpstreamBrems();
-    int hitno = 0;
-    int scatno = nscatupstream;
-    int bremno = nbremupstream;
       std::vector < int >indices(states.size());
     GXFTrackState *prevstate = nullptr;
     int i = nstatesupstream;
@@ -8015,27 +8010,11 @@ __attribute__ ((flatten))
     }
     for (int stateno = 0; stateno < (int) states.size(); stateno++) {
       if (stateno == 0 || stateno == nstatesupstream) {
-        scatno = nscatupstream;
-        bremno = nbremupstream;
         prevstate = nullptr;
       }
       int index = indices[stateno];
       std::unique_ptr<GXFTrackState> & state = states[index];
       if (state->materialEffects() != nullptr) {
-        if (state->getStateType(TrackStateOnSurface::Scatterer)) {
-          if (index >= nstatesupstream) {
-            scatno++;
-          } else {
-            scatno--;
-          }
-        }
-        if (state->materialEffects()->sigmaDeltaE() > 0) {
-          if (index >= nstatesupstream) {
-            bremno++;
-          } else {
-            bremno--;
-          }
-        }
         prevstate = state.get();
         continue;
       }
@@ -8136,7 +8115,6 @@ __attribute__ ((flatten))
         state->setFitQuality(fitQual);
       }
       prevstate = state.get();
-      hitno++;
     }
   }
 
@@ -8328,7 +8306,7 @@ __attribute__ ((flatten))
     if (phi < -M_PI) {
       phi += 2 * M_PI;
     }
-    return !(theta < 0 || theta > M_PI || phi < -M_PI || phi > M_PI);
+    return theta >= 0 && theta <= M_PI && phi >= -M_PI && phi <= M_PI;
   }
 
   bool 

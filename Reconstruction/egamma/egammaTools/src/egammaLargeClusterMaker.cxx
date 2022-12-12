@@ -159,8 +159,8 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       }
 
       // need some positive energy in EME2 or FCAL0 to be a good candidate
-      if (!(cluster->eSample(CaloSampling::EME2)  > 0 ||
-	    cluster->eSample(CaloSampling::FCAL0) > 0))
+      if (cluster->eSample(CaloSampling::EME2)  <= 0 &&
+	    cluster->eSample(CaloSampling::FCAL0) <= 0)
 	continue;
 
       // check if cluster is in FCAL or EMEC
@@ -255,7 +255,7 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
 	}
       }
 
-      if (caloSamV.size()) {
+      if (!caloSamV.empty()) {
         // If FCAL need to add cell to cluster in a cone.
 	// Also if we want cells from other samplings
         std::vector<const CaloCell*> cells;

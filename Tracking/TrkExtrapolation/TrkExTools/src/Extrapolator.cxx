@@ -2695,8 +2695,8 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
       ATH_MSG_DEBUG("  [+] next Tracking Volume = " << nextVolume->volumeName());
     }
     // set validity of last parameters to cache ------------------------------------------
-    updateLastValid = !(nextParameters && !cache.m_parametersOnDetElements && navParameters &&
-                        nextVolume && currentDistance > previousDistance);
+    updateLastValid = !nextParameters || cache.m_parametersOnDetElements || !navParameters ||
+                        !nextVolume || currentDistance <= previousDistance;
     // reset
     if (!nextParameters) {
       nextParameters = std::move(lastParameters);

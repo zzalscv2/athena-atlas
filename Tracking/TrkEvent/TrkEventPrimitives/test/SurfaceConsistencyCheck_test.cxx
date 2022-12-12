@@ -19,7 +19,7 @@
 #include <memory>
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-typedef int Surface;
+using Surface = int;
 
 //convenient way to generate different types with the same methods and holding a pSurf
 template<int N>

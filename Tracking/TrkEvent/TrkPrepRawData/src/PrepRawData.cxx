@@ -77,17 +77,6 @@ PrepRawData::PrepRawData()
 {
 }
 
-// copy constructor:
-PrepRawData::PrepRawData(const PrepRawData& RIO)
-  : Trk::ObjectCounter<Trk::PrepRawData>(RIO)
-  , m_clusId(RIO.m_clusId)
-  , m_localPos(RIO.m_localPos)
-  , m_rdoList(RIO.m_rdoList)
-  , m_localCovariance(RIO.m_localCovariance)
-  , m_indexAndHash(RIO.m_indexAndHash)
-{
-}
-
 MsgStream&
 PrepRawData::dump(MsgStream& stream) const
 {
