@@ -89,7 +89,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     # Derivation framework output settings    
     use_parallel_compression = flags.MP.UseSharedWriter and flags.MP.UseParallelCompression
     max_auto_flush = auto_flush if auto_flush else -1
-    for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_" in key and "FileName" in key)]:
+    for flag in [key for key in flags._flagdict.keys() if (("Output.DAOD_" in key or "Output.D2AOD_" in key) and "FileName" in key)]:
         # Since there may be several outputs, this has to be done in a loop 
         FileName = flags._flagdict[flag]._value 
         # Figure out if this is an augmentation child stream
@@ -119,7 +119,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
         CONTAINER_SPLITLEVEL = 0
         if "DAOD_PHYS" in FileName:
             TREE_AUTO_FLUSH = 500
-        if "DAOD_PHYSLITE" in FileName:
+        if "DAOD_PHYSLITE" in FileName or "D2AOD_PHYSLITE" in FileName:
             TREE_AUTO_FLUSH = 1000
             CONTAINER_SPLITLEVEL = 99
         if "DAOD_PHYSVAL" in FileName:
