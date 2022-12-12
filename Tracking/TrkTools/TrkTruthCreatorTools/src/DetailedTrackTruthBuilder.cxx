@@ -9,6 +9,7 @@
 
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "AtlasHepMC/MagicNumbers.h"
 
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/McEventCollection.h"
@@ -444,8 +445,7 @@ void DetailedTrackTruthBuilder::makeTruthToRecMap( PRD_InverseTruth& result, con
     // i.second = HepMcParticleLink
     auto pa = i.second.cptr();
     if( !pa ) { continue; } // skip noise
-    if( HepMC::barcode(pa)==std::numeric_limits<int32_t>::max() &&
-        pa->pdg_id()==999 ) { continue; } // skip geantinos
+    if(  pa->pdg_id()==999  && HepMC::barcode(pa)==HepMC::crazyParticleBarcode ) { continue; } // skip geantinos
     result.insert(std::make_pair(i.second, i.first));
   }
 }
@@ -464,7 +464,7 @@ SubDetHitStatistics DetailedTrackTruthBuilder::countPRDsOnTruth(const TruthTraje
     // sum over hits from all particles that arise from this pile-up
     // collision. the result is useless. don't do it.
     // in release 20, geantinos have
-    //   barcode==std::numeric_limits<int32_t>::max()
+    //   barcode==HepMC::crazyParticleBarcode
     //   pdg_id==999
     if (!(*p).cptr()) {
        ATH_MSG_WARNING( "HepMcParticleLink " << *p << " in truth trajectory does not point to a valid GenParticle.");
