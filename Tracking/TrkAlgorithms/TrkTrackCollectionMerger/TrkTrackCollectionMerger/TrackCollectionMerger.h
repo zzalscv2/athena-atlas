@@ -10,11 +10,10 @@
 
 #include "AthContainers/ConstDataVector.h"
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include "TrkEventUtils/PRDtoTrackMap.h"
-#include "TrkToolInterfaces/IExtendedTrackSummaryTool.h"
 #include "TrkToolInterfaces/IPRDtoTrackMapTool.h"
 #include "TrkTrack/TrackCollection.h"
 
@@ -32,7 +31,7 @@
 namespace Trk {
 
   /** @brief Class-algorithm for track collection merging and removalof potential duplicate tracks. */
-  class TrackCollectionMerger final: public AthAlgorithm
+  class TrackCollectionMerger final: public AthReentrantAlgorithm
     {
       
     public:
@@ -44,7 +43,7 @@ namespace Trk {
       TrackCollectionMerger(const std::string &name, ISvcLocator *pSvcLocator);
       virtual ~TrackCollectionMerger() {}
       virtual StatusCode initialize() override final;
-      virtual StatusCode execute() override final;
+      virtual StatusCode execute(const EventContext& ctx) const override final;
       virtual StatusCode finalize() override final;
 
     protected:
@@ -104,9 +103,6 @@ namespace Trk {
         "InDet::InDetPRDtoTrackMapToolGangedPixels"
       };
 
-      /** summary tool */
-      ToolHandle<Trk::IExtendedTrackSummaryTool> m_trkSummaryTool;
-
       ///////////////////////////////////////////////////////////////////
       /** @brief Protected methods:                                    */
       ///////////////////////////////////////////////////////////////////
@@ -114,11 +110,10 @@ namespace Trk {
       /** @brief A routine that merges the track collections. */
       StatusCode mergeTrack(const TrackCollection* trackCol,
                             Trk::PRDtoTrackMap* pPrdToTrackMap,
-                            ConstDataVector<TrackCollection>* outputCol);
+                            ConstDataVector<TrackCollection>* outputCol) const;
 
     private:
      
-      bool  m_updateAdditionalInfo;     //!< do not create the track summary again, but only update necessary things
       bool m_doTrackOverlay; //doing track overlay: needed to initialize the background PRD containers
 
 

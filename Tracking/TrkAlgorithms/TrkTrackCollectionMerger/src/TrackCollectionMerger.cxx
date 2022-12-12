@@ -18,15 +18,12 @@
 ///////////////////////////////////////////////////////////////////
 Trk::TrackCollectionMerger::TrackCollectionMerger(const std::string& name,
                                                   ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_updateAdditionalInfo(false)
+  : AthReentrantAlgorithm(name, pSvcLocator)
   , m_doTrackOverlay(false)
 {
   m_outtracklocation = "CombinedInDetTracks";
   declareProperty("TracksLocation", m_tracklocation);
   declareProperty("OutputTracksLocation", m_outtracklocation);
-  declareProperty("SummaryTool", m_trkSummaryTool);
-  declareProperty("UpdateAdditionalInfo", m_updateAdditionalInfo);
   declareProperty("DoTrackOverlay", m_doTrackOverlay);
 }
 
@@ -43,12 +40,7 @@ Trk::TrackCollectionMerger::initialize()
   ATH_CHECK(m_pileupPixel.initialize(m_doTrackOverlay));
   ATH_CHECK(m_pileupSCT.initialize(m_doTrackOverlay));
   ATH_CHECK(m_outtracklocation.initialize());
-  if (not m_trkSummaryTool.name().empty()) {
-    ATH_CHECK(m_trkSummaryTool.retrieve());
-  }
-  if (not m_assoTool.name().empty()) {
-    ATH_CHECK(m_assoTool.retrieve());
-  }
+  ATH_CHECK(m_assoTool.retrieve(DisableTool{m_assoTool.name().empty()}));
   ATH_CHECK(m_assoMapName.initialize(!m_assoMapName.key().empty()));
   return StatusCode::SUCCESS;
 }
@@ -57,7 +49,7 @@ Trk::TrackCollectionMerger::initialize()
 // Execute
 ///////////////////////////////////////////////////////////////////
 StatusCode 
-Trk::TrackCollectionMerger::execute(){
+Trk::TrackCollectionMerger::execute(const EventContext& ctx) const{
 
   auto outputCol = std::make_unique<ConstDataVector<TrackCollection>>(SG::VIEW_ELEMENTS);
   ATH_MSG_DEBUG("Number of Track collections " << m_tracklocation.size());
@@ -68,7 +60,7 @@ Trk::TrackCollectionMerger::execute(){
   size_t ttNumber = 0;
   for (auto& tcname : m_tracklocation){
     ///Retrieve tracks from StoreGate
-    SG::ReadHandle<TrackCollection> trackCol (tcname);
+    SG::ReadHandle<TrackCollection> trackCol (tcname, ctx);
     trackCollections.push_back(trackCol.cptr());
     ttNumber += trackCol->size();
   }
@@ -83,29 +75,12 @@ Trk::TrackCollectionMerger::execute(){
     }
   }
   ATH_MSG_DEBUG("Size of combined tracks " << outputCol->size());
-  if (m_trkSummaryTool) {
-    ATH_MSG_DEBUG("Update summaries");
-    // now loop over all tracks
-    for (Trk::Track const* trk : *outputCol) {
-      // Here we need to const cast the track
-      // as we create or update summaries.
-      Trk::Track* mutableTrack = const_cast<Trk::Track*>(trk);
-      if (not m_updateAdditionalInfo) {
-        m_trkSummaryTool->computeAndReplaceTrackSummary(
-          *mutableTrack,
-          false /* DO NOT suppress hole search*/);
-      } else if (m_updateAdditionalInfo) {
-          m_trkSummaryTool->updateAdditionalInfo(*mutableTrack);
-      }
-    }
-  } else {
-    ATH_MSG_WARNING("No track summary update performed because the TrackSummaryTool was not specified");
-  }
-  auto h_write = SG::makeHandle(m_outtracklocation);
+
+  auto h_write = SG::makeHandle(m_outtracklocation, ctx);
   ATH_CHECK(h_write.record(std::move(outputCol)));	     
   //
   if (!m_assoMapName.key().empty()) {
-     SG::WriteHandle<Trk::PRDtoTrackMap> write_handle(m_assoMapName);
+     SG::WriteHandle<Trk::PRDtoTrackMap> write_handle(m_assoMapName, ctx);
      if (write_handle.record( m_assoTool->reduceToStorableMap(std::move(pPrdToTrackMap))).isFailure()) {
         ATH_MSG_FATAL("Failed to add PRD to track association map.");
      }
@@ -130,7 +105,7 @@ Trk::TrackCollectionMerger::finalize()
 StatusCode
 Trk::TrackCollectionMerger::mergeTrack(const TrackCollection* trackCol,
                                        Trk::PRDtoTrackMap* pPrdToTrackMap,
-                                       ConstDataVector<TrackCollection>* outputCol)
+                                       ConstDataVector<TrackCollection>* outputCol) const
 {
   // loop over tracks, accept them and add them into association tool
   if (trackCol && !trackCol->empty()) {
