@@ -132,7 +132,7 @@ if not 'OutputOFCPoolFileDir' in dir():
 
 OFCFileTag = str(RunNumber)+"_"+Partition.replace("*","")
 
-OFCFileTag += "_"+str(Nsamples)+"samples_Picked"
+OFCFileTag += str(Nsamples)+"samples_Picked"
 
 if not 'OutputOFCRootFileName' in dir():
    OutputOFCRootFileName = "LArOFCPhys_"+OFCFileTag + ".root"
@@ -448,7 +448,7 @@ if (  WritePoolFile ) :
    from AthenaCommon.AppMgr import ServiceMgr
    from RegistrationServices.RegistrationServicesConf import IOVRegistrationSvc
    svcMgr += IOVRegistrationSvc()
-   svcMgr.IOVRegistrationSvc.OutputLevel = DEBUG
+   svcMgr.IOVRegistrationSvc.OutputLevel = WARNING
    svcMgr.IOVRegistrationSvc.RecreateFolders = False
 #   svcMgr.IOVRegistrationSvc.SVFolder = True
    		
@@ -458,7 +458,8 @@ if (  WritePoolFile ) :
 
 from McEventSelector.McEventSelectorConf import McEventSelector
 svcMgr += McEventSelector("EventSelector")
-svcMgr.EventSelector.RunNumber	= 10000000 # not runNumberRunNumber
+#svcMgr.EventSelector.RunNumber	= 10000000 # not runNumberRunNumber
+svcMgr.EventSelector.RunNumber	= int(RunNumber) # not runNumberRunNumber
 svcMgr.EventSelector.EventsPerRun      = 1
 svcMgr.EventSelector.FirstEvent	= 1
 svcMgr.EventSelector.InitialTimeStamp  = 0
@@ -480,7 +481,7 @@ svcMgr+=CfgMgr.AthenaEventLoopMgr(OutputLevel = VERBOSE)
 
 from AthenaCommon.AppMgr import theAuditorSvc
 from AthenaCommon.ConfigurableDb import getConfigurable
-theAuditorSvc += getConfigurable("MemStatAuditor")(OutputLevel = DEBUG)
+theAuditorSvc += getConfigurable("MemStatAuditor")(OutputLevel = WARNING)
 theAuditorSvc += getConfigurable("ChronoAuditor")()
 theAuditorSvc += getConfigurable("NameAuditor")()
 

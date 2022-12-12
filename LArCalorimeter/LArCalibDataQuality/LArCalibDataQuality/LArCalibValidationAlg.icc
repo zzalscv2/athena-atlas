@@ -5,13 +5,15 @@
 
 
 #include "CaloIdentifier/CaloGain.h"
+#include "CaloIdentifier/CaloCell_SuperCell_ID.h"
+#include "LArIdentifier/LArOnline_SuperCellID.h"
 
 template<class CONDITIONSCONTAINER>
 LArCalibValidationAlg<CONDITIONSCONTAINER>::LArCalibValidationAlg (const std::string& name, ISvcLocator* pSvcLocator) : 
   AthAlgorithm(name,pSvcLocator),
   m_myMsgLvl(MSG::ERROR),
-  m_onlineHelper(NULL),m_emId(NULL),m_hecId(NULL),m_fcalId(NULL),m_caloId(NULL),
-  m_reference(NULL),m_validation(NULL),m_nc_validation(NULL),
+  m_onlineHelper(nullptr),m_emId(nullptr), m_hecId(nullptr), m_fcalId(nullptr), m_caloId(nullptr),
+  m_reference(nullptr),m_validation(nullptr),m_nc_validation(nullptr),
   m_nChecked(0),m_nFailedValidation(0),m_nValidated(0),m_nBad(0),m_nNoReference(0) {
   declareProperty("ValidationKey",m_validationKey="",
 		  "SG key of the LArConditionsContainer to be validated");
@@ -54,9 +56,6 @@ LArCalibValidationAlg<CONDITIONSCONTAINER>::LArCalibValidationAlg (const std::st
   declareProperty("UseCorrChannels",m_useCorrChannel=true,
 		  "True: Use separate correction COOL channel, False: Correction + data in the same channel");
 
-  m_gainMap.push_back(std::string("HG"));
-  m_gainMap.push_back(std::string("MG"));
-  m_gainMap.push_back(std::string("LG"));
 }
 
 template<class CONDITIONSCONTAINER>
@@ -71,6 +70,13 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER>::initialize() {
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_BCKey.initialize());
   ATH_CHECK(m_CLKey.initialize());
+  if(m_isSC) {
+    m_gainMap.push_back(std::string("HG"));
+  } else {  
+    m_gainMap.push_back(std::string("HG"));
+    m_gainMap.push_back(std::string("MG"));
+    m_gainMap.push_back(std::string("LG"));
+  }
   return StatusCode::SUCCESS; 
 }
 
@@ -78,15 +84,29 @@ template<class CONDITIONSCONTAINER>
 StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER>::stop() {
   ATH_MSG_INFO ( "Entering LArCalibValidationAlg/"<<name() ) ; 
 
-  ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
+  if(m_isSC) {
+     const LArOnline_SuperCellID *onlHlp=nullptr;
+     ATH_CHECK( detStore()->retrieve(onlHlp, "LArOnline_SuperCellID") );
+     m_onlineHelper = dynamic_cast<const LArOnlineID_Base*>(onlHlp);
+
+     const CaloCell_SuperCell_ID *cId=nullptr;
+     ATH_CHECK( detStore()->retrieve(cId, "CaloCell_SuperCell_ID") );
+     m_caloId=dynamic_cast<const CaloCell_Base_ID*>(cId);
+  } else {   
+     const LArOnlineID *onlHlp=nullptr;
+     ATH_CHECK( detStore()->retrieve(onlHlp, "LArOnlineID") );
+     m_onlineHelper = dynamic_cast<const LArOnlineID_Base*>(onlHlp);
+
+     const CaloCell_ID *cId=nullptr;
+     ATH_CHECK( detStore()->retrieve(cId, "CaloCell_ID") );
+     m_caloId=dynamic_cast<const CaloCell_Base_ID*>(cId);
+  }
+
   ATH_CHECK( detStore()->retrieve(m_emId, "LArEM_ID") );
   ATH_CHECK (detStore()->retrieve(m_hecId, "LArHEC_ID") );
   ATH_CHECK( detStore()->retrieve(m_fcalId, "LArFCAL_ID") );
-  ATH_CHECK( detStore()->retrieve(m_caloId, "CaloCell_ID") );
 
   /// Get bad-channel tool 
-  const LArOnOffIdMapping* cabling=nullptr;
-  
   if (m_useBCInfo) {
     ATH_CHECK(m_bcMask.buildBitMask(m_problemsToMask,msg()));
   
@@ -94,6 +114,7 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER>::stop() {
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
 
+  const LArOnOffIdMapping* cabling=nullptr;
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};
   cabling=*cablingHdl;
   if(!cabling) {
@@ -172,10 +193,12 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER>::stop() {
   m_nBad=0;
   m_nNoReference=0;
 
-  m_checkedIds.resize(CaloGain::LARNGAIN); //For the three gains
+  unsigned maxgain;
+  if(m_isSC) maxgain=CaloGain::LARMEDIUMGAIN; else maxgain=CaloGain::LARNGAIN; 
+  m_checkedIds.resize(maxgain); //For the gains
 
   for (unsigned igain=CaloGain::LARHIGHGAIN; 
-       igain<CaloGain::LARNGAIN ; ++igain ) {
+       igain<maxgain ; ++igain ) {
     CONTIT it=m_validation->begin(igain);
     CONTIT it_e=m_validation->end(igain);
     for (;it!=it_e;it++) {
@@ -214,11 +237,16 @@ StatusCode LArCalibValidationAlg<CONDITIONSCONTAINER>::stop() {
 	if (thinRefCont) thinRefCont->setPdata(chid,ref,igain); 
       }
     }//end loop over container
+    ATH_MSG_INFO("checked "<<m_checkedIds[igain].size()<<" channels for gain "<<igain);
   }//end loop over gain
 
   if (m_checkCompleteness) checkCoolChannelCompleteness(cabling, clCont, bcCont);
 
+  ATH_MSG_INFO("checked completness");
+
   if (m_checkNumberOfCoolChannels) checkNumberOfCoolChannels(cabling,bcCont);
+
+  ATH_MSG_INFO("checked cool channels");
 
   //call summary method
   findFailedPatterns(cabling, clCont, bcCont);
@@ -431,7 +459,9 @@ const std::string LArCalibValidationAlg<CONDITIONSCONTAINER>::channelDescription
 
 template<class CONDITIONSCONTAINER>
 bool LArCalibValidationAlg<CONDITIONSCONTAINER>::checkCoolChannelCompleteness(const LArOnOffIdMapping *cabling, const LArCalibLineMapping *clCont, const LArBadChannelCont *bcCont) {
+  ATH_MSG_INFO("checkCoolChannelCompleteness starting....");
   bool retVal=true;
+  bool retVal1=true;
   FEBANDGAIN_t missing; //Keep track of missing FEBs
   CBANDCHANANDGAIN_t missingCBs; //Keep track of missing CBs
   //typedef typename CONDITIONSCONTAINER::MultChanCollection MULTICHANCOLL;
@@ -462,21 +492,41 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER>::checkCoolChannelCompleteness(co
       }
 
       if(m_patchCBs.size()) { // loop over channels, if connected to asked CBs
-         for(int ch=0; ch<128; ++ch) {
+         const LArOnlineID *onlHlp=nullptr;
+         StatusCode sc= detStore()->retrieve(onlHlp, "LArOnlineID");
+         if(sc.isFailure()) return false;
+         msg()<<MSG::INFO <<" m_patchCBs.size() "<<m_patchCBs.size()<<"  ";
+         for(unsigned i=0; i<m_patchCBs.size();++i) msg()<<MSG::INFO <<m_patchCBs[i]<<" ";
+         msg() << endmsg;
+         int chmax=128;
+         if(m_isSC) chmax=320;
+         for(int ch=0; ch<chmax; ++ch) {
             const HWIdentifier chanId = m_onlineHelper->channel_Id(febId,ch);
             const std::vector<HWIdentifier>& cLids=clCont->calibSlotLine(chanId); 
+            msg()<<MSG::INFO <<"ch. "<<ch<<" CL size: "<<cLids.size()<<": ";
+            for(unsigned cl=0; cl<cLids.size(); ++cl) msg()<<MSG::INFO <<cLids[cl].get_identifier32().get_compact()<<" ";
+            msg() << endmsg;
             for(unsigned cl=0; cl<cLids.size(); ++cl) {
-               const HWIdentifier calibModuleID = m_onlineHelper->calib_module_Id(cLids[cl]);
+               const HWIdentifier calibModuleID = onlHlp->calib_module_Id(cLids[cl]);
+               msg()<<MSG::INFO <<calibModuleID.get_identifier32().get_compact()<<" ";
                if (std::find(m_patchCBs.begin(),m_patchCBs.end(),calibModuleID.get_identifier32().get_compact()) != m_patchCBs.end()) { // we should patch this channel
                   missingCBs.push_back(std::make_pair(std::make_pair(febId,gain), ch));
+                  msg()<<MSG::INFO <<" found "; 
+                  break;
                }
+               msg() << endmsg;
             } // over CLs
          }// over channels
+         retVal1=false;
       } 
+        
    
     }//End loop over FEBs in subset
     ++subsetIndex;
   }//End loop over subsets in container
+
+  ATH_MSG_INFO("missing.size(): "<<missing.size()<<"  missingCBs.size(): "<<missingCBs.size());
+
   if (missing.size()) 
     retVal=patchMissingFEBs(missing,cabling,bcCont);
 
@@ -493,7 +543,15 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER>::checkCoolChannelCompleteness(co
     ATH_MSG_INFO ( "All Cool channel completly filled (" << multiChanColl->size() << " subsets)"  ) ;
   else
     ATH_MSG_ERROR ( "Not all COOL channnels completely filled" ) ;
-  return retVal;
+
+   if (missingCBs.size()) retVal1 = patchMissingCalibBoards(missingCBs,cabling,bcCont);
+   if (retVal1)
+      ATH_MSG_INFO ( "All missing CalibBoards completly filled "  ) ;
+   else
+      ATH_MSG_ERROR ( "Not all CalibBoards completely filled" ) ;
+
+  ATH_MSG_INFO("checkCoolChannelCompleteness done....");
+  return retVal && retVal1;
 }
 
 
@@ -552,7 +610,7 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER>::patchMissingFEBs(const FEBANDGA
 }
 
 template<class CONDITIONSCONTAINER>
-bool LArCalibValidationAlg<CONDITIONSCONTAINER>::patchMissingCalibBoards(const CBANDCHANANDGAIN_t& CBAndGain, const LArOnOffIdMapping *cabling, const LArCalibLineMapping */*clCont*/) {
+bool LArCalibValidationAlg<CONDITIONSCONTAINER>::patchMissingCalibBoards(const CBANDCHANANDGAIN_t& CBAndGain, const LArOnOffIdMapping *cabling, const LArBadChannelCont *bcCont) {
   unsigned nGood=0;
   unsigned nMissing=0;
   CBANDCHANANDGAIN_t::const_iterator missingIt=CBAndGain.begin();
@@ -571,7 +629,7 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER>::patchMissingCalibBoards(const C
     const LArCondObj& obj =m_reference->get(ourChannel,gain);
     if (obj.isEmpty()) { //Can't get reference object
 	if (cabling->isOnlineConnected(ourChannel)) { //Don't care if not connected
-	  ATH_MSG_ERROR ( "Channel " << chan << " of FEB " <<  channelDescription(febId,gain,true) 
+	  ATH_MSG_ERROR ( "Channel " << chan << " of FEB " <<  channelDescription(febId,cabling,bcCont,gain,true) 
                           << " can't be found in reference container either." ) ;
 	  ++nMissing;
 	}//end if isConnected
@@ -580,9 +638,9 @@ bool LArCalibValidationAlg<CONDITIONSCONTAINER>::patchMissingCalibBoards(const C
 	StatusCode sc=m_nc_validation->insertCorrection(ourChannel,obj,gain,m_useCorrChannel);
 	if (sc.isFailure()) {
 	  ++nMissing;
-	  ATH_MSG_ERROR ( "Failed to insert correction for channel " << chan << " of FEB " <<  channelDescription(febId,gain,true) ) ;
+	  ATH_MSG_ERROR ( "Failed to insert correction for channel " << chan << " of FEB " <<  channelDescription(febId,cabling,bcCont,gain,true) ) ;
 	} else {
-	  ATH_MSG_DEBUG ( "Copied channel " << chan << " of FEB " <<  channelDescription(febId,gain,true) 
+	  ATH_MSG_DEBUG ( "Copied channel " << chan << " of FEB " <<  channelDescription(febId,cabling,bcCont,gain,true) 
                           << " from reference container" ) ;
         ++nGood;
 	}
