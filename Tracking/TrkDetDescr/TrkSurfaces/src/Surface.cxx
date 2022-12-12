@@ -173,6 +173,69 @@ Trk::Surface::measurementFrame(const Amg::Vector3D&, const Amg::Vector3D&) const
   return transform().rotation();
 }
 
+/// Local to Global implementations
+// From Local position
+Amg::Vector3D
+Trk::Surface::localToGlobal(const Amg::Vector2D& locpos) const
+{
+  Amg::Vector3D gPosition;
+  localToGlobal(locpos, Amg::Vector3D(1., 1., 1.), gPosition);
+  return gPosition;
+}
+
+// From local position and momentum
+Amg::Vector3D
+Trk::Surface::localToGlobal(const Amg::Vector2D& locpos,
+                       const Amg::Vector3D& glomom) const
+{
+  Amg::Vector3D gPosition(0., 0., 0.);
+  localToGlobal(locpos, glomom, gPosition);
+  return gPosition;
+}
+
+// From Local parameters
+Amg::Vector3D
+Trk::Surface::localToGlobal(const LocalParameters& locpars) const
+{
+  Amg::Vector3D gPosition(0., 0., 0.);
+  localToGlobal(
+    localParametersToPosition(locpars), Amg::Vector3D(1., 1., 1.), gPosition);
+  return gPosition;
+}
+
+// From Local parameters and momementum
+Amg::Vector3D
+Trk::Surface::localToGlobal(const LocalParameters& locpars,
+                       const Amg::Vector3D& glomom) const
+{
+  Amg::Vector3D gPosition(0., 0., 0.);
+  localToGlobal(localParametersToPosition(locpars), glomom, gPosition);
+  return gPosition;
+}
+
+// common to all surfaces, uses memory optized method
+std::optional<Amg::Vector2D>
+Trk::Surface::globalToLocal(const Amg::Vector3D& glopos, double) const
+{
+  Amg::Vector2D lPosition(0., 0.);
+  if (globalToLocal(glopos, Amg::Vector3D(1., 1., 1.), lPosition)) {
+    return lPosition;
+  }
+  return std::nullopt;
+}
+
+// common to all surfaces, uses memory optized method
+std::optional<Amg::Vector2D>
+Trk::Surface::globalToLocal(const Amg::Vector3D& glopos,
+                       const Amg::Vector3D& glomom) const
+{
+  Amg::Vector2D lPosition(0., 0.);
+  if (globalToLocal(glopos, glomom, lPosition)) {
+    return lPosition;
+  }
+  return std::nullopt;
+}
+
 // overload dump for MsgStream operator
 MsgStream&
 Trk::Surface::dump(MsgStream& sl) const
