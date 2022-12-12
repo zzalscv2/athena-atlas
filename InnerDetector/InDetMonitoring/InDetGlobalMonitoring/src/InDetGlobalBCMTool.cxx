@@ -625,8 +625,6 @@ StatusCode InDetGlobalBCMTool::fillHistograms(){
       return StatusCode::SUCCESS;
     } else {
 	  
-	int nPriVtx = 0;
-	int nPileupVtx = 0;
 	
 	if (vxContainer->size() == 1) {
 	    if ( msgLvl(MSG::DEBUG ) ) {
@@ -636,9 +634,6 @@ StatusCode InDetGlobalBCMTool::fillHistograms(){
 	else{
 	    for (VxContainer::const_iterator vxIter = vxContainer->begin(); vxIter != vxContainer->end(); ++vxIter)
 	    {
-		// Count different types of vertices
-		if ((*vxIter)->vertexType() == Trk::PriVtx) nPriVtx++;
-		if ((*vxIter)->vertexType() == Trk::PileUp) nPileupVtx++;
 		
 		// Select primary vertex
 		if ((*vxIter)->vertexType() != Trk::PriVtx) continue;
@@ -658,10 +653,7 @@ StatusCode InDetGlobalBCMTool::fillHistograms(){
     bool ROD0 = true; //bools for m_NumberOfEvents histo
     bool ROD1 = true;
 
-    //int abortcountHGRod0 = 0; //FIXME abortFraction calculator
-    //int abortcountLGRod0 = 0;
-    //int abortcountHGRod1 = 0;
-    //int abortcountLGRod1 = 0;
+
 
     int nROD0HitLG[bc_readout] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     int nROD0HitHG[bc_readout] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -717,15 +709,6 @@ StatusCode InDetGlobalBCMTool::fillHistograms(){
 	    if (ROD == 1) nROD1BCID[BC_counter] = bcm_bcid;
 	  }
 
-
-
-
-
-
-
-
-	
-		  
 	  /*********************************
 	   *Filling NumberOfEvent histograms
 	   *********************************/
@@ -1002,22 +985,6 @@ StatusCode InDetGlobalBCMTool::fillHistograms(){
       positions_A[gain].sort();
       positions_C[gain].sort();
 
-      /*
-	Code to calculate the weight for the event. Could be useful in the future
-	but taken out now as it is unused at the moment, causing warnings during
-	compilation.
-	
-      float weight = 1.0;
-      float ndt = 0;
-
-      for (std::list<deltat_data>::iterator it_a =positions_A[gain].begin();it_a!=positions_A[gain].end();it_a++)
-          for (std::list<deltat_data>::iterator it_c =positions_C[gain].begin();it_c!=positions_C[gain].end();it_c++)
-              if ( (*it_a).bcid == (*it_c).bcid && (*it_a).lvl1a == BCM_LVL1A && (*it_c).lvl1a == BCM_LVL1A )
-                  ndt++;
-
-      if ( ndt )
-	  weight = 1 / ndt;
-      */
       float deltat=350.0;//so that it can't mix with normal data if calculation of deltat fails
       while (!positions_A[gain].empty()){
 	unsigned int bcid=(positions_A[gain].front()).bcid;
