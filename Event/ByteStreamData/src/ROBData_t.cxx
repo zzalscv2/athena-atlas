@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,7 +19,7 @@ namespace ByteStreamDataTest {
     ROBData robData2 = *robData;
 
     for (IT it = robData->begin(), it_e = robData->end(); it != it_e; ++it) {
-      uint32_t i = (*it);
+      [[maybe_unused]] uint32_t i = (*it);
       ++i;
     }
 

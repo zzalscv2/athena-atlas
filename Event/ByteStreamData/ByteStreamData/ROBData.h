@@ -9,7 +9,7 @@
 
 /**
  * @file ROBData.h
- * @author <a href="mailto:Andre.dos.Anjos@cern.ch>André Rabello dos
+ * @author <a href="mailto:Andre.dos.Anjos@cern.ch>AndrÃ© Rabello dos
  * ANJOS</a>
  * $Author: gemmeren $
  * $Revision: 1.18 $
