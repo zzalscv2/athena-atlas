@@ -50,7 +50,6 @@ namespace CP {
 
     std::vector<const xAOD::TrackParticle *> electronsInDetTrackParticles = getElectronTPs(toRemove);
 
-    int element_counter=0;
     //loop over input vertices
     for (const xAOD::Vertex* v : input) {
       bool containsElectrons = false;
@@ -81,12 +80,10 @@ namespace CP {
       }
       
       if(updateAuxInfo){
-	nv->auxdecor<float>("sumPt")= xAOD::PVHelpers::getVertexSumPt(nv, 1,false);
-	nv->auxdecor<float>("sumPt2")= xAOD::PVHelpers::getVertexSumPt(nv, 2,false);
+        nv->auxdecor<float>("sumPt")= xAOD::PVHelpers::getVertexSumPt(nv, 1,false);
+        nv->auxdecor<float>("sumPt2")= xAOD::PVHelpers::getVertexSumPt(nv, 2,false);
       }
-      
       output.push_back(nv);
-      element_counter++;
     }
     
     return StatusCode::SUCCESS;
@@ -97,7 +94,6 @@ namespace CP {
     
     std::vector<const xAOD::TrackParticle *> electronsInDetTrackParticles = getElectronTPs(toRemove);
 
-    int element_counter=0;
     //loop over input vertices
     for (xAOD::Vertex* v : vertices) {
       bool containsElectrons = false;
@@ -125,11 +121,9 @@ namespace CP {
       }
       
       if(updateAuxInfo){
-	v->auxdecor<float>("sumPt")= xAOD::PVHelpers::getVertexSumPt(v, 1,false);
-	v->auxdecor<float>("sumPt2")= xAOD::PVHelpers::getVertexSumPt(v, 2,false);
+        v->auxdecor<float>("sumPt")= xAOD::PVHelpers::getVertexSumPt(v, 1,false);
+        v->auxdecor<float>("sumPt2")= xAOD::PVHelpers::getVertexSumPt(v, 2,false);
       }
-      
-      element_counter++;
     }
 
     return StatusCode::SUCCESS;
@@ -142,7 +136,6 @@ namespace CP {
     
     std::vector<const xAOD::TrackParticle *> electronsInDetTrackParticles = getElectronTPs(toRemove);
     
-    int element_counter=0;
     //loop over input vertices
     for (const xAOD::Vertex* v : input) {
       bool containsElectrons = false;
@@ -173,12 +166,10 @@ namespace CP {
       }
       
       if(updateAuxInfo){
-	nv->auxdecor<float>("sumPt")= xAOD::PVHelpers::getVertexSumPt(nv, 1,false);
-	nv->auxdecor<float>("sumPt2")= xAOD::PVHelpers::getVertexSumPt(nv, 2,false);
+        nv->auxdecor<float>("sumPt")= xAOD::PVHelpers::getVertexSumPt(nv, 1,false);
+        nv->auxdecor<float>("sumPt2")= xAOD::PVHelpers::getVertexSumPt(nv, 2,false);
       }
-      
       output->push_back(nv);
-      element_counter++;
     }
 
     return output;
