@@ -386,7 +386,7 @@ InDetPhysValMonitoringTool::fillHistograms() {
   //
   //Counters for cutflow
   //
-  unsigned int nSelectedTruthTracks(0), nSelectedRecoTracks(0), nSelectedMatchedTracks(0), nAssociatedTruth(0), nMissingAssociatedTruth(0), nFakeTracks(0), nTruths(0);
+  unsigned int nSelectedTruthTracks(0), nSelectedRecoTracks(0), nSelectedMatchedTracks(0), nAssociatedTruth(0), nMissingAssociatedTruth(0), nTruths(0);
 
   CutFlow tmp_truth_cutflow( m_truthSelectionTool.get() ?  m_truthSelectionTool->nCuts() : 0 );
   
@@ -448,7 +448,6 @@ InDetPhysValMonitoringTool::fillHistograms() {
     const bool isAssociatedTruth = associatedTruth != nullptr;
     const bool isFake = not std::isnan(prob) ? (prob < m_lowProb) : true;
 
-    if(isFake) nFakeTracks++;
     if(!isAssociatedTruth) nMissingAssociatedTruth++;
     m_monPlots->fillFakeRate(*thisTrack, isFake, isAssociatedTruth, puEvents, nVertices, beamSpotWeight);
 
