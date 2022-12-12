@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/TimingClass.h"
@@ -165,8 +165,6 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
   else if( name == "HEC" ) det = 2; 
   else if( name == "FCAL" ) det = 3; 
   
-  int count0 = 0, count1 = 0, count2 = 0, count3 = 0;
-   
   for( int d = 0; d < 2; d++ ){ //sides
     for( int ft = 0; ft < 32; ft++ ){ //feedthrough
       for( int sl = 0; sl < 15; sl++ ){ //slot
@@ -233,19 +231,15 @@ void LArSamples::TimingClass::fitTimePerFebAllFebs(const std::string& nrun, cons
 	
 	if( Hist_entries <= 50 ){
 	  file << det << " " << d << " " << ft << " " <<  sl+1 << " " << Median[d][ft][sl+1] << " " << median_error << endl;  
-	  count1++;	
 	}	   	   
 	else if( gMinuit->fCstatu == "SUCCESSFUL" && Fit_error >= Fit_mean &&  Fit_sigma > 1.5*rmsDist ){ 
 	  file << det << " " << d << " " << ft << " " <<  sl+1 << " " << Median[d][ft][sl+1] << " " << median_error << endl;	    
-	  count0++; 
 	}	 		 	 
 	else if( gMinuit->fCstatu != "SUCCESSFUL" ){	 	  	  	  
 	  file << det << " " << d << " " << ft << " " <<  sl+1 << " " << Median[d][ft][sl+1] << " " << median_error << endl;  
-	  count2++;	     
 	}	  	    	    
 	else{
 	  file << det << " " << d << " " << ft << " " <<  sl+1 << " " << Fit_mean << " " << Fit_error << endl;
-	  count3++;
 	}		    	     
 	
       } 
