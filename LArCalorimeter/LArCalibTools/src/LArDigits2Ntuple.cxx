@@ -163,7 +163,6 @@ StatusCode LArDigits2Ntuple::execute()
      return StatusCode::SUCCESS;
   }
 
-  unsigned cellCounter=0;
   for( const LArDigit *digi : DigitContainer ){
 
     if(m_fillBCID) m_bcid	= thisbcid; 
@@ -203,7 +202,6 @@ StatusCode LArDigits2Ntuple::execute()
 
 
     ATH_CHECK( ntupleSvc()->writeRecord(m_nt) );
-    cellCounter++;
   }// over cells 
    
 

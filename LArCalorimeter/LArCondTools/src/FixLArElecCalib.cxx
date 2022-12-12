@@ -1168,7 +1168,6 @@ StatusCode FixLArElecCalib::ReadFile(const std::string& filename, const LArOnOff
 
    int   det=2;
    int   samp,reg,eta;
-   int   n = 0;
    int first; 
    while ( infile>>first )
      {
@@ -1191,7 +1190,6 @@ StatusCode FixLArElecCalib::ReadFile(const std::string& filename, const LArOnOff
 	   infile>>x;
 	   vfl.push_back(x);
 	 }
-        ++n;
 	ATH_MSG_DEBUG(" det,samp,reg,eta,values="
                       <<det<<" " 
                       <<samp<<" " 
@@ -1241,7 +1239,6 @@ StatusCode FixLArElecCalib::ReadFileAll(const std::string& filename, const LArOn
    ATH_MSG_INFO(" first line of the file  "<<s);
 
    int   det,samp,reg,eta;
-   int   n = 0;
    int first; 
    while ( infile>>first>>samp>>reg>>eta ) {
        Identifier id ; 
@@ -1274,7 +1271,6 @@ StatusCode FixLArElecCalib::ReadFileAll(const std::string& filename, const LArOn
 	   infile>>x;
 	   vfl.push_back(x);
 	 }
-        ++n;
 	ATH_MSG_DEBUG(" first, det,samp,reg,eta,values="
                       <<first<<"  " <<det<<" " <<samp<<" " <<reg<<" " <<eta<<" "  );
 

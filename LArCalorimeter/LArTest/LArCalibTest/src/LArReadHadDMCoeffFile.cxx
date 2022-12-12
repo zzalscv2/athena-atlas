@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArReadHadDMCoeffFile.h"
@@ -61,7 +61,7 @@ StatusCode LArReadHadDMCoeffFile::initDataFromFile(std::string hadDMCoeffFileNam
 
    char line[1024], title[128];
    int offset = 0;
-   int indx_zone = 0, indx_parset = 0;
+   int indx_zone = 0;
    int nFrac, nEner, nEta, nPars;
    while(fgets(line,1024,fin)) {
       if(line[0] == '#' || line[0] == '\n' ) continue;
@@ -137,7 +137,6 @@ StatusCode LArReadHadDMCoeffFile::initDataFromFile(std::string hadDMCoeffFileNam
                   if(i_frac==0 && i_ener==0) dmArea.m_EtaBins.push_back(eta);
                   m_data->addHadDMCoeff(pars);
                   pars.clear();
-                  indx_parset++;
                } else {
                  ATH_MSG_ERROR ( "Format error #8." );
                }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArReadHadDMCoeffFile2.h"
@@ -71,7 +71,6 @@ StatusCode LArReadHadDMCoeffFile2::initDataFromFile(const std::string& hadDMCoef
   }
 
   int offset = 0;
-  int indx = 0;
 
   std::string sLine;
   std::string sdummy;
@@ -139,7 +138,6 @@ StatusCode LArReadHadDMCoeffFile2::initDataFromFile(const std::string& hadDMCoef
 
     m_data->addHadDMArea(dmArea);
     offset += length; // ofset for next DM area
-    indx++;
     // putting zero parameters
     CaloHadDMCoeff2::HadDMCoeff pars;
     pars.resize(dmArea.m_nPars, 0.0);
