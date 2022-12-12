@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -33,6 +33,7 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
 #include "GaudiKernel/EventContext.h"
+#include "AthenaKernel/ExtendedEventContext.h"
 #include "CxxUtils/ubsan_suppress.h"
 #include "PutTrackCollectionsInSG.h"
 
@@ -133,7 +134,9 @@ BOOST_AUTO_TEST_SUITE(TrackCollectionMergerTest)
     BOOST_TEST(pMergeAlg->setProperty("TracksLocation","['TrackCollectionKey1','TrackCollectionKey2']").isSuccess());
     //initialize() is necessary here
     BOOST_TEST(pMergeAlg->initialize().isSuccess());
-    BOOST_TEST(pMergeAlg->execute().isSuccess());
+    EventContext ctx;
+    ctx.setExtension (Atlas::ExtendedEventContext());
+    BOOST_TEST(pMergeAlg->execute(ctx).isSuccess());
     std::vector<std::string> keysPresent{};
     g.storeGateSvc()->keys<TrackCollection>(keysPresent);
     for (auto & n: keysPresent){

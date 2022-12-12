@@ -939,7 +939,6 @@ else:
 
       from TrkTrackCollectionMerger.TrkTrackCollectionMergerConf import Trk__TrackCollectionMerger
       from InDetRecExample.TrackingCommon                        import getInDetPRDtoTrackMapToolGangedPixels
-      merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryTool(namePrefix = 'CombinedInDetSplitProb')
       if overlayFlags.doTrackOverlay():
         InputCombinedInDetTracks += ["Bkg_CombinedInDetTracks"]
       TrkTrackCollectionMerger = Trk__TrackCollectionMerger(name                    = "InDetTrackCollectionMerger",
@@ -947,9 +946,7 @@ else:
                                                             OutputTracksLocation    = InDetKeys.UnslimmedTracks(),
                                                             AssociationTool         = getInDetPRDtoTrackMapToolGangedPixels(),
                                                             AssociationMapName      = "PRDtoTrackMap" + InDetKeys.UnslimmedTracks(),
-                                                            UpdateAdditionalInfo    = True,
-                                                            DoTrackOverlay          = overlayFlags.doTrackOverlay(),
-                                                            SummaryTool             = merger_track_summary_tool)
+                                                            DoTrackOverlay          = overlayFlags.doTrackOverlay())
       topSequence += TrkTrackCollectionMerger
 
       if (InDetFlags.doPrintConfigurables()):
@@ -989,15 +986,12 @@ else:
           DummyCollection += [ InDetKeys.ExtendedTracksDisappearing()]
         if overlayFlags.doTrackOverlay():
           DummyCollection += ["Bkg_DisappearingTracks"]
-        merger_track_summary_tool = TrackingCommon.getInDetTrackSummaryTool(namePrefix = 'DisappearingSplitProb')
         from InDetRecExample.TrackingCommon                        import getInDetPRDtoTrackMapToolGangedPixels
         TrkTrackCollectionMerger_pix = Trk__TrackCollectionMerger(name                    = "InDetTrackCollectionMerger_pix",
                                                                   TracksLocation          = DummyCollection,
                                                                   OutputTracksLocation    = InDetKeys.DisappearingTracks(),
                                                                   AssociationTool         = getInDetPRDtoTrackMapToolGangedPixels(),
-                                                                  UpdateAdditionalInfo    = True,
-                                                                  DoTrackOverlay          = overlayFlags.doTrackOverlay(),
-                                                                  SummaryTool             = merger_track_summary_tool)
+                                                                  DoTrackOverlay          = overlayFlags.doTrackOverlay())
         topSequence += TrkTrackCollectionMerger_pix
 
         if InDetFlags.doTruth():

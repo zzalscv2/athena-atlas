@@ -23,14 +23,7 @@ def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         kwargs.setdefault("AssociationTool", result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
-    kwargs.setdefault("UpdateAdditionalInfo", True)
     kwargs.setdefault("DoTrackOverlay",flags.Overlay.doTrackOverlay)
-
-    if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolCfg(flags))
-        result.addPublicTool(TrackSummaryTool)
-        kwargs.setdefault("SummaryTool", TrackSummaryTool)
 
     result.addEventAlgo(CompFactory.Trk.TrackCollectionMerger(name, **kwargs))
     return result
@@ -50,13 +43,6 @@ def ITkTrackCollectionMergerAlgCfg(flags, name="ITkTrackCollectionMerger",
         kwargs.setdefault("AssociationTool", result.popToolsAndMerge(ITkPRDtoTrackMapToolGangedPixelsCfg(flags)))
 
     kwargs.setdefault("AssociationMapName", "ITkPRDToTrackMapCombinedITkTracks")
-    kwargs.setdefault("UpdateAdditionalInfo", True)
-
-    if "SummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolCfg
-        TrackSummaryTool = result.popToolsAndMerge(ITkTrackSummaryToolCfg(flags))
-        result.addPublicTool(TrackSummaryTool)
-        kwargs.setdefault("SummaryTool", TrackSummaryTool)
 
     result.addEventAlgo(CompFactory.Trk.TrackCollectionMerger(name, **kwargs))
     return result
