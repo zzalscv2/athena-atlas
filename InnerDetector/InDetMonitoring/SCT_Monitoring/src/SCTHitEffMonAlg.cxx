@@ -321,11 +321,9 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
     return StatusCode::FAILURE;
   }
 
-  int nTrk{0}, nTrkPars{0}, nTrkGood{0};
 
   // Loop over track collection to count tracks
   for (const Trk::Track* pthisTrack: *tracks) {
-    nTrk++;
     if (pthisTrack==nullptr) {
       continue;
     }
@@ -333,7 +331,6 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
                 "track cut: presence")) {
       continue;
     }
-    nTrkPars++;
 
     if (m_insideOutOnly and failCut(pthisTrack->info().patternRecoInfo(Trk::TrackInfo::SiSPSeededFinder),
                                     "track cut: inside-out only")) {
@@ -357,7 +354,6 @@ StatusCode SCTHitEffMonAlg::fillHistograms(const EventContext& ctx) const {
     if (m_maxZ0sinTheta and failCut(std::abs(z0 * sin(perigeeTheta)) <= m_maxZ0sinTheta, "track cut: Max Z0sinTheta")) {
       continue;
     }
-    nTrkGood++;
   }
 
   // Loop over original track collection
