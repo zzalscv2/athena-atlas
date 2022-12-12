@@ -26,7 +26,7 @@ def fromRunArgs(runArgs):
     # Switch on PerfMon
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
     setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
-    
+
     # Input types
     allowedInputTypes = [ 'AOD', 'DAOD_PHYS', 'EVNT' ]
     availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in allowedInputTypes ]
@@ -108,6 +108,11 @@ def fromRunArgs(runArgs):
     if ConfigFlags.PerfMon.doFullMonMT or ConfigFlags.PerfMon.doFastMonMT:
        from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
        cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+
+    # AMI tag into in-file metadata. Note that helper function requires runArgs at the moment,
+    # so this needs to be called up here, rather than in one of the configuration methods
+    from PyUtils import AMITagHelperConfig
+    cfg.merge(AMITagHelperConfig.SetAMITag(ConfigFlags,runArgs=runArgs))
 
     # Set EventPrintoutInterval to 100 events
     cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
