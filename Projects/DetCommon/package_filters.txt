@@ -8,6 +8,8 @@
 + Control/CxxUtils
 + Database/ConnectionManagement/AtlasAuthentication
 
++ MuonSpectrometer/MuonCnv/MuonNSWCommonDecode
+
 + Trigger/TrigConfiguration/TrigConfBase
 + Trigger/TrigConfiguration/TrigConfIO
 + Trigger/TrigConfiguration/TrigConfData
