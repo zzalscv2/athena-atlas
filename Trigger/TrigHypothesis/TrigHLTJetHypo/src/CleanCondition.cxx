@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "./CleanCondition.h"
@@ -10,7 +10,7 @@
 #include <cmath>
 #include <TLorentzVector.h>
 
-CleanCondition::CleanCondition(std::string cName) : m_cName(cName)
+CleanCondition::CleanCondition(const std::string& cName) : m_cName(cName)
 {
 
 }
