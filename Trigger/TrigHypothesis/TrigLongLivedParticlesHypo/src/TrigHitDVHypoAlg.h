@@ -69,7 +69,7 @@ private:
    StatusCode findSPSeeds(const EventContext&, const xAOD::TrigCompositeContainer*, std::vector<float>&, std::vector<float>&) const;
    StatusCode findJetSeeds(const xAOD::JetContainer*, const float, const float, std::vector<float>&, std::vector<float>&, std::vector<float>&) const;
    StatusCode selectSeedsNearby(const xAOD::TrigCompositeContainer* hitDVSeedsContainer,
-				std::vector<float>& jetSeeds_pt, std::vector<float>& jetSeeds_eta, std::vector<float>& jetSeeds_phi) const;
+				std::vector<float>& jetSeeds_eta, std::vector<float>& jetSeeds_phi, std::vector<float>& jetSeeds_pt) const;
    StatusCode calculateBDT(const EventContext&, const xAOD::TrigCompositeContainer*, const xAOD::TrigCompositeContainer*,
 			   const std::vector<float>&, const std::vector<float>&, const std::vector<float>&,
 			   const float&, const int, xAOD::TrigCompositeContainer*, int&) const;
