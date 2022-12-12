@@ -9,8 +9,8 @@ class PixelCluster : public SiCluster
     PixelCluster(const Surface*);
     virtual ~PixelCluster(void);
 
-    double m_m[2];
-    double m_cov[2][2];
+    double m_m[2]{};
+    double m_cov[2][2]{};
 
   public:
     virtual void setParameters(float* par);

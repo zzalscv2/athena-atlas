@@ -16,7 +16,7 @@ class TrkPlanarSurface;
 class TrkTrackState
 {
   public:
-    TrkTrackState();
+    TrkTrackState() = default;
     TrkTrackState(const double[5]);
     TrkTrackState(const TrkTrackState*);
     ~TrkTrackState(){};
@@ -51,13 +51,15 @@ class TrkTrackState
     }
 
   protected:
-    double m_Rk[5],m_Re[5];
-    double m_Gk[5][5],m_Ge[5][5];
-    int m_scattMode;
-    bool m_isScattered;
-    TrkPlanarSurface* m_pSurface;
-    TrkTrackState* m_pPrevState;
-    double m_A[5][5];
+    double m_Rk[5]{};
+    double m_Re[5]{};
+    double m_Gk[5][5]{};
+    double m_Ge[5][5]{};
+    int m_scattMode{0};
+    bool m_isScattered{false};
+    TrkPlanarSurface* m_pSurface{nullptr};
+    TrkTrackState* m_pPrevState{nullptr};
+    double m_A[5][5]{};
 
   private:
     void applyEnergyLoss(int);

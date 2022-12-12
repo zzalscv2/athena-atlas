@@ -19,8 +19,8 @@ class TrackFitter
     void matrixInversion5x5(double a[5][5]);
     virtual DkfTrack* createDkfTrack(const RecTrack* inputTrack);
 
-    double m_startB[3];
-    double m_endB[3];
+    double m_startB[3]{};
+    double m_endB[3]{};
     std::vector<int> m_reMapVector;
 };
 

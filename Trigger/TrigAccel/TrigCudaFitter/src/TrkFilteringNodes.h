@@ -30,10 +30,13 @@ class TrkFilteringNode1D : public TrkBaseNode
     void runKalmanFilter(TrkTrackState*);
     double calculateChi2();
 
-    double m_B[5],m_D,m_H[5],m_K[5];
-    double m_resid;
-    double m_m;
-    double m_V;
+    double m_B[5]{};
+    double m_D{};
+    double m_H[5]{};
+    double m_K[5]{};
+    double m_resid{};
+    double m_m{};
+    double m_V{};
 };
 
 class TrkFilteringNode2D : public TrkBaseNode
@@ -51,10 +54,13 @@ class TrkFilteringNode2D : public TrkBaseNode
     void runKalmanFilter(TrkTrackState*);
     double calculateChi2();
 
-    double m_B[5][2],m_D[2][2],m_H[2][5],m_K[5][2];
-    double m_resid[2];
-    double m_m[2];
-    double m_V[2][2];
+    double m_B[5][2]{};
+    double m_D[2][2]{};
+    double m_H[2][5]{};
+    double m_K[5][2]{};
+    double m_resid[2]{};
+    double m_m[2]{};
+    double m_V[2][2]{};
 };
 
 class TrkClusterNode : public TrkFilteringNode1D
