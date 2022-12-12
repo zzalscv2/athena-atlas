@@ -209,13 +209,6 @@ bool PhotonTruthTool::isQuarkBremMC
 bool PhotonTruthTool::isFinalStatePhotonMC
   (const xAOD::TruthParticle* truePart) const
 {
-  /*
-  if ( truePart == 0 ) return false ;
-  if ( truePart->genParticle()->barcode() >= 200000 ) return false ;
-  if ( truePart->genParticle()->status() != 1 ) return false ;
-  if ( truePart->pdgId() != 22 ) return false ;
-  return true ;
-  */
   return ( isFinalState(truePart) && truePart->pdgId()==22 ) ;
 }
 
