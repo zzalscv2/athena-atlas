@@ -74,6 +74,7 @@ if (NOT XAOD_STANDALONE)
     src/JetTagConditionalDecoratorAlg.cxx
     src/TrackLeptonDecoratorAlg.cxx
     src/TrackTruthDecoratorAlg.cxx
+    src/ElectronDecoratorAlg.cxx
     src/components/FlavorTagDiscriminants_entries.cxx
     LINK_LIBRARIES FlavorTagDiscriminants
     )
