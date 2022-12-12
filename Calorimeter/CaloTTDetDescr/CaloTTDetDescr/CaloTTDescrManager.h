@@ -27,7 +27,7 @@ class CaloLVL1_ID;
 *  @brief This class is used to build the CaloTTDescriptors and CaloTTDetDescrRegions
 *  carrying the geometry information of the Calorimeter Trigger Towers. 
 *
-*  It is initialized by the CaloTTMgrDetDescrCnv converter from package CaloCnv/CaloDetMgrDetDescrCnv
+*  It is initialized by the CaloTTMgrDetDescrCnv converter from package Calorimeter/CaloCnv/CaloTTDetDescrCnv
 *  
 *  @warning The hadronic part of the FCAL calorimeter calorimeter is constructed
 *   with 4 channels in eta. These 4 channels actually correspond to 2 channels in eta

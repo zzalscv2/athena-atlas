@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloDetDescr/CaloDetectorElements.h"
@@ -143,17 +143,6 @@ void EMBDetectorElement::init_description(const GeoAlignmentStore* geoAlignStore
 
 }
 
-void EMBDetectorElement::updateAlignment(EMBCellConstLink& embCell
-					 , const EMBDetectorRegion* embRegion
-					 , const CaloElementPositionShift* posShift)
-{
-  m_cell = embCell;
-  m_region = embRegion;
-  // updateAlignment() is called only from CaloAlignTool::align() callback
-  // This is why we explicitly use nullptr as first argument to init_description()
-  init_description(nullptr,posShift);
-}
-
 int EMBDetectorElement::getLayer() const
 {
   return m_region->getSamplingIndex();
@@ -277,18 +266,6 @@ void EMECDetectorElement::init_interpretation()
     else
       m_phi_raw = static_cast<float> (M_PI - (m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2.);
   }
-}
-
-void EMECDetectorElement::updateAlignment(EMECCellConstLink& emecCell
-					  , const EMECDetectorRegion* emecRegion
-					  , const CaloElementPositionShift* posShift)
-{
-  m_cell = emecCell;
-  m_region = emecRegion;
-  // updateAlignment() is called only from CaloAlignTool::align() callback
-  // This is why we explicitly use nullptr as first argument to init_description()
-  init_description(false,nullptr,posShift);
-  init_interpretation();
 }
 
 int EMECDetectorElement::getLayer() const
@@ -424,16 +401,6 @@ void HECDetectorElement::init_interpretation()
     m_phi_raw = static_cast<float> (m_phi_raw + (2.0*M_PI));
 }
 
-void HECDetectorElement::updateAlignment(HECCellConstLink& hecCell
-					 , const HECDetectorRegion* hecRegion
-					 , const CaloElementPositionShift* posShift)
-{
-  m_cell = hecCell;
-  m_region = hecRegion;
-  init_description(false,nullptr,posShift);
-  init_interpretation();
-}
-
 int HECDetectorElement::getLayer() const
 {
   return m_region->getSamplingIndex();
@@ -558,15 +525,6 @@ void FCALDetectorElement::init_description(bool isTestBeam
     fcal_deta_dphi (*this, m_deta, m_dphi);
   }
 
-}
-
-void FCALDetectorElement::updateAlignment(const FCALTile* fcalTile,
-					  const FCALModule* fcalModule,
-					  const CaloElementPositionShift* posShift)
-{
-  m_tile = fcalTile;
-  m_module = fcalModule;
-  init_description(false,nullptr,posShift);
 }
 
 int FCALDetectorElement::getLayer() const

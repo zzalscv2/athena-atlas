@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,9 +23,6 @@ in the Transient Detector Store.
 3. CaloDetDescriptor objects represent regions in the calorimeter.
 
 4. CaloDepthTool provides simplified and end-user defined quantities
-
-5. CaloAlignTool updates existing CaloDD elements and descriptors with 
-alignment information retrieved from the Conditions Database
 
 --------------------------------
   REQUIREMENTS 

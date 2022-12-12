@@ -80,8 +80,6 @@ CaloTowerBuilderToolTestAlg::make_cells()
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
   if(!caloMgrHandle.isValid()) std::abort();
   const CaloDetDescrManager* ddman = *caloMgrHandle;
-  if ( detStore()->retrieve (ddman, "CaloMgr").isFailure() )
-    std::abort();
   for (CaloCell_ID::SUBCALO subcalo : m_calos) {
     for (const CaloDetDescrElement* dde :
            ddman->element_range (subcalo))

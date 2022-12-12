@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -77,15 +77,6 @@ class EMBDetectorElement : public CaloDetDescrElement
   inline EMBCellConstLink getEMBCell() const {return m_cell;}
   
   /**
-   * @brief the method called by CaloAlignTool, updates alignment information
-   * @param embCell [IN] misaligned EMB Cell description from LArReadoutGeometry
-   * @param embRegion [IN] misaligned EMB Region description from LArReadoutGeometry
-   */
-  void updateAlignment(EMBCellConstLink& embCell
-		       , const EMBDetectorRegion* embRegion
-		       , const CaloElementPositionShift* posShift = nullptr);
-
-  /**
    * @brief get layer
    */
   virtual int getLayer() const override;
@@ -148,15 +139,6 @@ class EMECDetectorElement : public CaloDetDescrElement
    * @brief EMEC Cell description from LArReadoutGeometry
    */
   inline EMECCellConstLink getEMECCell() const {return m_cell;}
-
-  /**
-   * @brief the method called by CaloAlignTool, updates alignment information
-   * @param emecCell [IN] misaligned EMEC Cell description from LArReadoutGeometry
-   * @param emecRegion [IN] misaligned EMEC Region description from LArReadoutGeometry
-   */
-  void updateAlignment(EMECCellConstLink& emecCell
-		       , const EMECDetectorRegion* emecRegion
-		       , const CaloElementPositionShift* posShift = nullptr);
 
   /**
    * @brief get layer
@@ -232,15 +214,6 @@ class HECDetectorElement : public CaloDetDescrElement
   inline HECCellConstLink getHECCell() const {return m_cell;}
 
   /**
-   * @brief the method called by CaloAlignTool, updates alignment information
-   *  @param hecCell [IN] misaligned HEC Cell description from LArReadoutGeometry
-   *  @param hecRegion [IN] misaligned HEC Region description from LArReadoutGeometry
-   */
-  void updateAlignment(HECCellConstLink& hecCell
-		       , const HECDetectorRegion* hecRegion
-		       , const CaloElementPositionShift* posShift = nullptr);
-
-  /**
    * @brief get layer
    */
   virtual int getLayer() const override;
@@ -311,15 +284,6 @@ class FCALDetectorElement : public CaloDetDescrElement
    * @brief FCAL Tile description from LArReadoutGeometry
    */
   inline const FCALTile* getFCALTile() const {return m_tile;}
-
-  /**
-   * @brief the method called by CaloAlignTool, updates alignment information
-   * @param fcalTile [IN] misaligned FCAL Tile description from LArReadoutGeometry
-   * @param fcalModule [IN] misaligned FCAL Module description from LArReadoutGeometry
-   */
-  void updateAlignment(const FCALTile* fcalTile
-		       , const FCALModule* fcalModule
-		       , const CaloElementPositionShift* posShift = nullptr);
 
   /**
    * @brief get layer
