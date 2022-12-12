@@ -6,7 +6,8 @@
 
 
 //____________________________________________________________________
-HistValProfile::HistValProfile( const std::string& name, const std::string& title,
+HistValProfile::HistValProfile( bool trigger_conversion_all,
+                                const std::string& name, const std::string& title,
                                 int nbins, const double& xmin, const double& xmax,
                                 const double& profparmin, const double& profparmax )
   : HistValBase()
@@ -15,21 +16,22 @@ HistValProfile::HistValProfile( const std::string& name, const std::string& titl
   m_h2 = TProfile_LW::create(name.c_str(),title.c_str(),nbins,xmin,xmax,profparmin,profparmax,profile_test_erroroption());
   compareMetaData();
 
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 
 
 //____________________________________________________________________
 template <class TFloat>
-HistValProfile::HistValProfile( const std::string& name, const std::string& title,
+HistValProfile::HistValProfile( bool trigger_conversion_all,
+                                const std::string& name, const std::string& title,
                                 int nbins, const TFloat* xbins )
   : HistValBase()
 {
   m_h1 = new TProfile(name.c_str(),title.c_str(),nbins,xbins,profile_test_erroroption());
   m_h2 = TProfile_LW::create(name.c_str(),title.c_str(),nbins,xbins,profile_test_erroroption());
   compareMetaData();
-  if (HistVal_trigger_conversion_all)
+  if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }
 

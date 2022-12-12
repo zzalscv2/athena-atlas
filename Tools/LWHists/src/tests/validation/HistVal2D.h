@@ -22,22 +22,26 @@ class HistVal2D : public HistValBase {
 public:
   typedef typename THLW_2D::bin_type_t bin_type_t;
 
-  HistVal2D( const std::string& name, const std::string& title,
+  HistVal2D( bool trigger_conversion_all,
+             const std::string& name, const std::string& title,
              int nbinsx, const double& xmin, const double& xmax,
              int nbinsy, const double& ymin, const double& ymax );
 
   template <class TFloat>
-  HistVal2D( const std::string& name, const std::string& title,
+  HistVal2D( bool trigger_conversion_all,
+             const std::string& name, const std::string& title,
              int nbinsx, const TFloat* xbins,
              int nbinsy, const TFloat* ybins );
 
   template <class TFloat>
-  HistVal2D( const std::string& name, const std::string& title,
+  HistVal2D( bool trigger_conversion_all,
+             const std::string& name, const std::string& title,
              int nbinsx, const TFloat* xbins,
              int nbinsy, const double& ymin, const double& ymax );
 
   template <class TFloat>
-  HistVal2D( const std::string& name, const std::string& title,
+  HistVal2D( bool trigger_conversion_all,
+             const std::string& name, const std::string& title,
              int nbinsx, const double& xmin, const double& xmax,
              int nbinsy, const TFloat* ybins );
 
