@@ -224,10 +224,8 @@ StatusCode NoiseStudy::execute(const EventContext& context) const{
 		}
 	}
 	
-        int c = 0;
         size_t el_etas_size = el_etas.size();
         for(auto scell : *scells) {
-		c++;
 		float c_eta ( scell->eta() );
 		float c_phi ( scell->phi() );
 		bool inconeFinal=false;
