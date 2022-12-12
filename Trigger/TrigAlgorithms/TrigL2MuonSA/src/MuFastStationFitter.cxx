@@ -777,7 +777,7 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
 
         if (hitarray.size()==0) continue;
 
-	for (itMdtHit=mdtSegment->begin(); itMdtHit!=mdtSegment->end(); itMdtHit++) { // loop for MDT hit 
+	for (itMdtHit=mdtSegment->begin(); itMdtHit!=mdtSegment->end(); ++itMdtHit) { // loop for MDT hit
 
           int hit_index = std::distance(mdtSegment->begin(),itMdtHit);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuFastTrackExtrapolator.h"
@@ -35,27 +35,26 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
   
   StatusCode sc = StatusCode::SUCCESS;
   
-  std::vector<TrigL2MuonSA::TrackPattern>::iterator itTrack;
-  for (itTrack=v_trackPatterns.begin(); itTrack!=v_trackPatterns.end(); itTrack++) {
+  for (TrigL2MuonSA::TrackPattern& track : v_trackPatterns) {
 
-    int inner = (itTrack->s_address==-1)? xAOD::L2MuonParameters::Chamber::EndcapInner:
+    const int inner = (track.s_address==-1)? xAOD::L2MuonParameters::Chamber::EndcapInner:
       xAOD::L2MuonParameters::Chamber::BarrelInner;
 
     xAOD::L2StandAloneMuon* muonSA = new xAOD::L2StandAloneMuon();
     muonSA->makePrivateStore();
-    muonSA->setSAddress(itTrack->s_address);
-    muonSA->setPt((itTrack->pt)*(itTrack->charge));
-    muonSA->setEtaMS(itTrack->etaMap);
-    muonSA->setPhiMS(itTrack->phiMS);
-    muonSA->setRMS(itTrack->superPoints[inner].R);
-    muonSA->setZMS(itTrack->superPoints[inner].Z);
+    muonSA->setSAddress(track.s_address);
+    muonSA->setPt(track.pt*track.charge);
+    muonSA->setEtaMS(track.etaMap);
+    muonSA->setPhiMS(track.phiMS);
+    muonSA->setRMS(track.superPoints[inner].R);
+    muonSA->setZMS(track.superPoints[inner].Z);
 
     double etaVtx = 0.;
     double phiVtx = 0.;
     double sigEta = 0.;
     double sigPhi = 0.;
 
-    double eptinv = getMuFastRes(m_muFastRes_barrel, (itTrack->pt)*(itTrack->charge), itTrack->s_address, itTrack->etaMap, itTrack->phiMS);
+    const double eptinv = getMuFastRes(m_muFastRes_barrel, track.pt*track.charge, track.s_address, track.etaMap, track.phiMS);
 
     if (m_backExtrapolatorTool) {
 
@@ -66,8 +65,8 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
               << "Pt of Muon Feature out of BackExtrapolator range.");
         ATH_MSG_DEBUG ("Use Muon Feature position to fill the "
 		       << "TrigRoiDescriptor for IDSCAN.");
-        etaVtx = itTrack->etaMap;
-        phiVtx = itTrack->phiMS;
+        etaVtx = track.etaMap;
+        phiVtx = track.phiMS;
       }
 
     } else {
@@ -77,11 +76,11 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
 
     }
 
-    itTrack->deltaPt     = (eptinv!=0.)? eptinv * (itTrack->pt) * (itTrack->pt): 1.0e10;
-    itTrack->etaVtx      = etaVtx;
-    itTrack->phiVtx      = phiVtx;
-    itTrack->deltaEtaVtx = sigEta;
-    itTrack->deltaPhiVtx = sigPhi;
+    track.deltaPt     = (eptinv!=0.)? eptinv * track.pt * track.pt: 1.0e10;
+    track.etaVtx      = etaVtx;
+    track.phiVtx      = phiVtx;
+    track.deltaEtaVtx = sigEta;
+    track.deltaPhiVtx = sigPhi;
 
     if (muonSA) delete muonSA;
   }
@@ -93,13 +92,7 @@ StatusCode TrigL2MuonSA::MuFastTrackExtrapolator::extrapolateTrack(std::vector<T
 
 void TrigL2MuonSA::MuFastTrackExtrapolator::setMuFastRes(std::vector<double>& vec, double p1,double p2,
                                                          double p3,double p4,double p5,double p6) {
-  vec.clear();
-  vec.push_back(p1);
-  vec.push_back(p2);
-  vec.push_back(p3);
-  vec.push_back(p4);
-  vec.push_back(p5);
-  vec.push_back(p6);
+  vec = {p1, p2, p3, p4, p5, p6};
 }
 
 // --------------------------------------------------------------------------------

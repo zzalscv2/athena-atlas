@@ -93,7 +93,7 @@ int  TrigL2MuonSA::RpcPatFinder::patfinder_forEta(bool iphi,
 			     double result_aw[],
 			     double result_bw[],
 			     double result_dist[],
-                             const TrigL2MuonSA::RpcLayerHits rpcLayerHits) const {
+			     const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const {
   
   const std::vector<std::list<double>> *  rpc_x;
   rpc_x = &rpcLayerHits.hits_in_layer_eta;
@@ -114,7 +114,7 @@ int  TrigL2MuonSA::RpcPatFinder::patfinder_forEta(bool iphi,
     for(int i=0; i<8; i++) index[i]=0;
 
     // Loop on hits of start layer, for each hit try a new pattern
-    for (std::list<double>::const_iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); i_start++){
+    for (std::list<double>::const_iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); ++i_start){
       int n_hits=1;
       unsigned int pat=(1<<l_start); // bit pattern of hit layers
       double dMO=9999; // disstance middle-outer station
@@ -134,7 +134,7 @@ int  TrigL2MuonSA::RpcPatFinder::patfinder_forEta(bool iphi,
 	double x_layer=0;
 	double delta_layer=999;
 	//  loop on hits of test layer and picks the one with smaller distance from current_x
-	for (std::list<double>::const_iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); i_test++){ 
+	for (std::list<double>::const_iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); ++i_test){
 	  double delta=-1;
 	  // check if within the road
 	  if (deltaOK(l_current,l_test,current_x,*i_test,iphi,delta)){
@@ -202,7 +202,7 @@ int  TrigL2MuonSA::RpcPatFinder::patfinder(bool iphi,
 			     double &result_x,
 			     double &result_x1,
 			     double &result_dMO, 
-                             const TrigL2MuonSA::RpcLayerHits rpcLayerHits) const{
+			     const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
   
   const int N_layers=8;
 
@@ -228,7 +228,7 @@ int  TrigL2MuonSA::RpcPatFinder::patfinder(bool iphi,
   // Loop on start layer
   for (int l_start=0; l_start<=l_start_max; l_start++){
     // Loop on hits of start layer, for each hit try a new pattern
-    for (std::list<double>::const_iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); i_start++){
+    for (std::list<double>::const_iterator i_start=rpc_x->at(l_start).begin(); i_start!=rpc_x->at(l_start).end(); ++i_start){
       int n_hits=1;
       unsigned int pat=(1<<l_start); // bit pattern of hit layers
       double dMO=9999; // disstance middle-outer station
@@ -246,7 +246,7 @@ int  TrigL2MuonSA::RpcPatFinder::patfinder(bool iphi,
 	double x_layer=0;
 	double delta_layer=999;
 	//  loop on hits of test layer and picks the one with smaller distance from current_x
-	for (std::list<double>::const_iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); i_test++){ 
+	for (std::list<double>::const_iterator i_test=rpc_x->at(l_test).begin(); i_test!=rpc_x->at(l_test).end(); ++i_test){
 	  double delta=-1;
 	  // check if within the road
 	  if (deltaOK(l_current,l_test,current_x,*i_test,iphi,delta)){
@@ -412,7 +412,7 @@ void TrigL2MuonSA::RpcPatFinder::abcal(unsigned int result_pat,
                                        size_t index[], 
                                        double aw[], 
                                        double bw[],
-                                       const TrigL2MuonSA::RpcLayerHits rpcLayerHits) const{
+                                       const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const{
   const float ZERO_LIMIT = 1.e-5;
 
   const std::vector<std::vector<double> > * rpc_R;
