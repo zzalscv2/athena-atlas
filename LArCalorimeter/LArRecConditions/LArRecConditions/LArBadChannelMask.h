@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARBADCHANNEL_LARBADCHANNELMASK_H
@@ -7,8 +7,8 @@
 
 //#include "CaloIdentifier/CaloGain.h"           
 #include "Identifier/HWIdentifier.h" 
-#include "LArRecConditions/LArBadChannelEnum.h"
 #include "LArRecConditions/LArBadChannelCont.h"
+#include "LArRecConditions/LArBadChanBitPacking.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/StatusCode.h"
 #include <vector>
@@ -17,6 +17,8 @@
 
 class LArBadChannelMask {
  public:
+  LArBadChannelMask(bool isSC=false):m_isSC(isSC){};
+
   StatusCode buildBitMask(const std::vector<std::string>& problemsToMask, MsgStream& msg);
 
 
@@ -25,8 +27,10 @@ class LArBadChannelMask {
 
  private:
   const static LArBadChanBitPacking  s_bitPacking; // A helper for bit operations, etc.
-  typedef LArBadChannelEnum::BitWord BitWord;
+  const static LArBadChanSCBitPacking  s_bitSCPacking; // A helper for bit operations, etc.
+  typedef LArBadChannel::BitWord BitWord;
   BitWord  m_bitMask=0x0;  // The list of problems in bit form.
+  bool     m_isSC;
 };
 
 

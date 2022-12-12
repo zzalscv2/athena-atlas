@@ -18,6 +18,7 @@
 
 #ifndef LARCALIBDIGITSACCUMULATOR
 #define LARCALIBDIGITSACCUMULATOR
+#include <sstream>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -36,7 +37,7 @@ public:
   LArCalibDigitsAccumulator (const std::string& name, ISvcLocator* pSvcLocator);
   StatusCode initialize();
   StatusCode execute();
-  StatusCode finalize(){return StatusCode::SUCCESS;}
+  StatusCode finalize();
 
  /** 
    * @brief Class of intermediate accumulations.
@@ -47,13 +48,16 @@ public:
   class LArAccumulated{
   public:
     unsigned int m_ntrigger;
+    int m_nused;
+    unsigned int m_onlineId;
     std::vector< uint64_t > m_sum;
     std::vector< uint64_t > m_sum2;
-    LArAccumulated() : m_ntrigger(0) {};
+    LArAccumulated() : m_ntrigger(0), m_nused(0), m_onlineId(0) {};
   };
 
 private:
 
+  std::string getPatternName(std::string gain, bool isPulsed, int delay, int dac);
 
   ToolHandle<ICaloSuperCellIDTool> m_sc2ccMappingTool;
 
@@ -68,9 +72,6 @@ private:
 
   const LArOnlineID_Base* m_onlineHelper;
 
-  typedef std::vector<LArAccumulatedCalibDigit*> ACCUMDIGIT_VEC;
-  ACCUMDIGIT_VEC m_my_vec;
-
  /** 
    * @brief Store delay.
    * */
@@ -79,7 +80,7 @@ private:
  /** 
    * @brief LArAccumulatedCalibDigitContainer name.
    * */
-  std::string m_calibAccuDigitContainerName;
+  std::string m_calibAccuDigitContainerName;  // do we need this?
 
  /** 
    * @brief list of key for input digit container (=gain)
@@ -97,38 +98,39 @@ private:
   double m_delayScale;
 
  /** 
-   * @brief Tells you wether you keep only pulsed cells or all cells
+   * @brief Tells you whether you keep only pulsed cells or all cells
    * */
   bool m_keepPulsed;
 
  /** 
-   * @brief Tells you wether you run on SuperCells or Cells
+   * @brief Tells you whether you run on SuperCells or Cells
    * */
   bool m_isSC;
 
  /** 
-   * @brief Tells you wether you keep only fully pulsed supercells or all supercells
+   * @brief Tells you whether you keep only fully pulsed supercells or all supercells
    * */
   bool m_keepFullyPulsedSC;
 
-
  /** 
+   * @brief Percentage of the used triggers that we will skip over at the end, in order ot ensure that the accumulation is done, even if there are lots of missing events from SC
+   * */
+  double m_DropPercentTrig;
+  
+  /** 
    * @brief Vector (index=hash ID) of accumulation quantities
    * */
-  std::vector<LArAccumulated> m_Accumulated;
-
- /** 
+  std::map<std::string, std::vector<LArAccumulated> > m_Accumulated_map;
+  
+  /** 
    * @brief Event counter
    * */
   unsigned int m_event_counter;
   unsigned int m_eventNb = 0U;
 
-  // Information to remove certain readings if needed
-  std::map<std::string, std::map<int,std::vector<int>*>*>           m_readingsMap;
-  std::map<std::string, std::map<int,std::vector<int>*>*>::iterator m_readingsMap_it;
-  std::map<int, std::vector<int>*>::iterator                        m_channelMap_it;
-
-
+  /** 
+   * @brief Samples to shift by, usually used in the case of SCs
+   * */
   int m_sampleShift;
 };
 

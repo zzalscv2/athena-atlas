@@ -2,9 +2,10 @@
 
 if [[ $# < 4 ]] || [[ $# > 8 ]];
 then
-    echo "Syntax: $0 [-append] [-openiov] <tag> <Run1> <LB1>  <File> [Run2] [LB2]"
+    echo "Syntax: $0 [-append] [-openiov] [-supercell] <tag> <Run1> <LB1>  <File> [Run2] [LB2]"
     echo "optional -append is adding the content of File to a DB"
     echo "optional -openiov is updating UPD4 with open end IOV, if Run2/LB2 is not given" 
+    echo "optional -supercell is working for SC folders/tags"
     echo "<tag> can be 'UPD1', 'UPD4', 'UPD3' or 'BOTH' or 'All' or 'Bulk'.  'BOTH' means UPD1 and UPD4, UPD4 update is automatically updating also Bulk. All means UPD1,UPD3 and UPD4 with Bulk. Bulk is updating only Bulk"
     echo "<Run1> <LB1> are start IOV (for UPD4/Bulk)"
     echo "<File> is text file with changed channels, each line should have: B/E pos_neg FT Slot Channel CalibLine BadBitDescription"
@@ -14,15 +15,6 @@ fi
 
 
  
-
-echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannels...."
-fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
-upd4TagName=`echo $fulltag | grep -o "RUN2-UPD4-[0-9][0-9]"` 
-echo "Found UPD4 $upd4TagName"
-upd1TagName="RUN2-UPD1-00"
-BulkTagName="RUN2-Bulk-00"
-upd3TagName="RUN2-UPD3-00"
-
 outputSqlite="BadChannels.db"
 outputSqliteOnl="BadChannelsOnl.db"
 summaryFile="LArBuildBadChannelDB.summary.txt"
@@ -43,6 +35,34 @@ then
     shift
 else
     openiov=0
+fi
+
+if [ $1 == "-supercell" ]
+then
+    echo "Working on SC"
+    issc=1
+    shift
+else
+    issc=0
+fi
+
+if [ $issc == 0 ]
+then
+   echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannels...."
+   fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
+   upd4TagName=`echo $fulltag | grep -o "RUN2-UPD4-[0-9][0-9]"` 
+   echo "Found UPD4 $upd4TagName"
+   upd1TagName="RUN2-UPD1-00"
+   BulkTagName="RUN2-Bulk-00"
+   upd3TagName="RUN2-UPD3-00"
+else   
+   echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannelsSC...."
+   fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
+   upd4TagName=`echo $fulltag | grep -o "RUN3-UPD4-[0-9][0-9]"` 
+   echo "Found UPD4 $upd4TagName"
+   upd1TagName="RUN3-UPD1-00"
+   BulkTagName="RUN3-Bulk-00"
+   upd3TagName="RUN3-UPD3-00"
 fi
 
 tag=$1
@@ -69,8 +89,8 @@ elif [ $tag == "BOTH" ]
     tags="${upd1TagName} ${upd4TagName}"
 elif [ $tag == "All" ]
     then
-    echo "Working on UPD1, UPD3 and UPD4 lists"
-    tags="${upd1TagName} ${upd3TagName} ${upd4TagName}"
+    echo "Working on UPD1, UPD3, Bulk and UPD4 lists"
+    tags="${upd1TagName} ${upd3TagName} ${BulkTagName} ${upd4TagName}"
 else
     echo "ERROR, expected 'UPD1', 'UPD4' or 'BOTH' or 'All' or 'Bulk' or 'UPD3' as type, got: $tag"
     exit
@@ -209,9 +229,15 @@ do
 
 
   echo "Running athena to read current database content...with run number " $runnumber
-  athena.py -c "IOVEndRun=$runnumber;OutputFile=\"${oldTextFile}\";tag=\"LARBadChannelsOflBadChannels-${t}\"" LArBadChannelTool/LArBadChannel2Ascii.py > oracle2ascii_$t.log 2>&1
+  if [ $issc == 1 ]
+  then
+     athena.py -c "sqlite=\"BadChannelsSC.db\";IOVEndRun=$runnumber;OutputFile=\"${oldTextFile}\";tag=\"LARBadChannelsOflBadChannelsSC-${t}\";folderStr=\"/LAR/BadChannelsOfl/BadChannelsSC\";isSC=True" LArBadChannelTool/LArBadChannel2Ascii.py > oracle2ascii_$t.log 2>&1
+  else   
+     athena.py -c "IOVEndRun=$runnumber;OutputFile=\"${oldTextFile}\";tag=\"LARBadChannelsOflBadChannels-${t}\"" LArBadChannelTool/LArBadChannel2Ascii.py > oracle2ascii_$t.log 2>&1
+  fi   
+
   if [ $? -ne 0 ];  then
-      echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_$t.log!"
+      echo "Athena reported an error reading oracle ! Please check oracle2ascii_$t.log!"
       exit
   fi
 
@@ -245,6 +271,10 @@ do
       fi  
   fi
   prefix="${prefix}sqlite=\"${outputSqlite}\";TagPostfix=\"-$t\";InputFile=\"${inputTextFile}\""
+  if [ $issc == 1 ]
+  then
+     prefix="${prefix};isSC=True;Folder=\"/LAR/BadChannelsOfl/BadChannelsSC\";"
+  fi
   echo "Running athena to build sqlite database file ..."
   echo $t $prefix
   athena.py -c $prefix LArBadChannelTool/LArBadChannelDBAlg.py > ascii2sqlite_$t.log 2>&1
@@ -281,7 +311,13 @@ do
           prefix="IOVEndRun=${runnumber};IOVEndLB=$[ $lbnumber + 1 ];"
         fi  
   fi  
-  athena.py -c"${prefix}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";tag=\"LARBadChannelsOflBadChannels-${t}\"" LArBadChannelTool/LArBadChannel2Ascii.py > sqlite2ascii_$t.log 2>&1
+  if [ $issc == 1 ]
+  then
+     prefix="${prefix}tag=\"LARBadChannelsOflBadChannelsSC-${t}\";isSC=True;folderStr=\"/LAR/BadChannelsOfl/BadChannelsSC\";"
+  else   
+     prefix="${prefix}tag=\"LARBadChannelsOflBadChannels-${t}\""
+  fi
+  athena.py -c"${prefix}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";" LArBadChannelTool/LArBadChannel2Ascii.py > sqlite2ascii_$t.log 2>&1
 
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii_$t.log!"

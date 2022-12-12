@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-def LArBadChannelAccess(algname="LArBadChannelCondAlg",dbString=None):
+def LArBadChannelAccess(algname="LArBadChannelCondAlg",dbString=None, isSC=False):
     from AthenaCommon.AlgSequence import AthSequencer
     condSeq = AthSequencer("AthCondSeq")
 
@@ -35,6 +35,10 @@ def LArBadChannelAccess(algname="LArBadChannelCondAlg",dbString=None):
     from LArBadChannelTool.LArBadChannelToolConf import LArBadChannelCondAlg
     theLArBadChannelCondAlg=LArBadChannelCondAlg(algname)
     theLArBadChannelCondAlg.ReadKey=foldername
+    theLArBadChannelCondAlg.isSC=isSC
+    if isSC:
+       theLArBadChannelCondAlg.WriteKey="LArBadChannelSC"
+       theLArBadChannelCondAlg.CablingKey="LArOnOffIdMapSC"
     condSeq+=theLArBadChannelCondAlg
     return
 

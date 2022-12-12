@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -19,10 +19,8 @@ public:
   LArBadChannel2Ascii(const std::string& name, ISvcLocator* pSvcLocator);
   ~LArBadChannel2Ascii();
 
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
-  StatusCode stop();
+  virtual StatusCode initialize() final;
+  virtual StatusCode execute() final;
 
 private:
 
@@ -35,6 +33,7 @@ private:
   std::string                  m_executiveSummaryFile;
   bool                         m_wMissing;
   bool                         m_skipDisconnected;
+  bool                         m_isSC;
 
   enum DetPart {
     EMB=0,

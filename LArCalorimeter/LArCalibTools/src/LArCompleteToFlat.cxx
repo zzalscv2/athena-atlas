@@ -53,6 +53,7 @@ LArCompleteToFlat::LArCompleteToFlat( const std::string& name,
   declareProperty("RampInput",m_RampInput);//="LArRamp");
   declareProperty("MphysOverMcalInput",m_MphysOverMcalInput);//="LArMphysOverMcal");
   declareProperty("OFCInput",m_OFCInput);//="LArOFC");
+  declareProperty("OFCCaliInput",m_OFCCaliInput);//="LArOFC");
   declareProperty("ShapeInput",m_ShapeInput);//="LArShape");
   declareProperty("DSPThresholdsInput",m_DSPThresholdsInput);//="LArDSPThresholds");
   declareProperty("NameOfSet",m_nameOfSet); // for DSPThreshold
@@ -219,14 +220,19 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
   spec->extend<unsigned>("nSamples");
   spec->extend<unsigned>("version");
   CondAttrListCollection* collOFC=new CondAttrListCollection(true);
-  
+  int phase = 0;
   for (unsigned gain=0;gain<3;++gain) {
-
+    
     //Auto-detect the number of samples (at least in theory, could be different for each gain)
     unsigned nSamples=0;
     for (unsigned hs=0;hs<m_hashMax && nSamples==0;++hs) {
       const HWIdentifier chid=m_onlineID->channel_Id(hs);
       LArOFCFlat::OFCRef_t ofca= input->OFC_a(chid,gain);
+      if ( input->nTimeBins(chid,gain) > 23 ){
+	phase = 23;
+	ofca = input->OFC_a(chid,gain,phase);
+      }
+	
       nSamples=ofca.size();
     }
     if (nSamples==0) {
@@ -252,12 +258,12 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
     float* pTimeOffset=static_cast<float*>(toBlob.startingAddress());
     for (unsigned hs=0;hs<m_hashMax;++hs) {
       const HWIdentifier chid=m_onlineID->channel_Id(hs);
-      LArOFCFlat::OFCRef_t ofca= input->OFC_a(chid,gain);
-      LArOFCFlat::OFCRef_t ofcb= input->OFC_b(chid,gain);
+      LArOFCFlat::OFCRef_t ofca= input->OFC_a(chid,gain,phase);
+      LArOFCFlat::OFCRef_t ofcb= input->OFC_b(chid,gain,phase);
       float timeOffset=input->timeOffset(chid,gain);
       if (ofca.size()==0 && gain==2 && m_fakeEMBPSLowGain) {
-	ofca= input->OFC_a(chid,1);
-	ofcb= input->OFC_b(chid,1);
+	ofca= input->OFC_a(chid,1,phase);
+	ofcb= input->OFC_b(chid,1,phase);
 	timeOffset=input->timeOffset(chid,1);
 	++nCopiedEMPS;
       }
@@ -287,7 +293,7 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
 	message <<"Number of samples don't match. Expect " << nSamples << ", got " << ofcb.size() << "."; 
 	errIfConnected(chid,gain,"OFCb", message.str().c_str());
 	for (unsigned i=0;i<nSamples;++i) {
-	  pOfcb[hs*nSamples+i]=0.0;
+	  pOfcb[hs*nSamples+i]=1.0;
 	}
       }
       pTimeOffset[hs]=timeOffset;
@@ -764,25 +770,23 @@ StatusCode LArCompleteToFlat::stop() {
       }
     } else {
       ofcFlat(ofcComplete,flatName+"/OFC");
-      /*  
-      CondAttrListCollection* coll=ofcFlat(ofcComplete,"/LAR/ElecCalibFlat/OFC");
-      
-	LArOFCFlat* of=new LArOFCFlat(coll);
-     
-	sc=detStore()->record(of,"OFCFlat");
-	if (sc.isFailure()) {
-	ATH_MSG_ERROR( "Failed to record LArOFCFlat" );
-	}
-   
-	ILArOFC* iofc=of;
-	sc=detStore()->symLink(of,iofc);
-	if (sc.isFailure()) {
-	ATH_MSG_ERROR( "Failed to symlink LArOFCFlat" );
-	}
-      */
     }
   }//end have m_OFCInput
+  if (m_OFCCaliInput.size()) {
+    const LArOFCComplete* ofcComplete;
+    sc=detStore()->retrieve(ofcComplete,m_OFCCaliInput);
+    if (sc.isFailure()) {
+      if(m_forceStop) { 
+	ATH_MSG_ERROR( "Failed to get LArOFCComplete object (cali)" );
+	return sc;
+      } else {
+	ATH_MSG_WARNING( "Will not process LArOFCComplete (cali)" );
+      }
+    } else {
+      ofcFlat(ofcComplete,flatName+"/OFCCali");
 
+    }
+  }//end have m_OFCInput
   //Shape:
   if (m_ShapeInput.size()) {
     const LArShapeComplete* shapeComplete;
