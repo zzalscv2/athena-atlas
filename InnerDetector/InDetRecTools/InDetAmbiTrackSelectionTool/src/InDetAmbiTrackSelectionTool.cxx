@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -80,7 +80,6 @@ std::tuple<Trk::Track*,bool> InDet::InDetAmbiTrackSelectionTool::getCleanedOutTr
   // some counters used in the logic
   int  numUnused         = 0;
   int  numTRT_Unused     = 0;
-  int  numPseudo         = 0;
   int  numShared         = 0;
   int  numWeightedShared = 0;
   bool thishasblayer     = false;
@@ -179,7 +178,6 @@ std::tuple<Trk::Track*,bool> InDet::InDetAmbiTrackSelectionTool::getCleanedOutTr
       const Trk::PseudoMeasurementOnTrack* pseudo = dynamic_cast <const Trk::PseudoMeasurementOnTrack*> (meas);
       if (pseudo){
         ATH_MSG_VERBOSE ("-> Copy pseudo measurement");
-        numPseudo++; // increase counter
       } else {
         ATH_MSG_WARNING ("-> Measurement is not a pseudo measurment, not yet supported, try to copy !");
       }
