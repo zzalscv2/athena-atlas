@@ -192,7 +192,6 @@ StatusCode ZeeTaPMonTool::fillHistograms()
   ATH_MSG_DEBUG("Number of electrons: " << electron_container->size());
 
   int ngood_el = 0;
-  int n_tot = 0;
   float lead_et=-999;
   float subl_et=-999;
   const xAOD::Electron *lead_el = nullptr;
@@ -275,7 +274,6 @@ StatusCode ZeeTaPMonTool::fillHistograms()
   
   // If leading electron is LHTight use subleading as probe
   if(lead_isLHTight) { 
-    ++n_tot;
     m_hNZcandidates->Fill(lead_eta);
     EventZcandidateUsed = true;
     // Isolation Energy 
@@ -288,7 +286,6 @@ StatusCode ZeeTaPMonTool::fillHistograms()
   
   // If subleading electron is LHTight use leading as probe
   if(subl_isLHTight) { 
-    ++n_tot;
     if (!EventZcandidateUsed) m_hNZcandidates->Fill(subl_eta);
     // Isolation Energy 
     float topoetcone40;

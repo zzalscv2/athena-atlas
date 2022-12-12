@@ -66,7 +66,7 @@ class PrepRawData : public Trk::ObjectCounter<Trk::PrepRawData>
 public:
   /** public because of DataPool*/
   PrepRawData();
-  PrepRawData(const PrepRawData&);
+  PrepRawData(const PrepRawData&) = default;
   PrepRawData(PrepRawData&&) noexcept = default;
   PrepRawData& operator=(const PrepRawData&) = default;
   PrepRawData& operator=(PrepRawData&&) noexcept = default;

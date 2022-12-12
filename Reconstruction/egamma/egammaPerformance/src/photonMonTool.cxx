@@ -723,7 +723,7 @@ StatusCode photonMonTool::fillHistograms() {
     if (!((*ph_iter)->author(xAOD::EgammaParameters::AuthorPhoton)|| (*ph_iter)->author(xAOD::EgammaParameters::AuthorAmbiguous))) continue;
 
     //reject photons outside the kinematic acceptance
-    if (!((*ph_iter)->pt()> 7000. || fabs((*ph_iter)->eta()) < 2.47 )) continue;
+    if ((*ph_iter)->pt()<= 7000. && std::abs((*ph_iter)->eta()) >= 2.47 ) continue;
 
     // Check what photon is being processed
     bool isGood;

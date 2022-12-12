@@ -60,7 +60,7 @@ Trk::Segment::Segment(Trk::Segment&& seg) noexcept
 }
 
 // destructor - child save
-Trk::Segment::~Segment() {}
+Trk::Segment::~Segment() = default;
 
 // assignment operator
 Trk::Segment&

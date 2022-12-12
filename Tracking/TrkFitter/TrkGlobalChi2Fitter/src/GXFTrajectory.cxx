@@ -248,14 +248,9 @@ namespace Trk {
       }
     } else {
       m_states.insert(m_states.begin() + index, std::move(state));
-      int previousscats = 0;
       int previousbrems = 0;
       
       for (int i = 0; i < index; i++) {
-        if (m_states[i]->getStateType(TrackStateOnSurface::Scatterer)) {
-          previousscats++;
-        }
-        
         if ((m_states[i]->materialEffects() != nullptr)
             && m_states[i]->materialEffects()->sigmaDeltaE() > 0) {
           previousbrems++;
