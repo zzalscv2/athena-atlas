@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import sys
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
@@ -83,8 +83,8 @@ def fromRunArgs(runArgs):
         if ConfigFlags.HGTD.Geometry.useGeoModelXml:
             from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
         else:
-            from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg    
-    cfg.merge(HGTD_ReadoutGeometryCfg(ConfigFlags))
+            from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+        cfg.merge(HGTD_ReadoutGeometryCfg(ConfigFlags))
 
     if ConfigFlags.Detector.EnableLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
