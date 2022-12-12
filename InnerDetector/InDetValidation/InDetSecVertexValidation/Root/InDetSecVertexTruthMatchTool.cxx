@@ -285,7 +285,6 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
   //weights from each TruthVertex
   //=============================================================================
   size_t vtxEntry = 0;
-  unsigned int n_vx_with_bad_links = 0;
 
   for ( const xAOD::Vertex* vtx : vtxContainer ) {
 
@@ -323,14 +322,12 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
     float otherPt = 0;
     float fakePt = 0;
 
-    unsigned vx_n_bad_links = 0;
     //loop over the tracks in the vertex
     for ( size_t t = 0; t < ntracks; ++t ) {
 
       ATH_MSG_DEBUG("Checking track number " << t);
 
       if (!trkParts[t].isValid()) {
-         ++vx_n_bad_links;
          ATH_MSG_DEBUG("Track " << t << " is bad!");
          continue;
       }
@@ -388,9 +385,7 @@ StatusCode InDetSecVertexTruthMatchTool::matchVertices( const xAOD::VertexContai
       }
     }//end loop over tracks in vertex
 
-    if (vx_n_bad_links>0) {
-       ++n_vx_with_bad_links;
-    }
+    
 
     // normalize by total weight and pT
     std::for_each( matchinfo.begin(), matchinfo.end(), [&](VertexTruthMatchInfo& link)
