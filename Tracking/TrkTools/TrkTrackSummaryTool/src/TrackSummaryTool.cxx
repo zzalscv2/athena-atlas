@@ -293,7 +293,6 @@ Trk::TrackSummaryTool::processTrackStates(
   bool doHolesInDet,
   bool doHolesMuon) const
 {
-  int measCounter = 0;
   int cntAddChi2 = 0;
   float chi2Sum = 0;
   float chi2Sum2 = 0;
@@ -305,7 +304,6 @@ Trk::TrackSummaryTool::processTrackStates(
       trackState.type(Trk::TrackStateOnSurface::Measurement);
     const auto isOutlier = trackState.type(Trk::TrackStateOnSurface::Outlier);
     if (isMeasurement or isOutlier) {
-      ++measCounter;
       const Trk::MeasurementBase* measurement = trackState.measurementOnTrack();
       if (!measurement) {
         ATH_MSG_WARNING("measurementOnTrack == null for a TrackStateOnSurface "

@@ -217,9 +217,6 @@ InDet::TRT_LayerBuilderCond::cylindricalLayers(const EventContext& ctx,
     return nullptr;
   }
 
-  // ilay - for accessing the straw layers and for material decission
-  int ilay = 0;
-
   //  fix the positions where the layers are - these are used for the model geometry and the complex geometry ---------------
   std::vector<double> layerRadii;
   layerRadii.reserve(m_modelBarrelLayers);
@@ -486,8 +483,6 @@ InDet::TRT_LayerBuilderCond::cylindricalLayers(const EventContext& ctx,
                                                                  m_layerThickness,
                                                                  new InDet::TRT_OverlapDescriptor(trtIdHelper),
                                                                  aDescritpor));
-              // increment this layer
-              ++ilay;
         } // loop over layers
      } // loop over rings
 
