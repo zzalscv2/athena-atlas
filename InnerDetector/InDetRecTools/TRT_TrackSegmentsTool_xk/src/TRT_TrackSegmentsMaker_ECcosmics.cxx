@@ -1901,7 +1901,6 @@ TF1 *InDet::TRT_TrackSegmentsMaker_ECcosmics::perform_fit(int count,
 double InDet::TRT_TrackSegmentsMaker_ECcosmics::classify_segment(Trk::TrackSegment* seg, int &total) const
 {
   int real=0;
-  int noise=0;
   total=0;
 
   for(unsigned int i=0;i<seg->numberOfMeasurementBases();++i){
@@ -1913,8 +1912,6 @@ double InDet::TRT_TrackSegmentsMaker_ECcosmics::classify_segment(Trk::TrackSegme
         if(dc!=nullptr){
           if(isTrueHit(dc))
             real++;
-          else
-            noise++;
           total++;
 
         }
