@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGCALOHYPO_TRIGLARNOISEBURSTHYPOALG
 #define TRIGCALOHYPO_TRIGLARNOISEBURSTHYPOALG
@@ -49,18 +49,18 @@ class TrigLArNoiseBurstRecoAlg : public AthReentrantAlgorithm {
   Gaudi::Property< bool >  m_mNBTight_PsVetoFlaggedPartitions{ this, "MNBTight_PsVetoFlaggedPartitions", true, "flag to be used for NB detection" };
 
   ToolHandle< GenericMonitoringTool > m_monTool { this, "MonTool", "", "Monitoring tool" };
-  unsigned int m_mask;
+  unsigned int m_mask{0};
 
   // lock for IS publishing
   mutable std::mutex m_pubIS_mtx;
   std::shared_ptr<hltinterface::GenericHLTContainer> m_IsObject;
 
-  long int m_timeTagPosToClear;
-  long int m_publishTime;
+  long int m_timeTagPosToClear{};
+  long int m_publishTime{};
   std::string m_name_of_is;
-  size_t   m_evntPos;
-  size_t   m_timeTagPos;
-  size_t   m_timeTagPosns;
-  mutable long int m_timeTagPosRec ATLAS_THREAD_SAFE;
+  size_t   m_evntPos{};
+  size_t   m_timeTagPos{};
+  size_t   m_timeTagPosns{};
+  mutable long int m_timeTagPosRec ATLAS_THREAD_SAFE{};
 }; 
 #endif

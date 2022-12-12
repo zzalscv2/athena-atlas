@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigLArNoiseBurstRecoAlg.h"
@@ -87,16 +87,16 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
   SG::ReadCondHandle<LArBadFebCont> badHdl(m_knownBadFEBsVecKey, context);
   const LArBadFebCont* badCont=*badHdl;
   if(badCont) {
-    for(LArBadFebCont::BadChanVec::const_iterator i = badCont->begin(); i!=badCont->end(); i++) {
-      bf.insert(i->first);
+    for(const LArBadFebCont::BadChanEntry& badchan : *badCont) {
+      bf.insert(badchan.first);
     }
   }
     
   SG::ReadCondHandle<LArBadFebCont> MNBHdl(m_knownMNBFEBsVecKey, context);
   const LArBadFebCont* MNBCont=*MNBHdl;
   if(MNBCont) {
-    for(LArBadFebCont::BadChanVec::const_iterator i = MNBCont->begin(); i!=MNBCont->end(); i++) {
-      MNBfeb.push_back(HWIdentifier(i->first));
+    for(const LArBadFebCont::BadChanEntry& badchan : *MNBCont) {
+      MNBfeb.push_back(HWIdentifier(badchan.first));
     } 
   }
 
