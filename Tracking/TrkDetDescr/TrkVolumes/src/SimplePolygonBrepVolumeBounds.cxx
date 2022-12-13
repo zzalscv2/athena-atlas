@@ -401,7 +401,7 @@ Trk::SimplePolygonBrepVolumeBounds::Diagonalie(
     int kPlus1 = (k + 1) % inputVertices.size();
 
     /* Skip edges incident to i or j */
-    if (!((k == i) || (kPlus1 == i) || (k == j) || (kPlus1 == j)))
+    if ((k != i) && (kPlus1 != i) && (k != j) && (kPlus1 != j))
       if (Intersect(
             inputVertices[i],
             inputVertices[j],

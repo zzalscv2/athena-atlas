@@ -193,7 +193,7 @@ Trk::PRD_AssociationTool::getPrdsOnTrack(const Maps& maps,
     if (rot){
       if(m_idHelperSvc->isMuon(rot->identify())){
         //only use precision hits for muon track overlap
-        if(!m_idHelperSvc->isMdt(rot->identify()) && !(m_idHelperSvc->isCsc(rot->identify()) && !m_idHelperSvc->measuresPhi(rot->identify()))) continue;
+        if(!m_idHelperSvc->isMdt(rot->identify()) && (!m_idHelperSvc->isCsc(rot->identify()) || m_idHelperSvc->measuresPhi(rot->identify()))) continue;
       }
       vec.push_back(rot->prepRawData());
     }
@@ -205,7 +205,7 @@ Trk::PRD_AssociationTool::getPrdsOnTrack(const Maps& maps,
           const Trk::RIO_OnTrack* rot = &competingROT->rioOnTrack(i);
           if( !rot || !rot->prepRawData() || !m_idHelperSvc->isMuon(rot->identify()) ) continue;
           //only use precision hits for muon track overlap
-          if(!m_idHelperSvc->isMdt(rot->identify()) && !(m_idHelperSvc->isCsc(rot->identify()) && !m_idHelperSvc->measuresPhi(rot->identify()))) continue;
+          if(!m_idHelperSvc->isMdt(rot->identify()) && (!m_idHelperSvc->isCsc(rot->identify()) || m_idHelperSvc->measuresPhi(rot->identify()))) continue;
           vec.push_back(rot->prepRawData());
         }
       }

@@ -82,7 +82,7 @@ namespace Trk {
 #ifdef HEPMC3
                 if( genEvent->vertices().empty() ) {
                   ATH_MSG_DEBUG( "No vertices found in first GenEvent" );
-                  return 0;
+                  return nullptr;
                 }
                auto pv = genEvent->vertices()[0];
 #else
@@ -109,7 +109,7 @@ namespace Trk {
 // here the region of interest is selected.
                 std::map<int,HepMC::ConstGenVertexPtr> vertex_ids;
 #ifdef HEPMC3
-                for (auto vtx: genEvent->vertices()){
+                for (const auto& vtx: genEvent->vertices()){
 #else
                 for ( HepMC::GenEvent::vertex_const_iterator i = genEvent->vertices_begin(); i != genEvent->vertices_end()  ;++i ) {
                     auto vtx=*i;
@@ -182,7 +182,7 @@ namespace Trk {
 #endif
 
                                     if(genParticle) {
-                                        auto tpEvent = genParticle->parent_event();
+                                        const auto *tpEvent = genParticle->parent_event();
                                         if(tpEvent==genEvent) { 
                                             HepMC::ConstGenVertexPtr pVertex{nullptr};
                                             if (genParticle) pVertex = genParticle->production_vertex();

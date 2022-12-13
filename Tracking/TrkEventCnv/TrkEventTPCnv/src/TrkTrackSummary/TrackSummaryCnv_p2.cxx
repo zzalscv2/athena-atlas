@@ -12,7 +12,7 @@ void TrackSummaryCnv_p2::dbgPrint( const Trk::TrackSummary *t){
     std::cout << "m_idHitPattern:\t" << t->m_idHitPattern << std::endl;
 
     std::cout << " std::vector m_information size: "<< t->m_information.size() <<std::endl;
-    for (std::vector<int>::const_iterator i=t->m_information.begin();i!=t->m_information.end();++i) std::cout<<"\t "<<(*i);
+    for (int i : t->m_information) std::cout<<"\t "<<i;
     std::cout<<std::endl;
 
     if(t->m_muonTrackSummary){

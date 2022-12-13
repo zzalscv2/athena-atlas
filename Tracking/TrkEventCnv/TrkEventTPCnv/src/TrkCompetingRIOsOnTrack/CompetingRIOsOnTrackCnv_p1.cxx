@@ -21,10 +21,9 @@ void CompetingRIOsOnTrackCnv_p1::persToTrans( const Trk::CompetingRIOsOnTrack_p1
   #ifdef UseFloatsIn_CompetingRIOsOnTrack
   auto tmpVector = std::vector<double>();
   tmpVector.reserve(persObj->m_assignProb.size());
-  for (std::vector<float>::const_iterator itr  = persObj->m_assignProb.begin() ; 
-  itr != persObj->m_assignProb.end()   ; ++itr)
+  for (float itr : persObj->m_assignProb)
   {
-    tmpVector.push_back((double)(*itr));
+    tmpVector.push_back((double)itr);
   }
   transObj->m_assignProb = std::move(tmpVector);
   #else

@@ -78,7 +78,7 @@ Trk::InDetReconstructableSelector::selectGenSignal (const McEventCollection* Sim
   for( ; itCollision != SimTracks->end(); ++itCollision ) {
     const HepMC::GenEvent*    genEvent = *itCollision;
     
-    for ( auto particle:   *genEvent) {
+    for ( const auto& particle:   *genEvent) {
 
 
       // 1) require stable particle from generation or simulation

@@ -237,12 +237,12 @@ bool CompareTwoTracks::operator()(VxTrackAtVertex vtxTrk){ // MD: took away dere
     const Trk::Perigee * measPer2 = originalTrk->perigeeParameters();
     if(! (measPer1 && measPer2 )) equal = false;
     else{
-      float diff = fabs(std::numeric_limits<float>::epsilon());
-      if( ! (( fabs(measPer1->parameters()[Trk::d0]     - measPer2->parameters()[Trk::d0])     <= diff)
-         && ( fabs(measPer1->parameters()[Trk::z0]     - measPer2->parameters()[Trk::z0])     <= diff)
-         && ( fabs(measPer1->parameters()[Trk::phi]    - measPer2->parameters()[Trk::phi])    <= diff)
-         && ( fabs(measPer1->parameters()[Trk::theta]  - measPer2->parameters()[Trk::theta])  <= diff)
-         && ( fabs(measPer1->parameters()[Trk::qOverP] - measPer2->parameters()[Trk::qOverP]) <= diff)))
+      float diff = std::abs(std::numeric_limits<float>::epsilon());
+      if( ( std::abs(measPer1->parameters()[Trk::d0]     - measPer2->parameters()[Trk::d0])     > diff)
+         || ( std::abs(measPer1->parameters()[Trk::z0]     - measPer2->parameters()[Trk::z0])     > diff)
+         || ( std::abs(measPer1->parameters()[Trk::phi]    - measPer2->parameters()[Trk::phi])    > diff)
+         || ( std::abs(measPer1->parameters()[Trk::theta]  - measPer2->parameters()[Trk::theta])  > diff)
+         || ( std::abs(measPer1->parameters()[Trk::qOverP] - measPer2->parameters()[Trk::qOverP]) > diff))
               equal = false;
     }
      //std::cout << " comparing two Tracks' perigee parameter, the perigee of the comparing track is: "<< *measPer1 <<" the perigee of the compared track is: "<< *measPer2 << " compare result is: " << equal << std::endl;
@@ -714,7 +714,7 @@ bool BeamspotVertexPreProcessor::doBeamspotConstraintTrackSelection(const Track*
 	const double qoverP = perigee->parameters()[Trk::qOverP] * 1000.;
 	double pt = 0.;
 	if (qoverP != 0 )
-	  pt = fabs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
+	  pt = std::abs(1.0/qoverP)*sin(perigee->parameters()[Trk::theta]);
 	ATH_MSG_DEBUG( " pt  : "<< pt );
 	if (pt > m_maxPt)
 	  return false;
@@ -1047,17 +1047,20 @@ void BeamspotVertexPreProcessor::accumulateVTX(AlignTrack* alignTrack) {
     if( module ) {
       std::vector<Amg::VectorX>& deriv_vec = derivIt->second;
       std::vector<Amg::VectorX> drdaWF;
-      ATH_MSG_DEBUG( "accumulateVTX: The deriv_vec size is  " << deriv_vec.size() );
+      ATH_MSG_DEBUG("accumulateVTX: The deriv_vec size is  "
+                    << deriv_vec.size());
       DataVector<AlignPar>* alignPars = m_alignModuleTool->getAlignPars(module);
       int nModPars = alignPars->size();
-      if ((nModPars+3) != (int)deriv_vec.size() ) {
-        ATH_MSG_ERROR("accumulateVTX: Derivatives w.r.t. the vertex seem to be missing");
+      if ((nModPars + 3) != (int)deriv_vec.size()) {
+        ATH_MSG_ERROR(
+            "accumulateVTX: Derivatives w.r.t. the vertex seem to be missing");
         return;
       }
-      for (int i=0;i<nModPars;i++) {
-        drdaWF.push_back(2.0 * (WF) * deriv_vec[i]);
+      drdaWF.reserve(nModPars);
+      for (int i = 0; i < nModPars; i++) {
+        drdaWF.emplace_back(2.0 * (WF)*deriv_vec[i]);
       }
-      ATH_MSG_DEBUG("accumulateVTX: derivX incremented by:  " << drdaWF );
+      ATH_MSG_DEBUG("accumulateVTX: derivX incremented by:  " << drdaWF);
       // now add contribution from this track to the X object:
       derivX.emplace_back(module,std::move(drdaWF));
 

@@ -69,7 +69,7 @@ buildTruthTrajectory(TruthTrajectory *result, HepMC::ConstGenParticlePtr input) 
 
 //================================================================
 DecayInFlyTruthTrajectoryBuilder::MotherDaughter
-DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(HepMC::ConstGenVertexPtr vtx) 
+DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(const HepMC::ConstGenVertexPtr& vtx) 
 {
   HepMC::ConstGenParticlePtr mother{nullptr};
   HepMC::ConstGenParticlePtr daughter{nullptr};
@@ -96,7 +96,7 @@ DecayInFlyTruthTrajectoryBuilder::truthTrajectoryCuts(HepMC::ConstGenVertexPtr v
 
 	int num_passed_cuts = 0;
 	HepMC::ConstGenParticlePtr passed_cuts{nullptr};
-	for(HepMC::ConstGenParticlePtr candidate: *vtx){
+	for(const HepMC::ConstGenParticlePtr& candidate: *vtx){
 	  if(candidate->pdg_id() == mother->pdg_id()) {
 
 	    if(passed_cuts && (mother->pdg_id() == 11)) { // second negative electron is a special case

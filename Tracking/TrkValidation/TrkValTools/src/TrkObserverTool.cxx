@@ -280,7 +280,7 @@ int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const Obser
 		ATH_MSG_DEBUG ("saveTracksToStore: Valid key: "<<m_savedTracksMapWriteKey.key());
 	}
 
-	for (auto& itrMap : *trk_map) {
+	for (const auto& itrMap : *trk_map) {
 		ATH_MSG_DEBUG("saveTracksToStore: Writing track with id "<<itrMap.first<<" and rejection reason "<<std::get<xAOD::ObserverToolIndex::rejectReason>(itrMap.second));
 		wh_tracks->push_back(std::get<xAOD::ObserverToolIndex::track>(itrMap.second));
 		wh_tracksMap->insert(std::make_pair(itrMap.first, itrMap.second));
@@ -348,7 +348,7 @@ void Trk::TrkObserverTool::dumpTrackMap(const ObservedTrackMap* trk_map) const {
 	std::lock_guard<std::mutex> lock{m_mutex};
 
 	ATH_MSG_INFO ("Dump observedTrkMap (size = " << getNObservedTracks(trk_map) << ")");
-	for (auto& itrMap : *trk_map) {
+	for (const auto& itrMap : *trk_map) {
 		ATH_MSG_DEBUG("Id: " << itrMap.first);
 		ATH_MSG_DEBUG("\tscore:                  " << std::get<xAOD::ObserverToolIndex::score>(itrMap.second));
 		ATH_MSG_DEBUG("\trejectStep:             " << std::get<xAOD::ObserverToolIndex::rejectStep>(itrMap.second));
@@ -413,7 +413,7 @@ std::string Trk::TrkObserverTool::dumpRejection(xAOD::RejectionStep rejectStep, 
 int Trk::TrkObserverTool::getNFinalTracks(const ObservedTrackMap* trk_map) {
 	// counts the tracks which did not get rejected (this number should equal finalTracks)
 	int nFinalTracks = 0;
-	for (auto& itrMap : *trk_map) {
+	for (const auto& itrMap : *trk_map) {
 		if (std::get<xAOD::ObserverToolIndex::rejectReason>(itrMap.second) == xAOD::RejectionReason::acceptedTrack) nFinalTracks++;
 	}
 	return nFinalTracks;

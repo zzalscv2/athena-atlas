@@ -31,7 +31,7 @@ PlotBase::PlotBase(PlotBase *pParent, const std::string &sDir) {
 
 void
 PlotBase::initialize() {
-  for (auto subNode: m_vSubNodes) {
+  for (auto *subNode: m_vSubNodes) {
     subNode->initialize();
   }
   initializePlots();
@@ -39,7 +39,7 @@ PlotBase::initialize() {
 
 void
 PlotBase::finalize() {
-  for (auto subNode: m_vSubNodes) {
+  for (auto *subNode: m_vSubNodes) {
     subNode->finalize();
   }
   finalizePlots();
@@ -47,7 +47,7 @@ PlotBase::finalize() {
 
 void
 PlotBase::setDetailLevel(int iDetailLevel) {
-  for (auto subNode: m_vSubNodes) {
+  for (auto *subNode: m_vSubNodes) {
     subNode->setDetailLevel(iDetailLevel);
   }
   m_iDetailLevel = iDetailLevel;
@@ -66,7 +66,7 @@ PlotBase::retrieveBookedHistograms() {
 std::vector<TreeData> 
 PlotBase::retrieveBookedTrees() {
   std::vector<TreeData> vBookedTrees = m_vBookedTrees;
-  for (auto subNode: m_vSubNodes) {
+  for (auto *subNode: m_vSubNodes) {
     std::vector<TreeData> subNodeTrees = subNode->retrieveBookedTrees();
     vBookedTrees.insert(vBookedTrees.end(), subNodeTrees.begin(), subNodeTrees.end());
   }
