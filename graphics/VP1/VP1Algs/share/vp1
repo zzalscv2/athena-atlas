@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Script for constructing command which launches athena on vp1.py, with appropriate options (in the -c flag).
+# Script to construct the command that launches Athena on vp1.py, 
+# with all the appropriate options (in the -c flag).
 #
 # Author: Thomas.Kittelmann@cern.ch
 # First useful version: July 2007
@@ -20,6 +21,10 @@
 
 #fixme/todo: option to start cruise mode (event/second)
 #fixme/todo: MULTINP_CPY should not be allowed to exist beforehand!
+
+# Prefix all output from this script with '[vp1]'
+exec > >(trap "" INT TERM; sed 's/^/[vp1] /')
+exec 2> >(trap "" INT TERM; sed 's/^/[vp1\/stderr] /' >&2)
 
 
 ### TERMINAL COLORS ###
