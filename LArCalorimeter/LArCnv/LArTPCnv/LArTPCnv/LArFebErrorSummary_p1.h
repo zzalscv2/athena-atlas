@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARTPCNV_LARFEBERRORSUMMARY_P1_H
@@ -9,7 +9,8 @@
 @brief persistent class for LArFebErrorSummary, version p2.
 */
 
-#include  <vector> 
+#include  <vector>
+#include  <cstdint>
 
 class LArFebErrorSummary_p1 {
   
