@@ -8,7 +8,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
 
-//#include "TrkEventPrimitives/GlobalPosition.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 #include "TrkSurfaces/Surface.h"
 
@@ -16,6 +15,10 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cstdint>
+
+namespace {
+  constexpr float PI_F = static_cast<float>(M_PI);
+}
 
 namespace InDet {
 CaloClusterROIPhiRZContainerMaker::CaloClusterROIPhiRZContainerMaker(const std::string& name,
@@ -167,7 +170,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
        for (unsigned int roi_unordered_i=0;  roi_unordered_i < rois.size(); ++roi_unordered_i) {
           for (unsigned int output_i : m_outputUnsorted) {
              if  (output_i>=max_output[roi_unordered_i]) break;
-             if (std::abs(rois[ roi_unordered_i ][0])<M_PI || rois[ roi_unordered_i ][0]==M_PI ) {
+             if (std::abs(rois[ roi_unordered_i ][0])<PI_F  or (rois[ roi_unordered_i ][0] == PI_F)) {
                 output_rois[output_i]->push_back( rois[ roi_unordered_i ] );
              }
           }
