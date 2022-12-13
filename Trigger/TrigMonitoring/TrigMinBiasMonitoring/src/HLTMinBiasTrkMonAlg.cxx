@@ -190,7 +190,7 @@ StatusCode HLTMinBiasTrkMonAlg::monitorTrkCounts(const EventContext& context) co
     int nhits = 0;
     uint32_t pattern = trk->hitPattern();
     for (int bit = 0; bit < 32; bit++)
-      nhits += (pattern & (1 << bit) ? 1 : 0);
+      nhits += (pattern & (1u << bit) ? 1 : 0);
     return nhits;
   };
   auto trkHits = Collection("trkHits", *offlineTrkHandle, getNhits);
