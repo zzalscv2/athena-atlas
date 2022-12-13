@@ -60,7 +60,7 @@ public:
     
     MuonEndcapStationNSW    = 0x01000000, // 24
     ForwardRegion           = 0x02000000, // 25
-    // free                 = 0x04000000, // 26
+    AFP                     = 0x04000000, // 26
     // free                 = 0x08000000, // 27
     
     // free                 = 0x10000000, // 28
