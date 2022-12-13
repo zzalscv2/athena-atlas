@@ -54,7 +54,7 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACDiagonal( const HWIdentifier&  C
   Eigen::MatrixXd AutoCorrMatrix=Eigen::MatrixXd::Zero(nSamples,nSamples);
 
   const ILArAutoCorr* autoCorr=nullptr;
-  detStore()->retrieve(autoCorr).ignore();
+  detStore()->retrieve(autoCorr,m_keyAutoCorr).ignore();
   
 
   if ( autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
@@ -103,7 +103,7 @@ const Eigen::MatrixXd LArAutoCorrDecoderTool::ACPhysics( const HWIdentifier&  Ce
   Eigen::MatrixXd AutoCorrMatrix=Eigen::MatrixXd::Identity(nSamples,nSamples);
 
   const ILArAutoCorr* autoCorr=nullptr;
-  detStore()->retrieve(autoCorr).ignore();
+  detStore()->retrieve(autoCorr,m_keyAutoCorr).ignore();
   
   if ( autoCorr ) { // LArAutoCorrComplete is loaded in DetStore
 

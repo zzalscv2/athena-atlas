@@ -27,11 +27,11 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     LArPhysOFCAlg.KeyOFC   = "LArOFC_"+postfix
     LArPhysOFCAlg.KeyShape = "LArShape_"+postfix
     if (nColl==0):
-        LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(UseAlwaysHighGain=True,
+        LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
                                                                        isSC = flags.LArCalib.isSC)
     else:
         LArPhysOFCAlg.DecoderTool = CompFactory.LArAutoCorrDecoderTool(DecodeMode=1,
-                                                                       UseAlwaysHighGain=True,
+                                                                       UseAlwaysHighGain=flags.LArCalib.PhysACuseHG,
                                                                        isSC = flags.LArCalib.isSC,
                                                                        KeyAutoCorr="LArPhysAutoCorr")
                                                             
@@ -76,7 +76,7 @@ def _ofcAlg(flags,postfix,folderSuffix,nPhases,dPhases,nDelays,nColl):
     return result
 
 
-def LArOFCPhysCfg(flags):
+def LArOFCPhysCfg(flags,loadPhysAC=True):
 
     #Get basic services and cond-algos
     from LArCalibProcessing.LArCalibBaseConfig import LArCalibBaseCfg,chanSelStr
@@ -88,7 +88,6 @@ def LArOFCPhysCfg(flags):
     rs=FolderTagResolver()
     PhysWaveTag=rs.getFolderTag(flags.LArCalib.PhysWave.Folder)
     AutoCorrTag=rs.getFolderTag(flags.LArCalib.AutoCorr.Folder)
-    #PhysAutoCorrTag= "_mu_"+str(flags.LArCalib.NColl)+rs.getFolderTagSuffix(flags.LArCalib.PhysAutoCorr.Folder)
     PhysAutoCorrTag= rs.getFolderTag(flags.LArCalib.PhysAutoCorr.Folder)
     if (nColl>0):
         #Insert mu in tag-name:
@@ -101,7 +100,8 @@ def LArOFCPhysCfg(flags):
 
     result.merge(addFolders(flags,flags.LArCalib.PhysWave.Folder,detDb=flags.LArCalib.Input.Database, tag=PhysWaveTag, modifiers=chanSelStr(flags)))
     result.merge(addFolders(flags,flags.LArCalib.AutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=AutoCorrTag, modifiers=chanSelStr(flags)))
-    result.merge(addFolders(flags,flags.LArCalib.PhysAutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=PhysAutoCorrTag,modifiers=chanSelStr(flags)))
+    if loadPhysAC:
+        result.merge(addFolders(flags,flags.LArCalib.PhysAutoCorr.Folder,detDb=flags.LArCalib.Input.Database, tag=PhysAutoCorrTag,modifiers=chanSelStr(flags)))
 
     
     
