@@ -213,13 +213,13 @@ MuonEDMPrinterTool::printMeasurements(const Trk::Track& track) const
                     itMap++;
                     if (itMap != measAndTheirAlignmentEffects.end() && itMap->first == m)
                         aeotos.push_back(itMap->second);
-                    const Trk::ResidualPull* resPull = m_pullCalculator->residualPull(
-                        m, trackParameters, Trk::ResidualPull::Unbiased, Trk::TrackState::unidentified, aeotos);
+                    std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
+                        m, trackParameters, Trk::ResidualPull::Unbiased, Trk::TrackState::unidentified, aeotos)};
                     if (resPull) dataStr += print(*resPull);
                     if (resPull) dataStr += " (AEOT)";
                 } else {
-                    const Trk::ResidualPull* resPull =
-                        m_pullCalculator->residualPull(m, trackParameters, Trk::ResidualPull::Unbiased);
+                    std::unique_ptr<const Trk::ResidualPull> resPull{
+                        m_pullCalculator->residualPull(m, trackParameters, Trk::ResidualPull::Unbiased)};
                     if (resPull) dataStr += print(*resPull);
                 }
             }
