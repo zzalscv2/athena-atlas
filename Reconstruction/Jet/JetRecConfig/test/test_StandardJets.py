@@ -33,19 +33,13 @@ if args.Help:
 
 
 from pprint import pprint
-from JetRecConfig.JetRecConfig import JetRecCfg, jetlog
+from JetRecConfig.JetRecConfig import JetRecCfg
 
 # Set message levels
 from AthenaCommon import Logging, Constants
 msgLvl = getattr(Constants,args.msgLvl)
 Logging.log.setLevel(msgLvl)
 tlog = Logging.logging.getLogger('test_StandardJets')
-
-    
-# Setting needed for the ComponentAccumulator to do its thing
-from AthenaCommon.Configurable import Configurable
-Configurable.configurableRun3Behavior=True
-
 
 # Config flags steer the job at various levels
 from AthenaConfiguration.AllConfigFlags import ConfigFlags

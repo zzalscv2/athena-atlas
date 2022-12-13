@@ -44,9 +44,6 @@ if __name__=="__main__":
     result.addEventAlgo(CompFactory.ClusterMatching.CaloClusterMatchLinkAlg("MuonTCLinks", ClustersToDecorate="MuonClusterCollection"))
     cfg.merge(result)
 
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = True
-
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardSmallRJets import AntiKt4EMPFlow
     from JetRecConfig.JetConfigFlags import jetInternalFlags  
