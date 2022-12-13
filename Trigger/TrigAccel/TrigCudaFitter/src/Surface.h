@@ -15,9 +15,9 @@ class Surface
     long int generateKey() const;
 
   private:
-    double m_center[3];
-    double m_normal[3];
-    double m_matrix[3][3];
+    double m_center[3]{};
+    double m_normal[3]{};
+    double m_matrix[3][3]{};
 };
 #endif
 

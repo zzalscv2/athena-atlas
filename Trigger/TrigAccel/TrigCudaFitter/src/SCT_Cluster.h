@@ -12,8 +12,8 @@ class SCT_Cluster : public SiCluster
     virtual void setParameters(float* par) = 0;
     virtual TrkBaseNode* createDkfNode(void) const = 0;
 
-    double m_m;
-    double m_cov;
+    double m_m{};
+    double m_cov{};
 };
 
 #endif

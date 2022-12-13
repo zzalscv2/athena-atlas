@@ -5,7 +5,6 @@
 
 PixelCluster::PixelCluster(const Surface* pS) : SiCluster(pS)
 {
-	m_cov[0][1]=m_cov[1][0]=0.0;m_cov[0][0]=m_cov[1][1]=0.0;
 }
 
 PixelCluster::~PixelCluster(void)

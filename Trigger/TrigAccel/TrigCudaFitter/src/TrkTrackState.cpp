@@ -18,14 +18,6 @@
 #include "TrkPlanarSurface.h"
 #include "TrkTrackState.h"
 
-TrkTrackState::TrkTrackState()
-{
-  memset(m_Rk,0,sizeof(m_Rk));
-  memset(m_Gk,0,sizeof(m_Gk));
-  m_pSurface=NULL;m_scattMode=0;
-  m_isScattered=false;m_pPrevState=NULL;
-}
-
 TrkTrackState::TrkTrackState(const double Rk[5])
 {
   int i;
