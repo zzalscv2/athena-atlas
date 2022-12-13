@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <algorithm>
@@ -142,7 +142,7 @@ StatusCode TrigBmumuxComboHypo::mergeMuonsFromDecisions(TrigBmumuxState& state) 
     if (!muon->trackParticle(xAOD::Muon::TrackParticleType::CombinedTrackParticle)) continue;
 
     auto decisionEL = TrigCompositeUtils::decisionToElementLink(decision, state.context());
-    auto itr = std::find_if(muons.begin(), muons.end(), [this, muon = muon](const auto& x){ return isIdenticalTracks(muon, *x.link); });
+    auto itr = std::find_if(muons.begin(), muons.end(), [this, muon](const auto& x){ return isIdenticalTracks(muon, *x.link); });
     if (itr == muons.end()) {
       muons.push_back({muonEL, std::vector<ElementLink<DecisionContainer>>(1, decisionEL), DecisionIDContainer()});
     }
@@ -207,7 +207,7 @@ StatusCode TrigBmumuxComboHypo::mergeTracksFromViews(TrigBmumuxState& state) con
 
       if (viewCounter == 0 ||
           std::find_if(tracks.begin(), tracks.end(),
-                       [this,track = track](const auto& x){ return isIdenticalTracks(track, *x); }) == tracks.end()) {
+                       [this, track](const auto& x){ return isIdenticalTracks(track, *x); }) == tracks.end()) {
         tracks.emplace_back(trackEL);
       }
     }

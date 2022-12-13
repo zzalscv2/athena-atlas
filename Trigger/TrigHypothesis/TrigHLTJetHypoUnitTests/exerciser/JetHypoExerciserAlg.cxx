@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigHLTJetHypoUnitTests/JetHypoExerciserAlg.h"
@@ -91,7 +91,7 @@ StatusCode JetHypoExerciserAlg::execute() {
 
   std::stringstream ss;
   ss <<  "========= ncall: "<<m_ncall << "==========\n";
-  ss << debugInfoCollector->toString() + '\n';
+  if(m_visitDebug) ss << debugInfoCollector->toString() + '\n';
   auto s = ss.str();
   std::ofstream outfile;
   outfile.open(m_logname, std::ios_base::app);
