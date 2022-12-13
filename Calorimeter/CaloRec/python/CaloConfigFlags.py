@@ -10,21 +10,27 @@ def createCaloConfigFlags():
     ccf.addFlag("Calo.Noise.useCaloNoiseLumi", True)
 
     #CaloCell flags     
-    ccf.addFlag("Calo.Cell.doPileupOffsetBCIDCorr", True)  
+    ccf.addFlag("Calo.Cell.doPileupOffsetBCIDCorr", True)
     ccf.addFlag("Calo.Cell.doDeadCellCorr", True)
-    ccf.addFlag("Calo.Cell.doPedestalCorr", lambda prevFlags: not prevFlags.Input.isMC)
-    ccf.addFlag("Calo.Cell.doEnergyCorr",lambda prevFlags: not prevFlags.Input.isMC and not prevFlags.Common.isOnline)
-    ccf.addFlag("Calo.Cell.doTimeCorr", lambda prevFlags: not prevFlags.Input.isMC and not prevFlags.Common.isOnline)
+    ccf.addFlag("Calo.Cell.doPedestalCorr",
+                lambda prevFlags: not prevFlags.Input.isMC)
+    ccf.addFlag("Calo.Cell.doEnergyCorr",
+                lambda prevFlags: not prevFlags.Input.isMC and not prevFlags.Common.isOnline)
+    ccf.addFlag("Calo.Cell.doTimeCorr",
+                lambda prevFlags: not prevFlags.Input.isMC and not prevFlags.Common.isOnline)
 
-    #TopoCluster Flags:     
+    # TopoCluster Flags:
     ccf.addFlag("Calo.TopoCluster.doTwoGaussianNoise", True)
     ccf.addFlag("Calo.TopoCluster.doTreatEnergyCutAsAbsolute", False)
     ccf.addFlag("Calo.TopoCluster.doTopoClusterLocalCalib", True)
-    ccf.addFlag("Calo.TopoCluster.doTimeCut", False)
-    ccf.addFlag("Calo.TopoCluster.extendTimeCut", False)
-    ccf.addFlag("Calo.TopoCluster.useUpperLimitForTimeCut", False)
+    ccf.addFlag("Calo.TopoCluster.doTimeCut",
+                lambda prevFlags: not prevFlags.Trigger.doHLT)
+    ccf.addFlag("Calo.TopoCluster.extendTimeCut",
+                lambda prevFlags: prevFlags.Calo.TopoCluster.doTimeCut)
+    ccf.addFlag("Calo.TopoCluster.useUpperLimitForTimeCut",
+                lambda prevFlags: prevFlags.Calo.TopoCluster.doTimeCut)
     ccf.addFlag("Calo.TopoCluster.timeCutUpperLimit", 20.0)
-    ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments",True)
+    ccf.addFlag("Calo.TopoCluster.writeExtendedClusterMoments", True)
     #### Cluster correction flags:
     # If true, then reweight cells to prevent double-counting between clusters.
     ccf.addFlag ('Calo.ClusterCorrection.doSlidingWindowCellWeights', False)
