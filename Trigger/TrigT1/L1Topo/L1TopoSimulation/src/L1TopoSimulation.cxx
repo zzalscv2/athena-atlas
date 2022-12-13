@@ -24,8 +24,7 @@
 #include "L1TopoRDO/Helpers.h"
 #include "L1TopoRDO/L1TopoTOB.h"
 #include "L1TopoRDO/L1TopoRDOCollection.h"
-#include "L1TopoRDO/L1TopoROD.h"
-#include "L1TopoRDO/L1TopoFPGA.h"
+#include "L1TopoRDO/L1TopoResult.h"
 
 // xAOD
 #include "xAODTrigger/L1TopoSimResults.h"
@@ -200,6 +199,9 @@ L1TopoSimulation::execute() {
      if (retrieveHardwareDecision(m_isLegacyTopo, ctx).isSuccess()) {
        m_topoSteering->propagateHardwareBitsToAlgos();
        m_topoSteering->setOutputAlgosSkipHistograms(false);
+     }
+     else {
+       m_topoSteering->setOutputAlgosSkipHistograms(true);
      }
      if (!m_scaler->decision(m_prescaleForDAQROBAccess) and m_prescaleForDAQROBAccess>1) {
        m_topoSteering->setOutputAlgosSkipHistograms(true);
@@ -401,50 +403,14 @@ L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
     return StatusCode::FAILURE;
   }
 
-  std::unique_ptr<L1Topo::L1TopoFPGA> l1topoFPGA;
-  
-  for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
-    const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
-    size_t nWords = dataWords.size();
-    if (nWords!=50) {
-      ATH_MSG_WARNING("Expected data word container size is 50, but found " << nWords);
-      return StatusCode::FAILURE;
-    }
-    uint32_t rodTrailer2 = dataWords[--nWords];
-    uint32_t rodTrailer1 = dataWords[--nWords];
-
-    L1Topo::L1TopoROD l1topoROD(rodTrailer1, rodTrailer2);
-
-    ATH_MSG_VERBOSE(l1topoROD);
-
-    for (size_t i = nWords; i --> 0;) {
-      if ((i+1)%8==0) {
-	uint32_t fpgaTrailer2 = dataWords[i];
-	uint32_t fpgaTrailer1 = dataWords[--i];
-
-	l1topoFPGA.reset(new L1Topo::L1TopoFPGA(fpgaTrailer1, fpgaTrailer2));
-
-	ATH_MSG_VERBOSE(*l1topoFPGA.get());
-    
-      }
-      else {
-	if (l1topoFPGA->topoNumber() != 1) {
-	  i-=3;
-	  uint32_t overflowWord = dataWords[--i];
-	  uint32_t triggerWord = dataWords[--i];
-	  for (size_t iBit=0;iBit<32;iBit++) {
-	    uint32_t topo = l1topoFPGA->topoNumber();
-	    uint32_t fpga = l1topoFPGA->fpgaNumber();
-	    unsigned int index = L1Topo::triggerBitIndexPhase1(topo, fpga, iBit);
-	    hardwareDaqRobTriggerBits[index] = (triggerWord>>iBit)&1;
-	    hardwareDaqRobOvrflowBits[index] = (overflowWord>>iBit)&1;
-	  }
-	  ATH_MSG_DEBUG("trigger word: " << std::hex << std::showbase << triggerWord << std::dec);
-	  ATH_MSG_DEBUG("overflow word: " << std::hex << std::showbase << overflowWord << std::dec);
-	}
-      }
-    }
+  std::unique_ptr<L1Topo::L1TopoResult> l1topoResult = std::make_unique<L1Topo::L1TopoResult>(*cont);
+  if (!l1topoResult->getStatus()) {
+    ATH_MSG_WARNING("Decoding L1Topo results failed!!");
+    return StatusCode::FAILURE;
   }
+  hardwareDaqRobTriggerBits = l1topoResult->getDecisions();
+  hardwareDaqRobOvrflowBits = l1topoResult->getOverflows();
+
 
   hardwareDaqRobTriggerBits = hardwareDaqRobTriggerBits & ~hardwareDaqRobOvrflowBits;
   
