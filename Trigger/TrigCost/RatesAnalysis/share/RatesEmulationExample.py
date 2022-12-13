@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__=='__main__':
@@ -33,23 +33,13 @@ if __name__=='__main__':
   parser.add_argument('flags', nargs='*', help='Config flag overrides')
   args = parser.parse_args()
 
-  # Setup the Run III behavior
-  from AthenaCommon.Configurable import Configurable
-  Configurable.configurableRun3Behavior = 1
-
   # Set the Athena configuration flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
   # Set the Athena configuration flags
   ConfigFlags.Input.Files = ["root://eosatlas.cern.ch//eos/atlas/atlasdatadisk/rucio/data16_13TeV/8d/de/AOD.10654269._000566.pool.root.1"]
-
+  ConfigFlags.Exec.OutputLevel = args.loglevel
   ConfigFlags.fillFromArgs(args.flags)
-  from PyUtils import AthFile
-  af = AthFile.fopen(ConfigFlags.Input.Files[0]) 
-  isMC = ('IS_SIMULATION' in af.fileinfos['evt_type'])
-  runNumber = af.fileinfos['run_number'][0]
-
-  ConfigFlags.Input.isMC = isMC
   useBunchCrossingData = (args.doRatesVsPositionInTrain or args.vetoStartOfTrain > 0)
 
   ConfigFlags.lock()
@@ -76,7 +66,7 @@ if __name__=='__main__':
   xsec = args.MCCrossSection
   fEff = args.MCFilterEfficiency
   dset = args.MCDatasetName
-  if isMC and xsec == 0: # If the input file is MC then make sure we have the needed info
+  if ConfigFlags.Input.isMC and xsec == 0: # If the input file is MC then make sure we have the needed info
     from .RatesGetCrossSectionMC import GetCrossSectionAMI
     amiTool = GetCrossSectionAMI()
     if dset == "": # Can we get the dataset name from the input file path?
@@ -86,9 +76,9 @@ if __name__=='__main__':
     fEff = amiTool.getFilterEfficiency()
 
   ebw = CompFactory.EnhancedBiasWeighter('EnhancedBiasRatesTool')
-  ebw.RunNumber = runNumber
+  ebw.RunNumber = ConfigFlags.Input.RunNumber[0]
   ebw.UseBunchCrossingData = useBunchCrossingData
-  ebw.IsMC = isMC
+  ebw.IsMC = ConfigFlags.Input.isMC
   # The following three are only needed if isMC == true
   ebw.MCCrossSection = xsec
   ebw.MCFilterEfficiency = fEff
@@ -126,5 +116,5 @@ if __name__=='__main__':
   # exampleMonitorAcc.getEventAlgo('ExampleMonAlg').OutputLevel = 2 # DEBUG
   cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-  sc = cfg.run(args.maxEvents, args.loglevel)
+  sc = cfg.run(args.maxEvents)
   sys.exit(0 if sc.isSuccess() else 1)
