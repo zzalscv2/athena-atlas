@@ -115,7 +115,7 @@ class doTimeCut(JobProperty):
     """
     statusOn=True
     allowedTypes=['bool']
-    StoredValue=False
+    StoredValue=True
 
 
 class extendTimeCut(JobProperty):
@@ -123,14 +123,14 @@ class extendTimeCut(JobProperty):
     """
     statusOn=True
     allowedTypes=['bool']
-    StoredValue=False
+    StoredValue=True
 
 class useUpperLimitForTimeCut(JobProperty):
     """
     """
     statusOn=True
     allowedTypes=['bool']
-    StoredValue=False
+    StoredValue=True
 
 class timeCutUpperLimit(JobProperty):
     """
