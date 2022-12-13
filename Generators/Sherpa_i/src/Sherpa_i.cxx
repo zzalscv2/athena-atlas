@@ -122,26 +122,12 @@ namespace SHERPA {
 CLHEP::HepRandomEngine* p_rndEngine{};
 
 Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
-  : GenModule(name, pSvcLocator), p_sherpa(NULL)
+  : GenModule(name, pSvcLocator)
 {
   #ifdef IS_SHERPA_3
   declareProperty("BaseFragment", m_inputfiles["Base.yaml"] = "");
   declareProperty("RunCard", m_inputfiles["Sherpa.yaml"] = "");
-  #else
-  declareProperty("RunCard", m_runcard = "");
-  declareProperty("Parameters", m_params);
   #endif
-  declareProperty("OpenLoopsLibs", m_openloopslibs);
-  declareProperty("ExtraFiles", m_extrafiles);
-  declareProperty("NCores", m_ncores=1);
-  declareProperty("MemoryMB", m_memorymb=2500.);
-  declareProperty("PluginCode", m_plugincode = "");
-
-  declareProperty("VariationWeightCap", m_variation_weight_cap=10.0);
-  declareProperty("CrossSectionScaleFactor", m_xsscale=1.0);
-  declareProperty("CleanupGeneratedFiles", m_cleanup=true);
-
-  declareProperty("Dsid", m_dsid);
 }
 
 
@@ -149,7 +135,7 @@ Sherpa_i::Sherpa_i(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode Sherpa_i::genInitialize(){
   if (m_plugincode != "") {
     compilePlugin(m_plugincode);
-    m_params.push_back("SHERPA_LDADD=Sherpa_iPlugin");
+    m_params.value().push_back("SHERPA_LDADD=Sherpa_iPlugin");
   }
 
   ATH_MSG_INFO("Sherpa initialising...");
@@ -169,7 +155,7 @@ StatusCode Sherpa_i::genInitialize(){
     #ifdef IS_SHERPA_3
     m_inputfiles["Base.yaml"] += "SHERPA_LDADD: Sherpa_iPlugin \n";
     #else
-    m_params.push_back("SHERPA_LDADD=Sherpa_iPlugin");
+    m_params.value().push_back("SHERPA_LDADD=Sherpa_iPlugin");
     #endif
   }
 
@@ -415,7 +401,7 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
   }
 
   // disregard manual RUNDATA setting if run card given in JO
-  if (m_runcard != "") m_params.push_back("RUNDATA=Run.dat");
+  if (m_runcard != "") m_params.value().push_back("RUNDATA=Run.dat");
 
   // allow to overwrite all parameters from JO file
   params.insert(params.begin()+params.size(), m_params.begin(), m_params.end());
@@ -423,7 +409,7 @@ void Sherpa_i::getParameters(int &argc, char** &argv) {
   // create Run.dat file if runcard explicitely given
   if (m_runcard != "") {
     FILE *file = fopen("Run.dat","w");
-    fputs(m_runcard.c_str(),file);
+    fputs(m_runcard.value().c_str(),file);
     fclose(file);
   }
 
