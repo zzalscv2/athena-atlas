@@ -23,7 +23,7 @@ using Surface = int;
 
 //convenient way to generate different types with the same methods and holding a pSurf
 template<int N>
-struct Thing{
+struct ATLAS_CHECK_THREAD_SAFETY Thing{
   Surface  surf{};
   const Surface & associatedSurface() const{
    return surf;
