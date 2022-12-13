@@ -79,6 +79,7 @@ rdotrig2aod.explicit_input = True
 rdotrig2aod.args = '--inputRDO_TRIGFile=RDO_TRIG.pool.root --outputAODFile=AOD.pool.root --steering "doRDO_TRIG" "doTRIGtoALL"'
 rdotrig2aod.args += ' --preExec="all:from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'"'
 rdotrig2aod.args += ' --conditionsTag="all:OFLCOND-MC16-SDR-RUN2-09"'
+rdotrig2aod.args += ' --postExec="from OutputStreamAthenaPool.MultipleStreamManager import MSMgr; aod=MSMgr.GetStream(\\\"StreamAOD\\\"); aod.AddItem(\\\"xAOD::TrigCompositeContainer#HLTNav_R2ToR3Summary\\\"); aod.AddItem(\\\"xAOD::TrigCompositeAuxContainer#HLTNav_R2ToR3SummaryAux.\\\"); "'
 
 # AOD -> DAOD
 aod2daod = ExecStep.ExecStep('AODtoDAOD')
