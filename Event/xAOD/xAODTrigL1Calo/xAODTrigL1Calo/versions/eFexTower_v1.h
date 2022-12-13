@@ -42,7 +42,16 @@ namespace xAOD {
       uint8_t fpga() const; /// getter for the fpga number [0-3] inclusive
       ///  set fpga number
       void setFpga(uint8_t); /// setter for the above
-      
+
+      /// get tower identifer which is assembled from the above data members
+      /// Is in the form of a signed 7 digit number: +/- XXYYMMF
+      ///   +/- = a/c side
+      ///   XX is eta (from 1 to 25)
+      ///   YY is phi (from 00 to 63)
+      ///   MM is module (from 00 to 23, or 99 otherwise)
+      ///   F is fpga (from 0 to 3, or 9 otherwise)
+      int32_t id() const;
+
       /// get Energy Counts
       const std::vector<uint16_t>& et_count() const; /// getter for the 11 energy counts
       /// set Energy Counts
