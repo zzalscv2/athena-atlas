@@ -75,17 +75,6 @@ if __name__ == "__main__":
                    "joboption under some name for (mainly) debugging "\
                    "and/or customization purposes.")
 
-    _add("--use-recex-links",
-         dest    = "use_recex_links",
-         action  = "store_true",
-         default = True,
-         help    = "switch to run RecExCommon_links and thus a local db replica")
-
-    _add("--no-recex-links",
-         dest    = "use_recex_links",
-         action  = "store_false",
-         help    = "switch to NOT run RecExCommon_links")
-
     _add("--do-clean-up",
          dest    = "do_clean_up",
          action  = "store_true",
@@ -156,7 +145,6 @@ if __name__ == "__main__":
             nevts=int(options.evts),
             skip=int(options.skip),
             dump_jobo=options.dump_jobo,
-            use_recex_links=options.use_recex_links,
             pyalg_cls=options.pyalg_cls,
             include=options.include,
             exclude=options.exclude,
