@@ -454,7 +454,7 @@ NSWL1::PadTrigger PadTriggerLogicOfflineTool::convert(const SectorTriggerCandida
     
     const IdContext ModuleContext = helper->module_context();
    
-    for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; i++ ) {
+    for ( std::vector<Identifier>::const_iterator i=idfirst ; i!=idlast ; ++i ) {
 
       Identifier     Id = *i;
       IdentifierHash hashId;
