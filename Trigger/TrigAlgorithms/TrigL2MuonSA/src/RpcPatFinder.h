@@ -65,14 +65,14 @@ class RpcPatFinder: public AthAlgTool
 		double &result_x,
 		double &result_x1,
 		double &result_dMO,
-                const TrigL2MuonSA::RpcLayerHits rpcLayerHits) const;
+		const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const;
 
   int patfinder_forEta(bool iphi,
 		    unsigned int &result_pat,
 		    double result_aw[],
 		    double result_bw[],
 		    double result_dist[],
-                    const TrigL2MuonSA::RpcLayerHits rpcLayerHits) const;
+		    const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const;
 
   bool deltaOK(int l1, int l2, double x1, double x2, int isphi, double &delta) const;  
   double calibR(const std::string& stationName, double R, double Phi) const;  
@@ -80,7 +80,7 @@ class RpcPatFinder: public AthAlgTool
              size_t index[], 
              double aw[], 
              double bw[], 
-             const TrigL2MuonSA::RpcLayerHits rpcLayerHits) const;
+             const TrigL2MuonSA::RpcLayerHits& rpcLayerHits) const;
 };
 
 }
