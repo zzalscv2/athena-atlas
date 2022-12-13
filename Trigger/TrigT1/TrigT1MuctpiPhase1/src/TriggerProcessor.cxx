@@ -131,7 +131,7 @@ namespace LVL1MUCTPIPHASE1 {
 
 
             // Add extra bit in front to flag that this is a RUN3 RoI
-            daq_word |= 0x1 << 31;
+            daq_word |= 1u << 31;
 
             //find the trigger decisions
             std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> > decisions = m_trigThresholdDecisionTool->getThresholdDecisions(
