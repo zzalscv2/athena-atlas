@@ -2,6 +2,8 @@
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+import math
+
 class TrigTauMonAlgBuilder:
 
   _configured = False
@@ -432,25 +434,25 @@ class TrigTauMonAlgBuilder:
 
     monGroup.defineHistogram('L1RoIEt,L1RoIEta', type='TH2F', title='L1 RoI Et vs Eta; E_{T}[GeV]; #eta',
                             xbins=100,xmin=0,xmax=100,
-                             ybins=100,ymin=-2.6,ymax=2.6, opt='kAlwaysCreate')
+                             ybins=60,ymin=-2.5,ymax=2.5, opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIEt,L1RoIPhi', type='TH2F', title='L1 RoI Et vs Phi; E_{T}[GeV]; #phi',
                             xbins=100,xmin=0,xmax=100,
-                             ybins=100,ymin=-3.2,ymax=3.2, opt='kAlwaysCreate')
+                             ybins=100,ymin=-math.pi,ymax=math.pi, opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIEta,L1RoIPhi', type='TH2F', title='L1 RoI Eta vs Phi; #eta; #phi',
-                            xbins=100,xmin=-2.6,xmax=2.6,
-                             ybins=100,ymin=-3.2,ymax=3.2, opt='kAlwaysCreate')
+                            xbins=60,xmin=-2.5,xmax=2.5,
+                             ybins=100,ymin=-math.pi,ymax=math.pi, opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIEMIsol', title='L1 RoI EM Isol; E_{T}^{EM Isol}[GeV]; N RoI',xbins=16,xmin=-2,xmax=30,opt='kAlwaysCreate')
-    monGroup.defineHistogram('L1RoIEta', title='L1 RoI Eta; #eta; N RoI',xbins=100,xmin=-2.6,xmax=2.6,opt='kAlwaysCreate')
+    monGroup.defineHistogram('L1RoIEta', title='L1 RoI Eta; #eta; N RoI',xbins=60,xmin=-2.5,xmax=2.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIHadCore', title='L1 RoI HAD Core; E_{T}^{HAD}[GeV]; N RoI',xbins=16,xmin=-2,xmax=30,opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIHadIsol', title='L1 RoI HAD Isol; E_{T}^{HAD Isol}[GeV]; N RoI',xbins=16,xmin=-2,xmax=30,opt='kAlwaysCreate')
-    monGroup.defineHistogram('L1RoIPhi', title='L1 RoI Phi; #phi; N RoI',xbins=100,xmin=-3.2,xmax=3.2,opt='kAlwaysCreate')
+    monGroup.defineHistogram('L1RoIPhi', title='L1 RoI Phi; #phi; N RoI',xbins=100,xmin=-math.pi,xmax=math.pi,opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoITauClus', title='L1 RoI Tau Clust Energy; E_{T}[GeV]; N RoI',xbins=260,xmin=0,xmax=130,opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoITauClus,L1RoIEMIsol', type='TH2F', title='L1 RoI TauClus vs EMiso; E_{T}[GeV]; E_{T}^{EM Isol}[GeV]',
                             xbins=140,xmin=10,xmax=80,
                              ybins=42,ymin=-1,ymax=20,opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIEt', title='L1 RoI Tau Clust Energy; E_{T}[GeV]; N RoI',xbins=30,xmin=0,xmax=150,opt='kAlwaysCreate')
-    monGroup.defineHistogram('L1RoIRCore', title='L1 RoI RCore isolation; rCore isolation; N RoI',xbins=40,xmin=0,xmax=4,opt='kAlwaysCreate')
-    monGroup.defineHistogram('L1RoIRHad' , title='L1 RoI RHAD isolation; rHad isolation; N RoI'  ,xbins=20,xmin=0,xmax=2,opt='kAlwaysCreate')
+    monGroup.defineHistogram('L1RoIRCore', title='L1 RoI RCore isolation; rCore isolation; N RoI',xbins=250,xmin=0,xmax=1,opt='kAlwaysCreate')
+    monGroup.defineHistogram('L1RoIRHad' , title='L1 RoI RHAD isolation; rHad isolation; N RoI'  ,xbins=250,xmin=0,xmax=1,opt='kAlwaysCreate')
     monGroup.defineHistogram('L1RoIIso', title='L1 RoI isolation; isolation [GeV]; N RoI'  ,xbins=15,xmin=0,xmax=30,opt='kAlwaysCreate')
                              
   #
