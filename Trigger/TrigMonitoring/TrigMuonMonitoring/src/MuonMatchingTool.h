@@ -278,7 +278,7 @@ class MuonMatchingTool : public AthAlgTool {
  private:
 
   enum L1Items{ L1B_MU3V=1, L1B_MU5VF=2, L1B_MU8F=3, L1B_MU14FCH=6, L1B_MU14FCHR=6 , L1E_MU3V=1, L1E_MU5VF=3, L1E_MU8F=6, L1E_MU14FCH=12, L1E_MU14FCHR=12, ERROR};
-  int L1ItemStringToInt(std::string l1item, int roiSource) const {
+  int L1ItemStringToInt(const std::string& l1item, int roiSource) const {
     if( "L1_MU3V"==l1item) return roiSource==0 ? L1Items::L1B_MU3V : L1Items::L1E_MU3V;
     if( "L1_MU5VF"==l1item) return roiSource==0 ? L1Items::L1B_MU5VF : L1Items::L1E_MU5VF;
     if( "L1_MU8F"==l1item) return roiSource==0 ? L1Items::L1B_MU8F : L1Items::L1E_MU8F;
@@ -321,7 +321,7 @@ class MuonMatchingTool : public AthAlgTool {
    */
   template<class T, class OFFL> 
   const TrigCompositeUtils::LinkInfo<DataVector<T> > matchLinkInfo(const OFFL *offl, std::string trigger, float reqdR, bool &pass,
-                                                                   const std::string containerSGKey = "",
+                                                                   const std::string& containerSGKey = "",
 				                                   std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*) = &MuonMatchingTool::trigPosForMatch<T>) const;
 
   /**
@@ -337,7 +337,7 @@ class MuonMatchingTool : public AthAlgTool {
    * @todo Consider improving the argument list.
    */
   template<class T, class OFFL> const T* match(const OFFL *offl, std::string trigger, float reqdR, bool &pass,
-                                               const std::string containerSGKey = "",
+                                               const std::string& containerSGKey = "",
 				               std::tuple<bool,double,double> (*trigPosForMatchFunc)(const T*) = &MuonMatchingTool::trigPosForMatch<T>) const;
 
   /**
