@@ -4,7 +4,6 @@
 # art-type: grid
 # art-athena-mt: 8
 # art-include: master/Athena
-# art-include: 22.0/Athena
 # art-output: *.log   
 python $Athena_DIR/python/BTagging/BTagESD.py | tee temp.log
 echo "art-result: ${PIPESTATUS[0]}"

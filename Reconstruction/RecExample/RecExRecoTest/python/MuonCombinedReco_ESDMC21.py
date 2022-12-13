@@ -3,9 +3,9 @@
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     
-    #Made in master, 25 May 2022 using
-    #https://gitlab.cern.ch/atlas/athena/-/blob/b74428c8ff7dcd8c859fce16001c60a14b78256b/Reconstruction/RecExample/RecJobTransformTests/test/test_mc20e_13TeV.sh
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc16_13TeV/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.ESD.e6337_s3681_r13145/myESD.pool.root"]
+    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecExRecoTest/mc21_13p6TeV/ESDFiles/mc21_13p6TeV.421450.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep_fct.recon.ESD.e8445_e8447_s3822_r13565/ESD.28877240._000046.pool.root.1"]
+    # Use latest MC21 tag to pick up latest muon folders apparently needed
+    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-10"
     ConfigFlags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
