@@ -44,4 +44,12 @@ namespace xAOD{
     setHad_status( Had_status );
   }
 
+  int32_t eFexTower_v1::id() const {
+      int etaIndex = int( (eta()+0.025)*10 ) + (((eta()+0.025)<0) ? -1 : 1); // runs from -25 to 25 (excluding 0)
+      int phiIndex = int( (phi()+0.025)*32./ROOT::Math::Pi() ) + ((phi()+0.025)<0 ? 63 : 0); // runs from 0 to 63
+      int modIndex = ( module()>23 ) ? 99 : module(); // module runs from 0 to 23 or otherwise takes value 99
+      int fpgaIndex = ( fpga() > 3 ) ? 9 : fpga(); //from runs from 0 to 3 or otherwise takes value 9
+      return (std::abs(etaIndex)*100000 + phiIndex*1000 + modIndex*10 +fpgaIndex)*(etaIndex<0 ? -1 : 1);
+  }
+
 } // namespace xAOD

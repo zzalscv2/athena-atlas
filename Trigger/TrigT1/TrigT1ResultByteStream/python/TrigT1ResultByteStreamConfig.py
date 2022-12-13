@@ -369,9 +369,10 @@ if __name__ == '__main__':
   parser.add_argument('--evtMax',type=int,default=-1,help="number of events to process (-1 = til end of files)")
   parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
   parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+  parser.add_argument('--userAlgs',nargs='+',help="names of user algorithms to add, can specify as Type/Name or just Type",default=[])
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
   parser.add_argument('--outputHISTFile',default="",help="if specified, will activate monitoring")
-  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jxTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
+  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eDataTowers","jTOBs","jxTOBS","jTowers","gTOBs","gCaloTowers","Topo","legacy","tTowers","sCells","eTriggerTowers"},required=True,
                       help="What data to decode and output.")
   args = parser.parse_args()
 
@@ -384,6 +385,7 @@ if __name__ == '__main__':
     flags.Trigger.triggerConfig='DB'
     from AthenaConfiguration.Enums import LHCPeriod
     flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
+    flags.IOVDb.GlobalTag = "CONDBR2-HLTP-2022-02"
 
   flags.Exec.OutputLevel = algLogLevel
   flags.Exec.MaxEvents = args.evtMax
@@ -425,6 +427,34 @@ if __name__ == '__main__':
     auxType = edmType.replace('Container','AuxContainer')
     return [f'{edmType}#{edmName}',
             f'{auxType}#{edmName}Aux.']
+
+  if "eTriggerTowers" in args.outputs:
+    # building eTowers from supercells and trigger towers
+    args.outputs += ["sCells","tTowers"] # need both of these
+
+    # next few lines are attempt to include masked channels
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg # should this be LArOnOffIdMappingSCCfg?
+    acc.merge( LArOnOffIdMappingCfg(flags) )
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    acc.merge(addFolders(flags,"/LAR/BadChannels/BadChannelsSC","LAR",tag="LARBadChannelsBadChannelsSC-RUN3-UPD1-00",className="CondAttrListCollection"))
+    acc.addCondAlgo(CompFactory.LArBadChannelCondAlg(ReadKey="/LAR/BadChannels/BadChannelsSC",isSC=True,CablingKey="LArOnOffIdMapSC"))
+
+    acc.addEventAlgo( CompFactory.LVL1.eFexTowerBuilder("eFexTowerBuilder",MappingVerificationMode=False), sequenceName='AthAlgSeq' )
+    outputEDM += addEDM('xAOD::eFexTowerContainer', acc.getEventAlgo("eFexTowerBuilder").eFexContainerWriteKey)
+
+  if "sCells" in args.outputs:
+    from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
+    acc.merge( ReadSCellFromByteStreamCfg(flags,"SCell") )
+    acc.getEventAlgo("LArRAWtoSuperCell").SCellContainerIn="SC_ET_ID" # collection after timing cuts (SC_ET would be before timing cuts, SC would be the ADC samples)
+    outputEDM += ["CaloCellContainer#SCell"]
+
+  if "tTowers" in args.outputs:
+    from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
+    acc.merge(ByteStreamReadCfg(flags, type_names=['xAOD::TriggerTowerContainer/xAODTriggerTowers',
+                                                            'xAOD::TriggerTowerAuxContainer/xAODTriggerTowersAux.']))
+
+
+
 
 
   ########################################
@@ -500,8 +530,8 @@ if __name__ == '__main__':
   ########################################
   # eFEX ROIs and Input data
   ########################################
-  if any( [x in args.outputs for x in ['eTOBs','exTOBs','eTowers']] ):
-    eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs='eTOBs' in args.outputs,xTOBs='exTOBs' in args.outputs,decodeInputs='eTowers' in args.outputs)
+  if any( [x in args.outputs for x in ['eTOBs','exTOBs','eDataTowers']] ):
+    eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs='eTOBs' in args.outputs,xTOBs='exTOBs' in args.outputs,decodeInputs='eDataTowers' in args.outputs)
     # eFexTool_xTOBs = eFexByteStreamToolCfg('eFexBSDecoder_xTOBs', flags,xTOBs=True)
     decoderTools += [eFexTool]
 
@@ -544,6 +574,13 @@ if __name__ == '__main__':
   # get rid of warning about propagating input attribute list ... since there is none
   # note it's odd that the AthenaCommon.globalflags input format property doesn't get updated appropriately by flags??
   acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
+
+  if flags.Exec.OutputLevel==Constants.DEBUG: acc.getService("StoreGateSvc").Dump=True # when debugging also dump the storegatesvc content
+
+  # schedule user algs, if any
+  for alg in args.userAlgs: acc.addEventAlgo(CompFactory.getComp(alg.split('/')[0])(name=alg.split('/')[-1]),sequenceName='AthEndSeq')
+
+
 
   if args.outputHISTFile != "":
     from AthenaMonitoring.AthMonitorCfgHelper import getDQTHistSvc
