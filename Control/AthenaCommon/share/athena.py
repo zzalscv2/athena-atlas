@@ -36,7 +36,8 @@ do
 done
 
 
-# Do the actual preloading via LD_PRELOAD
+# Do the actual preloading via LD_PRELOAD and save the original value
+export LD_PRELOAD_ORIG=${LD_PRELOAD}
 source `which athena_preload.sh `
 
 if [ $USECA -eq 1 ] 
@@ -94,39 +95,14 @@ __doc__     = 'For details about athena.py, run "less `which athena.py`"'
 import sys, os
 import getopt
 
-ldpreload = os.getenv( 'LD_PRELOAD' ) or ''
-
 ### parse the command line arguments -----------------------------------------
 import AthenaCommon.AthOptionsParser as aop
 opts = aop.parse()
 _help_and_exit = aop._help_and_exit
 
-### remove preload hack for proper execution of child-processes --------------
-if ldpreload:
-   if 'TCMALLOCDIR' in os.environ:
-       tcmlib = os.getenv( 'TCMALLOCDIR' ) +  "/libtcmalloc.so"
-       ldpreload = ldpreload.replace(tcmlib, '' )
-       tcmlib = os.getenv( 'TCMALLOCDIR' ) +  "/libtcmalloc_minimal.so"
-       ldpreload = ldpreload.replace(tcmlib, '' )
-       del tcmlib
-   pos = ldpreload.find ('/libexctrace_collector.so')
-   if pos >= 0:
-      pos0 = ldpreload.rfind (':', 0, pos)
-      pos1 = ldpreload.find (':', pos)
-      if pos1 < 0:
-         pos1 = len(ldpreload)
-      ldpreload = ldpreload[0:pos0+1] + ldpreload[pos1:]
-   if os.getenv( 'ATHENA_ADD_PRELOAD' ):
-      ldpreload = ldpreload.replace(os.getenv( 'ATHENA_ADD_PRELOAD' ), '' )
-      os.unsetenv( 'ATHENA_ADD_PRELOAD' )
-   ldpreload = ldpreload.replace( '::', ':')
-   ldpreload = ldpreload.strip(':')
-
-   if not ldpreload:
-      del os.environ[ 'LD_PRELOAD' ]
-   else:
-      os.environ[ 'LD_PRELOAD' ] = ldpreload
-del ldpreload
+### remove preload libs for proper execution of child-processes --------------
+os.environ['LD_PRELOAD'] = os.getenv('LD_PRELOAD_ORIG')
+os.unsetenv('LD_PRELOAD_ORIG')
 
 ### start profiler, if requested
 if opts.profile_python:
