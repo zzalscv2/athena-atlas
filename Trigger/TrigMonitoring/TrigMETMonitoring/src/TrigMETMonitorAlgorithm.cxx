@@ -452,23 +452,25 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     if ( offline_met_cont.isValid() && offline_met_cont->size() > 0 ) {
       finalTrkMET = ((*offline_met_cont)["FinalTrk"]);
       muonsMET = ((*offline_met_cont)["Muons"]);
-      
-      offline_Ex = - finalTrkMET->mpx()/Gaudi::Units::GeV;
-      offline_Ey = - finalTrkMET->mpy()/Gaudi::Units::GeV;
-      offline_sumEt = finalTrkMET->sumet()/Gaudi::Units::GeV;
-      offline_Et = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
-      offline_Et_eff = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
-      fill(tool,offline_Ex,offline_Ey,offline_Et,offline_sumEt);
 
-      if(finalTrkMET && muonsMET){
-        xAOD::MissingET finalTrkNoMuMET = *finalTrkMET - *muonsMET;
-        offline_NoMu_Ex = - finalTrkNoMuMET.mpx()/Gaudi::Units::GeV;
-        offline_NoMu_Ey = - finalTrkNoMuMET.mpy()/Gaudi::Units::GeV;	
-        offline_NoMu_sumEt = finalTrkNoMuMET.sumet()/Gaudi::Units::GeV;
-        offline_NoMu_Et = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
-        offline_NoMu_Et_eff = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
-        fill(tool,offline_NoMu_Ex,offline_NoMu_Ey,offline_NoMu_Et,offline_NoMu_sumEt);
-      }	
+      if(finalTrkMET) {
+        offline_Ex = - finalTrkMET->mpx()/Gaudi::Units::GeV;
+        offline_Ey = - finalTrkMET->mpy()/Gaudi::Units::GeV;
+        offline_sumEt = finalTrkMET->sumet()/Gaudi::Units::GeV;
+        offline_Et = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
+        offline_Et_eff = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
+        fill(tool,offline_Ex,offline_Ey,offline_Et,offline_sumEt);
+
+        if(muonsMET){
+          xAOD::MissingET finalTrkNoMuMET = *finalTrkMET - *muonsMET;
+          offline_NoMu_Ex = - finalTrkNoMuMET.mpx()/Gaudi::Units::GeV;
+          offline_NoMu_Ey = - finalTrkNoMuMET.mpy()/Gaudi::Units::GeV;
+          offline_NoMu_sumEt = finalTrkNoMuMET.sumet()/Gaudi::Units::GeV;
+          offline_NoMu_Et = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
+          offline_NoMu_Et_eff = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
+          fill(tool,offline_NoMu_Ex,offline_NoMu_Ey,offline_NoMu_Et,offline_NoMu_sumEt);
+        }
+      }
     }
 
     // access L1 MET values
