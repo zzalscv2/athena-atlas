@@ -1,6 +1,14 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-#Translate the commonly used runArgs into configFlags 
+# Reset preload libs for proper execution of child-processes (ATR-26769).
+# We only put this here because this is executed by all CA transform skeletons:
+import os
+if 'LD_PRELOAD_ORIG' in os.environ:
+    os.environ['LD_PRELOAD'] = os.getenv('LD_PRELOAD_ORIG')
+    os.unsetenv('LD_PRELOAD_ORIG')
+
+
+#Translate the commonly used runArgs into configFlags
 def commonRunArgsToFlags(runArgs,configFlags):
     ## Max/skip events
     if hasattr(runArgs,"skipEvents"):
