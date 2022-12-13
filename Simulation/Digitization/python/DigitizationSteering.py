@@ -92,6 +92,8 @@ def DigitizationMainContentCfg(flags):
     # Signal-only truth information
     if flags.Digitization.PileUp:
         from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
+            MergeMcEventCollCfg,
+            InTimeOnlyMcEventCollCfg,
             SignalOnlyMcEventCollCfg,
             MergeAntiKt4TruthJetsCfg,
             MergeAntiKt6TruthJetsCfg,
@@ -100,7 +102,12 @@ def DigitizationMainContentCfg(flags):
             MergeCalibHitsCfg,
         )
         if flags.Common.ProductionStep is not ProductionStep.FastChain and getEnabledDetectors(flags):
-            acc.merge(SignalOnlyMcEventCollCfg(flags))
+            if flags.Digitization.DigiSteeringConf=="StandardPileUpToolsAlg":
+                acc.merge(MergeMcEventCollCfg(flags))
+            elif flags.Digitization.DigiSteeringConf=="StandardInTimeOnlyTruthPileUpToolsAlg":
+                acc.merge(InTimeOnlyMcEventCollCfg(flags))
+            else:
+                acc.merge(SignalOnlyMcEventCollCfg(flags))
         if flags.Digitization.EnableTruth:
             puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
             if "AntiKt4TruthJets" in puCollections:
