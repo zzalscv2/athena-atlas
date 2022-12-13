@@ -610,7 +610,7 @@ class MultipleStreamManager:
             TREE_AUTO_FLUSH = 100
         if StreamName in ["StreamDAOD_PHYS"]:
             TREE_AUTO_FLUSH = 500
-        if StreamName in ["StreamDAOD_PHYSLITE"]:
+        if StreamName in ["StreamDAOD_PHYSLITE", "StreamD2AOD_PHYSLITE"]:
             TREE_AUTO_FLUSH = 1000
             CONTAINER_SPLITLEVEL = 99
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree", str(TREE_AUTO_FLUSH) ) ]
@@ -647,7 +647,7 @@ class MultipleStreamManager:
             TREE_AUTO_FLUSH = 100
         if Parent in ["StreamDAOD_PHYS"]:
             TREE_AUTO_FLUSH = 500
-        if Parent in ["StreamDAOD_PHYSLITE"]:
+        if Parent in ["StreamDAOD_PHYSLITE", "StreamD2AOD_PHYSLITE"]:
             TREE_AUTO_FLUSH = 1000
             CONTAINER_SPLITLEVEL = 99
         svcMgr.AthenaPoolCnvSvc.PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree_" + StreamName, str(TREE_AUTO_FLUSH) ) ]
