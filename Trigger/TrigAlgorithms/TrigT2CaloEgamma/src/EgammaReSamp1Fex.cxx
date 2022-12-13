@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -264,6 +264,7 @@ StatusCode EgammaReSamp1Fex::execute(xAOD::TrigEMCluster& rtrigEmCluster, const 
   double etot = 0.;
   double wstot = -9999.;
   double wstot_deta = (z_etamax - z_etamin) * 0.5;
+  // cppcheck-suppress negativeIndex
   double eta_center = z_etacell[z_ncmax];
   if (caloDDE != 0) {
     eta_center = caloDDE->eta();

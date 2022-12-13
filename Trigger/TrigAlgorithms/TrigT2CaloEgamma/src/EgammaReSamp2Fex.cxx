@@ -104,9 +104,7 @@ StatusCode EgammaReSamp2Fex::execute(xAOD::TrigEMCluster& rtrigEmCluster, const 
       dphi = std::abs(M_PI - dphi);
       dphi = std::abs(M_PI - dphi);
       if (dphi < 0.025 + 0.002) { // the same here (around 2*pi/64/4, but ok)
-        if (windows.find(larcell) == windows.end()) {
-          windows[larcell] = 0.0;
-        } // end of windows check
+        windows.emplace(larcell, 0.0);
       }   // End of dphi check
     }     // End of deta check
     ncells++;
