@@ -8,11 +8,12 @@
 #include "TrkTrack/TrackStateOnSurface.h"
 
 #include "TestTools/leakcheck.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <iostream>
 
 int
-main()
+main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "Trk::Track test" << std::endl;
 

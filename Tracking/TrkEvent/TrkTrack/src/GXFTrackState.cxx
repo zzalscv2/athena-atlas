@@ -16,6 +16,7 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkEventPrimitives/SurfaceConsistencyCheck.h"
 #include "TrkEventPrimitives/unique_clone.h"
+#include <utility>
 
 namespace Trk {
   GXFTrackState::GXFTrackState(GXFTrackState & rhs):
@@ -109,7 +110,8 @@ namespace Trk {
   
   bool
   GXFTrackState::isSane() const{
-    if (not consistentSurfaces(m_measurement.get(),m_trackpar.get(), m_materialEffects.get() )){
+    const GXFMaterialEffects* eff = m_materialEffects.get();
+    if (not consistentSurfaces(m_measurement.get(),m_trackpar.get(), eff) ){
       std::cerr << "GXFTrackState::isSane. With :" << '\n';
       std::cerr << "Types : " << m_tsType.to_string() << '\n';
       std::cerr << "Surfaces differ! " << std::endl;
