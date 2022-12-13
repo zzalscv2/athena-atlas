@@ -152,18 +152,27 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 //check that the SCell Identifier exists in the map
                 auto it_ScellID2ptr = map_ScellID2ptr.find(SCellID);
                 if(it_ScellID2ptr == map_ScellID2ptr.end()) {
-                    ATH_MSG_ERROR("Scell ID: "<<SCellID<< " not found on map map_ScellID2ptr");
-                    return StatusCode::FAILURE;
+                    ATH_MSG_WARNING("Scell ID: 0x"<<std::hex<<(SCellID >> 32)<<std::dec<< " not found on map map_ScellID2ptr");
+                    
+                    scEt.push_back(0);
+                    scEta.push_back(-99);
+                    scPhi.push_back(-99);
+                    // bit shifting to get only a 32 bit number
+                    scID.push_back( SCellID >> 32 );                        
+                    
+                }
+                else{
+                    const CaloCell* myCell = it_ScellID2ptr->second;
+                    
+                    scEt.push_back(myCell->et());
+                    scEta.push_back(myCell->eta());
+                    scPhi.push_back(myCell->phi());
+                    // bit shifting to get only a 32 bit number
+                    scID.push_back( SCellID >> 32 );                    
                 }
 
 
-                const CaloCell* myCell = it_ScellID2ptr->second;
-                
-                scEt.push_back(myCell->et());
-                scEta.push_back(myCell->eta());
-                scPhi.push_back(myCell->phi());
-                // bit shifting to get only a 32 bit number
-                scID.push_back( SCellID >> 32 );
+
             }   
 
         }
@@ -181,14 +190,20 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             //check that the Tile Identifier exists in the map
             auto it_TileID2ptr = map_TileID2ptr.find(TileID);
             if(it_TileID2ptr == map_TileID2ptr.end()) {
-                ATH_MSG_ERROR("Scell ID: "<<TileID<< " not found on map map_TileID2ptr");
-                return StatusCode::FAILURE;
-            }            
+                ATH_MSG_WARNING("Scell ID: 0x"<<std::hex<<TileID<<std::dec<< " not found on map map_TileID2ptr");
+
+                TileEt    = 0;
+                TileEta   = -99;
+                TilePhi   = -99; 
+            }
+            else{
+                TileEt    = (it_TileID2ptr->second)->cpET();
+                TileEta   = (it_TileID2ptr->second)->eta();
+                float phi = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
+                TilePhi   = phi;                
+            }           
             
-            TileEt    = (it_TileID2ptr->second)->cpET();
-            TileEta   = (it_TileID2ptr->second)->eta();
-            float phi = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
-            TilePhi   = phi;
+
         }
         
         // Decorating the tower with the corresponding information

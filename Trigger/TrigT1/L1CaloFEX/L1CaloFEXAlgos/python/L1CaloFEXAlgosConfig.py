@@ -17,6 +17,23 @@ def L1CaloFEXDecoratorCfg(name):
     return acc
 
 
+def jFexEmulatedTowersDerivationCfg(name,flags):
+    """
+    Create emulated towers for derivation jobs running on RAWD
+    Requires to decode the SCells (the legacy TriggerTowers are already available)
+    """
+    acc=ComponentAccumulator()
+
+    from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
+    acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
+
+    emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
+    emulator.jTowersWriteKey   = "L1_jFexEmulatedTowers"
+    acc.addEventAlgo(emulator)
+
+    return acc
+
+
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
     from AthenaCommon.Logging import logging
@@ -128,10 +145,7 @@ if __name__ == '__main__':
     
     # Decodes LATOME into SCell container
     from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg,TriggerTowersInputCfg
-    if any(["data22_cos" in f for f in args.filesInput]):
-        acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
-    else:
-        acc.merge(ReadSCellFromByteStreamCfg(flags))
+    acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
     
     # Creates the TriggerTower container
     acc.merge(TriggerTowersInputCfg(flags))
