@@ -81,7 +81,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     return sqrt(deta*deta + dphi*dphi);
   };
 
-  inline bool HLTMatching(const xAOD::TauJet* offline_tau, std::vector<const xAOD::TauJet*> online_tau_vec, float threshold) const
+  inline bool HLTMatching(const xAOD::TauJet* offline_tau, const std::vector<const xAOD::TauJet*>& online_tau_vec, float threshold) const
   {
     for(auto online_tau: online_tau_vec){
       float deltaR = dR(offline_tau->eta(),offline_tau->phi(), online_tau->eta(),online_tau->phi());
@@ -103,7 +103,7 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
     return false;
   };
   
-  inline bool HLTTruthMatching(const xAOD::TruthParticle* true_taus, const std::vector<const xAOD::TauJet*> online_tau_vec, float threshold) const
+  inline bool HLTTruthMatching(const xAOD::TruthParticle* true_taus, const std::vector<const xAOD::TauJet*>& online_tau_vec, float threshold) const
   {
     for(auto online_tau: online_tau_vec){
       float deltaR = dR(true_taus->eta(),true_taus->phi(), online_tau->eta(),online_tau->phi());
