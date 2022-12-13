@@ -609,7 +609,14 @@
                <string>ZDC</string>
               </property>
              </widget>
-            </item>
+         </item>
+         <item>
+             <widget class="QCheckBox" name="checkBox_AFP">
+                 <property name="text">
+                     <string>AFP</string>
+                 </property>
+             </widget>
+         </item>
             <item>
              <widget class="QCheckBox" name="checkBox_ALFA">
               <property name="text">
