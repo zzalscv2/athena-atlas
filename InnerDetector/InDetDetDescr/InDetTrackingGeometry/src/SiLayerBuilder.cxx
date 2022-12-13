@@ -481,10 +481,13 @@ const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers
           msg(MSG::DEBUG) << endmsg;           
       }
       // prepare the right overlap descriptor       
-      Trk::OverlapDescriptor* olDescriptor = nullptr;
-      if (m_pixelCase)
-          olDescriptor = new InDet::PixelOverlapDescriptor;
-      else olDescriptor = new  InDet::SCT_OverlapDescriptor(m_addMoreSurfaces);
+      std::unique_ptr<Trk::OverlapDescriptor> olDescriptor = nullptr;
+      if (m_pixelCase){
+          olDescriptor = std::make_unique<InDet::PixelOverlapDescriptor>();
+      }
+      else {
+        olDescriptor = std::make_unique<InDet::SCT_OverlapDescriptor>(m_addMoreSurfaces);
+      }
       // for eventual use with the passive layer
       currentLayerRadius = layerRadius[layerCounter];
 
@@ -493,7 +496,7 @@ const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers
                                            currentBinnedArray,
                                            *layerMaterial,
                                            layerThickness[layerCounter],
-                                           olDescriptor);
+                                           std::move(olDescriptor));
       // cleanup of the layer material --------------------------------------------------------------
       delete layerMaterial; 
       // register the layer to the surfaces
@@ -907,23 +910,26 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
        
         Trk::DiscBounds* activeLayerBounds    = new Trk::DiscBounds(rMin,rMax);
         // prepare the right overlap descriptor       
-        Trk::OverlapDescriptor* olDescriptor = nullptr;
-        if (m_pixelCase)
-            olDescriptor = new InDet::PixelOverlapDescriptor;
-        //else olDescriptor = new  InDet::SCT_OverlapDescriptor;
-	else {
-	  std::vector<Trk::BinUtility*>* binUtils = new std::vector<Trk::BinUtility*>;
-	  if (singleBinUtils) {
-	    std::vector<Trk::BinUtility*>::iterator binIter = singleBinUtils->begin();
-	    for ( ; binIter != singleBinUtils->end(); ++binIter){
-	      binUtils->push_back((*binIter)->clone());
-	    }
-	  }
-	  //DiscOverlapDescriptor takes possession of binUtils, will delete it on destruction.
-	  // but *does not* manage currentBinnedArray.
-	  olDescriptor = new  InDet::DiscOverlapDescriptor(currentBinnedArray, binUtils);
-	}
-        
+        std::unique_ptr<Trk::OverlapDescriptor> olDescriptor = nullptr;
+        if (m_pixelCase) {
+            olDescriptor = std::make_unique<InDet::PixelOverlapDescriptor>();
+        } else {
+            std::vector<Trk::BinUtility*>* binUtils =
+                new std::vector<Trk::BinUtility*>;
+            if (singleBinUtils) {
+                std::vector<Trk::BinUtility*>::iterator binIter =
+                    singleBinUtils->begin();
+                for (; binIter != singleBinUtils->end(); ++binIter) {
+                    binUtils->push_back((*binIter)->clone());
+                }
+            }
+            // DiscOverlapDescriptor takes possession of binUtils, will delete
+            // it on destruction.
+            //  but *does not* manage currentBinnedArray.
+            olDescriptor =
+                std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray, binUtils);
+        }
+
         // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
         // activeLayerTransform deleted in 'Surface' baseclass
         Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
@@ -931,7 +937,7 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
                                                          currentBinnedArray,
                                                          *layerMaterial,
                                                          thickness,
-                                                         olDescriptor);
+                                                         std::move(olDescriptor));
         // cleanup
         delete layerMaterial;
         // register the layer to the surfaces --- if necessary to the other sie as well
@@ -1272,7 +1278,7 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
     Trk::DiscBounds* activeLayerBounds    = new Trk::DiscBounds(discRmin[discCounter],discRmax[discCounter]);
     std::vector<Trk::BinUtility*>* binUtils = new std::vector<Trk::BinUtility*>;
     // prepare the right overlap descriptor       
-    Trk::OverlapDescriptor* olDescriptor = new  InDet::DiscOverlapDescriptor(currentBinnedArray, binUtils, true);
+    auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray, binUtils, true);
         
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
@@ -1281,7 +1287,7 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
                                                      currentBinnedArray,
                                                      *layerMaterial,
                                                      thickness,
-                                                     olDescriptor);
+                                                     std::move(olDescriptor));
     // cleanup
     delete layerMaterial;
     // register the layer to the surfaces --- if necessary to the other sie as well

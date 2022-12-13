@@ -24,6 +24,8 @@ class MsgStream;
 #include "TrkNeutralParameters/NeutralParameters.h"
 #include "TrkParameters/TrackParameters.h"
 
+#include <memory>
+
 namespace Trk {
 
 class Surface;
@@ -64,6 +66,7 @@ enum LayerType { passive = 0, active = 1 };
    [....] - other
 
    @author Andreas.Salzburger@cern.ch
+   @author Christos Anastopoulos (Athena MT)
 
 */
 
@@ -74,16 +77,17 @@ class Layer {
 
   /**Constructor with MaterialProperties */
   Layer(const LayerMaterialProperties& laymatprop, double thickness = 0.,
-        OverlapDescriptor* od = nullptr, int ltype = int(passive));
+        std::unique_ptr<OverlapDescriptor> od = nullptr,
+        int ltype = int(passive));
 
   /**Constructor with pointer to SurfaceArray (passing ownership) */
   Layer(SurfaceArray* surfaceArray, double thickness = 0.,
-        OverlapDescriptor* od = nullptr, int ltype = int(passive));
+        std::unique_ptr<OverlapDescriptor> = nullptr, int ltype = int(passive));
 
   /**Constructor with MaterialProperties and pointer SurfaceArray (passing
    * ownership) */
   Layer(SurfaceArray* surfaceArray, const LayerMaterialProperties& laymatprop,
-        double thickness = 0., OverlapDescriptor* od = nullptr,
+        double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
         int ltype = int(passive));
 
   /**Copy Constructor for Layers */
@@ -290,7 +294,7 @@ class Layer {
   //!< thickness of the Layer
   double m_layerThickness;
   //!< descriptor for overlap/next surface (owning ptr)
-  OverlapDescriptor* m_overlapDescriptor;
+  std::unique_ptr<OverlapDescriptor> m_overlapDescriptor;
 
   // These are stored by not owning pointers belong to the  Volume
   //!< the previous Layer according to BinGenUtils

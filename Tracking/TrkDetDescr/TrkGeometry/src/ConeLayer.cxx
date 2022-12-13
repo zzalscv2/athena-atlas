@@ -20,29 +20,29 @@ Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(Trk::ConeSurface* cyl,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(*cyl)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
                           Trk::SurfaceArray* surfaceArray,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(surfaceArray, thickness, olap, laytyp)
+  , Layer(surfaceArray, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
@@ -50,10 +50,10 @@ Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::SurfaceArray* surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(surfaceArray, laymatprop, thickness, olap, laytyp)
+  , Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Trk::ConeLayer& clay) = default;

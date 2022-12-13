@@ -455,7 +455,7 @@ const std::vector<Trk::CylinderLayer*>* InDet::TRT_LayerBuilder::cylindricalLaye
                                                                  strawArray,
                                                                  *layerMaterial,
                                                                  m_layerThickness,
-                                                                 new InDet::TRT_OverlapDescriptor(trtIdHelper),
+                                                                 std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
                                                                  aDescritpor));
                    delete layerMaterial;
 
@@ -463,7 +463,7 @@ const std::vector<Trk::CylinderLayer*>* InDet::TRT_LayerBuilder::cylindricalLaye
                   barrelLayers->push_back(new Trk::CylinderLayer(barrelLayerBounds,
                                                                  strawArray,
                                                                  m_layerThickness,
-                                                                 new InDet::TRT_OverlapDescriptor(trtIdHelper),
+                                                                 std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
                                                                  aDescritpor));
         } // loop over layers
      } // loop over rings
@@ -720,14 +720,14 @@ const std::vector<Trk::DiscLayer*>* InDet::TRT_LayerBuilder::discLayers() const
                                                 strawArray,
                                                 *layerMaterial,
                                                 m_layerThickness,
-                                                new InDet::TRT_OverlapDescriptor(trtIdHelper),
+                                                std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
                                                 aDescriptor);
            else if (!m_modelGeometry)
               currentLayer = new Trk::DiscLayer(fullDiscTransform,
                                                 fullDiscBounds->clone(),
                                                 strawArray,
                                                 m_layerThickness,
-                                                new InDet::TRT_OverlapDescriptor(trtIdHelper),
+                                                std::make_unique<InDet::TRT_OverlapDescriptor>(trtIdHelper),
                                                 aDescriptor);
 
           if (currentLayer) endcapLayers->push_back(currentLayer);

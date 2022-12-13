@@ -50,14 +50,14 @@ public:
                 CylinderBounds* cbounds,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
-                OverlapDescriptor* od = nullptr,
+                std::unique_ptr<OverlapDescriptor> od = nullptr,
                 int laytyp = int(Trk::active));
 
   /**Constructor with CylinderSurface and  MaterialProperties */
   CylinderLayer(CylinderSurface* cyl,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
-                OverlapDescriptor* od = nullptr,
+                std::unique_ptr<OverlapDescriptor> od = nullptr,
                 int laytyp = int(Trk::active));
 
   /**Constructor with CylinderSurface components and pointer to SurfaceArray
@@ -69,7 +69,7 @@ public:
                 CylinderBounds* cbounds,
                 SurfaceArray* surfaceArray,
                 double thickness = 0.,
-                OverlapDescriptor* od = nullptr,
+                std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,
                 int laytyp = int(Trk::active));
 
@@ -80,7 +80,7 @@ public:
                 SurfaceArray* surfaceArray,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
-                OverlapDescriptor* od = nullptr,
+                std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,
                 int laytyp = int(Trk::active));
 
@@ -88,13 +88,13 @@ public:
    * MaterialProperties */
   CylinderLayer(CylinderBounds* cbounds,
                 const LayerMaterialProperties& laymatprop,
-                double thickness = 0., OverlapDescriptor* od = nullptr,
+                double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
                 int laytyp = int(Trk::active));
 
   /**Concentric Layer: Constructor with CylinderSurface components and pointer
    * to SurfaceArray (passing ownership) */
   CylinderLayer(CylinderBounds* cbounds, SurfaceArray* surfaceArray,
-                double thickness = 0., OverlapDescriptor* od = nullptr,
+                double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,
                 int laytyp = int(Trk::active));
 
@@ -102,7 +102,7 @@ public:
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   CylinderLayer(CylinderBounds* cbounds, SurfaceArray* surfaceArray,
                 const LayerMaterialProperties& laymatprop,
-                double thickness = 0., OverlapDescriptor* od = nullptr,
+                double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,
                 int laytyp = int(Trk::active));
 

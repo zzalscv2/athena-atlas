@@ -18,14 +18,12 @@
 Trk::SubtractedCylinderLayer::SubtractedCylinderLayer(
     const Trk::SubtractedCylinderSurface* subCyl,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : SubtractedCylinderSurface(*subCyl),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::SubtractedCylinderLayer::SubtractedCylinderLayer(
-    const Trk::SubtractedCylinderLayer& clay)
-
-    = default;
+    const Trk::SubtractedCylinderLayer& clay) = default;
 
 Trk::SubtractedCylinderLayer::SubtractedCylinderLayer(
     const Trk::SubtractedCylinderLayer& clay, const Amg::Transform3D& transf)

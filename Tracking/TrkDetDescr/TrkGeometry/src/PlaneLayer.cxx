@@ -18,100 +18,98 @@
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::RectangleBounds* rbounds,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, rbounds),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::TrapezoidBounds* tbounds,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::DiamondBounds* tbounds,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::EllipseBounds* tbounds,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(Trk::PlaneSurface* plane,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
-    : PlaneSurface(*plane), Layer(laymatprop, thickness, olap, laytyp) {}
+    : PlaneSurface(*plane), Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(
     const Amg::Transform3D & transform,
     Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::RectangleBounds* rbounds,
                             Trk::SurfaceArray* surfaceArray, double thickness,
-                            Trk::OverlapDescriptor* olap, int laytyp)
+                            std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, rbounds),
-      Layer(surfaceArray, thickness, olap, laytyp) {}
+      Layer(surfaceArray, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::TrapezoidBounds* tbounds,
                             Trk::SurfaceArray* surfaceArray, double thickness,
-                            Trk::OverlapDescriptor* olap, int laytyp)
+                            std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, thickness, olap, laytyp) {}
+      Layer(surfaceArray, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::DiamondBounds* tbounds,
                             Trk::SurfaceArray* surfaceArray, double thickness,
-                            Trk::OverlapDescriptor* olap, int laytyp)
+                            std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, thickness, olap, laytyp) {}
+      Layer(surfaceArray, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::RectangleBounds* rbounds,
                             Trk::SurfaceArray* surfaceArray,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, rbounds),
-      Layer(surfaceArray, laymatprop, thickness, olap, laytyp) {}
+      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::TrapezoidBounds* tbounds,
                             Trk::SurfaceArray* surfaceArray,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, laymatprop, thickness, olap, laytyp) {}
+      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::DiamondBounds* tbounds,
                             Trk::SurfaceArray* surfaceArray,
                             const Trk::LayerMaterialProperties& laymatprop,
-                            double thickness, Trk::OverlapDescriptor* olap,
+                            double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, laymatprop, thickness, olap, laytyp) {}
+      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp) {}
 
-Trk::PlaneLayer::PlaneLayer(const Trk::PlaneLayer& play)
-
-    = default;
+Trk::PlaneLayer::PlaneLayer(const Trk::PlaneLayer& play) = default;
 
 Trk::PlaneLayer::PlaneLayer(const Trk::PlaneLayer& play,
                             const Amg::Transform3D& transf)

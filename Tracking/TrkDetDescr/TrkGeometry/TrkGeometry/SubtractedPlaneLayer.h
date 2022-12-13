@@ -40,7 +40,7 @@ public:
      and MaterialProperties  */
   SubtractedPlaneLayer(const SubtractedPlaneSurface* subtrPlaneSurf,
                        const LayerMaterialProperties& laymatprop,
-                       double thickness = 0., OverlapDescriptor* od = nullptr,
+                       double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
                        int laytyp = int(Trk::active));
 
   /**Copy constructor of SubtractedPlaneLayer*/

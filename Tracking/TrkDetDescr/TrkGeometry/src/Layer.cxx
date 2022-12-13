@@ -30,12 +30,13 @@ Trk::Layer::Layer()
       m_ref(0.) {}
 
 Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
-                  double thickness, Trk::OverlapDescriptor* olap, int laytyp)
+                  double thickness,
+                  std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : m_surfaceArray(nullptr),
       m_layerMaterialProperties(
           SharedObject<LayerMaterialProperties>(laymatprop.clone())),
       m_layerThickness(thickness),
-      m_overlapDescriptor(olap),
+      m_overlapDescriptor(std::move(olap)),
       m_previousLayer(nullptr),
       m_nextLayer(nullptr),
       m_binUtility(nullptr),
@@ -46,11 +47,11 @@ Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
       m_ref(0.) {}
 
 Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray, double thickness,
-                  Trk::OverlapDescriptor* olap, int laytyp)
+                  std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : m_surfaceArray(surfaceArray),
       m_layerMaterialProperties(SharedObject<LayerMaterialProperties>(nullptr)),
       m_layerThickness(thickness),
-      m_overlapDescriptor(olap),
+      m_overlapDescriptor(std::move(olap)),
       m_previousLayer(nullptr),
       m_nextLayer(nullptr),
       m_binUtility(nullptr),
@@ -62,12 +63,13 @@ Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray, double thickness,
 
 Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray,
                   const Trk::LayerMaterialProperties& laymatprop,
-                  double thickness, Trk::OverlapDescriptor* olap, int laytyp)
+                  double thickness,
+                  std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : m_surfaceArray(surfaceArray),
       m_layerMaterialProperties(
           SharedObject<LayerMaterialProperties>(laymatprop.clone())),
       m_layerThickness(thickness),
-      m_overlapDescriptor(olap),
+      m_overlapDescriptor(std::move(olap)),
       m_previousLayer(nullptr),
       m_nextLayer(nullptr),
       m_binUtility(nullptr),
@@ -95,18 +97,16 @@ Trk::Layer::Layer(const Trk::Layer& lay)
 
 Trk::Layer::~Layer() {
   delete m_surfaceArray;
-  delete m_overlapDescriptor;
 }
 
 Trk::Layer& Trk::Layer::operator=(const Trk::Layer& lay) {
   if (this != &lay) {
-    delete m_overlapDescriptor;
     delete m_surfaceArray;
     m_layerThickness = lay.m_layerThickness;
     m_enclosingTrackingVolume = lay.m_enclosingTrackingVolume;
     m_enclosingDetachedTrackingVolume = lay.m_enclosingDetachedTrackingVolume;
-    m_overlapDescriptor =
-        (lay.m_overlapDescriptor) ? lay.m_overlapDescriptor->clone() : nullptr;
+    m_overlapDescriptor.reset(
+        (lay.m_overlapDescriptor) ? lay.m_overlapDescriptor->clone() : nullptr);
     m_surfaceArray =
         (lay.m_surfaceArray) ? lay.m_surfaceArray->clone() : nullptr;
     m_layerMaterialProperties.reset(lay.m_layerMaterialProperties->clone());

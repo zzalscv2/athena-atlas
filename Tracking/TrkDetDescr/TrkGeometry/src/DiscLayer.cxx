@@ -22,10 +22,10 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::DiscBounds* dbounds,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
   DiscSurface::associateLayer(*this);
@@ -34,10 +34,10 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
 Trk::DiscLayer::DiscLayer(Trk::DiscSurface* disc,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : DiscSurface(*disc)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
   DiscSurface::associateLayer(*this);
@@ -47,11 +47,11 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::DiscBounds* dbounds,
                           Trk::SurfaceArray* surfaceArray,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(surfaceArray, thickness, olap, laytyp)
+  , Layer(surfaceArray, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
@@ -65,11 +65,11 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::SurfaceArray* surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
-                          Trk::OverlapDescriptor* olap,
+                          std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(surfaceArray, laymatprop, thickness, olap, laytyp)
+  , Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
