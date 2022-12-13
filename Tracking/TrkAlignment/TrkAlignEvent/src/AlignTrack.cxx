@@ -167,10 +167,8 @@ namespace Trk {
       if(atrack.m_alignTSOSCollection!=nullptr) {
         AlignTSOSCollection * aTSOScoll = new AlignTSOSCollection;
         aTSOScoll->reserve(atrack.m_alignTSOSCollection->size());
-        int count(0);
         AlignTSOSIt itAtsos_end = atrack.m_alignTSOSCollection->end();
         for(AlignTSOSIt itAtsos = atrack.m_alignTSOSCollection->begin(); itAtsos!=itAtsos_end; ++itAtsos) {
-          ++count;
           assert(*itAtsos!=0); // check that is defined.
           AlignTSOS * atsos = new AlignTSOS(**itAtsos);
           aTSOScoll->push_back(atsos);
