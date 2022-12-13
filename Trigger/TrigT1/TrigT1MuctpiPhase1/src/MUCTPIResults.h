@@ -1,7 +1,7 @@
 // This file is really -*- C++ -*-.
 
 /*                                                                                                                      
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration                                               
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1MUCTPIPHASE1_MUCTPIRESULTS_H
@@ -19,10 +19,9 @@ namespace LVL1MUCTPIPHASE1 {
   struct DAQData {
 
     DAQData(unsigned word, 
-	    const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions)
-    {
-      dataWord=word;
-      thresholdDecisions=decisions;
+            const std::vector<std::pair<std::shared_ptr<TrigConf::L1Threshold>, bool> >& decisions) :
+      dataWord(word),
+      thresholdDecisions(decisions) {
     }
 
     unsigned dataWord=0;

@@ -1,5 +1,5 @@
 /*                                                                                                                      
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // This file is really -*- C++ -*-.
@@ -47,13 +47,13 @@ namespace LVL1MUCTPIPHASE1 {
 
   private:
 
-    bool m_doZeroSuppression;
-    unsigned int m_threshold1Candidate;
-    unsigned int m_threshold2Candidate;
-    int m_suppressionMode;
-    unsigned int m_maxCandPerPtvalue;
-    unsigned int m_maxCandSendToRoib;
-    unsigned int m_candBcidOffset;
+    bool m_doZeroSuppression{true};
+    unsigned int m_threshold1Candidate{1};
+    unsigned int m_threshold2Candidate{1};
+    int m_suppressionMode{0};
+    unsigned int m_maxCandPerPtvalue{64};
+    unsigned int m_maxCandSendToRoib{14};
+    unsigned int m_candBcidOffset{0};
     std::vector< std::vector< unsigned int > > m_ptSorterBuckets;
 
     L1TopoLUT m_l1topoLUT;

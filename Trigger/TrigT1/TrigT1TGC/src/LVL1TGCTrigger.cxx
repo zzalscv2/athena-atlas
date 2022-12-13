@@ -402,31 +402,28 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
 void LVL1TGCTrigger::doMaskOperation(const TgcDigitContainer* tgc_container,
                                      std::map<Identifier, int>& TgcDigitIDs)
 {
-    std::map<Identifier, int>::iterator itCh;
     // (1) skip masked channels
-    for (TgcDigitContainer::const_iterator c = tgc_container->begin(); c != tgc_container->end(); ++c) {
-      for (TgcDigitCollection::const_iterator h = (*c)->begin(); h != (*c)->end(); ++h) {
+    for (const TgcDigitCollection* c : *tgc_container) {
+      for (const TgcDigit* h : *c) {
 
         // check BCID
-        if ((*h)->bcTag()!=m_bctagInProcess) continue;
+        if (h->bcTag()!=m_bctagInProcess) continue;
 
-        Identifier channelId = (*h)->identify();
-        itCh=m_MaskedChannel.find(channelId);
+        Identifier channelId = h->identify();
+        const auto itCh = m_MaskedChannel.find(channelId);
         if (itCh!=m_MaskedChannel.end() && itCh->second==0) {
           ATH_MSG_DEBUG("This channel is masked! offlineID=" << channelId);
           continue;
         }
-        TgcDigitIDs.insert(std::map<Identifier,int>::value_type(channelId,1));
+        TgcDigitIDs.emplace(channelId, 1);
       }
     }
 
     // (2) add fired channels by force
-    for(itCh=m_MaskedChannel.begin(); itCh!=m_MaskedChannel.end(); itCh++) {
-      if (itCh->second==1) {
-        ATH_MSG_VERBOSE("This channel is fired by force! offlineID=" << itCh->first);
-        if (TgcDigitIDs.find(itCh->first)==TgcDigitIDs.end()) {
-          TgcDigitIDs.insert(std::map<Identifier,int>::value_type(itCh->first,1));
-        }
+    for(const auto& [Id, OnOff] : m_MaskedChannel) {
+      if (OnOff==1) {
+        ATH_MSG_VERBOSE("This channel is fired by force! offlineID=" << Id);
+        TgcDigitIDs.emplace(Id, 1);
       }
     }
 
@@ -436,13 +433,11 @@ void LVL1TGCTrigger::doMaskOperation(const TgcDigitContainer* tgc_container,
 }
   
 //////////////////////////////////////////////////
-void  LVL1TGCTrigger::fillTGCEvent(std::map<Identifier, int>& tgcDigitIDs, TGCEvent& event)
+void  LVL1TGCTrigger::fillTGCEvent(const std::map<Identifier, int>& tgcDigitIDs, TGCEvent& event)
 {
-    std::map<Identifier, int>::iterator itCh;
-
     // Loop on TGC detectors (collections)
-    for(itCh=tgcDigitIDs.begin(); itCh!=tgcDigitIDs.end(); itCh++) {
-      Identifier channelId = itCh->first;
+    for(const auto& itCh : tgcDigitIDs) {
+      const Identifier channelId = itCh.first;
       int subsystemNumber;
       int octantNumber;
       int moduleNumber;
