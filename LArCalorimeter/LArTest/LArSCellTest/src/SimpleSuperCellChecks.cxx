@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -433,7 +433,6 @@ StatusCode SimpleSuperCellChecks::execute(){
 		sc_etsk[idx].push_back( cell->et() );
 		sc_times[idx].push_back( cell->time() );
 	}
-	unsigned int cc=0;
 	unsigned int ccQual=0;
         for(auto scell : *scells) {
 		float SCell_et=scell->et();
@@ -491,7 +490,7 @@ StatusCode SimpleSuperCellChecks::execute(){
                 }
 		} // end of check of EM central region
 
-		if ( fabsf( resol + 999 ) < 0.1 ) {cc++; continue;}
+		if ( fabsf( resol + 999 ) < 0.1 ) { continue;}
 		int index=-1;
 		int index2=0;
 		if ( scell->caloDDE()->getSampling() == CaloSampling::PreSamplerB ){
@@ -561,7 +560,6 @@ StatusCode SimpleSuperCellChecks::execute(){
 			}
 		}
 		}
-		cc++;
 		
 		
 	}

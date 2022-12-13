@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -157,7 +157,6 @@ StatusCode SimpleLArDigitsChecks::execute(){
            ATH_MSG_WARNING("Do not have mapping object " << m_cablingSCKey.key());
            return StatusCode::SUCCESS;
         }
-	unsigned int count_sCells=0;
 	unsigned int count_sCells_Layer0=0;
 	unsigned int count_sCells_Layer1=0;
 	unsigned int count_sCells_Layer2=0;
@@ -171,7 +170,6 @@ StatusCode SimpleLArDigitsChecks::execute(){
 	unsigned int count_sCells_Layer10=0;
 	unsigned int count_sCells_Layer11=0;
         for(auto scell : *scells) {
-		count_sCells++;
 		int index=-1;
 		float thre=500.0;
 		if ( scell->caloDDE()->getSampling() == CaloSampling::PreSamplerB ){
