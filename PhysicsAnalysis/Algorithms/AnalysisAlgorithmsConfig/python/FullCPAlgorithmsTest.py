@@ -443,6 +443,8 @@ def makeSequenceOld (dataType, algSeq, vars, metVars, forCompare, isPhyslite, no
 
 def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite, noPhysliteBroken) :
 
+    from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
+
     # it seems the right containers are in the test input files so far
     largeRJets = False
     # there are no track jets in PHYSLITE, or in the sequence configuration
@@ -497,11 +499,11 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
 
     # Include, and then set up the photon analysis algorithm sequence:
-    from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
-
-    makePhotonCalibrationConfig (configSeq, 'AnaPhotons')
+    configSeq += makeConfig ('Photons', 'AnaPhotons')
     configSeq.setOptionValue ('.recomputeIsEM', False)
-    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight')
+    configSeq += makeConfig ('Photons.Selection', 'AnaPhotons.tight')
+    configSeq.setOptionValue ('.qualityWP', 'Tight')
+    configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
     vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
               'OutPhotons_NOSYS.phi -> ph_phi',
@@ -511,12 +513,14 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
-    # Include, and then set up the muon analysis algorithm sequence:
-    from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
-
-    makeMuonCalibrationConfig (configSeq, 'AnaMuons')
-    makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Medium.Iso', postfix='medium')
-    makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Tight.Iso', postfix='tight')
+    # set up the muon analysis algorithm sequence:
+    configSeq += makeConfig ('Muons', 'AnaMuons')
+    configSeq += makeConfig ('Muons.Selection', 'AnaMuons.medium')
+    configSeq.setOptionValue ('.quality', 'Medium')
+    configSeq.setOptionValue ('.isolation', 'Iso')
+    configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
+    configSeq.setOptionValue ('.quality', 'Tight')
+    configSeq.setOptionValue ('.isolation', 'Iso')
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
               'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',

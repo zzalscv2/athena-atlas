@@ -219,12 +219,12 @@ class PhotonWorkingPointConfig (ConfigBlock) :
 
 
 def makePhotonCalibrationConfig( seq, containerName,
-                                 postfix = '',
-                                 crackVeto = False,
-                                 enableCleaning = True,
-                                 cleaningAllowLate = False,
-                                 recomputeIsEM = False,
-                                 ptSelectionOutput = False ):
+                                 postfix = None,
+                                 crackVeto = None,
+                                 enableCleaning = None,
+                                 cleaningAllowLate = None,
+                                 recomputeIsEM = None,
+                                 ptSelectionOutput = None ):
     """Create photon calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -245,18 +245,24 @@ def makePhotonCalibrationConfig( seq, containerName,
     """
 
     config = PhotonCalibrationConfig (containerName)
-    config.setOptionValue ('postfix', postfix)
-    config.setOptionValue ('crackVeto', crackVeto)
-    config.setOptionValue ('enableCleaning', enableCleaning)
-    config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
-    config.setOptionValue ('recomputeIsEM', recomputeIsEM)
-    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
+    if postfix is not None :
+        config.setOptionValue ('postfix', postfix)
+    if crackVeto is not None :
+        config.setOptionValue ('crackVeto', crackVeto)
+    if enableCleaning is not None :
+        config.setOptionValue ('enableCleaning', enableCleaning)
+    if cleaningAllowLate is not None :
+        config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
+    if recomputeIsEM is not None :
+        config.setOptionValue ('recomputeIsEM', recomputeIsEM)
+    if ptSelectionOutput is not None :
+        config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
     seq.append (config)
 
 
 
 def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                  recomputeIsEM = False ):
+                                  recomputeIsEM = None ):
     """Create photon analysis algorithms for a single working point
 
     Keywrod arguments:
@@ -268,12 +274,13 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
       recomputeIsEM -- Whether to rerun the cut-based selection. If not, use derivation flags
     """
 
-    splitWP = workingPoint.split ('.')
-    if len (splitWP) != 2 :
-        raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
-
     config = PhotonWorkingPointConfig (containerName, postfix)
-    config.setOptionValue ('qualityWP',     splitWP[0])
-    config.setOptionValue ('isolationWP',   splitWP[1])
-    config.setOptionValue ('recomputeIsEM', recomputeIsEM)
+    if workingPoint is not None :
+        splitWP = workingPoint.split ('.')
+        if len (splitWP) != 2 :
+            raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
+        config.setOptionValue ('qualityWP',     splitWP[0])
+        config.setOptionValue ('isolationWP',   splitWP[1])
+    if recomputeIsEM is not None :
+        config.setOptionValue ('recomputeIsEM', recomputeIsEM)
     seq.append (config)
