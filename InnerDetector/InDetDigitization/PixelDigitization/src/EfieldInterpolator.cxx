@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // PixelDigitization includes
@@ -342,10 +342,8 @@ std::vector<std::vector<TString> > EfieldInterpolator::list_files(const TString&
   std::ifstream in;
   ATH_MSG_DEBUG("Try to open: " << fileList_TCADsamples.Data());
   in.open(fileList_TCADsamples);
-  int nlines = 0;
   while (1) {
     in >> tmpname >> tmpfluence >> tmpvolt;
-    nlines++;
     if (!in.good()) break;
     if (tmpname.BeginsWith('#')) continue;
     if (tmpname.EndsWith(".dat")) {
