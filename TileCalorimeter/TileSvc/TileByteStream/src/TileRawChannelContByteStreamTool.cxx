@@ -93,7 +93,6 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
   std::vector<TileFastRawChannel> channels;
   channels.reserve (m_tileHWID->channel_hash_max());
 
-  int nch = 0;
   uint32_t reid = 0x0;
 
   for (const TileRawChannelCollection* rawChannelCollection : *rawChannelContainer) {
@@ -115,7 +114,7 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
     int drawer = m_tileHWID->drawer(drawer_id);
     int drawerIdx = TileCalibUtils::getDrawerIdx(ros, drawer);
 
-    int n = 0;
+    int nChannels = 0;
 
     for (const TileRawChannel* rawChannel : *rawChannelCollection) {
 
@@ -131,20 +130,19 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
         if (oflCont) {
           if (quality > 15.0) quality = 15.0;
           if (m_tileBadChanTool->getAdcStatus(drawerIdx, channel, adc).isBad()) quality += 16.;
-	}
+        }
         //amplitude = m_tileToolEmscale->channelCalib(drawerIdx, channel, adc, amplitude, inputUnit, outputUnit);
         channels.emplace_back (frag_id, channel, adc, amplitude, time, quality);
       }
 
       // Don't need to worry about these moving due to the reserve() above.
       encoder.add(&channels.back());
-      ++nch;
-      ++n;
+      ++nChannels;
     }
 
     ATH_MSG_DEBUG( " Collection " << MSG::hex << "0x" << frag_id
                   << " ROD " << "0x" << reid
-                  << " number of channels " << MSG::dec << n );
+                  << " number of channels " << MSG::dec << nChannels );
   }
 
   // TileROD_Encoder has collected all the channels, now can fill the

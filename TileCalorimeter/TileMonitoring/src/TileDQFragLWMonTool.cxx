@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -533,13 +533,7 @@ void TileDQFragLWMonTool::fillBadDrawer() {
 
       uint16_t jumps_corruption[4][64][NCORRUPTED] = { { { 0u } } };
 
-      int nBadDr = 0;
-      int nBadDrNM = 0;
-
       for (const TileDigitsCollection* digitsCollection : *digitsContainer) {
-
-        int nBadCh = 0;
-        int nBadChNM = 0;
 
         int fragId = digitsCollection->identify();
         int drawer = (fragId & 0x3F); // range 0-63
@@ -586,7 +580,6 @@ void TileDQFragLWMonTool::fillBadDrawer() {
 
           if ( (error > 0) &&
               !(isDisconnected(ROS, drawer, channel) || m_tileBadChanTool->getAdcStatus(adcId).isBad()) ) {
-            ++nBadCh;
             if (msgLvl(MSG::DEBUG)) {
               msg(MSG::DEBUG) << "LB " << getLumiBlock()
                               << " Evt " << getEvtNum()
@@ -606,18 +599,13 @@ void TileDQFragLWMonTool::fillBadDrawer() {
 
             m_badChannelJump2D[partition]->Fill(module, channel);
             if (isModuleDCSgood(ROS, drawer) && m_dqStatus->isChanDQgood(ROS, drawer, channel)) {
-              ++nBadChNM;
               m_badChannelJump2DNotMasked[partition]->Fill(module, channel);
               if (error <= NCORRUPTED)
                 jumps_corruption[ROS - 1][drawer][error - 1] |= 1u << (unsigned int) (channel / 3);
             }
           }
         }
-        if (nBadCh > 0) {
-          ++nBadDr;
-        }
 
-        if (nBadChNM > 0) ++nBadDrNM;
       }
 
       for (unsigned int partition = 0; partition < NumPart; partition++)

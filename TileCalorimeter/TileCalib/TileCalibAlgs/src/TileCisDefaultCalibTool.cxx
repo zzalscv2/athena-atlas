@@ -473,7 +473,7 @@ StatusCode TileCisDefaultCalibTool::finalizeCalculations() {
     double maxGoodCharge = m_linfitMax[gain_ind], minGoodCharge = 999999.;
     double maxCharge = 0.0, minCharge = 999999., maxAmp = 0.0, minAmp = 999999.;
     bool signalInRange = true;
-    int nptGood = 0, nptBefore = 0;
+    int nptGood = 0;
 
     // find number of points in graph for this adc
     npt = MeanDacMap->size();
@@ -595,16 +595,12 @@ StatusCode TileCisDefaultCalibTool::finalizeCalculations() {
             if (R>0.4 && R<2.5) {
               prevMean = mean;
               prevCharge = charge;
-              //prevSlope = slope;
               prevSlope = (prevSlope + slope)/2.;
-              //prevSlope = (prevSlope*nptBefore + slope)/(nptBefore+1);
-              ++nptBefore;
             }
           } else {
             double R = slope / m_defaultCalib[gain_ind];
             if (R>0.4 && R<2.5) {
               prevSlope = slope;
-              ++nptBefore;
             }
           }
         } else if (nptGood < 3 && signalInRange && charge >= m_linfitMax[gain_ind] && mean < m_maxAmp[gain_ind] && prevSlope != 0) {

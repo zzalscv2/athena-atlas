@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -510,37 +510,6 @@ void TileDQFragMonTool::fillBadDrawer() {
 
   m_dqStatus = SG::makeHandle (m_DQstatusKey).get();
 
-#if 0
-  if (m_contNameDSP.size() > 0) {
-    const TileRawChannelContainer* RawChannelCnt;
-
-    if (evtStore()->retrieve(RawChannelCnt, m_contNameDSP).isFailure()) {
-      ATH_MSG_WARNING( "Can't retrieve DSP RawChannel from TES" );
-      m_contNameDSP = "";
-    } else {
-
-      int nBadDr = 0;
-      int nBadDrNM = 0;
-
-      for (const TileRawChannelCollection* rawChannelCollection : *RawChannelCnt) {
-
-        int status = findDrawerErrors(rawChannelCollection);
-        if (status == 4) {
-          ++nBadDr;
-          int fragId = rawChannelCollection->identify();
-          int drawer = fragId & 0x3F;  // range 0-63
-          int ROS = fragId >> 8;  // range 1-4
-          bool drbad = true;
-          if (m_checkDCS) drbad = m_tileDCS->isStatusBad(ROS, drawer);
-
-          if (!drbad) ++nBadDrNM;
-        }
-      }
-    }
-  }
-#endif /* 0 */
-
-
   uint32_t lvl1info = getL1info();
   bool phys = (lvl1info == 0) || (((lvl1info >> Trig_b7) & 1) == 1);
   if (phys && m_contNameOffline.size() > 0) {
@@ -658,13 +627,7 @@ void TileDQFragMonTool::fillBadDrawer() {
 
       uint16_t jumps_corruption[4][64][NCORRUPTED] = { { { 0u } } };
 
-      int nBadDr = 0;
-      int nBadDrNM = 0;
-
       for (const TileDigitsCollection* digitsCollection : *digitsContainer) {
-
-        int nBadCh = 0;
-        int nBadChNM = 0;
 
         int fragId = digitsCollection->identify();
         int drawer = (fragId & 0x3F); // range 0-63
@@ -711,7 +674,6 @@ void TileDQFragMonTool::fillBadDrawer() {
 
           if ( (error > 0) &&
               !(isDisconnected(ROS, drawer, channel) || m_tileBadChanTool->getAdcStatus(adcId).isBad()) ) {
-            ++nBadCh;
             if (msgLvl(MSG::DEBUG)) {
               msg(MSG::DEBUG) << "LB " << getLumiBlock()
                               << " Evt " << getEvtNum()
@@ -740,18 +702,12 @@ void TileDQFragMonTool::fillBadDrawer() {
 
             m_hist_BadChannelJump2D[partition]->Fill(module, channel);
             if (isModuleDCSgood(ROS, drawer) && m_dqStatus->isChanDQgood(ROS, drawer, channel)) {
-              ++nBadChNM;
               m_hist_BadChannelJump2D_nonmask[partition]->Fill(module, channel);
               if (error <= NCORRUPTED)
                 jumps_corruption[ROS - 1][drawer][error - 1] |= 1u << (unsigned int) (channel / 3);
             }
           }
         }
-        if (nBadCh > 0) {
-          ++nBadDr;
-        }
-
-        if (nBadChNM > 0) ++nBadDrNM;
       }
 
       for (int partition = 0; partition < NumPart; partition++)
