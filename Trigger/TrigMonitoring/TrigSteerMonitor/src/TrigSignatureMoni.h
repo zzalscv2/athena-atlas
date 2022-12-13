@@ -49,6 +49,7 @@ class TrigSignatureMoni : public extends<AthReentrantAlgorithm, IIncidentListene
   // Class representing asynchronously published histograms
   class RateHistogram {
    public:
+    RateHistogram() = default;
     ~RateHistogram();
 
     // Initialize rate histogram and create buffer
