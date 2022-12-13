@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkVertexFitters/SequentialVertexFitter.h"
@@ -231,7 +231,6 @@ namespace Trk{
         reLinearizeTracks(tracks_to_fit, returnVertex->position());
       }
       //loop over available tracks
-      int cnt = 0;
 
       for(std::vector<Trk::VxTrackAtVertex>::iterator i = tracksBegin; i != tracksEnd;++i)
       {                  
@@ -239,7 +238,6 @@ namespace Trk{
         if (new_vertex != returnVertex.get()) {
             returnVertex.reset( new_vertex );
         }
-        ++cnt;
       }//end of loop over available tracks
 
       //now the updated state that is stored in returnVertex
