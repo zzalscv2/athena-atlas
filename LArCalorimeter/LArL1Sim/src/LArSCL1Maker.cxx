@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // +======================================================================+
@@ -368,7 +368,6 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
 
   it=0;
   it_end=nbSC;
-  int cc=0;int dd=0;
   short MAXADC=4096; // 12 bits ADC?
   std::vector<float> noise(m_nSamples);
   double Rndm[32];
@@ -381,11 +380,10 @@ StatusCode LArSCL1Maker::execute(const EventContext& context) const
   for( ; it != it_end; ++it){
       std::vector< float > *vecPtr = &zeroSamp; 
       if ( alreadyThere[it] ) vecPtr= &(scFloatContainerTmp.at(it)); 
-      else {  cc++;  }
       std::vector<float>& vec = *vecPtr;
 
       const HWIdentifier id = hwid[it];
-      if ( id == 0 ) { dd++; continue; } 
+      if ( id == 0 ) { continue; } 
 
       // Do I have Overlay
       size_t backGroundIdx = 999999;
