@@ -1047,7 +1047,7 @@ void MatrixReadOut::makeTestPattern(ubit16 mode, ubit16 ktimes, int eventNum) {
     const ubit16 maxchan = 100;
     const ubit16 maxtimes = 200;
     ubit16 IJ[maxtimes][4], channels[maxtimes][4][maxchan];
-    float times[maxtimes];
+    float times[maxtimes] = {0};
     char plane[4][3];
     strcpy(plane[0], "I0");
     strcpy(plane[1], "I1");

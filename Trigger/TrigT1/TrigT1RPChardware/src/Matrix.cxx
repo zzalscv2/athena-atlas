@@ -169,45 +169,23 @@ void Matrix::reset() {
 }  // end-of-Matrix::reset
 //-----------------------------------------------------------------------//
 void Matrix::initRegisters() {
-    ubit16 i, j, k, l, m;
-    for (i = 0; i < 2; i++) {                 // side address
-        for (j = 0; j < 2; j++) {             // layer address
-            for (k = 0; k < s_nclock; k++) {  // clock bins
-                for (l = 0; l < 2; l++) {     // the two words to make 64 bits
-                    rodat[i][j][k][l] = 0;
-                    m_input[i][j][k][l] = 0;
-                    for (m = 0; m < s_nthres; m++) {
-                        m_prepr[m][i][j][k][l] = 0;
-                        m_mjori[m][i][j][k][l] = 0;
-                    }                                            // end-of-for(m
-                }                                                // end-of-for(l
-            }                                                    // end-of-for(k
-        }                                                        // end-of-for(j
-    }                                                            // end-of-for(i
-    for (i = 0; i < s_nthres; i++) {                             // thresholds
-        for (j = 0; j < s_NBunch; j++) { m_trigger[i][j] = 0; }  // end-of-for(j
-        for (j = 0; j < s_nclock; j++) {                         // clock bins
-            m_trigg[i][j] = 0;
-        }                                                        // end-of-for(j
-    }                                                            // end-of-for(i
-    for (i = 0; i < s_NBunch; i++) {                             // loop on left-right overlapping flags
-        for (j = 0; j < 2; j++) { m_triggerOverlap[i][j] = 0; }  // end-of-for(j
-    }                                                            // end-of-for(i
-    //
-    // initialize k-pattern out
-    //
 
-    for (j = 0; j < s_nclock; j++) {
-        overlapRO[j] = 0;
-        highestthRO[j] = 0;
-        m_k_pattern[j] = 0;
-        k_readout[j] = 0;
-        for (i = 0; i < 2; i++) { m_triggerOverlapRO[j][i] = 0; }
-    }
-    for (i = 0; i < s_NBunch; i++) {
-        m_highestth[i] = 0;
-        m_overlap[i] = 0;
-    }  // end-of-for(i
+    // helper to set arrays to zero (only use with integer arrays!)
+    auto zero = [](auto& arr) { memset( arr, 0, sizeof(arr) ); };
+    zero( rodat );
+    zero( m_input );
+    zero( m_prepr );
+    zero( m_mjori );
+    zero( m_trigger );
+    zero( m_trigg );
+    zero( m_triggerOverlap );
+    zero( overlapRO );
+    zero( highestthRO );
+    zero( m_k_pattern );
+    zero( k_readout );
+    zero( m_triggerOverlapRO );
+    zero( m_highestth );
+    zero( m_overlap );
 }  // end-of-Matrix::initRegisters
 //-----------------------------------------------------------------------//
 void Matrix::initRPCpointers() {
@@ -1532,13 +1510,13 @@ void Matrix::makeTestPattern(ubit16 mode, ubit16 ktimes) {
     const ubit16 maxchan = 100;
     const ubit16 maxtimes = 1000;
     ubit16 i, j, l;
-    ubit16 IJ[maxtimes][4], channels[maxtimes][4][maxchan];
-    float times[maxtimes];
+    ubit16 IJ[maxtimes][4] = {0};
+    ubit16 channels[maxtimes][4][maxchan] = {0};
+    float times[maxtimes] = {0};
     char plane[4][3];
     const float timeOffsetHit = 114.675;
     //
     rpcdata *rpcpnt;
-    int ntimes;
     float timemin;
     //
     strcpy(plane[0], "I0");
@@ -1551,11 +1529,8 @@ void Matrix::makeTestPattern(ubit16 mode, ubit16 ktimes) {
              << "-------------------------------" << endl;
     }  // end-of-if(m_matrixDebug&1<<df)
     //
-    ntimes = 0;
+    int ntimes = 0;
     ubit16 completed = 0;
-    for (l = 0; l < maxtimes; l++) {
-        for (i = 0; i < 4; i++) { IJ[l][i] = 0; }
-    }
     //
     // first reset the marker flags
     //
@@ -1631,13 +1606,12 @@ void Matrix::makeOutPattern() {
     const float timeOffsetThr = 210.500;
     ubit16 i, l;
     CMAword bit;
-    ubit16 chanHistory[32];
-    for (i = 0; i < 32; i++) { chanHistory[i] = 0; }
+    ubit16 chanHistory[32] = {0};
     const ubit16 maxchan = 100;
     const ubit16 maxtimes = s_nclock;
     ubit16 ntimes, newtime;
     ubit16 nchannels[maxtimes][2][2], channels[maxtimes][2][2][maxchan];
-    float time, times[maxtimes];
+    float time, times[maxtimes]{0};
     //
     // trigger registers: k-trigger (historically was k-pattern)
     //

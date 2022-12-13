@@ -87,7 +87,7 @@ public:
 class InternalRegister {
 public:
     std::array<DataFromPad, 8> pad{};
-    CMAword tile;
+    CMAword tile{};
     OutputFromSectorLogic out;
     InternalRegister() = default;
     friend std::ostream &operator<<(std::ostream &stream, InternalRegister &o);
