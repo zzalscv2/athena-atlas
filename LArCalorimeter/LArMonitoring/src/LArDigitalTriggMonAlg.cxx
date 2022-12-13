@@ -201,10 +201,8 @@ StatusCode LArDigitalTriggMonAlg::fillHistograms(const EventContext& ctx) const
 
     std::string layer;
 
-    int counter_digits=0;
     /** Loop over digits*/
     for ( ; itDig!=itDig_e;++itDig) {
-      counter_digits++;
       pLArDigit = *itDig;
       unsigned int trueNSamples = pLArDigit->nsamples();
       MNsamples = trueNSamples;

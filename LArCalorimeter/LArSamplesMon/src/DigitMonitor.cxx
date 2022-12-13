@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSamplesMon/DigitMonitor.h"
@@ -575,7 +575,6 @@ bool DigitMonitor::makeResidualCorrections(const TString& outputFile, short resT
                                            unsigned int minSize, bool weigh, bool adjust, bool zeroTime) const
 {
   TreeShapeErrorGetter* shapeError = new TreeShapeErrorGetter(outputFile, true);
-  unsigned int nProcessed = 0;
   std::vector< std::vector<ResidualCalculator> > ringCalcs;
   std::vector<ResidualCalculator> gainRingCalcs(Geo::nPhiRings());
   for (unsigned int g = 0; g < CaloGain::LARNGAIN; g++) ringCalcs.push_back(gainRingCalcs);
@@ -608,7 +607,6 @@ bool DigitMonitor::makeResidualCorrections(const TString& outputFile, short resT
         continue;
       }
 
-      nProcessed++;
       cout << i << " : Phi ring " << cellHistory(i)->cellInfo()->globalPhiRing() << " : adding " << resCalc->size() << endl;
       shapeError->addCell(*resCalc, (CaloGain::CaloGain)g);
       ringCalcs[g][cellHistory(i)->cellInfo()->globalPhiRing()].append(*resCalc);
