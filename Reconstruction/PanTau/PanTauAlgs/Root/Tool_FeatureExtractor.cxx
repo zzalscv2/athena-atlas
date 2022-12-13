@@ -122,7 +122,7 @@ void PanTau::Tool_FeatureExtractor::addFeatureWrtSeedEnergy(PanTau::TauFeature* 
 							    double numerator,
 							    const std::map<std::string, double>& denominatorMap) const {
   std::map<std::string, double>::const_iterator it = denominatorMap.begin();
-  for(; it!=denominatorMap.end(); it++) {
+  for(; it!=denominatorMap.end(); ++it) {
     std::string FullName = featName + it->first;
     float       value    = (float)it->second;
     if(value <= 0. || std::isnan(value) || std::isinf(value) ) continue; 

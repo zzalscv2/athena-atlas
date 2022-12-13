@@ -943,7 +943,7 @@ bool JetTagMonitoring::isTopEvent() { // added by SARA for 2017 data taking
 
   // loop over muon container  
   int n_isoMuons = 0;
-  for ( ; muonItr != muonEnd; muonItr++) {
+  for ( ; muonItr != muonEnd; ++muonItr) {
     //select muons which passed pT cut
     if ((*muonItr) -> pt() / Gaudi::Units::GeV < m_MuonPtCut) continue;
     bool inAcceptance = TMath::Abs((*muonItr) -> eta()) < m_MuonEtaCut;
@@ -1105,7 +1105,7 @@ void JetTagMonitoring::fillJetHistograms() {
   xAOD::JetContainer::const_iterator firstKinematicjetItr = jets->end(); // added by SARA
   
   // Loop over jets
-  for ( ; jetItr != jetEnd; jetItr++) {
+  for ( ; jetItr != jetEnd; ++jetItr) {
     
     // All jets
     
