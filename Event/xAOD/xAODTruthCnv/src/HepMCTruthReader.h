@@ -33,8 +33,8 @@ private:
   std::string m_hepMCContainerName;
 
   void printEvent(const HepMC::GenEvent*);
-  void printVertex(HepMC::ConstGenVertexPtr);
-  void printParticle(HepMC::ConstGenParticlePtr);
+  void printVertex(const HepMC::ConstGenVertexPtr&);
+  void printParticle(const HepMC::ConstGenParticlePtr&);
 
 }; // class HepMCTruthReader
 

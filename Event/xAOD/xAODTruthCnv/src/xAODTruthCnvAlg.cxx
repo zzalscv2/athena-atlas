@@ -337,7 +337,7 @@ namespace xAODMaker {
                      [] (const HepMC::ConstGenParticlePtr& a,
                          const HepMC::ConstGenParticlePtr& b)
                      { return HepMC::barcode(a) < HepMC::barcode(b); });
-          for (auto part: parts)
+          for (const auto& part: parts)
 #else
           for (auto part: *genEvt)
 #endif
@@ -391,7 +391,7 @@ namespace xAODMaker {
                 
 	  // (3) Loop over the map
 	  auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
-	  for (auto  vertex : vertices) {
+	  for (const auto&  vertex : vertices) {
 	    const auto& parts = vertexMap[vertex];
 	    // (a) create TruthVertex
 	    xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
@@ -476,7 +476,7 @@ namespace xAODMaker {
 
 
     // A helper to set up a TruthVertex (without filling the ELs)
-    void xAODTruthCnvAlg::fillVertex(xAOD::TruthVertex* tv, HepMC::ConstGenVertexPtr gv) {
+    void xAODTruthCnvAlg::fillVertex(xAOD::TruthVertex* tv, const HepMC::ConstGenVertexPtr& gv) {
         // id was renamed to status in HepMC3.
 #ifdef HEPMC3
         tv->setId(gv->status());
@@ -492,7 +492,7 @@ namespace xAODMaker {
     
     
     // A helper to set up a TruthParticle (without filling the ELs)
-    void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, HepMC::ConstGenParticlePtr gp) {
+    void xAODTruthCnvAlg::fillParticle(xAOD::TruthParticle* tp, const HepMC::ConstGenParticlePtr& gp) {
         tp->setPdgId(gp->pdg_id());
         tp->setBarcode(HepMC::barcode(gp));
         tp->setStatus(gp->status());

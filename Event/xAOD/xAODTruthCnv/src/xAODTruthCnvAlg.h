@@ -123,8 +123,8 @@ namespace xAODMaker {
     typedef std::map<HepMC::ConstGenVertexPtr, VertexParticles> VertexMap;
 
     /// These functions do not set up ELs, just the other variables
-    static void fillVertex(xAOD::TruthVertex *tv, HepMC::ConstGenVertexPtr gv);
-    static void fillParticle(xAOD::TruthParticle *tp, HepMC::ConstGenParticlePtr gp);
+    static void fillVertex(xAOD::TruthVertex *tv, const HepMC::ConstGenVertexPtr& gv);
+    static void fillParticle(xAOD::TruthParticle *tp, const HepMC::ConstGenParticlePtr& gp);
 
     /// The key of the input AOD truth container
     SG::ReadHandleKey<McEventCollection> m_aodContainerKey{ 

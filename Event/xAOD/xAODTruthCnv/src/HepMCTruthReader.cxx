@@ -83,7 +83,7 @@ void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
   cout << "        Barcode   PDG ID      ( Px,       Py,       Pz,     E ) Stat  DecayVtx\n";
   cout << "--------------------------------------------------------------------------------\n";
 #ifdef HEPMC3
-  for (auto iv: event->vertices()) {  printVertex(iv);  } 
+  for (const auto& iv: event->vertices()) {  printVertex(iv);  } 
 #else
   for (HepMC::GenEvent::vertex_const_iterator iv = event->vertices_begin(); iv != event->vertices_end(); ++iv) {
     printVertex(*iv);
@@ -94,7 +94,7 @@ void HepMCTruthReader::printEvent(const HepMC::GenEvent* event) {
 
 // Print method for vertex - mimics the HepMC dump.
 // Particle print method called within here
-void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
+void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
   std::ios::fmtflags f( cout.flags() ); 
   cout << "GenVertex (" << vertex << "):";
   if (HepMC::barcode(vertex) != 0) {
@@ -178,7 +178,7 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
   // }
   // Print out all the incoming, then outgoing particles
 #ifdef HEPMC3
-  for (auto  iPIn: vertex->particles_in()) {       
+  for (const auto&  iPIn: vertex->particles_in()) {       
     if ( iPIn == vertex->particles_in().front() ) {
       cout << " I: ";
       cout.width(2);
@@ -186,7 +186,7 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
     } else cout << "      ";
     printParticle(iPIn);
   }
-  for (auto iPOut: vertex->particles_out()) {
+  for (const auto& iPOut: vertex->particles_out()) {
     if ( iPOut == vertex->particles_out().front()) {
       cout << " O: ";
       cout.width(2);
@@ -220,7 +220,7 @@ void HepMCTruthReader::printVertex(HepMC::ConstGenVertexPtr vertex) {
 
 
 // Print method for particle - mimics the HepMC dump.
-void HepMCTruthReader::printParticle(HepMC::ConstGenParticlePtr particle) {
+void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle) {
   std::ios::fmtflags f( cout.flags() ); 
   cout << " ";
   cout.width(9);
