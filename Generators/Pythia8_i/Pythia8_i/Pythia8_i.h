@@ -12,6 +12,7 @@
 #include "CLHEP/Random/RandFlat.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "Pythia8_i/UserHooksFactory.h"
+#include "Pythia8_i/IPythia8Custom.h"
 
 //#include "Pythia8/../Pythia8Plugins/HepMC2.h"
 #ifdef HEPMC3
@@ -23,7 +24,7 @@
      #endif
   #endif
 namespace HepMC {
-typedef HepMC3::Pythia8ToHepMC3 Pythia8ToHepMC;
+  typedef HepMC3::Pythia8ToHepMC3 Pythia8ToHepMC;
 }
 #else
 #include "Pythia8Plugins/HepMC2.h"
@@ -34,9 +35,7 @@ typedef HepMC3::Pythia8ToHepMC3 Pythia8ToHepMC;
 
 /**
  *  Author: James Monk (jmonk@cern.ch)
-*/
-
-class IPythia8Custom;
+ */
 
 namespace Pythia8{
   class Sigma2Process;
@@ -67,102 +66,106 @@ class Pythia8_i: public GenModule{
 
 public:
   Pythia8_i(const std::string &name, ISvcLocator *pSvcLocator);
-  
+
   ~Pythia8_i();
 
   class CommandException : public std::runtime_error{
   public:
-    
-  CommandException(const std::string &cmd): std::runtime_error("Cannot interpret command: " + cmd){
+
+    CommandException(const std::string &cmd): std::runtime_error("Cannot interpret command: " + cmd){
     }
   };
-    
+
   virtual StatusCode genInitialize();
   virtual StatusCode callGenerator();
   virtual StatusCode fillEvt(HepMC::GenEvent *evt);
   virtual StatusCode fillWeights(HepMC::GenEvent *evt);
   virtual StatusCode genFinalize();
 
-  double pythiaVersion()const;
+  double pythiaVersion() const;
 
   static const std::string& pythia_stream();
   static std::string xmlpath();
-    
+
 protected:
 
   bool useRndmGenSvc() const { return m_useRndmGenSvc; }
-  
-  // make these protected so that Pythia8B can access them
-  std::unique_ptr<Pythia8::Pythia> m_pythia;
-  HepMC::Pythia8ToHepMC m_pythiaToHepMC;
-  unsigned int m_maxFailures;
 
-  bool m_useRndmGenSvc;
-  customRndm *m_atlasRndmEngine;
+  // make these protected so that Pythia8B can access them
+  std::unique_ptr<Pythia8::Pythia> m_pythia{};
+  HepMC::Pythia8ToHepMC m_pythiaToHepMC;
+  UnsignedIntegerProperty m_maxFailures{this, "MaxFailures", 10};
+
+  BooleanProperty m_useRndmGenSvc{this, "useRndmGenSvc", true, "the max number of consecutive failures"};
+  std::unique_ptr<customRndm> m_atlasRndmEngine{};
 
 private:
 
   static std::string findValue(const std::string &command, const std::string &key);
   void addLHEToHepMC(HepMC::GenEvent *evt);
 
-  int m_internal_event_number;
-  
-  double m_version;
-  
-  std::vector<std::string> m_commands;
+  int m_internal_event_number{0};
+
+  double m_version{-1.};
+
+  StringArrayProperty m_commands{this, "Commands", {} };
   std::vector<std::string> m_userParams;
   std::vector<std::string> m_userModes;
 
   enum PDGID {PROTON=2212, ANTIPROTON=-2212, LEAD=1000822080, NEUTRON=2112, ANTINEUTRON=-2112, MUON=13, ANTIMUON=-13, ELECTRON=11, POSITRON=-11, INVALID=0};
 
-  double m_collisionEnergy;
-  
-  std::string m_beam1;
-  std::string m_beam2;
- 
-  int m_dsid;
+  DoubleProperty m_collisionEnergy{this, "CollisionEnergy", 14000.0};
 
-  std::string m_lheFile;
 
-  bool m_storeLHE;
-  bool m_doCKKWLAcceptance;
-  bool m_doFxFxXS;
-  double m_nAccepted;
-  double m_nMerged;
-  double m_sigmaTotal;
-  double m_conversion;
-  
-  unsigned int m_failureCount;
-  
+  StringProperty m_beam1{this, "Beam1", "PROTON"};
+  StringProperty m_beam2{this, "Beam2", "PROTON"};
+
+  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+
+  StringProperty m_lheFile{this, "LHEFile", ""};
+
+  BooleanProperty m_storeLHE{this, "StoreLHE", false};
+  BooleanProperty m_doCKKWLAcceptance{this, "CKKWLAcceptance", false};
+  BooleanProperty m_doFxFxXS{this, "FxFxXS", false};
+  double m_nAccepted{0.};
+  double m_nMerged{0.};
+  double m_sigmaTotal{0.};
+  double m_conversion{1.};
+
+  unsigned int m_failureCount{0};
+
   std::map<std::string, PDGID> m_particleIDs;
 
-  std::vector<long int> m_seeds;
+  std::vector<long int> m_seeds{};
 
-  std::string m_userProcess;
+  StringProperty m_userProcess{this, "UserProcess", ""};
 
   // ptr to possible user process
-  Pythia8::Sigma2Process *m_procPtr;
-  
-  std::vector<std::string> m_userHooks;
+  std::unique_ptr<Pythia8::Sigma2Process> m_procPtr{};
 
-  std::vector<UserHooksPtrType> m_userHooksPtrs;
-  
-  std::string m_userResonances;
-  
+  StringArrayProperty m_userHooks{this, "UserHooks", {} };
+
+  std::vector<UserHooksPtrType> m_userHooksPtrs{};
+
+  StringProperty m_userResonances{this, "UserResonances", ""};
+
   std::vector<Pythia8::ResonanceWidths*> m_userResonancePtrs;
-  
-  bool m_useLHAPDF;
 
-  std::string m_particleDataFile;
-  std::string m_outputParticleDataFile;
-  
-  double m_mergingWeight, m_enhanceWeight;
-  std::vector<std::string> m_weightIDs,m_weightNames;
-  bool m_doLHE3Weights;
-  std::vector<std::string> m_weightCommands;
-  std::vector<std::string> m_showerWeightNames;
+  BooleanProperty m_useLHAPDF{this, "UseLHAPDF", true};
 
-  ToolHandle<IPythia8Custom>    m_athenaTool;
+  StringProperty m_particleDataFile{this, "ParticleData", ""};
+  StringProperty m_outputParticleDataFile{this, "OutputParticleData", "ParticleData.local.xml"};
+
+  double m_mergingWeight{1.0};
+  double m_enhanceWeight{1.0};
+  std::vector<std::string> m_weightIDs{};
+  std::vector<std::string> m_weightNames{};
+  bool m_doLHE3Weights{false};
+  std::vector<std::string> m_weightCommands{};
+  std::vector<std::string> m_showerWeightNames{"nominal"};
+  StringArrayProperty m_showerWeightNamesProp{this, "ShowerWeightNames", {} };
+
+  PublicToolHandle<IPythia8Custom> m_athenaTool{this, "CustomInterface", ""};
 
   static int s_allowedTunes(double version);
 
