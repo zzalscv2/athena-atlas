@@ -84,7 +84,7 @@ class LVL1TGCTrigger : public AthAlgorithm
 			       LVL1MUONIF::Lvl1MuCTPIInputPhase1*,
 			       std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     void doMaskOperation(const TgcDigitContainer* ,std::map<Identifier, int>& );
-    void fillTGCEvent(std::map<Identifier, int>& ,  TGCEvent&);
+    void fillTGCEvent(const std::map<Identifier, int>& ,  TGCEvent&);
     
     // Fill TMDB event data
     StatusCode fillTMDB();
