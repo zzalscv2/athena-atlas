@@ -488,7 +488,7 @@ namespace Trk{
         static void FillMatrixP(AmgSymMatrix(5)& , std::vector<double>& ) ;
         static void FillMatrixP(int iTrk, AmgSymMatrix(5)& , std::vector<double>& ) ;
         static Amg::MatrixX * GiveFullMatrix(int NTrk, std::vector<double>&) ;
-        bool convertAmg5SymMtx(const AmgSymMatrix(5)*, double[] ) const;
+        bool convertAmg5SymMtx(const AmgSymMatrix(5)*, double[15] ) const;
 
         void VKalTransform(double MAG,
                            double A0V,
@@ -496,10 +496,10 @@ namespace Trk{
                            double PhiV,
                            double ThetaV,
                            double PInv,
-                           const double[],
+                           const double[15],
                            long int& Charge,
-                           double[],
-                           double[]) const;
+                           double[5],
+                           double[15]) const;
 
         xAOD::Vertex* makeXAODVertex(int,
                                      const Amg::Vector3D&,
