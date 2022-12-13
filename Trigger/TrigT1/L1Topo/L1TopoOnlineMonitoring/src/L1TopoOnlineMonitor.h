@@ -75,7 +75,7 @@ private:
 
   std::vector<unsigned> m_ctpIds;
 
-  std::vector<std::vector<unsigned>> m_startbit;
+  std::vector<std::vector<std::pair<unsigned,unsigned>>> m_startbit;
 
   //RateVars m_rateVars{};
   // ------------------------- Properties and handles --------------------------
@@ -110,21 +110,21 @@ private:
   // ------------------------- Private methods ---------------------------------
   
   /// Monitor the simulated bits
-  StatusCode doSimMon(DecisionBits& decisionBits, const EventContext& ctx) const;
+  StatusCode doSimMon(DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeights, const EventContext& ctx) const;
   
   /// Monitor the Hw bits from CTP
   StatusCode doHwMonCTP(DecisionBits& decisionBits, const EventContext& ctx) const;
   
   /// Monitor the Hw bits from RAW data
-  StatusCode doHwMon(DecisionBits& decisionBits, const EventContext& ctx) const;
+  StatusCode doHwMon(DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeights, const EventContext& ctx) const;
   
   /// Compare hardware and simulation
-  StatusCode doComp(DecisionBits& decisionBits) const;
+  StatusCode doComp(DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw) const;
     
   /// Get CTP ids from menu
   std::vector<unsigned> getCtpIds(const TrigConf::L1Menu& l1menu);
 
-  std::vector<std::vector<unsigned>> getStartBits(const TrigConf::L1Menu& l1menu);
+  std::vector<std::vector<std::pair<unsigned,unsigned>>> getStartBits(const TrigConf::L1Menu& l1menu);
 
 };
 

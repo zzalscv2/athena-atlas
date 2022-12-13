@@ -110,15 +110,42 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
                                     title=title, xbins=64, xlabels=labels,
                                     xmin=0, xmax=64)
 
-    #TODO: add labels
     for cable in range(4):
         topoName = 'Topo1Opt'+str(cable)
-        name = 'CableOpti_'+str(cable+4)
+        name = 'CableOpti_'+str(cable)
+        weight = name+'_weight'
         name += f';{topoName}'
         title = f'Topo Optical Cable {cable}'
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        xlabels = [x for x in labels if x]
         alg.MonTool.defineHistogram(name, path='EXPERT', type='TH1I',
-                                    title=title, xbins=128, xlabels=getMultiplicityLabels(flags=flags,topoModule=topoName),
-                                    xmin=0, xmax=128)
+                                    title=title, xbins=len(xlabels), xlabels=xlabels,
+                                    weight=weight,
+                                    xmin=0, xmax=len(xlabels))
+    for cable in range(4):
+        topoName = 'Topo1Opt'+str(cable)
+        name = 'HdwTopo1Opt'+str(cable)
+        weight = name+'_weight'
+        name += f';{topoName}_data'
+        title = f'Topo Optical Cable {cable} (Data)'
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        xlabels = [x for x in labels if x]
+        alg.MonTool.defineHistogram(name, path='EXPERT', type='TH1I',
+                                    title=title, xbins=len(xlabels), xlabels=xlabels,
+                                    weight=weight,
+                                    xmin=0, xmax=len(xlabels))
+
+    for cable in range(4):
+        topoName = 'Topo1Opt'+str(cable)
+        labels = getMultiplicityLabels(flags=flags,topoModule=topoName)
+        labels = [x for x in labels if x]
+        for i,label in enumerate(labels):
+            name = f'Topo1Opt{cable}_{i}_Sim,Topo1Opt{cable}_{i}_Hdw;Topo1Opt{cable}_{label}'
+            title = f'Topo1Opt{cable}_{label};Simulation Counts;Hardware Counts'
+            alg.MonTool.defineHistogram(name, path='EXPERT', type='TH2F',
+                                        title=title,xbins=10,ybins=10,
+                                        xmin=0, xmax=10,
+                                        ymin=0, ymax=10)
 
     alg.MonTool.defineHistogram('TopoSim', path='EXPERT', type='TH1I',
                                     title='Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,

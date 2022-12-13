@@ -11,6 +11,7 @@
 #include "L1TopoRDO/Helpers.h"
 #include "L1TopoRDO/L1TopoROD.h"
 #include "L1TopoRDO/L1TopoFPGA.h"
+#include "L1TopoRDO/L1TopoResult.h"
 
 // System includes
 #include <utility>
@@ -93,10 +94,12 @@ StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const 
   DecisionBits decisionBits{};
   enum class MonFunction : uint8_t {doSimMon=0, doHwMonCTP, doHwMon, doComp, doSummary};
   std::vector<uint8_t> failedMonFunctions;
+  std::vector<std::vector<unsigned>> multWeightsSim;
+  std::vector<std::vector<unsigned>> multWeightsHdw;
 
   
   if (m_doHwMon) {
-    StatusCode sc = doHwMon(decisionBits,ctx);
+    StatusCode sc = doHwMon(decisionBits,multWeightsHdw,ctx);
     ATH_MSG_DEBUG("Executed doHWMon: " << (sc.isFailure() ? "failed" : "ok"));
     if (sc.isFailure()) {
       failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doHwMon));
@@ -112,7 +115,7 @@ StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const 
   }
   
   if (m_doSimMon) {
-    StatusCode sc = doSimMon(decisionBits,ctx);
+    StatusCode sc = doSimMon(decisionBits,multWeightsSim,ctx);
     ATH_MSG_DEBUG("Executed doSimMon: " << (sc.isFailure() ? "failed" : "ok"));
     if (sc.isFailure()) {
       failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doSimMon));
@@ -120,7 +123,7 @@ StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const 
   }
 
   if (m_doComp) {
-    StatusCode sc = doComp(decisionBits);
+    StatusCode sc = doComp(decisionBits,multWeightsSim,multWeightsHdw);
     ATH_MSG_DEBUG("Executed doComp: " << (sc.isFailure() ? "failed" : "ok"));
     if (sc.isFailure()) {
       failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doComp));
@@ -134,7 +137,7 @@ StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const 
 }
 
 
-StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, const EventContext& ctx ) const {
+StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeights, const EventContext& ctx ) const {
   
   
   SG::ReadHandle<xAOD::L1TopoSimResultsContainer> cont(m_l1topoKey, ctx);
@@ -146,12 +149,13 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, const Even
   ATH_MSG_DEBUG("----got L1Topo container: " << cont.key());
 
   std::bitset<s_nTopoCTPOutputs>& triggerBitsSim = DecisionBits::createBits(decisionBits.triggerBitsSim);
+  std::unordered_map<unsigned,std::bitset<s_nTopoCTPOutputs>> multWeightsMap;
   for(const auto l1topo_dec : * cont){
     ATH_MSG_DEBUG( "Reading L1Topo EDM:: Connection ID: " << l1topo_dec->connectionId() << " Clock: " << l1topo_dec->clock() << " Bit-length: " << l1topo_dec->bitWidth() << " Word: " << l1topo_dec->topoWord() << " Word64: " << l1topo_dec->topoWord64() );
     
-    std::vector<unsigned> topoword;
 
     if (l1topo_dec->bitWidth() == 32) {
+      std::vector<unsigned> topoword;
       for(unsigned int i=0; i<32; ++i) {
 	uint32_t mask = 0x1; mask <<= i;
 	if ((l1topo_dec->topoWord() & mask) !=0)
@@ -167,22 +171,41 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, const Even
       Monitored::Group(m_monTool,monTopoDec);
     }
     else if (l1topo_dec->bitWidth() == 64) {
-      for(auto startbit : m_startbit[l1topo_dec->connectionId() - 4]) {
-	      uint64_t mask = 0x11; mask <<= startbit;
-	      if ((l1topo_dec->topoWord64() & mask) !=0) { 
-          topoword.push_back(64*l1topo_dec->clock() + startbit);
-        }
+      for (size_t i=0;i<64;i++) {
+	unsigned index = i+l1topo_dec->clock()*64;
+	uint64_t mask = 0x1; mask <<= i;
+	if ((l1topo_dec->topoWord64() & mask) !=0) {
+	  multWeightsMap[static_cast<unsigned>(l1topo_dec->connectionId() - 4)].set(index);
+	}
       }
-      std::string name = "CableOpti_";
-      name += std::to_string(l1topo_dec->connectionId());
-      auto monTopoDec = Monitored::Collection(name, topoword);
-      Monitored::Group(m_monTool,monTopoDec);
     }
     else {
       ATH_MSG_DEBUG( "Unknown Bit-length: " << l1topo_dec->bitWidth() );
       return StatusCode::FAILURE;
     }
   }
+  
+  for (unsigned key=0;key<4;key++) {
+    std::vector<unsigned> vecCount, vecIndices;
+    unsigned indices = 0;
+    for (auto startbit : m_startbit[key]) {
+      unsigned count = 0;
+      for (size_t i=0;i<startbit.second;i++){
+	if (multWeightsMap[key][startbit.first+i]) {
+	  count += 1 * pow(2,i);
+	}
+      }
+      vecCount.push_back(count);
+      vecIndices.push_back(indices);
+      indices++;
+    }
+    multWeights.push_back(vecCount);
+    std::string name = "CableOpti_"+std::to_string(key);
+    auto monMult = Monitored::Collection(name, vecIndices);
+    auto monMultWeight = Monitored::Collection(name+"_weight", vecCount);
+    Monitored::Group(m_monTool,monMult,monMultWeight);
+  }
+  
   std::vector<size_t> triggerBitIndicesSim = bitsetIndices(triggerBitsSim);
   auto monTopoSim = Monitored::Collection("TopoSim", triggerBitIndicesSim);
   Monitored::Group(m_monTool,monTopoSim);
@@ -232,7 +255,7 @@ StatusCode L1TopoOnlineMonitor::doHwMonCTP( DecisionBits& decisionBits, const Ev
   return StatusCode::SUCCESS;
 }
 
-StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const EventContext& ctx ) const {
+StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeights, const EventContext& ctx ) const {
   
   SG::ReadHandle<xAOD::L1TopoRawDataContainer> cont(m_l1topoRawDataKey, ctx);
   if(!cont.isValid()){
@@ -244,51 +267,100 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
 
   std::bitset<s_nTopoCTPOutputs>& triggerBits = DecisionBits::createBits(decisionBits.triggerBits);
   std::bitset<s_nTopoCTPOutputs>& overflowBits = DecisionBits::createBits(decisionBits.overflowBits);
-  
-  std::unique_ptr<L1Topo::L1TopoFPGA> l1topoFPGA;
-  
-  for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
-    const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
-    size_t nWords = dataWords.size();
-    if (nWords!=50) {
-      ATH_MSG_WARNING("Expected data word container size is 50, but found " << nWords);
-      return StatusCode::FAILURE;
-    }
-    uint32_t rodTrailer2 = dataWords[--nWords];
-    uint32_t rodTrailer1 = dataWords[--nWords];
 
-    L1Topo::L1TopoROD l1topoROD(rodTrailer1, rodTrailer2);
-
-    ATH_MSG_VERBOSE(l1topoROD);
-
-    for (size_t i = nWords; i --> 0;) {
-      if ((i+1)%8==0) {
-	uint32_t fpgaTrailer2 = dataWords[i];
-	uint32_t fpgaTrailer1 = dataWords[--i];
-
-	l1topoFPGA.reset(new L1Topo::L1TopoFPGA(fpgaTrailer1, fpgaTrailer2));
-
-	ATH_MSG_VERBOSE(*l1topoFPGA.get());
-    
-      }
-      else {
-	if (l1topoFPGA->topoNumber() != 1) {
-	  i-=3;
-	  uint32_t overflowWord = dataWords[--i];
-	  uint32_t triggerWord = dataWords[--i];
-	  for (size_t iBit=0;iBit<32;iBit++) {
-	    uint32_t topo = l1topoFPGA->topoNumber();
-	    uint32_t fpga = l1topoFPGA->fpgaNumber();
-	    unsigned int index = L1Topo::triggerBitIndexPhase1(topo, fpga, iBit);
-	    overflowBits[index] = (overflowWord>>iBit)&1;
-	    triggerBits[index] = (triggerWord>>iBit)&1;
-	  }
-	  ATH_MSG_DEBUG("trigger word: " << std::hex << std::showbase << triggerWord << std::dec);
-	  ATH_MSG_DEBUG("overflow word: " << std::hex << std::showbase << overflowWord << std::dec);
-	}
-      }
-    }
+  std::unique_ptr<L1Topo::L1TopoResult> l1topoResult = std::make_unique<L1Topo::L1TopoResult>(*cont);
+  if (!l1topoResult->getStatus()) {
+    ATH_MSG_WARNING("Decoding L1Topo results failed!!");
+    return StatusCode::FAILURE;
   }
+
+  // TO-DO Make error monitoring by @Gabriel
+  /*
+  for (unsigned i=0;i<l1topoResult->getFPGASize();i++) {
+    unsigned topoNumber = l1topoResult->getFPGA(i)->topoNumber();
+    unsigned fpgaNumber = l1topoResult->getFPGA(i)->fpgaNumber();
+    std::cout << "Topo: " << topoNumber
+	      << "FPGA: " << fpgaNumber
+	      << std::endl;
+  }
+  */
+  
+  // Multiplicities ---------------------------------------------------------
+  std::vector<unsigned> topo1Opt0,topo1Opt1,topo1Opt2,topo1Opt3;
+  std::vector<unsigned> topo1Opt0Indices,topo1Opt1Indices,topo1Opt2Indices,topo1Opt3Indices;
+
+  unsigned indices=0;
+  for (auto startbit : m_startbit[0]) {
+    unsigned count = 0;
+    for (size_t i=0;i<startbit.second;i++){
+      if (l1topoResult->getTopo1Opt0()[startbit.first+i]) {
+	count += 1 * pow(2,i);
+      }
+    }
+    topo1Opt0.push_back(count);
+    topo1Opt0Indices.push_back(indices);
+    indices++;
+  }
+  indices=0;
+  for (auto startbit : m_startbit[1]) {
+    unsigned count = 0;
+    for (size_t i=0;i<startbit.second;i++){
+      if (l1topoResult->getTopo1Opt1()[startbit.first+i]) {
+	count += 1 * pow(2,i);
+      }
+    }
+    topo1Opt1.push_back(count);
+    topo1Opt1Indices.push_back(indices);
+    indices++;
+  }
+  indices=0;
+  for (auto startbit : m_startbit[2]) {
+    unsigned count = 0;
+    for (size_t i=0;i<startbit.second;i++){
+      if (l1topoResult->getTopo1Opt2()[startbit.first+i]) {
+	count += 1 * pow(2,i);
+      }
+    }
+    topo1Opt2.push_back(count);
+    topo1Opt2Indices.push_back(indices);
+    indices++;
+  }
+  indices=0;
+  for (auto startbit : m_startbit[3]) {
+    unsigned count = 0;
+    for (size_t i=0;i<startbit.second;i++){
+      if (l1topoResult->getTopo1Opt3()[startbit.first+i]) {
+	count += 1 * pow(2,i);
+      }
+    }
+    topo1Opt3.push_back(count);
+    topo1Opt3Indices.push_back(indices);
+    indices++;
+  }
+
+  auto monTopo1Opt0 = Monitored::Collection("HdwTopo1Opt0", topo1Opt0Indices);
+  auto monTopo1Opt0Weight = Monitored::Collection("HdwTopo1Opt0_weight", topo1Opt0);
+  Monitored::Group(m_monTool, monTopo1Opt0, monTopo1Opt0Weight);
+  multWeights.push_back(topo1Opt0);
+
+  auto monTopo1Opt1 = Monitored::Collection("HdwTopo1Opt1", topo1Opt1Indices);
+  auto monTopo1Opt1Weight = Monitored::Collection("HdwTopo1Opt1_weight", topo1Opt1);
+  Monitored::Group(m_monTool, monTopo1Opt1, monTopo1Opt1Weight);
+  multWeights.push_back(topo1Opt1);
+
+  auto monTopo1Opt2 = Monitored::Collection("HdwTopo1Opt2", topo1Opt2Indices);
+  auto monTopo1Opt2Weight = Monitored::Collection("HdwTopo1Opt2_weight", topo1Opt2);
+  Monitored::Group(m_monTool, monTopo1Opt2, monTopo1Opt2Weight);
+  multWeights.push_back(topo1Opt2);
+
+  auto monTopo1Opt3 = Monitored::Collection("HdwTopo1Opt3", topo1Opt3Indices);
+  auto monTopo1Opt3Weight = Monitored::Collection("HdwTopo1Opt3_weight", topo1Opt3);
+  Monitored::Group(m_monTool, monTopo1Opt3, monTopo1Opt3Weight);
+  multWeights.push_back(topo1Opt3);
+  
+  // Decisions ---------------------------------------------------------------
+  triggerBits = l1topoResult->getDecisions();
+  overflowBits = l1topoResult->getOverflows();
 
   triggerBits = triggerBits & (~overflowBits);
   const std::vector<size_t> triggerBitIndicesHdw = bitsetIndices(triggerBits);
@@ -305,7 +377,7 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
   return StatusCode::SUCCESS;
 }
 
-StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
+StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits, std::vector<std::vector<unsigned>> &multWeightsSim, std::vector<std::vector<unsigned>> &multWeightsHdw ) const {
   if (!decisionBits.triggerBitsSim.has_value()) {
     ATH_MSG_DEBUG("Simulation bits not set. Skipping simulation to hardware comparison");
     return StatusCode::FAILURE;
@@ -383,20 +455,34 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
     }
   }
 
+  if (multWeightsSim.size() == 0 and multWeightsHdw.size() == 0) {
+    ATH_MSG_DEBUG("Multiplicities not set, skipping multiplicities comparisin");
+    return StatusCode::FAILURE;
+  }
+
+  for (size_t i=0;i<multWeightsSim.size();i++) {
+    for (size_t k=0;k<multWeightsSim[i].size();k++) {
+      std::string colName = "Topo1Opt" + std::to_string(i) + "_" + std::to_string(k);
+      auto monMultSim = Monitored::Scalar<unsigned>(colName+"_Sim", multWeightsSim[i][k]);
+      auto monMultHdw = Monitored::Scalar<unsigned>(colName+"_Hdw", multWeightsHdw[i][k]);
+      Monitored::Group(m_monTool, monMultSim, monMultHdw);
+    }
+  }
+
   return StatusCode::SUCCESS;
 }
 
-std::vector<std::vector<unsigned>> L1TopoOnlineMonitor::getStartBits( const TrigConf::L1Menu& l1menu ) {
+std::vector<std::vector<std::pair<unsigned,unsigned>>> L1TopoOnlineMonitor::getStartBits( const TrigConf::L1Menu& l1menu ) {
 
-  std::vector<std::vector<unsigned>> startbit_vec;
+  std::vector<std::vector<std::pair<unsigned,unsigned>>> startbit_vec;
   std::vector<std::string> connNames = l1menu.connectorNames();
   for( const std::string connName : {"Topo1Opt0", "Topo1Opt1", "Topo1Opt2", "Topo1Opt3"}) {
     if( find(connNames.begin(), connNames.end(), connName) == connNames.end() ) {
       continue;
     }
-    std::vector<unsigned> startbit;
+    std::vector<std::pair<unsigned,unsigned>> startbit;
 	  for(auto & t1 : l1menu.connector(connName).triggerLines()) {
-      startbit.push_back(t1.startbit());
+	    startbit.push_back(std::make_pair(t1.startbit(),t1.nbits()));
     }
     startbit_vec.push_back(startbit);
   }
