@@ -156,6 +156,7 @@ FLAG_NOMUON=0
 FLAG_LUCID=0
 FLAG_ONLINE=0
 FLAG_ALFA=0
+FLAG_AFP=0
 FLAG_FORWARD_REGION=0
 FLAG_ZDC=0
 FLAG_CAVERN=0
@@ -286,6 +287,9 @@ while [ $i -le $# ]; do
 	FLAG_ONLINE=1
     elif [ "x${arg}" == "x-alfa" ]; then
 	FLAG_ALFA=1
+    elif [ "x${arg}" == "x-afp" ]; then
+        echo "Setting for AFP geometry..."
+        FLAG_AFP=1
     elif [ "x${arg}" == "x-forwardregion" ]; then
 	FLAG_FORWARD_REGION=1
     elif [ "x${arg}" == "x-zdc" ]; then
@@ -309,7 +313,7 @@ while [ $i -le $# ]; do
     elif [ "x${arg}" == "x-cgal" ]; then
 	FLAG_CGAL=1
     elif [ "x${arg}" == "x-slhc" ]; then
-        echo "SLHC"
+        echo "Setting for SLHC..."
         FLAG_SLHC=1
     #elif [ "x${arg}" == "x-customgeom" ]; then
     #    FLAG_CUSTOMGEOMETRY=1
@@ -720,6 +724,7 @@ if [ "x$FLAG_HELP" != "x0" ]; then
     # echo "                                A lightweight version is built by default"
     echo "  -lucid                      : Init geometry and converters for the LUCID forward detector."
     echo "  -alfa                       : Init geometry and converters for the ALFA forward detector."
+    echo "  -afp                        : Init geometry and converters for the AFP forward detector."
     echo "  -forwardregion              : Init geometry and converters for the FrwardRegion."
     echo "  -zdc                        : Init geometry and converters for the ZDC forward detector."
     echo "  -cavern                     : Init geometry for the cavern infrastructure."
@@ -1020,6 +1025,10 @@ fi
 if [ "x$FLAG_ALFA" != "x0" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
     OPTS="${OPTS}vp1ALFA=True"
+fi
+if [ "x$FLAG_AFP" != "x0" ]; then
+    if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi
+    OPTS="${OPTS}vp1AFP=True"
 fi
 if [ "x$FLAG_FORWARD_REGION" != "x0" ]; then
     if [ "x$OPTS" != "x" ]; then OPTS="$OPTS;"; fi

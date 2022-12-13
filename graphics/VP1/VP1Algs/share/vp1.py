@@ -5,6 +5,7 @@ if not 'vp1Calo' in dir(): vp1Calo=True
 if not 'vp1Muon' in dir(): vp1Muon=True
 if not 'vp1LUCID' in dir(): vp1LUCID=False
 if not 'vp1ALFA' in dir(): vp1ALFA=False
+if not 'vp1AFP' in dir(): vp1AFP=False
 if not 'vp1ForwardRegion' in dir(): vp1ForwardRegion=False
 if not 'vp1ZDC' in dir(): vp1ZDC=False
 if not 'vp1Extrapolator' in dir(): vp1Extrapolator=True
@@ -236,10 +237,13 @@ if vp1BatchRandomConfiguration:
 
 #Detector setup:
 from AthenaCommon.DetFlags import DetFlags
+# INNER DETECTORS
 if (vp1ID): DetFlags.ID_setOn()
 else:       DetFlags.ID_setOff()
+# CALORIMETERS
 if (vp1Calo): DetFlags.Calo_setOn()
 else:         DetFlags.Calo_setOff()
+# MUON SPECTROMETER
 if (vp1Muon):
     DetFlags.Muon_setOn()
     from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
@@ -247,14 +251,21 @@ if (vp1Muon):
     if not MuonGeometryFlags.hasMM(): DetFlags.MM_setOff()
     if not MuonGeometryFlags.hasSTGC(): DetFlags.sTGC_setOff()
 else:         DetFlags.Muon_setOff()
+# LUCID
 if (vp1LUCID): DetFlags.Lucid_setOn()
 else:          DetFlags.Lucid_setOff()
-if (vp1ALFA): DetFlags.ALFA_setOn()
-else:          DetFlags.ALFA_setOff()
-if (vp1ForwardRegion): DetFlags.FwdRegion_setOn()
-else:          DetFlags.FwdRegion_setOff()
+# ZDC
 if (vp1ZDC): DetFlags.ZDC_setOn()
-else:          DetFlags.ZDC_setOff()
+else:        DetFlags.ZDC_setOff()
+# AFP
+if (vp1AFP):  DetFlags.AFP_setOn()
+else:         DetFlags.AFP_setOff()
+# ALFA
+if (vp1ALFA): DetFlags.ALFA_setOn()
+else:         DetFlags.ALFA_setOff()
+# FORWARDREGION
+if (vp1ForwardRegion): DetFlags.FwdRegion_setOn()
+else:                  DetFlags.FwdRegion_setOff()
     
 DetFlags.Print()
 
