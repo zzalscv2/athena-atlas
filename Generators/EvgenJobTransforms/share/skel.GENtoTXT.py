@@ -416,9 +416,6 @@ include("EvgenJobTransforms/Generate_ecmenergies.py")
 # Propagate DSID and seed to the generators
 include("EvgenJobTransforms/Generate_dsid_ranseed.py")
 
-## Process random seed arg and pass to generators
-include("EvgenJobTransforms/Generate_randomseeds.py")
-
 ## Propagate debug output level requirement to generators
 if (hasattr( runArgs, "VERBOSE") and runArgs.VERBOSE ) or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "DEBUG") or (hasattr( runArgs, "loglevel") and runArgs.loglevel == "VERBOSE"):
    include("EvgenJobTransforms/Generate_debug_level.py")
