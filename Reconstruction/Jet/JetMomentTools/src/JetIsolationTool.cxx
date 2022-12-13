@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetIsolationTool.cxx 
@@ -127,12 +127,10 @@ namespace jet {
       jetIsolation(const xAOD::Jet* jet, std::vector<jet::ParticlePosition> &nearbyConstit) const {
         IsolationResult result;
         result.m_isoSumPt = 0;
-        int contributed = 0;
         for ( size_t i=0 ; i<nearbyConstit.size(); ++i ) {
           if ( m_iso.inIsolationArea(jet, nearbyConstit[i]) ) {
             result.m_isoP     += m_kine.getP(nearbyConstit[i]);
             result.m_isoSumPt += m_kine.getPt(nearbyConstit[i]);
-            ++contributed;
           }    
         }
         return result;
