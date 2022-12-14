@@ -116,7 +116,7 @@ public:
     }
   };
 
-  TrigFTF_GNN_Edge() : m_n1(nullptr), m_n2(nullptr), m_level(-1), m_next(-1), m_nNei(0) {};
+  TrigFTF_GNN_Edge() = default;
 
   inline void initialize(TrigFTF_GNN_Node* n1, TrigFTF_GNN_Node* n2) {
     m_n1 = n1; 
@@ -127,15 +127,15 @@ public:
   }
 
 
-  TrigFTF_GNN_Node* m_n1;
-  TrigFTF_GNN_Node* m_n2;
+  TrigFTF_GNN_Node* m_n1{nullptr};
+  TrigFTF_GNN_Node* m_n2{nullptr};
   
-  signed char m_level, m_next;
+  signed char m_level{-1}, m_next{-1};
 
-  unsigned char m_nNei;
-  float m_p[4];
+  unsigned char m_nNei{0};
+  float m_p[4]{};
   
-  unsigned int m_vNei[N_SEG_CONNS];//global indices of the connected edges
+  unsigned int m_vNei[N_SEG_CONNS]{};//global indices of the connected edges
 
 };
 
