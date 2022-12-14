@@ -12,9 +12,6 @@ from AthenaConfiguration.ComponentAccumulator import CompFactory
 from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
-from AthenaCommon.Configurable import Configurable
-Configurable.configurableRun3Behavior = 1
-
 # Output configuration - currently testing offline workflow
 flags.Trigger.writeBS = False
 flags.Trigger.EDMVersion = 3
