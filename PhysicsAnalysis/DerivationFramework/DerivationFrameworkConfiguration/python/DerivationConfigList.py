@@ -103,6 +103,10 @@ from DerivationFrameworkJetEtMiss.JETM12 import JETM12Cfg
 # JETM14: MET trigger (single mu selection)
 from DerivationFrameworkJetEtMiss.JETM14 import JETM14Cfg
 
+# Trigger derivations
+# TRIG8: ID trigger performance (extra trigger info eg online tracks and RoIs [idperf chain skimming])
+from DerivationFrameworkTrigger.TRIG8 import TRIG8Cfg
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
@@ -123,4 +127,5 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg',
            'JETM1Cfg','JETM2Cfg','JETM3Cfg','JETM4Cfg','JETM5Cfg','JETM6Cfg',
            'JETM10Cfg','JETM11Cfg','JETM12Cfg','JETM14Cfg',
+           'TRIG8Cfg'
            ]
