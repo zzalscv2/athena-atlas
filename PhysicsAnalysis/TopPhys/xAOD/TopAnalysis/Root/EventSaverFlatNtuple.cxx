@@ -90,6 +90,18 @@ namespace top {
     m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_DOWN(0.),
     m_weight_leptonSF_MU_SF_ID_BAD_MUON_VETO_UP(0.),
     m_weight_leptonSF_MU_SF_ID_BAD_MUON_VETO_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_CR1_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_CR1_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_CR2_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_CR2_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_CR3_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_CR3_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN(0.),
+    m_weight_leptonSF_MU_SF_ID_TAGPT_UP(0.),
+    m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN(0.),
     // Muon isolation SF systematics
     m_weight_leptonSF_MU_SF_Isol_STAT_UP(0.),
     m_weight_leptonSF_MU_SF_Isol_STAT_DOWN(0.),
@@ -604,6 +616,30 @@ namespace top {
                                                "weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_UP");
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_DOWN,
                                                "weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_CR1_UP,
+                                                "weight_leptonSF_MU_SF_ID_CR1_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_CR1_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_CR1_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_CR2_UP,
+                                                "weight_leptonSF_MU_SF_ID_CR2_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_CR2_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_CR2_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_CR3_UP,
+                                                "weight_leptonSF_MU_SF_ID_CR3_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_CR3_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_CR3_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_UP,
+                                                "weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_UP,
+                                                "weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_TAGPT_UP,
+                                                "weight_leptonSF_MU_SF_ID_TAGPT_UP");
+            systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN,
+                                                "weight_leptonSF_MU_SF_ID_TAGPT_DOWN");
           } else {
             systematicTree->makeOutputVariable(m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP,
                                                "weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP");
@@ -1929,6 +1965,18 @@ namespace top {
           m_weight_leptonSF_MU_SF_ID_TRUTH_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TRUTH_DOWN);
           m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TRUTH_LOWPT_UP);
           m_weight_leptonSF_MU_SF_ID_TRUTH_LOWPT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TRUTH_LOWPT_DOWN);
+          m_weight_leptonSF_MU_SF_ID_CR1_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_CR1_UP);
+          m_weight_leptonSF_MU_SF_ID_CR1_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_CR1_DOWN);
+          m_weight_leptonSF_MU_SF_ID_CR2_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_CR2_UP);
+          m_weight_leptonSF_MU_SF_ID_CR2_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_CR2_DOWN);
+          m_weight_leptonSF_MU_SF_ID_CR3_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_CR3_UP);
+          m_weight_leptonSF_MU_SF_ID_CR3_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_CR3_DOWN);
+          m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_HIGHETA_PROBEIP_UP);
+          m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEIP_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_HIGHETA_PROBEIP_DOWN);
+          m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_HIGHETA_PROBEISO_UP);
+          m_weight_leptonSF_MU_SF_ID_HIGHETA_PROBEISO_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_HIGHETA_PROBEISO_DOWN);
+          m_weight_leptonSF_MU_SF_ID_TAGPT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TAGPT_UP);
+          m_weight_leptonSF_MU_SF_ID_TAGPT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_TAGPT_DOWN);
         } else {
           m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_UP = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SYST_LOWPT_UP);
           m_weight_leptonSF_MU_SF_ID_SYST_LOWPT_DOWN = m_sfRetriever->leptonSF(event, top::topSFSyst::MU_SF_ID_SYST_LOWPT_DOWN);

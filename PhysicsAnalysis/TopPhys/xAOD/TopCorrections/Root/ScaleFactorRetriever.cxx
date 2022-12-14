@@ -984,7 +984,55 @@ namespace top {
     case top::topSFSyst::MU_SF_ID_BAD_MUON_VETO_DOWN:
       decoration += "_BAD_MUON_VETO_DOWN";
       break;
+      
+    case top::topSFSyst::MU_SF_ID_CR1_UP:
+      decoration += "_CR1_UP";
+      break;
 
+    case top::topSFSyst::MU_SF_ID_CR1_DOWN:
+      decoration += "_CR1_DOWN";
+      break;
+      
+    case top::topSFSyst::MU_SF_ID_CR2_UP:
+      decoration += "_CR2_UP";
+      break;
+
+    case top::topSFSyst::MU_SF_ID_CR2_DOWN:
+      decoration += "_CR2_DOWN";
+      break;
+    
+    case top::topSFSyst::MU_SF_ID_CR3_UP:
+      decoration += "_CR3_UP";
+      break;
+
+    case top::topSFSyst::MU_SF_ID_CR3_DOWN:
+      decoration += "_CR3_DOWN";
+      break;
+      
+    case top::topSFSyst::MU_SF_ID_HIGHETA_PROBEIP_UP:
+      decoration += "_HIGHETA_PROBEIP_UP";
+      break;
+      
+    case top::topSFSyst::MU_SF_ID_HIGHETA_PROBEIP_DOWN:
+      decoration += "_HIGHETA_PROBEIP_DOWN";
+      break;
+      
+    case top::topSFSyst::MU_SF_ID_HIGHETA_PROBEISO_UP:
+      decoration += "_HIGHETA_PROBEISO_UP";
+      break;
+      
+    case top::topSFSyst::MU_SF_ID_HIGHETA_PROBEISO_DOWN:
+      decoration += "_HIGHETA_PROBEISO_DOWN";
+      break;
+    
+    case top::topSFSyst::MU_SF_ID_TAGPT_UP:
+      decoration += "_TAGPT_UP";
+      break;
+    
+    case top::topSFSyst::MU_SF_ID_TAGPT_DOWN:
+      decoration += "_TAGPT_DOWN";
+      break;
+      
     default:
       // Do nothing, we have the decoration already
       break;
