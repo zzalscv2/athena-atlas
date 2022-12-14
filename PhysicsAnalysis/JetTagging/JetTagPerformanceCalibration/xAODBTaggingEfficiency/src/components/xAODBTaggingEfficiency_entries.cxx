@@ -5,7 +5,6 @@
 #include "xAODBTaggingEfficiency/BTaggingTruthTaggingTool.h"
 #include "xAODBTaggingEfficiency/BTaggingEigenVectorRecompositionTool.h"
 
-
 #include "../ToolTester.h"
 // Should probably alter the namespace
 

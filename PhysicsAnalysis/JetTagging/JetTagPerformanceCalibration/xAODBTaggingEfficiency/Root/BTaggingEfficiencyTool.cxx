@@ -9,6 +9,9 @@
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataContainer.h"
 
+// for the onnxtool
+#include "xAODBTaggingEfficiency/OnnxUtil.h"
+
 #include "PATInterfaces/SystematicRegistry.h"
 #include "PathResolver/PathResolver.h"
 
@@ -106,10 +109,10 @@ namespace {
       std::string::size_type end;
       std::string tmp(str);
       do {
-	end = tmp.find(token);
-	std::string entry = trim(tmp.substr(0,end));
-	if (entry.size() > 0) result.push_back(entry); 
-	if (end != std::string::npos) tmp = tmp.substr(end+1);
+        end = tmp.find(token);
+        std::string entry = trim(tmp.substr(0,end));
+        if (entry.size() > 0) result.push_back(entry); 
+        if (end != std::string::npos) tmp = tmp.substr(end+1);
       } while (end != std::string::npos);
     }
     return result;
@@ -153,14 +156,17 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("OldConeFlavourLabel",                 m_oldConeFlavourLabel = false, "when using cone-based flavour labelling, specify whether or not to use the (deprecated) Run-1 legacy labelling");
   declareProperty("IgnoreOutOfValidityRange",            m_ignoreOutOfValidityRange = false, "ignore out-of-extrapolation-range errors as returned by the underlying tool");
   declareProperty("VerboseCDITool",                      m_verboseCDITool = true,       "specify whether or not to retain 'normal' printout from the underlying tool");
+  declareProperty( "useCTagging",                        m_useCTag=false,       "Enabled only for FixedCut or Continuous WPs: define wether the cuts refer to b-tagging or c-tagging");
+  // if it is empty, the onnx tool won't be initialised
+  declareProperty( "pathToONNX",                         m_pathToONNX = "",             "path to the onnx file that will be used for inference");
+  
   // initialise some variables needed for caching
   // TODO : add configuration of the mapIndices - rather than just using the default of 0
   //m_mapIndices["Light"] = m_mapIndices["T"] = m_mapIndices["C"] = m_mapIndices["B"] = 0;
   m_initialised = false;
-  // m_getTagWeight = 0;
-  m_applySyst = false;
-  m_isContinuous = false;
-
+  m_applySyst      = false;
+  m_isContinuous   = false;
+  m_isContinuous2D = false;
   // declare the selection tool to be private (not absolutely sure this is needed?)
   m_selectionTool.declarePropertyFor(this, "BTaggingSelectionTool", "selection tool to be used internally");
 }
@@ -168,23 +174,6 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
 BTaggingEfficiencyTool::~BTaggingEfficiencyTool() {
   delete m_CDI;
 }
-
-// /// Silly copy constructor for the benefit of dictionary generation
-// BTaggingEfficiencyTool::BTaggingEfficiencyTool(const BTaggingEfficiencyTool& other) :
-//   IBTaggingEfficiencyTool(other), CP::ISystematicsTool(other), asg::AsgTool(other.name()+"_copy"),
-//   m_path(other.m_path), m_SFFile(other.m_SFFile), m_EffFile(other.m_EffFile),
-//   m_SFBName(other.m_SFBName), m_SFCName(other.m_SFCName), m_SFTName(other.m_SFTName), m_SFLightName(other.m_SFLightName),
-//   m_EffBName(other.m_EffBName), m_EffCName(other.m_EffCName), m_EffTName(other.m_EffTName), m_EffLightName(other.m_EffLightName),
-//   m_excludeFromEV(other.m_excludeFromEV), m_useDevFile(other.m_useDevFile), m_coneFlavourLabel(other.m_coneFlavourLabel),
-//   m_initialised(other.m_initialised), m_applySyst(other.m_applySyst),
-//   m_applyThisSyst(other.m_applyThisSyst), m_systematicsInfo(other.m_systematicsInfo), m_systematics(other.m_systematics),
-//   m_OP(other.m_OP), m_jetAuthor(other.m_jetAuthor), m_isContinuous(other.m_isContinuous), m_getTagWeight(other.m_getTagWeight),
-//   m_mapIndices(other.m_mapIndices), m_SFIndices(other.m_SFIndices), m_EffIndices(other.m_EffIndices) {
-
-//   // The one dynamically allocated data member is the CDI
-//   m_CDI = new Analysis::CalibrationDataInterfaceROOT(*(other.m_CDI));
-//   ATH_MSG_INFO( "Instantiated copy CalibrationDataInterfaceROOT object at " << m_CDI);
-// }
 
 StatusCode BTaggingEfficiencyTool::initialize() {
 
@@ -233,12 +222,11 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     //    CalibrationDataInterfaceROOT::getWeightScaleFactor() instead of
     //    CalibrationDataInterfaceROOT::getScaleFactor() must be used
     m_isContinuous = true;
-    // if (m_taggerName == "MV1")
-    //   m_getTagWeight = &xAOD::BTagging::MV1_discriminant;
-    // else {
-    //   ATH_MSG_FATAL( "No tag weight retrieval function defined for tagger = " << m_taggerName);
-    // }
   }
+  else if  (m_OP.find("Continuous2D")  != std::string::npos) {
+    m_isContinuous2D = true;
+  }
+
   ATH_MSG_INFO( " JetAuthor = " << m_jetAuthor);
 
   std::string flavours[] = { "B", "C", "Light", "T" };
@@ -275,6 +263,21 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     to_exclude = split(m_excludeFlvFromEV[flavour]);
     // Append to the existing list
     excludeFromEVCov[flavour].insert(excludeFromEVCov[flavour].end(), to_exclude.begin(), to_exclude.end());
+  }
+  // For the SFEigen strategy, tau "jets" are treated differently from other flavours. 
+  // First, copy the charm-jet calibration settings
+  excludeFromEVCov["T"] = excludeFromEVCov["C"];
+  // Then ensure that the charm -> tau extrapolation uncertainty is added.
+  // Technically the additional condition should never be necessary, as existing entries should not apply to tau "jets"; so this is mostly to protect users against a duplicate specification
+  if (m_systStrategy != "Envelope" && std::find(excludeFromEVCov["T"].begin(), excludeFromEVCov["T"].end(), "extrapolation from charm") == excludeFromEVCov["T"].end())
+    excludeFromEVCov["T"].push_back("extrapolation from charm");
+
+  //high pt extrapolation uncertainties
+  if((m_OP.find("Continuous") != std::string::npos) && (m_jetAuthor.find("AntiKtVR30Rmax4Rmin02TrackJets") != std::string::npos)){
+    excludeFromEVCov["B"].push_back("extrapolation_pt_b_Eigen*");
+    excludeFromEVCov["C"].push_back("extrapolation_pt_c_Eigen*");
+    excludeFromEVCov["Light"].push_back("extrapolation_pt_l_Eigen*");
+    excludeFromEVCov["T"].push_back("extrapolation_pt_c_Eigen*");
   }
   // For the SFEigen strategy, tau "jets" are treated differently from other flavours. 
   // First, copy the charm-jet calibration settings
@@ -371,18 +374,27 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // Also, remove the "extrapolation" uncertainty from the list (it will be added later under Extrapolation rather than SFNamed).
       bool hasExtrapolation = false;
       for (unsigned int i = 0; i < systematics.size(); ++i) {
-	if (systematics[i] == "extrapolation") {
-          hasExtrapolation = true;
-          systematics.erase(systematics.begin() + i--); // don't forget to decrement i
-	} else {
-	  std::replace_if(systematics[i].begin(), systematics[i].end(), [] (char c) { return c == ' '; }, '_');
-	  // We don't add suffixes here but only for EV variations (see JIRA: AFT-343)
-	  // systematics[i].append(suffixes[i]);
-	}
+        if (systematics[i] == "extrapolation") {
+                hasExtrapolation = true;
+                systematics.erase(systematics.begin() + i--); // don't forget to decrement i
+        } else {
+          std::replace_if(systematics[i].begin(), systematics[i].end(), [] (char c) { return c == ' '; }, '_');
+          // We don't add suffixes here but only for EV variations (see JIRA: AFT-343)
+          // systematics[i].append(suffixes[i]);
+        }
       }
       if (!addSystematics(systematics, flavourID, SFNamed)) {
-	ATH_MSG_ERROR("SFEigen model: error adding named systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("SFEigen model: error adding named systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
+        return StatusCode::FAILURE;
+      }
+      // Add here the extrapolation uncertainty (if it exists -- which ought to be the case).
+      // "Cosmetic" fix: the outside world wants to see "FT_EFF_" prefixes. On the other hand, like for the above named uncertainties, we don't add suffixes here
+      if (hasExtrapolation) {
+        std::vector<std::string> extrapSyst; extrapSyst.push_back(std::string("FT_EFF_extrapolation"));
+        if (! addSystematics(extrapSyst, flavourID, Extrapolation)) {
+          ATH_MSG_ERROR("SFEigen model: error adding extrapolation uncertainty for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
+          return StatusCode::FAILURE;
+        }
       }
       // Add here the extrapolation uncertainty (if it exists -- which ought to be the case).
       // "Cosmetic" fix: the outside world wants to see "FT_EFF_" prefixes. On the other hand, like for the above named uncertainties, we don't add suffixes here
@@ -396,24 +408,24 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // And then the eigenvector variations
       std::vector<std::string> eigenSysts = makeEigenSyst(getLabel(flavourIDRef),m_CDI->getNumVariations(idRef, SFEigen), suffixes[i]);
       if (!addSystematics(eigenSysts, flavourID, SFEigen)) {
-	ATH_MSG_ERROR("SFEigen model: error adding eigenvector systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("SFEigen model: error adding eigenvector systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
+        return StatusCode::FAILURE;
       }
       // The above should cover all uncertainties except the charm -> tau extrapolation; so we take care of that here.
       if (flavourID == 15) {
-	// First extract the complete list of uncertainties for taus
-	std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id);
-	// And from this list extract only this particular uncertainty (if it exists)
-	const std::string s_tau_extrap = "extrapolation from charm";
-	if (std::find(all_systematics.begin(), all_systematics.end(), s_tau_extrap) != all_systematics.end()) {
-	  // Again, we don't add the suffix here (per JIRA: AFT-343)
-	  std::string entry = "FT_EFF_extrapolation_from_charm"; // entry.append(suffixes[i]);
-	  std::vector<std::string> extrapSyst; extrapSyst.push_back(entry);
-	  if (! addSystematics(extrapSyst, flavourID, TauExtrapolation)) {
-	    ATH_MSG_ERROR("SFEigen model: error adding charm->tau systematics for flavour " << getLabel(flavourID) << ", invalid initialization");
-	    return StatusCode::FAILURE;
-	  }
-	}
+        // First extract the complete list of uncertainties for taus
+        std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id);
+        // And from this list extract only this particular uncertainty (if it exists)
+        const std::string s_tau_extrap = "extrapolation from charm";
+        if (std::find(all_systematics.begin(), all_systematics.end(), s_tau_extrap) != all_systematics.end()) {
+          // Again, we don't add the suffix here (per JIRA: AFT-343)
+          std::string entry = "FT_EFF_extrapolation_from_charm"; // entry.append(suffixes[i]);
+          std::vector<std::string> extrapSyst; extrapSyst.push_back(entry);
+          if (! addSystematics(extrapSyst, flavourID, TauExtrapolation)) {
+            ATH_MSG_ERROR("SFEigen model: error adding charm->tau systematics for flavour " << getLabel(flavourID) << ", invalid initialization");
+            return StatusCode::FAILURE;
+          }
+        }
       }
     } else if (m_systStrategy == "Envelope") {
       //
@@ -432,39 +444,39 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // std::cout << std::endl;
       const std::string s_total = "systematics";
       if (std::find(all_ref_systematics.begin(), all_ref_systematics.end(), s_total) == all_ref_systematics.end()) {
-	ATH_MSG_ERROR("Envelope model: required uncertainty " << s_total << " not found for flavour " << getLabel(flavourIDRef)
-		      << ", invalid initialization");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Envelope model: required uncertainty " << s_total << " not found for flavour " << getLabel(flavourIDRef)
+                << ", invalid initialization");
+        return StatusCode::FAILURE;
       }
       std::vector<std::string> totalSyst; totalSyst.push_back("FT_EFF_" + getLabel(flavourIDRef) + "_" + s_total + suffixes[i]);
       if (! addSystematics(totalSyst, flavourID, Total)) {
-	  ATH_MSG_ERROR("Envelope model: error adding systematics uncertainty for flavour " << getLabel(flavourIDRef)
-		      << ", invalid initialization");
-	return StatusCode::FAILURE;
+        ATH_MSG_ERROR("Envelope model: error adding systematics uncertainty for flavour " << getLabel(flavourIDRef)
+              << ", invalid initialization");
+        return StatusCode::FAILURE;
       }
       // Second, handle the extrapolation variations; these are shared between flavours (unless different suffixes are specified)
       const std::string s_extrap = "extrapolation";
       if (std::find(all_ref_systematics.begin(), all_ref_systematics.end(), s_extrap) != all_ref_systematics.end()) {
-	std::vector<std::string> extrapSyst; extrapSyst.push_back("FT_EFF_" + s_extrap + suffixes[i]);
-	if (! addSystematics(extrapSyst, flavourID, Extrapolation)) {
-	  ATH_MSG_ERROR("Envelope model: error adding extrapolation uncertainty for flavour " << getLabel(flavourIDRef)
-		      << ", invalid initialization");
-	  return StatusCode::FAILURE;
-	}
+        std::vector<std::string> extrapSyst; extrapSyst.push_back("FT_EFF_" + s_extrap + suffixes[i]);
+        if (! addSystematics(extrapSyst, flavourID, Extrapolation)) {
+          ATH_MSG_ERROR("Envelope model: error adding extrapolation uncertainty for flavour " << getLabel(flavourIDRef)
+                << ", invalid initialization");
+          return StatusCode::FAILURE;
+        }
       }
       // Finally, handle the charm -> tau extrapolation (as in the above)
       if (flavourID == 15) {
-	// First extract the complete list of uncertainties for taus
-	std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id);
-	// And from this list extract only this particular uncertainty (if it exists)
-	const std::string s_tau_extrap = "extrapolation from charm";
-	if (std::find(all_systematics.begin(), all_systematics.end(), s_tau_extrap) != all_systematics.end()) {
-	  std::vector<std::string> extrapSyst; extrapSyst.push_back("FT_EFF_extrapolation_from_charm" + suffixes[i]);
-	  if (! addSystematics(extrapSyst, flavourID, TauExtrapolation)) {
-	    ATH_MSG_ERROR("Envelope model: error adding charm->tau systematics for flavour " << getLabel(flavourID) << ", invalid initialization");
-	    return StatusCode::FAILURE;
-	  }
-	}
+        // First extract the complete list of uncertainties for taus
+        std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id);
+        // And from this list extract only this particular uncertainty (if it exists)
+        const std::string s_tau_extrap = "extrapolation from charm";
+        if (std::find(all_systematics.begin(), all_systematics.end(), s_tau_extrap) != all_systematics.end()) {
+          std::vector<std::string> extrapSyst; extrapSyst.push_back("FT_EFF_extrapolation_from_charm" + suffixes[i]);
+          if (! addSystematics(extrapSyst, flavourID, TauExtrapolation)) {
+            ATH_MSG_ERROR("Envelope model: error adding charm->tau systematics for flavour " << getLabel(flavourID) << ", invalid initialization");
+            return StatusCode::FAILURE;
+          }
+        }
       }
     }
   }
@@ -488,6 +500,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_CHECK( m_selectionTool.setProperty("OperatingPoint",               m_OP) );
     ATH_CHECK( m_selectionTool.setProperty("JetAuthor",                    m_jetAuthor) );
     ATH_CHECK( m_selectionTool.setProperty("MinPt",                        m_minPt) );
+    ATH_CHECK( m_selectionTool.setProperty("useCTagging",                  m_useCTag) );
     ATH_CHECK( m_selectionTool.retrieve() );
  }
 
@@ -496,6 +509,17 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_MSG_INFO("!!!!! You have chosen to disable out-of-validity return codes -- contact the Flavour Tagging group if such jets comprise a substantial part of the phase space in your analysis !!!!!");
   }
   
+  // create and initialise the onnx tool
+  if (m_pathToONNX != ""){
+    std::string pathtoonnxfile = PathResolverFindCalibFile(m_pathToONNX);
+    if (pathtoonnxfile == ""){
+      ATH_MSG_ERROR("ONNX error: Model file doesn't exist! Please set the property 'pathToONNX' to a valid ONNX file");
+      return StatusCode::FAILURE;
+    }
+    m_onnxUtil = std::make_unique<OnnxUtil> (m_pathToONNX);
+    m_onnxUtil->initialize();
+  }
+
   m_initialised = true;
   return StatusCode::SUCCESS;
 }
@@ -553,7 +577,7 @@ BTaggingEfficiencyTool::getScaleFactor( int flavour, const Analysis::Calibration
     }
   }
 
-  status = m_isContinuous ?
+  status = (m_isContinuous || m_isContinuous2D) ?
     m_CDI->getWeightScaleFactor(v,sfindex,efindex,
 				unc,unc_ind,result) :
     m_CDI->getScaleFactor(v,sfindex,efindex,
@@ -833,7 +857,6 @@ BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::Calibratio
 					 float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
-
   CalibResult result;
 
   unsigned int sfindex = 0;
@@ -847,7 +870,6 @@ BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::Calibratio
   // no uncertainty index here as there aren't any uncertainties associated with the MC efficiencies
   CalibrationStatus status = m_CDI->getMCEfficiency(v,efindex,
 						    unc,result);
-  
   eff = result.first;
   if( m_applySyst && !m_applyThisSyst.isUp) {
     eff = result.second; // down variation
@@ -863,6 +885,22 @@ BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::Calibratio
   default:
     return CorrectionCode::Ok;
   }
+}
+
+// get efficiencies with the onnx model (fixed cut wp)
+CorrectionCode
+BTaggingEfficiencyTool::getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& effAllJet)
+{
+  m_onnxUtil->runInference(node_feat, effAllJet);
+  return CorrectionCode::Ok;
+}
+
+// get efficiencies with the onnx model (continuous wp)
+CorrectionCode
+BTaggingEfficiencyTool::getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<std::vector<float>>& effAllJetAllWp)
+{
+  m_onnxUtil->runInference(node_feat, effAllJetAllWp);
+  return CorrectionCode::Ok;
 }
 
 // Systematics framework - modelled on PhysicsAnalysis/AnalysisCommon/CPAnalysisExamples/Root/JetCalibrationToolExample3.cxx
@@ -903,7 +941,7 @@ BTaggingEfficiencyTool::listSystematics() const {
       unsigned int idx;
       unsigned int flavour = all_flavours[flv];
       if (info.second.getIndex(flavour, idx))
-	flavours.push_back(getLabel(int(flavour)));
+        flavours.push_back(getLabel(int(flavour)));
     }
     results[variation] = flavours;
   }
@@ -1011,17 +1049,21 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
   x.jetTagWeight = 0.;
   x.jetAuthor = m_jetAuthor;
   //bool weightOK = true;
-  if (m_isContinuous) {
+  if (m_isContinuous2D){
+    x.jetTagWeight = m_selectionTool->getQuantile(jet)+0.5;
+    //    std::cout <<"inside fill variables in EffTool: " <<x.jetTagWeight <<" " <<x.jetAuthor <<std::endl;
+  }
+  else if (m_isContinuous) {
     const xAOD::BTagging* tagInfo = xAOD::BTaggingUtilities::getBTagging( jet );
     if (!tagInfo) return false;
-    // x.jetTagWeight = (tagInfo->*m_getTagWeight)();
     // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
     if (m_taggerName.find("DL1") != std::string::npos) {
-      return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight) == CP::CorrectionCode::Ok);
+      return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
     } else {
       return tagInfo->MVx_discriminant(m_taggerName, x.jetTagWeight);
     }
   }
+
   return true;
 }
 

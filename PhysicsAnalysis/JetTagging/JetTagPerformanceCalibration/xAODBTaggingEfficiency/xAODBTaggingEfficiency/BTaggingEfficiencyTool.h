@@ -30,6 +30,10 @@
 #include "CalibrationDataInterface/CalibrationDataVariables.h"
 #include "CalibrationDataInterface/CalibrationDataInterfaceROOT.h"
 
+// for the onnxtool
+#include "xAODBTaggingEfficiency/OnnxUtil.h"
+
+
 class BTaggingEfficiencyTool: public asg::AsgTool,
             public virtual IBTaggingEfficiencyTool
 {
@@ -118,6 +122,16 @@ class BTaggingEfficiencyTool: public asg::AsgTool,
    */
   CP::CorrectionCode getMCEfficiency( int flavour, const Analysis::CalibrationDataVariables& v,
               float & eff);
+
+  /** Computes the MC efficiency of the jets in a given event. (Uses the onnx tool)
+      For fixed cut wp
+   */
+  CP::CorrectionCode getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& effAllJet);
+    
+  /** Computes the MC efficiency of the jets in a given event. (Uses the onnx tool)
+      For continuous wp
+   */
+  CP::CorrectionCode getMCEfficiencyONNX( const std::vector<std::vector<float>>& node_feat, std::vector<std::vector<float>>& effAllJetAllWp);
 
   /// @}
 
@@ -281,6 +295,8 @@ private:
 
   /// pointer to the object doing the actual work
   Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
+  /// pointer to the onnx tool
+  std::unique_ptr<OnnxUtil> m_onnxUtil;
 
   /// @name core configuration properties (set at initalization time and not modified afterwards)
   /// @{
@@ -330,6 +346,10 @@ private:
   bool m_ignoreOutOfValidityRange;
   /// if false, suppress any non-error/warning printout from the underlying tool
   bool m_verboseCDITool;
+  /// 1D tagging only: define wether the cuts refer to b-tagging or c-tagging
+  bool m_useCTag = false;
+  /// if this string is empty, the onnx tool won't be created
+  std::string m_pathToONNX;
   /// @}
 
   /// @name Cached variables
@@ -347,6 +367,8 @@ private:
   CP::SystematicSet m_systematics;
   // specifically for continuous tagging
   bool m_isContinuous;
+  // specifically for continuous 2D tagging
+  bool m_isContinuous2D;
   // pointer to a member function of a b-tagger
   // tagWeight_member_t m_getTagWeight;
 

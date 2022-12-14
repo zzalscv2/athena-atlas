@@ -108,7 +108,6 @@ CalibrationDataContainer::getSystUncertainty(const CalibrationDataVariables& x,
   // cache the pointer to the "systematics" object (to avoid string comparisons)
   if (!obj) {
     if (! m_objSystematics) {
-      // std::cout << "retrieving total systematics pointer" << std::endl;
       m_objSystematics = GetValue("systematics");
     }
     obj = m_objSystematics;
@@ -350,8 +349,8 @@ CalibrationDataContainer::computeVariables(const CalibrationDataVariables& x, bo
       if (status != kExtrapolatedRange) {
 	status  = (extrapolate || (m_vars[var] >= getUpperBound(m_variables[var], true))) ? kExtrapolatedRange : kRange;
 	// std::cout << "computeVariables(): variable " << var << ", value: " << m_vars[var] << ", extrapolate? " << extrapolate
-	// 	  << ", upper bound: " << getUpperBound(m_variables[var],extrapolate)
-	// 	  << " (extrapolation bound: " << getUpperBound(m_variables[var],true) << "), setting status to " << status << std::endl;
+	//  	  << ", upper bound: " << getUpperBound(m_variables[var],extrapolate)
+	//	  << " (extrapolation bound: " << getUpperBound(m_variables[var],true) << "), setting status to " << status << std::endl;
       }
       if (m_restrict) m_vars[var] = getUpperBound(m_variables[var], extrapolate) - rangeEpsilon;
     }
@@ -549,7 +548,6 @@ CalibrationDataHistogramContainer::getResult(const CalibrationDataVariables& x,
   //                  validity bounds as relevant for extrapolation uncertainties
   if (!obj) {
     if (! m_objResult) {
-      // std::cout << "retrieving central value pointer" << std::endl;
       m_objResult = GetValue("result");
     }
     obj = m_objResult;
@@ -565,12 +563,9 @@ CalibrationDataHistogramContainer::getResult(const CalibrationDataVariables& x,
   // Note: FindFixBin() is only available in "recent" ROOT versions (FindBin() is appropriate for older versions)
   // (otherwise we need to rely on the ResetBit(TH1::kCanRebin) method having been used)
   if (m_interpolate) {
-    // std::cout << "retrieving interpolated result" << std::endl;
     result = getInterpolatedResult(hist);
   } else {
-    // std::cout << "retrieving binned result" << std::endl;
     Int_t bin = hist->FindFixBin(m_vars[0], m_vars[1], m_vars[2]);
-    // Int_t bin = findBin(hist, false);
     result = hist->GetBinContent(bin);
   }
 
@@ -590,7 +585,6 @@ CalibrationDataHistogramContainer::getStatUncertainty(const CalibrationDataVaria
   //     result:      result
 
   if (! m_objResult) {
-    // std::cout << "retrieving central value pointer" << std::endl;
     m_objResult = GetValue("result");
   }
   TH1* hist = dynamic_cast<TH1*>(m_objResult);
@@ -691,7 +685,6 @@ CalibrationDataHistogramContainer::checkBounds()
   }
   // if an extrapolation uncertainty histogram was provided, use this to determine a second set of validity bounds
   const TH1* hExtrapolate = dynamic_cast<const TH1*>(GetValue("extrapolation"));
-  // if (hExtrapolate) std::cout << "debug: found extrapolation histogram" << std::endl;
   for (unsigned int t = 0; int(t) < hist->GetDimension(); ++t) {
     const TAxis* axis; const TAxis* axis2 = 0;
     switch (t) {
@@ -1166,7 +1159,6 @@ CalibrationDataMappedHistogramContainer::getResult(const CalibrationDataVariable
 
   if (!obj) {
     if (! m_objResult) {
-      // std::cout << "retrieving central value pointer" << std::endl;
       m_objResult = GetValue("result");
     }
     obj = m_objResult;
@@ -1193,7 +1185,6 @@ CalibrationDataMappedHistogramContainer::getStatUncertainty(const CalibrationDat
   //     result:      result
 
   if (! m_objResult) {
-    // std::cout << "retrieving central value pointer" << std::endl;
     m_objResult = GetValue("result");
   }
   TH1* hist = dynamic_cast<TH1*>(m_objResult);
@@ -1717,12 +1708,9 @@ CalibrationDataFunctionContainer::getStatUncertainty(const CalibrationDataVariab
   }
 
   TMatrixT<double> gradients(npar,1);
-  //  std::cout << "parametricVariance: gradients:";
   for (int ipar = 0; ipar < npar; ++ipar) {
     gradients(ipar,0) = func->GradientPar(ipar, m_vars, eps);
-    // std::cout << " " << gradients(ipar,0);
   }
-  //  std::cout << std::endl;
 
   // carry out the matrix multiplication
   TMatrixT<double> gradientsTransposed(TMatrixT<double>::kTransposed, gradients);
