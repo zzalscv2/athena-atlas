@@ -36,6 +36,12 @@ StatusCode SUSYObjDef_xAOD::GetPhotons(xAOD::PhotonContainer*& copy, xAOD::Shall
     ATH_MSG_ERROR("SUSYTools was not initialized!!");
     return StatusCode::FAILURE;
   }
+
+  if (m_isPHYSLITE && photonkey.find("AnalysisPhotons")==std::string::npos){
+    ATH_MSG_ERROR("You are running on PHYSLITE derivation. Please change the Photons container to 'AnalysisPhotons'");
+    return StatusCode::FAILURE;
+  }
+
   const xAOD::PhotonContainer* photons = nullptr;
   if (copy==nullptr) { // empty container provided
     if (containerToBeCopied != nullptr) {

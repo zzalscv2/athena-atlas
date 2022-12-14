@@ -718,6 +718,7 @@ namespace ST {
 
     std::map<std::string,bool> m_slices;
     bool m_isRun3;
+    bool m_isPHYSLITE;
 
     std::string m_metJetSelection;
 

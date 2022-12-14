@@ -56,6 +56,11 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
     return StatusCode::FAILURE;
   }
   
+  if (m_isPHYSLITE && muonkey.find("AnalysisMuons")==std::string::npos){
+    ATH_MSG_ERROR("You are running on PHYSLITE derivation. Please change the Muons container to 'AnalysisMuons'");
+    return StatusCode::FAILURE;
+  }
+
   const xAOD::MuonContainer* muons = nullptr;
   if (copy==nullptr) { // empty container provided
     if (containerToBeCopied != nullptr) {

@@ -64,6 +64,11 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
     return StatusCode::FAILURE;
   }
 
+  if (m_isPHYSLITE && elekey.find("AnalysisElectrons")==std::string::npos){
+    ATH_MSG_ERROR("You are running on PHYSLITE derivation. Please change the Electrons container to 'AnalysisElectrons'");
+    return StatusCode::FAILURE;
+  }
+
   const xAOD::ElectronContainer* electrons = nullptr;
   if (copy==nullptr) { // empty container provided
     if (containerToBeCopied != nullptr) {
