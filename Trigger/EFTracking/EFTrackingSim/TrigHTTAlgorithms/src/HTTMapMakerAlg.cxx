@@ -369,7 +369,7 @@ StatusCode HTTMapMakerAlg::writeSubrmap(std::vector<HTTHit> const & allHits)
     for (int s = 0; s < m_nSlices; s++) {
         for (auto trk : slicedTracks[s]) {
             toTrim.clear();
-            for (std::vector<Module>::iterator m = m_track2modules[trk].begin(); m != m_track2modules[trk].end(); m++)
+            for (std::vector<Module>::iterator m = m_track2modules[trk].begin(); m != m_track2modules[trk].end(); ++m)
                 if (100 * ( float((*m).numTracks[s]) / float(slicedTracks[s].size()) ) < m_trim)
                     toTrim.push_back(m);
             trimmed += toTrim.size();
@@ -437,7 +437,7 @@ StatusCode HTTMapMakerAlg::writeEtaPatterns()
         unsigned planesDone = 0;
         for (unsigned p = 0; p < m_planes[m_region].size(); p++)
         {
-            for (std::vector<Module>::iterator m = m_track2modules[trk].begin(); m != m_track2modules[trk].end(); m++)
+            for (std::vector<Module>::iterator m = m_track2modules[trk].begin(); m != m_track2modules[trk].end(); ++m)
                 if ((*m).plane == static_cast<int>(p))
                 {
                     track_etapatts << std::to_string(static_cast<int>((*m).det)) << "\t" << std::to_string(static_cast<int>((*m).bec)) << "\t" << std::to_string((*m).eta) << "\t\t";

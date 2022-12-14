@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -28,7 +28,7 @@ private:
   ToolHandle<IHTTEventOutputHeaderTool>    m_writeOutputTool { this, "OutputTool", "HTTOutputHeaderTool/WriteOutputHeaderTool", "Output Tool" };
   
   // histograms
-  TH2F*   m_hits_r_vs_z = nullptr;
+  //TH2F*   m_hits_r_vs_z = nullptr;
 };
 
 #endif // HTT_DUMPOUTPUTSTATALG_H

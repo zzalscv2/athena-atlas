@@ -163,13 +163,13 @@ protected:
     float m_z = 0;
 
     // --- Truth and Other ---
-    unsigned m_hw_word; // store Strip and Pixel cluster positions as integers using the same HTT_IM HW definition
-    unsigned m_ToT; // time over Threshold
-    long m_eventindex; // athena event index assigned to this channel
-    long m_barcode; // geant particle barcode assigned to this channel
-    float m_barcode_pt; // maximum 'pt' for any 'good' geant particle contributing to the channel.
-                        // corresponds to the particle with m_barcode
-    unsigned long m_parentage_mask; // ancestor information of this channel
+    unsigned m_hw_word = 0; // store Strip and Pixel cluster positions as integers using the same HTT_IM HW definition
+    unsigned m_ToT = 0; // time over Threshold
+    long m_eventindex = 0; // athena event index assigned to this channel
+    long m_barcode = 0; // geant particle barcode assigned to this channel
+    float m_barcode_pt = 0; // maximum 'pt' for any 'good' geant particle contributing to the channel.
+                            // corresponds to the particle with m_barcode
+    unsigned long m_parentage_mask = 0; // ancestor information of this channel
 
     HTTMultiTruth m_truth;
     // geant truth data (clusters only). filled during clustering using the m_barcode and
