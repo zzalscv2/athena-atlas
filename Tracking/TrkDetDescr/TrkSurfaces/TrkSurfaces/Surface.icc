@@ -100,10 +100,72 @@ Surface::onSurface(const T& pars, const Trk::BoundaryCheck& bcheck) const
   return isOnSurface(pars.position(), bcheck);
 }
 
+/// Local to Global implementations
+// From Local position
+inline Amg::Vector3D
+Surface::localToGlobal(const Amg::Vector2D& locpos) const
+{
+  Amg::Vector3D gPosition;
+  localToGlobal(locpos, Amg::Vector3D(1., 1., 1.), gPosition);
+  return gPosition;
+}
+
+// From local position and momentum
+inline Amg::Vector3D
+Surface::localToGlobal(const Amg::Vector2D& locpos,
+                       const Amg::Vector3D& glomom) const
+{
+  Amg::Vector3D gPosition(0., 0., 0.);
+  localToGlobal(locpos, glomom, gPosition);
+  return gPosition;
+}
+
+// From Local parameters
+inline Amg::Vector3D
+Surface::localToGlobal(const LocalParameters& locpars) const
+{
+  Amg::Vector3D gPosition(0., 0., 0.);
+  localToGlobal(
+    localParametersToPosition(locpars), Amg::Vector3D(1., 1., 1.), gPosition);
+  return gPosition;
+}
+
+// From Local parameters and momementum
+inline Amg::Vector3D
+Surface::localToGlobal(const LocalParameters& locpars,
+                       const Amg::Vector3D& glomom) const
+{
+  Amg::Vector3D gPosition(0., 0., 0.);
+  localToGlobal(localParametersToPosition(locpars), glomom, gPosition);
+  return gPosition;
+}
+
 inline std::unique_ptr<Surface>
 Surface::uniqueClone() const
 {
   return std::unique_ptr<Surface>(clone());
+}
+
+// common to all surfaces, uses memory optized method
+inline std::optional<Amg::Vector2D>
+Surface::globalToLocal(const Amg::Vector3D& glopos, double) const
+{
+  Amg::Vector2D lPosition(0., 0.);
+  if (globalToLocal(glopos, Amg::Vector3D(1., 1., 1.), lPosition)) {
+    return lPosition;
+  }
+  return std::nullopt;
+}
+// common to all surfaces, uses memory optized method
+inline std::optional<Amg::Vector2D>
+Surface::globalToLocal(const Amg::Vector3D& glopos,
+                       const Amg::Vector3D& glomom) const
+{
+  Amg::Vector2D lPosition(0., 0.);
+  if (globalToLocal(glopos, glomom, lPosition)) {
+    return lPosition;
+  }
+  return std::nullopt;
 }
 
 // take local position and return global direction
