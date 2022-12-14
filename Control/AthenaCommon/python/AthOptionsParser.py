@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # @file AthenaCommon.AthOptionsParser
 # @purpose the central module to parse command line options of athena.py
@@ -20,7 +20,7 @@ from .Debugging import DbgStage
 ### globals -------------------------------------------------------------------
 _useropts = "bidc:hl:svp:r:t:"
 _userlongopts = [
-    "batch", "interactive", "no-display", "debug=", "command=", "help",
+    "batch", "interactive", "no-display", "debug=", "command=", "CA", "help",
     "loglevel=", "showincludes", "trace=", "check-properties",
     "version",
     "leak-check=", "leak-check-execute", "delete-check=",
@@ -56,6 +56,7 @@ Accepted command line options:
      --skipEvents=<numEvents>         ...  Number of events to skip (only used in batch mode)
      --filesInput=<files>             ...  Set the FilesInput job property 
                                             (comma-separated list, which can include wild characters)
+     --CA                             ...  ComponentAccumulator mode
  -b, --batch                          ...  batch mode [DEFAULT]
  -i, --interactive                    ...  interactive mode
      --no-display                           prompt, but no graphics display
