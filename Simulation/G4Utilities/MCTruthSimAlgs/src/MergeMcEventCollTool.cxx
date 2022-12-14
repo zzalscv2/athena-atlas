@@ -479,7 +479,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   auto endOfCurrentListOfVertices = currentBackgroundEvent.vertices_end();
 #endif
   for (; currentVertexIter != endOfCurrentListOfVertices; ++currentVertexIter) {
-    auto  pCurrentVertex=*currentVertexIter;
+    const auto&  pCurrentVertex=*currentVertexIter;
     HepMC::GenVertexPtr  pCopyOfVertexForClassification[NOPUTYPE];
     for (int type(INTIME); type<NOPUTYPE; ++type) pCopyOfVertexForClassification[type]=(HepMC::GenVertexPtr )nullptr;
 
@@ -492,7 +492,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
 
     //loop over outgoing particles in the current GenVertex keeping those not classified as NOPUTYPE
     ATH_MSG_VERBOSE( "Starting an outgoing particle loop ... " );
-    for (HepMC::ConstGenParticlePtr currentVertexParticle: *pCurrentVertex){
+    for (const HepMC::ConstGenParticlePtr& currentVertexParticle: *pCurrentVertex){
       ATH_MSG_VERBOSE( "Found a particle at location " << std::hex << currentVertexParticle << std::dec  << " with PDG ID = " << currentVertexParticle->pdg_id() );
       HepMC::ConstGenVertexPtr  pCurrentParticleProductionVertex = currentVertexParticle->production_vertex();
       puType particleClassification(classifyVertex(currentVertexParticle, pCurrentParticleProductionVertex,currentEventTime));
@@ -521,7 +521,7 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
     /** add the in-coming particles to the in-time minbias vertex only */
     if (m_saveType[INTIME] && pCopyOfVertexForClassification[INTIME]) {
 #ifdef HEPMC3
- for (auto currentVertexParticle:  pCurrentVertex->particles_in()) {
+ for (const auto& currentVertexParticle:  pCurrentVertex->particles_in()) {
         pCopyOfVertexForClassification[INTIME]->add_particle_in (std::make_shared<HepMC3::GenParticle>(currentVertexParticle->data()));
       }
 #else
@@ -550,11 +550,11 @@ StatusCode MergeMcEventCollTool::processUnfilteredEvent(const McEventCollection 
   return StatusCode::SUCCESS;
 }
 
-bool MergeMcEventCollTool::isInitialCollisionVertex(HepMC::ConstGenVertexPtr  pCurrentVertex) const {
+bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexPtr&  pCurrentVertex) const {
 //AV: The claims below about this code corectness for the Pythia (which one?) minbias 
 //    event could be outdated as of 2021, e.g. the comparison of barcodes could be incorrect 
 #ifdef HEPMC3
-for (auto pCurrentVertexParticle: pCurrentVertex->particles_in())
+for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in())
       {  
          if ( (4==pCurrentVertexParticle->status()) ||  (2212==pCurrentVertexParticle->pdg_id()
            && (1==HepMC::barcode(pCurrentVertexParticle) || 2==HepMC::barcode(pCurrentVertexParticle)) ) ) {
@@ -580,7 +580,7 @@ for (auto pCurrentVertexParticle: pCurrentVertex->particles_in())
   return false;
 }
 
-MergeMcEventCollTool::puType MergeMcEventCollTool::classifyVertex(HepMC::ConstGenParticlePtr  pCurrentVertexParticle, HepMC::ConstGenVertexPtr  pCurrentParticleProductionVertex, double currentEventTime) {
+MergeMcEventCollTool::puType MergeMcEventCollTool::classifyVertex(const HepMC::ConstGenParticlePtr&  pCurrentVertexParticle, const HepMC::ConstGenVertexPtr&  pCurrentParticleProductionVertex, double currentEventTime) {
   //=======================================================================
   //handle the slimming case
   //=======================================================================

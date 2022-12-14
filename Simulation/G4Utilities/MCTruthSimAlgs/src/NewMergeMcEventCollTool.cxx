@@ -128,7 +128,7 @@ StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvt
 #ifdef HEPMC3
       HepMC::GenEvent * evt = new HepMC::GenEvent(c_evt);
       HepMC::fillBarcodesAttribute(evt);
-      for (auto  itVer:  evt->vertices()) {
+      for (const auto&  itVer:  evt->vertices()) {
         HepMC::FourVector newPos(itVer->position().x(),itVer->position().y(),itVer->position().z(),itVer->position().t()+timeOffset);
         itVer->set_position(newPos);
       }

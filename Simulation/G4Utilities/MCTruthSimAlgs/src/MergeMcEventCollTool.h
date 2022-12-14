@@ -68,9 +68,9 @@ private:
   //** Ensure that any GenEvent::HeavyIon info is stored in the signal GenEvent.
   StatusCode saveHeavyIonInfo(const McEventCollection *pMcEvtColl);
   //** Classify the current GenParticle according to the MC Truth Taskforce requirements
-  MergeMcEventCollTool::puType classifyVertex(HepMC::ConstGenParticlePtr  pCurrentVertexParticle, HepMC::ConstGenVertexPtr  pCurrentParticleProductionVertex, double currentEventTime);
+  MergeMcEventCollTool::puType classifyVertex(const HepMC::ConstGenParticlePtr&  pCurrentVertexParticle, const HepMC::ConstGenVertexPtr&  pCurrentParticleProductionVertex, double currentEventTime);
   //** Check if the current GenVertex contains beam particles
-  bool isInitialCollisionVertex(HepMC::ConstGenVertexPtr  pCurrentVertex) const;
+  bool isInitialCollisionVertex(const HepMC::ConstGenVertexPtr&  pCurrentVertex) const;
   //** Check whether the current McEventCollection has already been truth-filtered
   bool isTruthFiltertedMcEventCollection(const McEventCollection *pMcEvtColl) const;
   //** Map from GenEvent to puType FIXME: Simpler to key the map on GenEvent* ?

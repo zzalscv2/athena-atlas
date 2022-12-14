@@ -382,7 +382,7 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
-  HepMcParticleLink (HepMC::ConstGenParticlePtr p,
+  HepMcParticleLink (const HepMC::ConstGenParticlePtr& p,
                      uint32_t eventIndex = 0,
                      EBC_EVCOLL evColl=EBC_MAINEVCOLL,
                      PositionFlag positionFlag = IS_INDEX,
