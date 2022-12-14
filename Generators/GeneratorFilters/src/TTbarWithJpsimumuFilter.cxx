@@ -74,17 +74,14 @@ StatusCode TTbarWithJpsimumuFilter::filterEvent() {
 bool TTbarWithJpsimumuFilter::isLeptonDecay(HepMC::ConstGenParticlePtr part, int type) const {
     auto end = part->end_vertex();
     if(!end) return true;
-    int partbarcode = HepMC::barcode(part);
 #ifdef HEPMC3
     for (auto p: end->particles_out()) {
-        if (partbarcode > HepMC::barcode(p)) continue;
         if (std::abs(p->pdg_id()) !=  type ) return false;
     }
 #else
     HepMC::GenVertex::particle_iterator firstChild = end->particles_begin(HepMC::children);
     HepMC::GenVertex::particle_iterator endChild = end->particles_end(HepMC::children);
     for(; firstChild!=endChild; ++firstChild) {
-        if( partbarcode > (*firstChild)->barcode() ) continue; /// protection for sherpa
         int childtype = std::abs((*firstChild)->pdg_id());
         if( childtype != type ) {
             return false;
