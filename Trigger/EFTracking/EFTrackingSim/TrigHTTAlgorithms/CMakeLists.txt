@@ -12,7 +12,7 @@ atlas_add_component( TrigHTTAlgorithms
    src/*.cxx
    src/components/*.cxx
    INCLUDE_DIRS   ${LWTNN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel TrigHTTBanksLib TrigHTTConfToolsLib TrigHTTHoughLib TrigHTTInputLib TrigHTTLRTLib TrigHTTMapsLib TrigHTTObjectsLib )
+   LINK_LIBRARIES ${LWTNN_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel AthenaMonitoringKernelLib CxxUtils GaudiKernel TrigHTTBanksLib TrigHTTConfToolsLib TrigHTTHoughLib TrigHTTInputLib TrigHTTLRTLib TrigHTTMapsLib TrigHTTObjectsLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

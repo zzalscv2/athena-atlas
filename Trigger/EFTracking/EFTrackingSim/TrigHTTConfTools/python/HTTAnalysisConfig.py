@@ -23,7 +23,6 @@ def getNSubregions(path):
 def HTTEventSelectionCfg():
     result=ComponentAccumulator()
     eventSelector = CompFactory.HTTEventSelectionSvc()
-    eventSelector.OutputLevel=2
     eventSelector.regions = "/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/HTT/TrigHTTMaps/V1/map_file/slices_v01_Jan21.txt"
     eventSelector.regionID = 0
     eventSelector.sampleType = 'singleMuons'
@@ -42,7 +41,6 @@ def TrigHTTMappingCfg():
     HTTMapping.modulemap = f'{pathMapping}map_file/ITk.global-to-local.moduleidmap'
     HTTMapping.NNmap = f'{pathMapping}map_file/NN_DNN_Region_0p1_0p3_HTTFake_HTTTrueMu_SingleP_8L_Nom_v6.json'
     HTTMapping.layerOverride = {}
-    HTTMapping.OutputLevel=2 
     result.addService(HTTMapping, create=True, primary=True)
     return result
 
@@ -280,8 +278,6 @@ def checkIfAlgoTagExist(flags, tag):
         raise Exception(f'{tag} does not appear to be flag category')
 
 
-    
-
 def HTTLogicalHistProcessAlgCfg(configFlags):
    
     result=ComponentAccumulator()
@@ -359,7 +355,9 @@ def HTTLogicalHistProcessAlgCfg(configFlags):
         theHTTLogicalHistProcessAlg.doLRT = True
         theHTTLogicalHistProcessAlg.LRTHitFiltering = (not configFlags.Trigger.HTT.ActivePass.lrtSkipHitFiltering)
 
-    
+    from TrigHTTAlgorithms.HTTAlgorithmConfig import HTTLogicalHitsProcessAlgMonitoringCfg
+    theHTTLogicalHistProcessAlg.MonTool = result.getPrimaryAndMerge(HTTLogicalHitsProcessAlgMonitoringCfg(configFlags))
+
     result.addEventAlgo(theHTTLogicalHistProcessAlg)
     return result
 
@@ -380,6 +378,8 @@ if __name__ == "__main__":
     newFlags = prepareFlagsForHTTLogicalHistProcessAlg(ConfigFlags)
 
     acc=MainServicesCfg(newFlags)
+    acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.merge(HTTLogicalHistProcessAlgCfg(newFlags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
+    acc.run()
 
