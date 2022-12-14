@@ -241,3 +241,15 @@ def addLRTDoubletHTTool(algo_tag):
     from AthenaCommon.AppMgr import ToolSvc
     ToolSvc += tool
     return tool
+
+
+def HTTLogicalHitsProcessAlgMonitoringCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+    monTool = GenericMonitoringTool('MonTool')
+    monTool.defineHistogram('regionID', path='EXPERT', type='TH1I', title='regionID', xbins=200, xmin=0, xmax=200)
+    result.setPrivateTools(monTool)
+
+    return result
+
