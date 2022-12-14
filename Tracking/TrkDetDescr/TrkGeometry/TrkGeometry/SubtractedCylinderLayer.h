@@ -43,7 +43,7 @@ public:
   SubtractedCylinderLayer(const SubtractedCylinderSurface* subCyl,
                           const LayerMaterialProperties& laymatprop,
                           double thickness = 0.,
-                          OverlapDescriptor* od = nullptr,
+                          std::unique_ptr<OverlapDescriptor> od = nullptr,
                           int laytyp = int(Trk::active));
 
   /**Copy constructor*/

@@ -986,7 +986,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderCond::mergeDiscLayers (std::vect
   // but *does not* manage mergeBA.      
   std::vector<Trk::BinUtility*>* clonedBinUtils = new std::vector<Trk::BinUtility*>();
   for (auto *bu : *binUtils) clonedBinUtils->push_back(bu->clone());
-  Trk::OverlapDescriptor* olDescriptor = new InDet::DiscOverlapDescriptor(mergeBA,clonedBinUtils,true);
+  auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(mergeBA,clonedBinUtils,true);
     
   // position & bounds of the disc layer
   double disc_thickness = std::fabs(zb.second-zb.first);
@@ -1004,7 +1004,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderCond::mergeDiscLayers (std::vect
                        // get the layer material from the first merged layer
                        *(inputDiscs[0]->layerMaterialProperties()),
                        disc_thickness,
-                       olDescriptor);
+                       std::move(olDescriptor));
 
   // register the layer to the surfaces 
   Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();

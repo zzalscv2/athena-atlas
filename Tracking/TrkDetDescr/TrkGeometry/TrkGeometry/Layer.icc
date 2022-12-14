@@ -148,7 +148,7 @@ inline const LayerMaterialProperties *Layer::layerMaterialProperties() const {
 }
 
 inline const OverlapDescriptor *Layer::overlapDescriptor() const {
-  return m_overlapDescriptor;
+  return m_overlapDescriptor.get();
 }
 /** set the previous Layer*/
 inline void Layer::setPreviousLayer(const Layer *in) { m_previousLayer = in; }

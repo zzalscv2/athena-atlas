@@ -18,14 +18,12 @@
 Trk::SubtractedPlaneLayer::SubtractedPlaneLayer(
     const SubtractedPlaneSurface* subtrPlaneSurf,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : SubtractedPlaneSurface(*subtrPlaneSurf),
-      Layer(laymatprop, thickness, olap, laytyp) {}
+      Layer(laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::SubtractedPlaneLayer::SubtractedPlaneLayer(
-    const Trk::SubtractedPlaneLayer& play)
-
-    = default;
+    const Trk::SubtractedPlaneLayer& play) = default;
 
 Trk::SubtractedPlaneLayer::SubtractedPlaneLayer(
     const Trk::SubtractedPlaneLayer& play, const Amg::Transform3D& transf)

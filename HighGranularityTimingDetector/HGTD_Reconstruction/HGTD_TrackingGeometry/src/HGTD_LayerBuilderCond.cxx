@@ -303,10 +303,10 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     activeLayerTransform = Amg::Translation3D(0.,0.,thisDiscZpos);
       
     Trk::DiscBounds* activeLayerBounds = new Trk::DiscBounds(minRmin, maxRmax);
-     
-    Trk::OverlapDescriptor* olDescriptor = new HGTD_OverlapDescriptor(currentBinnedArray, 
-                                                                       rBins, phiBins);
-     
+
+    auto olDescriptor = std::make_unique<HGTD_OverlapDescriptor>(
+        currentBinnedArray, rBins, phiBins);
+
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
     Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
@@ -314,7 +314,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
                                                      currentBinnedArray,
                                                      layerMaterial,
                                                      thickness,
-                                                     olDescriptor);
+                                                     std::move(olDescriptor));
     
     // register the layer to the surfaces
     Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();

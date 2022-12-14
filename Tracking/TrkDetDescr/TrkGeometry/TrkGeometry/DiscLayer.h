@@ -54,14 +54,14 @@ public:
             DiscBounds* dbounds,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with DiscSurface and MaterialProperties */
   DiscLayer(DiscSurface* disc,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             int laytyp = int(Trk::active));
 
   /**Constructor with DiscSurface components and pointer to SurfaceArray
@@ -70,7 +70,7 @@ public:
             DiscBounds* dbounds,
             SurfaceArray* surfaceArray,
             double isontolerance = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             IApproachDescriptor* ad = nullptr,
             int laytyp = int(Trk::active));
 
@@ -81,7 +81,7 @@ public:
             SurfaceArray* surfaceArray,
             const LayerMaterialProperties& laymatprop,
             double thickness = 0.,
-            OverlapDescriptor* od = nullptr,
+            std::unique_ptr<OverlapDescriptor> od = nullptr,
             IApproachDescriptor* ad = nullptr,
             int laytyp = int(Trk::active));
 

@@ -24,10 +24,10 @@ Trk::CylinderLayer::CylinderLayer(
   Trk::CylinderBounds* cbounds,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
-  Trk::OverlapDescriptor* olap,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
   int laytyp)
   : CylinderSurface(transform, cbounds)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
   CylinderSurface::associateLayer(*this);
@@ -37,10 +37,10 @@ Trk::CylinderLayer::CylinderLayer(
   Trk::CylinderSurface* cyl,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
-  Trk::OverlapDescriptor* olap,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
   int laytyp)
   : CylinderSurface(*cyl)
-  , Layer(laymatprop, thickness, olap, laytyp)
+  , Layer(laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(nullptr)
 {
   CylinderSurface::associateLayer(*this);
@@ -50,11 +50,11 @@ Trk::CylinderLayer::CylinderLayer(const Amg::Transform3D& transform,
                                   Trk::CylinderBounds* cbounds,
                                   Trk::SurfaceArray* surfaceArray,
                                   double thickness,
-                                  Trk::OverlapDescriptor* olap,
+                                  std::unique_ptr<Trk::OverlapDescriptor> olap,
                                   Trk::IApproachDescriptor* ades,
                                   int laytyp)
   : CylinderSurface(transform, cbounds)
-  , Layer(surfaceArray, thickness, olap, laytyp)
+  , Layer(surfaceArray, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   CylinderSurface::associateLayer(*this);
@@ -71,11 +71,11 @@ Trk::CylinderLayer::CylinderLayer(
   Trk::SurfaceArray* surfaceArray,
   const Trk::LayerMaterialProperties& laymatprop,
   double thickness,
-  Trk::OverlapDescriptor* olap,
+  std::unique_ptr<Trk::OverlapDescriptor> olap,
   Trk::IApproachDescriptor* ades,
   int laytyp)
   : CylinderSurface(transform, cbounds)
-  , Layer(surfaceArray, laymatprop, thickness, olap, laytyp)
+  , Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   CylinderSurface::associateLayer(*this);
@@ -89,9 +89,9 @@ Trk::CylinderLayer::CylinderLayer(
 Trk::CylinderLayer::CylinderLayer(
     Trk::CylinderBounds* cbounds,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : CylinderSurface(cbounds),
-      Layer(laymatprop, thickness, olap, laytyp),
+      Layer(laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(nullptr) {
   CylinderSurface::associateLayer(*this);
 }
@@ -99,10 +99,10 @@ Trk::CylinderLayer::CylinderLayer(
 Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
                                   Trk::SurfaceArray* surfaceArray,
                                   double thickness,
-                                  Trk::OverlapDescriptor* olap,
+                                  std::unique_ptr<Trk::OverlapDescriptor> olap,
                                   Trk::IApproachDescriptor* ades, int laytyp)
     : CylinderSurface(cbounds),
-      Layer(surfaceArray, thickness, olap, laytyp),
+      Layer(surfaceArray, thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
   if (!ades && surfaceArray) buildApproachDescriptor();
@@ -113,9 +113,9 @@ Trk::CylinderLayer::CylinderLayer(Trk::CylinderBounds* cbounds,
 Trk::CylinderLayer::CylinderLayer(
     Trk::CylinderBounds* cbounds, Trk::SurfaceArray* surfaceArray,
     const Trk::LayerMaterialProperties& laymatprop, double thickness,
-    Trk::OverlapDescriptor* olap, Trk::IApproachDescriptor* ades, int laytyp)
+    std::unique_ptr<Trk::OverlapDescriptor> olap, Trk::IApproachDescriptor* ades, int laytyp)
     : CylinderSurface(cbounds),
-      Layer(surfaceArray, laymatprop, thickness, olap, laytyp),
+      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp),
       m_approachDescriptor(ades) {
   CylinderSurface::associateLayer(*this);
   if (!ades && surfaceArray) buildApproachDescriptor();
