@@ -145,7 +145,7 @@ TFCSGANEtaSlice::NetworkOutputs TFCSGANEtaSlice::GetNetworkOutputs(const TFCSTru
   double randUniformZ = 0.;
   NetworkInputs inputs;
 
-  int maxExp, minExp;
+  int maxExp=0, minExp=0;
   if (m_pid == 22 || fabs(m_pid) == 11){
     if (truth->P() > 4096){ //This is the momentum, not the energy, because the split is based on the samples which are produced with the momentum
       maxExp = 22;
