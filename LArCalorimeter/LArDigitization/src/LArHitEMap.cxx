@@ -74,7 +74,6 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
     std::vector<double> phiPart;
     std::vector<double> etaPart;
 
-//    std::cout << " in BuildWindows " << deta << dphi << ptmin << std::endl;
     etaPart.clear();
     phiPart.clear();
 
@@ -87,14 +86,12 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
     for (itr = mcCollptr->begin(); itr!=mcCollptr->end(); ++itr) {
       for (auto part: *(*itr))
       {
-         //works only for photons(22) and electrons(11) primary particle from Geant (status>1000)
+         //works only for photons(22) and electrons(11) primary particle (+pi0 in case not decayed by generator)
          // with pt>5 GeV
-// GU 20-june-2006 use barcode between 10001 and 20000 to select primary particles //AV2020: not sure if it works
-         if(   (part->pdg_id()==22 || std::abs(part->pdg_id())==11 || part->pdg_id()==111) 
-            && HepMC::barcode(part)>10000 && HepMC::barcode(part)<20000
-            && part->momentum().perp()> ptmin)
+         // check status==1 and barcode<200000  to pickup "stable" particle from generator excluding G4 secondaries
+         if(   (part->pdg_id()==22 || std::abs(part->pdg_id())==11 || part->pdg_id()==111) && part->momentum().perp()> ptmin
+             && part->status()==1 && HepMC::barcode(part) < 200000 ) 
          {
-//          std::cout << "good particle found ! " << part->pdg_id() << std::endl;
           etaPart.push_back(part->momentum().pseudoRapidity());
           phiPart.push_back(part->momentum().phi());
          }
@@ -105,7 +102,6 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
     if ( etaPart.size() == 0) return true;
     const float pi=2*asin(1.);
 
-//    std::cout << "LArHitEmap:size of map " << m_emap.size() << std::endl;
     for (unsigned int i=0; i < m_emap.size(); i++) 
     {
      LArHitList& theLArHitList = m_emap[i];
