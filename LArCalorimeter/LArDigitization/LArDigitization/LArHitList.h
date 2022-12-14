@@ -15,7 +15,7 @@ private:
   LARLIST m_list;
 
 public:
-   LArHitList(){};
+   LArHitList(){m_inWindows=false;};
   ~LArHitList(){};
 
    void AddHit(const float energy, const float time) {
