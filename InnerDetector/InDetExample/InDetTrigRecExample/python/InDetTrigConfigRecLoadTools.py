@@ -12,12 +12,15 @@ from __future__ import print_function
 # common
 from AthenaCommon.AppMgr import ToolSvc
 from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
+
 from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
 InDetTrigCutValues = EFIDTrackingCuts
 
 from AthenaCommon.DetFlags import DetFlags
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigConfigRecLoadTools.py")
+
+from InDetTrigRecExample.InDetTrigCommonTools import CAtoLegacyPublicToolDecorator
 
 from InDetTrigRecExample.InDetTrigConditionsAccess import PixelConditionsSetup, SCT_ConditionsSetup
 from AthenaCommon.CfgGetter import getPublicTool,getPrivateTool
@@ -273,39 +276,13 @@ if InDetTrigFlags.loadExtrapolator():
   if (InDetTrigFlags.doPrintConfigurables()):
     print (     InDetTrigMaterialUpdator)
 
-  #
-  # Set up extrapolator
-  #
-
-  InDetTrigSubPropagators = []
-  InDetTrigSubUpdators = []
   
-  # -------------------- set it depending on the geometry --------------
-  # default for ID is (Rk,Mat)
-  InDetTrigSubPropagators += [ InDetTrigPropagator.name() ]
-  InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
+  from TrkConfig.TrkExRungeKuttaPropagatorConfig import InDetPropagatorCfg
+  InDetTrigPropagator = CAtoLegacyPublicToolDecorator(InDetPropagatorCfg, name = "InDetTrigPropagator")
   
-  # default for Calo is (Rk,MatLandau)
-  InDetTrigSubPropagators += [ InDetTrigPropagator.name() ]
-  InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
+  from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+  InDetTrigExtrapolator = CAtoLegacyPublicToolDecorator(InDetExtrapolatorCfg, name="InDetTrigExtrapolator")
   
-  # default for MS is (STEP,Mat)
-  InDetTrigSubPropagators += [ InDetTrigStepPropagator.name() ]
-  InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
-
-  from TrkExTools.TrkExToolsConf import Trk__Extrapolator
-  InDetTrigExtrapolator = Trk__Extrapolator(name        = 'InDetTrigLegacyExtrapolator',
-                                            Propagators             = [ InDetTrigRKPropagator, InDetTrigStepPropagator],
-                                            MaterialEffectsUpdators = [ InDetTrigMaterialUpdator ],
-                                            Navigator               = InDetTrigNavigator,
-                                            SubPropagators          = InDetTrigSubPropagators,
-                                            SubMEUpdators           = InDetTrigSubUpdators,
-                                            #DoCaloDynamic          = False
-                                            )
-
-  ToolSvc += InDetTrigExtrapolator
-
-
 #
 # ----------- control loading of fitters
 #
@@ -507,19 +484,10 @@ if InDetTrigFlags.loadSummaryTool():
   #
   # Loading Configurable HoleSearchTool
   #
-  from InDetTrackHoleSearch.InDetTrackHoleSearchConf import InDet__InDetTrackHoleSearchTool
 
-  InDetTrigHoleSearchTool = InDet__InDetTrackHoleSearchTool(name = "InDetTrigLegacyHoleSearchTool",
-                                                            Extrapolator = InDetTrigExtrapolator,
-                                                            BoundaryCheckTool=InDetTrigBoundaryCheckTool
-                                                            )
-                                                            #Commissioning = InDetTrigFlags.doCommissioning()) #renamed
-  InDetTrigHoleSearchTool.CountDeadModulesAfterLastHit = True  
-
-  ToolSvc += InDetTrigHoleSearchTool
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigHoleSearchTool)
-
+  from InDetConfig.InDetTrackHoleSearchConfig import TrigHoleSearchToolCfg
+  InDetTrigHoleSearchTool = CAtoLegacyPublicToolDecorator(TrigHoleSearchToolCfg)
+  
   #Load inner Pixel layer tool
   from InDetRecExample import TrackingCommon
   InDetTrigTestPixelLayerToolInner = TrackingCommon.getInDetTrigTestPixelLayerToolInner()
@@ -877,16 +845,6 @@ from TRT_RawDataByteStreamCnv.TRT_RawDataByteStreamCnvConf import TRT_RodDecoder
 InDetTrigTRTRodDecoder = TRT_RodDecoder(name = "InDetTrigTRTRodDecoder",
                                         LoadCompressTableDB = (globalflags.DataSource() != 'geant4'))
 ToolSvc += InDetTrigTRTRodDecoder
-
-
-from TrkTrackSummaryTool.TrkTrackSummaryToolConf import Trk__TrackSummaryTool
-InDetTrigFastTrackSummaryTool = Trk__TrackSummaryTool(name = "InDetTrigFastTrackSummaryTool",
-                                                      InDetSummaryHelperTool = InDetTrigTrackSummaryHelperToolSi,
-                                                      doHolesInDet           = False
-                                                      )
-ToolSvc += InDetTrigFastTrackSummaryTool
-if (InDetTrigFlags.doPrintConfigurables()):
-    print      (InDetTrigFastTrackSummaryTool)
 
 
 from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigHoleSearchTool
