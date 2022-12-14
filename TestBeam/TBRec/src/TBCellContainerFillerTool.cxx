@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCellContainerFillerTool.h"
@@ -61,7 +61,6 @@ TBCellContainerFillerTool::process (CaloCellContainer* theCont,
 
   // fill holes with 0 energy cells
   
-  unsigned int added = 0;
   ATH_MSG_DEBUG ( " Now check all cells give meaningfull answer " );
   ATH_MSG_DEBUG ( " Size of original container: "<<theCont->size() );
   for (unsigned int theHash=0;theHash<m_hashMax;++theHash){
@@ -81,7 +80,6 @@ TBCellContainerFillerTool::process (CaloCellContainer* theCont,
       }
       ATH_MSG_VERBOSE ( "Adding 0. energy cell: " << m_theCaloCCIDM->cell_id(theHash));
       theCont->push_back(nCell);
-      ++added;
     } 
   }
   

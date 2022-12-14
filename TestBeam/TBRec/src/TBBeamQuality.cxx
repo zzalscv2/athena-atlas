@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -55,10 +55,8 @@ StatusCode TBBeamQuality::initialize()
   ATH_MSG_INFO (" TBBeamQuality: List of Tools:" );
   ATH_MSG_INFO  ("-----------------------------------");
   
-  unsigned int toolCtr = 0;
   for (ToolHandle<TBBeamQualityTool>& tool : m_bqtools)
     { 
-      toolCtr ++;
       ATH_MSG_INFO 
         (" Tool Name: "
 	 <<tool->name()
