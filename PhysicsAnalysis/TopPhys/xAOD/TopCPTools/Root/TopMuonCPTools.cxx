@@ -297,7 +297,7 @@ namespace top {
                    "Failed to set CustomInputFolder property for MuonEfficiencyScaleFactors tool");
       }
       if (m_config->isRun3()) {
-        top::check(asg::setProperty(tool, "CalibrationRelease", "220817_Preliminary_r22run3"),
+        top::check(asg::setProperty(tool, "CalibrationRelease", "221121_Preliminary_r22run3"),
                    "Failed to set CalibrationRelease property for MuonEfficiencyScaleFactors tool");
       }
 
