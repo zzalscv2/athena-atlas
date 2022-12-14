@@ -11,6 +11,8 @@
 
 #include <cstdlib>
 
+using Athena::Units::GeV;
+
 
 JetEfficiencyMonitorAlgorithm::JetEfficiencyMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator )
   : AthMonitorAlgorithm(name,pSvcLocator)

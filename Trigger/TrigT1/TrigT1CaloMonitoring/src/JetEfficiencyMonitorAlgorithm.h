@@ -16,8 +16,6 @@
 #include "xAODTrigger/gFexGlobalRoI.h"
 #include "xAODTrigger/gFexGlobalRoIContainer.h"
 
-using Athena::Units::GeV;
- 
 // #include "TrigDecisionTool/TrigDecisionTool.h"
 //#include "TrigT1Interfaces/TrigT1CaloDefs.h"
 
