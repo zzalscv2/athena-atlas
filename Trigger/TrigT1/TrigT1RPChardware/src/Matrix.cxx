@@ -1510,8 +1510,8 @@ void Matrix::makeTestPattern(ubit16 mode, ubit16 ktimes) {
     const ubit16 maxchan = 100;
     const ubit16 maxtimes = 1000;
     ubit16 i, j, l;
-    ubit16 IJ[maxtimes][4] = {0};
-    ubit16 channels[maxtimes][4][maxchan] = {0};
+    ubit16 IJ[maxtimes][4] = {{0}};
+    ubit16 channels[maxtimes][4][maxchan] = {{{0}}};
     float times[maxtimes] = {0};
     char plane[4][3];
     const float timeOffsetHit = 114.675;
