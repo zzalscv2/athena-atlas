@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 // -*- mode: c++ -*-
 
@@ -23,12 +23,13 @@ method if needed.
 #include "GaudiKernel/ISvcManager.h"
 
 #include "gtest/gtest.h"
+#include "CxxUtils/checker_macros.h"
 
 class IAppMgrUI;
 
 namespace Athena_test {
 
-  class InitGaudiGoogleTest : public ::testing::Test {
+  class ATLAS_NOT_THREAD_SAFE InitGaudiGoogleTest : public ::testing::Test {
   public:
 
     /**
