@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondData/CscCondDbData.h"
@@ -7,31 +7,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include <atomic>
-
-// constructor
-CscCondDbData::CscCondDbData() :
-    m_onlineOfflinePhiFlip(true),
-    m_channelContext(),
-    m_moduleContext(),
-    m_onlineChannelIdsFromLayerHash(),
-    m_onlineChannelIdsFromChamberCoolChannel(),
-    m_cachedDeadLayers(),
-    m_cachedDeadStations(),
-    m_cachedDeadLayersId(),
-    m_cachedDeadStationsId(),
-    m_cachedDeadChannelsHash(),
-    m_cachedChannelsF001(),
-    m_cachedChannelsNoise(),
-    m_cachedChannelsPed(),
-    m_cachedChannelsPSlope(),
-    m_cachedChannelsRMS(),
-    m_cachedChannelsStatus(),
-    m_cachedChannelsT0Base(),
-    m_cachedChannelsT0Phase(),
-    m_emptyNames(),
-    m_emptyIds(),
-    m_emptyHashs() {
-}
 
 
 // loadParameters
@@ -42,8 +17,6 @@ CscCondDbData::loadParameters(const CscIdHelper* idHelper){
     m_moduleContext  = idHelper->module_context();
     m_channelContext = idHelper->channel_context();
 
-    //prepare layer hash array
-    int hash = 0;
 
     for(int stationName  = 0; stationName < 2; stationName++){
       for(int stationEta =0; stationEta <2; stationEta++){
@@ -65,8 +38,7 @@ CscCondDbData::loadParameters(const CscIdHelper* idHelper){
                 log << MSG::WARNING << "Failed at geting online id!" << endmsg;
               }
               else {
-                m_onlineChannelIdsFromLayerHash.push_back(onlineId);
-                ++hash;
+                m_onlineChannelIdsFromLayerHash.push_back(onlineId);               
               }
             }
           }

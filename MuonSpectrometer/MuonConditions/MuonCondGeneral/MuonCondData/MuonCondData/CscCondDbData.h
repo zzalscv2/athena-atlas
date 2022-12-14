@@ -27,7 +27,7 @@ class CscCondDbData {
 
 public:
 
-    CscCondDbData();
+    CscCondDbData() = default;
     virtual ~CscCondDbData() = default;
 
     void loadParameters(const CscIdHelper*);
@@ -88,34 +88,34 @@ public:
  
 private:
 
-    bool m_onlineOfflinePhiFlip;
+    bool m_onlineOfflinePhiFlip{true};
 
-    IdContext m_channelContext;
-    IdContext m_moduleContext;
+    IdContext m_channelContext{};
+    IdContext m_moduleContext{};
 
-    std::vector<unsigned int> m_onlineChannelIdsFromLayerHash;
-    std::vector<unsigned int> m_onlineChannelIdsFromChamberCoolChannel;
+    std::vector<unsigned int> m_onlineChannelIdsFromLayerHash{};
+    std::vector<unsigned int> m_onlineChannelIdsFromChamberCoolChannel{};
 
-    std::vector<std::string> m_cachedDeadLayers;
-    std::vector<std::string> m_cachedDeadStations;
+    std::vector<std::string> m_cachedDeadLayers{};
+    std::vector<std::string> m_cachedDeadStations{};
 
-    std::vector<Identifier> m_cachedDeadLayersId;
-    std::vector<Identifier> m_cachedDeadStationsId;
+    std::vector<Identifier> m_cachedDeadLayersId{};
+    std::vector<Identifier> m_cachedDeadStationsId{};
 
-    std::vector<unsigned int> m_cachedDeadChannelsHash;
+    std::vector<unsigned int> m_cachedDeadChannelsHash{};
 
-    std::map<unsigned int, float> m_cachedChannelsF001;
-    std::map<unsigned int, float> m_cachedChannelsNoise;
-    std::map<unsigned int, float> m_cachedChannelsPed;
-    std::map<unsigned int, float> m_cachedChannelsPSlope;
-    std::map<unsigned int, float> m_cachedChannelsRMS;
-    std::map<unsigned int, int  > m_cachedChannelsStatus;
-    std::map<unsigned int, float> m_cachedChannelsT0Base;
-    std::map<unsigned int, bool > m_cachedChannelsT0Phase;
+    std::map<unsigned int, float> m_cachedChannelsF001{};
+    std::map<unsigned int, float> m_cachedChannelsNoise{};
+    std::map<unsigned int, float> m_cachedChannelsPed{};
+    std::map<unsigned int, float> m_cachedChannelsPSlope{};
+    std::map<unsigned int, float> m_cachedChannelsRMS{};
+    std::map<unsigned int, int  > m_cachedChannelsStatus{};
+    std::map<unsigned int, float> m_cachedChannelsT0Base{};
+    std::map<unsigned int, bool > m_cachedChannelsT0Phase{};
 
-    std::vector<std::string> m_emptyNames;
-    std::vector<Identifier> m_emptyIds; 
-    std::vector<unsigned int> m_emptyHashs;
+    std::vector<std::string> m_emptyNames{};
+    std::vector<Identifier> m_emptyIds{}; 
+    std::vector<unsigned int> m_emptyHashs{};
 
     const bool  m_nillbool  = false;
     const float m_nillfloat = -1;
