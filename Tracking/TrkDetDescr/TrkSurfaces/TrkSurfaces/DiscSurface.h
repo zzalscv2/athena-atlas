@@ -238,32 +238,6 @@ public:
                              const Amg::Vector3D& mom,
                              Amg::Vector2D& loc) const override;
 
-  /**  Special method for DiscSurface : local<->local transformations polar <->
-   * cartesian */
-  Amg::Vector2D localPolarToCartesian(const Amg::Vector2D& locpol) const;
-
-  /**  Special method for Disc surface : local<->local transformations polar <->
-   * cartesian */
-  Amg::Vector2D localCartesianToPolar(const Amg::Vector2D& loccart) const;
-
-  /**  Special method for Disc surface : local<->local transformations polar <->
-   * cartesian by value*/
-  Amg::Vector2D localCartesianToPolarValue(const Amg::Vector2D& loccart) const;
-
-  /**  Special method for DiscSurface : local<->local transformations polar <->
-   * cartesian */
-  Amg::Vector2D localPolarToLocalCartesian(const Amg::Vector2D& locpol) const;
-
-  /** Special method for DiscSurface :  local<->global transformation when
-   * provided cartesian coordinates */
-  Amg::Vector3D localCartesianToGlobal(const Amg::Vector2D& locpos) const;
-
-  /** Special method for DiscSurface : global<->local from cartesian coordinates
-   */
-  std::optional<Amg::Vector2D> globalToLocalCartesian(
-    const Amg::Vector3D& glopos,
-    double tol = 0.) const;
-
   /** fast straight line intersection schema - standard: provides closest
      intersection and (signed) path length forceDir is to provide the closest
      forward solution

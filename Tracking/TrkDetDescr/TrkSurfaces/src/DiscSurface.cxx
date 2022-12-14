@@ -279,49 +279,6 @@ Trk::DiscSurface::straightLineIntersection(const Amg::Vector3D& pos,
   return Trk::Intersection(pos, 0., false);
 }
 
-Amg::Vector2D
-Trk::DiscSurface::localPolarToLocalCartesian(const Amg::Vector2D& locpol) const
-{
-  const Trk::DiscTrapezoidalBounds* dtbo =
-    dynamic_cast<const Trk::DiscTrapezoidalBounds*>(&(bounds()));
-  if (dtbo) {
-    double rMedium = dtbo->rCenter();
-    double phi = dtbo->averagePhi();
-
-    Amg::Vector2D polarCenter(rMedium, phi);
-    const Amg::Vector2D cartCenter = localPolarToCartesian(polarCenter);
-    const Amg::Vector2D cartPos = localPolarToCartesian(locpol);
-    Amg::Vector2D Pos = cartPos - cartCenter;
-    Amg::Vector2D locPos(Pos[Trk::locX] * sin(phi) - Pos[Trk::locY] * cos(phi),
-                         Pos[Trk::locY] * sin(phi) + Pos[Trk::locX] * cos(phi));
-
-    return {locPos[Trk::locX], locPos[Trk::locY]};
-  }
-
-  return { locpol[Trk::locR] * cos(locpol[Trk::locPhi]),
-           locpol[Trk::locR] * sin(locpol[Trk::locPhi]) };
-}
-
-/** local<->global transformation in case of polar local coordinates */
-Amg::Vector3D
-Trk::DiscSurface::localCartesianToGlobal(const Amg::Vector2D& locpos) const
-{
-  Amg::Vector3D loc3Dframe(locpos[Trk::locX], locpos[Trk::locY], 0.);
-  return Amg::Vector3D(transform() * loc3Dframe);
-}
-
-/** local<->global transformation in case of polar local coordinates */
-std::optional<Amg::Vector2D>
-Trk::DiscSurface::globalToLocalCartesian(const Amg::Vector3D& glopos,
-                                         double tol) const
-{
-  Amg::Vector3D loc3Dframe = inverseTransformMultHelper(glopos);
-  if (std::abs(loc3Dframe.z()) > s_onSurfaceTolerance + tol) {
-    return std::nullopt;
-  }
-  return Amg::Vector2D(loc3Dframe.x(), loc3Dframe.y());
-}
-
 #if defined(FLATTEN) && defined(__GNUC__)
 // We compile this function with optimization, even in debug builds; otherwise,
 // the heavy use of Eigen makes it too slow.  However, from here we may call

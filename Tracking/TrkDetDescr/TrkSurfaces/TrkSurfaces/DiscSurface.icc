@@ -87,29 +87,6 @@ DiscSurface::localParametersToPosition(const LocalParameters& locpars) const
   return Amg::Vector2D(0.5 * bounds().r(), 0.);
 }
 
-inline Amg::Vector2D
-DiscSurface::localPolarToCartesian(const Amg::Vector2D& locpol) const
-{
-  return Amg::Vector2D(locpol[locR] * std::cos(locpol[locPhi]),
-                       locpol[locR] * std::sin(locpol[locPhi]));
-}
-
-inline Amg::Vector2D
-DiscSurface::localCartesianToPolar(const Amg::Vector2D& loccart) const
-{
-  return Amg::Vector2D(
-    std::sqrt(loccart[locX] * loccart[locX] + loccart[locY] * loccart[locY]),
-    std::atan2(loccart[locY], loccart[locX]));
-}
-inline Amg::Vector2D
-DiscSurface::localCartesianToPolarValue(const Amg::Vector2D& loccart) const
-{
-  return (Amg::Vector2D(
-    std::sqrt(loccart[locX] * loccart[locX] + loccart[locY] * loccart[locY]),
-    std::atan2(loccart[locY], loccart[locX])));
-}
-
-
 /** Return properly formatted class name for screen output */
 inline std::string
 DiscSurface::name() const
