@@ -65,9 +65,9 @@ namespace Rec {
        return StatusCode::FAILURE;
      }
 
-     // Vertex container and its auxilliary store
-     std::unique_ptr<xAOD::VertexContainer>    bVertexContainer    = std::make_unique<xAOD::VertexContainer>();
-     std::unique_ptr<xAOD::VertexAuxContainer> bVertexAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
+     //-- create container for new vertices
+     auto bVertexContainer    = std::make_unique<xAOD::VertexContainer>();
+     auto bVertexAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
      bVertexContainer->setStore(bVertexAuxContainer.get());
 
      std::vector<const xAOD::TrackParticle*> trkparticles(0);

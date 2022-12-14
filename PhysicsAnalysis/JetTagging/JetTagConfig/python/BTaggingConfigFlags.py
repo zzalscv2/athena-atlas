@@ -83,6 +83,9 @@ def createBTaggingConfigFlags():
     # experimental flags
     btagcf.addFlag("BTagging.Pseudotrack", False)
 
+    #NewVrtSecInclusiveAlg
+    btagcf.addFlag("BTagging.RunNewVrtSecInclusive", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation)
+
     # track classification tool flags
     btagcf.addFlag("BTagging.TrkClassFiveBinMode",False)
 

@@ -266,6 +266,13 @@ def BTagAlgsCfg(inputFlags,
         )
     )
 
+    if inputFlags.BTagging.RunNewVrtSecInclusive:
+        #add soft b hadron vertex finder (outside of jets)
+        from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import NewVrtSecInclusiveAlgTightCfg,NewVrtSecInclusiveAlgMediumCfg,NewVrtSecInclusiveAlgLooseCfg
+        result.merge(NewVrtSecInclusiveAlgTightCfg(inputFlags))
+        result.merge(NewVrtSecInclusiveAlgMediumCfg(inputFlags))
+        result.merge(NewVrtSecInclusiveAlgLooseCfg(inputFlags))
+
     # Add some high level information to the b-tagging object we
     # created above
     result.merge(
