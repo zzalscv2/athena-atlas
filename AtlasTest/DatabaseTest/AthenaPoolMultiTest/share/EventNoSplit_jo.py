@@ -86,8 +86,6 @@ topSequence+=Triggered
 
 from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
 
-ToolSvc = Service( "ToolSvc" )
-
 # Filtered stream 2
 Stream2 = AthenaPoolOutputStream( "Stream2", "AthenaPoolMultiTest_NoSplit2.root", False, noTag=False )
 Stream2.CheckNumberOfWrites = False
