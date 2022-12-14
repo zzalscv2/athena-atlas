@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -333,12 +333,10 @@ namespace MuonGM {
 
                 int firstj;
                 firstj = 0;
-                int n = 0;
-
+                
                 for (unsigned int j = firstj; j < dhwtgc->size(); j++) {
                     if (wtgc[j].jsta != wtgcall[i].jsta)
-                        continue;
-                    n++;
+                        continue;                   
 
                     mat = (int)wtgc[j].icovol;
                     p = wtgc[j].zpovol * Gaudi::Units::cm;
