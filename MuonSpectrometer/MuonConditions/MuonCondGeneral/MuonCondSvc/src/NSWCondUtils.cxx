@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020, 2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020, 2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -25,14 +25,9 @@ namespace MuonCalib{
 	  log<<MSG::FATAL<<"Trying to load NSW alignment constants from ASCII file but cannot open: "<<filename<<endmsg;
 	  throw std::runtime_error("Trying to load NSW alignment constants from ASCII file but cannot open file.");
 	 }
-    int nLines = 1;
-    int nNewALines = 0;
-    int nNewBLines = 0;
     std::string line;
 
     while(std::getline(inputFile,line)){
-
-      ++nLines;
 
       char delimiter = ':';
       const auto tokens = MdtStringUtils::tokenize(line, delimiter);
@@ -114,14 +109,13 @@ namespace MuonCalib{
         newALine.setParameters(s, z, t, rots, rotz, rott);
         newALine.isNew(true);
         writeALines.insert(std::make_pair(id_mult, newALine));
-        ++nNewALines;
-
+      
         BLinePar newBLine;
         newBLine.setAmdbId(stationType, eta, phi, mult);
         newBLine.setParameters(bz, bp, bn, sp, sn, tw, pg, tr, eg, ep, en);
         newBLine.isNew(true);
         writeBLines.insert(std::make_pair(id_mult, newBLine));
-        ++nNewBLines;
+      
       }
     }
   }
