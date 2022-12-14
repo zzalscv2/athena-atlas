@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -170,7 +170,6 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
     float time_d5d6   = 0.0;
 
     int ich   = 0;
-    int jch5  = 0;
     int jch6  = 0;
     int jch56 = 0;
 
@@ -236,7 +235,6 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
           }
           if ( TMDBchan==0 || TMDBchan==1 ) { /* choose d5 cell */
             energy_d5 += energy;
-            ++jch5;
           }
 
         }
