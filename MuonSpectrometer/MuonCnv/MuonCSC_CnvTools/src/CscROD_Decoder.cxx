@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscROD_Decoder.h"
@@ -197,9 +197,7 @@ void Muon::CscROD_Decoder::rodVersion2(const ROBFragment& robFrag, CscRawDataCon
     ATH_MSG_DEBUG("Calibration Layer: " << calLayer << "  Latency: " << latency);
     ATH_MSG_DEBUG("Is neutron rejection ON?: " << ne << "  Is sparsified data?: " << isSparsified);
 
-    /** number of RPU in the ROD */  // Two RPU per one ROD
-    uint16_t numberRPU = 0;
-
+   
     /** total word counter */
     uint32_t counter = 0;
     uint32_t rpuSize = 0;
@@ -247,9 +245,7 @@ void Muon::CscROD_Decoder::rodVersion2(const ROBFragment& robFrag, CscRawDataCon
         rpuSize += rSize;
         ATH_MSG_DEBUG("RPU size = " << rSize);
 
-        /** increase RPU count event if has bad or no data */
-        numberRPU++;
-
+        
         /** if the data is good before deciding how to proceed */
         /** The meaning for the Type TTTT is:
             0: no error, but can be empty.
@@ -521,7 +517,6 @@ void Muon::CscROD_Decoder::rodVersion1(const ROBFragment& robFrag, CscRawDataCon
 
     uint32_t i = rodHeader;
 
-    uint32_t numberOfDPU = 0x0;
     while (dpuFragment && i < (size - rodFooter)) {
         // the DPU id follows the DPU header marker
         i += 1;
@@ -572,7 +567,6 @@ void Muon::CscROD_Decoder::rodVersion1(const ROBFragment& robFrag, CscRawDataCon
         }
         // check that the new fragment is a DPU header block
         if (i < (size - rodFooter)) dpuFragment = rodReadOut.isDPU(p[i]);
-        numberOfDPU++;
     }
 
     if (rawCollection) {

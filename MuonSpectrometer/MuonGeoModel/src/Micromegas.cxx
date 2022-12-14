@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Micromegas.h"
@@ -90,8 +90,7 @@ namespace MuonGM {
         ptrd->add(new GeoSerialIdentifier(0));
 
         int igl = 0;
-        int iSenLyr = 0;
-
+       
         // Loop over Micromegas layers
         for (int i = 0; i < t->nlayers; i++) {
             // std::cout<<"loop over layers"<<std::endl;
@@ -141,8 +140,7 @@ namespace MuonGM {
             GeoPhysVol *ptrdframe = new GeoPhysVol(ltrdframe);
 
             ptrdtmp->add(ptrdframe);
-
-            iSenLyr++;
+           
         } // Loop over tgc layers
 
         return ptrd;

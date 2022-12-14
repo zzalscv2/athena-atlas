@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/sTGC.h"
@@ -119,8 +119,7 @@ namespace MuonGM {
         ptrd->add(new GeoSerialIdentifier(0));
 
         int igl = 0;
-        int iSenLyr = 0;
-
+       
         // Loop over sTGC layers
         for (int i = 0; i < t->nlayers; i++) {
             double widthActive;
@@ -248,8 +247,7 @@ namespace MuonGM {
                 // Add frame volume to QL3
                 ptrdgas->add(ptrdframe);
             }
-
-            iSenLyr++;
+           
             newpos = newXPos;
         } // Loop over stgc layers
 
