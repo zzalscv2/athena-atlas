@@ -55,12 +55,10 @@
             ATH_MSG_DEBUG("Track has no TSOS?");
             continue;
         }         
-        int nAEOT = 0;
         for (const Trk::TrackStateOnSurface* tsos : *trk->trackStateOnSurfaces()) {
             if (!tsos->type(Trk::TrackStateOnSurface::Alignment)) continue;
             const Trk::AlignmentEffectsOnTrack* aeot = tsos->alignmentEffectsOnTrack();
             if (!aeot) continue;
-            ++nAEOT;
             std::set<unsigned int> chIdSet;
             for (const Identifier& id : aeot->vectorOfAffectedTSOS()) {
                 if (!id.is_valid() || !m_idHelperSvc->isMuon(id)) continue;
