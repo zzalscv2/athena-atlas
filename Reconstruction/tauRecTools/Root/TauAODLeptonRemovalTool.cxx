@@ -137,7 +137,7 @@ std::vector<std::pair<const xAOD::CaloCluster*, const xAOD::Electron*>> TauAODLe
                 auto elec_cluster_links = elec->caloClusterLinks();
                 for (const auto & elec_cluster_link : elec_cluster_links) {
                     if (elec_cluster_link.isValid()) {
-                        auto orig_elec_clusters = std::move(getOrignalTopoClusters(*elec_cluster_link));
+                        auto orig_elec_clusters = getOrignalTopoClusters(*elec_cluster_link);
                         for (auto cluster : orig_elec_clusters){
                             ret.push_back(std::make_pair(cluster, elec));
                         }
@@ -174,7 +174,7 @@ std::vector<std::pair<const xAOD::CaloCluster*, const xAOD::Muon*>> TauAODLepton
                     auto cls_e = muon_cluster->e();
                     auto loss_diff = ((cls_e - loss_e) / (cls_e + loss_e));
                     if (muon_e > cls_e && loss_diff < 0.1 && loss_diff > -0.3) {
-                        auto orig_muon_clusters = std::move(getOrignalTopoClusters(muon_cluster));
+                        auto orig_muon_clusters = getOrignalTopoClusters(muon_cluster);
                         for (auto cluster : orig_muon_clusters)
                             ret.push_back(std::make_pair(cluster, muon));
                     }
