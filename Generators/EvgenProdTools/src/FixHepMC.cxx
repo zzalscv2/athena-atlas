@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -149,12 +149,10 @@ StatusCode FixHepMC::execute() {
 
     // Event particle content cleaning -- remove "bad" structures
     std::vector<HepMC::GenParticlePtr> toremove;
-    long seenThisEvent = 0;
     for (auto ip: evt->particles()) {
       // Skip this particle if (somehow) its pointer is null
       if (!ip) continue;
       m_totalSeen += 1;
-      seenThisEvent += 1;
       // Flag to declare if a particle should be removed
       bool bad_particle = false;
       // Check for loops
