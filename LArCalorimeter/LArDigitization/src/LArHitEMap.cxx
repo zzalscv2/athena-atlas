@@ -103,7 +103,6 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
 
 
     if ( etaPart.size() == 0) return true;
-    const float pi=2*asin(1.);
 
 //    std::cout << "LArHitEmap:size of map " << m_emap.size() << std::endl;
     for (unsigned int i=0; i < m_emap.size(); i++) 
@@ -114,7 +113,7 @@ bool LArHitEMap::BuildWindows(const McEventCollection* mcCollptr,
      double phi=calodde->phi();
      for(unsigned int iPart=0;iPart<etaPart.size();++iPart)
        {
-	 double deltaPhi=fmod(phiPart[iPart]-phi+3*pi,2*pi)-pi;
+	 double deltaPhi=fmod(phiPart[iPart]-phi+3.0*M_PI,2.0*M_PI)-M_PI;
 	 double deltaEta=etaPart[iPart]-eta;
 	 if( std::fabs(deltaPhi)<dphi/2. &&
 	     std::fabs(deltaEta)<deta/2. )

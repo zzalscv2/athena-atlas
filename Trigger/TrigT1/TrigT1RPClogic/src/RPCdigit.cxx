@@ -183,7 +183,7 @@ bool RPCdigit::radius(float& rad) const
 {
     if(m_x != 0. || m_y != 0.)
     {
-	rad = sqrt( pow(m_x,2) + pow(m_y,2) );
+	rad = std::sqrt( std::pow(m_x,2) + std::pow(m_y,2) );
 	return true;
     }
     return false;
@@ -195,8 +195,8 @@ bool RPCdigit::theta(float& theta) const
     float radius;
     if(this->radius(radius))
     {
-        if(m_z != 0.) theta = atan( radius/ fabsf(m_z) );
-        else theta = asin(1.);
+        if(m_z != 0.) theta = std::atan( radius/ std::abs(m_z) );
+        else theta = M_PI_2;
         return true;
     }
     return false;
@@ -207,7 +207,7 @@ bool RPCdigit::eta(float& eta) const
     float theta;
     if(this->theta(theta))
     {
-        eta = -log(tan(theta/2.));
+        eta = -std::log(std::tan(theta/2.f));
         if(m_z < 0.) eta = -eta; 
         return true;
     }
@@ -218,7 +218,7 @@ bool RPCdigit::phi(float& phi) const
 {
     if(m_x != 0. || m_y != 0.)
     {
-        phi = atan2(m_y,m_x);
+        phi = std::atan2(m_y,m_x);
 	return true;
     }
     return false;   
@@ -228,7 +228,7 @@ bool RPCdigit::station_eta(float& eta) const
 {
     if(m_station_radius)
     {
-        if(m_z != 0.) eta = -log(tan(atan(m_station_radius/fabsf(m_z))/2.));
+        if(m_z != 0.) eta = -std::log(std::tan(std::atan(m_station_radius/std::abs(m_z))/2.f));
         if(m_z < 0. ) eta = -eta;
         return true;
     }

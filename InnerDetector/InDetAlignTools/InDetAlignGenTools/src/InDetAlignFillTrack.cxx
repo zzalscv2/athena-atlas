@@ -335,7 +335,7 @@ StatusCode InDetAlignFillTrack::FillTrack() {
             m_nt_mc_Trk_prob[nTracks] = trkTruthProb;
             float pX = genParticle->momentum().px();
             float pY = genParticle->momentum().py();
-            float genParticlePt = sqrt((pX * pX) + (pY * pY));
+            float genParticlePt = std::sqrt((pX * pX) + (pY * pY));
             m_nt_mc_Trk_genParticlePt[nTracks] = genParticlePt;
             m_nt_mc_Trk_genParticleEta[nTracks] = genParticle->momentum().eta();
             m_nt_mc_Trk_genParticlePhi[nTracks] = genParticle->momentum().phi();
@@ -379,7 +379,7 @@ StatusCode InDetAlignFillTrack::FillTrack() {
 
                   HepGeom::Point3D<double> productionVertex = (*record).GetPosition();
                   if ((*record).GetPDGCode() < 0) charge = -charge;
-                  if (fabs((*record).GetPDGCode()) != 13) continue;
+                  if (std::abs((*record).GetPDGCode()) != 13) continue;
 
                   Amg::Vector3D direction((*record).GetMomentum().x(),
                                           (*record).GetMomentum().y(),
@@ -393,7 +393,7 @@ StatusCode InDetAlignFillTrack::FillTrack() {
 
 
                   double genPar_phi = direction.phi();
-                  if (genPar_phi < 0.) genPar_phi = genPar_phi + (4 * asin(1.));
+                  if (genPar_phi < 0.) genPar_phi = genPar_phi + 2.0*M_PI;
 
                   ATH_MSG_DEBUG("Production vertex (x,y,z): ("
                                 << productionVertex.x() << ", "
@@ -438,7 +438,7 @@ StatusCode InDetAlignFillTrack::FillTrack() {
                   // If less than tolerance don't bother with the propagation )
                   const Amg::Vector3D difference = productionVertexAsGlobalPosition - perigeeGlobalPosition;
 
-                  double distance = sqrt(difference.x() * difference.x() + difference.y() * difference.y());
+                  double distance = std::sqrt(difference.x() * difference.x() + difference.y() * difference.y());
                   ATH_MSG_DEBUG("Distance between perigee point and generated vertex: "
                                 << distance / CLHEP::m << " m");
 
@@ -863,7 +863,7 @@ void InDetAlignFillTrack::dumpTrack(int itrk, const Trk::Track* trk,
                       << phi0 << ", " << theta << ", " << qOverP << endmsg;
     }
 
-    float transverseMomentum = sqrt((aMeasPer->momentum().x()) * (aMeasPer->momentum().x())
+    float transverseMomentum = std::sqrt((aMeasPer->momentum().x()) * (aMeasPer->momentum().x())
                                     + (aMeasPer->momentum().y()) * (aMeasPer->momentum().y()));
 
     ATH_MSG_DEBUG("  p = " << aMeasPer->momentum().mag() / CLHEP::GeV << " CLHEP::GeV/c, "
@@ -1071,7 +1071,7 @@ void InDetAlignFillTrack::dumpPerigee(const Trk::TrackParameters* generatedTrack
   float eta = generatedTrackPerigee->eta();
   float charge = generatedTrackPerigee->charge();
   float qoverp = generatedTrackPerigee->parameters()[Trk::qOverP];
-  float qoverpt = generatedTrackPerigee->parameters()[Trk::qOverP] / (sin(theta));
+  float qoverpt = generatedTrackPerigee->parameters()[Trk::qOverP] / (std::sin(theta));
   float pt = (1 / qoverpt) * (charge);
   // int pdg = genParticle->pdg_id();
 
@@ -1081,7 +1081,7 @@ void InDetAlignFillTrack::dumpPerigee(const Trk::TrackParameters* generatedTrack
     msg(MSG::DEBUG) << " " << d0 << ", " << z0 << ", "
                     << phi0 << ", " << theta << ", " << qoverp << endmsg;
 
-    msg(MSG::DEBUG) << "  p = " << fabs(1 / qoverp) / CLHEP::GeV << " CLHEP::GeV/c, "
+    msg(MSG::DEBUG) << "  p = " << std::abs(1.0 / qoverp) / CLHEP::GeV << " CLHEP::GeV/c, "
                     << " pT = " << pt / CLHEP::GeV << " CLHEP::GeV/c" << endmsg;
   }
 
@@ -1125,7 +1125,7 @@ StatusCode InDetAlignFillTrack::dumpMatching(const TrackCollection* tracksUpper,
     float eta0Up = measUpperPer->eta();
     float z0Up = measUpperPer->parameters()[Trk::z0];
     float thetaUp = measUpperPer->parameters()[Trk::theta];
-    float qOverPtUp = measUpperPer->parameters()[Trk::qOverP] * 1000 / sin(thetaUp);
+    float qOverPtUp = measUpperPer->parameters()[Trk::qOverP] * 1000 / std::sin(thetaUp);
     float chargeUp = measUpperPer->charge();
     float ptUp = measUpperPer->pT() / 1000.;
 
@@ -1165,7 +1165,7 @@ StatusCode InDetAlignFillTrack::dumpMatching(const TrackCollection* tracksUpper,
       float eta0Low = measLowerPer->eta();
       float z0Low = measLowerPer->parameters()[Trk::z0];
       float thetaLow = measLowerPer->parameters()[Trk::theta];
-      float qOverPtLow = measLowerPer->parameters()[Trk::qOverP] * 1000 / sin(thetaLow);
+      float qOverPtLow = measLowerPer->parameters()[Trk::qOverP] * 1000 / std::sin(thetaLow);
       float chargeLow = measLowerPer->charge();
       float ptLow = measLowerPer->pT() / 1000.;
 
@@ -1177,7 +1177,7 @@ StatusCode InDetAlignFillTrack::dumpMatching(const TrackCollection* tracksUpper,
       float deta2 = (eta0Up - eta0Low) * (eta0Up - eta0Low);
 
       // look for a matching track within a cone
-      float dR = sqrt(dphi2 + deta2);
+      float dR = std::sqrt(dphi2 + deta2);
       ATH_MSG_DEBUG("dR (sqrt(dphi+deta2): " << dR);
       ATH_MSG_DEBUG("minmdR (sqrt(dphi+deta2): " << m_mindR);
       if (dR < m_mindR) {
