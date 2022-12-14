@@ -261,12 +261,12 @@ namespace NSWL1 {
 
                       // Phi-id - here use local phi (not phiShf)
                       uint8_t phi_id = 0;
-                      if (slope.phi*M_PI/180.0 > m_phiMax || slope.phi*M_PI/180.0 < m_phiMin) trigRawDataSegment->setPhiIndex(phi_id);
+                      if (slope.phi > m_phiMax || slope.phi < m_phiMin) trigRawDataSegment->setPhiIndex(phi_id);
                       else {
                         uint8_t nPhi = (1<<m_phiBits) -2; // To accomodate the new phi-id encoding prescription around 0
                         float phiSteps = (m_phiMax - m_phiMin)/nPhi;
                         for (uint8_t i=0; i<nPhi; i++) {
-                          if ((slope.phi*M_PI/180.0) < (m_phiMin+i*phiSteps)) {
+                          if ((slope.phi) < (m_phiMin+i*phiSteps)) {
                             phi_id = i;
                             break;
                           }
