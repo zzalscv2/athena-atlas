@@ -72,7 +72,7 @@ StatusCode HIEventShapeFillerTool::fillCollectionFromTowerContainer(const INavig
 
     if (cellToken.size() == 0) continue;
     for (NavigationToken<CaloCell, double, CaloCellIDFcn>::const_iterator cellItr = cellToken.begin();
-      cellItr != cellToken.end(); cellItr++) updateShape(m_evtShape, m_index, *cellItr, cellToken.getParameter(*cellItr), eta0, phi0);
+      cellItr != cellToken.end(); ++cellItr) updateShape(m_evtShape, m_index, *cellItr, cellToken.getParameter(*cellItr), eta0, phi0);
   }//end tower loop
   return StatusCode::SUCCESS;
 }

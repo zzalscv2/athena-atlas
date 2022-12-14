@@ -100,7 +100,7 @@ StatusCode METMonTool::initialize()
   ATH_MSG_DEBUG("metRegKey = " << m_metRegKey);
   ATH_MSG_DEBUG("metKeys   = ");
   std::vector<std::string>::iterator it = m_metKeys.begin();
-  for (; it != m_metKeys.end(); it++)
+  for (; it != m_metKeys.end(); ++it)
     {
       ATH_MSG_DEBUG((*it));
     }

@@ -107,7 +107,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
       TLorentzVector part_momentum_lv = (*pitr)->p4();
       
       // label b, c and light jets
-      if (abs(pdg) == 5 || abs(pdg) == 4) {
+      if (std::abs(pdg) == 5 || std::abs(pdg) == 4) {
 	double pt = part_momentum_lv.Pt();
 	if (pt > m_ptCut) {
 	  // Herwig ! Do not use quark from Hadron decay !

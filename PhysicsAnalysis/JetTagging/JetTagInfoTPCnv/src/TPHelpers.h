@@ -27,7 +27,7 @@ namespace Analysis {
       result.reserve(persVector.size());
       for (std::vector<TPObjRef>::const_iterator itr = persVector.begin();
 	   itr != persVector.end();
-	   itr++) {
+	   ++itr) {
 	result.push_back(masterCvt->createTransFromPStore(cnv, *itr, msg));
       }
   }
