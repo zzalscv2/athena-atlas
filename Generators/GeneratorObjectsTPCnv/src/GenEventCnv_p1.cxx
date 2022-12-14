@@ -205,7 +205,7 @@ GenEventCnv_p1::createGenVertex( const GenEvent_p1& persEvt,
 HepMC::GenParticlePtr 
 GenEventCnv_p1::createGenParticle( const GenParticle_p1& persPart,
 				   ParticlesMap_t& partToEndVtx,
-                                   HepMC::DataPool& datapools, HepMC::GenVertexPtr parent) const
+                                   HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent) const
 {
   HepMC::GenParticlePtr p = datapools.getGenParticle();
   if (parent) parent->add_particle_out(p);

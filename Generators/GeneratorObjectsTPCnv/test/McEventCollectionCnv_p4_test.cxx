@@ -24,8 +24,8 @@
 
 #include "GeneratorObjectsTPCnv/McEventCollectionCnv_p4.h"
 
-void compareGenParticle(HepMC::ConstGenParticlePtr p1,
-                        HepMC::ConstGenParticlePtr p2)
+void compareGenParticle(const HepMC::ConstGenParticlePtr& p1,
+                        const HepMC::ConstGenParticlePtr& p2)
 {
   assert (HepMC::barcode(p1) == HepMC::barcode(p2));
   assert (p1->status() == p2->status());
@@ -41,8 +41,8 @@ void compareGenParticle(HepMC::ConstGenParticlePtr p1,
 }
 
 
-void compareGenVertex(HepMC::ConstGenVertexPtr v1,
-                      HepMC::ConstGenVertexPtr v2)
+void compareGenVertex(const HepMC::ConstGenVertexPtr& v1,
+                      const HepMC::ConstGenVertexPtr& v2)
 {
   assert (HepMC::barcode(v1) == HepMC::barcode(v2));
   assert (float(v1->position().x()) == float(v2->position().x())); // only persistified with float precision

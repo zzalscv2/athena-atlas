@@ -106,7 +106,7 @@ void McEventCollectionCnv_p2::persToTrans( const McEventCollection_p2* persObj,
     if ( sigProcVtx ) HepMC::set_signal_process_vertex(genEvt, HepMC::barcode_to_vertex(genEvt, sigProcVtx ) );
 
     // connect particles to their end vertices
-    for ( auto p:  partToEndVtx) {
+    for ( const auto& p:  partToEndVtx) {
       auto decayVtx = HepMC::barcode_to_vertex(genEvt, p.second );
       if ( decayVtx ) {
         decayVtx->add_particle_in( p.first );
@@ -254,7 +254,7 @@ McEventCollectionCnv_p2::createGenVertex( const McEventCollection_p2& persEvt,
 
 HepMC::GenParticlePtr
 McEventCollectionCnv_p2::createGenParticle( const GenParticle_p2& persPart,
-                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools, HepMC::GenVertexPtr parent ) const
+                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent ) const
 {
   HepMC::GenParticlePtr p    = datapools.getGenParticle();
 

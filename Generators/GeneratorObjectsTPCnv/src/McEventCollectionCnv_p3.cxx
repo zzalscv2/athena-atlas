@@ -240,7 +240,7 @@ McEventCollectionCnv_p3::createGenVertex( const McEventCollection_p3& persEvt,
 HepMC::GenParticlePtr
 McEventCollectionCnv_p3::createGenParticle( const GenParticle_p3& persPart,
                                             ParticlesMap_t& partToEndVtx,
-                                            HepMC::DataPool& datapools, HepMC::GenVertexPtr parent, bool add_to_output ) const
+                                            HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent, bool add_to_output ) const
 {
   HepMC::GenParticlePtr p    = datapools.getGenParticle();
   if (parent) add_to_output?parent->add_particle_out(p):parent->add_particle_in(p);

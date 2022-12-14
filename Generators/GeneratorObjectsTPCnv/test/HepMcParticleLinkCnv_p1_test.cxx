@@ -108,7 +108,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
 #ifdef HEPMC3
   if(!ge.vertices().empty()){
     std::vector<HepMC::GenVertexPtr> vtxvec;
-    for (auto vtx: ge.vertices()) {
+    for (const auto& vtx: ge.vertices()) {
       vtxvec.push_back(vtx);
       ge.remove_vertex(vtx);
       

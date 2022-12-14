@@ -502,7 +502,7 @@ void McEventCollectionCnv_p6::transToPers( const McEventCollection* transObj,
     }
 
     // create vertices
-    for (auto v: genEvt->vertices()) {
+    for (const auto& v: genEvt->vertices()) {
       writeGenVertex( v, *persObj );
     }
 #else
@@ -673,7 +673,7 @@ McEventCollectionCnv_p6::createGenVertex( const McEventCollection_p6& persEvt,
 
 HepMC::GenParticlePtr
 McEventCollectionCnv_p6::createGenParticle( const GenParticle_p6& persPart,
-                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools ,HepMC::GenVertexPtr parent, bool add_to_output ) const
+                                            ParticlesMap_t& partToEndVtx, HepMC::DataPool& datapools ,const HepMC::GenVertexPtr& parent, bool add_to_output ) const
 {
   HepMC::GenParticlePtr p(nullptr);
     if (m_isPileup) {
@@ -779,7 +779,7 @@ McEventCollectionCnv_p6::createGenParticle( const GenParticle_p6& persPart,
 }
 
 #ifdef HEPMC3
-void McEventCollectionCnv_p6::writeGenVertex( HepMC::ConstGenVertexPtr vtx,
+void McEventCollectionCnv_p6::writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
                                               McEventCollection_p6& persEvt ) const
 {
   const HepMC::FourVector& position = vtx->position();
@@ -803,14 +803,14 @@ void McEventCollectionCnv_p6::writeGenVertex( HepMC::ConstGenVertexPtr vtx,
 
   // we write only the orphans in-coming particles and beams
   persVtx.m_particlesIn.reserve(vtx->particles_in().size());
-  for (auto p: vtx->particles_in()) {
+  for (const auto& p: vtx->particles_in()) {
     if ( !p->production_vertex() || p->production_vertex()->id() == 0 ) {
       persVtx.m_particlesIn.push_back( writeGenParticle( p, persEvt ) );
     }
   }
 
   persVtx.m_particlesOut.reserve(vtx->particles_out().size());
-  for (auto p: vtx->particles_out()) {
+  for (const auto& p: vtx->particles_out()) {
     persVtx.m_particlesOut.push_back( writeGenParticle( p, persEvt ) );
   }
 
@@ -856,7 +856,7 @@ void McEventCollectionCnv_p6::writeGenVertex( const HepMC::GenVertex& vtx,
 #endif
 
 #ifdef HEPMC3
-int McEventCollectionCnv_p6::writeGenParticle( HepMC::ConstGenParticlePtr p,
+int McEventCollectionCnv_p6::writeGenParticle( const HepMC::ConstGenParticlePtr& p,
                                                McEventCollection_p6& persEvt ) const
 {
   const HepMC::FourVector mom = p->momentum();
