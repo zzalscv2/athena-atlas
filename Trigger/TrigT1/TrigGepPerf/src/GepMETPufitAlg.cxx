@@ -18,7 +18,6 @@ namespace PUfitVar{
   constexpr float trimFactor = 0.9;
   constexpr std::size_t nEtaBins = 14;
   constexpr std::size_t nPhiBins = 8;
-  constexpr std::size_t nTowers = nEtaBins*nPhiBins;
 }
 
 GepMETPufitAlg::GepMETPufitAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
