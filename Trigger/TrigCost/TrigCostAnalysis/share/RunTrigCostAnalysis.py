@@ -213,10 +213,6 @@ if __name__=='__main__':
 
   log.level = args.loglevel
 
-  # Setup the Run III behavior
-  from AthenaCommon.Configurable import Configurable
-  Configurable.configurableRun3Behavior = 1
-
   # Set the Athena configuration flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
   # verbosity defined in Control/AthenaCommon/python/Constants.py
