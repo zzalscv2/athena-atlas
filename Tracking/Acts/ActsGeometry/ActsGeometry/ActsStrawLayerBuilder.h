@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSSTRAWLAYERBUILDER_H
@@ -47,9 +47,9 @@ public:
   ActsStrawLayerBuilder(const Config&           cfg,
                        std::unique_ptr<const Acts::Logger> logger
                        = Acts::getDefaultLogger("GMSLayBldr", Acts::Logging::INFO))
-    : m_logger(std::move(logger))
+    : m_cfg (cfg),
+      m_logger(std::move(logger))
   {
-    m_cfg = cfg;
   }
 
   ~ActsStrawLayerBuilder() {}
