@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -57,8 +57,6 @@ The following tests are currently being run:
     - Two jobOptions run: 
       - AthenaPoolTestStep2Write.py : rewrites part of the above write
         into a second file
-      - AthenaPoolTestReadNav.py : read part from second file, part
-        from first file via navigation
       .
     .
 
@@ -81,15 +79,6 @@ The following tests are currently being run:
     - Two jobOptions run: 
       - LArCellContWriter_jobOptionsReg.py
       - LArCellContReader_jobOptionsReg.py
-      .
-    .
-
-  - Write/read LAr &Cell &Identifiable Containers using LFNs - write
-    into two files and read then both one after the other.
-    - Three jobOptions run: 
-      - LArCellContWriter_jobOptionsStep1.py
-      - LArCellContWriter_jobOptionsStep2.py
-      - LArCellContReader_jobOptionsByLFN.py
       .
     .
 

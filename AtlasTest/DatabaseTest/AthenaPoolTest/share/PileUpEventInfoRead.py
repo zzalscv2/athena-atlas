@@ -52,15 +52,9 @@ topSequence += PileUpEventInfoReader( "PileUpEventInfoReader" )
 #--------------------------------------------------------------
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 #--------------------------------------------------------------
-svcMgr.MessageSvc = Service( "MessageSvc" )
 svcMgr.MessageSvc.OutputLevel = WARNING
 svcMgr.MessageSvc.debugLimit  = 100000
-#ClassIDSvc = Service( "ClassIDSvc" )
-#ClassIDSvc.OutputLevel = 3
 PileUpEventInfoReader.OutputLevel = DEBUG
-
-AthenaEventLoopMgr = Service( "AthenaEventLoopMgr" )
-#AthenaEventLoopMgr.OutputLevel = DEBUG
 
 # No stats printout
 include( "AthenaPoolTest/NoStats_jobOptions.py" )
