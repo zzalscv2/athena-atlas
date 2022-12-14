@@ -876,11 +876,15 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   if ( inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData") && inputMetaStore()->retrieve(fmd,"FileMetaData").isSuccess() )
      fmd->value(xAOD::FileMetaData::dataType, dataType);
   if ( dataType.compare("StreamDAOD_PHYS")==0 || dataType.compare("StreamDAOD_PHYSLITE")==0 ) m_defaultTruthJets = "AntiKt4TruthDressedWZJets";
+  if ( dataType.compare("StreamDAOD_PHYSLITE")==0 ) m_isPHYSLITE = true;
+
   ATH_MSG_INFO( "Configured for truth jet collection: " << m_defaultTruthJets );
 
-  m_inputMETCore = "MET_Core_" + m_inputMETSuffix;
-  m_inputMETMap = "METAssoc_" + m_inputMETSuffix;
-  ATH_MSG_INFO("Build MET with map: " << m_inputMETMap);
+  m_inputMETCore = m_isPHYSLITE? "MET_Core_AnalysisMET":"MET_Core_" + m_inputMETSuffix;
+  m_inputMETMap  = m_isPHYSLITE? "METAssoc_AnalysisMET":"METAssoc_" + m_inputMETSuffix;
+  
+  ATH_MSG_DEBUG ( "Build MET Core:     " << m_inputMETCore);
+  ATH_MSG_DEBUG ( "Build MET with map: " << m_inputMETMap);
 
   m_jetCleanDFName = TString::Format("DFCommonJets_jetClean_%s", m_badJetCut.c_str());
   m_acc_jetClean = m_jetCleanDFName;

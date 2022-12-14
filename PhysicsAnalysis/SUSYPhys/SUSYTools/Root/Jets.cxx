@@ -74,6 +74,11 @@ namespace ST {
       return StatusCode::FAILURE;
     }
 
+  if (m_isPHYSLITE && jetkey.find("AnalysisJets") == std::string::npos){
+    ATH_MSG_ERROR("You are running on PHYSLITE derivation. Please change the Jets container to 'AnalysisJets'");
+    return StatusCode::FAILURE;
+  }
+
     ATH_MSG_DEBUG("Default jetkey:           " << m_defaultJets);
     ATH_MSG_DEBUG("Function argument jetkey: " << jetkey);
 
