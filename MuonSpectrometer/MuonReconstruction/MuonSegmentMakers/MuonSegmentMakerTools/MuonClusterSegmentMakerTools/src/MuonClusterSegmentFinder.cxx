@@ -102,14 +102,8 @@ namespace Muon {
                 if (clusteredCol) clusterPRD->addCollection(clusteredCol, tgcCol->identifyHash()).ignore();
             }
             std::vector<const Muon::TgcPrepDataCollection*> theTGCs;
-            Muon::TgcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
-            int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); ++theIt) {
-                contInt++;
-                if ((*theIt)->size() == 0) { theEmpty++; }
-                theTGCs.push_back(*theIt);
-            }
-
+            std::transform(clusterPRD->begin(), clusterPRD->end(), std::back_inserter(theTGCs), [](auto* c){return c;});
+            
             findSegments(theTGCs, mdtPrdCont, segColl, tgcTruthColl);
         }  // end if TGC
 
@@ -120,14 +114,8 @@ namespace Muon {
                 if (clusteredCol) clusterPRD->addCollection(clusteredCol, rpcCol->identifyHash()).ignore();
             }
             std::vector<const Muon::RpcPrepDataCollection*> theRPCs;
-            Muon::RpcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
-            int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); ++theIt) {
-                contInt++;
-                if ((*theIt)->size() == 0) { theEmpty++; }
-                theRPCs.push_back(*theIt);
-            }
-
+            std::transform(clusterPRD->begin(), clusterPRD->end(), std::back_inserter(theRPCs), [](auto* c){return c;});
+            
             findSegments(theRPCs, mdtPrdCont, segColl, rpcTruthColl);
         }  // end if RPC
     }
@@ -140,27 +128,15 @@ namespace Muon {
         if (tgcPrdCont) {
             Muon::TgcPrepDataContainer* clusterPRD = m_clusterTool->cluster(*tgcPrdCont);
             std::vector<const Muon::TgcPrepDataCollection*> theTGCs;
-            Muon::TgcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
-            int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); ++theIt) {
-                contInt++;
-                if ((*theIt)->size() == 0) { theEmpty++; }
-                theTGCs.push_back(*theIt);
-            }
-
+            std::transform(clusterPRD->begin(), clusterPRD->end(), std::back_inserter(theTGCs), [](auto* c){return c;});
             findSegments(theTGCs, mdtPrdCont, segColl, tgcTruthColl);
         }  // end if TGC
 
         if (rpcPrdCont) {
             Muon::RpcPrepDataContainer* clusterPRD = m_clusterTool->cluster(*rpcPrdCont);
             std::vector<const Muon::RpcPrepDataCollection*> theRPCs;
-            Muon::RpcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
-            int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); ++theIt) {
-                contInt++;
-                if ((*theIt)->size() == 0) { theEmpty++; }
-                theRPCs.push_back(*theIt);
-            }
+            std::transform(clusterPRD->begin(), clusterPRD->end(), std::back_inserter(theRPCs), [](auto* c){return c;});
+            
 
             findSegments(theRPCs, mdtPrdCont, segColl, rpcTruthColl);
         }  // end if rpc

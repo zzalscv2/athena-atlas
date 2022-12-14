@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/MuonCalibExtendedTrack.h"
@@ -228,18 +228,6 @@ namespace MuonCalib {
              << (int)position().perp() << " z " << (int)z0() << std::setprecision(5) << " phi " << phi() << " theta " << theta()
              << std::setw(6) << " q*mom " << (int)p() * sign << " pt " << std::setw(5) << (int)pt() << " association: segments "
              << m_associatedSegments.size() << " tracks " << m_associatedTracks.size();
-
-        // if (author() == 0) {
-        //     const MuonCalibExtendedTrack* ipTrack = getAssociatedTrack(1);
-        //     if (ipTrack) {
-        //         sout << std::endl
-        //              << "  at ip "
-        //              << " r " << (int)ipTrack->position().perp() << " z " << (int)ipTrack->z0() << std::setprecision(5) << " phi "
-        //              << ipTrack->phi() << " theta " << ipTrack->theta() << std::setw(6) << " q*mom " << (int)ipTrack->p() * sign << " pt
-        //              "
-        //              << std::setw(5) << (int)ipTrack->pt();
-        //     }
-        // }
         return sout.str();
     }
 
@@ -318,7 +306,6 @@ namespace MuonCalib {
 
                 std::set<MuonFixedId> foundIds, sharedEtaLayers, sharedPhiLayers, firstEtaLayers, firstPhiLayers, secondEtaLayers,
                     secondPhiLayers;
-                unsigned int wrongSign{0};
                 for (const CalibHitE_Ptr& calib_hit : rit.second) {
                     const MuonFixedId& id = calib_hit->identify();
                     bool measuresPhi = manip.measuresPhi(id);
@@ -333,11 +320,9 @@ namespace MuonCalib {
 
                         if (id.is_mdt()) {
                             /// Why is it important to be 2 mm apart from the wire in order to swap sign?
-                            if (std::abs(calib_hit->driftRadius()) > 2. && std::abs(test_hit->driftRadius()) > 2. &&
-                                calib_hit->driftRadius() * test_hit->driftRadius() < 0.)
-                                ++wrongSign;
-                            else
-                                sharedEtaLayers.insert(id);
+                            if (!(std::abs(calib_hit->driftRadius()) > 2. && std::abs(test_hit->driftRadius()) > 2. &&
+                                calib_hit->driftRadius() * test_hit->driftRadius() < 0.))
+                                    sharedEtaLayers.insert(id);
                         } else {
                             if (measuresPhi)
                                 sharedPhiLayers.insert(layerId);
@@ -455,89 +440,13 @@ namespace MuonCalib {
         }
         return overlap;
     }
-    // bool MuonCalibExtendedTrack::isAssociated(const MuonCalibExtendedSegment* segment) const {
-    //     return std::find_if(m_associatedSegments.begin(), m_associatedSegments.end(),
-    //                         [&segment](const std::shared_ptr<MuonCalibExtendedSegment>& test) { return test.get() == segment; }) !=
-    //            m_associatedSegments.end();
-    // }
-
-    // bool MuonCalibExtendedTrack::isAssociated(const MuonCalibExtendedTrack* track) const {
-    //     return std::find_if(m_associatedTracks.begin(), m_associatedTracks.end(),
-    //                         [track](const std::shared_ptr<MuonCalibExtendedTrack>& test) { return test.get() == track; }) !=
-    //            m_associatedTracks.end();
-    // }
-
-    // std::shared_ptr<MuonCalibExtendedTrack> MuonCalibExtendedTrack::getAssociatedTrack(int author) const {
-    //     std::vector<std::shared_ptr<MuonCalibExtendedTrack>>::const_iterator pos = std::find_if(
-    //         m_associatedTracks.begin(),
-
-    //         m_associatedTracks.end(), [author](const std::shared_ptr<MuonCalibExtendedTrack>& test) { return test->author() == author;
-    //         });
-    //     if (pos != m_associatedTracks.end()) return *pos;
-    //     return nullptr;
-    // }
-
-    // float MuonCalibExtendedTrack::d0ip() const {
-    //     if (author() == 0) {
-    //         std::shared_ptr<MuonCalibExtendedTrack> ipTrack = getAssociatedTrack(10);
-    //         if (ipTrack) {
-    //             return ipTrack->d0();
-    //         } else {
-    //             ipTrack = getAssociatedTrack(1);
-    //             if (ipTrack) return ipTrack->d0();
-    //         }
-    //     }
-    //     return MuonCalibTrack_E::d0();
-    // }
-
-    // float MuonCalibExtendedTrack::z0ip() const {
-    //     if (author() == 0) {
-    //         std::shared_ptr<MuonCalibExtendedTrack> ipTrack = getAssociatedTrack(10);
-    //         if (ipTrack) {
-    //             return ipTrack->z0();
-    //         } else {
-    //             ipTrack = getAssociatedTrack(1);
-    //             if (ipTrack) return ipTrack->z0();
-    //         }
-    //     }
-    //     return MuonCalibTrack_E::z0();
-    // }
-
-    // float MuonCalibExtendedTrack::pip() const {
-    //     if (author() == 0) {
-    //         std::shared_ptr<MuonCalibExtendedTrack> ipTrack = getAssociatedTrack(10);
-    //         if (ipTrack) {
-    //             return ipTrack->p();
-    //         } else {
-    //             ipTrack = getAssociatedTrack(1);
-    //             if (ipTrack) return ipTrack->p();
-    //         }
-    //     }
-    //     return MuonCalibTrack_E::p();
-    // }
-
+   
     int MuonCalibExtendedTrack::pdgCode() const { return m_pdgCode; }
 
     int MuonCalibExtendedTrack::barCode() const { return m_barCode; }
 
     /// Documentation needed
-    bool MuonCalibExtendedTrack::isIDConfirmed() const {
-        //   static const   std::set<int> idAuthors{20, 25, 30, 35, 40, 41, 42};
-
-        // for (const std::shared_ptr<MuonCalibExtendedTrack>& it : m_associatedTracks) {
-        //     if (idAuthors.count(it->author())) return true;
-        //     if (it)->author() == 140 ) {
-        //             std::shared_ptr<const MuonCalibExtendedTrack> mbTrack = it->getAssociatedTrack(100);
-        //             if (mbTrack) {
-        //                 if (mbTrack->ndof() != it->ndof())
-        //                     return true;
-        //                 else {
-        //                     MsgStream log(Athena::getMessageSvc(), "MuonCalibExtendedTrack");
-        //                     log << MSG::WARNING << "STACO track without IDn" << endmsg;
-        //                 }
-        //             }
-        //         }
-        // }
+    bool MuonCalibExtendedTrack::isIDConfirmed() const {        
         return false;
     }
 }  // namespace MuonCalib
