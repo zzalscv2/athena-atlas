@@ -435,6 +435,7 @@ QWidget * VP1GeometrySystem::buildController()
   m_d->addSubSystem( VP1GeoFlags::LUCID,".*Lucid.*");
   m_d->addSubSystem( VP1GeoFlags::ZDC,".*ZDC.*");
   m_d->addSubSystem( VP1GeoFlags::ALFA,".*ALFA.*");
+  m_d->addSubSystem( VP1GeoFlags::AFP,".*AFP.*");
   m_d->addSubSystem( VP1GeoFlags::ForwardRegion,".*ForwardRegion.*");
 
   //The muon systems require special treatment, since we want to
@@ -1459,6 +1460,7 @@ void VP1GeometrySystem::Imp::createPathExtras(const VolumeHandle* volhandle, QSt
   case VP1GeoFlags::LUCID:
   case VP1GeoFlags::ZDC:
   case VP1GeoFlags::ALFA:
+  case VP1GeoFlags::AFP:
   case VP1GeoFlags::ForwardRegion:
   case VP1GeoFlags::AllUnrecognisedVolumes:
   default:{
