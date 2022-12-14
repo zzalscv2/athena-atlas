@@ -26,6 +26,7 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET'):
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
     from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    from LArCellRec.LArRAWtoSuperCellConfig import LArRAWtoSuperCellCfg
     acc.merge(TileGMCfg(flags))
     acc.merge(LArGMCfg(flags))
     acc.merge(LArLATOMEMappingCfg(flags))
@@ -36,8 +37,7 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET'):
     decoderAlg = CompFactory.LArRawSCDataReadingAlg('LArRawSCDataReadingAlg', LATOMEDecoder=decoderTool)
     acc.addEventAlgo(decoderAlg)
 
-    scellAlg = CompFactory.LArRAWtoSuperCell('LArRAWtoSuperCell', SCellContainerIn=keyIn, SCellContainerOut=key)
-    acc.addEventAlgo(scellAlg)
+    acc.merge(LArRAWtoSuperCellCfg(flags,mask=True,SCellContainerIn=keyIn, SCellContainerOut=key) )
 
     return acc
 

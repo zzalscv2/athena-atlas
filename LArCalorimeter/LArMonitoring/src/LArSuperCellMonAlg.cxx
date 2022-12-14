@@ -105,7 +105,9 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
 
     const CaloCell* superCell = *SCit; 
     variables.clear();
-    
+    // Discard masked cells from monitoring
+    int SCprov = superCell->provenance()&0xFFF;
+    if (m_removeMasked && ((SCprov&0x80)==0x80)) continue;
     float SCet = superCell->et();
     const CaloDetDescrElement* SCcaloDDE = superCell->caloDDE();
     float SCeta,SCphi;
@@ -115,7 +117,6 @@ StatusCode LArSuperCellMonAlg::fillHistograms(const EventContext& ctx) const{
     getHistoCoordinates(SCcaloDDE, SCeta, SCphi, iLyr, iLyrNS);
     
  
-    int SCprov = superCell->provenance()&0xFFF;
     bool SCpassTime = SCprov & 0x200;
     bool SCpassPF =   SCprov & 0x40;
 

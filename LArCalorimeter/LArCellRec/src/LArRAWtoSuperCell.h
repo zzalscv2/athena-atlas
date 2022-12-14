@@ -23,6 +23,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "LArRawEvent/LArRawSCContainer.h"
+#include "LArRecConditions/LArBadChannelCont.h"
 
 
 class LArOnline_SuperCellID;
@@ -56,6 +57,10 @@ private:
   /// Geometry manager.
   SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloMgrKey
         {this, "CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
+
+  /// Bad Channel masking for Super-Cells
+  SG::ReadCondHandleKey<LArBadChannelCont> m_bcContKey
+    {this, "LArBadChannelKey", "LArBadChannelSC", "Key of the LArBadChannelCont SC" };
 
   //Identifier helper
   const LArOnline_SuperCellID* m_laronline_id = nullptr;
