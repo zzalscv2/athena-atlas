@@ -427,6 +427,10 @@ void test1 (TestRCUSvc& rcusvc)
   //*** Test errors from extendLastRange().
   assert (cc_rl.extendLastRange (EventIDRange (timestamp (800), timestamp (900))).isFailure());
   assert (cc_ts.extendLastRange (EventIDRange (runlbn (50, 10), runlbn (50, 20))).isFailure());
+
+  assert (cc_rl.entries() == 2);
+  cc_rl.clear();
+  assert (cc_rl.entries() == 0);
 }
 
 
@@ -793,6 +797,10 @@ void test5 (TestRCUSvc& rcusvc)
     std::cout.flush();
     std::abort();
   }
+
+  assert (cc.entries() == 8);
+  cc.clear();
+  assert (cc.entries() == 0);
 }
 
 

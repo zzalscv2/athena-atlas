@@ -355,6 +355,13 @@ public:
 
 
   /**
+   * @brief Remove all entries in the container.
+   *        Mostly for testing --- should not normally be used.
+   */
+  void clear();
+
+
+  /**
    * @brief Mark that this thread is no longer accessing data from this container.
    * @param ctx Event context for the current thread.
    *

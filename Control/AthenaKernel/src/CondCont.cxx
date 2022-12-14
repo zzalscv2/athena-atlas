@@ -352,6 +352,15 @@ size_t CondContBase::trim (const std::vector<key_type>& runLbnKeys, const std::v
 }
 
 
+/**
+ * @brief Remove all entries in the container.
+ *        Mostly for testing --- should not normally be used.
+ */
+void CondContBase::clear()
+{
+  m_condSet.clear();
+}
+
 
 /**
  * @brief Mark that this thread is no longer accessing data from this container.
