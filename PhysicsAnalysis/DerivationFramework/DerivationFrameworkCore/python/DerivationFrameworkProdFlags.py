@@ -2733,7 +2733,7 @@ jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_TRIG6Stream
 listAODtoDPD.append(WriteDAOD_TRIG6Stream.StreamName)
 
 class WriteDAOD_TRIG7Stream (JobProperty):
-     """TRIG6 derivation"""
+     """TRIG7 derivation"""
      statusOn = True
      allowedTypes = ['bool']
      StoredValue = False
@@ -2744,6 +2744,7 @@ class WriteDAOD_TRIG7Stream (JobProperty):
      pass
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_TRIG7Stream)
 listAODtoDPD.append(WriteDAOD_TRIG7Stream.StreamName)
+
 
 from RecExConfig.RecoFunctions import AddValidItemToList
 AddValidItemToList(listAODtoDPD,listAllKnownDPD)
