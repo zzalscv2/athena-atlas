@@ -138,7 +138,7 @@ namespace Trk
       
       //get "intensity" (scalar sum ot p_T^2)
       double sum_pt2(0.0);
-      for (auto part: *myEvent) {
+      for (const auto& part: *myEvent) {
 	if(!pass(part, mcEventCollection.cptr())) continue; //select stable charged particles
 	sum_pt2 += part->momentum().perp2();
       }
@@ -184,7 +184,7 @@ namespace Trk
 
 
 #ifdef HEPMC3
-    bool isEmpty = ( evt->particles().size() == 0 );
+    bool isEmpty = ( evt->particles().empty() );
 #else
     bool isEmpty = ( evt->particles_size() == 0 );
 #endif
@@ -223,7 +223,7 @@ namespace Trk
     return true;
   }
 
-  bool MCTrueSeedFinder::pass( HepMC::ConstGenParticlePtr part,
+  bool MCTrueSeedFinder::pass( const HepMC::ConstGenParticlePtr& part,
 			       const McEventCollection* coll ) const {
 
     // Check if the particle is coming from a "good" GenEvent:

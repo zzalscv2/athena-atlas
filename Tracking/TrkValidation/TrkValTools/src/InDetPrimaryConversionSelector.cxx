@@ -72,7 +72,7 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
   for( ; itCollision != SimTracks->end(); ++itCollision ) {
     const HepMC::GenEvent*    genEvent = *itCollision;
     
-    for (auto particle: *genEvent) {
+    for (const auto& particle: *genEvent) {
 
       // 1) require stable particle from generation or simulation
       if ((particle->status()%1000) != 1 )    continue;
@@ -104,7 +104,7 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
 	if ( std::abs(pdgCode) == 11 ) {
 	  ATH_MSG_DEBUG ("Electron/Positron detected -- checking for production process ...");
 #ifdef HEPMC3
-	  for ( auto  inParticle: prodVertex->particles_in()) {
+	  for ( const auto&  inParticle: prodVertex->particles_in()) {
 #else
 	  HepMC::GenVertex::particles_in_const_iterator ItinParticle     = prodVertex->particles_in_const_begin();
 	  HepMC::GenVertex::particles_out_const_iterator ItinParticleEnd = prodVertex->particles_in_const_end();

@@ -79,7 +79,7 @@ private:
     void givePullWarning() const;
     void fillValues(const int& detectorType, double res1=-1000., double pull1=-1000., double res2=-1000., double pull2=-1000.);
 
-    bool                m_pullWarning; //!< warn only once, if pull cannot be calculated
+    bool                m_pullWarning = false; //!< warn only once, if pull cannot be calculated
     bool                m_trkParametersWarning; //!< warn only once, if no track parameters exist
 
     //! The residual and pull calculator tool

@@ -50,7 +50,7 @@ std::vector<Trk::DigitizationStep> Trk::PlanarModuleStepper::cellSteps(const Trk
     std::vector<Trk::DigitizationStep> cSteps;
     
     // get the test surfaces for bin intersections
-    auto& stepSurfaces = dmodule.stepSurfaces(startPoint,endPoint);
+    const auto& stepSurfaces = dmodule.stepSurfaces(startPoint,endPoint);
     
     // the track direction
     Amg::Vector3D trackDirection((endPoint-startPoint).unit());
@@ -60,7 +60,7 @@ std::vector<Trk::DigitizationStep> Trk::PlanarModuleStepper::cellSteps(const Trk
     stepIntersections.reserve(stepSurfaces.size()+1);
     
     // run them - and check for the fast exit    
-    for (auto& sSurface : stepSurfaces){
+    for (const auto& sSurface : stepSurfaces){
         // try it out by intersecting, but do not force the direction 
         Trk::Intersection sIntersection = sSurface->straightLineIntersection(startPoint,trackDirection,true,true);
         if (sIntersection.valid) {
@@ -101,7 +101,7 @@ std::vector<Trk::DigitizationStep> Trk::PlanarModuleStepper::cellSteps(const Trk
     // the collected intersections
     std::vector< Trk::Intersection > boundaryIntersections; 
     // run them - and check for the fast exit    
-    for (auto& bSurface : boundarySurfaces){
+    for (const auto& bSurface : boundarySurfaces){
         // count as an attempt
         ++attempts;
         // try it out by intersecting, but do not force the direction 

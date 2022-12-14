@@ -47,7 +47,7 @@ namespace Trk {
      * between mother and daughter particles; i.e. TruthTrajectories
      * are not allowed to branch.
      */
-    static MotherDaughter truthTrajectoryCuts(HepMC::ConstGenVertexPtr vtx) ;
+    static MotherDaughter truthTrajectoryCuts(const HepMC::ConstGenVertexPtr& vtx) ;
   };
   
 } // end namespace Trk

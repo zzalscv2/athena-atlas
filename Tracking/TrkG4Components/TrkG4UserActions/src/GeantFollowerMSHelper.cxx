@@ -54,8 +54,7 @@ Trk::GeantFollowerMSHelper::GeantFollowerMSHelper(const std::string& t, const st
 }
 
 // destructor
-Trk::GeantFollowerMSHelper::~GeantFollowerMSHelper()
-{}
+Trk::GeantFollowerMSHelper::~GeantFollowerMSHelper() = default;
 
 // Athena standard methods
 // initialize

@@ -64,7 +64,7 @@ Trk::InDetHaloSelector::selectGenSignal (const McEventCollection* SimTracks) con
   for( ; itCollision != SimTracks->end(); ++itCollision ) {
     const HepMC::GenEvent*    genEvent = *itCollision;
     
-    for (auto particle: *genEvent) {
+    for (const auto& particle: *genEvent) {
 
       // 1) require stable particle from generation or simulation
       if ((particle->status()%1000) != 1 )    continue;

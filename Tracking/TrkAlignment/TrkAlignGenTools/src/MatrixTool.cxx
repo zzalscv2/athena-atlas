@@ -212,8 +212,8 @@ namespace Trk {
     }
 
     ATH_MSG_INFO("Retrieving data from the following files: ");
-    for (int i=0;i<(int)m_inputVectorFiles.size();i++) {
-      ATH_MSG_INFO(m_pathbin+m_inputVectorFiles[i]);
+    for (auto & inputVectorFile : m_inputVectorFiles) {
+      ATH_MSG_INFO(m_pathbin+inputVectorFile);
     }    
 
     return StatusCode::SUCCESS;

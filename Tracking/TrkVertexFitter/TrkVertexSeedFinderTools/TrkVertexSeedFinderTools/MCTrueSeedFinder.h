@@ -110,7 +110,7 @@ namespace Trk
     bool pass( const HepMC::GenEvent* evt,
 	       const McEventCollection* coll = 0 ) const;
     /// Function selecting GenParticle objects
-    bool pass( HepMC::ConstGenParticlePtr part,
+    bool pass( const HepMC::ConstGenParticlePtr& part,
 	       const McEventCollection* coll = 0 ) const;
 
     StatusCode retrieveInteractionsInfo (std::vector<Amg::Vector3D>& interactions) const;

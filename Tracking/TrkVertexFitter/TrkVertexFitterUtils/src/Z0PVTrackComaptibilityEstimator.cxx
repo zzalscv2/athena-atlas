@@ -118,14 +118,7 @@ namespace Trk{
       }
     }
   
-    if(std::abs(ip->IPz0) / ip->sigmaz0 < m_z0SignificanceMax && !pileup){
-
-      
-      return true;
-    }
-  
-    
-    return false;
+    return std::abs(ip->IPz0) / ip->sigmaz0 < m_z0SignificanceMax && !pileup;
   }
 
 

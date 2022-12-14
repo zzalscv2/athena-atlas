@@ -370,17 +370,16 @@ bool ShiftingDerivCalcTool::setDerivatives(AlignTrack* alignTrack)
   std::vector<std::pair<AlignModule*, std::vector<double> > > * actualSecondDerivatives =
       new std::vector<std::pair<AlignModule*, std::vector<double> > >;
   deleteChi2VAlignParam();
-  for (std::vector<AlignModule*>::const_iterator moduleIt=alignModules.begin();
-    moduleIt!=alignModules.end(); ++moduleIt) {
+  for (auto *alignModule : alignModules) {
 
-    ATH_MSG_DEBUG("finding derivatives for module "<<(**moduleIt).identify());
+    ATH_MSG_DEBUG("finding derivatives for module "<<(*alignModule).identify());
 
     std::vector<Amg::VectorX> deriv_vec;
     std::vector<Amg::VectorX> derivErr_vec;
     std::vector<double> actualsecderiv_vec;
 
     // get alignPars and create arrays to store chi2 vs. align pars
-    DataVector<AlignPar>* alignPars=m_alignModuleTool->getAlignPars(*moduleIt);
+    DataVector<AlignPar>* alignPars=m_alignModuleTool->getAlignPars(alignModule);
     const int nAlignPar = alignPars->size();
     m_tmpChi2VAlignParam  = new double*[nAlignPar];
     m_tmpChi2VAlignParamX = new double*[nAlignPar];
@@ -400,7 +399,7 @@ bool ShiftingDerivCalcTool::setDerivatives(AlignTrack* alignTrack)
 
     // first attempt with normal number of fitter iterations
     bool success=getAllDerivatives(
-           alignTrack, *moduleIt,
+           alignTrack, alignModule,
            tmpderiv_vec,tmpderivErr_vec,tmpactualsecderiv_vec,
            resetIPar);
     if (!success){
@@ -415,7 +414,7 @@ bool ShiftingDerivCalcTool::setDerivatives(AlignTrack* alignTrack)
     if (resetIPar) {
       // second attempt with increased number of fitter iterations
       m_secPass=true;
-      success=getAllDerivatives(alignTrack,*moduleIt,
+      success=getAllDerivatives(alignTrack,alignModule,
               tmpderiv_vec,tmpderivErr_vec,tmpactualsecderiv_vec,
               resetIPar);
     }
@@ -432,7 +431,7 @@ bool ShiftingDerivCalcTool::setDerivatives(AlignTrack* alignTrack)
     if (resetIPar) {
       // third and last attempt with number of fitter iterations set to maximum
       m_nIterations=m_maxIter;
-      success=getAllDerivatives(alignTrack,*moduleIt,
+      success=getAllDerivatives(alignTrack,alignModule,
               tmpderiv_vec,tmpderivErr_vec,tmpactualsecderiv_vec,
               resetIPar);
     }
@@ -464,21 +463,21 @@ bool ShiftingDerivCalcTool::setDerivatives(AlignTrack* alignTrack)
     ATH_MSG_DEBUG("setting chi2 vs. align param arrays");
     m_chi2VAlignParamVec.push_back(m_tmpChi2VAlignParam);
     m_chi2VAlignParamXVec.push_back(m_tmpChi2VAlignParamX);
-    (**moduleIt).setChi2VAlignParamArray (m_tmpChi2VAlignParam);
-    (**moduleIt).setChi2VAlignParamXArray(m_tmpChi2VAlignParamX);
+    (*alignModule).setChi2VAlignParamArray (m_tmpChi2VAlignParam);
+    (*alignModule).setChi2VAlignParamXArray(m_tmpChi2VAlignParamX);
 
     // arrays for measurement types
     if (m_doChi2VAlignParamMeasType) {
       ATH_MSG_DEBUG("pushing back for measType");
       m_chi2VAlignParamVecMeasType.push_back(m_tmpChi2VAlignParamMeasType);
       for (int i=0;i<TrackState::NumberOfMeasurementTypes;i++)
-        (**moduleIt).setChi2VAlignParamArrayMeasType(i,m_tmpChi2VAlignParamMeasType[i]);
+        (*alignModule).setChi2VAlignParamArrayMeasType(i,m_tmpChi2VAlignParamMeasType[i]);
     }
     ATH_MSG_DEBUG("done setting arrays");
 
-    derivatives->push_back(make_pair(*moduleIt,deriv_vec));
-    derivativeErr->push_back(make_pair(*moduleIt,derivErr_vec));
-    actualSecondDerivatives->push_back(make_pair(*moduleIt,actualsecderiv_vec));
+    derivatives->push_back(make_pair(alignModule,deriv_vec));
+    derivativeErr->push_back(make_pair(alignModule,derivErr_vec));
+    actualSecondDerivatives->push_back(make_pair(alignModule,actualsecderiv_vec));
   }
 
   m_ntracksPassDerivatives++;
@@ -846,8 +845,8 @@ Amg::VectorX ShiftingDerivCalcTool::getDerivatives(
   }
 
   // delete TGraphs and TCanvas
-  for (int i=0;i<(int)vecGraphs.size();i++)
-    delete vecGraphs[i];
+  for (auto & vecGraph : vecGraphs)
+    delete vecGraph;
   delete canv;
 
   delete [] residuals;
@@ -927,8 +926,8 @@ void ShiftingDerivCalcTool::deleteChi2VAlignParam()
   m_chi2VAlignParamVec.clear();
   m_chi2VAlignParamXVec.clear();
 
-  for (int i=0;i<(int)m_chi2VAlignParamVecMeasType.size();i++) {
-    delete [] m_chi2VAlignParamVecMeasType[i];  m_chi2VAlignParamVecMeasType[i]=nullptr;
+  for (auto & i : m_chi2VAlignParamVecMeasType) {
+    delete [] i;  i=nullptr;
   }
   m_chi2VAlignParamVecMeasType.clear();
 }

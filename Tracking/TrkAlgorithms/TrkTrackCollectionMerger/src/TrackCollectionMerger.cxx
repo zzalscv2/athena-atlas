@@ -58,7 +58,7 @@ Trk::TrackCollectionMerger::execute(const EventContext& ctx) const{
   std::vector<const TrackCollection*> trackCollections;
   trackCollections.reserve(m_tracklocation.size());
   size_t ttNumber = 0;
-  for (auto& tcname : m_tracklocation){
+  for (const auto& tcname : m_tracklocation){
     ///Retrieve tracks from StoreGate
     SG::ReadHandle<TrackCollection> trackCol (tcname, ctx);
     trackCollections.push_back(trackCol.cptr());

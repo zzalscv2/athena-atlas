@@ -288,9 +288,9 @@ StatusCode VertexSeedFinderTestAlg::execute()
 StatusCode
 VertexSeedFinderTestAlg::makeMcEventCollection (const EventContext& ctx) const
 {
-  auto evt1 = new HepMC::GenEvent();
-  auto evt2 = new  HepMC::GenEvent();
-  auto evt3 = new HepMC::GenEvent();
+  auto *evt1 = new HepMC::GenEvent();
+  auto *evt2 = new  HepMC::GenEvent();
+  auto *evt3 = new HepMC::GenEvent();
 
   HepMC::set_signal_process_vertex (evt1,HepMC::newGenVertexPtr(HepMC::FourVector{1*mm,   2*mm,  12*mm,0.0}));
   HepMC::set_signal_process_vertex (evt2,HepMC::newGenVertexPtr(HepMC::FourVector{0.3*mm,-0.7*mm,-3*mm,0.0}));
