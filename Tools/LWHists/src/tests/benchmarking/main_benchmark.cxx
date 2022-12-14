@@ -72,59 +72,68 @@ template <> std::string histClassName<TProfile_LW>() { return "TProfile_LW"; }
 template <> std::string histClassName<TProfile2D>() { return "TProfile2D"; }
 template <> std::string histClassName<TProfile2D_LW>() { return "TProfile2D_LW"; }
 
-long time_clock;
-void timerStart() { time_clock = clock(); }
-double timerEnd(const std::string& text, const unsigned& n, const unsigned estimatedOverheadToDiscount = 0)
+struct Timer
 {
-  double t((clock()-time_clock-estimatedOverheadToDiscount)*(1./double(CLOCKS_PER_SEC))*1.0e6/n);
-  std::cout<<"  Timed ["<<text<<"]: "<<t<<" microsecond"<<std::endl;
-  return t;
-}
+  Timer() : m_time_clock (clock()) {}
+  double end(const std::string& text,
+             const unsigned& n,
+             const unsigned estimatedOverheadToDiscount = 0)
+  {
+    double t((clock()-m_time_clock-estimatedOverheadToDiscount)*(1./double(CLOCKS_PER_SEC))*1.0e6/n);
+    std::cout<<"  Timed ["<<text<<"]: "<<t<<" microsecond"<<std::endl;
+    return t;
+  }
 
-long long lastMemNKB;
-void memCheckStart() { lastMemNKB = thisProcess_VirtualMemUsed_kB(); }
-double memCheckEnd(const std::string& text, const unsigned& n, const double& extra=0.0)
+  long m_time_clock;
+};
+
+struct MemCheck
 {
-  double m(extra+double(thisProcess_VirtualMemUsed_kB()-lastMemNKB)*double(1024.0)/n);
-  std::cout<<"  Mem-usage ["<<text<<"]: "<<m<<" bytes"<<std::endl;
-  return m;
-}
+  MemCheck() : m_lastMemNKB (thisProcess_VirtualMemUsed_kB()) {}
+  double end (const std::string& text, const unsigned& n, const double& extra=0.0)
+  {
+    double m(extra+double(thisProcess_VirtualMemUsed_kB()-m_lastMemNKB)*double(1024.0)/n);
+    std::cout<<"  Mem-usage ["<<text<<"]: "<<m<<" bytes"<<std::endl;
+    return m;
+  }
+  
+  long long m_lastMemNKB;
+};
 
-TRandom3 theRandGen(117);
-double getRandX() { return theRandGen.Gaus(50.0,12.5); }
+double getRandX(TRandom& rand) { return rand.Gaus(50.0,12.5); }
 
 // double getRandX() { return 102.0*(rand()*1.0/RAND_MAX)-1.0; }
 
-template <class T> void fillX(T*t) { t->Fill(getRandX()); }
-template <class T> void fillXW(T*t) { t->Fill(getRandX(),1.2); }
-template <> void fillX(TH2F*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TH2D*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TH2I*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TH2F_LW*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TH2D_LW*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TH2I_LW*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TProfile*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TProfile_LW*t) { t->Fill(getRandX(),15.0); }
-template <> void fillX(TProfile2D*t) { t->Fill(getRandX(),getRandX(),15.0); }
-template <> void fillX(TProfile2D_LW*t) { t->Fill(getRandX(),getRandX(),15.0); }
-template <> void fillXW(TH2F*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TH2D*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TH2I*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TH2F_LW*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TH2D_LW*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TH2I_LW*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TProfile*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TProfile_LW*t) { t->Fill(getRandX(),getRandX(),1.2); }
-template <> void fillXW(TProfile2D*t) { t->Fill(getRandX(),getRandX(),15.0,1.2); }
-template <> void fillXW(TProfile2D_LW*t) { t->Fill(getRandX(),getRandX(),15.0,1.2); }
+template <class T> void fillX(TRandom& rand, T*t) { t->Fill(getRandX(rand)); }
+template <class T> void fillXW(TRandom& rand, T*t) { t->Fill(getRandX(rand),1.2); }
+template <> void fillX(TRandom& rand, TH2F*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TH2D*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TH2I*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TH2F_LW*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TH2D_LW*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TH2I_LW*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TProfile*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TProfile_LW*t) { t->Fill(getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TProfile2D*t) { t->Fill(getRandX(rand),getRandX(rand),15.0); }
+template <> void fillX(TRandom& rand, TProfile2D_LW*t) { t->Fill(getRandX(rand),getRandX(rand),15.0); }
+template <> void fillXW(TRandom& rand, TH2F*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TH2D*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TH2I*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TH2F_LW*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TH2D_LW*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TH2I_LW*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TProfile*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TProfile_LW*t) { t->Fill(getRandX(rand),getRandX(rand),1.2); }
+template <> void fillXW(TRandom& rand, TProfile2D*t) { t->Fill(getRandX(rand),getRandX(rand),15.0,1.2); }
+template <> void fillXW(TRandom& rand, TProfile2D_LW*t) { t->Fill(getRandX(rand),getRandX(rand),15.0,1.2); }
 
-template <class T> void fakeFillRandGen() { getRandX(); }
-template <> void fakeFillRandGen<TH2F>() { getRandX();getRandX(); }
-template <> void fakeFillRandGen<TH2D>() { getRandX();getRandX(); }
-template <> void fakeFillRandGen<TH2I>() { getRandX();getRandX(); }
-template <> void fakeFillRandGen<TH2F_LW>() { getRandX();getRandX(); }
-template <> void fakeFillRandGen<TH2D_LW>() { getRandX();getRandX(); }
-template <> void fakeFillRandGen<TH2I_LW>() { getRandX();getRandX(); }
+template <class T> void fakeFillRandGen(TRandom& rand) { getRandX(rand); }
+template <> void fakeFillRandGen<TH2F>(TRandom& rand) { getRandX(rand);getRandX(rand); }
+template <> void fakeFillRandGen<TH2D>(TRandom& rand) { getRandX(rand);getRandX(rand); }
+template <> void fakeFillRandGen<TH2I>(TRandom& rand) { getRandX(rand);getRandX(rand); }
+template <> void fakeFillRandGen<TH2F_LW>(TRandom& rand) { getRandX(rand);getRandX(rand); }
+template <> void fakeFillRandGen<TH2D_LW>(TRandom& rand) { getRandX(rand);getRandX(rand); }
+template <> void fakeFillRandGen<TH2I_LW>(TRandom& rand) { getRandX(rand);getRandX(rand); }
 
 template <class T> T* book(const std::string& n, const std::string& t, unsigned nbins)
 {T*h=new T(n.c_str(),t.c_str(),nbins,0.0,100.0);
@@ -187,7 +196,8 @@ template <class T> void safeDelete(T*h)
 }
 
 template <class T>
-int performBenchmark( const unsigned nhists,
+int performBenchmark( TRandom& rand,
+                      const unsigned nhists,
 		      const unsigned nbins,
 		      const int nfills /*<0 for fill(x,w)*/)
 {
@@ -203,12 +213,12 @@ int performBenchmark( const unsigned nhists,
   //First we book:
   std::string title("This is some title");
   it=hists.begin();
-  memCheckStart();
-  timerStart();
+  MemCheck m1;
+  Timer t1;
   for (;it!=itE;++it)
     it->second = book<T>(it->first,title,nbins);
-  timerEnd(histClassName<T>()+" booking",nhists);
-  double mem_booked = memCheckEnd("Booked size ["+histClassName<T>()+"]",hists.size());
+  t1.end(histClassName<T>()+" booking",nhists);
+  double mem_booked = m1.end("Booked size ["+histClassName<T>()+"]",hists.size());
 
   if (!isROOT<T>())
     std::cout<<"Pool wastage: "<<LWHistControls::poolWasteFraction()*100.0<<" %"<<std::endl;
@@ -220,29 +230,29 @@ int performBenchmark( const unsigned nhists,
   it=hists.begin();
   for (;it!=itE;++it)
     for (unsigned i = 0; i < nrandfills; ++i)
-      fakeFillRandGen<T>();
+      fakeFillRandGen<T>(rand);
   const long loopandrandgenoverhead(clock()-clock1);
 
   if (nfills!=0) {
-    memCheckStart();
+    MemCheck m2;
 
 
     //Time random fills:
     it=hists.begin();
-    timerStart();
+    Timer t2;
     if (nfills<0) {
       for (;it!=itE;++it)
 	for (unsigned i = 0; i < nrandfills; ++i)
-	  fillXW(it->second);
-      timerEnd(histClassName<T>()+" average time of random fills (Fill(x,w))",nhists*nrandfills,loopandrandgenoverhead);
+	  fillXW(rand, it->second);
+      t2.end(histClassName<T>()+" average time of random fills (Fill(x,w))",nhists*nrandfills,loopandrandgenoverhead);
     } else {
       for (;it!=itE;++it)
 	for (unsigned i = 0; i < nrandfills; ++i)
-	  fillX(it->second);
-      timerEnd(histClassName<T>()+" average time of random fills (Fill(x))",nhists*nrandfills,loopandrandgenoverhead);
+	  fillX(rand, it->second);
+      t2.end(histClassName<T>()+" average time of random fills (Fill(x))",nhists*nrandfills,loopandrandgenoverhead);
     }
 
-    memCheckEnd("Size after random fills ["+histClassName<T>()+"]",hists.size(),mem_booked);
+    m2.end("Size after random fills ["+histClassName<T>()+"]",hists.size(),mem_booked);
 
     if (!isROOT<T>())
       std::cout<<"Pool wastage: "<<LWHistControls::poolWasteFraction()*100.0<<" %"<<std::endl;
@@ -278,8 +288,7 @@ int performBenchmark( const unsigned nhists,
   return 0;
 }
 
-std::string progname;
-int usage()
+int usage (const std::string& progname)
 {
   std::cout << "Usage:\n\n  "
 	    << progname << " [float|double|int|profile] [1d|2d] [root|lw|lwrb] [nbins] [nfills] [nhists]\n\n"
@@ -295,14 +304,14 @@ int usage()
   return 1;
 }
 int main (int argc, char** argv) {
-  progname=argv[0];
+  std::string progname=argv[0];
   if (argc!=7)
-    return usage();
+    return usage(progname);
   const int nbins = atoi(argv[4]);
   const int nfills = atoi(argv[5]);
   const int nhists = atoi(argv[6]);
   if (nbins<1||nbins>USHRT_MAX-1||nhists<1||nhists>1000000)
-    return usage();
+    return usage(progname);
 
   std::string valtype(argv[1]),dim(argv[2]),histimpl(argv[3]);
   if (histimpl=="lwrb") {
@@ -311,39 +320,41 @@ int main (int argc, char** argv) {
     std::cout<<"Using ROOT backend for LW histograms."<<std::endl;
   }
 
+  TRandom3 rand(117);
+
   if (valtype=="float"&&dim=="1d"&&histimpl=="lw")
-    return performBenchmark<TH1F_LW> (nhists,nbins,nfills);
+    return performBenchmark<TH1F_LW> (rand, nhists,nbins,nfills);
   if (valtype=="double"&&dim=="1d"&&histimpl=="lw")
-    return performBenchmark<TH1D_LW> (nhists,nbins,nfills);
+    return performBenchmark<TH1D_LW> (rand, nhists,nbins,nfills);
   if (valtype=="int"&&dim=="1d"&&histimpl=="lw")
-    return performBenchmark<TH1I_LW> (nhists,nbins,nfills);
+    return performBenchmark<TH1I_LW> (rand, nhists,nbins,nfills);
   if (valtype=="profile"&&dim=="1d"&&histimpl=="lw")
-    return performBenchmark<TProfile_LW> (nhists,nbins,nfills);
+    return performBenchmark<TProfile_LW> (rand, nhists,nbins,nfills);
   if (valtype=="float"&&dim=="1d"&&histimpl=="root")
-    return performBenchmark<TH1F> (nhists,nbins,nfills);
+    return performBenchmark<TH1F> (rand, nhists,nbins,nfills);
   if (valtype=="double"&&dim=="1d"&&histimpl=="root")
-    return performBenchmark<TH1D> (nhists,nbins,nfills);
+    return performBenchmark<TH1D> (rand, nhists,nbins,nfills);
   if (valtype=="int"&&dim=="1d"&&histimpl=="root")
-    return performBenchmark<TH1I> (nhists,nbins,nfills);
+    return performBenchmark<TH1I> (rand, nhists,nbins,nfills);
   if (valtype=="profile"&&dim=="1d"&&histimpl=="root")
-    return performBenchmark<TProfile> (nhists,nbins,nfills);
+    return performBenchmark<TProfile> (rand, nhists,nbins,nfills);
 
   if (valtype=="float"&&dim=="2d"&&histimpl=="lw")
-    return performBenchmark<TH2F_LW> (nhists,nbins,nfills);
+    return performBenchmark<TH2F_LW> (rand, nhists,nbins,nfills);
   if (valtype=="double"&&dim=="2d"&&histimpl=="lw")
-    return performBenchmark<TH2D_LW> (nhists,nbins,nfills);
+    return performBenchmark<TH2D_LW> (rand, nhists,nbins,nfills);
   if (valtype=="int"&&dim=="2d"&&histimpl=="lw")
-    return performBenchmark<TH2I_LW> (nhists,nbins,nfills);
+    return performBenchmark<TH2I_LW> (rand, nhists,nbins,nfills);
   if (valtype=="profile"&&dim=="2d"&&histimpl=="lw")
-    return performBenchmark<TProfile2D_LW> (nhists,nbins,nfills);
+    return performBenchmark<TProfile2D_LW> (rand, nhists,nbins,nfills);
   if (valtype=="float"&&dim=="2d"&&histimpl=="root")
-    return performBenchmark<TH2F> (nhists,nbins,nfills);
+    return performBenchmark<TH2F> (rand, nhists,nbins,nfills);
   if (valtype=="double"&&dim=="2d"&&histimpl=="root")
-    return performBenchmark<TH2D> (nhists,nbins,nfills);
+    return performBenchmark<TH2D> (rand, nhists,nbins,nfills);
   if (valtype=="int"&&dim=="2d"&&histimpl=="root")
-    return performBenchmark<TH2I> (nhists,nbins,nfills);
+    return performBenchmark<TH2I> (rand, nhists,nbins,nfills);
   if (valtype=="profile"&&dim=="2d"&&histimpl=="root")
-    return performBenchmark<TProfile2D> (nhists,nbins,nfills);
+    return performBenchmark<TProfile2D> (rand, nhists,nbins,nfills);
 
-  return usage();
+  return usage(progname);
 }
