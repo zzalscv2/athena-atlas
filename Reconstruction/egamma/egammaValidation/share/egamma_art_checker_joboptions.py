@@ -65,7 +65,7 @@ jobproperties.Global.DetDescrVersion = Geometry
 # Geometry
 from AtlasGeoModel import GeoModelInit
 from AtlasGeoModel import SetGeometryVersion
-include("CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include("CaloConditions/CaloConditions_jobOptions.py")
 include("LArDetDescr/LArDetDescr_joboptions.py")
 
 

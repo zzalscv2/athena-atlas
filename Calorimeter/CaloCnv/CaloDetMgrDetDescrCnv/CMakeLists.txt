@@ -8,6 +8,4 @@ atlas_add_component( CaloDetMgrDetDescrCnv
                      src/*.cxx
                      LINK_LIBRARIES DetDescrCnvSvcLib GaudiKernel CaloDetDescrLib CaloIdentifier CaloDetDescrUtils AthenaKernel AthenaBaseComps StoreGateLib )
 
-# Install files from the package:
-atlas_install_joboptions( share/*.py )
 

@@ -89,10 +89,6 @@ from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
 GeoModelSvc = GeoModelSvc()
 GeoModelSvc.TileVersionOverride = "TileTB-3B-00"
 
-# Common for the Calo: detector description package
-#include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
-#include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
-
 
 if not 'TileBarrelOnly' in dir():
     TileBarrelOnly = False

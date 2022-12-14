@@ -98,7 +98,7 @@ elif (simFlags.SimLayout.get_Value()=='tb_Tile2000_2003_5B'):
 from AtlasGeoModel import GeoModelInit
 if(DetFlags.Calo_on()):
     # Common for the Calo
-    include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+    include( "CaloConditions/CaloConditions_jobOptions.py" )
     include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 ##--- Persistency of test-beam layout ----------------------------------
 if jobproperties.AthenaCommonFlags.PoolHitsOutput.statusOn :

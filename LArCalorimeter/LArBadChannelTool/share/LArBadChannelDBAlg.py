@@ -65,7 +65,7 @@ else:
    LArOnOffIdMapping()
 
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 
 theApp.EvtMax = 1

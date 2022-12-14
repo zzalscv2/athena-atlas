@@ -126,7 +126,7 @@ if DetFlags.LAr_on():
     include.block ( "CaloConditions/LArTTCellMap_ATLAS_jobOptions.py" )
     include.block ( "CaloConditions/CaloTTIdMap_ATLAS_jobOptions.py" )
     # the LAr and Calo detector description package
-    include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+    include( "CaloConditions/CaloConditions_jobOptions.py" )
     include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
     #include( "LArCondCnv/LArCondCnv_IdMapH6_jobOptions.py" )
 

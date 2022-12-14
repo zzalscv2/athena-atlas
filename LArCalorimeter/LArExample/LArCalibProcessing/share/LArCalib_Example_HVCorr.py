@@ -119,7 +119,7 @@ except:
    pass
 
 include( "AthenaCommon/Atlas_Gen.UnixStandardJob.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include( "CaloConditions/CaloConditions_jobOptions.py")
 include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
 include( "LArConditionsCommon/LArIdMap_comm_jobOptions.py" )
 

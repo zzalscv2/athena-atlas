@@ -43,7 +43,7 @@ from IOVDbSvc.CondDB import conddb
 conddb.setGlobalTag(globalflags.ConditionsTag())
 svcMgr.IOVDbSvc.overrideTags +=  ["<prefix>/CALO/Identifier/CaloTTOnOffIdMapAtlas</prefix> <tag>CALOIdentifierCaloTTOnOffIdMapAtlas-0002</tag>"]
 
-include ("CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include ("CaloConditions/CaloConditions_jobOptions.py")
 include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
 
 include("LArConditionsCommon/LArIdMap_comm_jobOptions.py")

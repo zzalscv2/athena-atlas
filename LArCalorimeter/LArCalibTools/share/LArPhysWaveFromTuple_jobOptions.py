@@ -35,7 +35,7 @@ include( "AthenaCommon/Atlas.UnixStandardJob.py" )
 
 # use this for release 12
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 
 theApp.Dlls += ["LArRawUtils"]

@@ -17,7 +17,7 @@ if DetFlags.overlay.LAr_on() or DetFlags.overlay.Tile_on():
       include("LArConditionsCommon/LArConditionsCommon_MC_jobOptions.py")
 
    include( "LArIdCnv/LArIdCnv_joboptions.py" )
-   include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+   include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 if DetFlags.overlay.LAr_on():
 

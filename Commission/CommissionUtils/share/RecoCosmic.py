@@ -37,7 +37,7 @@ include( "LArDetDescr/LArDetDescr_joboptions.py" )
 include( "LArCondCnv/LArCondCnv_G4_jobOptions.py" )
 include( "TileConditions/TileConditions_jobOptions.py" )
 include( "TileIdCnv/TileIdCnv_jobOptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 # CaloCell 
 include( "CaloRec/CaloCellMaker_config.py" )

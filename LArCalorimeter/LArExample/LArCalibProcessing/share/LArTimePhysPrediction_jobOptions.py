@@ -78,7 +78,7 @@ include( "LArIdCnv/LArIdCnv_joboptions.py" )
 # end of modified version of LArCalibProcessing/LArCalib_P3C_MinimalSetup.py
 
 #to read the Calo descriptor
-include ("CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include ("CaloConditions/CaloConditions_jobOptions.py")
 include("AthenaPoolCnvSvc/AthenaPool_jobOptions.py")
 include("LArCondAthenaPool/LArCondAthenaPool_joboptions.py")
 
