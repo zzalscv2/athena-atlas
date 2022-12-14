@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 # Author: Wim Lavrijsen (LBNL, WLavrijsen@lbl.gov)
 
 """Unit tests for verifying setting of Gaudi/Athena configurables."""
@@ -425,14 +425,11 @@ class DummyToolB( Configurable.ConfigurableAlgTool ):
 class ConfigurableEqualityTestCase( unittest.TestCase ):
    """Verify behavior of Configurable equality comparisons"""
 
-   # In the pre-Run3 behaviour, the same instance was always returned.
    def setUp(self):
-      Configurable.Configurable.configurableRun3Behavior = True
-      pass
+      Configurable.Configurable._useGlobalInstances = False
 
    def tearDown(self):
-      Configurable.Configurable.configurableRun3Behavior = False
-      pass
+      Configurable.Configurable._useGlobalInstances = True
 
    def test1EqualityIsReflexive( self ):
       """Test that x == x"""
@@ -476,6 +473,6 @@ if __name__ == '__main__':
    result = not runner.run( testSuite ).wasSuccessful()
 
  # don't want to depend on gaudimodule
-   assert( not 'gaudimodule' in sys.modules )
+   assert( 'gaudimodule' not in sys.modules )
 
    sys.exit( result )

@@ -29,16 +29,21 @@ __all__ = [ 'Configurable',
 from AthenaCommon.Logging import logging
 log = logging.getLogger( 'Configurable' )
 
-# context manager, sets the configurableRun3Behavior flag
-class ConfigurableRun3Behavior:
-    def __init__(self, target_state=1):
+
+# Context Manager to set Configurable behavior
+class ConfigurableCompAccBehavior:
+    def __init__(self, target_state=True):
         self._target_state = target_state
         self._previous_state = None
     def __enter__(self):
-        self._previous_state = Configurable.configurableRun3Behavior
-        Configurable.configurableRun3Behavior = self._target_state
+        self._previous_state = Configurable._useGlobalInstances
+        # CA does not use global instances:
+        Configurable._useGlobalInstances = not self._target_state
     def __exit__(self, exception_type, exception_value, traceback):
-        Configurable.configurableRun3Behavior = self._previous_state
+        Configurable._useGlobalInstances = self._previous_state
+
+# For backwards compatability
+ConfigurableRun3Behavior = ConfigurableCompAccBehavior
 
 ### base class for configurable Gaudi algorithms/services/algtools/etc. ======
 class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
@@ -79,7 +84,9 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
 
    _printOnce = 0
 
-   configurableRun3Behavior=0
+   # The default is the pre-ComponentAccumulator behavior, i.e. use
+   # a global namespace for configurable instances:
+   _useGlobalInstances = True
 
    def __new__ ( cls, *args, **kwargs ):
       """To Gaudi, any object with the same type/name is the same object. Hence,
@@ -125,9 +132,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
          raise NameError( '"%s": type separator "/" no allowed in component name, '
                           'typename is derived from configurable instead' % name )
 
-      #Uncomment the following line for debugging:
-      #print "cls.configurableRun3Behavior=",cls.configurableRun3Behavior
-      if cls.configurableRun3Behavior==0:
+      if cls._useGlobalInstances:
          # ordinary recycle case
          try:
             conf = cls.configurables[ name ]
@@ -186,7 +191,7 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
       cls.__init__( conf, *args, **kwargs )
 
     # update normal, per-class cache
-      if cls.configurableRun3Behavior==0:
+      if cls._useGlobalInstances:
          cls.configurables[ name ] = conf
 
     # update generics super-cache
