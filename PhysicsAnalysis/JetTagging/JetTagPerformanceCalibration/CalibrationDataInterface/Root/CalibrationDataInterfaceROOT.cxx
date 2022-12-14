@@ -1576,7 +1576,6 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   if (container->getUncertainty("MCreference", variables, refMCResult) == Analysis::kError)
     return Analysis::kError;
   double fracMCref = refMCResult.first;
-
   // Retrieve the MC reference information, if requested (the initialisation below is to make sure
   // that no exceptions in the code will be needed)
   double fracSFref = fracMCref, fracEffref = fracMCref;
@@ -1589,7 +1588,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
       m_objects[indexSFref]->getResult(variables, fracSFref);
       m_objects[indexEffref]->getResult(variables, fracEffref);
       if (! (fracSFref > 0. && fracEffref > 0.)) {
-	cerr << "getWeightScaleFactor: error: invalid reference tag weight fraction" << endl;
+	cerr << "getWeightScaleFactor: error: invalid reference tag weight fraction " <<fracSFref <<" " <<fracEffref << std::endl;
 	return Analysis::kError;
       }
     }

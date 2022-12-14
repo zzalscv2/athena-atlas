@@ -33,7 +33,7 @@ int main() {
 
 
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool("BTaggingSelectionTool/BTagSelecTest");
-  StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2017-21-13TeV-MC16-CDI-2018-02-09_v1.root" );
+  StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2022-07-28_v1.root" );
   StatusCode code2 = tool.setProperty("TaggerName",    taggerName  );
   StatusCode code3 = tool.setProperty("OperatingPoint", workingPointName);
   StatusCode code4 = tool.setProperty("JetAuthor",      "AntiKt4EMTopoJets" );
@@ -122,7 +122,7 @@ int main() {
   taggerName = "DL1";
   workingPointName = "Continuous";
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool_Continuous("BTaggingSelectionTool/BTagSelContinuousTest");
-  code1 = tool_Continuous.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2017-21-13TeV-MC16-CDI-2018-02-09_v1.root" );
+  code1 = tool_Continuous.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2022-07-28_v1.root" );
   code2 = tool_Continuous.setProperty("TaggerName",    taggerName  );
   code3 = tool_Continuous.setProperty("OperatingPoint", workingPointName );
   code4 = tool_Continuous.setProperty("JetAuthor",      "AntiKt4EMTopoJets" );
@@ -153,30 +153,31 @@ int main() {
   }
 
 
-  //Veto working points
+  //CTagging
   //**************************
-  //by setting the OperatingPoint to a string with the format WP1_Veto_Tagger2_WP2
-  //for example, FixedCutBEff_70_Veto_DL1_CTag_Loose
+  //for example, FixedCutBEff_70 but in ctagging mode
   //the selection tool will require the jet to be
   //tagged by the standard working point
   //and to not be tagged by the secondary tagger and working point
 
-  taggerName = "MV2c10";
-  workingPointName = "FixedCutBEff_70_Veto_DL1_CTag_Loose";
+  taggerName = "DL1r";
+  workingPointName = "Continuous";
 
-  asg::StandaloneToolHandle<IBTaggingSelectionTool> tool_veto("BTaggingSelectionTool/BTagSelecVetoTest");
-  code1 = tool_veto.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2017-21-13TeV-MC16-CDI-2018-02-09_v1.root" );
-  code2 = tool_veto.setProperty("TaggerName",    taggerName  );
-  code3 = tool_veto.setProperty("OperatingPoint", workingPointName );
-  code4 = tool_veto.setProperty("JetAuthor",      "AntiKt4EMTopoJets" );
-  code5 = tool_veto.initialize();
+  asg::StandaloneToolHandle<IBTaggingSelectionTool> tool_ctag("BTaggingSelectionTool/BTagSelecTest");
+  code1 = tool_ctag.setProperty( "FlvTagCutDefinitionsFileName","xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2022-07-28_v1.root" );
+  code2 = tool_ctag.setProperty("TaggerName",    taggerName  );
+  code3 = tool_ctag.setProperty("OperatingPoint", workingPointName );
+  code4 = tool_ctag.setProperty("JetAuthor",      "AntiKt4EMPFlowJets" );
+  code5 = tool_ctag.setProperty("useCTagging",    true );
+  auto code6 = tool_ctag.initialize();
 
-  if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS) {
-    std::cout << "Initialization of tool " << tool_veto->name() << " failed! " << std::endl;
+  if (code1 != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS 
+   || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS || code6 != StatusCode::SUCCESS) {
+    std::cout << "Initialization of tool " << tool->name() << " failed! " << std::endl;
     return -1;
   }
   else {
-    std::cout << "Initialization of tool " << tool_veto->name() << " finished." << std::endl;
+    std::cout << "Initialization of tool " << tool->name() << " finished." << std::endl;
   }
 
 
@@ -184,21 +185,16 @@ int main() {
   for (const xAOD::Jet* jet : *jets) {
 
     //getting a tagging decision, is the jet tagged or not
-    bool tagged = static_cast<bool>(tool_veto->accept(*jet));
-
+    bool tagged = static_cast<bool>(tool->accept(*jet));
 
     // if you are using a format without xAOD::Jets or where the jet does not have a properly filled b-tagging object,
-    // you need the two tagger weights, for the nominal tagger and the veto tagger.
+    // you need the two tagger weights, for the nominal tagger and th tagger.
 
     //you can get the tagger weight,
     double tagweight_nominal;
-    double tagweight_veto_tagger;
-
-    if( tool_veto->getTaggerWeight( *jet ,tagweight_nominal)!=CorrectionCode::Ok ){ std::cout << " error retrieving nominal tagger weight " << std::endl; return -1; }
-    //use a third argument set to true to getTaggerWeight for the veto tagger weight
-    if( tool_veto->getTaggerWeight( *jet ,tagweight_veto_tagger,true)!=CorrectionCode::Ok ){ std::cout << " error retrieving veto tagger weight " << std::endl; return -1; }
-
-
+    double tagweight_ctag;
+    if( tool->getTaggerWeight( *jet ,tagweight_nominal)!=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
+    if( tool_ctag->getTaggerWeight( *jet ,tagweight_ctag, true)!=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight in ctag mode " << std::endl; return -1; }
     //if you have DL1 weights, you can get the tagger weight this way
     const xAOD::BTagging *btag = xAOD::BTaggingUtilities::getBTagging( *jet );
 
@@ -206,16 +202,13 @@ int main() {
     double dl1_pc = btag->auxdata<double>("DL1_pc");
     double dl1_pu = btag->auxdata<double>("DL1_pu");
 
-    //the 5th argument tells it to retrive the veto tagger weight
-    if(  tool_veto->getTaggerWeight(dl1_pb,dl1_pc,dl1_pu, tagweight_veto_tagger,true) !=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
-
-
+    //the 5th argument tells it to retrive the tagger weight in ctagging mode instead of btagging
+    if(  tool_ctag->getTaggerWeight(dl1_pb,dl1_pc,dl1_pu, tagweight_ctag,true) !=CorrectionCode::Ok ){ std::cout << " error retrieving tagger weight " << std::endl; return -1; }
 
     double pT = jet->pt();
     double eta = jet->eta();
 
-    bool tagged_withtagweights = static_cast<bool>(tool_veto->accept(pT,eta,tagweight_nominal,tagweight_veto_tagger));
-
+    bool tagged_withtagweights = static_cast<bool>(tool_ctag->accept(pT,eta,tagweight_nominal,tagweight_ctag));
 
     std::cout << "jet " << jet_index << " " <<  taggerName  << "  " << workingPointName << " is tagged " << tagged << " tagged (with tagweights) "<< tagged_withtagweights << std::endl;
 

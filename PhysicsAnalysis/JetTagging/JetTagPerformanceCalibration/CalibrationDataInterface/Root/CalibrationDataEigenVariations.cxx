@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
+#include <vector>
 
 #include "TH1.h"
 #include "TVectorT.h"
@@ -210,7 +211,7 @@ m_cnt(cnt), m_initialized(false), m_namedExtrapolation(-1), m_statVariations(fal
     std::vector<std::string> to_exclude = split(m_cnt->getExcludedUncertainties());
     for (auto name : to_exclude) excludeNamedUncertainty(name);
     if (to_exclude.size() == 0) {
-      std::cerr << "CalibrationDataEigenVariations warning: exclusion of pre-set uncertainties list requested but no (or empty) list found" << std::endl;
+      std::cerr << "CalibrationDataEigenVariations warning: exclusion of pre-set uncertainties list requested but no (or empty) list found" <<std::endl;
     }
   }
   // also flag if statistical uncertainties stored as variations (this typically happens as a result of smoothing / pruning of SF results)
@@ -229,7 +230,7 @@ CalibrationDataEigenVariations::~CalibrationDataEigenVariations()
     delete it->first;
     delete it->second;
   }
-  std::cout << "eigenvariations destructor: removing " << m_eigen.size() << " eigenvariations" << std::endl;
+  std::cout << "eigenvariations destructor: removing " << m_eigen.size() << " eigenvariations" <<std::endl;
   for (vector<pair<TH1*, TH1*> >::iterator it = m_eigen.begin();
        it != m_eigen.end(); ++it) {
     delete it->first;
@@ -248,18 +249,39 @@ CalibrationDataEigenVariations::excludeNamedUncertainty(const std::string& name)
   //   meaningful in this context, and specifying them is not allowed.
   // - Once the eigenvector diagonalisation has been carried out, this method may
   //   not be used anymore.
-
-  if (m_initialized)
-    std::cerr << "CalibrationDataEigenVariations::excludeNamedUncertainty error:"
-	      << " initialization already done" << std::endl;
+  if (m_initialized){
+    std::cerr <<"CalibrationDataEigenVariations::excludeNamedUncertainty error:"
+    		  << " initialization already done" <<std::endl;
+  }  
   else if (name == "comment"    || name == "result"   || name == "systematics" ||
 	   name == "statistics" || name == "combined" || name == "extrapolation" ||
-	   name == "MCreference" || name == "MChadronisation" || name == "ReducedSets" || name == "excluded_set")
-    std::cerr << "CalibrationDataEigenVariations::excludeNamedUncertainty error:"
-	      << " name " << name << " not allowed" << std::endl;
-  else if (! m_cnt->GetValue(name.c_str()))
-    std::cerr << "CalibrationDataEigenVariations::excludeNamedUncertainty error:"
-	      << " uncertainty named " << name << " not found" << std::endl;
+	   name == "MCreference" || name == "MChadronisation" || name == "ReducedSets" || name == "excluded_set"){
+    std::cerr <<"CalibrationDataEigenVariations::excludeNamedUncertainty error:"
+	      << " name " << name << " not allowed" <<std::endl;
+  }
+  // in case multiple uncertainties should be discarded
+  else if (name.back() == '*'){
+    std::string temp_name = name.substr(0, name.size()-1); //remove "*"
+    std::vector<std::string> uncs = m_cnt->listUncertainties();
+    std::vector<std::string> unc_subgroup;
+    std::copy_if(uncs.begin(), uncs.end(), back_inserter(unc_subgroup),
+		 [&temp_name](const std::string& el) {
+		   return el.compare(0, temp_name.size(), temp_name) == 0;
+		 });
+    std::cout <<"Found a group of uncertainties to exclude: " <<name <<" found " <<unc_subgroup.size() <<" uncertainties corresponding to the query" <<std::endl;
+    for (auto single_name : unc_subgroup){
+      // only really add if the entry is not yet in the list
+      if (m_namedIndices.find(single_name) == m_namedIndices.end()) {
+	std::cout <<"Name : " <<single_name <<std::endl;
+	m_named.push_back(std::pair<TH1*, TH1*>(0, 0));
+	m_namedIndices[single_name] = m_named.size()-1;
+      }
+    }
+  }
+  else if (! m_cnt->GetValue(name.c_str())){
+    std::cerr <<"CalibrationDataEigenVariations::excludeNamedUncertainty error:"
+    		   << " uncertainty named " << name << " not found" <<std::endl;
+  }
   // only really add if the entry is not yet in the list
   else if (m_namedIndices.find(name) == m_namedIndices.end()) {
     m_named.push_back(std::pair<TH1*, TH1*>(0, 0));
@@ -309,7 +331,6 @@ CalibrationDataEigenVariations::getEigenCovarianceMatrix()
         uncs[t] == "ReducedSets" || uncs[t] == "excluded_set") continue;
     // entries that can be excluded if desired
     if (m_namedIndices.find(uncs[t]) != m_namedIndices.end()) continue;
-
     TH1* hunc = dynamic_cast<TH1*>(m_cnt->GetValue(uncs[t].c_str()));
     cov += getSystCovarianceMatrix(result, hunc, m_cnt->isBinCorrelated(uncs[t]), m_cnt->getTagWeightAxis());
   }
@@ -406,6 +427,10 @@ CalibrationDataEigenVariations::getJacobianReductionMatrix()
       }
     }
   }
+
+  // **** COMMENTED OUT FOR NOW. 
+  // Leave it here in case the calibration method will change again in the future. 
+  // No need to reweight the SF by the efficiency of that bin (MCreference always = 0)
 
   // Determine whether the container is for "continuous" calibration.
   // This is important since the number of independent scale factors (for each pt or eta bin)
@@ -543,20 +568,21 @@ CalibrationDataEigenVariations::initialize(double min_variance)
   // // This is important since the number of independent scale factors (for each pt or eta bin)
   // // is reduced by 1 compared to the number of tag weight bins (related to the fact that the fractions
   // // of events in tag weight bins have to sum up to unity).
-  int axis = m_cnt->getTagWeightAxis();
+  //  int axis = m_cnt->getTagWeightAxis();
   // bool doContinuous = false; unsigned int weightAxis = 0;
 
-  if (axis >= 0) {
+  //if (axis >= 0) {
   //   doContinuous = true;
   //   weightAxis = (unsigned int) axis;
   //   // In this case, verify that the special "uncertainty" entry that is in fact the reference MC tag
   //   // weight fractions is present. These tag weight fractions are needed in order to carry out the
   //   // diagonalisation successfully.
-    if (! dynamic_cast<TH1*>(m_cnt->GetValue("MCreference"))) {
-      std::cerr << " Problem: continuous calibration object found without MC reference tag weight histogram " << std::endl;
-      return;
-    }
-  }
+  //    NOTE: MCreference is not used at the moment (always 0 in the CDI). Comment it out. 
+  //    if (! dynamic_cast<TH1*>(m_cnt->GetValue("MCreference"))) {
+  //   std::cerr << " Problem: continuous calibration object found without MC reference tag weight histogram " << std::endl;
+  //  return;
+  // }
+  //}
 
   // Only relevant for continuous calibration containers, but in order to void re-computation we
   // retrieve them here
