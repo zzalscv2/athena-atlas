@@ -742,7 +742,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillMeasurementData(
       float pullLocX     = s_errorEntry;
       float pullLocY     = s_errorEntry;
       if (trkParameters) {
-        const Trk::ResidualPull* residualPull
+        std::unique_ptr<Trk::ResidualPull> residualPull
           = m_residualPullCalculator->residualPull(measurement, trkParameters,
                                                    (m_isUnbiased==1) ? Trk::ResidualPull::Unbiased :
                                                     Trk::ResidualPull::Biased);
@@ -767,7 +767,6 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillMeasurementData(
                              << (isOutlier? " (flagged as outlier)." : "."));
             }
           }
-          delete residualPull;
         } else {
           msg(MSG::WARNING) << "ResidualPullCalculator failed!" << endmsg;
         }

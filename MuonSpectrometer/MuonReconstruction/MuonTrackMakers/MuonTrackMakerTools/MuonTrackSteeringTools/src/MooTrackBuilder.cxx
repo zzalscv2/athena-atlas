@@ -1259,13 +1259,12 @@ namespace Muon {
                         double residual = 1e10;
                         double pull = 1e10;
                         // pointer to resPull
-                        const Trk::ResidualPull* resPull =
+                        std::unique_ptr<Trk::ResidualPull> resPull =
                             m_pullCalculator->residualPull(meas, impactPars.get(), Trk::ResidualPull::Unbiased);
                         if (resPull && resPull->pull().size() == 1) {
                             if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "  residual " << m_printer->print(*resPull);
                             residual = resPull->residual().front();
                             pull = resPull->pull().front();
-                            delete resPull;
                         } else {
                             ATH_MSG_WARNING("failed to calculate residual and pull");
                         }

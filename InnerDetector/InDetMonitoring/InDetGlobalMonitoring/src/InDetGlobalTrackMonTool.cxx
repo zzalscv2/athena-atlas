@@ -1022,7 +1022,9 @@ void InDetGlobalTrackMonTool::FillTIDE()
 				    if ( !UnbiasedTrackParams )
 					if(msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "RemoveFromState did not work, using original TrackParameters" << endmsg;
 
-				    const Trk::ResidualPull * residualPull = m_residualPullCalculator->residualPull(tsos->measurementOnTrack(), ( UnbiasedTrackParams ) ? UnbiasedTrackParams:tsos->trackParameters(), Trk::ResidualPull::Unbiased);
+
+            std::unique_ptr<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(
+              tsos->measurementOnTrack(), ( UnbiasedTrackParams ) ? UnbiasedTrackParams:tsos->trackParameters(), Trk::ResidualPull::Unbiased);
 				    if (residualPull) {
 					{
 					    float dr = trackPart->p4().DeltaR( jetItr->p4() );

@@ -35,7 +35,7 @@ StatusCode InDet::SCT_ResidualPullCalculator::initialize() {
 /////////////////////////////////
 /// calc residual and pull for SCT measurements
 /////////////////////////////////
-const Trk::ResidualPull* InDet::SCT_ResidualPullCalculator::residualPull(
+std::unique_ptr<Trk::ResidualPull> InDet::SCT_ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -128,9 +128,10 @@ const Trk::ResidualPull* InDet::SCT_ResidualPullCalculator::residualPull(
 
     // create the Trk::ResidualPull:
     // ParameterKey is always 1, because otherwise we rotated it back
-    return new Trk::ResidualPull(std::move(residual), std::move(pull), pullIsValid, resType, 1, sinAlpha);
+    return std::make_unique<Trk::ResidualPull>(std::move(residual),
+                                               std::move(pull), pullIsValid,
+                                               resType, 1, sinAlpha);
 }
-
 
 /////////////////////////////////
 /// calc residuals for SCT measurements

@@ -272,7 +272,7 @@ namespace JiveXML {
 				*/
 
 				//Get the residualPull object
-				const Trk::ResidualPull* residualPull = residualPullCalculator->residualPull(rot, tsosParameters,Trk::ResidualPull::Biased);
+        std::unique_ptr<Trk::ResidualPull> residualPull = residualPullCalculator->residualPull(rot, tsosParameters,Trk::ResidualPull::Biased);
 
 				if (residualPull) {
 					//Get the first residual
