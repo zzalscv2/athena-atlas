@@ -95,6 +95,11 @@ def FTAG1Cfg(ConfigFlags):
                 "JetAssociatedSCTClusters",
                 ]
 
+    if ConfigFlags.BTagging.RunNewVrtSecInclusive:
+        FTAG1SlimmingHelper.AppendToDictionary.update({'NSVI_SecVrt_Tight' : 'xAOD::VertexContainer','NSVI_SecVrt_TightAux' : 'xAOD::VertexAuxContainer',
+                                                       'NSVI_SecVrt_Medium' : 'xAOD::VertexContainer','NSVI_SecVrt_MediumAux' : 'xAOD::VertexAuxContainer',
+                                                       'NSVI_SecVrt_Loose' : 'xAOD::VertexContainer','NSVI_SecVrt_LooseAux' : 'xAOD::VertexAuxContainer'})
+
     # Append to dictionary
     FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
     FTAG1SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
@@ -110,6 +115,13 @@ def FTAG1Cfg(ConfigFlags):
 
     # Static content
     FtagBaseContent.add_static_content_to_SlimmingHelper(FTAG1SlimmingHelper)
+
+    if ConfigFlags.BTagging.RunNewVrtSecInclusive:
+        excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#NSVI_SecVrt_Loose", "xAOD::VertexContainer#NSVI_SecVrt_Medium", "xAOD::VertexContainer#NSVI_SecVrt_Tight"]
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexAuxContainer#NSVI_SecVrt_LooseAux."+excludedVertexAuxData]
+        FTAG1SlimmingHelper.StaticContent += ["xAOD::VertexContainer#NSVI_SecVrt_MediumAux."+excludedVertexAuxData ]
+        FTAG1SlimmingHelper.StaticContent += [ "xAOD::VertexContainer#NSVI_SecVrt_TightAux."+excludedVertexAuxData]
 
     # Add truth containers
     if ConfigFlags.Input.isMC:

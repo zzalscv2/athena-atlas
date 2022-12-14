@@ -199,7 +199,7 @@ def V2TCalibrationToolCfg(flags, name="V2TCalibrationTool", **myargs):
 
     myargs["VertexFitterTool"] = acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags))
     myargs["ExtrapolatorName"] = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    myargs["FillHist"]     = True,
+    myargs["FillHist"]     = True
     myargs["CutPt"]        = 400.
     myargs["CutBLayHits"]  = 0
     myargs["CutPixelHits"] = 1
