@@ -850,7 +850,7 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
       SG::ReadHandle<xAOD::TruthEventContainer> truthEventContainer(m_truthEventName);
       if (truthEventContainer.isValid()) {
         for (const auto *const evt : *truthEventContainer) {
-          truthVtx = evt->truthVertex(0);
+          truthVtx = evt->nTruthVertices()>0 ? evt->truthVertex(0) : nullptr;
           if (truthVtx) {
             truthHSVertices.push_back(truthVtx);
           }
@@ -868,7 +868,7 @@ InDetPhysValMonitoringTool::getTruthVertices() const {
       SG::ReadHandle<xAOD::TruthPileupEventContainer> truthPileupEventContainer(m_truthPileUpEventName);
       if (truthPileupEventContainer.isValid()) {
         for (const auto *const evt : *truthPileupEventContainer) {
-          truthVtx = evt->truthVertex(0);
+          truthVtx = evt->nTruthVertices()>0 ? evt->truthVertex(0) : nullptr;
           if (truthVtx) {
             truthPUVertices.push_back(truthVtx);
           }
