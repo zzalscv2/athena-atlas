@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           CrateEnergy.h  -  description
@@ -40,20 +40,19 @@ CrateEnergy::CrateEnergy(unsigned int crate, const DataVector<ModuleEnergy>* JEM
   unsigned int eT[2] = {0,0};
   unsigned int eX[2] = {0,0};
   unsigned int eY[2] = {0,0};
-  DataVector<ModuleEnergy>::const_iterator it = JEMs->begin();
-  for ( ; it != JEMs->end(); it++) {
-    int moduleInQuad = (*it)->module() % 8;
-    if ((*it)->crate() == m_crate) {
-      int quad = ( (*it)->module() < 8 ? 0 : 1 );
+  for ( const ModuleEnergy* jem : *JEMs ) {
+    int moduleInQuad = jem->module() % 8;
+    if (jem->crate() == m_crate) {
+      int quad = ( jem->module() < 8 ? 0 : 1 );
       if ((maskTE>>moduleInQuad)&1) {
-        eT[quad] += (*it)->et();
-        if ( (*it)->et() >= m_jemEtSaturation ) m_overflowT = 1;
+        eT[quad] += jem->et();
+        if ( jem->et() >= m_jemEtSaturation ) m_overflowT = 1;
       }
       if ((maskXE>>moduleInQuad)&1) {
-        eX[quad] += (*it)->ex();
-        eY[quad] += (*it)->ey();
-        if ( (*it)->ex() >= m_jemEtSaturation ) m_overflowX = 1;
-        if ( (*it)->ey() >= m_jemEtSaturation ) m_overflowY = 1;
+        eX[quad] += jem->ex();
+        eY[quad] += jem->ey();
+        if ( jem->ex() >= m_jemEtSaturation ) m_overflowX = 1;
+        if ( jem->ey() >= m_jemEtSaturation ) m_overflowY = 1;
       } 
     }  // Right crate?
   }   // Loop over JEMs
@@ -119,21 +118,20 @@ CrateEnergy::CrateEnergy(unsigned int crate, const DataVector<EnergyCMXData>* JE
   unsigned int eT[2] = {0,0};
   unsigned int eX[2] = {0,0};
   unsigned int eY[2] = {0,0};
-  DataVector<EnergyCMXData>::const_iterator it = JEMs->begin();
-  for ( ; it != JEMs->end(); it++) {
-    int moduleInQuad = (*it)->module() % 8;
-    if ((unsigned int)(*it)->crate() == m_crate) {
-      int quad = ( (*it)->module() < 8 ? 0 : 1 );
+  for ( const EnergyCMXData* jem : *JEMs ) {
+    int moduleInQuad = jem->module() % 8;
+    if ((unsigned int)jem->crate() == m_crate) {
+      int quad = ( jem->module() < 8 ? 0 : 1 );
 
       if ((maskTE>>moduleInQuad)&1) {
-        eT[quad] += (*it)->Et();
-        if ( (*it)->Et() >= m_jemEtSaturation ) m_overflowT = 1;
+        eT[quad] += jem->Et();
+        if ( jem->Et() >= m_jemEtSaturation ) m_overflowT = 1;
       }
       if ((maskXE>>moduleInQuad)&1) {
-        eX[quad] += (*it)->Ex();
-        eY[quad] += (*it)->Ey();
-        if ( (*it)->Ex() >= m_jemEtSaturation ) m_overflowX = 1;
-        if ( (*it)->Ey() >= m_jemEtSaturation ) m_overflowY = 1;
+        eX[quad] += jem->Ex();
+        eY[quad] += jem->Ey();
+        if ( jem->Ex() >= m_jemEtSaturation ) m_overflowX = 1;
+        if ( jem->Ey() >= m_jemEtSaturation ) m_overflowY = 1;
       } 
     }
   }

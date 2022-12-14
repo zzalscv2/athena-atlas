@@ -402,7 +402,7 @@ TopoSteering::executeDecisionAlgorithm(TCS::DecisionAlg *alg,
       else {
         const TOBArray * tobA = dynamic_cast<const TOBArray *>( sc->outputData());
         if(tobA==nullptr) {
-          TCS_EXCEPTION("L1Topo Steering: Decision algorithm " << alg->name() << " expects TOBArray(s) as input, but did not get it from connector " << inConn->name());
+          TCS_EXCEPTION("L1Topo Steering: Decision algorithm " << alg->name() << " expects TOBArray(s) as input, but did not get it from connector " << (inConn ? inConn->name() : ""));
         }
         input.push_back( tobA );
       }

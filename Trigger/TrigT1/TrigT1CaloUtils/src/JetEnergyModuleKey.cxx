@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           JetEnergyModuleKey.cpp  -  description
@@ -66,10 +66,9 @@ std::vector<unsigned int> JetEnergyModuleKey::jeKeys(unsigned int crate, unsigne
   std::vector<Coordinate> coords = jeCoords(crate, module);
 
   // Then calculate keys
-  std::vector<Coordinate>::const_iterator it = coords.begin();
   JetElementKey get(0.,0.);
-  for (; it != coords.end(); it++) {
-    keys.push_back(get.jeKey(*it));
+  for (const Coordinate& c : coords) {
+    keys.push_back(get.jeKey(c));
   }
   
   return keys;

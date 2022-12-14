@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           ModuleEnergy.cxx  -  description
@@ -40,9 +40,8 @@ ModuleEnergy::ModuleEnergy(const xAOD::JetElementMap_t* JEContainer, unsigned in
     bool saturated = false;
     JetEnergyModuleKey get;
     std::vector<unsigned int> keys = get.jeKeys(crate, module);
-    std::vector<unsigned int>::const_iterator it = keys.begin();
-    for (; it != keys.end(); it++) {
-      xAOD::JetElementMap_t::const_iterator test=JEContainer->find(*it);
+    for (unsigned int k : keys) {
+      xAOD::JetElementMap_t::const_iterator test=JEContainer->find(k);
       if (test != JEContainer->end()) {
 	/** Check JE not masked in TE trigger */
 	double eta = test->second->eta();
