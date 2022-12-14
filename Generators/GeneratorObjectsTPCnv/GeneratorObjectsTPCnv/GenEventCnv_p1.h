@@ -111,7 +111,7 @@ class GenEventCnv_p1 : public T_AthenaPoolTPCnvBase<HepMC::GenEvent,
   HepMC::GenParticlePtr 
   createGenParticle( const GenParticle_p1& p,
 		     ParticlesMap_t& partToEndVtx,
-                     HepMC::DataPool& datapools, HepMC::GenVertexPtr parent=nullptr) const;
+                     HepMC::DataPool& datapools, const HepMC::GenVertexPtr& parent=nullptr) const;
 
   /////////////////////////////////////////////////////////////////// 
   // Protected data: 
