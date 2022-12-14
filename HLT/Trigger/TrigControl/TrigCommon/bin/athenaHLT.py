@@ -41,7 +41,6 @@ import argparse
 import ast
 import collections.abc
 from datetime import datetime as dt
-import six
 
 # Use single-threaded oracle client library to avoid extra
 # threads when forking (see ATR-21890, ATDBOPS-115)
@@ -184,8 +183,8 @@ def update_trigconf_keys(args):
 
 def update_nested_dict(d, u):
    """Update nested dictionary (https://stackoverflow.com/q/3232943)"""
-   for k, v in six.iteritems(u):
-      if isinstance(v, collections.Mapping):
+   for k, v in u.items():
+      if isinstance(v, collections.abc.Mapping):
          d[k] = update_nested_dict(d.get(k, {}), v)
       else:
          d[k] = v
