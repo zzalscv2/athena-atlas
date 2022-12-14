@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           SystemEnergy.h  -  description
@@ -37,27 +37,26 @@ SystemEnergy::SystemEnergy(const DataVector<CrateEnergy> *crates, const TrigConf
   /** Get Ex, Ey, ET sums from crates and form global sums <br>
       Propagate overflows and test for new ones <br> */
 
-  DataVector<CrateEnergy>::const_iterator it = crates->begin();
-  for (; it != crates->end(); it++)
+  for (const CrateEnergy* cr : *crates)
   {
-    if ((*it)->crate() == 0)
+    if (cr->crate() == 0)
     {
-      m_systemEx += (*it)->ex();
-      m_systemEy += (*it)->ey();
-      m_systemEt += (*it)->et();
+      m_systemEx += cr->ex();
+      m_systemEy += cr->ey();
+      m_systemEt += cr->et();
     }
-    else if ((*it)->crate() == 1)
+    else if (cr->crate() == 1)
     {
-      m_systemEx -= (*it)->ex();
-      m_systemEy += (*it)->ey();
-      m_systemEt += (*it)->et();
+      m_systemEx -= cr->ex();
+      m_systemEy += cr->ey();
+      m_systemEt += cr->et();
     }
     
-    m_overflowX = m_overflowX | ((*it)->ex() == -xyMax);
-    m_overflowY = m_overflowY | ((*it)->ey() == -xyMax);
-    m_overflowT = m_overflowT | ((*it)->et() == m_maxEtSumThr);
+    m_overflowX = m_overflowX | (cr->ex() == -xyMax);
+    m_overflowY = m_overflowY | (cr->ey() == -xyMax);
+    m_overflowT = m_overflowT | (cr->et() == m_maxEtSumThr);
 
-    if ((*it)->restricted())
+    if (cr->restricted())
       m_restricted = 1;
   }
 
