@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Qjets.h"
@@ -113,7 +113,7 @@ void Qjets::Cluster(fastjet::ClusterSequence & cs){
   } 
 
   // merge remaining jets with beam
-  int num_merged_final(0);
+  [[maybe_unused]] int num_merged_final(0);
 
   for(unsigned int i = 0 ; i < cs.jets().size(); i++)
     if(JetUnmerged(i)){

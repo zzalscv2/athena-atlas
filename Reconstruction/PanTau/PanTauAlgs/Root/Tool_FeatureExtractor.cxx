@@ -382,7 +382,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
   unsigned int                num_ConstsIn01To02             = 0;
   unsigned int                num_ConstsIn02To03             = 0;
   unsigned int                num_ConstsIn03To04             = 0;
-  unsigned int                num_ConstsIn04To05             = 0;
   // ===> Maximal values
   double                      max_DeltaR                  = 0;
     
@@ -442,7 +441,6 @@ StatusCode PanTau::Tool_FeatureExtractor::calculateFeatures(PanTau::PanTauSeed* 
     if(hlp_DeltaR >= 0.1 && hlp_DeltaR < 0.2) num_ConstsIn01To02++;
     if(hlp_DeltaR >= 0.2 && hlp_DeltaR < 0.3) num_ConstsIn02To03++;
     if(hlp_DeltaR >= 0.3 && hlp_DeltaR < 0.4) num_ConstsIn03To04++;
-    if(hlp_DeltaR >= 0.4 && hlp_DeltaR < 0.5) num_ConstsIn04To05++;
     // update Max values
     if(hlp_DeltaR > max_DeltaR) max_DeltaR = hlp_DeltaR;
   }//end loop over selected EFOs
