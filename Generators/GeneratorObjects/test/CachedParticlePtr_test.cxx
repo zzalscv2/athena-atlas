@@ -39,8 +39,7 @@ void test1()
   p2.reset();
   assert (p2.get() == nullptr);
 
-  GeneratorObjects::CachedParticlePtr p3 (p1);
-  assert (p1.get() == gp1);
+   assert (p1.get() == gp1);
   p2 = p1;
   assert (p2.get() == gp1);
 }
