@@ -313,7 +313,7 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         float predictR = trackParameterUnbiased->parameters()[Trk::locR];
 
         const Trk::MeasurementBase* mesh = tsos->measurementOnTrack();
-	const Trk::ResidualPull* residualPull = m_residualPullCalculator->residualPull(mesh,
+        std::unique_ptr<Trk::ResidualPull> residualPull = m_residualPullCalculator->residualPull(mesh,
                                                                                        trackParameterUnbiased.get(),
                                                                                        Trk::ResidualPull::Unbiased);
 
@@ -324,7 +324,6 @@ StatusCode IDAlignMonResidualsAlg::fillHistograms( const EventContext& ctx ) con
         }
 
         //delete trackParameterUnbiased;
-        delete residualPull;
 
         float residualR = hitR - predictR;
 
@@ -716,7 +715,7 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
 
       ATH_MSG_DEBUG(" got hit and track parameters ");
 
-      const Trk::ResidualPull* residualPull = nullptr;
+      std::unique_ptr<Trk::ResidualPull> residualPull = nullptr;
       if(unBias) residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals.get(), Trk::ResidualPull::Unbiased);
       else residualPull = m_residualPullCalculator->residualPull(mesh, trackParameterForResiduals.get(), Trk::ResidualPull::Biased);
 
@@ -744,7 +743,6 @@ StatusCode  IDAlignMonResidualsAlg::getSiResiduals(const Trk::Track* track, cons
 	  }
 	}
 
-	delete residualPull;
 
       }
       else {

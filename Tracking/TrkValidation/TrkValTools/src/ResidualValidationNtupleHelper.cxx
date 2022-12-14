@@ -227,7 +227,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::fillMeasurementData (
         fillValues(detectorType);
         return StatusCode::SUCCESS;
     } */
-    const Trk::ResidualPull* residualPull=nullptr;
+    std::unique_ptr<Trk::ResidualPull> residualPull=nullptr;
     if (detectorType!=TrackState::unidentified) {
         residualPull = m_residualPullCalculator->residualPull(measurement, trkParameters,
           (*m_isUnbiased==1) ? Trk::ResidualPull::Unbiased : Trk::ResidualPull::Biased);
@@ -269,7 +269,6 @@ StatusCode Trk::ResidualValidationNtupleHelper::fillMeasurementData (
                         -1000. );
         }
     }
-    delete residualPull;
 
     return StatusCode::SUCCESS;
 }

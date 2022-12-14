@@ -180,7 +180,7 @@ void Trk::ResidualPullCalculator::residuals(
 ////////////////////////////////////////////////////////////////////////////////
 //  calc residual and pull with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
-const Trk::ResidualPull* Trk::ResidualPullCalculator::residualPull(
+std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -309,14 +309,15 @@ const Trk::ResidualPull* Trk::ResidualPullCalculator::residualPull(
         }
     
     }
-    return new Trk::ResidualPull(std::move(residual), std::move(pull), pullIsValid, resType,
-    measurement->localParameters().parameterKey());
+    return std::make_unique<Trk::ResidualPull>(
+        std::move(residual), std::move(pull), pullIsValid, resType,
+        measurement->localParameters().parameterKey());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 //  calc residual and pull with determination of detector/MBase type
 ////////////////////////////////////////////////////////////////////////////////
-const Trk::ResidualPull* Trk::ResidualPullCalculator::residualPull(
+std::unique_ptr<Trk::ResidualPull> Trk::ResidualPullCalculator::residualPull(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* originalTrkPar,
     const Trk::ResidualPull::ResidualType resType,
@@ -429,7 +430,7 @@ const Trk::ResidualPull* Trk::ResidualPullCalculator::residualPull(
     }
   
     // Now call original method.
-    const Trk::ResidualPull* resPull = residualPull(measurement, trkPar, resType, detType );
+    std::unique_ptr<Trk::ResidualPull> resPull = residualPull(measurement, trkPar, resType, detType );
     delete trkPar;
     return resPull;
 }

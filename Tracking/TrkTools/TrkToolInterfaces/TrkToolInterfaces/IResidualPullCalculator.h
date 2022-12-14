@@ -18,6 +18,7 @@
 #include "TrkParameters/TrackParameters.h" // typedef
 #include "TrkEventPrimitives/TrackStateDefs.h"
 #include "TrkEventPrimitives/ResidualPull.h"
+#include <memory>
 
 namespace Trk {
 static const InterfaceID IID_IResidualPullCalculator("IResidualPullCalculator",1,0);
@@ -44,7 +45,7 @@ public:
      * The function can determine the sub-detector type itself by using the ID helper,
      * or interpret the DetectorType enum from the method interface.
      */    
-    virtual const Trk::ResidualPull* residualPull
+    virtual std::unique_ptr<Trk::ResidualPull> residualPull
       (const Trk::MeasurementBase*,
        const Trk::TrackParameters*,
        const Trk::ResidualPull::ResidualType residualType,
@@ -59,12 +60,12 @@ public:
    * Residuals differ in all three cases; please be aware of this.
    *
    * This function determines the sub-detector type itself by using the ID helper*/
-    virtual const Trk::ResidualPull* residualPull(
+    virtual std::unique_ptr<Trk::ResidualPull> residualPull(
              const Trk::MeasurementBase* ,
              const Trk::TrackParameters* ,
              const Trk::ResidualPull::ResidualType ,
              const Trk::TrackState::MeasurementType, 
-             const std::vector<const Trk::AlignmentEffectsOnTrack*>& ) const { return (Trk::ResidualPull*) nullptr; }
+             const std::vector<const Trk::AlignmentEffectsOnTrack*>& ) const { return nullptr; }
 
      /** This function is a light-weight version of the function above, designed for track fitters
       * where speed is critical. The user has to provide a std::vector of size 5, which gets 

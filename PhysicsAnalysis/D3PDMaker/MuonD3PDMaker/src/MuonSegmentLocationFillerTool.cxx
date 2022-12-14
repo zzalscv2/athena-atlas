@@ -179,17 +179,15 @@ StatusCode MuonSegmentLocationFillerTool::fill (const Trk::Segment& ts) {
     float pullb  = -99999;
     if( exPars ){
       //residualPull just needs some numbers from the params, it never owns them
-      const Trk::ResidualPull* resPull = m_pullCalculator->residualPull( &meas, exPars.get(), Trk::ResidualPull::Biased );
+      std::unique_ptr<Trk::ResidualPull> resPull = m_pullCalculator->residualPull( &meas, exPars.get(), Trk::ResidualPull::Biased );
       if( resPull ) {
 	res = resPull->residual().front();
 	pullub = resPull->pull().front();
-	delete resPull;
       }else ATH_MSG_WARNING("Failed to calculate biased residual for " << m_idHelperSvc->toString(id) );
 
       resPull = m_pullCalculator->residualPull( &meas, exPars.get(), Trk::ResidualPull::Unbiased );
       if( resPull ) {
 	pullb = resPull->pull().front();
-	delete resPull;
       } else {
         ATH_MSG_WARNING("Failed to calculate biased residual for " << m_idHelperSvc->toString(id) );
       }
