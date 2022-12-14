@@ -39,7 +39,7 @@ public:
    *                     which density is evaluated (default: ATLAS coverage
    *                     @f$ \eta_H = 5. @f$ - optional argument ) 
    */
-  EventEtDensity(double rho,double sigma=0.,double area=40*asin(1.),
+  EventEtDensity(double rho,double sigma=0.,double area=40.0*M_PI_2,
 		 double etaLow=-5.,double etaHigh=5.);
   /*! @brief Constructor
    * 
@@ -203,7 +203,7 @@ inline EventEtDensity::EventEtDensity()
   rhoSigma     = 0.;
   etaRangeLow  = -5.;
   etaRangeHigh = 5.;
-  areaValue    = (etaRangeHigh-etaRangeLow)*4.*asin(1.);
+  areaValue    = (etaRangeHigh-etaRangeLow)*2.*M_PI;
 }
 inline EventEtDensity::EventEtDensity(double rho,double sigma,double area,
 				      double etaLow,double etaHigh)

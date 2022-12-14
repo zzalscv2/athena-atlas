@@ -26,18 +26,18 @@ void fcal_deta_dphi (const CaloDetDescrElement& elt,
   const double Dy = 0.5 * elt.dy();
   const double phi = elt.phi();
   const double r = elt.r();
-  const double dxcphi = Dx*cos(phi);
-  const double dxsphi = Dx*sin(phi);
-  const double dycphi = Dy*cos(phi);
-  const double dysphi = Dy*sin(phi);
+  const double dxcphi = Dx*std::cos(phi);
+  const double dxsphi = Dx*std::sin(phi);
+  const double dycphi = Dy*std::cos(phi);
+  const double dysphi = Dy*std::sin(phi);
   // approximate width orthogonal to radial vector
-  const double DrT = sqrt(dxsphi*dxsphi+dycphi*dycphi);
+  const double DrT = std::sqrt(dxsphi*dxsphi+dycphi*dycphi);
   // total width in phi
   const double inv_r = 1. / r;
   dphi = 2.*DrT * inv_r;
 
   // extension in radius
-  double dr = sqrt(dxcphi*dxcphi+dysphi*dysphi);
+  double dr = std::sqrt(dxcphi*dxcphi+dysphi*dysphi);
 
   // half-width in eta..
   // sinh(eta) = z/r = f
@@ -47,7 +47,7 @@ void fcal_deta_dphi (const CaloDetDescrElement& elt,
   // to avoid overlaps between cells, assume a plane geometry with dz =0
   double f=elt.z() * inv_r;
   double df  = elt.z()*dr*inv_r*inv_r;
-  deta = 2.*std::abs(df) /sqrt(f*f+1.);
+  deta = 2.*std::abs(df) /std::sqrt(f*f+1.);
 }
 
 
@@ -88,8 +88,8 @@ void EMBDetectorElement::init_description(const GeoAlignmentStore* geoAlignStore
   z_loc = (m_cell->getZMaxLocal(EMBCell::CENTER) + m_cell->getZMinLocal(EMBCell::CENTER))/2.;
   r_loc = m_cell->getRLocal(EMBCell::CENTER);
 
-  x_loc = r_loc*cos(phi_loc);
-  y_loc = r_loc*sin(phi_loc);
+  x_loc = r_loc*std::cos(phi_loc);
+  y_loc = r_loc*std::sin(phi_loc);
 
   Amg::Vector3D globalDefCoords = xfDef*Amg::Vector3D(x_loc,y_loc,z_loc);
   Amg::Vector3D globalAbsCoords = posShift
@@ -104,10 +104,10 @@ void EMBDetectorElement::init_description(const GeoAlignmentStore* geoAlignStore
   m_y = static_cast<float> (globalAbsCoords.y());
   m_z = static_cast<float> (globalAbsCoords.z());
 
-  const double r_raw= sqrt(globalDefCoords.x()*globalDefCoords.x()+globalDefCoords.y()*globalDefCoords.y());
+  const double r_raw= std::sqrt(globalDefCoords.x()*globalDefCoords.x()+globalDefCoords.y()*globalDefCoords.y());
   m_r_raw = static_cast<float> (r_raw);
 
-  const double r = sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y());
+  const double r = std::sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y());
   m_r=static_cast<float>(r);
 
 
@@ -115,7 +115,7 @@ void EMBDetectorElement::init_description(const GeoAlignmentStore* geoAlignStore
     const double big_r = std::sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y()+globalAbsCoords.z()*globalAbsCoords.z());
     const double inv_big_r = 1. / big_r;
     const double inv_r = 1. / r;
-    m_eta     = static_cast<float> (-log((big_r-globalAbsCoords.z()) * inv_r));
+    m_eta     = static_cast<float> (-std::log((big_r-globalAbsCoords.z()) * inv_r));
     m_sinTh = static_cast<float> (r * inv_big_r);
     m_cosTh = static_cast<float> (globalAbsCoords.z() * inv_big_r);
     m_cosPhi=globalAbsCoords.x() * inv_r;
@@ -126,14 +126,14 @@ void EMBDetectorElement::init_description(const GeoAlignmentStore* geoAlignStore
     m_sinTh = 0.;
   }
 
-  m_phi_raw = static_cast<float> (atan2(globalDefCoords.y(),globalDefCoords.x()));
-  m_phi = static_cast<float> (atan2(globalAbsCoords.y(),globalAbsCoords.x()));
+  m_phi_raw = static_cast<float> (std::atan2(globalDefCoords.y(),globalDefCoords.x()));
+  m_phi = static_cast<float> (std::atan2(globalAbsCoords.y(),globalAbsCoords.x()));
   
-  m_deta = static_cast<float> (fabs(m_cell->getEtaMax() - m_cell->getEtaMin()));
-  m_dphi = static_cast<float> (fabs(m_cell->getPhiLocalUpper() - m_cell->getPhiLocalLower()));
+  m_deta = static_cast<float> (std::abs(m_cell->getEtaMax() - m_cell->getEtaMin()));
+  m_dphi = static_cast<float> (std::abs(m_cell->getPhiLocalUpper() - m_cell->getPhiLocalLower()));
 
   // TO DO, find better value
-  m_dr = static_cast<float> (fabs(m_cell->getRLocal(EMBCell::FRONT) - m_cell->getRLocal(EMBCell::BACK))/2.);
+  m_dr = static_cast<float> (std::abs(m_cell->getRLocal(EMBCell::FRONT) - m_cell->getRLocal(EMBCell::BACK))/2.);
 
   // -- from CaloDDE --
   m_dx = 0.;
@@ -208,8 +208,8 @@ void EMECDetectorElement::init_description(bool isTestBeam
   z_loc = m_cell->getZLocal(EMECCell::CENTER);
   r_loc = (m_cell->getRMinLocal(EMECCell::CENTER) + m_cell->getRMaxLocal(EMECCell::CENTER))/2.;
 
-  x_loc = r_loc*cos(m_phi_raw);
-  y_loc = r_loc*sin(m_phi_raw);
+  x_loc = r_loc*std::cos(m_phi_raw);
+  y_loc = r_loc*std::sin(m_phi_raw);
 
   Amg::Vector3D globalNomCoords = xfNominal*Amg::Vector3D(x_loc,y_loc,z_loc);
   Amg::Vector3D globalAbsCoords = (posShift!=nullptr ?
@@ -247,11 +247,11 @@ void EMECDetectorElement::init_description(bool isTestBeam
     m_sinTh = 0.;
   }
 
-  m_phi = static_cast<float> (atan2(globalAbsCoords.y(),globalAbsCoords.x()));
+  m_phi = static_cast<float> (std::atan2(globalAbsCoords.y(),globalAbsCoords.x()));
 
-  m_deta = static_cast<float> (fabs(m_cell->getEtaMax() - m_cell->getEtaMin()));
-  m_dphi = static_cast<float> (fabs(m_cell->getPhiLocalLower() - m_cell->getPhiLocalUpper()));
-  m_dz = static_cast<float> (fabs(m_cell->getZLocal(EMECCell::BACK) - m_cell->getZLocal(EMECCell::FRONT))/2.);
+  m_deta = static_cast<float> (std::abs(m_cell->getEtaMax() - m_cell->getEtaMin()));
+  m_dphi = static_cast<float> (std::abs(m_cell->getPhiLocalLower() - m_cell->getPhiLocalUpper()));
+  m_dz = static_cast<float> (std::abs(m_cell->getZLocal(EMECCell::BACK) - m_cell->getZLocal(EMECCell::FRONT))/2.);
 
   // -- from CaloDDE --
   m_dx = 0.;
@@ -268,7 +268,7 @@ void EMECDetectorElement::init_interpretation()
     if(m_cell->getPhiLocalUpper()<M_PI)
       m_phi_raw = static_cast<float> ((m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2.);
     else
-      m_phi_raw = static_cast<float> ((m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2. - 2*M_PI);
+      m_phi_raw = static_cast<float> ((m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2. - 2.0*M_PI);
   }
   else
   { // Negative EMEC
@@ -348,8 +348,8 @@ void HECDetectorElement::init_description(bool isTestBeam
 
   const Amg::Transform3D &xfAbs = m_region->getAbsoluteTransform(geoAlignStore);
 
-  x_loc = r_loc*cos(m_phi_raw);
-  y_loc = r_loc*sin(m_phi_raw);
+  x_loc = r_loc*std::cos(m_phi_raw);
+  y_loc = r_loc*std::sin(m_phi_raw);
 
   Amg::Vector3D globalNomCoords = xfNominal*Amg::Vector3D(x_loc,y_loc,z_loc);
   Amg::Vector3D globalAbsCoords = (posShift!=nullptr ?
@@ -365,10 +365,10 @@ void HECDetectorElement::init_description(bool isTestBeam
   m_z = static_cast<float> (globalAbsCoords.z());
 
 
-  const double r_raw= sqrt(globalNomCoords.x()*globalNomCoords.x()+globalNomCoords.y()*globalNomCoords.y());
+  const double r_raw= std::sqrt(globalNomCoords.x()*globalNomCoords.x()+globalNomCoords.y()*globalNomCoords.y());
   m_r_raw = static_cast<float> (r_raw);
 
-  const double r = sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y());
+  const double r = std::sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y());
   m_r=static_cast<float>(r);
 
 
@@ -376,7 +376,7 @@ void HECDetectorElement::init_description(bool isTestBeam
     const double big_r = std::sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y()+globalAbsCoords.z()*globalAbsCoords.z());
     const double inv_r = 1. / r;
     const double inv_big_r = 1. / big_r;
-    m_eta     = static_cast<float> (-log((big_r-globalAbsCoords.z()) * inv_r));
+    m_eta     = static_cast<float> (-std::log((big_r-globalAbsCoords.z()) * inv_r));
     m_sinTh = static_cast<float> (r * inv_big_r);
     m_cosTh = static_cast<float> (globalAbsCoords.z() * inv_big_r);
     m_cosPhi=globalAbsCoords.x() * inv_r;
@@ -387,11 +387,11 @@ void HECDetectorElement::init_description(bool isTestBeam
     m_sinTh = 0.;
   }
 
-  m_phi = static_cast<float> (atan2(globalAbsCoords.y(),globalAbsCoords.x()));
+  m_phi = static_cast<float> (std::atan2(globalAbsCoords.y(),globalAbsCoords.x()));
 
   m_deta = static_cast<float> (m_cell->getEtaMaxNominal() - m_cell->getEtaMinNominal());
-  m_dphi = static_cast<float> (fabs(m_cell->getPhiLocalUpper() - m_cell->getPhiLocalLower()));
-  m_dz = static_cast<float> (fabs(m_cell->getZLocal(HECCell::FRONT)-m_cell->getZLocal(HECCell::BACK))/2.);
+  m_dphi = static_cast<float> (std::abs(m_cell->getPhiLocalUpper() - m_cell->getPhiLocalLower()));
+  m_dz = static_cast<float> (std::abs(m_cell->getZLocal(HECCell::FRONT)-m_cell->getZLocal(HECCell::BACK))/2.);
 
   // -- from CaloDDE --
   m_dx = 0.;
@@ -408,7 +408,7 @@ void HECDetectorElement::init_interpretation()
     if(m_cell->getPhiLocalUpper()<M_PI)
       m_phi_raw = static_cast<float> ((m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2.);
     else
-      m_phi_raw = static_cast<float> ((m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2. - 2*M_PI);
+      m_phi_raw = static_cast<float> ((m_cell->getPhiLocalLower() + m_cell->getPhiLocalUpper())/2. - 2.0*M_PI);
   }
   else
   { // Negative HEC
@@ -419,9 +419,9 @@ void HECDetectorElement::init_interpretation()
   }
 
   if(m_phi_raw>M_PI)
-    m_phi_raw = static_cast<float> (m_phi_raw - (2*M_PI));
+    m_phi_raw = static_cast<float> (m_phi_raw - (2.0*M_PI));
   else if(m_phi_raw<-M_PI)
-    m_phi_raw = static_cast<float> (m_phi_raw + (2*M_PI));
+    m_phi_raw = static_cast<float> (m_phi_raw + (2.0*M_PI));
 }
 
 void HECDetectorElement::updateAlignment(HECCellConstLink& hecCell
@@ -510,7 +510,7 @@ void FCALDetectorElement::init_description(bool isTestBeam
   m_dr = 0.;
 
   // From Calo DDE
-  const double r = sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y());
+  const double r = std::sqrt(globalAbsCoords.x()*globalAbsCoords.x()+globalAbsCoords.y()*globalAbsCoords.y());
   m_r=static_cast<float>(r);
 
 
@@ -529,8 +529,8 @@ void FCALDetectorElement::init_description(bool isTestBeam
     m_sinTh = 0.;
   }
 
-  m_phi_raw = static_cast<float> (atan2(globalDefCoords.y(),globalDefCoords.x()));
-  m_phi = static_cast<float> (atan2(globalAbsCoords.y(),globalAbsCoords.x()));
+  m_phi_raw = static_cast<float> (std::atan2(globalDefCoords.y(),globalDefCoords.x()));
+  m_phi = static_cast<float> (std::atan2(globalAbsCoords.y(),globalAbsCoords.x()));
 
 // -- from CaloDDE --
   const double r_raw= sqrt(globalDefCoords.x()*globalDefCoords.x()+globalDefCoords.y()*globalDefCoords.y());
@@ -541,15 +541,15 @@ void FCALDetectorElement::init_description(bool isTestBeam
     const double big_r_raw = std::sqrt(globalDefCoords.x()*globalDefCoords.x()+globalDefCoords.y()*globalDefCoords.y()+globalDefCoords.z()*globalDefCoords.z());
       // bug !!
     // m_sinTh = m_r/big_r_raw;
-      m_eta_raw = static_cast<float> (-log((big_r_raw-globalDefCoords.z())/r_raw));
+      m_eta_raw = static_cast<float> (-std::log((big_r_raw-globalDefCoords.z())/r_raw));
   }
   else 
   {
     m_eta_raw = 0.;
   }
 
-  m_phi = static_cast<float> (atan2(globalAbsCoords.y(),globalAbsCoords.x()));
-  m_phi_raw= static_cast<float> (atan2(globalDefCoords.y(),globalDefCoords.x()));
+  m_phi = static_cast<float> (std::atan2(globalAbsCoords.y(),globalAbsCoords.x()));
+  m_phi_raw= static_cast<float> (std::atan2(globalDefCoords.y(),globalDefCoords.x()));
   // -- from CaloDDE --
 
 
@@ -590,18 +590,18 @@ void TileDetectorElement::set_cylindric(double eta,
   m_r= static_cast<float> (r);
 
   m_phi = static_cast<float> (phi);
-  if(phi<-2*asin(1.))
-    m_phi = static_cast<float> (phi + 4.*asin(1.));
-  else if(phi>2*asin(1.))
-    m_phi = static_cast<float> (phi - 4.*asin(1.));
+  if(phi<-M_PI)
+    m_phi = static_cast<float> (phi + 2.0*M_PI);
+  else if(phi>M_PI)
+    m_phi = static_cast<float> (phi - 2.0*M_PI);
 
-  m_cosPhi=static_cast<float> (cos(m_phi));
-  m_sinPhi=static_cast<float> (sin(m_phi));
-  m_sinTh=static_cast<float> (1/cosh(eta));
-  m_cosTh=static_cast<float> (tanh(eta));
+  m_cosPhi=static_cast<float> (std::cos(m_phi));
+  m_sinPhi=static_cast<float> (std::sin(m_phi));
+  m_sinTh=static_cast<float> (1/std::cosh(eta));
+  m_cosTh=static_cast<float> (std::tanh(eta));
   m_x = static_cast<float> (r*m_cosPhi);
   m_y = static_cast<float> (r*m_sinPhi);
-  m_z = static_cast<float> (r*sinh(eta));
+  m_z = static_cast<float> (r*std::sinh(eta));
   
 }
 
@@ -613,14 +613,14 @@ void TileDetectorElement::set_cylindric_raw(double eta_raw,
   m_r_raw = static_cast<float> (r_raw);
   
   m_phi_raw = static_cast<float> (phi_raw);
-  if(phi_raw<-2*asin(1.))
-    m_phi_raw = static_cast<float> (phi_raw + 4.*asin(1.));
-  else if(phi_raw>2*asin(1.))
-    m_phi_raw = static_cast<float> (phi_raw - 4.*asin(1.));
+  if(phi_raw<-M_PI)
+    m_phi_raw = static_cast<float> (phi_raw + 2.0*M_PI);
+  else if(phi_raw>M_PI)
+    m_phi_raw = static_cast<float> (phi_raw - 2.0*M_PI);
   
-  m_x_raw = static_cast<float> (r_raw*cos(m_phi_raw));
-  m_y_raw = static_cast<float> (r_raw*sin(m_phi_raw));
-  m_z_raw = static_cast<float> (r_raw*sinh(eta_raw));
+  m_x_raw = static_cast<float> (r_raw*std::cos(m_phi_raw));
+  m_y_raw = static_cast<float> (r_raw*std::sin(m_phi_raw));
+  m_z_raw = static_cast<float> (r_raw*std::sinh(eta_raw));
   
 }
 
@@ -640,8 +640,8 @@ Identifier MbtsDetectorElement::customID() const
 void MbtsDetectorElement::compute_derived()
 {
   // Compute x,y coordinates of scintillator centre
-  m_x = static_cast<float> (m_r*cos(m_phi));
-  m_y = static_cast<float> (m_r*sin(m_phi));
+  m_x = static_cast<float> (m_r*std::cos(m_phi));
+  m_y = static_cast<float> (m_r*std::sin(m_phi));
 }
 
 
@@ -822,10 +822,10 @@ CaloSuperCellDetectorElement::updateBE
   m_eta = eta;
   m_phi = phi;
 
-  m_cosPhi = cos(phi);
-  m_sinPhi = sin(phi);
-  m_sinTh  = 1/cosh(eta);
-  m_cosTh  = tanh(eta);
+  m_cosPhi = std::cos(phi);
+  m_sinPhi = std::sin(phi);
+  m_sinTh  = 1/std::cosh(eta);
+  m_cosTh  = std::tanh(eta);
 
   double r = 0;
   double r_raw = 0;
@@ -836,13 +836,13 @@ CaloSuperCellDetectorElement::updateBE
     m_dr = rz_raw_max - rz_raw_min;
     m_dz = 0;
 
-    m_z_raw = rz_raw * sinh(eta_raw);
+    m_z_raw = rz_raw * std::sinh(eta_raw);
     m_z = r * sinh(eta);
   }
   else {
-    r_raw = rz_raw / sinh(eta_raw);
+    r_raw = rz_raw / std::sinh(eta_raw);
     double z   = rzsum / drzsum;
-    r = z / sinh(eta);
+    r = z / std::sinh(eta);
 
     m_dz = rz_raw_max - rz_raw_min;
     m_dr = 0;
@@ -851,12 +851,12 @@ CaloSuperCellDetectorElement::updateBE
     m_z = z;
   }
 
-  m_x_raw = r_raw * cos(phi_raw);
-  m_y_raw = r_raw * sin(phi_raw);
+  m_x_raw = r_raw * std::cos(phi_raw);
+  m_y_raw = r_raw * std::sin(phi_raw);
   m_r_raw = r_raw;
 
-  m_x = r * cos(phi);
-  m_y = r * sin(phi);
+  m_x = r * std::cos(phi);
+  m_y = r * std::sin(phi);
   m_r = r;
 
   return StatusCode::SUCCESS;
@@ -956,8 +956,8 @@ CaloSuperCellDetectorElement::updateFCAL
   m_y = y;
   m_z = z;
 
-  m_phi_raw = atan2 (y_raw, x_raw);
-  m_phi = atan2 (y, x);
+  m_phi_raw = std::atan2 (y_raw, x_raw);
+  m_phi = std::atan2 (y, x);
 
   const double r_raw = hypot (x_raw, y_raw);
   const double r = hypot (x, y);
@@ -966,12 +966,12 @@ CaloSuperCellDetectorElement::updateFCAL
   m_r_raw = r_raw;
   m_r = r;
 
-  const double big_r = sqrt (x*x + y*y + z*z);
-  const double big_r_raw = sqrt (x_raw*x_raw + y_raw*y_raw + z_raw*z_raw);
+  const double big_r = std::sqrt (x*x + y*y + z*z);
+  const double big_r_raw = std::sqrt (x_raw*x_raw + y_raw*y_raw + z_raw*z_raw);
   const double inv_big_r = 1. / big_r;
 
-  m_eta = -log ((big_r - z) * inv_r);
-  m_eta_raw = -log ((big_r_raw - z_raw) / r_raw);
+  m_eta = -std::log ((big_r - z) * inv_r);
+  m_eta_raw = -std::log ((big_r_raw - z_raw) / r_raw);
   m_sinTh = r * inv_big_r;
   m_cosTh = z * inv_big_r;
   m_cosPhi = x * inv_r;
@@ -1002,22 +1002,22 @@ void DummyDetDescrElement::set_cylindric(double eta,
   m_r= static_cast<float> (r);
 
   m_phi = static_cast<float> (phi);
-  if(phi<-2*asin(1.))
-    m_phi = static_cast<float> (phi + 4.*asin(1.));
-  else if(phi>2*asin(1.))
-    m_phi = static_cast<float> (phi - 4.*asin(1.));
+  if(phi<-M_PI)
+    m_phi = static_cast<float> (phi + 2.0*M_PI);
+  else if(phi>M_PI)
+    m_phi = static_cast<float> (phi - 2.0*M_PI);
   
   //  m_x = r*cos(m_phi);
   // m_y = r*sin(m_phi);
   //m_z = r*sinh(eta);
 
-  m_cosPhi=static_cast<float> (cos(m_phi));
-  m_sinPhi=static_cast<float> (sin(m_phi));
-  m_sinTh=static_cast<float> (1/cosh(eta));
-  m_cosTh=static_cast<float> (tanh(eta));
+  m_cosPhi=static_cast<float> (std::cos(m_phi));
+  m_sinPhi=static_cast<float> (std::sin(m_phi));
+  m_sinTh=static_cast<float> (1/std::cosh(eta));
+  m_cosTh=static_cast<float> (std::tanh(eta));
   m_x = static_cast<float> (r*m_cosPhi);
   m_y = static_cast<float> (r*m_sinPhi);
-  m_z = static_cast<float> (r*sinh(eta));
+  m_z = static_cast<float> (r*std::sinh(eta));
 
   
   //  double big_r = sqrt(m_x*m_x+m_y*m_y+m_z*m_z);
@@ -1035,14 +1035,14 @@ void DummyDetDescrElement::set_cylindric_raw(double eta_raw,
   m_r_raw = static_cast<float> (r_raw);
 
   m_phi_raw = static_cast<float> (phi_raw);
-  if(phi_raw<-2*asin(1.))
-    m_phi_raw = static_cast<float> (phi_raw + 4.*asin(1.));
-  else if(phi_raw>2*asin(1.))
-    m_phi_raw = static_cast<float> (phi_raw - 4.*asin(1.));
+  if(phi_raw<-M_PI)
+    m_phi_raw = static_cast<float> (phi_raw + 2.0*M_PI);
+  else if(phi_raw>M_PI)
+    m_phi_raw = static_cast<float> (phi_raw - 2.0*M_PI);
   
-  m_x_raw = static_cast<float> (r_raw*cos(m_phi_raw));
-  m_y_raw = static_cast<float> (r_raw*sin(m_phi_raw));
-  m_z_raw = static_cast<float> (r_raw*sinh(eta_raw));
+  m_x_raw = static_cast<float> (r_raw*std::cos(m_phi_raw));
+  m_y_raw = static_cast<float> (r_raw*std::sin(m_phi_raw));
+  m_z_raw = static_cast<float> (r_raw*std::sinh(eta_raw));
   
   //  double big_r = sqrt(m_x_raw*m_x_raw+m_y_raw*m_y_raw+m_z_raw*m_z_raw);
   // if(big_r > 0.001)
