@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RoiDescriptor )
@@ -9,6 +9,11 @@ atlas_add_library( RoiDescriptor
                    Root/RoiUtil.cxx
                    PUBLIC_HEADERS RoiDescriptor
                    LINK_LIBRARIES IRegionSelector )
+if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
+  # Don't allow clang to make optimizations that may introduce FPEs.
+  # Fixes some FPEs observed in the clang15 build.
+  set_target_properties( RoiDescriptor PROPERTIES COMPILE_FLAGS "-ffp-exception-behavior=strict" )
+endif()
 
 atlas_add_dictionary( RoiDescriptorDict
                       RoiDescriptor/RoiDescriptorDict.h
