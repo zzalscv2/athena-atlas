@@ -33,7 +33,7 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                                                     RegSelTool_Pixel  = pixRegSelTool,
                                                                     RegSelTool_SCT    = sctRegSelTool,
                                                                     PixelSP_ContainerName = "ITkPixelSpacePoints",
-                                                                    SCT_SP_ContainerName = "ITkStripSpacePoints",
+                                                                    UseSctSpacePoints = False,
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
 
     from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
