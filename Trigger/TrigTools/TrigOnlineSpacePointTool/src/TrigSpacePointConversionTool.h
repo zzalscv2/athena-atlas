@@ -58,6 +58,7 @@ class TrigSpacePointConversionTool : virtual public ITrigSpacePointConversionToo
   bool m_useBeamTilt;
   bool m_useNewScheme;
   bool m_usePixelSpacePoints;
+  bool m_useSctSpacePoints;
 
   void shiftSpacePoints(std::vector<TrigSiSpacePointBase>&, const EventContext&) const;
   void transformSpacePoints(std::vector<TrigSiSpacePointBase>&, const EventContext&) const;

@@ -38,7 +38,7 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                                                     RegSelTool_Pixel  = pixRegSelTool,
                                                                     RegSelTool_SCT    = sctRegSelTool,
                                                                     PixelSP_ContainerName = "ITkPixelTrigSpacePoints",
-                                                                    SCT_SP_ContainerName="ITkStripTrigSpacePoints", 
+                                                                    UseSctSpacePoints = False,
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberToolITk_FTF") ) )
 
     from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring

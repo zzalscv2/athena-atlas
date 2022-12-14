@@ -35,6 +35,7 @@ TrigSpacePointConversionTool::TrigSpacePointConversionTool(const std::string& t,
   declareProperty( "PixelSP_ContainerName",  m_pixelSpacePointsContainerKey = std::string("PixelTrigSpacePoints"));
   declareProperty( "SCT_SP_ContainerName",   m_sctSpacePointsContainerKey = "SCT_TrigSpacePoints" );
   declareProperty( "UsePixelSpacePoints",    m_usePixelSpacePoints = true );
+  declareProperty( "UseSctSpacePoints",      m_useSctSpacePoints = true );
 }
 
 StatusCode TrigSpacePointConversionTool::initialize() {
@@ -78,13 +79,14 @@ StatusCode TrigSpacePointConversionTool::initialize() {
  
   ATH_CHECK(m_beamSpotKey.initialize());
 
-  ATH_CHECK(m_pixelSpacePointsContainerKey.initialize());
-  ATH_CHECK(m_sctSpacePointsContainerKey.initialize());
-
-  ATH_CHECK(m_pixelSpacePointsContainerKey.initialize());
-  ATH_CHECK(m_sctSpacePointsContainerKey.initialize());
-
- if (!m_usePixelSpacePoints) ATH_MSG_INFO(" Only converting SCT spacepoints => SSS seeds only");
+  if (!m_usePixelSpacePoints && !m_useSctSpacePoints) {
+    ATH_MSG_FATAL("Both usePixelSpacePoints and useSctSpacePoints set to False. At least one needs to be True");
+    return StatusCode::FAILURE;
+  }
+  if (!m_useSctSpacePoints) ATH_MSG_INFO("Only converting Pixel spacepoints => PPP seeds only");
+  if (!m_usePixelSpacePoints) ATH_MSG_INFO("Only converting SCT spacepoints => SSS seeds only");
+  ATH_CHECK(m_pixelSpacePointsContainerKey.initialize(m_usePixelSpacePoints));
+  ATH_CHECK(m_sctSpacePointsContainerKey.initialize(m_useSctSpacePoints));
 
   ATH_MSG_INFO("TrigSpacePointConversionTool initialized ");
 
@@ -103,11 +105,18 @@ StatusCode TrigSpacePointConversionTool::getSpacePoints(const IRoiDescriptor& in
 
   output.clear();
   
-
-  SG::ReadHandle<SpacePointContainer> pixelSpacePointsContainer(m_pixelSpacePointsContainerKey, ctx);
-  ATH_CHECK(pixelSpacePointsContainer.isValid());
-  SG::ReadHandle<SpacePointContainer> sctSpacePointsContainer(m_sctSpacePointsContainerKey, ctx);
-  ATH_CHECK(sctSpacePointsContainer.isValid());
+  const SpacePointContainer* pixelSpacePointsContainer = nullptr;
+  if (m_usePixelSpacePoints) {
+    SG::ReadHandle<SpacePointContainer> pixHandle(m_pixelSpacePointsContainerKey, ctx);
+    ATH_CHECK(pixHandle.isValid());
+    pixelSpacePointsContainer = pixHandle.ptr();
+  }
+  const SpacePointContainer* sctSpacePointsContainer = nullptr;
+  if (m_useSctSpacePoints) {
+    SG::ReadHandle<SpacePointContainer> sctHandle(m_sctSpacePointsContainerKey, ctx);
+    ATH_CHECK(sctHandle.isValid());
+    sctSpacePointsContainer = sctHandle.ptr();
+  }
 
   std::vector<IdentifierHash> listOfPixIds;
   std::vector<IdentifierHash> listOfSctIds;
@@ -140,11 +149,11 @@ StatusCode TrigSpacePointConversionTool::getSpacePoints(const IRoiDescriptor& in
     
     if(m_useNewScheme) {
       if (m_usePixelSpacePoints)  nPix=selector.select(*pixelSpacePointsContainer,listOfPixIds, m_layerNumberTool->pixelLayers());
-      nSct=selector.select(*sctSpacePointsContainer,listOfSctIds, m_layerNumberTool->sctLayers());
+      if (m_useSctSpacePoints)  nSct=selector.select(*sctSpacePointsContainer,listOfSctIds, m_layerNumberTool->sctLayers());
     }
     else {
       if (m_usePixelSpacePoints)  nPix=selector.select(*pixelSpacePointsContainer,listOfPixIds);
-      nSct=selector.select(*sctSpacePointsContainer,listOfSctIds);
+      if (m_useSctSpacePoints)  nSct=selector.select(*sctSpacePointsContainer,listOfSctIds);
     }
 
 
@@ -153,12 +162,12 @@ StatusCode TrigSpacePointConversionTool::getSpacePoints(const IRoiDescriptor& in
     FTF::SpacePointSelector<FTF::RoI_Filter> selector(filter);
     
     if(m_useNewScheme) {
-      nPix=selector.select(*pixelSpacePointsContainer,listOfPixIds, m_layerNumberTool->pixelLayers());
-      nSct=selector.select(*sctSpacePointsContainer,listOfSctIds, m_layerNumberTool->sctLayers());
+      if (m_usePixelSpacePoints) nPix=selector.select(*pixelSpacePointsContainer,listOfPixIds, m_layerNumberTool->pixelLayers());
+      if (m_useSctSpacePoints) nSct=selector.select(*sctSpacePointsContainer,listOfSctIds, m_layerNumberTool->sctLayers());
     }
     else {
-      nPix=selector.select(*pixelSpacePointsContainer,listOfPixIds);
-      nSct=selector.select(*sctSpacePointsContainer,listOfSctIds);
+      if (m_usePixelSpacePoints) nPix=selector.select(*pixelSpacePointsContainer,listOfPixIds);
+      if (m_useSctSpacePoints) nSct=selector.select(*sctSpacePointsContainer,listOfSctIds);
     }
   }
   if(!m_useBeamTilt) shiftSpacePoints(output, ctx);
