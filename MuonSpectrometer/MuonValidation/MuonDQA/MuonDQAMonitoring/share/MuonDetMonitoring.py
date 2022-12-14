@@ -152,27 +152,6 @@ if DQMonFlags.doMuonSegmentMon():
     except Exception:
         treatException("DataQualitySteering_jobOptions.py: exception when setting up Muon CSC segment monitoring")
 
-#------------- ---------#
-# Muon track monitoring #
-#------------- ---------#
-# switch between legacy and new code
-Run3_test = False
-if DQMonFlags.doMuonTrackMon():
-    try:
-        if MuonESDMon and Run3_test:
-            from MuonTrackMonitoring.MuonTrackMonitorAlgorithm import MuonTrackConfig
-            topSequence += MuonTrackConfig(DQMonFlags,isOld=True)
-
-        # Legacy monitoring
-        elif MuonESDMon:
-            if DQMonFlags.useTrigger(): ## monitoring tool cannot have a dependence on TrigDecisionTool if DQMonFlags.useTrigger==False (ATLASRECTS-3549)
-                if MuonDQADetFlags.doMuonTrackMon():
-                    include ("MuonTrackMonitoring/MuonTrackDQA_options.py")
-                if MuonDQADetFlags.MuonTrkMonDoTrigger():
-                    include ("MuonTrackMonitoring/MuonTrigTrackDQA_options.py")
-    except Exception:
-        treatException("DataQualitySteering_jobOptions.py: exception when setting up Muon track monitoring")
-
 #-------------------------#
 # Muon physics monitoring #
 #-------------------------#
