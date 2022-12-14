@@ -180,11 +180,10 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
         AdaptiveResidualSmoothing smoothing;
 
         // counter //
-        unsigned int counter{0}, counter2{0};
+        unsigned int counter{0};
         // overwrite drift radii and calculate the average resolution //
         for (const auto & k : seg) {
             if (k->mdtHitsOnTrack() < 4) { continue; }
-            counter2++;
             double avres(0.0);
             for (unsigned int h = 0; h < k->mdtHitsOnTrack(); h++) {
                 k->mdtHOT()[h]->setDriftRadius(tmp_rt->radius(k->mdtHOT()[h]->driftTime()),
