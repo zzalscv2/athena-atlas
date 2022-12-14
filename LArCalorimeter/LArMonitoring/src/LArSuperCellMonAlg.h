@@ -105,6 +105,7 @@ private:
 			EMECPNS,EMEC1NS,EMEC2NS,EMEC3NS,FCAL1NS,FCAL2NS,FCAL3NS,MAXLYRNS};
 
   FloatArrayProperty   m_thresholdsProp[MAXLYRNS];
+  BooleanProperty m_removeMasked{this, "RemoveMasked", true};
 
   //Enumerate partitions
   enum PartitionEnum{EMBA,EMBC,EMECA,EMECC,HECA,HECC,FCALA,FCALC,MAXPARTITIONS};

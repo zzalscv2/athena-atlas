@@ -22,6 +22,7 @@ ApplicationMgr                                               0 SUCCESS          
 ApplicationMgr                                               0 SUCCESS                     CaloSuperCellAlignCondAlg/CaloSuperCellAlignCondAlg
 ApplicationMgr                                               0 SUCCESS                     LArLATOMEMappingAlg/LArLATOMEMappingAlg
 ApplicationMgr                                               0 SUCCESS                     LArOnOffMappingAlg/LArOnOffMappingAlgSC
+ApplicationMgr                                               0 SUCCESS                     LArBadChannelCondAlg/LArBadChannelCondSCAlg
 ApplicationMgr                                               0 SUCCESS           AthSequencer/AthEndSeq
 ApplicationMgr                                               0 SUCCESS                AthIncFirerAlg/EndIncFiringAlg
 ApplicationMgr                                               0 SUCCESS                IncidentProcAlg/IncidentProcAlg2
