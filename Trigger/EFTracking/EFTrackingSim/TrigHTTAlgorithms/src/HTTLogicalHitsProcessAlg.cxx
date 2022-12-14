@@ -51,7 +51,7 @@ StatusCode HTTLogicalHitsProcessAlg::initialize()
     std::stringstream ss(m_description);
     std::string line;
     ATH_MSG_INFO("Tag config:");
-    if (m_description != nullptr) {
+    if (!m_description.empty()) {
         while (std::getline(ss, line, '\n')) {
             ATH_MSG_INFO('\t' << line);
         }

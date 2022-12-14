@@ -69,7 +69,7 @@ private:
   Gaudi::Property <bool> m_doFastOR { this, "doFastOR", false, "Use fast overlap removal algorithm instead of default"};
 
   int m_totLayers = 0;                 //  Total number of layers used for a track
-  ORAlgo m_algo;                    //  Internal ORAlgo enum for faster compare
+  ORAlgo m_algo{ORAlgo::Normal};       //  Internal ORAlgo enum for faster compare
 
 
   StatusCode runOverlapRemoval_fast(std::vector<HTTTrack>& tracks);
