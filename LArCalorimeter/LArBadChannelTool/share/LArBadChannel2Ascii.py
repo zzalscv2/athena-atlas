@@ -60,7 +60,7 @@ from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
 
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 theApp.EvtMax = 1
 

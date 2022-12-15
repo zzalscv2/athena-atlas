@@ -56,7 +56,7 @@ DetDescrCnvSvc.DetectorManagers += ["CaloTTDescrManager"]
 DetDescrCnvSvc.DetectorManagers += ["CaloMgr"]
 
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 include( "IdDictDetDescrCnv/IdDictDetDescrCnv_joboptions.py" ) 
 
 if ( DetDescription == "ATLAS" ) :

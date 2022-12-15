@@ -208,7 +208,7 @@ from LArROD.LArRODFlags import larRODFlags
 larRODFlags.doOFCPileupOptimization.set_Value_and_Lock(True)
 larRODFlags.useHighestGainAutoCorr.set_Value_and_Lock(True)
 
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include( "CaloConditions/CaloConditions_jobOptions.py")
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )

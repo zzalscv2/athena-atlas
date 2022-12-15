@@ -65,7 +65,7 @@ ReadSCT_RDO.OutputLevel = 1
 # ReadTRT_RDO.OutputLevel = 1;
 # LAr
 # the LAr and Calo detector description package
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 include( "LArDetMgrDetDescrCnv/LArDetMgrDetDescrCnv_joboptions.py" )
 

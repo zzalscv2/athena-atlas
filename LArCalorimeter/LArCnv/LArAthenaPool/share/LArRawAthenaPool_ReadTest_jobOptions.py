@@ -18,7 +18,7 @@ ReadLArRaw = Algorithm( "ReadLArRaw" )
 ReadLArRaw.LArRawChannelContainerName = "LArRawChannels" 
 ReadLArRaw.HistogramID = 168 
 ReadLArRaw.NtupleLocID = "/FILE1/LARG" 
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+include( "CaloConditions/CaloConditions_jobOptions.py" )
 
 include( "LArDetMgrDetDescrCnv/LArDetMgrDetDescrCnv_joboptions.py" )
 

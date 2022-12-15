@@ -80,7 +80,7 @@ def getLArPileUpTool(name='LArPileUpTool', **kwargs): ## useLArFloat()=True,isOv
     ## FIXME includes to be replaced by confGetter configuration.
     if not isOverlay():
         from AthenaCommon.Resilience import protectedInclude
-        protectedInclude( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+        protectedInclude( "CaloConditions/CaloConditions_jobOptions.py" )
         protectedInclude( "LArDetDescr/LArDetDescr_joboptions.py" )
         protectedInclude("LArConditionsCommon/LArConditionsCommon_MC_jobOptions.py")
     from Digitization.DigitizationFlags import digitizationFlags
@@ -165,7 +165,7 @@ def getLArHitEMapToDigitAlg(name="LArHitEMapToDigitAlgDefault", **kwargs):
     ## FIXME includes to be replaced by confGetter configuration.
     if not isOverlay():
         from AthenaCommon.Resilience import protectedInclude
-        protectedInclude( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
+        protectedInclude( "CaloConditions/CaloConditions_jobOptions.py" )
         protectedInclude( "LArDetDescr/LArDetDescr_joboptions.py" )
         protectedInclude("LArConditionsCommon/LArConditionsCommon_MC_jobOptions.py")
     else:

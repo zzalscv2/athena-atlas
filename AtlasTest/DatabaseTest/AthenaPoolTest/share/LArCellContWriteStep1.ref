@@ -84,7 +84,7 @@ ClassIDSvc           INFO  getRegistryEntries: read 317 CLIDRegistry entries for
 ApplicationMgr       INFO Successfully loaded modules : CaloIdCnv
 ClassIDSvc           INFO  getRegistryEntries: read 376 CLIDRegistry entries for module LArGeoAlgsNV
 ApplicationMgr       INFO Successfully loaded modules : LArGeoAlgsNV
-Athena               INFO including file "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py"
+Athena               INFO including file "CaloConditions/CaloConditions_jobOptions.py"
 now executing CaloDetMgrDetDescrCnv_CaloDetDescrCnv
 ClassIDSvc           INFO  getRegistryEntries: read 494 CLIDRegistry entries for module CaloDetMgrDetDescrCnv
 ApplicationMgr       INFO Successfully loaded modules : CaloDetMgrDetDescrCnv

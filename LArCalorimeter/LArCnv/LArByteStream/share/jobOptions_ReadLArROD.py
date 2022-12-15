@@ -34,10 +34,9 @@ from AtlasGeoModel import GeoModelInit
 include( "LArDetDescr/LArDetDescr_joboptions.py" )
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
 include( "LArIdCnv/LArIdCnv_joboptions.py" )
-include ("CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
+include ("CaloConditions/CaloConditions_jobOptions.py")
 include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "TileConditions/TileConditions_jobOptions.py" )
-include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py" )
 
 
 # Read LArRawChannel 
