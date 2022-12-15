@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IdentifierStandAlone
@@ -27,7 +27,8 @@ class Identifier
   Identifier(value_type value):m_id(value) {};
   
   operator value_type() const { return m_id; }
-  
+
+  // cppcheck-suppress operatorEqVarError; false positive
   Identifier& operator = (const Identifier& old) {m_id=old;return (*this);};
   Identifier& operator = (value_type value) {m_id=value;return (*this);};
   bool operator == (const Identifier& other) const {return (m_id == other.m_id);}
