@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FORWARDTRACKER_MAGNETFACTORY_H
@@ -15,7 +15,7 @@ namespace ForwardTracker {
 				   double       z,
 				   double       strength,
 				   double       length,
-				   std::string  aperType,
+				   const std::string&  aperType,
 				   double       A1,
 				   double       A2,
 				   double       A3,
