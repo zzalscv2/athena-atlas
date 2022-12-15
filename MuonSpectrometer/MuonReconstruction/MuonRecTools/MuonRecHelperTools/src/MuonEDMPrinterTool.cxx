@@ -210,7 +210,7 @@ MuonEDMPrinterTool::printMeasurements(const Trk::Track& track) const
                 if (itMap != measAndTheirAlignmentEffects.end()) {
                     std::vector<const Trk::AlignmentEffectsOnTrack*> aeotos;
                     aeotos.push_back(itMap->second);
-                    itMap++;
+                    ++itMap;
                     if (itMap != measAndTheirAlignmentEffects.end() && itMap->first == m)
                         aeotos.push_back(itMap->second);
                     std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(

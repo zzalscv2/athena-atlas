@@ -189,7 +189,7 @@ G4double G4ProcessHelper::GetInclusiveCrossSection(const G4DynamicParticle *aPar
         std::vector<G4int> nq=CustomPDGParser::s_containedQuarks(thePDGCode);
         for (std::vector<G4int>::iterator it = nq.begin();
              it != nq.end();
-             it++)
+             ++it)
           {
             // 12 mb taken from asymptotic pion-nucleon scattering cross sections
             if (*it == 1 || *it == 2) theXsec += 12 * CLHEP::millibarn;
@@ -404,7 +404,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   //Renormalising probabilities
   for (std::vector<G4double>::iterator it = Probabilities.begin();
        it != Probabilities.end();
-       it++)
+       ++it)
     {
       *it /= CumulatedProbability;
     }

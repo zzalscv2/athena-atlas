@@ -90,7 +90,7 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
   xAOD::TruthEventContainer::const_iterator itEvtE = truthEventContainer->end();
   const xAOD::TruthParticle* LabellingParticle(0);
   //const xAOD::TruthEvent* LabellingEvent(0);
-  for (; itEvt != itEvtE; itEvt++) {
+  for (; itEvt != itEvtE; ++itEvt) {
     const xAOD::TruthEvent* GenEvent = *itEvt;
     std::vector<ElementLink<xAOD::TruthParticleContainer> >::const_iterator ELpitr = GenEvent->truthParticleLinks().begin();
     std::vector<ElementLink<xAOD::TruthParticleContainer> >::const_iterator pitrE = GenEvent->truthParticleLinks().end();
@@ -139,12 +139,12 @@ bool JetQuarkLabel::matchJet(const xAOD::Jet& myJet,
 	  if (afterFSR) {
 	  //if (afterFSR && !fromHadron) {
 	    deltaR=part_momentum_lv.DeltaR(jet_hlv);
-	    if (abs(pdg) == 4 && deltaR < deltaRC) {deltaRC = deltaR; barcc = (*pitr)->barcode(); }
-	    if (abs(pdg) == 5 && deltaR < deltaRB) {deltaRB = deltaR; barcb = (*pitr)->barcode(); LabellingParticle=(*pitr);}
+	    if (std::abs(pdg) == 4 && deltaR < deltaRC) {deltaRC = deltaR; barcc = (*pitr)->barcode(); }
+	    if (std::abs(pdg) == 5 && deltaR < deltaRB) {deltaRB = deltaR; barcb = (*pitr)->barcode(); LabellingParticle=(*pitr);}
 	  }
 	}
       }
-      if (abs(pdg) == 15) {
+      if (std::abs(pdg) == 15) {
 	double pt = part_momentum_lv.Pt();
 	if (pt > m_ptCut) {
 	  ATH_MSG_VERBOSE( "MCTruth: part " << (*pitr)->barcode() << " PDG= " << pdg
