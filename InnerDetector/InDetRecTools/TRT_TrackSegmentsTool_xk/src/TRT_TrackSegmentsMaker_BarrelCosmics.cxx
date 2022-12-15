@@ -430,7 +430,7 @@ int InDet::TRT_TrackSegmentsMaker_BarrelCosmics::findSeed(double xmin,
   for (int j=0; j<m_nBinsInPhi; j++) {
 
     double phi = phimin+(0.5+j)*phibin;
-    double cosphi( cos(phi) ), sinphi( sin(phi) );
+    double cosphi( std::cos(phi) ), sinphi( std::sin(phi) );
     for (int i=0; i<m_nBinsInX; i++) binInX[i] = 0;
     double transformXMin(xmin*sinphi); xbin = (xmax-xmin)*sinphi / (1.*m_nBinsInX);
 
@@ -624,7 +624,7 @@ void InDet::TRT_TrackSegmentsMaker_BarrelCosmics::convert(std::vector<const InDe
   }
 
   double cotanPhi = mean[2] / mean[4];
-  double phi = atan(1./cotanPhi); if (phi<0.) phi += M_PI;
+  double phi = std::atan(1./cotanPhi); if (phi<0.) phi += M_PI;
   ATH_MSG_DEBUG("compare parameters X  : " << trackpar[0] << " vs. " << mean[0]-mean[1]*cotanPhi );
   ATH_MSG_DEBUG("compare parameters phi: " << trackpar[1] << " vs. " << phi );
 

@@ -306,7 +306,7 @@ StatusCode TrigL2MuonSA::MdtDataPreparator::collectMdtHitsFromPrepData(const std
       float cInCo = 1./std::cos(std::abs(std::atan(OrtoRadialPos/Rmin)));
       float cPhi0 = cPhip - std::atan(OrtoRadialPos/Rmin);
       if(cPhi0 > M_PI) cPhip -= 2*M_PI;
-      if(cPhip<0. && (std::abs(M_PI+cPhip) < 0.05) ) cPhip = std::acos(0.)*2.;
+      if(cPhip<0. && (std::abs(M_PI+cPhip) < 0.05) ) cPhip = M_PI;
 
       ATH_MSG_DEBUG(" ...MDT hit Z/R/chamber/MultiLater/TubeLayer/Tube/Layer/adc/tdc = "
 		    << Z << "/" << R << "/" << chamber << "/" << MultiLayer << "/" << TubeLayer << "/"

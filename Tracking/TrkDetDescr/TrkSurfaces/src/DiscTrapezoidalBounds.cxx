@@ -187,7 +187,7 @@ Trk::DiscTrapezoidalBounds::inside(const Amg::Vector2D& locpo,
       */
       for (int t = 1; t <= m_maxIterations; t++) {
         int numNodes = 4 << t;
-        innerPolygonCoef[t] = 0.5 / cos(4 * acos(0.0) / numNodes);
+        innerPolygonCoef[t] = 0.5 / cos(2.0f*M_PI / numNodes);
         double c1x = (c0x + c2x) * innerPolygonCoef[t];
         double c1y = (c0y + c2y) * innerPolygonCoef[t];
         double tx = x - c1x; // t indicates a translated coordinate
@@ -214,7 +214,7 @@ Trk::DiscTrapezoidalBounds::inside(const Amg::Vector2D& locpo,
           return true; // collision with t1---t0
         }
         outerPolygonCoef[t] =
-          0.5 / (cos(2 * acos(0.0) / numNodes) * cos(2 * acos(0.0) / numNodes));
+          0.5 / (std::cos(M_PI / numNodes) * std::cos(M_PI / numNodes));
         double c3x = (c0x + c1x) * outerPolygonCoef[t];
         double c3y = (c0y + c1y) * outerPolygonCoef[t];
         if ((c3x - x) * (c3x - x) + (c3y - y) * (c3y - y) < rr) {

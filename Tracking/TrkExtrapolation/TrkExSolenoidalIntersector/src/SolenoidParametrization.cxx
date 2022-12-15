@@ -309,9 +309,9 @@ SolenoidParametrization::printFieldIntegrals (MsgStream& msg) const
 	// check symmetry (reflect in each axis)
 	for (int k = 0; k != 3; ++k)
 	{
-	    if (k == 0) direction = Amg::Vector3D(-cos(phi),sin(phi),cotTheta);
-	    if (k == 1) direction = Amg::Vector3D(cos(phi),-sin(phi),cotTheta);
-	    if (k == 2) direction = Amg::Vector3D(cos(phi),sin(phi),-cotTheta);
+	    if (k == 0) direction = Amg::Vector3D(-std::cos(phi),std::sin(phi),cotTheta);
+	    if (k == 1) direction = Amg::Vector3D(std::cos(phi),-std::sin(phi),cotTheta);
+	    if (k == 2) direction = Amg::Vector3D(std::cos(phi),std::sin(phi),-cotTheta);
 	    position		= Amg::Vector3D(0.,0.,0.);
 	    double asymm	= 0.;
 	    // look up field along eta-line

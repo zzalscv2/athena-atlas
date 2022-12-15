@@ -83,7 +83,7 @@ void TileGeoSectionBuilder::fillSection(GeoPhysVol*&             mother,
 {
   (*m_log) << MSG::DEBUG <<" TileGeoSectionBuilder::fillSection ModuleNcp= "<<ModuleNcp<< endmsg;
 
-  double tan_delta_phi_2 = tan(delta_phi/2*Gaudi::Units::deg);
+  double tan_delta_phi_2 = std::tan(delta_phi/2*Gaudi::Units::deg);
 
   // -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
   // Obtain required materials - Air and Iron
@@ -1606,11 +1606,11 @@ void TileGeoSectionBuilder::fillFinger(GeoPhysVol*&             mother,
                                       elementHeight/2*Gaudi::Units::cm,
                                       elementDy2/2*Gaudi::Units::cm,
                                       elementDy1/2*Gaudi::Units::cm,
-                                      atan((elementDy1-elementDy2)/(2.*elementHeight)),
+                                      std::atan((elementDy1-elementDy2)/(2.*elementHeight)),
                                       elementHeight/2*Gaudi::Units::cm,
                                       elementDy2/2*Gaudi::Units::cm,
                                       elementDy1/2*Gaudi::Units::cm,
-                                      atan((elementDy1-elementDy2)/(2.*elementHeight)));
+                                      std::atan((elementDy1-elementDy2)/(2.*elementHeight)));
 
       lvFingerElement = new GeoLogVol(currentName,fingerElementTrap,currentMaterial);
 
@@ -2352,7 +2352,7 @@ void TileGeoSectionBuilder::fillPeriod(GeoPhysVol*&              mother,
       double dy1Period = period->getYHalfLength1();
       double tanphi = (period->getYHalfLength2()-dy1Period)/period->getZHalfLength()/2.;
       if (m_log->level()<=MSG::DEBUG)
-        if (fabs(tanphi-tan_delta_phi_2) > 1.e-5)
+        if (std::abs(tanphi-tan_delta_phi_2) > 1.e-5)
           (*m_log) << MSG::DEBUG <<"Different tan_delta_phi_2 " << tanphi << " " << tan_delta_phi_2  <<endmsg;
 
       for (j = CurrentScin; j < (CurrentScin + m_dbManager->TILBnscin()); j++) {
@@ -2485,7 +2485,7 @@ void TileGeoSectionBuilder::fillDescriptor(TileDetDescriptor*&   descriptor,
   // -- default values for all regions
   // they are overwritten later in calculateR() by actual values taken from DB
   float phi_min, phi_max;
-  float dphi = 4*acos(0.)/64;
+  float dphi = 2.0f*M_PI/64;
 
   if (testbeam) { // put modules symmetricaly
     phi_max = nphi*dphi/2;
@@ -2687,7 +2687,7 @@ void TileGeoSectionBuilder::fillDescriptor(TileDetDescriptor*&   descriptor,
     }
     nsamp = 2;
     nphi  = 8;
-    dphi  = atan(1.);
+    dphi  = M_PI_4;
     phi_min = -dphi/2;
     phi_max = nphi * dphi + phi_min;
   }

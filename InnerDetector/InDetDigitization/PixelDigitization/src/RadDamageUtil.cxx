@@ -155,7 +155,6 @@ double RadDamageUtil::weighting3D(double x, double y, double z, int n, int m, in
   //TODO: talk to ben about this comment:
   //be warned that there is numerical instability if n and m are too large!  Suggest n ~ m ~ 10.
   double potential = 0.;
-  double pi = TMath::Pi();
 
   for (int i = -n; i <= n; i++) {
     for (int j = -m; j <= m; j++) {
@@ -170,11 +169,11 @@ double RadDamageUtil::weighting3D(double x, double y, double z, int n, int m, in
         Z = 1 - z;
       } else {
         //Equation 18 & 19 in support note
-        factor_x = std::sin(i * pi / Nrep) / (pi * i);
-        factor_y = std::sin(j * pi / Nrep) / (pi * j);
+        factor_x = std::sin(i * M_PI / Nrep) / (M_PI * i);
+        factor_y = std::sin(j * M_PI / Nrep) / (M_PI * j);
         //Equation 17 in support note
         double norm = std::sqrt(std::pow(alpha(i, Nrep, a), 2) + std::pow(alpha(j, Nrep, b), 2));
-        Z = sinh(norm * (1 - z)) / sinh(norm);
+        Z = std::sinh(norm * (1 - z)) / sinh(norm);
       }
       //Equation 18 & 19 in support note
       X = factor_x * std::cos(alpha(i, Nrep, a) * x);
@@ -193,8 +192,7 @@ double RadDamageUtil::weighting3D(double x, double y, double z, int n, int m, in
 //Solution to Poisson's equation for a 2D inf. strip
 //i.e. weighting potential with 2D solution
 double RadDamageUtil::weighting2D(double x, double z, double Lx, double sensorThickness) {
-  if (z == 0) z = 0.00001; //a pathology in the definition.
-  double pi = 4. * TMath::ATan(1.);
+  if (z == 0) z = 0.00001; //a pathology in the definition.M_PI
 
   //scale to binsize (inputs assumed to be in mm)
   sensorThickness *= 1000.;
@@ -202,11 +200,11 @@ double RadDamageUtil::weighting2D(double x, double z, double Lx, double sensorTh
 
   //val is set according to equation 3 in the radDamageDefaults support note
   double val =
-    (TMath::Sin(pi * z / sensorThickness) * TMath::SinH(0.5 * pi * Lx / sensorThickness) /
-     (TMath::CosH(pi * x / sensorThickness) - TMath::Cos(pi * z / sensorThickness) *
-      TMath::CosH(0.5 * pi * Lx / sensorThickness)));
-  if (val > 0) return TMath::ATan(val) / pi;
-  else return TMath::ATan(val) / pi + 1;
+    (TMath::Sin(M_PI * z / sensorThickness) * TMath::SinH(0.5 * M_PI * Lx / sensorThickness) /
+     (TMath::CosH(M_PI * x / sensorThickness) - TMath::Cos(M_PI * z / sensorThickness) *
+      TMath::CosH(0.5 * M_PI * Lx / sensorThickness)));
+  if (val > 0) return TMath::ATan(val) / M_PI;
+  else return TMath::ATan(val) / M_PI + 1;
 }
 
 //=========================================
