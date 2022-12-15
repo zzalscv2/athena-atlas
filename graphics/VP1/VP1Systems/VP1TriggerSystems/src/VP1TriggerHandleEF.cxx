@@ -241,8 +241,8 @@ void VP1Trig::VP1TriggerHandleEF::loadMuonTrack(int trackNo, QString type)
     if(trackNo==0) h_id.push_back(QString::fromStdString(muonTrackName[i]));
     if(muonTrackName[i]=="Theta") {
       double cotTh = muonTrackData(type,i);
-      if(cotTh!=0) data.push_back(QString::number((M_PI/2)-atan(1/cotTh)));
-      else data.push_back(QString::number((M_PI/2)-atan(10^10)));
+      if(cotTh!=0) data.push_back(QString::number((M_PI_2)-std::atan(1/cotTh)));
+      else data.push_back(QString::number((M_PI_2)-std::atan(10^10)));
     }
     else {
       data.push_back(QString::number(muonTrackData(type,i)));

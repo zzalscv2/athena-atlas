@@ -32,9 +32,9 @@ CandidateMatchHelpers::approxXYZwrtATLAS(const xAOD::CaloCluster& cluster,
      * 1/cosh(clusterEta) == sin(theta)
      * tan =sin/cos
      */
-    const double tanthetaclus = (1 / cosh(clusterEta)) / tanh(clusterEta);
+    const double tanthetaclus = (1.0 / std::cosh(clusterEta)) / std::tanh(clusterEta);
     if (isEndCap) {
-      Rclus = fabs(ZfaceCalo * (tanthetaclus));
+      Rclus = std::abs(ZfaceCalo * (tanthetaclus));
       // Negative Eta ---> negative Z
       if (clusterEta < 0) {
         Zclus = -Zclus;
@@ -49,7 +49,7 @@ CandidateMatchHelpers::approxXYZwrtATLAS(const xAOD::CaloCluster& cluster,
   }
 
   const double clusterPhi = cluster.phi();
-  return { Rclus * cos(clusterPhi), Rclus * sin(clusterPhi), Zclus };
+  return { Rclus * std::cos(clusterPhi), Rclus * std::sin(clusterPhi), Zclus };
 }
 
 double
@@ -66,9 +66,9 @@ CandidateMatchHelpers::PhiROT(const double Et,
   double phiRot = 0.0;
   double ecCorr = 1.0;
   if (isEndCap) {
-    const double ecFactor = 1.0 / (0.8 * atan(15.0 / 34.0));
-    const double sinTheta0 = 2.0 * atan(exp(-fabs(Eta)));
-    ecCorr = sinTheta0 * sqrt(sinTheta0) * ecFactor;
+    const double ecFactor = 1.0 / (0.8 * std::atan(15.0 / 34.0));
+    const double sinTheta0 = 2.0 * std::atan(std::exp(-std::abs(Eta)));
+    ecCorr = sinTheta0 * std::sqrt(sinTheta0) * ecFactor;
   }
   ////
   const double Rscaled = (Rcalo - r_first) * (1. / Rcalo);

@@ -2299,7 +2299,7 @@ namespace Muon {
         double xline = lsegPos.x();
         double yline = lsegPos.y();
         double zline = lsegPos.z();
-        ATH_MSG_VERBOSE(" Associated  hits " << rots.size() << " angleXZ " << 90. * segLocDir.angleXZ() / acos(0.) << " dXdZ " << dXdZ
+        ATH_MSG_VERBOSE(" Associated  hits " << rots.size() << " angleXZ " << 90. * segLocDir.angleXZ() / (M_PI_2) << " dXdZ " << dXdZ
                                              << " seg Pos (" << xline << " " << zline << ") " << segLocPos);
 
         std::vector<HitInXZ> hits;
