@@ -225,7 +225,7 @@ void PixelCalib() {
           }
         }
         if (WhichPart == 2){
-          if (modStr.substr(0, 2) != "L1" and modStr.substr(0, 2) != "L2"){
+          if (modStr.substr(0, 2) != "L1" && modStr.substr(0, 2) != "L2"){
             continue;
           }
         }
@@ -2505,9 +2505,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI0_max > chi2_error){
-          if(badcalI0_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI0 = 0;
             parEI0 = -28284.3;
             parCI0 = 0;
@@ -2580,9 +2578,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI1_max > chi2_error){
-          if(badcalI1_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI1 = 0;
             parEI1 = -28284.3;
             parCI1 = 0;
@@ -2654,9 +2650,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI2_max > chi2_error){
-          if(badcalI2_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI2 = 0;
             parEI2 = -28284.3;
             parCI2 = 0;
@@ -2727,9 +2721,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI3_max > chi2_error){
-          if(badcalI3_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI3 = 0;
             parEI3 = -28284.3;
             parCI3 = 0;
@@ -2799,9 +2791,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI4_max > chi2_error){
-          if(badcalI4_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI4 = 0;
             parEI4 = -28284.3;
             parCI4 = 0;
@@ -2871,9 +2861,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI5_max > chi2_error){
-          if(badcalI5_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI5 = 0;
             parEI5 = -28284.3;
             parCI5 = 0;
@@ -2943,9 +2931,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI6_max > chi2_error){
-          if(badcalI6_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI6 = 0;
             parEI6 = -28284.3;
             parCI6 = 0;
@@ -3015,9 +3001,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI7_max > chi2_error){
-          if(badcalI7_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI7 = 0;
             parEI7 = -28284.3;
             parCI7 = 0;
@@ -3087,9 +3071,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI8_max > chi2_error){
-          if(badcalI8_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI8 = 0;
             parEI8 = -28284.3;
             parCI8 = 0;
@@ -3159,9 +3141,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI9_max > chi2_error){
-          if(badcalI9_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI9 = 0;
             parEI9 = -28284.3;
             parCI9 = 0;
@@ -3231,9 +3211,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI10_max > chi2_error){
-          if(badcalI10_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI10 = 0;
             parEI10 = -28284.3;
             parCI10 = 0;
@@ -3303,9 +3281,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI11_max > chi2_error){
-          if(badcalI11_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI11 = 0;
             parEI11 = -28284.3;
             parCI11 = 0;
@@ -3375,9 +3351,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI12_max > chi2_error){
-          if(badcalI12_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI12 = 0;
             parEI12 = -28284.3;
             parCI12 = 0;
@@ -3447,9 +3421,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI13_max > chi2_error){
-          if(badcalI13_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI13 = 0;
             parEI13 = -28284.3;
             parCI13 = 0;
@@ -3519,9 +3491,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI14_max > chi2_error){
-          if(badcalI14_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI14 = 0;
             parEI14 = -28284.3;
             parCI14 = 0;
@@ -3591,9 +3561,7 @@ void PixelCalib() {
         fprintf(outputfile, "[ ");
 
         while(badcalI15_max > chi2_error){
-          if(badcalI15_max < chi2_error){
-            break;
-          }else if (ncharge_re < ncharge/2.0){
+          if (ncharge_re < ncharge/2.0){
             parAI15 = 0;
             parEI15 = -28284.3;
             parCI15 = 0;

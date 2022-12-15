@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MultiHisto_cxx
@@ -305,7 +305,7 @@ std::string  MultiHisto<ht>::NameString(int idiv, int index){
 	size_t found = name.find('#');
 	if(found != std::string::npos) name = name.substr(found+1);
 	found = name.find(' ');
-	if(found != std::string::npos) name = name.substr(0,found);
+	if(found != std::string::npos)  name.resize(0,found);
 	basename << name << (m_div_bins[idiv])[index] << "-" <<
 		(m_div_bins[idiv])[index+1];
 	return basename.str();
