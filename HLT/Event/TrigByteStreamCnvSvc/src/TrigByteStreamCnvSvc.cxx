@@ -50,7 +50,7 @@ namespace {
     return str;
   }
   template<typename T> struct printNWordsHex {
-    printNWordsHex(const size_t n, const T* w, const std::string s=" ") : nwords(n), words(w), sep(s) {}
+    printNWordsHex(const size_t n, const T* w, const std::string& s=" ") : nwords(n), words(w), sep(s) {}
     size_t nwords;
     const T* words;
     std::string sep;
