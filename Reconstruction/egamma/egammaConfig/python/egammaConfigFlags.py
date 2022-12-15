@@ -155,7 +155,7 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClusters",
                  'egamma66FWDClusters')
     egcf.addFlag("Egamma.Keys.Output.EgammaLargeFWDClustersSuppESD", '')
-
+    
     return egcf
 
 

@@ -13,7 +13,5 @@ atlas_add_library( CaloRingerToolsLib
 atlas_add_component( CaloRingerTools
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps AthenaKernel CaloEvent CaloGeoHelpers CaloRingerToolsLib CaloUtilsLib GaudiKernel PATCoreLib RingerSelectorToolsEnumsLib StoreGateLib xAODBase xAODCaloEvent xAODCaloRings xAODEgamma )
+                     LINK_LIBRARIES AthContainers AthLinks AthenaBaseComps AthenaKernel CaloEvent CaloGeoHelpers CaloRingerToolsLib CaloUtilsLib GaudiKernel PATCoreLib StoreGateLib xAODBase xAODCaloEvent xAODCaloRings xAODEgamma )
 
-# Install files from the package:
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

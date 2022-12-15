@@ -90,3 +90,4 @@ float AsgRingerSelectorTool::predict( const xAOD::TrigRingerRings* ringsCluster,
 
 
 }// namespace
+

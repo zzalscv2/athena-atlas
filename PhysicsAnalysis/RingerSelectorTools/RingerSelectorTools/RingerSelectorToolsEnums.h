@@ -125,4 +125,3 @@ enum Requirement {
 } // namespace Ringer
 
 #endif // RINGERSELECTORTOOLS_RINGERSELECTORTOOLSENUMS_H
-

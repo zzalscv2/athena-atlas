@@ -330,4 +330,3 @@ class RingerProcedureWrapper<
 #include "RingerPreProcessorWrapper.icc"
 #endif // RINGER_DISCRIMINATOR_WRAPPER_INCLUDE
 #endif // INCLUDE_HEADER_ONLY
-

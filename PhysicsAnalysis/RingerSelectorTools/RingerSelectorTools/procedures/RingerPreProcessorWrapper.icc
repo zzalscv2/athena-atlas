@@ -8,9 +8,7 @@
 
 #include "RingerPreProcessorWrapper.h"
 #include "RingerProcedureWrapper.icc"
-
 #include "Normalizations.h"
-
 #include "RingerSelectorTools/RingerSelectorToolsDefs.h"
 
 #include <type_traits>

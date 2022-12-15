@@ -19,7 +19,7 @@
 #include "xAODEgamma/Electron.h"
 
 // Asg selectors include:
-#include "RingerSelectorTools/IAsgElectronRingerSelector.h"
+// #include "RingerSelectorTools/IAsgElectronRingerSelector.h"
 
 #include "StoreGate/ReadHandleKey.h"
 
@@ -72,8 +72,8 @@ class CaloRingerPhotonsReader : public CaloRingerInputReader,
      * @brief Electron selectors.
      * TODO Change it to Photon Selector
      **/
-    PublicToolHandleArray<IAsgElectronRingerSelector> m_ringerSelectors {this,
-	"PhotonSelectors", {}, "The ASG Photon Selectors."};
+  //   PublicToolHandleArray<IAsgElectronRingerSelector> m_ringerSelectors {this,
+	// "PhotonSelectors", {}, "The ASG Photon Selectors."};
 
     /**
      * @brief Hold selectors result names.

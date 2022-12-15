@@ -40,15 +40,6 @@ StatusCode CaloRingerElectronsReader::initialize()
 
   ATH_CHECK(m_inputElectronContainerKey.initialize());
 
-  if ( m_selectorsAvailable ) {
-    ATH_CHECK( retrieveSelectors() );
-  }
-
-  // initialize the selectors
-  ATH_CHECK(m_selKeys.initialize());
-  ATH_CHECK(m_isEMKeys.initialize());
-  ATH_CHECK(m_lhoodKeys.initialize());
-
   if ( m_builderAvailable ) {
     // Initialize our fctor
     m_clRingsBuilderElectronFctor =
@@ -63,33 +54,6 @@ StatusCode CaloRingerElectronsReader::initialize()
 
   return StatusCode::SUCCESS;
 
-}
-
-// =============================================================================
-StatusCode CaloRingerElectronsReader::retrieveSelectors()
-{
-  ATH_MSG_INFO("Retrieving " << m_ringerSelectors.size() <<
-    " reader tools for " << name() );
-
-  ATH_CHECK(m_ringerSelectors.retrieve());
-
-  const std::string& contName = m_inputElectronContainerKey.key();
-
-  for (const auto& tool : m_ringerSelectors)
-  {
-    ATH_CHECK(addSelectorDeco(contName, tool->name()));
-  }
-  return StatusCode::SUCCESS;
-}
-
-// =============================================================================
-StatusCode CaloRingerElectronsReader::addSelectorDeco(const std::string &contName,
-						      const std::string &selName)
-{
-  m_selKeys.emplace_back(contName + "." + selName);
-  m_isEMKeys.emplace_back(contName + "." + selName + "_isEM");
-  m_lhoodKeys.emplace_back(contName + "." + selName + "_output");
-  return StatusCode::SUCCESS;
 }
 
 // =============================================================================
@@ -124,55 +88,7 @@ StatusCode CaloRingerElectronsReader::execute()
     m_clRingsBuilderElectronFctor->checkRelease();
   }
 
-  StatusCode sc;
-
-  auto selHandles = m_selKeys.makeHandles();
-  auto isEMHandles = m_isEMKeys.makeHandles();
-  auto lhoodHandles = m_lhoodKeys.makeHandles();
-
-  // Run selectors, if available:
-  for ( size_t i = 0; i < m_ringerSelectors.size(); i++ ) {
-    for ( const xAOD::Electron *el : *electrons ) {
-
-      const auto& selector = m_ringerSelectors[i];
-
-      // Execute selector for each electron
-      asg::AcceptData acceptData (&selector->getAcceptInfo());
-      StatusCode lsc = selector->execute(el, acceptData);
-      sc &= lsc;
-
-      if ( lsc.isFailure() ){
-        ATH_MSG_WARNING("Error while executing selector: " <<
-            selector->name());
-      }
-
-      // Retrieve results:
-       const std::vector<float> &outputSpace = selector->getOutputSpace();
-
-      ATH_MSG_DEBUG( "Result for " << selector->name() << " is: "
-          << std::boolalpha << static_cast<bool>(acceptData)
-          << " and its outputSpace is: "
-          << std::noboolalpha << outputSpace);
-
-      // Save the bool result
-      selHandles[i](*el) = static_cast<bool>(acceptData);
-
-      //// Save the resulting bitmask
-      isEMHandles[i](*el) = static_cast<unsigned int>(acceptData.getCutResultInverted());
-
-      // Check if output space is empty, if so, use error code
-      float outputToSave(std::numeric_limits<float>::min());
-      if ( !outputSpace.empty() ){
-        outputToSave = outputSpace[0];
-      }
-
-      // Save chain output
-      lhoodHandles[i](*el) = outputToSave;
-    }
-  }
-
-  return sc;
-
+  return StatusCode::SUCCESS;
 }
 
 } // namespace Ringer
