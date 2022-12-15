@@ -5,7 +5,7 @@
 
 from AthenaCommon import CfgMgr, CFElements
 from AthenaCommon.AlgSequence import AlgSequence
-from AthenaCommon.Configurable import Configurable, ConfigurableCompAccBehavior
+from AthenaCommon.Configurable import Configurable, ConfigurableCABehavior
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
 from AthenaConfiguration.ComponentAccumulator import ConfigurationError
@@ -369,7 +369,7 @@ def CAtoGlobalWrapper(cfgFunc, flags, **kwargs):
     if not callable(cfgFunc):
         raise TypeError("CAtoGlobalWrapper must be called with a configuration-function as parameter")
 
-    with ConfigurableCompAccBehavior():
+    with ConfigurableCABehavior():
         result = cfgFunc(flags, **kwargs)
         if isinstance(result, tuple):
             ca = result[0]
@@ -428,7 +428,7 @@ def appendCAtoAthena(ca):
                                               "{origPropValue} and {propValue}")
 
     def _fetchOldSeq(name=""):
-        with ConfigurableCompAccBehavior(target_state=False):
+        with ConfigurableCABehavior(target_state=False):
             seq = AlgSequence(name)
         return seq
 

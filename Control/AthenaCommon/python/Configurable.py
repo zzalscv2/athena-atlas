@@ -31,7 +31,7 @@ log = logging.getLogger( 'Configurable' )
 
 
 # Context Manager to set Configurable behavior
-class ConfigurableCompAccBehavior:
+class ConfigurableCABehavior:
     def __init__(self, target_state=True):
         self._target_state = target_state
         self._previous_state = None
@@ -43,7 +43,7 @@ class ConfigurableCompAccBehavior:
         Configurable._useGlobalInstances = self._previous_state
 
 # For backwards compatability
-ConfigurableRun3Behavior = ConfigurableCompAccBehavior
+ConfigurableRun3Behavior = ConfigurableCABehavior
 
 ### base class for configurable Gaudi algorithms/services/algtools/etc. ======
 class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
