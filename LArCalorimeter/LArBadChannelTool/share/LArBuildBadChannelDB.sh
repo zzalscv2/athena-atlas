@@ -2,6 +2,7 @@
 
 if [[ $# < 4 ]] || [[ $# > 8 ]];
 then
+    echo "Syntax: $0 [-append] [-openiov] <tag> <Run1> <LB1>  <File> [Run2] [LB2]"
     echo "Syntax: $0 [-append] [-openiov] [-supercell] <tag> <Run1> <LB1>  <File> [Run2] [LB2]"
     echo "optional -append is adding the content of File to a DB"
     echo "optional -openiov is updating UPD4 with open end IOV, if Run2/LB2 is not given" 
@@ -14,7 +15,6 @@ then
 fi
 
 
- 
 outputSqlite="BadChannels.db"
 outputSqliteOnl="BadChannelsOnl.db"
 summaryFile="LArBuildBadChannelDB.summary.txt"
@@ -30,7 +30,7 @@ fi
 
 if [ $1 == "-openiov" ]
 then
-    echo "Open ended IOV, if Run2/LB2 is not supplied"
+    echo "Open ended IOV"
     openiov=1
     shift
 else
@@ -50,6 +50,10 @@ if [ $issc == 0 ]
 then
    echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannels...."
    fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannels` 
+   if [ $? -ne 0 ]
+   then
+       exit
+   fi
    upd4TagName=`echo $fulltag | grep -o "RUN2-UPD4-[0-9][0-9]"` 
    echo "Found UPD4 $upd4TagName"
    upd1TagName="RUN2-UPD1-00"
@@ -58,12 +62,17 @@ then
 else   
    echo "Resolving current folder-level tag suffix for /LAR/BadChannelsOfl/BadChannelsSC...."
    fulltag=`getCurrentFolderTag.py "COOLOFL_LAR/CONDBR2" /LAR/BadChannelsOfl/BadChannelsSC` 
+   if [ $? -ne 0 ]
+   then
+       exit
+   fi
    upd4TagName=`echo $fulltag | grep -o "RUN3-UPD4-[0-9][0-9]"` 
    echo "Found UPD4 $upd4TagName"
    upd1TagName="RUN3-UPD1-00"
    BulkTagName="RUN3-Bulk-00"
    upd3TagName="RUN3-UPD3-00"
 fi
+
 
 tag=$1
 shift
@@ -227,17 +236,18 @@ do
       exit
   fi
 
+  if [ $issc == 1 ];
+      then
+      SCParam="--SC"
+  else
+      SCParam=""
+  fi
 
   echo "Running athena to read current database content...with run number " $runnumber
-  if [ $issc == 1 ]
-  then
-     athena.py -c "sqlite=\"BadChannelsSC.db\";IOVEndRun=$runnumber;OutputFile=\"${oldTextFile}\";tag=\"LARBadChannelsOflBadChannelsSC-${t}\";folderStr=\"/LAR/BadChannelsOfl/BadChannelsSC\";isSC=True" LArBadChannelTool/LArBadChannel2Ascii.py > oracle2ascii_$t.log 2>&1
-  else   
-     athena.py -c "IOVEndRun=$runnumber;OutputFile=\"${oldTextFile}\";tag=\"LARBadChannelsOflBadChannels-${t}\"" LArBadChannelTool/LArBadChannel2Ascii.py > oracle2ascii_$t.log 2>&1
-  fi   
+  python -m LArBadChannelTool.LArBadChannel2Ascii -r $runnumber -o $oldTextFile -t ${t} $SCParam > oracle2ascii_$t.log 2>&1 
 
   if [ $? -ne 0 ];  then
-      echo "Athena reported an error reading oracle ! Please check oracle2ascii_$t.log!"
+      echo "Athena reported an error reading back sqlite file ! Please check oracle2ascii_$t.log!"
       exit
   fi
 
@@ -254,30 +264,23 @@ do
       exit
   fi
 
-  if [ $t == ${upd1TagName} ]
+  iovEnd=""
+  echo "$t and  $openiov" 
+  if [[ $t == ${upd1TagName} || $openiov == 1 ]]
       then
-      prefix=""
+      iovEnd=""
   else
-      prefix="IOVBeginRun=${runnumber};IOVBeginLB=${lbnumber};"
-      if [[ $openiov == 0 ]]
+      if  [[ $runnumber2 > 0 && $lbnumber2 > 0 ]]
       then
-        if  [[ $runnumber2 > 0 ]] && [[ $lbnumber2 -ge 0 ]]
-        then
-          prefix="${prefix}IOVEndRun=${runnumber2};IOVEndLB=${lbnumber2};" 
-        else  
-#prefix="${prefix}IOVEndRun=$runnumber;IOVEndLB=4294967295;"
-          prefix="${prefix}IOVEndRun=$[ $runnumber + 1];IOVEndLB=0;"
-        fi  
+          iovEnd="--runnumber2  $runnumber2 --lbnumber2 $lbnumber2"
+      else  
+          iovEnd="--runnumber2  $[ $runnumber + 1] --lbnumber2 0"
       fi  
   fi
-  prefix="${prefix}sqlite=\"${outputSqlite}\";TagPostfix=\"-$t\";InputFile=\"${inputTextFile}\""
-  if [ $issc == 1 ]
-  then
-     prefix="${prefix};isSC=True;Folder=\"/LAR/BadChannelsOfl/BadChannelsSC\";"
-  fi
+
   echo "Running athena to build sqlite database file ..."
-  echo $t $prefix
-  athena.py -c $prefix LArBadChannelTool/LArBadChannelDBAlg.py > ascii2sqlite_$t.log 2>&1
+  echo "Parameters: -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber ${inputTextFile} $iovEnd"
+  python -m LArBadChannelTool.LArBadChannelDBAlg -o ${outputSqlite} -t $t -r $runnumber -l $lbnumber $SCFlag ${inputTextFile} $iovEnd > ascii2sqlite_$t.log 2>&1
   if [ $? -ne 0 ];  then
     echo "Athena reported an error! Please check ascii2sqlite_$t.log!"
     exit
@@ -291,42 +294,19 @@ do
 
   if grep -q "REJECTED" ascii2sqlite_$t.log
       then
-      echo "ERROR: At least one line in the input text file could not be read. Syntax Error?"
+      echo "ERROR: At least one line in the input text file could not be read. Syntax Error? See ascii2sqlite_$t.log"
   fi
 
   echo "Running athena to test readback of sqlite database file"
-  if [[ $runnumber2 > 0 ]] && [[ $lbnumber2 > 0 ]]
-  then
-        if [[ $lbnumber2 < 2147483648 ]]
-        then
-           prefix="IOVEndRun=${runnumber2};IOVEndLB=$[ ${lbnumber2} - 1 ];" 
-        else   
-           prefix="IOVEndRun=${runnumber2};IOVEndLB=2147483647;" 
-        fi   
-  else      
-        if [[ $openiov == 1 ]]
-        then
-          prefix=""
-        else  
-          prefix="IOVEndRun=${runnumber};IOVEndLB=$[ $lbnumber + 1 ];"
-        fi  
-  fi  
-  if [ $issc == 1 ]
-  then
-     prefix="${prefix}tag=\"LARBadChannelsOflBadChannelsSC-${t}\";isSC=True;folderStr=\"/LAR/BadChannelsOfl/BadChannelsSC\";"
-  else   
-     prefix="${prefix}tag=\"LARBadChannelsOflBadChannels-${t}\""
-  fi
-  athena.py -c"${prefix}sqlite=\"${outputSqlite}\";OutputFile=\"${outputTextFile}\";" LArBadChannelTool/LArBadChannel2Ascii.py > sqlite2ascii_$t.log 2>&1
-
+  python -m LArBadChannelTool.LArBadChannel2Ascii -o $outputTextFile -d $outputSqlite -t $t -r $runnumber -l $lbnumber  $SCFlag > sqlite2ascii_$t.log 2>&1
   if [ $? -ne 0 ];  then
       echo "Athena reported an error reading back sqlite file ! Please check sqlite2ascii_$t.log!"
       exit
   fi
 
 
-  if `grep  ERROR sqlite2ascii_$t.log | grep -v "dupe ignored"`
-      then
+  if grep  ERROR sqlite2ascii_$t.log
+  then
       echo "An error occured during reading back sqlite file ! Please check sqlite2ascii_$t.log!"
       exit
   fi
@@ -394,7 +374,6 @@ if [ -f $outputSqliteOnl ];
 then
     echo "$outputSqliteOnl: Containing UPD1 version of bad-channel list for ONLINE DB."
     echo "Upload to ONLINE oracle server using"
-    #echo "/afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --online ${outputSqliteOnl} CONDBR2 ATONR_COOL ATLAS_COOLONL_LAR_W <password>"
     echo "export COOL_FLASK=http://aiatlas001.cern.ch:5000"
     echo "/afs/cern.ch/user/a/atlcond/utilsflask/AtlCoolMerge.py --flask BadChannels.db CONDBR2 ATONR_COOLOFL_GPN ATLAS_COOLOFL_LAR_W <password>"
 fi 

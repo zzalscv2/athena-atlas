@@ -179,11 +179,11 @@ StatusCode LArBadChannel2Ascii::execute() {
 
   }//end loop over channels;
   if (m_skipDisconnected)
-    ATH_MSG_INFO ( "Found " << count << " entries in the bad-channel database. (Number of connected cells: " << nConnected  );
+    ATH_MSG_INFO ( "Found " << count << " entries in the bad-channel database. (Number of connected cells: " << nConnected << ")"  );
   else
-    ATH_MSG_INFO ( "Found " << count << " entries in the bad-channel database. (Number of cells: " << nConnected  );
+    ATH_MSG_INFO ( "Found " << count << " entries in the bad-channel database. (Number of cells: " << nConnected  << ")");
   if (m_wMissing)
-    ATH_MSG_INFO ( "Inclduing missing FEBs" );
+    ATH_MSG_INFO ( "Including missing FEBs" );
   else
     ATH_MSG_INFO ( "Without missing FEBs" );
   if (outfile.is_open())
