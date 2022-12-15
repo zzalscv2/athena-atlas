@@ -128,6 +128,10 @@ void eflowRecCluster::setClusterType() {
           + m_cluster->eSample(xAOD::CaloCluster::CaloSample::MINIFCAL3);
 
   double totalEnergy = EMB_E + EME_E + HEC_E + Tile_E + FCAL_E + MiniFCAL_E;
+  if(std::abs(totalEnergy) < 1.0e-4){
+     m_calorimeterType = UNASSIGNED;
+     return;
+  }
   double ratioEM = (EMB_E+EME_E)/totalEnergy;
   double ratioHCAL = (HEC_E+Tile_E)/totalEnergy;
   double ratioFCAL = (FCAL_E + MiniFCAL_E)/totalEnergy;
