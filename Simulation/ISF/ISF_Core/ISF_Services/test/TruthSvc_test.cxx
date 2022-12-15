@@ -8,6 +8,9 @@
  * @brief Tests for ISF::TruthSvc.
  */
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 #undef NDEBUG
 
 // Tested service
