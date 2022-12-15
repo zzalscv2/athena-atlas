@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,6 @@ using namespace InDetDD;
 SiSmearedDigitizationTool::SiSmearedDigitizationTool(const std::string &type, const std::string &name,
                                                      const IInterface* parent):
   PileUpToolBase(type, name, parent),
-  m_thpcsi(nullptr),
   m_pixel_ID(nullptr),
   m_sct_ID(nullptr),
   m_randomEngineName("SiSmearedDigitization"),
@@ -268,7 +267,6 @@ StatusCode SiSmearedDigitizationTool::prepareEvent(const EventContext& /*ctx*/, 
   ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: in pixel prepareEvent() ---" );
 
   m_siHitCollList.clear();
-  m_thpcsi = new TimedHitCollection<SiHit>();
   m_HardScatterSplittingSkipper = false;
 
   return StatusCode::SUCCESS;
@@ -309,7 +307,6 @@ StatusCode SiSmearedDigitizationTool::processBunchXing(int bunchXing,
     ATH_MSG_VERBOSE("time index info. time: " << timeIndex.time()
                     << " index: " << timeIndex.index()
                     << " type: " << timeIndex.type());
-    m_thpcsi->insert(timeIndex, siHitColl);
     m_siHitCollList.push_back(siHitColl);
   }
 
@@ -417,10 +414,9 @@ StatusCode SiSmearedDigitizationTool::processAllSubEvents(const EventContext& ct
     ATH_MSG_DEBUG ( "SiHitCollection found with " << p_collection->size() << " hits" );
     ++iColl;
   }
-  m_thpcsi = &thpcsi;
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  if(this->digitize(ctx).isFailure()) {
+  if(this->digitize(ctx, thpcsi).isFailure()) {
     ATH_MSG_FATAL ( "digitize method failed!" );
     return StatusCode::FAILURE;
   }
@@ -722,7 +718,8 @@ StatusCode SiSmearedDigitizationTool::mergeClusters(SCT_detElement_RIO_map * clu
   return StatusCode::SUCCESS;
 }
 
-StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
+StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx,
+                                               TimedHitCollection<SiHit>& thpcsi)
 {
   // Set the RNG to use for this event.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
@@ -761,7 +758,7 @@ StatusCode SiSmearedDigitizationTool::digitize(const EventContext& ctx)
     m_sctClusterMap = new SCT_detElement_RIO_map;
   }
 
-  while (m_thpcsi->nextDetectorElement(i, e)) {
+  while (thpcsi.nextDetectorElement(i, e)) {
 
     while (i != e) {
       m_useDiscSurface = false;
