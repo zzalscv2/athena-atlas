@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// ------------------------------------------------------------- 
+// -------------------------------------------------------------
 // Generators/Starlight_i.cxx Description: Allows the user
 // to generate Starlight events and store the result in the
 // Transient Store.
@@ -11,7 +11,7 @@
 //   Andrzej Olszewski:  Initial Code January 2011
 //   Andrzej Olszewski:  Update for Starlight "r193" March 2016
 //
-// Random seed set via jo 
+// Random seed set via jo
 // Random numbers not saved by atlas engine mechanism event by event.
 
 #include "Starlight_i/Starlight_i.h"
@@ -31,63 +31,19 @@
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/LorentzVector.h"
 
-namespace{
-  static const std::string starlight_stream = "STARLIGHT";
-}
-
 #include "reportingUtils.h"
 #include "starlightconstants.h"
 #include "starlightparticlecodes.h"
 
-Starlight_i::Starlight_i(const std::string& name, ISvcLocator* pSvcLocator): 
-             GenModule(name,pSvcLocator), m_events(0), 
-	     m_starlight(0),
-	     m_randomGenerator(nullptr),
-             m_lheOutput(false),
-             m_maxevents(5500), 
-             m_doTauolappLheFormat(false),
-  	     m_inputParameters(),
-             m_axionMass(1.),
-	     m_event(0),
-	     m_configFileName(""),
-	     m_beam1Z(0),
-	     m_beam1A(0),
-	     m_beam2Z(0),
-	     m_beam2A(0),
-	     m_beam1Gamma(0.),
-	     m_beam2Gamma(0.),
-	     m_maxW(0.),
-	     m_minW(0.),
-	     m_nmbWBins(0),
-	     m_maxRapidity(0.),
-	     m_nmbRapidityBins(0),
-	     m_accCutPt(false),
-	     m_minPt(0.),
-	     m_maxPt(0.),
-	     m_accCutEta(false),
-	     m_minEta(0.),
-	     m_maxEta(0.),
-	     m_productionMode(0),
-	     m_nmbEventsTot(0),
-	     m_prodParticleId(0),
-	     m_randomSeed(0),
-	     m_beamBreakupMode(0),
-	     m_interferenceEnabled(false),
-	     m_interferenceStrength(0.),
-	     m_coherentProduction(false),
-	     m_incoherentFactor(0.),
-	     m_maxPtInterference(0.),
-	     m_nmbPtBinsInterference(0),
-	     m_ptBinWidthInterference(0),
-	     m_xsecMethod(0),
-	     m_nThreads(1),
-	     m_pythFullRec(0)
+namespace{
+  static const std::string starlight_stream = "STARLIGHT";
+}
+
+typedef std::vector<std::string> CommandVector;
+
+Starlight_i::Starlight_i(const std::string& name, ISvcLocator* pSvcLocator):
+             GenModule(name,pSvcLocator)
 {
-  declareProperty("Initialize",	m_InitializeVector);
-  declareProperty("ConfigFileName", m_configFileName);
-  declareProperty("lheOutput",	m_lheOutput);
-  declareProperty("maxevents",	m_maxevents);
-  declareProperty("doTauolappLheFormat", m_doTauolappLheFormat);
 }
 
 Starlight_i::~Starlight_i(){
@@ -123,7 +79,7 @@ StatusCode Starlight_i::genInitialize()
     m_starlight->setInputParameters(&m_inputParameters);
     // and initialize
     m_starlight->init();
-    
+
     // dump events to lhef (needed for QED showering with Pythia8
     if(m_lheOutput){
       ATH_MSG_INFO("===> dumping starlight events to lhef format. \n"  );
@@ -146,7 +102,7 @@ StatusCode Starlight_i::callGenerator()
     m_randomGenerator->SetSeed(seeds[0]);
 
     // Generate event
-    m_event = new upcEvent; 
+    m_event = new upcEvent;
     (*m_event) = m_starlight->produceEvent();
 
     // update event counter
@@ -155,27 +111,27 @@ StatusCode Starlight_i::callGenerator()
     int numberofTracks = m_event->getParticles()->size();
     int numberOfVertices = 1; //m_event->getVertices()->size();
 
-    ATH_MSG_DEBUG( "EVENT: " << m_events << " " 
+    ATH_MSG_DEBUG( "EVENT: " << m_events << " "
                    << " with " << numberOfVertices << " vertices "
                    << " and " << numberofTracks << " tracks"  );
-    ATH_MSG_DEBUG( "VERTEX: "<< 0. << " " << 0. << " " << 0. 
+    ATH_MSG_DEBUG( "VERTEX: "<< 0. << " " << 0. << " " << 0.
                    << " with " << numberofTracks << " tracks"  );
-      
+
     int ipart = 0;
-    std::vector<starlightParticle>::const_iterator part = 
+    std::vector<starlightParticle>::const_iterator part =
       (m_event->getParticles())->begin();
-    for (part = m_event->getParticles()->begin(); 
-	 part != m_event->getParticles()->end(); ++part, ++ipart) {
-      ATH_MSG_DEBUG( "TRACK: " << " " 
+    for (part = m_event->getParticles()->begin();
+         part != m_event->getParticles()->end(); ++part, ++ipart) {
+      ATH_MSG_DEBUG( "TRACK: " << " "
                      << starlightParticleCodes::jetsetToGeant((*part).getCharge() * (*part).getPdgCode()) << " "
-                     << (*part).GetPx() << " " << (*part).GetPy() << " "<< (*part).GetPz() 
+                     << (*part).GetPx() << " " << (*part).GetPy() << " "<< (*part).GetPz()
                      << " " << m_events << " " << ipart << " " << 0 << " "
                      << (*part).getCharge() * (*part).getPdgCode()  );
     }
 
     ATH_MSG_DEBUG( " Starlight generating done.  \n"   );
 
-    return StatusCode::SUCCESS;  
+    return StatusCode::SUCCESS;
 }
 
 StatusCode
@@ -202,75 +158,75 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     HepMC::GenVertexPtr v1 = HepMC::newGenVertexPtr();
     evt->add_vertex( v1 );
 
-    // Loop on all final particles and 
+    // Loop on all final particles and
     // put them all as outgoing from the event vertex
     int ipart = 0;
     std::vector<starlightParticle>::const_iterator part =
       (m_event->getParticles())->begin();
     for (part = m_event->getParticles()->begin();
-         part != m_event->getParticles()->end(); ++part, ++ipart) 
+         part != m_event->getParticles()->end(); ++part, ++ipart)
       {
-	int pid = (*part).getPdgCode();
-	int charge = (*part).getCharge();
+        int pid = (*part).getPdgCode();
+        int charge = (*part).getCharge();
         //AO special for pid sign stored in charge
         int pidsign = pid/std::abs(pid);
         int chsign = 0;
         if (charge !=0) chsign = charge/std::abs(charge);
         if( chsign != pidsign && chsign != 0) pid = -pid;
 
-	double px = (*part).GetPx();
-	double py = (*part).GetPy();
-	double pz = (*part).GetPz();
-	double e  = (*part).GetE();
-	// mass fix implemented only for muons
-	if(std::abs(pid)==13) {
+        double px = (*part).GetPx();
+        double py = (*part).GetPy();
+        double pz = (*part).GetPz();
+        double e  = (*part).GetE();
+        // mass fix implemented only for muons
+        if(std::abs(pid)==13) {
           float mass = m_inputParameters.muonMass();//0.1056583715;// starlightConstants::muonMass;
-	  e  = std::sqrt(px*px + py*py + pz*pz + mass*mass);
-	}
+          e  = std::sqrt(px*px + py*py + pz*pz + mass*mass);
+        }
         // mass fix for photons (ALPs)
         if(std::abs(pid)==22) {
           e  = std::sqrt(px*px + py*py + pz*pz);
         }
 
-	ATH_MSG_DEBUG( "saving particle " << ipart  );
+        ATH_MSG_DEBUG( "saving particle " << ipart  );
 
-	v1->add_particle_out( 
-			     HepMC::newGenParticlePtr(HepMC::FourVector(px, py, pz, e), pid, 1) );
+        v1->add_particle_out(
+                             HepMC::newGenParticlePtr(HepMC::FourVector(px, py, pz, e), pid, 1) );
       }
     ATH_MSG_DEBUG( "Saved " << ipart << " tracks "  );
 
     // Convert cm->mm and GeV->MeV
-    // 
+    //
     GeVToMeV(evt);
-    
+
     return StatusCode::SUCCESS;
 }
 
 bool
 Starlight_i::starlight2lhef()
 {
-          
+
     std::string lheFilename    = "events.lhe";
     std::ofstream lheStream;
     lheStream.open(lheFilename.c_str(), std::ofstream::trunc);
     if(!lheStream) {
       ATH_MSG_ERROR("error: Failed to open  file "+lheFilename);
       return false;
-    }  
-    
+    }
+
     lheStream << "<LesHouchesEvents version=\"1.0\">\n";
-    lheStream << "<!--\n";   
+    lheStream << "<!--\n";
     lheStream << "File generated using Starlight \n";
     lheStream << "-->\n";
-    
+
     lheStream << "<init>\n";
     lheStream << "  13  -13  2.510000e+03  2.510000e+03  0  0  0  0  3  1\n";
     lheStream << "  1.000000e+00  0.000000e+00  1.000000e+00   9999\n";
     lheStream << "</init>\n";
-      
-       
+
+
     std::unique_ptr<upcEvent> uevent(new upcEvent);
-       
+
     for(unsigned int i=0; i<m_maxevents; i++) {
       lheStream << "<event>\n";
       (*uevent) = m_starlight->produceEvent();
@@ -284,33 +240,33 @@ Starlight_i::starlight2lhef()
          photon_system += particle_sl;
          ptscale += std::sqrt((*part).GetPx()*(*part).GetPx() + (*part).GetPy()*(*part).GetPy());
            }
-      
+
       // avg pt is the correct scale here
       ptscale /= static_cast<float> (ipart);
       lheStream << "     4  9999  1.000000e+00  "<<ptscale<<"  7.297e-03  2.569093e-01\n";
-      
+
       if(m_doTauolappLheFormat){
       lheStream << " -11    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
-                  << photon_system.m()/2.*std::exp(photon_system.rapidity())<<"  " 
+                  << photon_system.m()/2.*std::exp(photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(photon_system.rapidity())
                   << "  0.0000000000e+00 0. 9.\n";
       lheStream << " 11    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
-                  << -photon_system.m()/2.*std::exp(-photon_system.rapidity())<<"  " 
+                  << -photon_system.m()/2.*std::exp(-photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(-photon_system.rapidity())
                   << "  0.0000000000e+00 0. 9.\n";
       }
 
       else{
               lheStream << " 22    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
-                  << photon_system.m()/2.*std::exp(photon_system.rapidity())<<"  " 
+                  << photon_system.m()/2.*std::exp(photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(photon_system.rapidity())
                   <<"  0.0000000000e+00 0. 9.\n";
               lheStream << " 22    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
-                  << -photon_system.m()/2.*std::exp(-photon_system.rapidity())<<"  " 
+                  << -photon_system.m()/2.*std::exp(-photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(-photon_system.rapidity())
                   <<"  0.0000000000e+00 0. 9.\n";
       }
-      
+
       for (part = uevent->getParticles()->begin(); part != uevent->getParticles()->end(); ++part, ++ipart)
       {
         int pid = (*part).getPdgCode();
@@ -319,7 +275,7 @@ Starlight_i::starlight2lhef()
         int pidsign = pid/std::abs(pid);
         int chsign = charge/std::abs(charge);
         if( chsign != pidsign ) pid = -pid;
-        
+
         double px = (*part).GetPx();
         double py = (*part).GetPy();
         double pz = (*part).GetPz();
@@ -328,17 +284,17 @@ Starlight_i::starlight2lhef()
         if(std::abs(pid)==11) mass = m_inputParameters.mel();
         else if(std::abs(pid)==13) mass = m_inputParameters.muonMass();
         else if(std::abs(pid)==15) mass = m_inputParameters.tauMass();
-        
+
         lheStream << pid<<"     1     1     2     0     0  "<<px<<"  "<<py<<"  "<<pz<<"  "<<e<<"  "<<mass<<"  0. 9.\n";
-        
+
        }
     lheStream << "</event>\n";
     }
-        
-        
-    lheStream << "</LesHouchesEvents>";  
+
+
+    lheStream << "</LesHouchesEvents>";
     lheStream.close();
-        
+
     return true;
 }
 
@@ -351,18 +307,18 @@ bool Starlight_i::set_user_params()
   if (m_configFileName.empty()) {
     m_configFileName = "tmp.slight.in";
     if (!prepare_params_file()) {
-      printWarn << 
-	"problems initializing input parameters. cannot initialize starlight.";
+      printWarn <<
+        "problems initializing input parameters. cannot initialize starlight.";
       return false;
     }
   }
-  
+
   m_inputParameters.configureFromFile(m_configFileName);
   if (!m_inputParameters.init()) {
     ATH_MSG_WARNING( "problems initializing input parameters. cannot initialize starlight. "  );
     return false;
   }
-  
+
   return true;
 }
 
@@ -374,158 +330,158 @@ bool Starlight_i::prepare_params_file()
     {
         ATH_MSG_INFO( "  Command is: " << *i  );
 
-	StringParse mystring(*i);
-	std::string myparam = mystring.piece(1);
-	if (myparam == "beam1Z")
-	{
-	  m_beam1Z  = mystring.numpiece(2);
-	}
-	else if (myparam == "beam1A")
-	{
-	  m_beam1A  = mystring.numpiece(2);
-	}
-	else if (myparam == "beam2Z")
-	{
-	  m_beam2Z  = mystring.numpiece(2);
-	}
-	else if (myparam == "beam2A")
-	{
-	  m_beam2A  = mystring.numpiece(2);
-	}
-	else if (myparam == "beam1Gamma")
-	{
-	  m_beam1Gamma  = mystring.numpiece(2);
-	}
-	else if (myparam == "beam2Gamma")
-	{
-	  m_beam2Gamma  = mystring.numpiece(2);
-	}
-	else if (myparam == "maxW")
-	{
-	  m_maxW  = mystring.numpiece(2);
-	}
-	else if (myparam == "minW")
-	{
-	  m_minW  = mystring.numpiece(2);
-	}
-	else if (myparam == "nmbWBins")
-	{
-	  m_nmbWBins  = mystring.numpiece(2);
-	}
-	else if (myparam == "maxRapidity")
-	{
-	  m_maxRapidity  = mystring.numpiece(2);
-	}
-	else if (myparam == "nmbRapidityBins")
-	{
-	  m_nmbRapidityBins  = mystring.numpiece(2);
-	}
-	else if (myparam == "accCutPt")
-	{
-	  m_accCutPt = mystring.numpiece(2);
-	}
-	else if (myparam == "minPt")
-	{
-	  m_minPt = mystring.numpiece(2);
-	}
-	else if (myparam == "maxPt")
-	{
-	  m_maxPt = mystring.numpiece(2);
-	}
-	else if (myparam == "accCutEta")
-	{
-	  m_accCutEta = mystring.numpiece(2);
-	}
-	else if (myparam == "minEta")
-	{
-	  m_minEta = mystring.numpiece(2);
-	}
-	else if (myparam == "maxEta")
-	{
-	  m_maxEta = mystring.numpiece(2);
-	}
-	else if (myparam == "productionMode")
-	{
-	  m_productionMode  = mystring.numpiece(2);
-	}
+        StringParse mystring(*i);
+        std::string myparam = mystring.piece(1);
+        if (myparam == "beam1Z")
+        {
+          m_beam1Z  = mystring.numpiece(2);
+        }
+        else if (myparam == "beam1A")
+        {
+          m_beam1A  = mystring.numpiece(2);
+        }
+        else if (myparam == "beam2Z")
+        {
+          m_beam2Z  = mystring.numpiece(2);
+        }
+        else if (myparam == "beam2A")
+        {
+          m_beam2A  = mystring.numpiece(2);
+        }
+        else if (myparam == "beam1Gamma")
+        {
+          m_beam1Gamma  = mystring.numpiece(2);
+        }
+        else if (myparam == "beam2Gamma")
+        {
+          m_beam2Gamma  = mystring.numpiece(2);
+        }
+        else if (myparam == "maxW")
+        {
+          m_maxW  = mystring.numpiece(2);
+        }
+        else if (myparam == "minW")
+        {
+          m_minW  = mystring.numpiece(2);
+        }
+        else if (myparam == "nmbWBins")
+        {
+          m_nmbWBins  = mystring.numpiece(2);
+        }
+        else if (myparam == "maxRapidity")
+        {
+          m_maxRapidity  = mystring.numpiece(2);
+        }
+        else if (myparam == "nmbRapidityBins")
+        {
+          m_nmbRapidityBins  = mystring.numpiece(2);
+        }
+        else if (myparam == "accCutPt")
+        {
+          m_accCutPt = mystring.numpiece(2);
+        }
+        else if (myparam == "minPt")
+        {
+          m_minPt = mystring.numpiece(2);
+        }
+        else if (myparam == "maxPt")
+        {
+          m_maxPt = mystring.numpiece(2);
+        }
+        else if (myparam == "accCutEta")
+        {
+          m_accCutEta = mystring.numpiece(2);
+        }
+        else if (myparam == "minEta")
+        {
+          m_minEta = mystring.numpiece(2);
+        }
+        else if (myparam == "maxEta")
+        {
+          m_maxEta = mystring.numpiece(2);
+        }
+        else if (myparam == "productionMode")
+        {
+          m_productionMode  = mystring.numpiece(2);
+        }
         else if (myparam == "axionMass")
         {
           m_axionMass  = mystring.numpiece(2);
         }
-	else if (myparam == "nmbEventsTot")
-	{
-	  m_nmbEventsTot  = mystring.numpiece(2);
-	}
-	else if (myparam == "prodParticleId")
-	{
-	  m_prodParticleId  = mystring.numpiece(2);
-	}
-	else if (myparam == "randomSeed")
-	{
-	  m_randomSeed  = mystring.numpiece(2);
-	}
-	else if (myparam == "outputFormat")
-	{
-	  m_outputFormat  = mystring.numpiece(2);
-	}
-	else if (myparam == "beamBreakupMode")
-	{
-	  m_beamBreakupMode  = mystring.numpiece(2);
-	}
-	else if (myparam == "interferenceEnabled")
-	{
-	  m_interferenceEnabled  = mystring.numpiece(2);
-	}
-	else if (myparam == "interferenceStrength")
-	{
-	  m_interferenceStrength  = mystring.numpiece(2);
-	}
-	else if (myparam == "coherentProduction")
-	{
-	  m_coherentProduction = mystring.numpiece(2);
-	}
-	else if (myparam == "incoherentFactor")
-	{
-	  m_incoherentFactor  = mystring.numpiece(2);
-	}
-	else if (myparam == "maxPtInterference")
-	{
-	  m_maxPtInterference  = mystring.numpiece(2);
-	}
-	else if (myparam == "nmbPtBinsInterference")
-	{
-	  m_nmbPtBinsInterference  = mystring.numpiece(2);
-	}
-	else if (myparam == "xsecMethod")
-	{
-	  m_xsecMethod = mystring.numpiece(2);
-	}
-	else if (myparam == "nThreads")
-	{
-	  m_nThreads = mystring.numpiece(2);
-	}
-	else if (myparam == "pythFullRec")
-	{
-	  m_pythFullRec = mystring.numpiece(2);
-	}
-	else
-	{
-          ATH_MSG_ERROR( " ERROR in STARLIGHT INITIALIZATION PARAMETERS  " 
+        else if (myparam == "nmbEventsTot")
+        {
+          m_nmbEventsTot  = mystring.numpiece(2);
+        }
+        else if (myparam == "prodParticleId")
+        {
+          m_prodParticleId  = mystring.numpiece(2);
+        }
+        else if (myparam == "randomSeed")
+        {
+          m_randomSeed  = mystring.numpiece(2);
+        }
+        else if (myparam == "outputFormat")
+        {
+          m_outputFormat  = mystring.numpiece(2);
+        }
+        else if (myparam == "beamBreakupMode")
+        {
+          m_beamBreakupMode  = mystring.numpiece(2);
+        }
+        else if (myparam == "interferenceEnabled")
+        {
+          m_interferenceEnabled  = mystring.numpiece(2);
+        }
+        else if (myparam == "interferenceStrength")
+        {
+          m_interferenceStrength  = mystring.numpiece(2);
+        }
+        else if (myparam == "coherentProduction")
+        {
+          m_coherentProduction = mystring.numpiece(2);
+        }
+        else if (myparam == "incoherentFactor")
+        {
+          m_incoherentFactor  = mystring.numpiece(2);
+        }
+        else if (myparam == "maxPtInterference")
+        {
+          m_maxPtInterference  = mystring.numpiece(2);
+        }
+        else if (myparam == "nmbPtBinsInterference")
+        {
+          m_nmbPtBinsInterference  = mystring.numpiece(2);
+        }
+        else if (myparam == "xsecMethod")
+        {
+          m_xsecMethod = mystring.numpiece(2);
+        }
+        else if (myparam == "nThreads")
+        {
+          m_nThreads = mystring.numpiece(2);
+        }
+        else if (myparam == "pythFullRec")
+        {
+          m_pythFullRec = mystring.numpiece(2);
+        }
+        else
+        {
+          ATH_MSG_ERROR( " ERROR in STARLIGHT INITIALIZATION PARAMETERS  "
                          << myparam << " is an invalid parameter !"  );
-	    return false;
-	}
+            return false;
+        }
     }
 
     std::ofstream configFile;
-    configFile.open(m_configFileName.c_str());
+    configFile.open(m_configFileName.value().c_str());
 
-    configFile << "BEAM_1_Z = " << m_beam1Z << std::endl; 
+    configFile << "BEAM_1_Z = " << m_beam1Z << std::endl;
     configFile << "BEAM_1_A = " << m_beam1A << std::endl;
-    configFile << "BEAM_2_Z = " << m_beam2Z << std::endl; 
+    configFile << "BEAM_2_Z = " << m_beam2Z << std::endl;
     configFile << "BEAM_2_A = " << m_beam2A << std::endl;
     configFile << "BEAM_1_GAMMA = " << m_beam1Gamma << std::endl;
     configFile << "BEAM_2_GAMMA = " << m_beam2Gamma << std::endl;
-    configFile << "W_MAX = " << m_maxW << std::endl; 
+    configFile << "W_MAX = " << m_maxW << std::endl;
     configFile << "W_MIN = " << m_minW << std::endl;
     configFile << "W_N_BINS = " << m_nmbWBins << std::endl;
     configFile << "RAP_MAX = " << m_maxRapidity << std::endl;
