@@ -8,17 +8,17 @@ class MetAnalysisConfig (ConfigBlock):
     """the ConfigBlock for the MET configuration"""
 
     def __init__ (self, containerName) :
-        super (MetAnalysisConfig, self).__init__ ()
+        super (MetAnalysisConfig, self).__init__ (containerName)
         self.containerName = containerName
-        self.postfix = ''
-        self.useFJVT = False
-        self.treatPUJets = False
-        self.jets = ""
-        self.electrons = ""
-        self.muons = ""
-        self.photons = ""
-        self.taus = ""
-        self.invisible = ""
+        self.addOption ('postfix', '', type=str)
+        self.addOption ('useFJVT', False, type=bool)
+        self.addOption ('treatPUJets', False, type=bool)
+        self.addOption ('jets', "", type=str)
+        self.addOption ('electrons', "", type=str)
+        self.addOption ('muons', "", type=str)
+        self.addOption ('photons', "", type=str)
+        self.addOption ('taus', "", type=str)
+        self.addOption ('invisible', "", type=str)
 
     def makeAlgs (self, config) :
 
@@ -81,14 +81,14 @@ class MetAnalysisConfig (ConfigBlock):
 
 
 def makeMetAnalysisConfig( seq, containerName,
-                             postfix = '',
-                             useFJVT = False,
-                             treatPUJets = False,
-                             jets = "",
-                             electrons = "",
-                             muons = "",
-                             photons = "",
-                             taus = ""):
+                             postfix = None,
+                             useFJVT = None,
+                             treatPUJets = None,
+                             jets = None,
+                             electrons = None,
+                             muons = None,
+                             photons = None,
+                             taus = None):
     """Create a met analysis algorithm config
 
     Note that defining a jet container is mandatory, but all other input
@@ -103,12 +103,20 @@ def makeMetAnalysisConfig( seq, containerName,
     """
 
     config = MetAnalysisConfig (containerName)
-    config.postfix = postfix
-    config.useFJVT = useFJVT
-    config.treatPUJets = treatPUJets
-    config.jets = jets
-    config.electrons = electrons
-    config.muons = muons
-    config.photons = photons
-    config.taus = taus
+    if postfix is not None :
+        config.setOptionValue ('postfix', postfix)
+    if useFJVT is not None :
+        config.setOptionValue ('useFJVT', useFJVT)
+    if treatPUJets is not None :
+        config.setOptionValue ('treatPUJets', treatPUJets)
+    if jets is not None :
+        config.setOptionValue ('jets', jets)
+    if electrons is not None :
+        config.setOptionValue ('electrons', electrons)
+    if muons is not None :
+        config.setOptionValue ('muons', muons)
+    if photons is not None :
+        config.setOptionValue ('photons', photons)
+    if taus is not None :
+        config.setOptionValue ('taus', taus)
     seq.append (config)

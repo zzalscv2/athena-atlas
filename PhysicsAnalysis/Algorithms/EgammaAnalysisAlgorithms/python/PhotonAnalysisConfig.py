@@ -245,18 +245,12 @@ def makePhotonCalibrationConfig( seq, containerName,
     """
 
     config = PhotonCalibrationConfig (containerName)
-    if postfix is not None :
-        config.setOptionValue ('postfix', postfix)
-    if crackVeto is not None :
-        config.setOptionValue ('crackVeto', crackVeto)
-    if enableCleaning is not None :
-        config.setOptionValue ('enableCleaning', enableCleaning)
-    if cleaningAllowLate is not None :
-        config.setOptionValue ('cleaningAllowLate', cleaningAllowLate)
-    if recomputeIsEM is not None :
-        config.setOptionValue ('recomputeIsEM', recomputeIsEM)
-    if ptSelectionOutput is not None :
-        config.setOptionValue ('ptSelectionOutput', ptSelectionOutput)
+    config.setOptionValue ('postfix', postfix, noneAction='ignore')
+    config.setOptionValue ('crackVeto', crackVeto, noneAction='ignore')
+    config.setOptionValue ('enableCleaning', enableCleaning, noneAction='ignore')
+    config.setOptionValue ('cleaningAllowLate', cleaningAllowLate, noneAction='ignore')
+    config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
+    config.setOptionValue ('ptSelectionOutput', ptSelectionOutput, noneAction='ignore')
     seq.append (config)
 
 
@@ -281,6 +275,5 @@ def makePhotonWorkingPointConfig( seq, containerName, workingPoint, postfix,
             raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
         config.setOptionValue ('qualityWP',     splitWP[0])
         config.setOptionValue ('isolationWP',   splitWP[1])
-    if recomputeIsEM is not None :
-        config.setOptionValue ('recomputeIsEM', recomputeIsEM)
+    config.setOptionValue ('recomputeIsEM', recomputeIsEM, noneAction='ignore')
     seq.append (config)

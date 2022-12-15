@@ -7,16 +7,18 @@ from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 class TauCalibrationConfig (ConfigBlock):
     """the ConfigBlock for the tau four-momentum correction"""
 
-    def __init__ (self, containerName, postfix) :
-        super (TauCalibrationConfig, self).__init__ ()
+    def __init__ (self, containerName) :
+        super (TauCalibrationConfig, self).__init__ (containerName)
         self.containerName = containerName
-        self.postfix = postfix
-        if self.postfix != '' and self.postfix[0] != '_' :
-            self.postfix = '_' + self.postfix
-        self.rerunTruthMatching = True
+        self.addOption ('postfix', '', type=str)
+        self.addOption ('rerunTruthMatching', True, type=bool)
 
 
     def makeAlgs (self, config) :
+
+        postfix = self.postfix
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
 
         if config.isPhyslite() :
             config.setSourceName (self.containerName, "AnalysisTauJets")
@@ -26,7 +28,7 @@ class TauCalibrationConfig (ConfigBlock):
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() != 'data':
             alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
-                                          'TauTruthMatchingAlg' + self.postfix )
+                                          'TauTruthMatchingAlg' + postfix )
             config.addPrivateTool( 'matchingTool',
                                    'TauAnalysisTools::TauTruthMatchingTool' )
             alg.matchingTool.WriteTruthTaus = 1
@@ -34,7 +36,7 @@ class TauCalibrationConfig (ConfigBlock):
             alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the tau 4-momentum smearing algorithm:
-        alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
@@ -49,18 +51,26 @@ class TauWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (16 Mar 22)."""
 
-    def __init__ (self, containerName, postfix, quality) :
-        super (TauWorkingPointConfig, self).__init__ ()
+    def __init__ (self, containerName, postfix) :
+        super (TauWorkingPointConfig, self).__init__ (containerName + '.' + postfix)
         self.containerName = containerName
         self.selectionName = postfix
-        self.postfix = postfix
-        if self.postfix != '' and self.postfix[0] != '_' :
-            self.postfix = '_' + self.postfix
-        self.quality = quality
-        self.legacyRecommendations = False
+        self.addOption ('postfix', None, type=str)
+        self.addOption ('quality', None, type=str)
+        self.addOption ('legacyRecommendations', False, type=bool)
 
 
     def makeAlgs (self, config) :
+
+        selectionPostfix = self.selectionName
+        if selectionPostfix != '' and selectionPostfix[0] != '_' :
+            selectionPostfix = '_' + selectionPostfix
+
+        postfix = self.postfix
+        if postfix is None :
+            postfix = self.selectionName
+        if postfix != '' and postfix[0] != '_' :
+            postfix = '_' + postfix
 
         nameFormat = 'TauAnalysisAlgorithms/tau_selection_{}.conf'
         if self.legacyRecommendations:
@@ -74,22 +84,22 @@ class TauWorkingPointConfig (ConfigBlock) :
 
         # Setup the tau selection tool
         selectionTool = config.createPublicTool( 'TauAnalysisTools::TauSelectionTool',
-                                                 'TauSelectionTool' + self.postfix)
+                                                 'TauSelectionTool' + postfix)
         selectionTool.ConfigPath = inputfile
 
         # Set up the algorithm selecting taus:
-        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
         alg.selectionTool.ConfigPath = inputfile
-        alg.selectionDecoration = 'selected_tau' + self.postfix + ',as_bits'
+        alg.selectionDecoration = 'selected_tau' + selectionPostfix + ',as_bits'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, bits=6)
 
         # Set up an algorithm used for decorating baseline tau selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
-                                      'TauSelectionSummary' + self.postfix )
-        alg.selectionDecoration = 'baselineSelection' + self.postfix + ',as_char'
+                                      'TauSelectionSummary' + postfix )
+        alg.selectionDecoration = 'baselineSelection' + selectionPostfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
 
@@ -98,14 +108,14 @@ class TauWorkingPointConfig (ConfigBlock) :
         # taus:
         if config.dataType() != 'data':
             alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
-                                   'TauEfficiencyCorrectionsAlg' + self.postfix )
+                                   'TauEfficiencyCorrectionsAlg' + postfix )
             config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
                 ( selectionTool.getType(), selectionTool.getName() )
-            alg.scaleFactorDecoration = 'tau_effSF' + self.postfix + '_%SYS%'
+            alg.scaleFactorDecoration = 'tau_effSF' + selectionPostfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
-            alg.outOfValidityDeco = 'bad_eff' + self.postfix
+            alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
 
@@ -113,8 +123,8 @@ class TauWorkingPointConfig (ConfigBlock) :
 
 
 
-def makeTauCalibrationConfig( seq, containerName, postfix = '',
-                              rerunTruthMatching = True):
+def makeTauCalibrationConfig( seq, containerName, postfix = None,
+                              rerunTruthMatching = None):
     """Create tau calibration analysis algorithms
 
     This makes all the algorithms that need to be run first befor
@@ -130,8 +140,11 @@ def makeTauCalibrationConfig( seq, containerName, postfix = '',
       rerunTruthMatching -- Whether or not to rerun truth matching
     """
 
-    config = TauCalibrationConfig (containerName, postfix)
-    config.rerunTruthMatching = rerunTruthMatching
+    config = TauCalibrationConfig (containerName)
+    if postfix is not None :
+        config.setOptionValue ('postfix', postfix)
+    if rerunTruthMatching is not None :
+        config.setOptionValue ('rerunTruthMatching', rerunTruthMatching)
     seq.append (config)
 
 
@@ -139,7 +152,7 @@ def makeTauCalibrationConfig( seq, containerName, postfix = '',
 
 
 def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                               legacyRecommendations = False):
+                               legacyRecommendations = None):
     """Create tau analysis algorithms for a single working point
 
     Keyword arguments:
@@ -151,10 +164,11 @@ def makeTauWorkingPointConfig( seq, containerName, workingPoint, postfix,
                  names are unique.
     """
 
-    splitWP = workingPoint.split ('.')
-    if len (splitWP) != 1 :
-        raise ValueError ('working point should be of format "quality", not ' + workingPoint)
-
-    config = TauWorkingPointConfig (containerName, postfix, splitWP[0])
-    config.legacyRecommendations = legacyRecommendations
+    config = TauWorkingPointConfig (containerName, postfix)
+    if workingPoint is not None :
+        splitWP = workingPoint.split ('.')
+        if len (splitWP) != 1 :
+            raise ValueError ('working point should be of format "quality", not ' + workingPoint)
+        config.setOptionValue ('quality', splitWP[0])
+    config.setOptionValue ('legacyRecommendations', legacyRecommendations, noneAction='ignore')
     seq.append (config)

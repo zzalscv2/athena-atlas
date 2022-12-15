@@ -8,10 +8,10 @@ class EventCleaningBlock (ConfigBlock):
     """the ConfigBlock for event cleaning"""
 
     def __init__ (self) :
-        super (EventCleaningBlock, self).__init__ ()
-        self.runPrimaryVertexSelection = True
-        self.runEventCleaning = False
-        self.userGRLFiles = []
+        super (EventCleaningBlock, self).__init__ ('Trigger')
+        self.addOption ('runPrimaryVertexSelection', True, type=bool)
+        self.addOption ('runEventCleaning', False, type=bool)
+        self.addOption ('userGRLFiles', [], type=None)
 
 
     def makeAlgs (self, config) :
@@ -42,9 +42,9 @@ class EventCleaningBlock (ConfigBlock):
 
 
 def makeEventCleaningConfig( seq,
-                             runPrimaryVertexSelection = True,
-                             runEventCleaning = False,
-                             userGRLFiles = []):
+                             runPrimaryVertexSelection = None,
+                             runEventCleaning = None,
+                             userGRLFiles = None):
     """Create a basic event cleaning analysis algorithm sequence
 
     Keyword arguments:
@@ -54,7 +54,7 @@ def makeEventCleaningConfig( seq,
     """
 
     config = EventCleaningBlock ()
-    config.runPrimaryVertexSelection = runPrimaryVertexSelection
-    config.runEventCleaning = runEventCleaning
-    config.userGRLFiles = userGRLFiles
+    config.setOptionValue ('runPrimaryVertexSelection', runPrimaryVertexSelection, noneAction='ignore')
+    config.setOptionValue ('runEventCleaning', runEventCleaning, noneAction='ignore')
+    config.setOptionValue ('userGRLFiles', userGRLFiles, noneAction='ignore')
     seq.append (config)

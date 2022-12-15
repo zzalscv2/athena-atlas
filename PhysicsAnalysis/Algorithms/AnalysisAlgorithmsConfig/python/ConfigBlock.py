@@ -3,9 +3,10 @@
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
 
-    def __init__ (self, type, info) :
+    def __init__ (self, type, info, duplicateAction) :
         self.type = type
         self.info = info
+        self.duplicateAction = duplicateAction
 
 
 
@@ -58,7 +59,7 @@ class ConfigBlock:
 
     def __init__ (self, groupName = '') :
         self._groupName = groupName
-        self._properties = {}
+        self._options = {}
 
 
     def groupName (self) :
@@ -66,8 +67,8 @@ class ConfigBlock:
 
         This is generally either 'ObjectName' or
         'ObjectName.SelectionName', and can be used to identify blocks
-        on which to set properties.  This name should not change after
-        the block has been created, i.e. not depend on any properties
+        on which to set options.  This name should not change after
+        the block has been created, i.e. not depend on any options
         itself.
 
         WARNING: The backend to option handling is slated to be
@@ -78,7 +79,7 @@ class ConfigBlock:
 
 
     def addOption (self, name, defaultValue,
-                   *, type, info='') :
+                   *, type, info='', duplicateAction='set') :
         """declare the given option on the configuration block
 
         This should only be called in the constructor of the
@@ -88,15 +89,18 @@ class ConfigBlock:
         at some point.  This particular function should essentially
         stay the same, but some behavior may change.
         """
-        if name in self._properties :
+        if name in self._options :
             raise KeyError ('duplicate option: ' + name)
-        if type not in [str, bool, int, float] :
+        if type not in [str, bool, int, float, None] :
             raise TypeError ('unknown option type: ' + str (type))
+        if duplicateAction not in ['skip', 'set', 'error'] :
+            raise ValueError ('unknown duplicateAction: ' + duplicateAction)
         setattr (self, name, defaultValue)
-        self._properties[name] = ConfigBlockOption (type=type, info=info)
+        self._options[name] = ConfigBlockOption (type=type, info=info, duplicateAction=duplicateAction)
 
 
-    def setOptionValue (self, name, value) :
+    def setOptionValue (self, name, value,
+                        *, noneAction='error', isDuplicate=False) :
         """set the given option on the configuration block
 
         NOTE: The backend to option handling is slated to be replaced
@@ -104,9 +108,30 @@ class ConfigBlock:
         stay the same, but some behavior may change.
         """
 
-        if name not in self._properties :
+        noneActions = ['error', 'set', 'ignore']
+        if noneAction not in noneActions :
+            raise ValueError ('invalid noneAction: ' + noneAction + ' [allowed values: ' + str (noneActions) + ']')
+
+        if name not in self._options :
             raise KeyError ('unknown option: ' + name)
-        setattr (self, name, value)
+        option = self._options[name]
+
+        if isDuplicate :
+            if option.duplicateAction == 'set' :
+                pass
+            elif option.duplicateAction == 'skip' :
+                return
+            elif option.duplicateAction == 'error' :
+                raise Exception ("can't have two options with the same name: " + self._groupName + '.' + name)
+
+        if value is not None or noneAction == 'set' :
+            setattr (self, name, value)
+        elif noneAction == 'ignore' :
+            pass
+        elif noneAction == 'error' :
+            raise ValueError ('passed None for setting option ' + name + ' with noneAction=error')
+        else :
+            raise Exception ('should not get here')
 
 
     def hasOption (self, name) :
@@ -116,4 +141,4 @@ class ConfigBlock:
         replaced at some point.  This particular function may change
         behavior, interface or be removed/replaced entirely.
         """
-        return name in self._properties
+        return name in self._options
