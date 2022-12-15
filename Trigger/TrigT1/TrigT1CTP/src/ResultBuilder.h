@@ -66,12 +66,14 @@ namespace LVL1CTP {
       std::unique_ptr<CTPSLink> constructRoIResult( const EventIDBase & eventID, 
                                                     const std::vector<uint32_t> & tbp, const std::vector<uint32_t> & tap, 
                                                     const std::vector<uint32_t> & tav, const std::vector<uint32_t> & tip, 
+                                                    const std::vector<uint32_t> & extra,
                                                     const unsigned char triggerType ) const;
 
       //! build RDO result (CTP_RDO)
       std::unique_ptr<CTP_RDO> constructRDOResult( const EventIDBase & eventID, 
                                                    const std::vector<uint32_t> & tbp, const std::vector<uint32_t> & tap, 
-                                                   const std::vector<uint32_t> & tav, const std::vector<uint32_t> & tip ) const;
+                                                   const std::vector<uint32_t> & tav, const std::vector<uint32_t> & tip,
+                                                   const std::vector<uint32_t> & extra ) const;
 
    private:
 
