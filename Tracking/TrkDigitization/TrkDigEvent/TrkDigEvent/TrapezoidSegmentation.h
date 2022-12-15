@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -41,6 +41,10 @@ namespace Trk {
                                     
             /** TODO contructor from BinUtilities for more complex readouts */                        
             
+            TrapezoidSegmentation (const TrapezoidSegmentation&) = delete;
+            TrapezoidSegmentation& operator= (const TrapezoidSegmentation&) = delete;
+
+
             /** Virtual Destructor */
             virtual ~TrapezoidSegmentation();
             
