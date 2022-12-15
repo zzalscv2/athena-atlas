@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -220,11 +220,9 @@ StatusCode CscDigitizationTool::CoreDigitization(Collections_t& collections,CscS
     }
   }
 
-  // reset the pointer if it is not null
-  if (m_thpcCSC) {
-    delete m_thpcCSC;
-    m_thpcCSC=nullptr;
-  }
+  // reset the pointer.
+  delete m_thpcCSC;
+  m_thpcCSC=nullptr;
 
   // now loop over the digit map
   // build the digits
