@@ -199,4 +199,24 @@ bool AuxTypeVectorFactory<T, ALLOC>::isDynamic() const
 }
 
 
+/**
+ * @brief Return the @c type_info of the vector allocator.
+ */
+template <class T, class ALLOC>
+const std::type_info* AuxTypeVectorFactory<T, ALLOC>::tiAlloc() const 
+{
+  return &typeid(ALLOC);
+}
+
+
+/**
+ * @brief Return the @c type_info of the vector allocator.
+ */
+template <class T, class ALLOC>
+std::string AuxTypeVectorFactory<T, ALLOC>::tiAllocName() const 
+{
+  return SG::normalizedTypeinfoName (typeid(ALLOC));
+}
+
+
 } // namespace SG

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file xAODRootAccess/test/ut_xaodrootaccess_tauxvector_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -100,8 +98,29 @@ void test1()
 }
 
 
+// Testing tiAllocName.
+void test2()
+{
+  std::cout << "test2\n";
+
+  {
+    TClass* cl = TClass::GetClass ("vector<int>");
+    xAOD::TAuxVectorFactory fac (cl);
+    assert (fac.tiAlloc() == nullptr);
+    assert (fac.tiAllocName() == "std::allocator<int>");
+  }
+  {
+    TClass* cl = TClass::GetClass ("vector<int,std::pmr::polymorphic_allocator<int> >");
+    xAOD::TAuxVectorFactory fac (cl);
+    assert (fac.tiAlloc() == nullptr);
+    assert (fac.tiAllocName() == "std::pmr::polymorphic_allocator<int>");
+  }
+}
+
+
 int main()
 {
   test1();
+  test2();
   return 0;
 }

@@ -75,6 +75,20 @@ namespace xAOD {
       /// Type of the factory
       virtual bool isDynamic() const override { return true; }
 
+      /**
+       * @brief Return the @c type_info of the vector allocator.
+       *
+       * May be nullptr for a dynamic vector.
+       */
+      virtual const std::type_info* tiAlloc() const override;
+
+
+      /**
+       * @brief Return the (demangled) name of the vector allocator.
+       */
+      virtual std::string tiAllocName() const override;
+
+
       /// @}
 
    private:

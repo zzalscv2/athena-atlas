@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainersRoot/test/RootAuxVectorFactory_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -380,6 +378,26 @@ void test6()
 }
 
 
+// Testing tiAllocName.
+void test7()
+{
+  std::cout << "test7\n";
+
+  {
+    TClass* cl = TClass::GetClass ("vector<int>");
+    SG::RootAuxVectorFactory fac (cl);
+    assert (fac.tiAlloc() == nullptr);
+    assert (fac.tiAllocName() == "std::allocator<int>");
+  }
+  {
+    TClass* cl = TClass::GetClass ("vector<int,std::pmr::polymorphic_allocator<int> >");
+    SG::RootAuxVectorFactory fac (cl);
+    assert (fac.tiAlloc() == nullptr);
+    assert (fac.tiAllocName() == "std::pmr::polymorphic_allocator<int>");
+  }
+}
+
+
 int main()
 {
   std::cout << "RootAuxVectorFactory_test\n";
@@ -389,5 +407,6 @@ int main()
   test4();
   test5();
   test6();
+  test7();
   return 0;
 }

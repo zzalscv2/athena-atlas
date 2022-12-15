@@ -114,6 +114,22 @@ void test1()
   test_vector<bool, Athena_test::TestAlloc>();
   test_vector<float, Athena_test::TestAlloc>();
   test_vector2<float, Athena_test::TestAlloc>();
+
+  {
+    SG::AuxTypeVectorFactory<int> fac1;
+    assert (fac1.tiAlloc() == &typeid(std::allocator<int>));
+    assert (fac1.tiAllocName() == "std::allocator<int>");
+  }
+  {
+    SG::AuxTypeVectorFactory<int, Athena_test::TestAlloc<int> > fac2;
+    assert (fac2.tiAlloc() == &typeid(Athena_test::TestAlloc<int>));
+    assert (fac2.tiAllocName() == "Athena_test::TestAlloc<int>");
+  }
+  {
+    SG::AuxTypeVectorFactory<std::vector<int> > fac3;
+    assert (fac3.tiAlloc() == &typeid(std::allocator<std::vector<int> >));
+    assert (fac3.tiAllocName() == "std::allocator<std::vector<int> >");
+  }
 }
 
 

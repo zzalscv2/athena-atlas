@@ -12,6 +12,7 @@
 
 #include "AthContainersInterfaces/IAuxTypeVectorFactory.h"
 #include "AthContainers/tools/AuxTypeVector.h"
+#include "AthContainers/normalizedTypeinfoName.h"
 
 
 #ifndef ATHCONTAINERS_AUXTYPEVECTORFACTORY_H
@@ -128,6 +129,18 @@ public:
    *        if the std::vector code is used directly.
    */
   virtual bool isDynamic() const override;
+
+
+  /**
+   * @brief Return the @c type_info of the vector allocator.
+   */
+  virtual const std::type_info* tiAlloc() const override;
+
+
+  /**
+   * @brief Return the (demangled) name of the vector allocator.
+   */
+  virtual std::string tiAllocName() const override;
 
 
 private:

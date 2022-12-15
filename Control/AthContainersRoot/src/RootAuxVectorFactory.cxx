@@ -544,4 +544,35 @@ bool RootAuxVectorFactory::isDynamic() const
 }
 
 
+/**
+ * @brief Return the @c type_info of the vector allocator.
+ *
+ * May be nullptr for a dynamic vector.
+ */
+const std::type_info* RootAuxVectorFactory::tiAlloc() const
+{
+  return nullptr;
+}
+
+
+/**
+ * @brief Return the (demangled) name of the vector allocator.
+ */
+std::string RootAuxVectorFactory::tiAllocName() const
+{
+  std::string name = SG::normalizedTypeinfoName (*m_vecClass->GetTypeInfo());
+  CxxUtils::ClassName cn (name);
+  std::string alloc_name;
+  if (cn.ntargs() >= 2) {
+    alloc_name = cn.targ(1).fullName();
+  }
+  else if (cn.ntargs() == 1) {
+    alloc_name = "std::allocator<" + cn.targ(0).fullName();
+    if (alloc_name[alloc_name.size()-1] == '>') alloc_name += " ";
+    alloc_name += ">";
+  }
+  return alloc_name;
+}
+
+
 } // namespace SG
