@@ -201,7 +201,7 @@ def addDetectorArguments(parser):
 #  @param parser trfArgParser object
 def addMetadataArguments(parser):
     parser.defineArgGroup('Metadata', 'Metadata arguments that will be passed into the transform')
-    parser.add_argument('--AMIConfig', '--AMI', type=argFactory(trfArgClasses.argString, runarg=False), help='Configure transform with AMI tag parameters', group="Metadata")
+    parser.add_argument('--AMIConfig', '--AMI', type=argFactory(trfArgClasses.argString), help='Configure transform with AMI tag parameters', group="Metadata")
     parser.add_argument('--AMITag',  type=argFactory(trfArgClasses.argString), metavar='TAG', group="Metadata",
                         help='AMI tag from which this job was defined - this option simply writes the '
                         'relevant AMI tag value into the output metadata, it does not configure the job (use --AMIConfig for that)')

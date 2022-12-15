@@ -139,6 +139,10 @@ def fromRunArgs(runArgs):
     # Post-exec
     processPostExec(runArgs, ConfigFlags, cfg)
 
+    # Write AMI tag into in-file metadata
+    from PyUtils.AMITagHelperConfig import AMITagCfg
+    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+
     import time
     tic = time.time()
     # Run the final accumulator

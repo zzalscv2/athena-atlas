@@ -101,6 +101,10 @@ def fromRunArgs(runArgs):
     # Post-exec
     processPostExec(runArgs, ConfigFlags, cfg)
 
+    # Write AMI tag into in-file metadata
+    from PyUtils.AMITagHelperConfig import AMITagCfg
+    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+
     # Run the final configuration
     sc = cfg.run()
     sys.exit(not sc.isSuccess())
