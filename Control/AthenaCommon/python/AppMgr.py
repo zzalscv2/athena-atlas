@@ -75,7 +75,7 @@ def iadd( self, tool ):
       tool = (tool,)
 
  # only add once (allow silently)
-   if self.configurableRun3Behavior:
+   if not self._useGlobalInstances:
       # But if duplicates may not be the same Configurable instances,
       # need to force the owner to prevent errors about public tools
       # not in ToolSvc when old configuration fragments are imported

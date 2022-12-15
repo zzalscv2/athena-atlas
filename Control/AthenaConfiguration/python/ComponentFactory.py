@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import sys
 
@@ -11,8 +11,8 @@ def isRun3Cfg():
     (PackageConf.py, RecExCommon)
     """
     from AthenaCommon.Configurable import Configurable
-    if "AthenaCommon.Include" not in sys.modules\
-        or Configurable.configurableRun3Behavior:
+    if ("AthenaCommon.Include" not in sys.modules
+        or not Configurable._useGlobalInstances):
         return True
     else:
         return False

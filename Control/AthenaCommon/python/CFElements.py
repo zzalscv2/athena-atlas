@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
-from AthenaCommon.Configurable import Configurable
 from AthenaCommon.AlgSequence import AthSequencer as LegacyAthSequencer
 import collections
 
@@ -327,7 +326,6 @@ class TestLegacyCF( unittest.TestCase, TestCF ):
         isRun3Cfg = lambda : False  # noqa: E731 (lambda for mockup)
 
         from AthenaCommon.Configurable import ConfigurablePyAlgorithm
-        Configurable.configurableRun3Behavior=0
         top = parOR("top")
 
         # Skip initialization if it's already been done... otherwise, we'll
