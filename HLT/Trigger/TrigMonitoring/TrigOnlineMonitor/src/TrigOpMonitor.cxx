@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigOpMonitor.h"
@@ -188,7 +188,7 @@ void TrigOpMonitor::fillIOVDbHist()
   // fill histograms
   IIOVDbSvc::KeyInfo info;
   for (const std::string& key : keyList) {
-
+    // cppcheck-suppress nullPointerRedundantCheck
     if (m_IOVDbSvc->getKeyInfo(key, info) && info.retrieved) {
 
       m_currentIOVs[key] = info.range;
@@ -259,6 +259,7 @@ void TrigOpMonitor::fillIOVDbChangeHist(const EventContext& ctx)
   // Loop over all keys known to IOVDbSvc
   IIOVDbSvc::KeyInfo info;
   for (const std::string& k : keys) {
+    // cppcheck-suppress nullPointerRedundantCheck
     if (not m_IOVDbSvc->getKeyInfo(k, info)) continue;
     if (not info.retrieved) continue;
 
