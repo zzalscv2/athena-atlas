@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.AlgSequence import AthSequencer
 from AthenaCommon.Logging import logging
@@ -44,33 +44,24 @@ def BunchCrossingCondAlgDefault():
     elif beamFlags.bunchStructureSource() == 2:
         bgkey = 'L1BunchGroup'  # unless we use in file metadata...
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags
+        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+        from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
         if getattr(svcMgr, 'xAODConfigSvc') and svcMgr.xAODConfigSvc.UseInFileMetadata:
-            from AthenaConfiguration.AllConfigFlags import ConfigFlags
             if 'TriggerMenuJson_BG' not in ConfigFlags.Input.MetadataItems:
                 # this is for when we need to configure the BunchGroupCondAlg with info extracted from converted JSON
                 # in this case avoid using the xAODConfigSvc, because it will be set up incorrectly
                 configFlags_with_DB = ConfigFlags.clone()
                 configFlags_with_DB.Trigger.triggerConfig = 'FILE'
-                from AthenaCommon.Configurable import ConfigurableRun3Behavior
-                with ConfigurableRun3Behavior():
-                    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-                    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
-                    from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
-                    acc = ComponentAccumulator()
-                    acc.merge(BunchGroupCondAlgCfg(configFlags_with_DB))
-                appendCAtoAthena(acc)
+
+                CAtoGlobalWrapper(BunchGroupCondAlgCfg, configFlags_with_DB)
+
             else:
                 bgkey = ''
         else:
-            from AthenaCommon.Configurable import ConfigurableRun3Behavior
-            with ConfigurableRun3Behavior():
-                from AthenaConfiguration.AllConfigFlags import ConfigFlags
-                from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
-                from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
-                acc = ComponentAccumulator()
-                acc.merge(BunchGroupCondAlgCfg(ConfigFlags))
-            appendCAtoAthena(acc)
-        # this probably fails for reading R21 ESD but not going to support that case
+            CAtoGlobalWrapper(BunchGroupCondAlgCfg, ConfigFlags)
+
+    # this probably fails for reading R21 ESD but not going to support that case
     elif beamFlags.bunchStructureSource() == 0:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'
         # Mistakenly created as multi-version folder, must specify HEAD 
