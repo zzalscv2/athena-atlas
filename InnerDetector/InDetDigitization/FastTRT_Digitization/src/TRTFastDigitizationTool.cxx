@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -250,8 +250,10 @@ StatusCode TRTFastDigitizationTool::setNumericalConstants() {
    return StatusCode::SUCCESS;
 }
 
-StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine) {
-
+StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
+                                                        CLHEP::HepRandomEngine* rndmEngine,
+                                                        TimedHitCollection< TRTUncompressedHit >& thpctrt)
+{
   // Create OUTPUT PRD_MultiTruthCollection for TRT measurements
   SG::WriteHandle< PRD_MultiTruthCollection > trtPrdTruth(m_trtPrdTruthKey, ctx);
   trtPrdTruth = std::make_unique< PRD_MultiTruthCollection >();
@@ -278,7 +280,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx,
   m_driftCircleMap.clear();
 
   TimedHitCollection< TRTUncompressedHit >::const_iterator itr1, itr2;
-  while ( m_thpctrt->nextDetectorElement( itr1, itr2 ) ) {
+  while ( thpctrt.nextDetectorElement( itr1, itr2 ) ) {
 
     for ( ; itr1 != itr2; ++itr1 ) {
 
@@ -445,7 +447,6 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
     if ( m_HardScatterSplittingMode == 1 && !m_HardScatterSplittingSkipper ) { m_HardScatterSplittingSkipper = true; }
     timedHitCollection.insert( itr.first, static_cast< const TRTUncompressedHitCollection * >( itr.second ) );
   }
-  m_thpctrt = &timedHitCollection;
 
   // Set the RNG to use for this event.
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this, m_randomEngineName);
@@ -454,7 +455,7 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
   CLHEP::HepRandomEngine *rndmEngine = rngWrapper->getEngine(ctx);
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
-  CHECK( this->produceDriftCircles(ctx, rndmEngine ) );
+  CHECK( this->produceDriftCircles(ctx, rndmEngine, timedHitCollection ) );
 
   CHECK( this->createAndStoreRIOs(ctx, rndmEngine) );
   ATH_MSG_DEBUG ( "createAndStoreRIOs() succeeded" );
@@ -475,7 +476,7 @@ StatusCode TRTFastDigitizationTool::mergeEvent(const EventContext& ctx) {
 
   // Process the Hits straw by straw: get the iterator pairs for given straw
   if ( m_thpctrt != nullptr ) {
-    CHECK( this->produceDriftCircles(ctx, rndmEngine) );
+    CHECK( this->produceDriftCircles(ctx, rndmEngine, *m_thpctrt) );
   }
 
   // Clean up temporary containers
