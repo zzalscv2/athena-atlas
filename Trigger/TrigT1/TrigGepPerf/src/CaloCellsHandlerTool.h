@@ -56,10 +56,9 @@ public:
 		  "totalNoiseKey",
 		  "totalNoise",
 		  "SG Key of CaloNoise data object"};
-  
-  
-  // const mutable CaloCell_ID* m_ccIdHelper;
-  const CaloCell_ID* m_CaloCell_ID;
+
+
+  const CaloCell_ID* m_CaloCell_ID{nullptr};
   std::vector<unsigned int> getNeighbours(const CaloCellContainer& allcells,
 					  const CaloCell* acell,
 					  const EventContext&) const;
