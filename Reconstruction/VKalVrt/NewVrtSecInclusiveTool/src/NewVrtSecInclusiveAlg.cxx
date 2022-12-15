@@ -43,26 +43,27 @@ namespace Rec {
 
    StatusCode NewVrtSecInclusiveAlg::execute(const EventContext &ctx) const
    {
+
+     const xAOD::Vertex* pv = nullptr;
+     std::vector<const xAOD::TrackParticle*> trkparticles(0);
+
      //-- Extract TrackParticles
      SG::ReadHandle<xAOD::TrackParticleContainer> tp_cont(m_tpContainerKey, ctx);
      if ( !tp_cont.isValid() ) {
         ATH_MSG_WARNING( "No TrackParticle container found in TES" );
-        return StatusCode::FAILURE; }
+     }else{
+        for(auto tp : (*tp_cont)) trkparticles.push_back(tp);
+     }
 
      //-- Extract Primary Vertices
      SG::ReadHandle<xAOD::VertexContainer> pv_cont(m_pvContainerKey, ctx);
      if ( !pv_cont.isValid() ) {
        ATH_MSG_WARNING( "No Primary Vertices container found in TDS" );
-       return StatusCode::FAILURE; }
-
-     //-- Extract PV itself
-     const xAOD::Vertex* pv = nullptr;
-     for ( auto v : *pv_cont ) {
-       if (v->vertexType()==xAOD::VxType::PriVtx) {    pv = v;   break; }
-     }
-     if (!pv) {
-       ATH_MSG_WARNING("Primary vertex not found");
-       return StatusCode::FAILURE;
+     }else{
+       //-- Extract PV itself
+       for ( auto v : *pv_cont ) {
+         if (v->vertexType()==xAOD::VxType::PriVtx) {    pv = v;   break; }
+       }
      }
 
      //-- create container for new vertices
@@ -70,13 +71,11 @@ namespace Rec {
      auto bVertexAuxContainer = std::make_unique<xAOD::VertexAuxContainer>();
      bVertexContainer->setStore(bVertexAuxContainer.get());
 
-     std::vector<const xAOD::TrackParticle*> trkparticles(0);
-     for(auto tp : (*tp_cont)) trkparticles.push_back(tp);
-
-     std::unique_ptr<Trk::VxSecVertexInfo> foundVrts = m_bvertextool->findAllVertices(trkparticles,*pv);      
-     if(foundVrts && foundVrts->vertices().size()){
-        const std::vector<xAOD::Vertex*> vtmp=foundVrts->vertices();
-        for(auto & iv :  vtmp) {
+     if( pv &&  trkparticles.size()>2 ){
+       std::unique_ptr<Trk::VxSecVertexInfo> foundVrts = m_bvertextool->findAllVertices(trkparticles,*pv);      
+       if(foundVrts && foundVrts->vertices().size()){
+         const std::vector<xAOD::Vertex*> vtmp=foundVrts->vertices();
+         for(auto & iv :  vtmp) {
            bVertexContainer->push_back(iv);
            std::vector< Trk::VxTrackAtVertex > & vtrk = iv->vxTrackAtVertex();
            TLorentzVector VSUM(0.,0.,0.,0.);
@@ -93,7 +92,8 @@ namespace Rec {
            bvrtPt(*iv) =VSUM.Pt();
            bvrtEta(*iv)=VSUM.Eta();
            bvrtPhi(*iv)=VSUM.Phi();
-        }
+         }
+       }
      }
      ATH_MSG_DEBUG("Found Vertices in this event: " << bVertexContainer->size());
 
