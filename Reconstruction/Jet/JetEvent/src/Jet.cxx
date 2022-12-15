@@ -537,9 +537,9 @@ bool Jet::cleanUp()
       for ( ; fC != lC; ++fC )
 	{
 	  double weight(this->getWeight(fC));
-	  if ( fabs(weight)< m_ignoreWeight )
+	  if ( std::abs(weight)< m_ignoreWeight )
 	    {
-	      aCtr++;
+	      ++aCtr;
 	      this->removeConstituent(*fC);
 	    }
 	}
@@ -612,9 +612,9 @@ bool Jet::isIdentical(const Jet* pJet ) const
       while ( ( fK != lK ) && !((*fC) == (*fK) &&
 				fabs(this->getWeight(fK)-wJ) < m_ignoreWeight) )
  
-	{ fK++; }
+	{ ++fK; }
       isEqual = fK != lK;
-      fC++;
+      ++fC;
     }
 
   return isEqual;
@@ -844,26 +844,6 @@ Jet::shape_t Jet::getShape(const mkey_t& shapeName,bool addIfMissing) const
     }
   return shape_t();
 }
-
-//////////////////
-// Associations //
-//////////////////
-
-/// RSRSRS
-// void Jet::fillAssoToken(INavigationToken& /* token */ ) const
-// {
-//   assostore_t::const_iterator fAss(m_assocStore->begin());
-//   assostore_t::const_iterator lAss(m_assocStore->end());
-//   for ( ; fAss != lAss; fAss++ )
-//     {
-//       // RS HERE
-//       // (*fAss)->fillToken(token);
-//     }
-// }
-
-////////////////////////////
-// Constituent Navigation //
-////////////////////////////
 
 /////////////
 // TagInfo //

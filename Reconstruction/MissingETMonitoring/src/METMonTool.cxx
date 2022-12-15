@@ -86,7 +86,7 @@ StatusCode METMonTool::initialize()
       for (; it != m_metKeys.end();)
         {
 	  if ((*it) == m_metFinKey) it = m_metKeys.erase(it);
-	  else it++;
+	  else ++it;
         }
       m_metKeys.value().push_back(m_metFinKey);
     }
