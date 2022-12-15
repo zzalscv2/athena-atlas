@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonClusterSegmentFinderTool.h"
@@ -99,16 +99,17 @@ namespace Muon {
     ///
     using MeasVec= NSWSeed::MeasVec;
     NSWSeed::SeedMeasurement::SeedMeasurement(const Muon::MuonClusterOnTrack* cl):
-        m_cl{cl} {
-        static const Amg::Vector3D dir_loc{0., 1.,0.};
-        m_dir = std::make_unique<Amg::Vector3D>(cl->detectorElement()->transform(cl->identify()).linear()*dir_loc);
+        m_cl{cl},
+        m_dir (cl->detectorElement()->transform(cl->identify()).linear() * Amg::Vector3D(0, 1, 0))
+    {
     }
 
     NSWSeed::NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
                      const std::array<double,2>& lengths) :
-        m_parent{parent} {       
+      m_parent{parent},
+      m_pos {seed[0].pos() + lengths[0] * seed[0].dir()}
+    {       
        
-        m_pos = seed[0].pos() + lengths[0] * seed[0].dir();
         const Amg::Vector3D un_dir = (seed[1].pos() + lengths[1] *seed[1].dir() - m_pos);
         m_dir = un_dir.unit();
 
