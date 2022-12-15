@@ -80,7 +80,7 @@ Gep::ConeJetMaker::makeJets( const std::vector<Gep::Cluster> &clusters) const
     jet.seedEt = seedEt;
 
     TLorentzVector jetVec;
-    float px{0}, py{0}, pz{0};
+    float px{0}, py{0};
     int clusterIndex {0};
     
     //build jet with clusters within dR from seed
@@ -91,7 +91,6 @@ Gep::ConeJetMaker::makeJets( const std::vector<Gep::Cluster> &clusters) const
         jetVec += cl.vec;        
         px += cl.vec.Px();
 	py += cl.vec.Py();
-	pz += cl.vec.Pz();
 	
         jet.constituentsIndices.push_back(clusterIndex);
       }
