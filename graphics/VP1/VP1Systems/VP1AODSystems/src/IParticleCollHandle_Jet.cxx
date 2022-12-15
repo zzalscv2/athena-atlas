@@ -447,11 +447,9 @@ void IParticleCollHandle_Jet::rerandomise()
 
   largeChangesBegin();
   handleIterationBegin();
-  unsigned int ijet(0);
   AODHandleBase* handle=0;
   while ((handle=getNextHandle()))
   {    
-    ++ijet;
     IParticleHandle_Jet* jet = dynamic_cast<IParticleHandle_Jet*>(handle);
     if (jet && jet->has3DObjects()) {
       jet->rerandomiseMaterial();
