@@ -90,6 +90,8 @@ def MC20e(flags):
 
 def MC20NoPileUp(flags):
     """MC20e flags for MC without pile-up"""
+    flags.Input.MCCampaign = Campaign.MC20a
+
     flags.Beam.NumberOfCollisions = 0
     flags.Digitization.InputBeamSigmaZ = 42
 
