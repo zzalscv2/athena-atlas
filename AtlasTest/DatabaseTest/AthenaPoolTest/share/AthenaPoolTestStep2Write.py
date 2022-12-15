@@ -86,8 +86,6 @@ print(Stream1.ItemList)
 #--------------------------------------------------------------
 svcMgr.MessageSvc.OutputLevel = WARNING
 svcMgr.MessageSvc.debugLimit  = 100000
-#rds ClassIDSvc = Service( "ClassIDSvc" )
-#rds ClassIDSvc.OutputLevel = 3
 AthenaPoolTestDataWriter.OutputLevel = DEBUG
 
 from AthenaServices import AthenaServicesConf
