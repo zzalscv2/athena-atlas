@@ -225,13 +225,12 @@ HVNormal3D SbPolyhedron::FindNodeNormal(int iFace, int iNode) const
  ***********************************************************************/
 {
   HVNormal3D  normal = GetUnitNormal(iFace);
-  int          k = iFace, iOrder = 1, n = 1;
+  int          k = iFace, iOrder = 1;
 
   for(;;) {
     k = FindNeighbour(k, iNode, iOrder);
     if (k == iFace) break;
     if (k > 0) {
-      n++;
       normal += GetUnitNormal(k);
     }else{
       if (iOrder < 0) break;

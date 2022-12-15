@@ -1914,13 +1914,10 @@ unsigned int PolygonTriangulator::Polygon::selectNextEdge(internal_poltrig::Line
 //----------------------------------------------------------------------------
 void PolygonTriangulator::Polygon::searchMonotones()
 {
-  int loop=0;
-
   internal_poltrig::LineMap edges=m_edges;
 
   while( edges.size() > m_diagonals.size() )
     {
-      ++loop;
       internal_poltrig::Monopoly poly;
       internal_poltrig::LineMap::iterator it=edges.begin();
       internal_poltrig::Pointbase* startp=it->second->endPoint(0);
