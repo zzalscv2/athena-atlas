@@ -88,9 +88,7 @@ if __name__=="__main__":
         AccessMode = xAODAccessMode(int(sys.argv[2]))
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaCommon.Configurable import ConfigurableRun3Behavior
-    with ConfigurableRun3Behavior():
-        cfg = MainServicesCfg(ConfigFlags)
-        cfg.merge(xAODReadCfg(ConfigFlags,AccessMode))
+    cfg = MainServicesCfg(ConfigFlags)
+    cfg.merge(xAODReadCfg(ConfigFlags,AccessMode))
 
     cfg.run(10)
