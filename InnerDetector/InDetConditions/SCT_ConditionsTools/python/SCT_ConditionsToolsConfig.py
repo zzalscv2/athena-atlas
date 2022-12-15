@@ -360,9 +360,18 @@ def SCT_ReadCalibDataToolCfg(flags, name="InDetSCT_ReadCalibDataTool", cond_kwar
                                     className="CondAttrListCollection",
                                     splitMC=True))
 
+    ignore_defects = ["NOISE_SLOPE","OFFSET_SLOPE","GAIN_SLOPE","BAD_OPE","NO_HI","HI_GAIN","LO_GAIN"]
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        ignore_defects_parameters = [-1000.,-1000.,-1000.,-1000.,-1000.,-1000.,-1000.]
+    else:
+        ignore_defects_parameters = [-1000.,-1000.,-1000.,-1000.,-1000.,-1000.,15.]
+
     acc.addCondAlgo(CompFactory.SCT_ReadCalibDataCondAlg(name=cond_kwargs["ReadCalibDataCondAlgName"],
                                                          ReadKeyGain=cond_kwargs["GainFolder"],
-                                                         ReadKeyNoise=cond_kwargs["NoiseFolder"]))
+                                                         ReadKeyNoise=cond_kwargs["NoiseFolder"],
+                                                         IgnoreDefects=ignore_defects,
+                                                         IgnoreDefectsParameters=ignore_defects_parameters))
     from SCT_Cabling.SCT_CablingConfig import SCT_CablingToolCfg
     kwargs.setdefault("SCT_CablingTool", acc.popToolsAndMerge(SCT_CablingToolCfg(flags)))
 

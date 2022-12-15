@@ -31,13 +31,21 @@ class SCT_ReadCalibDataToolSetup:
             conddb.addFolderSplitMC("SCT", self.gainFolder, self.gainFolder, className="CondAttrListCollection")
 
     def setAlgs(self):
+        ignore_defects = ["NOISE_SLOPE","OFFSET_SLOPE","GAIN_SLOPE","BAD_OPE","NO_HI","HI_GAIN","LO_GAIN"]
+        from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
+        if commonGeoFlags.Run() not in ["RUN1", "RUN2"]:
+            ignore_defects_parameters = [-1000.,-1000.,-1000.,-1000.,-1000.,-1000.,-1000.]
+        else:
+            ignore_defects_parameters = [-1000.,-1000.,-1000.,-1000.,-1000.,-1000.,15.]
         from AthenaCommon.AlgSequence import AthSequencer
         condSeq = AthSequencer("AthCondSeq")
         if not hasattr(condSeq, self.algName):
             from SCT_ConditionsAlgorithms.SCT_ConditionsAlgorithmsConf import SCT_ReadCalibDataCondAlg
             condSeq += SCT_ReadCalibDataCondAlg(name = self.algName,
                                                 ReadKeyGain = self.gainFolder,
-                                                ReadKeyNoise = self.noiseFolder)
+                                                ReadKeyNoise = self.noiseFolder,
+                                                IgnoreDefects = ignore_defects,
+                                                IgnoreDefectsParameters = ignore_defects_parameters)
         self.alg = getattr(condSeq, self.algName)
 
     def setTool(self):
