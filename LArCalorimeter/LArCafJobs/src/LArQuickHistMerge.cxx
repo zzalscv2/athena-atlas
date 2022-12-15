@@ -516,6 +516,7 @@ int main(int argc, char** argv) {
     baseDirs.push_back("CaloTopoClusters/CalECC");
     baseDirs.push_back("CaloTopoClusters/CalEMBAR");
     baseDirs.push_back("CaloTopoClusters/CalEMECA");
+    baseDirs.push_back("CaloTopoClusters/CalEMECC");
 
   }
   else {
