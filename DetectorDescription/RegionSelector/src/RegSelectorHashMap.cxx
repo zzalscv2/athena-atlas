@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RegionSelector/RegSelectorHashMap.h"
@@ -560,7 +560,8 @@ StatusCode RegSelectorHashMap::read(const char *filename){
     do{
       robId.clear();
       pch = strchr(buffer,' ');
-      int test = sscanf(pch, " %u %d %d %lf %lf %lf %lf %s %s",  &hashId, &layer, &samp, &emin, &emax, &pmin, &pmax, robIdStr, robIdStr2);
+      int test = sscanf(pch, " %u %d %d %lf %lf %lf %lf %11s %11s",  // max 11 chars + null-byte
+                        &hashId, &layer, &samp, &emin, &emax, &pmin, &pmax, robIdStr, robIdStr2);
       robId.push_back(strtol(robIdStr,nullptr,16));
       if ( test == 9 ) // this means that there are 2 ROBs in 1 TT
         robId.push_back(strtol(robIdStr2,nullptr,16));
