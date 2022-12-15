@@ -13,7 +13,12 @@
 #include <vector>
 #include <stdint.h>
 
+#undef FCS_USE_HASH_SORTED_CELLMAP
+#ifdef FCS_USE_HASH_SORTED_CELLMAP
+#include "CaloDetDescr/CaloDetDescrElement.h"
+#else
 class CaloDetDescrElement;
+#endif
 class TFCSParametrizationBase;
 
 namespace CLHEP
@@ -22,6 +27,7 @@ namespace CLHEP
 }
 
 constexpr std::uint32_t operator"" _FCShash(char const* s, std::size_t count);
+
 
 class TFCSSimulationState:public TObject
 {
@@ -43,7 +49,17 @@ class TFCSSimulationState:public TObject
     void set_E(double E) { m_Etot=E; } ;
     void add_E(int sample,double Esample) { m_E[sample]+=Esample;m_Etot+=Esample; };
 
+#ifdef FCS_USE_HASH_SORTED_CELLMAP
+    struct hashesCmp {
+      bool operator()(const CaloDetDescrElement* a, const CaloDetDescrElement* b) const {
+        return a->calo_hash() < b->calo_hash();
+      }
+    };
+    // Being able to force the order iteration over the Cellmap_t is very useful when debugging small differences in output
+    typedef std::map<const CaloDetDescrElement*,float, hashesCmp> Cellmap_t;
+#else
     typedef std::map<const CaloDetDescrElement*,float> Cellmap_t;
+#endif
 
     Cellmap_t& cells() {return m_cells;};
     const Cellmap_t& cells() const {return m_cells;};
