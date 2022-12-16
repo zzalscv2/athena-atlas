@@ -12,9 +12,12 @@
 #include "GaudiKernel/PhysicalConstants.h"
 using namespace Gaudi::Units;
 
+
 #include <vector>
 #include <string>
 #include <cmath>
+#include <stdexcept>
+
 typedef std::pair<int, int> IndexKey;
 namespace {
   double charge( const int id ) {
@@ -88,8 +91,12 @@ namespace {
       const IndexKey key2(makekey(signal_process_id2, event_number2,separator_hack2));
       const PileUpBackgroundMap::const_iterator event1=m_backgroundClassificationMap.find(key1);
       const PileUpBackgroundMap::const_iterator event2=m_backgroundClassificationMap.find(key2);
-      if(event1==m_backgroundClassificationMap.end())  {std::cout<<"An ERROR occured while sorting the events, 1."<<std::endl; abort();}
-      if(event2==m_backgroundClassificationMap.end())  {std::cout<<"An ERROR occured while sorting the events, 2."<<std::endl; abort();}
+      if(event1==m_backgroundClassificationMap.end())  {
+        throw std::runtime_error("GenEventSorter::operator() : IndexKey 1 not found in backgroundClassificationMap");
+      }
+      if(event2==m_backgroundClassificationMap.end())  {
+        throw std::runtime_error("GenEventSorter::operator() : IndexKey 2 not found in backgroundClassificationMap");
+      }
       
       //Both events have the same 'type'
       if(event1->second==event2->second) {
