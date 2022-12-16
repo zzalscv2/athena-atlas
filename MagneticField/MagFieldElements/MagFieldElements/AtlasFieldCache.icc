@@ -19,14 +19,16 @@ inline MagField::AtlasFieldCache::AtlasFieldCache(double solFieldScale,
 inline bool
 MagField::AtlasFieldCache::fillFieldCache(double z, double r, double phi)
 {
-
-  // Check if are still in the current zone.
-  //  We have only one solenoid zone with  known id (m_solZoneId).
-  //  So if the id matches we aee fine.
-  //  Otherwise check if we are still inside.
+  // We have gone outside of a cache volume. For the solenoid, it is 'safe' to
+  // just check\n if we are inside the solenoid zone, and then we can find the
+  // next cache volume. For toroid, it is best to not check if we are inside
+  // the zone, and just find the zone for the current point.
+  // So we need to look up a fieldZone:
+  // 1) If we do NOT have one
+  // 2) Everytime we are in a Zone that does NOT have a solenoid ID
+  // 3)  If it has solenoid ID and we are NOT inside
   if (!m_zone3d || m_zone3d->id() != m_solZoneId ||
       !m_zone3d->inside(z, r, phi)) {
-    // we need to try and a find a new zone
     m_zone3d = m_fieldMap ? m_fieldMap->findBFieldZone(z, r, phi) : nullptr;
   }
 
