@@ -13,7 +13,7 @@
 Gep::ConeJetMaker::ConeJetMaker(float jetR,
 				const xAOD::jFexSRJetRoIContainer& seeds,
 				float seedEtThreshold,
-				std::string scheme) : 
+				const std::string& scheme) :
   m_jetR{jetR},
   m_seeds{seeds},
   m_seedEtThreshold{seedEtThreshold},

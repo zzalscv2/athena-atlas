@@ -26,7 +26,7 @@ namespace Gep
     ConeJetMaker(float jetR,
 		 const xAOD::jFexSRJetRoIContainer& seeds,
 		 float seedEtThreshold = 5.e3 /*MeV*/,
-		 std::string recombScheme = "EScheme");
+		 const std::string& recombScheme = "EScheme");
     
     std::string toString() const override;
     virtual std::vector<Gep::Jet> makeJets(const std::vector<Gep::Cluster> &clusters) const override;

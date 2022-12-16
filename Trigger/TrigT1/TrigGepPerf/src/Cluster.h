@@ -31,8 +31,8 @@ namespace Gep{
     }
 
     
-    int ncells;
-    float time;
+    int ncells {0};
+    float time {0};
     TLorentzVector vec;
     std::vector<unsigned int> cell_id;
     

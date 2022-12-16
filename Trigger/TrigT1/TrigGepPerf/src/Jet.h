@@ -13,7 +13,7 @@ namespace Gep{
    
     TLorentzVector vec;    
     std::vector<int> constituentsIndices;
-    int nConstituents;
+    int nConstituents {0};
     float radius {0};
     float seedEta {0};
     float seedPhi {0};

@@ -16,7 +16,7 @@ namespace Gep{
 
   public:
 
-    ModAntikTJetMaker(std::string alg = "ModAntikT", int nIter = 10000, float jetR = 0.4) :
+    ModAntikTJetMaker(const std::string& alg = "ModAntikT", int nIter = 10000, float jetR = 0.4) :
       m_jetAlg{alg},
       m_nIter{nIter},
       m_jetR{jetR} {}
@@ -24,7 +24,7 @@ namespace Gep{
     virtual std::vector<Gep::Jet> makeJets( const std::vector<Gep::Cluster> &clusters) const override;
     virtual std::string toString() const override;
 
-    void setName(std::string jetAlg) { m_jetAlg = jetAlg;}
+    void setName(const std::string& jetAlg) { m_jetAlg = jetAlg;}
     //For running modified algorithm
     void setNIter(int nIter) { m_nIter = nIter;}
     void setJetR(float jetR) { m_jetR = jetR;}
