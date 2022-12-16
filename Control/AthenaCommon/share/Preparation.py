@@ -95,6 +95,7 @@ if not opts.minimal:
 # -- end of minimal
 
 ## user level configuration
+from AthenaCommon.Include import IncludeError
 try:
    include( "$HOME/.athenarc" )
 except IncludeError:
