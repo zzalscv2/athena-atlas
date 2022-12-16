@@ -26,6 +26,7 @@ endif()
 # Imported target(s) used by the project.
 find_package( nlohmann_json ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
+find_package( Geant4 ${_quietFlag} )
 
 # Clean up.
 unset( _quietFlag )
