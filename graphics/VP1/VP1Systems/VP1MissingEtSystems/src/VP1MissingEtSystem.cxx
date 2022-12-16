@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -61,17 +61,17 @@ void VP1MissingEtSystem::buildEventSceneGraph ( StoreGateSvc*, SoSeparator *root
 {
   //Create collection list based on contents of event store, populate gui and apply states:
   QList<VP1StdCollection*> cols;
-  foreach (VP1StdCollection*col, VP1MissingEtHandle::createCollections(this))
+  for (VP1StdCollection*col : VP1MissingEtHandle::createCollections(this))
     cols << col;
-  foreach (VP1StdCollection*col, VP1MissingEtCaloHandle::createCollections(this))
+  for (VP1StdCollection*col : VP1MissingEtCaloHandle::createCollections(this))
     cols << col;
-  foreach (VP1StdCollection*col, VP1MissingEtTruthHandle::createCollections(this))
+  for (VP1StdCollection*col : VP1MissingEtTruthHandle::createCollections(this))
     cols << col;
 
   m_d->collWidget->setCollections(cols);
 
   //Add collections to event scenegraph:
-  foreach (VP1StdCollection* col,m_d->collWidget->collections<VP1StdCollection>())
+  for (VP1StdCollection* col : m_d->collWidget->collections<VP1StdCollection>())
     root->addChild(col->collSwitch());
 }
 
@@ -90,7 +90,7 @@ QWidget * VP1MissingEtSystem::buildController()
 void VP1MissingEtSystem::userPickedNode(SoNode*, SoPath * pickedPath)
 {
   //Find in which collection an object was picked and let that deal with the pick:
-  foreach (VP1MissingEtHandle* handle,m_d->collWidget->collections<VP1MissingEtHandle>()) {
+  for (VP1MissingEtHandle* handle : m_d->collWidget->collections<VP1MissingEtHandle>()) {
     if (handle->visible()&&pickedPath->containsNode(handle->collSep())) {
       message(handle->clicked(pickedPath));
       return;
