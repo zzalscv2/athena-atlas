@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # @file PyUtils.FilePeekerTool
 # @purpose peek into APR files to read in-file metadata without Athena (based on PyAthena.FilePeekerLib code by Sebastian Binet) 
@@ -351,7 +351,7 @@ class FilePeekerTool():
             peeked_data['stream_tags'] = stream_tags
 
         # AtlasRelease - reproduce AthFile behavior
-        from AthenaCommon.AppMgr import release_metadata
+        from PyUtils.Helpers import release_metadata
         rel_metadata = release_metadata()
         project = rel_metadata['project name']
         version = rel_metadata['release']
