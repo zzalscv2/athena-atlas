@@ -78,6 +78,9 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=[], **kwargs):
     if flags.PhysVal.doMuon:
         from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg
         tools.append(acc.popToolsAndMerge(PhysValMuonCfg(flags)))
+    if flags.PhysVal.doActs:
+        from ActsTrkAnalysisTools.ActsTrkAnalysisToolsConfig import PhysValActsCfg
+        tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
 
     kwargs.setdefault("AthenaMonTools", tools)
 

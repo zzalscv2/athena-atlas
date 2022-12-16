@@ -22,6 +22,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doMuonMatchedTracks", help='run plots for tracks matched to true muons', action='store_true', default=False)
     IDPVMparser.add_argument("--doElectronMatchedTracks", help='run plots for tracks matched to true electrons', action='store_true', default=False)
     IDPVMparser.add_argument("--doTruthToRecoNtuple", help='output track-to-truth ntuple', action='store_true', default=False)
+    IDPVMparser.add_argument("--doActs", help='run plots for acts collections', action='store_true', default=False)
     IDPVMparser.add_argument("--disableDecoration", help='disable extra track and truth decoration if possible', action='store_true', default=False)
     IDPVMparser.add_argument("--hardScatterStrategy", help='Strategy to select the hard scatter. 0 = SumPt² 1 = SumPt , 2 = Sumptw', choices=["0","1", "2"], default="0")
     IDPVMparser.add_argument("--truthMinPt", help='minimum truth particle pT', type=float, default=500)
@@ -62,6 +63,7 @@ ConfigFlags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
 ConfigFlags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
 ConfigFlags.PhysVal.IDPVM.GRL = MyArgs.GRL
 ConfigFlags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
+ConfigFlags.PhysVal.doActs = MyArgs.doActs
 
 ConfigFlags.Input.Files = []
 for path in MyArgs.filesInput.split(','):
