@@ -93,18 +93,30 @@ def makeSequenceOld (dataType, algSeq, vars, metVars, forCompare, isPhyslite, no
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
                                            runGhostMuonAssociation = not isPhyslite)
 
+    from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
+    btagger = "DL1dv01"
+    btagWP = "FixedCutBEff_60"
+    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False,
+                              enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+    vars += [
+        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+    ]
+    if dataType != 'data' :
+        vars += [
+            'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+        ]
     if not noPhysliteBroken :
         from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
         makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
-                                  enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True )
+                                  enableCutflow=True, btagger = btagger, btagWP = btagWP, kinematicSelection = True, postfix='legacy' )
         vars += [
-            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select_%SYS%',
         ]
         if dataType != 'data' :
             vars += [
-                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_legacy_eff_%SYS%'
             ]
 
     jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
@@ -555,6 +567,20 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
             'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
         ]
 
+    btagger = "DL1dv01"
+    btagWP = "FixedCutBEff_60"
+    configSeq += makeConfig( 'FlavorTagging', 'AnaJets.' + btagger + '_' + btagWP)
+    configSeq.setOptionValue ('.noEfficiency', False)
+    configSeq.setOptionValue ('.btagger', btagger)
+    configSeq.setOptionValue ('.btagWP', btagWP)
+    configSeq.setOptionValue ('.kinematicSelection', True )
+    vars += [
+        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+    ]
+    if dataType != 'data' :
+        vars += [
+            'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+        ]
     if not noPhysliteBroken :
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
@@ -565,11 +591,11 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         configSeq.setOptionValue ('.btagWP', btagWP)
         configSeq.setOptionValue ('.kinematicSelection', True )
         vars += [
-            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select_%SYS%',
         ]
         if dataType != 'data' :
             vars += [
-                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_legacy_eff_%SYS%'
             ]
 
 
