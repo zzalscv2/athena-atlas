@@ -474,7 +474,7 @@ int ZdcRecChannelTool::getTimingCFD(const Identifier& id,  const std::vector<std
 {
 
 	unsigned int i = 0;
-	unsigned int j = 0;
+	//unsigned int j = 0;
 	unsigned int nsamples_local = 14;
 	double v[14];
 	double t[14];
@@ -588,7 +588,7 @@ int ZdcRecChannelTool::getTimingCFD(const Identifier& id,  const std::vector<std
 		}
 		std::cout << std::endl;
 	   */
-		j++;
+		//j++;
 
 		gsl_root_fsolver_set (s, &F, x_lo, x_hi);
 
