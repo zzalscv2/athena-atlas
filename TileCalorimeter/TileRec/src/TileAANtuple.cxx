@@ -1061,7 +1061,7 @@ TileAANtuple::storeDigits(const EventContext& ctx
   TileDigitsContainer::const_iterator itCollEnd = (*digitsCnt).end();
   
   // Go through all TileDigitsCollections
-  for(; itColl != itCollEnd; itColl++) {
+  for(; itColl != itCollEnd; ++itColl) {
     int fragId = (*itColl)->identify();
     int drawer = fragId & 0x3F;
     int ROS = (fragId>>8);
@@ -1164,7 +1164,7 @@ TileAANtuple::storeDigits(const EventContext& ctx
       
       int cmpCounter = 0;
       // go through all TileDigits in collection
-      for (; it != itEnd; it++) {
+      for (; it != itEnd; ++it) {
         const TileDigits* digit = (*it);
         
         HWIdentifier hwid = digit->adc_HWID();

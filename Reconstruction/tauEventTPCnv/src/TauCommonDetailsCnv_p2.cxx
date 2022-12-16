@@ -48,7 +48,7 @@ void TauCommonDetailsCnv_p2::persToTrans(
     std::vector<float>::const_iterator i=pers->m_allTheData.begin();
     int first = (int)((*i)*1e-5);
     int second = ((int)(*i)) % 100000;
-    i++;
+    ++i;
     trans->setSeedTrk_etChrgEM01Trk (i, i+first);
     i+=first;
     trans->setSeedTrk_etResChrgEMTrk (i, i+second);
