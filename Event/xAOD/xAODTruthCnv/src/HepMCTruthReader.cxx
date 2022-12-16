@@ -12,9 +12,10 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "HepMCTruthReader.h"
 
-using namespace std;
+using std::cout;
+using std::endl;
 
-HepMCTruthReader::HepMCTruthReader(const string& name, ISvcLocator* svcLoc)
+HepMCTruthReader::HepMCTruthReader(const std::string& name, ISvcLocator* svcLoc)
   : AthAlgorithm(name, svcLoc)
 {
   /// @todo Provide these names centrally in a Python module and remove these hard-coded versions?
@@ -107,8 +108,8 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout << " (X,cT)=";
       cout.width(9);
       cout.precision(2);
-      cout.setf(ios::scientific, ios::floatfield);
-      cout.setf(ios_base::showpos);
+      cout.setf(std::ios::scientific, std::ios::floatfield);
+      cout.setf(std::ios_base::showpos);
       cout << vertex->position().x() << ",";
       cout.width(9);
       cout.precision(2);
@@ -119,8 +120,8 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout.width(9);
       cout.precision(2);
       cout << vertex->position().t();
-      cout.setf(ios::fmtflags(0), ios::floatfield);
-      cout.unsetf(ios_base::showpos);
+      cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
+      cout.unsetf(std::ios_base::showpos);
       cout << endl;
     } else {
       cout.width(9);
@@ -144,8 +145,8 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout << " (X,cT)=";
       cout.width(9);
       cout.precision(2);
-      cout.setf(ios::scientific, ios::floatfield);
-      cout.setf(ios_base::showpos);
+      cout.setf(std::ios::scientific, std::ios::floatfield);
+      cout.setf(std::ios_base::showpos);
       cout << vertex->position().x();
       cout.width(9);
       cout.precision(2);
@@ -156,8 +157,8 @@ void HepMCTruthReader::printVertex(const HepMC::ConstGenVertexPtr& vertex) {
       cout.width(9);
       cout.precision(2);
       cout << vertex->position().t();
-      cout.setf(ios::fmtflags(0), ios::floatfield);
-      cout.unsetf(ios_base::showpos);
+      cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
+      cout.unsetf(std::ios_base::showpos);
       cout << endl;
     } else {
       cout.width(9);
@@ -229,8 +230,8 @@ void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle)
   cout << particle->pdg_id() << " ";
   cout.width(9);
   cout.precision(2);
-  cout.setf(ios::scientific, ios::floatfield);
-  cout.setf(ios_base::showpos);
+  cout.setf(std::ios::scientific, std::ios::floatfield);
+  cout.setf(std::ios_base::showpos);
   cout << particle->momentum().px() << ",";
   cout.width(9);
   cout.precision(2);
@@ -241,8 +242,8 @@ void HepMCTruthReader::printParticle(const HepMC::ConstGenParticlePtr& particle)
   cout.width(9);
   cout.precision(2);
   cout << particle->momentum().e() << " ";
-  cout.setf(ios::fmtflags(0), ios::floatfield);
-  cout.unsetf(ios_base::showpos);
+  cout.setf(std::ios::fmtflags(0), std::ios::floatfield);
+  cout.unsetf(std::ios_base::showpos);
   if ( particle->status()==2 ) {
     if ( HepMC::barcode(particle->end_vertex())!=0 ) {
       cout.width(3);

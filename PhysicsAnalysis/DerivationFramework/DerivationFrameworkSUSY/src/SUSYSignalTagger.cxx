@@ -263,7 +263,7 @@ namespace DerivationFramework {
     else if (SUSY_Spart2_pdgId==-1000037) nch2minus++;
 
     else if (SUSY_Spart2_pdgId==1000021) ngluino++;
-    else if ((fabs(SUSY_Spart2_pdgId)>1000000 && fabs(SUSY_Spart2_pdgId)<=1000004) || (fabs(SUSY_Spart2_pdgId)>2000000 && fabs(SUSY_Spart2_pdgId)<=2000004)) {
+    else if ((std::abs(SUSY_Spart2_pdgId)>1000000 && std::abs(SUSY_Spart2_pdgId)<=1000004) || (std::abs(SUSY_Spart2_pdgId)>2000000 && std::abs(SUSY_Spart2_pdgId)<=2000004)) {
       if (SUSY_Spart2_pdgId>0) nsquark++;
       else nantisquark++;
     }
