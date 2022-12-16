@@ -647,16 +647,6 @@ class AthAppMgr( AppMgr ):
          import AthenaCommon.ConfigurationShelve as cs
          cs.saveToAscii(self._opts.config_dump_file)
 
-    # need to miminize this to configurables only
-      from AthenaCommon import ConfigurationCleanup
-      ConfigurationCleanup.Cleanse()
-      del ConfigurationCleanup
-
-    # for good measure, after removal of ConfigurationCleanup itself
-      import gc
-      gc.collect()
-      del gc
-
       return
    
  # redefines to take into acount setup of Configurables

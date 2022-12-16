@@ -190,7 +190,6 @@ if not (opts.scripts or opts.fromdb) and opts.run_batch:
 ### file inclusion and tracing -----------------------------------------------
 from AthenaCommon.Include import include
 include.setShowIncludes(opts.showincludes)
-include.setClean(opts.drop_cfg)
 
 
 ### pre-execution step -------------------------------------------------------

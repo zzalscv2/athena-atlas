@@ -26,7 +26,7 @@ _userlongopts = [
     "leak-check=", "leak-check-execute", "delete-check=",
     "perfmon", "pmon=", "repeat-evts=", "profile-python=",
     "enable-ers-hdlr=",
-    "keep-configuration","drop-configuration", "drop-and-reload", "config-only=",
+    "drop-and-reload", "config-only=",
     "dump-configuration=",
     "tcmalloc", "stdcmalloc", "stdcmath", "imf", "exctrace", "preloadlib=",
     "nprocs=",
@@ -85,8 +85,6 @@ Accepted command line options:
      --enable-ers-hdlr=y/n            ...  enable or not the ERS handler. [DEFAULT]
                                            is to disable it so we get nice
                                            tracebacks.
-     --keep-configuration             ...  do not offload Configurables after use [DEFAULT]
-     --drop-configuration             ...  offload Configurables after use
      --drop-and-reload                ...  offload configuration and start new process
      --config-only=<file>             ...  run configuration and store in <file>
      --dump-configuration=<file>      ...  dump an ASCII version of the post-setup() configuration to <file>
@@ -147,7 +145,6 @@ def parse(chk_tcmalloc=True):
     opts.do_pmon = False         # default is to NOT enable perfmon
     opts.nbr_repeat_evts = 0     # default is to NOT repeat events
     opts.enable_ers_hdlr = False # enable/disable TDAQ ERS signal handlers
-    opts.drop_cfg = False        # default is to keep the configurables at initialize
     opts.drop_reload = False     # default is to run a single process
     opts.config_only = ''        # default is to run full process
     opts.config_dump_file = None # not used by default
@@ -351,11 +348,6 @@ def parse(chk_tcmalloc=True):
         elif opt in ("--enable-ers-hdlr",):
             opts.enable_ers_hdlr = arg=='y'
             pass
-
-        elif opt in ("--drop-configuration",):
-            opts.drop_cfg = True
-        elif opt in ("--keep-configuration",):
-            opts.drop_cfg = False
 
         elif opt in ("--drop-and-reload",):
             opts.drop_reload = True
