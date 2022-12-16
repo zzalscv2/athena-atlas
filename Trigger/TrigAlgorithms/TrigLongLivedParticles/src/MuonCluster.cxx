@@ -43,8 +43,6 @@ MuonCluster::~MuonCluster() {
 
 StatusCode MuonCluster::initialize(){
 
-    ATH_MSG_INFO("MuonCluster::initialize()");
-
     ATH_MSG_INFO("Parameters for MuonCluster:" << name());
     ATH_MSG_INFO("DeltaR : " << m_DeltaR);
     ATH_MSG_INFO("MuonCluLabel : " << m_featureLabel);
@@ -61,8 +59,6 @@ StatusCode MuonCluster::initialize(){
     ATH_CHECK( m_muRoiClusNRoiKey.initialize() );
 
     if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
-
-    ATH_MSG_INFO("initialize() success");
 
     return StatusCode::SUCCESS;
 }
@@ -103,8 +99,6 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
                                 dPhi_cluSeed, dR_cluSeed, dEta_cluSeed,
                                 t1, t2);
 
-    ATH_MSG_DEBUG("MuonCluster::execute() called");
-
     //Setup the composite container we will put the MuonRoICluster in
     auto trigCompColl = SG::makeHandle(m_outputCompositesKey, ctx);
     ATH_CHECK(
@@ -121,7 +115,7 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
 
     //check to make sure we have all the input trigger elements!
 
-    int iter_cl=0;
+    int n_cl=0;
     lvl1_muclu_roi muonClu[20] = {{0,0,0}};
     lvl1_muclu_roi muonClu0[20] = {{0,0,0}};
 
@@ -133,13 +127,11 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
         return StatusCode::SUCCESS;
     }
 
-    ATH_MSG_DEBUG("begin loop on TrigRoiDescriptors and get muon RoIs");
-
     nL1RoIs = roiCollection->size();
     nRoIinClusters = 0;
     for (const TrigRoiDescriptor *roi : *roiCollection)
     {
-        if(iter_cl>= kMAX_ROI) {
+        if(n_cl>= kMAX_ROI) {
             ATH_MSG_WARNING("Too many L1 Muon RoIs: bailing out");
             break;
         }
@@ -150,20 +142,20 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
         my_lvl1_clu_roi.eta = roi->eta();
         my_lvl1_clu_roi.phi = roi->phi();
         my_lvl1_clu_roi.nroi = 0;
-        muonClu[iter_cl] = my_lvl1_clu_roi;
-        muonClu0[iter_cl] = my_lvl1_clu_roi;
-        ++iter_cl;
+        muonClu[n_cl] = my_lvl1_clu_roi;
+        muonClu0[n_cl] = my_lvl1_clu_roi;
+        ++n_cl;
     }
-    int n_cl = iter_cl;
 
-    ATH_MSG_DEBUG("Accumulated " << n_cl << " ROI Directions: ");
-    ATH_MSG_DEBUG("  [eta,  phi]");
-    for (int unsigned i=0;i<RoiEta_mon.size();i++) {
+    if (msgLvl(MSG::DEBUG)) {
+      ATH_MSG_DEBUG("Accumulated " << n_cl << " ROI Directions: ");
+      ATH_MSG_DEBUG("  [eta,  phi]");
+      for (int unsigned i=0;i<RoiEta_mon.size();i++) {
         ATH_MSG_DEBUG("  [" << RoiEta_mon.at(i) << "," << RoiPhi_mon.at(i) << "]");
+      }
     }
 
     // start the clustering
-    ATH_MSG_DEBUG("Start the Muon RoI clustering");
 
     t2.start();
     int n_itr = 0;
@@ -172,7 +164,6 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
         bool improvement = true;
         n_itr = 0;
         while(improvement){
-            ATH_MSG_DEBUG(" Improvement Loop " << n_itr);
             ++n_itr;
             double eta_avg=0.0;
             double cosPhi_avg=0.0;
@@ -244,6 +235,7 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     nRoIinClusters = nRoisInClu;
     nClusters = n_cl;
 
+    // cppcheck-suppress [negativeIndex] (we checked above that roiCollection->size() >=2)
     dPhi_cluSeed = CxxUtils::wrapToPi(muonClu0[sel_cl].phi)-CxxUtils::wrapToPi(muonClu[sel_cl].phi);
     dEta_cluSeed = muonClu0[sel_cl].eta-muonClu[sel_cl].eta;
     dR_cluSeed   = DeltaR(muonClu0[sel_cl],muonClu[sel_cl]);
