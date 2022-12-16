@@ -453,7 +453,7 @@ namespace dqutils
       auto val1 = j.at(p1);
       if (val1.type() == nlohmann::json::value_t::string)
       {
-        return_string = val1;
+        val1.get_to (return_string);
       }
       else if (val1.type() == nlohmann::json::value_t::object)
       {
