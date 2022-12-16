@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -34,7 +34,7 @@
 QList<VP1CaloClusterCollection*> VP1CaloClusterCollection::createCollections(IVP1System*sys,CaloClusterSysController*controller)
 {
   QList<VP1CaloClusterCollection*> cols;
-  foreach (QString key, VP1SGContentsHelper(sys).getKeys<CaloClusterContainer>()) {
+  for (QString key : VP1SGContentsHelper(sys).getKeys<CaloClusterContainer>()) {
     VP1CaloClusterCollection * col = new VP1CaloClusterCollection(key,sys,controller);
     col->init();
     cols << col;
@@ -128,7 +128,7 @@ public:
     if (!allowedEta.contains(c->eta()))
       return false;
     double phi(c->phi());
-    foreach(VP1Interval i,allowedPhi) {
+    for (VP1Interval i : allowedPhi) {
       if (i.contains(phi)||i.contains(phi+2*M_PI)||i.contains(phi-2*M_PI))
 	return true;
     }
@@ -202,7 +202,7 @@ VP1CaloClusterCollection::~VP1CaloClusterCollection()
     delete m_d->sephelper;
     sep->unref();
   }
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+  for (Imp::ClusterHandle*cluster : m_d->clusters)
     delete cluster;
   delete m_d;
 }
@@ -231,7 +231,7 @@ double VP1CaloClusterCollection::Imp::calculateHighestVisibleClusterEnergy() con
 {
   double e = 0;
   if (theclass->visible()) {
-    foreach(Imp::ClusterHandle*cluster,clusters) {
+    for (Imp::ClusterHandle*cluster : clusters) {
       if (cluster->attached()&&e<cluster->energyForLengthAndCuts(this))
 	e=cluster->energyForLengthAndCuts(this);
     }
@@ -291,7 +291,7 @@ QStringList VP1CaloClusterCollection::infoOnClicked(SoPath* pickedPath)
   const CaloCluster*cluster(0);
   Imp::ClusterHandle*clusterHandle(0);
   if (pickedNode->getTypeId()==SoGenericBox::getClassTypeId()) {
-    foreach(Imp::ClusterHandle*c,m_d->clusters) {
+    for (Imp::ClusterHandle*c : m_d->clusters) {
       if (c->genericBox()==pickedNode) {
 	cluster = c->cluster();
 	clusterHandle = c;
@@ -346,7 +346,7 @@ void VP1CaloClusterCollection::setAllowedEnergies(const VP1Interval& i)
     return;
   static_cast<IVP13DSystemSimple *>(systemBase())->deselectAll();
   largeChangesBegin();
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+  for (Imp::ClusterHandle*cluster : m_d->clusters)
     m_d->recheckCut(cluster);
   largeChangesEnd();
   //Fixme relaxed/tightened stuff
@@ -364,7 +364,7 @@ void VP1CaloClusterCollection::setAllowedEta(const VP1Interval& i)
     return;
   static_cast<IVP13DSystemSimple *>(systemBase())->deselectAll();
   largeChangesBegin();
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+  for (Imp::ClusterHandle*cluster : m_d->clusters)
     m_d->recheckCut(cluster);
   largeChangesEnd();
   //Fixme relaxed/tightened stuff
@@ -382,7 +382,7 @@ void VP1CaloClusterCollection::setAllowedPhi(const QList<VP1Interval>& i)
     return;
   static_cast<IVP13DSystemSimple *>(systemBase())->deselectAll();
   largeChangesBegin();
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+  for (Imp::ClusterHandle*cluster : m_d->clusters)
     m_d->recheckCut(cluster);
   largeChangesEnd();
   //Fixme relaxed/tightened stuff
@@ -400,7 +400,7 @@ void VP1CaloClusterCollection::setScale(const QPair<bool,double>& s)
   if (!isLoaded())
     return;
   largeChangesBegin();
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+  for (Imp::ClusterHandle*cluster : m_d->clusters)
     if (cluster->attached())
       cluster->updateShapePars(m_d);
   largeChangesEnd();
@@ -420,7 +420,7 @@ void VP1CaloClusterCollection::setShowVolumeOutLines(bool b)
   if (!isLoaded())
     return;
   largeChangesBegin();
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters)
+  for (Imp::ClusterHandle*cluster : m_d->clusters)
     if (cluster->genericBox())
       cluster->genericBox()->drawEdgeLines = b;
   largeChangesEnd();
@@ -435,7 +435,7 @@ void VP1CaloClusterCollection::setConsiderTransverseEnergies(bool b)
   if (!isLoaded())
     return;
   largeChangesBegin();
-  foreach(Imp::ClusterHandle*cluster,m_d->clusters) {
+  for (Imp::ClusterHandle*cluster : m_d->clusters) {
     bool attachPrev(cluster->attached());
     m_d->recheckCut(cluster);
     if (attachPrev&&cluster->attached())
