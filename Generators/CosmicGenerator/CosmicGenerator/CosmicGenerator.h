@@ -76,7 +76,7 @@ class CosmicGenerator:public GenModule {
 
 public:
   CosmicGenerator(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~CosmicGenerator();
+  virtual ~CosmicGenerator() = default;
   virtual StatusCode genInitialize();
   virtual StatusCode callGenerator();
   virtual StatusCode genFinalize();
@@ -89,29 +89,52 @@ public:
   static CLHEP::HepRandomEngine* COSMIC_RANDOM_ENGINE;
 
 private:
-  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+  // Migration to MeV and mm units: all conversions are done in this interface
+  // to the CosmicGun. The CosmicGun itself uses GeV units internally - to call
+  // the fortran code.
+  //
+
+  static constexpr float m_GeV = 1000.f; // FIXME Take from SystemOfUnits.h header?
+  static constexpr float m_mm = 10.f; // FIXME Take from SystemOfUnits.h header?
+
   // event counter, used for event ID
-  int m_events, m_rejected,m_accepted;
+  int m_events{0};
+  int m_rejected{0};
+  int m_accepted{0};
   std::vector<int> m_pdgCode;
-  float m_emin, m_emax;
-  float m_ctcut;
-  float m_xlow, m_xhig, m_zlow, m_zhig, m_yval, m_IPx, m_IPy, m_IPz, m_radius, m_zpos;
-  float m_tmin, m_tmax;
-  bool m_cavOpt;
-  int m_srOneOpt;
-  bool m_srOnePixECOpt;
-  bool m_swapYZAxis;
-  bool m_muonECOpt;
-  int m_printEvent, m_printMod;
-  int m_selection ; 
+  int m_selection{0};
 
-  float m_thetamin, m_thetamax, m_phimin, m_phimax;
-  
-  float m_GeV;
-  float m_mm;
+  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+  FloatProperty m_emin{this, "emin", 10.*m_GeV};
+  FloatProperty m_emax{this, "emax", 100.*m_GeV};
+  FloatProperty m_ctcut{this, "ctcut", 0.35};
+  FloatProperty m_xlow{this, "xvert_low", 0.*m_mm};
+  FloatProperty m_xhig{this, "xvert_hig", 10.*m_mm};
+  FloatProperty m_zlow{this, "zvert_low", 0.*m_mm};
+  FloatProperty m_zhig{this, "zvert_hig", 10.*m_mm};
+  FloatProperty m_yval{this, "yvert_val", 81.*m_mm};
+  FloatProperty m_IPx{this, "IPx", 0.f};
+  FloatProperty m_IPy{this, "IPy", 0.f};
+  FloatProperty m_IPz{this, "IPz", 0.f};
+  FloatProperty m_radius{this, "Radius", 0.f};
+  FloatProperty m_zpos{this, "Zposition", 14500.f};
+  FloatProperty m_tmin{this, "tmin", 0.f};
+  FloatProperty m_tmax{this, "tmax", 0.f};
+  BooleanProperty m_cavOpt{this, "OptimizeForCavern", false};
+  IntegerProperty m_srOneOpt{this, "OptimizeForSR1", 0}; // Not a bool??
+  BooleanProperty m_srOnePixECOpt{this, "OptimizeForSR1PixelEndCap", false};
+  BooleanProperty m_swapYZAxis{this, "SwapYZAxis", false};
+  BooleanProperty m_muonECOpt{this, "OptimizeForMuonEndCap", false};
+  IntegerProperty m_printEvent{this, "PrintEvent", 10};
+  IntegerProperty m_printMod{this, "PrintMod", 100};
 
-  bool m_readfile;
-  std::string m_infile;
+  FloatProperty m_thetamin{this, "ThetaMin", 0.f};
+  FloatProperty m_thetamax{this, "ThetaMax", 1.f};
+  FloatProperty m_phimin{this, "PhiMin", -1.*M_PI};
+  FloatProperty m_phimax{this, "PhiMax", M_PI};
+
+  bool m_readfile{false};
+  StringProperty m_infile{this, "eventfile", "NONE"};
   std::ifstream    m_ffile;
 
   // Event scalars, three-vectors, and four-vectors:
@@ -121,27 +144,27 @@ private:
   std::vector<HepMC::Polarization> m_polarization;
 
   // Energy dependent position cut for muons to reach the detector.
-  bool exzCut(const CLHEP::Hep3Vector& pos,const CLHEP::HepLorentzVector& p); 
+  bool exzCut(const CLHEP::Hep3Vector& pos,const CLHEP::HepLorentzVector& p);
 
   // property for calling exzCut
-  bool m_exzCut ; 
-  // maximum r used in exzCut 
-  float m_rmax ; 
+  BooleanProperty m_exzCut{this, "ExzCut", false};
+  // maximum r used in exzCut
+  FloatProperty m_rmax{this, "RMax", 10000000.f};
 
   // Calculation of pathlength in rock and whether cosmic ray is aimed towards
   // the pixel detector
   double pathLengthInRock(double xgen, double ygen, double zgen, double theta, double phi);
   bool pointsAtPixels(double xgen, double ygen, double zgen, double theta, double phi);
 
-  // New optimization options
-  bool m_doPathlengthCut;
-  bool m_doAimedAtPixelsCut;
-  bool m_doReweighting;
-  double m_energyCutThreshold;
-  double m_ysurface;
-  double m_rvertmax;
-  double m_pixelplanemaxx;
-  double m_pixelplanemaxz;
+  // New optimization options (November 2007)
+  BooleanProperty m_doPathlengthCut{this, "doPathLengthCut", false};
+  BooleanProperty m_doAimedAtPixelsCut{this, "doAimedAtPixelsCut", false};
+  BooleanProperty m_doReweighting{this, "doReweighting", false};
+  DoubleProperty m_energyCutThreshold{this, "energyCutThreshold", 1.0};
+  DoubleProperty m_ysurface{this, "ysurface", 81.*m_mm};
+  DoubleProperty m_rvertmax{this, "rvert_max", 300.*m_mm}; // replaces rectangle in case of reweighting
+  DoubleProperty m_pixelplanemaxx{this, "pixelplane_maxx", 1150.};
+  DoubleProperty m_pixelplanemaxz{this, "pixelplane_maxz", 1650.};
 };
 
 #endif

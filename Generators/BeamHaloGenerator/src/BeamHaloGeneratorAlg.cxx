@@ -15,39 +15,11 @@
 //--------------------------------------------------------------------------
 
 BeamHaloGeneratorAlg::BeamHaloGeneratorAlg(const std::string& name, ISvcLocator* svcLocator)
-  : GenModule(name,svcLocator),
-    m_inputTypeStr("MARS-NM"),  
-    m_inputFile("bgi-b2l1.1"),
-    m_interfacePlane(20850.0),
-    m_enableFlip(false),
-    m_flipProbability(0.),
-    m_enableSampling(false),
-    m_bufferFileName("buffer.bin"),
-    m_generatorSettings(),
-    m_doMonitoringPlots(false),
-    m_tHistSvc(0),
-    m_randomStream("BeamHalo"),
-    m_beamHaloGenerator(0),
-    m_evt() {
-  declareProperty("inputType", m_inputTypeStr = "MARS-NM");
-  declareProperty("inputFile",  m_inputFile = "bgi-b2l1.1");
-  declareProperty("interfacePlane", m_interfacePlane = 20850.0); // (mm)
-  declareProperty("enableFlip", m_enableFlip = false);
-  declareProperty("flipProbability", m_flipProbability = 0.0);
-  declareProperty("enableSampling", m_enableSampling = false);
-  declareProperty("bufferFileName", m_bufferFileName = "BinaryBuffer.bin");
-  declareProperty("generatorSettings", m_generatorSettings, "A set of cuts to be applied to generated particles.");
-  declareProperty("doMonitoringPlots", m_doMonitoringPlots = false);
-  declareProperty("randomStream", m_randomStream = "BeamHalo");
-
-  for(int i=0;i<NPLOTS;i++) 
-    m_validationPlots[i] = 0;
-
-}
-
-//--------------------------------------------------------------------------
-
-BeamHaloGeneratorAlg::~BeamHaloGeneratorAlg() {
+  : GenModule(name,svcLocator)
+{
+  for (int i=0;i<NPLOTS;i++) {
+    m_validationPlots[i] = nullptr;
+  }
 }
 
 //--------------------------------------------------------------------------

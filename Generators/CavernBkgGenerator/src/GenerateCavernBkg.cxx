@@ -26,7 +26,6 @@ extern "C" {
 GenerateCavernBkg::GenerateCavernBkg(const std::string& name, ISvcLocator* pSvcLocator)
   : GenModule(name, pSvcLocator)
 {
-  declareProperty("InputFile",  m_infile="fvpn21n.dat");
 }
 
 
@@ -55,7 +54,7 @@ GenerateCavernBkg::callGenerator() {
   ATH_MSG_DEBUG("Random seeds: " << m_seeds[0] << ", " << m_seeds[1]);
 
   // Generate event
-  cavbkg_(m_infile.c_str(), strlen(m_infile.c_str()));
+  cavbkg_(m_infile.value().c_str(), strlen(m_infile.value().c_str()));
 
   return StatusCode::SUCCESS;
 }
