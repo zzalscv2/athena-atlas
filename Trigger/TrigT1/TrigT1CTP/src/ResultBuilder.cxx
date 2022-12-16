@@ -230,6 +230,7 @@ LVL1CTP::ResultBuilder::constructRoIResult( const EventIDBase & eventID,
                                             const std::vector<uint32_t> & tap,
                                             const std::vector<uint32_t> & tav,
                                             const std::vector<uint32_t> & tip,
+                                            const std::vector<uint32_t> & extra,
                                             const unsigned char triggerType ) const
 {
    //
@@ -243,6 +244,7 @@ LVL1CTP::ResultBuilder::constructRoIResult( const EventIDBase & eventID,
    roi_vector.insert(roi_vector.end(), tbp.begin(), tbp.end()); // TBP
    roi_vector.insert(roi_vector.end(), tap.begin(), tap.end()); // TAP
    roi_vector.insert(roi_vector.end(), tav.begin(), tav.end()); // TAV
+   roi_vector.insert(roi_vector.end(), extra.begin(), extra.end()); // Extra words
 		
    ATH_MSG_VERBOSE( "Stored data elements of RoI result" );
 		
@@ -259,7 +261,16 @@ LVL1CTP::ResultBuilder::constructRoIResult( const EventIDBase & eventID,
    //
 		
    // convention for source id in LVL1: 0 for DAQ, 1 for RoIB
-   ROIB::Header helperHeader(eformat::helper::SourceIdentifier(eformat::TDAQ_CTP, 1).code());
+   const uint32_t source_id{eformat::helper::SourceIdentifier(eformat::TDAQ_CTP, 1).code()};
+
+   // version word
+   uint32_t version_word = eformat::DEFAULT_ROD_VERSION;
+   const uint32_t l1a_pos{0}; // there's only one BC in RoIB fragment, which is the L1A one
+   version_word |= ((extra.size() & m_ctpDataFormat->getProgrammableExtraWordsMask()) << m_ctpDataFormat->getProgrammableExtraWordsShift());
+   version_word |= ((l1a_pos & m_ctpDataFormat->getL1APositionMask()) << m_ctpDataFormat->getL1APositionShift());
+   version_word |= ((m_ctpVersionNumber & m_ctpDataFormat->getCTPFormatVersionMask()) << m_ctpDataFormat->getCTPFormatVersionShift());
+
+   ROIB::Header helperHeader(source_id, 0, version_word);
 		
    helperHeader.setRunNumber( eventID.run_number());
    //helperHeader.setL1ID( eventID.extendedL1ID());
@@ -302,23 +313,32 @@ LVL1CTP::ResultBuilder::constructRDOResult( const EventIDBase & eventID,
                                             const std::vector<uint32_t> & tbp,
                                             const std::vector<uint32_t> & tap,
                                             const std::vector<uint32_t> & tav,
-                                            const std::vector<uint32_t> & tip ) const
-{		
-   std::unique_ptr<CTP_RDO> result( new CTP_RDO(m_ctpVersionNumber) );
+                                            const std::vector<uint32_t> & tip,
+                                            const std::vector<uint32_t> & extra ) const
+{
+   auto wrongSize = [this](const std::vector<uint32_t> & vec, uint32_t exp, std::string_view name) {
+      if (vec.size() == exp) {return false;}
+      ATH_MSG_ERROR("Wrong " << name << " vector size passed to constructRDOResult, " << vec.size() << " instead of " << exp);
+      return true;
+   };
+   if (wrongSize(tip, m_ctpDataFormat->getTIPwords(), "TIP")
+    || wrongSize(tbp, m_ctpDataFormat->getTBPwords(), "TBP")
+    || wrongSize(tap, m_ctpDataFormat->getTAPwords(), "TAP")
+    || wrongSize(tav, m_ctpDataFormat->getTAVwords(), "TAV")) {
+      return nullptr;
+   }
+
+   std::vector<uint32_t> data(static_cast<size_t>(m_ctpDataFormat->getNumberTimeWords()), uint32_t{0});
+   data.reserve(m_ctpDataFormat->getNumberTimeWords() + m_ctpDataFormat->getDAQwordsPerBunch() + extra.size());
+   data.insert(data.end(),tip.begin(),tip.end());
+   data.insert(data.end(),tbp.begin(),tbp.end());
+   data.insert(data.end(),tap.begin(),tap.end());
+   data.insert(data.end(),tav.begin(),tav.end());
+   data.insert(data.end(),extra.begin(),extra.end());
+
+   std::unique_ptr<CTP_RDO> result( new CTP_RDO(m_ctpVersionNumber, std::move(data), extra.size()) );
    result->setTimeSec(eventID.time_stamp());                // Time stamp: 32-bit UTC seconds
    result->setTimeNanoSec(eventID.time_stamp_ns_offset());  // Time stamp: 28-bit nanoseconds
-   for (unsigned int i(0); i < m_ctpDataFormat->getTIPwords(); ++i) {
-      result->setTIPWord(i, tip[i]);
-   }
-   for (unsigned int i(0); i < tbp.size(); ++i) {
-      result->setTBPWord(i, tbp[i]);
-   }
-   for (unsigned int i(0); i < m_ctpDataFormat->getTAPwords(); ++i) {
-      result->setTAPWord(i, tap[i]);
-   }
-   for (unsigned int i(0); i < m_ctpDataFormat->getTAPwords(); ++i) {
-      result->setTAVWord(i, tav[i]);
-   }
    ATH_MSG_DEBUG( "Created CTP_RDO object" );
    return result;
 }

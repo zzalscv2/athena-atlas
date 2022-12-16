@@ -333,11 +333,6 @@ def L1TriggerByteStreamEncoderCfg(flags):
   if doRoIBResult(flags):
     roibResultTool = RoIBResultByteStreamToolCfg(name="RoIBResultBSEncoderTool", flags=flags, writeBS=True)
     acc.addPublicTool(roibResultTool)
-    # Special - in BS->BS job without L1Sim, need to decode extra data from input
-    # for encoding the CTP information back to BS
-    if flags.Input.Format is Format.BS and not flags.Trigger.doLVL1 and roibResultTool.CTPModuleId != 0xFF:
-      from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
-      acc.merge(ByteStreamReadCfg(flags, type_names=['CTP_RDO/CTP_RDO']))
 
   # Run-3 L1Muon encoding
   if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:

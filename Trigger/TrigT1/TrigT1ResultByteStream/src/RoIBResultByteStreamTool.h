@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1RESULTBYTESTREAM_ROIBRESULTBYTESTREAMTOOL_H
@@ -8,7 +8,6 @@
 // Trigger includes
 #include "L1TopoRDO/L1TopoRDO.h"
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
-#include "TrigT1Result/CTP_RDO.h"
 #include "TrigT1Result/Header.h"
 #include "TrigT1Result/Trailer.h"
 #include "TrigT1ResultByteStream/IL1TriggerByteStreamTool.h"
@@ -100,12 +99,6 @@ private:
    **/
   ROIB::Trailer roibTrailer(const DataStatus& dataStatus, const uint32_t dataSize) const;
 
-  /**
-   * @brief Helper method to extract CTP ROD minor version word from CTP_RDO object
-   * @in rdo The CTP_RDO object produced in CTP simulation or decoded from data
-   **/
-  uint16_t ctpRodMinorVersion(const CTP_RDO& rdo) const;
-
   // ------------------------- Properties --------------------------------------
   /// @name Properties holding module IDs for L1 RoI ROBs
   /// @{
@@ -151,10 +144,6 @@ private:
   SG::ReadHandleKey<ROIB::RoIBResult> m_roibResultReadKey {
     this, "RoIBResultReadKey", "",
     "Read handle key to RoIBResult for conversion to ByteStream"
-  };
-  SG::ReadHandleKey<CTP_RDO> m_ctpRdoReadKey {
-    this, "CTPRDOReadKey", LVL1CTP::DEFAULT_RDOOutputLocation,
-    "Read handle key to CTP_RDO for conversion to ByteStream"
   };
   /// @}
 

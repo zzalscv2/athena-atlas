@@ -65,7 +65,6 @@ StatusCode RoIBResultByteStreamTool::initialize() {
   // Initialise data handles
   ATH_CHECK(m_roibResultWriteKey.initialize(mode==ConversionMode::Decoding));
   ATH_CHECK(m_roibResultReadKey.initialize(mode==ConversionMode::Encoding));
-  ATH_CHECK(m_ctpRdoReadKey.initialize(m_doCTP && mode==ConversionMode::Encoding));
 
   // Set configured ROB IDs from module IDs
   std::vector<eformat::helper::SourceIdentifier> configuredROBSIDs;
@@ -154,11 +153,8 @@ StatusCode RoIBResultByteStreamTool::convertToBS(std::vector<OFFLINE_FRAGMENTS_N
     const std::vector<ROIB::CTPRoI>& ctpDataVec = roibResult->cTPResult().roIVec();
     OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment* rob = convertDataToRob(ctpSID, ctpDataVec);
 
-    // Update ROD minor version in the ROB based on information from CTP_RDO
-    auto ctpRdo = SG::makeHandle(m_ctpRdoReadKey, eventContext);
-    ATH_CHECK(ctpRdo.isValid());
-    const uint16_t rodMinorVersion = ctpRodMinorVersion(*ctpRdo);
-    rob->rod_minor_version(rodMinorVersion);
+    // Update ROD minor version which encodes extra information about CTP data format (e.g. number of extra words)
+    rob->rod_minor_version(roibResult->cTPResult().header().formatVersion() & 0xffffu);
 
     // Update L1 bits in event header
     // TODO: change to context-aware method when it is added to the IByteStreamEventAccess interface
@@ -541,25 +537,4 @@ L1TopoRDO RoIBResultByteStreamTool::l1topoContent(const ROBFragment& rob) const 
   content.setDataWords(std::move(vDataWords));
   content.setSourceID(rob.rod_source_id());
   return content;
-}
-
-uint16_t RoIBResultByteStreamTool::ctpRodMinorVersion(const CTP_RDO& rdo) const {
-  const CTPdataformatVersion& ctpFormat = rdo.getCTPVersion();
-  const uint32_t ctpVersionNumber = rdo.getCTPVersionNumber();
-  const uint32_t l1aPosition = rdo.getL1AcceptBunchPosition();
-  const uint32_t nAddWords = rdo.getNumberOfAdditionalWords();
-
-  ATH_MSG_DEBUG("CTP version number: " << ctpVersionNumber);
-  ATH_MSG_DEBUG("L1A bunch position: " << l1aPosition);
-  ATH_MSG_DEBUG("N additional words: " << nAddWords);
-  ATH_MSG_DEBUG("N bunches: " << rdo.getNumberOfBunches());
-
-  uint16_t rodMinorVersion{0};
-  rodMinorVersion |= ((nAddWords & ctpFormat.getProgrammableExtraWordsMask()) << ctpFormat.getProgrammableExtraWordsShift());
-  rodMinorVersion |= ((l1aPosition & ctpFormat.getL1APositionMask()) << ctpFormat.getL1APositionShift());
-  rodMinorVersion |= ((ctpVersionNumber & ctpFormat.getCTPFormatVersionMask()) << ctpFormat.getCTPFormatVersionShift());
-
-  ATH_MSG_DEBUG("CTP ROD minor version calculated as 0x" << MSG::hex << rodMinorVersion << MSG::dec);
-
-  return rodMinorVersion;
 }
