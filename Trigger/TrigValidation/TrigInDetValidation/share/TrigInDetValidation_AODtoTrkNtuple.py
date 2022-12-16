@@ -268,7 +268,7 @@ if ( True ) :
     
     ]
 
-  from AthenaCommon.AppMgr import release_metadata
+  from PyUtils.Helpers import release_metadata
   d = release_metadata()
   TestMonTool.releaseMetaData = d['nightly name'] + " " + d['nightly release'] + " " + d['date'] + " " + d['platform'] + " " + d['release']
   TestMonTool.outputFileName="TrkNtuple.root"
