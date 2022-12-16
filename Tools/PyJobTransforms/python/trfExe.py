@@ -1447,7 +1447,7 @@ class athenaExecutor(scriptExecutor):
             elif 'valgrind' in self.conf._argdict and self.conf._argdict['valgrind'].value is True:
                 msg.info('Disabling "--drop-and-reload" because the job is configured to use Valgrind')
             elif 'athenaopts' in self.conf.argdict:
-                athenaConfigRelatedOpts = ['--config-only','--drop-and-reload','--drop-configuration','--keep-configuration']
+                athenaConfigRelatedOpts = ['--config-only','--drop-and-reload']
                 # Note for athena options we split on '=' so that we properly get the option and not the whole "--option=value" string
                 if currentSubstep in self.conf.argdict['athenaopts'].value:
                     conflictOpts = set(athenaConfigRelatedOpts).intersection(set([opt.split('=')[0] for opt in self.conf.argdict['athenaopts'].value[currentSubstep]]))
