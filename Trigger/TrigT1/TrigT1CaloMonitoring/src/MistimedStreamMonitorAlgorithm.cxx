@@ -170,7 +170,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   
    // now classify the tower signals by looking at their FADC counts, if it exceeds 70
-  int satCounter = 0; // saturated TT
   int badCounter = 0; // category 2 really bad
   int bad2Counter = 0; // category 4 bad peak 2 
   int bad3Counter = 0; // category 6 bad peak 3 
@@ -218,7 +217,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
     if(maxADCval < 70){
       ttPulseCategory = 0.1;
     }else if(maxADCval == 1023) {
-      satCounter++;
       ttPulseCategory = 1;
       if(! (tt)->layer()) emActivityCounter++;
     }else{
