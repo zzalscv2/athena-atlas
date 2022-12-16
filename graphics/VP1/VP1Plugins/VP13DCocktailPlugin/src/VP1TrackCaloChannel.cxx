@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,9 +50,9 @@ void VP1TrackCaloChannel::init()
 //  addSystem(new VP1CaloClusterSystem,IVP13DStandardChannelWidget::StartDisabled);
   addSystem(new VP1AODSystem,IVP13DStandardChannelWidget::StartDisabled);
 
-  foreach(QString n,VP1SysConf::extraGeometrySystems())
+  for (QString n : VP1SysConf::extraGeometrySystems())
     addSystem(new VP1GeometrySystem(VP1GeoFlags::None,n),IVP13DStandardChannelWidget::StartDisabled);
-  foreach(QString n,VP1SysConf::extraTrackSystems())
+  for (QString n : VP1SysConf::extraTrackSystems())
     addSystem(new VP1TrackSystem(n),IVP13DStandardChannelWidget::StartDisabled);
 
   VP1SysConf::setupStandardConnectionsAndOptions( guidelinesystem,geosys,tracksys,prdsys,0,VP1SysConf::EVENTSTUDIES );
