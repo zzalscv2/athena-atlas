@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1PRDSystems/PRDHandle_MDT.h"
@@ -90,7 +90,7 @@ QStringList PRDHandle_MDT::clicked() const
     Identifier id = m_driftcircle->identify();
 
     os << "MdtPrepData with Identifier ["<<id.get_compact()  ;
-    os << "] = [" << (idhelper->print_to_string(id)).c_str()  ;
+    os << "] = [" << (idhelper->print_to_string(id))  ;
     os << "]\n at global position = [" << m_driftcircle->globalPosition()<<"], local position = ["<<m_driftcircle->localPosition()<<"].";
     os <<"\nDrift radius = "<<m_driftcircle->localPosition()[0]<<" CLHEP::mm. ";
     os <<"ADC: "<<m_driftcircle->adc();
