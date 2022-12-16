@@ -1,6 +1,6 @@
 /** -*- C++ -*- */
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file L1DynamicPedestalProviderRoot.h
@@ -50,8 +50,8 @@ namespace LVL1
 
     static const int s_nElement = 33;
     static const int s_nBcid = 350; // mc12: max 350 // all: 3564
-    int m_firRefEm[s_nElement][s_nBcid];
-    int m_firRefHad[s_nElement][s_nBcid];
+    int m_firRefEm[s_nElement][s_nBcid]{};
+    int m_firRefHad[s_nElement][s_nBcid]{};
   }; // end of class L1DynamicPedestalProviderRoot
 
 } // end of namespace
