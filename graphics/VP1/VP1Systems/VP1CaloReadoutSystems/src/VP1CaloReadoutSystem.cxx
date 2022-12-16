@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloReadoutSystems/VP1CaloReadoutSystem.h"
@@ -330,9 +330,9 @@ void VP1CaloReadoutSystem::enabledPhiSectorsChanged()
      }
    }
    m_clockwork->currentlyEnabledPhiSectors = v;
-   foreach (int iphi,justDisabledPhiSectors)
+   for (int iphi : justDisabledPhiSectors)
      phiSectorTurnoff(iphi);
-   foreach (int iphi,justEnabledPhiSectors)
+   for (int iphi : justEnabledPhiSectors)
      phiSectorTurnon(iphi);
 }
 
