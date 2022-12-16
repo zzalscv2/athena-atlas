@@ -21,7 +21,7 @@ from .Debugging import DbgStage
 _useropts = "bidc:hl:svp:r:t:"
 _userlongopts = [
     "batch", "interactive", "no-display", "debug=", "command=", "CA", "help",
-    "loglevel=", "showincludes", "trace=", "check-properties",
+    "loglevel=", "showincludes", "trace=",
     "version",
     "leak-check=", "leak-check-execute", "delete-check=",
     "perfmon", "pmon=", "repeat-evts=", "profile-python=",
@@ -74,8 +74,6 @@ Accepted command line options:
                                               INFO, WARNING, ERROR, or FATAL)
  -s, --showincludes,                  ...  show printout of included files
      --trace <pattern>                     also show files that match <pattern>
- -t, --check-properties <level>       ...  check properties based on setting history,
-                                              report details depend <level>
  -v, --version                        ...  print version number
      --perfmon                        ...  enable performance monitoring toolkit
                                            (same as --pmon=perfmon)
@@ -143,7 +141,6 @@ def parse(chk_tcmalloc=True):
     opts.command = ""            # optional one-line command
     opts.showincludes = 0        # don't show include files
     opts.trace_pattern = ""      # defaults decided in Include module
-    opts.check_properties = 0    # no checking by default
     opts.do_pmon = False         # default is to NOT enable perfmon
     opts.nbr_repeat_evts = 0     # default is to NOT repeat events
     opts.enable_ers_hdlr = False # enable/disable TDAQ ERS signal handlers
@@ -274,16 +271,6 @@ def parse(chk_tcmalloc=True):
         elif opt == "--trace":
             opts.trace_pattern = arg
 
-        elif opt in ("-t", "--check-properties" ):
-            try:
-                iarg = int(arg)
-                if iarg == 1 or iarg < 0:
-                    raise ValueError
-                opts.check_properties = iarg
-            except ValueError:
-                print ('properties check expects a numerical argument of 2 or greater')
-                _help_and_exit()
-            
         elif opt in ("-v", "--version"):
             print (__version__)
             sys.exit()

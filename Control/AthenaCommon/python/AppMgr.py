@@ -636,12 +636,6 @@ class AthAppMgr( AppMgr ):
                detail = 'not in TopAlg or other known list'
             Logging.log.error( 'Algorithm "%s": %s, no properties set', grc.getFullName(), detail )
 
-    # if requested, print a (summary of) the list of potential property clashes
-      if self._opts and self._opts.check_properties:
-         from AthenaCommon import PropertyHistoryCheck
-         PropertyHistoryCheck.check( self._opts.check_properties )
-         del PropertyHistoryCheck
-
     # if requested, dump the current state of the configuration to an ASCII file
       if self._opts and self._opts.config_dump_file:
          import AthenaCommon.ConfigurationShelve as cs
