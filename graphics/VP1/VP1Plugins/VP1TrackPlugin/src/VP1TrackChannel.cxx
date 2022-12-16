@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1TrackPlugin/VP1TrackChannel.h"
@@ -39,9 +39,9 @@ void VP1TrackChannel::init()
 
   addSystem(new VP1SimHitSystem(),IVP13DStandardChannelWidget::StartDisabled);
 
-  foreach(QString n,VP1SysConf::extraGeometrySystems())
+  for (QString n : VP1SysConf::extraGeometrySystems())
     addSystem(new VP1GeometrySystem(VP1GeoFlags::None,n),IVP13DStandardChannelWidget::StartDisabled);
-  foreach(QString n,VP1SysConf::extraTrackSystems())
+  for (QString n : VP1SysConf::extraTrackSystems())
     addSystem(new VP1TrackSystem(n),IVP13DStandardChannelWidget::StartDisabled);
 
   VP1SysConf::setupStandardConnectionsAndOptions( guidelinesystem,geosys,tracksys,prdsys,vertex,VP1SysConf::EVENTSTUDIES );
