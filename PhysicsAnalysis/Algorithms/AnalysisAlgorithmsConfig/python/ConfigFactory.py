@@ -83,7 +83,9 @@ def makeConfig (factoryName, groupName,
         makeJetJvtAnalysisConfig( configSeq, groupName )
 
 
-    elif factoryName == 'FlavorTagging' :
+    elif factoryName.startswith ('FlavorTagging') :
+        raise ValueError ('You requested a FlavorTagging factory, but the name was changed to FlavourTagging')
+    elif factoryName == 'FlavourTagging' :
         from FTagAnalysisAlgorithms.FTagAnalysisConfig import makeFTagAnalysisConfig
         groupSplit = groupName.split ('.')
         if len (groupSplit) != 2 or groupSplit[0] == '' or groupSplit[1] == '' :
