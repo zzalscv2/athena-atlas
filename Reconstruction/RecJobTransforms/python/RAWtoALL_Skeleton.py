@@ -138,6 +138,10 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Utils import setupLoggingLevels
     setupLoggingLevels(ConfigFlags, cfg)
 
+    # Write AMI tag into in-file metadata
+    from PyUtils.AMITagHelperConfig import AMITagCfg
+    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+
     timeConfig = time.time()
     log.info("configured in %d seconds", timeConfig - timeStart)
 
