@@ -107,7 +107,7 @@ eflowObject::~eflowObject()
   std::vector<CaloClusterContainer*>::iterator firstContainer = m_eflowClusContainers.begin();
   std::vector<CaloClusterContainer*>::iterator lastContainer = m_eflowClusContainers.end();
 
-  for (; firstContainer != lastContainer; firstContainer++) delete *firstContainer;
+  for (; firstContainer != lastContainer; ++firstContainer) delete *firstContainer;
   m_eflowClusContainers.clear();
 
 }

@@ -55,7 +55,7 @@ void DetailedTrackTruthCollectionCnv_p3::transToPers( const DetailedTrackTruthCo
   pers->m_entries.resize(trans->size());
   Trk::DetailedTrackTruthCollection_p3::CollectionType::size_type ipers(0);
 
-  for(DetailedTrackTruthCollection::const_iterator itrans=trans->begin(); itrans!=trans->end(); itrans++, ipers++) {
+  for(DetailedTrackTruthCollection::const_iterator itrans=trans->begin(); itrans!=trans->end(); ++itrans, ++ipers) {
     Trk::DetailedTrackTruthCollection_p3::Entry& current = pers->m_entries[ipers];
     current.key.m_index = itrans->first.index(); // extract index from ElementLink
     detailedTruthConverter.transToPers(&itrans->second, &current.detailedTruth, msg);

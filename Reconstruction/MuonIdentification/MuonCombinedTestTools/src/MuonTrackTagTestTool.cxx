@@ -131,7 +131,7 @@ namespace MuonCombined {
             if ((**tsosit).type(Trk::TrackStateOnSurface::Measurement) && !(**tsosit).type(Trk::TrackStateOnSurface::Outlier)) {
                 mspar = (**tsosit).trackParameters();
             }
-            tsosit++;
+            ++tsosit;
         }
 
         if (!mspar) {
