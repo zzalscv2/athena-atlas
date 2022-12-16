@@ -89,7 +89,8 @@ def ClusterSplitProbabilityContainerName(flags):
     extension = flags_set[-1].InDet.Tracking.ActivePass.extension
     ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + extension
     if len(flags_set)==1 and flags.InDet.Tracking.doBackTracking: # Only primary pass + back-tracking
-        ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb"
+        ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb" \
+                                    + extension
 
     return ClusterSplitProbContainer
 
@@ -363,7 +364,7 @@ def InDetTrackRecoCfg(flags):
                 result.merge(BackTrackingCfg(current_flags,
                                              InputCollections = InputCombinedInDetTracks,
                                              ClusterSplitProbContainer = ClusterSplitProbContainer))
-                ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb"
+                ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb" + current_flags.InDet.Tracking.ActivePass.extension
                 InputCombinedInDetTracks += ["ResolvedTRTSeededTracks"]
                 InputExtendedInDetTracks += ["ResolvedTRTSeededTracks"]
 
