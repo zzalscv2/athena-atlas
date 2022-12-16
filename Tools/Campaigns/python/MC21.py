@@ -41,6 +41,8 @@ def MC21aSingleBeamspot(flags):
 
 def MC21LowMu(flags):
     """MC21 flags for MC to match Run 3 data with low pile-up"""
+    flags.Input.MCCampaign = Campaign.MC21a
+
     flags.Beam.NumberOfCollisions = 60.
     flags.Input.ConditionsRunNumber = 410000
 
@@ -63,6 +65,8 @@ def MC21LowMu(flags):
 
 def MC21NoPileUp(flags):
     """MC21a flags for MC to match initial Run 3 data"""
+    flags.Input.MCCampaign = Campaign.MC21a
+
     flags.Beam.NumberOfCollisions = 0.
     flags.Input.ConditionsRunNumber = 410000
 
@@ -83,6 +87,8 @@ def BeamspotSplitMC21a():
 
 def MC21SimulationNoIoV(flags):
     """MC21 base flags for simulation without specifying conditions IoVs"""
+    flags.Input.MCCampaign = Campaign.MC21a
+
     from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
