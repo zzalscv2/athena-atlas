@@ -222,9 +222,13 @@ Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 06C9EAE8-6F5B-E011-BAAA-003048F0E7AC
 Domain[ROOT_All]     INFO                           /cvmfs/atlas-condb.cern.ch/repo/conditions/cond09/cond09_mc.000029.gen.COND/cond09_mc.000029.gen.COND._0002.pool.root
 RootDatabase.open    INFO /cvmfs/atlas-condb.cern.ch/repo/conditions/cond09/cond09_mc.000029.gen.COND/cond09_mc.000029.gen.COND._0002.pool.root File version:52200
-CaloMgrDetDescrCnv   INFO in createObj: creating a Calo Detector Manager object in the detector store
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 8667C6F2-1559-DE11-A611-000423D9A21A
+Domain[ROOT_All]     INFO                           /cvmfs/atlas-condb.cern.ch/repo/conditions/cond08/cond08_mc.000003.gen.COND/cond08_mc.000003.gen.COND._0064.pool.root
+RootDatabase.open    INFO /cvmfs/atlas-condb.cern.ch/repo/conditions/cond08/cond08_mc.000003.gen.COND/cond08_mc.000003.gen.COND._0064.pool.root File version:52200
+LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [INVALID]}
 CaloIdMgrDetDes...   INFO in createObj: creating a CaloDescrManager object in the detector store
-ClassIDSvc           INFO getRegistryEntries: read 188 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 75 CLIDRegistry entries for module ALL
 CaloIDHelper_ID...   INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID            INFO initialize_from_dictionary
 AtlasDetectorID      INFO initialize_from_dictionary - OK
@@ -241,22 +245,15 @@ CaloIDHelper_ID...   INFO in createObj: creating a LArHEC_SuperCell_ID helper ob
 AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIDHelper_ID...   INFO in createObj: creating a LArFCAL_SuperCell_ID helper object in the detector store
 AtlasDetectorID      INFO initialize_from_dictionary - OK
-LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-11-16T2101/Athena/22.0.49/InstallArea/x86_64-centos7-gcc8-opt/share/FCalSuperCells2DNeighborsNew-April2014.txt
-LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-11-16T2101/Athena/22.0.49/InstallArea/x86_64-centos7-gcc8-opt/share/FCalSuperCells3DNeighborsNextNew-April2014.txt
-LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-11-16T2101/Athena/22.0.49/InstallArea/x86_64-centos7-gcc8-opt/share/FCalSuperCells3DNeighborsPrevNew-April2014.txt
+LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc11-opt/2022-12-13T2101/Athena/23.0.12/InstallArea/x86_64-centos7-gcc11-opt/share/FCalSuperCells2DNeighborsNew-April2014.txt
+LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc11-opt/2022-12-13T2101/Athena/23.0.12/InstallArea/x86_64-centos7-gcc11-opt/share/FCalSuperCells3DNeighborsNextNew-April2014.txt
+LArFCAL_Base_ID      INFO Reading file /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc11-opt/2022-12-13T2101/Athena/23.0.12/InstallArea/x86_64-centos7-gcc11-opt/share/FCalSuperCells3DNeighborsPrevNew-April2014.txt
 CaloIDHelper_ID...   INFO in createObj: creating a Tile_SuperCell_ID helper object in the detector store
 AtlasDetectorID      INFO initialize_from_dictionary - OK
-TileNeighbour        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc8-opt/2021-11-16T2101/Athena/22.0.49/InstallArea/x86_64-centos7-gcc8-opt/share/TileSuperCellNeighbour.txt
+TileNeighbour        INFO Reading file  /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_Athena_x86_64-centos7-gcc11-opt/2022-12-13T2101/Athena/23.0.12/InstallArea/x86_64-centos7-gcc11-opt/share/TileSuperCellNeighbour.txt
 AtlasDetectorID      INFO initialize_from_dictionary - OK
-CaloIdMgrDetDes...   INFO  Finished 
-CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 8667C6F2-1559-DE11-A611-000423D9A21A
-Domain[ROOT_All]     INFO                           /cvmfs/atlas-condb.cern.ch/repo/conditions/cond08/cond08_mc.000003.gen.COND/cond08_mc.000003.gen.COND._0064.pool.root
-RootDatabase.open    INFO /cvmfs/atlas-condb.cern.ch/repo/conditions/cond08/cond08_mc.000003.gen.COND/cond08_mc.000003.gen.COND._0064.pool.root File version:52200
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
-IOVDbSvc             INFO Opening COOL connection for COOLOFL_LAR/OFLP200
-IOVDbSvc             INFO Disconnecting from COOLOFL_LAR/OFLP200
-LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [INVALID]}
+CaloIdMgrDetDes...   INFO  Finished
+CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv
 CaloAlignCondAlg     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [INVALID]}
 test1
 towers

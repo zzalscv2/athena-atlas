@@ -221,7 +221,8 @@ Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 06C9EAE8-6F5B-E011-BAAA-003048F0E7AC
 Domain[ROOT_All]     INFO                           /cvmfs/atlas-condb.cern.ch/repo/conditions/cond09/cond09_mc.000029.gen.COND/cond09_mc.000029.gen.COND._0002.pool.root
 RootDatabase.open    INFO /cvmfs/atlas-condb.cern.ch/repo/conditions/cond09/cond09_mc.000029.gen.COND/cond09_mc.000029.gen.COND._0002.pool.root File version:52200
-CaloMgrDetDescrCnv   INFO in createObj: creating a Calo Detector Manager object in the detector store
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
+LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [INVALID]}
 CaloIdMgrDetDes...   INFO in createObj: creating a CaloDescrManager object in the detector store
 ClassIDSvc           INFO getRegistryEntries: read 188 CLIDRegistry entries for module ALL
 CaloIDHelper_ID...   INFO in createObj: creating a CaloDM_ID helper object in the detector store
@@ -252,10 +253,8 @@ CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDesc
 Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 8667C6F2-1559-DE11-A611-000423D9A21A
 Domain[ROOT_All]     INFO                           /cvmfs/atlas-condb.cern.ch/repo/conditions/cond08/cond08_mc.000003.gen.COND/cond08_mc.000003.gen.COND._0064.pool.root
 RootDatabase.open    INFO /cvmfs/atlas-condb.cern.ch/repo/conditions/cond08/cond08_mc.000003.gen.COND/cond08_mc.000003.gen.COND._0064.pool.root File version:52200
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 IOVDbSvc             INFO Opening COOL connection for COOLOFL_LAR/OFLP200
 IOVDbSvc             INFO Disconnecting from COOLOFL_LAR/OFLP200
-LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [INVALID]}
 CaloAlignCondAlg     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [INVALID]}
 test1
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===

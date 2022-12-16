@@ -8,8 +8,6 @@
 + AtlasGeometryCommon/SubDetectorEnvelopes
 + AtlasTest/CITest
 + AtlasTest/TestTools
-+ Calorimeter/CaloAlignment/CaloAlignmentTools
-+ Calorimeter/CaloCnv/CaloDetMgrDetDescrCnv
 + Calorimeter/CaloCnv/CaloIdCnv
 + Calorimeter/CaloCnv/CaloSimEventAthenaPool
 + Calorimeter/CaloCnv/CaloSimEventTPCnv

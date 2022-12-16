@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
- * @file CaloAlignTool.h
+ * @file ICaloRecoSimpleGeomTool.h
  *
  * @brief ICaloSimpleGeomTool interface declaration 
  * 19.9.2005 Creation of the interface CaloDetDescr/ICaloSimpleGeomTool : the 
