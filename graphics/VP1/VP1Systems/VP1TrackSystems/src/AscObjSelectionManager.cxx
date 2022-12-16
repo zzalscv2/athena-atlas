@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -338,7 +338,7 @@ void AscObjSelectionManager::ensureDeselected(const QList<AssociatedObjectHandle
   if (handles.isEmpty())
     return;
   QList<AssociatedObjectHandleBase*> selHandlesBefore = m_d->selAscObjHandles;
-  foreach (AssociatedObjectHandleBase*handle,handles)
+  for (AssociatedObjectHandleBase*handle : handles)
     m_d->selAscObjHandles.removeAll(handle);
   if (selHandlesBefore!=m_d->selAscObjHandles) {
     m_d->updateSelectionVisuals();
@@ -364,7 +364,7 @@ void AscObjSelectionManager::ensureSelected(const QList<AssociatedObjectHandleBa
   } else {
     //Multi selections allowed
     QList<AssociatedObjectHandleBase*> selHandlesBefore = m_d->selAscObjHandles;
-    foreach (AssociatedObjectHandleBase*handle,handles) {
+    for (AssociatedObjectHandleBase*handle : handles) {
       if (!m_d->selAscObjHandles.contains(handle))
 	m_d->selAscObjHandles << handle;
     }
@@ -391,7 +391,7 @@ void AscObjSelectionManager::ascObjDetailLevelChanged()
 
   const bool isSimpleMode = (m_d->controller->assocObjDetailLevel()==TrackCommonFlags::SIMPLE);
   int i(0);
-  foreach (AssociatedObjectHandleBase* handle,m_d->selAscObjHandles) {
+  for (AssociatedObjectHandleBase* handle : m_d->selAscObjHandles) {
     SoPath * path = (*pathlist)[i++];
     if (!path)
       continue;
