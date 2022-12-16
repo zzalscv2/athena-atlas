@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -317,7 +317,7 @@ void PhiSectorManager::enabledPhiSectorsChanged()
     if (m_d->currentlyEnabledPhiSectors[iphi]!=v[iphi])
       changedPhiSectors << iphi;
   m_d->currentlyEnabledPhiSectors = v;
-  foreach (int iphi,changedPhiSectors)
+  for (int iphi : changedPhiSectors)
     updateEnabledPhiSections(iphi);
 }
 
