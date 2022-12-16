@@ -66,8 +66,6 @@ def RoIBResultToxAODCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaCommon import Configurable
-    Configurable.ConfigurableRun3Behavior = 1
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
