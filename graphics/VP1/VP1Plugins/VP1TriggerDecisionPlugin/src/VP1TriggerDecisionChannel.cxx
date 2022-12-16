@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ void VP1TriggerDecisionChannel::cellActivated( int row, int /*column*/ )
 
     message("===== "+key+" ("+(type.isEmpty()? 0 :type)+"):");
 
-    foreach(QString line,info)
+    for (QString line : info)
             message(line);
 
 }
