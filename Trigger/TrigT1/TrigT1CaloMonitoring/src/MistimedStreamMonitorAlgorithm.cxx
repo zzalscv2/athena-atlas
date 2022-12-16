@@ -675,7 +675,7 @@ StatusCode  MistimedStreamMonitorAlgorithm::fillPPMEtaPhi( MonitorTT &monTT,
 
 
 
-bool MistimedStreamMonitorAlgorithm::pulseQuality(const std::vector<uint16_t> ttPulse, int peakSlice) const {
+bool MistimedStreamMonitorAlgorithm::pulseQuality(const std::vector<uint16_t>& ttPulse, int peakSlice) const {
      
     bool goodPulse = true;
     int size = ttPulse.size();

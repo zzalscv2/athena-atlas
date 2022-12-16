@@ -29,9 +29,9 @@ public: MistimedStreamMonitorAlgorithm( const std::string& name, ISvcLocator* pS
   
   /// Struct to contain PPM trigger tower info
   struct MonitorTT { 
-    const xAOD::TriggerTower* tower;
-    double phiScaled; /// phi for 2d maps with integer bins (taking into account granularity in eta)
-    double phi1d;     /// phi for 1d phi distributions (taking into account granularity in eta) 
+    const xAOD::TriggerTower* tower = nullptr;
+    double phiScaled = 0; /// phi for 2d maps with integer bins (taking into account granularity in eta)
+    double phi1d = 0;     /// phi for 1d phi distributions (taking into account granularity in eta)
   };
 
   /// Struct to contain CPM tower info
@@ -56,7 +56,7 @@ private:
   
   StringProperty m_packageName{this,"PackageName","MistimedStreamMonitor","group name for histogramming"};
 
-  bool pulseQuality(const std::vector<uint16_t> ttPulse, int peakSlice) const;
+  bool pulseQuality(const std::vector<uint16_t>& ttPulse, int peakSlice) const;
  
 
   // TrigDecisionTool

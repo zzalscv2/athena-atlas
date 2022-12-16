@@ -1344,7 +1344,7 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_
       for ( ; it_rpc_hit != (*it_rpc) -> end() ; ++it_rpc_hit )
         {
           if (!(*it_rpc_hit) -> isInput() && (*it_rpc_hit) -> rowinBcid() == 1) {
-	    std::ostringstream rpckey;
+            std::ostringstream rpckey;
             rpckey << "BA" << (*it_rpc)->sectorId() <<"-RoI" << (*it_rpc_hit) -> roi()
                    << "-Pt" << (*it_rpc_hit) -> ptId();
             rpcCandidates.insert (std::pair<std::string, const RpcSLTriggerHit* >(rpckey.str(),(*it_rpc_hit)));
@@ -1352,27 +1352,23 @@ TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_RDO* theMuCTPI_
         }
     }
 
-  Muon::TgcCoinDataContainer::const_iterator it_tgc;
-  Muon::TgcCoinDataCollection::const_iterator it_tgc_col;
-  for (it_tgc = theTGCContainer->begin(); it_tgc != theTGCContainer->end(); it_tgc++) {
-    for (it_tgc_col = (*it_tgc)->begin(); it_tgc_col != (*it_tgc)->end(); it_tgc_col++) {
-      if ((*it_tgc_col)->pt() != 0 ) {
-	std::ostringstream tgckey;
-	std::string sys = "FW";
-        if ((*it_tgc_col)->isForward()) {  // Forward sector, account for different numbering scheme in SL readout
-          int secID = (*it_tgc_col)->phi();
+  for (const Muon::TgcCoinDataCollection* tgc_coll : *theTGCContainer) {
+    for (const Muon::TgcCoinData* tgc_coin : *tgc_coll) {
+      if (tgc_coin->pt() != 0 ) {
+        std::ostringstream tgckey;
+        if (tgc_coin->isForward()) {  // Forward sector, account for different numbering scheme in SL readout
+          int secID = tgc_coin->phi();
           if (secID == 24) secID = 0;
-          tgckey << sys << secID+(24*(*it_tgc_col)->isAside()) <<"-RoI" << (*it_tgc_col)->roi()
-                 << "-Pt" << (*it_tgc_col)->pt();
+          tgckey << "FW" << secID+(24*tgc_coin->isAside()) <<"-RoI" << tgc_coin->roi()
+                 << "-Pt" << tgc_coin->pt();
         } else { // Endcap sector, account for different numbering scheme in SL readout
-	  std::string sys = "EC";
-          int secID =  (*it_tgc_col)->phi()+1;
+          int secID =  tgc_coin->phi()+1;
           if (secID == 48 ) secID = 0;
           else if (secID == 49 ) secID = 1;
-          tgckey << sys << secID + (48*(*it_tgc_col)->isAside()) <<"-RoI" << (*it_tgc_col)->roi()
-                 << "-Pt" << (*it_tgc_col)->pt();
+          tgckey << "EC" << secID + (48*tgc_coin->isAside()) <<"-RoI" << tgc_coin->roi()
+                 << "-Pt" << tgc_coin->pt();
         }
-        tgcCandidates.insert(std::pair<std::string, const Muon::TgcCoinData* >(tgckey.str(),(*it_tgc_col)));
+        tgcCandidates.emplace(tgckey.str(), tgc_coin);
       }
     }
   }

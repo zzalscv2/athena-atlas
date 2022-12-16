@@ -26,11 +26,11 @@ public:PPMSimBSMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocat
   
   /// Struct to contain PPM trigger tower info
   struct MonitorTT { 
-    const xAOD::TriggerTower* tower;
-    double phiScaled; /// phi for 2d maps with integer bins (taking into account granularity in eta)
-    double phi1d;     /// phi for 1d phi distributions (taking into account granularity in eta) 
-    int jepET;
-    double maxADC;    /// max ADC timeslice
+    const xAOD::TriggerTower* tower{};
+    double phiScaled{}; /// phi for 2d maps with integer bins (taking into account granularity in eta)
+    double phi1d{};     /// phi for 1d phi distributions (taking into account granularity in eta)
+    int jepET{};
+    double maxADC{};    /// max ADC timeslice
   };
 
 
