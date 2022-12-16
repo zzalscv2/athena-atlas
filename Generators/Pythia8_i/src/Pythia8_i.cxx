@@ -32,7 +32,6 @@ namespace {
 #define PYTHIA8_CONVERSION 1.0
 
 #ifdef PYTHIA_VERSION_INTEGER
-  #if PYTHIA_VERSION_INTEGER > 8230
   #undef PYTHIA8_NWEIGHTS
   #undef PYTHIA8_WEIGHT
   #undef PYTHIA8_WLABEL
@@ -43,11 +42,6 @@ namespace {
   #endif
   #define PYTHIA8_WEIGHT getGroupWeight
   #define PYTHIA8_WLABEL getGroupName
-  #if PYTHIA_VERSION_INTEGER < 8244
-    #undef PYTHIA8_CONVERSION
-    #define PYTHIA8_CONVERSION 1.0e9
-  #endif
-  #endif
 #endif
 
 /**
