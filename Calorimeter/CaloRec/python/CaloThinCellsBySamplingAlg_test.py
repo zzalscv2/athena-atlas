@@ -13,8 +13,7 @@ from AthenaPython.PyAthenaComps import Alg, StatusCode
 import ROOT
 
 
-def make_calo_cells (detStore):
-    mgr = detStore['CaloMgr']
+def make_calo_cells (mgr):
     ccc = ROOT.CaloCellContainer()
     for i in range (mgr.element_size()):
         elt = mgr.get_element (ROOT.IdentifierHash (i))
@@ -29,14 +28,17 @@ def make_calo_cells (detStore):
 
 class CreateDataAlg (Alg):
     def execute (self):
-        ccc = make_calo_cells (self.detStore)
+        ctx = self.getContext()
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
+        ccc = make_calo_cells (mgr)
         self.evtStore.record (ccc, 'AllCalo', False)
         return StatusCode.Success
 
 
 class CheckThinningAlg (Alg):
     def execute (self):
-        mgr = self.detStore['CaloMgr']
+        ctx = self.getContext()
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
         dec = self.evtStore['AllCalo_THINNED_StreamAOD.thinAlg']
 
         for i in range (dec.size()):
