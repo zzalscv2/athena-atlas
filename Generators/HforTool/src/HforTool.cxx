@@ -344,7 +344,7 @@ void HforTool::findHFQuarks() {
 
 	// if no b/c-hadron parent and no b/c-quark daughter, keep it!
       if (!hasbchadronparent && !hasbcquarkdaughter) {
-	ATH_MSG_DEBUG("  final state b/c-quark, barcode = "<< HepMC::barcode(bcpart));
+	ATH_MSG_DEBUG("  final state b/c-quark = "<< bcpart);
 	finalstate_q[apdg].push_back(bcpart) ;
       }
 

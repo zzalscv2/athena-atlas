@@ -243,8 +243,7 @@ namespace Trk
 
     const HepPDT::ParticleData* pd = m_partPropSvc->PDT()->particle( std::abs( pdg ) );
     if( ! pd ) {
-      ATH_MSG_DEBUG( "Could not get particle data for pdg = " << pdg 
-		     << " status " << part->status() << " barcode " <<HepMC::barcode(part)
+      ATH_MSG_DEBUG( "Could not get particle data for = " << part 
 		     << " process id " <<HepMC::signal_process_id(part->parent_event()));
       return false;
     }

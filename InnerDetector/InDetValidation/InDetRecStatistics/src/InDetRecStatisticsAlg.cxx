@@ -571,9 +571,7 @@ selectGenSignal  (const McEventCollection* SimTracks,
 	  int   pdgCode = particle->pdg_id();
 	  const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
 	  if (!pd) {
-	    ATH_MSG_DEBUG("Could not get particle data for particle with "
-			 <<"pdgCode="<<pdgCode<< ", status=" << particle->status()
-			 << ", barcode=" << HepMC::barcode(particle));
+	    ATH_MSG_DEBUG("Could not get particle data for particle "<< particle);
 	    ATH_MSG_DEBUG("GenParticle= " << particle);
 	    continue;
 	  }

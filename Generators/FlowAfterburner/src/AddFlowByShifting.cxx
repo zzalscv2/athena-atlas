@@ -222,9 +222,7 @@ StatusCode AddFlowByShifting::execute() {
                                          parent->momentum().py(),
                                          parent->momentum().pz(),
                                          parent->momentum().e());
-        ATH_MSG_DEBUG("Parent particle: " << HepMC::barcode(parent)        <<
-                      " PID = "           << parent->pdg_id()         <<
-                      " Status = "        << parent->status()         <<
+        ATH_MSG_DEBUG("Parent particle: " << parent        <<
                       " Eta = "           << momentum.pseudoRapidity()<<
                       " Phi = "           << momentum.phi()            );
 
@@ -307,7 +305,7 @@ void AddFlowByShifting::MoveDescendantsToParent
   // by phishift to parent particle position
   auto endvtx = parent->end_vertex();
   if ( endvtx ) {
-    ATH_MSG_DEBUG("Processing branch of parent particle "<< HepMC::barcode(parent));
+    ATH_MSG_DEBUG("Processing branch of parent particle "<< parent);
 
     // now rotate descendant vertices
 #ifdef HEPMC3
@@ -320,7 +318,7 @@ void AddFlowByShifting::MoveDescendantsToParent
         auto descvtx = (*descvtxit);
 #endif
 
-          ATH_MSG_DEBUG("Processing vertex " << HepMC::barcode(descvtx));
+          ATH_MSG_DEBUG("Processing vertex " << descvtx);
 
           // rotate vertex
           if(std::abs(phishift) > 1e-7) {
@@ -343,9 +341,7 @@ void AddFlowByShifting::MoveDescendantsToParent
                                                  descpart->momentum().py(),
                                                  descpart->momentum().pz(),
                                                  descpart->momentum().e());
-                ATH_MSG_DEBUG("Descendant particle: " << HepMC::barcode(descpart)<<
-                              " PID = "               << descpart->pdg_id() <<
-                              " Status = "            << descpart->status() <<
+                ATH_MSG_DEBUG("Descendant particle: " << descpart <<
                               " Eta = "               << momentum.pseudoRapidity() <<
                               " Phi = "               << momentum.phi() );
               }
