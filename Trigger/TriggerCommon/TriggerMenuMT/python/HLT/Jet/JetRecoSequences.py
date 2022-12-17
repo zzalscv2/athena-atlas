@@ -3,7 +3,7 @@
 #
 
 from AthenaCommon.CFElements import parOR, findAllAlgorithms
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import RecoFragmentsPool
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
 from JetRecConfig import JetInputConfig, JetRecConfig
@@ -23,7 +23,7 @@ from JetRec.JetRecConf import JetViewAlg
 
 # this code uses CA internally, needs to be in this context manager,
 # at least until ATLASRECTS-6635 is closed
-with ConfigurableRun3Behavior():
+with ConfigurableCABehavior():
     from ..Bjet.BjetFlavourTaggingConfiguration import getFastFlavourTagging
 
 from AthenaCommon.Logging import logging
@@ -297,7 +297,7 @@ def jetCaloRecoSequences( configFlags, RoIs, **jetRecoDict ):
 def getFastFlavourTaggingSequence( dummyFlags, name, inputJets, inputVertex, inputTracks, 
                                    addAlgs=[], isPFlow=False):
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         ca_ft_algs = getFastFlavourTagging( dummyFlags, inputJets, inputVertex, inputTracks, isPFlow)
 
     # 1) We need to do the algorithms manually and then remove them from the CA

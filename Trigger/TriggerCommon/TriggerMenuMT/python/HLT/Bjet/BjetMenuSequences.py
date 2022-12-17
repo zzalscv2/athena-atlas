@@ -4,7 +4,7 @@
 # menu components
 from AthenaCommon.CFElements import seqAND, findAllAlgorithms
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
@@ -62,7 +62,7 @@ def getBJetSequence(flags, jc_name=None):
         inputJets=InputMakerAlg.InViewJets
     )
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         # Flavour Tagging
         from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfiguration import getFlavourTagging
         acc_flavourTaggingAlgs = getFlavourTagging(

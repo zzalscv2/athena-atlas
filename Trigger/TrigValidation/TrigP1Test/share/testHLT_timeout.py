@@ -12,9 +12,9 @@ from AthenaCommon.AlgScheduler import AlgScheduler
 AlgScheduler.setDataLoaderAlg('SGInputLoader')
 
 # Configure the HLT algorithms
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 hypo = None
-with ConfigurableRun3Behavior():
+with ConfigurableCABehavior():
     import TrigExamples.MTCalibPebConfig as Conf
     hypo_tools = [Conf.make_hypo_tool('HLT_MTCalibPeb{:d}'.format(num)) for num in range(1, 4)]
     for tool in hypo_tools:

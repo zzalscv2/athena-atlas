@@ -75,8 +75,8 @@ def setupxAODWriting(flags):
     topAlgs += TrigConf__xAODMenuWriterMT(KeyWriterTool=TrigConf__KeyWriterTool('KeyWriterToolOffline'))
 
     # Schedule also the prescale conditions algs
-    from AthenaCommon.Configurable import ConfigurableRun3Behavior
-    with ConfigurableRun3Behavior():
+    from AthenaCommon.Configurable import ConfigurableCABehavior
+    with ConfigurableCABehavior():
         from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
         from TrigConfigSvc.TrigConfigSvcCfg import L1PrescaleCondAlgCfg, HLTPrescaleCondAlgCfg, BunchGroupCondAlgCfg
         acc = ComponentAccumulator()

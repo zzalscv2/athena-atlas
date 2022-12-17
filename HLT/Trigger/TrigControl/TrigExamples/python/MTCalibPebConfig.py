@@ -341,8 +341,8 @@ def hlt_seq_cfg(flags, num_chains, concurrent=False, hackCA2Global=False, hypo_a
     # has an empty ToolHandle and CA adds a tool to the handle
     if hackCA2Global:
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        from AthenaCommon.Configurable import ConfigurableRun3Behavior
-        with ConfigurableRun3Behavior(target_state=0):
+        from AthenaCommon.Configurable import ConfigurableCABehavior
+        with ConfigurableCABehavior(target_state=0):
             svcMgr.HltEventLoopMgr.ResultMaker = conf2toConfigurable(acc.getService('HltEventLoopMgr').ResultMaker)
 
     return acc
