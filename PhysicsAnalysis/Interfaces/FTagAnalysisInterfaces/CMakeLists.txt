@@ -8,7 +8,7 @@ atlas_add_library( FTagAnalysisInterfacesLib
    FTagAnalysisInterfaces/*.h
    INTERFACE
    PUBLIC_HEADERS FTagAnalysisInterfaces
-   LINK_LIBRARIES AsgTools xAODJet PATCoreLib PATInterfaces CalibrationDataInterfaceLib )
+   LINK_LIBRARIES AsgTools xAODBTaggingEfficiencyLib xAODJet PATCoreLib PATInterfaces CalibrationDataInterfaceLib )
 
 atlas_add_dictionary( FTagAnalysisInterfacesDict
    FTagAnalysisInterfaces/FTagAnalysisInterfacesDict.h
