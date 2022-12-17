@@ -134,6 +134,7 @@ int main( int argc, char* argv[] ) {
   int isAtlfast = -1;
   int NoSyst = 1;
   int debug = 1;
+  bool isPHYSLite = false;
   Long64_t entries=-1;
 
   // Open the input file:
@@ -143,7 +144,7 @@ int main( int argc, char* argv[] ) {
   ANA_CHECK( ifile.get() );
 
   bool isRun3 = false;
-  if ((fileName.Contains("mc21a") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
+  if ((fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
   if (isRun3) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
   std::string prw_file = "DUMMY";
@@ -180,14 +181,17 @@ int main( int argc, char* argv[] ) {
   std::map<std::string, std::string> containers = getFileContainers(ifile);
   bool hasTrkJets(false), hasFatJets(false);
   for (auto& x : containers) {
-    if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos) hasTrkJets = true;
+    if (x.first.find("AntiKtVR30Rmax4Rmin02TrackJets")!=std::string::npos)           hasTrkJets = true;
     if (x.first.find("AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets")!=std::string::npos) hasFatJets = true;
+    if (x.first.find("AnalysisElectrons")!=std::string::npos)                        isPHYSLite = true;
+
   }
   if (debug>0) {
     ANA_MSG_INFO("Checking file contents (containers):");
     for (auto& x : containers) ANA_MSG_INFO("  - found " << x.first.c_str() << " (" << x.second.c_str() << ")");
     ANA_MSG_INFO("hasTrkJets: " << (hasTrkJets?"true":"false"));
     ANA_MSG_INFO("hasFatJets: " << (hasFatJets?"true":"false"));
+    ANA_MSG_INFO("isPHYSLite: " << (isPHYSLite?"true":"false"));
   }
 
   // Create a TEvent object:
@@ -435,7 +439,6 @@ int main( int argc, char* argv[] ) {
 
   int period = (debug>0) ? 1 : 100;
   std::string cbkname, stream, ostream, kernel;
-  bool isPHYSLite = false;
 
   // Loop over the events:
   for ( Long64_t entry = 0; entry < entries; ++entry ) {
@@ -479,7 +482,6 @@ int main( int argc, char* argv[] ) {
            allEventsCBK = cbk;
         }
       }
-      if (stream.compare("PHYSLITE")==0) isPHYSLite=true;
 
       if (allEventsCBK) {
         uint64_t nEventsProcessed  = allEventsCBK->nAcceptedEvents();
