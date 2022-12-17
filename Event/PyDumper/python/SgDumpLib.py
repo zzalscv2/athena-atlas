@@ -48,6 +48,9 @@ def _gen_jobo(dct):
             inputFileSummary['geometry'] = 'ATLAS-R1-2012-02-00-00'
 
         from RecExConfig.RecFlags import rec
+        # Don't try to rebuild truth.
+        # Need to set this here or autoconfig may lock it on.
+        rec.doTruth.set_Value_and_Lock(False)
         # Skip auto-config for EVNT files.
         if inputFileSummary['stream_names'] == ['StreamEVGEN']:
             rec.AutoConfiguration.set_Value_and_Lock ([])
