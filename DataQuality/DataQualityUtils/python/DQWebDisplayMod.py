@@ -229,12 +229,20 @@ def DQWebDisplay( inputFilePath, runAccumulating, c ):
             raise IOError('tarfile ssh transfer failed')
     if c.eosResultsDir != "":
         print("Transfering han files to EOS")
-        success_EOS = transferFilesToEOS( xferFileList[:], "./han_results/", c.eosResultsDir )
+        failures = 0
+        eos_attempts = 3
+        while failures < (eos_attempts+1) :
+            success_EOS = transferFilesToEOS( xferFileList[:], "./han_results/", c.eosResultsDir )
+            if success_EOS:
+                break
+            failures += 1
+            sleep(5**failures)
         if success_EOS:
             print("Done.")
             print("")
         else:
             print("FAILED!",)
+            raise IOError("Transfer to /eos failed after {} attempts".format(failures))
             if c.emailWarnings:
                 email('The transfer of han files\n\n' +
                       ''.join(xferFileList) +

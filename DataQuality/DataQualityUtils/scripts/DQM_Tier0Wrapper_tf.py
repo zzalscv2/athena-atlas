@@ -241,6 +241,9 @@ def dq_combined_trf(jsonfile, outmap):
       print("Production mode is not True, turning off incremental mode")
       incr = 'False'
     
+    # server list
+    servers = parmap.get('servers', 'False')
+
     # get file paths, put into environment vars
     filepaths = parmap.get('filepaths', None)
     if filepaths and isinstance(filepaths, dict):
@@ -311,6 +314,7 @@ def dq_combined_trf(jsonfile, outmap):
     if 'servers' in parmap and isinstance(parmap['servers'], str):
       os.environ['DQC_SERVERS'] = parmap['servers']
 
+
     print("Job parameters:\n")
     print("  Run number:      ", runnr)
     print("  Stream name:     ", stream)
@@ -320,6 +324,9 @@ def dq_combined_trf(jsonfile, outmap):
     print("  COOL uploads:    ", allowCOOLUpload)
     print("  Production mode: ", productionMode)
     print("  Skip merge:      ", skipMerge)
+    if servers == []:
+        print("  EOS only:    True")
+        outmap['EOSonly'] = "True"
 
   except:
     outmap['exitCode'] = 104
