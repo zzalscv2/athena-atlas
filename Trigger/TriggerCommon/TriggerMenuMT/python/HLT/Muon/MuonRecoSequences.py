@@ -410,13 +410,12 @@ def muEFSARecoSequence( RoIs, name ):
 
   muEFSARecoSequence = parOR("efmsViewNode_"+name)
 
-  efAlgs = []
 
   EFMuonViewDataVerifier = CfgMgr.AthViews__ViewDataVerifier( "EFMuonViewDataVerifier_" + name )
   EFMuonViewDataVerifier.DataObjects = [( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
                                         ( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+%s' % RoIs )]
 
-  efAlgs.append( EFMuonViewDataVerifier )
+  muEFSARecoSequence+= EFMuonViewDataVerifier
 
   #need MdtCondDbAlg for the MuonStationIntersectSvc (required by segment and track finding)
   from AthenaCommon.AlgSequence import AthSequencer
@@ -431,7 +430,7 @@ def muEFSARecoSequence( RoIs, name ):
   MuonStationsInterSectAlg()
   if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
       theMuonLayerHough = MuonLayerHoughAlg("TrigMuonLayerHoughAlg")
-      efAlgs.append(theMuonLayerHough)
+      muEFSARecoSequence+=theMuonLayerHough
 
       # if NSW is excluded from reconstruction (during commissioning)
       if muonRecFlags.runCommissioningChain():
@@ -474,24 +473,15 @@ def muEFSARecoSequence( RoIs, name ):
 
 
   #Algorithms to views
-  efAlgs.append( theSegmentFinderAlg )
+  muEFSARecoSequence+=theSegmentFinderAlg
   if muonRecFlags.runCommissioningChain():
-    efAlgs.append( theSegmentFilterAlg )
-  efAlgs.append( TrackBuilder )
-  efAlgs.append( xAODTrackParticleCnvAlg )
-  efAlgs.append( theMuonCandidateAlg )
-  efAlgs.append( themuoncreatoralg )
+    muEFSARecoSequence+=theSegmentFilterAlg
+  muEFSARecoSequence+=TrackBuilder
+  muEFSARecoSequence+=xAODTrackParticleCnvAlg
+  muEFSARecoSequence+=theMuonCandidateAlg
+  muEFSARecoSequence+=themuoncreatoralg
 
 
-  # setup muEFMsonly algs
-  for efAlg in efAlgs:
-      if "RoIs" in efAlg.properties():
-        if name == "FS":
-          from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection 
-          efAlg.RoIs = mapThresholdToL1RoICollection("FS")
-        else:
-          efAlg.RoIs = RoIs
-      muEFSARecoSequence += efAlg
   sequenceOut = themuoncreatoralg.MuonContainerLocation
 
   return muEFSARecoSequence, sequenceOut
@@ -507,7 +497,6 @@ def muEFCBRecoSequence( RoIs, name ):
   from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg, MuonCombinedAlg, MuonCreatorAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
 
-  efAlgs = []
   muEFCBRecoSequence = parOR("efcbViewNode_"+name)
   #Need ID tracking related objects and MS tracks from previous steps
   ViewVerifyMS = CfgMgr.AthViews__ViewDataVerifier("muonCBViewDataVerifier_"+name)
@@ -641,14 +630,11 @@ def muEFCBRecoSequence( RoIs, name ):
                                        MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgCB_"+name))
 
   #Add all algorithms
-  efAlgs.append(theIndetCandidateAlg)
-  efAlgs.append(theMuonCombinedAlg)
-  efAlgs.append(themuoncbcreatoralg)
+  muEFCBRecoSequence+=theIndetCandidateAlg
+  muEFCBRecoSequence+=theMuonCombinedAlg
+  muEFCBRecoSequence+=themuoncbcreatoralg
 
 
-  # setup muEFMsonly algs
-  for efAlg in efAlgs:
-    muEFCBRecoSequence += efAlg
   sequenceOut = themuoncbcreatoralg.MuonContainerLocation
 
 
@@ -664,7 +650,6 @@ def muEFInsideOutRecoSequence(RoIs, name):
   from MuonCombinedRecExample.MuonCombinedAlgs import MuonCombinedInDetCandidateAlg, MuonInsideOutRecoAlg, MuGirlStauAlg, MuonCreatorAlg, StauCreatorAlg, MuonInDetToMuonSystemExtensionAlg
   from MuonCombinedAlgs.MuonCombinedAlgsMonitoring import MuonCreatorAlgMonitoring
 
-  efAlgs = []
 
   viewNodeName="efmuInsideOutViewNode_"+name
   if "Late" in name:
@@ -690,7 +675,7 @@ def muEFInsideOutRecoSequence(RoIs, name):
 
       if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
         theMuonLayerHough = CfgMgr.MuonLayerHoughAlg( "MuonLayerHoughAlg")
-        efAlgs.append(theMuonLayerHough)
+        efmuInsideOutRecoSequence+=theMuonLayerHough
 
         # if NSW is excluded from reconstruction (during commissioning)
         if muonRecFlags.runCommissioningChain():
@@ -703,9 +688,9 @@ def muEFInsideOutRecoSequence(RoIs, name):
       else:
         theSegmentFinderAlg = MooSegmentFinderAlg("TrigLateMuonSegmentMaker_"+name)
 
-      efAlgs.append(theSegmentFinderAlg)
+      efmuInsideOutRecoSequence+=theSegmentFinderAlg
       if muonRecFlags.runCommissioningChain():
-        efAlgs.append(theSegmentFilterAlg) 
+        efmuInsideOutRecoSequence+=theSegmentFilterAlg 
 
     # need to run precisions tracking for late muons, since we don't run it anywhere else
 
@@ -740,7 +725,7 @@ def muEFInsideOutRecoSequence(RoIs, name):
     else:
       ToolSvc.CombinedMuonIDHoleSearch.BoundaryCheckTool.SctSummaryTool.ConditionsTools=['SCT_ConfigurationConditionsTool/InDetTrigInDetSCT_ConfigurationConditionsTool']
 
-    efAlgs.append(theIndetCandidateAlg)
+    efmuInsideOutRecoSequence+=theIndetCandidateAlg
 
 
   else:
@@ -775,16 +760,11 @@ def muEFInsideOutRecoSequence(RoIs, name):
     insideoutcreatoralg = MuonCreatorAlg("TrigMuonCreatorAlgInsideOut_"+name,  MuonCandidateLocation={candidatesName}, TagMaps=["muGirlTagMap"],InDetCandidateLocation="InDetCandidates_"+name,
                                          MuonContainerLocation = cbMuonName, ExtrapolatedLocation = "InsideOutCBExtrapolatedMuons",
                                          MSOnlyExtrapolatedLocation = "InsideOutCBMSOnlyExtrapolatedMuons", CombinedLocation = "InsideOutCBCombinedMuon", MonTool = MuonCreatorAlgMonitoring("MuonCreatorAlgInsideOut_"+name))
-    efAlgs.append(inDetExtensionAlg)
+    efmuInsideOutRecoSequence+=inDetExtensionAlg
 
-  efAlgs.append(theInsideOutRecoAlg)
-  efAlgs.append(insideoutcreatoralg)
+  efmuInsideOutRecoSequence+=theInsideOutRecoAlg
+  efmuInsideOutRecoSequence+=insideoutcreatoralg
 
-  # setup inside-out algs
-  for efAlg in efAlgs:
-      if "RoIs" in efAlg.properties():
-        efAlg.RoIs = RoIs
-      efmuInsideOutRecoSequence += efAlg
   sequenceOut = cbMuonName
 
   return efmuInsideOutRecoSequence, sequenceOut
