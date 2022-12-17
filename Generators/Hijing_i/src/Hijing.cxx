@@ -457,7 +457,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                      iter != vertexPtrVec_particles_out_const_end;
                      iter++)
                   {
-                    log << HepMC::barcode((*iter)) << ", ";
+                    log << (*iter) << ", ";
                   }
 
                 log << endmsg;

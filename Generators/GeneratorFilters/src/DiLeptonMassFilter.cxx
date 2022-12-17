@@ -98,9 +98,9 @@ StatusCode DiLeptonMassFilter::filterEvent() {
                 double dilepPt = vec.perp();
 
                 ATH_MSG_DEBUG(" Lepton1 : Pt = " << (*pitr1)->momentum().perp() << ", Eta = " << (*pitr1)->momentum().pseudoRapidity() <<
-                              ", pdgid = " << pdgId1 << ", status = " << (*pitr1)->status() << ", barcode = " << HepMC::barcode(*pitr1) <<
+                              (*pitr1)<<
 							  " Lepton2 : Pt = " << (*pitr2)->momentum().perp() << ", Eta = " << (*pitr2)->momentum().pseudoRapidity() <<
-							  ", pdgid = " << pdgId2 << ", status = " << (*pitr2)->status() << ", barcode = " << HepMC::barcode(*pitr2) <<
+							  (*pitr2)<<
 							  " Mass = " << invMass <<
 							  " DilepPt = " << dilepPt);
 

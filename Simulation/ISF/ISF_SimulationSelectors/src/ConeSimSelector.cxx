@@ -147,8 +147,7 @@ void ISF::ConeSimSelector::update(const ISFParticle& particle)
           if (relative)
             {
               ATH_MSG_VERBOSE("Current particle has valid relative particle:"
-                              << " (pdg=" << relative->pdg_id() << ","
-                              << " barcode=" << HepMC::barcode(relative) << ")."
+                              << relative << "."
                               << " Will now check whether cone cuts apply" );
             }
           else
