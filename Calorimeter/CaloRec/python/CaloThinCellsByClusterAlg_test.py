@@ -17,8 +17,7 @@ import ROOT
 cell_hashes = set()
 
 
-def make_calo_cells (detStore):
-    mgr = detStore['CaloMgr']
+def make_calo_cells (mgr):
     ccc = ROOT.CaloCellContainer()
     for i in range (mgr.element_size()):
         elt = mgr.get_element (ROOT.IdentifierHash (i))
@@ -31,12 +30,11 @@ def make_calo_cells (detStore):
     return ccc
 
 
-def make_clusters (detStore, ccc, hashes):
+def make_clusters (mgr, ccc, hashes):
     clc = ROOT.xAOD.CaloClusterContainer()
     clc_store = ROOT.xAOD.CaloClusterAuxContainer()
     clc.setStore (clc_store)
 
-    mgr = detStore['CaloMgr']
     ids = ROOT.vector(ROOT.IdentifierHash)()
 
     for i in range(2):
@@ -69,12 +67,14 @@ def make_clusters (detStore, ccc, hashes):
 
 class CreateDataAlg (Alg):
     def execute (self):
-        ccc = make_calo_cells (self.detStore)
+        ctx = self.getContext()
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
+        ccc = make_calo_cells (mgr)
         self.evtStore.record (ccc, 'AllCalo', False)
 
         global cell_hashes
         cell_hashes = set()
-        (clc, clc_store) = make_clusters (self.detStore, ccc, cell_hashes)
+        (clc, clc_store) = make_clusters (mgr, ccc, cell_hashes)
         self.evtStore.record (clc, 'Clusters', False)
         self.evtStore.record (clc_store, 'ClustersAux.', False)
         return StatusCode.Success
@@ -87,7 +87,8 @@ class CheckThinningAlg (Alg):
                 abs (elt.phi() - phi) < 7*2*pi/256)
 
     def execute (self):
-        mgr = self.detStore['CaloMgr']
+        ctx = self.getContext()
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
         dec = self.evtStore['AllCalo_THINNED_StreamAOD.thinAlg']
 
         global cell_hashes
