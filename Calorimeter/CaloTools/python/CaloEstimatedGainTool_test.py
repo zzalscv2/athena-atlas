@@ -61,7 +61,8 @@ class TestAlg (Alg):
             
     def execute (self):
         log = logging.getLogger ('TestAlg')
-        mgr = self.detStore['CaloMgr']
+        ctx = self.getContext()
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
         elt1 = mgr.get_element (ROOT.CaloCell_ID.LAREM,
                                 2, True, 0.5, 0.1)
         self.testcell (elt1, [(1000, 0), (50000, 1), (300000, 2)])
