@@ -351,7 +351,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
   return StatusCode::SUCCESS;
 }
   
-std::string LArCalibDigitsAccumulator::getPatternName(std::string gain, bool isPulsed, int delay, int dac){
+std::string LArCalibDigitsAccumulator::getPatternName(const std::string& gain, bool isPulsed, int delay, int dac){
   std::ostringstream ss;
   ss<<gain<<"_"<<isPulsed<<"_"<<delay<<"_"<<dac;
   return ss.str();
