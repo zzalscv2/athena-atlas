@@ -78,6 +78,7 @@ template<typename trajectory_t>
 void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
 					  typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) {
   const auto& sourceLink = static_cast<const ATLASSourceLink&>(trackState.uncalibrated());
+  trackState.allocateCalibrated(sourceLink.dim());
   if (sourceLink.dim() == 0) {
     throw std::runtime_error("Cannot create dim 0 measurement");
   } else if (sourceLink.dim() == 1) {
