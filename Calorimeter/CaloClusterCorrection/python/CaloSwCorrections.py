@@ -140,8 +140,8 @@ import re
 
 # Need to be sure that we always get run3 configurables in the imported
 # steering modules.
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
-with ConfigurableRun3Behavior():
+from AthenaCommon.Configurable import ConfigurableCABehavior
+with ConfigurableCABehavior():
     from CaloClusterCorrection.CaloComputeSWcellWeights \
          import make_CaloComputeSWcellWeights
     from CaloClusterCorrection.CaloSwLayers      import make_CaloSwLayers
@@ -1283,7 +1283,7 @@ def make_CaloSwCorrections (key = None,
                             remdup = False,
                             rembad = False,
                             **kw):
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         ca = CaloSwCorrections.make_corrections (makeFlags(),
                                                  corrclass = CALOCORR_SW,
                                                  key = key,

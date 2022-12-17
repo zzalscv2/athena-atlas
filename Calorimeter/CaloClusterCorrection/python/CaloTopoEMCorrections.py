@@ -115,8 +115,8 @@
 
 # Need to be sure that we always get run3 configurables in the imported
 # steering modules.
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
-with ConfigurableRun3Behavior():
+from AthenaCommon.Configurable import ConfigurableCABehavior
+with ConfigurableCABehavior():
     from CaloClusterCorrection.CaloTopoEMmoments  import make_CaloTopoEMmoments
     from CaloClusterCorrection.CaloTopoEMlayers   import make_CaloTopoEMlayers
     from CaloClusterCorrection.CaloTopoEMetaoff   import make_CaloTopoEMetaoff
@@ -366,7 +366,7 @@ def make_CaloTopoEMCorrections (key = None,
                                 cells_name = None,
                                 source = None,
                                 **kw):
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         ca = CaloTopoEMCorrections.make_corrections (makeFlags(),
                                                      corrclass = CALOCORR_EMTOPO,
                                                      key = key,
