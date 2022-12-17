@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: xAODMenuReader.h 612011 2014-08-15 13:43:57Z krasznaa $
 #ifndef TRIGCONFXAOD_XAODMENUREADER_H
 #define TRIGCONFXAOD_XAODMENUREADER_H
 
@@ -28,8 +27,6 @@ namespace TrigConf {
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
     *
-    * $Revision: 612011 $
-    * $Date: 2014-08-15 15:43:57 +0200 (Fri, 15 Aug 2014) $
     */
    class xAODMenuReader : public AthAlgorithm {
 
@@ -50,7 +47,7 @@ namespace TrigConf {
       ToolHandle< TrigConf::ITrigConfigTool > m_configTool;
 
       /// An internal counter
-      int m_eventCounter;
+      int m_eventCounter{0};
 
    }; // class xAODMenuReader
 

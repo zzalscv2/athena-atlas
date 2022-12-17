@@ -642,22 +642,6 @@ void TrigTSerializer::setCLID(const uint32_t *guid){
 }
 
 
-/*
-StatusCode persistifyEL(const TClass *cl, void* instance){
-  if (cl){
-    TMethodCall method(cl, "toPersistent", "");
-    meth.Execute(instance);
-    return StatusCode::SUCCESS;
-  }
-  else
-    return StatusCode::FAILURE;
-}
-
-*/
-
-
-
-
 #include <boost/current_function.hpp>
 using namespace std;
 
