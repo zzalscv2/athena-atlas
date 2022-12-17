@@ -5,7 +5,7 @@
 //  ===============================================================================
 #include "MakeQuarkGluonFractionPlots.h"
 
-MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(std::string filename): 
+MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(const std::string& filename): 
   m_doGluVsFlavour("lightC"),
   m_channel({}),
   m_detailedConfig(false),
@@ -165,7 +165,7 @@ MakeQuarkGluonFractionPlots::MakeQuarkGluonFractionPlots(std::string filename):
  * Drawing methods
  * *******************************************/
 // Draw histograms from a map
-void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos, std::string psfilename){
+void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos, const std::string& psfilename){
   TCanvas c1;
   c1.SetLogx();
   for (std::map<std::string, TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it){
@@ -177,7 +177,7 @@ void MakeQuarkGluonFractionPlots::drawhistos(std::map<std::string, TH2D*> histos
   }
 }
 // Draw histograms from a vector
-void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, std::string psfilename){
+void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, const std::string& psfilename){
   TCanvas c1;
   c1.SetLogx();
   for (std::vector<TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it){
@@ -189,7 +189,7 @@ void MakeQuarkGluonFractionPlots::drawhistos(std::vector<TH2D*> histos, std::str
   }
 }
 //Write histograms to file (nominal and uncertainties, if presents)
-void MakeQuarkGluonFractionPlots::createOutputFile(std::string filename, std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc){
+void MakeQuarkGluonFractionPlots::createOutputFile(const std::string& filename, std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc){
   TFile *fout   = new TFile(filename.c_str(),"recreate");
   fout->cd();
   for (std::vector<TH2D*>::iterator it = histos.begin() ; it != histos.end(); ++it) (*it)->Write();
@@ -200,7 +200,7 @@ void MakeQuarkGluonFractionPlots::createOutputFile(std::string filename, std::ve
 /**************************************************************
  * QGF Evaluation - related methods
  * ************************************************************/
-void MakeQuarkGluonFractionPlots::DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap){
+void MakeQuarkGluonFractionPlots::DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap){
   bool newMap = createMap;
   bool istxt = ( (filename.find(".txt") + 4 ) == filename.length());
   if(istxt){

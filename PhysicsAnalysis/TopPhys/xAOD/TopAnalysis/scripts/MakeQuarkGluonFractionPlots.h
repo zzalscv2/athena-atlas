@@ -69,15 +69,15 @@ class MakeQuarkGluonFractionPlots {
 //end new
   
   //function that reads the configuration file and makes the gluon fraction plots
-  MakeQuarkGluonFractionPlots(std::string configfile);
+  MakeQuarkGluonFractionPlots(const std::string& configfile);
   
   //function to check if the file exists
   void checkFile(std::string filename);
   
   //function to draw histograms from a map
-  void drawhistos(std::map<std::string, TH2D*> histos, std::string psfilename);
+  void drawhistos(std::map<std::string, TH2D*> histos, const std::string& psfilename);
   //function to draw histograms from a vector
-  void drawhistos(std::vector<TH2D*> histos, std::string psfilename);
+  void drawhistos(std::vector<TH2D*> histos, const std::string& psfilename);
 
   //function to extract the JetCollectionName
   std::string extractJetCollectionName(std::string histoname);
@@ -125,7 +125,7 @@ class MakeQuarkGluonFractionPlots {
 
   bool m_mergechannels;
 
-  void DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap);
+  void DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap);
   void DumpFileToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap);
   void CreateQGFFile(std::string prename, std::map<std::string, TH2D*> h_input,std::vector< std::map<std::string, TH2D*> > h_input_1P,std::vector< std::map<std::string, TH2D*> > h_input_1PVar,std::vector< std::map<std::string, TH2D*> > h_input_2P,std::vector< std::map<std::string, TH2D*> > h_input_2PUp,std::vector< std::map<std::string, TH2D*> > h_input_2PDown);
 

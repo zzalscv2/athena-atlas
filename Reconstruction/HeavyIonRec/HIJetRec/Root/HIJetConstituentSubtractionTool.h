@@ -94,7 +94,7 @@ protected:
   inline bool momentOnly() const { return m_momentOnly; };
 
   inline void setEventShapeKey( SG::ReadHandleKey< xAOD::HIEventShapeContainer > key ) { m_eventShapeKey=key; };
-  inline void setMomentName(std::string key) { m_momentName=key; };
+  inline void setMomentName(const std::string& key) { m_momentName=key; };
   inline void setMomentOnly(bool x) { m_momentOnly=x; };
 
 };
