@@ -236,7 +236,8 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
   ATH_CHECK( getVoltagePerLine (ctx, voltagePerLine, addDep) );
 
   voltagePerCell_t voltageVec(MAX_LAR_CELLS);
-  ATH_CHECK(fillPathAndCellHV(voltageVec, hvCabling, voltagePerLine, pathologyContainer, hasPathologyEM, hasPathologyHEC, hasPathologyFCAL, rValues));
+  ATH_CHECK(fillPathAndCellHV(calodetdescrmgr,voltageVec, hvCabling, voltagePerLine, 
+                              pathologyContainer, hasPathologyEM, hasPathologyHEC, hasPathologyFCAL, rValues));
 
   std::vector<float> vScale;
   vScale.resize(MAX_LAR_CELLS,(float)1.0);
@@ -301,7 +302,7 @@ StatusCode LArHVCondAlg::makeAffectedRegionInfo (const EventContext& ctx,
     ATH_CHECK(searchNonNominalHV_FCAL(vAffected.get(), hvCabling, voltagePerLine));
   }
 
-  ATH_CHECK(updateMethod(vAffected.get(), bfCont, cabling));
+  ATH_CHECK(updateMethod(ctx, vAffected.get(), bfCont, cabling));
   ATH_CHECK(writeAffectedHandle.record(std::move(vAffected)));
   ATH_MSG_INFO("recorded new " << writeAffectedHandle.key() << " with range " 
                <<  writeAffectedHandle.getRange()<< " into Conditions Store");
@@ -340,7 +341,8 @@ StatusCode LArHVCondAlg::getVoltagePerLine (const EventContext& ctx,
 }
 
 
-StatusCode LArHVCondAlg::fillPathAndCellHV(voltagePerCell_t& hvdata
+StatusCode LArHVCondAlg::fillPathAndCellHV(const CaloDetDescrManager* calodetdescrmgr
+             , voltagePerCell_t& hvdata
 					   , const LArHVIdMapping* hvCabling
 					   , const voltagePerLine_t& voltage
 					   , const LArHVPathology& pathologies
@@ -349,8 +351,6 @@ StatusCode LArHVCondAlg::fillPathAndCellHV(voltagePerCell_t& hvdata
 					   , pathVec& hasPathologyFCAL
 					   , const float* rValues) const
 {
-  const CaloDetDescrManager* calodetdescrmgr = nullptr;
-  ATH_CHECK( detStore()->retrieve(calodetdescrmgr) );
 
   std::vector<unsigned int> listElec;
 
@@ -1364,11 +1364,13 @@ StatusCode LArHVCondAlg::searchNonNominalHV_FCAL(CaloAffectedRegionInfoVec *vAff
   return StatusCode::SUCCESS;
 }
 //=========================================================================================
-StatusCode LArHVCondAlg::updateMethod(CaloAffectedRegionInfoVec *vAffected, const LArBadFebCont* bfCont, const LArOnOffIdMapping* cabling) const { //store informations on the missing Febs w/ range of eta, phi, layer
+StatusCode LArHVCondAlg::updateMethod(const EventContext& ctx,
+                                      CaloAffectedRegionInfoVec *vAffected, const LArBadFebCont* bfCont, 
+                                      const LArOnOffIdMapping* cabling) const { //store informations on the missing Febs w/ range of eta, phi, layer
   ATH_MSG_DEBUG ( "updateMethod()" );
   
-  const CaloDetDescrManager* calodetdescrmgr = nullptr;
-  ATH_CHECK( detStore()->retrieve(calodetdescrmgr) );
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
+  const CaloDetDescrManager* calodetdescrmgr = *caloMgrHandle;
 
   std::vector<HWIdentifier>::const_iterator febid_it=m_onlineID->feb_begin();
   std::vector<HWIdentifier>::const_iterator febid_end_it=m_onlineID->feb_end();
