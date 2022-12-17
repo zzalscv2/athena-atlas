@@ -86,6 +86,13 @@ StatusCode muonTrkTrackThinTool::execute(const EventContext& ctx ) const {
 
     if (m_trackCollKey.key() == "CombinedMuonTracks")
       muon_tp = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);
+    
+    if (m_trackCollKey.key() == "MSOnlyExtrapolatedTracks")
+      muon_tp = muon->trackParticle(xAOD::Muon::MSOnlyExtrapolatedMuonSpectrometerTrackParticle);
+    
+    if (m_trackCollKey.key() == "ExtrapolatedMuonTracks")
+      muon_tp = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+
 
     if (!muon_tp) {
       ATH_MSG_DEBUG( "------------- No muon track particle " );
