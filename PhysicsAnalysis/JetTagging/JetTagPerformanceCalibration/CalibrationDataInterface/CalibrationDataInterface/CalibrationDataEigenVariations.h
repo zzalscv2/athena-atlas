@@ -17,7 +17,6 @@
 #include <utility>
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
-
 #include "CxxUtils/checker_macros.h"
 
 class TH1;
@@ -93,6 +92,10 @@ namespace Analysis
     /** Eigenvector recomposition method.*/
     bool EigenVectorRecomposition(const std::string label,
 				  std::map<std::string, std::map<std::string, float>> &coefficientMap);
+
+    /** Eigenvector recomposition method.*/
+    bool EigenVectorRecomposition(const std::string label,
+				  std::map<std::string, std::map<std::string, float>> &coefficientMap) const;
 
   private:
     /** container object containing the basic information */
