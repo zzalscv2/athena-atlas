@@ -153,7 +153,8 @@ private:
   StatusCode  dcs2LineVoltage(voltagePerLine_t& result, const std::vector<const CondAttrListCollection* >& fldvec) const;
 
   /// Read the voltage per HV line and store it in structure per readout-cell (resolve the many-HV-lines-to-many-cells mapping). Simulanitously fill the pathologies
-  StatusCode fillPathAndCellHV(voltagePerCell_t& hvdata
+  StatusCode fillPathAndCellHV(const CaloDetDescrManager* calodetdescrmgr
+             , voltagePerCell_t& hvdata
 			       , const LArHVIdMapping* hvCabling
 			       , const voltagePerLine_t& voltage
 			       , const LArHVPathology& pathologies
@@ -172,7 +173,9 @@ private:
   // for the LArAffectedRegions construction
   void extendPhiRegion(float phi, float & phi_min, float & phi_max) const;
 
-  StatusCode updateMethod(CaloAffectedRegionInfoVec *vAffected, const LArBadFebCont* bfCont, const LArOnOffIdMapping* cabling) const;
+  StatusCode updateMethod(const EventContext& ctx,
+                          CaloAffectedRegionInfoVec *vAffected,
+                          const LArBadFebCont* bfCont, const LArOnOffIdMapping* cabling) const;
 
   StatusCode searchNonNominalHV_EMB(CaloAffectedRegionInfoVec *vAffected
 				    , const LArHVIdMapping* hvCabling
