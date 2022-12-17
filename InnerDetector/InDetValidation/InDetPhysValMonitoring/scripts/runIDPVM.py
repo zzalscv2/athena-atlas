@@ -24,7 +24,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--doTruthToRecoNtuple", help='output track-to-truth ntuple', action='store_true', default=False)
     IDPVMparser.add_argument("--disableDecoration", help='disable extra track and truth decoration if possible', action='store_true', default=False)
     IDPVMparser.add_argument("--hardScatterStrategy", help='Strategy to select the hard scatter. 0 = SumPt² 1 = SumPt , 2 = Sumptw', choices=["0","1", "2"], default="0")
-    IDPVMparser.add_argument("--truthMinPt", help='minimum truth particle pT', type=float, default=500)
+    IDPVMparser.add_argument("--truthMinPt", help='minimum truth particle pT', type=float, default=None)
     IDPVMparser.add_argument("--outputFile", help='Name of output file',default="M_output.root")
     IDPVMparser.add_argument("--HSFlag", help='Hard-scatter flag - decides what is used for truth matching', choices=['HardScatter', 'All', 'PileUp'],default="HardScatter")
     IDPVMparser.add_argument("--ancestorIDList", help='List of ancestor truth IDs to match.', default = [], nargs='+', type=int)
@@ -37,7 +37,19 @@ def GetCustomAthArgs():
 # Parse the arguments
 MyArgs = GetCustomAthArgs()
 
+from AthenaConfiguration.Enums import LHCPeriod
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
+
+ConfigFlags.Input.Files = []
+for path in MyArgs.filesInput.split(','):
+    ConfigFlags.Input.Files += glob(path)
+ConfigFlags.PhysVal.OutputFileName = MyArgs.outputFile
+
+# Set default truthMinPt depending on Run config
+if MyArgs.truthMinPt is None:
+    MyArgs.truthMinPt = 1000 if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4 \
+                        else 500
+
 ConfigFlags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
 ConfigFlags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots
 ConfigFlags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
@@ -62,11 +74,6 @@ ConfigFlags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
 ConfigFlags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
 ConfigFlags.PhysVal.IDPVM.GRL = MyArgs.GRL
 ConfigFlags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
-
-ConfigFlags.Input.Files = []
-for path in MyArgs.filesInput.split(','):
-    ConfigFlags.Input.Files += glob(path)
-ConfigFlags.PhysVal.OutputFileName = MyArgs.outputFile
 
 ConfigFlags.lock()
 
