@@ -9,20 +9,24 @@
 #include "TrkMaterialOnTrack/EnergyLoss.h"
 
 namespace Trk {
-  GXFMaterialEffects::GXFMaterialEffects() {
-    m_eloss = nullptr;
-    m_scatphi = m_scattheta = m_sigmascatphi = m_sigmascattheta = m_x0 = m_measscatphi = 0;
-    m_surf = nullptr;
-    m_matprop = nullptr;
-    m_deltap = 0;
-    m_sigmadeltae = 0;
-    m_sigmadeltaepos = 0;
-    m_sigmadeltaeneg = 0;
-    m_deltae = 0;
-    m_iskink = false;
-    m_ismeasuredeloss = true;
-    m_x0 = 0;
-    m_sintheta = 1;
+  GXFMaterialEffects::GXFMaterialEffects()
+    : m_scatphi (0),
+      m_scattheta (0),
+      m_sigmascatphi (0),
+      m_sigmascattheta (0),
+      m_x0 (0),
+      m_deltap (0),
+      m_deltae (0),
+      m_sigmadeltae (0),
+      m_sigmadeltaepos (0),
+      m_sigmadeltaeneg (0),
+      m_surf (nullptr),
+      m_matprop (nullptr),
+      m_iskink (false),
+      m_ismeasuredeloss (true),
+      m_measscatphi (0),
+      m_sintheta (1)
+  {
   } 
   
   GXFMaterialEffects::GXFMaterialEffects(const MaterialEffectsOnTrack * meot) {
@@ -72,24 +76,25 @@ namespace Trk {
     m_measscatphi = 0;
   }
 
-  GXFMaterialEffects::GXFMaterialEffects(GXFMaterialEffects & rhs) {
-    m_eloss = std::unique_ptr<EnergyLoss>(rhs.m_eloss != nullptr ? rhs.m_eloss->clone() : nullptr);
-    m_scatphi = rhs.m_scatphi;
-    m_scattheta = rhs.m_scattheta;
-    m_sigmascatphi = rhs.m_sigmascatphi;
-    m_sigmascattheta = rhs.m_sigmascattheta;
-    m_x0 = rhs.m_x0;
-    m_deltap = rhs.m_deltap;
-    m_deltae = rhs.m_deltae;
-    m_sigmadeltae = rhs.m_sigmadeltae;
-    m_sigmadeltaepos = rhs.m_sigmadeltaepos;
-    m_sigmadeltaeneg = rhs.m_sigmadeltaeneg;
-    m_iskink = rhs.m_iskink;
-    m_ismeasuredeloss = rhs.m_ismeasuredeloss;
-    m_surf = rhs.m_surf;
-    m_matprop = rhs.m_matprop;
-    m_measscatphi = rhs.m_measscatphi;
-    m_sintheta = rhs.m_sintheta;
+  GXFMaterialEffects::GXFMaterialEffects(GXFMaterialEffects & rhs)
+    : m_scatphi (rhs.m_scatphi),
+      m_scattheta (rhs.m_scattheta),
+      m_sigmascatphi (rhs.m_sigmascatphi),
+      m_sigmascattheta (rhs.m_sigmascattheta),
+      m_x0 (rhs.m_x0),
+      m_deltap (rhs.m_deltap),
+      m_deltae (rhs.m_deltae),
+      m_sigmadeltae (rhs.m_sigmadeltae),
+      m_sigmadeltaepos (rhs.m_sigmadeltaepos),
+      m_sigmadeltaeneg (rhs.m_sigmadeltaeneg),
+      m_eloss (std::unique_ptr<EnergyLoss>(rhs.m_eloss != nullptr ? rhs.m_eloss->clone() : nullptr)),
+      m_surf (rhs.m_surf),
+      m_matprop (rhs.m_matprop),
+      m_iskink (rhs.m_iskink),
+      m_ismeasuredeloss (rhs.m_ismeasuredeloss),
+      m_measscatphi (rhs.m_measscatphi),
+      m_sintheta (rhs.m_sintheta)
+  {
   }
 
   GXFMaterialEffects & GXFMaterialEffects::operator =(GXFMaterialEffects & rhs) {
