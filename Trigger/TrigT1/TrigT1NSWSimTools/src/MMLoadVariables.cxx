@@ -38,10 +38,12 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
       for(const auto it : *truthContainer) {
         const HepMC::GenEvent *subEvent = it;
 #ifdef HEPMC3
-        for(auto particle : subEvent->particles()) {
+        for(auto particle : subEvent->particles())
 #else
-        HepMC::ConstGenEventParticleRange particle_range = subEvent->particle_range();
-        for(const auto pit : particle_range) {
+        for(const auto pit : subEvent->particle_range())
+#endif
+        {
+#ifndef HEPMC3
           const HepMC::GenParticle *particle = pit;
 #endif
           const HepMC::FourVector momentum = particle->momentum();
@@ -61,21 +63,23 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
               }
             }//muentry loop
             } // trackRecordCollection is not null
-            int l=0;
 #ifdef HEPMC3
-            for(auto vertex1 : subEvent->vertices()) {
+            for(auto vertex1 : subEvent->vertices())
 #else
-              HepMC::ConstGenEventVertexRange vertex_range = subEvent->vertex_range();
-              for(const auto vit : vertex_range) {
-                if(l!=0){break;}//get first vertex of iteration, may want to change this
-                const HepMC::GenVertex *vertex1 = vit;
+            int l=0;
+            for(const auto vit : subEvent->vertex_range())
+#endif              
+            {
+#ifndef HEPMC3
+              if(l!=0){break;}//get first vertex of iteration, may want to change this
+              l++;
+              const HepMC::GenVertex *vertex1 = vit;
 #endif
-                const HepMC::FourVector& position = vertex1->position();
-                vertex_tmp.SetXYZ(position.x(),position.y(),position.z());
-                l++;
-              }//end vertex loop
-            }
-            j++;
+              const HepMC::FourVector& position = vertex1->position();
+              vertex_tmp.SetXYZ(position.x(),position.y(),position.z());
+            }//end vertex loop
+          }
+          j++;
 
             if(thePart.Pt() > 0. && barcodeparticle < HepMC::SIM_REGENERATION_INCREMENT){
               bool addIt = true;
@@ -313,7 +317,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           tru_it->second.N_hits_postVMM=0;
         }
 
-        int xhit=0,uvhit=0;
         std::vector<bool>plane_hit(pars[station]->setup.size(),false);
 
         for(std::map<hitData_key,hitData_entry>::iterator it=hit_info.begin(); it!=hit_info.end(); ++it){
@@ -322,13 +325,6 @@ StatusCode MMLoadVariables::getMMDigitsInfo(const McEventCollection *truthContai
           if (tru_it != Event_Info.end()) tru_it->second.N_hits_postVMM++;
         }
         Hits_Data_Set_Time[std::make_pair(event,ient)] = hit_info;
-
-        for(unsigned int ipl=0;ipl<plane_hit.size();ipl++){
-          if(plane_hit[ipl]){
-            if(pars[station]->setup.substr(ipl,1)=="x") xhit++;
-            else if(pars[station]->setup.substr(ipl,1)=="u" || pars[station]->setup.substr(ipl,1)=="v") uvhit++;
-          }
-        }
         ient++;
       }
     return StatusCode::SUCCESS;
