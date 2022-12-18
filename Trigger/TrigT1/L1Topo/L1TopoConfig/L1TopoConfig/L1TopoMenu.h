@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef L1TOPOMENU_HPP
@@ -79,7 +79,7 @@ namespace TXC {
       
    private:
 
-      L1TopoMenu& operator=(const L1TopoMenu&) {return *this;}
+      L1TopoMenu& operator=(const L1TopoMenu&) = delete;
 
       friend class TrigConf::L1TopoConfig;
       friend class TrigConf::L1TopoMenuLoader;
