@@ -103,7 +103,6 @@ namespace JetTagDQA {
 
     float m_jetPtCut = -1;
     bool m_onZprime = false;
-    bool m_hasJetFitterNN = false;
     float m_jetPtCutTtbar;
     float m_jetPtCutZprime;
     float m_jetEtaCut;

@@ -63,8 +63,6 @@ namespace JetTagDQA {
     declareProperty( "JVTCutLargerEtaAntiKt4EMTopoJets", m_JVTCutLargerEtaAntiKt4EMTopoJets = 0.11);
     declareProperty( "JVTCutAntiKt4EMPFlowJets", m_JVTCutAntiKt4EMPFlowJets = 0.2);
     declareProperty( "truthMatchProbabilityCut", m_truthMatchProbabilityCut = 0.75);
-
-    declareProperty( "hasJetFitterNN", m_hasJetFitterNN);
   }
 
   // Destructor
