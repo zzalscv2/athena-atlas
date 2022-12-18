@@ -58,9 +58,7 @@ cell_desc = {
     (TILE, 1, 1, 11, 3, 1) : (50000,     TILEHIGHLOW,    49821.16),
     }
 
-def make_calo_cells (detStore, desc):
-    mgr = detStore['CaloMgr']
-    idhelper = detStore['CaloCell_ID']
+def make_calo_cells (mgr, idhelper, desc):
     ccc = ROOT.CaloCellContainer()
     for addr, (e, gain, exp) in desc.items():
         cellid = idhelper.cell_id (*addr)
@@ -146,7 +144,9 @@ class TestAlg (Alg):
     def execute (self):
         ctx = self.getContext()
         log = logging.getLogger ('TestAlg')
-        ccc = make_calo_cells (self.detStore, cell_desc)
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
+        idhelper = self.detStore['CaloCell_ID']
+        ccc = make_calo_cells (mgr, idhelper, cell_desc)
         assert self.tool.process (ccc, ctx).isSuccess()
         compare_cells (self.detStore, ccc, cell_desc)
         log.info ('finished')

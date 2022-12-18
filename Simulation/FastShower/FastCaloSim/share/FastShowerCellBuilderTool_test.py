@@ -142,8 +142,7 @@ exp_cells = {
 from AthenaPython.PyAthenaComps import Alg, StatusCode
 
 
-def make_calo_cells (detStore):
-    mgr = detStore['CaloMgr']
+def make_calo_cells (mgr):
     ccc = ROOT.CaloCellContainer()
     for i in range (mgr.element_size()):
         elt = mgr.get_element (ROOT.IdentifierHash (i))
@@ -179,8 +178,9 @@ class TestAlg (Alg):
 
     def execute (self):
         self.record_mc()
-
-        ccc = make_calo_cells (self.detStore)
+        ctx = self.getContext()
+        mgr = self.condStore['CaloDetDescrManager'].find (ctx.eventID())
+        ccc = make_calo_cells (mgr)
         if not self.tool1.process (ccc, self.getContext()):
             return StatusCode.Failure
 
