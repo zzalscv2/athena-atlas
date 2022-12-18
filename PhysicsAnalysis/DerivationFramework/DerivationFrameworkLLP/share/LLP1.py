@@ -369,7 +369,7 @@ SeqLLP1 += CfgMgr.DerivationFramework__DerivationKernel("LLP1Kernel",
 # FLAVOUR TAGGING
 #====================================================================
 
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollections
 FtagJetCollections(['AntiKt4EMTopoJets'],SeqLLP1)
 
 

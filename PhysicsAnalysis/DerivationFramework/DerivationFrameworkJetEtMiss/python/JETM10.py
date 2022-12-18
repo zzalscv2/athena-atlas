@@ -59,7 +59,7 @@ def JETM10Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM10SlimmingHelper = SlimmingHelper("JETM10SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM10SlimmingHelper = SlimmingHelper("JETM10SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import addMETTriggerDerivationContent
     addMETTriggerDerivationContent(JETM10SlimmingHelper, isLoose=True)

@@ -40,7 +40,7 @@ def AthenaMonitoringAODRecoCfg(flags):
             result.merge(AtlasGeometryCfg(flags))
             from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
             result.merge(BeamSpotCondAlgCfg(flags))
-            from BTagging.BTagRun3Config import BTagRecoSplitCfg
+            from BTagging.BTagConfig import BTagRecoSplitCfg
             # would rather use removesuffix below but need to wait for Python 3.9
             for container in jet_collections & btag_jet_collections:
                 result.merge(BTagRecoSplitCfg(flags, [container]))

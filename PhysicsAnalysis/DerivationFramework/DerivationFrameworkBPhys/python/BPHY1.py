@@ -153,7 +153,7 @@ def BPHY1Cfg(ConfigFlags):
     if ConfigFlags.Input.isMC :
         AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
 
-    BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     # Needed for trigger objects
     BPHY1SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY1SlimmingHelper.IncludeBPhysTriggerContent = True

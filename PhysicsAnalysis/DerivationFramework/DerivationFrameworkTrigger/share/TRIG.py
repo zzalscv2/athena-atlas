@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # DAOD_TRIG.py
@@ -245,7 +245,7 @@ SeqTRIG += CfgMgr.DerivationFramework__DerivationKernel("TRIGKernel",
 # FLAVOUR TAGGING   
 #====================================================================
 
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollection
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollection
 
 FtagJetCollection('AntiKt4EMPFlowJets',SeqTRIG)
 

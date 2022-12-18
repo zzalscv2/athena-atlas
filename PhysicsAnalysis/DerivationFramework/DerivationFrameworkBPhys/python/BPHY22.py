@@ -274,7 +274,7 @@ def BPHY22Cfg(ConfigFlags):
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    BPHY22SlimmingHelper = SlimmingHelper("BPHY22SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    BPHY22SlimmingHelper = SlimmingHelper("BPHY22SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     # Needed for trigger objects
     BPHY22SlimmingHelper.IncludeMuonTriggerContent  = True

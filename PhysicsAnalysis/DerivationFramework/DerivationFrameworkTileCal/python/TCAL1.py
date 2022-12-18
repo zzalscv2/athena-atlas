@@ -131,7 +131,7 @@ def TCAL1Cfg(ConfigFlags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices']
 
     TCAL1ExtraVariables = f'Muons.{TCAL1Prefix}etrkcone40'

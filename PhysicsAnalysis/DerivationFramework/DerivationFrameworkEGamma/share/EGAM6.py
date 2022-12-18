@@ -415,7 +415,7 @@ addDAODJets(jetList, EGAM6Sequence)
 #====================================================================
 # FLAVOUR TAGGING   
 #====================================================================
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollection
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollection
 FtagJetCollection('AntiKt4EMPFlowJets',EGAM6Sequence)
 
 

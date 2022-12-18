@@ -123,7 +123,7 @@ def BPHY3Cfg(ConfigFlags):
     for t in augCollections +BPHY3ThinningTools +skimCollections : acc.addPublicTool(t)
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []

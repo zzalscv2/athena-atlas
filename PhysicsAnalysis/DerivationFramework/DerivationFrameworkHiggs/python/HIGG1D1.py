@@ -29,7 +29,7 @@ def HIGG1D1KernelCfg(ConfigFlags, name='HIGG1D1Kernel', **kwargs):
     #CustomJetsConfig
     acc.merge(HIGG1D1CustomJetsCfg(ConfigFlags))
     
-    from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(ConfigFlags, ['AntiKt4EMPFlowCustomVtxJets'], ['HggPrimaryVertices']))
 
     #Custom MET
@@ -205,7 +205,7 @@ def HIGG1D1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    HIGG1D1SlimmingHelper = SlimmingHelper("HIGG1D1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    HIGG1D1SlimmingHelper = SlimmingHelper("HIGG1D1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     HIGG1D1SlimmingHelper.SmartCollections = ["EventInfo",
                                               "Electrons",
                                               "Photons",
@@ -324,10 +324,10 @@ def HIGG1D1Cfg(ConfigFlags):
                                            "AFPToFTrackContainer"]
     # Add Btagging information
     from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent,BTaggingXbbContent
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets")
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets")
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets")
-    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets")
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets", ConfigFlags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets", ConfigFlags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets", ConfigFlags)
+    HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets", ConfigFlags)
 
     # is this really needed given Photons are in the AllVariables list ?
     from DerivationFrameworkEGamma.PhotonsCPDetailedContent import PhotonsCPDetailedContent

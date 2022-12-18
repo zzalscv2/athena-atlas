@@ -117,7 +117,7 @@ def STDM7Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    STDM7SlimmingHelper = SlimmingHelper("STDM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections)
+    STDM7SlimmingHelper = SlimmingHelper("STDM7SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, ConfigFlags = flags)
     STDM7SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",

@@ -153,7 +153,7 @@ def RecoSteering(flags):
     # btagging
     acc.flagPerfmonDomain('FTag')
     if flags.Reco.EnableBTagging:
-        from BTagging.BTagRun3Config import BTagRecoSplitCfg
+        from BTagging.BTagConfig import BTagRecoSplitCfg
         acc.merge(BTagRecoSplitCfg(flags))
         log.info("---------- Configured btagging")
 

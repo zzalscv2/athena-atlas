@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.Enums import BeamType, LHCPeriod
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.JetBTaggingAlgConfig import JetBTaggingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
@@ -19,7 +19,20 @@ from BTagging.BTaggingConfiguration import getConfiguration
 from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
 
 # this is where you add the new trainings!
-def GetTaggerTrainingMap(jet_collection_list):
+def GetTaggerTrainingMap(inputFlags, jet_collection_list):
+    if inputFlags.GeoModel.Run >= LHCPeriod.Run4:
+        derivationTrainingMap = {
+            "AntiKt4EMTopo": [
+                "BTagging/20221008/dipsrun4/antikt4emtopo/network.json",
+                "BTagging/20221017/dl1drun4/antikt4emtopo/network.json",
+                "BTagging/20221010/GN1run4/antikt4emtopo/network.onnx"
+            ]
+        }
+        if jet_collection_list in derivationTrainingMap.keys():
+            return derivationTrainingMap[jet_collection_list]
+        else: # Default to AntiKt4EMTopo trainings in case nothing else available
+            return derivationTrainingMap["AntiKt4EMTopo"]
+
     derivationTrainingMap = {
         "AntiKt4EMPFlow": [
             "BTagging/201903/rnnip/antikt4empflow/network.json",
@@ -132,7 +145,7 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
             BTagAlgsCfg(
                 inputFlags,
                 JetCollection=jc,
-                nnList=GetTaggerTrainingMap(jc),
+                nnList=GetTaggerTrainingMap(inputFlags, jc),
                 muons='', # muon augmentation isn't thread safe, disable
                 renameTrackJets=True,
                 AddedJetSuffix='Jets'

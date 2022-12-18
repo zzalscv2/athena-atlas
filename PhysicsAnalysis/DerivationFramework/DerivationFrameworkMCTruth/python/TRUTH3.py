@@ -18,7 +18,7 @@ def TRUTH3Cfg(ConfigFlags):
     # Set up slimming content list
     #==============================================================================
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TRUTH3SlimmingHelper = SlimmingHelper("TRUTH3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TRUTH3SlimmingHelper = SlimmingHelper("TRUTH3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     TRUTH3SlimmingHelper.AppendToDictionary = {'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
                                            'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',

@@ -46,7 +46,7 @@ def TEST5Cfg(ConfigFlags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST5SlimmingHelper = SlimmingHelper("TEST5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TEST5SlimmingHelper = SlimmingHelper("TEST5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST5SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles","PrimaryVertices","Muons"]
     TEST5SlimmingHelper.ExtraVariables += ["InDetTrackParticles.DFDecoratorExample"]
     TEST5SlimmingHelper.ExtraVariables += ["Muons.TEST5GoodMuons"]

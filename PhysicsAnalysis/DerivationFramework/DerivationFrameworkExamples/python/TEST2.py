@@ -32,7 +32,7 @@ def TEST2Cfg(ConfigFlags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST2SlimmingHelper = SlimmingHelper("TEST2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TEST2SlimmingHelper = SlimmingHelper("TEST2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST2SlimmingHelper.SmartCollections = ["EventInfo",
                                             "Electrons",
                                             "Photons",

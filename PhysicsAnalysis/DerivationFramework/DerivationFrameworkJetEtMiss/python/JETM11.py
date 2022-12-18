@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+4# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_JETM11.py
@@ -79,7 +79,7 @@ def JETM11Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM11SlimmingHelper = SlimmingHelper("JETM11SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM11SlimmingHelper = SlimmingHelper("JETM11SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import addMETTriggerDerivationContent
     addMETTriggerDerivationContent(JETM11SlimmingHelper, isLoose=False)

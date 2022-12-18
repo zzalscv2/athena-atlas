@@ -280,7 +280,7 @@ def BPHY18Cfg(ConfigFlags):
     
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    BPHY18SlimmingHelper = SlimmingHelper("BPHY18SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    BPHY18SlimmingHelper = SlimmingHelper("BPHY18SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent  = []
