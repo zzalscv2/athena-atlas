@@ -179,7 +179,7 @@ namespace Rivet {
       Particles uncatV_decays;
       FourMomentum uncatV_p4(0,0,0,0);
       FourVector uncatV_v4(0,0,0,0);
-      int nWs=0, nZs=0, nTop=0;
+      int nWs=0, nZs=0;
       if ( isVH(prodMode) ) {
         for (auto ptcl:Rivet::HepMCUtils::particles(HSvtx,Relatives::CHILDREN)) {
           if (PID::isW(ptcl->pdg_id())) { ++nWs; cat.V=Particle(ptcl); }
@@ -218,7 +218,6 @@ namespace Rivet {
         // loop over particles produced in hard-scatter vertex
               for ( auto ptcl : Rivet::HepMCUtils::particles(HSvtx,Relatives::CHILDREN) ) {
                 if ( !PID::isTop(ptcl->pdg_id()) ) continue;
-          ++nTop;
           Particle top = getLastInstance(Particle(ptcl));
           if ( top.genParticle()->end_vertex() ) 
             for (auto child:top.children())
