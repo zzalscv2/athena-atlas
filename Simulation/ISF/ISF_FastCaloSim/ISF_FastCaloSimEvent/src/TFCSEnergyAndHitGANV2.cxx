@@ -85,9 +85,14 @@ bool TFCSEnergyAndHitGANV2::initializeNetwork(int pid,int etaMin,std::string Fas
   set_eta_min(etaMin/100.0);
   set_eta_max(etaMax/100.0);
   set_eta_nominal((etaMin+etaMax)/200.0);
+
+  int pidForXml = pid;
+  if (pid != 22 || pid != 11){
+    pidForXml = 211;
+  }
   
   int etaMid = (etaMin + etaMax)/2;
-  m_param.InitialiseFromXML(pid,etaMid,FastCaloGANInputFolderName);
+  m_param.InitialiseFromXML(pidForXml,etaMid,FastCaloGANInputFolderName);
   m_param.Print();
   m_slice = new TFCSGANEtaSlice(pid, etaMin, etaMax, m_param);
   m_slice->Print();

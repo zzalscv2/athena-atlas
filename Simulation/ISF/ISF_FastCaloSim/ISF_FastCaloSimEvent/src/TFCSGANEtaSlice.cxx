@@ -49,7 +49,7 @@ TFCSGANEtaSlice::~TFCSGANEtaSlice(){
 }
 
 bool TFCSGANEtaSlice::IsGanCorrectlyLoaded() const{
-  if (m_pid == 211){
+  if (m_pid == 211 || m_pid == 2212){
     if(m_gan_all==nullptr){
       return false;
     } 
@@ -70,6 +70,12 @@ bool TFCSGANEtaSlice::LoadGAN(){
   
   if (m_pid == 211){
     inputFileName = m_param.GetInputFolder() + "/neural_net_" + std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) + "_" + std::to_string(m_etaMax) +"_All.json";
+    std::cout<<"Gan input file name "<<inputFileName<<std::endl;
+    m_gan_all = new TFCSGANLWTNNHandler();
+    return m_gan_all->LoadGAN(inputFileName);    
+  }
+  else if (m_pid == 2212){
+    inputFileName = m_param.GetInputFolder() + "/neural_net_" + std::to_string(m_pid) + "_eta_" + std::to_string(m_etaMin) + "_" + std::to_string(m_etaMax) +"_High10.json";
     std::cout<<"Gan input file name "<<inputFileName<<std::endl;
     m_gan_all = new TFCSGANLWTNNHandler();
     return m_gan_all->LoadGAN(inputFileName);    
