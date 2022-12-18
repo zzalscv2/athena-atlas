@@ -77,7 +77,7 @@ def TCAL2Cfg(ConfigFlags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TCAL2SlimmingHelper = SlimmingHelper("TCAL2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TCAL2SlimmingHelper = SlimmingHelper("TCAL2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TCAL2SlimmingHelper.SmartCollections = ["EventInfo"]
 
     if ConfigFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3]:

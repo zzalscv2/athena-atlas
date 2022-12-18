@@ -544,7 +544,7 @@ METCommon.scheduleCustomVtxMETContent(vxColl="Hgg", jetColl="AntiKt4EMPFlowCusto
 # FLAVOUR TAGGING   ol90
 #====================================================;;p================
 
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollections
 #FtagJetCollections(["AntiKt4EMPFlowCustomVtxJets","AntiKt4EMPFlowJets"], SeqHIGG1D1, pvCols=[HggVertexContainerName,"PrimaryVertices"])
 
 

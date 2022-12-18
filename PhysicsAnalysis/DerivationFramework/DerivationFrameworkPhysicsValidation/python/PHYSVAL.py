@@ -48,7 +48,7 @@ def PHYSVALCfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     PHYSVALSlimmingHelper.SmartCollections = ["EventInfo",
                                               "Electrons",
                                               "Photons",

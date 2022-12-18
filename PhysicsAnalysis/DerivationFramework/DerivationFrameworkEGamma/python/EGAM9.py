@@ -280,7 +280,8 @@ def EGAM9Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM9SlimmingHelper = SlimmingHelper(
         'EGAM9SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+        NamesAndTypes = ConfigFlags.Input.TypedCollections,
+        ConfigFlags = ConfigFlags)
 
 
     # ------------------------------------------

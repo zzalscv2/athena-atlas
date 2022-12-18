@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.Enums import LHCPeriod
+
 # from
 # https://stackoverflow.com/questions/3663450/python-remove-substring-only-at-the-end-of-string
 def rchop(thestring, ending):
@@ -19,7 +21,7 @@ JetStandardAux = \
     , "ConeExclCHadronsFinal"
     ]
 
-BTaggingStandardAux = \
+BTaggingStandardRun3Aux = \
     [ 
       "DL1r_pu"
     , "DL1r_pc"
@@ -64,6 +66,24 @@ BTaggingStandardAux = \
 
     ]
 
+BTaggingStandardRun4Aux = [
+    "SV1_NGTinSvx",
+    "SV1_masssvx",
+
+    "dipsrun420221008_pu",
+    "dipsrun420221008_pc",
+    "dipsrun420221008_pb",
+
+    "DL1drun420221017_pu",
+    "DL1drun420221017_pc",
+    "DL1drun420221017_pb",
+
+    "GN1run420221010_pu",
+    "GN1run420221010_pc",
+    "GN1run420221010_pb"
+]
+
+
 # These are the inputs to DL1rmu + SMT
 BTaggingHighLevelAux = [
     "softMuon_dR",
@@ -84,8 +104,6 @@ BTaggingHighLevelAux = [
     "JetFitter_nTracksAtVtx",
     "JetFitter_N2Tpair",
     "JetFitter_deltaR",
-    "SV1_NGTinSvx",
-    "SV1_masssvx",
     "SV1_isDefaults",
     "SV1_N2Tpair",
     "SV1_efracsvx",
@@ -123,51 +141,25 @@ BTaggingHighLevelAux = [
     "softMuon_pc",
     "softMuon_pu",
     "softMuon_isDefaults"
-    , "DL1r20210519r22_pu"
-    , "DL1r20210519r22_pc"
-    , "DL1r20210519r22_pb"
-    , "DL1r20210824r22_pu"
-    , "DL1r20210824r22_pc"
-    , "DL1r20210824r22_pb"
-
-    , "dipsLoose20210729_pu"
-    , "dipsLoose20210729_pc"
-    , "dipsLoose20210729_pb"
-    , "dipsLoose20220314v2_pu"
-    , "dipsLoose20220314v2_pc"
-    , "dipsLoose20220314v2_pb"
-
-    , "dips20210729_pu"
-    , "dips20210729_pc"
-    , "dips20210729_pb"
-
-    , "DL1dv00_pu" #“recommended r22 tagger” which is DL1dLoose20210824r22 named DL1dv00
-    , "DL1dv00_pc"
-    , "DL1dv00_pb"
-    , "DL1dv01_pu" # new recommended r22 tagger named DL1dv01 which is DL1dLoose20220509
-    , "DL1dv01_pc"
-    , "DL1dv01_pb"
-
-    , "DL1d20210824r22_pu"
-    , "DL1d20210824r22_pc"
-    , "DL1d20210824r22_pb"    
-
-    , "GN120220509_pb"
-    , "GN120220509_pc"
-    , "GN120220509_pu"
-    
 ]
 
-BTaggingXbbAux = [
-    'JetFitter_N2Tpair','JetFitter_dRFlightDir','JetFitter_deltaeta',
-    'JetFitter_deltaphi', 'JetFitter_energyFraction', 'JetFitter_mass',
-    'JetFitter_massUncorr', 'JetFitter_nSingleTracks',
-    'JetFitter_nTracksAtVtx',
-    'JetFitter_nVTX', 'JetFitter_significance3d',
-    'SV1_L3d','SV1_Lxy','SV1_N2Tpair','SV1_NGTinSvx','SV1_deltaR',
-    'SV1_dstToMatLay', 'SV1_efracsvx', 'SV1_masssvx', 'SV1_significance3d',
-    'rnnip_pb','rnnip_pc','rnnip_ptau','rnnip_pu'
-]
+BTaggingHighLevelRun3Aux = BTaggingHighLevelAux \
+                           + [ "DL1r20210519r22_pu"
+                               , "DL1r20210519r22_pc"
+                               , "DL1r20210519r22_pb"
+                               , "DL1r20210824r22_pu"
+                               , "DL1r20210824r22_pc"
+                               , "DL1r20210824r22_pb"
+
+                               , "dips20210729_pu"
+                               , "dips20210729_pc"
+                               , "dips20210729_pb"
+
+                               , "DL1d20210824r22_pu"
+                               , "DL1d20210824r22_pc"
+                               , "DL1d20210824r22_pb" ]
+
+BTaggingHighLevelRun4Aux = BTaggingHighLevelAux
 
 JetGhostLabelAux = [
     "GhostBHadronsFinalCount",
@@ -189,7 +181,7 @@ JetExtendedAux = [
     "GhostTrack",
 ]
 
-def BTaggingExpertContent(jetcol):
+def BTaggingExpertContent(jetcol, ConfigFlags = None):
 
     btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
     if 'BTagging' in jetcol:
@@ -202,16 +194,20 @@ def BTaggingExpertContent(jetcol):
     jetAllAux = JetStandardAux + JetExtendedAux
     jetcontent = [ ".".join( [ jetcol + "Aux" ] + jetAllAux ) ]
 
+    isRun4 = False
+    if ConfigFlags is not None:
+        isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+
     # add aux variables
-    btaggingAllAux = (BTaggingHighLevelAux
-                      + BTaggingStandardAux
+    btaggingAllAux = ( BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux
+                      + BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
                       + BTaggingExtendedAux)
     btagcontent = [ ".".join( [ btagging + "Aux" ] + btaggingAllAux ) ]
 
     return [jetcol] + jetcontent + [ btagging ] + btagcontent
 
 
-def BTaggingStandardContent(jetcol):
+def BTaggingStandardContent(jetcol, ConfigFlags = None):
 
     btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
     if 'BTagging' in jetcol:
@@ -224,13 +220,18 @@ def BTaggingStandardContent(jetcol):
         [ jetcol ] \
         + [ ".".join( [ jetcol + "Aux" ] + JetStandardAux ) ]
 
+    isRun4 = False
+    if ConfigFlags is not None:
+        isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+
     btagcontent = \
         [ btagging ] \
-        + [ ".".join( [ btagging + "Aux" ] + BTaggingStandardAux ) ]
+        + [ ".".join( [ btagging + "Aux" ] + \
+                      BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux ) ]
     return jetcontent + btagcontent
 
 
-def BTaggingXbbContent(jetcol):
+def BTaggingXbbContent(jetcol, ConfigFlags = None):
 
     btaggingtmp = "BTagging_" + jetcol.split('Jets')[0]
     if 'BTagging' in jetcol:
@@ -243,8 +244,13 @@ def BTaggingXbbContent(jetcol):
     jetAllAux = JetStandardAux + JetGhostLabelAux
     jetcontent = [ ".".join( [ jetcol + "Aux" ] + jetAllAux ) ]
 
+    isRun4 = False
+    if ConfigFlags is not None:
+        isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
+
     # add aux variables
-    btaggingAllAux = BTaggingHighLevelAux + BTaggingStandardAux
+    btaggingAllAux =  BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux \
+                     + BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
     btagcontent = [ ".".join( [ btagging + "Aux" ] + btaggingAllAux ) ]
 
     return [jetcol] + jetcontent + [ btagging ] + btagcontent

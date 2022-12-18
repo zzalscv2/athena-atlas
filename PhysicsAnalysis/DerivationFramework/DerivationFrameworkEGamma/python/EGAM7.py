@@ -328,7 +328,8 @@ def EGAM7Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM7SlimmingHelper = SlimmingHelper(
         'EGAM7SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+        NamesAndTypes = ConfigFlags.Input.TypedCollections,
+        ConfigFlags = ConfigFlags )
 
 
     # ------------------------------------------

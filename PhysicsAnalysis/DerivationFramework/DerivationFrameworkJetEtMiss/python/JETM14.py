@@ -78,7 +78,7 @@ def JETM14Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM14SlimmingHelper = SlimmingHelper("JETM14SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM14SlimmingHelper = SlimmingHelper("JETM14SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     from DerivationFrameworkJetEtMiss.METTriggerDerivationContentConfig import addMETTriggerDerivationContent
     addMETTriggerDerivationContent(JETM14SlimmingHelper, isLoose=True)

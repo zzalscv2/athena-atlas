@@ -404,7 +404,8 @@ def EGAM3Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     EGAM3SlimmingHelper = SlimmingHelper(
         'EGAM3SlimmingHelper',
-        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+        NamesAndTypes = ConfigFlags.Input.TypedCollections,
+        ConfigFlags = ConfigFlags )
 
     # ------------------------------------------
     # containers for which we save all variables

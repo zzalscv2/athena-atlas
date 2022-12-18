@@ -147,7 +147,7 @@ if rec.readESD():
     rec.doBTagging=False
 if (jetOK or rec.readESD()) and rec.doBTagging() and  DetFlags.ID_on() and DetFlags.Muon_on():
     # Configure BTagging algorithm
-    from BTagging.BTagRun3Config import BTagRecoSplitCfg
+    from BTagging.BTagConfig import BTagRecoSplitCfg
     CAtoGlobalWrapper(BTagRecoSplitCfg, ConfigFlags)
 
 #

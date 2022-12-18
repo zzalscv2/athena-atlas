@@ -7,7 +7,7 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags
 # standard b-tagging
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-from BTagging.BTagRun3Config import BTagAlgsCfg
+from BTagging.BTagConfig import BTagAlgsCfg
 from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 
 # fast btagging

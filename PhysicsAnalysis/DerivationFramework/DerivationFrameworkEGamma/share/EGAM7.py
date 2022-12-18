@@ -276,7 +276,7 @@ addDAODJets(jetList, EGAM7Sequence)
 # FLAVOUR TAGGING
 #====================================================================
 #not available yet in r22
-#from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
+#from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollections
 #FtagJetCollections(['AntiKt4PV0TrackJets'], EGAM7Sequence)
 
 

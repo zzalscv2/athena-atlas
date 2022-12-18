@@ -31,7 +31,7 @@ def TEST3Cfg(ConfigFlags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    TEST3SlimmingHelper = SlimmingHelper("TEST3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TEST3SlimmingHelper = SlimmingHelper("TEST3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     TEST3SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles"]
     TEST3ItemList = TEST3SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TEST3", ItemList=TEST3ItemList, AcceptAlgs=["TEST3Kernel"]))

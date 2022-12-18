@@ -216,7 +216,7 @@ def JETM12Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    JETM12SlimmingHelper = SlimmingHelper("JETM12SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    JETM12SlimmingHelper = SlimmingHelper("JETM12SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     JETM12SlimmingHelper.SmartCollections = ["EventInfo",
                                              "Electrons", "Photons", "Muons", "TauJets",

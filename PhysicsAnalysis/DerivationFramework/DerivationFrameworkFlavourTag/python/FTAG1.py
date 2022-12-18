@@ -50,7 +50,7 @@ def FTAG1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     
-    FTAG1SlimmingHelper = SlimmingHelper("FTAG1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    FTAG1SlimmingHelper = SlimmingHelper("FTAG1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
     
     FTAG1SlimmingHelper.SmartCollections = [
                                            "Electrons",

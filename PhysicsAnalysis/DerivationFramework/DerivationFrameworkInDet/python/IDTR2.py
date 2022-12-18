@@ -132,7 +132,7 @@ def IDTR2Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    IDTR2SlimmingHelper = SlimmingHelper("IDTR2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    IDTR2SlimmingHelper = SlimmingHelper("IDTR2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     IDTR2SlimmingHelper.AllVariables = [
                                         "EventInfo",

@@ -12,7 +12,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 # these files are sloppy with imports, see ATLASRECTS-6635
 with ConfigurableRun3Behavior():
     from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
-    from BTagging.BTagRun3Config import BTagAlgsCfg, GetTaggerTrainingMap
+    from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
 
 # for backward compatability
 def FtagJetCollection(jetcol, seq, pvCol='PrimaryVertices', OutputLevel=WARNING):
@@ -145,7 +145,7 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
     acc.merge(BTagAlgsCfg(
         inputFlags=cfgFlags,
         JetCollection=jetcol_name_without_Jets,
-        nnList=GetTaggerTrainingMap(jetcol_name_without_Jets),
+        nnList=GetTaggerTrainingMap(cfgFlags, jetcol_name_without_Jets),
         trackCollection=track_collection,
         primaryVertices=pvCol,
         renameTrackJets=True,

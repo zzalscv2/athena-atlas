@@ -166,7 +166,7 @@ DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel("PHYSVALK
 # FLAVOUR TAGGING
 #====================================================================
 
-from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
+from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollections
 FtagJetCollections(['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets'],DerivationFrameworkJob)
 
 #====================================================================

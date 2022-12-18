@@ -100,7 +100,7 @@ def LLP1KernelCfg(ConfigFlags, name='LLP1Kernel', **kwargs):
                              suff="LRT"))
 
     # flavor tagging
-    from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
+    from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(ConfigFlags, ['AntiKt4EMTopoJets']))
 
     # VrtSecInclusive
@@ -300,7 +300,7 @@ def LLP1Cfg(ConfigFlags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
-    LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
     LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                            "Electrons",

@@ -328,7 +328,7 @@ def IDTIDECfg(configFlags):
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    IDTIDESlimmingHelper = SlimmingHelper("IDTIDESlimmingHelper", NamesAndTypes = configFlags.Input.TypedCollections)
+    IDTIDESlimmingHelper = SlimmingHelper("IDTIDESlimmingHelper", NamesAndTypes = configFlags.Input.TypedCollections, ConfigFlags = configFlags)
 
     AllVariables = []
     StaticContent = []
