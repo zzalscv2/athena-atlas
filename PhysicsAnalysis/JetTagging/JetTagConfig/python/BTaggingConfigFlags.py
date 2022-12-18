@@ -66,7 +66,6 @@ def createBTaggingConfigFlags():
 
     # Taggers for validation
     btagcf.addFlag("BTagging.SaveSV1Probabilities", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4)
-    btagcf.addFlag("BTagging.RunJetFitterNN",False)
     #Do we really need this in AthConfigFlags?
     #Comments in BTaggingConfiguration.py
     btagcf.addFlag("BTagging.OutputFiles.Prefix", "BTagging_")

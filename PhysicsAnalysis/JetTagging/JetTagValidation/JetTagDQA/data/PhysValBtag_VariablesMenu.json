@@ -679,19 +679,6 @@
             "forData": "true"
         },
 
-        "SV0_nGoodTracks": {
-            "_comment": "",
-            "title": "number of good tracks in SV0",
-            "xtitle": "nTracks",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "old_taggers"},
-            "xbins": 21,
-            "xmin": -0.5,
-            "xmax": 20.5,
-            "type": "TH1D",
-            "forData": "true"
-        },
-
         "llr": {
             "_comment": "",
             "title": "loglikelihoodratio of matched jets",

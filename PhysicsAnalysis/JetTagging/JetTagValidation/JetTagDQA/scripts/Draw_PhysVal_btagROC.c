@@ -10,7 +10,7 @@
 // Variables to edit:
 //
 // -List of taggers:
-//  const vector<TString> taggers = {"IP2D","IP3D","SV1","JetFitter","DL1dv00","DL1dv01","DL1r","GN1"};
+//  const vector<TString> taggers = {"IP2D","IP3D","SV1","DL1dv00","DL1dv01","DL1r","GN1"};
 //
 // -Output directories for plots
 //  const TString HistoDir = "ROC/";
@@ -72,7 +72,7 @@ const float EffMax=1.;
 
 //Some global variables for plotting:
 // taggers with 'old_taggers' in their name are assumed to be in the folder called 'old_taggers' in the merged root file
-vector<TString> taggers = {"IP2D","IP3D","RNNIP","DIPS","SV1","JetFitter","DL1dv00","DL1dv01","DL1r","GN1"};
+vector<TString> taggers = {"IP2D","IP3D","RNNIP","DIPS","SV1","DL1dv00","DL1dv01","DL1r","GN1"};
 //const vector<TString> taggers = {"IP2D"};
 //const vector<TString> taggers = {"IP3D"};
 //const vector<TString> taggers = {"RNNIP"};
@@ -128,7 +128,6 @@ void fill_WP_values(){
     WP_values.insert(make_pair<TString, vector<TString>>("RNNIP", {"50", "70", "80"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DIPS", {"50", "70", "80"}));
     WP_values.insert(make_pair<TString, vector<TString>>("SV1", {"40", "50", "60"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("JetFitter", {"50", "70", "80"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1dv00", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1dv01", {"60", "70", "77", "85"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"60", "70", "77", "85"}));
@@ -140,7 +139,6 @@ void fill_WP_values(){
     WP_values.insert(make_pair<TString, vector<TString>>("RNNIP", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DIPS", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("SV1", {"60"}));
-    WP_values.insert(make_pair<TString, vector<TString>>("JetFitter", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1dv00", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1dv01", {"70"}));
     WP_values.insert(make_pair<TString, vector<TString>>("DL1r", {"70"}));
@@ -1323,7 +1321,7 @@ void plotGraphsEffVsVar(TString var_name, vector<TString> InputFileNames, TStrin
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void Draw_PhysVal_btagROC(TString mcSample="ttbar", TString ref="files_merged/merged_NTUP_PHYSVAL_ref.root", TString test="files_merged/merged_NTUP_PHYSVAL_test.root", TString output="MyHistos", vector<TString> def_taggers= vector<TString>{"IP2D","IP3D","RNNIP","DIPS","SV1","JetFitter","DL1dv00","DL1dv01","DL1r","GN1"}, bool writeHistos=true){
+void Draw_PhysVal_btagROC(TString mcSample="ttbar", TString ref="files_merged/merged_NTUP_PHYSVAL_ref.root", TString test="files_merged/merged_NTUP_PHYSVAL_test.root", TString output="MyHistos", vector<TString> def_taggers= vector<TString>{"IP2D","IP3D","RNNIP","DIPS","SV1","DL1dv00","DL1dv01","DL1r","GN1"}, bool writeHistos=true){
   TH1::SetDefaultSumw2(true);
   fill_WP_values();
 
