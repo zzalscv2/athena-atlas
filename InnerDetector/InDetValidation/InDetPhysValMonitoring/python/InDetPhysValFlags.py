@@ -24,6 +24,7 @@ def createIDPVMConfigFlags():
     icf.addFlag("doHitLevelPlots", False )
     icf.addFlag("runDecoration", True )
     icf.addFlag("setTruthStrategy", "HardScatter" )
+    icf.addFlag("jetsNameForHardScatter", 'AntiKt4EMTopoJets' ) # when building jets, what types of jets are built (used for hardScatterStrategy == 2)
     icf.addFlag("validateExtraTrackCollections", [] ) # List of extra track collection names to be validated in addition to Tracks.
     icf.addFlag("ancestorIDs", [] )
     icf.addFlag("requiredSiHits", 1)

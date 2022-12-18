@@ -32,11 +32,11 @@ asetup Athena,master,latest
 ```  
 to get the most up-to date nightly or 
 ```
-asetup Athena,22.0.20
+asetup Athena,22.0.104
 ``` 
-to get a recent stable release. 
+to get a stable release. Recent releases can be found [like this](https://gitlab.cern.ch/atlas/athena/-/tags?sort=updated_desc&search=release) and the search will filter by name. Release numbering is explained [here](https://atlassoftwaredocs.web.cern.ch/athena/athena-releases/).
 
-This is always needed, regardless of the running mode. 
+An athena release is always needed, regardless of the running mode. 
 
 InDetPhysValMonitoring is fairly independent of the precise release you set up, except for any changes and fixes to the package itself that may have gone in in the course of time. 
 
@@ -65,6 +65,19 @@ fill the histograms and write them into a `PhysVal.root`.
 Since we run on data, you will not get the full set of histograms (as of the date of writing, the truth record in collision data has yet to be found). 
 
 ## Running with standalone job options 
+A script within the package [runIDPVM.py](scripts/runIDPVM.py) was designed to make a simple UI for this package.
+
+To run with standalone job options, it is sufficient to run in the command line: 
+```
+runIDPVM.py --filesInput <your input file, ESD/AOD/DAOD_IDTRKVALID> --doTightPrimary --outputFile <output.root>
+``` 
+
+This will schedule the same decoration and histogramming algorithms as done by `Reco_tf.py` above within a minimal environment. 
+You can configure the output file name as well as a limited number of the configuration parameters available similar to those described below. Sometimes the flags for runIDPVM are exactly the same as used in Reco_tf, other times there are some slight differences.
+
+## Depreciated running with standalone job options 
+
+**This section is maintained for those who used this workflow in the recent past. If you are a newcomer, please skip this subsection.**
 
 To run with standalone job options, it is sufficient to run in the command line: 
 ```
@@ -79,13 +92,13 @@ You can configure the output file name as well as a limited number of the config
 The InDetPhysValMonitoring framework is designed to be rather flexibly configurable, in order to allow the user to steer which histograms they need. 
 To avoid having to manually change the configuration, a set of `InDetPhysValFlags` is defined in [InDetPhysValJobProperties.py](python/InDetPhysValJobProperties.py)
 
-A short overview of some of the most interesting flags:
-*  `doValidateTightPrimaryTracks` (defaults to `False`) enables a second instance of the monitoring plots, made considering only reco tracks satisfying the `TightPrimary` working point. This can be useful to check how a tracking changes affects a high-quality subset of the tracks.  
-*  `doValidateTracksInJets` and `doValidateTracksInBJets` (both default to `False`) enable additional plots for tracks within jets. These are very useful for CTIDE (tracking in dense environments) and flavour-tagging performance studies.
-*  `doExpertOutput` (defaults to `False`) adds an extensive set of further histograms to all categories, which are mainly intended for tracking experts rather than day-to-day validation. Use if you need more detail than the standard plots give you. 
-*  `setTruthStrategy` allows you to choose which truth particles to use when calculating Efficiencies and resolutions. The default, `HardScatter`, will only select hard-scatter particles. So the efficiency measured will be the one for particles produced in the hard scatter, and the same holds for the resolutions. The alternate option is `All`, which selects all truth particles in the event. If you run with full pileup truth, this can allow you to include the particles from pileup interactions in your study. 
+A short overview of some of the most interesting flags with the correspondig flag for runIDPVM.py is give in brackets:
+*  `doValidateTightPrimaryTracks` [`doTightPrimary`] (defaults to `False`) enables a second instance of the monitoring plots, made considering only reco tracks satisfying the `TightPrimary` working point. This can be useful to check how a tracking changes affects a high-quality subset of the tracks.  
+*  `doValidateTracksInJets` and `doValidateTracksInBJets` [`doTracksInJets` and `doTracksInBJets`] (both default to `False`) enable additional plots for tracks within jets. These are very useful for CTIDE (tracking in dense environments) and flavour-tagging performance studies.
+*  `doExpertOutput` [`doExpertPlots`] (defaults to `False`) adds an extensive set of further histograms to all categories, which are mainly intended for tracking experts rather than day-to-day validation. Use if you need more detail than the standard plots give you. 
+*  `setTruthStrategy` [`HSFlag`] allows you to choose which truth particles to use when calculating Efficiencies and resolutions. The default, `HardScatter`, will only select hard-scatter particles. So the efficiency measured will be the one for particles produced in the hard scatter, and the same holds for the resolutions. The alternate options are `All` and `PileUp`. `All` selects all truth particles in the event. `PileUp` which selects all pile-up particles but requires "full pileup truth" (TruthPileupEvents) which is a non-standard production configuration, but is very interesting for tracking studies.
 
-For more flags, please see the file itself. 
+For more flags, please see the files themselves.
 
 ## Configuring when running with Reco_tf
 
@@ -100,11 +113,10 @@ Reco_tf.py --AMI=q431 \
 ``` 
 This will run the same job as in our previous example, but add some additional plots as well as a separate set of plots for tracks pre-selected with the `TightPrimary` working point. 
 
-## Configuring when using standalone job options
-The flags are not directly available in the standalone job options. 
-There are two ways of steering them in this use case: 
+## Configuring when using runIDPVM.py
+Most if not all flags are directly available in the script. 
 
-1. You can use a set of command line arguments supported by the [standalone job options](share/InDetPhysValMonitoring_topOptions.py) to have it set the flags for you. The following are supported: 
+You can use a set of command line arguments supported by the [standalone job options](share/InDetPhysValMonitoring_topOptions.py) to have it set the flags for you. The following are supported: 
     * `--doTightPrimary` will set  `InDetPhysValFlags.doValidateTightPrimaryTracks` to `True`
     * `--doTracksInJets` and `--doTracksInBJets` will set `InDetPhysValFlags.doValidateTracksInJets` and `InDetPhysValFlags.doValidateTracksInBJets` to `True`, respectively 
     * `--doExpertPlots` will set `InDetPhysValFlags.doExpertOutput` to `True`
@@ -113,18 +125,19 @@ There are two ways of steering them in this use case:
     To use the arguments, please pass them after the end of the standard invocation shown above, with one single `-` delimiter before the arguments. 
     For example, 
     ```
-    athena.py --filesInput <your input file, ESD/AOD/DAOD_IDTRKVALID> InDetPhysValMonitoring/InDetPhysValMonitoring_topOptions.py - --doTightPrimary --doExpertPlots --outputFile MyPhysVal.customName.root 
+    runIDPVM.py --filesInput <your input file, ESD/AOD/DAOD_IDTRKVALID> --outputFile MyPhysVal.customName.root 
     ```
     will enable the same extra histograms as in the transform example above, and change the output file name to `MyPhysVal.customName.root`. 
 
-2. You can also set missing flags by passing a pre-command to athena using the `-c` argument, using the same syntax that you would use in a `Reco_tf` `preExec` line: 
-```
-athena.py  -c "from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags; InDetPhysValFlags.doValidateTightPrimaryTracks.set_Value_and_Lock(True);InDetPhysValFlags.doExpertOutput.set_Value_and_Lock(True); " --filesInput <your input file, ESD/AOD/DAOD_IDTRKVALID> InDetPhysValMonitoring/InDetPhysValMonitoring_topOptions.py
-```
-will run the same configuration as the command line arguments above or the transform example. Except for providing an example, there is no real point in using this to set flags that can also be steered more easily using command line arguments, but it can be used to set flags not exposed via this mechanism. 
+Any flag which is not there can easily be added.
 
 # Plotting the output
-The [IDPhysValPlotting](https://gitlab.cern.ch/Atlas-Inner-Tracking/IDPhysValPlotting) package can be used to plot the output including comparing multiple sets of plots.
+The [IDPhysValPlotting](https://gitlab.cern.ch/Atlas-Inner-Tracking/IDPhysValPlotting/-/tree/master/) package can be used to plot the output including comparing multiple sets of plots. 
+
+## Plotting after running on the grid
+After running on the grid, the files need to be [post-processed](util/postProcessIDPVMHistos.cxx) before making plots. The two ways forward are:
+1.```postProcessIDPVMHistos <File to post-process>``` where the file is obtained by hadding outputs of several independent IDPVM runs and *is overwritten*.
+2.```postProcessIDPVMHistos -f <desired output file name> <File to post-process>``` which imitates a hadd-like signature for PhysVal merging.
 
 # Modifying the code 
 

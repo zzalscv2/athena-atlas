@@ -28,6 +28,7 @@ def GetCustomAthArgs():
     IDPVMparser.add_argument("--truthMinPt", help='minimum truth particle pT', type=float, default=None)
     IDPVMparser.add_argument("--outputFile", help='Name of output file',default="M_output.root")
     IDPVMparser.add_argument("--HSFlag", help='Hard-scatter flag - decides what is used for truth matching', choices=['HardScatter', 'All', 'PileUp'],default="HardScatter")
+    IDPVMparser.add_argument("--jetsNameForHardScatter", help='Name of jet collection',default="AntiKt4EMTopoJets")
     IDPVMparser.add_argument("--ancestorIDList", help='List of ancestor truth IDs to match.', default = [], nargs='+', type=int)
     IDPVMparser.add_argument("--requiredSiHits", help='Number of truth silicon hits', type=int, default=0)
     IDPVMparser.add_argument("--maxProdVertRadius", help='Maximum production radius for truth particles', type=float, default=300)
@@ -72,6 +73,7 @@ ConfigFlags.PhysVal.IDPVM.requiredSiHits = MyArgs.requiredSiHits
 ConfigFlags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
 ConfigFlags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
 ConfigFlags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
+ConfigFlags.PhysVal.IDPVM.jetsNameForHardScatter = MyArgs.jetsNameForHardScatter
 ConfigFlags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
 ConfigFlags.PhysVal.IDPVM.GRL = MyArgs.GRL
 ConfigFlags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
