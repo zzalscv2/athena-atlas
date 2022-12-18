@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from eflowRec import eflowRecConf
 from InDetTrackSelectionTool import InDetTrackSelectionToolConf
-from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from AthenaCommon.Logging import logging
@@ -23,6 +22,7 @@ def getExtrapolator():
     # FIXME: reconfigure for lower tolerance to speed up
     # from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
     from TrackToCalo.TrackToCaloConf import Trk__ParticleCaloExtensionTool
+    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
 
     return Trk__ParticleCaloExtensionTool(
         "HLTPF_ParticleCaloExtension", Extrapolator=InDetTrigExtrapolator
@@ -62,6 +62,7 @@ def PFTrackExtension(tracktype):
 
 def muonCaloTagSeq(flags, tracktype, tracksin, extcache, cellsin):
     from eflowRec.eflowRecConf import PFTrackMuonCaloTaggingAlg
+    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
     from TrackToCalo.TrackToCaloConf import Rec__ParticleCaloCellAssociationTool
     from CaloTrkMuIdTools.CaloTrkMuIdToolsConf import (
         CaloMuonScoreTool,
