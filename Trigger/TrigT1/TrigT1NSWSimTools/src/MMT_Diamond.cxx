@@ -130,7 +130,6 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
 
 void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc, const int &event) {
   auto t0 = std::chrono::high_resolution_clock::now();
-  int ntrig = 0;
   int bc_start = 999999;
   int bc_end = -1;
   int bc_wind = 4; // fixed time window (in bunch crossings) during which the algorithm collects ART hits
@@ -197,7 +196,6 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc,
       if (!hits_now.empty()) road->addHits(hits_now);
 
       if (road->checkCoincidences(bc_wind) && bc >= (sm_bc - 1)) {
-        ntrig++;
 
         ATH_MSG_DEBUG("------------------------------------------------------------------");
         ATH_MSG_DEBUG("Coincidence FOUND @BC: " << bc);
