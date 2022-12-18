@@ -301,6 +301,7 @@ class ItemDef:
         MenuItem('L1_TE5_VTE200'         ).setLogic( d.TE5  & Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TE5_VTE100'         ).setLogic( d.TE5  & Not(d.TE100) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TE5_VTE50'          ).setLogic( d.TE5  & Not(d.TE50)  & physcond).setTriggerType( TT.calo )
+        MenuItem('L1_TE5_VTE20'          ).setLogic( d.TE5  & Not(d.TE20)  & physcond).setTriggerType( TT.calo )
 
         MenuItem('L1_TE4_VTE200'         ).setLogic( d.TE4  & Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TE4_VTE100'         ).setLogic( d.TE4  & Not(d.TE100) & physcond).setTriggerType( TT.calo )
@@ -505,12 +506,15 @@ class ItemDef:
         MenuItem('L1_2TAU3_VTE50' ).setLogic( d.HA3.x(2)      & Not(d.TE50) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU2_VTE100').setLogic( d.HA2.x(2)      & Not(d.TE100) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU3_VTE100').setLogic( d.HA3.x(2)      & Not(d.TE100) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2TAU1_VTE200').setLogic( d.HA1.x(2)      & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU2_VTE200').setLogic( d.HA2.x(2)      & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU3_VTE200').setLogic( d.HA3.x(2)      & Not(d.TE200) & physcond).setTriggerType(TT.calo)
 
+        MenuItem('L1_TAU1_VTE200'    ).setLogic( d.HA1  & Not(d.TE200) & physcond).setTriggerType( TT.calo )
         MenuItem('L1_TAU1_TE3_VTE200').setLogic( d.HA1  & d.TE3    & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TAU1_TE4_VTE200').setLogic( d.HA1  & d.TE4    & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TAU1_TE5_VTE200').setLogic( d.HA1  & d.TE5    & Not(d.TE200) & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_TAU1_VTE200_EMPTY'   ).setLogic( d.HA1  & Not(d.TE200) & cosmiccond).setTriggerType( TT.calo )
 
         # 3xTAU
         MenuItem('L1_TAU20_2TAU12'  ).setLogic( d.HA20 & d.HA12.x(2)  & physcond).setTriggerType( TT.calo )
@@ -1128,6 +1132,7 @@ class ItemDef:
         MenuItem('L1_TE10_OVERLAY'    ).setLogic( d.TE10 & physcond).setTriggerType(TT.zerobs)
         MenuItem('L1_TE20_OVERLAY'    ).setLogic( d.TE20 & physcond).setTriggerType(TT.zerobs)
         MenuItem('L1_TE50_OVERLAY'    ).setLogic( d.TE50 & physcond).setTriggerType(TT.zerobs)
+        MenuItem('L1_MBTS_1_VTE50_OVERLAY' ).setLogic( MBTS_1 & Not(d.TE50) & physcond).setTriggerType(TT.zerobs)
 
         MenuItem('L1_ZDC_VTE200'      ).setLogic((ZDC_A | ZDC_C) & Not(d.TE200) & physcond)
         MenuItem('L1_ZDC_AND_VTE50'   ).setLogic( ZDC_AND & Not(d.TE50) & physcond)
@@ -1408,6 +1413,7 @@ class ItemDef:
         MenuItem('L1_TRT_EMPTY' ).setLogic(d.NIMTRT & cosmiccond).setTriggerType(TT.nim)
         MenuItem('L1_TRT_VTE200').setLogic(d.NIMTRT & Not(d.TE200) & physcond)
         MenuItem('L1_TRT_VTE50' ).setLogic(d.NIMTRT & Not(d.TE50)  & physcond)
+        MenuItem('L1_TRT_VTE20' ).setLogic(d.NIMTRT & Not(d.TE20)  & physcond)
 
         # TGC
         MenuItem('L1_TGC_BURST').setLogic(d.NIMTGC & bgrp12cond ).setTriggerType(TT.nim)

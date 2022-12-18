@@ -88,6 +88,7 @@ def defineMenu():
         'L1_TE600p0ETA49', 'L1_TE1500p0ETA49', 'L1_TE3000p0ETA49', 'L1_TE3500p0ETA49', 'L1_TE6500p0ETA49', 'L1_TE8000p0ETA49',
         'L1_TE50_VTE600p0ETA49',
         # calo overlay
+        'L1_MBTS_1_VTE50_OVERLAY',
         'L1_TE50_OVERLAY', 'L1_TE600p0ETA49_OVERLAY', 'L1_TE1500p0ETA49_OVERLAY', 'L1_TE3000p0ETA49_OVERLAY',
         'L1_TE3500p0ETA49_OVERLAY', 'L1_TE6500p0ETA49_OVERLAY', 'L1_TE8000p0ETA49_OVERLAY',
         
@@ -98,7 +99,9 @@ def defineMenu():
         'L1_MU3V_VTE50', 'L1_MU5VF_VTE50', 'L1_2MU3V_VTE50',
         
         #UPC - EM
-        'L1_TAU1_TE3_VTE200', 'L1_2TAU1_VTE50',
+        'L1_TAU1_TE3_VTE200', 'L1_TAU1_TE5_VTE200',
+        'L1_TAU1_VTE200', 'L1_TAU1_VTE200_EMPTY',
+        'L1_2TAU1_VTE200', 'L1_2TAU1_VTE50',
         'L1_EM7_VTE200',
         
         #UPC - new EM
@@ -116,9 +119,11 @@ def defineMenu():
         #UPC - calo, TRT - legacy
         'L1_TRT_VTE50',
         'L1_TRT_VTE200',
+        'L1_TRT_VTE20',
         #UPC - calo only - legacy
         'L1_VTE20',
         'L1_VTE50', 'L1_TE3_VTE50', 'L1_TE5_VTE50',
+        'L1_TE5_VTE20',
         'L1_VTE200', 'L1_TE3_VTE200', 'L1_TE5_VTE200', 'L1_TE20_VTE200', 'L1_TE50_VTE200',
         'L1_J12_VTE200',
         

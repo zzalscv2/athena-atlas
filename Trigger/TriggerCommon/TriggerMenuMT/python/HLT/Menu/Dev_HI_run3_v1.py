@@ -82,12 +82,13 @@ def setupMenu():
     chains['Egamma'] += [
         # ElectronChains----------
         #--------- legacy supporting electron chains
-        ChainProp(name='HLT_e13_etcut_nogsf_ion_L1EM10', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
-        ChainProp(name='HLT_e15_etcut_nogsf_ion_L1EM12', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
-        ChainProp(name='HLT_e18_etcut_nogsf_ion_L1EM14', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
-        ChainProp(name='HLT_e20_etcut_nogsf_ion_L1EM16', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
-        ChainProp(name='HLT_e30_etcut_nogsf_ion_L1EM22', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
-        ChainProp(name='HLT_e50_etcut_nogsf_ion_L1EM22', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        #_nogsf is not needed for etcut electron chains
+        ChainProp(name='HLT_e13_etcut_ion_L1EM10', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e15_etcut_ion_L1EM12', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e18_etcut_ion_L1EM14', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e20_etcut_ion_L1EM16', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e30_etcut_ion_L1EM22', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
+        ChainProp(name='HLT_e50_etcut_ion_L1EM22', stream=[HardProbesStream] ,groups=SingleElectronGroup+SupportLegGroup),
         ChainProp(name='HLT_e20_idperf_loose_nogsf_ion_L1EM16', stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+SupportLegGroup, monGroups=['idMon:t0']),
 
  
@@ -110,20 +111,21 @@ def setupMenu():
         ChainProp(name='HLT_2e20_loose_nogsf_ion_L12EM16',  stream=[HardProbesStream], groups=MultiElectronGroup+PrimaryLegGroup),
         
         #--------- phase-1 supproting electron chains
-        ChainProp(name='HLT_e15_etcut_nogsf_ion_L1eEM9',    stream=[HardProbesStream], groups=SingleElectronGroup+SupportPhIGroup),
-        ChainProp(name='HLT_e20_etcut_nogsf_ion_L1eEM15',   stream=[HardProbesStream], groups=SingleElectronGroup+SupportPhIGroup),
+        # replace L1eEM9 with L1eEM15 and L1eEM15 with eEM18, ATR-26366
+        ChainProp(name='HLT_e15_etcut_ion_L1eEM15',    stream=[HardProbesStream], groups=SingleElectronGroup+SupportPhIGroup),
+        ChainProp(name='HLT_e20_etcut_ion_L1eEM18',   stream=[HardProbesStream], groups=SingleElectronGroup+SupportPhIGroup),
 
         #--------- phase-1 physics electron chains
-        ChainProp(name='HLT_e15_lhloose_nogsf_ion_L1eEM9',  stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:t0_tp']),
-        ChainProp(name='HLT_e15_loose_nogsf_ion_L1eEM9',    stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:t0_tp']),
-        ChainProp(name='HLT_e15_lhmedium_nogsf_ion_L1eEM9', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e15_medium_nogsf_ion_L1eEM9',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e15_lhloose_nogsf_ion_L1eEM15',  stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e15_loose_nogsf_ion_L1eEM15',    stream=[HardProbesStream, 'express'], groups=SingleElectronGroup+PrimaryPhIGroup, monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e15_lhmedium_nogsf_ion_L1eEM15', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e15_medium_nogsf_ion_L1eEM15',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
 
-        ChainProp(name='HLT_e20_lhloose_nogsf_ion_L1eEM15', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e20_lhmedium_nogsf_ion_L1eEM15',stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e20_loose_nogsf_ion_L1eEM15',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e20_lhloose_nogsf_ion_L1eEM18', stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e20_lhmedium_nogsf_ion_L1eEM18',stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e20_loose_nogsf_ion_L1eEM18',   stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_e20_loose_nogsf_ion_L1eEM18L',  stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_e20_medium_nogsf_ion_L1eEM15',  stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_e20_medium_nogsf_ion_L1eEM18',  stream=[HardProbesStream], groups=SingleElectronGroup+PrimaryPhIGroup),
         ChainProp(name='HLT_2e20_loose_nogsf_ion_L12eEM18L',stream=[HardProbesStream], groups=MultiElectronGroup+PrimaryPhIGroup),
         
         
@@ -149,10 +151,10 @@ def setupMenu():
 
 
         #----------- phase-1 photon chains
-        ChainProp(name='HLT_g15_etcut_ion_L1eEM9', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportPhIGroup),
-        ChainProp(name='HLT_g20_etcut_ion_L1eEM9', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportPhIGroup),
-        ChainProp(name='HLT_g15_loose_ion_L1eEM9', stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
-        ChainProp(name='HLT_g20_loose_ion_L1eEM9', stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_g15_etcut_ion_L1eEM15', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportPhIGroup),
+        ChainProp(name='HLT_g20_etcut_ion_L1eEM15', stream=[HardProbesStream], groups=SinglePhotonGroup+SupportPhIGroup),
+        ChainProp(name='HLT_g15_loose_ion_L1eEM15', stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
+        ChainProp(name='HLT_g20_loose_ion_L1eEM15', stream=[HardProbesStream], groups=SinglePhotonGroup+PrimaryPhIGroup),
 
         #---UPC legacy egamma chains
         ChainProp(name='HLT_e12_lhloose_nogsf_L1EM7_VTE200',     l1SeedThresholds=['EM7'],  stream=[UPCStream, 'express'], groups=SingleElectronGroup+PrimaryLegGroup, monGroups=['egammaMon:shifter']),
@@ -255,6 +257,7 @@ def setupMenu():
         ChainProp(name='HLT_mb_sp_pix500_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTReprocessing']),
         ChainProp(name='HLT_mb_sp_pix1000_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTReprocessing']),
         ChainProp(name='HLT_mb_sp_vetospmbts2in_L1TE5_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportGroup),
+        ChainProp(name='HLT_mb_excl_1trk2_pt1_L1TRT_VTE20',  l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup+['PS:NoHLTReprocessing']),
         #----------- mbts
         ChainProp(name="HLT_mb_mbts_L1MBTS_2_2", l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:NoHLTReprocessing']),
         ChainProp(name="HLT_mb_mbts_L1MBTS_3_3", l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:NoHLTReprocessing']),
@@ -287,8 +290,12 @@ def setupMenu():
     ]
 
     chains['Streaming'] += [
-        ChainProp(name='HLT_noalg_L1TAU1_TE3_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L12TAU1_VTE50',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L12TAU1_VTE200',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TAU1_TE3_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TAU1_TE5_VTE200', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TAU1_VTE200',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TAU1_VTE200_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1ZDC_XOR_VTE200',  l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
 
         ChainProp(name='HLT_noalg_L1J15',   l1SeedThresholds=['FSNOSEED'], stream=[HardProbesStream], groups=MinBiasGroup+SupportLegGroup),
@@ -322,6 +329,7 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1TE600p0ETA49',l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
 
         #----TE MinBias OVERLAY----
+        ChainProp(name='HLT_noalg_L1MBTS_1_VTE50_OVERLAY', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE50_OVERLAY',         l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE600p0ETA49_OVERLAY', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE1500p0ETA49_OVERLAY',l1SeedThresholds=['FSNOSEED'], stream=[MinBiasOverlayStream], groups=MinBiasGroup+SupportLegGroup),
@@ -333,14 +341,18 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1MBTS_1_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TE50_VTE200',  l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
         ChainProp(name='HLT_noalg_L1TRT_VTE200',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TRT_VTE20',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
 
         ChainProp(name='HLT_noalg_L1gTE200',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup),
         ChainProp(name='HLT_noalg_L1jTE200',   l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportPhIGroup),
 
         #----Physics streamer for 2022 Nov HI test run, ATR-26405
-        ChainProp(name='HLT_noalg_L1VTE5',           l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_L1MBTS_1_VTE5',    l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
-        ChainProp(name='HLT_noalg_mb_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1VTE5',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1MBTS_1_VTE5',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_mb_L1MBTS_1_VTE5', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TE5_VTE20',      l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+        ChainProp(name='HLT_noalg_L1TE20_VTE200',    l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportLegGroup),
+
 
     ]
 

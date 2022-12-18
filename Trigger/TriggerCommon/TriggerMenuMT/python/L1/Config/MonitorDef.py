@@ -386,7 +386,10 @@ class MonitorDef:
                 # Tau
                 "L1_TAU8", "L1_TAU12IM",
                 "L1_TAU1_TE3_VTE200",
+                "L1_TAU1_TE5_VTE200",
                 "L1_2TAU1_VTE50",
+                "L1_2TAU1_VTE200",
+                "L1_TAU1_VTE200",
                 # Jet
                 "L1_J30", "L1_J50",
                 "L1_J20p31ETA49", "L1_J30p31ETA49",
@@ -402,6 +405,7 @@ class MonitorDef:
                 #
                 "L1_TE3_VTE200",
                 "L1_TE3_VTE50",
+                "L1_TE5_VTE20",
                 "L1_TE5_VTE50",
                 "L1_TE5_VTE200",
                 "L1_TE20_VTE200",
@@ -430,7 +434,7 @@ class MonitorDef:
                 #
                 "L1_VTE20", "L1_VTE50", "L1_VTE200",
                 # TRT
-                "L1_TRT_VTE50", "L1_TRT_VTE200",
+                "L1_TRT_VTE50", "L1_TRT_VTE200", "L1_TRT_VTE20",
                 # XE
                 "L1_XE30", "L1_XE35", "L1_XE50", "L1_XE60",
                 # Phase-I L1Calo
