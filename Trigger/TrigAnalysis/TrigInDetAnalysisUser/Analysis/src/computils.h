@@ -625,7 +625,7 @@ public:
 	    dkey += std::string(" : ");
 	    
 	    if ( (dkey+meanc).size()>58 ) { 
-	      leg.AddEntry( htest(), dkey.c_str(), "p" );
+	      leg.AddEntry( htest(), dkey, "p" );
 	      leg.AddEntry( hnull,   meanc,        "p" ); 
 	    }
 	    else { 
@@ -638,7 +638,7 @@ public:
 	      //  leg.AddEntry( hnull, "", "l" );
 	      
 	      if ( (rkey+meanrefc).size()>58 ) { 
-		leg.AddEntry( href(), rkey.c_str(), "l" );
+		leg.AddEntry( href(), rkey, "l" );
 		leg.AddEntry( hnull,  meanrefc,     "l" ); 
 	      }
 	      else {
@@ -649,7 +649,7 @@ public:
 	  
 	}
 	else { 
-	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key.c_str(), "p" );
+	  if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
 	}
 	
 	m_entries++;
@@ -796,7 +796,7 @@ public:
 	  dkey += std::string(" : ");
 
 	  if ( (dkey+meanc).size()>58 ) { 
-	    leg.AddEntry( htest(), dkey.c_str(), "p" );
+	    leg.AddEntry( htest(), dkey, "p" );
 	    leg.AddEntry( hnull,   meanc,        "p" ); 
 	  }
 	  else { 
@@ -808,7 +808,7 @@ public:
 	    //  leg.AddEntry( hnull, "", "l" );
 
 	    if ( (rkey+meanrefc).size()>58 ) { 
-	      leg.AddEntry( href(), rkey.c_str(), "l" );
+	      leg.AddEntry( href(), rkey, "l" );
 	      leg.AddEntry( hnull,  meanrefc,     "l" ); 
 	    }
 	    else {
@@ -819,7 +819,7 @@ public:
 
       }
       else { 
-	if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key.c_str(), "p" );
+	if ( LINEF || leg.size()<m_max_entries ) leg.AddEntry( htest(), key, "p" );
       }
 
       m_entries++;

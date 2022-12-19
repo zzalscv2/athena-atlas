@@ -185,9 +185,9 @@ void search(TDirectory* td=0, const std::string& s="") {
       
       //      if ( std::string(tobj->GetClassName()).find("TH1")!=std::string::npos )  status = add<TH1>( objname.c_str(), tobj );
       //      if ( std::string(tobj->GetClassName()).find("TH2")!=std::string::npos )  status = add<TH2>( objname.c_str(), tobj );
-      if ( std::string(tobj->GetClassName()).find("TH1")!=std::string::npos )       add<TH1>( objname.c_str(), tobj );
-      if ( std::string(tobj->GetClassName()).find("TH2")!=std::string::npos )       add<TH2>( objname.c_str(), tobj );
-      if ( std::string(tobj->GetClassName()).find("TProfile")!=std::string::npos )  add<TProfile>( objname.c_str(), tobj );
+      if ( std::string(tobj->GetClassName()).find("TH1")!=std::string::npos )       add<TH1>( objname, tobj );
+      if ( std::string(tobj->GetClassName()).find("TH2")!=std::string::npos )       add<TH2>( objname, tobj );
+      if ( std::string(tobj->GetClassName()).find("TProfile")!=std::string::npos )  add<TProfile>( objname, tobj );
       
       //      if ( !status ) std::cerr << "bad status" << std::endl;
     }
