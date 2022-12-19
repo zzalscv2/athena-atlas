@@ -100,7 +100,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     bool validRoIBResult = true;
     bool validTGCContainer = true;
     bool validRPCContainer = true;
-    int numberOfInvalidFragments = 0;
 
     //ERROR histos
     auto errorSummaryX = Monitored::Scalar<int>("errorSummaryX",0);
@@ -121,7 +120,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
           if (!theMuCTPI_Phase1_RDO) {
               ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_Phase1_RDOKey.key() << "\" in StoreGate");
               validMuCTPI_Phase1_RDO = false;
-              ++numberOfInvalidFragments;
           }
       }
       else
@@ -130,7 +128,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
           if (!theMuCTPI_RDO) {
               ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_RDOKey.key() << "\" in StoreGate");
               validMuCTPI_RDO = false;
-              ++numberOfInvalidFragments;
           }
       }
       // now try to get RPC and TGC SL output for comparisons
@@ -153,14 +150,12 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
       if (!theCTP_RDO) {
 	ATH_MSG_WARNING( "Could not find \"" << m_CTP_RDOKey.key() << "\" in StoreGate");
 	validCTP_RDO = false;
-	++numberOfInvalidFragments;
       }
       if (!m_runOnESD) {
 	theCTP_RIO = SG::get(m_CTP_RIOKey, ctx);
 	if (!theCTP_RIO) {
 	  ATH_MSG_WARNING( "Could not find \"" << m_CTP_RIOKey.key() << "\" in StoreGate");
 	  validCTP_RIO = false;
-	  ++numberOfInvalidFragments;
 	}
         ATH_MSG_DEBUG( "validCTP_RIO: " << validCTP_RIO );
       }
@@ -171,7 +166,6 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
       if (!roIBResult) {
 	ATH_MSG_WARNING( "Could not find \"" << m_RoIBResultKey.key() << "\" in StoreGate");
 	validRoIBResult = false;
-	++numberOfInvalidFragments;
       }
     }
 
