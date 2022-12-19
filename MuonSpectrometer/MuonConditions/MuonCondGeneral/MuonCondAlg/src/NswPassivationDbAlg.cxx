@@ -16,7 +16,6 @@ NswPassivationDbAlg::initialize(){
 
 	// retrievals
 	ATH_MSG_DEBUG( "initializing " << name() );				
-	ATH_CHECK(m_condSvc	.retrieve());
 	ATH_CHECK(m_idHelperSvc.retrieve());
 
 	// read keys
@@ -24,12 +23,6 @@ NswPassivationDbAlg::initialize(){
 
 	// write keys	
 	ATH_CHECK(m_writeKey.initialize());
-
-	// register write handles
-	if(m_condSvc->regHandle(this, m_writeKey).isFailure()) {
-	  ATH_MSG_FATAL("Unable to register WriteCondHandle " << m_writeKey.fullKey() << " with CondSvc");
-	  return StatusCode::FAILURE;
-	}
 
 	return StatusCode::SUCCESS;
 }

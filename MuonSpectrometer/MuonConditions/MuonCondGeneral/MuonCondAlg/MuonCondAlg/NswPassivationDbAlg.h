@@ -10,7 +10,6 @@
 #include <vector>
 
 // Gaudi includes
-#include "GaudiKernel/ICondSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 
@@ -47,7 +46,6 @@ private:
 
 	Identifier buildChannelId(const int station, const int stationEta, const int stationPhi, const int multiLayer, const int gasGap, const int pcbPos) const;
     
-    ServiceHandle<ICondSvc> m_condSvc{this, "CondSvc", "CondSvc"};
     ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
  
     writeKey_t m_writeKey{this, "WriteKey", "NswPassivationDbData", "Key of output passivation data" };
