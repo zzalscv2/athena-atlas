@@ -27,6 +27,17 @@
 #include "eformat/StreamTag.h"
 
 
+namespace {
+   /// Helper to suppress thread-checker warnings for single-threaded execution
+   StatusCode putEvent_ST(const IAthenaIPCTool& tool,
+                          long eventNumber, const void* source,
+                          size_t nbytes, unsigned int status) {
+      StatusCode sc ATLAS_THREAD_SAFE = tool.putEvent(eventNumber, source, nbytes, status);
+      return sc;
+   }
+}
+
+
 // Constructor.
 EventSelectorByteStream::EventSelectorByteStream(const std::string &name,
                                                  ISvcLocator *svcloc)
@@ -453,12 +464,13 @@ StatusCode EventSelectorByteStream::nextImpl(IEvtSelector::Context& it,
       }
    } // for loop
    if (!m_eventStreamingTool.empty() && m_eventStreamingTool->isServer()) { // For SharedReader Server, put event into SHM
-      const RawEvent* pre = 0;
-      pre = m_eventSource->currentEvent();
-      StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus()); // Only called single-threaded
-      while (sc.isRecoverable()) {
+      const RawEvent* pre = m_eventSource->currentEvent();
+      StatusCode sc;
+      while ( (sc = putEvent_ST(*m_eventStreamingTool,
+                                m_NumEvents - 1, pre->start(),
+                                pre->fragment_size_word() * sizeof(uint32_t),
+                                m_eventSource->currentEventStatus())).isRecoverable() ) {
          usleep(1000);
-         sc = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus());
       }
       if (!sc.isSuccess()) {
          ATH_MSG_ERROR("Cannot put Event " << m_NumEvents - 1 << " to AthenaSharedMemoryTool");
@@ -994,10 +1006,13 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
          return(StatusCode::FAILURE);
       }
       if (m_eventStreamingTool->isServer()) {
-         StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus()); // Only called single-threaded
-         while (sc.isRecoverable()) {
+         StatusCode sc;
+         while ( (sc = putEvent_ST(*m_eventStreamingTool,
+                                   m_NumEvents - 1,
+                                   pre->start(),
+                                   pre->fragment_size_word() * sizeof(uint32_t),
+                                   m_eventSource->currentEventStatus())).isRecoverable() ) {
             usleep(1000);
-            sc = m_eventStreamingTool->putEvent(m_NumEvents - 1, pre->start(), pre->fragment_size_word() * sizeof(uint32_t), m_eventSource->currentEventStatus());
          }
          if (!sc.isSuccess()) {
             ATH_MSG_ERROR("Cannot put Event " << m_NumEvents - 1 << " to AthenaSharedMemoryTool");
@@ -1006,10 +1021,9 @@ StatusCode EventSelectorByteStream::readEvent(int maxevt) {
       }
    }
    // End of file, wait for last event to be taken
-   StatusCode sc ATLAS_THREAD_SAFE = m_eventStreamingTool->putEvent(0, 0, 0, 0); // Only called single-threaded
-   while (sc.isRecoverable()) {
+   StatusCode sc;
+   while ( (sc = putEvent_ST(*m_eventStreamingTool, 0, 0, 0, 0)).isRecoverable() ) {
       usleep(1000);
-      sc = m_eventStreamingTool->putEvent(0, 0, 0, 0);
    }
    if (!sc.isSuccess()) {
       ATH_MSG_ERROR("Cannot put last Event marker to AthenaSharedMemoryTool");
