@@ -429,8 +429,6 @@ void TrigTSerializer::serialize(const std::string &nameOfClass, const void* inst
     //inefficient - to be compatible with Serializer for the moment can be avoided later
     uint32_t pbytes;
     char *pp = (char *)&pbytes;
-    size_t nints = bufsiz/4 + 1;
-    if (bufsiz%4) nints++;
 
     for (size_t i=0; i<bufsiz/4; i++){
       pbytes = 0;
