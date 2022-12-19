@@ -13,4 +13,7 @@ def HGTD_RecoCfg(flags):
     from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeExtensionCfg
     result.merge(TrackTimeExtensionCfg(flags))
 
+    from HGTD_Config.HGTD_TrackTimeExtensionConfig import TrackTimeDefAndQualityAlgCfg
+    result.merge(TrackTimeDefAndQualityAlgCfg(flags))
+
     return result

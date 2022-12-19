@@ -42,3 +42,10 @@ def TrackTimeExtensionCfg(flags, name = "TrackTimeExtensionAlg", **kwargs):
     kwargs.setdefault("HGTDClusterContainerName", "HGTD_Clusters")
     acc.addEventAlgo(CompFactory.HGTD.TrackTimeExtensionAlg(name, **kwargs))
     return acc
+
+def TrackTimeDefAndQualityAlgCfg(flags, name = "TrackTimeDefAndQualityAlg", **kwargs):
+    """Schedules an extension algorithm from ITk to HGTD """
+    acc = ComponentAccumulator()
+
+    acc.addEventAlgo(CompFactory.HGTD.TrackTimeDefAndQualityAlg(name, **kwargs))
+    return acc
