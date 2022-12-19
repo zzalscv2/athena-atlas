@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import LHCPeriod
 
 def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
     PFTrackSelectorFactory=CompFactory.PFTrackSelector
@@ -62,8 +63,12 @@ def getPFCellLevelSubtractionTool(inputFlags,toolName):
     PFCellLevelSubtractionToolFactory = CompFactory.PFSubtractionTool
     PFCellLevelSubtractionTool = PFCellLevelSubtractionToolFactory(toolName)
 
-    eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
-    PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
+    if inputFlags.GeoModel.Run <= LHCPeriod.Run3:
+        eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
+        PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss()
+    else:
+        eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
+        PFCellLevelSubtractionTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
 
     if(inputFlags.PF.EOverPMode):
         PFCellLevelSubtractionTool.CalcEOverP = True
@@ -85,8 +90,12 @@ def getPFRecoverSplitShowersTool(inputFlags,toolName):
     PFRecoverSplitShowersToolFactory = CompFactory.PFSubtractionTool
     PFRecoverSplitShowersTool = PFRecoverSplitShowersToolFactory(toolName)
 
-    eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
-    PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
+    if inputFlags.GeoModel.Run <= LHCPeriod.Run3:
+        eflowCellEOverPTool_Run2_mc20_JetETMiss = CompFactory.eflowCellEOverPTool_Run2_mc20_JetETMiss
+        PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_Run2_mc20_JetETMiss("eflowCellEOverPTool_Run2_mc20_JetETMiss_Recover")
+    else:
+        eflowCellEOverPTool_mc12_HLLHC = CompFactory.eflowCellEOverPTool_mc12_HLLHC 
+        PFRecoverSplitShowersTool.eflowCellEOverPTool = eflowCellEOverPTool_mc12_HLLHC ()
 
     PFRecoverSplitShowersTool.RecoverSplitShowers = True
 

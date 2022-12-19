@@ -175,14 +175,8 @@ def getPFAlg(flags, clustersin, tracktype):
     assert (flags is not None), "Impossible to create PFlow HLT algorithm with empty flags"
 
     # The tool to handle cell-level subtraction, default parameters
-    if flags.Trigger.Jet.doMC20_EOverP:
-        from eflowRec.eflowRecConf import eflowCellEOverPTool_Run2_mc20_JetETMiss
-        CellEOverPTool= eflowCellEOverPTool_Run2_mc20_JetETMiss()
-    else:
-        from eflowRec.eflowRecConf import eflowCellEOverPTool_mc12_JetETMiss
-        CellEOverPTool = eflowCellEOverPTool_mc12_JetETMiss()
-
-
+    from eflowRec.eflowRecConf import eflowCellEOverPTool_Run2_mc20_JetETMiss
+    CellEOverPTool= eflowCellEOverPTool_Run2_mc20_JetETMiss()
 
     # Need a few instances of PFTrackClusterMatchingTool with different distance cuts
     def getPFMatchingTool(name, matchcut):
