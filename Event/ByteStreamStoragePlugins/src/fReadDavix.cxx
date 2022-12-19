@@ -70,6 +70,7 @@ bool fReadDavix::isEoF()
   return false;
 }
 
+// cppcheck-suppress passedByValue; interface defined in EventStorage.
 bool fReadDavix::fileExists(std::string fName) const
 {
   Davix::DavixError* err2 = NULL;
@@ -79,6 +80,7 @@ bool fReadDavix::fileExists(std::string fName) const
   return true;
 }
 
+// cppcheck-suppress passedByValue; interface defined in EventStorage.
 void fReadDavix::openFile(std::string fName)
 {
   if(this->isOpen()) this->closeFile();
