@@ -2675,7 +2675,7 @@ int main(int argc, char** argv) {
 
 	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
-	if ( atlasstyle ) ATLASLabel( xpos, ypositions[0]+deltay, atlaslabel.c_str(), kBlack, ncolsp, nrowsp );
+	if ( atlasstyle ) ATLASLabel( xpos, ypositions[0]+deltay, atlaslabel, kBlack, ncolsp, nrowsp );
 
 	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
           
