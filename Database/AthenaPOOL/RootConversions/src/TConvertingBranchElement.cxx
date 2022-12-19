@@ -118,7 +118,7 @@ std::string BasenameOfBranch (const std::string& fullname)
     s = s.substr(pos+1);
   }
   while ((pos = s.rfind('[')) != std::string::npos) {
-    s = s.substr(0, pos);
+    s.resize(pos);
   }
   return s;
 }

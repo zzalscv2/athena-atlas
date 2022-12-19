@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolCnvSvc.cxx
@@ -454,7 +454,7 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
             }
             std::string tokenStr = placementStr;
             std::string contName = strstr(placementStr, "[CONT=");
-            tokenStr = tokenStr.substr(0, tokenStr.find("[CONT="));
+            tokenStr.erase(tokenStr.find("[CONT=")); //throws if [CONT= not found
             tokenStr.append(contName, contName.find(']') + 1);
             contName = contName.substr(6, contName.find(']') - 6);
             std::string className = strstr(placementStr, "[PNAME=");
