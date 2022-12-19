@@ -77,7 +77,7 @@ void Analysis_Fake::execute(const std::vector<TIDA::Track*>& ,
   // Loop over reference tracks
   // std::vector<TIDA::Track*>::const_iterator reference, referenceEnd=referenceTracks.end();
   std::vector<TIDA::Track*>::const_iterator test, testEnd=testTracks.end();
-  for(test=testTracks.begin(); test!=testEnd; test++) {
+  for(test=testTracks.begin(); test!=testEnd; ++test) {
   
     
     // Get test parameters

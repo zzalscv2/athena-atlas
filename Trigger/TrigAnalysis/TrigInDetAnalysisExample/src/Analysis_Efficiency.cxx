@@ -76,7 +76,7 @@ void Analysis_Efficiency::execute(const std::vector<TIDA::Track*>& referenceTrac
   
   // Loop over reference tracks
   std::vector<TIDA::Track*>::const_iterator reference, referenceEnd=referenceTracks.end();
-  for(reference=referenceTracks.begin(); reference!=referenceEnd; reference++) {
+  for(reference=referenceTracks.begin(); reference!=referenceEnd; ++reference) {
     
     // Get reference parameters
     double referenceEta = (*reference)->eta();

@@ -959,7 +959,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	      
 	      std::vector<std::pair<double,double> > philims;
 	      
-	      for ( ; citr!=chains.end() ; citr++ ) {
+	      for ( ; citr!=chains.end() ; ++citr ) {
 		if ( citr->name().find("HLT_")!=std::string::npos ) { 
 		  for ( size_t ir=0 ; ir<citr->size() ; ir++ ) {
 		    TIDARoiDescriptor& roi = citr->rois()[ir].roi();

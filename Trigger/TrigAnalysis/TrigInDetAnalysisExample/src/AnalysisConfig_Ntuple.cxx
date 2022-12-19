@@ -804,7 +804,7 @@ void AnalysisConfig_Ntuple::loop() {
 	  m_provider->msg(MSG::INFO) << "xAOD Primary vertex container " << xaodVtxCollection->size() <<  " entries" << endmsg;
 
 	  xAOD::VertexContainer::const_iterator vtxitr = xaodVtxCollection->begin();
-	  for ( ; vtxitr != xaodVtxCollection->end(); vtxitr++ ) {
+	  for ( ; vtxitr != xaodVtxCollection->end(); ++vtxitr ) {
 
 	    //	    std::cout << "SUTT  xAOD::Vertex::type() " << (*vtxitr)->type() << "\tvtxtype " << (*vtxitr)->vertexType() << "\tntrax " << (*vtxitr)->nTrackParticles() << std::endl; 
 
@@ -1582,7 +1582,7 @@ void AnalysisConfig_Ntuple::loop() {
 	      
 	      std::vector<std::pair<double,double> > philims;
 	      
-	      for ( ; citr!=chains.end() ; citr++ ) {
+	      for ( ; citr!=chains.end() ; ++citr ) {
 		if ( citr->name().find("HLT_")!=std::string::npos ) { 
 		  for ( size_t ir=0 ; ir<citr->size() ; ir++ ) {
 		    TIDARoiDescriptor& roi = citr->rois()[ir].roi();

@@ -90,7 +90,7 @@ public:
     
     while ( itr!=end() ) { 
       vec.push_back( &(itr->second) ); 
-      itr++;
+      ++itr;
     }
 
     /// sort the vector 
@@ -142,7 +142,7 @@ inline std::ostream& operator<<( std::ostream& s, const lumiList& _l ) {
     
     s << "lumiList: run " << itr->first << " range: " << itr->second.first() << "\t- " << itr->second.last() << "\t : size " << itr->second.lbsize() << "\n"; 
     
-    itr++;
+    ++itr;
   }
 
   return s;

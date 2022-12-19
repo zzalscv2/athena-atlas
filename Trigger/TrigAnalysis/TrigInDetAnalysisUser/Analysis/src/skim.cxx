@@ -312,7 +312,7 @@ int main(int argc, char** argv) {
       bool skip = true;
 
       std::vector<TIDA::Chain>::iterator citr = chains.begin();
-      for ( ; citr!=chains.end() ; citr++ ) {
+      for ( ; citr!=chains.end() ; ++citr ) {
 
 	if ( citr->name().find("HLT")==std::string::npos ) continue;
 
@@ -380,7 +380,7 @@ int main(int argc, char** argv) {
 	    
 	    std::vector<std::pair<double,double> > philims;
 	    
-	    for ( ; citr!=chains.end() ; citr++ ) {
+	    for ( ; citr!=chains.end() ; ++citr ) {
 	      if ( citr->name().find("HLT_")!=std::string::npos ) { 
 		for ( size_t ir=0 ; ir<citr->size() ; ir++ ) {
 		  TIDARoiDescriptor& roi = citr->rois()[ir].roi();
