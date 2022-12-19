@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration 
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
 */
 
 
@@ -7,7 +7,7 @@
 #include "TrigT1TGC/BIS78TrigOut.h"
 #include <iostream> // will be removed
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
 TGCBIS78::TGCBIS78()
 {
@@ -42,12 +42,12 @@ const TGCBIS78& TGCBIS78::operator=(const TGCBIS78& right)
   return *this;
 }
 
-std::shared_ptr<const BIS78TrigOut> TGCBIS78::getOutput(TGCRegionType region ,int TGC_TriggerSector) const
+std::shared_ptr<const BIS78TrigOut> TGCBIS78::getOutput(LVL1TGCTrigger::TGCRegionType region ,int TGC_TriggerSector) const
 {
   std::shared_ptr<BIS78TrigOut> trigBIS78_output;
   trigBIS78_output.reset(new BIS78TrigOut());
   trigBIS78_output->clear();
-  if(region==ENDCAP){
+  if(region==LVL1TGCTrigger::ENDCAP){
     if ( TGC_TriggerSector<0 || TGC_TriggerSector>47 ) return 0;
     int BIS78_TriggerSect=(TGC_TriggerSector - 2)/6;
     if(TGC_TriggerSector < 2) BIS78_TriggerSect=7;

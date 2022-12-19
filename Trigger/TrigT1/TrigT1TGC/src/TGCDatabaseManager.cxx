@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCDatabaseManager.h"
@@ -86,10 +86,9 @@ TGCDatabaseManager::TGCDatabaseManager()
   for(int i=0; i<NumberOfRegionType; i+=1){
     m_PPToSL[i] = 0;
   }
-  for (int side=0; side<NumberOfSide; side +=1) {
+  for (int side=0; side < LVL1TGC::kNSide; side++) {
     m_mapEIFI[side] = 0;
   }
-
 }
 
 TGCDatabaseManager::TGCDatabaseManager(TGCArguments* tgcargs,
@@ -131,8 +130,8 @@ TGCDatabaseManager::TGCDatabaseManager(TGCArguments* tgcargs,
 
   // EIFI Coincidence Map
   ATH_MSG_DEBUG("start to create EIFI coincidence map.");
-  for (int side=0; side<NumberOfSide; side +=1) {
-    m_mapEIFI[side] = new TGCEIFICoincidenceMap(tgcArgs(), readCondKey, ver_EIFI, side);
+  for (int side=0; side < LVL1TGC::kNSide; side++) {
+    m_mapEIFI[side] = new LVL1TGC::TGCEIFICoincidenceMap(tgcArgs(), readCondKey, ver_EIFI, side);
   }
 
   // Big Wheel Coincidence LUT
@@ -143,7 +142,7 @@ TGCDatabaseManager::TGCDatabaseManager(TGCArguments* tgcargs,
 
   // NSW coincidence Map
   if(tgcArgs()->USE_NSW()){
-    for (int side=0; side<NumberOfSide; side +=1) {
+    for (int side=0; side < LVL1TGC::kNSide; side++) {
       for (int oct=0; oct<NumberOfOctant; oct++) {
         for(int mod=0; mod<NumberOfModuleInBW; mod++){
           // NSW Coincidence Map
@@ -155,11 +154,11 @@ TGCDatabaseManager::TGCDatabaseManager(TGCArguments* tgcargs,
     
   // BIS78 coincidence Map
   if(tgcArgs()->USE_BIS78()){
-    m_mapBIS78.reset(new TGCBIS78CoincidenceMap(tgcArgs(),ver_BIS78));
+    m_mapBIS78.reset(new LVL1TGC::TGCBIS78CoincidenceMap(tgcArgs(),ver_BIS78));
   }
 
   //Hot RoI LUT
-  m_mapGoodMF.reset(new TGCGoodMF(tgcArgs(),ver_HotRoI));
+  m_mapGoodMF.reset(new LVL1TGC::TGCGoodMF(tgcArgs(),ver_HotRoI));
 }
 
 void TGCDatabaseManager::deleteConnectionPPToSL()
@@ -172,7 +171,6 @@ void TGCDatabaseManager::deleteConnectionPPToSL()
 
 TGCDatabaseManager::~TGCDatabaseManager()
 {
-
   int i,j,k;
   for( j=0; j<NumberOfRegionType; j+=1){
     for( i=0; i<TGCSector::NumberOfPatchPanelType; i+=1){
@@ -185,7 +183,7 @@ TGCDatabaseManager::~TGCDatabaseManager()
     m_PPToSL[j]=0;
   }
 
-  for(int side=0; side<NumberOfSide; side +=1) {
+  for (int side=0; side < LVL1TGC::kNSide; side++) {
     delete m_mapEIFI[side];
   }
 }
@@ -201,8 +199,8 @@ TGCDatabaseManager::TGCDatabaseManager(const TGCDatabaseManager& right)
     }
   }
   for( int i=0; i<NumberOfRegionType; i+=1) m_PPToSL[i] = 0;
-  for (int side=0; side<NumberOfSide; side +=1) {
-    m_mapEIFI[side] =0;
+  for (int side=0; side < LVL1TGC::kNSide; side++) {
+    m_mapEIFI[side] = 0;
   }
 
   *this = right;
@@ -226,9 +224,9 @@ TGCDatabaseManager::operator=(const TGCDatabaseManager& right)
       m_PPToSL[i] = new TGCConnectionPPToSL( *right.m_PPToSL[i] );
     }
     
-    for (int side=0; side<NumberOfSide; side +=1) {
+    for (int side=0; side<LVL1TGC::kNSide; side++) {
       if (m_mapEIFI[side]!=0) delete m_mapEIFI[side];
-      m_mapEIFI[side] = new TGCEIFICoincidenceMap(*(right.m_mapEIFI[side]));
+      m_mapEIFI[side] = new LVL1TGC::TGCEIFICoincidenceMap(*(right.m_mapEIFI[side]));
     }
 
     m_patchPanelToConnectionInPP = right.m_patchPanelToConnectionInPP;

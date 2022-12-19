@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration 
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
 */
 
 
@@ -122,7 +122,7 @@ std::shared_ptr<const NSWTrigOut> TGCNSW::getOutput(TGCRegionType region ,int si
 
 void TGCNSW::setOutput(int side, int NSWTriggerProcesser, uint8_t NSWeta_8bit, uint8_t NSWphi_6bit, uint8_t NSWDtheta_5bit, bool lowRes, bool phiRes, bool NSWmonitor)
 {
-  if ( (side<0)||(side>1) ) return;//side 0::Aside 1::Cside
+  if ( (side<0)||(side>1) ) return;  //side 0::Aside 1::Cside
   if ( (NSWTriggerProcesser<0) || (NSWTriggerProcesser>=NumberOfNSWTriggerProcesser) ) return;
   m_buffer[side][NSWTriggerProcesser]->setSide(side);
   m_buffer[side][NSWTriggerProcesser]->setNSWTriggerProcessor(NSWTriggerProcesser);

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //  table of connection between High-Pt Board and Sector Logic
-#ifndef TGCConnectionHPBToSL_hh
-#define TGCConnectionHPBToSL_hh
+#ifndef TrigT1TGC_ConnectionHPBToSL_H_
+#define TrigT1TGC_ConnectionHPBToSL_H_
 
 #include "TrigT1TGC/TGCBoardConnection.h"
 #include "TrigT1TGC/TGCSector.h"
@@ -28,17 +28,16 @@ class TGCConnectionHPBToSL : public TGCBoardConnection
 };
 
 inline
-int TGCConnectionHPBToSL::getSLPortToHPB(int type, int index) const
-{
+int TGCConnectionHPBToSL::getSLPortToHPB(int type, int index) const {
   return m_SLPortToHPB[type][index];
 }
 
 inline
-void TGCConnectionHPBToSL::setSLPortToHPB(int type, int index, int port)
-{
-  if(m_SLPortToHPB[type]==0) m_SLPortToHPB[type] = new int [m_numberOfBoard[type]];
+void TGCConnectionHPBToSL::setSLPortToHPB(int type, int index, int port) {
+  if (m_SLPortToHPB[type] == 0) m_SLPortToHPB[type] = new int [m_id.at(type).size()];
   m_SLPortToHPB[type][index] = port;
 }
-} //end of namespace bracket
 
-#endif  // TGCConnectionHPBToSL_hh
+}  // end of namespace
+
+#endif  // TrigT1TGC_ConnectionHPBToSL_H_

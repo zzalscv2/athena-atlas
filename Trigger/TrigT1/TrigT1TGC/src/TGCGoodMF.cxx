@@ -1,8 +1,9 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration 
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
 */
 
 #include "TrigT1TGC/TGCGoodMF.h"
+#include "TrigT1TGC/TGCNumbering.h"
 #include "PathResolver/PathResolver.h"
 
 #include "MuonCondInterface/ITGCTriggerDbTool.h"
@@ -19,20 +20,19 @@
 #include <sstream>
 #include <string>
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
-TGCGoodMF::TGCGoodMF(TGCArguments* tgcargs,const std::string& version)
-  :m_tgcArgs(tgcargs),
-   m_verName(version)
+TGCGoodMF::TGCGoodMF(LVL1TGCTrigger::TGCArguments* tgcargs, const std::string& version)
+: AthMessaging("LVL1TGC::TGCGoodMF"),
+  m_tgcArgs(tgcargs),
+  m_verName(version)
 {
-  this->readBadMFList();
-}
+  if (this->readBadMFList()) {
+    ATH_MSG_INFO("LVL1TGC Hot-ROI mask version of " << m_verName << " is selected");
+  } else {
+    ATH_MSG_INFO("LVL1TGC Hot-ROI mask NOT defined");
+  }
 
-TGCGoodMF::TGCGoodMF(const TGCGoodMF& right)
-{
-  m_tgcArgs=right.m_tgcArgs;
-  m_verName=right.m_verName;
-  this->readBadMFList();
 }
 
 const TGCGoodMF& TGCGoodMF::operator=(const TGCGoodMF& right)
@@ -89,12 +89,11 @@ bool TGCGoodMF::test_GoodMF(int moduleId,int sscId,int RoI) const
   int badMFId = itSSC->second;
   if (badMFId==0){ return true; }
 
-  enum {N_RoIofSSC=8};  
-  std::bitset<N_RoIofSSC> bs(badMFId);
+  std::bitset<kNRoiInSSC> bs(badMFId);
 
   int RoIId;
-  if(RoI%N_RoIofSSC >= 4){ RoIId = RoI%N_RoIofSSC-4; }
-  else{ RoIId = RoI%N_RoIofSSC+4; }
+  if(RoI % kNRoiInSSC >= 4){ RoIId = RoI % kNRoiInSSC - 4; }
+  else{ RoIId = RoI % kNRoiInSSC + 4; }
   
   return !bs[RoIId];
 }

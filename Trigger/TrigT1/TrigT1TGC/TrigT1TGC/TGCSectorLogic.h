@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGGSectorLogic_hh
@@ -21,6 +21,10 @@
 
 namespace LVL1TGC {
 class TGCTileMuCoincidenceLUT;
+class TGCGoodMF;
+class TGCBIS78;
+class TGCBIS78CoincidenceMap;
+class TGCEIFICoincidenceMap;
 }
 
 namespace LVL1TGCTrigger {
@@ -31,10 +35,6 @@ class TGCHighPtChipOut;
 class TGCTMDB;
 class TGCNSW;
 class TGCNSWCoincidenceMap;
-class TGCBIS78;
-class TGCBIS78CoincidenceMap;
-class TGCGoodMF;
-class TGCEIFICoincidenceMap;
 class TGCRPhiCoincidenceOut;
 class TGCTrackSelectorOut;
 
@@ -71,7 +71,7 @@ class TGCSectorLogic
 
   void setTMDB(const TGCTMDB* tmdb);
   void setNSW(std::shared_ptr<const TGCNSW> nsw);
-  void setBIS78(std::shared_ptr<const TGCBIS78> bis78);
+  void setBIS78(std::shared_ptr<const LVL1TGC::TGCBIS78> bis78);
   void showResult();
  
   int getNumberOfSubSectorCluster() const; 
@@ -110,8 +110,9 @@ private:
   int m_bid;
 
   int m_id;
+  LVL1TGC::TGCSide m_sideId;
   int m_sectorId, m_moduleId;
-  int m_sideId, m_octantId;
+  int m_octantId;
   TGCRegionType m_region;
   int  m_NumberOfWireHighPtBoard;
 
@@ -124,14 +125,14 @@ private:
 
   // Run-3 and Run-2 Coincidence LUTs and Window maps
   TGCRPhiCoincidenceMatrix m_matrix;
-  const TGCEIFICoincidenceMap*  m_mapEIFI;
+  const LVL1TGC::TGCEIFICoincidenceMap*  m_mapEIFI;
   std::shared_ptr<const LVL1TGC::TGCTileMuCoincidenceLUT> m_tileMuLUT;
   const TGCTMDB*            m_pTMDB;
   std::shared_ptr<const TGCNSW>               m_nsw;
   std::shared_ptr<const TGCNSWCoincidenceMap> m_mapNSW;
-  std::shared_ptr<const TGCBIS78>               m_bis78;
-  std::shared_ptr<const TGCBIS78CoincidenceMap> m_mapBIS78;
-  std::shared_ptr<const TGCGoodMF>            m_mapGoodMF;
+  std::shared_ptr<const LVL1TGC::TGCBIS78>    m_bis78;
+  std::shared_ptr<const LVL1TGC::TGCBIS78CoincidenceMap> m_mapBIS78;
+  std::shared_ptr<const LVL1TGC::TGCGoodMF> m_mapGoodMF;
 
   TGCTrackSelector m_trackSelector;
   std::shared_ptr<TGCTrackSelectorOut> m_trackSelectorOut;
@@ -152,15 +153,13 @@ private:
 inline
  int TGCSectorLogic::getNumberOfSubSectorCluster() const
 {
-  if (m_region==FORWARD) return 8;
-  else  return 19;
+  return (m_region == FORWARD) ? 8 : LVL1TGC::kNMaxSSC;
 }
 
 inline
  int TGCSectorLogic::getNumberOfSubSector() const
 {
-  if (m_region==FORWARD) return 8*8;
-  else  return (18*8+4);
+  return (m_region==FORWARD) ? 8 * LVL1TGC::kNRoiInSSC : LVL1TGC::kNumberOfEndcapRoI;
 }
 
 inline

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCSector_h
@@ -46,8 +46,8 @@ class TGCSector
 	    TGCForwardBackwardType forwardBackward, 
 	    const TGCDatabaseManager* db,
 	    const TGCTMDB*            tmdb,
-	    std::shared_ptr<const TGCNSW>             nsw,
-            std::shared_ptr<const TGCBIS78>           bis78
+	    std::shared_ptr<const TGCNSW>            nsw,
+            std::shared_ptr<const LVL1TGC::TGCBIS78> bis78
 	    );
 
   TGCSector();
@@ -87,7 +87,7 @@ class TGCSector
 private:
   const TGCTMDB* getTMDB() const { return m_TMDB; }
   std::shared_ptr<const TGCNSW>   getNSW() const{ return m_NSW; }
-  std::shared_ptr<const TGCBIS78>   getBIS78() const{ return m_BIS78; }
+  std::shared_ptr<const LVL1TGC::TGCBIS78> getBIS78() const{ return m_BIS78; }
  
   int getPatchPanelType(TGCSignalType signal, int layer) const;
 
@@ -122,7 +122,7 @@ private:
   TGCSectorLogic* m_SL;
   const TGCTMDB* m_TMDB;
   std::shared_ptr<const TGCNSW>  m_NSW;
-  std::shared_ptr<const TGCBIS78>  m_BIS78;
+  std::shared_ptr<const LVL1TGC::TGCBIS78>  m_BIS78;
 
   TGCArguments* m_tgcArgs;
   const TGCDatabaseManager* m_dbMgr;

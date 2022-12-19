@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCSSCControllerOut_hh
@@ -30,10 +30,10 @@ class TGCSSCControllerOut
   int getDPhi(int ssc, int phipos, bool ored=false) const;
   int getPtPhi(int ssc, int phipos, bool ored=false) const;
 
-  void setR(int ssc, int rIn);
-  void setDR(int ssc, int dRIn);
-  void setPtR(int ssc, int ptLvl);
-  void setHitR(int ssc, bool hit);
+  void setR(unsigned int ssc, int rIn);
+  void setDR(unsigned int ssc, int dRIn);
+  void setPtR(unsigned int ssc, int ptLvl);
+  void setHitR(unsigned int ssc, bool hit);
 
   void setPhi(int chamberNo, int phiPos, int phiIn);
   void setDPhi(int chamberNo, int phiPos, int dPhiIn);
@@ -48,12 +48,11 @@ class TGCSSCControllerOut
   void print() const; 
 
 protected:
-  enum {MaxNumberOfSubSectorCluster = 19};
   int getChamberNumber(int ssc) const;
   int getNumberOfChamberInR() const;
   int getNumberOfSubSectorCluster() const;
 private:
-  static const int s_chamber[TotalNumTGCRegionType][MaxNumberOfSubSectorCluster];
+  static const int s_chamber[TotalNumTGCRegionType][LVL1TGC::kNMaxSSC];
   
   TGCRegionType m_regionType;
 
@@ -62,10 +61,10 @@ private:
   int m_ptPhi[MaxNumberOfChamberInR][MaxNumberOfPhiInSSC];
   bool m_hitPhi[MaxNumberOfChamberInR][MaxNumberOfPhiInSSC];
 
-  int m_r[MaxNumberOfSubSectorCluster];
-  int m_dR[MaxNumberOfSubSectorCluster];
-  int m_ptR[MaxNumberOfSubSectorCluster];
-  bool m_hitR[MaxNumberOfSubSectorCluster];
+  int m_r[LVL1TGC::kNMaxSSC];
+  int m_dR[LVL1TGC::kNMaxSSC];
+  int m_ptR[LVL1TGC::kNMaxSSC];
+  bool m_hitR[LVL1TGC::kNMaxSSC];
 };
   
 inline
@@ -118,8 +117,7 @@ inline
 inline
  int TGCSSCControllerOut::getNumberOfSubSectorCluster() const
 {
-  if (m_regionType==FORWARD) return 8;
-  else  return 19;
+  return (m_regionType==FORWARD) ? 8 : LVL1TGC::kNMaxSSC;
 }
 inline
  int TGCSSCControllerOut::getR(int ssc) const 
@@ -193,42 +191,42 @@ inline
 }
 
 inline
-  void TGCSSCControllerOut::setR(int ssc, int rIn)
+  void TGCSSCControllerOut::setR(unsigned int ssc, int rIn)
 {
-  if((0 <= ssc)&&(ssc < MaxNumberOfSubSectorCluster)){
+  if (ssc < LVL1TGC::kNMaxSSC){
     m_r[ssc]=rIn; 
   }else{
-    std::cerr << "internal error in TGCSSCControllerOut::setR() sscid:" << ssc << " 0 < SSCId < " << MaxNumberOfSubSectorCluster << std::endl;
+    std::cerr << "internal error in TGCSSCControllerOut::setR() sscid:" << ssc << " 0 < SSCId < " << LVL1TGC::kNMaxSSC << std::endl;
   }
 }
 
 inline
-  void TGCSSCControllerOut::setDR(int ssc, int dRIn)
+  void TGCSSCControllerOut::setDR(unsigned int ssc, int dRIn)
 {
-  if((0 <= ssc)&&(ssc < MaxNumberOfSubSectorCluster)){
+  if (ssc < LVL1TGC::kNMaxSSC) {
     m_dR[ssc]=dRIn; 
-  }else{
-    std::cerr << "internal error in TGCSSCControllerOut::setDR() sscid:" << ssc << " 0 < SSCId < " << MaxNumberOfSubSectorCluster << std::endl;
+  } else {
+    std::cerr << "internal error in TGCSSCControllerOut::setDR() sscid:" << ssc << " 0 < SSCId < " << LVL1TGC::kNMaxSSC << std::endl;
   }
 }
 
 inline
-  void TGCSSCControllerOut::setPtR(int ssc, int ptLvl)
+  void TGCSSCControllerOut::setPtR(unsigned int ssc, int ptLvl)
 { 
-  if((0 <= ssc)&&(ssc < MaxNumberOfSubSectorCluster)){
-    m_ptR[ssc]=ptLvl; 
-  }else{
-    std::cerr << "internal error in TGCSSCControllerOut::setPtR() sscid:" << ssc << " 0 < SSCId < " << MaxNumberOfSubSectorCluster << std::endl;
+  if (ssc < LVL1TGC::kNMaxSSC) {
+    m_ptR[ssc] = ptLvl; 
+  } else{
+    std::cerr << "internal error in TGCSSCControllerOut::setPtR() sscid:" << ssc << " 0 < SSCId < " << LVL1TGC::kNMaxSSC << std::endl;
   }
 }
 
 inline
-  void TGCSSCControllerOut::setHitR(int ssc, bool hit)
+  void TGCSSCControllerOut::setHitR(unsigned int ssc, bool hit)
 {
-  if((0 <= ssc)&&(ssc < MaxNumberOfSubSectorCluster)){
+  if (ssc < LVL1TGC::kNMaxSSC) {
     m_hitR[ssc]=hit; 
-  }else{
-    std::cerr << "internal error in TGCSSCControllerOut::setHitR() sscid:" << ssc << " 0 < SSCId < " << MaxNumberOfSubSectorCluster << std::endl;
+  } else {
+    std::cerr << "internal error in TGCSSCControllerOut::setHitR() sscid:" << ssc << " 0 < SSCId < " << LVL1TGC::kNMaxSSC << std::endl;
   }
 }
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCElectronicsSystem.h"
@@ -24,8 +24,8 @@ void TGCElectronicsSystem::distributeSignal(LVL1TGCTrigger::TGCEvent* event)
     int octant = asd->GetTGCReadoutIndex().GetOctantNumber();
     int module = asd->GetTGCReadoutIndex().GetModuleNumber();
 
-    if(getSector(side, octant, module)){
-      if(side < NumberOfSide && octant < NumberOfOctant) 
+    if (getSector(side, octant, module)) {
+      if (side < LVL1TGC::kNSide && octant < NumberOfOctant) 
         getSector(side, octant, module)->distributeSignal(asd);
     }
     asd = 0;
@@ -40,9 +40,9 @@ TGCElectronicsSystem::TGCElectronicsSystem()
    m_bis78(0),
    m_tgcArgs(nullptr)
 {
-  for(int side=0; side < NumberOfSide; side++){
-    for(int oct=0; oct < NumberOfOctant; oct++){
-      for(int mod=0; mod < NumberOfModule; mod++){
+  for (int side=0; side < LVL1TGC::kNSide; side++) {
+    for (int oct=0; oct < NumberOfOctant; oct++) {
+      for (int mod=0; mod < NumberOfModule; mod++) {
         m_sector[side][oct][mod]=0;
       } // loop module
     } // loop octant
@@ -68,13 +68,13 @@ TGCElectronicsSystem::TGCElectronicsSystem(TGCArguments* tgcargs,
 
   // RPC BIS78
   if(tgcargs->USE_BIS78()){
-    m_bis78.reset(new TGCBIS78());
+    m_bis78.reset(new LVL1TGC::TGCBIS78());
   }
 
   int SectorId;
   LVL1TGCTrigger::TGCRegionType RegionType;
   LVL1TGCTrigger::TGCForwardBackwardType forwardBackward;
-  for(int side=0; side < NumberOfSide; side++){
+  for (int side=0; side < LVL1TGC::kNSide; side++) {
     for(int oct=0; oct < NumberOfOctant; oct++){
       for(int mod=0; mod < NumberOfModule; mod++){
         SectorId   = getSectorId(side,oct,mod);
@@ -192,15 +192,14 @@ TGCSector* TGCElectronicsSystem::getSector(LVL1TGCTrigger::TGCReadoutIndex index
 
 TGCElectronicsSystem::~TGCElectronicsSystem()
 {
-  int i,j,k;
-  for( i=0; i<NumberOfSide; i+=1){
-    for( j=0; j<NumberOfOctant; j+=1){
-      for( k=0; k<NumberOfModule; k+=1){
+  for (int i=0; i < LVL1TGC::kNSide; i++) {
+    for (int j=0; j < NumberOfOctant; j++) {
+      for (int k=0; k < NumberOfModule; k++) {
         if(m_sector[i][j][k]!=0) delete m_sector[i][j][k];
         m_sector[i][j][k]=0;
-      } // loop module
-    } // loop octant
-  } // loop side
+      }  // loop module
+    }  // loop octant
+  }  // loop side
 
   if (m_tmdb){ delete m_tmdb;}
 }
@@ -209,10 +208,10 @@ TGCElectronicsSystem::~TGCElectronicsSystem()
 TGCElectronicsSystem::TGCElectronicsSystem(const TGCElectronicsSystem& )
   : m_DB(0), m_tmdb(0)
 {
-  for( int i=0; i<NumberOfSide; i+=1){
-    for( int j=0; j<NumberOfOctant; j+=1) {
-      for( int k=0; k<NumberOfModule; k+=1){
-        m_sector[i][j][k]=0;
+  for (int i=0; i < LVL1TGC::kNSide; i++) {
+    for (int j=0; j<NumberOfOctant; j++) {
+      for (int k=0; k<NumberOfModule; k++) {
+        m_sector[i][j][k] = 0;
       } // loop module
     } // loop octant
   } // loop side

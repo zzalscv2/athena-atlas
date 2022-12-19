@@ -1,12 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// ====================================================================
-/*
-        TGCNSW.h
-*/
-// ====================================================================
 #ifndef TGC_NSW_H
 #define TGC_NSW_H
 
@@ -19,14 +14,8 @@ namespace LVL1TGCTrigger {
 
 class NSWTrigOut;
 
-// ====================================================================
-//
-// class definition
-//
-// ====================================================================
- 
 class TGCNSW{
-public:
+ public:
   TGCNSW();
   virtual ~TGCNSW();
  
@@ -45,10 +34,8 @@ public:
   int   getNumberOfNSWTriggerProcesser() const { return NumberOfNSWTriggerProcesser; };   
 
   void print() const;
-  enum { Aside=0 , Cside=1 };
-  protected:
-  std::shared_ptr<NSWTrigOut> m_buffer[2][NumberOfNSWTriggerProcesser];//buffer[Aside or Cside][NSW Trigger Processor]
-
+ protected:
+  std::shared_ptr<NSWTrigOut> m_buffer[LVL1TGC::TGCSide::kNSide][NumberOfNSWTriggerProcesser];  // buffer[Side][NSW TP]
 };
 
 
