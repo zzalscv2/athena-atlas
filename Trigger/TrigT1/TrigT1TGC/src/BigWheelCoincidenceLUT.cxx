@@ -95,8 +95,8 @@ bool BigWheelCoincidenceLUT::readMap()
   const uint8_t kNMODULETYPE = 12;
   const uint8_t modulenumber[kNMODULETYPE] = {0, 1, 2, 2, 3, 4, 5, 5, 6, 7, 8, 8};
   const std::string modulename[kNMODULETYPE] = {"0a","1a","2a","2b","3a","4a","5a","5b","6a","7a","8a","8b"};
-  const std::string sidename[kNSide] = {"a","c"};
-  const std::string capitalsidename [kNSide] = {"A", "C"};
+  const std::string sidename[TGCSide::kNSide] = {"a","c"};
+  const std::string capitalsidename[TGCSide::kNSide] = {"A", "C"};
 
   const std::string octantName[kNOctant] =
     {  "0", "1", "2", "3", "4", "5", "6", "7"};
@@ -126,7 +126,7 @@ bool BigWheelCoincidenceLUT::readMap()
     }
   }
 
-  const uint8_t num_sides = (m_fullCW) ? kNSide : 1;
+  const uint8_t num_sides = (m_fullCW) ? TGCSide::kNSide : 1;
   const uint8_t num_octants = (m_fullCW) ? kNOctant : 1;
 
   for (uint8_t iside=0; iside < num_sides; iside++) {

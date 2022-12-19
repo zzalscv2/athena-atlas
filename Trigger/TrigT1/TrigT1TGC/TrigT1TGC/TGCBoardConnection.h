@@ -1,57 +1,53 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TGCBoardConnection_hh
-#define TGCBoardConnection_hh
+#ifndef TrigT1TGC_BoardConnection_H_
+#define TrigT1TGC_BoardConnection_H_
 
+#include <vector>
 #include <iostream>
 
 namespace LVL1TGCTrigger {
 
 class TGCBoardConnection {
  public:
-  inline int getNumberOfType() const { return m_nType; }
-  int getNumber(int ntype) const;
-  int getId(int type, int board) const;
-
-  void setNumberOfType(int ntype);
-  void setNumber(int type, int nBoard);
-  void setId(int type, int board, int idIn);
+  TGCBoardConnection();
+  virtual ~TGCBoardConnection();
 
   TGCBoardConnection(const TGCBoardConnection& right);
-  TGCBoardConnection& operator=(const TGCBoardConnection& right);
+  TGCBoardConnection& operator = (const TGCBoardConnection& right);
 
-  TGCBoardConnection();
-  virtual ~TGCBoardConnection();  
+  inline int getNumberOfType() const { return m_id.size(); }
+  int getNumber(const unsigned int type) const;
+  int getId(const unsigned int type, const unsigned int board) const;
+
+  void setNumberOfType(int ntype);
+  void setNumber(const unsigned int type, int nBoard);
+  void setId(const unsigned int type, const unsigned int board, int idIn);
 
  protected:
-  int m_nType;
-  int* m_numberOfBoard;
-  int** m_id;
+  std::vector<std::vector<int>> m_id;   // [type][board]
 };
 
-inline int TGCBoardConnection::getNumber(int type) const
-{
-  if(m_numberOfBoard==0) {
-    std::cerr << "TGCBoardConnection::getNumber : numberOfBoard is zero" << std::endl;  
+inline int TGCBoardConnection::getNumber(const unsigned int type) const {
+  if (m_id.size() <= type) {
+    std::cerr << "TGCBoardConnection::getNumber : No defined type provided" << std::endl;
     return -1;
   }
-  return m_numberOfBoard[type];
+  return m_id.at(type).size();
 }
 
-inline
-int TGCBoardConnection::getId(int type, int board) const
-{
-  if(m_id!=0)
-    return m_id[type][board];
-  else { 
-    std::cerr << "TGCBoardConnection::getId: id is zero" << std::endl;  
-    return -1; 
-  } 
+inline int TGCBoardConnection::getId(const unsigned int type, const unsigned int board) const {
+  if (m_id.size() <= type ||
+      m_id.at(type).size() <= board) {
+    std::cerr << "TGCBoardConnection::getId : Undefined board is provided" << std::endl;
+    return -1;
+  }
+  return m_id.at(type).at(board);
 }
 
 
 } //end of namespace bracket
 
-#endif // TGCBoardConnection_hh
+#endif  // TrigT1TGC_BoardConnection_H_

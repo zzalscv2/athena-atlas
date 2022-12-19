@@ -282,7 +282,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
     m_innerTrackletSlotHolder.clearTriggerBits();
     
     // PatchPanel, SlaveBoard
-    for( int i=0; i<m_system->getNumberOfSide(); i+=1){ // i=0:Z>0(A) , i=1:Z<0(C)
+    for (LVL1TGC::TGCSide i : {LVL1TGC::TGCSide::ASIDE, LVL1TGC::TGCSide::CSIDE}) {
       for( int j=0; j<m_system->getNumberOfOctant(); j+=1){
         for( int k=0; k<m_system->getNumberOfModule(); k+=1){
           TGCSector* sector = m_system->getSector(i,j,k);
@@ -300,7 +300,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
     // HighPtBoard, SectorLogic
     const int muctpiBcId_offset = TgcDigit::BC_CURRENT;
     int muctpiBcId = m_bctagInProcess - muctpiBcId_offset;
-    for(int i=0; i<m_system->getNumberOfSide(); i+=1){
+    for(int i=0; i< LVL1TGC::kNSide; i++) {
       int sectoraddr_endcap = 0;
       int sectoraddr_forward = 0;
       for(int j=0; j<m_system->getNumberOfOctant(); j+=1){
@@ -919,8 +919,8 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
 
     // RPC BIS78
     if ( m_USEBIS78 ) {
-      std::shared_ptr<TGCBIS78> bis78 = m_system->getBIS78();
-      std::shared_ptr<const BIS78TrigOut> bis78_trigout = bis78->getOutput(region, sectorId);
+      std::shared_ptr<LVL1TGC::TGCBIS78> bis78 = m_system->getBIS78();
+      std::shared_ptr<const LVL1TGC::BIS78TrigOut> bis78_trigout = bis78->getOutput(region, sectorId);
       for ( int icand=0; icand<(int)bis78_trigout->getBIS78eta().size(); icand++ ){
         std::unique_ptr<TgcRawData> rawdata_bis78 (new TgcRawData(bcTag,
                                                                       static_cast<uint16_t>(subDetectorId),
@@ -1426,7 +1426,7 @@ StatusCode LVL1TGCTrigger::fillNSW(){
 StatusCode LVL1TGCTrigger::fillBIS78(){
     ATH_MSG_DEBUG("fillBIS78");
     StatusCode sc = StatusCode::SUCCESS;
-    std::shared_ptr<TGCBIS78> bis78 = m_system->getBIS78();
+    std::shared_ptr<LVL1TGC::TGCBIS78> bis78 = m_system->getBIS78();
     bis78->eraseOutput();
 
     //The following part will be available when RPC BIS78 Trigger Output is available.

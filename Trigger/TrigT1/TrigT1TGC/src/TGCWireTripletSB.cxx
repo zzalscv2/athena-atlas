@@ -53,58 +53,44 @@ void TGCWireTripletSB::doCoincidence()
   pattern[0] = m_patchPanelOut->getHitPattern(0);
   pattern[1] = m_patchPanelOut->getHitPattern(1);
   
-  if(pattern[1]!=0){ // necessary for 2/3 coincidence. 
-
-    int length=pattern[1]->getLength();
-    int unitLength=length/2;
-    int totalLength=3*unitLength;
+  if(pattern[1] != 0) {  // necessary for 2/3 coincidence. 
+    const int unitLength = pattern[1]->getLength() / 2;
+    const int totalLength = 3 * unitLength;
 
     m_lengthOfCoincidenceOut = s_LengthOfWTSBCoincidenceOut;
-    if( m_coincidenceOut!=0 ) delete m_coincidenceOut;
+    if (m_coincidenceOut != 0) delete m_coincidenceOut;
     m_coincidenceOut = new TGCHitPattern(m_lengthOfCoincidenceOut);
 
     // rearrange bit pattern for coincidence.
-    bool* b = new bool [totalLength];
-    int i;
-    for( i=0; i<unitLength; i+=1){
-      if(pattern[0]!=0){
+    std::vector<bool> b(totalLength);
+    for (int i=0; i < unitLength; i++) {
+      if (pattern[0] != 0) {
         b[3*i] = pattern[0]->getChannel(i+unitLength); //layer0(smallest in eta)
-      }else{
+      } else {
         b[3*i] = 0;
       }
-      if(pattern[1]!=0){
+      if (pattern[1] != 0) {
         b[3*i+1] = pattern[1]->getChannel(i); // layer1 
         b[3*i+2] = pattern[1]->getChannel(i+unitLength); //layer2
-      }else{
+      } else {
         b[3*i+1] = 0;
         b[3*i+2] = 0;
       }
     }
 
     // perform 2/3 coincidence
-    // bug fixed (KH 19/01/01) 
-    bool* out = new bool [totalLength];
-    for( i=0; i<totalLength-8; i++){
-      out[i] = ( b[i+3] & b[i+5] & !b[i+1] & !b[i+7] ) |
-	  ( b[i+3] & b[i+4] & !b[i+2] ) |
-	  ( b[i+4] & b[i+5] & !b[i+6] ) |
-	  ( b[i+6] & b[i+2] &  b[i+4] & !b[i+3] & !b[i+5] & !b[i+1] & !b[i+7]);
+    std::vector<bool> output(totalLength);
+    for (int i=0; i < totalLength-8; i++) {
+      output[i] = (b[i+3] & b[i+5] & !b[i+1] & !b[i+7]) |
+                  (b[i+3] & b[i+4] & !b[i+2]) |
+                  (b[i+4] & b[i+5] & !b[i+6]) |
+                  (b[i+6] & b[i+2] &  b[i+4] & !b[i+3] & !b[i+5] & !b[i+1] & !b[i+7]);
     }
-#ifdef TGCCOUT
-    std::cout << "WireTripletSB OUT" << std::endl;
-    for( i=0; i<totalLength-8; i+=1){
-        std::cout << out[i];
-        if(i==totalLength/3-1 || i==2*totalLength/3-1){std::cout << "\n";}
-    }
-    std::cout << std::endl;
-#endif
-    //    int base=(totalLength-m_lengthOfCoincidenceOut)/2;
-    int base = 0;
-    for( i=0; i<m_lengthOfCoincidenceOut; i+=1)
-      m_coincidenceOut->setChannel(i,out[i+base]);
 
-    delete [] b;
-    delete [] out;
+    int base = 0;
+    for (int i=0; i<m_lengthOfCoincidenceOut; i++) {
+      m_coincidenceOut->setChannel(i, output[i+base]);
+    }
   }
 }
 

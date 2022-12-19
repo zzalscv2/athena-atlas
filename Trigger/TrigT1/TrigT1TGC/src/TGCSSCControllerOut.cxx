@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSSCControllerOut.h"
@@ -7,7 +7,7 @@
 
 namespace LVL1TGCTrigger {
 
-const int TGCSSCControllerOut::s_chamber[TotalNumTGCRegionType][TGCSSCControllerOut::MaxNumberOfSubSectorCluster]
+const int TGCSSCControllerOut::s_chamber[TotalNumTGCRegionType][LVL1TGC::kNMaxSSC]
  = {{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, 
     { 0, 0, 0, 1, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4 } 
    }; 
@@ -24,7 +24,7 @@ TGCSSCControllerOut::TGCSSCControllerOut(TGCRegionType region):
     }
   }
 
-  for (int i=0; i<MaxNumberOfSubSectorCluster; i++ ){
+  for (size_t i=0; i < LVL1TGC::kNMaxSSC; i++ ){
     m_r[i]    = 0;
     m_dR[i]   = 0;
     m_ptR[i]  = 0; 
@@ -34,7 +34,7 @@ TGCSSCControllerOut::TGCSSCControllerOut(TGCRegionType region):
 
 bool TGCSSCControllerOut::hasHit(int ssc, bool ored) const
 {
-  for(int phiposInSSC = 0 ;phiposInSSC < MaxNumberOfPhiInSSC; phiposInSSC++){
+  for(int phiposInSSC = 0; phiposInSSC < MaxNumberOfPhiInSSC; phiposInSSC++){
     if(!ored){
       if(m_hitR[ssc]&&m_hitPhi[getChamberNumber(ssc)][phiposInSSC]) return true;
     } else if(hasChamberBoundary(ssc)){

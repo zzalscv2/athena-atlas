@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCConnectionHPBToSL.h"
-#include "TrigT1TGC/TGCBoardConnection.h"
 
 namespace LVL1TGCTrigger {
 
@@ -20,19 +19,18 @@ TGCConnectionHPBToSL::TGCConnectionHPBToSL(const TGCConnectionHPBToSL& right)
 {
   for(int j=0; j<TGCSector::NumberOfHighPtBoardType; j++) {
     if(m_SLPortToHPB[j]!=0) delete [] m_SLPortToHPB[j];
-    m_SLPortToHPB[j] = new int [m_numberOfBoard[j]];
+    m_SLPortToHPB[j] = new int [m_id.at(j).size()];
 
-    for(int k=0; k<m_numberOfBoard[j]; k++) m_SLPortToHPB[j][k] = right.m_SLPortToHPB[j][k];
+    for (unsigned int k=0; k < m_id.at(j).size(); k++) m_SLPortToHPB[j][k] = right.m_SLPortToHPB[j][k];
   }
 }
 
 
 TGCConnectionHPBToSL::~TGCConnectionHPBToSL()
 {
-  int j;
-  for( j=0; j<TGCSector::NumberOfHighPtBoardType; j+=1){
-      if(m_SLPortToHPB[j]!=0) delete [] m_SLPortToHPB[j];
-      m_SLPortToHPB[j]=0;
+  for(int j=0; j<TGCSector::NumberOfHighPtBoardType; j++) {
+    if(m_SLPortToHPB[j]!=0) delete [] m_SLPortToHPB[j];
+    m_SLPortToHPB[j]=0;
   }
 }
 
@@ -40,11 +38,10 @@ TGCConnectionHPBToSL& TGCConnectionHPBToSL::operator=(const TGCConnectionHPBToSL
 {
   if(this!=&right){
     TGCBoardConnection::operator=(right); // call base class assignment operator
-    int j,k;
-    for( j=0; j<TGCSector::NumberOfHighPtBoardType; j+=1){
+    for(int j=0; j<TGCSector::NumberOfHighPtBoardType; j+=1){
       if(m_SLPortToHPB[j]!=0) delete [] m_SLPortToHPB[j];
-      m_SLPortToHPB[j] = new int [m_numberOfBoard[j]]; 
-      for( k=0; k<m_numberOfBoard[j]; k+=1)
+      m_SLPortToHPB[j] = new int [m_id.at(j).size()]; 
+      for (unsigned int k=0; k < m_id.at(j).size(); k++)
 	m_SLPortToHPB[j][k] = right.m_SLPortToHPB[j][k];
     }
   }

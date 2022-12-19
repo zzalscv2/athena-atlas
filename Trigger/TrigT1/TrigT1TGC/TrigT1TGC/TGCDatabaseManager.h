@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGCDatabaseManager_hh
@@ -21,6 +21,9 @@
 namespace LVL1TGC {
 class BigWheelCoincidenceLUT;
 class TGCTileMuCoincidenceLUT;
+class TGCGoodMF;
+class TGCBIS78CoincidenceMap;
+class TGCEIFICoincidenceMap;
 }
 
 namespace LVL1TGCTrigger {
@@ -30,10 +33,7 @@ class TGCConnectionASDToPP;
 class TGCConnectionInPP;
 class TGCPatchPanel;
 class TGCConnectionPPToSL;
-class TGCEIFICoincidenceMap;
 class TGCNSWCoincidenceMap;
-class TGCBIS78CoincidenceMap;
-class TGCGoodMF;
 
 class TGCDatabaseManager : public AthMessaging
 {
@@ -53,11 +53,11 @@ class TGCDatabaseManager : public AthMessaging
   const TGCConnectionPPToSL* getConnectionPPToSL(TGCRegionType type) const;
   const TGCConnectionASDToPP* getConnectionASDToPP(TGCRegionType region, int type, TGCForwardBackwardType forwardBackward) const;
   std::shared_ptr<LVL1TGC::BigWheelCoincidenceLUT> getBigWheelCoincidenceLUT() const;
-  const TGCEIFICoincidenceMap* getEIFICoincidenceMap(int sideId) const;
+  const LVL1TGC::TGCEIFICoincidenceMap* getEIFICoincidenceMap(int sideId) const;
   std::shared_ptr<LVL1TGC::TGCTileMuCoincidenceLUT> getTileMuCoincidenceLUT() const;
   std::shared_ptr<TGCNSWCoincidenceMap> getNSWCoincidenceMap(int sideId, int octantId, int moduleId) const;
-  std::shared_ptr<TGCBIS78CoincidenceMap> getBIS78CoincidenceMap() const;
-  std::shared_ptr<TGCGoodMF> getGoodMFMap() const;
+  std::shared_ptr<LVL1TGC::TGCBIS78CoincidenceMap> getBIS78CoincidenceMap() const;
+  std::shared_ptr<LVL1TGC::TGCGoodMF> getGoodMFMap() const;
 
   TGCConnectionInPP* getConnectionInPP(TGCPatchPanel* patchPanel) const;
   void addConnectionInPP(const TGCPatchPanel* patchPanel, const TGCConnectionInPP* connectionInPP);
@@ -74,13 +74,13 @@ class TGCDatabaseManager : public AthMessaging
   enum {NumberOfModuleInBW=9};
 
   std::shared_ptr<LVL1TGC::BigWheelCoincidenceLUT> m_bigWheelLUT;
-  TGCEIFICoincidenceMap* m_mapEIFI[NumberOfSide];
+  LVL1TGC::TGCEIFICoincidenceMap* m_mapEIFI[LVL1TGC::kNSide];
   std::shared_ptr<LVL1TGC::TGCTileMuCoincidenceLUT> m_tileMuLUT;
-  std::array<std::array<std::array<std::shared_ptr<TGCNSWCoincidenceMap>, NumberOfModuleInBW>, NumberOfOctant>, NumberOfSide> m_mapNSW;
-  std::shared_ptr<TGCBIS78CoincidenceMap> m_mapBIS78; // temporal
+  std::array<std::array<std::array<std::shared_ptr<TGCNSWCoincidenceMap>, NumberOfModuleInBW>, NumberOfOctant>, LVL1TGC::kNSide> m_mapNSW;
+  std::shared_ptr<LVL1TGC::TGCBIS78CoincidenceMap> m_mapBIS78; // temporal
   TGCConnectionPPToSL* m_PPToSL[NumberOfRegionType];
   TGCConnectionASDToPP* m_ASDToPP[NumberOfRegionType][TGCSector::NumberOfPatchPanelType][TotalNumForwardBackwardType];
-  std::shared_ptr<TGCGoodMF> m_mapGoodMF;
+  std::shared_ptr<LVL1TGC::TGCGoodMF> m_mapGoodMF;
 
   std::map<PatchPanelIDs, std::pair<const TGCConnectionInPP, PatchPanelPointers> > m_patchPanelToConnectionInPP;
   
@@ -92,7 +92,7 @@ inline std::shared_ptr<LVL1TGC::BigWheelCoincidenceLUT> TGCDatabaseManager::getB
   return m_bigWheelLUT;
 }
 
-inline const TGCEIFICoincidenceMap* TGCDatabaseManager::getEIFICoincidenceMap(int sideId) const
+inline const LVL1TGC::TGCEIFICoincidenceMap* TGCDatabaseManager::getEIFICoincidenceMap(int sideId) const
 {
   return m_mapEIFI[sideId];
 }
@@ -107,12 +107,12 @@ inline std::shared_ptr<TGCNSWCoincidenceMap> TGCDatabaseManager::getNSWCoinciden
   return m_mapNSW[sideId][octantId][moduleId];
 }
 
-inline std::shared_ptr<TGCBIS78CoincidenceMap> TGCDatabaseManager::getBIS78CoincidenceMap() const
+inline std::shared_ptr<LVL1TGC::TGCBIS78CoincidenceMap> TGCDatabaseManager::getBIS78CoincidenceMap() const
 {
   return m_mapBIS78;
 }
 
-inline std::shared_ptr<TGCGoodMF> TGCDatabaseManager::getGoodMFMap() const {
+inline std::shared_ptr<LVL1TGC::TGCGoodMF> TGCDatabaseManager::getGoodMFMap() const {
   return m_mapGoodMF;
 }
 

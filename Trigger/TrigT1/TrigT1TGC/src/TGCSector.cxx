@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCSector.h"
@@ -117,7 +117,7 @@ TGCSector::TGCSector(TGCArguments* tgcargs,
 		     const TGCDatabaseManager* db,
 		     const TGCTMDB*            tm,
 		     std::shared_ptr<const TGCNSW>  nsw,
-		     std::shared_ptr<const TGCBIS78>  bis78)
+		     std::shared_ptr<const LVL1TGC::TGCBIS78>  bis78)
  : m_id(idIn), m_regionType(type), m_numberOfHit(0),
    m_TMDB(tm), m_NSW(nsw), m_BIS78(bis78),
    m_tgcArgs(tgcargs), m_dbMgr(db)

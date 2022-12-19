@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCTileMuCoincidenceLUT.h"
@@ -85,10 +85,10 @@ bool TGCTileMuCoincidenceLUT::readMap()
 
   std::ifstream file(fullName.c_str(),std::ios::in);    
 
-  enum{BufferSize=1024};
+  static constexpr unsigned int BufferSize = 256;
   char buf[BufferSize];
 
-  while(file.getline(buf,BufferSize)) {
+  while (file.getline(buf, BufferSize)) {
 
     int16_t sideId = -1;
     int16_t sectorId = -1;

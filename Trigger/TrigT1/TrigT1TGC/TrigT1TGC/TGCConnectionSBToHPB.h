@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //  Table of connection between Slave Board and High-Pt Board.
-#ifndef TGCConnectionSBToHPB_hh
-#define TGCConnectionSBToHPB_hh
+#ifndef TrigT1TGC_ConnectionSBToHPB_H_
+#define TrigT1TGC_ConnectionSBToHPB_H_
 
 #include "TrigT1TGC/TGCBoardConnection.h"
 #include "TrigT1TGC/TGCNumbering.h"
@@ -12,7 +12,7 @@
 namespace LVL1TGCTrigger {
 
 class TGCConnectionSBToHPB : public TGCBoardConnection {
-public:
+ public:
   int getHPBPortToSB(int type, int index) const;
   void setHPBPortToSB(int type, int index, int port);
 
@@ -24,37 +24,33 @@ public:
   TGCConnectionSBToHPB(const TGCConnectionSBToHPB& right);
   TGCConnectionSBToHPB& operator=(const TGCConnectionSBToHPB& right);
 
-private:
+ private:
   int* m_HPBPortToSB[NumberOfSlaveBoardType];
   int* m_HPBIdToSB[NumberOfSlaveBoardType];
 };
 
 inline
-int TGCConnectionSBToHPB::getHPBPortToSB(int type, int index) const
-{
+int TGCConnectionSBToHPB::getHPBPortToSB(int type, int index) const {
   return m_HPBPortToSB[type][index];
 }
 
 inline
-void TGCConnectionSBToHPB::setHPBPortToSB(int type, int index, int port)
-{
-  if(m_HPBPortToSB[type]==0) m_HPBPortToSB[type] = new int [m_numberOfBoard[type]];
+void TGCConnectionSBToHPB::setHPBPortToSB(int type, int index, int port) {
+  if(m_HPBPortToSB[type]==0) m_HPBPortToSB[type] = new int [m_id.at(type).size()];
   m_HPBPortToSB[type][index] = port;
 }
 
 inline
-int TGCConnectionSBToHPB::getHPBIdToSB(int type, int index) const
-{
+int TGCConnectionSBToHPB::getHPBIdToSB(int type, int index) const {
   return m_HPBIdToSB[type][index];
 }
 
 inline
-void TGCConnectionSBToHPB::setHPBIdToSB(int type, int index, int id)
-{
-  if(m_HPBIdToSB[type]==0) m_HPBIdToSB[type] = new int [m_numberOfBoard[type]];
+void TGCConnectionSBToHPB::setHPBIdToSB(int type, int index, int id) {
+  if(m_HPBIdToSB[type]==0) m_HPBIdToSB[type] = new int [m_id.at(type).size()];
   m_HPBIdToSB[type][index] = id;
 }
 
-} //end of namespace bracket
+}  // end of namespace
 
-#endif // TGCConnectionSBToHPB_hh
+#endif  // TrigT1TGC_ConnectionSBToHPB_H_
