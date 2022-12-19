@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef _MUON_NSW_TRIGGER_COMMON_DECODER_H_
-#define _MUON_NSW_TRIGGER_COMMON_DECODER_H_
+#ifndef MUONNSWCMOMONDECODE_NSWTRIGGERCOMMONDECODER_H
+#define MUONNSWCMOMONDECODE_NSWTRIGGERCOMMONDECODER_H
 
 #include <stdint.h>
 #include <vector>
@@ -19,7 +19,7 @@ namespace Muon
     class NSWTriggerCommonDecoder
     {
      public:
-      explicit NSWTriggerCommonDecoder (const eformat::read::ROBFragment &rob, const std::string triggerType);
+      explicit NSWTriggerCommonDecoder (const eformat::read::ROBFragment &rob, const std::string& triggerType);
       //will use trigger type for stgc/mm/pad specialization?
       virtual ~NSWTriggerCommonDecoder () = default;
 
@@ -38,4 +38,4 @@ namespace Muon
   }
 }
 
-#endif // _MUON_NSW_TRIGGER_COMMON_DECODER_H_
+#endif // not MUONNSWCMOMONDECODE_NSWTRIGGERCOMMONDECODER_H
