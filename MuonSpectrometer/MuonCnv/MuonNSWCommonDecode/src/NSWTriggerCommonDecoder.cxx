@@ -12,7 +12,7 @@
 
 #include <string>
 
-Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read::ROBFragment &robFrag, const std::string triggerType)
+Muon::nsw::NSWTriggerCommonDecoder::NSWTriggerCommonDecoder (const eformat::read::ROBFragment &robFrag, const std::string& triggerType)
   : m_has_error (false),
     m_triggerType (triggerType)
 {

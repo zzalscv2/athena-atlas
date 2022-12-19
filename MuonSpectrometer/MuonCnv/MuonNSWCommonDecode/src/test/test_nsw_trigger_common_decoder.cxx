@@ -456,47 +456,48 @@ int test_nsw_trigger_common_decoder_loop (Params &params, Statistics &statistics
       std::cout << "Cannot open this file properly; skipping to next one" << std::endl;
       anyBrokenFile = true;
     }
-
-    while (!reader->endOfFile () && (params.max_events == 0 || statistics.nevents < params.max_events))
-    {
-      try
+    else {
+      while (!reader->endOfFile () && (params.max_events == 0 || statistics.nevents < params.max_events))
       {
-        DRError err = reader->getData (size, &buf);
-
-        if (err != EventStorage::DROK)
+        try
         {
-          std::cout << "Cannot get data properly from file" << data_file_name.c_str () << "; skipping it!" << std::endl;
-          anyBrokenFile = true;
+          DRError err = reader->getData (size, &buf);
+
+          if (err != EventStorage::DROK)
+          {
+            std::cout << "Cannot get data properly from file" << data_file_name.c_str () << "; skipping it!" << std::endl;
+            anyBrokenFile = true;
+            if (buf) delete buf;
+            break;
+          }
+
+          eformat::read::FullEventFragment f ((unsigned int *) buf);
+          f.check ();
+
+          //reset branches
+          data = outBranches();
+
+          if ( test_nsw_trigger_common_decoder_event (f, data, params, statistics) )
+          {
+            std::cout << "Cannot decode properly event " << statistics.nevents << "; skipping it!" <<std::endl;
+            if (buf) delete buf;
+            continue;
+          }
+
+          if (!params.print_only) {outtree->Fill();}
+          ++statistics.nevents;
+        }
+
+        catch (std::runtime_error& error)
+        {
+          std::cout << "Exception!" << std::endl;
+          std::cout << error.what() << std::endl;
           if (buf) delete buf;
           break;
         }
 
-        eformat::read::FullEventFragment f ((unsigned int *) buf);
-        f.check ();
-
-        //reset branches
-        data = outBranches();
-
-        if ( test_nsw_trigger_common_decoder_event (f, data, params, statistics) )
-        {
-          std::cout << "Cannot decode properly event " << statistics.nevents << "; skipping it!" <<std::endl;
-          if (buf) delete buf;
-          continue;
-        }
-
-        if (!params.print_only) {outtree->Fill();}
-        ++statistics.nevents;
-      }
-
-      catch (std::runtime_error& error)
-      {
-        std::cout << "Exception!" << std::endl;
-        std::cout << error.what() << std::endl;
         if (buf) delete buf;
-        break;
       }
-
-      if (buf) delete buf;
     }
 
     if (!params.print_only) {
