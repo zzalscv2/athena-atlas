@@ -19,7 +19,7 @@ from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from GaudiKernel.DataHandle import DataHandle
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
 from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
@@ -1052,7 +1052,7 @@ def algorithmCAToGlobalWrapper(gen, flags, *args, **kwargs):
     If CA contains more than one algorithm, a list is returned, else a single algorithm is returned.
     
     """
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         ca = gen(flags, *args, **kwargs)
         assert isinstance(ca, ComponentAccumulator), "Function provided does not generate ComponentAccumulator"
     algs = ca.getEventAlgos()
@@ -1067,7 +1067,7 @@ def menuSequenceCAToGlobalWrapper(gen, flags, *args, **kwargs):
     """
     Generates & converts MenuSequenceCA into the MenuSequence, in addition appending aux stuff to global configuration
     """
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         msca = gen(flags, *args, **kwargs)
         assert isinstance(msca, MenuSequenceCA), "Function provided to menuSequenceCAToGlobalWrapper does not generate MenuSequenceCA"
 

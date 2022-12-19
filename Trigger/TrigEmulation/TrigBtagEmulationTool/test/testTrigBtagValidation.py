@@ -49,8 +49,8 @@ def main():
             JetChainParts['bTag'] += ['newTagger']
 
 
-    from AthenaCommon.Configurable import ConfigurableRun3Behavior
-    with ConfigurableRun3Behavior():
+    from AthenaCommon.Configurable import ConfigurableCABehavior
+    with ConfigurableCABehavior():
         from AthenaConfiguration.AllConfigFlags import ConfigFlags
         ConfigFlags.Scheduler.ShowDataDeps = True
         ConfigFlags.Scheduler.ShowDataFlow = True

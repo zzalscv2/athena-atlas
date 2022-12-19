@@ -5,12 +5,12 @@ from AthenaCommon.CFElements import findAllAlgorithms
 from GaudiKernel.Configurable import WARNING
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 # these files are sloppy with imports, see ATLASRECTS-6635
-with ConfigurableRun3Behavior():
+with ConfigurableCABehavior():
     from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
     from BTagging.BTagConfig import BTagAlgsCfg, GetTaggerTrainingMap
 
@@ -26,7 +26,7 @@ def FtagJetCollections(jetcols, seq, pvCols=[], OutputLevel=WARNING):
             raise ValueError('PV collection length is not the same as Jets')
         pvCols=['PrimaryVertices']*len(jetcols)
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
 
         from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
 

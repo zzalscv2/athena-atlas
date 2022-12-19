@@ -10,7 +10,7 @@ from AthenaCommon.CFElements import parOR, seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Electron'
@@ -46,7 +46,7 @@ def precisionElectronMenuSequence(is_probe_leg=False, ion=False,  variant=''):
 
     # make the Hypo
     from TrigEgammaHypo.TrigEgammaPrecisionElectronHypoTool import createTrigEgammaPrecisionElectronHypoAlg
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
        hypo_tuple = createTrigEgammaPrecisionElectronHypoAlg("TrigEgamma" + tag(ion) + "HypoAlg_noGSF"+ variant, sequenceOut)
     thePrecisionElectronHypo = conf2toConfigurable(hypo_tuple[0])
     hypo_acc = hypo_tuple[1]

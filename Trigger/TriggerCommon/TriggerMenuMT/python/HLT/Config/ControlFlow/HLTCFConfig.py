@@ -29,7 +29,7 @@ from TriggerMenuMT.HLT.Config.Validation.CFValidation import testHLTTree
 
 from AthenaCommon.CFElements import parOR, seqAND, getSequenceChildren, isSequence, compName, findSubSequence,findAlgorithm
 from AthenaCommon.AlgSequence import AlgSequence, dumpSequence
-from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaCommon.Configurable import ConfigurableCABehavior
 from AthenaCommon.Logging import logging
 
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable, appendCAtoAthena
@@ -179,7 +179,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
             except KeyError: # We may be using a probe leg that has different reco from the tag
                 log.debug(f"Tag leg does not match probe: '{vmname[:-6]}', will not use cached views")
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         summaryAcc, summaryAlg = triggerSummaryCfg( flags, hypos )
 
     # Schedule the DecisionSummaryMakerAlg
@@ -231,13 +231,13 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
     decObj = collectDecisionObjects( hypos, filters, hltSeeding, summaryAlg )
     decObjHypoOut = collectHypoDecisionObjects(hypos, inputs=False, outputs=True)
 
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         monAcc, monAlg = triggerMonitoringCfg( flags, hypos, filters, hltSeeding )
 
     hltEndSeq += conf2toConfigurable( monAlg )
     appendCAtoAthena( monAcc )
         
-    with ConfigurableRun3Behavior():
+    with ConfigurableCABehavior():
         edmAlg = triggerMergeViewsAndAddMissingEDMCfg(flags, ['AOD', 'ESD'], hypos, viewMakers, decObj, decObjHypoOut)
 
     from TrigCostMonitor.TrigCostMonitorConfig import TrigCostMonitorFinalizeCfg
