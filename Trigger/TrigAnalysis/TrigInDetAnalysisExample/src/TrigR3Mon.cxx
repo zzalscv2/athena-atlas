@@ -291,7 +291,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	/// check for configured chains only ...
 	
 	if ( chainName.head().find("HLT_")==std::string::npos ) {
-	  toolitr++;
+	  ++toolitr;
 	  continue;
 	}
 	
@@ -305,7 +305,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	
 	if ( selectChain=="" ) { 
 	  msg(MSG::WARNING) << "^[[91;1m" << "No chain matched\tchain input " << chainName.head() << "  :  " << chainName.tail() << "^[[m"<< endmsg;
-	  toolitr++;
+	  ++toolitr;
 	  continue;
 	}
 	  
@@ -351,18 +351,18 @@ StatusCode TrigR3Mon::bookHistograms() {
 		   ( shifter_ftf<shifterChains && chainName.vtx()!="" && chainName.vtx()==lastvtx ) ) {  
 	      msg(MSG::DEBUG) << "^[[91;1m" << "Matching chain " << selectChain << " excluded - Shifter chain already definied^[[m" << endmsg;
 	      /// pre and postfix operators generate the same code with optimisation
-	      toolitr++;
+	      ++toolitr;
 	      continue;
 	    }
-	    shifter_ftf++;
+	    ++shifter_ftf;
 	    lastvtx = chainName.vtx();
 	  }
 	  else if ( chainName.tail().find("_IDTrig")!=std::string::npos || chainName.tail().find("CosmicsN_EFID")!=std::string::npos ) { 
 	    /// EFID chain
-	    shifter_efid++;
+	    ++shifter_efid;
 	    if ( shifter_efid>shifterChains ) {
 	      msg(MSG::DEBUG) << "^[[91;1m" << "Matching chain " << selectChain << " excluded - Shifter chain already definied^[[m" << endmsg;
-	      toolitr++;
+	      ++toolitr;
 	      continue;
 	    }
 	  }
@@ -371,7 +371,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	    shifter_efid_run1++;
 	    if ( shifter_efid_run1>shifterChains ) {
 	      msg(MSG::DEBUG) << "^[[91;1m" << "Matching chain " << selectChain << " excluded - Shifter chain already definied^[[m" << endmsg;
-	      toolitr++;
+	      ++toolitr;
 	      continue;
 	    }
 	  }
@@ -385,7 +385,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	
       }
      
-      toolitr++;
+      ++toolitr;
     }
 	
     m_chainNames = chains;

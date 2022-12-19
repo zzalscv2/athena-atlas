@@ -2087,7 +2087,7 @@ int main(int argc, char** argv)
             double pt = std::atof( ptconfig.c_str() );
             if ( pt>0 ) { 
               std::vector<TIDA::Track*> reft; reft.reserve(refp_vec.size());
-              for ( std::vector<TIDA::Track*>::const_iterator itr=refp_vec.begin() ; itr!=refp_vec.end() ; itr++ ) { 
+              for ( std::vector<TIDA::Track*>::const_iterator itr=refp_vec.begin() ; itr!=refp_vec.end() ; ++itr ) { 
                 if ( std::fabs((*itr)->pT())>=pt ) reft.push_back( *itr );
               }
               refp_vec = reft;

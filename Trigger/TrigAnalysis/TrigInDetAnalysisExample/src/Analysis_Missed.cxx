@@ -81,7 +81,7 @@ void Analysis_Missed::execute(const std::vector<TIDA::Track*>& referenceTracks,
   int mainAuthor=-1; int countMain=0;
   int testAuthor=-1; int countTest=0;
   std::vector<TIDA::Track*>::const_iterator test,  testEnd=testTracks.end();
-  for(test=testTracks.begin(); test!=testEnd; test++) {
+  for(test=testTracks.begin(); test!=testEnd; ++test) {
     // Check main author
     if(mainAuthor==-1) mainAuthor=(*test)->author();
     // Check test author
@@ -134,7 +134,7 @@ void Analysis_Missed::execute(const std::vector<TIDA::Track*>& referenceTracks,
     bool matchOnline=false;
 
     // Loop over reference tracks
-    for(ref=referenceTracks.begin(); ref!=refEnd; ref++){
+    for(ref=referenceTracks.begin(); ref!=refEnd; ++ref){
       // Get ref parameters
       double refEta = (*ref)->eta();
       double refPhi = phi((*ref)->phi());
@@ -144,7 +144,7 @@ void Analysis_Missed::execute(const std::vector<TIDA::Track*>& referenceTracks,
     if(!matchOffline) continue;
     
     // Loop over test tracks
-    for(test2=testTracks.begin(); test2!=test2End; test2++) {
+    for(test2=testTracks.begin(); test2!=test2End; ++test2) {
       // Check author
       if((*test2)->author()!=testAuthor) continue;
       // Get ref parameters
