@@ -10,7 +10,7 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
 
-MMT_Hit::MMT_Hit(char wedge, hitData_entry entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par) {
+MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
   m_sector = wedge;
 
   std::string module(1, wedge);
@@ -102,6 +102,10 @@ MMT_Hit::MMT_Hit(char wedge, hitData_entry entry, const MuonGM::MuonDetectorMana
   double base = par->ybases[m_plane][eta];
   m_Y = base + m_strip*roP.stripPitch - roP.stripPitch/2.;
   m_YZslope = m_Y / m_Z;
+
+  double index = std::round((std::abs(m_RZslope)-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
+  double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
+  m_shift = roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
 }
 
 MMT_Hit::MMT_Hit(const MMT_Hit* hit) {
@@ -128,6 +132,7 @@ MMT_Hit::MMT_Hit(const MMT_Hit* hit) {
   m_YZslope = hit->m_YZslope;
   m_isNoise = hit->m_isNoise;
   m_time = hit->m_time;
+  m_shift = hit->m_shift;
 }
 
 bool MMT_Hit::isX() const {

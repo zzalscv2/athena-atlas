@@ -57,7 +57,6 @@ class MMT_Road {
     void incrementAge(const int &bcwind);
     double getB() const { return m_B; }
     double getPitch() const { return m_pitch; }
-    const ROOT::Math::XYZVector& getPlaneCoordinate(const unsigned int index) const { return m_planeCoordinates[index]; }
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
     int getRoadSizeUpX() const { return m_roadSizeUpX; }
@@ -89,7 +88,6 @@ class MMT_Road {
     int m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV;
     double m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
     bool m_trig;
-    std::vector<ROOT::Math::XYZVector> m_planeCoordinates;
     std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
 };
 #endif
