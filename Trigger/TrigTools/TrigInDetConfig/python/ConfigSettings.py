@@ -144,13 +144,14 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._adaptiveVertex = True
       self._actsVertex     = True
       self._addSingleTrackVertices = True
-      self._roi          = "HLT_Roi_JetSuper"
+      self._roi      = "HLT_Roi_JetSuper"
       self._etaHalfWidth = 0.3
       self._phiHalfWidth = 0.3
       self._zedHalfWidth = 150
-      self._doFullScan   = True
-      self._pTmin        = 1*GeV
+      self._doFullScan = True
+      self._pTmin      = 1*GeV
       #-----
+      self._doFullScan      = True
       self._doTRT           = False
       self._DoubletDR_Max   = 200
       self._SeedRadBinWidth = 10
@@ -287,7 +288,13 @@ class ConfigSettings_bmumux( _ConfigSettingsBase ):
       self._phiHalfWidth        = 0.75
       self._zedHalfWidth        = 225
       self._doSeedRedundancyCheck = True
+      self._SuperRoI = False
 
+   @property
+   def SuperRoI(self):
+      return self._SuperRoI
+
+      
 
 class ConfigSettings_electronLRT( _ConfigSettingsBase ):
    def __init__( self ):
