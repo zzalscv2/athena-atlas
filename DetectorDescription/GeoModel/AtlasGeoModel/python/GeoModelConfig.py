@@ -8,7 +8,7 @@ from AthenaCommon import Logging
 def GeoModelCfg(configFlags):
     version=configFlags.GeoModel.AtlasVersion
 
-    from AthenaCommon.AppMgr import release_metadata
+    from PyUtils.Helpers import release_metadata
     rel_metadata = release_metadata()
     relversion = rel_metadata['release'].split('.')
     if len(relversion) < 3:

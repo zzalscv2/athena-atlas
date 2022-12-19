@@ -6,12 +6,12 @@
 """Application manager and other global Gaudi components."""
 
 import sys, os
-from functools import lru_cache
 from AthenaCommon import ExitCodes
 
 from AthenaCommon import AlgSequence, Configurable, Logging
 import GaudiCoreSvc.GaudiCoreSvcConf as GaudiCoreSvcConf
 import GaudiCommonSvc.GaudiCommonSvcConf as GaudiCommonSvcConf
+from PyUtils.Helpers import release_metadata
 
 ### data ---------------------------------------------------------------------
 __version__ = '3.2.0'
@@ -32,41 +32,6 @@ def _type_and_name(n):
    t = s[0]
    if len(s)==2: n=s[1]
    return t,n
-
-@lru_cache(maxsize=None)
-def release_metadata():
-   """`release_metadata` returns informations about the current release being used
-   """
-   import configparser
-   import os
-   d = {
-      'project name': '?',
-      'release': '?',
-      'base release': '?',
-      'nightly release': '?',
-      'nightly name': '?',
-      'date': '?',
-      'platform': '?',
-      }
-
-   for cmake_path in os.environ['CMAKE_PREFIX_PATH'].split(os.pathsep):
-      release_data = os.path.join(cmake_path, 'ReleaseData')
-      if os.path.exists(release_data):
-         d1=d
-         cfg = configparser.ConfigParser()
-         try:
-            cfg.read( release_data )
-            if cfg.has_section( 'release_metadata' ):
-               d1.update( dict( cfg.items( 'release_metadata' ) ) )
-               d1['platform'] = os.getenv( '%s_PLATFORM' % d1['project name'],
-                                           '?' )
-               release = d1['release'].split('.')
-               base_release = d1['base release'].split('.')
-               if len(release)>=3 or len(base_release)>=3:
-                  return d1
-         except Exception:
-            pass
-   return d
 
 ### associator for public tools ----------------------------------------------
 def iadd( self, tool ):

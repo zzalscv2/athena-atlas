@@ -128,7 +128,7 @@ def _doMenuConversion(flags):
 def _getMenuFileName(flags):
     """Return base name for menu files"""
     if not _doMenuConversion(flags):  # menu created in this release
-        from AthenaCommon.AppMgr import release_metadata
+        from PyUtils.Helpers import release_metadata
         return '_'+flags.Trigger.triggerMenuSetup+'_'+release_metadata()['release']
     else:  # menu files created via JSON conversion
         return ''
