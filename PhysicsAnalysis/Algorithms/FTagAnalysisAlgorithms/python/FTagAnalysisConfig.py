@@ -18,10 +18,13 @@ class FTagConfig (ConfigBlock):
         self.addOption ('noEfficiency', False, type=bool)
         self.addOption ('legacyRecommendations', False, type=bool)
         self.addOption ('minPt', None, type=float)
+        self.addOption ('bTagCalibFile', None, type=str,
+                        info='calibration file for CDI')
 
     def makeAlgs (self, config) :
 
         jetCollection = config.originalName (self.containerName)
+
         selectionName = self.postfix
         if selectionName is None or selectionName == '' :
             selectionName = self.btagger + '_' + self.btagWP
@@ -68,11 +71,13 @@ class FTagConfig (ConfigBlock):
                 jetCollection += '_BTagging201903'
 
         # CDI file
-        # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21
-        bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root"
-
-        # This is the new calibration file, but it seems to have issues in some cases
-        #bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
+        if self.bTagCalibFile is not None :
+            bTagCalibFile = self.bTagCalibFile
+        elif self.legacyRecommendations :
+            # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTagCalibrationRecommendationsRelease21
+            bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2020-21-13TeV-MC16-CDI-2021-04-16_v1.root"
+        else:
+            bTagCalibFile = "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root"
 
         if self.kinematicSelection:
             # Set up the ftag kinematic selection algorithm(s):
