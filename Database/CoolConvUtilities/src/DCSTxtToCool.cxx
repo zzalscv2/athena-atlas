@@ -130,7 +130,7 @@ void DCSTxtToCool::beginDataPoint(const std::string& datap) {
   if (m_ndata>0) flushBuffer();
   // strip trailing linefeeds
   while (datap.substr(datap.size()-1,1)=="\r") 
-    datap=datap.substr(0,datap.size()-1);
+    datap.pop_back();
   // lookup datapoint to folder mapping
   std::cout << "Begin processing datapoint " << datap << std::endl;
   std::string key0=m_dpmap.begin()->first;
