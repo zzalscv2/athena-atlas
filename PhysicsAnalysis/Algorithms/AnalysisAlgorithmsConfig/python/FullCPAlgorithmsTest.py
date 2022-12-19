@@ -569,7 +569,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
-    configSeq += makeConfig( 'FlavorTagging', 'AnaJets.' + btagger + '_' + btagWP)
+    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.' + btagger + '_' + btagWP)
     configSeq.setOptionValue ('.noEfficiency', False)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
@@ -584,7 +584,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     if not noPhysliteBroken :
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
-        configSeq += makeConfig( 'FlavorTagging', 'AnaJets.' + btagger + '_' + btagWP)
+        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.' + btagger + '_' + btagWP)
         configSeq.setOptionValue ('.noEfficiency', False)
         configSeq.setOptionValue ('.legacyRecommendations', True)
         configSeq.setOptionValue ('.btagger', btagger)
