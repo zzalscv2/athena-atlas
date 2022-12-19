@@ -10,16 +10,29 @@ log = logging.getLogger(__name__)
 
 def bmumuxAlgSequence(ConfigFlags):
     from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
-    from DecisionHandling.DecisionHandlingConf import  ViewCreatorCentredOnIParticleROITool
+    from DecisionHandling.DecisionHandlingConf import  ViewCreatorCentredOnIParticleROITool, ViewCreatorMuonSuperROITool 
 
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     IDConfig = getInDetTrigConfig( "bphysics" )
 
-    viewCreatorROITool = ViewCreatorCentredOnIParticleROITool(
-        RoIEtaWidth = IDConfig.etaHalfWidth,
-        RoIPhiWidth = IDConfig.phiHalfWidth,
-        RoIZedWidth = IDConfig.zedHalfWidth,
-        RoisWriteHandleKey = recordable('HLT_Roi_Bmumux'))
+    log.debug("TrigBPhysMenuSequence: eta half width %s ", IDConfig.etaHalfWidth)
+    log.debug("TrigBPhysMenuSequence: phi half width %s ", IDConfig.phiHalfWidth)
+    log.debug("TrigBPhysMenuSequence: zed half width %s ", IDConfig.zedHalfWidth)
+    log.debug("TrigBphysMenuSequence: superRoI %s ", IDConfig.SuperRoI)
+
+    if IDConfig.SuperRoI:
+        viewCreatorROITool = ViewCreatorMuonSuperROITool(
+            RoIEtaWidth = IDConfig.etaHalfWidth,
+            RoIPhiWidth = IDConfig.phiHalfWidth,
+            RoIZedWidth = IDConfig.zedHalfWidth,
+            RoisWriteHandleKey = recordable(IDConfig.roi))
+    else:
+        viewCreatorROITool = ViewCreatorCentredOnIParticleROITool(
+            RoIEtaWidth = IDConfig.etaHalfWidth,
+            RoIPhiWidth = IDConfig.phiHalfWidth,
+            RoIZedWidth = IDConfig.zedHalfWidth,
+            RoisWriteHandleKey = recordable(IDConfig.roi))
+
 
     viewMaker = EventViewCreatorAlgorithm(
         name = 'IMbmumux',
