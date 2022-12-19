@@ -1,0 +1,60 @@
+{
+    "GLOBAL": {
+        "PV_x": {
+            "_comment": "",
+            "title": "x pos of selected PV",
+            "xtitle": "x [mm]",
+            "ytitle": "Events",
+		"path":  {"ART": "", "PHYSVAL": "global"},
+            "xbins": 50,
+            "xmin": -0.6,
+            "xmax": -0.4,
+            "type": "TH1D",
+            "forData": "true"
+        },
+
+        "PV_y": {
+            "_comment": "",
+            "title": "y pos of selected PV",
+            "xtitle": "y [mm]",
+            "ytitle": "Events",
+            "path":  {"ART": "", "PHYSVAL": "global"},
+            "xbins": 50,
+            "xmin": -0.6,
+            "xmax": -0.4,
+            "type": "TH1D",
+            "forData": "true"
+        }
+    },
+
+    "TAGGER": {
+       "IP3D_gradeOfTracks": {
+            "_comment": "",
+            "title": "IP3D grade of tracks",
+            "xtitle": "grade of tracks",
+            "ytitle": "Tracks",
+            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
+            "xbins": 14,
+            "xmin": -0.5,
+            "xmax": 13.5,
+            "forEachTruthType": ["U","B","C","DATA"],
+            "type": "TH1D",
+            "forData": "true"
+        },
+
+        "IP2D_gradeOfTracks": {
+            "_comment": "",
+            "title": "IP2D grade of tracks",
+            "xtitle": "grade of tracks",
+            "ytitle": "Tracks",
+            "path":  {"ART": "bTagging", "PHYSVAL": "old_taggers"},
+            "xbins": 14,
+            "xmin": -0.5,
+            "xmax": 13.5,
+            "forEachTruthType": ["U","B","C","DATA"],
+            "type": "TH1D",
+            "forData": "true"
+        }
+    }
+
+}

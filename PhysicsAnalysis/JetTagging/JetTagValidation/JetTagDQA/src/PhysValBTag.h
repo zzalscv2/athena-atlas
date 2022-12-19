@@ -111,6 +111,11 @@ namespace JetTagDQA {
     float m_JVTCutAntiKt4EMPFlowJets;
     float m_truthMatchProbabilityCut;
 
+    std::string m_dipsName;
+    std::string m_DL1dv00Name;
+    std::string m_DL1dv01Name;
+    std::string m_GN1Name;
+
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMTopoPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKt4EMPFlowJetsPlots;
     JetTagDQA::BTaggingValidationPlots m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots;

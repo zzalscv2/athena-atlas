@@ -46,6 +46,16 @@ namespace JetTagDQA{
     }
     m_truthMatchProbabilityCut = truthMatchProbabilityCut;
   }
+
+  void BTaggingValidationPlots::setTaggerNames(std::string dipsName,
+					       std::string DL1dv00Name,
+					       std::string DL1dv01Name,
+					       std::string GN1Name){
+    m_dipsName = dipsName;
+    m_DL1dv00Name = DL1dv00Name;
+    m_DL1dv01Name = DL1dv01Name;
+    m_GN1Name = GN1Name;
+  }
   
   // implement the bookHistogram function using the histogram definitions
   TH1* BTaggingValidationPlots::bookHistogram(std::string histo_name, const std::string& var_name, const std::string& part, const std::string& prefix){
@@ -1308,18 +1318,18 @@ namespace JetTagDQA{
 
     // pb, pu, pc 
     double DIPS_pb, DIPS_pu, DIPS_pc;
-    if (btag->isAvailable<float>("dipsLoose20220314v2_pb")){
-        DIPS_pb = btag->auxdata<float>("dipsLoose20220314v2_pb");
+    if (btag->isAvailable<float>(m_dipsName + "_pb")){
+        DIPS_pb = btag->auxdata<float>(m_dipsName + "_pb");
     } else {
 	DIPS_pb = -1;
     }
-    if (btag->isAvailable<float>("dipsLoose20220314v2_pu")){
-        DIPS_pu = btag->auxdata<float>("dipsLoose20220314v2_pu");
+    if (btag->isAvailable<float>(m_dipsName + "_pu")){
+        DIPS_pu = btag->auxdata<float>(m_dipsName + "_pu");
     } else {
 	DIPS_pu = -1;
     }
-    if (btag->isAvailable<float>("dipsLoose20220314v2_pc")){
-        DIPS_pc = btag->auxdata<float>("dipsLoose20220314v2_pc");
+    if (btag->isAvailable<float>(m_dipsName + "_pc")){
+        DIPS_pc = btag->auxdata<float>(m_dipsName + "_pc");
     } else {
 	DIPS_pc = -1;
     }
@@ -1332,7 +1342,6 @@ namespace JetTagDQA{
     //// SV1 variables
 
     // number of good tracks
-    // int nGTinSvx0(1000);
     int nGTinSV1(1000);
     try{ btag->taggerInfo(nGTinSV1, xAOD::SV1_NGTinSvx); }
     catch(std::exception& exception){ nGTinSV1 = -1; }
@@ -1363,18 +1372,18 @@ namespace JetTagDQA{
     //// high level tagger variables
     // get the DL1x vars
     double DL1dv00_pb, DL1dv00_pu, DL1dv00_pc;
-    if (btag->isAvailable<float>("DL1dv00_pb")){
-        DL1dv00_pb = btag->auxdata<float>("DL1dv00_pb");
+    if (btag->isAvailable<float>(m_DL1dv00Name + "_pb")){
+        DL1dv00_pb = btag->auxdata<float>(m_DL1dv00Name + "_pb");
     } else {
 	DL1dv00_pb = -1;
     }
-    if (btag->isAvailable<float>("DL1dv00_pu")){
-        DL1dv00_pu = btag->auxdata<float>("DL1dv00_pu");
+    if (btag->isAvailable<float>(m_DL1dv00Name + "_pu")){
+        DL1dv00_pu = btag->auxdata<float>(m_DL1dv00Name + "_pu");
     } else {
 	DL1dv00_pu = -1;
     }
-    if (btag->isAvailable<float>("DL1dv00_pc")){
-        DL1dv00_pc = btag->auxdata<float>("DL1dv00_pc");
+    if (btag->isAvailable<float>(m_DL1dv00Name + "_pc")){
+        DL1dv00_pc = btag->auxdata<float>(m_DL1dv00Name + "_pc");
     } else {
 	DL1dv00_pc = -1;
     }
@@ -1383,18 +1392,18 @@ namespace JetTagDQA{
     m_DL1dv00_pc->Fill(DL1dv00_pc, event->beamSpotWeight());
 
     double DL1dv01_pb, DL1dv01_pu, DL1dv01_pc;
-    if (btag->isAvailable<float>("DL1dv01_pb")){
-        DL1dv01_pb = btag->auxdata<float>("DL1dv01_pb");
+    if (btag->isAvailable<float>(m_DL1dv01Name +"_pb")){
+        DL1dv01_pb = btag->auxdata<float>(m_DL1dv01Name + "_pb");
     } else {
 	DL1dv01_pb = -1;
     }
-    if (btag->isAvailable<float>("DL1dv01_pu")){
-        DL1dv01_pu = btag->auxdata<float>("DL1dv01_pu");
+    if (btag->isAvailable<float>(m_DL1dv01Name + "_pu")){
+        DL1dv01_pu = btag->auxdata<float>(m_DL1dv01Name + "_pu");
     } else {
 	DL1dv01_pu = -1;
     }
-    if (btag->isAvailable<float>("DL1dv01_pc")){
-        DL1dv01_pc = btag->auxdata<float>("DL1dv01_pc");
+    if (btag->isAvailable<float>(m_DL1dv01Name + "_pc")){
+        DL1dv01_pc = btag->auxdata<float>(m_DL1dv01Name +"_pc");
     } else {
 	DL1dv01_pc = -1;
     }
@@ -1424,18 +1433,18 @@ namespace JetTagDQA{
 
     // get the GN1 vars
     double GN1_pb, GN1_pu, GN1_pc;
-    if (btag->isAvailable<float>("GN120220509_pb")){
-        GN1_pb = btag->auxdata<float>("GN120220509_pb");
+    if (btag->isAvailable<float>(m_GN1Name + "_pb")){
+        GN1_pb = btag->auxdata<float>(m_GN1Name + "_pb");
     } else {
 	GN1_pb = -1;
     }
-    if (btag->isAvailable<float>("GN120220509_pu")){
-        GN1_pu = btag->auxdata<float>("GN120220509_pu");
+    if (btag->isAvailable<float>(m_GN1Name + "_pu")){
+        GN1_pu = btag->auxdata<float>(m_GN1Name + "_pu");
     } else {
 	GN1_pu = -1;
     }
-    if (btag->isAvailable<float>("GN120220509_pc")){
-        GN1_pc = btag->auxdata<float>("GN120220509_pc");
+    if (btag->isAvailable<float>(m_GN1Name + "_pc")){
+        GN1_pc = btag->auxdata<float>(m_GN1Name + "_pc");
     } else {
 	GN1_pc = -1;
     }

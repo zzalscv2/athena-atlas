@@ -63,6 +63,12 @@ namespace JetTagDQA {
     declareProperty( "JVTCutLargerEtaAntiKt4EMTopoJets", m_JVTCutLargerEtaAntiKt4EMTopoJets = 0.11);
     declareProperty( "JVTCutAntiKt4EMPFlowJets", m_JVTCutAntiKt4EMPFlowJets = 0.2);
     declareProperty( "truthMatchProbabilityCut", m_truthMatchProbabilityCut = 0.75);
+
+    declareProperty( "dipsTaggerName", m_dipsName = "dipsLoose20220314v2");
+    declareProperty( "DL1dv00TaggerName", m_DL1dv00Name = "DL1dv00");
+    declareProperty( "DL1dv01TaggerName", m_DL1dv01Name = "DL1dv01");
+    declareProperty( "GN1TaggerName", m_GN1Name = "GN120220509");
+
   }
 
   // Destructor
@@ -86,24 +92,20 @@ namespace JetTagDQA {
       m_HistogramDefinitionsMap.insert(std::pair< std::string, std::vector< std::string > >(name, m_HistogramDefinitionsVector[i]));
     }
 
-    // set the detail level
-    m_antiKt4EMTopoPlots.setDetailLevel(m_detailLevel);
-    m_antiKt4EMPFlowJetsPlots.setDetailLevel(m_detailLevel);
-    m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots.setDetailLevel(m_detailLevel);
-
-    // give that map to the BTaggingValidationPlots
-    m_antiKt4EMTopoPlots.setHistogramDefinitions(m_HistogramDefinitionsMap);
-    m_antiKt4EMPFlowJetsPlots.setHistogramDefinitions(m_HistogramDefinitionsMap);
-    m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots.setHistogramDefinitions(m_HistogramDefinitionsMap);
-
-    // set the isData key, the JVT and TMP cuts
-    m_antiKt4EMTopoPlots.setIsDataJVTCutsAndTMPCut(m_isData, m_JVTCutAntiKt4EMTopoJets, m_JVTCutLargerEtaAntiKt4EMTopoJets, m_JVTCutAntiKt4EMPFlowJets, m_truthMatchProbabilityCut);
-    m_antiKt4EMPFlowJetsPlots.setIsDataJVTCutsAndTMPCut(m_isData, m_JVTCutAntiKt4EMTopoJets, m_JVTCutLargerEtaAntiKt4EMTopoJets, m_JVTCutAntiKt4EMPFlowJets, m_truthMatchProbabilityCut);
-    m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots.setIsDataJVTCutsAndTMPCut(m_isData, m_JVTCutAntiKt4EMTopoJets, m_JVTCutLargerEtaAntiKt4EMTopoJets, m_JVTCutAntiKt4EMPFlowJets, m_truthMatchProbabilityCut);
-
     m_btagplots.insert(std::make_pair(m_jetName1, &m_antiKt4EMTopoPlots));
     m_btagplots.insert(std::make_pair(m_jetName2, &m_antiKt4EMPFlowJetsPlots));
     m_btagplots.insert(std::make_pair(m_jetName3, &m_antiKtVR30Rmax4Rmin02PV0TrackJetsPlots));
+
+    for(const auto& [name, plot]: m_btagplots){
+      plot->setDetailLevel(m_detailLevel);
+      plot->setHistogramDefinitions(m_HistogramDefinitionsMap);
+      plot->setIsDataJVTCutsAndTMPCut(m_isData,
+				      m_JVTCutAntiKt4EMTopoJets,
+				      m_JVTCutLargerEtaAntiKt4EMTopoJets,
+				      m_JVTCutAntiKt4EMPFlowJets,
+				      m_truthMatchProbabilityCut);
+      plot->setTaggerNames(m_dipsName, m_DL1dv00Name, m_DL1dv01Name, m_GN1Name);
+    }
    
     return StatusCode::SUCCESS;
   }
