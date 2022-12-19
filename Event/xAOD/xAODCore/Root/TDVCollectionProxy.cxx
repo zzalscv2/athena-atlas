@@ -127,7 +127,7 @@ namespace xAOD {
          // arguments. But we only need the first one, before the first comma.
          const std::string::size_type comma = elt.find( ',' );
          if( comma != std::string::npos ) {
-            elt = elt.substr( 0, comma );
+            elt.resize (comma);
          }
 
          return elt;
