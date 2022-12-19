@@ -549,8 +549,8 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
       const int   N_LAYER = 8;
       const float DR_TO_REF_CUT = 0.4;
 
-      int n_sp_injet = 0;           int n_pixsp_injet = 0;           int n_sctsp_injet = 0;
-      int n_sp_injet_usedByTrk = 0; int n_pixsp_injet_usedByTrk = 0; int n_sctsp_injet_usedByTrk = 0;
+      int n_sp_injet = 0;
+      int n_sp_injet_usedByTrk = 0;
       int v_n_sp_injet[N_LAYER];
       int v_n_sp_injet_usedByTrk[N_LAYER];
       for(int i=0; i<N_LAYER; i++) { v_n_sp_injet[i]=0; v_n_sp_injet_usedByTrk[i]=0; }
@@ -563,9 +563,6 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
 	 if( dr > DR_TO_REF_CUT ) continue;
 
 	 //
-	 bool isPix = spData->getDetail<bool>("hitDVSP_isPix");
-	 bool isSct = spData->getDetail<bool>("hitDVSP_isSct");
-
 	 int sp_layer = (int)spData->getDetail<int16_t>("hitDVSP_layer");
 	 int sp_trkid = (int)spData->getDetail<int16_t>("hitDVSP_usedTrkId");
 	 bool isUsedByTrk = (sp_trkid != -1);
@@ -575,13 +572,9 @@ StatusCode TrigHitDVHypoAlg::calculateBDT(const EventContext& context,
 	 if( ilayer<=7  ) { // Pixel barrel or Sct barrel
 	    n_sp_injet++;
 	    v_n_sp_injet[ilayer]++;
-	    if( isPix ) n_pixsp_injet++;
-	    if( isSct ) n_sctsp_injet++;
 	    if( isUsedByTrk ) {
 	       n_sp_injet_usedByTrk++;
 	       v_n_sp_injet_usedByTrk[ilayer]++;
-	       if( isPix ) n_pixsp_injet_usedByTrk++;
-	       if( isSct ) n_sctsp_injet_usedByTrk++;
 	    }
 	 }
       }
