@@ -261,6 +261,8 @@ StatusCode CaloCalibClusterMomentsMaker::initialize()
   ATH_CHECK( m_CalibrationHitContainerNames.initialize() );
   ATH_CHECK( m_DMCalibrationHitContainerNames.initialize() );
 
+   ATH_CHECK(m_caloDetDescrMgrKey.initialize());
+
   return StatusCode::SUCCESS;
 }
 
@@ -272,8 +274,8 @@ CaloCalibClusterMomentsMaker::execute(const EventContext& ctx,
 {  
   ATH_MSG_DEBUG( "Executing " << name()  );
 
-  const CaloDetDescrManager* calo_dd_man = nullptr;
-  ATH_CHECK( detStore()->retrieve (calo_dd_man, "CaloMgr") );
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloDetDescrMgrKey,ctx};
+  const CaloDetDescrManager* calo_dd_man = *caloMgrHandle;
 
   bool foundAllContainers (true);
   std::vector<const CaloCalibrationHitContainer *> v_cchc;

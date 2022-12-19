@@ -18,6 +18,7 @@
 class CaloCell_ID;
 class CaloDM_ID;
 class CaloDmDescrManager;
+class CaloDetDescrManager;
 
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
@@ -122,6 +123,9 @@ class CaloCalibClusterMomentsMaker: public AthAlgTool, virtual public CaloCluste
    * The containers specified in this property should hold calibration
    * hits outside the calorimeter systems - i.e. dead material hits ... */
   SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_DMCalibrationHitContainerNames;
+
+  /** Conditions Handle Key to access the CaloDetDescrManager */
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
 
   const CaloCell_ID* m_calo_id;
 
