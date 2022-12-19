@@ -143,6 +143,8 @@ void dumptrace (FILE* fp)
       continue;
     if (strstr (buf, "_start") != nullptr)
       continue;
+    if (strstr (buf, "annobin_elf_init") != nullptr)
+      continue;
     if (strstr (buf, "$x") != nullptr)
       continue;
     fputs (buf, stdout);
