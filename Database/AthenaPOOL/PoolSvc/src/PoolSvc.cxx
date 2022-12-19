@@ -870,12 +870,12 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       }
       if (auto p = contName.find('('); p != std::string::npos) {
          objName = contName.substr(p + 1); // Get BranchName between parenthesis
-         objName = objName.substr(0, objName.find(')'));
+         objName.erase(objName.find(')'));
       } else if (auto p = contName.find("::"); p != std::string::npos) {
          objName = contName.substr(p + 2); // Split off Tree name
       } else if (auto p = contName.find('_'); p != std::string::npos) {
          objName = contName.substr(p + 1); // Split off "POOLContainer"
-         objName = objName.substr(0, objName.find('/')); // Split off key
+         objName.erase(objName.find('/')); // Split off key
       }
       std::string::size_type off = 0;
       while ((off = objName.find_first_of("<>/")) != std::string::npos) {
