@@ -577,8 +577,7 @@ int AtlCoolCopy::copyFolder ATLAS_NOT_THREAD_SAFE
 	p1=metadata.find("<timeStamp>");
 	p2=metadata.find("</timeStamp>");
 	if (p1!=std::string::npos && p2!=std::string::npos) {
-	  metadata=metadata.substr(0,p1)+"<timeStamp>"+newmeta+
-	    metadata.substr(p2);
+	  metadata.replace(0,p2,"<timeStamp>"+newmeta);
   	  std::cout << "Forced destination folder to " << newmeta << " : "
 		  << metadata << std::endl;
 	} else {

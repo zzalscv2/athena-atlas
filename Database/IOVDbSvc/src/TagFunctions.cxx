@@ -82,7 +82,7 @@ namespace IOVDbNamespace{
       if (results[MAJMIN] == "Major") rstrip=6;
       if (results[MAJMIN] == "Minor") rstrip=3;
       // check if characters need to be stripped from end of tag
-      if (rstrip>0 && tag.size()>rstrip) result=result.substr(0,result.size()-rstrip);
+      if (rstrip>0 && tag.size()>rstrip) result.erase(result.size()-rstrip);
     } else {
       throw std::runtime_error("Could not resolve TagInfo tag " + target );
     }
