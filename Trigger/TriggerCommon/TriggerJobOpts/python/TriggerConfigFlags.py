@@ -343,10 +343,7 @@ def createTriggerRecoFlags():
     flags.addFlag("Trigger.FSHad.PFOMuonRemoval", "Calo")
 
     # the minimum pT threshold to use for the muon removal
-    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)
-
-    # Switch on MC20 EOverP maps for the jet slice
-    flags.addFlag("Trigger.Jet.doMC20_EOverP", True)
+    flags.addFlag("Trigger.FSHad.PFOMuonRemovalMinPt", 10 * GeV)   
 
     # enable fast b-tagging for all fully calibrated HLT PFlow jets
     flags.addFlag("Trigger.Jet.fastbtagPFlow", True)
