@@ -556,6 +556,7 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
+      void setTaggerNames(std::string dipsName, std::string DL1dv00Name, std::string DL1dv01Name, std::string GN1Name);
 
       // jvt variables 
       bool m_JVT_defined;
@@ -582,6 +583,12 @@ namespace JetTagDQA{
       void bookDiscriminantVsPTAndLxyHistograms(const std::string& tagger_name, const std::map<std::string, double>& workingPoints, const bool& isOldTagger, std::map<std::string, int>::const_iterator label_iter, const std::string& m_sParticleType);
       template <class T>
       void fillHistoWithTruthCases(T value, TH1* histo_incl, TH1* histo_b, TH1* histo_c, TH1* histo_l, TH1* histo_muon, const int& truth_label, const bool& has_muon, const xAOD::EventInfo* event);
+
+      // tagger names
+      std::string m_dipsName;
+      std::string m_DL1dv00Name;
+      std::string m_DL1dv01Name;
+      std::string m_GN1Name;
 
   };
     
