@@ -170,7 +170,7 @@ if opts.showincludes:
    AthCIncMod.marker = AthCIncMod.__marker__      # reset
 del AthCIncMod
 
-if opts.do_leak_chk != False:
+if opts.do_leak_chk:
    from Hephaestus.Auditor import HephaestusAuditor
    theApp.AuditAlgorithms = True
    svcMgr.AuditorSvc += HephaestusAuditor(

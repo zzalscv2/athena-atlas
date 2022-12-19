@@ -177,11 +177,6 @@ except Exception:
    aop._help_and_exit()
 
 
-### default file name for ease of use ----------------------------------------
-if not opts.scripts and os.path.exists(opts.default_jobopt):
-   _msg.info("using default file %s", opts.default_jobopt)
-   opts.scripts.append(opts.default_jobopt)
-
 if not (opts.scripts or opts.fromdb) and opts.run_batch:
    _msg.error( "batch mode requires at least one script" )
    from AthenaCommon.ExitCodes import INCLUDE_ERROR
