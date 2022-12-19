@@ -94,8 +94,9 @@ import AthenaCommon.AthOptionsParser as aop
 opts = aop.parse()
 
 ### remove preload libs for proper execution of child-processes --------------
-os.environ['LD_PRELOAD'] = os.getenv('LD_PRELOAD_ORIG')
-os.unsetenv('LD_PRELOAD_ORIG')
+if 'LD_PRELOAD_ORIG' in os.environ:
+   os.environ['LD_PRELOAD'] = os.getenv('LD_PRELOAD_ORIG')
+   os.unsetenv('LD_PRELOAD_ORIG')
 
 ### start profiler, if requested
 if opts.profile_python:
