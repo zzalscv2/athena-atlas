@@ -18,6 +18,7 @@
 class CaloCell_ID;
 class CaloDM_ID;
 class CaloDmDescrManager;
+class CaloDetDescrManager;
 class McEventCollection;
 class TruthParticleContainer;
 
@@ -198,6 +199,9 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   /** ReadHandleKey for truth particle container */
   SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleContainerKey{this,"TruthParticles","TruthParticles","ReadHandleKey for truth particle container"};
   
+  /** Conditions Handle Key to access the CaloDetDescrManager */
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloDetDescrMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
+
   const CaloCell_ID* m_calo_id;
 
   const CaloDM_ID*    m_caloDM_ID;

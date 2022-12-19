@@ -271,6 +271,8 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
 
   ATH_CHECK(m_truthParticleContainerKey.initialize());
 
+  ATH_CHECK(m_caloDetDescrMgrKey.initialize());
+
   return StatusCode::SUCCESS;
 }
 
@@ -279,9 +281,10 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
 StatusCode
 CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
                                        xAOD::CaloClusterContainer *theClusColl) const
-{
-  const CaloDetDescrManager* calo_dd_man = nullptr;
-  ATH_CHECK( detStore()->retrieve (calo_dd_man, "CaloMgr") );
+{  
+
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloDetDescrMgrKey,ctx};
+  const CaloDetDescrManager* calo_dd_man = *caloMgrHandle;
 
   bool foundAllContainers (true);
   std::vector<const CaloCalibrationHitContainer *> v_cchc;
