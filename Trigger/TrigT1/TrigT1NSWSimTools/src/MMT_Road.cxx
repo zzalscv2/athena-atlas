@@ -24,7 +24,6 @@ MMT_Road::MMT_Road(const char sector, const MuonGM::MuonDetectorManager* detMana
   m_innerRadiusEta1 = mm.innerRadiusEta1;
   m_innerRadiusEta2 = mm.innerRadiusEta2;
   m_B = (1./std::tan(1.5/180.*M_PI));
-  m_planeCoordinates = mm.planeCoordinates;
 }
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
@@ -68,13 +67,6 @@ bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
   else if (hit->isV()) iroad = this->iRoadv();
   else return false;
 
-  double R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
-  double Z = hit->getZ();
-
-  double index = std::round((std::abs(hit->getRZSlope())-0.1)/5e-04); // 0.0005 is approx. the step in slope achievable with a road size of 8 strips
-  double roundedSlope = 0.1 + index*((0.6 - 0.1)/1000.);
-  double shift = roundedSlope*(this->getPlaneCoordinate(hit->getPlane()).Z() - this->getPlaneCoordinate(0).Z());
-
   double olow = 0., ohigh = 0.;
   if (hit->isX()) {
     olow  = this->getRoadSizeDownX()*this->getPitch();
@@ -84,13 +76,12 @@ bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
     ohigh = this->getRoadSizeUpUV()*this->getPitch();
   }
 
-  double slow  = (R + (this->getRoadSize()*iroad  )*this->getPitch() + shift + this->getPitch()/2. - olow)/Z;
-  double shigh = (R + (this->getRoadSize()*(iroad+1))*this->getPitch() + shift + this->getPitch()/2. + ohigh)/Z;
+  double R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
+  double slow  = (R + (this->getRoadSize()*iroad  )*this->getPitch() + hit->getShift() + this->getPitch()/2. - olow)/hit->getZ();
+  double shigh = (R + (this->getRoadSize()*(iroad+1))*this->getPitch() + hit->getShift() + this->getPitch()/2. + ohigh)/hit->getZ();
 
-  double slope = hit->getRZSlope();
-
-  if (slope > 0.) return (slope >= slow && slope < shigh);
-  else return (slope >= shigh && slope < slow);
+  if (hit->getRZSlope() > 0.) return (hit->getRZSlope() >= slow && hit->getRZSlope() < shigh);
+  else return (hit->getRZSlope() >= shigh && hit->getRZSlope() < slow);
 }
 
 double MMT_Road::avgSofX() const {
@@ -176,8 +167,7 @@ bool MMT_Road::horizontalCheck() const {
     if (hit->getPlane() >-1 && hit->getPlane() < 2) nx1++;
     if (hit->getPlane() > 5 && hit->getPlane() < 8) nx2++;
   }
-  if (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= this->getXthreshold()) return true;
-  return false;
+  return (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= this->getXthreshold());
 }
 
 void MMT_Road::incrementAge(const int &bcwind) {
@@ -227,6 +217,5 @@ bool MMT_Road::stereoCheck() const {
     if (hit->getPlane() == 3 || hit->getPlane() == 5) nv++;
   }
 
-  if (nu > 0 && nv > 0 && (nu+nv) >= this->getUVthreshold()) return true;
-  return false;
+  return (nu > 0 && nv > 0 && (nu+nv) >= this->getUVthreshold());
 }
