@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/__init__.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -9,5 +9,5 @@ __author__  = 'Wim Lavrijsen (WLavrijsen@lbl.gov)'
 __all__ = [ 'Constants', 'PhysicalConstants', 'SystemOfUnits',
             'Include', 'Logging', 'ResourceLimits', 'ShellEscapes',
             'DetFlags', 'GlobalFlags',
-            'Help', 'ObjectBrowser', 'PropertiesManip', 'Utils',
+            'PropertiesManip', 'Utils',
             'AlgSequence', 'Configurable', 'CfgMgr' ]
