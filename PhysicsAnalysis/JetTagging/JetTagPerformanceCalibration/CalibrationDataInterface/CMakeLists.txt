@@ -4,7 +4,7 @@
 atlas_subdir( CalibrationDataInterface )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint )
+find_package( ROOT COMPONENTS Cint Core Tree MathCore Hist RIO pthread MathMore Minuit Minuit2 Matrix Physics HistPainter Rint)
 
 find_package( Boost ) # header-only so no libraries needed
 
@@ -27,7 +27,7 @@ atlas_add_library( CalibrationDataInterfaceLib
                    ${CalibrationDataInterfaceLibDictSource}
                    PUBLIC_HEADERS CalibrationDataInterface
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils)
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
