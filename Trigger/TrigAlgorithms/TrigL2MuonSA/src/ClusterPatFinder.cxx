@@ -518,7 +518,6 @@ void TrigL2MuonSA::ClusterPatFinder::abcal(unsigned int result_pat, size_t index
   int hot_min[3]={999,999,999};
   int hot_max[3]={-999,-999,-999};
   
-  int inn_counter=0;
   int out_counter=0;
 
   for(int i=0; i<8; i++){
@@ -537,7 +536,6 @@ void TrigL2MuonSA::ClusterPatFinder::abcal(unsigned int result_pat, size_t index
     }
     if(hot_max[2] < i )         hot_max[2] = i;
 
-    inn_counter++;
     if(1 < i) out_counter++;
   }//for i 
   //

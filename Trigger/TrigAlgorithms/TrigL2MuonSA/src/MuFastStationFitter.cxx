@@ -602,7 +602,6 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
     MdtLayerHits_index[i_station][i_layer].push_back(i_hit);
   }
 
-  unsigned int real_layer_num = 0;
   std::vector<unsigned int> Ly_1st;
   Ly_1st.clear();
   std::vector<float> Line_A;
@@ -639,7 +638,6 @@ void TrigL2MuonSA::MuFastStationFitter::stationSPFit(TrigL2MuonSA::MdtHits*    m
     if (MdtLayerHits[i_station][i_layer]==0) continue;
 
     Ly_1st.push_back(i_layer);
-    real_layer_num++;
   }
 
   const int real_layer= Ly_1st.size();
