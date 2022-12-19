@@ -791,7 +791,10 @@ GeoFullPhysVol* LArGeo::EndcapCryostatConstruction::createEnvelope(bool bPos)
     // Build material geometry only if the FullGeo flag has been set
     if(m_fullGeo) {
       // Define iterators
-      IRDBRecordset::const_iterator itMother, itModerator,itTube=mbtsTubs->end();
+      IRDBRecordset::const_iterator itMother = mbtsTubs->end();
+      IRDBRecordset::const_iterator itModerator = mbtsTubs->end();
+      IRDBRecordset::const_iterator itTube=mbtsTubs->end();
+
       IRDBRecordset::const_iterator first = mbtsTubs->begin();
       IRDBRecordset::const_iterator last = mbtsTubs->end();
 
