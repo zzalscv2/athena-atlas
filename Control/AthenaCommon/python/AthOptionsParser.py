@@ -131,7 +131,6 @@ def parse(chk_tcmalloc=True):
 
     scripts, fromdb, _opts = [], None, []
     opts = Options()
-    opts.default_jobopt = "jobOptions.py" # name of the default joboption (if not provided)
     opts.msg_lvl = "INFO"        # default level of (gaudi) logging
     opts.dbg_stage = None        # no debugging by default
     opts.run_batch = 1           # batch mode is the default
@@ -197,7 +196,6 @@ def parse(chk_tcmalloc=True):
             scripts.append(arg)
         elif arg[-4:] == '.pkl' and '=' not in arg:
             fromdb = arg
-            opts.default_jobopt = ''
         elif arg == '-':     # rest are user opts, save and done
             opts.user_opts += args[ args.index(arg)+1: ]
             break
@@ -232,7 +230,6 @@ def parse(chk_tcmalloc=True):
 
         elif opt in ("-i", "--interactive"):
             opts.run_batch = 0
-            opts.default_jobopt = ""
             if opts.display is None:
                 opts.display = 1
 
@@ -342,8 +339,6 @@ def parse(chk_tcmalloc=True):
             opts.config_only = arg
             if opts.config_only[-4:] != '.pkl':
                opts.config_only += '.pkl'
-
-            opts.default_jobopt = ''
 
         elif opt in ("--dump-configuration",):
             opts.config_dump_file = arg
