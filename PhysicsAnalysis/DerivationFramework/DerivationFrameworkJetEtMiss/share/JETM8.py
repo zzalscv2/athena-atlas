@@ -131,9 +131,9 @@ DerivationFrameworkJob += jetm8Seq
 #=======================================
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
-jetm8Seq += CfgMgr.DerivationFramework__DerivationKernel(	name = "JETM8TrigKernel", 
-									SkimmingTools = [JETM8TrigSkimmingTool],
-									ThinningTools = [])
+jetm8Seq += CfgMgr.DerivationFramework__DerivationKernel(name = "JETM8TrigKernel", 
+                            SkimmingTools = [JETM8TrigSkimmingTool],
+                            ThinningTools = [])
 
 #=======================================
 # BUILD TCC INPUTS

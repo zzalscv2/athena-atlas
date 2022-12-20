@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexTaggerTool.h
@@ -113,6 +113,7 @@ protected:  // data
   TString m_fn;
   TFile * m_jvtfile;
   TH2F * m_jvthisto;
+  bool m_useOriginVertex;
 
 };
 

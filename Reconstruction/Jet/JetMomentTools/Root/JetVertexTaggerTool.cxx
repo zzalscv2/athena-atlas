@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- ////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexTaggerTool.cxx
@@ -33,6 +33,7 @@ JetVertexTaggerTool::JetVertexTaggerTool(const std::string& name)
     declareProperty("JVTLikelihoodHistName",m_jvtlikelihoodHistName = "JVTRootCore_kNN100trim_pt20to50_Likelihood");
     declareProperty("TrackSelector", m_htsel);
     declareProperty("JVTName", m_jvtName ="Jvt");
+    declareProperty("UseOriginVertex", m_useOriginVertex = false);
 }
 
 //**********************************************************************
@@ -70,11 +71,30 @@ StatusCode JetVertexTaggerTool::initialize() {
 
 int JetVertexTaggerTool::modify(xAOD::JetContainer& jetCont) const {
 
-  const xAOD::Vertex* HSvertex = findHSVertex();
-  if(!HSvertex) return 1;
+  // Get the vertex to calculate with respect to
+  // Only appropriate if we are using a single vertex interpretation, not if using OriginVertex
+  const xAOD::Vertex* HSvertex = nullptr;
+  if (!m_useOriginVertex)
+  {
+    HSvertex = findHSVertex();
+    if(!HSvertex) return 1;
+  }
 
   for(xAOD::Jet * jet : jetCont) 
     {      
+      // Get origin-vertex-specific information if relevant
+      if (m_useOriginVertex)
+      {
+        HSvertex = jet->getAssociatedObject<xAOD::Vertex>("OriginVertex");
+        if (!HSvertex) // nullptr if the attribute doesn't exist
+        {
+          ATH_MSG_ERROR("OriginVertex was requested, but the jet does not contain an OriginVertex");
+          return 2;
+        }
+        else
+          ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+      }
+      
       // Calculate RpT and JVFCorr 
       // Default JVFcorr to -1 when no tracks are associated.
       float jvfcorr = jet->getAttribute<float>(m_jvfCorrName);
@@ -97,7 +117,39 @@ int JetVertexTaggerTool::modify(xAOD::JetContainer& jetCont) const {
 
       // Done
       
+  } 
+
+  if (m_useOriginVertex) { // Compute JVT for jets assuming other vertices as origin
+    // Get the vertices container
+    const xAOD::VertexContainer* vertices = NULL;
+    if ( evtStore()->retrieve(vertices,m_verticesName).isFailure() ) {
+      ATH_MSG_ERROR("Could not retrieve the VertexContainer from evtStore: " << m_verticesName);
+     return 1;
+    }
+    ATH_MSG_DEBUG("Successfully retrieved VertexContainer from evtStore: " << m_verticesName);
+
+    std::vector<float> jvtVtx;
+    std::string jvfName = "JVF";
+
+    for(xAOD::Jet * jet : jetCont) {      
+      jvtVtx.clear();
+      const std::vector<float>& jvfcorrVtx = jet->getAttribute<std::vector<float>>(m_jvfCorrName+"Vec");
+      const std::vector<float>& rptVtx = jet->getAttribute<std::vector<float>>(jvfName+"RptVec");
+
+      // Loop over vertices
+      for(size_t vtxi=0; vtxi<vertices->size(); ++vtxi) {
+
+        float jvfcorr = jvfcorrVtx.at(vtxi);
+        float rpt = rptVtx.at(vtxi);
+        float jvt = evaluateJvt(rpt, jvfcorr);
+        jvtVtx.push_back(jvt);
+      }
+
+      jet->setAttribute(m_jvtName+"Vec", jvtVtx);
+      // Done
+      
     } 
+  }
 
   return 0;
 }
@@ -124,7 +176,18 @@ float JetVertexTaggerTool::updateJvt(const xAOD::Jet& jet) const {
   string sjvfcorr = m_jvfCorrName;
   float jvfcorr = jet.getAttribute<float>(sjvfcorr);
   std::vector<float> sumpttrkpt500 = jet.getAttribute<std::vector<float> >(m_sumPtTrkName);
-  const xAOD::Vertex* HSvertex = findHSVertex();
+  
+  // Get the vertex to calculate with respect to
+  const xAOD::Vertex* HSvertex = nullptr;
+  if (!m_useOriginVertex)
+    HSvertex = findHSVertex();
+  else
+  {
+    HSvertex = jet.getAssociatedObject<xAOD::Vertex>("OriginVertex");
+    if (!HSvertex) // nullptr if the attribute doesn't exist, nothing to do as behaviour is same as other method, checked below and return -1
+      ATH_MSG_VERBOSE("JetVertexTaggerTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+  }
+  
   if(!HSvertex) {
     ATH_MSG_ERROR("No hard scatter vertex found. Returning JVT=-1");
     return -1.;

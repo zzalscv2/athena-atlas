@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETRECTOOLS_JETRECTOOLSDICT_H
@@ -17,6 +17,7 @@
 #include "JetRecTools/JetInputElRemovalTool.h"
 #include "JetRecTools/JetTrackSelectionTool.h"
 #include "JetRecTools/PFlowPseudoJetGetter.h"
+#include "JetRecTools/PFlowByVertexPseudoJetGetter.h"
 #include "JetRecTools/PuppiWeightTool.h"
 #include "JetRecTools/SimpleJetTrackSelectionTool.h"
 #include "JetRecTools/SoftKillerWeightTool.h"

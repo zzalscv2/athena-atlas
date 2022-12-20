@@ -108,6 +108,7 @@ def filterout(skiptoolnames, tools):
 
 # Pseudojet getters
 empfgetters =  [jtm.empflowget]
+empfbvgetters = [jtm.empflowbyvertexget]
 
 trackgetters = [jtm.trackget]
 # Add track ghosts
@@ -124,6 +125,7 @@ if jetFlags.useTracks():
   emgetters      += [jtm.gtrackget]
   lcgetters      += [jtm.gtrackget]
   empfgetters    += [jtm.gtrackget]
+  empfbvgetters  += [jtm.gtrackget]
   tccgetters     += [jtm.gtrackget]
   ufocsskgetters += [jtm.gtrackget]
   ufochsgetters  += [jtm.gtrackget]
@@ -132,6 +134,7 @@ if jetFlags.useMuonSegments():
   emgetters      += [jtm.gmusegget]
   lcgetters      += [jtm.gmusegget]
   empfgetters    += [jtm.gmusegget]
+  empfbvgetters  += [jtm.gmusegget]
   tccgetters     += [jtm.gmusegget]
   ufocsskgetters += [jtm.gmusegget]
   ufochsgetters  += [jtm.gmusegget]
@@ -154,6 +157,7 @@ if jetFlags.useTruth():
   emgetters      += [jtm.gtruthget]
   lcgetters      += [jtm.gtruthget]
   empfgetters    += [jtm.gtruthget]
+  empfbvgetters  += [jtm.gtruthget]
   tccgetters     += [jtm.gtruthget]
   ufocsskgetters += [jtm.gtruthget]
   ufochsgetters  += [jtm.gtruthget]
@@ -168,6 +172,7 @@ if jetFlags.useTruth():
   truthwzgetters += flavorgetters
   trackgetters   += flavorgetters
   empfgetters    += flavorgetters
+  empfbvgetters  += flavorgetters
   tccgetters     += flavorgetters
   ufocsskgetters += flavorgetters
   ufochsgetters  += flavorgetters
@@ -181,6 +186,7 @@ if jetFlags.useTracks():
   emgetters       += trackjetgetters
   lcgetters       += trackjetgetters
   empfgetters     += trackjetgetters
+  empfbvgetters   += trackjetgetters
   tccgetters      += trackjetgetters
   ufocsskgetters  += trackjetgetters
   ufochsgetters   += trackjetgetters
@@ -190,6 +196,7 @@ if jetFlags.useTracks():
 jtm.gettersMap["emtopo"]    = list(emgetters)
 jtm.gettersMap["lctopo"]    = list(lcgetters)
 jtm.gettersMap["empflow"]   = list(empfgetters)
+jtm.gettersMap["empflowbyvertex"] = list(empfbvgetters)
 jtm.gettersMap["track"]     = list(trackgetters)
 jtm.gettersMap["pv0track"]  = list(trackgetters)
 jtm.gettersMap["tcc"]       = list(tccgetters)
@@ -299,6 +306,12 @@ pflow_ungroomed_modifiers = []
 pflow_ungroomed_modifiers += [jtm.constitfourmom_pflow]
 pflow_ungroomed_modifiers += filterout(["ecpsfrac"], ungroomed_modifiers)
 
+# Modifiers for pflow by-vertex jets
+# same as pflow jets, but with some switched config (turning on by-vertex flag)
+pflow_byvtx_ungroomed_modifiers = []
+pflow_byvtx_ungroomed_modifiers += filterout(["jvf","jvt","trksummoms"], pflow_ungroomed_modifiers)
+pflow_byvtx_ungroomed_modifiers += [jtm.jvf_byvtx,jtm.jvt_byvtx,jtm.trksummoms_byvtx]
+
 pflow_groomed_modifiers = []
 pflow_groomed_modifiers += [jtm.constitfourmom_pflow]
 pflow_groomed_modifiers += groomed_modifiers
@@ -359,6 +372,7 @@ if len(jetFlags.skipTools()):
   track_ungroomed_modifiers         = filterout(jetFlags.skipTools(), track_ungroomed_modifiers)
   groomed_modifiers                 = filterout(jetFlags.skipTools(), groomed_modifiers)
   pflow_ungroomed_modifiers         = filterout(jetFlags.skipTools(), pflow_ungroomed_modifiers)
+  pflow_byvtx_ungroomed_modifiers   = filterout(jetFlags.skipTools(), pflow_byvtx_ungroomed_modifiers)
   emtopo_ungroomed_modifiers        = filterout(jetFlags.skipTools(), emtopo_ungroomed_modifiers)
   lctopo_ungroomed_modifiers        = filterout(jetFlags.skipTools(), lctopo_ungroomed_modifiers)
   tcc_ungroomed_modifiers           = filterout(jetFlags.skipTools(), tcc_ungroomed_modifiers)
@@ -376,6 +390,7 @@ jtm.modifiersMap["groomed"]               =      list(groomed_modifiers)
 jtm.modifiersMap["emtopo_ungroomed"]      =      list(emtopo_ungroomed_modifiers)
 jtm.modifiersMap["lctopo_ungroomed"]      =      list(lctopo_ungroomed_modifiers)
 jtm.modifiersMap["pflow_ungroomed"]       =      list(pflow_ungroomed_modifiers)
+jtm.modifiersMap["pflow_byvtx_ungroomed"] =      list(pflow_byvtx_ungroomed_modifiers)
 jtm.modifiersMap["tcc_ungroomed"]         =      list(tcc_ungroomed_modifiers)
 
 jtm.modifiersMap["emtopo_groomed"]        =      list(emtopo_groomed_modifiers)

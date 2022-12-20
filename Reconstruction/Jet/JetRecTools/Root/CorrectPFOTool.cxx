@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // CorrectPFOTool.cxx
@@ -19,6 +19,7 @@ CorrectPFOTool::CorrectPFOTool(const std::string &name):
   declareProperty("CorrectNeutral",      m_correctneutral = true, "True to use the neutral component of PFlow.");
   declareProperty("CorrectCharged",      m_correctcharged = true, "True if use the charged component of PFlow.");
   declareProperty("UseChargedWeights",m_useChargedWeights = true, "True if we make use of weighting scheme for charged PFO");
+  declareProperty("DoByVertex", m_doByVertex = false, "True to add vertex-by-vertex corrections for neutral PFOs");
 
   // Input properties
   declareProperty("VertexContainerKey", 
@@ -46,7 +47,7 @@ StatusCode CorrectPFOTool::process_impl(xAOD::IParticleContainer* cont) const {
   // Type-checking happens in the JetConstituentModifierBase class
   // so it is safe just to static_cast
   xAOD::PFOContainer* pfoCont = static_cast<xAOD::PFOContainer*> (cont);
-  return correctPFO(*pfoCont);
+  return !m_doByVertex ? correctPFO(*pfoCont) : correctPFOByVertex(*pfoCont);
 }
 
 const xAOD::Vertex* CorrectPFOTool::getPrimaryVertex() const {
@@ -100,14 +101,75 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont) const {
 
     if ( fabs(ppfo->charge())<FLT_MIN) { // Neutral PFOs
       if(m_correctneutral) {
-	ATH_CHECK( applyNeutralCorrection(*ppfo, *vtx) );
+        ATH_CHECK( applyNeutralCorrection(*ppfo, *vtx) );
       }
     } else { // Charged PFOs
       if(m_correctcharged) {
-	ATH_CHECK( applyChargedCorrection(*ppfo) );
+        ATH_CHECK( applyChargedCorrection(*ppfo) );
       }      
     }
   } // PFO loop
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
+
+  //static const SG::AuxElement::Accessor< std::vector<unsigned> > matchedPVs("MatchingPVs");
+  static const SG::AuxElement::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+  
+  // Retrieve Primary Vertices
+  const xAOD::VertexContainer* vertices = nullptr;
+  if(evtStore()->retrieve(vertices, m_vertexContainer_key).isFailure()
+     || vertices->empty()){
+      ATH_MSG_WARNING(" This event has no primary vertices " );
+      return StatusCode::FAILURE;
+  } 
+  
+  // Store the size in advance, as we will be extending it with duplicate neutrals adjusted to the vertex of interest
+  const size_t numPFO {cont.size()};
+  for (size_t iPFO {0}; iPFO < numPFO; ++iPFO)
+  {
+    xAOD::PFO* ppfo = cont.at(iPFO);
+    if (ppfo == nullptr)
+      ATH_MSG_WARNING("Got a nullptr PFO when trying to correct PFOs");
+    else if (std::abs(ppfo->charge())<FLT_MIN)
+    {
+      if (m_correctneutral)
+      {
+        // Neutral PFOs - there are copies, one per vertex, already created
+        // We need to now need to correct each copy to point to the corresponding vertex
+        if (!copyIndex.isAvailable(*ppfo))
+        {
+          ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object without the corresponding vertex index attribute");
+          continue;
+        }
+        
+        const unsigned iVtx = copyIndex(*ppfo);
+        if (iVtx >= vertices->size())
+        {
+          ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");
+          continue;
+        }
+        const xAOD::Vertex* vtx = vertices->at(iVtx);
+          
+        // Determine the correct four-vector interpretation for a neutral PFO associated with this vertex
+        // Cannot use applyNeutralCorrection as that only used VxType::PriVtx, but we want to apply to all primary vertices
+        // As such, extract the relevant parts and modify appropriately here
+        if (!m_inputIsEM || m_calibrate) { // Use LC four-vector
+          ppfo->setP4(ppfo->GetVertexCorrectedFourVec(*vtx));
+        } else { // Use EM four-vector
+          ppfo->setP4(ppfo->GetVertexCorrectedEMFourVec(*vtx));
+        }
+
+      }
+    }
+    else
+    {
+      // Charged PFOs - correct them in-place, as they already have a vertex interpretation
+      if (m_correctcharged) ATH_CHECK(applyChargedCorrection(*ppfo));
+    }
+  }
 
   return StatusCode::SUCCESS;
 }

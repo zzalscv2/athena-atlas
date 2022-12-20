@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJet/JetContainerInfo.h"
@@ -110,6 +110,7 @@ namespace xAOD {
       { "LCPFlow",               LCPFlow },
       { "EMPFlow",               EMPFlow },
       { "EMCPFlow",              EMCPFlow },
+      { "EMPFlowByVertex",       EMPFlowByVertex },
       { "TrackCaloCluster",      TrackCaloCluster },
       { "UFO",                   UFO },
       { "UFOCHS",                UFOCHS },
@@ -162,6 +163,7 @@ namespace xAOD {
       { LCPFlow,               "LCPFlow" },
       { EMPFlow,               "EMPFlow" },
       { EMCPFlow,              "EMCPFlow" },
+      { EMPFlowByVertex,       "EMPFlowByVertex" },
       { TrackCaloCluster,      "TrackCaloCluster" },
       { UFO,                   "UFO" },
       { UFOCHS,                "UFOCHS" },

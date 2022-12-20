@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- ////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrackSumMomentsTool.cxx
@@ -27,6 +27,7 @@ JetTrackSumMomentsTool::JetTrackSumMomentsTool(const std::string& name)
     declareProperty("TrackVertexAssociation",m_tva);
     declareProperty("TrackSelector", m_htsel);
     declareProperty("RequireTrackPV", m_requireTrackPV = true);
+    declareProperty("UseOriginVertex", m_useOriginVertex = false);
 }
 
 
@@ -50,11 +51,14 @@ int JetTrackSumMomentsTool::modifyJet(xAOD::Jet& jet) const {
 
   // Get input vertex collection
   const xAOD::VertexContainer* vertexContainer = nullptr;
-  if ( evtStore()->retrieve(vertexContainer,m_vertexContainer).isFailure()
-       || vertexContainer == nullptr ) {
-    ATH_MSG_ERROR("Could not retrieve the VertexContainer from evtStore: "
-                  << m_vertexContainer);
-    return 1;
+  if (!m_useOriginVertex)
+  {
+    if ( evtStore()->retrieve(vertexContainer,m_vertexContainer).isFailure()
+         || vertexContainer == nullptr ) {
+      ATH_MSG_ERROR("Could not retrieve the VertexContainer from evtStore: "
+                    << m_vertexContainer);
+      return 1;
+    }
   }
 
   // Get the track-vertex association
@@ -73,12 +77,26 @@ int JetTrackSumMomentsTool::modifyJet(xAOD::Jet& jet) const {
   }
   
 
-  if (vertexContainer->size() == 0 ) { 
+  if (!m_useOriginVertex && vertexContainer->size() == 0 ) { 
     ATH_MSG_WARNING("There are no vertices in the container. Exiting"); 
     return 4;
   }
 
-  const xAOD::Vertex* HSvertex = findHSVertex(vertexContainer);
+  // Get the vertex to calculate with respect to
+  const xAOD::Vertex* HSvertex = nullptr;
+  if (!m_useOriginVertex)
+    HSvertex = findHSVertex(vertexContainer);
+  else
+  {
+    HSvertex = jet.getAssociatedObject<xAOD::Vertex>("OriginVertex");
+    if (!HSvertex) // nullptr if the attribute doesn't exist
+    {
+      ATH_MSG_ERROR("OriginVertex was requested, but the jet does not contain an OriginVertex");
+      return 5;
+    }
+    else
+      ATH_MSG_VERBOSE("JetTrackSumMomentsTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+  }
 
   const std::pair<float,float> tracksums = getJetTrackSums(HSvertex, tracks, tva);
 
