@@ -265,6 +265,18 @@ class MultiTrajectory final
    */
   bool has_backends() const;
 
+  /**
+  * Implementation of allocation of calibrated measurements
+  */
+  void allocateCalibrated_impl(IndexType istate, std::size_t measdim) {
+    // resize the calibrated measurement to the size measdim
+    const auto& trackStates = *m_trackStates;
+    trackMeasurements().at(trackStates[istate]->calibrated())->resize(measdim);
+  }
+
+
+
+
  private:
   // bare pointers to the backend (need to be fast and we do not claim ownership
   // anyways)
