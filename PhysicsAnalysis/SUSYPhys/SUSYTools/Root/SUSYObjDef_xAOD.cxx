@@ -292,6 +292,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
 
     m_slices(std::map<std::string,bool>()),
     m_isRun3(false),
+    m_isPHYSLITE(false),
 
     m_metJetSelection(""),
     m_fatJets(""),
@@ -616,6 +617,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   //Egamma correction file list override
   declareProperty( "EleEffCorrFNList", m_EG_corrFNList );
   declareProperty( "IsRun3", m_isRun3 );
+  declareProperty( "IsPHYSLITE", m_isPHYSLITE );
   
   //For electron trigger SF tools
   declareProperty( "ElectronTriggerSFStringSingle",      m_electronTriggerSFStringSingle);
@@ -876,7 +878,7 @@ StatusCode SUSYObjDef_xAOD::initialize() {
   if ( inputMetaStore()->contains<xAOD::FileMetaData>("FileMetaData") && inputMetaStore()->retrieve(fmd,"FileMetaData").isSuccess() )
      fmd->value(xAOD::FileMetaData::dataType, dataType);
   if ( dataType.compare("StreamDAOD_PHYS")==0 || dataType.compare("StreamDAOD_PHYSLITE")==0 ) m_defaultTruthJets = "AntiKt4TruthDressedWZJets";
-  if ( dataType.compare("StreamDAOD_PHYSLITE")==0 ) m_isPHYSLITE = true;
+  if ( dataType.compare("StreamDAOD_PHYSLITE")==0) m_isPHYSLITE = true;
 
   ATH_MSG_INFO( "Configured for truth jet collection: " << m_defaultTruthJets );
 
