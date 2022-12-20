@@ -496,7 +496,7 @@ void Analysis_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
   h_chain->Fill(4.5, testTracks.size() );
 
 
-  for( ; reference!=referenceEnd ; reference++ ) {
+  for( ; reference!=referenceEnd ; ++reference ) {
     
     // Get reference parameters
     double referenceEta = (*reference)->eta();

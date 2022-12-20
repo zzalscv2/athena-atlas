@@ -1007,7 +1007,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		    }
 		    if ( remove_track ) { inc=false; tracks.erase( it ); }
 		  }
-		  if ( inc ) it++;
+		  if ( inc ) ++it;
 		}
 		
 		/// may well put the reporting back in, so leaving this 

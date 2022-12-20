@@ -195,7 +195,7 @@ T* Get( TFile& f, const std::string& n, const std::string& dir="",
 
   if ( h == 0 ) { 
     if ( chainmap && chainmap->size()!=0 ) { 
-      for ( chainmap_t::const_iterator itr=chainmap->begin() ; itr!=chainmap->end() ; itr++ ) { 
+      for ( chainmap_t::const_iterator itr=chainmap->begin() ; itr!=chainmap->end() ; ++itr ) { 
 	if ( contains( name, itr->first ) ) { 
 	  std::cout << "\tmatch: " << itr->first << " -> " << itr->second << std::endl;
 	  name.replace( name.find(itr->first), itr->first.size(), itr->second );
@@ -1169,7 +1169,7 @@ int main(int argc, char** argv) {
       
       std::cout << "\nusing chain map:" << std::endl;
       
-      for ( chainmap_t::iterator itr=chainmap->begin() ; itr!=chainmap->end() ; itr++ ) { 
+      for ( chainmap_t::iterator itr=chainmap->begin() ; itr!=chainmap->end() ; ++itr ) { 
 	std::cout << "\t" << itr->first << "\t" << itr->second << std::endl;
       }
     }
