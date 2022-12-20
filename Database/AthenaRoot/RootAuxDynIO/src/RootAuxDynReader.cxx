@@ -136,7 +136,7 @@ std::string getKeyFromBranch (TBranch* branch)
     }
 
     if (key.size() >= 5 && key.substr(key.size()-4, 4) == RootAuxDynIO::AUX_POSTFIX )
-      key = key.substr (0, key.size()-4);
+      key.erase(key.size()-4);
     return key;
   }
   return "";

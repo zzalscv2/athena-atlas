@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootCnvSvc.cxx
@@ -76,7 +76,7 @@ StatusCode RootCnvSvc::connectOutput(const std::string& file, const std::string&
       return StatusCode::FAILURE;
     }
     m_treeName = fileName.substr(inx1 + 1, inx2 - inx1 - 1);
-    fileName = fileName.substr(0, inx1);
+    fileName.resize(inx1);//already checked that inx1!=npos
   }
   if (!m_rootSvc->open(fileName, mode).isSuccess()) {
     ATH_MSG_ERROR("Could not open-recreate file [" << file << "]");
