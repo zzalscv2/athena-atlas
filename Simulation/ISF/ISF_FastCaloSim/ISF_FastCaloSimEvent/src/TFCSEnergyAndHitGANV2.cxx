@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSEnergyAndHitGANV2.h"
@@ -87,7 +87,7 @@ bool TFCSEnergyAndHitGANV2::initializeNetwork(int pid,int etaMin,std::string Fas
   set_eta_nominal((etaMin+etaMax)/200.0);
 
   int pidForXml = pid;
-  if (pid != 22 || pid != 11){
+  if (pid != 22 && pid != 11){
     pidForXml = 211;
   }
   
