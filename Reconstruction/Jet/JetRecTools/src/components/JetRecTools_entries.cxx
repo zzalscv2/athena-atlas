@@ -6,6 +6,7 @@
 #include "JetRecTools/TrackVertexAssociationTool.h"
 #include "JetRecTools/TrackPseudoJetGetter.h"
 #include "JetRecTools/PFlowPseudoJetGetter.h"
+#include "JetRecTools/PFlowByVertexPseudoJetGetter.h"
 #include "JetRecTools/JetConstituentModSequence.h"
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "JetRecTools/CaloClusterConstituentsOrigin.h"
@@ -26,6 +27,7 @@ DECLARE_COMPONENT( SimpleJetTrackSelectionTool )
 DECLARE_COMPONENT( TrackVertexAssociationTool )
 DECLARE_COMPONENT( TrackPseudoJetGetter )
 DECLARE_COMPONENT( PFlowPseudoJetGetter )
+DECLARE_COMPONENT( PFlowByVertexPseudoJetGetter )
 DECLARE_COMPONENT( JetConstituentModSequence )
 DECLARE_COMPONENT( JetConstituentModifierBase )
 DECLARE_COMPONENT( CaloClusterConstituentsOrigin )

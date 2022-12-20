@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 #********************************************************************
 # JetCommon.py
@@ -477,7 +477,7 @@ def addStandardJets(jetalg, rsize, inputtype, ptmin=0., ptminFilter=0.,
                     mods="default", calibOpt="none", ghostArea=0.01,
                     algseq=None, namesuffix="",
                     outputGroup="CustomJets", customGetters=None, pretools = [], constmods = [],
-                    overwrite=False):
+                    overwrite=False, ivtxin=None):
     jetnamebase = "{0}{1}{2}{3}".format(jetalg,int(rsize*10),inputtype,namesuffix)
     jetname = jetnamebase+"Jets"
     algname = "jetalg"+jetnamebase
@@ -508,6 +508,7 @@ def addStandardJets(jetalg, rsize, inputtype, ptmin=0., ptminFilter=0.,
                        "EMPFlow":"pflow_ungroomed",
                        "EMCPFlow":"pflow_ungroomed",
                        "PFlowCustomVtx":"pflow_ungroomed",
+                       "EMPFlowByVertex":"pflow_byvtx_ungroomed",
                        "Truth":"truth_ungroomed",
                        "TruthWZ":"truth_ungroomed",
                        "PV0Track":"track_ungroomed",
@@ -523,6 +524,7 @@ def addStandardJets(jetalg, rsize, inputtype, ptmin=0., ptminFilter=0.,
         finderArgs['ghostArea'] = ghostArea
         finderArgs['modifiersin'] = mods
         finderArgs['calibOpt'] = calibOpt
+        finderArgs['ivtxin'] = ivtxin
         dfjetlog.info("mods in:"+ str(finderArgs['modifiersin']))
         if overwrite:
             dfjetlog.info("Will overwrite AOD version of "+jetname)
@@ -646,6 +648,26 @@ def addCHSPFlowObjects():
             # This was added by JetCommon
             job.jetalg.Tools.append(jtm.jetconstitCHSPFlow)
             dfjetlog.info("Added CHS PFlow sequence to \'jetalg\'")
+            dfjetlog.info(job.jetalg.Tools)
+
+def addCHSByVertexPFlowObjects():
+    # Only act if the collection does now already exist
+    from RecExConfig.AutoConfiguration import IsInInputFile
+    if not IsInInputFile("xAOD::PFOContainer","CHSByVertexParticleFlowObjects"):
+        # Check that an alg doing this has not already been inserted
+        from AthenaCommon.AlgSequence import AlgSequence
+        job = AlgSequence()
+        from JetRec.JetRecStandard import jtm
+        if not hasattr(job,"jetalgCHSByVertexPFlow") and not hasattr(jtm,"jetconstitCHSByVertexPFlow"):
+            from JetRec.JetRecConf import JetToolRunner
+            jtm += JetToolRunner("jetconstitCHSByVertexPFlow",
+                                 EventShapeTools=[],
+                                 Tools=[jtm.JetConstitSeq_PFlowCHSByVertex])
+            # Add this tool runner to the JetAlgorithm instance "jetalg"
+            # which runs all preparatory tools
+            # This was added by JetCommon
+            job.jetalg.Tools.append(jtm.jetconstitCHSByVertexPFlow)
+            dfjetlog.info("Added CHS ByVertex PFlow sequence to \'jetalg\'")
             dfjetlog.info(job.jetalg.Tools)
 
 # If we are not running on EVNT then add PFlow Rho for precision recommendations

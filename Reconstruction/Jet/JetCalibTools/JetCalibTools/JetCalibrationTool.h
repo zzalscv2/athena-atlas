@@ -163,6 +163,8 @@ private:
   std::vector<JetCalibrationToolBase*> m_insituCombMassCorr;
   GenericHistScaleCorrection* m_genericScaleCorr;
 
+  // Try to use jet-attribute-specified origin vertex for calibration
+  bool m_useOriginVertex;
 }; 
 
 #endif //> !JETCALIBTOOLS_APPLYJETCALIBRATION_H

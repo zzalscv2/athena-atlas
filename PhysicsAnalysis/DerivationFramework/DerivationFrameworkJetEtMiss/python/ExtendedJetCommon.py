@@ -265,6 +265,13 @@ def addAntiKt4NoPtCutJets(sequence,outputlist):
     addStandardJets("AntiKt", 0.4, "EMPFlow", namesuffix="NoPtCut", ptmin=0, ptminFilter=1,
                     mods="pflow_ungroomed", algseq=sequence, outputGroup=outputlist,calibOpt="none")
 
+# 1 MeV cut at constituent level for MCJES, from ALL primary vertices
+def addAntiKt4ByVertexJets(sequence,outputlist, ptfilter=7000):
+    addCHSByVertexPFlowObjects()
+    addStandardJets("AntiKt",0.4,"EMPFlowByVertex", namesuffix="", ptmin=0, ptminFilter=ptfilter,
+                     mods="pflow_byvtx_ungroomed", algseq=sequence, outputGroup=outputlist,calibOpt="none",
+                     ivtxin=-1, customGetters="empflowbyvertex")
+
 ##################################################################
 
 def applyJetAugmentation(jetalg,algname,sequence,jetaugtool):

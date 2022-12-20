@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetTrackSumMomentsTool.h 
@@ -65,6 +65,7 @@ private:
   std::string m_assocTracksName;
   std::string m_tva;
   bool m_requireTrackPV;
+  bool m_useOriginVertex;
   ToolHandle<IJetTrackSelector> m_htsel;
 
 };

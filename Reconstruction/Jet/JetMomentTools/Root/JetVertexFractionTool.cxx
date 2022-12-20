@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetVertexFractionTool.cxx
@@ -24,6 +24,7 @@ JetVertexFractionTool::JetVertexFractionTool(const std::string& name)
   declareProperty("K_JVFCorrScale",m_kcorrJVF = 0.01);
   declareProperty("PUTrkPtCut",m_PUtrkptcut = 30000.);
   declareProperty("IsTrigger",m_isTrigger =false);
+  declareProperty("UseOriginVertex",m_useOriginVertex = false);
 }
 
 //**********************************************************************
@@ -115,12 +116,31 @@ int JetVertexFractionTool::modify(xAOD::JetContainer& jetCont) const {
     return 4;
   }
 
-  const xAOD::Vertex* HSvertex = findHSVertex(vertices);
+  // Get the vertex to calculate with respect to
+  // Only appropriate if we are using a single vertex interpretation, not if using OriginVertex
+  const xAOD::Vertex* HSvertex = nullptr;
+  if (!m_useOriginVertex)
+    HSvertex = findHSVertex(vertices);
 
   // Count pileup tracks - currently done for each collection
-  const int n_putracks = getPileupTrackCount(HSvertex, tracksCont, tva);
+  // Only appropriate if we are using a single vertex interpretation, not if using OriginVertex
+  const int n_putracks = !m_useOriginVertex ? getPileupTrackCount(HSvertex, tracksCont, tva) : -1;
 
   for(xAOD::Jet * jet : jetCont) {
+    // Get origin-vertex-specific information if relevant
+    if (m_useOriginVertex)
+    {
+      HSvertex = jet->getAssociatedObject<xAOD::Vertex>("OriginVertex");
+      if (!HSvertex) // nullptr if the attribute doesn't exist
+      {
+        ATH_MSG_ERROR("OriginVertex was requested, but the jet does not contain an OriginVertex");
+        return 5;
+      }
+      else
+        ATH_MSG_VERBOSE("JetVertexFractionTool " << name() << " is using OriginVertex at index: " << HSvertex->index());
+    }
+    const int n_putracks_local = !m_useOriginVertex ? n_putracks : getPileupTrackCount(HSvertex,tracksCont,tva);
+
     // Get the tracks associated to the jet
     // Note that there may be no tracks - this is both normal and an error case
     std::vector<const xAOD::TrackParticle*> tracks;
@@ -151,13 +171,60 @@ int JetVertexFractionTool::modify(xAOD::JetContainer& jetCont) const {
     // Default JVFcorr to -1 when no tracks are associated.
     float jvfcorr = -999.;
     if(sumpttrk_PV + sumpttrk_nonPV > 0) {
-      jvfcorr = sumpttrk_PV / (sumpttrk_PV + ( sumpttrk_nonPV / (m_kcorrJVF * std::max(n_putracks, 1) ) ) );
+      jvfcorr = sumpttrk_PV / (sumpttrk_PV + ( sumpttrk_nonPV / (m_kcorrJVF * std::max(n_putracks_local, 1) ) ) );
     } else {
       jvfcorr = -1;
     }
     jet->setAttribute(m_jvfname+"Corr",jvfcorr);
   }
 
+  if (m_useOriginVertex) { // Add extra info to compute JVT for jets assuming other vertices as origin
+    std::vector<float> jvfCorrVtx;
+    std::vector<float> rptVtx;
+
+    for(xAOD::Jet * jet : jetCont) {      
+      jvfCorrVtx.clear();
+      rptVtx.clear();
+
+      // Loop over vertices
+      for(xAOD::Vertex* pv : *vertices){
+
+        // Calculate RpT and JVFCorr for a given vertex
+        // Default JVFcorr to -1 when no tracks are associated. -  copied from JetVertexFractionTool.cxx
+        // Get the tracks associated to the jet
+        // Note that there may be no tracks - this is both normal and an error case
+        std::vector<const xAOD::TrackParticle*> tracks;
+        if ( ! jet->getAssociatedObjects(m_assocTracksName, tracks) ) {
+          ATH_MSG_DEBUG("Associated tracks not found.");
+        }
+      
+        const int n_putracks = getPileupTrackCount(pv, tracksCont, tva);
+
+        // Get the track pT sums for all tracks in the jet (first key) and those associated to PU(?) (second key) vertices.
+        const std::pair<float,float> tracksums = getJetVertexTrackSums(pv, tracks, tva);
+        // Get the track pT sums for each individual vertex
+        std::vector<float> vsumpttrk = jet->getAttribute<std::vector<float> >(m_sumPtTrkName);
+        float sumpttrk_PV = vsumpttrk[pv->index()];
+        float sumpttrk_nonPV = tracksums.second; // Consider as "PU" all vertices not matching the one I'm looping over
+        float jvfcorr = -999.;
+        float m_kcorrJVF = 0.01;
+        if(sumpttrk_PV + sumpttrk_nonPV > 0) { 
+          jvfcorr = sumpttrk_PV / (sumpttrk_PV + ( sumpttrk_nonPV / (m_kcorrJVF * std::max(n_putracks, 1) ) ) );
+        } else {
+          jvfcorr = -1;
+        }
+        jvfCorrVtx.push_back(jvfcorr);
+
+        const float rpt = vsumpttrk[pv->index()]/jet->pt();
+        rptVtx.push_back(rpt);
+      }
+
+      jet->setAttribute(m_jvfname+"CorrVec",jvfCorrVtx);
+      jet->setAttribute(m_jvfname+"RptVec",rptVtx);
+      // Done
+      
+    } 
+  }
   return 0;
 }
 

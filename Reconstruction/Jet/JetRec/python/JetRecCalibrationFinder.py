@@ -61,7 +61,7 @@ class JetRecCalibrationFinder:
     from JetCalibTools.JetCalibToolsConf import JetCalibrationTool
     from JetRec.JetRecStandardToolManager import jtm
     inp = inpin
-    if inpin == "PFlowCustomVtx":
+    if inpin == "PFlowCustomVtx" or inpin == "EMPFlowByVertex":
       inp = "EMPFlow"
     # Find the configuration file.
     configkey = configkeyin
@@ -83,6 +83,11 @@ class JetRecCalibrationFinder:
     jetlog.info( myname + "    seq: " + str(seq) )
     jetlog.info( myname + "  Jet definition: " + jetdefn )
     jetlog.info( myname + "  Configuration file: " + configfile )
+    
+    useOriginVertex = False
+    if inpin == "EMPFlowByVertex":
+      useOriginVertex = True
+      jetlog.info( myname + "Using jet-attribute-specified origin vertex for calibration")
 
     if tname in jtm.tools:
       jetlog.info( myname + "  Skipping previously-defined tool: " + tname )
@@ -117,6 +122,8 @@ class JetRecCalibrationFinder:
         evssuf="LCPFlowEventShape"
       elif inpin == "PFlowCustomVtx":
         evssuf="PFlowCustomVtxEventShape"
+      elif inpin == "EMPFlowByVertex":
+        evssuf="EMPFlowEventShape"
       else:
         evssuf="INVALID"
         jetlog.info( myname + "  ERROR: Invalid input specifier: " + inp )
@@ -125,7 +132,7 @@ class JetRecCalibrationFinder:
       jetlog.info( myname + "  Event shape key: " + evskey )
       # ...create the tool.
       jtm += JetCalibrationTool(tname, JetCollection=jetdefn, ConfigFile=configfile, CalibSequence=fullseq, RhoKey=evskey,
-                                CalibArea=calibareatag)
+                                CalibArea=calibareatag, useOriginVertex=useOriginVertex)
 
     return jtm.tools[tname]
 
