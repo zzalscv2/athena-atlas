@@ -1,12 +1,14 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INDETREADOUTGEOMETRY_TRT_DETELEMENTCONTAINER_H
-#define INDETREADOUTGEOMETRY_TRT_DETELEMENTCONTAINER_H
+#ifndef TRT_READOUTGEOMETRY_TRT_DETELEMENTCONTAINER_H
+#define TRT_READOUTGEOMETRY_TRT_DETELEMENTCONTAINER_H
 
 #include "TRT_DetElementCollection.h"
 #include "TRT_Numerology.h"
+#include "InDetIdentifier/TRT_ID.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include <vector>
 
@@ -19,7 +21,8 @@ class TRT_Numerology;
 
 /// Class to hold different TRT detector elements structures. 
 
-class TRT_DetElementContainer{
+class TRT_DetElementContainer : public AthMessaging
+{
 
  public:  
 
@@ -36,18 +39,33 @@ class TRT_DetElementContainer{
 
   void addEndcapElement(TRT_EndcapElement *element);
 
+  void manageBarrelElement(TRT_BarrelElement *barrel, const TRT_ID* idHelper);
+
+  void manageEndcapElement(TRT_EndcapElement *endcap, const TRT_ID* idHelper);
+
   const TRT_DetElementCollection* getElements() const;
 
   const TRT_Numerology* getTRTNumerology() const;
 
-  const TRT_EndcapElement *getEndcapDetElement(unsigned int positive,                                                                                     
-					    unsigned int wheelIndex,                                                            
-					    unsigned int strawLayerIndex,                                                     
-					    unsigned int phiIndex) const;
-  const TRT_BarrelElement *getBarrelDetElement(unsigned int positive,
-					    unsigned int moduleIndex,
-					    unsigned int phiIndex,
-					    unsigned int strawLayerIndex) const;
+  const TRT_BarrelElement *getBarrelDetElement(unsigned int positive
+					       , unsigned int moduleIndex
+					       , unsigned int phiIndex
+					       , unsigned int strawLayerIndex) const;
+
+  TRT_BarrelElement *getBarrelDetElement(unsigned int positive
+					 , unsigned int moduleIndex
+					 , unsigned int phiIndex
+					 , unsigned int strawLayerIndex);
+
+  const TRT_EndcapElement *getEndcapDetElement(unsigned int positive
+					       , unsigned int wheelIndex
+					       , unsigned int strawLayerIndex
+					       , unsigned int phiIndex) const;
+
+  TRT_EndcapElement *getEndcapDetElement(unsigned int positive
+					 , unsigned int wheelIndex
+					 , unsigned int strawLayerIndex
+					 , unsigned int phiIndex);
 
   void clear();
 
