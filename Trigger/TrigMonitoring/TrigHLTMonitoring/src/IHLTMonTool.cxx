@@ -48,7 +48,7 @@ IHLTMonTool::IHLTMonTool(const std::string & type, const std::string & myname, c
 
 IHLTMonTool::~IHLTMonTool() {
   // delete MonGroups
-  for (std::map<std::string, MonGroup *>::iterator i = m_group.begin(); i != m_group.end(); i++) {
+  for (std::map<std::string, MonGroup *>::iterator i = m_group.begin(); i != m_group.end(); ++i) {
     if (i->second)
       delete i->second;
   }
