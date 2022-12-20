@@ -66,7 +66,7 @@ void Analysis_Distribution::execute(const std::vector<TIDA::Track*>& /*reference
   std::vector<TIDA::Track*>::const_iterator test=testTracks.begin();
   std::vector<TIDA::Track*>::const_iterator testEnd=testTracks.end();
 
-  for ( ; test!=testEnd ; test++ ) {
+  for ( ; test!=testEnd ; ++test ) {
     
     // Get test parameters
     double testEta = (*test)->eta();

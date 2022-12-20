@@ -424,7 +424,7 @@ int main(int argc, char** argv) {
 		  }
 		  if ( remove_track ) { inc=false; tracks.erase( it ); }
 		}
-		if ( inc ) it++;
+		if ( inc ) ++it;
 	      }
 
 	    }

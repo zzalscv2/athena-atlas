@@ -133,7 +133,7 @@ StatusCode TrigTRTHTHCounter::execute(const EventContext& ctx) const {
     InDet::TRT_DriftCircleCollection::const_iterator trtItr = (*trtdriftContainerItr)->begin();
     InDet::TRT_DriftCircleCollection::const_iterator trtEnd = (*trtdriftContainerItr)->end();
       
-    for(; trtItr!=trtEnd; trtItr++){
+    for(; trtItr!=trtEnd; ++trtItr){
 	
       // find out which detector element the hit belongs to
       const InDetDD::TRT_BaseElement *det = (*trtItr)->detectorElement();

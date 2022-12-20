@@ -255,7 +255,7 @@ void AnalysisConfig_Ntuple::loop() {
 		     
 		    }
 		  
-		    chainitr++;
+		    ++chainitr;
 		}
 		
 		//	  std::cout << "output chains" << std::endl;
@@ -1630,7 +1630,7 @@ void AnalysisConfig_Ntuple::loop() {
 		    }
 		    if ( remove_track ) { inc=false; tracks.erase( it ); }
 		  }
-		  if ( inc ) it++;
+		  if ( inc ) ++it;
 		}
 		
 		/// may well put the reporting back in, so leaving this 
