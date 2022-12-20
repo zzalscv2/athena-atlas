@@ -2301,7 +2301,6 @@ float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_
    const int PIXLOC_PIX_UNKNOWN = 5;
 
    std::multimap<float,int> dEdxMap;
-   int   n_usedIBLOverflowHits=0;
    float dEdxValue = 0;
 
    // Check for track states:
@@ -2409,7 +2408,6 @@ float TrigFastTrackFinder::dEdx(const Trk::Track* track, int& pixelhits, int& n_
 	    dEdxValue = charge*conversion_factor/thickness;
 	    dEdxMap.insert(std::pair<float,int>(dEdxValue, iblOverflow));
 	    pixelhits++;
-	    if(iblOverflow==1)n_usedIBLOverflowHits++;
 	 }
 	 ATH_MSG_VERBOSE("dEdx=" << dEdxValue);
 	 v_pixhit_dedx.push_back(dEdxValue); v_pixhit_tot.push_back(tot);
@@ -3228,11 +3226,8 @@ int TrigFastTrackFinder::recoAndFillDisTrkCand(const std::string& base_prefix,
    std::string prefix;
 
    int n_stored_tracks = 0;
-   int idx = -1;
 
    for (auto trk = tracks->begin(); trk!=tracks->end(); ++trk) {
-
-      idx++;
 
       Trk::Track* ptrk = *trk;
 
