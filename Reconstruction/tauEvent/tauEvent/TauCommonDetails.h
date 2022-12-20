@@ -1286,7 +1286,7 @@ namespace Analysis {
 
         // vector bool of which tracks pass the track filter
         std::vector<bool> TrackFilterPass() const;
-        void setTrackFilterPass(std::vector<bool> value);
+        void setTrackFilterPass(const std::vector<bool>& value);
 
         // nProng based on what the track filter passes
         int TrackFilterProngs() const;
