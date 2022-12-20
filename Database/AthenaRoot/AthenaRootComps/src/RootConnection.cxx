@@ -62,8 +62,6 @@ namespace Athena {
 RootConnection::RootConnection(const IInterface* /*own*/, const std::string& pfn) :
 	m_fid(),
 	m_pfn(pfn),
-	//m_age(0),
-	//m_owner(own),
 	m_file(0),
 	m_tree(0),
 	m_branch(0),
@@ -162,7 +160,7 @@ StatusCode RootConnection::setContainer(const std::string& container, const std:
       return StatusCode::FAILURE;
     }
     branchName = treeName.substr(inx1 + 1, inx2 - inx1 - 1);
-    treeName = treeName.substr(0, inx1);
+    treeName.resize(inx1);//inx1 was already checked
   }
   if (m_tree == 0) {
     m_tree = (TTree*)m_file->Get(treeName.c_str());
