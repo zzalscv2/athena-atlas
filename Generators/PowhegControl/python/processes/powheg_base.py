@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import Logging
 from .configurable import Configurable
@@ -72,6 +72,25 @@ class PowhegBase(Configurable):
         os.environ['LD_LIBRARY_PATH'] = ldpath_new
         logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
         logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
+
+    def manually_set_openloops_gnu_paths(self):
+        '''
+        Manual fix for OpenLoops libraries path, avoiding issues when /afs not available
+        This is NOT a viable long-term solution and should be made obsolete after the migration
+        away from AFS is more advanced.
+        '''
+        import os
+        logger.warning("Applying manual, hard-coded fixes for OpenLoops library paths")
+        logger.info("OpenLoopsPath (before) = {0}".format(os.getenv('OpenLoopsPath')))
+        logger.debug("LD_LIBRARY_PATH (before) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
+        OLPath = os.path.dirname(self.executable)+"/obj-gnu"
+        os.environ['OpenLoopsPath'] = OLPath
+        ldpath = os.getenv('LD_LIBRARY_PATH')
+        ldpath_new = OLPath+ ":" + OLPath + "/proclib:" + ldpath
+        os.environ['LD_LIBRARY_PATH'] = ldpath_new
+        logger.info("OpenLoopsPath (after) = {0}".format(os.getenv('OpenLoopsPath')))
+        logger.debug("LD_LIBRARY_PATH (after) = {0}".format(os.getenv('LD_LIBRARY_PATH')))
+
 
     def link_madloop_libraries(self):
         '''
