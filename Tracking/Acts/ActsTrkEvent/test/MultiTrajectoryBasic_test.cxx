@@ -541,27 +541,29 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyCrossTalk, EmptyMTJ) {
     BOOST_CHECK_EQUAL(tsb.smoothedCovariance(), cov);
   }
 
-  // TODO problem with a link tsa.uncalibrated()
+  // TODO in the next MR
+  // problem with a link tsa.uncalibrated()
   // https://github.com/acts-project/acts/blob/980f9ef66ce2df426be87e611f9a8c813904ad7c/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L479
 
-  // TODO
-  // allocateCalibrated(eBoundSize) is not implemented yet
-  // https://github.com/acts-project/acts/blob/980f9ef66ce2df426be87e611f9a8c813904ad7c/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L488
-
-  // TODO
-  // re-enable this test as soon as the allocateCalibrated(eBoundSize) is
-  // implemented in the ActsTrk::Multitrajectory as of now the calibratedSize is
-  // 0 and this makes the test fail
-  /*
+  {
+    // reset measurements w/ full parameters
+    auto [measPar, measCov] = generateBoundParametersCovariance(rng);
+    tsb.allocateCalibrated(eBoundSize);
+    tsb.calibrated<eBoundSize>() = measPar;
+    tsb.calibratedCovariance<eBoundSize>() = measCov;
+    BOOST_CHECK_EQUAL(tsa.calibrated<eBoundSize>(), measPar);
+    BOOST_CHECK_EQUAL(tsa.calibratedCovariance<eBoundSize>(), measCov);
+    BOOST_CHECK_EQUAL(tsb.calibrated<eBoundSize>(), measPar);
+    BOOST_CHECK_EQUAL(tsb.calibratedCovariance<eBoundSize>(), measCov);
+  }
   {
     // reset only the effective measurements
     auto [measPar, measCov] = generateBoundParametersCovariance(rng);
+    tsb.calibratedSize()=eBoundSize;
     size_t nMeasurements = tsb.effectiveCalibrated().rows();
     auto effPar = measPar.head(nMeasurements);
     auto effCov = measCov.topLeftCorner(nMeasurements, nMeasurements);
-    // TODO
-    // Here should be a command tsb.allocateCalibrated(eBoundSize);
-    // but we create TrackState always with calibrated alocated
+    tsb.allocateCalibrated(eBoundSize);
     tsb.effectiveCalibrated() = effPar;
     tsb.effectiveCalibratedCovariance() = effCov;
     BOOST_CHECK_EQUAL(tsa.effectiveCalibrated(), effPar);
@@ -569,7 +571,6 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyCrossTalk, EmptyMTJ) {
     BOOST_CHECK_EQUAL(tsb.effectiveCalibrated(), effPar);
     BOOST_CHECK_EQUAL(tsb.effectiveCalibratedCovariance(), effCov);
   }
-  */
   {
     Jacobian jac = Jacobian::Identity();
     BOOST_CHECK_NE(tsa.jacobian(), jac);
