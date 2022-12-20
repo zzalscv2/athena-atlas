@@ -396,7 +396,7 @@ TopoSteering::executeDecisionAlgorithm(TCS::DecisionAlg *alg,
    for(const Connector* inConn: inputConnectors)
    {
       const SortingConnector * sc = dynamic_cast<const SortingConnector *>(inConn);
-      if (sc==nullptr && inConn!=nullptr) {
+      if (sc==nullptr) {
 	 TCS_EXCEPTION("L1Topo Steering: Decision algorithm " << alg->name() << " could not cast as SortingConnector* the input connector " << inConn->name());
       }
       else {
