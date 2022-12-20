@@ -102,7 +102,6 @@ private:
   int m_rejected{0};
   int m_accepted{0};
   std::vector<int> m_pdgCode;
-  int m_selection{0};
 
   IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
   FloatProperty m_emin{this, "emin", 10.*m_GeV};
