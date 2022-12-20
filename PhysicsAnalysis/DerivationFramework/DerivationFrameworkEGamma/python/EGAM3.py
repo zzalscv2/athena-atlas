@@ -499,6 +499,13 @@ def EGAM3Cfg(ConfigFlags):
     EGAM3SlimmingHelper.AppendToDictionary.update(densityDict)
     EGAM3SlimmingHelper.ExtraVariables += densityList
 
+    # To have ptcone40
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags,
+                                    object_types = ('Photons',),
+                                    ptCuts = (500,1000),
+                                    postfix = 'Extra'))
+
     # electrons: detailed shower shape and track variables
     EGAM3SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
     EGAM3SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent

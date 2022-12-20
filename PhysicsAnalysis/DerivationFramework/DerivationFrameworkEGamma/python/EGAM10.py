@@ -196,7 +196,6 @@ def EGAM10KernelCfg(ConfigFlags, name='EGAM10Kernel', **kwargs):
     # skimming
     skimmingTool = acc.getPrimaryAndMerge(EGAM10SkimmingToolCfg(ConfigFlags))
 
-
     # setup the kernel
     acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,
                                       SkimmingTools = [skimmingTool],
@@ -300,17 +299,18 @@ def EGAM10Cfg(ConfigFlags):
 
     # photons
     EGAM10SlimmingHelper.ExtraVariables += [
-        'Photons.core57cellsEnergyCorrection.topoetcone20.topoetcone30',
-        'Photons.topoetcone40.ptcone20.ptcone30.ptcone40.f3.f3core',
+        'Photons.ptcone30.ptcone40.f3.f3core',
         'Photons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId',
         'Photons.maxEcell_x.maxEcell_y.maxEcell_z',
+        'Photons.ptcone40_Nonprompt_All_MaxWeightTTVA_pt1000',
+        'Photons.ptcone40_Nonprompt_All_MaxWeightTTVA_pt500',
         'Photons.ptcone20_Nonprompt_All_MaxWeightTTVA_pt500',
         'Photons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000', 
         'Photons.ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500']
 
     # electrons
     EGAM10SlimmingHelper.ExtraVariables += [
-        'Electrons.topoetcone20.topoetcone30.topoetcone40.ptcone20.ptcone30',
+        'Electrons.topoetcone30.topoetcone40.ptcone20.ptcone30',
         'Electrons.ptcone40.maxEcell_time.maxEcell_energy.maxEcell_gain',
         'Electrons.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z']
 
@@ -361,6 +361,12 @@ def EGAM10Cfg(ConfigFlags):
     EGAM10SlimmingHelper.ExtraVariables += \
         densityList + [f'Photons{pflowIsoVar}'] 
 
+    # To have ptcone40, needed for efficiency measurement with MM
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags,
+                                    object_types = ('Photons',),
+                                    ptCuts = (500,1000),
+                                    postfix = 'Extra'))
 
     # truth
     if ConfigFlags.Input.isMC:

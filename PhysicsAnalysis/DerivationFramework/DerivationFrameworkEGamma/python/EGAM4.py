@@ -302,7 +302,13 @@ def EGAM4Cfg(ConfigFlags):
                              name = 'EGAM4Kernel',
                              StreamName = 'StreamDAOD_EGAM4',
                              TriggerListsHelper = EGAM4TriggerListsHelper))
-    
+
+    # To have ptcone40
+    from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
+    acc.merge(DerivationTrackIsoCfg(ConfigFlags,
+                                    object_types = ('Photons',),
+                                    ptCuts = (500,1000),
+                                    postfix = 'Extra'))
 
     # configure slimming
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
