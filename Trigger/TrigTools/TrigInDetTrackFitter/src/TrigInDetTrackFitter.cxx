@@ -918,14 +918,12 @@ StatusCode TrigInDetTrackFitter::getUnbiasedResiduals(const Trk::Track& pT,
     return StatusCode::FAILURE;
   }
 
-  int nNodeIndex=-1;
   bool OK=true;
   std::vector<Trk::TrkBaseNode*>::iterator pnIt,pnEnd(vpTrkNodes.end());
 
   for(std::vector<Trk::TrkBaseNode*>::iterator pNodeIt=vpTrkNodes.begin();pNodeIt!=vpTrkNodes.end();
       ++pNodeIt)
   {
-    nNodeIndex++;
     Trk::TrkBaseNode* pMaskedNode=(*pNodeIt);
     Trk::TrkTrackState* pMaskedState=nullptr;
 

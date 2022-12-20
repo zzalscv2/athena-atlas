@@ -47,21 +47,13 @@ TrigTrackSeedGeneratorITk::~TrigTrackSeedGeneratorITk() {
 
 void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePointBase>& vSP) {
 
-  int nPixels = 0;
-  int nStored = 0;
-
   for(std::vector<TrigSiSpacePointBase>::const_iterator it = vSP.begin();it != vSP.end();++it) {
  
     bool isPixel = (*it).isPixel();
 
     if(!isPixel) continue;
 
-    nPixels++;
-
-    int result = m_storage->addSpacePoint((*it), (m_settings.m_useTrigSeedML > 0));
-    
-    if(result == 0) nStored++;
-    
+    m_storage->addSpacePoint((*it), (m_settings.m_useTrigSeedML > 0));
   }
   m_storage->sortByPhi();
   m_storage->generatePhiIndexing(1.5*m_phiSliceWidth);
@@ -270,8 +262,6 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   int nNodes = vNodes.size();
 
-  int nLinks = 0;
-    
   for(int nodeIdx=0;nodeIdx<nNodes;nodeIdx++) {
       
     const TrigFTF_GNN_Node* pN = vNodes.at(nodeIdx);
@@ -345,7 +335,6 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 	}
 		
 	pS->m_vNei[pS->m_nNei++] = outEdgeIdx;
-	nLinks++;
 	if(pS->m_nNei >= N_SEG_CONNS) break;
       }
     }
