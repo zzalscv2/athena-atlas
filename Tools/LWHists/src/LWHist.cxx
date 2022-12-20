@@ -24,6 +24,7 @@
 #include <cassert>
 #include <cstring>
 #include <cmath>
+#include <mutex>
 
 //____________________________________________________________________
 void LWHist::safeDelete(LWHist*h)
@@ -205,11 +206,9 @@ LWHist::LWHist( const char* n,
     LWStrUtils::setStringFromInput(t,m_title);
   }
   ++LWHistStats::s_nActiveHists;
-  static bool first = true;
-  if (first) {
-    first = false;
-    std::cout<<"LWHists INFO: Using light weight histograms"<<std::endl;
-  }
+  static std::once_flag first_flag;
+  std::call_once (first_flag,
+                  []() { std::cout<<"LWHists INFO: Using light weight histograms"<<std::endl; });
 }
 
 //____________________________________________________________________
