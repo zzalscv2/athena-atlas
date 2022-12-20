@@ -122,12 +122,11 @@ private:
 
   taggerproperties m_tagger;
 
-  enum Tagger{UNKNOWN, DL1, DL1r, GN1, MV2c10};
+  enum Tagger{UNKNOWN, DL1, GN1, MV2c10};
   Tagger m_taggerEnum;
 
   Tagger SetTaggerEnum(const std::string& taggerName){
-    if(taggerName == "DL1r") return Tagger::DL1r;
-    else if(taggerName == "DL1") return Tagger::DL1;
+    if(taggerName.find("DL1") != std::string::npos) return Tagger::DL1;
     else if(taggerName.find("GN1") != std::string::npos) return Tagger::GN1;
     else if(taggerName == "MV2c10") return Tagger::MV2c10;
     else 
