@@ -145,7 +145,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertex(void) {
   if(m_tmin < m_tmax){
     t_val = CLHEP::RandFlat::shoot(engine, m_tmin, m_tmax);
   }
-  else if(m_tmin == m_tmax){
+  else if(m_tmin.value() == m_tmax.value()){
     t_val = m_tmin;
   }
   else ATH_MSG_FATAL("You specified m_tmin = " << m_tmin << " and m_tmax " << m_tmax);
@@ -200,7 +200,7 @@ CLHEP::HepLorentzVector CosmicGenerator::generateVertexReweighted(void) {
   if(m_tmin < m_tmax){
     t_val = CLHEP::RandFlat::shoot(engine, m_tmin, m_tmax);
   }
-  else if(m_tmin == m_tmax){
+  else if(m_tmin.value() == m_tmax.value()){
     t_val = m_tmin;
   }
   else ATH_MSG_FATAL( " You specified m_tmin = " << m_tmin << " and m_tmax " << m_tmax );
