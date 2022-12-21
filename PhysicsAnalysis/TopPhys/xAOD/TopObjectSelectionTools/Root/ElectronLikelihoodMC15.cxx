@@ -55,6 +55,12 @@ namespace top {
     if (operatingPoint == "TightLH") {
       egammaNamesAreNotConsistantAnywhere = "DFCommonElectronsLHTight";
     }
+    if (operatingPoint == "LooseHILH") {
+      egammaNamesAreNotConsistantAnywhere = "DFCommonElectronsHILHLoose";
+    }
+    if (operatingPoint == "MediumHILH") {
+      egammaNamesAreNotConsistantAnywhere = "DFCommonElectronsHILHMedium";
+    }
 
     if (operatingPointLoose == "LooseLH") {
       egammaNamesAreNotConsistantAnywhereLoose = "DFCommonElectronsLHLoose";
@@ -67,6 +73,12 @@ namespace top {
     }
     if (operatingPointLoose == "TightLH") {
       egammaNamesAreNotConsistantAnywhereLoose = "DFCommonElectronsLHTight";
+    }
+    if (operatingPointLoose == "LooseHILH") {
+      egammaNamesAreNotConsistantAnywhereLoose = "DFCommonElectronsHILHLoose";
+    }
+    if (operatingPointLoose == "MediumHILH") {
+      egammaNamesAreNotConsistantAnywhereLoose = "DFCommonElectronsHILHMedium";
     }
 
     m_operatingPoint_DF = egammaNamesAreNotConsistantAnywhere;

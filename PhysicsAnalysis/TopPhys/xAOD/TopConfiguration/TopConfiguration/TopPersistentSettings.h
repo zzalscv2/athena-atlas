@@ -64,6 +64,7 @@ namespace top {
     bool m_useElectronChargeIDSelection;
     bool m_useEgammaLeakageCorrection;
     bool m_useEgammaPileupCorrection;
+    bool m_useEgammaSFs;
     bool m_enablePromptLeptonImprovedVetoStudies;
 
     std::string m_fwdElectronID;

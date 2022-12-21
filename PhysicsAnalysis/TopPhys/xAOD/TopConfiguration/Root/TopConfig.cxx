@@ -231,6 +231,7 @@ namespace top {
     m_useElectronChargeIDSelection(false),
     m_useEgammaLeakageCorrection(false),
     m_useEgammaPileupCorrection(true),
+    m_useEgammaSFs(true),
     m_enablePromptLeptonImprovedVetoStudies(false),
 
     // Fwd electron configuration
@@ -1227,6 +1228,7 @@ namespace top {
     this->useElectronChargeIDSelection(settings->value("UseElectronChargeIDSelection"));
     this->useEgammaLeakageCorrection(settings->value("UseEgammaLeakageCorrection"));
     this->useEgammaPileupCorrection(settings->value("UseEgammaPileupCorrection"));
+    this->useEgammaSFs(settings->value("UseEgammaSFs"));
     this->electronPtcut(std::stof(settings->value("ElectronPt")));
     this->electrond0Sigcut(std::stof(settings->value("Electrond0Sig")));
     this->electrondeltaz0cut(std::stof(settings->value("Electrondeltaz0")));
@@ -3678,6 +3680,7 @@ namespace top {
     out->m_useElectronChargeIDSelection = m_useElectronChargeIDSelection;
     out->m_useEgammaLeakageCorrection = m_useEgammaLeakageCorrection;
     out->m_useEgammaPileupCorrection = m_useEgammaPileupCorrection;
+    out->m_useEgammaSFs = m_useEgammaSFs;
     out->m_enablePromptLeptonImprovedVetoStudies = m_enablePromptLeptonImprovedVetoStudies;
 
     out->m_fwdElectronID = m_fwdElectronID;
@@ -3843,6 +3846,7 @@ namespace top {
     m_useElectronChargeIDSelection = settings->m_useElectronChargeIDSelection;
     m_useEgammaLeakageCorrection = settings->m_useEgammaLeakageCorrection;
     m_useEgammaPileupCorrection = settings->m_useEgammaPileupCorrection;
+    m_useEgammaSFs = settings->m_useEgammaSFs;
     m_enablePromptLeptonImprovedVetoStudies = settings->m_enablePromptLeptonImprovedVetoStudies;
 
     m_fwdElectronID = settings->m_fwdElectronID;

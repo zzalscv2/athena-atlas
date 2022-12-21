@@ -98,6 +98,8 @@ namespace top {
                       "True/False. Switch on/off super cluster based core leakage correction -- REQUIRES ptag>p3947 (Default True).", "False");
     registerParameter("UseEgammaPileupCorrection",
                       "True/False. Switch on/off improved egamma pileup correction is correction", "True");
+    registerParameter("UseEgammaSFs",
+                      "True/False. Switch on/off the use of SFs for electrons", "True");
     registerParameter("EnablePromptLeptonImprovedVetoStudies",
                       "True/False. Adds the (many!) variables necessary to validate the PromptLeptonImprovedVeto electron+muon isolation -- TEMPORARY, for studies only (Default False).",
                       "False");

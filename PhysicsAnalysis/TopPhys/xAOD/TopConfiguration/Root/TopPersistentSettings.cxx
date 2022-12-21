@@ -38,6 +38,7 @@ namespace top {
     m_useElectronChargeIDSelection(false),
     m_useEgammaLeakageCorrection(false),
     m_useEgammaPileupCorrection(true),
+    m_useEgammaSFs(true),
     m_enablePromptLeptonImprovedVetoStudies(false),
 
     m_fwdElectronID("SetMe"),
