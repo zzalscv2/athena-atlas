@@ -67,7 +67,7 @@ namespace Analysis
   */  
 
   /** specification of type information requested by the user */
-  enum Uncertainty { None, Total, Statistical, Systematic, Extrapolation, SFEigen, SFNamed, TauExtrapolation };
+  enum Uncertainty { None, Total, Statistical, Systematic, Extrapolation, SFEigen, SFNamed, TauExtrapolation, SFGlobalEigen };
 
   /** specification of Eigenvector variations reduction strategy. For implementation reasons the possibilities are given in "reverse" order. */
   enum EVReductionStrategy { Tight = 0, Medium = 1, Loose = 2};
@@ -98,7 +98,7 @@ namespace Analysis
 				   const std::map<std::string, std::vector<std::string> >& EffNames,
 				   const std::map<std::string, std::vector<std::string> >& excludeFromEV,
 				   const std::map<std::string, Analysis::EVReductionStrategy> EVReductions,
-				   bool useEV = true, bool useMCMCSF = true,
+				   bool useEV = true, Uncertainty strat = SFEigen, bool useMCMCSF = true,
 				   bool useTopologyRescaling = false, bool useRecommendedEVExclusions = false,
 				   bool verbose = true);
 
@@ -117,7 +117,8 @@ namespace Analysis
       // Note that for both of the following, the label is assumed to adhere to the
       // TruthInfo conventions (see package PhysicsAnalysis/JetTagging/JetTagInfo).
 
-      /** efficiency scale factor retrieval by name. */
+      // THe following methods are one of three
+      /** efficiency scale factor retrieval by name. #1 */
       CalibResult getScaleFactor (const CalibrationDataVariables& variables,
 				  const std::string& label, const std::string& OP,
 				  Uncertainty unc, unsigned int numVariation = 0,
@@ -126,7 +127,7 @@ namespace Analysis
      /** efficiency retrieval by name */
       CalibResult getEfficiency (const CalibrationDataVariables& variables,
 				 const std::string& label, const std::string& OP,
-				 Uncertainty unc, unsigned int numVariation = 0,
+				 Uncertainty unc, const std::string& flavour, unsigned int numVariation = 0,
 				 unsigned int mapIndex = 0);
       
       /** "MC" inefficiency scale factor retrieval by name */
@@ -159,7 +160,7 @@ namespace Analysis
 	  has been switched on to begin with). In this case the order of the uncertainties listed is
 	  important since it indicates the index by which the given named uncertainty is identified.
       */
-      std::vector<std::string> listScaleFactorUncertainties(const std::string& author,
+      std::vector<std::string> listScaleFactorUncertainties(const std::string& author, //<-------- One of two
 							    const std::string& label,
 							    const std::string& OP,
 							    bool named = false);
@@ -167,8 +168,8 @@ namespace Analysis
       /** @brief retrieve the number of variations relevant to the calibration object.
 	  The Uncertainty enum is used to specify the category.
       */
-      unsigned int getNumVariations(const std::string& author, const std::string& label,
-				    const std::string& OP, Uncertainty unc);
+      unsigned int getNumVariations(const std::string& author, const std::string& label, 
+				    const std::string& OP, Uncertainty unc); 
 
       // ------------------------------------------------------------------------------------------
 
@@ -187,25 +188,25 @@ namespace Analysis
       /** Retrieve the name of the calibration object (container) given its index */
       std::string nameFromIndex (unsigned int index) const;
 
-      /** efficiency scale factor retrieval by index */
+      /** efficiency scale factor retrieval by index #2 */
       CalibResult getScaleFactor (const CalibrationDataVariables& variables,
 				  unsigned int indexSF, unsigned int indexEff,
-				  Uncertainty unc, unsigned int numVariation = 0);
+				  Uncertainty unc, const std::string& flavour, unsigned int numVariation = 0);
 
      /** efficiency retrieval by index */
       CalibResult getEfficiency (const CalibrationDataVariables& variables,
 				 unsigned int indexSF, unsigned int indexEff,
-				 Uncertainty unc, unsigned int numVariation = 0);
+				 Uncertainty unc, const std::string& flavour, unsigned int numVariation = 0);
       
       /**  "MC" inefficiency scale factor retrieval by index */
       CalibResult getInefficiencyScaleFactor(const CalibrationDataVariables& variables,
 					     unsigned int indexSF, unsigned int indexEff,
-					     Uncertainty unc, unsigned int numVariation = 0);
+					     Uncertainty unc, const std::string& flavour, unsigned int numVariation = 0);
 
       /**   inefficiency retrieval by index */
       CalibResult getInefficiency (const CalibrationDataVariables& variables,
 				   unsigned int indexSF, unsigned int indexEff,
-                                   Uncertainty unc, unsigned int numVariation = 0);
+              Uncertainty unc, const std::string& flavour, unsigned int numVariation = 0);
 
       /** "MC" efficiency retrieval by index */
       CalibResult getMCEfficiency (const CalibrationDataVariables& variables, unsigned int index,
@@ -230,12 +231,12 @@ namespace Analysis
 	  important since it indicates the index by which the given named uncertainty is identified.
       */
       std::vector<std::string> listScaleFactorUncertainties(unsigned int index,
-							    bool named = false) const;
+							   const std::string& flavour, bool named = false);
 
       /** @brief retrieve the number of variations relevant to the calibration object.
 	  The Uncertainty enum is used to specify the category.
       */
-      unsigned int getNumVariations(unsigned int index, Uncertainty unc) const;
+      unsigned int getNumVariations(unsigned int index, Uncertainty unc, const std::string& flavour); 
 
       /** @ brief construct the full object pathname from its individual components */
       std::string fullName(const std::string& author, const std::string& OP,
@@ -249,29 +250,29 @@ namespace Analysis
       // one of the arguments. Other than this, the same comments hold as for the previous set of
       // methods.
 
-      /** efficiency scale factor retrieval by index */
+      /** efficiency scale factor retrieval by index #3 */
       CalibrationStatus getScaleFactor (const CalibrationDataVariables& variables,
 					unsigned int indexSF, unsigned int indexEff,
 					Uncertainty unc, unsigned int numVariation,
-					CalibResult& result);
+					CalibResult& result, const std::string& flavour);
 
      /** efficiency retrieval by index */
       CalibrationStatus getEfficiency (const CalibrationDataVariables& variables,
 				       unsigned int indexSF, unsigned int indexEff,
 				       Uncertainty unc, unsigned int numVariation,
-				       CalibResult& result);
+				       CalibResult& result, const std::string& flavour);
       
       /**  "MC" inefficiency scale factor retrieval by index */
       CalibrationStatus getInefficiencyScaleFactor(const CalibrationDataVariables& variables,
 						   unsigned int indexSF, unsigned int indexEff,
 						   Uncertainty unc, unsigned int numVariation,
-						   CalibResult& result);
+						   CalibResult& result, const std::string& flavour);
 
       /**   inefficiency retrieval by index */
       CalibrationStatus getInefficiency (const CalibrationDataVariables& variables,
 					 unsigned int indexSF, unsigned int indexEff,
 					 Uncertainty unc, unsigned int numVariation,
-					 CalibResult& result);
+					 CalibResult& result, const std::string& flavour);
 
       /** "MC" efficiency retrieval by index */
       CalibrationStatus getMCEfficiency (const CalibrationDataVariables& variables,
@@ -287,7 +288,7 @@ namespace Analysis
       // for the regular (non-continuous) case, the method is not protected against wrong usage of this index!
 
       /** efficiency scale factor retrieval by name */
-      CalibResult getWeightScaleFactor (const CalibrationDataVariables& variables, const std::string& label,
+      CalibResult getWeightScaleFactor (const CalibrationDataVariables& variables, const std::string& label, //<--------- One of three
 					Uncertainty unc, unsigned int numVariation = 0, unsigned int mapIndex = 0);
 
       /** efficiency scale factor retrieval by index */
@@ -359,19 +360,19 @@ namespace Analysis
       // Rootcint requires this to be public.
 
       class HadronisationReferenceHelper {
-      public:
-	HadronisationReferenceHelper(TMap* mapSF, TMap* mapEff);
-	// default constructor (for PROOF purposes)
-	HadronisationReferenceHelper() {;}
-	/**
-	   Retrieve the (full) name of the reference histogram, given the hadronisation specification.
-	   The return value will be false if the specification cannot be found, and true otherwise.
-	*/
-	bool getReference(const std::string& spec, std::string& ref) const;
+        public:
+          HadronisationReferenceHelper(TMap* mapSF, TMap* mapEff);
+          // default constructor (for PROOF purposes)
+          HadronisationReferenceHelper() {;}
+          /**
+             Retrieve the (full) name of the reference histogram, given the hadronisation specification.
+            The return value will be false if the specification cannot be found, and true otherwise.
+          */
+          bool getReference(const std::string& spec, std::string& ref) const;
 
-      private:
-	/** map from hadronisation specification to container name */
-	std::map<std::string, std::string> m_refs;
+        private:
+          /** map from hadronisation specification to container name */
+          std::map<std::string, std::string> m_refs;
       };
 
       // ------------------------------------------------------------------------------------------
@@ -379,6 +380,19 @@ namespace Analysis
       /** initialization for PROOF usage */
       void initialize(const std::string& jetauthor, const std::string& OP, Uncertainty unc);
 
+      /** @brief utility function taking care of object retrieval */
+      // CalibrationDataContainer* retrieveContainer(const std::string& name, bool isSF);
+      CalibrationDataContainer* retrieveContainer(const std::string& label, const std::string& OP, const std::string& author, const std::string& cntname, bool isSF, bool doPrint = true);
+
+      // The above two methods need to be modified to handle the various EV techniques
+      // 
+    
+    
+    
+    
+    
+    /* Private data members and methods */
+    
     private:
 
       /** @brief pointer to the TFile object providing access to the calibrations */
@@ -386,21 +400,14 @@ namespace Analysis
       TFile* m_fileSF; //! Do not attempt to persistify (PROOF)
 
       /** @brief jet author aliases (there is no single CalibrationBroker object here to
-	  take care of this, so we do it in this class) */
+	    take care of this, so we do it in this class) */
       std::map<std::string, std::string> m_aliases;
 
       /** @brief cache the objects themselves (so that the user will not have to delete
-	  them after each call etc.). The caching is done so that objects can be retrieved
-	  by number as well as by (OP, flavour, calibration name) combination. */
+      them after each call etc.). The caching is done so that objects can be retrieved
+      by number as well as by (OP, flavour, calibration name) combination. */
       std::vector<CalibrationDataContainer*> m_objects;
       std::map<std::string, unsigned int>    m_objectIndices;
-
-      /** @brief utility function taking care of object retrieval */
-      // CalibrationDataContainer* retrieveContainer(const std::string& name, bool isSF);
-      CalibrationDataContainer* retrieveContainer(const std::string& dir, const std::string& cntname, bool isSF, bool doPrint = true);
-
-      /** @brief utility function taking care of eigenvector objects retrieval */
-      //      const CalibrationDataEigenVariations* retrieveCalibrationDataEV(const CalibrationDataContainer* calibrationDataContainer) const;
 
       /** @brief associated alias retrieval method */
       std::string getAlias(const std::string& author) const;
@@ -414,16 +421,19 @@ namespace Analysis
       // Eigenvector variations functionality
 
       /** store the eigenvector class and associate to its CalibrationDataContainer **/
-      std::map<const CalibrationDataContainer*,CalibrationDataEigenVariations*> m_eigenVariationsMap;
-
+      std::map<const CalibrationDataContainer*, std::shared_ptr<CalibrationDataEigenVariations> > m_eigenVariationsMap;
+      
       /** decide whether to run the eigenvector method or not **/
       bool m_runEigenVectorMethod;
+      Uncertainty m_EVStrategy; // <--- In addition, specify whether to use the global eigenvariations method
 
       /** Eigenvector reduction strategy (per flavour) **/
       std::map<std::string, Analysis::EVReductionStrategy> m_EVReductions;
       
       /** store the uncertainties which should be excluded from building the full covariance matrix **/
       std::map<std::string, std::vector<std::string> > m_excludeFromCovMatrix;
+      // <--------- The above maps the flavour of the jet to the string of uncertainties to exclude from EV on that jet flavour
+
 
       /** if true, exclude pre-recommended lists of uncertainties from the covariance matrix building, in addition to the above user specified lists **/
       bool m_useRecommendedEVExclusions;
@@ -439,11 +449,11 @@ namespace Analysis
           (the fact that this is steerable is intended to be temporary only) */
       bool m_useMCMCSF;
       /** specify whether or not to use MC/MC (topology) scale factors
-	  (also this steering option may be removed) */
+	    (also this steering option may be removed) */
       bool m_useTopologyRescaling;
 
       /** the following maps (one for each directory) specify the name of the container
-	  serving as the 'hadronisation' reference for each object */
+	   serving as the 'hadronisation' reference for each object */
       std::map<std::string, HadronisationReferenceHelper*> m_refMap;
       /** store the 'hadronisation' reference for each object (-1 means no reference found) */
       std::vector<int>                                     m_hadronisationReference;
@@ -461,7 +471,9 @@ namespace Analysis
       double               m_maxAbsEta;
       OutOfBoundsStrategy  m_absEtaStrategy;
       OutOfBoundsStrategy  m_otherStrategy;
-      [[nodiscard]] bool                 checkAbsEta(const CalibrationDataVariables& variables, unsigned int index);
+      
+      [[nodiscard]] bool checkAbsEta(const CalibrationDataVariables& variables, unsigned int index);
+
       /** counters for flagging out-of-bound cases */
       std::vector<unsigned int> m_etaCounters;
       std::vector<unsigned int> m_mainCounters;

@@ -30,6 +30,7 @@ using Analysis::CalibResult;
 using Analysis::CalibrationStatus;
 using Analysis::Total;
 using Analysis::SFEigen;
+using Analysis::SFGlobalEigen;
 using Analysis::SFNamed;
 using Analysis::None;
 using Analysis::Extrapolation;
@@ -123,7 +124,7 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   declareProperty("TaggerName",                          m_taggerName="",               "tagging algorithm name as specified in CDI file");
   declareProperty("OperatingPoint",                      m_OP="",                       "operating point as specified in CDI file");
   declareProperty("JetAuthor",                           m_jetAuthor="",                "jet collection & JVF/JVT specification in CDI file");
-  declareProperty("JetAuthor",                           m_jetAuthor="",                "jet collection & JVF/JVT specification in CDI file");
+  //declareProperty("JetAuthor",                           m_jetAuthor="",                "jet collection & JVF/JVT specification in CDI file");
   declareProperty("MinPt",                               m_minPt=-1,                    "minimum jet pT cut");
   declareProperty("ScaleFactorFileName",                 m_SFFile = "",                 "name of the official scale factor calibration CDI file (uses PathResolver)");
   declareProperty("UseDevelopmentFile",                  m_useDevFile = false,          "specify whether or not to use the (PathResolver) area for temporary scale factor calibration CDI files");
@@ -172,7 +173,7 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
 }
 
 BTaggingEfficiencyTool::~BTaggingEfficiencyTool() {
-  delete m_CDI;
+  //delete m_CDI;
 }
 
 StatusCode BTaggingEfficiencyTool::initialize() {
@@ -181,6 +182,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   ATH_MSG_INFO( " Hello BTaggingEfficiencyTool user... initializing");
   ATH_MSG_INFO( " TaggerName = " << m_taggerName);
   ATH_MSG_INFO( " OP = " << m_OP);
+  ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy);
 
   //if a configuration file was provided for efficiency maps, overwrite the efficiency map selection with the one provided in the first line of the config
   if(m_EffConfigFile!=""){
@@ -313,7 +315,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 
   // Note that the instantiation below does not leave a choice: the Eigenvector variations and generator-specific scale factors are always used
   std::vector<std::string> jetAliases;
-  m_CDI = new Analysis::CalibrationDataInterfaceROOT(m_taggerName,                              // tagger name: always needed
+  m_CDI = std::shared_ptr<Analysis::CalibrationDataInterfaceROOT>( new Analysis::CalibrationDataInterfaceROOT(m_taggerName,                              // tagger name: always needed
 						     m_SFFile.c_str(),                          // full pathname of the SF calibration file: always needed
 						     (m_EffFile == "") ? 0 : m_EffFile.c_str(), // full pathname of optional efficiency file
 						     jetAliases,                                // since we configure the jet "collection name" by hand, we don't need this
@@ -322,14 +324,20 @@ StatusCode BTaggingEfficiencyTool::initialize() {
 						     excludeFromEVCov,                          // names of systematic uncertainties to be excluded from the EV decomposition
 						     EVRedStrategies,                           // strategies for eigenvector reductions
 						     m_systStrategy != "Envelope",              // assume that eigenvector variations will be used unless the "Envelope" model is used
+                 (m_systStrategy=="SFEigen") ? Analysis::SFEigen : Analysis::Uncertainty::SFGlobalEigen,
 						     true,                                      // use MC/MC scale factors
 						     false,                                     // do not use topology rescaling (only relevant for pseudo-continuous tagging)
-						     m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
-						     m_verboseCDITool);                         // if false, suppress any non-error/warning messages
+						     true,//m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
+						     //m_verboseCDITool);                         // if false, suppress any non-error/warning messages
+                 true) ); // set verbose
 
+  std::cout << "BTEffTool->initialize : setMapIndex(Light)" << std::endl;
   setMapIndex("Light",0);
+  std::cout << "BTEffTool->initialize : setMapIndex(C)" << std::endl;
   setMapIndex("C",0);
+  std::cout << "BTEffTool->initialize : setMapIndex(B)" << std::endl;
   setMapIndex("B",0);
+  std::cout << "BTEffTool->initialize : setMapIndex(T)" << std::endl;
   setMapIndex("T",0);
 
   ATH_MSG_INFO( "Using systematics model " << m_systStrategy);
@@ -350,7 +358,9 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   // then autmatically set things up to use these by default
   // All this must happen before registerSystematics otherwise that won't work
   for (int i = 0; i < 4; ++i) {
+    // For each flavour, we check the validity of the initialization of the CalibrationInterfaceROOT object (m_CDI)
     unsigned int flavourID = getFlavourID(flavours[i]);
+    //std::cout << " Beginning of flavour loop for flavour " << getLabel(flavourID) << " before m_SFIndices find " << std::endl;
     // std::map<unsigned int, unsigned int>::const_iterator
     auto mapIter = m_SFIndices.find(flavourID);
     if( mapIter==m_SFIndices.end()) { // if the flavour doesn't have an entry need to fail the initialization
@@ -358,70 +368,82 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       return StatusCode::FAILURE;
     }
     int id = mapIter->second;
-
+    //std::cout << " Beginning of flavour loop for flavour " << getLabel(flavourID) << " after m_SFIndices find"  << std::endl;
     // Implement the different strategies for dealing with uncertainties here.
-    if (m_systStrategy == "SFEigen") {
+    if (m_systStrategy == "SFEigen" || m_systStrategy == "SFGlobalEigen") {
       //
       // Generally recommended model: use eigenvector variations. Notes:
       // -   The list of systematics to be excluded from the eigenvector variation approach is dynamic.
       // -   The tau SF are identical to the c-jet ones, with merely one additional uncertainty assigned due to the extrapolation.
       //
+
       unsigned int flavourIDRef = (flavourID == 15) ? 4 : flavourID;
       int idRef = m_SFIndices.find(flavourIDRef)->second;
+      
       // First, handle any named variations
-      std::vector<std::string> systematics = m_CDI->listScaleFactorUncertainties(idRef,true);
+      std::vector<std::string> systematics = m_CDI->listScaleFactorUncertainties(idRef, getLabel(flavourID), true); // flavours[i] should be "B", "C", "Light", or "T"
       // Replace any spaces with underscores (this is to make ROOT browsing happy).
       // Also, remove the "extrapolation" uncertainty from the list (it will be added later under Extrapolation rather than SFNamed).
       bool hasExtrapolation = false;
+      //std::cout << " BTaggingEfficiencyTool constructor -> " << m_systStrategy << " before extrap " << hasExtrapolation << std::endl;
       for (unsigned int i = 0; i < systematics.size(); ++i) {
         if (systematics[i] == "extrapolation") {
                 hasExtrapolation = true;
                 systematics.erase(systematics.begin() + i--); // don't forget to decrement i
         } else {
-          std::replace_if(systematics[i].begin(), systematics[i].end(), [] (char c) { return c == ' '; }, '_');
+          std::replace_if(systematics[i].begin(), systematics[i].end(), [] (char c) { return c == ' '; }, '_'); // <--- This just replaces spaces with underscores
           // We don't add suffixes here but only for EV variations (see JIRA: AFT-343)
           // systematics[i].append(suffixes[i]);
         }
       }
-      if (!addSystematics(systematics, flavourID, SFNamed)) {
-        ATH_MSG_ERROR("SFEigen model: error adding named systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
+      //std::cout << " BTaggingEfficiencyTool constructor -> " << m_systStrategy << " after extrap " << hasExtrapolation << std::endl;
+      
+      if (!addSystematics(systematics, flavourID, SFNamed)) { // <-------------------- Add the SFNamed to m_systematicsInfo
+        ATH_MSG_ERROR("SFEigen model: error adding named systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization"); // For each uncertainty type, have to add ALL uncertainties pertaining to that type
         return StatusCode::FAILURE;
       }
+
       // Add here the extrapolation uncertainty (if it exists -- which ought to be the case).
       // "Cosmetic" fix: the outside world wants to see "FT_EFF_" prefixes. On the other hand, like for the above named uncertainties, we don't add suffixes here
       if (hasExtrapolation) {
-        std::vector<std::string> extrapSyst; extrapSyst.push_back(std::string("FT_EFF_extrapolation"));
+        std::vector<std::string> extrapSyst; extrapSyst.push_back(std::string("FT_EFF_extrapolation")); // <-------------------------------------------------------- Add the EXTRAPOLATION to m_systematicsInfo
         if (! addSystematics(extrapSyst, flavourID, Extrapolation)) {
           ATH_MSG_ERROR("SFEigen model: error adding extrapolation uncertainty for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
           return StatusCode::FAILURE;
         }
       }
-      // Add here the extrapolation uncertainty (if it exists -- which ought to be the case).
-      // "Cosmetic" fix: the outside world wants to see "FT_EFF_" prefixes. On the other hand, like for the above named uncertainties, we don't add suffixes here
-      if (hasExtrapolation) {
-        std::vector<std::string> extrapSyst; extrapSyst.push_back(std::string("FT_EFF_extrapolation"));
-        if (! addSystematics(extrapSyst, flavourID, Extrapolation)) {
-          ATH_MSG_ERROR("SFEigen model: error adding extrapolation uncertainty for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
-          return StatusCode::FAILURE;
-        }
-      }
+
       // And then the eigenvector variations
-      std::vector<std::string> eigenSysts = makeEigenSyst(getLabel(flavourIDRef),m_CDI->getNumVariations(idRef, SFEigen), suffixes[i]);
-      if (!addSystematics(eigenSysts, flavourID, SFEigen)) {
-        ATH_MSG_ERROR("SFEigen model: error adding eigenvector systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
-        return StatusCode::FAILURE;
+      if (m_systStrategy == "SFEigen"){
+        std::vector<std::string> eigenSysts = makeEigenSyst(getLabel(flavourIDRef),m_CDI->getNumVariations(idRef, SFEigen, getLabel(flavourID)), suffixes[i]); // <------------------------ Add the eigenvariations to m_systematicsInfo
+        if (!addSystematics(eigenSysts, flavourID, SFEigen)) {
+          ATH_MSG_ERROR("SFEigen model: error adding eigenvector systematics for flavour " << getLabel(flavourIDRef) << ", invalid initialization");
+          return StatusCode::FAILURE;
+        }
+      } else if (m_systStrategy == "SFGlobalEigen") {
+        ////////////////////////////////////////////////
+
+        // we have to add the SFGlobalEigen systematics like this...
+        std::vector<std::string> eigenSysts = makeEigenSyst(getLabel(flavourIDRef),m_CDI->getNumVariations(idRef, SFGlobalEigen, getLabel(flavourID)), suffixes[i]); // <------------------------ Add the eigenvariations to m_systematicsInfo
+        if (!addSystematics(eigenSysts, flavourID, SFGlobalEigen)) {
+          ATH_MSG_ERROR("SFGlobalEigen model: error adding eigenvector systematics for flavour " << getLabel(flavourIDRef) << " ie " << getLabel(flavourID) << ", invalid initialization");
+          return StatusCode::FAILURE;
+        }
+
+      ////////////////////////////////////////////////
       }
+      //std::cout << " BTaggingEfficiencyTool constructor -> After SFEigen/SFGlobalEigen " << std::endl;
       // The above should cover all uncertainties except the charm -> tau extrapolation; so we take care of that here.
       if (flavourID == 15) {
         // First extract the complete list of uncertainties for taus
-        std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id);
+        std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id, getLabel(flavourID));
         // And from this list extract only this particular uncertainty (if it exists)
         const std::string s_tau_extrap = "extrapolation from charm";
         if (std::find(all_systematics.begin(), all_systematics.end(), s_tau_extrap) != all_systematics.end()) {
           // Again, we don't add the suffix here (per JIRA: AFT-343)
           std::string entry = "FT_EFF_extrapolation_from_charm"; // entry.append(suffixes[i]);
           std::vector<std::string> extrapSyst; extrapSyst.push_back(entry);
-          if (! addSystematics(extrapSyst, flavourID, TauExtrapolation)) {
+          if (! addSystematics(extrapSyst, flavourID, TauExtrapolation)) {     // <---------------------------------------- Add the TauExtrapolation to m_systematicsInfo
             ATH_MSG_ERROR("SFEigen model: error adding charm->tau systematics for flavour " << getLabel(flavourID) << ", invalid initialization");
             return StatusCode::FAILURE;
           }
@@ -438,7 +460,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       unsigned int flavourIDRef = (flavourID == 15) ? 4 : flavourID;
       int idRef = m_SFIndices.find(flavourIDRef)->second;
       // First, handle the Total variations; these need different prefixes to reflect them being uncorrelated
-      std::vector<std::string> all_ref_systematics = m_CDI->listScaleFactorUncertainties(idRef,false);
+      std::vector<std::string> all_ref_systematics = m_CDI->listScaleFactorUncertainties(idRef,getLabel(flavourID),false);
       // std::cout << "uncertainties for flavour " << getLabel(flavourIDRef) << ":";
       // for (auto syst : all_ref_systematics) std::cout << " " << syst;
       // std::cout << std::endl;
@@ -467,7 +489,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       // Finally, handle the charm -> tau extrapolation (as in the above)
       if (flavourID == 15) {
         // First extract the complete list of uncertainties for taus
-        std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id);
+        std::vector<std::string> all_systematics = m_CDI->listScaleFactorUncertainties(id, getLabel(flavourID));
         // And from this list extract only this particular uncertainty (if it exists)
         const std::string s_tau_extrap = "extrapolation from charm";
         if (std::find(all_systematics.begin(), all_systematics.end(), s_tau_extrap) != all_systematics.end()) {
@@ -479,10 +501,10 @@ StatusCode BTaggingEfficiencyTool::initialize() {
         }
       }
     }
-  }
+  } // <---- end flavour loop...
+
   // now fill the SystematicSet
-  for( std::map<SystematicVariation,SystInfo>::const_iterator mapIter = m_systematicsInfo.begin();
-       mapIter != m_systematicsInfo.end();++mapIter) {
+  for( std::map<SystematicVariation,SystInfo>::const_iterator mapIter = m_systematicsInfo.begin(); mapIter != m_systematicsInfo.end();++mapIter) {
     const SystematicVariation & variation = mapIter->first;
     m_systematics.insert(variation);
   }
@@ -491,6 +513,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   if( registry.registerSystematics(*this) != StatusCode::SUCCESS) 
     return StatusCode::FAILURE;
 
+  //std::cout << " BTaggingEfficiencyTool constructor -> After systematics framework " << std::endl;
   // Finally, also initialise the selection tool, if needed (for now this is the case only for DL1 tag weight computations,
   // so we do this only when DL1 is specified)
   if (m_taggerName.find("DL1") != std::string::npos) {
@@ -501,8 +524,9 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_CHECK( m_selectionTool.setProperty("JetAuthor",                    m_jetAuthor) );
     ATH_CHECK( m_selectionTool.setProperty("MinPt",                        m_minPt) );
     ATH_CHECK( m_selectionTool.setProperty("useCTagging",                  m_useCTag) );
-    ATH_CHECK( m_selectionTool.retrieve() );
+    ATH_CHECK( m_selectionTool.retrieve() ); // <---- retrieve the tool
  }
+ //std::cout << " BTaggingEfficiencyTool constructor -> After DL1 " << std::endl;
 
   // if the user decides to ignore these errors, at least make her/him aware of this
   if (m_ignoreOutOfValidityRange) {
@@ -536,7 +560,11 @@ BTaggingEfficiencyTool::getScaleFactor( const xAOD::Jet & jet, float & sf)
   int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_oldConeFlavourLabel, m_extFlavourLabel);
 
   Analysis::CalibrationDataVariables vars;
+  //const double pt = jet.pt();
+  //const double eta = jet.eta();
+  //const double tagwe = 0.7; // temporary testing
   if (! fillVariables(jet, vars)) {
+  //if (! fillVariables(pt, eta, tagwe, vars)){
     ATH_MSG_ERROR("unable to fill variables required for scale factor evaluation");
     return CorrectionCode::Error;
   }
@@ -558,43 +586,42 @@ BTaggingEfficiencyTool::getScaleFactor( int flavour, const Analysis::Calibration
   unsigned int sfindex = 0;
   unsigned int efindex = 0;
   
-  if( !getIndices(flavour,sfindex,efindex)) {
+  if( !getIndices(flavour,sfindex,efindex)) { //<-------- This method returns true if it can find the sfindex and efindex corresponding to the flavour
+    // These indices are used internally in the CalibrationDataInterfaceROOT. They represent the index where
+    // the CalibrationDataContainer storing the calibration scalefactors/efficiencies are at in the CDIROOT (in m_objects in both cases, but needs a call to getMCScaleFactor in latter case)
+    // Once the container is retrieved by index, the CalibrationDataEigenVariations object is retrieved by container,
+    // which actually returns Up/Down variations, else return SF+SFError
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor call to getIndices failed " << flavour << " " << sfindex << " " << efindex);
     return CorrectionCode::Error;
   }
   CalibrationStatus status;
   Uncertainty unc = None;
-  unsigned int unc_ind=0;
+  unsigned int unc_ind=0; // <----- This is the index of the variation internal to the CDIROOT object
   
-  if( m_applySyst) {
-
-    unc = m_applyThisSyst.uncType;
-    
+  if( m_applySyst) { // indicate that we want to apply a systematic variation, i.e. return an up/down variation pair
+    unc = m_applyThisSyst.uncType; // type of systematic strategy...
     if(!m_applyThisSyst.getIndex(flavour,unc_ind)) {
-      ATH_MSG_VERBOSE("getScaleFactor: requested variation cannot be applied to flavour " << getLabel(flavour)
-		      << ", returning nominal result");
+      ATH_MSG_VERBOSE("getScaleFactor: requested variation cannot be applied to flavour " << getLabel(flavour) << ", returning nominal result");
+      //std::cout << " -----> BUT requested variation can't be applied to that flavour..." << std::endl;
       unc = None;
     }
   }
 
-  status = (m_isContinuous || m_isContinuous2D) ?
-    m_CDI->getWeightScaleFactor(v,sfindex,efindex,
-				unc,unc_ind,result) :
-    m_CDI->getScaleFactor(v,sfindex,efindex,
-			  unc,unc_ind,result);
+  // In all likelihood, the "sfindex" and "efindex" need more work in the CDIROOT (or in the CDGEV)
+  status = (m_isContinuous || m_isContinuous2D) ? m_CDI->getWeightScaleFactor(v,sfindex,efindex, unc,unc_ind,result) : m_CDI->getScaleFactor(v,sfindex,efindex, unc,unc_ind,result, getLabel(flavour)); //<----- getScaleFactor method#3
 
   // Interpret what has been retrieved;
   // this depends both on the uncertainty type and on the up/down setting.
-  sf = result.first; // central value or up variation
+  sf = result.first;
   if (m_applySyst && unc != None) {
-    if (! (unc == SFEigen || unc == SFNamed))
+    if (! (unc == SFEigen || unc == SFNamed || unc == SFGlobalEigen)){ 
       sf += m_applyThisSyst.isUp ? result.second : -result.second ;
-    else if (!m_applyThisSyst.isUp) {
-      sf = result.second; // down variation
-    }
+    } else if (!m_applyThisSyst.isUp) {
+      sf = result.second; // otherwise, set the sf to the down variation (if down is requested)
+    } // otherwise, doing nothing will return the result.first value, which SHOULD represent the up variation
   }
+  //std::cout << " BTagEffTool->getScaleFactor -> result.first is " << result.first << " and result.second is " << result.second << " ---> The sf = " << sf << std::endl;
 
-  // std::cout << "CDI getScaleFactor: " << sf << ", status: " << status << std::endl;
   switch (status) {
   case Analysis::kError:
     ATH_MSG_ERROR("BTaggingEfficiencyTool::getScaleFactor call to underlying code returned a kError!");
@@ -616,6 +643,7 @@ BTaggingEfficiencyTool::getEfficiency( const xAOD::Jet & jet, float & eff)
   int flavour = jetFlavourLabel(jet, m_coneFlavourLabel, m_oldConeFlavourLabel, m_extFlavourLabel);
 
   Analysis::CalibrationDataVariables vars;
+
   if (! fillVariables(jet, vars)) {
     ATH_MSG_ERROR("unable to fill variables required for efficiency evaluation");
     return CorrectionCode::Error;
@@ -625,8 +653,8 @@ BTaggingEfficiencyTool::getEfficiency( const xAOD::Jet & jet, float & eff)
 }
 
 CorrectionCode
-BTaggingEfficiencyTool::getEfficiency( int flavour, const Analysis::CalibrationDataVariables& v, 
-				       float & eff)
+BTaggingEfficiencyTool::getEfficiency( int flavour, const Analysis::CalibrationDataVariables& v,  
+                float & eff)
 {
   if (! m_initialised) return CorrectionCode::Error;
 
@@ -652,21 +680,19 @@ BTaggingEfficiencyTool::getEfficiency( int flavour, const Analysis::CalibrationD
     // }
     
     if(!m_applyThisSyst.getIndex(flavour,unc_ind)) {
-      ATH_MSG_VERBOSE("getEfficiency: requested variation cannot be applied to flavour " << getLabel(flavour)
-		      << ", returning nominal result");
+      ATH_MSG_VERBOSE("getEfficiency: requested variation cannot be applied to flavour " << getLabel(flavour) << ", returning nominal result");
       unc = None;
     }
   }
 
-  CalibrationStatus status = m_CDI->getEfficiency(v,sfindex,efindex,
-						  unc,unc_ind,result);
+  CalibrationStatus status = m_CDI->getEfficiency(v,sfindex,efindex, unc,unc_ind,result, getLabel(flavour));
   // Interpret what has been retrieved;
   // this depends both on the uncertainty type and on the up/down setting.
   eff = result.first; // central value or up variation
   if (m_applySyst && unc != None) {
-    if (! (unc == SFEigen || unc == SFNamed))
+    if (! (unc == SFEigen || unc == SFNamed)){
       eff += m_applyThisSyst.isUp ? result.second : -result.second ;
-    else if (!m_applyThisSyst.isUp) {
+    } else if (!m_applyThisSyst.isUp) {
       eff = result.second; // down variation
     }
   }
@@ -733,8 +759,7 @@ BTaggingEfficiencyTool::getInefficiency( int flavour, const Analysis::Calibratio
     }
   }
 
-  CalibrationStatus status = m_CDI->getInefficiency(v, sfindex, efindex,
-						    unc, unc_ind, result);
+  CalibrationStatus status = m_CDI->getInefficiency(v, sfindex, efindex, unc, unc_ind, result, getLabel(flavour));
   // Interpret what has been retrieved;
   // this depends both on the uncertainty type and on the up/down setting.
   // For the Total uncertainty, note also the sign change compared to e.g. getEfficiency().
@@ -809,8 +834,7 @@ BTaggingEfficiencyTool::getInefficiencyScaleFactor( int flavour, const Analysis:
     }
   }
 
-  CalibrationStatus status = m_CDI->getInefficiencyScaleFactor(v,sfindex,efindex,
-							       unc, unc_ind, result);
+  CalibrationStatus status = m_CDI->getInefficiencyScaleFactor(v,sfindex,efindex, unc, unc_ind, result, getLabel(flavour));
   // Interpret what has been retrieved;
   // this depends both on the uncertainty type and on the up/down setting.
   // For the Total uncertainty, note also the sign change compared to e.g. getScaleFactor().
@@ -868,8 +892,7 @@ BTaggingEfficiencyTool::getMCEfficiency( int flavour, const Analysis::Calibratio
   }
   Uncertainty unc = None;
   // no uncertainty index here as there aren't any uncertainties associated with the MC efficiencies
-  CalibrationStatus status = m_CDI->getMCEfficiency(v,efindex,
-						    unc,result);
+  CalibrationStatus status = m_CDI->getMCEfficiency(v,efindex, unc,result);
   eff = result.first;
   if( m_applySyst && !m_applyThisSyst.isUp) {
     eff = result.second; // down variation
@@ -918,7 +941,7 @@ SystematicSet BTaggingEfficiencyTool::affectingSystematics() const {
 
 // subset of systematics that are recommended
 SystematicSet BTaggingEfficiencyTool::recommendedSystematics() const {
-  return affectingSystematics();
+  return affectingSystematics(); // <---- Why not just return "m_systematics" as above???
 }
 
 const std::map<SystematicVariation, std::vector<std::string> >
@@ -939,21 +962,24 @@ BTaggingEfficiencyTool::listSystematics() const {
     std::vector<std::string> flavours;
     for (unsigned int flv = 0; flv < 4; ++flv) {
       unsigned int idx;
-      unsigned int flavour = all_flavours[flv];
-      if (info.second.getIndex(flavour, idx))
-        flavours.push_back(getLabel(int(flavour)));
+      unsigned int flavour = all_flavours[flv]; // <--- Grab the number 5,4,15,0 for B,C,T,Light respectively
+      if (info.second.getIndex(flavour, idx)){ // <---- If the flavour is mapped to an index internally in the SystInfo.indexMap, then return true
+        flavours.push_back(getLabel(int(flavour))); //<----- If return true, then it means the systematic applies to that flavour, push flavour label, e.g. "B"
+      }
     }
-    results[variation] = flavours;
+    results[variation] = flavours; // <------ Map the list of flavours that a systematic applies to, to the SystematicVariation object that was retrieved from m_systematicsInfo
   }
   return results;
 }
+
+
 ///
 /// This method retrieves all systematic uncertainties known to the relevant calibration objects.
 /// Since the expected use of this method is in the context of the SFEigen model, we will assume (and not check) that this model is being used.
 /// Note: the uncertainties returned are in the format of the underlying CDI, and do not have the rewriting applied to them that one would use in analysis.
 ///
 std::map<std::string, std::vector<std::string> >
-BTaggingEfficiencyTool::listScaleFactorSystematics(bool named) const {
+BTaggingEfficiencyTool::listScaleFactorSystematics(bool named) const { // <-------- MAy have to make changes for SFGlobalEigen?
   std::map<std::string, std::vector<std::string> > uncertainties;
 
   const unsigned int all_flavours[4] = { 5, 4, 15, 0 };
@@ -969,7 +995,7 @@ BTaggingEfficiencyTool::listScaleFactorSystematics(bool named) const {
     }
     int idRef = mapIter->second;
     // Retrieve the actual list
-    std::vector<std::string> systematics = m_CDI->listScaleFactorUncertainties(idRef, named);
+    std::vector<std::string> systematics = m_CDI->listScaleFactorUncertainties(idRef, getLabel(flavourID), named);
     // For the special case of tau SF, add the extrapolation from charm.
     // Since this comes on top of the charm uncertainties, it would always be a "named" uncertainty,
     // so there is no need to check for the "named" argument.
@@ -1044,6 +1070,7 @@ StatusCode BTaggingEfficiencyTool::applySystematicVariation( const SystematicSet
 bool
 BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVariables& x) const
 {
+  //std::cout << "!!!!!!!!!In fillVariables!!!!!!!!!" << std::endl;
   x.jetPt = jet.pt();
   x.jetEta = jet.eta();
   x.jetTagWeight = 0.;
@@ -1092,11 +1119,11 @@ BTaggingEfficiencyTool::setMapIndex(const std::string& label, unsigned int index
   unsigned int effIndex;
   if (m_CDI->retrieveCalibrationIndex(label, m_OP, m_jetAuthor, false, effIndex, index)) {
     // replace cached information
-    m_mapIndices[label] = index;
-    m_EffIndices[flavour] = effIndex;
+    m_mapIndices[label] = index; 
+    m_EffIndices[flavour] = effIndex; // This shortcuts you from flavourID to Eff container
     unsigned int sfIndex;
     if( m_CDI->retrieveCalibrationIndex(label, m_OP, m_jetAuthor, true, sfIndex, index)) {
-      m_SFIndices[flavour] = sfIndex;
+      m_SFIndices[flavour] = sfIndex; // This shortcuts you from flavourID to SF container
       return true;
     } else {
       ATH_MSG_ERROR("setMapIndex failed to find a SF calibration object" << label << " " << index);
@@ -1164,7 +1191,7 @@ BTaggingEfficiencyTool::getIndices(unsigned int flavour, unsigned int & sf, unsi
 bool
 BTaggingEfficiencyTool::SystInfo::getIndex( unsigned int flavourID, unsigned int & index) const {
   // std::map<unsigned int, unsigned int>::const_iterator
-  auto mapIter = indexMap.find(flavourID);
+  auto mapIter = indexMap.find(flavourID); // if this systematic applies to flavour (i.e. if it's found) then return the index of the variation (numVariation) internal to CDIROOT
   if (mapIter==indexMap.end()) {
     return false;
   } else {
@@ -1177,8 +1204,7 @@ BTaggingEfficiencyTool::SystInfo::getIndex( unsigned int flavourID, unsigned int
 // this map is used to do the lookup of which systematic to apply.
 // ie it is used to map the systematics framework on the systematics approach of the CDI
 
-bool BTaggingEfficiencyTool::addSystematics(const std::vector<std::string> & systematicNames, unsigned int flavourID,
-					    Uncertainty uncType) {
+bool BTaggingEfficiencyTool::addSystematics(const std::vector<std::string> & systematicNames, unsigned int flavourID, Uncertainty uncType) {
   for (int i=0, n=systematicNames.size(); i<n; ++i) {
     const std::string systName = systematicNames[i];
     SystematicVariation up(systName,1);
@@ -1186,6 +1212,7 @@ bool BTaggingEfficiencyTool::addSystematics(const std::vector<std::string> & sys
     std::map<SystematicVariation,SystInfo>::iterator iter = m_systematicsInfo.find(up);
     if (iter == m_systematicsInfo.end()) {
       // First case: new variation
+      //std::cout << "BTagEffTool->addSystematics : systematic " << systName << " is a new systematic for " << getLabel(flavourID) << " and uncType " << uncType << std::endl;
       SystInfo info;
       info.isUp = true;
       info.uncType = uncType;
@@ -1199,15 +1226,16 @@ bool BTaggingEfficiencyTool::addSystematics(const std::vector<std::string> & sys
       // jet flavour. Check that indeed it's not registered yet for the requested flavour.
       SystInfo info = iter->second; // make a copy
       std::map<unsigned int, unsigned int>::const_iterator indIter = info.indexMap.find(flavourID);
+      //std::cout << "BTagEffTool->addSystematics : systematic " << systName << " has already been added to m_systematicsInfo for " << uncType << std::endl;
       if (indIter != info.indexMap.end()) {
-	ATH_MSG_ERROR("addSystematics : flavourID " << flavourID << " is already in the map for uncertainty '" << systName << "', ignoring");
-	continue;
+        ATH_MSG_ERROR("addSystematics : flavourID " << flavourID << " is already in the map for uncertainty '" << systName << "', ignoring");
+        continue;
       } else {
-	info.indexMap[flavourID] = i;
-	m_systematicsInfo[up] = info;
-	ATH_MSG_VERBOSE("addSystematics: adding " << systName << " for flavour " << getLabel(flavourID));
-	info.isUp = false;
-	m_systematicsInfo[down] = info;
+        info.indexMap[flavourID] = i;
+        m_systematicsInfo[up] = info;
+        ATH_MSG_VERBOSE("addSystematics: adding " << systName << " for flavour " << getLabel(flavourID));
+        info.isUp = false;
+        m_systematicsInfo[down] = info;
       }
     }
   }

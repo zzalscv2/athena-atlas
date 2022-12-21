@@ -37,6 +37,10 @@ if( XAOD_ANALYSIS )
       util/BTaggingEfficiencyToolTester.cxx
       LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
 
+   atlas_add_executable( SystematicStrategyComparison
+      util/SystematicStrategyComparison.cxx
+      LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib )
+
    atlas_add_executable( BTaggingEigenVectorRecompositionToolTester
       util/BTaggingEigenVectorRecompositionToolTester.cxx
       LINK_LIBRARIES AsgTools FTagAnalysisInterfacesLib )
