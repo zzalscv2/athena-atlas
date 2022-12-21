@@ -203,7 +203,11 @@ public:
    /// CHECK( tool.retrieve() );
    template<typename W> static W* createTool(const std::string& typeAndName, INamedInterface* parent = 0) {
       std::string type = typeAndName; std::string name = typeAndName;
-      if(type.find('/')!=std::string::npos) { type = type.substr(0,type.find('/')); name = name.substr(name.find('/')+1,name.length()); }
+      std::string::size_type pos = type.find('/');
+      if(pos!=std::string::npos) {
+        type.resize (pos);
+        name = name.substr(pos+1,name.length());
+      }
       if(parent==0) {
 	//use ToolSvc as parent
 	parent = Gaudi::svcLocator()->service( "ToolSvc" );
@@ -226,7 +230,11 @@ public:
    //equivalent method for creating an algorithm ... always returns an IAlgorithm though, so not templated
    static IAlgorithm* createAlgorithm(const std::string& typeAndName) {
       std::string type = typeAndName; std::string name = typeAndName;
-      if(type.find('/')!=std::string::npos) { type = type.substr(0,type.find('/')); name = name.substr(name.find('/')+1,name.length()); }
+      std::string::size_type pos = type.find('/');
+      if(pos!=std::string::npos) {
+        type.resize (pos);
+        name = name.substr(pos+1,name.length());
+      }
       IAlgorithm* out = Algorithm::Factory::create(type,name,Gaudi::svcLocator()).release();
       out->addRef(); //important to increment the reference count so that Gaudi Garbage collection wont delete alg ahead of time 
       return out;
@@ -321,10 +329,14 @@ public:
       //if the typeName is std::string, we will try to use the gaudi parsers to parse it
       //otherwise we try to do a straight assignment 
       try {
+        // cppcheck-suppress danglingTempReference; false positive
 	const coral::Attribute& attr = attrlist->second[key];
+        // cppcheck-suppress danglingTempReference; false positive
 	if(attr.specification().typeName()=="string") {
+          // cppcheck-suppress danglingTempReference; false positive
 	  if(Gaudi::Parsers::parse(out,attr.data<std::string>()).isFailure()) return StatusCode::FAILURE;
 	} else { //do a straight conversion, and just hope its ok (FIXME: should probably do a check of typeid(T) vs typeName)
+          // cppcheck-suppress danglingTempReference; false positive
 	  out = attr.data<T>();
 	}
       }
