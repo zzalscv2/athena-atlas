@@ -56,7 +56,7 @@ TruthParticleCnvTool::TruthParticleCnvTool( const std::string& type,
   AthAlgTool( type, name, parent ),
   m_dataType         ( ParticleDataType::True ),
   m_vxCandidatesName ( ),
-  m_pdt              ( 0 ),
+  m_pdt              ( nullptr ),
   m_selectSignalTypeProp ( 0 )
 {
   //
@@ -114,7 +114,7 @@ StatusCode TruthParticleCnvTool::initialize()
   }      
 
   m_pdt = partPropSvc->PDT();
-  if ( 0 == m_pdt ) {
+  if ( nullptr == m_pdt ) {
     ATH_MSG_ERROR("Could not retrieve HepPDT::ParticleDataTable from "\
 		  "ParticleProperties Service !!");
     return StatusCode::FAILURE;
@@ -184,7 +184,7 @@ StatusCode TruthParticleCnvTool::execute (const EventContext& ctx) const
   //  selection for particles from minbias copied from the JetsFromTruthTool
 
   std::size_t genEventIndex = 0;
-  const ITruthParticleVisitor* dummyVisitor = 0;
+  const ITruthParticleVisitor* dummyVisitor = nullptr;
   bool all_good = true;
 
   McEventCollection::const_iterator fEvt = mcEventsReadHandle->begin();
@@ -197,7 +197,7 @@ StatusCode TruthParticleCnvTool::execute (const EventContext& ctx) const
     const HepMC::GenEvent* evt = *it;
     // there are holes in a McEventCollection when pile-up is enabled
     // so deal with it
-    if (0 == evt) {
+    if (nullptr == evt) {
       continue;
     }
     genEventIndex = (it - mcEventsReadHandle->begin());
@@ -233,14 +233,14 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
 {
   ATH_MSG_DEBUG("Converting McEventCollection to TruthParticleContainer");
 
-  if ( 0 == m_pdt ) {
+  if ( nullptr == m_pdt ) {
     ATH_MSG_ERROR("Could not convert McEventCollection into "\
 		  "TruthParticleContainer if NO ParticleDataTable is "\
 		  "available !!");
     return StatusCode::FAILURE;
   }
   
-  if ( 0 == mcCollection ) {
+  if ( nullptr == mcCollection ) {
     ATH_MSG_WARNING("Null pointer to McEventCollection !");
     return StatusCode::RECOVERABLE;
   }
@@ -315,7 +315,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
       return StatusCode::RECOVERABLE;
     }
 
-    const TruthEtIsolationsContainer* etIsols = 0;
+    const TruthEtIsolationsContainer* etIsols = nullptr;
     if ( !evtStore()->retrieve( etIsols, etIsolName ).isSuccess() ) {
       ATH_MSG_WARNING("Could not retrieve the TruthEtIsolations container at ["
 		      << etIsolName << "] !!");

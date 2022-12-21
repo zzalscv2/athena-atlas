@@ -88,7 +88,7 @@ StatusCode VtxBasedFilterTool::buildMcAod( const McEventCollection* in,
 	<< "] from McEventCollection ["     << m_mcEventsReadHandleKey.key() 
 	<< "] !!" << endmsg;
       delete outEvt;
-      outEvt = 0;
+      outEvt = nullptr;
       continue;
     }
 
@@ -113,7 +113,7 @@ StatusCode VtxBasedFilterTool::buildGenEvent( const HepMC::GenEvent* in,
   }
 
 #ifdef HEPMC3
-  for (auto vtx: in->vertices()){
+  for (const auto& vtx: in->vertices()){
 #else
   // loop over vertices
   for ( HepMC::GenEvent::vertex_const_iterator vtxit = in->vertices_begin(); vtxit != in->vertices_end(); ++vtxit ) {
@@ -134,7 +134,7 @@ StatusCode VtxBasedFilterTool::buildGenEvent( const HepMC::GenEvent* in,
   return StatusCode::SUCCESS;
 }
 
-bool VtxBasedFilterTool::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
+bool VtxBasedFilterTool::isAccepted( const HepMC::ConstGenVertexPtr& vtx ) const
 {
   if ( !vtx ) {
     return false;
@@ -154,7 +154,7 @@ bool VtxBasedFilterTool::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
   return false;
 }
 
-StatusCode VtxBasedFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
+StatusCode VtxBasedFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
 				       HepMC::GenEvent* evt ) const
 {
   if ( !srcVtx || !evt ) {
@@ -178,7 +178,7 @@ StatusCode VtxBasedFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
 
   ////////////////////////////
   /// Fill the parent branch
-  for ( auto parent: srcVtx->particles_in() ) {
+  for ( const auto& parent: srcVtx->particles_in() ) {
     HepMC::GenParticlePtr p = HepMC::barcode_to_particle(evt, HepMC::barcode(parent) );
     if ( !p ) {
       p = HepMC::newGenParticlePtr();
@@ -198,7 +198,7 @@ StatusCode VtxBasedFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
   
   //////////////////////////////
   /// Fill the children branch
-  for ( auto child: srcVtx->particles_out()) {
+  for ( const auto& child: srcVtx->particles_out()) {
     HepMC::GenParticlePtr p = HepMC::barcode_to_particle(evt, HepMC::barcode(child) );
     if ( !p ) {
       p = HepMC::newGenParticlePtr();
@@ -276,16 +276,11 @@ StatusCode VtxBasedFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
 }
 
 bool 
-VtxBasedFilterTool::isFromHardScattering( HepMC::ConstGenVertexPtr vtx ) const
+VtxBasedFilterTool::isFromHardScattering( const HepMC::ConstGenVertexPtr& vtx ) const
 {
-  if ( std::abs(HepMC::barcode(vtx)) <= m_maxHardScatteringVtxBarcode.value() &&
+  return std::abs(HepMC::barcode(vtx)) <= m_maxHardScatteringVtxBarcode.value() &&
        m_ppFilter.isAccepted(vtx) &&
-       ! m_showerFilter.isAccepted(vtx) ) {
-
-    return true;
-  } else {
-    return false;
-  }
+       ! m_showerFilter.isAccepted(vtx);
 }
 
 /////////////////////////////////////////////////////////////////// 

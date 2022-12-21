@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCPARTICLETOOLS_TRUTHISOLATIONTOOL_H 
@@ -94,7 +94,7 @@ class TruthIsolationTool : virtual public ITruthIsolationTool,
    *  for various cone sizes into the @c TruthEtIsolations container
    */
   void computeIso( const std::list<HepMC::ConstGenParticlePtr>& parts, 
-		   HepMC::ConstGenParticlePtr p,
+		   const HepMC::ConstGenParticlePtr& p,
 		   TruthEtIsolations& etIsolations, 
 		   ITruthIsolationTool::ParticleSelect sel );
 

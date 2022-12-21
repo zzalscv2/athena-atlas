@@ -42,7 +42,7 @@ McAodWriterTool::McAodWriterTool( const std::string& type,
 				  const std::string& name, 
 				  const IInterface* parent ) : 
   AthAlgTool( type, name, parent ),
-  m_ioBackend( 0 )
+  m_ioBackend( nullptr )
 {
   //
   // Property declaration
@@ -70,7 +70,7 @@ McAodWriterTool::~McAodWriterTool()
 
   if ( m_ioBackend ) {
     delete m_ioBackend;
-    m_ioBackend = 0;
+    m_ioBackend = nullptr;
   }
 }
 
@@ -86,7 +86,7 @@ StatusCode McAodWriterTool::initialize()
   }
 
   // setup backend
-  if ( 0 == m_ioBackend ) {
+  if ( nullptr == m_ioBackend ) {
     setupBackend(m_ioBackendURL);
   }
 
@@ -105,9 +105,9 @@ StatusCode McAodWriterTool::finalize()
 StatusCode McAodWriterTool::execute()
 {
   // retrieve the TruthParticles
-  const TruthParticleContainer * mcParts = 0;
+  const TruthParticleContainer * mcParts = nullptr;
   if ( evtStore()->retrieve( mcParts, m_truthParticlesName ).isFailure() ||
-       0 == mcParts ) {
+       nullptr == mcParts ) {
     ATH_MSG_WARNING("Could not retrieve a TruthParticleContainer at ["
 		    << m_truthParticlesName << "] !!");
     return StatusCode::RECOVERABLE;
@@ -122,7 +122,7 @@ StatusCode McAodWriterTool::execute()
 
 StatusCode McAodWriterTool::write( const TruthParticleContainer* mcParts )
 {
-  if ( 0 == mcParts ) {
+  if ( nullptr == mcParts ) {
     ATH_MSG_WARNING("NULL pointer to TruthParticleContainer !!");
     return StatusCode::RECOVERABLE;
   }
@@ -165,7 +165,7 @@ void McAodWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
   // reset internal state
   if ( m_ioBackend ) {
     delete m_ioBackend;
-    m_ioBackend = 0;
+    m_ioBackend = nullptr;
   }
 
   // caching URL
@@ -200,5 +200,4 @@ void McAodWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
 
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["
 		<< fileName << "]");
-  return;
 }

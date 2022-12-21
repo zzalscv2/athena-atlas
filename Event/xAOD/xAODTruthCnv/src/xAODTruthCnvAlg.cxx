@@ -304,8 +304,8 @@ namespace xAODMaker {
 	   auto disconnectedSignalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
 	  if (disconnectedSignalProcessVtx) {
 #ifdef HEPMC3
-	    if (disconnectedSignalProcessVtx->particles_in().size() == 0 &&
-		disconnectedSignalProcessVtx->particles_out().size() == 0 ) {
+	    if (disconnectedSignalProcessVtx->particles_in().empty() &&
+		disconnectedSignalProcessVtx->particles_out().empty() ) {
 #else
 	    if (disconnectedSignalProcessVtx->particles_in_size() == 0 &&
 		disconnectedSignalProcessVtx->particles_out_size() == 0 ) {

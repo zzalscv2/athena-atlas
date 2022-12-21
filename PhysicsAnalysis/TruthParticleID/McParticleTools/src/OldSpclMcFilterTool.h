@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // OldSpclMcFilterTool.h 
@@ -87,7 +87,7 @@ class OldSpclMcFilterTool : public TruthParticleFilterBaseTool
    */
   StatusCode rebuildLinks( const HepMC::GenEvent * mcEvent,
 			   HepMC::GenEvent * outEvt,
-			   HepMC::GenParticlePtr mcPart );
+			   const HepMC::GenParticlePtr& mcPart );
 
   /** to get tesIO **/
   StatusCode initializeTool();

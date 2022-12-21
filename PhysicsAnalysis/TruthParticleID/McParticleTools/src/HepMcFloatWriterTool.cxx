@@ -34,7 +34,7 @@ HepMcFloatWriterTool::HepMcFloatWriterTool( const std::string& type,
 					    const std::string& name, 
 					    const IInterface* parent ) : 
   AthAlgTool( type, name, parent ),
-  m_ioBackend( 0 )
+  m_ioBackend( nullptr )
 {
   //
   // Property declaration
@@ -61,7 +61,7 @@ HepMcFloatWriterTool::~HepMcFloatWriterTool()
 
   if ( m_ioBackend ) {
     delete m_ioBackend;
-    m_ioBackend = 0;
+    m_ioBackend = nullptr;
   }
 }
 
@@ -72,7 +72,7 @@ StatusCode HepMcFloatWriterTool::initialize()
   ATH_MSG_INFO("Initializing " << name() << "...");
 
   // setup backend
-  if ( 0 == m_ioBackend ) {
+  if ( nullptr == m_ioBackend ) {
     setupBackend(m_ioBackendURL);
   }
 
@@ -98,8 +98,8 @@ StatusCode HepMcFloatWriterTool::finalize()
 StatusCode HepMcFloatWriterTool::execute()
 {
   // retrieve the McEventCollection
-  const McEventCollection * mcEvts = 0;
-  if ( evtStore()->retrieve( mcEvts, m_mcEventsName ).isFailure() || 0 == mcEvts ) {
+  const McEventCollection * mcEvts = nullptr;
+  if ( evtStore()->retrieve( mcEvts, m_mcEventsName ).isFailure() || nullptr == mcEvts ) {
     ATH_MSG_ERROR("Could not retrieve a McEventCollection at [" << m_mcEventsName << "] !!");
     return StatusCode::FAILURE;
   }
@@ -172,7 +172,7 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
   out << '\n';
 
   out << "#-- particles --\n";
-  for (auto p: *evt) {
+  for (const auto& p: *evt) {
     if ( p ) {
       out << "# " << HepMC::barcode(p) << " " << p->pdg_id() << "\n";
       
@@ -202,7 +202,7 @@ StatusCode HepMcFloatWriterTool::write( const HepMC::GenEvent* evt )
 
   out << "#-- vertices -- \n";
 #ifdef HEPMC3
-  for (auto v: evt->vertices()) {
+  for (const auto& v: evt->vertices()) {
     if ( v ) { 
       out << "# " << HepMC::barcode(v) << " " << v->status() << "\n";
       const HepMC::FourVector pos = v->position();
@@ -265,7 +265,7 @@ void HepMcFloatWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ 
   // reset internal state
   if ( m_ioBackend ) {
     delete m_ioBackend;
-    m_ioBackend = 0;
+    m_ioBackend = nullptr;
   }
 
   // caching URL
@@ -292,5 +292,4 @@ void HepMcFloatWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ 
     m_ioBackend = new std::ofstream( fileName.c_str(), std::ios::out | std::ios::trunc );
   }
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
-  return;
 }

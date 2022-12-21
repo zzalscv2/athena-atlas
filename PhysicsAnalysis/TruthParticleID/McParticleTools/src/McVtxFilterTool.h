@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McVtxFilterTool.h 
@@ -145,14 +145,14 @@ class McVtxFilterTool : virtual public IMcVtxFilterTool,
    *  The last parameter is used here to add (or not) the whole decay tree at a given
    *  vertex. (Default: just add the vertex, not the whole tree of children)
    */
-  void addVertex(  HepMC::ConstGenVertexPtr vtx, HepMC::GenEvent * evt,
+  void addVertex(  const HepMC::ConstGenVertexPtr& vtx, HepMC::GenEvent * evt,
 		  const VtxType::Flag vtxType = VtxType::IsNotRootVertex ) const;
 
   /** Helper function: return true if we are at a root vertex (i.e., a vertex
    *  that satisfies one of the chosen decay modes) and if the PDG of the particle
    *  is in the m_particles list (or the m_particle list is empty).
    */
-  bool keepParticle( const VtxType::Flag vtxType, HepMC::ConstGenParticlePtr p ) const;
+  bool keepParticle( const VtxType::Flag vtxType, const HepMC::ConstGenParticlePtr& p ) const;
 
   /** @brief Callback method to ensure consistency of filters.
    *  Method to ensure the synchronisation between the filters

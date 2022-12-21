@@ -62,7 +62,7 @@ HepMcReaderTool::~HepMcReaderTool()
   ATH_MSG_DEBUG("Calling destructor");
 
   delete m_ioFrontend;
-  m_ioFrontend = 0;
+  m_ioFrontend = nullptr;
 }
 
 /// Athena Algorithm's Hooks
@@ -77,7 +77,7 @@ StatusCode HepMcReaderTool::initialize()
   }
 
   // setup frontend
-  if ( 0 == m_ioFrontend ) {
+  if ( nullptr == m_ioFrontend ) {
     setupFrontend(m_ioFrontendURL);
   }
 
@@ -133,7 +133,7 @@ void HepMcReaderTool::setupFrontend( Gaudi::Details::PropertyBase& /*prop*/ )
   // reset internal state
   if ( m_ioFrontend ) {
     delete m_ioFrontend;
-    m_ioFrontend = 0;
+    m_ioFrontend = nullptr;
   }
 
   // caching URL
@@ -173,5 +173,4 @@ void HepMcReaderTool::setupFrontend( Gaudi::Details::PropertyBase& /*prop*/ )
 #endif
 
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
-  return;
 }

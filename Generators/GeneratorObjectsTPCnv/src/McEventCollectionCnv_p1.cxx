@@ -26,9 +26,9 @@ McEventCollectionCnv_p1::McEventCollectionCnv_p1() :
   Base_t( )
 {}
 
-McEventCollectionCnv_p1::McEventCollectionCnv_p1( const McEventCollectionCnv_p1& rhs ) :
-  Base_t( rhs )
-{}
+McEventCollectionCnv_p1::McEventCollectionCnv_p1( const McEventCollectionCnv_p1& rhs ) 
+  
+= default;
 
 McEventCollectionCnv_p1&
 McEventCollectionCnv_p1::operator=( const McEventCollectionCnv_p1& rhs )
@@ -44,8 +44,7 @@ McEventCollectionCnv_p1::operator=( const McEventCollectionCnv_p1& rhs )
 ///////////////////////////////////////////////////////////////////
 
 McEventCollectionCnv_p1::~McEventCollectionCnv_p1()
-{
-}
+= default;
 
 
 void McEventCollectionCnv_p1::persToTrans( const McEventCollection_p1* persObj,
@@ -72,12 +71,7 @@ void McEventCollectionCnv_p1::persToTrans( const McEventCollection_p1* persObj,
     datapool.evt.reserve( datapool.evt.allocated() + nEvts );
   }
   transObj->reserve( nEvts );
-  for ( std::vector<GenEvent_p1>::const_iterator
-          itr    = persObj->begin(),
-          itrEnd = persObj->end();
-        itr != itrEnd;
-        ++itr ) {
-    const GenEvent_p1& persEvt = *itr;
+  for (const auto & persEvt : *persObj) {
     HepMC::GenEvent * genEvt   = datapool.getGenEvent();
     genEvtCnv.persToTrans( &persEvt, genEvt, msg );
     transObj->push_back( genEvt );
@@ -86,8 +80,6 @@ void McEventCollectionCnv_p1::persToTrans( const McEventCollection_p1* persObj,
 
   msg << MSG::DEBUG << "Loaded McEventCollection from persistent state [OK]"
       << endmsg;
-
-  return;
 }
 
 void McEventCollectionCnv_p1::transToPers( const McEventCollection*,
@@ -104,5 +96,4 @@ void McEventCollectionCnv_p1::transToPers( const McEventCollection*,
       << endmsg;
 
   throw std::runtime_error( "Retired McEventCollectionCnv_p1::transToPers() !!" );
-  return;
 }

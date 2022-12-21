@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p2.h
@@ -101,21 +101,21 @@ class McEventCollectionCnv_p2 : public T_AthenaPoolTPCnvBase<
    *  of barcodes to particle so that we can reconnect all the (non-orphan)
    *  particles to their decay vertex (if any).
    */
-  HepMC::GenVertexPtr
+  static HepMC::GenVertexPtr
   createGenVertex( const McEventCollection_p2& persEvts,
                    const GenVertex_p2& vtx,
                    ParticlesMap_t& bcToPart,
-                   HepMC::DataPool& datapools,HepMC::GenEvent* parent=nullptr  ) const;
+                   HepMC::DataPool& datapools,HepMC::GenEvent* parent=nullptr  ) ;
 
   /** @brief Create a transient @c GenParticle from a persistent one (vers.1)
    *  It returns the new @c GenParticle. Note that the map being passed as an
    *  argument is to hold the association of barcodes to particle so that
    *  we can reconnect all the particles to their decay vertex (if any).
    */
-  HepMC::GenParticlePtr
+  static HepMC::GenParticlePtr
   createGenParticle( const GenParticle_p2& p,
                      ParticlesMap_t& partToEndVtx,
-                     HepMC::DataPool& datapools,const HepMC::GenVertexPtr& parent=nullptr  ) const;
+                     HepMC::DataPool& datapools,const HepMC::GenVertexPtr& parent=nullptr  ) ;
 
 };
 #endif //> GENERATOROBJECTSTPCNV_MCEVENTCOLLECTIONCNV_P2_H

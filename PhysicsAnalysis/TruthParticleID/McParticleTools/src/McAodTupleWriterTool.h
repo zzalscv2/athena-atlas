@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McAodTupleWriterTool.h 
@@ -114,7 +114,7 @@ class McAodTupleWriterTool : virtual public IIOMcAodTool,
     boost::array<double, s_nMax> m_etcone70;
   };
   /// our cached particles
-  McAodParticles m_particles;
+  McAodParticles m_particles{};
 
   /// Pointer to @ ITHistSvc
   ServiceHandle<ITHistSvc> m_tupleSvc;

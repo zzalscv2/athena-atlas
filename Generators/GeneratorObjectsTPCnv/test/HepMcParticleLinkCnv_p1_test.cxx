@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -174,12 +174,11 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
   HepMC::GenEvent& ge4 = *(inputTestDataHandle->at(3));
   ge4.set_event_number(event_number4);
   populateFilteredGenEvent(ge4,genPartList);
-  return;
 }
 
 void testit (const HepMcParticleLink& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   HepMcParticleLinkCnv_p1 cnv;
   HepMcParticleLink_p1 pers;
   cnv.transToPers (&trans1, &pers, log);
