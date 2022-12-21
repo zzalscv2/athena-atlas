@@ -99,8 +99,7 @@ StatusCode Analysis::CalibrationDataInterfaceTester::execute()
     ATH_MSG_DEBUG(" label: " << label);
     ATH_MSG_DEBUG(" SF (unc.): " << sfResult.first
 		 << "(" << sfResult.second << ")");
-    ATH_MSG_DEBUG(" eff (unc.): " << effResult.first
-	  << "(" << effResult.second << ")";
+    ATH_MSG_DEBUG(" eff (unc.): " << effResult.first << "(" << effResult.second << ")");
 
   }
 
