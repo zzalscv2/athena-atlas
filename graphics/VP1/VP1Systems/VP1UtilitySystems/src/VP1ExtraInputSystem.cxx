@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1UtilitySystems/VP1ExtraInputSystem.h"
@@ -190,7 +190,7 @@ void VP1ExtraInputSystem::restoreFromState(QByteArray ba){
   IVP13DSystemSimple::restoreFromState(state.restoreByteArray());
 
   state.restore(m_c->ui.toolBox);
-  foreach(QString fileName, state.restore<QStringList>())
+  for (QString fileName : state.restore<QStringList>())
     m_c->inputFile(this,fileName);
   state.restore(m_c->ui.baseLMButton,m_c->ui.phongLMButton);
   state.restore(m_c->ui.visibleCheckBox);
