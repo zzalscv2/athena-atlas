@@ -50,13 +50,13 @@ namespace InDet {
     virtual StatusCode initialize() override;
 
     /** LayerBuilder interface method - returning Barrel-like layers */
-    const std::vector<Trk::CylinderLayer* >* cylindricalLayers() const;
+    virtual const std::vector<Trk::CylinderLayer* >* cylindricalLayers() const override;
 
     /** LayerBuilder interface method - returning Endcap-like layers */
-    const std::vector<Trk::DiscLayer* >*     discLayers() const;
+    virtual const std::vector<Trk::DiscLayer* >*     discLayers() const override;
 
     /** LayerBuilder interface method - returning Planar-like layers */
-    const std::vector<Trk::PlaneLayer* >*    planarLayers() const;
+    virtual const std::vector<Trk::PlaneLayer* >*    planarLayers() const override;
 
     /** Name identification */
     virtual const std::string& identification() const override final;
