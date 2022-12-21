@@ -832,6 +832,12 @@ namespace top {
       }
     }
 
+    inline virtual void useEgammaSFs(const std::string& s) {
+      if (!m_configFixed) {
+        m_useEgammaSFs = (s == "True" || s == "true");
+      }
+    }
+
     inline void removeElectronVetoLArCrack() {
       if (!m_configFixed) {
         m_electronVetoLArCrack = false;
@@ -954,6 +960,7 @@ namespace top {
     inline bool useElectronChargeIDSelection() const {return m_useElectronChargeIDSelection;}
     inline bool useEgammaLeakageCorrection() const {return m_useEgammaLeakageCorrection;}
     inline bool useEgammaPileupCorrection() const {return m_useEgammaPileupCorrection;}
+    inline bool useEgammaSFs() const {return m_useEgammaSFs;}
     inline bool enablePromptLeptonImprovedVetoStudies() const {return m_enablePromptLeptonImprovedVetoStudies;}
 
     // Fwd electron
@@ -2603,6 +2610,7 @@ namespace top {
     bool m_useEgammaLeakageCorrection;
     bool m_useEgammaPileupCorrection;
     bool m_enablePromptLeptonImprovedVetoStudies;
+    bool m_useEgammaSFs; // nils
 
     // experimental electronID map path
     std::string m_electronIDSFFile_path = "Default";
