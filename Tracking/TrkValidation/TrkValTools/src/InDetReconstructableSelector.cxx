@@ -104,8 +104,7 @@ Trk::InDetReconstructableSelector::selectGenSignal (const McEventCollection* Sim
         const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
 
         if (!pd) { // nuclei excluded, still problems with a given type?
-          ATH_MSG_INFO ("Could not get particle data for particle with pdgCode="<<pdgCode<< ", status=" << particle->status() << ", barcode=" << HepMC::barcode(particle));
-          ATH_MSG_INFO ("GenParticle= " << particle);
+          ATH_MSG_INFO ("Could not get particle data for particle "<< particle);
           continue;
         }
         float charge          = pd->charge();

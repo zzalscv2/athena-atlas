@@ -69,15 +69,12 @@ Trk::InDetHaloSelector::selectGenSignal (const McEventCollection* SimTracks) con
       // 1) require stable particle from generation or simulation
       if ((particle->status()%1000) != 1 )    continue;
 
-      
       int   pdgCode         = particle->pdg_id();
-      if (abs(pdgCode) > 1000000000 ) continue; // ignore nuclei from hadronic interactions
+      if (std::abs(pdgCode) > 1000000000 ) continue; // ignore nuclei from hadronic interactions
       const HepPDT::ParticleData* pd = m_particleDataTable->particle(std::abs(pdgCode));
-      ATH_MSG_DEBUG( "checking particle barcode = " <<  HepMC::barcode(particle) );
+      ATH_MSG_DEBUG( "Checking particle " <<  particle );
       if (!pd) { // nuclei excluded, still problems with a given type?
-	ATH_MSG_INFO ("Could not get particle data for particle with pdgCode="<<pdgCode
-		      << ", status=" << particle->status() << ", barcode=" << HepMC::barcode(particle));
-	ATH_MSG_INFO ("GenParticle= " << particle);
+        ATH_MSG_INFO ("Could not get particle data for particle" << particle);
 	continue;
       }
       float charge          = pd->charge();
@@ -85,7 +82,6 @@ Trk::InDetHaloSelector::selectGenSignal (const McEventCollection* SimTracks) con
       if (std::fabs(charge)<0.5) continue;
       
       genSignal->push_back(particle);
-    
     
     } // loop and select particles
   }   // loop and select pile-up vertices
