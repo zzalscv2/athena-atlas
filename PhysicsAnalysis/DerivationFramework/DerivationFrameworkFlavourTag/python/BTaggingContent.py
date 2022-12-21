@@ -199,8 +199,8 @@ def BTaggingExpertContent(jetcol, ConfigFlags = None):
         isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
 
     # add aux variables
-    btaggingAllAux = ( BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux
-                      + BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
+    btaggingAllAux = ( (BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux)
+                      + (BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux)
                       + BTaggingExtendedAux)
     btagcontent = [ ".".join( [ btagging + "Aux" ] + btaggingAllAux ) ]
 
@@ -227,7 +227,8 @@ def BTaggingStandardContent(jetcol, ConfigFlags = None):
     btagcontent = \
         [ btagging ] \
         + [ ".".join( [ btagging + "Aux" ] + \
-                      BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux ) ]
+                      (BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux) ) ]
+
     return jetcontent + btagcontent
 
 
@@ -249,8 +250,8 @@ def BTaggingXbbContent(jetcol, ConfigFlags = None):
         isRun4 = ConfigFlags.GeoModel.Run >= LHCPeriod.Run4
 
     # add aux variables
-    btaggingAllAux =  BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux \
-                     + BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux
+    btaggingAllAux = (BTaggingHighLevelRun4Aux if isRun4 else BTaggingHighLevelRun3Aux) \
+                     + (BTaggingStandardRun4Aux if isRun4 else BTaggingStandardRun3Aux)
     btagcontent = [ ".".join( [ btagging + "Aux" ] + btaggingAllAux ) ]
 
     return [jetcol] + jetcontent + [ btagging ] + btagcontent
