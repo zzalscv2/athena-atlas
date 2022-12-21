@@ -70,7 +70,6 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
   int netarpc = 0;
   int netatgc = 0;
   int netacsc = 0;
-  int irio = 0;
   
   std::vector<const Trk::RIO_OnTrack*> rots;
   std::vector<const Trk::CompetingRIOsOnTrack*> crots; // lookup vector to check if rot is part of competing rio. vector contains 0 if not part of competing rio
@@ -123,7 +122,6 @@ const Muon::MuonSegment* MuonSegmentAmbiCleaner::resolve(const Muon::MuonSegment
     const Trk::RIO_OnTrack* rot = rots[i];
     const Trk::PrepRawData* prd = rot->prepRawData();
     Identifier id = prd->identify();
-    irio++;
     if( m_idHelperSvc->isMdt( rot->identify() ) ){
       meas_keep.push_back(rot->clone());
       netamdt++;
