@@ -48,7 +48,6 @@ bool TrigEgammaEmulationFastPhotonHypoTool::decide(  const Trig::TrigData &input
   float Eratio       = -99.0;
   float f1           = -99.0;
   float HadET        = -99.0;
-  int cutCounter     = 0;
 
   const xAOD::TrigPhoton* photon = input.trig_photon;
 
@@ -83,14 +82,12 @@ bool TrigEgammaEmulationFastPhotonHypoTool::decide(  const Trig::TrigData &input
   } else {
     ATH_MSG_VERBOSE( "eta bin used for cuts " << etaBin );
   }
-  cutCounter++; // passed eta cut                                                                                                                                                                           
   // Reta (was previously called Rcore)                                                                                                                                                                     
   if ( Reta > m_carcorethr[etaBin] ){
     ATH_MSG_VERBOSE( "TrigPhoton Reta=" << Reta
 		     << " cut in etaBin " << etaBin << " is Reta >= "  << m_carcorethr[etaBin]  );
     return  false;
   }
-  cutCounter++;
   //  // Eratio           
   bool inCrack = ( absEta > 2.37 || ( absEta > 1.37 && absEta < 1.52) );
   if ( inCrack || f1<m_F1thr[0] ) {
@@ -99,7 +96,6 @@ bool TrigEgammaEmulationFastPhotonHypoTool::decide(  const Trig::TrigData &input
   } else {
     if ( Eratio > m_caeratiothr[etaBin] ) return false;
   }
-  cutCounter++;
   if(inCrack)  Eratio  = -1; //Set default value in crack for monitoring.                                                                                                                                   
 
   // ET_em                                                                                                                                                                                                  
@@ -108,7 +104,6 @@ bool TrigEgammaEmulationFastPhotonHypoTool::decide(  const Trig::TrigData &input
 		     << " not in etaBin " << etaBin << " is ET_em < " << m_eTthr[etaBin] );
     return false;
   }
-  cutCounter++;
 
   // ET_had                                                                                                                                                                                                 
   // find which ET_had to apply : this depends on the ET_em and the eta bin                                                                                                                                 
@@ -128,7 +123,6 @@ bool TrigEgammaEmulationFastPhotonHypoTool::decide(  const Trig::TrigData &input
     return false;
 
   }
-  cutCounter++;
   
   return true;
   
