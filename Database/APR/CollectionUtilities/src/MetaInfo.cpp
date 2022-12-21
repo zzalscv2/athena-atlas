@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CollectionBase/ICollection.h"
@@ -143,7 +143,7 @@ MetaInfo::addMetaEntry(std::string key, std::string val)
 
 
 
-bool MetaInfo::shouldCopy(string key)
+bool MetaInfo::shouldCopy(const std::string& key)
 {
    if( !m_noMetadata )
       return true;
