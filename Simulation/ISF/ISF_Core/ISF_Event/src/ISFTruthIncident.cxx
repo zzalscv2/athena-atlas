@@ -74,15 +74,11 @@ int ISF::ISFTruthIncident::parentPdgCode() const {
   return m_parent.pdgCode();
 }
 
-HepMC::ConstGenParticlePtr ISF::ISFTruthIncident::parentParticle() const {
-    return getHepMCTruthParticle(m_parent);
-}
-
 HepMC::GenParticlePtr ISF::ISFTruthIncident::parentParticle() {
     return getHepMCTruthParticle(m_parent);
 }
 
-Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() const {
+Barcode::ParticleBarcode ISF::ISFTruthIncident::parentBarcode() {
   return m_parent.barcode();
 }
 
@@ -129,7 +125,7 @@ Barcode::ParticleBarcode ISF::ISFTruthIncident::childBarcode(unsigned short inde
 }
 
 HepMC::GenParticlePtr ISF::ISFTruthIncident::childParticle(unsigned short index,
-                                                         Barcode::ParticleBarcode bc) const {
+                                                           Barcode::ParticleBarcode bc) {
   // the child particle
   ISF::ISFParticle *sec = m_children[index];
 
