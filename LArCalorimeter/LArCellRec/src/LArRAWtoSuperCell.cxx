@@ -15,6 +15,7 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "LArRecConditions/LArBadChannel.h"
 
 LArRAWtoSuperCell::LArRAWtoSuperCell( const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm( name, pSvcLocator)//, m_sem_mgr(0)
@@ -86,8 +87,13 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
                 cell->setEnergy( 12.5*energy*cosh(cell->eta()) );
 
 		// set some provenance to indicate bad channel
-		if(badchannel && (!badchannel->offlineStatus(off_id).good()) ) 
-			cell->setProvenance(cell->provenance()|0x80);
+		if(badchannel) {
+		   LArBadChannel bc = badchannel->offlineStatus(off_id);
+		   if ( !bc.good() && bc.statusBad(LArBadChannel::LArBadChannelSCEnum::maskedOSUMBit) ){
+		     cell->setProvenance(cell->provenance()|0x80);
+		   }
+		   
+		}
 		// we probably should soon associate some quality information to the saturation, maybe the bcid to provenance
 		cell->setQuality((unsigned short)saturation);
                 new_scell_cont->push_back( std::move(cell) );
