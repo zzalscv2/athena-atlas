@@ -53,7 +53,7 @@ namespace xAOD {
 
    THolder::THolder( void* object, ::TClass* type, ::Bool_t owner )
       : m_object( object ), m_type( type ),
-        m_typeInfo( type ? m_type->GetTypeInfo() : 0 ), m_owner( owner ),
+        m_typeInfo( m_type ? m_type->GetTypeInfo() : 0 ), m_owner( owner ),
         m_typeKind( getTypeKind( type ) ) {
 
       // Complain if the passed dictionary will be unusable later on:

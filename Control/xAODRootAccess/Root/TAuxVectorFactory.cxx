@@ -27,22 +27,23 @@ namespace xAOD {
                   XAOD_MESSAGE( "No collection proxy found for type %s" ),
                   cl->GetName() );
       }
-
-      // Check if the elements of the vector are objects:
-      ::TClass* eltClass = m_proxy->GetValueClass();
-      if( eltClass ) {
-         // Initialise the assignment operator's method call:
-         std::string proto = "const ";
-         proto += eltClass->GetName();
-         proto += "&";
-         m_assign.setProto( eltClass, "operator=", proto );
-         if( m_assign.call() == nullptr ) {
-            ::Warning( "xAOD::TAuxVectorFactory::TAuxVectorFactory",
-                       XAOD_MESSAGE( "Can't get assignment operator for "
-                                     "class %s" ),
-                       eltClass->GetName() );
-         }
-         m_defElt = eltClass->New();
+      else {
+         // Check if the elements of the vector are objects:
+        ::TClass* eltClass = m_proxy->GetValueClass();
+        if( eltClass ) {
+           // Initialise the assignment operator's method call:
+          std::string proto = "const ";
+          proto += eltClass->GetName();
+          proto += "&";
+          m_assign.setProto( eltClass, "operator=", proto );
+          if( m_assign.call() == nullptr ) {
+             ::Warning( "xAOD::TAuxVectorFactory::TAuxVectorFactory",
+                        XAOD_MESSAGE( "Can't get assignment operator for "
+                                      "class %s" ),
+                        eltClass->GetName() );
+          }
+          m_defElt = eltClass->New();
+        }
       }
    }
 
