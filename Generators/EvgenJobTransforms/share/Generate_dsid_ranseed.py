@@ -15,7 +15,7 @@ else:
   if 'Pythia8' in evgenConfig.generators:
     genSeq.Pythia8.RandomSeed=seed
     genSeq.Pythia8.Dsid=dsid
-  if 'PythiaB' in evgenConfig.generators:
+  if 'Pythia8B' in evgenConfig.generators:
     genSeq.Pythia8B.RandomSeed=seed
     genSeq.Pythia8B.Dsid=dsid
   if 'Herwig7' in evgenConfig.generators:

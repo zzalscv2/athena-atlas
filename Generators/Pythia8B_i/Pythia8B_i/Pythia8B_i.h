@@ -63,6 +63,7 @@ private:
     bool m_sameAlphaSAsMPI;
     Pythia8::SuppressSmallPT *m_SuppressSmallPT;
     unsigned int m_failureCount;
+
 };
 
 #endif

@@ -93,6 +93,8 @@ protected:
   BooleanProperty m_useRndmGenSvc{this, "useRndmGenSvc", true, "the max number of consecutive failures"};
   std::unique_ptr<customRndm> m_atlasRndmEngine{};
 
+  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
+
 private:
 
   static std::string findValue(const std::string &command, const std::string &key);
@@ -113,8 +115,6 @@ private:
 
   StringProperty m_beam1{this, "Beam1", "PROTON"};
   StringProperty m_beam2{this, "Beam2", "PROTON"};
-
-  IntegerProperty m_dsid{this, "Dsid", 999999, "Dataset ID number"};
 
   StringProperty m_lheFile{this, "LHEFile", ""};
 
