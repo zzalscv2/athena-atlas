@@ -504,6 +504,7 @@ StatusCode  MistimedStreamMonitorAlgorithm::makeTowerPPM( const xAOD::TriggerTow
   MonitorTT monTT;
   monTT.tower = tt;
   monTT.phiScaled = phiMod;
+  monTT.phi1d = 0;
   vecMonTT.push_back(monTT);
    
   return StatusCode::SUCCESS; 

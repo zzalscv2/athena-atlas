@@ -47,6 +47,7 @@ class CpmMonitorAlgorithm : public AthMonitorAlgorithm {
   };
 
   struct MonitorCmxCpTob{
+    MonitorCmxCpTob() = default;  // suppresses a cppcheck false positive
     const xAOD::CMXCPTob_v1* tob{};
     // some modified/derived information 
     uint8_t x{}; // crate * m_modules + cpm - 1
