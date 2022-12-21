@@ -272,22 +272,12 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   
 #ifdef HEPMC3
   // Process particles in barcode order.
-  // Accessing the barcode is expensive with HepMC3, so construct a
-  // temporary (barcode,index) vector and sort that.  In that way,
-  // we only need to fetch the barcode once for each particle.
-  const std::vector<HepMC::ConstGenParticlePtr>& parts = evt->particles();
-  std::vector<std::pair<int, int> > partOrder;
-  partOrder.reserve (parts.size());
-  for (const HepMC::ConstGenParticlePtr& p : parts) {
-    partOrder.emplace_back (HepMC::barcode(p), partOrder.size());
-  }
-  std::sort (partOrder.begin(), partOrder.end());
-  for (const std::pair<int,int>& p: partOrder)
-  {
-    HepMC::ConstGenParticlePtr hepMcPart = parts[p.second];
+  auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>("barcodes");
+  if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
+  std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
+  for (const auto &[k,hepMcPart]: bcmap) {
 #else
-  for (auto hepMcPart: *evt)
-  {
+  for (auto hepMcPart: *evt) {
 #endif
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );

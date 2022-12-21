@@ -321,27 +321,19 @@ namespace xAODMaker {
 	  pair<HepMC::ConstGenParticlePtr,HepMC::ConstGenParticlePtr> beamParticles;
 	  bool genEvt_valid_beam_particles=false;
 #ifdef HEPMC3
-	  auto beamParticles_vec = genEvt->beams();
-	  genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
-	  if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
-#else	  
-          genEvt_valid_beam_particles=genEvt->valid_beam_particles();
-	  if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
-#endif 
-
-#ifdef HEPMC3
-          // We want to process particles in barcode order, so need to
-          // explicitly sort them.
-          std::vector<HepMC::ConstGenParticlePtr> parts = genEvt->particles();
-          std::sort (parts.begin(), parts.end(),
-                     [] (const HepMC::ConstGenParticlePtr& a,
-                         const HepMC::ConstGenParticlePtr& b)
-                     { return HepMC::barcode(a) < HepMC::barcode(b); });
-          for (const auto& part: parts)
+        auto beamParticles_vec = genEvt->beams();
+        genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
+        if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
+        // We want to process particles in barcode order. Don't ask why.
+        auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes");
+        if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
+        std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
+        for (const auto &[k,part]: bcmap) {
 #else
-          for (auto part: *genEvt)
+        genEvt_valid_beam_particles=genEvt->valid_beam_particles();
+        if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
+        for (auto part: *genEvt) {
 #endif
-          {
 	    // (a) create TruthParticle
 	    xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
 	    xTruthParticleContainer->push_back( xTruthParticle );

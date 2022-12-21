@@ -94,8 +94,21 @@ public:
       }
     }
   }
-  std::unordered_map<int, GenVertexPtr> barcode_to_vertex_map() const { return m_vertexBC; }
-  std::unordered_map<int, GenParticlePtr> barcode_to_particle_map() const { return m_particleBC; }
+  const std::unordered_map<int, GenVertexPtr>& unordered_barcode_to_vertex_map() const { return m_vertexBC; }
+  const std::unordered_map<int, GenParticlePtr>& unordered_barcode_to_particle_map() const { return m_particleBC; }
+
+  std::map<int, ConstGenVertexPtr> barcode_to_vertex_map() const {
+    std::map<int, ConstGenVertexPtr> ret;
+    for (const auto &bcvertpair: m_vertexBC)
+      ret.insert({bcvertpair.first,std::const_pointer_cast<const HepMC3::GenVertex>(bcvertpair.second)});
+    return ret;
+   }
+  std::map<int, ConstGenParticlePtr> barcode_to_particle_map() const {
+    std::map<int, ConstGenParticlePtr> ret;
+    for (const auto &bcpartpair: m_particleBC)
+      ret.insert({bcpartpair.first,std::const_pointer_cast<const HepMC3::GenParticle>(bcpartpair.second)});
+    return ret;
+   }
 
   void fillAttribute(GenEvent* e) {
     auto barcodeAttributes = e->attributes()["barcode"];
