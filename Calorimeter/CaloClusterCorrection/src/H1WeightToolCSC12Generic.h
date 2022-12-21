@@ -50,8 +50,8 @@ private:
   Constant<CxxUtils::Array<1> > m_wtTile2 { this, "wtTile2" };
   Constant<CxxUtils::Array<1> > m_wtHec1  { this, "wtHec1" };
   Constant<CxxUtils::Array<1> > m_wtHec2  { this, "wtHec2" };
-  Constant<CxxUtils::Array<1> > m_wtFCal1 { this, "wrFCal1" };
-  Constant<CxxUtils::Array<1> > m_wtFCal2 { this, "wrFCal2" };
+  Constant<CxxUtils::Array<1> > m_wtFCal1 { this, "wtFCal1" };
+  Constant<CxxUtils::Array<1> > m_wtFCal2 { this, "wtFCal2" };
   Constant<float>               m_wtGap   { this, "wtGap" };
   Constant<float>               m_wtScint { this, "wtScint" };
   Constant<float>               m_wtCryo  { this, "wtCyo" };
