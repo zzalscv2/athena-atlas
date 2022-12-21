@@ -116,12 +116,16 @@ namespace top {
       m_jetAntiKt4_PFlow_MCFS_JMS_ConfigFile = "JES_JMS_MC16Recommendation_Consolidated_MC_only_PFlow_July2019_Rel21.config";
       m_jetAntiKt4_PFlow_MCFS_JMS_CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear_JMS";
 
-      // HI special
+      // HI special -- this is PbPb
       m_jetAntiKt4HI_MC_ConfigFile = "JES_MC16_HI_Jan2021_5TeV.config";
       m_jetAntiKt4HI_MC_CalibSequence = "EtaJES";
       
       m_jetAntiKt4HI_Data_ConfigFile = "JES_MC16_HI_Jan2021_5TeV.config";
       m_jetAntiKt4HI_Data_CalibSequence = "EtaJES_Insitu";
+
+      // HIP (p+Pb and Pb+p) collisions have separate calibration
+      m_jetAntiKt4HI_pPb_ConfigFile = "JES_MC16_HI_Jul2021_pPb_8TeV.config";
+      m_jetAntiKt4HI_Pbp_ConfigFile = "JES_MC16_HI_Jul2021_Pbp_8TeV.config";
     } else { // standard pp collisions
       m_jetJVT_ConfigFile = "JVTlikelihood_20140805.root";
 
@@ -212,7 +216,13 @@ namespace top {
             calibConfig = m_jetAntiKt4_MCAFII_PFlow_ConfigFile;
             calibSequence = m_jetAntiKt4_MCAFII_PFlow_CalibSequence;
           } else if (m_config->useHIJets()) {
-            calibConfig = m_jetAntiKt4HI_MC_ConfigFile;
+            if (m_config->isHI_pPb())
+              calibConfig = m_jetAntiKt4HI_pPb_ConfigFile;
+            else if (m_config->isHI_Pbp())
+              calibConfig = m_jetAntiKt4HI_Pbp_ConfigFile;
+            else
+              calibConfig = m_jetAntiKt4HI_MC_ConfigFile;
+
             calibSequence = m_jetAntiKt4HI_MC_CalibSequence;
           } else {
             calibConfig = m_jetAntiKt4_MCAFII_ConfigFile;
@@ -232,7 +242,13 @@ namespace top {
               calibConfig = m_jetAntiKt4_PFlow_MCFS_ConfigFile;
               calibSequence = m_jetAntiKt4_PFlow_MCFS_CalibSequence;
             } else if (m_config->useHIJets()) {
-              calibConfig = m_jetAntiKt4HI_MC_ConfigFile;
+              if (m_config->isHI_pPb())
+                calibConfig = m_jetAntiKt4HI_pPb_ConfigFile;
+              else if (m_config->isHI_Pbp())
+                calibConfig = m_jetAntiKt4HI_Pbp_ConfigFile;
+              else
+                calibConfig = m_jetAntiKt4HI_MC_ConfigFile;
+
               calibSequence = m_jetAntiKt4HI_MC_CalibSequence;
             } else { // EMTopo
               calibConfig = m_jetAntiKt4_MCFS_ConfigFile;
@@ -254,7 +270,13 @@ namespace top {
             calibConfig = m_jetAntiKt4_Data_PFlow_ConfigFile;
             calibSequence = m_jetAntiKt4_Data_PFlow_CalibSequence;
           } else if (m_config->useHIJets()) {
-            calibConfig = m_jetAntiKt4HI_Data_ConfigFile;
+            if (m_config->isHI_pPb())
+              calibConfig = m_jetAntiKt4HI_pPb_ConfigFile;
+            else if (m_config->isHI_Pbp())
+              calibConfig = m_jetAntiKt4HI_Pbp_ConfigFile;
+            else
+              calibConfig = m_jetAntiKt4HI_Data_ConfigFile;
+
             calibSequence = m_jetAntiKt4HI_Data_CalibSequence;
           } else {
             calibConfig = m_jetAntiKt4_Data_ConfigFile;

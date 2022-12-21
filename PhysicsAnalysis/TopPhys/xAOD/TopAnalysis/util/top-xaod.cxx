@@ -290,6 +290,8 @@ int main(int argc, char** argv) {
         const unsigned int runnumber = eventInfo->runNumber();
         const std::string thisYear = topConfig->getYear(runnumber, isMC);
         topConfig->SetYear(thisYear);
+	// determine if the runNumber is pPb or Pbp collisions
+	topConfig->set_isHIP(runnumber);
       } else {
         topConfig->SetYear("UNKNOWN");
       }
