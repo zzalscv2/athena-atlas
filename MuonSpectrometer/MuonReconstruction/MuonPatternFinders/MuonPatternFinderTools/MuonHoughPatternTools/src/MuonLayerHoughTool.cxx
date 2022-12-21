@@ -1081,8 +1081,7 @@ namespace Muon {
                                                         << ntrigconfirm);
 
                     // overlap counters
-                    int nmmHits{0}, ntgcOverlaps{0}, nrpcOverlaps{0}, nstgcOverlaps{0}, ntgcNoOverlaps{0}, nrpcNoOverlaps{0},
-                        nstgcNoOverlaps{0};
+                    int nmmHits{0}, ntgcOverlaps{0}, nrpcOverlaps{0}, nstgcOverlaps{0}, nstgcNoOverlaps{0};
 
                     // loop over hits
                     for (const auto& etaHit : maximum->hits) {
@@ -1092,8 +1091,7 @@ namespace Muon {
                             else {
                                 if (tgcClusters[stIndex].count(etaHit->tgc))
                                     ++ntgcOverlaps;
-                                else
-                                    ++ntgcNoOverlaps;
+                               
                             }
                         } else if (etaHit->prd) {
                             Identifier layId = m_idHelperSvc->gasGapId(etaHit->prd->identify());
@@ -1105,9 +1103,7 @@ namespace Muon {
                                 else if (m_idHelperSvc->issTgc(layId))
                                     ++nstgcOverlaps;
                             } else {
-                                if (m_idHelperSvc->isRpc(layId))
-                                    ++nrpcNoOverlaps;
-                                else if (m_idHelperSvc->issTgc(layId))
+                                if (m_idHelperSvc->issTgc(layId))
                                     ++nstgcNoOverlaps;
                             }
                         }
@@ -1477,7 +1473,6 @@ namespace Muon {
 
                 int nmdt = 0;
                 int nmm = 0;
-                int ntgc = 0;
                 int nstgc = 0;
 
                 const unsigned int nHitsInMaximum = maximum.hits.size();
@@ -1488,8 +1483,7 @@ namespace Muon {
 
                     if (m_idHelperSvc->isMdt(id))
                         ++nmdt;
-                    else if (m_idHelperSvc->isTgc(id))
-                        ++ntgc;
+                    
                     else if (m_idHelperSvc->issTgc(id))
                         ++nstgc;
                     else if (m_idHelperSvc->isMM(id))
