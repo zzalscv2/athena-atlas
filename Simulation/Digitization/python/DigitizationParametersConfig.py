@@ -70,7 +70,7 @@ def writeDigitizationMetadata(ConfigFlags):
 
     ## Digitized detector flags: add each enabled detector to the DigitizedDetectors list - might be better to determine this from the OutputStream or CA-itself? Possibly redundant info though?
     from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
-    digiDets = getEnabledDetectors(ConfigFlags)
+    digiDets = ['Truth'] + getEnabledDetectors(ConfigFlags)
     logDigitizationWriteMetadata.info("Setting 'DigitizedDetectors' = %s" , repr(digiDets))
     dbFiller.addDigitParam('DigitizedDetectors', repr(digiDets))
 
