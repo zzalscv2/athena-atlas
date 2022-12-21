@@ -502,12 +502,10 @@ void Muon::RpcRdoToPrepDataToolCore::printInputRdo() const {
         // For each pad, loop on the coincidence matrices
         RpcPad::const_iterator itCM = rdoColl->begin();
         RpcPad::const_iterator itCM_e = rdoColl->end();
-        int icm = 0;
         int icphi = 0;
         int iceta = 0;
         int ictrg = 0;
         for (; itCM != itCM_e; ++itCM) {
-            icm++;
             bool etaview = false;
             if (!evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) etaview = true;
             bool highPtCm = false;
@@ -531,10 +529,8 @@ void Muon::RpcRdoToPrepDataToolCore::printInputRdo() const {
             // For each CM, loop on the fired channels
             RpcCoinMatrix::const_iterator itD = (*itCM)->begin();
             RpcCoinMatrix::const_iterator itD_e = (*itCM)->end();
-            int idata = 0;
             if (itD == itD_e) { ATH_MSG_INFO("Empty CM"); }
             for (; itD != itD_e; ++itD) {
-                idata++;
 
                 const RpcFiredChannel* rpcChan = (*itD);
                 ATH_MSG_INFO("***** RpcFiredChannel: bcid " << rpcChan->bcid() << " time " << rpcChan->time() << " ijk " << rpcChan->ijk());
@@ -562,7 +558,6 @@ void Muon::RpcRdoToPrepDataToolCore::printPrepDataImpl(const Muon::RpcPrepDataCo
     int ncoll = 0;
     int ict = 0;
     int ictphi = 0;
-    int ictamb = 0;
     int icteta = 0;
     int icttrg = 0;
     ATH_MSG_INFO("--------------------------------------------------------------------------------------------");
@@ -579,7 +574,7 @@ void Muon::RpcRdoToPrepDataToolCore::printPrepDataImpl(const Muon::RpcPrepDataCo
                 if (m_idHelperSvc->rpcIdHelper().measuresPhi(rpc->identify())) {
                     iccphi++;
                     ictphi++;
-                    if (rpc->ambiguityFlag() > 1) ictamb++;
+                    
                 } else {
                     icceta++;
                     icteta++;
@@ -885,7 +880,6 @@ StatusCode Muon::RpcRdoToPrepDataToolCore::processPad(
                     if (reduceCablOvl_thisHit) {
                         if (collection->begin() != collection->end()) {
                             RpcPrepDataCollection::iterator it_rpcPrepData;
-                            int icc = 0;
                             ATH_MSG_VERBOSE("Check for duplicates in coll. with size " << collection->size());
                             int current_dbphi = 0;
                             int current_dbz = 0;
@@ -899,7 +893,6 @@ StatusCode Muon::RpcRdoToPrepDataToolCore::processPad(
                             }
 
                             for (RpcPrepData* rpc : *collection) {
-                                icc++;
                                 if (channelId == rpc->identify() && fabs(time - rpc->time()) < m_overlap_timeTolerance) {
                                     duplicate = true;
                                     hasAMatchingEtaHit = false;  // we don't want to increment the number of strips with

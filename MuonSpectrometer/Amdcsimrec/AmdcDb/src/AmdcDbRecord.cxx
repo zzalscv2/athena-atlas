@@ -8,6 +8,9 @@
 #include <iomanip>
 #include <iostream>
 #include <utility>
+#include <limits>
+#include <algorithm> //for std::clamp
+
 
 const std::string AmdcDbRecord::s_notFound = "NOT FOUND";
 const std::string AmdcDbRecord::s_notImplemented = "Not Implemented";
@@ -135,7 +138,12 @@ double AmdcDbRecord::getDouble(const std::string& NameToFind) const {
 }
 float AmdcDbRecord::getFloat(const std::string& NameToFind) const {
 
-  return getDouble(NameToFind) ;
+  const auto result = getDouble(NameToFind) ;
+  constexpr double floatMax = std::numeric_limits<float>::max();
+  constexpr double floatLowest = std::numeric_limits<float>::lowest();
+  
+  auto floatResult = static_cast<float>(std::clamp(result, floatLowest, floatMax ));
+  return floatResult;
 
 }
 

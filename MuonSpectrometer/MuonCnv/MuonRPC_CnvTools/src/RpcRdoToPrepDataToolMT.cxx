@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcRdoToPrepDataToolMT.h"
@@ -216,7 +216,6 @@ void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(Muon::RpcPrepDataContainer& p
     int ncoll = 0;
     int ict = 0;
     int ictphi = 0;
-    int ictamb = 0;
     int icteta = 0;
     int icttrg = 0;
     msg(MSG::INFO) << "--------------------------------------------------------------------------------------------" << endmsg;
@@ -236,7 +235,7 @@ void Muon::RpcRdoToPrepDataToolMT::printMTPrepData(Muon::RpcPrepDataContainer& p
                 if (m_idHelperSvc->rpcIdHelper().measuresPhi(rpc->identify())) {
                     iccphi++;
                     ictphi++;
-                    if (rpc->ambiguityFlag() > 1) ictamb++;
+                    
                 } else {
                     icceta++;
                     icteta++;
