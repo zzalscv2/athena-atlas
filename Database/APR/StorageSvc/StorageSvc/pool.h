@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -133,6 +133,7 @@ namespace pool   {
   public:
     RefCounter() {}
     RefCounter( const RefCounter& ) { m_count = 1; }
+    // cppcheck-suppress operatorEqVarError; deliberate
     RefCounter& operator= (const RefCounter&) { return *this; }
     /// Increase the reference count
     int addRef()   { return ++m_count; }
