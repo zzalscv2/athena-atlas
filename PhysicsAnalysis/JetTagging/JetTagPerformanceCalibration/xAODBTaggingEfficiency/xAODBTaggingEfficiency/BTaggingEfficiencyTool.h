@@ -294,8 +294,9 @@ private:
   bool fillVariables(const double jetPt, const double jetEta, const double jetTagWeight, Analysis::CalibrationDataVariables& x) const;
 
   /// pointer to the object doing the actual work
-  Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
-  /// pointer to the onnx tool
+  //Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
+   std::shared_ptr<Analysis::CalibrationDataInterfaceROOT> m_CDI;
+   /// pointer to the onnx tool
   std::unique_ptr<OnnxUtil> m_onnxUtil;
 
   /// @name core configuration properties (set at initalization time and not modified afterwards)
@@ -329,7 +330,7 @@ private:
   std::string m_jetAuthor;
   ///  minimum jet pT
   float m_minPt;
-  /// systematics model to be used (current choices are "SFEigen", "SFEigenRefined", and "Envelope")
+  /// systematics model to be used (current choices are "SFEigen", "SFEigenRefined", and "Envelope") // <-------- Addoing "SFGlobalEigen" to the list
   std::string m_systStrategy;
   /// if true, attempt to retrieve the data/MC efficiency scale factor calibration files from the @PathResolver development area
   bool m_useDevFile;
@@ -376,7 +377,7 @@ private:
   std::map<std::string, unsigned int> m_mapIndices;
 
   /// actual information identifying scale factor calibration objects
-  std::map<unsigned int, unsigned int> m_SFIndices;
+  std::map<unsigned int, unsigned int> m_SFIndices; // <------------- maps flavourID to an index corresponding to the index at which the container used for SFs is stored in CDIROOT's 
   /// actual information identifying efficiency calibration objects
   std::map<unsigned int, unsigned int> m_EffIndices;
 

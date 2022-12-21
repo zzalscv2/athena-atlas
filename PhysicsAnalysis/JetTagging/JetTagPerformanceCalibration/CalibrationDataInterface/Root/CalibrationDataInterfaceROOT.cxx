@@ -8,7 +8,7 @@
 /* Begin_Html
 <h2>Purpose</h2>
 <p>This class provides the main interface to b-tagging calibration information.
-   Each instance can be used to handle a single tagger (so if multiple taggers' information
+   Each instance can be used to handle a single tagger (so if multiple taggers' information       // <--------- Each CDIROOT object represents 1 tagger (DL1, DL1r, MV2c10, etc.)
    needs to be accessed, multiple CalibrationDataInterfaceROOT instances need to be created).<br />
    Its action is steered by a configuration file (which is parsed using TEnv and which is
    specified in the CalibrationDataInterfaceROOT constructor).
@@ -277,6 +277,7 @@ using std::string;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::setw;
 
 using Analysis::CalibrationDataContainer;
 using Analysis::UncertaintyResult;
@@ -290,7 +291,7 @@ ClassImp(Analysis::CalibrationDataInterfaceROOT)
 
 //________________________________________________________________________________
 Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const string& taggerName, string configname, string pathname) :
-  m_runEigenVectorMethod(false), m_useRecommendedEVExclusions(false), m_verbose(true),
+  m_runEigenVectorMethod(false), m_EVStrategy(SFEigen), m_useRecommendedEVExclusions(false), m_verbose(true),
   m_absEtaStrategy(GiveUp), m_otherStrategy(Flag)
 {
   // Normal constructor.
@@ -482,12 +483,12 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
 								     const std::vector<std::string>& jetAliases,
 								     const std::map<std::string, std::string>& SFNames,
 								     const std::map<std::string, std::vector<std::string> >& EffNames,
-								     const std::map<std::string, std::vector<std::string> >& excludeFromEV,
+								     const std::map<std::string, std::vector<std::string> >& excludeFromEV, //<------- Take the map of flavours and flavour uncertainties to exclude from EV per jet flavour
 								     const std::map<std::string, EVReductionStrategy> EVReductions,
-								     bool useEV, bool useMCMCSF, bool useTopologyRescaling,
+								     bool useEV, Uncertainty strat, bool useMCMCSF, bool useTopologyRescaling,
 								     bool useRecommendedEEVExclusions, bool verbose) :
   m_filenameSF(fileSF), m_filenameEff(""),
-  m_runEigenVectorMethod(useEV), m_EVReductions(EVReductions),
+  m_runEigenVectorMethod(useEV), m_EVStrategy(strat), m_EVReductions(EVReductions),
   m_useRecommendedEVExclusions(useRecommendedEEVExclusions), m_verbose(verbose),
   m_useMCMCSF(useMCMCSF), m_useTopologyRescaling(useTopologyRescaling),
   m_maxAbsEta(2.5), m_absEtaStrategy(GiveUp),
@@ -524,6 +525,14 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
   if (m_verbose) {
     cout << "=== CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===" << endl;
     cout << " taggerName           : " << taggerName.c_str() << endl;
+    cout << " Systematic strategy : ";
+    if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
+      cout << "SFEigen" << endl;
+    } else if (m_EVStrategy == Analysis::Uncertainty::SFGlobalEigen){
+      cout << "SFGlobalEigen" << endl;
+    } else {
+      cout << " Other" << endl;
+    }
     if (fileEff) cout << " Efficiency file name : " << fileEff << endl;
     cout << " SF         file name : " << fileSF << endl
 	 << endl;
@@ -556,9 +565,11 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
   setEffCalibrationNames(EffNames);
   setSFCalibrationNames(SFNames);
 
-  if (m_runEigenVectorMethod) {
+  if (m_runEigenVectorMethod) { // <---------- IF we want to run EV, then decide which one
+    // The following should hold for both eigenvector decomposition methods (SFEigen and SFGlobalEigen)
+    // The global one simply adapts itself to using the m_excludeFromCovMatrix to perform the same task
+    
     m_excludeFromCovMatrix = excludeFromEV;
-
     std::string flavours[] = { "B", "C", "T", "Light" };
     unsigned int n_excluded = 0;
     for (auto const& flavour : flavours) {
@@ -568,17 +579,18 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const std::
       cout << " List of uncertainties to exclude:";
       if (n_excluded == 0) cout << " none";
       for (auto const& flavour : flavours) {
-	if (m_excludeFromCovMatrix[flavour].size() > 0) {
-	  cout << "\n\t" << flavour << ":\t";
-	  for (unsigned int i = 0; i < m_excludeFromCovMatrix[flavour].size(); ++i) {
-	    cout << m_excludeFromCovMatrix[flavour][i];
-	    if (i+1 != m_excludeFromCovMatrix[flavour].size()) cout << ";  ";
-	  }
-	  cout << endl;
-	}
-      }
+        if (m_excludeFromCovMatrix[flavour].size() > 0) {
+          cout << "\n\t" << flavour << ":\t";
+          for (unsigned int i = 0; i < m_excludeFromCovMatrix[flavour].size(); ++i) {
+            cout << m_excludeFromCovMatrix[flavour][i];
+            if (i+1 != m_excludeFromCovMatrix[flavour].size()) cout << ";  ";
+          }
+          cout << endl;
+        }
+            }
       cout << endl;
     }
+
   }
   
   if (m_verbose) cout << "======= end of CalibrationDataInterfaceROOT instantiation ========" << endl;
@@ -597,7 +609,7 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT()
 Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const Analysis::CalibrationDataInterfaceROOT& other) :
   Analysis::CalibrationDataInterfaceBase(other), m_aliases(other.m_aliases), m_objects(), m_objectIndices(),
   m_filenameSF(other.m_filenameSF), m_filenameEff(other.m_filenameEff),
-  m_eigenVariationsMap(), m_runEigenVectorMethod(other.m_runEigenVectorMethod),
+  m_eigenVariationsMap(), m_runEigenVectorMethod(other.m_runEigenVectorMethod), m_EVStrategy(other.m_EVStrategy),
   m_excludeFromCovMatrix(other.m_excludeFromCovMatrix), m_useMCMCSF(other.m_useMCMCSF), m_useTopologyRescaling(other.m_useTopologyRescaling),
   m_refMap(), m_hadronisationReference(),
   m_maxAbsEta(other.m_maxAbsEta), m_absEtaStrategy(other.m_absEtaStrategy), m_otherStrategy(other.m_otherStrategy),
@@ -618,7 +630,6 @@ Analysis::CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT(const Analy
 Analysis::CalibrationDataInterfaceROOT::~CalibrationDataInterfaceROOT()
 {
   // Destructor
-
   if ((m_fileEff!=0) && (m_fileSF!=0)) { 
     if (m_fileEff == m_fileSF) { 
       m_fileEff->Close(); 
@@ -630,12 +641,9 @@ Analysis::CalibrationDataInterfaceROOT::~CalibrationDataInterfaceROOT()
       delete m_fileSF;  m_fileSF = 0; 
     } 
   }
-
   // delete also the stored objects (these are owned by us)
-  for (std::vector<CalibrationDataContainer*>::iterator it = m_objects.begin();
-       it != m_objects.end(); ++it) {
+  for (std::vector<CalibrationDataContainer*>::iterator it = m_objects.begin(); it != m_objects.end(); ++it) {
     if (*it) {
-      if (m_runEigenVectorMethod && m_eigenVariationsMap[*it]) { delete m_eigenVariationsMap[*it]; m_eigenVariationsMap[*it] = 0;}
       delete *it; *it = 0;
     }
   }
@@ -652,8 +660,8 @@ Analysis::CalibrationDataInterfaceROOT::~CalibrationDataInterfaceROOT()
     cout << "\t\tCalibrationDataInterfaceROOT |eta| out-of-bounds summary:" << endl;
     for (unsigned int index = 0; index < m_mainCounters.size(); ++index)
       if (m_etaCounters[index] > 0) {
-	found = true;
-	cout << "\t\t\t" << nameFromIndex(index) << ": " << m_etaCounters[index] << endl;
+        found = true;
+        cout << "\t\t\t" << nameFromIndex(index) << ": " << m_etaCounters[index] << endl;
       }
     if (!found) cout << "\t\t\tNo issues found" << endl;
   }
@@ -662,11 +670,11 @@ Analysis::CalibrationDataInterfaceROOT::~CalibrationDataInterfaceROOT()
     cout << "\t\tCalibrationDataInterfaceROOT object out-of-bounds summary:" << endl;
     for (unsigned int index = 0; index < m_mainCounters.size(); ++index)
       if (m_mainCounters[index] + m_extrapolatedCounters[index] > 0) {
-	found = true;
-	cout << "\t\t\t" << nameFromIndex(index)
-	     << " general: "       << m_mainCounters[index]
-	     << ", extrapolated: " << m_extrapolatedCounters[index]
-	     << endl;
+        found = true;
+        cout << "\t\t\t" << nameFromIndex(index)
+            << " general: "       << m_mainCounters[index]
+            << ", extrapolated: " << m_extrapolatedCounters[index]
+	          << endl;
       }
     if (!found) cout << "\t\t\tNo issues found" << endl;
   }
@@ -701,18 +709,19 @@ Analysis::CalibrationDataInterfaceROOT::retrieveCalibrationIndex (const std::str
 
   // construct the full name from the label, operating point, SF/Eff choice;
   // then look up this full name
-
   string name = fullName(author, OP, label, isSF, mapIndex);
   std::map<string, unsigned int>::const_iterator it = m_objectIndices.find(name);
   if (it == m_objectIndices.end()) {
     // If no container is found, attempt to retrieve it here (this is so that users won't
     // have to call the named scale factor etc. methods once just to retrieve the container).
     string flavour = (label == "N/A") ? "Light" : label;
-    string dirname = m_taggerName + "/" + getAlias(author) + "/" + OP + "/" + flavour;
     string cntname = getContainername(flavour, isSF, mapIndex);
-    retrieveContainer(dirname, cntname, isSF, m_verbose);
+    std::cout << "CalibrationDataInterfaceROOT->retrieveCalibrationIndex :  container name is " << cntname  << std::endl;
+    retrieveContainer(flavour, OP, author, cntname, isSF, m_verbose); // Only call this if you want to retrieve a currently not available container
     it = m_objectIndices.find(name);
     if (it == m_objectIndices.end()) return false;
+  } else {
+    std::cout << "CalibrationDataInterfaceROOT->retrieveCalibrationIndex : container " << name << " already cached! " << std::endl;
   }
 
   index = it->second;
@@ -724,7 +733,7 @@ Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
 							const string& label, const string& OP,
 							Uncertainty unc, unsigned int numVariation,
-							unsigned int mapIndex)
+							unsigned int mapIndex) //const
 {
   // Scale factor retrieval identifying the requested calibration object by name.
   // The return value is either a (value, uncertainty) or an (up, down) variation pair, as documented
@@ -738,20 +747,15 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
   //    numVariation:  variation index (in case of eigenvector or named variations)
   //    mapIndex:      index to the efficiency map to be used (this is needed for MC/MC scale factor
   //                   application)
-
   unsigned int indexEff, indexSF;
-  if (! (retrieveCalibrationIndex (label, OP, variables.jetAuthor, false, indexEff, mapIndex) &&
-	 retrieveCalibrationIndex (label, OP, variables.jetAuthor, true, indexSF))) {
-    cerr << "getScaleFactor: unable to find SF calibration for object "
-	 << fullName(variables.jetAuthor, OP, label, false, mapIndex)
-	 << " or SF calibration for object "
-	 << fullName(variables.jetAuthor, OP, label, true) << endl;
+  if (! (retrieveCalibrationIndex (label, OP, variables.jetAuthor, false, indexEff, mapIndex) && retrieveCalibrationIndex (label, OP, variables.jetAuthor, true, indexSF))) {
+    cerr << "getScaleFactor: unable to find SF calibration for object " << fullName(variables.jetAuthor, OP, label, false, mapIndex) << " or SF calibration for object " << fullName(variables.jetAuthor, OP, label, true) << endl;
     // Return a dummy result if the object is not found
     return Analysis::dummyResult;
   }
 
-  Analysis::CalibResult result;
-  return (getScaleFactor(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  Analysis::CalibResult result; // the following is SF #3
+  return (getScaleFactor(variables, indexSF, indexEff, unc, numVariation, result, label) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
@@ -759,7 +763,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
 							unsigned int indexSF, unsigned int indexEff,
-							Uncertainty unc, unsigned int numVariation)
+							Uncertainty unc, const std::string& flavour, unsigned int numVariation)
 {
   // Scale factor retrieval identifying the requested calibration object by index.
   // The return value is either a (value, uncertainty) or an (up, down) variation pair, as documented
@@ -771,18 +775,17 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
   //    unc:           keyword indicating what uncertainties to evaluate (or whether eigenvector or
   //                   named variations are to be computed)
   //    numVariation:  variation index (in case of eigenvector or named variations)
-
-  Analysis::CalibResult result;
-  return (getScaleFactor(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  Analysis::CalibResult result; // the following is SF #3
+  return (getScaleFactor(variables, indexSF, indexEff, unc, numVariation, result, flavour) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
 //________________________________________________________________________________
 Analysis::CalibrationStatus
-Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables,
+Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVariables& variables, //<---- variables contain author, pt, eta, tagweight
 							unsigned int indexSF, unsigned int indexEff,
 							Uncertainty unc, unsigned int numVariation,
-							Analysis::CalibResult& result)
+							Analysis::CalibResult& result, const string& flavour) //const /// <------- CalibResult is a pair<double,double>
 {
   // Scale factor retrieval identifying the requested calibration object by index.
   //
@@ -808,44 +811,64 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
   }
 
   // retrieve the MC/MC scale factor
-  double MCMCSF = m_useMCMCSF ? getMCMCScaleFactor(variables, indexSF, indexEff) : 1;
+  double MCMCSF = m_useMCMCSF ? getMCMCScaleFactor(variables, indexSF, indexEff) : 1; // if we don't want to switch generator, MCMCSF = 1, as it should  be
 
-  if (!m_runEigenVectorMethod && (unc == SFEigen || unc == SFNamed))
+  if (!m_runEigenVectorMethod && (unc == SFEigen || unc == SFNamed || unc == SFGlobalEigen))
   {
      cerr << " ERROR. Trying to call eigenvector method but initialization not switched on in b-tagging configuration." << endl;
      cerr << " Please correct your configuration first. Nominal uncertainties used. " << endl;
   }
-  if (unc == SFEigen || unc == SFNamed) {
-    CalibrationDataEigenVariations* eigenVariation = nullptr;
+
+  // Procede with eigenvariations methods i.e. return the SF variations
+  if (unc == SFEigen || unc == SFNamed || unc==SFGlobalEigen) {
+    std::shared_ptr<CalibrationDataEigenVariations> eigenVariation;
     try {
       eigenVariation=m_eigenVariationsMap.at(container);
-    }
-    catch (const std::out_of_range&) {
+    } catch (const std::out_of_range&) {
       cerr << " Could not retrieve eigenvector variation, while it should have been there." << endl;
-      return Analysis::kError;
-    }
-    unsigned int maxVariations = (unc == SFEigen) ? eigenVariation->getNumberOfEigenVariations() : eigenVariation->getNumberOfNamedVariations();
-    if (numVariation > maxVariations-1) {
-      cerr << "Asked for " << ((unc == SFEigen) ? "eigenvariation" : "named variation") << " number: " << numVariation << 
-	" but overall number of available variations is: " << maxVariations << endl;
       return Analysis::kError;
     }
     TH1* up=0;
     TH1* down=0;
-    bool isOK = (unc == SFEigen) ?
-      eigenVariation->getEigenvectorVariation(numVariation,up,down) :
-      eigenVariation->getNamedVariation(numVariation,up,down);
-    if (!isOK) {
-      cerr << "Eigenvector object is there but cannot retrieve up and down uncertainty histograms." << endl;
+    bool extrapolate = false; // store if the numVariation is the extrapolation named uncertainty index
+    if (unc == SFEigen || unc==SFNamed){
+      unsigned int maxVariations = (unc == SFEigen) ? eigenVariation->getNumberOfEigenVariations() : eigenVariation->getNumberOfNamedVariations();
+      if (numVariation > maxVariations-1) {
+        cerr << "Asked for " << ((unc == SFEigen) ? "eigenvariation" : "named variation") << " number: " << numVariation << " but overall number of available variations is: " << maxVariations << endl;
+        return Analysis::kError;
+      }
+      bool isOK = eigenVariation->getEigenvectorVariation(numVariation,up,down);
+      if (!isOK) {
+        cerr << "Eigenvector object is there but cannot retrieve up and down uncertainty histograms." << endl;
+        return Analysis::kError;
+      }
+      // the 'extrapolation' uncertainty (always a named one) needs a somewhat special treatment
+      extrapolate = (unc == SFNamed) ? eigenVariation->isExtrapolationVariation(numVariation) : false;
+
+    } else if (unc == SFGlobalEigen) {
+      std::shared_ptr<CalibrationDataGlobalEigenVariations> GEV = std::dynamic_pointer_cast<CalibrationDataGlobalEigenVariations>(eigenVariation); //dynamic_cast<std::shared_ptr<CalibrationDataGlobalEigenVariations> >(eigenVariation);
+      unsigned int maxVariations = GEV->getNumberOfEigenVariations(flavour); // <----- This gets the number of variations of the flavour
+      if (numVariation > maxVariations-1) {
+        cerr << "Asked for global eigenvariation number: " << numVariation << " but overall number of available variations is: " << maxVariations << endl;
+        return Analysis::kError;
+      }
+      bool isOK = GEV->getEigenvectorVariation(flavour, numVariation,up,down);
+      if (!isOK) {
+        cerr << "Eigenvector object is there but cannot retrieve up and down uncertainty histograms." << endl;
+        return Analysis::kError;
+      }
+      // the 'extrapolation' uncertainty (always a named one) needs a somewhat special treatment
+      extrapolate = GEV->isExtrapolationVariation(numVariation, flavour);
+    } else {
+      std::cerr << "ERROR: you requested " << unc << " but that isn't in the set of (SFEigen, SFGlobalEigen, SFNamed)  for eigenvariations. " << std::endl;
       return Analysis::kError;
     }
-    // the 'extrapolation' uncertainty (always a named one) needs a somewhat special treatment
-    bool extrapolate = (unc == SFNamed) ? eigenVariation->isExtrapolationVariation(numVariation) : false;
     
     double valueUp;
     double valueDown;
-    Analysis::CalibrationStatus statUp   = container->getResult(variables, valueUp,  up,   extrapolate);
+    Analysis::CalibrationStatus statUp   = container->getResult(variables, valueUp,  up,   extrapolate); // This is what actually retrieves results from the container
     Analysis::CalibrationStatus statDown = container->getResult(variables, valueDown,down, extrapolate);
+
     if (statUp == Analysis::kError || statDown == Analysis::kError)
       return Analysis::kError;
     if (m_otherStrategy == GiveUp)
@@ -861,12 +884,15 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 
     result.first  = MCMCSF*valueUp;
     result.second = MCMCSF*valueDown;
+
     // Prevent negative return values. Should the comparison be against a strict 0?
     result.first  = std::max(Analysis::CalibZERO, result.first);
     result.second = std::max(Analysis::CalibZERO, result.second);
-    return statUp;
-  } //end eigenvector method
 
+    return statUp; // end of getScaleFactor if SFEigen, SFGlobalEigen, or SFNamed is set
+
+
+  } // <-------------- The above returns the up/down varied scale factor
   //Proceed with no-eigenvector result
 
   // always retrieve the result itself
@@ -876,44 +902,44 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
     cerr << "getScaleFactor: error retrieving result in non-EV context!" << endl;
     return status;
   }
-  if (m_otherStrategy == GiveUp)
+  if (m_otherStrategy == GiveUp){
     assert (status != Analysis::kRange);
-  else if (m_otherStrategy == GiveUpExtrapolated)
+  } else if (m_otherStrategy == GiveUpExtrapolated) {
     assert (status != Analysis::kExtrapolatedRange);
-  else if (m_otherStrategy == Flag) {
-    if (status == Analysis::kRange)
+  } else if (m_otherStrategy == Flag) {
+    if (status == Analysis::kRange){
       increaseCounter(indexSF);
-    else if (status == Analysis::kExtrapolatedRange)
+    } else if (status == Analysis::kExtrapolatedRange) {
       increaseCounter(indexSF, Extrapolated);
+    }
   }
 
   // retrieve the statistical uncertainty if desired
   double stat(0);
   if (unc == Total || unc == Statistical) {
     if (container->getStatUncertainty(variables, stat) == Analysis::kError) {
-      cerr << "getScaleFactor: error retrieving Scale factor parameter covariance matrix!"
-	   << endl;
+      cerr << "getScaleFactor: error retrieving Scale factor parameter covariance matrix!" << endl;
       return Analysis::kError;
     }
   }
+
   Analysis::UncertaintyResult resSyst(0,0);
   if (unc == Total || unc == Systematic) {
     if (container->getSystUncertainty(variables, resSyst) == Analysis::kError) {
-      cerr << "getScaleFactor: error retrieving Scale factor parameter systematic uncertainty!"
-	   << endl;
+      cerr << "getScaleFactor: error retrieving Scale factor parameter systematic uncertainty!" << endl;
       return Analysis::kError;
     }
   } else if (unc == Extrapolation) {
     // this uncertainty is special, since it is not normally to be combined into the overall systematic uncertainty
     if (container->getUncertainty("extrapolation", variables, resSyst) == Analysis::kError)
-      cerr << "getScaleFactor: error retrieving Scale factor parameter extrapolation uncertainty!"
-	   << endl;
+      cerr << "getScaleFactor: error retrieving Scale factor parameter extrapolation uncertainty!" << endl;
   } else if (unc == TauExtrapolation) {
     // also this uncertainty is special, since it it singles out an uncertainty relevant only for tau "jets",
     // and some care has to be taken not to duplicate or omit uncertainties
     if (container->getUncertainty("extrapolation from charm", variables, resSyst) == Analysis::kError)
-      cerr << "getScaleFactor: error retrieving Scale factor parameter extrapolation uncertainty!"
-	   << endl;
+      cerr << "getScaleFactor: error retrieving Scale factor parameter extrapolation uncertainty!" << endl;
+  } else if (unc == None){
+    std::cout << " Dealing with a None uncertainty - returning no error " << std::endl;
   }
 
   double uncertainty = combinedUncertainty(stat, resSyst);
@@ -922,6 +948,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 
   // Prevent negative return values. Should the comparison be against a strict 0?
   result.first = std::max(Analysis::CalibZERO, result.first);
+  std::cout << "CDIROOT->getScaleFactor : returning " << result.first << " and " << result.second << std::endl;
   return status;
 
 }
@@ -944,8 +971,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
 
   unsigned int index;
   if (! retrieveCalibrationIndex (label, OP, variables.jetAuthor, false, index, mapIndex)) {
-    cerr << "getMCEfficiency: unable to find Eff calibration for object "
-	 << fullName(variables.jetAuthor, OP, label, false, mapIndex) << endl;
+    cerr << "getMCEfficiency: unable to find Eff calibration for object " << fullName(variables.jetAuthor, OP, label, false, mapIndex) << endl;
     // Return a dummy result if the object is not found
     return Analysis::dummyResult;
   }
@@ -958,7 +984,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
 //________________________________________________________________________________
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVariables& variables,
-							 unsigned int index, Uncertainty unc)
+							 unsigned int index, Uncertainty unc) //const
 {
   // MC efficiency retrieval identifying the requested calibration object by index.
   // The return value is a (value, uncertainty) pair, as documented above, and will
@@ -1005,14 +1031,13 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
     assert (status != Analysis::kRange); // no need to test also statDown
   else if (m_otherStrategy == Flag)
     if (status == Analysis::kRange)
-      increaseCounter(index);
+      this->increaseCounter(index);
 
   // retrieve the statistical uncertainty if desired
   double stat(0);
   if (unc == Total || unc == Statistical) {
     if (container->getStatUncertainty(variables, stat) == Analysis::kError) {
-      cerr << "getMCEfficiency: error retrieving MC efficiency parameter covariance matrix!"
-	   << endl;
+      cerr << "getMCEfficiency: error retrieving MC efficiency parameter covariance matrix!" << endl;
     return Analysis::kError;
     }
   }
@@ -1039,7 +1064,7 @@ Analysis::CalibrationDataInterfaceROOT::getMCEfficiency (const CalibrationDataVa
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVariables& variables,
 						       const string& label,
-						       const string& OP, Uncertainty unc,
+						       const string& OP, Uncertainty unc, const std::string& flavour,
                                                        unsigned int numVariation, unsigned int mapIndex)
 {
   // Data efficiency retrieval identifying the requested calibration objects by name.
@@ -1058,24 +1083,20 @@ Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVari
   unsigned int indexSF, indexEff;
   if (! (retrieveCalibrationIndex (label, OP, variables.jetAuthor, false, indexEff, mapIndex) &&
 	 retrieveCalibrationIndex (label, OP, variables.jetAuthor, true, indexSF))) {
-    cerr << "getEfficiency: unable to find Eff calibration for object "
-	 << fullName(variables.jetAuthor, OP, label, false, mapIndex)
-	 << " or SF calibration for object "
-	 << fullName(variables.jetAuthor, OP, label, true) << endl;
+    cerr << "getEfficiency: unable to find Eff calibration for object " << fullName(variables.jetAuthor, OP, label, false, mapIndex) << " or SF calibration for object " << fullName(variables.jetAuthor, OP, label, true) << endl;
     // Return a dummy result if the object is not found
     return Analysis::dummyResult;
   }
   
   Analysis::CalibResult result;
-  return (getEfficiency(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
-    Analysis::dummyResult : result;
+  return (getEfficiency(variables, indexSF, indexEff, unc, numVariation, result, flavour) == Analysis::kError) ? Analysis::dummyResult : result;
 }
 
 //________________________________________________________________________________
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVariables& variables,
 						       unsigned int indexSF, unsigned int indexEff,
-						       Uncertainty unc, unsigned int numVariation)
+						       Uncertainty unc, const std::string& flavour, unsigned int numVariation)
 {
   // Data efficiency retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor.
@@ -1090,7 +1111,7 @@ Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVari
   //    numVariation:  variation index (in case of eigenvector or named variations)
 
   Analysis::CalibResult result;
-  return (getEfficiency(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  return (getEfficiency(variables, indexSF, indexEff, unc, numVariation, result, flavour) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
@@ -1099,7 +1120,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVariables& variables,
 						       unsigned int indexSF, unsigned int indexEff,
 						       Uncertainty unc, unsigned int numVariation,
-						       Analysis::CalibResult& result)
+						       Analysis::CalibResult& result, const std::string& flavour)
 {
   // Data efficiency retrieval identifying the requested calibration objects by index.
   //
@@ -1113,7 +1134,7 @@ Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVari
   //                   A dummy value will be returned in case of an error.
 
   Analysis::CalibResult sfResult;
-  Analysis::CalibrationStatus sfStatus = getScaleFactor(variables, indexSF, indexEff, unc, numVariation, sfResult);
+  Analysis::CalibrationStatus sfStatus = getScaleFactor(variables, indexSF, indexEff, unc, numVariation, sfResult, flavour);
   if (sfStatus == Analysis::kError) return sfStatus;
   Analysis::CalibResult effResult;
   Analysis::CalibrationStatus effStatus= getMCEfficiency(variables, indexEff, unc, effResult);
@@ -1128,7 +1149,7 @@ Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVari
     // (e.g. 'value' above contains the upward variation)
     if (unc == SFEigen || unc == SFNamed) {
       double valueDown = effResult.first*sfResult.second;
-      result.first  = value;
+      result.first  = value; // up/down variataions of data-efficiency
       result.second = valueDown;
       return sfStatus;
     }
@@ -1143,10 +1164,7 @@ Analysis::CalibrationDataInterfaceROOT::getEfficiency (const CalibrationDataVari
     }
   } else {
     // now never happens due to protection of SF return value:
-    cerr << "ERROR: CalibrationDataInterfaceROOT::getEfficiency: SF null result, SF=" << sfResult.first
-	 << " MC eff=" << effResult.first 
-	 << "; setting SF=1."
-	 << endl;
+    cerr << "ERROR: CalibrationDataInterfaceROOT::getEfficiency: SF null result, SF=" << sfResult.first << " MC eff=" << effResult.first  << "; setting SF=1." << endl;
     relative = Analysis::dummyValue;
   }
 
@@ -1190,7 +1208,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor (const Calibr
   }
   
   Analysis::CalibResult result;
-  return (getInefficiencyScaleFactor(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  return (getInefficiencyScaleFactor(variables, indexSF, indexEff, unc, numVariation, result, label) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
@@ -1198,7 +1216,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor (const Calibr
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor(const CalibrationDataVariables& variables,
 								   unsigned int indexSF, unsigned int indexEff,
-								   Uncertainty unc, unsigned int numVariation)
+								   Uncertainty unc, const std::string& flavour, unsigned int numVariation)
 {
   // Inefficiency scale factor retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1214,7 +1232,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor(const Calibra
   //    numVariation:  variation index (in case of eigenvector or named variations)
 
   Analysis::CalibResult result;
-  return (getInefficiencyScaleFactor(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  return (getInefficiencyScaleFactor(variables, indexSF, indexEff, unc, numVariation, result, flavour) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
@@ -1223,7 +1241,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor(const CalibrationDataVariables& variables,
 								   unsigned int indexSF, unsigned int indexEff,
 								   Uncertainty unc, unsigned int numVariation,
-								   Analysis::CalibResult& result)
+								   Analysis::CalibResult& result, const std::string& flavour)
 {
   // Inefficiency scale factor retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1239,7 +1257,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiencyScaleFactor(const Calibra
   //                   A dummy value will be returned in case of an error.
 
   Analysis::CalibResult sfResult;
-  Analysis::CalibrationStatus sfStatus = getScaleFactor(variables, indexSF, indexEff, unc, numVariation, sfResult);
+  Analysis::CalibrationStatus sfStatus = getScaleFactor(variables, indexSF, indexEff, unc, numVariation, sfResult, flavour);
   if (sfStatus == Analysis::kError) return sfStatus;
   Analysis::CalibResult effResult;
   Analysis::CalibrationStatus effStatus= getMCEfficiency(variables, indexEff, unc, effResult);
@@ -1311,7 +1329,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVa
   }
   
   Analysis::CalibResult result;
-  return (getInefficiency(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  return (getInefficiency(variables, indexSF, indexEff, unc, numVariation, result, label) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
@@ -1319,7 +1337,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVa
 Analysis::CalibResult
 Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVariables& variables,
 							 unsigned int indexSF, unsigned int indexEff,
-							 Uncertainty unc, unsigned int numVariation)
+							 Uncertainty unc, const std::string& flavour, unsigned int numVariation)
 {
   // Data inefficiency retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1335,7 +1353,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVa
   //    numVariation:  variation index (in case of eigenvector or named variations)
 
   Analysis::CalibResult result;
-  return (getInefficiency(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
+  return (getInefficiency(variables, indexSF, indexEff, unc, numVariation, result, flavour) == Analysis::kError) ?
     Analysis::dummyResult : result;
 }
 
@@ -1344,7 +1362,7 @@ Analysis::CalibrationStatus
 Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVariables& variables,
 							 unsigned int indexSF, unsigned int indexEff,
 							 Uncertainty unc, unsigned int numVariation,
-							 Analysis::CalibResult& result)
+							 Analysis::CalibResult& result, const std::string& flavour)
 {
   // Data inefficiency retrieval identifying the requested calibration objects by index.
   // The data efficiency is computed as the product of MC efficiency and data/MC efficiency scale factor;
@@ -1360,7 +1378,7 @@ Analysis::CalibrationDataInterfaceROOT::getInefficiency (const CalibrationDataVa
   //                   A dummy value will be returned in case of an error.
 
   Analysis::CalibResult sfResult;
-  Analysis::CalibrationStatus sfStatus = getScaleFactor(variables, indexSF, indexEff, unc, numVariation, sfResult);
+  Analysis::CalibrationStatus sfStatus = getScaleFactor(variables, indexSF, indexEff, unc, numVariation, sfResult, flavour);
   if (sfStatus == Analysis::kError) return sfStatus;
   Analysis::CalibResult effResult;
   Analysis::CalibrationStatus effStatus= getMCEfficiency(variables, indexEff, unc, effResult);
@@ -1462,6 +1480,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
 							      const string& label, Uncertainty unc,
 							      unsigned int numVariation, unsigned int mapIndex)
 {
+    // #1
   // Tag weight fraction scale factor retrieval identifying the requested calibration object by name.
   // The return value is either a (value, uncertainty) or (if eigenvector or named variations are specified)
   // an (up, down) variation pair, and will be a dummy value in case an error occurs.
@@ -1490,8 +1509,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   }
 
   Analysis::CalibResult result;
-  return (getWeightScaleFactor(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ?
-    Analysis::dummyResult : result;
+  return (getWeightScaleFactor(variables, indexSF, indexEff, unc, numVariation, result) == Analysis::kError) ? Analysis::dummyResult : result;
 }
 
 //________________________________________________________________________________
@@ -1500,6 +1518,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
 							      unsigned int indexSF, unsigned int indexEff,
 							      Uncertainty unc, unsigned int numVariation)
 {
+    // #2
   // Tag weight fraction scale factor retrieval identifying the requested calibration object by index.
   // The return value is either a (value, uncertainty) or (if eigenvector or named variations are specified)
   // an (up, down) variation pair, and will be a dummy value in case an error occurs.
@@ -1527,6 +1546,7 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
 							      Uncertainty unc, unsigned int numVariation,
 							      Analysis::CalibResult& result)
 {
+    // #3
   // Tag weight fraction scale factor retrieval identifying the requested calibration object by index.
   // Note that in contrast to the "regular" (non-continuous) case, the computation of the scale factor in
   // general needs the (selection- or even process-specific) MC tag weight fractions, in order to rescale
@@ -1541,7 +1561,6 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   //    numVariation:  variation index (in case of eigenvector or named variations)
   //    result:        (value, uncertainty) or (up, down) variation pair, depending on the unc value.
   //                   A dummy value will be returned in case of an error.
-
   CalibrationDataContainer* container = m_objects[indexSF];
   if (! container) return Analysis::kError;
   CalibrationDataContainer* effContainer = m_objects[indexEff];
@@ -1588,8 +1607,8 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
       m_objects[indexSFref]->getResult(variables, fracSFref);
       m_objects[indexEffref]->getResult(variables, fracEffref);
       if (! (fracSFref > 0. && fracEffref > 0.)) {
-	cerr << "getWeightScaleFactor: error: invalid reference tag weight fraction " <<fracSFref <<" " <<fracEffref << std::endl;
-	return Analysis::kError;
+        cerr << "getWeightScaleFactor: error: invalid reference tag weight fraction " <<fracSFref <<" " <<fracEffref << std::endl;
+        return Analysis::kError;
       }
     }
   }
@@ -1611,26 +1630,23 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
      cerr << "getWeightScaleFactor: ERROR. Trying to call eigenvector method but initialization not switched on in b-tagging .env config file." << endl;
      cerr << "                             Please correct your .env config file first. Nominal uncertainties used. " << endl;
   }
+
   if (unc == SFEigen || unc == SFNamed) {
-    CalibrationDataEigenVariations* eigenVariation = nullptr;
+    std::shared_ptr<CalibrationDataEigenVariations> eigenVariation;
     try {
       eigenVariation = m_eigenVariationsMap.at(container);
-    }
-    catch (const std::out_of_range&) {
+    } catch (const std::out_of_range&) {
       cerr << "getWeightScaleFactor: could not retrieve eigenvector variation, while it should have been there." << endl;
       return Analysis::kError;
     }
     unsigned int maxVariations = (unc == SFEigen) ? eigenVariation->getNumberOfEigenVariations() : eigenVariation->getNumberOfNamedVariations();
     if (numVariation > maxVariations-1) {
-      cerr << "getWeightScaleFactor: asked for " << ((unc == SFEigen) ? "eigenvariation" : "named variation") << " number: " << numVariation << 
-	" but overall number of available variations is: " << maxVariations << endl;
+      cerr << "getWeightScaleFactor: asked for " << ((unc == SFEigen) ? "eigenvariation" : "named variation") << " number: " << numVariation << " but overall number of available variations is: " << maxVariations << endl;
       return Analysis::kError;
     }
     TH1* up=0;
     TH1* down=0;
-    bool isOK = (unc == SFEigen) ?
-      eigenVariation->getEigenvectorVariation(numVariation,up,down) :
-      eigenVariation->getNamedVariation(numVariation,up,down);
+    bool isOK = (unc == SFEigen) ? eigenVariation->getEigenvectorVariation(numVariation,up,down) : eigenVariation->getNamedVariation(numVariation,up,down);
     if (!isOK) {
       cerr << "getWeightScaleFactor: Eigenvector object is there but cannot retrieve up and down uncertainty histograms." << endl;
       return Analysis::kError;
@@ -1687,16 +1703,14 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
   double stat(0);
   if (unc == Total || unc == Statistical) {
     if (container->getStatUncertainty(variables, stat) == Analysis::kError) {
-      cerr << "getWeightScaleFactor: error retrieving Scale factor parameter covariance matrix!"
-	   << endl;
+      cerr << "getWeightScaleFactor: error retrieving Scale factor parameter covariance matrix!" << endl;
       return Analysis::kError;
     }
   }
   Analysis::UncertaintyResult uncertaintyResult(0,0);
   if (unc == Total || unc == Systematic) {
     if (container->getSystUncertainty(variables, uncertaintyResult) == Analysis::kError) {
-      cerr << "getWeightScaleFactor: error retrieving Scale factor parameter systematic uncertainty!"
-           << endl;
+      cerr << "getWeightScaleFactor: error retrieving Scale factor parameter systematic uncertainty!" << endl;
       return Analysis::kError;
     }
   } else if (unc == Extrapolation) {
@@ -1748,27 +1762,23 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
   // combination of the two individual inputs, and then by explicitly computing
   // the scale factors in each of these resulting bins.
 
-  std::vector<std::pair<unsigned int, unsigned int> >::const_iterator it =
-    std::find(m_checkedWeightScaleFactors.begin(), m_checkedWeightScaleFactors.end(),
-	      std::make_pair(indexSF, indexEff));
+  std::vector<std::pair<unsigned int, unsigned int> >::const_iterator it = std::find(m_checkedWeightScaleFactors.begin(), m_checkedWeightScaleFactors.end(), std::make_pair(indexSF, indexEff));
   if (it != m_checkedWeightScaleFactors.end()) return;
+
 
   // Assume that only histogram containers are involved here (this should be the case
   // as at least a strict tag weight binning should be applied).
   CalibrationDataHistogramContainer* container = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[indexSF]);
   if (! container) {
-    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: container for object "
-	 << nameFromIndex(indexSF) << " not found!" << endl;
+    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: container for object " << nameFromIndex(indexSF) << " not found!" << endl;
     return;
   } else if (! container->GetValue("MCreference")) {
-    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: no MCreference histogram for object "
-	 << nameFromIndex(indexSF) << "!" << endl;
+    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: no MCreference histogram for object " << nameFromIndex(indexSF) << "!" << endl;
     return;
   }
   CalibrationDataHistogramContainer* effContainer = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[indexEff]);
   if (! effContainer) {
-    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: container for object "
-	 << nameFromIndex(indexEff) << " not found!" << endl;
+    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: error: container for object " << nameFromIndex(indexEff) << " not found!" << endl;
     return;
   }
 
@@ -1783,30 +1793,27 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
     effBoundaries[effVars[t]] = effContainer->getBinBoundaries(effVars[t]);
 
   // Special case: handle |eta| versus eta differences, by transforming to the latter
-  if (boundaries.find(CalibrationDataContainer::kEta) == boundaries.end() &&
-      boundaries.find(CalibrationDataContainer::kAbsEta) != boundaries.end()) {
+  if (boundaries.find(CalibrationDataContainer::kEta) == boundaries.end() && boundaries.find(CalibrationDataContainer::kAbsEta) != boundaries.end()) {
     boundaries[CalibrationDataContainer::kEta] = boundaries[CalibrationDataContainer::kAbsEta];
     boundaries.erase(CalibrationDataContainer::kAbsEta);
   }
-  if (effBoundaries.find(CalibrationDataContainer::kEta) == effBoundaries.end() &&
-      effBoundaries.find(CalibrationDataContainer::kAbsEta) != effBoundaries.end()) {
+  if (effBoundaries.find(CalibrationDataContainer::kEta) == effBoundaries.end() && effBoundaries.find(CalibrationDataContainer::kAbsEta) != effBoundaries.end()) {
     effBoundaries[CalibrationDataContainer::kEta] = effBoundaries[CalibrationDataContainer::kAbsEta];
     effBoundaries.erase(CalibrationDataContainer::kAbsEta);
   }
-  if (boundaries.find(CalibrationDataContainer::kEta) != boundaries.end() &&
-      effBoundaries.find(CalibrationDataContainer::kEta) != effBoundaries.end()) {
+  if (boundaries.find(CalibrationDataContainer::kEta) != boundaries.end() && effBoundaries.find(CalibrationDataContainer::kEta) != effBoundaries.end()) {
     std::vector<double>& v = boundaries[CalibrationDataContainer::kEta];
     std::vector<double>& vEff = effBoundaries[CalibrationDataContainer::kEta];
     if (v[0] < 0 && vEff[0] >= 0) {
       // in this case, supplement the positive entries in vEff with their negative analogues
       std::vector<double> vtmp(vEff);
       for (std::vector<double>::iterator it = vtmp.begin(); it != vtmp.end(); ++it)
-	if (*it > 0) vEff.insert(vEff.begin(), -(*it));
+	    if (*it > 0) vEff.insert(vEff.begin(), -(*it));
     } else if (v[0] >= 0 && vEff[0] < 0) {
       // in this case, supplement the positive entries in v with their negative analogues
       std::vector<double> vtmp(v);
       for (std::vector<double>::iterator it = vtmp.begin(); it != vtmp.end(); ++it)
-	if (*it > 0) v.insert(v.begin(), -(*it));
+	    if (*it > 0) v.insert(v.begin(), -(*it));
     }
   }
 
@@ -1820,36 +1827,32 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
       // Take the MC array as a starting point, as it's likely to be the longest.
       mergedBoundaries[vars[t]] = effBoundaries[vars[t]];
       
-      for (std::vector<double>::iterator it = boundaries[vars[t]].begin();
-	   it != boundaries[vars[t]].end(); ++it) {
-	std::vector<double>::iterator itcmp = mergedBoundaries[vars[t]].begin();
-	// Iterate until we've found a value in the target array equal to
-	// or larger than the given element
-	while ((! CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) &&
-	       *itcmp < *it && itcmp != mergedBoundaries[vars[t]].end()) ++itcmp;
-	// Nothing needs to be done if the values are "nearly identical"
-	if (CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) continue;
-	// Otherwise insert the given element (this can mean adding to the end)
-	mergedBoundaries[vars[t]].insert(itcmp, *it);
+      for (std::vector<double>::iterator it = boundaries[vars[t]].begin(); it != boundaries[vars[t]].end(); ++it) {
+        std::vector<double>::iterator itcmp = mergedBoundaries[vars[t]].begin();
+        // Iterate until we've found a value in the target array equal to
+        // or larger than the given element
+        while ((! CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) &&
+              *itcmp < *it && itcmp != mergedBoundaries[vars[t]].end()) ++itcmp;
+        // Nothing needs to be done if the values are "nearly identical"
+        if (CalibrationDataContainer::isNearlyEqual(*itcmp, *it)) continue;
+        // Otherwise insert the given element (this can mean adding to the end)
+        mergedBoundaries[vars[t]].insert(itcmp, *it);
       }
     }
   }
   // Variables not present in the scale factor object still need to go in
   for (unsigned int t = 0; t < effVars.size(); ++t)
-    if (boundaries.find(effVars[t]) == boundaries.end())
+    if (boundaries.find(effVars[t]) == boundaries.end()) 
       mergedBoundaries[effVars[t]] = effBoundaries[effVars[t]];
+  
   // Carry out a rudimentary cross-check of the tag weight bin
   // (the binning used for the scale factor and MC objects should be identical).
   if (boundaries.find(CalibrationDataContainer::kTagWeight) == boundaries.end()) {
-    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: "
-	 << "no tag weight axis found for object " << nameFromIndex(indexSF) << endl;
+    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: " << "no tag weight axis found for object " << nameFromIndex(indexSF) << endl;
   } else if (effBoundaries.find(CalibrationDataContainer::kTagWeight) == effBoundaries.end()) {
-    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: "
-	 << "no tag weight axis found for object " << nameFromIndex(indexEff) << endl;
-  } else if (boundaries[CalibrationDataContainer::kTagWeight].size() !=
-  	     effBoundaries[CalibrationDataContainer::kTagWeight].size()) {
-    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: "
-  	 << "different tag weight binning for objects " << nameFromIndex(indexSF) << " (";
+    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: " << "no tag weight axis found for object " << nameFromIndex(indexEff) << endl;
+  } else if (boundaries[CalibrationDataContainer::kTagWeight].size() != effBoundaries[CalibrationDataContainer::kTagWeight].size()) {
+    cerr << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: " << "different tag weight binning for objects " << nameFromIndex(indexSF) << " (";
     std::vector<double>& v = boundaries[CalibrationDataContainer::kTagWeight];
     for (unsigned int ib = 0; ib < v.size()-1; ++ib) cerr << v[ib] << ",";
     cerr << v[v.size()-1] << ") and " << nameFromIndex(indexEff) << " (";
@@ -1867,40 +1870,32 @@ Analysis::CalibrationDataInterfaceROOT::checkWeightScaleFactors(unsigned int ind
     }
     // Finally, carry out the cross-check that all this is about: recompute the scale factor
     // in each pseudo-bin
-    cout << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: cross-checking scale factors for objects "
-	 << nameFromIndex(indexSF) << " and " << nameFromIndex(indexEff) << "\n"
-	 << std::setfill('-') << std::setw(100) << "-" << endl;
+    cout << "CalibrationDataInterfaceROOT::checkWeightScaleFactors: cross-checking scale factors for objects " << nameFromIndex(indexSF) << " and " << nameFromIndex(indexEff) << "\n" << std::setfill('-') << std::setw(100) << "-" << endl;
     cout << std::setfill(' ');
     CalibrationDataVariables x;
-    std::vector<double>& vPt = mergedBoundaries[CalibrationDataContainer::kPt],
-      vEta = mergedBoundaries[CalibrationDataContainer::kEta],
-      vTagWeight = mergedBoundaries[CalibrationDataContainer::kTagWeight];
+    std::vector<double>& vPt = mergedBoundaries[CalibrationDataContainer::kPt], vEta = mergedBoundaries[CalibrationDataContainer::kEta], vTagWeight = mergedBoundaries[CalibrationDataContainer::kTagWeight];
     for (unsigned int ipt = 0; ipt < vPt.size()-1; ++ipt) {
       x.jetPt = (vPt[ipt] + vPt[ipt+1]) * 500.; // account for MeV -> GeV conversion
       for (unsigned int ieta = 0; ieta < vEta.size()-1; ++ieta) {
-	x.jetEta = (vEta[ieta] + vEta[ieta+1]) / 2.;
-	for (unsigned int iwt = 0; iwt < vTagWeight.size()-1; ++iwt) {
-	  x.jetTagWeight = (vTagWeight[iwt] + vTagWeight[iwt+1]) / 2.;
-	  // Retrieve the central scale factor value and the old and new MC tag weight fractions
-	  double value;
-	  container->getResult(x, value);
-	  Analysis::UncertaintyResult uncertaintyResult(0,0);
-	  container->getUncertainty("MCreference", x, uncertaintyResult);
-	  double fracMCref = uncertaintyResult.first;
-	  double fracMCnew;
-	  effContainer->getResult(x, fracMCnew);
-	  // Compute the new scale factor value
-	  if (!(fracMCnew > 0.)) {
-	    cout << "\tfor (pt=" << x.jetPt << ",eta=" << x.jetEta << ",tagweight=" << x.jetTagWeight
-		 << "): invalid new MC fraction: " << fracMCnew << endl;
-	  } else {
-	    double newvalue = 1.0 + (value - 1.0) * fracMCref/fracMCnew;
-	    if (newvalue <= 0 || newvalue > m_maxTagWeight)
-	      cout << "\tfor (pt=" << x.jetPt << ",eta=" << x.jetEta << ",tagweight=" << x.jetTagWeight
-		   << "): old (value=" << value << ",MC=" << fracMCref << "), new (value="
-		   << newvalue << ",MC=" << fracMCnew << ")" << endl;
-	  }
-	}
+	      x.jetEta = (vEta[ieta] + vEta[ieta+1]) / 2.;
+	      for (unsigned int iwt = 0; iwt < vTagWeight.size()-1; ++iwt) {
+	        x.jetTagWeight = (vTagWeight[iwt] + vTagWeight[iwt+1]) / 2.;
+          // Retrieve the central scale factor value and the old and new MC tag weight fractions
+          double value;
+          container->getResult(x, value);
+          Analysis::UncertaintyResult uncertaintyResult(0,0);
+          container->getUncertainty("MCreference", x, uncertaintyResult);
+          double fracMCref = uncertaintyResult.first;
+          double fracMCnew;
+          effContainer->getResult(x, fracMCnew);
+          // Compute the new scale factor value
+          if (!(fracMCnew > 0.)) {
+	          cout << "\tfor (pt=" << x.jetPt << ",eta=" << x.jetEta << ",tagweight=" << x.jetTagWeight << "): invalid new MC fraction: " << fracMCnew << endl;
+	        } else {
+	          double newvalue = 1.0 + (value - 1.0) * fracMCref/fracMCnew;
+	          if (newvalue <= 0 || newvalue > m_maxTagWeight) cout << "\tfor (pt=" << x.jetPt << ",eta=" << x.jetEta << ",tagweight=" << x.jetTagWeight << "): old (value=" << value << ",MC=" << fracMCref << "), new (value=" << newvalue << ",MC=" << fracMCnew << ")" << endl;
+	        }
+	      }
       }
     }
   }
@@ -1929,6 +1924,7 @@ Analysis::CalibrationDataInterfaceROOT::checkAbsEta(const CalibrationDataVariabl
     if (std::fabs(variables.jetEta) > m_maxAbsEta) {
       increaseCounter(index, Eta);
     }
+
   }
   return pass;
 }
@@ -1996,19 +1992,20 @@ Analysis::CalibrationDataInterfaceROOT::listScaleFactorUncertainties(const strin
   unsigned int index;
   if (! retrieveCalibrationIndex (label, OP, author, true, index)) {
     // Return a dummy result if the object is not found
-    cerr << "listScaleFactorUncertainties: unable to find SF calibration for object "
-	 << fullName(author, OP, label, true) << endl;
+    cerr << "listScaleFactorUncertainties: unable to find SF calibration for object " << fullName(author, OP, label, true) << endl;
     std::vector<string> dummy;
     return dummy;
   }
-  return listScaleFactorUncertainties(index, named);
+  return listScaleFactorUncertainties(index, label, named);
 }
 
 //________________________________________________________________________________
 std::vector<string>
 Analysis::CalibrationDataInterfaceROOT::listScaleFactorUncertainties(unsigned int index,
-								     bool named) const
+								     const std::string& flavour, bool named)
 {
+  // Note: this method already works on a per-flavour basis, so passing flavour in is a simple addition
+  // Method is called primarily from within the BTaggingEfficiencyTool - W.L.
   // Retrieve the sources of uncertainty relevant for the given scale factor calibration object,
   // identifying the object by index.
   //
@@ -2020,18 +2017,31 @@ Analysis::CalibrationDataInterfaceROOT::listScaleFactorUncertainties(unsigned in
 
   std::vector<string> dummy;
   CalibrationDataContainer* container = m_objects[index];
+
   if (container) {
     if (named) {
       // Find out which uncertainties are excluded from eigenvector construction
       if (! m_runEigenVectorMethod) return dummy;
-      const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap.at(container);
-      std::vector<string> unordered = eigenVariation->listNamedVariations();
-      std::vector<string> ordered(unordered.size());
-      for (unsigned int i = 0; i < unordered.size(); ++i)
-	ordered[eigenVariation->getNamedVariationIndex(unordered[i])] = unordered[i];
-      return ordered;
+      std::shared_ptr<CalibrationDataEigenVariations> eigenVariation=m_eigenVariationsMap.at(container);
+      if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
+        std::vector<string> unordered = eigenVariation->listNamedVariations(); // this is for the regular EV
+        std::vector<string> ordered(unordered.size());
+        for (unsigned int i = 0; i < unordered.size(); ++i) {
+          ordered[eigenVariation->getNamedVariationIndex(unordered[i])] = unordered[i];
+        }
+        return ordered;
+      } else if (m_EVStrategy == Analysis::Uncertainty::SFGlobalEigen){
+        // here we want to get the named uncertainties from the global eigenvariations flavour container specifically...
+        std::shared_ptr<CalibrationDataGlobalEigenVariations> GEV = std::dynamic_pointer_cast<CalibrationDataGlobalEigenVariations>(eigenVariation);
+        std::vector<std::string> unordered = GEV->listNamedVariations(flavour);
+        std::vector<std::string> ordered(unordered.size()); // ordered by the NAMED VARIATION (internal) ORDERING
+        for (unsigned int i = 0; i < unordered.size(); ++i) {
+          ordered[GEV->getNamedVariationIndex(unordered[i], flavour)] = unordered[i]; 
+        }
+        return ordered;
+      }
     }
-    return container->listUncertainties();
+    return container->listUncertainties(); // return this if not named 
   }
 
   return dummy;
@@ -2056,13 +2066,13 @@ Analysis::CalibrationDataInterfaceROOT::getNumVariations(const std::string& auth
   unsigned int index;
 
   if (! retrieveCalibrationIndex (label, OP, author, true, index)) return 0;
-  return getNumVariations(index, unc);
+  return getNumVariations(index, unc, label);
 }
 
 //________________________________________________________________________________
 unsigned int
 Analysis::CalibrationDataInterfaceROOT::getNumVariations(unsigned int index,
-							 Uncertainty unc) const
+							 Uncertainty unc, const std::string& flavour)
 {
   // Retrieve the number of eigenvector variations or named variations relevant for
   // the given scale factor calibration object, identifying the object by index.
@@ -2071,13 +2081,15 @@ Analysis::CalibrationDataInterfaceROOT::getNumVariations(unsigned int index,
   //    unc:     should be set to SFEigen or SFNamed for the cases of
   //             eigenvector variations or named variations, respectively
 
-  if (! (unc == SFEigen || unc == SFNamed)) return 0;
+  if (! (unc == SFEigen || unc == SFNamed || unc == SFGlobalEigen)) return 0;
   CalibrationDataContainer* container = m_objects[index];
   if (! container) return 0;
-  CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap.at(container);
-  return (unc == SFEigen) ?
-    eigenVariation->getNumberOfEigenVariations() :
-    eigenVariation->getNumberOfNamedVariations();
+  std::shared_ptr<CalibrationDataEigenVariations> eigenVariation=m_eigenVariationsMap.at(container);
+  if (unc == SFGlobalEigen){
+    std::shared_ptr<CalibrationDataGlobalEigenVariations> GEV = std::dynamic_pointer_cast<CalibrationDataGlobalEigenVariations>(eigenVariation);
+    return GEV->getNumberOfEigenVariations(flavour);
+  }
+  return (unc == SFEigen) ? eigenVariation->getNumberOfEigenVariations() : eigenVariation->getNumberOfNamedVariations();
 }
 
 //________________________________________________________________________________
@@ -2095,8 +2107,7 @@ Analysis::CalibrationDataInterfaceROOT::getBinnedScaleFactors (const std::string
   unsigned int index;
   if (! retrieveCalibrationIndex (label, OP, author, true, index)) {
     // Return a dummy result if the object is not found
-    cerr << "getBinnedScaleFactors: unable to find SF calibration for object "
-	 << fullName(author, OP, label, true) << endl;
+    cerr << "getBinnedScaleFactors: unable to find SF calibration for object " << fullName(author, OP, label, true) << endl;
     return 0;
   }
   CalibrationDataHistogramContainer* container = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[index]);
@@ -2155,8 +2166,7 @@ Analysis::CalibrationDataInterfaceROOT::getShiftedScaleFactors (const std::strin
   unsigned int index;
   if (! retrieveCalibrationIndex (label, OP, author, true, index)) {
     // Return a null result if the object is not found
-    cerr << "getShiftedScaleFactors: unable to find SF calibration for object "
-	 << fullName(author, OP, label, true) << endl;
+    cerr << "getShiftedScaleFactors: unable to find SF calibration for object " << fullName(author, OP, label, true) << endl;
     return 0;
   }
   CalibrationDataHistogramContainer* container = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[index]);
@@ -2225,11 +2235,10 @@ Analysis::CalibrationDataInterfaceROOT::runEigenVectorRecomposition (const std::
   }
 
   // Retrieve eigenvariation
-  CalibrationDataEigenVariations* eigenVariation = nullptr;
+  std::shared_ptr<CalibrationDataEigenVariations> eigenVariation;
   try {
     eigenVariation = m_eigenVariationsMap.at(container);
-  }
-  catch (const std::out_of_range&) {
+  } catch (const std::out_of_range&) {
     cerr << "runEigenVectorRecomposition: Could not retrieve eigenvector variation, while it should have been there." << endl;
     return Analysis::kError;
   }
@@ -2260,62 +2269,131 @@ namespace {
     if (hist->GetDimension() > 1) rows *= nbiny;
     if (hist->GetDimension() > 2) rows *= nbinz;
     TMatrixDSym stat(rows);
-    for (Int_t binx = 1; binx < nbinx; ++binx)
-      for (Int_t biny = 1; biny < nbiny; ++biny)
-	for (Int_t binz = 1; binz < nbinz; ++binz) {
-	  Int_t bin = hist->GetBin(binx, biny, binz);
-	  double err = hist->GetBinError(bin);
-	  stat(bin, bin) = err*err;
-	}
+    for (Int_t binx = 1; binx < nbinx; ++binx){
+      for (Int_t biny = 1; biny < nbiny; ++biny){
+	      for (Int_t binz = 1; binz < nbinz; ++binz) {
+	        Int_t bin = hist->GetBin(binx, biny, binz);
+	        double err = hist->GetBinError(bin);
+	        stat(bin, bin) = err*err;
+	      }
+      }
+    }
     return stat;
   }
 
   // Construct the covariance matrix assuming that histogram "unc" contains systematic uncertainties
   // pertaining to the "ref" results, and that the uncertainties are fully correlated from bin to bin
   // (unless option "doCorrelated" is false, in which bins are assumed uncorrelated)
-  TMatrixDSym getSystCovarianceMatrix(const TH1* ref, const TH1* unc, bool doCorrelated) {
+  TMatrixDSym getSystCovarianceMatrix(const TH1* ref, const TH1* unc, bool doCorrelated, string uncname, int tagWeightAxis) {
     Int_t nbinx = ref->GetNbinsX()+2, nbiny = ref->GetNbinsY()+2, nbinz = ref->GetNbinsZ()+2;
     Int_t rows = nbinx;
     if (ref->GetDimension() > 1) rows *= nbiny;
     if (ref->GetDimension() > 2) rows *= nbinz;
     TMatrixDSym cov(rows);
 
+    for(int i=0 ; i<10 ; i++){
+      Int_t bin = unc->GetBin(1,i,1);
+      double uncval = unc->GetBinContent(bin);
+      cout << uncval << ", ";
+    } cout << endl;
+
     // Carry out a minimal consistency check
-    if (unc->GetNbinsX()+2 != nbinx || unc->GetNbinsY()+2 != nbiny || unc->GetNbinsZ()+2 != nbinz
-	|| unc->GetDimension() != ref->GetDimension()) {
-      cout << "getSystCovarianceMatrix: inconsistency found in histograms "
-	   << ref->GetName() << " and " << unc->GetName() << endl;
+    if (unc->GetNbinsX()+2 != nbinx || unc->GetNbinsY()+2 != nbiny || unc->GetNbinsZ()+2 != nbinz || unc->GetDimension() != ref->GetDimension()) {
+      std::cout << "getSystCovarianceMatrix: inconsistency found in histograms " << ref->GetName() << " and " << unc->GetName() << " : " << uncname << std::endl;
       return cov;
     }
 
-    // Special case: uncertainties not correlated from bin to bin
+    // // the "2" below doesn't actually imply that two bins are used...
+    // // this is just to make the loops below work
+    // if (ref->GetDimension() <= 1) nbiny = 2;
+    // if (ref->GetDimension() <= 2) nbinz = 2;
+
+    // Special case: uncertainties not correlated from bin to bin.
+    // The exception here is for tag weight bins, which are always assumed to be fully correlated.
     if (! doCorrelated) {
-      for (Int_t binx = 1; binx < nbinx; ++binx)
-	for (Int_t biny = 1; biny < nbiny; ++biny)
-	  for (Int_t binz = 1; binz < nbinz; ++binz) {
-	    Int_t bin = ref->GetBin(binx, biny, binz);
-	    double err = ref->GetBinError(bin);
-	    cov(bin,bin) = err*err;
-	  }
-      return cov;
+      if (tagWeightAxis < 0) {
+        // truly uncorrelated uncertainties
+        for (Int_t binx = 1; binx < nbinx-1; ++binx){
+          for (Int_t biny = 1; biny < nbiny-1; ++biny){
+            for (Int_t binz = 1; binz < nbinz-1; ++binz) {
+              Int_t bin = ref->GetBin(binx, biny, binz);
+              double err = unc->GetBinContent(bin);
+              cov(bin,bin) = err*err;
+            }
+          }
+        }
+        return cov;
+      } else if (tagWeightAxis == 0) {
+        // continuous histogram with tag weight X axis
+        for (Int_t biny = 1; biny < nbiny-1; ++biny){
+          for (Int_t binz = 1; binz < nbinz-1; ++binz){
+            for (Int_t binx = 1; binx < nbinx-1; ++binx) {
+              Int_t bin = ref->GetBin(binx, biny, binz);
+              double err = unc->GetBinContent(bin);
+              for (Int_t binx2 = 1; binx2 < nbinx-1; ++binx2) {
+                Int_t bin2 = ref->GetBin(binx2, biny, binz);
+                double err2 = unc->GetBinContent(bin2);
+                cov(bin,bin2) = err*err2;
+              }
+            }
+          }
+        }
+        return cov;
+      } else if (tagWeightAxis == 1) {
+        // continuous histogram with tag weight Y axis
+        for (Int_t binx = 1; binx < nbinx-1; ++binx){
+          for (Int_t binz = 1; binz < nbinz-1; ++binz){
+            for (Int_t biny = 1; biny < nbiny-1; ++biny) {
+              Int_t bin = ref->GetBin(binx, biny, binz);
+              double err = unc->GetBinContent(bin);
+              for (Int_t biny2 = 1; biny2 < nbiny-1; ++biny2) {
+                Int_t bin2 = ref->GetBin(binx, biny2, binz);
+                double err2 = unc->GetBinContent(bin2);
+                cov(bin,bin2) = err*err2;
+              }
+            }
+          }
+        }
+        return cov;
+      } else if (tagWeightAxis == 2) {
+        // continuous histogram with tag weight Z axis
+        for (Int_t binx = 1; binx < nbinx-1; ++binx){
+          for (Int_t biny = 1; biny < nbiny-1; ++biny){
+            for (Int_t binz = 1; binz < nbinz-1; ++binz) {
+              Int_t bin = ref->GetBin(binx, biny, binz);
+              double err = unc->GetBinContent(bin);
+              for (Int_t binz2 = 1; binz2 < nbinz-1; ++binz2) {
+                Int_t bin2 = ref->GetBin(binx, biny, binz2);
+                double err2 = unc->GetBinContent(bin2);
+                cov(bin,bin2) = err*err2;
+              }
+            }
+          }
+        }
+        return cov;
+      }
     }
 
-    for (Int_t binx = 1; binx < nbinx; ++binx)
-      for (Int_t biny = 1; biny < nbiny; ++biny)
-	for (Int_t binz = 1; binz < nbinz; ++binz) {
-	  Int_t bin = ref->GetBin(binx, biny, binz);
-	  double err = ref->GetBinError(bin);
-	  for (Int_t binx2 = 1; binx2 < nbinx; ++binx2)
-	    for (Int_t biny2 = 1; biny2 < nbiny; ++biny2)
-	      for (Int_t binz2 = 1; binz2 < nbinz; ++binz2) {
-		Int_t bin2 = ref->GetBin(binx2, biny2, binz2);
-		double err2 = ref->GetBinError(bin2);
-		cov(bin, bin2) = err*err2;
-	      }
-	}
+    for (Int_t binx = 1; binx < nbinx-1; ++binx){
+      for (Int_t biny = 1; biny < nbiny-1; ++biny){
+        for (Int_t binz = 1; binz < nbinz-1; ++binz) { 
+          Int_t bin = ref->GetBin(binx, biny, binz);   
+          double err = unc->GetBinContent(bin);   // <------------- For every bin in the "ref" ("result") TH1*, GetBinContents of the corresponding uncertainty bin
+          for (Int_t binx2 = 1; binx2 < nbinx-1; ++binx2){
+            for (Int_t biny2 = 1; biny2 < nbiny-1; ++biny2){
+              for (Int_t binz2 = 1; binz2 < nbinz-1; ++binz2) {
+                Int_t bin2 = ref->GetBin(binx2, biny2, binz2); 
+                double err2 = unc->GetBinContent(bin2); // <------- Grab the unc contents of every bin, and compute the covariance matrix element
+                cov(bin, bin2) = err*err2;             //  <------- err1 and err2 are the uncertainty content of the bins, so "cov" is real, symmetric
+              }                                       //   <------- "cov" would imply that the "hunc" histogram stores "x - E[x]" differences from the mean. So in the end, it computes the covariance (as a sum of these)
+            }
+          }
+        }
+      }
+    }
     return cov;
   }
-
+  
 }
 
 //====================== retrieval of calibration covariance matrix ========================
@@ -2335,16 +2413,14 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix (const st
   //    label:   jet flavour label
   //    OP:      tagger working point
   //    unc:     source of uncertainty to consider
-
   // Catch issues with the specified input as early as possible
   TMatrixDSym dummy;
   if (unc == "comment" || unc == "result" || unc == "combined") return dummy;
 
   unsigned int index;
   if (! retrieveCalibrationIndex (label, OP, author, true, index)) {
-  // Return a dummy result if the object is not found
-    cerr << "getScaleFactorCovarianceMatrix: unable to find SF calibration for object "
-	 << fullName(author, OP, label, true) << endl;
+    // Return a dummy result if the object is not found
+    cerr << "getScaleFactorCovarianceMatrix: unable to find SF calibration for object " << fullName(author, OP, label, true) << endl;
     return dummy;
   }
   CalibrationDataHistogramContainer* container = dynamic_cast<CalibrationDataHistogramContainer*>(m_objects[index]);
@@ -2353,8 +2429,6 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix (const st
   // retrieve the central calibration and its axes
   TH1* result = dynamic_cast<TH1*>(container->GetValue("result"));
   if (! result) return dummy;
-  // std::vector<unsigned int> varResult = CalibrationDataContainer::getVariableTypes(result);
-
   // "normal" case: single source of uncertainty
   if (unc != "all") {
     if (unc == "statistics") {
@@ -2366,7 +2440,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix (const st
 	     << "corresponding to name " << unc << endl;
 	return dummy;
       }
-      return getSystCovarianceMatrix(result, hunc, container->isBinCorrelated(unc));
+      return getSystCovarianceMatrix(result, hunc, container->isBinCorrelated(unc), unc, container->getTagWeightAxis());
     }
   }
 
@@ -2378,10 +2452,12 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactorCovarianceMatrix (const st
   // Then loop through the list of (other) uncertainties
   std::vector<string> uncs = container->listUncertainties();
   for (unsigned int t = 0; t < uncs.size(); ++t) {
-    if (uncs[t] == "comment" || uncs[t] == "result" ||
-	uncs[t] == "combined" || uncs[t] == "statistics") continue;
+    if (uncs[t] == "comment" || uncs[t] == "result" || uncs[t] == "combined" || 
+        uncs[t] == "statistics" || uncs[t]=="extrapolation" || uncs[t]=="MChadronisation" || 
+        uncs[t]=="ReducedSets" || uncs[t]=="systematics") continue;
     TH1* hunc = dynamic_cast<TH1*>(container->GetValue(uncs[t].c_str()));
-    cov += getSystCovarianceMatrix(result, hunc, container->isBinCorrelated(uncs[t]));
+    TMatrixDSym syst_cov = getSystCovarianceMatrix(result, hunc, container->isBinCorrelated(uncs[t]), uncs[t], container->getTagWeightAxis());
+    cov += syst_cov;
   }
 
   return cov;
@@ -2398,8 +2474,7 @@ Analysis::CalibrationDataInterfaceROOT::initialize(const string& jetauthor, cons
     cerr << "initialize can only be called once per CalibrationDataInterfaceROOT object" << endl; 
     return; 
   } else { 
-    cout << "initializing BTagCalibrationDataInterfaceROOT for PROOF with jetAuthor = " << jetauthor  
-	 << ", tagger = " << m_taggerName << ", operating point = " << OP << ", uncertainty = " << unc << endl; 
+    cout << "initializing BTagCalibrationDataInterfaceROOT for PROOF with jetAuthor = " << jetauthor  << ", tagger = " << m_taggerName << ", operating point = " << OP << ", uncertainty = " << unc << endl; 
   } 
  		 
   // quark flavours 
@@ -2415,12 +2490,14 @@ Analysis::CalibrationDataInterfaceROOT::initialize(const string& jetauthor, cons
   BTagVars.jetEta = 1.5; //Irrelevant, just has to be valid to retrieve objects 
  		 
   std::vector<string>::iterator flav = label.begin(); 
-  for(; flav!=label.end(); ++flav) { 
+  for(; flav!=label.end(); flav++) { 
     std::pair<double, double> BTagCalibResult; 
-    BTagCalibResult = getScaleFactor(BTagVars,(*flav), OP, unc); 
+    BTagCalibResult = getScaleFactor(BTagVars,(*flav), OP, unc);
+    std::cout << "CalibrationDataInterfaceROOT->initialize : BTagCalibResult " << std::endl;
  		 
     std::pair<double, double> BTagCalibMCEff; 
     BTagCalibMCEff = getMCEfficiency(BTagVars,(*flav), OP, unc); 
+    std::cout << "CalibrationDataInterfaceROOT->initialize : BTagCalibMCEff " << std::endl;
   }      
  		 
   if (m_fileEff != m_fileSF) { 
@@ -2435,7 +2512,7 @@ Analysis::CalibrationDataInterfaceROOT::initialize(const string& jetauthor, cons
 
 //________________________________________________________________________________
 CalibrationDataContainer*
-Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& dir, const string& cntname, bool isSF, bool doPrint)
+Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& label, const string& OP, const string& author, const string& cntname, bool isSF, bool doPrint)
 {
   // Attempt to retrieve the given container from file. Note that also the corresponding
   // "hadronisation" reference is retrieved (if possible and not yet done).
@@ -2449,6 +2526,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& dir, con
   //              (note that this is typically steered by the m_verbose setting;
   //               only for the retrieval of the maps used for MC/MC SF calculations, this printout is always switched off)
 
+  string dir = m_taggerName + "/" + getAlias(author) + "/" + OP + "/" + label;
   // construct the full object name
   string name = dir + "/" + cntname;
 
@@ -2473,8 +2551,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& dir, con
 
   // For successfully retrieved containers, also print some more information (implemented on user request)
   if (doPrint) {
-    cout << "CalibrationDataInterface: retrieved container " << name << " (with comment: '" << cnt->getComment()
-	 << "' and hadronisation setting '" << cnt->getHadronisation() << "')" << endl;
+    cout << "CalibrationDataInterface: retrieved container " << name << " (with comment: '" << cnt->getComment() << "' and hadronisation setting '" << cnt->getHadronisation() << "')" << endl;
   }
 
 
@@ -2493,7 +2570,7 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& dir, con
       delete mapEff;
     } else {
       string SFCalibName = getContainername(getBasename(dir), true);
-      if (m_objectIndices.find(SFCalibName) == m_objectIndices.end()) retrieveContainer(dir, SFCalibName, true, doPrint);
+      if (m_objectIndices.find(SFCalibName) == m_objectIndices.end()) retrieveContainer(label, OP, author, SFCalibName, true, doPrint);
     }
   }
 
@@ -2507,60 +2584,115 @@ Analysis::CalibrationDataInterfaceROOT::retrieveContainer(const string& dir, con
     if (mapit != m_refMap.end()) {
       string ref;
       if (mapit->second->getReference(spec, ref)) {
-	// Retrieve the hadronisation reference if not already done. Note that the "isSF" is left unchanged:
-	// this allows to retrieve the reference from the same file as the scale factor object. An exception
-	// is the reference for the calibration scale factor object, which should always be obtained from
-	// the scale factor file. 
-	// An efficiency container can be its own hadronisation reference (this is not "protected" against).
-	string refname(dir + "/" + ref);
-	std::map<string, unsigned int>::const_iterator it = m_objectIndices.find(refname);
-	// If the reference cannot be found, assume that it hasn't yet been retrieved so attempt it now.
-	if (it == m_objectIndices.end()) {
-	  // Omit the printout of container information here (the idea being that showing MC/MC SF information would confuse rather than help)
-	  retrieveContainer(dir, ref, isSF, false); it = m_objectIndices.find(refname);
-	}
-	m_hadronisationReference[idx] = it->second;
+        // Retrieve the hadronisation reference if not already done. Note that the "isSF" is left unchanged:
+        // this allows to retrieve the reference from the same file as the scale factor object. An exception
+        // is the reference for the calibration scale factor object, which should always be obtained from
+        // the scale factor file. 
+        // An efficiency container can be its own hadronisation reference (this is not "protected" against).
+        string refname(dir + "/" + ref);
+        std::map<string, unsigned int>::const_iterator it = m_objectIndices.find(refname);
+        // If the reference cannot be found, assume that it hasn't yet been retrieved so attempt it now.
+        if (it == m_objectIndices.end()) {
+          // Omit the printout of container information here (the idea being that showing MC/MC SF information would confuse rather than help)
+          retrieveContainer(label, OP, author, ref, isSF, false); it = m_objectIndices.find(refname);
+        }
+        m_hadronisationReference[idx] = it->second;
       }
-    } else if (m_useMCMCSF)
+    } else if (m_useMCMCSF) {
       cerr << "btag Calib: retrieveContainer: MC hadronisation reference map not found -- this should not happen!" << endl;
+    }
   }
-  if (m_hadronisationReference[idx] == -1 || ! m_objects[m_hadronisationReference[idx]])
+  if (m_hadronisationReference[idx] == -1 || ! m_objects[m_hadronisationReference[idx]]){
     // Not being able to construct the MC/MC scale factors will lead to a potential bias.
     // However, this is not considered sufficiently severe that we will flag it as an error.
-    if (m_useMCMCSF)
-      cerr << "btag Calib: retrieveContainer: warning: unable to apply MC/MC scale factors for container "
-	   << name << " with hadronisation reference = '" << spec << "'" << endl;
+    if (m_useMCMCSF){
+      cerr << "btag Calib: retrieveContainer: warning: unable to apply MC/MC scale factors for container " << name << " with hadronisation reference = '" << spec << "'" << endl;
+    }
+  }
 
   // Initialize the Eigenvector variation object corresponding to this object, if applicable. Notes:
   // - the dual use of "isSF" (both referring to the file and to the object, see above) requires another protection here
   // - the constructor's second argument is used to determine whether to exclude a pre-determined set of uncertainties from the EV decomposition
+  //
+  // We also want to separate behavior between SFEigen and SFGlobalEigen systematic strategies
+  // The former requires a CalibrationDataEigenVariations object to be made per flavour.
+  // The latter combines all corresponding flavours, so once it's been made for a single flavour, it's cached under all the corresponding "flavour containers"
+  // simulataneously in m_eigenVariationsMap, and is checked for on each subsequent call to this method.
   if (m_runEigenVectorMethod && isSF && name.find("_SF") != string::npos) {
     CalibrationDataHistogramContainer* histoContainer=dynamic_cast<CalibrationDataHistogramContainer*>(cnt);
     if (histoContainer==0) {
       cerr << "Could not cast Container to a HistogramContainer. " << endl;
       return 0;
     }
-    CalibrationDataEigenVariations* newEigenVariation=new CalibrationDataEigenVariations(histoContainer, m_useRecommendedEVExclusions);
+    if (m_EVStrategy == Analysis::Uncertainty::SFEigen){
+      ///////////////////////////////////////////////////////////////
+      std::shared_ptr<CalibrationDataEigenVariations> newEigenVariation(new CalibrationDataEigenVariations(m_filenameSF, m_taggerName, OP, author, histoContainer, m_useRecommendedEVExclusions));
 
-    // At this point we may also want to reduce the number of eigenvector variations.
-    // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
-    string flavour = dir.substr(dir.find_last_of("/")+1);
+      // At this point we may also want to reduce the number of eigenvector variations.
+      // The choices are stored with the container object; but first we need to know what flavour we are dealing with.
+      string flavour = dir.substr(dir.find_last_of("/")+1); //<--- Pretty sure this could easily be just "label", no?
 
-    for (auto entry : m_excludeFromCovMatrix[flavour]) {
-      newEigenVariation->excludeNamedUncertainty(entry);
+      for (auto entry : m_excludeFromCovMatrix[flavour]) {
+        newEigenVariation->excludeNamedUncertainty(entry, cnt);
+      }
+      newEigenVariation->initialize();
+      int to_retain = histoContainer->getEigenvectorReduction(m_EVReductions[flavour]); // returns the number of eigenvariations to retain as per the EV reduction strategy
+      if (to_retain > -1) {
+        if (m_verbose) cout << "btag Calib: reducing number of eigenvector variations for flavour " << flavour << " to " << to_retain << endl;
+        // The merged variations will end up as the first entry in the specified list, i.e., as the last of the variations to be "retained"
+        newEigenVariation->mergeVariationsFrom(size_t(to_retain-1)); // All variations stored with indices larger than this are merged
+      } else if (m_EVReductions[flavour] != Loose) {
+        cerr << "btag Calib: unable to retrieve eigenvector reduction information for flavour " << flavour << " and scheme " << m_EVReductions[flavour] << "; not applying any reduction" << endl;
+      }
+      m_eigenVariationsMap[cnt]=newEigenVariation;
+
+      ///////////////////////////////////////////////////////////////
+    } else if (m_EVStrategy == Analysis::Uncertainty::SFGlobalEigen) {
+      ///////////////////////////////////////////////////////////////
+      std::map<const CalibrationDataContainer*, std::shared_ptr<CalibrationDataEigenVariations> >::iterator evit = m_eigenVariationsMap.find(cnt);
+      // The global implementation internally combines all the "flavour containers" (containers that correspond to each other, only with different flavours)
+      // But the CalibrationDataInterfaceROOT object doesn't need to know that, so we want to get all the flavour containers in one go here
+      // and map them (with m_eigenVariationsMap) to the same CalibrationDataGlobalEigenVariations pointer.
+      // Then, in methods like getScaleFactor, we call the virtual methods which will give the proper result e.g. if you want the SF for a b-jet, it'll call the 
+
+      if (evit == m_eigenVariationsMap.end()){
+        // now to see if it's completely empty or not
+        if (m_eigenVariationsMap.empty()){
+          // <---------- cdipath = m_filenameSF (for now), tagger = m_taggerName, wp = OP, jetcollection = author, 
+          std::shared_ptr<CalibrationDataGlobalEigenVariations> newEigenVariation(new CalibrationDataGlobalEigenVariations(m_filenameSF, m_taggerName, OP, author, histoContainer, m_useRecommendedEVExclusions));
+          for (auto entry : m_excludeFromCovMatrix[label]) {
+            newEigenVariation->excludeNamedUncertainty(entry, label);//, cnt); // <---- custom exclude named uncertainties method for global variations
+          }
+
+          newEigenVariation->initialize();
+          
+          // flavour loop to get the flavour reduction schemes and apply them
+          std::vector<std::string> flavz = {"B", "C", "Light", "T"};
+          for (std::string& flavour : flavz){
+            int to_retain = histoContainer->getEigenvectorReduction(m_EVReductions[flavour]); // returns the number of eigenvariations to retain as per the EV reduction strategy
+            if (to_retain > -1) {
+              if (m_verbose) cout << "btag Calib: reducing number of eigenvector variations for flavour " << flavour << " to " << to_retain << endl;
+              // The merged variations will end up as the first entry in the specified list, i.e., as the last of the variations to be "retained"
+              newEigenVariation->mergeVariationsFrom(size_t(to_retain-1), flavour); // All variations stored with indices larger than this are merged
+            } else if (m_EVReductions[flavour] != Loose) {
+              cerr << "btag Calib: unable to retrieve eigenvector reduction information for flavour " << flavour << " and scheme " << m_EVReductions[flavour] << "; not applying any reduction" << endl;
+            }
+          }
+
+          m_eigenVariationsMap.insert({cnt, newEigenVariation});
+        } else {
+          // Need to point to the CDGEV object four times in the m_eigenVariationsMap to appease the CDIROOT backend design...
+          // Ok, turns out I can't retrieve the containers from CDGEV and insert them directly, because I'd have to use the containers directly instead..
+          // So the strategy is to just take the CGEV objects that are already in the map, and mpa the present container to it
+          std::shared_ptr<CalibrationDataEigenVariations> previous_eigenvariation = m_eigenVariationsMap.begin()->second;
+          m_eigenVariationsMap.insert({cnt, previous_eigenvariation});
+        }
+
+      } else {
+        std::cout << "CalibrationDataInterfaceROOT->retrieveContainer : the CDGEV object for " << name << " already exists! " << std::endl;
+      }
+    ///////////////////////////////////////////////////////////////
     }
-
-    newEigenVariation->initialize();
-    int to_retain = histoContainer->getEigenvectorReduction(m_EVReductions[flavour]);
-    if (to_retain > -1) {
-      if (m_verbose) cout << "btag Calib: reducing number of eigenvector variations for flavour " << flavour << " to " << to_retain << endl;
-      // The merged variations will end up as the first entry in the specified list, i.e., as the last of the variations to be "retained"
-      newEigenVariation->mergeVariationsFrom(size_t(to_retain-1));
-    } else if (m_EVReductions[flavour] != Loose)
-      cerr << "btag Calib: unable to retrieve eigenvector reduction information for flavour " << flavour << " and scheme "
-	   << m_EVReductions[flavour] << "; not applying any reduction" << endl;
-
-    m_eigenVariationsMap[cnt]=newEigenVariation;
   }
 
   return cnt;
