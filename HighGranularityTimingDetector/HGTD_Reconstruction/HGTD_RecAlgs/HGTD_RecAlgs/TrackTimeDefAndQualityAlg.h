@@ -63,7 +63,7 @@ class TrackTimeDefAndQualityAlg : public AthReentrantAlgorithm {
 private:
   // different shift distances for bitfield definition
   const short m_recoed_ptrn_sft = 0;
-  const short m_exp_ptrn_sft = 4;
+  //const short m_exp_ptrn_sft = 4;
   const short m_comp_ptrn_sft = 8;
   const short m_holes_ptrn_sft = 12;
   const short m_primes_ptrn_sft = 16;
