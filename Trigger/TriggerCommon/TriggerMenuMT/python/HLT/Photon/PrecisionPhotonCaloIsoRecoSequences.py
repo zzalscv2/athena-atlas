@@ -25,12 +25,13 @@ def precisionPhotonCaloIsoRecoSequence(RoIs, ion=False):
     import AthenaCommon.CfgMgr as CfgMgr
 
     caloClusters = TrigEgammaKeys.precisionPhotonCaloClusterContainer
-    collectionOut = TrigEgammaKeys.precisionPhotonContainer # Input and output would be in the same container (Should I make a NEW container for this?)
+    collectionIn = TrigEgammaKeys.precisionPhotonContainer # Input container with non isolated photons. These photons will be decorated with isolation variables (by running TrigPhotonIsoBuilderCfg[HI]). Monitoring of isolation variables is also executed over input photon container
+    collectionOut = TrigEgammaKeys.precisionPhotonIsoContainer # Output container with isolated photons. The resulting decorated photons will be copied over to this new container by the HypoAlg. Hypo Tool and decision will be done over photons in this isolated output photon container 
 
     ViewVerify = CfgMgr.AthViews__ViewDataVerifier("PrecisionPhotonCaloIsoPhotonViewDataVerifier" + tag)
     ViewVerify.DataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
                               ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool 
-                              ( 'xAOD::PhotonContainer' , 'StoreGateSvc+%s' % collectionOut), # This is the Photon container with the output of the precision step
+                              ( 'xAOD::PhotonContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonContainer), # This is the Photon input container with non-isolated photons
                               ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
                               ( 'CaloCellContainer' , 'StoreGateSvc+CaloCellsFS' ),
                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
@@ -59,8 +60,8 @@ def precisionPhotonCaloIsoRecoSequence(RoIs, ion=False):
     #online monitoring for topoEgammaBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonCaloIsoMonitorCfg
     PrecisionPhotonCaloIsoRecoMonAlgo = PrecisionPhotonCaloIsoMonitorCfg('PrecisionPhotonCaloIsoEgammaBuilderMon' + tag)
-    PrecisionPhotonCaloIsoRecoMonAlgo.PhotonKey = collectionOut
-    PrecisionPhotonCaloIsoRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % collectionOut, '%s.topoetcone40' % collectionOut]
+    PrecisionPhotonCaloIsoRecoMonAlgo.PhotonKey = TrigEgammaKeys.precisionPhotonContainer 
+    PrecisionPhotonCaloIsoRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % collectionIn, '%s.topoetcone40' % collectionIn]
     thesequence += PrecisionPhotonCaloIsoRecoMonAlgo
 
 
