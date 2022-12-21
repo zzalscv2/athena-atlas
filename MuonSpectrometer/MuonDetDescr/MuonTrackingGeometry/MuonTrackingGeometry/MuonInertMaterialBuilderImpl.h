@@ -71,6 +71,10 @@ class MuonInertMaterialBuilderImpl : public AthAlgTool, public Trk::TrackingVolu
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;
 
+  std::pair<std::unique_ptr< std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
+            std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
+  buildDetachedTrackingVolumesImpl(const MuonGM::MuonDetectorManager* muonMgr, bool blend) const;
+
  protected:
   /** Constructor */
   MuonInertMaterialBuilderImpl(const std::string&, const std::string&, const IInterface*);
