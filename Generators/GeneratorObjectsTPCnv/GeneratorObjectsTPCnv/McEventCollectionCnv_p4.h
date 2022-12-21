@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // McEventCollectionCnv_p4.h
@@ -126,8 +126,8 @@ class McEventCollectionCnv_p4 : public T_AthenaPoolTPCnvBase<
    *  @c GenEvent.
    */
 #ifdef HEPMC3
-  void writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
-                       McEventCollection_p4& persEvt ) const;
+  static void writeGenVertex( const HepMC::ConstGenVertexPtr& vtx,
+                       McEventCollection_p4& persEvt ) ;
 #else
   void writeGenVertex( const HepMC::GenVertex& vtx,
                        McEventCollection_p4& persEvt ) const;
@@ -139,8 +139,8 @@ class McEventCollectionCnv_p4 : public T_AthenaPoolTPCnvBase<
    *  persistent @c GenEvent
    */
 #ifdef HEPMC3   
-  int writeGenParticle( const HepMC::ConstGenParticlePtr& p,
-                        McEventCollection_p4& persEvt ) const;
+  static int writeGenParticle( const HepMC::ConstGenParticlePtr& p,
+                        McEventCollection_p4& persEvt ) ;
 #else
   int writeGenParticle( const HepMC::GenParticle& p,
                         McEventCollection_p4& persEvt ) const;

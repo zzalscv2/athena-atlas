@@ -27,7 +27,6 @@ void HepMcParticleLinkCnv_p2::persToTrans( const HepMcParticleLink_p2* persObj,
                                           persObj->m_mcEvtIndex,
                                           HepMcParticleLink::ExtendedBarCode::eventCollectionFromChar(persObj->m_evtColl),
                                           flag) );
-  return;
 }
 
 void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
@@ -57,6 +56,5 @@ void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
   persObj->m_mcEvtIndex = index;
   persObj->m_barcode    = transObj->barcode();
   persObj->m_evtColl    = transObj->getEventCollectionAsChar();
-  return;
 }
 

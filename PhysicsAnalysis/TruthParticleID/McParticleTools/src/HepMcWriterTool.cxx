@@ -27,7 +27,7 @@ static const char * const s_protocolSep = ":";
 ////////////////
 HepMcWriterTool::HepMcWriterTool( const std::string& type,   const std::string& name,  const IInterface* parent ) : 
   AthAlgTool( type, name, parent ),
-  m_ioBackend( 0 )
+  m_ioBackend( nullptr )
 {
   //
   // Property declaration
@@ -55,7 +55,7 @@ HepMcWriterTool::~HepMcWriterTool()
 
   if ( m_ioBackend ) {
     delete m_ioBackend;
-    m_ioBackend = 0;
+    m_ioBackend = nullptr;
   }
 }
 
@@ -72,7 +72,7 @@ StatusCode HepMcWriterTool::initialize()
   }
 
   // setup backend
-  if ( 0 == m_ioBackend ) {
+  if ( nullptr == m_ioBackend ) {
     setupBackend(m_ioBackendURL);
   }
 
@@ -88,8 +88,8 @@ StatusCode HepMcWriterTool::finalize()
 StatusCode HepMcWriterTool::execute()
 {
   // retrieve the McEventCollection
-  const McEventCollection * mcEvts = 0;
-  if ( evtStore()->retrieve( mcEvts, m_mcEventsName ).isFailure() || 0 == mcEvts ) {
+  const McEventCollection * mcEvts = nullptr;
+  if ( evtStore()->retrieve( mcEvts, m_mcEventsName ).isFailure() || nullptr == mcEvts ) {
     ATH_MSG_ERROR("Could not retrieve a McEventCollection at ["  << m_mcEventsName << "] !!");
     return StatusCode::FAILURE;
   }
@@ -131,7 +131,7 @@ void HepMcWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
   // reset internal state
   if ( m_ioBackend ) {
     delete m_ioBackend;
-    m_ioBackend = 0;
+    m_ioBackend = nullptr;
   }
 
   // caching URL
@@ -169,5 +169,4 @@ void HepMcWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*prop*/ )
   }    
 #endif
   ATH_MSG_DEBUG("Using protocol [" << protocol << "] and write to ["<< fileName << "]");
-  return;
 }

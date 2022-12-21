@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,16 +36,16 @@ using CLHEP::HepLorentzVector;
 namespace {
   inline 
   HepLorentzVector svToLv( const HepMC::FourVector& v )
-  { return HepLorentzVector( v.x(), v.y(), v.z(), v.t() ); }
+  { return { v.x(), v.y(), v.z(), v.t() }; }
 }
 
-typedef std::list<HepMC::ConstGenParticlePtr> GenParticles_t;
+using GenParticles_t = std::list<HepMC::ConstGenParticlePtr>;
 
 TruthIsolationTool::TruthIsolationTool( const std::string& type, 
 					const std::string& name, 
 					const IInterface* parent ) : 
   AthAlgTool ( type, name,   parent ),
-  m_pdt      ( 0 )
+  m_pdt      ( nullptr )
 {
   //
   // Property declaration
@@ -79,8 +79,7 @@ TruthIsolationTool::TruthIsolationTool( const std::string& type,
 }
 
 TruthIsolationTool::~TruthIsolationTool()
-{ 
-}
+= default;
 
 StatusCode TruthIsolationTool::initialize() 
 {
@@ -100,7 +99,7 @@ StatusCode TruthIsolationTool::initialize()
   }      
 
   m_pdt = partPropSvc->PDT();
-  if ( 0 == m_pdt ) {
+  if ( nullptr == m_pdt ) {
     ATH_MSG_ERROR("Could not retrieve HepPDT::ParticleDataTable from "\
 		  "ParticleProperties Service !!");
     return StatusCode::FAILURE;
@@ -126,7 +125,7 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
 				       ITruthIsolationTool::ParticleSelect partSel )
 {
   // retrieve collection
-  const McEventCollection* mcEvts = 0;
+  const McEventCollection* mcEvts = nullptr;
   if ( !evtStore()->retrieve( mcEvts, mcEvtName ).isSuccess() ) {
     ATH_MSG_WARNING("Could not retrieve a McEventCollection at ["
 		    << mcEvtName << "] !!" << endmsg
@@ -150,7 +149,7 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
   if ( !evtStore()->record( etIsolations, 
 			     truthEtIsolName.str() ).isSuccess() ) {
     delete etIsolations;
-    etIsolations = 0;
+    etIsolations = nullptr;
     ATH_MSG_WARNING("Could not record a TruthEtIsolations container at ["
 		    << truthEtIsolName.str() << "] !!");
     return StatusCode::RECOVERABLE;
@@ -186,7 +185,7 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
 				       TruthEtIsolations& etIsols, 
 				       ITruthIsolationTool::ParticleSelect partSel )
 {
-  if ( 0 == genEvt ) {
+  if ( nullptr == genEvt ) {
     msg(MSG::WARNING)
       << "Null pointer to GenEvent (idx = [" << genIdx << "] from "
       << "McEventCollection [" << mcEvtName << "]) !!"
@@ -199,13 +198,13 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
 
   // create a reduced list of particles
   GenParticles_t particles;
-  for ( auto i: *genEvt) {
+  for ( const auto& i: *genEvt) {
     if ( isStable(i) && isInteracting(i) ) {
       particles.push_back( i );
     }
   }
 
-  for ( auto i: *genEvt) {
+  for ( const auto& i: *genEvt) {
     const HepMC::FourVector hlv = i->momentum();
     const int    ida = std::abs(i->pdg_id());
     const int    sta = i->status();
@@ -226,7 +225,7 @@ TruthIsolationTool::buildEtIsolations( const std::string& mcEvtName,
 
 void
 TruthIsolationTool::computeIso( const GenParticles_t& particles, 
-				HepMC::ConstGenParticlePtr part,
+				const HepMC::ConstGenParticlePtr& part,
 				TruthEtIsolations& etIsolations, 
 				ITruthIsolationTool::ParticleSelect partSel  )
 {
@@ -240,21 +239,17 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
   McAod::EtIsolations pyi = etIsol;
 
   int barcodepart = HepMC::barcode(part);
-  for ( GenParticles_t::const_iterator
-	  i    = particles.begin(),
-	  iEnd = particles.end(); 
-	i != iEnd; 
-	++i ) {
-    if ( HepMC::barcode(*i) == barcodepart ) {
+  for (const auto & particle : particles) {
+    if ( HepMC::barcode(particle) == barcodepart ) {
       continue;
     }
     if( partSel == ITruthIsolationTool::UseChargedOnly ) {
-      double particleCharge = McUtils::chargeFromPdgId((*i)->pdg_id(),
+      double particleCharge = McUtils::chargeFromPdgId(particle->pdg_id(),
 						       m_pdt);
       if( std::abs(particleCharge)<1.e-2 )
 	continue;
     }
-    const HepLorentzVector itrHlv = ::svToLv((*i)->momentum());
+    const HepLorentzVector itrHlv = ::svToLv(particle->momentum());
     const double r = hlv.deltaR(itrHlv);
     for ( std::size_t iCone = 0; 
 	  iCone != TruthParticleParameters::NbrOfCones; 
@@ -272,7 +267,7 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
   double pyv = 0.*GeV;
   auto decVtx = part->end_vertex();
   if (ida == 15 && decVtx) {
-    for (auto child:  *decVtx) {
+    for (const auto& child:  *decVtx) {
       if ( isInteracting(child) ) {
 	if( partSel == ITruthIsolationTool::UseChargedOnly ) {
 	  double particleCharge = McUtils::chargeFromPdgId(child->pdg_id(),m_pdt);
@@ -295,7 +290,6 @@ TruthIsolationTool::computeIso( const GenParticles_t& particles,
   }
 
   etIsolations.setEtIsol( part, etIsol );
-  return;
 }
 
 void 

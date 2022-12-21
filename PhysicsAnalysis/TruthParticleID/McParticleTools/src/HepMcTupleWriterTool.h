@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcTupleWriterTool.h 
@@ -96,7 +96,7 @@ class HepMcTupleWriterTool : virtual public IIOHepMcTool, public AthAlgTool
     boost::array<int,    s_nMax> m_barcode;
   };
   /// our cached particles
-  HepMcParticles m_particles;
+  HepMcParticles m_particles{};
 
   /// Pointer to @ ITHistSvc
   ServiceHandle<ITHistSvc> m_tupleSvc;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -37,7 +37,7 @@ McAodTupleWriterTool::McAodTupleWriterTool( const std::string& type,
 					    const IInterface* parent ) : 
   AthAlgTool( type, name, parent ),
   m_tupleSvc ( "THistSvc",     name ),
-  m_tuple    ( 0 )
+  m_tuple    ( nullptr )
 {
   //
   // Property declaration
@@ -106,9 +106,9 @@ StatusCode McAodTupleWriterTool::finalize()
 StatusCode McAodTupleWriterTool::execute()
 {
   // retrieve the TruthParticleContainer
-  const TruthParticleContainer * mc = 0;
+  const TruthParticleContainer * mc = nullptr;
   if ( evtStore()->retrieve( mc, m_truthParticlesName ).isFailure() ||
-       0 == mc ) {
+       nullptr == mc ) {
     ATH_MSG_ERROR("Could not retrieve a TruthParticleContainer at ["
 		  << m_truthParticlesName << "] !!");
     return StatusCode::FAILURE;
@@ -179,7 +179,7 @@ StatusCode McAodTupleWriterTool::write( const TruthParticleContainer* mc )
 void McAodTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outputFileName*/ )
 {
   const bool createIf = false;
-  IProperty * tSvc = 0;
+  IProperty * tSvc = nullptr;
   if ( !service( m_tupleSvc.name(), tSvc, createIf ).isSuccess() ) {
     ATH_MSG_ERROR("Could not retrieve THistSvc handle !!");
     throw GaudiException( "Could not retrieve THistSvc", 
@@ -208,8 +208,7 @@ void McAodTupleWriterTool::setupBackend( Gaudi::Details::PropertyBase& /*m_outpu
 			  StatusCode::FAILURE );
   }
 
-  return;
-}
+  }
 
 void McAodTupleWriterTool::bookTuple()
 {
@@ -218,7 +217,7 @@ void McAodTupleWriterTool::bookTuple()
   TTree* t = new TTree("mcaod","McAod validation tuple");
   if ( !m_tupleSvc->regTree( "/" + streamName + "/mcaod", t ).isSuccess() ) {
     ATH_MSG_ERROR("Could not register McAod validation tuple !!");
-    delete t; t = 0;
+    delete t; t = nullptr;
     throw GaudiException( "Could not register McAod validation tuple !!",
 			  name(),
 			  StatusCode::FAILURE );
@@ -247,5 +246,4 @@ void McAodTupleWriterTool::bookTuple()
   t->Branch( "etcone70",  m_particles.m_etcone70.elems, "etcone70[nParts]/D" );
 
   m_tuple = t;
-  return;
 }

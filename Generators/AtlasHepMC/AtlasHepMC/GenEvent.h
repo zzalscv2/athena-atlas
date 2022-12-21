@@ -94,9 +94,7 @@ public:
       }
     }
   }
-  const std::unordered_map<int, GenVertexPtr>& unordered_barcode_to_vertex_map() const { return m_vertexBC; }
-  const std::unordered_map<int, GenParticlePtr>& unordered_barcode_to_particle_map() const { return m_particleBC; }
-
+  
   std::map<int, ConstGenVertexPtr> barcode_to_vertex_map() const {
     std::map<int, ConstGenVertexPtr> ret;
     for (const auto &bcvertpair: m_vertexBC)

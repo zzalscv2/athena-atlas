@@ -130,10 +130,10 @@ StatusCode McVtxFilterTool::execute()
   ATH_MSG_DEBUG("Executing " << name() << "...");
 
   ATH_MSG_VERBOSE("Retrieve the McEventCollection to be filtered for");
-  const McEventCollection * mcColl = 0;
+  const McEventCollection * mcColl = nullptr;
   sc = evtStore()->retrieve( mcColl, m_mcEventsName );
 
-  if ( sc.isFailure() || 0 == mcColl ) {
+  if ( sc.isFailure() || nullptr == mcColl ) {
     msg(MSG::ERROR)
       << "Failed to retrieve McEventCollection at : "
       << m_mcEventsName
@@ -164,22 +164,16 @@ void McVtxFilterTool::displayOptions() const
   msg(MSG::INFO)
     << "Options for " << name() << " :" << endmsg
     << "\tDecay Patterns: [ ";
-  for ( std::vector<std::string>::const_iterator itr = m_decayPatterns.value().begin();
-	itr != m_decayPatterns.value().end();
-	++itr ) {
-    msg(MSG::INFO) << (*itr) << "; ";
+  for (const auto & itr : m_decayPatterns.value()) {
+    msg(MSG::INFO) << itr << "; ";
   }
   msg(MSG::INFO) << "]" << endmsg;
 
   msg(MSG::INFO) << "Particles to keep: [";
-  for ( std::vector<long>::const_iterator itr = m_particles.value().begin();
-	itr != m_particles.value().end();
-	++itr ) {
-    msg(MSG::INFO) << (*itr) << ", ";
+  for (long itr : m_particles.value()) {
+    msg(MSG::INFO) << itr << ", ";
   }
   msg(MSG::INFO) << "]" << endmsg;
-
-  return;
 }
 
 void McVtxFilterTool::stats() const
@@ -190,15 +184,12 @@ void McVtxFilterTool::stats() const
       << "\t==> [" << m_decayPatterns.value()[i] << "] accepted " 
       << m_counter[i] << " vertices" << endmsg;
   }
-  return;
-}
+  }
 
 bool McVtxFilterTool::isAccepted( HepMC::ConstGenVertexPtr vtx ) const
 {
-  for( DataVector<McVtxFilter>::const_iterator filter = m_filters.begin();
-       filter != m_filters.end();
-       ++filter ) {
-    if ( (*filter)->isAccepted( vtx ) ) {
+  for(const auto *filter : m_filters) {
+    if ( filter->isAccepted( vtx ) ) {
       return true;
     }
   }//> end loop over McVtxFilters
@@ -214,7 +205,7 @@ void
 McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
 					  McEventCollection* filterColl )
 {
-  if ( 0 == mcColl ) {
+  if ( nullptr == mcColl ) {
     ATH_MSG_ERROR("McEventCollection is NULL pointer !!");
     return;
   }
@@ -231,7 +222,7 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
   /// and event number from the GenEvent source
   HepMC::GenEvent * evt = HepMC::copyemptyGenEvent(evtSrc);
 
-  for ( auto itrPart: *evtSrc) {
+  for ( const auto& itrPart: *evtSrc) {
     auto dcyVtx = itrPart->end_vertex();
     if ( dcyVtx ) {
       int vtxBC = HepMC::barcode(dcyVtx);
@@ -295,7 +286,6 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
   TruthHelper::copyBeamParticles (*evtSrc, *evt);
 
   filterColl->push_back(evt);
-  return;
 }
 
 
@@ -303,7 +293,7 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
 /// Const methods: 
 ///////////////////////////////////////////////////////////////////
 
-void McVtxFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, 
+void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx, 
 				 HepMC::GenEvent * evt,
 				 const VtxType::Flag vtxType ) const
 {
@@ -320,7 +310,7 @@ void McVtxFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
   }
   
   /// Fill the parent branch
-  for ( auto parent:  srcVtx->particles_in()) {
+  for ( const auto& parent:  srcVtx->particles_in()) {
     HepMC::GenParticlePtr  mother = HepMC::barcode_to_particle(evt, HepMC::barcode(parent) );
     if ( ! mother ) {
       mother = HepMC::newGenParticlePtr();
@@ -340,7 +330,7 @@ void McVtxFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
   }//> loop over ingoing particles
   
   /// Fill the children branch
-  for ( auto child: srcVtx->particles_out()) {
+  for ( const auto& child: srcVtx->particles_out()) {
     HepMC::GenParticlePtr daughter = HepMC::barcode_to_particle(evt, HepMC::barcode(child) );
     if ( !daughter ) {
       if ( !keepParticle( vtxType, child ) ) {
@@ -447,14 +437,13 @@ void McVtxFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx,
   }//> loop over outgoing particles
 #endif
 
-  return;
-}
+  }
 
 bool McVtxFilterTool::keepParticle( const VtxType::Flag vtxType, 
-				    HepMC::ConstGenParticlePtr part ) const 
+				    const HepMC::ConstGenParticlePtr& part ) const 
 {
   // no particle, so no particle to keep. Simple, isn't ?
-  if ( 0 == part ) {
+  if ( nullptr == part ) {
     return false;
   }
 
@@ -473,14 +462,9 @@ bool McVtxFilterTool::keepParticle( const VtxType::Flag vtxType,
     // we are at a Root vertex.
     // And we only keep the outgoing particles which are in our list
     const int pdgId = part->pdg_id();
-    if ( std::find( m_particles.value().begin(), 
+    return std::find( m_particles.value().begin(), 
 		    m_particles.value().end(), 
-		    pdgId ) == 
-	 m_particles.value().end() ) {
-      return false;
-    } else {
-      return true;
-    }
+		    pdgId ) != m_particles.value().end();
   } else {
     
     // Humm.. we don't know anything about this VtxType...
@@ -563,5 +547,4 @@ void McVtxFilterTool::setupFilters( Gaudi::Details::PropertyBase& /*decayPattern
 				    bool(matchBranches[i]) );
   }
 
-  return;
-}
+  }

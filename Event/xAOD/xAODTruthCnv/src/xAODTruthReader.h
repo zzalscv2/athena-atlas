@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODCREATORALGS_XAODTRUTHREADER_H
@@ -38,8 +38,8 @@ namespace xAODReader {
     std::string m_xaodTruthVertexContainerName;
 
     void printEvent(const xAOD::TruthEventBase*);
-    void printVertex(const xAOD::TruthVertex*);
-    void printParticle(const xAOD::TruthParticle*);
+    static void printVertex(const xAOD::TruthVertex*);
+    static void printParticle(const xAOD::TruthParticle*);
 
   }; // class xAODTruthReader
 

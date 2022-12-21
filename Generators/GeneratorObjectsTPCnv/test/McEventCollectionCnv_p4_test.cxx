@@ -36,9 +36,7 @@ void compareGenParticle(const HepMC::ConstGenParticlePtr& p1,
   assert ((p1->momentum().px()) == (p2->momentum().px()));
   assert ((p1->momentum().py()) == (p2->momentum().py()));
   assert ((p1->momentum().pz()) == (p2->momentum().pz()));
-  assert (float(p1->momentum().m()) == float(p2->momentum().m())); // only persistified with float precision
-  return;
-}
+  assert (float(p1->momentum().m()) == float(p2->momentum().m())); }
 
 
 void compareGenVertex(const HepMC::ConstGenVertexPtr& v1,
@@ -89,8 +87,7 @@ const HepMC::GenVertex::particles_out_const_iterator endOfResetListOfParticlesOu
     ++originalPartOutIter;
   }
 
-  return;
-}
+  }
 
 
 void compare (const HepMC::GenEvent& e1,
@@ -153,8 +150,7 @@ void compare (const HepMC::GenEvent& e1,
     ++resetVertexIter;
   }
 #endif
-  return;
-}
+  }
 
 void compare (const McEventCollection& p1,
               const McEventCollection& p2)
@@ -209,7 +205,7 @@ void populateGenEvent2(HepMC::GenEvent & ge)
 
 void testit (const McEventCollection& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   McEventCollectionCnv_p4 cnv;
   McEventCollection_p4 pers;
   cnv.transToPers (&trans1, &pers, log);

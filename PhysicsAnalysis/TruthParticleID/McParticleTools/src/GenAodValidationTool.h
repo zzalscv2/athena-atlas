@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // GenAodValidationTool.h 
@@ -93,8 +93,8 @@ class GenAodValidationTool : public TruthParticleValidationBaseTool
    *   - check same number of branches
    *   - check same particles (4-mom + id + status)
    */
-  bool compareVtx( HepMC::ConstGenVertexPtr vtx1,
-		   HepMC::ConstGenVertexPtr vtx2 ) const;
+  bool compareVtx( const HepMC::ConstGenVertexPtr& vtx1,
+		   const HepMC::ConstGenVertexPtr& vtx2 ) const;
 
   /** @brief Check that 2 given particles are the same:
    *    - 4-mom 
@@ -103,8 +103,8 @@ class GenAodValidationTool : public TruthParticleValidationBaseTool
    *    - flow
    *    - polarization
    */
-  bool compareParts( HepMC::ConstGenParticlePtr p1,
-		     HepMC::ConstGenParticlePtr p2 ) const;
+  bool compareParts( const HepMC::ConstGenParticlePtr& p1,
+		     const HepMC::ConstGenParticlePtr& p2 ) const;
 
   /** Request pointers to the HepMcWriterTools to be able to write 
    *  out HepMC::GenEvent for further comparison (off-framework)

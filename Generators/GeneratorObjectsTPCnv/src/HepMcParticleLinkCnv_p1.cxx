@@ -43,7 +43,6 @@ void HepMcParticleLinkCnv_p1::persToTrans( const HepMcParticleLink_p1* persObj,
                                           persObj->m_mcEvtIndex,
                                           evColl,
                                           flag) );
-  return;
 }
 
 void HepMcParticleLinkCnv_p1::transToPers( const HepMcParticleLink* transObj,
@@ -68,6 +67,5 @@ void HepMcParticleLinkCnv_p1::transToPers( const HepMcParticleLink* transObj,
   }
   persObj->m_mcEvtIndex = index;
   persObj->m_barcode    = transObj->barcode();
-  return;
 }
 
