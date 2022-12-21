@@ -109,7 +109,4 @@ events = args.maxEvents
 if events<=0:
   events = 10000000000
 cfg.run(maxEvents=events)
-f=open("MaterialMappingITk.pkl","wb")
-cfg.store(f)
-f.close()
 
