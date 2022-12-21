@@ -249,7 +249,7 @@ private:
     double d;
     char   temps[1024] = ""; 
     int    r=0;
-    if ( (r=sscanf(s.c_str(), "%lf%s", &d, temps))==0 || r!=1 || string(temps)!="" ) {
+    if ( (r = std::sscanf(s.c_str(), "%lf%1023s", &d, temps))==0 || r!=1 || string(temps)!="" ) {
       cerr << "ReadCards() error converting string to number : " << s << endl;
       exit(0);
     }
