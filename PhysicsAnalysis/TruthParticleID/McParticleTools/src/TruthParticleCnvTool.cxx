@@ -275,7 +275,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   auto bcmapatt = evt->attribute<HepMC::GenEventBarcodes>("barcodes");
   if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
   std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
-  for (const auto &[k,hepMcPart]: bcmap) {
+  for (const auto &[bc,hepMcPart]: bcmap) {
 #else
   for (auto hepMcPart: *evt) {
 #endif
@@ -292,9 +292,9 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
 
     if ( hepMcPart != mcPart->genParticle() ) {
       ATH_MSG_ERROR("TruthParticle is not wrapping the GenParticle : " 
-		    << HepMC::barcode(hepMcPart) << " !!");
+		    << hepMcPart << " !!");
     }
-    HepMcParticleLink mcLink( HepMC::barcode(hepMcPart), genEventIndex, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION, sg ); // FIXME assuming that we are using the hard-scatter McEventCollection - would need to pass this info as an argument to the convert function.
+    HepMcParticleLink mcLink( bc, genEventIndex, EBC_MAINEVCOLL, HepMcParticleLink::IS_POSITION, sg ); // FIXME assuming that we are using the hard-scatter McEventCollection - would need to pass this info as an argument to the convert function.
     bcToMcPart[ mcLink.compress() ] = mcPart;
 
   }//> end loop over particles
