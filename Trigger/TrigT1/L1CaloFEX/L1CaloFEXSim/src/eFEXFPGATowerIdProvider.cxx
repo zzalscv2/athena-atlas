@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1CaloFEXSim/eFEXFPGATowerIdProvider.h"
@@ -206,24 +206,19 @@ StatusCode LVL1::eFEXFPGATowerIdProvider::loadcsv()
   if (myfile.is_open()) {
     while (std::getline(myfile, eachline)) {
       // ignore text after #
-      eachline = eachline.substr(0, eachline.find("#"));
+      std::string::size_type ipos = eachline.find("#");
+      if (ipos!=std::string::npos) eachline.resize(ipos);
+
       // prevent reading lines with only white spaces
-      eachline = eachline.substr(0, eachline.find("\n"));
-      bool if_emptyline = true;
-      for (char const each_char : eachline) {
-        // ignore lines with non-digit characters
-        if (!isspace(each_char) && !isdigit(each_char) && each_char != ',') {
-          ATH_MSG_INFO("invalid line");
-          break;
-        }
-        // ignore empty lines
-        if (!isspace(each_char)) {
-          if_emptyline = false;
-          //break;
-        }
-      }
-      if (if_emptyline) {
+      if (std::all_of(eachline.begin(), eachline.end(), ::isspace)) {
         continue;
+      }
+
+      // ignore lines with non-digit characters
+      auto validchar = [](char ch) { return (::isspace(ch) || ::isdigit(ch) || ch==','); };
+      if (!std::all_of(eachline.begin(), eachline.end(), validchar)) {
+        ATH_MSG_INFO("invalid line '" << eachline << "'");
+        break;
       }
 
       // split lines in the .csv file by comma
