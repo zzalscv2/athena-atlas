@@ -92,8 +92,7 @@ Trk::InDetPrimaryConversionSelector::selectGenSignal (const McEventCollection* S
         const HepPDT::ParticleData* pd = m_particleDataTable->particle(abs(pdgCode));
 
         if (!pd) { // nuclei excluded, still problems with a given type?
-          ATH_MSG_INFO ("Could not get particle data for particle with pdgCode="<<pdgCode<< ", status=" << particle->status() << ", barcode=" << HepMC::barcode(particle));
-          ATH_MSG_INFO ("GenParticle= " << particle);
+          ATH_MSG_INFO ("Could not get particle data for particle GenParticle= " << particle);
           continue;
         }
 
