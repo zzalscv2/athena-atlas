@@ -21,7 +21,7 @@ namespace Muon {
     by Sarka.Todorova@cern.ch, Marcin.Wolter@cern.ch
   */
 
-class MuonInertMaterialBuilderCond : public MuonInertMaterialBuilderImpl {
+class MuonInertMaterialBuilderCond final : public MuonInertMaterialBuilderImpl {
  public:
   /** Constructor */
   MuonInertMaterialBuilderCond(const std::string&, const std::string&, const IInterface*);
@@ -32,7 +32,7 @@ class MuonInertMaterialBuilderCond : public MuonInertMaterialBuilderImpl {
   virtual StatusCode finalize() override;
 
   /** Method returning cloned and positioned material objects */
-  virtual std::pair<
+  std::pair<
       std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >,
       std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > > >
   buildDetachedTrackingVolumes(const EventContext& ctx, SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,

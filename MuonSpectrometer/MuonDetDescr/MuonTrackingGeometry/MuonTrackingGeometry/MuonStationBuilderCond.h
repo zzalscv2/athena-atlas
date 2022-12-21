@@ -17,7 +17,7 @@ namespace Muon {
     by Sarka.Todorova@cern.ch
   */
 
-class MuonStationBuilderCond
+class MuonStationBuilderCond final
     : public MuonStationBuilderImpl,
       virtual public Trk::IDetachedTrackingVolumeBuilderCond {
  public:

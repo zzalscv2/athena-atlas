@@ -71,8 +71,6 @@ class TrackingGeometry
 
   friend class GeometryBuilderCond;
 
-  // gives ownership over MuonTG constituents
-  friend class Muon::MuonTrackingGeometryBuilderCond;
 
   class constTransformLayerMap
   {
@@ -161,7 +159,19 @@ public:
 
   void dump(MsgStream& out, const std::string& head) const;
 
-private:
+  // get ownership of Muon Tracking Geometry Elements
+  void ownMuonElements(
+      std::unique_ptr<std::vector<
+          std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>&&
+          muonInertMaterialConstituents,
+      std::unique_ptr<
+          const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>&&
+          muonStations,
+      std::unique_ptr<
+          const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>&&
+          muonInertObjs);
+
+ private:
   /** Geometry Builder busineess:
       the geometry builder has to sign*/
   void sign(GeometrySignature geosit, GeometryType geotype = Static);

@@ -18,16 +18,13 @@ StatusCode Muon::MuonInertMaterialBuilderCond::initialize() {
   return Muon::MuonInertMaterialBuilderImpl::initialize();
 }
 
-StatusCode Muon::MuonInertMaterialBuilderCond::finalize() {
-  return Muon::MuonInertMaterialBuilderImpl::finalize();
-}
+StatusCode Muon::MuonInertMaterialBuilderCond::finalize() { return Muon::MuonInertMaterialBuilderImpl::finalize(); }
 
 std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
           std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
 Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventContext& ctx,
                                                                  SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                                                  bool blend) const {
-
   SG::ReadCondHandle<MuonGM::MuonDetectorManager> readHandle{m_muonMgrReadKey, ctx};
   if (!readHandle.isValid() || !(*readHandle)) {
     ATH_MSG_ERROR(m_muonMgrReadKey.fullKey()
@@ -66,8 +63,7 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
       }
       perm = msTypeName.compare(0, 1, "J") != 0 && m_blendLimit > 0 && protMass > m_blendLimit;
     }
-    if (perm)
-      msTypeName += "PERM";
+    if (perm) msTypeName += "PERM";
     //
     const Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
     for (auto combTr : (*msTypeIter).second) {
@@ -81,20 +77,19 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
   }
 
   // clean up prototypes
-  for (auto& it : *msTypes)
-    delete it.first;
+  for (auto& it : *msTypes) delete it.first;
   delete msTypes;
 
   // merge
   std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>> muonObjects = nullptr;
-  if (mInert.first.empty())
-    muonObjects =
-        std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.second));
+  if (mInert.first.empty()){
+    muonObjects = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.second));
+  }
   else {
-    for (unsigned int i = 0; i < mInert.second.size(); i++)
+    for (unsigned int i = 0; i < mInert.second.size(); i++) {
       mInert.first.push_back(std::move(mInert.second[i]));
-    muonObjects =
-        std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.first));
+    }
+    muonObjects = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.first));
   }
 
   ATH_MSG_INFO(name() << " returns  " << (*muonObjects).size() << " objects (detached volumes)");
