@@ -2286,6 +2286,13 @@ namespace top {
     std::string getYear(unsigned int runnumber, const bool isMC);
     
     const std::string& getYear(){return m_year;}
+
+    // helper methods to determine if we are processing proton-lead or lead-proton collisions
+    // these are determined using a HI config flag in AnalysisTop + a run number interval
+    void set_isHIP(unsigned int runNumber);
+    inline bool isHI_pPb() { return m_isHI_pPb; }
+    inline bool isHI_Pbp() { return m_isHI_Pbp; }
+
     void SetYear(const std::string& year){m_year = year;}
 
     void SetTriggersToYear(const bool isMC);
@@ -3161,6 +3168,9 @@ namespace top {
     std::unordered_map<std::string, std::string> m_showerMCMCtranslator;
 
     std::string m_year;
+
+    bool m_isHI_pPb;
+    bool m_isHI_Pbp;
 
     //ReadFloatOption
     float readFloatOption(top::ConfigurationSettings* const& settings, std::string in) const;

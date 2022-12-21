@@ -519,7 +519,9 @@ namespace top {
     m_badBatmanCleaningMin(276262),
     m_badBatmanCleaningMax(311481),
     m_useEventLevelJetCleaningTool(false),
-    m_year("UNKNOWN") {
+    m_year("UNKNOWN"),
+    m_isHI_pPb(false),
+    m_isHI_Pbp(false) {
     m_allSelectionNames = std::shared_ptr<std::vector<std::string > > (new std::vector<std::string> );
 
     m_systHashPhotons = std::shared_ptr<std::unordered_set<std::size_t> > (new std::unordered_set<std::size_t> );
@@ -4077,6 +4079,13 @@ namespace top {
     if (runnumber > 348835 && runnumber < 999999) return "2018";
     
     return "UNKNOWN";
+  }
+
+  void TopConfig::set_isHIP(unsigned int runnumber) {
+    if (runnumber >=  313063 && runnumber <= 313435)
+      m_isHI_pPb = true;
+    else if (runnumber >= 313572 && runnumber <= 314170)
+      m_isHI_Pbp = true;
   }
 
   void TopConfig::SetTriggersToYear(const bool isMC) {
