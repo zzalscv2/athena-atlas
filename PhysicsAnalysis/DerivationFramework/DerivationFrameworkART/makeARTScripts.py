@@ -12,7 +12,8 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "IDTR2",
               "EGAM1","EGAM2","EGAM3","EGAM4","EGAM5","EGAM7","EGAM8","EGAM9","EGAM10",
               "FTAG1","FTAG2",
-              "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22"
+              "BPHY1","BPHY2","BPHY3","BPHY4","BPHY5","BPHY6","BPHY10","BPHY15","BPHY16","BPHY18","BPHY21","BPHY22",
+              "STDM7"
 ]
 
 truthFormatList = ["TRUTH0", "TRUTH1", "TRUTH3"]
@@ -20,7 +21,7 @@ truthFormatList = ["TRUTH0", "TRUTH1", "TRUTH3"]
 trainList = [
               ["EGAM1","EGAM2","EGAM5","EGAM10"],
               ["EGAM3","EGAM4","JETM4"],
-              ["EGAM7","JETM3"],
+              ["EGAM7","JETM3","STDM7"],
               ["EGAM8","EGAM9","JETM1","LLP1"],
               ["JETM6","FTAG2"]
 ]
