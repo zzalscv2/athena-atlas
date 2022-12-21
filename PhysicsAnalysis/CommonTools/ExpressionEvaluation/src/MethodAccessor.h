@@ -29,10 +29,11 @@ namespace ExpressionParsing {
    template <class T_Cont,typename T_src>
    class CollectionMethodHelper {
    public:
-      CollectionMethodHelper(RootUtils::TSMethodCall method_call, const TVirtualCollectionProxy &collection_proxy, const void *data, [[maybe_unused]] unsigned int n_elements)
+      CollectionMethodHelper(const RootUtils::TSMethodCall& method_call, const TVirtualCollectionProxy &collection_proxy, const void *data, [[maybe_unused]] unsigned int n_elements)
          : m_methodCall( method_call),
            m_collectionProxy( collection_proxy.Generate())
       {
+         // cppcheck-suppress assertWithSideEffect
          assert( m_methodCall.call() != nullptr );
          void* data_nc ATLAS_THREAD_SAFE = const_cast<void *>(data);  // required by TVirtualCollectionProxy
          m_collectionProxy->PushProxy(data_nc);
@@ -89,10 +90,11 @@ namespace ExpressionParsing {
    template <class T_Cont,typename T_src>
    class MethodHelper {
    public:
-      MethodHelper(RootUtils::TSMethodCall method_call, const void *data)
+      MethodHelper(const RootUtils::TSMethodCall& method_call, const void *data)
          : m_methodCall( method_call),
            m_data(data)
       {
+         // cppcheck-suppress assertWithSideEffect
          assert( m_methodCall.call() != nullptr );
       }
 

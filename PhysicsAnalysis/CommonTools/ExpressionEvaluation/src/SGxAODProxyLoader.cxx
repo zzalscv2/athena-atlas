@@ -88,7 +88,7 @@ namespace ExpressionParsing {
         }
      }
      RootUtils::TSMethodCall method_call;
-     method_call.setProto (elementClass, method_name.c_str(), "",
+     method_call.setProto (elementClass, method_name, "",
                            ROOT::kConversionMatch);
      if (!method_call.call() || !method_call.call()->IsValid()) {
         std::stringstream msg;

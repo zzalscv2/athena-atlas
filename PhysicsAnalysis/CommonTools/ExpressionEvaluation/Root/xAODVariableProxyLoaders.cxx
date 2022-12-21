@@ -22,7 +22,7 @@ namespace ExpressionParsing {
       if (!cls) return;
     }
 
-    m_methodCall.setProto (cls, methodName.c_str(), "");
+    m_methodCall.setProto (cls, methodName, "");
 
     m_valid = m_methodCall.call() != nullptr;
   }
@@ -103,7 +103,7 @@ namespace ExpressionParsing {
     TClass *elementClass = m_collectionProxy->GetValueClass();
     if (!elementClass) return;
 
-    m_methodCall.setProto (elementClass, methodName.c_str(), "");
+    m_methodCall.setProto (elementClass, methodName, "");
 
     m_valid = m_methodCall.call() != nullptr;
   }
@@ -190,7 +190,7 @@ namespace ExpressionParsing {
 
   xAODProxyLoader::~xAODProxyLoader()
   {
-    reset();
+    xAODProxyLoader::reset();
   }
 
   void xAODProxyLoader::reset()
