@@ -119,8 +119,8 @@ def DigitizationMainContentCfg(flags):
             acc.merge(MergeMuonEntryLayerCfg(flags))
             acc.merge(MergeCalibHitsCfg(flags))
 
-        from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
-        acc.merge(TruthDigitizationOutputCfg(flags))
+    from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+    acc.merge(TruthDigitizationOutputCfg(flags))
 
     # Beam spot reweighting
     if flags.Common.ProductionStep != ProductionStep.PileUpPresampling and flags.Digitization.InputBeamSigmaZ > 0:

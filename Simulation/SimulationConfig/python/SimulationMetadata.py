@@ -30,7 +30,7 @@ def fillAtlasMetadata(ConfigFlags, dbFiller):
     #---------
     ## Simulated detector flags: add each enabled detector to the simulatedDetectors list
     from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
-    simDets = getEnabledDetectors(ConfigFlags)
+    simDets = ['Truth'] + getEnabledDetectors(ConfigFlags)
     simMDlog.info("Setting 'SimulatedDetectors' = %r", simDets)
     dbFiller.addSimParam('SimulatedDetectors', repr(simDets))
 
