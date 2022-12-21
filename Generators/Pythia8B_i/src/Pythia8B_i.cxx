@@ -17,6 +17,9 @@
 #include "AtlasHepMC/GenEvent.h"
 #include <boost/algorithm/string.hpp>
 
+// calls to fortran routines
+#include "AthenaKernel/RNGWrapper.h"
+
 // Pointer to random engine
 CLHEP::HepRandomEngine*  Pythia8B_i::p_rndmEngine = nullptr;
 
@@ -110,7 +113,8 @@ StatusCode Pythia8B_i::genInitialize() {
     if(m_userString == "NONE") m_userString.clear();
     // Call the base class genInitialize()
     CHECK(Pythia8_i::genInitialize());
-    
+
+  ATH_MSG_DEBUG("... seeding Athena random number generator");
     if (m_useRndmGenSvc){
       p_rndmEngine = m_atlasRndmEngine->getEngine(); // NOT THREAD-SAFE
       if (!p_rndmEngine) {
@@ -158,15 +162,18 @@ StatusCode Pythia8B_i::callGenerator(){
         ATH_MSG_DEBUG("BEventBuffer not empty; skipping callGenerator");
         return StatusCode::SUCCESS;
     }
-    
-    if(useRndmGenSvc() && Pythia8B_i::p_rndmEngine){
-        // Save the random number seeds in the event
-        const long* s =  Pythia8B_i::p_rndmEngine->getSeeds();
-        m_seeds.clear();
-        m_seeds.push_back(s[0]);
-        m_seeds.push_back(s[1]);
-    }
-    
+
+   if(m_useRndmGenSvc && Pythia8B_i::p_rndmEngine){
+       //Re-seed the random number stream
+       long seeds[7];
+       const EventContext& ctx = Gaudi::Hive::currentContext();
+       ATHRNG::calculateSeedsMC21(seeds, "PYTHIA8B",  ctx.eventID().event_number(), m_dsid, m_randomSeed);
+       m_atlasRndmEngine->getEngine()->setSeeds(seeds, 0); // NOT THREAD-SAFE
+       m_seeds.clear();
+       m_seeds.push_back(seeds[0]);
+       m_seeds.push_back(seeds[1]);
+  }   
+
     // Generator. Shorthand for event.
     Pythia8::Event& event = Pythia8_i::m_pythia->event;
     
