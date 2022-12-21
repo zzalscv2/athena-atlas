@@ -29,9 +29,6 @@ class TrackingGeometry;
 class TrackingVolume;
 class Layer;
 
-/** Interface ID for IGeometryBuilderConds*/
-static const InterfaceID IID_IGeometryBuilderCond("IGeometryBuilderCond", 1, 0);
-
 /** @class IGeometryBuilderCond
 
   Interface class IGeometryBuilderCond,
@@ -48,11 +45,11 @@ class IGeometryBuilderCond : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(IGeometryBuilderCond, 1, 0);
+
   /**Virtual destructor*/
   virtual ~IGeometryBuilderCond() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_IGeometryBuilderCond; }
 
   /** TrackingGeometry Interface methode -
    *   - Event context

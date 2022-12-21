@@ -2,10 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// ILayerBuilder.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef TRKDETDESCRINTERFACES_ILAYERBUILDER_H
 #define TRKDETDESCRINTERFACES_ILAYERBUILDER_H
 
@@ -23,9 +19,6 @@ class DiscLayer;
 class PlaneLayer;
 class Layer;
 
-/** Interface ID for ILayerBuilders*/
-static const InterfaceID IID_ILayerBuilder("ILayerBuilder", 1, 0);
-
 /** @class ILayerBuilder
   Interface class ILayerBuilders
   It inherits from IAlgTool. The actual implementation of the AlgTool depends on
@@ -37,11 +30,11 @@ class ILayerBuilder : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ILayerBuilder, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ILayerBuilder() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ILayerBuilder; }
 
   /** LayerBuilder interface method - returning Barrel-like layers */
   virtual const std::vector<CylinderLayer*>* cylindricalLayers() const = 0;

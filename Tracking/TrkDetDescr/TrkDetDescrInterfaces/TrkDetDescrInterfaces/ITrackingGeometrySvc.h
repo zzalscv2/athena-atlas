@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,9 +14,6 @@
 #include "GaudiKernel/StatusCode.h"
 
 
-/** Declaration of the interface ID ( interface id, major version, minor version) */
-static const InterfaceID IID_ITrackingGeometrySvc(2211, 1 , 0);
-
 /** @class ITrackingGeometrySvc 
 
     The interface implemented by the TrackingGeometrySvc.
@@ -30,8 +27,8 @@ namespace Trk {
   class ITrackingGeometrySvc : virtual public IInterface {
    
    public:
-    //!< Retrieve interface ID
-    static const InterfaceID& interfaceID() { return IID_ITrackingGeometrySvc; }
+  /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(ITrackingGeometrySvc, 1, 0);
 
     /** Provide the TrackingGeometry */
     virtual const Trk::TrackingGeometry* trackingGeometry() const = 0;

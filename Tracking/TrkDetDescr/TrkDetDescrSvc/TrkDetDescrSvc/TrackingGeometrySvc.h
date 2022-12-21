@@ -43,24 +43,12 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch */
      
   class ATLAS_NOT_THREAD_SAFE TrackingGeometrySvc :
-      public AthService,
-      virtual public ITrackingGeometrySvc,
-      virtual public ITagInfoMgr::Listener
+    public extends <AthService, ITrackingGeometrySvc>, virtual public ITagInfoMgr::Listener
   {
     public:
   
-      //!< Retrieve interface ID
-      static const InterfaceID& interfaceID() { return IID_ITrackingGeometrySvc; }
-  
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
-  
-      /** Query the interfaces.
-      /   Input: riid, Requested interface ID
-      /          ppvInterface, Pointer to requested interface
-      /   Return: StatusCode indicating SUCCESS or FAILURE.
-      / N.B. Don't forget to release the interface after use!!! **/
-      virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
   
       // TagInfoMgr callback
       virtual void tagInfoUpdated() override final;

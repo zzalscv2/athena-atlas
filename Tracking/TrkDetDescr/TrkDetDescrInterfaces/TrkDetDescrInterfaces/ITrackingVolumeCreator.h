@@ -28,11 +28,6 @@ class VolumeBounds;
 class Material;
 class MagneticFieldProperties;
 
-/** Interface ID for ITrackingVolumeCreators*/
-static const InterfaceID IID_ITrackingVolumeCreator("ITrackingVolumeCreator",
-                                                    1,
-                                                    0);
-
 /** @class ITrackingVolumeCreator
 
   Interface class ITrackingVolumeCreators
@@ -46,11 +41,11 @@ class ITrackingVolumeCreator : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ITrackingVolumeCreator, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ITrackingVolumeCreator() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ITrackingVolumeCreator; }
 
   /** create a TrackingVolume* from a set of layers and (optional) parameters
 

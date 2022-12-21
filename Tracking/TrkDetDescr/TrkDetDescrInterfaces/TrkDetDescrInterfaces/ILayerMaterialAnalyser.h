@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -24,9 +24,6 @@ namespace Trk {
   
   typedef std::vector< std::vector < const MaterialProperties* > > MaterialPropertiesMatrix;
   
-  /** Interface ID for ILayerMaterialAnalysers*/  
-  static const InterfaceID IID_ILayerMaterialAnalyser("ILayerMaterialAnalyser", 1, 0);
-  
   /** @class ILayerMaterialAnalyser
     
     Interface class for LayerMaterial analysis 
@@ -36,11 +33,11 @@ namespace Trk {
   class ILayerMaterialAnalyser : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(ILayerMaterialAnalyser, 1, 0);
+
       /**Virtual destructor*/
       virtual ~ILayerMaterialAnalyser(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_ILayerMaterialAnalyser; }
 
       /** process the layer  - after material creation and loading */
       virtual StatusCode analyseLayerMaterial(const Layer& lay) const = 0;

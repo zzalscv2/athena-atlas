@@ -36,30 +36,18 @@ namespace Trk {
    
       @author Andreas.Salzburger@cern.ch, Edward.Moyse@cern.ch
    */
-  class TrackingVolumesSvc : public AthService, virtual public ITrackingVolumesSvc {
+  class TrackingVolumesSvc : public extends<AthService, ITrackingVolumesSvc> {
   
     public:
   
-      //!< Retrieve interface ID
-      static const InterfaceID& interfaceID() { return IID_ITrackingVolumesSvc; }
-  
       virtual StatusCode initialize() override;
       virtual StatusCode finalize() override;
-  
-      /** Query the interfaces.
-      /   Input: riid, Requested interface ID
-      /          ppvInterface, Pointer to requested interface
-      /   Return: StatusCode indicating SUCCESS or FAILURE.
-      / N.B. Don't forget to release the interface after use!!! **/
-      virtual StatusCode queryInterface( const InterfaceID& riid, void** ppvInterface ) override;
   
       /** @copydoc ITrackingVolumesSvc::volume() */
       virtual const Trk::Volume& volume(const TrackingVolumeIdentifier& volumeId) const override;
   
       /** @copydoc ITrackingVolumesSvc::volumeName() */
       virtual const std::string& volumeName(const TrackingVolumeIdentifier& volumeId) const override;
-  
-      friend class SvcFactory<TrackingVolumesSvc>;
   
       /** Standard Constructor */
       TrackingVolumesSvc(const std::string& name, ISvcLocator* svc);

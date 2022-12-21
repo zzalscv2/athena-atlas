@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,9 +22,6 @@ namespace Trk {
   class Surface;
   class IPropagator;
 
-  /** Interface ID for IDynamicLayerCreator*/  
-  static const InterfaceID IID_IDynamicLayerCreator("IDynamicLayerCreator", 1, 0);
-  
   /** @class IDynamicLayerCreator
     Interface class IDynamicLayerCreator
     It inherits from IAlgTool. The actual implementation of the AlgTool depends on the SubDetector,
@@ -37,11 +34,11 @@ namespace Trk {
   class IDynamicLayerCreator : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IDynamicLayerCreator, 1, 0);
+
       /**Virtual destructor*/
       virtual ~IDynamicLayerCreator(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_IDynamicLayerCreator; }
 
       /** DynamicLayerCreator interface method
           Input parameters are:

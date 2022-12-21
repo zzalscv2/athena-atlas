@@ -57,9 +57,6 @@ namespace Trk {
         /** Destructor */
         virtual ~LayerArrayCreator();
 
-        /** AlgTool and IAlgTool interface methods */
-        static const InterfaceID& interfaceID() { return IID_ILayerArrayCreator; }
-
         /** LayerArrayCreator interface method - for Barrel-like layers */
         LayerArray* cylinderLayerArray(const std::vector<CylinderLayer* >& layers,
                                        double rmin,

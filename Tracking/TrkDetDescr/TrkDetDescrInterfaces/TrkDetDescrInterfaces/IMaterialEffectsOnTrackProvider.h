@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -27,9 +27,6 @@ namespace Trk {
   class IPropagator;
   class TrackingVolume;
 
-  /** Interface ID for IDynamicLayerCreator*/  
-  static const InterfaceID IID_IMaterialEffectsOnTrackProvider("IMaterialEffectsOnTrackProvider", 1, 0);
-  
   /** @class IMaterialEffectsOnTrackProvider
     Interface class IMaterialEffectsOnTrackProvider
     It inherits from IAlgTool. The actual implementation of the AlgTool depends on the SubDetector,
@@ -42,11 +39,11 @@ namespace Trk {
   class IMaterialEffectsOnTrackProvider : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IMaterialEffectsOnTrackProvider, 1, 0);
+
       /**Virtual destructor*/
       virtual ~IMaterialEffectsOnTrackProvider(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_IMaterialEffectsOnTrackProvider; }
 
       /** Interface method for MaterialEffectsOnTrack updates.
 	  The provider creates surfaces inside the volume given
