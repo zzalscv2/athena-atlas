@@ -102,7 +102,7 @@ void Analysis_Missed::execute(const std::vector<TIDA::Track*>& referenceTracks,
   // Loop over test tracks
   std::vector<TIDA::Track*>::const_iterator test2, test2End=testTracks.end();
   std::vector<TIDA::Track*>::const_iterator ref,   refEnd=referenceTracks.end();
-  for(test=testTracks.begin(); test!=testEnd; test++) {
+  for(test=testTracks.begin(); test!=testEnd; ++test) {
     
     // Check pT
     if(fabs((*test)->pT())<2000) continue;

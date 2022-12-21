@@ -946,7 +946,7 @@ void ConfAnalysis::finalise() {
 
   std::map<std::string, TH1F*>::iterator hitr=m_histos.begin();
   std::map<std::string, TH1F*>::iterator hend=m_histos.end();
-  for ( ; hitr!=hend ; hitr++ ) hitr->second->Write();     
+  for ( ; hitr!=hend ; ++hitr ) hitr->second->Write();     
   //  std::cout << "DBG >" << eff_pt->Hist()->GetName() << "< DBG" << std::endl;
 
   //  std::vector<Efficiency*> heff = { eff_pt,

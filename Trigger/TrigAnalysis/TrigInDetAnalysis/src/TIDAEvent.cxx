@@ -45,7 +45,7 @@ void TIDA::Event::erase( const std::string& name ) {
 
   while ( _itr!=_chains.end() ) { 
     if ( _itr->name()!=name ) m_chains.push_back( *_itr );
-    _itr++;
+    ++_itr;
   }
 
 } 

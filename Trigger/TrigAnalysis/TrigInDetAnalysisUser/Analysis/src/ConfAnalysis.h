@@ -67,7 +67,7 @@ public:
     //2D histograms
     std::map<std::string, TH2F*>::iterator hitr2D=m_histos2D.begin();                                                                                           
     std::map<std::string, TH2F*>::iterator hend2D=m_histos2D.end();
-    for ( ; hitr2D!=hend2D ; hitr2D++ ) delete hitr2D->second;     
+    for ( ; hitr2D!=hend2D ; ++hitr2D ) delete hitr2D->second;     
     // tag and probe object
     if ( m_TnP_tool ) delete m_TnP_tool;
   }  

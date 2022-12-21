@@ -463,7 +463,7 @@ void TrigTrackSelector::selectTracks( const xAOD::TruthParticleContainer* trutht
   truthBeamline( truthtracks, x0, y0 );
 
 
-  for ( ; trackitr!=trackend; trackitr++) {
+  for ( ; trackitr!=trackend; ++trackitr) {
 
 
     // Only select charged final state particles

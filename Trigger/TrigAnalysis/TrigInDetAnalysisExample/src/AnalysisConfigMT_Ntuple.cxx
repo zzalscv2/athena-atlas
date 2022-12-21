@@ -120,7 +120,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		     
 		  }
 		  
-		  chainitr++;
+		  ++chainitr;
 		}
 		
 		m_chainNames = chainNames;
