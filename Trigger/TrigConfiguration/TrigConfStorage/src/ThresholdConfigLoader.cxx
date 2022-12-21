@@ -161,7 +161,7 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
       coral::ICursor& cursor = query->execute();
 
       unsigned int schema_version = triggerDBSchemaVersion();
-      unsigned int numberofvalues = 0;
+      //unsigned int numberofvalues = 0;
       TriggerThreshold*       tt = 0;
       int nRowsLoop1 = -2009;
       int nRowsLoop2 = -2010;
@@ -177,10 +177,10 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
                // trigger thresholds sorted by type
                thrConfig.addTriggerThreshold(tt);
                tt = new TriggerThreshold();
-               numberofvalues = 0;
+               //numberofvalues = 0;
             } else {
                tt = new TriggerThreshold();
-               numberofvalues = 0;
+               //numberofvalues = 0;
             }
 
             //==================================================
@@ -281,7 +281,7 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
             ttv->setEtaMax(row["TTV.L1TTV_ETA_MAX"].data<int>());
             ttv->setWindow(row["TTV.L1TTV_WINDOW"].data<int>());
             tt->addThresholdValue(ttv);
-            ++numberofvalues;
+            //++numberofvalues;
             TRG_MSG_DEBUG("ThresholdConfigLoader loading thresholdvalue with ID = " << ttv->id() << ":  " << ttv->name());
          }
 
@@ -346,7 +346,7 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
 
       coral::ICursor& cursor1 = query1->execute();
 
-      numberofvalues = 0;
+      //numberofvalues = 0;
       tt = 0;
       nRowsLoop1 = -2009;
       nRowsLoop2 = -2010;
@@ -365,10 +365,10 @@ bool TrigConf::ThresholdConfigLoader::load( ThresholdConfig& thrConfig ) {
                // trigger thresholds sorted by type
                thrConfig.addTriggerThreshold(tt);
                tt = new TriggerThreshold();
-               numberofvalues = 0;
+               //numberofvalues = 0;
             } else {
                tt = new TriggerThreshold();
-               numberofvalues = 0;
+               //numberofvalues = 0;
             }
 
             //==================================================
