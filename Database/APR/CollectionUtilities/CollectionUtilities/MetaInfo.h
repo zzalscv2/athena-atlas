@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef UTILITIES_COLLECTION_METAINFO
@@ -72,7 +72,7 @@ namespace pool
   
   protected:
      /// checks if this metadata item should be copied
-     bool       shouldCopy( std::string key );
+     bool       shouldCopy( const std::string& key );
      
      /// do not copy source metadata
      bool      	m_noMetadata;

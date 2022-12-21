@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_PERSISTENCYSVC_ITECHNOLOGYSPECIFICATTRIBUTES_H
@@ -35,7 +35,7 @@ namespace pool {
 
     /// Templated method to retrieve an attribute
     template< class T > T attribute( const std::string& attributeName,
-                                     std::string option = "" ) {
+                                     const std::string& option = "" ) {
       T data;
       const std::type_info& typeInfo = typeid(T);
       if ( ! this->attributeOfType( attributeName,

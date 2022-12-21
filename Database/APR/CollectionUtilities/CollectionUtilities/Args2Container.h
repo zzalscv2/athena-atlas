@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef UTILITIES_COLLECTION_ARGS2CONTAINER
@@ -92,7 +92,7 @@ namespace pool
   private:
 
      // input xml methods   
-     std::vector<std::string> fillCmdLineArgsFromXML(std::string file);
+     std::vector<std::string> fillCmdLineArgsFromXML(const std::string& file);
 
      // output xml methods
      void writeXMLContent(std::vector<std::string>& argv);

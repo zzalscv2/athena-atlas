@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <xercesc/dom/DOM.hpp>
@@ -608,7 +608,7 @@ void Args2Container::writeXMLContent(std::vector<std::string>& argv)
 //   DTD is implicit in code, but not checked explicitly.
 //
 //------------------------------------------------------------------------------
-std::vector<std::string> Args2Container::fillCmdLineArgsFromXML(std::string file)
+std::vector<std::string> Args2Container::fillCmdLineArgsFromXML(const std::string& file)
 {
    std::vector<std::string> args;
    args.push_back(m_name);
