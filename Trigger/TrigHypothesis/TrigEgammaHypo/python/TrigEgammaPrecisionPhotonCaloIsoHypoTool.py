@@ -6,11 +6,12 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags
 #
 # photon hypo alg
 #
-def createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name, sequenceOut):
+def createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name, sequenceOut, sequenceIn):
 
   from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaPrecisionPhotonCaloIsoHypoAlg
   thePrecisionPhotonCaloIsoHypo = TrigEgammaPrecisionPhotonCaloIsoHypoAlg(name)
-  thePrecisionPhotonCaloIsoHypo.Photons = sequenceOut
+  thePrecisionPhotonCaloIsoHypo.Photons = sequenceIn       # Key of the input photon container
+  thePrecisionPhotonCaloIsoHypo.IsoPhotons = sequenceOut   # key of the output isolated photon container
   return thePrecisionPhotonCaloIsoHypo
 
 

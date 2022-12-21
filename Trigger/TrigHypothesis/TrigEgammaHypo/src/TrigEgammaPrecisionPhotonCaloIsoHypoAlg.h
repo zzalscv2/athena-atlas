@@ -8,6 +8,7 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODEgamma/PhotonContainer.h"
+#include "xAODEgamma/PhotonAuxContainer.h"
 #include "xAODEgamma/Photon.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 #include "DecisionHandling/HypoBase.h"
@@ -29,10 +30,11 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoAlg : public ::HypoBase {
   private: 
 
     ToolHandleArray< ITrigEgammaPrecisionPhotonCaloIsoHypoTool > m_hypoTools { this, "HypoTools", {}, "Hypo tools" }; 
-    SG::ReadHandleKey< xAOD::PhotonContainer > m_photonsKey { this, "Photons", "Photons", "Photons in roi" };  
-  
+    SG::ReadHandleKey< xAOD::PhotonContainer > m_photonsKey { this, "Photons", "", "Photons in roi" };  
+    SG::WriteHandleKey< xAOD::PhotonContainer > m_IsophotonsKey { this, "IsoPhotons", "", "Output isolated photon container" };
+
     //Gaudi::Property<std::vector<std::string>> m_isemNames {this, "IsEMNames", {}, "IsEM pid names."};
-	// Should I add here the isolation tool and run it as in Egamma reconstruction?
+    // Should I add here the isolation tool and run it as in Egamma reconstruction?
 
 }; 
 

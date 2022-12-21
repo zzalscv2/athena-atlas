@@ -21,7 +21,9 @@ StatusCode TrigEgammaPrecisionPhotonCaloIsoHypoAlg::initialize()
   ATH_MSG_DEBUG ( "Initializing " << name() << "..." );
   ATH_CHECK( m_hypoTools.retrieve() );
   ATH_CHECK( m_photonsKey.initialize() );
+  ATH_CHECK( m_IsophotonsKey.initialize() );
   renounce( m_photonsKey );// photons are made in views, so they are not in the EvtStore: hide them
+  renounce( m_IsophotonsKey );// photons are made in views, so they are not in the EvtStore: hide them
 
   return StatusCode::SUCCESS;
 }
@@ -34,6 +36,12 @@ StatusCode TrigEgammaPrecisionPhotonCaloIsoHypoAlg::execute( const EventContext&
   ATH_CHECK( previousDecisionsHandle.isValid() );  
   ATH_MSG_DEBUG( "Running with "<< previousDecisionsHandle->size() <<" previous decisions");
 
+
+  // create handles for isolated photons
+  SG::WriteHandle<xAOD::PhotonContainer> h_isoPhotons = SG::makeHandle(m_IsophotonsKey, context);
+  //make the output photon container
+  ATH_CHECK(h_isoPhotons.record(std::make_unique<xAOD::PhotonContainer>(),
+                              std::make_unique<xAOD::PhotonAuxContainer>()));
 
   // new decisions
 
@@ -74,11 +82,19 @@ StatusCode TrigEgammaPrecisionPhotonCaloIsoHypoAlg::execute( const EventContext&
         ATH_CHECK(ph.isValid());
 
         ATH_MSG_DEBUG ( "PhotonHandle in position " << cl << " processing...");
+        ATH_MSG_DEBUG ( "Copying xAOD photon to new isolated container " << m_IsophotonsKey << " to run isolation tool decoration later...");
+        // Copy the photon in non-iso container to the To-Be-Isolation-Evaluated IsoPhoton container
+        xAOD::Photon *isoPhoton = new xAOD::Photon();
+        h_isoPhotons->push_back(isoPhoton);
+        const xAOD::Photon *originalPhoton = *ph;
+        *isoPhoton = *originalPhoton; // Deep copy
+
         auto d = TCU::newDecisionIn( decisions, TCU::hypoAlgNodeName() );
-        d->setObjectLink( TCU::featureString(),  ph );
+        d->setObjectLink( TCU::featureString(), ElementLink<xAOD::PhotonContainer>(*h_isoPhotons, isoPhoton->index(), context) );
         TrigCompositeUtils::linkToPrevious( d, decisionInput().key(), counter );
 
-        ITrigEgammaPrecisionPhotonCaloIsoHypoTool::PhotonInfo info(d, roi, photonHandle.cptr()->at(cl), previousDecision);
+        ITrigEgammaPrecisionPhotonCaloIsoHypoTool::PhotonInfo info(d, roi, isoPhoton, previousDecision);
+
 
         toolInput.push_back(info);
         validphotons++;

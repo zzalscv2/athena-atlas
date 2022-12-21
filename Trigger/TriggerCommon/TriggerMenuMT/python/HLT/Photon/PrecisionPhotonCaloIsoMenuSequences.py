@@ -51,9 +51,14 @@ def precisionPhotonCaloIsoMenuSequence(flags, name,ion=False):
     """Creates precisionPhotonCaloIso  sequence"""
     (sequence, precisionPhotonCaloIsoViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionPhotonCaloIsoSequence,ConfigFlags,ion=ion)
 
+    from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
+    TrigEgammaKeys = getTrigEgammaKeys()
+
     # Hypo 
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonCaloIsoHypoTool import createTrigEgammaPrecisionPhotonCaloIsoHypoAlg
-    thePrecisionPhotonCaloIsoHypo = createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name+ tag(ion) +"Hypo", sequenceOut)
+    thePrecisionPhotonCaloIsoHypo = createTrigEgammaPrecisionPhotonCaloIsoHypoAlg(name+ tag(ion) +"Hypo", sequenceOut, TrigEgammaKeys.precisionPhotonContainer )
+
+
     
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonCaloIsoHypoTool import TrigEgammaPrecisionPhotonCaloIsoHypoToolFromDict
 
