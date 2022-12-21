@@ -37,8 +37,8 @@ namespace Trk {
       /** AlgTool and IAlgTool interface methods */
       static const InterfaceID& interfaceID() { return IID_IDetachedTrackingVolumeBuilder; }
 
-      virtual std::vector<DetachedTrackingVolume*>* buildDetachedTrackingVolumes(bool blend=false) = 0 ;
-    
+      virtual std::unique_ptr<std::vector<std::unique_ptr<DetachedTrackingVolume> > >
+      buildDetachedTrackingVolumes(bool blend = false) const = 0;
   };
 
 } // end of namespace

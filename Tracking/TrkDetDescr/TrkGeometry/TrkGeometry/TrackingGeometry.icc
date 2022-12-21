@@ -101,4 +101,18 @@ TrackingGeometry::closestMaterialLayer(const T& pars,
                          nullptr);
 }
 
+inline void TrackingGeometry::ownMuonElements(
+    std::unique_ptr<std::vector<
+        std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>&&
+        muonInertMaterialConstituents,
+    std::unique_ptr<
+        const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>&&
+        muonStations,
+    std::unique_ptr<
+        const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>&&
+        muonInertObjs) {
+  m_muonInertMaterialConstituents = std::move(muonInertMaterialConstituents);
+  m_muonStations = std::move(muonStations);
+  m_muonInertObjs = std::move(muonInertObjs);
 }
+}  // namespace Trk

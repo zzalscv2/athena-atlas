@@ -19,25 +19,12 @@ StatusCode Muon::MuonStationBuilder::initialize() {
   return Muon::MuonStationBuilderImpl::initialize();
 }
 
-std::vector<Trk::DetachedTrackingVolume*>*
-Muon::MuonStationBuilder::buildDetachedTrackingVolumes(bool blend) {
+std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
+Muon::MuonStationBuilder::buildDetachedTrackingVolumes(bool blend) const{
   if (!m_muonMgr) {
     ATH_MSG_FATAL("No muon manager is provided");
     return nullptr;
   }
 
-  std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
-      tmpRes = Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(
-          m_muonMgr, blend);
-
-  // For the "old" interface we need to return plain ptr.
-  // pass ownership.
-  // This we should prb change as we consolidate more
-  // and more
-  auto toPtr = std::make_unique<std::vector<Trk::DetachedTrackingVolume*>>();
-  toPtr->reserve(tmpRes->size());
-  for (auto& uniqPtr : *tmpRes) {
-    toPtr->push_back(uniqPtr.release());
-  }
-  return toPtr.release();
+  return Muon::MuonStationBuilderImpl::buildDetachedTrackingVolumesImpl(m_muonMgr, blend);
 }

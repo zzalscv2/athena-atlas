@@ -5,25 +5,26 @@
 // constructor
 Muon::MuonInertMaterialBuilder::MuonInertMaterialBuilder(const std::string& t, const std::string& n,
                                                          const IInterface* p)
-    : Muon::MuonInertMaterialBuilderImpl(t, n, p) {
-  declareInterface<Trk::IDetachedTrackingVolumeBuilder>(this);
-}
+    : Muon::MuonInertMaterialBuilderImpl(t, n, p) {}
 
 StatusCode Muon::MuonInertMaterialBuilder::initialize() {
   StatusCode sc = detStore()->retrieve(m_muonMgr);
   sc = Muon::MuonInertMaterialBuilderImpl::initialize();
   return sc;
 }
-StatusCode Muon::MuonInertMaterialBuilder::finalize() {
-  return Muon::MuonInertMaterialBuilderImpl::finalize();
-}
+StatusCode Muon::MuonInertMaterialBuilder::finalize() { return Muon::MuonInertMaterialBuilderImpl::finalize(); }
 
-std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumes(bool blend) {
+std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
+          std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
+Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumes(bool blend) const {
   // split output into objects to be kept and objects which may be released from memory (blended)
-  std::pair<std::vector<Trk::DetachedTrackingVolume*>, std::vector<Trk::DetachedTrackingVolume*>> mInert;
+  //
+  std::pair<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>,
+            std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
+      mInert;
 
   // retrieve muon station prototypes from GeoModel
-  auto [msTypes, constituentsVector]  = buildDetachedTrackingVolumeTypes(m_muonMgr, blend);
+  auto [msTypes, constituentsVector] = buildDetachedTrackingVolumeTypes(m_muonMgr, blend);
   ATH_MSG_INFO(name() << " obtained " << msTypes->size() << " prototypes");
   std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>::const_iterator msTypeIter =
       msTypes->begin();
@@ -45,11 +46,11 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBuilder::build
     //
     Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
     for (auto combTr : (*msTypeIter).second) {
-      Trk::DetachedTrackingVolume* newStat = msTV->clone(msTypeName, combTr);
+      std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msTV->clone(msTypeName, combTr)};
       if (perm) {
-        mInert.first.push_back(newStat);
+        mInert.first.push_back(std::move(newStat));
       } else {
-        mInert.second.push_back(newStat);
+        mInert.second.push_back(std::move(newStat));
       }
     }
   }
@@ -61,17 +62,19 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBuilder::build
   delete msTypes;
 
   // merge
-  std::vector<Trk::DetachedTrackingVolume*>* muonObjects = nullptr;
-  if (mInert.first.empty())
-    muonObjects = new std::vector<Trk::DetachedTrackingVolume*>(mInert.second);
+  std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>> muonObjects = nullptr;
+  if (mInert.first.empty()){
+    muonObjects = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.second));
+  }
   else {
-    for (unsigned int i = 0; i < mInert.second.size(); i++)
-      mInert.first.push_back(mInert.second[i]);
-    muonObjects = new std::vector<Trk::DetachedTrackingVolume*>(mInert.first);
+    for (unsigned int i = 0; i < mInert.second.size(); i++) {
+      mInert.first.push_back(std::move(mInert.second[i]));
+    }
+    muonObjects = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.first));
   }
 
   ATH_MSG_INFO(name() << " returns  " << (*muonObjects).size() << " objects (detached volumes)");
 
-  return muonObjects;
+  return {std::move(muonObjects), std::move(constituentsVector)};
 }
 
