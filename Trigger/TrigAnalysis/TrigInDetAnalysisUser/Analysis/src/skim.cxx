@@ -278,7 +278,7 @@ int main(int argc, char** argv) {
 	
 	double eventsps = 1000*i/t;
 
-	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%d at %5.2lf ps) ", 
+	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%u at %5.2lf ps) ", 
 		     cck[ii%4], ((1000*(i+1)/entries)*0.1), t*0.001, est*0.001, i, eventsps );   
 
 	std::fflush(stdout);
