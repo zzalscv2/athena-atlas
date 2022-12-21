@@ -343,7 +343,7 @@ int main(int argc, char** argv) {
 	for ( size_t ic=0 ; ic<chainnames.size() ; ic++ ) {
 	  
 	  bool matched = false;
-	  for ( std::set<std::string>::iterator it=require_chains.begin() ; it!=require_chains.end() ; it++ ) { 
+	  for ( std::set<std::string>::iterator it=require_chains.begin() ; it!=require_chains.end() ; ++it ) { 
 
 	    matched |= std::regex_match( chainnames[ic], std::regex(*it+".*") );
 

@@ -2116,7 +2116,7 @@ int main(int argc, char** argv)
                 const TrackTrigObject* tobj = tom.object( (*itr)->id() );
 
                 if ( tobj==0 || tobj->pt()<ETconfig ) refp_vec.erase( itr );
-                else itr++;
+                else ++itr;
               }
             }
           }

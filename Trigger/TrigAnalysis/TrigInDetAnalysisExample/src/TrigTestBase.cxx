@@ -295,7 +295,7 @@ StatusCode TrigTestBase::book(bool newEventsBlock, bool newLumiBlock, bool newRu
 	  if ( chainName.head().find("HLT_")==std::string::npos && 
 	       chainName.head().find("EF_")==std::string::npos  && 
 	       chainName.head().find("L2_")==std::string::npos ) { 
-	    chainitr++;
+	    ++chainitr;
 	    continue;
 	  }
 	  

@@ -150,7 +150,7 @@ size_t AnalysisConfig_Ntuple::get_jets( Trig::FeatureContainer::combination_cons
 
     xAOD::JetContainer::const_iterator jitr = jets->begin();
 
-    for ( int j=0 ; jitr!=jets->end() ; jitr++, j++ ) { 
+    for ( int j=0 ; jitr!=jets->end() ; ++jitr, j++ ) { 
       
       const xAOD::Jet* ajet = (*jitr);
 
@@ -1250,7 +1250,7 @@ void AnalysisConfig_Ntuple::loop() {
 		        m_provider->msg(MSG::INFO) << "Chain " << chainName << "\tcombination " << icomb << endmsg;
 			//		std::cout << "Chain " << chainName << "\tcombination " << icomb << std::endl;
 
-		        icomb++;
+		        ++icomb;
 		  
 
 			//   now add rois to this ntuple chain
