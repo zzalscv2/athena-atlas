@@ -105,10 +105,10 @@ commonHistoSpecs = [
                 ] ),
 
     # another selection : only very high pT jets
-    SelectSpec( 'highptrange2TeVto8TeV','2000<pt<8000',path='highptrange2TeVto8TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
-    SelectSpec( 'highptrange1TeVto2TeV','1000<pt<2000',path='highptrange1TeVto2TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
-    SelectSpec( 'highptrange500GeVto1TeV','500<pt<1000',path='highptrange500GeVto1TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
-    SelectSpec( 'highptrange200GeVto500GeV','200<pt<500',path='highptrange200GeVto500GeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
+    SelectSpec( 'highptrange2TeVto8TeV','2000<pt:GeV<8000',path='highptrange2TeVto8TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
+    SelectSpec( 'highptrange1TeVto2TeV','1000<pt:GeV<2000',path='highptrange1TeVto2TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
+    SelectSpec( 'highptrange500GeVto1TeV','500<pt:GeV<1000',path='highptrange500GeVto1TeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
+    SelectSpec( 'highptrange200GeVto500GeV','200<pt:GeV<500',path='highptrange200GeVto500GeV',FillerTools = ["highpt","m","eta","phi","eta;phi",] ),
 
     # Selecting jets failing the LooseBad selection from the JetCleaningTool.
     SelectSpec( 'LooseBadFailedJets', 'LooseBad', InverseJetSel=True, 
@@ -239,9 +239,16 @@ def standardJetMonitoring(inputFlags):
         jetMonAlgConfig( "AntiKt4EMPFlowJets", inputFlags),
         ]
     
+    # Configure filter tools 
+    from AthenaMonitoring.EventFlagFilterToolConfig import EventFlagFilterToolCfg
+#    from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
+    from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
+#    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg 
+
     # schedule each JetMonitoringAlg by invoking the toAlg() methods of the config specification
     for conf in jetAlgConfs:        
-        conf.toAlg(helper) # adds the conf as a JetMonitoringAlg to the helper
-    
+       alg = conf.toAlg(helper)
+       alg.FilterTools = [ EventFlagFilterToolCfg(inputFlags),helper.resobj.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))]    
+
     rv.merge(helper.result())  # the AthMonitorCfgHelper returns an accumulator to be used by the general configuration system.
     return rv
