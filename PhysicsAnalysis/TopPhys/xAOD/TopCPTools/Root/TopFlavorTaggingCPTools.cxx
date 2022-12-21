@@ -212,11 +212,11 @@ namespace top {
     std::set<std::string> setOfExcludedSysts, setOfScaleFactorSystematics;
 
     for (auto sys : listOfExcludedSysts) {
-      if (setOfExcludedSysts.find(sys) == setOfExcludedSysts.end()) setOfExcludedSysts.insert(sys);
+      setOfExcludedSysts.insert(sys);
     }
 
     for (auto sys : listOfScaleFactorSystematics) {
-      if (setOfScaleFactorSystematics.find(sys) == setOfScaleFactorSystematics.end()) setOfScaleFactorSystematics.insert(sys);
+      setOfScaleFactorSystematics.insert(sys);
     }
 
     //
