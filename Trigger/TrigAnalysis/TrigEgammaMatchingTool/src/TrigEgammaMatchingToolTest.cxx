@@ -59,7 +59,7 @@ namespace Trig{
 
     //**********************************************************************
 
-    void TrigEgammaMatchingToolTest::match(const std::string trigger,const xAOD::Egamma *eg){
+    void TrigEgammaMatchingToolTest::match(const std::string& trigger,const xAOD::Egamma *eg){
 
         
         if (eg) {
