@@ -637,7 +637,6 @@ CalibrationDataEigenVariations::initialize(double min_variance)
   TMatrixDSym cov = getEigenCovarianceMatrix();
   TMatrixDSym corr(result->GetNbinsX()*result->GetNbinsY()*result->GetNbinsZ()); // We want to construct the correlation matrix in order to compare the final eigenvariations correlation matrix to it  
 
-  int coun = 0;
   int rowc = 0;
   for (int row = 0 ; row < cov.GetNrows() ; row++){
     int colc = 0; 
@@ -648,7 +647,6 @@ CalibrationDataEigenVariations::initialize(double min_variance)
       long double rowvar = sqrt(cov(row,row));
       long double colvar = sqrt(cov(col,col));
       corr(rowc,colc) = cov(row,col)/(rowvar * colvar); // divide each element by the variance
-      coun++;
       colc++;
     }
     if (colb){
@@ -1556,10 +1554,6 @@ CalibrationDataGlobalEigenVariations::initialize(double min_variance)
 
     TH1* result = dynamic_cast<TH1*>(c->GetValue("result"));
     //construct the combined_result and combined_named_variations (up and down)
-    Int_t res_nbinx = result->GetNbinsX()+2, res_nbiny = result->GetNbinsY()+2, res_nbinz = result->GetNbinsZ()+2;
-    Int_t rows = res_nbinx;
-    if (result->GetDimension() > 1) rows *= res_nbiny;
-    if (result->GetDimension() > 2) rows *= res_nbinz;
     if (c->getTagWeightAxis() == -1){ // <---- For fixed cut WP, the Y axis **should** be the pT axis (but can it can potentially be different in the future)
       flav_bins[flavour] = result->GetNbinsY(); // Add the number of bins of the result histogram with non-zero results...  
       std::cout << "flav_bins["<<flavour<<"] = " << flav_bins[flavour] << std::endl;
