@@ -31,14 +31,15 @@
 struct ConvProxy
 {
   ConvProxy(const HLT::TriggerElement *te);
-
+  bool isChild(const ConvProxy* other ) const; // returns true if the other isn children (any depth) to this node
+  bool isParent(const ConvProxy* other ) const;
   bool mergeAllowed(const ConvProxy *other) const;
   void merge(ConvProxy *other); // this will change the also the "other" so it knows it has been merged
   const HLT::TriggerElement *te = nullptr;
   std::vector<HLT::te_id_type> teIDs; // post merging will contain IDs of all merged TEs
 
-  std::vector<ConvProxy *> children;
-  std::vector<ConvProxy *> parents;
+  std::set<ConvProxy *> children;
+  std::set<ConvProxy *> parents;
   std::set<HLT::Identifier> runChains;
   std::set<HLT::Identifier> passChains;
   static const uint64_t MissingFEA = 0;
