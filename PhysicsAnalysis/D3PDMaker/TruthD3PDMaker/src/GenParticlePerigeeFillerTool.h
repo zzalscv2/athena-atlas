@@ -28,7 +28,7 @@ public:
 			const IInterface* parent);
 
   StatusCode initialize();
-  virtual StatusCode book();
+  virtual StatusCode book() override;
 
 #ifdef HEPMC3
   virtual StatusCode fill (const HepMC::ConstGenParticlePtr& p);

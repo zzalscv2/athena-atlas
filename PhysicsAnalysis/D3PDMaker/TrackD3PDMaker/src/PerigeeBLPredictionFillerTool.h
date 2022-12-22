@@ -45,7 +45,7 @@ public:
   virtual StatusCode initialize();
 
   /// Book variables for this block.
-  virtual StatusCode book();
+  virtual StatusCode book() override;
 
   /**
    * @brief Fill one block --- type-safe version.

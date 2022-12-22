@@ -73,7 +73,7 @@ public :
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
+   void     Init(TTree *tree);
    virtual std::vector<TH1D*>* histograms(int bin, int mode = 0);
    virtual std::vector<TH2D*>* trueHistos(){return m_twoDHistosTruth;}
    virtual std::vector<TH2D*>* recoHistos(){return m_twoDHistosReco;}
