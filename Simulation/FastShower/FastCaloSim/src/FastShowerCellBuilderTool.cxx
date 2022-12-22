@@ -2277,7 +2277,6 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
   Stats stats;
   int stat_npar=0;
   int stat_npar_OK=0;
-  int stat_npar_nOK=0;
   for(const auto& part: Simulparticles) {
 
     std::vector<Trk::HitInfo>* hitVector = caloHits(*part);
@@ -2296,8 +2295,8 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
                         ctx,
 			cellInfoCont))
     {
-      ++stat_npar_nOK;
-    } else {
+    }
+    else {
       ++stat_npar_OK;
     }
 
