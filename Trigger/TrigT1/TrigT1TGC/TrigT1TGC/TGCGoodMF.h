@@ -22,7 +22,7 @@ class TGCGoodMF : public AthMessaging {
   TGCGoodMF(LVL1TGCTrigger::TGCArguments*,const std::string& version);
   virtual ~TGCGoodMF() = default;
 
-  TGCGoodMF(const TGCGoodMF& right) = default;
+  TGCGoodMF(const TGCGoodMF& right) = delete;
   const TGCGoodMF& operator=(const TGCGoodMF& right);
 
   bool test_GoodMF(int moduleId, int sscId, int subsector) const;
