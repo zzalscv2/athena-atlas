@@ -1530,7 +1530,6 @@ G4bool FullModelReactionDynamics::TwoCluster(
 
   // target is always in backward hemisphere
   G4int backwardCount = 1;           // number of particles in backward hemisphere
-  G4int backwardNucleonCount = 1;    // number of nucleons in backward hemisphere
   targetParticle.SetSide( -1 );
   G4double backwardMass = targetParticle.GetMass()/CLHEP::GeV;
 
@@ -1564,7 +1563,6 @@ G4bool FullModelReactionDynamics::TwoCluster(
   if( xtarg <= 0.0 )xtarg = 0.01;
   G4int nuclearExcitationCount = Poisson( xtarg );
   if(atomicWeight<1.0001) nuclearExcitationCount = 0;
-  G4int extraNucleonCount = 0;
   //G4double extraMass = 0.0;
   if( nuclearExcitationCount > 0 )
     {
@@ -1585,8 +1583,6 @@ G4bool FullModelReactionDynamics::TwoCluster(
                 pVec->SetDefinition( aProton );
               else
                 pVec->SetDefinition( aNeutron );
-              ++backwardNucleonCount;
-              ++extraNucleonCount;
             }
           else
             {                                       // add a pion
