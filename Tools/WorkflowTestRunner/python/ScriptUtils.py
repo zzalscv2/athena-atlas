@@ -269,8 +269,9 @@ def run_checks(setup: TestSetup, tests: List[WorkflowTest], performance_checks: 
     fpe_check = FPECheck(setup)
     # run checks
     for test in tests:
-        all_passed = main_check.run(test) and all_passed
-        if not setup.run_only:
+        test_succeeded = main_check.run(test)
+        all_passed = test_succeeded and all_passed
+        if test_succeeded and not setup.run_only:
             all_passed = test.run_checks(fpe_check, performance_checks) and all_passed
     return all_passed
 
