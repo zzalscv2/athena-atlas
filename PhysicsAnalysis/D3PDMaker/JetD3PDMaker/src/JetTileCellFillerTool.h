@@ -46,7 +46,7 @@ namespace D3PD {
         virtual StatusCode initialize();
 
         /// Book variables for this block.
-        virtual StatusCode book();
+        virtual StatusCode book() override;
 
 
         /**

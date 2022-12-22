@@ -49,7 +49,7 @@ public:
    *
    * This is called at the start of the first event.
    */
-  virtual StatusCode book();
+  virtual StatusCode book() override;
 
 
   /**

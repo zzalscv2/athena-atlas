@@ -93,7 +93,7 @@ public :
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
-   virtual void     Init(TTree *tree);
+   void     Init(TTree *tree);
    virtual TH1F*    Loop(TString& histName, int bins, int low, int high, int entries=0,
                          bool loc1=true, bool loc2=true, bool phi=true, bool theta=true, bool qop=true, bool relAbs=true);
    virtual Bool_t   Notify();

@@ -46,7 +46,7 @@ public:
 
 
   /// Book variables for this block.
-  virtual StatusCode book();
+  virtual StatusCode book() override;
 
 
   /**

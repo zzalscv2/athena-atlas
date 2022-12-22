@@ -49,7 +49,7 @@ namespace D3PD {
                                         const std::type_info& ti );
 
       /// Book variables for this block.
-      virtual StatusCode book();
+      virtual StatusCode book() override;
 
       /**
        * @brief Fill one block --- type-safe version.
