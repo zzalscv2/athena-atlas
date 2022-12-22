@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /* **********************************************************************
@@ -428,7 +428,6 @@ StatusCode CSCSegmValAlg::fillHistograms() {
       ATH_MSG_DEBUG(  "Processing only the first segm in the segm collection"                         );
     }
 
-    int segnum = 0;
     int layerindex = 0;
 
     //Loop over segms
@@ -459,8 +458,6 @@ StatusCode CSCSegmValAlg::fillHistograms() {
       
       // Analyze segment if it is a csc segment
       if ( isCscSegment(segm) ) {
-	
-	segnum++;
 	
 	// Initialize cluster counter
 	for(int sect = 0; sect < 33; sect++) {
