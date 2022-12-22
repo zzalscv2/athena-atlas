@@ -63,7 +63,9 @@ public:
       const Amg::Vector3D& gp,
       const BoundaryCheck& bcheck = BoundaryCheck(true)) const override final;
 
- protected:
+  /** Move the layer  - not implemented */
+  virtual void moveLayer(Amg::Transform3D&) override final {};
+
   /** Resize the layer to the tracking volume - not implemented */
   virtual void resizeLayer(const VolumeBounds&, double) override final {}
 
@@ -72,6 +74,7 @@ public:
                                         const Amg::Vector3D&,
                                         double) override final {}
 
+ protected:
   SharedObject<Surface>
       m_surfaceRepresentation;  //!< for the navigation Volume the surface is
                                 //!< a private member */

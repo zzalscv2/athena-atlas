@@ -90,14 +90,8 @@ class Layer {
         double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
         int ltype = int(passive));
 
-  /**Copy Constructor for Layers */
-  Layer(const Layer& lay);
-
   /**Destructor*/
   virtual ~Layer();
-
-  /** Assignment operator */
-  Layer& operator=(const Layer& lay);
 
   /** Return the entire SurfaceArray, returns 0 if no SurfaceArray*/
   const SurfaceArray* surfaceArray() const;
@@ -228,15 +222,12 @@ class Layer {
   /** set the Layer coding */
   void setLayerType(int identifier);
 
-  /** boolean method to check if the layer needs a LayerMaterialProperties */
-  bool needsMaterialProperties() const;
-
   /** assignMaterialPropeties */
   void assignMaterialProperties(const LayerMaterialProperties&,
                                 double scale = 1.0);
 
   /** move the Layer */
-  virtual void moveLayer(Amg::Transform3D&){};
+  virtual void moveLayer(Amg::Transform3D&) = 0;
 
   /**register Volume associated to the layer */
   void registerRepresentingVolume(const Volume* theVol);
@@ -279,7 +270,7 @@ class Layer {
 
   /** resize layer to the TrackingVolume dimensions - to be overloaded by the
    * extended classes*/
-  virtual void resizeLayer(const VolumeBounds&, double) {}
+  virtual void resizeLayer(const VolumeBounds&, double) = 0;
 
   /** resize and reposition layer : dedicated for entry layers */
   virtual void resizeAndRepositionLayer(const VolumeBounds& vBounds,
@@ -287,6 +278,11 @@ class Layer {
                                         double envelope = 1.) = 0;
 
  protected:
+  /**Copy Constructor for Derived classes */
+  Layer(const Layer& lay);
+  /** Assignment operator for Derived classes*/
+  Layer& operator=(const Layer& lay);
+
   //!< SurfaceArray on this layer Surface (owning ptr)
   SurfaceArray* m_surfaceArray;
   //!< MaterialPoperties of this layer Surface

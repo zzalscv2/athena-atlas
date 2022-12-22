@@ -80,7 +80,6 @@ public:
   /** move the Layer */
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
- private:
   /** Resize the layer to the tracking volume - not implemented*/
   virtual void resizeLayer(const VolumeBounds&, double) override final {}
 

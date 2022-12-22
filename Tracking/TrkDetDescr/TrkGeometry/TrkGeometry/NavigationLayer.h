@@ -89,7 +89,6 @@ class NavigationLayer final : public Layer {
   /** move the Layer */
   virtual void moveLayer(Amg::Transform3D&) override final;
 
- protected:
   /** Resize the layer to the tracking volume - not implemented */
   virtual void resizeLayer(const VolumeBounds&, double) override final {}
 
@@ -98,6 +97,7 @@ class NavigationLayer final : public Layer {
                                         const Amg::Vector3D&,
                                         double) override final {}
 
+ protected:
   Surface* m_surfaceRepresentation;  //!< for the navigation Volume the
                                      //!< surface is a private member */
 

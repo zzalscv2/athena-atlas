@@ -142,7 +142,6 @@ public:
   /** move the Layer */
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
- private:
   /** Resize the layer to the tracking volume - only works for
    * CylinderVolumeBouns */
   virtual void resizeLayer(const VolumeBounds& vBounds,
@@ -155,6 +154,7 @@ public:
                                         double envelope) override final;
 
 
+ private:
   /** Surface seen on approach - if not defined differently, it is the
    * surfaceRepresentation() */
   const Surface& approachSurface(const Amg::Vector3D& pos,

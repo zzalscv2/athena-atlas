@@ -190,20 +190,6 @@ const Trk::MaterialProperties* Trk::Layer::fullUpdateMaterialProperties(
   return nullptr;
 }
 
-bool Trk::Layer::needsMaterialProperties() const {
-  //!< @todo this is temporary
-  if (m_surfaceArray) {
-    Trk::BinnedArraySpan<Trk::Surface const * const > surfaces = std::as_const(*m_surfaceArray).arrayObjects();
-    for (const auto& sIter : surfaces) {
-      if (sIter && sIter->materialLayer() &&
-          (sIter->materialLayer())->layerMaterialProperties())
-        return false;
-    }
-    return true;
-  }
-  return true;
-}
-
 void Trk::Layer::assignMaterialProperties(const LayerMaterialProperties& prop,
                                           double scale) {
   m_layerMaterialProperties =
