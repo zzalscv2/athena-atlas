@@ -32,6 +32,7 @@
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 #include "GeneratorFilters/xAODXtoVVDecayFilterExtended.h"
 #include "GeneratorFilters/xAODHTFilter.h"
+#include "GeneratorFilters/xAODFourLeptonMassFilter.h"
 
 
 
@@ -134,6 +135,7 @@ DECLARE_COMPONENT( xAODVBFForwardJetsFilter )
 DECLARE_COMPONENT( xAODVBFMjjIntervalFilter )
 DECLARE_COMPONENT( xAODXtoVVDecayFilterExtended )
 DECLARE_COMPONENT( xAODHTFilter )
+DECLARE_COMPONENT( xAODFourLeptonMassFilter)
 
 
 
