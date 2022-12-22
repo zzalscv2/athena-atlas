@@ -81,10 +81,10 @@ void TGCWireTripletSB::doCoincidence()
     // perform 2/3 coincidence
     std::vector<bool> output(totalLength);
     for (int i=0; i < totalLength-8; i++) {
-      output[i] = (b[i+3] & b[i+5] & !b[i+1] & !b[i+7]) |
-                  (b[i+3] & b[i+4] & !b[i+2]) |
-                  (b[i+4] & b[i+5] & !b[i+6]) |
-                  (b[i+6] & b[i+2] &  b[i+4] & !b[i+3] & !b[i+5] & !b[i+1] & !b[i+7]);
+      output[i] = (b[i+3] && b[i+5] && !b[i+1] && !b[i+7]) ||
+                  (b[i+3] && b[i+4] && !b[i+2]) ||
+                  (b[i+4] && b[i+5] && !b[i+6]) ||
+                  (b[i+6] && b[i+2] &&  b[i+4] && !b[i+3] && !b[i+5] && !b[i+1] && !b[i+7]);
     }
 
     int base = 0;
