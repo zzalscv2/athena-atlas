@@ -27,51 +27,51 @@
 
 class Epos: public GenModule {
 public:
-  Epos(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~Epos() = default;
-  
-  virtual StatusCode genInitialize();
-  virtual StatusCode callGenerator();
-  virtual StatusCode genFinalize();
-  virtual StatusCode fillEvt(HepMC::GenEvent* evt);
+    Epos(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~Epos() = default;
+
+    virtual StatusCode genInitialize();
+    virtual StatusCode callGenerator();
+    virtual StatusCode genFinalize();
+    virtual StatusCode fillEvt(HepMC::GenEvent* evt);
 
 protected:
-  // The interface 
-  CRMCinterface* m_interface;
+    // The interface
+    CRMCinterface* m_interface;
     // event counter
-  int m_events;
-  int m_ievent; //event counter in Epos
-  int m_iout; //output type
+    int m_events;
+    int m_ievent; //event counter in Epos
+    int m_iout; //output type
 
     // setable properties
-  double      m_beamMomentum;
-  double      m_targetMomentum;
-  int         m_model;
-  int         m_primaryParticle;
-  int         m_targetParticle;
-  std::string m_paramFile;
-  std::string m_lheout;
-  int         m_itab;
-  int         m_ilheout;
-  int         m_nEvents;
-  double      m_degymx;
+    double      m_beamMomentum;
+    double      m_targetMomentum;
+    int         m_model;
+    int         m_primaryParticle;
+    int         m_targetParticle;
+    std::string m_paramFile;
+    std::string m_lheout;
+    int         m_itab;
+    int         m_ilheout;
+    int         m_nEvents;
+    double      m_degymx;
 
-  //Gen_tf run args.
-  IntegerProperty m_dsid{this, "Dsid", 999999};
+    //Gen_tf run args.
+    IntegerProperty m_dsid{this, "Dsid", 999999};
 
     // max number of particles MUST BE EQUAL TO THE NUMBER SET IN crmc-aaa.f! (it is max. number allowed by HepMC2.6 now)
-// static const size_t kMaxParticles = HEPEVT_EntriesAllocation; 
+// static const size_t kMaxParticles = HEPEVT_EntriesAllocation;
 //  static const size_t kMaxParticles = HEPEVT_SIZE_REPLACE;
-  inline static const size_t kMaxParticles {10000};
-  std::vector<int>   m_partID;
-  std::vector<double> m_partPx;
-  std::vector<double> m_partPy;
-  std::vector<double> m_partPz;
-  std::vector<double> m_partEnergy;
-  std::vector<double> m_partMass;
-  std::vector<int>   m_partStat;
+    inline static const size_t kMaxParticles {10000};
+    std::vector<int>   m_partID;
+    std::vector<double> m_partPx;
+    std::vector<double> m_partPy;
+    std::vector<double> m_partPz;
+    std::vector<double> m_partEnergy;
+    std::vector<double> m_partMass;
+    std::vector<int>   m_partStat;
 
-  std::vector<long int> m_seeds;
+    std::vector<long int> m_seeds;
 };
 
 #endif
