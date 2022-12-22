@@ -422,8 +422,9 @@ bool FixHepMC::isLoop(HepMC::ConstGenParticlePtr p) {
   if (p->production_vertex() == p->end_vertex() && p->end_vertex() != NULL) return true;
   if (m_loopByBC && p->production_vertex()) {
     /// @todo Use new particle MC::parents(...) tool
+    int barcodep = HepMC::barcode(p);
     for (auto itrParent: *(p->production_vertex())) {
-      if ( HepMC::barcode(itrParent) > HepMC::barcode(p) ) {
+      if ( HepMC::barcode(itrParent) >  barcodep) {
         ATH_MSG_VERBOSE("Found a loop (a la Sherpa sample) via barcode.");
         return true; // Cannot vectorize, but this is a pretty short loop
       } // Check on barcodes

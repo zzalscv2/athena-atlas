@@ -2231,19 +2231,19 @@ FastShowerCellBuilderTool::process (CaloCellContainer* theCellContainer,
 #endif
           if(invpar) {
             if(sep) msg()<<",";
-            msg()<<HepMC::barcode(invpar);
+            msg()<<invpar;
             sep=true;
           }
         }
       }
-      msg()<<"->"<<HepMC::barcode(par);
+      msg()<<"->"<<par;
       if(outver) {
         msg()<<"->";
         bool sep=false;
         for(const auto& outpar: *outver) {
           if(outpar) {
             if(sep) msg()<<",";
-            msg()<<HepMC::barcode(outpar);
+            msg()<<outpar;
             sep=true;
           }
         }
