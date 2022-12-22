@@ -278,6 +278,7 @@ TruthParticleCnvTool::convert( const McEventCollection * mcCollection,
   for (const auto &[bc,hepMcPart]: bcmap) {
 #else
   for (auto hepMcPart: *evt) {
+    int bc = HepMC::barcode(hepMcPart);
 #endif
 
     TruthParticle * mcPart = new TruthParticle( hepMcPart, container );
