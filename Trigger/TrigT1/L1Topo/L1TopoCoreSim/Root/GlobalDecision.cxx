@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -45,7 +45,7 @@ GlobalDecision::decision_field(string connName, unsigned int clock) const {
 }
 
 uint32_t
-GlobalDecision::overflow_field(string connName, unsigned int clock) const {
+GlobalDecision::overflow_field(const std::string& connName, unsigned int clock) const {
    if(clock==0) {
       // lower 32 bit
       return (uint32_t) (m_overflow.find(connName)->second & 0xffffffff);
