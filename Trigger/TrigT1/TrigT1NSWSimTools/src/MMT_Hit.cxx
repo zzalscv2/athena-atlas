@@ -95,6 +95,7 @@ MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetec
 
   m_R = globalPos.perp();
   m_Z = globalPos.z();
+  m_oneOverZ = 1./m_Z;
   m_Ri = m_strip*roP.stripPitch;
   m_RZslope = m_R / m_Z;
 
