@@ -11,7 +11,7 @@
 #include <sstream>
 
 //________________________________________________________________________
-ChamberNames::ChamberNames(std::string filename) {
+ChamberNames::ChamberNames(const std::string& filename) {
     std::ifstream file(filename.c_str());
     if (!file.is_open()) {
         std::cout << "Can't open AlignmentConstantsFile" << std::endl;
