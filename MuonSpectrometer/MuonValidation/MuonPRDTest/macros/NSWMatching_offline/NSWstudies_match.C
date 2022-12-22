@@ -312,7 +312,7 @@ void NSWstudies::fillHists (Flocalize_collection& oData, std::vector< TH1I* >& h
    }
 }
 
-void init_hists (std::vector< TH1I* >& hist_vec, bool isMM, std::string datatype, std::string matchedwith) {
+void init_hists (std::vector< TH1I* >& hist_vec, bool isMM, const std::string& datatype, const std::string& matchedwith) {
    int ndigits;
    const char* obj = datatype.c_str();
    const char* type;

@@ -3,7 +3,7 @@
 */
 
 
-int makeZdcNtuple(std::string submitDir = "submitDir", std::string readDir = "file:/tmp/steinber", int nevt = -1, std::string enableStr = "", std::string vers = "0", int localTrackLimit = 1e6, std::string grlOption = "")
+int makeZdcNtuple(std::string submitDir = "submitDir", std::string readDir = "file:/tmp/steinber", int nevt = -1, const std::string& enableStr = "", const std::string& vers = "0", int localTrackLimit = 1e6, std::string grlOption = "")
 {
 
   // Set up the job for xAOD access:

@@ -597,7 +597,7 @@ void largeur_eta_phi(int iDet, int iLayer, int iReg, float &weta, float &wphi)
 
 ///////////////////////////////////////////////////////////////////
 
-void read_id(std::string id,int n)
+void read_id(const std::string& id,int n)
 {
   //cout<<"read_id: ";
   char dot;

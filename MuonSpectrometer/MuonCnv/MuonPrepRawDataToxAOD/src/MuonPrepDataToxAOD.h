@@ -27,7 +27,7 @@ public:
   static const int invalid_value = -99999;
 
   // Constructor with parameters:
-  MuonPrepDataToxAOD(const std::string &name,ISvcLocator *pSvcLocator, std::string inputName, std::string sdoName ) :
+  MuonPrepDataToxAOD(const std::string &name,ISvcLocator *pSvcLocator, const std::string& inputName, const std::string& sdoName ) :
     AthAlgorithm(name,pSvcLocator)
   {  
     m_inputContainerName = inputName;

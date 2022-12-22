@@ -64,7 +64,7 @@ namespace {
 
   template <typename T>
   T match_first(const std::vector<std::pair<std::regex, T> >& regexes,
-                const std::string var_name,
+                const std::string& var_name,
                 const std::string& context) {
     for (const auto& pair: regexes) {
       if (std::regex_match(var_name, pair.first)) {

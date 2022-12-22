@@ -11,7 +11,7 @@
 
 class ChamberNames {
 public:
-    ChamberNames(std::string filename);
+    ChamberNames(const std::string& filename);
     virtual ~ChamberNames();
 
     std::string chamberName(int identifier) const;
