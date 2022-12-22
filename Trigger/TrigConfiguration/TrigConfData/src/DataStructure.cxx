@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -25,12 +25,12 @@ TrigConf::DataStructure::DataStructure(const std::string & name, const ptree & d
 
 TrigConf::DataStructure::DataStructure(ptree && data) :
    m_initialized(true),
-   m_dataSPtr(std::make_shared<ptree>(move(data)))
+   m_dataSPtr(std::make_shared<ptree>(std::move(data)))
 {}
 
 TrigConf::DataStructure::DataStructure(const std::string & name, ptree && data) :
    m_initialized(true),
-   m_dataSPtr(std::make_shared<ptree>(move(data))),
+   m_dataSPtr(std::make_shared<ptree>(std::move(data))),
    m_name(name)
 {}
 
@@ -51,7 +51,7 @@ TrigConf::DataStructure::setData(ptree&& data)
 {
    clear();
    m_initialized = true;
-   m_dataSPtr = std::make_shared<ptree>(move(data));
+   m_dataSPtr = std::make_shared<ptree>(std::move(data));
    m_dataPtr = nullptr;
    update();
 }
