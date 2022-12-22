@@ -1,6 +1,5 @@
-
 /*                                                                                                                                          
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TRT_ReadoutGeometry/TRT_DetElementContainer.h"
@@ -9,9 +8,10 @@
 
 namespace InDetDD{
 
-  TRT_DetElementContainer::TRT_DetElementContainer():
-    m_trtcoll(),
-    m_trtnum(nullptr)
+  TRT_DetElementContainer::TRT_DetElementContainer()
+    : AthMessaging("TRT_DetElementContainer")
+    , m_trtcoll()
+    , m_trtnum(nullptr)
   {
     clear();
   }
@@ -21,7 +21,8 @@ namespace InDetDD{
     clear();
   }
 
-  void TRT_DetElementContainer::setNumerology(const TRT_Numerology* mynum) {
+  void TRT_DetElementContainer::setNumerology(const TRT_Numerology* mynum) 
+  {
     m_trtnum=mynum;
   }
 
@@ -35,24 +36,48 @@ namespace InDetDD{
     return m_trtnum;
   }
 
-  const TRT_BarrelElement* TRT_DetElementContainer::getBarrelDetElement(unsigned int positive,
-								 unsigned int moduleIndex,
-								 unsigned int phiIndex,
-								 unsigned int strawLayerIndex) const {
+  const TRT_BarrelElement* TRT_DetElementContainer::getBarrelDetElement(unsigned int positive
+									, unsigned int moduleIndex
+									, unsigned int phiIndex
+									, unsigned int strawLayerIndex) const 
+  {
     if ( positive >= 2 || moduleIndex >= NMODMAX
 	 || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXBR) return nullptr;
 
     return m_baArray[positive][moduleIndex][phiIndex][strawLayerIndex];
   }
 
-  const TRT_EndcapElement* TRT_DetElementContainer::getEndcapDetElement(unsigned int positive,
-								 unsigned int wheelIndex,
-								 unsigned int strawLayerIndex,
-								 unsigned int phiIndex) const {
+  TRT_BarrelElement* TRT_DetElementContainer::getBarrelDetElement(unsigned int positive
+								  , unsigned int moduleIndex
+								  , unsigned int phiIndex
+								  , unsigned int strawLayerIndex)
+  {
+    if ( positive >= 2 || moduleIndex >= NMODMAX
+	 || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXBR) return nullptr;
 
+    return m_baArray[positive][moduleIndex][phiIndex][strawLayerIndex];
+  }
+
+
+  const TRT_EndcapElement* TRT_DetElementContainer::getEndcapDetElement(unsigned int positive
+									, unsigned int wheelIndex
+									, unsigned int strawLayerIndex
+									, unsigned int phiIndex) const
+  {
     if ( positive >= 2 || wheelIndex >= NWHEELMAX
 	 || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXEC) return nullptr;
+    
+    return m_ecArray[positive][wheelIndex][strawLayerIndex][phiIndex];
+  }
 
+  TRT_EndcapElement* TRT_DetElementContainer::getEndcapDetElement(unsigned int positive
+								  , unsigned int wheelIndex
+								  , unsigned int strawLayerIndex
+								  , unsigned int phiIndex)
+  {
+    if ( positive >= 2 || wheelIndex >= NWHEELMAX
+	 || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXEC) return nullptr;
+    
     return m_ecArray[positive][wheelIndex][strawLayerIndex][phiIndex];
   }
 
@@ -96,6 +121,88 @@ namespace InDetDD{
       [endcap->getCode().getStrawLayerIndex()]
       [endcap->getCode().getPhiIndex()] = endcap;
     m_trtcoll.push_back(endcap);
+  }
+
+  void TRT_DetElementContainer::manageBarrelElement(TRT_BarrelElement *barrel, const TRT_ID* idHelper)
+  {
+    if (m_baArray
+       [barrel->getCode().isPosZ()]
+       [barrel->getCode().getModuleIndex()]
+       [barrel->getCode().getPhiIndex()]
+       [barrel->getCode().getStrawLayerIndex()] ) {
+      
+      //Element already added - complain!
+      ATH_MSG_DEBUG("manageBarrelElement: Overriding existing element");
+    }
+
+    m_baArray
+      [barrel->getCode().isPosZ()]
+      [barrel->getCode().getModuleIndex()]
+      [barrel->getCode().getPhiIndex()]
+      [barrel->getCode().getStrawLayerIndex()]
+      =barrel;
+
+    // Add the barrel element to the hash vector:
+    if (idHelper) {
+      Identifier id = idHelper->layer_id(barrel->getCode().isPosZ() ? +1 : -1,
+					 barrel->getCode().getPhiIndex(),
+					 barrel->getCode().getModuleIndex(),
+					 barrel->getCode().getStrawLayerIndex());
+      IdentifierHash hashId = idHelper->straw_layer_hash(id);
+      if (hashId.is_valid()) {
+	if (m_trtcoll.size() <= hashId) {
+	  m_trtcoll.resize(static_cast<unsigned int>(hashId) + 1);
+	}
+	if (m_trtcoll[hashId]) {
+	  //Element already added - complain!
+	  ATH_MSG_DEBUG("manageBarrelElement: Overriding existing element for hashID");
+	}
+	m_trtcoll[hashId]=barrel;
+      } 
+      else {
+	ATH_MSG_WARNING("manageBarrelElement: Invalid identifier");
+      }
+    }    
+  }
+
+  void TRT_DetElementContainer::manageEndcapElement(TRT_EndcapElement *endcap, const TRT_ID* idHelper)
+  {
+    if (m_ecArray
+	[endcap->getCode().isPosZ()]
+	[endcap->getCode().getWheelIndex()]
+	[endcap->getCode().getStrawLayerIndex()]
+        [endcap->getCode().getPhiIndex()] ) {
+      //Element already added - complain!
+      ATH_MSG_WARNING("manageEndcapElement: Overriding existing element");
+    }
+    
+    m_ecArray
+      [endcap->getCode().isPosZ()]
+      [endcap->getCode().getWheelIndex()]
+      [endcap->getCode().getStrawLayerIndex()]
+      [endcap->getCode().getPhiIndex()]
+      =endcap;
+
+    if (idHelper) {
+      Identifier id = idHelper->layer_id(endcap->getCode().isPosZ() ? +2 : -2,
+					 endcap->getCode().getPhiIndex(),
+					 endcap->getCode().getWheelIndex(),
+					 endcap->getCode().getStrawLayerIndex());
+      
+      IdentifierHash hashId = idHelper->straw_layer_hash(id);
+      if (hashId.is_valid()) {
+	if (m_trtcoll.size() <= hashId) {
+	  m_trtcoll.resize(static_cast<unsigned int>(hashId) + 1);
+	}
+	if (m_trtcoll[hashId]) {
+	  //Element already added - complain!
+	  ATH_MSG_DEBUG("manageEndcapElement: Overriding existing element for hashID");
+	}
+	m_trtcoll[hashId]=endcap;
+      } else {
+	ATH_MSG_WARNING("manageEndcapElement: Invalid identifier");
+      }
+    }
   }
 
   void TRT_DetElementContainer::clear()
