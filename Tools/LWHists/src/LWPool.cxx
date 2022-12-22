@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,22 +13,19 @@
 ////////////////////////////////////////////////////////////////
 
 #include "LWPool.h"
+#include "CxxUtils/checker_macros.h"
 #include <algorithm>
 #include <new>
 
-LWPool * LWPool::s_motherPool = 0;
 LWPool * LWPool::getMotherPool()
 {
-  if (!s_motherPool) {
-    //The mother pool parameters determine the growth
-    //dynamics of all pools:
-    const unsigned extra = sizeof(LWPool)+sizeof(LWPoolAreaBookKeeper)+8;
-    const unsigned poolgrow = 16384+extra;
-    //    const unsigned motherpoolgrow = poolgrow*128+extra;
-    const unsigned motherpoolgrow = poolgrow*32+extra;
-    s_motherPool = new LWPool(poolgrow,motherpoolgrow);
-  }
-  return s_motherPool;
+  //The mother pool parameters determine the growth
+  //dynamics of all pools:
+  static constexpr unsigned extra = sizeof(LWPool)+sizeof(LWPoolAreaBookKeeper)+8;
+  static constexpr unsigned poolgrow = 16384+extra;
+  static constexpr unsigned motherpoolgrow = poolgrow*32+extra;
+  static LWPool mother ATLAS_THREAD_SAFE (poolgrow,motherpoolgrow);
+  return &mother;
 }
 
 //____________________________________________________________________
@@ -58,39 +55,49 @@ void LWPool::init()
   assert(m_chunksize>=1);
   LWHISTMALLOC(sizeof(m_areas[0])*16);
   m_areas.reserve(16);
-  m_areaIt = m_areaItB = m_areas.begin();
-  m_areaItE = m_areas.end();
 }
 
 //____________________________________________________________________
 LWPool::~LWPool()
 {
-  for (m_areaIt = m_areaItB;m_areaIt!=m_areaItE;++m_areaIt) {
-    char * c = reinterpret_cast<char*>(*m_areaIt);
+  erase();
+}
+
+//____________________________________________________________________
+void LWPool::erase()
+{
+  std::scoped_lock lock (m_mutex);
+  for (LWPoolArea* a : m_areas) {
+    char * c = reinterpret_cast<char*>(a);
     if (isMotherPool())
       delete[] c;
     else
       getMotherPool()->release(c);
   }
+  m_areas.clear();
+  m_likelyNonEmptyArea = nullptr;
+  m_likelyReleaseArea = nullptr;
 }
 
 //____________________________________________________________________
 long long LWPool::getMotherMemOwned()
 {
-  return s_motherPool ? getMotherPool()->getMemOwned() : 0;
+  return getMotherPool()->getMemOwned();
 }
 
 //____________________________________________________________________
 long long LWPool::getMemOwned() const
 {
+  std::scoped_lock lock (m_mutex);
   return m_growsize*m_areas.size();
 }
 
 //____________________________________________________________________
 long long LWPool::getMemDishedOut() const {
+  std::scoped_lock lock (m_mutex);
   long long l(0);
-  for (m_areaIt = m_areaItB;m_areaIt!=m_areaItE;++m_areaIt)
-    l += (*m_areaIt)->getMemDishedOut();
+  for (LWPoolArea* a : m_areas)
+    l += a->getMemDishedOut();
   return l;
 }
 
@@ -103,13 +110,13 @@ char* LWPool::acquireClean()
 }
 
 //____________________________________________________________________
-char * LWPool::searchAcquire()
+char * LWPool::searchAcquire() // Must hold lock.
 {
   m_likelyNonEmptyArea = 0;
-  for (m_areaIt = m_areaItB;m_areaIt!=m_areaItE;++m_areaIt) {
-    char * c = (*m_areaIt)->acquire();
+  for (LWPoolArea* a : m_areas) {
+    char * c = a->acquire();
     if (c) {
-      m_likelyNonEmptyArea = *m_areaIt;
+      m_likelyNonEmptyArea = a;
       return c;
     }
   }
@@ -121,22 +128,23 @@ char * LWPool::searchAcquire()
 }
 
 //____________________________________________________________________
-LWPoolArea * LWPool::findArea(char* c)
+LWPoolArea * LWPool::findArea(char* c) // Must hold lock
 {
   //Figure out which area (if any), we belong in. For reasons of cpu
   //and (in particular) cache-efficiency we do not actually ask the
   //classes themselves, rather we just look at their addresses (since
   //their addresses marks the beginning of the pool-areas also):
 
-  m_areaIt = std::lower_bound(m_areaItB,m_areaItE,reinterpret_cast<void*>(c));
-  LWPoolArea* a(m_areaIt==m_areaItE?m_areas.back():*(--m_areaIt));
+  std::vector<LWPoolArea*>::iterator areaIt =
+    std::lower_bound(m_areas.begin(),m_areas.end(),reinterpret_cast<void*>(c));
+  LWPoolArea* a(areaIt==m_areas.end()?m_areas.back():*(--areaIt));
   assert(a&&a->belongsInArea(c)&&"Trying to release chunk back to a mem-pool from which it was never acquired");
   assert(reinterpret_cast<char*>(a)<c&&c<reinterpret_cast<char*>(a)+m_growsize);
   return a;
 }
 
 //____________________________________________________________________
-LWPoolArea* LWPool::grow()
+LWPoolArea* LWPool::grow() // Must hold lock.
 {
   char * c(0);
   if (isMotherPool()) {
@@ -157,15 +165,13 @@ LWPoolArea* LWPool::grow()
     LWHISTMALLOC(sizeof(m_areas.at(0))*m_areas.capacity());
   sort(m_areas.begin(),m_areas.end());//always keep sorted
   //fixme: make slightly faster by manually inserting and moving up mem.
-  m_areaItB = m_areas.begin();
-  m_areaItE = m_areas.end();
   m_likelyNonEmptyArea = a;
 
   return a;
 }
 
 //____________________________________________________________________
-void LWPool::freeArea(LWPoolArea*a)
+void LWPool::freeArea(LWPoolArea*a) // Must hold lock
 {
   assert(!m_areas.empty());
 
@@ -189,21 +195,15 @@ void LWPool::freeArea(LWPoolArea*a)
       m_areas.at(j) = m_areas.at(j+1);
   }
   m_areas.resize(nareasminusone);
-  m_areaItE = m_areas.end();
   char * c = reinterpret_cast<char*>(a);
   if (isMotherPool())
     delete[] c;
   else
     getMotherPool()->release(c);
-  if (m_areas.empty()&&isMotherPool()) {
-    delete s_motherPool;
-    s_motherPool = 0;
-  }
 }
 
 //____________________________________________________________________
 void LWPool::forceCleanupMotherPool()
 {
-  delete s_motherPool;
-  s_motherPool=0;
+  getMotherPool()->erase();
 }

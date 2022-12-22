@@ -19,6 +19,7 @@
 
 #include "LWPoolSelector.h"
 #include "LWPool.h"
+#include "CxxUtils/checker_macros.h"
 #include <cassert>
 #include <atomic>
 
@@ -32,6 +33,8 @@ public:
   static char * acquire(unsigned length);
   static void release(char*,unsigned length);
   static void cleanup();//Returns all acquired memory to the system.
+                        //Not safe to call this concurrently with anything
+                        //else.
 
   //Convenience:
   template<unsigned length> static char* acquire() { return acquire(length); }
@@ -49,12 +52,11 @@ public:
   static long long getTotalPoolMemUsed();
 
 private:
-  LWPool * m_pools[LWPoolSelector::numberOfPools];
   LWPools();
   ~LWPools();
 private:
   class PoolList;
-  static PoolList s_pools;
+  static PoolList s_pools ATLAS_THREAD_SAFE;
   static std::atomic<long long> s_bytesDynAlloc;
   static LWPool * initPool(unsigned poolIndex,unsigned length);
   static LWPool * getPool(unsigned length);

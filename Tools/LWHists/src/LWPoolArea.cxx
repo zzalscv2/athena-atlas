@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,7 +51,7 @@ unsigned LWPoolArea::calcNChunks(unsigned chunksize,unsigned length_of_mem)
 #ifndef NDEBUG
   long wastage = ntotbytes - nchunks*chunksize-LWPoolAreaBookKeeper::nBytesNeededForCreate(nchunks);
   assert(wastage>=0);
-  assert(wastage<long(chunksize+sizeof(LWPoolAreaBookKeeper::BitField)));
+  assert(wastage<std::max(9l,long(chunksize+sizeof(LWPoolAreaBookKeeper::BitField))));
   if (wastage*1.0>0.05*ntotbytes||wastage>640) {
     std::cout<<"LWHist MemPool (chunksize: "<<chunksize<<") WARNING: Wasting "
 	     <<wastage<<" bytes per area ("<<(wastage*100.0/ntotbytes)<<" %)"<<std::endl;

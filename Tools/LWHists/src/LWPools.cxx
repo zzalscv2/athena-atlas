@@ -27,23 +27,26 @@ LWPools::PoolList::PoolList()
 //____________________________________________________________________
 void LWPools::PoolList::nullout()
 {
-  memset(m_poolarr,0,LWPoolSelector::nPools()*sizeof(m_poolarr[0]));
+  for (size_t i = 0; i < LWPoolSelector::nPools(); i++) {
+    m_poolarr[i] = nullptr;
+  }
 }
 
 //____________________________________________________________________
 void LWPools::PoolList::cleanup()
 {
 #ifdef LW_DEBUG_POOLS_DEBUG_USAGE
+  std::scoped_lock lock (m_mutex);
   if (!m_memoryHandedOut.empty())
     std::cout<<"LWPools::PoolList::cleanup() WARNING: "<<m_memoryHandedOut.size()
 	     <<" unreleased pool allocations"<<std::endl;
 #endif
   for (unsigned i=0;i<LWPoolSelector::nPools();++i) {
-    if (m_poolarr[i])
+    LWPool* p = m_poolarr[i].exchange (nullptr);
+    if (p)
       s_bytesDynAlloc -= sizeof(LWPool);
-    delete m_poolarr[i];
+    delete p;
   }
-  nullout();
   LWPool::forceCleanupMotherPool();
 }
 
@@ -51,11 +54,16 @@ void LWPools::PoolList::cleanup()
 LWPool * LWPools::initPool(unsigned idx,unsigned length)
 {
   assert(idx<LWPoolSelector::numberOfPools);
-  assert(!s_pools[idx]);
   assert(LWPoolSelector::poolIndex(length)==idx);
   LWPool * pool = new LWPool(LWPoolSelector::poolSize(length));
   s_bytesDynAlloc += sizeof(LWPool);
-  s_pools[idx] = pool;
+  LWPool* exp = nullptr;
+  s_pools[idx].compare_exchange_strong (exp, pool);
+  if (exp) {
+    s_bytesDynAlloc -= sizeof(LWPool);
+    delete pool;
+    pool = exp;
+  }
   return pool;
 }
 
@@ -76,7 +84,9 @@ long long LWPools::getTotalPoolMemAllocated()
 long long LWPools::getTotalPoolMemUsed()
 {
   long long l(s_bytesDynAlloc);
-  for (unsigned i=0;i<LWPoolSelector::nPools();++i)
-    if (s_pools[i]) l+=s_pools[i]->getMemDishedOut();
+  for (unsigned i=0;i<LWPoolSelector::nPools();++i) {
+    LWPool* p = s_pools[i];
+    if (p) l+=p->getMemDishedOut();
+  }
   return l;
 }
