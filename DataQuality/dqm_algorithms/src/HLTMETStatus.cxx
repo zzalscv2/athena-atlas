@@ -98,7 +98,7 @@ dqm_algorithms::HLTMETStatus::execute(const std::string & name,
   colflags[2] = ((colflags[2] > 0) && (colflags[2] <= ntotBins)) ? colflags[2] : 1;
   colflags[3] = ((colflags[3] >= colflags[2]) && (colflags[3] <= ntotBins)) ? colflags[3] : ntotBins;
   bool yellowLo2HiEmpty = true, redLo2HiEmpty = true;
-  int ytot = 0, ycnt = 0, rtot = 0, rcnt = 0;
+  int ycnt = 0, rcnt = 0;
   
   // we fill 1(error) or 0(no-error) for each bin for every event
   // therefore we have to divide #of entries by #of bins
@@ -112,7 +112,6 @@ dqm_algorithms::HLTMETStatus::execute(const std::string & name,
   if(doflags[0]) {
     for( size_t j = colflags[0]; j <= colflags[1]; j++ ) {
       // if at least one of the bins > 0 : flag = YELLOW
-      ytot ++;
       double thebinc = histogram -> GetBinContent(j);
       // fraction of events having this error-bit set
       double thefrac = thebinc / nevtstot; 
@@ -133,7 +132,6 @@ dqm_algorithms::HLTMETStatus::execute(const std::string & name,
   if(doflags[1]) {
     for( size_t j = colflags[2]; j <= colflags[3]; j++ ) {
       // if at least one of the bins > 0 : flag = RED
-      rtot ++; 
       double thebinc = histogram -> GetBinContent(j);
       // fraction of events having this error-bit set
       double thefrac = thebinc / nevtstot; 

@@ -73,30 +73,19 @@ dqm_core::Result *TRTCheckPeakSimple::execute(const std::string &name, const TOb
     }
 
 
-    const int nbinsx = histogram->GetNbinsX();
     const double gthreshold = dqm_algorithms::tools::GetFromMap("PeakPosition", config.getGreenThresholds());
     const double rthreshold = dqm_algorithms::tools::GetFromMap("PeakPosition", config.getRedThresholds());
     const std::vector<int> range = dqm_algorithms::tools::GetBinRange(histogram, config.getParameters());
     const int xmin = range[0];
     const int xmax = range[1];
 
-    //compute the number of empty bins (or bins=0)
-    int zerobins = 0;
-    for (int i = 1; i <= nbinsx; i++) {
-        if (histogram->GetBinContent(i) == 0) {
-            zerobins++;
-        }
-    }
-
     //compute the weighted mean
     float wmean = 0;
     float sum = 0;
     float integral = 0;
-    int counter = 0;
     for (int i = xmin; i <= xmax; i++) {
         integral += histogram->GetBinContent(i);
         sum += i * (histogram->GetBinContent(i));
-        counter++;
     }
     wmean = sum / integral; // make sure that integer division does not truncate decimal of mean
 

@@ -117,7 +117,6 @@ dqm_core::Result *dqm_algorithms::L1Calo_OutlierAndFlatnessTest::execute( const 
 
   //Compute outlier bins by using a simplified Grubb's test without cutting on a t-distribution but by giving an external threshold defining how many standard deviations a value has to differ from the mean to be classified as an outlier or by giving an absolute threshold for classifying values as outliers
   int totalBadBins = 0;
-  int totalUncountedBadBins = 0;
   double mean=0;
   double stdev=0;    
   
@@ -146,9 +145,7 @@ dqm_core::Result *dqm_algorithms::L1Calo_OutlierAndFlatnessTest::execute( const 
 	  dev=std::abs(histogram->GetBinContent(i) - mean)/stdev;
 	  absdev_test=std::abs(histogram->GetBinContent(i) - mean);
 	  if ((dev > sigmaDev) && (absdev_test > absDev)) {
-	    if (dontCountSigmaOutliers){
-	      totalUncountedBadBins++;
-	    } else {
+	    if (!dontCountSigmaOutliers){
 	      totalBadBins++;
 	    }
 	  }
@@ -157,7 +154,6 @@ dqm_core::Result *dqm_algorithms::L1Calo_OutlierAndFlatnessTest::execute( const 
     } 
 
     int totalBadBins_all = 0;
-    int totalUncountedBadBins_all = 0;
     double mean_all=0;
     double stdev_all=0;    
     
@@ -186,9 +182,7 @@ dqm_core::Result *dqm_algorithms::L1Calo_OutlierAndFlatnessTest::execute( const 
 	  dev_all=std::abs(histogram->GetBinContent(i) - mean_all)/stdev_all;
 	  absdev_test_all=std::abs(histogram->GetBinContent(i) - mean_all);
 	  if ((dev_all > sigmaDev) && (absdev_test_all > absDev)) {
-	    if (dontCountSigmaOutliers){
-	      totalUncountedBadBins_all++;
-	    } else {
+	    if (!dontCountSigmaOutliers){
 	      totalBadBins_all++;
 	    }
 	  }
