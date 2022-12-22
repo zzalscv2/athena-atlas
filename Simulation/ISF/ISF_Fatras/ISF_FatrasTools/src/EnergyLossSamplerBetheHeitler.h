@@ -13,6 +13,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk
 #include "ISF_FatrasInterfaces/IEnergyLossSampler.h"
@@ -33,7 +34,8 @@ namespace iFatras{
       @author Noemi.Calace@cern.ch, Andreas.Salzburger@cern.ch
    */
 
-  class EnergyLossSamplerBetheHeitler : public extends<AthAlgTool, iFatras::IEnergyLossSampler> {
+  // deprecated: ATLASSIM-6020
+  class ATLAS_NOT_THREAD_SAFE EnergyLossSamplerBetheHeitler : public extends<AthAlgTool, iFatras::IEnergyLossSampler> {
 
  public:
     
