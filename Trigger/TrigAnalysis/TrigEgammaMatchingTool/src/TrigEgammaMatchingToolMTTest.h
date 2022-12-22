@@ -26,7 +26,7 @@ class TrigEgammaMatchingToolMTTest : public AthMonitorAlgorithm {
   private:
 
             
-    void inspect(const std::string, const xAOD::Egamma *) const ;
+    void inspect(const std::string&, const xAOD::Egamma *) const ;
 
     SG::ReadHandleKey<xAOD::ElectronContainer> m_electronKey{this , "ElectronKey", "Electrons", ""};
 

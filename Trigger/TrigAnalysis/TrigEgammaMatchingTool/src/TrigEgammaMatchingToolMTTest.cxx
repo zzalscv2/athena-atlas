@@ -42,7 +42,7 @@ StatusCode TrigEgammaMatchingToolMTTest::initialize() {
 
 //**********************************************************************
 
-void TrigEgammaMatchingToolMTTest::inspect(const std::string trigger,const xAOD::Egamma *eg) const {
+void TrigEgammaMatchingToolMTTest::inspect(const std::string& trigger,const xAOD::Egamma *eg) const {
 
   if (eg) {
     
