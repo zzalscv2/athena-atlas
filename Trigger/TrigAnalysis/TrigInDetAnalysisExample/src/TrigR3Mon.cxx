@@ -45,7 +45,7 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
      m_legacy(true), 
      m_fiducial_radius(32),
      m_requireDecision(false),
-     m_filter_on_roi(false)  
+     m_filter_on_roi(false)
 {
   msg(MSG::INFO) << "TrigR3Mon::TrigR3Mon() compiled: " << __DATE__ << " " << __TIME__ << endmsg;
 
@@ -56,6 +56,8 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
   declareProperty( "d0Cut",   m_d0Cut   = 1000 );
   declareProperty( "z0Cut",   m_z0Cut   = 2000 );
   declareProperty( "siHits",  m_siHits  = -1 );
+  m_pixHits=0;
+  m_sctHits=0;
 
   declareProperty( "trtHits",   m_trtHits   = -2 );
   declareProperty( "strawHits", m_strawHits = -2 );
