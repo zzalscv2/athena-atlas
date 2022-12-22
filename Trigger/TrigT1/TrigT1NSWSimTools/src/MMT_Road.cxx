@@ -23,7 +23,6 @@ MMT_Road::MMT_Road(const char sector, const MuonGM::MuonDetectorManager* detMana
   m_pitch = mm.pitch;
   m_innerRadiusEta1 = mm.innerRadiusEta1;
   m_innerRadiusEta2 = mm.innerRadiusEta2;
-  m_B = (1./std::tan(1.5/180.*M_PI));
 }
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
@@ -62,23 +61,27 @@ bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
   if (this->getSector() != hit->getSector()) return false;
 
   int iroad = 0;
-  if (hit->isX()) iroad = this->iRoadx();
-  else if (hit->isU()) iroad = this->iRoadu();
-  else if (hit->isV()) iroad = this->iRoadv();
+  unsigned short int olow = 0, ohigh = 0;
+  if (hit->isX()) {
+    iroad = this->iRoadx();
+    olow  = this->getRoadSizeDownX();
+    ohigh = this->getRoadSizeUpX();
+  }
+  else if (hit->isU()) {
+    iroad = this->iRoadu();
+    olow  = this->getRoadSizeDownUV();
+    ohigh = this->getRoadSizeUpUV();
+  }
+  else if (hit->isV()) {
+    iroad = this->iRoadv();
+    olow  = this->getRoadSizeDownUV();
+    ohigh = this->getRoadSizeUpUV();
+  }
   else return false;
 
-  double olow = 0., ohigh = 0.;
-  if (hit->isX()) {
-    olow  = this->getRoadSizeDownX()*this->getPitch();
-    ohigh = this->getRoadSizeUpX()*this->getPitch();
-  } else {
-    olow  = this->getRoadSizeDownUV()*this->getPitch();
-    ohigh = this->getRoadSizeUpUV()*this->getPitch();
-  }
-
   double R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
-  double slow  = (R + (this->getRoadSize()*iroad  )*this->getPitch() + hit->getShift() + this->getPitch()/2. - olow)/hit->getZ();
-  double shigh = (R + (this->getRoadSize()*(iroad+1))*this->getPitch() + hit->getShift() + this->getPitch()/2. + ohigh)/hit->getZ();
+  double slow  = (R + (this->getRoadSize()*iroad     + 0.5 - olow )*this->getPitch() + hit->getShift())*hit->getOneOverZ();
+  double shigh = (R + (this->getRoadSize()*(iroad+1) + 0.5 + ohigh)*this->getPitch() + hit->getShift())*hit->getOneOverZ();
 
   if (hit->getRZSlope() > 0.) return (hit->getRZSlope() >= slow && hit->getRZSlope() < shigh);
   else return (hit->getRZSlope() >= shigh && hit->getRZSlope() < slow);

@@ -55,7 +55,6 @@ class MMT_Road {
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
     void incrementAge(const int &bcwind);
-    double getB() const { return m_B; }
     double getPitch() const { return m_pitch; }
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
@@ -78,7 +77,6 @@ class MMT_Road {
   private:
     const MuonGM::MuonDetectorManager* m_detManager{};        //!< MuonDetectorManager
     const MuonGM::MuonDetectorManager* GetDetManager() { return m_detManager; }
-    double m_B;
     int m_iroad;
     int m_iroadx;
     int m_iroadu;
