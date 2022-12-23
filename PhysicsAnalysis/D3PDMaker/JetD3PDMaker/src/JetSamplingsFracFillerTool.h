@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file   JetD3PDMaker/src/JetSamplingsFracFillerTool.h
  * @author Haifeng Li <Haifeng.Li@cern.ch>
@@ -52,7 +49,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const Jet& jet);
+  virtual StatusCode fill (const Jet& jet) override;
   
   
 private:
