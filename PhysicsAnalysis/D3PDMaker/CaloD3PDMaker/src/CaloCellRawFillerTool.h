@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloD3PDMaker/src/CaloCellRawFillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -50,7 +47,7 @@ public:
    * @brief Fill one block --- type-safe version.
    * @param p Object from which to fill.
    */
-  virtual StatusCode fill (const CaloCell& p);
+  virtual StatusCode fill (const CaloCell& p) override;
 
 
 private:

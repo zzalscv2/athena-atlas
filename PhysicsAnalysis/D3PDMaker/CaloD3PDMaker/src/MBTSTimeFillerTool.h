@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CaloD3PDMaker/src/MBTSFillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -43,7 +40,7 @@ public:
 
 
   /// Standard Gaudi initialize method.
-  StatusCode initialize();
+  virtual StatusCode initialize() override;
 
 
   /// Book variables for this block.
@@ -53,7 +50,7 @@ public:
   /**
    * @brief Fill one block --- type-safe version.
    */
-  virtual StatusCode fill ();
+  virtual StatusCode fill() override;
 
 
 private:
