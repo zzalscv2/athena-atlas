@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file TrackD3PDMaker/src/PerigeePairOldPerigeeAssociationTool.h
  * @author scott snyder
@@ -48,7 +45,7 @@ public:
    *
    * Return the target of the association, or 0.
    */
-  virtual const Trk::Perigee* get (const D3PD::PerigeePair& p);
+  virtual const Trk::Perigee* get (const D3PD::PerigeePair& p) override;
 };
 
 

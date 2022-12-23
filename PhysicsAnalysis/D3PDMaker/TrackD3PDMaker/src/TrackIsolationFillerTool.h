@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file TrackD3PDMaker/src/TrackIsolationFillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -52,7 +49,7 @@ public:
 
 
   // Standard Gaudi initialize method.
-  StatusCode initialize();
+  virtual StatusCode initialize() override;
 
 
   /// Book variables for this block.
@@ -67,7 +64,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const xAOD::IParticle& p);
+  virtual StatusCode fill (const xAOD::IParticle& p) override;
 
 
 private:
