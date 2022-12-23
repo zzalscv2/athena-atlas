@@ -1,9 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
 // $Id: GenEventPileUpFillerTool.h 348274 2011-02-28 16:25:06Z krasznaa $
 /**
  * @file TruthD3PDMaker/src/GenEventPileUpFillerTool.h
@@ -46,7 +44,7 @@ namespace D3PD {
        * is compatible with what it expects, and raise an error otherwise.
        */
       virtual StatusCode configureD3PD( IAddVariable* tree,
-                                        const std::type_info& ti );
+                                        const std::type_info& ti ) override;
 
       /// Book variables for this block.
       virtual StatusCode book() override;
@@ -59,7 +57,7 @@ namespace D3PD {
        * is responsible for arranging that all the pointers for booked variables
        * are set appropriately upon entry.
        */
-      virtual StatusCode fill( const HepMC::GenEvent& p );
+      virtual StatusCode fill( const HepMC::GenEvent& p ) override;
 
    private:
       // Variables to write out:

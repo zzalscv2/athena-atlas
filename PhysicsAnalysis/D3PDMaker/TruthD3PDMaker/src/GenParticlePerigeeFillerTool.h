@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKD3PDMAKER_GENPARTICLEPERIGEEFILLERTOOL_H
@@ -27,13 +27,13 @@ public:
 			const std::string& name,
 			const IInterface* parent);
 
-  StatusCode initialize();
+  virtual StatusCode initialize() override;
   virtual StatusCode book() override;
 
 #ifdef HEPMC3
-  virtual StatusCode fill (const HepMC::ConstGenParticlePtr& p);
+  virtual StatusCode fill (const HepMC::ConstGenParticlePtr& p) override;
 #else
-  virtual StatusCode fill (const HepMC::GenParticle& p);
+  virtual StatusCode fill (const HepMC::GenParticle& p) override;
 #endif
 
 private:
