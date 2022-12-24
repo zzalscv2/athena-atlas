@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Header: /build/atlas/cvs/atlas/offline/DetectorDescription/IdDictParser/src/IdDictParser.cxx,v 1.13 2008-12-09 09:55:22 dquarrie Exp $  
@@ -142,7 +142,7 @@ IdDictParser::IdDictParser () : XMLCoreParser ()
   m_regionentry = 0;
 } 
   
-IdDictMgr& IdDictParser::parse (const std::string& file_name, std::string tag)  
+IdDictMgr& IdDictParser::parse (const std::string& file_name, const std::string& tag)  
 { 
   m_idd.clear (); 
  
