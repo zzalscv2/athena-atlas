@@ -80,7 +80,7 @@ dqm_algorithms::HLTMETComponents::execute(const std::string & name,
   colflags[2] = ((colflags[2] > 0) && (colflags[2] <= nXBins)) ? colflags[2] : 1;
   colflags[3] = ((colflags[3] >= colflags[2]) && (colflags[3] <= nXBins)) ? colflags[3] : nXBins;
   bool yellowFlagComp = false, redFlagComp = false;
-  int ytot = 0, ycnt = 0, rtot = 0, rcnt = 0;
+  int ycnt = 0, rcnt = 0;
   
   // yellow flag
   float epsilon = 1.e-3;
@@ -93,8 +93,6 @@ dqm_algorithms::HLTMETComponents::execute(const std::string & name,
         float oflow = std::abs(hprojy->GetBinContent(nYBins+1));
         float btotal = hprojy->Integral();
 
-        // total bins requested for yellow flags
-        ytot++;
         // flag true if overflow/underflow has entries or if histo is empty
         // denoting missing component
         if(((uflow > epsilon) || (oflow > epsilon)) && (btotal < epsilon)) {
@@ -116,7 +114,6 @@ dqm_algorithms::HLTMETComponents::execute(const std::string & name,
         float uflow = std::abs(hprojy->GetBinContent(0));
         float oflow = std::abs(hprojy->GetBinContent(nYBins+1));
         float btotal = hprojy->Integral();
-        rtot++;
         // flag true if overflow/underflow has entries or if histo is empty
         // denoting missing component
         if(((uflow > epsilon) || (oflow > epsilon)) && (btotal < epsilon)) {

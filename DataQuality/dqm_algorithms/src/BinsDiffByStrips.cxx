@@ -266,7 +266,6 @@ config.getParameters(), 0.3);
   int nBinsYellow = 0;
   int nBinsGreen = 0;
   int nBinsUndefined = 0;
-  int nBinsDisabled = 0;
 
  
   //===============================================================================================
@@ -313,7 +312,6 @@ AllBinInOneStrip.push_back(binContent_tmp);
 	 inputs.push_back(binContent);
       }
       else {
-	nBinsDisabled++;
 	binwiseStatus->SetBinContent(ix,iy,dqm_core::Result::Disabled);
       }
     }

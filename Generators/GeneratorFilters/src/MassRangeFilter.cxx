@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/MassRangeFilter.h"
@@ -38,11 +38,9 @@ StatusCode MassRangeFilter::filterEvent() {
   bool samePDGID = (std::abs(m_PartId) == std::abs(m_PartId2));
   for (McEventCollection::const_iterator itr = events()->begin(); itr != events()->end(); ++itr) {
     const HepMC::GenEvent* genEvt = *itr;
-    int n = 0;
     auto genEvt_particles_begin=HepMC::begin(*genEvt);
     auto genEvt_particles_end=HepMC::end(*genEvt);
     for ( auto pitr1 = genEvt_particles_begin; pitr1 != genEvt_particles_end; ++pitr1) {
-      n++;
       if ((*pitr1)->status() != m_PartStatus ) continue; //status of the particle
       if (std::abs((*pitr1)->pdg_id()) != std::abs(m_PartId) ) continue; //PDG ID selection
       if ((*pitr1)->momentum().perp() < m_Ptmin ) continue; // pT cut
