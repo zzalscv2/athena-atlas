@@ -208,8 +208,6 @@ namespace DerivationFramework {
     int nsmunuL=0;
     int nstaunuL=0;
 
-    int nother=0;
-
     //Classification of the event follows (gg, sq...):
 
     if      (fabs(SUSY_Spart1_pdgId)== 1000022) nchi01++;
@@ -248,7 +246,6 @@ namespace DerivationFramework {
     else if (SUSY_Spart1_pdgId==2000015) nstau2minus++;
     else if (SUSY_Spart1_pdgId==-2000015) nstau2plus++;
     else if (fabs(SUSY_Spart1_pdgId)==1000016) nstaunuL++;
-    else nother++;
 
 
 
@@ -291,7 +288,6 @@ namespace DerivationFramework {
     else if (SUSY_Spart2_pdgId==2000015) nstau2minus++;
     else if (SUSY_Spart2_pdgId==-2000015) nstau2plus++;
     else if (fabs(SUSY_Spart2_pdgId)==1000016) nstaunuL++;
-    else nother++;
 
 
     ///Final classification
