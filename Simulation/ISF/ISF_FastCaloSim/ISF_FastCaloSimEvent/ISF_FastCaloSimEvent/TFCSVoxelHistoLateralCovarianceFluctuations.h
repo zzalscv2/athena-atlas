@@ -23,7 +23,7 @@ public:
   virtual void set_geometry(ICaloGeometry* geo) override {m_geo=geo;};
   ICaloGeometry* get_geometry() {return m_geo;};
 
-  bool initialize(TFile* inputfile, std::string folder);
+  bool initialize(TFile* inputfile, const std::string& folder);
 
   /// create one fluctuated shape for a shower to be applied as scale factor to the average shape
   /// Store the fluctuation in simulstate

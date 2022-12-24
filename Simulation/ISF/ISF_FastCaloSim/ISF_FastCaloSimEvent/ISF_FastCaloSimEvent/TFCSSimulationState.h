@@ -139,7 +139,7 @@ class TFCSSimulationState:public TObject
         return ((count ? fnv1a_32(s, count - 1) : 2166136261u) ^ s[count]) * 16777619u;
     }
     // Run time call for hash function
-    static std::uint32_t getAuxIndex(std::string s);
+    static std::uint32_t getAuxIndex(const std::string& s);
     static std::uint32_t getAuxIndex(const char* s);
     
     //Check if some auxiliary information is stored
