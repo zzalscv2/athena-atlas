@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandomEngine.h"
@@ -56,7 +56,7 @@ void TFCSSimulationState::Print(Option_t *) const
   }  
 }
 
-std::uint32_t TFCSSimulationState::getAuxIndex(std::string s) 
+std::uint32_t TFCSSimulationState::getAuxIndex(const std::string& s) 
 {
   return TFCSSimulationState::fnv1a_32(s.c_str(),s.size());
 }

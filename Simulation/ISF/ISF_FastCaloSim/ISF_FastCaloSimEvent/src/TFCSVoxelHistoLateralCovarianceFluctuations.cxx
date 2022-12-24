@@ -54,7 +54,7 @@ TFCSVoxelHistoLateralCovarianceFluctuations::~TFCSVoxelHistoLateralCovarianceFlu
 {
 }
 
-bool TFCSVoxelHistoLateralCovarianceFluctuations::initialize(TFile* inputfile, std::string folder)
+bool TFCSVoxelHistoLateralCovarianceFluctuations::initialize(TFile* inputfile, const std::string& folder)
 {
   //load m_eigenvariances and m_parMeans from input file
   //load histograms for each cell from input file
