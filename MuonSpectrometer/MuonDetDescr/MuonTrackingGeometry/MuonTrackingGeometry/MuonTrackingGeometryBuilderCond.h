@@ -14,6 +14,7 @@
 #include "MuonTrackingGeometry/MuonInertMaterialBuilderCond.h"
 #include "MuonTrackingGeometry/MuonTrackingGeometryBuilderImpl.h"
 #include "TrkDetDescrInterfaces/IDetachedTrackingVolumeBuilderCond.h"
+#include "TrkGeometry/TrackingGeometry.h"
 //
 #include "GaudiKernel/ToolHandle.h"
 

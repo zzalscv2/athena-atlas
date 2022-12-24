@@ -6,6 +6,7 @@
 #define MUONTRACKINGGEOMETRY_MUONSTATIONBUILDERCOND_H
 
 #include "MuonTrackingGeometry/MuonStationBuilderImpl.h"
+#include "TrkGeometry/TrackingGeometry.h"
 #include "TrkDetDescrInterfaces/IDetachedTrackingVolumeBuilderCond.h"
 //
 #include "StoreGate/ReadCondHandleKey.h"

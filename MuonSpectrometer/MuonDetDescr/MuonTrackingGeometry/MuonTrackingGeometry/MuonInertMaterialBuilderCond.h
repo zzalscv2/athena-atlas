@@ -10,6 +10,7 @@
 #define MUONTRACKINGGEOMETRY_MUONINERTMATERIALBUILDERCOND_H
 
 #include "MuonTrackingGeometry/MuonInertMaterialBuilderImpl.h"
+#include "TrkGeometry/TrackingGeometry.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 namespace Muon {
