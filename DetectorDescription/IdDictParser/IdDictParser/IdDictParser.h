@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IDDICTPARSER_IDDICTPARSER_H
@@ -12,7 +12,7 @@ class IdDictParser : public XMLCoreParser
 { 
 public:  
   IdDictParser ();  
-  IdDictMgr& parse (const std::string& file_name, std::string tag = ""); 
+  IdDictMgr& parse (const std::string& file_name, const std::string& tag = ""); 
  
   IdDictMgr             m_idd; 
   IdDictDictionary*     m_dictionary; 
