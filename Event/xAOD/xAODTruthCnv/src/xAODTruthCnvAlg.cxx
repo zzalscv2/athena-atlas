@@ -288,8 +288,9 @@ namespace xAODMaker {
 	      xTruthEvent->setPdfInfoParameter((float)pdfInfo->pdf2(), xAOD::TruthEvent::XF2);
 #endif
 	    }
-	  }
-	  if (!isSignalProcess) xTruthPileupEventContainer->push_back( xTruthPileupEvent );
+	  }else{//not isSignalProcess
+      xTruthPileupEventContainer->push_back( xTruthPileupEvent );
+    }
                 
 	  // (2) Build particles and vertices
 	  // Map for building associations between particles and vertices
@@ -324,21 +325,24 @@ namespace xAODMaker {
         auto beamParticles_vec = genEvt->beams();
         genEvt_valid_beam_particles=(beamParticles_vec.size()>1);
         if (genEvt_valid_beam_particles){beamParticles.first=beamParticles_vec[0]; beamParticles.second=beamParticles_vec[1]; }
-        // We want to process particles in barcode order. Don't ask why.
+        // We want to process particles in barcode order.
         auto bcmapatt = genEvt->attribute<HepMC::GenEventBarcodes>("barcodes");
         if (!bcmapatt) ATH_MSG_ERROR("TruthParticleCnvTool.cxx: Event does not contain barcodes attribute"); 
         std::map<int, HepMC3::ConstGenParticlePtr> bcmap = bcmapatt->barcode_to_particle_map();
+        xTruthParticleContainer->reserve(bcmap.size());
         for (const auto &[k,part]: bcmap) {
 #else
         genEvt_valid_beam_particles=genEvt->valid_beam_particles();
         if ( genEvt_valid_beam_particles ) beamParticles = genEvt->beam_particles();
+        xTruthParticleContainer->reserve(genEvt->particles_size());
         for (auto part: *genEvt) {
 #endif
 	    // (a) create TruthParticle
 	    xAOD::TruthParticle* xTruthParticle = new xAOD::TruthParticle();
+      // (b) Put particle into container;
 	    xTruthParticleContainer->push_back( xTruthParticle );
-	    fillParticle(xTruthParticle, part); // (b) Copy HepMC info into the new particle
-	    // (c) Put particle into container; Build Event<->Particle element link
+	    fillParticle(xTruthParticle, part); // (c) Copy HepMC info into the new particle
+	    // (d) Build Event<->Particle element link
 	    const ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, xTruthParticleContainer->size()-1);
 	    if (isSignalProcess) xTruthEvent->addTruthParticleLink(eltp);
 	    if (!isSignalProcess) xTruthPileupEvent->addTruthParticleLink(eltp);
@@ -350,11 +354,11 @@ namespace xAODMaker {
 	    // Is this one of the beam particles?
 	    if (genEvt_valid_beam_particles) {
 	      if (isSignalProcess) {
-		if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
-		if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
+          if (part == beamParticles.first) xTruthEvent->setBeamParticle1Link(eltp);
+          if (part == beamParticles.second) xTruthEvent->setBeamParticle2Link(eltp);
 	      }
 	    }
-	    // (d) Particle's production vertex
+	    // (e) Particle's production vertex
 	    auto productionVertex = part->production_vertex();
             // Skip the dummy vertex that HepMC3 adds
             // Can distinguish it from real vertices because it has
@@ -362,19 +366,19 @@ namespace xAODMaker {
 	    if (productionVertex && productionVertex->parent_event() != nullptr) {
 	      VertexParticles& parts = vertexMap[productionVertex];
 	      if (parts.incoming.empty() && parts.outgoing.empty())
-		vertices.push_back (productionVertex);
+          vertices.push_back (productionVertex);
 	      parts.outgoingEL.push_back(eltp);
 	      parts.outgoing.push_back(xTruthParticle);
 	    }
 	    //
 	    // else maybe want to keep track that this is the production vertex
 	    //
-	    // (e) Particle's decay vertex
+	    // (f) Particle's decay vertex
 	    auto decayVertex = part->end_vertex();
 	    if (decayVertex) {
 	      VertexParticles& parts = vertexMap[decayVertex];
 	      if (parts.incoming.empty() && parts.outgoing.empty())
-		vertices.push_back (decayVertex);
+          vertices.push_back (decayVertex);
 	      parts.incomingEL.push_back(eltp);
 	      parts.incoming.push_back(xTruthParticle);
 	    }
@@ -383,25 +387,27 @@ namespace xAODMaker {
                 
 	  // (3) Loop over the map
 	  auto signalProcessVtx = HepMC::signal_process_vertex(genEvt); // Get the signal process vertex
+    xTruthVertexContainer->reserve(vertices.size());
 	  for (const auto&  vertex : vertices) {
 	    const auto& parts = vertexMap[vertex];
 	    // (a) create TruthVertex
 	    xAOD::TruthVertex* xTruthVertex = new xAOD::TruthVertex();
+      // (b) Put particle into container (so has store)
 	    xTruthVertexContainer->push_back( xTruthVertex );
-	    fillVertex(xTruthVertex, vertex); // (b) Copy HepMC info into the new vertex
-	    // (c) Put particle into container; Build Event<->Vertex element link
+	    fillVertex(xTruthVertex, vertex); // (c) Copy HepMC info into the new vertex
+	    // (d) Build Event<->Vertex element link
 	    ElementLink<xAOD::TruthVertexContainer> eltv(*xTruthVertexContainer, xTruthVertexContainer->size()-1);
 	    // Mark if this is the signal process vertex
 	    if (vertex == signalProcessVtx && isSignalProcess) xTruthEvent->setSignalProcessVertexLink(eltv);
 	    if (isSignalProcess) xTruthEvent->addTruthVertexLink(eltv);
 	    if (!isSignalProcess) xTruthPileupEvent->addTruthVertexLink(eltv);
-	    // (d) Assign incoming particles to the vertex, from the map
+	    // (e) Assign incoming particles to the vertex, from the map
 	    xTruthVertex->setIncomingParticleLinks( parts.incomingEL );
-	    // (e) Assign outgoing particles to the vertex, from the map
+	    // (f) Assign outgoing particles to the vertex, from the map
 	    xTruthVertex->setOutgoingParticleLinks( parts.outgoingEL );
-	    // (f) Set Particle<->Vertex links for incoming particles
-	    for (xAOD::TruthParticle* p : parts.incoming) p->setDecayVtxLink(eltv);
 	    // (g) Set Particle<->Vertex links for incoming particles
+	    for (xAOD::TruthParticle* p : parts.incoming) p->setDecayVtxLink(eltv);
+	    // (h) Set Particle<->Vertex links for incoming particles
 	    for (xAOD::TruthParticle* p : parts.outgoing) p->setProdVtxLink(eltv);
 	  } //end of loop over vertices
                 
