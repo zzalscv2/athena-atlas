@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParabolaCscClusterFitter.h"
@@ -202,10 +202,10 @@ Results ParabolaCscClusterFitter::fit(const StripFitList& sfits, double tantheta
 
     // Count strips above threshold:
     ATH_MSG_VERBOSE("Parabola fitter input has " << nstrip << " strips:");
-    unsigned int nstrip_threshold = 0;
+    //unsigned int nstrip_threshold = 0;
     for (unsigned int istrip = 0; istrip < nstrip; ++istrip) {
         Identifier id = sfits[istrip].strip->identify();
-        if (sfits[istrip].charge >= 20000) ++nstrip_threshold;
+        //if (sfits[istrip].charge >= 20000) ++nstrip_threshold;
         ATH_MSG_VERBOSE(" index: " << istrip << " chn:" << m_idHelperSvc->cscIdHelper().strip(id)
                                    << " amp:" << (int)(sfits[istrip].charge / 1000) << " ke.");
     }
