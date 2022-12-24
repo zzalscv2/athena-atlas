@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/RNGSeeding_test.cxx
@@ -51,7 +51,12 @@ inline uint32_t getmaskedhash(const std::vector<unsigned long>& state,uint32_t h
   return gethash(state) & hashmask;
 }
 
-void test1(ATHRNG::RNGWrapper* wrapper, const ATHRNG::RNGWrapper::SeedingOptionType option=ATHRNG::RNGWrapper::SeedingDefault, const uint64_t nseeds=1000000, uint64_t run=330000, std::string algName="TestAlg", const uint64_t maxevnr=1ULL<<34)
+void test1(ATHRNG::RNGWrapper* wrapper,
+           const ATHRNG::RNGWrapper::SeedingOptionType option=ATHRNG::RNGWrapper::SeedingDefault,
+           const uint64_t nseeds=1000000,
+           uint64_t run=330000,
+           const std::string& algName="TestAlg",
+           const uint64_t maxevnr=1ULL<<34)
 {
   const size_t slot=0;
   EventContext ctx;
