@@ -371,11 +371,10 @@ std::array<double, 10>
 Trk::MultiComponentStateModeCalculator::calculateMode(
   const Trk::MultiComponentState& multiComponentState)
 {
-  // Check to see if the multi-component state is measured
-  if (!MultiComponentStateHelpers::isMeasured(multiComponentState)) {
+  // Check to see if all components have covariance
+  if (!MultiComponentStateHelpers::allHaveCovariance(multiComponentState)) {
     return {};
   }
-
   std::array<std::vector<Component>, 5> mixture;
 
   fillMixture(multiComponentState, mixture);
