@@ -90,23 +90,15 @@ namespace RungeKuttaUtils {
 // Step estimators to surface
 /////////////////////////////////////////////////////////////////////////////////
 double
-stepEstimatorToCone(double* ATH_RESTRICT,
-                    const double* ATH_RESTRICT,
-                    bool&);
-
+stepEstimator(int kind,
+              double* ATH_RESTRICT Su,
+              const double* ATH_RESTRICT P,
+              bool& Q);
 double
-stepEstimatorToPlane(const double* ATH_RESTRICT,
-                     const double* ATH_RESTRICT,
-                     bool&);
-double
-stepEstimatorToCylinder(double* ATH_RESTRICT,
-                        const double* ATH_RESTRICT,
-                        bool&);
-double
-stepEstimatorToStraightLine(const double* ATH_RESTRICT,
-                            const double* ATH_RESTRICT,
-                            bool&);
-
+stepEstimator(Trk::SurfaceType surfaceType,
+              double* ATH_RESTRICT Su,
+              const double* ATH_RESTRICT P,
+              bool& Q);
 /////////////////////////////////////////////////////////////////////////////////
 // Step estimators to surfaces
 /////////////////////////////////////////////////////////////////////////////////
@@ -133,11 +125,10 @@ fillDistancesMap(
 // Transformations from local to global system coordinates
 // for Trk::TrackParameters and Trk::NeutralParameters
 /////////////////////////////////////////////////////////////////////////////////
-
 bool
-transformLocalToGlobal(bool, const Trk::TrackParameters&, double*);
+transformLocalToGlobal(bool, const Trk::TrackParameters&, double* ATH_RESTRICT);
 bool
-transformLocalToGlobal(bool, const Trk::NeutralParameters&, double*);
+transformLocalToGlobal(bool, const Trk::NeutralParameters&, double* ATH_RESTRICT);
 
 /////////////////////////////////////////////////////////////////////////////////
 // Transformations from local to global system coordinates
@@ -171,7 +162,7 @@ transformGlobalToLocal(const Trk::Surface*,
 // Covariance matrix production for Trk::TrackParameters
 /////////////////////////////////////////////////////////////////////////////////
 AmgSymMatrix(5)
-  newCovarianceMatrix(const double* ATH_RESTRICT, const AmgSymMatrix(5) &);
+newCovarianceMatrix(const double* ATH_RESTRICT, const AmgSymMatrix(5) & ATH_RESTRICT);
 
 /////////////////////////////////////////////////////////////////////////////////
 // Transformations from curvilinear to global system coordinates

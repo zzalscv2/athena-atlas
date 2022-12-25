@@ -151,27 +151,6 @@ createStraightLine(const Trk::TrackParameters* inputTrackParameters)
                                         : std::nullopt));
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// Distance to surface
-/////////////////////////////////////////////////////////////////////////////////
-double
-distance(Trk::SurfaceType surfaceType, double* targetSurface, const double* P, bool& distanceEstimationSuccessful)
-{
-  if (surfaceType == Trk::SurfaceType::Plane || surfaceType == Trk::SurfaceType::Disc)
-    return Trk::RungeKuttaUtils::stepEstimatorToPlane(targetSurface, P, distanceEstimationSuccessful);
-  if (surfaceType == Trk::SurfaceType::Cylinder)
-    return Trk::RungeKuttaUtils::stepEstimatorToCylinder(targetSurface, P, distanceEstimationSuccessful);
-
-  if (surfaceType == Trk::SurfaceType::Line || surfaceType == Trk::SurfaceType::Perigee)
-    return Trk::RungeKuttaUtils::stepEstimatorToStraightLine(targetSurface, P, distanceEstimationSuccessful);
-
-  if (surfaceType == Trk::SurfaceType::Cone)
-    return Trk::RungeKuttaUtils::stepEstimatorToCone(targetSurface, P, distanceEstimationSuccessful);
-
-  // presumably curvilinear?
-  return Trk::RungeKuttaUtils::stepEstimatorToPlane(targetSurface, P, distanceEstimationSuccessful);
-}
-
 std::unique_ptr<Trk::TrackParameters>
 propagateNeutral(const Trk::TrackParameters& parm,
                  std::vector<Trk::DestSurf>& targetSurfaces,
@@ -892,9 +871,11 @@ propagateWithJacobianImpl(Cache& cache,
   double mom = 0.;
   double beta = 1.;
 
-  double distanceToTarget = distance(surfaceType, targetSurface, P, distanceEstimationSuccessful);
-  if (!distanceEstimationSuccessful)
+  double distanceToTarget = Trk::RungeKuttaUtils::stepEstimator(
+      surfaceType, targetSurface, P, distanceEstimationSuccessful);
+  if (!distanceEstimationSuccessful) {
     return false;
+  }
 
   // Set initial step length to 100mm or the distance to the target surface.
   double h = 0;
@@ -933,7 +914,8 @@ propagateWithJacobianImpl(Cache& cache,
                                    cache.m_MPV);
     // Calculate new distance to target
     previousDistance = std::abs(distanceToTarget);
-    distanceToTarget = distance(surfaceType, targetSurface, P, distanceEstimationSuccessful);
+    distanceToTarget = Trk::RungeKuttaUtils::stepEstimator(
+        surfaceType, targetSurface, P, distanceEstimationSuccessful);
     if (!distanceEstimationSuccessful)
       return false;
 
