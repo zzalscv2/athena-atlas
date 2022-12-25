@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValMET.cxx 
@@ -1010,20 +1010,16 @@ for(const auto& it : corrTrk_names) {
       double leadPt = 0., subleadPt = 0., leadPhi = 0., subleadPhi = 0.;
 
 
-      unsigned int jetcount = 0;
-
       for (auto jet_itr = jets->begin(); jet_itr != jets->end(); ++jet_itr) {
 	if ((*jet_itr)->pt() > leadPt && Accept(*jet_itr,JvtCut,jvtTool)) {
 	  subleadPt = leadPt;
 	  subleadPhi = leadPhi;
 	  leadPt = (*jet_itr)->pt();
 	  leadPhi = (*jet_itr)->phi();
- 	  jetcount++;
 	}
 	else if ((*jet_itr)->pt() > subleadPt && Accept(*jet_itr,JvtCut,jvtTool)) {
 	  subleadPt = (*jet_itr)->pt();
 	  subleadPhi = (*jet_itr)->phi();
- 	  jetcount++;
 	}
       }
 
