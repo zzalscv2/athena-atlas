@@ -196,9 +196,6 @@ void CaloGeometry::post_process(int sampling)
 
 void CaloGeometry::InitRZmaps()
 {
-
-  int nok=0;
-  
   FSmap< double , double > rz_map_eta [2][MAX_SAMPLING];
   FSmap< double , double > rz_map_rmid[2][MAX_SAMPLING];
   FSmap< double , double > rz_map_zmid[2][MAX_SAMPLING];
@@ -221,7 +218,6 @@ void CaloGeometry::InitRZmaps()
     const CaloDetDescrElement* theDDE=(*calo_iter).second;
     if(theDDE)
     {
-      ++nok;
       unsigned int sample=theDDE->getSampling();
 
       int side=0;

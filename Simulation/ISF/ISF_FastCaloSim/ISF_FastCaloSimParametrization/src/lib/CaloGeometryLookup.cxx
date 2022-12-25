@@ -244,20 +244,6 @@ void CaloGeometryLookup::post_process()
           <<refcell->identify()<<" outside eta range"<<endl;
     }
   }
-
-  int ncells=0;
-  int nempty=0;
-  for(int ieta=0;ieta<m_cell_grid_eta;++ieta) {
-    for(int iphi=0;iphi<m_cell_grid_phi;++iphi) {
-      if(!m_cell_grid[ieta][iphi]) {
-        ++nempty;
-        //cout<<"Sampling "<<sampling<<"_"<<index()<<": No cell at pos ("<<ieta<<","<<iphi<<")"<<endl;
-      } else {
-        ++ncells;
-      }
-    }
-  }  
-  //  cout<<"Grid: Sampling "<<sampling<<"_"<<index()<<": "<<ncells<<"/"<<size()<<" cells filled, "<<nempty<<" empty grid positions deta="<<m_deta_double<<" dphi="<<m_dphi_double<<endl;
 }
 
 float CaloGeometryLookup::calculate_distance_eta_phi(const CaloDetDescrElement* DDE,float eta,float phi,float& dist_eta0,float& dist_phi0) const
