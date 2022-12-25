@@ -19,7 +19,26 @@ namespace {
 constexpr double invsqrt2PI =
   M_2_SQRTPI / (2. * M_SQRT2); // 1. / sqrt(2. * M_PI);
 
-using namespace Trk::MultiComponentStateModeCalculator;
+// Simple representation of 1D component
+struct Component
+{
+  Component() = default;
+  ~Component() = default;
+  Component(const Component&) = default;
+  Component& operator=(const Component&) = default;
+  Component(Component&&) = default;
+  Component& operator=(Component&&) = default;
+  // Constructor with arguments
+  Component(double aWeight, double aMean, double aSigma)
+    : weight(aWeight)
+    , mean(aMean)
+    , sigma(aSigma)
+  {}
+  double weight = 0;
+  double mean = 0;
+  double sigma = 0;
+};
+
 
 /** bried method to determine the value of the a gaussian distribution at a
  * given value */
