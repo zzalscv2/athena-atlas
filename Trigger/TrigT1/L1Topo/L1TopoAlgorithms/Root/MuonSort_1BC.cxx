@@ -54,11 +54,9 @@ TCS::MuonSort_1BC::sort(const InputTOBArray & input, TOBArray & output) {
   const LateMuonTOBArray & muons = dynamic_cast<const LateMuonTOBArray&>(input);
 
   // fill output array with GenericTOB built from late muons
-  int ii=0;
   for(LateMuonTOBArray::const_iterator lm = muons.begin(); lm!= muons.end(); ++lm ) {
 
     const GenericTOB gtob(**lm);
-    ++ii;
 
     // eta cut
     if (parType_t(std::abs((*lm)-> eta())) < m_minEta) continue; 
