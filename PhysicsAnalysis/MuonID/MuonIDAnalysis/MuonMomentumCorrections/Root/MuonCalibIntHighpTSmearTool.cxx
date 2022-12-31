@@ -63,8 +63,16 @@ namespace CP
         // Do nothing, if it is data
         if(mu.CB.isData) return CorrectionCode::Ok;
 
-
         auto cat = ConvertToMacroCategory(mu.raw_mst_category);
+
+        ATH_MSG_VERBOSE("Doing high pT smearing: "<<int(cat)<<" for year: "<<int(mu.CB.year)<<" raw: "<<mu.raw_mst_category);
+
+        // If undefined, don't perform any smearing
+        if(cat == MCP::MST_Categories::Undefined)
+        {
+            return CorrectionCode::Ok; 
+        }
+
 
         double MS_Misaligned_p1 = m_MS_Misaligned_p1.at(mu.CB.year).at(cat)->getCalibConstant(mu.CB);
         double MS_Misaligned_p2 = m_MS_Misaligned_p2.at(mu.CB.year).at(cat)->getCalibConstant(mu.CB);

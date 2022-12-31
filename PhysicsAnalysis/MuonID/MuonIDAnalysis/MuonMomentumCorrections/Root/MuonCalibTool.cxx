@@ -191,12 +191,14 @@ namespace CP
         dec_idPt(mu) = muonObj.ID.calib_pt * GeVtoMeV;
         dec_mePt(mu) = muonObj.ME.calib_pt * GeVtoMeV;
         if(!m_validationMode)
-          muonObj.raw_mst_category = (CP::IMuonSelectionTool::ResolutionCategory) m_MuonSelectionTool->getResolutionCategory(mu);
+        {
+            muonObj.raw_mst_category = (CP::IMuonSelectionTool::ResolutionCategory) m_MuonSelectionTool->getResolutionCategory(mu);
+        }
 
         // Special case: if the proper flags are selected (m_extra_highpt_smearing or m_2stations_highpt_smearing)
         // an ad-hoc smearing of the combined momentum has to be applied
         bool extra_smearing   = (m_extra_highpt_smearing && (muonObj.raw_mst_category >= 0) && !( muonObj.raw_mst_category & IMuonSelectionTool::CategoryFour));  // Extra smearing, if selected, gets anyway only applied to non-3-station muons!
-        bool highpt_smearing = (m_2stations_highpt_smearing && ( muonObj.raw_mst_category & IMuonSelectionTool::CategoryThree));  // Special highpt smearing, if selected, gets anyway only applied to missing-inner, 2-station muons only!
+        bool highpt_smearing = (m_2stations_highpt_smearing && (muonObj.raw_mst_category >= 0) && ( muonObj.raw_mst_category & IMuonSelectionTool::CategoryThree));  // Special highpt smearing, if selected, gets anyway only applied to missing-inner, 2-station muons only!
 
         if (((extra_smearing || highpt_smearing)) && (mu.pt() > m_HighPtSystThreshold * GeVtoMeV))
         {
