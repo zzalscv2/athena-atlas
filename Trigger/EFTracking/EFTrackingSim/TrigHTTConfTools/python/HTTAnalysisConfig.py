@@ -381,5 +381,7 @@ if __name__ == "__main__":
     acc.addService(CompFactory.THistSvc(Output = ["EXPERT DATAFILE='monitoring.root', OPT='RECREATE'"]))
     acc.merge(HTTLogicalHistProcessAlgCfg(newFlags)) 
     acc.store(open('AnalysisConfig.pkl','wb'))
-    acc.run()
+    
+    statusCode = acc.run()
+    assert statusCode.isSuccess() is True, "Application execution did not succeed"
 
