@@ -100,6 +100,9 @@ run "NTUP_PHYSVAL" Derivation_tf.py \
   --format NTUP_PHYSVAL \
   --maxEvents ${number_of_events}
 
+mv runargs.PhysicsValidation.py runargs.PhysicsValidation.Main.py
+mv log.PhysicsValidation log.PhysicsValidation.Main
+
 checkstep "NTUP_PHYSVAL"
 
 #Run btag separately because they are ..doing things differently >:V
@@ -110,6 +113,9 @@ run "NTUP_BTAG_PHYSVAL" Derivation_tf.py \
   --validationFlags doBtag \
   --format NTUP_PHYSVAL \
   --maxEvents ${number_of_events}
+
+mv runargs.PhysicsValidation.py runargs.PhysicsValidation.BTAG.py
+mv log.PhysicsValidation log.PhysicsValidation.BTAG
 
 checkstep "NTUP_BTAG_PHYSVAL"
  
