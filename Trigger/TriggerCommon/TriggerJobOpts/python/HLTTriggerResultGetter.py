@@ -68,7 +68,7 @@ def HLTTriggerResultGetter(flags=None):
     _log.info("ESD content set according to the ESDEDMSet flag: %s and EDM version %d", flags.Trigger.ESDEDMSet, flags.Trigger.EDMVersion)
 
     # AOD objects choice
-    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet,  flags.Trigger.EDMVersion)
+    _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet, edmVersion)
 
     _log.info("AOD content set according to the AODEDMSet flag: %s and EDM version %d", flags.Trigger.AODEDMSet, flags.Trigger.EDMVersion)
 
