@@ -1245,11 +1245,8 @@ StatusCode ISF_HitAnalysis::execute()
   }
 
   //Start matching:
-  Int_t iindex = 0;
   for (std::map<Long64_t, FCS_cell>::iterator it = cells.begin(); it != cells.end(); )
   {
-    iindex++;
-    // std::cout <<iindex<<std::endl;
     one_matchedcell.clear(); //maybe not completely necessery, as we're not pushing_back into vectors
     //set the cell part
     one_matchedcell.cell = it->second;
