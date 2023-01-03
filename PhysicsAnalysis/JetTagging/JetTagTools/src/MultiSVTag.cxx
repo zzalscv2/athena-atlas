@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -168,8 +168,8 @@ namespace Analysis
         //if(jp4.DeltaR(svp4)>0.4) continue;
         vars.m_summass += mass;
         const std::vector<ElementLink<xAOD::TrackParticleContainer> > svTrackLinks = (**vtxIter)->trackParticleLinks();
-        if(svTrackLinks.size()==1){ 
-        }else{ nvtx2trk++;
+        if(svTrackLinks.size()>1){ 
+          nvtx2trk++;
         }
         all_trks += svTrackLinks.size();
 

@@ -1,7 +1,7 @@
 // emacs: this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -784,7 +784,7 @@ std::vector<typename IDScanZFinderInternal<SpacePoint>::vertex>* IDScanZFinderIn
       woutput.push_back( maxh );
     }
   
-  } // end of "b" loop, the loop over m_numberOfPeaks
+  }
   
   
     /// at this point we have the histogram with the highest N vertices removed
