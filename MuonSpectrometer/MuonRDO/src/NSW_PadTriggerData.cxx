@@ -1,77 +1,125 @@
 #include "MuonRDO/NSW_PadTriggerData.h"
 
 namespace Muon {
-NSW_PadTriggerData::NSW_PadTriggerData(IdentifierHash identifierHash, uint8_t sectorID, SectorSize sectorSize,
-    Endcap endcap, uint32_t BCID, uint32_t L1ID, const std::array<hitlist_t, 3>& hitlists)
-    : m_identifierHash(identifierHash), m_sectorID(sectorID), m_sectorSize(sectorSize), m_endcap(endcap), m_BCID(BCID),
-        m_L1ID(L1ID), m_hitlists(hitlists) { }
+NSW_PadTriggerData::NSW_PadTriggerData(uint32_t sourceid,
+                                       uint32_t flags,
+                                       uint32_t ec,
+                                       uint32_t fragid,
+                                       uint32_t secid,
+                                       uint32_t spare,
+                                       uint32_t orbit,
+                                       uint32_t bcid,
+                                       uint32_t l1id,
+                                       uint32_t hit_n,
+                                       uint32_t pfeb_n,
+                                       uint32_t trigger_n,
+                                       uint32_t bcid_n,
+                                       uint32_vt hit_relbcid,
+                                       uint32_vt hit_pfeb,
+                                       uint32_vt hit_tdschannel,
+                                       uint32_vt hit_vmmchannel,
+                                       uint32_vt hit_vmm,
+                                       uint32_vt hit_padchannel,
+                                       uint32_vt pfeb_addr,
+                                       uint32_vt pfeb_nchan,
+                                       uint32_vt pfeb_disconnected,
+                                       uint32_vt trigger_bandid,
+                                       uint32_vt trigger_phiid,
+                                       uint32_vt trigger_relbcid,
+                                       uint32_vt bcid_rel,
+                                       uint32_vt bcid_status,
+                                       uint32_vt bcid_multzero):
+  m_sourceid(sourceid),
+  m_flags(flags),
+  m_ec(ec),
+  m_fragid(fragid),
+  m_secid(secid),
+  m_spare(spare),
+  m_orbit(orbit),
+  m_bcid(bcid),
+  m_l1id(l1id),
+  m_hit_n(hit_n),
+  m_pfeb_n(pfeb_n),
+  m_trigger_n(trigger_n),
+  m_bcid_n(bcid_n),
+  m_hit_relbcid(hit_relbcid),
+  m_hit_pfeb(hit_pfeb),
+  m_hit_tdschannel(hit_tdschannel),
+  m_hit_vmmchannel(hit_vmmchannel),
+  m_hit_vmm(hit_vmm),
+  m_hit_padchannel(hit_padchannel),
+  m_pfeb_addr(pfeb_addr),
+  m_pfeb_nchan(pfeb_nchan),
+  m_pfeb_disconnected(pfeb_disconnected),
+  m_trigger_bandid(trigger_bandid),
+  m_trigger_phiid(trigger_phiid),
+  m_trigger_relbcid(trigger_relbcid),
+  m_bcid_rel(bcid_rel),
+  m_bcid_status(bcid_status),
+  m_bcid_multzero(bcid_multzero)
+{
+  std::tie(m_trigger_bandid, m_trigger_phiid, m_trigger_relbcid) =
+    filterNonNulls(m_trigger_bandid, m_trigger_phiid, m_trigger_relbcid);
+  m_trigger_n = static_cast<uint32_t>(m_trigger_bandid.size());
+}
 
-IdentifierHash NSW_PadTriggerData::identifierHash() const {
-    return m_identifierHash;
+NSW_PadTriggerData::NSW_PadTriggerData(bool side_A, uint32_t sector, uint32_t bcid, uint32_t l1id)
+{
+  m_sourceid = (side_A ? SIDE_A : SIDE_C) + 0x20 + sector;
+  m_secid = sector;
+  m_bcid = bcid;
+  m_l1id = l1id;
 }
 
 std::string NSW_PadTriggerData::string() const {
-    std::stringstream sstream{};
-    sstream << "IdentifierHash: " << m_identifierHash << ", size: " << size();
-    return sstream.str();
+  std::stringstream sstream{};
+  sstream << "Source ID: " << std::hex << getSourceid() << std::dec << " N(hits): " << getNumberOfHits() << " N(triggers) " << getNumberOfTriggers();
+  return sstream.str();
 }
 
-uint8_t NSW_PadTriggerData::sectorID() const noexcept {
-    return m_sectorID;
+std::tuple< uint32_vt, uint32_vt, uint32_vt >
+NSW_PadTriggerData::filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) const {
+  uint32_vt bandidsFiltered{}, phiidsFiltered{}, bcidsFiltered{};
+  for (size_t it = 0; it < bandids.size(); ++it) {
+    if (bandids.at(it) == NULL_BANDID and phiids.at(it) == NULL_PHIID) {
+      continue;
+    }
+    bandidsFiltered.push_back(bandids.at(it));
+    phiidsFiltered .push_back(phiids.at(it));
+    bcidsFiltered  .push_back(bcids.at(it));
+  }
+  return std::make_tuple(bandidsFiltered, phiidsFiltered, bcidsFiltered);
 }
 
-NSW_PadTriggerData::SectorSize NSW_PadTriggerData::sectorSize() const noexcept {
-    return m_sectorSize;
+void NSW_PadTriggerData::addTrigger(uint32_t bandid, uint32_t phiid, uint32_t relbcid) {
+  m_trigger_bandid.push_back(bandid);
+  m_trigger_phiid.push_back(phiid);
+  m_trigger_relbcid.push_back(relbcid);
+  m_trigger_n += 1;
 }
 
-NSW_PadTriggerData::Endcap NSW_PadTriggerData::endcap() const noexcept {
-    return m_endcap;
+bool NSW_PadTriggerData::sideA() const {
+  return m_sourceid < SIDE_C;
 }
 
-uint32_t NSW_PadTriggerData::BCID() const noexcept {
-    return m_BCID;
+bool NSW_PadTriggerData::sideC() const {
+  return not sideA();
 }
 
-uint32_t NSW_PadTriggerData::L1ID() const noexcept {
-    return m_L1ID;
+bool NSW_PadTriggerData::largeSector() const {
+  return m_secid % 2 == 0;
 }
 
-void NSW_PadTriggerData::sectorID(uint8_t sectorID) noexcept {
-    m_sectorID = sectorID;
-}
-
-void NSW_PadTriggerData::sectorSize(NSW_PadTriggerData::SectorSize sectorSize) noexcept {
-    m_sectorSize = sectorSize;
-}
-
-void NSW_PadTriggerData::endcap(NSW_PadTriggerData::Endcap endcap) noexcept {
-    m_endcap = endcap;
-}
-
-void NSW_PadTriggerData::BCID(uint32_t BCID) noexcept {
-    m_BCID = BCID;
-}
-
-void NSW_PadTriggerData::L1ID(uint32_t L1ID) noexcept {
-    m_L1ID = L1ID;
-}
-
-void NSW_PadTriggerData::hitlists(const std::array<hitlist_t, 3>& hitlists) {
-    // Can be optimized w/ taking param by value - depends on use case
-    m_hitlists = hitlists;
-}
-
-
-const std::array<NSW_PadTriggerData::hitlist_t, 3>& NSW_PadTriggerData::hitlists() const {
-    return m_hitlists;
+bool NSW_PadTriggerData::smallSector() const {
+  return not largeSector();
 }
 
 std::ostream& operator<<(std::ostream& stream, const NSW_PadTriggerData& rhs) {
-    return stream << rhs.string();
+  return stream << rhs.string();
 }
 
 MsgStream& operator<<(MsgStream& stream, const NSW_PadTriggerData& rhs) {
-    return stream << rhs.string();
+  return stream << rhs.string();
 }
 
 } // namespace Muon

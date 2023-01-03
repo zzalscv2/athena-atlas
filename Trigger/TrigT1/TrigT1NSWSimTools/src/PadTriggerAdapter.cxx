@@ -37,21 +37,16 @@ fillContainer(const std::unique_ptr<Muon::NSW_PadTriggerDataContainer> &out,
     it->second.push_back(pt.get());
   }
   for (const auto &item : triggerMap) {
-    uint32_t hash = item.first;
     const TriggerList &triggerList = item.second;
-    auto pt = triggerList[0];
-    auto newCollection = new Muon::NSW_PadTriggerData(
-        hash, pt->sectorId(),
-        static_cast<Muon::NSW_PadTriggerData::SectorSize>(pt->isSmall() ? 0
-                                                                        : 1),
-        static_cast<Muon::NSW_PadTriggerData::Endcap>(pt->sideId()),
-        pt->bctag(), l1id, {});
-    if (out->addCollection(newCollection, hash).isFailure()) {
+    const auto pt = triggerList[0];
+    const bool sideA = static_cast<bool>(pt->sideId());
+    auto newCollection = new Muon::NSW_PadTriggerData(sideA, pt->triggerSectorNumber() - 1, pt->bctag(), l1id);
+    for (const auto& pt: triggerList) {
+      newCollection->addTrigger(pt->bandId(), pt->phiId(), 0);
+    }
+    if (out->addCollection(newCollection, out->numberOfCollections()).isFailure()) {
       return StatusCode::FAILURE;
     }
-    for (auto pt : triggerList)
-      newCollection->push_back(
-          std::make_unique<Muon::NSW_PadTriggerSegment>(segment(*pt)));
   }
   return StatusCode::SUCCESS;
 }

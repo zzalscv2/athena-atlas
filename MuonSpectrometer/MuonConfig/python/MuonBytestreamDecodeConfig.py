@@ -255,6 +255,37 @@ def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     return acc
 
+def sTgcPadTriggerBytestreamDecodeCfg(flags, name="MuonsTgcPadTriggerRawDataProvider"):
+
+    acc = ComponentAccumulator()
+
+    # Make sure muon geometry is configured
+    from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
+    acc.merge(MuonGeoModelCfg(flags))
+
+    # Setup the sTGC ROD decoder
+    Muon__PadTrig_ROD_Decoder = CompFactory.Muon.PadTrig_ROD_Decoder
+    STGCPadTriggerRodDecoder = Muon__PadTrig_ROD_Decoder(name = "sTgcPadTriggerROD_Decoder")
+
+
+    # Setup the RAW data provider tool
+    keyName = flags.Overlay.BkgPrefix + "sTGCPadTriggerRDO" if flags.Common.isOverlay else "sTGCPadTriggerRDO"
+    Muon__PadTrig_RawDataProviderToolMT = CompFactory.Muon.PadTrig_RawDataProviderToolMT
+    MuonsTgcPadTriggerRawDataProviderTool = Muon__PadTrig_RawDataProviderToolMT(name = "sTgcPadTriggerRawDataProviderTool",
+                                                                                Decoder = STGCPadTriggerRodDecoder,
+                                                                                RdoLocation = keyName)
+
+    acc.addPublicTool( MuonsTgcPadTriggerRawDataProviderTool ) # This should be removed, but now defined as PublicTool at MuFastSteering
+
+    # Setup the RAW data provider algorithm
+    Muon__sTgcPadTriggerRawDataProvider = CompFactory.Muon.sTgcPadTriggerRawDataProvider
+    sTgcPadTriggerRawDataProvider = Muon__sTgcPadTriggerRawDataProvider(name = name,
+                                                                        ProviderTool = MuonsTgcPadTriggerRawDataProviderTool )
+
+    acc.addEventAlgo(sTgcPadTriggerRawDataProvider, primary = True)
+
+    return acc
+
 def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     acc = ComponentAccumulator()
 
@@ -331,6 +362,10 @@ def MuonByteStreamDecodersCfg(flags):
         # Schedule sTGC data decoding
         stgcdecodingAcc = sTgcBytestreamDecodeCfg( flags ) 
         cfg.merge( stgcdecodingAcc )
+
+        # Schedule sTGC Pad Trigger data decoding
+        stgcpadtriggerdecodingAcc = sTgcPadTriggerBytestreamDecodeCfg( flags )
+        cfg.merge( stgcpadtriggerdecodingAcc )
 
     return cfg
 

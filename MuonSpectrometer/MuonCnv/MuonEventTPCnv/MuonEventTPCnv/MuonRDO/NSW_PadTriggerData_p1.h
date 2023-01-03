@@ -1,25 +1,41 @@
 #ifndef MUONEVENTTPCNV_NSW_PADTRIGGERDATA_P1_H
 #define MUONEVENTTPCNV_NSW_PADTRIGGERDATA_P1_H
 
-#include "MuonEventTPCnv/MuonRDO/NSW_PadTriggerSegment_p1.h"
-
 #include <vector>
 
 namespace Muon {
+using uint32_vt = std::vector<uint32_t>;
 struct NSW_PadTriggerData_p1 {
-    unsigned int m_identifierHash;
-    uint8_t m_sectorID;
-    uint8_t m_sectorSize;
-    uint8_t m_endcap;
-    uint32_t m_BCID;
-    uint32_t m_L1ID;
-    // Hitlists from the BCs preceding, following, and at the time of the L1A
-    std::vector<uint16_t> m_precedingHitlist;
-    std::vector<uint16_t> m_currentHitlist;
-    std::vector<uint16_t> m_followingHitlist;
 
-    // Decision data
-    std::vector<NSW_PadTriggerSegment_p1> m_segments;
+    uint32_t m_sourceid{0};
+    uint32_t m_flags{0};
+    uint32_t m_ec{0};
+    uint32_t m_fragid{0};
+    uint32_t m_secid{0};
+    uint32_t m_spare{0};
+    uint32_t m_orbit{0};
+    uint32_t m_bcid{0};
+    uint32_t m_l1id{0};
+    uint32_t m_hit_n{0};
+    uint32_t m_pfeb_n{0};
+    uint32_t m_trigger_n{0};
+    uint32_t m_bcid_n{0};
+    uint32_vt m_hit_relbcid{};
+    uint32_vt m_hit_pfeb{};
+    uint32_vt m_hit_tdschannel{};
+    uint32_vt m_hit_vmmchannel{};
+    uint32_vt m_hit_vmm{};
+    uint32_vt m_hit_padchannel{};
+    uint32_vt m_pfeb_addr{};
+    uint32_vt m_pfeb_nchan{};
+    uint32_vt m_pfeb_disconnected{};
+    uint32_vt m_trigger_bandid{};
+    uint32_vt m_trigger_phiid{};
+    uint32_vt m_trigger_relbcid{};
+    uint32_vt m_bcid_rel{};
+    uint32_vt m_bcid_status{};
+    uint32_vt m_bcid_multzero{};
+
 };
 } // namespace Muon
 
