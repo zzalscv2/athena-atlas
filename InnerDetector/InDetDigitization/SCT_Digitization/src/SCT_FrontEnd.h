@@ -99,7 +99,7 @@ class  SCT_FrontEnd : public extends<AthAlgTool, IFrontEnd> {
   StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, const int& stripMax) const;
   StatusCode randomNoise(SiChargedDiodeCollection& collection, const Identifier& moduleId, int side, CLHEP::HepRandomEngine* rndmEngine, SCT_FrontEndData& data, const int& stripMax) const;
   StatusCode addNoiseDiode(SiChargedDiodeCollection& collection, int strip, int tbin) const;
-  float meanValue(std::vector<float>& calibDataVect) const;
+  static float meanValue(std::vector<float>& calibDataVect) ;
   StatusCode initVectors(int strips, SCT_FrontEndData& data) const;
 
  private:

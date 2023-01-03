@@ -124,7 +124,7 @@ StatusCode SCT_FastDigitizationTool::processBunchXing(int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -159,7 +159,7 @@ StatusCode SCT_FastDigitizationTool::processAllSubEvents(const EventContext& ctx
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.size()==0 )
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() )
     {
       ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
       return StatusCode::FAILURE;
@@ -283,11 +283,11 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
           bool isRep = false;
           const int trkn = currentSiHit->trackNumber();
           const Identifier detElId = hitSiDetElement->identify();
-          for (unsigned int j=0; j<trkNo.size();j++)
+          for (int j : trkNo)
             {
-              for (unsigned int k=0; k<detEl.size();k++)
+              for (auto & k : detEl)
                 {
-                  if ((trkn > 0) && (trkn == trkNo[j]) && (detElId == detEl[k])) {isRep = true; break;}
+                  if ((trkn > 0) && (trkn == j) && (detElId == k)) {isRep = true; break;}
                 }
               if (isRep) { break; }
             }
@@ -706,7 +706,7 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
             }
           // bail out - no left overs after cut
 
-          if (!potentialClusterRDOList.size() || potentialClusterPath_Used < m_sctMinimalPathCut)
+          if (potentialClusterRDOList.empty() || potentialClusterPath_Used < m_sctMinimalPathCut)
             {
               continue;
             }
@@ -798,9 +798,9 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
                   potentialClusterPosition +=  Amg::Vector2D(corr,0.);
                 }
               bool not_valid = false;
-              for (unsigned int i=0; i < potentialClusterRDOList.size(); i++)
+              for (auto & i : potentialClusterRDOList)
                 {
-                  if (!(potentialClusterRDOList[i].is_valid()))
+                  if (!(i.is_valid()))
                     {
                       not_valid = true;
                       break;
@@ -942,7 +942,7 @@ Amg::Vector3D SCT_FastDigitizationTool::stepToStripBorder(
                                                           double slopeYX,
                                                           double slopeZX,
                                                           const Amg::Vector2D& stripCenter,
-                                                          int direction) const
+                                                          int direction) 
 {
   double stepExitX = 0.;
   double stepExitY = 0.;
@@ -1014,7 +1014,7 @@ bool SCT_FastDigitizationTool::NeighbouringClusters(const std::vector<Identifier
 }
 
 
-void SCT_FastDigitizationTool::Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY ) const{
+void SCT_FastDigitizationTool::Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY ) {
 
   double localEntryX = localEntry.x();
   double localExitX = localExit.x();

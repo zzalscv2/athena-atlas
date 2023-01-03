@@ -213,8 +213,6 @@ void TRTDigSettings::print(const std::string& front) const {
 
   std::cout << front << "==============================================="<<std::endl;
 
-  return;
-
 }
 
 //---------------------------------------------------------------------

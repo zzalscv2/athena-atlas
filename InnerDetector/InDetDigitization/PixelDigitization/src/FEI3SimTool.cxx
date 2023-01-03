@@ -9,7 +9,7 @@ FEI3SimTool::FEI3SimTool(const std::string& type, const std::string& name, const
   FrontEndSimTool(type, name, parent) {
 }
 
-FEI3SimTool::~FEI3SimTool() { }
+FEI3SimTool::~FEI3SimTool() = default;
 
 StatusCode FEI3SimTool::initialize() {
   CHECK(FrontEndSimTool::initialize());
@@ -196,8 +196,7 @@ void FEI3SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       }
     }
   }
-  return;
-}
+  }
 
 int FEI3SimTool::relativeBunch2009(const double threshold, const double intimethreshold,
                                    const SiTotalCharge& totalCharge,

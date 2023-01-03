@@ -104,7 +104,7 @@ private:
   StatusCode digitize(const EventContext& ctx,
                       TimedHitCollection<SiHit>& thpcsi);
   bool NeighbouringClusters(const std::vector<Identifier>& potentialClusterRDOList,  const InDet::SCT_Cluster *existingCluster) const;
-  void Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY ) const;
+  static void Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY ) ;
 
   StringProperty m_inputObjectName{this, "InputObjectName", "SCT_Hits", "Input Object name"};     //! name of the sub event  hit collections.
 
@@ -145,14 +145,14 @@ private:
   DoubleProperty m_DiffusionShiftY_endcap{this, "DiffusionShiftY_endcap", 15};
   DoubleProperty m_sctMinimalPathCut{this, "SCT_MinimalPathLength", 90.};        //!< the 1. model parameter: minimal 3D path in strip
 
-  Amg::Vector3D stepToStripBorder(const InDetDD::SiDetectorElement& sidetel,
+  static Amg::Vector3D stepToStripBorder(const InDetDD::SiDetectorElement& sidetel,
                                   //const Trk::Surface& surface,
                                   double localStartX, double localStartY,
                                   double localEndX, double localEndY,
                                   double slopeYX,
                                   double slopeZX,
                                   const Amg::Vector2D& stripCenter,
-                                  int direction) const;
+                                  int direction) ;
 
 
 

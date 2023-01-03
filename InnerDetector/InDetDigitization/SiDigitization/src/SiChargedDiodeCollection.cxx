@@ -39,8 +39,7 @@ SiChargedDiodeCollection::SiChargedDiodeCollection(const InDetDD::SolidStateDete
 
 
 SiChargedDiodeCollection::~SiChargedDiodeCollection()
-{
-}
+= default;
 
 // Clean up the collection
 void SiChargedDiodeCollection::clear() {
@@ -52,11 +51,7 @@ void SiChargedDiodeCollection::clear() {
 
 
 bool SiChargedDiodeCollection::AlreadyHit(const InDetDD::SiCellId & siId) {
-  if(m_chargedDiodes.find(siId) == m_chargedDiodes.end() ) {
-    return false;
-  } else {
-    return true;
-  }
+  return m_chargedDiodes.find(siId) != m_chargedDiodes.end();
 }
 
 bool SiChargedDiodeCollection::AlreadyHit(const Identifier & id) {

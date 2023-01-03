@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -90,11 +90,10 @@ void SiTotalCharge::removeTimeInformation()
   m_chargeComposition.swap(oldComposition);
 
   // loop on all old charges
-  for(list_t::const_iterator p_charge=oldComposition.begin() ;
-      p_charge!=oldComposition.end() ; ++p_charge) {
+  for(const auto & p_charge : oldComposition) {
     // add the old charge (without time) to the list
-    addSiCharge(SiCharge(p_charge->charge(),0,
-			 p_charge->processType(),p_charge->particleLink()));
+    addSiCharge(SiCharge(p_charge.charge(),0,
+			 p_charge.processType(),p_charge.particleLink()));
   }
 }
 

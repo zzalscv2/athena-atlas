@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiTrackDistance.h"
 
-SiTrackDistance::SiTrackDistance()
-{   
-}
+SiTrackDistance::SiTrackDistance() = default;
 
 SiTrackDistance::SiTrackDistance(float tanTheta, float tanPhi, float zInit) :
     m_tanTheta(tanTheta),

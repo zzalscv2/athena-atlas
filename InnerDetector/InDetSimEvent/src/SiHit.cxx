@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/SiHit.h"
@@ -178,13 +178,13 @@ int SiHit::getSide() const {
 }
 
 void SiHit::print() const {
-  if (isPixel() == true) {
-    if (isPLR() == true) {
+  if (isPixel()) {
+    if (isPLR()) {
       std::cout << "*** PLR Hit " << std::endl;
     } else {
       std::cout << "*** Pixel Hit " << std::endl;
     }
-  } else if (isSCT() == true) {
+  } else if (isSCT()) {
     std::cout << "*** SCT Hit " << std::endl;
   }
   else {

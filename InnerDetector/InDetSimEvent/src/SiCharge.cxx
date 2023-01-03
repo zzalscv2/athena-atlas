@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,13 +14,7 @@
 #include "InDetSimEvent/SiCharge.h"
 
 // Copy constructor:
-SiCharge::SiCharge(const SiCharge &charge) :
-  m_charge(charge.m_charge),
-  m_time(charge.m_time),
-  m_processType(charge.m_processType),
-  m_partLink(charge.m_partLink),
-  m_trackDistance(charge.m_trackDistance)
-{}
+SiCharge::SiCharge(const SiCharge &charge) = default;
 
 // Constructor with parameters:
 SiCharge::SiCharge(const double& charge,const double& time,

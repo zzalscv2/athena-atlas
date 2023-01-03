@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetSimEvent/TRTHitIdHelper.h"
@@ -28,26 +28,22 @@ void TRTHitIdHelper::Initialize() {
   // Barrel or Endcap
 bool TRTHitIdHelper::isBarrel(const int& hid) const {
   int ps = this->GetFieldValue("BarrelEndcap", hid);
-  if (ps ==0 ) return true;
-  else return false;
+  return ps ==0;
 }
 
 bool TRTHitIdHelper::isEndcap(const int& hid) const {
   int ps = this->GetFieldValue("BarrelEndcap", hid);
-  if (ps ==0 ) return false;
-  else return true;
+  return ps != 0;
 }
 
 // Positive or Negative
 bool TRTHitIdHelper::isPositive(const int& hid) const {
   int ps = this->GetFieldValue("PositiveNegative", hid);
-  if (ps ==0 ) return true;
-  else return false;
+  return ps ==0;
 }
 bool TRTHitIdHelper::isNegative(const int& hid) const {
   int ps = this->GetFieldValue("PositiveNegative", hid);
-  if (ps ==0 ) return false;
-  else return true;
+  return ps != 0;
 }
 
 // Ring/Wheel

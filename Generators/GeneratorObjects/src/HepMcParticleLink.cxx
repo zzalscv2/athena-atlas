@@ -25,7 +25,7 @@ namespace {
 /**
  * @brief StoreGate keys to try for each EBC_EVCOLL enum.
  */
-constexpr static int NKEYS = 5;
+constexpr int NKEYS = 5;
 const
 std::string s_keys[EBC_NCOLLKINDS][NKEYS] =
   {
@@ -145,11 +145,11 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
   : m_store (sg),
     m_ptr (part),
-    m_extBarcode((0 != part) ? HepMC::barcode(part) : 0, eventIndex, evColl, positionFlag)
+    m_extBarcode((nullptr != part) ? HepMC::barcode(part) : 0, eventIndex, evColl, positionFlag)
 {
   assert(part);
 
-  if (part != 0 && positionFlag == IS_POSITION) {
+  if (part != nullptr && positionFlag == IS_POSITION) {
     if (const McEventCollection* pEvtColl = retrieveMcEventCollection(sg)) {
       const HepMC::GenEvent *pEvt = pEvtColl->at (eventIndex);
       m_extBarcode.makeIndex (pEvt->event_number(), eventIndex);
@@ -210,7 +210,7 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
         pEvt = pEvtColl->find (index);
       }
 
-      if (0 != pEvt) {
+      if (nullptr != pEvt) {
         p = HepMC::barcode_to_particle(pEvt,barcode());
         // Be sure to update m_extBarcode before m_ptrs;
         // otherwise, the logic in eventIndex() won't work correctly.

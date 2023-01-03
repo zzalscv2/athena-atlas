@@ -86,7 +86,7 @@ StatusCode TRT_SimDriftTimeTool::initialize()
   m_maxFieldSquaredLimit = 1.1*m_maxField*1.1*m_maxField;
   m_invMaxFieldSquared = 1.0/(m_maxField*m_maxField);
 
-  for (unsigned int i=0; i<pDTData.size(); i++)
+  for (auto & i : pDTData)
     {
 
       // Tabulate mean drifttimes at no and max field.
@@ -101,8 +101,8 @@ StatusCode TRT_SimDriftTimeTool::initialize()
         {
           double distance = ((m_maxDistance-m_minDistance)*distIndex)/(m_nTabulatedDistances-1.0)+m_minDistance;
           if (distIndex == m_nTabulatedDistances-1) distance = m_maxDistance;//to avoid a numerical mistake.
-          table_of_dist2meanDT_at_noField[distIndex]  = pDTData[i]->DriftTimeAtNoField(distance);
-          table_of_dist2meanDT_at_maxField[distIndex] = pDTData[i]->DriftTimeAtMaxField(distance);
+          table_of_dist2meanDT_at_noField[distIndex]  = i->DriftTimeAtNoField(distance);
+          table_of_dist2meanDT_at_maxField[distIndex] = i->DriftTimeAtMaxField(distance);
         }
 
       m_table_of_dist2meanDT_at_noField.push_back(table_of_dist2meanDT_at_noField);

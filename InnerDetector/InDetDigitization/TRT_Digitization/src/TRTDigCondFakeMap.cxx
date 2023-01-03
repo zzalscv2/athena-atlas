@@ -61,6 +61,4 @@ void TRTDigCondFakeMap::setStrawStateInfo(Identifier& TRT_Identifier,
   }
 
   relative_noiseamplitude = relnoiseamp * averagenoiseampforstrawlength;
-
-  return;
 }

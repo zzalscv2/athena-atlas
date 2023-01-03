@@ -87,7 +87,7 @@ StatusCode PixelDigitizationTool::processAllSubEvents(const EventContext& ctx) {
     ATH_CHECK(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSiHits));
     m_timedHits->reserve(numberOfSiHits);
     // Now merge all collections into one
-    for (TimedHitCollList::iterator iColl = hitCollList.begin(); iColl != hitCollList.end(); ++iColl) {
+    for (auto & iColl : hitCollList) {
       // Decide if this event will be processed depending on HardScatterSplittingMode
       if (m_HardScatterSplittingMode == 2 && !m_HardScatterSplittingSkipper) {
         m_HardScatterSplittingSkipper = true;
@@ -99,8 +99,8 @@ StatusCode PixelDigitizationTool::processAllSubEvents(const EventContext& ctx) {
       if (m_HardScatterSplittingMode == 1 && !m_HardScatterSplittingSkipper) {
         m_HardScatterSplittingSkipper = true;
       }
-      const SiHitCollection* p_collection(iColl->second);
-      m_timedHits->insert(iColl->first, p_collection);
+      const SiHitCollection* p_collection(iColl.second);
+      m_timedHits->insert(iColl.first, p_collection);
       ATH_MSG_DEBUG("SiTrackerHitCollection found with" << p_collection->size() << " hits"); // loop on the hit collections
     }
   }
@@ -359,9 +359,9 @@ StatusCode PixelDigitizationTool::mergeEvent(const EventContext& ctx) {
   // Digitize hits
   ATH_CHECK(digitizeEvent(ctx));
 
-  for (std::vector<SiHitCollection*>::iterator it = m_hitCollPtrs.begin(); it != m_hitCollPtrs.end(); ++it) {
-    (*it)->Clear();
-    delete(*it);
+  for (auto & hitCollPtr : m_hitCollPtrs) {
+    hitCollPtr->Clear();
+    delete hitCollPtr;
   }
   m_hitCollPtrs.clear();
 

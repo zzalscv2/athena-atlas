@@ -305,7 +305,6 @@ void SCT_SurfaceChargesGenerator::process(const SiDetectorElement* element,
                                           const EventContext& ctx) {
   ATH_MSG_VERBOSE("SCT_SurfaceChargesGenerator::process starts");
   processSiHit(element, *phit, inserter, phit.eventTime(), phit.eventId(), rndmEngine, ctx);
-  return;
 }
 
 // -------------------------------------------------------------------------------------------
@@ -585,8 +584,7 @@ void SCT_SurfaceChargesGenerator::processSiHit(const SiDetectorElement* element,
       } // end of loop on charges
     }
   }
-  return;
-}
+  }
 
 bool SCT_SurfaceChargesGenerator::chargeIsTrapped(double spess,
                                                   const SiDetectorElement* element,

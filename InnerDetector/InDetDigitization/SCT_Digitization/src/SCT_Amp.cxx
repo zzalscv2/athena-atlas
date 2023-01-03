@@ -101,7 +101,6 @@ void SCT_Amp::response(const list_t& Charges, const float timeOfThreshold, std::
     }
   }
   for (short bin{0}; bin<bin_max; ++bin) response[bin] = response[bin]*m_NormConstCentral;
-  return;
 }
 
 //----------------------------------------------------------------------
@@ -139,5 +138,4 @@ void SCT_Amp::crosstalk(const list_t& Charges, const float timeOfThreshold, std:
     }
   }
   for (short bin{0}; bin<bin_max; ++bin) response[bin] = response[bin]*m_NormConstNeigh;
-  return;
 }

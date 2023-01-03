@@ -216,7 +216,7 @@ StatusCode TRTDigitizationTool::processBunchXing(int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_dataObjectName, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -440,7 +440,7 @@ StatusCode TRTDigitizationTool::processStraws(const EventContext& ctx,
     const double bunchCrossingTime(hitTime(theHit) - static_cast<double>(theHit->GetGlobalTime()));
 
     // Add the simdata object to the map.
-    if ( depositVector.size() &&
+    if ( !depositVector.empty() &&
          (evtIndex == 0 || ((*i)->GetKineticEnergy()>m_minpileuptruthEkin))  &&
          (bunchCrossingTime < m_maxCrossingTimeSDO) && (bunchCrossingTime > m_minCrossingTimeSDO) ) {
       simDataMap->insert(std::make_pair(idStraw, InDetSimData(depositVector)));
@@ -548,7 +548,7 @@ StatusCode TRTDigitizationTool::processAllSubEvents(const EventContext& ctx) {
   else {
     TimedHitCollList hitCollList; // this is a list<pair<time_t, DataLink<TRTUncompressedHitCollection> > >
     unsigned int numberOfSimHits(0);
-    if ( !(m_mergeSvc->retrieveSubEvtsData(m_dataObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.size()==0 ) {
+    if ( !(m_mergeSvc->retrieveSubEvtsData(m_dataObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
       ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
       return StatusCode::FAILURE;
     } else {
@@ -595,7 +595,7 @@ StatusCode TRTDigitizationTool::processAllSubEvents(const EventContext& ctx) {
 
     ATH_MSG_DEBUG ( " Number of digits " << m_vDigits.size() << " (" << m_vDigits.size()-numberOfDigitsBeforeNoise << " of those are pure noise)" );
 
-    m_pNoise->sortDigits(m_vDigits);
+    TRTNoise::sortDigits(m_vDigits);
 
   } else {
     ATH_MSG_DEBUG ( " Number of digits " << m_vDigits.size() );
@@ -695,7 +695,7 @@ StatusCode TRTDigitizationTool::mergeEvent(const EventContext& ctx) {
 
     ATH_MSG_DEBUG ( " Number of digits " << m_vDigits.size() << " (" << m_vDigits.size()-numberOfDigitsBeforeNoise << " of those are pure noise)" );
 
-    m_pNoise->sortDigits(m_vDigits);
+    TRTNoise::sortDigits(m_vDigits);
 
   } else {
     ATH_MSG_DEBUG ( " Number of digits " << m_vDigits.size() );

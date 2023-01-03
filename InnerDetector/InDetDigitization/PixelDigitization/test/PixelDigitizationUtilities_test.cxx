@@ -23,7 +23,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ostream>
 
 namespace utf = boost::unit_test;
-namespace tt  = boost::test_tools;
 
 
 namespace PixelDigitization{

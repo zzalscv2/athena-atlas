@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <mutex>
@@ -57,22 +57,19 @@ void SiHitIdHelper::Initialize() {
 bool SiHitIdHelper::isPixel(const int& hid) const
 {
   int psh = this->GetFieldValue("Part", hid);
-  if (psh ==0 ) return true;
-  else return false;
+  return psh ==0;
 }
 
 bool SiHitIdHelper::isSCT(const int& hid) const
 {
   int psh = this->GetFieldValue("Part", hid);
-  if (psh ==1 ) return true;
-  else return false;
+  return psh ==1;
 }
 
 bool SiHitIdHelper::isHGTD(const int& hid) const
 {
   int psh = this->GetFieldValue("Part", hid);
-  if (psh ==2 ) return true;
-  else return false;
+  return psh ==2;
 }
 
 bool SiHitIdHelper::isPLR(const int& hid) const
@@ -80,8 +77,7 @@ bool SiHitIdHelper::isPLR(const int& hid) const
   if (!m_isITkHGTD) return false;
 
   int psh = this->GetFieldValue("BarrelEndcap", hid);
-  if (std::abs(psh) == 4) return true;
-  else return false;
+  return std::abs(psh) == 4;
 }
 
 
