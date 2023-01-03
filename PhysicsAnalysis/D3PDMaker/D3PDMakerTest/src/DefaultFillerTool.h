@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerTest/src/DefaultFillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -52,7 +49,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill();
+  virtual StatusCode fill() override;
 
 
 private:

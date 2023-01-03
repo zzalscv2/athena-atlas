@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file D3PDMakerTest/src/Obj12FillerTool.h
  * @author scott snyder <snyder@bnl.gov>
@@ -57,7 +54,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const Obj1& p);
+  virtual StatusCode fill (const Obj1& p) override;
 
 
   /**
@@ -68,7 +65,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const Obj2& p);
+  virtual StatusCode fill (const Obj2& p) override;
 
 
 private:
