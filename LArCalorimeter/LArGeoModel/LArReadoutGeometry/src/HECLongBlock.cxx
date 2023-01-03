@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArReadoutGeometry/HECLongBlock.h"
@@ -13,7 +13,9 @@ HECLongBlock::HECLongBlock(const HECLongBlock &right)
     m_frontPlateThickness(right.m_frontPlateThickness),
     m_backPlateThickness(right.m_backPlateThickness)
 {
-  for (int i=0;i<14;i++) m_RadialSeg.push_back( right.m_RadialSeg[i] ? (HECRadialSegment *) 0 : new HECRadialSegment(*right.m_RadialSeg[i]));
+  for (int i=0;i<14;i++) {
+    m_RadialSeg.push_back( right.m_RadialSeg[i] ? new HECRadialSegment(*right.m_RadialSeg[i]) : nullptr);
+  }
 }
 
 HECLongBlock::HECLongBlock (unsigned int blockNum
@@ -62,7 +64,9 @@ HECLongBlock & HECLongBlock::operator=(const HECLongBlock &right)
     m_frontPlateThickness=right.m_frontPlateThickness;
     m_backPlateThickness=right.m_backPlateThickness;
     
-    for (int i=0;i<14;i++) m_RadialSeg.push_back( right.m_RadialSeg[i] ? (HECRadialSegment *) 0 : new HECRadialSegment(*right.m_RadialSeg[i]));
+    for (int i=0;i<14;i++) {
+      m_RadialSeg.push_back( right.m_RadialSeg[i] ? new HECRadialSegment(*right.m_RadialSeg[i]) : nullptr);
+    }
     
   }
   return *this;
