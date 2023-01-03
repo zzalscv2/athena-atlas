@@ -23,38 +23,33 @@ namespace NSWL1 {
                                             Muon::NSW_TrigRawDataContainer* trigRdoContainer) const {
     ATH_MSG_DEBUG("------------- TriggerProcessorTool::mergeRDO ---------------------");
     ATH_MSG_DEBUG("Pad Trigger Container size: " << padTriggerContainer->size());
+    constexpr bool HAS_PHI_RESOLUTION{true};
+    constexpr uint8_t SPARE_IS_PAD{1};
     for ( const auto padTriggerData : *padTriggerContainer ) {
       ATH_MSG_DEBUG("Pad Trigger data: " << *padTriggerData);
-
-      char sectorSide = (padTriggerData->endcap() == Muon::NSW_PadTriggerData::Endcap::A) ? 'A' : 'C';
-      auto sectorID = (padTriggerData->sectorSize() == Muon::NSW_PadTriggerData::SectorSize::SMALL) ? padTriggerData->sectorID()*2-1 : padTriggerData->sectorID()*2-2;
-      Muon::NSW_TrigRawData* trigRawData = new Muon::NSW_TrigRawData(sectorID, sectorSide, padTriggerData->BCID());
-      for ( const Muon::NSW_PadTriggerSegment* padTriggerSegment : *padTriggerData) {
-        ATH_MSG_DEBUG("Pad Trigger segment: " << *padTriggerSegment);
-
-        Muon::NSW_TrigRawDataSegment* trigRawDataSegment = new Muon::NSW_TrigRawDataSegment();
-        uint8_t bandID = padTriggerSegment->bandID();
-        uint8_t phiID  = padTriggerSegment->phiID();
-        trigRawDataSegment->setRIndex(bandID);
-        trigRawDataSegment->setPhiIndex(phiID);
-
-        trigRawDataSegment->setPhiRes(true); // set sTGC bit
-        trigRawDataSegment->setSpare(1);     // set spare bit to 1, to distinguish between strips (default, i.e. 0) and pads
+      const char sectorSide = (padTriggerData->sideA()) ? 'A' : 'C';
+      auto trigRawData = new Muon::NSW_TrigRawData(padTriggerData->getSecid(), sectorSide, padTriggerData->getBcid());
+      for (size_t it = 0; it < padTriggerData->getNumberOfTriggers(); ++it) {
+        auto trigRawDataSegment = new Muon::NSW_TrigRawDataSegment();
+        trigRawDataSegment->setRIndex(padTriggerData->getTriggerBandIds().at(it));
+        trigRawDataSegment->setPhiIndex(padTriggerData->getTriggerPhiIds().at(it));
+        trigRawDataSegment->setPhiRes(HAS_PHI_RESOLUTION);
+        trigRawDataSegment->setSpare(SPARE_IS_PAD);
         trigRawData->push_back(trigRawDataSegment);
       }
       ATH_MSG_DEBUG("L1NSW-Pad Trigger Output: "
-		    << "sectorSide=" << trigRawData->sectorSide() << " "
-		    << "sectorId=" << trigRawData->sectorId() << " "
-		    << "bcId=" << trigRawData->bcId());
+                    << "sectorSide=" << trigRawData->sectorSide() << " "
+                    << "sectorId=" << trigRawData->sectorId() << " "
+                    << "bcId=" << trigRawData->bcId());
       for(const auto seg : *trigRawData){
-	ATH_MSG_DEBUG("\tPadSegment: "
-		      << "deltaTheta=" << static_cast<int16_t>(seg->deltaTheta()) << " "
-		      << "phiIndex=" << static_cast<int16_t>(seg->phiIndex()) << " "
-		      << "rIndex=" << static_cast<int16_t>(seg->rIndex()) << " "
-		      << "spare=" << static_cast<int16_t>(seg->spare()) << " "
-		      << "lowRes=" << seg->lowRes() << " "
-		      << "phiRes=" << seg->phiRes() << " "
-		      << "monitor=" << seg->monitor());
+        ATH_MSG_DEBUG("\tPadSegment: "
+                      << "deltaTheta=" << static_cast<int16_t>(seg->deltaTheta()) << " "
+                      << "phiIndex=" << static_cast<int16_t>(seg->phiIndex()) << " "
+                      << "rIndex=" << static_cast<int16_t>(seg->rIndex()) << " "
+                      << "spare=" << static_cast<int16_t>(seg->spare()) << " "
+                      << "lowRes=" << seg->lowRes() << " "
+                      << "phiRes=" << seg->phiRes() << " "
+                      << "monitor=" << seg->monitor());
       }
       trigRdoContainer->push_back(trigRawData);
     }

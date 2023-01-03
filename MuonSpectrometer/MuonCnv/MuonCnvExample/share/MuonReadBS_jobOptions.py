@@ -39,3 +39,4 @@ if (MuonGeometryFlags.hasSTGC() and MuonGeometryFlags.hasMM()):
 
     if DetFlags.readRDOBS.sTGC_on() and muonRecFlags.makePRDs():
         topSequence += getAlgorithm("MuonsTgcRawDataProvider")
+        topSequence += getAlgorithm("MuonsTgcPadTriggerRawDataProvider")

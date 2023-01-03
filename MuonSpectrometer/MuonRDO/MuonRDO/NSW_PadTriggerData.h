@@ -3,52 +3,127 @@
 
 #include "GaudiKernel/MsgStream.h"
 
-#include "AthContainers/DataVector.h"
-#include "Identifier/IdentifierHash.h"
-
-#include "MuonRDO/NSW_PadTriggerSegment.h"
-
 #include <sstream>
 
 namespace Muon {
-class NSW_PadTriggerData : public DataVector<NSW_PadTriggerSegment> {
-using hitlist_t = std::vector<uint16_t>;
-public:
-    enum class Endcap : uint8_t { C = 0, A = 1 };
-    enum class SectorSize : uint8_t { SMALL = 0, LARGE = 1 };
 
-    NSW_PadTriggerData(IdentifierHash identifierHash, uint8_t sectorID, SectorSize sectorSize, Endcap endcap,
-        uint32_t BCID, uint32_t L1ID, const std::array<hitlist_t, 3>& hitlists);
-    IdentifierHash identifierHash() const;
+using uint32_vt = std::vector<uint32_t>;
+
+class NSW_PadTriggerData {
+public:
+
+    // constructor for data
+    NSW_PadTriggerData(uint32_t sourceid,
+                       uint32_t flags,
+                       uint32_t ec,
+                       uint32_t fragid,
+                       uint32_t secid,
+                       uint32_t spare,
+                       uint32_t orbit,
+                       uint32_t bcid,
+                       uint32_t l1id,
+                       uint32_t hit_n,
+                       uint32_t pfeb_n,
+                       uint32_t trigger_n,
+                       uint32_t bcid_n,
+                       uint32_vt hit_relbcid,
+                       uint32_vt hit_pfeb,
+                       uint32_vt hit_tdschannel,
+                       uint32_vt hit_vmmchannel,
+                       uint32_vt hit_vmm,
+                       uint32_vt hit_padchannel,
+                       uint32_vt pfeb_addr,
+                       uint32_vt pfeb_nchan,
+                       uint32_vt pfeb_disconnected,
+                       uint32_vt trigger_bandid,
+                       uint32_vt trigger_phiid,
+                       uint32_vt trigger_relbcid,
+                       uint32_vt bcid_rel,
+                       uint32_vt bcid_status,
+                       uint32_vt bcid_multzero);
+
+    // constructor for sim
+    NSW_PadTriggerData(bool side_A, uint32_t sector, uint32_t bcid, uint32_t l1id);
+
+    uint32_t getSourceid()           const { return m_sourceid; }
+    uint32_t getFlags()              const { return m_flags; }
+    uint32_t getEc()                 const { return m_ec; }
+    uint32_t getFragid()             const { return m_fragid; }
+    uint32_t getSecid()              const { return m_secid; }
+    uint32_t getSpare()              const { return m_spare; }
+    uint32_t getOrbit()              const { return m_orbit; }
+    uint32_t getBcid()               const { return m_bcid; }
+    uint32_t getL1id()               const { return m_l1id; }
+    uint32_t getNumberOfHits()       const { return m_hit_n; }
+    uint32_t getNumberOfPfebs()      const { return m_pfeb_n; }
+    uint32_t getNumberOfTriggers()   const { return m_trigger_n; }
+    uint32_t getNumberOfBcids()      const { return m_bcid_n; }
+    uint32_vt getHitRelBcids()       const { return m_hit_relbcid; }
+    uint32_vt getHitPfebs()          const { return m_hit_pfeb; }
+    uint32_vt getHitTdsChannels()    const { return m_hit_tdschannel; }
+    uint32_vt getHitVmmChannels()    const { return m_hit_vmmchannel; }
+    uint32_vt getHitVmms()           const { return m_hit_vmm; }
+    uint32_vt getHitPadChannels()    const { return m_hit_padchannel; }
+    uint32_vt getPfebAddrs()         const { return m_pfeb_addr; }
+    uint32_vt getPfebNChannels()     const { return m_pfeb_nchan; }
+    uint32_vt getPfebDisconnecteds() const { return m_pfeb_disconnected; }
+    uint32_vt getTriggerBandIds()    const { return m_trigger_bandid; }
+    uint32_vt getTriggerPhiIds()     const { return m_trigger_phiid; }
+    uint32_vt getTriggerRelBcids()   const { return m_trigger_relbcid; }
+    uint32_vt getBcidRels()          const { return m_bcid_rel; }
+    uint32_vt getBcidStatuses()      const { return m_bcid_status; }
+    uint32_vt getBcidMultZeros()     const { return m_bcid_multzero; }
 
     std::string string() const;
-
-    uint8_t sectorID() const noexcept;
-    SectorSize sectorSize() const noexcept;
-    Endcap endcap() const noexcept;
-    uint32_t BCID() const noexcept;
-    uint32_t L1ID() const noexcept;
-
-    void sectorID(uint8_t sectorID) noexcept;
-    void sectorSize(SectorSize sectorSize) noexcept;
-    void endcap(Endcap endcap) noexcept;
-    void BCID(uint32_t BCID) noexcept;
-    void L1ID(uint32_t L1ID) noexcept;
-    void hitlists(const std::array<hitlist_t, 3>& hitlists);
-    const std::array<hitlist_t, 3>& hitlists() const;
-
     friend std::ostream& operator<<(std::ostream& stream, const NSW_PadTriggerData& rhs);
     friend MsgStream& operator<<(MsgStream& stream, const NSW_PadTriggerData& rhs);
 
+    void addTrigger(uint32_t bandid, uint32_t phiid, uint32_t relbcid);
+
+    bool sideA() const;
+    bool sideC() const;
+    bool largeSector() const;
+    bool smallSector() const;
+
 private:
-    IdentifierHash m_identifierHash;
-    uint8_t m_sectorID;
-    SectorSize m_sectorSize;
-    Endcap m_endcap;
-    uint32_t m_BCID;
-    uint32_t m_L1ID;
-    // List of pad hits, in a 3BC window around the L1A BC
-    std::array<hitlist_t, 3> m_hitlists;
+
+    std::tuple< uint32_vt, uint32_vt, uint32_vt >
+      filterNonNulls(uint32_vt bandids, uint32_vt phiids, uint32_vt bcids) const;
+
+    uint32_t m_sourceid{0};
+    uint32_t m_flags{0};
+    uint32_t m_ec{0};
+    uint32_t m_fragid{0};
+    uint32_t m_secid{0};
+    uint32_t m_spare{0};
+    uint32_t m_orbit{0};
+    uint32_t m_bcid{0};
+    uint32_t m_l1id{0};
+    uint32_t m_hit_n{0};
+    uint32_t m_pfeb_n{0};
+    uint32_t m_trigger_n{0};
+    uint32_t m_bcid_n{0};
+    uint32_vt m_hit_relbcid{};
+    uint32_vt m_hit_pfeb{};
+    uint32_vt m_hit_tdschannel{};
+    uint32_vt m_hit_vmmchannel{};
+    uint32_vt m_hit_vmm{};
+    uint32_vt m_hit_padchannel{};
+    uint32_vt m_pfeb_addr{};
+    uint32_vt m_pfeb_nchan{};
+    uint32_vt m_pfeb_disconnected{};
+    uint32_vt m_trigger_bandid{};
+    uint32_vt m_trigger_phiid{};
+    uint32_vt m_trigger_relbcid{};
+    uint32_vt m_bcid_rel{};
+    uint32_vt m_bcid_status{};
+    uint32_vt m_bcid_multzero{};
+
+    static constexpr uint32_t NULL_BANDID{0xff};
+    static constexpr uint32_t NULL_PHIID{0x3f};
+    static constexpr uint32_t SIDE_A = 0x6d0000;
+    static constexpr uint32_t SIDE_C = 0x6e0000;
+
 };
 } // namespace Muon
 
