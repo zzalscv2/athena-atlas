@@ -112,8 +112,10 @@ class AFP(DCSC_DefectTranslate_Subdetector):
         DCSC_Variable_With_Mapping('STATION', lambda iov: iov.inphysics is True),
     ]
 
-    dead_fraction_caution = 0.01
-    dead_fraction_bad = 0.75
+    equality_breaker = 0.0001
+
+    dead_fraction_caution = 0 + equality_breaker
+    dead_fraction_bad = 0.25 + equality_breaker
 
     mapping = {
         HV_A_FAR:  range( 1,  5),
