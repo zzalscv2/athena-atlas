@@ -90,6 +90,7 @@ class ConfigSettings_tauCore( _ConfigSettingsBase ):
        self._name     = "tauCore"
        self._suffix   = "TauCore"
        self._roi      = "HLT_Roi_TauCore"
+       self._pTmin    = 0.8*GeV
        self._holeSearch_FTF = True
 
 class ConfigSettings_tauIso( _ConfigSettingsBase ):
@@ -106,6 +107,8 @@ class ConfigSettings_tauIso( _ConfigSettingsBase ):
       self._addSingleTrackVertices = True
       self._vertex         = "HLT_IDVertex_Tau"
       self._electronPID    = False
+      self._pTmin          = 0.8*GeV
+      self._Xi2max         = 12
       # potential change coming up ...
       # self._minNSiHits_vtx = 6
 
@@ -130,9 +133,11 @@ class ConfigSettings_bjet( _ConfigSettingsBase ):
       self._name     = "bjet"
       self._suffix   = "Bjet"
       self._roi      = "HLT_Roi_Bjet"
-      self._pTmin    = 0.8*GeV
       self._etaHalfWidth    = 0.4
       self._phiHalfWidth    = 0.4
+      self._zedHalfWidth    = 10.0
+      self._pTmin  = 0.8*GeV
+      self._Xi2max = 12
 
 
 class ConfigSettings_jetSuper( _ConfigSettingsBase ):
@@ -144,14 +149,13 @@ class ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._adaptiveVertex = True
       self._actsVertex     = True
       self._addSingleTrackVertices = True
-      self._roi      = "HLT_Roi_JetSuper"
+      self._roi          = "HLT_Roi_JetSuper"
       self._etaHalfWidth = 0.3
       self._phiHalfWidth = 0.3
       self._zedHalfWidth = 150
-      self._doFullScan = True
-      self._pTmin      = 1*GeV
+      self._doFullScan   = True
+      self._pTmin        = 1*GeV
       #-----
-      self._doFullScan      = True
       self._doTRT           = False
       self._DoubletDR_Max   = 200
       self._SeedRadBinWidth = 10
@@ -293,8 +297,8 @@ class ConfigSettings_bmumux( _ConfigSettingsBase ):
    @property
    def SuperRoI(self):
       return self._SuperRoI
+       
 
-      
 
 class ConfigSettings_electronLRT( _ConfigSettingsBase ):
    def __init__( self ):
