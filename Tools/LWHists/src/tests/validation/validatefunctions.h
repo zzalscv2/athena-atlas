@@ -71,6 +71,7 @@ namespace HistValFunctions {
     return true;
   }
 
+  [[noreturn]]
   void testfailed(const std::string& testname);
 
   template <class T1, class T2>

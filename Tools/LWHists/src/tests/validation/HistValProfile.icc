@@ -14,7 +14,7 @@ HistValProfile::HistValProfile( bool trigger_conversion_all,
 {
   m_h1 = new TProfile(name.c_str(),title.c_str(),nbins,xmin,xmax,profparmin,profparmax,profile_test_erroroption());
   m_h2 = TProfile_LW::create(name.c_str(),title.c_str(),nbins,xmin,xmax,profparmin,profparmax,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile::compareMetaData();
 
   if (trigger_conversion_all)
     triggerConversionToROOTHist();
@@ -30,7 +30,7 @@ HistValProfile::HistValProfile( bool trigger_conversion_all,
 {
   m_h1 = new TProfile(name.c_str(),title.c_str(),nbins,xbins,profile_test_erroroption());
   m_h2 = TProfile_LW::create(name.c_str(),title.c_str(),nbins,xbins,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile::compareMetaData();
   if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }

@@ -14,7 +14,7 @@ class LWPools::PoolList {
   //basically an array of pools which inits to null
 public:
   std::atomic<LWPool*>& operator[](unsigned i) { return m_poolarr[i]; }
-  const LWPool * operator[](unsigned i) const { return m_poolarr[i]; }
+  const LWPool * operator[](unsigned i) const { return m_poolarr[i].load(); }
   PoolList();
   void cleanup();
 #ifdef LW_DEBUG_POOLS_DEBUG_USAGE

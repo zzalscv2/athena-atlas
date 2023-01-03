@@ -24,11 +24,15 @@ inline FlexErrArray<T>::FlexErrArray( unsigned nbins )
   assert(sizeof(T)>sizeof(unsigned short));
   if (small()) {
     memset(groups(),0,nGroupsNeeded(nbins)*sizeof(void*));
+    // cppcheck-suppress assertWithSideEffect
     assert(!groups()[0]);
+    // cppcheck-suppress assertWithSideEffect
     assert(!groups()[nGroupsNeeded(nbins)-1]);
   } else {
     memset(superGroups(),0,nSuperGroups(nbins)*sizeof(void*));
+    // cppcheck-suppress assertWithSideEffect
     assert(!superGroups()[0]);
+    // cppcheck-suppress assertWithSideEffect
     assert(!superGroups()[nSuperGroups(nbins)-1]);
   }
 }

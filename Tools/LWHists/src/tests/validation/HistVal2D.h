@@ -79,6 +79,7 @@ public:
   virtual void compareTH1s() override;
   virtual void compareFastLoop() override;
 
+  // cppcheck-suppress virtualCallInConstructor
   virtual void triggerConversionToROOTHist() override
   {
     if (!m_triggeredConversionToROOTHist) {

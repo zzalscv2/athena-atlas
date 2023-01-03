@@ -17,7 +17,7 @@ HistVal1D<TH_1D,THLW_1D>::HistVal1D( bool trigger_conversion_all,
 {
   m_h1 = new TH_1D(name.c_str(),title.c_str(),nbins,xmin,xmax);
   m_h2 = THLW_1D::create(name.c_str(),title.c_str(),nbins,xmin,xmax);
-  compareMetaData();
+  HistVal1D::compareMetaData();
 
   if (trigger_conversion_all)
     triggerConversionToROOTHist();

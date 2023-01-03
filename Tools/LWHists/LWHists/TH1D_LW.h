@@ -66,11 +66,13 @@ public:
 private:
   friend class LWHistInt;
   friend class LWHistVal;
+  // cppcheck-suppress virtualCallInConstructor
   virtual void clear() override;
   virtual unsigned actualFindBinX(const double&) const override;
   virtual double actualGetBinCenterX(int bin) const override;
   virtual const TH1* getROOTHistBaseNoAlloc() const override;
   virtual       TH1* getROOTHistBaseNoAlloc() override;
+  // cppcheck-suppress virtualCallInConstructor
   virtual void clearKeptROOTHist() override;//Does nothing if root-backend.
   const float * getVarBins() const;//null if fixed bin-widths
   float * getVarBins();//null if fixed bin-widths

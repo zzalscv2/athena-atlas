@@ -80,23 +80,27 @@ namespace RootSpy {
 
   //Utilities for book-keeping calls to root objects:
   const char * getROOTName(void* tobject) {
+    // cppcheck-suppress nullPointerRedundantCheck; false positive
     static const char* (*real)(void*)  = 0;
     if (!real) {
       real = (const char* (*)(void*))dlsym(RTLD_NEXT, "_ZNK6TNamed7GetNameEv");//Fixme: avoid this symbol hardcoding.
-      if (!real)
+      if (!real) {
 	std::cout<<"ROOTSPY ERROR: Could not find symbol for TNamed::GetName() through hardcoded mangling."<<std::endl;
-    return nullptr;
+        return nullptr;
+      }
     }
     return real(tobject);
   }
 
   const char * getROOTClass(void* tobject) {
+    // cppcheck-suppress nullPointerRedundantCheck; false positive
     static const char* (*real)(void*)  = 0;
     if (!real) {
       real = (const char* (*)(void*))dlsym(RTLD_NEXT, "_ZNK7TObject9ClassNameEv");//Fixme: avoid this symbol hardcoding.
-      if (!real)
+      if (!real) {
 	std::cout<<"ROOTSPY ERROR: Could not find symbol for TObject::GetName() through hardcoded mangling."<<std::endl;
-    return nullptr;
+        return nullptr;
+      }
     }
     return real(tobject);
   }

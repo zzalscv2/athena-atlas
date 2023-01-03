@@ -61,11 +61,11 @@ public:
   const char* GetErrorOption() const;
 
   void getSums( double& sumW,  double& sumW2,
-		double& sumWX, double& sumWX2,
-		double& sumWY, double&sumWY2 ) const;
+                double& sumWX, double& sumWX2,
+                double& sumWY, double&sumWY2 ) const;
   void setSums( const double& sumW,  const double&sumW2,
-		const double& sumWX, const double& sumWX2,
-		const double& sumWY, const double& sumWY2 );
+                const double& sumWX, const double& sumWX2,
+                const double& sumWY, const double& sumWY2 );
 
   TProfile* getROOTHist();
   virtual TH1* getROOTHistBase() override;
@@ -75,9 +75,11 @@ public:
 private:
   friend class LWHistInt;
   friend class LWHistVal;
+  // cppcheck-suppress virtualCallInConstructor
   virtual void clear() override;
   virtual const TH1* getROOTHistBaseNoAlloc() const override;
   virtual       TH1* getROOTHistBaseNoAlloc() override;
+  // cppcheck-suppress virtualCallInConstructor
   virtual void clearKeptROOTHist() override;//Does nothing if root-backend.
   const float * getVarBins() const;//null if fixed bin-widths
   float * getVarBins();//null if fixed bin-widths

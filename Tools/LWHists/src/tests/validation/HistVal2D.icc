@@ -15,7 +15,7 @@ HistVal2D<TH_2D,THLW_2D>::HistVal2D( bool trigger_conversion_all,
 {
   m_h1 = new TH_2D(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax);
   m_h2 = THLW_2D::create(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax);
-  compareMetaData();
+  HistVal2D::compareMetaData();
   if (trigger_conversion_all)
     triggerConversionToROOTHist();
 }

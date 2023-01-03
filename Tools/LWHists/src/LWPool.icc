@@ -27,7 +27,8 @@ inline void LWPool::release(char*c)
     m_likelyReleaseArea = findArea(c);
   assert(m_likelyReleaseArea);
   m_likelyReleaseArea->release(c);
-  if (m_likelyReleaseArea->isUnused()&&!isMotherPool())//NB: Mother pool never releases!!!!
-    //cppcheck-suppress thisUseAfterFree
+  if (m_likelyReleaseArea->isUnused()&&!isMotherPool()) {//NB: Mother pool never releases!!!!
+    // cppcheck-suppress thisUseAfterFree; xxx check this!
     freeArea(m_likelyReleaseArea);
+  }
 }
