@@ -29,19 +29,15 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-import os
-os.system("echo 'from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags ; InDetTrigFlags.cutLevel.set_Value_and_Lock(15) ' > cutlevel.py ; cat cutlevel.py ")
-
 Slices  = ['muon','electron','tau','bjet','fsjet']
 Events  = 4000
 Threads = 8
 Slots   = 8
 Release = "current"
-
-preinclude_file = 'RDOtoRDOTrigger:cutlevel.py'
-
 Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json  
 GridFiles = True
+
+preinclude_file = 'RDOtoRDOTrigger:TrigInDetValidation/TIDAcutlevel_preinclude.py'
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat      -r Offline -o data-hists-offline.root" ),
          ( "OfflineVtx",  " TIDAdata-run3-offline-vtx.dat  -r Offline -o data-hists-offline-vtx.root" ) ]
@@ -61,5 +57,3 @@ Comp = [ ( "L2muon",       "L2muon",      "data-hists-offline.root",      " -c T
    
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-
-
