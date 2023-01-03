@@ -29,7 +29,9 @@ def getBJetSequence(flags, jc_name=None):
 
     config=getInDetTrigConfig('jet')
     prmVtxKey = config.vertex
-    outputRoIName = getInDetTrigConfig('bjet').roi
+
+    bjetconfig    = getInDetTrigConfig('bjet')
+    outputRoIName = bjetconfig.roi
 
     jc_key = f'{jc_name}_'
     # Output container names as defined in TriggerEDMRun3
@@ -43,7 +45,10 @@ def getBJetSequence(flags, jc_name=None):
         RoITool = ViewCreatorCentredOnJetWithPVConstraintROITool(
             RoisWriteHandleKey  = recordable( outputRoIName ),
             VertexReadHandleKey = prmVtxKey,
-            PrmVtxLink = prmVtxKey.replace( "HLT_","" ),
+            PrmVtxLink  = prmVtxKey.replace( "HLT_","" ),
+            RoIEtaWidth = bjetconfig.etaHalfWidth,
+            RoIPhiWidth = bjetconfig.phiHalfWidth,
+            RoIZWidth   = bjetconfig.zedHalfWidth,
         ),
         Views = f"BTagViews_{jc_name}",
         InViewRoIs = "InViewRoIs",
