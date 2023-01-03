@@ -22,26 +22,6 @@
 namespace Trk {
 namespace MultiComponentStateModeCalculator {
 
-// Simple representation of 1D component
-struct Component
-{
-  Component() = default;
-  ~Component() = default;
-  Component(const Component&) = default;
-  Component& operator=(const Component&) = default;
-  Component(Component&&) = default;
-  Component& operator=(Component&&) = default;
-  // Constructor with arguments
-  Component(double aWeight, double aMean, double aSigma)
-    : weight(aWeight)
-    , mean(aMean)
-    , sigma(aSigma)
-  {}
-  double weight = 0;
-  double mean = 0;
-  double sigma = 0;
-};
-
 /** @brief  Method to calculate mode with MultiComponentState
  * state as input */
 std::array<double, 10>

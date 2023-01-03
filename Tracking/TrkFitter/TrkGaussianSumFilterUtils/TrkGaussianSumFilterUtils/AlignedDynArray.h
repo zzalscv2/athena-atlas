@@ -11,6 +11,7 @@
 #define GSFUtils_AlignedDynArray_H
 #include <cstdlib>
 #include <memory>
+#include <type_traits>
 #include "CxxUtils/assume_aligned.h"
 namespace GSFUtils {
 
@@ -38,7 +39,10 @@ struct AlignedDynArray
   static_assert(
     (ALIGNMENT % sizeof(void*)) == 0,
     "Alignment not an integral multiple of sizeof(void*)");
-
+  //Also we assert is POD
+  static_assert(
+    std::is_pod_v<T>,
+    "Type T is not POD");
   ///@{
   // Standard typedefs
   typedef T value_type;

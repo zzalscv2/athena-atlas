@@ -11,8 +11,6 @@ int
 main()
 {
 
-  using namespace Trk::MultiComponentStateModeCalculator;
-
   std::vector<Component> vec0 = {
     { 0.973657, -27.9079, 0.0538001 },    { 0.024202, -27.9023, 0.0580491 },
     { 0.00146762, -27.9063, 0.0594736 },  { 0.000452399, -27.8908, 0.0591268 },
