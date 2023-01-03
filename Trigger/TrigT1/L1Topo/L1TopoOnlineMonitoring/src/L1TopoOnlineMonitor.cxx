@@ -274,16 +274,51 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, std::vector
     return StatusCode::FAILURE;
   }
 
-  // TO-DO Make error monitoring by @Gabriel
-  /*
+  // Error monitoring ---------------------------------------------------------
+  enum class MonFunction : uint8_t {doRODct, doRODpc, doRODhc, doRODpe, doRODlm, doRODhm, doRODpt};
+  std::vector<uint8_t> rodErrors;
+  if (l1topoResult->getROD(0)->ct() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODct)); }
+  if (l1topoResult->getROD(0)->pc() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpc)); }
+  if (l1topoResult->getROD(0)->hc() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODhc)); }
+  if (l1topoResult->getROD(0)->pe() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpe)); }
+  if (l1topoResult->getROD(0)->lm() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODlm)); }
+  if (l1topoResult->getROD(0)->hm() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODhm)); }
+  if (l1topoResult->getROD(0)->pt() != 0) { rodErrors.push_back(static_cast<uint8_t>(MonFunction::doRODpt)); }
+  auto monErrorsROD = Monitored::Collection("ROD_Errors", rodErrors);
+  Monitored::Group(m_monTool, monErrorsROD);
+
   for (unsigned i=0;i<l1topoResult->getFPGASize();i++) {
     unsigned topoNumber = l1topoResult->getFPGA(i)->topoNumber();
     unsigned fpgaNumber = l1topoResult->getFPGA(i)->fpgaNumber();
-    std::cout << "Topo: " << topoNumber
-	      << "FPGA: " << fpgaNumber
-	      << std::endl;
+
+    auto mon_fpga_error = Monitored::Scalar<unsigned>("FPGA_Errors");
+    auto mon_fpga_labels = Monitored::Scalar("FPGA_Labels", (topoNumber*2)-fpgaNumber-1);
+
+    if (l1topoResult->getFPGA(i)->ct() != 0) {
+      mon_fpga_error = 0;
+      Monitored::Group(m_monTool, mon_fpga_error, mon_fpga_labels);
+    }
+    if (l1topoResult->getFPGA(i)->sm() != 0) { 
+      mon_fpga_error = 1;
+      Monitored::Group(m_monTool, mon_fpga_error, mon_fpga_labels);
+    }
+    if (l1topoResult->getFPGA(i)->pe() != 0) {
+      mon_fpga_error = 2;
+      Monitored::Group(m_monTool, mon_fpga_error, mon_fpga_labels);
+    }
+    if (l1topoResult->getFPGA(i)->lm() != 0) {
+      mon_fpga_error = 3;
+      Monitored::Group(m_monTool, mon_fpga_error, mon_fpga_labels);
+    }
+    if (l1topoResult->getFPGA(i)->hm() != 0) {
+      mon_fpga_error = 4;
+      Monitored::Group(m_monTool, mon_fpga_error, mon_fpga_labels);
+    }
+    if (l1topoResult->getFPGA(i)->pt() != 0) {
+      mon_fpga_error = 5;
+      Monitored::Group(m_monTool, mon_fpga_error, mon_fpga_labels);
+    }
   }
-  */
   
   // Multiplicities ---------------------------------------------------------
   std::vector<unsigned> topo1Opt0,topo1Opt1,topo1Opt2,topo1Opt3;
