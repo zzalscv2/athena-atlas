@@ -107,10 +107,9 @@ public:
   /** move the Layer */
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
-private:
   /** Resize the layer to the tracking volume - not (yet) supported for
    * ConeLayer */
-  void resize(const VolumeBounds&, double) const {}
+  virtual void resizeLayer(const VolumeBounds&, double) override final{}
 
   /** Resize the layer to the tracking volume - not supported since this an
    * entry layer method*/

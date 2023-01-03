@@ -121,7 +121,6 @@ public:
   /** move the Layer non-const*/
   virtual void moveLayer(Amg::Transform3D& shift) override final;
 
- private:
   /** Resize the layer to the tracking volume - only works for
    * CylinderVolumeBouns */
   virtual void resizeLayer(const VolumeBounds& vBounds,
@@ -132,6 +131,7 @@ public:
                                         const Amg::Vector3D& cCenter,
                                         double envelop) override final;
 
+ private:
   /** build approach surfaces */
   void buildApproachDescriptor();
 
