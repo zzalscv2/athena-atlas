@@ -184,6 +184,18 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
         alg.MonTool.defineHistogram('OverflowResults', path='EXPERT', type='TH1I',
                                     title='Overflow Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+        rod_errors_labels = ["CT", "pc", "hc", "pe", "lm", "hm", "pt"]
+        alg.MonTool.defineHistogram('ROD_Errors', path='EXPERT', type='TH1I', 
+                                    title='Counts of ROD errors', xbins=len(rod_errors_labels), xlabels=rod_errors_labels, 
+                                    xmin=0, xmax=len(rod_errors_labels))
+        fpga_errors_labels = ["CT", "sm", "pe", "lm", "hm", "pt"]
+        fpga_indexes = ["topo1fpga1", "topo1fpga0", "topo2fpga1", "topo2fpga0", "topo3fpga1", "topo3fpga0"]
+        alg.MonTool.defineHistogram('FPGA_Errors, FPGA_Labels; FPGA_Errors', path='EXPERT', type='TH2I',
+                                        title='Counts of FPGA errors',xbins=len(fpga_errors_labels),ybins=len(fpga_indexes),
+                                        xlabels=fpga_errors_labels,
+                                        ylabels=fpga_indexes,
+                                        xmin=0, xmax=len(fpga_errors_labels),
+                                        ymin=0, ymax=len(fpga_indexes))
         
 
     mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp']
