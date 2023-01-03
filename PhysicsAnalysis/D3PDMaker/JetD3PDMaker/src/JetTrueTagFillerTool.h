@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file JetD3PDMaker/src/JetFlavorTagComponentsFillerTool.cxx
  * @author Erik Devetak <edevetak@cern.ch>
@@ -36,8 +33,8 @@ public:
    * @param parent The tool's Gaudi parent.
    */
   JetTrueTagFillerTool  (const std::string& type,
-			   const std::string& name,
-			   const IInterface* parent);
+                         const std::string& name,
+                         const IInterface* parent);
   
 
   /// Book variables for this block.
@@ -52,7 +49,7 @@ public:
    * is responsible for arranging that all the pointers for booked variables
    * are set appropriately upon entry.
    */
-  virtual StatusCode fill (const Jet& p);
+  virtual StatusCode fill (const Jet& p) override;
   
   
 private:
