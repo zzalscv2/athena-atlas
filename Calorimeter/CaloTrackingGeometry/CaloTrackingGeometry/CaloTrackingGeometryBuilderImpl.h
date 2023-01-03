@@ -14,6 +14,7 @@
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
 #include "TrkDetDescrUtils/LayerIndexSampleMap.h"
+#include "TrkGeometry/Material.h"
 #include "TrkGeometry/TrackingGeometry.h"
 // EnvelopeDefinitionService
 #include "SubDetectorEnvelopes/IEnvelopeDefSvc.h"
@@ -25,7 +26,6 @@
 #include "CxxUtils/checker_macros.h"
 
 namespace Trk {
-class Material;
 class Layer;
 class MagneticFieldProperties;
 class ICaloTrackingVolumeBuilder;
@@ -86,7 +86,12 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
   //!< Volume Builder for the Tile Calorimeter
   ToolHandle<Trk::ICaloTrackingVolumeBuilder> m_tileVolumeBuilder;
 
-  Trk::Material* m_caloMaterial;  //!< Material properties
+  //!< Material properties
+  Trk::Material m_caloMaterial; 
+  Trk::Material m_Ar;  
+  Trk::Material m_Al;  
+  Trk::Material m_Scint;
+  Trk::Material m_crackMaterial;
 
   double m_caloEnvelope;  //!< Envelope cover for Gap Layers
   // enclosing endcap/cylindervolume
@@ -124,8 +129,6 @@ class CaloTrackingGeometryBuilderImpl : public AthAlgTool {
       const RZPairVector& bpCutouts, float, float, const std::string&,
       float&) const;
 
-  mutable std::mutex m_garbageMutex;
-  mutable std::vector<const Trk::Material*> m_materialGarbage ATLAS_THREAD_SAFE;
 };
 
 }  // namespace Calo
