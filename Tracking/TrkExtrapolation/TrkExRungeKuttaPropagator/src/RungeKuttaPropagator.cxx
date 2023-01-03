@@ -213,7 +213,7 @@ rungeKuttaStep(Cache& cache, bool Jac, double S, double* ATH_RESTRICT P, bool& I
 /////////////////////////////////////////////////////////////////////////////////
 
 double
-straightLineStep(bool Jac, double S, double* P)
+straightLineStep(bool Jac, double S, double* ATH_RESTRICT P)
 {
   double* R = &P[0]; // Start coordinates
   const double* A = &P[3]; // Start directions
@@ -607,31 +607,6 @@ crossPoint(const Trk::TrackParameters& Tp,
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// step estimation to surfaces
-/////////////////////////////////////////////////////////////////////////////////
-double
-stepEstimator(int kind, double* Su, const double* P, bool& Q)
-{
-  switch (kind) {
-    case 0: {
-      return Trk::RungeKuttaUtils::stepEstimatorToStraightLine(Su, P, Q);
-    }
-    case 1: {
-      return Trk::RungeKuttaUtils::stepEstimatorToPlane(Su, P, Q);
-    }
-    case 2: {
-      return Trk::RungeKuttaUtils::stepEstimatorToCylinder(Su, P, Q);
-    }
-    case 3: {
-      return Trk::RungeKuttaUtils::stepEstimatorToCone(Su, P, Q);
-    }
-    default: {
-      return 1000000.;
-    }
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 // Step estimator take into accout curvature
 /////////////////////////////////////////////////////////////////////////////////
 double
@@ -642,7 +617,7 @@ stepEstimatorWithCurvature(Cache& cache,
                            bool& Q)
 {
   // Straight step estimation
-  double Step = stepEstimator(kind, Su, P, Q);
+  double Step = Trk::RungeKuttaUtils::stepEstimator(kind, Su, P, Q);
   if (!Q)
     return 0.;
   const double AStep = std::abs(Step);
@@ -658,7 +633,7 @@ stepEstimatorWithCurvature(Cache& cache,
   const double As = 1. / std::sqrt(Ax * Ax + Ay * Ay + Az * Az);
 
   const double PN[6] = { P[0], P[1], P[2], Ax * As, Ay * As, Az * As };
-  const double StepN = stepEstimator(kind, Su, PN, Q);
+  const double StepN = Trk::RungeKuttaUtils::stepEstimator(kind, Su, PN, Q);
   if (!Q) {
     Q = true;
     return Step;
@@ -695,7 +670,7 @@ propagateWithJacobian(Cache& cache,
   //
   bool Q = 0;
   double S = 0;
-  double Step = stepEstimator(kind, Su, P, Q);
+  double Step = Trk::RungeKuttaUtils::stepEstimator(kind, Su, P, Q);
   if (!Q)
     return false;
 

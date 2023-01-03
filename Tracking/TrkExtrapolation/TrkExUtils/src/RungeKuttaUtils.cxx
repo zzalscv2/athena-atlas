@@ -846,11 +846,238 @@ jacobianTransformCurvilinearToStraightLine(const double* ATH_RESTRICT P,
   Jac[8] = s4 * d;                                                // dL1/dThe
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+// Step estimation to Plane
+/////////////////////////////////////////////////////////////////////////////////
+double
+stepEstimatorToPlane(const double* ATH_RESTRICT S,
+                     const double* ATH_RESTRICT P,
+                     bool& Q)
+{
+  const double* r = &P[0]; // Start coordinate
+  const double* a = &P[3]; // Start direction
+
+  const double A = a[0] * S[0] + a[1] * S[1] + a[2] * S[2];
+  if (A == 0.) {
+    Q = false;
+    return 1000000.;
+  }
+  const double D = (S[3] - r[0] * S[0]) - (r[1] * S[1] + r[2] * S[2]);
+  Q = true;
+  return (D / A);
 }
-/*
- * end of anonymous namespace for internal implementation methods
- * Interface methods follow.
- */
+
+/////////////////////////////////////////////////////////////////////////////////
+// Step estimation to Cylinder
+/////////////////////////////////////////////////////////////////////////////////
+double
+stepEstimatorToCylinder(double* ATH_RESTRICT S,
+                        const double* ATH_RESTRICT P,
+                        bool& Q)
+{
+  const double* r = &P[0]; // Start coordinate
+  const double* a = &P[3]; // Start direction
+
+  double dx = r[0] - S[0];
+  double dy = r[1] - S[1];
+  double dz = r[2] - S[2];
+  double B = dx * S[3] + dy * S[4] + dz * S[5];
+  double C = a[0] * S[3] + a[1] * S[4] + a[2] * S[5];
+  const double ax = a[0] - S[3] * C;
+  dx -= (B * S[3]);
+  const double ay = a[1] - S[4] * C;
+  dy -= (B * S[4]);
+  const double az = a[2] - S[5] * C;
+  dz -= (B * S[5]);
+  double A = 2. * (ax * ax + ay * ay + az * az);
+  if (A == 0.) {
+    Q = false;
+    return 0.;
+  }
+  B = 2. * (ax * dx + ay * dy + az * dz);
+  double g = dx + dy + dz;
+  C = (g - S[6]) * (g + S[6]) - 2. * (dx * (dy + dz) + dy * dz);
+  double Sq = B * B - 2. * A * C;
+
+  double Smin = -B / A, Smax = Smin;
+
+  if (Sq > 0.) {
+
+    Sq = std::sqrt(Sq) / A;
+    if (B > 0.) {
+      Smin += Sq;
+      Smax -= Sq;
+    } else {
+      Smin -= Sq;
+      Smax += Sq;
+    }
+  } else {
+    if (std::fabs(Smax) < .1) {
+      Q = false;
+      return 0.;
+    }
+  }
+
+  Q = true;
+  const double inside = Smin * Smax;
+
+  if (S[8] != 0.) {
+
+    if (inside > 0. || S[8] > 0.)
+      return Smin;
+    if (S[7] >= 0.) {
+      if (Smin >= 0.)
+        return Smin;
+      return Smax;
+    }
+    if (Smin <= 0.)
+      return Smin;
+    return Smax;
+  }
+
+  if (inside < 0.) {
+
+    S[8] = -1.;
+    if (S[7] >= 0.) {
+      if (Smin >= 0.)
+        return Smin;
+      return Smax;
+    }
+    if (Smin <= 0.)
+      return Smin;
+    return Smax;
+  }
+
+  // if(std::fabs(Smin) < .001) {S[8]=-1.; return Smax;}
+
+  S[8] = 1.;
+  return Smin;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Step estimation to Straight Line
+/////////////////////////////////////////////////////////////////////////////////
+double
+stepEstimatorToStraightLine(const double* ATH_RESTRICT S,
+                            const double* ATH_RESTRICT P,
+                            bool& Q)
+{
+  const double* r = &P[0]; // Start coordinate
+  const double* a = &P[3]; // Start direction
+
+  double D = a[0] * S[3] + a[1] * S[4] + a[2] * S[5];
+  const double A = (1. - D) * (1. + D);
+  if (A == 0.) {
+    Q = true;
+    return 1000000.;
+  }
+  D = (r[0] - S[0]) * (D * S[3] - a[0]) + (r[1] - S[1]) * (D * S[4] - a[1]) +
+      (r[2] - S[2]) * (D * S[5] - a[2]);
+  Q = true;
+  return (D / A);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Step estimation to Cone
+/////////////////////////////////////////////////////////////////////////////////
+double
+stepEstimatorToCone(double* ATH_RESTRICT S,
+                    const double* ATH_RESTRICT P,
+                    bool& Q)
+{
+  const double* r = &P[0]; // Start coordinate
+  const double* a = &P[3]; // Start direction
+
+  const double dx = r[0] - S[0];
+  const double dy = r[1] - S[1];
+  const double dz = r[2] - S[2];
+  const double A = dx * S[3] + dy * S[4] + dz * S[5];
+  const double B = a[0] * S[3] + a[1] * S[4] + a[2] * S[5];
+  const double C = a[0] * dx + a[1] * dy + a[2] * dz;
+  const double k = S[6];
+
+  const double KB = 1. - k * B * B;
+  const double KABC = k * A * B - C;
+  double Smin, Smax;
+
+  if (KB != 0.) {
+
+    Smin = KABC / KB;
+    Smax = Smin;
+    double Sq = KABC * KABC + (k * A * A - dx * dx - dy * dy - dz * dz) * KB;
+    if (Sq >= 0.) {
+      Sq = std::sqrt(Sq) / KB;
+      if (KABC > 0.) {
+        Smin -= Sq;
+        Smax += Sq;
+      } else {
+        Smin += Sq;
+        Smax -= Sq;
+      }
+      int n = 2;
+      if (A + B * Smin < 0.) {
+        --n;
+        Smin = Smax;
+      }
+      if (A + B * Smax < 0.) {
+        --n;
+        Smax = Smin;
+      }
+      if (!n) {
+        Q = false;
+        return 0.;
+      }
+
+    } else {
+      Q = false;
+      return 0.;
+    }
+  } else {
+    Smin = (dx * dx + dy * dy + dz * dz - k * A * A) / (2. * KABC);
+    Smax = Smin;
+    if (A + B * Smin < 0.) {
+      Q = false;
+      return 0.;
+    }
+  }
+
+  Q = true;
+  const double inside = Smin * Smax;
+
+  if (S[8] != 0.) {
+
+    if (inside > 0. || S[8] > 0.)
+      return Smin;
+    if (S[7] >= 0.) {
+      if (Smin >= 0.)
+        return Smin;
+      return Smax;
+    }
+    if (Smin <= 0.)
+      return Smin;
+    return Smax;
+  }
+
+  if (inside < 0.) {
+
+    S[8] = -1.;
+    if (S[7] >= 0.) {
+      if (Smin >= 0.)
+        return Smin;
+      return Smax;
+    }
+    if (Smin <= 0.)
+      return Smin;
+    return Smax;
+  }
+
+  S[8] = 1.;
+  return Smin;
+}
+
+
+} //end of anonymous namespace
+
 
 /////////////////////////////////////////////////////////////////////////////////
 // Common transformation from local to global system coordinates for all
@@ -860,7 +1087,7 @@ jacobianTransformCurvilinearToStraightLine(const double* ATH_RESTRICT P,
 bool
 Trk::RungeKuttaUtils::transformLocalToGlobal(bool useJac,
                                              const Trk::TrackParameters& Tp,
-                                             double* P)
+                                             double* ATH_RESTRICT P)
 {
   const Trk::TrackParameters* pTp = &Tp;
   if (!pTp)
@@ -878,7 +1105,7 @@ Trk::RungeKuttaUtils::transformLocalToGlobal(bool useJac,
 bool
 Trk::RungeKuttaUtils::transformLocalToGlobal(bool useJac,
                                              const Trk::NeutralParameters& Tp,
-                                             double* P)
+                                             double* ATH_RESTRICT P)
 {
   const Trk::NeutralParameters* pTp = &Tp;
   if (!pTp)
@@ -999,236 +1226,58 @@ Trk::RungeKuttaUtils::transformGlobalToLocal(const Trk::Surface* su,
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// Step estimation to Plane
+// step estimation to surfaces
 /////////////////////////////////////////////////////////////////////////////////
-
 double
-Trk::RungeKuttaUtils::stepEstimatorToPlane(const double* ATH_RESTRICT S,
-                                           const double* ATH_RESTRICT P,
-                                           bool& Q)
+Trk::RungeKuttaUtils::stepEstimator(
+  int kind,
+  double* ATH_RESTRICT Su,
+  const double* ATH_RESTRICT P,
+  bool& Q)
 {
-  const double* r = &P[0]; // Start coordinate
-  const double* a = &P[3]; // Start direction
-
-  const double A = a[0] * S[0] + a[1] * S[1] + a[2] * S[2];
-  if (A == 0.) {
-    Q = false;
-    return 1000000.;
+  switch (kind) {
+    case 0: {
+      return stepEstimatorToStraightLine(Su, P, Q);
+    }
+    case 1: {
+      return stepEstimatorToPlane(Su, P, Q);
+    }
+    case 2: {
+      return stepEstimatorToCylinder(Su, P, Q);
+    }
+    case 3: {
+      return stepEstimatorToCone(Su, P, Q);
+    }
+    default: {
+      return 1000000.;
+    }
   }
-  const double D = (S[3] - r[0] * S[0]) - (r[1] * S[1] + r[2] * S[2]);
-  Q = true;
-  return (D / A);
 }
-
-/////////////////////////////////////////////////////////////////////////////////
-// Step estimation to Cylinder
-/////////////////////////////////////////////////////////////////////////////////
-
 double
-Trk::RungeKuttaUtils::stepEstimatorToCylinder(double* ATH_RESTRICT S,
-                                              const double* ATH_RESTRICT P,
-                                              bool& Q)
+Trk::RungeKuttaUtils::stepEstimator(
+  Trk::SurfaceType surfaceType,
+  double* ATH_RESTRICT Su,
+  const double* ATH_RESTRICT P,
+  bool& Q)
 {
-  const double* r = &P[0]; // Start coordinate
-  const double* a = &P[3]; // Start direction
-
-  double dx = r[0] - S[0];
-  double dy = r[1] - S[1];
-  double dz = r[2] - S[2];
-  double B = dx * S[3] + dy * S[4] + dz * S[5];
-  double C = a[0] * S[3] + a[1] * S[4] + a[2] * S[5];
-  const double ax = a[0] - S[3] * C;
-  dx -= (B * S[3]);
-  const double ay = a[1] - S[4] * C;
-  dy -= (B * S[4]);
-  const double az = a[2] - S[5] * C;
-  dz -= (B * S[5]);
-  double A = 2. * (ax * ax + ay * ay + az * az);
-  if (A == 0.) {
-    Q = false;
-    return 0.;
+  if (surfaceType == Trk::SurfaceType::Plane ||
+      surfaceType == Trk::SurfaceType::Disc) {
+    return stepEstimatorToPlane(Su, P, Q);
   }
-  B = 2. * (ax * dx + ay * dy + az * dz);
-  double g = dx + dy + dz;
-  C = (g - S[6]) * (g + S[6]) - 2. * (dx * (dy + dz) + dy * dz);
-  double Sq = B * B - 2. * A * C;
-
-  double Smin = -B / A, Smax = Smin;
-
-  if (Sq > 0.) {
-
-    Sq = std::sqrt(Sq) / A;
-    if (B > 0.) {
-      Smin += Sq;
-      Smax -= Sq;
-    } else {
-      Smin -= Sq;
-      Smax += Sq;
-    }
-  } else {
-    if (std::fabs(Smax) < .1) {
-      Q = false;
-      return 0.;
-    }
+  if (surfaceType == Trk::SurfaceType::Cylinder) {
+    return stepEstimatorToCylinder(Su, P, Q);
   }
 
-  Q = true;
-  const double inside = Smin * Smax;
-
-  if (S[8] != 0.) {
-
-    if (inside > 0. || S[8] > 0.)
-      return Smin;
-    if (S[7] >= 0.) {
-      if (Smin >= 0.)
-        return Smin;
-      return Smax;
-    }
-    if (Smin <= 0.)
-      return Smin;
-    return Smax;
+  if (surfaceType == Trk::SurfaceType::Line ||
+      surfaceType == Trk::SurfaceType::Perigee) {
+    return stepEstimatorToStraightLine(Su, P, Q);
   }
 
-  if (inside < 0.) {
-
-    S[8] = -1.;
-    if (S[7] >= 0.) {
-      if (Smin >= 0.)
-        return Smin;
-      return Smax;
-    }
-    if (Smin <= 0.)
-      return Smin;
-    return Smax;
+  if (surfaceType == Trk::SurfaceType::Cone) {
+    return stepEstimatorToCone(Su, P, Q);
   }
-
-  // if(std::fabs(Smin) < .001) {S[8]=-1.; return Smax;}
-
-  S[8] = 1.;
-  return Smin;
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Step estimation to Straight Line
-/////////////////////////////////////////////////////////////////////////////////
-
-double
-Trk::RungeKuttaUtils::stepEstimatorToStraightLine(const double* ATH_RESTRICT S,
-                                                  const double* ATH_RESTRICT P,
-                                                  bool& Q)
-{
-  const double* r = &P[0]; // Start coordinate
-  const double* a = &P[3]; // Start direction
-
-  double D = a[0] * S[3] + a[1] * S[4] + a[2] * S[5];
-  const double A = (1. - D) * (1. + D);
-  if (A == 0.) {
-    Q = true;
-    return 1000000.;
-  }
-  D = (r[0] - S[0]) * (D * S[3] - a[0]) + (r[1] - S[1]) * (D * S[4] - a[1]) +
-      (r[2] - S[2]) * (D * S[5] - a[2]);
-  Q = true;
-  return (D / A);
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Step estimation to Cone
-/////////////////////////////////////////////////////////////////////////////////
-
-double
-Trk::RungeKuttaUtils::stepEstimatorToCone(double* ATH_RESTRICT S,
-                                          const double* ATH_RESTRICT P,
-                                          bool& Q)
-{
-  const double* r = &P[0]; // Start coordinate
-  const double* a = &P[3]; // Start direction
-
-  const double dx = r[0] - S[0];
-  const double dy = r[1] - S[1];
-  const double dz = r[2] - S[2];
-  const double A = dx * S[3] + dy * S[4] + dz * S[5];
-  const double B = a[0] * S[3] + a[1] * S[4] + a[2] * S[5];
-  const double C = a[0] * dx + a[1] * dy + a[2] * dz;
-  const double k = S[6];
-
-  const double KB = 1. - k * B * B;
-  const double KABC = k * A * B - C;
-  double Smin, Smax;
-
-  if (KB != 0.) {
-
-    Smin = KABC / KB;
-    Smax = Smin;
-    double Sq = KABC * KABC + (k * A * A - dx * dx - dy * dy - dz * dz) * KB;
-    if (Sq >= 0.) {
-      Sq = std::sqrt(Sq) / KB;
-      if (KABC > 0.) {
-        Smin -= Sq;
-        Smax += Sq;
-      } else {
-        Smin += Sq;
-        Smax -= Sq;
-      }
-      int n = 2;
-      if (A + B * Smin < 0.) {
-        --n;
-        Smin = Smax;
-      }
-      if (A + B * Smax < 0.) {
-        --n;
-        Smax = Smin;
-      }
-      if (!n) {
-        Q = false;
-        return 0.;
-      }
-
-    } else {
-      Q = false;
-      return 0.;
-    }
-  } else {
-    Smin = (dx * dx + dy * dy + dz * dz - k * A * A) / (2. * KABC);
-    Smax = Smin;
-    if (A + B * Smin < 0.) {
-      Q = false;
-      return 0.;
-    }
-  }
-
-  Q = true;
-  const double inside = Smin * Smax;
-
-  if (S[8] != 0.) {
-
-    if (inside > 0. || S[8] > 0.)
-      return Smin;
-    if (S[7] >= 0.) {
-      if (Smin >= 0.)
-        return Smin;
-      return Smax;
-    }
-    if (Smin <= 0.)
-      return Smin;
-    return Smax;
-  }
-
-  if (inside < 0.) {
-
-    S[8] = -1.;
-    if (S[7] >= 0.) {
-      if (Smin >= 0.)
-        return Smin;
-      return Smax;
-    }
-    if (Smin <= 0.)
-      return Smin;
-    return Smax;
-  }
-
-  S[8] = 1.;
-  return Smin;
+  // presumably curvilinear
+  return stepEstimatorToPlane(Su, P, Q);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -1363,7 +1412,7 @@ Trk::RungeKuttaUtils::stepEstimator(
 #endif
 AmgSymMatrix(5) Trk::RungeKuttaUtils::newCovarianceMatrix(
   const double* ATH_RESTRICT J,
-  const AmgSymMatrix(5) & M)
+  const AmgSymMatrix(5) & ATH_RESTRICT M)
 {
   AmgSymMatrix(5) nM;
   AmgSymMatrix(5)& m = nM;
