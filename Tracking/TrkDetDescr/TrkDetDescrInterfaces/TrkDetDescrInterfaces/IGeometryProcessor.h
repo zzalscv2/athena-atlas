@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -22,9 +22,6 @@ namespace Trk {
   class Layer;
   class Surface;
 
-  /** Interface ID for IGeometryProcessors*/  
-  static const InterfaceID IID_IGeometryProcessor("IGeometryProcessor", 1, 0);
-  
   /** @class IGeometryProcessor
   
        Interface class IGeometryProcessors
@@ -34,11 +31,11 @@ namespace Trk {
   class IGeometryProcessor : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IGeometryProcessor, 1, 0);
+
       /**Virtual destructor*/
       virtual ~IGeometryProcessor(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_IGeometryProcessor; }
 
       /** Processor Action to work on TrackingGeometry& tgeo */
       virtual StatusCode process  (TrackingGeometry& tvol) const = 0;

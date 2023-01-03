@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -62,9 +62,6 @@ namespace Trk {
   };
 
 
-  /** Interface ID for IVertexMapper*/  
-  static const InterfaceID IID_IVertexMapper("IVertexMapper", 1, 0);
-  
   /** @class IVertexMapper
      
      Interface class IVertexMapper
@@ -78,13 +75,12 @@ namespace Trk {
   class IVertexMapper : virtual public IAlgTool {
       
      public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IVertexMapper, 1, 0);
          
        /** Virtual destructor */
        virtual ~IVertexMapper(){}
        
-       /** AlgTool and IAlgTool interface methods */
-       static const InterfaceID& interfaceID() { return IID_IVertexMapper; }
-                                                    
        /** Record the vertex into the local frame of the closest module  */
        virtual MappedVertex mapToLocal(const Amg::Vector3D& vertex) const = 0;
 

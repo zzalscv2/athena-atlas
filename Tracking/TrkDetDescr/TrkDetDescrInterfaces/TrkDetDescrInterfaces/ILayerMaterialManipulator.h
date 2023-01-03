@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,9 +19,6 @@ namespace Trk {
 
   class LayerMaterialProperties;  
   class LayerIndex;
-    
-  /** Interface ID for ILayerMaterialManipulators*/  
-  static const InterfaceID IID_ILayerMaterialManipulator("ILayerMaterialManipulator", 1, 0);
   
   /** @class ILayerMaterialManipulator
     
@@ -32,11 +29,11 @@ namespace Trk {
   class ILayerMaterialManipulator : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(ILayerMaterialManipulator, 1, 0);
+
       /**Virtual destructor*/
       virtual ~ILayerMaterialManipulator(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_ILayerMaterialManipulator; }
 
       /** process the layer material - after material creation and before loading */
       virtual const LayerMaterialProperties* processLayerMaterial(const LayerIndex& layIndex, const LayerMaterialProperties& lmp) const = 0;

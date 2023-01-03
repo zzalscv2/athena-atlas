@@ -2,10 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// ILayerBuilderCond.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-
 #ifndef TRKDETDESCRINTERFACES_ILAYERBUILDERCOND_H
 #define TRKDETDESCRINTERFACES_ILAYERBUILDERCOND_H
 
@@ -28,9 +24,6 @@ class PlaneLayer;
 class Layer;
 class TrackingGeometry;
 
-/** Interface ID for ILayerBuilderCond*/
-static const InterfaceID IID_ILayerBuilderCond("ILayerBuilderCond", 1, 0);
-
 /** @class ILayerBuilderCond
   Interface class ILayerBuilderConds
   It inherits from IAlgTool. The actual implementation of the AlgTool depends on
@@ -42,11 +35,12 @@ class ILayerBuilderCond : virtual public IAlgTool
 {
 
 public:
+
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ILayerBuilderCond, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ILayerBuilderCond() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ILayerBuilderCond; }
 
   /** LayerBuilder interface method - returning Barrel-like layers */
   virtual std::unique_ptr<const std::vector<CylinderLayer*> >

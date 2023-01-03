@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,11 +17,6 @@ namespace Trk {
 class TrackingVolume;
 class BinUtility1D;
 
-/** Interface ID for ITrackingVolumeBuilders*/
-static const InterfaceID IID_ITrackingVolumeBuilder("ITrackingVolumeBuilder",
-                                                    1,
-                                                    0);
-
 /** @class ITrackingVolumeBuilder
 
   Interface class ITrackingVolumeBuilders
@@ -34,11 +29,11 @@ class ITrackingVolumeBuilder : virtual public IAlgTool
 {
 
 public:
+  /// Creates the InterfaceID and interfaceID() method
+  DeclareInterfaceID(ITrackingVolumeBuilder, 1, 0);
+
   /**Virtual destructor*/
   virtual ~ITrackingVolumeBuilder() {}
-
-  /** AlgTool and IAlgTool interface methods */
-  static const InterfaceID& interfaceID() { return IID_ITrackingVolumeBuilder; }
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
   virtual const std::vector<TrackingVolume*>* trackingVolumes() const = 0;

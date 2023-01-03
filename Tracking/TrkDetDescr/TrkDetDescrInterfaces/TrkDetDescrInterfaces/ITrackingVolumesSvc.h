@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,9 +14,6 @@
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaKernel/IOVSvcDefs.h"
 
-
-/** Declaration of the interface ID ( interface id, major version, minor version) */
-static const InterfaceID IID_ITrackingVolumesSvc(2211, 1 , 0);
 
 namespace Trk {
     
@@ -34,6 +31,9 @@ namespace Trk {
     class ITrackingVolumesSvc : virtual public IInterface {
 
        public:
+      /// Creates the InterfaceID and interfaceID() method
+      DeclareInterfaceID(ITrackingVolumesSvc, 1, 0);
+
         /** Enum to identify the various "volumes" which exist. The names of the enum variables are 
            intended to be as close as possible to the terminology already in use*/
         enum TrackingVolumeIdentifier {
@@ -43,10 +43,6 @@ namespace Trk {
             NumIdentifiers=3
         };
 
-           
-        /** Retrieve interface ID */
-        static const InterfaceID& interfaceID() { return IID_ITrackingVolumesSvc; }
-    
         /** Provide the TrackingVolumes */
         virtual const Trk::Volume& volume(const TrackingVolumeIdentifier& volumeId) const = 0;
     

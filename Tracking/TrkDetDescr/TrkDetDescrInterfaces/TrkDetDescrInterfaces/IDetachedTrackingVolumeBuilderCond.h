@@ -22,9 +22,6 @@ namespace Trk {
   class DetachedTrackingVolume;
   class TrackingGeometry;
  
-  /** Interface ID for IDetachedTrackingVolumeBuilderConds*/  
-  static const InterfaceID IID_IDetachedTrackingVolumeBuilderCond("IDetachedTrackingVolumeBuilderCond", 1, 0);
-  
   /** @class IDetachedTrackingVolumeBuilderCond
     
     Interface class IDetachedTrackingVolumeBuilderCond,
@@ -35,11 +32,11 @@ namespace Trk {
   class IDetachedTrackingVolumeBuilderCond : virtual public IAlgTool {
     
     public:
+    /// Creates the InterfaceID and interfaceID() method
+    DeclareInterfaceID(IDetachedTrackingVolumeBuilderCond, 1, 0);
+
       /**Virtual destructor*/
       virtual ~IDetachedTrackingVolumeBuilderCond(){}
-      
-      /** AlgTool and IAlgTool interface methods */
-      static const InterfaceID& interfaceID() { return IID_IDetachedTrackingVolumeBuilderCond; }
 
       virtual std::unique_ptr<std::vector<std::unique_ptr<DetachedTrackingVolume> > >
       buildDetachedTrackingVolumes(const EventContext& ctx,
