@@ -299,7 +299,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
 {
   ATH_MSG_VERBOSE("In McVtxFilterTool::addVertex( vtxType= "<<vtxType<< " )");
 #ifdef HEPMC3
-  HepMC::GenVertexPtr vtx = HepMC::barcode_to_vertex(evt,HepMC::barcode(srcVtx));
+  HepMC::GenVertexPtr vtx = (evt == srcVtx->parent_event()) ? std::const_pointer_cast<HepMC3::GenVertex>(srcVtx) : nullptr ;
   if ( !vtx ) {
     vtx = HepMC::newGenVertexPtr();
     evt->add_vertex(vtx);
@@ -311,7 +311,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
   
   /// Fill the parent branch
   for ( const auto& parent:  srcVtx->particles_in()) {
-    HepMC::GenParticlePtr  mother = HepMC::barcode_to_particle(evt, HepMC::barcode(parent) );
+    HepMC::GenParticlePtr  mother = (evt == parent->parent_event()) ? std::const_pointer_cast<HepMC3::GenParticle>(parent) : nullptr ;
     if ( ! mother ) {
       mother = HepMC::newGenParticlePtr();
       vtx->add_particle_in( mother );
@@ -331,7 +331,7 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
   
   /// Fill the children branch
   for ( const auto& child: srcVtx->particles_out()) {
-    HepMC::GenParticlePtr daughter = HepMC::barcode_to_particle(evt, HepMC::barcode(child) );
+    HepMC::GenParticlePtr daughter = (evt == child->parent_event()) ? std::const_pointer_cast<HepMC3::GenParticle>(child) : nullptr ;
     if ( !daughter ) {
       if ( !keepParticle( vtxType, child ) ) {
 	// only include selected particles via the "ParticlesToKeep" property
