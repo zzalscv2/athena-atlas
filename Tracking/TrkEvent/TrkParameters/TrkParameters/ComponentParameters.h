@@ -29,8 +29,7 @@ MultiComponentState
 clone(const MultiComponentState& in);
 
 /** Scale the  covariance matrix components  by
-   individual factors.
-*/
+   individual factors. */
 MultiComponentState
 WithScaledError(MultiComponentState&& in,
                 double errorScaleLocX,
@@ -39,10 +38,10 @@ WithScaledError(MultiComponentState&& in,
                 double errorScaleTheta,
                 double errorScaleQoverP);
 
-/** Check to see if all components in the state have measured track parameters
- */
+/** Check to see if all components
+ * have covariance Matrix.*/
 bool
-isMeasured(const MultiComponentState& in);
+allHaveCovariance(const MultiComponentState& in);
 
 /** Performing renormalisation of total state weighting to one */
 void

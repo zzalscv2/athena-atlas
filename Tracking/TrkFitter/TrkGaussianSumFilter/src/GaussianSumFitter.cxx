@@ -884,6 +884,7 @@ Trk::GaussianSumFitter::smootherFit(
   Trk::FitQualityOnSurface fitQuality;
   std::unique_ptr<Trk::MeasurementBase> firstSmootherMeasurementOnTrack =
     smootherPredictionMultiStateOnSurface->measurementOnTrack()->uniqueClone();
+  
   if (!firstSmootherMeasurementOnTrack) {
     ATH_MSG_WARNING(
       "Initial state on surface in smoother does not have an associated "
@@ -895,6 +896,12 @@ Trk::GaussianSumFitter::smootherFit(
                                        *firstSmootherMeasurementOnTrack,
                                        fitQuality);
   if (firstSmoothedState.empty()) {
+    return MultiTrajectory();
+  }
+
+  if (!MultiComponentStateHelpers::allHaveCovariance(firstSmoothedState)) {
+    ATH_MSG_WARNING(
+      "Not all components have covariance. Rejecting smoothed state.");
     return MultiTrajectory();
   }
   // The last TSOS is special so we do a proper collapse
@@ -910,12 +917,6 @@ Trk::GaussianSumFitter::smootherFit(
       std::move(combinedFirstSmoothedState),
       MultiComponentStateHelpers::clone(firstSmoothedState));
   smoothedTrajectory.push_back(updatedFirstStateOnSurface);
-
-  if (!MultiComponentStateHelpers::isMeasured(firstSmoothedState)) {
-    ATH_MSG_WARNING(
-      "Updated state is not measured. Rejecting smoothed state... returning 0");
-    return MultiTrajectory();
-  }
 
   // Generate a prediction by scaling the covariance of all components in the
   // first smoothed state and perform a measurement update to it.
@@ -939,10 +940,8 @@ Trk::GaussianSumFitter::smootherFit(
   ++trackStateOnSurface;
   // The is the last one we will see
   auto lasttrackStateOnSurface = forwardTrajectory.rend() - 1;
-  // TSOS that the cluster measuremenet will added on after
-  // can not be the last
+  // TSOS that the cluster measuremenet will added on. 
   auto secondLastTrackStateOnSurface = forwardTrajectory.rend() - 2;
-
   // This will be the next tsos that we will push to the
   // smoothedTrajectory DataVector (that takes ownership)
   Trk::MultiComponentStateOnSurface* updatedStateOnSurface = nullptr;

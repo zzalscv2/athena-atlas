@@ -63,17 +63,17 @@ Trk::MultiComponentStateHelpers::WithScaledError(Trk::MultiComponentState&& in,
 }
 
 bool
-Trk::MultiComponentStateHelpers::isMeasured(const Trk::MultiComponentState& in)
+Trk::MultiComponentStateHelpers::allHaveCovariance(const Trk::MultiComponentState& in)
 {
-  bool isMeasured = true;
+  bool allHaveCovariance = true;
   for (const ComponentParameters& component : in) {
     const AmgSymMatrix(5)* originalMatrix = component.first->covariance();
     if (!originalMatrix) {
-      isMeasured = false;
+      allHaveCovariance = false;
       break;
     }
   }
-  return isMeasured;
+  return allHaveCovariance;
 }
 
 void
