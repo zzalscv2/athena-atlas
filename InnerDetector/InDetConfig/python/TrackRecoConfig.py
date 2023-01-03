@@ -391,6 +391,10 @@ def InDetTrackRecoCfg(flags):
                                              OutputCombinedTracks = "CombinedInDetTracks",
                                              AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
 
+    from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
+    result.merge(TrackSlimmerCfg(flags,
+                                 TrackLocation = ["CombinedInDetTracks"]))
+
     if flags.InDet.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(flags))

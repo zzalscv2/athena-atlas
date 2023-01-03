@@ -103,6 +103,10 @@ def ITkTrackRecoCfg(flags):
                                                 AssociationMapName = "PRDtoTrackMapCombinedITkTracks" \
                                                 if not flags.ITk.Tracking.doFastTracking else ""))
 
+    from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
+    result.merge(TrackSlimmerCfg(flags,
+                                 TrackLocation = ["CombinedITkTracks"]))
+
     if flags.ITk.Tracking.doTruth:
         result.merge(ITkTrackTruthCfg(flags))
 
