@@ -181,7 +181,7 @@ later on these combinations are to be lookedup from the table / execute
 
 
 
-std::vector<std::vector<std::shared_ptr<PadData> >> PadTriggerLookupTool::selectWedgePatterns(const std::vector<std::shared_ptr<PadData>> &pads,int side, int sector,int wedge){
+std::vector<std::vector<std::shared_ptr<PadData> >> PadTriggerLookupTool::selectWedgePatterns(const std::vector<std::shared_ptr<PadData>> &pads,int side, int sector,int wedge) const {
 
         //first filter w.r.t inner/outer
         std::vector<std::shared_ptr<PadData> > padsInThisWedge;
@@ -460,7 +460,7 @@ std::vector<std::vector<std::shared_ptr<PadData> >> PadTriggerLookupTool::select
         return fetchSectorPads(false,side,sector);
     }
 
-StatusCode PadTriggerLookupTool::printGeometry( const std::vector<std::shared_ptr<PadOfflineData> >& pads, std::ofstream& ofile){
+StatusCode PadTriggerLookupTool::printGeometry( const std::vector<std::shared_ptr<PadOfflineData> >& pads, std::ofstream& ofile) const {
     const static std::vector<int> vertexordering={0,1,3,2};
     if(! ofile.is_open()){
         ATH_MSG_FATAL("File is not open!");
