@@ -166,10 +166,10 @@ StatusCode VtxBasedFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx
   }
 
 #ifdef HEPMC3
-  HepMC::GenVertexPtr  vtx = HepMC::barcode_to_vertex(evt,HepMC::barcode(srcVtx));
-  if ( ! vtx ) {
-    evt->add_vertex(vtx);
+  HepMC::GenVertexPtr  vtx = (evt == srcVtx->parent_event()) ? std::const_pointer_cast<HepMC3::GenVertex>(srcVtx) : nullptr;
+  if ( !vtx ) {
     vtx = HepMC::newGenVertexPtr();
+    evt->add_vertex(vtx);
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
     HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx) );
@@ -179,7 +179,7 @@ StatusCode VtxBasedFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx
   ////////////////////////////
   /// Fill the parent branch
   for ( const auto& parent: srcVtx->particles_in() ) {
-    HepMC::GenParticlePtr p = HepMC::barcode_to_particle(evt, HepMC::barcode(parent) );
+    HepMC::GenParticlePtr p = (evt == parent->parent_event()) ? std::const_pointer_cast<HepMC3::GenParticle>(parent) : nullptr;
     if ( !p ) {
       p = HepMC::newGenParticlePtr();
       vtx->add_particle_in( p );
@@ -199,7 +199,7 @@ StatusCode VtxBasedFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx
   //////////////////////////////
   /// Fill the children branch
   for ( const auto& child: srcVtx->particles_out()) {
-    HepMC::GenParticlePtr p = HepMC::barcode_to_particle(evt, HepMC::barcode(child) );
+    HepMC::GenParticlePtr p = (evt == child->parent_event()) ? std::const_pointer_cast<HepMC3::GenParticle>(child) : nullptr;
     if ( !p ) {
       p = HepMC::newGenParticlePtr();
       vtx->add_particle_out( p );
