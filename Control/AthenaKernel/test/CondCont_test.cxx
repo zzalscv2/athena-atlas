@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthenaKernel/test/CondCont_test.cxx
@@ -1265,7 +1265,17 @@ void testThread_MixedReader::operator()()
     if (m_map.find (key, obj, &rr)) {
       assert (lb >= rr->start().lumi_block() && lb < rr->stop().lumi_block());
       assert (ts >= rr->start().time_stamp() && ts < rr->stop().time_stamp());
-      assert (obj->m_x == static_cast<int> (rr->start().lumi_block() + rr->start().time_stamp()));
+      if (obj->m_x != static_cast<int> (rr->start().lumi_block() + rr->start().time_stamp()))
+      {
+        std::cerr << "testThread_MixedReader: Bad payload! " <<
+          obj->m_x << " rr " << *rr << " lb " << lb << " ts " << ts << "\n";
+        std::cerr << "  key: " << key << " start " << start << " stop " << stop << "\n";
+        std::cerr << "  rvec\n";
+        for (const EventIDRange& r : rvec) {
+          std::cerr << "    " << r << "\n";
+        }
+        std::abort();
+      }
     }
 
     if ((rvec.end()-1)->start().lumi_block() == (nwrites-1)/2) break;
