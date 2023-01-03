@@ -197,7 +197,7 @@ void testListTagsParams(const std::string& name) {
   }
 }
 
-void testFindTag(std::string tagname) {
+void testFindTag(const std::string& tagname) {
   std::cout << std::endl << "test: findTag" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -212,7 +212,7 @@ void testFindTag(std::string tagname) {
   }
 }
 
-void testRemoveTag(std::string tagname) {
+void testRemoveTag(const std::string& tagname) {
   std::cout << std::endl << "test: removeTag" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -226,7 +226,7 @@ void testRemoveTag(std::string tagname) {
   }
 }
 
-void testUpdateTag(std::string tagname) {
+void testUpdateTag(const std::string& tagname) {
   std::cout << std::endl << "test: updateTag" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -243,7 +243,7 @@ void testUpdateTag(std::string tagname) {
   }
 }
 
-void testUpdateTagSpecification(std::string tagname) {
+void testUpdateTagSpecification(const std::string& tagname) {
   std::cout << std::endl << "test: updateTagSpecification" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -292,7 +292,7 @@ void testCreateGlobalTag(std::string tagname) {
   }
 }
 
-void testFindGlobalTag(std::string tagname) {
+void testFindGlobalTag(const std::string& tagname) {
   std::cout << std::endl << "test: findGlobalTag" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -365,7 +365,7 @@ void testListGlobalTagsParams(std::string name, int size, int page) {
   }
 }
 
-void testRemoveGlobalTag(std::string tagname) {
+void testRemoveGlobalTag(const std::string& tagname) {
   std::cout << std::endl << "test: removeGlobalTag" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -407,7 +407,7 @@ void testUpdateGlobalTag(std::string tagname) {
   }
 }
 
-void testFindGlobalTagAsString(std::string tagname) {
+void testFindGlobalTagAsString(const std::string& tagname) {
   std::cout << std::endl << "test: findGlobalTagAsString" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -521,7 +521,7 @@ void testListRunLumiInfo() {
 // Global Tag Map Method Tests
 //===================================================
 
-void testFindGlobalTagMap(std::string mapname) {
+void testFindGlobalTagMap(const std::string& mapname) {
   std::cout << std::endl << "test: findGlobalTagMap" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -595,7 +595,7 @@ void testGetJson() {
 //===================================================
 
 // Be carrful tag has to be creted before this test!
-void testStorePayload(std::string tagname) {
+void testStorePayload(const std::string& tagname) {
   std::cout << std::endl << "test: storePayload" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -619,7 +619,7 @@ void testStorePayload(std::string tagname) {
 
 // This test for the local file storage method storePayloadDump.
 
-void testStorePayloadDump(std::string tagname) {
+void testStorePayloadDump(const std::string& tagname) {
   std::cout << std::endl << "test: storePayloadDump" << std::endl;
   bool rewrite = true;
   std::string path = "/tmp/cresttest/crest_dump";
@@ -648,7 +648,7 @@ void testStorePayloadDump(std::string tagname) {
 // IOV List Method Tests
 //===================================================
 
-void testFindAllIovs(std::string tagname) {
+void testFindAllIovs(const std::string& tagname) {
   std::cout << std::endl << "test: findAllIovs" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -683,7 +683,7 @@ void testFindAllIovsParams(std::string tagname, int size, int page) {
   }
 }
 
-void testFindAllIovsFS(std::string tagname) {
+void testFindAllIovsFS(const std::string& tagname) {
   std::cout << std::endl << "test: findAllIovsFS" << std::endl;
 
   CrestClient myCrestClient = CrestClient(true);
@@ -701,7 +701,7 @@ void testFindAllIovsFS(std::string tagname) {
 
 // test to check a method with additional parametrs:
 
-void testFindAllIovsFSPlus(std::string tagname, int size, int page) {
+void testFindAllIovsFSPlus(const std::string& tagname, int size, int page) {
   std::cout << std::endl << "test: findAllIovsFSPlus" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -716,7 +716,7 @@ void testFindAllIovsFSPlus(std::string tagname, int size, int page) {
   }
 }
 
-void testSelectIovsParams(std::string tagname, long since, long until) {
+void testSelectIovsParams(const std::string& tagname, long since, long until) {
   std::cout << std::endl << "test: selectIovs with additional parameters" << std::endl;
   CrestClientExt myCrestClient = CrestClientExt(SURL);
 
@@ -739,7 +739,7 @@ void testSelectIovsParams(std::string tagname, long since, long until) {
   }
 }
 
-void testSelectIovsFS(std::string tagname, long since, long until) {
+void testSelectIovsFS(const std::string& tagname, long since, long until) {
   std::cout << std::endl << "test: selectIovsFS with additional parameters" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -757,7 +757,7 @@ void testSelectIovsFS(std::string tagname, long since, long until) {
   }
 }
 
-void testSelectIovs(std::string tagname) {
+void testSelectIovs(const std::string& tagname) {
   std::cout << std::endl << "test: selectIovs" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -772,7 +772,7 @@ void testSelectIovs(std::string tagname) {
   }
 }
 
-void testSelectIovs(std::string tagname, long since, long until, long snapshot) {
+void testSelectIovs(const std::string& tagname, long since, long until, long snapshot) {
   std::cout << std::endl << "test: selectIovs, all paprams" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -787,7 +787,7 @@ void testSelectIovs(std::string tagname, long since, long until, long snapshot) 
   }
 }
 
-void testSelectGroups(std::string tagname) {
+void testSelectGroups(const std::string& tagname) {
   std::cout << std::endl << "test: selectGroups" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -939,7 +939,7 @@ void testCreateTagMetaInfoDetailed(std::string tagname) {
   }
 }
 
-void testGetTagMetaInfo(std::string tagname) {
+void testGetTagMetaInfo(const std::string& tagname) {
   std::cout << std::endl << "test: getTagMetaInfo" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -978,7 +978,7 @@ void testUpdateTagMetainfo(std::string tagname) {
 //  Tag Meta Info Method Tests in IOVDbSvc format
 //===================================================
 
-void testCreateTagMetaInfoIOVDbSvc(std::string tagname) {
+void testCreateTagMetaInfoIOVDbSvc(const std::string& tagname) {
   std::cout << std::endl << "test: createTagMetainfoIOVDbSvc" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
   std::string description = "meta tag description";
@@ -1006,7 +1006,7 @@ void testCreateTagMetaInfoIOVDbSvc(std::string tagname) {
   }
 }
 
-void testGetTagMetaInfoIOVDbSvc(std::string tagname) {
+void testGetTagMetaInfoIOVDbSvc(const std::string& tagname) {
   std::cout << std::endl << "test: getTagMetaInfoIOVDbSvc" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1073,7 +1073,7 @@ void testListPayloadTagInfo() {
   }
 }
 
-void testListPayloadTagInfo(std::string tagname) {
+void testListPayloadTagInfo(const std::string& tagname) {
   std::cout << std::endl << "test: listPayloadTagInfo with tag " << tagname << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1093,7 +1093,7 @@ void testListPayloadTagInfo(std::string tagname) {
 //================================================
 
 
-void testGetBlobInStream(std::string hash) {
+void testGetBlobInStream(const std::string& hash) {
   std::cout << std::endl << "test: getBlobInStream" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1115,7 +1115,7 @@ void testGetBlobInStream(std::string hash) {
   }
 }
 
-void testGetBlob(std::string hash) {
+void testGetBlob(const std::string& hash) {
   std::cout << std::endl << "test: getBlob" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1131,7 +1131,7 @@ void testGetBlob(std::string hash) {
   }
 }
 
-void testGetPayloadAsJson(std::string hash) {
+void testGetPayloadAsJson(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadAsJson" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1147,7 +1147,7 @@ void testGetPayloadAsJson(std::string hash) {
   }
 }
 
-void testGetPayloadAsString(std::string hash) {
+void testGetPayloadAsString(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadAsString" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1163,7 +1163,7 @@ void testGetPayloadAsString(std::string hash) {
   }
 }
 
-void testGetPayloadMetaInfoAsString(std::string hash) {
+void testGetPayloadMetaInfoAsString(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadMetaInfoAsString" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1179,7 +1179,7 @@ void testGetPayloadMetaInfoAsString(std::string hash) {
   }
 }
 
-void testGetPayloadMetaInfo(std::string hash) {
+void testGetPayloadMetaInfo(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadMetaInfo" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1248,7 +1248,7 @@ void testCreateTagMetaInfoDetailedFs(std::string tagname) {
   }
 }
 
-void testGetTagMetaInfoFs(std::string tagname) {
+void testGetTagMetaInfoFs(const std::string& tagname) {
   std::cout << std::endl << "test: getTagMetaInfoFs" << std::endl;
 
   CrestClient myCrestClient = CrestClient(true);
@@ -1312,7 +1312,7 @@ void testUpdateTagMetaInfoFs(std::string tagname) {
 
 // Tag Methods:
 
-void testFindTagFs(std::string tagname) {
+void testFindTagFs(const std::string& tagname) {
   std::cout << std::endl << "test: findTagFs" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1360,7 +1360,7 @@ void testCreateTagFs(std::string tagname) {
 
 // Payloads methods:
 
-void testStoreBatchPayloadsFs(std::string tagname) {
+void testStoreBatchPayloadsFs(const std::string& tagname) {
   std::cout << std::endl << "test: storeBatchPayloads" << std::endl;
 
   bool rewrite = true;
@@ -1414,7 +1414,7 @@ void testCreateGlobalTagFs(std::string tagname) {
   }
 }
 
-void testFindGlobalTagFs(std::string tagname) {
+void testFindGlobalTagFs(const std::string& tagname) {
   std::cout << std::endl << "test: findGlobalTagFs" << std::endl;
   bool rewrite = true;
   CrestClient myCrestClient = CrestClient(rewrite);
@@ -1455,7 +1455,7 @@ void testCreateGlobalTagMapFs(std::string globaltag, std::string tagname) {
   }
 }
 
-void testFindGlobalTagMapFs(std::string tagname) {
+void testFindGlobalTagMapFs(const std::string& tagname) {
   std::cout << std::endl << "test: findGlobalTagMapFs" << std::endl;
   bool rewrite = true;
   CrestClient myCrestClient = CrestClient(rewrite);
@@ -1473,7 +1473,7 @@ void testFindGlobalTagMapFs(std::string tagname) {
 
 // Hash calculation tests
 
-void testGetHash(std::string str) {
+void testGetHash(const std::string& str) {
   std::cout << std::endl << "test: getHash" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1488,7 +1488,7 @@ void hashCalculationTest(std::string str) {
 
 // Global Tag tests:
 
-void testCreateGlobalTag(std::string tagname, std::string description) {
+void testCreateGlobalTag(const std::string& tagname, const std::string& description) {
   std::cout << std::endl << "test: createGlobalTag (2 parameters)" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1544,7 +1544,7 @@ void testGetDateAndTime() {
 
 // payload method tests for file starage
 
-void testGetPayloadAsStringFS(std::string hash) {
+void testGetPayloadAsStringFS(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadAsStringFS" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1559,7 +1559,7 @@ void testGetPayloadAsStringFS(std::string hash) {
   }
 }
 
-void testGetPayloadAsJsonFS(std::string hash) {
+void testGetPayloadAsJsonFS(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadAsJsonFS" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1574,7 +1574,7 @@ void testGetPayloadAsJsonFS(std::string hash) {
   }
 }
 
-void testGetPayloadMetaInfoAsStringFS(std::string hash) {
+void testGetPayloadMetaInfoAsStringFS(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadMetaInfoAsStringFS" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1589,7 +1589,7 @@ void testGetPayloadMetaInfoAsStringFS(std::string hash) {
   }
 }
 
-void testGetPayloadMetaInfoAsJsonFS(std::string hash) {
+void testGetPayloadMetaInfoAsJsonFS(const std::string& hash) {
   std::cout << std::endl << "test: getPayloadMetaInfoAsJsonFS" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1604,7 +1604,7 @@ void testGetPayloadMetaInfoAsJsonFS(std::string hash) {
   }
 }
 
-void testGetBlobInStreamFS(std::string hash) {
+void testGetBlobInStreamFS(const std::string& hash) {
   std::cout << std::endl << "test: getBlobInStreamFs" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1627,7 +1627,7 @@ void testGetBlobInStreamFS(std::string hash) {
   }
 }
 
-void testGetBlobFS(std::string hash) {
+void testGetBlobFS(const std::string& hash) {
   std::cout << std::endl << "test: getBlobFs" << std::endl;
   CrestClient myCrestClient = CrestClient(true);
 
@@ -1669,7 +1669,7 @@ void testReturnJArray() {
 
 // Test for the storeBatchPayloads method. It has two payloads with the predefined payloadHash values ("aaa" and "bbb").
 
-void testStoreBatchPayloads(std::string tagname) {
+void testStoreBatchPayloads(const std::string& tagname) {
   std::cout << std::endl << "test: storeBatchPayloads" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1689,7 +1689,7 @@ void testStoreBatchPayloads(std::string tagname) {
 
 // Test for the storeBatchPayloads method. The payloads are calculated each time.
 
-void testStoreBatchPayloadsB(std::string tagname) {
+void testStoreBatchPayloadsB(const std::string& tagname) {
   std::cout << std::endl << "test: storeBatchPayloads2" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1875,7 +1875,7 @@ void testTagAndStoreBatchFsB(std::string tagname) {
 
 // IOV Number Methods:
 
-void testGetSize(std::string tagname) {
+void testGetSize(const std::string& tagname) {
   std::cout << std::endl << "test: getSize" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
@@ -1890,7 +1890,7 @@ void testGetSize(std::string tagname) {
   }
 }
 
-void testGetSizeFS(std::string tagname) {
+void testGetSizeFS(const std::string& tagname) {
   std::cout << std::endl << "test: getSizeFS" << std::endl;
 
   bool rewrite = true;
@@ -1947,7 +1947,7 @@ void test01() {
 
 // Tag statistics method test:
 
-void testGetTagDataInfo(std::string tagname) {
+void testGetTagDataInfo(const std::string& tagname) {
   bool rewrite = true;
   CrestClient myCrestClient = CrestClient(rewrite);
 
@@ -1960,7 +1960,7 @@ void testGetTagDataInfo(std::string tagname) {
   }
 }
 
-void testGetFirstLetters(std::string str) {
+void testGetFirstLetters(const std::string& str) {
   std::cout << std::endl << "test: getFirstLetters" << std::endl;
   CrestClient myCrestClient = CrestClient(SURL);
 
