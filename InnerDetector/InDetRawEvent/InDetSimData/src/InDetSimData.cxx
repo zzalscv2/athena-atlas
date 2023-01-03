@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -50,11 +50,9 @@ InDetSimData::InDetSimData (std::vector<Deposit>&& deposits,
 }
 
 InDetSimData::InDetSimData (const InDetSimData& other)
-  :m_word(other.m_word),
-   m_deposits(other.m_deposits)
-{
-
-}
+  
+   
+= default;
 
 InDetSimData &InDetSimData::operator=(const InDetSimData& other)
 {

@@ -35,7 +35,7 @@ using namespace std;
 RadDamageUtil::RadDamageUtil(const std::string& type, const std::string& name, const IInterface* parent) :
   AthAlgTool(type, name, parent) {}
 
-RadDamageUtil::~RadDamageUtil() {}
+RadDamageUtil::~RadDamageUtil() = default;
 
 //=======================================
 // I N I T I A L I Z E

@@ -374,7 +374,7 @@ void InducedChargeModel::getEField(const SCT_InducedChargeModelData& data,
 }
 
 /////////////////////////////////////////////////////////////////////
-size_t InducedChargeModel::getFEMIndex(SCT_InducedChargeModelData& data) const {
+size_t InducedChargeModel::getFEMIndex(SCT_InducedChargeModelData& data) {
   // Return index for s_VFD0 and EFieldModel.
   // If vdepl is out of range of s_VFD0, EFieldModel of FlatDiodeModel is returned.
   size_t iVFD = 0;

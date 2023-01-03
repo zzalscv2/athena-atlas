@@ -44,8 +44,7 @@ SCT_DigitizationTool::SCT_DigitizationTool(const std::string& type,
   m_WriteSCT1_RawData.declareUpdateHandler(&SCT_DigitizationTool::SetupRdoOutputType, this);
 }
 
-SCT_DigitizationTool::~SCT_DigitizationTool() {
-}
+SCT_DigitizationTool::~SCT_DigitizationTool() = default;
 
 // ----------------------------------------------------------------------
 // Initialize method:
@@ -307,7 +306,6 @@ void SCT_DigitizationTool::digitizeAllHits(const EventContext& ctx, SG::WriteHan
     chargedDiodes.clear();
   }
   ATH_MSG_DEBUG("hits processed");
-  return;
 }
 
 // digitize elements without hits
@@ -357,8 +355,7 @@ void SCT_DigitizationTool::digitizeNonHits(const EventContext& ctx, SG::WriteHan
     }
   }
 
-  return;
-}
+  }
 
 bool SCT_DigitizationTool::digitizeElement(const EventContext& ctx, SiChargedDiodeCollection* chargedDiodes, TimedHitCollection<SiHit>*& thpcsi, CLHEP::HepRandomEngine * rndmEngine) {
   if (nullptr == thpcsi) {
@@ -370,7 +367,7 @@ bool SCT_DigitizationTool::digitizeElement(const EventContext& ctx, SiChargedDio
   // get the iterator pairs for this DetEl
 
   TimedHitCollection<SiHit>::const_iterator i, e;
-  if (thpcsi->nextDetectorElement(i, e) == false) { // no more hits
+  if (!thpcsi->nextDetectorElement(i, e)) { // no more hits
     return false;
   }
 
@@ -463,7 +460,7 @@ StatusCode SCT_DigitizationTool::processBunchXing(int bunchXing,
 
     if ((not (m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                                 bSubEvents, eSubEvents).isSuccess())) and
-        hitCollList.size() == 0) {
+        hitCollList.empty()) {
       ATH_MSG_ERROR("Could not fill TimedHitCollList");
       return StatusCode::FAILURE;
     } else {
@@ -725,7 +722,7 @@ StatusCode SCT_DigitizationTool::getNextEvent(const EventContext& ctx) {
 
   TimedHitCollList hitCollList;
   unsigned int numberOfSiHits{0};
-  if (not (m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSiHits).isSuccess()) and hitCollList.size() == 0) {
+  if (not (m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSiHits).isSuccess()) and hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {

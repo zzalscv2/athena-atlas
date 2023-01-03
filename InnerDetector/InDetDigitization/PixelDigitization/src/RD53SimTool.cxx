@@ -15,7 +15,7 @@ RD53SimTool::RD53SimTool(const std::string& type, const std::string& name, const
   FrontEndSimTool(type, name, parent) {
 }
 
-RD53SimTool::~RD53SimTool() { }
+RD53SimTool::~RD53SimTool() = default;
 
 StatusCode RD53SimTool::initialize() {
   CHECK(FrontEndSimTool::initialize());
@@ -230,5 +230,4 @@ void RD53SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
      }
      }
    **/
-  return;
-}
+  }

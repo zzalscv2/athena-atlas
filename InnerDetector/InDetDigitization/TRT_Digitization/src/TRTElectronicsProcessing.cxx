@@ -443,8 +443,7 @@ void TRTElectronicsProcessing::DiscriminatorResponse(const double& lowthreshold,
           ++highThresholdBins;
         }
     }
-  return;
-}
+  }
 
 //___________________________________________________________________________
 unsigned TRTElectronicsProcessing::EncodeDigit() const {
@@ -544,8 +543,7 @@ void TRTElectronicsProcessing::HTt0Shift(int hitID) {
 
   }
 
-  return;
-
+  
 }
 
 //_____________________________________________________________________________
@@ -590,7 +588,6 @@ void TRTElectronicsProcessing::LTt0Shift( int hitID, int strawGasType ) {
 
   }
 
-  return;
-
+  
 }
 //_____________________________________________________________________________

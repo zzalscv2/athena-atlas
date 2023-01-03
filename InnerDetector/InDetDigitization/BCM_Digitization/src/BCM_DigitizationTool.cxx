@@ -122,7 +122,6 @@ void BCM_DigitizationTool::processSiHit(const SiHit &currentHit, double eventTim
     return;
   }
   m_depositVect[moduleNo].emplace_back(particleLink,currentHit.energyLoss());
-  return;
 }
 
 //----------------------------------------------------------------------
@@ -136,7 +135,7 @@ void BCM_DigitizationTool::createRDOsAndSDOs(const EventContext& ctx)
 
   // Digitize hit info and create RDO for each module
   for (int iMod=0; iMod<8; ++iMod) {
-    if (m_depositVect[iMod].size()) m_simDataCollMap->insert(std::make_pair(Identifier(iMod), InDetSimData(m_depositVect[iMod])));
+    if (!m_depositVect[iMod].empty()) m_simDataCollMap->insert(std::make_pair(Identifier(iMod), InDetSimData(m_depositVect[iMod])));
     std::vector<float> analog = createAnalog(iMod,m_enerVect[iMod],m_timeVect[iMod]);
     addNoise(iMod,analog, rngWrapper->getEngine(ctx));
     for (int iGain=0; iGain<2; ++iGain) {
@@ -147,8 +146,7 @@ void BCM_DigitizationTool::createRDOsAndSDOs(const EventContext& ctx)
       fillRDO(iGain*8+iMod,p1x,p1w,p2x,p2w);
     }
   }
-  return;
-}
+  }
 
 //----------------------------------------------------------------------
 // PrepareEvent method:
@@ -191,7 +189,7 @@ StatusCode BCM_DigitizationTool::processAllSubEvents(const EventContext& ctx)
   else {
     using TimedHitCollList = PileUpMergeSvc::TimedList<SiHitCollection>::type;
     TimedHitCollList hitCollList;
-    if (!(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList).isSuccess()) && hitCollList.size()==0) {
+    if (!(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList).isSuccess()) && hitCollList.empty()) {
       ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
       return StatusCode::FAILURE;
     } else {
@@ -320,7 +318,7 @@ std::vector<float> BCM_DigitizationTool::createAnalog(int iMod, std::vector<floa
 //----------------------------------------------------------------------
 void BCM_DigitizationTool::addNoise(int iMod, std::vector<float> &analog, CLHEP::HepRandomEngine* randomEngine)
 {
-  for (unsigned int iBin=0; iBin<analog.size(); ++iBin) analog[iBin]+=CLHEP::RandGaussZiggurat::shoot(randomEngine,0.,m_modNoise[iMod]);
+  for (float & iBin : analog) iBin+=CLHEP::RandGaussZiggurat::shoot(randomEngine,0.,m_modNoise[iMod]);
 }
 
 //----------------------------------------------------------------------

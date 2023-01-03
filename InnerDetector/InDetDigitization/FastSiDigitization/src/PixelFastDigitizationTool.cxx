@@ -172,7 +172,7 @@ StatusCode PixelFastDigitizationTool::processBunchXing(int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -252,7 +252,7 @@ StatusCode PixelFastDigitizationTool::processAllSubEvents(const EventContext& ct
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.size()==0 ) {
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
     ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
     return StatusCode::FAILURE;
   } else {
@@ -460,9 +460,9 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
 
       bool isRep = false;
 
-      for (unsigned int j=0; j<trkNo.size();j++) {
-        for (unsigned int k=0; k<detEl.size();k++) {
-          if ((trkn > 0) && (trkn == trkNo[j]) && (hitId == detEl[k])) {isRep = true; break;}
+      for (int j : trkNo) {
+        for (auto & k : detEl) {
+          if ((trkn > 0) && (trkn == j) && (hitId == k)) {isRep = true; break;}
         }
         if (isRep) break;
       }
@@ -645,8 +645,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
       int totalToT=std::accumulate(totList.begin(), totList.end(), 0);;
 
       // bail out if 0 pixel or path length problem
-      if (!rdoList.size() || accumulatedPathLength < pixMinimalPathCut || totalToT == 0) {
-        if (totalToT == 0 && rdoList.size() > 0 ) ATH_MSG_WARNING("The total ToT of the cluster is 0, this should never happen");
+      if (rdoList.empty() || accumulatedPathLength < pixMinimalPathCut || totalToT == 0) {
+        if (totalToT == 0 && !rdoList.empty() ) ATH_MSG_WARNING("The total ToT of the cluster is 0, this should never happen");
         continue;
       }
 
@@ -666,8 +666,8 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
           InDet::PixelCluster* currentCluster = clusIter->second;
           const std::vector<Identifier> &currentRdoList = currentCluster->rdoList();
           bool areNb = false;
-          for (std::vector<Identifier>::const_iterator rdoIter = rdoList.begin(); rdoIter != rdoList.end(); ++rdoIter) {
-            areNb = this->areNeighbours(currentRdoList, *rdoIter, hitSiDetElement,*m_pixel_ID);
+          for (auto rdoIter : rdoList) {
+            areNb = PixelFastDigitizationTool::areNeighbours(currentRdoList, rdoIter, hitSiDetElement,*m_pixel_ID);
             if (areNb) { break; }
           }
           if (areNb) {
@@ -697,16 +697,16 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
       }
 
       bool not_valid = false;
-      for (unsigned int entry=0; entry < rdoList.size(); entry++) {
-        if (!(rdoList[entry].is_valid())) { not_valid = true; break;}
+      for (auto & entry : rdoList) {
+        if (!(entry.is_valid())) { not_valid = true; break;}
       }
 
       if (not_valid) continue;
 
       if(merged) {
         //Hacks for merged clusters
-        for (std::vector<Identifier>::const_iterator rdoIter = rdoList.begin(); rdoIter != rdoList.end(); ++rdoIter) {
-          const InDetDD::SiCellId& chargeCellId =  hitSiDetElement->cellIdFromIdentifier(*rdoIter);
+        for (auto rdoIter : rdoList) {
+          const InDetDD::SiCellId& chargeCellId =  hitSiDetElement->cellIdFromIdentifier(rdoIter);
           // phi/ eta index
           int chargePhiIndex = chargeCellId.phiIndex();
           int chargeEtaIndex = chargeCellId.etaIndex();
@@ -737,7 +737,7 @@ StatusCode PixelFastDigitizationTool::digitize(const EventContext& ctx)
         //           clusterPosition = SG::ReadCondHandle<PixelDistortionData>(m_distortionKey)->correctSimulation(m_pixel_ID->wafer_hash(hitSiDetElement->identify()), clusterPosition, localDirection);
 
         // from InDetReadoutGeometry: width from eta
-        auto pixModDesign = dynamic_cast<const InDetDD::PixelModuleDesign*>(&hitSiDetElement->design());
+        const auto *pixModDesign = dynamic_cast<const InDetDD::PixelModuleDesign*>(&hitSiDetElement->design());
         if (!pixModDesign) {
           return StatusCode::FAILURE;
         }
@@ -847,7 +847,7 @@ StatusCode PixelFastDigitizationTool::createAndStoreRIOs(const EventContext& ctx
 
 
     if (clusterCollection) {
-      if (clusterCollection->size() != 0) {
+      if (!clusterCollection->empty()) {
         ATH_MSG_DEBUG ( "Filling ambiguities map" );
         m_gangedAmbiguitiesFinder->execute(clusterCollection,*m_ambiguitiesMap);
         ATH_MSG_DEBUG ( "Ambiguities map: " << m_ambiguitiesMap->size() << " elements" );
@@ -870,7 +870,7 @@ bool PixelFastDigitizationTool::areNeighbours
 (const std::vector<Identifier>& group,
  const Identifier& rdoID,
  const InDetDD::SiDetectorElement* /*element*/,
- const PixelID& pixelID) const
+ const PixelID& pixelID) 
 {
   // note: in the PixelClusteringToolBase, m_splitClusters is a variable; here
   // splitClusters was explicitly set to zero, acceptDiagonalClusters = 1
@@ -966,7 +966,7 @@ Trk::DigitizationModule* PixelFastDigitizationTool::buildDetectorModule(const In
 }
 
 
-Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector3D & Point, const Amg::Vector3D & Direction, Amg::Vector2D PlaneBorder, double halfthickness) const
+Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector3D & Point, const Amg::Vector3D & Direction, Amg::Vector2D PlaneBorder, double halfthickness) 
 {
   Amg::Vector3D Intersection(0.,0.,0.);
 
@@ -999,7 +999,7 @@ Amg::Vector3D PixelFastDigitizationTool::CalculateIntersection(const Amg::Vector
   return Intersection;
 }
 
-void PixelFastDigitizationTool::Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY) const{
+void PixelFastDigitizationTool::Diffuse(HepGeom::Point3D<double>& localEntry, HepGeom::Point3D<double>& localExit, double shiftX, double shiftY) {
 
   double localEntryX = localEntry.x();
   double localEntryY = localEntry.y();

@@ -28,7 +28,7 @@ EfieldInterpolator::EfieldInterpolator(const std::string& type, const std::strin
   AthAlgTool(type, name, parent),
   m_efieldOrigin(interspline) {}
 
-EfieldInterpolator::~EfieldInterpolator() {}
+EfieldInterpolator::~EfieldInterpolator() = default;
 
 StatusCode EfieldInterpolator::initialize() {
   ATH_MSG_DEBUG("Initializing " << name() << "...");
@@ -190,7 +190,7 @@ bool EfieldInterpolator::initializeFromFile(const std::string& finpath) {
 }
 
 // Check if requested values out of range of given TCAD samples
-void EfieldInterpolator::reliabilityCheck(double aimFluence, std::vector<double> fluences, double aimVoltage,
+void EfieldInterpolator::reliabilityCheck(double aimFluence, const std::vector<double>& fluences, double aimVoltage,
                                           const std::vector<double>& voltages) {
   bool tooLowVolt = true;
   bool tooHighVolt = true;
@@ -201,9 +201,9 @@ void EfieldInterpolator::reliabilityCheck(double aimFluence, std::vector<double>
   }
   bool tooLowFlu = true;
   bool tooHighFlu = true;
-  for (uint iv = 0; iv < fluences.size(); iv++) {
-    if (aimFluence < fluences.at(iv)) tooHighFlu = false;
-    if (aimFluence > fluences.at(iv)) tooLowFlu = false;
+  for (double fluence : fluences) {
+    if (aimFluence < fluence) tooHighFlu = false;
+    if (aimFluence > fluence) tooLowFlu = false;
   }
   if (tooLowFlu) ATH_MSG_WARNING(
       "WARNING: The fluence value you specified (" << aimFluence << ") is too low to be reliably interpolated!");
@@ -216,9 +216,7 @@ void EfieldInterpolator::reliabilityCheck(double aimFluence, std::vector<double>
   // Results from Closure Test
   // TCAD files save 20 for 20e14 neq/cm2
   if (12.2 < aimFluence || aimFluence < 1.) ATH_MSG_WARNING(" WARNING: The fluence value you specified (" << aimFluence << ") is outside the range within it could be reliably interpolated!"); //Based on closure test June 2018 - max fluences available: ... 10 12 15 20
-  if (1010. < aimVoltage || aimVoltage < 79.) ATH_MSG_WARNING(" WARNING: The voltage value you specified (" << aimVoltage << ") is outside the range within it could be reliably interpolated!"); //Based on closure test June 2018 - max voltages available: ... 600 800 1000V
-  return;
-}
+  if (1010. < aimVoltage || aimVoltage < 79.) ATH_MSG_WARNING(" WARNING: The voltage value you specified (" << aimVoltage << ") is outside the range within it could be reliably interpolated!"); }
 
 void EfieldInterpolator::scaleIntegralTo(TH1* hin, double aimInt, int first, int last) {
   hin->Scale(aimInt / (float) hin->Integral(first, last));
@@ -398,8 +396,8 @@ const std::string EfieldInterpolator::createInterpolationFromTCADtree(const std:
   //put into ascending order
   std::sort(allFluences.begin(), allFluences.end());
   std::sort(allVoltages.begin(), allVoltages.end());
-  for (uint i = 0; i < allFluences.size(); i++) ATH_MSG_DEBUG("fluences recorded: " << allFluences.at(i));
-  for (uint i = 0; i < allVoltages.size(); i++) ATH_MSG_DEBUG("voltages recorded: " << allVoltages.at(i));
+  for (double & allFluence : allFluences) ATH_MSG_DEBUG("fluences recorded: " << allFluence);
+  for (double & allVoltage : allVoltages) ATH_MSG_DEBUG("voltages recorded: " << allVoltage);
   std::vector<double> tmpef;
   myReader.Restart(); //available from ROOT 6.10.
   //Exclude TCAD efield values close to sensor edge

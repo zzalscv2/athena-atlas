@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeneratorObjects/HepMcParticleLink.icc
@@ -409,7 +409,7 @@ HepMcParticleLink::HepMcParticleLink (barcode_type barCode,
  * @param sg Optional specification of a specific store to reference.
  */
 inline
-HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       const std::string& evCollName,
                                       PositionFlag positionFlag /*= IS_INDEX*/,
@@ -434,7 +434,7 @@ HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
  * @param ctx Context of the store to reference.
  */
 inline
-HepMcParticleLink::HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       EBC_EVCOLL evColl,
                                       PositionFlag positionFlag,

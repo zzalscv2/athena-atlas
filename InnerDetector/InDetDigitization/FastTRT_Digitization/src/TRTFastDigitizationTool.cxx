@@ -130,7 +130,7 @@ StatusCode TRTFastDigitizationTool::processBunchXing( int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_trtHitCollectionKey, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -438,12 +438,12 @@ StatusCode TRTFastDigitizationTool::processAllSubEvents(const EventContext& ctx)
 
   m_HardScatterSplittingSkipper = false;
   TimedHitCollection< TRTUncompressedHit > timedHitCollection( numberOfSimHits );
-  for ( HitCollectionTimedList::iterator itr = hitCollectionTimedList.begin(); itr != hitCollectionTimedList.end(); ++itr ) {
+  for (auto & itr : hitCollectionTimedList) {
     // decide if this event will be processed depending on HardScatterSplittingMode & bunchXing
     if ( m_HardScatterSplittingMode == 2 && !m_HardScatterSplittingSkipper ) { m_HardScatterSplittingSkipper = true; continue; }
     if ( m_HardScatterSplittingMode == 1 && m_HardScatterSplittingSkipper )  { continue; }
     if ( m_HardScatterSplittingMode == 1 && !m_HardScatterSplittingSkipper ) { m_HardScatterSplittingSkipper = true; }
-    timedHitCollection.insert( itr->first, static_cast< const TRTUncompressedHitCollection * >( itr->second ) );
+    timedHitCollection.insert( itr.first, static_cast< const TRTUncompressedHitCollection * >( itr.second ) );
   }
   m_thpctrt = &timedHitCollection;
 
@@ -718,7 +718,7 @@ bool TRTFastDigitizationTool::isArgonStraw( const Identifier &straw_id ) const
 {
   // TRTCond::StrawStatus::Good == Xenon
   // return ( m_trtStrawStatusSummarySvc->getStatusHT( straw_id ) != TRTCond::StrawStatus::Good ? true : false );
-  return ( gasType( straw_id ) == 1 ? true : false );
+  return ( gasType( straw_id ) == 1 );
 } 
 
 

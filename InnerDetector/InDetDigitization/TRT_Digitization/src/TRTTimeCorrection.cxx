@@ -33,7 +33,7 @@ TRTTimeCorrection::TRTTimeCorrection(const TRTDigSettings* digset,
 
 
 //__________________________________________________________________________________________________________
-TRTTimeCorrection::~TRTTimeCorrection() {}
+TRTTimeCorrection::~TRTTimeCorrection() = default;
 
 //__________________________________________________________________________________________________________
 void TRTTimeCorrection::Initialize() {
@@ -56,14 +56,14 @@ void TRTTimeCorrection::Initialize() {
 
   //Initialize barrel max timeshift arrays:
   m_timeShiftForBarrelStraws.resize(nbarrelphi);
-  for (unsigned int iPhi = 0; iPhi < m_timeShiftForBarrelStraws.size(); ++iPhi) {
-    m_timeShiftForBarrelStraws[iPhi].resize(numerology->getNBarrelRings());
-    for (unsigned int iRing = 0; iRing < m_timeShiftForBarrelStraws[iPhi].size(); ++iRing) {
-      m_timeShiftForBarrelStraws[iPhi][iRing].resize(numerology->getNBarrelLayers(iRing));
-      for (unsigned int iLayer = 0; iLayer < m_timeShiftForBarrelStraws[iPhi][iRing].size(); ++iLayer) {
+  for (auto & timeShiftForBarrelStraw : m_timeShiftForBarrelStraws) {
+    timeShiftForBarrelStraw.resize(numerology->getNBarrelRings());
+    for (unsigned int iRing = 0; iRing < timeShiftForBarrelStraw.size(); ++iRing) {
+      timeShiftForBarrelStraw[iRing].resize(numerology->getNBarrelLayers(iRing));
+      for (unsigned int iLayer = 0; iLayer < timeShiftForBarrelStraw[iRing].size(); ++iLayer) {
         if (m_detmgr->getBarrelElement(0,iRing,0,iLayer)) {
           unsigned int nstraws_in_layer = m_detmgr->getBarrelElement(0,iRing,0,iLayer)->nStraws();
-          m_timeShiftForBarrelStraws[iPhi][iRing][iLayer].assign(nstraws_in_layer,m_notInitVal);
+          timeShiftForBarrelStraw[iRing][iLayer].assign(nstraws_in_layer,m_notInitVal);
         }
       }
     }
@@ -71,10 +71,10 @@ void TRTTimeCorrection::Initialize() {
 
   //Initialize endcap max timeshift arrays:
   m_timeShiftForEndCapPlanes.resize(nendcapphi);
-  for (unsigned int iPhi = 0; iPhi < m_timeShiftForEndCapPlanes.size(); ++iPhi) {
-    m_timeShiftForEndCapPlanes[iPhi].resize(numerology->getNEndcapWheels());
-    for (unsigned int iWheel = 0; iWheel < m_timeShiftForEndCapPlanes[iPhi].size(); ++iWheel) {
-      m_timeShiftForEndCapPlanes[iPhi][iWheel].assign(numerology->getNEndcapLayers(iWheel),m_notInitVal);
+  for (auto & timeShiftForEndCapPlane : m_timeShiftForEndCapPlanes) {
+    timeShiftForEndCapPlane.resize(numerology->getNEndcapWheels());
+    for (unsigned int iWheel = 0; iWheel < timeShiftForEndCapPlane.size(); ++iWheel) {
+      timeShiftForEndCapPlane[iWheel].assign(numerology->getNEndcapLayers(iWheel),m_notInitVal);
     }
   }
 
@@ -328,8 +328,7 @@ void TRTTimeCorrection::PropagationTime(const int& strawID, const double& meanZ,
 
   }
 
-  return;
-}
+  }
 
 //__________________________________________________________________________________________________________
 void TRTTimeCorrection::calculateSignalDists_Barrel(const unsigned int& iRing, const unsigned int& iLayer,
@@ -352,8 +351,6 @@ void TRTTimeCorrection::calculateSignalDists_Barrel(const unsigned int& iRing, c
 
   direct_dist  = 0.5*barrel_element->strawLength() + m_lengthDeadRegion;
   reflect_dist = 1.5*barrel_element->strawLength() + 3*m_lengthDeadRegion;
-
-  return;
 }
 
 //__________________________________________________________________________________________________________
@@ -370,8 +367,6 @@ void TRTTimeCorrection::calculateSignalDists_EndCap(const unsigned int& iWheel,
 
   direct_dist  = 0.5*ec_element->strawLength() + m_lengthDeadRegion;
   reflect_dist = 1.5*ec_element->strawLength() + 3*m_lengthDeadRegion;
-
-  return;
 }
 
 //_____________________________________________________________________________

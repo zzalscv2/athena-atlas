@@ -112,9 +112,9 @@ private:
   bool hole( double x_h, double y_h, double& vx_h, double& vy_h, double& D_h);
   double mud_e(double E) const;
   double mud_h(double E) const;
-  double ExValue150(int ix, int iy) const;
-  double EyValue150(int ix, int iy) const;
-  double GetPotentialValue(int ix, int iy) const;
+  static double ExValue150(int ix, int iy) ;
+  static double EyValue150(int ix, int iy) ;
+  static double GetPotentialValue(int ix, int iy) ;
   void holeTransport(double& x0, double& y0, double* Q_m2, double* Q_m1, double* Q_00, double* Q_p1, double* Q_p2, CLHEP::HepRandomEngine * rndmEngine);
   void electronTransport(double& x0, double& y0, double* Q_m2, double* Q_m1, double* Q_00, double* Q_p1, double* Q_p2, CLHEP::HepRandomEngine * rndmEngine) const;
   double inducedCharge(int& istrip, double& x, double& y, double& t) const;

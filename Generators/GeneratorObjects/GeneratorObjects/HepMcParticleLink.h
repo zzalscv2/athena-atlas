@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATOROBJECTS_HEPMCPARTICLELINK_H
@@ -401,7 +401,7 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param sg Optional specification of a specific store to reference.
    */
-  HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+  HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
                      const std::string& evCollName,
                      PositionFlag positionFlag = IS_INDEX,
@@ -420,7 +420,7 @@ public:
    * @param positionFlag: See @c eventIndex.
    * @param ctx Context of the store to reference.
    */
-  HepMcParticleLink (HepMC::ConstGenParticlePtr part,
+  HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                      uint32_t eventIndex,
                      EBC_EVCOLL evColl,
                      PositionFlag positionFlag,

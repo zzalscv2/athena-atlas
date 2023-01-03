@@ -163,7 +163,7 @@ StatusCode SiSmearedDigitizationTool::initialize()
   ATH_CHECK(m_pixelDetEleCollKey.initialize(m_SmearPixel));
   ATH_CHECK(m_SCTDetEleCollKey.initialize(not m_SmearPixel));
 
-  if (m_inputObjectName=="")
+  if (m_inputObjectName.empty())
     {
       ATH_MSG_FATAL ( "Property InputObjectName not set !" );
       return StatusCode::FAILURE;
@@ -290,7 +290,7 @@ StatusCode SiSmearedDigitizationTool::processBunchXing(int bunchXing,
 
   if (!(m_mergeSvc->retrieveSubSetEvtData(m_inputObjectName, hitCollList, bunchXing,
                                           bSubEvents, eSubEvents).isSuccess()) &&
-      hitCollList.size() == 0) {
+      hitCollList.empty()) {
     ATH_MSG_ERROR("Could not fill TimedHitCollList");
     return StatusCode::FAILURE;
   } else {
@@ -392,7 +392,7 @@ StatusCode SiSmearedDigitizationTool::processAllSubEvents(const EventContext& ct
   //this is a list<pair<time_t, DataLink<SCTUncompressedHitCollection> > >
   TimedHitCollList hitCollList;
   unsigned int numberOfSimHits(0);
-  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.size()==0 ) {
+  if ( !(m_mergeSvc->retrieveSubEvtsData(m_inputObjectName, hitCollList, numberOfSimHits).isSuccess()) && hitCollList.empty() ) {
     ATH_MSG_ERROR ( "Could not fill TimedHitCollList" );
     return StatusCode::FAILURE;
   } else {

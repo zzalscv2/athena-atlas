@@ -162,13 +162,13 @@ void TRTDigCondBase::initialize(CLHEP::HepRandomEngine* rndmEngine) {
   std::cout << "TRTDigCondBase  INFO Gas Geometry: BA_C[Kr] = " << nBAC[0][1] << " " << nBAC[1][1] << " " << nBAC[2][1] << std::endl;
   std::cout << "TRTDigCondBase  INFO Gas Geometry: BA_C[Ar] = " << nBAC[0][2] << " " << nBAC[1][2] << " " << nBAC[2][2] << std::endl;
 
-  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_A[Xe] = "; for (int i=0;i<14;i++) std::cout << nECA[i][0] << " "; std::cout << std::endl;
-  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_A[Kr] = "; for (int i=0;i<14;i++) std::cout << nECA[i][1] << " "; std::cout << std::endl;
-  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_A[Ar] = "; for (int i=0;i<14;i++) std::cout << nECA[i][2] << " "; std::cout << std::endl;
+  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_A[Xe] = "; for (auto & i : nECA) std::cout << i[0] << " "; std::cout << std::endl;
+  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_A[Kr] = "; for (auto & i : nECA) std::cout << i[1] << " "; std::cout << std::endl;
+  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_A[Ar] = "; for (auto & i : nECA) std::cout << i[2] << " "; std::cout << std::endl;
 
-  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_C[Xe] = "; for (int i=0;i<14;i++) std::cout << nECC[i][0] << " "; std::cout << std::endl;
-  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_C[Kr] = "; for (int i=0;i<14;i++) std::cout << nECC[i][1] << " "; std::cout << std::endl;
-  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_C[Ar] = "; for (int i=0;i<14;i++) std::cout << nECC[i][2] << " "; std::cout << std::endl;
+  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_C[Xe] = "; for (auto & i : nECC) std::cout << i[0] << " "; std::cout << std::endl;
+  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_C[Kr] = "; for (auto & i : nECC) std::cout << i[1] << " "; std::cout << std::endl;
+  std::cout << "TRTDigCondBase  INFO Gas Geometry: EC_C[Ar] = "; for (auto & i : nECC) std::cout << i[2] << " "; std::cout << std::endl;
 
 }
 
@@ -191,15 +191,13 @@ bool TRTDigCondBase::getNextNoisyStraw( CLHEP::HepRandomEngine* randengine, int&
 }
 
 //________________________________________________________________________________
-bool TRTDigCondBase::crossTalkNoise( CLHEP::HepRandomEngine* randengine ) {
+bool TRTDigCondBase::crossTalkNoise( CLHEP::HepRandomEngine* randengine ) const {
   const float noise(- m_crosstalk_noiselevel * log(CLHEP::RandFlat::shoot(randengine, 0.0, 1.0)));
-  if ( CLHEP::RandFlat::shoot(randengine, 0.0, 1.0) < noise ) return true;
-  return false;
+  return CLHEP::RandFlat::shoot(randengine, 0.0, 1.0) < noise;
 }
 
 //________________________________________________________________________________
-bool TRTDigCondBase::crossTalkNoiseOtherEnd( CLHEP::HepRandomEngine* randengine ) {
+bool TRTDigCondBase::crossTalkNoiseOtherEnd( CLHEP::HepRandomEngine* randengine ) const {
   const float noise(- m_crosstalk_noiselevel_other_end * log(CLHEP::RandFlat::shoot(randengine, 0.0, 1.0)));
-  if ( CLHEP::RandFlat::shoot(randengine, 0.0, 1.0) < noise ) return true;
-  return false;
+  return CLHEP::RandFlat::shoot(randengine, 0.0, 1.0) < noise;
 }

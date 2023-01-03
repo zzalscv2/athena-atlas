@@ -196,8 +196,6 @@ void TRTProcessingOfStraw::Initialize(const ITRT_CalDbTool* calDbTool)
   m_randBinomialAr = std::make_unique<CLHEP::RandBinomialFixedP>(nullptr, 1, m_settings->smearingFactor(2), m_maxelectrons);
 
   ATH_MSG_VERBOSE ( "Initialization done" );
-
-  return;
 }
 
 //________________________________________________________________________________
@@ -243,8 +241,7 @@ void TRTProcessingOfStraw::addClustersFromStep ( const double& scaledKineticEner
                                     prez + lambda * deltaZ);
     }
 
-  return;
-
+  
 }
 
 //________________________________________________________________________________
@@ -541,7 +538,6 @@ void TRTProcessingOfStraw::ProcessStraw ( MagField::AtlasFieldCache& fieldCache,
 
   //Electronics processing:
   m_pElectronicsProcessing->ProcessDeposits( m_depositList, hitID, outdigit, lowthreshold, noiseamplitude, strawGasType, elecProcRndmEngine, elecNoiseRndmEngine );
-  return;
 }
 
 //________________________________________________________________________________
@@ -751,8 +747,7 @@ void TRTProcessingOfStraw::ClustersToDeposits (MagField::AtlasFieldCache& fieldC
 
     } // end of cluster loop
 
-  return;
-}
+  }
 
 //________________________________________________________________________________
 Amg::Vector3D TRTProcessingOfStraw::getGlobalPosition (  int hitID, const TimedHitPtr<TRTUncompressedHit> *theHit ) {

@@ -34,7 +34,7 @@ TRTElectronicsNoise::TRTElectronicsNoise(const TRTDigSettings* digset,
 }
 
 //_____________________________________________________________________________
-TRTElectronicsNoise::~TRTElectronicsNoise(){}
+TRTElectronicsNoise::~TRTElectronicsNoise()= default;
 
 //_____________________________________________________________________________
 void TRTElectronicsNoise::getSamplesOfMaxLTOverNoiseAmp(std::vector<float>& maxLTOverNoiseAmp,
@@ -187,8 +187,8 @@ void TRTElectronicsNoise::tabulateNoiseSignalShape() {
   m_noiseSignalShape.resize(noiseshapebins);
 
   //Normalize:
-  for (unsigned int i(0); i < m_noiseSignalShape.size(); ++i) {
-    m_noiseSignalShape[i] /= shapemax;
+  for (double & i : m_noiseSignalShape) {
+    i /= shapemax;
   };
 
 }

@@ -63,8 +63,7 @@ TRTNoise::TRTNoise( const TRTDigSettings* digset,
 }
 
 //_____________________________________________________________________________
-TRTNoise::~TRTNoise() {
-}
+TRTNoise::~TRTNoise() = default;
 
 //_____________________________________________________________________________
 void TRTNoise::InitThresholdsAndNoiseAmplitudes_and_ProduceNoiseDigitPool(CLHEP::HepRandomEngine* noiseRndmEngine,
@@ -263,8 +262,7 @@ void TRTNoise::InitThresholdsAndNoiseAmplitudes_and_ProduceNoiseDigitPool(CLHEP:
     ProduceNoiseDigitPool( actual_LTs, actual_noiseamps, strawTypes, noiseRndmEngine, elecNoiseRndmEngine, elecProcRndmEngine );
   }
 
-  return;
-}
+  }
 
 //_____________________________________________________________________________
 void TRTNoise::ProduceNoiseDigitPool( const std::vector<float>& lowthresholds,
@@ -351,10 +349,7 @@ void TRTNoise::appendPureNoiseToProperDigits( std::vector<TRTDigit>& digitVect, 
     }
   };
 
-  digitVect.pop_back(); //Required since last hitID is occasionally corrupted.
-
-  return;
-}
+  digitVect.pop_back(); }
 
 //_____________________________________________________________________________
 
@@ -388,24 +383,24 @@ void TRTNoise::appendCrossTalkNoiseToProperDigits(std::vector<TRTDigit>& digitVe
                                                   m_id_helper->straw(*simhitsIdentifiersIter));
     if (otherEndID.get_compact()) { CrossTalkIdsOtherEnd.push_back(otherEndID); }
 
-    for (unsigned int i=0;i<CrossTalkIds.size();++i) {
+    for (auto & CrossTalkId : CrossTalkIds) {
 
-      if ( simhitsIdentifiers.find(CrossTalkIds[i]) == simhitsIdentifiers_end )  {
+      if ( simhitsIdentifiers.find(CrossTalkId) == simhitsIdentifiers_end )  {
         if (m_pDigConditions->crossTalkNoise(noiseRndmEngine)==1 ) {
           const int ndigit(m_digitPool[CLHEP::RandFlat::shootInt(noiseRndmEngine,
                                                                  m_digitPoolLength)]);
           int barrel_endcap, isneg;
-          switch ( m_id_helper->barrel_ec(CrossTalkIds[i]) ) {
+          switch ( m_id_helper->barrel_ec(CrossTalkId) ) {
           case -1:  barrel_endcap = 0; isneg = 0; break;
           case  1:  barrel_endcap = 0; isneg = 1; break;
           default:
             ATH_MSG_WARNING("TRTDigitization::TRTNoise - identifier problems - skipping detector element!!");
             continue;
           }
-          const int ringwheel(m_id_helper->layer_or_wheel(CrossTalkIds[i]));
-          const int phisector(m_id_helper->phi_module(CrossTalkIds[i]));
-          const int layer    (m_id_helper->straw_layer(CrossTalkIds[i]));
-          const int straw    (m_id_helper->straw(CrossTalkIds[i]));
+          const int ringwheel(m_id_helper->layer_or_wheel(CrossTalkId));
+          const int phisector(m_id_helper->phi_module(CrossTalkId));
+          const int layer    (m_id_helper->straw_layer(CrossTalkId));
+          const int straw    (m_id_helper->straw(CrossTalkId));
 
           //built hit id
           int hitid = hitid_helper->buildHitId( barrel_endcap, isneg, ringwheel, phisector,layer, straw);
@@ -415,14 +410,14 @@ void TRTNoise::appendCrossTalkNoiseToProperDigits(std::vector<TRTDigit>& digitVe
       }
     }
 
-    for (unsigned int i=0;i<CrossTalkIdsOtherEnd.size();++i) {
-      if ( simhitsIdentifiers.find(CrossTalkIdsOtherEnd[i]) == simhitsIdentifiers_end )  {
+    for (auto & i : CrossTalkIdsOtherEnd) {
+      if ( simhitsIdentifiers.find(i) == simhitsIdentifiers_end )  {
         if (m_pDigConditions->crossTalkNoiseOtherEnd(noiseRndmEngine)==1 ) {
 
           const int ndigit(m_digitPool[CLHEP::RandFlat::shootInt(noiseRndmEngine,m_digitPoolLength)]);
 
           int barrel_endcap, isneg;
-          switch ( m_id_helper->barrel_ec(CrossTalkIdsOtherEnd[i]) ) {
+          switch ( m_id_helper->barrel_ec(i) ) {
           case -1:  barrel_endcap = 0; isneg = 0; break;
           case  1:  barrel_endcap = 0; isneg = 1; break;
           default:
@@ -430,10 +425,10 @@ void TRTNoise::appendCrossTalkNoiseToProperDigits(std::vector<TRTDigit>& digitVe
             continue;
           }
 
-          const int ringwheel(m_id_helper->layer_or_wheel(CrossTalkIdsOtherEnd[i]));
-          const int phisector(m_id_helper->phi_module(CrossTalkIdsOtherEnd[i]));
-          const int layer    (m_id_helper->straw_layer(CrossTalkIdsOtherEnd[i]));
-          const int straw    (m_id_helper->straw(CrossTalkIdsOtherEnd[i]));
+          const int ringwheel(m_id_helper->layer_or_wheel(i));
+          const int phisector(m_id_helper->phi_module(i));
+          const int layer    (m_id_helper->straw_layer(i));
+          const int straw    (m_id_helper->straw(i));
 
           //built hit id
           int hitid = hitid_helper->buildHitId( barrel_endcap, isneg, ringwheel, phisector,layer, straw);
@@ -452,7 +447,6 @@ void TRTNoise::appendCrossTalkNoiseToProperDigits(std::vector<TRTDigit>& digitVe
 void TRTNoise::sortDigits(std::vector<TRTDigit>& digitVect)
 {
   std::stable_sort(digitVect.begin(), digitVect.end(), TRTDigitSorterObject);
-  return;
 }
 
 //_____________________________________________________________________________

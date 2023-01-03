@@ -8,7 +8,7 @@ FEI4SimTool::FEI4SimTool(const std::string& type, const std::string& name, const
   FrontEndSimTool(type, name, parent) {
 }
 
-FEI4SimTool::~FEI4SimTool() { }
+FEI4SimTool::~FEI4SimTool() = default;
 
 StatusCode FEI4SimTool::initialize() {
   CHECK(FrontEndSimTool::initialize());
@@ -232,5 +232,4 @@ void FEI4SimTool::process(SiChargedDiodeCollection& chargedDiodes, PixelRDO_Coll
       }
     }
   }
-  return;
-}
+  }

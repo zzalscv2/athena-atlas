@@ -257,7 +257,6 @@ void SCT_DetailedSurfaceChargesGenerator::process(const SiDetectorElement* eleme
   const float p_eventTime{phit.eventTime()};
   const unsigned short p_eventId{phit.eventId()};
   processSiHit(element, *phit, inserter, p_eventTime, p_eventId, rndmEngine, ctx);
-  return;
 }
 
 //-------------------------------------------------------------------------------------------
@@ -516,8 +515,7 @@ void SCT_DetailedSurfaceChargesGenerator::processSiHit(const SiDetectorElement* 
       }
     }
   }
-  return;
-}
+  }
 
 //------------------------------------------------------------
 //  initialization of e/h transport programme
@@ -591,15 +589,6 @@ void SCT_DetailedSurfaceChargesGenerator::init_mud_e(double T) {
   m_vs_e = 1.53E9 * pow(T, -0.87);
   m_Ec_e = 1.01 * pow(T, 1.55);
   m_beta_e = 2.57E-2 * pow(T, 0.66);
-
-#ifdef SCT_DIG_DEBUG
-  ATH_MSG_INFO("---- parameters for electron transport -----");
-  ATH_MSG_INFO("     m_vs_e    = " << m_vs_e);
-  ATH_MSG_INFO("     m_Ec_e    = " << m_Ec_e);
-  ATH_MSG_INFO("     m_beta_e  = " << m_beta_e);
-#endif
-
-  return;
 }
 
 //--------------------------------------------------------------
@@ -609,15 +598,6 @@ void SCT_DetailedSurfaceChargesGenerator::init_mud_h(double T) {
   m_vs_h = 1.62E8 * pow(T, -0.52);
   m_Ec_h = 1.24 * pow(T, 1.68);
   m_beta_h = 0.46 * pow(T, 0.17);
-
-#ifdef SCT_DIG_DEBUG
-  ATH_MSG_INFO("----parameters for hole transport -----");
-  ATH_MSG_INFO("     m_vs_h    = " << m_vs_h);
-  ATH_MSG_INFO("     m_Ec_h    = " << m_Ec_h);
-  ATH_MSG_INFO("     m_beta_h  = " << m_beta_h);
-#endif
-
-  return;
 }
 
 //--------------------------------------------------------------
@@ -814,8 +794,7 @@ void SCT_DetailedSurfaceChargesGenerator::EField(double x, double y, double& Ex,
     Ey = Ey00*(1.-fx)*(1.-fy) + Ey10*fx*(1.-fy) + Ey01*(1.-fx)*fy + Ey11*fx*fy;
     return;
   }
-  return;
-}
+  }
 
 //--------------------------------------------------------------
 //   drift mobility for electrons
@@ -921,10 +900,9 @@ void SCT_DetailedSurfaceChargesGenerator::holeTransport(double& x0, double& y0, 
 #ifdef SCT_DIG_DEBUG
   ATH_MSG_DEBUG("holeTransport : x,y=(" << x0*1.e4<< "," <<y0*1.e4<< ")->(" << x*1.e4<< "," <<y*1.e4 << ") t=" << t_current);
 #endif
-  return;
-}
+  }
 
-double SCT_DetailedSurfaceChargesGenerator::GetPotentialValue(int ix, int iy) const{
+double SCT_DetailedSurfaceChargesGenerator::GetPotentialValue(int ix, int iy) {
   return getPotentialValue(ix, iy);
 }
 
@@ -1011,8 +989,7 @@ void SCT_DetailedSurfaceChargesGenerator::electronTransport(double& x0, double& 
   ATH_MSG_DEBUG("elecTransport : x,y=(" << x0*1.e4 << "," << y0*1.e4 << ")->(" << x*1.e4 << "," << y*1.e4 << ") t=" << t_current);
 #endif
 
-  return;
-}
+  }
 
 //---------------------------------------------------------------------
 //  Charge map calculations
