@@ -51,7 +51,7 @@ void test1 (SGTest::TestStore& store)
   if (svc->setWeightNames (wmap, ctx).isFailure()) std::abort();
 
   assert (svc->weightNames (ctx) == wmap);
-  assert (svc->weightNameVec (ctx) == (std::vector<std::string> {"three", "two", "one"}));
+  assert (svc->weightNameVec (ctx) == (std::vector<std::string> {"one", "two", "three"}));
 
   {
     const IOVMetaDataContainer* cont = mdtool->findMetaDataContainer ("/Generation/Parameters");
@@ -131,7 +131,7 @@ void test2 (SGTest::TestStore& store)
                                            {"two", 2},
                                            {"three", 3} };
   assert (svc->weightNames (ctx) == wmap_exp1);
-  assert (svc->weightNameVec (ctx) == (std::vector<std::string> {"three", "two", "one"}));
+  assert (svc->weightNameVec (ctx) == (std::vector<std::string> {"one", "two", "three"}));
 
   {
     auto ev = std::make_unique<xAOD::EventInfo>();
