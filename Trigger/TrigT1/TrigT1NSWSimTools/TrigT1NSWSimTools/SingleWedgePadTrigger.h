@@ -44,8 +44,7 @@ namespace NSWL1 {
       triggers are one inner and one outer.
      */
     static bool areInnerOuterConsistent(const EtaPhiHalf &inner,
-                                        const EtaPhiHalf &outer,
-                                        bool verbose=false);
+                                        const EtaPhiHalf &outer);
     static EtaPhiHalf bandIndices(const EtaPhiHalf &inner, const EtaPhiHalf &outer);
     //! area that is overlapping between the pads that cause the trigger (pads are staggered)
     static Polygon padOverlap3(const std::vector<std::shared_ptr<PadOfflineData>> & pads);

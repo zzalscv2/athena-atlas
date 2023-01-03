@@ -56,7 +56,7 @@ namespace NSWL1 {
          const std::vector<float> m_etaBandsLargeSector;
          const std::vector<float> m_etaBandsSmallSector;
         StatusCode LookupSectorTriggers(const std::vector<std::shared_ptr<PadData>>& pads,int side, int sector, std::vector<std::unique_ptr<PadTrigger>> &triggers);
-        std::vector<std::vector<std::shared_ptr<PadData>>> selectWedgePatterns(const std::vector<std::shared_ptr<PadData>> &pads,int side, int sector,int multiplet);
+        std::vector<std::vector<std::shared_ptr<PadData>>> selectWedgePatterns(const std::vector<std::shared_ptr<PadData>> &pads,int side, int sector,int multiplet) const;
 
         const MuonGM::MuonDetectorManager* m_detManager;
 
@@ -69,7 +69,7 @@ namespace NSWL1 {
         std::unordered_map<std::vector<int>,std::pair<int,int> ,hashPattern> m_pats;
         //use sector numbering scheme as in idHelper (i.e sector numbers from {1....8} + S/L)
         //note that numbering for the sector logic is different ....
-        StatusCode printGeometry( const std::vector<std::shared_ptr<PadOfflineData>>&, std::ofstream&);//used for debugging purposes only, has no functionality in the actual trigger
+        StatusCode printGeometry( const std::vector<std::shared_ptr<PadOfflineData>>&, std::ofstream&) const;//used for debugging purposes only, has no functionality in the actual trigger
 
 
     };  
