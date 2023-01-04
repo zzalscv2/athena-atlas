@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -457,7 +457,6 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
 
     // iterate over hits and fill id-keyed drift time map
     TimedHitCollection<MMSimHit>::const_iterator i, e;
-    int nhits = 0;
 
     std::vector<std::unique_ptr<MmDigitCollection> > collections;
 
@@ -668,8 +667,6 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             Identifier parentID = m_idHelperSvc->mmIdHelper().parentID(layerID);
             Identifier digitID = m_idHelperSvc->mmIdHelper().channelID(parentID, m_idHelperSvc->mmIdHelper().multilayer(layerID),
                                                                        m_idHelperSvc->mmIdHelper().gasGap(layerID), stripNumber);
-
-            ++nhits;
 
             // contain (name, eta, phi, multiPlet)
             m_idHelperSvc->mmIdHelper().get_module_hash(layerID, moduleHash);
