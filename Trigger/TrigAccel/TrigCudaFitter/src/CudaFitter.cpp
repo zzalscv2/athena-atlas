@@ -218,10 +218,10 @@ void CudaFitter::fit(std::vector<const RecTrack*>& vpTracks) {
 
       nFittedTracksCPU+=Ntracks;
       cpuTotal+=hostTime;
-      int nBadTracks=0;    
+      //int nBadTracks=0;    
       float avChi2 [[maybe_unused]]=0.0;
       for(int ii=0;ii<Ntracks;ii++) {
-        if(outputTracks.m_status[ii]==0) nBadTracks++;
+        if(outputTracks.m_status[ii]==0) ;//nBadTracks++;
         else avChi2+=outputTracks.m_chi2[ii]/outputTracks.m_ndof[ii];
         // std::cout<<ii<<" status="<<outputTracks.m_status[ii]<<" chi2="<<outputTracks.m_chi2[ii]<<" ndof="<<outputTracks.m_ndof[ii]<<std::endl;
       }
