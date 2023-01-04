@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloRxGain.h"
@@ -61,6 +61,6 @@ L1CaloRxGain::L1CaloRxGain( const L1CaloRxCoolChannelId& channelId, int gain, co
 
 std::ostream& operator<<(std::ostream& output, const  L1CaloRxGain& r) {
 	//output << "channelID: " << r.m_channelId.id() << ", " << "identifier: " << r.m_identifier<< ", " << "crate: " << r.m_recCrate<< ", " << "slot: " << r.m_recSlot<< ", " << "channel: " << r.m_recChannel << ", " << "gain: " << r.m_gain << ", " << "comment: " << r.m_comment.c_str();
-	output << "channelID: " << r.m_channelId.id() << ", " << "gain: " << r.m_gain << ", " << "comment: " << r.m_comment.c_str();
+	output << "channelID: " << r.m_channelId.id() << ", " << "gain: " << r.m_gain << ", " << "comment: " << r.m_comment;
     return output;
 }
