@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRK_TRACKPARAMETERSIDHELPER_H
@@ -17,6 +17,8 @@ namespace Trk {
   /** helper class to encode and decode a TrackParametersIdentifier */
   class TrackParametersIdHelper {
   public:
+    // Avoid cppcheck warnings.
+    TrackParametersIdHelper() = default;
 
     /** Encodes a TrackParametersIdentifier from AtlasDetDescr::AtlasDetTechnology and CaloSampling::CaloSample 
         and a bool indicating whether this is an entry or exit layer.
