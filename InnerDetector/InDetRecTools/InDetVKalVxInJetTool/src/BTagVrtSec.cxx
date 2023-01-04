@@ -712,12 +712,13 @@ namespace InDet{
 	TVector3 SVmPV(tmpVrt.fitVertex.x()-primVrt.x(),
 		       tmpVrt.fitVertex.y()-primVrt.y(),
 		       tmpVrt.fitVertex.z()-primVrt.z());
-	tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(SVmPV, 1.)); //DeltaR SV-PV vs jet
-	if( tmpVrt.dRSVPV > m_coneForTag && (!m_getNegativeTag) ) continue;  // SV is outside of the jet cone
-
 	double jetVrtDir = SVmPV.Dot(jetDir.Vect());
+	if(jetVrtDir > 0) {tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(SVmPV, 1.));} //DeltaR SV-PV vs jet
+	else{tmpVrt.dRSVPV = jetDir.DeltaR(TLorentzVector(-SVmPV, 1.));}
+	if(tmpVrt.dRSVPV > m_coneForTag ) continue;  // SV is outside of the jet cone
+	
 	double vPos = SVmPV.Dot(tmpVrt.momentum.Vect())/tmpVrt.momentum.Rho();
-	if((!m_multiWithPrimary) &&(!m_getNegativeTail) && (!m_getNegativeTag) &&  jetVrtDir<0. )  continue; // secondary vertex behind primary
+	if((!m_multiWithPrimary) &&(!m_getNegativeTail) &&( ((!m_getNegativeTag) &&  jetVrtDir<0.) || (m_getNegativeTag && jetVrtDir > 0.) ))  continue; // secondary vertex behind primary
 	if(vPos<-100.) continue;  // Secondary vertex is too far behind primary
 
 	// Check track pixel hit patterns vs vertex position.
