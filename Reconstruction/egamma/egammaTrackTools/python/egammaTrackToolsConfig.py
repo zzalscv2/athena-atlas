@@ -9,28 +9,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from TrkConfig.AtlasExtrapolatorConfig import (
     AtlasExtrapolatorCfg, egammaCaloExtrapolatorCfg)
 from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-
-
-def egCaloDepthCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("name", "egCaloDepthToolmiddle")
-    kwargs.setdefault("DepthChoice", "middle")
-    acc.setPrivateTools(
-        CompFactory.CaloDepthTool(**kwargs))
-    return acc
-
-
-def egCaloSurfaceBuilderCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault(
-        "CaloDepthTool",
-        acc.popToolsAndMerge(egCaloDepthCfg(flags)))
-
-    acc.setPrivateTools(
-        CompFactory.CaloSurfaceBuilder(**kwargs)
-    )
-    return acc
-
+from CaloTrackingGeometry.CaloTrackingGeometryConfig import (
+    CaloSurfaceBuilderMiddleCfg)
 
 def EMParticleCaloExtensionToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
@@ -40,7 +20,7 @@ def EMParticleCaloExtensionToolCfg(flags, **kwargs):
 
     if "CaloSurfaceBuilder" not in kwargs:
         kwargs["CaloSurfaceBuilder"] = acc.popToolsAndMerge(
-            egCaloSurfaceBuilderCfg(flags))
+            CaloSurfaceBuilderMiddleCfg(flags))
 
     if "Extrapolator" not in kwargs:
         extrapAcc = egammaCaloExtrapolatorCfg(flags)
@@ -94,7 +74,7 @@ def CaloCluster_OnTrackBuilderCfg(flags,
     acc = ComponentAccumulator()
     if "CaloSurfaceBuilder" not in kwargs:
         kwargs["CaloSurfaceBuilder"] = acc.popToolsAndMerge(
-            egCaloSurfaceBuilderCfg(flags))
+            CaloSurfaceBuilderMiddleCfg(flags))
     tool = CompFactory.CaloCluster_OnTrackBuilder(name, **kwargs)
     acc.setPrivateTools(tool)
     return acc
