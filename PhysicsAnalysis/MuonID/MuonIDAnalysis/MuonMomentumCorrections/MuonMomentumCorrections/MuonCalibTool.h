@@ -97,8 +97,10 @@ namespace CP {
 
 
         // High pT correction options
-        Gaudi::Property<bool>  m_extra_highpt_smearing{this, "doExtraSmearing", false, "TODO"};
-        Gaudi::Property<bool>  m_2stations_highpt_smearing{this, "do2StationsHighPt", false, "TODO"};
+        // For more info: https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionToolR21#Usage_of_the_HighPt_selection
+        Gaudi::Property<bool>  m_2stations_highpt_smearing{this, "do2StationsHighPt", false, "Extra smearing to be applied if high pT WP is used"};
+        // For more info: https://twiki.cern.ch/twiki/bin/view/Atlas/MuonSelectionToolR21#Usage_of_the_HighPt_selection
+        Gaudi::Property<bool>  m_extra_highpt_smearing{this, "doExtraSmearing", false, "Flag provided to test if analysis are sensitive to high pT calibration. NOT TO BE USED FOR RESULTS. Please see twiki"};
         Gaudi::Property<float> m_HighPtSystThreshold{this, "HighPtSystThr", 300.0, "Thershold for high pT smearing in GeV"};      
 
         asg::AnaToolHandle<CP::IMuonSelectionTool> m_MuonSelectionTool{""};
