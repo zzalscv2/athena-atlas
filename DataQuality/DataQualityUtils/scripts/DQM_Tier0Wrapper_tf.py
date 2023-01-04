@@ -85,12 +85,20 @@ def getSubFileMap(fname, nevts=0) :
         map = {}
     return map
 
-def publish_success_to_mq(run, ptag, stream, incr, ami, procpass, hcfg, isprod):
+def publish_success_to_mq(run, ptag, stream, incr, ami, procpass, hcfg, isprod, parmap):
   import stomp, json, ssl
   from DataQualityUtils import stompconfig
+  import DataQualityConfigurations
   dest='/topic/atlas.dqm.progress'
   conn=stomp.Connection([('atlas-mb.cern.ch', 61013)])
   conn.connect(wait=True, **stompconfig.config())
+
+  eos_only = False
+
+  servers = parmap.get('servers', 'False')
+  if servers == [] or servers == '':
+     eos_only = True
+
 
   body = {
     'run': run,
@@ -99,6 +107,7 @@ def publish_success_to_mq(run, ptag, stream, incr, ami, procpass, hcfg, isprod):
     'ami': ami,
     'pass': procpass,
     'hcfg': hcfg,
+    'eos_only': eos_only,
     }
   headers = {
     'MsgClass':'DQ', 
@@ -243,6 +252,7 @@ def dq_combined_trf(jsonfile, outmap):
     
     # server list
     servers = parmap.get('servers', 'False')
+    os.environ['DQC_SERVERS'] = servers
 
     # get file paths, put into environment vars
     filepaths = parmap.get('filepaths', None)
@@ -310,10 +320,6 @@ def dq_combined_trf(jsonfile, outmap):
           if n_xmlrpc_tries <= MAX_XMLRPC_TRIES:
             time.sleep(20*2**n_xmlrpc_tries)
 
-    # data servers
-    if 'servers' in parmap and isinstance(parmap['servers'], str):
-      os.environ['DQC_SERVERS'] = parmap['servers']
-
 
     print("Job parameters:\n")
     print("  Run number:      ", runnr)
@@ -326,7 +332,6 @@ def dq_combined_trf(jsonfile, outmap):
     print("  Skip merge:      ", skipMerge)
     if servers == []:
         print("  EOS only:    True")
-        outmap['EOSonly'] = "True"
 
   except:
     outmap['exitCode'] = 104
@@ -476,7 +481,7 @@ def dq_combined_trf(jsonfile, outmap):
       if productionMode == 'True': 
           try:
               print('Publishing to message service')
-              publish_success_to_mq(runnr, dqproject, stream, incr=(incr=='True'), ami=amitag, procpass=procnumber, hcfg=filepaths, isprod=(productionMode=='True'))
+              publish_success_to_mq(runnr, dqproject, stream, incr=(incr=='True'), ami=amitag, procpass=procnumber, hcfg=filepaths, isprod=(productionMode=='True'), parmap=parmap)
           except:
               outmap['exitCode'] = 106
               outmap['exitAcronym'] = 'TRF_DQMDISPLAY_EXE'
