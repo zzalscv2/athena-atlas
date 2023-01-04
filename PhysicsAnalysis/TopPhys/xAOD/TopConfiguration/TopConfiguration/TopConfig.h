@@ -2609,8 +2609,8 @@ namespace top {
     bool m_useElectronChargeIDSelection;
     bool m_useEgammaLeakageCorrection;
     bool m_useEgammaPileupCorrection;
+    bool m_useEgammaSFs;
     bool m_enablePromptLeptonImprovedVetoStudies;
-    bool m_useEgammaSFs; // nils
 
     // experimental electronID map path
     std::string m_electronIDSFFile_path = "Default";
