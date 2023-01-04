@@ -369,7 +369,7 @@ def InDetTrackRecoCfg(flags):
                 InputExtendedInDetTracks += ["ResolvedTRTSeededTracks"]
 
             if flags.InDet.doTruth and (flags.InDet.Tracking.doPseudoTracking or flags.InDet.Tracking.doIdealPseudoTracking): ## Do we need the dotruth flags...?
-                from InDetConfig.TruthTrackingConfig import TruthTrackingCfg
+                from TrkConfig.TrkTruthTrackAlgsConfig import TruthTrackingCfg
                 result.merge(TruthTrackingCfg(flags))
 
                 ## Old config only scheduled InDetTrackTruth for IdealPseudoTracking, while the TrackParticleCnvAlg requires it if "doTruth" is enabled

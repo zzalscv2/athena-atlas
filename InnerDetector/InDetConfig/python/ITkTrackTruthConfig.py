@@ -16,14 +16,16 @@ def ITkTrackTruthCfg(flags,
     # --- Enable the detailed track truth
     #
     from InDetConfig.InDetTruthAlgsConfig import ITkDetailedTrackTruthMakerCfg
-    acc.merge(ITkDetailedTrackTruthMakerCfg(flags, Tracks, DetailedTruth))
+    acc.merge(ITkDetailedTrackTruthMakerCfg(flags,
+                                            TrackCollectionName = Tracks,
+                                            DetailedTrackTruthName = DetailedTruth))
     #
     # --- Detailed to old TrackTruth
     #
     from TrkConfig.TrkTruthAlgsConfig import ITkTrackTruthSimilaritySelectorCfg
     acc.merge(ITkTrackTruthSimilaritySelectorCfg(flags,
-                                                 DetailedTrackTruthName=DetailedTruth,
-                                                 OutputName=TracksTruth))
+                                                 DetailedTrackTruthName = DetailedTruth,
+                                                 OutputName = TracksTruth))
 
     return acc
 

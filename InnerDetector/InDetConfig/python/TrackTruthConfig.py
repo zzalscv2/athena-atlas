@@ -8,22 +8,24 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 # -------------------------------------------------------------------------
 
 def InDetTrackTruthCfg(flags,
-                       Tracks="CombinedInDetTracks",
-                       DetailedTruth="CombinedInDetTracksDetailedTruth",
-                       TracksTruth="CombinedInDetTracksTruthCollection"):
+                       Tracks = "CombinedInDetTracks",
+                       DetailedTruth = "CombinedInDetTracksDetailedTruth",
+                       TracksTruth = "CombinedInDetTracksTruthCollection"):
     acc = ComponentAccumulator()
     #
     # --- Enable the detailed track truth
     #
     from InDetConfig.InDetTruthAlgsConfig import InDetDetailedTrackTruthMakerCfg
-    acc.merge(InDetDetailedTrackTruthMakerCfg(flags, Tracks, DetailedTruth))
+    acc.merge(InDetDetailedTrackTruthMakerCfg(flags,
+                                              TrackCollectionName = Tracks,
+                                              DetailedTrackTruthName = DetailedTruth))
     #
     # --- Detailed to old TrackTruth
     #
     from TrkConfig.TrkTruthAlgsConfig import TrackTruthSimilaritySelectorCfg
     acc.merge(TrackTruthSimilaritySelectorCfg(flags,
-                                              DetailedTrackTruthName=DetailedTruth,
-                                              OutputName=TracksTruth))
+                                              DetailedTrackTruthName = DetailedTruth,
+                                              OutputName = TracksTruth))
 
     return acc
 
