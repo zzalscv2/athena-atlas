@@ -219,10 +219,6 @@
        <hist1D name="MET_Reference_AntiKt4EMTopo_FinalClus_sum" plotopts="" tests="KS" type="TH1D"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="Cumulative">
-      <hist1D name="MET_Reference_AntiKt4EMTopo_Cumulative_FinalClus" plotopts="" tests="KS" type="TH1D"/>
-      <hist1D name="MET_Reference_AntiKt4EMTopo_Cumulative_FinalTrk" plotopts="" tests="KS" type="TH1D"/>
-     </TDirectory>
      <TDirectory name="Residuals">
       <hist1D name="MET_Reference_AntiKt4EMTopo_Resolution_FinalClus_x" plotopts="" tests="KS" type="TH1D"/>
       <hist1D name="MET_Reference_AntiKt4EMTopo_Resolution_FinalClus_y" plotopts="" tests="KS" type="TH1D"/>
@@ -358,10 +354,6 @@
        <hist1D name="MET_Reference_AntiKt4EMPFlow_FinalClus_phi" plotopts="" tests="KS" type="TH1D"/>
        <hist1D name="MET_Reference_AntiKt4EMPFlow_FinalClus_sum" plotopts="" tests="KS" type="TH1D"/>
       </TDirectory>
-     </TDirectory>
-     <TDirectory name="Cumulative">
-      <hist1D name="MET_Reference_AntiKt4EMPFlow_Cumulative_FinalClus" plotopts="" tests="KS" type="TH1D"/>
-      <hist1D name="MET_Reference_AntiKt4EMPFlow_Cumulative_FinalTrk" plotopts="" tests="KS" type="TH1D"/>
      </TDirectory>
      <TDirectory name="Residuals">
       <hist1D name="MET_Reference_AntiKt4EMPFlow_Resolution_FinalClus_x" plotopts="" tests="KS" type="TH1D"/>
@@ -1665,12 +1657,7 @@
    <TDirectory name="BTag">
     <TDirectory name="ROC">
      <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_IP3D_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
      <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_tagger_IP3D_b_matched_weight_ctag" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="rejVsEff_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_matched_weight" type="TGraphErrors" plotopts="logy" tests="KS"/>
-     <graph name="effVsVar_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_70_matched_pt_ttbar" type="TGraphErrors" plotopts="" tests="KS"/>
-     <graph name="effVsVar_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_c_70_matched_pt_ttbar" type="TGraphErrors" plotopts="" tests="KS"/>
-     <graph name="effVsVar_BTag_AntiKt4EMTopoJets_old_taggers_IP2D_u_70_matched_pt_ttbar" type="TGraphErrors" plotopts="" tests="KS"/>
      <graph name="effVsVar_BTag_AntiKt4EMTopoJets_tagger_IP3D_b_70_matched_pt_ttbar" type="TGraphErrors" plotopts="" tests="KS"/>
      <graph name="effVsVar_BTag_AntiKt4EMTopoJets_tagger_IP3D_c_70_matched_pt_ttbar" type="TGraphErrors" plotopts="" tests="KS"/>
      <graph name="effVsVar_BTag_AntiKt4EMTopoJets_tagger_IP3D_u_70_matched_pt_ttbar" type="TGraphErrors" plotopts="" tests="KS"/>
@@ -1698,14 +1685,9 @@
      <TDirectory name="jet">
       <TDirectory name="jet">
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_IP3D_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_IP2D_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_RNNIP_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_DIPS_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_SV1_60" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_JetFitter_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_DL1dv00_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_DL1dv01_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_DL1r_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJetsThatPassedWPCuts_GN1_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_e" type="TH1F" plotopts="" tests="KS"/>
@@ -1725,7 +1707,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_eta_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_eta_l" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="tracks">
       <TDirectory name="_incl">
@@ -1863,7 +1844,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHoles_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedSCTHits_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="SV">
       <TDirectory name="_incl">
@@ -2001,7 +1981,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_SV_JetFitter_significance3d_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_SV_JetFitter_purity_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="tagger_IP3D">
       <TDirectory name="_pt_ttbar">
@@ -2046,34 +2025,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_weightBofTracks" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_weightCofTracks" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_weightUofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_RNNIP">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_RNNIP_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_DIPS">
@@ -2137,31 +2088,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_nGoodTracks_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="tagger_JetFitter">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_JetFitter_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
      <TDirectory name="tagger_DL1dv00">
       <TDirectory name="_pt_ttbar">
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
@@ -2188,62 +2114,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_pb" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_pc" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv00_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1dv01">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1r">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1r_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_GN1">
@@ -2274,39 +2144,6 @@
        <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_GN1_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="old_taggers">
-      <TDirectory name="_IP2D">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_NTracks_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_NTracks_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_NTracks_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_NTracks_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_gradeOfTracks_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_gradeOfTracks_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_gradeOfTracks_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_gradeOfTracks_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_weightBofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_weightCofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_old_taggers_IP2D_weightUofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other"/>
-     </TDirectory>
     </TDirectory>
     <TDirectory name="AntiKt4EMTopoJets">
      <TDirectory name="other_histograms">
@@ -2331,14 +2168,9 @@
      <TDirectory name="jet">
       <TDirectory name="jet">
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_IP3D_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_IP2D_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_RNNIP_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_DIPS_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_SV1_60" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_JetFitter_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_DL1dv00_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_DL1dv01_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_DL1r_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJetsThatPassedWPCuts_GN1_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_e" type="TH1F" plotopts="" tests="KS"/>
@@ -2358,7 +2190,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_eta_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_jet_jet_eta_l" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="tracks">
       <TDirectory name="_incl">
@@ -2496,7 +2327,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nSCTHoles_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tracks_nsharedSCTHits_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="SV">
       <TDirectory name="_incl">
@@ -2634,7 +2464,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_SV_JetFitter_significance3d_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_SV_JetFitter_purity_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="tagger_IP3D">
       <TDirectory name="_pt_ttbar">
@@ -2679,34 +2508,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_weightBofTracks" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_weightCofTracks" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_IP3D_weightUofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_RNNIP">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_RNNIP_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_DIPS">
@@ -2770,31 +2571,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_SV1_nGoodTracks_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="tagger_JetFitter">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_JetFitter_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
      <TDirectory name="tagger_DL1dv00">
       <TDirectory name="_pt_ttbar">
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
@@ -2821,62 +2597,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_pb" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_pc" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv00_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1dv01">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1dv01_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1r">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_tagger_DL1r_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_GN1">
@@ -2907,39 +2627,6 @@
        <hist1D name="BTag_AntiKt4EMTopoJets_tagger_GN1_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="old_taggers">
-      <TDirectory name="_IP2D">
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_NTracks_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_NTracks_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_NTracks_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_NTracks_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_gradeOfTracks_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_gradeOfTracks_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_gradeOfTracks_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_gradeOfTracks_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_weightBofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_weightCofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMTopoJets_old_taggers_IP2D_weightUofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other"/>
-     </TDirectory>
     </TDirectory>
     <TDirectory name="AntiKtVR30Rmax4Rmin02PV0TrackJets">
      <TDirectory name="other_histograms">
@@ -2964,14 +2651,9 @@
      <TDirectory name="jet">
       <TDirectory name="jet">
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_IP3D_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_IP2D_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_RNNIP_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_DIPS_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_SV1_60" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_JetFitter_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_DL1dv00_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_DL1dv01_70" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_DL1r_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJetsThatPassedWPCuts_GN1_70" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_jet_e" type="TH1F" plotopts="" tests="KS"/>
@@ -2991,7 +2673,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_jet_eta_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_jet_jet_eta_l" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="tracks">
       <TDirectory name="_incl">
@@ -3129,7 +2810,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tracks_nSCTHoles_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tracks_nsharedSCTHits_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="SV">
       <TDirectory name="_incl">
@@ -3267,7 +2947,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_significance3d_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_purity_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
      <TDirectory name="tagger_IP3D">
       <TDirectory name="_pt_ttbar">
@@ -3312,34 +2991,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_IP3D_weightBofTracks" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_IP3D_weightCofTracks" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_IP3D_weightUofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_RNNIP">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_RNNIP_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_DIPS">
@@ -3403,31 +3054,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_SV1_nGoodTracks_muon" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="tagger_JetFitter">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_JetFitter_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
      <TDirectory name="tagger_DL1dv00">
       <TDirectory name="_pt_ttbar">
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv00_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
@@ -3454,62 +3080,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv00_pb" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv00_pc" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv00_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1dv01">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1dv01_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1r">
-      <TDirectory name="_pt_ttbar">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_pt_Zprime">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="_Lxy">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_DL1r_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_GN1">
@@ -3539,39 +3109,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_GN1_pc" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_tagger_GN1_pu" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
-     </TDirectory>
-     <TDirectory name="old_taggers">
-      <TDirectory name="_IP2D">
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_b_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_b_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_b_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_b_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_b_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_c_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_c_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_c_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_c_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_c_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_u_matched_weight" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_u_matched_weight_trackCuts" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_u_70_matched_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_u_70_matched_pt_Zprime" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_u_70_matched_Lxy" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_NTracks_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_NTracks_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_NTracks_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_NTracks_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_gradeOfTracks_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_gradeOfTracks_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_gradeOfTracks_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_gradeOfTracks_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_weightBofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_weightCofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_old_taggers_IP2D_weightUofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-      <TDirectory name="other"/>
      </TDirectory>
     </TDirectory>
    </TDirectory>
