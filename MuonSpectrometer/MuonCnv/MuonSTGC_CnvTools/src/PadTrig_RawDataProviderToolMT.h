@@ -37,7 +37,7 @@ class PadTrig_RawDataProviderToolMT : virtual public IMuonRawDataProviderTool, p
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   ToolHandle<IPadTrig_ROD_Decoder>      m_decoder{this, "Decoder", "Muon::PadTrig_ROD_Decoder/PadTrig_ROD_Decoder"};
   ServiceHandle<IROBDataProviderSvc>    m_robDataProvider;
-  SG::WriteHandleKey<NSW_PadTriggerDataContainer> m_rdoContainerKey{this, "RdoLocation", "PADTRGRDO", "Name of of the RDO container to write to"};
+  SG::WriteHandleKey<NSW_PadTriggerDataContainer> m_rdoContainerKey{this, "RdoLocation", "NSW_PadTrigger_RDO", "Name of of the RDO container to write to"};
   
   unsigned int m_maxhashtoUse{0};
 };
