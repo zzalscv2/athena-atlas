@@ -68,19 +68,17 @@ def tauMonitoringConfig(inputFlags,**kwargs):
     # to enable a trigger filter, for example:
     #exampleMonAlg.TriggerChain = 'HLT_mu26_ivarmedium'
 
-    tauMonAlgTauTrig1.TriggerChain = "HLT_tau25_mediumRNN_tracktwoMVABDT_L1TAU12IM"
-    tauMonAlgTauTrig2.TriggerChain = "HLT_tau160_mediumRNN_tracktwoMVABDT_L1TAU100"
-    tauMonAlgTauTrig3.TriggerChain = "HLT_tau25_mediumRNN_tracktwoMVABDT_L1eTAU20M"
-    tauMonAlgTauTrig4.TriggerChain = "HLT_tau160_mediumRNN_tracktwoMVABDT_L1eTAU140"
+    tauMonAlgTauTrig1.TriggerChain = "HLT_tau25_mediumRNN_tracktwoMVA_L1TAU12IM"
+    tauMonAlgTauTrig2.TriggerChain = "HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100"
+    tauMonAlgTauTrig3.TriggerChain = "HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20M"
+    tauMonAlgTauTrig4.TriggerChain = "HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140"
     tauMonAlgTauTrig5.TriggerChain = "HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1TAU60_DR-TAU20ITAU12I"
-    tauMonAlgTauTrig6.TriggerChain = "HLT_tau35_mediumRNN_tracktwoMVABDT_tau25_mediumRNN_tracktwoMVABDT_03dRAB30_L1DR-TAU20ITAU12I-J25"
-    tauMonAlgTauTrig7.TriggerChain = "HLT_tau200_mediumRNN_tracktwoMVABDT_L1TAU100"
+    tauMonAlgTauTrig6.TriggerChain = "HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25"
+    tauMonAlgTauTrig7.TriggerChain = "HLT_tau200_mediumRNN_tracktwoMVA_L1TAU100"
+
 
     tauMonAlgEleTrig.TriggerChain = "HLT_e[2-9][0-9]_.*"
     tauMonAlgJetTrig.TriggerChain = "HLT_j[2-9][0-9]_.*"
-
-
-
 
     tauMonAlgBA.etaMin = -1.
     tauMonAlgBA.etaMax = 1.3
