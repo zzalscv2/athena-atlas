@@ -672,7 +672,7 @@ void MergeMcEventCollTool::updateClassificationMap(int signal_process_id, int ev
       ATH_MSG_ERROR( "updateClassidificationMap: Repeated KEY! "<< key <<". Previous category = " << event->second );
     }
     else {
-      ATH_MSG_DEBUG( "updateClassidificationMap: Updating categorty for existing key "<< key <<". Previous category = " << event->second << ", new catagory = " << classification );
+      ATH_MSG_DEBUG( "updateClassidificationMap: Updating category for existing key "<< key <<". Previous category = " << event->second << ", new category = " << classification );
     }
     if(int(RESTOFMB)!=event->second) {
       if(event->second<=classification) return;
