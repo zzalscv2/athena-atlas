@@ -107,7 +107,7 @@ bool EfexLatomeFibrePacker::checkCRC(const std::vector<myDataWord>& encodedData,
                                     InputDataFrameType frameType) const {
 
     auto inputData = encodedData;
-    myDataWord CRCCheck;
+    myDataWord CRCCheck = 0;
 
     //  Comment SJH: why do we need two cases here 
     //  (may have been different originally, but not now?)

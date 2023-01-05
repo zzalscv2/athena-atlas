@@ -94,7 +94,7 @@ bool EfexTrexFibrePacker::checkCRC(const std::vector<myDataWord>& encodedData,
                                     InputDataFrameType frameType) const {
 
     auto inputData = encodedData;
-    myDataWord CRCCheck;
+    myDataWord CRCCheck = 0;
 
     switch(frameType){
                     
