@@ -10,9 +10,9 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from ..Muon.MuonChainConfiguration import MuonChainConfiguration
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isRun3Cfg():
+if isComponentAccumulatorCfg():
     pass
 else:
     from ..Muon.MuonChainConfiguration import mul2IOOvlpRmSequenceCfg, mul2mtCBOvlpRmSequenceCfg, muEFCBSequenceCfg

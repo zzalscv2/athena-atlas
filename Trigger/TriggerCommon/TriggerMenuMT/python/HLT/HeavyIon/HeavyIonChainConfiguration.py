@@ -5,9 +5,9 @@ logging.getLogger().info('Importing %s', __name__)
 log = logging.getLogger(__name__)
 
 from ..Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isRun3Cfg():
+if isComponentAccumulatorCfg():
   pass
 else:
   from ..HeavyIon.HeavyIonMenuSequences import HIFwdGapMenuSequence

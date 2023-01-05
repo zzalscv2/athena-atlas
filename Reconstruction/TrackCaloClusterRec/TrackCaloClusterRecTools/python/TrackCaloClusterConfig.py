@@ -184,8 +184,8 @@ def runTCCReconstruction(configFlags, caloClusterName="CaloCalTopoClusters", det
 
 def runUFOReconstruction(configFlags, constits, caloClusterName="CaloCalTopoClusters", detectorEtaName = "default", assocPostfix="UFO", inputFEcontainerkey=""):
     """wrapper function using CAtoGlobalWrapper in order to maintain compatibility with RunII-style config in derivations"""
-    from AthenaConfiguration.ComponentFactory import isRun3Cfg
-    if isRun3Cfg():
+    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+    if isComponentAccumulatorCfg():
         return runUFOReconstruction_r22(configFlags, constits=constits, caloClusterName=caloClusterName, detectorEtaName=detectorEtaName, assocPostfix=assocPostfix, inputFEcontainerkey=inputFEcontainerkey)
     else:
         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper

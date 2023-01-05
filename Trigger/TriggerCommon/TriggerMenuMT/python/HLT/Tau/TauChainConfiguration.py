@@ -10,9 +10,9 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 from TriggerMenuMT.HLT.Config.ChainConfigurationBase import ChainConfigurationBase
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
-if isRun3Cfg():
+if isComponentAccumulatorCfg():
     pass
 else:
     from TriggerMenuMT.HLT.Tau.TauMenuSequences import tauCaloMVAMenuSeq, tauFTFTauCoreSeq, tauFTFTauLRTSeq, tauFTFTauIsoSeq, tauFTFTauIsoBDTSeq, tauTrackTwoMVASeq, tauTrackTwoLLPSeq, tauTrackLRTSeq, tauPrecTrackIsoSeq, tauPrecTrackLRTSeq

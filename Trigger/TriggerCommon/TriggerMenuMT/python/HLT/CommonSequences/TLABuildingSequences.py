@@ -4,7 +4,7 @@
 from TriggerMenuMT.HLT.Config.MenuComponents import ChainStep, RecoFragmentsPool
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from ..Jet.JetChainConfiguration import JetChainConfiguration
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 log = logging.getLogger(__name__)
@@ -100,7 +100,7 @@ def alignTLASteps(chain_configs, chain_dicts):
         tlaStep = findTLAStep(chainConfig)
 
         try:
-            if isRun3Cfg() and tlaStep is None:
+            if isComponentAccumulatorCfg() and tlaStep is None:
                 raise NoCAmigration ("[alignTLASteps] Missing TLA sequence with CA configurables")
         except NoCAmigration:
             return 0

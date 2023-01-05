@@ -10,7 +10,7 @@ from TrigPartialEventBuilding.TrigPartialEventBuildingConf import PEBInfoWriterA
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import StaticPEBInfoWriterToolCfg, RoIPEBInfoWriterToolCfg
 from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from libpyeformat_helper import SourceIdentifier, SubDetector
-from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaCommon.CFElements import seqAND, findAlgorithm
 from .LATOMESourceIDs import LATOMESourceIDs
 from AthenaCommon.Logging import logging
@@ -293,7 +293,7 @@ def alignEventBuildingSteps(chain_configs, chain_dicts):
     def getPebStepPosition(chainConfig):
         pebStep = findEventBuildingStep(chainConfig)
         try:
-            if isRun3Cfg() and pebStep is None:
+            if isComponentAccumulatorCfg() and pebStep is None:
                 raise NoCAmigration ("[alignTLASteps] Missing TLA sequence with CA configurables")
         except NoCAmigration:
             return 0

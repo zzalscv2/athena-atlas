@@ -147,8 +147,8 @@ class TestLegacy(TestGMT):
         sys.modules.pop('AthenaCommon.Include')
 
     def test_legacy(self):
-        from AthenaConfiguration.ComponentFactory import isRun3Cfg
-        self.assertFalse(isRun3Cfg())
+        from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+        self.assertFalse(isComponentAccumulatorCfg())
 
     def test_configurableType(self):
         gmt = GenericMonitoringTool('gmt')
