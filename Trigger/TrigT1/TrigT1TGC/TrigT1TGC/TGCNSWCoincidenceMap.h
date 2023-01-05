@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ */
+
 #ifndef TGCNSWCoincidenceMap_h
 #define TGCNSWCoincidenceMap_h
 
@@ -11,9 +15,12 @@
 
 class ITGCTriggerDbTool;
 
+namespace LVL1TGC {
+class NSWTrigOut;
+}
+
 namespace LVL1TGCTrigger {
 
-class NSWTrigOut;
 class TGCArguments;
 
 class TGCNSWCoincidenceMap : public AthMessaging {
@@ -31,8 +38,8 @@ public:
 
   bool isForward( int module );
 
-  int TGCNSW_pTcalcu_EtaPhi(const NSWTrigOut *nswOut, int RoI) const;
-  int TGCNSW_pTcalcu_EtaDtheta(const NSWTrigOut *nswOut, int RoI) const;
+  int TGCNSW_pTcalcu_EtaPhi(const LVL1TGC::NSWTrigOut *nswOut, int RoI) const;
+  int TGCNSW_pTcalcu_EtaDtheta(const LVL1TGC::NSWTrigOut *nswOut, int RoI) const;
 
   const std::string& getVersion() const;
   int   getSideId() const;
@@ -69,9 +76,7 @@ private:
 
 
 
-
-
-} //end of namespace bracket
+}  // end of namespace
 
 #endif // TGCNSWCoincidenceMap_hh
 

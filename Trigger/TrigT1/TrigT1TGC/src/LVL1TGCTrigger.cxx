@@ -20,7 +20,6 @@
 #include "TrigT1TGC/TGCSectorLogic.h"
 #include "TrigT1TGC/TGCNumbering.h"
 #include "TrigT1TGC/TrigT1TGC_ClassDEF.h"
-#include "TrigT1TGC/TGCTMDBOut.h"
 #include "TrigT1TGC/TGCNSW.h"
 #include "TrigT1TGC/NSWTrigOut.h"
 #include "TrigT1TGC/TGCBIS78.h"
@@ -37,11 +36,6 @@
 #include "MuonDigitContainer/TgcDigitContainer.h"
 #include "MuonDigitContainer/TgcDigitCollection.h"
 #include "MuonDigitContainer/TgcDigit.h"
-
-#include "MuonRDO/NSW_TrigRawData.h"
-#include "MuonRDO/NSW_TrigRawDataContainer.h"
-#include "MuonRDO/RpcBis78_TrigRawData.h"
-#include "MuonRDO/RpcBis78_TrigRawDataContainer.h"
 
 #include "TGCcablingInterface/ITGCcablingSvc.h"
 #include "TGCcablingInterface/ITGCcablingServerSvc.h"
@@ -194,21 +188,17 @@ StatusCode LVL1TGCTrigger::execute()
       
       // Use TileMu only if BC_CURRENT
       if (doTileMu && bc == m_CurrentBunchTag) {
-        sc = fillTMDB();
-        if (sc.isFailure()) {
-          ATH_MSG_WARNING("Cannot retrieve Tile Mu Data");
-          return sc;
-        }
+        ATH_CHECK(m_system->getTMDB()->retrieve(m_keyTileMu));
       }
 
       // Use NSW trigger output 
       if(doNSW && bc==m_CurrentBunchTag){  // To implement BC-calculation
-	ATH_CHECK(fillNSW());
+	ATH_CHECK(m_system->getNSW()->retrieve(m_keyNSWTrigOut));
       }
 
       // Use RPC BIS78 trigger output
       if(doBIS78 && bc == m_CurrentBunchTag){  // Todo: implement BC-calculation
-	ATH_CHECK(fillBIS78());
+	ATH_CHECK(m_system->getBIS78()->retrieve(m_keyBIS78TrigOut));
       }
 
       if (m_ProcessAllBunches || bc == m_CurrentBunchTag) {
@@ -338,7 +328,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
 	  std::shared_ptr<TGCTrackSelectorOut>  trackSelectorOut;
 	  sector->getSL()->getTrackSelectorOutput(trackSelectorOut);
 
-	  std::shared_ptr<TGCNSW> nsw = m_system->getNSW();
+	  std::shared_ptr<LVL1TGC::TGCNSW> nsw = m_system->getNSW();
 	  int module = sector->getModuleId();
 	  int sectorId;
           if(sector->getRegionType()==Endcap){
@@ -348,7 +338,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
 	    
 	    if ( m_tgcArgs.USE_NSW() ){
 	      sectorId = ((module/3)*2+module%3) + sector->getOctantId()*6;
-	      std::shared_ptr<const NSWTrigOut> pNSWOut = nsw->getOutput(sector->getRegionType(),
+	      std::shared_ptr<const LVL1TGC::NSWTrigOut> pNSWOut = nsw->getOutput(sector->getRegionType(),
 									 sector->getSideId(),
 									 sectorId);
 	      if ( pNSWOut ){
@@ -369,7 +359,7 @@ StatusCode LVL1TGCTrigger::processOneBunch(const TgcDigitContainer* tgc_containe
 
 	    if ( m_tgcArgs.USE_NSW() ) {
 	      sectorId =  (module/3) +  sector->getOctantId()*3;
-	      std::shared_ptr<const NSWTrigOut> pNSWOut = nsw->getOutput(sector->getRegionType(),
+	      std::shared_ptr<const LVL1TGC::NSWTrigOut> pNSWOut = nsw->getOutput(sector->getRegionType(),
 									 sector->getSideId(),
 									 sectorId);
 	      if ( pNSWOut ){
@@ -875,9 +865,8 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     }
     
     // Tile
-    const TGCTMDB* tmdb = m_system->getTMDB();
-    int inner_tile = tmdb->getInnerTileBits(sector->getSideId(), sectorId);
-    
+    int inner_tile = m_system->getTMDB()->getInnerTileBits(sector->getSideId(), sectorId);
+
     if (inner_tile > 0) {
       //TgcRawData * rawdata_tile = new TgcRawData(bcTag,
       //std::shared_ptr<TgcRawData> rawdata_tile (
@@ -896,8 +885,7 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     // NSW
     TGCRegionType region = sector->getRegionType();
     if ( m_USENSW ) {
-      std::shared_ptr<TGCNSW> nsw = m_system->getNSW();
-      std::shared_ptr<const NSWTrigOut> nsw_trigout = nsw->getOutput(region, !isAside, sectorId);
+      std::shared_ptr<const LVL1TGC::NSWTrigOut> nsw_trigout = m_system->getNSW()->getOutput(region, !isAside, sectorId);
       for ( int icand=0; icand<(int)nsw_trigout->getNSWeta().size(); icand++ ){
         std::unique_ptr<TgcRawData> rawdata_nsw (new TgcRawData(bcTag,
                                                                     static_cast<uint16_t>(subDetectorId),
@@ -919,8 +907,7 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
 
     // RPC BIS78
     if ( m_USEBIS78 ) {
-      std::shared_ptr<LVL1TGC::TGCBIS78> bis78 = m_system->getBIS78();
-      std::shared_ptr<const LVL1TGC::BIS78TrigOut> bis78_trigout = bis78->getOutput(region, sectorId);
+      std::shared_ptr<const LVL1TGC::BIS78TrigOut> bis78_trigout = m_system->getBIS78()->getOutput(sectorId);
       for ( int icand=0; icand<(int)bis78_trigout->getBIS78eta().size(); icand++ ){
         std::unique_ptr<TgcRawData> rawdata_bis78 (new TgcRawData(bcTag,
                                                                       static_cast<uint16_t>(subDetectorId),
@@ -1282,179 +1269,6 @@ StatusCode LVL1TGCTrigger::getCabling()
     return sc;
 }
 
-StatusCode LVL1TGCTrigger::fillTMDB()
-{
-    ATH_MSG_DEBUG("fillTMDB");
-    StatusCode sc =  StatusCode::SUCCESS;
-    TGCTMDB* tmdb = m_system->getTMDB();
-    
-    // clear TMDB
-    tmdb->eraseOutput();
-    
-    SG::ReadHandle<TileMuonReceiverContainer> readTileMuonReceiverContainer(m_keyTileMu);
-    if(!readTileMuonReceiverContainer.isValid()){
-      ATH_MSG_ERROR("Cannot retrieve Tile Muon Receiver Container.");
-      return StatusCode::FAILURE;
-    }
-    const TileMuonReceiverContainer* tileMuRecCont = readTileMuonReceiverContainer.cptr();
 
-    // loop over all TileMuonReceiverObj in container
-    TileMuonReceiverContainer::const_iterator tmItr = tileMuRecCont->begin();
-
-    const TileMuonReceiverObj * tmObj_Thresholds = *tmItr;
-    if ( (tmObj_Thresholds->GetThresholds()).size() == 4) {
-      float thresholds[4];
-      for (size_t ip=0;ip<4;ip++){
-        thresholds[ip] = (tmObj_Thresholds->GetThresholds()).at(ip);
-      }
-      ATH_MSG_DEBUG("thresholds[] :" << thresholds[0] << thresholds[1] << thresholds[2] << thresholds[3] );
-      ATH_MSG_DEBUG("type of GetThreshold : " << typeid((tmObj_Thresholds->GetThresholds())).name()
-                    << "  ID of GetThreshold : "
-                    << tmObj_Thresholds->GetID() );
-    }
-
-
-    //clear tmobj_Threshols
-    tmObj_Thresholds = 0;
-    // m_id and decision , etc ... from
-    ++tmItr;
-
-    for ( ; tmItr != tileMuRecCont->end(); ++tmItr) {
-
-      const TileMuonReceiverObj * tmObj = *tmItr;
-      // Tile Module
-      int moduleID = tmObj-> GetID();
-      int sideID   = (moduleID & 0xf00) >> 8;
-      int mod      = (moduleID & 0x0ff);
-      // TMDB decision
-      bool tile2SL[4];
-      //     [0]       [1]       [2]      [3]
-      //     d5d6_hi   d5d6_lo   d6_hi    d6_lo
-      for (size_t ip=0;ip<4;ip++){
-        tile2SL[ip] = (tmObj->GetDecision()).at(ip);
-      }
-      //if ( moduleID < 300 || (moduleID > 363 && moduleID < 400) || moduleID > 463 ||
-      if ( mod < 0 || mod > 63 || (sideID !=3 && sideID !=4) ||
-           ((tmObj->GetDecision()).size() != 4) ) {
-        continue;
-      } else {
-
-        // side 0: a-side, 1: c-side,  3: NA
-        // mod 0~63
-        int side = 3;
-        if (sideID == 3) {
-          side = 0;
-        } else if (sideID == 4) {
-          side = 1;
-        }
-        // setOutput(side, mod, hit56, hit6) -> hit56, 6
-        TGCTMDBOut::TileModuleHit hit56 = TGCTMDBOut::TM_NA;
-        TGCTMDBOut::TileModuleHit hit6 = TGCTMDBOut::TM_NA;
-        if (tile2SL[0] == true && tile2SL[1] == false) {
-          hit56 = TGCTMDBOut::TM_HIGH;
-        } else if (tile2SL[0] == false && tile2SL[1] == true) {
-          hit56 = TGCTMDBOut::TM_LOW;
-        } else if (tile2SL[0] == false && tile2SL[1] == false) {
-          hit56 = TGCTMDBOut::TM_NOHIT;
-        }
-
-        if (tile2SL[2] == true && tile2SL[3] == false) {
-          hit6 = TGCTMDBOut::TM_HIGH;
-        } else if (tile2SL[2] == false && tile2SL[3] == true) {
-          hit6 = TGCTMDBOut::TM_LOW;
-        } else if (tile2SL[2] == false && tile2SL[3] == false) {
-          hit6 = TGCTMDBOut::TM_NOHIT;
-        }
-
-        TGCTMDBOut::TileModuleHit prehit56 = tmdb->getOutput(side, mod)->getHit56();
-        TGCTMDBOut::TileModuleHit prehit6 = tmdb->getOutput(side, mod)->getHit6();
-        if(prehit56 != TGCTMDBOut::TM_NA && prehit56 > hit56) { hit56=prehit56; }
-        if(prehit6 != TGCTMDBOut::TM_NA && prehit6 > hit6) { hit6=prehit6; }
-
-        tmdb->setOutput(side, mod, hit56, hit6);
-      }
-    }
-
-    return sc;
-}
-
-
-
-//----------------------------------- 
-//NSW input
-//----------------------------------
-StatusCode LVL1TGCTrigger::fillNSW(){
-    ATH_MSG_DEBUG("fillNSW");
-    StatusCode sc = StatusCode::SUCCESS;
-    std::shared_ptr<TGCNSW> nsw = m_system->getNSW();
-    nsw->eraseOutput();
-
-    //The following part will be available when NSW Trigger Output is available.
-
-    SG::ReadHandle<Muon::NSW_TrigRawDataContainer> readNSW_TrigRawDataContainer(m_keyNSWTrigOut);
-    if(!readNSW_TrigRawDataContainer.isValid()){
-      ATH_MSG_ERROR("Cannot retrieve NSW TrigRawData Container.");
-      return StatusCode::FAILURE;
-    }
-    const Muon::NSW_TrigRawDataContainer* nsw_TrigRawDataContainer = readNSW_TrigRawDataContainer.cptr();
-    for(const Muon::NSW_TrigRawData* nsw_sector : *nsw_TrigRawDataContainer){
-      for(const Muon::NSW_TrigRawDataSegment* nsw_trk : *nsw_sector){
-	int nsw_sideId = (nsw_sector->sectorSide()=='A')?0:1;
-	nsw->setOutput(nsw_sideId,        // side
-		       nsw_sector->sectorId(), // Sector number in NSW
-		       nsw_trk->rIndex(),      // R-index
-		       nsw_trk->phiIndex(),    // Phi-index
-		       nsw_trk->deltaTheta(), // Delta theta index
-		       nsw_trk->lowRes(),
-		       nsw_trk->phiRes(),
-		       nsw_trk->monitor() // monitoring flag
-	              );
-      }
-    } 
-  
-
-    if(sc.isFailure()){
-      ATH_MSG_WARNING("Couldn't retrieve NSW trigger output");
-    }
-    return sc; 
-}
-
-
-//----------------------------------- 
-//RPC BIS78 input
-//----------------------------------
-StatusCode LVL1TGCTrigger::fillBIS78(){
-    ATH_MSG_DEBUG("fillBIS78");
-    StatusCode sc = StatusCode::SUCCESS;
-    std::shared_ptr<LVL1TGC::TGCBIS78> bis78 = m_system->getBIS78();
-    bis78->eraseOutput();
-
-    //The following part will be available when RPC BIS78 Trigger Output is available.
-    SG::ReadHandle<Muon::RpcBis78_TrigRawDataContainer> readBIS78_TrigRawDataContainer(m_keyBIS78TrigOut);
-    if(!readBIS78_TrigRawDataContainer.isValid()){
-      ATH_MSG_ERROR("Cannot retrieve RPC BIS78 TrigRawData Container.");
-      return StatusCode::FAILURE;
-    }
-    const Muon::RpcBis78_TrigRawDataContainer* bis78_TrigRawDataContainer = readBIS78_TrigRawDataContainer.cptr();
-    for(const Muon::RpcBis78_TrigRawData* bis78_sector : *bis78_TrigRawDataContainer){
-      if ( bis78_sector->sideId() != 1 ) continue; // BIS78 is only in A side!
-      for(const Muon::RpcBis78_TrigRawDataSegment* bis78_hit : *bis78_sector){
-	  bis78->setOutput(bis78_sector->sectorId(),
-			   bis78_hit->etaIndex(),      // Eta-index
-			   bis78_hit->phiIndex(),    // Phi-index
-			   bis78_hit->deltaEta(), // Delta eta
-			   bis78_hit->deltaPhi(), // Delta phi
-			   bis78_hit->flag3over3Eta(), // 
-			   bis78_hit->flag3over3Phi() // 
-	  );
-      }
-    }
-
-    if(sc.isFailure()){
-      ATH_MSG_WARNING("Couldn't retrieve RPC BIS78 trigger output");
-    }
-    return sc; 
-}
-
-} //end of namespace bracket
+}  // end of namespace
 

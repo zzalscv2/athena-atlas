@@ -9,6 +9,8 @@
 #include "TrigT1TGC/TGCReadoutIndex.h"
 
 namespace LVL1TGC {
+class TGCTMDB;
+class TGCNSW;
 class TGCBIS78;
 }
 
@@ -23,12 +25,12 @@ const int NumberOfRegions = 2;     // 1=Forward, 2=ENdcap
 class TGCEvent;
 class TGCDatabaseManager;
 class TGCSector;
-class TGCTMDB;
-class TGCNSW;
 
-class TGCElectronicsSystem
-{
+class TGCElectronicsSystem {
  public:
+  TGCElectronicsSystem(TGCArguments*, TGCDatabaseManager* database);
+  virtual ~TGCElectronicsSystem();
+
   void distributeSignal(TGCEvent* event);
   int getNumberOfSector() const { return NumberOfOctant*NumberOfModule; }
   int getNumberOfOctant() const { return NumberOfOctant; }
@@ -42,13 +44,9 @@ class TGCElectronicsSystem
     if ( (side<0) || (oct<0) || (mod<0) ) return 0;
     return m_sector[side][oct][mod];
   };
-  TGCTMDB* getTMDB() {return m_tmdb;}
-  const TGCTMDB* getTMDB() const {return m_tmdb;}
-  std::shared_ptr<TGCNSW>  getNSW() const {return m_nsw;}
+  std::shared_ptr<LVL1TGC::TGCTMDB> getTMDB() const {return m_tmdb;}
+  std::shared_ptr<LVL1TGC::TGCNSW> getNSW() const {return m_nsw;}
   std::shared_ptr<LVL1TGC::TGCBIS78> getBIS78() const {return m_bis78;}
-
-  TGCElectronicsSystem(TGCArguments*, TGCDatabaseManager* database);
-  ~TGCElectronicsSystem();
 
   TGCArguments* tgcArgs() { return m_tgcArgs;}
   const TGCArguments* tgcArgs() const { return m_tgcArgs;}
@@ -62,14 +60,15 @@ class TGCElectronicsSystem
  private:
   TGCDatabaseManager* m_DB;
   TGCSector* m_sector[LVL1TGC::kNSide][NumberOfOctant][NumberOfModule];
-  TGCTMDB*   m_tmdb;
-  std::shared_ptr<TGCNSW>   m_nsw;
-  std::shared_ptr<LVL1TGC::TGCBIS78>   m_bis78;
+  // Other Inner systems
+  std::shared_ptr<LVL1TGC::TGCTMDB>  m_tmdb{nullptr};
+  std::shared_ptr<LVL1TGC::TGCNSW>   m_nsw{nullptr};
+  std::shared_ptr<LVL1TGC::TGCBIS78> m_bis78{nullptr};
 
   TGCArguments* m_tgcArgs;
 };
 
 
-} //end of namespace bracket
+}  // end of namespace
 
 #endif // TGCElectronicsSystem_hh

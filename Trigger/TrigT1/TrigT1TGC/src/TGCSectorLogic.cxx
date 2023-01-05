@@ -95,13 +95,13 @@ TGCSectorLogic::TGCSectorLogic(TGCArguments* tgcargs, const TGCDatabaseManager* 
 TGCSectorLogic::~TGCSectorLogic()
 {}
 
-void TGCSectorLogic::setTMDB(const TGCTMDB* tmdb)
+void TGCSectorLogic::setTMDB(std::shared_ptr<const LVL1TGC::TGCTMDB> tmdb)
 {
   m_pTMDB = tmdb;
   if (m_pTMDB==0) m_useTileMu = false;
 }
 
-void TGCSectorLogic::setNSW(std::shared_ptr<const TGCNSW> nsw)
+void TGCSectorLogic::setNSW(std::shared_ptr<const LVL1TGC::TGCNSW> nsw)
 {
   m_nsw = nsw;
   if(m_nsw == 0) tgcArgs()->set_USE_NSW(false);
@@ -383,7 +383,7 @@ void TGCSectorLogic::doInnerCoincidence(int SSCId, TGCRPhiCoincidenceOut* coinci
 
 
 void TGCSectorLogic::doTGCNSWCoincidence(TGCRPhiCoincidenceOut* coincidenceOut){
-  std::shared_ptr<const NSWTrigOut> pNSWOut = m_nsw->getOutput(m_region,m_sideId,m_sectorId);
+  std::shared_ptr<const LVL1TGC::NSWTrigOut> pNSWOut = m_nsw->getOutput(m_region,m_sideId,m_sectorId);
 
   // for now, if there is a hit at NSW and the side is included in the detector mask, turn on the inner coin flag
   coincidenceOut->setInnerCoincidenceFlag( pNSWOut->getNSWeta().size()>0 && m_nswSide);
@@ -393,7 +393,7 @@ void TGCSectorLogic::doTGCNSWCoincidence(TGCRPhiCoincidenceOut* coincidenceOut){
 }
 
 bool TGCSectorLogic::doTGCBIS78Coincidence(TGCRPhiCoincidenceOut* coincidenceOut){
-  std::shared_ptr<const LVL1TGC::BIS78TrigOut> pBIS78Out = m_bis78->getOutput(m_region,m_sectorId);
+  std::shared_ptr<const LVL1TGC::BIS78TrigOut> pBIS78Out = m_bis78->getOutput(m_sectorId);
   if ( pBIS78Out.get() == 0 ) return false;
   int pt=0;
     
@@ -413,7 +413,7 @@ bool TGCSectorLogic::doTILECoincidence(TGCRPhiCoincidenceOut* coincidenceOut)
   bool isHitTileMu=false;
   for(int mod=0; mod < LVL1TGC::TGCTileMuCoincidenceLUT::N_Input_TileMuModule; mod++) {
     uint8_t maskTM = (uint8_t)(m_tileMuLUT->getTrigMask(mod, coincidenceOut->getIdSSC(), m_sectorId, m_sideId));
-    const TGCTMDBOut* tm = m_pTMDB->getOutput(m_sideId, m_sectorId, mod); 
+    std::shared_ptr<const LVL1TGC::TGCTMDBOut> tm = m_pTMDB->getOutput(m_sideId, m_sectorId, mod); 
     isHitTileMu = isHitTileMu || this->hitTileMu(maskTM, tm->getHit6(), tm->getHit56());
   }
 
@@ -471,16 +471,16 @@ bool TGCSectorLogic::hitTileMu(const uint8_t& mask, const uint8_t& hit6, const u
    */
   switch(mask) {
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D6_L:
-      return (hit6==TGCTMDBOut::TM_LOW || hit6==TGCTMDBOut::TM_HIGH);
+      return (hit6==LVL1TGC::TGCTMDBOut::TM_LOW || hit6==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D6_H:
-      return (hit6==TGCTMDBOut::TM_HIGH);
+      return (hit6==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D56_L:
-      return (hit56==TGCTMDBOut::TM_LOW || hit56==TGCTMDBOut::TM_HIGH);
+      return (hit56==LVL1TGC::TGCTMDBOut::TM_LOW || hit56==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     case LVL1TGC::TGCTileMuCoincidenceLUT::TM_D56_H:
-      return (hit56==TGCTMDBOut::TM_HIGH);
+      return (hit56==LVL1TGC::TGCTMDBOut::TM_HIGH);
       break;
     default:
       return false;

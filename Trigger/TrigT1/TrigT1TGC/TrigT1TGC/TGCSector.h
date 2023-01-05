@@ -45,10 +45,9 @@ class TGCSector
 	    TGCRegionType type, 
 	    TGCForwardBackwardType forwardBackward, 
 	    const TGCDatabaseManager* db,
-	    const TGCTMDB*            tmdb,
-	    std::shared_ptr<const TGCNSW>            nsw,
-            std::shared_ptr<const LVL1TGC::TGCBIS78> bis78
-	    );
+	    std::shared_ptr<const LVL1TGC::TGCTMDB>  tmdb,
+	    std::shared_ptr<const LVL1TGC::TGCNSW>   nsw,
+            std::shared_ptr<const LVL1TGC::TGCBIS78> bis78);
 
   TGCSector();
 
@@ -77,7 +76,7 @@ class TGCSector
   int getId() const;
   void dumpModule();
 
-  int getSideId() const { return m_sideId; }
+  LVL1TGC::TGCSide getSideId() const { return m_sideId; }
   int getOctantId() const { return m_octantId; }
   int getModuleId() const { return m_moduleId; }
 
@@ -85,8 +84,8 @@ class TGCSector
   const TGCArguments* tgcArgs() const { return m_tgcArgs; }
 
 private:
-  const TGCTMDB* getTMDB() const { return m_TMDB; }
-  std::shared_ptr<const TGCNSW>   getNSW() const{ return m_NSW; }
+  std::shared_ptr<const LVL1TGC::TGCTMDB> getTMDB() const { return m_TMDB; }
+  std::shared_ptr<const LVL1TGC::TGCNSW> getNSW() const{ return m_NSW; }
   std::shared_ptr<const LVL1TGC::TGCBIS78> getBIS78() const{ return m_BIS78; }
  
   int getPatchPanelType(TGCSignalType signal, int layer) const;
@@ -107,8 +106,8 @@ private:
  private:
   int m_id{0};
   TGCRegionType m_regionType;
+  LVL1TGC::TGCSide m_sideId{LVL1TGC::TGCSide::ASIDE};
   int m_numberOfHit;
-  int m_sideId;
   int m_octantId;
   int m_moduleId;
 
@@ -120,8 +119,8 @@ private:
   std::vector<TGCHighPtBoard*> m_HPB[NumberOfHighPtBoardType];
 
   TGCSectorLogic* m_SL;
-  const TGCTMDB* m_TMDB;
-  std::shared_ptr<const TGCNSW>  m_NSW;
+  std::shared_ptr<const LVL1TGC::TGCTMDB> m_TMDB;
+  std::shared_ptr<const LVL1TGC::TGCNSW>  m_NSW;
   std::shared_ptr<const LVL1TGC::TGCBIS78>  m_BIS78;
 
   TGCArguments* m_tgcArgs;

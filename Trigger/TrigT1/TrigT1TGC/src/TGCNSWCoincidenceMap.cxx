@@ -88,7 +88,7 @@ namespace LVL1TGCTrigger {
   }
 
   //TGC-NSW Eta-Phi Coincidence
-  int TGCNSWCoincidenceMap::TGCNSW_pTcalcu_EtaPhi(const NSWTrigOut *nswOut,int roi) const
+  int TGCNSWCoincidenceMap::TGCNSW_pTcalcu_EtaPhi(const LVL1TGC::NSWTrigOut *nswOut,int roi) const
   {
     std::vector<uint8_t> nswEta_vec=nswOut->getNSWeta();
     std::vector<uint8_t> nswPhi_vec=nswOut->getNSWphi();
@@ -110,7 +110,7 @@ namespace LVL1TGCTrigger {
 
 
   //TGC-NSW Eta-DeltaTheta Coincidence
-   int TGCNSWCoincidenceMap::TGCNSW_pTcalcu_EtaDtheta(const NSWTrigOut *nswOut,int roi) const
+   int TGCNSWCoincidenceMap::TGCNSW_pTcalcu_EtaDtheta(const LVL1TGC::NSWTrigOut *nswOut,int roi) const
   {
     std::vector<uint8_t> nswEta_vec=nswOut->getNSWeta();
     std::vector<uint8_t> nswDtheta_vec=nswOut->getNSWDtheta();

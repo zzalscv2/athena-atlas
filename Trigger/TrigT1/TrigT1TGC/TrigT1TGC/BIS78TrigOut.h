@@ -25,7 +25,8 @@ class BIS78TrigOut {
 
  public:
   BIS78TrigOut() = default;
-  BIS78TrigOut(std::vector<int> BIS78Trigger, std::vector<uint8_t> BIS78eta, std::vector<uint8_t> BIS78phi, std::vector<uint8_t> BIS78Deta, std::vector<uint8_t> BIS78Dphi, std::vector<uint8_t> BIS78flag3over3over3Eta, std::vector<uint8_t> BIS78flag3over3Phi,
+  BIS78TrigOut(std::vector<int> BIS78Trigger, std::vector<uint8_t> BIS78eta, std::vector<uint8_t> BIS78phi, std::vector<uint8_t> BIS78Deta, std::vector<uint8_t> BIS78Dphi,
+               std::vector<uint8_t> BIS78flag3over3over3Eta, std::vector<uint8_t> BIS78flag3over3Phi,
                LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
   BIS78TrigOut(std::vector<int> BIS78Trigger, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
   
