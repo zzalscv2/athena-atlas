@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -157,12 +157,7 @@ namespace MuonGM {
         sTGCDetectorDescription* stgc = aHelper.Get_sTGCDetector(sector_l, stEta, getStationPhi(), m_ml, side.back());
    
 #ifndef NDEBUG
-        if (stgc)
-            log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
-        else {
-            log << MSG::DEBUG << "No sTGC Detector" << endmsg;
-            log << MSG::DEBUG << sector_l << "  " << getStationEta() << " " << getStationPhi() << "  " << m_ml << " " << sector_l << endmsg;
-        }
+        log << MSG::DEBUG << "Found sTGC Detector " << stgc->GetName() << endmsg;
 #endif
 
         auto tech = stgc->GetTechnology();
