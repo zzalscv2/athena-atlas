@@ -45,7 +45,7 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    # In DAOD production the EventInfo is prepared specially by the SlimmingHelper to ensure it is written in AuxDyn form
    # So for derivations the ItemList from the SlimmingHelper alone is used without the extra EventInfo items
    finalItemList = []
-   if ("DAOD_" or "D2AOD_") in streamName:
+   if any(name in streamName for name in {"DAOD_", "D2AOD_"}):
       finalItemList = ItemList
    else:
       finalItemList = [f"xAOD::EventInfo#{eventInfoKey}", f"xAOD::EventAuxInfo#{eventInfoKey}Aux."] + ItemList 
