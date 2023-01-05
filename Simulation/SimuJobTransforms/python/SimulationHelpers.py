@@ -2,13 +2,13 @@
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, LArParameterization
 
 
-def getDetectorsFromRunArgs(ConfigFlags, runArgs):
+def getDetectorsFromRunArgs(flags, runArgs):
     """Generate detector list based on runtime arguments."""
     if hasattr(runArgs, 'detectors'):
         detectors = runArgs.detectors
     else:
         from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
-        detectors = getDefaultDetectors(ConfigFlags.GeoModel.AtlasVersion, includeForward=False)
+        detectors = getDefaultDetectors(flags.GeoModel.AtlasVersion, includeForward=False)
 
     # Support switching on Forward Detectors
     if hasattr(runArgs, 'LucidOn'):
@@ -27,7 +27,7 @@ def getDetectorsFromRunArgs(ConfigFlags, runArgs):
 
     # Fatras does not support simulating the BCM, so have to switch that off
     from SimulationConfig.SimEnums import SimulationFlavour
-    if ConfigFlags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
+    if flags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
         try:
             detectors.remove('BCM')
         except ValueError:
@@ -36,42 +36,42 @@ def getDetectorsFromRunArgs(ConfigFlags, runArgs):
     return detectors
 
 
-def enableFrozenShowersFCalOnly(ConfigFlags):
+def enableFrozenShowersFCalOnly(flags):
     """Turns on GFlash shower parametrization for FCAL"""
-    ConfigFlags.Sim.LArParameterization = LArParameterization.FrozenShowersFCalOnly
-    ConfigFlags.Sim.CalibrationRun = CalibrationRun.Off
+    flags.Sim.LArParameterization = LArParameterization.FrozenShowersFCalOnly
+    flags.Sim.CalibrationRun = CalibrationRun.Off
 
 
-def enableBeamPipeKill(ConfigFlags):
-    ConfigFlags.Sim.BeamPipeCut = 0.
-    ConfigFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
+def enableBeamPipeKill(flags):
+    flags.Sim.BeamPipeCut = 0.
+    flags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
 
 
-def enableTightMuonStepping(ConfigFlags):
-    ConfigFlags.Sim.TightMuonStepping = True
+def enableTightMuonStepping(flags):
+    flags.Sim.TightMuonStepping = True
 
 
-def enableG4SignalCavern(ConfigFlags):
-    """Set ConfigFlags to take care of Neutron BG"""
-    ConfigFlags.Sim.CavernBackground = CavernBackground.Signal
+def enableG4SignalCavern(flags):
+    """Set flags to take care of Neutron BG"""
+    flags.Sim.CavernBackground = CavernBackground.Signal
 
 
-def enableCalHits(ConfigFlags):
+def enableCalHits(flags):
     """Turns on calibration hits for LAr and Tile"""
-    ConfigFlags.Sim.CalibrationRun = CalibrationRun.LArTile
+    flags.Sim.CalibrationRun = CalibrationRun.LArTile
     # deactivate incompatible optimizations
-    ConfigFlags.Sim.LArParameterization = LArParameterization.NoFrozenShowers
-    ConfigFlags.Sim.NRRThreshold = False
-    ConfigFlags.Sim.NRRWeight = False
-    ConfigFlags.Sim.PRRThreshold = False
-    ConfigFlags.Sim.PRRWeight = False
+    flags.Sim.LArParameterization = LArParameterization.NoFrozenShowers
+    flags.Sim.NRRThreshold = False
+    flags.Sim.NRRWeight = False
+    flags.Sim.PRRThreshold = False
+    flags.Sim.PRRWeight = False
 
 
-def enableParticleID(ConfigFlags):
+def enableParticleID(flags):
     """Mods to have primary particle barcode signature on for calorimeter calibration hits."""
-    ConfigFlags.Sim.ParticleID=True
+    flags.Sim.ParticleID=True
 
 
-def enableVerboseSelector(ConfigFlags):
+def enableVerboseSelector(flags):
     """ """
-    ConfigFlags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.VerboseSelectorToolCfg']
+    flags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.VerboseSelectorToolCfg']

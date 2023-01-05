@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground, \
     LArParameterization, SimulationFlavour, TruthStrategy, VertexSource
@@ -8,8 +8,7 @@ from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBac
 #todo? add in the explanatory text from previous implementation
 
 def createSimConfigFlags():
-    scf=AthConfigFlags()
-
+    scf = AthConfigFlags()
     scf.addFlag("Sim.ParticleID", False)
 
     def _checkCalibrationRun(prevFlags):
@@ -33,7 +32,6 @@ def createSimConfigFlags():
     def _checkSimBarcodeOffsetConf(prevFlags):
         simBarcodeOffset  = 0
         if prevFlags.Input.Files:
-            from AthenaConfiguration.AutoConfigFlags import GetFileMD
             mdstring = GetFileMD(prevFlags.Input.Files).get("SimBarcodeOffset", "0")
             simBarcodeOffset = eval(mdstring)
             if not simBarcodeOffset:
@@ -48,7 +46,7 @@ def createSimConfigFlags():
     def _checkRegenerationIncrementConf(prevFlags):
         regenInc  = 0
         if prevFlags.Input.Files:
-            from AthenaConfiguration.AutoConfigFlags import GetFileMD
+            
             mdstring = GetFileMD(prevFlags.Input.Files).get("RegenerationIncrement", "0")
             regenInc = eval(mdstring)
             if not regenInc:
@@ -82,10 +80,8 @@ def createSimConfigFlags():
     scf.addFlag("Sim.DoFullChain", False)
 
     def _check_G4_version(prevFlags):
-        from AthenaConfiguration.AthConfigFlags import isGaudiEnv
         version = ""
         if prevFlags.Input.Files:
-            from AthenaConfiguration.AutoConfigFlags import GetFileMD
             version = GetFileMD(prevFlags.Input.Files).get("G4Version", "")
         if not version:
             from os import environ
@@ -99,7 +95,6 @@ def createSimConfigFlags():
     def _checkPhysicsListConf(prevFlags):
         physicsList = "FTFP_BERT_ATL"
         if prevFlags.Input.Files:
-            from AthenaConfiguration.AutoConfigFlags import GetFileMD
             physicsList = GetFileMD(prevFlags.Input.Files).get("PhysicsList", "")
             if not physicsList:
                 # Currently physicsList is also part of /Digitization/Parameters metadata. TODO migrate away from this.
@@ -151,7 +146,6 @@ def createSimConfigFlags():
     def _checkSimulationFlavour(prevFlags):
         simulator = SimulationFlavour.Unknown
         if prevFlags.Input.Files:
-            from AthenaConfiguration.AutoConfigFlags import GetFileMD
             simFlavour = GetFileMD(prevFlags.Input.Files).get("Simulator", "")
             if not simFlavour:
                 simFlavour = GetFileMD(prevFlags.Input.Files).get("SimulationFlavour", "")

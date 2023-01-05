@@ -2,34 +2,34 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def RenameHitCollectionsOnReadCfg(ConfigFlags):
+def RenameHitCollectionsOnReadCfg(flags):
 
     result = ComponentAccumulator()
     from SGComps.AddressRemappingConfig import InputRenameCfg
     result.merge(InputRenameCfg("McEventCollection","TruthEvent","TruthEventOLD"))
 
-    if ConfigFlags.Detector.EnableID or  ConfigFlags.Detector.EnableITk:
-        if ConfigFlags.Detector.EnableBCM:
+    if flags.Detector.EnableID or  flags.Detector.EnableITk:
+        if flags.Detector.EnableBCM:
             result.merge(InputRenameCfg("SiHitCollection","BCMHits","BCMHitsOLD"))
             result.merge(InputRenameCfg("SiHitCollection","BLMHits","BLMHitsOLD"))
-        if ConfigFlags.Detector.EnablePixel:
+        if flags.Detector.EnablePixel:
             result.merge(InputRenameCfg("SiHitCollection","PixelHits","PixelHitsOLD"))
-        if ConfigFlags.Detector.EnableSCT:
+        if flags.Detector.EnableSCT:
             result.merge(InputRenameCfg("SiHitCollection","SCT_Hits","SCT_HitsOLD"))
-        if ConfigFlags.Detector.EnableTRT:
+        if flags.Detector.EnableTRT:
             result.merge(InputRenameCfg("TRTUncompressedHitCollection","TRTUncompressedHits","TRTUncompressedHitsOLD"))
-        if ConfigFlags.Detector.EnableBCMPrime:
+        if flags.Detector.EnableBCMPrime:
             pass #TODO
-        if ConfigFlags.Detector.EnableITkPixel:
+        if flags.Detector.EnableITkPixel:
             result.merge(InputRenameCfg("SiHitCollection","ITkPixelHits","ITkPixelHitsOLD"))
-        if ConfigFlags.Detector.EnableITkStrip:
+        if flags.Detector.EnableITkStrip:
             result.merge(InputRenameCfg("SiHitCollection","ITkStripHits","ITkStripHitsOLD"))
-        if ConfigFlags.Detector.EnableHGTD:
+        if flags.Detector.EnableHGTD:
             result.merge(InputRenameCfg("SiHitCollection","HGTD_Hits","HGTD_HitsOLD"))
         result.merge(InputRenameCfg("TrackRecordCollection","CaloEntryLayer","CaloEntryLayerOLD"))
 
-    if ConfigFlags.Detector.EnableCalo:
-        if ConfigFlags.Detector.EnableLAr:
+    if flags.Detector.EnableCalo:
+        if flags.Detector.EnableLAr:
             result.merge(InputRenameCfg("LArHitContainer","LArHitEMB","LArHitEMBOLD"))
             result.merge(InputRenameCfg("LArHitContainer","LArHitEMEC","LArHitEMECOLD"))
             result.merge(InputRenameCfg("LArHitContainer","LArHitFCAL","LArHitFCALOLD"))
@@ -38,27 +38,27 @@ def RenameHitCollectionsOnReadCfg(ConfigFlags):
             result.merge(InputRenameCfg("CaloCalibrationHitContainer","LArCalibrationHitActive","LArCalibrationHitActiveOLD"))
             result.merge(InputRenameCfg("CaloCalibrationHitContainer","LArCalibrationHitDeadMaterial","LArCalibrationHitDeadMaterialOLD"))
             result.merge(InputRenameCfg("CaloCalibrationHitContainer","LArCalibrationHitInactive","LArCalibrationHitInactiveOLD"))
-        if ConfigFlags.Detector.EnableTile:
+        if flags.Detector.EnableTile:
             result.merge(InputRenameCfg("TileHitVector","TileHitVec","TileHitVecOLD"))
             result.merge(InputRenameCfg("CaloCalibrationHitContainer","TileCalibHitActiveCell","TileCalibHitActiveCellOLD"))
             result.merge(InputRenameCfg("CaloCalibrationHitContainer","TileCalibHitInactiveCell","TileCalibHitInactiveCellOLD"))
             result.merge(InputRenameCfg("CaloCalibrationHitContainer","TileCalibHitDeadMaterial","TileCalibHitDeadMaterialOLD"))
-        if ConfigFlags.Detector.EnableMBTS:
+        if flags.Detector.EnableMBTS:
             result.merge(InputRenameCfg("TileHitVector","MBTSHits","MBTSHitsOLD"))
         result.merge(InputRenameCfg("TrackRecordCollection","MuonEntryLayer","MuonEntryLayerOLD"))
 
-    if ConfigFlags.Detector.EnableMuon:
-        if ConfigFlags.Detector.EnableCSC:
+    if flags.Detector.EnableMuon:
+        if flags.Detector.EnableCSC:
             result.merge(InputRenameCfg("CSCSimHitCollection","CSC_Hits","CSC_HitsOLD"))
-        if ConfigFlags.Detector.EnableMDT:
+        if flags.Detector.EnableMDT:
             result.merge(InputRenameCfg("MDTSimHitCollection","MDT_Hits","MDT_HitsOLD"))
-        if ConfigFlags.Detector.EnableRPC:
+        if flags.Detector.EnableRPC:
             result.merge(InputRenameCfg("RPCSimHitCollection","RPC_Hits","RPC_HitsOLD"))
-        if ConfigFlags.Detector.EnableTGC:
+        if flags.Detector.EnableTGC:
             result.merge(InputRenameCfg("TGCSimHitCollection","TGC_Hits","TGC_HitsOLD"))
-        if ConfigFlags.Detector.EnablesTGC:
+        if flags.Detector.EnablesTGC:
             result.merge(InputRenameCfg("sTGCSimHitCollection","sTGC_Hits", "sTGC_HitsOLD"))
-        if ConfigFlags.Detector.EnableMM:
+        if flags.Detector.EnableMM:
             result.merge(InputRenameCfg("MMSimHitCollection","MM_Hits", "MM_HitsOLD"))
         result.merge(InputRenameCfg("TrackRecordCollection","MuonExitLayer","MuonExitLayerOLD"))
 
