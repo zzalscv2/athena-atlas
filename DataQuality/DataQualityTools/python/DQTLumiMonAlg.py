@@ -21,13 +21,8 @@ def DQTLumiMonAlgConfig(flags, isOld=False):
                                         'CATEGORY_monitoring_muonIso','EF_muX')
         DQTLumiMonAlgConfigByTriggerChain(helper, DQTLumiMonAlg, flags, isOld,
                                         'CATEGORY_primary_single_ele','EF_eX')
-    if isOld:
-        return helper.result()
-    else:
-        result = helper.result()
-        from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-        result.merge(AtlasGeometryCfg(flags))
-        return result
+    return helper.result()
+
 
 def DQTLumiMonAlgConfigByTriggerChain(helper, algConfObj, flags, isOld, triggerChain='', triggerPath=''):
     monAlg = helper.addAlgorithm(algConfObj, 'DQTLumiMonAlg'+triggerPath)

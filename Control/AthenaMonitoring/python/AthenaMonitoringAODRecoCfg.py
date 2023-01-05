@@ -36,8 +36,6 @@ def AthenaMonitoringAODRecoCfg(flags):
 
         if jet_collections & btag_jet_collections:
             info('Scheduling b-tagging of rebuilt jets')
-            from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-            result.merge(AtlasGeometryCfg(flags))
             from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
             result.merge(BeamSpotCondAlgCfg(flags))
             from BTagging.BTagConfig import BTagRecoSplitCfg

@@ -14,9 +14,7 @@ def RpcMonitoringConfig(inputFlags):
     result = ComponentAccumulator()
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
     result.merge(AtlasFieldCacheCondAlgCfg(inputFlags))
-    result.merge(AtlasGeometryCfg(inputFlags))
     
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'RpcMonitoringCfg')
@@ -387,9 +385,7 @@ if __name__=="__main__":
     cfg.merge(acc)
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
-    cfg.merge(AtlasGeometryCfg(ConfigFlags))
 
     if ConfigFlags.DQ.Steering.Muon.doTrackMon:
         # do not run in RAW->ESD

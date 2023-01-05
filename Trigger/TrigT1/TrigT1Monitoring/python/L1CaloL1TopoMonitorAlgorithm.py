@@ -10,10 +10,6 @@ def L1CaloL1TopoMonitoringConfig(inputFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     result = ComponentAccumulator()
 
-    # any things that need setting up for job e.g.
-    #from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-    #result.merge(AtlasGeometryCfg(inputFlags))
-
     # make the athena monitoring helper
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'L1CaloL1TopoMonitoringCfg')
