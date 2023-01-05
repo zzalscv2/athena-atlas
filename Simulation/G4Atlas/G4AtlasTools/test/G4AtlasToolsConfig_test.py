@@ -13,41 +13,41 @@ if __name__ == '__main__':
   log.setLevel(DEBUG)
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import ProductionStep
-  ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
-  ConfigFlags.Sim.ISFRun = True
+  flags = initConfigFlags()
+  flags.Common.ProductionStep = ProductionStep.Simulation
+  flags.Sim.ISFRun = True
 
   #Provide input
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT
 
-  #ConfigFlags.GeoModel.AtlasVersion = "tb_Tile2000_2003"
-  #ConfigFlags.GeoModel.AtlasVersion = "ctbh8"
-  ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-03-01-00'
+  #flags.GeoModel.AtlasVersion = "tb_Tile2000_2003"
+  #flags.GeoModel.AtlasVersion = "ctbh8"
+  flags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-03-01-00'
 
   # Setup detector flags
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-  setupDetectorFlags(ConfigFlags, ['BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'MBTS'], toggle_geometry=True)
+  setupDetectorFlags(flags, ['BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'MBTS'], toggle_geometry=True)
 
   # Finalize
-  ConfigFlags.lock()
+  flags.lock()
 
   ## Initialize a new component accumulator
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg
-  acc  = SensitiveDetectorMasterToolCfg(ConfigFlags)
+  acc  = SensitiveDetectorMasterToolCfg(flags)
   tool = cfg.popToolsAndMerge(acc)
   cfg.setPrivateTools(tool)
 
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
   #cfg not being used so complains ...fine now!
-  f=open("test.pkl","wb")
-  cfg.store(f) #sets wasmerged = true
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f) #sets wasmerged = true
 
   print ("-----------------finished----------------------")

@@ -13,38 +13,38 @@ if __name__ == '__main__':
   log.setLevel(DEBUG)
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import ProductionStep
-  ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
-  
+  flags = initConfigFlags()
+  flags.Common.ProductionStep = ProductionStep.Simulation
+
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
-  ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+  flags.Input.Files = defaultTestFiles.EVNT
+  flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
 
   from SimulationConfig.SimEnums import CavernBackground
-  ConfigFlags.Sim.CavernBackground = CavernBackground.Signal  #for it to go via atlas?
-  ConfigFlags.Sim.WorldRRange = 15000
-  ConfigFlags.Sim.WorldZRange = 27000
-  # Finalize 
-  ConfigFlags.lock()
+  flags.Sim.CavernBackground = CavernBackground.Signal  #for it to go via atlas?
+  flags.Sim.WorldRRange = 15000
+  flags.Sim.WorldZRange = 27000
+  # Finalize
+  flags.lock()
 
   ## Initialize a new component accumulator
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   from G4AtlasServices.G4AtlasServicesConfig import DetectorGeometrySvcCfg
   #add the algorithm
-  acc = DetectorGeometrySvcCfg(ConfigFlags)
+  acc = DetectorGeometrySvcCfg(flags)
   cfg.merge(acc)
 
   # Dump config
   #cfg.getService("StoreGateSvc").Dump = True
   #cfg.getService("ConditionStore").Dump = True
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
-  f=open("test.pkl","wb")
-  cfg.store(f) 
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f)
 
   print ("-----------------finished----------------------")

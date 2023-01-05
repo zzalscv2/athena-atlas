@@ -765,26 +765,26 @@ def fatrasPileupSimServiceIDCfg(flags, name="ISF_FatrasPileupSimSvc", **kwargs):
 
 
 if __name__ == "__main__":
-
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.isMC = True
+    flags.Input.Files = defaultTestFiles.HITS_RUN2
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
-    acc.popToolsAndMerge(fatrasTransportToolCfg(ConfigFlags))
+    acc = MainServicesCfg(flags)
+    acc.popToolsAndMerge(fatrasTransportToolCfg(flags))
 
     print("INFO_FatrasConfig: Dumping config flags")
-    ConfigFlags.dump()
+    flags.dump()
     print("INFO_FatrasConfig: Print config details")
     acc.printConfig(withDetails=True, summariseProps=True)
     acc.store(open('fatrassimtool.pkl', 'wb'))

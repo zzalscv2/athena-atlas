@@ -13,30 +13,31 @@ if __name__ == '__main__':
   log.setLevel(DEBUG)
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import ProductionStep, Project
-  ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
+  flags = initConfigFlags()
+  flags.Common.ProductionStep = ProductionStep.Simulation
 
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
+  flags.Input.Files = defaultTestFiles.EVNT
 
-  if ConfigFlags.Common.Project is Project.AthSimulation:
+  if flags.Common.Project is Project.AthSimulation:
     detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC'] # Forward Detector geometry not currently included in AthSimulation
   else:
     detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion', 'Lucid', 'ZDC', 'ALFA', 'AFP']
 
   # Setup detector flags
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-  setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+  setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-  ConfigFlags.Sim.WorldRRange = 15000
-  ConfigFlags.Sim.WorldZRange = 27000
+  flags.Sim.WorldRRange = 15000
+  flags.Sim.WorldZRange = 27000
 
-  ConfigFlags.Sim.TwissFileNomReal = "nominal" #so it doesn't crash
+  flags.Sim.TwissFileNomReal = "nominal" #so it doesn't crash
 
   # Finalize
-  ConfigFlags.lock()
+  flags.lock()
 
   from G4AtlasTools.G4GeometryToolConfig import BeamPipeGeoDetectorToolCfg
   from G4AtlasTools.G4GeometryToolConfig import PixelGeoDetectorToolCfg
@@ -55,50 +56,49 @@ if __name__ == '__main__':
   ## Initialize a new component accumulator
   cfg = ComponentAccumulator()
 
-  tool = cfg.popToolsAndMerge(BeamPipeGeoDetectorToolCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(BeamPipeGeoDetectorToolCfg(flags))
   cfg.addPublicTool(tool)
 
-  tool = cfg.popToolsAndMerge(PixelGeoDetectorToolCfg(ConfigFlags))
-  cfg.addPublicTool(tool)
-  
-  tool = cfg.popToolsAndMerge(SCTGeoDetectorToolCfg(ConfigFlags))
-  cfg.addPublicTool(tool)
-  
-  tool = cfg.popToolsAndMerge(TRTGeoDetectorToolCfg(ConfigFlags))
-  cfg.addPublicTool(tool)
-  
-  tool = cfg.popToolsAndMerge(IDETEnvelopeCfg(ConfigFlags))
-  cfg.addPublicTool(tool)
-  
-  tool = cfg.popToolsAndMerge(ForwardRegionEnvelopeCfg(ConfigFlags))
-  cfg.addPublicTool(tool)
-  
-  tool = cfg.popToolsAndMerge(CALOEnvelopeCfg(ConfigFlags))
-  cfg.addPublicTool(tool)
-  
-  tool = cfg.popToolsAndMerge(LucidGeoDetectorToolCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(PixelGeoDetectorToolCfg(flags))
   cfg.addPublicTool(tool)
 
-  tool = cfg.popToolsAndMerge(ALFAGeoDetectorToolCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(SCTGeoDetectorToolCfg(flags))
   cfg.addPublicTool(tool)
 
-  tool = cfg.popToolsAndMerge(ZDCGeoDetectorToolCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(TRTGeoDetectorToolCfg(flags))
   cfg.addPublicTool(tool)
 
-  tool = cfg.popToolsAndMerge(AFPGeoDetectorToolCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(IDETEnvelopeCfg(flags))
   cfg.addPublicTool(tool)
 
-  tool = cfg.popToolsAndMerge(ATLASEnvelopeCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(ForwardRegionEnvelopeCfg(flags))
   cfg.addPublicTool(tool)
 
-  tool = cfg.popToolsAndMerge(MaterialDescriptionToolCfg(ConfigFlags))
+  tool = cfg.popToolsAndMerge(CALOEnvelopeCfg(flags))
+  cfg.addPublicTool(tool)
+
+  tool = cfg.popToolsAndMerge(LucidGeoDetectorToolCfg(flags))
+  cfg.addPublicTool(tool)
+
+  tool = cfg.popToolsAndMerge(ALFAGeoDetectorToolCfg(flags))
+  cfg.addPublicTool(tool)
+
+  tool = cfg.popToolsAndMerge(ZDCGeoDetectorToolCfg(flags))
+  cfg.addPublicTool(tool)
+
+  tool = cfg.popToolsAndMerge(AFPGeoDetectorToolCfg(flags))
+  cfg.addPublicTool(tool)
+
+  tool = cfg.popToolsAndMerge(ATLASEnvelopeCfg(flags))
+  cfg.addPublicTool(tool)
+
+  tool = cfg.popToolsAndMerge(MaterialDescriptionToolCfg(flags))
   cfg.addPublicTool(tool)
 
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
-  f=open("test.pkl","wb")
-  cfg.store(f)
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f)
 
   print("-----------------finished----------------------")

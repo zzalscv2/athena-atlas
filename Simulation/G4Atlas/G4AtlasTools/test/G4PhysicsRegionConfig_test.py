@@ -16,59 +16,56 @@ if __name__ == '__main__':
 
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
+  flags = initConfigFlags()
+  flags.Input.Files = defaultTestFiles.EVNT
 
-  # Finalize 
-  ConfigFlags.lock()
+  # Finalize
+  flags.lock()
 
   ## Initialize a new component accumulator
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   #import the following tool configs
   from G4AtlasTools.G4PhysicsRegionConfig import *
   #add the tools
-  cfg.addPublicTool(BeampipeFwdCutPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(FWDBeamLinePhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(FwdRegionPhysicsRegionToolCfg(ConfigFlags))  
-  cfg.addPublicTool(PixelPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(SCTPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(TRTPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(TRT_ArPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(TRT_KrPhysicsRegionToolCfg(ConfigFlags)) 
-  cfg.addPublicTool(EMBPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(EMECPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(HECPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(FCALPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(EMECParaPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(FCALParaPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(FCAL2ParaPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(PreSampLArPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(DeadMaterialPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(DriftWallPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(DriftWall1PhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(DriftWall2PhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(MuonSystemFastPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(MuonPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(SX1PhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(BedrockPhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(CavernShaftsConcretePhysicsRegionToolCfg(ConfigFlags))
-  cfg.addPublicTool(SCTSiliconPhysicsRegionToolCfg(ConfigFlags))
-
-
+  cfg.addPublicTool(BeampipeFwdCutPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(FWDBeamLinePhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(FwdRegionPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(PixelPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(SCTPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(TRTPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(TRT_ArPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(TRT_KrPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(EMBPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(EMECPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(HECPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(FCALPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(EMECParaPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(FCALParaPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(FCAL2ParaPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(PreSampLArPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(DeadMaterialPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(DriftWallPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(DriftWall1PhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(DriftWall2PhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(MuonSystemFastPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(MuonPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(SX1PhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(BedrockPhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(CavernShaftsConcretePhysicsRegionToolCfg(flags))
+  cfg.addPublicTool(SCTSiliconPhysicsRegionToolCfg(flags))
 
   # Dump config
-  #cfg.getService("StoreGateSvc").Dump = True
-  #cfg.getService("ConditionStore").Dump = True
+  # cfg.getService("StoreGateSvc").Dump = True
+  # cfg.getService("ConditionStore").Dump = True
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
-
-  f=open("test.pkl","wb")
-  cfg.store(f) 
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f)
 
   print("-----------------finished----------------------")

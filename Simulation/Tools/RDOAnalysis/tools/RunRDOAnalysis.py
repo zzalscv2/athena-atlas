@@ -6,7 +6,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 import sys
 from argparse import ArgumentParser
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.Enums import ProductionStep
 
 # Argument parsing
@@ -37,24 +37,25 @@ else:
 print()
 
 # Configure
-ConfigFlags.Input.Files = [args.input]
+flags = initConfigFlags()
+flags.Input.Files = [args.input]
 if args.localgeo:
-    ConfigFlags.ITk.Geometry.AllLocal = True
+    flags.ITk.Geometry.AllLocal = True
 if args.presampling:
-    ConfigFlags.Common.ProductionStep = ProductionStep.PileUpPresampling
+    flags.Common.ProductionStep = ProductionStep.PileUpPresampling
 
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-setupDetectorFlags(ConfigFlags, args.detectors, use_metadata=True, toggle_geometry=True)
+setupDetectorFlags(flags, args.detectors, use_metadata=True, toggle_geometry=True)
 
-ConfigFlags.lock()
+flags.lock()
 
 # Construct our accumulator to run
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-acc.merge(PoolReadCfg(ConfigFlags))
+acc.merge(PoolReadCfg(flags))
 from RDOAnalysis.RDOAnalysisConfig import RDOAnalysisCfg
-acc.merge(RDOAnalysisCfg(ConfigFlags))
+acc.merge(RDOAnalysisCfg(flags))
 
 # Execute and finish
 sc = acc.run(maxEvents=args.maxEvents)

@@ -13,39 +13,39 @@ if __name__ == '__main__':
   log.setLevel(DEBUG)
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.Enums import Project
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
+  flags = initConfigFlags()
+  flags.Input.Files = defaultTestFiles.EVNT
 
   # Finalize
-#  ConfigFlags.lock()
+  flags.lock()
 
   ## Initialize a new component accumulator
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   from G4AtlasTools.G4FieldConfig import ATLASFieldManagerToolCfg, TightMuonsATLASFieldManagerToolCfg, Q1FwdFieldManagerToolCfg
   #add the algorithm
-  acc1 = ATLASFieldManagerToolCfg(ConfigFlags)
-  acc2 = TightMuonsATLASFieldManagerToolCfg(ConfigFlags)
+  acc1 = ATLASFieldManagerToolCfg(flags)
+  acc2 = TightMuonsATLASFieldManagerToolCfg(flags)
 
   cfg.popToolsAndMerge(acc1)
   cfg.popToolsAndMerge(acc2)
 
   #don't run for simulation only tests (todo - make new general test)
-  if ConfigFlags.Common.Project is not Project.AthSimulation:
-    acc3 = Q1FwdFieldManagerToolCfg(ConfigFlags)
+  if flags.Common.Project is not Project.AthSimulation:
+    acc3 = Q1FwdFieldManagerToolCfg(flags)
     cfg.popToolsAndMerge(acc3)
 
   # Dump config
   #cfg.getService("StoreGateSvc").Dump = True
   #cfg.getService("ConditionStore").Dump = True
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
-  f=open("test.pkl","wb")
-  cfg.store(f)
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f)
 
   print("-----------------finished----------------------")
