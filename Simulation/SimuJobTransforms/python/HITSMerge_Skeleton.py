@@ -14,67 +14,69 @@ def fromRunArgs(runArgs):
     log.info(str(runArgs))
 
     log.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    commonRunArgsToFlags(runArgs, flags)
 
     if hasattr(runArgs, 'inputHITSFile'):
-        ConfigFlags.Input.Files = runArgs.inputHITSFile
+        flags.Input.Files = runArgs.inputHITSFile
     else:
         raise RuntimeError('No input HITS file defined')
 
     if hasattr(runArgs, 'outputHITS_MRGFile'):
         if runArgs.outputHITS_MRGFile == 'None':
-            ConfigFlags.Output.HITSFileName = ''
+            flags.Output.HITSFileName = ''
             # TODO decide if we need a specific HITS_MRGFileName flag
         else:
-            ConfigFlags.Output.HITSFileName  = runArgs.outputHITS_MRGFile
+            flags.Output.HITSFileName  = runArgs.outputHITS_MRGFile
     else:
         raise RuntimeError('No outputHITS_MRGFile defined')
 
     # Generate detector list and setup detector flags
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
-    detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
+    detectors = getDetectorsFromRunArgs(flags, runArgs)
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True, keep_beampipe=True)
+    setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True, keep_beampipe=True)
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(PoolWriteCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(PoolWriteCfg(flags))
 
     # Ensure proper metadata propagation
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-    cfg.merge(IOVDbSvcCfg(ConfigFlags))
+    cfg.merge(IOVDbSvcCfg(flags))
 
     # Identifiers
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
-    cfg.merge(DetDescrCnvSvcCfg(ConfigFlags))
+    cfg.merge(DetDescrCnvSvcCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(ConfigFlags, 'HITS', disableEventTag="xAOD::EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections))
+    cfg.merge(OutputStreamCfg(flags, 'HITS', disableEventTag="xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections))
     cfg.getEventAlgo('OutputStreamHITS').TakeItemsFromInput = True
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs))
 
     import time
     tic = time.time()

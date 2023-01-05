@@ -16,8 +16,10 @@ def fromRunArgs(runArgs):
     log.info(str(runArgs))
 
     log.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    commonRunArgsToFlags(runArgs, flags)
 
     if not hasattr(runArgs, 'inputHITSFile'):
         raise RuntimeError('No input HITS file defined')
@@ -25,17 +27,17 @@ def fromRunArgs(runArgs):
     if not hasattr(runArgs, 'outputRDOFile'):
         raise RuntimeError('No output RDO file defined')
 
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Input.Files = runArgs.inputHITSFile
-    ConfigFlags.Output.RDOFileName = runArgs.outputRDOFile
+    flags.Input.isMC = True
+    flags.Input.Files = runArgs.inputHITSFile
+    flags.Output.RDOFileName = runArgs.outputRDOFile
 
     # runNumber is MC channel number in reco
     if hasattr(runArgs, 'runNumber'):
-        if ConfigFlags.Input.MCChannelNumber != runArgs.runNumber:
-            log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, ConfigFlags.Input.MCChannelNumber)
-            ConfigFlags.Input.MCChannelNumber = runArgs.runNumber
+        if flags.Input.MCChannelNumber != runArgs.runNumber:
+            log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
+            flags.Input.MCChannelNumber = runArgs.runNumber
         else:
-            log.info('MC channel number: %d', ConfigFlags.Input.MCChannelNumber)
+            log.info('MC channel number: %d', flags.Input.MCChannelNumber)
 
     # Autoconfigure enabled subdetectors
     if hasattr(runArgs, 'detectors'):
@@ -45,65 +47,65 @@ def fromRunArgs(runArgs):
 
     # Setup digitization flags
     from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
-    digitizationRunArgsToFlags(runArgs, ConfigFlags)
+    digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup common digitization flags
     from Digitization.DigitizationConfigFlags import setupDigitizationFlags
-    setupDigitizationFlags(runArgs, ConfigFlags)
-    log.info('Running with pile-up: %s', ConfigFlags.Digitization.PileUp)
+    setupDigitizationFlags(runArgs, flags)
+    log.info('Running with pile-up: %s', flags.Digitization.PileUp)
 
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
+    setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
-    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # Special Configuration preInclude
-    specialConfigPreInclude(ConfigFlags)
+    specialConfigPreInclude(flags)
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Load pile-up stuff after pre-include/exec to ensure everything is up-to-date
     from Digitization.DigitizationConfigFlags import pileupRunArgsToFlags
-    pileupRunArgsToFlags(runArgs, ConfigFlags)
+    pileupRunArgsToFlags(runArgs, flags)
 
     # Setup pile-up profile
-    if ConfigFlags.Digitization.PileUp:
+    if flags.Digitization.PileUp:
         from RunDependentSimComps.PileUpUtils import setupPileUpProfile
-        setupPileUpProfile(ConfigFlags)
+        setupPileUpProfile(flags)
 
     # TODO not parsed yet:
     # '--outputRDO_FILTFile'
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     # Main overlay steering
     from Digitization.DigitizationSteering import DigitizationMainCfg
-    cfg = DigitizationMainCfg(ConfigFlags)
+    cfg = DigitizationMainCfg(flags)
 
     # Special message service configuration
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
-    cfg.merge(DigitizationMessageSvcCfg(ConfigFlags))
+    cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Special Configuration postInclude
-    specialConfigPostInclude(ConfigFlags, cfg)
+    specialConfigPostInclude(flags, cfg)
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs))
 
     # Run the final configuration
     sc = cfg.run()

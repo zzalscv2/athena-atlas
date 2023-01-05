@@ -9,12 +9,12 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
 
 
-def setOverlayInputFiles(runArgs, configFlags, log):
+def setOverlayInputFiles(runArgs, flags, log):
     hasRDO_BKGInput = hasattr(runArgs, 'inputRDO_BKGFile')
     hasBS_SKIMInput = hasattr(runArgs, 'inputBS_SKIMFile')
     hasEVNT_Input   = hasattr(runArgs, 'inputEVNTFile')
 
-    if configFlags.Common.ProductionStep == ProductionStep.Overlay and not hasattr(runArgs, 'inputHITSFile'):
+    if flags.Common.ProductionStep == ProductionStep.Overlay and not hasattr(runArgs, 'inputHITSFile'):
         raise RuntimeError('No input HITS file defined')
 
     if hasRDO_BKGInput and hasBS_SKIMInput:
@@ -23,39 +23,39 @@ def setOverlayInputFiles(runArgs, configFlags, log):
         raise RuntimeError('Define one of RDO_BKG and BS_SKIM file types')
 
     if hasattr(runArgs, 'skipSecondaryEvents'):
-        configFlags.Overlay.SkipSecondaryEvents = runArgs.skipSecondaryEvents
+        flags.Overlay.SkipSecondaryEvents = runArgs.skipSecondaryEvents
 
     if hasRDO_BKGInput:
         log.info('Running MC+MC overlay')
-        configFlags.Overlay.DataOverlay = False
-        configFlags.Input.isMC = True
-        configFlags.Input.Files = runArgs.inputRDO_BKGFile
-        if configFlags.Common.ProductionStep == ProductionStep.Overlay:
-            configFlags.Input.SecondaryFiles = runArgs.inputHITSFile
-        elif configFlags.Common.ProductionStep == ProductionStep.FastChain:
+        flags.Overlay.DataOverlay = False
+        flags.Input.isMC = True
+        flags.Input.Files = runArgs.inputRDO_BKGFile
+        if flags.Common.ProductionStep == ProductionStep.Overlay:
+            flags.Input.SecondaryFiles = runArgs.inputHITSFile
+        elif flags.Common.ProductionStep == ProductionStep.FastChain:
             if not hasEVNT_Input:
                 raise RuntimeError('No input EVNT file defined')
             else:
-                configFlags.Input.SecondaryFiles = runArgs.inputEVNTFile
+                flags.Input.SecondaryFiles = runArgs.inputEVNTFile
         else:
             raise RuntimeError('No secondaryFiles are defined')
 
         # take MCChannelNumber from secondary input:
-        configFlags.Input.MCChannelNumber = GetFileMD(configFlags.Input.SecondaryFiles).get("mc_channel_number", 0)
+        flags.Input.MCChannelNumber = GetFileMD(flags.Input.SecondaryFiles).get("mc_channel_number", 0)
 
         # runNumber is MC channel number in reco
         if hasattr(runArgs, 'runNumber'):
-            if configFlags.Input.MCChannelNumber != runArgs.runNumber:
-                log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, configFlags.Input.MCChannelNumber)
-                configFlags.Input.MCChannelNumber = runArgs.runNumber
+            if flags.Input.MCChannelNumber != runArgs.runNumber:
+                log.warning('Got different MC channel number (%d) from runNumber than from metadata (%d)', runArgs.runNumber, flags.Input.MCChannelNumber)
+                flags.Input.MCChannelNumber = runArgs.runNumber
             else:
-                log.info('MC channel number: %d', configFlags.Input.MCChannelNumber)
+                log.info('MC channel number: %d', flags.Input.MCChannelNumber)
     else:
         log.info('Running MC+data overlay')
-        configFlags.Overlay.DataOverlay = True
-        configFlags.Input.isMC = False
-        configFlags.Input.Files = runArgs.inputHITSFile
-        configFlags.Input.SecondaryFiles = runArgs.inputBS_SKIMFile
+        flags.Overlay.DataOverlay = True
+        flags.Input.isMC = False
+        flags.Input.Files = runArgs.inputHITSFile
+        flags.Input.SecondaryFiles = runArgs.inputBS_SKIMFile
 
 
 def fromRunArgs(runArgs):
@@ -67,25 +67,27 @@ def fromRunArgs(runArgs):
     logOverlay.info(str(runArgs))
 
     logOverlay.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    ConfigFlags.Common.ProductionStep = ProductionStep.Overlay
+    commonRunArgsToFlags(runArgs, flags)
+
+    flags.Common.ProductionStep = ProductionStep.Overlay
 
     # Setting input files for Overlay
-    setOverlayInputFiles(runArgs, ConfigFlags, logOverlay)
+    setOverlayInputFiles(runArgs, flags, logOverlay)
 
     # Setting output files for Overlay
     if hasattr(runArgs, 'outputRDOFile'):
         if runArgs.outputRDOFile == 'None':
-            ConfigFlags.Output.RDOFileName = ''
+            flags.Output.RDOFileName = ''
         else:
-            ConfigFlags.Output.RDOFileName = runArgs.outputRDOFile
+            flags.Output.RDOFileName = runArgs.outputRDOFile
     else:
         raise RuntimeError('No output RDO file defined')
 
     if hasattr(runArgs, 'outputRDO_SGNLFile'):
-        ConfigFlags.Output.RDO_SGNLFileName = runArgs.outputRDO_SGNLFile
+        flags.Output.RDO_SGNLFileName = runArgs.outputRDO_SGNLFile
 
     # Autoconfigure enabled subdetectors
     if hasattr(runArgs, 'detectors'):
@@ -95,52 +97,52 @@ def fromRunArgs(runArgs):
 
     # Setup digitization flags
     from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
-    digitizationRunArgsToFlags(runArgs, ConfigFlags)
+    digitizationRunArgsToFlags(runArgs, flags)
 
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
+    setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True)
 
     # Disable LVL1 trigger if triggerConfig explicitly set to 'NONE'
     if hasattr(runArgs, 'triggerConfig') and runArgs.triggerConfig == 'NONE':
-        ConfigFlags.Detector.EnableL1Calo = False
+        flags.Detector.EnableL1Calo = False
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
-    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # Special Configuration preInclude
-    specialConfigPreInclude(ConfigFlags)
+    specialConfigPreInclude(flags)
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     # Main overlay steering
     from OverlayConfiguration.OverlaySteering import OverlayMainCfg
-    cfg = OverlayMainCfg(ConfigFlags)
+    cfg = OverlayMainCfg(flags)
 
     # Special message service configuration
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
-    cfg.merge(DigitizationMessageSvcCfg(ConfigFlags))
+    cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Special Configuration postInclude
-    specialConfigPostInclude(ConfigFlags, cfg)
+    specialConfigPostInclude(flags, cfg)
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs))
 
     # Run the final configuration
     sc = cfg.run()
