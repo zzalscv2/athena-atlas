@@ -11,9 +11,9 @@ from G4StepLimitation.G4StepLimitationConfig import G4StepLimitationToolCfg
 from TRT_TR_Process.TRT_TR_ProcessConfig import TRTPhysicsToolCfg
 
 
-def DetectorGeometrySvcCfg(ConfigFlags, name="DetectorGeometrySvc", **kwargs):
+def DetectorGeometrySvcCfg(flags, name="DetectorGeometrySvc", **kwargs):
     result = ComponentAccumulator()
-    detConstTool = result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(ConfigFlags))
+    detConstTool = result.popToolsAndMerge(G4AtlasDetectorConstructionToolCfg(flags))
     result.addPublicTool(detConstTool)
     kwargs.setdefault("DetectorConstruction", result.getPublicTool(detConstTool.name))
 
@@ -22,32 +22,32 @@ def DetectorGeometrySvcCfg(ConfigFlags, name="DetectorGeometrySvc", **kwargs):
 
 
 @AccumulatorCache
-def PhysicsListSvcCfg(ConfigFlags, name="PhysicsListSvc", **kwargs):
+def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
     result = ComponentAccumulator()
-    PhysOptionList = [ result.popToolsAndMerge(G4StepLimitationToolCfg(ConfigFlags)) ]
-    if ConfigFlags.Sim.ISF.Simulator.isQuasiStable():
+    PhysOptionList = [ result.popToolsAndMerge(G4StepLimitationToolCfg(flags)) ]
+    if flags.Sim.ISF.Simulator.isQuasiStable():
         #Quasi stable particle simulation
-        PhysOptionList += [ result.popToolsAndMerge(ExtraParticlesPhysicsToolCfg(ConfigFlags)) ] # FIXME more configuration required in this method
-        PhysOptionList += [ result.popToolsAndMerge(G4EMProcessesPhysicsToolCfg(ConfigFlags)) ]
-    #PhysOptionList += ConfigFlags.Sim.PhysicsOptions # FIXME Missing functionality
-    if ConfigFlags.Detector.GeometryTRT:
-        PhysOptionList +=[ result.popToolsAndMerge(TRTPhysicsToolCfg(ConfigFlags)) ]
-    if ConfigFlags.Detector.GeometryLucid or ConfigFlags.Detector.GeometryAFP:
+        PhysOptionList += [ result.popToolsAndMerge(ExtraParticlesPhysicsToolCfg(flags)) ] # FIXME more configuration required in this method
+        PhysOptionList += [ result.popToolsAndMerge(G4EMProcessesPhysicsToolCfg(flags)) ]
+    #PhysOptionList += flags.Sim.PhysicsOptions # FIXME Missing functionality
+    if flags.Detector.GeometryTRT:
+        PhysOptionList +=[ result.popToolsAndMerge(TRTPhysicsToolCfg(flags)) ]
+    if flags.Detector.GeometryLucid or flags.Detector.GeometryAFP:
         LucidPhysicsTool = CompFactory.LucidPhysicsTool
         PhysOptionList +=[LucidPhysicsTool("LucidPhysicsTool")]
     kwargs.setdefault("PhysOption", PhysOptionList)
     PhysDecaysList = []
     kwargs.setdefault("PhysicsDecay", PhysDecaysList)
-    kwargs.setdefault("PhysicsList", ConfigFlags.Sim.PhysicsList)
+    kwargs.setdefault("PhysicsList", flags.Sim.PhysicsList)
     if 'PhysicsList' in kwargs:
         if kwargs['PhysicsList'].endswith('_EMV') or kwargs['PhysicsList'].endswith('_EMX'):
             raise RuntimeError( 'PhysicsList not allowed: '+kwargs['PhysicsList'] )
 
     kwargs.setdefault("GeneralCut", 1.)
-    if ConfigFlags.Sim.CavernBackground not in [CavernBackground.Read, CavernBackground.Write]:
-        kwargs.setdefault("NeutronTimeCut", ConfigFlags.Sim.NeutronTimeCut)
-    kwargs.setdefault("NeutronEnergyCut", ConfigFlags.Sim.NeutronEnergyCut)
-    kwargs.setdefault("ApplyEMCuts", ConfigFlags.Sim.ApplyEMCuts)
+    if flags.Sim.CavernBackground not in [CavernBackground.Read, CavernBackground.Write]:
+        kwargs.setdefault("NeutronTimeCut", flags.Sim.NeutronTimeCut)
+    kwargs.setdefault("NeutronEnergyCut", flags.Sim.NeutronEnergyCut)
+    kwargs.setdefault("ApplyEMCuts", flags.Sim.ApplyEMCuts)
     ## from AthenaCommon.SystemOfUnits import eV, TeV
     ## kwargs.setdefault("EMMaxEnergy"     , 7*TeV)
     ## kwargs.setdefault("EMMinEnergy"     , 100*eV)

@@ -3,7 +3,7 @@ from __future__ import print_function
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def configCosmicFilterVolumeNames(ConfigFlags):
+def configCosmicFilterVolumeNames(flags):
     """returns a list with volume names. Can be merged with
     athena/Simulation/ISF/ISF_Core/ISF_Tools/python/ISF_ToolsConfig.py#0103
     """
@@ -19,24 +19,24 @@ def configCosmicFilterVolumeNames(ConfigFlags):
         "NONE": [],
      }
     volumeNames = []
-    for vol in ConfigFlags.Sim.CosmicFilterVolumeNames:
+    for vol in flags.Sim.CosmicFilterVolumeNames:
          volumeNames += volmap[vol]
 
     return volumeNames
 
-def CosmicFilterToolCfg(ConfigFlags, name="G4UA::G4CosmicFilterTool", **kwargs):
+def CosmicFilterToolCfg(flags, name="G4UA::G4CosmicFilterTool", **kwargs):
     result = ComponentAccumulator()
-    volumes=configCosmicFilterVolumeNames(ConfigFlags)
+    volumes=configCosmicFilterVolumeNames(flags)
 
     # use simple cosmic filter
     if len(volumes)==1:
 
-        if ConfigFlags.Sim.CosmicFilterID:
-            kwargs.setdefault("PDGId", ConfigFlags.Sim.CosmicFilterID)
-        if ConfigFlags.Sim.CosmicFilterPTmin:
-            kwargs.setdefault("PtMin", ConfigFlags.Sim.CosmicFilterPTmin)
-        if ConfigFlags.Sim.CosmicFilterPTmax:
-            kwargs.setdefault("PtMax", ConfigFlags.Sim.CosmicFilterPTmax)
+        if flags.Sim.CosmicFilterID:
+            kwargs.setdefault("PDGId", flags.Sim.CosmicFilterID)
+        if flags.Sim.CosmicFilterPTmin:
+            kwargs.setdefault("PtMin", flags.Sim.CosmicFilterPTmin)
+        if flags.Sim.CosmicFilterPTmax:
+            kwargs.setdefault("PtMax", flags.Sim.CosmicFilterPTmax)
         kwargs.setdefault("CollectionName",volumes[0])
 
         print ('G4CosmicFilter: Filter volume is %s' % volumes[0])

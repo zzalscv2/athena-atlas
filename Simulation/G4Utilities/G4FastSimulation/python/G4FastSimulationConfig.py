@@ -2,19 +2,17 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-SimpleFastKillerTool = CompFactory.SimpleFastKillerTool
-DeadMaterialShowerTool = CompFactory.DeadMaterialShowerTool
 
-def SimpleFastKillerCfg(ConfigFlags, **kwargs):
+
+def SimpleFastKillerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionNames" , ["BeampipeFwdCut"] )
-    result.setPrivateTools(SimpleFastKillerTool(name="SimpleFastKiller", **kwargs))
+    result.setPrivateTools(CompFactory.SimpleFastKillerTool(name="SimpleFastKiller", **kwargs))
     return result
 
 
-def DeadMaterialShowerCfg(ConfigFlags, **kwargs):
+def DeadMaterialShowerCfg(flags, **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("RegionNames",        ["DeadMaterial"])
-    result.setPrivateTools(DeadMaterialShowerTool(name="DeadMaterialShower", **kwargs))
+    result.setPrivateTools(CompFactory.DeadMaterialShowerTool(name="DeadMaterialShower", **kwargs))
     return result
-
