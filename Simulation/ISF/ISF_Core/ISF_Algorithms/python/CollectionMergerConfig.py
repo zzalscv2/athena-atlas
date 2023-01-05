@@ -89,7 +89,7 @@ def ISFCollectionMergerCfg(flags,name="ISF_CollectionMerger", **kwargs):
     return CompFactory.ISF.CollectionMerger(name, **kwargs)
 
 
-def CollectionMergerCfg(ConfigFlags,
+def CollectionMergerCfg(flags,
                         bare_collection_name,
                         mergeable_collection_suffix,
                         merger_input_property,
@@ -106,12 +106,12 @@ def CollectionMergerCfg(ConfigFlags,
                                      mergeable collection to."""
 
     result = ComponentAccumulator()
-    if ConfigFlags.Sim.ISFRun and ConfigFlags.Sim.ISF.HITSMergingRequired.get(region, True):
+    if flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get(region, True):
         mergeable_collection = f'{bare_collection_name}{mergeable_collection_suffix}'
 
         from ISF_Algorithms.CollectionMergerConfig import ISFCollectionMergerCfg
-        algo = ISFCollectionMergerCfg(ConfigFlags)
-        if ConfigFlags.Sim.ISF.ReSimulation:
+        algo = ISFCollectionMergerCfg(flags)
+        if flags.Sim.ISF.ReSimulation:
             result.addEventAlgo(algo,'SimSequence') # TODO ideally this would be configurable
         else:
             result.addEventAlgo(algo)

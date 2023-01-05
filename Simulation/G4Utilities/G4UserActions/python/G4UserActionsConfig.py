@@ -10,62 +10,62 @@ from SimulationConfig.SimEnums import CalibrationRun
 # to the ToolSvc and can be assigned to a ToolHandle by the add function.
 # Also, passing arguments to the getter (like "this is a system action") is not straightforward
 
-def AthenaStackingActionToolCfg(ConfigFlags, name='G4UA::AthenaStackingActionTool', **kwargs):
+def AthenaStackingActionToolCfg(flags, name='G4UA::AthenaStackingActionTool', **kwargs):
 
     result = ComponentAccumulator()
     ## Killing neutrinos
-    if "ATLAS" in ConfigFlags.GeoModel.AtlasVersion:
+    if "ATLAS" in flags.GeoModel.AtlasVersion:
         kwargs.setdefault('KillAllNeutrinos', True)
     ## Neutron Russian Roulette
-    if ConfigFlags.Sim.NRRThreshold and ConfigFlags.Sim.NRRWeight:
-        if ConfigFlags.Sim.CalibrationRun is not CalibrationRun.Off:
+    if flags.Sim.NRRThreshold and flags.Sim.NRRWeight:
+        if flags.Sim.CalibrationRun is not CalibrationRun.Off:
             raise NotImplementedError("Neutron Russian Roulette should not be used in Calibration Runs.")
         kwargs.setdefault('ApplyNRR', True)
-        kwargs.setdefault('NRRThreshold', ConfigFlags.Sim.NRRThreshold)
-        kwargs.setdefault('NRRWeight', ConfigFlags.Sim.NRRWeight)
+        kwargs.setdefault('NRRThreshold', flags.Sim.NRRThreshold)
+        kwargs.setdefault('NRRWeight', flags.Sim.NRRWeight)
     ## Photon Russian Roulette
-    if ConfigFlags.Sim.PRRThreshold and ConfigFlags.Sim.PRRWeight:
-        if ConfigFlags.Sim.CalibrationRun is not CalibrationRun.Off:
+    if flags.Sim.PRRThreshold and flags.Sim.PRRWeight:
+        if flags.Sim.CalibrationRun is not CalibrationRun.Off:
             raise NotImplementedError("Photon Russian Roulette should not be used in Calibration Runs.")
         kwargs.setdefault('ApplyPRR', True)
-        kwargs.setdefault('PRRThreshold', ConfigFlags.Sim.PRRThreshold)
-        kwargs.setdefault('PRRWeight', ConfigFlags.Sim.PRRWeight)
-    kwargs.setdefault('IsISFJob', ConfigFlags.Sim.ISFRun)
+        kwargs.setdefault('PRRThreshold', flags.Sim.PRRThreshold)
+        kwargs.setdefault('PRRWeight', flags.Sim.PRRWeight)
+    kwargs.setdefault('IsISFJob', flags.Sim.ISFRun)
 
     result.setPrivateTools( CompFactory.G4UA.AthenaStackingActionTool(name,**kwargs) )
     return result
 
 
-def AthenaTrackingActionToolCfg(ConfigFlags, name='G4UA::AthenaTrackingActionTool', **kwargs):
+def AthenaTrackingActionToolCfg(flags, name='G4UA::AthenaTrackingActionTool', **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault('SecondarySavingLevel', 2)
     
     subDetLevel=1
-    if "ATLAS" in ConfigFlags.GeoModel.AtlasVersion and ConfigFlags.Detector.GeometryCavern:
+    if "ATLAS" in flags.GeoModel.AtlasVersion and flags.Detector.GeometryCavern:
         subDetLevel=2
 
     kwargs.setdefault('SubDetVolumeLevel', subDetLevel)
     result.setPrivateTools( CompFactory.G4UA.AthenaTrackingActionTool(name,**kwargs) )
     return result
 
-def LooperKillerToolCfg(ConfigFlags, name='G4UA::LooperKillerTool', **kwargs):
+def LooperKillerToolCfg(flags, name='G4UA::LooperKillerTool', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.LooperKillerTool(name, **kwargs))
     return result
 
-def G4SimTimerToolCfg(ConfigFlags, name='G4UA::G4SimTimerTool', **kwargs):
+def G4SimTimerToolCfg(flags, name='G4UA::G4SimTimerTool', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.G4SimTimerTool(name,**kwargs))
     return result
 
 
-def G4TrackCounterToolCfg(ConfigFlags, name='G4UA::G4TrackCounterTool', **kwargs):
+def G4TrackCounterToolCfg(flags, name='G4UA::G4TrackCounterTool', **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.G4TrackCounterTool(name,**kwargs))
     return result
 
 
-def StoppedParticleActionToolCfg(ConfigFlags, name="G4UA::StoppedParticleActionTool", **kwargs):
+def StoppedParticleActionToolCfg(flags, name="G4UA::StoppedParticleActionTool", **kwargs):
     # Just have to set the stopping condition
     result = ComponentAccumulator()
     # FIXME UserActionConfig not yet migrated
@@ -77,13 +77,13 @@ def StoppedParticleActionToolCfg(ConfigFlags, name="G4UA::StoppedParticleActionT
     return result
 
 
-def FixG4CreatorProcessToolCfg(ConfigFlags, name="G4UA::FixG4CreatorProcessTool", **kwargs):
+def FixG4CreatorProcessToolCfg(flags, name="G4UA::FixG4CreatorProcessTool", **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.FixG4CreatorProcessTool(name, **kwargs))
     return result
 
 
-def HitWrapperToolCfg(ConfigFlags, name="G4UA::HitWrapperTool", **kwargs):
+def HitWrapperToolCfg(flags, name="G4UA::HitWrapperTool", **kwargs):
     result = ComponentAccumulator()
     # FIXME UserActionConfig not yet migrated
     # example custom configuration
@@ -95,7 +95,7 @@ def HitWrapperToolCfg(ConfigFlags, name="G4UA::HitWrapperTool", **kwargs):
     return result
 
 
-def LengthIntegratorToolCfg(ConfigFlags, name="G4UA::UserActionSvc.LengthIntegratorTool", **kwargs):
+def LengthIntegratorToolCfg(flags, name="G4UA::UserActionSvc.LengthIntegratorTool", **kwargs):
     THistSvc= CompFactory.THistSvc
     result = ComponentAccumulator()
     histsvc = THistSvc(name="THistSvc")
@@ -105,7 +105,7 @@ def LengthIntegratorToolCfg(ConfigFlags, name="G4UA::UserActionSvc.LengthIntegra
     result.setPrivateTools(CompFactory.G4UA.LengthIntegratorTool(name, **kwargs))
     return result
 
-def RadiationMapsMakerToolCfg(ConfigFlags, name="G4UA::UserActionSvc.RadiationMapsMakerTool", **kwargs):
+def RadiationMapsMakerToolCfg(flags, name="G4UA::UserActionSvc.RadiationMapsMakerTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("ActivationFileName","Activations.txt")
     kwargs.setdefault("NBinsDPhi",1) 
@@ -124,15 +124,14 @@ def RadiationMapsMakerToolCfg(ConfigFlags, name="G4UA::UserActionSvc.RadiationMa
     return result
 
 
-def HIPKillerToolCfg(ConfigFlags, name="G4UA::HIPKillerTool", **kwargs):
+def HIPKillerToolCfg(flags, name="G4UA::HIPKillerTool", **kwargs):
     result = ComponentAccumulator()
     result.setPrivateTools(CompFactory.G4UA.HIPKillerTool(name, **kwargs))
     return result
 
 
-def MonopoleLooperKillerToolCfg(ConfigFlags, name="G4UA::MonopoleLooperKillerTool", **kwargs):
+def MonopoleLooperKillerToolCfg(flags, name="G4UA::MonopoleLooperKillerTool", **kwargs):
     kwargs.setdefault("MaxSteps",2000000)
     kwargs.setdefault("PrintSteps",2)
     kwargs.setdefault("VerboseLevel",0)
-    return LooperKillerToolCfg(ConfigFlags, name, **kwargs)
-
+    return LooperKillerToolCfg(flags, name, **kwargs)
