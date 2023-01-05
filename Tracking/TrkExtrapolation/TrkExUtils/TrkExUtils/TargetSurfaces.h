@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -80,12 +80,12 @@ struct TargetSurface
     , index(ind)
     , assocVol(tVol)
     , volType(vtype)
+    , distanceAlongPath(0)
+    , distance(0)
+    , signAbsDist(0)
+    , intersection(0, 0, 0)
+    , status(0)
   {
-    distanceAlongPath = 0.;
-    distance = 0.;
-    signAbsDist = 0.;
-    intersection = Amg::Vector3D(0., 0., 0.);
-    status = 0;
   }
 
   /** Destructor */
