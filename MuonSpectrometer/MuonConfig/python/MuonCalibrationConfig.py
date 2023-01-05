@@ -60,8 +60,13 @@ def _setupMdtCondDB(flags):
         if flags.GeoModel.Run is LHCPeriod.Run4:
             # TODO: temporary conditions override until we get a global tag
             from IOVDbSvc.IOVDbSvcConfig import addFolders
-            result.merge(addFolders(flags, '/MDT/RT' + mdt_folder_name_appendix, 'MDT_OFL', className='CondAttrListCollection', tag='MDTRT_Sim-Run4-01', db="OFLP200"))
-            result.merge(addFolders(flags, '/MDT/T0' + mdt_folder_name_appendix, 'MDT_OFL', className='CondAttrListCollection', tag='MDTT0_Sim-Run4-01', db="OFLP200"))
+            # Ugly, but hopefully temporary hack
+            if flags.GeoModel.AtlasVersion.startswith('ATLAS-P2-RUN4-01-00'):
+                result.merge(addFolders(flags, '/MDT/RT' + mdt_folder_name_appendix, 'MDT_OFL', className='CondAttrListCollection', tag='MDTRT_Sim-Run4-01', db="OFLP200"))
+                result.merge(addFolders(flags, '/MDT/T0' + mdt_folder_name_appendix, 'MDT_OFL', className='CondAttrListCollection', tag='MDTT0_Sim-Run4-01', db="OFLP200"))
+            else:
+                result.merge(addFolders(flags, '/MDT/RT' + mdt_folder_name_appendix, 'MDT_OFL', className='CondAttrListCollection', tag='MDTRT_Sim-R3SYM-04', db="OFLP200"))
+                result.merge(addFolders(flags, '/MDT/T0' + mdt_folder_name_appendix, 'MDT_OFL', className='CondAttrListCollection', tag='MDTT0_Sim-R3SYM-03', db="OFLP200"))
         else:
             result.merge(addFoldersSplitOnline(flags, 'MDT', online_folders , offline_folders,
                                                className = 'CondAttrListCollection' ) )
