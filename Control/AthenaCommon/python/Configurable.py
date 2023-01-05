@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: AthenaCommon/python/Configurable.py
 # Author: Wim Lavrijsen (WLavrijsen@lbl.gov)
@@ -42,8 +42,6 @@ class ConfigurableCABehavior:
     def __exit__(self, exception_type, exception_value, traceback):
         Configurable._useGlobalInstances = self._previous_state
 
-# For backwards compatability
-ConfigurableRun3Behavior = ConfigurableCABehavior
 
 ### base class for configurable Gaudi algorithms/services/algtools/etc. ======
 class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
