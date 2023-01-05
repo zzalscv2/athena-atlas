@@ -5,7 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
@@ -19,18 +19,19 @@ parser = CommonTestArgumentParser("OverlayMetadataConfig_test.py")
 args = parser.parse_args()
 
 # Configure
-overlayTestFlags(ConfigFlags, args)
-overlayMetadataCheck(ConfigFlags)
-postprocessAndLockFlags(ConfigFlags, args)
-ConfigFlags.initAll()
-ConfigFlags.dump()
+flags = initConfigFlags()
+overlayTestFlags(flags, args)
+overlayMetadataCheck(flags)
+postprocessAndLockFlags(flags, args)
+flags.initAll()
+flags.dump()
 # Construct our accumulator to run
-acc = MainServicesCfg(ConfigFlags)
-acc.merge(PoolReadCfg(ConfigFlags))
-acc.merge(writeDigitizationParameters(ConfigFlags))
+acc = MainServicesCfg(flags)
+acc.merge(PoolReadCfg(flags))
+acc.merge(writeDigitizationParameters(flags))
 
 # Add event info overlay for minimal output
-acc.merge(EventInfoOverlayCfg(ConfigFlags))
+acc.merge(EventInfoOverlayCfg(flags))
 
 # Print and run
-sys.exit(printAndRun(acc, ConfigFlags, args))
+sys.exit(printAndRun(acc, flags, args))

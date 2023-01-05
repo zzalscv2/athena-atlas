@@ -2,135 +2,135 @@
 # Author: William L. (william.axel.leight@cern.ch)
 # Author: FY T. (fang-ying.tsai@cern.ch)
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg, MessageSvcCfg
 from AthenaConfiguration.Enums import Format, BeamType
 
-ConfigFlags.Input.Files = ['../RDO.29616558._005525.pool.root.1']
-ConfigFlags.Input.isMC = True
+flags = initConfigFlags()
+flags.Input.Files = ['../RDO.29616558._005525.pool.root.1']
+flags.Input.isMC = True
 #see MainServicesConfig.py
-ConfigFlags.Concurrency.NumThreads = 1
-ConfigFlags.Input.Format = Format.POOL
+flags.Concurrency.NumThreads = 1
+flags.Input.Format = Format.POOL
 
 # Set final Cond/Geo tag based on input file
-ConfigFlags.GeoModel.AtlasVersion='ATLAS-R3S-2021-02-00-00'
-ConfigFlags.IOVDb.GlobalTag = 'OFLCOND-MC21-SDR-RUN3-07'
+flags.GeoModel.AtlasVersion='ATLAS-R3S-2021-02-00-00'
+flags.IOVDb.GlobalTag = 'OFLCOND-MC21-SDR-RUN3-07'
 
-ConfigFlags.Beam.Type = BeamType.Collisions
-ConfigFlags.Beam.BunchSpacing = 25
-ConfigFlags.Beam.NumberOfCollisions = 60
+flags.Beam.Type = BeamType.Collisions
+flags.Beam.BunchSpacing = 25
+flags.Beam.NumberOfCollisions = 60
 
-ConfigFlags.Common.isOnline = False
+flags.Common.isOnline = False
 
-#ConfigFlags.Output.doWriteBS = True # default False. #  write out RDO ByteStream file
-ConfigFlags.Output.doWriteRDO = True  
-if not ConfigFlags.Output.RDOFileName:
-    ConfigFlags.Output.RDOFileName = 'RDO_test.pool.root'
-# DetectorConfigFlags.py is based upon DetFlags.py. Auto configured from the ATLAS-R3S-2021-02-00-00 tag
-ConfigFlags.Detector.GeometryID = True
-ConfigFlags.Detector.GeometryCalo = True
-ConfigFlags.Detector.GeometryForward = False
-ConfigFlags.Detector.EnableCalo = True
-ConfigFlags.Reco.EnableTracking = True
+#flags.Output.doWriteBS = True # default False. #  write out RDO ByteStream file
+flags.Output.doWriteRDO = True  
+if not flags.Output.RDOFileName:
+    flags.Output.RDOFileName = 'RDO_test.pool.root'
+flags.Detector.GeometryID = True
+flags.Detector.GeometryCalo = True
+flags.Detector.GeometryForward = False
+flags.Detector.EnableCalo = True
+flags.Reco.EnableTracking = True
 
 # InDetConfigFlags.py is based upon InDetFlags. Dropped lots of flags. 
-ConfigFlags.InDet.doTruth = False #Turn running of truth matching on and off (by default on for MC off for data)
-ConfigFlags.InDet.Tracking.doCaloSeededAmbi = False
-ConfigFlags.InDet.Tracking.doTIDE_Ambi = True
-ConfigFlags.InDet.Tracking.doCaloSeededBrem = True
-ConfigFlags.InDet.Tracking.doBackTracking = True
-ConfigFlags.InDet.PriVertex.doVertexFinding = False # from VertexFindingFlags.py
+flags.InDet.doTruth = False #Turn running of truth matching on and off (by default on for MC off for data)
+flags.InDet.Tracking.doCaloSeededAmbi = False
+flags.InDet.Tracking.doTIDE_Ambi = True
+flags.InDet.Tracking.doCaloSeededBrem = True
+flags.InDet.Tracking.doBackTracking = True
+flags.InDet.PriVertex.doVertexFinding = False # from VertexFindingFlags.py
 
 # Updated for Monitoring from DQConfigFlags.py
 # Missing? doMonitoringPrimaryVertexingEnhanced
-ConfigFlags.DQ.Steering.InDet.doGlobalMon = False
-ConfigFlags.DQ.Steering.doPixelMon = False
-ConfigFlags.DQ.Steering.doSCTMon = False
-ConfigFlags.DQ.Steering.doTRTMon = False
-ConfigFlags.DQ.Steering.InDet.doAlignMon = False
+flags.DQ.Steering.InDet.doGlobalMon = False
+flags.DQ.Steering.doPixelMon = False
+flags.DQ.Steering.doSCTMon = False
+flags.DQ.Steering.doTRTMon = False
+flags.DQ.Steering.InDet.doAlignMon = False
 
 ##Updates are based on LArConfigFlags.py. This stuff is in the LArConfigRun3PileUp, see LArConfigRun3.py
-ConfigFlags.LAr.ROD.DoOFCPileupOptimization = True # default is False, but if setting up LArConfigRun3PileUp it must be True
-ConfigFlags.LAr.ROD.UseHighestGainAutoCorr = True # default is False, but if setting up LArConfigRun3PileUp it must be True
-ConfigFlags.LAr.ROD.FirstSample = 0 # default
-ConfigFlags.LAr.ROD.nSamples = 4 # default is 5
-ConfigFlags.LAr.ROD.NumberOfCollisions = 60 # default is 0, but Run-3 default is 60
+flags.LAr.ROD.DoOFCPileupOptimization = True # default is False, but if setting up LArConfigRun3PileUp it must be True
+flags.LAr.ROD.UseHighestGainAutoCorr = True # default is False, but if setting up LArConfigRun3PileUp it must be True
+flags.LAr.ROD.FirstSample = 0 # default
+flags.LAr.ROD.nSamples = 4 # default is 5
+flags.LAr.ROD.NumberOfCollisions = 60 # default is 0, but Run-3 default is 60
 
 # Updates are based DigitizationConfigFlags.py
-ConfigFlags.Digitization.HighGainEMECIW = False #default is True, but the LArConfigRun3.py sets this to False
-ConfigFlags.Digitization.HighGainFCal = False # default is False
+flags.Digitization.HighGainEMECIW = False #default is True, but the LArConfigRun3.py sets this to False
+flags.Digitization.HighGainFCal = False # default is False
 # Updates are  based on TileConfigFlags.py
-ConfigFlags.Tile.RunType = 'PHY' # physics run type. # Tile run types: UNDEFINED, PHY, PED, LAS, BILAS, CIS, MONOCIS
-ConfigFlags.Tile.doOpt2 = False  # disable optimal filter with iterations
-ConfigFlags.Tile.doOptATLAS = True # run optimal filter without iterations
-ConfigFlags.Tile.correctAmplitude = True # apply parabolic correction
-ConfigFlags.Tile.correctTime = False # don't need time correction if best phase is used
-ConfigFlags.Tile.BestPhaseFromCOOL = True # use best phase stored in DB
+flags.Tile.RunType = 'PHY' # physics run type. # Tile run types: UNDEFINED, PHY, PED, LAS, BILAS, CIS, MONOCIS
+flags.Tile.doOpt2 = False  # disable optimal filter with iterations
+flags.Tile.doOptATLAS = True # run optimal filter without iterations
+flags.Tile.correctAmplitude = True # apply parabolic correction
+flags.Tile.correctTime = False # don't need time correction if best phase is used
+flags.Tile.BestPhaseFromCOOL = True # use best phase stored in DB
 #To set the output stream eventInfoKey to be Bkg_EventInfo, see OutputStreamConfig.py
 from AthenaConfiguration.Enums import ProductionStep
-ConfigFlags.Common.ProductionStep = ProductionStep.PileUpPresampling
+flags.Common.ProductionStep = ProductionStep.PileUpPresampling
 
-ConfigFlags.lock()
-ConfigFlags.dump()
-acc = MainServicesCfg(ConfigFlags)
+flags.lock()
+flags.dump()
+acc = MainServicesCfg(flags)
 
 from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-acc.merge(IOVDbSvcCfg(ConfigFlags))
+acc.merge(IOVDbSvcCfg(flags))
 
 # ----------------------------------------------------------------
 # Pool input
 # ----------------------------------------------------------------
-print("ConfigFlags.Input.Format", ConfigFlags.Input.Format)
-print("ConfigFlags.Trigger.Online.isPartition", ConfigFlags.Trigger.Online.isPartition)
+print("ConfigFlags.Input.Format", flags.Input.Format)
+print("ConfigFlags.Trigger.Online.isPartition", flags.Trigger.Online.isPartition)
 
 # Load input collection list from POOL metadata
 from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-acc.merge(SGInputLoaderCfg( ConfigFlags, Load=[( 'xAOD::EventInfo' , 'StoreGateSvc+Bkg_EventInfo' )]))
+acc.merge(SGInputLoaderCfg(flags, Load=[( 'xAOD::EventInfo' , 'StoreGateSvc+Bkg_EventInfo' )]))
 
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-acc.merge(PoolReadCfg(ConfigFlags))
+acc.merge(PoolReadCfg(flags))
 #set up detector stuff
 from CaloRec.CaloRecoConfig import CaloRecoCfg
-acc.merge(CaloRecoCfg(ConfigFlags))
+acc.merge(CaloRecoCfg(flags))
 #from CaloRecoConfig.py
 acc.getEventAlgo('CaloCellMaker').CaloCellMakerToolNames[1].EventInfo="Bkg_EventInfo"
 from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-acc.merge(TileRawChannelMakerCfg(ConfigFlags))
+acc.merge(TileRawChannelMakerCfg(flags))
 acc.getEventAlgo('TileRChMaker').TileDigitsContainer="Bkg_TileDigitsCnt"
 from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterCfg
-acc.merge(TileDigitsFilterCfg(ConfigFlags))
+acc.merge(TileDigitsFilterCfg(flags))
 acc.getEventAlgo('TileDigitsFilter').InputDigitsContainer="Bkg_TileDigitsCnt"
 from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-acc.merge(LArRawChannelBuilderAlgCfg(ConfigFlags,  LArDigitKey = "Bkg_LArDigitContainer_MC"))
+acc.merge(LArRawChannelBuilderAlgCfg(flags, LArDigitKey = "Bkg_LArDigitContainer_MC"))
 
 #RuntimeError: Attempt to modify locked flag container
 # from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
-# acc.merge(LArConfigRun3PileUp(ConfigFlags))
+# acc.merge(LArConfigRun3PileUp(flags))
 
 #to get the eGammaTopoCluster collection (copied from SystemRec_config.py)
 # Detector flags from DetectorConfigFlags.py
-if ConfigFlags.Detector.EnableCalo:
+if flags.Detector.EnableCalo:
     from egammaAlgs.egammaTopoClusterCopierConfig import egammaTopoClusterCopierCfg
-    acc.merge(egammaTopoClusterCopierCfg(ConfigFlags))
+    acc.merge(egammaTopoClusterCopierCfg(flags))
 # Reco flags from RecoConfigFlags.py
-if ConfigFlags.Reco.EnableTracking:
+if flags.Reco.EnableTracking:
     from InDetConfig.TrackRecoConfig import InDetTrackRecoCfg
-    acc.merge(InDetTrackRecoCfg(ConfigFlags))
+    acc.merge(InDetTrackRecoCfg(flags))
 from InDetConfig.InDetPrepRawDataFormationConfig import PixelClusterizationCfg, SCTClusterizationCfg, InDetTRT_RIO_MakerCfg
 
-acc.merge(PixelClusterizationCfg(ConfigFlags, DataObjectName="Bkg_PixelRDOs"))
-acc.merge(SCTClusterizationCfg(ConfigFlags, DataObjectName="Bkg_SCT_RDOs"))
-acc.merge(InDetTRT_RIO_MakerCfg(ConfigFlags, TRTRDOLocation="Bkg_TRT_RDOs"))
+acc.merge(PixelClusterizationCfg(flags, DataObjectName="Bkg_PixelRDOs"))
+acc.merge(SCTClusterizationCfg(flags, DataObjectName="Bkg_SCT_RDOs"))
+acc.merge(InDetTRT_RIO_MakerCfg(flags, TRTRDOLocation="Bkg_TRT_RDOs"))
 from LumiBlockComps.LuminosityCondAlgConfig import LuminosityCondAlgCfg
-acc.merge(LuminosityCondAlgCfg(ConfigFlags))
+acc.merge(LuminosityCondAlgCfg(flags))
 acc.getCondAlgo('LuminosityCondAlg').EventInfoKey="Bkg_EventInfo"
 acc.getCondAlgo('LuminosityCondAlg').actualMuKey="Bkg_EventInfo.actualInteractionsPerCrossing"
 acc.getCondAlgo('LuminosityCondAlg').averageMuKey="Bkg_EventInfo.averageInteractionsPerCrossing"
 
 # See TRTStandaloneConfig.py
-flagsTRT = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.TRTStandalonePass")
-from InDetConfig.InDetTrackScoringToolsConfig import InDetTRT_StandaloneScoringToolCfg
-InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTRT_StandaloneScoringToolCfg(flagsTRT))
+from InDetConfig.TRTStandaloneConfig import InDetTrtTrackScoringToolCfg
+flagsTRT = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.TRTStandalonePass")
+InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTrtTrackScoringToolCfg(flagsTRT))
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey="Bkg_EventInfo"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.averageInteractionsPerCrossingKey="Bkg_EventInfo.averageInteractionsPerCrossing"
@@ -140,10 +140,10 @@ acc.getEventAlgo('InDetSiSpTrackFinderForward').EventInfoKey="Bkg_EventInfo"
 acc.getEventAlgo('InDetSiSpTrackFinderDisappearing').EventInfoKey="Bkg_EventInfo"
 
 from CaloRec.CaloBCIDAvgAlgConfig import CaloBCIDAvgAlgCfg
-acc.merge(CaloBCIDAvgAlgCfg(ConfigFlags))
+acc.merge(CaloBCIDAvgAlgCfg(flags))
 acc.getEventAlgo('CaloBCIDAvgAlg').EventInfoKey="Bkg_EventInfo"
 from InDetConfig.BCM_ZeroSuppressionConfig import BCM_ZeroSuppressionCfg
-acc.merge(BCM_ZeroSuppressionCfg(ConfigFlags))
+acc.merge(BCM_ZeroSuppressionCfg(flags))
 acc.getEventAlgo('InDetBCM_ZeroSuppression').BcmContainerName="Bkg_BCM_RDOs"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey="Bkg_EventInfo"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"
@@ -153,7 +153,7 @@ itemsToRecord = ['TrackCollection#CombinedInDetTracks', 'TrackCollection#Disappe
                  'InDet::TRT_DriftCircleContainer#TRT_DriftCircles', "InDet::PixelClusterContainer#PixelClusters", "InDet::SCT_ClusterContainer#SCT_Clusters"]
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-acc.merge(OutputStreamCfg(ConfigFlags,"RDO", ItemList=itemsToRecord))
+acc.merge(OutputStreamCfg(flags, "RDO", ItemList=itemsToRecord))
 acc.getEventAlgo("EventInfoTagBuilder").EventInfoKey="Bkg_EventInfo" # see OutputStreamConfig.py
 
 # Keep input RDO objects in the output file
@@ -163,7 +163,7 @@ streamAlg.TakeItemsFromInput=True
 # -------------------------------------------------------------
 # MessageSvc
 # -------------------------------------------------------------
-acc.merge(MessageSvcCfg(ConfigFlags))
+acc.merge(MessageSvcCfg(flags))
 acc.getService("MessageSvc").Format = "% F%40W%C%4W%R%e%s%8W%R%T %0W%M"
 acc.getService("MessageSvc").enableSuppression = True
 acc.run(2)

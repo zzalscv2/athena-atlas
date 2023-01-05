@@ -6,7 +6,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 import sys
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 from Digitization.DigitizationSteering import DigitizationMainCfg, DigitizationMessageSvcCfg, DigitizationTestingPostInclude
 from RunDependentSimComps.PileUpUtils import generateBackgroundInputCollections, setupPileUpFlags
@@ -14,65 +14,66 @@ from RunDependentSimComps.PileUpUtils import generateBackgroundInputCollections,
 # Set up logging
 log.setLevel(DEBUG)
 
-ConfigFlags.Exec.MaxEvents = 4
+flags = initConfigFlags()
+flags.Exec.MaxEvents = 4
 
-ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-ConfigFlags.Output.RDOFileName = "mc16d_ttbar.CA.RDO.pool.root"
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-25-02"
+flags.Input.Files = defaultTestFiles.HITS_RUN2
+flags.Output.RDOFileName = "mc16d_ttbar.CA.RDO.pool.root"
+flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-25-02"
 
-ConfigFlags.GeoModel.Align.Dynamic = False
-ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+flags.GeoModel.Align.Dynamic = False
+flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
 
-ConfigFlags.Beam.BunchSpacing = 25
-ConfigFlags.Beam.NumberOfCollisions = 20.
+flags.Beam.BunchSpacing = 25
+flags.Beam.NumberOfCollisions = 20.
 
-ConfigFlags.LAr.ROD.NumberOfCollisions = 20
-ConfigFlags.LAr.ROD.nSamples = 4
-ConfigFlags.LAr.ROD.DoOFCPileupOptimization = True
-ConfigFlags.LAr.ROD.FirstSample = 0
-ConfigFlags.LAr.ROD.UseHighestGainAutoCorr = True
+flags.LAr.ROD.NumberOfCollisions = 20
+flags.LAr.ROD.nSamples = 4
+flags.LAr.ROD.DoOFCPileupOptimization = True
+flags.LAr.ROD.FirstSample = 0
+flags.LAr.ROD.UseHighestGainAutoCorr = True
 
-ConfigFlags.Digitization.HighGainEMECIW = False
+flags.Digitization.HighGainEMECIW = False
 
-ConfigFlags.Tile.BestPhaseFromCOOL = False
-ConfigFlags.Tile.correctTime = False
+flags.Tile.BestPhaseFromCOOL = False
+flags.Tile.correctTime = False
 
-ConfigFlags.Digitization.PileUp = True
-ConfigFlags.Digitization.EnableCaloHSTruthRecoInputs = False
-ConfigFlags.Digitization.RandomSeedOffset = 170
+flags.Digitization.PileUp = True
+flags.Digitization.EnableCaloHSTruthRecoInputs = False
+flags.Digitization.RandomSeedOffset = 170
 
-ConfigFlags.Digitization.DigiSteeringConf = 'StandardSignalOnlyTruthPileUpToolsAlg'
-ConfigFlags.Digitization.DoXingByXingPileUp = True
+flags.Digitization.DigiSteeringConf = 'StandardSignalOnlyTruthPileUpToolsAlg'
+flags.Digitization.DoXingByXingPileUp = True
 
-ConfigFlags.Digitization.PU.BunchSpacing = 25
-ConfigFlags.Digitization.PU.CavernIgnoresBeamInt = True
-ConfigFlags.Digitization.PU.NumberOfCavern = 0.0
-ConfigFlags.Digitization.PU.NumberOfHighPtMinBias = 0.2099789464
-ConfigFlags.Digitization.PU.NumberOfLowPtMinBias = 80.290021063135
+flags.Digitization.PU.BunchSpacing = 25
+flags.Digitization.PU.CavernIgnoresBeamInt = True
+flags.Digitization.PU.NumberOfCavern = 0.0
+flags.Digitization.PU.NumberOfHighPtMinBias = 0.2099789464
+flags.Digitization.PU.NumberOfLowPtMinBias = 80.290021063135
 
-cols = generateBackgroundInputCollections(ConfigFlags, defaultTestFiles.HITS_RUN2_MINBIAS_HIGH,
-                                          ConfigFlags.Digitization.PU.NumberOfHighPtMinBias, True)
-ConfigFlags.Digitization.PU.HighPtMinBiasInputCols = cols
+cols = generateBackgroundInputCollections(flags, defaultTestFiles.HITS_RUN2_MINBIAS_HIGH,
+                                          flags.Digitization.PU.NumberOfHighPtMinBias, True)
+flags.Digitization.PU.HighPtMinBiasInputCols = cols
 
-cols = generateBackgroundInputCollections(ConfigFlags, defaultTestFiles.HITS_RUN2_MINBIAS_LOW,
-                                          ConfigFlags.Digitization.PU.NumberOfLowPtMinBias, True)
-ConfigFlags.Digitization.PU.LowPtMinBiasInputCols = cols
+cols = generateBackgroundInputCollections(flags, defaultTestFiles.HITS_RUN2_MINBIAS_LOW,
+                                          flags.Digitization.PU.NumberOfLowPtMinBias, True)
+flags.Digitization.PU.LowPtMinBiasInputCols = cols
 
-setupPileUpFlags(ConfigFlags, 'RunDependentSimData.BunchTrains_MC20_2017', 'RunDependentSimData.PileUpProfile_run300000_MC20d')
+setupPileUpFlags(flags, 'RunDependentSimData.BunchTrains_MC20_2017', 'RunDependentSimData.PileUpProfile_run300000_MC20d')
 
-ConfigFlags.lock()
+flags.lock()
 
 # Construct our accumulator to run
-acc = DigitizationMainCfg(ConfigFlags)
-acc.merge(DigitizationMessageSvcCfg(ConfigFlags))
+acc = DigitizationMainCfg(flags)
+acc.merge(DigitizationMessageSvcCfg(flags))
 
-DigitizationTestingPostInclude(ConfigFlags, acc)
+DigitizationTestingPostInclude(flags, acc)
 
 # Dump config
 acc.getService("StoreGateSvc").Dump = True
 acc.getService("ConditionStore").Dump = True
 acc.printConfig(withDetails=True, summariseProps=True)
-ConfigFlags.dump()
+flags.dump()
 # print services
 from AthenaConfiguration.ComponentAccumulator import filterComponents
 for s, _ in filterComponents(acc._services):
@@ -82,6 +83,6 @@ for s in acc._conditionsAlgs:
     acc._msg.info(s)
 
 # Execute and finish
-sc = acc.run(maxEvents=ConfigFlags.Exec.MaxEvents)
+sc = acc.run(maxEvents=flags.Exec.MaxEvents)
 # Success should be 0
 sys.exit(not sc.isSuccess())

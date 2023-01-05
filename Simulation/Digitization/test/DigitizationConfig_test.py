@@ -6,7 +6,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 import sys
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 from Digitization.DigitizationSteering import DigitizationMainCfg, DigitizationMessageSvcCfg
 
@@ -14,25 +14,26 @@ from Digitization.DigitizationSteering import DigitizationMainCfg, DigitizationM
 log.setLevel(DEBUG)
 
 # Configure
-ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-ConfigFlags.Output.RDOFileName = "myRDO.pool.root"
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-25-02"
-ConfigFlags.GeoModel.Align.Dynamic = False
-ConfigFlags.Concurrency.NumThreads = 1
-ConfigFlags.Concurrency.NumConcurrentEvents=1
-ConfigFlags.Beam.NumberOfCollisions = 0.
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.HITS_RUN2
+flags.Output.RDOFileName = "myRDO.pool.root"
+flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-25-02"
+flags.GeoModel.Align.Dynamic = False
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents=1
+flags.Beam.NumberOfCollisions = 0.
 
-ConfigFlags.lock()
+flags.lock()
 
 # Construct our accumulator to run
-acc = DigitizationMainCfg(ConfigFlags)
-acc.merge(DigitizationMessageSvcCfg(ConfigFlags))
+acc = DigitizationMainCfg(flags)
+acc.merge(DigitizationMessageSvcCfg(flags))
 
 # Dump config
 acc.getService("StoreGateSvc").Dump = True
 acc.getService("ConditionStore").Dump = True
 acc.printConfig(withDetails=True)
-ConfigFlags.dump()
+flags.dump()
 # Execute and finish
 sc = acc.run(maxEvents=3)
 # Success should be 0
