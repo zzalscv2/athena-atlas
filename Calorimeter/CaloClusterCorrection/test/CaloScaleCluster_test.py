@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: CaloClusterCorrection/test/CaloScaleCluster_test.py
 # Author: scott snyder
@@ -7,8 +7,6 @@
 # Brief: Test for CaloScaleCluster
 #
 
-
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaPython.PyAthenaComps import Alg, StatusCode
 import ROOT
@@ -71,17 +69,17 @@ class TestAlg (Alg):
         return (clc, clc_store)
         
 
-def testCfg (configFlags):
+def testCfg (flags):
     result = ComponentAccumulator()
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    result.merge(LArGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    result.merge(LArOnOffIdMappingCfg(configFlags))
+    result.merge(LArOnOffIdMappingCfg(flags))
 
     from CaloClusterCorrection.CaloSwCorrections import rfac, make_CaloSwCorrectionsCfg
     from CaloClusterCorrection.constants import CALOCORR_JO
-    corr = make_CaloSwCorrectionsCfg (configFlags,
+    corr = make_CaloSwCorrectionsCfg (flags,
                                       key = 'ele35',
                                       source = CALOCORR_JO,
                                       version = 'v12_calh',
@@ -94,17 +92,18 @@ def testCfg (configFlags):
     return result
 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-ConfigFlags.LAr.doAlign = False
-ConfigFlags.Detector.GeometryTile = False
-ConfigFlags.Input.Files = defaultTestFiles.AOD_MC
+flags = initConfigFlags()
+flags.LAr.doAlign = False
+flags.Detector.GeometryTile = False
+flags.Input.Files = defaultTestFiles.AOD_MC
+flags.lock()
 
-ConfigFlags.lock()
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-acc=MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 
-acc.merge (testCfg (ConfigFlags))
+acc.merge (testCfg (flags))
 acc.run(1)
 

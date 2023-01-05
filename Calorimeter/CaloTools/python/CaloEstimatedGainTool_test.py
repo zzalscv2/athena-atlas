@@ -1,14 +1,11 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: CaloTools/python/CaloEstimatedGainTool_test.py
 # Author: scott snyder
 # Date: Aug, 2019
 # Brief: Test for CaloEstimatedGainTool.
 #
-
-from __future__ import print_function
-
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaPython.PyAthenaComps import Alg, StatusCode
@@ -58,7 +55,7 @@ class TestAlg (Alg):
             g = i32(self.tool.estimatedGain (ctx, cell, elt, 1))
             assert g == gain, (e, g, gain)
         return
-            
+
     def execute (self):
         log = logging.getLogger ('TestAlg')
         ctx = self.getContext()
@@ -85,16 +82,16 @@ class TestAlg (Alg):
         return StatusCode.Success
 
 
-def testCfg (configFlags):
+def testCfg (flags):
     result = ComponentAccumulator()
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
-    result.merge(LArGMCfg(configFlags))
-    result.merge(TileGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
+    result.merge(TileGMCfg(flags))
 
     from CaloTools.CaloEstimatedGainToolConfig import CaloEstimatedGainToolCfg
-    acc = CaloEstimatedGainToolCfg (configFlags)
+    acc = CaloEstimatedGainToolCfg (flags)
     acc.popPrivateTools()
     result.merge (acc)
 
@@ -102,19 +99,18 @@ def testCfg (configFlags):
     return result
 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RDO_RUN2
+flags.Detector.GeometryLAr = True
+flags.Detector.GeometryTile = True
+flags.needFlagsCategory('Tile')
+flags.needFlagsCategory('LAr')
 
-ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-ConfigFlags.Detector.GeometryLAr = True
-ConfigFlags.Detector.GeometryTile = True
-ConfigFlags.needFlagsCategory('Tile')
-ConfigFlags.needFlagsCategory('LAr')
+flags.lock()
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+acc = MainServicesCfg(flags)
 
-ConfigFlags.lock()
-from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-acc=MainServicesCfg(ConfigFlags)
-
-acc.merge (testCfg (ConfigFlags))
+acc.merge (testCfg (flags))
 acc.run(1)
-

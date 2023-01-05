@@ -1,16 +1,15 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
-
-from __future__ import print_function
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def CaloBaselineMonConfig(inputFlags, isTopLevel=True):
+
+def CaloBaselineMonConfig(flags, isTopLevel=True):
 
     from AthenaMonitoring import AthMonitorCfgHelper
-    helper = AthMonitorCfgHelper(inputFlags,'CaloBaselineMonCfg')
+    helper = AthMonitorCfgHelper(flags,'CaloBaselineMonCfg')
 
-    if not inputFlags.DQ.enableLumiAccess:
+    if not flags.DQ.enableLumiAccess:
        print('This algo needs Lumi access, returning empty config')
        if isTopLevel:
           from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -21,13 +20,13 @@ def CaloBaselineMonConfig(inputFlags, isTopLevel=True):
           return helper.result()
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-    cfg = LArGMCfg(inputFlags)
+    cfg = LArGMCfg(flags)
     from TileGeoModel.TileGMConfig import TileGMCfg
-    cfg.merge(TileGMCfg(inputFlags))
+    cfg.merge(TileGMCfg(flags))
     from LArCellRec.LArCollisionTimeConfig import LArCollisionTimeCfg
-    cfg.merge(LArCollisionTimeCfg(inputFlags))
+    cfg.merge(LArCollisionTimeCfg(flags))
     from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
+    cfg.merge(CaloNoiseCondAlgCfg(flags))
 
     caloBaselineMonAlg = helper.addAlgorithm(CompFactory.CaloBaselineMonAlg,'caloBaselineMonAlg')
 
@@ -54,7 +53,7 @@ def CaloBaselineMonConfig(inputFlags, isTopLevel=True):
                         "pedestalMon_BCIDmin":0,
                         "bcidtoolMon_BCIDmax":0}
     binlabels=["TotalEvents","ATLAS Ready","with Good LAr LB","with No LAr Collision","with No Beam Background", "with No Trigger Filter","with No LArError"] 
-    if not (inputFlags.Common.isOnline == 'online' or inputFlags.Input.isMC ):
+    if not (flags.Common.isOnline == 'online' or flags.Input.isMC ):
       tmp_CaloBaselineMon["useBadLBTool"]=True
       tmp_CaloBaselineMon["useReadyFilterTool"]=True
       tmp_CaloBaselineMon["useLArNoisyAlg"] = True
@@ -74,13 +73,13 @@ def CaloBaselineMonConfig(inputFlags, isTopLevel=True):
     from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
 
     caloBaselineMonAlg.useBadLBTool = tmp_CaloBaselineMon["useBadLBTool"]
-    caloBaselineMonAlg.BadLBTool = cfg.popToolsAndMerge(LArBadLBFilterToolCfg(inputFlags))
+    caloBaselineMonAlg.BadLBTool = cfg.popToolsAndMerge(LArBadLBFilterToolCfg(flags))
 
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
-    cfg.merge(BunchCrossingCondAlgCfg(inputFlags))
+    cfg.merge(BunchCrossingCondAlgCfg(flags))
 
     caloBaselineMonAlg.useReadyFilterTool = tmp_CaloBaselineMon["useReadyFilterTool"]
-    caloBaselineMonAlg.ReadyFilterTool = cfg.popToolsAndMerge(AtlasReadyFilterCfg(inputFlags))
+    caloBaselineMonAlg.ReadyFilterTool = cfg.popToolsAndMerge(AtlasReadyFilterCfg(flags))
     caloBaselineMonAlg.useLArCollisionFilterTool = tmp_CaloBaselineMon["useLArCollisionFilter"]
     caloBaselineMonAlg.useLArNoisyAlg = tmp_CaloBaselineMon["useLArNoisyAlg"]
     caloBaselineMonAlg.useBeamBackgroundRemoval = tmp_CaloBaselineMon["useBeamBackgroundRemoval"]
@@ -199,24 +198,25 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
-    #ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'CaloBaselineMonOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = True
-    ConfigFlags.DQ.useTrigger = True
-    ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
-    ConfigFlags.Exec.OutputLevel=WARNING
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
+    # flags.Input.isMC = True
+    flags.Output.HISTFileName = 'CaloBaselineMonOutput.root'
+    flags.DQ.enableLumiAccess = True
+    flags.DQ.useTrigger = True
+    flags.Calo.Cell.doPileupOffsetBCIDCorr=True
+    flags.Exec.OutputLevel=WARNING
+    flags.lock()
 
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
-    #from CaloRec.CaloRecoConfig import CaloRecoCfg
-    #cfg.merge(CaloRecoCfg(ConfigFlags))
+    # from CaloRec.CaloRecoConfig import CaloRecoCfg
+    # cfg.merge(CaloRecoCfg(flags))
 
-    cfg.merge(CaloBaselineMonConfig(ConfigFlags,False)) 
+    cfg.merge(CaloBaselineMonConfig(flags, False)) 
 
     cfg.run(10) #use cfg.run() to run on all events

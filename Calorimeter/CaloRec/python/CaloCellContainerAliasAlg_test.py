@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: CaloRec/python/CaloCellContainerAliasAlg_test.py
 # Author: scott snyder
@@ -28,16 +28,16 @@ class CheckAliasAlg (Alg):
         return StatusCode.Success
 
 
-def testCfg (configFlags):
+def testCfg (flags):
     result = ComponentAccumulator()
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
-    result.merge(LArGMCfg(configFlags))
-    result.merge(TileGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
+    result.merge(TileGMCfg(flags))
 
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
-    result.merge(LArOnOffIdMappingCfg(configFlags))
+    result.merge(LArOnOffIdMappingCfg(flags))
 
     result.addEventAlgo (CreateDataAlg ('CreateDataAlg'))
 
@@ -50,24 +50,22 @@ def testCfg (configFlags):
     return result
 
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RDO_RUN2
+flags.Input.TimeStamp = 1000
+flags.Detector.GeometryLAr = True
+flags.Detector.GeometryTile = True
+flags.needFlagsCategory('Tile')
+flags.needFlagsCategory('LAr')
 
-ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-ConfigFlags.Input.TimeStamp = 1000
-ConfigFlags.Detector.GeometryLAr = True
-ConfigFlags.Detector.GeometryTile = True
-ConfigFlags.needFlagsCategory('Tile')
-ConfigFlags.needFlagsCategory('LAr')
-
-ConfigFlags.lock()
-from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-acc=MainServicesCfg(ConfigFlags)
+flags.lock()
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+acc = MainServicesCfg(flags)
 
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-acc.merge (McEventSelectorCfg (ConfigFlags))
+acc.merge (McEventSelectorCfg (flags))
 
-acc.merge (testCfg (ConfigFlags))
+acc.merge (testCfg (flags))
 acc.run(1)
-
-    

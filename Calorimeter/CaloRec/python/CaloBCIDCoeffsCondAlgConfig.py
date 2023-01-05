@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # File: CaloRec/python/CaloBCIDCoeffsCondAlgConfig.py
 # Created: Mar 2020, sss
@@ -66,7 +66,7 @@ def CaloBCIDCoeffsCondAlgCfg (flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     only = ['CaloBCIDCoeffsCondAlg',
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             'LArPileUpShapeSymCondAlg']
 
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.lock()
     acc1 = CaloBCIDCoeffsCondAlgCfg (flags1)
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- mc')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.ESD
     flags2.lock()
     acc2 = CaloBCIDCoeffsCondAlgCfg (flags2)
