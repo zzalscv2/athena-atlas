@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
 SubDetectorEnvelopes configurations for AtlasGeometryCommon
@@ -12,12 +12,12 @@ from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 
 @AccumulatorCache
-def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs):
+def EnvelopeDefSvcCfg(flags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs):
     result = ComponentAccumulator()
 
     kwargs.setdefault("DBBeamPipeNode", 'BeamPipeEnvelope')
     kwargs.setdefault("DBInDetNode"   , 'InDetEnvelope'
-                                        if ConfigFlags.GeoModel.Run < LHCPeriod.Run4
+                                        if flags.GeoModel.Run < LHCPeriod.Run4
                                         else 'ITkEnvelope')
     kwargs.setdefault("DBCaloNode"    , 'CaloEnvelope'    )
     kwargs.setdefault("DBMSNode"      , 'MuonEnvelope'    )
@@ -30,7 +30,7 @@ def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs
     # setup fallback BeamPipeEnvelope
     BeamPipe = Volume()
 
-    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
         BeamPipe.addRZ(   28.8,   3545.0 )
         BeamPipe.addRZ(  120.0,   3545.0 )
     else:
@@ -56,7 +56,7 @@ def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs
     # setup fallback IDEnvelope
     InDet = Volume()
     # InDet should include HGTD when it's turned on
-    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
         InDet.addRZ( 1148.,  3545. )
         InDet.addRZ(  28.8,  3545. )
     else:
@@ -69,7 +69,7 @@ def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs
     # setup fallback CaloEnvelope
     Calo = Volume()
 
-    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
         Calo.addRZ( 1148.0,  3545.0 )
         Calo.addRZ(  120.0,  3545.0 )
     else:
@@ -135,7 +135,7 @@ def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs
     Cavern.addRZ(     0.0 , 26046.0 ) #
 
     # the outer dimesions differ between collision and cosmics jobs
-    if ConfigFlags.Beam.Type is not BeamType.Cosmics:
+    if flags.Beam.Type is not BeamType.Cosmics:
       #  -> for collision jobs the 'cavern' envelope is much smaller
       Cavern.addRZ(      0.0 , 500000.0 ) # z= +500m
       Cavern.addRZ( 500000.0  , 500000.0 ) # r=  500m
@@ -150,7 +150,7 @@ def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs
 
     #set the GeoModelSvc
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    acc = GeoModelCfg(ConfigFlags)
+    acc = GeoModelCfg(flags)
     kwargs.setdefault("GeoModelSvc", acc.getService("GeoModelSvc").getFullJobOptName())
     result.merge(acc)
 
