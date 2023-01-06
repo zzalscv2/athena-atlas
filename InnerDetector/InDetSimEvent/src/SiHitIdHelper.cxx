@@ -40,8 +40,9 @@ void SiHitIdHelper::Initialize() {
   m_isITkHGTD = isITkHGTD || isITkHGTDPLR || isITk_HGTD_NewID_PLR;
 
   if (m_isITkHGTD) InitializeField("Part",0,2);
+  else if (isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("Part",0,3);
   else InitializeField("Part",0,1);
-  if (isDBM || isITkHGTDPLR) InitializeField("BarrelEndcap",-4,4);
+  if (isDBM || isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("BarrelEndcap",-4,4);
   else InitializeField("BarrelEndcap",-2,2);
   InitializeField("LayerDisk",0,20);
   if (m_isITkHGTD) InitializeField("EtaModule",-100,100);
