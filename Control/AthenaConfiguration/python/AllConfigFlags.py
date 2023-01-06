@@ -14,7 +14,7 @@ def _addFlagsCategory (acf, name, generator, modName = None):
     return None
 
 
-def _createCfgFlags():
+def initConfigFlags():
 
     acf=AthConfigFlags()
 
@@ -354,7 +354,7 @@ def _createCfgFlags():
     return acf
 
 
-ConfigFlags=_createCfgFlags()
+ConfigFlags=initConfigFlags()
 
 if __name__=="__main__":
     import sys

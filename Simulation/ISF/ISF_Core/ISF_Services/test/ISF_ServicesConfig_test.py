@@ -12,37 +12,37 @@ if __name__ == '__main__':
   log.setLevel(DEBUG)
 
   #import config flags
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
-  ConfigFlags.Input.Files = defaultTestFiles.EVNT
+  flags = initConfigFlags()
+  flags.Input.Files = defaultTestFiles.EVNT
 
-  ConfigFlags.Sim.WorldRRange = 15000
-  ConfigFlags.Sim.WorldZRange = 27000 #change defaults?
+  flags.Sim.WorldRRange = 15000
+  flags.Sim.WorldZRange = 27000 #change defaults?
   detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC']
   # Setup detector flags
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-  setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+  setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
   # Finalize
-  ConfigFlags.lock()
+  flags.lock()
 
   from ISF_Services.ISF_ServicesConfig import MC15aPlusTruthServiceCfg, InputConverterCfg
   from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 
   ## Initialize a new component accumulator
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   #add the algorithm
-  cfg.merge(MC15aPlusTruthServiceCfg(ConfigFlags))
-  cfg.merge(InputConverterCfg(ConfigFlags))
-  cfg.merge(GeoIDSvcCfg(ConfigFlags))
+  cfg.merge(MC15aPlusTruthServiceCfg(flags))
+  cfg.merge(InputConverterCfg(flags))
+  cfg.merge(GeoIDSvcCfg(flags))
 
   # Dump config
   cfg.printConfig(withDetails=True, summariseProps = True)
-  ConfigFlags.dump()
+  flags.dump()
 
-  f=open("test.pkl","wb")
-  cfg.store(f)
-  f.close()
+  with open("test.pkl", "wb") as f:
+    cfg.store(f)
