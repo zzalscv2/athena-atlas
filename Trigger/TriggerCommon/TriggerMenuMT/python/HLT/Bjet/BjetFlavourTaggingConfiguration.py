@@ -8,7 +8,6 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
 from BTagging.BTagTrackAugmenterAlgConfig import BTagTrackAugmenterAlgCfg
 from BTagging.BTagConfig import BTagAlgsCfg
-from JetTagCalibration.JetTagCalibConfig import JetTagCalibCfg
 
 # fast btagging
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
@@ -24,11 +23,7 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
 
     acc = ComponentAccumulator()
 
-    # Jet Calibration
-    acc.merge(JetTagCalibCfg(trigFlags))
-    # "HLT_bJets" is the name of the b-jet JetContainer
-
-        #Track Augmenter
+    #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
         trigFlags,
         TrackCollection=inputTracks,
@@ -47,14 +42,6 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
         'BTagging/20211216trig/dl1d/AntiKt4EMPFlow/network.json',
         # Trigger GN1 training
         'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
-        #
-        # anti-bb tagger, see ATLINFR-4511
-        # this is required by the above tagger, but isn't a trigger
-        # training. Ideally should be replaced with 20211216trig
-        'BTagging/20210729/dipsLoose/antikt4empflow/network.json',
-        # This is the trigger specific one
-        'BTagging/20220331trig/DL1bb/antikt4empflow/network.json',
-
     ]
 
     acc.merge(BTagAlgsCfg(

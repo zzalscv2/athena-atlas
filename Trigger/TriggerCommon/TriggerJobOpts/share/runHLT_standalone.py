@@ -183,6 +183,8 @@ ConfigFlags.BTagging.forcedCalibrationChannel = 'AntiKt4EMTopo'
 # track association for trigger b-tagging might be inconsistent with
 # offline, override the default for now
 ConfigFlags.BTagging.minimumJetPtForTrackAssociation = 5e3
+# Disable some taggers that we don't use
+ConfigFlags.BTagging.taggerList = ['SV1','JetFitterNN']
 
 # Set final Cond/Geo tag based on input file, command line or default
 globalflags.DetDescrVersion = opt.setDetDescr or ConfigFlags.Trigger.OnlineGeoTag
