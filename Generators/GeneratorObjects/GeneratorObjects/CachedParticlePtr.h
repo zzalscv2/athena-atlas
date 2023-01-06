@@ -66,6 +66,12 @@ public:
 
 
   /**
+   * @brief Move constructor.  (Can't be defaulted due to the atomic member.)
+   */
+  CachedParticlePtr (CachedParticlePtr&& other) noexcept;
+
+
+  /**
    * @brief Assignment.  (Can't be defaulted due to the atomic member.)
    */
   CachedParticlePtr& operator= (const CachedParticlePtr& other);

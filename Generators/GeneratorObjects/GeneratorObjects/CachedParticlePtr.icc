@@ -49,6 +49,19 @@ CachedParticlePtr::CachedParticlePtr (const CachedParticlePtr& other)
 
 
 /**
+ * @brief Move constructor.  (Can't be defaulted due to the atomic member.)
+ */
+inline
+CachedParticlePtr::CachedParticlePtr (CachedParticlePtr&& other) noexcept
+{
+#if HEPMCPARTICLELINK_USE_STANDALONE_ATOMIC
+  std::atomic_exchange(&m_ptr,other.m_ptr);
+#else
+  m_ptr.exchange(other.m_ptr);
+#endif
+}
+
+/**
  * @brief Assignment.  (Can't be defaulted due to the atomic member.)
  */
 inline

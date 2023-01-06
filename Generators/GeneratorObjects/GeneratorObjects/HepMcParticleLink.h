@@ -148,6 +148,12 @@ public:
 
 
     /**
+     * @brief Move constructor.  (Can't be defaulted due to the atomic member.)
+     */
+    ExtendedBarCode(ExtendedBarCode&& rhs) noexcept;
+
+
+    /**
      * @brief Assignment.  (Can't be defaulted due to the atomic member.)
      */
     ExtendedBarCode& operator= (const ExtendedBarCode& rhs);
@@ -431,6 +437,12 @@ public:
    * @brief Copy constructor.
    */
   HepMcParticleLink(const HepMcParticleLink& rhs);
+
+
+  /**
+   * @brief Move constructor.
+   */
+  HepMcParticleLink(HepMcParticleLink&& rhs) noexcept;
 
 
   /**

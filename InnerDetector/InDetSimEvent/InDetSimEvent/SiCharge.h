@@ -37,6 +37,9 @@ public:
   // Copy constructor:
   SiCharge(const SiCharge &charge);
 
+  // Move constructor:
+  SiCharge(SiCharge &&charge) noexcept;
+
   // Constructor with parameters:
   //   deposited charge
   //   time of deposition
