@@ -85,6 +85,19 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (const ExtendedBarCode& rhs)
 
 
 /**
+ * @brief Move constructor.  (Can't be defaulted due to the atomic member.)
+ */
+inline
+HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (ExtendedBarCode&& rhs) noexcept
+  : m_BC (std::exchange(rhs.m_BC,0)),
+    m_evtIndex (rhs.m_evtIndex.load()), // no move constructor for atomics
+    m_evtColl (std::exchange(rhs.m_evtColl,EBC_MAINEVCOLL))
+{
+  // FIXME do we need to reset rhs.m_evtIndex here?
+}
+
+
+/**
  * @brief Assignment.  (Can't be defaulted due to the atomic member.)
  */
 inline
@@ -453,6 +466,18 @@ HepMcParticleLink::HepMcParticleLink (const HepMcParticleLink& rhs)
   : m_store(rhs.m_store),
     m_ptr(rhs.m_ptr),
     m_extBarcode(rhs.m_extBarcode)
+{
+}
+
+
+/**
+ * @brief Move constructor.
+ */
+inline
+HepMcParticleLink::HepMcParticleLink (HepMcParticleLink&& rhs) noexcept
+  : m_store(std::exchange(rhs.m_store,nullptr)),
+  m_ptr(std::move(rhs.m_ptr)),
+  m_extBarcode(std::move(rhs.m_extBarcode))
 {
 }
 

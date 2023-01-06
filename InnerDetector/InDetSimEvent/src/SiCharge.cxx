@@ -16,6 +16,16 @@
 // Copy constructor:
 SiCharge::SiCharge(const SiCharge &charge) = default;
 
+// Move constructor:
+SiCharge::SiCharge(SiCharge &&charge) noexcept :
+  m_charge(std::exchange(charge.m_charge, 0.)),
+  m_time(std::exchange(charge.m_time, 0.)),
+  m_processType(std::exchange(charge.m_processType, SiCharge::no)),
+  m_partLink(std::move(charge.m_partLink)),
+  m_trackDistance(std::move(charge.m_trackDistance))
+{
+}
+
 // Constructor with parameters:
 SiCharge::SiCharge(const double& charge,const double& time,
 		   const Process& processType,const HepMcParticleLink& PL) :
