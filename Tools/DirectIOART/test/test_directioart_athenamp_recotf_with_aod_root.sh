@@ -8,12 +8,12 @@
 
 set -e
 
-Reco_tf.py \
+Derivation_tf.py --CA \
   --multiprocess True \
   --athenaMPMergeTargetSize 'DAOD_*:0' \
   --inputAODFile root://lcg-lrz-rootd.grid.lrz.de:1094/pnfs/lrz-muenchen.de/data/atlas/dq2/atlasdatadisk/rucio/data18_13TeV/4e/57/data18_13TeV.00349263.physics_Main.merge.AOD.f937_m1972._lb0149._0001.1 \
   --outputDAODFile art.pool.root \
-  --reductionConf TEST1 \
+  --formats TEST1 \
   --maxEvents 100 \
   --preExec 'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff();'
 
