@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of pixel tools of SiClusterOnTrackTool package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -28,7 +28,7 @@ def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", *
     kwargs.setdefault("DisableDistortions", False) ## Is this correct?
     kwargs.setdefault("applyNNcorrection", flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
     kwargs.setdefault("NNIBLcorrection", flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
-    split_cluster_map_extension = flags.InDet.Tracking.ActivePass.extension if flags.InDet.Tracking.ActivePass.useTIDE_Ambi else ""
+    split_cluster_map_extension = flags.InDet.Tracking.ActiveConfig.extension if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi else ""
     kwargs.setdefault("SplitClusterAmbiguityMap", f"SplitClusterAmbiguityMap{split_cluster_map_extension}")
     kwargs.setdefault("RunningTIDE_Ambi", flags.InDet.Tracking.doTIDE_Ambi)
 
@@ -117,8 +117,7 @@ def ITkPixelClusterOnTrackToolBaseCfg(flags, name="ITkPixelClusterOnTrackTool", 
         kwargs.setdefault("PositionStrategy", 0)
 
     kwargs.setdefault("applyNNcorrection", False )
-    split_cluster_map_extension = flags.ITk.Tracking.ActivePass.extension
-    kwargs.setdefault("SplitClusterAmbiguityMap", f"SplitClusterAmbiguityMap{split_cluster_map_extension}")
+    kwargs.setdefault("SplitClusterAmbiguityMap", f"SplitClusterAmbiguityMap{flags.ITk.Tracking.ActiveConfig.extension}")
     kwargs.setdefault("RunningTIDE_Ambi", True )
 
     kwargs.setdefault("PixelErrorScalingKey", "")

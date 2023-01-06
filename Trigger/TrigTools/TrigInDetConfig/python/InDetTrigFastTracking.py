@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaCommon.Include import include
@@ -33,7 +33,7 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
   from InDetTrigRecExample import InDetTrigCA
   
-  InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
+  InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
   
   # Load RDOs if we aren't loading bytestream                                                                                       
   from AthenaCommon.AlgSequence import AlgSequence

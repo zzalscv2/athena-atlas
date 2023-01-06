@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetSegmentDriftCircleAssValidation package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -13,12 +13,12 @@ def SegmentDriftCircleAssValidationCfg(flags, name = "InDetSegmentDriftCircleAss
     #
     if extension == "_TRT":
         # TRT Subdetector segment finding
-        MinNumberDCs = flags.InDet.Tracking.ActivePass.minTRTonly
-        pTmin        = flags.InDet.Tracking.ActivePass.minPT
+        MinNumberDCs = flags.InDet.Tracking.ActiveConfig.minTRTonly
+        pTmin        = flags.InDet.Tracking.ActiveConfig.minPT
     else:
         # TRT-only/back-tracking segment finding
-        MinNumberDCs = flags.InDet.Tracking.ActivePass.minSecondaryTRTonTrk
-        pTmin        = flags.InDet.Tracking.ActivePass.minSecondaryPt
+        MinNumberDCs = flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk
+        pTmin        = flags.InDet.Tracking.ActiveConfig.minSecondaryPt
 
     kwargs.setdefault("TRT_DriftCirclesName", 'TRT_DriftCircles')
     kwargs.setdefault("pTmin", pTmin)

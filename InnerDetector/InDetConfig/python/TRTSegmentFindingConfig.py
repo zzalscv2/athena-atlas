@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
@@ -50,7 +50,7 @@ if __name__ == "__main__":
     flags.Concurrency.NumThreads=numThreads
     flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
 
-    flags = flags.cloneAndReplace("InDet.Tracking.ActivePass","InDet.Tracking.MainPass")
+    flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
 
     flags.lock()
     flags.dump()

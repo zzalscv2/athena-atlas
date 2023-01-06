@@ -23,13 +23,13 @@ def CaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="CaloClusterROIPhiRZC
     phiWidth=[]
     if False : # Set to True if TRT_SeededTrackFinder_ATL.SearchInCaloROI is true @TODO introduce flag or remove support since this does not seem to work?
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ3GeV')
-        minPt.append(ConfigFlags.InDet.Tracking.ActivePass.minSecondaryPt)
+        minPt.append(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt)
         phiWidth.append(0.3) # must be equal or larger than phiWidth of its clients: TRT_SeededTrackFinder_ATL (phiWidth)
 
-    if ConfigFlags.InDet.Tracking.ActivePass.RoISeededBackTracking:
+    if ConfigFlags.InDet.Tracking.ActiveConfig.RoISeededBackTracking :
         # TRT_TrackSegmentsFinder
         # TRT_SeededTrackFinder
-        pt_cut = ConfigFlags.InDet.Tracking.ActivePass.minRoIClusterEt
+        pt_cut = ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ%.0fGeVUnordered' % (pt_cut/Units.GeV))
         minPt.append(pt_cut)
         phiWidth.append(0.)  # no phi ordering, no Roi duplication close to +- pi
@@ -37,7 +37,7 @@ def CaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="CaloClusterROIPhiRZC
     if ConfigFlags.InDet.Tracking.doCaloSeededBrem:
         OutputROIContainerName.append('InDetCaloClusterROIPhiRZ0GeV')
         minPt.append(0)
-        phiWidth.append(ConfigFlags.InDet.Tracking.ActivePass.phiWidthBrem) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidt)
+        phiWidth.append(ConfigFlags.InDet.Tracking.ActiveConfig.phiWidthBrem) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidt)
 
     if ConfigFlags.InDet.Tracking.doCaloSeededAmbi and \
        ConfigFlags.Detector.EnableCalo:
@@ -88,7 +88,7 @@ def ITkCaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="CaloClusterROIPhi
     if ConfigFlags.ITk.Tracking.doCaloSeededBrem:
         OutputROIContainerName.append('ITkCaloClusterROIPhiRZ0GeV')
         minPt.append(0)
-        phiWidth.append(ConfigFlags.ITk.Tracking.ActivePass.phiWidthBrem[0]) # value from central eta bin
+        phiWidth.append(ConfigFlags.ITk.Tracking.ActiveConfig.phiWidthBrem[0]) # value from central eta bin
         # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
 
     if ConfigFlags.ITk.Tracking.doCaloSeededAmbi:
@@ -135,7 +135,7 @@ def HadCaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="HadCaloClusterROI
        ConfigFlags.Detector.EnableCalo:
         OutputROIContainerName.append("InDetHadCaloClusterROIPhiRZ")
         minPt.append(0)
-        phiWidth.append(ConfigFlags.InDet.Tracking.ActivePass.phiWidthBrem) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
+        phiWidth.append(ConfigFlags.InDet.Tracking.ActiveConfig.phiWidthBrem) # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
 
     if ConfigFlags.InDet.Tracking.doCaloSeededAmbi and \
        ConfigFlags.Detector.EnableCalo :
@@ -176,7 +176,7 @@ def ITkHadCaloClusterROIPhiRZContainerMakerCfg(ConfigFlags, name="HadCaloCluster
     if ConfigFlags.ITk.Tracking.doHadCaloSeededSSS:
         OutputROIContainerName.append("ITkHadCaloClusterROIPhiRZ")
         minPt.append(0)
-        phiWidth.append(ConfigFlags.ITk.Tracking.ActivePass.phiWidthBrem[0]) # value from central eta bin
+        phiWidth.append(ConfigFlags.ITk.Tracking.ActiveConfig.phiWidthBrem[0]) # value from central eta bin
         # must be equal or larger than phiWidth of its clients: InDetSiTrackMaker (phiWidth)
 
     if ConfigFlags.ITk.Tracking.doCaloSeededAmbi:

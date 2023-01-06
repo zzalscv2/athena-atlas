@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_TrackSegmentsTool_xk package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -12,7 +12,7 @@ def TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(flags, name = 'InDetTRT_SeedsMakerCon
         kwargs.setdefault("PropagatorTool", acc.popToolsAndMerge(
             RungeKuttaPropagatorCfg(flags)))
 
-    kwargs.setdefault("NumberMomentumChannel", flags.InDet.Tracking.ActivePass.TRTSegFinderPtBins)
+    kwargs.setdefault("NumberMomentumChannel", flags.InDet.Tracking.ActiveConfig.TRTSegFinderPtBins)
 
     acc.addCondAlgo(CompFactory.InDet.TRT_TrackSegmentsMakerCondAlg_ATLxk(name, **kwargs))
     return acc
@@ -36,14 +36,14 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
     #
     if extension == "_TRT":
         # TRT Subdetector segment finding
-        MinNumberDCs   = flags.InDet.Tracking.ActivePass.minTRTonly
-        pTmin          = flags.InDet.Tracking.ActivePass.minPT
-        sharedFrac     = flags.InDet.Tracking.ActivePass.maxTRTonlyShared
+        MinNumberDCs   = flags.InDet.Tracking.ActiveConfig.minTRTonly
+        pTmin          = flags.InDet.Tracking.ActiveConfig.minPT
+        sharedFrac     = flags.InDet.Tracking.ActiveConfig.maxTRTonlyShared
     else:
         # TRT-only/back-tracking segment finding
-        MinNumberDCs   = flags.InDet.Tracking.ActivePass.minSecondaryTRTonTrk
-        pTmin          = flags.InDet.Tracking.ActivePass.minSecondaryPt
-        sharedFrac     = flags.InDet.Tracking.ActivePass.maxSecondaryTRTShared
+        MinNumberDCs   = flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk
+        pTmin          = flags.InDet.Tracking.ActiveConfig.minSecondaryPt
+        sharedFrac     = flags.InDet.Tracking.ActiveConfig.maxSecondaryTRTShared
 
 
     acc = TRT_TrackSegmentsMakerCondAlg_ATLxkCfg(flags, name = 'InDetTRT_SeedsMakerCondAlg'+ extension,
@@ -63,7 +63,7 @@ def TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker',
     kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap'+extension if InputCollections is not None else '')
     kwargs.setdefault("RemoveNoiseDriftCircles", False)
     kwargs.setdefault("MinNumberDriftCircles", MinNumberDCs)
-    kwargs.setdefault("NumberMomentumChannel", flags.InDet.Tracking.ActivePass.TRTSegFinderPtBins)
+    kwargs.setdefault("NumberMomentumChannel", flags.InDet.Tracking.ActiveConfig.TRTSegFinderPtBins)
     kwargs.setdefault("pTmin", pTmin)
     kwargs.setdefault("sharedFrac", sharedFrac)
 

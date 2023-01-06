@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 #           Setup of precision tracking
 
@@ -22,7 +22,7 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from InDetTrigRecExample import InDetTrigCA
-    InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
+    InDetTrigCA.InDetTrigConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "Trigger.InDetTracking."+config.name)
     
     from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
     summaryTool = CAtoLegacyPublicToolDecorator(InDetTrigTrackSummaryToolCfg)

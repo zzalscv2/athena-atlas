@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkParticleCreator package
 # Creating xAOD::TrackParticles starting from 
 # input Trk::Tracks
@@ -65,17 +65,17 @@ def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kw
     return result
 
 def TrackParticleCreatorToolPIDCheckCfg(flags, name="InDetxAODParticleCreatorTool", **kwargs):
-    # Used only through tracking passes, where ActivePass flags are defined
-    if not flags.InDet.Tracking.ActivePass.RunTRTPID:
+    # Used only through tracking passes, where ActiveConfig flags are defined
+    if not flags.InDet.Tracking.ActiveConfig.RunTRTPID:
         kwargs.setdefault("TRT_ElectronPidTool", None)
-    if not flags.InDet.Tracking.ActivePass.RunPixelPID:
+    if not flags.InDet.Tracking.ActiveConfig.RunPixelPID:
         kwargs.setdefault("PixelToTPIDTool", None)
         kwargs.setdefault("TestPixelLayerTool", None)
 
     # have to create special public instance depending on PID tool configuration
     if name=="InDetxAODParticleCreatorTool" :
-        pixel_pid = flags.InDet.Tracking.ActivePass.RunPixelPID
-        trt_pid = flags.InDet.Tracking.ActivePass.RunTRTPID
+        pixel_pid = flags.InDet.Tracking.ActiveConfig.RunPixelPID
+        trt_pid = flags.InDet.Tracking.ActiveConfig.RunTRTPID
         if not trt_pid and not pixel_pid :
             name  += "NoPID"
         elif not trt_pid :

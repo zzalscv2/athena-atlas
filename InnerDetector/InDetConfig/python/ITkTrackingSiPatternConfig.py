@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 # ------------------------------------------------------------
@@ -15,10 +15,10 @@ def ITkTrackingSiPatternCfg(flags,
     #
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
-    if flags.ITk.Tracking.ActivePass.usePrdAssociationTool:
+    if flags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
         from InDetConfig.InDetTrackPRD_AssociationConfig import ITkTrackPRD_AssociationCfg
         acc.merge(ITkTrackPRD_AssociationCfg(flags,
-                                             name = 'ITkTrackPRD_Association' + flags.ITk.Tracking.ActivePass.extension,
+                                             name = 'ITkTrackPRD_Association' + flags.ITk.Tracking.ActiveConfig.extension,
                                              TracksName = list(InputCollections)))
 
     # ------------------------------------------------------------
@@ -57,7 +57,7 @@ def ITkTrackingSiPatternCfg(flags,
     if doTrackFindingAthena:
         from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderCfg
         SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderCfg
-        if flags.ITk.Tracking.ActivePass.extension == "ConversionFinding":
+        if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
             from InDetConfig.SiSPSeededTrackFinderConfig import ITkSiSPSeededTrackFinderROIConvCfg
             SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
         acc.merge(SiSPSeededTrackFinderCfg(flags,
@@ -70,7 +70,7 @@ def ITkTrackingSiPatternCfg(flags,
         from ActsTrkSeeding.ActsTrkSeedingConfig import ActsTrkSeedingFromAthenaCfg
         acc.merge(ActsTrkSeedingFromAthenaCfg(flags))
 
-        if flags.ITk.Tracking.ActivePass.extension == "ConversionFinding":
+        if flags.ITk.Tracking.ActiveConfig.extension == "ConversionFinding":
             from AthenaCommon.Logging import logging 
             log = logging.getLogger( 'ITkTrackingSiPattern' )
             log.warning('ROI-based track-finding is not available yet in ACTS, so the default one is used')
@@ -86,9 +86,9 @@ def ITkTrackingSiPatternCfg(flags,
     # ------------------------------------------------------------
     if flags.ITk.Tracking.doFastTracking:
         from TrkConfig.TrkCollectionAliasAlgConfig import CopyAlgForAmbiCfg
-        acc.merge(CopyAlgForAmbiCfg(flags, "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActivePass.extension,
-                                       CollectionName = SiSPSeededTrackCollectionKey, # Input
-                                       AliasName = ResolvedTrackCollectionKey))       # Output
+        acc.merge(CopyAlgForAmbiCfg(flags, "ITkCopyAlgForAmbi"+flags.ITk.Tracking.ActiveConfig.extension,
+                                    CollectionName = SiSPSeededTrackCollectionKey, # Input
+                                    AliasName = ResolvedTrackCollectionKey))       # Output
 
     else:
         from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg

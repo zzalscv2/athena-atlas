@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetEtaDependentCuts package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -7,7 +7,7 @@ import AthenaCommon.SystemOfUnits as Units
 def ITkEtaDependentCutsSvcCfg(flags, name = 'ITkEtaDependentCutsSvc', **kwargs):
     acc = ComponentAccumulator()
 
-    cuts = flags.ITk.Tracking.ActivePass
+    cuts = flags.ITk.Tracking.ActiveConfig
 
     kwargs.setdefault("etaBins",              cuts.etaBins)
     kwargs.setdefault("etaWidthBrem",         cuts.etaWidthBrem)
@@ -31,7 +31,7 @@ def ITkEtaDependentCutsSvcCfg(flags, name = 'ITkEtaDependentCutsSvc', **kwargs):
     kwargs.setdefault("Xi2max",               cuts.Xi2max)
     kwargs.setdefault("Xi2maxNoAdd",          cuts.Xi2maxNoAdd)
 
-    ITkEtaDependentCutsSvc = CompFactory.InDet.InDetEtaDependentCutsSvc( name = name + flags.ITk.Tracking.ActivePass.extension, **kwargs )
+    ITkEtaDependentCutsSvc = CompFactory.InDet.InDetEtaDependentCutsSvc( name = name + flags.ITk.Tracking.ActiveConfig.extension, **kwargs )
     acc.addService(ITkEtaDependentCutsSvc)
     return acc
 

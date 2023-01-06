@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of SiZvertexTool_xk package
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -6,8 +6,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 def SiZvertexMaker_xkCfg(flags, name="InDetZvertexMaker", **kwargs) :
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("Zmax", flags.InDet.Tracking.ActivePass.maxZImpact)
-    kwargs.setdefault("Zmin", -flags.InDet.Tracking.ActivePass.maxZImpact)
+    kwargs.setdefault("Zmax", flags.InDet.Tracking.ActiveConfig.maxZImpact)
+    kwargs.setdefault("Zmin", -flags.InDet.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("minRatio", 0.17)
 
     if "SeedMakerTool" not in kwargs:
@@ -19,5 +19,5 @@ def SiZvertexMaker_xkCfg(flags, name="InDetZvertexMaker", **kwargs) :
         kwargs.setdefault("HistSize", 2000)
         kwargs.setdefault("minContent", 30)
 
-    acc.setPrivateTools(CompFactory.InDet.SiZvertexMaker_xk(name = name+flags.InDet.Tracking.ActivePass.extension, **kwargs))
+    acc.setPrivateTools(CompFactory.InDet.SiZvertexMaker_xk(name = name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
     return acc

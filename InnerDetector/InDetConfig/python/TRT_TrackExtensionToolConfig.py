@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_TrackExtensionTool_xk packages
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -81,11 +81,11 @@ def TRT_TrackExtensionTool_xk_BaseCfg(flags, name='TRT_TrackExtensionTool_xk', *
 
     kwargs.setdefault("TRT_ClustersContainer", "TRT_DriftCircles")
     kwargs.setdefault("MinNumberDriftCircles",
-                      flags.InDet.Tracking.ActivePass.minTRTonTrk)
+                      flags.InDet.Tracking.ActiveConfig.minTRTonTrk)
     kwargs.setdefault("ScaleHitUncertainty", 2)
     kwargs.setdefault("RoadWidth", 20.)
     kwargs.setdefault("UseParameterization",
-                      flags.InDet.Tracking.ActivePass.useParameterizedTRTCuts)
+                      flags.InDet.Tracking.ActiveConfig.useParameterizedTRTCuts)
 
     acc.setPrivateTools(
         CompFactory.InDet.TRT_TrackExtensionTool_xk(name, **kwargs))
@@ -116,9 +116,9 @@ def TRT_TrackExtensionTool_xkCfg(flags, name='TRT_TrackExtensionTool_xk', **kwar
     kwargs.setdefault("maxImpactParameter",
                       500 if flags.InDet.Tracking.doBeamGas else 50 )  # single beam running, open cuts
 
-    if flags.InDet.Tracking.ActivePass.RoISeededBackTracking:
+    if flags.InDet.Tracking.ActiveConfig.RoISeededBackTracking:
         kwargs.setdefault("minTRTSegmentpT",
-                          flags.InDet.Tracking.ActivePass.minSecondaryPt)
+                          flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         TRT_TrackExtensionTool_xk_BaseCfg(flags, name, **kwargs)))

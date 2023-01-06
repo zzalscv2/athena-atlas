@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Configuration of TrkAmbiguitySolver
 # The Ambiguity Solver algorithm wraps a dedicated
@@ -15,7 +15,7 @@ def TrkAmbiguityScoreCfg(flags,
                          **kwargs):
     acc = ComponentAccumulator()
 
-    if flags.InDet.Tracking.ActivePass.useTIDE_Ambi:
+    if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         from TrkConfig.TrkAmbiguityProcessorConfig import (
             DenseEnvironmentsAmbiguityScoreProcessorToolCfg)
         InDetAmbiguityScoreProcessor = acc.popToolsAndMerge(
@@ -31,12 +31,12 @@ def TrkAmbiguityScoreCfg(flags,
     kwargs.setdefault("TrackInput",
                       [SiSPSeededTrackCollectionKey])
     kwargs.setdefault("TrackOutput",
-                      'ScoredMapInDetAmbiguityScore' + flags.InDet.Tracking.ActivePass.extension)
+                      'ScoredMapInDetAmbiguityScore' + flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("AmbiguityScoreProcessor",
                       InDetAmbiguityScoreProcessor)  # TODO: check the case when it is None object
 
     InDetAmbiguityScore = CompFactory.Trk.TrkAmbiguityScore(
-        name=name+flags.InDet.Tracking.ActivePass.extension, **kwargs)
+        name=name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs)
     acc.addEventAlgo(InDetAmbiguityScore)
     return acc
 
@@ -66,9 +66,9 @@ def TrkAmbiguityScore_Trig_Cfg(
     acc = ComponentAccumulator()
 
     kwargs.setdefault("TrackInput",
-                      [flags.InDet.Tracking.ActivePass.trkTracks_FTF])
+                      [flags.InDet.Tracking.ActiveConfig.trkTracks_FTF])
     kwargs.setdefault("TrackOutput",
-                      f"ScoreMap{flags.InDet.Tracking.ActivePass.input_name}")
+                      f"ScoreMap{flags.InDet.Tracking.ActiveConfig.input_name}")
     kwargs.setdefault("AmbiguityScoreProcessor", None)
 
     InDetAmbiguityScore = CompFactory.Trk.TrkAmbiguityScore(
@@ -98,12 +98,12 @@ def ITkTrkAmbiguityScoreCfg(
     kwargs.setdefault("TrackInput",
                       [SiSPSeededTrackCollectionKey])
     kwargs.setdefault("TrackOutput",
-                      'ScoredMapITkAmbiguityScore' + flags.ITk.Tracking.ActivePass.extension)
+                      'ScoredMapITkAmbiguityScore' + flags.ITk.Tracking.ActiveConfig.extension)
     # TODO: check the case when it is None object
     kwargs.setdefault("AmbiguityScoreProcessor",  ITkAmbiguityScoreProcessor)
 
     ITkAmbiguityScore = CompFactory.Trk.TrkAmbiguityScore(
-        name=name+flags.ITk.Tracking.ActivePass.extension, **kwargs)
+        name=name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs)
     acc.addEventAlgo(ITkAmbiguityScore)
     return acc
 
@@ -115,7 +115,7 @@ def TrkAmbiguitySolverCfg(
         ClusterSplitProbContainer='', **kwargs):
     acc = ComponentAccumulator()
 
-    if flags.InDet.Tracking.ActivePass.useTIDE_Ambi:
+    if flags.InDet.Tracking.ActiveConfig.useTIDE_Ambi:
         from TrkConfig.TrkAmbiguityProcessorConfig import (
             DenseEnvironmentsAmbiguityProcessorToolCfg)
         InDetAmbiguityProcessor = acc.popToolsAndMerge(
@@ -132,12 +132,12 @@ def TrkAmbiguitySolverCfg(
     # --- configure Ambiguity solver
     #
     kwargs.setdefault("TrackInput", 'ScoredMapInDetAmbiguityScore' +
-                      flags.InDet.Tracking.ActivePass.extension)
+                      flags.InDet.Tracking.ActiveConfig.extension)
     kwargs.setdefault("TrackOutput", ResolvedTrackCollectionKey)
     kwargs.setdefault("AmbiguityProcessor", InDetAmbiguityProcessor)
 
     InDetAmbiguitySolver = CompFactory.Trk.TrkAmbiguitySolver(
-        name=name+flags.InDet.Tracking.ActivePass.extension, **kwargs)
+        name=name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs)
     acc.addEventAlgo(InDetAmbiguitySolver)
     return acc
 
@@ -178,12 +178,12 @@ def TrkAmbiguitySolver_Trig_Cfg(
     processorTool = acc.popToolsAndMerge(
         SimpleAmbiguityProcessorTool_Trig_Cfg(
             flags,
-            name=f"InDetTrigMT_AmbiguityProcessor_{flags.InDet.Tracking.ActivePass.name}"))
+            name=f"InDetTrigMT_AmbiguityProcessor_{flags.InDet.Tracking.ActiveConfig.name}"))
 
     kwargs.setdefault(
-        "TrackInput", f"ScoreMap{flags.InDet.Tracking.ActivePass.input_name}")
+        "TrackInput", f"ScoreMap{flags.InDet.Tracking.ActiveConfig.input_name}")
     kwargs.setdefault(
-        "TrackOutput", flags.InDet.Tracking.ActivePass.trkTracks_IDTrig+"_Amb")
+        "TrackOutput", flags.InDet.Tracking.ActiveConfig.trkTracks_IDTrig+"_Amb")
     kwargs.setdefault("AmbiguityProcessor", processorTool)
 
     AmbiguitySolver = CompFactory.Trk.TrkAmbiguitySolver(name=name, **kwargs)
@@ -206,11 +206,11 @@ def ITkTrkAmbiguitySolverCfg(
     # --- configure Ambiguity solver
     #
     kwargs.setdefault("TrackInput", 'ScoredMapITkAmbiguityScore' +
-                      flags.ITk.Tracking.ActivePass.extension)
+                      flags.ITk.Tracking.ActiveConfig.extension)
     kwargs.setdefault("TrackOutput", ResolvedTrackCollectionKey)
     kwargs.setdefault("AmbiguityProcessor", ITkAmbiguityProcessor)
 
     ITkAmbiguitySolver = CompFactory.Trk.TrkAmbiguitySolver(
-        name=name+flags.ITk.Tracking.ActivePass.extension, **kwargs)
+        name=name+flags.ITk.Tracking.ActiveConfig.extension, **kwargs)
     acc.addEventAlgo(ITkAmbiguitySolver)
     return acc

@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 
@@ -1073,19 +1073,19 @@ if __name__ == "__main__":
   from AthenaCommon.Constants import WARNING
   l.setLevel(WARNING)
 
-  ConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass","InDet.Tracking.MainPass")
+  ConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
 
   assert ConfigFlags.InDet.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert ConfigFlags.InDet.Tracking.ActivePass.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActivePass.minRoIClusterEt)
+  assert ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
   ConfigFlags.InDet.Tracking.cutLevel = 2
-  assert ConfigFlags.InDet.Tracking.ActivePass.minRoIClusterEt == 0.0, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActivePass.minRoIClusterEt)
+  assert ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
   assert ConfigFlags.InDet.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(ConfigFlags.InDet.Tracking.BeamGasPass.minRoIClusterEt)
 
   assert ConfigFlags.InDet.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
   assert ConfigFlags.InDet.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
 
-  print("ConfigFlags.InDet.Tracking.ActivePass.minSecondaryPt",ConfigFlags.InDet.Tracking.ActivePass.minSecondaryPt * 1.0)
-  print("type(ConfigFlags.InDet.Tracking.ActivePass.minSecondaryPt)",type(ConfigFlags.InDet.Tracking.ActivePass.minSecondaryPt))
+  print("ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt",ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt * 1.0)
+  print("type(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt)",type(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt))
 
   #ConfigFlags.dump()
   print( "allok" )   

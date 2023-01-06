@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -18,21 +18,21 @@ def CombinedTrackingPassFlagSets(flags):
 
     # Primary Pass
     if flags.ITk.Tracking.doFastTracking:
-        flags = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.FastPass")
+        flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FastPass")
     else:
-        flags = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.MainPass")
+        flags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.MainPass")
     flags_set += [flags]
 
     # LRT
     if flags.ITk.Tracking.doLargeD0:
-        flagsLRT = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.LargeD0Pass")
+        flagsLRT = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.LargeD0Pass")
         if flags.ITk.Tracking.doFastTracking:
-            flagsLRT = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.LargeD0FastPass")
+            flagsLRT = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.LargeD0FastPass")
         flags_set += [flagsLRT]
 
     # Photon conversion tracking reco
     if flags.Detector.EnableCalo and flags.ITk.Tracking.doConversionFinding:
-        flagsConv = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.ConversionFindingPass")
+        flagsConv = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.ConversionFindingPass")
         flags_set += [flagsConv]
 
     _flags_set = flags_set # Put into cache 
@@ -41,7 +41,7 @@ def CombinedTrackingPassFlagSets(flags):
 
 def ITkClusterSplitProbabilityContainerName(flags):
     flags_set = CombinedTrackingPassFlagSets(flags)
-    extension = flags_set[-1].ITk.Tracking.ActivePass.extension
+    extension = flags_set[-1].ITk.Tracking.ActiveConfig.extension
     ClusterSplitProbContainer = "ITkAmbiguityProcessorSplitProb" + extension
     return ClusterSplitProbContainer
 
@@ -67,7 +67,7 @@ def ITkTrackRecoCfg(flags):
 
     for current_flags in flags_set:
 
-        extension = current_flags.ITk.Tracking.ActivePass.extension
+        extension = current_flags.ITk.Tracking.ActiveConfig.extension
         TrackContainer = "Resolved" + extension + "Tracks"
         SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks"
 
@@ -77,7 +77,7 @@ def ITkTrackRecoCfg(flags):
                                              SiSPSeededTrackCollectionKey = SiSPSeededTracks,
                                              ClusterSplitProbContainer = ClusterSplitProbContainer))
 
-        if current_flags.ITk.Tracking.ActivePass.storeSeparateContainer:
+        if current_flags.ITk.Tracking.ActiveConfig.storeSeparateContainer:
             if flags.ITk.Tracking.doTruth:
                 result.merge(ITkTrackTruthCfg(current_flags,
                                               Tracks = TrackContainer,

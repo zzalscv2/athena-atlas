@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_SegmentsToTrack package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -27,7 +27,7 @@ def TRT_SegmentsToTrackCfg(flags, name ='InDetTRT_SegmentsToTrack_Barrel', **kwa
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         kwargs.setdefault("AssociationTool", acc.popToolsAndMerge( InDetPRDtoTrackMapToolGangedPixelsCfg(flags) ))
 
-    kwargs.setdefault("MinNHit", flags.InDet.Tracking.ActivePass.minTRTonly)
+    kwargs.setdefault("MinNHit", flags.InDet.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("OutlierRemoval", True)
     kwargs.setdefault("MaterialEffects", False)
 
