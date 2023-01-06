@@ -1,6 +1,6 @@
 """GPerfTools profiler config
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -13,7 +13,7 @@ def GPT_ProfilerServiceCfg(flags, **kwargs):
     ProfilerService = CompFactory.GPT.ProfilerService
     kwargs.setdefault("ProfileFileName", "gpt-execute.profile")
     kwargs.setdefault("InitEvent", 1)
-    
+
     acc = ComponentAccumulator()
     acc.addService(ProfilerService(**kwargs), create=True)
     acc.setAppProperty("AuditAlgorithms", True)
@@ -26,9 +26,10 @@ def GPT_ProfilerServiceCfg(flags, **kwargs):
 if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthExHelloWorld.HelloWorldConfig import HelloWorldCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Exec.MaxEvents=10
-    cfg=MainServicesCfg(ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Exec.MaxEvents = 10
+    cfg = MainServicesCfg(flags)
     cfg.merge(HelloWorldCfg())
-    cfg.merge(GPT_ProfilerServiceCfg(ConfigFlags))
+    cfg.merge(GPT_ProfilerServiceCfg(flags))
     cfg.run()
