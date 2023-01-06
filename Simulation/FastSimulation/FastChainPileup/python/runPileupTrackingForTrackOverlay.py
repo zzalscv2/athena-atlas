@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Author: William L. (william.axel.leight@cern.ch)
 # Author: FY T. (fang-ying.tsai@cern.ch)
 
@@ -129,7 +129,7 @@ acc.getCondAlgo('LuminosityCondAlg').averageMuKey="Bkg_EventInfo.averageInteract
 
 # See TRTStandaloneConfig.py
 from InDetConfig.TRTStandaloneConfig import InDetTrtTrackScoringToolCfg
-flagsTRT = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.TRTStandalonePass")
+flagsTRT = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.TRTStandalonePass")
 InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTrtTrackScoringToolCfg(flagsTRT))
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey="Bkg_EventInfo"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"

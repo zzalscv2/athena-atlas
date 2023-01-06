@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetTruthAlgs package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -48,7 +48,7 @@ def InDetTruthTrackBuilderCfg(flags, name='InDetTruthTrackBuilder', **kwargs):
 
     kwargs.setdefault('MinDegreesOfFreedom', 1)
     kwargs.setdefault('MatEffects', flags.InDet.Tracking.materialInteractionsType) #Does this need a default type of 0?
-    kwargs.setdefault('MinSiHits', flags.InDet.Tracking.ActivePass.minClusters)
+    kwargs.setdefault('MinSiHits', flags.InDet.Tracking.ActiveConfig.minClusters)
 
     result.setPrivateTools(CompFactory.Trk.TruthTrackBuilder(name, **kwargs))
     return result
@@ -60,7 +60,7 @@ def InDetPRD_TruthTrajectoryBuilderCfg(flags, name='InDetPRD_TruthTrajectoryBuil
     kwargs.setdefault('PRD_MultiTruthCollections', truthClusters)
     InDetPRD_Provider = result.popToolsAndMerge(InDetPRD_ProviderCfg())
     kwargs.setdefault('InDetPRD_Provider', InDetPRD_Provider)
-    kwargs.setdefault('MinimumPt', flags.InDet.Tracking.ActivePass.minPT)
+    kwargs.setdefault('MinimumPt', flags.InDet.Tracking.ActiveConfig.minPT)
 
     InDetTruthTrajectorySorter = result.popToolsAndMerge(InDetPRDTruthTrajectorySorterCfg())
     manipulators = [ InDetTruthTrajectorySorter ]

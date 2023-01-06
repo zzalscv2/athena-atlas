@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_SeededSpacePointFinderTool package
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -42,7 +42,7 @@ def TRT_SeededSpacePointFinder_ATLCfg(flags, name='InDetTRT_SeededSpFinder', Inp
     kwargs.setdefault("NeighborSearch", True)
     kwargs.setdefault("LoadFull", False)
     kwargs.setdefault("DoCosmics", flags.Beam.Type is BeamType.Cosmics)
-    kwargs.setdefault("pTmin", flags.InDet.Tracking.ActivePass.minSecondaryPt)
+    kwargs.setdefault("pTmin", flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
 
     InDetTRT_SeededSpacePointFinder = CompFactory.InDet.TRT_SeededSpacePointFinder_ATL(name = name, **kwargs)
     acc.setPrivateTools(InDetTRT_SeededSpacePointFinder)

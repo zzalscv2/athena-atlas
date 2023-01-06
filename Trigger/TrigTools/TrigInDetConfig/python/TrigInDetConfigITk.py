@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -53,19 +53,19 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
                                             RoIs                     = roisKey,
                                             trigZFinder              = CompFactory.TrigZFinder(),
                                             doZFinder                = False,
-                                            SeedRadBinWidth          = flags.ITk.Tracking.ActivePass.SeedRadBinWidth,
-                                            TrackInitialD0Max        = 1000. if flags.ITk.Tracking.ActivePass.extension == 'cosmics' else 20.0,
-                                            TracksName               = flags.ITk.Tracking.ActivePass.trkTracks_FTF,
+                                            SeedRadBinWidth          = flags.ITk.Tracking.ActiveConfig.SeedRadBinWidth,
+                                            TrackInitialD0Max        = 1000. if flags.ITk.Tracking.ActiveConfig.extension == 'cosmics' else 20.0,
+                                            TracksName               = flags.ITk.Tracking.ActiveConfig.trkTracks_FTF,
                                             TripletDoPSS             = False,
-                                            Triplet_D0Max            = flags.ITk.Tracking.ActivePass.Triplet_D0Max,
-                                            Triplet_D0_PPS_Max       = flags.ITk.Tracking.ActivePass.Triplet_D0_PPS_Max,
+                                            Triplet_D0Max            = flags.ITk.Tracking.ActiveConfig.Triplet_D0Max,
+                                            Triplet_D0_PPS_Max       = flags.ITk.Tracking.ActiveConfig.Triplet_D0_PPS_Max,
                                             Triplet_MaxBufferLength  = 3,
                                             Triplet_MinPtFrac        = 1,
                                             Triplet_nMaxPhiSlice     = 53,
-                                            doCloneRemoval           = flags.ITk.Tracking.ActivePass.doCloneRemoval,
-                                            doResMon                 = flags.ITk.Tracking.ActivePass.doResMon,
-                                            doSeedRedundancyCheck    = flags.ITk.Tracking.ActivePass.doSeedRedundancyCheck,
-                                            pTmin                    = flags.ITk.Tracking.ActivePass.minPT[0],
+                                            doCloneRemoval           = flags.ITk.Tracking.ActiveConfig.doCloneRemoval,
+                                            doResMon                 = flags.ITk.Tracking.ActiveConfig.doResMon,
+                                            doSeedRedundancyCheck    = flags.ITk.Tracking.ActiveConfig.doSeedRedundancyCheck,
+                                            pTmin                    = flags.ITk.Tracking.ActiveConfig.minPT[0],
                                             useNewLayerNumberScheme  = True,
                                             MinHits                  = 5,
                                             useGPU                   = False,
@@ -81,8 +81,8 @@ def ITkftfCfg(flags, roisKey, signature, signatureName):
 def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
     """ Generates precision fast tracking config, it is a primary config function """
 
-    flags = inflags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.MainPass")
-    trigflags = flags.cloneAndReplace("ITk.Tracking.ActivePass", "Trigger.ITkTracking."+signatureName)
+    flags = inflags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.MainPass")
+    trigflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
     
     #If signature specified add suffix to the name of each algorithms
     signature =  ("_" + signatureName if signatureName else '').lower()
@@ -131,8 +131,8 @@ def ITktrigInDetFastTrackingCfg( inflags, roisKey, signatureName, in_view ):
     from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
     acc.merge(ITkTrackParticleCnvAlgCfg(trigflags,
                                         name = "ITkTrigTrackParticleCnvAlg"+signature,
-                                        TrackContainerName = trigflags.ITk.Tracking.ActivePass.trkTracks_FTF,
-                                        xAODTrackParticlesFromTracksContainerName = trigflags.ITk.Tracking.ActivePass.tracks_FTF))
+                                        TrackContainerName = trigflags.ITk.Tracking.ActiveConfig.trkTracks_FTF,
+                                        xAODTrackParticlesFromTracksContainerName = trigflags.ITk.Tracking.ActiveConfig.tracks_FTF))
     
 
     if flags.Output.doWriteAOD:
@@ -147,8 +147,8 @@ def ITkambiguitySolverAlgCfg(flags):
     prefix="InDetTrigMT"
 
     from TrkConfig.TrkAmbiguitySolverConfig import ITkTrkAmbiguityScoreCfg, ITkTrkAmbiguitySolverCfg
-    acc.merge(ITkTrkAmbiguityScoreCfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.ITk.Tracking.ActivePass.input_name}"))
-    acc.merge(ITkTrkAmbiguitySolverCfg(flags, name  = f"{prefix}TrkAmbiguitySolver_{flags.ITk.Tracking.ActivePass.input_name}"))
+    acc.merge(ITkTrkAmbiguityScoreCfg(flags, name = f"{prefix}TrkAmbiguityScore_{flags.ITk.Tracking.ActiveConfig.input_name}"))
+    acc.merge(ITkTrkAmbiguitySolverCfg(flags, name  = f"{prefix}TrkAmbiguitySolver_{flags.ITk.Tracking.ActiveConfig.input_name}"))
 
     return acc
 
@@ -156,7 +156,7 @@ def ITktrigInDetPrecisionTrackingCfg( inflags, signatureName, in_view=True ):
     """ Generates precision tracking config, it is a primary config function """
 
     acc = ComponentAccumulator()
-    flags = inflags.cloneAndReplace("ITk.Tracking.ActivePass", "Trigger.ITkTracking."+signatureName)
+    flags = inflags.cloneAndReplace("ITk.Tracking.ActiveConfig", "Trigger.ITkTracking."+signatureName)
 
     acc.merge(ITkambiguitySolverAlgCfg(flags))
 

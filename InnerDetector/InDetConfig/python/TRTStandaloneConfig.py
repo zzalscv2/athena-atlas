@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
@@ -18,17 +18,17 @@ def InDetTrtTrackScoringToolCfg(flags, name ='InDetTRT_StandaloneScoringTool', e
 
     kwargs.setdefault("useAmbigFcn", True)
     kwargs.setdefault("useSigmaChi2", False)
-    kwargs.setdefault("PtMin", flags.InDet.Tracking.ActivePass.minPT if extension == "_TRT" # TRT track segments
-                               else flags.InDet.Tracking.ActivePass.minTRTonlyPt # TRT standalone
+    kwargs.setdefault("PtMin", flags.InDet.Tracking.ActiveConfig.minPT if extension == "_TRT" # TRT track segments
+                               else flags.InDet.Tracking.ActiveConfig.minTRTonlyPt # TRT standalone
                      )
-    kwargs.setdefault("minTRTonTrk", flags.InDet.Tracking.ActivePass.minTRTonly)
+    kwargs.setdefault("minTRTonTrk", flags.InDet.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("maxEta", 2.1)
-    kwargs.setdefault("UseParameterization", flags.InDet.Tracking.ActivePass.useTRTonlyParamCuts)
-    kwargs.setdefault("OldTransitionLogic", flags.InDet.Tracking.ActivePass.useTRTonlyOldLogic)
-    kwargs.setdefault("minTRTPrecisionFraction", flags.InDet.Tracking.ActivePass.minSecondaryTRTPrecFrac)
-    kwargs.setdefault("TRTTrksEtaBins", flags.InDet.Tracking.ActivePass.TrkSel.TRTTrksEtaBins)
-    kwargs.setdefault("TRTTrksMinTRTHitsThresholds", flags.InDet.Tracking.ActivePass.TrkSel.TRTTrksMinTRTHitsThresholds)
-    kwargs.setdefault("TRTTrksMinTRTHitsMuDependencies", flags.InDet.Tracking.ActivePass.TrkSel.TRTTrksMinTRTHitsMuDependencies)
+    kwargs.setdefault("UseParameterization", flags.InDet.Tracking.ActiveConfig.useTRTonlyParamCuts)
+    kwargs.setdefault("OldTransitionLogic", flags.InDet.Tracking.ActiveConfig.useTRTonlyOldLogic)
+    kwargs.setdefault("minTRTPrecisionFraction", flags.InDet.Tracking.ActiveConfig.minSecondaryTRTPrecFrac)
+    kwargs.setdefault("TRTTrksEtaBins", flags.InDet.Tracking.ActiveConfig.TrkSel.TRTTrksEtaBins)
+    kwargs.setdefault("TRTTrksMinTRTHitsThresholds", flags.InDet.Tracking.ActiveConfig.TrkSel.TRTTrksMinTRTHitsThresholds)
+    kwargs.setdefault("TRTTrksMinTRTHitsMuDependencies", flags.InDet.Tracking.ActiveConfig.TrkSel.TRTTrksMinTRTHitsMuDependencies)
 
     acc.setPrivateTools(CompFactory.InDet.InDetTrtTrackScoringTool(name, **kwargs))
     return acc
@@ -41,7 +41,7 @@ def TRT_SegmentToTrackToolCfg(flags, name ='InDetTRT_SegmentToTrackTool', extens
     # set up TRT_SegmentToTrackTool
     #
 
-    if flags.InDet.Tracking.ActivePass.usePrdAssociationTool:
+    if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool:
         from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
         asso_tool = acc.popToolsAndMerge( InDetPRDtoTrackMapToolGangedPixelsCfg(flags) )
     else:
@@ -68,7 +68,7 @@ def TRT_SegmentToTrackToolCfg(flags, name ='InDetTRT_SegmentToTrackTool', extens
     kwargs.setdefault("ScoringTool", InDetTRT_StandaloneScoringTool)
     kwargs.setdefault("Extrapolator", InDetExtrapolator)
     kwargs.setdefault("FinalRefit", True)
-    kwargs.setdefault("MaxSharedHitsFraction", flags.InDet.Tracking.ActivePass.maxTRTonlyShared)
+    kwargs.setdefault("MaxSharedHitsFraction", flags.InDet.Tracking.ActiveConfig.maxTRTonlyShared)
     kwargs.setdefault("SuppressHoleSearch", True)
 
     InDetTRT_SegmentToTrackTool = CompFactory.InDet.TRT_SegmentToTrackTool(name = name, **kwargs)
@@ -89,12 +89,12 @@ def TRT_StandaloneTrackFinderCfg(flags, name ='InDetTRT_StandaloneTrackFinder', 
                                                                                         extension=extension))
     acc.addPublicTool(InDetTRT_SegmentToTrackTool)
 
-    kwargs.setdefault("MinNumDriftCircles", flags.InDet.Tracking.ActivePass.minTRTonly)
-    kwargs.setdefault("MinPt", flags.InDet.Tracking.ActivePass.minTRTonlyPt)
+    kwargs.setdefault("MinNumDriftCircles", flags.InDet.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("MinPt", flags.InDet.Tracking.ActiveConfig.minTRTonlyPt)
     kwargs.setdefault("InputSegmentsLocation", BarrelSegments)
     kwargs.setdefault("MaterialEffects", 0)
     kwargs.setdefault("PRDtoTrackMap", prd_to_track_map)
-    kwargs.setdefault("OldTransitionLogic", flags.InDet.Tracking.ActivePass.useTRTonlyOldLogic)
+    kwargs.setdefault("OldTransitionLogic", flags.InDet.Tracking.ActiveConfig.useTRTonlyOldLogic)
     kwargs.setdefault("OutputTracksLocation", TRTStandaloneTracks)
     kwargs.setdefault("TRT_SegToTrackTool", InDetTRT_SegmentToTrackTool)
 
@@ -113,7 +113,7 @@ def TRTStandaloneCfg( flags, extension = '', InputCollections = None, BarrelSegm
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
     prd_to_track_map = PRDtoTrackMap
-    if flags.InDet.Tracking.ActivePass.usePrdAssociationTool and extension != "_TRT" :
+    if flags.InDet.Tracking.ActiveConfig.usePrdAssociationTool and extension != "_TRT" :
         prefix='InDetTRTonly_'
         prd_to_track_map = prefix+'PRDtoTrackMap'+extension
         from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg

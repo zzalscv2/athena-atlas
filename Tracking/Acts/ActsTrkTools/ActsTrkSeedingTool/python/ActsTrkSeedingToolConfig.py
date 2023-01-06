@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -100,9 +100,9 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
     kwargs.setdefault('SpacePointsPixelName', 'ITkPixelSpacePoints')
     kwargs.setdefault('SpacePointsStripName', 'ITkStripSpacePoints')
     kwargs.setdefault('SpacePointsOverlapName', 'ITkOverlapSpacePoints')
-    kwargs.setdefault('usePixel', ConfigFlags.ITk.Tracking.ActivePass.useITkPixel and ConfigFlags.ITk.Tracking.ActivePass.useITkPixelSeeding)
-    kwargs.setdefault('useStrip', ConfigFlags.ITk.Tracking.ActivePass.useITkStrip and ConfigFlags.ITk.Tracking.ActivePass.useITkStripSeeding)
-    kwargs.setdefault('useOverlapSpCollection', ConfigFlags.ITk.Tracking.ActivePass.useITkStrip and ConfigFlags.ITk.Tracking.ActivePass.useITkStripSeeding)
+    kwargs.setdefault('usePixel', ConfigFlags.ITk.Tracking.ActiveConfig.useITkPixel and ConfigFlags.ITk.Tracking.ActiveConfig.useITkPixelSeeding)
+    kwargs.setdefault('useStrip', ConfigFlags.ITk.Tracking.ActiveConfig.useITkStrip and ConfigFlags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
+    kwargs.setdefault('useOverlapSpCollection', ConfigFlags.ITk.Tracking.ActiveConfig.useITkStrip and ConfigFlags.ITk.Tracking.ActiveConfig.useITkStripSeeding)
     kwargs.setdefault('doSpacePointConversion', not (convertInDetClusters and doSpacePointFormationActs))
     kwargs.setdefault('ActsTrkSpacePointsPixelName'    , "ITkPixelSpacePoints")
     kwargs.setdefault('ActsTrkSpacePointsStripName'    , "ITkStripSpacePoints")
@@ -110,9 +110,9 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
     kwargs.setdefault('PixelClusterContainerKey', "ITkPixelClusters")
     kwargs.setdefault('StripClusterContainerKey', "ITkStripClusters")
 
-    if ConfigFlags.ITk.Tracking.ActivePass.usePrdAssociationTool:
+    if ConfigFlags.ITk.Tracking.ActiveConfig.usePrdAssociationTool:
         # not all classes have that property !!!
-        kwargs.setdefault('PRDtoTrackMap', 'ITkPRDtoTrackMap'+ ConfigFlags.ITk.Tracking.ActivePass.extension)
+        kwargs.setdefault('PRDtoTrackMap', 'ITkPRDtoTrackMap'+ ConfigFlags.ITk.Tracking.ActiveConfig.extension)
 
     # Acts Seed Tools
     # Do not overwrite if already present in `kwargs`

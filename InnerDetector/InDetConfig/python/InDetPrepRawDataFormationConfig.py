@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of InDetPrepRawDataFormation package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -248,9 +248,9 @@ def TrigTRTRIOMakerCfg(flags, name="InDetTrigMTTRTDriftCircleMaker", **kwargs):
     kwargs.setdefault("TRTRIOLocation", "TRT_TrigDriftCircles")
     kwargs.setdefault("TRTRDOLocation", "TRT_RDOs_TRIG" if flags.Input.Format is Format.BS else "TRT_RDOs")
     kwargs.setdefault("isRoI_Seeded", True)
-    kwargs.setdefault("RoIs", flags.InDet.Tracking.ActivePass.roi)
+    kwargs.setdefault("RoIs", flags.InDet.Tracking.ActiveConfig.roi)
     
-    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name+"_"+flags.InDet.Tracking.ActivePass.name, **kwargs))
+    acc.addEventAlgo(CompFactory.InDet.TRT_RIO_Maker(name+"_"+flags.InDet.Tracking.ActiveConfig.name, **kwargs))
     return acc
 
 def AthenaTrkClusterizationCfg(flags):

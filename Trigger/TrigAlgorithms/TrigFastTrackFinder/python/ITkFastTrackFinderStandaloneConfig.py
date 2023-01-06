@@ -1,11 +1,11 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ITkFastTrackFinderStandaloneCfg(flags):
     acc = ComponentAccumulator()
 
-    newflags = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.FTFPass")
+    newflags = flags.cloneAndReplace("ITk.Tracking.ActiveConfig", "ITk.Tracking.FTFPass")
 
     ResolvedTrackCollectionKey = 'TrigFastTrackFinder_IDTrig_Tracks'
     SiSPSeededTrackCollectionKey = 'TrigFastTrackFinder_FTF_Tracks'
