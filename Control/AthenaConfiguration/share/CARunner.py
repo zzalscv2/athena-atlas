@@ -1,5 +1,5 @@
 #!/usr/bin/env python 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import sys,os
 import pickle
@@ -37,8 +37,9 @@ if __name__=="__main__":
 
     if acc._isMergable: #Not a top-level accumulator
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        acc1=MainServicesCfg(ConfigFlags)
+        from AthenaConfiguration.AllConfigFlags import initConfigFlags
+        flags = initConfigFlags()
+        acc1 = MainServicesCfg(flags)
         acc1.merge(acc)
     else:
         acc1 = acc
