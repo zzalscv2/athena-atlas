@@ -687,7 +687,7 @@ namespace Muon {
             if (!pit) continue;
             if (HepMC::barcode(pit) == barcodeIn || foundBC) {
                 foundBC = true;
-                ATH_MSG_DEBUG("getMother() : pdg = " << pit->pdg_id() << " barcode = " << HepMC::barcode(pit));
+                ATH_MSG_DEBUG("getMother() : " << pit );
                 if (pit->pdg_id() != pdgFinal) {  // the first case a track had a different flavour
 #ifdef HEPMC3
                     return pit.scptr();

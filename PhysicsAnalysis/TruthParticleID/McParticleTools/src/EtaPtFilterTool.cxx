@@ -183,7 +183,7 @@ StatusCode EtaPtFilterTool::buildGenEvent( const HepMC::GenEvent* in, HepMC::Gen
     
     if ( addVertex( vtx, out, vmap, pmap, isSignalVertex ).isFailure() )
     {
-      ATH_MSG_WARNING("Could not add vertex [" << HepMC::barcode(vtx) << "]");
+      ATH_MSG_WARNING("Could not add vertex " << vtx );
     }
 
   } //> end loop over vertices

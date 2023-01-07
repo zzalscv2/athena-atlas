@@ -270,7 +270,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 	  ++itrBc ) {
 //AV:  We modify the event!
       HepMC::GenParticlePtr p = HepMC::barcode_to_particle((HepMC::GenEvent*)(*evt),*itrBc);
-      ATH_MSG_DEBUG("[pdg,bc]= " << p->pdg_id() << ", " << HepMC::barcode( p));
+      ATH_MSG_DEBUG("[pdg,particle]= " << p->pdg_id() << ", " << p);
       if ( m_barcodes.find(HepMC::barcode(p)) == m_barcodes.end() ) { 
 	going_out.push_back(p); // list of useless particles
 	HepMC::GenVertexPtr pvtx = p->production_vertex();
@@ -280,8 +280,7 @@ StatusCode PileupFilterTool::shapeGenEvent( McEventCollection* genAod )
 	if ( msgLvl(MSG::DEBUG) ) {
 	  msg(MSG::DEBUG)
 	    << "Removing [" 
-	    << p->pdg_id() << ", " 
-	    <<HepMC::barcode( p) << "]" 
+	    <<p << "]" 
 	    << "\tprod/endVtx: " << pvtx 
 	    << "/"  << evtx 
 	    << endmsg;
@@ -435,15 +434,15 @@ StatusCode PileupFilterTool::reconnectParticles( const McEventCollection* in,
 	continue;
       }
       if ( rebuildLinks( evt, outEvt, itrPart ).isFailure() ) {
-	ATH_MSG_WARNING("Could not rebuild links for this particle [pdgId,bc]= "
+	ATH_MSG_WARNING("Could not rebuild links for this particle [pdgId,particle]= "
 			<< itrPart->pdg_id()
-			<< ", " << HepMC::barcode(itrPart));
+			<< ", " << itrPart);
       } else if ( msgLvl(MSG::VERBOSE) ) {
 	msg(MSG::VERBOSE)
 	  << "==========================================================="
 	  << endmsg
 	  << "Production vertex for particle " 
-	  << HepMC::barcode(itrPart) << " : ";
+	  << itrPart << " : ";
 	if ( itrPart->production_vertex() ) {
 	  std::stringstream prodVtx("");
 	  HepMC::Print::line(prodVtx,itrPart->production_vertex());
@@ -455,7 +454,7 @@ StatusCode PileupFilterTool::reconnectParticles( const McEventCollection* in,
 	}
 	
 	msg(MSG::VERBOSE) << "Decay vertex for particle " 
-			  << HepMC::barcode(itrPart) << " : ";
+			  << itrPart << " : ";
 	if ( itrPart->end_vertex() ) {
 	  std::stringstream dcyVtx("");
 	  HepMC::Print::line(dcyVtx,itrPart->end_vertex());
@@ -587,8 +586,8 @@ StatusCode PileupFilterTool::rebuildLinks( const HepMC::GenEvent * mcEvt,
 		// so we skip it
 		if ( msgLvl(MSG::VERBOSE) ) {
 		  msg(MSG::VERBOSE)
-		    << "found a particle [bc,pdgId]= "
-		    << HepMC::barcode(itrPart) << ", "
+		    << "found a particle = "
+		    << itrPart << ", "
 		    << "but its production vertex has incoming particles !"
 		    << endmsg;
 		  continue;
