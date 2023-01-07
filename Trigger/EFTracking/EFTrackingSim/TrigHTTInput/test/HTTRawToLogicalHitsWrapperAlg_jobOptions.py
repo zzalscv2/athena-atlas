@@ -94,7 +94,6 @@ wrapper.InputTool = HTTReadInput
 wrapper.OutputTool = HTTWriteOutput
 wrapper.RawToLogicalHitsTool = HTTRawLogic
 wrapper.Clustering = True
-wrapper.Monitor = True
 theJob += wrapper
 
 ###############################################################
