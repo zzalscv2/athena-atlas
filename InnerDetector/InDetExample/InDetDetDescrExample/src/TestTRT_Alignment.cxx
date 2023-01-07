@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetDetDescrExample/TestTRT_Alignment.h"
@@ -191,7 +191,7 @@ TestTRT_Alignment::printAlignmentShifts() {
     } // loop over elements
   } else { // Just modules
     TRT_ID::const_id_iterator moduleIter;
-    for (moduleIter = m_idHelper->module_begin(); moduleIter != m_idHelper->module_end(); moduleIter++) {
+    for (moduleIter = m_idHelper->module_begin(); moduleIter != m_idHelper->module_end(); ++moduleIter) {
       Identifier moduleId = *moduleIter;
       cout << "Module " << m_idHelper->show_to_string(moduleId) << endl;
       int numStrawLayers = m_idHelper->straw_layer_max(moduleId);
