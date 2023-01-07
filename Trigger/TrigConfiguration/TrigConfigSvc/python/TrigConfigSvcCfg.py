@@ -375,8 +375,8 @@ if __name__ == "__main__":
             l1menu_generated._hasRun = False
 
         def test_currentMenu(self):
-            from AthenaConfiguration.AllConfigFlags import _createCfgFlags
-            ConfigFlags = _createCfgFlags()
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+            ConfigFlags = initConfigFlags()
             ConfigFlags.Trigger.EDMVersion = 3
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             ConfigFlags.Input.Files = defaultTestFiles.RAW
@@ -387,8 +387,8 @@ if __name__ == "__main__":
             HLTPrescaleCondAlgCfg( ConfigFlags )
 
         def test_legacyMenu(self):
-            from AthenaConfiguration.AllConfigFlags import _createCfgFlags
-            ConfigFlags = _createCfgFlags()
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+            ConfigFlags = initConfigFlags()
             from AthenaConfiguration.TestDefaults import defaultTestFiles
             ConfigFlags.Input.Files = defaultTestFiles.RAW
             ConfigFlags.lock()
