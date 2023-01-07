@@ -542,7 +542,7 @@ void xrangeuser(TH1* h, bool symmetric ) {
 
 
 
-std::string findcell( std::string name, const std::string regex, const std::string splitex ) { 
+std::string findcell( std::string name, const std::string& regex, const std::string& splitex ) { 
   
   size_t posex = name.find( regex );
   

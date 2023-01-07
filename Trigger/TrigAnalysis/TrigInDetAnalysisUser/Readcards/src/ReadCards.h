@@ -58,7 +58,7 @@ public:
 
   int GetNValues() const { return mValues.size(); }
 
-  bool isTagDefined(const string tag) const { 
+  bool isTagDefined(const string& tag) const { 
     for ( int i=0 ;  i<GetNValues() ; i++ ) { 
       if ( tag==mValues[i].Tag() ) return true;
     }
@@ -200,7 +200,7 @@ private:
     return 0;
   }
 
-  bool AddTag(string tag, vector<string> values) { 
+  bool AddTag(const string& tag, const vector<string>& values) { 
     for ( unsigned i=0 ; i<mValues.size() ; i++ ) { 
       if ( tag == mValues[i].Tag() ) { 
 	cerr << "ReadCards::addTag() tag " << tag << " already defined in file " << mFileName << endl;
@@ -239,13 +239,13 @@ private:
 
 
   // error reporting routine
-  void error(const std::string s) {
+  void error(const std::string& s) {
     cerr << "ReadCards() syntax error in file " << mFileName << " : " << s << endl;
     exit(0);
   }
 
 
-  double handle(const std::string s, const std::string& ="") const {
+  double handle(const std::string& s, const std::string& ="") const {
     double d;
     char   temps[1024] = ""; 
     int    r=0;

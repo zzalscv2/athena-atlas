@@ -41,10 +41,10 @@ class Value {
 public:
   
   Value()                           : mTag(""), mVal(0) { } 
-  Value(char* s,  std::vector<std::string> v) : mTag(s),  mVal(v) { } 
-  Value(char* s,  std::string v)              : mTag(s),  mVal(0) { mVal.push_back(v); } 
-  Value(std::string s, std::vector<std::string> v) : mTag(s),  mVal(v) { } 
-  Value(std::string s, std::string v)              : mTag(s),  mVal(0) { mVal.push_back(v); } 
+  Value(char* s,  const std::vector<std::string>& v) : mTag(s),  mVal(v) { } 
+  Value(char* s,  const std::string& v)              : mTag(s),  mVal(0) { mVal.push_back(v); } 
+  Value(const std::string& s, const std::vector<std::string>& v) : mTag(s),  mVal(v) { } 
+  Value(const std::string& s, const std::string& v)              : mTag(s),  mVal(0) { mVal.push_back(v); } 
   
   const std::string&              Tag() const {  return mTag;  }
   const std::vector<std::string>&  Val() const {  return mVal;  }

@@ -105,7 +105,7 @@ public:
   { Initialise(name, n1, a1, n2, a2, b2); }   
 
   Resplot(const std::string& name, 
-	  std::vector<double> a,
+	  const std::vector<double>& a,
 	  int n2, double a2, double b2, const std::string& xaxis="") :
     //   TH2D( "2d", "2d", a.size()-1, &a[0], n2, a2, b2),   
     mSet(false),  m_name(name), 
@@ -119,8 +119,8 @@ public:
 
 
   Resplot(const std::string& name, 
-	  std::vector<double> a,
-	  std::vector<double> b, 
+	  const std::vector<double>& a,
+	  const std::vector<double>& b, 
 	  const std::string& xaxis="") :
     //   TH2D( "2d", "2d", a.size()-1, &a[0], n2, a2, b2),   
     mSet(false),  m_name(name), 

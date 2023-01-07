@@ -88,7 +88,7 @@ void contents( std::vector<std::string>& keys,
 double realmax( TH1* h, bool include_error=true, double lo=0, double hi=0 );
 double realmin( TH1* h, bool include_error=true, double lo=0, double hi=0 );
 
-std::string findcell( std::string name, const std::string regex, const std::string splitex="/" );
+std::string findcell( std::string name, const std::string& regex, const std::string& splitex="/" );
 
 std::string findrun( TFile *f );
 
@@ -1073,7 +1073,7 @@ public:
   
 
 
-  void sortx( const AxisInfo xinfo ) { // bool autoset=false, bool sym=false, bool logset=false, bool rangeset=false, double lo=0, double hi=0 ) { 
+  void sortx( const AxisInfo& xinfo ) { // bool autoset=false, bool sym=false, bool logset=false, bool rangeset=false, double lo=0, double hi=0 ) { 
     
     if ( xinfo.rangeset() ) { 
       m_lo = xinfo.lo();
@@ -1191,11 +1191,11 @@ public:
     return "";
   }
 
-  void SetXaxisTitle(std::string s) { 
+  void SetXaxisTitle(const std::string& s) { 
     if ( size()>0 ) at(0).htest()->GetXaxis()->SetTitle(s.c_str());
   }
 
-  void SetYaxisTitle(std::string s) { 
+  void SetYaxisTitle(const std::string& s) { 
     if ( size()>0 ) at(0).htest()->GetYaxis()->SetTitle(s.c_str());
   }
 
