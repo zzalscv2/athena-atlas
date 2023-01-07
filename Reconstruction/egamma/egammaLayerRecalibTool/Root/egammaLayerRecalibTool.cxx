@@ -243,11 +243,11 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale("layer2_alt_run2_r21_v0");
     add_scale("ps_2016_r21_v0");
   }
-  else if("run2_alt_with_layer2_modif" == tune) { 
-    add_scale("ps_EMECHV1"); 
-    add_scale("layer2_alt_run2_v1"); 
+  else if("run2_alt_with_layer2_modif" == tune) {
+    add_scale("ps_EMECHV1");
+    add_scale("layer2_alt_run2_v1");
     add_scale("ps_2016");
-  } 
+  }
   // 2012
   else if ("2012" == tune) {
     add_scale("ps_HV1");
@@ -616,14 +616,14 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale(new ScaleE2(InputModifier::ONEBASED),
               new GetAmountHisto1D(*histo));
   }
-  else if("layer2_alt_run2_v1" == tune) { 
-    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v3/egammaLayerRecalibTunes.root"); 
-    TFile f(file.c_str()); 
+  else if("layer2_alt_run2_v1" == tune) {
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v3/egammaLayerRecalibTunes.root");
+    TFile f(file.c_str());
     TH1* histo = dynamic_cast<TH1*>(f.Get("hE1E2mu_2016_v1"));
-    assert(histo); 
-    add_scale(new ScaleE2(InputModifier::ONEBASED), 
-              new GetAmountHisto1D(*histo)); 
-  } 
+    assert(histo);
+    add_scale(new ScaleE2(InputModifier::ONEBASED),
+              new GetAmountHisto1D(*histo));
+  }
   else if("layer2_alt_2012_v5" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
@@ -939,7 +939,7 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     ATH_MSG_ERROR("egamma particle without CaloCluster");
     return CP::CorrectionCode::Error;
   }
-  
+
   StdCalibrationInputs inputs {
     event_info.averageInteractionsPerCrossing(),
       event_info.runNumber(),
@@ -967,7 +967,7 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     deco_layer_correction(*cluster) = m_tune;
     return status;
   }
-  
+
     ATH_MSG_DEBUG("cannot correct layer energies: decorating particle with non-corrected layer energies");
     // this is done for safety, since when a particle is decorated
     // all the particle in the container are decorated
@@ -979,7 +979,7 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
     deco_E3(*cluster) = cluster->energyBE(3);
     deco_layer_correction(*cluster) = m_tune;
     return status;
-  
+
 }
 
 
@@ -1042,9 +1042,9 @@ egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
   if (args_map.find("amount") != args_map.end()) {
     std::string amount_str = args_map["amount"];
     bool perc = false;
-    if (std::string("%") == amount_str.substr(amount_str.size()-1, amount_str.size())) {
+    if (amount_str.back()=='%') {
       perc = true;
-      amount_str = amount_str.substr(0, amount_str.size()-1);
+      amount_str.pop_back();
     }
     const float amount = TString(amount_str).Atof() * (perc ? 0.01 : 1);
 
