@@ -221,17 +221,14 @@ public:
                                ParticleHypothesis particle = pion,
                                const TrackingVolume* tVol = nullptr) const = 0;
 
-  /** Validation Action:
-    Can be implemented optionally, outside access to internal validation steps
+  /** Propagation method needed for StepEngine
   */
-
   virtual Trk::ExtrapolationCode propagate(
     const EventContext& ctx,
     Trk::ExCellCharged& eCell,
     Trk::TargetSurfaces& sfs,
     Trk::TargetSurfaceVector& solutions) const = 0;
 
-  virtual void validationAction() const {}
 };
 
 } // end of namespace
