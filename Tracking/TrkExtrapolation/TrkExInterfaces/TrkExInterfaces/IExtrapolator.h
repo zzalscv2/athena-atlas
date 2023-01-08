@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,9 +49,7 @@ static const InterfaceID IID_IExtrapolator("IExtrapolator", 1, 0);
  @author Christos Anastopoulos (Athena MT)
  */
 
-class IPropagator;
 class INavigator;
-class IMaterialUpdater;
 class Track;
 class Surface;
 class TrackingVolume;
@@ -193,7 +191,8 @@ public:
 
   /** Extrapolation method collecting intersections with subdetector
    * boundaries and active volumes/layers. Destination
-   * (subdetector boundary) : geoID (+ entry, -exit) ( default MS exit )
+   * (subdetector boundary) : geoID (+ entry, -exit) 
+   * default Calo = 3 exit (see GeometrySignature.h)
    * Employs the STEP propagator, used in the ParticleCaloExtension
    * mainly for muons and Particle Flow.
    */
@@ -212,10 +211,6 @@ public:
 
   /** Validation Action*/
   virtual void validationAction() const = 0;
-
-  /** Access the subPropagator to the given volume*/
-  virtual const IPropagator* subPropagator(
-    const TrackingVolume& tvol) const = 0;
 };
 } // end of namespace
 
