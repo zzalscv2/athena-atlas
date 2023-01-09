@@ -33,9 +33,9 @@ def getGrades(flags):
 
 
 def getTaggerList(flags):
-    # NOTE: MV2c10 is deprecated but something in trigger is asking
-    # for it... maybe online monitoring?
     base = ['IP2D','IP3D','SV1','JetFitterNN']
+    if flags.Trigger.doHLT:
+        base = ['SV1','JetFitterNN']
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         base += ['MV2c10']
     flip = ['IP2DNeg', 'IP3DNeg','IP2DFlip', 'IP3DFlip','SV1Flip']
@@ -44,25 +44,40 @@ def getTaggerList(flags):
     return base
 
 
+def minimumJetPtForTrackAssociation(flags):
+    if flags.Trigger.doHLT:
+        return 5e3
+    return 4e3
+
+
+def calibrationTag(flags):
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        return "BTagCalibITk-23-00-03-v1"
+    return ""
+
+
 def createBTaggingConfigFlags():
     btagcf = AthConfigFlags()
 
     btagcf.addFlag("BTagging.taggerList", getTaggerList)
-    btagcf.addFlag("BTagging.databaseScheme", "")
+    btagcf.addFlag("BTagging.databaseScheme", '')
     btagcf.addFlag("BTagging.calibrationChannelAliases",
                    calibrationChannelAliases)
-    btagcf.addFlag("BTagging.forcedCalibrationChannel", "")
-    btagcf.addFlag("BTagging.calibrationTag", lambda prevFlags: "BTagCalibITk-23-00-03-v1" if prevFlags.GeoModel.Run>=LHCPeriod.Run4 else "")
+    btagcf.addFlag("BTagging.forcedCalibrationChannel", '')
+    btagcf.addFlag("BTagging.calibrationTag",
+                   calibrationTag)
 
     # the track association minimum is set to 4 GeV because of track
     # jets in offline reconstruction.
-    btagcf.addFlag("BTagging.minimumJetPtForTrackAssociation", 4e3)
-    # Disable JetVertexCharge ATLASRECTS-4506
+    btagcf.addFlag("BTagging.minimumJetPtForTrackAssociation",
+                   minimumJetPtForTrackAssociation)
+
+    # these are only used for IPxD and SV1 likelihoods
     btagcf.addFlag("BTagging.RunModus", "analysis") # reference mode used in FlavourTagPerformanceFramework (RetagFragment.py)
     btagcf.addFlag("BTagging.ReferenceType", "ALL") # reference type for IP and SV taggers (B, UDSG, ALL)
     btagcf.addFlag("BTagging.JetPtMinRef", 15e3) # in MeV for uncalibrated pt
-    btagcf.addFlag("BTagging.PrimaryVertexCollectionName", "PrimaryVertices")
     btagcf.addFlag("BTagging.Grades", getGrades)
+
 
     # Taggers for validation
     btagcf.addFlag("BTagging.SaveSV1Probabilities", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4)
@@ -73,10 +88,10 @@ def createBTaggingConfigFlags():
     # Run the flip taggers
     btagcf.addFlag("BTagging.RunFlipTaggers", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation and prevFlags.GeoModel.Run < LHCPeriod.Run4)
 
-   # Trackless approach                                                                                                                                                                                                                   
+   # Trackless approach
     btagcf.addFlag("BTagging.Trackless", False)
     btagcf.addFlag("BTagging.Trackless_JetCollection", "AntiKt4EMPFlowJets")
-    btagcf.addFlag("BTagging.Trackless_JetPtMin", 300) #in GeV                                                                                                                                                                            
+    btagcf.addFlag("BTagging.Trackless_JetPtMin", 300) #in GeV
     btagcf.addFlag("BTagging.Trackless_dR", 0.4)
 
     # experimental flags
