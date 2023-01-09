@@ -68,11 +68,11 @@ namespace Muon {
         }
 
         std::string truthSegmentContainerName (m_muonTruthSegmentContainerName.key());
-        int ppos = truthSegmentContainerName.find('.');
-        truthSegmentContainerName = truthSegmentContainerName.substr(0, ppos);
+        auto ppos = truthSegmentContainerName.find('.');
+        truthSegmentContainerName.resize(std::min(ppos,truthSegmentContainerName.size()));
         std::string segmentCollectionName( m_muonSegmentCollectionName.key());
         ppos = segmentCollectionName.find('.');
-        segmentCollectionName = segmentCollectionName.substr(0, ppos);
+        segmentCollectionName.resize(std::min(ppos,segmentCollectionName.size()));
 
         std::vector<const Muon::MuonSegment*> muonSegments;
         typedef std::map<const Muon::MuonSegment*, ElementLink<xAOD::MuonSegmentContainer> > MuonSegmentLinkMap;
