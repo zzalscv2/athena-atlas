@@ -21,7 +21,7 @@
 namespace Analysis {
 
   BTagTrackAugmenterAlg::BTagTrackAugmenterAlg( const std::string& name, ISvcLocator* loc )
-    : AthAlgorithm(name, loc) {}
+    : AthReentrantAlgorithm(name, loc) {}
 
   StatusCode BTagTrackAugmenterAlg::initialize() {
     ATH_MSG_INFO( "Inizializing " << name() << "... " );
@@ -76,11 +76,9 @@ namespace Analysis {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode BTagTrackAugmenterAlg::execute() {
+  StatusCode BTagTrackAugmenterAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Executing " << name() << "... " );
   
-    const EventContext& ctx = getContext();
-
     // ========================================================================================================================== 
     //    ** Retrieve Ingredients
     // ========================================================================================================================== 
@@ -103,22 +101,22 @@ namespace Analysis {
 
     // ========================================================================================================================== 
     //    ** Make Decorators (these are outputs)
-    // ========================================================================================================================== 
+    // ==========================================================================================================================
 
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, float > decor_d0( m_dec_d0 );
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, float > decor_z0( m_dec_z0 );
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, float > decor_d0_sigma( m_dec_d0_sigma );
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, float > decor_z0_sigma( m_dec_z0_sigma );
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> decor_d0(m_dec_d0, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> decor_z0(m_dec_z0, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> decor_d0_sigma(m_dec_d0_sigma, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> decor_z0_sigma(m_dec_z0_sigma, ctx);
 
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, std::vector< float > > decor_track_pos( m_dec_track_pos );
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, std::vector< float > > decor_track_mom( m_dec_track_mom );
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float> > decor_track_pos(m_dec_track_pos, ctx);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float> > decor_track_mom(m_dec_track_mom, ctx);
 
-    SG::WriteDecorHandle< xAOD::TrackParticleContainer, char > decor_invalid(
-      m_dec_invalid);
+    SG::WriteDecorHandle<xAOD::TrackParticleContainer, char> decor_invalid(
+        m_dec_invalid, ctx);
 
-    // ========================================================================================================================== 
+    // ==========================================================================================================================
     //    ** Computation
-    // ========================================================================================================================== 
+    // ==========================================================================================================================
 
     Trk::PerigeeSurface primary_surface( primary->position() );
 
@@ -127,7 +125,7 @@ namespace Analysis {
       std::unique_ptr< const Trk::ImpactParametersAndSigma > ip( m_track_to_vx->estimate( track, primary ) );
       if ( ip ) {
         decor_d0(*track) = ip->IPd0;
-  decor_z0(*track) = ip->IPz0SinTheta;
+        decor_z0(*track) = ip->IPz0SinTheta;
         decor_d0_sigma(*track) = ip->sigmad0;
         decor_z0_sigma(*track) = ip->sigmaz0SinTheta;
         ATH_MSG_DEBUG( " d0= " << ip->IPd0 <<
