@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -271,6 +271,7 @@ public:
 
   /** Validation Action,*/
   virtual void validationAction() const override final;
+
 private:
 
   typedef std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>> identifiedParameters_t;
@@ -596,7 +597,7 @@ private:
                             ParticleHypothesis particle = pion) const;
 
   /** Access the subPropagator to the given volume*/
-  virtual const IPropagator* subPropagator(const TrackingVolume& tvol) const override;
+  const IPropagator* subPropagator(const TrackingVolume& tvol) const;
 
   /** Access the subPropagator to the given volume*/
   const IMaterialEffectsUpdator* subMaterialEffectsUpdator(const TrackingVolume& tvol) const;
