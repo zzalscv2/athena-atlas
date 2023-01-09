@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -70,6 +70,7 @@ size_t JetKeyDescriptorInstance::getIndex(const category_t& cat,
         // cppcheck-suppress nullPointerRedundantCheck; false positive
 	m_Stores->m_catStore.push_back(cat);
 	keystore_t kStore; kStore.push_back(key);
+        // cppcheck-suppress nullPointerRedundantCheck; false positive
 	m_Stores->m_keyStore.push_back(kStore);
 	return 0;
       }
@@ -93,6 +94,7 @@ size_t JetKeyDescriptorInstance::getIndex(const category_t& cat,
                 }
                 // cppcheck-suppress nullPointerRedundantCheck; false positive
 		(m_Stores->m_keyStore[iCat]).push_back(key);
+                // cppcheck-suppress nullPointerRedundantCheck; false positive
 		return (m_Stores->m_keyStore[iCat]).size()-1;
 	      }
 	    else
