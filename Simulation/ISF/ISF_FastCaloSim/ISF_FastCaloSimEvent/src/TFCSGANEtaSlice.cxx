@@ -31,9 +31,6 @@ TFCSGANEtaSlice::TFCSGANEtaSlice(int pid, int etaMin, int etaMax, const TFCSGANX
   m_etaMin = etaMin;
   m_etaMax = etaMax;
   m_param = param;
-  
-  param.Print();
-  m_param.Print();
 }
 
 TFCSGANEtaSlice::~TFCSGANEtaSlice(){
