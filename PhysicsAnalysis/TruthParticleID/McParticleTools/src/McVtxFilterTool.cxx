@@ -229,6 +229,7 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
       ATH_MSG_VERBOSE("Doing vtx: " << vtxBC);
 
       int i = 0;
+      bool added = false;
       for( DataVector<McVtxFilter>::const_iterator filter = m_filters.begin(); filter != m_filters.end(); ++filter,++i ) {
 	ATH_MSG_VERBOSE("Processing with filter[" << i << "]...");
 	if ( (*filter)->isAccepted( dcyVtx ) ) {
@@ -237,7 +238,8 @@ McVtxFilterTool::filterMcEventCollection( const McEventCollection* mcColl,
 
 	  /// Check if this vertex has already been recorded 
 	  /// in the new GenEvent
-	  if ( HepMC::barcode_to_vertex(evt,vtxBC) ) {
+	  if ( !added && HepMC::barcode_to_vertex(evt,vtxBC) ) {
+	    added = true;
 	    //
 	    // nothing to do
 	    //
@@ -335,9 +337,9 @@ void McVtxFilterTool::addVertex( const HepMC::ConstGenVertexPtr& srcVtx,
     if ( !daughter ) {
       if ( !keepParticle( vtxType, child ) ) {
 	// only include selected particles via the "ParticlesToKeep" property
-	ATH_MSG_VERBOSE("Skipping outgoing particle id|bc: ["
+	ATH_MSG_VERBOSE("Skipping outgoing particle id|particle: ["
 			<< child->pdg_id() << "|" 
-			<< HepMC::barcode(child) << "]");
+			<< child << "]");
       } else {
 	daughter = HepMC::newGenParticlePtr();
       // set the daughter's production vertex to our new vertex
@@ -474,7 +476,7 @@ bool McVtxFilterTool::keepParticle( const VtxType::Flag vtxType,
       << "In keepParticle: Don't know anything about this VtxType ["
       << vtxType << "] !!"
       << endmsg
-      << "We'll keep this particle [bc= " << HepMC::barcode(part) 
+      << "We'll keep this particle [ " << part 
       << "] but : Check your jobOption !!"
       << endmsg;
     return true;

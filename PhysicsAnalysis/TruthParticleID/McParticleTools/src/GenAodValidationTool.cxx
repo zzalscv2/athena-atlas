@@ -242,14 +242,14 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
       if ( !checkVtx ) {
 	ATH_MSG_WARNING
 	  ("Output GenEvent is missing the selected HardScattering Vtx !!"
-	   << " (" << HepMC::barcode(vtx) << ")");
+	   << " (" << vtx << ")");
       } else {
 	(*m_outFile) << "---------" << std::endl;
 	 HepMC::Print::line(*m_outFile,checkVtx);
 	if ( !compareVtx( vtx, checkVtx ) ) {
 	  ATH_MSG_WARNING("Selected HardScattering vertices are NOT the same !!"
 			  << " at Event [" << evtNbr << "]"
-			  << " refVtx = " << HepMC::barcode(vtx));
+			  << " refVtx = " << vtx);
 	}
       }
     }
@@ -262,14 +262,14 @@ GenAodValidationTool::executeTool( const HepMC::GenEvent* refMcEvts,
     HepMC::ConstGenVertexPtr refVtx = HepMC::barcode_to_vertex(refMcEvts,HepMC::barcode(checkVtx));
     if (!refVtx) {
       ATH_MSG_WARNING("In Event [" << evtNbr
-		      << "]: got null ref-vertex (barcode: " 
-		      << HepMC::barcode(checkVtx) << ")");
+		      << "]: got null ref-vertex ( " 
+		      << checkVtx << ")");
       continue;
     }
     if ( !compareVtx( refVtx, checkVtx ) ) {
       ATH_MSG_WARNING("In Event [" << evtNbr
 		      << "]: vertices are not the SAME (" 
-		      << HepMC::barcode(refVtx) << ")");
+		      << refVtx << ")");
       std::stringstream refVtxStr;
       HepMC::Print::line(refVtxStr,refVtx);
       std::stringstream checkVtxStr;

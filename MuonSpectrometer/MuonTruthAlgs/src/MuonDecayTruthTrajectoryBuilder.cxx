@@ -40,7 +40,7 @@ namespace Muon {
 
             // copy the outer half to result
             while (!tmp.empty()) {
-                ATH_MSG_DEBUG(" Adding daughter: barcode " << HepMC::barcode(current) << " PDG id " << current->pdg_id());
+                ATH_MSG_DEBUG(" Adding daughter: " << current);
                 result->push_back(tmp.top());
                 tmp.pop();
             }
@@ -50,7 +50,7 @@ namespace Muon {
 
             // Now continue towards the interaction point
             while ((next = getMother(current))) {
-                ATH_MSG_DEBUG(" Adding mother: barcode " << HepMC::barcode(current) << " PDG id " << current->pdg_id());
+                ATH_MSG_DEBUG(" Adding mother:  " << current);
                 result->push_back(current = next);
             }
 
