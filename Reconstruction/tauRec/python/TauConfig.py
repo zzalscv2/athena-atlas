@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -271,7 +271,7 @@ def TauReconstructionCfg(flags):
 # Please follow the import to find the implementation
 def TauAODrunnerAlgCfg(flags):
     from DerivationFrameworkTau.TauCommonConfig import AddMuonRemovalTauAODReRecoAlgCfg
-    result = AddMuonRemovalTauAODReRecoAlgCfg(flags, prefix='')
+    result = AddMuonRemovalTauAODReRecoAlgCfg(flags)
     return result
 
 

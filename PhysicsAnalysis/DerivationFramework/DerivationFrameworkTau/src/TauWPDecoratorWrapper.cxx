@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -68,8 +68,8 @@ namespace DerivationFramework {
     else {
       return StatusCode::SUCCESS;
     }
-    // if the decoration exists, do nothing
-    if (*m_isDecorAvailable.ptr()) {
+    // if the decoration exists, do nothing unless instructed to override the decoration
+    if (*m_isDecorAvailable.ptr() && !m_overrideDecoration) {
       return StatusCode::SUCCESS;
     }
 

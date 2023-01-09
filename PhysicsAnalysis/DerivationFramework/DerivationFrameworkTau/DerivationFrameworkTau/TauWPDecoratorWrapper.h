@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -40,7 +40,8 @@ namespace DerivationFramework {
       ToolHandle <TauWPDecorator> m_tTauWPDecorator;
       CxxUtils::CachedValue<bool> m_isDecorAvailable;
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauContainerKey { this, "TauContainerName", "TauJets", "Input tau container key" };
-
+      // needed for mu-had ditaus, as we first decorate "TauJets", then need to override the decoration for "TauJets_MuonRM"
+      Gaudi::Property<bool> m_overrideDecoration {this, "OverrideDecoration", false, "Override existing decoration"};
   };
 }
 

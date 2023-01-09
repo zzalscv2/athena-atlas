@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -74,9 +74,12 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     #and electrons,photons,muons and taus
     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg    
     acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags))
-    acc.merge(AddDiTauLowPtCfg(ConfigFlags, prefix = 'PhysCommon'))
-    acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags, prefix = 'PhysCommon'))
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, prefix = 'PhysCommon', evetoFixTag="v1"))
+    acc.merge(AddDiTauLowPtCfg(ConfigFlags))
+    acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags))
+    # fix eVeto WP for taus and ditaus
+    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True))
+    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True, TauContainerName="TauJets_MuonRM", OverrideDecoration=True))
+
     FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets']
     if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
         FTagJetColl.append('AntiKt4EMTopoJets')
