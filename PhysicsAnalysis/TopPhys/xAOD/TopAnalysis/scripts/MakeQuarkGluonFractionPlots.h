@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 //Author: Regina Moles Valls - <regina.moles.valls@cern.ch>
 //R21 migration: Matteo Scornajenghi - <matteo.scornajenghi@cern.ch>
@@ -60,12 +60,12 @@ class MakeQuarkGluonFractionPlots {
  public:
 //new functions
   void printXMLConfigFile();
-  void readXMLConfigFile(std::string configfile);
+  void readXMLConfigFile(const std::string& configfile);
   void readXMLNode(TXMLEngine xml, XMLNodePointer_t node);
   bool decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, bool &value);
   bool decodeString(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, std::string &value);
   bool decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, float &value);
-  void AbortXMLDecode(std::string value);
+  void AbortXMLDecode(const std::string& value);
 //end new
   
   //function that reads the configuration file and makes the gluon fraction plots
@@ -86,16 +86,16 @@ class MakeQuarkGluonFractionPlots {
   std::string extractJetNumber(std::string histoname);
   
   //function to compute the gluon fraction
-  std::vector<TH2D*> computeQuarkGluonFraction (std::map< std::string,TH2D* > inputhistos, std::string quarkflavour, std::string prename);
+  std::vector<TH2D*> computeQuarkGluonFraction (std::map< std::string,TH2D* > inputhistos, std::string quarkflavour, const std::string& prename);
   
   //function to create the output file
   void createOutputFile(std::string filename,std::vector<TH2D*> histos, std::vector<TH2D*> histosUnc );
   
   //Subtract
-  std::vector<TH2D*> getDelta (std::vector<TH2D*> h_nom, std::vector<TH2D*> h_var, double scale, std::string prehistname);
+  std::vector<TH2D*> getDelta (std::vector<TH2D*> h_nom, std::vector<TH2D*> h_var, double scale, const std::string& prehistname);
   
   //function to compute the total systematic uncertainty
-  std::vector<TH2D*> evaluateQGFUncertaity(std::vector<std::vector<TH2D*> > f_1P, std::vector<std::vector<TH2D*> > f_2PUp, std::vector<std::vector<TH2D*> > f_2PDown, std::string channel);
+  std::vector<TH2D*> evaluateQGFUncertaity(std::vector<std::vector<TH2D*> > f_1P, std::vector<std::vector<TH2D*> > f_2PUp, std::vector<std::vector<TH2D*> > f_2PDown, const std::string& channel);
   
 
   
@@ -125,9 +125,9 @@ class MakeQuarkGluonFractionPlots {
 
   bool m_mergechannels;
 
-  void DumpToMap(std::map<std::string, TH2D*> &h_map, std::string filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap);
+  void DumpToMap(std::map<std::string, TH2D*> &h_map, const std::string& filename, const std::string& channel, const std::string& folder, const std::string& keyname, bool createMap);
   void DumpFileToMap(std::map<std::string, TH2D*> &h_map, std::string filename, std::string channel, std::string folder, std::string keyname, bool createMap);
-  void CreateQGFFile(std::string prename, std::map<std::string, TH2D*> h_input,std::vector< std::map<std::string, TH2D*> > h_input_1P,std::vector< std::map<std::string, TH2D*> > h_input_1PVar,std::vector< std::map<std::string, TH2D*> > h_input_2P,std::vector< std::map<std::string, TH2D*> > h_input_2PUp,std::vector< std::map<std::string, TH2D*> > h_input_2PDown);
+  void CreateQGFFile(const std::string& prename, const std::map<std::string, TH2D*>& h_input,std::vector< std::map<std::string, TH2D*> > h_input_1P,std::vector< std::map<std::string, TH2D*> > h_input_1PVar,std::vector< std::map<std::string, TH2D*> > h_input_2P,std::vector< std::map<std::string, TH2D*> > h_input_2PUp,std::vector< std::map<std::string, TH2D*> > h_input_2PDown);
 
 };
 
