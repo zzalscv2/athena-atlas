@@ -97,7 +97,7 @@ namespace top {
       if (m_config->useFwdElectrons() && m_config->makeAllCPTools()) {
         top::check(setupSelectors(), "Failed to setup Fwd electrons selectors tools");
       }
-      if (m_config->isMC()) {// scale-factors are only for MC
+      if (m_config->isMC() && m_config->useEgammaSFs()) {// scale-factors are only for MC
         top::check(setupScaleFactors(), "Failed to setup Egamma scale-factor tools");
       }
     } else {
@@ -407,7 +407,7 @@ namespace top {
 
     ATH_MSG_INFO(
       "Requested Electrons SF tool for " << m_config->electronEfficiencySystematicModel() << " correlation model");
-     
+
     if (m_config->electronEfficiencySystematicModel() != "TOTAL") {
       ATH_MSG_INFO(
         "Setting up Electrons SF tool for " << m_config->electronEfficiencySystematicModel() << " correlation model");
@@ -422,7 +422,7 @@ namespace top {
                                                                 m_config->electronEfficiencySystematicModelEtaBinning(),
                                                                 m_config->electronEfficiencySystematicModelEtBinning());
       // ID SFs
-      if(m_config->electronIDSFFilePath() =="Default") m_electronEffSFIDCorrModel = setupElectronSFToolWithMap(elSFPrefixCorrModel + "ID", m_electronEffSFIDFile, "",
+      if(m_config->electronIDSFFilePath() =="Default") m_electronEffSFIDCorrModel = setupElectronSFToolWithMap(elSFPrefixCorrModel + "ID", m_electronEffSFIDFile, "", 
                                                               electronID, "", "", dataType,
                                                               m_config->electronEfficiencySystematicModelNToys(),
                                                               m_config->electronEfficiencySystematicModelToySeed(),
@@ -433,7 +433,6 @@ namespace top {
                     m_config->electronEfficiencySystematicModel(),
                     m_config->electronEfficiencySystematicModelEtaBinning(),
                     m_config->electronEfficiencySystematicModelEtBinning());
-
 
       if(m_config->electronIDSFFileLoosePath() =="Default") m_electronEffSFIDLooseCorrModel = setupElectronSFToolWithMap(elSFPrefixCorrModel + "IDLoose",
                                                                    m_electronEffSFIDLooseFile, "", electronIDLoose, "",
@@ -572,6 +571,7 @@ namespace top {
       m_electronEffSFChargeID = setupElectronSFTool(elSFPrefix + "ChargeID", inChargeID, dataType);
       m_electronEffSFChargeIDLoose = setupElectronSFTool(elSFPrefix + "ChargeIDLoose", inChargeIDLoose, dataType);
     }
+
     if(electronIsolation != "PLVTight" && electronIsolation != "PLVLoose" &&
        electronIsolation != "PLImprovedTight" && electronIsolation != "PLImprovedVeryTight" &&
        electronIsolation != "TightTrackOnly_VarRad" && electronIsolation != "TightTrackOnly_FixedRad"){
@@ -588,6 +588,7 @@ namespace top {
       top::check(ChargeMisIDCorrectionsLoose->setProperty("CorrectionFileName", m_electronEffSFChargeMisIDLooseFile), "Failed to setProperty");
       top::check(ChargeMisIDCorrectionsLoose->initialize(), "Failed to setProperty");
     }
+
     return StatusCode::SUCCESS;
   }
 
@@ -741,7 +742,7 @@ IAsgElectronEfficiencyCorrectionTool*
                                             const std::string& correlation_model,
                                             const std::string& correlationModelEtaBinning,
                                             const std::string& correlationModelEtBinning) {
-    
+
     std::string iso_key = ISO_key;
     // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/LatestRecommendationsElectronIDRun2#PLV_scale_factors_for_central_el
     // If isolation WP is PLVTight or PLVLoose, switch to no isolation to trick this function.
@@ -779,7 +780,6 @@ IAsgElectronEfficiencyCorrectionTool*
 
       // Set the keys which configure the tool options (empty string means we do not include this key)
       if (reco_key != "" && reco_key != "None") {
-        ATH_MSG_INFO(" Adding RecoKey    : " + reco_key);
         top::check(asg::setProperty(tool, "RecoKey", reco_key), "Failed to set RecoKey to " + name);
       }
       if (ID_key != "" && ID_key != "None") {
@@ -796,6 +796,7 @@ IAsgElectronEfficiencyCorrectionTool*
         top::check(asg::setProperty(tool, "TriggerKey", trigger_key), "Failed to set TriggerKey to " + name);
       }
       top::check(asg::setProperty(tool, "OutputLevel", MSG::INFO), "Failed to set OutputLevel to " + name);
+      
       top::check(tool->initialize(), "Failed to initialize " + name);
     }
     return tool;

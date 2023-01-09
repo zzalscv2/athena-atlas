@@ -832,6 +832,12 @@ namespace top {
       }
     }
 
+    inline virtual void useEgammaSFs(const std::string& s) {
+      if (!m_configFixed) {
+        m_useEgammaSFs = (s == "True" || s == "true");
+      }
+    }
+
     inline void removeElectronVetoLArCrack() {
       if (!m_configFixed) {
         m_electronVetoLArCrack = false;
@@ -954,6 +960,7 @@ namespace top {
     inline bool useElectronChargeIDSelection() const {return m_useElectronChargeIDSelection;}
     inline bool useEgammaLeakageCorrection() const {return m_useEgammaLeakageCorrection;}
     inline bool useEgammaPileupCorrection() const {return m_useEgammaPileupCorrection;}
+    inline bool useEgammaSFs() const {return m_useEgammaSFs;}
     inline bool enablePromptLeptonImprovedVetoStudies() const {return m_enablePromptLeptonImprovedVetoStudies;}
 
     // Fwd electron
@@ -2286,6 +2293,13 @@ namespace top {
     std::string getYear(unsigned int runnumber, const bool isMC);
     
     const std::string& getYear(){return m_year;}
+
+    // helper methods to determine if we are processing proton-lead or lead-proton collisions
+    // these are determined using a HI config flag in AnalysisTop + a run number interval
+    void set_isHIP(unsigned int runNumber);
+    inline bool isHI_pPb() { return m_isHI_pPb; }
+    inline bool isHI_Pbp() { return m_isHI_Pbp; }
+
     void SetYear(const std::string& year){m_year = year;}
 
     void SetTriggersToYear(const bool isMC);
@@ -2595,6 +2609,7 @@ namespace top {
     bool m_useElectronChargeIDSelection;
     bool m_useEgammaLeakageCorrection;
     bool m_useEgammaPileupCorrection;
+    bool m_useEgammaSFs;
     bool m_enablePromptLeptonImprovedVetoStudies;
 
     // experimental electronID map path
@@ -3161,6 +3176,9 @@ namespace top {
     std::unordered_map<std::string, std::string> m_showerMCMCtranslator;
 
     std::string m_year;
+
+    bool m_isHI_pPb;
+    bool m_isHI_Pbp;
 
     //ReadFloatOption
     float readFloatOption(top::ConfigurationSettings* const& settings, std::string in) const;

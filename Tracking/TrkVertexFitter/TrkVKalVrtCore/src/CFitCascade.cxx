@@ -209,12 +209,14 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
 //      }
       if(existPointingCnst){   // add pointed vertex covariance to track
         for(int km=0; km<6; km++) VrtMomCov[km] += vk->nextCascadeVrt->fitCovXYZMom[km];
-        VrtMomCov[0]  *= 1000.;
-        VrtMomCov[2]  *= 1000.;
-        VrtMomCov[5]  *= 1000.;
-        VrtMomCov[9]  *= 1000.;
-        VrtMomCov[14] *= 1000.;
-        VrtMomCov[20] *= 1000.;
+        if(vk->nextCascadeVrt->TrackList[0]->Id>0){ //There is at least one real track in this vertex
+          VrtMomCov[0]  *= 1000.;
+          VrtMomCov[2]  *= 1000.;
+          VrtMomCov[5]  *= 1000.;
+          VrtMomCov[9]  *= 1000.;
+          VrtMomCov[14] *= 1000.;
+          VrtMomCov[20] *= 1000.;
+        }
       }
 //
 //  Particle creation and propagation      

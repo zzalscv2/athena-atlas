@@ -84,22 +84,6 @@ class GeneratorAnalysisBlock (ConfigBlock):
 
 
 
-class PrimaryVertexBlock (ConfigBlock):
-    """the ConfigBlock for requiring primary vertices"""
-
-    def __init__ (self) :
-        super (PrimaryVertexBlock, self).__init__ ()
-
-
-    def makeAlgs (self, config) :
-
-        config.createAlgorithm( 'CP::VertexSelectionAlg',
-                                'PrimaryVertexSelectorAlg' )
-        config.VertexContainer = 'PrimaryVertices'
-        config.MinVertices = 1
-
-
-
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
@@ -210,15 +194,6 @@ def makeGeneratorAnalysisConfig( seq,
     config.saveCutBookkeepers = saveCutBookkeepers
     config.runNumber = runNumber
     config.cutBookkeepersSystematics = cutBookkeepersSystematics
-    seq.append (config)
-
-
-
-def makePrimaryVertexConfig( seq ) :
-    """Create config block that requires a primary vertex
-    """
-
-    config = PrimaryVertexBlock ()
     seq.append (config)
 
 

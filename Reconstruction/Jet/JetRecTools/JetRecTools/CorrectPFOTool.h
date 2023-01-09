@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// PFlowPseudoJetGetter.h
+// CorrectPFOTool.h
 
 #ifndef JETRECTOOLS_CORRECTPFOTOOL_H
 #define JETRECTOOLS_CORRECTPFOTOOL_H
@@ -16,7 +16,7 @@
 ///  InputIsEM - If true, EM-scale is used for the neutral pflow
 ///  CalibratePFO - If true the EM-scale pflow is calibrated
 ///
-/// \author Jennifer Roloff and John Stupak - based on PFlowPseudoJetGetter by P-A Delsart, D. Adams
+/// \author Jennifer Roloff, John Stupak, and Steven Schramm - based on PFlowPseudoJetGetter by P-A Delsart, D. Adams
 //////////////////////////////////////////////////
 
 #include "JetRecTools/JetConstituentModifierBase.h"
@@ -41,6 +41,7 @@ class CorrectPFOTool : public JetConstituentModifierBase{
   StatusCode process_impl(xAOD::IParticleContainer* cont) const override final;
   // Type-specific operation
   StatusCode correctPFO(xAOD::PFOContainer& cont) const;
+  StatusCode correctPFOByVertex(xAOD::PFOContainer& cont) const;
 
   const xAOD::Vertex* getPrimaryVertex() const;
   StatusCode applyNeutralCorrection(xAOD::PFO& pfo, const xAOD::Vertex& vtx) const;
@@ -51,6 +52,7 @@ class CorrectPFOTool : public JetConstituentModifierBase{
   bool m_correctneutral;   //If true, correct neutral PFO
   bool m_correctcharged;   //If true, correct charged PFO
   bool m_useChargedWeights; //If true, them we make use of the charged PFO weighting scheme
+  bool m_doByVertex;  // If true, then we add vertex-by-vertex corrections as auxdata for neutral PFOs
   ToolHandle<CP::IWeightPFOTool> m_weightPFOTool;
 
   std::string m_vertexContainer_key;

@@ -33,7 +33,7 @@ class GlobalSequentialCorrection
 
   GlobalSequentialCorrection();
   GlobalSequentialCorrection(const std::string& name);
-  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, TString calibAreaTag, bool dev); //Apply the full GS calibration by default
+  GlobalSequentialCorrection(const std::string& name, TEnv * config, TString jetAlgo, TString calibAreaTag, bool useOriginVertex, bool dev); //Apply the full GS calibration by default
   virtual ~GlobalSequentialCorrection();
 
   virtual StatusCode initializeTool(const std::string& name);
@@ -102,6 +102,7 @@ class GlobalSequentialCorrection
   bool m_nTrkwTrk_4PFlow;
   bool m_TileGap3_4PFlow;
   double m_turnOffStartingpT, m_turnOffEndpT;
+  bool m_useOriginVertex;
 
 };
 

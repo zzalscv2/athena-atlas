@@ -79,11 +79,12 @@ namespace top {
   }
 
   StatusCode ElectronScaleFactorCalculator::initialize() {
+    if (!m_config->useEgammaSFs()) return StatusCode::SUCCESS;
     ATH_MSG_INFO(" top::ElectronScaleFactorCalculator initialize");
 
-    top::check(m_electronEffSFTrigger.retrieve(), "Failed to retrieve electron SF Tool");
-    top::check(m_electronEffSFTriggerLoose.retrieve(), "Failed to retrieve electron SF Tool");
-
+    top::check(m_electronEffSFTrigger.retrieve(), "Failed to retrieve electron SF Tool" );
+    top::check(m_electronEffSFTriggerLoose.retrieve(), "Failed to retrieve electron SF Tool" );
+    
     if (m_config->electronEfficiencySystematicModel() != "TOTAL") {
       top::check(m_electronEffSFTriggerCorrModel.retrieve(),
                  "Failed to retrieve electron SF Tool for correlation model");
@@ -91,14 +92,14 @@ namespace top {
         m_electronEffSFTriggerLooseCorrModel.retrieve(), "Failed to retrieve electron SF Tool for correlation model");
     }
 
-    top::check(m_electronEffSFReco.retrieve(), "Failed to retrieve electron SF Tool");
+    top::check(m_electronEffSFReco.retrieve(), "Failed to retrieve electron SF Tool" );
     if (m_config->electronEfficiencySystematicModel() != "TOTAL") {
       top::check(m_electronEffSFRecoCorrModel.retrieve(), "Failed to retrieve electron SF Tool for correlation model");
     }
 
     if (asg::ToolStore::contains<IAsgElectronEfficiencyCorrectionTool> ("AsgElectronEfficiencyCorrectionTool_Iso")) {
       m_electronEffIso_exists = true;
-      top::check(m_electronEffSFIso.retrieve(), "Failed to retrieve electron SF Tool");
+      top::check(m_electronEffSFIso.retrieve(), "Failed to retrieve electron SF Tool" );
       if (m_config->electronEfficiencySystematicModel() != "TOTAL") {
         top::check(m_electronEffSFIsoCorrModel.retrieve(), "Failed to retrieve electron SF Tool for correlation model");
       }
@@ -169,8 +170,8 @@ namespace top {
           return StatusCode::FAILURE;
         }
 
-    top::check(m_electronEffSFID.retrieve(), "Failed to retrieve electron SF Tool");
-    top::check(m_electronEffSFIDLoose.retrieve(), "Failed to retrieve electron SF Tool");
+    top::check(m_electronEffSFID.retrieve(), "Failed to retrieve electron SF Tool 5 " );
+    top::check(m_electronEffSFIDLoose.retrieve(), "Failed to retrieve electron SF Tool 6 " );
 
     if (m_config->electronEfficiencySystematicModel() != "TOTAL") {
       top::check(m_electronEffSFIDCorrModel.retrieve(), "Failed to retrieve electron SF Tool for correlation model");
@@ -351,6 +352,7 @@ namespace top {
   }
 
   StatusCode ElectronScaleFactorCalculator::execute() {
+    if (!m_config->useEgammaSFs()) return StatusCode::SUCCESS;
     ///-- Loop over all electron collections --///
     for (auto currentSystematic : *m_config->systSgKeyMapElectrons()) {
       const xAOD::ElectronContainer* electrons(nullptr);

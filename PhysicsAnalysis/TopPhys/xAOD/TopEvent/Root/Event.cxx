@@ -76,7 +76,8 @@ std::ostream& operator << (std::ostream& os, const top::Event& event) {
   for (const auto* const tauPtr : event.m_tauJets) {
     os << "    " << *tauPtr << "\n";
   }
-  os << "MET: " << *event.m_met << "\n";
+  if (event.m_met)
+    os << "MET: " << *event.m_met << "\n";
 
   return os;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetFromPseudojet.cxx
@@ -108,7 +108,8 @@ JetFromPseudojet::add(const PseudoJet& pj, xAOD::JetContainer& jets,
   ATH_MSG_VERBOSE("Done add with input");
   if ( (inputtype == xAOD::JetInput::EMTopo ) || 
        (inputtype == xAOD::JetInput::EMPFlow ) ||
-       (inputtype == xAOD::JetInput::PFlowCustomVtx ) ) {
+       (inputtype == xAOD::JetInput::PFlowCustomVtx ) ||
+       (inputtype == xAOD::JetInput::EMPFlowByVertex) ) {
     ATH_MSG_VERBOSE("Setting constituent state to uncalibrated state");
     pjet->setConstituentsSignalState(xAOD::UncalibratedJetConstituent);
   } else {

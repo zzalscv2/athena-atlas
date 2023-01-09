@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Source file for the JetConstituentModSequence.h
@@ -17,6 +17,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
+#include "xAODTracking/VertexContainer.h"
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/PFOContainer.h"
 #include "xAODPFlow/PFOAuxContainer.h"
@@ -56,6 +57,15 @@ StatusCode JetConstituentModSequence::initialize() {
     ATH_MSG_ERROR(" Unsupported input type "<< m_inputType );
     return StatusCode::FAILURE;
   }
+
+  // TODO - make configurable
+  if (m_outputContainer.find("ByVertex") != std::string::npos)
+  {
+    m_byVertex = true;
+    ATH_MSG_INFO("Constituent modifier sequence is by vertex");
+  }
+  else
+    m_byVertex = false;
   
   return StatusCode::SUCCESS;
 }
@@ -95,8 +105,22 @@ int JetConstituentModSequence::execute() const {
     ATH_CHECK( evtStore()->retrieve(charged, m_inputContainer+"ChargedParticleFlowObjects") );
     ATH_CHECK( evtStore()->retrieve(neutral, m_inputContainer+"NeutralParticleFlowObjects") );
 
+    unsigned neutralCopies = 0;
+    if (m_byVertex)
+    {
+      // Retrieve Primary Vertices
+      const xAOD::VertexContainer* vertices = nullptr;
+      if(evtStore()->retrieve(vertices, "PrimaryVertices").isFailure() // TODO - make configurable
+         || vertices->empty()){
+          ATH_MSG_WARNING(" This event has no primary vertices - cannot determine the number of neutral copies " );
+          return 1;
+      }
+
+      neutralCopies = static_cast<unsigned>(vertices->size());
+    }
+
     chargedCopy = static_cast<xAOD::PFOContainer *>(copyAndRecord<xAOD::PFOContainer, xAOD::PFOAuxContainer, xAOD::PFO>(charged, !m_trigger, "ChargedParticleFlowObjects"));
-    neutralCopy = static_cast<xAOD::PFOContainer *>(copyAndRecord<xAOD::PFOContainer, xAOD::PFOAuxContainer, xAOD::PFO>(neutral, !m_trigger, "NeutralParticleFlowObjects"));
+    neutralCopy = static_cast<xAOD::PFOContainer *>(copyAndRecord<xAOD::PFOContainer, xAOD::PFOAuxContainer, xAOD::PFO>(neutral, !m_trigger, "NeutralParticleFlowObjects",neutralCopies));
 
     if(!chargedCopy || !neutralCopy) {
       ATH_MSG_ERROR("Unable to record output collections for " << m_outputContainer+"*ParticleFlowObjects" );
@@ -124,7 +148,6 @@ int JetConstituentModSequence::execute() const {
     break;}
 
 
-
   default: {
     ATH_MSG_WARNING( "Unsupported input type " << m_inputType );
   }
@@ -146,7 +169,7 @@ int JetConstituentModSequence::execute() const {
       return 1;
     }
   }
-
+    
 #ifndef XAOD_STANDALONE
   if(!m_trigger) {
     ATH_CHECK( evtStore()->setConst(modifiedCont) );

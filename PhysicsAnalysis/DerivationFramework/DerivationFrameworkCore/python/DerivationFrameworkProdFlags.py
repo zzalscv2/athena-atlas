@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.JobProperties import JobProperty, JobPropertyContainer
 from AthenaCommon.JobProperties import jobproperties
@@ -1789,7 +1789,7 @@ jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_JETM6Stream
 listAODtoDPD.append(WriteDAOD_JETM6Stream.StreamName)
 
 class WriteDAOD_JETM7Stream(JobProperty):
-    """JETM7: top"""
+    """JETM7: Vertex-by-vertex jet reconstruction derivation"""
     statusOn = True
     allowedTypes = ['bool']
     StoredValue = False
@@ -1813,6 +1813,7 @@ class WriteDAOD_JETM8Stream(JobProperty):
     pass
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_JETM8Stream)
 listAODtoDPD.append(WriteDAOD_JETM8Stream.StreamName)
+
 
 class WriteDAOD_JETM9Stream(JobProperty):
     """JETM9: Many R values calibration"""

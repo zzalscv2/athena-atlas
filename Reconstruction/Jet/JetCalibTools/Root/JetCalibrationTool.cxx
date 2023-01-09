@@ -21,9 +21,8 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   : JetCalibrationToolBase::JetCalibrationToolBase( name ),
     m_jetAlgo(""), m_config(""), m_calibSeq(""), m_calibAreaTag(""), m_originScale(""), m_shower(""), m_devMode(false), m_isData(true), m_timeDependentCalib(false), m_rhoKey("auto"), m_dir(""), m_eInfoName(""), m_globalConfig(nullptr),
     m_doBcid(true), m_doJetArea(true), m_doResidual(true), m_doOrigin(true), m_doGSC(true), m_doMC2MC(true),
-    m_bcidCorr(nullptr), m_jetPileupCorr(nullptr), m_etaJESCorr(nullptr), m_globalSequentialCorr(nullptr), m_insituDataCorr(nullptr), m_jetMassCorr(nullptr), m_jetSmearCorr(nullptr), m_jetMC2MCCorr(nullptr), InsituCombMassCorr(nullptr), m_insituCombMassCorr(), m_genericScaleCorr(nullptr)
+    m_bcidCorr(nullptr), m_jetPileupCorr(nullptr), m_etaJESCorr(nullptr), m_globalSequentialCorr(nullptr), m_insituDataCorr(nullptr), m_jetMassCorr(nullptr), m_jetSmearCorr(nullptr), m_jetMC2MCCorr(nullptr), InsituCombMassCorr(nullptr), m_insituCombMassCorr(), m_genericScaleCorr(nullptr), m_useOriginVertex(false)
 { 
-
   declareProperty( "JetCollection", m_jetAlgo = "AntiKt4LCTopo" );
   declareProperty( "RhoKey", m_rhoKey = "auto" );
   declareProperty( "ConfigFile", m_config = "" );
@@ -35,7 +34,7 @@ JetCalibrationTool::JetCalibrationTool(const std::string& name)
   declareProperty( "OriginScale", m_originScale = "JetOriginConstitScaleMomentum");
   declareProperty( "CalibArea", m_calibAreaTag = "00-04-82");
   declareProperty( "ShowerModel", m_shower = "Py8" );
-
+  declareProperty( "useOriginVertex", m_useOriginVertex = false);
 }
 
 
@@ -302,7 +301,7 @@ StatusCode JetCalibrationTool::getCalibClass(const std::string&name, TString cal
     ATH_MSG_INFO("Initializing GSC correction.");
     suffix="_GSC";
     if(m_devMode) suffix+="_DEV";
-    m_globalSequentialCorr = new GlobalSequentialCorrection(name+suffix,m_globalConfig,jetAlgo,calibPath,m_devMode);
+    m_globalSequentialCorr = new GlobalSequentialCorrection(name+suffix,m_globalConfig,jetAlgo,calibPath,m_useOriginVertex,m_devMode);
     m_globalSequentialCorr->msg().setLevel( this->msg().level() );
     if ( m_globalSequentialCorr->initializeTool(name+suffix).isFailure() ) {
       ATH_MSG_FATAL("Couldn't initialize the Global Sequential Calibration. Aborting"); 

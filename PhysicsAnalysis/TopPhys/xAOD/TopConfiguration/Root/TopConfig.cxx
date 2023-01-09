@@ -231,6 +231,7 @@ namespace top {
     m_useElectronChargeIDSelection(false),
     m_useEgammaLeakageCorrection(false),
     m_useEgammaPileupCorrection(true),
+    m_useEgammaSFs(true),
     m_enablePromptLeptonImprovedVetoStudies(false),
 
     // Fwd electron configuration
@@ -519,7 +520,9 @@ namespace top {
     m_badBatmanCleaningMin(276262),
     m_badBatmanCleaningMax(311481),
     m_useEventLevelJetCleaningTool(false),
-    m_year("UNKNOWN") {
+    m_year("UNKNOWN"),
+    m_isHI_pPb(false),
+    m_isHI_Pbp(false) {
     m_allSelectionNames = std::shared_ptr<std::vector<std::string > > (new std::vector<std::string> );
 
     m_systHashPhotons = std::shared_ptr<std::unordered_set<std::size_t> > (new std::unordered_set<std::size_t> );
@@ -1227,6 +1230,7 @@ namespace top {
     this->useElectronChargeIDSelection(settings->value("UseElectronChargeIDSelection"));
     this->useEgammaLeakageCorrection(settings->value("UseEgammaLeakageCorrection"));
     this->useEgammaPileupCorrection(settings->value("UseEgammaPileupCorrection"));
+    this->useEgammaSFs(settings->value("UseEgammaSFs"));
     this->electronPtcut(std::stof(settings->value("ElectronPt")));
     this->electrond0Sigcut(std::stof(settings->value("Electrond0Sig")));
     this->electrondeltaz0cut(std::stof(settings->value("Electrondeltaz0")));
@@ -3678,6 +3682,7 @@ namespace top {
     out->m_useElectronChargeIDSelection = m_useElectronChargeIDSelection;
     out->m_useEgammaLeakageCorrection = m_useEgammaLeakageCorrection;
     out->m_useEgammaPileupCorrection = m_useEgammaPileupCorrection;
+    out->m_useEgammaSFs = m_useEgammaSFs;
     out->m_enablePromptLeptonImprovedVetoStudies = m_enablePromptLeptonImprovedVetoStudies;
 
     out->m_fwdElectronID = m_fwdElectronID;
@@ -3843,6 +3848,7 @@ namespace top {
     m_useElectronChargeIDSelection = settings->m_useElectronChargeIDSelection;
     m_useEgammaLeakageCorrection = settings->m_useEgammaLeakageCorrection;
     m_useEgammaPileupCorrection = settings->m_useEgammaPileupCorrection;
+    m_useEgammaSFs = settings->m_useEgammaSFs;
     m_enablePromptLeptonImprovedVetoStudies = settings->m_enablePromptLeptonImprovedVetoStudies;
 
     m_fwdElectronID = settings->m_fwdElectronID;
@@ -4077,6 +4083,13 @@ namespace top {
     if (runnumber > 348835 && runnumber < 999999) return "2018";
     
     return "UNKNOWN";
+  }
+
+  void TopConfig::set_isHIP(unsigned int runnumber) {
+    if (runnumber >=  313063 && runnumber <= 313435)
+      m_isHI_pPb = true;
+    else if (runnumber >= 313572 && runnumber <= 314170)
+      m_isHI_Pbp = true;
   }
 
   void TopConfig::SetTriggersToYear(const bool isMC) {

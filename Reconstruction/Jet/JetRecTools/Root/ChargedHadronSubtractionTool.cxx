@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
 #include "JetRecTools/ChargedHadronSubtractionTool.h"
 
 using namespace std;
@@ -16,6 +20,8 @@ ChargedHadronSubtractionTool::ChargedHadronSubtractionTool(const std::string& na
 
   declareProperty("Z0sinThetaCutValue", m_z0sinThetaCutValue=2.0, "True if we will use the track to vertex tool");
 
+  declareProperty("DoByVertex", m_byVertex=false, "True if we should match to each primary vertex, not just PV0");
+
 }
 
 StatusCode ChargedHadronSubtractionTool::initialize() {
@@ -23,6 +29,10 @@ StatusCode ChargedHadronSubtractionTool::initialize() {
     ATH_MSG_ERROR("ChargedHadronSubtractionTool requires PFO inputs. It cannot operate on objects of type "
 		  << m_inputType);
   return StatusCode::FAILURE;
+  }
+  if (m_byVertex && m_useTrackToVertexTool) {
+    ATH_MSG_ERROR("ChargedHadronSubtractionTool does not support both TrackVertexAssociation and DoByVertex");
+    return StatusCode::FAILURE;
   }
 
   return StatusCode::SUCCESS;
@@ -32,7 +42,7 @@ StatusCode ChargedHadronSubtractionTool::process_impl(xAOD::IParticleContainer* 
   // Type-checking happens in the JetConstituentModifierBase class
   // so it is safe just to static_cast
   xAOD::PFOContainer* pfoCont = static_cast<xAOD::PFOContainer*> (cont);
-  return matchToPrimaryVertex(*pfoCont);
+  return !m_byVertex ? matchToPrimaryVertex(*pfoCont) : matchByPrimaryVertex(*pfoCont);
 }
 
 const xAOD::Vertex* ChargedHadronSubtractionTool::getPrimaryVertex() const {
@@ -64,6 +74,16 @@ const xAOD::Vertex* ChargedHadronSubtractionTool::getPrimaryVertex() const {
   return nullptr;
 }
 
+double ChargedHadronSubtractionTool::calcAbsZ0SinTheta(const xAOD::TrackParticle& trk, const xAOD::Vertex& vtx)
+{
+  // vtz.z() provides z of that vertex w.r.t the center of the beamspot (z = 0).
+  // Thus we correct the track z0 to be w.r.t z = 0
+  const float z0 = trk.z0() + trk.vz() - vtx.z();
+  const float theta = trk.theta();
+  return std::abs(z0*std::sin(theta));
+}
+
+
 StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(xAOD::PFOContainer& cont) const {
   const static SG::AuxElement::Accessor<char> PVMatchedAcc("matchedToPV");
   const static SG::AuxElement::Accessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
@@ -88,7 +108,7 @@ StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(xAOD::PFOContainer
 
   for ( xAOD::PFO* ppfo : cont ) {
     // Ignore neutral PFOs
-    if(fabs(ppfo->charge()) < FLT_MIN) continue;
+    if(std::abs(ppfo->charge()) < FLT_MIN) continue;
 
     bool matchedToPrimaryVertex = false;
     bool matchedToPileupSideband = false;
@@ -104,12 +124,9 @@ StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(xAOD::PFOContainer
       if(vtx->vertexType()==xAOD::VxType::NoVtx) { // No reconstructed vertices
 	matchedToPrimaryVertex = true; // simply match all cPFOs in this case
       } else { // Had a good reconstructed vertex.
-	// vtz.z() provides z of that vertex w.r.t the center of the beamspot (z = 0).
-	// Thus we correct the track z0 to be w.r.t z = 0
-	float z0 = ptrk->z0() + ptrk->vz() - vtx->z();
-	float theta = ptrk->theta();
-	matchedToPrimaryVertex = ( fabs(z0*sin(theta)) < m_z0sinThetaCutValue );
-        if (fabs(z0*sin(theta)) < 2.0*m_z0sinThetaCutValue && fabs(z0*sin(theta)) >= m_z0sinThetaCutValue ) matchedToPileupSideband = true;
+        const double absZ0sinTheta = calcAbsZ0SinTheta(*ptrk,*vtx);
+	matchedToPrimaryVertex = ( absZ0sinTheta < m_z0sinThetaCutValue );
+        if (absZ0sinTheta < 2.0*m_z0sinThetaCutValue && absZ0sinTheta >= m_z0sinThetaCutValue ) matchedToPileupSideband = true;
       }
     } // TVA vs PV decision
     PVMatchedAcc(*ppfo) = matchedToPrimaryVertex;
@@ -118,3 +135,58 @@ StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(xAOD::PFOContainer
 
   return StatusCode::SUCCESS;
 }
+
+StatusCode ChargedHadronSubtractionTool::matchByPrimaryVertex(xAOD::PFOContainer& cont) const
+{
+  const static SG::AuxElement::Accessor< std::vector<unsigned> > matchingPVs("MatchingPVs");
+  const static SG::AuxElement::Accessor< std::vector<unsigned> > matchingPUSBs("MatchingPUsidebands");
+
+  // Retrieve Primary Vertices
+  const xAOD::VertexContainer* pvtxs = nullptr;
+  if(evtStore()->retrieve(pvtxs, m_vertexContainer_key).isFailure()
+     || pvtxs->empty()){
+      ATH_MSG_WARNING(" This event has no primary vertices to match to PFOs" );
+      return StatusCode::FAILURE;
+  } 
+
+  for (xAOD::PFO* ppfo : cont) {
+    // Ignore neutral PFOs
+    if(std::abs(ppfo->charge()) < FLT_MIN) continue;
+
+    // Get the track for this charged PFO
+    const xAOD::TrackParticle* ptrk = ppfo->track(0);
+    if(ptrk==nullptr) {
+      ATH_MSG_WARNING("Charged PFO with index " << ppfo->index() << " has no ID track!");
+      continue;
+    }
+
+    std::vector<unsigned> matchingVertexList;
+    std::vector<unsigned> matchingPUSBList;
+
+    // Loop over the primary vertices to determine which ones potentially match
+    for (const xAOD::Vertex* vtx : *pvtxs) {
+      bool matchedToVertex = false;
+      bool matchedToPUsideband = false;
+
+      if (vtx == nullptr) {
+        ATH_MSG_WARNING("Encountered a nullptr vertex when trying to match charged PFOs to vertices");
+        continue;
+      } else if(vtx->vertexType()==xAOD::VxType::NoVtx) { // No reconstructed vertices
+	matchedToVertex = true; // simply match all cPFOs in this case
+      } else { // Had a good reconstructed vertex
+        const double absZ0sinTheta = calcAbsZ0SinTheta(*ptrk,*vtx);
+	matchedToVertex = ( absZ0sinTheta < m_z0sinThetaCutValue );
+        if (absZ0sinTheta < 2.0*m_z0sinThetaCutValue && absZ0sinTheta >= m_z0sinThetaCutValue ) matchedToPUsideband = true;
+      }
+
+      if (matchedToVertex) matchingVertexList.push_back(vtx->index());
+      if (matchedToPUsideband) matchingPUSBList.push_back(vtx->index());
+    }
+
+    matchingPVs(*ppfo) = std::move(matchingVertexList);
+    matchingPUSBs(*ppfo) = std::move(matchingPUSBList);
+  }
+
+  return StatusCode::SUCCESS;
+}
+

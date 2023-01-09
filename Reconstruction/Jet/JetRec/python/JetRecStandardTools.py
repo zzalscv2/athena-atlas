@@ -34,6 +34,7 @@ from JetRecTools.JetRecToolsConf import CorrectPFOTool
 from JetRecTools.JetRecToolsConf import ChargedHadronSubtractionTool
 from JetRecTools.JetRecToolsConf import TrackPseudoJetGetter
 from JetRecTools.JetRecToolsConf import PFlowPseudoJetGetter
+from JetRecTools.JetRecToolsConf import PFlowByVertexPseudoJetGetter
 from JetRecTools.JetRecToolsConf import JetTrackSelectionTool
 from JetRecTools.JetRecToolsConf import SimpleJetTrackSelectionTool
 from JetRecTools.JetRecToolsConf import TrackVertexAssociationTool
@@ -396,6 +397,29 @@ jtm += ctm.buildConstitModifSequence( "JetConstitSeq_PFlowCHS",
                                       OutputContainer = "CHS",  #"ParticleFlowObjects" will be appended later
                                       modList = ['correctPFO', 'chsPFO'] )
 
+# Add the equivalent PFO tools, but configured for all-vertex PFlow jet reconstruction
+# Correction tool duplicates the neutral PFOs, correcting to each possible vertex
+# CHS tool is updated to scan over all vertices, rather than requiring only PV0
+# For both, have to later filter based on a specific vertex of interest, at the point of jet reco for a given vertex
+ctm.add( CorrectPFOTool("correctByVertexPFOTool",
+                        WeightPFOTool = jtm.pflowweighter,
+                        InputIsEM = True,
+                        CalibratePFO = False,
+                        UseChargedWeights = True,
+                        InputType = xAOD.Type.ParticleFlow,
+                        DoByVertex = True,
+                        ),
+         alias = 'correctBVPFO' )
+
+ctm.add( ChargedHadronSubtractionTool("CHSByVertexTool", InputType = 3, DoByVertex=True),
+         alias = 'chsBVPFO')
+
+jtm += ctm.buildConstitModifSequence( "JetConstitSeq_PFlowCHSByVertex",
+                                      InputContainer = "JetETMiss",
+                                      OutputContainer = "CHSByVertex", #"ParticleFlowObjects" will be appended later
+                                      modList = ['correctBVPFO', 'chsBVPFO' ] )
+
+
 # EM-scale pflow.
 jtm += PFlowPseudoJetGetter(
   "empflowget",
@@ -450,6 +474,21 @@ jtm += PFlowPseudoJetGetter(
   UseNeutral = True,
   UseChargedPV = False,
   UseChargedPUsideband = False,
+)
+
+# EM-scale pflow - by vertex version
+jtm += PFlowByVertexPseudoJetGetter(
+  "empflowbyvertexget",
+  Label = "EMPFlowByVertex",
+  InputContainer = "CHSByVertexParticleFlowObjects",
+  OutputContainer = "PseudoJetEMPFlowByVertex",
+  SkipNegativeEnergy = True,
+  GhostScale = 0.0,
+  UseCharged = True,
+  UseNeutral = True,
+  UseChargedPV = True,
+  UseChargedPUsideband = False,
+  UniqueChargedVertex = True,
 )
 
 # AntiKt2 track jets.
@@ -685,6 +724,21 @@ jtm += JetVertexFractionTool(
   PUTrkPtCut = 30000.0
 )
 
+# Jet vertex fraction with selection, by vertex
+jtm += JetVertexFractionTool(
+  "jvf_byvtx",
+  VertexContainer = jtm.vertexContainer,
+  AssociatedTracks = "GhostTrack",
+  TrackVertexAssociation = jtm.tvassoc.TrackVertexAssociation,
+  TrackParticleContainer  = jtm.trackContainer,
+  TrackSelector = jtm.trackselloose,
+  JVFName = "JVF",
+  K_JVFCorrScale = 0.01,
+  #Z0Cut = 3.0,
+  PUTrkPtCut = 30000.0,
+  UseOriginVertex = True,
+)
+
 # Jet vertex tagger.
 jtm += JetVertexTaggerTool(
   "jvt",
@@ -693,6 +747,14 @@ jtm += JetVertexTaggerTool(
   # TrackVertexAssociation = jtm.tvassoc.TrackVertexAssociation,
   # TrackSelector = jtm.trackselloose,
   JVTName = "Jvt",
+)
+
+# Jet vertex tagger, by vertex
+jtm += JetVertexTaggerTool(
+  "jvt_byvtx",
+  VertexContainer = jtm.vertexContainer,
+  JVTName = "Jvt",
+  UseOriginVertex = True,
 )
 
 # Jet track info.
@@ -713,6 +775,17 @@ jtm += JetTrackSumMomentsTool(
   TrackVertexAssociation = jtm.tvassoc.TrackVertexAssociation,
   RequireTrackPV = True,
   TrackSelector = jtm.trackselloose
+)
+
+# Jet track vector sum info, by vertex
+jtm += JetTrackSumMomentsTool(
+  "trksummoms_byvtx",
+  VertexContainer = jtm.vertexContainer,
+  AssociatedTracks = "GhostTrack",
+  TrackVertexAssociation = jtm.tvassoc.TrackVertexAssociation,
+  RequireTrackPV = True,
+  TrackSelector = jtm.trackselloose,
+  UseOriginVertex = True,
 )
 
 # Jet cluster info.
