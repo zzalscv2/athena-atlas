@@ -2,14 +2,15 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// TRT_DetectorManager.h
-///////////////////////////////////////////////////////////////////
-// (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
+#ifndef TRT_READOUTGEOMETRY_TRT_DETECTORMANAGER_H
+#define TRT_READOUTGEOMETRY_TRT_DETECTORMANAGER_H
 
-#ifndef TRT_DetectorManager_h
-#define TRT_DetectorManager_h 1
+/**
+ *  @file TRT_DetectorManager.h
+ */
+
+#include "TRT_DetElementContainer.h"
+
 #include "InDetReadoutGeometry/InDetDetectorManager.h"
 #include "TRT_ReadoutGeometry/TRT_Conditions.h"
 #include "TRT_ReadoutGeometry/TRT_BarrelElement.h"
@@ -47,20 +48,20 @@ namespace InDetDD {
   class TRT_EndcapDescriptor;
   class TRT_Numerology;
 
-  /** class TRT_DetectorManager
-  
-    The Detector Manager for all TRT Detector elements,
-    it acts as the interface to the detector elements which can be retrieved
-    from the TRT_DetectorManager either via numerology or Identifier access. 
-  
-    In addition, the alignable transforms are set via Identifer and forwarded
-    to the GeoModel class; hence, we are sitting at the interface between
-    CLHEP and AMG.
-  
-    @author Grant Gorfine
-     modified & maintined: Nick Styles, Andreas Salzburger
-     
-  */
+  /**
+   *  @class TRT_DetectorManager
+   *
+   *  @brief The Detector Manager for all TRT Detector elements,
+   *  it acts as the interface to the detector elements which can be retrieved
+   *  from the TRT_DetectorManager either via numerology or Identifier access. 
+   *
+   *  In addition, the alignable transforms are set via Identifer and forwarded
+   *  to the GeoModel class; hence, we are sitting at the interface between
+   *  CLHEP and AMG.
+   *
+   *  @author Grant Gorfine
+   *  modified & maintined: Nick Styles, Andreas Salzburger
+   */
   
   class TRT_DetectorManager
     : public InDetDetectorManager,
@@ -75,8 +76,8 @@ namespace InDetDD {
     ~TRT_DetectorManager();
     
     /** Access Raw Geometry:-------------------------------------------------------*/
-    virtual unsigned int getNumTreeTops()           const override;                 //
-    virtual PVConstLink  getTreeTop(unsigned int i) const override;                 //
+    virtual unsigned int getNumTreeTops()           const override;                //
+    virtual PVConstLink  getTreeTop(unsigned int i) const override;                //
     //-----------------------------------------------------------------------------//
     
     /** Get the ID helper: --------------------------------------------------------*/
@@ -107,9 +108,11 @@ namespace InDetDD {
     const TRT_BaseElement *getElement(IdentifierHash id) const;   // Fast          //
     //-----------------------------------------------------------------------------//
 
+    /** Access the element container ----------------------------------------------*/
+    const TRT_DetElementContainer* getDetectorElementContainer() const;
 
-    /** Access to Whole Collection of Elements -------------------------------------*/
-    const TRT_DetElementCollection * getDetectorElementCollection() const;
+    /** Access to Whole Collection of Elements ------------------------------------*/
+    const TRT_DetElementCollection* getDetectorElementCollection() const;
     TRT_DetElementCollection::const_iterator getDetectorElementBegin() const;
     TRT_DetElementCollection::const_iterator getDetectorElementEnd() const;
 
@@ -117,29 +120,30 @@ namespace InDetDD {
 
     
     /** Access Barrel Elements:------------------(Fast)----------------------------*/
-    const TRT_BarrelElement *getBarrelElement(unsigned int positive,               //
-					                          unsigned int moduleIndex,            //
-					                          unsigned int phiIndex,               //
-					                          unsigned int strawLayerIndex) const; //
-    TRT_BarrelElement *getBarrelElement(unsigned int positive,                     //
-					                    unsigned int moduleIndex,                  //
-					                    unsigned int phiIndex,                     //
-					                    unsigned int strawLayerIndex);             //
+    const TRT_BarrelElement *getBarrelElement(unsigned int positive                //
+					      , unsigned int moduleIndex           //
+					      , unsigned int phiIndex              //
+					      , unsigned int strawLayerIndex) const; 
+
+    TRT_BarrelElement *getBarrelElement(unsigned int positive                      //
+					, unsigned int moduleIndex                 //
+					, unsigned int phiIndex                    //
+					, unsigned int strawLayerIndex);           //
     //                                                                             //
     //-----------------------------------------------------------------------------//
   
     
     /** Access Endcap Elements:------------------(Fast)-----------------------------*/
-    const TRT_EndcapElement *getEndcapElement(unsigned int positive,               //
-					                          unsigned int wheelIndex,             //
-					                          unsigned int strawLayerIndex,        //
-					                          unsigned int phiIndex) const;        //
-    TRT_EndcapElement *getEndcapElement(unsigned int positive,                     //
-					                    unsigned int wheelIndex,                   //
-					                    unsigned int strawLayerIndex,              //
-					                    unsigned int phiIndex);                    //
-    //                                                                             //
-    //-----------------------------------------------------------------------------//
+    const TRT_EndcapElement *getEndcapElement(unsigned int positive                 //
+					      , unsigned int wheelIndex             //
+					      , unsigned int strawLayerIndex        //
+					      , unsigned int phiIndex) const;       //
+    TRT_EndcapElement *getEndcapElement(unsigned int positive                       //
+					, unsigned int wheelIndex                   //
+					, unsigned int strawLayerIndex              //
+					, unsigned int phiIndex);                   //
+    //                                                                              //
+    //------------------------------------------------------------------------------//
 
     /** Conditions interface (mostly for internal use):----------------------------*/
     const TRT_Conditions * conditions() const;                                     //
@@ -249,21 +253,13 @@ namespace InDetDD {
     // Private member data:--------------------------------------------------------//
     std::vector<PVLink> m_volume;                                                  //
     //                                                                             //
-    enum {NMODMAX=3};                                                              //
-    enum {NWHEELMAX=18};                                                           //
-    enum {NPHIMAX=32};                                                             //
-    enum {NSTRAWLAYMAXBR=30};                                                      //
-    enum {NSTRAWLAYMAXEC=16};                                                      //
-    //                                                                             //
-    TRT_BarrelElement *m_barrelArray[2][NMODMAX][NPHIMAX][NSTRAWLAYMAXBR]{};         //
-    TRT_EndcapElement *m_endcapArray[2][NWHEELMAX][NSTRAWLAYMAXEC][NPHIMAX]{};       //
-    TRT_DetElementCollection m_elements;                                           //     
+    TRT_DetElementContainer m_elementContainer;                                    //
     //                                                                             //
     TRT_Numerology  *m_numerology;                                                 //
     const TRT_ID    *m_idHelper;                                                   //
     bool             m_ownsIdHelper;                                               //
-    const GeoXF::Function *m_barrelXF[3]{};                                          //
-    const GeoXF::Function *m_endcapXF[3]{};                                          //
+    const GeoXF::Function *m_barrelXF[3]{};                                        //
+    const GeoXF::Function *m_endcapXF[3]{};                                        //
     //                                                                             //
     ActiveGasType m_gasType;                                                       //
     unsigned int m_digvers;                                                        //

@@ -39,6 +39,7 @@ namespace InDetDD {
         m_digvers(9999),
         m_digversname("ERROR:DIGVERSNOTSET!")
     {
+      m_elementContainer.setNumerology(m_numerology);
 
     // If detstore no passed then get it from bootstrap.
         if (m_detStore == nullptr) {
@@ -46,27 +47,6 @@ namespace InDetDD {
             if (sc.isFailure()) msg(MSG::ERROR) << "Could not locate DetectorStore" << endmsg;
         }
 
-    //
-    // NULL out barrel and endcap arrays:
-    //
-        for (auto & ec : m_barrelArray) {
-            for (auto & mod : ec) {
-                for (auto & phi : mod) {
-                    for (auto & sLay : phi) {
-                        sLay=nullptr;
-                    }
-                }
-            }
-        }
-        for (auto & ec : m_endcapArray) {
-            for (auto & whe : ec) {
-                for (auto & sLay : whe) {
-                    for(auto & phi : sLay) {
-                        phi=nullptr;
-                    }
-                }
-            }
-        }
         m_barrelXF[0]=m_barrelXF[1]=m_barrelXF[2]=nullptr;
         m_endcapXF[0]=m_endcapXF[1]=m_endcapXF[2]=nullptr;
     }
@@ -85,24 +65,6 @@ namespace InDetDD {
     {
         for (auto & i : m_volume) {
             i->unref();
-        }
-        for (auto & ec : m_barrelArray) {
-            for (auto & mod : ec) {
-                for (auto & phi : mod) {
-                    for (auto & sLay : phi) {
-                        delete sLay;
-                    }
-                }
-            }
-        }
-        for (auto & ec : m_endcapArray) {
-            for (auto & whe : ec) {
-                for (auto & sLay : whe) {
-                    for(auto & phi : sLay) {
-                        delete phi;
-                    }
-                }
-            }
         }
         delete m_numerology;
         if (m_ownsIdHelper)    delete m_idHelper;
@@ -139,181 +101,99 @@ namespace InDetDD {
         vol->ref();
         m_volume.push_back(vol);
     }
-
+  
     // Manage the barrel elements:
-    void TRT_DetectorManager::manageBarrelElement(TRT_BarrelElement *barrel) {
-
-        if ( m_barrelArray
-            [barrel->getCode().isPosZ()]
-            [barrel->getCode().getModuleIndex()]
-            [barrel->getCode().getPhiIndex()]
-            [barrel->getCode().getStrawLayerIndex()] ) {
-
-            //Element already added - complain!
-            if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "manageBarrelElement: Overriding existing element"<<endmsg;
-        };
-
-        m_barrelArray
-            [barrel->getCode().isPosZ()]
-            [barrel->getCode().getModuleIndex()]
-            [barrel->getCode().getPhiIndex()]
-            [barrel->getCode().getStrawLayerIndex()]
-            =barrel;
-
-        // Add the barrel element to the hash vector:
-        if (m_idHelper) {
-            Identifier id = m_idHelper->layer_id(barrel->getCode().isPosZ() ? +1 : -1,
-                barrel->getCode().getPhiIndex(),
-                barrel->getCode().getModuleIndex(),
-                barrel->getCode().getStrawLayerIndex());
-            IdentifierHash hashId = m_idHelper->straw_layer_hash(id);
-            if (hashId.is_valid()) {
-                if (m_elements.size() <= hashId) {
-                    m_elements.resize(static_cast<unsigned int>(hashId) + 1);
-                }
-                if (m_elements[hashId]) {
-                    //Element already added - complain!
-                    if(msgLvl(MSG::DEBUG))
-                        msg(MSG::DEBUG) << "manageBarrelElement: Overriding existing element for hashID"<<endmsg;
-                }
-                m_elements[hashId]=barrel;
-            } else {
-                msg(MSG::WARNING) << "manageBarrelElement: Invalid identifier" << endmsg;
-            }
-
-        }
-
+    void TRT_DetectorManager::manageBarrelElement(TRT_BarrelElement *barrel) 
+    {
+      m_elementContainer.manageBarrelElement(barrel,m_idHelper);
+    }
+  
+    // Manage the endcap elements:
+    void TRT_DetectorManager::manageEndcapElement(TRT_EndcapElement *endcap) 
+    {
+      m_elementContainer.manageEndcapElement(endcap,m_idHelper);
     }
 
-  // Manage the endcap elements:
-    void TRT_DetectorManager::manageEndcapElement(TRT_EndcapElement *endcap) {
-
-        if ( m_endcapArray
-            [endcap->getCode().isPosZ()]
-            [endcap->getCode().getWheelIndex()]
-            [endcap->getCode().getStrawLayerIndex()]
-        [endcap->getCode().getPhiIndex()] ) {
-
-            //Element already added - complain!
-            if(msgLvl(MSG::DEBUG))
-                msg(MSG::DEBUG) << "manageEndcapElement: Overriding existing element"<<endmsg;
-        };
-
-        m_endcapArray
-            [endcap->getCode().isPosZ()]
-            [endcap->getCode().getWheelIndex()]
-            [endcap->getCode().getStrawLayerIndex()]
-            [endcap->getCode().getPhiIndex()]
-            =endcap;
-
-        if (m_idHelper) {
-            Identifier id = m_idHelper->layer_id(endcap->getCode().isPosZ() ? +2 : -2,
-                endcap->getCode().getPhiIndex(),
-                endcap->getCode().getWheelIndex(),
-                endcap->getCode().getStrawLayerIndex());
-
-            IdentifierHash hashId = m_idHelper->straw_layer_hash(id);
-            if (hashId.is_valid()) {
-                if (m_elements.size() <= hashId) {
-                    m_elements.resize(static_cast<unsigned int>(hashId) + 1);
-                }
-                if (m_elements[hashId]) {
-                    //Element already added - complain!
-                    if(msgLvl(MSG::DEBUG))
-                        msg(MSG::DEBUG) << "manageEndcapElement: Overriding existing element for hashID"<<endmsg;
-                }
-                m_elements[hashId]=endcap;
-            } else {
-                msg(MSG::WARNING) << "manageEndcapElement: Invalid identifier" << endmsg;
-            }
-        }
+    const TRT_BarrelElement *TRT_DetectorManager::getBarrelElement(unsigned int positive
+                                                                   , unsigned int moduleIndex
+                                                                   , unsigned int phiIndex
+                                                                   , unsigned int strawLayerIndex) const 
+    {
+      return m_elementContainer.getBarrelDetElement(positive,moduleIndex,phiIndex,strawLayerIndex);
     }
 
-    const TRT_BarrelElement *TRT_DetectorManager::getBarrelElement(unsigned int positive,
-                                                                   unsigned int moduleIndex,
-                                                                   unsigned int phiIndex,
-                                                                   unsigned int strawLayerIndex) const {
-        if ( positive >= 2 || moduleIndex >= NMODMAX
-            || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXBR) return nullptr;
-
-        return m_barrelArray[positive][moduleIndex][phiIndex][strawLayerIndex];
+    TRT_BarrelElement *TRT_DetectorManager::getBarrelElement(unsigned int positive
+							     , unsigned int moduleIndex
+							     , unsigned int phiIndex
+							     , unsigned int strawLayerIndex)
+    {
+      return m_elementContainer.getBarrelDetElement(positive,moduleIndex,phiIndex,strawLayerIndex);
     }
 
-
-
-    TRT_BarrelElement *TRT_DetectorManager::getBarrelElement(unsigned int positive,
-        unsigned int moduleIndex,
-        unsigned int phiIndex,
-        unsigned int strawLayerIndex){
-        if ( positive >= 2 || moduleIndex >= NMODMAX
-            || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXBR) return nullptr;
-
-        return m_barrelArray[positive][moduleIndex][phiIndex][strawLayerIndex];
+    const TRT_EndcapElement *TRT_DetectorManager::getEndcapElement(unsigned int positive
+								   , unsigned int wheelIndex
+								   , unsigned int strawLayerIndex
+								   , unsigned int phiIndex) const 
+    {
+      return m_elementContainer.getEndcapDetElement(positive,wheelIndex,strawLayerIndex,phiIndex);
     }
 
-
-
-
-
-    const TRT_EndcapElement *TRT_DetectorManager::getEndcapElement(unsigned int positive,
-        unsigned int wheelIndex,
-        unsigned int strawLayerIndex,
-        unsigned int phiIndex) const {
-
-        if ( positive >= 2 || wheelIndex >= NWHEELMAX
-            || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXEC) return nullptr;
-
-        return m_endcapArray[positive][wheelIndex][strawLayerIndex][phiIndex];
+    TRT_EndcapElement *TRT_DetectorManager::getEndcapElement(unsigned int positive
+							     , unsigned int wheelIndex
+							     , unsigned int strawLayerIndex
+							     , unsigned int phiIndex) 
+    {
+      return m_elementContainer.getEndcapDetElement(positive,wheelIndex,strawLayerIndex,phiIndex);
     }
 
-
-    TRT_EndcapElement *TRT_DetectorManager::getEndcapElement(unsigned int positive,
-        unsigned int wheelIndex,
-        unsigned int strawLayerIndex,
-        unsigned int phiIndex) {
-
-        if ( positive >= 2 || wheelIndex >= NWHEELMAX
-            || phiIndex>=NPHIMAX || strawLayerIndex >= NSTRAWLAYMAXEC) return nullptr;
-
-        return m_endcapArray[positive][wheelIndex][strawLayerIndex][phiIndex];
-    }
-
-    const TRT_ID *TRT_DetectorManager::getIdHelper() const {
+    const TRT_ID *TRT_DetectorManager::getIdHelper() const 
+    {
         return m_idHelper;
     }
 
-
-    void TRT_DetectorManager::setIdHelper(const TRT_ID *idHelper, bool owns) {
+    void TRT_DetectorManager::setIdHelper(const TRT_ID *idHelper, bool owns) 
+    {
         m_idHelper=idHelper;
         m_ownsIdHelper=owns;
     }
 
 
 
-    const TRT_BaseElement *TRT_DetectorManager::getElement(Identifier id) const {
-        // Make sure it is a straw_layer id
-        Identifier strawLayerId = m_idHelper->layer_id(id);
-        IdentifierHash hashId = m_idHelper->straw_layer_hash(strawLayerId);
-        if (hashId>=m_elements.size()) return nullptr;
-        return m_elements[hashId];
+    const TRT_BaseElement *TRT_DetectorManager::getElement(Identifier id) const 
+    {
+      // Make sure it is a straw_layer id
+      Identifier strawLayerId = m_idHelper->layer_id(id);
+      IdentifierHash hashId = m_idHelper->straw_layer_hash(strawLayerId);
+      const TRT_DetElementCollection* elements = m_elementContainer.getElements();
+      if (hashId>=elements->size()) return nullptr;
+      return (*elements)[hashId];
     }
 
-    const TRT_BaseElement *TRT_DetectorManager::getElement(IdentifierHash id) const {
-        if (id>=m_elements.size()) return nullptr;
-        return m_elements[id];
+    const TRT_BaseElement *TRT_DetectorManager::getElement(IdentifierHash id) const 
+    {
+      const TRT_DetElementCollection* elements = m_elementContainer.getElements();
+      if (id>=elements->size()) return nullptr;
+      return (*elements)[id];
     }
 
-
-    const TRT_DetElementCollection * TRT_DetectorManager::getDetectorElementCollection() const {
-        return &m_elements;
+    const TRT_DetElementContainer* TRT_DetectorManager::getDetectorElementContainer() const
+    {
+      return &m_elementContainer;
     }
 
-    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementBegin() const {
-        return m_elements.begin();
+    const TRT_DetElementCollection * TRT_DetectorManager::getDetectorElementCollection() const 
+    {
+      return m_elementContainer.getElements();
     }
 
-    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementEnd() const {
-        return m_elements.end();
+    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementBegin() const 
+    {
+      return m_elementContainer.getElements()->begin();
+    }
+
+    TRT_DetElementCollection::const_iterator TRT_DetectorManager::getDetectorElementEnd() const 
+    {
+      return m_elementContainer.getElements()->end();
     }
 
 
