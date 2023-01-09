@@ -63,7 +63,7 @@ public:
     // std::cout << "ConfAnalysis::~ConfAnalysis() " << name() << std::endl;
     std::map<std::string, TH1F*>::iterator hitr=m_histos.begin();
     std::map<std::string, TH1F*>::iterator hend=m_histos.end();
-    for ( ; hitr!=hend ; hitr++ ) delete hitr->second;     
+    for ( ; hitr!=hend ; ++hitr ) delete hitr->second;     
     //2D histograms
     std::map<std::string, TH2F*>::iterator hitr2D=m_histos2D.begin();                                                                                           
     std::map<std::string, TH2F*>::iterator hend2D=m_histos2D.end();

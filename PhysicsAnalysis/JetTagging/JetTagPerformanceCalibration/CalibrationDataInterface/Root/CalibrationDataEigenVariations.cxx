@@ -1312,7 +1312,7 @@ CalibrationDataEigenVariations(cdipath, tagger, wp, jetcollection, cnt, excludeR
   std::cout << "| " << std::endl;
   while (it != m_all_shared_systematics.end()){
     std::cout << "|-- " << (*it) << std::endl;
-    it++;
+    ++it;
   }
   std::cout << std::endl;
   // End of constructor
