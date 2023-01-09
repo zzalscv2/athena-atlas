@@ -30,7 +30,9 @@ private:
   //1D
   //
   TH1* m_nInnerMostPixelHits{nullptr};
+  TH1* m_nInnerMostPixelEndcapHits{nullptr};
   TH1* m_nNextToInnerMostPixelHits{nullptr};
+  TH1* m_nNextToInnerMostPixelEndcapHits{nullptr};
   TH1* m_nPixelHits{nullptr};
   TH1* m_nSCTHits{nullptr};
   TH1* m_nTRTHits{nullptr};
@@ -64,7 +66,9 @@ private:
   //TProfiles versus eta
   //
   TProfile* m_nInnerMostPixelHits_vs_eta{nullptr};
+  TProfile* m_nInnerMostPixelEndcapHits_vs_eta{nullptr};
   TProfile* m_nNextToInnerMostPixelHits_vs_eta{nullptr};
+  TProfile* m_nNextToInnerMostPixelEndcapHits_vs_eta{nullptr};
   TProfile* m_nPixelHits_vs_eta{nullptr};
   TProfile* m_nSCTHits_vs_eta{nullptr};
   TProfile* m_nTRTHits_vs_eta{nullptr};
@@ -97,7 +101,9 @@ private:
   //TProfiles versus phi
   //
   TProfile* m_nInnerMostPixelHits_vs_phi{nullptr};
+  TProfile* m_nInnerMostPixelEndcapHits_vs_phi{nullptr};
   TProfile* m_nNextToInnerMostPixelHits_vs_phi{nullptr};
+  TProfile* m_nNextToInnerMostPixelEndcapHits_vs_phi{nullptr};
   TProfile* m_nPixelHits_vs_phi{nullptr};
   TProfile* m_nSCTHits_vs_phi{nullptr};
   TProfile* m_nTRTHits_vs_phi{nullptr};
@@ -127,8 +133,10 @@ private:
   // 2D profile content 
   //
   TProfile2D* m_nInnerMostPixelHits_vs_etaphi{nullptr};
+  TProfile2D* m_nInnerMostPixelEndcapHits_vs_etaphi{nullptr};
   TProfile2D* m_nExpectedInnerMostPixelHits_vs_etaphi{nullptr};
   TProfile2D* m_nNextToInnerMostPixelHits_vs_etaphi{nullptr};
+  TProfile2D* m_nNextToInnerMostPixelEndcapHits_vs_etaphi{nullptr};
   TProfile2D* m_nExpectedNextToInnerMostPixelHits_vs_etaphi{nullptr};
   TProfile2D* m_nPixelHits_vs_etaphi{nullptr};
   TProfile2D* m_nPixelHoles_vs_etaphi{nullptr};
@@ -142,7 +150,9 @@ private:
   //TProfiles versus mu
   //
   TProfile* m_nInnerMostPixelHits_vs_mu{nullptr};
+  TProfile* m_nInnerMostPixelEndcapHits_vs_mu{nullptr};
   TProfile* m_nNextToInnerMostPixelHits_vs_mu{nullptr};
+  TProfile* m_nNextToInnerMostPixelEndcapHits_vs_mu{nullptr};
   TProfile* m_nPixelHits_vs_mu{nullptr};
   TProfile* m_nSCTHits_vs_mu{nullptr};
   TProfile* m_nTRTHits_vs_mu{nullptr};

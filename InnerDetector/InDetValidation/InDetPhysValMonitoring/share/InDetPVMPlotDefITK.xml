@@ -47,6 +47,64 @@
   <!-- Plots common to Run2 and ITK -->
   &Common;
   <!-- ITK-specific plots -->
+
+  <!--
+      =======================================================
+      innermost pixel hit plots for endcaps
+      =======================================================
+  -->
+
+  <h id="nInnerMostPixelEndcapHits" type="TH1F" title="InnerMost Pixel EndcapHits">
+    <x title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+    <y title="Entries"/>
+  </h>
+  <h id="nInnerMostPixelEndcapHits_vs_eta" type="TProfile" title="InnerMost Pixel Endcap Hits vs Eta">
+    <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+    <y title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelEndcapHits_vs_phi" type="TProfile" title="InnerMost Pixel Endcap Hits vs Phi">
+    <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+    <y title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelEndcapHits_vs_etaphi" type="TProfile2D" title="InnerMost Pixel Endcap Hits vs Eta and Phi">
+    <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+    <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+    <z title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelEndcapHits_vs_mu" type="TProfile" title="InnerMost Pixel Endcap Hits vs Mu">
+    <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+    <y title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+
+  <h id="nNextToInnerMostPixelEndcapHits" type="TH1F" title="Next To InnerMost Pixel Endcap Hits">
+    <x title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+    <y title="Entries"/>
+  </h>
+  <h id="nNextToInnerMostPixelEndcapHits_vs_eta" type="TProfile" title="Next To InnerMost Pixel Endcap Hits vs Eta">
+    <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+    <y title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nNextToInnerMostPixelEndcapHits_vs_etaphi" type="TProfile2D" title="Next To InnerMost Pixel Endcap Hits vs Eta and Phi">
+    <x title="#eta" n="&ETABINS2D;" lo="-&ETA;" hi="&ETA;"/>
+    <y title="#phi" n="&PHIBINS2D;" lo="-3.2" hi="3.2"/>
+    <z title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nNextToInnerMostPixelEndcapHits_vs_phi" type="TProfile" title="Next To InnerMost Pixel Endcap Hits vs Phi">
+    <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+    <y title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nNextToInnerMostPixelEndcapHits_vs_mu" type="TProfile" title="Next To InnerMost Pixel Endcap Hits vs Mu">
+    <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+    <y title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+
+  <!--
+      =======================================================
+      end of innermost pixel hit plots for endcaps
+      =======================================================
+  -->
+
+
   <!--
       =======================================================
       efficiency vs mu plots [InDetPerfPlot_Eff]:
