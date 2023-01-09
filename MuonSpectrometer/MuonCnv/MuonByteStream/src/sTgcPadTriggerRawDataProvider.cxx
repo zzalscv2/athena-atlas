@@ -14,7 +14,7 @@ StatusCode Muon::sTgcPadTriggerRawDataProvider::initialize() {
 }
 
 StatusCode Muon::sTgcPadTriggerRawDataProvider::execute(const EventContext& ctx) const {
-    ATH_MSG_INFO("sTgcPadTriggerRawDataProvider::execute");
+    ATH_MSG_DEBUG("sTgcPadTriggerRawDataProvider::execute");
     if (!m_rawDataTool->convert(ctx).isSuccess()) {
       ATH_MSG_ERROR("STGC Pad Trigger BS conversion into RDOs failed");
       return StatusCode::FAILURE;
