@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODROOTACCESS_TOOLS_TEVENTFORMATREGISTRY_H
@@ -27,10 +27,10 @@ namespace xAOD {
 
    public:
       /// Access the only instance of the object in memory
-      static TEventFormatRegistry& instance();
+      static const TEventFormatRegistry& instance();
 
       /// Access the managed EventFormat object
-      EventFormat& getEventFormat( const TFile* file );
+      EventFormat& getEventFormat( const TFile* file ) const;
 
       /// Merge the contents of another EventFormat object into the managed one
       void merge( const TFile* file, const EventFormat& ef );
