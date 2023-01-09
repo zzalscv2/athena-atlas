@@ -147,7 +147,9 @@ void Trk::MaterialMapper::recordMaterialHit(const AssociatedMaterial& amhit, con
             (*volTreeObj).path          += amhit.steplength();
             (*volTreeObj).pathInX0      += amhit.steplengthInX0();
             (*volTreeObj).pathInL0      += amhit.steplengthInL0();
-            (*volTreeObj).pathZARho     += (amhit.Z()/amhit.A())*amhit.rho()*amhit.steplength();
+            if(amhit.A() != 0.0) {
+                (*volTreeObj).pathZARho     += (amhit.Z()/amhit.A())*amhit.rho()*amhit.steplength();
+            }
         } else
             ATH_MSG_WARNING( "Cannot find/create VolumeTreeObject for volume '" << itvol->volumeName() << "'." );
         itvol = itvol->getMotherVolume();
@@ -166,7 +168,9 @@ void Trk::MaterialMapper::recordMaterialHit(const AssociatedMaterial& amhit, con
         m_mappedPathInX0        +=  amhit.steplengthInX0();
         m_mappedPathInL0        +=  amhit.steplengthInL0();
         m_mappedPathRho         +=  amhit.rho()*steplength;
-        m_mappedPathZARho       +=  (amhit.Z()/amhit.A())*amhit.rho()*steplength;
+        if(amhit.A() != 0.0) {
+            m_mappedPathZARho       +=  (amhit.Z()/amhit.A())*amhit.rho()*steplength;
+        }
         ATH_MSG_VERBOSE("[ MaterialMapper ] Accumulated Path in Rho (*Z/A) = " << m_mappedPathRho << " ( " <<  m_mappedPathZARho << " )");
     } else 
         m_unmappedPathInX0 +=  amhit.steplengthInX0();

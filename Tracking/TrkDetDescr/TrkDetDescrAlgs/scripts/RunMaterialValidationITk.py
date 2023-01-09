@@ -84,7 +84,4 @@ cfg.printConfig(withDetails = True, summariseProps = True)
 
 ## as no input file, maxEvents should be a valid number
 cfg.run(maxEvents=args.maxEvents)
-f=open("MaterialValidationITk.pkl","wb")
-cfg.store(f)
-f.close()
 
