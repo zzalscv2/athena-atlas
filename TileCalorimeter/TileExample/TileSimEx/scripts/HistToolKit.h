@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ##########################################
@@ -24,8 +24,8 @@ int DrawCMEAndLumi(float xstart, float ystart, string lumiInFb, string CME) ;
 bool sort_by_histmax(TH1F* hist1, TH1F* hist2) ;
 bool sort_by_vechistmax(std::pair<TH1F*, bool> p1, std::pair<TH1F*, bool> p2) ;
 
-TH1F* bookTH1F(std::string name, std::string title,
-               std::string xlabel,std::string ylabel,
+TH1F* bookTH1F( const std::string& name, const std::string& title,
+               const std::string& xlabel,const std::string& ylabel,
                int xbins, double xlow, double xhigh,
                bool sumw2 = true, bool overflow=true)
 {
@@ -49,8 +49,8 @@ TH1F* bookTH1F(string name, string title,
   return tmp ;
 }
 
-TH1F* bookTH1F(string name, string title,
-               string xlabel,string ylabel,
+TH1F* bookTH1F(const string& name, const string& title,
+               const string& xlabel,const string& ylabel,
                TH1F* hist,
                bool sumw2 = true)
 {
@@ -127,7 +127,7 @@ TH1F* getDataLikeHist(TH1F* eff, TH1F* scaled, string name, int jobSeed = 10 )
 
 
 // Get map from binary file
-int GetNumberOfEvents(std::string filename, std::map<string, int> *channelvsbumber)
+int GetNumberOfEvents(const std::string& filename, std::map<string, int> *channelvsbumber)
 {
   ifstream fileIn(filename.c_str());
   std::string line;
