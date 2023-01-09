@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def TRT_SegmentsToTrackCfg(flags, name ='InDetTRT_SegmentsToTrack_Barrel', **kwargs):
+def TRT_Cosmics_SegmentsToTrackCfg(flags, name ='InDetTRT_Cosmics_SegmentsToTrack', **kwargs):
     acc = ComponentAccumulator()
 
     if "ExtrapolationTool" not in kwargs:

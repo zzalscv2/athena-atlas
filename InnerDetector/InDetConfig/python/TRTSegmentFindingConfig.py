@@ -2,9 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
-def TRTSegmentFindingCfg(flags, extension = "",
-                         InputCollections = None,
-                         BarrelSegments = None):
+def TRTSegmentFindingCfg(flags, InputCollections = None):
     acc = ComponentAccumulator()
 
     #
@@ -13,28 +11,82 @@ def TRTSegmentFindingCfg(flags, extension = "",
     if InputCollections is not None:
         from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg
         acc.merge(InDetTrackPRD_AssociationCfg(flags,
-                                               name = 'InDetSegmentTrackPRD_Association' + extension,
-                                               AssociationMapName = 'InDetSegmentPRDtoTrackMap' + extension,
+                                               name = 'InDetSegmentTrackPRD_Association',
+                                               AssociationMapName = 'InDetSegmentPRDtoTrackMap',
                                                TracksName = list(InputCollections)))
 
     #
     # --- TRT track reconstruction
     #
-    from InDetConfig.TRT_TrackSegmentsFinderConfig import TRT_TrackSegmentsFinderCfg
-    acc.merge(TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder'+extension,
-                                         extension = extension,
-                                         SegmentsLocation = BarrelSegments,
-                                         InputCollections = InputCollections))
+    if flags.Beam.Type is BeamType.Cosmics:
+        from InDetConfig.TRT_TrackSegmentsFinderConfig import (
+            TRT_TrackSegmentsFinder_Cosmics_Cfg)
+        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(flags))
+    else:
+        from InDetConfig.TRT_TrackSegmentsFinderConfig import (
+            TRT_TrackSegmentsFinderCfg)
+        acc.merge(TRT_TrackSegmentsFinderCfg(flags))
+
+        #
+        # --- load TRT validation alg
+        #
+        if flags.InDet.doTruth:
+            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import (
+                SegmentDriftCircleAssValidationCfg)
+            acc.merge(SegmentDriftCircleAssValidationCfg(flags))
+
+    return acc
+
+def TRTSegmentFinding_Phase_Cfg(flags):
+    acc = ComponentAccumulator()
+
     #
-    # --- load TRT validation alg
+    # --- TRT track reconstruction
     #
+    if flags.Beam.Type is BeamType.Cosmics:
+        from InDetConfig.TRT_TrackSegmentsFinderConfig import (
+            TRT_TrackSegmentsFinder_Cosmics_Cfg)
+        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name='InDetTRT_TrackSegmentsFinder_Phase_Cosmics',
+                                                      SegmentsLocation = 'TRTSegments_Phase'))
+    else:
+        from InDetConfig.TRT_TrackSegmentsFinderConfig import (
+            TRT_TrackSegmentsFinder_Phase_Cfg)
+        acc.merge(TRT_TrackSegmentsFinder_Phase_Cfg(flags))
+
+        #
+        # --- load TRT validation alg
+        #
+        if flags.InDet.doTruth:
+            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import SegmentDriftCircleAssValidationCfg
+            acc.merge(SegmentDriftCircleAssValidationCfg(flags,
+                                                         name = "InDetSegmentDriftCircleAssValidation_Phase"))
+
+    return acc
+
+def TRTSegmentFinding_TrackSegments_Cfg(flags):
+    acc = ComponentAccumulator()
+
+    #
+    # --- TRT track reconstruction
+    #
+    if flags.Beam.Type is BeamType.Cosmics:
+        from InDetConfig.TRT_TrackSegmentsFinderConfig import (
+            TRT_TrackSegmentsFinder_Cosmics_Cfg)
+        acc.merge(TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name='InDetTRT_TrackSegmentsFinder_TrackSegments_Cosmics',
+                                                      SegmentsLocation = 'TRTSegmentsTRT'))
+    else:
+        from InDetConfig.TRT_TrackSegmentsFinderConfig import (
+            TRT_TrackSegmentsFinder_TrackSegments_Cfg)
+        acc.merge(TRT_TrackSegmentsFinder_TrackSegments_Cfg(flags))
+
+        #
+        # --- load TRT validation alg
+        #
     
-    if flags.InDet.doTruth and flags.Beam.Type is not BeamType.Cosmics:
-        from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import SegmentDriftCircleAssValidationCfg
-        acc.merge(SegmentDriftCircleAssValidationCfg(flags,
-                                                     name = "InDetSegmentDriftCircleAssValidation"+extension,
-                                                     extension = extension))
-    
+        if flags.InDet.doTruth:
+            from InDetConfig.InDetSegmentDriftCircleAssValidationConfig import SegmentDriftCircleAssValidation_TrackSegments_Cfg
+            acc.merge(SegmentDriftCircleAssValidation_TrackSegments_Cfg(flags))
+
     return acc
 
 
@@ -61,17 +113,9 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     top_acc.merge(PoolReadCfg(flags))
 
-    # NewTracking collection keys
-    InputCombinedInDetTracks = []
-
     from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
     top_acc.merge(TRTPreProcessingCfg(flags))
-
-    top_acc.merge(TRTSegmentFindingCfg( flags,
-                                        extension = "",
-                                        InputCollections = InputCombinedInDetTracks,
-                                        BarrelSegments = 'TRTSegments'))
-    #############################################################################
+    top_acc.merge(TRTSegmentFindingCfg(flags))
 
     iovsvc = top_acc.getService('IOVDbSvc')
     iovsvc.OutputLevel=5

@@ -7,7 +7,10 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 #
 # ------------------------------------------------------------
 
-def BackTrackingCfg(flags, InputCollections = None, TrackCollectionKeys=[] , TrackCollectionTruthKeys=[], ClusterSplitProbContainer=''):
+def BackTrackingCfg(flags, InputCollections = None,
+                    TrackCollectionKeys=[] ,
+                    TrackCollectionTruthKeys=[],
+                    ClusterSplitProbContainer=''):
     acc = ComponentAccumulator()
     # ------------------------------------------------------------
     #
@@ -16,7 +19,8 @@ def BackTrackingCfg(flags, InputCollections = None, TrackCollectionKeys=[] , Tra
     # ------------------------------------------------------------
 
     from InDetConfig.TRT_SeededTrackFinderConfig import TRT_SeededTrackFinderCfg
-    acc.merge(TRT_SeededTrackFinderCfg(flags, InputCollections = InputCollections))
+    acc.merge(TRT_SeededTrackFinderCfg(flags,
+                                       InputCollections = InputCollections))
     # ------------------------------------------------------------
     #
     # --- Resolve back tracking tracks
@@ -24,7 +28,8 @@ def BackTrackingCfg(flags, InputCollections = None, TrackCollectionKeys=[] , Tra
     # ------------------------------------------------------------
     from TrkConfig.TrkAmbiguitySolverConfig import TrkAmbiguityScore_TRT_Cfg, TrkAmbiguitySolver_TRT_Cfg
     acc.merge(TrkAmbiguityScore_TRT_Cfg(flags))
-    acc.merge(TrkAmbiguitySolver_TRT_Cfg(flags, ClusterSplitProbContainer = ClusterSplitProbContainer))
+    acc.merge(TrkAmbiguitySolver_TRT_Cfg(flags,
+                                         ClusterSplitProbContainer = ClusterSplitProbContainer))
 
     return acc
 
@@ -64,22 +69,13 @@ if __name__ == "__main__":
     top_acc.merge(TRTPreProcessingCfg(flags))
 
     ######################################## TRTSegmentFinding Configuration ###########################################
-    InputCollections = []
 
     from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFindingCfg
-    top_acc.merge(TRTSegmentFindingCfg( flags,
-                                        extension = "",
-                                        InputCollections = InputCollections,
-                                        BarrelSegments = 'TRTSegments'))
+    top_acc.merge(TRTSegmentFindingCfg(flags))
 
     ########################################## BackTracking Configuration ##############################################
-    TrackCollectionKeys = []
 
-    top_acc.merge(BackTrackingCfg(  flags,
-                                    InputCollections = InputCollections,
-                                    TrackCollectionKeys=TrackCollectionKeys,
-                                    TrackCollectionTruthKeys=[],
-                                    ClusterSplitProbContainer=''))
+    top_acc.merge(BackTrackingCfg(flags))
 
     ####################################################################################################################
 
