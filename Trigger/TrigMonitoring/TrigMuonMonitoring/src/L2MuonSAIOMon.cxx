@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L2MuonSAIOMon.h"
@@ -959,7 +959,7 @@ bool L2MuonSAIOMon :: isPassedmuCombHypo( const std::string &chain, const xAOD::
   bool my_pikCuts = true;
   float my_maxPtToApplyPik = 25.;
   float my_chi2MaxID = 3.5;
-  ATH_MSG_INFO( "decision_ptthreshold:   " << decision_ptthreshold( chain, my_EtaBins, my_muCombThres, my_pikCuts, my_maxPtToApplyPik, my_chi2MaxID ) );
+  ATH_MSG_DEBUG( "decision_ptthreshold:   " << decision_ptthreshold( chain, my_EtaBins, my_muCombThres, my_pikCuts, my_maxPtToApplyPik, my_chi2MaxID ) );
 
   bool pikCut = true;
   bool stdCut = true;
