@@ -279,7 +279,7 @@ namespace SH
 	  {
 	    if (iter == 0)
 	      RCU_THROW_MSG ("sample name matches entire postfix pattern: \"" + sampleName + "\"");
-	    sampleName = sampleName.substr (0, iter);
+	    sampleName.resize (iter);
 	    done = true;
 	  }
 	}
@@ -349,7 +349,7 @@ namespace SH
 	     myindex < 0)
       {
 	while (!sampleName.empty() && sampleName[sampleName.size()-1] == '/')
-	  sampleName = sampleName.substr (0, sampleName.size() - 1);
+	  sampleName.pop_back();
 	if (sampleName.empty())
 	  return sampleName;
 	if (myindex < 0)
@@ -360,7 +360,7 @@ namespace SH
 	    sampleName.clear ();
 	    return sampleName;
 	  }
-	  sampleName = sampleName.substr (0, split);
+	  sampleName.resize (split);
 	  ++ myindex;
 	}
 	if (sampleName.empty())

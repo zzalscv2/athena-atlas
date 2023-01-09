@@ -212,7 +212,7 @@ namespace EL
     }
     std::string to = location;
     while (!to.empty() && to[to.size()-1] == '/')
-      to = to.substr (0,to.size()-1);
+      to.resize (to.size()-1);
     {
       SH::SampleHandler sh;
       sh.load (location + "/hist");
