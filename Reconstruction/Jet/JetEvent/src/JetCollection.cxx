@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -137,7 +137,7 @@ std::string JetCollection::author() const
 { 
   return keyDesc()->getKey(JetKeyConstants::InfoCat,m_jetAuthor);  
 }
-void JetCollection::setAuthor(std::string author){
+void JetCollection::setAuthor(const std::string& author){
   m_jetAuthor = keyDesc()->getIndex(JetKeyConstants::InfoCat,author,true); 
 }
 
