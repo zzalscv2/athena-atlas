@@ -177,15 +177,6 @@ if ConfigFlags.Input.Format is Format.POOL:
 # Run-3 Trigger produces Run-3 EDM
 ConfigFlags.Trigger.EDMVersion = 3
 
-# Some legacy b-tagging configuration is trigger specific
-ConfigFlags.BTagging.databaseScheme = 'Trig'
-ConfigFlags.BTagging.forcedCalibrationChannel = 'AntiKt4EMTopo'
-# track association for trigger b-tagging might be inconsistent with
-# offline, override the default for now
-ConfigFlags.BTagging.minimumJetPtForTrackAssociation = 5e3
-# Disable some taggers that we don't use
-ConfigFlags.BTagging.taggerList = ['SV1','JetFitterNN']
-
 # Set final Cond/Geo tag based on input file, command line or default
 globalflags.DetDescrVersion = opt.setDetDescr or ConfigFlags.Trigger.OnlineGeoTag
 ConfigFlags.GeoModel.AtlasVersion = globalflags.DetDescrVersion()
