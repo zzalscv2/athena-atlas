@@ -1,9 +1,8 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
-LArFebErrorSummaryMaker=CompFactory.LArFebErrorSummaryMaker
 from LArBadChannelTool.LArBadChannelConfig import LArBadFebCfg
 from AthenaCommon.Logging import logging
-
+from OutputStreamAthenaPool.OutputStreamConfig import addToESD
 
 def LArFebErrorSummaryMakerCfg(configFlags):
 
@@ -52,6 +51,8 @@ def LArFebErrorSummaryMakerCfg(configFlags):
                                          #MaskFebZeroSample = lMaskFebZeroSample,
                                          )
                     )
+
+    acc.merge(addToESD(configFlags,["LArFebErrorSummary#LArFebErrorSummary",]))
 
     return acc
 
