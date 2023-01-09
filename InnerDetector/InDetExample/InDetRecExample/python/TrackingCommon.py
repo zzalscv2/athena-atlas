@@ -1784,7 +1784,9 @@ def getTrackObserverTool(name='TrackObserverTool', write_tracks = False, **kwarg
     the_name = makeName( name, kwargs)
     from InDetRecExample.InDetKeys import InDetKeys
     from TrkValTools.TrkValToolsConf import Trk__TrkObserverTool
+    from AthenaCommon import CfgGetter
     TrackObserverTool = Trk__TrkObserverTool(the_name, **kwargs)
+    TrackObserverTool.Fitter = CfgGetter.getPublicToolClone('InDetTrackFitterObserver', 'InDetTrackFitter')
     if write_tracks:
         TrackObserverTool.ObsTrackCollection = InDetKeys.ObservedTracks()
         TrackObserverTool.ObsTrackCollectionMap = InDetKeys.ObservedTracks()+"Map"

@@ -891,7 +891,6 @@ else:
           InDetTracksTruth = ConfiguredInDetTrackTruth(InDetKeys.PseudoTracks(),
                                                        InDetKeys.PseudoDetailedTracksTruth(),
                                                        InDetKeys.PseudoTracksTruth(),
-                                                       False,
                                                        PixelClusterTruth,
                                                        SCT_ClusterTruth,
                                                        TRT_DriftCircleTruth)
