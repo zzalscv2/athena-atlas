@@ -79,7 +79,7 @@ namespace CP
         split != std::string::npos)
     {
       suffix = baseName.substr (split);
-      baseName = baseName.substr (0, split);
+      baseName.resize (split);
     }
 
     for (auto& sys : sysList)

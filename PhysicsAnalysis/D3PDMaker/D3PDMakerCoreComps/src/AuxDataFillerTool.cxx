@@ -193,7 +193,7 @@ StatusCode AuxDataFillerTool::parseVars()
     std::string::size_type ipos = name.find ('#');
     if (ipos != std::string::npos) {
       docstring = name.substr (ipos+1, std::string::npos);
-      name = name.substr (0, ipos);
+      name.resize(ipos);
     }
 
     std::string defstring;

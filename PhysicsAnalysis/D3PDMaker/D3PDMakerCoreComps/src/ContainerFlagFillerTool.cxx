@@ -90,7 +90,7 @@ StatusCode ContainerFlagFillerTool::book()
     std::string::size_type ipos = flagname.find (':');
     if (ipos != std::string::npos) {
       desc = flagname.substr (ipos+1, std::string::npos);
-      flagname = flagname.substr (0, ipos);
+      flagname.resize (ipos);
     }
     CHECK( addVariable (flagname, m_flags[ i ], desc) );
   }
