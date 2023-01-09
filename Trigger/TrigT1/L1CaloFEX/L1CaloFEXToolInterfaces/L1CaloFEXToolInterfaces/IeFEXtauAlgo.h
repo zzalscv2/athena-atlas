@@ -45,6 +45,8 @@ Interface definition for eFEXtauAlgo
     virtual unsigned int getBitwiseEt() = 0;
     virtual bool getUnD() = 0;
     virtual unsigned int getSeed() = 0;
+    virtual void getSums(unsigned int seed, bool UnD, std::vector<unsigned int> & RcoreSums, 
+                         std::vector<unsigned int> & RemSums) = 0;
 
   private:
 

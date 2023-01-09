@@ -58,6 +58,9 @@ namespace LVL1 {
     virtual float getRealRHad() override;
     virtual unsigned int getEt() override;
     virtual unsigned int getBitwiseEt() override;
+    virtual void getSums(unsigned int seed, bool UnD, 
+                         std::vector<unsigned int> & RcoreSums, 
+                         std::vector<unsigned int> & Remums) override;
 
   protected:
 

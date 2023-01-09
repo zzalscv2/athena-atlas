@@ -141,6 +141,11 @@ void eFEXegAlgo::getReta(std::vector<unsigned int> & retavec) {
   // get environment
   envsum = totalsum - coresum;
 
+  // Overflow handling
+  if (coresum > 0xffff) coresum = 0xffff;
+  if (envsum > 0xffff)   envsum = 0xffff;
+
+  // Return results
   retavec.push_back(coresum);
   retavec.push_back(envsum);
 
@@ -183,6 +188,11 @@ void eFEXegAlgo::getRhad(std::vector<unsigned int> & rhadvec) {
     }
   }   
   
+  // Overflow handling
+  if (emsum > 0xffff)   emsum = 0xffff;
+  if (hadsum > 0xffff) hadsum = 0xffff;
+  
+  // Return results
   rhadvec.push_back(emsum);
   rhadvec.push_back(hadsum);
 
@@ -211,6 +221,11 @@ void LVL1::eFEXegAlgo::getWstot(std::vector<unsigned int> & output){
     }
   }
 
+  // Overflow handling
+  if (den > 0xffff)     den = 0xffff;
+  if (numer > 0xffff) numer = 0xffff;
+  
+  // Return results
   output.push_back(den);
   output.push_back(numer);
 
@@ -253,6 +268,9 @@ unsigned int LVL1::eFEXegAlgo::getET() {
   totET += L1_ET_1 + L1_ET_2 + L1_ET_3 + L1_ET_4 + L1_ET_5 + L1_ET_6;
   totET += L2_ET_1 + L2_ET_2 + L2_ET_3 + L2_ET_4 + L2_ET_5 + L2_ET_6;
   totET += L3_ET_1 + L3_ET_2;
+
+  // overflow handling
+  if (totET > 0xffff) totET = 0xffff;
 
   return totET;
 
@@ -318,9 +336,33 @@ void LVL1::eFEXegAlgo::getWindowET(int layer, int jPhi, int SCID, unsigned int &
     }
   }
 
+  // overflow handling
+  if (outET > 0xffff) outET = 0xffff;
+
+}
+
+
+// Utility function to calculate and return jet discriminant sums for specified location
+// Intended to allow xAOD TOBs to be decorated with this information
+void eFEXegAlgo::getSums(unsigned int seed, bool UnD, 
+                         std::vector<unsigned int> & RetaSums, 
+                         std::vector<unsigned int> & RhadSums, 
+                         std::vector<unsigned int> & WstotSums) 
+{
+  // Set seed parameters to supplied values
+  m_seed_UnD = UnD;
+  m_seedID = seed;
+  m_hasSeed = true;
+
+  // Now just call the 3 discriminant calculation methods
+  getReta(RetaSums);
+  getRhad(RhadSums);
+  getWstot(WstotSums);
+
 }
   
-  
+
+// Find seed and UnD flag  
 void eFEXegAlgo::setSeed() {
 
   m_hasSeed = false;
