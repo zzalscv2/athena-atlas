@@ -59,6 +59,10 @@ namespace LVL1 {
     virtual unsigned int getUnD() override {return m_seed_UnD;};
     virtual void getCoreEMTowerET(unsigned int & et) override;
     virtual void getCoreHADTowerET(unsigned int & et) override;
+    virtual void getSums(unsigned int seed, bool UnD, 
+                         std::vector<unsigned int> & RetaSums, 
+                         std::vector<unsigned int> & RhadSums, 
+                         std::vector<unsigned int> & WstotSums) override;
   private:
     void setSeed();
     bool m_seed_UnD = false; 

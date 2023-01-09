@@ -44,6 +44,8 @@ Interface definition for eFEXegAlgo
     virtual unsigned int getUnD() = 0;
     virtual void getCoreEMTowerET(unsigned int & et) = 0;
     virtual void getCoreHADTowerET(unsigned int & et) = 0;
+    virtual void getSums(unsigned int seed, bool UnD, std::vector<unsigned int> & RetaSums, 
+                         std::vector<unsigned int> & RhadSums, std::vector<unsigned int> & WstotSums) = 0;
 
   };
 
