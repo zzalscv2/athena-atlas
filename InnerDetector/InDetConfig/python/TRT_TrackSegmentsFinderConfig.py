@@ -1,11 +1,10 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TRT_TrackSegmentsFinder package
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 import AthenaCommon.SystemOfUnits as Units
 
 def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
-                               extension = '',
                                InputCollections = None,
                                **kwargs):
 
@@ -14,18 +13,11 @@ def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
     acc = AtlasFieldCacheCondAlgCfg(flags)
 
     if "SegmentsMakerTool" not in kwargs:
-        if flags.Beam.Type is BeamType.Cosmics:
-            from InDetConfig.TRT_TrackSegmentsToolConfig import (
-                TRT_TrackSegmentsMaker_BarrelCosmicsCfg)
-            InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
-                TRT_TrackSegmentsMaker_BarrelCosmicsCfg(flags, name='InDetTRTSegmentsMaker'+extension))
-        else:
-            from InDetConfig.TRT_TrackSegmentsToolConfig import (
-                TRT_TrackSegmentsMaker_ATLxkCfg)
-            InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
-                TRT_TrackSegmentsMaker_ATLxkCfg(flags, name = 'InDetTRT_SeedsMaker'+extension, 
-                                                extension = extension,
-                                                InputCollections = InputCollections))
+        from InDetConfig.TRT_TrackSegmentsToolConfig import (
+            TRT_TrackSegmentsMaker_ATLxkCfg)
+        InDetTRT_TrackSegmentsMaker = acc.popToolsAndMerge(
+            TRT_TrackSegmentsMaker_ATLxkCfg(flags,
+                                            InputCollections = InputCollections))
         kwargs.setdefault("SegmentsMakerTool", InDetTRT_TrackSegmentsMaker)
 
     if "RoadTool" not in kwargs:
@@ -43,5 +35,47 @@ def TRT_TrackSegmentsFinderCfg(flags, name = 'InDetTRT_TrackSegmentsFinder',
                           "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % \
                           (flags.InDet.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV))
 
+    kwargs.setdefault("SegmentsLocation", "TRTSegments")
+
     acc.addEventAlgo(CompFactory.InDet.TRT_TrackSegmentsFinder(name, **kwargs))
+    return acc
+
+def TRT_TrackSegmentsFinder_Cosmics_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinder_Cosmics', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "SegmentsMakerTool" not in kwargs:
+        from InDetConfig.TRT_TrackSegmentsToolConfig import (
+            TRT_TrackSegmentsMaker_BarrelCosmicsCfg)
+        kwargs.setdefault("SegmentsMakerTool", acc.popToolsAndMerge(
+            TRT_TrackSegmentsMaker_BarrelCosmicsCfg(flags)))
+
+    acc.merge(TRT_TrackSegmentsFinderCfg(flags, name, **kwargs))
+    return acc
+
+def TRT_TrackSegmentsFinder_Phase_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinder_Phase', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "SegmentsMakerTool" not in kwargs:
+        from InDetConfig.TRT_TrackSegmentsToolConfig import (
+            TRT_TrackSegmentsMaker_ATLxk_Phase_Cfg)
+        kwargs.setdefault("SegmentsMakerTool", acc.popToolsAndMerge(
+            TRT_TrackSegmentsMaker_ATLxk_Phase_Cfg(flags)))
+
+    kwargs.setdefault("SegmentsLocation", "TRTSegments_Phase")
+
+    acc.merge(TRT_TrackSegmentsFinderCfg(flags, name, **kwargs))
+    return acc
+
+def TRT_TrackSegmentsFinder_TrackSegments_Cfg(flags, name = 'InDetTRT_TrackSegmentsFinder_TrackSegments', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "SegmentsMakerTool" not in kwargs:
+        from InDetConfig.TRT_TrackSegmentsToolConfig import (
+            TRT_TrackSegmentsMaker_ATLxk_TrackSegments_Cfg)
+        kwargs.setdefault("SegmentsMakerTool", acc.popToolsAndMerge(
+            TRT_TrackSegmentsMaker_ATLxk_TrackSegments_Cfg(flags)))
+
+    kwargs.setdefault("SegmentsLocation", "TRTSegmentsTRT")
+
+    acc.merge(TRT_TrackSegmentsFinderCfg(flags, name, **kwargs))
     return acc

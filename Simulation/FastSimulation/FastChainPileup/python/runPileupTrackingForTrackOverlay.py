@@ -128,9 +128,9 @@ acc.getCondAlgo('LuminosityCondAlg').actualMuKey="Bkg_EventInfo.actualInteractio
 acc.getCondAlgo('LuminosityCondAlg').averageMuKey="Bkg_EventInfo.averageInteractionsPerCrossing"
 
 # See TRTStandaloneConfig.py
-from InDetConfig.TRTStandaloneConfig import InDetTrtTrackScoringToolCfg
 flagsTRT = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.TRTStandalonePass")
-InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTrtTrackScoringToolCfg(flagsTRT))
+from InDetConfig.InDetTrackScoringToolsConfig import InDetTRT_StandaloneScoringToolCfg
+InDetTRT_StandaloneScoringTool = acc.popToolsAndMerge(InDetTRT_StandaloneScoringToolCfg(flagsTRT))
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.EventInfoKey="Bkg_EventInfo"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.actualInteractionsPerCrossingKey="Bkg_EventInfo.actualInteractionsPerCrossing"
 acc.getPublicTool('InDetTRT_StandaloneScoringTool').LuminosityTool.averageInteractionsPerCrossingKey="Bkg_EventInfo.averageInteractionsPerCrossing"

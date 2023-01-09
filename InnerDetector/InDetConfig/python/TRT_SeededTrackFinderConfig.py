@@ -4,58 +4,71 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
 
-def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder', InputCollections=[], **kwargs):
+def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder',
+                             InputCollections=None,
+                             **kwargs):
 
     # TRT seeded back tracking algorithm
-
-    #
-    # --- decide if use the association tool
-    #
-    usePrdAssociationTool = (len(InputCollections) > 0)
-
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc = BeamSpotCondAlgCfg(flags)
 
     if flags.InDet.Tracking.ActiveConfig.usePixel:
-        from InDetConfig.SiCombinatorialTrackFinderToolConfig import SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg
+        from InDetConfig.SiCombinatorialTrackFinderToolConfig import (
+            SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg)
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_Pixel_Cfg(flags))
 
     if flags.InDet.Tracking.ActiveConfig.useSCT:
-        from InDetConfig.SiCombinatorialTrackFinderToolConfig import SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg
+        from InDetConfig.SiCombinatorialTrackFinderToolConfig import (
+            SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg)
         acc.merge(SiDetElementBoundaryLinksCondAlg_xk_SCT_Cfg(flags))
 
     if "RefitterTool" not in kwargs:
         from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterBTCfg
-        kwargs.setdefault("RefitterTool", acc.popToolsAndMerge(InDetTrackFitterBTCfg(flags)))
+        kwargs.setdefault("RefitterTool", acc.popToolsAndMerge(
+            InDetTrackFitterBTCfg(flags)))
 
     if "TrackExtensionTool" not in kwargs:
-        from InDetConfig.TRT_TrackExtensionToolConfig import TRT_TrackExtensionToolCfg
-        kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(TRT_TrackExtensionToolCfg(flags)))
+        from InDetConfig.TRT_TrackExtensionToolConfig import (
+            TRT_TrackExtensionToolCfg)
+        kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(
+            TRT_TrackExtensionToolCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolNoHoleSearchCfg
-        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolNoHoleSearchCfg(flags)))
+        from TrkConfig.TrkTrackSummaryToolConfig import (
+            InDetTrackSummaryToolNoHoleSearchCfg)
+        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
+            InDetTrackSummaryToolNoHoleSearchCfg(flags)))
 
     if "Extrapolator" not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
     if "TrackTool" not in kwargs:
-        from InDetConfig.TRT_SeededTrackFinderToolConfig import TRT_SeededTrackFinder_ATLCfg
-        InDetTRT_SeededTrackTool = acc.popToolsAndMerge(TRT_SeededTrackFinder_ATLCfg(flags, InputCollections=InputCollections))
+        from InDetConfig.TRT_SeededTrackFinderToolConfig import (
+            TRT_SeededTrackFinder_ATLCfg)
+        InDetTRT_SeededTrackTool = acc.popToolsAndMerge(
+            TRT_SeededTrackFinder_ATLCfg(flags,
+                                         InputCollections=InputCollections))
         acc.addPublicTool(InDetTRT_SeededTrackTool)
         kwargs.setdefault("TrackTool", InDetTRT_SeededTrackTool)
 
-    kwargs.setdefault("PRDtoTrackMap", 'InDetSegmentPRDtoTrackMap' if usePrdAssociationTool else "")
-    kwargs.setdefault("MinTRTonSegment", flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk)
-    kwargs.setdefault("MinTRTonly", flags.InDet.Tracking.ActiveConfig.minTRTonly)
+    kwargs.setdefault("PRDtoTrackMap",
+                      'InDetSegmentPRDtoTrackMap' if InputCollections is not None else "")
+    kwargs.setdefault("MinTRTonSegment",
+                      flags.InDet.Tracking.ActiveConfig.minSecondaryTRTonTrk)
+    kwargs.setdefault("MinTRTonly",
+                      flags.InDet.Tracking.ActiveConfig.minTRTonly)
     kwargs.setdefault("TrtExtension", True)
-    kwargs.setdefault("SiExtensionCuts", flags.InDet.Tracking.ActiveConfig.SiExtensionCuts)
+    kwargs.setdefault("SiExtensionCuts",
+                      flags.InDet.Tracking.ActiveConfig.SiExtensionCuts)
     kwargs.setdefault("minPt", flags.InDet.Tracking.ActiveConfig.minSecondaryPt)
-    kwargs.setdefault("maxRPhiImp", flags.InDet.Tracking.ActiveConfig.maxSecondaryImpact)
+    kwargs.setdefault("maxRPhiImp",
+                      flags.InDet.Tracking.ActiveConfig.maxSecondaryImpact)
     kwargs.setdefault("maxZImp", flags.InDet.Tracking.ActiveConfig.maxZImpact)
     kwargs.setdefault("maxEta", flags.InDet.Tracking.ActiveConfig.maxEta)
-    kwargs.setdefault("RejectShortExtension", flags.InDet.Tracking.ActiveConfig.rejectShortExtensions)
+    kwargs.setdefault("RejectShortExtension",
+                      flags.InDet.Tracking.ActiveConfig.rejectShortExtensions)
     kwargs.setdefault("FinalRefit", False)
     kwargs.setdefault("FinalStatistics", False)
     kwargs.setdefault("OutputSegments", False)
@@ -71,6 +84,5 @@ def TRT_SeededTrackFinderCfg(flags, name='InDetTRT_SeededTrackFinder', InputColl
         kwargs.setdefault("CaloSeededRoI", True)
         kwargs.setdefault("EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ%.0fGeVUnordered" % (flags.InDet.Tracking.ActiveConfig.minRoIClusterEt/Units.GeV))
 
-    InDetTRT_SeededTrackFinder = CompFactory.InDet.TRT_SeededTrackFinder(name, **kwargs)
-    acc.addEventAlgo(InDetTRT_SeededTrackFinder)
+    acc.addEventAlgo(CompFactory.InDet.TRT_SeededTrackFinder(name, **kwargs))
     return acc

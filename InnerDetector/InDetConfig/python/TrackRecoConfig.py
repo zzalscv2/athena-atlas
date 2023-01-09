@@ -87,11 +87,13 @@ def ClusterSplitProbabilityContainerName(flags):
 
     flags_set = CombinedTrackingPassFlagSets(flags)
     extension = flags_set[-1].InDet.Tracking.ActiveConfig.extension
+    if extension=="TRTStandalone": # No ambi processing for TRT standalone, so pick the previous pass
+        extension = flags_set[-2].InDet.Tracking.ActiveConfig.extension
+
     ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + extension
     if len(flags_set)==1 and flags.InDet.Tracking.doBackTracking: # Only primary pass + back-tracking
         ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb" \
                                     + extension
-
     return ClusterSplitProbContainer
 
 # TODO find config to validate this
@@ -110,11 +112,8 @@ def InDetCosmicsTrackRecoPreProcessingCfg(flags):
                                             ExtendedTrackCollection = "ExtendedTracks",
                                             ExtendedTracksMap = "ExtendedTracksMap"))
 
-    from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFindingCfg
-    result.merge(TRTSegmentFindingCfg(flags,
-                                      extension = "_Phase",
-                                      InputCollections = None,
-                                      BarrelSegments = "TRTSegments_Phase"))
+    from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFinding_Phase_Cfg
+    result.merge(TRTSegmentFinding_Phase_Cfg(flags))
 
     from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg
     result.merge(InDetTrackPRD_AssociationCfg(flags,
@@ -122,10 +121,10 @@ def InDetCosmicsTrackRecoPreProcessingCfg(flags):
                                               AssociationMapName = 'InDetTRTonly_PRDtoTrackMapPhase',
                                               TracksName = []))
 
-    from InDetConfig.TRT_SegmentsToTrackConfig import TRT_SegmentsToTrackCfg
-    result.merge(TRT_SegmentsToTrackCfg(flags, name = 'InDetTRT_SegmentsToTrack_BarrelPhase',
-                                        InputSegmentsCollection = "TRTSegments_Phase",
-                                        OutputTrackCollection = "TRT_Tracks_Phase"))
+    from InDetConfig.TRT_SegmentsToTrackConfig import TRT_Cosmics_SegmentsToTrackCfg
+    result.merge(TRT_Cosmics_SegmentsToTrackCfg(flags, name = 'InDetTRT_Cosmics_SegmentsToTrack_Phase',
+                                                InputSegmentsCollection = "TRTSegments_Phase",
+                                                OutputTrackCollection = "TRT_Tracks_Phase"))
 
     from InDetConfig.InDetCosmicsEventPhaseConfig import InDetCosmicsEventPhaseCfg
     result.merge(InDetCosmicsEventPhaseCfg(flags,  InputTracksNames=["TRT_Tracks_Phase"]))
@@ -217,16 +216,11 @@ def InDetTrackRecoCfg(flags):
     # TRT track segment finding
     if flags.InDet.Tracking.doTrackSegmentsTRT:
         flagsTRT = flags.cloneAndReplace("InDet.Tracking.ActiveConfig", "InDet.Tracking.TRTPass")
-        from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFindingCfg
-        result.merge(TRTSegmentFindingCfg(flagsTRT,
-                                          extension = "_TRT",
-                                          InputCollections = [],
-                                          BarrelSegments = "TRTSegmentsTRT"))
+        from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFinding_TrackSegments_Cfg
+        result.merge(TRTSegmentFinding_TrackSegments_Cfg(flagsTRT))
 
-        result.merge(TRTStandaloneCfg(flagsTRT,
-                                      extension = "_TRT",
-                                      InputCollections = [],
-                                      BarrelSegments = "TRTSegmentsTRT"))
+        from InDetConfig.TRTStandaloneConfig import TRT_TrackSegment_Cfg
+        result.merge(TRT_TrackSegment_Cfg(flagsTRT))
 
     # ------------------------------------------------------------
     #
@@ -251,9 +245,7 @@ def InDetTrackRecoCfg(flags):
         if flags.InDet.Tracking.doTRTStandalone and extension=="TRTStandalone":
             TRTTrackContainer = "TRTStandaloneTracks"
             result.merge(TRTStandaloneCfg(current_flags,
-                                          extension = "",
-                                          InputCollections = InputCombinedInDetTracks,
-                                          BarrelSegments = "TRTSegments"))
+                                          InputCollections = InputCombinedInDetTracks))
             InputCombinedInDetTracks += [TRTTrackContainer]
             InputExtendedInDetTracks += [TRTTrackContainer]
 
@@ -277,7 +269,7 @@ def InDetTrackRecoCfg(flags):
         SiSPSeededTracks = "SiSPSeeded" + extension + "Tracks" # Old config had inconsistent "SiSPSeeded" vs "SiSpSeeded" keys
 
         # --- do the Si pattern if not done in the cosmic preprocessing
-        if flags.Beam.Type is not BeamType.Cosmics:
+        if not(isPrimaryPass and flags.Beam.Type is BeamType.Cosmics):
             result.merge(TrackingSiPatternCfg(current_flags,
                                               InputCollections = InputExtendedInDetTracks,
                                               ResolvedTrackCollectionKey = ResolvedTracks,
@@ -354,9 +346,7 @@ def InDetTrackRecoCfg(flags):
             if flags.InDet.Tracking.doTRTSegments:
                 from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFindingCfg
                 result.merge(TRTSegmentFindingCfg(current_flags,
-                                                  extension = "",
-                                                  InputCollections = InputCombinedInDetTracks,
-                                                  BarrelSegments = "TRTSegments"))
+                                                  InputCollections = InputCombinedInDetTracks))
 
             # BackTracking
             if flags.InDet.Tracking.doBackTracking:
