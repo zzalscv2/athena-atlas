@@ -35,9 +35,6 @@ void TGCElectronicsSystem::distributeSignal(LVL1TGCTrigger::TGCEvent* event)
 
 TGCElectronicsSystem::TGCElectronicsSystem()
  : m_DB(0),
-   m_tmdb(0),
-   m_nsw(0),
-   m_bis78(0),
    m_tgcArgs(nullptr)
 {
   for (int side=0; side < LVL1TGC::kNSide; side++) {
@@ -52,18 +49,15 @@ TGCElectronicsSystem::TGCElectronicsSystem()
 
 TGCElectronicsSystem::TGCElectronicsSystem(TGCArguments* tgcargs,
 					   TGCDatabaseManager* database)
- : m_DB(database),
-   m_tmdb(0),
-   m_nsw(0),
-   m_bis78(0),
-   m_tgcArgs(tgcargs)
+: m_DB(database),
+  m_tgcArgs(tgcargs)
 {
-  // TileMu
-  m_tmdb = new TGCTMDB();
+  // TMDB
+  m_tmdb.reset(new LVL1TGC::TGCTMDB());
 
   // NSW
   if(tgcargs->USE_NSW()){
-    m_nsw.reset(new TGCNSW());
+    m_nsw.reset(new LVL1TGC::TGCNSW());
   }
 
   // RPC BIS78
@@ -85,8 +79,7 @@ TGCElectronicsSystem::TGCElectronicsSystem(TGCArguments* tgcargs,
 						 m_DB,
 						 m_tmdb,
 						 m_nsw,
-						 m_bis78
-						 );
+						 m_bis78);
       } // loop module
     } // loop octant
   } //loop side
@@ -200,13 +193,11 @@ TGCElectronicsSystem::~TGCElectronicsSystem()
       }  // loop module
     }  // loop octant
   }  // loop side
-
-  if (m_tmdb){ delete m_tmdb;}
 }
 
 // hiddedn copy constructor
 TGCElectronicsSystem::TGCElectronicsSystem(const TGCElectronicsSystem& )
-  : m_DB(0), m_tmdb(0)
+: m_DB(0)
 {
   for (int i=0; i < LVL1TGC::kNSide; i++) {
     for (int j=0; j<NumberOfOctant; j++) {

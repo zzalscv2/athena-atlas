@@ -22,6 +22,7 @@
 namespace LVL1TGC {
 class TGCTileMuCoincidenceLUT;
 class TGCGoodMF;
+class TGCNSW;
 class TGCBIS78;
 class TGCBIS78CoincidenceMap;
 class TGCEIFICoincidenceMap;
@@ -33,7 +34,6 @@ class TGCDatabaseManager;
 class TGCHighPtBoard;
 class TGCHighPtChipOut;
 class TGCTMDB;
-class TGCNSW;
 class TGCNSWCoincidenceMap;
 class TGCRPhiCoincidenceOut;
 class TGCTrackSelectorOut;
@@ -69,8 +69,8 @@ class TGCSectorLogic
 
   TGCSSCController* getSSCController(){return &m_SSCController;};
 
-  void setTMDB(const TGCTMDB* tmdb);
-  void setNSW(std::shared_ptr<const TGCNSW> nsw);
+  void setTMDB(std::shared_ptr<const LVL1TGC::TGCTMDB> tmdb);
+  void setNSW(std::shared_ptr<const LVL1TGC::TGCNSW> nsw);
   void setBIS78(std::shared_ptr<const LVL1TGC::TGCBIS78> bis78);
   void showResult();
  
@@ -127,8 +127,8 @@ private:
   TGCRPhiCoincidenceMatrix m_matrix;
   const LVL1TGC::TGCEIFICoincidenceMap*  m_mapEIFI;
   std::shared_ptr<const LVL1TGC::TGCTileMuCoincidenceLUT> m_tileMuLUT;
-  const TGCTMDB*            m_pTMDB;
-  std::shared_ptr<const TGCNSW>               m_nsw;
+  std::shared_ptr<const LVL1TGC::TGCTMDB>      m_pTMDB;
+  std::shared_ptr<const LVL1TGC::TGCNSW>     m_nsw;
   std::shared_ptr<const TGCNSWCoincidenceMap> m_mapNSW;
   std::shared_ptr<const LVL1TGC::TGCBIS78>    m_bis78;
   std::shared_ptr<const LVL1TGC::TGCBIS78CoincidenceMap> m_mapBIS78;

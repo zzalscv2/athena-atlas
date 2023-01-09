@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1TGC/TGCTMDBOut.h"
 
 #include <iostream>
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
 TGCTMDBOut::TGCTMDBOut()
  : m_sideID(0), m_moduleID(-1), m_hit_56(TM_NA), m_hit_6(TM_NA)

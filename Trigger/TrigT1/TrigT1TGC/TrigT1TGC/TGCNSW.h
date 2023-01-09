@@ -5,35 +5,39 @@
 #ifndef TGC_NSW_H
 #define TGC_NSW_H
 
-#include <vector>
 #include <memory>
 
 #include "TrigT1TGC/TGCNumbering.h"
 
-namespace LVL1TGCTrigger {
+#include "AthenaBaseComps/AthMessaging.h"
+#include "StoreGate/ReadHandle.h"
+
+#include "MuonRDO/NSW_TrigRawDataContainer.h"
+
+namespace LVL1TGC {
 
 class NSWTrigOut;
 
-class TGCNSW{
+class TGCNSW : public AthMessaging {
  public:
   TGCNSW();
-  virtual ~TGCNSW();
- 
-  TGCNSW(const TGCNSW& right);
-  const TGCNSW& operator=(const TGCNSW& right);
-  bool operator==(const TGCNSW& right) const
-  { return (this==&right); }
-  bool operator!=(const TGCNSW& right) const
-  { return (this!=&right); }
+  virtual ~TGCNSW() = default;
+  TGCNSW(const TGCNSW& right) = default;
+  const TGCNSW& operator = (const TGCNSW& right) = delete;
+  bool operator == (const TGCNSW& right) const = delete;
+  bool operator != (const TGCNSW& right) const = delete;
 
+  StatusCode retrieve(SG::ReadHandleKey<Muon::NSW_TrigRawDataContainer> key);
+  std::shared_ptr<const NSWTrigOut> getOutput(LVL1TGCTrigger::TGCRegionType region ,int side, int TGC_TriggerSector) const;
+
+ private:
   enum { NumberOfNSWTriggerProcesser = 16 };
 
-  std::shared_ptr<const NSWTrigOut> getOutput(TGCRegionType region ,int side, int TGC_TriggerSector) const;
-  void  setOutput(int side, int NSWTriggerProcesser,uint8_t NSWeta_8bit,uint8_t NSWphi_6bit,uint8_t NSWDtheta_5bit, bool lowRes, bool phiRes, bool NSWmonitor); //eta:0.005 phi:10mrad Dtheta:1mrad 
-  void  eraseOutput();
-  int   getNumberOfNSWTriggerProcesser() const { return NumberOfNSWTriggerProcesser; };   
+  void setOutput(int side, int NSWTriggerProcesser,uint8_t NSWeta_8bit,uint8_t NSWphi_6bit,uint8_t NSWDtheta_5bit, bool lowRes, bool phiRes, bool NSWmonitor); //eta:0.005 phi:10mrad Dtheta:1mrad 
+  void eraseOutput();
 
   void print() const;
+
  protected:
   std::shared_ptr<NSWTrigOut> m_buffer[LVL1TGC::TGCSide::kNSide][NumberOfNSWTriggerProcesser];  // buffer[Side][NSW TP]
 };

@@ -1,38 +1,26 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// ====================================================================
-/*
-        NSWTrigOut.cc             
-*/
-// ====================================================================
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "TrigT1TGC/NSWTrigOut.h"
 #include "TrigT1TGC/TGCArguments.h"
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
-
-///////////////////////////////////////////////////////////////
-NSWTrigOut::NSWTrigOut(int side, std::vector<int> NSWTP, std::vector<uint8_t> NSWeta, std::vector<uint8_t> NSWphi, std::vector<uint8_t> NSWDtheta, std::vector<bool> NSWlowRes, std::vector<bool> NSWphiRes, std::vector<bool> NSWmonitor, TGCArguments* tgcargs)
-  : m_sideID(side), m_NSWTriggerProcessor(NSWTP), m_NSWeta_8bit(NSWeta), m_NSWphi_6bit(NSWphi), m_NSWDtheta_5bit(NSWDtheta), m_NSWlowRes(NSWlowRes), m_NSWphiRes(NSWphiRes), m_NSWmonitor(NSWmonitor), m_tgcArgs(tgcargs)
-///////////////////////////////////////////////////////////////
+NSWTrigOut::NSWTrigOut(int side, std::vector<int> NSWTP, std::vector<uint8_t> NSWeta, std::vector<uint8_t> NSWphi, std::vector<uint8_t> NSWDtheta, std::vector<bool> NSWlowRes, std::vector<bool> NSWphiRes, std::vector<bool> NSWmonitor,
+                       LVL1TGCTrigger::TGCArguments* tgcargs)
+: m_sideID(side), m_NSWTriggerProcessor(NSWTP), m_NSWeta_8bit(NSWeta), m_NSWphi_6bit(NSWphi), m_NSWDtheta_5bit(NSWDtheta), m_NSWlowRes(NSWlowRes), m_NSWphiRes(NSWphiRes), m_NSWmonitor(NSWmonitor), m_tgcArgs(tgcargs)
 {
 }
 
-///////////////////////////////////////////////////////////////
-NSWTrigOut::NSWTrigOut(int side, std::vector<int> NSWTP, TGCArguments* tgcargs)
+NSWTrigOut::NSWTrigOut(int side, std::vector<int> NSWTP, LVL1TGCTrigger::TGCArguments* tgcargs)
   : m_sideID(side), m_NSWTriggerProcessor(NSWTP), m_tgcArgs(tgcargs)
-///////////////////////////////////////////////////////////////
 {
 }
 
 
-///////////////////////////////////////////////////////////
 NSWTrigOut& NSWTrigOut::operator+=(const NSWTrigOut& right)
-///////////////////////////////////////////////////////////
 {
   if (this != &right && (m_sideID==right.m_sideID || m_sideID==-1)) {
     m_NSWTriggerProcessor.insert(m_NSWTriggerProcessor.end(), right.m_NSWTriggerProcessor.begin(), right.m_NSWTriggerProcessor.end());
@@ -46,9 +34,7 @@ NSWTrigOut& NSWTrigOut::operator+=(const NSWTrigOut& right)
   return *this;
 }
 
-/////////////////////////////
 void NSWTrigOut::print() const
-/////////////////////////////
 {
   MsgStream msg(Athena::getMessageSvc(), "LVL1TGC::NSWTrigOut");
   if (m_tgcArgs) msg.setLevel(m_tgcArgs->MSGLEVEL());

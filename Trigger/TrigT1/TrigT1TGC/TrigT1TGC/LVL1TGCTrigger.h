@@ -86,15 +86,6 @@ class LVL1TGCTrigger : public AthAlgorithm
     void doMaskOperation(const TgcDigitContainer* ,std::map<Identifier, int>& );
     void fillTGCEvent(const std::map<Identifier, int>& ,  TGCEvent&);
     
-    // Fill TMDB event data
-    StatusCode fillTMDB();
-
-    // Fill NSW event data
-    StatusCode fillNSW();
-
-    // Fill RPC BIS78 event data
-    StatusCode fillBIS78();
-
     // record bare-RDO for LowPT coincidences (on m_OutputTgcRDO=True):
     void recordRdoSLB(TGCSector *, std::map<std::pair<int, int>, std::unique_ptr<TgcRdo>>&);
     

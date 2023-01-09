@@ -1,26 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// ====================================================================
-/*
-        NSWTrigOut.h
-*/
-// ====================================================================
 #ifndef NSW_TRIGOUT_H
 #define NSW_TRIGOUT_H
 
 #include <vector>
 
 namespace LVL1TGCTrigger {
-
   class TGCArguments;
+}
 
-// ====================================================================
-//
-// class definition
-//
-// ====================================================================
+namespace LVL1TGC {
  
 class NSWTrigOut {
 protected:
@@ -35,8 +26,8 @@ protected:
 
 public:
   NSWTrigOut() = default;
-  NSWTrigOut(int side, std::vector<int> NSWTrigger, std::vector<uint8_t> NSWeta, std::vector<uint8_t> NSWphi, std::vector<uint8_t> NSWDtheta, std::vector<bool> NSWlowRes, std::vector<bool> NSWphiRes, std::vector<bool> NSWmonitor, TGCArguments* tgcargs=nullptr);
-  NSWTrigOut(int side, std::vector<int> NSWTrigger,TGCArguments* tgcargs=nullptr);
+  NSWTrigOut(int side, std::vector<int> NSWTrigger, std::vector<uint8_t> NSWeta, std::vector<uint8_t> NSWphi, std::vector<uint8_t> NSWDtheta, std::vector<bool> NSWlowRes, std::vector<bool> NSWphiRes, std::vector<bool> NSWmonitor, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
+  NSWTrigOut(int side, std::vector<int> NSWTrigger, LVL1TGCTrigger::TGCArguments* tgcargs=nullptr);
 
   NSWTrigOut& operator+=(const NSWTrigOut& right);
   bool operator==(const NSWTrigOut& right) const
@@ -75,9 +66,9 @@ public:
   void print() const;
 
  private:
-  TGCArguments* m_tgcArgs{nullptr};
+  LVL1TGCTrigger::TGCArguments* m_tgcArgs{nullptr};
 };
 
-} //end of namespace bracket
+}  // end of namespace
 
 #endif

@@ -5,39 +5,45 @@
 #ifndef TGC_BIS78_H
 #define TGC_BIS78_H
 
-#include <vector>
 #include <memory>
 
 #include "TrigT1TGC/TGCNumbering.h"
+
+#include "AthenaBaseComps/AthMessaging.h"
+#include "StoreGate/ReadHandle.h"
+#include "MuonRDO/RpcBis78_TrigRawDataContainer.h"
 
 namespace LVL1TGC {
 
 class BIS78TrigOut;
 
-class TGCBIS78{
-public:
+class TGCBIS78 : public AthMessaging {
+ public:
   TGCBIS78();
-  virtual ~TGCBIS78();
- 
-  TGCBIS78(const TGCBIS78& right);
-  const TGCBIS78& operator=(const TGCBIS78& right);
-  bool operator==(const TGCBIS78& right) const
-  { return (this==&right); }
-  bool operator!=(const TGCBIS78& right) const
-  { return (this!=&right); }
+  virtual ~TGCBIS78() = default;
+  TGCBIS78(const TGCBIS78& right) = default;
+  const TGCBIS78& operator = (const TGCBIS78& right) = delete;
+  bool operator == (const TGCBIS78& right) const = delete;
+  bool operator != (const TGCBIS78& right) const = delete;
 
-  enum { NumberOfBIS78PadBoard = 8 };
+  StatusCode retrieve(SG::ReadHandleKey<Muon::RpcBis78_TrigRawDataContainer> key);
 
-  std::shared_ptr<const BIS78TrigOut> getOutput(LVL1TGCTrigger::TGCRegionType region , int TGC_TriggerSector) const;
-  void  setOutput(int BIS78PadBoard,uint8_t BIS78eta_6bit,uint8_t BIS78phi_6bit,uint8_t BIS78Deta_3bit,uint8_t BIS78Dphi_3bit,uint8_t BIS78flag3over3eta_1bit,uint8_t BIS78flag3over3phi_1bit); //
-  void  eraseOutput();
+  std::shared_ptr<const BIS78TrigOut> getOutput(int TGC_TriggerSector) const;
 
   void print() const;
+
+ private:
+  void  setOutput(unsigned int BIS78PadBoard,uint8_t BIS78eta_6bit,uint8_t BIS78phi_6bit,uint8_t BIS78Deta_3bit,uint8_t BIS78Dphi_3bit,uint8_t BIS78flag3over3eta_1bit,uint8_t BIS78flag3over3phi_1bit);
+  void  eraseOutput();
+
+ private:
+  static constexpr unsigned int kNPadBoards = 8;
+
  protected:
-  std::shared_ptr<BIS78TrigOut> m_buffer[NumberOfBIS78PadBoard];//buffer[BIS78 Trigger Processor]
+  std::shared_ptr<BIS78TrigOut> m_buffer[kNPadBoards];//buffer[BIS78 Trigger Processor]
 };
 
 
-} //end of namespace bracket
+}  // end of namespace
 
 #endif

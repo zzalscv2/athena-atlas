@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigT1TGC_TGCTMDBOut_H
 #define TrigT1TGC_TGCTMDBOut_H
 
-namespace LVL1TGCTrigger {
+namespace LVL1TGC {
 
 class TGCTMDBOut
 {
@@ -21,15 +21,8 @@ class TGCTMDBOut
   TGCTMDBOut(const TGCTMDBOut& right) = default;
   TGCTMDBOut& operator = (const TGCTMDBOut& right) = default;
 
-  int operator==(const TGCTMDBOut& right) const
-  {
-    return (this==&right);
-  }
-
-  int operator!=(const TGCTMDBOut& right) const
-  {
-    return (this!=&right);
-  }
+  bool operator == (const TGCTMDBOut& right) const = delete;
+  bool operator != (const TGCTMDBOut& right) const = delete;
 
   // set functons
   void setSide(int side) { m_sideID = side; }
