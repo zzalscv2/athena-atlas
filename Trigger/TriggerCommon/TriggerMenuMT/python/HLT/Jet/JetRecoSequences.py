@@ -21,6 +21,8 @@ from TrigInDetConfig.InDetTrigVertices import makeInDetTrigVertices
 from .JetTrackingConfig import jetTTVA
 from JetRec.JetRecConf import JetViewAlg
 
+from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
+
 # this code uses CA internally, needs to be in this context manager,
 # at least until ATLASRECTS-6635 is closed
 with ConfigurableCABehavior():
@@ -400,6 +402,17 @@ def jetTrackingRecoSequences(configFlags, RoIs, clustersKey, **jetRecoDict):
         configFlags, clustersKey=clustersKey, **trkcolls, **jetRecoDict )
 
     return [jetTrkSeq,jetRecoSeq], jetsOut, jetDef
+
+## record event variables (NPV and rho to a TrigCompositeContainer: needed for online-derived calibration
+def eventinfoRecordSequence(configFlags, suffix, pvKey, rhoKey_PFlow = 'HLT_Kt4EMPFlowEventShape', rhoKey_EMTopo = 'HLT_Kt4EMTopoEventShape'):
+    eventInfoRecorderAlg = TrigEventInfoRecorderAlgCfg("TrigEventInfoRecorderAlg_jet")
+    eventInfoRecorderAlg.decorateTLA = True #misnomer in this case: just means write our PV&rho event variables to container
+    eventInfoRecorderAlg.trigEventInfoKey = recordable(f"HLT_TCEventInfo_{suffix}")
+    eventInfoRecorderAlg.primaryVertexInputName = pvKey
+    eventInfoRecorderAlg.RhoKey_PFlow = rhoKey_PFlow
+    eventInfoRecorderAlg.RhoKey_EMTopo = rhoKey_EMTopo
+    recordSeq = parOR("TrigEventInfoRecorderSeq_{suffix}", [eventInfoRecorderAlg])
+    return recordSeq 
 
 # Grooming needs the ungroomed jets to be built first,
 # so call the basic jet reco seq, then add a grooming alg
