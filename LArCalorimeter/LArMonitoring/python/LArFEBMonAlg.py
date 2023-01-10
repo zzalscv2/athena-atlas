@@ -46,8 +46,8 @@ def LArFEBMonConfigCore(helper,algoinstance,inputFlags, cellDebug=False, dspDebu
     larFEBMonAlg.Streams=lArDQGlobals.defaultStreamNames
 
     isCOMP200=False
-    from AthenaConfiguration.ComponentFactory import isRun3Cfg
-    if isRun3Cfg():
+    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
+    if isComponentAccumulatorCfg():
       if "COMP200" in inputFlags.IOVDb.DatabaseInstance:
          isCOMP200=True
     else:      
@@ -59,7 +59,7 @@ def LArFEBMonConfigCore(helper,algoinstance,inputFlags, cellDebug=False, dspDebu
        dbString="<db>COOLONL_LAR/CONDBR2</db>"
        persClass="AthenaAttributeList"
        fld="/LAR/Configuration/DSPThresholdFlat/Thresholds"
-       if isRun3Cfg():
+       if isComponentAccumulatorCfg():
           havethem=False
           for c in helper.resobj.getServices(): 
               if c.getName()=="IOVDbSvc":
@@ -87,7 +87,7 @@ def LArFEBMonConfigCore(helper,algoinstance,inputFlags, cellDebug=False, dspDebu
        fld='/LAR/Configuration/DSPThreshold/Thresholds'
        db='LAR_ONL'
        obj='LArDSPThresholdsComplete'
-       if isRun3Cfg():
+       if isComponentAccumulatorCfg():
            from IOVDbSvc.IOVDbSvcConfig import addFolders
            helper.resobj.merge(addFolders(inputFlags,fld,db,obj))
        else:
@@ -210,7 +210,7 @@ def LArFEBMonConfigCore(helper,algoinstance,inputFlags, cellDebug=False, dspDebu
                                   xbins=lArDQGlobals.Samples_Bins, xmin=lArDQGlobals.Samples_Min, xmax=lArDQGlobals.Samples_Max)
 
     isOnline=False
-    if isRun3Cfg() :
+    if isComponentAccumulatorCfg() :
       if inputFlags.DQ.Environment == 'online':
          isOnline=True
     else:

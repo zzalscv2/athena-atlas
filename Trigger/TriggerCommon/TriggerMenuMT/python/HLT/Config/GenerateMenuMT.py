@@ -3,7 +3,7 @@
 import importlib
 import string
 
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 
 
@@ -159,7 +159,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         for chainDict in self.chainDicts:
             log.debug("Next: getting chain configuration for chain %s ", chainDict['chainName'])
             chainConfig,lengthOfChainConfigs = self.__generateChainConfig(flags, chainDict)
-            if isRun3Cfg():
+            if isComponentAccumulatorCfg():
                 # skip chain generation if no ChainConfig was found
                 if chainConfig is None:
                     continue
@@ -378,7 +378,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 raise Exception('Stopping the execution. Please correct the configuration.')
 
             log.debug("Chain %s \n chain configs: %s",chainPartDict['chainName'],chainPartConfig)
-            if isRun3Cfg() and \
+            if isComponentAccumulatorCfg() and \
                 (chainPartConfig is None or (any(["_MissingCA" in step.name for step in chainPartConfig.steps]) \
                     and "_MissingCA" not in chainPartConfig.steps[-1].name )):      
                     # if a MissingCA step exist and it's not the last one, do not build the chain because it's incomplete              
@@ -407,7 +407,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
         # This part is to deal with combined chains between different signatures
         try:
             if len(listOfChainConfigs) == 0:
-                if isRun3Cfg():
+                if isComponentAccumulatorCfg():
                     raise NoCAmigration("[__generateChainConfigs] chain {0} generation missed configuration".format(mainChainDict['chainName']))                               
                 raise Exception('[__generateChainConfigs] No Chain Configuration found for {0}'.format(mainChainDict['chainName']))                    
             else:
@@ -431,7 +431,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             log.exception('[__generateChainConfigs] Full chain dictionary is\n %s ', mainChainDict)
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
         except AttributeError:                    
-            if isRun3Cfg():
+            if isComponentAccumulatorCfg():
                 log.warning(str(NoCAmigration("[__generateChainConfigs] addTopoInfo failed with CA configurables") )  )  
                 return None,[]                       
             raise Exception('[__generateChainConfigs] Stopping menu generation. Please investigate the exception shown above.')
@@ -450,7 +450,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
                 log.debug('Configuring event building sequence %s for chain %s', eventBuildType, mainChainDict['chainName'])
                 EventBuildingSequences.addEventBuildingSequence(flags, theChainConfig, eventBuildType, mainChainDict)
             except TypeError as ex:
-                if isRun3Cfg():
+                if isComponentAccumulatorCfg():
                     log.warning(str(NoCAmigration("[__generateChainConfigs] EventBuilding/TLA sequences failed with CA configurables")) )                                  
                 else:
                     log.error(ex)

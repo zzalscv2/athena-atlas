@@ -1,18 +1,18 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.ComponentFactory import CompFactory, isRun3Cfg
+from AthenaConfiguration.ComponentFactory import CompFactory, isComponentAccumulatorCfg
 from AthenaCommon.AlgSequence import AthSequencer as LegacyAthSequencer
 import collections
 
 
 def _append( seq, sub ):
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         seq.Members.append( sub )
     else:
         seq += sub
 
 def parOR(name, subs=[]):
     """ parallel OR sequencer """
-    seq = CompFactory.AthSequencer( name ) if isRun3Cfg() else LegacyAthSequencer( name )
+    seq = CompFactory.AthSequencer( name ) if isComponentAccumulatorCfg() else LegacyAthSequencer( name )
     seq.ModeOR = True
     seq.Sequential = False
     seq.StopOverride = True
@@ -22,7 +22,7 @@ def parOR(name, subs=[]):
 
 def seqAND(name, subs=[]):
     """ sequential AND sequencer """
-    seq = CompFactory.AthSequencer( name ) if isRun3Cfg() else LegacyAthSequencer( name )
+    seq = CompFactory.AthSequencer( name ) if isComponentAccumulatorCfg() else LegacyAthSequencer( name )
     seq.ModeOR = False
     seq.Sequential = True
 #    seq.StopOverride = True
@@ -33,7 +33,7 @@ def seqAND(name, subs=[]):
 
 def seqOR(name, subs=[]):
     """ sequential OR sequencer, used when a barrier needs to be set by all subs reached irrespective of the decision """
-    seq = CompFactory.AthSequencer( name ) if isRun3Cfg() else LegacyAthSequencer( name )
+    seq = CompFactory.AthSequencer( name ) if isComponentAccumulatorCfg() else LegacyAthSequencer( name )
     seq.ModeOR = True
     seq.Sequential = True
     seq.StopOverride = True
@@ -322,8 +322,8 @@ class TestCF(object):
 
 class TestLegacyCF( unittest.TestCase, TestCF ):
     def setUp( self ):
-        global isRun3Cfg
-        isRun3Cfg = lambda : False  # noqa: E731 (lambda for mockup)
+        global isComponentAccumulatorCfg
+        isComponentAccumulatorCfg = lambda : False  # noqa: E731 (lambda for mockup)
 
         from AthenaCommon.Configurable import ConfigurablePyAlgorithm
         top = parOR("top")
@@ -347,8 +347,8 @@ class TestLegacyCF( unittest.TestCase, TestCF ):
 
 class TestConf2CF( unittest.TestCase,  TestCF ):
     def setUp( self ):
-        global isRun3Cfg
-        isRun3Cfg = lambda : True  # noqa: E731 (lambda for mockup)
+        global isComponentAccumulatorCfg
+        isComponentAccumulatorCfg = lambda : True  # noqa: E731 (lambda for mockup)
 
         def __mkAlg(name):
             alg = ConfigurablePyAlgorithm(name)
@@ -371,8 +371,8 @@ class TestConf2CF( unittest.TestCase,  TestCF ):
 
 class TestNest( unittest.TestCase ):
     def test( self ):
-        global isRun3Cfg
-        isRun3Cfg = lambda : True  # noqa: E731 (lambda for mockup)
+        global isComponentAccumulatorCfg
+        isComponentAccumulatorCfg = lambda : True  # noqa: E731 (lambda for mockup)
 
         top = parOR("top")
         nest1 = parOR("nest1")

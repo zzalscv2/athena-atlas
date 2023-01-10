@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaCommon.Logging import logging
 
 from AthenaMonitoringKernel.AthenaMonitoringKernelConf import GenericMonitoringTool as _GMT1
@@ -13,7 +13,7 @@ import json
 log = logging.getLogger(__name__)
 
 def _isOnline():
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         from AthenaConfiguration.AllConfigFlags import ConfigFlags
         return ConfigFlags.Common.isOnline
     else:
@@ -22,7 +22,7 @@ def _isOnline():
 
 def GenericMonitoringTool(name='GenericMonitoringTool', **kwargs):
     '''Create GenericMonitoringTool'''
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         return GenericMonitoringTool_v2(name, **kwargs)
     else:
         return GenericMonitoringTool_v1(name, **kwargs)

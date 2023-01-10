@@ -9,7 +9,7 @@ import abc
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 
 
@@ -50,12 +50,12 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         seqArray = []                
         for sequenceCfg in sequenceCfgArray:            
             try:
-                if isRun3Cfg():
+                if isComponentAccumulatorCfg():
                     seqArray.append (sequenceCfg(flags, **stepArgs) )                                                         
                 else:
                     seqArray.append( RecoFragmentsPool.retrieve( sequenceCfg, flags, **stepArgs ))                                                       
             except NameError:
-                if isRun3Cfg():
+                if isComponentAccumulatorCfg():
                     log.warning(str(NoCAmigration('[getStep] This sequence {0} does not exist for CA components'.format(sequenceCfg.__name__)) ))                    
                 else: 
                     raise
@@ -64,7 +64,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
             return ChainStep(stepName, seqArray, [self.mult], [self.dict], comboHypoCfg=comboHypoCfg, comboToolConfs=comboTools)
 
         try:
-            if isRun3Cfg():
+            if isComponentAccumulatorCfg():
                 raise NoCAmigration                            
             raise RuntimeError("[getStep] No sequences generated for step %s!", stepPartName)        
         except NoCAmigration:

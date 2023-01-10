@@ -30,14 +30,14 @@ def LArDigitalTriggMonConfigCore(helper, algoinstance,inputFlags):
     from IOVDbSvc.CondDB import conddb
     
     #get SC onl-offl mapping from DB    
-    from AthenaConfiguration.ComponentFactory import isRun3Cfg
+    from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
     folder="/LAR/Identifier/OnOffIdMap_SC"
     persClass="AthenaAttributeList"
     dbString="<db>COOLONL_LAR/CONDBR2</db>"
     
     from AthenaCommon.Logging import logging
     mlog = logging.getLogger( 'LArDigitalTriggMon' )
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         from AthenaConfiguration.ComponentFactory import CompFactory
         try:
             condLoader=helper.resobj.getCondAlgo("CondInputLoader")

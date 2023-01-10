@@ -5,7 +5,7 @@ from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuS
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaConfiguration.ComponentFactory import isRun3Cfg
+from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
@@ -21,7 +21,7 @@ def mergeChainDefs(listOfChainDefs, chainDict):
     #one for each part in the chain
     
     # protect against serial merging in the signature code
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         try:           
             for chainPartConfig in listOfChainDefs:
                 if any ([ "_MissingCA" in step.name for step in chainPartConfig.steps]):
@@ -158,7 +158,7 @@ def EmptyMenuSequenceCfg(flags, name):
     return EmptyMenuSequence(name)
 
 def getEmptyMenuSequence(flags, name):
-    if isRun3Cfg():
+    if isComponentAccumulatorCfg():
         return EmptyMenuSequenceCfg(flags, name)
     else:
         return RecoFragmentsPool.retrieve(EmptyMenuSequenceCfg, flags=flags, name=name)                

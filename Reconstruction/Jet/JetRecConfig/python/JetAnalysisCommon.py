@@ -260,7 +260,7 @@ CompFactory.addNameSpaces( 'Analysis', 'Trk', 'Jet', 'Sim',)
 ComponentFactory = ModuleType("ComponentFactory")
 ComponentFactory.CompFactory = CompFactory
 
-ComponentFactory.isRun3Cfg = lambda : True
+ComponentFactory.isComponentAccumulatorCfg = lambda : True
 
 
 #*******************************************************************
