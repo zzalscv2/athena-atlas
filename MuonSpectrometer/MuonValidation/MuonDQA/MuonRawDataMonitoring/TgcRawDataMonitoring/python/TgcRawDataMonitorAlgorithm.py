@@ -16,9 +16,7 @@ def TgcRawDataMonitoringConfig(inputFlags):
     result = ComponentAccumulator()
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
     result.merge(AtlasFieldCacheCondAlgCfg(inputFlags))
-    result.merge(AtlasGeometryCfg(inputFlags))
     
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'TgcRawDataMonitorCfg')
@@ -1237,8 +1235,6 @@ if __name__=='__main__':
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
-    from AtlasGeoModel.AtlasGeoModelConfig import AtlasGeometryCfg
-    cfg.merge(AtlasGeometryCfg(ConfigFlags))
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
     cfg.merge(L1ConfigSvcCfg(ConfigFlags))
     generateL1Menu(ConfigFlags)
