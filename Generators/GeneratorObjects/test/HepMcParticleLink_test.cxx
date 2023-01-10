@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -241,6 +241,7 @@ namespace MCTesting {
     return genPart;
   }
 
+  // cppcheck-suppress syntaxError
   TEST_F(HepMcParticleLink_test, old_test) {
     std::cout << "*** HepMcParticleLink_test starts ***" <<std::endl;
 
