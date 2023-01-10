@@ -171,7 +171,7 @@ if __name__ == '__main__':
     gepAlgs_output_level = DEBUG
 
     acc.merge(CaloTopoClusterCfg(flags))
-    from TrigL0GepPerf.GepClusterTimingAlgConfig import GepClusterTimingAlgCfg
+    from TrigGepPerf.GepClusterTimingAlgConfig import GepClusterTimingAlgCfg
     acc.merge(GepClusterTimingAlgCfg(flags,
                                      OutputLevel=gepAlgs_output_level))
     
@@ -198,7 +198,7 @@ if __name__ == '__main__':
         if cluster_alg == 'Calo420':
             caloClustersKey='CaloTopoClusters' # from config dump
         else:
-            from TrigL0GepPerf.GepClusteringAlgConfig import GepClusteringAlgCfg
+            from TrigGepPerf.GepClusteringAlgConfig import GepClusteringAlgCfg
             
             caloClustersKey='GEP'+cluster_alg+'Clusters'
             gepclustering_cfg = GepClusteringAlgCfg(
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
             for jetAlg in jetAlgNames:
 
-                from TrigL0GepPerf.GepJetAlgConfig import GepJetAlgCfg 
+                from TrigGepPerf.GepJetAlgConfig import GepJetAlgCfg 
                 alg_name='Gep'+cluster_alg + jetAlg + 'JetAlg'
                 acc.merge(GepJetAlgCfg(
                     flags,
@@ -238,7 +238,7 @@ if __name__ == '__main__':
                 info('\nGepJetAlg properties dump\n')
                 info(str(acc.getEventAlgo(alg_name)._properties))
         
-            from TrigL0GepPerf.GepMETAlgConfig import GepMETAlgCfg 
+            from TrigGepPerf.GepMETAlgConfig import GepMETAlgCfg 
             alg_name='GepMET'+ cluster_alg +'Alg'
             acc.merge(GepMETAlgCfg(
                 flags,
@@ -248,7 +248,7 @@ if __name__ == '__main__':
                 OutputLevel=gepAlgs_output_level))
 
                     
-            from TrigL0GepPerf.GepMETPufitAlgConfig import GepMETPufitAlgCfg 
+            from TrigGepPerf.GepMETPufitAlgConfig import GepMETPufitAlgCfg 
             alg_name='GepMET' + cluster_alg + 'PufitAlg'
             acc.merge(GepMETPufitAlgCfg(
                 flags,
