@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -721,7 +721,14 @@ namespace xAOD {
   static const SG::AuxElement::Accessor< TauJet_v3::VertexLink_t > secondaryVertexAcc( "secondaryVertexLink" );
 
   const Vertex* TauJet_v3::secondaryVertex() const {
-   return ( *secondaryVertexAcc( *this ) );
+    if (secondaryVertexAcc.isAvailable(*this) == false) {
+      return nullptr;
+    }
+    const VertexLink_t& link = secondaryVertexAcc(*this);
+    if (link.isValid() == false) {
+      return nullptr;
+    }
+    return *link;
   }
 
 
