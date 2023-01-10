@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -93,58 +93,26 @@ namespace Trk {
     if (this!=&rhs)
     {
       // delete first all preceding data
-      std::vector<const ITrackLink*>::iterator trackBegin=m_primaryTrackLinks.begin();
-      std::vector<const ITrackLink*>::iterator trackEnd=m_primaryTrackLinks.end();
+      for (const ITrackLink* l : m_primaryTrackLinks) {
+        delete l;
+      }
+      m_primaryTrackLinks.clear();
+      for (const ITrackLink* l : m_secondaryTrackLinks) {
+        delete l;
+      }
+      m_secondaryTrackLinks.clear();
       
-      for (std::vector<const ITrackLink*>::iterator trackIter=trackBegin;
-           trackIter!=trackEnd;++trackIter) 
-      {
-        if (*trackIter!=0)
-        {
-          delete *trackIter;
-          *trackIter=0;
+      for (const ITrackLink* l : rhs.m_primaryTrackLinks) {
+        if (l) {
+          m_primaryTrackLinks.push_back(l->clone());
         }
       }
-      
-      trackBegin=m_secondaryTrackLinks.begin();
-      trackEnd=m_secondaryTrackLinks.end();
-      
-      for (std::vector<const ITrackLink*>::iterator trackIter=trackBegin;
-           trackIter!=trackEnd;++trackIter) 
-      {
-        if (*trackIter!=0)
-        {
-          delete *trackIter;
-          *trackIter=0;
+      for (const ITrackLink* l : rhs.m_secondaryTrackLinks) {
+        if (l) {
+          m_secondaryTrackLinks.push_back(l->clone());
         }
       }
 
-      m_primaryTrackLinks.clear();
-      m_secondaryTrackLinks.clear();
-      
-      std::vector<const ITrackLink*>::iterator trackNewBegin=m_primaryTrackLinks.begin();
-      std::vector<const ITrackLink*>::iterator trackNewEnd=m_primaryTrackLinks.end();
-        
-      for (std::vector<const ITrackLink*>::iterator trackNewIter=trackNewBegin;
-           trackNewIter!=trackNewEnd;++trackNewIter) 
-      {
-        if (*trackNewIter!=0)
-        {
-          m_primaryTrackLinks.push_back((*trackNewIter)->clone());
-        }
-      }
-      
-      trackNewBegin=m_secondaryTrackLinks.begin();
-      trackNewEnd=m_secondaryTrackLinks.end();
-      
-      for (std::vector<const ITrackLink*>::iterator trackNewIter=trackNewBegin;
-           trackNewIter!=trackNewEnd;++trackNewIter) 
-      {
-        if (*trackNewIter!=0)
-        {
-          m_secondaryTrackLinks.push_back((*trackNewIter)->clone());
-        }
-      }
     }
     return *this;
   }
