@@ -6,8 +6,8 @@
 # art-input-nfiles: 50
 # art-input-nfilesperjob: 3
 # art-include: master/Athena
-# art-include: 22.0-mc20/Athena
-# art-include: 22.0/Athena
+
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-runon: weekdays
 # art-runon: Sunday

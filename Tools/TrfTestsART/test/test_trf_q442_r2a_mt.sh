@@ -3,7 +3,7 @@
 # art-description: Reco_tf.py q442 RAWtoALL in MT mode
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0-mc20/Athena
+
 # art-athena-mt: 8
 
 Reco_tf.py \
