@@ -3,8 +3,8 @@
 # art-description: Reco_tf.py data18 RAWtoALL in MP mode, use 4 cores due to large memory usage of MP
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0-mc20/Athena
-# art-include: 22.0/Athena
+
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 export ATHENA_CORE_NUMBER=4
