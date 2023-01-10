@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -46,6 +46,8 @@ StatusCode TauVertexVariables::initialize() {
 //-----------------------------------------------------------------------------
 StatusCode TauVertexVariables::executeVertexVariables(xAOD::TauJet& pTau, xAOD::VertexContainer& pSecVtxContainer) const {
 
+  ElementLink<xAOD::VertexContainer> empty;
+  pTau.setSecondaryVertexLink(empty);
   pTau.setDetail(xAOD::TauJetParameters::trFlightPathSig, (float)(-1111.));
   
   // try to find secondary vertex if more than 1 track and the tau vertex is available
