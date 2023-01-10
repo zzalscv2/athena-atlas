@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -109,6 +109,7 @@ protected:
 };  // GenParticleGenericFilter_test fixture
 
 
+// cppcheck-suppress syntaxError
 TEST_F(GenParticleGenericFilter_test, allPropertiesUnset_expectParticlePass) {
   EXPECT_TRUE( m_filterTool->initialize().isSuccess() );
 
