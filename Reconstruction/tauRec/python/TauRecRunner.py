@@ -68,9 +68,6 @@ class TauRecRunner ( TauRecRunConfigured ) :
             tools.append(taualgs.getTauEleRNNEvaluator())
             tools.append(taualgs.getTauWPDecoratorEleRNN())
             tools.append(taualgs.getTauDecayModeNNClassifier())
-            # deployment of deep set ID postponed to a follow-up MR
-            #tools.append(taualgs.getTauJetDeepSetEvaluator())
-            #tools.append(taualgs.getTauWPDecoratorJetDeepSet())
 
         # which taus we write to AOD
         tools.append(taualgs.getTauAODSelector())
