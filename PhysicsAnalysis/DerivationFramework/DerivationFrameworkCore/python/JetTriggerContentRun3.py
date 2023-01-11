@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 JetTriggerContentRun3 = [
 "HLT_AntiKt4EMTopoJets_nojcalib",       
@@ -16,4 +16,7 @@ JetTriggerContentRun3 = [
 "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf",
 "HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetEtaJESScaleMomentum_m",
 "HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes",
-"HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jesAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetEtaJESScaleMomentum_m"]
+"HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jesAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetEtaJESScaleMomentum_m",
+"HLT_IDVertex_FS",
+"HLT_IDVertex_FSAux.x.y.z.vertexType",
+]
