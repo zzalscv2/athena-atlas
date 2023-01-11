@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file GeneratorObjects/CachedParticlePtr.h
@@ -76,6 +76,10 @@ public:
    */
   CachedParticlePtr& operator= (const CachedParticlePtr& other);
 
+  /**
+   * @brief Assignment.  (Can't be defaulted due to the atomic member.)
+   */
+  CachedParticlePtr& operator= (CachedParticlePtr&& other) noexcept;
 
   /**
    * @brief Reset the pointer to null.
@@ -96,7 +100,7 @@ public:
    * It is ok to call this concurrently, as long as each call uses
    * the same parameters.
    */
-  void set (HepMC::ConstGenParticlePtr part) const;
+  void set (const HepMC::ConstGenParticlePtr& part) const;
 
 
   /**
