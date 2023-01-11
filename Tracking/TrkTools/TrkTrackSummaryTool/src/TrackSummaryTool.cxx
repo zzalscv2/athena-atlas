@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrackSummaryTool/TrackSummaryTool.h"
@@ -179,15 +179,12 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
   if (!m_idTool.empty()) {
     if (m_pixelExists) {
       // Pixel counters set to 0
-      constexpr size_t numberOfPixelCounters{ 11 };
+      constexpr size_t numberOfPixelCounters{ 8 };
       constexpr std::array<size_t, numberOfPixelCounters> atPixelIndices{
         numberOfContribPixelLayers,
         numberOfInnermostPixelLayerHits,
-        numberOfInnermostPixelLayerOutliers,
         numberOfNextToInnermostPixelLayerHits,
-        numberOfNextToInnermostPixelLayerOutliers,
         numberOfPixelHits,
-        numberOfPixelOutliers,
         numberOfGangedPixels,
         numberOfGangedFlaggedFakes,
         numberOfPixelSpoiltHits,
@@ -198,11 +195,10 @@ Trk::TrackSummaryTool::fillSummary(const EventContext& ctx,
 
     }
     // SCT and TRT counters set to 0
-    constexpr size_t numberOfSctOrTrtCounters{ 10 };
+    constexpr size_t numberOfSctOrTrtCounters{ 9 };
     constexpr std::array<size_t, numberOfSctOrTrtCounters> atSctOrTrtIndices{
       numberOfSCTHits,
       numberOfSCTSpoiltHits,
-      numberOfSCTOutliers,
       numberOfTRTHits,
       numberOfTRTXenonHits,
       numberOfTRTHighThresholdHits,

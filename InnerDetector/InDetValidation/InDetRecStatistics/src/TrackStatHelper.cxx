@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -49,7 +49,6 @@ namespace Trk {
 // should be synchronised with ETrackSummaryTypes
 const Trk::SummaryType InDet::TrackStatHelper::s_summaryTypes[kNSummaryTypes] = {
    Trk::numberOfInnermostPixelLayerHits,
-   Trk::numberOfInnermostPixelLayerOutliers,
    Trk::numberOfPixelHits,
    Trk::numberOfPixelHoles,
    Trk::numberOfGangedPixels,
@@ -66,14 +65,10 @@ const Trk::SummaryType InDet::TrackStatHelper::s_summaryTypes[kNSummaryTypes] = 
 // Table column labels. should be synchronised with ETrackSummaryTypes
 const char * const InDet::TrackStatHelper::s_summaryTypeName[kNSummaryTypes] = {
    "blay",
-   "shrd",
-   "outl",
    "pix",
-   "shrd",
    "hole",
    "gang",
    "SCT",
-   "shrd",
    "hole",
    "DHole",
    "TRT",

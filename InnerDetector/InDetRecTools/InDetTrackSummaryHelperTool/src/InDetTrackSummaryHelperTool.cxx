@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSummaryHelperTool/InDetTrackSummaryHelperTool.h"
@@ -78,90 +78,73 @@ InDet::InDetTrackSummaryHelperTool::analyse(
   bool isOutlier = tsos->type(Trk::TrackStateOnSurface::Outlier);
   bool ispatterntrack = (track.info().trackFitter() == Trk::TrackInfo::Unknown);
 
-  if (m_usePixel and m_pixelId->is_pixel(id)) {
+  if (m_usePixel and m_pixelId->is_pixel(id)
+      and (not isOutlier or ispatterntrack)) {
+    // ME: outliers on pattern tracks may be
+    // reintegrated by fitter, so count them as hits
 
-    if (isOutlier and
-        not ispatterntrack) { // ME: outliers on pattern tracks may be
-                              // reintegrated by fitter, so count them as hits
-      information[Trk::numberOfPixelOutliers]++;
-      if (m_pixelId->layer_disk(id) == 0 and m_pixelId->is_barrel(id)) {
-        information[Trk::numberOfInnermostPixelLayerOutliers]++;
-      }
-      if (m_pixelId->layer_disk(id) == 1 and m_pixelId->is_barrel(id)) {
-        information[Trk::numberOfNextToInnermostPixelLayerOutliers]++;
-      }
+    information[Trk::numberOfPixelHits]++;
+    if (m_pixelId->layer_disk(id) == 0 and m_pixelId->is_barrel(id))
+      information[Trk::numberOfInnermostPixelLayerHits]++;
+    if (m_pixelId->layer_disk(id) == 1 and m_pixelId->is_barrel(id))
+      information[Trk::numberOfNextToInnermostPixelLayerHits]++;
+
+    // check to see if there's an ambiguity with the ganged cluster.
+    const PixelClusterOnTrack* pix = nullptr;
+    if (rot->rioType(Trk::RIO_OnTrackType::PixelCluster)) {
+      pix = static_cast<const PixelClusterOnTrack*>(rot);
+    }
+    if (not pix) {
+      ATH_MSG_ERROR("Could not cast pixel RoT to PixelClusterOnTrack!");
     } else {
-      information[Trk::numberOfPixelHits]++;
-      if (m_pixelId->layer_disk(id) == 0 and m_pixelId->is_barrel(id))
-        information[Trk::numberOfInnermostPixelLayerHits]++;
-      if (m_pixelId->layer_disk(id) == 1 and m_pixelId->is_barrel(id))
-        information[Trk::numberOfNextToInnermostPixelLayerHits]++;
-
-      // check to see if there's an ambiguity with the ganged cluster.
-      const PixelClusterOnTrack* pix = nullptr;
-      if (rot->rioType(Trk::RIO_OnTrackType::PixelCluster)) {
-        pix = static_cast<const PixelClusterOnTrack*>(rot);
+      if (pix->isBroadCluster())
+	information[Trk::numberOfPixelSpoiltHits]++;
+      if (pix->hasClusterAmbiguity()) {
+	information[Trk::numberOfGangedPixels]++;
+	if (pix->isFake())
+	  information[Trk::numberOfGangedFlaggedFakes]++;
       }
-      if (not pix) {
-        ATH_MSG_ERROR("Could not cast pixel RoT to PixelClusterOnTrack!");
+
+      if ((m_pixelId->is_barrel(id))) {
+	int offset = m_pixelId->layer_disk(id);
+	if (not hitPattern.test(offset))
+	  information[Trk::numberOfContribPixelLayers]++;
+	hitPattern.set(offset); // assumes numbered consecutively
       } else {
-        if (pix->isBroadCluster())
-          information[Trk::numberOfPixelSpoiltHits]++;
-        if (pix->hasClusterAmbiguity()) {
-          information[Trk::numberOfGangedPixels]++;
-          if (pix->isFake())
-            information[Trk::numberOfGangedFlaggedFakes]++;
-        }
-
-        if ((m_pixelId->is_barrel(id))) {
-          int offset = m_pixelId->layer_disk(id);
-          if (not hitPattern.test(offset))
-            information[Trk::numberOfContribPixelLayers]++;
-          hitPattern.set(offset); // assumes numbered consecutively
-        } else {
-          int offset = static_cast<int>(
-            Trk::pixelEndCap0); // get int value of first pixel endcap disc
-          offset += m_pixelId->layer_disk(id);
-          if (not hitPattern.test(offset))
-            information[Trk::numberOfContribPixelLayers]++;
-          hitPattern.set(offset); // assumes numbered consecutively
-        }
+	int offset = static_cast<int>(Trk::pixelEndCap0); // get int value of first pixel endcap disc
+	offset += m_pixelId->layer_disk(id);
+	if (not hitPattern.test(offset))
+	  information[Trk::numberOfContribPixelLayers]++;
+	hitPattern.set(offset); // assumes numbered consecutively
       }
-
     }
 
-  } else if (m_useSCT and m_sctId->is_sct(id)) {
-    if (isOutlier and
-        not ispatterntrack) { // ME: outliers on pattern tracks may be
-                              // reintegrated by fitter, so count them as hits
-      information[Trk::numberOfSCTOutliers]++;
+  } else if (m_useSCT and m_sctId->is_sct(id)
+	     and (not isOutlier or ispatterntrack)) {
+    // ME: outliers on pattern tracks may be
+    // reintegrated by fitter, so count them as hits
 
-    } else {
-      information[Trk::numberOfSCTHits]++;
+    information[Trk::numberOfSCTHits]++;
 
-      const InDet::SCT_ClusterOnTrack* sctclus = nullptr;
-      if (rot->rioType(Trk::RIO_OnTrackType::SCTCluster)) {
-        sctclus = static_cast<const InDet::SCT_ClusterOnTrack*>(rot);
-      }
-      if (not sctclus) {
-        ATH_MSG_ERROR("Could not cast SCT RoT to SCT_ClusterOnTrack!");
-      } else {
-        if (sctclus->isBroadCluster())
-          information[Trk::numberOfSCTSpoiltHits]++;
-      }
-
-      if ((m_sctId->is_barrel(id))) {
-        int offset = static_cast<int>(Trk::sctBarrel0);
-        hitPattern.set(
-          offset + m_sctId->layer_disk(id)); // assumes numbered consecutively
-      } else {
-        int offset = static_cast<int>(
-          Trk::sctEndCap0); // get int value of first sct endcap disc
-        hitPattern.set(
-          offset + m_sctId->layer_disk(id)); // assumes numbered consecutively
-      }
-
+    const InDet::SCT_ClusterOnTrack* sctclus = nullptr;
+    if (rot->rioType(Trk::RIO_OnTrackType::SCTCluster)) {
+      sctclus = static_cast<const InDet::SCT_ClusterOnTrack*>(rot);
     }
+    if (not sctclus) {
+      ATH_MSG_ERROR("Could not cast SCT RoT to SCT_ClusterOnTrack!");
+    } else {
+      if (sctclus->isBroadCluster())
+	information[Trk::numberOfSCTSpoiltHits]++;
+    }
+
+    if ((m_sctId->is_barrel(id))) {
+      int offset = static_cast<int>(Trk::sctBarrel0);
+      hitPattern.set(offset + m_sctId->layer_disk(id)); // assumes numbered consecutively
+    } else {
+      int offset = static_cast<int>(Trk::sctEndCap0); // get int value of first sct endcap disc
+      hitPattern.set(offset + m_sctId->layer_disk(id)); // assumes numbered consecutively
+    }
+
   } else if (m_useTRT and m_trtId->is_trt(id)) {
     bool isArgonStraw = false;
     bool isKryptonStraw = false;

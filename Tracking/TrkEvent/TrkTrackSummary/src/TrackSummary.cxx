@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
                           Summary.cxx  -  description
@@ -96,16 +96,10 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfContribPixelLayers) << "\n";
   out << " * Number of Innermost Pixel layer hits        : "
       << trackSum.get(numberOfInnermostPixelLayerHits) << "\n";
-  out << " * Number of Innermost Pixel layer outliers    : "
-      << trackSum.get(numberOfInnermostPixelLayerOutliers) << "\n";
   out << " * Number of Next-To-Innermost Pixel layer hits        : "
       << trackSum.get(numberOfNextToInnermostPixelLayerHits) << "\n";
-  out << " * Number of Next-To-Innermost Pixel layer outliers    : "
-      << trackSum.get(numberOfNextToInnermostPixelLayerOutliers) << "\n";
   out << " * Number of pixel hits          : "
       << trackSum.get(numberOfPixelHits) << "\n";
-  out << " * Number of pixel outliers      : "
-      << trackSum.get(numberOfPixelOutliers) << "\n";
   out << " * Number of spoilt pixel hits   : "
       << trackSum.get(numberOfPixelSpoiltHits) << "\n";
   out << " * Number of pixel holes         : "
@@ -118,8 +112,6 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfPixelDeadSensors) << "\n";
   out << " * Number of SCT hits            : " << trackSum.get(numberOfSCTHits)
       << "\n";
-  out << " * Number of SCT outliers        : "
-      << trackSum.get(numberOfSCTOutliers) << "\n";
   out << " * Number of SCT holes           : " << trackSum.get(numberOfSCTHoles)
       << "\n";
   out << " * Number of SCT double Holes    : "

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCOMBINEDBASETOOLS_MUONCREATORTOOL_H
@@ -198,8 +198,10 @@ namespace MuonCombined {
            {this,"CopyFloatSummaryKeys",{"TRTTrackOccupancy","eProbabilityComb","eProbabilityHT","pixeldEdx","TRTdEdx","eProbabilityNN"},
             "List of float aux element names to copy over from ID track particle summaries."};
         Gaudi::Property< std::vector<std::string> >  m_copyCharSummaryKeys
-	  {this,"CopyUInt8SummaryKeys",{"numberOfUsedHitsdEdx","numberOfIBLOverflowsdEdx","TRTdEdxUsedHits",
-		"expectInnermostPixelLayerHit", "expectNextToInnermostPixelLayerHit"},
+	  {this,"CopyUInt8SummaryKeys",
+	      {"numberOfUsedHitsdEdx","numberOfIBLOverflowsdEdx","TRTdEdxUsedHits",
+		  "expectInnermostPixelLayerHit", "expectNextToInnermostPixelLayerHit",
+		  "numberOfPixelOutliers", "numberOfInnermostPixelLayerOutliers", "numberOfNextToInnermostPixelLayerOutliers", "numberOfSCTOutliers"},
             "List of uint8_t aux element names to copy over from ID track particle summaries."};
 
         std::vector< std::unique_ptr<SG::AuxElement::Accessor<float> > >    m_copyFloatSummaryAccessors;
