@@ -22,9 +22,9 @@ namespace MultiComponentStateCombiner {
 
 /** @bried Calculate combined state of many components */
 std::unique_ptr<Trk::TrackParameters>
-combine(const MultiComponentState&,
-        const bool useMode = false,
-        const double fractionPDFused = 1.0);
+combineToSingle(const MultiComponentState&,
+                const bool useMode = false,
+                const double fractionPDFused = 1.0);
 
 /** @brief Combined/merge a component to another one */
 void

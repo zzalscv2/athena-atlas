@@ -69,14 +69,15 @@ Trk::MultiComponentStateOnSurface*
 smootherHelper(Trk::MultiComponentState&& updatedState,
                std::unique_ptr<const Trk::MeasurementBase>&& measurement,
                const Trk::FitQualityOnSurface& fitQuality,
-               bool islast)
+               bool islast,
+               bool useMode)
 
 {
   // If is the last we want also to combine
   // the Multi component state in a single TrackParameter
   if (islast) {
     auto combinedLastState =
-      Trk::MultiComponentStateCombiner::combine(updatedState, true);
+      Trk::MultiComponentStateCombiner::combineToSingle(updatedState, useMode);
     if (combinedLastState) {
       return new Trk::MultiComponentStateOnSurface(fitQuality,
                                                    std::move(measurement),
@@ -98,14 +99,12 @@ Trk::GaussianSumFitter::GaussianSumFitter(const std::string& type,
   , m_trkParametersComparisonFunction{}
   , m_inputPreparator(nullptr)
   , m_sortingReferencePoint{ 0, 0, 0 }
-  , m_cutChiSquaredPerNumberDOF(50.)
   , m_FitPRD{ 0 }
   , m_FitMeasurementBase{ 0 }
   , m_fitSuccess{ 0 }
 {
   declareInterface<ITrackFitter>(this);
   declareProperty("SortingReferencePoint", m_sortingReferencePoint);
-  declareProperty("StateChi2PerNDOFCut", m_cutChiSquaredPerNumberDOF);
 }
 
 StatusCode
@@ -594,10 +593,9 @@ Trk::GaussianSumFitter::makePerigee(
     return nullptr;
   }
 
-  // Determine the combined state as well to be passed to the
-  // MultiComponentStateOnSurface object
+  // Determine the combined state
   std::unique_ptr<Trk::TrackParameters> combinedPerigee =
-    MultiComponentStateCombiner::combine(stateExtrapolatedToPerigee, true);
+    MultiComponentStateCombiner::combineToSingle(stateExtrapolatedToPerigee, m_useMode);
 
   // Perigee is an additional MultiComponentStateOnSurface
   std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
@@ -782,7 +780,7 @@ Trk::GaussianSumFitter::stepForwardFit(
     measurement.reset(originalMeasurement->clone());
   } else {
     std::unique_ptr<Trk::TrackParameters> combinedState =
-      MultiComponentStateCombiner::combine(extrapolatedState);
+      MultiComponentStateCombiner::combineToSingle(extrapolatedState);
     if (!combinedState) {
       ATH_MSG_WARNING("State combination failed... exiting");
       return false;
@@ -907,7 +905,7 @@ Trk::GaussianSumFitter::smootherFit(
   // The last TSOS is special so we do a proper collapse
   // of the multi component to single TrackParameter
   std::unique_ptr<Trk::TrackParameters> combinedFirstSmoothedState =
-    MultiComponentStateCombiner::combine(firstSmoothedState, true);
+    MultiComponentStateCombiner::combineToSingle(firstSmoothedState, m_useMode);
 
   // The 1st updated/smoothed state owned  by the trajectory
   const Trk::MultiComponentStateOnSurface* updatedFirstStateOnSurface =
@@ -1022,10 +1020,11 @@ Trk::GaussianSumFitter::smootherFit(
       updatedStateOnSurface = smootherHelper(std::move(combinedfitterState),
                                              std::move(measurement),
                                              combinedFitQuality,
-                                             islast);
+                                             islast,
+                                             m_useMode);
     } else { // If combination with forwards state is not done
       updatedStateOnSurface = smootherHelper(
-        std::move(updatedState), std::move(measurement), fitQuality, islast);
+        std::move(updatedState), std::move(measurement), fitQuality, islast, m_useMode);
     }
     // For the next iteration start from last added
     loopUpdatedState = &(updatedStateOnSurface->components());
@@ -1124,7 +1123,7 @@ Trk::GaussianSumFitter::addCCOT(
 
   //  Combine the state  and find the mode of the distribution
   std::unique_ptr<Trk::TrackParameters> combinedState =
-    MultiComponentStateCombiner::combine(extrapolatedState, true);
+    MultiComponentStateCombiner::combineToSingle(extrapolatedState, m_useMode);
   auto combinedFitQuality =
     Trk::GsfMeasurementUpdator::fitQuality(extrapolatedState, *ccot);
 
