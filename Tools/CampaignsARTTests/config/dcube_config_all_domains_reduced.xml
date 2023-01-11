@@ -75,7 +75,6 @@
        <hist1D name="nSCTHoles_vs_eta" plotopts="" tests="KS" type="TProfile"/>
        <hist1D name="nPixelSharedHits" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="nSCTSharedHits" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="pixeldEdx" plotopts="" tests="KS" type="TH1F"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="Tracks">
