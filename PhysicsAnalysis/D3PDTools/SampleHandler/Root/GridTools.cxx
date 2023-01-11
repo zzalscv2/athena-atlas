@@ -143,7 +143,7 @@ namespace SH
           while (isspace (subresult.front()))
             subresult = subresult.substr (1);
           while (isspace (subresult.back()))
-            subresult = subresult.substr (0, subresult.size()-1);
+            subresult.pop_back();
           result.push_back (std::move (subresult));
         }
       }
