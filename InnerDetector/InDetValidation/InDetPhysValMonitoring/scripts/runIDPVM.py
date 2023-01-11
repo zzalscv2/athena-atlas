@@ -40,54 +40,55 @@ def GetCustomAthArgs():
 MyArgs = GetCustomAthArgs()
 
 from AthenaConfiguration.Enums import LHCPeriod
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
 
-ConfigFlags.Input.Files = []
+flags.Input.Files = []
 for path in MyArgs.filesInput.split(','):
-    ConfigFlags.Input.Files += glob(path)
-ConfigFlags.PhysVal.OutputFileName = MyArgs.outputFile
+    flags.Input.Files += glob(path)
+flags.PhysVal.OutputFileName = MyArgs.outputFile
 
 # Set default truthMinPt depending on Run config
 if MyArgs.truthMinPt is None:
-    MyArgs.truthMinPt = 1000 if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4 \
+    MyArgs.truthMinPt = 1000 if flags.GeoModel.Run >= LHCPeriod.Run4 \
                         else 500
 
-ConfigFlags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
-ConfigFlags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots
-ConfigFlags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
-ConfigFlags.PhysVal.IDPVM.doValidateTruthToRecoNtuple = MyArgs.doTruthToRecoNtuple
-ConfigFlags.PhysVal.IDPVM.doValidateTracksInBJets = MyArgs.doTracksInBJets
-ConfigFlags.PhysVal.IDPVM.doValidateTracksInJets = MyArgs.doTracksInJets
-ConfigFlags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
-ConfigFlags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
-ConfigFlags.PhysVal.IDPVM.doTruthOriginPlots = MyArgs.doTruthOrigin
-ConfigFlags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTracks
-ConfigFlags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks
-ConfigFlags.PhysVal.IDPVM.doValidateLargeD0Tracks = MyArgs.doLargeD0Tracks
-ConfigFlags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks = MyArgs.doMergedLargeD0Tracks
-ConfigFlags.PhysVal.IDPVM.doRecoOnly = MyArgs.doRecoOnly
-ConfigFlags.PhysVal.IDPVM.doPerAuthorPlots = MyArgs.doPerAuthor
-ConfigFlags.PhysVal.IDPVM.doHitLevelPlots = MyArgs.doHitLevelPlots
-ConfigFlags.PhysVal.IDPVM.runDecoration = not MyArgs.disableDecoration
-ConfigFlags.PhysVal.IDPVM.requiredSiHits = MyArgs.requiredSiHits
-ConfigFlags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
-ConfigFlags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
-ConfigFlags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
-ConfigFlags.PhysVal.IDPVM.jetsNameForHardScatter = MyArgs.jetsNameForHardScatter
-ConfigFlags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
-ConfigFlags.PhysVal.IDPVM.GRL = MyArgs.GRL
-ConfigFlags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
-ConfigFlags.PhysVal.doActs = MyArgs.doActs
+flags.PhysVal.IDPVM.setTruthStrategy = MyArgs.HSFlag
+flags.PhysVal.IDPVM.doExpertOutput   = MyArgs.doExpertPlots
+flags.PhysVal.IDPVM.doPhysValOutput  = not MyArgs.doExpertPlots
+flags.PhysVal.IDPVM.doValidateTruthToRecoNtuple = MyArgs.doTruthToRecoNtuple
+flags.PhysVal.IDPVM.doValidateTracksInBJets = MyArgs.doTracksInBJets
+flags.PhysVal.IDPVM.doValidateTracksInJets = MyArgs.doTracksInJets
+flags.PhysVal.IDPVM.doValidateLooseTracks = MyArgs.doLoose
+flags.PhysVal.IDPVM.doValidateTightPrimaryTracks = MyArgs.doTightPrimary
+flags.PhysVal.IDPVM.doTruthOriginPlots = MyArgs.doTruthOrigin
+flags.PhysVal.IDPVM.doValidateMuonMatchedTracks = MyArgs.doMuonMatchedTracks
+flags.PhysVal.IDPVM.doValidateElectronMatchedTracks = MyArgs.doElectronMatchedTracks
+flags.PhysVal.IDPVM.doValidateLargeD0Tracks = MyArgs.doLargeD0Tracks
+flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks = MyArgs.doMergedLargeD0Tracks
+flags.PhysVal.IDPVM.doRecoOnly = MyArgs.doRecoOnly
+flags.PhysVal.IDPVM.doPerAuthorPlots = MyArgs.doPerAuthor
+flags.PhysVal.IDPVM.doHitLevelPlots = MyArgs.doHitLevelPlots
+flags.PhysVal.IDPVM.runDecoration = not MyArgs.disableDecoration
+flags.PhysVal.IDPVM.requiredSiHits = MyArgs.requiredSiHits
+flags.PhysVal.IDPVM.maxProdVertRadius = MyArgs.maxProdVertRadius
+flags.PhysVal.IDPVM.ancestorIDs = MyArgs.ancestorIDList
+flags.PhysVal.IDPVM.hardScatterStrategy = int(MyArgs.hardScatterStrategy)
+flags.PhysVal.IDPVM.jetsNameForHardScatter = MyArgs.jetsNameForHardScatter
+flags.PhysVal.IDPVM.truthMinPt = MyArgs.truthMinPt
+flags.PhysVal.IDPVM.GRL = MyArgs.GRL
+flags.PhysVal.IDPVM.validateExtraTrackCollections = MyArgs.validateExtraTrackCollections
+flags.PhysVal.doActs = MyArgs.doActs
 
-ConfigFlags.lock()
+flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-acc.merge(PoolReadCfg(ConfigFlags))
+acc.merge(PoolReadCfg(flags))
 
 from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringCfg
-acc.merge(InDetPhysValMonitoringCfg(ConfigFlags))
+acc.merge(InDetPhysValMonitoringCfg(flags))
 
 acc.printConfig(withDetails=True)
 

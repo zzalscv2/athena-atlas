@@ -31,29 +31,30 @@ def ITkTrackTruthCfg(flags,
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     numThreads=1
-    ConfigFlags.Concurrency.NumThreads=numThreads
-    ConfigFlags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads=numThreads
+    flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
 
-    ConfigFlags.Detector.GeometryITkPixel = True
-    ConfigFlags.Detector.GeometryITkStrip = True
+    flags.Detector.GeometryITkPixel = True
+    flags.Detector.GeometryITkStrip = True
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     ################## SiliconPreProcessing Configurations ###################
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
-    top_acc.merge(ITkRecPreProcessingSiliconCfg(ConfigFlags))
+    top_acc.merge(ITkRecPreProcessingSiliconCfg(flags))
     
     #//// TrackingSiPatternConfig configurations from Temporary location /////
     ################# SiSPSeededTrackFinder Configurations ###################
@@ -63,7 +64,7 @@ if __name__ == "__main__":
     SiSPSeededTrackCollectionKey = 'SiSPSeededPixelTracks'
     ResolvedTrackCollectionKey = 'ResolvedPixelTracks'
     from InDetConfig.ITkTrackingSiPatternConfig import ITkSiSPSeededTrackFinderCfg
-    top_acc.merge(ITkSiSPSeededTrackFinderCfg( ConfigFlags,
+    top_acc.merge(ITkSiSPSeededTrackFinderCfg( flags,
                                                InputCollections = InputCollections, 
                                                SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey))
     ##########################################################################
@@ -73,7 +74,7 @@ if __name__ == "__main__":
     InputDetailedTrackTruth = 'DetailedTrackTruth'
     InputTrackCollectionTruth = 'TrackTruthCollection'
     
-    top_acc.merge(ITkTrackTruthCfg(flags=ConfigFlags,
+    top_acc.merge(ITkTrackTruthCfg(flags,
                                    Tracks = InputTrackCollection,
                                    DetailedTruth = InputDetailedTrackTruth,
                                    TracksTruth = InputTrackCollectionTruth))

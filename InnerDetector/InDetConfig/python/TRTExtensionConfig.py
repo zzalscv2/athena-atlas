@@ -54,7 +54,8 @@ def NewTrackingTRTExtensionPhaseCfg(flags,
 ##########################################################################################################################
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     numThreads=1
     flags.Concurrency.NumThreads=numThreads
