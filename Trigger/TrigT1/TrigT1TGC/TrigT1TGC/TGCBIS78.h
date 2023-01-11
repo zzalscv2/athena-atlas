@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TGC_BIS78_H
@@ -21,7 +21,7 @@ class TGCBIS78 : public AthMessaging {
  public:
   TGCBIS78();
   virtual ~TGCBIS78() = default;
-  TGCBIS78(const TGCBIS78& right) = default;
+  TGCBIS78(const TGCBIS78& right) = delete;
   const TGCBIS78& operator = (const TGCBIS78& right) = delete;
   bool operator == (const TGCBIS78& right) const = delete;
   bool operator != (const TGCBIS78& right) const = delete;
