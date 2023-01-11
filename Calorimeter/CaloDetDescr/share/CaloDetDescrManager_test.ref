@@ -1,0 +1,437 @@
+Sampling:0
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:18.21, z:20.11, dz:0.00
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:311.90, z:313.80, dz:0.00
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:618.11, z:620.01, dz:0.00
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:949.12, z:951.02, dz:0.00
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:1318.23, z:1320.13, dz:0.00
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:1740.24, z:1742.14, dz:0.00
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:2232.09, z:2233.99, dz:0.00
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:1456.66, r:1455.18, dr:43.36
+CaloDD: z_raw:2813.53, z:2815.43, dz:0.00
+
+Sampling:1
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:1543.51, r:1542.03, dr:43.49
+CaloDD: z_raw:12.06, z:13.96, dz:0.00
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:1543.51, r:1542.03, dr:43.49
+CaloDD: z_raw:323.07, z:324.97, dz:0.00
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:1540.94, r:1539.46, dr:40.92
+CaloDD: z_raw:645.98, z:647.88, dz:0.00
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:1535.89, r:1534.41, dr:35.87
+CaloDD: z_raw:992.09, z:993.99, dz:0.00
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:1524.62, r:1523.15, dr:24.60
+CaloDD: z_raw:1370.00, z:1371.90, dz:0.00
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:1524.62, r:1523.15, dr:24.60
+CaloDD: z_raw:1810.18, z:1812.08, dz:0.00
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:1521.80, r:1520.32, dr:21.77
+CaloDD: z_raw:2318.70, z:2320.60, dz:0.00
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:1516.62, r:1515.29, dr:16.60
+CaloDD: z_raw:2929.34, z:2931.24, dz:0.00
+
+Sampling:2
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:1757.65, r:1756.32, dr:170.65
+CaloDD: z_raw:21.97, z:23.87, dz:0.00
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:1758.10, r:1756.77, dr:171.10
+CaloDD: z_raw:376.44, z:378.34, dz:0.00
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:1755.72, r:1754.39, dr:174.58
+CaloDD: z_raw:745.01, z:746.91, dz:0.00
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:1732.44, r:1731.11, dr:160.76
+CaloDD: z_raw:1128.81, z:1130.71, dz:0.00
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:1739.91, r:1738.58, dr:190.69
+CaloDD: z_raw:1574.56, z:1576.46, dz:0.00
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:1707.96, r:1706.63, dr:158.74
+CaloDD: z_raw:2040.46, z:2042.36, dz:0.00
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:1672.96, r:1671.63, dr:130.54
+CaloDD: z_raw:2563.53, z:2565.43, dz:0.00
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:1730.76, r:1729.43, dr:197.54
+CaloDD: z_raw:3440.26, z:3442.16, dz:0.00
+
+Sampling:3
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:1944.15, r:1942.82, dr:15.85
+CaloDD: z_raw:48.62, z:50.52, dz:0.00
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:1944.68, r:1943.34, dr:15.32
+CaloDD: z_raw:441.39, z:443.29, dz:0.00
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:1944.50, r:1943.17, dr:15.50
+CaloDD: z_raw:851.78, z:853.68, dz:0.00
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:1926.60, r:1925.27, dr:33.40
+CaloDD: z_raw:1284.47, z:1286.37, dz:0.00
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:1944.57, r:1943.24, dr:15.43
+CaloDD: z_raw:1793.11, z:1795.01, dz:0.00
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:1911.38, r:1910.04, dr:48.62
+CaloDD: z_raw:2321.42, z:2323.32, dz:0.00
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:1880.40, r:1879.07, dr:79.60
+CaloDD: z_raw:2925.32, z:2927.22, dz:0.00
+
+Sampling:4
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1546.55, r:1546.55, dr:0.00
+CaloDD: z_raw:3624.00, z:3669.00, dz:2.00
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1248.24, r:1248.24, dr:0.00
+CaloDD: z_raw:3624.00, z:3669.00, dz:2.00
+
+Sampling:5
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:1966.10, r:1967.10, dr:0.00
+CaloDD: z_raw:3741.74, z:3790.74, dz:41.74
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1577.55, r:1578.55, dr:0.00
+CaloDD: z_raw:3740.73, z:3789.73, dz:40.73
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1273.78, r:1274.78, dr:0.00
+CaloDD: z_raw:3741.00, z:3790.00, dz:40.99
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1033.90, r:1034.90, dr:0.00
+CaloDD: z_raw:3741.21, z:3790.21, dz:41.21
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:842.28, r:843.28, dr:0.00
+CaloDD: z_raw:3741.60, z:3790.60, dz:41.60
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:684.67, r:685.67, dr:0.00
+CaloDD: z_raw:3730.20, z:3779.20, dz:30.20
+
+Sampling:6
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:2100.08, r:2101.08, dr:0.00
+CaloDD: z_raw:3996.74, z:4045.74, dz:213.26
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1688.45, r:1689.45, dr:0.00
+CaloDD: z_raw:3956.02, z:4005.02, dz:174.56
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1358.02, r:1359.02, dr:0.00
+CaloDD: z_raw:3942.21, z:3991.21, dz:160.22
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1100.61, r:1101.61, dr:0.00
+CaloDD: z_raw:3939.45, z:3988.45, dz:157.03
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:892.13, r:893.13, dr:0.00
+CaloDD: z_raw:3924.87, z:3973.87, dz:141.66
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:720.51, r:721.51, dr:0.00
+CaloDD: z_raw:3887.90, z:3936.90, dz:127.50
+----: eta:2.61, phi:0.00
+CaloDD: r_raw:556.39, r:557.39, dr:0.00
+CaloDD: z_raw:3912.34, z:3961.34, dz:212.34
+----: eta:2.81, phi:0.00
+CaloDD: r_raw:453.05, r:454.05, dr:0.00
+CaloDD: z_raw:3897.47, z:3946.47, dz:197.47
+----: eta:3.01, phi:0.00
+CaloDD: r_raw:369.54, r:370.54, dr:0.00
+CaloDD: z_raw:3887.30, z:3936.30, dz:187.30
+----: eta:3.21, phi:0.00
+CaloDD: r_raw:333.04, r:334.04, dr:0.00
+CaloDD: z_raw:3873.40, z:3922.40, dz:173.40
+
+Sampling:7
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1708.35, r:1709.35, dr:0.00
+CaloDD: z_raw:4167.43, z:4216.43, dz:42.57
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1376.56, r:1377.56, dr:0.00
+CaloDD: z_raw:4156.21, z:4205.21, dz:53.79
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1175.82, r:1176.82, dr:0.00
+CaloDD: z_raw:4153.24, z:4202.24, dz:56.76
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:902.94, r:903.94, dr:0.00
+CaloDD: z_raw:4126.98, z:4175.98, dz:83.02
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:733.60, r:734.60, dr:0.00
+CaloDD: z_raw:4111.36, z:4160.36, dz:98.64
+----: eta:2.61, phi:0.00
+CaloDD: r_raw:592.65, r:593.65, dr:0.00
+CaloDD: z_raw:4167.34, z:4216.34, dz:42.66
+----: eta:2.81, phi:0.00
+CaloDD: r_raw:482.68, r:483.68, dr:0.00
+CaloDD: z_raw:4152.47, z:4201.47, dz:57.53
+----: eta:3.01, phi:0.00
+CaloDD: r_raw:393.78, r:394.78, dr:0.00
+CaloDD: z_raw:4142.30, z:4191.30, dz:67.70
+----: eta:3.21, phi:0.00
+CaloDD: r_raw:354.96, r:355.96, dr:0.00
+CaloDD: z_raw:4128.40, z:4177.40, dz:81.60
+
+Sampling:8
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1761.75, r:1761.75, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1424.22, r:1424.22, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1156.28, r:1156.28, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:941.40, r:941.40, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:767.88, r:767.88, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:2.61, phi:0.00
+CaloDD: r_raw:662.21, r:662.21, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:2.81, phi:0.00
+CaloDD: r_raw:541.14, r:541.14, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:3.01, phi:0.00
+CaloDD: r_raw:442.49, r:442.49, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+----: eta:3.21, phi:0.00
+CaloDD: r_raw:361.97, r:361.97, dr:0.00
+CaloDD: z_raw:4416.25, z:4461.25, dz:140.25
+
+Sampling:9
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1924.83, r:1924.83, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1556.06, r:1556.06, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1263.32, r:1263.32, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:1028.54, r:1028.54, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:838.96, r:838.96, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:2.61, phi:0.00
+CaloDD: r_raw:723.51, r:723.51, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:2.81, phi:0.00
+CaloDD: r_raw:591.23, r:591.23, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+----: eta:3.01, phi:0.00
+CaloDD: r_raw:483.45, r:483.45, dr:0.00
+CaloDD: z_raw:4824.50, z:4869.50, dz:268.00
+
+Sampling:10
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:2146.53, r:2146.53, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1735.28, r:1735.28, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1408.83, r:1408.83, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:1147.01, r:1147.01, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:935.59, r:935.59, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:2.61, phi:0.00
+CaloDD: r_raw:806.84, r:806.84, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:2.81, phi:0.00
+CaloDD: r_raw:659.33, r:659.33, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+----: eta:3.01, phi:0.00
+CaloDD: r_raw:539.13, r:539.13, dr:0.00
+CaloDD: z_raw:5379.50, z:5424.50, dz:246.50
+
+Sampling:11
+----: eta:1.81, phi:0.00
+CaloDD: r_raw:1890.45, r:1890.45, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:2.01, phi:0.00
+CaloDD: r_raw:1534.81, r:1534.81, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:2.21, phi:0.00
+CaloDD: r_raw:1249.58, r:1249.58, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:2.41, phi:0.00
+CaloDD: r_raw:1019.25, r:1019.25, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:2.61, phi:0.00
+CaloDD: r_raw:878.99, r:878.99, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:2.81, phi:0.00
+CaloDD: r_raw:718.29, r:718.29, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:3.01, phi:0.00
+CaloDD: r_raw:587.34, r:587.34, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+----: eta:3.21, phi:0.00
+CaloDD: r_raw:480.46, r:480.46, dr:0.00
+CaloDD: z_raw:5860.00, z:5905.00, dz:234.00
+
+Sampling:12
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:122.55, z:123.24, dz:246.48
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:618.90, z:620.76, dz:255.61
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:1140.09, z:1141.10, dz:273.86
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:1707.03, z:1707.09, dz:292.12
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:2342.48, z:2341.54, dz:337.77
+
+Sampling:13
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:3020.00, r:3020.00, dr:840.00
+CaloDD: z_raw:151.06, z:151.06, dz:0.00
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:3020.00, r:3020.00, dr:840.00
+CaloDD: z_raw:762.89, z:762.89, dz:0.00
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:3020.00, r:3020.00, dr:840.00
+CaloDD: z_raw:1405.33, z:1405.33, dz:0.00
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:3020.00, r:3020.00, dr:840.00
+CaloDD: z_raw:2104.18, z:2104.18, dz:0.00
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:3020.00, r:2795.00, dr:390.00
+CaloDD: z_raw:2887.47, z:2642.79, dz:319.51
+
+Sampling:14
+----: eta:0.01, phi:0.00
+CaloDD: r_raw:3630.00, r:3630.00, dr:380.00
+CaloDD: z_raw:0.00, z:0.00, dz:730.30
+----: eta:0.21, phi:0.00
+CaloDD: r_raw:3630.00, r:3630.00, dr:380.00
+CaloDD: z_raw:730.85, z:734.87, dz:739.43
+----: eta:0.41, phi:0.00
+CaloDD: r_raw:3630.00, r:3630.00, dr:380.00
+CaloDD: z_raw:1491.03, z:1497.12, dz:785.08
+----: eta:0.61, phi:0.00
+CaloDD: r_raw:3630.00, r:3630.00, dr:380.00
+CaloDD: z_raw:2311.05, z:2346.10, dz:912.88
+
+Sampling:15
+
+Sampling:16
+----: eta:0.81, phi:0.00
+CaloDD: r_raw:3630.00, r:3630.00, dr:380.00
+CaloDD: z_raw:3470.70, z:3405.00, dz:309.00
+
+Sampling:17
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:2813.00, r:2813.00, dr:326.00
+CaloDD: z_raw:3527.10, z:3552.00, dz:12.00
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:2073.00, r:2073.00, dr:478.00
+CaloDD: z_raw:3520.75, z:3536.00, dz:6.00
+----: eta:1.61, phi:0.00
+CaloDD: r_raw:1653.00, r:1653.00, dr:362.00
+CaloDD: z_raw:3519.70, z:3536.00, dz:6.00
+
+Sampling:18
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:3924.70, z:3966.95, dz:456.34
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:2450.00, r:2450.00, dr:300.00
+CaloDD: z_raw:4934.97, z:4980.02, dz:547.61
+
+Sampling:19
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:2870.00, r:2870.00, dr:540.00
+CaloDD: z_raw:3598.57, z:3720.53, dz:292.06
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:2870.00, r:2870.00, dr:540.00
+CaloDD: z_raw:4597.51, z:4633.21, dz:547.61
+----: eta:1.41, phi:0.00
+CaloDD: r_raw:2870.00, r:2870.00, dr:540.00
+CaloDD: z_raw:5780.96, z:5810.56, dz:638.88
+
+Sampling:20
+----: eta:1.01, phi:0.00
+CaloDD: r_raw:3480.00, r:3480.00, dr:680.00
+CaloDD: z_raw:4089.70, z:4167.74, dz:1186.48
+----: eta:1.21, phi:0.00
+CaloDD: r_raw:3480.00, r:3480.00, dr:680.00
+CaloDD: z_raw:5252.93, z:5445.49, dz:1369.02
+
+Sampling:21
+----: eta:3.21, phi:0.00
+CaloDD: r_raw:405.21, r:405.21, dr:0.00
+CaloDD: z_raw:4890.60, z:4935.60, dz:222.10
+----: eta:3.41, phi:0.00
+CaloDD: r_raw:315.27, r:315.27, dr:0.00
+CaloDD: z_raw:4890.60, z:4935.60, dz:222.10
+----: eta:3.61, phi:0.00
+CaloDD: r_raw:255.34, r:255.34, dr:0.00
+CaloDD: z_raw:4890.60, z:4935.60, dz:222.10
+----: eta:3.81, phi:0.00
+CaloDD: r_raw:225.38, r:225.38, dr:0.00
+CaloDD: z_raw:4890.60, z:4935.60, dz:222.10
+----: eta:4.01, phi:0.00
+CaloDD: r_raw:195.44, r:195.44, dr:0.00
+CaloDD: z_raw:4890.60, z:4935.60, dz:222.10
+
+Sampling:22
+----: eta:3.21, phi:0.00
+CaloDD: r_raw:434.30, r:434.30, dr:0.00
+CaloDD: z_raw:5349.45, z:5394.45, dz:221.15
+----: eta:3.41, phi:0.00
+CaloDD: r_raw:344.17, r:344.17, dr:0.00
+CaloDD: z_raw:5349.45, z:5394.45, dz:221.15
+----: eta:3.61, phi:0.00
+CaloDD: r_raw:278.90, r:278.90, dr:0.00
+CaloDD: z_raw:5349.45, z:5394.45, dz:221.15
+----: eta:3.81, phi:0.00
+CaloDD: r_raw:246.29, r:246.29, dr:0.00
+CaloDD: z_raw:5349.45, z:5394.45, dz:221.15
+----: eta:4.01, phi:0.00
+CaloDD: r_raw:213.71, r:213.71, dr:0.00
+CaloDD: z_raw:5349.45, z:5394.45, dz:221.15
+
+Sampling:23
+----: eta:3.41, phi:0.00
+CaloDD: r_raw:405.67, r:405.67, dr:0.00
+CaloDD: z_raw:5823.95, z:5868.95, dz:221.15
+----: eta:3.61, phi:0.00
+CaloDD: r_raw:297.92, r:297.92, dr:0.00
+CaloDD: z_raw:5823.95, z:5868.95, dz:221.15
+----: eta:3.81, phi:0.00
+CaloDD: r_raw:244.12, r:244.12, dr:0.00
+CaloDD: z_raw:5823.95, z:5868.95, dz:221.15
+----: eta:4.01, phi:0.00
+CaloDD: r_raw:190.44, r:190.44, dr:0.00
+CaloDD: z_raw:5823.95, z:5868.95, dz:221.15
