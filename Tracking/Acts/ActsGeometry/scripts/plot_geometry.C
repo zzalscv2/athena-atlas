@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include "TFile.h"
@@ -8,7 +8,7 @@
 #include "TROOT.h"
 
 
-void plot_geometry(std::string file) {
+void plot_geometry(const std::string & file) {
   gROOT->SetBatch();
   std::cout << "Plotting " << file << std::endl;
 
