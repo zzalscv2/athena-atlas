@@ -120,17 +120,13 @@ def JETM5Cfg(ConfigFlags):
     
     JETM5SlimmingHelper = SlimmingHelper("JETM5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
-    JETM5SlimmingHelper.SmartCollections = ["EventInfo",
+    JETM5SlimmingHelper.SmartCollections = ["EventInfo", "InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
-                                            "InDetTrackParticles", "PrimaryVertices",
-                                            "MET_Baseline_AntiKt4EMTopo",
-                                            "MET_Baseline_AntiKt4EMPFlow",
+                                            "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
                                             "BTagging_AntiKt4EMPFlow"]
 
     JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
-                                        "MuonTruthParticles", "egammaTruthParticles",
-                                        "TruthParticles", "TruthEvents", "TruthVertices",
                                         "MuonSegments",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape",
                                         "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects", "UFOCSSK"]
@@ -143,6 +139,9 @@ def JETM5Cfg(ConfigFlags):
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer',
                                                        'TruthVertices': 'xAOD::TruthVertexContainer',
                                                        'TruthVerticesAux': 'xAOD::TruthVertexAuxContainer'})
+
+        JETM5SlimmingHelper.AllVariables += ["MuonTruthParticles", "egammaTruthParticles",
+                                             "TruthParticles", "TruthEvents", "TruthVertices"]
 
     # Trigger content
     JETM5SlimmingHelper.IncludeTriggerNavigation = False

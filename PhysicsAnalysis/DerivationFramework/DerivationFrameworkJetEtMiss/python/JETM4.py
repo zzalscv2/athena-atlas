@@ -156,17 +156,12 @@ def JETM4Cfg(ConfigFlags):
     
     JETM4SlimmingHelper = SlimmingHelper("JETM4SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
-    JETM4SlimmingHelper.SmartCollections = ["EventInfo",
+    JETM4SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
                                             "Electrons", "Photons", "Muons", "TauJets",
-                                            "InDetTrackParticles", "PrimaryVertices",
-                                            "MET_Baseline_AntiKt4EMTopo",
-                                            "MET_Baseline_AntiKt4EMPFlow",
+                                            "MET_Baseline_AntiKt4EMTopo","MET_Baseline_AntiKt4EMPFlow",
                                             "AntiKt4EMPFlowJets","AntiKt4EMTopoJets",
-                                            "AntiKt4TruthJets",
-                                            "AntiKt10TruthJets",
                                             "AntiKt10LCTopoJets",
                                             "AntiKt10UFOCSSKJets",
-                                            "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                             "AntiKtVR30Rmax4Rmin02PV0TrackJets",
@@ -193,6 +188,9 @@ def JETM4Cfg(ConfigFlags):
         
         JETM4SlimmingHelper.AllVariables += ["TruthParticles", "TruthEvents", "TruthVertices", 
                                              "MuonTruthParticles", "egammaTruthParticles",]
+        JETM4SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt10TruthJets",
+                                                 "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
+                                                 "AntiKt10TruthSoftDropBeta100Zcut10Jets"]
 
     # Trigger content
     JETM4SlimmingHelper.IncludeTriggerNavigation = False

@@ -223,7 +223,7 @@ def JETM12Cfg(ConfigFlags):
                                              "InDetTrackParticles", "PrimaryVertices",
                                              "MET_Baseline_AntiKt4EMTopo",
                                              "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets","AntiKt4TruthJets",
+                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
                                              "BTagging_AntiKt4EMPFlow"]
 
     JETM12SlimmingHelper.AllVariables = ["MuonSegments","InDetTrackParticles",
@@ -232,13 +232,14 @@ def JETM12Cfg(ConfigFlags):
     JETM12SlimmingHelper.ExtraVariables = ["InDetTrackParticles.TrkIsoPt1000_ptcone40.TrkIsoPt1000_ptcone30.TrkIsoPt1000_ptcone20.TrkIsoPt500_ptcone40.TrkIsoPt500_ptcone30.TrkIsoPt500_ptcone20"]
 
     if ConfigFlags.Input.isMC:
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
+        addTruth3ContentToSlimmerTool(JETM12SlimmingHelper)
+
         JETM12SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
 
         JETM12SlimmingHelper.SmartCollections += ["AntiKt4TruthJets"]
-        JETM12SlimmingHelper.AllVariables += ["MuonTruthParticles", "TruthParticles", "TruthVertices", 
-                                              "TruthMuons","TruthElectrons","TruthPhotons","TruthTaus","TruthNeutrinos",
-                                              "MET_Truth"]
+        JETM12SlimmingHelper.AllVariables += ["MuonTruthParticles", "TruthParticles", "TruthVertices"]
 
     # Trigger content
     JETM12SlimmingHelper.IncludeTriggerNavigation = False

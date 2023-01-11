@@ -106,17 +106,75 @@ namespace CaloConstitHelpers {
     virtual double time(JetConstitIterator & it) const override {
       const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(it->rawConstituent());
       const static SG::AuxElement::ConstAccessor<float> accTiming("TIMING");
-      return accTiming(*fe);
+
+      float timing = -1;
+
+      if(accTiming.isAvailable(*fe)){
+	timing = accTiming(*fe);
+      }
+      else{
+	if(fe->otherObjects().size() == 1 && fe->otherObject(0)){
+	  const auto* neutralObject = (fe->otherObject(0));
+	  const xAOD::CaloCluster* cluster = nullptr;
+
+	  if(neutralObject->type() == xAOD::Type::CaloCluster){
+            cluster = dynamic_cast<const xAOD::CaloCluster*> (neutralObject);
+          }
+          //If we have a PFO (in case of fe being a UFO), we need to get the associated cluster first
+          else {
+            const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(neutralObject);
+            if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+              cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
+            }
+          }
+
+	  if(cluster){
+	    timing = cluster->time();
+	  }
+	}
+      }
+      return timing;
     }        
 
     virtual double energyHEC(JetConstitIterator & it ) const override {
       const xAOD::FlowElement* fe = static_cast<const xAOD::FlowElement*>(it->rawConstituent());
+
       // Add up the four individual HEC layers
       const static SG::AuxElement::ConstAccessor<float> accHEC0("LAYERENERGY_HEC0");
       const static SG::AuxElement::ConstAccessor<float> accHEC1("LAYERENERGY_HEC1");
       const static SG::AuxElement::ConstAccessor<float> accHEC2("LAYERENERGY_HEC2");
       const static SG::AuxElement::ConstAccessor<float> accHEC3("LAYERENERGY_HEC3");
-      return accHEC0(*fe) + accHEC1(*fe) + accHEC2(*fe) + accHEC3(*fe);
+
+      float sum_HEC = 0.0;
+
+      // The variables are available for PFOs but not UFOs
+      if(accHEC0.isAvailable(*fe) && accHEC1.isAvailable(*fe) && accHEC2.isAvailable(*fe) && accHEC3.isAvailable(*fe)){
+	sum_HEC = accHEC0(*fe) + accHEC1(*fe) + accHEC2(*fe) + accHEC3(*fe);
+      }
+      else{
+	for (size_t n = 0; n < fe->otherObjects().size(); ++n) {
+	  if(! fe->otherObject(n)) continue;
+	  const auto* neutralObject = (fe->otherObject(n));
+
+	  const xAOD::CaloCluster* cluster = nullptr;
+
+	  //If we have a cluster, we can directly access the calorimeter information
+	  if(neutralObject->type() == xAOD::Type::CaloCluster){
+	    cluster = dynamic_cast<const xAOD::CaloCluster*> (neutralObject);
+	  }
+	  //If we have a PFO (in case of fe being a UFO), we need to get the associated cluster first
+	  else {
+	    const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(neutralObject);
+	    if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+	      cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
+	    }
+	  }
+	  if(cluster){
+	    sum_HEC += cluster->eSample( CaloSampling::HEC0 ) + cluster->eSample( CaloSampling::HEC1 ) + cluster->eSample( CaloSampling::HEC2 ) + cluster->eSample( CaloSampling::HEC3 );
+	  }
+	}
+      }
+      return sum_HEC;
     }
 
   };
