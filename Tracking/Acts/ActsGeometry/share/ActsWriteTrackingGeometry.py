@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ###############################################################
 #
 # Write the tracking geometry as a obj and json files.
@@ -16,11 +16,11 @@ from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometryToolCfg
 from ActsGeometry.ActsGeometryConfig import ActsMaterialJsonWriterToolCfg
 from ActsGeometry.ActsGeometryConfig import ActsObjWriterToolCfg
 
-def ActsWriteTrackingGeometryCfg(configFlags, name="ActsWriteTrackingGeometry", **kwargs):
+def ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry", **kwargs):
 
   result = ComponentAccumulator()
 
-  acc = ActsTrackingGeometryToolCfg(configFlags) 
+  acc = ActsTrackingGeometryToolCfg(flags)
   result.merge(acc)
   ActsMaterialJsonWriterTool = ActsMaterialJsonWriterToolCfg(OutputFile = "geometry-maps.json",
                                                              processSensitives = False,
@@ -44,37 +44,39 @@ def ActsWriteTrackingGeometryCfg(configFlags, name="ActsWriteTrackingGeometry", 
 if "__main__" == __name__:
   from AthenaCommon.Logging import log
   from AthenaCommon.Constants import VERBOSE
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
+  flags = initConfigFlags()
+
   ## Just enable ID for the moment.
-  ConfigFlags.Input.isMC             = True
-  ConfigFlags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
-  ConfigFlags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"
-  ConfigFlags.Detector.GeometryBpipe = True
-  ConfigFlags.Detector.GeometryID    = True
-  ConfigFlags.Detector.GeometryPixel = True
-  ConfigFlags.Detector.GeometrySCT   = True
-  ConfigFlags.Detector.GeometryCalo  = True
-  ConfigFlags.Detector.GeometryMuon  = False
-  ConfigFlags.Detector.GeometryTRT   = True
+  flags.Input.isMC             = True
+  flags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
+  flags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"
+  flags.Detector.GeometryBpipe = True
+  flags.Detector.GeometryID    = True
+  flags.Detector.GeometryPixel = True
+  flags.Detector.GeometrySCT   = True
+  flags.Detector.GeometryCalo  = True
+  flags.Detector.GeometryMuon  = False
+  flags.Detector.GeometryTRT   = True
 
-  ConfigFlags.Concurrency.NumThreads = 1
-  ConfigFlags.Concurrency.NumConcurrentEvents = 1
+  flags.Concurrency.NumThreads = 1
+  flags.Concurrency.NumConcurrentEvents = 1
 
-  ConfigFlags.lock()
-  ConfigFlags.dump()
+  flags.lock()
+  flags.dump()
 
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-  cfg.merge(BeamPipeGeometryCfg(ConfigFlags))
+  cfg.merge(BeamPipeGeometryCfg(flags))
 
-  alignCondAlgCfg = ActsAlignmentCondAlgCfg(ConfigFlags)
+  alignCondAlgCfg = ActsAlignmentCondAlgCfg(flags)
 
   cfg.merge(alignCondAlgCfg)
 
-  alg = ActsWriteTrackingGeometryCfg(ConfigFlags,
+  alg = ActsWriteTrackingGeometryCfg(flags,
                                      OutputLevel=VERBOSE)
 
   cfg.merge(alg)
