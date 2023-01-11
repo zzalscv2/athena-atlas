@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYS.py
@@ -26,7 +26,6 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
         'TrackParticleThinningToolName'       : "PHYSTrackParticleThinningTool",
         'MuonTPThinningToolName'              : "PHYSMuonTPThinningTool",
         'TauJetThinningToolName'              : "PHYSTauJetThinningTool",
-        'TauTPThinningToolName'               : "PHYSTauTPThinningTool",
         'TauJets_MuonRMThinningToolName'      : "PHYSTauJets_MuonRMThinningTool",
         'DiTauTPThinningToolName'             : "PHYSDiTauTPThinningTool",
         'DiTauLowPtThinningToolName'          : "PHYSDiTauLowPtThinningTool",

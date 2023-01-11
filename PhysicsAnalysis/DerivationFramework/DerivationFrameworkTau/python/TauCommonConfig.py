@@ -191,3 +191,12 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     )
     acc.addEventAlgo(myTauAODRunnerAlg)
     return acc
+
+
+def TauThinningCfg(flags, name, **kwargs):
+    """configure tau thinning"""
+
+    acc = ComponentAccumulator()
+    TauThinningTool = CompFactory.DerivationFramework.TauThinningTool
+    acc.addPublicTool(TauThinningTool(name, **kwargs), primary=True)
+    return acc
