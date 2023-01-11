@@ -3875,7 +3875,7 @@ namespace top {
       if (runnumber == 310000) return "2018";
       
       // Run 3 mc21a
-      if (runnumber == 330000) return "2022";
+      if (runnumber == 410000) return "2022";
 
       return "UNKNOWN";
     }
