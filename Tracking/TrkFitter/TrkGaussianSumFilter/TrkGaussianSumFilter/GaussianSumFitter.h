@@ -197,15 +197,24 @@ private:
     "Combine with forwards state during Smoothing"
   };
 
+  Gaudi::Property<bool> m_useMode{
+    this,
+    "useMode",
+    true,
+    "Combine/Collapse the MultiComponent State using Mode rather than mean"
+  };
+
+  Gaudi::Property<double> m_cutChiSquaredPerNumberDOF{
+    this,
+    "StateChi2PerNDOFCut",
+    50.,
+    "Cut on Chi2 per NDOF"
+  };
+
   PropDirection m_directionToPerigee;
-
   TrkParametersComparisonFunction m_trkParametersComparisonFunction;
-
   std::unique_ptr<TrackFitInputPreparator> m_inputPreparator;
   std::vector<double> m_sortingReferencePoint;
-
-  // For the forward fit part
-  double m_cutChiSquaredPerNumberDOF = 0.0;
 
   // Counters for fit statistics
   // Number of Fit PrepRawData Calls
