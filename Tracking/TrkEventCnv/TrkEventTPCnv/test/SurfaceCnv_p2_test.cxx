@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TrkEventTPCnv/test/SurfaceCnv_p2_test.cxx
@@ -165,7 +165,7 @@ void testit (const Trk::Surface& trans1)
   CNV cnv;
   cnv.setCnvToolName ("TestCnvTool");
   Trk::Surface_p2 pers;
-  const auto & p=dynamic_cast<const typename CNV::Trans_t*>(&trans1);
+  const auto* p=dynamic_cast<const typename CNV::Trans_t*>(&trans1);
   cnv.transToPers (p, &pers, log);
   std::unique_ptr<Trk::Surface> trans2 (cnv.createTransient (&pers, log));
   compare (trans1, *trans2);
