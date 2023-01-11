@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TrackSummaryAccessors_v1.cxx 576255 2013-12-19 12:54:41Z emoyse $
@@ -59,13 +59,21 @@ namespace xAOD {
         DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerHits                );
         DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerOutliers            );
         DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerSharedHits          );
-        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerSplitHits          );
-        DEFINE_ACCESSOR( uint8_t, expectInnermostPixelLayerHit                   );	
+        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerSplitHits           );
+        DEFINE_ACCESSOR( uint8_t, expectInnermostPixelLayerHit                   );
+        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerEndcapHits          );
+        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerEndcapOutliers      );
+        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerSharedEndcapHits    );
+        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerSplitEndcapHits     );
         DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerHits                );
         DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerOutliers            );
         DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerSharedHits          );
-        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerSplitHits          );
-        DEFINE_ACCESSOR( uint8_t, expectNextToInnermostPixelLayerHit                   );	
+        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerSplitHits           );
+        DEFINE_ACCESSOR( uint8_t, expectNextToInnermostPixelLayerHit                   );
+        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerEndcapHits          );
+        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerEndcapOutliers      );
+        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerSharedEndcapHits    );
+        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerSplitEndcapHits     );
         DEFINE_ACCESSOR( uint8_t, numberOfGangedPixels              );
         DEFINE_ACCESSOR( uint8_t, numberOfGangedFlaggedFakes        );
         DEFINE_ACCESSOR( uint8_t, numberOfPixelDeadSensors          );
@@ -106,8 +114,6 @@ namespace xAOD {
         DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelFlatHoles            );
         DEFINE_ACCESSOR( uint8_t, numberOfPixelBarrelInclinedHoles        );
         DEFINE_ACCESSOR( uint8_t, numberOfPixelEndcapHoles                );
-        DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerEndcapHits   );
-        DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerEndcapHits);
         DEFINE_ACCESSOR( uint8_t, hasValidTime);
 
       default:                  

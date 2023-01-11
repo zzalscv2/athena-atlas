@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /***************************************************************************
 Summary.h  -  description
@@ -49,20 +49,12 @@ enum SummaryType
   numberOfContribPixelLayers = 29,
   //!< these are the hits in the first pixel layer, i.e. b-layer
   numberOfBLayerHits = 0,
-  //!< number of blayer outliers
-  numberOfBLayerOutliers = 31,
   //!< these are the hits in the 0th pixel layer?
   numberOfInnermostPixelLayerHits = 53,
-  //!< number of 0th layer outliers
-  numberOfInnermostPixelLayerOutliers = 54,
   //!< these are the hits in the 1st pixel layer
   numberOfNextToInnermostPixelLayerHits = 58,
-  //!< number of 1st pixel layer outliers
-  numberOfNextToInnermostPixelLayerOutliers = 59,
   //!< these are the pixel hits, including the b-layer
   numberOfPixelHits = 2,
-  //!< these are the pixel outliers, including the b-layer
-  numberOfPixelOutliers = 41,
   //!< number of pixel layers on track with absence of hits
   numberOfPixelHoles = 1,
   //!< number of pixels which have a ganged ambiguity.
@@ -77,8 +69,6 @@ enum SummaryType
   numberOfDBMHits = 63,
   //!< number of hits in SCT
   numberOfSCTHits = 3,
-  //!< number of SCT outliers
-  numberOfSCTOutliers = 39,
   //!< number of SCT holes
   numberOfSCTHoles = 4,
   //!< number of Holes in both sides of a SCT module
@@ -188,6 +178,13 @@ enum SummaryType
   legacy_numberOfNextToInnermostLayerSplitHits = 61,
   legacy_numberOfTRTSharedHits = 62,
 
+  // in the past used to store pixel and SCT outliers
+  legacy_numberOfBLayerOutliers = 31,
+  legacy_numberOfInnermostPixelLayerOutliers = 54,
+  legacy_numberOfNextToInnermostPixelLayerOutliers = 59,
+  legacy_numberOfPixelOutliers = 41,
+  legacy_numberOfSCTOutliers = 39,
+
   // -- numbers...
   numberOfTrackSummaryTypes = 76
 };
@@ -203,6 +200,8 @@ static const std::vector<unsigned int> unusedSummaryTypes = {
   legacy_numberOfInnermostPixelLayerSharedHits, legacy_numberOfInnermostLayerSplitHits,
   legacy_numberOfNextToInnermostPixelLayerSharedHits, legacy_numberOfNextToInnermostLayerSplitHits,
   legacy_numberOfTRTSharedHits,
+  legacy_numberOfBLayerOutliers, legacy_numberOfInnermostPixelLayerOutliers, legacy_numberOfNextToInnermostPixelLayerOutliers,
+  legacy_numberOfPixelOutliers, legacy_numberOfSCTOutliers,
 };
 
 // Troels.Petersen@cern.ch:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -167,6 +167,9 @@ public:
 
    /** Add expected hit info for innermost pixel layers not computed in Trk::TrkSummary */
    void addExpectedHitInformation(const Perigee* perigee, xAOD::TrackParticle& tp) const;
+
+   /** Add outlier hit info not computed in Trk::TrkSummary anymore*/
+   void addOutlierHitInformation(const DataVector<const TrackStateOnSurface>* trackStates, xAOD::TrackParticle& tp) const;
 
    /** Add shared hit info not computed in Trk::TrkSummary anymore*/
    void addSharedHitInformation(const Track *track, xAOD::TrackParticle& tp) const;
