@@ -35,6 +35,9 @@ HistogramPersis...  DEBUG Service base class initialized successfully
 HistogramPersis...WARNING Histograms saving not required.
 ApplicationMgr       INFO Application Manager Initialized successfully
 ApplicationMgr Ready
- *** DataPool test in progress: 
+ *** DataPool test in progress:
+test_basic
+test_slots
+test_clear
  **** DataPool test successfully completed **** 
 ChronoStatSvc        INFO Time User   : Tot=    0 [us]                                             #=  1

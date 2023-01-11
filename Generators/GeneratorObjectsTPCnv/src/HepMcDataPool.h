@@ -1,7 +1,8 @@
+#pragma GCC optimize "-O0"
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // HepMcDataPool.h
@@ -80,6 +81,61 @@ namespace HepMC {
 
   struct DataPool {
 
+#ifdef HEPMC3
+    // Helpers for allocating HepMC objects from a DataPool.
+    // But because HepMC3 keeps shared_ptr's to its objects, we need
+    // to be careful here.
+    //
+    // First, the memory we get from the pool is actually owned by the pool,
+    // so we don't want the shared_ptr's to actually delete anything.
+    // We accomplish this by creating the shared_ptr's for particles and
+    // vertices with null deleters.  (This isn't an issue for the GenEvent
+    // objects, since we don't manage them what shared_ptr, but we do need
+    // to be careful not to put them in an owning DataVector.)
+    //
+    // Second, before we create a shared_ptr with a pointer we've just
+    // gotten from the DataPool, we need to be sure that there aren't any
+    // other shared_ptr's to the same object --- otherwise, the behavior
+    // is undefined.  (We hide the worst consequences of this by the fact
+    // that we have no-op deleters, but it can still result in the weak
+    // references in GenParticle mysteriously expiring.  See ATR-26790.)
+    // So we need to clear the objects before that.  We could in principle
+    // do that in the get* functions, but it's nicer to set up clear hooks
+    // in the DataPool so that that happens when objects are returned
+    // to the pool.  (And that way, we don't maintain allocated memory
+    // from free objects in the pool.)
+
+    static void clearEvent (HepMC::GenEvent* evt)
+    {
+      evt->clear();
+    }
+    ::DataPool<HepMC::GenEvent, clearEvent> evt;
+    HepMC::GenEvent* getGenEvent()
+    {
+      return evt.nextElementPtr();
+    }
+
+    static void clearVertex (HepMC::GenVertex* vtx)
+    {
+      *vtx = HepMC::GenVertex();
+    }
+    ::DataPool<HepMC::GenVertex, clearVertex> vtx;
+    HepMC::GenVertexPtr getGenVertex()
+    {
+      return HepMC::GenVertexPtr (vtx.nextElementPtr(), [](HepMC::GenVertex*){});
+    }
+
+
+    static void clearParticle (HepMC::GenParticle* part)
+    {
+      *part = HepMC::GenParticle();
+    }
+    ::DataPool<HepMC::GenParticle, clearParticle> part;
+    HepMC::GenParticlePtr getGenParticle()
+    {
+      return HepMC::GenParticlePtr (part.nextElementPtr(), [](HepMC::GenParticle*){});
+    }
+#else
     typedef ::DataPool<HepMC::GenEvent> GenEvtPool_t;
     /// an arena of @c HepMC::GenEvent for efficient object instantiation
     GenEvtPool_t evt;
@@ -92,27 +148,6 @@ namespace HepMC {
     /// an arena of @c HepMC::GenParticle for efficient object instantiation
     GenPartPool_t part;
 
-#ifdef HEPMC3
-    HepMC::GenEvent* getGenEvent()
-    {
-      HepMC::GenEvent* p = evt.nextElementPtr();
-      *p = HepMC::GenEvent();
-      return p;
-    }
-    HepMC::GenVertexPtr getGenVertex()
-    {
-      HepMC::GenVertexPtr p (vtx.nextElementPtr(), [](HepMC::GenVertex*){});
-      *p = HepMC::GenVertex();
-      return p;
-    }
-
-    HepMC::GenParticlePtr getGenParticle()
-    {
-      HepMC::GenParticlePtr p (part.nextElementPtr(), [](HepMC::GenParticle*){});
-      *p = HepMC::GenParticle();
-      return p;
-    }
-#else
     HepMC::GenEvent* getGenEvent()
     {
       return evt.nextElementPtr();
