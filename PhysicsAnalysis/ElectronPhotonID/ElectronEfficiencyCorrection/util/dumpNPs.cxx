@@ -201,7 +201,7 @@ bool Config::initialize(int argc, char* argv[])
     const std::size_t pos{key.find('=')};
     if (pos == std::string::npos) help();
     std::string val(key.substr(pos + 1));
-    key = key.substr(0, pos);
+    key.resize(pos);
     if (!key.length() || !val.length()) help();
     if (key == "CorrectionFileNameList") {
       std::vector<std::string> files{val};

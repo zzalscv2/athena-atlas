@@ -748,7 +748,7 @@ namespace top {
             --commentpos; // the position of the '#' shifted after removing '\'
             continue;
         } else {
-          newstring = newstring.substr(0, commentpos);
+          newstring.resize(commentpos);
           break;
         }
       }
