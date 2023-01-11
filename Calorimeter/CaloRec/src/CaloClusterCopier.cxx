@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -43,7 +43,7 @@ CaloClusterCopier::CaloClusterCopier(const std::string& type,
 // Destructor 
 // -------------------------------------------------------------
 CaloClusterCopier::~CaloClusterCopier()
-{ }
+= default;
 
 StatusCode CaloClusterCopier::initialize() {
 
@@ -130,8 +130,6 @@ void CaloClusterCopier::getClusterSize(){
   }
 
   ATH_MSG_DEBUG("Name, Cluster size = " << name() << " " << m_clusterSize);
-
-  return;
 
 }
 //xAOD::CaloCluster_v1::

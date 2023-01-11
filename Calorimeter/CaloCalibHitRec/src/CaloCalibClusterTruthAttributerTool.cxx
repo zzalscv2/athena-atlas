@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibHitRec/CaloCalibClusterTruthAttributerTool.h"
@@ -7,7 +7,7 @@
 CaloCalibClusterTruthAttributerTool::CaloCalibClusterTruthAttributerTool(const std::string& type, const std::string& name,  const IInterface* parent) : base_class(type,name,parent) {
 }
 
-CaloCalibClusterTruthAttributerTool::~CaloCalibClusterTruthAttributerTool(){}
+CaloCalibClusterTruthAttributerTool::~CaloCalibClusterTruthAttributerTool()= default;
 
 StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAOD::CaloCluster& theCaloCluster, unsigned int numTruthParticles, const std::map<Identifier,std::vector<const CaloCalibrationHit*> >& identifierToCaloHitMap, const std::map<unsigned int,const xAOD::TruthParticle*>& truthBarcodeToTruthParticleMap, std::vector<std::pair<unsigned int, double > >& barcodeTrueCalHitEnergy) const{
 
@@ -23,7 +23,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
   //loop once over the cells to find the barcodes and pt of truth particles in this cluster
   std::map<unsigned int, double> barcodeTruePtMap;
   
-  for (auto thisCaloCell : *theCellLinks){   
+  for (const auto *thisCaloCell : *theCellLinks){   
 
     if (!thisCaloCell){
       ATH_MSG_WARNING("Have invalid pointer to CaloCell");
@@ -38,7 +38,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     if (identifierToCaloHitMap.end() == identifierToCaloHitMapIterator) continue;
     const std::vector<const CaloCalibrationHit*>& theseCalibrationHits = (*identifierToCaloHitMapIterator).second;
 
-    for (auto thisCalibrationHit : theseCalibrationHits){
+    for (const auto *thisCalibrationHit : theseCalibrationHits){
       unsigned int barcode = thisCalibrationHit->particleID();
       const xAOD::TruthParticle* theTruthParticle = truthBarcodeToTruthParticleMap.at(barcode);
       double theTruthParticlePt = theTruthParticle->pt();
@@ -53,7 +53,8 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
 
   std::vector<std::pair<unsigned int, double > > barcodeTruePtPairs;
 
-  for (const auto& thisEntry : barcodeTruePtMap) barcodeTruePtPairs.emplace_back(thisEntry);
+  barcodeTruePtPairs.reserve(barcodeTruePtMap.size());
+for (const auto& thisEntry : barcodeTruePtMap) barcodeTruePtPairs.emplace_back(thisEntry);
 
   std::sort(barcodeTruePtPairs.begin(),barcodeTruePtPairs.end(),[]( std::pair<unsigned int, double> a, std::pair<unsigned int, double> b) -> bool {return a.second > b.second;} );
 
@@ -69,7 +70,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
   for (auto& thisPair : barcodeTrueCalHitEnergy) thisPair.second = 0.0;
 
   //now loop on calorimeter cells again to sum up the truth energies of the leading three particles.    
-  for (auto thisCaloCell : *theCellLinks){
+  for (const auto *thisCaloCell : *theCellLinks){
     
     if (!thisCaloCell){
       ATH_MSG_WARNING("Have invalid pointer to CaloCell");
@@ -84,7 +85,7 @@ StatusCode CaloCalibClusterTruthAttributerTool::calculateTruthEnergies(const xAO
     if (identifierToCaloHitMap.end() == identifierToCaloHitMapIterator) continue;
     std::vector<const CaloCalibrationHit*> theseCalibrationHits = (*identifierToCaloHitMapIterator).second;
 
-    for (auto thisCalibrationHit : theseCalibrationHits){
+    for (const auto *thisCalibrationHit : theseCalibrationHits){
       unsigned int barcode = thisCalibrationHit->particleID();
       double thisCalHitTruthEnergy = thisCalibrationHit->energyEM() + thisCalibrationHit->energyNonEM();
       if (true == m_fullTruthEnergy) thisCalHitTruthEnergy += (thisCalibrationHit->energyEscaped() + thisCalibrationHit->energyInvisible());

@@ -1,19 +1,15 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "CaloEvent/CaloClusterMomentStore.h"
 
 // constructor
-CaloClusterMomentStore::CaloClusterMomentStore() 
-{ }
+CaloClusterMomentStore::CaloClusterMomentStore() = default;
 
 CaloClusterMomentStore::CaloClusterMomentStore(const CaloClusterMomentStore& 
-					       rMomStore)
-  : m_store (rMomStore.m_store)
-{
-}
+					       rMomStore) = default;
 
 CaloClusterMomentStore::CaloClusterMomentStore(const CaloClusterMomentStore*
 					       pMomStore)
@@ -30,8 +26,7 @@ CaloClusterMomentStore::operator= (const CaloClusterMomentStore& rMomStore)
 }
 
 // destructor
-CaloClusterMomentStore::~CaloClusterMomentStore()
-{ }
+CaloClusterMomentStore::~CaloClusterMomentStore() = default;
 
 // retrieve moment value
 bool CaloClusterMomentStore::retrieve(const moment_type& rMomType,
@@ -70,5 +65,5 @@ bool CaloClusterMomentStore::retrieveMomentTypes(moment_type_list&
 
 
 #ifdef __clang__
-CaloClusterMomentStore::CaloClusterMomentIterator::~CaloClusterMomentIterator() {}
+
 #endif

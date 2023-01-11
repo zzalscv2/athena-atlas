@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -53,7 +53,7 @@ private:
                        const CaloTowerSeg::SubSeg& subseg,
                        test_tows_t& tows);
 
-  void test_subseg_iter (const CaloDetDescrManager*,
+  static void test_subseg_iter (const CaloDetDescrManager*,
 			 const CaloTowerStore&,
                          const std::vector<CaloCell_ID::SUBCALO>&,
                          const CaloTowerSeg::SubSeg&);

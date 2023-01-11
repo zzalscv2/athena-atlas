@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCALIBHITREC_CALOCALIBCLUSTERMOMENTSMAKER2_H
@@ -217,7 +217,7 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
 
   std::vector<CalibHitIPhiIEtaRange> *m_i_phi_eta[3];
 
-  mutable std::atomic<bool> m_foundAllContainers;
+  mutable std::atomic<bool> m_foundAllContainers{};
 
   enum keys_dm_energy_sharing {kMatchDmOff, kMatchDmLoose, kMatchDmMedium, kMatchDmTight};
   enum keys_calib_frac_origin {kCalibFracEM, kCalibFracHAD, kCalibFracREST, kCalibFracMax};
@@ -237,7 +237,7 @@ class CaloCalibClusterMomentsMaker2: public AthAlgTool, virtual public CaloClust
   float m_apars_r0;
   int m_MatchDmType;
 
-  double angle_mollier_factor(double x) const;
+  static double angle_mollier_factor(double x) ;
   void get_calib_frac(const std::map<unsigned int,int>& truthBarcodeToPdgCodeMap,
                       const MyClusInfo& clusInfo, std::vector<double> &engFrac) const;
 };

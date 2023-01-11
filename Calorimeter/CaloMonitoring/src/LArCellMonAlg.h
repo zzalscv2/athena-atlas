@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // based on LArCellMonTool by W.Lampl (Spring 2017: Major re-design, early 2020: migration to AthenaMT)
 
@@ -182,10 +182,10 @@ private:
   //Private methods: Initialization and job-option interpretation
   StatusCode initThresh();
   void setLArCellBinning();
-  bool isThrListed(std::vector<std::string> vec, std::string s) const;
+  static bool isThrListed(std::vector<std::string> vec, const std::string& s) ;
   //void resetInternals();
 
-  std::string strToLower(const std::string& input) const;
+  static std::string strToLower(const std::string& input) ;
 
   //The threshold-related variables and histograms are grouped in the following struct
   //one instance per threshold-type

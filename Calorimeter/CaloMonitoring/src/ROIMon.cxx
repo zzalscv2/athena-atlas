@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -9,9 +9,9 @@
 // ********************************************************************
 #include "ROIMon.h" 
 
-#include <stdint.h>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
+#include <cstdint>
 #include <functional>
 #include <set>
 
@@ -35,10 +35,10 @@ ROIMon::ROIMon( ComTime* comtime,float distance)
 }
 
 
-ROIMon::~ROIMon(){}
+ROIMon::~ROIMon()= default;
 
 
-int ROIMon::Accept( Hep3Vector Point){
+int ROIMon::Accept( const Hep3Vector& Point){
 
 // get info from TileMuFitter
 
@@ -113,7 +113,7 @@ int ROIMon::AcceptTime(){
 
 
 
-float ROIMon::GetDistance(Hep3Vector Point){
+float ROIMon::GetDistance(const Hep3Vector& Point){
    /*int acceptance=*/this->Accept(Point);
   return m_theDistance;
 }

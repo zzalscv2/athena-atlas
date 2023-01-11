@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -122,15 +122,15 @@ CaloDetDescrManager_Base::element_end() const
 CaloDetDescrManager_Base::calo_element_range
 CaloDetDescrManager_Base::element_range() const
 {
-  return calo_element_range (m_element_vec.begin(), 
-                             m_element_vec.end());
+  return {m_element_vec.begin(), 
+                             m_element_vec.end()};
 }
     
 CaloDetDescrManager_Base::calo_nonconst_element_range
 CaloDetDescrManager_Base::element_range_nonconst()
 {
-  return calo_nonconst_element_range (m_element_vec.begin(), 
-                                      m_element_vec.end());
+  return {m_element_vec.begin(), 
+                                      m_element_vec.end()};
 }
     
 CaloDetDescrManager_Base::calo_element_const_iterator
@@ -151,8 +151,8 @@ CaloDetDescrManager_Base::calo_element_range
 CaloDetDescrManager_Base::element_range(CaloCell_ID::SUBCALO subCalo) const 
 {
   int sCal = (int) subCalo;
-  return calo_element_range (m_subCalo_begin[sCal],
-                             m_subCalo_end[sCal]);
+  return {m_subCalo_begin[sCal],
+                             m_subCalo_end[sCal]};
 }
 
 const CaloDetDescrElement*
@@ -534,13 +534,13 @@ CaloDetDescrManager_Base::calo_descriptors_size() const
 CaloDetDescrManager_Base::calo_descr_range
 CaloDetDescrManager_Base::calo_descriptors_range() const
 {
-  return calo_descr_range (m_descr_vec.begin(), m_descr_vec.end());
+  return {m_descr_vec.begin(), m_descr_vec.end()};
 }
 
 CaloDetDescrManager_Base::calo_nonconst_descr_range
 CaloDetDescrManager_Base::calo_descriptors_range_nonconst()
 {
-  return calo_nonconst_descr_range (m_descr_vec.begin(), m_descr_vec.end());
+  return {m_descr_vec.begin(), m_descr_vec.end()};
 }
 
 CaloDetDescrManager_Base::calo_descr_const_iterator
@@ -564,15 +564,15 @@ CaloDetDescrManager_Base::tile_descriptors_size() const
 CaloDetDescrManager_Base::calo_descr_range
 CaloDetDescrManager_Base::tile_descriptors_range() const
 {
-  return calo_descr_range (m_tile_descr_vec.begin(),
-                           m_tile_descr_vec.end());
+  return {m_tile_descr_vec.begin(),
+                           m_tile_descr_vec.end()};
 }
  
 CaloDetDescrManager_Base::calo_nonconst_descr_range
 CaloDetDescrManager_Base::tile_descriptors_range_nonconst()
 {
-  return calo_nonconst_descr_range (m_tile_descr_vec.begin(),
-                                    m_tile_descr_vec.end());
+  return {m_tile_descr_vec.begin(),
+                                    m_tile_descr_vec.end()};
 }
  
 const CaloDetDescriptor*

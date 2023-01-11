@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,7 +45,7 @@ CaloSum::CaloSum(CaloVarType                      varType,
 //}
 
 CaloSum::~CaloSum()
-{ }
+= default;
 
 ///////////////////
 // Configuration //
@@ -305,13 +305,13 @@ CaloSum::const_iterator CaloSum::end() const
 }
 
 CaloSum::CaloRegion 
-CaloSum::getRegion(const_iterator& theIterator) const
+CaloSum::getRegion(const_iterator& theIterator) 
 {
   return ((*theIterator).first).first;
 }
 
 CaloSampling::CaloSample
-CaloSum::getSampling(const_iterator& theIterator) const
+CaloSum::getSampling(const_iterator& theIterator) 
 {
   return ((*theIterator).first).second;
 }
@@ -353,7 +353,7 @@ bool CaloSum::getSums(const CaloRegion&     theRegion,
       return false;
     }
   // find element
-  key_t theKey = this->getKey(theRegion,theSampling);
+  key_t theKey = CaloSum::getKey(theRegion,theSampling);
   store_const_iter_t theAccessor = m_sumStore.find(theKey);
   if ( theAccessor != m_sumStore.end() )
     {
@@ -416,7 +416,7 @@ bool CaloSum::contains(const CaloRegion&      theRegion,
 		       const CaloSampling::CaloSample& theSampling) const
 {
   return 
-    m_sumStore.find(this->getKey(theRegion,theSampling)) != 
+    m_sumStore.find(CaloSum::getKey(theRegion,theSampling)) != 
     m_sumStore.end();
 }
 
@@ -442,7 +442,7 @@ bool CaloSum::setUp()
 
 CaloSum::key_t CaloSum::getKey(const CaloRegion&      theRegion, 
 			       const CaloSampling::CaloSample& theSampling) 
-  const
+  
 {
   return key_t(theRegion,theSampling);
 }

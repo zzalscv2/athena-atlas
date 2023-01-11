@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -19,10 +19,9 @@
 
 #include "egammaEvent/Photon.h"
 
-#include <stdint.h>
 #include <algorithm>
 #include <cmath>
-#include <math.h>
+#include <cstdint>
 #include <functional>
 #include <set>
 #include <vector>
@@ -137,7 +136,7 @@ CaloTransverseBalanceVecMon::CaloTransverseBalanceVecMon(const std::string& type
  
 }
 
-CaloTransverseBalanceVecMon::~CaloTransverseBalanceVecMon() {}
+CaloTransverseBalanceVecMon::~CaloTransverseBalanceVecMon() = default;
 
 
 StatusCode CaloTransverseBalanceVecMon::initialize() {
@@ -171,7 +170,7 @@ StatusCode CaloTransverseBalanceVecMon::bookHistograms(){
 
    //  use MMTB trigger awareness
    std::string TheTrigger;
-   if (m_triggerChainProp == "")  TheTrigger="NoTrigSel";
+   if (m_triggerChainProp.empty())  TheTrigger="NoTrigSel";
    else TheTrigger = m_triggerChainProp;
 
    m_theTransverseBalance_shift= new MonGroup( this, "/CaloMonitoring/TransverseBalance/", theinterval);
@@ -314,14 +313,14 @@ StatusCode CaloTransverseBalanceVecMon::fillHistograms() {
     float ph_phi = gam->phi();
     bool  ph_isTight = (gam->isem(egammaPIDObs::PhotonTight)==0);
  //   if( ph_pt <  m_photonPtCut)  continue; 
-    if( !(fabs(ph_eta)<2.47 && (fabs(ph_eta)>=1.52 || fabs(ph_eta)<=1.37))) continue;
+    if( fabs(ph_eta)>=2.47 || (fabs(ph_eta)<1.52 && fabs(ph_eta)>1.37)) continue;
     if( !ph_isTight) continue;
     m_userPhotonContainer->push_back( gam );
     m_h_photon_pt->Fill(ph_pt);
     m_h_photon_eta->Fill(ph_eta);
     m_h_photon_phi->Fill(ph_phi);
   }
-  if(m_userPhotonContainer->size()==0) return StatusCode::SUCCESS;
+  if(m_userPhotonContainer->empty()) return StatusCode::SUCCESS;
   //find leading photon
   PhotonContainer::const_iterator leadingPhPr;
   if(m_userPhotonContainer->size()>1){
@@ -365,7 +364,7 @@ StatusCode CaloTransverseBalanceVecMon::fillHistograms() {
   m_h_njet_beforeoverlap->Fill(njet_c_beforeoverlap);
   m_h_njet_afteroverlap->Fill(njet_c_afteroverlap);
 
-  if(userJetContainer.size()==0) return StatusCode::SUCCESS;
+  if(userJetContainer.empty()) return StatusCode::SUCCESS;
 
   const Jet* leadingJetPr = nullptr;
   const Jet* subleadingJetPr = nullptr;
@@ -378,7 +377,7 @@ StatusCode CaloTransverseBalanceVecMon::fillHistograms() {
     m_h_leadingJet_phi->Fill(leadingJetPr->phi());
   }
  // leading photon and leading jet study
- if(m_userPhotonContainer->size()>0 && userJetContainer.size()>0 && leadingJetPr){
+ if(!m_userPhotonContainer->empty() && !userJetContainer.empty() && leadingJetPr){
   float pt_ratio = (*leadingPhPr)->pt() / leadingJetPr->pt(); 
   m_h_pt_ratio ->Fill(pt_ratio);
   float ph_jet_deltaPhi = fabs((*leadingPhPr)->phi() - leadingJetPr->phi());

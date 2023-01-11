@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************************
@@ -54,8 +54,7 @@ CalibHitIDCheck::CalibHitIDCheck(const std::string& name, ISvcLocator* pSvcLocat
 
 }
 
-CalibHitIDCheck::~CalibHitIDCheck()
-{}
+CalibHitIDCheck::~CalibHitIDCheck() = default;
 
 
 

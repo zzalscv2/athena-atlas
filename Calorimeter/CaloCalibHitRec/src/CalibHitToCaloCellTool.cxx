@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibHitRec/CalibHitToCaloCellTool.h"
@@ -54,7 +54,7 @@ CalibHitToCaloCellTool::CalibHitToCaloCellTool(const std::string& t, const std::
 }
 
 
-CalibHitToCaloCellTool::~CalibHitToCaloCellTool() {}
+CalibHitToCaloCellTool::~CalibHitToCaloCellTool() = default;
 
 
 ////////////////   INITIALIZE   ///////////////////////
@@ -145,7 +145,7 @@ StatusCode CalibHitToCaloCellTool::processCalibHitsFromParticle(int barcode) con
   int nhitsInactive = 0;
 
   for (unsigned int i=0; i<calibHitContainers.size(); i++) {
-    for( const auto calibhit: *(calibHitContainers[i])) {
+    for( const auto *const calibhit: *(calibHitContainers[i])) {
       //care only for deposits of the given truth particle
       if ((int)calibhit->particleID()!=barcode) continue;
 

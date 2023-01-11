@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -64,7 +64,7 @@ private:
   //  bool       fillMoments(const xAOD::CaloCluster& rClus);                                          ///< Copies list of filled moments into lookup 
   bool       clusterFilter(const xAOD::CaloCluster& rClus) const;                                      ///< Filter topo-cluster
   bool       towerFilter(const xAOD::CaloCluster& rTowr) const;                                        ///< Filter topo-tower
-  StatusCode addContainerWriteHandle(whandle_t& signalHandle) const;                                   ///< Add a write handle for a container (in CaloClusterStoreHelper from r21.9)
+  static StatusCode addContainerWriteHandle(whandle_t& signalHandle) ;                                   ///< Add a write handle for a container (in CaloClusterStoreHelper from r21.9)
   ///@}
 };
 

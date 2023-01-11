@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -256,7 +256,7 @@ StatusCode CaloCalibClusterMomentsMaker2::initialize()
       }
       for (int im=0;im<3;im++) {
         if ( ietaMin[im] <= ietaMax[im] ) {
-          CalibHitIPhiIEtaRange theRange;
+          CalibHitIPhiIEtaRange theRange{};
           theRange.iPhi = (char)jp;
           theRange.iEtaMin = (char)ietaMin[im];
           theRange.iEtaMax = (char)ietaMax[im];
@@ -650,7 +650,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
   std::map<unsigned int,int> truthBarcodeToPdgCodeMap;
   
   //loop on truth particle container is slow, so put needed information in a map for faster key lookup in later loops
-  for ( auto thisTruthParticle : *truthParticleContainerReadHandle){	  
+  for ( const auto *thisTruthParticle : *truthParticleContainerReadHandle){	  
 
     if (!thisTruthParticle){
       ATH_MSG_WARNING("Got invalid pointer to TruthParticle");
@@ -784,7 +784,7 @@ CaloCalibClusterMomentsMaker2::execute(const EventContext& ctx,
 /* ****************************************************************************
 
 **************************************************************************** */
-double CaloCalibClusterMomentsMaker2::angle_mollier_factor(double x) const
+double CaloCalibClusterMomentsMaker2::angle_mollier_factor(double x) 
 {
   double eta = fabs(x);
   double ff;

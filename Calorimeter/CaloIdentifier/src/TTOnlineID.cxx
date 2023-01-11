@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/TTOnlineID.h"
@@ -43,25 +43,25 @@ TTOnlineID:: ~TTOnlineID()= default;
 IdContext TTOnlineID::crateContext(void) const
 {
   ExpandedIdentifier id;
-  return (IdContext(id, 0, m_crate_index));
+  return {id, 0, m_crate_index};
 }
 
 IdContext TTOnlineID::moduleContext(void) const
 {
   ExpandedIdentifier id;
-  return (IdContext(id, 0, m_module_index));
+  return {id, 0, m_module_index};
 }
 
 IdContext TTOnlineID::submoduleContext(void) const
 {
   ExpandedIdentifier id;
-  return (IdContext(id, 0, m_submodule_index));
+  return {id, 0, m_submodule_index};
 }
 
 IdContext TTOnlineID::channelContext(void) const
 {
   ExpandedIdentifier id;
-  return (IdContext(id, 0, m_channel_index));
+  return {id, 0, m_channel_index};
 }
 
 

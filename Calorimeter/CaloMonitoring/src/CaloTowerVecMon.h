@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -104,7 +104,7 @@ class CaloTowerVecMon : public ManagedMonitorToolBase {
    bool m_useLArNoisyAlg;
 
    // trigger Awareness:
-   bool m_useTriggerCaloMon;
+   bool m_useTriggerCaloMon = false;
    ToolHandle<Trig::TrigDecisionTool> m_trigDec; 
    std::string m_TriggerNames1;
    std::string m_TriggerNames2;
@@ -133,24 +133,24 @@ class CaloTowerVecMon : public ManagedMonitorToolBase {
    int   m_ncells_most;
 
    // twr pre hists
-   TH1F* m_n_calos;
-   TH1F* m_n_twrs;
+   TH1F* m_n_calos = nullptr;
+   TH1F* m_n_twrs = nullptr;
 
    // cell hists 
-   TH1F* m_ratioE_leadcell_tower;
-   TH2F* m_etaphi_hotrat_tower;
-   TProfile2D* m_etaphi_avgenergy_hotrat_tower;
+   TH1F* m_ratioE_leadcell_tower = nullptr;
+   TH2F* m_etaphi_hotrat_tower = nullptr;
+   TProfile2D* m_etaphi_avgenergy_hotrat_tower = nullptr;
 
    //No threshold energy hists
-   TH1F* m_twr_e;
-   TH1F* m_postwr_e_thresh;
-   TH1F* m_negtwr_e_thresh; 
-   TH1F* m_twr_et_FcalA0;
-   TH1F* m_twr_et_FcalA1;
-   TH1F* m_twr_et_FcalA2;
-   TH1F* m_twr_et_FcalC0;
-   TH1F* m_twr_et_FcalC1;
-   TH1F* m_twr_et_FcalC2;   
+   TH1F* m_twr_e = nullptr;
+   TH1F* m_postwr_e_thresh = nullptr;
+   TH1F* m_negtwr_e_thresh = nullptr; 
+   TH1F* m_twr_et_FcalA0 = nullptr;
+   TH1F* m_twr_et_FcalA1 = nullptr;
+   TH1F* m_twr_et_FcalA2 = nullptr;
+   TH1F* m_twr_et_FcalC0 = nullptr;
+   TH1F* m_twr_et_FcalC1 = nullptr;
+   TH1F* m_twr_et_FcalC2 = nullptr;   
 
    // multi-threshold hists
    TH2F* m_twr_etaphi_Et_thresh[MAX_E];
@@ -181,13 +181,13 @@ class CaloTowerVecMon : public ManagedMonitorToolBase {
    TH2F* m_twr_etaphi_thresh[MAX_E];
 
    // twr stat hists
-   TH1F* m_twr_et_Fcal0;
-   TH1F* m_twr_et_Fcal1;
-   TH1F* m_twr_et_Fcal2;
+   TH1F* m_twr_et_Fcal0 = nullptr;
+   TH1F* m_twr_et_Fcal1 = nullptr;
+   TH1F* m_twr_et_Fcal2 = nullptr;
 
-   TH1F* m_twrMost_e;
-   TH2F* m_twrMost_etaphi;
-   TH1F* m_twrMost_nCells;
+   TH1F* m_twrMost_e = nullptr;
+   TH2F* m_twrMost_etaphi = nullptr;
+   TH1F* m_twrMost_nCells = nullptr;
 };
 
 #endif // CaloTowerVecMon_H

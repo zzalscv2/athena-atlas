@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -462,7 +462,7 @@ int CaloNeighbours::get_prevInCalo(const IdentifierHash &id,std::vector<Identifi
 
 int CaloNeighbours::get_neighbours(const IdentifierHash &id,
                                    const std::vector<std::unique_ptr<CaloNeighbourRegion> > &regions,
-                                   std::vector<IdentifierHash>& neighbourList) const
+                                   std::vector<IdentifierHash>& neighbourList) 
 {
   int result = 0;
   for (const std::unique_ptr<CaloNeighbourRegion>& p : regions) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -38,7 +38,7 @@ public:
 		     float phi_min, float phi_max, float dphi,
 		     int   sign_eta,short n_lay);
 
-    ~CaloTTDescriptor();
+    ~CaloTTDescriptor() = default;
 
     /** set internal data member m_id (which is unused. should be removed */
     void	set			(const Identifier& id);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -36,8 +36,7 @@ CaloTTDescriptor::CaloTTDescriptor(float eta_min,   float eta_max,   float deta,
 {
 }
 
-CaloTTDescriptor::~CaloTTDescriptor()
-{}
+
 
 void	
 CaloTTDescriptor::print	() const
@@ -60,8 +59,6 @@ CaloTTDescriptor::print	() const
 	      << std::setw(9) << std::setprecision(4) << m_dphi    << " "
 	      << std::setw(9) << std::setprecision(4) << m_nLay    << " "
 	      << std::endl;	    
-    
-    return;
 }
 
     

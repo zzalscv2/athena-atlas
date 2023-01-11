@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -57,8 +57,7 @@ CaloCellMaker::CaloCellMaker(const std::string& name, ISvcLocator* pSvcLocator)
 // DESTRUCTOR:
 /////////////////////////////////////////////////////////////////////
 
-CaloCellMaker::~CaloCellMaker() {
-}
+CaloCellMaker::~CaloCellMaker() = default;
 
 /////////////////////////////////////////////////////////////////////
 // INITIALIZE:

@@ -1,4 +1,4 @@
-//Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+//Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #include "CaloTowerGeometryCondAlg.h" 
 #include "AthenaKernel/IOVInfiniteRange.h"
@@ -103,7 +103,7 @@ void CaloTowerGeometryCondAlg::dump(const CaloTowerGeometry* towerGeo) const {
     unsigned cellCounter=0;
     for (;it!=towerGeo->end();++it,++cellCounter) { //Loop over  cells in cell-to-tower lookup
       towerfile << cellCounter << ": ";
-      for (auto& item : *it) { //
+      for (const auto& item : *it) { //
 	auto idx=std::get<0>(item);
 	double w=std::get<1>(item);
 	towerfile << " (" << idx << "," << w <<");";
@@ -114,7 +114,6 @@ void CaloTowerGeometryCondAlg::dump(const CaloTowerGeometry* towerGeo) const {
   }//end if file-name given
 
 
-  return;
-}
+  }
 
 

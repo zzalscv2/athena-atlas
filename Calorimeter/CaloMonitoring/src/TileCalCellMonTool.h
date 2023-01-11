@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONTOOL_H
@@ -45,7 +45,7 @@ private:
 
   //Private methods:
   void initParam();
-  void getRMSdevNoise(TProfile *t1, TProfile *t2, TH1F *t3);
+  static void getRMSdevNoise(TProfile *t1, TProfile *t2, TH1F *t3);
 
   //Job Properties and other private variables
   SG::ReadHandleKey<CaloCellContainer> m_cellContainerName { this, "CaloCellContainer", "AllCalo", "SG key of the input cell container" };

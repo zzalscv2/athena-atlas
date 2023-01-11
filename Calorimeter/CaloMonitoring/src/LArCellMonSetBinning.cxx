@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCellMonTool.h"
@@ -167,5 +167,4 @@ void LArCellMonTool::setLArCellBinning() {
   int fcal3aPhiBins[fcal3aNPhiReg+1] = {10,1,1,4,2,1,2,2,1,1,2,10,1,1,4,2,1,2,2,1,1,2};
   m_binning[FCAL3A].doPhiBinning(fcal3aNPhiReg,fcal3aPhiBreakPts,fcal3aPhiBins);
   m_binning[FCAL3C]=m_binning[FCAL3A].etaMirror();
-  return;
 }

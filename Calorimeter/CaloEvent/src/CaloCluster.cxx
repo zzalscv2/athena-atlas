@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -552,8 +552,6 @@ void CaloCluster::updateKine(const CaloCell* theCell, double weight)
 
   m_barrel = (m_nBarrel>0);
   m_endcap = (m_nEndcap>0);
-
-  return;
 }
 
 
@@ -818,7 +816,6 @@ void CaloCluster::calculateKine(const bool useweight,const bool updateLayers)
 
   m_barrel = (m_nBarrel>0);
   m_endcap = (m_nEndcap>0);
-  return;
 }
 
 ///////////////////////////
@@ -1156,7 +1153,7 @@ CaloCluster::moment_iterator CaloCluster::endMoment(bool useLink) const
     }
   else
     {
-      return moment_iterator();
+      return {};
     }
 }
 
@@ -1526,7 +1523,7 @@ CaloCluster::MomentStoreIter::MomentStoreIter(const moment_iterator_i& iter,
   : m_iter(iter), m_firstStore(firstStore), m_secndStore(secndStore)
 { }
 /*! Destructor */
-CaloCluster::MomentStoreIter::~MomentStoreIter() { }
+CaloCluster::MomentStoreIter::~MomentStoreIter() = default;
 
 /*! \brief Advance iterator */
 CaloCluster::MomentStoreIter CaloCluster::MomentStoreIter::next()

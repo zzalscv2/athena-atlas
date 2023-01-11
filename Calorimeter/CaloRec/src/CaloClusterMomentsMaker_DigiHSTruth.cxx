@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //-----------------------------------------------------------------------
 // File and Version Information:
@@ -587,7 +587,7 @@ CaloClusterMomentsMaker_DigiHSTruth::execute(const EventContext& ctx,
 
             const double epsilon = 1.E-6;
 
-      if ( !( std::abs(S[0]) < epsilon || std::abs(S[1]) < epsilon || std::abs(S[2]) < epsilon ) ) {
+      if ( std::abs(S[0]) >= epsilon && std::abs(S[1]) >= epsilon && std::abs(S[2]) >= epsilon ) {
 
         Amg::Vector3D prAxis(showerAxis);
 

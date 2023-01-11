@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERVERTEXFRACTIONMAKER_H
@@ -25,7 +25,7 @@ class CaloClusterVertexFractionMaker: public AthAlgTool, virtual public CaloClus
                              xAOD::CaloClusterContainer* theClusColl) const override;
 
  private:
-  double calculateDPhi(double phi1, double phi2) const;
+  static double calculateDPhi(double phi1, double phi2) ;
 
     const double m_CALO_INNER_R;        // inner radius of the EM barrel envelope in mm
     const double m_CALO_INNER_Z;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     LArCellMonAlg.cxx
@@ -66,9 +66,7 @@ LArCellMonAlg::LArCellMonAlg(const std::string& name, ISvcLocator* pSvcLocator)
 
 
 
-LArCellMonAlg::~LArCellMonAlg() {
-
-}
+LArCellMonAlg::~LArCellMonAlg() = default;
 
 ////////////////////////////////////////////
 StatusCode LArCellMonAlg::initialize() {
@@ -332,8 +330,7 @@ void LArCellMonAlg::checkTriggerAndBeamBackground(bool passBeamBackgroundRemoval
 	fill(m_MonGroupName,eventCounter);
       }
     }//end loop over thresholds
-  return;
-}
+  }
 
 /*
 void LArCellMonAlg::sporadicNoiseCandidate(const CaloCell* cell, const LArCellMonAlg::LayerEnum iLyr, const float threshold, const LArOnOffIdMapping* cabling) const {
@@ -687,7 +684,7 @@ StatusCode LArCellMonAlg::createPerJobHistograms(const CaloCellContainer* cellCo
 
 
 
-std::string  LArCellMonAlg::strToLower(const std::string& input) const {
+std::string  LArCellMonAlg::strToLower(const std::string& input) {
   std::string output;
   for (const auto& c : input) {
     output.push_back(std::tolower(c));
@@ -695,7 +692,7 @@ std::string  LArCellMonAlg::strToLower(const std::string& input) const {
   return output;
 }
 
- bool LArCellMonAlg::isThrListed(std::vector<std::string> vec, std::string s) const {
+ bool LArCellMonAlg::isThrListed(std::vector<std::string> vec, const std::string& s) {
    return (std::find(vec.begin(),vec.end(),s)!=vec.end());
  }
 
@@ -723,8 +720,6 @@ void LArCellMonAlg::getHistoCoordinates(const CaloDetDescrElement* dde, float& c
   }
   
   const unsigned side=(celleta>0) ? 0 : 1; //Value >0 means A-side
-  iLyr=iLyrNS*2+side;  //Getting LayerEnum value. This logic works because of the way the enums LayerEnum and LayerEnumNoSides are set up. 
-  return;
-}
+  iLyr=iLyrNS*2+side;  }
 
 
