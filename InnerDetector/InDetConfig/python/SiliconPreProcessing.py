@@ -183,27 +183,29 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    ConfigFlags.InDet.Tracking.doPixelClusterSplitting = True
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+
+    flags.InDet.Tracking.doPixelClusterSplitting = True
 
     numThreads=1
-    ConfigFlags.Concurrency.NumThreads=numThreads
-    ConfigFlags.Concurrency.NumConcurrentEvents=numThreads
+    flags.Concurrency.NumThreads=numThreads
+    flags.Concurrency.NumConcurrentEvents=numThreads
 
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
-    top_acc.merge(InDetRecPreProcessingSiliconCfg(ConfigFlags))
+    top_acc.merge(InDetRecPreProcessingSiliconCfg(flags))
 
     iovsvc = top_acc.getService('IOVDbSvc')
     iovsvc.OutputLevel=5

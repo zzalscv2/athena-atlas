@@ -52,29 +52,31 @@ def TruthTrackingCfg(flags, name='InDetTruthTrackCreation', **kwargs):
     return acc
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     # Disable calo for this test
-    ConfigFlags.Detector.EnableCalo = False
+    flags.Detector.EnableCalo = False
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     ################################ Aditional configurations ################################
     ##
-    top_acc.merge(TruthTrackingCfg(ConfigFlags))
-    if ConfigFlags.InDet.Tracking.doIdealPseudoTracking:
+    top_acc.merge(TruthTrackingCfg(flags))
+    if flags.InDet.Tracking.doIdealPseudoTracking:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
-        top_acc.merge(InDetTrackTruthCfg(ConfigFlags, 'InDetPseudoTrackParticles', 'InDetPseudoTrackTruthCollection', 'InDetPseudoTrackTruthCollection'))
+        top_acc.merge(InDetTrackTruthCfg(flags, 'InDetPseudoTrackParticles', 'InDetPseudoTrackTruthCollection', 'InDetPseudoTrackTruthCollection'))
 
-#    ConfigFlags.lock()
-    ConfigFlags.dump()
+    #flags.lock()
+    flags.dump()
     
     ComponentAccumulator.debugMode="trackCA trackEventAlgo ..."
 

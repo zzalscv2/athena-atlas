@@ -1064,30 +1064,31 @@ def createTRTStandaloneTrackingPassFlags():
 
 if __name__ == "__main__":
 
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+
   from AthenaConfiguration.TestDefaults import defaultTestFiles
-  ConfigFlags.Input.Files=defaultTestFiles.RAW
+  flags.Input.Files=defaultTestFiles.RAW
   
   from AthenaCommon.Logging import logging
-  l = logging.getLogger('AthConfigFlags')
-  from AthenaCommon.Constants import WARNING
-  l.setLevel(WARNING)
+  l = logging.getLogger('TrackingPassFlags')
+  from AthenaCommon.Constants import INFO
+  l.setLevel(INFO)
 
-  ConfigFlags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
+  flags = flags.cloneAndReplace("InDet.Tracking.ActiveConfig","InDet.Tracking.MainPass")
 
-  assert ConfigFlags.InDet.Tracking.cutLevel == 19 , "default cut level is wrong"
-  assert ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
-  ConfigFlags.InDet.Tracking.cutLevel = 2
-  assert ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(ConfigFlags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
-  assert ConfigFlags.InDet.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(ConfigFlags.InDet.Tracking.BeamGasPass.minRoIClusterEt)
+  assert flags.InDet.Tracking.cutLevel == 19 , "default cut level is wrong"
+  assert flags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 6000.0 * Units.MeV, "wrong cut value {} ".format(flags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
+  flags.InDet.Tracking.cutLevel = 2
+  assert flags.InDet.Tracking.ActiveConfig.minRoIClusterEt == 0.0, "wrong cut value {} ".format(flags.InDet.Tracking.ActiveConfig.minRoIClusterEt)
+  assert flags.InDet.Tracking.BeamGasPass.minRoIClusterEt == 0.0, "wrong cut value {}, not following cutLevel setting ".format(flags.InDet.Tracking.BeamGasPass.minRoIClusterEt)
 
-  assert ConfigFlags.InDet.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
-  assert ConfigFlags.InDet.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
+  assert flags.InDet.Tracking.HeavyIonPass.minSiNotShared == 7, "wrong cut value, overwrite"
+  assert flags.InDet.Tracking.HeavyIonPass.minRoIClusterEt == 0.0, "wrong cut value, overwrite"
 
-  print("ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt",ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt * 1.0)
-  print("type(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt)",type(ConfigFlags.InDet.Tracking.ActiveConfig.minSecondaryPt))
+  l.info("flags.InDet.Tracking.ActiveConfig.minSecondaryPt %f", flags.InDet.Tracking.ActiveConfig.minSecondaryPt * 1.0)
+  l.info("type(flags.InDet.Tracking.ActiveConfig.minSecondaryPt) " + str(type(flags.InDet.Tracking.ActiveConfig.minSecondaryPt)))
 
-  #ConfigFlags.dump()
-  print( "allok" )   
+
 
 

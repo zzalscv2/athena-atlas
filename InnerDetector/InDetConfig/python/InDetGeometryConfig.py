@@ -42,31 +42,33 @@ def InDetGeometryCfg (flags):
 if __name__ == "__main__":
   from AthenaCommon.Logging import log
   from AthenaCommon.Constants import DEBUG
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
+
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   # Set up logging and new style config
   log.setLevel(DEBUG)
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   # Provide MC input
-  ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
-  ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
-  ConfigFlags.GeoModel.Align.Dynamic = False
+  flags.Input.Files = defaultTestFiles.HITS_RUN2
+  flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
+  flags.GeoModel.Align.Dynamic = False
   # Provide data input
   # from AthenaConfiguration.TestDefaults import defaultTestFiles
-  # ConfigFlags.Input.Files = defaultTestFiles.AOD
-  # ConfigFlags.GeoModel.Align.Dynamic = True
-  ConfigFlags.lock()
+  # flags.Input.Files = defaultTestFiles.AOD
+  # flags.GeoModel.Align.Dynamic = True
+  flags.lock()
   # Construct ComponentAccumulator
-  acc = MainServicesCfg(ConfigFlags)
-  acc.merge(PoolReadCfg(ConfigFlags))
-  acc.merge(InDetGeometryCfg(ConfigFlags)) # FIXME This sets up the whole ID geometry would be nicer just to set up min required
+  acc = MainServicesCfg(flags)
+  acc.merge(PoolReadCfg(flags))
+  acc.merge(InDetGeometryCfg(flags)) # FIXME This sets up the whole ID geometry would be nicer just to set up min required
   #acc.getService("StoreGateSvc").Dump=True
   acc.getService("ConditionStore").Dump=True
   acc.printConfig(withDetails=True)
   f=open('InDetGMCfg2.pkl','wb')
   acc.store(f)
   f.close()
-  ConfigFlags.dump()
+  flags.dump()
   # Execute and finish
   acc.run(maxEvents=3)

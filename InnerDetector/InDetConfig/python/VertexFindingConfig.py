@@ -236,7 +236,9 @@ def ActsGaussAdaptiveMultiFindingBaseCfg(flags, **kwargs):
 
 if __name__ == "__main__":
     from AthenaCommon.Logging import logging
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg

@@ -635,31 +635,33 @@ def InDetTrackRecoOutputCfg(flags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     # Disable calo for this test
-    ConfigFlags.Detector.EnableCalo = False
+    flags.Detector.EnableCalo = False
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     #######################################################################
     #################### Additional Configuration  ########################
-    if "EventInfo" not in ConfigFlags.Input.Collections:
+    if "EventInfo" not in flags.Input.Collections:
         from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-        top_acc.merge(EventInfoCnvAlgCfg(ConfigFlags))
+        top_acc.merge(EventInfoCnvAlgCfg(flags))
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        top_acc.merge(GEN_AOD2xAODCfg(ConfigFlags))
+        top_acc.merge(GEN_AOD2xAODCfg(flags))
 
-    top_acc.merge(InDetTrackRecoCfg(ConfigFlags))
+    top_acc.merge(InDetTrackRecoCfg(flags))
     from AthenaCommon.Constants import DEBUG
     top_acc.foreach_component("AthEventSeq/*").OutputLevel=DEBUG
     top_acc.printConfig(withDetails=True, summariseProps=True)

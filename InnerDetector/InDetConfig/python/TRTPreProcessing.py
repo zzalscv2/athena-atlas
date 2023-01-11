@@ -46,34 +46,36 @@ def TRTPreProcessingCfg(flags, **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files=defaultTestFiles.RDO_RUN2
+    flags.Input.Files=defaultTestFiles.RDO_RUN2
 
     # TODO: TRT only?
 
     numThreads=1
-    ConfigFlags.Concurrency.NumThreads=numThreads
-    ConfigFlags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads=numThreads
+    flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-    top_acc.merge(TRT_ReadoutGeometryCfg( ConfigFlags ))
+    top_acc.merge(TRT_ReadoutGeometryCfg(flags))
 
     from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
     from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-    top_acc.merge( PixelReadoutGeometryCfg(ConfigFlags) )
-    top_acc.merge( SCT_ReadoutGeometryCfg(ConfigFlags) )
+    top_acc.merge(PixelReadoutGeometryCfg(flags))
+    top_acc.merge(SCT_ReadoutGeometryCfg(flags))
 
-    top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
+    top_acc.merge(TRTPreProcessingCfg(flags))
 
     iovsvc = top_acc.getService('IOVDbSvc')
     iovsvc.OutputLevel=5

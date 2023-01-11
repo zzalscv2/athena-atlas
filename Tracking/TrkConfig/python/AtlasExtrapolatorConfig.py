@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # New configuration for ATLAS extrapolator
 # The extrapolator  combines
@@ -415,31 +415,33 @@ def MCTBExtrapolatorCfg(flags, name='MCTBExtrapolator', **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
     from AthenaConfiguration.ComponentAccumulator import printProperties
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import logging
 
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.fillFromArgs()
+    flags.lock()
+    flags.dump()
 
     cfg = ComponentAccumulator()
     mlog = logging.getLogger("AtlasExtrapolatorConfigTest")
     mlog.info("Configuring AtlasExtrapolator : ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        AtlasExtrapolatorCfg(ConfigFlags)),
+        AtlasExtrapolatorCfg(flags)),
         nestLevel=1,
         printDefaults=True)
     mlog.info("Configuring egammaCaloExtrapolator : ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        egammaCaloExtrapolatorCfg(ConfigFlags)),
+        egammaCaloExtrapolatorCfg(flags)),
         nestLevel=1,
         printDefaults=True)
     mlog.info("Configuring MCTruthClassifierExtrapolator : ")
     printProperties(mlog, cfg.popToolsAndMerge(
-        MCTruthClassifierExtrapolatorCfg(ConfigFlags)),
+        MCTruthClassifierExtrapolatorCfg(flags)),
         nestLevel=1,
         printDefaults=True)
 

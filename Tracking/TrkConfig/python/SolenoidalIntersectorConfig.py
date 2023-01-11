@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -20,10 +20,10 @@ def SolenoidalIntersectorCfg(flags, name='SolenoidalIntersector', **kwargs):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
-    flags1 = ConfigFlags.clone()
-    acc1 = SolenoidalIntersectorCfg (flags1)
-    print ('private tools:', acc1.popPrivateTools())
-    acc1.printConfig (summariseProps=True)
-    acc1.wasMerged()
+    acc = SolenoidalIntersectorCfg (flags)
+    print ('private tools:', acc.popPrivateTools())
+    acc.printConfig (summariseProps=True)
+    acc.wasMerged()

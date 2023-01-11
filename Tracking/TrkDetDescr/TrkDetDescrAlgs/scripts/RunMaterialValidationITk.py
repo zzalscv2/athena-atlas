@@ -7,7 +7,8 @@ Run material validation to check material maps for tracking geometry.
 
 from AthenaCommon.Logging import log
 from argparse import ArgumentParser
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+flags = initConfigFlags()
 
 # Argument parsing
 parser = ArgumentParser("RunMaterialValidationITk.py")
@@ -35,38 +36,38 @@ if args.localgeo:
     print("...overridden by local Geometry Xml files")
 print()
 
-ConfigFlags.Input.isMC             = True
-ConfigFlags.Input.Files = []
+flags.Input.isMC             = True
+flags.Input.Files = []
 
 if args.localgeo:
-  ConfigFlags.ITk.Geometry.AllLocal = True
+  flags.ITk.Geometry.AllLocal = True
   
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+from AthenaConfiguration.Detectorflags import setupDetectorFlags
 detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-ConfigFlags.GeoModel.AtlasVersion = args.geometrytag
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
-ConfigFlags.GeoModel.Align.Dynamic = False
-ConfigFlags.TrackingGeometry.MaterialSource = "COOL"
+flags.GeoModel.AtlasVersion = args.geometrytag
+flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+flags.GeoModel.Align.Dynamic = False
+flags.TrackingGeometry.MaterialSource = "COOL"
 
-ConfigFlags.Detector.GeometryCalo  = False
-ConfigFlags.Detector.GeometryMuon  = False
+flags.Detector.GeometryCalo  = False
+flags.Detector.GeometryMuon  = False
 
 # This should run serially for the moment.
-ConfigFlags.Concurrency.NumThreads = 1
-ConfigFlags.Concurrency.NumConcurrentEvents = 1
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents = 1
 
-ConfigFlags.ITk.trackingGeometry.loadLocalDbForMaterialMaps=True
-LocalDataBaseName = ConfigFlags.ITk.trackingGeometry.localDatabaseName
-ConfigFlags.IOVDb.DBConnection='sqlite://;schema='+LocalDataBaseName+';dbname=OFLP200'
+flags.ITk.trackingGeometry.loadLocalDbForMaterialMaps=True
+LocalDataBaseName = flags.ITk.trackingGeometry.localDatabaseName
+flags.IOVDb.DBConnection='sqlite://;schema='+LocalDataBaseName+';dbname=OFLP200'
 
 log.debug('Lock config flags now.')
-ConfigFlags.lock()
+flags.lock()
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-cfg=MainServicesCfg(ConfigFlags)
+cfg=MainServicesCfg(flags)
 
 ### setup dumping of additional information
 if args.verboseAccumulators:
@@ -74,11 +75,11 @@ if args.verboseAccumulators:
 if args.verboseStoreGate:
   cfg.getService("StoreGateSvc").Dump = True
   
-log.debug('Dumping of ConfigFlags now.')
-ConfigFlags.dump()
+log.debug('Dumping of flags now.')
+flags.dump()
 
 from TrkDetDescrAlgs.TrkDetDescrAlgsConfig import MaterialValidationCfg
-cfg.merge(MaterialValidationCfg(ConfigFlags))
+cfg.merge(MaterialValidationCfg(flags))
   
 cfg.printConfig(withDetails = True, summariseProps = True)
 

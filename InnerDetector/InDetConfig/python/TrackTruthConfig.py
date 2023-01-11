@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 # -------------------------------------------------------------------------
@@ -31,35 +31,36 @@ def InDetTrackTruthCfg(flags,
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     numThreads=1
-    ConfigFlags.Concurrency.NumThreads=numThreads
-    ConfigFlags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads=numThreads
+    flags.Concurrency.NumConcurrentEvents=numThreads # Might change this later, but good enough for the moment.
 
-    ConfigFlags.Detector.GeometryPixel = True
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT   = True
+    flags.Detector.GeometryPixel = True
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT   = True
 
-    ConfigFlags.InDet.Tracking.doPixelClusterSplitting = True
+    flags.InDet.Tracking.doPixelClusterSplitting = True
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
+    flags.dump()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    top_acc = MainServicesCfg(ConfigFlags)
+    top_acc = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    top_acc.merge(PoolReadCfg(ConfigFlags))
+    top_acc.merge(PoolReadCfg(flags))
 
     ################## SiliconPreProcessing Configurations ###################
     from InDetConfig.SiliconPreProcessing import InDetRecPreProcessingSiliconCfg
-    top_acc.merge(InDetRecPreProcessingSiliconCfg(ConfigFlags))
+    top_acc.merge(InDetRecPreProcessingSiliconCfg(flags))
     #################### TRTPreProcessing Configurations #####################
     from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-    top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
+    top_acc.merge(TRTPreProcessingCfg(flags))
     
     #//// TrackingSiPatternConfig configurations from Temporary location /////
     ################# SiSPSeededTrackFinder Configurations ###################
@@ -69,7 +70,7 @@ if __name__ == "__main__":
     SiSPSeededTrackCollectionKey = 'SiSPSeededPixelTracks'
     ResolvedTrackCollectionKey = 'ResolvedPixelTracks'
     from InDetConfig.TrackingSiPatternConfig import SiSPSeededTrackFinderCfg
-    top_acc.merge(SiSPSeededTrackFinderCfg( ConfigFlags,
+    top_acc.merge(SiSPSeededTrackFinderCfg( flags,
                                             InputCollections = InputCollections, 
                                             SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey))
     ##########################################################################
@@ -79,7 +80,7 @@ if __name__ == "__main__":
     InputDetailedTrackTruth = 'DetailedTrackTruth'
     InputTrackCollectionTruth = 'TrackTruthCollection'
     
-    top_acc.merge(InDetTrackTruthCfg(flags=ConfigFlags,
+    top_acc.merge(InDetTrackTruthCfg(flags,
                                      Tracks = InputTrackCollection,
                                      DetailedTruth = InputDetailedTrackTruth,
                                      TracksTruth = InputTrackCollectionTruth))
