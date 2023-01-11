@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include <string>
@@ -20,7 +20,7 @@ const static geo_id_value channel_mask   = 0x00000000000fffff;
 #define ACTS_BIT_ENCODE(value, mask) (value << ACTS_BIT_SHIFT(mask))
 #define ACTS_BIT_DECODE(code, mask) ((code & mask) >> ACTS_BIT_SHIFT(mask))
 
-void geo_id(std::string filename) {
+void geo_id(const std::string & filename) {
 
   auto infile = TFile::Open(filename.c_str());
 

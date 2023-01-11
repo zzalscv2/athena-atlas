@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include <string>
@@ -14,7 +14,7 @@
 #include "TGraph.h"
 
 TGraph
-fill_geometry_hist_rz(std::string filename,
+fill_geometry_hist_rz(const std::string & filename,
     //std::tuple<size_t, double, double> rbnd,
     //std::tuple<size_t, double, double> zbnd,
     long long maxEvents = std::numeric_limits<long long>::max()) {
