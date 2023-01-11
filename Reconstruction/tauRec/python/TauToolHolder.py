@@ -964,6 +964,26 @@ def TauWPDecoratorEleRNNCfg(flags):
     result.setPrivateTools(myTauEleWPDecorator)
     return result
 
+def TauWPDecoratorEleRNNFixCfg(flags):
+    result = ComponentAccumulator()
+    _name = sPrefix + 'TauWPDecoratorEleRNNFix_v1'
+
+    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
+    WPConf = flags.Tau.TauEleRNNWPfix
+    myTauEleWPDecorator = TauWPDecorator(name = _name,
+                                         flatteningFile1Prong = WPConf[0],
+                                         flatteningFile3Prong = WPConf[1],
+                                         DecorWPNames = [ "EleRNNLoose_v1", "EleRNNMedium_v1", "EleRNNTight_v1" ],
+                                         DecorWPCutEffs1P = [0.95, 0.90, 0.85],
+                                         DecorWPCutEffs3P = [0.98, 0.95, 0.90],
+                                         UseEleBDT = True,
+                                         ScoreName = "RNNEleScore",
+                                         NewScoreName = "RNNEleScoreSigTrans_v1",
+                                         DefineWPs = True)
+
+    result.setPrivateTools(myTauEleWPDecorator)
+    return result
+
 def TauDecayModeNNClassifierCfg(flags):
     result = ComponentAccumulator()
     _name = sPrefix + 'TauDecayModeNNClassifier'

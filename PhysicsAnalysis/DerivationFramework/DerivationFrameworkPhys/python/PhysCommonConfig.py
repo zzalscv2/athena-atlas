@@ -67,7 +67,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import FtagJetCollectionsCfg
-    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddTauWPDecorationCfg, AddMuonRemovalTauAODReRecoAlgCfg)
+    from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddMuonRemovalTauAODReRecoAlgCfg, AddTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(ConfigFlags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
@@ -76,9 +76,9 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags))
     acc.merge(AddDiTauLowPtCfg(ConfigFlags))
     acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags))
-    # fix eVeto WP for taus and ditaus
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True))
-    acc.merge(AddTauWPDecorationCfg(ConfigFlags, evetoFix=True, TauContainerName="TauJets_MuonRM", OverrideDecoration=True))
+    # eVeto WP and DeepSet ID for taus and muon-subtracted taus
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets"))
+    acc.merge(AddTauIDDecorationCfg(ConfigFlags, TauContainerName="TauJets_MuonRM"))
 
     FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets']
     if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:

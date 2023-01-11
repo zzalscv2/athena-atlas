@@ -62,6 +62,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRNNConfig", ["taueveto_rnn_config_1P_r22.json", "taueveto_rnn_config_3P_r22.json"])
     tau_cfg.addFlag("Tau.TauEleRNNWPConfig", ["taueveto_rnn_flat_1P_r22.root", "taueveto_rnn_flat_3P_r22.root"])
     tau_cfg.addFlag("Tau.DecayModeNNClassifierConfig", "NNDecayMode_R22_v1.json")
+    tau_cfg.addFlag("Tau.TauEleRNNWPfix", ["rnneveto_mc16d_flat_1p_fix.root", "rnneveto_mc16d_flat_3p_fix.root"])
     tau_cfg.addFlag("Tau.TauJetDeepSetConfig", ["tauid_R22_1p_trk_dpst_notrkfakeRNN.json", "tauid_R22_2p_trk_dpst.json", "tauid_R22_3p_trk_dpst.json"])
     tau_cfg.addFlag("Tau.TauJetDeepSetWP", ["model_R22_1p_trk_dpst_notrkfakeRNN.root", "model_R22_2p_trk_dpst.root", "model_R22_3p_trk_dpst.root"])
 
