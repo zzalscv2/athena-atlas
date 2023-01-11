@@ -113,15 +113,13 @@ def JETM2Cfg(ConfigFlags):
     
     JETM2SlimmingHelper = SlimmingHelper("JETM2SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections, ConfigFlags = ConfigFlags)
 
-    JETM2SlimmingHelper.SmartCollections = ["EventInfo",
-                                             "Electrons", "Photons", "Muons", "TauJets",
-                                             "InDetTrackParticles", "PrimaryVertices",
-                                             "MET_Baseline_AntiKt4EMPFlow",
-                                             "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
-                                             "AntiKt4TruthJets","AntiKt10TruthJets",
-                                             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
-                                             "BTagging_AntiKt4EMPFlow",
-                                             "BTagging_AntiKtVR30Rmax4Rmin02Track",
+    JETM2SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles", "PrimaryVertices",
+                                            "Electrons", "Photons", "Muons", "TauJets",
+                                            "MET_Baseline_AntiKt4EMPFlow",
+                                            "AntiKt4EMTopoJets","AntiKt4EMPFlowJets",
+                                            "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
+                                            "BTagging_AntiKt4EMPFlow",
+                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
 
     ]
 
@@ -129,12 +127,10 @@ def JETM2Cfg(ConfigFlags):
                                         "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
                                         "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape",
-                                        "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
-                                        "TruthParticles","TruthVertices","TruthEvents"]
+                                        "Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape"]
 
     JETM2SlimmingHelper.ExtraVariables = ["AntiKt4EMPFlowJets.GhostTower",
                                           "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.SizeParameter",
-                                          "AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter",
                                           "UFOCSSK.pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks",
                                           "UFO.pt.eta.phi.m.signalType.otherObjectLinks.chargedObjectLinks",
                                           "InDetTrackParticles.particleHypothesis.vx.vy.vz.btagIp_d0Uncertainty.btagIp_z0SinThetaUncertainty.btagIp_z0SinTheta.btagIp_trackMomentum.btagIp_trackDisplacement.btagIp_invalidIp",
@@ -167,9 +163,10 @@ def JETM2Cfg(ConfigFlags):
         JETM2SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
                                                        'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
         
-        JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles"]
-        JETM2SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
-        JETM2SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
+        JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles",
+                                             "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles", "TruthVertices","TruthEvents"]
+        JETM2SlimmingHelper.ExtraVariables += ["AntiKt10TruthSoftDropBeta100Zcut10Jets.SizeParameter"]
+        JETM2SlimmingHelper.SmartCollections += ["AntiKt4TruthJets","AntiKt10TruthJets","AntiKt4TruthWZJets"]
 
     # Trigger content
     JETM2SlimmingHelper.IncludeTriggerNavigation = False

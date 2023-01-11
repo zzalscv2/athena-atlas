@@ -37,8 +37,12 @@ calibmods_lowCut = (
     "Sort",
 )
 
+calibmods_noCut = (
+    "ConstitFourMom", "CaloEnergies", "Sort"
+)
+
 standardmods = (
-    "LArHVCorr", "Width",
+    "Width",
     "CaloQuality", "TrackMoments","TrackSumMoments",
     "JVF", "JVT", "Charge",
 )
@@ -82,7 +86,7 @@ if not ConfigFlags.Jet.useCalibJetThreshold:
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+filterPF+truthmods+standardmods+("JetGhostLabel",),
+                               modifiers = calibmods+filterPF+truthmods+standardmods+("JetGhostLabel","LArHVCorr"),
                                lock = True
 )
 
@@ -91,7 +95,7 @@ AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
 
 AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
                               ghostdefs = standardghosts+flavourghosts, 
-                              modifiers = calibmods+("Filter_ifnotESD:15000","OriginSetPV")+standardmods+clustermods,
+                              modifiers = calibmods+("Filter_ifnotESD:15000","OriginSetPV","LArHVCorr")+standardmods+clustermods,
                               lock = True,
 )
 
@@ -99,7 +103,7 @@ AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
 
 AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               ghostdefs = standardghosts+["TrackLRT"]+flavourghosts,
-                              modifiers = calibmods+filterEM+truthmods+standardmods+clustermods,
+                              modifiers = calibmods+filterEM+truthmods+standardmods+clustermods+("LArHVCorr",),
                               lock = True,
 )
 
@@ -109,7 +113,7 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 # *********************************************************
 AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                    ghostdefs = standardghosts+flavourghosts,
-                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation")+truthmods+standardmods,
+                                   modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation","LArHVCorr")+truthmods+standardmods,
                                    ptmin = 2000,
                                    lock = True
 )
@@ -120,7 +124,7 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = ("ConstitFourMom","Sort","Filter:1","EMScaleMom","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge","CaloEnergies",)+truthmods,
+                               modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation",)+truthmods+standardmods,
                                ptmin = 2000,
                                lock = True
 )
@@ -131,7 +135,7 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = ("ConstitFourMom", "Sort", "Filter:1", "EMScaleMom", "JetPtAssociation", "Width", "TrackMoments", "TrackSumMoments", "JVF", "JVT", "Charge", "CaloEnergies", "N90",)+truthmods,
+                                      modifiers = calibmods_noCut+("Filter:1","EMScaleMom","JetPtAssociation",)+truthmods+standardmods,
                                       ptmin = 1,
                                       lock = True
 )
