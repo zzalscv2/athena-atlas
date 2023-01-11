@@ -1550,7 +1550,7 @@ void AnalysisConfig_Ntuple::loop() {
 		     
 			//			m_provider->msg(MSG::INFO) << " done" << endmsg;      
 
-			if ( roiInfo ) delete roiInfo;
+			delete roiInfo;
 			roiInfo = 0;
 		}
 
