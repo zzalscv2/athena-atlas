@@ -72,7 +72,7 @@ void SurfaceValidationTree::Init(TTree *tree)
    fChain->SetBranchAddress("CorrFactor",&CorrFactor);
    fChain->SetBranchAddress("PathInX0",&PathInX0);
    fChain->SetBranchAddress("Rho",&Rho);
-   Notify();
+   SurfaceValidationTree::Notify();
 }
 
 Bool_t SurfaceValidationTree::Notify()
