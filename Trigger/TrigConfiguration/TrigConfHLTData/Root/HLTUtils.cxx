@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -50,7 +50,7 @@ recursivelyFindInputTEs( unsigned int teId, const TrigConf::HLTSequenceList& seq
    }
 }
 
-void recursivelyFindInputTEs( std::string tename, const TrigConf::HLTSequenceList& seqList, std::vector<std::string>& tes ) {
+void recursivelyFindInputTEs( const std::string& tename, const TrigConf::HLTSequenceList& seqList, std::vector<std::string>& tes ) {
   const TrigConf::HLTSequence* seq = seqList.getSequence(tename);
   if ( seq==0 ) return;
 
