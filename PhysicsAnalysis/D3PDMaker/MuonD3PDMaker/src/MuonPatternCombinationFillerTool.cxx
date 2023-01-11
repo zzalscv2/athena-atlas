@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////
@@ -47,7 +47,6 @@ namespace D3PD {
     CHECK( addVariable("gdir_x", m_pattern_gdir_x) );
     CHECK( addVariable("gdir_y", m_pattern_gdir_y) );
     CHECK( addVariable("gdir_z", m_pattern_gdir_z) );
-    CHECK( addVariable("seedType", m_pattern_seedType) );
     CHECK( addVariable("nMDT", m_pattern_nMDT) );
     CHECK( addVariable("nRPC", m_pattern_nRPC) );
     CHECK( addVariable("nTGC", m_pattern_nTGC) );
@@ -97,7 +96,6 @@ namespace D3PD {
     *m_pattern_gdir_x = static_cast<float>(gdir.x());
     *m_pattern_gdir_y = static_cast<float>(gdir.y());
     *m_pattern_gdir_z = static_cast<float>(gdir.z());
-    *m_pattern_seedType = static_cast<int>(pattern.trackRoadType());
     
     //hits from the pattern combination
     int nPatternMDT(0),nPatternRPC(0),nPatternTGC(0),nPatternCSC(0);

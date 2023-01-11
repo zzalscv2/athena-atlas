@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -47,7 +47,6 @@ private:
   float* m_pattern_gdir_x;
   float* m_pattern_gdir_y;
   float* m_pattern_gdir_z;
-  int*   m_pattern_seedType;
   int* m_pattern_nMDT;
   int* m_pattern_nRPC;
   int* m_pattern_nTGC;
