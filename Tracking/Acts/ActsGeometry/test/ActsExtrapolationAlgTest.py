@@ -3,7 +3,7 @@
 This job options file will run an example extrapolation using the
 Acts tracking geometry and the Acts extrapolation toolchain.
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 
 # start from scratch with component accumulator
@@ -14,38 +14,39 @@ from ActsGeometry.ActsGeometryConfig import ActsExtrapolationAlgCfg
 if "__main__" == __name__:
   from AthenaCommon.Logging import log
   from AthenaCommon.Constants import INFO
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
+  flags = initConfigFlags()
 
   ## Just enable ID for the moment.
-  ConfigFlags.Input.isMC             = True
-  ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1']
-  ConfigFlags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
-  ConfigFlags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"
-  ConfigFlags.Detector.GeometryBpipe = True
-  ConfigFlags.Detector.GeometryID    = True
-  ConfigFlags.Detector.GeometryPixel = True
-  ConfigFlags.Detector.GeometrySCT   = True
-  ConfigFlags.Detector.GeometryCalo  = True
-  ConfigFlags.Detector.GeometryMuon  = False
-  ConfigFlags.Detector.GeometryTRT   = True
-  ConfigFlags.Acts.TrackingGeometry.MaterialSource = "None"
+  flags.Input.isMC             = True
+  flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1']
+  flags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
+  flags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"
+  flags.Detector.GeometryBpipe = True
+  flags.Detector.GeometryID    = True
+  flags.Detector.GeometryPixel = True
+  flags.Detector.GeometrySCT   = True
+  flags.Detector.GeometryCalo  = True
+  flags.Detector.GeometryMuon  = False
+  flags.Detector.GeometryTRT   = True
+  flags.Acts.TrackingGeometry.MaterialSource = "None"
 
-  ConfigFlags.Concurrency.NumThreads = 10
-  ConfigFlags.Concurrency.NumConcurrentEvents = 10
+  flags.Concurrency.NumThreads = 10
+  flags.Concurrency.NumConcurrentEvents = 10
 
-  ConfigFlags.Exec.MaxEvents = 100
+  flags.Exec.MaxEvents = 100
 
-  ConfigFlags.lock()
-  ConfigFlags.dump()
+  flags.lock()
+  flags.dump()
 
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
   from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-  cfg.merge(BeamPipeGeometryCfg(ConfigFlags))
+  cfg.merge(BeamPipeGeometryCfg(flags))
 
 
-  alg = ActsExtrapolationAlgCfg(ConfigFlags,
+  alg = ActsExtrapolationAlgCfg(flags,
                                 OutputLevel=INFO,
                                 NParticlesPerEvent = int(100),
                                 WritePropStep = True,

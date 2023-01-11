@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #==============================================================
 #
 #
@@ -13,7 +13,7 @@ import sys
 from argparse import ArgumentParser
 
 from AthenaCommon.Constants import INFO
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -21,12 +21,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsGeometry.ActsGeometryConfig import ActsExtrapolationToolCfg
 
 
-def defaultTestFlags(configFlags, args):
+def defaultTestFlags(flags, args):
 
 
     ## Just enable ID for the moment.
-    ConfigFlags.Input.isMC            = True
-    ConfigFlags.ITk.Geometry.AllLocal = True
+    flags.Input.isMC            = True
+    flags.ITk.Geometry.AllLocal = True
     detectors = [
       "ITkPixel",
       "ITkStrip",
@@ -34,44 +34,44 @@ def defaultTestFlags(configFlags, args):
     ]
  
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+    setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    #ConfigFlags.Acts.TrackingGeometry.MaterialSource = "Input"
-    # ConfigFlags.Acts.TrackingGeometry.MaterialSource = "material-maps.json"
+    flags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
+    flags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
+    flags.GeoModel.Align.Dynamic = False
+    # flags.Acts.TrackingGeometry.MaterialSource = "Input"
+    # flags.Acts.TrackingGeometry.MaterialSource = "material-maps.json"
 
-    ConfigFlags.Detector.GeometryCalo = False
-    ConfigFlags.Detector.GeometryMuon = False
+    flags.Detector.GeometryCalo = False
+    flags.Detector.GeometryMuon = False
 
     # # This should run serially for the moment.
-    # ConfigFlags.Concurrency.NumThreads = 1
-    ConfigFlags.Concurrency.NumConcurrentEvents = 1
+    # flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents = 1
 
-    configFlags.Input.Files = [args.inputevntfile]
+    flags.Input.Files = [args.inputevntfile]
     
-    configFlags.Output.HITSFileName = args.outputhitsfile
+    flags.Output.HITSFileName = args.outputhitsfile
 
     from SimulationConfig.SimEnums import BeamPipeSimMode, CalibrationRun, CavernBackground
-    configFlags.Sim.CalibrationRun = CalibrationRun.Off
-    configFlags.Sim.RecordStepInfo = False
-    configFlags.Sim.CavernBackground = CavernBackground.Signal
-    configFlags.Sim.ISFRun = False
-    configFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
+    flags.Sim.CalibrationRun = CalibrationRun.Off
+    flags.Sim.RecordStepInfo = False
+    flags.Sim.CavernBackground = CavernBackground.Signal
+    flags.Sim.ISFRun = False
+    flags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
 
-    configFlags.Input.RunNumber = [284500]
-    configFlags.Input.OverrideRunNumber = True
-    configFlags.Input.LumiBlockNumber = [1]
+    flags.Input.RunNumber = [284500]
+    flags.Input.OverrideRunNumber = True
+    flags.Input.LumiBlockNumber = [1]
 
-def printAndRun(accessor, configFlags, args):
+def printAndRun(accessor, flags, args):
     """debugging and execution"""
     # Dump config
     if args.verboseAccumulators:
         accessor.printConfig(withDetails=True)
     if args.verboseStoreGate:
         accessor.getService("StoreGateSvc").Dump = True
-    configFlags.dump()
+    flags.dump()
 
     # Execute and finish
     sc = accessor.run(maxEvents=args.maxEvents)
@@ -83,51 +83,51 @@ def printAndRun(accessor, configFlags, args):
     return not sc.isSuccess()
 
 
-def ITkCfg(configFlags):
-    acc = MainServicesCfg(configFlags)
+def ITkCfg(flags):
+    acc = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    acc.merge(PoolReadCfg(configFlags))
-    acc.merge(PoolWriteCfg(configFlags))
+    acc.merge(PoolReadCfg(flags))
+    acc.merge(PoolWriteCfg(flags))
 
     # add BeamEffectsAlg
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
-    acc.merge(BeamEffectsAlgCfg(configFlags))
+    acc.merge(BeamEffectsAlgCfg(flags))
 
     from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    itkPixel = ITkPixelReadoutGeometryCfg(ConfigFlags)
+    itkPixel = ITkPixelReadoutGeometryCfg(flags)
     acc.merge(itkPixel)
 
     from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    itkStrip = ITkStripReadoutGeometryCfg(ConfigFlags)
+    itkStrip = ITkStripReadoutGeometryCfg(flags)
     acc.merge(itkStrip)
 
     from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-    acc.merge(BeamPipeGeometryCfg(ConfigFlags))
+    acc.merge(BeamPipeGeometryCfg(flags))
 
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    gmsAcc = GeoModelCfg(configFlags)
+    gmsAcc = GeoModelCfg(flags)
     acc.merge(gmsAcc)
 
     return acc
 
-def ActsGeantFollowerCfg(configFlags, name="ActsGeantFollowerTool", **kwargs):
+def ActsGeantFollowerCfg(flags, name="ActsGeantFollowerTool", **kwargs):
     
     result = ComponentAccumulator()
 
     from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-    result.merge(TrackingGeometrySvcCfg(configFlags))
+    result.merge(TrackingGeometrySvcCfg(flags))
 
     from ActsGeometry.ActsGeometryConfig import NominalAlignmentCondAlgCfg
-    nomAli = NominalAlignmentCondAlgCfg(configFlags, OutputLevel=INFO)
+    nomAli = NominalAlignmentCondAlgCfg(flags, OutputLevel=INFO)
     result.merge(nomAli)
 
     from ActsGeometry.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-    tgSvc = ActsTrackingGeometrySvcCfg(configFlags, OutputLevel=INFO)
+    tgSvc = ActsTrackingGeometrySvcCfg(flags, OutputLevel=INFO)
     result.merge(tgSvc)
 
     print('DEF WRITER : ')
-    Actsextrapol = ActsExtrapolationToolCfg(ConfigFlags,
+    Actsextrapol = ActsExtrapolationToolCfg(flags,
                                         InteractionMultiScatering = True,
                                         InteractionEloss = True,
                                         InteractionRecord=True,
@@ -135,7 +135,7 @@ def ActsGeantFollowerCfg(configFlags, name="ActsGeantFollowerTool", **kwargs):
     result.merge(Actsextrapol)
 
     from TrkConfig.AtlasExtrapolationEngineConfig import AtlasExtrapolationEngineCfg
-    extrapAcc = AtlasExtrapolationEngineCfg(configFlags)
+    extrapAcc = AtlasExtrapolationEngineCfg(flags)
     AtlasExtrapolationEngine = extrapAcc.getPrimary()
     result.merge(extrapAcc)
 
@@ -154,13 +154,13 @@ def ActsGeantFollowerCfg(configFlags, name="ActsGeantFollowerTool", **kwargs):
     from ActsGeantFollowing.ActsGeantFollowingConfig import ActsGeantFollowerToolCfg
     actionAcc = ComponentAccumulator()
     actions = []
-    actions += [actionAcc.popToolsAndMerge(ActsGeantFollowerToolCfg(configFlags))]
+    actions += [actionAcc.popToolsAndMerge(ActsGeantFollowerToolCfg(flags))
     actionAcc.setPrivateTools(actions)
     ActsGeantFollowerAction = result.popToolsAndMerge(actionAcc)
     
     #Retrieving the default action list
     from G4AtlasServices.G4AtlasUserActionConfig import getDefaultActions
-    defaultActions = result.popToolsAndMerge(getDefaultActions(configFlags))
+    defaultActions = result.popToolsAndMerge(getDefaultActions(flags))
 
     #Adding LengthIntegrator to defaults
     actionList = (defaultActions + ActsGeantFollowerAction)
@@ -194,27 +194,28 @@ parser.add_argument("--outputhitsfile",default="myHITS.pool.root", type=str,
 args = parser.parse_args()
 
 # Configure
-defaultTestFlags(ConfigFlags, args)
-ConfigFlags.lock()
+flags = initConfigFlags()
+defaultTestFlags(flags, args)
+flags.lock()
 
 # Construct our accumulator to run
-acc = ITkCfg(ConfigFlags)
+acc = ITkCfg(flags)
 kwargs = {}
 
 svcName = "ActsGeantFollowerTool"
-acc.merge(ActsGeantFollowerCfg(ConfigFlags,svcName,**kwargs))
+acc.merge(ActsGeantFollowerCfg(flags,svcName,**kwargs))
 kwargs.update(UserActionSvc=svcName)
 
 from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
-acc.merge(G4AtlasAlgCfg(ConfigFlags, "ITkG4AtlasAlg", **kwargs))
+acc.merge(G4AtlasAlgCfg(flags, "ITkG4AtlasAlg", **kwargs))
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
-acc.merge( OutputStreamCfg(ConfigFlags,"HITS", ItemList=getStreamHITS_ItemList(ConfigFlags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
+                acc.merge( OutputStreamCfg(flags,"HITS", ItemList=getStreamHITS_ItemList(flags), disableEventTag=True, AcceptAlgs=['ITkG4AtlasAlg']) )
 
 # dump pickle
 with open("ITkTest.pkl", "wb") as f:
     acc.store(f)
 
 # Print and run
-sys.exit(printAndRun(acc, ConfigFlags, args))
+sys.exit(printAndRun(acc, flags, args))

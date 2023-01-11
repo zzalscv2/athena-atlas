@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 ###############################################################
 #
 # Map material from a Geantino scan onto the surfaces and 
@@ -19,18 +19,18 @@ from ActsGeometry.ActsGeometryConfig import ActsMaterialJsonWriterToolCfg
 
 from ActsGeometry.ActsGeometryConfig import ActsAlignmentCondAlgCfg
 
-def ActsMaterialMappingCfg(configFlags, name = "ActsMaterialMapping", **kwargs):
+def ActsMaterialMappingCfg(flags, name = "ActsMaterialMapping", **kwargs):
   result = ComponentAccumulator()
 
   MaterialStepConverterTool = ActsMaterialStepConverterToolCfg()
   kwargs["MaterialStepConverterTool"] = MaterialStepConverterTool.getPrimary()   
   result.merge(MaterialStepConverterTool)
 
-  ActsSurfaceMappingTool = ActsSurfaceMappingToolCfg(configFlags)
+  ActsSurfaceMappingTool = ActsSurfaceMappingToolCfg(flags)
   kwargs["SurfaceMappingTool"] = ActsSurfaceMappingTool.getPrimary()   
   result.merge(ActsSurfaceMappingTool)
 
-  ActsVolumeMappingTool = ActsVolumeMappingToolCfg(configFlags)
+  ActsVolumeMappingTool = ActsVolumeMappingToolCfg(flags)
   kwargs["VolumeMappingTool"] = ActsVolumeMappingTool.getPrimary()
   result.merge(ActsVolumeMappingTool)
 
@@ -50,48 +50,50 @@ def ActsMaterialMappingCfg(configFlags, name = "ActsMaterialMapping", **kwargs):
 if "__main__" == __name__:
   from AthenaCommon.Logging import log
   from AthenaCommon.Constants import INFO
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
   from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
   from ActsGeometry.ActsGeometryConfig import ActsMaterialTrackWriterSvcCfg
 
+  flags = initConfigFlags()
+
   ## Just enable ID for the moment.
-  ConfigFlags.Input.isMC             = True
-  ConfigFlags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
-  ConfigFlags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"
-  ConfigFlags.Detector.GeometryBpipe = True
-  ConfigFlags.Detector.GeometryID    = True
-  ConfigFlags.Detector.GeometryPixel = True
-  ConfigFlags.Detector.GeometrySCT   = True
-  ConfigFlags.Detector.GeometryCalo  = True
-  ConfigFlags.Detector.GeometryMuon  = False
-  ConfigFlags.Detector.GeometryTRT   = True
-  ConfigFlags.Acts.TrackingGeometry.MaterialSource = "geometry-maps.json"
-  # ConfigFlags.Acts.TrackingGeometry.MaterialSource = "/eos/project-a/acts/public/MaterialMaps/ATLAS/geometry-maps.json"
-  ConfigFlags.Concurrency.NumThreads = 1
-  ConfigFlags.Concurrency.NumConcurrentEvents = 1
+  flags.Input.isMC             = True
+  flags.GeoModel.AtlasVersion  = "ATLAS-R2-2016-01-00-01"
+  flags.IOVDb.GlobalTag        = "OFLCOND-SIM-00-00-00"
+  flags.Detector.GeometryBpipe = True
+  flags.Detector.GeometryID    = True
+  flags.Detector.GeometryPixel = True
+  flags.Detector.GeometrySCT   = True
+  flags.Detector.GeometryCalo  = True
+  flags.Detector.GeometryMuon  = False
+  flags.Detector.GeometryTRT   = True
+  flags.Acts.TrackingGeometry.MaterialSource = "geometry-maps.json"
+  # flags.Acts.TrackingGeometry.MaterialSource = "/eos/project-a/acts/public/MaterialMaps/ATLAS/geometry-maps.json"
+  flags.Concurrency.NumThreads = 1
+  flags.Concurrency.NumConcurrentEvents = 1
 
-  ConfigFlags.lock()
-  ConfigFlags.dump()
+  flags.lock()
+  flags.dump()
 
-  cfg = MainServicesCfg(ConfigFlags)
+  cfg = MainServicesCfg(flags)
 
-  cfg.merge(ActsMaterialTrackWriterSvcCfg(ConfigFlags,
+  cfg.merge(ActsMaterialTrackWriterSvcCfg(flags,
                                           "ActsMaterialTrackWriterSvc",
                                           "MaterialTracks_mapping.root"))
 
-  cfg.merge(PoolReadCfg(ConfigFlags))
+  cfg.merge(PoolReadCfg(flags))
   eventSelector = cfg.getService("EventSelector")
   eventSelector.InputCollections = ["MaterialStepFile.root"]
 
   from BeamPipeGeoModel.BeamPipeGMConfig import BeamPipeGeometryCfg
-  cfg.merge(BeamPipeGeometryCfg(ConfigFlags))
+  cfg.merge(BeamPipeGeometryCfg(flags))
 
-  alignCondAlgCfg = ActsAlignmentCondAlgCfg(ConfigFlags)
+  alignCondAlgCfg = ActsAlignmentCondAlgCfg(flags)
 
   cfg.merge(alignCondAlgCfg)
 
-  alg = ActsMaterialMappingCfg(ConfigFlags,
+  alg = ActsMaterialMappingCfg(flags,
                                OutputLevel=INFO,
                                mapSurfaces = True,
                                mapVolumes = True)
