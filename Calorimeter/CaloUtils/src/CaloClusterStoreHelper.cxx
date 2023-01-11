@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -87,5 +87,4 @@ void CaloClusterStoreHelper::copyContainer (const xAOD::CaloClusterContainer* ol
     *newClu=*oldCluster;
     //new xAOD::CaloCluster (*oldCluster)); //Copy c'tor creates a private AuxStore and a private ClusterCellLink obj
   }
-  return;
-}
+  }

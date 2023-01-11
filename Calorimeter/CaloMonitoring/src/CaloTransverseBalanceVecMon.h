@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -58,18 +58,18 @@ class CaloTransverseBalanceVecMon : public ManagedMonitorToolBase {
    bool m_useLArNoisyAlg;
  
  // useful functions
-  float deltaR(float a_eta,float a_phi,float b_eta,float b_phi);
-  void findLeadingPhoton(const PhotonContainer* userPhotonContainer,PhotonContainer::const_iterator& leadingPhPr);
-  void findleadingANDsubleadingjets
+  static float deltaR(float a_eta,float a_phi,float b_eta,float b_phi);
+  static void findLeadingPhoton(const PhotonContainer* userPhotonContainer,PhotonContainer::const_iterator& leadingPhPr);
+  static void findleadingANDsubleadingjets
     (const std::vector<const Jet*>& userJetContainer,
      Jet const* & leadingJetPr,
      Jet const* & subleadingJetPr);
-  void getmissingEt_phi(float missingEx,float missingEy,float& missingEt_phi);
-  void AdjustPhi(float& deltaphi);
-  void  Plotregister(MonGroup* monitorGroup,TH1F* hist);
-  void  Plotregister(MonGroup* monitorGroup,TH2F* hist); 
-  void  Plotregister(MonGroup* monitorGroup,TH1I* hist);
-  void  Plotregister(MonGroup* monitorGroup,TProfile* hist);
+  static void getmissingEt_phi(float missingEx,float missingEy,float& missingEt_phi);
+  static void AdjustPhi(float& deltaphi);
+  static void  Plotregister(MonGroup* monitorGroup,TH1F* hist);
+  static void  Plotregister(MonGroup* monitorGroup,TH2F* hist); 
+  static void  Plotregister(MonGroup* monitorGroup,TH1I* hist);
+  static void  Plotregister(MonGroup* monitorGroup,TProfile* hist);
 ///////////////////////////////////////////////////
   float m_photonPtCut;
 

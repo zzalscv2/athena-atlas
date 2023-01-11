@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -71,8 +71,7 @@ CalibHitToCaloCell::CalibHitToCaloCell(const std::string& name, ISvcLocator* pSv
 
 
 CalibHitToCaloCell::~CalibHitToCaloCell()
-{
-}
+= default;
 
 
 ////////////////   INITIALIZE   ///////////////////////

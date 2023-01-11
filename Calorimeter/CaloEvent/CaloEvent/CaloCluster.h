@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -669,22 +669,22 @@ class CaloCluster :  public CaloCompositeKineBase,
   // Just hide them from reflex for now.
 #ifndef __REFLEX__
   /*! \brief Pointer to getter functions */
-  GET_VALUE m_getE;
+  GET_VALUE m_getE{};
   /*! \brief Pointer to getter functions */
-  GET_VALUE m_getEta;
+  GET_VALUE m_getEta{};
   /*! \brief Pointer to getter functions */
-  GET_VALUE m_getPhi;
+  GET_VALUE m_getPhi{};
   /*! \brief Pointer to getter functions */
-  GET_VALUE m_getM;
+  GET_VALUE m_getM{};
 
   /*! \brief Pointer to setter functions */
-  SET_VALUE m_setE;
+  SET_VALUE m_setE{};
   /*! \brief Pointer to setter functions */
-  SET_VALUE m_setEta;
+  SET_VALUE m_setEta{};
   /*! \brief Pointer to setter functions */
-  SET_VALUE m_setPhi;
+  SET_VALUE m_setPhi{};
   /*! \brief Pointer to setter functions */
-  SET_VALUE m_setM;
+  SET_VALUE m_setM{};
 #endif
 
   /*! \brief Stores actual signal state */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloCalibrationHitContainer
@@ -26,7 +26,7 @@ class CaloCalibrationHitContainer:public AthenaHitsVector<CaloCalibrationHit>
 public:
 
   /** Constructor of CaloCalibrationHitContainer */
-  CaloCalibrationHitContainer (std::string collectionName="DefaultCollectionName" );
+  CaloCalibrationHitContainer (const std::string& collectionName="DefaultCollectionName" );
 
   /** Destructor */
   virtual ~CaloCalibrationHitContainer()  ;

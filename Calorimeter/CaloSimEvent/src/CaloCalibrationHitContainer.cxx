@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // 09-Feb-2004 WGS: The following code was duplicated from
@@ -15,16 +15,14 @@
 #include <utility>
 
 
-CaloCalibrationHitContainer::CaloCalibrationHitContainer(std::string collectionName)
-: AthenaHitsVector<CaloCalibrationHit>(std::move(collectionName))
+CaloCalibrationHitContainer::CaloCalibrationHitContainer(const std::string& collectionName)
+: AthenaHitsVector<CaloCalibrationHit>(collectionName)
 {
 
 }
 
 CaloCalibrationHitContainer::~CaloCalibrationHitContainer() 
-{
-
-}
+= default;
 
 CaloCalibrationHitContainer::operator std::string () const
 {

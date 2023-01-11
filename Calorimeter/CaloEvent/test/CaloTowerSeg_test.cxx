@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -222,7 +222,8 @@ void test5()
 {
   std::cout << "test5\n";
   std::vector<int> test_towers;
-  for (int i=0; i < 100; i++) test_towers.push_back(i);
+  test_towers.reserve(100);
+for (int i=0; i < 100; i++) test_towers.push_back(i);
   CaloTowerSeg seg (10, 10, 0, 10);
   test5a (test_towers, seg.subseg (5, 2, 0, 1));
   printf ("\n");

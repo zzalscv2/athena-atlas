@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -29,7 +29,7 @@ CaloClusterSnapshot::CaloClusterSnapshot(const std::string& type,
 // Destructor 
 // -------------------------------------------------------------
 CaloClusterSnapshot::~CaloClusterSnapshot()
-{ }
+= default;
 
 StatusCode CaloClusterSnapshot::initialize() {
 

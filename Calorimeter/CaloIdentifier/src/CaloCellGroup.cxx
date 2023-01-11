@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloCellGroup.h"
@@ -215,9 +215,8 @@ bool CaloCellGroup::inGroup(const Identifier id) const {
 
 
 
-void CaloCellGroup::complain(MsgStream& logStr, const std::string& problem) const {
+void CaloCellGroup::complain(MsgStream& logStr, const std::string& problem) {
   logStr << MSG::ERROR << "Malformed definition string '"<<problem << "'" << endmsg;
-  return;
 }
 
 
@@ -297,8 +296,7 @@ void CaloCellGroupList::dump(const CaloCell_Base_ID* caloCellId) {
       std::cout << x[i] << " ";
     std::cout << "]" << std::endl;
   }
-  return;
-}
+  }
 
 void CaloCellGroupList::printDef() const {
   std::cout << "Definitions: " << std::endl;

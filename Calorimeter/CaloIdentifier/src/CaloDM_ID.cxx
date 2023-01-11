@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloIdentifier/CaloDM_ID.h"
@@ -528,14 +528,14 @@ IdContext
 CaloDM_ID::region_context             (void) const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_REGION_INDEX));
+    return {id, 0, m_REGION_INDEX};
 }
 
 IdContext       
 CaloDM_ID::zone_context              (void) const
 {
     ExpandedIdentifier id;
-    return (IdContext(id, 0, m_PHI_INDEX));
+    return {id, 0, m_PHI_INDEX};
 }
 
 

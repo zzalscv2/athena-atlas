@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // NAME:     LArCellMonTool.cxx
@@ -133,9 +133,7 @@ LArCellMonTool::LArCellMonTool(const std::string& type, const std::string& name,
 
 
 
-LArCellMonTool::~LArCellMonTool() {
-
-}
+LArCellMonTool::~LArCellMonTool() = default;
 
 ////////////////////////////////////////////
 StatusCode LArCellMonTool::initialize() {
@@ -183,7 +181,7 @@ StatusCode LArCellMonTool::initialize() {
   ATH_CHECK( m_cellContainerName.initialize() );
 
   //Call base-call initialize methods
-  ATH_CHECK( ManagedMonitorToolBase::initialize() );
+  ATH_CHECK( CaloMonToolBase::initialize() );
   ATH_CHECK( CaloMonToolBase::initialize() );
 
   ATH_MSG_DEBUG("LArCellMonTool::initialize() is done!");
@@ -423,7 +421,7 @@ StatusCode LArCellMonTool::bookLarNonThreHists(){
 
 
   //Book non-threshold energy histograms:
-  std::array<double,55> logEnergyBins;
+  std::array<double,55> logEnergyBins{};
   if (m_useLogarithmicEnergyBinning) {
     const static double step = std::pow(10,0.1);
     logEnergyBins[0]=10;
@@ -536,8 +534,7 @@ void LArCellMonTool::checkTriggerAndBeamBackground() {
       thr.m_eventsPassed++; 
     }
   }//end loop over thresholds
-  return;
-} 
+  } 
 
 
 void LArCellMonTool::sporadicNoiseCandidate(const CaloCell* cell, const LArCellMonTool::LayerEnum iLyr, const float threshold, const LArOnOffIdMapping* cabling) {
@@ -567,8 +564,7 @@ void LArCellMonTool::sporadicNoiseCandidate(const CaloCell* cell, const LArCellM
     snc.m_h_energyVsLB->Fill(m_lb,energy);
   }
 
-  return;
-}
+  }
 
 void LArCellMonTool::bookNoisyCellHistos(SporadicNoiseCell_t& result, const CaloDetDescrElement* dde, 
 					 const PartitionEnum part, const float threshold,
@@ -617,8 +613,6 @@ void LArCellMonTool::bookNoisyCellHistos(SporadicNoiseCell_t& result, const Calo
  result.m_h_energyVsLB->GetYaxis()->SetTitle("MeV");
 
  regHist(result.m_h_energyVsLB,dir,run,ATTRIB_X_VS_LB,"","merge").ignore();
-
- return;
 }
 
 
@@ -864,7 +858,7 @@ StatusCode LArCellMonTool::procHistograms() {
 
 
 
-void  LArCellMonTool::regTempHist(TH1* h, MonGroup& mg) {
+void  LArCellMonTool::regTempHist(TH1* h, MonGroup& mg) const {
   if (m_doSaveTempHists) {
     mg.regHist(h).ignore();
   }
@@ -911,7 +905,7 @@ StatusCode LArCellMonTool::finalize() {
 
 
 
-TH2F* LArCellMonTool::newEtaPhiHist(const std::string& hName, const std::string& hTitle, const CaloMonitoring::LArCellBinning& binning) const {
+TH2F* LArCellMonTool::newEtaPhiHist(const std::string& hName, const std::string& hTitle, const CaloMonitoring::LArCellBinning& binning) {
  
   TH2F* result=new TH2F(hName.c_str(),hTitle.c_str(),
 			binning.getNTotEtaBins(),binning.getEtaBinArray(),
@@ -1225,7 +1219,7 @@ StatusCode LArCellMonTool::bookLarMultThreHists() {
 }
 
 
-std::string  LArCellMonTool::strToLower(const std::string& input) const {
+std::string  LArCellMonTool::strToLower(const std::string& input) {
   std::string output;
   for (const auto& c : input) {
     output.push_back(std::tolower(c));
@@ -1267,8 +1261,7 @@ void LArCellMonTool::resetInternals() {
 
   }//end loop over thresholds
 
-  return;
-}
+  }
 
 
 StatusCode LArCellMonTool::fillOccupancyHist(LArCellMonTool::thresholdHist_t& thr
@@ -1334,9 +1327,7 @@ void LArCellMonTool::getHistoCoordinates(const CaloDetDescrElement* dde, float& 
   }
   
   const unsigned side=(celleta>0) ? 0 : 1; //Value >0 means A-side
-  iLyr=iLyrNS*2+side;  //Getting LayerEnum value. This logic works because of the way the enums LayerEnum and LayerEnumNoSides are set up. 
-  return;
-}
+  iLyr=iLyrNS*2+side;  }
 
 
 void LArCellMonTool::divideByOccupancy(TH2F* fraction, const TH2F* total, const TH2* occupancy) {
@@ -1359,6 +1350,5 @@ void LArCellMonTool::divideByOccupancy(TH2F* fraction, const TH2F* total, const 
       fraction->SetBinError(i,std::sqrt(1./o));
     }
   }
-  return;
-
+  
 }

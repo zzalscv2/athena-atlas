@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -85,13 +85,13 @@ private:
   int         fill_phi_vec  (std::set<std::pair<IdentifierHash,int> > & ids, 
                              unsigned int hash_max, unsigned int max_phi, MsgStream & log);
 
-  void          get_id      (std::string & strName, Identifier & id, const Tile_Base_ID* tileID);
+  static void          get_id      (std::string & strName, Identifier & id, const Tile_Base_ID* tileID);
 
-  void          get_name    (Identifier & id, std::string & section, int & module,
+  static void          get_name    (Identifier & id, std::string & section, int & module,
                              std::string & cell, const Tile_Base_ID* tileID, MsgStream & log,
                              const char * end);
 
-  void          print_list  (std::vector<IdentifierHash> & nb_list, 
+  static void          print_list  (std::vector<IdentifierHash> & nb_list, 
                              const Tile_Base_ID* tileID, const IdContext* context,
                              MsgStream & log, const char * pref, const char * suff);
 };

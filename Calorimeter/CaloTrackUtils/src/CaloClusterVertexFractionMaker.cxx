@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // in contrary to CaloClusterVertexFractionMakerAthAlg this is a CaloClusterCollectionProcessor and not an Athena Algorithm
@@ -227,7 +227,7 @@ CaloClusterVertexFractionMaker::execute(const EventContext& ctx,
   return StatusCode::SUCCESS;
 }
 
-double CaloClusterVertexFractionMaker::calculateDPhi(double phi1, double phi2) const
+double CaloClusterVertexFractionMaker::calculateDPhi(double phi1, double phi2) 
 {
   double dPhi = fabs(phi1 - phi2);
   if (dPhi > M_PI) dPhi = 2.*M_PI - dPhi;

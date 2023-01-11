@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
  
@@ -84,7 +84,7 @@ namespace Calo_Detail{
  {
 
   public:
-  inline   gt_cluster_et () {} ;
+  inline   gt_cluster_et () = default ;
   inline   bool operator () (CaloClusterBuilderSW::ClusterWithCenter& c1, 
 			CaloClusterBuilderSW::ClusterWithCenter& c2)
   {

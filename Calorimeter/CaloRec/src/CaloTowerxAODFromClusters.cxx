@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,7 +22,7 @@ CaloTowerxAODFromClusters::CaloTowerxAODFromClusters(const std::string& name,ISv
 }
 
 CaloTowerxAODFromClusters::~CaloTowerxAODFromClusters()
-{ }
+= default;
 
 StatusCode CaloTowerxAODFromClusters::initialize() {
   ATH_CHECK(m_inputClusterContainerKey.initialize());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCONDBLOBOBJS_CALOCONDBLOBBASE_H
@@ -143,9 +143,9 @@ class CaloCondBlobBase{
   /** @brief Internal ctor. */
   CaloCondBlobBase(coral::Blob* blob_nc, const coral::Blob* blob);
 
-  uint32_t packGainAndNchans(const uint32_t gain, const uint32_t nChans);
-  uint32_t unpacknGains(const uint32_t gainAndnChans);
-  uint32_t unpacknChans(const uint32_t gainAndnChans);
+  static uint32_t packGainAndNchans(const uint32_t gain, const uint32_t nChans);
+  static uint32_t unpacknGains(const uint32_t gainAndnChans);
+  static uint32_t unpacknChans(const uint32_t gainAndnChans);
 
   /** @brief Returns the BLOB start address as uint32_t pointer. */
   const uint32_t* getBlobStart() const;

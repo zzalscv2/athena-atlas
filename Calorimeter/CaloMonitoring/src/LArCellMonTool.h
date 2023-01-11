@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -140,9 +140,9 @@ private:
   StatusCode bookLarMultThreHists(); 
   StatusCode bookSporHists();
   StatusCode bookLarNonThreHists();
-  TH2F* newEtaPhiHist(const std::string& hName, const std::string& hTitle, const CaloMonitoring::LArCellBinning& binning) const;
-  std::string strToLower(const std::string& input) const;
-  void regTempHist(TH1* h, MonGroup& mg);
+  static TH2F* newEtaPhiHist(const std::string& hName, const std::string& hTitle, const CaloMonitoring::LArCellBinning& binning) ;
+  static std::string strToLower(const std::string& input) ;
+  void regTempHist(TH1* h, MonGroup& mg) const;
 
   //Private methods: Histogram filling
   StatusCode createPerJobHistograms(const EventContext& ctx,
@@ -152,7 +152,7 @@ private:
 
   //Helpers for histogram filling
   void getHistoCoordinates(const CaloDetDescrElement* dde, float& celleta, float& cellphi, unsigned& iLyr, unsigned& iLyrNS) const; 
-  void divideByOccupancy(TH2F* fraction, const TH2F* total, const TH2* occupancy) ;
+  static void divideByOccupancy(TH2F* fraction, const TH2F* total, const TH2* occupancy) ;
 
 
   //Job Properties and other private variables

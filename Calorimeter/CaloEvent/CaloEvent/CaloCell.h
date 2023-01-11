@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOCELL_H
@@ -228,7 +228,7 @@ protected:
 #   define m_tileQual ((uint8_t*)&m_quality)
 #else
   union {
-    int  m_quality ; 
+    int  m_quality = 0 ; 
     uint16_t m_qualProv[2];
     uint8_t m_tileQual[4];
   };

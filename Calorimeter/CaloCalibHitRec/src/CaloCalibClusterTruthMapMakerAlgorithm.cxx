@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloCalibClusterTruthMapMakerAlgorithm.h"
@@ -70,7 +70,7 @@ void CaloCalibClusterTruthMapMakerAlgorithm::fillIdentifierToCaloHitMap(std::map
   else calibrationHitReadHandles.push_back(lArDMCaloCalibrationHitReadHandle);
   
   for (auto& thisCalibrationHitReadHandle : calibrationHitReadHandles){
-    for (auto thisCalibrationHit : *thisCalibrationHitReadHandle){
+    for (const auto *thisCalibrationHit : *thisCalibrationHitReadHandle){
 
       if (!thisCalibrationHit) {
         ATH_MSG_WARNING("Got invalid pointer to CaloCalibrationHit in container with key :" << thisCalibrationHitReadHandle.key());
@@ -98,7 +98,7 @@ void CaloCalibClusterTruthMapMakerAlgorithm::fillTruthBarcodeToTruthParticleMap(
     return;
   }
 
-  for ( auto thisTruthParticle : *truthParticleReadHandle){       
+  for ( const auto *thisTruthParticle : *truthParticleReadHandle){       
 
     if (!thisTruthParticle){
       ATH_MSG_WARNING("Got invalid pointer to TruthParticle");

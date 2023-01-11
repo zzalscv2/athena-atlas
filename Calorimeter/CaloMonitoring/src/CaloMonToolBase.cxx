@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloMonToolBase.h" 
@@ -23,7 +23,7 @@ CaloMonToolBase::CaloMonToolBase(const std::string& type, const std::string& nam
 
   declareProperty("useBeamBackgroundRemoval",m_useBeamBackgroundRemoval=false);
 }
-CaloMonToolBase::~CaloMonToolBase() {}
+CaloMonToolBase::~CaloMonToolBase() = default;
 
 StatusCode CaloMonToolBase::initialize() {
 
@@ -179,7 +179,7 @@ StatusCode CaloMonToolBase::checkFilters(bool& ifPass){
   }
 
   std::string TheTrigger;
-  if (m_triggerChainProp == "") {  
+  if (m_triggerChainProp.empty()) {  
     TheTrigger="NoTrigSel";
     ifPass = ifPass && 1; // No Trigger Filter check
     if(ifPass) m_h_EvtRejSumm->Fill(6); //All events with ATLAS Ready and Good LB and Good LAr collision time and not Beam Background and Trigger Filter pass

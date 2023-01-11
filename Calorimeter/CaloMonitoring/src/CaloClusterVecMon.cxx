@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -26,9 +26,9 @@
 
 #include "RecBackgroundEvent/BeamBackgroundData.h"
 
-#include "CaloGeoHelpers/CaloSampling.h"
 #include "AthenaKernel/Units.h"
-#include <math.h>
+#include "CaloGeoHelpers/CaloSampling.h"
+#include <cmath>
 
 
 using xAOD::CaloCluster;
@@ -90,8 +90,7 @@ CaloClusterVecMon::CaloClusterVecMon(const std::string& type, const std::string&
 }
 
 
-CaloClusterVecMon::~CaloClusterVecMon() {
-}
+CaloClusterVecMon::~CaloClusterVecMon() = default;
 
 void CaloClusterVecMon::initHists(){
  // cell hists 
@@ -169,7 +168,7 @@ StatusCode CaloClusterVecMon::initialize() {
   //Initialize read handle key
   ATH_CHECK( m_clusterContainerName.initialize() );
 
-  sc = ManagedMonitorToolBase::initialize();
+  sc = CaloMonToolBase::initialize();
   if(sc.isFailure()){
     ATH_MSG_ERROR("Could not initialize ManagedMonitorToolBase");
     return sc;
@@ -282,7 +281,7 @@ bool CaloClusterVecMon::checkTimeGran(bool isNewEventsBlock, bool isNewLumiBlock
 ////////////////////////////////////////////////////////////////////////////
 void CaloClusterVecMon::bookCellHists(const Interval_t theinterval){
     std::string TheTrigger;
-    if (m_triggerChainProp == "")  TheTrigger="NoTrigSel";
+    if (m_triggerChainProp.empty())  TheTrigger="NoTrigSel";
     else TheTrigger = m_triggerChainProp;
 
     MonGroup  cluster_expert  ( this, "/CaloMonitoring/ClusterMon/"+m_clusterContainerName.key()+TheTrigger+"/General", theinterval);                
@@ -361,7 +360,7 @@ void CaloClusterVecMon::bookCellHists(const Interval_t theinterval){
 ////////////////////////////////////////////////////////////////////////////
 void CaloClusterVecMon::bookClusterHists(const Interval_t theinterval){
     std::string TheTrigger;
-    if (m_triggerChainProp == "")  TheTrigger="NoTrigSel";
+    if (m_triggerChainProp.empty())  TheTrigger="NoTrigSel";
     else TheTrigger = m_triggerChainProp;
 
     MonGroup  cluster_1drates_expert  ( this, "/CaloMonitoring/ClusterMon/"+m_clusterContainerName.key()+TheTrigger+"/1d_Rates", theinterval);
@@ -563,7 +562,7 @@ void CaloClusterVecMon::bookClusterHists(const Interval_t theinterval){
 ////////////////////////////////////////////////////////////////////////////
 void CaloClusterVecMon::bookClusterStatHists(const Interval_t theinterval){
     std::string TheTrigger;
-    if (m_triggerChainProp == "")  TheTrigger="NoTrigSel";
+    if (m_triggerChainProp.empty())  TheTrigger="NoTrigSel";
     else TheTrigger = m_triggerChainProp;
  
     MonGroup  cluster_2davgEt_expert  ( this, "/CaloMonitoring/ClusterMon/"+m_clusterContainerName.key()+TheTrigger+"/TransEnergy", theinterval);   
@@ -640,7 +639,7 @@ void CaloClusterVecMon::fillTileHistRange(){
 ////////////////////////////////////////////////////////////////////////////
 void CaloClusterVecMon::bookTileHists(const Interval_t theinterval){
       std::string TheTrigger;
-      if (m_triggerChainProp == "")  TheTrigger="NoTrigSel";
+      if (m_triggerChainProp.empty())  TheTrigger="NoTrigSel";
       else TheTrigger = m_triggerChainProp;
 
       MonGroup  tile_cluster_shift  ( this, "/CaloMonitoring/ClusterMon/"+m_clusterContainerName.key()+TheTrigger+"/General", theinterval);    //SHIFT
@@ -1017,7 +1016,7 @@ void CaloClusterVecMon::fillTileHist(const xAOD::CaloClusterContainer* clusterCo
 
   //xAOD::CaloClusterContainer clusColl(SG::VIEW_ELEMENTS);
   std::vector<const CaloCluster*> clusColl;
-  for (auto clu : *clusterCont) {
+  for (const auto *clu : *clusterCont) {
     if ( fabs( clu->eta() ) < 1.6 ) clusColl.push_back(clu);
   }
   /*

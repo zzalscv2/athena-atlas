@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -90,7 +90,7 @@ CaloTowerSeg CaloTowerSeg::SubSeg::segmentation() const
   const double phimin = m_parent.phi (m_phimin) - m_parent.dphi()/2;
   const double phimax = m_parent.phi (m_phimax) + m_parent.dphi()/2;
 
-  return CaloTowerSeg (neta(), nphi(), etamin, etamax, phimin, phimax);
+  return {neta(), nphi(), etamin, etamax, phimin, phimax};
 }
 
 
