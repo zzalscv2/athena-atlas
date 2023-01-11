@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -593,6 +593,44 @@ def getTauWPDecoratorJetRNN():
                                        NewScoreName = "RNNJetScoreSigTrans",
                                        DefineWPs = True,
                                        )
+    return myTauWPDecorator
+
+
+def getTauJetDeepSetEvaluator():
+    _name = sPrefix + 'TauJetDeepSet'
+    from tauRecTools.tauRecToolsConf import TauJetRNNEvaluator
+    myTauJetRNNEvaluator = TauJetRNNEvaluator(name = _name,
+                                              NetworkFile0P = "",
+                                              NetworkFile1P = tauFlags.TauJetDeepSetConfig()[0],
+                                              NetworkFile2P = tauFlags.TauJetDeepSetConfig()[1],
+                                              NetworkFile3P = tauFlags.TauJetDeepSetConfig()[2],
+                                              OutputVarname = "JetDeepSetScore",
+                                              MaxTracks = 10,
+                                              MaxClusters = 6,
+                                              MaxClusterDR = 1.0,
+                                              VertexCorrection = True,
+                                              InputLayerScalar = "scalar",
+                                              InputLayerTracks = "tracks",
+                                              InputLayerClusters = "clusters",
+                                              OutputLayer = "rnnid_output",
+                                              OutputNode = "sig_prob")
+    return myTauJetRNNEvaluator
+
+
+def getTauWPDecoratorJetDeepSet():
+    _name = sPrefix + 'TauWPDecoratorJetDeepSet'
+    from tauRecTools.tauRecToolsConf import TauWPDecorator
+    myTauWPDecorator = TauWPDecorator(name=_name,
+                                      flatteningFile1Prong = tauFlags.TauJetDeepSetWP()[0],
+                                      flatteningFile2Prong = tauFlags.TauJetDeepSetWP()[1],
+                                      flatteningFile3Prong = tauFlags.TauJetDeepSetWP()[2],
+                                      DecorWPNames = ["JetDeepSetVeryLoose", "JetDeepSetLoose", "JetDeepSetMedium", "JetDeepSetTight"],
+                                      DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
+                                      DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
+                                      DecorWPCutEffs3P = [0.95, 0.75, 0.60, 0.45],
+                                      ScoreName = "JetDeepSetScore",
+                                      NewScoreName = "JetDeepSetScoreTrans",
+                                      DefineWPs = True)
     return myTauWPDecorator
 
 

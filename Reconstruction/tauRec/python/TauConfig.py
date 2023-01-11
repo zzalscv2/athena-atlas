@@ -146,7 +146,6 @@ def TauRunnerAlgCfg(flags):
     if flags.Tau.doPanTau:
         import PanTauAlgs.JobOptions_Main_PanTau_New as pantau
         tools.append( result.popToolsAndMerge(pantau.PanTauCfg(flags)) )
-        # tools.append( result.popToolsAndMerge(tauTools.PanTauCfg(flags)) )
 
     tools.append(result.popToolsAndMerge(tauTools.TauCombinedTESCfg(flags)) )
     # these tools need pantau info
@@ -161,6 +160,9 @@ def TauRunnerAlgCfg(flags):
         tools.append( result.popToolsAndMerge(tauTools.TauEleRNNEvaluatorCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorEleRNNCfg(flags)) )
         tools.append( result.popToolsAndMerge(tauTools.TauDecayModeNNClassifierCfg(flags)) )
+        # deployment of deep set ID postponed to a follow-up MR
+        #tools.append( result.popToolsAndMerge(tauTools.TauJetDeepSetEvaluatorCfg(flags)) )
+        #tools.append( result.popToolsAndMerge(tauTools.TauWPDecoratorJetDeepSetCfg(flags)) )
 
     tools.append( result.popToolsAndMerge(tauTools.TauAODSelectorCfg(flags)) )
 

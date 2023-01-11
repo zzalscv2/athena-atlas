@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/TauJetRNNUtils.h"
@@ -163,6 +163,10 @@ std::unique_ptr<VarCalc> get_calculator(const std::vector<std::string>& scalar_v
     calc->insert("eProbabilityHT", Variables::Track::eProbabilityHT, track_vars);
     calc->insert("eProbabilityNN", Variables::Track::eProbabilityNN, track_vars);
     calc->insert("eProbabilityNNorHT", Variables::Track::eProbabilityNNorHT, track_vars);
+    calc->insert("chargedScoreRNN", Variables::Track::chargedScoreRNN, track_vars);
+    calc->insert("isolationScoreRNN", Variables::Track::isolationScoreRNN, track_vars);
+    calc->insert("conversionScoreRNN", Variables::Track::conversionScoreRNN, track_vars);
+    calc->insert("fakeScoreRNN", Variables::Track::fakeScoreRNN, track_vars);
 
     // Cluster variable calculator functions
     calc->insert("et_log", Variables::Cluster::et_log, cluster_vars);
@@ -516,6 +520,30 @@ bool eProbabilityNNorHT(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track
   static const SG::AuxElement::ConstAccessor<float> acc_eProbabilityNN("eProbabilityNN");
   float eProbabilityNN = acc_eProbabilityNN(*atrack);
   out = (atrack->pt()>2000.) ? eProbabilityNN : eProbabilityHT;
+  return true;
+}
+
+bool chargedScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+  static const SG::AuxElement::ConstAccessor<float> acc_chargedScoreRNN("rnn_chargedScore");
+  out = acc_chargedScoreRNN(track);
+  return true;
+}
+
+bool isolationScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+  static const SG::AuxElement::ConstAccessor<float> acc_isolationScoreRNN("rnn_isolationScore");
+  out = acc_isolationScoreRNN(track);
+  return true;
+}
+
+bool conversionScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+  static const SG::AuxElement::ConstAccessor<float> acc_conversionScoreRNN("rnn_conversionScore");
+  out = acc_conversionScoreRNN(track);
+  return true;
+}
+
+bool fakeScoreRNN(const xAOD::TauJet& /*tau*/, const xAOD::TauTrack &track, double &out) {
+  static const SG::AuxElement::ConstAccessor<float> acc_fakeScoreRNN("rnn_fakeScore");
+  out = acc_fakeScoreRNN(track);
   return true;
 }
 

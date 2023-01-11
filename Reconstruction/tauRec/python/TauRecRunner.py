@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 ##
@@ -68,7 +68,9 @@ class TauRecRunner ( TauRecRunConfigured ) :
             tools.append(taualgs.getTauEleRNNEvaluator())
             tools.append(taualgs.getTauWPDecoratorEleRNN())
             tools.append(taualgs.getTauDecayModeNNClassifier())
-            
+            # deployment of deep set ID postponed to a follow-up MR
+            #tools.append(taualgs.getTauJetDeepSetEvaluator())
+            #tools.append(taualgs.getTauWPDecoratorJetDeepSet())
 
         # which taus we write to AOD
         tools.append(taualgs.getTauAODSelector())
