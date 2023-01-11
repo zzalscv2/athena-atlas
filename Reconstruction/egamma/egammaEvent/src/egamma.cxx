@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // INCLUDE HEADER FILES:
@@ -64,11 +64,11 @@ egamma::egamma(const egamma &rhs, bool copyDetails, bool copyMinimal):
   INavigable          (rhs),
   I4Momentum          (rhs),
   INavigable4Momentum (rhs),
-  egammaImpl_t        (rhs)
+  egammaImpl_t        (rhs),
+  m_author            (rhs.m_author),
+  m_egPID             (new egPID(*(rhs.m_egPID))),
+  m_momentumCluster   (rhs.m_momentumCluster)
 {
-  m_author        = rhs.m_author; 
-  m_momentumCluster = rhs.m_momentumCluster; 
-  m_egPID         = new egPID(*(rhs.m_egPID));
   if (!copyMinimal) {
     m_cluster       = rhs.m_cluster;
     m_trackParticle = rhs.m_trackParticle;
