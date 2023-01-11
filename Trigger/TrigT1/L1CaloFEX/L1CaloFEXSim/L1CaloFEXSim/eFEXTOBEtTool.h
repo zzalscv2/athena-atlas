@@ -45,22 +45,26 @@ namespace LVL1 {
     virtual ~eFEXTOBEtTool();
 
     /** Tool to calculate eEM discriminant sums */
+    virtual
     StatusCode getegSums(float etaTOB, float phiTOB, int seed, int UnD, 
                                   std::vector<unsigned int> &RetaSums,
                                   std::vector<unsigned int> &RhadSums, 
-                                  std::vector<unsigned int> &WstotSums);
+                                  std::vector<unsigned int> &WstotSums) override;
 
 
     /** Tool to calculate eTaudiscriminant sums */
+    virtual
     StatusCode gettauSums(float etaTOB, float phiTOB, int seed, int UnD, 
                                    std::vector<unsigned int> &RcoreSums,
-                                   std::vector<unsigned int> &RemSums);
+                                   std::vector<unsigned int> &RemSums) override;
 
     /** Tool to find eTower identifier from an eta, phi coordinate pair */
-    unsigned int eTowerID(float eta, float phi);
+    virtual
+    unsigned int eTowerID(float eta, float phi) override;
 
     /** Tool to find eFEX and FPGA numbers and eta index of a TOB within the FPGA */
-    void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta);
+    virtual
+    void location(float etaTOB, float phiTOB, int& eFEX, int& FPGA, int& fpgaEta) override;
 
     /** Internal data */
   private:
