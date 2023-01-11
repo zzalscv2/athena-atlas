@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ################################################################################
 #
@@ -864,6 +864,51 @@ def TauWPDecoratorJetRNNCfg(flags):
                                        ScoreName = "RNNJetScore",
                                        NewScoreName = "RNNJetScoreSigTrans",
                                        DefineWPs = True )
+
+    result.setPrivateTools(myTauWPDecorator)
+    return result
+
+def TauJetDeepSetEvaluatorCfg(flags):
+    result = ComponentAccumulator()
+    _name = sPrefix + 'TauJetDeepSet'
+
+    TauJetRNNEvaluator = CompFactory.getComp("TauJetRNNEvaluator")
+    NNConf = flags.Tau.TauJetDeepSetConfig
+    myTauJetRNNEvaluator = TauJetRNNEvaluator(name = _name,
+                                              NetworkFile1P = NNConf[0],
+                                              NetworkFile2P = NNConf[1],
+                                              NetworkFile3P = NNConf[2],
+                                              OutputVarname = "JetDeepSetScore",
+                                              MaxTracks = 10,
+                                              MaxClusters = 6,
+                                              MaxClusterDR = 1.0,
+                                              VertexCorrection = True,
+                                              InputLayerScalar = "scalar",
+                                              InputLayerTracks = "tracks",
+                                              InputLayerClusters = "clusters",
+                                              OutputLayer = "rnnid_output",
+                                              OutputNode = "sig_prob")
+
+    result.setPrivateTools(myTauJetRNNEvaluator)
+    return result
+
+def TauWPDecoratorJetDeepSetCfg(flags):
+    result = ComponentAccumulator()
+    _name = sPrefix + 'TauWPDecoratorJetDeepSet'
+
+    TauWPDecorator = CompFactory.getComp("TauWPDecorator")
+    WPConf = flags.Tau.TauJetDeepSetWP
+    myTauWPDecorator = TauWPDecorator(name=_name,
+                                      flatteningFile1Prong = WPConf[0],
+                                      flatteningFile2Prong = WPConf[1],
+                                      flatteningFile3Prong = WPConf[2],
+                                      DecorWPNames = ["JetDeepSetVeryLoose", "JetDeepSetLoose", "JetDeepSetMedium", "JetDeepSetTight"],
+                                      DecorWPCutEffs1P = [0.95, 0.85, 0.75, 0.60],
+                                      DecorWPCutEffs2P = [0.95, 0.75, 0.60, 0.45],
+                                      DecorWPCutEffs3P = [0.95, 0.75, 0.60, 0.45],
+                                      ScoreName = "JetDeepSetScore",
+                                      NewScoreName = "JetDeepSetScoreTrans",
+                                      DefineWPs = True)
 
     result.setPrivateTools(myTauWPDecorator)
     return result
