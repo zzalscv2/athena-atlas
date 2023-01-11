@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LayerValidationTree.h"
@@ -80,7 +80,7 @@ void LayerValidationTree::Init(TTree *tree)
    fChain->SetBranchAddress("HitPositionR",HitPositionR);
 
 
-   Notify();
+   LayerValidationTree::Notify();
 }
 
 Bool_t LayerValidationTree::Notify()
