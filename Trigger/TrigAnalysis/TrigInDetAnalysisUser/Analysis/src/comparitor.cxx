@@ -1880,7 +1880,7 @@ int main(int argc, char** argv) {
 	  std::cout << xaxis << std::endl;
 
 	  if ( htest==0 ) { 
-	    if ( htest==0 ) std::cerr << "missing test histogram: " << (chains[j]+" / "+reghist) << " " << htest<< std::endl; 
+	    std::cerr << "missing test histogram: " << (chains[j]+" / "+reghist) << " " << htest<< std::endl; 
 	    continue;
 	  }
 
@@ -1908,7 +1908,7 @@ int main(int argc, char** argv) {
 
 
 	  if ( !noreftmp && hreft==0 ) { 
-	    if ( hreft==0 ) std::cerr << "missing ref histogram: " << (refchain[j]+" / "+reghist)  
+	    std::cerr << "missing ref histogram: " << (refchain[j]+" / "+reghist)  
 				      << " " << hreft << std::endl; 
 	    noreftmp = true;
 	    Plotter::setplotref(false);
@@ -2669,22 +2669,22 @@ int main(int argc, char** argv) {
       
 	/// actually draw the plot here ...
       
-	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+	if ( fulldbg ) std::cout << __LINE__ << std::endl;
 	
 	plots.Draw( legend );
 
-	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+	if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
 	if ( atlasstyle ) ATLASLabel( xpos, ypositions[0]+deltay, atlaslabel, kBlack, ncolsp, nrowsp );
 
-	if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+	if ( fulldbg ) std::cout << __LINE__ << std::endl;
           
 	for ( unsigned it=0 ; it<taglabels.size() ; it++ ) { 
 	  DrawLabel( xpos, ypositions[it], taglabels[it], kBlack, 0.04 );
 	}
       }
     
-      if ( fulldbg ) if ( fulldbg ) std::cout << __LINE__ << std::endl;
+      if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
 
       if ( ( !nostats || !nomeans ) && !noplots ) { 
