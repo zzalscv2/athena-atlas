@@ -407,7 +407,7 @@ void SigAnalysis::execute(const std::vector<TIDA::Track*>& reftracks,
 
   if ( dump && m_print ) { 
     
-     if ( m_print ) std::cout << "SigAnalysis::execute() missed a high pT track - dumping tracks" << std::endl;
+     std::cout << "SigAnalysis::execute() missed a high pT track - dumping tracks" << std::endl;
       
     for ( int i=reftracks.size() ; i-- ; ) {
 
