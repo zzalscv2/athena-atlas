@@ -44,7 +44,7 @@ class CorrectPFOTool : public JetConstituentModifierBase{
   StatusCode correctPFOByVertex(xAOD::PFOContainer& cont) const;
 
   const xAOD::Vertex* getPrimaryVertex() const;
-  StatusCode applyNeutralCorrection(xAOD::PFO& pfo, const xAOD::Vertex& vtx) const;
+  StatusCode applyNeutralCorrection(xAOD::PFO& pfo, const xAOD::Vertex& vtx, bool goodVtx) const;
   StatusCode applyChargedCorrection(xAOD::PFO& pfo) const;
 
   bool m_inputIsEM;   /// If true EM clusters are used for neutral PFOs.
