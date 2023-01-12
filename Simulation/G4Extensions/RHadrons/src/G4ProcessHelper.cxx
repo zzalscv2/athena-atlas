@@ -420,7 +420,7 @@ ReactionProduct G4ProcessHelper::GetFinalStateInternal(const G4Track& aTrack,G4P
   while(!selected && tries < 100){
     i=0;
     G4double dice = CLHEP::RandFlat::shoot();
-    while(dice>Probabilities[i] && i<theReactionProductList.size()){
+    while( i<theReactionProductList.size() && dice>Probabilities[i] ){
       i++;
     }
 
