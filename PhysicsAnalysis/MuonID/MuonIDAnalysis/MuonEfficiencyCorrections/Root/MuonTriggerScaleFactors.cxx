@@ -30,29 +30,29 @@
 namespace CP {
     static const double muon_barrel_endcap_boundary = 1.05;
     unsigned int MuonTriggerScaleFactors::getFallBackRunNumber() const{
-      return 340453;
+        return 340453;
     }
     MuonTriggerScaleFactors::MuonTriggerScaleFactors(const std::string& name) :
-      asg::AsgTool(name),
-      m_systFilter(),
-      m_appliedSystematics(nullptr),
-      m_fileName(),
-      m_efficiencyMap(),
-      m_efficiencyMapReplicaArray(),
-      m_muonquality("Medium"),
-      m_calibration_version("190129_Winter_r21"),
-      m_custom_dir(),
-      m_binning("fine"),
-      m_allowZeroSF(false),
-      m_experimental(false),
-      m_useRel207(false),
-      m_useMC16c(false),
-      m_forceYear(-1),
-      m_forcePeriod(""),
-      m_replicaTriggerList(),
-      m_replicaSet(),
-      m_nReplicas(100),
-      m_ReplicaRandomSeed(12345) {
+        asg::AsgTool(name),
+        m_systFilter(),
+        m_appliedSystematics(nullptr),
+        m_fileName(),
+        m_efficiencyMap(),
+        m_efficiencyMapReplicaArray(),
+        m_muonquality("Medium"),
+        m_calibration_version("221123_Autumn_r22_2"),
+        m_custom_dir(),
+        m_binning("fine"),
+        m_allowZeroSF(false),
+        m_experimental(false),
+        m_useRel207(false),
+        m_useMC16c(false),
+        m_forceYear(-1),
+        m_forcePeriod(""),
+        m_replicaTriggerList(),
+        m_replicaSet(),
+        m_nReplicas(100),
+        m_ReplicaRandomSeed(12345) {
       
         declareProperty("MuonQuality", m_muonquality); // HighPt,Tight,Medium,Loose,LowPt
         declareProperty("CalibrationRelease", m_calibration_version);
@@ -68,8 +68,8 @@ namespace CP {
         declareProperty("NReplicas", m_nReplicas, "Number of generated toy replicas, if replicas are required.");
         declareProperty("ReplicaRandomSeed", m_ReplicaRandomSeed, "Random seed for toy replica generation.");
         declareProperty("AllowZeroSF", m_allowZeroSF, "If a trigger is not available will return 0 instead of throwing an error. More difficult to spot configuration issues. Use at own risk");
-	declareProperty("forceYear", m_forceYear, "Only for developers. Never use this in any analysis!!!!!!");
-	declareProperty("forcePeriod", m_forcePeriod, "Only for developers. Never use this in any analysis!!!!!!");
+        declareProperty("forceYear", m_forceYear, "Only for developers. Never use this in any analysis!!!!!!");
+        declareProperty("forcePeriod", m_forcePeriod, "Only for developers. Never use this in any analysis!!!!!!");
     }
 
     MuonTriggerScaleFactors::~MuonTriggerScaleFactors() { }
@@ -85,8 +85,8 @@ namespace CP {
 	    else
 	      fileName = "muontrigger_sf_2017_mc16d_v03.root";
 	  }
-	  else if (year == 2018)
-	    fileName = "muontrigger_sf_2018_mc16e_v02.root";
+	  else if (year == 2018) fileName = "muontrigger_sf_2018_mc16e_v02.root";
+      else if (year == 2022) fileName = "muontrigger_sf_2022_mc21.root";
 	  else{
 	    ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
 	    return StatusCode::SUCCESS;
@@ -112,7 +112,7 @@ namespace CP {
         }
 	else {
             ATH_MSG_INFO("Note: setting up with user specified input file location " << m_custom_dir << " - this is not encouraged!");
-            filePath = Form("%s/%s", m_custom_dir.c_str(), fileName.c_str());
+            filePath = PathResolverFindCalibFile(Form("%s/%s", m_custom_dir.c_str(), fileName.c_str()));
         }
 
         TFile* file = TFile::Open(filePath.c_str());
@@ -230,8 +230,9 @@ namespace CP {
             m_replicaSet.insert(trigToy);
 
         ATH_MSG_INFO("MuonTriggerScaleFactors::initialize");
-        for (int i = 2015; i <= 2018; ++i) {
-            ATH_CHECK(LoadTriggerMap(i));
+        int years_to_run[5] = {2015, 2016, 2017, 2018, 2022};
+        for (int &year: years_to_run) {
+            ATH_CHECK(LoadTriggerMap(year));
         }
         return StatusCode::SUCCESS;
     }
@@ -731,7 +732,8 @@ namespace CP {
       if (run <= 284484) return 2015;
       else if (run <= 311481) return 2016;
       else if (run <= 340453) return 2017;
-      else return 2018;
+      else if (run <= 364292) return 2018;
+      else return 2022;
     }
   
     std::string MuonTriggerScaleFactors::getDataPeriod() const {
@@ -743,60 +745,65 @@ namespace CP {
     }
 
     std::string MuonTriggerScaleFactors::getDataPeriod(unsigned int runNumber, unsigned year) const {
-      if(!m_forcePeriod.empty())
-	return m_forcePeriod;
-      if (year == 2015) {
-	if (runNumber >= 266904 && runNumber <= 272531) return "AC";
-	else if (runNumber >= 276073 && runNumber <= 276954) return "D";
-	else if (runNumber >= 278727 && runNumber <= 279928) return "E";
-	else if (runNumber >= 279932 && runNumber <= 280422) return "F";
-	else if (runNumber >= 280423 && runNumber <= 281075) return "G";
-	else if (runNumber >= 281130 && runNumber <= 281411) return "H";
-	else if (runNumber >= 281662 && runNumber <= 282482) return "I"; // special ALFA run
-	else if (runNumber >= 282625 && runNumber <= 284484) return "J";
-      }
-      else if (year == 2016) {
-	if (runNumber >= 296939 && runNumber <= 300287) return "A";
-	else if (runNumber >= 300345 && runNumber <= 300908) return "B";
-	else if (runNumber >= 301912 && runNumber <= 302393) return "C";
-	else if (runNumber >= 302737 && runNumber <= 302872) return "D1D3";
-	else if (runNumber >= 302919 && runNumber <= 303560) return "D4D8";
-	else if (runNumber >= 303638 && runNumber <= 303892) return "E";
-	else if (runNumber >= 303943 && runNumber <= 304494) return "F";
-	else if (runNumber >= 305291 && runNumber <= 306714) return "G";
-	else if (runNumber >= 307124 && runNumber <= 308084) return "I";
-	else if (runNumber >= 309311 && runNumber <= 309759) return "K";
-	else if (runNumber >= 310015 && runNumber <= 311481) return "L";
-      }
-      else if (year == 2017) {
-	if (runNumber >= 324320 && runNumber <= 325558) return "A";
-	else if (runNumber >= 325713 && runNumber <= 328393) return "B";
-	else if (runNumber >= 329385 && runNumber <= 330470) return "C";
-	else if (runNumber >= 330857 && runNumber <= 332304) return "D";
-	else if (runNumber >= 332720 && runNumber <= 334779) return "E";
-	else if (runNumber >= 334842 && runNumber <= 335290) return "F";
-	else if (runNumber >= 336497 && runNumber <= 336782) return "H";
-	else if (runNumber >= 336832 && runNumber <= 337833) return "I";
-	else if (runNumber >= 338183 && runNumber <= 340453) return "K";
-      }
-      else if (year == 2018) {
-	if (runNumber >= 348197 && runNumber <= 348836) return "A";
-	else if (runNumber >= 348885 && runNumber <= 349533) return "B";
-	else if (runNumber >= 349534 && runNumber <= 350220) return "C";
-	else if (runNumber >= 350310 && runNumber <= 352107) return "D";
-	else if (runNumber >= 352123 && runNumber <= 352137) return "E";
-	else if (runNumber >= 352274 && runNumber <= 352514) return "F";
-	else if (runNumber >= 354107 && runNumber <= 354494) return "G";
-	else if (runNumber >= 354826 && runNumber <= 355224) return "H";
-	else if (runNumber >= 355261 && runNumber <= 355273) return "I";
-	else if (runNumber >= 355331 && runNumber <= 355468) return "J";
-	else if (runNumber >= 355529 && runNumber <= 356259) return "K";
-	else if (runNumber >= 357050 && runNumber <= 359171) return "L";
-	else if (runNumber >= 359191 && runNumber <= 360414) return "M";
-	else if (runNumber >= 361635 && runNumber <= 361696) return "N";
-	else if (runNumber >= 361738 && runNumber <= 363400) return "O";
-	else if (runNumber >= 363664 && runNumber <= 364292) return "Q";
-      }
+        if(!m_forcePeriod.empty())
+            return m_forcePeriod;
+        if (year == 2015) {
+            if (runNumber >= 266904 && runNumber <= 272531) return "AC";
+            else if (runNumber >= 276073 && runNumber <= 276954) return "D";
+            else if (runNumber >= 278727 && runNumber <= 279928) return "E";
+            else if (runNumber >= 279932 && runNumber <= 280422) return "F";
+            else if (runNumber >= 280423 && runNumber <= 281075) return "G";
+            else if (runNumber >= 281130 && runNumber <= 281411) return "H";
+            else if (runNumber >= 281662 && runNumber <= 282482) return "I"; // special ALFA run
+            else if (runNumber >= 282625 && runNumber <= 284484) return "J";
+        }
+        else if (year == 2016) {
+            if (runNumber >= 296939 && runNumber <= 300287) return "A";
+            else if (runNumber >= 300345 && runNumber <= 300908) return "B";
+            else if (runNumber >= 301912 && runNumber <= 302393) return "C";
+            else if (runNumber >= 302737 && runNumber <= 302872) return "D1D3";
+            else if (runNumber >= 302919 && runNumber <= 303560) return "D4D8";
+            else if (runNumber >= 303638 && runNumber <= 303892) return "E";
+            else if (runNumber >= 303943 && runNumber <= 304494) return "F";
+            else if (runNumber >= 305291 && runNumber <= 306714) return "G";
+            else if (runNumber >= 307124 && runNumber <= 308084) return "I";
+            else if (runNumber >= 309311 && runNumber <= 309759) return "K";
+            else if (runNumber >= 310015 && runNumber <= 311481) return "L";
+        }
+        else if (year == 2017) {
+            if (runNumber >= 324320 && runNumber <= 325558) return "A";
+            else if (runNumber >= 325713 && runNumber <= 328393) return "B";
+            else if (runNumber >= 329385 && runNumber <= 330470) return "C";
+            else if (runNumber >= 330857 && runNumber <= 332304) return "D";
+            else if (runNumber >= 332720 && runNumber <= 334779) return "E";
+            else if (runNumber >= 334842 && runNumber <= 335290) return "F";
+            else if (runNumber >= 336497 && runNumber <= 336782) return "H";
+            else if (runNumber >= 336832 && runNumber <= 337833) return "I";
+            else if (runNumber >= 338183 && runNumber <= 340453) return "K";
+        }
+        else if (year == 2018) {
+            if (runNumber >= 348197 && runNumber <= 348836) return "A";
+            else if (runNumber >= 348885 && runNumber <= 349533) return "B";
+            else if (runNumber >= 349534 && runNumber <= 350220) return "C";
+            else if (runNumber >= 350310 && runNumber <= 352107) return "D";
+            else if (runNumber >= 352123 && runNumber <= 352137) return "E";
+            else if (runNumber >= 352274 && runNumber <= 352514) return "F";
+            else if (runNumber >= 354107 && runNumber <= 354494) return "G";
+            else if (runNumber >= 354826 && runNumber <= 355224) return "H";
+            else if (runNumber >= 355261 && runNumber <= 355273) return "I";
+            else if (runNumber >= 355331 && runNumber <= 355468) return "J";
+            else if (runNumber >= 355529 && runNumber <= 356259) return "K";
+            else if (runNumber >= 357050 && runNumber <= 359171) return "L";
+            else if (runNumber >= 359191 && runNumber <= 360414) return "M";
+            else if (runNumber >= 361635 && runNumber <= 361696) return "N";
+            else if (runNumber >= 361738 && runNumber <= 363400) return "O";
+            else if (runNumber >= 363664 && runNumber <= 364292) return "Q";
+        }
+        else if (year == 2022) {
+            if(runNumber >= 430536 && runNumber <= 432180) return "F";
+            else if (runNumber >= 435816 && runNumber <= 437124) return "H";
+
+        }
     
       //Return some  default  value
       return getDataPeriod(getFallBackRunNumber() , getYear(getFallBackRunNumber() ));
