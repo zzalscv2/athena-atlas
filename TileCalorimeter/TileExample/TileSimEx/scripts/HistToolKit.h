@@ -62,8 +62,8 @@ TH1F* bookTH1F(const string& name, const string& title,
   return tmp ;
 }
 
-TH1I* bookTH1I(std::string name, std::string title,
-               std::string xlabel,std::string ylabel,
+TH1I* bookTH1I(const std::string& name, const std::string& title,
+               const std::string& xlabel,const std::string& ylabel,
                int xbins, double xlow, double xhigh,
                bool sumw2 = true)
 {

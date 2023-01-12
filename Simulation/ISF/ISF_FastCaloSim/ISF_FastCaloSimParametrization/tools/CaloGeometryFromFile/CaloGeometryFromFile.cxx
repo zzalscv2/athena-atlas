@@ -20,8 +20,8 @@
 
 CaloGeometryFromFile::CaloGeometryFromFile() : CaloGeometry() {}
 
-bool CaloGeometryFromFile::LoadGeometryFromFile(std::string fileName,
-                                                std::string treeName,
+bool CaloGeometryFromFile::LoadGeometryFromFile(const std::string& fileName,
+                                                const std::string& treeName,
                                                 std::string hashFileName)
 {
   std::map<uint64_t, uint64_t> cellId_vs_cellHashId_map;

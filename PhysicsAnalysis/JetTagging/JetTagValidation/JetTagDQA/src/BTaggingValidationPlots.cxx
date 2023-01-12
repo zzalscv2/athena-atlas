@@ -47,10 +47,10 @@ namespace JetTagDQA{
     m_truthMatchProbabilityCut = truthMatchProbabilityCut;
   }
 
-  void BTaggingValidationPlots::setTaggerNames(std::string dipsName,
-					       std::string DL1dv00Name,
-					       std::string DL1dv01Name,
-					       std::string GN1Name){
+  void BTaggingValidationPlots::setTaggerNames(const std::string& dipsName,
+					       const std::string& DL1dv00Name,
+					       const std::string& DL1dv01Name,
+					       const std::string& GN1Name){
     m_dipsName = dipsName;
     m_DL1dv00Name = DL1dv00Name;
     m_DL1dv01Name = DL1dv01Name;

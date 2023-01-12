@@ -556,7 +556,7 @@ namespace JetTagDQA{
       // a setter for the HistogramDefinitions and the jvt and TMP cuts
       void setHistogramDefinitions( std::map< std::string, std::vector< std::string > > HistogramDefinitions);
       void setIsDataJVTCutsAndTMPCut(bool isData, float JVTCutAntiKt4EMTopoJets, float JVTCutLargerEtaAntiKt4EMTopoJets, float JVTCutAntiKt4EMPFlowJets, float truthMatchProbabilityCut);
-      void setTaggerNames(std::string dipsName, std::string DL1dv00Name, std::string DL1dv01Name, std::string GN1Name);
+      void setTaggerNames(const std::string& dipsName, const std::string& DL1dv00Name, const std::string& DL1dv01Name, const std::string& GN1Name);
 
       // jvt variables 
       bool m_JVT_defined;
