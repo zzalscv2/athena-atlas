@@ -327,9 +327,8 @@ StatusCode BTaggingEfficiencyTool::initialize() {
                  (m_systStrategy=="SFEigen") ? Analysis::SFEigen : Analysis::Uncertainty::SFGlobalEigen,
 						     true,                                      // use MC/MC scale factors
 						     false,                                     // do not use topology rescaling (only relevant for pseudo-continuous tagging)
-						     true,//m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
-						     //m_verboseCDITool);                         // if false, suppress any non-error/warning messages
-                 true) ); // set verbose
+						     m_useRecommendedEVExclusions,              // if true, add pre-set lists of uncertainties to be excluded from EV decomposition
+						     m_verboseCDITool));                         // if false, suppress any non-error/warning messages
 
   std::cout << "BTEffTool->initialize : setMapIndex(Light)" << std::endl;
   setMapIndex("Light",0);
