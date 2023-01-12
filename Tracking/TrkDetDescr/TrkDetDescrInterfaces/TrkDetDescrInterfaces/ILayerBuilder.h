@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKDETDESCRINTERFACES_ILAYERBUILDER_H
@@ -37,13 +37,16 @@ public:
   virtual ~ILayerBuilder() {}
 
   /** LayerBuilder interface method - returning Barrel-like layers */
-  virtual const std::vector<CylinderLayer*>* cylindricalLayers() const = 0;
+  virtual std::unique_ptr<const std::vector<CylinderLayer*> >
+  cylindricalLayers() const = 0;
 
   /** LayerBuilder interface method - returning Endcap-like layers */
-  virtual const std::vector<DiscLayer*>* discLayers() const = 0;
+  virtual std::unique_ptr<const std::vector<DiscLayer*> >
+  discLayers() const = 0;
 
   /** LayerBuilder interface method - returning Planar-like layers */
-  virtual const std::vector<PlaneLayer*>* planarLayers() const = 0;
+  virtual std::unique_ptr<const std::vector<PlaneLayer*> >
+  planarLayers() const = 0;
 
   /** Name identification */
   virtual const std::string& identification() const = 0;

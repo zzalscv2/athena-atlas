@@ -52,16 +52,15 @@ const std::vector<Trk::Layer*> Trk::LayerProvider::negativeLayers() const
 const std::vector<Trk::Layer*> Trk::LayerProvider::centralLayers() const
 {
     // central layers
-    std::vector<Trk::Layer* >            cLayers;
+    std::vector<Trk::Layer* > cLayers;
     // retrieving the cylinder layers from the layer builder
-    const std::vector< Trk::CylinderLayer* >*   cylinderLayers = m_layerBuilder->cylindricalLayers();
+    std::unique_ptr<const std::vector<Trk::CylinderLayer*> >
+      cylinderLayers = m_layerBuilder->cylindricalLayers();
     // loop over it and push into the return vector;
     if (cylinderLayers){
         for (const auto & cL : (*cylinderLayers))
             cLayers.push_back(cL);
     }
-    // memory cleanup
-    delete cylinderLayers;
     // and return
     return cLayers;
 } 
@@ -81,7 +80,8 @@ const std::vector<Trk::Layer*> Trk::LayerProvider::discLayers(int posneg) const
     // get the disc layers
     std::vector <Trk::Layer*>   dLayers;
     // retrieving the cylinder layers from the layer builder
-    const std::vector<Trk::DiscLayer*>* discLayers = m_layerBuilder->discLayers();
+    std::unique_ptr<const std::vector< Trk::DiscLayer*> > discLayers =
+      m_layerBuilder->discLayers();
     // loop and fill either cache or dLayers
     if (discLayers){
         // loop over and push into the return/cache vector 
@@ -99,10 +99,8 @@ const std::vector<Trk::Layer*> Trk::LayerProvider::discLayers(int posneg) const
             }
         }
     }
-    // memory cleanup
-    delete discLayers;
     // and return
-    return dLayers;   
+    return dLayers;
 }
 
 

@@ -11,7 +11,7 @@ InDet::BeamPipeBuilder::BeamPipeBuilder(const std::string& t, const std::string&
 }
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector< Trk::CylinderLayer* >* InDet::BeamPipeBuilder::cylindricalLayers() const
+std::unique_ptr<const std::vector<Trk::CylinderLayer*> > InDet::BeamPipeBuilder::cylindricalLayers() const
 {
-  return InDet::BeamPipeBuilderImpl::cylindricalLayersImpl().release();
+  return InDet::BeamPipeBuilderImpl::cylindricalLayersImpl();
 }
