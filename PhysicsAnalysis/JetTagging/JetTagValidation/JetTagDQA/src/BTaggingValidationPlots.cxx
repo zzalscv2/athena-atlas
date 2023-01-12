@@ -304,26 +304,26 @@ namespace JetTagDQA{
 
     m_SV1_numSVs_muon = bookHistogram("SV1_numSVs_muon", "SV1_numSVs", m_sParticleType, "jets with muon - ");
     m_SV1_masssvx_muon = bookHistogram("SV1_masssvx_muon", "SV1_masssvx", m_sParticleType, "jets with muon - ");
-    m_SV1_N2Tpair_muon = bookHistogram("SV1_N2Tpair_muon", "SV1_N2Tpair", m_sParticleType, "jets with moun - ");
-    m_SV1_efracsvx_muon = bookHistogram("SV1_efracsvx_muon", "SV1_efracsvx", m_sParticleType, "jets with moun - ");
-    m_SV1_deltaR_muon = bookHistogram("SV1_deltaR_muon", "SV1_deltaR", m_sParticleType, "jets with moun - ");
-    m_SV1_significance3d_muon = bookHistogram("SV1_significance3d_muon", "SV1_significance3d", m_sParticleType, "jets with moun - ");
-    m_SV1_energyTrkInJet_muon = bookHistogram("SV1_energyTrkInJet_muon", "SV1_energyTrkInJet", m_sParticleType, "jets with moun - ");
-    m_SV1_NGTinSvx_muon = bookHistogram("SV1_NGTinSvx_muon", "SV1_NGTinSvx", m_sParticleType, "jets with moun - ");
-    m_SV1_Lxy_muon = bookHistogram("SV1_Lxy_muon", "SV1_Lxy", m_sParticleType, "jets with moun - ");
-    m_SV1_purity_muon = bookHistogram("SV1_purity_muon", "SV1_purity", m_sParticleType, "jets with moun - ");
-    m_SV1_fracTracks_fromB_muon = bookHistogram("SV1_fracTracks_fromB_muon", "SV1_fracTracks_from_B", m_sParticleType, "jets with moun - ");
-    m_SV1_fracTracks_fromC_muon = bookHistogram("SV1_fracTracks_fromC_muon", "SV1_fracTracks_from_C", m_sParticleType, "jets with moun - ");
-    m_SV1_fracTracks_fromFragmentation_muon = bookHistogram("SV1_fracTracks_fromFragmentation_muon", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "jets with moun - ");
-    m_SV1_fracTracks_fromSecondaries_muon = bookHistogram("SV1_fracTracks_fromSecondaries_muon", "SV1_fracTracks_from_Secondaries", m_sParticleType, "jets with moun - ");
-    m_SV1_fracTracks_fromPileup_muon = bookHistogram("SV1_fracTracks_fromPileup_muon", "SV1_fracTracks_from_Pileup", m_sParticleType, "jets with moun - ");
-    m_SV1_fracTracks_fromFake_muon = bookHistogram("SV1_fracTracks_fromFake_muon", "SV1_fracTracks_from_Fake", m_sParticleType, "jets with moun - ");
+    m_SV1_N2Tpair_muon = bookHistogram("SV1_N2Tpair_muon", "SV1_N2Tpair", m_sParticleType, "jets with muon - ");
+    m_SV1_efracsvx_muon = bookHistogram("SV1_efracsvx_muon", "SV1_efracsvx", m_sParticleType, "jets with muon - ");
+    m_SV1_deltaR_muon = bookHistogram("SV1_deltaR_muon", "SV1_deltaR", m_sParticleType, "jets with muon - ");
+    m_SV1_significance3d_muon = bookHistogram("SV1_significance3d_muon", "SV1_significance3d", m_sParticleType, "jets with muon - ");
+    m_SV1_energyTrkInJet_muon = bookHistogram("SV1_energyTrkInJet_muon", "SV1_energyTrkInJet", m_sParticleType, "jets with muon - ");
+    m_SV1_NGTinSvx_muon = bookHistogram("SV1_NGTinSvx_muon", "SV1_NGTinSvx", m_sParticleType, "jets with muon - ");
+    m_SV1_Lxy_muon = bookHistogram("SV1_Lxy_muon", "SV1_Lxy", m_sParticleType, "jets with muon - ");
+    m_SV1_purity_muon = bookHistogram("SV1_purity_muon", "SV1_purity", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromB_muon = bookHistogram("SV1_fracTracks_fromB_muon", "SV1_fracTracks_from_B", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromC_muon = bookHistogram("SV1_fracTracks_fromC_muon", "SV1_fracTracks_from_C", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromFragmentation_muon = bookHistogram("SV1_fracTracks_fromFragmentation_muon", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromSecondaries_muon = bookHistogram("SV1_fracTracks_fromSecondaries_muon", "SV1_fracTracks_from_Secondaries", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromPileup_muon = bookHistogram("SV1_fracTracks_fromPileup_muon", "SV1_fracTracks_from_Pileup", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromFake_muon = bookHistogram("SV1_fracTracks_fromFake_muon", "SV1_fracTracks_from_Fake", m_sParticleType, "jets with muon - ");
 
     m_SV1_fracHFTracksInJet_incl = bookHistogram("SV1_fracHFTracksInJet_incl", "SV1_fracHFTracksInJet", m_sParticleType);
     m_SV1_fracHFTracksInJet_b = bookHistogram("SV1_fracHFTracksInJet_b", "SV1_fracHFTracksInJet", m_sParticleType, "b-jets - ");
     m_SV1_fracHFTracksInJet_c = bookHistogram("SV1_fracHFTracksInJet_c", "SV1_fracHFTracksInJet", m_sParticleType, "c-jets - ");
     m_SV1_fracHFTracksInJet_l = bookHistogram("SV1_fracHFTracksInJet_l", "SV1_fracHFTracksInJet", m_sParticleType, "l-jets - ");
-    m_SV1_fracHFTracksInJet_muon = bookHistogram("SV1_fracHFTracksInJet_muon", "SV1_fracHFTracksInJet", m_sParticleType, "jets with moun - ");
+    m_SV1_fracHFTracksInJet_muon = bookHistogram("SV1_fracHFTracksInJet_muon", "SV1_fracHFTracksInJet", m_sParticleType, "jets with muon - ");
 
     if(m_detailLevel > 10){
       m_SV1_fracTracks_Secondaries_KshortDecay_incl = bookHistogram("SV1_fracTracks_Secondaries_KshortDecay_incl", "SV1_fracTracks_Secondaries_KshortDecay", m_sParticleType); 
@@ -406,14 +406,14 @@ namespace JetTagDQA{
     m_JetFitter_significance3d_l = bookHistogram("JetFitter_significance3d_l", "JetFitter_significance3d", m_sParticleType, "l-jets - ");
     m_JetFitter_purity_l = bookHistogram("JetFitter_purity_l", "JetFitter_purity", m_sParticleType, "l-jets - ");
     
-    m_JetFitter_N2Tpair_muon = bookHistogram("JetFitter_N2Tpair_muon", "JetFitter_N2Tpair", m_sParticleType, "jets with moun - ");
-    m_JetFitter_nVTX_muon = bookHistogram("JetFitter_nVTX_muon", "JetFitter_nVTX", m_sParticleType, "jets with moun - ");
-    m_JetFitter_nSingleTracks_muon = bookHistogram("JetFitter_nSingleTracks_muon", "JetFitter_nSingleTracks", m_sParticleType, "jets with moun - ");
-    m_JetFitter_nTracksAtVtx_muon = bookHistogram("JetFitter_nTracksAtVtx_muon", "JetFitter_nTracksAtVtx", m_sParticleType, "jets with moun - ");
-    m_JetFitter_mass_muon = bookHistogram("JetFitter_mass_muon", "JetFitter_mass", m_sParticleType, "jets with moun - ");
-    m_JetFitter_energyFraction_muon = bookHistogram("JetFitter_energyFraction_muon", "JetFitter_energyFraction", m_sParticleType, "jets with moun - ");
-    m_JetFitter_significance3d_muon = bookHistogram("JetFitter_significance3d_muon", "JetFitter_significance3d", m_sParticleType, "jets with moun - ");
-    m_JetFitter_purity_muon = bookHistogram("JetFitter_purity_muon", "JetFitter_purity", m_sParticleType, "jets with moun - ");
+    m_JetFitter_N2Tpair_muon = bookHistogram("JetFitter_N2Tpair_muon", "JetFitter_N2Tpair", m_sParticleType, "jets with muon - ");
+    m_JetFitter_nVTX_muon = bookHistogram("JetFitter_nVTX_muon", "JetFitter_nVTX", m_sParticleType, "jets with muon - ");
+    m_JetFitter_nSingleTracks_muon = bookHistogram("JetFitter_nSingleTracks_muon", "JetFitter_nSingleTracks", m_sParticleType, "jets with muon - ");
+    m_JetFitter_nTracksAtVtx_muon = bookHistogram("JetFitter_nTracksAtVtx_muon", "JetFitter_nTracksAtVtx", m_sParticleType, "jets with muon - ");
+    m_JetFitter_mass_muon = bookHistogram("JetFitter_mass_muon", "JetFitter_mass", m_sParticleType, "jets with muon - ");
+    m_JetFitter_energyFraction_muon = bookHistogram("JetFitter_energyFraction_muon", "JetFitter_energyFraction", m_sParticleType, "jets with muon - ");
+    m_JetFitter_significance3d_muon = bookHistogram("JetFitter_significance3d_muon", "JetFitter_significance3d", m_sParticleType, "jets with muon - ");
+    m_JetFitter_purity_muon = bookHistogram("JetFitter_purity_muon", "JetFitter_purity", m_sParticleType, "jets with muon - ");
     
 
     // IPs and IP significances
@@ -630,13 +630,13 @@ namespace JetTagDQA{
     m_IP3D_nTracks_b = bookHistogram("IP3D_NTracks_b", "IP3D_nTracks", m_sParticleType, "b-jets -");
     m_IP3D_nTracks_c = bookHistogram("IP3D_NTracks_c", "IP3D_nTracks", m_sParticleType, "c-jets -");
     m_IP3D_nTracks_l = bookHistogram("IP3D_NTracks_l", "IP3D_nTracks", m_sParticleType, "l-jets -");
-    m_IP3D_nTracks_muon = bookHistogram("IP3D_NTracks_muon", "IP3D_nTracks", m_sParticleType, "jets with moun -");
+    m_IP3D_nTracks_muon = bookHistogram("IP3D_NTracks_muon", "IP3D_nTracks", m_sParticleType, "jets with muon -");
 
     m_IP2D_nTracks_incl = bookHistogram("IP2D_NTracks_incl", "IP2D_nTracks", m_sParticleType);
     m_IP2D_nTracks_b = bookHistogram("IP2D_NTracks_b", "IP2D_nTracks", m_sParticleType, "b-jets -");
     m_IP2D_nTracks_c = bookHistogram("IP2D_NTracks_c", "IP2D_nTracks", m_sParticleType, "c-jets -");
     m_IP2D_nTracks_l = bookHistogram("IP2D_NTracks_l", "IP2D_nTracks", m_sParticleType, "l-jets -");
-    m_IP2D_nTracks_muon = bookHistogram("IP2D_NTracks_muon", "IP2D_nTracks", m_sParticleType, "jets with moun -");
+    m_IP2D_nTracks_muon = bookHistogram("IP2D_NTracks_muon", "IP2D_nTracks", m_sParticleType, "jets with muon -");
 
     m_nGTinSV1_incl = bookHistogram("SV1_nGoodTracks_incl", "SV1_nGoodTracks", m_sParticleType);
     m_nGTinSV1_b = bookHistogram("SV1_nGoodTracks_b", "SV1_nGoodTracks", m_sParticleType, "b-jets -");
