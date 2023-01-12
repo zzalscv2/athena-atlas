@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file SimpleAlgorithmConfig  Defines the class SimpleAlgorithmConfig a concrete simple implementation of dqm_core::AlgorithmConfig
@@ -30,10 +30,7 @@ namespace dqm_algorithms
 #endif
 
 		///Getters, interface defines in AlgorithmConfig
-	virtual TObject * getReference() const;
-        virtual const std::map<std::string, double>& getParameters() const;
-        virtual const std::map<std::string, double>& getGreenThresholds() const;
-        virtual const std::map<std::string, double>& getRedThresholds() const;
+	virtual TObject * getReference() const override;
 	///Setters
 	void setReference(TObject* ref);
 	void addParameter(std::string,double);//< Adds a new parameter to the list of current params
@@ -41,9 +38,6 @@ namespace dqm_algorithms
 	void addRedThreshold(std::string,double);//< Adds a new threshold to the list of current params
       private:
 	TObject* m_ref;
-	std::map<std::string,double> m_param;
-	std::map<std::string,double> m_green;
-	std::map<std::string,double> m_red;
       };
   }
 

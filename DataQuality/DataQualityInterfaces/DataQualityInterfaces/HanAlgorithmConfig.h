@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanAlgorithmConfig_h
@@ -30,15 +30,8 @@ public:
 		      const HanConfigAssessor* hca);
 
   virtual ~HanAlgorithmConfig();
-  
-  virtual TObject*                                      getReference() const;
-  
-  virtual const std::map< std::string, double >&  getParameters() const;
-  
-  virtual const std::map< std::string, double >&               getGreenThresholds() const;
-  
-  virtual const std::map< std::string, double >&               getRedThresholds() const;
 
+  virtual TObject* getReference() const override;
 
 protected:
 
@@ -47,9 +40,6 @@ protected:
   TFile* m_file;
   
   TObject*  m_ref;
-  std::map< std::string, double >  m_pars;
-  std::map<std::string,double>  m_grthr;
-  std::map<std::string,double>  m_rdthr;
   const HanConfigAssessor* m_hca;
 
 private:

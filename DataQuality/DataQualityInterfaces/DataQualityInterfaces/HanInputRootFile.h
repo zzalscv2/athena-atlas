@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanInputRootFile_h
@@ -28,14 +28,13 @@ public:
 
   virtual void addListener( const std::string& name, dqm_core::InputListener *listener ) override;
 
-  TFile* file() const { return m_rootFile.get(); }
+  TFile* file() const { return m_file.get(); }
 
   const TDirectory* getBasedir() const { return m_basedir; }
   TDirectory* getBasedir() { return m_basedir; }
 
 protected:
 
-  std::unique_ptr<TFile>  m_rootFile;
   TDirectory*           m_basedir;
 
   std::vector<std::string> m_histNames;
