@@ -128,6 +128,10 @@ StatusCode ZdcRecV3::execute()
   ATH_CHECK( moduleContainerH.record (std::move(moduleContainer),
 				      std::move(moduleAuxContainer)) );
 
+  SG::WriteHandle<xAOD::ZdcModuleContainer> sumsContainerH (m_zdcSumContainerName, ctx);
+  ATH_CHECK( sumsContainerH.record (std::move(moduleSumContainer),
+				      std::move(moduleSumAuxContainer)) );
+
   return StatusCode::SUCCESS;
 
 }
