@@ -126,6 +126,7 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
         
   // will use onnxtool
   StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw,  Analysis::TruthTagResults& results, int rand_seed=-1);
+  StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c,  Analysis::TruthTagResults& results, int rand_seed=-1);
   StatusCode CalculateResultsONNX( const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat, Analysis::TruthTagResults& results, int rand_seed = -1);
 
   StatusCode setEffMapIndex(const std::string& flavour, unsigned int index);
@@ -151,8 +152,8 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   // overloaded with node_feat that is used by onnx tool
   StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw);
   StatusCode setJets(TRFinfo &trfinf, const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat);
+  StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c);
   StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars, const std::vector<std::vector<float>>& node_feat);
-
             
   // get truth tagging weights
   // for one single systematic (including "Nominal")
@@ -189,8 +190,9 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
 
   StatusCode getAllEffMC(TRFinfo &trfinf);
   StatusCode getAllEffMCCDI(TRFinfo &trfinf);
-  StatusCode getAllEffMCGNN(TRFinfo &trfinf);
-            
+  StatusCode getAllEffMCGNN(TRFinfo &trfinf);            
+  StatusCode updateEfficiencyForHT(TRFinfo &trfinf);
+
   StatusCode getAllEffSF(TRFinfo &trfinf,int =0);
   std::vector<CP::SystematicSet> m_eff_syst;
   std::vector<std::string> m_sys_name;
@@ -271,7 +273,10 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   float m_maxRangePt;
   //  std::string m_CutFileName;
 
-  // properties of truth tagging
+  //***********************************//
+  // Prop. of BTaggingTruthTaggingTool //
+  //***********************************//
+
   bool m_doOnlyUpVariations;
   bool m_ignoreSF;
   bool m_usePerm;
@@ -283,6 +288,10 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   int m_nbins;
   std::vector<int> m_OperatingBins;
   unsigned int m_OP_index_for_GNN;
+
+  bool m_doHybridTag;
+  int m_directTagFlavForHybridTag;
+
 
   std::map<int, asg::AnaToolHandle<IBTaggingEfficiencyTool> > m_effTool_allBins;
 
@@ -306,6 +315,7 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
 
   bool fillVariables(const xAOD::Jet& jet, Analysis::CalibrationDataVariables& x);
   bool fillVariables(const float jetPt, const float jetEta, const float jetTagWeight, Analysis::CalibrationDataVariables& x);
+  bool fillVariables(const float jetPt, const float jetEta, const float jetTagWeightB, const float jetTagWeightC, Analysis::CalibrationDataVariables& x);
 
 };
 

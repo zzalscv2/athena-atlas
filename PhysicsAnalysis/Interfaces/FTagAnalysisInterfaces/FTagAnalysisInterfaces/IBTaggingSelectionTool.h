@@ -41,7 +41,8 @@ class IBTaggingSelectionTool : virtual public asg::IAsgTool {
     /// The return value represents the bin index of the quantile distribution
     virtual int getQuantile( const xAOD::IParticle* ) const = 0;
     virtual int getQuantile( const xAOD::Jet& ) const = 0;
-    virtual int getQuantile( double, double, double ) const = 0;
+    virtual int getQuantile( double, double, double ) const = 0; // continuous mode
+    virtual int getQuantile( double, double, double, double ) const = 0; // continuous2D mode
 
     virtual CP::CorrectionCode getCutValue(double /* jet pt */, double & cutval) const = 0;
     virtual CP::CorrectionCode getTaggerWeight( const xAOD::Jet& jet, double & weight , bool useCTag=false) const = 0;

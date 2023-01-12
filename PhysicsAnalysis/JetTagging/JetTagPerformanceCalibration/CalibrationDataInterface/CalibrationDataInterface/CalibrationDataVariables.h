@@ -45,6 +45,8 @@ namespace Analysis
     double jetPt;                    // in MeV
     double jetEta;
     double jetTagWeight;             // actual output of the tagging algorithm (relevant only for "continuous" tagging)
+    double jetTagWeightB;            // actual output of the b-tagging algorithm (relevant only for "continuous2D" tagging)
+    double jetTagWeightC;            // actual output of the c-tagging algorithm (relevant only for "continuous2D" tagging)                                     // jetTagWeight will be considered as jetTagweightB in this case
   };
 
   /** @enum CalibrationStatus
