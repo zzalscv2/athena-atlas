@@ -9883,6 +9883,14 @@ HLT_j0_HT50_pf_ftf_preseljHT500_L1HT190-J15s5pETA21:
   stepFeatures:
     0: 3
     1: 16
+HLT_j0_perf_pf_subjesgscIS_ftf_L1RD0_FILLED:
+  eventCount: 20
+  stepCounts:
+    0: 20
+    1: 20
+  stepFeatures:
+    0: 20
+    1: 195
 HLT_j100_0eta290_020jvt_bdl1d60_pf_ftf_xe50_cell_xe85_pfopufit_L1XE55:
   eventCount: 1
   stepCounts:
@@ -10841,6 +10849,14 @@ HLT_j25_pf_ftf_L1RD0_FILLED:
   stepFeatures:
     0: 20
     1: 110
+HLT_j25_pf_subjesgscIS_ftf_L1RD0_FILLED:
+  eventCount: 20
+  stepCounts:
+    0: 20
+    1: 20
+  stepFeatures:
+    0: 20
+    1: 99
 HLT_j25f_L1RD0_FILLED:
   eventCount: 3
   stepCounts:
