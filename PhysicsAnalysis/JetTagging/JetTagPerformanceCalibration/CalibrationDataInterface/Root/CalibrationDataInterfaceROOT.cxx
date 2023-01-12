@@ -938,8 +938,6 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
     // and some care has to be taken not to duplicate or omit uncertainties
     if (container->getUncertainty("extrapolation from charm", variables, resSyst) == Analysis::kError)
       cerr << "getScaleFactor: error retrieving Scale factor parameter extrapolation uncertainty!" << endl;
-  } else if (unc == None){
-    std::cout << " Dealing with a None uncertainty - returning no error " << std::endl;
   }
 
   double uncertainty = combinedUncertainty(stat, resSyst);
@@ -948,7 +946,6 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
 
   // Prevent negative return values. Should the comparison be against a strict 0?
   result.first = std::max(Analysis::CalibZERO, result.first);
-  std::cout << "CDIROOT->getScaleFactor : returning " << result.first << " and " << result.second << std::endl;
   return status;
 
 }
