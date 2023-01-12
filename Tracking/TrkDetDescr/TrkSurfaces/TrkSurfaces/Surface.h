@@ -73,11 +73,6 @@ enum SurfaceOwner
 class Surface: public Trk::ObjectCounter<Trk::Surface>
 {
 
-  /** Declare the ILayerBuilder / ITrackingVolumeHelper to be a friend class
-   * such it is able to set the layer */
-  friend class ILayerBuilder;
-  friend class ITrackingVolumeHelper;
-
 public:
   /*
    * struct holding the transform, center, normal,
