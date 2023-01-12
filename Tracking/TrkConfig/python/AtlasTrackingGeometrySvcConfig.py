@@ -17,24 +17,36 @@ def _setupCondDB(flags, CoolDataBaseFolder, quiet=True):
     version = 21
     sub_version = ''
 
-    AtlasMaterialTag = materialTagBase+str(version)+sub_version+'_'
-    if flags.Detector.GeometryITk:
-        AtlasMaterialTag = flags.ITk.trackingGeometry.materialTag+str(flags.ITk.trackingGeometry.version)+'_'
-    cfolder = CoolDataBaseFolder +'<tag>TagInfoMajor/'+AtlasMaterialTag+'/GeoAtlas</tag>'
+    # Tag an input tag of form TagInfo{Major|Minor}/<tag> or TagInfo(Major|Minor}/<prefix>/<tag>
+    # The tag information string defines how to handle the GeoAtlas in the TagInfo manager
+    # TagInfo      : uses the geometry tag as is
+    # TagInfoMajor : only uses the major version of the geometry tag
+    # TagInfoMinor : uses both major and minor version of the geometry tag
 
-    if flags.Detector.GeometryITk and flags.ITk.trackingGeometry.loadLocalDbForMaterialMaps:
-        DataBaseName=flags.ITk.trackingGeometry.localDatabaseName
-        from IOVDbSvc.IOVDbSvcConfig import addFolders
-        result.merge(addFolders(flags,"/GLOBAL/TrackingGeo/LayerMaterialITK",detDb=DataBaseName, tag=AtlasMaterialTag))
-        cfolder = CoolDataBaseFolder +'<tag>TagInfoMajor/'+AtlasMaterialTag+'</tag>'
+    AtlasMaterialTag = materialTagBase + str(version) + sub_version
+    cfolder = CoolDataBaseFolder + '<tag>TagInfoMajor/' + \
+        AtlasMaterialTag + '_/GeoAtlas</tag>'
 
-    # if not quiet:
-    #   print('[ TrackingGeometrySvc ]     base material tag : ' + AtlasMaterialTag)
-    #   print('[ TrackingGeometrySvc ]     translated to COOL: ' + cfolder)
+    if not flags.Detector.GeometryITk:
+        # load the right folders
+        result.merge(addFoldersSplitOnline(
+            flags, 'GLOBAL', [cfolder], [cfolder],
+            splitMC=True, className='Trk::LayerMaterialMap'))
 
-    # load the right folders
-    result.merge( addFoldersSplitOnline(flags,'GLOBAL',[cfolder],[cfolder],splitMC=True) )
-
+    #redefine tag and folder for ITk, as we use a different schema
+    else:
+        AtlasMaterialTag = flags.ITk.trackingGeometry.materialTag + \
+            str(flags.ITk.trackingGeometry.version)
+        if flags.ITk.trackingGeometry.loadLocalDbForMaterialMaps:
+            DataBaseName = flags.ITk.trackingGeometry.localDatabaseName
+            from IOVDbSvc.IOVDbSvcConfig import addFolders
+            result.merge(addFolders(flags, "/GLOBAL/TrackingGeo/LayerMaterialITK",
+                                    detDb=DataBaseName, tag=AtlasMaterialTag))
+        else:
+            materialFileTag = AtlasMaterialTag + '_'+ flags.GeoModel.AtlasVersion
+            from IOVDbSvc.IOVDbSvcConfig import addFolders
+            result.merge(addFolders(flags,"/GLOBAL/TrackingGeo/LayerMaterialITK","GLOBAL_OFL", tag=materialFileTag,
+                                    db="OFLP200", className="Trk::LayerMaterialMap"))
     return result
 
 
