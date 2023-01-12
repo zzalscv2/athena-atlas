@@ -130,25 +130,6 @@ public:
   /** AlgTool finalize method */
   virtual StatusCode finalize() override;
 
-  /** Extrapolate Neutral xAOD particle to surface.
-   * Starts from the perigee parameters. */
-  virtual std::unique_ptr<NeutralParameters> extrapolate(
-    const xAOD::NeutralParticle& xnParticle,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true) const override final;
-
-  /** Extrapolate Charged xAOD particle to surface
-   * Starts from the perigee parameters.*/
-  virtual std::unique_ptr<TrackParameters> extrapolate(
-    const EventContext& ctx,
-    const xAOD::TrackParticle& particleBase,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true,
-    ParticleHypothesis particle = pion,
-    MaterialUpdateMode matupmode = addNoise) const override final;
-
   /** Extrapolate directly: Forwards directly the call to the 
    * configured "Global" propagator. No navigation and no 
    * material effecs. Useful when we need fast propagation

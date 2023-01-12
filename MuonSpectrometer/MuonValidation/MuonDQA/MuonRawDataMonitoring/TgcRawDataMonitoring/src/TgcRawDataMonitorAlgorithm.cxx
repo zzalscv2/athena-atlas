@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TgcRawDataMonitorAlgorithm.h"
@@ -976,7 +976,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 							     m_endcapPivotPlaneMaximumRadius.value());
 	  const Trk::BoundaryCheck boundaryCheck = true;
 	  const auto extTrkParams = m_extrapolator->extrapolate(ctx,
-								*trackParticle,
+								trackParticle->perigeeParameters(),
 								*disc,
 								Trk::alongMomentum,
 								boundaryCheck,

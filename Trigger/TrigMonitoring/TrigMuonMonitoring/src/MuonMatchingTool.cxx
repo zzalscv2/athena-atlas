@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -409,7 +409,7 @@ const Trk::TrackParameters* MuonMatchingTool :: extTrackToTGC( const xAOD::Track
   const bool boundaryCheck = true;
 
   const Trk::TrackParameters* param = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
-                                                                  *trk,
+                                                                  trk->perigeeParameters(),
                                                                   *disc,
                                                                   Trk::anyDirection,
                                                                   boundaryCheck,
@@ -430,7 +430,7 @@ const Trk::TrackParameters* MuonMatchingTool :: extTrackToRPC( const xAOD::Track
   const bool boundaryCheck = true;
 
   const Trk::TrackParameters* param = m_extrapolator->extrapolate(Gaudi::Hive::currentContext(),
-                                                                  *trk,
+                                                                  trk->perigeeParameters(),
                                                                   *barrel,
                                                                   Trk::anyDirection,
                                                                   boundaryCheck,

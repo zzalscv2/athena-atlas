@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -459,7 +459,7 @@ StatusCode DQTMuonIDTrackTool::fillHistograms()
                         << premeasPerigee->associatedSurface());
         measPerigee =
           m_extrapolator->extrapolate(ctx,
-                                      **muontracksItr,
+                                      (*muontracksItr)->perigeeParameters(),
                                       (idPerigee->associatedSurface()),
                                       Trk::anyDirection,
                                       true,
