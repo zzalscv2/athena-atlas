@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags, GetFileMD
+from AthenaConfiguration.AllConfigFlags import initConfigFlags, GetFileMD
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format, ProductionStep
@@ -41,26 +41,25 @@ def athenaMPRunArgsToFlags(runArgs, flags):
         flags.MP.UseParallelCompression = runArgs.parallelCompression
 
 
-def AthenaMPCfg(configFlags):
+def AthenaMPCfg(flags):
 
     os.putenv('XRD_ENABLEFORKHANDLERS','1')
     os.putenv('XRD_RUNFORKHANDLER','1')
 
-    result=ComponentAccumulator()
+    result = ComponentAccumulator()
 
     # Configure MP Event Loop Manager
-    AthMpEvtLoopMgr=CompFactory.AthMpEvtLoopMgr
-    mpevtloop = AthMpEvtLoopMgr()
+    mpevtloop = CompFactory.AthMpEvtLoopMgr()
 
-    mpevtloop.NWorkers=configFlags.Concurrency.NumProcs
-    mpevtloop.Strategy=configFlags.MP.Strategy
-    mpevtloop.WorkerTopDir = configFlags.MP.WorkerTopDir
-    mpevtloop.OutputReportFile = configFlags.MP.OutputReportFile
-    mpevtloop.CollectSubprocessLogs = configFlags.MP.CollectSubprocessLogs
-    mpevtloop.PollingInterval = configFlags.MP.PollingInterval
-    mpevtloop.MemSamplingInterval = configFlags.MP.MemSamplingInterval
-    mpevtloop.IsPileup = configFlags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling] and configFlags.Digitization.PileUp
-    mpevtloop.EventsBeforeFork = 0 if configFlags.MP.Strategy == 'EventService' else configFlags.MP.EventsBeforeFork
+    mpevtloop.NWorkers = flags.Concurrency.NumProcs
+    mpevtloop.Strategy = flags.MP.Strategy
+    mpevtloop.WorkerTopDir = flags.MP.WorkerTopDir
+    mpevtloop.OutputReportFile = flags.MP.OutputReportFile
+    mpevtloop.CollectSubprocessLogs = flags.MP.CollectSubprocessLogs
+    mpevtloop.PollingInterval = flags.MP.PollingInterval
+    mpevtloop.MemSamplingInterval = flags.MP.MemSamplingInterval
+    mpevtloop.IsPileup = flags.Common.ProductionStep in [ProductionStep.Digitization, ProductionStep.PileUpPresampling] and flags.Digitization.PileUp
+    mpevtloop.EventsBeforeFork = 0 if flags.MP.Strategy == 'EventService' else flags.MP.EventsBeforeFork
 
     # Configure Gaudi File Manager
     filemgr = CompFactory.FileMgr(LogFile="FileManagerLog")
@@ -72,23 +71,23 @@ def AthenaMPCfg(configFlags):
         shutil.copyfile('PoolFileCatalog.xml','PoolFileCatalog.xml.AthenaMP-saved')
 
     # Compute event chunk size
-    chunk_size = getChunkSize(configFlags)
+    chunk_size = getChunkSize(flags)
 
     # Configure Strategy
-    debug_worker = configFlags.Concurrency.DebugWorkers
-    event_range_channel = configFlags.MP.EventRangeChannel
-    use_shared_reader = configFlags.MP.UseSharedReader
-    use_shared_writer = configFlags.MP.UseSharedWriter
+    debug_worker = flags.Concurrency.DebugWorkers
+    event_range_channel = flags.MP.EventRangeChannel
+    use_shared_reader = flags.MP.UseSharedReader
+    use_shared_writer = flags.MP.UseSharedWriter
 
-    if configFlags.MP.Strategy=='SharedQueue' or configFlags.MP.Strategy=='RoundRobin':
+    if flags.MP.Strategy == 'SharedQueue' or flags.MP.Strategy == 'RoundRobin':
         if use_shared_reader:
             AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
 
-            if configFlags.Input.Format is Format.BS:
+            if flags.Input.Format is Format.BS:
                 evSel = CompFactory.EventSelectorByteStream("EventSelector")
 
                 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-                bscfg = ByteStreamReadCfg(configFlags)
+                bscfg = ByteStreamReadCfg(flags)
                 result.merge(bscfg)
             else:
                 evSel = CompFactory.EventSelectorAthenaPool("EventSelector")
@@ -98,34 +97,34 @@ def AthenaMPCfg(configFlags):
                                                             UseMultipleSegments=True)
 
                 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-                result.merge(PoolReadCfg(configFlags))
+                result.merge(PoolReadCfg(flags))
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(configFlags, InputStreamingTool=inputStreamingTool))
+                result.merge(AthenaPoolCnvSvcCfg(flags, InputStreamingTool=inputStreamingTool))
 
             evSel.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool",
                                                             SharedMemoryName=f"EventStream{str(os.getpid())}")
             result.addService(evSel)
 
         if use_shared_writer:
-            if any((configFlags.Output.doWriteESD,
-                    configFlags.Output.doWriteAOD,
-                    configFlags.Output.doWriteDAOD,
-                    configFlags.Output.doWriteRDO)) or configFlags.Output.HITSFileName!='':
+            if any((flags.Output.doWriteESD,
+                    flags.Output.doWriteAOD,
+                    flags.Output.doWriteDAOD,
+                    flags.Output.doWriteRDO)) or flags.Output.HITSFileName!='':
                 AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
                 outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool_0",
                                                              SharedMemoryName=f"OutputStream{str(os.getpid())}")
 
                 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-                result.merge(PoolWriteCfg(configFlags))
+                result.merge(PoolWriteCfg(flags))
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-                result.merge(AthenaPoolCnvSvcCfg(configFlags,
+                result.merge(AthenaPoolCnvSvcCfg(flags,
                                                  OutputStreamingTool=[outputStreamingTool]))
 
         queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
                                                             IsPileup=mpevtloop.IsPileup,
                                                             EventsBeforeFork=mpevtloop.EventsBeforeFork,
                                                             ChunkSize=chunk_size)
-        if configFlags.Concurrency.NumThreads > 0:
+        if flags.Concurrency.NumThreads > 0:
             if mpevtloop.IsPileup:
                 raise Exception('Running pileup digitization in mixed MP+MT currently not supported')
             queue_consumer = CompFactory.SharedEvtQueueConsumer(UseSharedWriter=use_shared_writer,
@@ -135,10 +134,10 @@ def AthenaMPCfg(configFlags):
             queue_consumer = CompFactory.SharedEvtQueueConsumer(UseSharedReader=use_shared_reader,
                                                                 UseSharedWriter=use_shared_writer,
                                                                 IsPileup=mpevtloop.IsPileup,
-                                                                IsRoundRobin=(configFlags.MP.Strategy=='RoundRobin'),
+                                                                IsRoundRobin=(flags.MP.Strategy=='RoundRobin'),
                                                                 EventsBeforeFork=mpevtloop.EventsBeforeFork,
-                                                                ReadEventOrders=configFlags.MP.ReadEventOrders,
-                                                                EventOrdersFile=configFlags.MP.EventOrdersFile,
+                                                                ReadEventOrders=flags.MP.ReadEventOrders,
+                                                                EventOrdersFile=flags.MP.EventOrdersFile,
                                                                 Debug=debug_worker)
         mpevtloop.Tools += [ queue_provider, queue_consumer ]
 
@@ -148,58 +147,58 @@ def AthenaMPCfg(configFlags):
                                                          Debug=debug_worker)
             mpevtloop.Tools += [ shared_writer ]
 
-    elif configFlags.MP.Strategy=='EventService':
+    elif flags.MP.Strategy=='EventService':
         channelScatterer2Processor = "AthenaMP_Scatterer2Processor"
         channelProcessor2EvtSel = "AthenaMP_Processor2EvtSel"
 
         mpevtloop.Tools += [ CompFactory.EvtRangeScatterer(ProcessorChannel = channelScatterer2Processor,
                                                            EventRangeChannel = event_range_channel,
-                                                           DoCaching=configFlags.MP.EvtRangeScattererCaching) ]
+                                                           DoCaching=flags.MP.EvtRangeScattererCaching) ]
         mpevtloop.Tools += [ CompFactory.vtRangeProcessor(IsPileup=mpevtloop.IsPileup,
                                                           Channel2Scatterer = channelScatterer2Processor,
                                                           Channel2EvtSel = channelProcessor2EvtSel,
                                                           Debug=debug_worker) ]
 
     else:
-        msg.warning("Unknown strategy %s. No MP tools will be configured", configFlags.MP.Strategy)
+        msg.warning("Unknown strategy %s. No MP tools will be configured", flags.MP.Strategy)
 
     result.addService(mpevtloop, primary=True)
 
     return result
 
-def getChunkSize(configFlags) -> int:
+def getChunkSize(flags) -> int:
     chunk_size = 1
-    if configFlags.MP.ChunkSize > 0:
-        chunk_size = configFlags.MP.ChunkSize
+    if flags.MP.ChunkSize > 0:
+        chunk_size = flags.MP.ChunkSize
         msg.info('Chunk size set to %i', chunk_size)
     else:
-        md = GetFileMD(configFlags.Input.Files)
+        md = GetFileMD(flags.Input.Files)
         #Don't use auto flush for shared reader
-        if configFlags.MP.UseSharedReader:
+        if flags.MP.UseSharedReader:
             msg.info('Shared Reader in use, chunk_size set to default (%i)', chunk_size)
         #Use auto flush only if file is compressed with LZMA, else use default chunk_size
-        elif configFlags.MP.ChunkSize == -1:
+        elif flags.MP.ChunkSize == -1:
             if md.get('file_comp_alg',-1) == 2:
                 chunk_size = md.get('auto_flush',-1)
                 msg.info('Chunk size set to auto flush (%i)', chunk_size)
             else:
                 msg.info('LZMA algorithm not in use, chunk_size set to default (%i)', chunk_size)
         #Use auto flush only if file is compressed with LZMA or ZLIB, else use default chunk_size
-        elif configFlags.MP.ChunkSize == -2:
+        elif flags.MP.ChunkSize == -2:
             if md.get('file_comp_alg',-1) in [1,2]:
                 chunk_size = md.get('auto_flush',-1)
                 msg.info('Chunk size set to auto flush (%i)', chunk_size)
             else:
                 msg.info('LZMA nor ZLIB in use, chunk_size set to default (%i)', chunk_size)
                 #Use auto flush only if file is compressed with LZMA, ZLIB or LZ4, else use default chunk_size
-        elif configFlags.MP.ChunkSize == -3:
+        elif flags.MP.ChunkSize == -3:
             if md.get('file_comp_alg',-1) in [1,2,4]:
                 chunk_size = md.get('auto_flush',-1)
                 msg.info('Chunk size set to auto flush (%i)', chunk_size)
             else:
                 msg.info('LZMA, ZLIB nor LZ4 in use, chunk_size set to (%i)', chunk_size)
         #Use auto flush value for chunk_size, regarldess of compression algorithm
-        elif configFlags.MPChunkSize <= -4:
+        elif flags.MPChunkSize <= -4:
             chunk_size = md.get('auto_flush',-1)
             msg.info('Chunk size set to auto flush (%i)', chunk_size)
         else:
@@ -212,13 +211,14 @@ if __name__=="__main__":
 
     # -----------------  Example with input file --------------
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
-    ConfigFlags.Exec.MaxEvents=10
-    ConfigFlags.Concurrency.NumProcs=2
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Exec.MaxEvents=10
+    flags.Concurrency.NumProcs=2
 
-    cfg=MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
     from AthenaPoolCnvSvc.PoolReadConfig import EventSelectorAthenaPoolCfg
-    cfg.merge(EventSelectorAthenaPoolCfg(ConfigFlags))
+    cfg.merge(EventSelectorAthenaPoolCfg(flags))
     cfg.run()
     # -----------------  Example with input file --------------
 
