@@ -23,7 +23,7 @@ gROOT.SetBatch(False)
 
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
 from LArMonCoolLib import GetReadyFlag
-from DeMoLib import strLumi, initialize,MakeTH1,SetXLabel,MakeLegend
+from DeMoLib import strLumi, initialize,MakeTH1,SetXLabel,MakeLegend,returnPeriod
 
 global debug
 debug = False
@@ -141,7 +141,8 @@ runsFilter = []
 if (options['plotDiff2tags'] and options['restrictTagRuns'] in list(yearTagProperties["description"].keys()) and "%s%s"%(args.parser_year[0],yearTagProperties["description"][options['restrictTagRuns']]) in yearTagList): #if requested, restrict the runs to be considered to the one of the tag option
   fRuns = open("%s/runs-ALL.dat"%yearTagDir["%s%s"%(args.parser_year[0],yearTagProperties["description"][options['restrictTagRuns']])])
   for iline in fRuns.readlines():
-    runsFilter.append(int(iline))
+    runWithoutPeriod = int(iline.split(" (")[0])
+    runsFilter.append(runWithoutPeriod)
   fRuns.close()
   print("I am considering only the %d runs of %s"%(len(runsFilter),options['restrictTagRuns']))
   print(runsFilter)
@@ -164,18 +165,18 @@ if options['retrieveComments']:
     defRecap[iDef] = "\n\n===== Recap for %s================================================================================================================================\n"%(iDef.ljust(15))
     defRecap[iDef] += "Description: %s - %s\n"%(defectVeto["description"][iDef],defVetoType[iDef])
     if (defVetoType[iDef] == "Intolerable defect"):
-      defRecap[iDef] +="     Run| Tot lumi|Lost lumi|Recov. L.|  LB range |     Author | "
+      defRecap[iDef] +="     Run| Period| Tot lumi|Lost lumi|Recov. L.|  LB range |     Author | "
     else:
-      defRecap[iDef] +="     Run| Tot lumi|Aff. lumi|Recov. L.|  LB range |     Author | "
+      defRecap[iDef] +="     Run| Period| Tot lumi|Aff. lumi|Recov. L.|  LB range |     Author | "
 
     if (defVetoType[iDef] == "Intolerable defect"):
-      defRecapHtml[iDef] ='<tr class="out0intolerable" id="%s-%s-%s"> <th colspan="7"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
-      defRecapHtml[iDef] +='<tr class="out0intolerable"> <th colspan="7"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
-      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> Lost lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
+      defRecapHtml[iDef] ='<tr class="out0intolerable" id="%s-%s-%s"> <th colspan="8"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
+      defRecapHtml[iDef] +='<tr class="out0intolerable"> <th colspan="8"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
+      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Period </th><th> Tot lumi </th><th> Lost lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
     else:
-      defRecapHtml[iDef] ='<tr class="out0tolerable" id="%s-%s-%s"> <th colspan="7"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
-      defRecapHtml[iDef] +='<tr class="out0tolerable"> <th colspan="7"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
-      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Tot lumi </th><th> Aff. lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
+      defRecapHtml[iDef] ='<tr class="out0tolerable" id="%s-%s-%s"> <th colspan="8"> %s - LUMILOSTTOBEREPLACED affected </th></tr>'%(iDef,args.parser_year[0],args.parser_tag[0],iDef)
+      defRecapHtml[iDef] +='<tr class="out0tolerable"> <th colspan="8"> Description: %s - %s</th></tr>'%(defectVeto["description"][iDef],defVetoType[iDef])
+      defRecapHtml[iDef] +='<tr class="out0"> <th> Run </th><th> Period </th><th> Tot lumi </th><th> Aff. lumi </th><th> Recov. L. </th><th>  LB range </th><th>     Author </th><th>     Comment </th></tr> '
 
 if options['prepareReproc']:
   defReproc = {}
@@ -319,13 +320,14 @@ for iYT in yearTagList:
                       # This "replace" is a dirty hack due to bad unicode in defect comment in run 355995/LAr
                       # You may need to add some others if you observe a crash...
 
-                      defRecap[iDef] += "\n %d |%s|%s|%s|%s |%s| %s"%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
-                      defRecapHtml[iDef] += '<tr class="out1"><th> %d </th> <th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><tr>'%(runnumber,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
+                      runperiod = returnPeriod(runnumber,args.parser_system,args.parser_year[0],args.parser_tag[0])
+                      defRecap[iDef] += "\n %d |%s|%s|%s|%s|%s |%s| %s"%(runnumber,runperiod.rjust(7),strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecapHtml[iDef] += '<tr class="out1"><th> %d </th> <th> %s </th> <th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><th> %s </th><tr>'%(runnumber,runperiod,strLumi(luminosity,"ub",False).rjust(9),(strLumi(lostLumi,"pb",False)).rjust(9),(strLumi(recovLumi,"pb",False)).rjust(9),lbRange,defect.user.rjust(12),cleanedDefect)
                       if (options['prepareReproc'] and recovLumi>0.):
                         defReproc[iDef] += "\n@%d"%runnumber
                     else:
-                      defRecap[iDef] += "\n -------------------------------------|%s |%s| %s"%(lbRange,defect.user.rjust(12),cleanedDefect)
-                      defRecapHtml[iDef] += '<tr class="out1"><th colspan="4"><th> %s </th><th> %s </th><th> %s </th><tr>'%(lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecap[iDef] += "\n ---------------------------------------------|%s |%s| %s"%(lbRange,defect.user.rjust(12),cleanedDefect)
+                      defRecapHtml[iDef] += '<tr class="out1"><th colspan="5"><th> %s </th><th> %s </th><th> %s </th><tr>'%(lbRange,defect.user.rjust(12),cleanedDefect)
                     for iPart in ["EMBA","EMBC","EMECA","EMECC","HECA","HECC","FCALA","FCALC"]:
                       if iPart in defect.channel and "SEVNOISEBURST" not in defect.channel: # Add the affected partition (except for SEVNOISEBURST, where the comment should contain it)
                         defRecap[iDef] += " - %s"%iPart
@@ -376,8 +378,8 @@ if options['plotLossPerRun'] and options['retrieveComments']:
   f = open("%s/YearStats-%s/%s/%s/recapDefects.txt"%(args.parser_directory,args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
   fHtml = open("%s/YearStats-%s/%s/%s/recapDefects.html"%(args.parser_directory,args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
   fHtml.write('<table class="report">')
-  fHtml.write('<tr class="out0"> <th width="60pix"></th><th width="100pix"></th></th><th width="100pix"></th><th width="100pix"></th><th width="100pix"></th><th width="100pix"></th><th></th></tr>')
-  fHtml.write('<tr class="out0"> <th colspan="7"> Recap generated on %s </th></tr>'%(strftime("%a, %d %b %Y %H:%M", localtime())))
+  fHtml.write('<tr class="out0"> <th width="60pix"></th><th width="60pix"></th><th width="80pix"></th></th><th width="80pix"></th><th width="80pix"></th><th width="80pix"></th><th width="100pix"></th><th></th></tr>')
+  fHtml.write('<tr class="out0"> <th colspan="8"> Recap generated on %s </th></tr>'%(strftime("%a, %d %b %Y %H:%M", localtime())))
   if options['prepareReproc']:
     fReproc = open("YearStats-%s/%s/%s/defectsForReproc.txt"%(args.parser_system,args.parser_year[0],args.parser_tag[0]),'w')
 

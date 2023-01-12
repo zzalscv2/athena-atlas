@@ -177,9 +177,10 @@ for iYT in yearTagList:
   runsCharact[iYT] = {'Low':1e10,'High':0,'Number':0}
   
   fTemp = open("%s/runs-ALL.dat"%yearTagDir[iYT])
-  for iRun in fTemp.readlines():
-    if int(iRun)<runsCharact[iYT]['Low']:runsCharact[iYT]['Low']=int(iRun)
-    if int(iRun)>runsCharact[iYT]['High']:runsCharact[iYT]['High']=int(iRun)
+  for iline in fTemp.readlines():
+    runNb = int(iline.split(" (")[0]) # Removing the period
+    if runNb<runsCharact[iYT]['Low']:runsCharact[iYT]['Low']=int(runNb)
+    if runNb>runsCharact[iYT]['High']:runsCharact[iYT]['High']=int(runNb)
     runsCharact[iYT]['Number'] += 1
 
   runsCharact[iYT]['Range']="%d->%d"%(runsCharact[iYT]['Low'],runsCharact[iYT]['High'])
@@ -271,17 +272,23 @@ for iYT in yearTagList:
             ATLASLabel(0.4,0.85,"Internal")
 
     # And finally the integrated luminosities
-    canvasResults[iYT]['intLumi']= TCanvas( "c_intLumi_%s"%(iYT),"Integrated luminosity per period", 200, 10, 1150, 500)
+    canvasResults[iYT]['intLumi']= TCanvas( "c_intLumi_%s"%(iYT),"Integrated luminosity per period", 100, 10, 1350, 500)
     # Same margin as for the stacked results
     canvasResults[iYT]['intLumi'].SetLeftMargin(0.08)
     canvasResults[iYT]['intLumi'].SetRightMargin(0.35)
 
     if (options['plotYearStatsLarge']):
       h1PeriodLett_IntLuminosity[iYT].Draw("P HIST")
+      h1PeriodLett_IntLuminosity[iYT].LabelsOption("v")
+      h1PeriodLett_IntLuminosity[iYT].GetXaxis().SetTitleOffset(1.45)
+      h1PeriodLett_IntLuminosity[iYT].GetXaxis().SetLabelSize(0.04)
       for iBin in range(1,h1PeriodLett_IntLuminosity[iYT].GetNbinsX()+1):
         print(("Period %s: %.3f pb-1"%(h1PeriodLett_IntLuminosity[iYT].GetXaxis().GetBinLabel(iBin),h1PeriodLett_IntLuminosity[iYT].GetBinContent(iBin))))
     else:
       h1Period_IntLuminosity[iYT].Draw("P HIST")
+      h1Period_IntLuminosity[iYT].LabelsOption("v")
+      h1Period_IntLuminosity[iYT].GetXaxis().SetTitleOffset(1.45)
+      h1Period_IntLuminosity[iYT].GetXaxis().SetLabelSize(0.04)
       for iBin in range(1,h1Period_IntLuminosity[iYT].GetNbinsX()+1):
         print(("Period %s: %.3f pb-1"%(h1Period_IntLuminosity[iYT].GetXaxis().GetBinLabel(iBin),h1Period_IntLuminosity[iYT].GetBinContent(iBin))))
 
