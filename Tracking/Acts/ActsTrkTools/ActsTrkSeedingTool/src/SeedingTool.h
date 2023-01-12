@@ -3,7 +3,7 @@
 */
 
 #ifndef ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
-#define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H 1
+#define ACTSTRKSEEDINGTOOL_SEEDINGTOOL_H
 
 // ATHENA
 #include "ActsTrkToolInterfaces/ISeedingTool.h"
@@ -25,13 +25,16 @@
 #include <cmath> //for M_PI
 
 namespace ActsTrk {
-  
+
   class SeedingTool :
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
-    
   public:
-    SeedingTool(const std::string& type, const std::string& name,
-		    const IInterface* parent);
+    using value_type = ActsTrk::SpacePoint;
+    using seed_type = Acts::Seed< ActsTrk::SpacePoint >;
+    
+    SeedingTool(const std::string& type, 
+		const std::string& name,
+		const IInterface* parent);
     virtual ~SeedingTool() = default;
     
     virtual StatusCode initialize() override;
@@ -44,7 +47,7 @@ namespace ActsTrk {
 		  const Acts::Vector3& bField,
 		  ActsTrk::SeedContainer& seedContainer) const override;
     
-  private:        
+  protected:
     // metafunction to obtain correct type in iterated container given the iterator type
     template<typename spacepoint_iterator_t>
     struct external_spacepoint {
@@ -55,18 +58,17 @@ namespace ActsTrk {
                        >::type;
     };
 
-    template< typename spacepoint_iterator_t >
+    template< typename external_iterator_t >
       StatusCode
-      createSeeds( spacepoint_iterator_t spBegin,
-		   spacepoint_iterator_t spEnd,
+      createSeeds( external_iterator_t spBegin,
+		   external_iterator_t spEnd,
 		   const Acts::Vector3& beamSpotPos,
 		   const Acts::Vector3& bField,
-       std::vector< Acts::Seed< typename external_spacepoint<spacepoint_iterator_t>::type > >&  seeds) const;
+		   std::vector< seed_type >& seeds) const;
     
-    template< typename external_spacepoint_t >
-      const std::pair< 
-                   Acts::SpacePointGridConfig, 
-                   Acts::SeedFinderConfig< external_spacepoint_t > 
+    const std::pair< 
+      Acts::SpacePointGridConfig, 
+      Acts::SeedFinderConfig< value_type >
       > 
       prepareConfiguration(const Acts::Vector2& beamPos, 
 			   const Acts::Vector3& bField) const;
@@ -74,7 +76,7 @@ namespace ActsTrk {
     // *********************************************************************
     // *********************************************************************
 
-  private:
+  protected:
 
     // Properties to set SpacePointGridConfig
     Gaudi::Property< float > m_minPt {this, "minPt", 900. * Acts::UnitConstants::MeV,
@@ -246,9 +248,8 @@ namespace ActsTrk {
       "vector containing the map of z bins in the top layers"};
     Gaudi::Property< int > m_numPhiNeighbors {this, "numPhiNeighbors", 1,
       "number of phi bin neighbors at each side of the current bin that will be used to search for SPs"};
-
   };
-  
+
 } // namespace
 
 #endif

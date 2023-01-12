@@ -95,12 +95,9 @@ namespace ActsTrk {
 				     const Acts::Vector3& bField,
 				     ActsTrk::SeedContainer& seedContainer ) const
   {
-    using external_spacepoint_t = ActsTrk::SpacePoint;
-    using seed_t = Acts::Seed<external_spacepoint_t>;
-
     auto finderCfg = prepareConfiguration(Acts::Vector2(beamSpotPos[Amg::x], beamSpotPos[Amg::y]),
 					  bField);
-    Acts::SeedFinderOrthogonal<external_spacepoint_t> finder(finderCfg);
+    Acts::SeedFinderOrthogonal<value_type> finder(finderCfg);
 
     // Compute seeds
     auto groupSeeds = finder.createSeeds(spContainer);
@@ -108,14 +105,14 @@ namespace ActsTrk {
     // Store seeds
     seedContainer.reserve(groupSeeds.size());
     for( const auto& seed: groupSeeds) {
-      std::unique_ptr<seed_t> to_add = std::make_unique<seed_t>(seed);
+      std::unique_ptr<seed_type> to_add = std::make_unique<seed_type>(seed);
       seedContainer.push_back(std::move(to_add));  
     }
 
     return StatusCode::SUCCESS;
   }
 
-  const Acts::SeedFinderOrthogonalConfig<ActsTrk::SpacePoint>
+  const Acts::SeedFinderOrthogonalConfig< typename OrthogonalSeedingTool::value_type >
   OrthogonalSeedingTool::prepareConfiguration(const Acts::Vector2& beamPos,
 					      const Acts::Vector3& bField) const
   {
@@ -153,8 +150,8 @@ namespace ActsTrk {
     filterCfg.forwardSeedConfirmationRange.minImpactSeedConf = m_seedConfForwardMinImpact;
 
     // Configuration Acts::SeedFinderOrthogonal
-    Acts::SeedFinderOrthogonalConfig<ActsTrk::SpacePoint> finderCfg;
-    finderCfg.seedFilter =  std::make_shared<Acts::SeedFilter<ActsTrk::SpacePoint>>(filterCfg); 
+    Acts::SeedFinderOrthogonalConfig<value_type> finderCfg;
+    finderCfg.seedFilter =  std::make_shared<Acts::SeedFilter<value_type>>(filterCfg); 
     finderCfg.minPt = m_minPt;
     finderCfg.cotThetaMax = m_cotThetaMax;
     finderCfg.deltaRMinTopSP = m_deltaRMinTopSP;
