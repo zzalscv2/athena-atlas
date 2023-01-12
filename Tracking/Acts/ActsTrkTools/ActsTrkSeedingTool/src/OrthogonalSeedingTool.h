@@ -28,6 +28,9 @@ namespace ActsTrk {
     public extends<AthAlgTool, ActsTrk::ISeedingTool> {
 
   public:
+    using value_type = ActsTrk::SpacePoint;
+    using seed_type = Acts::Seed< ActsTrk::SpacePoint >;
+
     OrthogonalSeedingTool(const std::string& type, const std::string& name,
 			  const IInterface* parent);
     virtual ~OrthogonalSeedingTool() = default;
@@ -43,7 +46,9 @@ namespace ActsTrk {
 		  ActsTrk::SeedContainer& seedContainer ) const override;
     
   private:
-    const Acts::SeedFinderOrthogonalConfig<ActsTrk::SpacePoint> 
+
+
+    const Acts::SeedFinderOrthogonalConfig<value_type>
       prepareConfiguration(const Acts::Vector2& beamPos,
 			   const Acts::Vector3& bField) const;
     
