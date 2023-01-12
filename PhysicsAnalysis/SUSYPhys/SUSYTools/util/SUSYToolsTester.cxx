@@ -675,6 +675,10 @@ int main( int argc, char* argv[] ) {
       ANA_MSG_DEBUG( taus_nominal->size() << " taus");
     }
     
+    // MET Trigger
+    bool passMETtrig = objTool.IsMETTrigPassed();
+    ANA_MSG_DEBUG( "Pass MET trigger " << passMETtrig);
+
     // MET
     metcst_nominal->setStore(metcst_nominal_aux);
     metcst_nominal->reserve(10);
