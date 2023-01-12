@@ -44,22 +44,25 @@ namespace InDet {
     virtual ~BeamPipeBuilder() = default;
 
     /** LayerBuilder interface method - returning Barrel-like layers */
-    virtual const std::vector<Trk::CylinderLayer* >* cylindricalLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::CylinderLayer*> >
+    cylindricalLayers() const override final;
 
     /** LayerBuilder interface method - returning Endcap-like layers */
-    virtual const std::vector<Trk::DiscLayer* >*     discLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::DiscLayer*> >
+    discLayers() const override final;
 
     /** LayerBuilder interface method - returning Planar-like layers */
-    virtual const std::vector<Trk::PlaneLayer* >*    planarLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::PlaneLayer*> >
+    planarLayers() const override final;
 
     /** Name identification */
     virtual const std::string& identification() const override;
   };
 
-  inline const std::vector< Trk::DiscLayer* >*  BeamPipeBuilder::discLayers() const
+  inline std::unique_ptr<const std::vector<Trk::DiscLayer*> > BeamPipeBuilder::discLayers() const
   { return 0; }
 
-  inline const std::vector< Trk::PlaneLayer* >* BeamPipeBuilder::planarLayers() const
+  inline std::unique_ptr<const std::vector<Trk::PlaneLayer*> > BeamPipeBuilder::planarLayers() const
   { return 0; }
 
   inline const std::string& BeamPipeBuilder::identification() const

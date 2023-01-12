@@ -28,20 +28,19 @@ StatusCode InDet::TRT_LayerBuilder::initialize()
 
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector<Trk::CylinderLayer*>*
+std::unique_ptr<const std::vector<Trk::CylinderLayer*> >
 InDet::TRT_LayerBuilder::cylindricalLayers() const
 {
   if (!m_trtMgr) return nullptr;
   const InDetDD::TRT_DetElementContainer* trtContainer = m_trtMgr->getDetectorElementContainer();
-  return cylindricalLayersImpl(trtContainer).release();
+  return cylindricalLayersImpl(trtContainer);
 }
 
 
 /** LayerBuilder interface method - returning Endcap-like layers */
-const std::vector<Trk::DiscLayer*>* InDet::TRT_LayerBuilder::discLayers() const
+std::unique_ptr<const std::vector<Trk::DiscLayer*> > InDet::TRT_LayerBuilder::discLayers() const
 {
   if (!m_trtMgr) return nullptr;
   const InDetDD::TRT_DetElementContainer* trtContainer = m_trtMgr->getDetectorElementContainer();
-
-  return discLayersImpl(trtContainer).release();
+  return discLayersImpl(trtContainer);
 }

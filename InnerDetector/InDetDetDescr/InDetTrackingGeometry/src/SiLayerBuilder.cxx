@@ -31,15 +31,15 @@ StatusCode InDet::SiLayerBuilder::initialize()
 
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers() const
+std::unique_ptr<const std::vector<Trk::CylinderLayer*> > InDet::SiLayerBuilder::cylindricalLayers() const
 {
   const InDetDD::SiDetectorElementCollection* siDetElementCollectionPtr = m_siMgr->getDetectorElementCollection();
-  return cylindricalLayersImpl(*siDetElementCollectionPtr).release();
+  return cylindricalLayersImpl(*siDetElementCollectionPtr);
 }
 
 
 /** LayerBuilder interface method - returning Endcap-like layers */
-const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
+std::unique_ptr<const std::vector<Trk::DiscLayer* > > InDet::SiLayerBuilder::discLayers() const
 {
   // sanity check for ID Helper
   if (!m_pixIdHelper && !m_sctIdHelper){
@@ -49,7 +49,7 @@ const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
 
   // check for DBMS
   int nDBMLayers = m_siMgr->numerology().numEndcapsDBM();
-  if (!nDBMLayers) return ((m_pixelCase and m_useRingLayout) ? createRingLayers().release() : createDiscLayers().release());
+  if (!nDBMLayers) return ((m_pixelCase and m_useRingLayout) ? createRingLayers() : createDiscLayers());
 
   ATH_MSG_DEBUG( "Found " << m_siMgr->numerology().numEndcapsDBM() << " DBM layers active, building first ECs, then DBMS");
   std::unique_ptr<std::vector<Trk::DiscLayer*> > ecLayers = createDiscLayers();
@@ -58,7 +58,7 @@ const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
     ecLayers = createDiscLayers(std::move(ecLayers));
     ATH_MSG_VERBOSE( "Created " << ecLayers->size() << " endcap layers with DBM.");
   }
-  return ecLayers.release();
+  return ecLayers;
 
 }
 

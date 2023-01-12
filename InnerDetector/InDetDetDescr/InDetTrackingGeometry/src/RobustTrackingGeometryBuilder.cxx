@@ -180,7 +180,7 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
        // retrieve the cylinder and disc layers
        ATH_MSG_DEBUG( "[ LayerBuilder : '" << m_layerBuilders[ilb]->identification() << "' ] being processed. " );
        // (a) cylinder           
-       const std::vector<Trk::CylinderLayer*>* cylinderLayers = m_layerBuilders[ilb]->cylindricalLayers();
+       std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylinderLayers = m_layerBuilders[ilb]->cylindricalLayers();
        // (a)
        std::vector<Trk::Layer*> cylinderVolumeLayers;     
        if (cylinderLayers && !cylinderLayers->empty()){
@@ -229,7 +229,7 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
        endcapMinExtend =  ( centralExtendZ > endcapMinExtend) ? 10e10 : endcapMinExtend; 
        
        // (b) discs       
-       const std::vector<Trk::DiscLayer*>* discLayers = m_layerBuilders[ilb]->discLayers();       
+       std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers = m_layerBuilders[ilb]->discLayers();
        std::vector<Trk::Layer*> discVolumeLayersNeg;
        std::vector<Trk::Layer*> discVolumeLayersPos;                        
        if (discLayers && !discLayers->empty()){
@@ -289,10 +289,6 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
        providedDiscLayersNeg.push_back(discVolumeLayersNeg);
        providedDiscLayersPos.push_back(discVolumeLayersPos);
                 
-       // memory cleanup
-       delete discLayers;
-       delete cylinderLayers;  
-       
        if (msgLvl(MSG::VERBOSE)){
          // summary after this step
          ATH_MSG_VERBOSE( "[ Summary STEP 1  ---------------------------------------- ]  " );
@@ -330,11 +326,10 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
    Trk::CylinderVolumeBounds* beamPipeBounds = new Trk::CylinderVolumeBounds(overallRmin,overallExtendZ); 
    // BinnedArray needed
    Trk::BinnedArray<Trk::Layer>* beamPipeLayerArray = nullptr;
-   const std::vector<Trk::CylinderLayer*>* beamPipeVec = m_beamPipeBuilder->cylindricalLayers();
+   std::unique_ptr<const std::vector<Trk::CylinderLayer*> > beamPipeVec = m_beamPipeBuilder->cylindricalLayers();
    if (!beamPipeVec->empty()) {
      beamPipeLayerArray = m_layerArrayCreator->cylinderLayerArray(*beamPipeVec, 0., beamPipeBounds->outerRadius(), Trk::arbitrary);
    }
-   delete beamPipeVec;
    // create the TrackingVolume
    beamPipeVolume = new Trk::TrackingVolume(nullptr,
                                             beamPipeBounds,

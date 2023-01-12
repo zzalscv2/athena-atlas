@@ -45,13 +45,13 @@ namespace InDet {
     virtual StatusCode initialize() override final;
 
     /** LayerBuilder interface method - returning Barrel-like layers */
-    virtual const std::vector<Trk::CylinderLayer*>* cylindricalLayers() const override final;
+    virtual std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylindricalLayers() const override final;
 
     /** LayerBuilder interface method - returning Endcap-like layers */
-    virtual const std::vector<Trk::DiscLayer*>* discLayers() const override final;
+    virtual std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers() const override final;
 
     /** LayerBuilder interface method - returning Planar-like layers */
-    virtual const std::vector<Trk::PlaneLayer*>* planarLayers() const override final;
+    virtual std::unique_ptr<const std::vector<Trk::PlaneLayer*> > planarLayers() const override final;
 
     /** Name identification */
     virtual const std::string& identification() const override final;
@@ -62,7 +62,7 @@ namespace InDet {
     StringProperty m_trtMgrLocation{this, "TRT_DetManagerLocation", "TRT"}; //!< the location of the TRT Manager
   };
 
-  inline const std::vector<Trk::PlaneLayer* >* TRT_LayerBuilder::planarLayers() const
+  inline std::unique_ptr<const std::vector<Trk::PlaneLayer* > > TRT_LayerBuilder::planarLayers() const
   { return nullptr; }
 
   inline const std::string& TRT_LayerBuilder::identification() const

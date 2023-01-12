@@ -50,13 +50,13 @@ namespace InDet {
     virtual StatusCode initialize() override;
 
     /** LayerBuilder interface method - returning Barrel-like layers */
-    virtual const std::vector<Trk::CylinderLayer* >* cylindricalLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::CylinderLayer* > > cylindricalLayers() const override final;
 
     /** LayerBuilder interface method - returning Endcap-like layers */
-    virtual const std::vector<Trk::DiscLayer* >*     discLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::DiscLayer* > > discLayers() const override final;
 
     /** LayerBuilder interface method - returning Planar-like layers */
-    virtual const std::vector<Trk::PlaneLayer* >*    planarLayers() const override;
+    virtual std::unique_ptr<const std::vector<Trk::PlaneLayer* > > planarLayers() const override final;
 
     /** Name identification */
     virtual const std::string& identification() const override final;
@@ -76,7 +76,7 @@ namespace InDet {
 
   };
 
-  inline const std::vector<Trk::PlaneLayer*>* SiLayerBuilder::planarLayers() const
+  inline std::unique_ptr<const std::vector<Trk::PlaneLayer*> > SiLayerBuilder::planarLayers() const
   { return 0; }
 
   inline const std::string& SiLayerBuilder::identification() const
