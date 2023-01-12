@@ -184,17 +184,21 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate
 
   // Get predicted extrapolation weights
   auto outputs            = m_nn->compute(inputVariables);
-  for (unsigned int i = 0; i < m_relevantLayers->size(); i++) {
-    const int ilayer = std::as_const(m_relevantLayers)->at(i);
-    ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: " << ilayer << " weight: " << outputs["extrapWeight_"+std::to_string(ilayer)]);
-    float weight = outputs["extrapWeight_"+std::to_string(ilayer)];
-    // Protections
-    if(weight < 0){
-      weight = 0;
-    } else if(weight > 1){
-      weight = 1;
+  for(int ilayer=0; ilayer < CaloCell_ID_FCS::MaxSample; ++ilayer) {
+    if(std::find(m_relevantLayers->cbegin(), m_relevantLayers->cend(), ilayer) != m_relevantLayers->cend()){
+      ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: " << ilayer << " weight: " << outputs["extrapWeight_"+std::to_string(ilayer)]);
+      float weight = outputs["extrapWeight_"+std::to_string(ilayer)];
+      // Protections
+      if(weight < 0){
+        weight = 0;
+      } else if(weight > 1){
+        weight = 1;
+      }
+      simulstate.setAuxInfo<float>(ilayer, weight);
+    } else { // use weight=0.5 for non-relevant layers
+      ATH_MSG_DEBUG("Setting weight=0.5 for layer = " << std::to_string(ilayer));
+      simulstate.setAuxInfo<float>(ilayer, float(0.5));
     }
-    simulstate.setAuxInfo<float>(ilayer, weight);
   }
   return FCSSuccess;
 }
@@ -210,7 +214,7 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationSta
    if(simulstate.hasAuxInfo(cs)){
      extrapWeight = simulstate.getAuxInfo<float>(cs);
    } else{ // missing AuxInfo
-     ATH_MSG_FATAL("Simulstate is not decorated with extrapolation weights");
+     ATH_MSG_FATAL("Simulstate is not decorated with extrapolation weights for cs = " << std::to_string(cs));
      return FCSFatal;
    }
 
