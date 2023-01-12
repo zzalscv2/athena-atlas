@@ -2822,13 +2822,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_energyTrkInJet_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_NGTinSvx_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_Lxy_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_purity_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromB_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromC_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFragmentation_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromSecondaries_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromPileup_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFake_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracHFTracksInJet_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_N2Tpair_incl" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_nVTX_incl" type="TH1F" plotopts="" tests="KS"/>
@@ -2849,13 +2842,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_energyTrkInJet_b" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_NGTinSvx_b" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_Lxy_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_purity_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromB_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromC_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFragmentation_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromSecondaries_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromPileup_b" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFake_b" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracHFTracksInJet_b" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_N2Tpair_b" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_nVTX_b" type="TH1F" plotopts="" tests="KS"/>
@@ -2876,13 +2862,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_energyTrkInJet_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_NGTinSvx_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_Lxy_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_purity_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromB_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromC_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFragmentation_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromSecondaries_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromPileup_c" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFake_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracHFTracksInJet_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_N2Tpair_c" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_nVTX_c" type="TH1F" plotopts="" tests="KS"/>
@@ -2903,13 +2882,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_energyTrkInJet_l" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_NGTinSvx_l" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_Lxy_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_purity_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromB_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromC_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFragmentation_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromSecondaries_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromPileup_l" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFake_l" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracHFTracksInJet_l" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_N2Tpair_l" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_nVTX_l" type="TH1F" plotopts="" tests="KS"/>
@@ -2930,13 +2902,6 @@
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_energyTrkInJet_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_NGTinSvx_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_Lxy_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_purity_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromB_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromC_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFragmentation_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromSecondaries_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromPileup_muon" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracTracks_fromFake_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_SV1_fracHFTracksInJet_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_N2Tpair_muon" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKtVR30Rmax4Rmin02PV0TrackJets_SV_JetFitter_nVTX_muon" type="TH1F" plotopts="" tests="KS"/>
