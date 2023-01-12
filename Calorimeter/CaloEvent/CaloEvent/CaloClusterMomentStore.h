@@ -60,7 +60,7 @@ class CaloClusterMomentStore
 	ATH_CLING_BODY (: m_actual(iStore) { } )
       /*! \brief Destructor */
 #ifdef __clang__
-      ~CaloClusterMomentIterator() = default;
+      ~CaloClusterMomentIterator();
 #else
       ~CaloClusterMomentIterator() ATH_CLING_BODY( { } )
 #endif

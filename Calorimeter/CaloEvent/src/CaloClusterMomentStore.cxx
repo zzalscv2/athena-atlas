@@ -6,10 +6,14 @@
 #include "CaloEvent/CaloClusterMomentStore.h"
 
 // constructor
-CaloClusterMomentStore::CaloClusterMomentStore() = default;
+CaloClusterMomentStore::CaloClusterMomentStore() 
+{ }
 
 CaloClusterMomentStore::CaloClusterMomentStore(const CaloClusterMomentStore& 
-					       rMomStore) = default;
+					       rMomStore)
+  : m_store (rMomStore.m_store)
+{
+}
 
 CaloClusterMomentStore::CaloClusterMomentStore(const CaloClusterMomentStore*
 					       pMomStore)
@@ -26,7 +30,8 @@ CaloClusterMomentStore::operator= (const CaloClusterMomentStore& rMomStore)
 }
 
 // destructor
-CaloClusterMomentStore::~CaloClusterMomentStore() = default;
+CaloClusterMomentStore::~CaloClusterMomentStore()
+{ }
 
 // retrieve moment value
 bool CaloClusterMomentStore::retrieve(const moment_type& rMomType,
@@ -65,5 +70,5 @@ bool CaloClusterMomentStore::retrieveMomentTypes(moment_type_list&
 
 
 #ifdef __clang__
-
+CaloClusterMomentStore::CaloClusterMomentIterator::~CaloClusterMomentIterator() {}
 #endif
