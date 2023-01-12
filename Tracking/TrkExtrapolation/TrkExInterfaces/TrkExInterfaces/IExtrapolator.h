@@ -68,14 +68,6 @@ public:
   /** AlgTool interface methods */
   static const InterfaceID& interfaceID() { return IID_IExtrapolator; }
 
-  /** Extrapolate Neutral xAOD particle to surface.
-   * Starts from the perigee parameters. */
-  virtual std::unique_ptr<NeutralParameters> extrapolate(
-    const xAOD::NeutralParticle& xnParticle,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true) const = 0;
-
   /** Main extrapolation Interface starting from neutral parameters 
    * and aiming at surface.*/
   virtual std::unique_ptr<NeutralParameters> extrapolate(
@@ -83,17 +75,6 @@ public:
     const Surface& sf,
     PropDirection dir = anyDirection,
     const BoundaryCheck& bcheck = true) const = 0;
-
-  /** Extrapolate Charged xAOD particle to surface
-   * Starts from the perigee parameters.*/
-  virtual std::unique_ptr<TrackParameters> extrapolate(
-    const EventContext& ctx,
-    const xAOD::TrackParticle& particleBase,
-    const Surface& sf,
-    PropDirection dir = anyDirection,
-    const BoundaryCheck& bcheck = true,
-    ParticleHypothesis particle = pion,
-    MaterialUpdateMode matupmode = addNoise) const = 0;
 
   /** Main extrapolation interface starting from charged parameters and aiming
    * at Surface*/

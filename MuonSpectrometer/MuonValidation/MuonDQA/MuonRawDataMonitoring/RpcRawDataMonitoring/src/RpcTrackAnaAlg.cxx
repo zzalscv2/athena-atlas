@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // C/C++
@@ -644,7 +644,7 @@ RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                res
 
   if(m_useAODParticle) {
     detParameters = m_extrapolator->extrapolate(ctx,
-                                                *track_particle,
+                                                track_particle->perigeeParameters(),
                                                 gapSurface,
                                                 result.direction,
                                                 false,

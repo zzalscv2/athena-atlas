@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetMultipleVertexSeedFinderUtils/InDetTrackZ0SortingTool.h"
@@ -165,7 +165,7 @@ namespace InDet
 	Trk::PerigeeSurface perigeeSurface(reference->position());
 	perigee = m_extrapolator->extrapolate(
     ctx,
-    **tb,
+    (*tb)->perigeeParameters(),
     perigeeSurface,
     Trk::anyDirection,true, Trk::pion).release();  
 	

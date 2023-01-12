@@ -484,7 +484,8 @@ namespace InDet
 	  {
 
           const Trk::TrackParameters* lexPerigee =
-            m_extrapolator->extrapolate(ctx, **p_tr, perigeeSurface, Trk::anyDirection, true, Trk::pion)
+            m_extrapolator->extrapolate(ctx, (*p_tr)->perigeeParameters(), 
+                                        perigeeSurface, Trk::anyDirection, true, Trk::pion)
               .release();
           double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
           delete lexPerigee;

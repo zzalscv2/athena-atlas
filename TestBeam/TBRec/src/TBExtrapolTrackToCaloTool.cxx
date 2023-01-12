@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -543,7 +543,10 @@ Amg::Vector3D TBExtrapolTrackToCaloTool::getMomentumAtVertex(const xAOD::Vertex&
         ATH_MSG_WARNING("NULL pointer to TrackParticle in vertex");
         continue;
       }
-      const Trk::TrackParameters* params = m_extrapolator->extrapolate(ctx, *tp, *surface, Trk::alongMomentum).release();
+      const Trk::TrackParameters* params = m_extrapolator->extrapolate(ctx, 
+                                                                       tp->perigeeParameters(), 
+                                                                       *surface, 
+                                                                       Trk::alongMomentum).release();
       if (!params)
         ATH_MSG_DEBUG("Extrapolation to vertex (perigee) failed");
       else

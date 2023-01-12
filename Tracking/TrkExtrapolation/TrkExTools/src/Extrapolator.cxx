@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 ///////////////////////////////////////////////////////////////////
@@ -459,33 +459,6 @@ Trk::Extrapolator::finalize()
   }
 
   return StatusCode::SUCCESS;
-}
-
-std::unique_ptr<Trk::NeutralParameters>
-Trk::Extrapolator::extrapolate(const xAOD::NeutralParticle& xnParticle,
-                               const Surface& sf,
-                               PropDirection dir,
-                               const BoundaryCheck& bcheck) const
-{
-  const Trk::NeutralPerigee& nPerigee = xnParticle.perigeeParameters();
-
-  return extrapolate(nPerigee, sf, dir, bcheck);
-}
-
-std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const xAOD::TrackParticle& xtParticle,
-                               const Surface& sf,
-                               PropDirection dir,
-                               const BoundaryCheck& bcheck,
-                               ParticleHypothesis particle,
-                               MaterialUpdateMode matupmode) const
-{
-  const Trk::Perigee& tPerigee = xtParticle.perigeeParameters();
-  // !< @TODO: search for closest parameter in on new curvilinear
-  // x/y/z and surface distance ...
-  // ... for the moment ... take the perigee
-  return extrapolate(ctx, tPerigee, sf, dir, bcheck, particle, matupmode);
 }
 
 std::unique_ptr<Trk::NeutralParameters>
