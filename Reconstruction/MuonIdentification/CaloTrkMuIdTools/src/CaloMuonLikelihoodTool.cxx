@@ -252,8 +252,8 @@ double CaloMuonLikelihoodTool::getLHR(const xAOD::CaloClusterContainer* ClusColl
     double tmp_mx(-999), tmp_mxH(-999), tmp_mxE(-999);
     for (int i = 0; i < 24; ++i) {
         if (s[i] > tmp_mx) { tmp_mx = s[i]; }
-        if (s[i] > tmp_mxE && i < 11) { tmp_mxE = s[i]; }
-        if (s[i] > tmp_mxH && i >= 11) { tmp_mxH = s[i]; }
+        if (i < 11 && s[i] > tmp_mxE ) { tmp_mxE = s[i]; }
+        if (i >= 11 && s[i] > tmp_mxH ) { tmp_mxH = s[i]; }
     }
 
     double emFr{999}, mxFr{999}, mxEM{999}, mxHad{999}, EoverEtrk{999}, eemb1_wrtTotal{999}, eemb2_wrtTotal{999}, eemb3_wrtGroup{999},
