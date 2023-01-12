@@ -23,7 +23,7 @@ class RoiFilter {
 public:
 
   RoiFilter( double eta=0, bool comp=false, size_t m=1 ) : meta(eta), mcomp(comp), mmult(m) { } 
-  RoiFilter(TIDARoiDescriptor) { } 
+  RoiFilter(TIDARoiDescriptor): meta(0.0),mcomp(false),mmult(0) { } 
 
   double       eta() const { return meta; }
   bool   composite() const { return mcomp; }

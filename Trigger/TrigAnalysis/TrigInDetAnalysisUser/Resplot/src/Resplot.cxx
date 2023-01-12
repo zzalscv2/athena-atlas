@@ -234,15 +234,15 @@ void Resplot::Initialise(const std::string& name,
 
 
 void Resplot::Initialise(const std::string& name, 
-			 std::vector<double> a,
+			 const std::vector<double>& a,
 			 int n2, double a2, double b2) {
   Initialise(name, a.size()-1, &a[0], n2, a2, b2);
 } 
 
 
 void Resplot::Initialise(const std::string& name, 
-			 std::vector<double> a,
-			 std::vector<double> b ) { 
+			 const std::vector<double>& a,
+			 const std::vector<double>& b ) { 
   Initialise(name, a.size()-1, &a[0], b.size()-1, &b[0] );
 } 
 

@@ -31,8 +31,7 @@ class Directory {
  public:
 
   Directory() : mHAddState(true), mDAddState(true), mPop(NULL), mDir(NULL) { } 
-  Directory(const std::string& n) : mPop(gDirectory), mDir(gDirectory->mkdir(n.c_str())) { 
-    //   push();
+  Directory(const std::string& n) :mHAddState(true), mDAddState(true), mPop(gDirectory), mDir(gDirectory->mkdir(n.c_str())) { 
   } 
 
   virtual ~Directory() {  }
