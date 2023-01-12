@@ -335,9 +335,14 @@ class Legend {
 
 public:
 
-  Legend() : m_leg(0) { } 
+  Legend() : m_leg(nullptr){ 
+    m_x[0]=0.0;
+    m_y[0]=0.0;
+    m_x[1]=0.0;
+    m_y[1]=0.0;
+	  } 
 
-  Legend(double x1, double x2, double y1, double y2) { 
+  Legend(double x1, double x2, double y1, double y2): m_leg(nullptr) { 
     m_x[0]=x1;
     m_y[0]=y1;
     m_x[1]=x2;
@@ -913,6 +918,7 @@ public:
     m_maxset(false), m_max(0),
     m_minset(false), m_min(0),
     m_rangeset(false), 
+    m_lo(0.0), m_hi(0.0),
     m_trim_errors(errors)
   { }
 
@@ -1073,7 +1079,7 @@ public:
   
 
 
-  void sortx( const AxisInfo& xinfo ) { // bool autoset=false, bool sym=false, bool logset=false, bool rangeset=false, double lo=0, double hi=0 ) { 
+  void sortx( const AxisInfo& xinfo ) {
     
     if ( xinfo.rangeset() ) { 
       m_lo = xinfo.lo();

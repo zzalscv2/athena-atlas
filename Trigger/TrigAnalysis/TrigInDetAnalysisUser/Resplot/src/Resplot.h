@@ -72,10 +72,14 @@ public:
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL), 
     m_h2d(NULL), m_h1d(NULL), 
     m_dir(NULL),
+    n_primary(0),
+    n_secondary(0),
+    a_secondary(0.0),
+    b_secondary(0.0),
     m_xaxis(""), m_yaxis(""), m_fitname(""), m_finalised(false),
     m_uniform(true)
   {  } 
-  
+
 
   Resplot(const std::string& name, 
 	  int n1, double a1, double b1, 
@@ -107,7 +111,6 @@ public:
   Resplot(const std::string& name, 
 	  const std::vector<double>& a,
 	  int n2, double a2, double b2, const std::string& xaxis="") :
-    //   TH2D( "2d", "2d", a.size()-1, &a[0], n2, a2, b2),   
     mSet(false),  m_name(name), 
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),   
@@ -122,7 +125,6 @@ public:
 	  const std::vector<double>& a,
 	  const std::vector<double>& b, 
 	  const std::string& xaxis="") :
-    //   TH2D( "2d", "2d", a.size()-1, &a[0], n2, a2, b2),   
     mSet(false),  m_name(name), 
     m_Nentries(NULL), 
     m_mean(NULL), m_sigma(NULL), m_chi2(NULL),   
@@ -267,12 +269,12 @@ public:
 		  int n2, const double* a2);
 
   void Initialise(const std::string& name, 
-		  std::vector<double> a, 
+		  const std::vector<double>& a, 
 		  int n2, double a2, double b2);
 
   void Initialise(const std::string& name, 
-		  std::vector<double> a, 
-		  std::vector<double> b ); 
+		  const std::vector<double>& a, 
+		  const std::vector<double>& b ); 
  
   
   // Fill the helper histograms

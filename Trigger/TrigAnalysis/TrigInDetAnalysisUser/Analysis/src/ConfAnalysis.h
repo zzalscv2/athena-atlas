@@ -52,9 +52,14 @@ public:
   
   ConfAnalysis( const std::string& name, const ChainString& config, TagNProbe* TnP_tool=0 ) : 
     TrackAnalysis( clean(name) ), 
-    mconfig(config),
-    Nreco(0), Nref(0), Nmatched(0), m_print(false), m_roi(0), 
-    m_initialised(false), m_initialiseFirstEvent(false) { // , m_lfirst(true)  {
+    mconfig(config)
+    {
+    hphivsDd0res[0]=0;
+    hphivsDd0res[1]=0;
+    hphivsDd0res[2]=0;
+    hphivsDa0res[0]=0;
+    hphivsDa0res[1]=0;
+    hphivsDa0res[2]=0;
     std::cout << "ConfAnalysis::ConfAnalysis() " << TrackAnalysis::name() << " ..." << std::endl;
     setTnPtool( TnP_tool );
   }
@@ -148,7 +153,7 @@ private:
 
   ChainString  mconfig;
 
-  TIDDirectory* mdir;
+  TIDDirectory* mdir = 0;
 
   std::map<std::string, TH1F*> m_histos;
   std::map<std::string, TH2F*> m_histos2D;
@@ -158,7 +163,7 @@ private:
   TH1F* m_invmassObj = 0;
 
   // tag and probe object
-  TagNProbe* m_TnP_tool;
+  TagNProbe* m_TnP_tool = 0;
 
   Efficiency* eff_pt = 0;
   Efficiency* eff_ptp = 0;
@@ -213,12 +218,12 @@ private:
   //  TH2F* hnpix_v_sct_rec;
   //  TH2F* hnpix_v_sct_match;
 
-  TH1F* hDeltaR;
+  TH1F* hDeltaR = 0;
 
   /// number of reconstructed tracks 
-  int Nreco;
-  int Nref;
-  int Nmatched;
+  int Nreco = 0;
+  int Nref = 0;
+  int Nmatched = 0;
 
   Resplot* rnpix_eta = 0;
   Resplot* rnsct_eta = 0;
@@ -298,10 +303,10 @@ private:
   std::vector<Resplot*> rDa0res;
   std::vector<Resplot*> rDz0res;
 
-  Resplot* rzedreslb;
+  Resplot* rzedreslb = 0;
 
-  Resplot* rzedlb;
-  Resplot* rzedlb_rec;
+  Resplot* rzedlb = 0;
+  Resplot* rzedlb_rec = 0;
 
   //  std::vector<Resplot*> rd0res_95;
   //  std::vector<Resplot*> rd0res_rms;
@@ -356,12 +361,12 @@ private:
   Efficiency* m_eff_vs_et = 0;
 
   /// flag to print out the matched tracks etc
-  bool m_print;
+  bool m_print = false;
 
   const TIDARoiDescriptor* m_roi = 0;
 
-  bool m_initialised;
-  bool m_initialiseFirstEvent;
+  bool m_initialised = false;
+  bool m_initialiseFirstEvent = false;
 
   Resplot* m_rnsct_vs_npix = 0;
   Resplot* m_rnsct_vs_npix_rec = 0;
