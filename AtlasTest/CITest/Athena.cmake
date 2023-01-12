@@ -196,6 +196,10 @@ atlas_add_citest( ACTS_ValidateOrthogonalSeeds
     SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsValidateOrthogonalSeeds.sh
     LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
 
+atlas_add_citest( ACTS_ActsPersistifyEDM 
+    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/ActsPersistifyEDM.sh 
+    LOG_IGNORE_PATTERN "WARNING FPE INVALID" )
+
 #################################################################################
 # Trigger
 #################################################################################
