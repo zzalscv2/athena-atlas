@@ -1393,7 +1393,7 @@ void JetTagMonitoring::fillDetailedHistograms(const xAOD::Jet *jet, Jet_t taggab
 }
 
 
-void JetTagMonitoring::fillBadTrackBits(const std::bitset<17> failedCuts, double eta, double phi) {
+void JetTagMonitoring::fillBadTrackBits(const std::bitset<17>& failedCuts, double eta, double phi) {
 
   if ( failedCuts[pTMin]           == 0 ) m_tracks_pTMin_2D->Fill(eta, phi, 1.);
   if ( failedCuts[d0Max]           == 0 ) m_tracks_d0Max_2D->Fill(eta, phi, 1.);

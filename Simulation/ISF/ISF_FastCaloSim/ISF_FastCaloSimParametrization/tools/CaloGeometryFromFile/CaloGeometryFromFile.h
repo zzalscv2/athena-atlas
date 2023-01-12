@@ -12,7 +12,7 @@ class CaloGeometryFromFile : public CaloGeometry
 public:
   CaloGeometryFromFile();
 
-  bool LoadGeometryFromFile(std::string fileName, std::string treeName,
+  bool LoadGeometryFromFile(const std::string& fileName, const std::string& treeName,
                             std::string hashFileName
                             = "/eos/atlas/atlascerngroupdisk/proj-simul/"
                               "CaloGeometry/cellId_vs_cellHashId_map.txt");
