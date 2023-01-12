@@ -12,11 +12,17 @@ import sys, socket, pathlib, errno, re, subprocess, os
 maindir = "/afs/cern.ch/user/a/atlasdqm/www/DeMo"
 libdir = os.path.dirname(__file__)
 
-global run3_yt
+run2 = False
+run3 = True
 
-run3_yt = {"2022":["Tier0_2022","GRL_2022"]}
+global run3_yt
+run3_yt = {"2022":["Tier0_2022","GRL_2022"],
+           "2023":["Tier0_2023","GRL_2023"]}
+
 tag_menuName = {"Tier0_2022":"All",
-                "GRL_2022":"GRL"}
+                "GRL_2022":"GRL",
+                "Tier0_2023":"All",
+                "GRL_2023":"GRL"}
 
 global subsystems
 subsystems = {"Inner detector":["Pixel","SCT","TRT"],
@@ -50,6 +56,22 @@ subsystemName = {"Pixel":"Pixel",
 subsystemNotInRun2 = {}
 subsystemNotInRun3 = ["CSC"]
 
+################################################################
+# When https is found in a character line, add a link in html
+# If none, simply return the line unchanged.
+def addLink(l):
+    htmlSplitted = l.split("https")
+
+    if len(htmlSplitted)>1: # Url found -> Direct link added
+        urlAlreadyReplaced = []
+        for iUrl in range(1,len(htmlSplitted)):
+            url = "https%s"%(htmlSplitted[iUrl].split(" ")[0])
+            if (url not in urlAlreadyReplaced):
+                l = l.replace(url,'''<a href="%s" target="_blank"> %s </a>'''%(url,url))
+            urlAlreadyReplaced.append(url)
+
+    return l
+
 
 ################################################################
 def addHeader(page):
@@ -71,20 +93,25 @@ def addHeader(page):
     ### Home
     page.write('''   <li><a href='.'><span>Home</span></a></li>''')
 
-    ### Weekly recap overview
-    page.write('''   <li><a href='Weekly.html'><span>Weekly recap</span></a></li>''')
+    ### Weekly recap overview - Only in Run3
+    if (run3):
+        page.write('''   <li><a href='Weekly.html'><span>Weekly overview</span></a></li>''')
 
     ### Year stats for all systems
-    page.write('''   <li class='active has-sub'><a><span>Year stats</span></a>''')
+    page.write('''   <li class='active has-sub'><a><span>Overview</span></a>''')
     page.write('''     <ul>''')
-    for iYear in run3_yt.keys():
-        for iTag in run3_yt[iYear]:
-            page.write('''       <li><a href='YearStats-%s-%s.html'><span>%s overview - %s</span></a></li>'''%(iYear,iTag,iYear,tag_menuName[iTag]))
-    #
-    page.write('''       <li><a href='YearStats-2018-DQPaper_2018.html'><span>2018 overview - DQ Paper</span></a></li>''')
-    page.write('''       <li><a href='YearStats-2017-DQPaper_2017.html'><span>2017 overview - DQ Paper</span></a></li>''')
-    page.write('''       <li><a href='YearStats-2016-DQPaper_2016.html'><span>2016 overview - DQ Paper</span></a></li>''')
-    page.write('''       <li><a href='YearStats-2015-DQPaper_2015.html'><span>2015 overview - DQ Paper</span></a></li>''')
+    if (run3):
+        for iYear in run3_yt.keys():
+            for iTag in run3_yt[iYear]:
+                page.write('''       <li><a href='YearStats-%s-%s.html'><span>Year stats - %s - %s</span></a></li>'''%(iYear,iTag,iYear,tag_menuName[iTag]))
+                page.write('''       <li><a href='recapDefectsHighlights-%s-%s.html'><span>Defect highlights (beta) - %s - %s</span></a></li>'''%(iYear,iTag,iYear,tag_menuName[iTag]))
+
+    if (run2):
+        page.write('''       <li><a href='YearStats-2018-DQPaper_2018.html'><span>2018 overview - DQ Paper</span></a></li>''')
+        page.write('''       <li><a href='YearStats-2017-DQPaper_2017.html'><span>2017 overview - DQ Paper</span></a></li>''')
+        page.write('''       <li><a href='YearStats-2016-DQPaper_2016.html'><span>2016 overview - DQ Paper</span></a></li>''')
+        page.write('''       <li><a href='YearStats-2015-DQPaper_2015.html'><span>2015 overview - DQ Paper</span></a></li>''')
+
     page.write('''     </ul>''')
     page.write('''   </li>''')
     
@@ -92,20 +119,24 @@ def addHeader(page):
         page.write('''   <li class='active has-sub'><a><span>%s</span></a>'''%iSystem)
         page.write('''      <ul>''')
 
-        for iSubSystem in subsystems[iSystem]:
-             page.write('''<li class='has-sub'><a ><span>%s</span></a>'''%subsystemName[iSubSystem])
-             page.write('''   <ul>''')
-             if (iSubSystem not in subsystemNotInRun3):
-                 page.write('''      <li><a href='%s-Weekly.html'><span>Weekly</span></a></li>'''%(iSubSystem))
-                 for iYear in run3_yt.keys():
-                     for iTag in run3_yt[iYear]:
-                         page.write('''      <li><a href='%s-YearStats-%s-%s.html'><span>Year stats - %s - %s</span></a></li>'''%(iSubSystem,iYear,iTag,iYear,tag_menuName[iTag]))
-                         page.write('''      <li><a href='%s-recapDefects-%s-%s.html'><span>Defect recap - %s - %s </span></a></li>'''%(iSubSystem,iYear,iTag,iYear,tag_menuName[iTag]))
-             if (iSubSystem not in subsystemNotInRun2):
-                 page.write('''      <li><a href='%s-YearStats-DQPaper_.html'><span>Year stats - Run2</span></a></li>'''%(iSubSystem))
-                 page.write('''      <li class='last'><a href='%s-recapDefects-DQPaper_.html'><span>Defect recap - Run2</span></a></li>'''%(iSubSystem))
-             page.write('''   </ul>''')
-             page.write('''</li>''')
+        for iSystem in subsystems[iSystem]:
+            if ((run3) and (iSystem not in subsystemNotInRun3)) or ((run2) and (iSystem not in subsystemNotInRun2)):
+                page.write('''<li class='has-sub'><a ><span>%s</span></a>'''%subsystemName[iSystem])
+                page.write('''   <ul>''')
+            else:
+                continue
+
+            if (run3) and (iSystem not in subsystemNotInRun3):
+                page.write('''      <li><a href='%s-Weekly.html'><span>Weekly</span></a></li>'''%(iSystem))
+                for iYear in run3_yt.keys():
+                    for iTag in run3_yt[iYear]:
+                        page.write('''      <li><a href='%s-YearStats-%s-%s.html'><span>Year stats - %s - %s</span></a></li>'''%(iSystem,iYear,iTag,iYear,tag_menuName[iTag]))
+                        page.write('''      <li><a href='%s-recapDefects-%s-%s.html'><span>Defect recap - %s - %s </span></a></li>'''%(iSystem,iYear,iTag,iYear,tag_menuName[iTag]))
+            if (run2) and (iSystem not in subsystemNotInRun2):
+                page.write('''      <li><a href='%s-YearStats-DQPaper_.html'><span>Year stats - Run2</span></a></li>'''%(iSystem))
+                page.write('''      <li class='last'><a href='%s-recapDefects-DQPaper_.html'><span>Defect recap - Run2</span></a></li>'''%(iSystem))
+            page.write('''   </ul>''')
+            page.write('''</li>''')
         page.write('''</ul>''')
         page.write('''</li>''')
 
@@ -119,7 +150,7 @@ def addHeader(page):
 ################################################################
 def addFooter(page):
     page.write('''<div style="text-align:left" class="rectangle">''')
-    page.write('''Documentation available <a href="https://twiki.cern.ch/twiki/bin/view/Atlas/DataQualityDemo"> here </a> <br>''')
+    page.write('''Link to the <a href="logs/DeMoCron.log"> cron job output </a> - Documentation available <a href="https://twiki.cern.ch/twiki/bin/view/Atlas/DataQualityDemo"> here </a> <br>''')
     page.write('''Original developer: Benjamin Trocm&eacute (LPSC Grenoble) - Maintenance: Benjamin Trocm&eacute (LPSC Grenoble)''')
     page.write('''</div></body>''')
     page.write('''<html>''')
@@ -226,7 +257,186 @@ def addHeaderRun2RecapDefects(page):
     page.write('''</div>''')
     return
 
-#######################
+################################################################
+def createRun2LegacyPages():
+    ## Run 2 Year stats for all systems
+    for iYear in ["2015","2016","2017","2018"]:
+        page = open("%s/YearStats-%s-DQPaper_%s.html"%(maindir,iYear,iYear),"w")
+        addHeader(page)
+        for iSystem in subsystemName.keys():
+            if (iSystem not in subsystemNotInRun2):
+                page.write('''<div style="text-align:left" class="rectangle"> <b>%s</b>'''%iSystem)
+                page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/DQPaper_%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSystem,iYear,iYear))
+                if iSystem == "LAr":
+                    page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/DQPaper_%s/grl-veto.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSystem,iYear,iYear))
+                page.write('''</div>''')
+        addFooter(page)
+        page.close()
+
+    ## Run 2 YearStats page per system
+    for iSystem in subsystemName.keys():
+        if (iSystem not in subsystemNotInRun3):
+            page = open("%s/%s-YearStats-DQPaper_.html"%(maindir,iSystem),"w")
+            addHeader(page)
+            for iYear in ["2015","2016","2017","2018"]:
+                page.write('''<div style="text-align:left" class="rectangle"><b>%s</b>'''%(iYear))
+                page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-LAr/%s/DQPaper_%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iYear,iYear))
+                if iSystem == "LAr":
+                    page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-LAr/%s/DQPaper_%s/grl-veto.png" alt=""  width="750" content="no-cache" /></figure>'''%(iYear,iYear))
+                page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-LAr/%s/DQPaper_%s/grl-lumi.png" alt=""  width="750" content="no-cache" /></figure>'''%(iYear,iYear))
+                page.write('''</div>''')
+            addFooter(page)
+            page.close()
+
+    ## Run 2 RecapDefect page per system
+    for iSystem in subsystemName.keys():
+        if (iSystem not in subsystemNotInRun2):
+            page = open("%s/%s-recapDefects-DQPaper_.html"%(maindir,iSystem),"w")
+            addHeader(page)
+            addHeaderRun2RecapDefects(page)
+            for iYear in ["2015","2016","2017","2018"]:
+                page.write('''<hr>''')
+                page.write('''<a id='%s'> %s dataset </a>'''%(iYear,iYear))
+                readFile = open("YearStats-%s/%s/DQPaper_%s/recapDefects.html"%(iSystem,iYear,iYear))
+                for line in readFile:
+                    page.write(line)                    
+            addFooter(page)
+            page.close()
+
+################################################################
+def createWeeklyOverview(weeklyYear,weeklyTag):
+    weekly = open("%s/Weekly.html"%maindir,"w")
+    addHeader(weekly)
+    addHeaderWeekly(weekly)
+    for iSystem in subsystemName.keys():
+        if (iSystem not in subsystemNotInRun3):
+            weekly.write('''<div style="text-align:left" class="rectangle"> <b>%s</b>'''%subsystemName[iSystem])
+            weekly.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/summary-0.png" alt=""  width="750" content="no-cache"/></figure>'''%(iSystem,weeklyYear,weeklyTag))
+            weekly.write('''<a> Link to the <a href="%s-Weekly.html" > weekly plots.</a>'''%(iSystem))
+            weekly.write('''</div>''')
+    addFooter(weekly)
+    weekly.close()
+
+################################################################
+def createWeeklySystem(weeklyYear,weeklyTag,system):
+    page = open("%s/%s-Weekly.html"%(maindir,system),"w")
+    addHeader(page)
+    addHeaderWeekly(page)
+    page.write('''<div style="text-align:left" class="rectangle"><b>%s</b> - <a href="YearStats-%s/%s/%s/daemon-weekly.out" target="_blank"> Daemon output </a>'''%(subsystemName[system],system,weeklyYear,weeklyTag))
+    page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/defects--Run--%s.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,weeklyYear,weeklyTag,weeklyTag))
+    if system == "LAr" :
+        page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/veto--Run--%s.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,weeklyYear,weeklyTag,weeklyTag))
+        page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/noiseBurst_veto_evol.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,weeklyYear,weeklyTag))
+    page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/summary-0.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,weeklyYear,weeklyTag))
+    addFooter(page)
+    page.close()
+
+################################################################
+def createYearStatsSystem(year,tag,system):
+    yearTag = "%s_%s"%(year,tag)
+    page = open("%s/%s-YearStats-%s-%s.html"%(maindir,system,year,tag),"w")
+    addHeader(page)
+    addHeaderYearStatsRecap(page,year,tag,system)
+    page.write('''<div style="text-align:left" class="rectangle"><b>%s - %s</b> - <a href="YearStats-%s/%s/%s/daemon-grl.out" target="_blank"> daemon output </a> - <a href="YearStats-%s/%s/%s/runs-notYetSignedOff.dat" target="_blank"> Runs not yet signed off </a> - Switch to the <a href="%s-recapDefects-%s-%s.html"> defect recap page</a> </div>'''%(year,tag_menuName[tag],system,year,tag,system,year,tag,system,year,tag))
+    page.write('''<div style="text-align:left" class="rectangle"><figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,year,tag))
+    if system == "LAr" :
+        page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-veto.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,year,tag))
+    page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-lumi.png" alt=""  width="750" content="no-cache" /></figure>'''%(system,year,tag))
+    page.write('''</div>''')
+    addFooter(page)
+    page.close()
+
+################################################################
+def createYearStatsOverview(year,tag):
+    yearTag = "%s_%s"%(year,tag)
+    page = open("%s/YearStats-%s-%s.html"%(maindir,year,tag),"w")
+    addHeader(page)
+    addHeaderYearStatsRecap(page,year,tag)
+    for iSystem in subsystemName.keys():
+        if (iSystem not in subsystemNotInRun3):
+            page.write('''<div style="text-align:left" class="rectangle"> <b>%s</b>'''%subsystemName[iSystem])
+            page.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSystem,year,tag))
+            page.write('''</div>''')
+    addFooter(page)
+    page.close()
+
+################################################################
+def createDefectRecapSystem(year,tag,system):
+    yearTag = "%s_%s"%(year,tag)
+    page = open("%s/%s-recapDefects-%s-%s.html"%(maindir,system,year,tag),"w")
+    addHeader(page)
+    addHeaderYearStatsRecap(page,year,tag,system)
+    page.write('''<div style="text-align:left" class="rectangle"><b>%s - %s</b> - <a href="YearStats-%s/%s/%s/daemon-recapDefects.out" target="_blank"> daemon output </a> - <a href="YearStats-%s/%s/%s/runs-notYetSignedOff.dat" target="_blank"> Runs not yet signed off </a> - Switch to the <a href="%s-YearStats-%s-%s.html"> year stats page</a> </div>'''%(year,tag_menuName[tag],system,year,tag,system,year,tag,system,year,tag))
+
+    if (os.path.exists("YearStats-%s/%s/%s/recapDefects.html"%(system,year,tag))):        
+        readFile = open("YearStats-%s/%s/%s/recapDefects.html"%(system,year,tag))
+        for line in readFile: # NB: the recapDefects.html files contain a single line for the whole table. 
+            page.write(addLink(line))
+
+    addFooter(page)
+    page.close()
+
+################################################################
+def createDefectRecapHighlights(year,tag):
+    yearTag = "%s_%s"%(year,tag)
+    page = open("%s/recapDefectsHighlights-%s-%s.html"%(maindir,year,tag),"w")
+    addHeader(page)
+    addHeaderYearStatsRecap(page,year,tag)
+
+    defectsToKeep = {"Pixel":["DISABLED"],
+                     "TRT":["DISABLED"],
+                     "RPC":["DISABLED"],
+                     "MDT":["DISABLED"],
+                     "TGC":["DISABLED"],
+                     "Global":["TOROID_OFF"],
+                     }
+
+    runHighlights = {}
+
+    for iSystem in subsystemName.keys():
+        if (iSystem in defectsToKeep.keys()) and (iSystem not in subsystemNotInRun3):
+            if (os.path.exists("YearStats-%s/%s/%s/recapDefects.txt"%(iSystem,year,tag))):        
+                readFile = open("YearStats-%s/%s/%s/recapDefects.txt"%(iSystem,year,tag))
+
+                currentDefect = ""
+                currentRun = ""
+
+                for line in readFile:
+                    if line.startswith("===== Recap for "):
+                        currentDefect = ((line.split("===== Recap for ")[1]).split("===")[0]).replace(" ","")
+                    elif line.startswith("Description:") or line.startswith("     Run") or (currentDefect not in defectsToKeep[iSystem]):
+                        continue
+                    else:
+                        iovLine = line.split("|")
+                        if (len(iovLine) == 8): # The defect to keep should be on a single line (i.e. not multiple iov in a given run)
+                            runFound = iovLine[0]
+                            if (runFound not in runHighlights.keys()):
+                                runHighlights[runFound] = {}
+                                runHighlights[runFound]["TotLumi"] = iovLine[2]
+                            runHighlights[runFound][iSystem] = "<th>%s</th><th>%s : %s</th>"%(addLink(iovLine[3]),currentDefect,iovLine[7])
+
+    page.write('''<table class="report"><tr class="out0intolerable"> <th width="150pix"></th><th width="150pix"></th></th><th width="1500pix"></th></tr>''')
+
+    listOfRuns = list(runHighlights.keys())
+    listOfRuns.sort(reverse=True)
+    
+    for iRun in listOfRuns:
+        page.write('''<tr class="out0intolerable"> <th colspan="3"> Runs %s - Integrated luminosity : %s </th></tr>'''%(iRun,runHighlights[iRun]["TotLumi"]))
+        page.write('''<tr class="out0"><th> System </th> <th> Lost lumi </th> <th> Comment </th> </tr> ''')
+        for iSystem in runHighlights[iRun].keys():
+            if iSystem == "TotLumi":
+                continue
+            page.write('''<tr class="out1"><th> %s </th> %s </tr>'''%(iSystem,runHighlights[iRun][iSystem]))
+
+    page.write('''</table>''')
+
+
+    addFooter(page)
+    page.close()
+
+
+###################################################################################################################
+###################################################################################################################
 # Main script
 
 homepage = open("%s/index.html"%maindir,"w")
@@ -234,137 +444,42 @@ addHeader(homepage)
 addFooter(homepage)
 homepage.close()
 
-weeklyYear = "2022"
-weeklyTag = "Tier0_2022"
+## Run2 legacy pages
+if (run2):
+    createRun2LegacyPages()
 
-## Weekly page for all systems
-weekly = open("%s/Weekly.html"%maindir,"w")
-addHeader(weekly)
-addHeaderWeekly(weekly)
-for iSubSystem in subsystemName.keys():
-    if (iSubSystem not in subsystemNotInRun3):
-        weekly.write('''<div style="text-align:left" class="rectangle"> <b>%s</b>'''%subsystemName[iSubSystem])
-        weekly.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/summary-0.png" alt=""  width="750" content="no-cache"/></figure>'''%(iSubSystem,weeklyYear,weeklyTag))
-        weekly.write('''<a> Link to the <a href="%s-Weekly.html" > weekly plots.</a>'''%(iSubSystem))
-        weekly.write('''</div>''')
-addFooter(weekly)
-weekly.close()
+# Run3 pages
+if (run3):
+    weeklyYear = "2022"
+    weeklyTag = "Tier0_2022"
 
-## Weekly page per system
-for iSubSystem in subsystemName.keys():
-    if (iSubSystem not in subsystemNotInRun3):
-        systemWeekly = open("%s/%s-Weekly.html"%(maindir,iSubSystem),"w")
-        addHeader(systemWeekly)
-        addHeaderWeekly(systemWeekly)
-        systemWeekly.write('''<div style="text-align:left" class="rectangle"><b>%s</b> - <a href="YearStats-%s/%s/%s/daemon-weekly.out" target="_blank"> Daemon output </a>'''%(subsystemName[iSubSystem],iSubSystem,weeklyYear,weeklyTag))
-        systemWeekly.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/defects--Run--%s.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,weeklyYear,weeklyTag,weeklyTag))
-        if iSubSystem == "LAr" :
-            systemWeekly.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/veto--Run--%s.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,weeklyYear,weeklyTag,weeklyTag))
-            systemWeekly.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/noiseBurst_veto_evol.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,weeklyYear,weeklyTag))
-        systemWeekly.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/Weekly/summary-0.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,weeklyYear,weeklyTag))
-        addFooter(systemWeekly)
-        systemWeekly.close()
+    ## Weekly page for all systems
+    createWeeklyOverview(weeklyYear,weeklyTag)
 
-## YearStats page for all systems
-yearStats = {}
-for iYear in run3_yt.keys():
-    for iTag in run3_yt[iYear]:
-        yearTag = "%s_%s"%(iYear,iTag)
-        yearStats[yearTag] = open("%s/YearStats-%s-%s.html"%(maindir,iYear,iTag),"w")
-        addHeader(yearStats[yearTag])
-        addHeaderYearStatsRecap(yearStats[yearTag],iYear,iTag)
-        for iSubSystem in subsystemName.keys():
-            if (iSubSystem not in subsystemNotInRun3):
-                yearStats[yearTag].write('''<div style="text-align:left" class="rectangle"> <b>%s</b>'''%subsystemName[iSubSystem])
-                yearStats[yearTag].write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,iYear,iTag))
-                yearStats[yearTag].write('''</div>''')
-        addFooter(yearStats[yearTag])
-        yearStats[yearTag].close()
-        
-## YearStats page per system
-yearStatsSystem = {}
-for iYear in run3_yt.keys():
-    for iTag in run3_yt[iYear]:
-        for iSubSystem in subsystemName.keys():
-            if (iSubSystem not in subsystemNotInRun3):
-                yearStatsSystem[yearTag] = open("%s/%s-YearStats-%s-%s.html"%(maindir,iSubSystem,iYear,iTag),"w")
-                addHeader(yearStatsSystem[yearTag])
-                addHeaderYearStatsRecap(yearStatsSystem[yearTag],iYear,iTag,iSubSystem)
-                yearStatsSystem[yearTag].write('''<div style="text-align:left" class="rectangle"><b>%s - %s</b> - <a href="YearStats-%s/%s/%s/daemon-grl.out" target="_blank"> daemon output </a> - <a href="YearStats-%s/%s/%s/runs-notYetSignedOff.dat" target="_blank"> Runs not yet signed off </a>'''%(iYear,tag_menuName[iTag],iSubSystem,iYear,iTag,iSubSystem,iYear,iTag))
-                yearStatsSystem[yearTag].write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,iYear,iTag))
-                if iSubSystem == "LAr" :
-                    yearStatsSystem[yearTag].write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-veto.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,iYear,iTag))
-                yearStatsSystem[yearTag].write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/%s/grl-lumi.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,iYear,iTag))
-                yearStatsSystem[yearTag].write('''</div>''')
-                addFooter(yearStatsSystem[yearTag])
-                yearStatsSystem[yearTag].close()
+    ## Weekly page per system
+    for iSystem in subsystemName.keys():
+        if iSystem not in subsystemNotInRun3:
+            createWeeklySystem(weeklyYear,weeklyTag,iSystem)
 
-## RecapDefect page per system
-recapDefectSystem = {}
-for iYear in run3_yt.keys():
-    for iTag in run3_yt[iYear]:
-        for iSubSystem in subsystemName.keys():
-            if (iSubSystem not in subsystemNotInRun3):
-                recapDefectSystem[yearTag] = open("%s/%s-recapDefects-%s-%s.html"%(maindir,iSubSystem,iYear,iTag),"w")
-                addHeader(recapDefectSystem[yearTag])
-                addHeaderYearStatsRecap(recapDefectSystem[yearTag],iYear,iTag,iSubSystem)
-                readFile = open("YearStats-%s/%s/%s/recapDefects.html"%(iSubSystem,iYear,iTag))
-                for line in readFile:
-                    htmlSplitted = line.split("https")
-                    
-                    if len(htmlSplitted)>1: # Url found -> Direct links added
-                        urlAlreadyReplaced = []
-                        for iUrl in range(1,len(htmlSplitted)):
-                            url = "https%s"%(htmlSplitted[iUrl].split(" ")[0])
-                            if (url not in urlAlreadyReplaced):
-                                line = line.replace(url,'''<a href="%s" target="_blank"> %s </a>'''%(url,url))
-                            urlAlreadyReplaced.append(url)
+    ## YearStats page for all systems
+    for iYear in run3_yt.keys():
+        for iTag in run3_yt[iYear]:
+            createYearStatsOverview(iYear,iTag)
 
-                    recapDefectSystem[yearTag].write(line)                    
-                addFooter(recapDefectSystem[yearTag])
-                recapDefectSystem[yearTag].close()
+    ## YearStats page per system
+    for iYear in run3_yt.keys():
+        for iTag in run3_yt[iYear]:
+            for iSystem in subsystemName.keys():
+                if (iSystem not in subsystemNotInRun3):
+                    createYearStatsSystem(iYear,iTag,iSystem)
 
-## Run 2 Year stats for all systems
-yearStats = {}
-for iYear in ["2015","2016","2017","2018"]:
-    yearStats[iYear] = open("%s/YearStats-%s-DQPaper_%s.html"%(maindir,iYear,iYear),"w")
-    addHeader(yearStats[iYear])
-    for iSubSystem in subsystemName.keys():
-        if (iSubSystem not in subsystemNotInRun2):
-            yearStats[iYear].write('''<div style="text-align:left" class="rectangle"> <b>%s</b>'''%iSubSystem)
-            yearStats[iYear].write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/DQPaper_%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,iYear,iYear))
-            if iSubSystem == "LAr":
-                yearStats[iYear].write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-%s/%s/DQPaper_%s/grl-veto.png" alt=""  width="750" content="no-cache" /></figure>'''%(iSubSystem,iYear,iYear))
-            yearStats[iYear].write('''</div>''')
-    addFooter(yearStats[iYear])
-    yearStats[iYear].close()
+    ## RecapDefect page per system
+    for iYear in run3_yt.keys():
+        for iTag in run3_yt[iYear]:
+            for iSystem in subsystemName.keys():
+                if (iSystem not in subsystemNotInRun3):
+                    createDefectRecapSystem(iYear,iTag,iSystem)
 
-## Run 2 YearStats page per system
-for iSubSystem in subsystemName.keys():
-    if (iSubSystem not in subsystemNotInRun3):
-        yearStatsSystem = open("%s/%s-YearStats-DQPaper_.html"%(maindir,iSubSystem),"w")
-        addHeader(yearStatsSystem)
-        for iYear in ["2015","2016","2017","2018"]:
-            yearStatsSystem.write('''<div style="text-align:left" class="rectangle"><b>%s</b>'''%(iYear))
-            yearStatsSystem.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-LAr/%s/DQPaper_%s/grl-defects.png" alt=""  width="750" content="no-cache" /></figure>'''%(iYear,iYear))
-            if iSubSystem == "LAr":
-                yearStatsSystem.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-LAr/%s/DQPaper_%s/grl-veto.png" alt=""  width="750" content="no-cache" /></figure>'''%(iYear,iYear))
-            yearStatsSystem.write('''<figure> <img src="https://atlasdqm.web.cern.ch/atlasdqm/DeMo/YearStats-LAr/%s/DQPaper_%s/grl-lumi.png" alt=""  width="750" content="no-cache" /></figure>'''%(iYear,iYear))
-            yearStatsSystem.write('''</div>''')
-        addFooter(yearStatsSystem)
-        yearStatsSystem.close()
-
-## Run 2 RecapDefect page per system
-for iSubSystem in subsystemName.keys():
-    if (iSubSystem not in subsystemNotInRun2):
-        recapDefectSystem = open("%s/%s-recapDefects-DQPaper_.html"%(maindir,iSubSystem),"w")
-        addHeader(recapDefectSystem)
-        addHeaderRun2RecapDefects(recapDefectSystem)
-        for iYear in ["2015","2016","2017","2018"]:
-            recapDefectSystem.write('''<hr>''')
-            recapDefectSystem.write('''<a id='%s'> %s dataset </a>'''%(iYear,iYear))
-            readFile = open("YearStats-%s/%s/DQPaper_%s/recapDefects.html"%(iSubSystem,iYear,iYear))
-            for line in readFile:
-                recapDefectSystem.write(line)                    
-        addFooter(recapDefectSystem)
-        recapDefectSystem.close()
+    for iYear in run3_yt.keys():
+        for iTag in run3_yt[iYear]:
+            createDefectRecapHighlights(iYear,iTag)

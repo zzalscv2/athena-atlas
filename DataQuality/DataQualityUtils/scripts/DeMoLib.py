@@ -13,7 +13,7 @@ from ROOT import TCanvas,TLegend
 from ROOT import kYellow,kOrange,kRed,kBlue,kPink,kMagenta,kGreen,kSpring,kViolet,kAzure,kCyan,kTeal,kBlack,kWhite
 from ROOT import TProfile,TH1F
 
-import time,os
+import time,os,subprocess
 
 def MakeTProfile(name,xtitle,ytitle,xmin,xmax,nbins,color):
    h = TProfile(name,name, nbins, xmin, xmax)
@@ -49,6 +49,19 @@ def MakeLegend(xmin,ymin,xmax,ymax):
     l.SetTextSize(0.03)
     l.SetBorderSize(0)
     return l
+
+########################################################################
+# Return the data period of a run based on the information stored in
+# YearStats-[system]/[year]/[tag]/runs-ALL.dat
+def returnPeriod(runNb,system,year,tag):
+   p = subprocess.Popen(["grep","%d"%runNb,"YearStats-%s/%s/%s/runs-ALL.dat"%(system,year,tag)],stdout = subprocess.PIPE)
+   (o,e) = p.communicate()
+   tmp = o.decode().split("(")
+   if len(tmp)>0:
+      tmp2 = tmp[1].split(")")[0]
+
+   return tmp2
+   
 
 
 ########################################################################
@@ -113,7 +126,7 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
     yAxisTitle = "Lost luminosity due to %s [%s]"%(nameSplitted[0],unit)
   legendHeader = "%s - %s"%(nameSplitted[2],time.strftime("%d %b", time.localtime()))
 
-  resCanvas[name] = TCanvas(name,"%s - %s"%(yAxisTitle,xAxisTitle),200, 10, 1150, 500)
+  resCanvas[name] = TCanvas(name,"%s - %s"%(yAxisTitle,xAxisTitle),100, 10, 1350, 500)
   resCanvas[name].SetLeftMargin(0.08)
   resCanvas[name].SetRightMargin(0.35)
   resCanvas[name].SetGridy(1)
@@ -160,6 +173,7 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
       histo['%s_toStack'%iIndex] = histo[iIndex]
     if lumiBool:
       histo['%s_toStack'%iIndex].Multiply(histo['%s_toStack'%iIndex],histoIntLumi,0.01)
+    histo['%s_toStack'%iIndex].LabelsOption("v")
     resStack[name].Add(histo['%s_toStack'%iIndex])
 
   entryNb = 0
@@ -212,7 +226,10 @@ def plotStack(name,histo,index,indexName,histoIntLumi,lumiBool,resStack,resCanva
   mx = resStack[name].GetMaximum()*1.2
   resStack[name].SetMaximum(mx)
   resStack[name].Draw("hist")
+  resStack[name].GetXaxis().LabelsOption("v")
+  resStack[name].GetXaxis().SetLabelSize(0.04)
   resStack[name].GetXaxis().SetTitle("%s"%xAxisTitle)
+  resStack[name].GetXaxis().SetTitleOffset(1.45)
   resStack[name].GetYaxis().SetTitle("%s"%yAxisTitle)
   resStack[name].GetYaxis().SetTitleOffset(0.7)
   if resStack[name].GetMaximum()>10.:
@@ -270,17 +287,19 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
                             "DQPaper_2017":"/Run 2 final",
                             "DQPaper_2018":"/Run 2 final",
                             "Tier0_2022":"/Tier0",
-                            "GRL_2022":"/GRL runs"}
+                            "GRL_2022":"/GRL runs",
+                            "Tier0_2023":"/Tier0",
+                            "GRL_2023":"/GRL runs"}
 
   # DB tag for the defect database - Common to all systems
   # Please keep the definition below organised as it is. It is mandatory to extract the database tag by the DeMoGenerateWWW.py script
-  yearTag["defect"] = {"DQPaper_2015":"DetStatus-v105-pro22-13","DQPaper_2016":"DetStatus-v105-pro22-13","DQPaper_2017":"DetStatus-v105-pro22-13","DQPaper_2018":"DetStatus-v105-pro22-13","Tier0_2022":"HEAD","GRL_2022":"HEAD"}
+  yearTag["defect"] = {"DQPaper_2015":"DetStatus-v105-pro22-13","DQPaper_2016":"DetStatus-v105-pro22-13","DQPaper_2017":"DetStatus-v105-pro22-13","DQPaper_2018":"DetStatus-v105-pro22-13","Tier0_2022":"HEAD","GRL_2022":"HEAD","Tier0_2023":"HEAD","GRL_2023":"HEAD"}
 
   # Condition tag for the veto database - defined later per system when relevant
   yearTag["veto"] = {}
 
-  yearTag["offlineLumiTag"] = {"OflLumi":{"2015":"OflLumi-13TeV-004","2016":"OflLumi-13TeV-009","2017":"OflLumi-13TeV-010","2018":"OflLumi-13TeV-010","2018_pbpb":"OflLumi-13TeV-001","2022":"OflLumi-Run3-002"},
-                               "OflLumiAcct":{"2022":"OflLumiAcct-Run3-002"}}
+  yearTag["offlineLumiTag"] = {"OflLumi":{"2015":"OflLumi-13TeV-004","2016":"OflLumi-13TeV-009","2017":"OflLumi-13TeV-010","2018":"OflLumi-13TeV-010","2018_pbpb":"OflLumi-13TeV-001","2022":"OflLumi-Run3-002","2023":"OflLumi-Run3-002"},
+                               "OflLumiAcct":{"2022":"OflLumiAcct-Run3-002","2023":"OflLumiAcct-Run3-002"}}
 
 #################################### NEWSYSTEM defects
 ###  if system == "NEWSYSTEM":
@@ -426,7 +445,9 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
   if system == "LAr":
     # This tag is associated to conditions used in a processing
     yearTag["veto"] = {"Tier0_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
-                       "GRL_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11"
+                       "GRL_2022":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
+                       "Tier0_2023":"LARBadChannelsOflEventVeto-RUN2-UPD4-11",
+                       "GRL_2023":"LARBadChannelsOflEventVeto-RUN2-UPD4-11"
                        }
 
     partitions["color"] = { 'EMBA':kYellow-9,'EMBC':kYellow,'EMECA':kOrange,'EMECC':kOrange-3,'HECA':kRed-3,'HECC':kRed+2,'FCALA':kBlue-3,'FCALC':kBlue+2}
@@ -658,7 +679,7 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     # Global intolerable and tolerable defects
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
     defects0["globIntol"] = ["NOTRACKS","IBL_TRACKCOVERAGE_SEVERE","PIXEL_TRACKCOVERAGE_SEVERE","SCT_TRACKCOVERAGE_SEVERE","TRT_TRACKCOVERAGE_SEVERE","UNKNOWN","BS_RUNAVERAGE","BS_PARAMETERSTEP","BS_NOTNOMINAL"] # IDGlobal system
-    defects0["globTol"] = ["ALIGN_DEGRADED","LOWSTAT","IBL_TRACKCOVERAGE","PIXEL_TRACKCOVERAGE","SCT_TRACKCOVERAGE","TRT_TRACKCOVERAGE","VERTEXBUG"] # IDGlobal
+    defects0["globTol"] = ["ALIGN_DEGRADED","LOWSTAT","IBL_TRACKCOVERAGE","PIXEL_TRACKCOVERAGE","SCT_TRACKCOVERAGE","TRT_TRACKCOVERAGE","VERTEXBUG"] # IDGlobal system
     
     veto["all"] = [] # Veto name as defined in the COOL database
     veto["COOL"] = {} # Veto name as defined in the COOL database
@@ -910,14 +931,14 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     partitions["color"] = {}
     partitions["list"] = list(partitions["color"].keys())
 
-    defects0["prefix"] = ["ALPHA"]
+    defects0["prefix"] = ["ALFA"]
     # Partition intolerable and tolerable defects - Order determines what defect is proeminent
     defects0["partIntol"] = []
     defects0["partTol"] = []
     # Global intolerable and tolerable defects
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
     defects0["globIntol"] = ["MISSING_TRIGGER","WRONG_POSITION","MISSING_PMF_5orMore"] # ALFA system
-    defects0["globTol"] = ["ALFA_MISSING_PMF_1to4"] # ALFA system
+    defects0["globTol"] = ["MISSING_PMF_1to4"] # ALFA system
     
     veto["all"] = [] # Veto name as defined in the COOL database
     veto["COOL"] = {} # Veto name as defined in the COOL database
@@ -964,8 +985,8 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
     defects0["partTol"] = []
     # Global intolerable and tolerable defects
     # Warning : do not remove/edit the comment specifying the system. It is used to display the defects in the webpage
-    defects0["globIntol"] = ["BUSY_GREATER50PCT","LOWMUCONFIG_IN_HIGHMU","OFFLINE_PROCESSING_PROBLEM","SOLENOID_OFF","SOLENOID_RAMPING","SOLENOID_NOTNOMINAL","TOROID_OFF","TOROID_NOTNOMINAL","TOROID_RAMPING"] # Global defect
-    defects0["globTol"] = ["BUSY"] # Global defect
+    defects0["globIntol"] = ["BUSY_GREATER50PCT","LOWMUCONFIG_IN_HIGHMU","OFFLINE_PROCESSING_PROBLEM","SOLENOID_OFF","SOLENOID_RAMPING","SOLENOID_NOTNOMINAL","TOROID_OFF","TOROID_NOTNOMINAL","TOROID_RAMPING"] # Global system
+    defects0["globTol"] = [] # Global system
     
     veto["all"] = [] # Veto name as defined in the COOL database
     veto["COOL"] = {} # Veto name as defined in the COOL database
@@ -988,6 +1009,11 @@ def initialize(system,yearTag,partitions,defects0,defectVeto,veto,signOff,year =
 ################ Definitions common to all systems
   # 
   defects0["globalFilterDefects"] = ["GLOBAL_LHC_50NS","GLOBAL_LHC_NONSTANDARD_BC","GLOBAL_LHC_LOW_N_BUNCHES","GLOBAL_LHC_NOBUNCHTRAIN","GLOBAL_LHC_COMMISSIONING","GLOBAL_LHC_HIGHBETA","GLOBAL_LOWMUCONFIG_IN_HIGHMU","LUMI_VDM","GLOBAL_NOTCONSIDERED"]
+  if system == "Global": # In the case of the Global system, do not apply global filtering as they may be common intolerable defects. 
+     for iDef in defects0["globalFilterDefects"]:
+        if iDef not in defects0["globIntol"]:
+           defects0["globIntol"].append(iDef)
+     defects0["globalFilterDefects"] = []
 
   defects0["part"] = defects0["partIntol"] + defects0["partTol"]
   defects0["glob"] = defects0["globIntol"] + defects0["globTol"]

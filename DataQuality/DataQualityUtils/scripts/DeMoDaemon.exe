@@ -22,7 +22,7 @@ cd ${rundir}
 echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
 source $AtlasSetup/scripts/asetup.sh --stable 22.0,Athena,latest
-export ScriptPath=$Athena_DIR/src/DataQuality/DataQualityUtils/scripts
+export ScriptPath=$rundir
 
 echo "First, looking for new runs..."
 cmd="python $ScriptPath/DeMoUpdate.py --runListUpdate -y ${year}"
@@ -48,7 +48,8 @@ do
 
 
     # Script for updating the year stats
-    # If you want to reset the year stats, add --resetYearStats (not recommanded as much longer)
+    # If you want to reset the year stats, use the first command line with --resetYearStats (not recommanded as much longer)
+    #cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --resetYearStats --updateYearStats"
     cmd="python $ScriptPath/DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --skipAlreadyUpdated --updateYearStats"
     log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
     echo "** ${cmd} **"

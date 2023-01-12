@@ -52,6 +52,11 @@ runListDir = "./RunList"
 
 ################################################################################################################################################
 #### Ancillary functions
+def sort_period(text):
+  letter = "".join([i for i in text if not i.isdigit()])
+  number = "".join([i for i in text if i.isdigit()])
+  return (letter, int(number))
+ 
 def printProp(varname):
   print("**",varname,"**")
   if hasattr(sys.modules[__name__],varname):
@@ -216,6 +221,26 @@ def extractNamePartition(foundDefect):
       defectSplitted = foundDefect.split("_",2)
       if len(defectSplitted) > 2:
         defectName=defectSplitted[2]
+    elif (foundDefect.startswith("LUMI")): # LUMI_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("ALFA")): # ALFA_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("LCD")): # LCD_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("ZDC")): # ZDC_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
+    elif (foundDefect.startswith("GLOBAL")): # GLOBAL_[NAME]
+      defectSplitted = foundDefect.split("_",1)
+      if len(defectSplitted) > 1:
+        defectName=defectSplitted[1]
 
     return defectName, defectPart
     
@@ -467,7 +492,6 @@ if options['updateYearStats']:
         print("I am forcing the year stats reset...")
         options['resetYearStats'] = True
     elif os.path.getsize("%s/runs-ALL.dat"%options['yearStatsDir']) == 0.:
-        # runs-ALL.data and runs-[period].dat updated only for runs in GRL
         # Test here relevant at the beginning of the year when some runs have been reviewed at EXPR/BULK level (but not FINAL hence no year stats)
         # In such a case a TProfiles.root file may exist even if no update was made
         # April 18: I am not sure that this situation is still relevant... 
@@ -666,7 +690,7 @@ for idef in grlDef["intol"]+grlDef["intol_recov"]+allIntolDef: #Intolerable defe
     if len(periodListYear) != 0 or len(periodListCurrent) != 0: # At least one period found in current or past runs, otherwise no way to plot year stats
       # Collect all periods (archived ones + new ones)
       periodListYear = periodListYear + newPeriodInYearStats 
-      periodListYear.sort() # The list of periods is now sorted
+      periodListYear = sorted(periodListYear, key=sort_period) # The list of periods is now sorted
       periodNbYear = len(periodListYear) # Number of periods      
       # Create the empty year stats TProfile histograms for the updated period list
       hProfPeriod_IntolDefect[idef] = MakeTProfile(profPeriodName,"%s"%(defectVeto["description"][idefName]),"Lost luminosity (%)", -0.5,+0.5+periodNbYear,periodNbYear+1,defectVeto["color"][idefName])
@@ -1219,7 +1243,7 @@ if (options['updateYearStats'] and bool_newRunsInYearStats):
       for irun in periodListCurrent[iper]:
         if (irun in list(runinfo.keys()) and runinfo[irun]['newInYearStats']): # Runs not yet considered in yearStats
           f.write("%d\n"%(irun))
-          fAll.write("%d\n"%(irun))
+          fAll.write("%d (%s)\n"%(irun,iper))
       f.close()
     fAll.close()
     print("I have updated year stats")
