@@ -15,80 +15,82 @@ def fromRunArgs(runArgs):
     log.info(str(runArgs))
 
     log.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from SimulationConfig.SimEnums import SimulationFlavour
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    flags = initConfigFlags()
+
+    commonRunArgsToFlags(runArgs, flags)
 
     # Set ProductionStep
     from AthenaConfiguration.Enums import ProductionStep
-    ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
+    flags.Common.ProductionStep = ProductionStep.Simulation
 
     # Set the simulator
     if hasattr(runArgs, 'simulator'):
-       ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+       flags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
 
     # This is ISF and resimulation
-    ConfigFlags.Sim.ISFRun = True
-    ConfigFlags.Sim.ISF.ReSimulation = True
+    flags.Sim.ISFRun = True
+    flags.Sim.ISF.ReSimulation = True
 
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
-    detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
+    detectors = getDetectorsFromRunArgs(flags, runArgs)
 
     if hasattr(runArgs, 'inputHITSFile'):
-        ConfigFlags.Input.Files = runArgs.inputHITSFile
+        flags.Input.Files = runArgs.inputHITSFile
     else:
         log.error('No inputHITSFile provided. Please try using Sim_tf.py instead.')
         raise RuntimeError('No intputHITSFile provided.')
 
     if hasattr(runArgs, 'outputHITS_RSMFile'):
         if runArgs.outputHITS_RSMFile == 'None':
-            ConfigFlags.Output.HITSFileName = ''
+            flags.Output.HITSFileName = ''
         else:
-            ConfigFlags.Output.HITSFileName  = runArgs.outputHITS_RSMFile
+            flags.Output.HITSFileName  = runArgs.outputHITS_RSMFile
 
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+    setupDetectorFlags(flags, detectors, toggle_geometry=True)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
-    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
+    setPerfmonFlagsFromRunArgs(flags, runArgs)
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Special Configuration preInclude
-    specialConfigPreInclude(ConfigFlags)
+    specialConfigPreInclude(flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Common simulation runtime arguments
     from SimulationConfig.SimConfigFlags import simulationRunArgsToFlags
-    simulationRunArgsToFlags(runArgs, ConfigFlags)
+    simulationRunArgsToFlags(runArgs, flags)
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
-    cfg = CommonSimulationCfg(ConfigFlags, log)
+    cfg = CommonSimulationCfg(flags, log)
 
     # Add OLD suffix to the names of collections read in from the input HITS file
     from SimuJobTransforms.ReSimInputConfig import RenameHitCollectionsOnReadCfg
-    cfg.merge(RenameHitCollectionsOnReadCfg(ConfigFlags))
+    cfg.merge(RenameHitCollectionsOnReadCfg(flags))
 
     # Special Configuration postInclude
-    specialConfigPostInclude(ConfigFlags, cfg)
+    specialConfigPostInclude(flags, cfg)
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs))
 
     import time
     tic = time.time()

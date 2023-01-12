@@ -14,24 +14,26 @@ def fromRunArgs(runArgs):
     log.info(str(runArgs))
 
     log.info('**** Setting-up configuration flags')
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    commonRunArgsToFlags(runArgs, ConfigFlags)
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    commonRunArgsToFlags(runArgs, flags)
 
     if hasattr(runArgs, "PileUpPresampling"):
         from AthenaConfiguration.Enums import ProductionStep
-        ConfigFlags.Common.ProductionStep = ProductionStep.PileUpPresampling
+        flags.Common.ProductionStep = ProductionStep.PileUpPresampling
 
     if hasattr(runArgs, 'inputRDOFile'):
-        ConfigFlags.Input.Files = runArgs.inputRDOFile
+        flags.Input.Files = runArgs.inputRDOFile
     else:
         raise RuntimeError('No input RDO file defined')
 
     if hasattr(runArgs, 'outputRDO_MRGFile'):
         if runArgs.outputRDO_MRGFile == 'None':
-            ConfigFlags.Output.RDOFileName = ''
+            flags.Output.RDOFileName = ''
             # TODO decide if we need a specific RDO_MRGFileName flag
         else:
-            ConfigFlags.Output.RDOFileName  = runArgs.outputRDO_MRGFile
+            flags.Output.RDOFileName  = runArgs.outputRDO_MRGFile
     else:
         raise RuntimeError('No outputRDO_MRGFile defined')
 
@@ -42,80 +44,80 @@ def fromRunArgs(runArgs):
         detectors = None
 
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
+    setupDetectorFlags(flags, detectors, use_metadata=True, toggle_geometry=True)
 
     # Pre-include
-    processPreInclude(runArgs, ConfigFlags)
+    processPreInclude(runArgs, flags)
 
     # Pre-exec
-    processPreExec(runArgs, ConfigFlags)
+    processPreExec(runArgs, flags)
 
     # Lock flags
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    cfg.merge(PoolWriteCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
+    cfg.merge(PoolWriteCfg(flags))
 
     # Geometry dependencies
-    if ConfigFlags.Detector.EnablePixel:
+    if flags.Detector.EnablePixel:
         from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
-        cfg.merge(PixelReadoutGeometryCfg(ConfigFlags))
-    if ConfigFlags.Detector.EnableSCT:
+        cfg.merge(PixelReadoutGeometryCfg(flags))
+    if flags.Detector.EnableSCT:
         from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
-        cfg.merge(SCT_ReadoutGeometryCfg(ConfigFlags))
-    if ConfigFlags.Detector.EnableTRT:
+        cfg.merge(SCT_ReadoutGeometryCfg(flags))
+    if flags.Detector.EnableTRT:
         from TRT_GeoModel.TRT_GeoModelConfig import TRT_ReadoutGeometryCfg
-        cfg.merge(TRT_ReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(TRT_ReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.EnableITkPixel:
+    if flags.Detector.EnableITkPixel:
         from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-        cfg.merge(ITkPixelReadoutGeometryCfg(ConfigFlags))
-    if ConfigFlags.Detector.EnableITkStrip:
+        cfg.merge(ITkPixelReadoutGeometryCfg(flags))
+    if flags.Detector.EnableITkStrip:
         from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-        cfg.merge(ITkStripReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(ITkStripReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.EnableHGTD:
-        if ConfigFlags.HGTD.Geometry.useGeoModelXml:
+    if flags.Detector.EnableHGTD:
+        if flags.HGTD.Geometry.useGeoModelXml:
             from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
         else:
             from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
-        cfg.merge(HGTD_ReadoutGeometryCfg(ConfigFlags))
+        cfg.merge(HGTD_ReadoutGeometryCfg(flags))
 
-    if ConfigFlags.Detector.EnableLAr:
+    if flags.Detector.EnableLAr:
         from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-        cfg.merge(LArGMCfg(ConfigFlags))
-    if ConfigFlags.Detector.EnableTile:
+        cfg.merge(LArGMCfg(flags))
+    if flags.Detector.EnableTile:
         from TileGeoModel.TileGMConfig import TileGMCfg
-        cfg.merge(TileGMCfg(ConfigFlags))
+        cfg.merge(TileGMCfg(flags))
         from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
-        cfg.merge(TileCablingSvcCfg(ConfigFlags))
+        cfg.merge(TileCablingSvcCfg(flags))
 
-    if ConfigFlags.Detector.EnableMuon:
+    if flags.Detector.EnableMuon:
         from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-        cfg.merge(MuonGeoModelCfg(ConfigFlags))
+        cfg.merge(MuonGeoModelCfg(flags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    cfg.merge(OutputStreamCfg(ConfigFlags, 'RDO'))
+    cfg.merge(OutputStreamCfg(flags, 'RDO'))
     cfg.getEventAlgo('OutputStreamRDO').TakeItemsFromInput = True
 
     # Silence HepMcParticleLink warnings
     from Digitization.DigitizationSteering import DigitizationMessageSvcCfg
-    cfg.merge(DigitizationMessageSvcCfg(ConfigFlags))
+    cfg.merge(DigitizationMessageSvcCfg(flags))
 
     # Post-include
-    processPostInclude(runArgs, ConfigFlags, cfg)
+    processPostInclude(runArgs, flags, cfg)
 
     # Post-exec
-    processPostExec(runArgs, ConfigFlags, cfg)
+    processPostExec(runArgs, flags, cfg)
 
     # Write AMI tag into in-file metadata
     from PyUtils.AMITagHelperConfig import AMITagCfg
-    cfg.merge(AMITagCfg(ConfigFlags, runArgs))
+    cfg.merge(AMITagCfg(flags, runArgs))
 
     import time
     tic = time.time()
