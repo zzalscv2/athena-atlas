@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCondAlg/MdtCalibDbAlg.h"
@@ -141,7 +141,7 @@ StatusCode MdtCalibDbAlg::defaultRt(std::unique_ptr<MdtRtRelationCollection> &wr
     }
 
     // Open the Ascii file with the RT relations
-    std::string fileName = PathResolver::find_file(it->c_str(), "DATAPATH");
+    std::string fileName = PathResolver::find_file(*it, "DATAPATH");
     if (fileName.length() == 0) { ATH_MSG_ERROR("RT Ascii file \"" << it->c_str() << "\" not found"); }
     std::ifstream inputFile(fileName.c_str());
     if (!inputFile) {
@@ -359,7 +359,7 @@ StatusCode MdtCalibDbAlg::loadRt() {
             data = *(static_cast<const std::string *>((atr["data"]).addressOfData()));
             ATH_MSG_VERBOSE("Data load is " << data);
             // interpret as string stream
-            std::string istr(data.c_str());
+            std::string istr(data);
             ATH_CHECK(extractString(istr, header, " "));
             ATH_CHECK(extractString(istr, payload, " "));
             if (!istr.empty()) ATH_CHECK(extractString(istr, trailer, " "));
@@ -809,7 +809,7 @@ StatusCode MdtCalibDbAlg::loadTube() {
             ATH_MSG_VERBOSE("Data load is " << data);
 
             // interpret as string stream
-            std::string istr(data.c_str());
+            std::string istr(data);
             ATH_CHECK(extractString(istr, header, "\n"));
             ATH_CHECK(extractString(istr, payload, "\n"));
             if (!istr.empty()) ATH_CHECK(extractString(istr, trailer, "\n"));
