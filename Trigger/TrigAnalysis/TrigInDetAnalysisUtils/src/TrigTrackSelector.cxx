@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  2 Nov 2014 11:10:06 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -1205,10 +1205,10 @@ bool TrigTrackSelector::selectTrack( const xAOD::TrackParticle* track, void* ) {
       int fitter = track->trackFitter();
       std::bitset<xAOD::NumberOfTrackRecoInfo>  patternrec = track->patternRecoInfo();
 
-      int icount = 0;
+      //int icount = 0;<- never used if section below is commented
       for ( unsigned ipr=patternrec.size() ; ipr-- ; ) { 
 	if ( patternrec[ipr] ) {
-	  icount++;
+	  //icount++; <- never used if section below is commented
 	  trackAuthor |= (ipr >> 16);
 	  // static bool first = true;
 	  // if ( first && icount>1 ) { 
