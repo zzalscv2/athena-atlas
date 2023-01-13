@@ -4,7 +4,7 @@
  **     @author  berare gokturk
  **     @date    Mon 17 May 2021 20:02:26 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include <string>
@@ -136,7 +136,7 @@ void efficiency( std::vector<double>& bins, std::vector<double>& values, const s
 
   if ( pos!=std::string::npos ) { 
     labels   = plotname.substr( pos, plotname.size() );
-    plotname = plotname.substr( 0, pos );
+    plotname.resize(pos);// 'pos' guaranteed to be <= string length
     std::cout << "plotname: " << plotname << "\tlabels: " << labels << std::endl;  
   } 
 
@@ -269,7 +269,7 @@ void mean( std::vector<double>& bins, std::vector<double>& values, const std::ve
 
   if ( pos!=std::string::npos ) { 
     labels   = plotname.substr( pos, plotname.size() );
-    plotname = plotname.substr( 0, pos );
+    plotname.resize(pos); // 'pos' guaranteed to be <= string length
     std::cout << "plotname: " << plotname << "\tlabels: " << labels << std::endl;  
   } 
 

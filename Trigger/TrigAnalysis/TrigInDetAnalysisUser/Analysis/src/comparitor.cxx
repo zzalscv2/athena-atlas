@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 12 Oct 2012 13:39:05 BST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -281,7 +281,7 @@ TH1F* d0rebin( TH1F* h ) {
 
   double x = 0; 
 
-  for ( int i=0 ; x<20 ; i++ ) { 
+  for ( [[maybe_unused]] int i=0 ; x<20 ; i++ ) { 
   
     alimits.push_back(x);
 

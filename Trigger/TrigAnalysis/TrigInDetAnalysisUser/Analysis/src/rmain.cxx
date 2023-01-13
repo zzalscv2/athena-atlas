@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -1479,7 +1479,6 @@ int main(int argc, char** argv)
 
 
 
-  int addedfiles = 0;
 
 
 
@@ -1518,7 +1517,6 @@ int main(int argc, char** argv)
 
     bool newfile = true;
 
-    addedfiles++;  
 
     TFile*  finput = TFile::Open( filenames[ifile].c_str() );
 
@@ -2300,8 +2298,7 @@ int main(int argc, char** argv)
           analitrp->second->execute( refpp, testpp, _matcher );
           
 
-          static int ecounter = 0;
-          ecounter++;
+         
         }
       } // loop through rois
       
