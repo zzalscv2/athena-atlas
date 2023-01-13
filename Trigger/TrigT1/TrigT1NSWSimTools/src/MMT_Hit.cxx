@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Hit.h"
@@ -10,15 +10,15 @@
 #include "MuonReadoutGeometry/MMReadoutElement.h"
 #include <cmath>
 
-MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
-  m_sector = wedge;
+MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates) {
+  m_sector = par->getSector();
 
-  std::string module(1, wedge);
+  std::string module(1, m_sector);
   module += (std::abs(entry.station_eta) == 1) ? "M1" : "M2";
   m_module = module;
 
   m_station_name = "MM";
-  m_station_name += wedge;
+  m_station_name += m_sector;
   m_VMM_chip = entry.VMM_chip;
   m_MMFE_VMM = entry.MMFE_VMM;
   m_ART_ASIC = std::ceil(1.*entry.MMFE_VMM/2);
@@ -90,7 +90,7 @@ MMT_Hit::MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetec
 
   MMDetectorHelper aHelper;
   char side = (globalPos.z() > 0.) ? 'A' : 'C';
-  MMDetectorDescription* mm = aHelper.Get_MMDetector(wedge, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
+  MMDetectorDescription* mm = aHelper.Get_MMDetector(m_sector, std::abs(m_station_eta), m_station_phi, m_multiplet, side);
   MMReadoutParameters roP   = mm->GetReadoutParameters();
 
   m_R = globalPos.perp();

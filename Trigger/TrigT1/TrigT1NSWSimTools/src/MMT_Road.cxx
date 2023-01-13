@@ -1,28 +1,27 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TrigT1NSWSimTools/MMT_Road.h"
 
-MMT_Road::MMT_Road(const char sector, const MuonGM::MuonDetectorManager* detManager, const micromegas_t &mm, int xthr, int uvthr, int iroadx, int iroadu, int iroadv) {
+MMT_Road::MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
+                   const float pitch, const float eta1, const float eta2, const int iroadx, const int iroadu, const int iroadv) {
   m_sector = sector;
   m_iroad  = iroadx;
   m_iroadx = iroadx;
   m_iroadu = (iroadu != -1) ? iroadu : iroadx;
   m_iroadv = (iroadv != -1) ? iroadv : iroadx;
-  m_trig = false;
   m_xthr = xthr;
   m_uvthr = uvthr;
 
-  m_detManager = detManager;
-  m_roadSize = mm.roadSize;
-  m_roadSizeUpX = mm.nstrip_up_XX;
-  m_roadSizeDownX = mm.nstrip_dn_XX;
-  m_roadSizeUpUV = mm.nstrip_up_UV;
-  m_roadSizeDownUV = mm.nstrip_dn_UV;
-  m_pitch = mm.pitch;
-  m_innerRadiusEta1 = mm.innerRadiusEta1;
-  m_innerRadiusEta2 = mm.innerRadiusEta2;
+  m_roadSize = roadSize;
+  m_roadSizeUpX = UpX;
+  m_roadSizeDownX = DownX;
+  m_roadSizeUpUV = UpUV;
+  m_roadSizeDownUV = DownUV;
+  m_pitch = pitch;
+  m_innerRadiusEta1 = eta1;
+  m_innerRadiusEta2 = eta2;
 }
 
 void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
@@ -79,7 +78,7 @@ bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
   }
   else return false;
 
-  double R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
+  float R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
   double slow  = (R + (this->getRoadSize()*iroad     + 0.5 - olow )*this->getPitch() + hit->getShift())*hit->getOneOverZ();
   double shigh = (R + (this->getRoadSize()*(iroad+1) + 0.5 + ohigh)*this->getPitch() + hit->getShift())*hit->getOneOverZ();
 

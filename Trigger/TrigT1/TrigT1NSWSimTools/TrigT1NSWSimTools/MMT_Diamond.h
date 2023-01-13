@@ -1,5 +1,5 @@
 /*   
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */ 
 
 #ifndef MMT_DIAMOND_H 
@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 #include "MMT_Road.h"
+#include <cmath>
 #include <vector>
 
 struct slope_t {

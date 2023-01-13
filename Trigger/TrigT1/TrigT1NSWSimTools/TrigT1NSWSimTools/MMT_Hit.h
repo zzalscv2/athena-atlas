@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_HIT_H
@@ -13,8 +13,9 @@ namespace MuonGM {
 
 class MMT_Hit {
   public:
-    MMT_Hit(char wedge, const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates);
+    MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* detManager, const std::shared_ptr<MMT_Parameters> par, const std::vector<ROOT::Math::XYZVector> &planeCoordinates);
     MMT_Hit(const MMT_Hit* hit);
+    ~MMT_Hit()=default;
 
     int getART() const { return m_ART_ASIC; }
     int getAge() const { return m_age; }
