@@ -1258,7 +1258,7 @@ class argYODAFile(argFile):
                 for untar in tar.getmembers():
                     fileTXT = tar.extractfile(untar)
                     if fileTXT is not None :
-                        lines = fileTXT.read()
+                        lines = fileTXT.read().decode("utf-8")
                         lhecount = lines.count('/event')
 
                 self._fileMetadata[fname]['nentries'] = lhecount
@@ -1927,7 +1927,7 @@ class argLHEFile(argFile):
                 for untar in tar.getmembers():
                     fileTXT = tar.extractfile(untar)
                     if fileTXT is not None :
-                        lines = fileTXT.read()
+                        lines = fileTXT.read().decode("utf-8")
                         lhecount = lines.count('/event')
 
                 self._fileMetadata[fname]['nentries'] = lhecount
