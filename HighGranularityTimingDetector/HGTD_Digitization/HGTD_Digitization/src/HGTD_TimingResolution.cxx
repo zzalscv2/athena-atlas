@@ -289,7 +289,7 @@ HGTD_TimingResolution::PulseWaveform HGTD_TimingResolution::simulatePulse(
   float p_time;
 
   // Convolution integral of Landau and Gaussian by sum
-  for (size_t i = 412; i < 527; i++) {
+  for (int i = 412; i < 527; i++) {
 
     fland = TMath::Landau(3.5 + (i * 0.005), mpc, pulseParameter[0]) /
             pulseParameter[0];
