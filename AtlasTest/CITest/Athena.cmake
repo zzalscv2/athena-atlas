@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # CI test definitions for the Athena project
 # --> README.md before you modify this file
@@ -57,13 +57,13 @@ atlas_add_citest( RecoRun2Data_LegacyVsCA
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoLegacyVsCA.sh RecoRun2Data q442
    DEPENDS_SUCCESS RecoRun2Data RecoRun2Data_CAConfig )
 
-atlas_add_citest( RecoRun2Data_DAODPHYS
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DAODPhys.sh PHYS ../RecoRun2Data/run_q442/myAOD.pool.root
-   DEPENDS_SUCCESS RecoRun2Data )
+atlas_add_citest( DerivationRun2Data_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
 
-atlas_add_citest( RecoRun2Data_DAODPHYSLite
-   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DAODPhys.sh PHYSLITE ../RecoRun2Data/run_q442/myAOD.pool.root
-   DEPENDS_SUCCESS RecoRun2Data )
+atlas_add_citest( DerivationRun2Data_PHYSLITE
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun2MC
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w MCReco --threads 0 -e '--maxEvents 25' )
@@ -78,6 +78,14 @@ atlas_add_citest( RecoRun2MC_LegacyVsCA
 atlas_add_citest( RecoRun2MC_PileUp
    SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
+
+atlas_add_citest( DerivationRun2MC_PHYS
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun2MC_PHYSLITE
+   SCRIPT RunWorkflowTests_Run2.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
 
 atlas_add_citest( RecoRun3Data
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 --threads 8 -e '--maxEvents 100' --run-only
@@ -111,6 +119,14 @@ atlas_add_citest( RecoRun3Data_Cosmics
 atlas_add_citest( RecoRun3Data_Calib
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q451 -e '--maxEvents 25' --no-output-checks )
 
+atlas_add_citest( DerivationRun3Data_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3Data_PHYSLITE
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag data_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( RecoRun3MC
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/RecoRun3MC.sh )
 
@@ -125,14 +141,21 @@ atlas_add_citest( RecoRun3MC_PileUp
    SCRIPT RunWorkflowTests_Run3.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun3/run_d1760/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun3 )
 
+atlas_add_citest( DerivationRun3MC_PHYS
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYS --threads 4
+   PROPERTIES PROCESSORS 4 )
+
+atlas_add_citest( DerivationRun3MC_PHYSLITE
+   SCRIPT RunWorkflowTests_Run3.py --CI -d -w Derivation --tag mc_PHYSLITE --threads 4
+   PROPERTIES PROCESSORS 4 )
+
 atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    LOG_IGNORE_PATTERN "WARNING FPE" 
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
-
 atlas_add_citest( RecoRun4MC_DAODPHYS
-  SCRIPT RunWorkflowTests_Run4.py --CI -d -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
+  SCRIPT RunWorkflowTests_Run4.py --CI -d -w Derivation -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root'  # go two levels up as the test runs in a subfolder
   LOG_IGNORE_PATTERN "WARNING FPE INVALID"
   DEPENDS_SUCCESS RecoRun4MC )
 
