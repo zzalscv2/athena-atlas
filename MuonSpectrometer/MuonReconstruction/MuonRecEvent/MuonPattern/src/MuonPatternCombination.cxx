@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -17,10 +17,10 @@ namespace Muon {
 
     MuonPatternCombination::MuonPatternCombination(const Trk::TrackParameters* parameter,
                                                    const std::vector<MuonPatternChamberIntersect>& chamberData) :
-        m_parameter(parameter), m_chamberData(chamberData), m_roadType(0) {}
+        m_parameter(parameter), m_chamberData(chamberData) {}
 
     MuonPatternCombination::MuonPatternCombination(const MuonPatternCombination& pat) :
-        m_parameter(pat.m_parameter ? pat.m_parameter->clone() : nullptr), m_chamberData(pat.m_chamberData), m_roadType(0) {}
+        m_parameter(pat.m_parameter ? pat.m_parameter->clone() : nullptr), m_chamberData(pat.m_chamberData) {}
 
     MuonPatternCombination& MuonPatternCombination::operator=(const MuonPatternCombination& pat) {
         if (this != &pat) {
