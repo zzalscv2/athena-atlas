@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //================================================================//
@@ -9,7 +9,6 @@
 #include "CaloCalibrationHitsTestTool.h"
 #include "GeoAdaptors/GeoCaloCalibHit.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include <TH1.h>
 #include <TH2D.h>
@@ -39,7 +38,7 @@ StatusCode CaloCalibrationHitsTestTool::initialize(){
      m_path+="Calib/Tile/";
      m_hitcollkey="TileCalibration"+m_calibHitType.substr(4)+"HitCnt";
   } else{
-    ATH_MSG(ERROR) << " unknown key " <<m_calibHitType<<endmsg;
+    ATH_MSG_ERROR(" unknown key " <<m_calibHitType);
     return StatusCode::FAILURE;
   }
 
@@ -64,25 +63,26 @@ StatusCode CaloCalibrationHitsTestTool::initialize(){
   _TH1D_WEIGHTED(m_eTot_eta,(m_calibHitType+"_eTot_eta").c_str(),25,-5.,5.); 
   _TH1D_WEIGHTED(m_eTot_phi,(m_calibHitType+"_eTot_phi").c_str(),25,-3.2,3.2);
 
-  ATH_CHECK(detStore()->retrieve(m_caloMgr));
+  ATH_CHECK(m_caloMgrKey.initialize());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode CaloCalibrationHitsTestTool::processEvent(){
 
-  CaloCalibrationHitContainer::const_iterator hit;
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,Gaudi::Hive::currentContext()};
+  const CaloDetDescrManager* caloMgr = *caloMgrHandle;
 
   const CaloCalibrationHitContainer* iter;
   CHECK(evtStore()->retrieve(iter,m_hitcollkey));
-  for(hit=(*iter).begin(); hit != (*iter).end(); ++hit){
+  for(const CaloCalibrationHit* hit : *iter) {
 
-    GeoCaloCalibHit geoHit(**hit, m_hitcollkey, m_caloMgr);
+    GeoCaloCalibHit geoHit(*hit, m_hitcollkey, caloMgr);
     if (!geoHit) continue;
     const CaloDetDescrElement* ddElement = geoHit.getDetDescrElement();
 
     if (!ddElement) {
-      ATH_MSG(WARNING) << " could not retrieve DetElement in CaloCalibrationHitsTestTool/" <<m_calibHitType<<endmsg;
+      ATH_MSG_WARNING(" could not retrieve DetElement in CaloCalibrationHitsTestTool/" <<m_calibHitType);
       continue;
     }
     double eta = ddElement->eta();
@@ -94,7 +94,7 @@ StatusCode CaloCalibrationHitsTestTool::processEvent(){
     double invEnergy = geoHit.energyInvisible();
     double escEnergy = geoHit.energyEscaped();
     double totEnergy = geoHit.energyTotal();
-    double particleID = (*hit)->particleID();
+    double particleID = hit->particleID();
 
     m_eta->Fill(eta);
     m_phi->Fill(phi);
