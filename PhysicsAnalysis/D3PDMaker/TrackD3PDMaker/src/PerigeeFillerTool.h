@@ -18,7 +18,7 @@ public:
 		     const std::string& name,
 		     const IInterface* parent);
 
-  virtual StatusCode book() override;
+  virtual StatusCode book() final;
 
   virtual StatusCode fill (const Trk::TrackParameters &p) override;
 

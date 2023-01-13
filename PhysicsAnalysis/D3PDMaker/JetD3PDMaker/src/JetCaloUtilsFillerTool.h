@@ -39,7 +39,7 @@ namespace D3PD {
     
 
     /// Book variables for this block.
-    virtual StatusCode book() override;
+    virtual StatusCode book() final;
     
     
     /**

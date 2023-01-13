@@ -51,7 +51,7 @@ public:
 
   /// Standard Gaudi initialize method.
   virtual StatusCode initialize() override;
-  virtual StatusCode book() override;
+  virtual StatusCode book() final;
 
 
   /**
