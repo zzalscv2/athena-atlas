@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
 	
     ToolHandleArray<CP::IMuonTriggerScaleFactors> muonTools;
     asg::AnaToolHandle<CP::IMuonTriggerScaleFactors> muonTool("CP::MuonTriggerScaleFactors/MuonTrigEff");
-    muonTool.setProperty("MuonQuality", "Tight").ignore();
+    muonTool.setProperty("MuonQuality", "Medium").ignore();
 	muonTool.setProperty("OutputLevel", MSG::ERROR).ignore();
     if(muonTool.initialize() != StatusCode::SUCCESS)
     {
