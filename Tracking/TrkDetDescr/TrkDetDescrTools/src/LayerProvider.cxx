@@ -39,15 +39,6 @@ StatusCode Trk::LayerProvider::initialize()
     return StatusCode::SUCCESS;
 }
 
-/** LayerBuilder interface method - returning the layers at negative side */
-const std::vector<Trk::Layer*> Trk::LayerProvider::negativeLayers() const
-{
-    // if any cache is there it has to be returned
-    if (!m_layerCache.empty()) return m_layerCache;
-    // this will fill the cache with positive layers
-    return discLayers(-1);
-}    
-
 /** LayerBuilder interface method - returning the central layers */
 const std::vector<Trk::Layer*> Trk::LayerProvider::centralLayers() const
 {
@@ -65,44 +56,32 @@ const std::vector<Trk::Layer*> Trk::LayerProvider::centralLayers() const
     return cLayers;
 } 
 
-/** LayerBuilder interface method - returning the layers at negative side */
-const std::vector<Trk::Layer*> Trk::LayerProvider::positiveLayers() const
+/** LayerBuilder interface method - returning the endcap layer */
+std::pair<const std::vector<Trk::Layer*>, const std::vector<Trk::Layer*> >
+Trk::LayerProvider::endcapLayer() const
 {
-    // if any cache is there it has to be returned
-    if (!m_layerCache.empty()) return m_layerCache;
-    // this will fill the cache with negative layers
-    return discLayers(1);
-}
+  // get the disc layers
+  std::vector<Trk::Layer*> dLayers_pos;
+  std::vector<Trk::Layer*> dLayers_neg;
+  // retrieving the cylinder layers from the layer builder
+  std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers =
+    m_layerBuilder->discLayers();
 
-/** LayerBuilder interface method - returning the layers at negative side */
-const std::vector<Trk::Layer*> Trk::LayerProvider::discLayers(int posneg) const
-{
-    // get the disc layers
-    std::vector <Trk::Layer*>   dLayers;
-    // retrieving the cylinder layers from the layer builder
-    std::unique_ptr<const std::vector< Trk::DiscLayer*> > discLayers =
-      m_layerBuilder->discLayers();
-    // loop and fill either cache or dLayers
-    if (discLayers){
-        // loop over and push into the return/cache vector 
-        for (const auto & dL : (*discLayers) ){
-            // get the center posituion 
-            double zpos = dL->surfaceRepresentation().center().z();
-            if (posneg > 0){
-                // configured to provide positive and cache negative
-                if (zpos > 0.) dLayers.push_back(dL);
-                else m_layerCache.push_back(dL);
-            } else {
-                // configured to provide negative and cache positive
-                if (zpos < 0.) dLayers.push_back(dL);
-                else m_layerCache.push_back(dL);
-            }
-        }
+  // loop and fill either cache or dLayers
+  if (discLayers) {
+    // loop over and push into the return/cache vector
+    for (Trk::DiscLayer* dL : (*discLayers)) {
+      // get the center posituion
+      double zpos = dL->surfaceRepresentation().center().z();
+      if (zpos > 0.)
+          dLayers_pos.push_back(dL);
+      else
+          dLayers_neg.push_back(dL);
     }
-    // and return
-    return dLayers;
+  }
+  // and return
+  return std::make_pair(dLayers_pos, dLayers_neg);
 }
-
 
 // finalize
 StatusCode Trk::LayerProvider::finalize()

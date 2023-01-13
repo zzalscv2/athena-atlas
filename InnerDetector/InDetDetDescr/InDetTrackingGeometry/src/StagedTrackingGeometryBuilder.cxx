@@ -155,15 +155,19 @@ Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry
        ATH_MSG_DEBUG( "[ LayerBuilder : '" << lProvider->identification() << "' ] being processed. " );
        // retrieve the layers
        std::vector<Trk::Layer*> centralLayers = lProvider->centralLayers();
-       std::vector<Trk::Layer*> negativeLayers = lProvider->negativeLayers();
-       std::vector<Trk::Layer*> positiveLayers = lProvider->positiveLayers();
+       std::pair<const std::vector<Trk::Layer*>, const std::vector<Trk::Layer*> > endcapLayersPair = lProvider->endcapLayer();
        ATH_MSG_VERBOSE("       -> retrieved "  << centralLayers.size()  << " central layers.");
-       ATH_MSG_VERBOSE("       -> retrieved "  << negativeLayers.size() << " layers on negative side.");
-       ATH_MSG_VERBOSE("       -> retrieved "  << positiveLayers.size() << " layers on positive side.");
+       ATH_MSG_VERBOSE("       -> retrieved "  << endcapLayersPair.second.size() << " layers on negative side.");
+       ATH_MSG_VERBOSE("       -> retrieved "  << endcapLayersPair.first.size() << " layers on positive side.");
        // getting the Layer setup from parsing the builder output
-       InDet::LayerSetup lSetup = estimateLayerSetup(lProvider->identification(), ilS, 
-                                                     negativeLayers,centralLayers,positiveLayers,
-                                                     envelopeVolumeRadius, envelopeVolumeHalfZ);
+       InDet::LayerSetup lSetup =
+         estimateLayerSetup(lProvider->identification(),
+                            ilS,
+                            endcapLayersPair.second,
+                            centralLayers,
+                            endcapLayersPair.first,
+                            envelopeVolumeRadius,
+                            envelopeVolumeHalfZ);
        // get the maxima - for R and Z
        takeBigger(maximumLayerRadius, lSetup.rMax);
        takeBigger(maximumLayerExtendZ, lSetup.zMax);
