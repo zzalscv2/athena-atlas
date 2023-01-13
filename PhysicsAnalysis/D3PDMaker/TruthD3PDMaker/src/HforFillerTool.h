@@ -26,7 +26,7 @@ namespace D3PD {
 
     virtual StatusCode initialize() override;
 
-    virtual StatusCode book() override;
+    virtual StatusCode book() final;
 
     virtual StatusCode fill() override;
 
