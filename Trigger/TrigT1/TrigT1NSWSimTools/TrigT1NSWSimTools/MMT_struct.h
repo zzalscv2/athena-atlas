@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MM_STRUCT_H
@@ -231,6 +231,12 @@ class MMT_Parameters : public AthMessaging {
   void fill_yzmod();
   void index_key_test();
   char getSector() const { return sector; }
+  double getlWidth() const { return m_lWidth; }
+  double getPitch() const { return m_pitch; }
+  double getLowerBoundEta1() const { return m_innerRadiusEta1; }
+  double getLowerBoundEta2() const { return m_innerRadiusEta2; }
+  double getMissedBottomEtaStrips() const { return m_missedBottomEta; }
+  double getMissedBottomStereoStrips() const { return m_missedBottomStereo; }
 
   //eta-phi stuff
   int eta_bin(double theta) const;
@@ -314,6 +320,9 @@ class MMT_Parameters : public AthMessaging {
 
   double mid_plane_large_X, mid_plane_large, mid_plane_large_UV;
   double vertical_strip_width_UV;
+
+  double m_lWidth, m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
+  double m_missedBottomEta, m_missedBottomStereo;
 };
 
 struct mm_digit_entry{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -207,10 +207,12 @@ namespace NSWL1 {
                 m_trigger_strip->push_back(hitDatas[ihds].strip);
               }
             }
-            std::vector<double> slopes = diamond->getHitSlopes();
-            if (m_doNtuple) for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
+            if (m_doNtuple) {
+              std::vector<double> slopes = diamond->getHitSlopes();
+              for (const auto &s : slopes) m_trigger_RZslopes->push_back(s);
+              slopes.clear();
+            }
             diamond->resetSlopes();
-            slopes.clear();
             /*
              * Here we create roads with all MMT_Hit collected before (if any), then we save the results
              */

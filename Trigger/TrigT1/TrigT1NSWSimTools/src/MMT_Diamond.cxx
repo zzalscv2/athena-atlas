@@ -1,7 +1,4 @@
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
-#include "MuonAGDDDescription/MMDetectorDescription.h"
-#include "MuonAGDDDescription/MMDetectorHelper.h"
-#include <cmath>
 
 MMT_Diamond::MMT_Diamond(const MuonGM::MuonDetectorManager* detManager): AthMessaging(Athena::getMessageSvc(), "MMT_Diamond") {
   m_detManager = detManager;
@@ -26,36 +23,6 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   entry.sector = par->getSector();
   entry.stationPhi = (par->getSector() == 'S') ? phi*2-1 : phi*2-2;
 
-  micromegas_t micromegas;
-  MMDetectorHelper aHelper;
-  MMDetectorDescription* mm = aHelper.Get_MMDetector(par->getSector(), 1, 5, 1, 'A');
-  MMReadoutParameters roP   = mm->GetReadoutParameters();
-  MMDetectorDescription* mm2 = aHelper.Get_MMDetector(par->getSector(), 2, 5, 1, 'A');
-  MMReadoutParameters roP_2   = mm2->GetReadoutParameters();
-
-  micromegas.roadSize = this->getRoadSize();
-  micromegas.nstrip_up_XX = this->getRoadSizeUpX();
-  micromegas.nstrip_dn_XX = this->getRoadSizeDownX();
-  micromegas.nstrip_up_UV = this->getRoadSizeUpUV();
-  micromegas.nstrip_dn_UV = this->getRoadSizeDownUV();
-  micromegas.strips = roP.tStrips;
-  micromegas.pitch = roP.stripPitch;
-  micromegas.nMissedTopEta = roP.nMissedTopEta;
-  micromegas.nMissedBottomEta = roP.nMissedBottomEta;
-  micromegas.nMissedTopStereo = roP.nMissedTopStereo;
-  micromegas.nMissedBottomStereo = roP.nMissedBottomStereo;
-
-  micromegas.dimensions_top = mm->lWidth();
-  micromegas.dimensions_bottom = mm->sWidth();
-  micromegas.dimensions_height = mm->Length();
-
-  micromegas.activeArea_top = roP.activeTopLength;
-  micromegas.activeArea_bottom = roP.activeBottomLength;
-  micromegas.activeArea_height = roP.activeH;
-  micromegas.innerRadiusEta1 = roP.distanceFromZAxis;
-  micromegas.innerRadiusEta2 = roP_2.distanceFromZAxis;
-  micromegas.stereoAngles = roP.stereoAngle;
-
   std::string sector = (par->getSector() == 'L') ? "MML" : "MMS";
 
   /*
@@ -63,6 +30,8 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
    * X & Y are constant in all layers, for a given phi (Not used at the moment)
    * Z (layer coordinates) changes only for Small and Large sectors --> USED and working!
    */
+  std::vector<ROOT::Math::XYZVector> planeCoordinates{};
+  planeCoordinates.reserve(8);
   for (unsigned int iphi = 0; iphi < 8; iphi++) {
     Amg::Vector3D globalPos(0.0, 0.0, 0.0);
     int multilayer = (iphi < 4) ? 1 : 2;
@@ -72,23 +41,23 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
      * channelMin() function (https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/MuonSpectrometer/MuonIdHelpers/MuonIdHelpers/MmIdHelper.h?v=21.3#0123)
      * could be used, instead of hardcoding the strip id, but it returns (always?) as initialized in level ranges
      */
-    int strip = (iphi > 1 && iphi < 6) ? roP.nMissedBottomStereo+1 : roP.nMissedBottomEta+1;
+    int strip = (iphi > 1 && iphi < 6) ? par->getMissedBottomStereoStrips()+1 : par->getMissedBottomEtaStrips()+1;
     Identifier strip_id = detManager->mmIdHelper()->channelID(sector, 1, iphi+1, multilayer, gasgap, strip);
     const MuonGM::MMReadoutElement* readout = detManager->getMMReadoutElement(strip_id);
 
     ROOT::Math::XYZVector coord(0.,0.,0.);
     if (readout->stripGlobalPosition(strip_id, globalPos)) coord.SetXYZ(globalPos.x(), globalPos.y(), globalPos.z());
     else ATH_MSG_WARNING("Wedge " << sector << " phi: " << iphi << " mult. " << multilayer << " gas " << gasgap <<  " | Unable to retrieve global positions");
-    micromegas.planeCoordinates.push_back(coord);
+    planeCoordinates.push_back(coord);
   }
 
   int nroad = 8192/this->getRoadSize();
   double B = (1./std::tan(1.5/180.*M_PI));
-  int uvfactor = std::round( mm2->lWidth() / (B * 0.4 * 2.)/this->getRoadSize() ); // mm2 pointer is used because the full wedge has to be considered, i.e. S(L/M)2
+  int uvfactor = std::round( par->getlWidth() / (B * 0.4 * 2.)/this->getRoadSize() ); // full wedge has to be considered, i.e. S(L/M)2
   this->setUVfactor(uvfactor);
 
   for (int ihds = 0; ihds < (int)hitDatas.size(); ihds++) {
-    auto myhit = std::make_shared<MMT_Hit>(par->getSector(), hitDatas[ihds], detManager, par, micromegas.planeCoordinates);
+    auto myhit = std::make_shared<MMT_Hit>(hitDatas[ihds], detManager, par, planeCoordinates);
     if (myhit->verifyHit()) {
       m_hitslopes.push_back(myhit->getRZSlope());
       entry.ev_hits.push_back(myhit);
@@ -97,34 +66,68 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   entry.side = (std::all_of(entry.ev_hits.begin(), entry.ev_hits.end(), [] (const auto hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
 
   for (int i = 0; i < nroad; i++) {
-    auto myroad = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i);
+    auto myroad = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                             this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                             this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                             this->getXthreshold(), this->getUVthreshold(),
+                                             par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(), i);
     entry.ev_roads.push_back(myroad);
 
     int nuv = (this->getUV()) ? this->getUVfactor() : 0;
     for (int uv = 1; uv <= nuv; uv++) {
       if (i-uv < 0) continue;
 
-      auto myroad_0 = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i, i+uv, i-uv);
+      auto myroad_0 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                                 this->getXthreshold(), this->getUVthreshold(),
+                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
+                                                 i, i+uv, i-uv);
       entry.ev_roads.push_back(myroad_0);
 
-      auto myroad_1 = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i, i-uv, i+uv);
+      auto myroad_1 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                                 this->getXthreshold(), this->getUVthreshold(),
+                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
+                                                 i, i-uv, i+uv);
       entry.ev_roads.push_back(myroad_1);
 
-      auto myroad_2 = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i, i+uv-1, i-uv);
+      auto myroad_2 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                                 this->getXthreshold(), this->getUVthreshold(),
+                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
+                                                 i, i+uv-1, i-uv);
       entry.ev_roads.push_back(myroad_2);
 
-      auto myroad_3 = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i, i-uv, i+uv-1);
+      auto myroad_3 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                                 this->getXthreshold(), this->getUVthreshold(),
+                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
+                                                 i, i-uv, i+uv-1);
       entry.ev_roads.push_back(myroad_3);
 
-      auto myroad_4 = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i, i-uv+1, i+uv);
+      auto myroad_4 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                                 this->getXthreshold(), this->getUVthreshold(),
+                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
+                                                 i, i-uv+1, i+uv);
       entry.ev_roads.push_back(myroad_4);
 
-      auto myroad_5 = std::make_shared<MMT_Road>(par->getSector(), detManager, micromegas, this->getXthreshold(), this->getUVthreshold(), i, i+uv, i-uv+1);
+      auto myroad_5 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
+                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
+                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
+                                                 this->getXthreshold(), this->getUVthreshold(),
+                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
+                                                 i, i+uv, i-uv+1);
       entry.ev_roads.push_back(myroad_5);
     }
   }
   m_diamonds.push_back(entry);
-
+  planeCoordinates.clear();
   ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 

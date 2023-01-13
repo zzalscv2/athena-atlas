@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef MMT_ROAD_H
@@ -8,38 +8,11 @@
 #include "MMT_Hit.h"
 #include <cmath>
 #include <numeric>
- 
-namespace MuonGM {
-  class MuonDetectorManager;
-}
-
-struct micromegas_t {
-  int roadSize{-1};
-  int nstrip_up_XX{-1};
-  int nstrip_dn_XX{-1};
-  int nstrip_up_UV{-1};
-  int nstrip_dn_UV{-1};
-  unsigned int strips{0};
-  unsigned int nMissedTopEta{0};
-  unsigned int nMissedBottomEta{0};
-  unsigned int nMissedTopStereo{0};
-  unsigned int nMissedBottomStereo{0};
-  double pitch{0.};
-  double dimensions_top{0.};
-  double dimensions_bottom{0.};
-  double dimensions_height{0.};
-  double activeArea_top{0.};
-  double activeArea_bottom{0.};
-  double activeArea_height{0.};
-  double innerRadiusEta1{0.};
-  double innerRadiusEta2{0.};
-  std::vector<double> stereoAngles{};
-  std::vector<ROOT::Math::XYZVector> planeCoordinates{};
-};
 
 class MMT_Road {
   public:
-    MMT_Road(const char sector, const MuonGM::MuonDetectorManager* detManager, const micromegas_t &mm, int xthr, int uvthr, int iroadx, int iroadu = -1, int iroadv = -1);
+    MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
+             const float pitch, const float eta1, const float eta2, const int iroadx, const int iroadu = -1, const int iroadv = -1);
     ~MMT_Road()=default;
 
     void addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits);
@@ -75,8 +48,6 @@ class MMT_Road {
     bool stereoCheck() const;
 
   private:
-    const MuonGM::MuonDetectorManager* m_detManager{};        //!< MuonDetectorManager
-    const MuonGM::MuonDetectorManager* GetDetManager() { return m_detManager; }
     int m_iroad;
     int m_iroadx;
     int m_iroadu;
@@ -84,8 +55,7 @@ class MMT_Road {
     char m_sector;
     int m_xthr, m_uvthr;
     int m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV;
-    double m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
-    bool m_trig;
+    float m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
     std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
 };
 #endif
