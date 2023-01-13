@@ -1,16 +1,14 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// LayerProviderCond.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef TRKDETDESCRTOOLS_LAYERPROVIDERCOND_H
 #define TRKDETDESCRTOOLS_LAYERPROVIDERCOND_H
 
 // Trk
+#include "TrkDetDescrTools/LayerProviderImpl.h"
 #include "TrkDetDescrInterfaces/ILayerProviderCond.h"
+#include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
@@ -18,18 +16,16 @@
 
 namespace Trk {
 
-class Layer;
-class ILayerBuilderCond;
+  class Layer;
 
 /** @class LayerProviderCond
 
-  Wrapper around an ILayerBuilderCond to feed into the StagedGeometryBuilder
+  Wrapper around an ILayerBuilderCond to feed into the StagedGeometryBuilderCond
 
   @author Andreas.Salzburger@cern.ch
  */
 class LayerProviderCond final
-  : public AthAlgTool
-  , virtual public ILayerProviderCond
+  : public extends<LayerProviderImpl, ILayerProviderCond>
 {
 
 public:
@@ -37,7 +33,7 @@ public:
   LayerProviderCond(const std::string&, const std::string&, const IInterface*);
 
   /** Destructor */
-  virtual ~LayerProviderCond();
+  virtual ~LayerProviderCond() = default;
 
   /** initialize */
   virtual StatusCode initialize() override final;
@@ -56,7 +52,7 @@ public:
   virtual const std::string& identification() const override final;
 
 private:
-  ToolHandle<ILayerBuilderCond> m_layerBuilder;
+  PublicToolHandle<ILayerBuilderCond> m_layerBuilder{this, "LayerBuilder", ""};  // Name specification from outside
 };
 
 } // end of namespace
