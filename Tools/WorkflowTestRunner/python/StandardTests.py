@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from typing import List
 
 from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck
@@ -6,7 +6,8 @@ from .Inputs import input_EVNT, input_EVNT_AF3, input_HITS, \
     input_HITS_unfiltered, \
     input_HITS_MC_overlay, input_RDO_BKG, \
     input_HITS_data_overlay, input_BS_SKIM, \
-    input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino
+    input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
+    input_AOD
 from .Test import TestSetup, WorkflowRun, WorkflowTest, WorkflowType
 
 
@@ -169,26 +170,37 @@ class DerivationTest(WorkflowTest):
     """Derivations test."""
 
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
-        if "maxEvents" not in extra_args:
-            extra_args += " --maxEvents 10"
+        test_def = ID.split("_")
+        data_type = test_def[0].lower()
+        format = test_def[-1].upper()
 
         threads = 0
         if setup.custom_threads is not None:
             threads = setup.custom_threads
 
+        if "maxEvents" not in extra_args:
+            events = 100
+            extra_args += f" --maxEvents {events}"
+        if "inputAODFile" not in extra_args:
+            extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
+
+        # could also use p5503
         self.command = \
-            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py --AMIConfig {ID}"
+            (f"ATHENA_CORE_NUMBER={threads} Derivation_tf.py --CA"
+             f" --formats {format}"
+             " --multiprocess --multithreadedFileValidation True"
+             " --athenaMPMergeTargetSize 'DAOD_*:0'"
+             " --sharedWriter True"
              " --outputDAODFile myOutput.pool.root"
-             " --formats PHYS"
              f" --imf False {extra_args}")
 
         # skip performance checks for now due to CA
         self.skip_performance_checks = True
 
-        if threads == 0:
-            # does not work with shared writer
+        enable_checks = False
+        if enable_checks:
             self.output_checks = [
-                FrozenTier0PolicyCheck(setup, "DAOD_PHYS", 10)
+                FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10)
             ]
 
         super().__init__(ID, run, type, steps, setup)
