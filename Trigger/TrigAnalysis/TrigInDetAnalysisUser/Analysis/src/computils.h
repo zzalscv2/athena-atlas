@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef COMPUTILS_H
@@ -97,7 +97,7 @@ double plotable( TH1* h ); // , double xlo=-999, double xhi=-999 );
 
 class data_mismatch : public std::exception { 
 public:
-  data_mismatch(const std::string& s) { std::cerr << "exception:" << what() << " " << s << std::endl; }; 
+  data_mismatch(const std::string& s) { std::cerr << "exception:" << data_mismatch::what() << " " << s << std::endl; }; 
   virtual const char* what() const throw() { return "data don't match"; }
 };
 
@@ -352,7 +352,9 @@ public:
 
   // Legend( const Legend& leg ) : mleg((TLegend*)leg.mleg->Clone()) { } 
 
- Legend(const Legend& legend) : m_leg(legend.m_leg) { } 
+ Legend(const Legend& legend) : m_leg(legend.m_leg), 
+   m_x{legend.m_x[0], legend.m_x[1]}, 
+   m_y{legend.m_y[0], legend.m_y[1]} { } 
 
   ~Legend() { } 
 

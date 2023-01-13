@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sat Aug 30 2014 14:38:03 CEST  
  **
- **     Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -553,7 +553,7 @@ std::string findcell( std::string name, const std::string& regex, const std::str
   std::string duff = name;
 
   while ( pos!=std::string::npos && pos>posex+regex.size() ) { 
-    name = name.substr( 0, pos );
+    name.resize(pos); //pos must be <=string length
     pos = name.find_last_of( splitex );
   }
   

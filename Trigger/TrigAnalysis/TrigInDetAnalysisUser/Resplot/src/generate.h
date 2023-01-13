@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef GENERATE_H
@@ -75,6 +75,9 @@ public:
 
   hist_generator(TH1D* h, bool _smooth=true );
   
+  hist_generator(const hist_generator &) = delete;
+  hist_generator operator=(const hist_generator &) = delete;
+  
   virtual ~hist_generator() { delete ms; if ( mrandom ) delete mrandom; }
 
   /// actually generate a random number from the distribution
@@ -131,6 +134,8 @@ class experiment {
 public:
 
   experiment( TH1D* h, int Nexperiments=10, int fevents=0 );
+  experiment(const experiment& ) = delete;
+  experiment operator=(const experiment& ) = delete;
 
   double hmean() const { return m_hmean; }  
   double hrms()  const { return m_hrms; }  

@@ -199,7 +199,7 @@ std::string number(const int& i, const std::string& s) {
 
 std::string dirname( std::string name ) { 
   std::string::size_type pos = name.find_last_of( '/' );
-  if ( pos!=std::string::npos ) name = name.substr( 0, pos );
+  if ( pos!=std::string::npos ) name.resize( pos );
   return name;
 }
 
