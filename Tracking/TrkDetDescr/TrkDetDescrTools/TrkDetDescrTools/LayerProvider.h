@@ -46,25 +46,18 @@ namespace Trk {
         /** finalize */
         StatusCode finalize();
 
-        /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector<Layer*> negativeLayers() const; 
-      
+        /** LayerBuilder interface method - returning the endcap layer */
+        std::pair<const std::vector<Layer*>, const std::vector<Layer*> >
+          endcapLayer() const;
+
         /** LayerBuilder interface method - returning the central layers */
         const std::vector<Layer*> centralLayers() const; 
-      
-        /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector<Layer*> positiveLayers() const; 
 
         /** Name identification */
         const std::string& identification() const;
 
       private:
-        /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector<Layer*> discLayers(int posneg) const;   
-      
         ToolHandle<ILayerBuilder>               m_layerBuilder;
-        mutable std::vector<Trk::Layer*>  m_layerCache;
-        
     };
 
 
