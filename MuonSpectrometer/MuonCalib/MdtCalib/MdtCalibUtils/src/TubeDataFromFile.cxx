@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibUtils/TubeDataFromFile.h"
@@ -185,7 +185,7 @@ namespace MuonCalib {
 
                             if (isnan(t0) != 0) t0 = -99999.;
 
-                            fprintf(ftube, " %d,%d,%d,%d,%d,%d,%d,%d,%d,", mdt_head, tube_id, fixId.mdtChamberId().getIdInt(), lowrun,
+                            fprintf(ftube, " %d,%d,%u,%d,%d,%d,%d,%d,%d,", mdt_head, tube_id, fixId.mdtChamberId().getIdInt(), lowrun,
                                     uprun, runflag, sc, validflag, stat);
 
                             for (int ii = -2; ii < 35; ii++) {

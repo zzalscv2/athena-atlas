@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_GLOBALTIMEFITTER_H
@@ -39,7 +39,7 @@ namespace MuonCalib {
                                                                    // return 2.0 ; //  FLAT 2 mm resolution
         };
         bool fit(MuonCalibSegment &seg) const { return m_fitter->fit(seg); }
-        bool fit(MuonCalibSegment &seg, MuonCalib::IMdtSegmentFitter::HitSelection selection) const {
+        bool fit(MuonCalibSegment &seg, const MuonCalib::IMdtSegmentFitter::HitSelection& selection) const {
             return m_fitter->fit(seg, selection);
         }
 
