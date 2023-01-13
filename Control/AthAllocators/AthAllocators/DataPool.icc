@@ -20,7 +20,7 @@ DATAPOOL_T
 typename DataPool<VALUE, clear>::alloc_t::Params DataPool<VALUE, clear>::initParams()
 {
   typename alloc_t::Params params = alloc_t::initParams<VALUE> (s_minRefCount);
-  if (clear) {
+  if (clear != nullptr) {
     params.clear = callClear;
   }
   return params;
