@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -64,8 +64,8 @@ bool ImportData::readDataFile(const char* filename, std::vector<std::string>& co
 			{
 				if(std::getline(f,line))
 				{
-					auto i = line.find('#');
-					if(i != std::string::npos) line = line.substr(0,i);
+					const std::string::size_type i = line.find('#');
+					if(i != std::string::npos) line.resize(i);
 					if(line.length() >= 3) contents.emplace_back(std::move(line));
 				}
 			}
@@ -662,7 +662,7 @@ bool ImportData::suggestElectronMapKeys(const std::map<std::string,std::string>&
 					legsWithMultipleKeys.insert(leg);
 					for(int i=0;i<32;++i)
 					{
-						if(supportedYears & (1<<i))
+						if(supportedYears & (1u<<i))
 						{
 							if(strLegs.length() && strLegs.back()!=',') strLegs += ',';
 							strLegs += m_dictionary.at(leg) + "[" + std::to_string(2015 + i) + "]";
