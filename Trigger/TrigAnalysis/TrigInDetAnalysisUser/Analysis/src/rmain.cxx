@@ -2115,8 +2115,10 @@ int main(int argc, char** argv)
               while (  itr!=refp_vec.end() ) { 
                 const TrackTrigObject* tobj = tom.object( (*itr)->id() );
 
-                if ( tobj==0 || tobj->pt()<ETconfig ) refp_vec.erase( itr );
-                else ++itr;
+                if ( tobj==0 || tobj->pt()<ETconfig ) 
+		  itr=refp_vec.erase( itr );
+                else 
+		  ++itr;
               }
             }
           }
