@@ -108,7 +108,7 @@ namespace xAODMaker {
                      std::string typeName;
                      ATH_CHECK( m_clidSvc->getTypeNameOfID( proxy->clID(),
                                                             typeName ) );
-                     if( typeName.substr( 0, 6 ) == "xAOD::" ) {
+                     if( typeName.compare( 0, 6, "xAOD::" ) == 0) {
                         m_clids[ proxy->name() ] = proxy->clID();
                      }
                   }
@@ -121,7 +121,7 @@ namespace xAODMaker {
             std::string typeName;
             ATH_CHECK( m_clidSvc->getTypeNameOfID( proxy->clID(),
                                                    typeName ) );
-            if( ( typeName.substr( 0, 6 ) == "xAOD::" ) &&
+            if( ( typeName.compare( 0, 6 , "xAOD::") == 0) &&
                 ( typeName != "xAOD::ByteStreamAuxContainer_v1" ) ) {
                m_clids[ proxy->name() ] = proxy->clID();
             }
