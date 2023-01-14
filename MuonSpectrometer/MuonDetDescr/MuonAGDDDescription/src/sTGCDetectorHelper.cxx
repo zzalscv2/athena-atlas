@@ -11,6 +11,8 @@
 
 #include <vector>
 
+extern int myatoi(std::string_view str);
+
 sTGCDetectorHelper::sTGCDetectorHelper()
 {
         if (m_svc.retrieve().isFailure()) {
@@ -42,17 +44,17 @@ sTGCDetectorDescription* sTGCDetectorHelper::Get_sTGCDetector(char type,int ieta
 		if (dp)
 		{
 			if (dp->ID.detectorType != "sTGC") continue;
-			std::string dad=dp->ID.detectorAddress;
+			std::string_view dad=dp->ID.detectorAddress;
 		
 			char dtype=dad[3];
 			char dctype='L';
 			if (dtype=='3') dctype='S';
 			if (dctype!=type) continue;
-			int deta=atoi(dad.substr(5,1).c_str());
+			int deta=myatoi(dad.substr(5,1));
 			if (deta!=ieta) continue;
-			int dphi=atoi(dad.substr(12,1).c_str());
+			int dphi=myatoi(dad.substr(12,1));
 			if (dphi!=iphi) continue;
-			int dlayer=atoi(dad.substr(7,1).c_str());
+			int dlayer=myatoi(dad.substr(7,1));
 			if (dlayer!=layer) continue;
 			char dside=dad[13];
 			if (dside!=side) continue;
@@ -78,17 +80,17 @@ AGDDPositionedDetector sTGCDetectorHelper::Get_sTGCPositionedDetector(char type,
 		if (dp)
 		{
 			if (dp->ID.detectorType != "sTGC") continue;
-			std::string dad=dp->ID.detectorAddress;
+			std::string_view dad=dp->ID.detectorAddress;
 		
 			char dtype=dad[3];
 			char dctype='L';
 			if (dtype=='3') dctype='S';
 			if (dctype!=type) continue;
-			int deta=atoi(dad.substr(5,1).c_str());
+			int deta=myatoi(dad.substr(5,1));
 			if (deta!=ieta) continue;
-			int dphi=atoi(dad.substr(12,1).c_str());
+			int dphi=myatoi(dad.substr(12,1));
 			if (dphi!=iphi) continue;
-			int dlayer=atoi(dad.substr(7,1).c_str());
+			int dlayer=myatoi(dad.substr(7,1));
 			if (dlayer!=layer) continue;
 			char dside=dad[13];
 			if (dside!=side) continue;

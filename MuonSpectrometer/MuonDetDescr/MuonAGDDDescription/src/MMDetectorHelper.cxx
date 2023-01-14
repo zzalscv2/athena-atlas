@@ -8,8 +8,9 @@
 #include "AGDDKernel/AGDDPositionerStore.h"
 #include "AGDDKernel/AGDDDetectorPositioner.h"
 #include "AGDDControl/AGDDController.h"
-
 #include <vector>
+#include <charconv>
+
 
 MMDetectorHelper::MMDetectorHelper()
 {
@@ -30,6 +31,13 @@ MMDetectorHelper::MMDetectorHelper()
 	
 }
 
+int myatoi(std::string_view str){
+	int result=-9999;
+	std::from_chars(str.data(), str.data() + str.size(), result);
+	return result;
+}
+
+
 MMDetectorDescription* MMDetectorHelper::Get_MMDetector(char type,int ieta,int iphi,int layer,char side)
 {
 	MMDetectorDescription* mm=nullptr;
@@ -42,17 +50,17 @@ MMDetectorDescription* MMDetectorHelper::Get_MMDetector(char type,int ieta,int i
 		if (dp)
 		{
 			if (dp->ID.detectorType != "Micromegas") continue;
-			std::string dad=dp->ID.detectorAddress;
+			std::string_view dad=dp->ID.detectorAddress;
 
 			char dtype=dad[3];
 			char dctype='L';
 			if (dtype=='3') dctype='S';
 			if (dctype!=type) continue;
-			int deta=atoi(dad.substr(5,1).c_str());
+			int deta=myatoi(dad.substr(5,1));
 			if (deta!=ieta) continue;
-			int dphi=atoi(dad.substr(12,1).c_str());
+			int dphi=myatoi(dad.substr(12,1));
 			if (dphi!=iphi) continue;
-			int dlayer=atoi(dad.substr(7,1).c_str());
+			int dlayer=myatoi(dad.substr(7,1));
 			if (dlayer!=layer) continue;
 			char dside=dad[13];
 			if (dside!=side) continue;
@@ -78,17 +86,17 @@ AGDDPositionedDetector MMDetectorHelper::Get_MMPositionedDetector(char type,int 
 		if (dp)
 		{
 			if (dp->ID.detectorType != "Micromegas") continue;
-			std::string dad=dp->ID.detectorAddress;
+			std::string_view dad=dp->ID.detectorAddress;
 
 			char dtype=dad[3];
 			char dctype='L';
 			if (dtype=='3') dctype='S';
 			if (dctype!=type) continue;
-			int deta=atoi(dad.substr(5,1).c_str());
+			int deta=myatoi(dad.substr(5,1));
 			if (deta!=ieta) continue;
-			int dphi=atoi(dad.substr(12,1).c_str());
+			int dphi=myatoi(dad.substr(12,1));
 			if (dphi!=iphi) continue;
-			int dlayer=atoi(dad.substr(7,1).c_str());
+			int dlayer=myatoi(dad.substr(7,1));
 			if (dlayer!=layer) continue;
 			char dside=dad[13];
 			if (dside!=side) continue;
@@ -104,13 +112,13 @@ AGDDPositionedDetector MMDetectorHelper::Get_MMPositionedDetector(char type,int 
 
 MMDetectorDescription* MMDetectorHelper::Get_MMDetectorType(const std::string& type)
 {
-	if (m_MicromegasList.find(type) != m_MicromegasList.end()) return m_MicromegasList[type];
+	if (auto itr = m_MicromegasList.find(type); itr != m_MicromegasList.end()) return itr->second;
 	return nullptr;
 }
 
 MMDetectorDescription* MMDetectorHelper::Get_MMDetectorSubType(const std::string& type)
 {
-	if (m_MicromegasListSubType.find(type) != m_MicromegasListSubType.end()) return m_MicromegasListSubType[type];
+	if (auto itr = m_MicromegasListSubType.find(type); itr != m_MicromegasListSubType.end()) return itr->second;
 	return nullptr;
 }
 

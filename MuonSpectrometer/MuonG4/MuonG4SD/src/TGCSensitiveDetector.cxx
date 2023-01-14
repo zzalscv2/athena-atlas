@@ -73,7 +73,7 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       } else {
         zside = -1;
       }
-      if (stationName.substr(2,1) == "F") {
+      if (stationName.at(2) == 'F') {
 
         stationPhi    = (abs(volCopyNo%100)-1)*3;
         if (abs(volCopyNo/100) > 3) {
@@ -87,8 +87,8 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
           stationPhi = 24 - stationPhi;
         }
 
-      } else if (stationName.substr(2,1) == "E") {
-        if (stationName.substr(1,1) == "4") {
+      } else if (stationName.at(2) == 'E') {
+        if (stationName.at(1) == '4') {
 
           stationPhi = (abs(volCopyNo%100)-1)*3+abs(volCopyNo/100);
 
@@ -147,7 +147,7 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       } else {
         zside = 1;
       }
-      if (stationName.substr(2,1) == "F") {
+      if (stationName.at(2) == 'F') {
 
         stationPhi    = (abs(copyNrBase%100)-1)*3;
         if (abs(copyNrBase/100) > 3) {
@@ -161,8 +161,8 @@ G4bool TGCSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
           stationPhi = 24 - stationPhi;
         }
 
-      } else if (stationName.substr(2,1) == "E") {
-        if (stationName.substr(1,1) == "4") {
+      } else if (stationName.at(2) == 'E') {
+        if (stationName.at(1) == '4') {
 
           stationPhi = (abs(copyNrBase%100)-1)*3+abs(copyNrBase/100);
 
