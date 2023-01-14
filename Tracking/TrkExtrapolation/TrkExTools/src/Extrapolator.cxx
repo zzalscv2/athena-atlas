@@ -715,8 +715,8 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           }
         } else if (staticVol->geometrySignature() != Trk::MS ||
                    !m_useMuonMatApprox ||
-                   (*iTer)->name().substr((*iTer)->name().size() - 4, 4) ==
-                     "PERM") { // retrieve
+                   (*iTer)->name().compare((*iTer)->name().size() - 4, 4, "PERM") ==
+                     0) { // retrieve
                                // inert
                                // detached
                                // objects
@@ -911,7 +911,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       continue;
     }
     if (!active && staticVol->geometrySignature() == Trk::MS && m_useMuonMatApprox &&
-        (*dIter)->name().substr((*dIter)->name().size() - 4, 4) != "PERM") {
+        (*dIter)->name().compare((*dIter)->name().size() - 4, 4, "PERM") != 0) {
       continue;
     }
     const Trk::TrackingVolume* dVol = (*dIter)->trackingVolume();
@@ -4742,8 +4742,8 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           }
         } else if (cache.m_currentStatic->geometrySignature() != Trk::MS ||
                    !m_useMuonMatApprox ||
-                   (*iTer)->name().substr((*iTer)->name().size() - 4, 4) ==
-                     "PERM") {
+                   (*iTer)->name().compare((*iTer)->name().size() - 4, 4, "PERM") ==
+                     0) {
           // retrieve inert detached
           // objects only if needed
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
@@ -4819,7 +4819,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       continue;
     }
     if (!active && cache.m_currentStatic->geometrySignature() == Trk::MS && m_useMuonMatApprox &&
-        (*dIter)->name().substr((*dIter)->name().size() - 4, 4) != "PERM") {
+        (*dIter)->name().compare((*dIter)->name().size() - 4, 4, "PERM") != 0) {
       continue;
     }
     const Trk::TrackingVolume* dVol = (*dIter)->trackingVolume();
