@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastCaloSim/ParticleEnergyParametrization.h"
@@ -259,11 +259,11 @@ void ParticleEnergyParametrization::DiceParticle(ParticleEnergyShape& p,TRandom&
   double xmin= std::as_const(m_Ecal_vs_dist)->GetXaxis()->GetBinLowEdge(distbin);
   double xmax= std::as_const(m_Ecal_vs_dist)->GetXaxis()->GetBinUpEdge(distbin);
 
-  //p.dist_in = GetRandomInBinRange(rand, xmin,xmax ,(TH1F*)m_h_layer_d_fine);
+  //p.dist_in = GetRandomInBinRange(rand, xmin,xmax ,m_h_layer_d_fine);
   if(m_h_layer_d_fine) {
     //cout<<" fine hist ptr="<<m_h_layer_d_fine<<endl;
     //cout<<" fine hist="<<m_h_layer_d_fine->GetName()<<" : "<<m_h_layer_d_fine->GetTitle()<<endl;
-    p.dist_in = GetRandomInBinRange(rand, xmin,xmax ,(TH1*) m_h_layer_d_fine);
+    p.dist_in = GetRandomInBinRange(rand, xmin,xmax , m_h_layer_d_fine);
   }
 
   const ParticleEnergyParametrizationInDistbin* shapeindist=DistPara(distbin);
@@ -366,31 +366,38 @@ void ParticleEnergyParametrization::RepeatDiceParticles(ParticleEnergyShape* p,i
   }
 }
 
-double ParticleEnergyParametrization::GetRandomInBinRange(TRandom& rand, double xmin_in1, double xmax_in1 , TH1* in2) {
+double ParticleEnergyParametrization::GetRandomInBinRange(TRandom& rand, double xmin_in1, double xmax_in1 , const TH1* in2) {
 
  // cout << " enter GetRandomInBinRange " << endl;
   int NumOfBin_in2 = in2->GetNbinsX();
 
-// find bins in "in2" and NumOfBins
-  int firstbin_in2 = in2->FindBin(xmin_in1);
+  // find bins in "in2" and NumOfBins
+  int firstbin_in2 = in2->FindFixBin(xmin_in1);
   if(firstbin_in2>0) --firstbin_in2;
-  int lastbin_in2  = in2->FindBin(xmax_in1);
+  int lastbin_in2  = in2->FindFixBin(xmax_in1);
   if(in2->GetNbinsX()< lastbin_in2) lastbin_in2  = in2->GetNbinsX();
 
 // Get the number of bins in "in2"
 //  int nbinsx = lastbin_in2 - firstbin_in2 +1 ;
-// dice random number flat in [0,1] and map it to intervall [fIntegral(firstbin_in2),fIntegral(lastbin_in2)]
+// dice random number flat in [0,1] and map it to interval [fIntegral(firstbin_in2),fIntegral(lastbin_in2)]
   double r1,r;
   double x;
   do{
      r=rand.Rndm();
-     r1= in2->GetIntegral()[firstbin_in2] +r*( in2->GetIntegral()[lastbin_in2]-in2->GetIntegral()[firstbin_in2]);
+     // For calling GetIntegral().
+     // TH1::GetIntegral() is non-const because the first time it is called,
+     // it computes and memoizes the integral.  After that, it simply returns
+     // what was calculated earlier.
+     // We take care to call GetIntegral when we're given the histogram.
+     // If that's done, then it should be safe to call GetIntegral() in MT.
+     TH1* in2_nc ATLAS_THREAD_SAFE = const_cast<TH1*>(in2);
+     r1= in2_nc->GetIntegral()[firstbin_in2] +r*( in2_nc->GetIntegral()[lastbin_in2]-in2_nc->GetIntegral()[firstbin_in2]);
 
-     Int_t ibin = TMath::BinarySearch(NumOfBin_in2,&in2->GetIntegral()[0],r1);
+     Int_t ibin = TMath::BinarySearch(NumOfBin_in2,&in2_nc->GetIntegral()[0],r1);
      x = in2->GetXaxis()->GetBinLowEdge(ibin+1);
   
-     if (r1 > in2->GetIntegral()[ibin]){ 
-         x += in2->GetBinWidth(ibin+1)*(r1-in2->GetIntegral()[ibin])/(in2->GetIntegral()[ibin+1] - in2->GetIntegral()[ibin]);
+     if (r1 > in2_nc->GetIntegral()[ibin]){ 
+         x += in2->GetBinWidth(ibin+1)*(r1-in2_nc->GetIntegral()[ibin])/(in2_nc->GetIntegral()[ibin+1] - in2_nc->GetIntegral()[ibin]);
      }
    } while (x<  xmin_in1|| x> xmax_in1);
   
@@ -422,7 +429,10 @@ void ParticleEnergyParametrization::Streamer(TBuffer &R__b)
       R__b >> m_Ecal_vs_dist;
       if(R__v>=3) { 
         R__b >> m_h_layer_d_fine;
-        if(m_h_layer_d_fine) m_h_layer_d_fine->SetDirectory(nullptr);
+        if(m_h_layer_d_fine) {
+          m_h_layer_d_fine->SetDirectory(nullptr);
+          m_h_layer_d_fine->GetIntegral();
+        }
       }
       m_DistPara.Streamer(R__b);
       int R__i;
