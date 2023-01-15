@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_TPHELPERS
@@ -25,10 +25,8 @@ namespace Analysis {
   {
       result.clear();
       result.reserve(persVector.size());
-      for (std::vector<TPObjRef>::const_iterator itr = persVector.begin();
-	   itr != persVector.end();
-	   ++itr) {
-	result.push_back(masterCvt->createTransFromPStore(cnv, *itr, msg));
+      for (const TPObjRef& ref : persVector) {
+	result.push_back(masterCvt->createTransFromPStore(cnv, ref, msg));
       }
   }
 
