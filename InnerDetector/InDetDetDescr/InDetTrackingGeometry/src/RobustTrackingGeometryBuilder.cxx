@@ -129,7 +129,7 @@ StatusCode InDet::RobustTrackingGeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
+std::unique_ptr<Trk::TrackingGeometry> InDet::RobustTrackingGeometryBuilder::trackingGeometry
 (Trk::TrackingVolume*) const
 {
    // only one assumption: 
@@ -137,7 +137,7 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
    
    ////////////////////////////////////////////////////////////////////////////////////////////////////////    
    // The Overall Geometry
-   Trk::TrackingGeometry* trackingGeometry = nullptr;   
+  std::unique_ptr<Trk::TrackingGeometry> trackingGeometry{};
 
    // retrieve all the layers and sort them
    unsigned int numLayBuilders = m_layerBuilders.size();
@@ -612,7 +612,7 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
       highestIdVolume = detectorWithBp;
       
   // (V) create the TrackingGeometry ------------------------------------------------------  
-  trackingGeometry = new Trk::TrackingGeometry(highestIdVolume);
+   trackingGeometry = std::make_unique<Trk::TrackingGeometry>(highestIdVolume);
  
  if (m_indexStaticLayers) {
       ATH_MSG_VERBOSE("Re-index the static layers ...");

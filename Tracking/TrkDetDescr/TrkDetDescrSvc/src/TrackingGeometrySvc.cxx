@@ -123,7 +123,7 @@ Trk::TrackingGeometrySvc::trackingGeometryInit(bool needsInit)
 #endif
 
     // build the TrackingGeometry from the builder
-    m_trackingGeometry = m_trackingGeometryBuilder->trackingGeometry();
+    m_trackingGeometry = m_trackingGeometryBuilder->trackingGeometry().release();
 
 #ifdef TRKDETDESCR_MEMUSAGE
     ATH_MSG_INFO("[ memory usage ] TrackingGeometry retrieved: ");
