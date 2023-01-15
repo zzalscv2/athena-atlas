@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************************
@@ -42,16 +42,22 @@ class TileCorrelation
     void calculateCorrelation(int dignum);
     void calculateRunningCorrelation(int dignum, int chthres, bool is7to9);
     void printCorrelation(int dignum);
-    void saveCorrelationSumm(bool deltaCorrelation, std::string correlationSummOptFilterFile,
+    void saveCorrelationSumm(bool deltaCorrelation, const std::string& correlationSummOptFilterFile,
         const TileHWID *tileHWID, int dignum);
 
-    void saveCorrelationMatrix(bool deltaCorrelation, std::string correlationMatrixOptFilterFile,
+    void saveCorrelationMatrix(bool deltaCorrelation, const std::string& correlationMatrixOptFilterFile,
         const TileHWID *tileHWID, int dignum);
 
-    void calculateWeights(bool deltaCorrelation, std::vector<double> shapeFormLG, std::vector<double> shapeFormHG,
-        std::vector<double> shapeFormDerivativeLG, std::vector<double> shapeFormDerivativeHG, std::string aiLoOptFilterFile,
-        std::string biLoOptFilterFile, std::string aiHiOptFilterFile, std::string biHiOptFilterFile,
-        const TileHWID *tileHWID, int dignum);
+    void calculateWeights(bool deltaCorrelation,
+                          const std::vector<double>& shapeFormLG,
+                          const std::vector<double>& shapeFormHG,
+                          const std::vector<double>& shapeFormDerivativeLG,
+                          const std::vector<double>& shapeFormDerivativeHG,
+                          const std::string& aiLoOptFilterFile,
+                          const std::string& biLoOptFilterFile,
+                          const std::string& aiHiOptFilterFile,
+                          const std::string& biHiOptFilterFile,
+                          const TileHWID *tileHWID, int dignum);
   
     void buildPulseShape(std::vector<double> &pulseShape, std::vector<double> &pulseShapeY,
         std::vector<double> &pulseShapeT, int dignum);
