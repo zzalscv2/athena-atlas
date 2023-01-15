@@ -144,7 +144,7 @@ namespace InDet {
       /** AlgTool finalize method */
       StatusCode finalize();
       /** TrackingGeometry Interface methode */
-      Trk::TrackingGeometry* trackingGeometry(Trk::TrackingVolume* tvol = 0) const; 
+      std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(Trk::TrackingVolume* tvol = 0) const; 
 
       /** The unique signature */
       Trk::GeometrySignature geometrySignature() const { return Trk::ID; }

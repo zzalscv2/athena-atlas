@@ -126,7 +126,7 @@ StatusCode InDet::StagedTrackingGeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry
+std::unique_ptr<Trk::TrackingGeometry> InDet::StagedTrackingGeometryBuilder::trackingGeometry
 (Trk::TrackingVolume*) const
 {
    // only one assumption: 
@@ -136,7 +136,7 @@ Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry
    
    ////////////////////////////////////////////////////////////////////////////////////////////////////////    
    // The Overall Geometry
-   Trk::TrackingGeometry* trackingGeometry = nullptr;   
+   std::unique_ptr<Trk::TrackingGeometry> trackingGeometry{};
 
    // get the dimensions from the envelope service 
    const RZPairVector& envelopeDefs = m_enclosingEnvelopeSvc->getInDetRZBoundary();
@@ -296,7 +296,7 @@ Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry
        m_replaceJointBoundaries);
 
    //  create the TrackingGeometry ------------------------------------------------------  
-   trackingGeometry = new Trk::TrackingGeometry(enclosedDetector);
+   trackingGeometry = std::make_unique<Trk::TrackingGeometry>(enclosedDetector);
    
    if (m_indexStaticLayers) {
       ATH_MSG_VERBOSE("Re-index the static layers ...");

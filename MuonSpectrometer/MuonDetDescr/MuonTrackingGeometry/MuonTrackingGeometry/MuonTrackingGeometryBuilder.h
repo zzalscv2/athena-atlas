@@ -39,8 +39,8 @@ class MuonTrackingGeometryBuilder final : public MuonTrackingGeometryBuilderImpl
   virtual StatusCode initialize() override;
   /** AlgTool finalize method */
   virtual StatusCode finalize() override;
-  /** TrackingGeometry Interface methode */
-  virtual Trk::TrackingGeometry* trackingGeometry(Trk::TrackingVolume* tvol = 0) const override;
+  /** TrackingGeometry Interface method */
+  virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(Trk::TrackingVolume* tvol = 0) const override;
 
   /** The unique signature */
   virtual Trk::GeometrySignature geometrySignature() const override { return MuonTrackingGeometryBuilderImpl::signature(); }

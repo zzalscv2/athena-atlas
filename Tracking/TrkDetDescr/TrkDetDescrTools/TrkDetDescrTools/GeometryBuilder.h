@@ -61,7 +61,7 @@ namespace Trk {
 
         
         /** TrackingGeometry Interface method - optionally a pointer to Bounds */
-        TrackingGeometry* trackingGeometry(TrackingVolume* tvol = 0) const;
+        std::unique_ptr<TrackingGeometry> trackingGeometry(TrackingVolume* tvol = 0) const;
 
         /** The unique signature */
         GeometrySignature geometrySignature() const { return Trk::Global; }
@@ -69,7 +69,7 @@ namespace Trk {
       private:
 
         /** TrackingGeometry for ATLAS setup */
-        TrackingGeometry* atlasTrackingGeometry() const;
+        std::unique_ptr<TrackingGeometry> atlasTrackingGeometry() const;
 
 #ifdef TRKDETDESCR_MEMUSAGE         
         MemoryLogger                        m_memoryLogger;                //!< in case the memory is logged

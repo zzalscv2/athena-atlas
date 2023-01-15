@@ -118,11 +118,11 @@ StatusCode Trk::GeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* Trk::GeometryBuilder::trackingGeometry(Trk::TrackingVolume*) const
+std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::trackingGeometry(Trk::TrackingVolume*) const
 {
 
     // the geometry to be constructed
-    Trk::TrackingGeometry* tGeometry = nullptr;
+    std::unique_ptr<Trk::TrackingGeometry> tGeometry = nullptr;
     if ( m_inDetGeometryBuilder.empty() && m_caloGeometryBuilder.empty() && m_muonGeometryBuilder.empty() ) {
 
         ATH_MSG_VERBOSE( "Configured to only create world TrackingVolume." );
@@ -139,7 +139,7 @@ Trk::TrackingGeometry* Trk::GeometryBuilder::trackingGeometry(Trk::TrackingVolum
                                                                    "EmptyWorldVolume");
 
         // create a new geometry
-        tGeometry = new Trk::TrackingGeometry(worldVolume);
+        tGeometry = std::make_unique<Trk::TrackingGeometry>(worldVolume);
     } else
         tGeometry = atlasTrackingGeometry();
     // sign it before you return anything
@@ -149,15 +149,15 @@ Trk::TrackingGeometry* Trk::GeometryBuilder::trackingGeometry(Trk::TrackingVolum
 }
 
 
-Trk::TrackingGeometry* Trk::GeometryBuilder::atlasTrackingGeometry() const
+std::unique_ptr<Trk::TrackingGeometry> Trk::GeometryBuilder::atlasTrackingGeometry() const
 {
     // the return geometry
-    Trk::TrackingGeometry* atlasTrackingGeometry = nullptr;
+    std::unique_ptr<Trk::TrackingGeometry> atlasTrackingGeometry = nullptr;
 
     // A ------------- INNER DETECTOR SECTION --------------------------------------------------------------------------------
     // get the Inner Detector and/or Calorimeter trackingGeometry
-    Trk::TrackingGeometry* inDetTrackingGeometry  = nullptr;
-    Trk::TrackingGeometry* caloTrackingGeometry   = nullptr;
+    std::unique_ptr<Trk::TrackingGeometry> inDetTrackingGeometry  = nullptr;
+    std::unique_ptr<Trk::TrackingGeometry> caloTrackingGeometry   = nullptr;
 
     // the volumes to be given to higher level tracking geometry builders
     Trk::TrackingVolume* inDetVolume    = nullptr;
@@ -188,10 +188,8 @@ Trk::TrackingGeometry* Trk::GeometryBuilder::atlasTrackingGeometry() const
                 inDetVolume = inDetTrackingGeometry->checkoutHighestTrackingVolume();
                 // assign it as the highest volume
                 highestVolume = inDetVolume;
-                // cleanup
-                delete inDetTrackingGeometry;
             } else // -> Take the exit and return ID stand alone
-                atlasTrackingGeometry = inDetTrackingGeometry;
+              atlasTrackingGeometry = std::move(inDetTrackingGeometry);
         }
 
 #ifdef TRKDETDESCR_MEMUSAGE            
@@ -220,10 +218,8 @@ Trk::TrackingGeometry* Trk::GeometryBuilder::atlasTrackingGeometry() const
                 caloVolume = caloTrackingGeometry->checkoutHighestTrackingVolume();
                 // assign it as the highest volume (overwrite ID)
                 highestVolume = caloVolume;
-                // cleanup
-                delete caloTrackingGeometry;
             } else // -> Take the exit and return Calo back
-                atlasTrackingGeometry = caloTrackingGeometry;
+              atlasTrackingGeometry = std::move(caloTrackingGeometry);
         }
 
 #ifdef TRKDETDESCR_MEMUSAGE            
@@ -398,7 +394,7 @@ Trk::TrackingGeometry* Trk::GeometryBuilder::atlasTrackingGeometry() const
         ATH_MSG_VERBOSE( "Atlas Inner/Outer Sector glued successfully together." );
 
         // job done -> create the TrackingGeometry
-        atlasTrackingGeometry = new Trk::TrackingGeometry(atlasVolume);
+        atlasTrackingGeometry = std::make_unique<Trk::TrackingGeometry>(atlasVolume);
         
         // detailed information about this tracking geometry
         ATH_MSG_VERBOSE( "Atlas TrackingGeometry built with following parameters : ");
