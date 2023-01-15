@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_MuonAssociationCNV_P1_H
@@ -30,8 +30,8 @@ namespace Analysis {
       virtual void persToTrans(const NavAssociationCommon_p1 *persObj,
 			       MuonAssociation *transObj,
 			       MsgStream &log);
-      virtual void transToPers(const MuonAssociation *persObj,
-			       NavAssociationCommon_p1 *transObj,
+      virtual void transToPers(const MuonAssociation *transObj,
+			       NavAssociationCommon_p1 *persObj,
 			       MsgStream &log);
     private:
       NavigableCnv_p1<Navigable<MuonContainer,double>,float> *m_navAssCnv;

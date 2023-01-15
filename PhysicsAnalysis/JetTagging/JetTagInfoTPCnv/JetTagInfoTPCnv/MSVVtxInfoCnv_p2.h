@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFOTPCNV_MSVVtxInfoCnv_P2_H
@@ -27,8 +27,8 @@ namespace Analysis {
       virtual void persToTrans(const MSVVtxInfo_p2 *persObj,
 			       MSVVtxInfo *transObj,
 			       MsgStream &log);
-      virtual void transToPers(const MSVVtxInfo *persObj,
-			       MSVVtxInfo_p2 *transObj,
+      virtual void transToPers(const MSVVtxInfo *transObj,
+			       MSVVtxInfo_p2 *persObj,
 			       MsgStream &log);
 
     private:
