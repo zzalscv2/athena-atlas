@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # art-include: master/Athena
-# art-include: master/AthDerivation
 # art-description: DAOD building PHYS and PHYSLITE data18 MP w/ SharedWriter w/o parallel compression
 # art-type: grid
 # art-output: *.pool.root
@@ -10,16 +9,14 @@
 # art-output: checkIndexRefs*.txt
 # art-athena-mt: 8
 
-ATHENA_CORE_NUMBER=8 Reco_tf.py \
+ATHENA_CORE_NUMBER=8 Derivation_tf.py \
   --inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1 \
   --outputDAODFile art.pool.root \
-  --reductionConf PHYS PHYSLITE \
+  --formats PHYS PHYSLITE \
   --maxEvents -1 \
   --sharedWriter True \
   --parallelCompression False \
   --multiprocess True \
-  --preExec 'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff();' \
-  --postExec 'from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence; swapAlgsInSequence(topSequence,"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK", "UFOInfoAlgCSSK" )'
 
 echo "art-result: $? reco"
 

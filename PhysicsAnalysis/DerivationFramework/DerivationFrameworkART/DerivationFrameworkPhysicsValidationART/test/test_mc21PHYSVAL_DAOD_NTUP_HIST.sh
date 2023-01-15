@@ -5,10 +5,10 @@
 # art-input: mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8453_s3873_r13829
 # art-include: master/Athena
 # art-input-nfiles: 1
-# art-cores: 4
 # art-output: DAOD_PHYSVAL.OUT.root
 # art-output: NTUP_PHYSVAL.root
 # art-output: PHYSVAL_WEB
+# art-athena-mt: 4
 
 run () {
   name="${1}"
@@ -29,6 +29,8 @@ checkstep () {
   fi
 }
 
+
+export ATHENA_CORE_NUMBER=4
 
 echo " "
 echo " ********** Making DAOD_PHYSVAL **********"
