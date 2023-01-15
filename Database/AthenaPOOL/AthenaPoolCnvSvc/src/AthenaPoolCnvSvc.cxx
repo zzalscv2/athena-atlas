@@ -58,8 +58,6 @@ StatusCode AthenaPoolCnvSvc::initialize() {
       }
       // Put PoolSvc into share mode to avoid duplicating catalog.
       m_poolSvc->setShareMode(true);
-      // Disable PersistencySvc per output file mode
-      m_persSvcPerOutput.setValue(false);
    }
    if (!m_inputStreamingTool.empty() || !m_outputStreamingTool.empty()) {
       // Retrieve AthenaSerializeSvc
@@ -1107,6 +1105,8 @@ StatusCode AthenaPoolCnvSvc::makeServer(int num) {
             return(StatusCode::FAILURE);
          }
          m_streamClientFiles.clear();
+         // Disable PersistencySvc per output file mode, for SharedWriter Server
+         m_persSvcPerOutput.setValue(false);
          return(StatusCode::SUCCESS);
       }
       return(StatusCode::RECOVERABLE);
