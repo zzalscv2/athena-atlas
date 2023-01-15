@@ -84,9 +84,17 @@ void test1 ATLAS_NOT_THREAD_SAFE (std::vector<HepMC::GenParticlePtr>& genPartVec
   for (int i=0; i < 10; i++) {
     auto pGenParticle = genPartVector.at(i);
     HepMcParticleLink trkLink(HepMC::barcode(pGenParticle),pGenParticle->parent_event()->event_number());
-    int o = i*100;
-    trans1.Emplace (HepGeom::Point3D<double> (10.5+o, 11.5+o, 12.5+o),
-                    HepGeom::Point3D<double> (13.5+o, 14.5+o, 15.5+o),
+    const double angle = i*0.2*M_PI;
+    std::vector< HepGeom::Point3D<double> > stepPoints(11);
+    for (int j=0; j<11; ++j) {
+      const double jd(j);
+      const double r(30.+110.*jd);
+      stepPoints.emplace_back(r*std::cos(angle),
+                              r*std::sin(angle),
+                              350.*jd);
+    }
+    const int o = i*100;
+    trans1.Emplace (stepPoints.at(i), stepPoints.at(i+1),
                     16.5+o,
                     17.5+o,
                     trkLink,
