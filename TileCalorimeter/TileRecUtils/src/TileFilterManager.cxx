@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **************************************************************************************
@@ -329,8 +329,8 @@ int TileFilterManager::fitDigits2(TileFilterResult &tResult, bool lDebug) {
     // Calculate significance chi of each fit parameter..
     // double chiCutLow[4] = {chiCut, 1.50, 0.75, 0.};
     const int Ndim = 12;
-    double chiAmp[Ndim];
-    int iAmp[Ndim] = {};
+    double chiAmp[Ndim] = {0};
+    int iAmp[Ndim] = {0};
     int Npile = 0;
     for (int i = 2; i < Npar; i++) {
       chiAmp[Npile] = fitAmp[i] / fitErr[i];
