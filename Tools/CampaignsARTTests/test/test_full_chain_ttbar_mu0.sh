@@ -11,7 +11,7 @@
 # art-athena-mt: 4
 
 #Option for sim/digi/reco
-default_geometry="ATLAS-P2-RUN4-01-00-00"
+default_geometry="ATLAS-P2-RUN4-01-01-00"
 default_condition="OFLCOND-MC15c-SDR-14-05"
 number_of_events=4000
 
