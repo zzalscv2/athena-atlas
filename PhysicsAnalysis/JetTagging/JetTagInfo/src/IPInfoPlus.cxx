@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,7 +17,7 @@ namespace Analysis {
       m_tagLikelihood.clear();
   }
 
-  IPInfoPlus::IPInfoPlus(TagInfoType tagJetInfoType) : 
+  IPInfoPlus::IPInfoPlus(const TagInfoType& tagJetInfoType) : 
     BaseTagInfo(tagJetInfoType),
     m_trackinfo() {
       m_tagLikelihood.clear();
@@ -38,7 +38,7 @@ namespace Analysis {
   IPInfoPlus::~IPInfoPlus() {
   }
 
-  void IPInfoPlus::updateTrackWeight(const Rec::TrackParticle* trk, std::string view, double w) {
+  void IPInfoPlus::updateTrackWeight(const Rec::TrackParticle* trk, const std::string& view, double w) {
     if(!trk) return;
     for(int i=0;i<this->numTrackInfo();i++) {
       if( trk==m_trackinfo.at(i).track() ) {
