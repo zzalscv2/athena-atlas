@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ParticleEnergyParametrization_h
@@ -36,7 +36,11 @@ public:
   double& weight_err(int calosample)                         {return m_weights_err[calosample];};
   double  weight_err(int calosample) const                   {return m_weights_err[calosample];};
   void    set_Ecal_vs_dist(TH2* h);
-  void    set_dist_fine(TH1* h)                               {m_h_layer_d_fine=h;};
+  void    set_dist_fine(TH1* h) {
+    m_h_layer_d_fine=h;
+    // Make sure that the integral is available.
+    h->GetIntegral();
+  };
   void    set_Elayer_vs_dist(int calosample,TH2* h)         {MakeCumulativeX(calosample,h);};
   void    set_mean_vs_dist(int distbin,const TVectorD& mean) {SetTVectorD(DistPara(distbin)->m_mean,mean);};
   void    set_RMS_vs_dist (int distbin,const TVectorD& RMS)  {SetTVectorD(DistPara(distbin)->m_RMS ,RMS );};
@@ -44,7 +48,7 @@ public:
   
   void    DiceParticle(ParticleEnergyShape& p,TRandom& rand) const;
   void    RepeatDiceParticles(ParticleEnergyShape* p,int n) const;
-  static double  GetRandomInBinRange(TRandom& rand, double xmin_in1,double xmax_in2,TH1* in2) ;
+  static double  GetRandomInBinRange(TRandom& rand, double xmin_in1,double xmax_in2,const TH1* in2) ;
 
   void MakeCumulativeX(int calosample,TH2* h);
   static void CorelatedGausRandom_corset(const TMatrixD& v,TMatrixD& c);

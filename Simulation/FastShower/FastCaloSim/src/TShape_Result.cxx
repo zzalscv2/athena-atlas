@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FastCaloSim/TShape_Result.h"
@@ -250,20 +250,23 @@ Double_t TShape_Result::f_2DSpline_getd(double dxfcx_mm,double dyfcy_mm,int maxi
   return d;
 }
 
-Double_t TShape_Result::SplineEval(TSpline3* sp,Double_t x,Double_t xmin,Double_t xmax)
+Double_t TShape_Result::SplineEval(const TSpline3* sp,Double_t x,Double_t xmin,Double_t xmax)
 {
+  // For calling the GetCoeff method.  TSpline3::GetCoeff could (and should!)
+  // have been declared const, but as of ROOT 6.26.10, it is not.
+  TSpline3* sp_nc ATLAS_THREAD_SAFE = const_cast<TSpline3*>(sp);
   double res;
   if(x>xmax) {
     Int_t np=sp->GetNp();
     double fX,fY,fB,fC,fD;
-    sp->GetCoeff(np-1,fX,fY,fB,fC,fD);
+    sp_nc->GetCoeff(np-1,fX,fY,fB,fC,fD);
 
     double dx=x-fX;
     res=fY+dx*fB;
   } else {
     if(x<xmin) {
       double fX,fY,fB,fC,fD;
-      sp->GetCoeff(0,fX,fY,fB,fC,fD);
+      sp_nc->GetCoeff(0,fX,fY,fB,fC,fD);
       double dx=x-fX;
       res=fY+dx*fB;
     } else {
@@ -277,7 +280,7 @@ Double_t TShape_Result::f_2DSpline(double dxfcx_mm,double dyfcy_mm) const
 {
   double dxfcx_mm2=dxfcx_mm*dxfcx_mm;
   if(m_fitsplines_EtaPhiAspectRatio) {
-    double etascale=SplineEval( (TSpline3*)(m_fitsplines_EtaPhiAspectRatio) , dxfcx_mm , m_fitsplines_EtaPhiAspectRatio_minx , m_fitsplines_EtaPhiAspectRatio_maxx);
+    double etascale=SplineEval( static_cast<const TSpline3*>(m_fitsplines_EtaPhiAspectRatio) , dxfcx_mm , m_fitsplines_EtaPhiAspectRatio_minx , m_fitsplines_EtaPhiAspectRatio_maxx);
     dxfcx_mm2*=TMath::Exp(2*etascale);
   }
   
@@ -289,7 +292,7 @@ Double_t TShape_Result::f_2DSpline(double dxfcx_mm,double dyfcy_mm) const
   double max_aspect=2;
   double d=f_2DSpline_getd(dxfcx_mm,dyfcy_mm,40,max_aspect);
 */  
-  double exp=SplineEval( (TSpline3*)m_fitsplines_EnergyDistribution , d , 0 , m_fitsplines_EnergyDistribution_maxx);
+  double exp=SplineEval( static_cast<const TSpline3*>(m_fitsplines_EnergyDistribution) , d , 0 , m_fitsplines_EnergyDistribution_maxx);
   if(exp<-20) exp=-20;
   if(exp>3) exp=3;
 
