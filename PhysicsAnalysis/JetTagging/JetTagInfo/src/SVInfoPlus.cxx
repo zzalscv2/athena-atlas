@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagInfo/SVInfoPlus.h"
@@ -19,7 +19,7 @@ SVInfoPlus::SVInfoPlus() : BaseTagInfo(),
 		   m_trackinfo(std::vector<SVTrackInfo>()) {}
 
 /** constructor with info type */
-SVInfoPlus::SVInfoPlus(TagInfoType tagJetInfoType) : BaseTagInfo(tagJetInfoType),
+SVInfoPlus::SVInfoPlus(const TagInfoType& tagJetInfoType) : BaseTagInfo(tagJetInfoType),
   m_recsvx(Trk::RecVertex()),
   m_NGTinJet(-1),
   m_NGTinSvx(-1),

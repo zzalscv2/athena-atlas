@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGINFO_IPINFOPLUS_H
@@ -27,7 +27,7 @@ public:
     /** Default constructor */
     IPInfoPlus();
     /** Constructors from tag type */
-    IPInfoPlus(TagInfoType x);
+    IPInfoPlus(const TagInfoType& x);
     IPInfoPlus(const IPInfoPlus& IPInfoPlus);
     IPInfoPlus &operator= (const IPInfoPlus& rhs);
     virtual ~IPInfoPlus();
@@ -42,7 +42,7 @@ public:
       return m_trackinfo.at(i);
     }
     /** Update the track weights for a trackparticle */
-    void updateTrackWeight(const Rec::TrackParticle* trk, std::string view, double w);
+    void updateTrackWeight(const Rec::TrackParticle* trk, const std::string& view, double w);
 
 private:
     std::vector<IPTrackInfo> m_trackinfo;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -30,7 +30,7 @@ public:
     SoftMuonInfo();
 
     /** constructor with info type */
-    SoftMuonInfo(TagInfoType x);
+    SoftMuonInfo(const TagInfoType& x);
     
     /** copy destructor */
     SoftMuonInfo(const SoftMuonInfo& SoftMuonInfo);
