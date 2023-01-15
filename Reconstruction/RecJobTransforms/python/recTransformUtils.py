@@ -148,7 +148,7 @@ def addAllRecoArgs(trf, RAWtoALL=False):
 ## @brief Detect if the RAWtoALL steering argument is set
 #  This is a very special case, requiring an unfortunately hacky solution... :-(
 def detectRAWtoALL(argv):
-    limitedParser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS)
+    limitedParser = argparse.ArgumentParser(argument_default=argparse.SUPPRESS, add_help=False)
     limitedParser.add_argument("--steering", nargs="+")
     limitedParser.add_argument("--argJSON")
     limitedParser.add_argument("--AMIConfig", "--AMI")
