@@ -26,6 +26,8 @@ parser.add_argument("--maxEvents",default=10, type=int,
                     help="The number of events to run. 0 skips execution")
 parser.add_argument("--geometrytag",default="ATLAS-P2-RUN4-01-00-00", type=str,
                     help="The geometry tag to use")
+parser.add_argument("--noLocalMaterial", action="store_true", default=False, 
+                    help="Do NOT use local material maps")
 args = parser.parse_args()
 
 # Some info about the job
@@ -42,7 +44,7 @@ flags.Input.Files = []
 if args.localgeo:
   flags.ITk.Geometry.AllLocal = True
   
-from AthenaConfiguration.Detectorflags import setupDetectorFlags
+from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
 setupDetectorFlags(flags, detectors, toggle_geometry=True)
@@ -59,9 +61,10 @@ flags.Detector.GeometryMuon  = False
 flags.Concurrency.NumThreads = 1
 flags.Concurrency.NumConcurrentEvents = 1
 
-flags.ITk.trackingGeometry.loadLocalDbForMaterialMaps=True
-LocalDataBaseName = flags.ITk.trackingGeometry.localDatabaseName
-flags.IOVDb.DBConnection='sqlite://;schema='+LocalDataBaseName+';dbname=OFLP200'
+if not args.noLocalMaterial:
+    flags.ITk.trackingGeometry.loadLocalDbForMaterialMaps=True
+    LocalDataBaseName = flags.ITk.trackingGeometry.localDatabaseName
+    flags.IOVDb.DBConnection='sqlite://;schema='+LocalDataBaseName+';dbname=OFLP200'
 
 log.debug('Lock config flags now.')
 flags.lock()
