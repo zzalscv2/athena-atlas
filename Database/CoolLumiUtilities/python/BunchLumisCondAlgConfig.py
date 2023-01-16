@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: CoolLumiUtilities/python/BunchLumisCondAlgConfig.py
 # Created: May 2019, sss
@@ -11,25 +11,25 @@ from AthenaConfiguration.Enums import ProductionStep
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 
-def BunchLumisCondAlgCfg (configFlags):
+def BunchLumisCondAlgCfg (flags):
     name = 'BunchLumisCondAlg'
     result = ComponentAccumulator()
 
     # Should only be used for Run 1.
-    if configFlags.IOVDb.DatabaseInstance != 'COMP200':
+    if flags.IOVDb.DatabaseInstance != 'COMP200':
         return result
 
     folder = '/TDAQ/OLC/BUNCHLUMIS'
-    if configFlags.Common.isOverlay:
+    if flags.Common.isOverlay:
         # Load reduced channel list for overlay jobs to try to reduce COOL access
         # Need Lucid AND, OR, HitOR, BcmH OR, BcmV OR
         folder = '<channelSelection>101,102,103,201,211</channelSelection> ' + folder
 
-    result.merge (addFolders (configFlags, folder, 'TDAQ',
+    result.merge (addFolders (flags, folder, 'TDAQ',
                               className='CondAttrListCollection'))
 
     from CoolLumiUtilities.FillParamsCondAlgConfig import FillParamsCondAlgCfg
-    result.merge (FillParamsCondAlgCfg(configFlags))
+    result.merge (FillParamsCondAlgCfg(flags))
     fpalg = result.getCondAlgo ('FillParamsCondAlg')
 
     BunchLumisCondAlg=CompFactory.BunchLumisCondAlg
@@ -43,11 +43,11 @@ def BunchLumisCondAlgCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.Input.ProjectName = 'data12_8TeV'
     flags1.lock()
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- data+overlay')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.RAW
     flags2.Input.ProjectName = 'data12_8TeV'
     flags2.Common.ProductionStep = ProductionStep.Overlay
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     acc2.wasMerged()
 
     print ('--- default')
-    flags3 = ConfigFlags.clone()
+    flags3 = initConfigFlags()
     flags3.Input.Files = defaultTestFiles.RAW
     flags3.lock()
     acc3 = BunchLumisCondAlgCfg (flags3)
