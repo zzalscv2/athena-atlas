@@ -193,7 +193,7 @@ double MuonTPExtrapolationTool::dROnTriggerPivotPlane(const xAOD::Muon& tag, con
     return dr;
 }
 
-std::unique_ptr<const Trk::TrackParameters> MuonTPExtrapolationTool::extrapolateToTriggerPivotPlane(
+std::unique_ptr<Trk::TrackParameters> MuonTPExtrapolationTool::extrapolateToTriggerPivotPlane(
     const xAOD::TrackParticle& track) const {
     const EventContext& ctx = Gaudi::Hive::currentContext();
     // BARREL
@@ -209,7 +209,7 @@ std::unique_ptr<const Trk::TrackParameters> MuonTPExtrapolationTool::extrapolate
     // and then attempt to extrapolate our track to this surface, checking for the boundaries of the barrel
     bool boundaryCheck = true;
 
-    std::unique_ptr<const Trk::TrackParameters> p{
+    std::unique_ptr<Trk::TrackParameters> p{
         m_extrapolator->extrapolate(ctx, perigee, *cylinder, Trk::alongMomentum, boundaryCheck, Trk::muon)};
 
     // if the extrapolation worked out (so we are in the barrel) we are done and can return the
@@ -232,9 +232,7 @@ std::unique_ptr<const Trk::TrackParameters> MuonTPExtrapolationTool::extrapolate
         std::make_unique<Trk::DiscSurface>(matrix, m_endcapPivotPlaneMinimumRadius, m_endcapPivotPlaneMaximumRadius);
 
     boundaryCheck = false;
-    std::unique_ptr<const Trk::TrackParameters> e{
-        m_extrapolator->extrapolate(ctx, perigee, *disc, Trk::alongMomentum, boundaryCheck, Trk::muon)};
-    return e;
+    return m_extrapolator->extrapolate(ctx, perigee, *disc, Trk::alongMomentum, boundaryCheck, Trk::muon);
 }
 
 StatusCode MuonTPExtrapolationTool::addBranches() const {

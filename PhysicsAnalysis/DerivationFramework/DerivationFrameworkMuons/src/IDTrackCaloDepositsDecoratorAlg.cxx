@@ -1,30 +1,27 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "DerivationFrameworkMuons/IDTrackCaloDepositsDecoratorTool.h"
+#include "DerivationFrameworkMuons/IDTrackCaloDepositsDecoratorAlg.h"
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "muonEvent/DepositInCalo.h"
 #include "xAODMuon/Muon.h"
 #include "xAODTracking/TrackParticle.h"
 
-namespace {
-    static const SG::AuxElement::Decorator<bool> appliedDec("AppliedCaloDep");
-
+namespace {   
     static const SG::AuxElement::Decorator<std::vector<float>> dec_deposit("CaloDeposits");
     static const SG::AuxElement::Decorator<std::vector<float>> dec_eloss("CaloElosses");
     static const SG::AuxElement::Decorator<std::vector<uint16_t>> dec_type("CaloDepType");
 
 }  // namespace
 
-IDTrackCaloDepositsDecoratorTool::IDTrackCaloDepositsDecoratorTool(const std::string& t, const std::string& n, const IInterface* p) :
-    AthAlgTool(t, n, p) {
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareInterface<DerivationFramework::IAugmentationTool>(this);
-}
+namespace DerivationFramework {
+IDTrackCaloDepositsDecoratorAlg::IDTrackCaloDepositsDecoratorAlg(const std::string& n, ISvcLocator* p):
+    AthReentrantAlgorithm(n, p) {
+ }
 
-StatusCode IDTrackCaloDepositsDecoratorTool::initialize() {
+StatusCode IDTrackCaloDepositsDecoratorAlg::initialize() {
     ATH_CHECK(m_trkDepositInCalo.retrieve());
 
     ATH_CHECK(m_muon_key.initialize());
@@ -41,16 +38,7 @@ StatusCode IDTrackCaloDepositsDecoratorTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode IDTrackCaloDepositsDecoratorTool::decorate(const xAOD::IParticle* part) const {
-    // remember if we already decorated a track, saves CPU time
-    if (appliedDec.isAvailable(*part) && appliedDec(*part)) {
-        ATH_MSG_DEBUG("Already decorated this track!");
-        return StatusCode::SUCCESS;
-    }
-    return recompute_and_decorate(part);
-}
-
-StatusCode IDTrackCaloDepositsDecoratorTool::recompute_and_decorate(const xAOD::IParticle* particle) const {
+StatusCode IDTrackCaloDepositsDecoratorAlg::recompute_and_decorate(const xAOD::IParticle* particle) const {
     ATH_MSG_DEBUG("Recomputing calo deposition by hand");
 
     const xAOD::TrackParticle* track_part = nullptr;
@@ -71,8 +59,9 @@ StatusCode IDTrackCaloDepositsDecoratorTool::recompute_and_decorate(const xAOD::
 
     const CaloCellContainer* caloCellCont = nullptr;
     std::vector<DepositInCalo> deposits = m_trkDepositInCalo->getDeposits(&(track_part->perigeeParameters()), caloCellCont);
-    std::vector<float> dep_val{}, eloss_val{};
-    std::vector<uint16_t> types{};
+    std::vector<float>& dep_val{dec_deposit(*particle)};
+    std::vector<float>& eloss_val{dec_eloss(*particle)};
+    std::vector<uint16_t>& types{dec_type(*particle)};
     dep_val.reserve(deposits.size());
     eloss_val.reserve(deposits.size());
     types.reserve(deposits.size());
@@ -81,17 +70,10 @@ StatusCode IDTrackCaloDepositsDecoratorTool::recompute_and_decorate(const xAOD::
         eloss_val.push_back(it.muonEnergyLoss());
         types.push_back(it.subCaloId());
     }
-    dec_deposit(*particle) = std::move(dep_val);
-    dec_eloss(*particle) = std::move(eloss_val);
-    dec_type(*particle) = std::move(types);
-
-    appliedDec(*particle) = true;
-
     return StatusCode::SUCCESS;
 }
 
-StatusCode IDTrackCaloDepositsDecoratorTool::addBranches() const {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
+StatusCode IDTrackCaloDepositsDecoratorAlg::execute(const EventContext& ctx) const {
 
     SG::ReadHandle<xAOD::MuonContainer> muons{m_muon_key, ctx};
     if (!muons.isValid()) {
@@ -128,4 +110,5 @@ StatusCode IDTrackCaloDepositsDecoratorTool::addBranches() const {
 
     ATH_CHECK(recompute_and_decorate(tracks->front()));
     return StatusCode::SUCCESS;
+}
 }
