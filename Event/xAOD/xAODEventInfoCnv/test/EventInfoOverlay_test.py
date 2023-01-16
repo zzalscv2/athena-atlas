@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Run tests for EventInfo overlay
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -18,23 +18,24 @@ parser = CommonTestArgumentParser("EventInfoOverlay_test.py")
 args = parser.parse_args()
 
 # Configure
-ConfigFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
-ConfigFlags.Input.SecondaryFiles = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/Special/TestCase_xAODEventInfo.root"]
-ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
-ConfigFlags.Overlay.DataOverlay = False
-ConfigFlags.Output.RDOFileName = "myRDO.pool.root"
-ConfigFlags.Output.RDO_SGNLFileName = "myRDO_SGNL.pool.root"
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
+flags.Input.SecondaryFiles = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/Special/TestCase_xAODEventInfo.root"]
+flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
+flags.Overlay.DataOverlay = False
+flags.Output.RDOFileName = "myRDO.pool.root"
+flags.Output.RDO_SGNLFileName = "myRDO_SGNL.pool.root"
 
-postprocessAndLockFlags(ConfigFlags, args)
+postprocessAndLockFlags(flags, args)
 
 # Function tests
-accAlg = EventInfoOverlayCfg(ConfigFlags)
+accAlg = EventInfoOverlayCfg(flags)
 # reset to prevent errors on deletion
 accAlg.__init__()
 
 # Construct our accumulator to run
-acc = MainServicesCfg(ConfigFlags)
-acc.merge(PoolReadCfg(ConfigFlags))
+acc = MainServicesCfg(flags)
+acc.merge(PoolReadCfg(flags))
 
 # Print and run
-sys.exit(printAndRun(acc, ConfigFlags, args))
+sys.exit(printAndRun(acc, flags, args))

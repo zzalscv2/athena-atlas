@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """Dump CutBookkeepers
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 from argparse import ArgumentParser
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
@@ -19,16 +19,17 @@ parser.add_argument('input', type=str, nargs='?',
                     help='Specify the input file')
 args = parser.parse_args()
 
+flags = initConfigFlags()
 if args.input:
-    ConfigFlags.Input.Files = [args.input]
+    flags.Input.Files = [args.input]
 else:
-    ConfigFlags.Input.Files = defaultTestFiles.AOD_MC
-ConfigFlags.lock()
+    flags.Input.Files = defaultTestFiles.AOD_MC
+flags.lock()
 
 # Setup tools
-acc = MainServicesCfg(ConfigFlags)
-acc.merge(PoolReadCfg(ConfigFlags))
-acc.merge(BookkeeperDumperToolCfg(ConfigFlags))
+acc = MainServicesCfg(flags)
+acc.merge(PoolReadCfg(flags))
+acc.merge(BookkeeperDumperToolCfg(flags))
 
 # Execute and finish
 sc = acc.run(maxEvents=1)
