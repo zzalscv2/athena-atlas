@@ -545,23 +545,29 @@ void ISF::TruthSvc::setSharedChildParticleBarcode( ISF::ITruthIncident& ti) cons
 int ISF::TruthSvc::maxGeneratedParticleBarcode(HepMC::GenEvent *genEvent) const {
   int maxBarcode=0;
   const int firstSecondaryParticleBarcode(m_barcodeSvc->secondaryParticleBcOffset());
+#ifdef HEPMC3
+  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("GenEventBarcodes");
+  for (const auto& bp: allbarcodes->barcode_to_particle_map()) {
+    if(bp.first < firstSecondaryParticleBarcode) { maxBarcode=std::max(maxBarcode,bp.first); }
+  }
+#else
   for (auto currentGenParticle: *genEvent) {
     const int barcode=HepMC::barcode(currentGenParticle);
     if(barcode > maxBarcode && barcode < firstSecondaryParticleBarcode) { maxBarcode=barcode; }
   }
+#endif
   return maxBarcode;
 }
 
 int ISF::TruthSvc::maxGeneratedVertexBarcode(HepMC::GenEvent *genEvent) const {
   int maxBarcode=0;
-#ifdef HEPMC3
   const int firstSecondaryVertexBarcode(m_barcodeSvc->secondaryVertexBcOffset());
-  for (auto currentGenVertex: genEvent->vertices()) {
-    const int barcode=HepMC::barcode(currentGenVertex);
-    if(barcode < maxBarcode && barcode > firstSecondaryVertexBarcode) { maxBarcode=barcode; }
+#ifdef HEPMC3
+  auto allbarcodes = genEvent->attribute<HepMC::GenEventBarcodes>("GenEventBarcodes");
+  for (const auto& bp: allbarcodes->barcode_to_vertex_map()) {
+    if(bp.first > firstSecondaryVertexBarcode) { maxBarcode=std::min(maxBarcode,bp.first); }
   }
 #else
-  const int firstSecondaryVertexBarcode(m_barcodeSvc->secondaryVertexBcOffset());
   HepMC::GenEvent::vertex_const_iterator currentGenVertexIter;
   for (currentGenVertexIter= genEvent->vertices_begin();
        currentGenVertexIter!= genEvent->vertices_end();
