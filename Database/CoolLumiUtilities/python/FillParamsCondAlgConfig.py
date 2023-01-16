@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: CoolLumiUtilities/python/FillParamsCondAlgConfig.py
 # Created: May 2019, sss
@@ -9,17 +9,17 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
-def FillParamsCondAlgCfg (configFlags):
+def FillParamsCondAlgCfg (flags):
     name = 'FillParamsCondAlg'
     result = ComponentAccumulator()
 
     # Should only be used for Run 1.
-    if configFlags.IOVDb.DatabaseInstance != 'COMP200':
+    if flags.IOVDb.DatabaseInstance != 'COMP200':
         return result
 
     folder = '/TDAQ/OLC/LHC/FILLPARAMS'
     # Mistakenly created as multi-version folder, must specify HEAD 
-    result.merge (addFolders (configFlags, folder, 'TDAQ', tag='HEAD',
+    result.merge (addFolders (flags, folder, 'TDAQ', tag='HEAD',
                               className='AthenaAttributeList'))
 
     FillParamsCondAlg=CompFactory.FillParamsCondAlg
@@ -32,11 +32,11 @@ def FillParamsCondAlgCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     print ('--- data')
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RAW
     flags1.Input.ProjectName = 'data12_8TeV'
     flags1.lock()
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     acc1.wasMerged()
 
     print ('--- default')
-    flags2 = ConfigFlags.clone()
+    flags2 = initConfigFlags()
     flags2.Input.Files = defaultTestFiles.RAW
     flags2.lock()
     acc2 = FillParamsCondAlgCfg (flags2)
