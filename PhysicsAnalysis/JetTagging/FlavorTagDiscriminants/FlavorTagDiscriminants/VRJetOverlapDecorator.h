@@ -9,7 +9,7 @@
 enum class VRJetParameters {EDM,RHO30MIN02MAX4};
 
 struct VRJetOverlapConfig {
-  VRJetOverlapConfig(VRJetParameters = VRJetParameters::EDM);
+  VRJetOverlapConfig(VRJetParameters = VRJetParameters::RHO30MIN02MAX4);
   std::string relative_name;
   std::string absolute_name;
   VRJetParameters jet_parameters_source;
