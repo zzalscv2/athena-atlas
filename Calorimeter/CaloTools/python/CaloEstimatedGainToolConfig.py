@@ -1,47 +1,45 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # File: CaloTools/python/CaloEstimatedGainToolConfig.py
 # Created: Aug 2019, sss
 # Purpose: Configure CaloEstimatedGainTool.
 #
 
-
-from __future__ import print_function
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def CaloEstimatedGainToolCfg (configFlags):
+def CaloEstimatedGainToolCfg (flags):
     result = ComponentAccumulator()
 
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    result.merge (GeoModelCfg (configFlags))
+    result.merge (GeoModelCfg (flags))
 
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from TileGeoModel.TileGMConfig import TileGMCfg
     
-    result.merge(LArGMCfg(configFlags))
-    result.merge(TileGMCfg(configFlags))
+    result.merge(LArGMCfg(flags))
+    result.merge(TileGMCfg(flags))
 
     from LArCabling.LArCablingConfig import LArFebRodMappingCfg, LArCalibIdMappingCfg 
-    result.merge(LArFebRodMappingCfg(configFlags))
-    result.merge(LArCalibIdMappingCfg(configFlags))
+    result.merge(LArFebRodMappingCfg(flags))
+    result.merge(LArCalibIdMappingCfg(flags))
 
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
-    result.merge (TileInfoLoaderCfg (configFlags))
+    result.merge (TileInfoLoaderCfg (flags))
 
     from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-    acc = TileCondToolEmscaleCfg (configFlags)
+    acc = TileCondToolEmscaleCfg (flags)
     emscaleTool = acc.popPrivateTools()
     result.merge (acc)
 
     from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
-    acc = TileCondToolNoiseSampleCfg (configFlags)
+    acc = TileCondToolNoiseSampleCfg (flags)
     noiseSampleTool = acc.popPrivateTools()
     result.merge (acc)
 
     from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
-    result.merge (LArADC2MeVCondAlgCfg (configFlags))
+    result.merge (LArADC2MeVCondAlgCfg (flags))
     adc2mev = result.getCondAlgo ('LArADC2MeVCondAlg')
 
     TileCondIdTransforms=CompFactory.TileCondIdTransforms
@@ -59,10 +57,10 @@ def CaloEstimatedGainToolCfg (configFlags):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
-    flags1 = ConfigFlags.clone()
+    flags1 = initConfigFlags()
     flags1.Input.Files = defaultTestFiles.RDO_RUN2
     flags1.lock()
     acc1 = CaloEstimatedGainToolCfg (flags1)

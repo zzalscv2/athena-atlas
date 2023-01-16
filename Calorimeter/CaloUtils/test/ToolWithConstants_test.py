@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
 #
 # File: CaloRec/python/ToolWithConstants_test.py
 # Author: scott snyder
@@ -37,7 +37,7 @@ class TestAlg (Alg):
         if ctx.evt() == 0:
             self.tool2.testWriteConstants (ctx)
             self.testMerge (ctx)
-               
+
         return StatusCode.Success
 
 
@@ -56,9 +56,9 @@ class TestAlg (Alg):
         tc.version (10)
         assert self.tool1.mergeConstants (tc, ctx).isFailure()
         return
-    
 
-def testCfg (configFlags):
+
+def testCfg (flags):
     result = ComponentAccumulator()
 
     tool1 = CompFactory.CaloUtils.ToolWithConstantsTestTool \
@@ -89,18 +89,18 @@ def testCfg (configFlags):
 
 ROOT.errorcheck.ReportMessage.hideFunctionNames (True)
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
+flags = initConfigFlags()
+flags.Input.Files = defaultTestFiles.RDO_RUN2
+flags.Input.TimeStamp = 1000
 
-ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-ConfigFlags.Input.TimeStamp = 1000
-
-ConfigFlags.lock()
-from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
-acc=MainServicesCfg (ConfigFlags)
+flags.lock()
+from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+acc = MainServicesCfg (flags)
 
 from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-acc.merge (McEventSelectorCfg (ConfigFlags, EventsPerLB = 2))
+acc.merge (McEventSelectorCfg (flags, EventsPerLB = 2))
 
-acc.merge (testCfg (ConfigFlags))
+acc.merge (testCfg (flags))
 acc.run(8)

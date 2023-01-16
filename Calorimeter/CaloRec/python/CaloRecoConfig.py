@@ -1,88 +1,88 @@
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
 
-def CaloRecoCfg(configFlags, clustersname=None):
+def CaloRecoCfg(flags, clustersname=None):
     result = ComponentAccumulator()
-    if configFlags.Input.Format is Format.BS:
+    if flags.Input.Format is Format.BS:
         #Data-case: Schedule ByteStream reading for LAr & Tile
         from LArByteStream.LArRawDataReadingConfig import LArRawDataReadingCfg
-        result.merge(LArRawDataReadingCfg(configFlags))
+        result.merge(LArRawDataReadingCfg(flags))
 
         from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
 
-        result.merge(ByteStreamReadCfg(configFlags,type_names=['TileDigitsContainer/TileDigitsCnt',
-                                                               'TileRawChannelContainer/TileRawChannelCnt',
-                                                               'TileMuonReceiverContainer/TileMuRcvCnt']))
+        result.merge(ByteStreamReadCfg(flags,type_names=['TileDigitsContainer/TileDigitsCnt',
+                                                         'TileRawChannelContainer/TileRawChannelCnt',
+                                                         'TileMuonReceiverContainer/TileMuRcvCnt']))
         result.getService("ByteStreamCnvSvc").ROD2ROBmap=["-1"]
-        if configFlags.Output.doWriteESD:
+        if flags.Output.doWriteESD:
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterOutputCfg
-            result.merge(TileDigitsFilterOutputCfg(configFlags))
+            result.merge(TileDigitsFilterOutputCfg(flags))
         else: #Mostly for wrapping in RecExCommon
             from TileRecAlgs.TileDigitsFilterConfig import TileDigitsFilterCfg
-            result.merge(TileDigitsFilterCfg(configFlags))
+            result.merge(TileDigitsFilterCfg(flags))
 
         from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
-        result.merge(LArRawChannelBuilderAlgCfg(configFlags))
+        result.merge(LArRawChannelBuilderAlgCfg(flags))
 
         from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
-        result.merge(TileRawChannelMakerCfg(configFlags))
+        result.merge(TileRawChannelMakerCfg(flags))
 
-    if not configFlags.Input.isMC and not configFlags.Common.isOnline:
+    if not flags.Input.isMC and not flags.Common.isOnline:
         from LArCellRec.LArTimeVetoAlgConfig import LArTimeVetoAlgCfg
-        result.merge(LArTimeVetoAlgCfg(configFlags))
+        result.merge(LArTimeVetoAlgCfg(flags))
 
-    if not configFlags.Input.isMC and not configFlags.Overlay.DataOverlay:
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         from LArROD.LArFebErrorSummaryMakerConfig import LArFebErrorSummaryMakerCfg
-        result.merge(LArFebErrorSummaryMakerCfg(configFlags))
+        result.merge(LArFebErrorSummaryMakerCfg(flags))
 
 
     #Configure cell-building
     from CaloRec.CaloCellMakerConfig import CaloCellMakerCfg
-    result.merge(CaloCellMakerCfg(configFlags))
+    result.merge(CaloCellMakerCfg(flags))
 
     #Configure topo-cluster builder
     from CaloRec.CaloTopoClusterConfig import CaloTopoClusterCfg
-    result.merge(CaloTopoClusterCfg(configFlags, clustersname=clustersname))
+    result.merge(CaloTopoClusterCfg(flags, clustersname=clustersname))
 
     #Configure forward towers:
     from CaloRec.CaloFwdTopoTowerConfig import CaloFwdTopoTowerCfg
-    result.merge(CaloFwdTopoTowerCfg(configFlags,CaloTopoClusterContainerKey="CaloCalTopoClusters"))
+    result.merge(CaloFwdTopoTowerCfg(flags,CaloTopoClusterContainerKey="CaloCalTopoClusters"))
 
     #Configure NoisyROSummary
     from LArCellRec.LArNoisyROSummaryConfig import LArNoisyROSummaryCfg
-    result.merge(LArNoisyROSummaryCfg(configFlags))
+    result.merge(LArNoisyROSummaryCfg(flags))
 
     #Configure TileLookForMuAlg
     from TileMuId.TileMuIdConfig import TileLookForMuAlgCfg
-    result.merge(TileLookForMuAlgCfg(configFlags))
+    result.merge(TileLookForMuAlgCfg(flags))
 
-    if not configFlags.Input.isMC and not configFlags.Overlay.DataOverlay:
+    if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         #Configure LArDigitsThinner:
         from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
-        result.merge(LArDigitThinnerCfg(configFlags))
+        result.merge(LArDigitThinnerCfg(flags))
 
     #Configure MBTSTimeDiff
     #Clients are BackgroundWordFiller and (deprecated?) DQTBackgroundMonTool
     #Consider moving to BackgroundWordFiller config
-    if configFlags.Detector.GeometryMBTS:
+    if flags.Detector.GeometryMBTS:
         from TileRecAlgs.MBTSTimeDiffEventInfoAlgConfig import MBTSTimeDiffEventInfoAlgCfg
-        result.merge(MBTSTimeDiffEventInfoAlgCfg(configFlags))
+        result.merge(MBTSTimeDiffEventInfoAlgCfg(flags))
 
 
     #Configure AOD Cell-Thinning based on samplings:
     from CaloRec.CaloThinCellsBySamplingAlgConfig import CaloThinCellsBySamplingAlgCfg
-    result.merge(CaloThinCellsBySamplingAlgCfg(configFlags,'StreamAOD', ['TileGap3']))
+    result.merge(CaloThinCellsBySamplingAlgCfg(flags,'StreamAOD', ['TileGap3']))
     
 
     return result
 
 
-def CaloRecoDebuggingCfg(configFlags):
+def CaloRecoDebuggingCfg(flags):
     result = ComponentAccumulator()
 
     result.addEventAlgo(CompFactory.DumpLArRawChannels(LArRawChannelContainerName="LArRawChannels_FromDigits"))
@@ -96,23 +96,23 @@ def CaloRecoDebuggingCfg(configFlags):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG,INFO
     log.setLevel(DEBUG)
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data",]
 
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data17_13TeV.00330470.physics_Main.daq.RAW._lb0310._SFO-1._0001.data",]
 
+    flags.Exec.OutputLevel=INFO
+    flags.fillFromArgs()
 
-    ConfigFlags.Exec.OutputLevel=INFO
-    ConfigFlags.fillFromArgs()
-
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
-    acc.merge(CaloRecoCfg(ConfigFlags))
+    acc.merge(CaloRecoCfg(flags))
 
 
     CaloCellDumper=CompFactory.CaloCellDumper
