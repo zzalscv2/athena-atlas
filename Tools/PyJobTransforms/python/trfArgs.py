@@ -102,21 +102,21 @@ def addAthenaArguments(parser, maxEventsDefaultSubstep='first', addValgrind=True
                         nargs='+', metavar='substep:Strategy', group='Athena',
                         help='Set the AthenaMP scheduling strategy for a particular substep. Default is unset.')
     parser.add_argument('--athenaMPUseEventOrders', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Change AthenaMP setup to read event numbers from event orders files')
     parser.add_argument('--athenaMPEventsBeforeFork', type=trfArgClasses.argFactory(trfArgClasses.argInt, runarg=False),
                         metavar='N', group='Athena',
                         help='Set AthenaMP to fork after processing N events (default is to fork immediately after '
                         'initialisation')
     parser.add_argument('--sharedWriter', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='SharedWriter mode active')
     parser.add_argument('--parallelCompression',
                         type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Delegate event data compression to the workers while using SharedWriter')
     parser.add_argument('--eventService', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=True),
-                        metavar='BOOL', group='Athena',
+                        metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
                         help='Switch AthenaMP to the Event Service configuration')
     parser.add_argument('--multithreaded', type=trfArgClasses.argFactory(trfArgClasses.argBool, runarg=False),
                         metavar='BOOL', group='Athena', nargs='?', const=trfArgClasses.argBool('True'),
@@ -516,8 +516,10 @@ def addFileValidationArguments(parser):
                         group='File Validation', help='If FALSE skip output file validation (default TRUE; warning - do not use this option in production jobs!)')
     
     parser.add_argument('--parallelFileValidation', type = argFactory(trfArgClasses.argBool), metavar='BOOL',
+                        nargs='?', const=trfArgClasses.argBool('True'),
                         group='File Validation', help='Parallelise file validation if True')
     parser.add_argument('--multithreadedFileValidation', type = argFactory(trfArgClasses.argBool), metavar='BOOL',
+                        nargs='?', const=trfArgClasses.argBool('True'),
                         group='File Validation', help='Use multithreaded ROOT file validation if True')
 
 def addParallelJobProcessorArguments(parser):
