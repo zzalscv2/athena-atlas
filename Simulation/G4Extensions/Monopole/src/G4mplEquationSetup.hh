@@ -23,11 +23,23 @@
 // * acceptance of all terms of the Geant4 Software license.          *
 // ********************************************************************
 //
-// G4mplEquationSetup is responsible for switching between two different
-// equation of motions, one for monopoles and another for the rest of the
-// particles.
+// $Id: $
+//
+// G4mplEquationSetup is responsible for
+//  - creating the stepper, equation of motion and chord finder for one
+//     or more fields (& managers) in a setup;
+//  - switching to use the equation of motion for monopole tracks;
+//  - providing the way to restore the original chord finder, when a
+//     monopole track moves to a different field-mgr, or ends its tracking.
 //
 // =======================================================================
+// Modified:  2 Nov 2022, J. Apostolakis:
+//           - correct description of ownership/lifetimes of objects
+//           - added ResetIntegration method that restore 'original' chordfinder
+//              object (for pure electic charge)  after end of monopole track
+//              stepping, or when crossing a boundary to a new field manager.
+//           - reduce churn of G4ChordFinder objects
+//           
 // Modified: 19 May 2019, M. Bandieramonte: introduced MT mode. The class
 // 	     was a Singleton and it was not thread-safe.
 //           Added the #ifdef G4MULTITHREADED directive to handle
@@ -66,12 +78,22 @@ class G4mplEquationSetup
 public:
 
   void InitialiseForField(G4FieldManager* fieldManager );
+  // Prepare classes needed integration of 'Monopole' transport, but do not put it in place
+  // Must be called every time the field manager can change (=> for each monopole track in application with many field Mgrs! )
 
   void SwitchStepperAndChordFinder(G4bool val, G4FieldManager* fieldManager );
   // Switch between mode for 'Monopole' and ordinary propagation
-  //  0 - ordinary
-  //  1 - monopole
+  //  0 / false - ordinary
+  //  1 / true  - monopole
+  // Uses the original 'ordinary' ChordFinder or 'our' monolope ChordFinder
 
+  void ResetIntegration(G4FieldManager* fieldManager);
+  //  Restore the original integration classes (ChordFinder+dependents) to current field Manager.
+  //  Checks (asserts) that the fieldManager was the original one (when replacing.)
+
+  void CheckAndUpdateField( G4FieldManager* fieldManager); 
+  //  Ensure that the field of this fieldManager is the one in the equation - else update it to be so.
+   
   static G4mplEquationSetup* GetInstance();
 
   ~G4mplEquationSetup() ;
@@ -94,29 +116,34 @@ private:
 
   G4mplEquationSetup();
 
+  // Internal method
+
+  // 1. to recreate all key objects - stepper, equation & chord-finder for monopole
+  void CreateStepperToChordFinder(G4MagneticField* magFieldNC);
+  // 2. to check whether the field object was changed -- by a field manager reconfiguring itself
+  void CheckAndUpdateField( G4MagneticField* magField );
+   
   //
   // Invariants - constant during tracking
   // ----------
 
-  // Objects owned
-  G4Mag_UsualEqRhs*       fEquation ;
-  G4mplEqMagElectricField*     fMonopoleEquation ;
-  G4MagIntegratorStepper* fMonopoleStepper ;
-
   // Parameters - invariant during stepping
   G4double                fMinStep ;
+  G4bool                  fVerbose;
 
-  //  Objects typically not owned
-  G4MagIntegratorStepper* fStepper ;
-  G4bool                  fCreatedOrdinaryStepper; // If set, created stepper.
-
-  G4bool                      fVerbose;
   //
   // State - changed during tracking
   // -----
 
-  //  The chord finder must be changed during tracking
-  G4ChordFinder*          fChordFinder ;
+  // Objects owned -- created during tracking 
+  //                  and transiently associated with the current FieldManager object.
+  G4mplEqMagElectricField*  fMonopoleEquation= nullptr;
+  G4MagIntegratorStepper*   fMonopoleStepper = nullptr;
+  G4ChordFinder*            fMonopoleChordFinder= nullptr;
+
+  // Cache of objects related to the current state - for consistency
+  G4FieldManager*   fCurrentFieldManager = nullptr; // Memory of this needed to ensure integrity
+  G4ChordFinder*    fOriginalChordFinder = nullptr; // ChordFinder object (for ordinary charged tracks) of current FM
 };
 
 #endif
