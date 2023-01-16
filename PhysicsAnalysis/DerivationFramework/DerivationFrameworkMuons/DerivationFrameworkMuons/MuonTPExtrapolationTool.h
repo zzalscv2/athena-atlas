@@ -33,7 +33,7 @@ public:
 
 private:
     /// run the extrapolation - only available in full athena
-    std::unique_ptr<const Trk::TrackParameters> extrapolateToTriggerPivotPlane(const xAOD::TrackParticle& track) const;
+    std::unique_ptr<Trk::TrackParameters> extrapolateToTriggerPivotPlane(const xAOD::TrackParticle& track) const;
 
     // Utility method to handle extrapolation and decoration for one TrackParticle.
     // In AthAnalysis, it attempts to read the decoration that should be present in the DAODs we use (MUON1/2).
