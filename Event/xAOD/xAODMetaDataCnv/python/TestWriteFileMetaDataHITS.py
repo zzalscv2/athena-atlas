@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """Test multi-threaded xAOD::FileMetaData writing
 
 Read default test HITS and configure to write output stream with
@@ -43,21 +43,21 @@ def main():
     """Run a job writing a file with FileMetaData"""
     msg = Logging.logging.getLogger("TestFileMetaData")
 
-    config_flags = AllConfigFlags.ConfigFlags
-    config_flags.Exec.OutputLevel = Constants.DEBUG
-    config_flags.Input.Files = TestDefaults.defaultTestFiles.HITS_RUN2
-    config_flags.Output.HITSFileName = "test.pool.root"
-    config_flags.Concurrency.NumThreads = 4
-    config_flags.Concurrency.NumConcurrentEvents = 4
-    config_flags.lock()
+    flags = AllConfigFlags.initConfigFlags()
+    flags.Exec.OutputLevel = Constants.DEBUG
+    flags.Input.Files = TestDefaults.defaultTestFiles.HITS_RUN2
+    flags.Output.HITSFileName = "test.pool.root"
+    flags.Concurrency.NumThreads = 4
+    flags.Concurrency.NumConcurrentEvents = 4
+    flags.lock()
 
-    write = MainServicesConfig.MainServicesCfg(config_flags)
-    write.merge(PoolReadCfg(config_flags))
-    write.merge(writeFileMetaData(config_flags))
+    write = MainServicesConfig.MainServicesCfg(flags)
+    write.merge(PoolReadCfg(flags))
+    write.merge(writeFileMetaData(flags))
     write.run(100)
 
     try:
-        if testMetaData(config_flags.Output.HITSFileName):
+        if testMetaData(flags.Output.HITSFileName):
             msg.info("File contains xAOD::FileMetaData")
             return 0
         msg.error("File does not contain xAOD::FileMetaData")

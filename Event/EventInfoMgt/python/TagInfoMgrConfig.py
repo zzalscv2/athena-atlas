@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -26,14 +26,14 @@ def TagInfoMgrCfg(flags, tagValuePairs={}):
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    flags.lock()
 
-    ConfigFlags.Input.Files = defaultTestFiles.RDO_RUN2
-    ConfigFlags.lock()
-
-    acc = TagInfoMgrCfg( ConfigFlags, {"SomeKey": "SomeValue"} )
-    acc2 = TagInfoMgrCfg( ConfigFlags, {"OtherKey": "OtherValue", "SomeKey": "SomeValue"} )
+    acc = TagInfoMgrCfg( flags, {"SomeKey": "SomeValue"} )
+    acc2 = TagInfoMgrCfg( flags, {"OtherKey": "OtherValue", "SomeKey": "SomeValue"} )
     acc.merge(acc2)
 
     assert "SomeKey" in acc.getService("TagInfoMgr").ExtraTagValuePairs

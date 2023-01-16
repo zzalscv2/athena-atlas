@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """Test CutFlowSvc
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 from argparse import ArgumentParser
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.TestDefaults import defaultTestFiles
@@ -29,25 +29,26 @@ parser.add_argument("--sharedWriter", default=False,
                     action="store_true", help="Run with shared writer")
 args = parser.parse_args()
 
+flags = initConfigFlags()
 if args.input:
-  ConfigFlags.Input.Files = [args.input]
+  flags.Input.Files = [args.input]
 elif args.data:
-  ConfigFlags.Input.Files = defaultTestFiles.RAW
+  flags.Input.Files = defaultTestFiles.RAW
 else:
-  ConfigFlags.Input.Files = defaultTestFiles.AOD_MC
+  flags.Input.Files = defaultTestFiles.AOD_MC
 
 # Flags relating to multithreaded execution
 threads = args.threads
 procs = args.processes
 maxEvents = 200
-ConfigFlags.Concurrency.NumThreads = threads
-ConfigFlags.Concurrency.NumProcs = procs
+flags.Concurrency.NumThreads = threads
+flags.Concurrency.NumProcs = procs
 if threads > 0:
   maxEvents = max(maxEvents, 10 * threads)
-  ConfigFlags.Scheduler.ShowDataDeps = True
-  ConfigFlags.Scheduler.ShowDataFlow = True
-  ConfigFlags.Scheduler.ShowControlFlow = True
-  ConfigFlags.Concurrency.NumConcurrentEvents = threads
+  flags.Scheduler.ShowDataDeps = True
+  flags.Scheduler.ShowDataFlow = True
+  flags.Scheduler.ShowControlFlow = True
+  flags.Concurrency.NumConcurrentEvents = threads
 suffix = f"_test_{threads}_{procs}"
 if procs > 0:
   maxEvents = max(maxEvents, 10 * procs)
@@ -55,33 +56,33 @@ if procs > 0:
     suffix += "_data"
   if args.sharedWriter:
     maxEvents *= 5
-    ConfigFlags.MP.UseSharedWriter = True
+    flags.MP.UseSharedWriter = True
     suffix += "_sharedWriter"
-  ConfigFlags.MP.WorkerTopDir = f"athenaMP_workers{suffix}"
-  ConfigFlags.MP.EventOrdersFile = f"athenamp_eventorders{suffix}.txt"
+  flags.MP.WorkerTopDir = f"athenaMP_workers{suffix}"
+  flags.MP.EventOrdersFile = f"athenamp_eventorders{suffix}.txt"
 
-ConfigFlags.Output.AODFileName = f"testAOD{suffix}.pool.root"
+flags.Output.AODFileName = f"testAOD{suffix}.pool.root"
 
-ConfigFlags.lock()
+flags.lock()
 
 # Setup service
-acc = MainServicesCfg(ConfigFlags)
+acc = MainServicesCfg(flags)
 from AthenaConfiguration.Enums import Format
-if ConfigFlags.Input.Format is Format.BS:
+if flags.Input.Format is Format.BS:
   from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-  acc.merge(ByteStreamReadCfg(ConfigFlags))
+  acc.merge(ByteStreamReadCfg(flags))
 else:
-  acc.merge(PoolReadCfg(ConfigFlags))
+  acc.merge(PoolReadCfg(flags))
 
-if 'EventInfo' not in ConfigFlags.Input.Collections:
+if 'EventInfo' not in flags.Input.Collections:
   from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
-  acc.merge(EventInfoCnvAlgCfg(ConfigFlags, disableBeamSpot=True))
+  acc.merge(EventInfoCnvAlgCfg(flags, disableBeamSpot=True))
 
-acc.merge(CutFlowSvcCfg(ConfigFlags))
+acc.merge(CutFlowSvcCfg(flags))
 acc.addEventAlgo(CompFactory.TestFilterReentrantAlg("TestReentrant1", FilterKey="TestReentrant1", Modulo=2))
 acc.addEventAlgo(CompFactory.TestFilterReentrantAlg("TestReentrant2", FilterKey="TestReentrant2", Modulo=4))
 
-acc.merge(OutputStreamCfg(ConfigFlags, "AOD", MetadataItemList=CutFlowOutputList(ConfigFlags)))
+acc.merge(OutputStreamCfg(flags, "AOD", MetadataItemList=CutFlowOutputList(flags)))
 
 # Debugging
 from AthenaCommon.Constants import VERBOSE

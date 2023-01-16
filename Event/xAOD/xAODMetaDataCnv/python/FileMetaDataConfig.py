@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """Configure jobs to propogate and/or create xAOD::FileMetaData
 
 Configure the FileMetaDataTool to propogate FileMetaData into the MetaDataStore
@@ -8,14 +8,9 @@ output stream is written to the output file.
 
     Typical usage example
 
-        from xAODFileMetaDataCnv import FileMetaDataConfig
+        from xAODFileMetaDataCnv.FileMetaDataConfig import FileMetaDataCfg
         ca = ComponentAccumulator()
-        ca.merge(
-            FileMetaDataConfig.FileMetaDataCfg(
-                flags=ConfigFlags,
-                stream=outputStreamObject,
-            )
-        )
+        ca.merge(FileMetaDataCfg(flags, stream=outputStreamObject))
 """
 from AthenaConfiguration import ComponentFactory, ComponentAccumulator
 from AthenaCommon import Logging
