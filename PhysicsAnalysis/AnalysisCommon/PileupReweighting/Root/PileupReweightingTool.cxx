@@ -468,7 +468,7 @@ StatusCode PileupReweightingTool::apply(const xAOD::EventInfo& eventInfo, bool m
       eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") = (rrn==0) ? getRandomRunNumber(eventInfo, false) : rrn;
    }
    if(!eventInfo.isAvailable<unsigned int>(m_prefix+"RandomLumiBlockNumber"))
-      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber")  );
+      eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber") = (eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")==0) ? 0 : /*m_tool->*/GetRandomLumiBlockNumber(  eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber")  );
    if(!eventInfo.isAvailable<ULong64_t>(m_prefix+"PRWHash"))
       eventInfo.auxdecor<ULong64_t>(m_prefix+"PRWHash") = getPRWHash( eventInfo );
 
@@ -476,7 +476,7 @@ StatusCode PileupReweightingTool::apply(const xAOD::EventInfo& eventInfo, bool m
    if(!m_noWeightsMode && !eventInfo.isAvailable<float>(m_prefix+"PileupWeight"))
       eventInfo.auxdecor<float>(m_prefix+"PileupWeight") = getCombinedWeight(eventInfo, true);
       
-   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdecor<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdecor<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdecor<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
+   ATH_MSG_VERBOSE("PileupWeight = " << eventInfo.auxdataConst<float>(m_prefix+"PileupWeight") << " RandomRunNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomRunNumber") << " RandomLumiBlockNumber = " << eventInfo.auxdataConst<unsigned int>(m_prefix+"RandomLumiBlockNumber"));
 
    return StatusCode::SUCCESS;
 }
