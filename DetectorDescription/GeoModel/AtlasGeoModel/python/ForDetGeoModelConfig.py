@@ -1,17 +1,18 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
+from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 
-def ForDetGeometryCfg( ConfigFlags ):
+
+def ForDetGeometryCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
-    acc = GeoModelCfg( ConfigFlags )
+    acc = GeoModelCfg(flags)
     geoModelSvc=acc.getPrimary()
     # LUCID
-    if ConfigFlags.Detector.GeometryLucid:
+    if flags.Detector.GeometryLucid:
         LUCID_DetectorTool=CompFactory.LUCID_DetectorTool
         geoModelSvc.DetectorTools += [ LUCID_DetectorTool() ]
     # ALFA
-    if ConfigFlags.Detector.GeometryALFA:
+    if flags.Detector.GeometryALFA:
         #from ALFA_GeoModel.ALFA_GeoModelConf import ALFA_DetectorTool 
         ALFA_DetectorTool=CompFactory.ALFA_DetectorTool
         theALFA_DetectorTool=ALFA_DetectorTool(name="ALFA_DetectorTool")
@@ -33,17 +34,17 @@ def ForDetGeometryCfg( ConfigFlags ):
         theALFA_DetectorTool.B7R1L_MDGeometryType = 2
         theALFA_DetectorTool.B7R1L_ODGeometryType = 2
         geoModelSvc.DetectorTools += [ theALFA_DetectorTool ]
-        acc.merge(addFoldersSplitOnline(ConfigFlags,'FWD','/FWD/Onl/ALFA/position_calibration','/FWD/ALFA/position_calibration'))
+        acc.merge(addFoldersSplitOnline(flags,'FWD','/FWD/Onl/ALFA/position_calibration','/FWD/ALFA/position_calibration'))
     # ForwardRegion
-    if ConfigFlags.Detector.GeometryFwdRegion:
+    if flags.Detector.GeometryFwdRegion:
         ForwardRegionGeoModelTool=CompFactory.ForwardRegionGeoModelTool
         geoModelSvc.DetectorTools += [ ForwardRegionGeoModelTool() ]
     # ZDC
-    if ConfigFlags.Detector.GeometryZDC:
+    if flags.Detector.GeometryZDC:
         ZDC_DetTool=CompFactory.ZDC_DetTool
         geoModelSvc.DetectorTools += [ ZDC_DetTool() ]
     # AFP
-    if ConfigFlags.Detector.GeometryAFP:
+    if flags.Detector.GeometryAFP:
         AFP_GeoModelTool=CompFactory.AFP_GeoModelTool
         geoModelSvc.DetectorTools += [ AFP_GeoModelTool() ]
     acc.addService(geoModelSvc)
