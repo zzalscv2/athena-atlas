@@ -714,7 +714,7 @@ namespace MuonGM {
 
             Identifier id;
             //= m_mdtIdHelper->elementID(stType, jzz, jff);
-            if (m_tgcIdHelper && stType.substr(0, 1) == "T") {
+            if (m_tgcIdHelper && stType.at(0) == 'T') {
                 // TGC case
                 int stPhi = MuonGM::stationPhiTGC(stType, jff, jzz, geometryVersion());
                 int stEta = 1;            // stEta for the station is stEta for the first component chamber
@@ -722,7 +722,7 @@ namespace MuonGM {
                 id = m_tgcIdHelper->elementID(stType, stEta, stPhi);
                 if (log.level() <= MSG::DEBUG)
                     log << MSG::DEBUG << "Filling A-line container with entry for key = " << m_tgcIdHelper->show_to_string(id) << endmsg;
-            } else if (m_cscIdHelper && stType.substr(0, 1) == "C") {
+            } else if (m_cscIdHelper && stType.at(0) == 'C') {
                 // CSC case
                 id = m_cscIdHelper->elementID(stType, jzz, jff);
                 if (log.level() <= MSG::DEBUG)
@@ -882,7 +882,7 @@ namespace MuonGM {
 
             if (job != 0) {
                 // job different than 0 (standard for TGC conditions for Sept 2010 repro.)
-                if (stType.substr(0, 1) == "T") {
+                if (stType.at(0) == 'T') {
                     if (log.level() <= MSG::DEBUG)
                         log << MSG::DEBUG << "ALinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
                             << " has JOB not 0 - this is expected for TGC" << endmsg;
@@ -1084,21 +1084,21 @@ namespace MuonGM {
                         << " ep=" << BLine.ep() << " en=" << BLine.en() << ")" << endmsg;
             }
 
-            if (stType.substr(0, 1) == "T" || stType.substr(0, 1) == "C" || (stType.substr(0, 3) == "BML" && std::abs(jzz) == 7)) {
+            if (stType.at(0) == 'T' || stType.at(0) == 'C' || (stType.substr(0, 3) == "BML" && std::abs(jzz) == 7)) {
                 if (log.level() <= MSG::DEBUG)
                     log << MSG::DEBUG << "BLinePar with AmdbId " << stType << " " << jzz << " " << jff << " " << job
                         << " is not a MDT station - skipping" << endmsg;
                 continue;
             }
             if (mdtDeformationFlag() == 2 &&
-                (stType.substr(0, 3) == "BEE" || stType.substr(0, 1) == "E"))  // MDT deformations are requested for Barrel(ASAP) only !!!!
+                (stType.substr(0, 3) == "BEE" || stType.at(0) == 'E'))  // MDT deformations are requested for Barrel(ASAP) only !!!!
             {
                 if (log.level() <= MSG::DEBUG)
                     log << MSG::DEBUG << " mdtDeformationFlag()==" << mdtDeformationFlag() << " stName = " << stType.substr(0, 3)
                         << " barrel / ec initial = " << stType.substr(0, 1) << " 	 skipping this b-line" << endmsg;
                 continue;  // MDT deformations are requested for Barrel(ASAP) only !!!!
             }
-            if (mdtDeformationFlag() == 3 && (stType.substr(0, 3) != "BEE" && stType.substr(0, 1) == "B")) {
+            if (mdtDeformationFlag() == 3 && (stType.substr(0, 3) != "BEE" && stType.at(0) == 'B')) {
                 if (log.level() <= MSG::DEBUG)
                     log << MSG::DEBUG << " mdtDeformationFlag()==" << mdtDeformationFlag() << " stName = " << stType.substr(0, 3)
                         << " barrel / ec initial = " << stType.substr(0, 1) << " 	 skipping this b-line" << endmsg;

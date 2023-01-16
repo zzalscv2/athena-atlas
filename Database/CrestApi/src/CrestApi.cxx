@@ -1313,7 +1313,7 @@ namespace Crest {
     /* Enable tracing of ascii data */
     //sanitise the current path
     std::string sanitisedPath(current_path);
-    auto caretPosition = sanitisedPath.find("^");
+    auto caretPosition = sanitisedPath.find('^');
     if (caretPosition != std::string::npos) sanitisedPath.replace(caretPosition, 1, "%5E");
     /* get a curl handle */
     curl = curl_easy_init();

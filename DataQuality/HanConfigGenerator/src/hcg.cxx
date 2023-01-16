@@ -38,6 +38,7 @@
 #include "TDirectory.h"
 
 #include "TPad.h"
+#include <algorithm>
 
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone app
@@ -196,7 +197,7 @@ std::string chopex(std::string& s1, const std::string& s2)
   std::string s3;
   if ( pos == std::string::npos ) {
     s3 = s1;
-    s1.erase(0, s1.size());
+    s1.clear();
   }
   else {
     s3 = s1.substr(0, pos); 
@@ -213,7 +214,7 @@ std::string chomp(std::string& s1, const std::string& s2)
   std::string s3;
   if ( pos == std::string::npos ) {
     s3 = s1;
-    s1.erase(0,s1.size());    
+    s1.clear();
   }
   else {
     s3 = s1.substr(pos+s2.size(),s1.size());
@@ -263,7 +264,7 @@ std::string chopfirst(std::string& s1, const std::string& s2)
   }
   else {
     s3 = s1;
-    s1 = "";
+    s1.clear();
   } 
   return s3;
 } 
@@ -354,16 +355,16 @@ std::vector<std::string> maphist( const std::vector<std::string>& v ) {
 /// match the individual directories of two strings 
 bool match( std::string s1, std::string s2 ) { 
   
-  int i1 = count( s1, "/" );
-  int i2 = count( s2, "/" );
+  int i1 = std::count( s1.begin(), s1.end(), '/' );
+  int i2 = std::count( s2.begin(), s2.end(), '/' );
 
   int i = ( i1<i2 ? i1 : i2 ); 
 
   //  std::cerr << "match s1 " << s1 << " " << s2 << std::endl;
 
   for ( i++ ; i-- ; ) { 
-    size_t p1 = s1.find("/");
-    size_t p2 = s2.find("/");
+    size_t p1 = s1.find('/');
+    size_t p2 = s2.find('/');
 
     std::string ss1 = s1.substr( 0, p1 );
     std::string ss2 = s2.substr( 0, p2 );
@@ -1142,7 +1143,8 @@ int main(int argc, char** argv) {
       ++i;
       
       if ( i<argc-offset ) { 
-	  dirs.insert( std::map<std::string,int>::value_type( argv[i], count( argv[i], "/" ) ) );
+    std::string stringdir(argv[i]);
+	  dirs.insert( std::map<std::string,int>::value_type( stringdir, std::count( stringdir.begin(), stringdir.end(), '/' ) ) );
 	  
 	  std::string tdir = argv[i];
 	  

@@ -9,6 +9,7 @@
 #include <sstream>
 
 
+extern int myatoi(std::string_view str);
 
 MMDetectorDescription::MMDetectorDescription(const std::string& s,
                                              AGDDDetectorStore& ds):
@@ -30,14 +31,15 @@ void MMDetectorDescription::SetDetectorAddress(AGDDDetectorPositioner* p)
 		p->ID.detectorType="Micromegas";
 		p->theDetector=this;
 		std::stringstream stringone;
-		std::string side="A";
-		if (p->ID.sideIndex<0) side="C";
+		char side='A';
+		if (p->ID.sideIndex<0) side='C';
 		int ctype=0;
-		int ml=atoi(subType().substr(3,1).c_str());
-		if (subType().substr(2,1)=="L") ctype=1;
-		else if (subType().substr(2,1)=="S") ctype=3;
-		int etaIndex=atoi(subType().substr(1,1).c_str());
-		stringone<<"sMD"<<ctype<<"-"<<etaIndex<<"-"<<ml<<"-phi"<<p->ID.phiIndex+1<<side<<std::endl;
+		std::string_view subt = subType();
+		int ml=myatoi(subt.substr(3,1));
+		if (subt[2]=='L') ctype=1;
+		else if (subt[2]=='S') ctype=3;
+		int etaIndex=myatoi(subt.substr(1,1));
+		stringone<<"sMD"<<ctype<<'-'<<etaIndex<<'-'<<ml<<"-phi"<<p->ID.phiIndex+1<<side<<std::endl;
 		//std::cout<<" stringone "<<stringone.str()<<std::endl;
 		p->ID.detectorAddress=stringone.str();
 }
