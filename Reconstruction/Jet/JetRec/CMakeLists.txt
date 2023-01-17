@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( JetRec )
@@ -90,7 +90,7 @@ atlas_add_test(JetClustererTest
   SOURCES
   test/JetClustererTest.cxx
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GTEST_LIBRARIES} JetRecLib
+  LINK_LIBRARIES ${GTEST_LIBRARIES} JetRecLib CxxUtils
   POST_EXEC_SCRIPT nopost.sh )
 
 if ( NOT GENERATIONBASE AND NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
