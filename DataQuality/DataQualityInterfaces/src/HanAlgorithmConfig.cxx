@@ -16,6 +16,7 @@
 #include "DataQualityInterfaces/HanConfigAlgLimit.h"
 #include "DataQualityInterfaces/HanConfigAlgPar.h"
 #include "DataQualityInterfaces/HanConfigAssessor.h"
+#include "DataQualityInterfaces/HanConfigParMap.h"
 #include "DataQualityInterfaces/HanUtils.h"
 
 
@@ -35,15 +36,17 @@ HanAlgorithmConfig( const HanConfigAssessor& hca, TFile* config )
 
 HanAlgorithmConfig::
 HanAlgorithmConfig( TObject* reference, 
-		    const std::map< std::string, double >& parameters,
-		    const std::map< std::string, double >& greenThresholds,
-		    const std::map< std::string, double >& redThresholds,
-		    const HanConfigAssessor* hca)
+                    const std::map< std::string, double >& parameters,
+                    const std::map< std::string, std::string>& stringParameters,
+                    const std::map< std::string, double >& greenThresholds,
+                    const std::map< std::string, double >& redThresholds,
+                    const HanConfigAssessor* hca)
     : m_file(0)
     , m_ref(reference)
     , m_hca(hca)
 {
   m_parameters = parameters;
+  m_generic_parameters = stringParameters;
   m_green_thresholds = greenThresholds;
   m_red_thresholds = redThresholds;
 }
@@ -95,6 +98,11 @@ CopyAlgConfig( const HanConfigAssessor& hca )
     parName = std::string( par->GetName() );
     ParsVal_t parMapVal( parName, par->GetValue() );
     m_parameters.insert( parMapVal );
+  }
+  TIter nextStrPar( hca.GetAllAlgStrPars() );
+  HanConfigParMap* strPar;
+  while( (strPar = dynamic_cast<HanConfigParMap*>( nextStrPar() )) != 0 ) {
+    m_generic_parameters.emplace( strPar->GetName(), strPar->GetValue() );
   }
   
   std::string limName;

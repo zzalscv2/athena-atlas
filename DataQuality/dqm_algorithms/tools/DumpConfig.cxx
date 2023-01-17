@@ -127,15 +127,22 @@ dqm_algorithms::tools::DumpConfig::DumpThresholds(){
 void
 dqm_algorithms::tools::DumpConfig::DumpParams(){
   
-  std::map<std::string,double>::const_iterator iter;
   char pline[500];
   int count=0;
   
-  for (iter=m_params.begin();iter!=m_params.end();++iter){
+  for ( auto& param : m_params ) {
     m_myfile<<"<obj class=\"DQAlgorithmParameter\" id=\""+m_param_id[count]+"\">\n";
-    m_myfile<<"  <attr name=\"Name\" type=\"string\">\""+iter->first+"\"</attr>\n";
-    sprintf(pline, "  <attr name=\"Value\" type=\"double\" num=\"1\">%4.2f</attr>\n</obj>\n\n",iter->second);
+    m_myfile<<"  <attr name=\"Name\" type=\"string\">\""+param.first+"\"</attr>\n";
+    sprintf(pline, "  <attr name=\"Value\" type=\"double\" num=\"1\">%4.2f</attr>\n</obj>\n\n",param.second);
     m_myfile<<pline;
+    ++count;
+  }
+  
+  for ( auto& param : m_strParams ) {
+    m_myfile<<"<obj class=\"DQAlgorithmParameter\" id=\""+m_param_id[count]+"\">\n";
+    m_myfile<<"  <attr name=\"Name\" type=\"string\">\""+param.first+"\"</attr>\n";
+    m_myfile<<"  <attr name=\"Value\" type=\"string\" num=\"1\">"+param.second+"</attr>\n";
+    m_myfile<<"</obj>\n\n";
     ++count;
   }
   
@@ -189,15 +196,21 @@ dqm_algorithms::tools::DumpConfig::DumpOnlineConfig(std::string filename, bool d
   // Parameters....
   m_params=m_config.getParameters();
   int paramsize=m_params.size();
+  m_strParams=m_config.getGenericParameters();
+  paramsize+=m_strParams.size();
   
   char paramsline [500];
   sprintf(paramsline, "<rel name=\"AlgorithmParameters\" num=\"%d\">\n", paramsize);
 m_myfile <<paramsline;
  
  std::map<std::string,double>::const_iterator iter;
- for (iter=m_params.begin();iter!=m_params.end();++iter){
-   m_myfile <<"     \"DQAlgorithmParameter\" \"Params_"+m_ParameterName+"_"+iter->first+"\"\n";
-   m_param_id.push_back("Params_"+m_ParameterName+"_"+iter->first);
+ for ( auto& param : m_params ) {
+   m_myfile <<"     \"DQAlgorithmParameter\" \"Params_"+m_ParameterName+"_"+param.first+"\"\n";
+   m_param_id.push_back("Params_"+m_ParameterName+"_"+param.first);
+ }
+ for ( auto& param : m_strParams ) {
+   m_myfile <<"     \"DQAlgorithmParameter\" \"Params_"+m_ParameterName+"_"+param.first+"\"\n";
+   m_param_id.push_back("Params_"+m_ParameterName+"_"+param.first);
  }
  m_myfile<<"</rel>\n";
  

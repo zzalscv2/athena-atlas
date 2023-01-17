@@ -24,10 +24,11 @@ public:
   HanAlgorithmConfig( const HanConfigAssessor& hca, TFile* config );
 
   HanAlgorithmConfig( TObject* reference, 
-		      const std::map< std::string, double >& parameters,
-		      const std::map< std::string, double >& greenThresholds,
-		      const std::map< std::string, double >& redThresholds,
-		      const HanConfigAssessor* hca);
+                      const std::map< std::string, double >& parameters,
+                      const std::map< std::string, std::string>& stringParameters,
+                      const std::map< std::string, double >& greenThresholds,
+                      const std::map< std::string, double >& redThresholds,
+                      const HanConfigAssessor* hca);
 
   virtual ~HanAlgorithmConfig();
 

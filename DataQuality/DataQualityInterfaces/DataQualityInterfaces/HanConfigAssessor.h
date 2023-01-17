@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanConfigAssessor_h
@@ -73,6 +73,10 @@ public:
   virtual void                AddAlgPar( const HanConfigAlgPar& algPar_ );
   virtual HanConfigAlgPar     GetAlgPar( std::string name_ ) const;
   virtual TIter               GetAllAlgPars() const;
+
+  virtual void                AddAlgStrPar( const HanConfigParMap& algPar_ );
+  virtual HanConfigParMap     GetAlgStrPar( std::string name_ ) const;
+  virtual TIter               GetAllAlgStrPars() const;
   
   virtual void                AddAlgLimit( const HanConfigAlgLimit& algLim_ );
   virtual HanConfigAlgLimit   GetAlgLimit( std::string name_ ) const;
@@ -106,6 +110,7 @@ protected:
   TObjString m_algRefName;
   
   TSeqCollection* m_algPars;
+  TSeqCollection* m_algStrPars;
   TSeqCollection* m_algLimits;
   TSeqCollection* m_annotations;
 
@@ -114,7 +119,7 @@ protected:
 
 //Get rid of Root macros that confuse Doxygen
 ///\cond CLASSDEF
-  ClassDef( HanConfigAssessor, 5 ) // A histogram with an associated algorithm, producing an assessment
+  ClassDef( HanConfigAssessor, 6 ) // A histogram with an associated algorithm, producing an assessment
 ///\endcond
   
 };

@@ -27,9 +27,10 @@ dqm_algorithms::tools::SimpleAlgorithmConfig::SimpleAlgorithmConfig(const Algori
   dqm_core::AlgorithmConfig(), m_ref(conf.getReference())
 {
   //Copy configuration in this
-  m_parameters       = conf.getParameters();
-  m_green_thresholds = conf.getGreenThresholds();
-  m_red_thresholds   = conf.getRedThresholds();
+  m_parameters         = conf.getParameters();
+  m_generic_parameters = conf.getGenericParameters();
+  m_green_thresholds   = conf.getGreenThresholds();
+  m_red_thresholds     = conf.getRedThresholds();
 }
 #endif
 
@@ -50,6 +51,12 @@ void
 dqm_algorithms::tools::SimpleAlgorithmConfig::addParameter(std::string key, double value)
 {
   m_parameters.insert( std::make_pair(key,value) );
+}
+
+void
+dqm_algorithms::tools::SimpleAlgorithmConfig::addGenericParameter(std::string key, std::string value)
+{
+  m_generic_parameters.emplace( key, value );
 }
 
 void
