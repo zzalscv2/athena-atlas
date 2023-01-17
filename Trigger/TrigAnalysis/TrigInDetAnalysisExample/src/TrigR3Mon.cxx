@@ -15,9 +15,6 @@
 #include "TrigInDetAnalysisUtils/Filter_Track.h"
 #include "TrigInDetAnalysisUtils/TagNProbe.h"
 
-// #include "AthenaMonitoring/AthenaMonManager.h"
-// #include "AthenaMonitoring/ManagedMonitorToolTest.h"
-
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrigInDetAnalysisExample/TIDAHistogram.h"
 

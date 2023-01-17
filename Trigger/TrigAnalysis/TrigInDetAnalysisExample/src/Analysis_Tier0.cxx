@@ -567,7 +567,7 @@ void Analysis_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
 
 
     for ( size_t ilayer=0 ; ilayer<32 ; ilayer++ ) { 
-      if ( (*reference)->hitPattern()&(1<<ilayer) ) m_h_layer->Fill( ilayer );
+      if ( (*reference)->hitPattern()&(1U<<ilayer) ) m_h_layer->Fill( ilayer );
     } 
     
     if (test) {
@@ -598,7 +598,7 @@ void Analysis_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
       h_trkvtx_z_lb->Fill( event()->lumi_block(), beamTestz() );
 
       for ( size_t ilayer=0 ; ilayer<32 ; ilayer++ ) { 
-	if ( test->hitPattern()&(1<<ilayer) ) m_h_layer_rec->Fill( ilayer );
+	if ( test->hitPattern()&(1U<<ilayer) ) m_h_layer_rec->Fill( ilayer );
       } 
 
       //      std::cout << "SUTT beam x " << beamTestx() << " " << "\tx " << beamTesty() << " " <<  "\ty " << beamTestz() << std::endl;
