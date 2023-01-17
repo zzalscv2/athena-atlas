@@ -217,7 +217,7 @@ public:
     virtual Long64_t LoadTree(Long64_t entry);
     void Init(TTree *tree);
     virtual void Loop(Long64_t maxEvent);
-    virtual Bool_t Notify();
+    virtual Bool_t Notify() final;
     virtual void Show(Long64_t entry = -1);
 
     // PRIVATE METHODS

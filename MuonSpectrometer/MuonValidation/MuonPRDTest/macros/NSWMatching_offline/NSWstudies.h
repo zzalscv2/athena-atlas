@@ -615,7 +615,7 @@ public :
    virtual Long64_t LoadTree(Long64_t entry);
    void     Init(TTree *tree);
    virtual void     Loop();
-   virtual Bool_t   Notify();
+   virtual Bool_t   Notify() final;
    virtual void     Show(Long64_t entry = -1);
 };
 
