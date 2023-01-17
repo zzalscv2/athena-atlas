@@ -684,6 +684,7 @@ StatusCode ISF_HitAnalysis::execute()
  m_MuonEntryLayer_px->clear();
  m_MuonEntryLayer_py->clear();
  m_MuonEntryLayer_pz->clear();
+ m_MuonEntryLayer_pdg->clear();
 
  //##########################
 
