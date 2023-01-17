@@ -39,7 +39,7 @@ void SiHitIdHelper::Initialize() {
   // cache the HL-LHC decision
   m_isITkHGTD = isITkHGTD || isITkHGTDPLR || isITk_HGTD_NewID_PLR;
 
-  if (m_isITkHGTD) InitializeField("Part",0,2);
+  if (isITkHGTD) InitializeField("Part",0,2);
   else if (isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("Part",0,3);
   else InitializeField("Part",0,1);
   if (isDBM || isITkHGTDPLR || isITk_HGTD_NewID_PLR) InitializeField("BarrelEndcap",-4,4);
