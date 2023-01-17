@@ -54,6 +54,22 @@ def TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapCombinedInDetTracks")
 
+    if name == "ObserverTrackStateOnSurfaceDecorator":
+        kwargs["ContainerName"] = "InDetObservedTrackParticles"
+        kwargs["DecorationPrefix"] = "ObservedTrack_"
+        kwargs["PixelMsosName"] = "ObservedTrack_Pixel_MSOSs"
+        kwargs["SctMsosName"] = "ObservedTrack_SCT_MSOSs"
+        kwargs["TrtMsosName"] = "ObservedTrack_TRT_MSOSs"
+        kwargs["AddPRD"] = True
+
+    if name == "PseudoTrackStateOnSurfaceDecorator":
+        kwargs["ContainerName"] = "InDetPseudoTrackParticles"
+        kwargs["DecorationPrefix"] = "Pseudo_"
+        kwargs["PixelMsosName"] = "Pseudo_Pixel_MSOSs"
+        kwargs["SctMsosName"] = "Pseudo_SCT_MSOSs"
+        kwargs["TrtMsosName"] = "Pseudo_TRT_MSOSs"
+        kwargs["AddPRD"] = True
+
     TrackStateOnSurfaceDecorator = CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator
     acc.addPublicTool(TrackStateOnSurfaceDecorator(name, **kwargs),
                       primary = True)

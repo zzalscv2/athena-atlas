@@ -488,7 +488,7 @@ namespace DerivationFramework {
           Trk::TrackStateOnSurfaceComparisonFunction CompFunc( trkTrack->perigeeParameters()->momentum() );
           stable_sort( tsoss.begin(), tsoss.end(), CompFunc );
         } else {
-          ATH_MSG_ERROR("Track has not perigee parameters");
+          ATH_MSG_ERROR("Track has no perigee parameters");
         }
       }
 

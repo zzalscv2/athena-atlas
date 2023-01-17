@@ -360,7 +360,7 @@ def InDetTrackRecoCfg(flags):
 
             if flags.InDet.doTruth and (flags.InDet.Tracking.doPseudoTracking or flags.InDet.Tracking.doIdealPseudoTracking): ## Do we need the dotruth flags...?
                 from TrkConfig.TrkTruthTrackAlgsConfig import TruthTrackingCfg
-                result.merge(TruthTrackingCfg(flags))
+                result.merge(TruthTrackingCfg(current_flags))
 
                 ## Old config only scheduled InDetTrackTruth for IdealPseudoTracking, while the TrackParticleCnvAlg requires it if "doTruth" is enabled
                 if flags.InDet.doTruth: ## needed if flag above is removed
@@ -381,18 +381,29 @@ def InDetTrackRecoCfg(flags):
                                              OutputCombinedTracks = "CombinedInDetTracks",
                                              AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
 
-    from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
-    result.merge(TrackSlimmerCfg(flags,
-                                 TrackLocation = ["CombinedInDetTracks"]))
+    if flags.InDet.doSlimming:
+        from TrkConfig.TrkTrackSlimmerConfig import TrackSlimmerCfg
+        result.merge(TrackSlimmerCfg(flags,
+                                    TrackLocation = ["CombinedInDetTracks"]))
 
     if flags.InDet.doTruth:
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(flags))
+        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
+            result.merge(InDetTrackTruthCfg(flags,
+                                            Tracks = "ObservedTracksCollection",
+                                            DetailedTruth = "ObservedTracksCollectionDetailedTruth",
+                                            TracksTruth = "ObservedTracksCollectionTruthCollection"))
+
 
     from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
     result.merge(TrackParticleCnvAlgCfg(flags,
                                         ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags),
                                         AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
+
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
+        from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
+        result.merge(TrackParticleCnvAlgCfg(flags, name = "ObserverTrackParticleCnvAlg"))
 
     if flags.InDet.Tracking.doStoreTrackSeeds:
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgNoPIDCfg
@@ -406,14 +417,26 @@ def InDetTrackRecoCfg(flags):
         result.merge(primaryVertexFindingCfg(flags))
 
     if flags.InDet.Tracking.writeExtendedPRDInfo:
-        from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPixelPrepDataToxAODCfg, InDetSCT_PrepDataToxAODCfg, InDetTRT_PrepDataToxAODCfg
-        result.merge(InDetPixelPrepDataToxAODCfg(flags, ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags)))
-        result.merge(InDetSCT_PrepDataToxAODCfg(flags))
-        result.merge(InDetTRT_PrepDataToxAODCfg(flags))
+        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring or flags.InDet.Tracking.doPseudoTracking:
+            from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPixelPrepDataToxAOD_ExtraTruthCfg, InDetSCT_PrepDataToxAOD_ExtraTruthCfg, InDetTRT_PrepDataToxAOD_ExtraTruthCfg
+            result.merge(InDetPixelPrepDataToxAOD_ExtraTruthCfg(flags, ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags)))
+            result.merge(InDetSCT_PrepDataToxAOD_ExtraTruthCfg(flags))
+            result.merge(InDetTRT_PrepDataToxAOD_ExtraTruthCfg(flags))
+        else:
+            from InDetConfig.InDetPrepRawDataToxAODConfig import InDetPixelPrepDataToxAODCfg, InDetSCT_PrepDataToxAODCfg, InDetTRT_PrepDataToxAODCfg
+            result.merge(InDetPixelPrepDataToxAODCfg(flags, ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags)))
+            result.merge(InDetSCT_PrepDataToxAODCfg(flags))
+            result.merge(InDetTRT_PrepDataToxAODCfg(flags))
 
         from DerivationFrameworkInDet.InDetToolsConfig import TrackStateOnSurfaceDecoratorCfg
         TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="TrackStateOnSurfaceDecorator"))
         result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("InDetCommonKernel", AugmentationTools = [TrackStateOnSurfaceDecorator]))
+        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
+            ObserverTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="ObserverTrackStateOnSurfaceDecorator"))
+            result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("ObserverInDetCommonKernel", AugmentationTools = [ObserverTrackStateOnSurfaceDecorator]))
+        if flags.InDet.Tracking.doPseudoTracking:
+            PseudoTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="PseudoTrackStateOnSurfaceDecorator"))
+            result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("PseudoInDetCommonKernel", AugmentationTools = [PseudoTrackStateOnSurfaceDecorator]))
 
         if flags.Input.isMC:
             from InDetPhysValMonitoring.InDetPhysValDecorationConfig import InDetPhysHitDecoratorAlgCfg
@@ -535,6 +558,14 @@ def InDetTrackRecoOutputCfg(flags):
             toESD += ["TrackTruthCollection#InDetPseudoTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#InDetPseudoTracksDetailedTruth"]
 
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
+        toESD += ["TrackCollection#ObservedTracksCollection"]
+        toESD += ["xAOD::TrackParticleContainer#InDetObservedTrackParticles"]
+        toESD += [f"xAOD::TrackParticleAuxContainer#InDetObservedTrackParticlesAux.{excludedAuxData}"]
+        if flags.InDet.doTruth:
+            toESD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
+            toESD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
+
     # add the forward tracks for combined muon reconstruction
     if flags.InDet.Tracking.doForwardTracks:
         toESD += ["TrackCollection#ResolvedForwardTracks"]
@@ -604,7 +635,7 @@ def InDetTrackRecoOutputCfg(flags):
         if flags.InDet.doTruth:
             toAOD += ["TrackTruthCollection#InDetPseudoTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#InDetPseudoTrackDetailedTruth"]
-    if special:  # flags.InDet.doTIDE_AmbiTrackMonitoring:
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
         toAOD += ["xAOD::TrackParticleContainer#InDetObservedTrackParticles"]
         toAOD += [f"xAOD::TrackParticleAuxContainer#InDetObservedTrackParticlesAux.{excludedAuxData}"]
         if flags.InDet.doTruth:
@@ -626,6 +657,24 @@ def InDetTrackRecoOutputCfg(flags):
             "xAOD::TrackStateValidationContainer#TRT_MSOSs",
             "xAOD::TrackStateValidationAuxContainer#TRT_MSOSsAux."
         ]
+        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
+            toAOD += [
+                "xAOD::TrackStateValidationContainer#ObservedTrack_Pixel_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#ObservedTrack_Pixel_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#ObservedTrack_SCT_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#ObservedTrack_SCT_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#ObservedTrack_TRT_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#ObservedTrack_TRT_MSOSsAux."
+            ]
+        if flags.InDet.Tracking.doPseudoTracking:
+            toAOD += [
+                "xAOD::TrackStateValidationContainer#Pseudo_Pixel_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#Pseudo_Pixel_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#Pseudo_SCT_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#Pseudo_SCT_MSOSsAux.",
+                "xAOD::TrackStateValidationContainer#Pseudo_TRT_MSOSs",
+                "xAOD::TrackStateValidationAuxContainer#Pseudo_TRT_MSOSsAux."
+            ]
 
     result = ComponentAccumulator()
     result.merge(addToESD(flags, toESD + toAOD))

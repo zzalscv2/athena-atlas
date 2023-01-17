@@ -272,6 +272,12 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
     kwargs.setdefault("OutputClusterSplitProbabilityName",
                       f"SplitProb{flags.InDet.Tracking.ActiveConfig.extension}")
 
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
+        from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
+        TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
+        acc.addPublicTool(TrkObserverTool)
+        kwargs.setdefault("ObserverTool", TrkObserverTool)
+
     acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityScoreProcessorTool(
         f"{name}{flags.InDet.Tracking.ActiveConfig.extension}", **kwargs))
     return acc
@@ -421,6 +427,15 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
     kwargs.setdefault(
         "MatEffects", flags.InDet.Tracking.materialInteractionsType
         if flags.InDet.Tracking.materialInteractions else 0)
+
+    if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
+        from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
+        TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
+        acc.addPublicTool(TrkObserverTool)
+        kwargs.setdefault("ObserverTool", TrkObserverTool)
+        TrkObserverToolWriter = acc.popToolsAndMerge(TrkObserverToolCfg(flags, name = "TrackObserverToolWriter"))
+        acc.addPublicTool(TrkObserverToolWriter)
+        kwargs.setdefault("ObserverToolWriter", TrkObserverToolWriter)
 
     acc.setPrivateTools(CompFactory.Trk.DenseEnvironmentsAmbiguityProcessorTool(
         name=name+flags.InDet.Tracking.ActiveConfig.extension, **kwargs))
