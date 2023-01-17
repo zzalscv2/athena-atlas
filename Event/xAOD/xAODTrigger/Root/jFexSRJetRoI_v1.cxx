@@ -10,6 +10,7 @@
 
 // Local include(s):
 #include "xAODTrigger/jFexSRJetRoI.h"
+#include "getQuadrant.h"
 
 namespace xAOD {
 
@@ -166,26 +167,26 @@ namespace xAOD {
 
     uint jFexSRJetRoI_v1::unpackGlobalPhi() const {
         uint globalPhi = 0;
+        const unsigned int quadrant = ::getQuadrant(fpgaNumber());
 
         //16 is the phi height of an FPGA
         if(jFexNumber() == 0 || jFexNumber() == 5) {
             
             if(tobLocalEta() <=s_FWD_EtaPosition[1]) { //Region 1
-                globalPhi = tobLocalPhi() + (fpgaNumber() * 16);
+                globalPhi = tobLocalPhi() + (quadrant * 16);
             }
             else if(tobLocalEta() <=s_FWD_EtaPosition[4]) {//Region 2 and Region 3 have the same granularity
-                globalPhi = (16*fpgaNumber()) + 2*(tobLocalPhi());
+                globalPhi = (16*quadrant) + 2*(tobLocalPhi());
             }
             else if(tobLocalEta() <=s_FWD_EtaPosition[6]) {//Region 4
-                globalPhi = (16*fpgaNumber()) + 4*(tobLocalPhi())+1;
+                globalPhi = (16*quadrant) + 4*(tobLocalPhi())+1;
             }
         }
         else { //Modules 1-4
-            globalPhi = tobLocalPhi() + (fpgaNumber() * 16);
+            globalPhi = tobLocalPhi() + (quadrant * 16);
         }
 
         return globalPhi;
-
     }
 
 } // namespace xAOD

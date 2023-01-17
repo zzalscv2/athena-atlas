@@ -3123,23 +3123,23 @@ HLT_e20_lhtight_ivarloose_L1EM15VHI:
     5: 9
     6: 7
 HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M:
-  eventCount: 1
+  eventCount: 2
   stepCounts:
-    0: 1
-    1: 1
-    2: 1
-    3: 1
-    4: 1
-    5: 1
-    6: 1
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+    4: 2
+    5: 2
+    6: 2
   stepFeatures:
-    0: 1
-    1: 1
-    2: 1
-    3: 1
-    4: 1
-    5: 1
-    6: 1
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+    4: 2
+    5: 2
+    6: 2
 HLT_e20_lhvloose_L1EM15VH:
   eventCount: 10
   stepCounts:

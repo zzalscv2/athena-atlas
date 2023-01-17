@@ -11,6 +11,7 @@
 
 // Local include(s):
 #include "xAODTrigger/jFexLRJetRoI.h"
+#include "getQuadrant.h"
 
 namespace xAOD {
 
@@ -142,10 +143,10 @@ namespace xAOD {
 
     // In the region of |eta|<2.5 there is not different granularity
     uint jFexLRJetRoI_v1::unpackGlobalPhi() const {
-
-        uint globalPhi = tobLocalPhi() + (fpgaNumber() * 16);
+        const unsigned int quadrant = ::getQuadrant(fpgaNumber());
+        
+        uint globalPhi = tobLocalPhi() + (quadrant * 16);
         return globalPhi;
-
     }
 
 
