@@ -237,7 +237,7 @@ namespace ST {
     virtual StatusCode GetJetsSyst(const xAOD::JetContainer& calibjets,xAOD::JetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux, const bool recordSG=true, const std::string& jetkey="") = 0;
     virtual StatusCode GetFatJets(xAOD::JetContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, const bool recordSG = false, const std::string& jetkey = "", const bool doLargeRdecorations = false, const xAOD::JetContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetTaus(xAOD::TauJetContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& taukey="TauJets", const xAOD::TauJetContainer* containerToBeCopied = nullptr) = 0;
-    virtual StatusCode GetMuons(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& muonkey="Muons", const xAOD::MuonContainer* containerToBeCopied = nullptr) = 0;
+    virtual StatusCode GetMuons(xAOD::MuonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true, const std::string& muonkey="Muons", const std::string& lrtmuonkey = "MuonsLRT", const xAOD::MuonContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetElectrons(xAOD::ElectronContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true,const std::string& elekey="Electrons", const xAOD::ElectronContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetPhotons(xAOD::PhotonContainer*& copy,xAOD::ShallowAuxContainer*& copyaux,const bool recordSG=true,const std::string& photonkey="Photons", const xAOD::PhotonContainer* containerToBeCopied = nullptr) = 0;
     virtual StatusCode GetMET(xAOD::MissingETContainer& met,
@@ -259,6 +259,8 @@ namespace ST {
 			      	 double& metSignificance,
                       	         bool doTST = true, bool doJVTCut = true
 				 ) = 0;
+
+    virtual StatusCode MergeMuons(const  xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const = 0;
 
     virtual bool IsPFlowCrackVetoCleaning(const xAOD::ElectronContainer* elec = nullptr, const xAOD::PhotonContainer* gamma = nullptr) const = 0;
 
