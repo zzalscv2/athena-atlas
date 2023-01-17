@@ -19,20 +19,12 @@ def InDetPrdAssociationToolCfg(flags, name='InDetPrdAssociationTool', **kwargs) 
   kwargs.setdefault("addTRToutliers", True)
   return InDetPrdAssociationTool_noTRTCfg(flags, name, **kwargs)
 
-def InDetPrdAssociationTool_setupCfg(flags, name='InDetPrdAssociationTool_setup', **kwargs) :
-  kwargs.setdefault("SetupCorrect", True)
-  return InDetPrdAssociationToolCfg(flags, name, **kwargs)
-
 def TrigPrdAssociationToolCfg(flags, name='InDetTrigPrdAssociationTool', **kwargs):
   kwargs.setdefault("PixelClusterAmbiguitiesMapName", 'TrigPixelClusterAmbiguitiesMap')
   return InDetPrdAssociationTool_noTRTCfg(flags, name, **kwargs)
 
 def ITkPrdAssociationToolCfg(flags, name='ITkPrdAssociationTool', **kwargs):
   return InDetPrdAssociationTool_noTRTCfg(flags, name, **kwargs)
-
-def ITkPrdAssociationTool_setupCfg(flags, name='ITkPrdAssociationTool_setup', **kwargs):
-  kwargs.setdefault("SetupCorrect", True)
-  return ITkPrdAssociationToolCfg(flags, name, **kwargs)
 
 def InDetPRDtoTrackMapToolGangedPixelsCfg(flags, name='PRDtoTrackMapToolGangedPixels', **kwargs):
     acc = ComponentAccumulator()
