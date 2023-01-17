@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETEDM_FASTJETLINK_H
@@ -24,8 +24,9 @@ namespace xAOD {
   
   class FastJetLink : public FastJetLinkBase {
   public:
-    FastJetLink(const fastjet::PseudoJet & pj ){
-      m_actualPseudoJet = pj;
+    FastJetLink(const fastjet::PseudoJet & pj )
+      : m_actualPseudoJet (pj)
+    {
       pseudoJet = &m_actualPseudoJet;
       if( pj.has_valid_cluster_sequence () ) {
         clusterSequence = pj.validated_cluster_sequence ();
