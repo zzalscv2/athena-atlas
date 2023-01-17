@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //general interface for secondary vertex finders
@@ -16,7 +16,7 @@
 namespace Analysis {
 
   JetSecVtxFindingAlg::JetSecVtxFindingAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthAlgorithm(name,pSvcLocator),
+    AthReentrantAlgorithm(name,pSvcLocator),
     m_secVertexFinderToolHandle(this),
     m_vxPrimaryName("PrimaryVertices")
   {
@@ -53,16 +53,16 @@ namespace Analysis {
   }
 
 
-  StatusCode JetSecVtxFindingAlg::execute() {
+  StatusCode JetSecVtxFindingAlg::execute(const EventContext& ctx) const {
     //retrieve the Jet container
-    SG::ReadHandle<xAOD::JetContainer> h_JetCollectionName (m_JetCollectionName);
+    SG::ReadHandle<xAOD::JetContainer> h_JetCollectionName (m_JetCollectionName, ctx);
     if (!h_JetCollectionName.isValid()) {
       ATH_MSG_ERROR( " cannot retrieve jet container with key " << m_JetCollectionName.key()  );
       return StatusCode::FAILURE;
     }
 
     /* Record the VxSecVertexInfo output container */
-    SG::WriteHandle<Trk::VxSecVertexInfoContainer> h_VxSecVertexInfoName (m_VxSecVertexInfoName);
+    SG::WriteHandle<Trk::VxSecVertexInfoContainer> h_VxSecVertexInfoName (m_VxSecVertexInfoName, ctx);
     ATH_CHECK( h_VxSecVertexInfoName.record(std::make_unique<Trk::VxSecVertexInfoContainer>()));
 
     if (h_JetCollectionName->size() == 0) {
@@ -71,7 +71,7 @@ namespace Analysis {
     }
 
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink< xAOD::IParticleContainer> > >
-      h_TracksToTag (m_TracksToTag);
+      h_TracksToTag (m_TracksToTag, ctx);
 
     if (!h_TracksToTag.isAvailable()) {
       ATH_MSG_ERROR( "cannot retrieve jet container particle EL decoration with key " << h_TracksToTag.decorKey()  );
@@ -81,7 +81,7 @@ namespace Analysis {
     const xAOD::Vertex* primaryVertex(0);
 
     //retrieve primary vertex
-    SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName);
+    SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName, ctx);
     if (!h_VertexCollectionName.isValid()) {
         ATH_MSG_ERROR( " cannot retrieve primary vertex container with key " << m_VertexCollectionName.key()  );
         return StatusCode::FAILURE;
