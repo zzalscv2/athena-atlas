@@ -630,19 +630,19 @@ void MakeQuarkGluonFractionPlots::AbortXMLDecode(const std::string& value){
   abort();
 }
 
-bool MakeQuarkGluonFractionPlots::decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, float &value){
+bool MakeQuarkGluonFractionPlots::decodeFloat(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, float &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   value=std::stof(xml.GetAttrValue(attr));
   return true;
 }
 
-bool MakeQuarkGluonFractionPlots::decodeString(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, std::string &value){
+bool MakeQuarkGluonFractionPlots::decodeString(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, std::string &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   value=xml.GetAttrValue(attr);
   return true;
 }
 
-bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, std::string match, bool &value){
+bool MakeQuarkGluonFractionPlots::decodeBool(TXMLEngine xml, XMLAttrPointer_t attr, const std::string& match, bool &value){
   if(strncmp(xml.GetAttrName(attr),match.c_str(),100)!=0) return false;
   if(strncmp(xml.GetAttrValue(attr),"true",100)==0)
     value=true;
