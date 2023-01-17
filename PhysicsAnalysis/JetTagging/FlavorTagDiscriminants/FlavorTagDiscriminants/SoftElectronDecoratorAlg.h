@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ELECTRON_DECORATOR_ALG_HH
@@ -15,9 +15,9 @@
 
 namespace FlavorTagDiscriminants {
 
-  class ElectronDecoratorAlg: public AthReentrantAlgorithm {
+  class SoftElectronDecoratorAlg: public AthReentrantAlgorithm {
   public:
-    ElectronDecoratorAlg(const std::string& name,
+    SoftElectronDecoratorAlg(const std::string& name,
                           ISvcLocator* pSvcLocator );
 
     virtual StatusCode initialize() override;
@@ -36,27 +36,27 @@ namespace FlavorTagDiscriminants {
     // Decorators for electrons
 
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_et {
-      this, "et", "et", 
+      this, "ftag_et", "ftag_et", 
         "Transverse energy of the electron"};
     
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_deltaPOverP {
-      this, "deltaPOverP", "deltaPOverP", 
+      this, "ftag_deltaPOverP", "ftag_deltaPOverP", 
         "Momentum lost by the electron track between the perigee and the last measurement point divided by the momentum at the perigee"};
     
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_isoPtOverPt {
-      this, "ptVarCone30OverPt", "ptVarCone30OverPt", 
+      this, "ftag_ptVarCone30OverPt", "ftag_ptVarCone30OverPt", 
         "Ratio of isolated pt to pt"};
     
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_energyOverP {
-      this, "energyOverP", "energyOverP", 
+      this, "ftag_energyOverP", "ftag_energyOverP", 
         "Ratio of cluster energy energy to track momentum"};
     
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_z0 {
-      this, "z0AlongBeamspot", "z0AlongBeamspot", 
+      this, "ftag_z0AlongBeamspot", "ftag_z0AlongBeamspot", 
         "Electron z0 along beamspot"};
 
     SG::WriteDecorHandleKey< xAOD::ElectronContainer > m_dec_electron_z0_significance {
-      this, "z0AlongBeamspotSignificance", "z0AlongBeamspotSignificance", 
+      this, "ftag_z0AlongBeamspotSignificance", "ftag_z0AlongBeamspotSignificance", 
         "Electron z0 significance along beamspot"};
     
     SG::AuxElement::ConstAccessor<float> m_pt_varcone30{"ptvarcone30_TightTTVA_pt1000"};

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
-#include "FlavorTagDiscriminants/ElectronDecoratorAlg.h"
+#include "FlavorTagDiscriminants/SoftElectronDecoratorAlg.h"
 
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
@@ -15,11 +15,11 @@
 
 namespace FlavorTagDiscriminants {
 
-  ElectronDecoratorAlg::ElectronDecoratorAlg(
+  SoftElectronDecoratorAlg::SoftElectronDecoratorAlg(
     const std::string& name, ISvcLocator* loc )
     : AthReentrantAlgorithm(name, loc) {}
 
-  StatusCode ElectronDecoratorAlg::initialize() {
+  StatusCode SoftElectronDecoratorAlg::initialize() {
     ATH_MSG_DEBUG( "Initializing " << name() << "... " );
 
     // Initialize Container keys
@@ -57,7 +57,7 @@ namespace FlavorTagDiscriminants {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode ElectronDecoratorAlg::execute(const EventContext& ctx) const {
+  StatusCode SoftElectronDecoratorAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Executing " << name() << "... " );
 
     using EC = xAOD::ElectronContainer;
@@ -136,7 +136,7 @@ namespace FlavorTagDiscriminants {
     return StatusCode::SUCCESS;
   }
   
-  const xAOD::Vertex* ElectronDecoratorAlg::primary(const xAOD::VertexContainer& vertices) const {
+  const xAOD::Vertex* SoftElectronDecoratorAlg::primary(const xAOD::VertexContainer& vertices) const {
     if (vertices.size() == 0) {
       throw std::runtime_error("no primary vertices");
     }
