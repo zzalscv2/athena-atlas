@@ -164,7 +164,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     inputOutputCollection->addValue_pileup("pileup_map_Et_values_Total_met", pileup_Total_met);
     inputOutputCollection->fill_pileup();    
     
-    if(m_id==0 || m_id==2) {
+    if(m_id==0 || m_id==3) {
         ATH_CHECK( m_jFEXsumETAlgoTool->safetyTest());
         ATH_CHECK( m_jFEXsumETAlgoTool->reset());
         ATH_CHECK( m_jFEXmetAlgoTool->safetyTest());
