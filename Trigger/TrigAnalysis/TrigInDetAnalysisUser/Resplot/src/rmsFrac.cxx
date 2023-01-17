@@ -109,9 +109,10 @@ double findMean(TH1D* s, double frac=0.95) {
   int imax = 0;
  
   int it=0;
-
+  constexpr int it_max=20;
+  constexpr int it_max_report=20;
   /// maximum 20 iterations, calculating the mean of 95% until stable
-  for ( ; it<20 ; it++ ) { 
+  for ( ; it<it_max ; it++ ) { 
 
 
     //    std::cout << it << "\tmean " << mean << " +- " << meane << std::endl; 
@@ -141,8 +142,10 @@ double findMean(TH1D* s, double frac=0.95) {
 	break; 
       }
     }
-    
-    
+    //cppcheck-suppress oppositeInnerCondition
+    if ( it>=it_max_report ) {
+      std::cerr << s->GetName() << "\tMax iterations " << it << " reached" << std::endl;
+    }
     
     mean = m;
     meane = me;
