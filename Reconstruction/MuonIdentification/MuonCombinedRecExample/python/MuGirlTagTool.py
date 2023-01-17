@@ -71,6 +71,8 @@ def MuonStauSegmentRegionRecoveryTool(name="MuonStauSegmentRegionRecoveryTool",*
    kwargs.setdefault("SeededSegmentFinder", getPublicTool("MuonStauSeededSegmentFinder") )
    kwargs.setdefault("ChamberHoleRecoveryTool", getPublicTool("MuonStauChamberHoleRecoveryTool") )
    kwargs.setdefault("Fitter",  getPublicTool("CombinedStauTrackBuilderFit") )
+   kwargs.setdefault("RecoverMM", False)
+   kwargs.setdefault("RecoverSTGC", False)
    if ConfigFlags.Muon.MuonTrigger and athenaCommonFlags.isOnline:
       kwargs.setdefault('MdtCondKey', "")
    return MuidSegmentRegionRecoveryTool(name,**kwargs)
