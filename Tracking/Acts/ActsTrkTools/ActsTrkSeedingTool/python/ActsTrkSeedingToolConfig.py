@@ -5,16 +5,17 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from ActsInterop import UnitConstants
 from ActsInterop.ActsConfigFlags import SeedingStrategy 
 
-def ActsTrkITkPixelSeedingToolCfg(flags) -> ComponentAccumulator:
+def ActsTrkITkPixelSeedingToolCfg(flags,
+                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::SeedingTool
-    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel"))
+    acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkStripSeedingToolCfg(flags) -> ComponentAccumulator:
+def ActsTrkITkStripSeedingToolCfg(flags,
+                                  **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values
-    kwargs = {}
     # For SpacePointGridConfig
     kwargs.setdefault("gridRMax" , 1000. * UnitConstants.mm)
     kwargs.setdefault("deltaRMax" , 600. * UnitConstants.mm)
@@ -48,16 +49,17 @@ def ActsTrkITkStripSeedingToolCfg(flags) -> ComponentAccumulator:
     acc.setPrivateTools(CompFactory.ActsTrk.SeedingTool(name = "ActsSeedingTool_ITkStrip", **kwargs))
     return acc
 
-def ActsTrkITkPixelOrthogonalSeedingToolCfg(flags) -> ComponentAccumulator:
+def ActsTrkITkPixelOrthogonalSeedingToolCfg(flags,
+                                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkPixel, use default values for ActsTrk::OrthogonalSeedingTool 
-    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel"))
+    acc.setPrivateTools(CompFactory.ActsTrk.OrthogonalSeedingTool(name = "OrthogonalSeedingTool_ITkPixel", **kwargs))
     return acc
 
-def ActsTrkITkStripOrthogonalSeedingToolCfg(flags) -> ComponentAccumulator:
+def ActsTrkITkStripOrthogonalSeedingToolCfg(flags,
+                                            **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     ## For ITkStrip, change properties that have to be modified w.r.t. the default values 
-    kwargs = {}
     kwargs.setdefault("impactMax" , 20. * UnitConstants.mm)
     kwargs.setdefault('rMax', 1200. * UnitConstants.mm)
     kwargs.setdefault("deltaRMinTopSP" , 20. * UnitConstants.mm)
