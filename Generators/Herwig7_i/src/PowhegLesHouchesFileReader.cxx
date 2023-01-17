@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration 
 */
 // -*- C++ -*-
 //
@@ -557,7 +557,7 @@ void powhegLesHouchesFileReader::open() {
 	IdLabel = std::regex_replace(IdLabel, std::regex(R"([\D])"), "");
 	std::string name = hs;
 	erase_substr(name, "<weightid='"+IdLabel+"'>");
-	name = name.substr(0, name.find("<", 0));
+	name.erase(name.find('<'));
 	m_optionalWeightsLabel[IdLabel]=name;	
 	optionalWeightsNames.push_back(name);
       }
