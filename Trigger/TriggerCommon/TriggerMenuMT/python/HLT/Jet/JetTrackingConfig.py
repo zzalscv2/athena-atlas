@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from JetRecTools import JetRecToolsConfig
@@ -60,7 +60,7 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
     IDTrigConfig = getInDetTrigConfig( 'jet' )
     if trkopt == "ftf":
         from TrigInDetConfig.TrigInDetConfig import trigInDetFastTrackingCfg
-        from TrigInDetConfig.TrigInDetPriVtxConfig import vertexFinderCfg
+        from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
         acc.merge(trigInDetFastTrackingCfg(flags, RoIs, signatureName="jet", in_view=False))
 
         # get the jetContext for trkopt (and build it if not existing yet)
@@ -74,12 +74,12 @@ def JetFSTrackingCfg(flags, trkopt, RoIs):
             )
         else:
             acc.merge(
-                vertexFinderCfg(
+                InDetTrigPriVxFinderCfg(
                     flags,
                     signature="jet",
-                    inputTracks=jetContext["Tracks"],
-                    outputVertices=IDTrigConfig.vertex,
                     adaptiveVertexing=IDTrigConfig.adaptiveVertex,
+                    TracksName=jetContext["Tracks"],
+                    VxCandidatesOutputName=IDTrigConfig.vertex,
                 )
             )
             acc.merge(
@@ -159,15 +159,15 @@ def jetTTVA( signature, jetseq, trkopt, config, verticesname=None, adaptiveVerte
 @AccumulatorCache
 def JetVertexCfg(flags, trkopt, adaptiveVertex, jetContext):
     """ Create the jet vertexing """
-    from TrigInDetConfig.TrigInDetPriVtxConfig import vertexFinderCfg
+    from InDetConfig.InDetPriVxFinderConfig import InDetTrigPriVxFinderCfg
     from TrackVertexAssociationTool.TTVAToolConfig import TTVAToolCfg
 
-    acc = vertexFinderCfg(
+    acc = InDetTrigPriVxFinderCfg(
         flags,
         signature = "jet",
-        inputTracks = jetContext["Tracks"],
-        outputVertices = jetContext["Vertices"],
-        adaptiveVertexing = adaptiveVertex)
+        adaptiveVertexing = adaptiveVertex,
+        TracksName = jetContext["Tracks"],
+        VxCandidatesOutputName = jetContext["Vertices"])
 
     # Create the track selection tool
     # TODO - this is not used anywhere that I can see so I'm skipping it

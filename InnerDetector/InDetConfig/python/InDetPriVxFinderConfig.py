@@ -1,0 +1,115 @@
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Configuration of InDetPriVxFinder package
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "VertexCollectionSortingTool" not in kwargs:
+        from TrkConfig.TrkVertexToolsConfig import (
+            VertexCollectionSortingToolCfg)
+        kwargs.setdefault("VertexCollectionSortingTool", acc.popToolsAndMerge(
+            VertexCollectionSortingToolCfg(flags)))
+
+    if "VertexFinderTool" not in kwargs:
+        from InDetConfig.InDetPriVxFinderToolConfig import (
+            VertexFinderToolCfg)
+        kwargs.setdefault("VertexFinderTool", acc.popToolsAndMerge(
+            VertexFinderToolCfg(flags)))
+
+    kwargs.setdefault("doVertexSorting", True)
+
+    acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
+    return acc
+
+def InDetTrigPriVxFinderCfg(flags, name="InDetTrigPriVxFinder",
+                            signature="",
+                            adaptiveVertexing = True,
+                            **kwargs):
+
+    acc = ComponentAccumulator()
+
+    if "VertexFinderTool" not in kwargs:
+        if adaptiveVertexing:
+            from InDetConfig.InDetPriVxFinderToolConfig import (
+                TrigGaussAdaptiveMultiFindingCfg)
+            VertexFinderTool = acc.popToolsAndMerge(
+                TrigGaussAdaptiveMultiFindingCfg(flags, signature=signature))
+        else:
+            from InDetConfig.InDetPriVxFinderToolConfig import (
+                TrigGaussIterativeFindingCfg)
+            VertexFinderTool = acc.popToolsAndMerge(
+                TrigGaussIterativeFindingCfg(flags, signature=signature))
+        kwargs.setdefault("VertexFinderTool", VertexFinderTool)
+
+    if "VertexCollectionSortingTool" not in kwargs:
+        from TrkConfig.TrkVertexToolsConfig import (
+            SumPt2VertexCollectionSortingToolCfg)
+        kwargs.setdefault("VertexCollectionSortingTool", acc.popToolsAndMerge(
+            SumPt2VertexCollectionSortingToolCfg(flags)))
+
+    if "PriVxMonTool" not in kwargs:
+        from InDetPriVxFinder.InDetPriVxFinderMonitoring import (
+            InDetPriVxFinderMonitoringTool)
+        kwargs.setdefault("PriVxMonTool", InDetPriVxFinderMonitoringTool())
+
+    kwargs.setdefault("doVertexSorting", True)
+
+    acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
+    return acc
+
+
+def primaryVertexFindingCfg(flags, **kwargs):
+    acc = InDetPriVxFinderCfg(flags)
+
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+
+    excludedVtxAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
+    verticesContainer = [
+        "xAOD::VertexContainer#PrimaryVertices",
+        "xAOD::VertexAuxContainer#PrimaryVerticesAux." + excludedVtxAuxData,
+    ]
+
+    acc.merge(addToAOD(flags, verticesContainer))
+    acc.merge(addToESD(flags, verticesContainer))
+
+    return acc
+
+if __name__ == "__main__":
+    from AthenaCommon.Logging import logging
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    from AthenaConfiguration.ComponentAccumulator import printProperties
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+    from InDetConfig.VertexFindingFlags import VertexSetup
+
+    flags.Input.Files = defaultTestFiles.RDO_RUN2
+    import sys
+    if 'ActsGaussAdaptiveMultiFinding' in sys.argv:
+        flags.InDet.PriVertex.setup = VertexSetup.ActsGaussAMVF
+    elif "IterativeFinding" in sys.argv:
+        flags.InDet.PriVertex.setup = VertexSetup.IVF
+    elif "GaussIterativeFinding" in sys.argv:
+        flags.InDet.PriVertex.setup = VertexSetup.GaussIVF
+    elif "AdaptiveMultiFinding" in sys.argv:
+        flags.InDet.PriVertex.setup = VertexSetup.AMVF
+    elif "GaussAdaptiveMultiFinding" in sys.argv:
+        flags.InDet.PriVertex.setup = VertexSetup.GaussAMVF
+    flags.lock()
+
+    acc = MainServicesCfg(flags)
+    acc.merge(primaryVertexFindingCfg(flags))
+
+    mlog = logging.getLogger("primaryVertexFindingConfigTest")
+    mlog.info("Configuring  primaryVertexFinding: ")
+
+    printProperties(
+        mlog,
+        acc.getEventAlgo("InDetPriVxFinder"),
+        nestLevel=2,
+        printDefaults=True,
+    )
+

@@ -117,7 +117,7 @@ def ITkTrackRecoCfg(flags):
                                            if not flags.ITk.Tracking.doFastTracking else ""))
 
     if flags.ITk.PriVertex.doVertexFinding:
-        from InDetConfig.VertexFindingConfig import primaryVertexFindingCfg
+        from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
 
     if flags.ITk.Tracking.writeExtendedPRDInfo:

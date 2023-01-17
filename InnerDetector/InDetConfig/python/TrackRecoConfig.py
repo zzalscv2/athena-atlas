@@ -402,7 +402,7 @@ def InDetTrackRecoCfg(flags):
                                                  xAODTrackParticlesFromTracksContainerName = "SiSPSeedSegmentsTrackParticles"))
 
     if flags.InDet.PriVertex.doVertexFinding:
-        from InDetConfig.VertexFindingConfig import primaryVertexFindingCfg
+        from InDetConfig.InDetPriVxFinderConfig import primaryVertexFindingCfg
         result.merge(primaryVertexFindingCfg(flags))
 
     if flags.InDet.Tracking.writeExtendedPRDInfo:
