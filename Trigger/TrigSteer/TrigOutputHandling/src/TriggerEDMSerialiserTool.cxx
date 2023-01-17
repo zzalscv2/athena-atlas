@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cstring>
@@ -256,7 +256,7 @@ StatusCode TriggerEDMSerialiserTool::serialiseDynAux( DataObject* dObj, const Ad
     ATH_CHECK( fillPayload( mem, sz, fragment ) );
     fragment[0] = fragment.size();
 
-    if ( mem != nullptr ) delete [] static_cast<const char*>( mem );
+    delete [] static_cast<const char*>( mem );
 
     buffer.insert( buffer.end(), fragment.begin(), fragment.end() );
     ++nDynWritten;
