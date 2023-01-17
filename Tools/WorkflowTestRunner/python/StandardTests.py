@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from typing import List
 
-from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck
+from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
 from .Inputs import input_EVNT, input_EVNT_AF3, input_HITS, \
     input_HITS_unfiltered, \
     input_HITS_MC_overlay, input_RDO_BKG, \
@@ -100,6 +100,8 @@ class SimulationTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "HITS", 10)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "HITS"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -122,6 +124,8 @@ class OverlayTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 10)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -142,6 +146,8 @@ class DataOverlayTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 10)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -162,6 +168,8 @@ class PileUpTest(WorkflowTest):
         self.output_checks = [
             FrozenTier0PolicyCheck(setup, "RDO", 5)
         ]
+        if "CA" not in extra_args:
+            self.output_checks.append(MetadataCheck(setup, "RDO"))
 
         super().__init__(ID, run, type, steps, setup)
 
@@ -200,7 +208,8 @@ class DerivationTest(WorkflowTest):
         enable_checks = False
         if enable_checks:
             self.output_checks = [
-                FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10)
+                FrozenTier0PolicyCheck(setup, f"DAOD_{format}", 10),
+                MetadataCheck(setup, f"DAOD_{format}"),
             ]
 
         super().__init__(ID, run, type, steps, setup)
