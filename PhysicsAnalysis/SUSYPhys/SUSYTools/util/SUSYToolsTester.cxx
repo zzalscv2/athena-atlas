@@ -146,7 +146,10 @@ int main( int argc, char* argv[] ) {
   bool isRun3 = false;
   if ((fileName.Contains("mc21") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
-  if (isRun3) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+  if (isRun3) {
+    config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
+    ANA_MSG_INFO("Configuring for Run 3");
+  }
   std::string prw_file = "DUMMY";
   std::string ilumicalc_file = "DUMMY";
 

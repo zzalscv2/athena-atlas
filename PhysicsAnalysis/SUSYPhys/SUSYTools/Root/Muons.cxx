@@ -20,6 +20,11 @@
 #include "MuonAnalysisInterfaces/IMuonEfficiencyScaleFactors.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
+#include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
+#include "xAODMuon/MuonAuxContainer.h"
+#include <AsgTools/CurrentContext.h>
+#include <AthContainers/ConstDataVector.h>
+#include <AsgTools/AsgToolConfig.h>
 
 #include "IsolationCorrections/IIsolationCorrectionTool.h"
 #include "IsolationSelection/IIsolationSelectionTool.h"
@@ -48,12 +53,75 @@ namespace ST {
   const static SG::AuxElement::ConstAccessor<float> acc_z0sinTheta("z0sinTheta");
   const static SG::AuxElement::Decorator<float>     dec_d0sig("d0sig");
   const static SG::AuxElement::ConstAccessor<float> acc_d0sig("d0sig");
+  const static SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> dec_originalMuonLink("originalMuonLink");
+  const static SG::AuxElement::Decorator<char> dec_isLRT("isLRT");
 
-StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& muonkey, const xAOD::MuonContainer* containerToBeCopied)
+
+StatusCode SUSYObjDef_xAOD::MergeMuons(const xAOD::MuonContainer & muons, const std::vector<bool> &writeMuon, xAOD::MuonContainer* outputCol) const{
+
+    if (muons.empty()) return StatusCode::SUCCESS;
+    for (const xAOD::Muon* muon: muons) {
+        // add muon into output 
+        if (writeMuon.at(muon->index())){
+            newMuon = new xAOD::Muon(*muon);
+            ElementLink<xAOD::MuonContainer> muLink;
+            muLink.toIndexedElement(muons, muon->index());
+            dec_originalMuonLink(*newMuon) = muLink;
+            outputCol->push_back(newMuon); 
+        }
+    }
+    return StatusCode::SUCCESS;
+}
+
+
+StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAuxContainer*& copyaux, bool recordSG, const std::string& muonkey, const std::string& lrtmuonkey, const xAOD::MuonContainer* containerToBeCopied)
 {
   if (!m_tool_init) {
     ATH_MSG_ERROR("SUSYTools was not initialized!!");
     return StatusCode::FAILURE;
+  }
+
+  // Initializing prompt/LRT OR procedure
+  auto outputCol = std::make_unique<xAOD::MuonContainer>();
+  std::unique_ptr<xAOD::MuonAuxContainer> outputAuxCol;
+  outputAuxCol = std::make_unique<xAOD::MuonAuxContainer>();
+  outputCol->setStore(outputAuxCol.get());
+  ATH_CHECK( m_outMuonLocation.initialize() );
+
+  if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
+    ATH_MSG_INFO("Applying prompt/LRT muon OR procedure"); 
+
+    // First identify if merged container has already been made (for instances where GetMuons() is called more than once)
+    if (evtStore()->contains<xAOD::MuonContainer>("StdWithLRTMuons")) {
+      ATH_MSG_DEBUG("Merged prompt/LRT container already created in TStore");  
+    } else {
+      ATH_MSG_DEBUG("Creating merged prompt/LRT container in TStore");
+
+      // Retrieve prompt and LRT muons from TStore
+      ATH_CHECK( evtStore()->retrieve(prompt_muons, muonkey) );
+      ATH_CHECK( evtStore()->retrieve(lrt_muons, lrtmuonkey) );
+
+      // Check overlap between prompt and LRT collections
+      std::vector<bool> writePromptMuon;
+      std::vector<bool> writeLRTMuon;
+      m_muonLRTORTool->checkOverlap(*prompt_muons, *lrt_muons, writePromptMuon, writeLRTMuon);
+    
+      // Decorate muons with prompt/LRT
+      for (const xAOD::Muon* mu : *prompt_muons) dec_isLRT(*mu) = 0;
+      for (const xAOD::Muon* mu : *lrt_muons) dec_isLRT(*mu) = 1;
+
+      // Create merged StdWithLRTMuons container
+      outputCol->reserve(prompt_muons->size() + lrt_muons->size());
+      ATH_CHECK(MergeMuons(*prompt_muons, writePromptMuon, outputCol.get()) );
+      ATH_CHECK(MergeMuons(*lrt_muons, writeLRTMuon, outputCol.get()) );
+
+      // Save merged StdWithLRTMuons container to TStore
+      ATH_CHECK(evtStore()->record(std::move(outputCol), m_outMuonLocation.key())); 
+      ATH_CHECK(evtStore()->record(std::move(outputAuxCol), m_outMuonLocation.key() + "Aux.") );
+    }
+  } else {
+    if (evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey) == false && bool(m_muLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtmuonkey << " not in ROOT file, check config!");
+    ATH_MSG_INFO("Not applying prompt/LRT muon OR procedure"); 
   }
   
   if (m_isPHYSLITE && muonkey.find("AnalysisMuons")==std::string::npos){
@@ -62,23 +130,33 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
   }
 
   const xAOD::MuonContainer* muons = nullptr;
-  if (copy==nullptr) { // empty container provided
-    if (containerToBeCopied != nullptr) {
-      muons = containerToBeCopied;
+  if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
+      ATH_MSG_DEBUG("Using container: " << m_outMuonLocation.key());
+      ATH_CHECK( evtStore()->retrieve(muons, m_outMuonLocation.key())); 
+  }
+  else { 
+    if (copy==nullptr) { // empty container provided
+        ATH_MSG_DEBUG("Empty container provided");
+      if (containerToBeCopied != nullptr) {
+        ATH_MSG_DEBUG("Containter to be copied not nullptr");
+        muons = containerToBeCopied;
+      }
+      else {
+        ATH_MSG_DEBUG("Getting Muons collection");
+        ATH_CHECK( evtStore()->retrieve(muons, muonkey) );
+      }
     }
-    else {
-      ATH_CHECK( evtStore()->retrieve(muons, muonkey) );
-    }
-    std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
-    copy = shallowcopy.first;
-    copyaux = shallowcopy.second;
-    bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
-    if (!setLinks) {
-      ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
-    }
+  }
+
+  std::pair<xAOD::MuonContainer*, xAOD::ShallowAuxContainer*> shallowcopy = xAOD::shallowCopyContainer(*muons);
+  copy = shallowcopy.first;
+  copyaux = shallowcopy.second;
+  bool setLinks = xAOD::setOriginalObjectLink(*muons, *copy);
+  if (!setLinks) {
+    ATH_MSG_WARNING("Failed to set original object links on " << muonkey);
   } else { // use the user-supplied collection instead 
-    ATH_MSG_DEBUG("Not retrieving muon collecton, using existing one provided by user");
-    muons=copy;
+      ATH_MSG_DEBUG("Not retrieving muon collecton, using existing one provided by user");
+      muons=copy;
   }
 
   for (const auto& muon : *copy) {

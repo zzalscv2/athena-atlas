@@ -42,6 +42,7 @@ using namespace ST;
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 #include "MuonAnalysisInterfaces/IMuonEfficiencyScaleFactors.h"
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
+#include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
 
 #include "TauAnalysisTools/ITauSelectionTool.h"
 #include "TauAnalysisTools/ITauSmearingTool.h"
@@ -627,6 +628,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       ATH_CHECK( m_muonSelectionHighPtTool.retrieve() );
     } else  ATH_CHECK( m_muonSelectionHighPtTool.retrieve() );
     
+
+    //////////////
+    // Initialise prompt/LRT muon OR tool 
+    if (!m_muonLRTORTool.isUserConfigured()) {
+        toolName = "MuonLRTOverlapRemovalTool";
+        m_muonLRTORTool.setTypeAndName("CP::MuonLRTOverlapRemovalTool/"+toolName);
+        ATH_CHECK( m_muonLRTORTool.setProperty("overlapStrategy", CP::IMuonLRTOverlapRemovalTool::defaultStrategy) );
+        ATH_CHECK( m_muonLRTORTool.retrieve() );
+    } else ATH_CHECK( m_muonLRTORTool.retrieve() );
   
     ///////////////////////////////////////////////////////////////////////////////////////////
     // Initialise muon efficiency tools
