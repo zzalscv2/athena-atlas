@@ -264,7 +264,6 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const Payload* dataptr ) cons
     const std::vector<std::string> descr( PayloadHelpers::collectionDescription( start ) );
     ATH_CHECK( descr.size() == 2 );
     std::string persistentTypeName{ descr[0] };
-    // cppcheck-suppress containerOutOfBounds; false positive
     const std::string key{ descr[1] };
     const size_t bsize{ PayloadHelpers::dataSize( start ) };
 
