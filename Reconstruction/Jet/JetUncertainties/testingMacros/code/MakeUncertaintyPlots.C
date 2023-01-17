@@ -36,15 +36,15 @@ double GetPileupUncertainty(JESprovider &jes, double pt, double eta,
 double DrawPtHisto(TH1 *h, double eta, Str opt, int col=kRed, int style=1, int width=4);
 double DrawVsEtaHisto(TH1 *h, double pt, Str opt, int col=kRed, int style=1, int width=4, double max=-1);
 TH1D *AddInQuad(std::vector<TH1D*> hists, bool avoidLast=false);
-TH1D *AddInQuadButOne(std::vector<TH1D*> hists) { return AddInQuad(hists,true); }
+TH1D *AddInQuadButOne(const std::vector<TH1D*>& hists) { return AddInQuad(hists,true); }
 void error(Str msg) { printf("ERROR:\n  %s\n",msg.Data()); abort(); }
 double GetMultiUncert(JESprovider &j, Str name, double pt, double eta, 
 		      double DRmin, double mu, double NPV, double rms);
 void DrawJEScomp(HistV nps, StrV compNames, Str msg, double var, bool vsPt);
-void DrawJEScompVsPt(HistV nps, StrV compNames, double eta, Str msg) {
+void DrawJEScompVsPt(const HistV& nps, StrV compNames, double eta, Str msg) {
   DrawJEScomp(nps,compNames,msg,eta,true);
 }
-void DrawJEScompVsEta(HistV nps, StrV compNames, double pt, Str msg) {
+void DrawJEScompVsEta(const HistV& nps, StrV compNames, double pt, Str msg) {
   DrawJEScomp(nps,compNames,msg,pt,false);
 }
 
@@ -332,7 +332,7 @@ void DrawJEScomp(HistV nps, StrV compNames, Str msg, double var, bool vsPt) {
 }
 
 // Add a new DrawJEScomp to compare new to old.
-void DrawJEScompToOld(HistV nps, StrV compNames, Str msg, double var, bool vsPt, HistV compTot, StrV compCompNames) {
+void DrawJEScompToOld(HistV nps, StrV compNames, Str msg, double var, bool vsPt, const HistV& compTot, StrV compCompNames) {
 
   TH1D *tot = AddInQuad(nps);
   TH1D *compTot = AddInQuad(compTot); 
