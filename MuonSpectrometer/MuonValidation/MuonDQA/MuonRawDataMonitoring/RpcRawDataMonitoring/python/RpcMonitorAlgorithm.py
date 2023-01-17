@@ -40,6 +40,10 @@ def RpcMonitoringConfig(inputFlags):
 
     if not inputFlags.DQ.triggerDataAvailable:
         rpcTrackAnaAlg.MuonRoIContainerName = ''
+    else:
+        # LVL1MuonRoIs are only available after the HLTResultMTByteStreamDecoderAlg has executed
+        from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
+        rpcTrackAnaAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
 
     ######################################################################################################
     ## Occupancy histograms
@@ -238,6 +242,10 @@ def RpcMonitoringConfig(inputFlags):
     
     if not inputFlags.DQ.triggerDataAvailable:
         Lv1AnaAlg.MuonRoIContainerName = ''
+    else:
+        # LVL1MuonRoIs are only available after the HLTResultMTByteStreamDecoderAlg has executed
+        from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
+        Lv1AnaAlg.ExtraInputs += [('xAOD::TrigCompositeContainer' , 'StoreGateSvc+'+getRun3NavigationContainerFromInput(inputFlags))]
 
     myGroup_lv1Trigger = helper.addGroup(Lv1AnaAlg, 'RPCLv1AnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
 
