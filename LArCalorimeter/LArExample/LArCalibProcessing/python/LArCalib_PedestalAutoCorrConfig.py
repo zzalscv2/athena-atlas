@@ -208,20 +208,23 @@ def LArPedestalAutoCorrCfg(flags):
 if __name__ == "__main__":
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
+    ConfigFlags=initConfigFlags()
     addLArCalibFlags(ConfigFlags)
 
     ConfigFlags.LArCalib.Input.Dir = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/LArCalibProcessing"
+    
     ConfigFlags.LArCalib.Input.Type="calibration_LArElec-Pedestal"
-    ConfigFlags.LArCalib.Input.RunNumbers=[174585,]
-
+    ConfigFlags.LArCalib.Input.RunNumbers=[441236,]
+    
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
     
     ConfigFlags.LArCalib.Output.ROOTFile="ped.root"
 
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
-    ConfigFlags.IOVDb.GlobalTag="LARCALIB-000-02"
+    ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-00"
+    ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
 
     ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
