@@ -35,9 +35,13 @@ bool MdtTdcMap::initMap(const MdtMezzanineType* mezType, uint8_t chanZero, int l
             << (int)mezType->nOfTubesInLayer() << " tubes per layer and " << (int)mezType->nOfLayers() << " layers" << endmsg;
     }
     for (uint8_t chan = 0; chan < 24; ++chan) {
-        const uint8_t tube_chan = ((chan - chan % 4) / 4);
-        int layer = 0;
-        int tube = 0;
+        uint8_t tube_chan = ((chan - chan % 4) / 4);
+        /// Octoberfest chambers need a mirror in the tube channel numbering 
+        /// https://its.cern.ch/jira/browse/ATLASRECTS-7411
+        if (m_mezType == 71) {
+            tube_chan = 5 - tube_chan;
+        }
+        int layer{0}, tube{0};
 
         // special case of the BME of end 2013 and BMG 2017
         /*
