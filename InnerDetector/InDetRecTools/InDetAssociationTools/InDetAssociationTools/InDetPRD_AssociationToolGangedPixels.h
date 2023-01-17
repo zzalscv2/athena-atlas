@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDET_PRD_ASSOCIATIONTOOL_H
@@ -111,7 +111,6 @@ namespace InDet {
 
     /** add TRT outliers in the addTrack method to avoid splits due to rejected extensions */
     bool m_addTRToutliers;
-    bool m_setupCorrect;
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAssociationTools/PRD_AssociationTool.h"
@@ -19,7 +19,6 @@ Trk::PRD_AssociationTool::PRD_AssociationTool(const std::string& t,
   :
   base_class(t,n,p)
 {
-  declareProperty( "SetupCorrect",  m_setupCorrect=false);
 }
 
 StatusCode Trk::PRD_AssociationTool::initialize()
@@ -28,10 +27,6 @@ StatusCode Trk::PRD_AssociationTool::initialize()
   if (sc.isFailure()) return sc;
   ATH_CHECK( m_prdToTrackMap.initialize( !m_prdToTrackMap.key().empty() ) );
   ATH_CHECK( m_idHelperSvc.retrieve());
-  if (!m_setupCorrect) {
-    ATH_MSG_INFO("initialize: Tool " << name() << " not configured for PRD usage.");
-  }
-
   return StatusCode::SUCCESS;
 }
 

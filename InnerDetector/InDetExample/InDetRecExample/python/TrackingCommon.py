@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.Logging import logging
@@ -705,7 +705,6 @@ def getConstPRD_AssociationTool(name='ConstPRD_AssociationTool',**kwargs) :
     the_name,prefix,suffix=makeNameGetPreAndSuffix(name,kwargs)
 
     kwargs = setDefaults( kwargs,
-                          SetupCorrect     = True,
                           PRDtoTrackMap    = prefix+'PRDtoTrackMap'+suffix)
 
     from TrkAssociationTools.TrkAssociationToolsConf import Trk__PRD_AssociationTool
@@ -736,7 +735,7 @@ def getInDetPrdAssociationTool_setup(name='InDetPrdAssociationTool_setup',**kwar
     '''
     Provide an instance for all clients which set the tool explicitely
     '''
-    return getInDetPrdAssociationTool(name, **setDefaults(kwargs, SetupCorrect                   = True) )
+    return getInDetPrdAssociationTool(name, **kwargs)
 
 def getInDetPixelConditionsSummaryTool(name = "PixelConditionsSummaryTool",**kwargs) :
     the_name = makeName( name, kwargs)
