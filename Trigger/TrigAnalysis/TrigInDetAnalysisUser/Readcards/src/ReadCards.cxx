@@ -9,7 +9,7 @@
  **
  **   @date         Tue Apr 26 13:44:42 CEST 2005
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -126,11 +126,11 @@ void ReadCards::clean() {
  
   //  cout << "ReadCards reading from file " << mFileName << endl;
   
-  int i=0;
+  
   while ( !mFile.eof() ) {
     size_t pos;
 
-    ++i;
+    
     getline(mFile,line,'\n');
 
     //    cout << ">> " << line << endl;
@@ -321,8 +321,8 @@ void ReadCards::parse()
       if ( bra.size()!=ket.size() )  error("mismatched braces :" + input);
     }      
 
-
-    int nargs = 0;
+    //Note: nargs is unused unless the debug code below is uncommented
+    //int nargs = 0;
 
     bool _empty = true;
     
@@ -332,7 +332,7 @@ void ReadCards::parse()
 
       // get rid of spaces at either end of line
       chopends(line);
-      nargs++;
+      //nargs++;
 
       //      cout << nargs << "  line   >" << line << "<   " << endl;
 
