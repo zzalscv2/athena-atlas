@@ -1,28 +1,34 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkVertexFitterUtils package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def FullLinearizedTrackFactoryCfg(flags, name='FullLinearizedTrkFactory', **kwargs):
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.Trk.FullLinearizedTrackFactory(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.Trk.FullLinearizedTrackFactory(name, **kwargs))
     return acc
 
 def AtlasFullLinearizedTrackFactoryCfg(flags, name='AtlasFullLinearizedTrkFactory', **kwargs):
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    from MagFieldServices.MagFieldServicesConfig import (
+        AtlasFieldCacheCondAlgCfg)
     acc = AtlasFieldCacheCondAlgCfg(flags) # To produce AtlasFieldCacheCondObj
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
-    acc.setPrivateTools(CompFactory.Trk.FullLinearizedTrackFactory(name, **kwargs))
+    acc.setPrivateTools(
+        CompFactory.Trk.FullLinearizedTrackFactory(name, **kwargs))
     return acc
 
 def DetAnnealingMakerCfg(flags, name='DetAnnealingMaker', **kwargs):
@@ -40,10 +46,12 @@ def TrackToVertexIPEstimatorCfg(flags, name='TrackToVertexIPEstimator', **kwargs
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
 
     if 'LinearizedTrackFactory' not in kwargs:
-        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(FullLinearizedTrackFactoryCfg(flags)))
+        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(
+            FullLinearizedTrackFactoryCfg(flags)))
 
     acc.setPrivateTools(CompFactory.Trk.TrackToVertexIPEstimator(name, **kwargs))
     return acc
@@ -53,10 +61,23 @@ def AtlasTrackToVertexIPEstimatorCfg(flags, name='AtlasTrackToVertexIPEstimator'
 
     if 'Extrapolator' not in kwargs:
         from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            AtlasExtrapolatorCfg(flags)))
 
     if 'LinearizedTrackFactory' not in kwargs:
-        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(AtlasFullLinearizedTrackFactoryCfg(flags)))
+        kwargs.setdefault("LinearizedTrackFactory", acc.popToolsAndMerge(
+            AtlasFullLinearizedTrackFactoryCfg(flags)))
 
     acc.setPrivateTools(CompFactory.Trk.TrackToVertexIPEstimator(name, **kwargs))
+    return acc
+
+def ImpactPoint3dEstimatorCfg(flags, name='ImpactPoint3dEstimator', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(
+            InDetExtrapolatorCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.Trk.ImpactPoint3dEstimator(name, **kwargs))
     return acc

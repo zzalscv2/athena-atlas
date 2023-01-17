@@ -66,7 +66,7 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doDigitalROTCreation", False)
     icf.addFlag("InDet.Tracking.holeSearchInGX2Fit", True)
     # control which fitter to be used: ('DistributedKalmanFilter', 'GlobalChi2Fitter', 'GaussianSumFilter')
-    icf.addFlag("InDet.Tracking.trackFitterType", TrackFitterType.GlobalChi2Fitter)
+    icf.addFlag("InDet.Tracking.trackFitterType", TrackFitterType.GlobalChi2Fitter, enum=TrackFitterType)
     # control which measurement updator to load as InDetUpdator
     # ("None"/"fast"/"smatrix"/"weight"/"amg")
     # "None" loads the default KalmanUpdator

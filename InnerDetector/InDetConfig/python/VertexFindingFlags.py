@@ -1,7 +1,18 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, FlagEnum
+
+class VertexSortingSetup(FlagEnum):
+    SumPt2Sorting = 'SumPt2Sorting'
+    SumPtSorting = 'SumPtSorting'
+
+class VertexSetup(FlagEnum):
+    GaussAMVF = 'GaussAdaptiveMultiFinding'
+    AMVF = 'AdaptiveMultiFinding'
+    GaussIVF = 'GaussIterativeFinding'
+    IVF = 'IterativeFinding'
+    ActsGaussAMVF = 'ActsGaussAdaptiveMultiFinding'
 
 
 def createSecVertexingFlags():
@@ -179,14 +190,9 @@ def createPriVertexingFlags():
     flags.addFlag("doMaxTracksCut", True)
     flags.addFlag("MaxTracks", 3000)
     # string to store the setup for primary vertexing.
-    #  Possible types:
-    # 'ActsGaussAdaptiveMultiFinding', 'GaussAdaptiveMultiFinding',
-    # 'GaussIterativeFinding', 'AdaptiveMultiFinding', 'IterativeFinding'
-    flags.addFlag("setup", "ActsGaussAdaptiveMultiFinding")
+    flags.addFlag("setup", VertexSetup.ActsGaussAMVF, enum=VertexSetup)
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
-    # Possible types:
-    # 'SumPt2Sorting','SumPtSorting'
-    flags.addFlag("sortingSetup", "SumPt2Sorting")
+    flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, enum=VertexSortingSetup)
     flags.addFlag("useBeamConstraint", True)
 
     return flags
