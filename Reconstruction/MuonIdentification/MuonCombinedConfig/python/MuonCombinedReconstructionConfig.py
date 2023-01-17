@@ -83,8 +83,8 @@ def MuGirlStauAlgCfg(flags, name="MuGirlStauAlg", **kwargs):
                        result.popToolsAndMerge(MuonStauRecoToolCfg(flags)))
     kwargs.setdefault("TagMap", "stauTagMap")
     kwargs.setdefault("HasCSC", flags.Detector.GeometryCSC)
-    kwargs.setdefault("HasSTgc", flags.Detector.GeometrysTGC)
-    kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
+    kwargs.setdefault("HasSTgc", False)
+    kwargs.setdefault("HasMM", False)
     # kwargs.setdefault("TGCPrepDataLocation",
     #                   'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
     kwargs.setdefault("TGCPrepDataLocation", 'TGC_Measurements') # This is probably wrong, but matches old-config. #FIXME

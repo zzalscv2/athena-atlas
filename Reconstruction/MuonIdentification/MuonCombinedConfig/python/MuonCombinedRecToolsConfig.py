@@ -1058,6 +1058,7 @@ def MuonStauRecoToolCfg(flags,  name="MuonStauRecoTool", **kwargs):
     from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
     muon_combined_track_summary = result.popToolsAndMerge(MuonCombinedTrackSummaryToolCfg(flags))
     muidsegmentregionrecovery = result.popToolsAndMerge(MuonSegmentRegionRecoveryToolCfg(flags, name="MuonStauSegmentRegionRecoveryTool", SeededSegmentFinder=seededsegmentfinder,
+                                                                                         RecoverMM = False, RecoverSTGC = False,
                                                                                          ChamberHoleRecoveryTool=chamberholerecoverytool, Fitter=fitter, TrackSummaryTool=muon_combined_track_summary))
     trackbuilder = result.popToolsAndMerge(CombinedMuonTrackBuilderCfg(
         flags, name="CombinedStauTrackBuilder", MdtRotCreator=staurotcreator, MuonHoleRecovery=muidsegmentregionrecovery))
