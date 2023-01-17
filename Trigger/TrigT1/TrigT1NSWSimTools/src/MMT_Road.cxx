@@ -78,9 +78,8 @@ bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
   }
   else return false;
 
-  float R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
-  double slow  = (R + (this->getRoadSize()*iroad     + 0.5 - olow )*this->getPitch() + hit->getShift())*hit->getOneOverZ();
-  double shigh = (R + (this->getRoadSize()*(iroad+1) + 0.5 + ohigh)*this->getPitch() + hit->getShift())*hit->getOneOverZ();
+  double slow  = (this->getLowerBound(hit->getStationEta()) + (this->getRoadSize()*iroad     + 0.5 - olow )*this->getPitch() + hit->getShift())*hit->getOneOverZ();
+  double shigh = (this->getLowerBound(hit->getStationEta()) + (this->getRoadSize()*(iroad+1) + 0.5 + ohigh)*this->getPitch() + hit->getShift())*hit->getOneOverZ();
 
   if (hit->getRZSlope() > 0.) return (hit->getRZSlope() >= slow && hit->getRZSlope() < shigh);
   else return (hit->getRZSlope() >= shigh && hit->getRZSlope() < slow);
@@ -161,6 +160,10 @@ bool MMT_Road::evaluateLowRes() const {
     else if (hit->getPlane() > 3 && !hit->isNoise()) nhits2++;
   }
   return (nhits1 < 4 || nhits2 < 4);
+}
+
+double MMT_Road::getLowerBound(const int eta) const {
+  return (std::abs(eta) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
 }
 
 bool MMT_Road::horizontalCheck() const {

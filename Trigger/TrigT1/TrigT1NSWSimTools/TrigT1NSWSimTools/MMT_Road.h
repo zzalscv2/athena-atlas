@@ -28,6 +28,7 @@ class MMT_Road {
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
     void incrementAge(const int &bcwind);
+    double getLowerBound(const int eta) const;
     double getPitch() const { return m_pitch; }
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
@@ -55,7 +56,7 @@ class MMT_Road {
     char m_sector;
     int m_xthr, m_uvthr;
     int m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV;
-    float m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
+    double m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
     std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
 };
 #endif
