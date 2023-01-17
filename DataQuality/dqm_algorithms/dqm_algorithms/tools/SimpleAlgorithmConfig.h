@@ -34,6 +34,7 @@ namespace dqm_algorithms
 	///Setters
 	void setReference(TObject* ref);
 	void addParameter(std::string,double);//< Adds a new parameter to the list of current params
+	void addGenericParameter(std::string,std::string);//< Adds a new string parameter to the list of current generic params
 	void addGreenThreshold(std::string,double);//< Adds a new threshold to the list of current params
 	void addRedThreshold(std::string,double);//< Adds a new threshold to the list of current params
       private:

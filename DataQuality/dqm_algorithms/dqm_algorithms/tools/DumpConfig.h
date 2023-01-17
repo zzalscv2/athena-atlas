@@ -34,6 +34,7 @@ namespace dqm_algorithms
 
         std::ofstream m_myfile;
 	std::map<std::string,double> m_params;
+	std::map<std::string,std::string> m_strParams;
 	std::map<std::string,double> m_gthresh;
 	std::map<std::string,double> m_rthresh;
 	std::vector<std::string> m_red_id;

@@ -34,6 +34,7 @@
 #include "DataQualityInterfaces/HanConfigAssessor.h"
 #include "DataQualityInterfaces/HanConfigGroup.h"
 #include "DataQualityInterfaces/HanConfigMetadata.h"
+#include "DataQualityInterfaces/HanConfigParMap.h"
 #include "DataQualityInterfaces/HanOutput.h"
 #include "DataQualityInterfaces/HanUtils.h"
 #include "DataQualityInterfaces/MiniConfig.h"
@@ -801,10 +802,21 @@ GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
       dqpar->SetAlgRefName((newRefString.str()));
 
     }else {
-      HanConfigAlgPar algPar;
-      algPar.SetName( *i );
-      algPar.SetValue( m_algConfig.GetFloatAttribute(algID,*i) );
-      dqpar->AddAlgPar( algPar );
+      std::string stringValue = m_algConfig.GetStringAttribute( algID, *i );
+      float numberValue;
+      std::istringstream parser( stringValue );
+      parser >> numberValue;
+      if ( ! parser ) {
+        HanConfigParMap algPar;
+        algPar.SetName( *i );
+        algPar.SetValue( stringValue );
+        dqpar->AddAlgStrPar( algPar );
+      } else {
+        HanConfigAlgPar algPar;
+        algPar.SetName( *i );
+        algPar.SetValue( numberValue );
+        dqpar->AddAlgPar( algPar );
+      }
     }
   }
 }

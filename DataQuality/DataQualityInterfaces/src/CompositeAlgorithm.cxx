@@ -160,6 +160,7 @@ ConfigureSubAlg(const dqm_core::AlgorithmConfig& config, const std::string& suba
     ref = config.getReference();
   } catch (dqm_core::BadConfig &) { /* ignore */ }
   std::map< std::string,double >  pars;
+  std::map<std::string,std::string> strPars;
   std::map<std::string,double> grthr;
   std::map<std::string,double> rdthr;
 
@@ -176,6 +177,15 @@ ConfigureSubAlg(const dqm_core::AlgorithmConfig& config, const std::string& suba
       } else if (parname.substr(0, pos) == subalg) {
 	pars.insert(std::map< std::string, double >::value_type(parname.substr(pos+1), parVal->second));
       }
+  }
+  for ( auto& strPar : config.getGenericParameters() ) {
+    std::string parname = strPar.first;
+    auto pipeIndex = parname.find( '|' );
+    if ( pipeIndex == std::string::npos ) {
+      strPars.insert( strPar );
+    } else if ( parname.substr( 0, pipeIndex ) == subalg ) {
+      strPars.emplace( parname.substr( pipeIndex + 1 ), strPar.second );
+    }
   }
   for (std::map< std::string, double >::const_iterator thrVal = oldgrthr.begin();
        thrVal != oldgrthr.end(); ++thrVal) {
@@ -197,7 +207,7 @@ ConfigureSubAlg(const dqm_core::AlgorithmConfig& config, const std::string& suba
 	rdthr.insert(std::map< std::string, double >::value_type(thrname.substr(pos+1), thrVal->second));
       }
   }
-  return new HanAlgorithmConfig(ref, pars, grthr, rdthr, 0);
+  return new HanAlgorithmConfig(ref, pars, strPars, grthr, rdthr, 0);
 }
 	    
 

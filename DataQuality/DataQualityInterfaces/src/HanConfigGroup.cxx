@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -267,6 +267,11 @@ PrintIOStream( std::ostream& o ) const
     HanConfigAlgPar* par;
     while( (par = dynamic_cast<HanConfigAlgPar*>( nextPar() )) != 0 ) {
       o << "    " << par;
+    }
+    TIter nextStrPar( m_algStrPars );
+    HanConfigParMap* strPar;
+    while( (strPar = dynamic_cast<HanConfigParMap*>( nextStrPar() )) != 0 ) {
+      o << "    " << strPar;
     }
     o << "  }\n";
   }
