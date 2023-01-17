@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PYTHIA8_USERHOOKS_USERSETTING_H
@@ -19,7 +19,7 @@ namespace Pythia8_UserHooks{
     
     public:
     
-  UserSetting(const std::string & name, T defaultValue):
+  UserSetting(const std::string & name, const T & defaultValue):
     m_paramName(name),
     m_param(defaultValue),
     m_settingsPtr(0),
