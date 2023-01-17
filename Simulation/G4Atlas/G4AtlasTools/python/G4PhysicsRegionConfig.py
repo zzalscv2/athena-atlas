@@ -115,8 +115,15 @@ def ITkStripPhysicsRegionToolCfg(flags, name='ITkStripPhysicsRegionTool', **kwar
 
 def HGTDPhysicsRegionToolCfg(flags, name='HGTDPhysicsRegionTool', **kwargs):
     kwargs.setdefault("RegionName", 'HGTD')
-    volumeList = ['HGTD::HGTDSiSensor0', 'HGTD::HGTDSiSensor1',
-                  'HGTD::HGTDSiSensor2', 'HGTD::HGTDSiSensor3']
+    if flags.HGTD.Geometry.useGeoModelXml:
+        volumeList = ['HGTD::HGTDSiSensorPosL0',"HGTD::HGTDSiSensorPosL1",
+                      'HGTD::HGTDSiSensorPosL2','HGTD::HGTDSiSensorPosL3',
+                      'HGTD::HGTDSiSensorNegL0','HGTD::HGTDSiSensorNegL1',
+                      'HGTD::HGTDSiSensorNegL2','HGTD::HGTDSiSensorNegL3',
+                      'HGTD::HGTDSiSensor']
+    else:                    
+        volumeList = ['HGTD::HGTDSiSensor0', 'HGTD::HGTDSiSensor1',
+                      'HGTD::HGTDSiSensor2', 'HGTD::HGTDSiSensor3']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.05)
     kwargs.setdefault("PositronCut", 0.05)
