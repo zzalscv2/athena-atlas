@@ -118,8 +118,9 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
             TrackCollectionCnvToolCfg(flags)))
 
     if flags.InDet.doTruth:
-        kwargs.setdefault("TrackTruthContainerName",
-                          kwargs["TrackContainerName"]+"TruthCollection")
+        kwargs.setdefault("TrackTruthContainerName", "TrackTruthCollection" \
+                          if kwargs["TrackContainerName"]=="CombinedInDetTracks" \
+                          else kwargs["TrackContainerName"]+"TruthCollection")
         kwargs.setdefault("AddTruthLink", True)
         if "MCTruthClassifier" not in kwargs:
             from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg

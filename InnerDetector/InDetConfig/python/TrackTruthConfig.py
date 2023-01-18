@@ -9,8 +9,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def InDetTrackTruthCfg(flags,
                        Tracks = "CombinedInDetTracks",
-                       DetailedTruth = "CombinedInDetTracksDetailedTruth",
-                       TracksTruth = "CombinedInDetTracksTruthCollection"):
+                       DetailedTruth = "DetailedTrackTruth",
+                       TracksTruth = "TrackTruthCollection"):
     acc = ComponentAccumulator()
     #
     # --- Enable the detailed track truth
