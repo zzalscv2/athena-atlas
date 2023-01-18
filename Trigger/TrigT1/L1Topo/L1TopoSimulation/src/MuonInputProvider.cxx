@@ -19,7 +19,14 @@
 
 #include "TrigConfData/L1Menu.h"
 
+#include "xAODTrigger/MuonRoI.h"
+#include "xAODTrigger/MuonRoIContainer.h"
+
+#include "TrigT1MuctpiBits/HelpersPhase1.h"
+
+
 using namespace LVL1;
+using namespace xAOD;
 
 MuonInputProvider::MuonInputProvider( const std::string& type, const std::string& name, 
                                       const IInterface* parent) :
@@ -283,6 +290,73 @@ MuonInputProvider::handle(const Incident& incident) {
    }
 }
 
+TCS::MuonTOB MuonInputProvider::createMuonTOB(const xAOD::MuonRoI & muonRoI, const std::vector<unsigned int> & rpcPtValues, const std::vector<unsigned int> & tgcPtValues) const{
+
+
+   float et;
+   float eta = muonRoI.eta();
+   float phi = muonRoI.phi();
+
+   // WARNING:: 
+   // This uses a mapping for thrNumber : thrValue , where the thresholds
+   // can change per run, and so the menu used might be different.
+   // This should be changed to read from threshold value as soon
+   // as it is available.
+   // See: https://its.cern.ch/jira/browse/ATR-26165
+
+   int thrNumber = muonRoI.getThrNumber();
+
+   if (muonRoI.getSource() == xAOD::MuonRoI::RoISource::Barrel) { //RPC
+      et = rpcPtValues[thrNumber]; //map is in GeV
+    } else {
+      et = tgcPtValues[thrNumber]; //map is in GeV
+    }
+
+   unsigned int EtTopo = et*10;
+   int etaTopo = topoIndex(eta,40);
+   int phiTopo = topoIndex(phi,20);
+
+   if (phiTopo < 0){ phiTopo += 128; }
+   
+   TCS::MuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), muonRoI.getRoI() );
+   muon.setEtDouble(static_cast<double>(EtTopo/10.));
+   muon.setEtaDouble(static_cast<double>(etaTopo/40.));
+   muon.setPhiDouble(static_cast<double>(phiTopo/20.));
+
+   // Muon flags
+   if ( muonRoI.getSource() != xAOD::MuonRoI::RoISource::Barrel) { // TGC ( endcap (E) + forward (F) )
+      muon.setBW2or3( topoFlag(muonRoI.getBW3Coincidence()) ); //Needs checking if this is the right flag
+      muon.setInnerCoin( topoFlag(muonRoI.getInnerCoincidence()) );
+      muon.setGoodMF( topoFlag(muonRoI.getGoodMF()) );
+      muon.setCharge( topoFlag(muonRoI.getCharge()) );
+      muon.setIs2cand( 0 );
+      muon.setIsTGC( 1 );
+   }
+   else { // RPC ( barrel (B) )
+      muon.setBW2or3( 0 );
+      muon.setInnerCoin( 0 );
+      muon.setGoodMF( 0 );
+      muon.setCharge( 0 );
+      muon.setIs2cand( topoFlag(muonRoI.isMoreCandInRoI()) );  //Needs checking if this is the right flag
+      muon.setIsTGC( 0 );
+   }
+
+   m_hPt->Fill( muon.EtDouble() );
+   if ( muon.isTGC() ) { m_hPtTGC->Fill( muon.EtDouble() ); }
+   else                { m_hPtRPC->Fill( muon.EtDouble() ); }
+   m_hPtEta->Fill( muon.eta(), muon.EtDouble() );
+   m_hPhiEta->Fill( muon.eta(), muon.phi() );
+
+   m_hBW2or3Eta->Fill( muon.eta(), muon.bw2or3() );
+   m_hInnerCoinEta->Fill( muon.eta(), muon.innerCoin() );
+   m_hGoodMFEta->Fill( muon.eta(), muon.goodMF() );
+   m_hChargeEta->Fill( muon.eta(), muon.charge() );
+   m_hIs2candEta->Fill( muon.eta(), muon.is2cand() );
+   m_hIsTGCEta->Fill( muon.eta(), muon.isTGC() );
+
+   return muon;
+}
+
 TCS::MuonTOB
 MuonInputProvider::createMuonTOB(uint32_t roiword, const TrigConf::L1Menu * l1menu) const {
 
@@ -299,6 +373,7 @@ MuonInputProvider::createMuonTOB(uint32_t roiword, const TrigConf::L1Menu * l1me
    
    return muon;
 }
+
 
 TCS::MuonTOB
 MuonInputProvider::createMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
@@ -432,82 +507,26 @@ MuonInputProvider::topoFlag(bool flag) const {
 StatusCode
 MuonInputProvider::fillTopoInputEvent(TCS::TopoInputEvent& inputEvent) const {
 
-   if( m_MuonEncoding == 0 ) {
+      if (!m_MuonL1RoIKey.empty()) {
 
-      ATH_MSG_DEBUG("Filling the muon input from MuCTPIToRoIBSLink produced by L1Muctpi.cxx.");
+        ATH_MSG_DEBUG("Using muon inputs from L1 RoI");
 
-      const ROIB::RoIBResult* roibResult {nullptr};
+        const TrigConf::L1Menu * l1menu = nullptr;
+        ATH_CHECK( detStore()->retrieve(l1menu) );
+          
+        //Read mapping from menu
+        const auto & exMU = l1menu->thrExtraInfo().MU();
+        auto rpcPtValues = exMU.knownRpcPtValues();
+        auto tgcPtValues = exMU.knownTgcPtValues();
 
-      const L1MUINT::MuCTPIToRoIBSLink* muctpi_slink {nullptr};
+        SG::ReadHandle<xAOD::MuonRoIContainer> muonROIs (m_MuonL1RoIKey);
+        for (auto muonRoi : *muonROIs) {
 
+            inputEvent.addMuon( MuonInputProvider::createMuonTOB( *muonRoi, rpcPtValues, tgcPtValues) );
 
-      if(m_muonROILocation.key().empty()==false){
-         SG::ReadHandle<L1MUINT::MuCTPIToRoIBSLink> MuCTPIHandle(m_muonROILocation);//LVL1MUCTPI::DEFAULT_MuonRoIBLocation)
-         if( MuCTPIHandle.isValid() ){
-            muctpi_slink = MuCTPIHandle.cptr();
          }
-      }
+      } else{
 
-      if(muctpi_slink == nullptr && not m_roibLocation.key().empty()){
-         SG::ReadHandle<ROIB::RoIBResult> roib (m_roibLocation);
-         if( roib.isValid() ){
-            roibResult = roib.cptr(); 
-         }
-      }
-
-      if(!muctpi_slink && !roibResult) {
-         ATH_MSG_WARNING("Neither a MuCTPIToRoIBSLink with SG key " << m_muonROILocation.key() << " nor an RoIBResult were found in the event. No muon input for the L1Topo simulation.");
-         return StatusCode::RECOVERABLE;
-      }
-
-
-      if( roibResult ) {
-
-         const TrigConf::L1Menu * l1menu = nullptr;
-         ATH_CHECK( detStore()->retrieve(l1menu) );
-
-         const std::vector< ROIB::MuCTPIRoI >& rois = roibResult->muCTPIResult().roIVec();
-
-         ATH_MSG_DEBUG("Filling the input event from RoIBResult. Number of Muon ROIs: " << rois.size() );
-
-         for( const ROIB::MuCTPIRoI & muonRoI : rois ) {
-
-            if( !( muonRoI.roIWord() & LVL1::CandidateVetoMask  ) ) {
-               inputEvent.addMuon( MuonInputProvider::createMuonTOB( muonRoI.roIWord(), l1menu ) );
-            } else {
-            // overflow implemented only for reduced granularity encoding (see below)
-               ATH_MSG_DEBUG(" Ignore Vetoed L1 Mu RoI " <<  muonRoI.roIWord() );
-            }
-         }
-
-      } else if( muctpi_slink ) {
-
-         const TrigConf::L1Menu * l1menu = nullptr;
-         ATH_CHECK( detStore()->retrieve(l1menu) );
-
-         ATH_MSG_DEBUG("Filling the input event. Number of Muon ROIs: " << muctpi_slink->getMuCTPIToRoIBWords().size() - ROIB::Header::wordsPerHeader - ROIB::Trailer::wordsPerTrailer - 1);
-      
-         unsigned int icnt = 0;
-         for ( unsigned int roiword : muctpi_slink->getMuCTPIToRoIBWords() ) {
-               
-            ++icnt;
-            // skip header
-            if ( icnt <= ROIB::Header::wordsPerHeader + 1 ) {
-               continue;
-            }
-            // skip trailer
-            if ( icnt > ( muctpi_slink->getMuCTPIToRoIBWords().size() - ROIB::Trailer::wordsPerTrailer ) ) {
-               continue;
-            }
-            if( !(roiword & LVL1::CandidateVetoMask) ) {
-               inputEvent.addMuon( MuonInputProvider::createMuonTOB( roiword, l1menu ) );
-            } else {
-               ATH_MSG_DEBUG(" Ignore Vetoed L1 Mu RoI " << roiword );
-            }
-         }
-      
-      }
-   } else {  // reduced granularity encoding
       ATH_MSG_DEBUG("Use MuCTPiToTopo granularity Muon ROIs.");
 
       // first see if L1Muctpi simulation already ran and object is in storegate, if not throw an error
