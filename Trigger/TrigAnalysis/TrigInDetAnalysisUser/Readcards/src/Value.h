@@ -11,7 +11,7 @@
  **
  **   @date         Wed May  4 11:14:42 BST 2005
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -40,20 +40,19 @@ class Value {
   
 public:
   
-  Value()                           : mTag(""), mVal(0) { } 
-  Value(char* s,  const std::vector<std::string>& v) : mTag(s),  mVal(v) { } 
-  Value(char* s,  const std::string& v)              : mTag(s),  mVal(0) { mVal.push_back(v); } 
-  Value(const std::string& s, const std::vector<std::string>& v) : mTag(s),  mVal(v) { } 
-  Value(const std::string& s, const std::string& v)              : mTag(s),  mVal(0) { mVal.push_back(v); } 
+  Value()                           : m_Tag(""), m_Val(0) { }
+  Value(char* s,  const std::vector<std::string>& v) : m_Tag(s),  m_Val(v) { }
+  Value(char* s,  const std::string& v)              : m_Tag(s),  m_Val(0) { m_Val.push_back(v); }
+  Value(const std::string& s, const std::vector<std::string>& v) : m_Tag(s),  m_Val(v) { }
+  Value(const std::string& s, const std::string& v)              : m_Tag(s),  m_Val(0) { m_Val.push_back(v); }
   
-  const std::string&              Tag() const {  return mTag;  }
-  const std::vector<std::string>&  Val() const {  return mVal;  }
+  const std::string&              Tag() const {  return m_Tag;  }
+  const std::vector<std::string>&  Val() const {  return m_Val;  }
   
 private:
   
-  std::string              mTag;
-  //  std::vector<double>  mVal;
-  std::vector<std::string> mVal;
+  std::string              m_Tag;
+  std::vector<std::string> m_Val;
 
 };
 

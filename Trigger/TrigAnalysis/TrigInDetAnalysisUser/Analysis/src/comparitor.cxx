@@ -577,7 +577,7 @@ int main(int argc, char** argv) {
   bool make_ref_efficiencies = false;
   bool refit_resplots        = false;
   bool refitref_resplots     = false;
-  bool _bayes      = true;
+  bool bayes       = true;
   bool nostats     = false;
   bool nomeans     = false;
   bool noref       = false;
@@ -613,7 +613,7 @@ int main(int argc, char** argv) {
   double xoffset = 0;
 
   
-  double _ypos = 0;
+  double ypos_arg = 0;
 
   std::string pattern = "";
   std::string regex   = "";
@@ -760,7 +760,7 @@ int main(int argc, char** argv) {
       usechainref = true;
     }
     else if ( arg=="-nb" || arg=="--nobayes" ) { 
-      _bayes = false;
+      bayes = false;
     }
     else if ( arg=="-es" || arg=="--effscale" ) { 
       if ( ++i<argc ) scale_eff=std::atof(argv[i]);
@@ -804,7 +804,7 @@ int main(int argc, char** argv) {
       else return usage(argv[0], -1, "no xoffset provided");
     }
     else if ( arg=="-yp" || arg=="--ypos" ) { 
-      if ( ++i<argc ) _ypos=std::atof(argv[i]);
+      if ( ++i<argc ) ypos_arg=std::atof(argv[i]);
       else return usage(argv[0], -1, "no y position provided");
     }
     else if ( arg=="-xe" || arg=="--xerror" ) { 
@@ -960,7 +960,7 @@ int main(int argc, char** argv) {
 
   std::cout << argv[0] << " options:" << std::endl;
   std::cout << "\tATLAS style:                 " << ( atlasstyle ? "true" : "false" ) << std::endl; 
-  std::cout << "\tBayesian uncertainties:      " << ( _bayes ? "true" : "false" ) << std::endl; 
+  std::cout << "\tBayesian uncertainties:      " << ( bayes ? "true" : "false" ) << std::endl; 
   std::cout << "\trefit resplot uncertainties: " << ( refit_resplots ? "true" : "false" ) << std::endl; 
   std::cout << "\tsuppress mean and rms stats: " << ( nostats ? "true" : "false" ) << std::endl;  
   if ( !nostats ) std::cout << "\tsuppress meanstats:          " << ( nomeans ? "true" : "false" ) << std::endl;  
@@ -1597,7 +1597,7 @@ int main(int argc, char** argv) {
 	else            ypos = 0.18;
       }
 
-      if ( _ypos!=0 ) ypos = _ypos;
+      if ( ypos_arg!=0 ) ypos = ypos_arg;
       
       double xpos_original = xpos;
 
@@ -2006,7 +2006,7 @@ int main(int argc, char** argv) {
 	}
 
 	
-	if ( _bayes ) { 
+	if ( bayes ) { 
 
 	  if ( htest && contains( std::string(htest->GetName()), "eff" ) ) {
 
@@ -2370,14 +2370,14 @@ int main(int argc, char** argv) {
 
 	    if ( range<0.2*scale_eff ) {
  
-	      double _max = int( (h->GetMaximum() + 20)*0.1 )*0.1*scale_eff;
-	      double _min = int( (h->GetMinimum() - 10)*0.1 )*0.1*scale_eff;
+	      double max = int( (h->GetMaximum() + 20)*0.1 )*0.1*scale_eff;
+	      double min = int( (h->GetMinimum() - 10)*0.1 )*0.1*scale_eff;
 	    
-	      if ( _max>1*scale_eff ) _max = 1.02*scale_eff;
-	      if ( _min<0 )           _min = 0;
+	      if ( max>1*scale_eff ) max = 1.02*scale_eff;
+	      if ( min<0 )           min = 0;
 	    
-	      h->SetMinimum(_min);
-	      h->SetMaximum(_max);
+	      h->SetMinimum(min);
+	      h->SetMaximum(max);
 	   
 	    }
 

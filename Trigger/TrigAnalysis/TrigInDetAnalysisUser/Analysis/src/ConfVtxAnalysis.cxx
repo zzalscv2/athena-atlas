@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Sun  9 Aug 2015 21:53:46 CEST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -16,7 +16,7 @@
 
 
 ConfVtxAnalysis::ConfVtxAnalysis( const std::string& n, bool use_secVtx_limits ) : 
-  VertexAnalysis( n ), m_initialised(false), m_finalised(false), m_use_secVtx_limits(use_secVtx_limits), mdir(0) { } 
+  VertexAnalysis( n ), m_initialised(false), m_finalised(false), m_use_secVtx_limits(use_secVtx_limits), m_dir(0) { }
 
 
 extern TIDA::Event* gevent;
@@ -36,8 +36,8 @@ void ConfVtxAnalysis::initialise() {
 
   //  std::cout << "ConfVtxAnalysis::initialise() " << name() << std::endl;
 
-  mdir = new TIDDirectory(name());
-  mdir->push();
+  m_dir = new TIDDirectory(name());
+  m_dir->push();
 
 #if 0
   double vnbins[41] = {
@@ -102,70 +102,70 @@ void ConfVtxAnalysis::initialise() {
                        50, 55, 60, 
                        70, 80 };
 
-  hnvtx   = new TH1F( "nvtx", ";number of vertices",   101, -0.5,  100.5   );
-  hzed    = new TH1F( "zed",   ";vtx z [mm]",          200, -300,   300   );
-  hx      = new TH1F( "x",     ";vtx x [mm]",          800, -1,    1   );
-  hy      = new TH1F( "y",     ";vtx y [mm]",          800, -1,    1   );
-  hr      = new TH1F( "r",     ";vtx r [mm]",           40, vrbins );
+  m_hnvtx   = new TH1F( "nvtx", ";number of vertices",   101, -0.5,  100.5   );
+  m_hzed    = new TH1F( "zed",   ";vtx z [mm]",          200, -300,   300   );
+  m_hx      = new TH1F( "x",     ";vtx x [mm]",          800, -1,    1   );
+  m_hy      = new TH1F( "y",     ";vtx y [mm]",          800, -1,    1   );
+  m_hr      = new TH1F( "r",     ";vtx r [mm]",           40, vrbins );
   //  hntrax  = new TH1F( "ntrax", ";number of tracks", 201,   -0.5, 200.5 );
-  hmu     = new TH1F( "mu",    ";<mu>",         81, -0.5, 80.5   );
-  hlb     = new TH1F( "lb",    ";lumi block",  301, -0.5, 3009.5   );
+  m_hmu     = new TH1F( "mu",    ";<mu>",         81, -0.5, 80.5   );
+  m_hlb     = new TH1F( "lb",    ";lumi block",  301, -0.5, 3009.5   );
 
-  hnvtx_rec  = new TH1F( "nvtx_rec",  ";number of vertices",  101, -0.5, 100.5 );
-  hzed_rec   = new TH1F( "zed_rec",   ";vtx z [mm]",          200, -300,   300 );
-  hx_rec     = new TH1F( "x_rec",     ";vtx x [mm]",          800, -1,    1   );
-  hy_rec     = new TH1F( "y_rec",     ";vtx y [mm]",          800, -1,    1   );
-  hr_rec     = new TH1F( "r_rec",     ";vtx r [mm]",           40, vrbins );
+  m_hnvtx_rec  = new TH1F( "nvtx_rec",  ";number of vertices",  101, -0.5, 100.5 );
+  m_hzed_rec   = new TH1F( "zed_rec",   ";vtx z [mm]",          200, -300,   300 );
+  m_hx_rec     = new TH1F( "x_rec",     ";vtx x [mm]",          800, -1,    1   );
+  m_hy_rec     = new TH1F( "y_rec",     ";vtx y [mm]",          800, -1,    1   );
+  m_hr_rec     = new TH1F( "r_rec",     ";vtx r [mm]",           40, vrbins );
 
   // different binning for primary and sec vtx analysis
   if (m_use_secVtx_limits) {
-    hntrax      = new TH1F( "ntrax", ";number of tracks", 14, -0.5, 13.5 );
-    hntrax_rec  = new TH1F( "ntrax_rec", ";number of tracks", 14, -0.5,  13.5 );
-    h_dntrax    = new TH1F( "dntrax", ";trigger - offline tracks", 61, -30.5, 30.5 );
+    m_hntrax      = new TH1F( "ntrax", ";number of tracks", 14, -0.5, 13.5 );
+    m_hntrax_rec  = new TH1F( "ntrax_rec", ";number of tracks", 14, -0.5,  13.5 );
+    m_h_dntrax    = new TH1F( "dntrax", ";trigger - offline tracks", 61, -30.5, 30.5 );
   }
   else {
-    hntrax      = new TH1F( "ntrax", ";number of tracks", 80,  vnbins );
-    hntrax_rec  = new TH1F( "ntrax_rec", ";number of tracks", 80, vnbins );
-    h_dntrax    = new TH1F( "dntrax", ";trigger - offline tracks", 15, -7.5, 7.5 );
+    m_hntrax      = new TH1F( "ntrax", ";number of tracks", 80,  vnbins );
+    m_hntrax_rec  = new TH1F( "ntrax_rec", ";number of tracks", 80, vnbins );
+    m_h_dntrax    = new TH1F( "dntrax", ";trigger - offline tracks", 15, -7.5, 7.5 );
   }
 
 
-  hzed_res = new TH1F( "zed_res", "Delta z [mm]", 400, -10, 10 );
-  hx_res   = new TH1F( "x_res",   "Delta x [mm]", 200, -0.1, 0.1 );
-  hy_res   = new TH1F( "y_res",   "Delta y [mm]", 200, -0.1, 0.1 );
+  m_hzed_res = new TH1F( "zed_res", "Delta z [mm]", 400, -10, 10 );
+  m_hx_res   = new TH1F( "x_res",   "Delta x [mm]", 200, -0.1, 0.1 );
+  m_hy_res   = new TH1F( "y_res",   "Delta y [mm]", 200, -0.1, 0.1 );
 
-  rdntrax_vs_zed   = new Resplot( "rdntrax_vs_zed",   100,  -300,  300,   61, -30.5, 30.5);
-  rdntrax_vs_ntrax = new Resplot( "rdntrax_vs_ntrax", 14,   -0.5, 13.5,   15, -30.5, 30.5);
-  rdntrax_vs_r     = new Resplot( "rdntrax_vs_r",     40, vrbins,   15, -7.5,  7.5 ); 
+  m_rdntrax_vs_zed   = new Resplot( "rdntrax_vs_zed",   100,  -300,  300,   61, -30.5, 30.5);
+  m_rdntrax_vs_ntrax = new Resplot( "rdntrax_vs_ntrax", 14,   -0.5, 13.5,   15, -30.5, 30.5);
+  m_rdntrax_vs_r     = new Resplot( "rdntrax_vs_r",     40, vrbins,   15, -7.5,  7.5 );
 
-  rdz_vs_zed    = new Resplot( "rdz_vs_zed",   100, -300,    300,    1600, -20, 20 ); 
-  rdz_vs_ntrax  = new Resplot( "rdz_vs_ntrax", 201,   -0.5,  200.5,  1600, -20, 20 ); 
-  rdz_vs_nvtx   = new Resplot( "rdz_vs_nvtx",  81,    -0.5,   80.5,  1600, -20, 20 ); 
-  rdz_vs_mu     = new Resplot( "rdz_vs_mu",    30,     0,     30,    1600, -20, 20 ); 
-  rdz_vs_r      = new Resplot( "rdz_vs_r",     40,  vrbins,   1600,  -20,  20 ); 
+  m_rdz_vs_zed    = new Resplot( "rdz_vs_zed",   100, -300,    300,    1600, -20, 20 );
+  m_rdz_vs_ntrax  = new Resplot( "rdz_vs_ntrax", 201,   -0.5,  200.5,  1600, -20, 20 );
+  m_rdz_vs_nvtx   = new Resplot( "rdz_vs_nvtx",  81,    -0.5,   80.5,  1600, -20, 20 );
+  m_rdz_vs_mu     = new Resplot( "rdz_vs_mu",    30,     0,     30,    1600, -20, 20 );
+  m_rdz_vs_r      = new Resplot( "rdz_vs_r",     40,  vrbins,   1600,  -20,  20 );
 
-  rdr_vs_zed    = new Resplot( "rdr_vs_zed",  100,   -300,  300, 800, -15, 15 );
-  rdr_vs_r      = new Resplot( "rdr_vs_r",     40, vrbins,  800, -15,  15 );
-  rdr_vs_ntrax  = new Resplot( "rdr_vs_ntrax", 14,   -0.5, 13.5, 800, -15, 15 );
+  m_rdr_vs_zed    = new Resplot( "rdr_vs_zed",  100,   -300,  300, 800, -15, 15 );
+  m_rdr_vs_r      = new Resplot( "rdr_vs_r",     40, vrbins,  800, -15,  15 );
+  m_rdr_vs_ntrax  = new Resplot( "rdr_vs_ntrax", 14,   -0.5, 13.5, 800, -15, 15 );
 
-  eff_zed   = new Efficiency( hzed,   "zed_eff" );
-  eff_x     = new Efficiency( hx,     "x_eff" );
-  eff_y     = new Efficiency( hy,     "y_eff" );
-  eff_ntrax = new Efficiency( hntrax, "ntrax_eff" );
-  eff_nvtx  = new Efficiency( hnvtx,  "nvtx_eff" );
-  eff_mu    = new Efficiency( hmu, "mu_eff" );
-  eff_lb    = new Efficiency( hlb, "lb_eff" );
-  eff_r     = new Efficiency( hr, "r_eff" ); 
+  m_eff_zed   = new Efficiency( m_hzed,   "zed_eff" );
+  m_eff_x     = new Efficiency( m_hx,     "x_eff" );
+  m_eff_y     = new Efficiency( m_hy,     "y_eff" );
+  m_eff_ntrax = new Efficiency( m_hntrax, "ntrax_eff" );
+  m_eff_nvtx  = new Efficiency( m_hnvtx,  "nvtx_eff" );
+  m_eff_mu    = new Efficiency( m_hmu, "mu_eff" );
+  m_eff_lb    = new Efficiency( m_hlb, "lb_eff" );
+  m_eff_r     = new Efficiency( m_hr, "r_eff" );
 
-  rnvtxrec_nvtx = new Resplot( "rnvtxrec_vs_nvtx",   81,  -0.5,   80.5,  81,   -0.5,   80.5 ); 
+  m_rnvtxrec_nvtx = new Resplot( "rnvtxrec_vs_nvtx",   81,  -0.5,   80.5,  81,   -0.5,   80.5 );
 
   //  double ntrax[10] = { 0, 2, 5, 10, 15, 20, 30, 15, 100 }; 
 
-  rdz_vs_lb    = new Resplot( "rdz_vs_lb",  301, -0.5, 3009.5,  800, -20, 20 ); 
-  rdx_vs_lb    = new Resplot( "rdx_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 ); 
-  rdy_vs_lb    = new Resplot( "rdy_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
+  m_rdz_vs_lb    = new Resplot( "rdz_vs_lb",  301, -0.5, 3009.5,  800, -20, 20 );
+  m_rdx_vs_lb    = new Resplot( "rdx_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
+  m_rdy_vs_lb    = new Resplot( "rdy_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
 
-  mdir->pop();
+  m_dir->pop();
 
 }
 
@@ -217,10 +217,10 @@ void ConfVtxAnalysis::execute_internal( const std::vector<TIDA::Vertex*>& vtx0,
 
   m.match( vtx0, vtx1 );
 
-  hnvtx->Fill( vtx0.size() );
-  hnvtx_rec->Fill( vtx1.size() );
+  m_hnvtx->Fill( vtx0.size() );
+  m_hnvtx_rec->Fill( vtx1.size() );
   
-  rnvtxrec_nvtx->Fill( vtx0.size(), vtx1.size() );
+  m_rnvtxrec_nvtx->Fill( vtx0.size(), vtx1.size() );
 
   // keep alternate functionality commented
   // std::cout << "gevent " << gevent << std::endl;
@@ -239,14 +239,14 @@ void ConfVtxAnalysis::execute_internal( const std::vector<TIDA::Vertex*>& vtx0,
     // offline vertex radial position
     double r = std::sqrt(vtx0[i]->x()*vtx0[i]->x() + vtx0[i]->y()*vtx0[i]->y()); 
 
-    hx->Fill( vtx0[i]->x() );
-    hy->Fill( vtx0[i]->y() );
-    hzed->Fill( vtx0[i]->z() );
-    hntrax->Fill( vtx0[i]->Ntracks() );
-    hr->Fill( r );
+    m_hx->Fill( vtx0[i]->x() );
+    m_hy->Fill( vtx0[i]->y() );
+    m_hzed->Fill( vtx0[i]->z() );
+    m_hntrax->Fill( vtx0[i]->Ntracks() );
+    m_hr->Fill( r );
 
-    hlb->Fill( lb );
-    hmu->Fill( mu );
+    m_hlb->Fill( lb );
+    m_hmu->Fill( mu );
 
     const TIDA::Vertex* mv = m.matched( vtx0[i] ); 
 
@@ -262,51 +262,51 @@ void ConfVtxAnalysis::execute_internal( const std::vector<TIDA::Vertex*>& vtx0,
       
       int dntrax = mv->Ntracks() - vtx0[i]->Ntracks();
 
-      hx_rec->Fill( mv->x() );
-      hy_rec->Fill( mv->y() );
-      hzed_rec->Fill( mv->z() );
-      hntrax_rec->Fill( mv->Ntracks() );
-      hr_rec->Fill( r_rec );
+      m_hx_rec->Fill( mv->x() );
+      m_hy_rec->Fill( mv->y() );
+      m_hzed_rec->Fill( mv->z() );
+      m_hntrax_rec->Fill( mv->Ntracks() );
+      m_hr_rec->Fill( r_rec );
 
-      hx_res->Fill( mv->x() - vtx0[i]->x() );
-      hy_res->Fill( mv->y() - vtx0[i]->y() );
-      hzed_res->Fill( mv->z() - vtx0[i]->z() );
+      m_hx_res->Fill( mv->x() - vtx0[i]->x() );
+      m_hy_res->Fill( mv->y() - vtx0[i]->y() );
+      m_hzed_res->Fill( mv->z() - vtx0[i]->z() );
 
-      h_dntrax->Fill( dntrax );
+      m_h_dntrax->Fill( dntrax );
           
-      rdz_vs_zed->Fill(   vtx0[i]->z(),       mv->z() - vtx0[i]->z() );
-      rdz_vs_ntrax->Fill( vtx0[i]->Ntracks(), mv->z() - vtx0[i]->z() );
-      rdz_vs_nvtx->Fill( vtx0.size(),  mv->z() - vtx0[i]->z() ); /// this isn't really legitimate
-      rdz_vs_mu->Fill( mu,  mv->z() - vtx0[i]->z() ); /// this isn't really legitimate
-      rdz_vs_r->Fill( r, mv->z() - vtx0[i]->z() );
+      m_rdz_vs_zed->Fill(   vtx0[i]->z(),       mv->z() - vtx0[i]->z() );
+      m_rdz_vs_ntrax->Fill( vtx0[i]->Ntracks(), mv->z() - vtx0[i]->z() );
+      m_rdz_vs_nvtx->Fill( vtx0.size(),  mv->z() - vtx0[i]->z() ); /// this isn't really legitimate
+      m_rdz_vs_mu->Fill( mu,  mv->z() - vtx0[i]->z() ); /// this isn't really legitimate
+      m_rdz_vs_r->Fill( r, mv->z() - vtx0[i]->z() );
 
-      rdntrax_vs_zed->Fill( vtx0[i]->z(), dntrax );
-      rdntrax_vs_ntrax->Fill( vtx0[i]->Ntracks(), dntrax );
-      rdntrax_vs_r->Fill( r, dntrax );
+      m_rdntrax_vs_zed->Fill( vtx0[i]->z(), dntrax );
+      m_rdntrax_vs_ntrax->Fill( vtx0[i]->Ntracks(), dntrax );
+      m_rdntrax_vs_r->Fill( r, dntrax );
       
-      rdr_vs_zed->Fill( vtx0[i]->z(), r_rec - r );
-      rdr_vs_r->Fill( r, r_rec - r );
-      rdr_vs_ntrax->Fill( vtx0[i]->Ntracks(), r_rec - r );
+      m_rdr_vs_zed->Fill( vtx0[i]->z(), r_rec - r );
+      m_rdr_vs_r->Fill( r, r_rec - r );
+      m_rdr_vs_ntrax->Fill( vtx0[i]->Ntracks(), r_rec - r );
 
-      eff_zed->Fill( vtx0[i]->z() );
-      eff_x->Fill( vtx0[i]->x() );
-      eff_y->Fill( vtx0[i]->y() );
-      eff_r->Fill( r );
+      m_eff_zed->Fill( vtx0[i]->z() );
+      m_eff_x->Fill( vtx0[i]->x() );
+      m_eff_y->Fill( vtx0[i]->y() );
+      m_eff_r->Fill( r );
 
-      eff_ntrax->Fill( vtx0[i]->Ntracks() );
-      eff_nvtx->Fill( vtx0.size() );
+      m_eff_ntrax->Fill( vtx0[i]->Ntracks() );
+      m_eff_nvtx->Fill( vtx0.size() );
 
-      eff_mu->Fill( mu );
-      eff_lb->Fill( lb );
+      m_eff_mu->Fill( mu );
+      m_eff_lb->Fill( lb );
 
       //	std::cout << "found vtx ref vertex size " << vtx0.size() << "\tonline " << vtx1.size() << std::endl;
       //	std::cout << "\tref:  " << *vtx0[i] << std::endl;
       //	for ( unsigned iv=0 ; iv<vtx1.size() ; iv++ ) if ( vtx1[iv] ) std::cout << "\t" << iv << " :  " << *vtx1[iv] << std::endl;
       
       /// what about beam tilts etc? where are these defined with respect to ?
-      rdz_vs_lb->Fill( lb, mv->z() - vtx0[i]->z() ); 
-      rdx_vs_lb->Fill( lb, mv->x() - vtx0[i]->x() ); 
-      rdy_vs_lb->Fill( lb, mv->y() - vtx0[i]->y() ); 
+      m_rdz_vs_lb->Fill( lb, mv->z() - vtx0[i]->z() );
+      m_rdx_vs_lb->Fill( lb, mv->x() - vtx0[i]->x() );
+      m_rdy_vs_lb->Fill( lb, mv->y() - vtx0[i]->y() );
 
     } else {
       //	std::cout << "\t" << "------" << std::endl;
@@ -336,16 +336,16 @@ void ConfVtxAnalysis::execute_internal( const std::vector<TIDA::Vertex*>& vtx0,
 #endif
 
 
-      eff_x->FillDenom( vtx0[i]->x() );
-      eff_y->FillDenom( vtx0[i]->y() );
-      eff_zed->FillDenom( vtx0[i]->z() );
-      eff_r->FillDenom( r );
+      m_eff_x->FillDenom( vtx0[i]->x() );
+      m_eff_y->FillDenom( vtx0[i]->y() );
+      m_eff_zed->FillDenom( vtx0[i]->z() );
+      m_eff_r->FillDenom( r );
 
-      eff_ntrax->FillDenom( vtx0[i]->Ntracks() );
-      eff_nvtx->FillDenom( vtx0.size() );
+      m_eff_ntrax->FillDenom( vtx0[i]->Ntracks() );
+      m_eff_nvtx->FillDenom( vtx0.size() );
 
-      eff_mu->FillDenom( mu );
-      eff_lb->FillDenom( lb );
+      m_eff_mu->FillDenom( mu );
+      m_eff_lb->FillDenom( lb );
     }
   }
 }
@@ -359,57 +359,57 @@ void ConfVtxAnalysis::finalise() {
 
   m_finalised = true;
 
-  mdir->push();
+  m_dir->push();
 
-  hnvtx->Write();
-  hzed->Write();
-  hntrax->Write();
-  hr->Write();
+  m_hnvtx->Write();
+  m_hzed->Write();
+  m_hntrax->Write();
+  m_hr->Write();
 
-  hnvtx_rec->Write();
-  hzed_rec->Write();
-  hntrax_rec->Write();
-  hr_rec->Write();
+  m_hnvtx_rec->Write();
+  m_hzed_rec->Write();
+  m_hntrax_rec->Write();
+  m_hr_rec->Write();
 
-  hmu->Write();
-  hlb->Write();
-  h_dntrax->Write();
-  hzed_res->Write();
+  m_hmu->Write();
+  m_hlb->Write();
+  m_h_dntrax->Write();
+  m_hzed_res->Write();
 
   std::cout << "finalising resplots" << std::endl;
 
-  rdz_vs_zed->Finalise( Resplot::FitNull95 );    rdz_vs_zed->Write();
-  rdz_vs_ntrax->Finalise( Resplot::FitNull95 );  rdz_vs_ntrax->Write();
-  rdz_vs_nvtx->Finalise( Resplot::FitNull95 );   rdz_vs_nvtx->Write();
-  rdz_vs_mu->Finalise( Resplot::FitNull95 );   rdz_vs_mu->Write();
-  rdz_vs_r->Finalise( Resplot::FitNull95 ); rdz_vs_r->Write();
+  m_rdz_vs_zed->Finalise( Resplot::FitNull95 );    m_rdz_vs_zed->Write();
+  m_rdz_vs_ntrax->Finalise( Resplot::FitNull95 );  m_rdz_vs_ntrax->Write();
+  m_rdz_vs_nvtx->Finalise( Resplot::FitNull95 );   m_rdz_vs_nvtx->Write();
+  m_rdz_vs_mu->Finalise( Resplot::FitNull95 );   m_rdz_vs_mu->Write();
+  m_rdz_vs_r->Finalise( Resplot::FitNull95 ); m_rdz_vs_r->Write();
 
-  rdntrax_vs_zed->Finalise( Resplot::FitNull95 ); rdntrax_vs_zed->Write();
-  rdntrax_vs_ntrax->Finalise( Resplot::FitNull95 ); rdntrax_vs_ntrax->Write();
-  rdntrax_vs_r->Finalise( Resplot::FitNull95 ); rdntrax_vs_r->Write();
+  m_rdntrax_vs_zed->Finalise( Resplot::FitNull95 ); m_rdntrax_vs_zed->Write();
+  m_rdntrax_vs_ntrax->Finalise( Resplot::FitNull95 ); m_rdntrax_vs_ntrax->Write();
+  m_rdntrax_vs_r->Finalise( Resplot::FitNull95 ); m_rdntrax_vs_r->Write();
 
-  rdr_vs_zed->Finalise( Resplot::FitNull95 ); rdr_vs_zed->Write();
-  rdr_vs_r->Finalise( Resplot::FitNull95 ); rdr_vs_r->Write();
-  rdr_vs_ntrax->Finalise( Resplot::FitNull95 ); rdr_vs_ntrax->Write();
+  m_rdr_vs_zed->Finalise( Resplot::FitNull95 ); m_rdr_vs_zed->Write();
+  m_rdr_vs_r->Finalise( Resplot::FitNull95 ); m_rdr_vs_r->Write();
+  m_rdr_vs_ntrax->Finalise( Resplot::FitNull95 ); m_rdr_vs_ntrax->Write();
 
-  rnvtxrec_nvtx->Finalise( Resplot::FitNull95 );    rnvtxrec_nvtx->Write();
+  m_rnvtxrec_nvtx->Finalise( Resplot::FitNull95 );    m_rnvtxrec_nvtx->Write();
 
-  eff_zed->finalise();   eff_zed->Bayes()->Write( (eff_zed->name()+"_tg").c_str() );
-  eff_x->finalise();     eff_x->Bayes()->Write( (eff_x->name()+"_tg").c_str() );
-  eff_y->finalise();     eff_y->Bayes()->Write( (eff_y->name()+"_tg").c_str() );
-  eff_r->finalise(); eff_r->Bayes()->Write( (eff_r->name()+"_tg").c_str());
+  m_eff_zed->finalise();   m_eff_zed->Bayes()->Write( (m_eff_zed->name()+"_tg").c_str() );
+  m_eff_x->finalise();     m_eff_x->Bayes()->Write( (m_eff_x->name()+"_tg").c_str() );
+  m_eff_y->finalise();     m_eff_y->Bayes()->Write( (m_eff_y->name()+"_tg").c_str() );
+  m_eff_r->finalise(); m_eff_r->Bayes()->Write( (m_eff_r->name()+"_tg").c_str());
 
-  eff_ntrax->finalise(); eff_ntrax->Bayes()->Write( (eff_ntrax->name()+"_tg").c_str() );
-  eff_nvtx->finalise();  eff_nvtx->Bayes()->Write( (eff_nvtx->name()+"_tg").c_str() );
+  m_eff_ntrax->finalise(); m_eff_ntrax->Bayes()->Write( (m_eff_ntrax->name()+"_tg").c_str() );
+  m_eff_nvtx->finalise();  m_eff_nvtx->Bayes()->Write( (m_eff_nvtx->name()+"_tg").c_str() );
 
-  eff_mu->finalise();  eff_mu->Bayes()->Write( (eff_mu->name()+"_tg").c_str() );
-  eff_lb->finalise();  eff_lb->Bayes()->Write( (eff_lb->name()+"_tg").c_str() );
+  m_eff_mu->finalise();  m_eff_mu->Bayes()->Write( (m_eff_mu->name()+"_tg").c_str() );
+  m_eff_lb->finalise();  m_eff_lb->Bayes()->Write( (m_eff_lb->name()+"_tg").c_str() );
 
 
-  rdx_vs_lb->Finalise( Resplot::FitNull95 );    rdx_vs_lb->Write();
-  rdy_vs_lb->Finalise( Resplot::FitNull95 );    rdy_vs_lb->Write();
-  rdz_vs_lb->Finalise( Resplot::FitNull95 );    rdz_vs_lb->Write();
+  m_rdx_vs_lb->Finalise( Resplot::FitNull95 );    m_rdx_vs_lb->Write();
+  m_rdy_vs_lb->Finalise( Resplot::FitNull95 );    m_rdy_vs_lb->Write();
+  m_rdz_vs_lb->Finalise( Resplot::FitNull95 );    m_rdz_vs_lb->Write();
 
-  mdir->pop();
+  m_dir->pop();
 }
 

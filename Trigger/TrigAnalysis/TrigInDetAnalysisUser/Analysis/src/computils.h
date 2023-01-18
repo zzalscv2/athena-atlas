@@ -464,7 +464,6 @@ public:
     m_entries(0), 
     m_trim_errors(false)
   {
-    // plotref = true;
   }
 
   
@@ -538,7 +537,7 @@ public:
        
       }
 
-      if ( plotref && href() ) { 
+      if ( s_plotref && href() ) {
 	if ( contains(href()->GetName(),"_vs_")  || 
 	     contains(href()->GetName(),"sigma") || 
 	     contains(href()->GetName(),"mean") || 
@@ -599,7 +598,7 @@ public:
 	
 	  char meanrefc[64];
 	  bool displayref = false;
-	  if ( meanplotref && href() ) { 
+	  if ( s_meanplotref && href() ) {
 	    displayref = true;
 	    true_mean muref( href() );
 	    std::sprintf( meanrefc, " <t> = %3.2f #pm %3.2f ms (ref)", muref.mean(), muref.error() );
@@ -710,7 +709,7 @@ public:
 
 
 #if 0
-      if ( plotref && href() ) { 
+      if ( s_plotref && href() ) {
 	if ( contains(href()->GetName(),"_vs_")  || 
 	     contains(href()->GetName(),"sigma") || 
 	     contains(href()->GetName(),"mean") || 
@@ -769,7 +768,7 @@ public:
 
 	char meanrefc[64];
 	bool displayref = false;
-	if ( meanplotref && href() ) { 
+	if ( s_meanplotref && href() ) {
 	  displayref = true;
 	  true_mean muref( href() );
 	  std::sprintf( meanrefc, " <t> = %3.2f #pm %3.2f ms (ref)", muref.mean(), muref.error() );
@@ -856,8 +855,8 @@ public:
 
 public:
 
-  static void setplotref( bool b )     { plotref=meanplotref=b; }
-  static void setmeanplotref( bool b ) { meanplotref=b; }
+  static void setplotref( bool b )     { s_plotref=s_meanplotref=b; }
+  static void setmeanplotref( bool b ) { s_meanplotref=b; }
 
 private:
 
@@ -870,8 +869,8 @@ private:
 
   std::string m_plotfilename;
 
-  static bool plotref;
-  static bool meanplotref;
+  inline static bool s_plotref{true};
+  inline static bool s_meanplotref{true};
 
   size_t  m_max_entries;
   size_t  m_entries;
@@ -879,15 +878,6 @@ private:
   bool m_trim_errors;
 
 };
-
-template<typename T>
-bool tPlotter<T>::plotref = true;
-
-
-template<typename T>
-bool tPlotter<T>::meanplotref = true;
-
-
 
 
 typedef tPlotter<TH1F> Plotter;
@@ -926,25 +916,25 @@ public:
 
   double realmin( double lo=0, double hi=0 ) {
     bool first = true;
-    double _min = 1000;
+    double min = 1000;
     for ( unsigned i=0 ; i<size() ; i++ ) {
       double rmtest = ::realmin( at(i).htest(), false, lo, hi );
-      if ( rmtest!=0 && ( first || _min>rmtest ) ) _min = rmtest;
+      if ( rmtest!=0 && ( first || min>rmtest ) ) min = rmtest;
       if ( rmtest!=0 ) first = false;
     }
-    return _min;
+    return min;
   }
 
   double realmax(double lo=0, double hi=0) {
     bool first = true;
-    double _max = 0;
+    double max = 0;
     for ( unsigned i=0 ; i<size() ; i++ ) {
       //      double rmref  = realmin( at(i).href(), false );
       double rmtest = ::realmax( at(i).htest(), false, lo, hi );
-      if ( rmtest!=0 && ( first || _max<rmtest ) ) _max = rmtest;
+      if ( rmtest!=0 && ( first || max<rmtest ) ) max = rmtest;
       if ( rmtest!=0 ) first = false;
     }
-    return _max;
+    return max;
   }
 
 
@@ -1180,7 +1170,7 @@ public:
     //  for ( unsigned i=0 ; i<size() ; i++,  first=false ) at(i).Draw( i, &leg, means, first, (i==size()-1) );
     for ( unsigned i=size() ; i-- ;  first=false ) at(i).Draw( i, &leg, means, first, i==0 );
 
-    if ( watermark ) DrawLabel(0.1, 0.02, "built "+stime()+release, kBlack, 0.03 );
+    if ( s_watermark ) DrawLabel(0.1, 0.02, "built "+stime()+release, kBlack, 0.03 );
 
     gPad->SetLogy(m_logy);
     gPad->SetLogx(m_logx);
@@ -1216,7 +1206,7 @@ public:
 
 public:
 
-  static void setwatermark(bool b) { watermark = b; }
+  static void setwatermark(bool b) { s_watermark = b; }
 
 private:
   
@@ -1242,7 +1232,7 @@ private:
 
 private:
 
-  static bool watermark;
+  static bool s_watermark;
 
 };
 

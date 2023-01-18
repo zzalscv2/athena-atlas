@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    2016-07-09 23:56:54 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -99,8 +99,8 @@ private:
 
 };
 
-inline std::ostream& operator<<( std::ostream& s, const dataset& _d ) { 
-  return s << _d.directory() << " " << _d.size();
+inline std::ostream& operator<<( std::ostream& s, const dataset& ds ) {
+  return s << ds.directory() << " " << ds.size();
 }
 
 

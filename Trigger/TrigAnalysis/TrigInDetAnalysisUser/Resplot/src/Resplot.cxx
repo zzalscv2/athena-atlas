@@ -11,7 +11,7 @@
  **
  **   @date         Mon Jun 21 18:35:22 BST 2004
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -36,15 +36,15 @@
 ClassImp(Resplot)
 
 
-bool Resplot::mAddDirectoryStatus = true;
-bool Resplot::interpolate_flag = true;
-bool Resplot::nofit = false;
+bool Resplot::s_mAddDirectoryStatus = true;
+bool Resplot::s_interpolate_flag = true;
+bool Resplot::s_nofit = false;
 
 /// use the new error estimates
-bool Resplot::oldrms95   = true;
-bool Resplot::scalerms95 = true;
+bool Resplot::s_oldrms95   = true;
+bool Resplot::s_scalerms95 = true;
 
-Resplot::ERROR Resplot::ErrorSet = Resplot::OK;
+Resplot::ERROR Resplot::s_ErrorSet = Resplot::OK;
 
 
 void binwidth(TH1D* h) { 
@@ -108,12 +108,12 @@ double getWeights(TH2D* h) {
 
 
 
-const std::string Resplot::rversion = "resplot-v29";
+const std::string Resplot::s_rversion = "resplot-v29";
 
-void GetStats( TH1D* h, std::vector<double>& _s ) { 
+void GetStats( TH1D* h, std::vector<double>& stats ) {
 
-  _s.clear();
-  _s.resize(4);
+  stats.clear();
+  stats.resize(4);
 
   TAxis& fXaxis = *h->GetXaxis();
   
@@ -153,18 +153,18 @@ void GetStats( TH1D* h, std::vector<double>& _s ) {
   double rmserror  = std::sqrt(0.25*(sx4/v-v*s))/s;
   //  double rmserror1 = std::sqrt(0.4*(sx4/s-v*v)/s);  << is this the correct one? it seems about 2* too large 
 
-  _s[0] = mu;
-  _s[1] = std::sqrt(v/s);
+  stats[0] = mu;
+  stats[1] = std::sqrt(v/s);
 
-  _s[2] = rms;
-  _s[3] = rmserror;
+  stats[2] = rms;
+  stats[3] = rmserror;
 
   //  double duff = std::sqrt(0.5*v/s);
 
 #if 0
   std::cout << "GetStats() "  
-    //   << "\tmean " << _s[0] << " +- " << _s[1]
-	    << "\trms "  << _s[2] << " +- " << _s[3] << "\t(" << rmserror1 << ")" << "\t root " << duff << std::endl;
+    //   << "\tmean " << stats[0] << " +- " << stats[1]
+	    << "\trms "  << stats[2] << " +- " << stats[3] << "\t(" << rmserror1 << ")" << "\t root " << duff << std::endl;
 #endif
 
 } 
@@ -198,7 +198,7 @@ void Resplot::Initialise(const std::string& name,
   SetPrimary(n1, a1, b1);
   SetSecondary(n2, a2, b2);
 
-  mSet = true;
+  m_Set = true;
   //  TH2D::SetDirectory(0);
 
   m_name = name;
@@ -254,7 +254,7 @@ void Resplot::Initialise(const std::string& name,
   SetPrimary(n1, a1);
   SetSecondary(n2, a2, b2);
 
-  mSet = true;
+  m_Set = true;
   
   m_name = name;
   const std::string name_2d = "2d";
@@ -299,7 +299,7 @@ void Resplot::Initialise(const std::string& name,
   SetPrimary(n1, a1);
   SetSecondary(n2, a2[0], a2[n2+1]);
 
-  mSet = true;
+  m_Set = true;
   
   m_name = name;
   const std::string name_2d = "2d";
@@ -343,7 +343,7 @@ Int_t Resplot::DWrite(TDirectory* g) const {
 
     //   std::cout << "Resplot::Write() Name " << Name() << "; " << gDirectory->GetName();
 
-    TDirectory* _cwd = gDirectory;
+    TDirectory* cwd = gDirectory;
     if ( g ) g->cd();
     Directory d(Name());
     d.push();
@@ -361,7 +361,7 @@ Int_t Resplot::DWrite(TDirectory* g) const {
     gDirectory->mkdir("slices")->cd();
     for ( unsigned i=0 ; i<m_slices.size() ; i++ ) m_slices[i]->Write(); 
     d.pop();
-    _cwd->cd();
+    cwd->cd();
 
     return 0;
 } 
@@ -389,9 +389,9 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
   
   //  gDirectory->pwd();
 
-  ErrorSet = OK;
+  s_ErrorSet = OK;
 
-  //  std::cout << "Resplot::Finalise() Name " << Name() << "\tn_primary " << n_primary << std::endl;
+  //  std::cout << "Resplot::Finalise() Name " << Name() << "\tm_n_primary " << m_n_primary << std::endl;
 
   gStyle->SetOptFit(1111);
   gStyle->SetOptStat(2211);
@@ -410,9 +410,9 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
 
 #if 1
 
-  for ( int i=1 ; i<=n_primary ; i++ ) {    
+  for ( int i=1 ; i<=m_n_primary ; i++ ) {
 
-    if ( i%1000==0 ) std::cout << "slice " << i << " of " << n_primary << std::endl;
+    if ( i%1000==0 ) std::cout << "slice " << i << " of " << m_n_primary << std::endl;
 
     //    std::string projname = tagname(m_name,i).c_str();
     double pllim = m_mean->GetBinLowEdge(i);
@@ -442,9 +442,9 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
     TF1* f1 = 0;
 
 
-    if ( !nofit ) f1 = func(s, a, b); 
+    if ( !s_nofit ) f1 = func(s, a, b);
 
-    //    std::cout << "nofit " << nofit << "\tf1 " << f1 << std::endl;
+    //    std::cout << "nofit " << s_nofit << "\tf1 " << f1 << std::endl;
 
 
     //    unZeroErrors(s);
@@ -507,7 +507,7 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
 
   TF1* f2 = 0;
 
-  if ( !nofit ) { 
+  if ( !s_nofit ) {
     ZeroErrors(m_h1d);
     f2 = func(m_h1d, a, b);
     unZeroErrors(m_h1d);  
@@ -519,10 +519,10 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
     f2->SetLineWidth(1);
     f2->SetNpx(5000);
 
-    g_mean  = StatVal( f2->GetParameter(1), f2->GetParError(1) );
-    g_sigma = StatVal( f2->GetParameter(2), f2->GetParError(2) );
+    m_g_mean  = StatVal( f2->GetParameter(1), f2->GetParError(1) );
+    m_g_sigma = StatVal( f2->GetParameter(2), f2->GetParError(2) );
 
-    //    std::cout << gDirectory->GetName() << "\tgmean " << g_mean << "\tgsigma " << g_sigma << std::endl;  
+    //    std::cout << gDirectory->GetName() << "\tgmean " << m_g_mean << "\tgsigma " << g_sigma << std::endl;
     
     std::string mname = std::string(f2->GetParName(1));
     std::string sname = std::string(f2->GetParName(2));
@@ -535,9 +535,9 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
     delete f2;
   }
   else {
-    if ( !nofit ) std::cerr << "null overall fit Resplot:" << m_name << std::endl;
-    g_mean  = StatVal(0,0);
-    g_sigma = StatVal(0,0);
+    if ( !s_nofit ) std::cerr << "null overall fit Resplot:" << m_name << std::endl;
+    m_g_mean  = StatVal(0,0);
+    m_g_sigma = StatVal(0,0);
   }
 
 
@@ -545,12 +545,12 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
   
   m_finalised = true;
 
-  if ( ErrorSet!=OK ) {  
-    if ( ErrorSet == HISTOWIDTH ) { 
+  if ( s_ErrorSet!=OK ) {
+    if ( s_ErrorSet == HISTOWIDTH ) {
       std::cerr << __FUNCTION__ << " for " << m_name 
 		<< " :\tdistribution wider than histogram width " << std::endl;
     }
-    if ( ErrorSet == BINWIDTH ) {
+    if ( s_ErrorSet == BINWIDTH ) {
       std::cerr << __FUNCTION__ << " for " << m_name 
 		<< " :\tbins too wide: cannot calculate rms95 " << std::endl;
     }
@@ -802,8 +802,7 @@ TH2D* Resplot::combine(const TH2* h, double inveps2) {
 	  /// bin error
 	  double ne  = h->GetBinError(i,j);
 	  double nhe = h2->GetBinError(xbin+1, j);
-	  double _ne = std::sqrt( ne*ne + nhe*nhe );
-	  h2->SetBinError(xbin+1, j, _ne );
+	  h2->SetBinError(xbin+1, j, std::sqrt( ne*ne + nhe*nhe ) );
 
 	}
       }
@@ -966,7 +965,7 @@ TH1D* Resplot::GetEfficiencies(const std::string& hname, double lower, double up
   if ( m_xaxis!="" ) e->SetXTitle(m_xaxis.c_str());
   
 
-  for ( int i=1 ; i<=n_primary ; i++ ) {
+  for ( int i=1 ; i<=m_n_primary ; i++ ) {
     TH1D* s = m_h2d->ProjectionY(tagname(hname,i), i, i, "e");
     StatVal v = GetEfficiency(s, lower, upper);
     e->SetBinContent(i, v.value);
@@ -1000,7 +999,7 @@ TH1D* Resplot::GetEfficiencies(const std::string& hname, double Nsigma ) {
   if ( m_xaxis!="" ) e->SetXTitle(m_xaxis.c_str());
   
 
-  for ( int i=1 ; i<=n_primary ; i++ ) {
+  for ( int i=1 ; i<=m_n_primary ; i++ ) {
     
     double mean  = m_mean->GetBinContent(i);
     double sigma = m_sigma->GetBinContent(i);
@@ -1097,9 +1096,9 @@ TF1* Resplot::FitCentralGaussian(TH1D* s, double , double ) {
   
   if (nbins>2) {
 
-    TH1D* _s = (TH1D*)s->Clone("duff");
-    _s->SetDirectory(0);
-    _s->Fit(f1,"Q");
+    TH1D* s_tmp = (TH1D*)s->Clone("duff");
+    s_tmp->SetDirectory(0);
+    s_tmp->Fit(f1,"Q");
    
     if ( f1 ) { 
       /// if the fit is "bad" fit only to the central region
@@ -1127,10 +1126,10 @@ TF1* Resplot::FitCentralGaussian(TH1D* s, double , double ) {
 
 
       
-      int _nbins=0;
-      for (int j=1 ; j<=s->GetNbinsX() ; j++) if ( s->GetBinCenter(j)>llim && s->GetBinCenter(j)<ulim  ) _nbins++;
+      int nbins=0;
+      for (int j=1 ; j<=s->GetNbinsX() ; j++) if ( s->GetBinCenter(j)>llim && s->GetBinCenter(j)<ulim  ) nbins++;
       
-      if ( _nbins>2 ) { 
+      if ( nbins>2 ) {
 	
 	//      if ( frac>3 )  s->Fit(f1,"Q");
 	//      else           s->Fit(f1,"Q", "", llim, ulim);
@@ -1141,7 +1140,7 @@ TF1* Resplot::FitCentralGaussian(TH1D* s, double , double ) {
       }
       else for ( int j=0 ; j<3 ; j++ ) f1->SetParameter(j, 0);
 
-      delete _s;
+      delete s_tmp;
  
     }
 
@@ -1345,12 +1344,12 @@ double FindMean(TH1D* s, double frac=0.95) {
     int i=1;
     while ( true ) { 
       
-      int _upperbin = imax+i;
-      int _lowerbin = imax-i;
+      const int upperbin_i = imax+i;
+      const int lowerbin_i = imax-i;
       
-      if ( _upperbin>s->GetNbinsX() || _lowerbin<1 ) break; 
+      if ( upperbin_i>s->GetNbinsX() || lowerbin_i<1 ) break;
       
-      double tsum = sumn + s->GetBinContent(_upperbin) + s->GetBinContent(_lowerbin);
+      double tsum = sumn + s->GetBinContent(upperbin_i) + s->GetBinContent(lowerbin_i);
       
       if ( tsum>entries*frac ) { 
 	//	uppersum = tsum/entries; 
@@ -1361,8 +1360,8 @@ double FindMean(TH1D* s, double frac=0.95) {
       
       sumn = tsum;
       
-      upperbin = _upperbin;
-      lowerbin = _lowerbin;
+      upperbin = upperbin_i;
+      lowerbin = lowerbin_i;
       
       i++;
     }
@@ -1479,7 +1478,7 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
   
   if ( sumn>entries*frac ) {
     s->GetXaxis()->SetRange(1,s->GetNbinsX());
-    ErrorSet = BINWIDTH;
+    s_ErrorSet = BINWIDTH;
     return f;
   }
 
@@ -1488,12 +1487,12 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
     int i=1;
     while ( true ) { 
       
-      int _upperbin = imax+i;
-      int _lowerbin = imax-i;
+      const int upperbin_i = imax+i;
+      const int lowerbin_i = imax-i;
       
-      if ( _upperbin>s->GetNbinsX() || _lowerbin<1 ) break; 
+      if ( upperbin_i>s->GetNbinsX() || lowerbin_i<1 ) break;
       
-      double tsum = sumn + s->GetBinContent(_upperbin) + s->GetBinContent(_lowerbin);
+      double tsum = sumn + s->GetBinContent(upperbin_i) + s->GetBinContent(lowerbin_i);
       
       //      std::cout << i << " frac: " << lowersum 
       //		<< "\tx " << s->GetBinCenter(lowerbin) 
@@ -1508,8 +1507,8 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
 
       sumn = tsum;
       
-      upperbin = _upperbin;
-      lowerbin = _lowerbin;
+      upperbin = upperbin_i;
+      lowerbin = lowerbin_i;
       
       //      if ( std::fabs(lowersum-frac)<0.1 ) 
 
@@ -1519,7 +1518,7 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
 
   if ( uppersum==0 ) { 
     s->GetXaxis()->SetRange(1,s->GetNbinsX());
-    ErrorSet = HISTOWIDTH;
+    s_ErrorSet = HISTOWIDTH;
     return f;
   } 
 
@@ -1546,7 +1545,7 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
 
     //    std::cout << "GetEntries " << s->GetName() << " " << sentries << std::endl; 
 
-    if ( interpolate_flag ) { 
+    if ( s_interpolate_flag ) {
       s->GetXaxis()->SetRange(lowerbin, upperbin);
 
       //      std::cout << "GetEntries " << s->GetName() << " " << generate::GetEntries(s,lowerbin,upperbin)/sentries << std::endl; 
@@ -1640,7 +1639,7 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
     /// a "corrected" rms of the inner 0.95% of the data, 
     /// corrected such that for a gaussian, will return 1.
     double scale = 1;
-    if ( scalerms95 ) scale = 1.1479538518; 
+    if ( s_scalerms95 ) scale = 1.1479538518;
 
 
     
@@ -1672,14 +1671,14 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
 
 
 TF1* Resplot::FitNull95(TH1D* s, double , double  ) {
-  //  if ( oldrms95 ) return Resplot::FitNull95Obsolete(s, 0.95, true ); /// use approximate root errors for speed
-  if ( oldrms95 ) return Resplot::FitNull95Obsolete( s, 0.95 ); /// use approximate root errors for speed
+  //  if ( s_oldrms95 ) return Resplot::FitNull95Obsolete(s, 0.95, true ); /// use approximate root errors for speed
+  if ( s_oldrms95 ) return Resplot::FitNull95Obsolete( s, 0.95 ); /// use approximate root errors for speed
   else            return Resplot::FitNull95New(s);
 } 
 
 
 
-int _nexperiments     = 0;
+int  nexperiments_     = 0;
 int  nexperiments_max = 40;
 int  nexperiments_min = 20;
 
@@ -1703,32 +1702,32 @@ TF1* Resplot::FitNull95New(TH1D* s, double, bool ) { // double frac, bool useroo
 
 
   //  double _entries = getWeights( s );
-  double _entries = s->GetEffectiveEntries();
+  const double entries = s->GetEffectiveEntries();
 
 
   //  int nexperiments = 20+int(800/std::sqrt(s->GetEntries()));
   //  int nexperiments = 20+int(800/std::sqrt(s->GetEntries()));
-  int nexperiments = 20+int(1000/_entries);
+  int nexperiments = 20+int(1000/entries);
   
-  if ( _nexperiments!=0 ) nexperiments = _nexperiments;
+  if ( nexperiments_!=0 ) nexperiments = nexperiments_;
 
 
   if ( nexperiments>nexperiments_max ) nexperiments = nexperiments_max;
   if ( nexperiments<nexperiments_min ) nexperiments = nexperiments_min;
   
-  //  std::cout << "FitNull95  entries " << _entries << "\tnexperiments " << nexperiments << std::endl; 
+  //  std::cout << "FitNull95  entries " << entries << "\tnexperiments " << nexperiments << std::endl;
 
-  //  std::cout << "experiments " << _nexperiments << std::endl;
+  //  std::cout << "experiments " << nexperiments_ << std::endl;
 
   //  std::cout << "h entries " << s->GetEntries() << "\tn experiments " << nexperiments << "\tN " << s->GetEntries()*nexperiments  << std::endl;
 
   /// calculate the 
-  generate::experiment e( s, nexperiments, _entries );
+  generate::experiment e( s, nexperiments, entries );
   
   /// a "corrected" rms of the inner 0.95% of the data, 
   /// corrected such that for a gaussian, will return 1.
   double scale = 1;
-  if ( scalerms95 ) scale = 1.1479538518; 
+  if ( s_scalerms95 ) scale = 1.1479538518;
 
   //  f->FixParameter( 1, s->GetMean() );     
   f->FixParameter( 1, e.hmean() );     
@@ -1807,12 +1806,12 @@ TF1* Resplot::FitNull95Central(TH1D* s) {
     int i=1;
     while ( true ) { 
       
-      int _upperbin = imax+i;
-      int _lowerbin = imax-i;
+      const int upperbin_i = imax+i;
+      const int lowerbin_i = imax-i;
       
-      if ( _upperbin>s->GetNbinsX() || _lowerbin<1 ) break; 
+      if ( upperbin_i>s->GetNbinsX() || lowerbin_i<1 ) break;
       
-      double tsum = sumn + s->GetBinContent(_upperbin) + s->GetBinContent(_lowerbin);
+      double tsum = sumn + s->GetBinContent(upperbin_i) + s->GetBinContent(lowerbin_i);
       
       if ( tsum>entries*frac ) { uppersum = tsum/entries; break; }
       
@@ -1820,8 +1819,8 @@ TF1* Resplot::FitNull95Central(TH1D* s) {
 
       sumn = tsum;
       
-      upperbin = _upperbin;
-      lowerbin = _lowerbin;
+      upperbin = upperbin_i;
+      lowerbin = lowerbin_i;
       
       i++;
     }
@@ -1845,7 +1844,7 @@ TF1* Resplot::FitNull95Central(TH1D* s) {
 
     std::vector<double> stats;
 
-    if ( interpolate_flag ) { 
+    if ( s_interpolate_flag ) {
       s->GetXaxis()->SetRange(lowerbin, upperbin);
 
 
@@ -2016,7 +2015,7 @@ TF1* Resplot::FitXExp(TH1D* s, double a, double b) {
 
 
 
-Double_t langaufun(Double_t *_x, Double_t *par) {         
+Double_t langaufun(Double_t *x_par, Double_t *par) {
 
   //Fit parameters:
   //par[0]=Total area (integral -inf to inf, normalization constant)
@@ -2037,7 +2036,7 @@ Double_t langaufun(Double_t *_x, Double_t *par) {
       Double_t np = 500;   // number of convolution steps
       Double_t sc =   5;   // convolution extends to +-sc Gaussian sigmas
 
-      double& x = _x[0];     
+      double& x = x_par[0];
 
       // Variables
       Double_t xx;

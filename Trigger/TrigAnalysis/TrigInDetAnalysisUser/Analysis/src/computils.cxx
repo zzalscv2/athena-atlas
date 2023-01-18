@@ -39,7 +39,7 @@ bool LINEF = true;
 bool LINES = false;
 
 
-bool Plots::watermark = true;
+bool Plots::s_watermark = true;
 
 int   colours[6] = {  1,    2, kBlue-4,  6, kCyan-2,  kMagenta+2 };
 int   markers[6] = { 20,   24,      25, 26,      25,          22 };
@@ -237,14 +237,14 @@ bool fcontains( const std::string& s, const std::string& p) {
 double plotable( TH1* h ) { // , double xlo, double xhi ) {
   double n = 0;
     
-  double _xlo = h->GetBinLowEdge(1);
-  double _xhi = h->GetBinLowEdge(h->GetNbinsX()+1);
+  double xlo = h->GetBinLowEdge(1);
+  double xhi = h->GetBinLowEdge(h->GetNbinsX()+1);
 
   //  if ( xlo!=-999 ) _xlo = xlo;
   //  if ( xhi!=-999 ) _xhi = xhi;
 
   for ( int i=h->GetNbinsX()+1 ; --i ; ) {
-    if ( h->GetBinCenter(i)>_xlo && h->GetBinCenter(i)<_xhi ) n += h->GetBinContent(i);
+    if ( h->GetBinCenter(i)>xlo && h->GetBinCenter(i)<xhi ) n += h->GetBinContent(i);
   } 
   return n;
 }

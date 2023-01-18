@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    $Id: event_selector.h 513250 2012-08-10 14:35:11Z 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -41,8 +41,8 @@ public:
 };
 
 
-inline std::ostream& operator<<( std::ostream& s, const event_selector& _e ) { 
-  return s << _e.size();
+inline std::ostream& operator<<( std::ostream& s, const event_selector& es ) {
+  return s << es.size();
 }
 
 

@@ -29,7 +29,7 @@
 
 
 
-std::vector<std::string> ReadCards::mPath;
+std::vector<std::string> ReadCards::m_Path;
 
 /** set up the search path for the config files
  **/
@@ -47,12 +47,12 @@ void ReadCards::CreatePath() {
     std::string config_path = getenv("CONFIG_PATH");
     std::cout << "ReadCards::CONFIG_PATH " << config_path << std::endl;
     while ( config_path.size() ) {
-      mPath.push_back(chop(config_path, ":")+'/');
+      m_Path.push_back(chop(config_path, ":")+'/');
     }
   }
-  mPath.push_back("");
-  mPath.push_back(std::string( RESPLOTDIR )+'/');
-  //  for ( int i=0 ; i<mPath.size() ; i++ )   cout << "ReadCards>>CreatePath() mPath[" << i << "]=" << mPath[i] << endl;
+  m_Path.push_back("");
+  m_Path.push_back(std::string( RESPLOTDIR )+'/');
+  //  for ( int i=0 ; i<m_Path.size() ; i++ )   cout << "ReadCards>>CreatePath() m_Path[" << i << "]=" << m_Path[i] << endl;
 }
 
 
@@ -61,16 +61,16 @@ void ReadCards::CreatePath() {
 
 void ReadCards::Construct(const std::string& filename) {
   
-  if ( mPath.size()==0 ) CreatePath();
-  for ( unsigned i=0 ; i<mPath.size() ; i++ ) { 
-    std::string tmp_filename = mPath[i]+filename;
+  if ( m_Path.size()==0 ) CreatePath();
+  for ( unsigned i=0 ; i<m_Path.size() ; i++ ) {
+    std::string tmp_filename = m_Path[i]+filename;
     if ( canopen(tmp_filename) ) { 
-      mFileName = tmp_filename; 
+      m_FileName = tmp_filename;
       break;
     } 
   }
 
-  if ( mFileName.size()==0 ) {
+  if ( m_FileName.size()==0 ) {
     cerr << "ReadCards::Construct() cannot open file " << filename << endl; 
     exit(0);      
   }
@@ -80,24 +80,24 @@ void ReadCards::Construct(const std::string& filename) {
 
   char tfile[1024];
 
-  if ( mFileName.find('/')==std::string::npos ) std::sprintf( tfile, ".readcards-%s-%d", mFileName.c_str(), pid );
+  if ( m_FileName.find('/')==std::string::npos ) std::sprintf( tfile, ".readcards-%s-%d", m_FileName.c_str(), pid );
   else                                          std::sprintf( tfile, ".readcards-%d", pid );
 
   char cmd[2056];
-  std::sprintf( cmd, "cpp -I. -P %s > %s", mFileName.c_str(), tfile );
+  std::sprintf( cmd, "cpp -I. -P %s > %s", m_FileName.c_str(), tfile );
 
   std::system( cmd );
 
   std::cout << "pid: " << pid << "  " << tfile << std::endl;
 
   //  ReadCards inputdata(datafile);                                                                                                                  
-  //  mFile.open(mFileName.c_str());
-  mFile.open(tfile);
-  cout << "ReadCards::Construct() opening " << mFileName << endl; 
+  //  m_File.open(m_FileName.c_str());
+  m_File.open(tfile);
+  cout << "ReadCards::Construct() opening " << m_FileName << endl;
   ReadParam();
   //  cout << "ReadCards::Construct() read  " 
-  //       << mValues.size() << " entries" << endl; 
-  mFile.close();
+  //       << m_Values.size() << " entries" << endl;
+  m_File.close();
 
   std::sprintf( cmd, "rm %s", tfile );
   std::system( cmd );
@@ -124,14 +124,14 @@ void ReadCards::clean() {
   ostringstream os(ostringstream::out);
   std::string line;
  
-  //  cout << "ReadCards reading from file " << mFileName << endl;
+  //  cout << "ReadCards reading from file " << m_FileName << endl;
   
   
-  while ( !mFile.eof() ) {
+  while ( !m_File.eof() ) {
     size_t pos;
 
     
-    getline(mFile,line,'\n');
+    getline(m_File,line,'\n');
 
     //    cout << ">> " << line << endl;
 
@@ -184,9 +184,9 @@ void ReadCards::clean() {
     if ( line.size() )    os << line;
   }
 
-  // cout << "ReadCards read " << i << " lines from file " << mFileName << endl;
+  // cout << "ReadCards read " << i << " lines from file " << m_FileName << endl;
 
-  mString = os.str();
+  m_String = os.str();
 }
 
 
@@ -200,45 +200,45 @@ void ReadCards::parse()
 
   //  std::string shafted;
 
-  chopends(mString);
+  chopends(m_String);
 
-  while ( mString.size() ) {
+  while ( m_String.size() ) {
     
-    //    cout << "mString.size() " <<  mString.size() << endl;
+    //    cout << "m_String.size() " <<  m_String.size() << endl;
 
-    //    if ( mString.size()<3 ) cout << "mString >" << mString << "<" << endl;
+    //    if ( m_String.size()<3 ) cout << "m_String >" << m_String << "<" << endl;
 
     // break at semi colons that are not within "" pairs
 
-    size_t pos = mString.find(';');
+    size_t pos = m_String.find(';');
     
     while ( pos != std::string::npos ) { 
 
-      std::string duff =  mString.substr(0,pos);
+      std::string duff =  m_String.substr(0,pos);
     
       //      size_t n = std::count(duff.begin(), duff.end(), "\"");
       size_t n = count( duff, "\"" );
       
       if ( n%2==0 ) { 
 	/* Make the replacement. */
-	mString.replace( pos, 1, "|");
+	m_String.replace( pos, 1, "|");
       }
       else { 
-	mString.replace( pos, 1, "####");
+	m_String.replace( pos, 1, "####");
       }
 
       //      std::cout << "duff: " << duff << " : " << n << " " << std::endl;
 
 
-      pos = mString.find(';');
+      pos = m_String.find(';');
 
     }      
 
-    if ( mString.find('|')==std::string::npos ) { 
-      error("syntax error, missing semicolon at end of input " + mString );
+    if ( m_String.find('|')==std::string::npos ) {
+      error("syntax error, missing semicolon at end of input " + m_String );
     }
 
-    string input = choptoken(mString,"|"); // shafted = input;
+    string input = choptoken(m_String,"|"); // shafted = input;
     string line  = input;   
     
     // copy the unparsed line
@@ -324,11 +324,11 @@ void ReadCards::parse()
     //Note: nargs is unused unless the debug code below is uncommented
     //int nargs = 0;
 
-    bool _empty = true;
+    bool empty = true;
     
     while ( line.size() ) {
 
-      _empty = false;
+      empty = false;
 
       // get rid of spaces at either end of line
       chopends(line);
@@ -389,7 +389,7 @@ void ReadCards::parse()
       values.push_back(token);
     }
 
-    if ( !_empty ) { 
+    if ( !empty ) {
     
       // check the vector had braces
       if ( bra.empty() && values.size()>1 ) error("missing braces : " + input);
@@ -397,7 +397,7 @@ void ReadCards::parse()
       // missing value
       if ( values.empty() ) { 
 	//  std::cout << "shafted :" << shafted << ":" << std::endl; 
-	//      std::cout << "\nmString " << mString << std::endl;  
+	//      std::cout << "\nm_String " << m_String << std::endl;
 	error("tag with no value : " + input);      
       }  
       
@@ -406,7 +406,7 @@ void ReadCards::parse()
       AddTag(tagname,values);
     }
 
-    chopends(mString);
+    chopends(m_String);
   }
 }
 
@@ -482,18 +482,18 @@ void ReadCards::ReadParam()
 
 
 void ReadCards::print() {
-  //  cout << "ReadCards::print()  read " << mValues.size() << " cards from file " << mFileName << endl;
-  for ( unsigned i=0 ; i<mValues.size() ; i++ ) {
-    //    cout << "  ReadCards::print()  read " << mValues[i].Tag() << " =";
-    //    cout << "  read  " << mValues[i].Tag() << " =";
+  //  cout << "ReadCards::print()  read " << m_Values.size() << " cards from file " << m_FileName << endl;
+  for ( unsigned i=0 ; i<m_Values.size() ; i++ ) {
+    //    cout << "  ReadCards::print()  read " << m_Values[i].Tag() << " =";
+    //    cout << "  read  " << m_Values[i].Tag() << " =";
 
-    printf("read tag  %s\t = ", mValues[i].Tag().c_str() );
+    printf("read tag  %s\t = ", m_Values[i].Tag().c_str() );
    
-    for ( unsigned j=0 ; j<mValues[i].Val().size() ; j++ ) {
-      // if ( mValues[i].Val().size()>5 ) if (!(j%5)) cout << endl << "            ";  
-      // cout << " " << (mValues[i].Val())[j];
+    for ( unsigned j=0 ; j<m_Values[i].Val().size() ; j++ ) {
+      // if ( m_Values[i].Val().size()>5 ) if (!(j%5)) cout << endl << "            ";
+      // cout << " " << (m_Values[i].Val())[j];
 
-      const std::vector<std::string>& vals = mValues[i].Val();
+      const std::vector<std::string>& vals = m_Values[i].Val();
       
       if ( vals[j].size()>10 || ( vals.size()>5 && !(j%5) ) ) printf("\n\t\t\t");
       printf("%s ", vals[j].c_str() ); 
