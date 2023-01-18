@@ -8,6 +8,7 @@
 #include "../ViewContainerThinning.h"
 #include "../JetExternalAssocTool.h"
 #include "../TVAAugmentationTool.h"
+#include "../ClusterMetAugmentationTool.h"
 
 using namespace DerivationFramework;
  
@@ -20,6 +21,7 @@ DECLARE_TOOL_FACTORY( METTriggerAugmentationTool )
 DECLARE_TOOL_FACTORY( ViewContainerThinning )
 DECLARE_TOOL_FACTORY( JetExternalAssocTool )
 DECLARE_TOOL_FACTORY( TVAAugmentationTool )
+DECLARE_TOOL_FACTORY( ClusterMetAugmentationTool )
 
 DECLARE_FACTORY_ENTRIES( DerivationFrameworkJetEtMiss ) {
 
@@ -32,5 +34,6 @@ DECLARE_FACTORY_ENTRIES( DerivationFrameworkJetEtMiss ) {
     DECLARE_TOOL( ViewContainerThinning )
     DECLARE_TOOL( JetExternalAssocTool )
     DECLARE_TOOL( TVAAugmentationTool )
+    DECLARE_TOOL( ClusterMetAugmentationTool)
 
 }

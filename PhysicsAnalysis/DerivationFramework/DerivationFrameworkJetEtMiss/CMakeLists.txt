@@ -31,6 +31,7 @@ atlas_depends_on_subdirs( PUBLIC
                           InnerDetector/InDetRecTools/TrackVertexAssociationTool
                           Trigger/TrigAnalysis/TrigAnalysisInterfaces
 			  Reconstruction/Jet/JetMomentTools
+        Control/AthToolSupport/AsgTools
 			  )
 
 # External dependencies:
@@ -42,7 +43,7 @@ atlas_add_library( DerivationFrameworkJetEtMissLib
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel
-                   PRIVATE_LINK_LIBRARIES AthenaBaseComps xAODCore xAODJet xAODPFlow xAODTracking xAODTrigger xAODTruth JetInterface FTagAnalysisInterfacesLib JetJvtEfficiency JetAnalysisInterfacesLib PathResolver PFlowUtils AssociationUtilsLib JetMomentToolsLib
+                   PRIVATE_LINK_LIBRARIES AthenaBaseComps xAODCore xAODJet xAODPFlow xAODTracking xAODTrigger xAODTruth JetInterface FTagAnalysisInterfacesLib JetJvtEfficiency JetAnalysisInterfacesLib PathResolver PFlowUtils AssociationUtilsLib JetMomentToolsLib JetCalibToolsLib
 InDetTrackSelectionToolLib # QGTaggerTool for nTracks ### 
 ParticleJetToolsLib # JetTruthLabelingTool ###
 TrackVertexAssociationToolLib
@@ -51,7 +52,7 @@ TrackVertexAssociationToolLib
 atlas_add_component( DerivationFrameworkJetEtMiss
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthenaBaseComps xAODCore xAODJet xAODPFlow xAODTracking xAODTrigger xAODTruth JetInterface FTagAnalysisInterfacesLib JetJvtEfficiency JetAnalysisInterfacesLib PathResolver PFlowUtils DerivationFrameworkJetEtMissLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AthenaBaseComps xAODCore xAODJet xAODPFlow xAODTracking xAODTrigger xAODTruth JetInterface FTagAnalysisInterfacesLib JetJvtEfficiency JetAnalysisInterfacesLib PathResolver PFlowUtils DerivationFrameworkJetEtMissLib JetCalibToolsLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )
