@@ -94,6 +94,10 @@ def JETM5KernelCfg(ConfigFlags, name='JETM5Kernel', **kwargs):
                                       ThinningTools = thinningTools,
                                       SkimmingTools = [skimmingTool] if not ConfigFlags.Input.isMC else []))       
 
+
+    # PFlow augmentation tool
+    from DerivationFrameworkJetEtMiss.PFlowCommonConfig import PFlowCommonCfg
+    acc.merge(PFlowCommonCfg(ConfigFlags))
     
     return acc
 
@@ -129,7 +133,9 @@ def JETM5Cfg(ConfigFlags):
     JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
                                         "MuonSegments",
                                         "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape",
-                                        "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects", "UFOCSSK"]
+                                        "GlobalNeutralParticleFlowObjects", "GlobalChargedParticleFlowObjects", 
+                                        "CHSGChargedParticleFlowObjects", "CHSGNeutralParticleFlowObjects",
+                                        "UFOCSSK"]
 
 
     JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
