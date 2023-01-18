@@ -93,9 +93,7 @@ HepMcParticleLink::ExtendedBarCode::ExtendedBarCode (ExtendedBarCode&& rhs) noex
     m_evtIndex (rhs.m_evtIndex.load()), // no move constructor for atomics
     m_evtColl (std::exchange(rhs.m_evtColl,EBC_MAINEVCOLL))
 {
-  // FIXME do we need to reset rhs.m_evtIndex here?
 }
-
 
 /**
  * @brief Assignment.  (Can't be defaulted due to the atomic member.)
@@ -112,6 +110,20 @@ HepMcParticleLink::ExtendedBarCode::operator= (const ExtendedBarCode& rhs)
   return *this;
 }
 
+/**
+ * @brief Assignment.  (Can't be defaulted due to the atomic member.)
+ */
+inline
+HepMcParticleLink::ExtendedBarCode&
+HepMcParticleLink::ExtendedBarCode::operator= (ExtendedBarCode&& rhs) noexcept
+{
+  if (this != &rhs) {
+    m_BC = std::exchange(rhs.m_BC, 0);
+    m_evtIndex = static_cast<index_type>(rhs.m_evtIndex.load());
+    m_evtColl = std::exchange(rhs.m_evtColl, EBC_MAINEVCOLL);
+  }
+  return *this;
+}
 
 /**
  * @brief Barcode of target variable (0 for a null link).
@@ -456,46 +468,6 @@ HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                        Atlas::getExtendedEventContext(ctx).proxy())
 {
 }
-
-
-/**
- * @brief Copy constructor.
- */
-inline
-HepMcParticleLink::HepMcParticleLink (const HepMcParticleLink& rhs)
-  : m_store(rhs.m_store),
-    m_ptr(rhs.m_ptr),
-    m_extBarcode(rhs.m_extBarcode)
-{
-}
-
-
-/**
- * @brief Move constructor.
- */
-inline
-HepMcParticleLink::HepMcParticleLink (HepMcParticleLink&& rhs) noexcept
-  : m_store(std::exchange(rhs.m_store,nullptr)),
-  m_ptr(std::move(rhs.m_ptr)),
-  m_extBarcode(std::move(rhs.m_extBarcode))
-{
-}
-
-
-/**
- * @brief Assignment.
- */
-inline
-HepMcParticleLink& HepMcParticleLink::operator= (const HepMcParticleLink& rhs)
-{
-  if (this != &rhs) {
-    m_store = rhs.m_store;
-    m_ptr = rhs.m_ptr;
-    m_extBarcode = rhs.m_extBarcode;
-  }
-  return *this;
-}
-
 
 /**
  * @brief Dereference.

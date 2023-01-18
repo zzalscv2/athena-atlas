@@ -158,6 +158,10 @@ public:
      */
     ExtendedBarCode& operator= (const ExtendedBarCode& rhs);
 
+    /**
+     * @brief Move Assignment.  (Can't be defaulted due to the atomic member.)
+     */
+    ExtendedBarCode& operator= (ExtendedBarCode&& rhs) noexcept;
 
     /**
      * @brief Barcode of target variable (0 for a null link).
@@ -436,19 +440,23 @@ public:
   /**
    * @brief Copy constructor.
    */
-  HepMcParticleLink(const HepMcParticleLink& rhs);
+  HepMcParticleLink(const HepMcParticleLink& rhs) = default;
 
 
   /**
    * @brief Move constructor.
    */
-  HepMcParticleLink(HepMcParticleLink&& rhs) noexcept;
-
+  HepMcParticleLink(HepMcParticleLink&& rhs) noexcept = default;
 
   /**
    * @brief Assignment.
    */
-  HepMcParticleLink& operator= (const HepMcParticleLink& rhs);
+  HepMcParticleLink& operator=(const HepMcParticleLink& rhs) = default;
+
+  /**
+   * @brief Move Assignment.
+   */
+  HepMcParticleLink& operator=(HepMcParticleLink&& rhs) = default;
 
 
   /// \name pointer interface
