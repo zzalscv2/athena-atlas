@@ -179,7 +179,7 @@ def ITkTrackRecoOutputCfg(flags):
         toESD += ["TrackCollection#SiSPSeedSegments"]
 
     toESD += ["TrackCollection#SiSPSeededTracks"]
-    toESD += ["TrackCollection#CombinedInDetTracks"]
+    toESD += ["TrackCollection#CombinedITkTracks"]
 
     ##### AOD #####
     toAOD += ["xAOD::TrackParticleContainer#InDetTrackParticles"]
