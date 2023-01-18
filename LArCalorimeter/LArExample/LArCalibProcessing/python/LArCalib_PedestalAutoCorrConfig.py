@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 
@@ -220,8 +220,8 @@ if __name__ == "__main__":
     
     ConfigFlags.Input.Files=ConfigFlags.LArCalib.Input.Files
     
-    ConfigFlags.LArCalib.Output.ROOTFile="ped.root"
-
+    ConfigFlags.LArCalib.Output.ROOTFile="larpededest.root"
+    ConfigFlags.LArCalib.Output.POOLFile="larpedestal.pool.root"
     ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=CONDBR2"
     ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-00"
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
