@@ -1,11 +1,11 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 import math
 
 
-def CTPUnpackingMonitoring(maxItems, maxChains):
+def CTPUnpackingMonitoring(flags, maxItems, maxChains):
     tool = GenericMonitoringTool('MonTool')
     tool.HistPath="HLTFramework/HLTSeeding"
     tool.defineHistogram('TAVItems', path='EXPERT', type='TH1F', title='Number of active L1 TAV items;N Items;N Events',
@@ -15,7 +15,7 @@ def CTPUnpackingMonitoring(maxItems, maxChains):
     return tool
 
 
-def RoIsUnpackingMonitoring(prefix, maxCount, maxEta=3.):
+def RoIsUnpackingMonitoring(flags, prefix, maxCount, maxEta=3.):
     tool = GenericMonitoringTool('MonTool')
     tool.HistPath = f'HLTFramework/HLTSeeding/RoIs_{prefix}'
     tool.defineHistogram('count', path='EXPERT', type='TH1F', title=f'Number of {prefix} RoIs;N RoIs;N Events',
@@ -30,7 +30,7 @@ def RoIsUnpackingMonitoring(prefix, maxCount, maxEta=3.):
     return tool
 
 
-def PrescalingMonitoring():
+def PrescalingMonitoring(flags):
     tool = GenericMonitoringTool('MonTool')
     tool.HistPath="HLTFramework/HLTSeeding"
     tool.defineHistogram('LB,HLTPSK', path='EXPERT', type='TH2I', opt='kAddBinsDynamically',

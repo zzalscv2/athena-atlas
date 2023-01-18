@@ -1,8 +1,8 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def HLTResultMTMakerCfg(name="HLTResultMTMaker"):
+def HLTResultMTMakerCfg(flags, name="HLTResultMTMaker"):
    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
    m = CompFactory.HLTResultMTMaker(name)
@@ -48,7 +48,7 @@ def HLTResultMTMakerCfg(name="HLTResultMTMaker"):
 
    return m
 
-def TriggerEDMSerialiserToolCfg(name="Serialiser"):
+def TriggerEDMSerialiserToolCfg(flags, name="Serialiser"):
 
    from TrigEDMConfig.DataScoutingInfo import getFullHLTResultID
 
@@ -117,7 +117,7 @@ def TriggerBitsMakerToolCfg(name="TriggerBitsMakerTool"):
 
    return bitsmaker
 
-def DecisionSummaryMakerAlgCfg(name="DecisionSummaryMakerAlg"):
+def DecisionSummaryMakerAlgCfg(flags, name="DecisionSummaryMakerAlg"):
    alg = CompFactory.DecisionSummaryMakerAlg(name)
    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
    alg.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from collections import OrderedDict
 from builtins import str
@@ -176,7 +176,7 @@ def triggerSummaryCfg(flags, hypos):
     """
     acc = ComponentAccumulator()
     from TrigOutputHandling.TrigOutputHandlingConfig import DecisionSummaryMakerAlgCfg
-    decisionSummaryAlg = DecisionSummaryMakerAlgCfg()
+    decisionSummaryAlg = DecisionSummaryMakerAlgCfg(flags)
     chainToLastCollection = OrderedDict() # keys are chain names, values are lists of collections
 
 
@@ -279,7 +279,7 @@ def triggerMonitoringCfg(flags, hypos, filters, hltSeeding):
     mon.L1Decisions  = getProp( hltSeeding, 'HLTSeedingSummaryKey' )
 
     from DecisionHandling.DecisionHandlingConfig import setupFilterMonitoring
-    [ [ setupFilterMonitoring( alg ) for alg in algs ]  for algs in list(filters.values()) ]
+    [ [ setupFilterMonitoring( flags, alg ) for alg in algs ]  for algs in list(filters.values()) ]
 
     return acc, mon
 
@@ -364,7 +364,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
     from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
 
     # Tool serialising EDM objects to fill the HLT result
-    serialiser = TriggerEDMSerialiserToolCfg()
+    serialiser = TriggerEDMSerialiserToolCfg(flags)
     for item, modules in ItemModuleDict.items():
         sModules = sorted(modules)
         __log.debug('adding to serialiser list: %s, modules: %s', item, sModules)
@@ -390,7 +390,7 @@ def triggerBSOutputCfg(flags, hypos, offline=False):
         # Create HLT result maker and alg
         from TrigOutputHandling.TrigOutputHandlingConfig import HLTResultMTMakerCfg
         HLTResultMTMakerAlg=CompFactory.HLTResultMTMakerAlg
-        hltResultMakerTool = HLTResultMTMakerCfg()
+        hltResultMakerTool = HLTResultMTMakerCfg(flags)
         hltResultMakerTool.StreamTagMaker = stmaker
         hltResultMakerTool.MakerTools = [bitsmaker, serialiser]
         hltResultMakerAlg = HLTResultMTMakerAlg()

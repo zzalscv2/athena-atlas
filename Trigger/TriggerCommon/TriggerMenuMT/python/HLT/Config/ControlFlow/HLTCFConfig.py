@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """
     ------ Documentation on HLT Tree creation -----
@@ -50,10 +50,10 @@ log = logging.getLogger( __name__ )
 
 
 #### Functions to create the CF tree from CF configuration objects
-def makeSummary(name, flatDecisions):
+def makeSummary(flags, name, flatDecisions):
     """ Returns a TriggerSummaryAlg connected to given decisions"""
 
-    summary = TriggerSummaryAlg( CFNaming.stepSummaryName(name) )
+    summary = TriggerSummaryAlg( flags, CFNaming.stepSummaryName(name) )
     summary.InputDecision = "HLTSeedingSummary"
     summary.FinalDecisions = list(OrderedDict.fromkeys(flatDecisions))
     return summary
@@ -157,7 +157,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
     for step in finalDecisions:
         flatDecisions.extend (step)
 
-    summary = makeSummary("Final", flatDecisions)
+    summary = makeSummary(flags, "Final", flatDecisions)
     hltEndSeq += summary
 
     log.debug("[makeHLTTree] created the final summary tree")
@@ -517,7 +517,7 @@ def createControlFlow(flags, HLTNode, CFseqList):
         for CFseq in CFseqList[nstep]:
             stepDecisions.extend(CFseq.decisions)
 
-        summary=makeSummary( stepSequenceName, stepDecisions )
+        summary=makeSummary( flags, stepSequenceName, stepDecisions )
 
         HLTNode += summary
 

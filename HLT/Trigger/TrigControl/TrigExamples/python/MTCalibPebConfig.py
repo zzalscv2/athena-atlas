@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, conf2toConfigurable
@@ -220,7 +220,7 @@ def hlt_result_cfg(flags, hypo_algs):
     from TrigOutputHandling.TrigOutputHandlingConfig import TriggerEDMSerialiserToolCfg, StreamTagMakerToolCfg, TriggerBitsMakerToolCfg
 
     # Tool serialising EDM objects to fill the HLT result
-    serialiser = TriggerEDMSerialiserToolCfg('Serialiser')
+    serialiser = TriggerEDMSerialiserToolCfg(flags, 'Serialiser')
     # Add some framework EDM to the output, but skip the ones in EDMDetailsRun3 to avoid the fuss
     serialiser.addCollectionListToMainResult([
         coll[0] for coll in TriggerHLTListRun3 if 'BS' in coll[1] and coll[2]=='Steer' and not coll[0].split('#')[0] in EDMDetailsRun3
