@@ -50,16 +50,17 @@ def L1TopoSimulationCfg(flags):
     acc = ComponentAccumulator()
 
     #Configure the MuonInputProvider
+    
     muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
                                                     ROIBResultLocation = "", #disable input from RoIBResult
                                                     MuonROILocation = "",
                                                     MuonEncoding = 1)
-
+                                                    
     #Configure the MuonRoiTools for the MIP
     from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
     muProvider.RecRpcRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
     muProvider.RecTgcRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
-
+    
     emtauProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
     jetProvider = CompFactory.LVL1.jFexInputProvider("jFexInputProvider")
     energyProvider = CompFactory.LVL1.gFexInputProvider("gFexInputProvider")
@@ -149,7 +150,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
         muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
                                                         ROIBResultLocation = "", #disable input from RoIBResult
                                                         MuonROILocation = "",
-                                                        MuonEncoding = 1)
+                                                        MuonL1RoIKey="") #"LVL1MuonRoIs" to enable reading from L1 RoI
 
         #Configure the MuonRoiTools for the MIP
         from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg

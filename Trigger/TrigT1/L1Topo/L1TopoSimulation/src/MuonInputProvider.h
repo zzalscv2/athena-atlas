@@ -16,6 +16,8 @@
 #include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 
+ #include "xAODTrigger/MuonRoI.h"
+
 #include "TH1.h"
 #include "TH2.h"
 
@@ -49,6 +51,7 @@ namespace LVL1 {
       virtual void handle(const Incident&) override;
 
    private:
+      TCS::MuonTOB createMuonTOB(const xAOD::MuonRoI & muonRoI, const std::vector<unsigned int> & rpcPtValues, const std::vector<unsigned int> & tgcPtValues) const;
       TCS::MuonTOB createMuonTOB(uint32_t roiword, const TrigConf::L1Menu *l1menu) const;
       TCS::MuonTOB createMuonTOB(const MuCTPIL1TopoCandidate & roi) const;
       TCS::LateMuonTOB createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const;
@@ -88,6 +91,8 @@ namespace LVL1 {
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocation { this, "locationMuCTPItoL1Topo", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1Topo "};
       SG::ReadHandleKey<LVL1::MuCTPIL1Topo> m_MuCTPItoL1TopoLocationPlusOne { this, "locationMuCTPItoL1Topo1", LVL1MUCTPI::DEFAULT_MuonL1TopoLocation, "Storegate key for MuCTPItoL1TopoPlusOne"};
       Gaudi::Property<uint16_t> m_MuonEncoding {this, "MuonEncoding", 0, "0=full granularity Mu ROIs, 1=MuCTPiToTopo granularity"};
+      Gaudi::Property<std::string> m_MuonL1RoIKey {this, "MuonL1RoIKey", "", "Empty=Use Muctpi, LVL1MuonRoIs=Use reading from xAOD L1 RoI"};
+
 
       mutable LockedHandle<TH1> m_hPt ATLAS_THREAD_SAFE;
       mutable LockedHandle<TH1> m_hPtTGC ATLAS_THREAD_SAFE;
