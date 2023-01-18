@@ -91,7 +91,7 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
   const xAODTruthParticleLinkVector* truthLinks = nullptr;
   const TrackParticleTruthCollection* aodTruth = nullptr;
   const TrackTruthCollection* trackTruth = nullptr;
-  const ObservedTrackMap* tracksMap = nullptr;
+  const ObservedTracksMap* tracksMap = nullptr;
 
   //timer object for total execution time
   auto mnt_timer_Total  = Monitored::Timer<std::chrono::milliseconds>("TIME_Total");
@@ -158,14 +158,14 @@ TrackParticleCnvAlg::execute(const EventContext& ctx) const
 
     // Augment track particles with information from observer tool
     if (m_augmentObservedTracks){
-      SG::ReadHandle<ObservedTrackMap> rh_tracksMap(m_tracksMap, ctx);
+      SG::ReadHandle<ObservedTracksMap> rh_tracksMap(m_tracksMap, ctx);
       if (!rh_tracksMap.isValid()) {
         ATH_MSG_ERROR(m_tracksMap.key() << " not found");
         return StatusCode::FAILURE;
       }
       else {
         tracksMap = rh_tracksMap.cptr();
-        ATH_MSG_VERBOSE("Got ObservedTrackMap with key " << m_tracksMap.key()
+        ATH_MSG_VERBOSE("Got ObservedTracksMap with key " << m_tracksMap.key()
                                                         << " found.");
       }
 
@@ -250,7 +250,7 @@ TrackParticleCnvAlg::convert(
   CONVTOOL& conv_tool,
   SG::WriteHandle<xAOD::TrackParticleContainer>& xaod,
   const xAODTruthParticleLinkVector* truthLinkVec,
-  const ObservedTrackMap* obs_track_map /*=0*/) const
+  const ObservedTracksMap* obs_track_map /*=0*/) const
 {
   // Create the xAOD container and its auxiliary store:
 

@@ -534,6 +534,8 @@ namespace xAOD {
     numWeightedShared,
     rejectStep_full,
     rejectReason_full,
+    closestHadROIdR,
+    closestHadROIEt,
   };
 
   /// A convenience namespace to make the client code easier to understand
