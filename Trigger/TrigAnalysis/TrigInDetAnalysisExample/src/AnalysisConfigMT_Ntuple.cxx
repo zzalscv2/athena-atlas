@@ -3,7 +3,7 @@
  **
  **     @author  mark sutton
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysisExample/AnalysisConfigMT_Ntuple.h"
@@ -1023,7 +1023,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 #endif
 
-	if ( mTree ) mTree->Fill();
+	if ( m_Tree ) m_Tree->Fill();
 	
 }
 

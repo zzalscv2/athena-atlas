@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigInDetAnalysisExample )
@@ -19,10 +19,3 @@ atlas_add_library( TrigInDetAnalysisExampleLib
 atlas_add_component( TrigInDetAnalysisExample
                      src/components/*.cxx
                      LINK_LIBRARIES TrigInDetAnalysisExampleLib )
-
-# Disable naming convention checker.
-# FIXME: This should be fixed properly once run2 is finished.
-if( ${CMAKE_CXX_FLAGS} MATCHES "libchecker_gccplugins" )
-  set_target_properties( TrigInDetAnalysisExampleLib PROPERTIES COMPILE_FLAGS -fplugin-arg-libchecker_gccplugins-checkers=no-naming )
-  set_target_properties( TrigInDetAnalysisExample PROPERTIES COMPILE_FLAGS -fplugin-arg-libchecker_gccplugins-checkers=no-naming )
-endif()

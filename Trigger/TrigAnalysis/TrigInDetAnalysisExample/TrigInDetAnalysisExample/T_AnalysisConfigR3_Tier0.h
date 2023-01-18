@@ -17,7 +17,7 @@
  **     @author  mark sutton
  **     @date    Tue 16 May 2017 09:28:55 CEST 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #ifndef TrigInDetAnalysisExample_T_AnalysisConfigR3_Tier0_H
@@ -1230,9 +1230,6 @@ protected:
 protected:
 
   bool      m_useBeamCondSvc;
-
-  TFile*    mFile;
-  TTree*    mTree;
 
   std::vector<ChainString>  m_chainNames;
   std::vector<A*>           m_analyses;
