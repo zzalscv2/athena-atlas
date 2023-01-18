@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMUONCNV_MUONSEGMENTCNVALG_H
 #define XAODMUONCNV_MUONSEGMENTCNVALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODMuonCnv/IMuonSegmentConverterTool.h"
 
@@ -23,16 +23,16 @@ namespace xAODMaker {
     * @author Niels van Eldik
     *
     */
-   class MuonSegmentCnvAlg : public AthAlgorithm {
+   class MuonSegmentCnvAlg : public AthReentrantAlgorithm {
 
    public:
       /// Regular algorithm constructor
       MuonSegmentCnvAlg( const std::string& name, ISvcLocator* svcLoc );
 
       /// Function initialising the algorithm
-      virtual StatusCode initialize();
+      virtual StatusCode initialize() override;
       /// Function executing the algorithm
-      virtual StatusCode execute();
+      virtual StatusCode execute(const EventContext& ctx) const override;
 
    private:
      // the following segments do NOT contain MuGirl segments

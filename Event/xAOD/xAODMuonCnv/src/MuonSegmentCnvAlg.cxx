@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentCnvAlg.h"
@@ -14,7 +14,7 @@
 namespace xAODMaker {
 
   MuonSegmentCnvAlg::MuonSegmentCnvAlg(const std::string& name, ISvcLocator* svcLoc) :
-    AthAlgorithm(name, svcLoc) {
+    AthReentrantAlgorithm(name, svcLoc) {
   }
 
   StatusCode MuonSegmentCnvAlg::initialize() {
@@ -28,11 +28,11 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode MuonSegmentCnvAlg::execute() {
+  StatusCode MuonSegmentCnvAlg::execute(const EventContext& ctx ) const {
 
      // Retrieve the AOD particles:
      const Trk::SegmentCollection* segments = nullptr;
-     SG::ReadHandle<Trk::SegmentCollection> h_segments(m_muonSegmentLocation);
+     SG::ReadHandle<Trk::SegmentCollection> h_segments(m_muonSegmentLocation, ctx);
      if(h_segments.isValid()) {
        segments = h_segments.cptr();
      }
@@ -45,7 +45,7 @@ namespace xAODMaker {
      if( ! segments ) return StatusCode::SUCCESS;
 
      // Create the xAOD container and its auxiliary store:
-     SG::WriteHandle<xAOD::MuonSegmentContainer> xaod (m_xaodContainerName);
+     SG::WriteHandle<xAOD::MuonSegmentContainer> xaod (m_xaodContainerName, ctx);
      ATH_CHECK(xaod.record(std::make_unique<xAOD::MuonSegmentContainer>(),
                            std::make_unique<xAOD::MuonSegmentAuxContainer>()));
 

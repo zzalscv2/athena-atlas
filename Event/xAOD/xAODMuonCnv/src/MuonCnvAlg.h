@@ -55,10 +55,10 @@ namespace xAODMaker {
       /// The key for the output xAOD::CaloClusterContainer
       std::string m_xaodContainerName;
 
-      void setParameters(const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
-      void checkAndSetParameter(MuonParameters::ParamDef aodParameter,xAOD::Muon::ParamDef xaodParameter, const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
-      void setIsolations(const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
-      void checkAndSetIsolation(MuonParameters::ParamDef aodParameter,xAOD::Iso::IsolationType xaodParameter, const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
+      static void setParameters(const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
+      static void checkAndSetParameter(MuonParameters::ParamDef aodParameter,xAOD::Muon::ParamDef xaodParameter, const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
+      static void setIsolations(const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
+      static void checkAndSetIsolation(MuonParameters::ParamDef aodParameter,xAOD::Iso::IsolationType xaodParameter, const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
       void setLinks(const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon) const;
       void setMuonHitContent(const Analysis::Muon& aodmuon, xAOD::Muon& xaodmuon);
       ElementLink<xAOD::TrackParticleContainer> getNewLink(const ElementLink<Rec::TrackParticleContainer>& oldLink, const std::string& name) const;
