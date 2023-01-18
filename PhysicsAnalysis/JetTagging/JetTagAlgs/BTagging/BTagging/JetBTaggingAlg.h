@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAGGING_JETBTAGGINGALG_HH
@@ -10,7 +10,7 @@
 /// Algorithm to run and add btagging information.
 ////////////////////////////////////////////
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -29,7 +29,7 @@ namespace Analysis{
 class IJetFitterVariablesFactory;
 
 class  JetBTaggingAlg: 
-  public AthAlgorithm
+  public AthReentrantAlgorithm
    { 
   public:
   
@@ -39,7 +39,7 @@ class  JetBTaggingAlg:
     
     /** Main routines specific to an ATHENA algorithm */
     virtual StatusCode initialize() override;
-    virtual StatusCode execute() override;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
   private:
   

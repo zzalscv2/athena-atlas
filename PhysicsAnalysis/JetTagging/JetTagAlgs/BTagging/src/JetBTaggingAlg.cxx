@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTagging/JetBTaggingAlg.h"
@@ -28,7 +28,7 @@ namespace Analysis {
 
 
   JetBTaggingAlg::JetBTaggingAlg(const std::string& n, ISvcLocator *p) : 
-    AthAlgorithm(n,p),
+    AthReentrantAlgorithm(n,p),
     m_JetName(""),
     m_bTagTool("Analysis::BTagTool",this),
     m_bTagSecVtxTool("Analysis::BTagSecVertexing",this)
@@ -112,9 +112,7 @@ namespace Analysis {
   }
 
 
-  StatusCode JetBTaggingAlg::execute() {
-    const EventContext& ctx = Gaudi::Hive::currentContext();
-
+  StatusCode JetBTaggingAlg::execute(const EventContext& ctx) const {
     //retrieve the Jet container
     SG::ReadHandle<xAOD::JetContainer> h_JetCollectionName (m_JetCollectionName, ctx);
     if (!h_JetCollectionName.isValid()) {
