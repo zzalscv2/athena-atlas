@@ -154,6 +154,14 @@ def makeConfig (factoryName, groupName,
         makeOutputThinningConfig (configSeq, groupSplit[0], configName = configName)
 
 
+    elif factoryName == 'Output.Simple' :
+        if groupName == '' :
+            groupName = 'Output'
+        from AsgAnalysisAlgorithms.OutputAnalysisConfig import OutputAnalysisConfig
+        config = OutputAnalysisConfig (groupName)
+        configSeq.append (config)
+
+
     else :
         raise ValueError ('unknown factory: ' + factoryName)
 

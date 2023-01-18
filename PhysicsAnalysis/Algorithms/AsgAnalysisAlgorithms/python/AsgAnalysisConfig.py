@@ -102,6 +102,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
+        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'generatorWeight', isEventLevel=True)
 
 
 
@@ -180,6 +181,7 @@ class OutputThinningBlock (ConfigBlock):
         alg.input = config.readName (self.containerName)
         if self.outputName is not None :
             alg.output = self.outputName + '_%SYS%'
+            config.addOutputContainer (self.containerName, self.outputName)
         else :
             alg.output = config.copyName (self.containerName)
         if selection != '' :

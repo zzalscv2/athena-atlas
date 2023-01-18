@@ -27,6 +27,19 @@ class SelectionConfig :
 
 
 
+class OutputConfig :
+    """all the data for a given variables in the output that has been registered"""
+
+    def __init__ (self, origContainerName, variableName,
+                  *, noSys, enabled) :
+        self.origContainerName = origContainerName
+        self.outputContainerName = None
+        self.variableName = variableName
+        self.noSys = noSys
+        self.enabled = enabled
+
+
+
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
 
@@ -40,7 +53,9 @@ class ContainerConfig :
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
+        self.isMet = False
         self.selections = []
+        self.outputs = {}
 
     def currentName (self) :
         if self.index == 0 :
@@ -57,6 +72,7 @@ class ContainerConfig :
         self.index = 0
         self.viewIndex = 1
         self.selections = []
+        self.outputs = {}
 
 
 
@@ -85,10 +101,12 @@ class ConfigAccumulator :
         self._isPhyslite = isPhyslite
         self._algSeq = algSeq
         self._containerConfig = {}
+        self._outputContainers = {}
         self._pass = 0
         self._algorithms = {}
         self._currentAlg = None
         self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
+        self._eventLevelOutputs = {}
 
 
     def dataType (self) :
@@ -165,7 +183,7 @@ class ConfigAccumulator :
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName, originalName = originalName)
 
 
-    def writeName (self, containerName) :
+    def writeName (self, containerName, *, isMet=None) :
         """register that the given container will be made and return
         its name"""
         if containerName not in self._containerConfig :
@@ -175,6 +193,8 @@ class ConfigAccumulator :
         if self._containerConfig[containerName].index != 0 :
             raise Exception ("trying to write container twice: " + containerName)
         self._containerConfig[containerName].index += 1
+        if isMet is not None :
+            self._containerConfig[containerName].isMet = isMet
         return self._containerConfig[containerName].currentName()
 
 
@@ -225,6 +245,17 @@ class ConfigAccumulator :
         return result
 
 
+    def isMetContainer (self, containerName) :
+        """whether the given container is registered as a MET container
+
+        This is mostly/exclusively used for determining whether to
+        write out the whole container or just a single MET term.
+        """
+        if containerName not in self._containerConfig :
+            raise Exception ("container unknown: " + containerName)
+        return self._containerConfig[containerName].isMet
+
+
     def readNameAndSelection (self, containerName) :
         """get the name of the "current copy" of the given container, and the
         selection string
@@ -257,6 +288,8 @@ class ConfigAccumulator :
             self._containerConfig[name].nextPass ()
         self._pass = 1
         self._currentAlg = None
+        self._outputContainers = {}
+        self._eventLevelOutputs = {}
 
 
     def getPreselection (self, containerName, selectionName) :
@@ -347,3 +380,40 @@ class ConfigAccumulator :
         config = self._containerConfig[containerName]
         selection = SelectionConfig (selectionName, decoration, **kwargs)
         config.selections.append (selection)
+
+
+    def addOutputContainer (self, containerName, outputContainerName) :
+        """register a copy of a container used in outputs"""
+        if containerName not in self._containerConfig :
+            raise KeyError ("container unknown: " + containerName)
+        if outputContainerName in self._outputContainers :
+            raise KeyError ("duplicate output container name: " + outputContainerName)
+        self._outputContainers[outputContainerName] = containerName
+
+
+    def addOutputVar (self, containerName, variableName, outputName,
+                      *, noSys=False, enabled=True, isEventLevel=False) :
+        """add an output variable for the given container to the output
+        """
+
+        if not isEventLevel :
+            if containerName not in self._containerConfig :
+                raise KeyError ("container unknown: " + containerName)
+            baseConfig = self._containerConfig[containerName].outputs
+        else :
+            baseConfig = self._eventLevelOutputs
+        if outputName in baseConfig :
+            raise KeyError ("duplicate output variable name: " + outputName)
+        config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled)
+        baseConfig[outputName] = config
+
+
+    def getOutputVars (self, containerName) :
+        """get the output variables for the given container"""
+        if containerName == '' :
+            return self._eventLevelOutputs
+        if containerName in self._outputContainers :
+            containerName = self._outputContainers[containerName]
+        if containerName not in self._containerConfig :
+            raise KeyError ("unknown container for output: " + containerName)
+        return self._containerConfig[containerName].outputs
