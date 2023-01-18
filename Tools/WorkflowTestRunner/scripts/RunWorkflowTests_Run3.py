@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from sys import exit
 
@@ -55,7 +55,7 @@ def main():
         if not options.workflow or options.workflow is WorkflowType.MCReco:
             ami_tag = "q445" if not options.ami_tag else options.ami_tag
             if "--CA" in options.extra_args:
-                tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering doRAWtoALL"))
+                tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RAWtoALL"], setup, options.extra_args + " --steering no"))
             else:
                 tests_to_run.append(QTest(ami_tag, run, WorkflowType.MCReco, ["HITtoRDO", "RDOtoRDOTrigger", "RAWtoALL"], setup, options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataReco:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @brief Module with standard reconstruction transform options and substeps
 
@@ -102,11 +102,11 @@ def addRecoSubsteps(executorSet):
     # It will be enabled explicitly via --steering if required
     executorSet.add(athenaExecutor(name = 'RAWtoALL', skeletonFile = 'RecJobTransforms/skeleton.RAWtoALL_tf.py',
                                    skeletonCA = 'RecJobTransforms.RAWtoALL_Skeleton',
-                                   substep = 'r2a', inData = [],
-                                   outData = []))
+                                   substep = 'r2a', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
+                                   outData = ['ESD', 'AOD', 'HIST_ESD_INT', 'HIST_AOD_INT', 'TXT_JIVEXMLTGZ'],))
     executorSet.add(athenaExecutor(name = 'RAWtoESD', skeletonFile = 'RecJobTransforms/skeleton.RAWtoESD_tf.py',
-                                   substep = 'r2e', inData = ['BS', 'RDO', 'DRAW_ZMUMU', 'DRAW_ZEE', 'DRAW_EMU', 'DRAW_RPVLL'], 
-                                   outData = ['ESD', 'HIST_ESD_INT', 'TXT_JIVEXMLTGZ'],))
+                                   substep = 'r2e', inData = [], 
+                                   outData = [],))
     executorSet.add(athenaExecutor(name = 'RAWtoTLA_AOD', skeletonCA = 'RecJobTransforms.RAWtoTLA_AOD_Skeleton',
                                    substep = 'r2tla', inData = ['BS'], outData = ['TLA_AOD'], ))
     executorSet.add(athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
