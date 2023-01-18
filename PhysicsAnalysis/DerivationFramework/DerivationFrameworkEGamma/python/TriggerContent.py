@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # ********************************************************************
 # TriggerContent.py
@@ -737,7 +737,7 @@ ExtraContainersElectronTrigger['Run3'] = [
         "HLT_IDTrack_ElecLRT_FTF",
         "HLT_IDTrack_ElecLRT_FTFAux.",
         "HLT_FastElectrons",
-        "HLT_FastElectronsAux."
+        "HLT_FastElectronsAux.",
         "HLT_FastElectrons_LRT",
         "HLT_FastElectrons_LRTAux.",
         "HLT_CaloEMClusters_Electron",
@@ -745,7 +745,7 @@ ExtraContainersElectronTrigger['Run3'] = [
         "HLT_TrigEMClusters_Electrons",
         "HLT_TrigEMClusters_ElectronsAux.",
         "HLT_TrigEMClusters_Electrons_GSF",
-        "HLT_TrigEMClusters_Electrons_GSFAux."
+        "HLT_TrigEMClusters_Electrons_GSFAux.",
         "HLT_IDTrack_Electron_IDTrig",
         "HLT_IDTrack_Electron_IDTrigAux.",
         "HLT_IDTrack_Electron_GSF",
@@ -760,7 +760,7 @@ ExtraContainersElectronTrigger['Run2'] = [
         "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex",
         "HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.",
         "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrig",
-        "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux."
+        "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux.",
         "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID",
         "HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.",
         ]
@@ -798,9 +798,9 @@ ExtraContainersMuonTrigger['Run3'] = [
         'HLT_Muons_FS',
         'HLT_Muons_FSAux.',
         'HLT_MuonsCB_RoI',
-        'HLT_MuonsCB_RoIAux.'
+        'HLT_MuonsCB_RoIAux.',
         'HLT_MuonsCB_LRT',
-        'HLT_MuonsCB_LRTAux.'
+        'HLT_MuonsCB_LRTAux.',
         'HLT_MuonsCB_FS',
         'HLT_MuonsCB_FSAux.',
         ]
