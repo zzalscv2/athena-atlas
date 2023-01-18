@@ -111,6 +111,7 @@ namespace DerivationFramework {
     if(!m_jetCalibTool.empty()) {
       CHECK(m_jetCalibTool.retrieve());
       ATH_MSG_INFO("Augmenting jets with calibration \"" << m_momentPrefix+m_calibMomentKey << "\"");
+      ATH_MSG_INFO("Jet calibration tool is: " << m_jetCalibTool);
       m_docalib = true;
 
       dec_calibpt  = new SG::AuxElement::Decorator<float>(m_momentPrefix+m_calibMomentKey+"_pt");
