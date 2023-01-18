@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -15,7 +15,7 @@ else:
     from TriggerMenuMT.HLT.MinBias.ALFAMenuSequences import ALFAPerfSequence
     from TriggerMenuMT.HLT.MinBias.AFPMenuSequence import AFPTrkSequenceCfg, AFPGlobalSequenceCfg
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
@@ -41,8 +41,9 @@ def TrigAFPDijetComboHypoToolCfg(chainDict):
     name = chainDict['chainName']
     tool = TrigAFPDijetComboHypoTool(name)
 
-    monTool = GenericMonitoringTool("MonTool_"+name)
-    monTool.Histograms = [defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)]
+    monTool = GenericMonitoringTool("MonTool_"+name,
+                                    HistPath = 'AFPComboHypo/'+tool.getName())
+    monTool.defineHistogram('DijetMass', type='TH1F', path='EXPERT', title="Dijet mass", xbins=100, xmin=0, xmax=2000)
     monTool.defineHistogram('DijetRapidity', type='TH1F', path='EXPERT', title="Dijet rapidity", xbins=100, xmin=-5, xmax=5)
 
     monTool.defineHistogram('XiJet1', type='TH1F', path='EXPERT', title="Jet 1 xi", xbins=100, xmin=0, xmax=1)
@@ -70,7 +71,6 @@ def TrigAFPDijetComboHypoToolCfg(chainDict):
     monTool.defineHistogram('SideC_diffX', type='TH1F', path='EXPERT', title="Track X diff side C", xbins=100, xmin=-50, xmax=50)
     monTool.defineHistogram('SideC_diffY', type='TH1F', path='EXPERT', title="Track Y diff side C", xbins=100, xmin=-50, xmax=50)
 
-    monTool.HistPath = 'AFPComboHypo/'+tool.getName()
     tool.MonTool = monTool
     return tool
 

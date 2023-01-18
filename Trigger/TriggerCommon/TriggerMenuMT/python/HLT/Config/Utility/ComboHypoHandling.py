@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ############################################################
 # Functionality to add generic topo hypos to combined chains
@@ -54,7 +54,7 @@ from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassH
 
 def TrigComboHypoToolFromDict(chainDict):
     from TrigHypoCommonTools.TrigHypoCommonToolsConf import TrigComboHypoTool
-    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+    from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
     chainName = chainDict['chainName']
     log.debug("[TrigComboHypoToolFromDict] chain %s, combo hypos to be processed: %s, t", chainName, chainDict['extraComboHypos'])
@@ -147,16 +147,16 @@ def TrigComboHypoToolFromDict(chainDict):
             monToolName = f"MonTool_{chainName}_{chainDict['extraComboHypos'][iTopo]}"
         histNameTag = var
         monTool = GenericMonitoringTool(monToolName)
-        monTool.Histograms = [defineHistogram(histNameTag+'OfAccepted', type='TH1F', path='EXPERT',
-                                              title=var+" in accepted combinations; {}".format(var),
-                                              xbins=allowed_obs[var]['hist_nbins'],
-                                              xmin=allowed_obs[var]['hist_min'],
-                                              xmax=allowed_obs[var]['hist_max']),
-                              defineHistogram(histNameTag+'OfProcessed', type='TH1F', path='EXPERT',
-                                              title=var+" in processed combinations; {}".format(var),
-                                              xbins=allowed_obs[var]['hist_nbins'],
-                                              xmin=allowed_obs[var]['hist_min'],
-                                              xmax=allowed_obs[var]['hist_max'])]
+        monTool.defineHistogram(histNameTag+'OfAccepted', type='TH1F', path='EXPERT',
+                                title=var+" in accepted combinations; {}".format(var),
+                                xbins=allowed_obs[var]['hist_nbins'],
+                                xmin=allowed_obs[var]['hist_min'],
+                                xmax=allowed_obs[var]['hist_max'])
+        monTool.defineHistogram(histNameTag+'OfProcessed', type='TH1F', path='EXPERT',
+                                title=var+" in processed combinations; {}".format(var),
+                                xbins=allowed_obs[var]['hist_nbins'],
+                                xmin=allowed_obs[var]['hist_min'],
+                                xmax=allowed_obs[var]['hist_max'])
         log.debug("[TrigComboHypoToolFromDict] tool configured for hypo name: %s, topoInfo = %s", chainName, topoInfo)
         log.debug("[TrigComboHypoToolFromDict] histName = %s", histNameTag)
 
