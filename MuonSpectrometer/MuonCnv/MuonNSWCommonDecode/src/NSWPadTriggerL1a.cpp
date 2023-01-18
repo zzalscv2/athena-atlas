@@ -16,8 +16,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   const std::vector<uint32_t> words(bs, bs + remaining);
 
   if (checkSize(words)) {
-    const auto nbytes = std::to_string(words.size());
-    throw std::runtime_error("Packet too small. N(bytes) = " + nbytes);
+    return;
   }
 
   // NSW header
@@ -34,7 +33,7 @@ Muon::nsw::NSWPadTriggerL1a::NSWPadTriggerL1a(const uint32_t* bs, const uint32_t
   m_decoded.orbitid = getOrbitid(words);
   m_decoded.orbit1  = getOrbit1(words);
   if (m_decoded.orbit1 != 1) {
-    throw std::runtime_error("Orbit1 check failed");
+    return;
   }
 
   // debug
