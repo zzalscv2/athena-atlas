@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStreamCnvTest/RpcDigitToRpcRDO.h"
@@ -261,8 +261,8 @@ RpcPad* RpcDigitToRpcRDO::decodePad(PADreadout& pad, const RpcCablingCondData* r
     PadReadOutStructure pad_header = readout->getHeader();
     PadReadOutStructure pad_footer = readout->getFooter();
     // Check the data format
-    assert(pad_header.isHeader());
-    assert(pad_footer.isFooter());
+    if(!pad_header.isHeader()) std::abort();
+    if(!pad_footer.isFooter()) std::abort();
 
     unsigned int hashId = index.hash();
     unsigned int onlineId = pad_id;
@@ -294,9 +294,9 @@ RpcCoinMatrix* RpcDigitToRpcRDO::decodeMatrix(MatrixReadOut* matrix, Identifier&
     MatrixReadOutStructure matrix_subheader = matrix->getSubHeader();
     MatrixReadOutStructure matrix_footer = matrix->getFooter();
     // Check the data structure
-    assert(matrix_header.isHeader());
-    assert(matrix_subheader.isSubHeader());
-    assert(matrix_footer.isFooter());
+    if(!matrix_header.isHeader()) std::abort();
+    if(!matrix_subheader.isSubHeader()) std::abort();
+    if(!matrix_footer.isFooter()) std::abort();
 
     // Create the coincidence matrix
     RpcCoinMatrix* coinMatrix =
@@ -306,7 +306,7 @@ RpcCoinMatrix* RpcDigitToRpcRDO::decodeMatrix(MatrixReadOut* matrix, Identifier&
     MatrixReadOutStructure cm_hit;
     for (int j = 0; j < matrix->numberOfBodyWords(); ++j) {
         cm_hit = matrix->getCMAHit(j);
-        assert(cm_hit.isBody());
+        if(!cm_hit.isBody()) std::abort();
         RpcFiredChannel* firedChannel = nullptr;
 
         if (cm_hit.ijk() < rpcRawHitWordLength) {
