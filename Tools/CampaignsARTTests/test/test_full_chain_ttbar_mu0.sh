@@ -7,7 +7,7 @@
 # art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
-# art-html: dcube_last
+# art-html: dcube_wrt_last_nightly
 # art-athena-mt: 4
 
 #Option for sim/digi/reco
