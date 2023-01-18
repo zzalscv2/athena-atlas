@@ -187,6 +187,7 @@ StatusCode Epos::fillEvt( HepMC::GenEvent* evt )
 #ifdef HEPMC3
     hepevtconverter.convert(*evt);
     evt->set_event_number(m_events);
+    HepMC::fillBarcodesAttribute(evt);
     HepMC::set_random_states(evt, m_seeds );
     evt->weights().push_back(1.0);
     m_runinfo = std::make_shared<HepMC3::GenRunInfo>();
