@@ -63,6 +63,9 @@ public:
   // Move constructor:
   SiCharge(SiCharge&& charge) noexcept = default;
 
+  //Move assignment
+  SiCharge& operator=(SiCharge&& charge) noexcept = default;
+
   ///////////////////////////////////////////////////////////////////
   // Const methods:
   ///////////////////////////////////////////////////////////////////
