@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 19 Jan 2009 17:25:51 GMT 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -32,17 +32,17 @@ void TrackEfficiency::initialise() {
   double limits[13] = { 0,     1000,  2000,  3000,  5000,  7000,  
   			10000, 14000, 20000, 30000, 40000, 60000, 100000 };
 
-  double _limits[24] = { 0,     1000,  2000,  3000,  5000,  7000, 8000, 8500, 9000, 9500,    
+  double limits2[24] = { 0,     1000,  2000,  3000,  5000,  7000, 8000, 8500, 9000, 9500,
 			 10000, 10500, 11000, 11500, 12000, 12500, 13000, 13500, 14000, 
 			 20000, 30000, 40000, 60000, 100000 };
 #endif
 
-  double _limits[18] = { 0,     1000,  2000,  3000,  5000,  7000, 
+  double limits2[18] = { 0,     1000,  2000,  3000,  5000,  7000,
 			 8000,  9000, 10000, 11000, 12000, 13000, 
 			 14000, 20000, 30000, 40000, 60000, 100000 };
 
   std::vector<double> limits;
-  for ( int i=0 ; i<18 ; i++ ) limits.push_back(_limits[i]);
+  for ( int i=0 ; i<18 ; i++ ) limits.push_back(limits2[i]);
 
 #if 0
   // efficiencies

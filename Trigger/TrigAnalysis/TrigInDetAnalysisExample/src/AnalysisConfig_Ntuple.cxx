@@ -3,7 +3,7 @@
  **
  **     @author  mark sutton
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -230,7 +230,7 @@ void AnalysisConfig_Ntuple::book() {
 
 	if ( first_open || genericFlag() ) {
 		/// create a brand new ntple
-		mFile = new TFile( outputFileName.c_str(), "recreate"); 
+		m_File = new TFile( outputFileName.c_str(), "recreate");
 
 		TTree*  dataTree = new TTree("dataTree", "dataTree");
 		TString releaseData(m_releaseData.c_str());
@@ -240,19 +240,19 @@ void AnalysisConfig_Ntuple::book() {
 		delete dataTree;
 
 
-		mTree = new TTree("tree", "tree");
-		mTree->Branch( "TIDA::Event", "TIDA::Event", m_event, 6400, 1 );
+		m_Tree = new TTree("tree", "tree");
+		m_Tree->Branch( "TIDA::Event", "TIDA::Event", m_event, 6400, 1 );
 
 		
 	}
 	else { 
 		/// update the ntple from the file  
-		mFile = new TFile( outputFileName.c_str(), "update");
-		mTree = (TTree *)mFile->Get("tree");
-		mTree->SetBranchAddress( "TIDA::Event", &m_event );
+		m_File = new TFile( outputFileName.c_str(), "update");
+		m_Tree = (TTree *)m_File->Get("tree");
+		m_Tree->SetBranchAddress( "TIDA::Event", &m_event );
 	}
 
-	mDir = gDirectory;
+	m_Dir = gDirectory;
 
 	first_open = false;
 
@@ -284,38 +284,38 @@ void AnalysisConfig_Ntuple::finalize() {
 
 	/// NB: flag this round the other way for multiple files
 	if ( m_finalised ) { 
-		m_provider->msg(MSG::INFO) << "AnalysisConfig_Ntuple::finalise() flagged, not finalising  " << m_provider->name() << "\t" << mTree->GetEntries() << " entries" << endmsg; 
+		m_provider->msg(MSG::INFO) << "AnalysisConfig_Ntuple::finalise() flagged, not finalising  " << m_provider->name() << "\t" << m_Tree->GetEntries() << " entries" << endmsg;
 		return;
 	}
 
-	m_provider->msg(MSG::INFO) << "AnalysisConfig_Ntuple::finalise() writing " << m_provider->name() << "\t" << mTree->GetEntries() << " entries" << endmsg; 
+	m_provider->msg(MSG::INFO) << "AnalysisConfig_Ntuple::finalise() writing " << m_provider->name() << "\t" << m_Tree->GetEntries() << " entries" << endmsg;
 
 	TDirectory* directory = gDirectory; 
 
-	//	std::cout << "change directory " << name() << "  " << mDir->GetName() << std::endl;
+	//	std::cout << "change directory " << name() << "  " << m_Dir->GetName() << std::endl;
 
-	m_provider->msg(MSG::DEBUG) << "change directory " << name() << "  " << mDir->GetName() << endmsg;
+	m_provider->msg(MSG::DEBUG) << "change directory " << name() << "  " << m_Dir->GetName() << endmsg;
 
 
-	mDir->cd();
+	m_Dir->cd();
 
 	//  gDirectory->pwd();
 
-	if ( mTree ) mTree->Write("", TObject::kOverwrite);
+	if ( m_Tree ) m_Tree->Write("", TObject::kOverwrite);
 
-	//  mFile->Write();
-	if ( mFile ) mFile->Close();
+	//  m_File->Write();
+	if ( m_File ) m_File->Close();
 
 
 	m_finalised = true; /// flag that we have finalised and closed this file
 
-	// mTree "belongs" to the mFile so was (possibly) deleted on the mFile->Close();
+	// m_Tree "belongs" to the m_File so was (possibly) deleted on the m_File->Close();
 	// so don't delete it ! 
-	// delete mTree; 
-	delete mFile;
+	// delete m_Tree;
+	delete m_File;
 
-	mTree = 0;
-	mFile = 0; 
+	m_Tree = 0;
+	m_File = 0;
 
 	//  f.Write();
 	//  f.Close();

@@ -6,7 +6,7 @@
  **     @author  Mark Sutton (sutt@cern.ch)
  **     @date    Tue  8 Feb 2022 09:08:26 GMT
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysis/Filter_AcceptAll.h"
@@ -193,7 +193,7 @@ StatusCode TrigR3Mon::bookHistograms() {
   /// make a copy of the input truth setting job option, so that we can
   /// change it if required
 
-  bool m_mcTruth = m_mcTruthIn;
+  bool mcTruth = m_mcTruthIn;
 
   if ( m_buildNtuple ) { 
   
@@ -214,7 +214,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	  
 	m_sequences.back()->releaseData(m_releaseMetaData);
 	if ( m_requireDecision ) m_sequences.back()->setRequireDecision(true);
-	if ( m_mcTruthIn )       m_sequences.back()->setMCTruth(m_mcTruth);
+	if ( m_mcTruthIn )       m_sequences.back()->setMCTruth(mcTruth);
 	m_sequences.back()->setFilterOnRoi( m_filter_on_roi );
   }
   else if ( m_analysis_config=="Tier0" ) {
@@ -404,7 +404,7 @@ StatusCode TrigR3Mon::bookHistograms() {
       allcs.emplace_back( ChainString( allchains[i] ) );
       if ( allcs.back().head().find("HLT_")==0 ) continue;
       if ( allcs.back().head()=="Offline" ) { 
-	m_mcTruth   = false;
+	mcTruth   = false;
 	if ( allcs.back().tail()!="" ) {
 	  if ( allcs.back().tail().find("+")==0 ) { 
 	    mtypes.push_back( allcs.back().tail().substr(1) );
@@ -450,7 +450,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	  double massMin = 40;
 	  double massMax = 150;
 
-	  if ( m_mcTruth ) tnp = new TagNProbe( "Truth",   massMin, massMax );
+	  if ( mcTruth ) tnp = new TagNProbe( "Truth",   massMin, massMax );
 	  else             tnp = new TagNProbe( "Offline", massMin, massMax );
 
 	  tnp->tag(tag.raw()) ;
@@ -487,7 +487,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 
 	analysis->initialise();
 
-	if ( m_mcTruth ) { 
+	if ( mcTruth ) {
 	    analysis->setPdgID( m_selectTruthPdgId );
 	    analysis->setParentPdgID( m_selectParentTruthPdgId );	    
 
