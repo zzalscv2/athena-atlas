@@ -168,25 +168,5 @@ InDetFlags.InDet25nsec.set_Value_and_Lock(True)
 
 jobproperties.Beam.bunchSpacing.set_Value_and_Lock(25)
 
-# --------------------------------------------- Monitoring
-### replaced by MuonTrackMonitoring (SMW Jan 23 2016)
-### from AthenaMonitoring.DQMonFlags import DQMonFlags
-### DQMonFlags.doMuonPhysicsMon.set_Value_and_Lock(True)
-
-
-### ------------------- inherited from 20.1.0.2 -----------
-#from RecExConfig.RecFlags import rec
-#rec.doJetMissingETTag.set_Value_and_Lock(False)
-
-
-#from TrigHLTMonitoring.HLTMonFlags import HLTMonFlags
-#HLTMonFlags.doBphys=False
-
-
-#jobproperties.CaloCellFlags.doLArDeadOTXCorr.set_Value_and_Lock(False)
-
-#from LArConditionsCommon.LArCondFlags import larCondFlags
-#larCondFlags.OFCShapeFolder.set_Value_and_Lock("")
-
 ## main online reco scripts
 include ("RecExOnline/RecExOnline_jobOptions.py")
