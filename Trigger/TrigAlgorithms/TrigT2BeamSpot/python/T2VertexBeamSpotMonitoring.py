@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 # Default set opt histogram options to use for per-LBN histograms
 _LBN_OPTIONS = "kLBNHistoryDepth=1 kAlwaysCreate"
@@ -10,19 +10,14 @@ class BaseMonitoringTool:
     """Base class which defines few useful methods to cope with defineHistogram
     madness.
     """
-    def __init__(self, name):
-        self.name = name
-        self.histograms = []
-
-    def __call__(self):
-        """Creates the actual monitoring tool instance"""
-        return GenericMonitoringTool(self.name, Histograms = self.histograms)
+    def __init__(self, flags, name):
+        self.monTool = GenericMonitoringTool(name)
 
     def makeHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
-        self.histograms += [defineHistogram(
+        self.monTool.defineHistogram(
             name, path=path, type=type, title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax, **kw
-        )]
+        )
 
     def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
         opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
@@ -33,12 +28,12 @@ class BaseMonitoringTool:
     def makeHisto2D(self, nameX, nameY, type, xbins, xmin, xmax,
                     ybins, ymin, ymax, title, path='EXPERT', opt=None, **kw):
         name = ", ".join([nameX, nameY])
-        self.histograms += [defineHistogram(
+        self.monTool.defineHistogram(
             name, path=path, type=type, title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax,
             ybins=ybins, ymin=ymin, ymax=ymax,
             **kw
-        )]
+        )
 
     def makeLBNHisto2D(self, nameX, nameY, type, xbins, xmin, xmax,
                        ybins, ymin, ymax, title, path='EXPERT', opt="", **kw):
@@ -50,10 +45,10 @@ class BaseMonitoringTool:
 
     def makeProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
         name = ", ".join([nameX, nameY])
-        self.histograms += [defineHistogram(
+        self.monTool.defineHistogram(
             name, path=path, type="TProfile", title=title, opt=opt,
             xbins=xbins, xmin=xmin, xmax=xmax, **kw,
-        )]
+        )
 
     def makeLBNProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
         opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
@@ -63,8 +58,8 @@ class BaseMonitoringTool:
 
 
 class T2VertexBeamSpotMonitoring(BaseMonitoringTool):
-    def __init__ (self, name="T2VertexBeamSpotMonitoring"):
-        super(T2VertexBeamSpotMonitoring, self).__init__(name)
+    def __init__ (self, flags, name="T2VertexBeamSpotMonitoring"):
+        super(T2VertexBeamSpotMonitoring, self).__init__(flags, name)
 
         # monitored variables for updateBS():
         #  - TIME_TotalTime
@@ -77,7 +72,7 @@ class T2VertexBeamSpotMonitoring(BaseMonitoringTool):
 
 
 class T2VertexBeamSpotToolMonitoring(BaseMonitoringTool):
-    def __init__ (self, name="T2VertexBeamSpotToolMonitoring", detail=2):
+    def __init__ (self, flags, name="T2VertexBeamSpotToolMonitoring", detail=2):
         """
         Parameters
         ----------
@@ -87,7 +82,7 @@ class T2VertexBeamSpotToolMonitoring(BaseMonitoringTool):
             online running. 2 (default) will make all possible histograms,
             this should be suitable for offline.
         """
-        super(T2VertexBeamSpotToolMonitoring, self).__init__(name)
+        super(T2VertexBeamSpotToolMonitoring, self).__init__(flags, name)
 
         # monitored variables for execute():
         #  - nTotalTracks
@@ -480,8 +475,8 @@ class T2BSTrackFilterToolMonitoring(BaseMonitoringTool):
 
     where {filter} is one of "Filter" or "FilterBS"
     """
-    def __init__ (self, name="T2BSTrackFilterToolMonitoring", detail=1):
-        super(T2BSTrackFilterToolMonitoring, self).__init__(name)
+    def __init__ (self, flags, name="T2BSTrackFilterToolMonitoring", detail=1):
+        super(T2BSTrackFilterToolMonitoring, self).__init__(flags, name)
 
         self.makeHisto1D('TIME_TrackFilter', 'TH1I', 100, 0, 10000,
                          title="Timing of filter method; time [#mus];")
@@ -549,8 +544,8 @@ class T2TrackBeamSpotToolMonitoring(BaseMonitoringTool):
     - BeamLSMatricesBCID
     - TrackLLPolyCoeff
     """
-    def __init__ (self, name="T2TrackBeamSpotToolMonitoring", detail=1):
-        super(T2TrackBeamSpotToolMonitoring, self).__init__(name)
+    def __init__ (self, flags, name="T2TrackBeamSpotToolMonitoring", detail=1):
+        super(T2TrackBeamSpotToolMonitoring, self).__init__(flags, name)
 
         self.makeHisto1D('TIME_updateBS', 'TH1I', 100, 0, 10000,
                          title="Timing beamspot update; time [#mus];")

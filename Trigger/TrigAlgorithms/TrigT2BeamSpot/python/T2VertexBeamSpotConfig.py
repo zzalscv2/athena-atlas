@@ -1,25 +1,26 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-from TrigT2BeamSpot.TrigT2BeamSpotConf import (PESA__T2VertexBeamSpot, PESA__T2BSTrackFilterTool,
-        PESA__T2TrackBeamSpotTool, PESA__T2VertexBeamSpotTool)
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+from TrigT2BeamSpot.TrigT2BeamSpotConf import (PESA__T2VertexBeamSpot,
+                                               PESA__T2BSTrackFilterTool,
+                                               PESA__T2TrackBeamSpotTool,
+                                               PESA__T2VertexBeamSpotTool)
 from TrigVertexFitter.TrigVertexFitterConf import TrigPrimaryVertexFitter
 from AthenaCommon.AppMgr import ToolSvc
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 # TrigPrimaryVertexFitter: D. Emeliyanov (author)
 primaryVertexFitter = TrigPrimaryVertexFitter(zVariance=3.0, CreateTrackLists=True)
 ToolSvc += primaryVertexFitter
 
 #Adding new monitoring tool
-from TrigT2BeamSpot.T2VertexBeamSpotMonitoring import (T2VertexBeamSpotMonitoring, T2VertexBeamSpotToolMonitoring,
-        T2BSTrackFilterToolMonitoring, T2TrackBeamSpotToolMonitoring)
-filtermon = T2BSTrackFilterToolMonitoring()
-bsToolMonitoring = T2VertexBeamSpotToolMonitoring()
-trackBSmon = T2TrackBeamSpotToolMonitoring()
-bsAlgMonitoring = T2VertexBeamSpotMonitoring()
+from TrigT2BeamSpot.T2VertexBeamSpotMonitoring import (T2VertexBeamSpotMonitoring,
+                                                       T2VertexBeamSpotToolMonitoring,
+                                                       T2BSTrackFilterToolMonitoring,
+                                                       T2TrackBeamSpotToolMonitoring)
 
 # track filter tool used by vertex tool
 trackFilterForVertex = PESA__T2BSTrackFilterTool(
     name = "TrackFilterVtx",
-    MonTool = filtermon(),
+    MonTool = T2BSTrackFilterToolMonitoring(ConfigFlags).monTool,
     TrackMinPt          = 0.5,      # Minimum track pT to be considered for vertexing
     TrackMaxEta         = 2.5,      # Maximum absolute value of eta
     TrackMaxZ0          = 200.0,    # Maximum track Z0 to be considered for vertexing
@@ -42,7 +43,7 @@ trackFilterForVertex = PESA__T2BSTrackFilterTool(
 # track filter tool used by track tool
 trackFilterForTrack = PESA__T2BSTrackFilterTool(
     name = "TrackFilterTrk",
-    MonTool = filtermon(),
+    MonTool = T2BSTrackFilterToolMonitoring(ConfigFlags).monTool,
     TrackMinPt          = 0.5,      # Minimum track pT to be considered for vertexing
     TrackMaxEta         = 2.5,      # Maximum absolute value of eta
     TrackMaxZ0          = 200.0,    # Maximum track Z0 to be considered for vertexing
@@ -65,7 +66,7 @@ trackFilterForTrack = PESA__T2BSTrackFilterTool(
 #TODO: create an instance which can be called and adjusted
 InDetTrigMTBeamSpotTool = PESA__T2VertexBeamSpotTool(
     name = "T2VertexBeamSpotTool",
-    MonTool = bsToolMonitoring(),
+    MonTool = T2VertexBeamSpotToolMonitoring(ConfigFlags).monTool,
     TrackFilter         = trackFilterForVertex,
     PrimaryVertexFitter = primaryVertexFitter,
 
@@ -93,7 +94,7 @@ InDetTrigMTBeamSpotTool = PESA__T2VertexBeamSpotTool(
 InDetTrigMTTrackBeamSpotTool = PESA__T2TrackBeamSpotTool(
     name                = "T2TrackBeamSpotTool",
     TrackFilter         = trackFilterForTrack,
-    MonTool             = trackBSmon(),
+    MonTool             = T2TrackBeamSpotToolMonitoring(ConfigFlags).monTool,
     doLeastSquares      = True,
     doLogLikelihood     = True,
     beamSizeLS          = 0.01,      # Approximate beam size, mm
@@ -106,8 +107,8 @@ class T2VertexBeamSpot_Fex ( PESA__T2VertexBeamSpot ) :
         self.doTrackBeamSpot = True         # run track-based calibration tool
         self.TrackBeamSpotTool = InDetTrigMTTrackBeamSpotTool
         self.BeamSpotTool = InDetTrigMTBeamSpotTool
-        self.MonTool = bsAlgMonitoring()
-        
+        self.MonTool = T2VertexBeamSpotMonitoring(ConfigFlags).monTool
+
 # Setup for relaxed cuts at 900 GeV LHC center-of-mass
 class T2VertexBeamSpot_loose ( T2VertexBeamSpot_Fex ) :
     __slots__ = []
