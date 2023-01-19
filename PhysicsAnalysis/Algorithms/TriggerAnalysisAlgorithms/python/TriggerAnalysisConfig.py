@@ -30,6 +30,8 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.triggers = list(self.triggerChains)
             alg.selectionDecoration = 'trigPassed'
             alg.noFilter = self.noFilter
+            for t in self.triggerChains :
+                config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, isEventLevel=True)
 
             # Calculate trigger prescales
             if config.dataType() == 'data' and self.prescaleLumiCalcFiles:

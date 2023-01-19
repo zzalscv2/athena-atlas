@@ -51,7 +51,10 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, vars, metVars, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken) :
+
+    vars = []
+    metVars = []
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
@@ -449,11 +452,36 @@ def makeSequenceOld (dataType, algSeq, vars, metVars, forCompare, isPhyslite, no
     addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
                              'selectPtEta')
 
+
+    # Add an ntuple dumper algorithm:
+    treeMaker = createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
+    treeMaker.TreeName = 'analysis'
+    # the auto-flush setting still needs to be figured out
+    #treeMaker.TreeAutoFlush = 0
+    algSeq += treeMaker
+    ntupleMaker = createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' )
+    ntupleMaker.TreeName = 'analysis'
+    ntupleMaker.Branches = vars
+    # ntupleMaker.OutputLevel = 2  # For output validation
+    algSeq += ntupleMaker
+    if len (metVars) > 0:
+        ntupleMaker = createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' )
+        ntupleMaker.TreeName = 'analysis'
+        ntupleMaker.Branches = metVars
+        #ntupleMaker.OutputLevel = 2  # For output validation
+        algSeq += ntupleMaker
+    treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
+    treeFiller.TreeName = 'analysis'
+    algSeq += treeFiller
+
     pass
 
 
 
-def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite, noPhysliteBroken) :
+def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken) :
+
+    vars = []
+    metVars = []
 
     from AnalysisAlgorithmsConfig.ConfigFactory import makeConfig
 
@@ -464,6 +492,12 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
 
     configSeq = ConfigSequence ()
 
+    outputContainers = {'mu_': 'OutMuons',
+                        'el_': 'OutElectrons',
+                        'ph_': 'OutPhotons',
+                        'tau_': 'OutTauJets',
+                        'jet_': 'OutJets',
+                        'met_': 'AnaMET'}
 
     if not isPhyslite :
         # Include, and then set up the pileup analysis sequence:
@@ -498,13 +532,6 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     else :
         configSeq.setOptionValue ('.isolationWP', 'NonIso')
     configSeq.setOptionValue ('.recomputeLikelihood', recomputeLikelihood)
-    vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
-              'OutElectrons_NOSYS.phi -> el_phi',
-              'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
-              'OutElectrons_NOSYS.charge -> el_charge',
-              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
 
 
     # Include, and then set up the photon analysis algorithm sequence:
@@ -514,12 +541,6 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     configSeq.setOptionValue ('.qualityWP', 'Tight')
     configSeq.setOptionValue ('.isolationWP', 'FixedCutTight')
     configSeq.setOptionValue ('.recomputeIsEM', False)
-    vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
-              'OutPhotons_NOSYS.phi -> ph_phi',
-              'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
-              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
     # set up the muon analysis algorithm sequence:
@@ -530,91 +551,47 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     configSeq += makeConfig ('Muons.Selection', 'AnaMuons.tight')
     configSeq.setOptionValue ('.quality', 'Tight')
     configSeq.setOptionValue ('.isolation', 'Iso')
-    vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
-              'OutMuons_NOSYS.phi -> mu_phi',
-              'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',
-              'OutMuons_NOSYS.charge -> mu_charge',
-              'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%',
-              'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%', ]
-        vars += [ 'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
 
 
     # Include, and then set up the tau analysis algorithm sequence:
     configSeq += makeConfig ('TauJets', 'AnaTauJets')
     configSeq += makeConfig ('TauJets.Selection', 'AnaTauJets.tight')
     configSeq.setOptionValue ('.quality', 'Tight')
-    vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
-              'OutTauJets_NOSYS.phi -> tau_phi',
-              'OutTauJets_NOSYS.charge -> tau_charge',
-              'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
-              'OutTauJets_%SYS%.baselineSelection_tight  -> tau_select_tight_%SYS%', ]
-    if dataType != 'data':
-        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
     # Include, and then set up the jet analysis algorithm sequence:
     configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
     configSeq.setOptionValue ('.runJvtUpdate', True)
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
-    vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
-             'OutJets_NOSYS.phi -> jet_phi',
-             'OutJets_NOSYS.eta -> jet_eta', ]
 
     configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
-    if dataType != 'data':
-        vars += [
-            'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
-        ]
 
     btagger = "DL1dv01"
     btagWP = "FixedCutBEff_60"
-    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.' + btagger + '_' + btagWP)
+    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
     configSeq.setOptionValue ('.noEfficiency', False)
     configSeq.setOptionValue ('.btagger', btagger)
     configSeq.setOptionValue ('.btagWP', btagWP)
     configSeq.setOptionValue ('.kinematicSelection', True )
-    vars += [
-        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
-    ]
-    if dataType != 'data' :
-        vars += [
-            'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
-        ]
     if not noPhysliteBroken :
         btagger = "DL1r"
         btagWP = "FixedCutBEff_77"
-        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.' + btagger + '_' + btagWP)
+        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
         configSeq.setOptionValue ('.noEfficiency', False)
         configSeq.setOptionValue ('.legacyRecommendations', True)
         configSeq.setOptionValue ('.btagger', btagger)
         configSeq.setOptionValue ('.btagWP', btagWP)
         configSeq.setOptionValue ('.kinematicSelection', True )
-        vars += [
-            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_legacy_select_%SYS%',
-        ]
-        if dataType != 'data' :
-            vars += [
-                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_legacy_eff_%SYS%'
-            ]
 
 
     if largeRJets :
         configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
         configSeq.setOptionValue ('.postfix', 'largeR_jets' )
-        vars += ['OutLargeRJets_%SYS%.pt  -> larger_jet_pt_%SYS%',
-                 'OutLargeRJets_NOSYS.phi -> larger_jet_phi',
-                 'OutLargeRJets_NOSYS.eta -> larger_jet_eta',
-                 'OutLargeRJets_NOSYS.m   -> larger_jet_m', ]
-
+        outputContainers['larger_jet_'] = 'OutLargeRJets'
 
     if trackJets :
         configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
         configSeq.setOptionValue ('.postfix', 'track_jets' )
-        vars += ['OutTrackJets_%SYS%.pt  -> track_jet_pt_%SYS%',
-                 'OutTrackJets_NOSYS.phi -> track_jet_phi',
-                 'OutTrackJets_NOSYS.eta -> track_jet_eta',
-                 'OutTrackJets_NOSYS.m   -> track_jet_m', ]
+        outputContainers['track_jet_'] = 'OutTrackJets'
 
 
     if dataType != 'data' :
@@ -623,14 +600,12 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         configSeq.setOptionValue ('.saveCutBookkeepers', True)
         configSeq.setOptionValue ('.runNumber', 284500)
         configSeq.setOptionValue ('.cutBookkeepersSystematics', True)
-        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
     # Include, and then set up the trigger analysis sequence:
     configSeq += makeConfig( 'Trigger.Chains', None )
     configSeq.setOptionValue ('.triggerChains', triggerChains )
     configSeq.setOptionValue ('.noFilter', True )
-    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
     configSeq += makeConfig ('Selection.PtEta', 'AnaElectrons')
@@ -678,11 +653,6 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     # since `tight` is a strict subset of `medium` it doesn't matter
     # if we do an "or" of the two.
     configSeq.setOptionValue ('.muons', 'AnaMuons.medium||tight')
-    metVars += [
-        'AnaMET_%SYS%.mpx   -> met_mpx_%SYS%',
-        'AnaMET_%SYS%.mpy   -> met_mpy_%SYS%',
-        'AnaMET_%SYS%.sumet -> met_sumet_%SYS%',
-    ]
 
 
     # Include, and then set up the overlap analysis algorithm config:
@@ -694,14 +664,6 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
     configSeq.setOptionValue ('.taus',        'AnaTauJets.tight')
     configSeq.setOptionValue ('.inputLabel',  'preselectOR')
     configSeq.setOptionValue ('.outputLabel', 'passesOR' )
-
-    vars += [
-        'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
-        'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
-        'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
-        'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
-        'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
-    ]
 
 
     configSeq += makeConfig ('Output.Thinning', 'AnaElectrons.Thinning')
@@ -725,6 +687,11 @@ def makeSequenceBlocks (dataType, algSeq, vars, metVars, forCompare, isPhyslite,
         configSeq += makeConfig ('Output.Thinning', 'AnaTrackJets.Thinning')
         configSeq.setOptionValue ('.outputName', 'OutTrackJets')
 
+    configSeq += makeConfig ('Output.Simple', 'Output')
+    configSeq.setOptionValue ('.treeName', 'analysis')
+    configSeq.setOptionValue ('.vars', vars)
+    configSeq.setOptionValue ('.metVars', metVars)
+    configSeq.setOptionValue ('.containers', outputContainers)
 
     configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)
     configSeq.fullConfigure (configAccumulator)
@@ -765,35 +732,11 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
         # must be in AnalysisBase
         pass
 
-    vars = []
-    metVars = []
     if not useBlocks :
-        makeSequenceOld (dataType, algSeq, vars=vars, metVars=metVars, forCompare=forCompare,
+        makeSequenceOld (dataType, algSeq, forCompare=forCompare,
                          isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
     else :
-        makeSequenceBlocks (dataType, algSeq, vars=vars, metVars=metVars, forCompare=forCompare,
+        makeSequenceBlocks (dataType, algSeq, forCompare=forCompare,
                             isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
-
-
-    # Add an ntuple dumper algorithm:
-    treeMaker = createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
-    treeMaker.TreeName = 'analysis'
-    # the auto-flush setting still needs to be figured out
-    #treeMaker.TreeAutoFlush = 0
-    algSeq += treeMaker
-    ntupleMaker = createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' )
-    ntupleMaker.TreeName = 'analysis'
-    ntupleMaker.Branches = vars
-    # ntupleMaker.OutputLevel = 2  # For output validation
-    algSeq += ntupleMaker
-    if len (metVars) > 0:
-        ntupleMaker = createAlgorithm( 'CP::AsgxAODMetNTupleMakerAlg', 'MetNTupleMaker' )
-        ntupleMaker.TreeName = 'analysis'
-        ntupleMaker.Branches = metVars
-        #ntupleMaker.OutputLevel = 2  # For output validation
-        algSeq += ntupleMaker
-    treeFiller = createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
-    treeFiller.TreeName = 'analysis'
-    algSeq += treeFiller
 
     return algSeq

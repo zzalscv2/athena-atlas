@@ -58,6 +58,12 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'JetShallowCopyAlg' + self.postfix )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
+ 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'm', 'm')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
 
 
 
@@ -206,6 +212,8 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.skipBadEfficiency = 0
             alg.jets = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
+            if alg.scaleFactorDecoration != '' :
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
 
         if self.runFJvtSelection :
             alg = config.createAlgorithm( 'CP::JvtEfficiencyAlg', 'ForwardJvtEfficiencyAlg' )

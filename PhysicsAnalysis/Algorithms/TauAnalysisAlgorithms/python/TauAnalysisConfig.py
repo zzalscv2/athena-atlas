@@ -42,6 +42,11 @@ class TauCalibrationConfig (ConfigBlock):
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 
+        config.addOutputVar (self.containerName, 'pt', 'pt')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+
 
 
 
@@ -102,6 +107,7 @@ class TauWorkingPointConfig (ConfigBlock) :
         alg.selectionDecoration = 'baselineSelection' + selectionPostfix + ',as_char'
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
+        config.addOutputVar (self.containerName, 'baselineSelection' + postfix, 'select' + postfix)
 
 
         # Set up the algorithm calculating the efficiency scale factors for the
@@ -118,6 +124,7 @@ class TauWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'bad_eff' + selectionPostfix
             alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'effSF' + postfix)
 
 
 

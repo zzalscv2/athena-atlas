@@ -45,6 +45,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             electrons, alg.preselection = config.readNameAndSelection (self.electrons)
             alg.particles = electrons
             alg.selectionDecoration = self.inputLabel + ',as_char'
+            config.addOutputVar (self.electrons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
 
         photons = None
         if self.photons != "" :
@@ -52,6 +53,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             photons, alg.preselection = config.readNameAndSelection (self.photons)
             alg.particles = photons
             alg.selectionDecoration = self.inputLabel + ',as_char'
+            config.addOutputVar (self.photons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
 
         muons = None
         if self.muons != "" :
@@ -59,6 +61,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             muons, alg.preselection = config.readNameAndSelection (self.muons)
             alg.particles = muons
             alg.selectionDecoration = self.inputLabel + ',as_char'
+            config.addOutputVar (self.muons.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
 
         taus = None
         if self.taus != "" :
@@ -66,6 +69,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             taus, alg.preselection = config.readNameAndSelection (self.taus)
             alg.particles = taus
             alg.selectionDecoration = self.inputLabel + ',as_char'
+            config.addOutputVar (self.taus.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
 
         jets = None
         if self.jets != "" :
@@ -73,6 +77,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             jets, alg.preselection = config.readNameAndSelection (self.jets)
             alg.particles = jets
             alg.selectionDecoration = self.inputLabel + ',as_char'
+            config.addOutputVar (self.jets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
 
         fatJets = None
         if self.fatJets != "" :
@@ -80,6 +85,7 @@ class OverlapAnalysisConfig (ConfigBlock):
             fatJets, alg.preselection = config.readNameAndSelection (self.fatJets)
             alg.particles = fatJets
             alg.selectionDecoration = self.inputLabel + ',as_char'
+            config.addOutputVar (self.fatJets.split('.')[0], self.outputLabel + '_%SYS%', 'select_or')
 
 
         # Create the overlap removal algorithm:
