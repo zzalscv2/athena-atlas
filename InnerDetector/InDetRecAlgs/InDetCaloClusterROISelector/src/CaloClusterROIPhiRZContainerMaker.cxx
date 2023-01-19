@@ -42,6 +42,10 @@ StatusCode CaloClusterROIPhiRZContainerMaker::initialize()
        ATH_MSG_FATAL( "No OutputROIContainerName given.");
        return StatusCode::FAILURE;
     }
+    if (m_keepEt && m_outputClusterContainerNameEt.key().empty()) {
+       ATH_MSG_FATAL( "No m_outputClusterContainerNameEt given with m_keepEt = true.");
+       return StatusCode::FAILURE;
+    }
     if (m_outputClusterContainerName.size() > std::numeric_limits<uint8_t>::max()) {
        ATH_MSG_FATAL( "Too many OutputROIContainerNames given.");
        return StatusCode::FAILURE;
@@ -66,6 +70,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::initialize()
     m_selectedClusters=0;
 
     ATH_CHECK(m_outputClusterContainerName.initialize());
+    ATH_CHECK(m_outputClusterContainerNameEt.initialize(m_keepEt && !m_outputClusterContainerNameEt.key().empty()));
     ATH_CHECK(m_inputClusterContainerName.initialize(!m_inputClusterContainerName.key().empty()));
     m_outputSorted.reserve( m_outputIndex.size() );
     m_outputUnsorted.reserve( m_outputIndex.size() );
@@ -78,6 +83,9 @@ StatusCode CaloClusterROIPhiRZContainerMaker::initialize()
        }
        ATH_MSG_INFO( "ROIPhiRZ container " << m_outputClusterContainerName[  m_outputIndex[output_i] ]
                      << " : " << m_minPtEm[m_outputIndex[output_i] ] << " MeV " <<  ( m_phiWidth[m_outputIndex[output_i]]>0. ? " order by phi " : " unordered" ) );
+    }
+    if (m_keepEt){
+       ATH_MSG_INFO( "ROIPhiRZEt container: " << m_outputClusterContainerNameEt );
     }
     return StatusCode::SUCCESS;
 }
@@ -114,11 +122,13 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
     unsigned int all_clusters{};
     unsigned int selected_clusters{};
     ROIPhiRZContainer          rois;      // temporary ROI container
+    ROIPhiRZEtContainer     rois_Et;      // temporary ROI container with Et
     std::vector<unsigned int >   n_rois;   // number of ROIs per output container
     n_rois.resize(m_outputIndex.size(),0);
 
     std::vector<uint8_t >       max_output;// the outputs are ordered by the pt-cut, this is the index of the last output which passed the pt-cut per ROI
     rois.reserve( inputClusterContainer->size());
+    rois_Et.reserve( inputClusterContainer->size());
     max_output.resize(inputClusterContainer->size());
 
     // create ROIs.
@@ -129,7 +139,7 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
         if (m_egammaCaloClusterSelector->passSelection(cluster,*caloMgr))
         {
             selected_clusters++;
-            addROI(*cluster, *caloMgr, rois, max_output, n_rois);
+            addROI(*cluster, *caloMgr, rois, max_output, n_rois, rois_Et);
         }
     }
     // This may happen if a ROI close to +-pi gets duplicated...
@@ -141,12 +151,17 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
 
     // create ROI output container
     std::vector< SG::WriteHandle<ROIPhiRZContainer> > output_rois;
+    SG::WriteHandle<ROIPhiRZEtContainer> wh_output_rois_Et;
     output_rois.reserve(m_outputIndex.size());
     for (unsigned int output_idx : m_outputIndex) {
        unsigned int the_size = n_rois[output_rois.size()];
        output_rois.emplace_back( m_outputClusterContainerName[output_idx], ctx);
        ATH_CHECK( output_rois.back().record( std::make_unique<ROIPhiRZContainer>() ) );
        output_rois.back()->reserve( the_size);
+    } 
+    if (m_keepEt) {
+      wh_output_rois_Et = SG::WriteHandle<ROIPhiRZEtContainer>{m_outputClusterContainerNameEt, ctx};
+      ATH_CHECK(wh_output_rois_Et.record( std::make_unique<ROIPhiRZEtContainer>() ));
     }
 
     if (!m_outputSorted.empty()) {
@@ -161,6 +176,9 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
              if  (output_i>=max_output[roi_i]) break;
              output_rois[output_i]->push_back( rois[ roi_i ] );
           }
+          if (m_keepEt){
+             wh_output_rois_Et->push_back( rois_Et[ roi_i ] );
+          }
        }
     }
 
@@ -172,6 +190,11 @@ StatusCode CaloClusterROIPhiRZContainerMaker::execute(const EventContext& ctx) c
              if  (output_i>=max_output[roi_unordered_i]) break;
              if (std::abs(rois[ roi_unordered_i ][0])<PI_F  or (rois[ roi_unordered_i ][0] == PI_F)) {
                 output_rois[output_i]->push_back( rois[ roi_unordered_i ] );
+             }
+          }
+          if (m_keepEt){
+             if (std::abs(rois_Et[ roi_unordered_i ][0])<PI_F  or (rois_Et[ roi_unordered_i ][0] == PI_F)) {
+                wh_output_rois_Et->push_back( rois_Et[ roi_unordered_i ] );
              }
           }
        }
@@ -228,7 +251,8 @@ void CaloClusterROIPhiRZContainerMaker::addROI( const xAOD::CaloCluster &cluster
                                                  const CaloDetDescrManager &caloDDMgr,
                                                  ROIPhiRZContainer &output_rois,
                                                  std::vector<uint_fast8_t> &max_output,
-                                                 std::vector<unsigned int> &n_rois) const {
+                                                 std::vector<unsigned int> &n_rois,
+                                                 ROIPhiRZEtContainer &output_rois_et) const {
 
   double energy = cluster.e();
 
@@ -259,7 +283,9 @@ void CaloClusterROIPhiRZContainerMaker::addROI( const xAOD::CaloCluster &cluster
   if ( et >= m_sortedMinPtEm[0]){
      unsigned int roi_idx=output_rois.size();
      output_rois.addROI(global_position, m_maxPhiWidth);
-
+     if (m_keepEt){
+        output_rois_et.addROI(global_position, m_maxPhiWidth, cluster.e() * std::sin(global_position.theta()));
+     }
      unsigned int n_duplicates = output_rois.size()-roi_idx-1;
      if (n_duplicates>0) {
         m_duplicateROI += n_duplicates;

@@ -58,8 +58,8 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
         kwargs.setdefault("doHadCaloSeed"             , flags.InDet.Tracking.doCaloSeededAmbi)   #Do special cuts in region of interest
         kwargs.setdefault("HadROIPhiRZContainer"      , "InDetHadCaloClusterROIPhiRZBjet")
         if flags.InDet.Tracking.doCaloSeededAmbi:
-            from InDetConfig.InDetCaloClusterROISelectorConfig import HadCaloClusterROIPhiRZContainerMakerCfg
-            acc.merge(HadCaloClusterROIPhiRZContainerMakerCfg(flags))
+            from InDetConfig.InDetCaloClusterROISelectorConfig import HadCaloClusterROIPhiRZEtContainerMakerCfg
+            acc.merge(HadCaloClusterROIPhiRZEtContainerMakerCfg(flags))
         kwargs.setdefault("minPtConv"                 , 10000)   #Only allow split clusters on track withe pt greater than this MeV
         kwargs.setdefault("minPtBjetROI"              , 10000)
         kwargs.setdefault("phiWidthEM"                , 0.05)     #Split cluster ROI size

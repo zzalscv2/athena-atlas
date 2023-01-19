@@ -28,6 +28,8 @@
 
 // Track fitter
 #include "TrkFitterInterfaces/ITrackFitter.h"
+// for hadronic ROI studies
+#include "TrkCaloClusterROI/ROIPhiRZEtContainer.h"
 
 // for creating xAOD with TrackParticle
 #include "xAODTracking/TrackParticleContainer.h"
@@ -66,6 +68,9 @@ namespace Trk {
 		    SG::WriteHandleKey<ObservedTracksMap> m_savedTracksMapWriteKey;
 			// track fitter
 		    ToolHandle<ITrackFitter> m_fitterTool;
+			// hadronic ROI container
+			SG::ReadHandleKey<ROIPhiRZEtContainer> m_inputHadClusterContainerKey;
+		    FloatProperty m_hadEtMin{this, "hadEtMin", 150000., "in MeV"};
 
 			mutable std::mutex m_mutex;
 			struct CacheEntry {

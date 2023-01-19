@@ -34,7 +34,7 @@
 // which serves as Id for the tool. If a track has a parent, the unique 
 // Id of the parent is also saved by the tool. As the ambiguity processor
 // tools delete tracks, all tracks (including temporary tracks) are
-// saved to the tool's cache entry, i.e. an ObservedTrackMap object.
+// saved to the tool's cache entry, i.e. an ObservedTracksMap object.
 
 // Two instances of the TrkObserverTool must be instantiated in order
 // to avoid data handle conflicts:
@@ -64,6 +64,7 @@ Trk::TrkObserverTool::TrkObserverTool(const std::string& type, const std::string
 		    declareProperty("Fitter", m_fitterTool );
 			declareProperty("ObsTrackCollection", m_savedTracksWriteKey);
 			declareProperty("ObsTrackCollectionMap", m_savedTracksMapWriteKey);
+			declareProperty("HadROIPhiRZEtContainer", m_inputHadClusterContainerKey);
 }
 
 // Destructor
@@ -76,9 +77,11 @@ StatusCode Trk::TrkObserverTool::initialize() {
 	ATH_MSG_INFO("Initializing TrkObserverTool with name: " << name());
 	ATH_MSG_INFO("\tm_savedTracksWriteKey: " << m_savedTracksWriteKey.key());
 	ATH_MSG_INFO("\tm_savedTracksMapWriteKey: " << m_savedTracksMapWriteKey.key());
+	ATH_MSG_INFO("\tm_inputHadClusterContainerKey: " << m_inputHadClusterContainerKey.key());
 	ATH_CHECK(AthAlgTool::initialize());
 	ATH_CHECK(m_savedTracksWriteKey.initialize(!m_savedTracksWriteKey.key().empty()));
 	ATH_CHECK(m_savedTracksMapWriteKey.initialize(!m_savedTracksMapWriteKey.key().empty()));
+	ATH_CHECK(m_inputHadClusterContainerKey.initialize(!m_inputHadClusterContainerKey.key().empty()));
 	ATH_CHECK(m_fitterTool.retrieve());
 	ATH_MSG_INFO("Initialized TrkObserverTool");
 	return StatusCode::SUCCESS;
@@ -98,7 +101,7 @@ void Trk::TrkObserverTool::newEvent(CacheEntry* ent) const {
 		ent->m_observedTrkMap->clear();
 		delete ent->m_observedTrkMap;
 	}
-	ent->m_observedTrkMap = new ObservedTrackMap;
+	ent->m_observedTrkMap = new ObservedTracksMap;
 }
 
 void Trk::TrkObserverTool::updateTrackMap(int uid, double score, xAOD::RejectionStep rejectStep, xAOD::RejectionReason rejectReason) const {
@@ -107,7 +110,7 @@ void Trk::TrkObserverTool::updateTrackMap(int uid, double score, xAOD::Rejection
 	// get event context and map from cache
 	const EventContext& ctx{Gaudi::Hive::currentContext()};
 	std::lock_guard<std::mutex> lock{m_mutex};
-	ObservedTrackMap* trk_map = getTrackMap(ctx);
+	ObservedTracksMap* trk_map = getTrackMap(ctx);
 	// find track and update score
 	if ( trk_map->find(uid) == trk_map->end() ) {
 		// not found
@@ -131,7 +134,7 @@ void Trk::TrkObserverTool::updateScore(int uid, double score) const {
 	// get event context and map from cache
 	const EventContext& ctx{Gaudi::Hive::currentContext()};
 	std::lock_guard<std::mutex> lock{m_mutex};
-	ObservedTrackMap* trk_map = getTrackMap(ctx);
+	ObservedTracksMap* trk_map = getTrackMap(ctx);
 	// find track and update score
 	if ( trk_map->find(uid) == trk_map->end() ) {
 		// not found
@@ -150,7 +153,7 @@ void Trk::TrkObserverTool::rejectTrack(int uid, xAOD::RejectionStep rejectStep, 
 	// get event context and map from cache
 	const EventContext& ctx{Gaudi::Hive::currentContext()};
 	std::lock_guard<std::mutex> lock{m_mutex};
-	ObservedTrackMap* trk_map = getTrackMap(ctx);
+	ObservedTracksMap* trk_map = getTrackMap(ctx);
 	// find track and update rejection location
 	if ( trk_map->find(uid) == trk_map->end() ) {
 		// not found
@@ -195,6 +198,24 @@ void Trk::TrkObserverTool::addInputTrack(int uid, const Trk::Track& track) const
 	}
 	std::vector<xAOD::RejectionStep> v_rejectStep = {xAOD::RejectionStep::solveTracks};
 	std::vector<xAOD::RejectionReason> v_rejectReason = {xAOD::RejectionReason::acceptedTrack};
+	ATH_MSG_DEBUG("addInputTrack: getting m_inputHadClusterContainerKey = "<<m_inputHadClusterContainerKey);
+	SG::ReadHandle<ROIPhiRZEtContainer> calo(m_inputHadClusterContainerKey);
+	ATH_MSG_DEBUG("addInputTrack: got "<<calo->size()<<" calo clusters");
+	float had_roi_dR = -2;
+	float had_roi_Et = -2;
+	if (!calo.isValid()) {
+		ATH_MSG_ERROR("addInputTrack: failed to get Had Calo cluster collection " << m_inputHadClusterContainerKey );
+	}
+	else{
+		std::vector<float> dREt = calo->getClosestROIdREt( copiedTrack->trackParameters()->front()->momentum().phi(),
+													 	   copiedTrack->trackParameters()->front()->eta(),
+													 	   0. /* ignore r of track */,
+													 	   copiedTrack->trackParameters()->front()->position().z(),
+													 	   m_hadEtMin);
+		had_roi_dR = dREt[0];
+		had_roi_Et = dREt[1];
+		ATH_MSG_DEBUG("addInputTrack: closest had_roi_dR = "<<had_roi_dR<<", had_roi_Et = "<<had_roi_Et);
+	}
 	ent->m_observedTrkMap->insert( std::make_pair(uid, std::make_tuple(copiedTrack.release(), // Id, track
 											 -1, // score
 											 xAOD::RejectionStep::solveTracks, // rejection step
@@ -202,7 +223,7 @@ void Trk::TrkObserverTool::addInputTrack(int uid, const Trk::Track& track) const
 											 0, // unique parentId
 											 // holes/shared/split hits information (-2 means not filled yet)
 											 -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2.0f, -2.0f, -2,
-											 v_rejectStep, v_rejectReason)));
+											 v_rejectStep, v_rejectReason, had_roi_dR, had_roi_Et)));
 }
 
 void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk::Track& track) const {
@@ -211,7 +232,7 @@ void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk:
 	// get event context and map from cache
 	const EventContext& ctx{Gaudi::Hive::currentContext()};
 	std::lock_guard<std::mutex> lock{m_mutex};
-	ObservedTrackMap* trk_map = getTrackMap(ctx);
+	ObservedTracksMap* trk_map = getTrackMap(ctx);
 
 	// deep copy of the track (because some subtracks get deleted), information has to be available later
 	std::unique_ptr<Trk::Track> copiedTrack;
@@ -243,6 +264,24 @@ void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk:
 	// add subtrack to cache map
 	std::vector<xAOD::RejectionStep> v_rejectStep = {rejectStep};
 	std::vector<xAOD::RejectionReason> v_rejectReason = {xAOD::RejectionReason::acceptedTrack};
+	ATH_MSG_DEBUG("addSubTrack: getting m_inputHadClusterContainerKey = "<<m_inputHadClusterContainerKey);
+	SG::ReadHandle<ROIPhiRZEtContainer> calo(m_inputHadClusterContainerKey);
+	ATH_MSG_DEBUG("addSubTrack: got "<<calo->size()<<" calo clusters");
+	float had_roi_dR = -2;
+	float had_roi_Et = -2;
+	if (!calo.isValid()) {
+		ATH_MSG_ERROR("addSubTrack: failed to get Had Calo cluster collection " << m_inputHadClusterContainerKey );
+	}
+	else{
+		std::vector<float> dREt = calo->getClosestROIdREt( copiedTrack->trackParameters()->front()->momentum().phi(),
+													 	   copiedTrack->trackParameters()->front()->eta(),
+													 	   0. /* ignore r of track */,
+													 	   copiedTrack->trackParameters()->front()->position().z(),
+													 	   m_hadEtMin);
+		had_roi_dR = dREt[0];
+		had_roi_Et = dREt[1];
+		ATH_MSG_DEBUG("addSubTrack: closest had_roi_dR = "<<had_roi_dR<<", had_roi_Et = "<<had_roi_Et);
+	}
 	trk_map->insert( std::make_pair(track_uid, std::make_tuple(copiedTrack.release(), // Id, track
 											 score, // score
 											 rejectStep, // rejection step
@@ -250,10 +289,10 @@ void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk:
 											 parent_uid, // unique parentId
 											 // holes/shared/split hits information (-2 means not filled yet)
 											 -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2.0f, -2.0f, -2,
-											 v_rejectStep, v_rejectReason)));
+											 v_rejectStep, v_rejectReason, had_roi_dR, had_roi_Et)));
 }
 
-ObservedTrackMap* Trk::TrkObserverTool::getTrackMap(const EventContext& ctx) const {
+ObservedTracksMap* Trk::TrkObserverTool::getTrackMap(const EventContext& ctx) const {
 
 	ATH_MSG_DEBUG("Get track map from cache");
 	// get cache
@@ -265,7 +304,7 @@ ObservedTrackMap* Trk::TrkObserverTool::getTrackMap(const EventContext& ctx) con
 	return ent->m_observedTrkMap;
 }
 
-int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const ObservedTrackMap* trk_map) const {
+int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const ObservedTracksMap* trk_map) const {
 
 	std::lock_guard<std::mutex> lock{m_mutex};
 	// Save tracks and map to store
@@ -274,7 +313,7 @@ int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const Obser
 	ATH_MSG_DEBUG("\tm_savedTracksMapWriteKey: "<<m_savedTracksMapWriteKey.key());
 
 	SG::WriteHandle<TrackCollection> wh_tracks{m_savedTracksWriteKey, ctx};
-	SG::WriteHandle<ObservedTrackMap> wh_tracksMap{m_savedTracksMapWriteKey, ctx};
+	SG::WriteHandle<ObservedTracksMap> wh_tracksMap{m_savedTracksMapWriteKey, ctx};
 
 	// Tracks write handle
 	StatusCode sc = wh_tracks.record(std::make_unique<TrackCollection>());
@@ -292,7 +331,7 @@ int Trk::TrkObserverTool::saveTracksToStore(const EventContext& ctx, const Obser
 	}
 
 	// Tracks map write handle
-	sc = wh_tracksMap.record(std::make_unique<ObservedTrackMap>());
+	sc = wh_tracksMap.record(std::make_unique<ObservedTracksMap>());
 	if (sc.isFailure()) {
 		ATH_MSG_ERROR("saveTracksToStore: Could not record tracks map: "<<m_savedTracksMapWriteKey.key());
 	}
@@ -329,7 +368,7 @@ void Trk::TrkObserverTool::updateHolesSharedHits(int uid, int numPixelHoles, int
 	// get event context and map from cache
 	const EventContext& ctx{Gaudi::Hive::currentContext()};
 	std::lock_guard<std::mutex> lock{m_mutex};
-	ObservedTrackMap* trk_map = getTrackMap(ctx);
+	ObservedTracksMap* trk_map = getTrackMap(ctx);
 
 	// find track and update rejection location
 	if ( trk_map->find(uid) == trk_map->end() ) {
@@ -367,7 +406,7 @@ void Trk::TrkObserverTool::updateHolesSharedHits(int uid, int numPixelHoles, int
 	}
 }
 
-void Trk::TrkObserverTool::dumpTrackMap(const ObservedTrackMap* trk_map) const {
+void Trk::TrkObserverTool::dumpTrackMap(const ObservedTracksMap* trk_map) const {
 
 	// prints out/dumps all entries in m_observedTrkMap
 
@@ -436,7 +475,7 @@ std::string Trk::TrkObserverTool::dumpRejection(xAOD::RejectionStep rejectStep, 
 	return rejection_description;
 }
 
-int Trk::TrkObserverTool::getNFinalTracks(const ObservedTrackMap* trk_map) {
+int Trk::TrkObserverTool::getNFinalTracks(const ObservedTracksMap* trk_map) {
 	// counts the tracks which did not get rejected (this number should equal finalTracks)
 	int nFinalTracks = 0;
 	for (const auto& itrMap : *trk_map) {
@@ -445,7 +484,7 @@ int Trk::TrkObserverTool::getNFinalTracks(const ObservedTrackMap* trk_map) {
 	return nFinalTracks;
 }
 
-int Trk::TrkObserverTool::getNObservedTracks(const ObservedTrackMap* trk_map) {
+int Trk::TrkObserverTool::getNObservedTracks(const ObservedTracksMap* trk_map) {
 	// check the number of tracks in the observer tool map
 	return trk_map->size();
 }

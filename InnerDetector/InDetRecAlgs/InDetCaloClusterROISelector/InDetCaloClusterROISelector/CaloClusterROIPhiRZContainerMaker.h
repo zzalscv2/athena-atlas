@@ -9,6 +9,7 @@
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
+#include "TrkCaloClusterROI/ROIPhiRZEtContainer.h"
 
 #include "egammaInterfaces/IegammaCaloClusterSelector.h"
 #include "xAODEgamma/EgammaxAODHelpers.h"
@@ -63,8 +64,8 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
                 const CaloDetDescrManager &caloDDMgr,
                 ROIPhiRZContainer &output_rois,
                 std::vector<uint_fast8_t> &max_output,
-                std::vector<unsigned int> &n_rois) const;
-
+                std::vector<unsigned int> &n_rois,
+                ROIPhiRZEtContainer &output_rois_Et) const;
    /** @brief Name of the cluster intput collection*/
    SG::ReadHandleKey<xAOD::CaloClusterContainer>   m_inputClusterContainerName
       {this, "InputClusterContainerName", "egammaTopoCluster", "Input cluster for egamma objects"};
@@ -72,6 +73,9 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
    /** @brief Name of the ROI output collection*/
    SG::WriteHandleKeyArray<ROIPhiRZContainer>  m_outputClusterContainerName
       {this, "OutputROIContainerName", {}, "Output collection of eta ordered ROIs"};
+
+   SG::WriteHandleKey<ROIPhiRZEtContainer>  m_outputClusterContainerNameEt
+      {this, "OutputROIContainerNameEt", "", "Output collection of eta ordered ROIs with Et"};
 
    /**
     * @brief Name of the CaloDetDescrManager condition object
@@ -95,6 +99,9 @@ class CaloClusterROIPhiRZContainerMaker : public AthReentrantAlgorithm
 
    Gaudi::Property< std::vector<float> >  m_minPtEm
       {this, "minPt", {}, "Minimum pt of cluster ROIs (EMFraction corrected if EMEnerygOnly is set)."};
+
+   Gaudi::Property< bool > m_keepEt
+      {this, "keepEt", false, "Keep the cluster Et information" };
 
    std::vector<unsigned int> m_outputIndex;
    std::vector<unsigned int> m_outputSorted;
