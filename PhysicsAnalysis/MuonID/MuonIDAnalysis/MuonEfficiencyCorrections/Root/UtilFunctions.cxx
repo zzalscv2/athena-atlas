@@ -24,9 +24,7 @@ namespace CP{
     std::string ReplaceExpInString(std::string str, const std::string &exp, const std::string &rep) {
         size_t ExpPos = str.find(exp);
         if (ExpPos == std::string::npos) return str;
-        size_t ExpLen = exp.size();
-
-        str = str.substr(0, ExpPos) + rep + str.substr(ExpPos + ExpLen, std::string::npos);
+        str.replace(ExpPos,exp.size(),rep);
         if (str.find(exp) != std::string::npos) return ReplaceExpInString(str, exp, rep);
         return str;
     }
