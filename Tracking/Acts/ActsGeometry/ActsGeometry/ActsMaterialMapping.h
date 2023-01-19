@@ -61,7 +61,7 @@ private:
   Gaudi::Property<bool>                           m_mapSurfaces{this, "mapSurfaces", true, "Map the material onto surfaces"};
   Gaudi::Property<bool>                           m_mapVolumes{this, "mapVolumes", true, "Map the material onto volumes"};
   ToolHandle<IActsMaterialStepConverterTool>      m_materialStepConverterTool{this, "MaterialStepConverterTool", "ActsMaterialStepConverterTool"};
-  SG::ReadHandleKey<Trk::MaterialStepCollection>  m_inputMaterialStepCollection;
+  SG::ReadHandleKey<Trk::MaterialStepCollection>  m_inputMaterialStepCollection{this, "MaterialStepRecordsKey", "MaterialStepRecords"};
   ToolHandle<IActsSurfaceMappingTool>             m_surfaceMappingTool{this, "SurfaceMappingTool", "ActsSurfaceMappingTool"};
   ToolHandle<IActsVolumeMappingTool>              m_volumeMappingTool{this, "VolumeMappingTool", "ActsVolumeMappingTool"};
   ToolHandle<IActsMaterialJsonWriterTool>         m_materialJsonWriterTool{this, "MaterialJsonWriterTool", "ActsMaterialJsonWriterTool"};

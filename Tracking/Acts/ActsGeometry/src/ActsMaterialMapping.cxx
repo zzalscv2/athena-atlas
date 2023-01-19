@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsMaterialMapping.h"
@@ -42,7 +42,6 @@ ActsMaterialMapping::ActsMaterialMapping(const std::string &name,
                                            ISvcLocator *pSvcLocator)
     : AthAlgorithm(name, pSvcLocator),
       m_materialTrackWriterSvc("ActsMaterialTrackWriterSvc", name),
-      m_inputMaterialStepCollection("MaterialStepRecords"),
       m_mappingState(m_gctx,m_mctx),
       m_mappingStateVol(m_gctx,m_mctx)
 {}
@@ -71,32 +70,32 @@ StatusCode ActsMaterialMapping::initialize() {
 }
 
 StatusCode ActsMaterialMapping::execute() {
-  ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__);
+  ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   const EventContext& ctx = Gaudi::Hive::currentContext();
-
-  Acts::RecordedMaterialTrack mTrack;
   SG::ReadHandle<Trk::MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection, ctx);
-  mTrack = m_materialStepConverterTool->convertToMaterialTrack(*materialStepCollection);
 
-  if(m_mapSurfaces){
-    auto context = m_surfaceMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
-    std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
-    m_mappingState.geoContext = geoContext;
+  if (materialStepCollection.isValid() and not materialStepCollection->empty()) {
+    Acts::RecordedMaterialTrack mTrack = m_materialStepConverterTool->convertToMaterialTrack(*materialStepCollection);
 
-    m_surfaceMappingTool->mapper()->mapMaterialTrack(m_mappingState, mTrack);
+    if(m_mapSurfaces){
+      auto context = m_surfaceMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
+      std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
+      m_mappingState.geoContext = geoContext;
+      m_surfaceMappingTool->mapper()->mapMaterialTrack(m_mappingState, mTrack);
+    }
+    if(m_mapVolumes){
+      auto context = m_volumeMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
+      std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
+      m_mappingStateVol.geoContext = geoContext;
+      m_volumeMappingTool->mapper()->mapMaterialTrack(m_mappingStateVol, mTrack);
+    }
+    m_materialTrackWriterSvc->write(mTrack);
   }
-  if(m_mapVolumes){
-    auto context = m_volumeMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
-    std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
-    m_mappingStateVol.geoContext = geoContext;       
-    m_volumeMappingTool->mapper()->mapMaterialTrack(m_mappingStateVol, mTrack);
-  }
-  m_materialTrackWriterSvc->write(mTrack);
-  ATH_MSG_VERBOSE(name() << " execute done");
   return StatusCode::SUCCESS;
 }
 
 StatusCode ActsMaterialMapping::finalize() {
+  ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   Acts::DetectorMaterialMaps detectorMaterial;
 
   // Finalize all the maps using the cached state
