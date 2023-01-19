@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructureutils_boostedxbbtag_header
@@ -26,16 +26,16 @@ namespace JetSubStructureUtils {
   class BoostedXbbTag {
     public:
       // standard tool constructor
-      BoostedXbbTag(std::string working_point           = "medium",
+      BoostedXbbTag(const std::string& working_point    = "medium",
 #ifdef ROOTCORE
-                    std::string recommendations_file    = "$ROOTCOREBIN/data/JetSubStructureUtils/config_13TeV_Htagging_MC15c_77WP_20160522.dat",
+                    const std::string& recommendations_file    = "$ROOTCOREBIN/data/JetSubStructureUtils/config_13TeV_Htagging_MC15c_77WP_20160522.dat",
 #else
-                    std::string recommendations_file    = "JetSubStructureUtils/data/config_13TeV_Htagging_MC15c_77WP_20160522.dat",
+                    const std::string& recommendations_file    = "JetSubStructureUtils/data/config_13TeV_Htagging_MC15c_77WP_20160522.dat",
 #endif
-                    std::string boson_type              = "Higgs",
-                    std::string algorithm_name          = "AK10LCTRIMF5R20",
+                    const std::string& boson_type       = "Higgs",
+                    const std::string& algorithm_name   = "AK10LCTRIMF5R20",
                     int num_bTags                       = 2,
-                    std::string decor_prefix            = "",
+                    const std::string& decor_prefix     = "",
                     bool debug                          = false,
                     bool verbose                        = false);
 
@@ -43,7 +43,7 @@ namespace JetSubStructureUtils {
       int result(const xAOD::Jet& jet, const xAOD::MuonContainer* muons) const;
       // sometimes you don't have certain properties set so pass them in
       //    to select the appropriate tagging recommendation
-      int result(const xAOD::Jet& jet, std::string algorithm_name, const xAOD::MuonContainer* muons) const;
+      int result(const xAOD::Jet& jet, const std::string& algorithm_name, const xAOD::MuonContainer* muons) const;
 
       // given the jet and configurations, return the string representation of the jet
       //        eg: AK10LCTRIMF5R20, CA10LCPRUNR50Z15, CA12LCBDRSM100R30Y15
