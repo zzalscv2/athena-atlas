@@ -636,7 +636,6 @@ else:
       InputForwardInDetTracks = []
       InputForwardInDetTracks += InputCombinedInDetTracks
       if InDetFlags.runLRTReco() and InDetFlags.storeSeparateLargeD0Container():
-        ClusterSplitProbContainer = ClusterSplitProbContainerLargeD0
         InputForwardInDetTracks +=[ InDetLargeD0TRTExtension.ForwardTrackCollection()]
 
       #
