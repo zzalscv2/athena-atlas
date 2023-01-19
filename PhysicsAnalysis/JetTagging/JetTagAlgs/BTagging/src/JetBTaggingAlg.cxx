@@ -68,7 +68,7 @@ namespace Analysis {
     // but right now there aren't any muons for b-tagging in the trigger
     // so if an empty muon container is passed, DON'T DECLARE A DEPENDENCY
     // we'll make an empty container on the b-tagging object later...
-    m_DoMuons = m_IncomingMuons.key() != "";
+    m_DoMuons = !m_IncomingMuons.key().empty();
 
     if (m_DoMuons) {
       ATH_MSG_DEBUG("#BTAG# muons requested for: " << m_JetCollectionName.key());
@@ -188,14 +188,13 @@ namespace Analysis {
     fieldCondObj->getInitializedCache (fieldCache);
 
     if (!fieldCache.solenoidOn()) {
-      for (size_t jetIndex=0; jetIndex < h_JetCollectionName->size() ; ++jetIndex) {
-        const xAOD::Jet * jet = h_JetCollectionName->at(jetIndex);
+      for (const auto *jet : *h_JetCollectionName) {
         ElementLink< xAOD::BTaggingContainer> linkBTagger;
         h_jetBTaggingLinkName(*jet) = linkBTagger;
       }
       return StatusCode::SUCCESS;
     } else { //Solenoid ON
-      for (auto jet : *h_JetCollectionName.ptr()) {
+      for (const auto *jet : *h_JetCollectionName.ptr()) {
         xAOD::BTagging *newBTagMT = new xAOD::BTagging();
         h_BTaggingCollectionName->push_back(newBTagMT);
 
@@ -204,8 +203,9 @@ namespace Analysis {
 
         std::vector<ElementLink<xAOD::TrackParticleContainer> > tmpTracks;
 
-        for (ElementLink<xAOD::IParticleContainer> elpart : trackLinks)
-          tmpTracks.push_back(ElementLink<xAOD::TrackParticleContainer>(elpart.key(), elpart.index()));
+        tmpTracks.reserve(trackLinks.size());
+        for (const ElementLink<xAOD::IParticleContainer>& elpart : trackLinks)
+          tmpTracks.emplace_back(elpart.key(), elpart.index());
 
         h_OutgoingTracks(*newBTagMT) = tmpTracks;
 
@@ -218,8 +218,8 @@ namespace Analysis {
         if (m_DoMuons) {
           const std::vector<ElementLink<xAOD::IParticleContainer> >& muonLinks = (*h_IncomingMuons)(*jet);
 
-          for (ElementLink<xAOD::IParticleContainer> elpart : muonLinks)
-            tmpMuons.push_back(ElementLink<xAOD::MuonContainer>(elpart.key(), elpart.index()));
+          for (const ElementLink<xAOD::IParticleContainer>& elpart : muonLinks)
+            tmpMuons.emplace_back(elpart.key(), elpart.index());
         }
 
         h_OutgoingMuons(*newBTagMT) = tmpMuons;
