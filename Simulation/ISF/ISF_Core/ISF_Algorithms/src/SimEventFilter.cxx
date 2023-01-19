@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SIMULATIONBASE
@@ -53,7 +53,7 @@ StatusCode ISF::SimEventFilter::finalize()
 }
 
 /** check if the given particle passes all filters */
-bool ISF::SimEventFilter::passesFilters(HepMC::ConstGenParticlePtr part, const ToolHandleArray<IGenParticleFilter>& filters) const
+bool ISF::SimEventFilter::passesFilters(HepMC::ConstGenParticlePtr& part, const ToolHandleArray<IGenParticleFilter>& filters) const
 {
   // TODO: implement this as a std::find_if with a lambda function
   for ( const auto& filter : filters ) {

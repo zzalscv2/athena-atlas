@@ -44,7 +44,7 @@ namespace Simulation {
     /** calculate the transformations that we want to apply to the particles in the current GenEvent */
     StatusCode initializeGenEvent(CLHEP::HepLorentzRotation& transform, const EventContext& ctx) const;
     /** apply rotations to individual GenParticles */
-    void rotateParticle(HepMC::GenParticlePtr p, const CLHEP::HepLorentzRotation& transform) const;
+    void rotateParticle(HepMC::GenParticlePtr& p, const CLHEP::HepLorentzRotation& transform) const;
 
     Gaudi::Property<double> m_xangle{this, "xAngle", 0.0, "rotation about x-axis"};
     Gaudi::Property<double> m_yangle{this, "yAngle", 0.0, "rotation about y-axis"};

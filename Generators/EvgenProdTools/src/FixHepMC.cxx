@@ -46,7 +46,7 @@ StatusCode FixHepMC::execute() {
 
     // Catch cases with more than 2 beam particles (16.11.2021)
     std::vector<HepMC::GenParticlePtr> beams_t;
-    for (HepMC::GenParticlePtr p : evt->beams()) {
+    for (const HepMC::GenParticlePtr& p : evt->beams()) {
       if (p->status() == 4)  beams_t.push_back(p);
     }
     if (beams_t.size() > 2) {
@@ -408,17 +408,17 @@ StatusCode FixHepMC::finalize() {
 //@{
 
 // Identify PDG ID = 0 particles, usually from HEPEVT padding
-bool FixHepMC::isPID0(HepMC::ConstGenParticlePtr p) {
+bool FixHepMC::isPID0(const HepMC::ConstGenParticlePtr& p) const {
   return p->pdg_id() == 0;
 }
 
 // Identify non-transportable stuff _after_ hadronisation
-bool FixHepMC::isNonTransportableInDecayChain(HepMC::ConstGenParticlePtr p) {
+bool FixHepMC::isNonTransportableInDecayChain(const HepMC::ConstGenParticlePtr& p) const {
   return !MC::PID::isTransportable(p->pdg_id()) && MC::fromDecay(p);
 }
 
 // Identify internal "loop" particles
-bool FixHepMC::isLoop(HepMC::ConstGenParticlePtr p) {
+bool FixHepMC::isLoop(const HepMC::ConstGenParticlePtr& p) const {
   if (p->production_vertex() == p->end_vertex() && p->end_vertex() != NULL) return true;
   if (m_loopByBC && p->production_vertex()) {
     /// @todo Use new particle MC::parents(...) tool

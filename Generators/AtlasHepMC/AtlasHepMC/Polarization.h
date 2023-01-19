@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -24,7 +24,7 @@ private:
     double m_phi;
     bool m_is_defined;
 };
-inline Polarization polarization(HepMC3::GenParticlePtr a) {
+inline Polarization polarization(const HepMC3::GenParticlePtr& a) {
     std::shared_ptr<HepMC3::DoubleAttribute> phi_A =a->attribute<HepMC3::DoubleAttribute>("phi");
     std::shared_ptr<HepMC3::DoubleAttribute> theta_A=a->attribute<HepMC3::DoubleAttribute>("theta");
     double phi=(phi_A?phi_A->value():0.0);
@@ -32,7 +32,7 @@ inline Polarization polarization(HepMC3::GenParticlePtr a) {
     bool is_defined = phi_A && theta_A;
     return Polarization(theta,phi,is_defined);
 }
-inline Polarization polarization(HepMC3::ConstGenParticlePtr a) {
+inline Polarization polarization(const HepMC3::ConstGenParticlePtr& a) {
     std::shared_ptr<HepMC3::DoubleAttribute> phi_A =a->attribute<HepMC3::DoubleAttribute>("phi");
     std::shared_ptr<HepMC3::DoubleAttribute> theta_A=a->attribute<HepMC3::DoubleAttribute>("theta");
     double phi=(phi_A?phi_A->value():0.0);
@@ -40,7 +40,7 @@ inline Polarization polarization(HepMC3::ConstGenParticlePtr a) {
     bool is_defined = phi_A && theta_A;
     return Polarization(theta,phi,is_defined);
 }
-template<class T> void  set_polarization( T a,  Polarization b) {
+template<class T> void  set_polarization( T& a,  Polarization b) {
     a->add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(b.phi()));
     a->add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(b.theta()));
 }
@@ -48,10 +48,10 @@ template<class T> void  set_polarization( T a,  Polarization b) {
 #else
 #include "HepMC/Polarization.h"
 namespace HepMC {
-template<class T> void set_polarization( T a,  Polarization b) {
+template<class T> void set_polarization( T& a,  Polarization b) {
     a->set_polarization(b);
 }
-template<class T>  Polarization polarization(T a) {
+template<class T>  Polarization polarization(const T& a) {
     return a->polarization();
 }
 }

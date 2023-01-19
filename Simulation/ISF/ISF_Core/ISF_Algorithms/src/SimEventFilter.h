@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGORITHMS_SIMEVENTFILTER_H
@@ -41,7 +41,7 @@ namespace ISF {
     virtual StatusCode  finalize() override final;
 
   private:
-    bool passesFilters(HepMC::ConstGenParticlePtr part, const ToolHandleArray<IGenParticleFilter>& filters) const;
+    bool passesFilters(HepMC::ConstGenParticlePtr& part, const ToolHandleArray<IGenParticleFilter>& filters) const;
 
     /** Input truth collections */
     SG::ReadHandleKey<McEventCollection> m_inputHardScatterEvgenKey{this, "InputHardScatterCollection", "", "Input Hard Scatter EVGEN collection."}; //!< input hard scatter collection
