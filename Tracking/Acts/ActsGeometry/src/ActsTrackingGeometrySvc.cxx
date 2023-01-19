@@ -123,9 +123,9 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   if (m_useMaterialMap) {
     std::shared_ptr<const Acts::IMaterialDecorator> matDeco = nullptr;
 
-    std::string matFileFullPath = PathResolverFindCalibFile(m_materialMapInputFileBase.value());
+    std::string matFileFullPath = PathResolverFindCalibFile(m_materialMapCalibFolder.value()+"/"+m_materialMapInputFileBase.value());
     if (matFileFullPath.empty()) {
-      ATH_MSG_ERROR( "Material Map Input File " << m_materialMapInputFileBase.value() << " not found.");
+      ATH_MSG_ERROR( "Material Map Input File " << m_materialMapCalibFolder.value() << "/" << m_materialMapInputFileBase.value() << " not found.");
       return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("Configured to use material input: " << matFileFullPath);
