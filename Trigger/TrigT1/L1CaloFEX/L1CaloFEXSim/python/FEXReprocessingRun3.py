@@ -203,7 +203,7 @@ if __name__ == '__main__':
     if "gFex" in args.outputs:    
 
         ##################################################
-        # jFEX simulation
+        # gFEX simulation
         ##################################################  
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')
         gFEX.gSuperCellTowerMapperTool = CompFactory.LVL1.gSuperCellTowerMapper('gSuperCellTowerMapper')
@@ -232,6 +232,7 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCutSim')
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCutSim'      )
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERmsSim'           )                
+        outputEDM += addEDM('xAOD::gFexTowerContainer',     'L1_gFexTriggerTowers'        )                
         
         acc.addEventAlgo(gFEX, sequenceName='AthAlgSeq')
         
@@ -242,7 +243,6 @@ if __name__ == '__main__':
         from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexByteStreamToolCfg
         gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
         decoderTools += [gFexTool]
-
                 
         outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexRhoRoI'            )
         outputEDM += addEDM('xAOD::gFexJetRoIContainer'   , 'L1_gFexSRJetRoI'          )
@@ -253,8 +253,14 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMSTComponentsJwoj'    )
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gMETComponentsNoiseCut')
         outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarENoiseCut'      )
-        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERms'           )
-        
+        outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', 'L1_gScalarERms'           )        
+
+
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import gFexInputByteStreamToolCfg
+        gFexInputTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+        decoderTools += [gFexInputTool]
+        outputEDM += addEDM('xAOD::gFexTowerContainer'    , 'L1_gFexDataTowers'        )                
+
     
     decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=decoderTools, MaybeMissingROBs=maybeMissingRobs)
     acc.addEventAlgo(decoderAlg, primary=True, sequenceName='AthAlgSeq')

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSim - Simulation of the gFEX module
@@ -51,6 +51,7 @@ namespace LVL1 {
       ATH_CHECK( m_gFEXJwoJAlgoTool.retrieve() );
       ATH_CHECK( m_gFEXaltMetAlgoTool.retrieve() );
       ATH_CHECK(m_l1MenuKey.initialize());
+      ATH_CHECK(m_gTowersWriteKey.initialize());
       return StatusCode::SUCCESS;
    }
 
@@ -59,6 +60,11 @@ namespace LVL1 {
  }
 
 StatusCode gFEXSim::executegFEXSim(gTowersIDs tmp_gTowersIDs_subset, gFEXOutputCollection* gFEXOutputs){
+
+   // Container to save gTowers
+   SG::WriteHandle<xAOD::gFexTowerContainer> gTowersContainer(m_gTowersWriteKey);
+   ATH_CHECK(gTowersContainer.record(std::make_unique<xAOD::gFexTowerContainer>(), std::make_unique<xAOD::gFexTowerAuxContainer>()));
+   ATH_MSG_DEBUG("Recorded gFexTriggerTower container with key " << gTowersContainer.key());
 
    typedef  std::array<std::array<int, FEXAlgoSpaceDefs::centralNeta>, FEXAlgoSpaceDefs::centralNphi> gTowersCentral;
    typedef  std::array<std::array<int, FEXAlgoSpaceDefs::forwardNeta>, FEXAlgoSpaceDefs::centralNphi> gTowersForward;
@@ -86,6 +92,7 @@ StatusCode gFEXSim::executegFEXSim(gTowersIDs tmp_gTowersIDs_subset, gFEXOutputC
    ATH_CHECK(m_gFEXFPGA_Tool->init(0));
    m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_centralFPGA);
    m_gFEXFPGA_Tool->GetEnergyMatrix(Atwr);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer);
    m_gFEXFPGA_Tool->reset();
    //FPGA A----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -100,6 +107,7 @@ StatusCode gFEXSim::executegFEXSim(gTowersIDs tmp_gTowersIDs_subset, gFEXOutputC
    ATH_CHECK(m_gFEXFPGA_Tool->init(1));
    m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_centralFPGA_B);
    m_gFEXFPGA_Tool->GetEnergyMatrix(Btwr);
+   m_gFEXFPGA_Tool->FillgTowerEDMCentral(gTowersContainer);
    m_gFEXFPGA_Tool->reset();
    //FPGA B----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -123,6 +131,7 @@ StatusCode gFEXSim::executegFEXSim(gTowersIDs tmp_gTowersIDs_subset, gFEXOutputC
    ATH_CHECK(m_gFEXFPGA_Tool->init(2));
    m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_forwardFPGA);
    m_gFEXFPGA_Tool->GetEnergyMatrix(CPtwr);
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer);
    m_gFEXFPGA_Tool->reset();
    //FPGA C-P----------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -143,9 +152,10 @@ StatusCode gFEXSim::executegFEXSim(gTowersIDs tmp_gTowersIDs_subset, gFEXOutputC
          tmp_gTowersIDs_subset_forwardFPGA_N[myrow][mycol] = tmp_gTowersIDs_subset[myrow][mycol];
       }
    }
-   ATH_CHECK(m_gFEXFPGA_Tool->init(3));
+   ATH_CHECK(m_gFEXFPGA_Tool->init(2));
    m_gFEXFPGA_Tool->SetTowersAndCells_SG(tmp_gTowersIDs_subset_forwardFPGA_N);
    m_gFEXFPGA_Tool->GetEnergyMatrix(CNtwr);
+   m_gFEXFPGA_Tool->FillgTowerEDMForward(gTowersContainer);
    m_gFEXFPGA_Tool->reset();
    //FPGA C-N----------------------------------------------------------------------------------------------------------------------------------------------
 

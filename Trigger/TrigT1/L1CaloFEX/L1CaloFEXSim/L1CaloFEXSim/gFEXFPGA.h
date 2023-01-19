@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXFPGA - Defines FPGA tools
@@ -16,7 +16,6 @@
 #include "L1CaloFEXToolInterfaces/IgFEXFPGA.h"
 #include "L1CaloFEXSim/gTowerContainer.h"
 #include "L1CaloFEXSim/gFEXOutputCollection.h"
-
 #include <vector>
 
 namespace LVL1 {
@@ -42,6 +41,13 @@ namespace LVL1 {
     virtual void GetEnergyMatrix(gTowersCentral &) const override ;
     virtual void GetEnergyMatrix(gTowersForward &) const override ;
 
+    virtual void FillgTowerEDMCentral(SG::WriteHandle<xAOD::gFexTowerContainer> &) override ;
+    virtual void FillgTowerEDMForward(SG::WriteHandle<xAOD::gFexTowerContainer> &) override ;
+
+    virtual uint32_t getTowerIDForward ( int &iEta, int &iPhi, float Eta) const override;
+
+    virtual void getEtaPhi(float &Eta, float &Phi, int iEta, int iPhi) const override ;
+
 
     /** Internal data */
   private:
@@ -53,7 +59,6 @@ namespace LVL1 {
 
 
     SG::ReadHandleKey<LVL1::gTowerContainer> m_gFEXFPGA_gTowerContainerKey {this, "MyGTowers", "gTowerContainer", "Input container for gTowers"};
-
 
   };
 

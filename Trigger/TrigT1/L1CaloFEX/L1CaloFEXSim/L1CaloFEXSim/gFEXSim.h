@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //    gFEXSim - Simulation of the gFEX module
@@ -117,6 +117,8 @@ namespace LVL1 {
     ToolHandle<IgFEXaltMetAlgo> m_gFEXaltMetAlgoTool {this, "gFEXaltMetAlgoTool", "LVL1::gFEXaltMetAlgo", "Tool that runs the gFEX noise cut and rho+RMS algorithms for MET"};
 
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
+  
+    SG::WriteHandleKey < xAOD::gFexTowerContainer > m_gTowersWriteKey    {this,"gTowersWriteKey"   ,"L1_gFexTriggerTowers", "Write gFexEDM Trigger Tower container"};
   };
 
 } // end of namespace
