@@ -20,6 +20,7 @@
 #include "PixelGeoModel/IBLParameterSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "TrkCaloClusterROI/ROIPhiRZContainer.h"
+#include "TrkCaloClusterROI/ROIPhiRZEtContainer.h"
 #include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
@@ -377,9 +378,11 @@ namespace InDet
       
     /** Does track pass criteria for hadronic ROI? */
     bool inHadronicROI(const Trk::Track* ptrTrack) const;
+    bool inHadronicROI_optimized(const Trk::Track* ptrTrack) const;
 
     /** Check if the cluster is compatible with a hadronic cluster*/
     bool isHadCaloCompatible(const Trk::TrackParameters& Tp) const;
+    bool isHadCaloCompatible_optimized(const Trk::TrackParameters& Tp) const;
 
     /** Check if the cluster is compatible with a EM cluster*/
     bool isEmCaloCompatible(const Trk::TrackParameters& Tp) const;
@@ -469,12 +472,18 @@ namespace InDet
 
     // ROI stuff
     BooleanProperty m_useHClusSeed{this, "doHadCaloSeed", false};
+    BooleanProperty m_skipAmbi{this, "doSkipAmbi", false};
+    BooleanProperty m_skipAmbiInROI{this, "doSkipAmbiInROI", false};
+    BooleanProperty m_skipAmbiInROI_optimized{this, "doSkipAmbiInROI_optimized", false};
     FloatProperty m_minPtSplit{this, "minPtSplit", 0.};
     FloatProperty m_minPtBjetROI{this, "minPtBjetROI", 15000., "in MeV"};
     FloatProperty m_phiWidth{this, "phiWidth", 0.2};
     FloatProperty m_etaWidth{this, "etaWidth", 0.2};
+    FloatProperty m_rWidth{this, "rWidth", 0.1};
+    FloatProperty m_minTrackPtROI{this, "minTrackPtROI", 10000., "in MeV"};
+    FloatProperty m_hadEtMin{this, "hadEtMin", 150000., "in MeV"};
     SG::ReadHandleKey<ROIPhiRZContainer> m_inputHadClusterContainerName{this, "HadROIPhiRZContainer", ""};
-      
+    SG::ReadHandleKey<ROIPhiRZEtContainer> m_inputHadClusterEtContainerKey{this, "HadROIPhiRZEtContainer", ""};
     BooleanProperty m_useEmClusSeed{this, "doEmCaloSeed", false};
     FloatProperty m_minPtEm{this, "minPtConv", 10000., "in MeV"};
     FloatProperty m_phiWidthEm{this, "phiWidthEM", 0.05};

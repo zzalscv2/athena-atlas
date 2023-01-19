@@ -206,6 +206,12 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doIdealPseudoTracking", False)
     # Switch for track observer tool
     icf.addFlag("InDet.Tracking.doTIDE_AmbiTrackMonitoring", False)
+    # Skip ambiguity solver entirely
+    icf.addFlag("InDet.Tracking.doSkipAmbi", False)
+    # Skip ambiguity solver in hadronic ROI
+    icf.addFlag("InDet.Tracking.doSkipAmbiROI", False)
+    # Skip ambiguity solver in optimized hadronic ROI
+    icf.addFlag("InDet.Tracking.doSkipAmbiROI_optimized", False)
 
 
     from InDetConfig.TrackingPassFlags import (

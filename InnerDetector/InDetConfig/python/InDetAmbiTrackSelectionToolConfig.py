@@ -60,10 +60,27 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
         if flags.InDet.Tracking.doCaloSeededAmbi:
             from InDetConfig.InDetCaloClusterROISelectorConfig import HadCaloClusterROIPhiRZEtContainerMakerCfg
             acc.merge(HadCaloClusterROIPhiRZEtContainerMakerCfg(flags))
+        kwargs.setdefault("HadROIPhiRZEtContainer"    , "InDetHadCaloClusterROIPhiRZEt")
         kwargs.setdefault("minPtConv"                 , 10000)   #Only allow split clusters on track withe pt greater than this MeV
         kwargs.setdefault("minPtBjetROI"              , 10000)
         kwargs.setdefault("phiWidthEM"                , 0.05)     #Split cluster ROI size
         kwargs.setdefault("etaWidthEM"                , 0.05)     #Split cluster ROI size
+        kwargs.setdefault("doSkipAmbi"                , flags.InDet.Tracking.doSkipAmbi)
+        kwargs.setdefault("doSkipAmbiInROI"           , flags.InDet.Tracking.doSkipAmbiROI)
+        kwargs.setdefault("doSkipAmbiInROI_optimized" , flags.InDet.Tracking.doSkipAmbiROI_optimized)
+        kwargs.setdefault("hadEtMin"                  , 0.)
+        # D
+        # kwargs.setdefault("rWidth"                    , 0.1)
+        # kwargs.setdefault("minTrackPtROI"             , 10000.)
+        # C
+        # kwargs.setdefault("rWidth"                    , 0.1)
+        # kwargs.setdefault("minTrackPtROI"             , 5000.)
+        # B
+        # kwargs.setdefault("rWidth"                    , 0.05)
+        # kwargs.setdefault("minTrackPtROI"             , 10000.)
+        # A
+        kwargs.setdefault("rWidth"                    , 0.05)
+        kwargs.setdefault("minTrackPtROI"             , 5000.)
         if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
             from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
             TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
