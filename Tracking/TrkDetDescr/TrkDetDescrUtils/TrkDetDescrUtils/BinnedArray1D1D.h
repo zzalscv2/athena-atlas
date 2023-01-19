@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,10 +45,7 @@ public:
     , m_singleBinUtilities(nullptr)
   {}
 
-  /** Constructor with std::vector and a  BinUtility - reference counted, will
-     delete objects at the end, if this deletion should be turned off, the
-     boolean deletion should be switched to false the global position is given
-     by object! */
+  /** Constructor with std::vector and a  BinUtility */
   BinnedArray1D1D(
     const std::vector<std::pair<SharedObject<T>, Amg::Vector3D>>& tclassvector,
     BinUtility* steeringBinGen1D,
