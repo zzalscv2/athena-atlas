@@ -1583,18 +1583,20 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   }
 
   if (!m_trigMatchingTool.isUserConfigured()) {
-    if (!m_upstreamTriggerMatching){
-      m_trigMatchingTool.setTypeAndName("Trig::MatchingTool/TrigMatchingTool");
-      ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
-    } else {
-      if (m_isRun3) {
+    if (m_upstreamTriggerMatching){
+      m_trigMatchingTool.setTypeAndName("Trig::MatchFromCompositeTool/TrigMatchFromCompositeTool");
+      ATH_CHECK( m_trigMatchingTool.setProperty("InputPrefix", m_trigMatchingPrefix) );
+      ATH_CHECK( m_trigMatchingTool.setProperty("RemapBrokenLinks", true) );
+    } 
+    else {
+      if (m_isRun3){
         m_trigMatchingTool.setTypeAndName("Trig::R3MatchingTool/TrigR3MatchingTool");
         ATH_CHECK( m_trigMatchingTool.setProperty("ScoringTool", m_trigDRScoringTool.getHandle()) );
-      }
+        ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
+      } 
       else {
-        m_trigMatchingTool.setTypeAndName("Trig::MatchFromCompositeTool/TrigMatchFromCompositeTool");
-        ATH_CHECK( m_trigMatchingTool.setProperty("InputPrefix", m_trigMatchingPrefix) );
-        ATH_CHECK( m_trigMatchingTool.setProperty("RemapBrokenLinks", true) );
+        m_trigMatchingTool.setTypeAndName("Trig::MatchingTool/TrigMatchingTool");
+        ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
       }
     }
     ATH_CHECK( m_trigMatchingTool.setProperty("OutputLevel", this->msg().level()) );
