@@ -1,10 +1,10 @@
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # 
 
 EnableFilterMonitoring = False  # Can be changed in a precommand/preExec
 
-def setupFilterMonitoring( filterAlg ):
+def setupFilterMonitoring( flags, filterAlg ):
     if not EnableFilterMonitoring or not hasattr(filterAlg, "Input"):
         return
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -20,7 +20,7 @@ def setupFilterMonitoring( filterAlg ):
 
     filterAlg.MonTool = monTool
 
-def TriggerSummaryAlg( name ):
+def TriggerSummaryAlg( flags, name ):
     from AthenaConfiguration.ComponentFactory import CompFactory
     alg = CompFactory.TriggerSummaryAlg( name )
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool

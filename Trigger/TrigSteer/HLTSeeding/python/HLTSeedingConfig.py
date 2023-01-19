@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 import math
@@ -93,14 +93,13 @@ def mapThresholdToL1RoICollection(threshold):
     log.error("Threshold \""+ threshold + "\" not mapped to any ROI collection! Available are: " + str(_mapL1ThresholdToRoICollection.values()))
 
 
-def createLegacyCaloRoIUnpackers():
-    #from HLTSeeding.HLTSeedingConf import EMRoIsUnpackingTool, METRoIsUnpackingTool, JRoIsUnpackingTool, TAURoIsUnpackingTool
+def createLegacyCaloRoIUnpackers(flags):
     from HLTSeeding.HLTSeedingMonitoring import RoIsUnpackingMonitoring
     from TrigEDMConfig.TriggerEDMRun3 import recordable
     emUnpacker = CompFactory.EMRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("EM"),
                                                  DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEEM"),
                                                  OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("EM")),
-                                                 MonTool = RoIsUnpackingMonitoring( prefix="EM", maxCount=30 ))
+                                                 MonTool = RoIsUnpackingMonitoring( flags, prefix="EM", maxCount=30 ))
 
     metUnpacker = CompFactory.METRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("XE"))
 
@@ -109,12 +108,12 @@ def createLegacyCaloRoIUnpackers():
                                                    DecisionsProbe = mapThresholdToL1DecisionCollection("PROBETAU"),
                                                    OutputTrigRoIs = recordable("HLT_TAURoI"))
 
-    tauUnpacker.MonTool = RoIsUnpackingMonitoring( prefix="TAU", maxCount=30 )
+    tauUnpacker.MonTool = RoIsUnpackingMonitoring( flags, prefix="TAU", maxCount=30 )
 
     jUnpacker = CompFactory.JRoIsUnpackingTool(Decisions = mapThresholdToL1DecisionCollection("J"),
                                                OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("J")) )
 
-    jUnpacker.MonTool = RoIsUnpackingMonitoring( prefix="J", maxCount=30, maxEta=5 )
+    jUnpacker.MonTool = RoIsUnpackingMonitoring( flags, prefix="J", maxCount=30, maxEta=5 )
 
     return [emUnpacker, metUnpacker, tauUnpacker, jUnpacker ]
 
@@ -131,14 +130,14 @@ def createCaloRoIUnpackers(flags):
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eEM")),
             RoIHalfWidthEta = 0.2,
             RoIHalfWidthPhi = 0.2,
-            MonTool = RoIsUnpackingMonitoring(prefix="eEM", maxCount=maxRoICount_eFex))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="eEM", maxCount=maxRoICount_eFex))
         eFexTauUnpacker = CompFactory.eFexTauRoIsUnpackingTool(
             Decisions = mapThresholdToL1DecisionCollection("eTAU"),
             DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeTAU"),
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eTAU")),
             RoIHalfWidthEta = 0.4,
             RoIHalfWidthPhi = math.pi/8,
-            MonTool = RoIsUnpackingMonitoring(prefix="eTAU", maxCount=maxRoICount_eFex))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="eTAU", maxCount=maxRoICount_eFex))
         tools += [eFexEMUnpacker, eFexTauUnpacker]
 
     if flags.Trigger.L1.dojFex:
@@ -149,19 +148,19 @@ def createCaloRoIUnpackers(flags):
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jTAU")),
             RoIHalfWidthEta = 0.4,
             RoIHalfWidthPhi = math.pi/8,
-            MonTool = RoIsUnpackingMonitoring(prefix="jTAU", maxCount=maxRoICount_jFex))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="jTAU", maxCount=maxRoICount_jFex))
         jFexSRJetUnpacker = CompFactory.jFexSRJetRoIsUnpackingTool(
             Decisions = mapThresholdToL1DecisionCollection("jJ"),
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jJ")),
             RoIHalfWidthEta = 0.1,
             RoIHalfWidthPhi = 0.1,
-            MonTool = RoIsUnpackingMonitoring(prefix="jJ", maxCount=maxRoICount_jFex, maxEta=5))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="jJ", maxCount=maxRoICount_jFex, maxEta=5))
         jFexLRJetUnpacker = CompFactory.jFexLRJetRoIsUnpackingTool(
             Decisions = mapThresholdToL1DecisionCollection("jLJ"),
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("jLJ")),
             RoIHalfWidthEta = 0.1,
             RoIHalfWidthPhi = 0.1,
-            MonTool = RoIsUnpackingMonitoring(prefix="jLJ", maxCount=maxRoICount_jFex, maxEta=5))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="jLJ", maxCount=maxRoICount_jFex, maxEta=5))
         tools += [jFexTauUnpacker, jFexSRJetUnpacker, jFexLRJetUnpacker]
 
     if flags.Trigger.L1.dogFex:
@@ -171,13 +170,13 @@ def createCaloRoIUnpackers(flags):
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("gJ")),
             RoIHalfWidthEta = 0.1,
             RoIHalfWidthPhi = 0.1,
-            MonTool = RoIsUnpackingMonitoring(prefix="gJ", maxCount=maxRoICount_gFex, maxEta=5))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="gJ", maxCount=maxRoICount_gFex, maxEta=5))
         gFexLRJetUnpacker = CompFactory.gFexLRJetRoIsUnpackingTool(
             Decisions = mapThresholdToL1DecisionCollection("gLJ"),
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("gLJ")),
             RoIHalfWidthEta = 0.1,
             RoIHalfWidthPhi = 0.1,
-            MonTool = RoIsUnpackingMonitoring(prefix="gLJ", maxCount=maxRoICount_gFex, maxEta=5))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="gLJ", maxCount=maxRoICount_gFex, maxEta=5))
         tools += [gFexSRJetUnpacker, gFexLRJetUnpacker]
 
     # Need both eFex and jFex for cTAU
@@ -189,7 +188,7 @@ def createCaloRoIUnpackers(flags):
             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("cTAU")),
             RoIHalfWidthEta = 0.4,
             RoIHalfWidthPhi = math.pi/8,
-            MonTool = RoIsUnpackingMonitoring(prefix="cTAU", maxCount=maxRoICount_eFex))
+            MonTool = RoIsUnpackingMonitoring(flags, prefix="cTAU", maxCount=maxRoICount_eFex))
         tools += [cTauUnpacker]
 
     return tools
@@ -201,7 +200,7 @@ def createLegacyMuonRoIUnpackers(flags):
         Decisions = mapThresholdToL1DecisionCollection("MU"),
         DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEMU"),
         OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("MU")),
-        MonTool = RoIsUnpackingMonitoring(prefix="MU", maxCount=20))
+        MonTool = RoIsUnpackingMonitoring(flags, prefix="MU", maxCount=20))
 
     return [muUnpacker]
 
@@ -214,13 +213,13 @@ def createMuonRoIUnpackers(flags):
         OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("MU")),
         RoIHalfWidthEta = 0.1,
         RoIHalfWidthPhi = 0.1,
-        MonTool = RoIsUnpackingMonitoring(prefix="MU", maxCount=20))
+        MonTool = RoIsUnpackingMonitoring(flags, prefix="MU", maxCount=20))
     return [muUnpacker]
 
-def createPrescalingTool():
+def createPrescalingTool(flags):
     from HLTSeeding.HLTSeedingMonitoring import PrescalingMonitoring
 
-    prescaler = CompFactory.PrescalingTool(MonTool = PrescalingMonitoring())
+    prescaler = CompFactory.PrescalingTool(MonTool = PrescalingMonitoring(flags))
     return prescaler
 
 def createKeyWriterTool():
@@ -318,7 +317,7 @@ class HLTSeeding(CompFactory.HLTSeeding) :
             if flags.Trigger.enableL1CaloPhase1:
                 self.xAODRoIUnpackers += createCaloRoIUnpackers(flags)
             if flags.Trigger.enableL1CaloLegacy:
-                self.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers()
+                self.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers(flags)
 
         # MU unpacker
         if flags.Trigger.L1.doMuon:
@@ -327,7 +326,7 @@ class HLTSeeding(CompFactory.HLTSeeding) :
             else:
                 self.RoIBRoIUnpackers += createLegacyMuonRoIUnpackers(flags)
 
-        self.prescaler = createPrescalingTool()
+        self.prescaler = createPrescalingTool(flags)
         self.KeyWriterTool = createKeyWriterTool()
 
         self.DoCostMonitoring = flags.Trigger.CostMonitoring.doCostMonitoring
@@ -348,7 +347,7 @@ def HLTSeedingCfg(flags, seqName = None):
     decoderAlg.L1TriggerResult = "L1TriggerResult" if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1 else ""
     decoderAlg.HLTSeedingSummaryKey = "HLTSeedingSummary" # Transient, consumed by DecisionSummaryMakerAlg
     decoderAlg.ctpUnpacker = CompFactory.CTPUnpackingTool( ForceEnableAllChains = flags.Trigger.HLTSeeding.forceEnableAllChains,
-                                                           MonTool = CTPUnpackingMonitoring(512, 400) )
+                                                           MonTool = CTPUnpackingMonitoring(flags, 512, 400) )
 
     # Add L1DataConsistencyChecker unless we forceEnableAllChains which always results in missing TOBs
     if not flags.Trigger.HLTSeeding.forceEnableAllChains:
@@ -376,7 +375,7 @@ def HLTSeedingCfg(flags, seqName = None):
         if flags.Trigger.enableL1CaloPhase1:
             decoderAlg.xAODRoIUnpackers += createCaloRoIUnpackers(flags)
         if flags.Trigger.enableL1CaloLegacy:
-            decoderAlg.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers()
+            decoderAlg.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers(flags)
 
     if flags.Trigger.L1.doMuon:
         if flags.Trigger.enableL1MuonPhase1:
@@ -384,7 +383,7 @@ def HLTSeedingCfg(flags, seqName = None):
         else:
             decoderAlg.RoIBRoIUnpackers += createLegacyMuonRoIUnpackers(flags)
 
-    decoderAlg.prescaler = createPrescalingTool()
+    decoderAlg.prescaler = createPrescalingTool(flags)
     decoderAlg.KeyWriterTool = createKeyWriterTool()
     decoderAlg.DoCostMonitoring = flags.Trigger.CostMonitoring.doCostMonitoring
     decoderAlg.CostMonitoringChain = flags.Trigger.CostMonitoring.chain
