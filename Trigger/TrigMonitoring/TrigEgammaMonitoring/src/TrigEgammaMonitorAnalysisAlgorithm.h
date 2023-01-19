@@ -27,12 +27,10 @@ class TrigEgammaMonitorAnalysisAlgorithm: public TrigEgammaMonitorBaseAlgorithm
 
   private:
 
-
     // Efficiency monitoring
     void fillEfficiency( const std::string &subgroup, const std::string &level, const std::string &pidword, const TrigInfo& info, 
                          const std::vector< std::pair< const xAOD::Egamma *, const TrigCompositeUtils::Decision* >>& pairObjs,
                          std::vector< asg::AcceptData > acceptObjs, const std::string& dirname ) const;
-
 
     // Disribution monitoring
     void fillL1Calo( const std::string &trigger, const std::vector< const xAOD::EmTauRoI* >& l1_vec ) const; 
