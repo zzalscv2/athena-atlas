@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 if __name__ == '__main__':
@@ -181,6 +181,14 @@ if __name__ == '__main__':
     # Run clustering and jet finding algorithms
     # These may be produced by statndard ATLAS Alorithms, or by
     # GEP Algorithms.
+
+    from TrigGepPerf.GepPi0AlgConfig import GepPi0AlgCfg
+    # currently caloCellsProducer can be caloCellsFromCaloCells or
+    # caloCellsFromCaloClusters
+    acc.merge(GepPi0AlgCfg(flags,
+                           name='GepPi0Alg',
+                           caloCellsProducer="caloCellsFromCaloCells",
+                           OutputLevel=gepAlgs_output_level))
     
     # PS not yet tested: topoclAlgs = ['Calo422'] 
     known_cluster_algs = ['WFS', 'Calo420']
