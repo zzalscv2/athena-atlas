@@ -85,7 +85,7 @@ namespace Simulation
 #endif
       for( ; vtxIt != vtxItEnd; ++vtxIt) {
         // quick access:
-        auto curVtx = (*vtxIt);
+        auto& curVtx = (*vtxIt);
 #ifdef HEPMC3
         // NB Doing this check to explicitly avoid the fallback mechanism in
         // HepMC3::GenVertex::position() to return the position of

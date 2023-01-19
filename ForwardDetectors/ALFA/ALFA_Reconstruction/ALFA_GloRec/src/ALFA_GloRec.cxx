@@ -331,7 +331,7 @@ StatusCode ALFA_GloRec::Truth_info(){
     //loop over one event
     m_z_g_pos = -1.e10;
     m_z_g_neg =  1.e10;
-    for(HepMC::ConstGenParticlePtr begGen:  (**mcTruBeg)){
+    for(const HepMC::ConstGenParticlePtr& begGen:  (**mcTruBeg)){
 	 		if(((std::abs(begGen->pdg_id())==2212)||(std::abs(begGen->pdg_id())==211))){
 				double px, py, pz;
 				double x, y, z;

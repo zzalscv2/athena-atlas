@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-
-///////////////////////////////////////////////////////////////////
-// HepMCHelper.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
 
 #ifndef ISF_EVENT_HEPMCHELPER_H
 #define ISF_EVENT_HEPMCHELPER_H 1
@@ -52,7 +48,7 @@ namespace ISF {
           at least one particle with one of the given PDG codes appears.
           returns pointer to first found particle that matches any of the
           given PDG codes in relativesPDG */
-      static inline HepMC::ConstGenParticlePtr findRealtiveWithPDG( HepMC::ConstGenParticlePtr genParticle,
+      static inline HepMC::ConstGenParticlePtr findRealtiveWithPDG( HepMC::ConstGenParticlePtr& genParticle,
                                                                     const HepMC::IteratorRange &relation,
                                                                     const std::set<int> &relativesPDG     );
   };

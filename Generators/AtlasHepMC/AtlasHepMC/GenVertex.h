@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -27,27 +27,27 @@ inline GenVertexPtr newGenVertexPtr(const HepMC3::FourVector &pos = HepMC3::Four
     return v;
 }
 
-inline int particles_in_size(GenVertexPtr v) { return v->particles_in().size();}
-inline int particles_out_size(GenVertexPtr v) { return v->particles_out().size();}
-inline int particles_in_size(ConstGenVertexPtr v) { return v->particles_in().size();}
-inline int particles_out_size(ConstGenVertexPtr v) { return v->particles_out().size();}
+inline int particles_in_size(const GenVertexPtr& v) { return v->particles_in().size();}
+inline int particles_out_size(const GenVertexPtr& v) { return v->particles_out().size();}
+inline int particles_in_size(const ConstGenVertexPtr& v) { return v->particles_in().size();}
+inline int particles_out_size(const ConstGenVertexPtr& v) { return v->particles_out().size();}
 
-inline int barcode(GenVertexPtr p) {
+inline int barcode(const GenVertexPtr& p) {
     if (!p) return 0;
     auto e = p->parent_event();
     if (!e) return 0;
     std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
     return barcode?(barcode->value()):p->id();
 }
-inline int barcode_or_id(ConstGenVertexPtr p) { return p->id();}
-inline int barcode(ConstGenVertexPtr p) {
+inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->id();}
+inline int barcode(const ConstGenVertexPtr& p) {
     if (!p) return 0;
     auto e = p->parent_event();
     if (!e) return 0;
     std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p->id());
     return barcode?(barcode->value()):p->id();
 }
-inline int barcode(HepMC3::GenVertex p) {
+inline int barcode(const HepMC3::GenVertex& p) {
     auto e = p.parent_event();
     if (!e) return 0;
     std::shared_ptr<HepMC3::IntAttribute> barcode=e->attribute<HepMC3::IntAttribute>("barcode",p.id());
@@ -76,9 +76,9 @@ namespace Print {
 inline void line(std::ostream& os,const GenVertex& v) {v.print(os);}
 inline void line(std::ostream& os,const GenVertex* v) {v->print(os);}
 }
-inline int barcode_or_id(ConstGenVertexPtr p) { return p->barcode();}
-inline int barcode(ConstGenVertexPtr p) { return p->barcode();}
-inline int barcode(const GenVertex p) { return p.barcode();}
+inline int barcode_or_id(const ConstGenVertexPtr& p) { return p->barcode();}
+inline int barcode(const ConstGenVertexPtr& p) { return p->barcode();}
+inline int barcode(const GenVertex& p) { return p.barcode();}
 inline void* raw_pointer(GenVertexPtr p) { return p;}
 inline const void* raw_pointer(ConstGenVertexPtr p) { return p;}
 inline std::ostream& operator<<( std::ostream& os, const GenVertex* v ) { if (v) return os<<(*v); else return os;}

@@ -148,7 +148,7 @@ namespace Simulation
     return StatusCode::SUCCESS;
   }
 
-  void GenEventBeamEffectBooster::boostParticle(HepMC::GenParticlePtr p,
+  void GenEventBeamEffectBooster::boostParticle(HepMC::GenParticlePtr& p,
                                                 const CLHEP::HepLorentzRotation& transform) const
   {
     // Apply the same transformation for EVERY HepMC::GenParticle
