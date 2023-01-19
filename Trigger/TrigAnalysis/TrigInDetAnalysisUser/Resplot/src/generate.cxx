@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:41:26 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -228,58 +228,58 @@ TH1D* smooth( TH1D* hin, bool sym ) {
 
 
 
-  hist_generator::hist_generator(TH1D* h, bool _smooth ) : mrandom(0) { 
+  hist_generator::hist_generator(TH1D* h, bool _smooth ) : m_random(0) {
     
   /// save the original histogram (should save a copy ho hum) 
-  mraw = h;
+  m_raw = h;
   
   if ( _smooth ) {
     /// smooth the original
-    msmooth = smooth( h );
+    m_smooth = smooth( h );
   }
   else { 
     /// else simply clone the original
-    msmooth = (TH1D*)h->Clone( (std::string(h->GetName())+"-smooth").c_str() );
-    msmooth->SetDirectory(0);
+    m_smooth = (TH1D*)h->Clone( (std::string(h->GetName())+"-smooth").c_str() );
+    m_smooth->SetDirectory(0);
   }
 
   
   /// generate a pdf from the smoothed distribution
-  ms = PDF( msmooth );
-  delete msmooth;
+  m_s = PDF( m_smooth );
+  delete m_smooth;
   
-  ms->SetMinimum(0);
-  ms->SetMaximum(1);
+  m_s->SetMinimum(0);
+  m_s->SetMaximum(1);
   
-  my.push_back( 0 );
-  mx.push_back( ms->GetBinLowEdge(1) );
+  m_y.push_back( 0 );
+  m_x.push_back( m_s->GetBinLowEdge(1) );
   
   
-  for ( int i=1 ; i<=ms->GetNbinsX() ; i++ ) { 
-    mx.push_back( ms->GetBinLowEdge(i+1) );
-    my.push_back( ms->GetBinContent(i) );
+  for ( int i=1 ; i<=m_s->GetNbinsX() ; i++ ) {
+    m_x.push_back( m_s->GetBinLowEdge(i+1) );
+    m_y.push_back( m_s->GetBinContent(i) );
   }
   
-  mdy.resize(mx.size());
-  mdx.resize(mx.size());
-  mdxdy.resize(mx.size());
+  m_dy.resize(m_x.size());
+  m_dx.resize(m_x.size());
+  m_dxdy.resize(m_x.size());
   
   //    std::cout << "calculating gradients ..." << std::endl;
   
-  for ( unsigned i=0 ; i<my.size()-1 ; i++ ) { 
-      double dy = my[i+1] - my[i];
-      double dx = mx[i+1] - mx[i];
+  for ( unsigned i=0 ; i<m_y.size()-1 ; i++ ) {
+      double dy = m_y[i+1] - m_y[i];
+      double dx = m_x[i+1] - m_x[i];
 
       double dxdy = dx/dy;
 
-      mdy[i] = dy;
-      mdx[i] = dx;
-      mdxdy[i] = dxdy;
+      m_dy[i] = dy;
+      m_dx[i] = dx;
+      m_dxdy[i] = dxdy;
   }
   
   /// assign the actual generator
   /// use a shared generator
-  mrandom = new BasicRandom(true);
+  m_random = new BasicRandom(true);
   /// use a dedicated generator
   /// mrandom = new BasicRandom(false);
   
@@ -292,7 +292,7 @@ TH1D* smooth( TH1D* hin, bool sym ) {
 int Nevent_min = 0;
 int Nevent_max = 5000;
 
-double _frac = 0.95;
+const double frac = 0.95;
 
 /// given a distribution, gnerate some number of pseudo 
 /// experiments to estimate the uncertainties in the mean 
@@ -320,17 +320,16 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
     
     //    m_hmean = h->GetMean();
     //    m_hrms  = rms95(h, findMean(h,0.95) );
-    m_hmean = findMean(h, _frac);
-    m_hrms  = rmsFrac(h, _frac, m_hmean );
+    m_hmean = findMean(h, frac);
+    m_hrms  = rmsFrac(h, frac, m_hmean );
     //   m_hrms  = rms95(h, m_hmean );
 
     //    std::cout << "central mean " << m_hmean << "\trms95 " << m_hrms << std::endl; 
 
     h->GetXaxis()->SetRange(1,h->GetNbinsX());
 
-    //    mg = new hist_generator( h, false ); 
-    mg = new hist_generator( h ); 
-    generator_base& g = *mg;
+    m_gen = new hist_generator( h );
+    generator_base& g = *m_gen;
     
     
     
@@ -391,9 +390,9 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
       
       for ( int i=Nevents ; i-- ; )  h3->Fill( g.generate() );
       
-      double _mean95  = findMean( h3, _frac );
+      double _mean95  = findMean( h3, frac );
       //      double _rms95 = 1.1479538518*rmsFrac( h3, 0.95, _mean95 ); 
-      double _rms95 = rmsFrac( h3, _frac, _mean95 ); 
+      double _rms95 = rmsFrac( h3, frac, _mean95 );
 
 
 #if 0
@@ -443,7 +442,7 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
     
     m_global_rms       = get_mean(rms);
     m_global_rms_error = get_rms(rms)*fnscale;
-    delete mg;
+    delete m_gen;
     
 
     //    std::cout << "\t\t mean " << m_global_mean << " +- " <<  m_global_mean_error 

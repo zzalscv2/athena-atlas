@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 30 Jan 2012 18:43:21 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -37,9 +37,9 @@ void remove_duplicates(std::vector<T>& vec) {
 }
 
 std::string time_str() { 
-  time_t _t;
-  time(&_t);
-  std::string s(ctime(&_t));
+  time_t t;
+  time(&t);
+  std::string s(ctime(&t));
   return s.substr(0,s.find('\n'));
 }
 
@@ -59,12 +59,12 @@ int usage(int e=0) {
 }
 
 template<class T>
-std::ostream& operator<<( std::ostream& s, const std::set<T>& _s ) { 
-  typename std::set<T>::const_iterator sitr = _s.begin();
-  s << "[  ";
-  while ( sitr!=_s.end() ) s << (*sitr++) << "\t"; 
-  s << " ]";
-  return s;
+std::ostream& operator<<( std::ostream& os, const std::set<T>& s ) {
+  typename std::set<T>::const_iterator sitr = s.begin();
+  os << "[  ";
+  while ( sitr!=s.end() ) os << (*sitr++) << "\t";
+  os << " ]";
+  return os;
 }
 
 

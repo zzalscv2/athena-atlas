@@ -11,7 +11,7 @@
  **
  **   @date         Tue Apr 26 13:44:30 CEST 2005
  **
- **   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **                   
  **                   
  **
@@ -56,27 +56,27 @@ public:
 
   ~ReadCards() { } 
 
-  int GetNValues() const { return mValues.size(); }
+  int GetNValues() const { return m_Values.size(); }
 
   bool isTagDefined(const string& tag) const { 
     for ( int i=0 ;  i<GetNValues() ; i++ ) { 
-      if ( tag==mValues[i].Tag() ) return true;
+      if ( tag==m_Values[i].Tag() ) return true;
     }
     return false;
   }
 
   const std::vector<double>  GetVector(unsigned i)  const  { 
     std::vector<double> dValues;
-    if ( i<mValues.size() ) {
-      for ( unsigned j=0 ;  j<mValues[i].Val().size() ; j++ ) { 
-	dValues.push_back(handle(mValues[i].Val()[j]));
+    if ( i<m_Values.size() ) {
+      for ( unsigned j=0 ;  j<m_Values[i].Val().size() ; j++ ) {
+	dValues.push_back(handle(m_Values[i].Val()[j]));
       }
     }
     return dValues;
   }
 
   string GetValueString(unsigned i) const  { 
-    if ( i<mValues.size() ) return mValues[i].Tag();
+    if ( i<m_Values.size() ) return m_Values[i].Tag();
     else return string("");
   }
 
@@ -95,7 +95,7 @@ public:
   }
 
   std::string GetString(const unsigned i) const {
-    if ( i<mValues.size() ) return mValues[i].Val()[0];
+    if ( i<m_Values.size() ) return m_Values[i].Val()[0];
     return "";
   }
   
@@ -113,7 +113,7 @@ public:
 
 
   std::vector<std::string>  GetStringVector(const std::string& tag) const {
-    return mValues[GetIndex(tag)].Val();
+    return m_Values[GetIndex(tag)].Val();
   }
 
 
@@ -145,7 +145,7 @@ public:
   }    
 
   void Set(const std::string& tag, std::vector<std::string>& value) const {
-    if ( isTagDefined(tag) ) value = mValues[GetIndex(tag)].Val();
+    if ( isTagDefined(tag) ) value = m_Values[GetIndex(tag)].Val();
   }
 
   void print();
@@ -154,11 +154,11 @@ public:
   std::vector<string> Tags(const std::string& pattern="") const { 
     std::vector<string> tags;
     if ( pattern=="" ) { 
-      for ( unsigned i=0 ; i<mValues.size() ; i++ ) tags.push_back(mValues[i].Tag());
+      for ( unsigned i=0 ; i<m_Values.size() ; i++ ) tags.push_back(m_Values[i].Tag());
     }
     else { 
-      for ( unsigned i=0 ; i<mValues.size() ; i++ ) { 
-	if ( mValues[i].Tag().find(pattern)!=std::string::npos ) tags.push_back(mValues[i].Tag());
+      for ( unsigned i=0 ; i<m_Values.size() ; i++ ) {
+	if ( m_Values[i].Tag().find(pattern)!=std::string::npos ) tags.push_back(m_Values[i].Tag());
       }
     }
     return tags;
@@ -194,38 +194,36 @@ private:
   void clean();
 
   int GetIndex(const std::string& tag) const { 
-    for ( int i=GetNValues() ; i-- ; )  if ( tag == mValues[i].Tag() ) return i;
-    cerr << "ReadCards::GetValue() no tag: " << tag << " in file: " << mFileName << endl;
+    for ( int i=GetNValues() ; i-- ; )  if ( tag == m_Values[i].Tag() ) return i;
+    cerr << "ReadCards::GetValue() no tag: " << tag << " in file: " << m_FileName << endl;
     exit(-1);
     return 0;
   }
 
   bool AddTag(const string& tag, const vector<string>& values) { 
-    for ( unsigned i=0 ; i<mValues.size() ; i++ ) { 
-      if ( tag == mValues[i].Tag() ) { 
-	cerr << "ReadCards::addTag() tag " << tag << " already defined in file " << mFileName << endl;
+    for ( unsigned i=0 ; i<m_Values.size() ; i++ ) {
+      if ( tag == m_Values[i].Tag() ) {
+	cerr << "ReadCards::addTag() tag " << tag << " already defined in file " << m_FileName << endl;
 	exit(-1);
       }
     }
-    mValues.push_back(Value(tag,values));
+    m_Values.push_back(Value(tag,values));
     return true;
   }
 
 
 private:
 
-  std::string  mFileName;
+  std::string m_FileName;
 
-  ifstream mFile;
-  //int      mPos;
+  ifstream m_File;
 
-  std::string    mString;
+  std::string    m_String;
 
-  std::vector<Value>   mValues;
-  std::vector<double>  mdValues;
-  std::vector<int>     mValuesFlag;
+  std::vector<Value>   m_Values;
+  std::vector<int>     m_ValuesFlag;
 
-  static std::vector<std::string> mPath;
+  static std::vector<std::string> m_Path;
 
 private:
 
@@ -240,7 +238,7 @@ private:
 
   // error reporting routine
   void error(const std::string& s) {
-    cerr << "ReadCards() syntax error in file " << mFileName << " : " << s << endl;
+    cerr << "ReadCards() syntax error in file " << m_FileName << " : " << s << endl;
     exit(0);
   }
 

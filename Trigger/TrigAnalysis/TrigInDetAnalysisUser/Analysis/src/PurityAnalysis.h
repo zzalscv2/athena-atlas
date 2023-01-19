@@ -40,7 +40,7 @@ public:
 public:
   
   PurityAnalysis( const std::string& name ) : 
-    TrackAnalysis( name ), Nreco(0), Nref(0), Nmatched(0), m_print(false) {
+    TrackAnalysis( name ), m_Nreco(0), m_Nref(0), m_Nmatched(0), m_print(false) {
     std::cout << "PurityAnalysis::PurityAnalysis() " << TrackAnalysis::name() << std::endl;
   }  
 
@@ -50,13 +50,13 @@ public:
     std::map<std::string, TH1F*>::iterator hend=m_histos.end();
     for ( ; hitr!=hend ; ++hitr ) delete hitr->second;     
 
-    Efficiency* heff[4]    = {    eff_pt,    eff_eta,    eff_phi,    eff_z0 };
-    Efficiency* hpurity[4] = { purity_pt, purity_eta, purity_phi, purity_z0 };
+    Efficiency* heff[4]    = {    m_eff_pt,    m_eff_eta,    m_eff_phi,    m_eff_z0 };
+    Efficiency* hpurity[4] = { m_purity_pt, m_purity_eta, m_purity_phi, m_purity_z0 };
 
     for ( int i=4 ; i-- ; ) { delete heff[i]; delete hpurity[i]; } 
 
-    delete eff_ptp;
-    delete eff_ptm;
+    delete m_eff_ptp;
+    delete m_eff_ptm;
 
   }  
   
@@ -86,38 +86,38 @@ private:
   }
 
 private:
-  TIDDirectory* mdir = 0;
+  TIDDirectory* m_dir = 0;
 
   std::map<std::string, TH1F*> m_histos;
 
-  Efficiency* eff_pt = 0;
-  Efficiency* eff_ptp = 0;
-  Efficiency* eff_ptm = 0;
+  Efficiency* m_eff_pt = 0;
+  Efficiency* m_eff_ptp = 0;
+  Efficiency* m_eff_ptm = 0;
 
-  Efficiency* eff_eta = 0;
-  Efficiency* eff_phi = 0;
-  Efficiency* eff_z0 = 0;
-  Efficiency* eff_d0 = 0;
-  Efficiency* eff_a0 = 0;
+  Efficiency* m_eff_eta = 0;
+  Efficiency* m_eff_phi = 0;
+  Efficiency* m_eff_z0 = 0;
+  Efficiency* m_eff_d0 = 0;
+  Efficiency* m_eff_a0 = 0;
 
-  Efficiency* purity_pt = 0;
-  Efficiency* purity_eta = 0;
-  Efficiency* purity_phi = 0;
-  Efficiency* purity_z0 = 0;
-  Efficiency* purity_d0 = 0;
-  Efficiency* purity_a0 = 0;
+  Efficiency* m_purity_pt = 0;
+  Efficiency* m_purity_eta = 0;
+  Efficiency* m_purity_phi = 0;
+  Efficiency* m_purity_z0 = 0;
+  Efficiency* m_purity_d0 = 0;
+  Efficiency* m_purity_a0 = 0;
 
-  //  Efficiency2D* eff_pteta; 
-  //  Efficiency2D* eff_etapt;
+  //  Efficiency2D* m_eff_pteta;
+  //  Efficiency2D* m_eff_etapt;
 
-  TH1F* hDeltaR = 0;
+  TH1F* m_hDeltaR = 0;
 
   /// number of reconstructed tracks 
-  int Nreco;
-  int Nref;
-  int Nmatched;
+  int m_Nreco;
+  int m_Nref;
+  int m_Nmatched;
 
-  TH1F* hchi2 = 0;
+  TH1F* m_hchi2 = 0;
 
   /// flag to print out the matched tracks etc
   bool m_print;
@@ -126,8 +126,8 @@ private:
 
 
 
-inline std::ostream& operator<<( std::ostream& s, const PurityAnalysis& _s ) { 
-  return s << _s.name();
+inline std::ostream& operator<<( std::ostream& s, const PurityAnalysis& pa ) {
+  return s << pa.name();
 }
 
 

@@ -48,12 +48,12 @@ void getRange(TH1D* s, int imax, double frac,
     int i=1;
     while ( true ) { 
       
-      int _upperbin = imax+i;
-      int _lowerbin = imax-i;
+      const int upperbin_i = imax+i;
+      const int lowerbin_i = imax-i;
       
-      if ( _upperbin>s->GetNbinsX() || _lowerbin<1 ) break; 
+      if ( upperbin_i>s->GetNbinsX() || lowerbin_i<1 ) break;
       
-      tsum += s->GetBinContent(_upperbin) + s->GetBinContent(_lowerbin);
+      tsum += s->GetBinContent(upperbin_i) + s->GetBinContent(lowerbin_i);
       
       //      std::cout << i << " frac: " << lowersum 
       //		<< "\tx " << s->GetBinCenter(lowerbin) 
@@ -68,8 +68,8 @@ void getRange(TH1D* s, int imax, double frac,
 
       lowerfrac = sumn/entries;
             
-      upperbin = _upperbin;
-      lowerbin = _lowerbin;
+      upperbin = upperbin_i;
+      lowerbin = lowerbin_i;
 
       i++;
     }

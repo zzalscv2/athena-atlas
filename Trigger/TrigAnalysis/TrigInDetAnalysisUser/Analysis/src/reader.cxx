@@ -4,7 +4,7 @@
  **     @author  mark sutton
  **     @date    Mon 30 Jan 2012 18:43:21 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -65,17 +65,15 @@ int main(int argc, char** argv) {
 
   for ( unsigned i=0 ; i<files.size() ; i++ ) {
     
-    TFile* _finput = TFile::Open( files[i].c_str() );
+    TFile* finput = TFile::Open( files[i].c_str() );
 
-    if ( _finput==0 || !_finput->IsOpen() || _finput->IsZombie() ) {
+    if ( finput==0 || !finput->IsOpen() || finput->IsZombie() ) {
       std::cerr << "Error: could not open output file" << std::endl;
       exit(-1);
     }
 
-    TFile&  finput = *_finput;
-  
-    if ( show_release || quit_after_release ) { 
-      TTree*  dataTree = (TTree*)finput.Get("dataTree");
+    if ( show_release || quit_after_release ) {
+      TTree*  dataTree = (TTree*)finput->Get("dataTree");
       TString* releaseData = new TString("");
       
       if ( dataTree ) { 
@@ -95,7 +93,7 @@ int main(int argc, char** argv) {
 
     ///   TChain* data = new TChain("tree");
     /// opening each with a TTree is faster than a chain
-    TTree* data = (TTree*)finput.Get("tree");
+    TTree* data = (TTree*)finput->Get("tree");
     
     TIDA::Event* track_ev = new TIDA::Event();
     data->SetBranchAddress("TIDA::Event",&track_ev);
@@ -106,7 +104,7 @@ int main(int argc, char** argv) {
       std::cout << *track_ev << std::endl;
     }
     
-    finput.Close();
+    finput->Close();
     
   }
     

@@ -111,9 +111,9 @@ void handler(int sig) {
 // useful function to return a string with the 
 // current date   
 std::string time_str() { 
-  time_t _t;
-  time(&_t);
-  std::string s(ctime(&_t));
+  time_t t;
+  time(&t);
+  std::string s(ctime(&t));
   //  std::string::size_type pos = s.find("\n");
   // if ( pos != std::string::npos ) 
   return s.substr(0,s.find('\n'));
@@ -784,7 +784,7 @@ int main(int argc, char** argv)
   //  }
   
 
-  std::vector<double> _lumiblocks;
+  std::vector<double> lumiblocks;
   lumiParser  goodrunslist;
 
 
@@ -797,10 +797,10 @@ int main(int argc, char** argv)
   }
   else if ( inputdata.isTagDefined("LumiBlocks") )  { 
     /// else get the list from the dat file directly
-    _lumiblocks = inputdata.GetVector("LumiBlocks");
+    lumiblocks = inputdata.GetVector("LumiBlocks");
     
-    for (unsigned int i=0 ; i<_lumiblocks.size()-2 ; i+=3 ){ 
-      goodrunslist.addRange( _lumiblocks[i],  _lumiblocks[i+1],  _lumiblocks[i+2] );  
+    for (unsigned int i=0 ; i<lumiblocks.size()-2 ; i+=3 ){
+      goodrunslist.addRange( lumiblocks[i],  lumiblocks[i+1],  lumiblocks[i+2] );
     }
   }
   
@@ -1308,9 +1308,9 @@ int main(int argc, char** argv)
 
   /// Determine what sort of matching is required ...
 
-  TrackAssociator* _matcher = 0;
+  TrackAssociator* matcher = 0;
 
-  if      ( useMatcher == "Sigma" )    _matcher = new Associator_BestSigmaMatcher("sigma", Rmatch); 
+  if      ( useMatcher == "Sigma" )    matcher = new Associator_BestSigmaMatcher("sigma", Rmatch);
   else if ( useMatcher == "DeltaRZ" || useMatcher == "DeltaRZSinTheta" )  { 
     double deta = 0.05;
     double dphi = 0.05;
@@ -1319,21 +1319,21 @@ int main(int argc, char** argv)
     if ( inputdata.isTagDefined("Matcher_dphi" ) ) dphi = inputdata.GetValue("Matcher_dphi"); 
     if ( inputdata.isTagDefined("Matcher_dzed" ) ) dzed = inputdata.GetValue("Matcher_dzed"); 
 
-    if ( useMatcher == "DeltaRZ" ) _matcher = new Associator_BestDeltaRZMatcher(         "deltaRZ", deta, dphi, dzed ); 
-    else                           _matcher = new Associator_BestDeltaRZSinThetaMatcher( "deltaRZ", deta, dphi, dzed ); 
+    if ( useMatcher == "DeltaRZ" ) matcher = new Associator_BestDeltaRZMatcher(         "deltaRZ", deta, dphi, dzed );
+    else                           matcher = new Associator_BestDeltaRZSinThetaMatcher( "deltaRZ", deta, dphi, dzed );
   }
   else if ( useMatcher == "pT_2" ) { 
     double pTmatchLim_2 = 1.0;
     if ( inputdata.isTagDefined("Matcher_pTLim_2") ) pTmatchLim_2 = inputdata.GetValue("Matcher_pTLim_2");
-    _matcher = new Associator_SecondBestpTMatcher("SecpT", pTmatchLim_2);
+    matcher = new Associator_SecondBestpTMatcher("SecpT", pTmatchLim_2);
   }
   else if ( useMatcher == "Truth" ) {  
-    _matcher = new Associator_TruthMatcher();
+    matcher = new Associator_TruthMatcher();
   }
   else { 
     /// default to deltaR matcher
     /// track matcher for best fit deltaR matcher
-    _matcher = new Associator_BestDeltaRMatcher("deltaR", Rmatch); 
+    matcher = new Associator_BestDeltaRMatcher("deltaR", Rmatch);
   }
   
   /// extra matcher for additionally matching reference to truth 
@@ -1869,9 +1869,9 @@ int main(int argc, char** argv)
 	foutdir->cd();
 	cf->initialiseInternal();
 	// changes to output directory and books the invariant mass histograms
-	TH1F* m_invmass     = cf->getHist_invmass();
-	TH1F* m_invmass_obj = cf->getHist_invmassObj();
-	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, m_invmass, m_invmass_obj, &tom );
+	TH1F* invmass     = cf->getHist_invmass();
+	TH1F* invmass_obj = cf->getHist_invmassObj();
+	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, invmass, invmass_obj, &tom );
       } 
       else {
 	// if not a tnp analysis then fill rois in the normal way
@@ -2219,10 +2219,10 @@ int main(int argc, char** argv)
           }
         }
 
-        _matcher->match( refp, testp);
+        matcher->match( refp, testp);
        
-        if ( tom.status() ) analitr->second->execute( refp, testp, _matcher, &tom );
-        else                analitr->second->execute( refp, testp, _matcher );
+        if ( tom.status() ) analitr->second->execute( refp, testp, matcher, &tom );
+        else                analitr->second->execute( refp, testp, matcher );
 
         ConfVtxAnalysis* vtxanal = 0;
         analitr->second->store().find( vtxanal, "rvtx" );
@@ -2252,8 +2252,8 @@ int main(int argc, char** argv)
           std::cout << "ref tracks refp.size() "    << refp.size() << "\n" << refp  << std::endl;
           std::cout << "test tracks testp.size() " << testp.size() << "\n" << testp << std::endl;
           
-          TrackAssociator::map_type::const_iterator titr = _matcher->TrackAssociator::matched().begin();
-          TrackAssociator::map_type::const_iterator tend = _matcher->TrackAssociator::matched().end();
+          TrackAssociator::map_type::const_iterator titr = matcher->TrackAssociator::matched().begin();
+          TrackAssociator::map_type::const_iterator tend = matcher->TrackAssociator::matched().end();
           int im=0;
           std::cout << "track matches:\n";
           while (titr!=tend) { 
@@ -2289,7 +2289,7 @@ int main(int argc, char** argv)
           testPurityTracks.selectTracks( troi.tracks() );
           std::vector<TIDA::Track*> testpp = testPurityTracks.tracks();
 
-          _matcher->match(refpp, testpp); /// ???
+          matcher->match(refpp, testpp); /// ???
             
 
           std::map<std::string,TrackAnalysis*>::iterator analitrp = analysis.find(chain.name()+"-purity");
@@ -2297,7 +2297,7 @@ int main(int argc, char** argv)
           if ( analitrp == analysis.end() ) continue;
 
 
-          analitrp->second->execute( refpp, testpp, _matcher );
+          analitrp->second->execute( refpp, testpp, matcher );
           
 
          
@@ -2320,7 +2320,7 @@ int main(int argc, char** argv)
             << "\ttimes "  << mintime << " " << maxtime 
             << "\t( grl: " << grl_counter << " / " << pregrl_events << " )" << std::endl;
 
-  if ( monitorZBeam ) zbeam _zbeam( refz, testz );
+  if ( monitorZBeam ) zbeam zb( refz, testz );
 
   foutdir->cd();
   
