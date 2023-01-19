@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackingGeometry/SiLayerBuilderImpl.h"
@@ -221,7 +221,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
     ATH_MSG_DEBUG( "  -> With Rmin/Rmax (est) :  " << discRmin[discCounter] << " / " << discRmax[discCounter] );
 
     // prepare the binned array, it can be with one to several rings
-    Trk::BinnedArray<Trk::Surface>* currentBinnedArray = nullptr;
+    std::unique_ptr<Trk::BinnedArray<Trk::Surface>> currentBinnedArray = nullptr;
 
     double halfPhiStep = M_PI/discPhiSectors[discCounter];
     // protection in case phi value was fluctuating around 0 or M_PI in parsing
@@ -253,7 +253,7 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
                                                              Trk::binPhi);
 
     // a one-dimensional BinnedArray is sufficient
-    currentBinnedArray = new Trk::BinnedArray1D<Trk::Surface>(discSurfaces[discCounter],currentBinUtility);
+    currentBinnedArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(discSurfaces[discCounter],currentBinUtility);
 
     int discSurfacesNum = (discSurfaces[discCounter]).size();
     ATH_MSG_DEBUG( "Constructed BinnedArray for DiscLayer with "<< discSurfacesNum << " SubSurfaces." );
@@ -294,18 +294,15 @@ InDet::SiLayerBuilderImpl::createRingLayersImpl(const InDetDD::SiDetectorElement
     Trk::DiscBounds* activeLayerBounds    = new Trk::DiscBounds(discRmin[discCounter],discRmax[discCounter]);
     std::vector<Trk::BinUtility*>* binUtils = new std::vector<Trk::BinUtility*>;
     // prepare the right overlap descriptor
-    auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray, binUtils, true);
-
+    auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray.get(), binUtils, true);
+    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
     // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
     // activeLayerTransform deleted in 'Surface' baseclass
-    Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
-                                                     activeLayerBounds,
-                                                     currentBinnedArray,
-                                                     layerMaterial,
-                                                     thickness,
-                                                     std::move(olDescriptor));
-    // register the layer to the surfaces --- if necessary to the other sie as well
-    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
+    Trk::DiscLayer* activeLayer = new Trk::DiscLayer(
+        activeLayerTransform, activeLayerBounds, std::move(currentBinnedArray),
+        layerMaterial, thickness, std::move(olDescriptor));
+    // register the layer to the surfaces --- if necessary to the other sie as
+    // well
     registerSurfacesToLayer(layerSurfaces,*activeLayer);
     discLayers->push_back(activeLayer);
     // increase the disc counter by one
@@ -625,7 +622,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
          ATH_MSG_DEBUG( " --> " << irings <<  " R sector has " << discPhiSectors[discCounter][irings] << " phi sectors. " );
 
        // prepare the binned array, it can be with one to several rings
-       Trk::BinnedArray<Trk::Surface>* currentBinnedArray = nullptr;
+       std::unique_ptr<Trk::BinnedArray<Trk::Surface>> currentBinnedArray = nullptr;
        std::vector<Trk::BinUtility*>* singleBinUtils = new std::vector<Trk::BinUtility*>;
        bool weOwnSingleBinUtils{true};
        if (discRsectors==1){
@@ -657,7 +654,7 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
                                                                      Trk::closed,
                                                                      Trk::binPhi);
             // a one-dimensional BinnedArray is sufficient
-            currentBinnedArray = new Trk::BinnedArray1D<Trk::Surface>(discSurfaces[discCounter],currentBinUtility);
+            currentBinnedArray = std::make_unique<Trk::BinnedArray1D<Trk::Surface>>(discSurfaces[discCounter],currentBinUtility);
         } else {
             ATH_MSG_VERBOSE("Constructing a two-dimensional BinnedArray.");
             // get the binning in R first (can still be improved with non-aequidistant binning)
@@ -699,13 +696,12 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
                                                                   Trk::binPhi));
             }
             // a two-dimensional BinnedArray is needed ; takes possession of singleBinUtils and
-            // will delete it on destruction.
-            weOwnSingleBinUtils=false;
-            currentBinnedArray = new Trk::BinnedArray1D1D<Trk::Surface>(discSurfaces[discCounter],
-                                                                        currentSteerBinUtility,
-                                                                        singleBinUtils);
+            weOwnSingleBinUtils = false;
+            currentBinnedArray =
+                std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(
+                    discSurfaces[discCounter], currentSteerBinUtility,
+                    singleBinUtils);
         }
-
 
         int discSurfacesNum = (discSurfaces[discCounter]).size();
         ATH_MSG_DEBUG( "Constructed BinnedArray for DiscLayer with "<< discSurfacesNum << " SubSurfaces." );
@@ -762,20 +758,18 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
             // it on destruction.
             //  but *does not* manage currentBinnedArray.
             olDescriptor =
-                std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray, binUtils);
+                std::make_unique<InDet::DiscOverlapDescriptor>(currentBinnedArray.get(), binUtils);
         }
-
+        // register the layer to the surfaces --- if necessary to the other sie
+        // as well
+        Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
         // layer creation; deletes currentBinnedArray in baseclass 'Layer' upon destruction
         // activeLayerTransform deleted in 'Surface' baseclass
-        Trk::DiscLayer* activeLayer = new Trk::DiscLayer(activeLayerTransform,
-                                                         activeLayerBounds,
-                                                         currentBinnedArray,
-                                                         layerMaterial,
-                                                         thickness,
-                                                         std::move(olDescriptor));
-        // register the layer to the surfaces --- if necessary to the other sie as well
-        Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
-        registerSurfacesToLayer(layerSurfaces,*activeLayer);
+        Trk::DiscLayer* activeLayer =
+            new Trk::DiscLayer(activeLayerTransform, activeLayerBounds,
+                               std::move(currentBinnedArray), layerMaterial,
+                               thickness, std::move(olDescriptor));
+       registerSurfacesToLayer(layerSurfaces,*activeLayer);
         discLayers->push_back(activeLayer);
        // increase the disc counter by one
        ++discCounter;
@@ -1104,8 +1098,9 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
       ATH_MSG_VERBOSE("Creating the binned array for the sensitive detector elements with BinUtility :");
       ATH_MSG_VERBOSE( *currentBinUtility );
       // the binned array for the senstive surfaces to be built
-      Trk::BinnedArray<Trk::Surface>* currentBinnedArray =
-            new Trk::BinnedArray2D<Trk::Surface>(layerSurfaces[layerCounter],currentBinUtility);
+      auto currentBinnedArray =
+          std::make_unique<Trk::BinnedArray2D<Trk::Surface>>(
+              layerSurfaces[layerCounter], currentBinUtility);
       // unit test for sub surface ordering
       Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
 
@@ -1172,14 +1167,14 @@ InDet::SiLayerBuilderImpl::cylindricalLayersImpl(const InDetDD::SiDetectorElemen
         olDescriptor = std::make_unique<InDet::SCT_OverlapDescriptor>(m_addMoreSurfaces);
       }
 
-      // construct the layer (finally)
-      activeLayer = new Trk::CylinderLayer(new Trk::CylinderBounds(layerRadius[layerCounter],currentLayerExtend),
-                                           currentBinnedArray,
-                                           layerMaterial,
-                                           layerThickness[layerCounter],
-                                           std::move(olDescriptor));
-      // register the layer to the surfaces
       Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
+      // construct the layer (finally)
+      activeLayer = new Trk::CylinderLayer(
+          new Trk::CylinderBounds(layerRadius[layerCounter],
+                                  currentLayerExtend),
+          std::move(currentBinnedArray), layerMaterial,
+          layerThickness[layerCounter], std::move(olDescriptor));
+      // register the layer to the surfaces
       registerSurfacesToLayer(layerSurfaces,*activeLayer);
 
       // (3) register the layers

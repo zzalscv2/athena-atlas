@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -90,28 +90,28 @@ public:
   components and pointer to SurfaceArray (passing ownership),
   - rectangle bounds */
   PlaneLayer(const Amg::Transform3D & transform, RectangleBounds* rbounds,
-             SurfaceArray* surfaceArray, double thickness = 0.,
+             std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 
   /**Constructor with PlaneSurface
  components and pointer to SurfaceArray (passing ownership),
  - trapezoidal bounds */
   PlaneLayer(const Amg::Transform3D & transform, TrapezoidBounds* tbounds,
-             SurfaceArray* surfaceArray, double thickness = 0.,
+             std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 
   /**Constructor with PlaneSurface
  components and pointer to SurfaceArray (passing ownership),
  - diamond bounds */
   PlaneLayer(const Amg::Transform3D & transform, DiamondBounds* tbounds,
-             SurfaceArray* surfaceArray, double thickness = 0.,
+             std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 
   /**Constructor with PlaneSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership)
      - rectangle bounds */
   PlaneLayer(const Amg::Transform3D & transform, RectangleBounds* rbounds,
-             SurfaceArray* surfaceArray,
+             std::unique_ptr<SurfaceArray> surfaceArray,
              const LayerMaterialProperties& laymatprop, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 
@@ -119,7 +119,7 @@ public:
      MaterialProperties and pointer SurfaceArray (passing ownership)
      - trapezoidal bounds */
   PlaneLayer(const Amg::Transform3D & transform, TrapezoidBounds* rbounds,
-             SurfaceArray* surfaceArray,
+             std::unique_ptr<SurfaceArray> surfaceArray,
              const LayerMaterialProperties& laymatprop, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 
@@ -127,7 +127,7 @@ public:
      MaterialProperties and pointer SurfaceArray (passing ownership)
      - diamond bounds */
   PlaneLayer(const Amg::Transform3D & transform, DiamondBounds* rbounds,
-             SurfaceArray* surfaceArray,
+             std::unique_ptr<SurfaceArray> surfaceArray,
              const LayerMaterialProperties& laymatprop, double thickness = 0.,
              std::unique_ptr<OverlapDescriptor> od = nullptr, int laytyp = int(Trk::active));
 

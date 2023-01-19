@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -63,51 +63,51 @@ Trk::PlaneLayer::PlaneLayer(
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::RectangleBounds* rbounds,
-                            Trk::SurfaceArray* surfaceArray, double thickness,
+                            std::unique_ptr<Trk::SurfaceArray> surfaceArray, double thickness,
                             std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, rbounds),
-      Layer(surfaceArray, thickness, std::move(olap), laytyp) {}
+      Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::TrapezoidBounds* tbounds,
-                            Trk::SurfaceArray* surfaceArray, double thickness,
+                            std::unique_ptr<Trk::SurfaceArray> surfaceArray, double thickness,
                             std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, thickness, std::move(olap), laytyp) {}
+      Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::DiamondBounds* tbounds,
-                            Trk::SurfaceArray* surfaceArray, double thickness,
+                            std::unique_ptr<Trk::SurfaceArray> surfaceArray, double thickness,
                             std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, thickness, std::move(olap), laytyp) {}
+      Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::RectangleBounds* rbounds,
-                            Trk::SurfaceArray* surfaceArray,
+                            std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                             const Trk::LayerMaterialProperties& laymatprop,
                             double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, rbounds),
-      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp) {}
+      Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::TrapezoidBounds* tbounds,
-                            Trk::SurfaceArray* surfaceArray,
+                            std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                             const Trk::LayerMaterialProperties& laymatprop,
                             double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp) {}
+      Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Amg::Transform3D & transform,
                             Trk::DiamondBounds* tbounds,
-                            Trk::SurfaceArray* surfaceArray,
+                            std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                             const Trk::LayerMaterialProperties& laymatprop,
                             double thickness, std::unique_ptr<Trk::OverlapDescriptor> olap,
                             int laytyp)
     : PlaneSurface(transform, tbounds),
-      Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp) {}
+      Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp) {}
 
 Trk::PlaneLayer::PlaneLayer(const Trk::PlaneLayer& play) = default;
 

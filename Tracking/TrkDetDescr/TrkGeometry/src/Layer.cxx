@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -46,9 +46,9 @@ Trk::Layer::Layer(const Trk::LayerMaterialProperties& laymatprop,
       m_layerType(laytyp),
       m_ref(0.) {}
 
-Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray, double thickness,
+Trk::Layer::Layer(std::unique_ptr<Trk::SurfaceArray> surfaceArray, double thickness,
                   std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
-    : m_surfaceArray(surfaceArray),
+    : m_surfaceArray(std::move(surfaceArray)),
       m_layerMaterialProperties(SharedObject<LayerMaterialProperties>(nullptr)),
       m_layerThickness(thickness),
       m_overlapDescriptor(std::move(olap)),
@@ -61,11 +61,11 @@ Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray, double thickness,
       m_layerType(laytyp),
       m_ref(0.) {}
 
-Trk::Layer::Layer(Trk::SurfaceArray* surfaceArray,
+Trk::Layer::Layer(std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                   const Trk::LayerMaterialProperties& laymatprop,
                   double thickness,
                   std::unique_ptr<Trk::OverlapDescriptor> olap, int laytyp)
-    : m_surfaceArray(surfaceArray),
+    : m_surfaceArray(std::move(surfaceArray)),
       m_layerMaterialProperties(
           SharedObject<LayerMaterialProperties>(laymatprop.clone())),
       m_layerThickness(thickness),
@@ -95,20 +95,15 @@ Trk::Layer::Layer(const Trk::Layer& lay)
       m_layerType(lay.m_layerType),
       m_ref(lay.m_ref) {}
 
-Trk::Layer::~Layer() {
-  delete m_surfaceArray;
-}
-
 Trk::Layer& Trk::Layer::operator=(const Trk::Layer& lay) {
   if (this != &lay) {
-    delete m_surfaceArray;
     m_layerThickness = lay.m_layerThickness;
     m_enclosingTrackingVolume = lay.m_enclosingTrackingVolume;
     m_enclosingDetachedTrackingVolume = lay.m_enclosingDetachedTrackingVolume;
     m_overlapDescriptor.reset(
         (lay.m_overlapDescriptor) ? lay.m_overlapDescriptor->clone() : nullptr);
-    m_surfaceArray =
-        (lay.m_surfaceArray) ? lay.m_surfaceArray->clone() : nullptr;
+    m_surfaceArray.reset((lay.m_surfaceArray) ? lay.m_surfaceArray->clone()
+                                              : nullptr);
     m_layerMaterialProperties.reset(lay.m_layerMaterialProperties->clone());
     // just assign by pointer
     m_nextLayer = lay.m_nextLayer;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -37,23 +37,23 @@ Trk::ConeLayer::ConeLayer(Trk::ConeSurface* cyl,
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(surfaceArray, thickness, std::move(olap), laytyp)
+  , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Amg::Transform3D& transform,
                           Trk::ConeBounds* cbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           int laytyp)
   : ConeSurface(transform, cbounds)
-  , Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp)
+  , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
 {}
 
 Trk::ConeLayer::ConeLayer(const Trk::ConeLayer& clay) = default;

@@ -585,13 +585,13 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilder::mergeDiscLayers (std::vector<T
   // create merged binned array
   // a two-dimensional BinnedArray is needed ; takes possession of binUtils and
   // will delete it on destruction.
-  Trk::BinnedArray<Trk::Surface>* mergeBA = new Trk::BinnedArray1D1D<Trk::Surface>(surfaces,new Trk::BinUtility(rsteps,Trk::open,Trk::binR),binUtils);
+  auto mergeBA = std::make_unique<Trk::BinnedArray1D1D<Trk::Surface>>(surfaces,new Trk::BinUtility(rsteps,Trk::open,Trk::binR),binUtils);
 
   //DiscOverlapDescriptor takes possession of clonedBinUtils, will delete it on destruction.
   // but *does not* manage mergeBA.
   std::vector<Trk::BinUtility*>* clonedBinUtils = new std::vector<Trk::BinUtility*>();
   for (auto *bu : *binUtils) clonedBinUtils->push_back(bu->clone());
-  auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(mergeBA,clonedBinUtils,true);
+  auto olDescriptor = std::make_unique<InDet::DiscOverlapDescriptor>(mergeBA.get(),clonedBinUtils,true);
 
   // position & bounds of the disc layer
   double disc_thickness = std::fabs(zb.second-zb.first);
@@ -602,20 +602,19 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilder::mergeDiscLayers (std::vector<T
 
   // get the layer material from the first merged layer
   const Trk::LayerMaterialProperties* disc_material = inputDiscs[0]->layerMaterialProperties()->clone();
-
+  // register the layer to the surfaces
+  Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();
   // create disc layer
   // layer creation; deletes mergeBA in baseclass 'Layer' upon destruction
   Trk::DiscLayer* layer =
     new Trk::DiscLayer(transf,
                        new Trk::DiscBounds(rsteps.front(), rsteps.back()),
-                       mergeBA,
+                       std::move(mergeBA),
                        *disc_material,
                        disc_thickness,
                        std::move(olDescriptor));
 
-  // register the layer to the surfaces
-  Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();
-   for (const auto *sf : layerSurfaces) {
+  for (const auto *sf : layerSurfaces) {
      const InDetDD::SiDetectorElement* detElement = dynamic_cast<const InDetDD::SiDetectorElement*>(sf->associatedDetectorElement());
      const std::vector<const Trk::Surface*>& allSurfacesVector = detElement->surfaces();
      for (const auto *subsf : allSurfacesVector)
