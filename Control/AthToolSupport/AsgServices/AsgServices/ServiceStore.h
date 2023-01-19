@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,6 +12,7 @@
 #define ASGSERVICES_SERVICESTORE_H
 
 #ifndef XAOD_STANDALONE
+// cppcheck-suppress preprocessorErrorDirective
 #error "This header should only be used in XAOD_STANDALONE"
 #else
 
