@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -191,8 +191,9 @@ StatusCode RootD3PDSvc::make (const std::string& name, ID3PD* & d3pd)
           poolfile.erase (poolfile.size()-1);
       }
       else {
-        if (jpos != std::string::npos)
-          sname = sname.substr (0, jpos) + sname[sname.size()-1];
+        if (jpos != std::string::npos){
+          sname.erase(jpos,sname.size()-jpos-1);
+        }
         master = sname + master;
       }
     }
