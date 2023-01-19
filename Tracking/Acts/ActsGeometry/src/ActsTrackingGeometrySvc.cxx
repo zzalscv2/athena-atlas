@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsTrackingGeometrySvc.h"
@@ -47,8 +47,10 @@ using namespace Acts::UnitLiterals;
 
 ActsTrackingGeometrySvc::ActsTrackingGeometrySvc(const std::string &name,
                                                  ISvcLocator *svc)
-    : base_class(name, svc), m_detStore("StoreGateSvc/DetectorStore", name) {
-  m_elementStore = std::make_shared<ActsElementVector>();
+    : base_class(name, svc),
+      m_detStore("StoreGateSvc/DetectorStore", name),
+      m_elementStore (std::make_shared<ActsElementVector>())
+{
 }
 
 StatusCode ActsTrackingGeometrySvc::initialize() {

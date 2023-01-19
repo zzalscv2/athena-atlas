@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #define BOOST_TEST_MODULE MultiTrajectoryBasic_test
 #include <boost/test/data/test_case.hpp>
@@ -150,9 +150,10 @@ std::default_random_engine rng(31415);
 BOOST_AUTO_TEST_SUITE(EventDataMultiTrajectory)
 
 struct EmptyMTJ {  // setup empty MTJ
-  EmptyMTJ() {
-    trackStateBackend = std::make_unique<xAOD::TrackStateContainer>();
-    trackStateBackendAux = std::make_unique<xAOD::TrackStateAuxContainer>();
+  EmptyMTJ()
+    : trackStateBackend (std::make_unique<xAOD::TrackStateContainer>()),
+      trackStateBackendAux (std::make_unique<xAOD::TrackStateAuxContainer>())
+  {
     trackStateBackend->setStore(trackStateBackendAux.get());
 
     parametersBackend = std::make_unique<xAOD::TrackParametersContainer>();
@@ -673,4 +674,4 @@ BOOST_FIXTURE_TEST_CASE(TrackStateProxyAllocations, EmptyMTJ) {
 }
 
 // TODO remaining tests
-}
+BOOST_AUTO_TEST_SUITE_END()

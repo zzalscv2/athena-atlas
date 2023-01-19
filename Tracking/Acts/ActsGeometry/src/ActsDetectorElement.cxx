@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -150,11 +150,10 @@ ActsDetectorElement::ActsDetectorElement(
 ActsDetectorElement::ActsDetectorElement(
     const Acts::Transform3 &trf, const InDetDD::TRT_BaseElement &detElem,
     const Identifier &id)
-  : m_defTransform (trf)
+  :  m_detElement (&detElem),
+     m_defTransform (trf),
+     m_explicitIdentifier (id)
 {
-  m_detElement = &detElem;
-  m_explicitIdentifier = id;
-
   // we know this is a straw
   double length = detElem.strawLength() * 0.5 * length_unit;
 
