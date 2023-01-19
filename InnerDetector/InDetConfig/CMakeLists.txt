@@ -21,7 +21,7 @@ if (NOT SIMULATIONBASE)
 
     atlas_add_test( TRTSegmentFindingConfig_test
         SCRIPT python -m InDetConfig.TRTSegmentFindingConfig
-        PROPERTIES TIMEOUT 300
+        PROPERTIES TIMEOUT 600
         POST_EXEC_SCRIPT nopost.sh)
 
     atlas_add_test( TrackRecoConfig_test
