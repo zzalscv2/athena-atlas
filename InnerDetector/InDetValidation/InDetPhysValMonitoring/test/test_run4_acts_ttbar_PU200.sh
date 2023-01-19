@@ -30,7 +30,7 @@ run "Reconstruction" \
     --inputRDOFile ${rdo_23p0} \
     --outputAODFile AOD.root \
     --steering doRAWtoALL \
-    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsWorkflowFlags" \
+    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsArtFlags" \
     --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg"
 
 run "IDPVM" \
