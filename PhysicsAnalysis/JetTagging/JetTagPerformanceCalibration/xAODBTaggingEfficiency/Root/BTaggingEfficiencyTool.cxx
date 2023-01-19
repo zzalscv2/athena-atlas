@@ -1034,6 +1034,18 @@ BTaggingEfficiencyTool::getEigenRecompositionCoefficientMap(const std::string &l
 // WARNING the behaviour of future calls to getEfficiency and friends are modified by this
 // method - it indicates which systematic shifts are to be applied for all future calls
 StatusCode BTaggingEfficiencyTool::applySystematicVariation( const SystematicSet & systConfig) {
+  // If the user is doing the right thing, no need to use the costly filterForAffectingSystematics
+  // i.e if only 1 variation passed and this variation is in the map. Else, resort to full logic.
+  if (systConfig.size() == 1 ) {
+    auto mapIter = m_systematicsInfo.find(*(systConfig.begin()));
+    if (mapIter != m_systematicsInfo.end()) {
+      m_applySyst = true;
+      m_applyThisSyst = mapIter->second;
+      ATH_MSG_VERBOSE("variation '" << systConfig.begin()->name() << "' applied successfully");
+      return StatusCode::SUCCESS;
+    }
+  }
+
   // First filter out any systematics that do not apply to us
   SystematicSet filteredSysts;
   if (SystematicSet::filterForAffectingSystematics(systConfig, affectingSystematics(), filteredSysts) != StatusCode::SUCCESS) {
