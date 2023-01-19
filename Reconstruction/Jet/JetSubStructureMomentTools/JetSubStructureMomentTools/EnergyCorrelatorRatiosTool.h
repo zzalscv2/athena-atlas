@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -29,7 +29,7 @@ class EnergyCorrelatorRatiosTool :
     public:
 
       /// Constructor
-      EnergyCorrelatorRatiosTool(std::string name);
+      EnergyCorrelatorRatiosTool(const std::string& name);
      
       virtual StatusCode initialize() override;
 
@@ -92,31 +92,29 @@ struct EnergyCorrelatorRatiosTool::moments_t {
   /// Dichroic C and D series decorators
   std::unique_ptr< SG::AuxElement::Decorator<float> > dec_D2_dichroic;
 
-  moments_t (float Beta, std::string Prefix) {
+  moments_t (float Beta, const std::string& Prefix)
+    : prefix (Prefix),
+      suffix (GetBetaSuffix(Beta)),
+      beta (Beta),
 
-    prefix = Prefix;
-    beta = Beta;
+      acc_ECF1 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF1"+suffix)),
+      acc_ECF2 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF2"+suffix)),
+      acc_ECF3 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF3"+suffix)),
+      acc_ECF4 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF4"+suffix)),
+      acc_ECF5 (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF5"+suffix)),
 
-    suffix = GetBetaSuffix(beta);
+      acc_ECF1_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF1_ungroomed"+suffix)),
+      acc_ECF2_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF2_ungroomed"+suffix)),
+      acc_ECF3_ungroomed (std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF3_ungroomed"+suffix)),
+      
+      dec_C1 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C1"+suffix)),
+      dec_C2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C2"+suffix)),
+      dec_C3 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C3"+suffix)),
+      dec_C4 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C4"+suffix)),
+      dec_D2 (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"D2"+suffix)),
 
-    acc_ECF1 = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF1"+suffix);
-    acc_ECF2 = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF2"+suffix);
-    acc_ECF3 = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF3"+suffix);
-    acc_ECF4 = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF4"+suffix);
-    acc_ECF5 = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF5"+suffix);
-
-    acc_ECF1_ungroomed = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF1_ungroomed"+suffix);
-    acc_ECF2_ungroomed = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF2_ungroomed"+suffix);
-    acc_ECF3_ungroomed = std::make_unique< SG::AuxElement::ConstAccessor<float> >(prefix+"ECF3_ungroomed"+suffix);
-
-    dec_C1 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C1"+suffix);
-    dec_C2 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C2"+suffix);
-    dec_C3 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C3"+suffix);
-    dec_C4 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"C4"+suffix);
-    dec_D2 = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"D2"+suffix);
-
-    dec_D2_dichroic = std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"D2_dichroic"+suffix);
-
+      dec_D2_dichroic (std::make_unique< SG::AuxElement::Decorator<float> >(prefix+"D2_dichroic"+suffix))
+  {
   }
 
 };

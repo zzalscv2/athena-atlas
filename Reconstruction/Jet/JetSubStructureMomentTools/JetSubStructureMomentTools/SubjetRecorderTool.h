@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_subjetrecordertool_header
@@ -20,9 +20,9 @@ class SubjetRecorderTool :
 
     public:
       // Constructor and destructor
-      SubjetRecorderTool(std::string name);
+      SubjetRecorderTool(const std::string& name);
 
-      std::vector<xAOD::Jet *> recordSubjets(std::vector<fastjet::PseudoJet> subjets, xAOD::Jet &jet) const;
+      std::vector<xAOD::Jet *> recordSubjets(const std::vector<fastjet::PseudoJet>& subjets, xAOD::Jet &jet) const;
 
     private:
       std::string m_subjetlabel;

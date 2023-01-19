@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/VolatilityTool.h"
 #include "JetSubStructureUtils/Volatility.h"
 
-VolatilityTool::VolatilityTool(std::string name) : 
+VolatilityTool::VolatilityTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
   declareProperty("NumberOfIterations", m_num_iterations = 100);

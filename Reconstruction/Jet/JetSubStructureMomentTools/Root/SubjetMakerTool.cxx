@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/SubjetMakerTool.h"
 #include "JetEDM/JetConstituentFiller.h"
 #include "fastjet/ClusterSequence.hh"
 
-SubjetMakerTool::SubjetMakerTool(std::string name) : 
+SubjetMakerTool::SubjetMakerTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
   declareProperty("type", m_type = "AntiKt");

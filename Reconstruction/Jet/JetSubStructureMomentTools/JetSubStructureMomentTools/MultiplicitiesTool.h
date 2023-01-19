@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_multiplicitiestool_header
@@ -13,7 +13,7 @@ public JetSubStructureMomentToolsBase {
     
     public:
       // Constructor and destructor
-      MultiplicitiesTool(std::string name);
+      MultiplicitiesTool(const std::string& name);
       
       virtual int modifyJet(xAOD::Jet &injet) const override;
 };

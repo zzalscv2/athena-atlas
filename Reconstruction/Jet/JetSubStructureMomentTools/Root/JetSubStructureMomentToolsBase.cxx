@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 #include "JetEDM/JetConstituentFiller.h"
 
-JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase(std::string name) : 
+JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase(const std::string& name) : 
   JetModifierBase(name)
 {
   declareProperty("InputContainer",m_inputContainer = "");

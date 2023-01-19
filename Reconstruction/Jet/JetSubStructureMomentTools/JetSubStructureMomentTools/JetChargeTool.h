@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // JetChargeTool.h
@@ -15,7 +15,7 @@ class JetChargeTool :
 
     public:
       // Constructor and destructor
-      JetChargeTool(std::string name);
+      JetChargeTool(const std::string& name);
 
       int modifyJet(xAOD::Jet &jet) const;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef jetsubstructuremomenttools_subjetmakertool_header
@@ -13,7 +13,7 @@ class SubjetMakerTool :
     
     public:
       // Constructor and destructor
-      SubjetMakerTool(std::string name);
+      SubjetMakerTool(const std::string& name);
 
       std::string m_type;
       float m_R;

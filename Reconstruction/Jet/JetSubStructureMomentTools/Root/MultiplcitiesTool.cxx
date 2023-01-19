@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/MultiplicitiesTool.h"
 #include "JetSubStructureUtils/Multiplicities.h"
 
-MultiplicitiesTool::MultiplicitiesTool(std::string name) : 
+MultiplicitiesTool::MultiplicitiesTool(const std::string& name) : 
   JetSubStructureMomentToolsBase(name)
 {
 }
