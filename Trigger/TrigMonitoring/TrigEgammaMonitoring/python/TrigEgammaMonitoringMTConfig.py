@@ -533,7 +533,7 @@ class TrigEgammaMonAlgBuilder:
         self.bookL1CaloDistributions( monAlg, trigger )
         self.bookL2CaloDistributions( monAlg, trigger )
         self.bookEFCaloDistributions( monAlg, trigger )
-        
+
         self.bookL1CaloResolutions( monAlg, trigger )
         self.bookL1CaloAbsResolutions( monAlg, trigger )
         self.bookL2CaloResolutions( monAlg, trigger )
@@ -557,7 +557,7 @@ class TrigEgammaMonAlgBuilder:
 
         
         #
-        # Efficiecies
+        # Efficiencies
         #
 
         self.bookEfficiencies( monAlg, trigger, "L1Calo" )
@@ -579,6 +579,7 @@ class TrigEgammaMonAlgBuilder:
           self.bookEfficiencies( monAlg, trigger, "PrecisionCalo" , doEmulation=True)
           self.bookEfficiencies( monAlg, trigger, "FastPhoton" if info.isPhoton() else "FastElectron", doEmulation=True)         
           self.bookEfficiencies( monAlg, trigger, "HLT" , doEmulation=True)
+
 
 
 
@@ -792,8 +793,11 @@ class TrigEgammaMonAlgBuilder:
     # Efficiency
     self.addHistogram(monGroup, TProfile("pt,pt_passed", "#epsilon(p_T); p_{T} ; Efficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("et,et_passed", "#epsilon(E_T); E_{T} [GeV] ; Efficiency", self._nEtbins, self._etbins))
+    self.addHistogram(monGroup, TProfile("et_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", self._nEtbins, self._etbins))
     self.addHistogram(monGroup, TProfile("highet,highet_passed", "#epsilon(E_T); E_{T} [GeV] ; Efficiency", 40, 0., 500.))
+    self.addHistogram(monGroup, TProfile("highet_failed", "#epsilon(E_T); E_{T} [GeV] ; Inefficiency", 40, 0., 500.))
     self.addHistogram(monGroup, TProfile("eta,eta_passed", "#epsilon(#eta); #eta ; Efficiency", self._nEtabins, self._etabins))
+    self.addHistogram(monGroup, TProfile("eta_failed", "#epsilon(#eta); #eta ; Inefficiency", self._nEtabins, self._etabins))
     self.addHistogram(monGroup, TProfile("phi,phi_passed", "#epsilon(#phi); #phi ; Efficiency", 20, -3.2, 3.2))
     self.addHistogram(monGroup, TProfile("avgmu,avgmu_passed", "#epsilon(<#mu>); <#mu> ; Efficiency", 16, 0, 80))
     self.addHistogram(monGroup, TProfile("npvtx,npvtx_passed", "#epsilon(npvtx); npvtx ; Efficiency", 16, 0, 80))
