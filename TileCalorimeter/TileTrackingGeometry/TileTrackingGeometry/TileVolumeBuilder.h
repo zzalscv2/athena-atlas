@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ public:
     const CaloDetDescrManager& caloDDM) const override final;
 
 private:
-  void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) const;
+  static void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) ;
 
   void printInfo(const GeoPVConstLink& pv) const;
   void printChildren(const GeoPVConstLink& pv, int igen, const Amg::Transform3D& trIn) const;

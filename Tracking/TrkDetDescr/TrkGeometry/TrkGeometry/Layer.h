@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -81,22 +81,22 @@ class Layer {
         int ltype = int(passive));
 
   /**Constructor with pointer to SurfaceArray (passing ownership) */
-  Layer(SurfaceArray* surfaceArray, double thickness = 0.,
+  Layer(std::unique_ptr<SurfaceArray> surfaceArray, double thickness = 0.,
         std::unique_ptr<OverlapDescriptor> = nullptr, int ltype = int(passive));
 
   /**Constructor with MaterialProperties and pointer SurfaceArray (passing
    * ownership) */
-  Layer(SurfaceArray* surfaceArray, const LayerMaterialProperties& laymatprop,
+  Layer(std::unique_ptr<SurfaceArray> surfaceArray, const LayerMaterialProperties& laymatprop,
         double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
         int ltype = int(passive));
 
   /**Destructor*/
-  virtual ~Layer();
+  virtual ~Layer() = default;
 
-  /** Return the entire SurfaceArray, returns 0 if no SurfaceArray*/
+  /** Return the entire SurfaceArray, returns nullptr if no SurfaceArray*/
   const SurfaceArray* surfaceArray() const;
 
-  /** Return the entire SurfaceArray, returns 0 if no SurfaceArray*/
+  /** Return the entire SurfaceArray, returns nullptr if no SurfaceArray*/
   SurfaceArray* surfaceArray();
 
   /** If no subSurface array is defined or no subSurface can be found
@@ -284,7 +284,7 @@ class Layer {
   Layer& operator=(const Layer& lay);
 
   //!< SurfaceArray on this layer Surface (owning ptr)
-  SurfaceArray* m_surfaceArray;
+  std::unique_ptr<SurfaceArray> m_surfaceArray;
   //!< MaterialPoperties of this layer Surface
   SharedObject<LayerMaterialProperties> m_layerMaterialProperties;
   //!< thickness of the Layer

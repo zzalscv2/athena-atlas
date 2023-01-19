@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -67,7 +67,7 @@ public:
       */
   CylinderLayer(const Amg::Transform3D& transform,
                 CylinderBounds* cbounds,
-                SurfaceArray* surfaceArray,
+                std::unique_ptr<SurfaceArray> surfaceArray,
                 double thickness = 0.,
                 std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,
@@ -77,7 +77,7 @@ public:
      MaterialProperties and pointer SurfaceArray (passing ownership) */
   CylinderLayer(const Amg::Transform3D& transform,
                 CylinderBounds* cbounds,
-                SurfaceArray* surfaceArray,
+                std::unique_ptr<SurfaceArray> surfaceArray,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0.,
                 std::unique_ptr<OverlapDescriptor> od = nullptr,
@@ -93,14 +93,14 @@ public:
 
   /**Concentric Layer: Constructor with CylinderSurface components and pointer
    * to SurfaceArray (passing ownership) */
-  CylinderLayer(CylinderBounds* cbounds, SurfaceArray* surfaceArray,
+  CylinderLayer(CylinderBounds* cbounds, std::unique_ptr<SurfaceArray> surfaceArray,
                 double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,
                 int laytyp = int(Trk::active));
 
   /**Concentric Layer: Constructor with CylinderSurface components,
      MaterialProperties and pointer SurfaceArray (passing ownership) */
-  CylinderLayer(CylinderBounds* cbounds, SurfaceArray* surfaceArray,
+  CylinderLayer(CylinderBounds* cbounds, std::unique_ptr<SurfaceArray> surfaceArray,
                 const LayerMaterialProperties& laymatprop,
                 double thickness = 0., std::unique_ptr<OverlapDescriptor> od = nullptr,
                 IApproachDescriptor* ad = nullptr,

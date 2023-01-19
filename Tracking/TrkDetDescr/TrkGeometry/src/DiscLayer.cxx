@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,13 +45,13 @@ Trk::DiscLayer::DiscLayer(Trk::DiscSurface* disc,
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::DiscBounds* dbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(surfaceArray, thickness, std::move(olap), laytyp)
+  , Layer(std::move(surfaceArray), thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
@@ -62,14 +62,14 @@ Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
 
 Trk::DiscLayer::DiscLayer(const Amg::Transform3D& transform,
                           Trk::DiscBounds* dbounds,
-                          Trk::SurfaceArray* surfaceArray,
+                          std::unique_ptr<Trk::SurfaceArray> surfaceArray,
                           const Trk::LayerMaterialProperties& laymatprop,
                           double thickness,
                           std::unique_ptr<Trk::OverlapDescriptor> olap,
                           Trk::IApproachDescriptor* ades,
                           int laytyp)
   : DiscSurface(transform, dbounds)
-  , Layer(surfaceArray, laymatprop, thickness, std::move(olap), laytyp)
+  , Layer(std::move(surfaceArray), laymatprop, thickness, std::move(olap), laytyp)
   , m_approachDescriptor(ades)
 {
   DiscSurface::associateLayer(*this);
