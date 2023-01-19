@@ -1,4 +1,4 @@
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -21,7 +21,7 @@ else:
     from ..Electron.PrecisionTrackingMenuSequences     import precisionTrackingMenuSequence, precisionTrackingMenuSequence_LRT
     from ..Electron.PrecisionTracks_GSFRefittedMenuSequences   import precisionTracks_GSFRefittedMenuSequence, precisionTracks_GSFRefittedMenuSequence_LRT
 
-from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO,
 # so let's make them functions already now
@@ -90,20 +90,19 @@ from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
 
 def _diElectronMassComboHypoToolFromDict(chainDict, mass_range): 
     name = chainDict['chainName']
-    monTool = GenericMonitoringTool("MonTool_"+name)
-    monTool.Histograms = [
-        defineHistogram('DphiOfProcessed', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2),
-        defineHistogram('MassOfProcessed', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000),
-        defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2),
-        defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
-    ]
-    tool= TrigEgammaTopoHypoTool(name)
-    tool.AcceptAll = False
-    tool.ApplyMassCut = True
-    tool.LowerMassEgammaClusterCut = mass_range[0]
-    tool.UpperMassEgammaClusterCut = mass_range[1]
-    monTool.HistPath = 'EgammaMassHypo/'+tool.getName()
-    tool.MonTool = monTool
+    monTool = GenericMonitoringTool("MonTool_"+name,
+                                    HistPath = 'EgammaMassHypo/'+name)
+    monTool.defineHistogram('DphiOfProcessed', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('MassOfProcessed', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
+    monTool.defineHistogram('DphiOfAccepted', type='TH1F', path='EXPERT', title="PrecisionCalo Hypo entries per Phi;Phi", xbins=128, xmin=-3.2, xmax=3.2)
+    monTool.defineHistogram('MassOfAccepted', type='TH1F', path='EXPERT', title="Mass in accepted combinations [MeV]", xbins=75, xmin=0, xmax=150000)
+
+    tool = TrigEgammaTopoHypoTool(name,
+                                  AcceptAll = False,
+                                  ApplyMassCut = True,
+                                  LowerMassEgammaClusterCut = mass_range[0],
+                                  UpperMassEgammaClusterCut = mass_range[1],
+                                  MonTool = monTool)
     return tool
 
 

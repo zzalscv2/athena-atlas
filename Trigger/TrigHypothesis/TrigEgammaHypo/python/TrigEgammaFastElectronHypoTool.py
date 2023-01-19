@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 
@@ -21,14 +21,13 @@ def createTrigEgammaFastElectronHypoAlg(name, sequenceOut):
   #theFastElectronHypo.PidNames = ["tight", "medium", "loose", "vloose"]
   #theFastElectronHypo.RingerNNSelectorTools = createTrigEgammaFastCaloSelectors()
 
-  from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
-  MonTool = GenericMonitoringTool("MonTool_"+name)
-  MonTool.Histograms = [ 
-        defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0),
-        defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=100, xmin=0.0, xmax=100),
-  ]
-  MonTool.HistPath = 'FastElectronHypo/'+name
-  theFastElectronHypo.MonTool=MonTool
+  from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+  monTool = GenericMonitoringTool("MonTool_"+name,
+                                  HistPath = 'FastElectronHypo/'+name)
+  monTool.defineHistogram('TIME_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo Algtime; time [ us ] ; Nruns", xbins=80, xmin=0.0, xmax=8000.0)
+  monTool.defineHistogram('TIME_NN_exec', type='TH1F', path='EXPERT', title="Fast Calo Hypo NN Algtime; time [ us ] ; Nruns", xbins=100, xmin=0.0, xmax=100)
+
+  theFastElectronHypo.MonTool=monTool
   return theFastElectronHypo
 
 
