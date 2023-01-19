@@ -35,3 +35,10 @@ def actsValidateOrthogonalSeedsFlags(flags):
     from ActsInterop.ActsConfigFlags import SeedingStrategy
     flags.Acts.SeedingStrategy = SeedingStrategy.Orthogonal
     actsValidateSeedsFlags(flags)
+
+def actsArtFlags(flags):
+    """flags for Reco_tf with CA used in ART test: add Acts workflow to reco sequence"""
+    flags.Reco.EnableHGTDExtension = False
+    flags.Acts.doMonitoring = True
+    flags.ITk.Tracking.recoChain = [TrackingComponent.AthenaChain,
+                                    TrackingComponent.ActsChain]
