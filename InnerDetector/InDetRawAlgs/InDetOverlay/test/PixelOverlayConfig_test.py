@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Run tests on PixelOverlayConfig.py
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 import sys
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from InDetOverlay.PixelOverlayConfig import PixelOverlayCfg
@@ -19,24 +19,25 @@ parser = CommonTestArgumentParser("PixelOverlayConfig_test.py")
 args = parser.parse_args()
 
 # Configure
-overlayTestFlags(ConfigFlags, args)
-ConfigFlags.Output.RDOFileName = 'mcOverlayRDO_Pixel.pool.root'
-postprocessAndLockFlags(ConfigFlags, args)
+flags = initConfigFlags()
+overlayTestFlags(flags, args)
+flags.Output.RDOFileName = 'mcOverlayRDO_Pixel.pool.root'
+postprocessAndLockFlags(flags, args)
 
 # Construct our accumulator to run
-acc = MainServicesCfg(ConfigFlags)
-acc.merge(PoolReadCfg(ConfigFlags))
+acc = MainServicesCfg(flags)
+acc.merge(PoolReadCfg(flags))
 
 # Add event and truth overlay (needed downstream)
-acc.merge(EventInfoOverlayCfg(ConfigFlags))
-acc.merge(CopyMcEventCollectionCfg(ConfigFlags))
+acc.merge(EventInfoOverlayCfg(flags))
+acc.merge(CopyMcEventCollectionCfg(flags))
 
 # Add Pixel overlay
-acc.merge(PixelOverlayCfg(ConfigFlags))
+acc.merge(PixelOverlayCfg(flags))
 
 # Dump the pickle
 with open("PixelOverlayCfg.pkl", "wb") as f:
     acc.store(f)
 
 # Print and run
-sys.exit(printAndRun(acc, ConfigFlags, args))
+sys.exit(printAndRun(acc, flags, args))
