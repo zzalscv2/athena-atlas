@@ -24,11 +24,10 @@ if DQMonFlags.useTrigger():
    tdt_local_logger.info('Scheduling the trigger translator')
    # Look up all monitoring menu lists, shove into trigger translator
    # pass them in as joined strings, unpack in tool
-   from TrigHLTMonitoring.HLTMonTriggerList import HLTMonTriggerList
-   tdt_local_hltconfig = HLTMonTriggerList()
+   from TrigHLTMonitoring.HLTMonTriggerList import hltmonList
    import collections
    tdt_mapping = {}
-   for tdt_menu, tdt_menu_item in tdt_local_hltconfig.__dict__.items():
+   for tdt_menu, tdt_menu_item in hltmonList.__dict__.items():
       if not isinstance(tdt_menu_item, collections.Iterable): continue
       # work around possibly buggy category items
       if isinstance(tdt_menu_item, str): 

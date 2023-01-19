@@ -1,7 +1,6 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
- 
-from __future__ import print_function
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
+from AthenaCommon.Logging import logging
 import TrigBjetMonitoring.TrigBjetMonitCategory as bjet
 import TrigBphysMonitoring.TrigBphysMonitCategory as bphys
 import TrigEgammaMonitoring.TrigEgammaMonitCategory as egamma
@@ -11,13 +10,7 @@ import TrigMinBiasMonitoring.TrigMinBiasMonitCategory as minbias
 import TrigMuonMonitoring.TrigMuonMonitCategory as muon
 import TrigTauMonitoring.TrigTauMonitCategory as tau
 
-if 'DQMonFlags' not in dir():
-  from AthenaMonitoring.DQMonFlags import DQMonFlags
-
 class HLTMonTriggerList:
-  
-  # HLTMonTriggerList config
-  _configured = False
   
   # running mode config
   _get_monitoring_mode_success = False
@@ -62,41 +55,38 @@ class HLTMonTriggerList:
   
   
   def __init__(self):
-    if not self._configured:
-      self.config()
 
-  def config(self):
-    
     self.set_HLTMonTrigList_default()
-    
+
+    log = logging.getLogger('HLTMonTriggerList')
+
     self._get_monitoring_mode_success = self.get_monitoring_mode()
     
     if self._get_monitoring_mode_success is False:
       # what should be done in this case?
-      print ("HLTMonTriggerList: Error getting monitoring mode, default monitoring lists will be used.")
+      log.warning("Error getting monitoring mode, default monitoring lists will be used.")
       
     elif self.pp_mode is True:
-      print ("HLTMonTriggerList: Setting up pp monitoring.")
+      log.info("Setting up pp monitoring.")
       self.set_HLTMonTrigList_pp()
       
     elif self.mc_mode is True:
-      print ("HLTMonTriggerList: Setting up MC monitoring.")
+      log.info("Setting up MC monitoring.")
       self.set_HLTMonTrigList_mc()
       
     elif self.HI_mode is True:
-      print ("HLTMonTriggerList: Setting up HI monitoring.")
+      log.info("Setting up HI monitoring.")
       self.set_HLTMonTrigList_HI()
       
     elif self.cosmic_mode is True:
-      print ("HLTMonTriggerList: Setting up cosmic monitoring.")
+      log.info("Setting up cosmic monitoring.")
       self.set_HLTMonTrigList_cosmic()
       
-    self._configured = True
-
 
   # Implementation of https://its.cern.ch/jira/browse/ATR-13200
   def get_monitoring_mode(self):
     # Set monitoring mode
+    from AthenaMonitoring.DQMonFlags import DQMonFlags
     self.data_type = DQMonFlags.monManDataType()
     
     if self.data_type == 'monteCarlo':
