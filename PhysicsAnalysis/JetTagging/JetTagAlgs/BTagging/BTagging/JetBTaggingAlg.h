@@ -65,7 +65,7 @@ class  JetBTaggingAlg:
 
     std::string m_JetName;
 
-    bool m_DoMuons;
+    bool m_DoMuons = false;
 
     ToolHandle< IBTagTool > m_bTagTool;
     ToolHandle< IBTagLightSecVertexing > m_bTagSecVtxTool;

@@ -50,8 +50,8 @@ namespace Analysis
 
       private:
         
-         StatusCode fillVkalVariables(const xAOD::Jet&, xAOD::BTagging*, const Trk::VxSecVKalVertexInfo*, const xAOD::TrackParticleContainer*,  std::string) const;
-         StatusCode fillJFVariables(const xAOD::Jet&, xAOD::BTagging*, const Trk::VxJetFitterVertexInfo*, const xAOD::TrackParticleContainer*, std::string) const;
+         StatusCode fillVkalVariables(const xAOD::Jet&, xAOD::BTagging*, const Trk::VxSecVKalVertexInfo*, const xAOD::TrackParticleContainer*,  const std::string&) const;
+         StatusCode fillJFVariables(const xAOD::Jet&, xAOD::BTagging*, const Trk::VxJetFitterVertexInfo*, const xAOD::TrackParticleContainer*, const std::string&) const;
 
          ToolHandle<IJetFitterVariablesFactory> m_JFvarFactory;
          //ToolHandle<IMSVVariablesFactory> m_MSVvarFactory;

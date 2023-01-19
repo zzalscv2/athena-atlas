@@ -66,8 +66,7 @@ namespace Analysis {
     //declareProperty("MSVVariableFactory",          m_MSVvarFactory);
   }
 
-  BTagLightSecVertexing::~BTagLightSecVertexing() {
-  }
+  BTagLightSecVertexing::~BTagLightSecVertexing() = default;
 
   StatusCode BTagLightSecVertexing::initialize()
   {
@@ -112,7 +111,7 @@ namespace Analysis {
              xAOD::BTagging* newBTag,
 						 const Trk::VxSecVKalVertexInfo* myVertexInfoVKal,
 						 const xAOD::TrackParticleContainer* theTrackParticleContainer,
-						 std::string basename) const {
+						 const std::string& basename) const {
 
     const auto& key = basename.find("Flip")!=std::string::npos ? m_jetSVFlipLinkName : m_jetSVLinkName; 
     SG::ReadDecorHandle<xAOD::JetContainer, std::vector<ElementLink< xAOD::VertexContainer> > > h_jetSVLinkName (key);
@@ -137,8 +136,8 @@ namespace Analysis {
 	for (std::vector<xAOD::Vertex*>::const_iterator verticesIter = verticesBegin; verticesIter!=verticesEnd;++verticesIter) { 
 	  std::vector<ElementLink<xAOD::TrackParticleContainer> > theseTracks = (*verticesIter)->trackParticleLinks();
 	  npsec += theseTracks.size();
-	  for (std::vector<ElementLink<xAOD::TrackParticleContainer> >::iterator itr=theseTracks.begin();itr!=theseTracks.end();++itr){
-	    TrkList.push_back(*itr);
+	  for (auto & theseTrack : theseTracks){
+	    TrkList.push_back(theseTrack);
 	  }
 	}
       }
@@ -147,7 +146,7 @@ namespace Analysis {
       newBTag->setVariable<std::vector<ElementLink<xAOD::VertexContainer> > >(basename, "vertices", SVertexLinks);
       newBTag->setDynVxELName(basename, "vertices");
 
-      if(SVertexLinks.size() && myVertexInfoVKal){ 
+      if(!SVertexLinks.empty() && myVertexInfoVKal){ 
         mass = myVertexInfoVKal->mass();
         energyfrc = myVertexInfoVKal->energyFraction();
         n2trk = myVertexInfoVKal->n2trackvertices();
@@ -208,7 +207,7 @@ namespace Analysis {
 					       xAOD::BTagging* newBTag,
 					       const Trk::VxJetFitterVertexInfo* myVertexInfoJetFitter,
 					       const xAOD::TrackParticleContainer* theTrackParticleContainer,
-					       std::string basename) const {
+					       const std::string& basename) const {
 
     //THIS is a nasty hack from VD but by it's more likely we get GNN to work than someone to re-organise JetFitter
     const auto& key = basename.find("Flip")!=std::string::npos ? m_jetJFFlipVtxLinkName : m_jetJFVtxLinkName;
@@ -242,7 +241,7 @@ namespace Analysis {
     int nVtx = 0;
     Trk::VxJetCandidate* vxjetcand = nullptr;
     std::vector<Trk::VxVertexOnJetAxis*> Vtxonjetaxes;
-    if (JFvertices.size() > 0) {
+    if (!JFvertices.empty()) {
       vxjetcand = dynamic_cast< Trk::VxJetCandidate*>(JFvertices[0]);
       if (!vxjetcand) {
         ATH_MSG_WARNING("#BTAG# bad VxCandidate is not a VxJetCandidate");
@@ -338,7 +337,7 @@ namespace Analysis {
 
   StatusCode BTagLightSecVertexing::BTagSecVertexing_exec(const xAOD::JetContainer * jetContainer, xAOD::BTaggingContainer * btaggingContainer) const {
 
-    const xAOD::Vertex* primaryVertex(0);
+    const xAOD::Vertex* primaryVertex(nullptr);
 
     //retrieve primary vertex
     SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName);
@@ -351,9 +350,9 @@ namespace Analysis {
       ATH_MSG_DEBUG("#BTAG#  Vertex container is empty");
       return StatusCode::SUCCESS;
     }
-    for (xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin(); fz != h_VertexCollectionName->end(); ++fz) {
-      if ((*fz)->vertexType() == xAOD::VxType::PriVtx) {
-	      primaryVertex = *fz;
+    for (const auto *fz : *h_VertexCollectionName) {
+      if (fz->vertexType() == xAOD::VxType::PriVtx) {
+	      primaryVertex = fz;
 	      break;
       }
     }
@@ -369,7 +368,7 @@ namespace Analysis {
     }
 
     int nameiter = 0;
-    for(SG::ReadHandleKey<Trk::VxSecVertexInfoContainer> infoCont : m_VxSecVertexInfoNames) {
+    for(const SG::ReadHandleKey<Trk::VxSecVertexInfoContainer>& infoCont : m_VxSecVertexInfoNames) {
       SG::ReadHandle<Trk::VxSecVertexInfoContainer> h_VxSecVertexInfoName(infoCont);
       if (h_VxSecVertexInfoName.isValid()) {
         if (h_VxSecVertexInfoName->size() != jetContainer->size()) {
@@ -395,7 +394,7 @@ namespace Analysis {
           std::vector<ElementLink< xAOD::TrackParticleContainer > >::iterator itEL = tracksInJet.begin();
           std::vector<ElementLink< xAOD::TrackParticleContainer > >::iterator itELend = tracksInJet.end();
 
-          if(tracksInJet.size()==0){
+          if(tracksInJet.empty()){
             ATH_MSG_DEBUG("#BTAG# no tracks associated to the jet. Set some with the track selection tool " << trackname << " for VertexFinderxAODBaseName "<< basename);
             if("SV1" == basename ||"SV1Flip" == basename ){
               std::vector<ElementLink<xAOD::TrackParticleContainer> > TrkList;
