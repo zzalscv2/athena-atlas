@@ -88,6 +88,7 @@ StatusCode GenModule::execute() {
   // Create the MC event and send the GeneratorEvent stored in it to fillEvt
   HepMC::GenEvent* evt = HepMC::newGenEvent(1,1);
   CHECK(this->fillEvt(evt));
+  HepMC::fillBarcodesAttribute(evt);
 
   // Add the event to the MC event collection
   if (events()) {
