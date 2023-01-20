@@ -396,9 +396,15 @@ def InDetTrackRecoCfg(flags):
 
     if flags.InDet.Tracking.doStoreTrackSeeds:
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgNoPIDCfg
+        TrackContainer = "SiSPSeedSegments"
+        result.merge(InDetTrackTruthCfg(flags,
+                                Tracks = TrackContainer,
+                                DetailedTruth = f"{TrackContainer}DetailedTruth",
+                                TracksTruth = f"{TrackContainer}TruthCollection"))
+
         result.merge(TrackParticleCnvAlgNoPIDCfg(flags,
                                                  name = "SiSPSeedSegmentsCnvAlg",
-                                                 TrackContainerName = "SiSPSeedSegments",
+                                                 TrackContainerName = TrackContainer,
                                                  xAODTrackParticlesFromTracksContainerName = "SiSPSeedSegmentsTrackParticles"))
 
     if flags.InDet.PriVertex.doVertexFinding:
@@ -611,6 +617,11 @@ def InDetTrackRecoOutputCfg(flags):
             toAOD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
             toAOD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
 
+    if flags.InDet.Tracking.doStoreTrackSeeds:
+        toAOD += [
+            "xAOD::TrackParticleContainer#SiSPSeedSegmentsTrackParticles",
+            "xAOD::TrackParticleAuxContainer#SiSPSeedSegmentsTrackParticlesAux."
+        ]
     if flags.InDet.Tracking.writeExtendedPRDInfo:
         toAOD += [
             "xAOD::TrackMeasurementValidationContainer#PixelClusters",
