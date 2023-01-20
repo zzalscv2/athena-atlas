@@ -260,9 +260,11 @@ def TRT_LayerBuilderCfg(flags, namePrefix='', buildTrtStrawLayers = False):
     TRT_LayerBuilder = CompFactory.InDet.TRT_LayerBuilder(name=namePrefix+'TRT_LayerBuilder')
     # TRT barrel specifications - assume defaults
     # TRT endcap specifications - assume defaults
-
-    from SimulationConfig.SimEnums import SimulationFlavour
-    if buildTrtStrawLayers or (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator not in [SimulationFlavour.ATLFASTIIMT]):
+    if not (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator.usesFatras()):
+        # We do not need a detailed TRT description if we are not running Fatras
+        TRT_LayerBuilder.BarrelLayerBinsZ = 1
+        TRT_LayerBuilder.EndcapLayerBinsR = 1
+    if buildTrtStrawLayers or (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator.usesFatras()):
         TRT_LayerBuilder.ModelLayersOnly = False
     result.setPrivateTools(TRT_LayerBuilder)
     return result
@@ -312,8 +314,7 @@ def InDetTrackingGeometryBuilderCfg(name, flags, namePrefix='', setLayerAssociat
         # set the binning from bi-aequidistant to arbitrary for complex TRT volumes
         TRT_LayerBinning = 1
         from AthenaConfiguration.Enums import ProductionStep
-        from SimulationConfig.SimEnums import SimulationFlavour
-        if buildTrtStrawLayers or (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator not in [SimulationFlavour.ATLFASTIIMT]):
+        if buildTrtStrawLayers or (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator.usesFatras()):
             TRT_LayerBinning = 2
         binnings += [ TRT_LayerBinning ]
         colors += [ 5 ]
