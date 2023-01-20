@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignEvent/AlignVertex.h"
@@ -13,7 +13,6 @@ namespace Trk {
     , m_vector(nullptr)
     , m_original(nullptr)
     , m_originalPosition(nullptr)
-    , m_alignTracks(0)
     , m_position(nullptr)
     , m_covariance(nullptr)
     , m_derivatives(nullptr)
@@ -37,7 +36,6 @@ namespace Trk {
     , m_vector(new Amg::Vector3D(*(rhs.m_vector)))
     , m_original(new xAOD::Vertex(*(rhs.m_original)))
     , m_originalPosition(new Amg::Vector3D( *(rhs.m_originalPosition )))
-    , m_alignTracks(rhs.m_alignTracks)
     , m_position(new Amg::Vector3D(*(rhs.m_position)))
     , m_covariance(new AmgSymMatrix(3) (*(rhs.m_covariance)) )
     , m_derivatives(new auto(*(rhs.m_derivatives)))
@@ -57,7 +55,6 @@ namespace Trk {
       delete m_vector; m_vector = new Amg::Vector3D(*(rhs.m_vector));
       delete m_original; m_original = new xAOD::Vertex(*(rhs.m_original));
     	delete m_originalPosition; m_originalPosition = new Amg::Vector3D( *(rhs.m_originalPosition ));
-    	m_alignTracks = rhs.m_alignTracks;
     	delete m_position; m_position = new Amg::Vector3D(*(rhs.m_position));
     	delete m_covariance; m_covariance = new AmgSymMatrix(3) (*(rhs.m_covariance));
       delete m_derivatives; m_derivatives = new auto(*(rhs.m_derivatives));
@@ -78,7 +75,6 @@ namespace Trk {
     , m_vector(nullptr)
     , m_original(vertex)
     , m_originalPosition(nullptr)
-    , m_alignTracks(0)
     , m_position(nullptr)
     , m_covariance(nullptr)
     , m_derivatives(nullptr)
@@ -131,17 +127,6 @@ namespace Trk {
     m_constrained = true;
   }
 
-
-  //________________________________________________________________________
-  void AlignVertex::addAlignTrack(AlignTrack* alignTrack) 
-  {
-    m_alignTracks.push_back(&alignTrack);
-    alignTrack->setVtx(this);
-    alignTrack->setRefitD0(false);
-    alignTrack->setRefitZ0(false);
-    //    alignTrack->setType(AlignTrack::VertexMember);
-    m_nTracks++;
-  }
 
   //________________________________________________________________________
   void AlignVertex::addDerivatives(std::vector<AlignModuleVertexDerivatives>* vec)
