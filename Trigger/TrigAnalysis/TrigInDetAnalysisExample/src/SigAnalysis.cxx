@@ -217,7 +217,7 @@ void SigAnalysis::execute(const std::vector<TIDA::Track*>& reftracks,
   //  std::cout << "SigAnalysis (resolutions really) filling " << std::endl;
 
   // should have these as a class variable   
-  static std::string  varName[10] = { "pT", "eta", "phi", "z0", "d0", "a0", "nsct", "npix", "ntrt", "nstraw" };  
+  static const std::string  varName[10] = { "pT", "eta", "phi", "z0", "d0", "a0", "nsct", "npix", "ntrt", "nstraw" };
 
   //  std::cout << "SigAnalysis ref size " << reftracks.size() << "\ttest size " << testtracks.size() << std::endl; 
   
@@ -330,13 +330,9 @@ void SigAnalysis::execute(const std::vector<TIDA::Track*>& reftracks,
   // and get the corresponding matched reference tracks from the 
   // reverse map in the TrackAscociator class  - revmatched() 
 
-  static int icount = 0;
+  if ( m_print ) std::cout << "SigAnalysis::execute() \t " << name() << "\t " << m_icount << " events\t " << testtracks.size() << " tracks (" << m_Nreco << ")" << "\n---------------" << std::endl;
 
-  //  if ( icount%1000 ) std::cout << "chain " << name() << "\t " << m_Nreco << " tracks" << std::endl;
-  // if ( icount%1000 ) 
-  if ( m_print ) std::cout << "SigAnalysis::execute() \t " << name() << "\t " << icount << " events\t " << testtracks.size() << " tracks (" << m_Nreco << ")" << "\n---------------" << std::endl;
-
-  icount++;
+  m_icount++;
   
   m_Nreco += testtracks.size();
 

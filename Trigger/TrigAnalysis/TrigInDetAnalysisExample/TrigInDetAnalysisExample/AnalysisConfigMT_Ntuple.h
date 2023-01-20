@@ -11,7 +11,7 @@
  **     @author  mark sutton
  **     @date    Monday 18th May  2020 22:55:37 BST 
  **
- **     Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -49,7 +49,9 @@ protected:
   virtual void loop();
 
 private: 
-  
+
+  std::set<std::string> get_configured_chains();
+
   double m_fiducial_radius; 
   double m_ptmin; 
 

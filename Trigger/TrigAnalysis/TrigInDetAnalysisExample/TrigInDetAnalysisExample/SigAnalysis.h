@@ -33,7 +33,7 @@ public:
 
 public:
   
-  SigAnalysis( const std::string& name ) : TrackAnalysis( name ), m_Nreco(0), m_print(true), m_dir(0) {
+  SigAnalysis( const std::string& name ) : TrackAnalysis( name ), m_Nreco(0), m_print(true), m_icount(0), m_dir(0) {
     std::cout << "SigAnalysis::SigAnalysis() " << TrackAnalysis::name() << std::endl;
   }  
 
@@ -109,6 +109,9 @@ private:
 
   /// flag to print out the matched tracks etc
   bool m_print;
+
+  /// Event counter
+  int m_icount;
 
   TIDDirectory* m_dir;
 

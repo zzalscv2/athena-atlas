@@ -522,7 +522,7 @@ protected:
 
       /// selectTracks<TruthParticleContainer>( &selectorTruth, "INav4MomTruthEvent" );
 
-      const DataHandle<McEventCollection> mcevent;
+      const McEventCollection* mcevent;
 
       /// now as a check go through the GenEvent collection
 

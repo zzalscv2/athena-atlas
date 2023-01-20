@@ -67,7 +67,8 @@
 std::string date() { 
   time_t t;
   time(&t);
-  std::string mtime = ctime(&t);
+  char buf[26];
+  std::string mtime = ctime_r(&t, buf);
   mtime.erase( std::remove(mtime.begin(), mtime.end(), '\n'), mtime.end() );
   return mtime;
 }
@@ -213,12 +214,12 @@ void AnalysisConfig_Ntuple::book() {
 	/// save the current directory so we can return there after
 	TDirectory* dir = gDirectory;
 
-	static bool first_open = true;
+	static std::atomic<bool> first_open = true;
 
 	std::string outputFileName = m_outputFileName;
 
 	if ( genericFlag() ) { 
-		static int file_index = 0;
+		static std::atomic<int> file_index = 0;
 		std::string::size_type pos = outputFileName.find(".root");
 		if ( pos != std::string::npos ) outputFileName.erase(pos, outputFileName.size());
 		char file_label[64];
@@ -267,9 +268,7 @@ void AnalysisConfig_Ntuple::book() {
 
 	m_finalised = false; // flag we have an open file that is not yet finalised
 
-	m_tida_first = true;
-
-	m_provider->msg(MSG::INFO) << "AnalysisConfig_Ntuple::book() exiting" << endmsg;   
+	m_provider->msg(MSG::INFO) << "AnalysisConfig_Ntuple::book() exiting" << endmsg;
 
 }
 
