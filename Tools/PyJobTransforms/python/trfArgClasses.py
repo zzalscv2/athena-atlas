@@ -2352,6 +2352,7 @@ class argSubstepSteering(argSubstep):
     # "doOverlay" - run event overlay on presampled RDOs instead of standard HITtoRDO digitization
     # "doFCwOverlay" - run FastChain with MC-overlay (EVNTtoRDOwOverlay) instead of standard PU digitization (EVNTtoRDO)
     # "afterburn" - run the B decay afterburner for event generation
+    # "doRAWtoESD" - run legacy split workflow (RAWtoESD + ESDtoAOD)
     # "doRAWtoALL" - (deprecated) produce all DESDs and AODs directly from bytestream
     # "doTRIGtoALL" - (deprecated) produce AODs directly from trigger RDOs
     steeringAlises = {
@@ -2362,6 +2363,10 @@ class argSubstepSteering(argSubstep):
                       'doFCwOverlay': {'EVNTtoRDO': [('in', '-', 'EVNT'), ('out', '-', 'RDO')],
                                        'EVNTtoRDOwOverlay': [('in', '+', ('EVNT', 'RDO_BKG')), ('out', '+', 'RDO'), ('out', '+', 'RDO_SGNL')]},
                       'afterburn': {'generate': [('out', '-', 'EVNT')]},
+                      'doRAWtoESD': {'RAWtoALL': [('in', '-', 'BS'), ('in', '-', 'RDO'),
+                                                  ('out', '-', 'ESD'), ('out', '-', 'AOD')],
+                                     'RAWtoESD': [('in', '+', 'BS'), ('in', '+', 'RDO'),
+                                                  ('out', '+', 'ESD'),]},
                       'doRAWtoALL': {},
                       'doTRIGtoALL': {}
                       }

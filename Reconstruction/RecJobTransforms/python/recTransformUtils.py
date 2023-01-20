@@ -102,6 +102,8 @@ def addRecoSubsteps(executorSet):
                                    outData = ['ESD', 'AOD', 'HIST_ESD_INT', 'HIST_AOD_INT', 'TXT_JIVEXMLTGZ'],))
     executorSet.add(athenaExecutor(name = 'RAWtoTLA_AOD', skeletonCA = 'RecJobTransforms.RAWtoTLA_AOD_Skeleton',
                                    substep = 'r2tla', inData = ['BS'], outData = ['TLA_AOD'], ))
+    executorSet.add(athenaExecutor(name = 'RAWtoESD', skeletonFile = 'RecJobTransforms/skeleton.RAWtoESD_tf.py',
+                                   substep = 'r2e', inData = [], outData = [],))
     executorSet.add(athenaExecutor(name = 'ESDtoAOD', skeletonFile = 'RecJobTransforms/skeleton.ESDtoAOD_tf.py',
                                    substep = 'e2a', inData = ['ESD'], outData = ['AOD', 'HIST_AOD_INT']))
     executorSet.add(DQMergeExecutor(name = 'DQHistogramMerge', inData = [('HIST_ESD_INT', 'HIST_AOD_INT'), 'HIST_R2A', 'HIST_AOD'], outData = ['HIST']))
