@@ -29,7 +29,6 @@ StatusCode TrigTauMonitorAlgorithm::initialize() {
   ATH_CHECK( m_phase1l1cTauRoIKey.initialize() );
   ATH_CHECK( m_hltTauJetKey.initialize() );
   ATH_CHECK( m_hltTauJetCaloMVAOnlyKey.initialize() );
-  ATH_CHECK( m_hltSeedJetKey.initialize());
   ATH_CHECK( m_trigDecTool.retrieve() );
   ATH_CHECK( m_truthParticleKey.initialize(m_isMC) );
   ATH_CHECK( m_eventInfoKey.initialize() );
@@ -1008,36 +1007,10 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
 
     std::vector<const xAOD::CaloCluster *> clusters;
 
-    float max_cluster_dr = 1.0;
-    
-    if(!tau->jetLink().isValid()) {
-      continue;
-    }
-
-    const xAOD::Jet *jetSeed = tau->jet();
-    if (jetSeed==nullptr) {
-      ATH_MSG_ERROR("Tau jet link is invalid.");
-      continue;
+    for (const xAOD::IParticle* particle : tau->clusters()) {
+      const xAOD::CaloCluster* cluster = static_cast<const xAOD::CaloCluster*>(particle);
+      clusters.push_back(cluster); 
     } 
-
-    if(!jetSeed->getConstituents().isValid()) {
-      continue;
-    }
-
-    ATH_MSG_DEBUG("Link to constituents is valid");
-
-    for (const auto *const jc : jetSeed->getConstituents()) {
-      const auto *cl = dynamic_cast<const xAOD::CaloCluster *>(jc->rawConstituent());
-      if (!cl) {
-        ATH_MSG_ERROR("Calorimeter cluster is invalid.");
-        continue;
-      }
-
-      const auto lc_p4 = tau->p4(xAOD::TauJetParameters::DetectorAxis);
-      if (lc_p4.DeltaR(cl->p4()) < max_cluster_dr) {
-	clusters.push_back(cl);
-      }
-    }
   
     auto et_cmp = [](const xAOD::CaloCluster *lhs,
 		     const xAOD::CaloCluster *rhs) {

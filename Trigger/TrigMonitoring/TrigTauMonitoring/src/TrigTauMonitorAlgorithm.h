@@ -157,7 +157,6 @@ class TrigTauMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey< xAOD::jFexTauRoIContainer>  m_phase1l1jTauRoIKey {this, "phase1l1jTauRoIKey", "L1_jFexTauRoI","jTau Phase1 L1 RoI key"};
   SG::ReadHandleKey< xAOD::TauJetContainer> m_hltTauJetKey { this, "hltTauJetKey", "HLT_TrigTauRecMerged_MVA", "HLT taujet container key" };
   SG::ReadHandleKey< xAOD::TauJetContainer> m_hltTauJetCaloMVAOnlyKey { this, "hltTauJetCaloMVAOnlyKey", "HLT_TrigTauRecMerged_CaloMVAOnly", "HLT taujet container key" };
-  SG::ReadHandleKey< xAOD::JetContainer> m_hltSeedJetKey { this, "hltSeedJetKey", "HLT_jet_seed", "HLT jet seed container key" };
   SG::ReadHandleKey< xAOD::TruthParticleContainer> m_truthParticleKey { this, "truthParticleKey", "TruthParticles", "TruthParticleContainer key" };
 
 };
