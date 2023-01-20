@@ -1,6 +1,6 @@
 """Define methods to construct configured Tracking conversion algorithms
 
-Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -51,6 +51,20 @@ def TrackCollectionCnvToolCfg(flags, name="TrackCollectionCnvTool", **kwargs):
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
         TrackParticleCreator = result.popToolsAndMerge(
             TrackParticleCreatorToolCfg(flags))
+        result.addPublicTool(TrackParticleCreator)
+        kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
+
+    result.setPrivateTools(CompFactory.xAODMaker.TrackCollectionCnvTool(name, **kwargs))
+    return result
+
+def BeamLineTrackCollectionCnvToolCfg(flags, name="TrackCollectionCnvToolBeamLine", **kwargs):
+    result = ComponentAccumulator()
+
+    if "TrackParticleCreator" not in kwargs:
+        from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
+        TrackParticleCreator = result.popToolsAndMerge(
+              TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorToolBeamLine",
+                                          PerigeeExpression = "BeamLine"))
         result.addPublicTool(TrackParticleCreator)
         kwargs.setdefault("TrackParticleCreator", TrackParticleCreator)
 
@@ -129,7 +143,34 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
     else:
         kwargs.setdefault("AddTruthLink", False)
 
+    if flags.InDet.Tracking.perigeeExpression == "Vertex":
+        kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
+
     result.addEventAlgo(CompFactory.xAODMaker.TrackParticleCnvAlg(name, **kwargs))
+    return result
+
+def BeamLineTrackParticleCnvAlgCfg(flags, name="BeamLineTrackParticleCnvAlg",
+                                   ClusterSplitProbabilityName = "",
+                                   AssociationMapName = "",
+                                   **kwargs):
+    result = ComponentAccumulator()
+
+    if "TrackParticleCreator" not in kwargs:
+        from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
+        kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
+              TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorToolBeamLine",
+                                          ClusterSplitProbabilityName = ClusterSplitProbabilityName,
+                                          AssociationMapName = AssociationMapName,
+                                          PerigeeExpression = "BeamLine")))
+
+    if "TrackCollectionCnvTool" not in kwargs:
+        kwargs.setdefault("TrackCollectionCnvTool", result.popToolsAndMerge(
+              BeamLineTrackCollectionCnvToolCfg(flags)))
+    
+    if flags.InDet.Tracking.perigeeExpression == "Vertex":
+        kwargs.setdefault("PrimaryVerticesName", "")
+
+    result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
 
 def TrackParticleCnvAlgPIDCheckCfg(flags, name,

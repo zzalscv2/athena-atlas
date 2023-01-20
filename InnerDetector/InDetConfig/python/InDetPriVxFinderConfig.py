@@ -20,6 +20,15 @@ def InDetPriVxFinderCfg(flags, name="InDetPriVxFinder", **kwargs):
 
     kwargs.setdefault("doVertexSorting", True)
 
+    if flags.InDet.Tracking.perigeeExpression == "Vertex":
+        from xAODTrackingCnv.xAODTrackingCnvConfig import BeamLineTrackParticleCnvAlgCfg
+        from InDetConfig.TrackRecoConfig import ClusterSplitProbabilityContainerName
+        acc.merge(BeamLineTrackParticleCnvAlgCfg(flags,
+                                         ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags),
+                                         AssociationMapName = "PRDtoTrackMapCombinedInDetTracks",
+                                         xAODTrackParticlesFromTracksContainerName = "InDetTrackParticlesTemporary"))
+        kwargs["TracksName"]="InDetTrackParticlesTemporary"
+
     acc.addEventAlgo(CompFactory.InDet.InDetPriVxFinder(name, **kwargs))
     return acc
 

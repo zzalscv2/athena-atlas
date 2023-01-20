@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -36,7 +36,7 @@ namespace xAODMaker {
   }
 
   StatusCode RecTrackParticleContainerCnvTool::convert( const Rec::TrackParticleContainer* aod,
-							xAOD::TrackParticleContainer* xaod ) const {
+							xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* /*vtx*/ ) const {
     
     ATH_MSG_DEBUG( "Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
     Rec::TrackParticleContainer::const_iterator itr = aod->begin();
@@ -62,7 +62,7 @@ namespace xAODMaker {
   }
 
   StatusCode RecTrackParticleContainerCnvTool::convertAndAugment( const Rec::TrackParticleContainer* aod,
-							xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map ) const {
+							xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* /*vtx*/ ) const {
     
     ATH_MSG_DEBUG( "Sizes of containers before conversion: aod, xaod, trk_map: " << aod->size() << ", " << xaod->size() << ", "<< trk_map->size() );
     ATH_MSG_DEBUG( "convertAndAugment should not be called using IRecTrackParticleContainerCnvTool!" );
