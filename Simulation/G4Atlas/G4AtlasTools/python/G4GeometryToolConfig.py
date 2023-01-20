@@ -758,13 +758,13 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
         result.addPublicTool(tool)
         kwargs.setdefault("SenDetMasterTool", result.getPublicTool(tool.name))
 
-    #if hasattr(simFlags,"Eta"): #FIXME ugly hack
-    if False:
-        kwargs.setdefault("World", 'TileTB_World') # NEED TO ADD THIS
-        kwargs.setdefault("RegionCreators", getTB_RegionCreatorList(flags))
-        kwargs.setdefault("FieldManagers", getTB_FieldMgrList(flags))
-    #elif hasattr(simFlags,"LArTB_H1TableYPos"): #FIXME ugly hack
-    elif False:
+    if flags.Beam.Type is BeamType.TestBeam:
+        # Tile test beam
+        from G4AtlasTools.G4TestBeamGeometryConfig import TileTB_WorldEnvelopeCfg
+        kwargs.setdefault("World", result.popToolsAndMerge(TileTB_WorldEnvelopeCfg(flags)))
+        kwargs.setdefault("RegionCreators", []) # Empty for Tile test beam
+        kwargs.setdefault("FieldManagers", []) # Empty for Tile test beam
+    elif False: # This block is in case we ever decide to support LAr Test Beam again in Athena in the future
         kwargs.setdefault("World", 'LArTB_World')
         kwargs.setdefault("RegionCreators", getTB_RegionCreatorList(flags))
         kwargs.setdefault("FieldManagers", getTB_FieldMgrList(flags))
