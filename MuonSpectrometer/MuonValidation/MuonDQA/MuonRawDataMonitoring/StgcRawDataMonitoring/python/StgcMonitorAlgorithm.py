@@ -38,7 +38,8 @@ def sTgcMonitoringConfig(inputFlags):
     sTgcLumiblockGroup          = helper.addGroup(sTgcMonAlg, 'sTgcLumiblock', 'Muon/MuonRawDataMonitoring/sTgc/sTgcLumiblock')
     sTgcTimingGroup             = helper.addGroup(sTgcMonAlg, 'sTgcTiming', 'Muon/MuonRawDataMonitoring/sTgc/sTgcTiming')
     sTgcClusterFromSegmentGroup = helper.addGroup(sTgcMonAlg, 'sTgcClusterFromSegment', 'Muon/MuonRawDataMonitoring/sTgc/sTgcClusterFromSegment')
-
+    sTgYvsXGroup                = helper.addGroup(sTgcMonAlg, 'sTgcYvsX', 'Muon/MuonRawDataMonitoring/sTgc/sTgcYvsX')
+    
     # Configure histograms
     # Overview histograms
     sTgcOverviewGroup.defineHistogram('charge;chargeOverview', type = 'TH1F', title = 'charge; charge [fC]; number of entries', path = 'Overview', xbins = 100, xmin = 0., xmax = 1000.)
@@ -53,6 +54,7 @@ def sTgcMonitoringConfig(inputFlags):
     sTgcOverviewGroup.defineHistogram('r,z;rzOverview', type = 'TH2F', title = 'z vs R; sTgc-GlobalR [mm]; sTgc-GlobalZ [mm]; number of entries', path = 'Overview', xbins = 500, xmin = 0., xmax = 5000., ybins = 1000, ymin = -10000., ymax = 10000.) 
 
     # Layered and occupancy histograms
+    side          = ['ASide', 'CSide']
     stationEtaMax = 3
     sectorMax     = 16
     layerMax      = 8
@@ -122,6 +124,19 @@ def sTgcMonitoringConfig(inputFlags):
         varSectorsVersusLumiblockWireGroup    = f'wireGroupLumiblock_layer_{layerIndex},wireGroupStationEta_layer_{layerIndex};sectorsVersusLumiblockWireGroup_layer_{layerIndex}'
         weightSectorsVersusLumiblockWireGroup = f'wireGroupHit_layer_{layerIndex}'
         sTgcLumiblockGroup.defineHistogram(varSectorsVersusLumiblockWireGroup, type = 'TH2F', title = titleSectorsVersusLumiblockWireGroup, path = 'wireGroupSTGClumiblock', xbins = 3000, xmin = 0., xmax = 3000., ybins = 2*(3*sectorMax + 1), ymin = -float(3*sectorMax + 1), ymax = float(3*sectorMax + 1), ylabels = LumiblockYlabel, opt = 'kAlwaysCreate', weight = weightSectorsVersusLumiblockWireGroup)
+        
+        for sideIndex in side:
+            titleYvsXclusterPad = f'{sideIndex} layer {layerIndex}; sTgc-GlobalX-Pad (on track) [mm]; sTgc-GlobalY-Pad (on track) [mm]'
+            varYvsXclusterPad = f'xPosPad_{sideIndex}_layer_{layerIndex},yPosPad_{sideIndex}_layer_{layerIndex};sTgcYvsXclusterPad_{sideIndex}_layer_{layerIndex}'
+            sTgYvsXGroup.defineHistogram(varYvsXclusterPad, type = 'TH2F', title = titleYvsXclusterPad, path = 'YvsXtracksPad', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
+
+            titleYvsXclusterStrip = f'{sideIndex} layer {layerIndex}; sTgc-GlobalX-Strip (on track) [mm]; sTgc-GlobalY-Strip (on track) [mm]'
+            varYvsXclusterStrip = f'xPosStrip_{sideIndex}_layer_{layerIndex},yPosStrip_{sideIndex}_layer_{layerIndex};sTgcYvsXclusterStrip_{sideIndex}_layer_{layerIndex}'
+            sTgYvsXGroup.defineHistogram(varYvsXclusterStrip, type = 'TH2F', title = titleYvsXclusterStrip, path = 'YvsXtracksStrip', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
+            
+            titleYvsXclusterWireGroup = f'{sideIndex} layer {layerIndex}; sTgc-GlobalX-WireGroup (on track) [mm]; sTgc-GlobalY-WireGroup (on track) [mm]'
+            varYvsXclusterWireGroup = f'xPosWireGroup_{sideIndex}_layer_{layerIndex},yPosWireGroup_{sideIndex}_layer_{layerIndex};sTgcYvsXclusterWireGroup_{sideIndex}_layer_{layerIndex}'
+            sTgYvsXGroup.defineHistogram(varYvsXclusterWireGroup, type = 'TH2F', title = titleYvsXclusterWireGroup, path = 'YvsXtracksWireGroup', xbins = 500, xmin = -5000., xmax = 5000., ybins = 500, ymin = -5000., ymax = 5000., opt = 'kAlwaysCreate')
 
     acc = helper.result()
     result.merge(acc)
