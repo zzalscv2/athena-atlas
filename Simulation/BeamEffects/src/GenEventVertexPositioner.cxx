@@ -84,14 +84,16 @@ namespace Simulation
       auto vtxItEnd = ge.vertices_end();
 #endif
       for( ; vtxIt != vtxItEnd; ++vtxIt) {
+#ifdef HEPMC3
         // quick access:
         auto& curVtx = (*vtxIt);
-#ifdef HEPMC3
         // NB Doing this check to explicitly avoid the fallback mechanism in
         // HepMC3::GenVertex::position() to return the position of
         // another GenVertex in the event if the position isn't set (or is set to zero)!
         const HepMC::FourVector &curPos = (curVtx->has_set_position()) ? curVtx->position() : HepMC::FourVector::ZERO_VECTOR();
 #else
+        // quick access:
+        auto curVtx = (*vtxIt);
         const HepMC::FourVector &curPos = curVtx->position();
 #endif
 
