@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -352,10 +352,6 @@ StoreGateSvc::transientSwap( const CLID& id,
   _SGXCALL(transientSwap, (id, keyA, keyB), false);
 }
 
-DataObject*
-StoreGateSvc::typeless_readPrivateCopy(const CLID& clid, const std::string& key) {
-  _SGXCALL(typeless_readPrivateCopy, (clid, key), 0);
-}
 /// type-less recording of an object with a key, allow possibility of
 /// specifying const-access and history record
 StatusCode 
