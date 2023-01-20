@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_XAODTMETABRANCH_H
 #define XAODROOTACCESS_TOOLS_XAODTMETABRANCH_H
@@ -48,7 +48,7 @@ private:
    /// The type of the object that needs to be read
    const std::type_info* m_ti; //!
    /// Pointer to the object read in using TEvent
-   void* m_object; //!
+   const void* m_object; //!
 
    /// Declare the TObject style functions
 #define IsA IsARoot

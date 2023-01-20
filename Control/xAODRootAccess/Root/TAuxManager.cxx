@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,7 +45,12 @@ namespace xAOD {
       return m_storePtr->getEntry( entry, getall );
    }
 
-   void* TAuxManager::object() const {
+   const void* TAuxManager::object() const {
+
+      return m_storePtr;
+   }
+
+   void* TAuxManager::object() {
 
       return m_storePtr;
    }
@@ -91,7 +96,7 @@ namespace xAOD {
       return;
    }
 
-   TAuxStore* TAuxManager::getStore() const {
+   TAuxStore* TAuxManager::getStore() {
 
       return m_storePtr;
    }

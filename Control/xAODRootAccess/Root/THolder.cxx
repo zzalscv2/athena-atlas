@@ -212,7 +212,12 @@ namespace xAOD {
       return *this;
    }
 
-   void* THolder::get() const {
+   const void* THolder::get() const {
+
+      return m_object;
+   }
+
+   void* THolder::get() {
 
       return m_object;
    }

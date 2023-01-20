@@ -61,8 +61,11 @@ namespace xAOD {
       /// Move operator
       THolder& operator=( THolder&& rhs );
 
+      /// Return a typeless const pointer to the held object
+      const void* get() const;
       /// Return a typeless pointer to the held object
-      void* get() const;
+      void* get();
+
       /// Return a typeless pointer to the held object's pointer
       void** getPtr();
 
