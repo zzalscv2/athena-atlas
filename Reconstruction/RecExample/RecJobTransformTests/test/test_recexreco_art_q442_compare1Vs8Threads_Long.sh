@@ -3,7 +3,7 @@
 # art-description: Runs q431 in 1 and 8 thread modes with 1000 events, then runs diff-root.
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 # art-output: runOne
 # art-output: runTwo
