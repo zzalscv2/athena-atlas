@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file AthMonitorCfgHelper.py
@@ -348,15 +348,14 @@ def getTriggerTranslatorToolSimple(inputFlags):
     import logging
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
     from AthenaConfiguration.ComponentFactory import CompFactory
-    from TrigHLTMonitoring.HLTMonTriggerList import HLTMonTriggerList
+    from TrigHLTMonitoring.HLTMonTriggerList import hltmonList
     import collections.abc
 
     TriggerTranslatorToolSimple=CompFactory.TriggerTranslatorToolSimple
     
     tdt_local_logger = logging.getLogger('getTriggerTranslatorToolSimple')
-    tdt_local_hltconfig = HLTMonTriggerList()
     tdt_mapping = {}
-    for tdt_menu, tdt_menu_item in tdt_local_hltconfig.__dict__.items():
+    for tdt_menu, tdt_menu_item in hltmonList.__dict__.items():
         if not isinstance(tdt_menu_item, collections.abc.Iterable):
             continue
         # work around possibly buggy category items
