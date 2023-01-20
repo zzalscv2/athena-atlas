@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -14,7 +14,11 @@ namespace NSWL1 {
         std::shared_ptr<PadOfflineData> t_pad;
         int             t_cache_index;
 
-        PadHits(Identifier id, std::shared_ptr<PadOfflineData> p, int c) { t_id = id; t_pad=std::move(p); t_cache_index=c; }
+        PadHits(Identifier id, std::shared_ptr<PadOfflineData> p, int c)
+          : t_id (id),
+            t_pad (std::move(p)),
+            t_cache_index (c)
+      {  }
     };
 
 

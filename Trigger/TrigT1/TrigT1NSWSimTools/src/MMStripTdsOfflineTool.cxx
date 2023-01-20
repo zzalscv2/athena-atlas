@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena/Gaudi includes
@@ -24,7 +24,11 @@ namespace NSWL1 {
       int                 t_cache_index;
 
       // constructor
-      MMStripHits(Identifier id, MMStripOfflineData* p, int c) { t_id = id; t_mmstrip=p; t_cache_index=c; }
+      MMStripHits(Identifier id, MMStripOfflineData* p, int c)
+        : t_id (id),
+          t_mmstrip (p),
+          t_cache_index (c)
+      { }
     };
 
     typedef std::map < Identifier,std::vector<MMStripHits> > MMSTRIP_MAP;
