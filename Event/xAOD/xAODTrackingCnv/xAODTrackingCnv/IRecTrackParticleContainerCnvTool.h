@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -13,6 +13,7 @@
 
 // EDM include(s):
 #include "xAODTracking/TrackParticleContainer.h"
+#include "xAODTracking/Vertex.h"
 //#include "TrkTrack/TrackCollection.h"
 #include "TrkValInterfaces/ITrkObserverTool.h"
 
@@ -38,11 +39,11 @@ namespace xAODMaker {
   public:
     /// Function that fills an existing xAOD::TrackParticleContainer
     virtual StatusCode convert( const Rec::TrackParticleContainer* aod,
-				xAOD::TrackParticleContainer* xaod ) const = 0;
+				xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* vtx = nullptr) const = 0;
 
     /// Function that fills an existing xAOD::TrackParticleContainer and augments track particles
     virtual StatusCode convertAndAugment( const Rec::TrackParticleContainer* aod,
-				xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map ) const = 0;
+				xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* vtx = nullptr) const = 0;
 
     virtual StatusCode setParticleCreatorTool(ToolHandle<Trk::ITrackParticleCreatorTool> *tool) = 0;
     

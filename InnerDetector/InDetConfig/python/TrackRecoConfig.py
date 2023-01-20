@@ -389,6 +389,8 @@ def InDetTrackRecoCfg(flags):
         from InDetConfig.TrackTruthConfig import InDetTrackTruthCfg
         result.merge(InDetTrackTruthCfg(flags))
 
+    # by default, this will run before "primaryVertexFindingCfg"
+    # in case flags.InDet.Tracking.perigeeExpression is set to "Vertex", this will run after "primaryVertexFindingCfg"; the scheduler will always take care of the precedency
     from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
     result.merge(TrackParticleCnvAlgCfg(flags,
                                         ClusterSplitProbabilityName = ClusterSplitProbabilityContainerName(flags),

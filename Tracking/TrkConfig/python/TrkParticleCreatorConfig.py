@@ -57,9 +57,6 @@ def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kw
     kwargs.setdefault("BadClusterID", 3) # Select the mode to identify suspicous pixel cluster
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-    # Vertex as PerigeeExpression is not supported in default reco config because at the time of
-    # the track particle creation the primary vertex does not yet exist.
-    # The problem can be solved by first creating track particles wrt. the beam line
     kwargs.setdefault("PerigeeExpression", flags.InDet.Tracking.perigeeExpression)
     result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result

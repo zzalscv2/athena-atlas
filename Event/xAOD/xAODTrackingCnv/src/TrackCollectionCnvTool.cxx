@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -34,7 +34,7 @@ namespace xAODMaker {
   }
 
   StatusCode TrackCollectionCnvTool::convert( const TrackCollection* aod,
-					      xAOD::TrackParticleContainer* xaod ) const {
+					      xAOD::TrackParticleContainer* xaod, const xAOD::Vertex* vtx ) const {
     
     ATH_MSG_DEBUG( "Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
     
@@ -47,7 +47,7 @@ namespace xAODMaker {
         ATH_MSG_WARNING("WTaF? Empty element in container!");
         continue;
       }
-      xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr);
+      xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr, vtx);
 
       if (!particle) {
         ATH_MSG_WARNING("Failed to create a TrackParticle");
@@ -61,7 +61,7 @@ namespace xAODMaker {
   }
 
   StatusCode TrackCollectionCnvTool::convertAndAugment( const TrackCollection* aod,
-					      xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map ) const {
+					      xAOD::TrackParticleContainer* xaod, const ObservedTrackMap* trk_map, const xAOD::Vertex* vtx ) const {
         
     ATH_MSG_DEBUG( "convertAndAugment: Sizes of containers before conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
     ATH_MSG_DEBUG( "convertAndAugment: Size of track map: " << trk_map->size() );
@@ -82,7 +82,7 @@ namespace xAODMaker {
         ATH_MSG_WARNING("convertAndAugment: WTaF? Empty element in container!");
         continue;
       }
-      xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr);
+      xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr, vtx);
       if(!particle){
         ATH_MSG_WARNING("convertAndAugment: Failed to create a TrackParticle");
         ++itrMap;
@@ -137,10 +137,11 @@ namespace xAODMaker {
 
   xAOD::TrackParticle* TrackCollectionCnvTool::createParticle(xAOD::TrackParticleContainer& xaod,
 							      const TrackCollection& container,
-							      const Trk::Track& tp) const {
+							      const Trk::Track& tp,
+                    const xAOD::Vertex* vtx) const {
     // create the xAOD::TrackParticle, the pointer is added to the container in the function
     ElementLink<TrackCollection> trackLink( &tp, container );
-    return m_particleCreator->createParticle( trackLink, &xaod );
+    return m_particleCreator->createParticle( trackLink, &xaod , vtx);
     //no!    return m_particleCreator->createParticle( tp, &xaod );
   }
 
