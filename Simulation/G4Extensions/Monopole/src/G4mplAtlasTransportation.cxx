@@ -24,7 +24,6 @@
 // ********************************************************************
 //
 //
-// $Id: G4mplAtlasTransportation.cxx 729653 2016-03-14 15:55:47Z jchapman $
 // GEANT4 tag $Name: geant4-09-03-patch-01 $
 //
 // ------------------------------------------------------------
@@ -93,6 +92,7 @@ G4mplAtlasTransportation::G4mplAtlasTransportation( const CustomMonopole* mpl, G
     fMomentumChanged( false ),
     //fEnergyChanged( false ), // Not used?
     fParticleIsLooping( false ),
+    fCurrentTouchableHandle(),  // Points to (G4VTouchable*) 0
     fGeometryLimitedStep( false ),
     fPreviousSftOrigin (0.,0.,0.),
     fPreviousSafety    ( 0.0 ),
@@ -132,9 +132,6 @@ G4mplAtlasTransportation::G4mplAtlasTransportation( const CustomMonopole* mpl, G
   // Create object which sets up the equation of motion for monopole
   // or usual matter
   fEquationSetup= G4mplEquationSetup::GetInstance();
-
-  static G4TouchableHandle nullTouchableHandle;  // Points to (G4VTouchable*) 0
-  fCurrentTouchableHandle = nullTouchableHandle;
 
   fEndGlobalTimeComputed  = false;
   fCandidateEndGlobalTime = 0;
@@ -226,22 +223,20 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
   G4FieldManager* fieldMgr=0;
   G4bool          fieldExertsForce = false ;
   if( (particleElCharge != 0.0) || (particleMagCharge!=0.0) )        //  SB
-    {
+  {
+     G4FieldManager* oldFieldMgr= fFieldPropagator->GetCurrentFieldManager();
 
-      //      fFieldPropagator->SetVerboseLevel(4);
+     fieldMgr= fFieldPropagator->FindAndSetFieldManager( track.GetVolume() );
 
-      G4FieldManager* OldFieldMgr=0;
-      OldFieldMgr = fFieldPropagator->GetCurrentFieldManager();
+     // if fieldMgr changed, need to flush it's association with our ChordFinder
+     //     and then below to update stepper and chord finder
+     if (fieldMgr != oldFieldMgr) {
+        fEquationSetup->ResetIntegration( oldFieldMgr );
+        // Now ensure that it is configured for the new field-manager
+        fEquationSetup->InitialiseForField( fieldMgr );
+     }
 
-      fieldMgr= fFieldPropagator->FindAndSetFieldManager( track.GetVolume() );
-
-      //      fieldMgr->SetVerboseLevel(4);
-
-      // if fieldMgr changed, need to update stepper and chord finder
-      if (fieldMgr != OldFieldMgr)
-        fEquationSetup->SwitchStepperAndChordFinder( (particleMagCharge != 0.0), fieldMgr );
-
-      if (fieldMgr != 0) {
+     if (fieldMgr != nullptr) {
         // Message the field Manager, to configure it for this track
         fieldMgr->ConfigureForTrack( &track );
         // Moved here, in order to allow a transition
@@ -251,10 +246,15 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
         if (particleMagCharge!=0.0) fieldMgr->SetFieldChangesEnergy(true);
 
         // If the field manager has no field, there is no field !
-        fieldExertsForce = (fieldMgr->GetDetectorField() != 0);
+        fieldExertsForce = (fieldMgr->GetDetectorField() != nullptr);
 
-      }
-    }
+        if( fieldExertsForce)
+          fEquationSetup->SwitchStepperAndChordFinder( (particleMagCharge != 0.0), fieldMgr );
+        // else ...
+        // Is there extra safety measure to take if the fieldMgr has no field attached ??
+     }
+     // oldFieldMgr= fieldMgr;
+  }
 
   // Choose the calculation of the transportation: Field or not
   //
@@ -408,7 +408,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
          G4double  startEnergy= track.GetKineticEnergy();
          G4double  endEnergy= fTransportEndKineticEnergy;
 
-         static G4int no_inexact_steps=0, no_large_ediff;
+         static std::atomic<G4int> no_inexact_steps=0, no_large_ediff;
          G4double absEdiff = std::fabs(startEnergy- endEnergy);
          if( absEdiff > CLHEP::perMillion * endEnergy )
            {
@@ -419,7 +419,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
            {
              if( std::fabs(startEnergy- endEnergy) > CLHEP::perThousand * endEnergy )
                {
-                 static G4int no_warnings= 0, warnModulo=1,  moduloFactor= 10;
+                 static std::atomic<G4int> no_warnings= 0, warnModulo=1,  moduloFactor= 10;
                  no_large_ediff ++;
                  if( (no_large_ediff% warnModulo) == 0 )
                    {
@@ -445,7 +445,7 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
                             << no_large_ediff << " times." << G4endl;
                      if( no_large_ediff == warnModulo * moduloFactor )
                        {
-                         warnModulo *= moduloFactor;
+                         warnModulo = warnModulo * moduloFactor;
                        }
                    }
                }
@@ -541,13 +541,15 @@ AlongStepGetPhysicalInteractionLength( const G4Track&  track,
 G4VParticleChange* G4mplAtlasTransportation::AlongStepDoIt( const G4Track& track,
                                                     const G4Step&  stepData )
 {
-  static G4int noCalls=0;
-  static const G4ParticleDefinition* fOpticalPhoton =
+#ifdef G4VERBOSE
+  static std::atomic<G4int> noCalls=0;
+  noCalls++;
+#endif
+
+  static const G4ParticleDefinition* const fOpticalPhoton =
            G4ParticleTable::GetParticleTable()->FindParticle("opticalphoton");
 
   //  G4cout << "SB:  G4mplAtlasTransportation:  AlongStepDoIt" << G4endl;
-
-  noCalls++;
 
   fParticleChange.Initialize(track) ;
 
@@ -756,8 +758,8 @@ G4VParticleChange* G4mplAtlasTransportation::PostStepDoIt( const G4Track& track,
   }         // endif ( fGeometryLimitedStep )
 
   const G4VPhysicalVolume* pNewVol = retCurrentTouchable->GetVolume() ;
-  const G4Material* pNewMaterial   = 0 ;
-  const G4VSensitiveDetector* pNewSensitiveDetector   = 0 ;
+  G4Material* pNewMaterial   = 0 ;
+  G4VSensitiveDetector* pNewSensitiveDetector   = 0 ;
 
   if( pNewVol != 0 )
   {
@@ -768,8 +770,8 @@ G4VParticleChange* G4mplAtlasTransportation::PostStepDoIt( const G4Track& track,
   // ( <const_cast> pNewMaterial ) ;
   // ( <const_cast> pNewSensitiveDetector) ;
 
-  fParticleChange.SetMaterialInTouchable( (G4Material *) pNewMaterial ) ;
-  fParticleChange.SetSensitiveDetectorInTouchable( (G4VSensitiveDetector *) pNewSensitiveDetector ) ;
+  fParticleChange.SetMaterialInTouchable( pNewMaterial ) ;
+  fParticleChange.SetSensitiveDetectorInTouchable( pNewSensitiveDetector ) ;
 
   const G4MaterialCutsCouple* pNewMaterialCutsCouple = 0;
   if( pNewVol != 0 )
@@ -809,10 +811,6 @@ G4mplAtlasTransportation::StartTracking(G4Track* aTrack)
 
   //  G4cout << "SB:  G4mplAtlasTransportation:  StartTracking" << G4endl;
 
-
-// The actions here are those that were taken in AlongStepGPIL
-//   when track.GetCurrentStepNumber()==1
-
   // reset safety value and center
   //
   fPreviousSafety    = 0.0 ;
@@ -836,26 +834,30 @@ G4mplAtlasTransportation::StartTracking(G4Track* aTrack)
   }
 
   // Make sure to clear the chord finders of all fields (ie managers)
-  static G4FieldManagerStore* fieldMgrStore= G4FieldManagerStore::GetInstance();
-  fieldMgrStore->ClearAllChordFindersState();
+  G4FieldManagerStore::GetInstance()->ClearAllChordFindersState();
 
   // Set up the Field Propagation to integrate time in case of magnetic charge
   G4double   particleMagCharge = mplParticle->MagneticCharge();
 
-  // To be sure that equations are created *after* a global field manager
-  // is registered, we initialise here.
-  // This can be moved to a different location, so long as the global field
-  // manager is not changed after this point.
-  G4FieldManager* fieldMgr=0;
-  fieldMgr = fFieldPropagator->GetCurrentFieldManager();
+  // To be certain that equations etc are created *after* the field managers (global + other/s)
+  //   are constructed and registered, we initialise here.
+  G4FieldManager* fieldMgr= fFieldPropagator->GetCurrentFieldManager();
+
+  // Set up the equation of motion for monopole  
   fEquationSetup->InitialiseForField( fieldMgr );
 
-  // Set up the equation of motion for monopole or usual matter
   fEquationSetup->SwitchStepperAndChordFinder( (particleMagCharge != 0.0), fieldMgr );
-  //  If local fields exist, a similar call must be made for each local field
-  //  manager, every time the track enters a volume which has a different one.
+  //  If local fields exist, this done again for each local field manager, 
+  //   when the track enters a volume which has it.
 
   // Update the current touchable handle  (from the track's)
   //
   fCurrentTouchableHandle = aTrack->GetTouchableHandle();
+}
+
+void
+G4mplAtlasTransportation::EndTracking()
+{
+  G4VProcess::EndTracking();
+  fEquationSetup->ResetIntegration( fFieldPropagator->GetCurrentFieldManager() );
 }

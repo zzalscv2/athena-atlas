@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -16,28 +16,27 @@
 #include <stdexcept>
 #include <sstream>
 #include <iterator>
-#include <map>
 #include <set>
 
-bool CustomMonopoleFactory::loaded = false;
-//std::set<G4ParticleDefinition *> CustomMonopoleFactory::m_particles;
-std::set<CustomMonopole *> CustomMonopoleFactory::m_particles;
 
-//bool CustomMonopoleFactory::isCustomMonopole(G4ParticleDefinition *particle)
-bool CustomMonopoleFactory::isCustomMonopole(CustomMonopole *particle)
+const CustomMonopoleFactory& CustomMonopoleFactory::instance()
+{
+  static const CustomMonopoleFactory factory;
+  return factory;
+}
+
+bool CustomMonopoleFactory::isCustomMonopole(CustomMonopole *particle) const
 {
   return (particle && m_particles.find(particle)!=m_particles.end());
 }
 
-// CustomMonopole* CustomMonopoleFactory::getCustomMonopole(G4ParticleDefinition *particle)
-// {
-//   return (m_particles.find(particle)!=m_particles.end());
-// }
+CustomMonopoleFactory::CustomMonopoleFactory()
+{
+  loadCustomMonopoles();
+}
 
 void CustomMonopoleFactory::loadCustomMonopoles()
 {
-  if(loaded) return;
-  loaded = true;
   std::ifstream configFile("particles.txt");
   //  std::ifstream configFile("stophadrons.txt");
   G4String pType="custom";

@@ -151,6 +151,9 @@ public:  // without description
   void StartTracking(G4Track* aTrack);
   // Reset state for new (potentially resumed) track
 
+  void EndTracking();
+  // Reset dependent classes & clean up 'side effects' after the end of a monopole track
+   
 protected:
 
   G4bool               DoesGlobalFieldExist();
