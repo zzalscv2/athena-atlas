@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNEVENT_ALIGNVERTEX_H
@@ -100,9 +100,6 @@ namespace Trk {
     /** dump align vertex information */
     void dump(MsgStream& msg) ;
 
-    /** add a track pointer to the collection of this verterx: */
-    void addAlignTrack(AlignTrack* alignTrack);
-
     /** increment algebra objects for this verterx: */
     void incrementVector(const Amg::Vector3D& vtxV)     { (*m_vVector)+=vtxV; }
     void incrementMatrix(const AmgSymMatrix(3) vtxM)   { (*m_matrix)+=vtxM; }
@@ -151,11 +148,6 @@ namespace Trk {
     
   }; // end class
 
-
-  inline const AlignTrackCollection*  AlignVertex::alignTrackCollection() const { return &m_alignTracks; }
-
-  inline AlignTrackCollection::const_iterator AlignVertex::firstATrack() const { return m_alignTracks.begin(); }
-  inline AlignTrackCollection::const_iterator AlignVertex::lastATrack() const { return m_alignTracks.end(); }
 
 } // end namespace
 

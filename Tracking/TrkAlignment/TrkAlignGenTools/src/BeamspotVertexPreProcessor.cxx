@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkAlignGenTools/BeamspotVertexPreProcessor.h"
@@ -840,7 +840,6 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
       for (AlignVertex* ivtx : m_AlignVertices) {
         if( (ivtx->originalVertex())==vtx ) {
           ifound = true;
-          ivtx->addAlignTrack(alignTrack);
         }
       }
       if( !ifound ) {
@@ -857,7 +856,6 @@ AlignTrack* BeamspotVertexPreProcessor::doTrackRefit(const Track* track) {
           avtx->setConstraint( &qtemp, &vtemp);
         }
 
-        avtx->addAlignTrack(alignTrack);
         m_AlignVertices.push_back(avtx);
       }
     }
