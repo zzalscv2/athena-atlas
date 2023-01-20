@@ -55,13 +55,15 @@ class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
   void fillsTgcLumiblockHistograms(const Muon::sTgcPrepData*, const int lb) const;
   void fillsTgcTimingHistograms(const Muon::sTgcPrepData*) const;
   void fillsTgcClusterFromSegmentsHistograms(const Trk::SegmentCollection*) const;
+  void fillsTgcClusterFromTrackHistograms(const xAOD::TrackParticleContainer*) const;
 
   int getSectors(const Identifier& id) const;
   int getLayer(const int multiplet, const int gasGap) const;
   
   SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
   SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"};
-  SG::ReadHandleKey<Trk::SegmentCollection> m_segmentManagerKey{this, "segmentManagerKey", "TrackMuonSegments", "Muon segments"};
+  SG::ReadHandleKey<Trk::SegmentCollection> m_segmentManagerKey{this, "segmentManagerKey", "TrkMuonSegments", "Muon segments"}; 
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_meTrkKey{this, "METrkContainer", "ExtrapolatedMuonTrackParticles"};
 
   Gaudi::Property<bool> m_dosTgcESD{this,"dosTgcESD", true};
   Gaudi::Property<bool> m_dosTgcOverview{this,"dosTgcOverview", true};
