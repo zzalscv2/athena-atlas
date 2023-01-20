@@ -222,7 +222,7 @@ def readDBFromAMI(amiTag):
   amiclient = pyAMI.client.Client('atlas')
   AtlasAPI.init()
 
-  command = [ 'AMIGetAMITagInfo', '-amiTag="%s"' % amiTag,]
+  command = [ 'AMIGetAMITagInfo', '-amiTag="%s"' % amiTag, '-cached' ]
   amiTagInfo = amiclient.execute(command, format = 'dict_object').get_rows('amiTagInfo')[0]
 
   return amiTagInfo['DBserver'] if "DBserver" in amiTagInfo else None
