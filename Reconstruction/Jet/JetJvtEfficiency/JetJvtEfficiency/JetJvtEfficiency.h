@@ -72,7 +72,7 @@ private:
 
     SystApplied m_appliedSystEnum;
 
-    asg::AnaToolHandle<JetPileupTag::JetVertexNNTagger>  m_NNJvtTool_handle{"JetPileupTag::JetVertexNNTagger/NNJvt", this};
+    ToolHandle<JetPileupTag::JetVertexNNTagger>  m_NNJvtTool_handle;
 
     int m_tagger;
     std::string m_wp;
