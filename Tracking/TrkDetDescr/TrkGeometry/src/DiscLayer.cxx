@@ -120,7 +120,7 @@ Trk::DiscLayer::surfaceRepresentation()
 
 double Trk::DiscLayer::preUpdateMaterialFactor(const Trk::TrackParameters& parm,
                                                Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // const Amg::Vector3D& parmPos = parm.position();
   if (Trk::DiscSurface::normal().dot(dir * parm.momentum().normalized()) > 0.)
     return Trk::Layer::m_layerMaterialProperties->alongPreFactor();
@@ -129,7 +129,7 @@ double Trk::DiscLayer::preUpdateMaterialFactor(const Trk::TrackParameters& parm,
 
 double Trk::DiscLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // const Amg::Vector3D& parmPos = parm.position();
   if (Trk::DiscSurface::normal().dot(dir * parm.momentum().normalized()) > 0.)
     return Trk::Layer::m_layerMaterialProperties->alongPostFactor();
@@ -161,7 +161,7 @@ void Trk::DiscLayer::resizeLayer(const VolumeBounds& bounds, double envelope) {
         Trk::SharedObject<const Trk::SurfaceBounds>(rDiscBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // r/phi binning
-    if (Trk::Layer::m_layerMaterialProperties.get()) {
+    if (Trk::Layer::m_layerMaterialProperties) {
       const BinUtility* layerMaterialBU =
           Trk::Layer::m_layerMaterialProperties->binUtility();
       if (layerMaterialBU && layerMaterialBU->binningValue(0) == Trk::binR) {

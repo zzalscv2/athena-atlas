@@ -164,7 +164,7 @@ Trk::CylinderLayer::surfaceRepresentation()
 
 double Trk::CylinderLayer::preUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // calculate the direction to the normal
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
@@ -175,7 +175,7 @@ double Trk::CylinderLayer::preUpdateMaterialFactor(
 
 double Trk::CylinderLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0;
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
   if (pastStep.perp() > parm.position().perp())
@@ -209,7 +209,7 @@ void Trk::CylinderLayer::resizeLayer(const VolumeBounds& bounds,
         Trk::SharedObject<const Trk::CylinderBounds>(rCylinderBounds);
     // (1) resize the material properties by updating the BinUtility, assuming
     // rphi/z binning
-    if (Trk::Layer::m_layerMaterialProperties.get()) {
+    if (Trk::Layer::m_layerMaterialProperties) {
       const BinUtility* layerMaterialBU =
           Trk::Layer::m_layerMaterialProperties->binUtility();
       if (layerMaterialBU && layerMaterialBU->dimensions() > 1) {

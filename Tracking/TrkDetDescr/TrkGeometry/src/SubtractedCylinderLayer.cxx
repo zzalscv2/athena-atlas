@@ -53,7 +53,7 @@ Trk::SubtractedCylinderLayer::surfaceRepresentation()
 
 double Trk::SubtractedCylinderLayer::preUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0.;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0.;
   // calculate the direction to the normal
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
@@ -64,7 +64,7 @@ double Trk::SubtractedCylinderLayer::preUpdateMaterialFactor(
 
 double Trk::SubtractedCylinderLayer::postUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {
-  if (!Trk::Layer::m_layerMaterialProperties.get()) return 0;
+  if (!Trk::Layer::m_layerMaterialProperties) return 0;
   const Amg::Vector3D& parmPos = parm.position();
   Amg::Vector3D pastStep(parmPos + dir * parm.momentum().normalized());
   if (pastStep.perp() > parm.position().perp())
