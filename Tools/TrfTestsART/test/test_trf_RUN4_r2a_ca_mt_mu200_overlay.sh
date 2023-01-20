@@ -10,7 +10,7 @@ if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
 fi
 
 HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.600012.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e8185_s3856/HITS.29179779._000100.pool.root.1"
-RDOFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/50events.RDO.pool.root"
+RDOFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/RDO_BKG/ATLAS-P2-RUN4-01-00-00/mu200.50events.RDO.pool.root"
 
 Reco_tf.py \
   --AMIConfig r14001 \
