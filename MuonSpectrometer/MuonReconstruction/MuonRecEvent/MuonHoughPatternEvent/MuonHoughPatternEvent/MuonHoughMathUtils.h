@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONHOUGHPATTERNEVENT_MUONHOUGHMATHUTILS_H
@@ -65,10 +65,6 @@ public:
 
     /** converts integer to string */
     static std::string intToString(int i);
-    /** converts string to char* */
-    static const char* stringToChar(std::string& s);
-    /** converts integer to char* */
-    static const char* intToChar(int i);
 
     /** distance from (x0,y0) to line (r,phi) */
     double distanceToLine2D(double x0, double y0, double r, double phi) const;
