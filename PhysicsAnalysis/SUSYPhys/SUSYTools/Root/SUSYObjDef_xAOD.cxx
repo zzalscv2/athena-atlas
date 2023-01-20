@@ -37,6 +37,7 @@
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
 #include "EgammaAnalysisInterfaces/IAsgDeadHVCellRemovalTool.h"
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
+#include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
@@ -663,6 +664,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_egammaAmbiguityTool.declarePropertyFor( this, "EgammaAmbiguityTool", "The EgammaAmbiguityTool" );
   m_elecChargeIDSelectorTool.declarePropertyFor( this, "ElectronChargeIDSelectorTool", "The ElectronChargeIDSelectorTool" );
   m_elecChargeEffCorrTool.declarePropertyFor( this, "ElectronChargeEffCorrectionTool", "The ElectronChargeEffCorrectionTool" );
+  m_elecLRTORTool.declarePropertyFor( this, "ElectronLRTOverlapRemovalTool", "Prompt/LRT electron OR Tool" );
   //
   m_photonSelIsEM.declarePropertyFor( this, "PhotonIsEMSelector" , "The PhotonIsEMSelectorTool for signal photons" );
   m_photonSelIsEMBaseline.declarePropertyFor( this, "PhotonIsEMSelectorBaseline" , "The PhotonIsEMSelectorTool for baseline photons" );
@@ -1336,6 +1338,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_eleChIso, "Ele.CFTIso", rEnv, true); // use charge ID SFs without iso applied
   configFromFile(m_eleChID_signal, "Ele.CFTSignal", rEnv, !m_eleChID_WP.empty()); // Require ECID as part of the signal lepton definition
   configFromFile(m_eleId, "Ele.Id", rEnv, "TightLLH");
+  configFromFile(m_eleLRT, "Ele.LRTOR", rEnv, false);
+  configFromFile(m_eleLRT_strat, "Ele.LRTORStrat", rEnv, 0);
   configFromFile(m_eleConfig, "Ele.Config", rEnv, "None");
   configFromFile(m_eled0sig, "Ele.d0sig", rEnv, 5.);
   configFromFile(m_elez0, "Ele.z0", rEnv, 0.5);

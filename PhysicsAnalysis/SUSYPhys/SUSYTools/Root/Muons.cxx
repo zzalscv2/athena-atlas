@@ -22,9 +22,6 @@
 #include "MuonAnalysisInterfaces/IMuonTriggerScaleFactors.h"
 #include "MuonAnalysisInterfaces/IMuonLRTOverlapRemovalTool.h"
 #include "xAODMuon/MuonAuxContainer.h"
-#include <AsgTools/CurrentContext.h>
-#include <AthContainers/ConstDataVector.h>
-#include <AsgTools/AsgToolConfig.h>
 
 #include "IsolationCorrections/IIsolationCorrectionTool.h"
 #include "IsolationSelection/IIsolationSelectionTool.h"
@@ -89,7 +86,7 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
   ATH_CHECK( m_outMuonLocation.initialize() );
 
   if (bool(m_muLRT) && evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey)){
-    ATH_MSG_INFO("Applying prompt/LRT muon OR procedure"); 
+    ATH_MSG_DEBUG("Applying prompt/LRT muon OR procedure"); 
 
     // First identify if merged container has already been made (for instances where GetMuons() is called more than once)
     if (evtStore()->contains<xAOD::MuonContainer>("StdWithLRTMuons")) {
@@ -121,7 +118,7 @@ StatusCode SUSYObjDef_xAOD::GetMuons(xAOD::MuonContainer*& copy, xAOD::ShallowAu
     }
   } else {
     if (evtStore()->contains<xAOD::MuonContainer>(lrtmuonkey) == false && bool(m_muLRT) == true) ATH_MSG_WARNING("prompt/LRT OR procedure attempted but " << lrtmuonkey << " not in ROOT file, check config!");
-    ATH_MSG_INFO("Not applying prompt/LRT muon OR procedure"); 
+    ATH_MSG_DEBUG("Not applying prompt/LRT muon OR procedure"); 
   }
   
   if (m_isPHYSLITE && muonkey.find("AnalysisMuons")==std::string::npos){

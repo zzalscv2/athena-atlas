@@ -37,6 +37,7 @@ using namespace ST;
 #include "EgammaAnalysisInterfaces/IEGammaAmbiguityTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
+#include "EgammaAnalysisInterfaces/IElectronLRTOverlapRemovalTool.h"
 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
@@ -811,6 +812,15 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else ATH_CHECK( m_elecSelLikelihoodBaseline.retrieve() );
   }
 
+    //////////////
+    // Initialise prompt/LRT electron OR tool 
+    if (!m_elecLRTORTool.isUserConfigured()) {
+        toolName = "ElectronLRTOverlapRemovalTool";
+        m_elecLRTORTool.setTypeAndName("CP::ElectronLRTOverlapRemovalTool/"+toolName);
+        ATH_MSG_DEBUG("Setting ElectronLRTOverlapRemovalTool strategy to "<<m_eleLRT_strat);
+        ATH_CHECK( m_elecLRTORTool.setProperty("overlapStrategy", m_eleLRT_strat) );
+        ATH_CHECK( m_elecLRTORTool.retrieve() );
+    } else ATH_CHECK( m_elecLRTORTool.retrieve() );
 
   if (m_slices["pho"]) {
     // /////////////////////////////////////////////////////////////////////////////////////////
