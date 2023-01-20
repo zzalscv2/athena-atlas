@@ -286,7 +286,7 @@ class Layer {
   //!< SurfaceArray on this layer Surface (owning ptr)
   std::unique_ptr<SurfaceArray> m_surfaceArray;
   //!< MaterialPoperties of this layer Surface
-  SharedObject<LayerMaterialProperties> m_layerMaterialProperties;
+  std::unique_ptr<LayerMaterialProperties> m_layerMaterialProperties;
   //!< thickness of the Layer
   double m_layerThickness;
   //!< descriptor for overlap/next surface (owning ptr)
