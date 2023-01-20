@@ -29,10 +29,12 @@ public:
   
   //copy c'tor defaulted
   TRTUncompressedHit(const TRTUncompressedHit &) = default;
+  //Move c'tor defaulted
+  TRTUncompressedHit(TRTUncompressedHit &&) noexcept = default;
   //assignment defaulted
-  TRTUncompressedHit & operator = (const TRTUncompressedHit &) =default;
+  TRTUncompressedHit & operator = (const TRTUncompressedHit &) = default;
   //move assignment defaulted
-  TRTUncompressedHit & operator = (TRTUncompressedHit &&) = default;
+  TRTUncompressedHit & operator = (TRTUncompressedHit &&) noexcept = default;
 
   bool operator < (const TRTUncompressedHit& obj) const
   {return m_hitID < obj.m_hitID;}
