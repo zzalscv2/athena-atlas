@@ -109,31 +109,32 @@ MMT_Hit::MMT_Hit(const hitData_entry &entry, const MuonGM::MuonDetectorManager* 
   m_shift = roundedSlope*(planeCoordinates[m_plane].Z() - planeCoordinates[0].Z());
 }
 
-MMT_Hit::MMT_Hit(const MMT_Hit* hit) {
-  m_sector = hit->m_sector;
-  m_module = hit->m_module;
-  m_station_name = hit->m_station_name;
-  m_VMM_chip = hit->m_VMM_chip;
-  m_MMFE_VMM = hit->m_MMFE_VMM;
-  m_ART_ASIC = hit->m_ART_ASIC;
-  m_station_eta = hit->m_station_eta;
-  m_station_phi = hit->m_station_phi;
-  m_multiplet = hit->m_multiplet;
-  m_gasgap = hit->m_gasgap;
-  m_plane = hit->m_plane;
-  m_strip = hit->m_strip;
-  m_localX = hit->m_localX;
-  m_BC_time = hit->m_BC_time;
-  m_age = hit->m_age;
-  m_Y = hit->m_Y;
-  m_Z = hit->m_Z;
-  m_R = hit->m_R;
-  m_Ri = hit->m_Ri;
-  m_RZslope = hit->m_RZslope;
-  m_YZslope = hit->m_YZslope;
-  m_isNoise = hit->m_isNoise;
-  m_time = hit->m_time;
-  m_shift = hit->m_shift;
+MMT_Hit::MMT_Hit(const MMT_Hit* hit)
+  : m_sector (hit->m_sector),
+    m_module (hit->m_module),
+    m_station_name (hit->m_station_name),
+    m_VMM_chip (hit->m_VMM_chip),
+    m_MMFE_VMM (hit->m_MMFE_VMM),
+    m_ART_ASIC (hit->m_ART_ASIC),
+    m_plane (hit->m_plane),
+    m_station_eta (hit->m_station_eta),
+    m_station_phi (hit->m_station_phi),
+    m_multiplet (hit->m_multiplet),
+    m_gasgap (hit->m_gasgap),
+    m_strip (hit->m_strip),
+    m_localX (hit->m_localX),
+    m_RZslope (hit->m_RZslope),
+    m_YZslope (hit->m_YZslope),
+    m_BC_time (hit->m_BC_time),
+    m_age (hit->m_age),
+    m_Y (hit->m_Y),
+    m_Z (hit->m_Z),
+    m_R (hit->m_R),
+    m_Ri (hit->m_Ri),
+    m_isNoise (hit->m_isNoise),
+    m_time (hit->m_time),
+    m_shift (hit->m_shift)
+{
 }
 
 bool MMT_Hit::isX() const {

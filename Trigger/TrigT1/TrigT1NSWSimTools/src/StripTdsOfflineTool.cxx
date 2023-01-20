@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -13,7 +13,11 @@ namespace NSWL1 {
       Identifier      t_id;
       StripOfflineData* t_strip;
       int             t_cache_index;
-      StripHits(Identifier id, StripOfflineData* p, int c) { t_id = id; t_strip=p; t_cache_index=c; }
+      StripHits(Identifier id, StripOfflineData* p, int c)
+        : t_id (id),
+          t_strip (p),
+          t_cache_index (c)
+      {  }
     };
 
     using STRIP_MAP=std::map < Identifier,std::vector<StripHits> >;
