@@ -81,6 +81,15 @@ StatusCode AthenaPoolCnvSvc::initialize() {
          m_domainMaxFileSize = atoll(iter->c_str());
       }
    }
+   ATH_MSG_DEBUG("Setting StorageType to " << m_storageTechProp.value());
+   #define CHECK_TECH(TECH) \
+      if(m_storageTechProp.value() == #TECH) m_dbType = pool::TECH##_StorageType
+   CHECK_TECH(ROOTTREE);
+   CHECK_TECH(ROOTTREEINDEX);
+   if( m_dbType == TEST_StorageType ) {
+      ATH_MSG_FATAL("Unknown StorageType rquested: " << m_storageTechProp.value());
+      return StatusCode::FAILURE;
+   } 
    // Extracting INPUT POOL ItechnologySpecificAttributes for Domain, Database and Container.
    extractPoolAttributes(m_inputPoolAttr, &m_inputAttr, &m_inputAttr, &m_inputAttr);
    // Extracting the INPUT POOL ItechnologySpecificAttributes which are to be printed for each event
@@ -1024,8 +1033,9 @@ StatusCode AthenaPoolCnvSvc::convertAddress(const IOpaqueAddress* pAddress,
    return(StatusCode::SUCCESS);
 }
 //__________________________________________________________________________
-StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec,
-		int& outputTech) const {
+StatusCode
+AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec, int& outputTech) const
+{
   if (boost::starts_with (fileSpec, "oracle") || boost::starts_with (fileSpec, "mysql")) {
       outputTech = pool::POOL_RDBMS_StorageType.type();
    } else if (boost::starts_with (fileSpec, "ROOTKEY:")) {
@@ -1038,7 +1048,7 @@ StatusCode AthenaPoolCnvSvc::decodeOutputSpec(std::string& fileSpec,
       outputTech = pool::ROOTTREEINDEX_StorageType.type();
       fileSpec.erase(0, 14);
    } else if (outputTech == 0) {
-      outputTech = pool::ROOTTREEINDEX_StorageType.type();
+      outputTech = m_dbType.type();
    }
    return(StatusCode::SUCCESS);
 }

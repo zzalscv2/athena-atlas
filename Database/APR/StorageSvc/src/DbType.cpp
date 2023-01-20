@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -58,11 +58,11 @@ DbType DbType::getType(const std::string& name)  {
 const std::string DbType::storageName()  const {
   if ( *this == TEST_StorageType          )
     return "Test";
-  else if ( match(ROOTKEY_StorageType)    )
+  else if ( exactMatch(ROOTKEY_StorageType)    )
     return "ROOT_Key";
-  else if ( match(ROOTTREE_StorageType)   )
+  else if ( exactMatch(ROOTTREE_StorageType)   )
     return "ROOT_Tree";
-  else if ( match(ROOTTREEINDEX_StorageType)   )
+  else if ( exactMatch(ROOTTREEINDEX_StorageType)   )
     return "ROOT_TreeIndex";
   else if ( *this == ROOT_StorageType     )
     return "ROOT_All";

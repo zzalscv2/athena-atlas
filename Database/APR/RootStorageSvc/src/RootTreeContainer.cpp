@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -22,6 +22,7 @@
 #include "POOLCore/DbPrint.h"
 #include "StorageSvc/Transaction.h"
 #include "StorageSvc/DbReflex.h"
+#include "CxxUtils/checker_macros.h"
 
 // Local implementation files
 #include "RootTreeContainer.h"
@@ -37,20 +38,12 @@
 #include "RootUtils/TBranchElementClang.h"
 #include "TTreeFormula.h"
 
-#include "AthContainersInterfaces/IAuxStoreIO.h"
-#include "AthContainersInterfaces/IAuxTypeVector.h"
-#include "AthContainersInterfaces/IAuxStoreHolder.h"
-#include "AthContainers/AuxTypeRegistry.h"
-#include "AthContainers/normalizedTypeinfoName.h"
-#include "CxxUtils/checker_macros.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
 
 using namespace pool;
 using namespace std;
 
-
 namespace {
-
 
 class TBranchAccess : public TBranch
 {
@@ -125,6 +118,10 @@ void fixupPackedConversion (TBranch* br)
 static UCharDbArrayAthena  s_char_Blob ATLAS_THREAD_SAFE;
 static IntDbArray   s_int_Blob ATLAS_THREAD_SAFE;
 
+// required for unique_ptr compilation
+RootTreeContainer::BranchDesc::~BranchDesc() {
+}
+
 
 RootTreeContainer::RootTreeContainer()
 : m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
@@ -135,7 +132,7 @@ RootTreeContainer::RootTreeContainer()
 
 /// Standard destructor
 RootTreeContainer::~RootTreeContainer()   {
-  RootTreeContainer::close();
+   RootTreeContainer::close();
 }
 
 /// Ask if a given shape is supported
@@ -167,14 +164,12 @@ TBranch* RootTreeContainer::branch(const std::string& nam)  const  {
   return nullptr;
 }
 
+
 DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
 {
-   //clear aux branches write marker
-   for( auto &descMapElem: m_auxBranchMap ) {
-      descMapElem.second.written = false;
-   }
    int icol;
    int num_bytes = 0;
+   bool aux_needs_fill = false;
    Branches::iterator k;
    for(k=m_branches.begin(), icol=0; k !=m_branches.end(); ++k, ++icol) {
       BranchDesc& dsc = (*k);
@@ -184,50 +179,20 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
       switch( dsc.column->typeID() ) {
        case DbColumn::ANY:
        case DbColumn::POINTER:
-          dsc.object            = p.ptr;
-          p.ptr                 = &dsc.object;
-          if( dsc.aux_iostore_IFoffset >= 0 ) {
-             DbPrint log(m_name);
-             log << DbPrintLvl::Debug << " SG::IAuxStoreIO* detected in " << dsc.branch->GetName() << DbPrint::endmsg;
-             auto *store = reinterpret_cast<SG::IAuxStoreIO*>( (char*)dsc.object + dsc.aux_iostore_IFoffset );
-             // cout << "---    store object= " <<hex << store <<dec << " in " << dsc.branch->GetName()  <<endl;
-             // cout << "       obj=" << hex << dsc.object << dec << "  offset=" <<  dsc.aux_iostore_IFoffset << endl;
-             const SG::auxid_set_t selection = store->getSelectedAuxIDs();
-             log << DbPrintLvl::Debug << "       Attributes= " << selection.size() << DbPrint::endmsg;
-             for(SG::auxid_t id : selection) {
-                BranchDesc&       newBrDsc( m_auxBranchMap[id] );
-                if( !newBrDsc.branch ) {
-                   auto &reg = SG::AuxTypeRegistry::instance();
-                   // we have a new attribute, create a branch for it
-                   log << "   Creating branch for new dynamic attribute, Id=" << id << ": type="
-                       << SG::normalizedTypeinfoName( *(store->getIOType(id)) )
-                       << ", " << reg.getName(id) << DbPrint::endmsg;
-                   if( ! addAuxBranch(reg.getName(id), store->getIOType(id), newBrDsc) .isSuccess() )  {
-                      p.ptr = nullptr;  // trigger an Error
-                      break;
-                   }
-                   if( dsc.rows_written ) {
-                      // catch up with the rows written by other branches
-                      newBrDsc.object = nullptr;
-                      // As of root 6.22, calling SetAddress with nullptr
-                      // may not work as expected if the address had
-                      // previously been set to something non-null.
-                      // So we need to create the temp object ourselves.
-                      newBrDsc.branch->SetAddress( newBrDsc.dummyAddr() );
-                      for( size_t r=0; r<dsc.rows_written; ++r ) {
-                         num_bytes += newBrDsc.branch->BackFill();
-                      }
-                   }
-                }
-                void* ptr ATLAS_THREAD_SAFE = const_cast<void*>(store->getIOData(id));
-                newBrDsc.object = ptr;
-                newBrDsc.branch->SetAddress( newBrDsc.objectAddr() );
-                newBrDsc.written = true;  // marking that branch address was set, even if Fill is delayed
-                if( isBranchContainer() && !m_treeFillMode ) {
-                   size_t bytes_out = newBrDsc.branch->Fill();
-                   num_bytes += bytes_out;
-                }
+          dsc.object = p.ptr;
+          p.ptr      = &dsc.object;
+          try {
+             if( dsc.auxdyn_writer ) {
+                num_bytes += dsc.auxdyn_writer->writeAuxAttributes
+                   ( dsc.branch->GetName(), dsc.getIOStorePtr(), dsc.rows_written );
+                aux_needs_fill = aux_needs_fill || dsc.auxdyn_writer->needsCommit();
              }
+          } catch(const std::exception& exc) {
+             DbPrint err(m_name);
+             err << DbPrintLvl::Error << "Dynamic attributes writing error: " << exc.what()
+                 << DbPrint::endmsg;
+             p.ptr = nullptr;  // signal error
+             break;
           }
           dsc.rows_written++;
           break;
@@ -270,30 +235,12 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
       }
    }
 
-   // check if some AUX branches were not set
-   for( auto &descMapElem: m_auxBranchMap ) {
-      BranchDesc& dsc = descMapElem.second;
-      if( !dsc.written ) {
-         dsc.object = nullptr;
-         // As of root 6.22, calling SetAddress with nullptr
-         // may not work as expected if the address had
-         // previously been set to something non-null.
-         // So we need to create the temp object ourselves.
-         dsc.branch->SetAddress( dsc.dummyAddr() );
-         // cout << "   aaa Branch " <<  SG::AuxTypeRegistry::instance().getName(descMapElem.first) << " filled out with NULL" << endl;
-         if( isBranchContainer() && !m_treeFillMode ) {
-            size_t bytes_out = dsc.branch->Fill();
-            num_bytes += bytes_out;
-         }
-      }
-   }
-
    if( !isBranchContainer() ) {
       // Single Container per TTree - just Fill it now
       num_bytes = m_tree->Fill();
-   } else if( m_treeFillMode ) {
+   } else
+      if( m_treeFillMode ) {
       // Multiple containers per TTree - mark TTree for later Fill at commit
-      // cout << "----- " << m_name << " : TTree=" << m_tree->GetName() << " : marking DIRTY " << endl;
       if( m_isDirty ) {
          DbPrint log(m_name);
          log << DbPrintLvl::Error << "Attempt to write to a Branch Container twice in the same transaction! "
@@ -330,6 +277,7 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
    m_ioBytes = -1;
    return Error;
 }
+
 
 /// Fetch refined object address. Default implementation returns identity
 DbStatus RootTreeContainer::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)  {
@@ -444,12 +392,10 @@ RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
                s_char_Blob.release(false);
                break;
             case DbColumn::POINTER:
-               // call->setObject(p.ptr);
                // for AUX store objects with the right interface supply a special store object
                // that will read branches on demand
-               if( dsc.aux_reader ) {
-                  // cout << " ***  AuxDyn reader detected in " << dsc.clazz->GetName() << ", entry# " << evt_id << endl;
-                  dsc.aux_reader->addReaderToObject( *obj_p, evt_id, &m_rootDb->ioMutex() );
+               if( dsc.auxdyn_reader ) {
+                  dsc.auxdyn_reader->addReaderToObject( *obj_p, evt_id, &m_rootDb->ioMutex() );
                }
                break;
            }
@@ -501,15 +447,7 @@ DbStatus RootTreeContainer::close()   {
       dsc.clazz->Destructor(dsc.buffer);
     }
   }
-  for( auto &descMapElem: m_auxBranchMap ) {
-     BranchDesc& dsc = descMapElem.second;
-     if ( dsc.buffer && dsc.clazz )  {
-      // This somehow fails for templates.
-      dsc.clazz->Destructor(dsc.buffer);
-    }
-  }
   m_branches.clear();
-  m_auxBranchMap.clear();
   m_rootDb = nullptr;
   m_tree = nullptr;
   return DbContainerImp::close();
@@ -599,14 +537,23 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                           << DbPrint::endmsg;
                       return Error;
                    }
-                   dsc = BranchDesc(cl, pBranch, leaf, cl->New(), c);
-                   dsc.aux_reader = RootAuxDynIO::getReaderForBranch(pBranch);
-                   if (dsc.aux_reader) {
-                     // If we set up a reader, then disable aging
-                     // for this file.  That will prevent POOL from
-                     // deleting the file while we still have
-                     // references to its branches.
-                     dbH.setAge (-10);
+                   dsc = std::move( BranchDesc(cl, pBranch, leaf, cl->New(), c) );
+                   if( RootAuxDynIO::isAuxDynBranch(pBranch) ) {
+                      dsc.auxdyn_reader = RootAuxDynIO::getBranchAuxDynReader( m_tree, pBranch );
+                      if( !dsc.auxdyn_reader ) {
+                         log << DbPrintLvl::Error << "Failed to locate dynamic attribute storage for container "
+                             << m_name << " of type " << ROOTTREE_StorageType.storageName()
+                             << " Class " << pBranch->GetClassName() << " is unknown."
+                             << DbPrint::endmsg;
+                         return Error;
+                      }
+                      if (dsc.auxdyn_reader) {
+                         // If we set up a reader, then disable aging
+                         // for this file.  That will prevent POOL from
+                         // deleting the file while we still have
+                         // references to its branches.
+                         dbH.setAge (-10);
+                      }
                    }
                    break;
                 case DbColumn::CHAR:
@@ -787,8 +734,6 @@ DbStatus  RootTreeContainer::select(DbSelect& sel)    {
 }
 
 
-
-
 DbStatus  RootTreeContainer::addObject(const DbColumn* col,
                                        BranchDesc& dsc,
                                        const std::string& typ,
@@ -803,8 +748,9 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
       dsc.clazz = TClass::GetClass(typ.c_str());
       if ( nullptr != dsc.clazz )  {
          if ( dsc.clazz->GetStreamerInfo() )  {
-            std::string nam  = (m_branchName.empty() ? col->name() : m_branchName);
-            if (m_branchName.empty()) {
+            std::string nam = m_branchName;
+            if( nam.empty() ) {
+               nam = col->name();
                for ( std::string::iterator j = nam.begin(); j != nam.end(); ++j )    {
                   if ( !::isalnum(*j) ) *j = '_';
                }
@@ -829,7 +775,11 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
                   TClass *storeTClass = dsc.clazz->GetBaseClass("SG::IAuxStoreIO");
                   if( storeTClass ) {
                      // This is a class implementing SG::IAuxStoreIO
+                     // Provide writers for its dynamic attibutes
                      dsc.aux_iostore_IFoffset = dsc.clazz->GetBaseClassOffset( storeTClass );
+                     // TBranch Writer
+                     bool do_branch_fill = isBranchContainer() && !m_treeFillMode;
+                     dsc.auxdyn_writer = RootAuxDynIO::getBranchAuxDynWriter(m_tree, branchOffsetTabLen, do_branch_fill);
                   }
                }
                return Success;
@@ -855,100 +805,6 @@ DbStatus  RootTreeContainer::addObject(const DbColumn* col,
 }
 
 
-
-
-void RootTreeContainer::createBasicAuxBranch(const std::string& branchname, const std::string& leafname, BranchDesc& dsc)
-{
-   DbPrint log( m_name);
-   log << DbPrintLvl::Debug << "createBasicAuxBranch: " << branchname << ", leaf:" << leafname << DbPrint::endmsg;
-   dsc.is_basic_type = true;
-   dsc.branch = m_tree->Branch(branchname.c_str(), dsc.buffer, leafname.c_str(), 2048);
-//   if( dsc.branch )  dsc.leaf = dsc.branch->GetLeaf(bnam);
-}
-
-
-DbStatus  RootTreeContainer::addAuxBranch(const std::string& attribute,
-                                          const type_info* typeinfo,
-                                          BranchDesc& dsc)
-{
-   string error_type("is unknown");
-   string typenam = SG::normalizedTypeinfoName(*typeinfo);
-   string branch_name = RootAuxDynIO::auxBranchName(attribute, m_branchName);
-   dsc.branch = nullptr;
-   try {
-      if( *typeinfo == typeid(UInt_t) )
-         createBasicAuxBranch(branch_name, attribute + "/i", dsc);
-      else if( *typeinfo == typeid(Int_t) )
-         createBasicAuxBranch(branch_name, attribute + "/I", dsc);
-      else if( *typeinfo == typeid(Double_t) )
-         createBasicAuxBranch(branch_name, attribute + "/D", dsc);
-      else if( *typeinfo == typeid(Float_t) )
-         createBasicAuxBranch(branch_name, attribute + "/F", dsc);
-      else if( *typeinfo == typeid(Long64_t) )
-         createBasicAuxBranch(branch_name, attribute + "/L", dsc);
-      else if( *typeinfo == typeid(ULong64_t) )
-         createBasicAuxBranch(branch_name, attribute + "/l", dsc);
-      else if( *typeinfo == typeid(Short_t) )
-         createBasicAuxBranch(branch_name, attribute + "/S", dsc);
-      else if( *typeinfo == typeid(UShort_t) )
-         createBasicAuxBranch(branch_name, attribute + "/s", dsc);
-      else if( *typeinfo == typeid(Char_t) )
-         createBasicAuxBranch(branch_name, attribute + "/B", dsc);
-      else if( *typeinfo == typeid(UChar_t) )
-         createBasicAuxBranch(branch_name, attribute + "/b", dsc);
-      else if( *typeinfo == typeid(bool) )
-         createBasicAuxBranch(branch_name, attribute + "/O", dsc);
-      else if( *typeinfo == typeid(char*) || *typeinfo == typeid(unsigned char*) )
-         createBasicAuxBranch(branch_name, attribute + "/C", dsc);
-      else {
-         TClass* cl = TClass::GetClass(typenam.c_str());
-         if( !cl ) {
-            error_type =" has no TClass";
-         } else if( !cl->GetStreamerInfo() )  {
-            error_type =" has no streamer";
-         } else if( !cl->HasDictionary() ) {
-            error_type =" has no dictionary";
-         } else {
-            dsc.clazz = cl;
-            int split = cl->CanSplit() ? 1 : 0;
-            dsc.branch  = m_tree->Branch(branch_name.c_str(),   // Branch name
-                                         cl->GetName(),         // Object class
-                                         (void*)&dsc.buffer,    // Object address
-                                         8192,                  // Buffer size
-                                         split);                // Split Mode (Levels)
-         }
-      }
-   }
-   catch( const std::exception& e )    {
-      debugBreak(branch_name, "Cannot attach ROOT branch for AUX attribute.", e);
-   }
-   catch (...)   {
-      DbPrint err( branch_name );
-      err << DbPrintLvl::Fatal << "Unknown exception occurred. Cannot give more details."
-          << DbPrint::endmsg;
-      debugBreak(branch_name, "Cannot attach ROOT branch for AUX attribute.", true);
-   }
-
-   if( dsc.branch )  {
-      dsc.branch->SetAutoDelete(kFALSE);
-      // AUTO-DELETE is now OFF.
-      // This ensures, that all objects can be deleted
-      // by the framework. Keep the created object in the
-      // branch descriptor to allow selections
-
-      //setBranchOffsetTabLen( dsc.branch, branchOffsetTabLen );
-      return Success;
-   }
-
-   DbPrint log("RootStorageSvc::addAuxBranch");
-   log << DbPrintLvl::Error << "Failed to create Auxiliary branch '" << branch_name << "'."
-       << " Class " << typenam << error_type << DbPrint::endmsg;
-   return Error;
-}
-
-
-
-
 DbStatus
 RootTreeContainer::addBranch(const DbColumn* col,BranchDesc& dsc,const std::string& desc) {
   const char* nam  = (m_branchName.empty() ? col->name().c_str() : m_branchName.c_str());
@@ -967,6 +823,13 @@ RootTreeContainer::addBranch(const DbColumn* col,BranchDesc& dsc,const std::stri
 }
 
 
+void RootTreeContainer::setTreeFillMode(bool mode) {
+   m_treeFillMode = mode;
+   for( auto& desc : m_branches ) {
+      if( desc.auxdyn_writer ) desc.auxdyn_writer->setBranchFillMode(isBranchContainer() && !mode);
+   }
+}
+
 
 void RootTreeContainer::setBranchOffsetTabLen(TBranch* b, int offsettab_len)
 {
@@ -982,16 +845,15 @@ void RootTreeContainer::setBranchOffsetTabLen(TBranch* b, int offsettab_len)
 }
 
 
-
 /// Access options
 DbStatus RootTreeContainer::getOption(DbOption& opt) {
   if ( m_tree )  {
     const char* n = opt.name().c_str();
     if ( !strcasecmp(n,"BYTES_IO") )  {
        for( auto& branch: m_branches ) {
-          if( branch.aux_reader ) {
-             const_cast<RootTreeContainer*>(this)->m_ioBytes += branch.aux_reader->getBytesRead();
-             branch.aux_reader->resetBytesRead();
+          if( branch.auxdyn_reader ) {
+             const_cast<RootTreeContainer*>(this)->m_ioBytes += branch.auxdyn_reader->getBytesRead();
+             branch.auxdyn_reader->resetBytesRead();
           }
        }
        return opt._setValue((int)m_ioBytes);
@@ -1205,29 +1067,27 @@ DbStatus RootTreeContainer::setOption(const DbOption& opt)  {
   return Error;
 }
 
-
 /// Execute transaction action
 DbStatus RootTreeContainer::transAct(Transaction::Action action)
 {
    // execure action on the base class first
    DbStatus status = DbContainerImp::transAct(action);
    if( !status.isSuccess() ) return status;
-
    if( action != Transaction::TRANSACT_FLUSH ) return Success;
    if( !m_tree ) return Error;
+
    if( !isBranchContainer() ) {
       m_tree->AutoSave();
       return Success;
    }
    // check if all TTree branches were filled and write the TTree
-   Branches::iterator k;
-   for(k=m_branches.begin(); k !=m_branches.end(); ++k) {
-      Long64_t branchEntries = k->branch->GetEntries();
+   for( auto& desc : m_branches ) {
+      Long64_t branchEntries = desc.branch->GetEntries();
       Long64_t treeEntries = m_tree->GetEntries();
       if (branchEntries > treeEntries) {
          TIter next(m_tree->GetListOfBranches());
          TBranch * b = nullptr;
-         while((b = (TBranch*)next())){
+         while( (b = (TBranch*)next()) ) {
             if (b->GetEntries() != branchEntries) {
                DbPrint log(m_name);
                log << DbPrintLvl::Error << "Every branch must have the same number of entries."
@@ -1245,8 +1105,7 @@ DbStatus RootTreeContainer::transAct(Transaction::Action action)
              << " entries" << DbPrint::endmsg;
          return Error;
       }
-      BranchDesc& dsc = (*k);
-      dsc.rows_written = 0;
+      desc.rows_written = 0;
    }
    return Success;
 }

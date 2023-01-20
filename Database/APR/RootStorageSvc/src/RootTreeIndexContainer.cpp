@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  *   */
 
 // Local implementation files
@@ -13,7 +13,6 @@
 #include "TTreeIndex.h"
 
 using namespace pool;
-using namespace std;
 
 RootTreeIndexContainer::RootTreeIndexContainer() :
    m_indexBranch(nullptr), m_index_entries(0), m_index_multi( getpid() ), m_index(0), m_indexBump(0),

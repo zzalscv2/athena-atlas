@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TestDriver.h"
@@ -18,6 +18,7 @@
 #include "StorageSvc/DatabaseConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbType.h"
+#include "StorageSvc/DbString.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -63,45 +64,65 @@ TestDriver::testWriting()
   if ( ! class_SimpleTestClass ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class SimpleTestClass" );
   }
-  //std::string guid_nam = class_SimpleTestClass->propertyList()->getProperty( "ClassID" );
-  //if ( guid_nam.empty() ) {
-  //  std::ostringstream error;
-  //  error << "There is no ClassID property for class \"SimpleTestClass\"" << std::ends;
-  //  throw std::runtime_error( error.str() );
-  //}
-  //Guid guid(guid_nam);
-
+  Guid objGuid = pool::DbReflex::guid(class_SimpleTestClass);
+  // Creating class shape
+  const pool::Shape* objShape = 0;
+  storSvc->createShape( fd, m_objContainerName, objGuid, objShape );
+  if( !objShape ) throw std::runtime_error( "Could not create a persistent shape for SimpleTestClass" );
+  // object cache
   std::vector< SimpleTestClass* > myObjects;
+  myObjects.reserve(m_nObjects);
+
+  RootType class_DbString ( "pool::DbString" );
+  if( ! class_DbString ) {
+    throw std::runtime_error( "Could not retrieve the dictionary for class DbString" );
+  }
+  Guid strGuid = pool::DbReflex::guid(class_DbString);
+  const pool::Shape* strShape = 0;
+  storSvc->createShape( fd, m_strContainerName, strGuid, strShape );
+  if( !strShape ) throw std::runtime_error( "Could not create a persistent shape for DbString" );
+  std::vector< pool::DbString > myStrings;
+  myStrings.reserve(m_nObjects);
+  
+  if( !class_SimpleTestClass.Properties().HasProperty( "ClassID" ) ) {
+     std::ostringstream error;
+     error << "There is no ClassID property for class \"SimpleTestClass\"" << std::ends;
+     throw std::runtime_error( error.str() );
+  }
+
   for ( int i = 0; i < m_nObjects; ++i ) {
     myObjects.push_back( new SimpleTestClass() );
     SimpleTestClass* myObject = myObjects.back();
     myObject->data = i;
 
-    // Creating the persistent shape.
-    Guid guid = pool::DbReflex::guid(class_SimpleTestClass);
-    const pool::Shape* shape = 0;
-    if ( storSvc->getShape( fd, guid, shape ) == pool::IStorageSvc::SHAPE_NOT_AVAILIBLE ) {
-      storSvc->createShape( fd, m_containerName, guid, shape );
-    }
-    if ( ! shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
-    }
-  
     // Writing the object.
-    Token* token;
-    if ( ! ( storSvc->allocate( fd, m_containerName, m_storageType.type(),
-				myObject, shape, token ).isSuccess() ) ) {
-      throw std::runtime_error( "Could not write an object" );
+    Token* token = nullptr;
+    if ( ! ( storSvc->allocate( fd, m_objContainerName, m_storageType.type(),
+				myObject, objShape, token ).isSuccess() ) ) {
+      throw std::runtime_error( "Could not write a SimpleTestClass object" );
     }
-    //token->setClassID( guid );
-    delete token;
-  }
+    delete token; token = nullptr;
 
-  // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
-    throw std::runtime_error( "Could not end a transaction." );
+    myStrings.push_back( "This is my test DbString #" + std::to_string(i) );
+    const pool::DbString* sp = &myStrings.back();    
+    if( !storSvc->allocate( fd, m_strContainerName, m_storageType.type(),
+                            sp, strShape, token ).isSuccess() ) {
+       throw std::runtime_error( "Could not write a dbString" );
+    }
+    delete token; token = nullptr;
+    
+    if( m_commitEveryRow ) {
+       if ( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+          throw std::runtime_error( "Could not end a transaction." );
+       }
+    }
   }
-
+  if( !m_commitEveryRow ) {
+     // Closing the transaction.
+     if ( ! ( storSvc->endTransaction( connection, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+        throw std::runtime_error( "Could not end a transaction." );
+     }
+  }
   // Clearing the cache
   for ( std::vector< SimpleTestClass* >::iterator iObject = myObjects.begin();
 	iObject != myObjects.end(); ++iObject ) delete *iObject;
@@ -147,18 +168,32 @@ TestDriver::testReading()
   // Fetch the containers
   std::vector<const Token*> containerTokens;
   storageExplorer->containers( *fd, containerTokens );
-  if ( containerTokens.size() != 1 ) {
+  if ( containerTokens.size() != 2 ) {
     throw std::runtime_error( "Unexpected number of containers" );
   }
-  const Token* containerToken = containerTokens.front();
-  const std::string containerName = containerToken->contID();
-  if ( containerName != m_containerName ) {
-    throw std::runtime_error( "Container name read is different from the container name written" );
+
+  const Token* objContToken = nullptr;
+  for( const Token* containerToken : containerTokens ) {
+     if( containerToken->contID() == m_objContainerName ) {
+        objContToken = containerToken;
+        break;
+     }
   }
+  if( !objContToken )  throw std::runtime_error( "Could not find the main Container in the DB");
+
+  const Token* strContToken = nullptr;
+  for( const Token* containerToken : containerTokens ) {
+     if( containerToken->contID() == m_strContainerName ) {
+        strContToken = containerToken;
+        break;
+     }
+  }
+  if( !strContToken )  throw std::runtime_error( "Could not find the String container in the DB");
+
 
   // Fetch the objects in the container.
   pool::DbSelect selectionObject("");
-  sc = storageExplorer->select( *fd, containerToken->contID(), selectionObject );
+  sc = storageExplorer->select( *fd, m_objContainerName, selectionObject );
   int iObject = 0;
   if ( sc.isSuccess() ) {
     Token* objectToken = 0;
@@ -183,7 +218,7 @@ TestDriver::testReading()
 
       SimpleTestClass* object = reinterpret_cast< SimpleTestClass* >( ptr );
       if ( object->data != iObject ) {
-	throw std::runtime_error( "Object read different from object written" );
+         throw std::runtime_error( "Object read different from object written!   Obj data=" + std::to_string(object->data) );
       }
       delete object;
       ++iObject;
@@ -191,9 +226,39 @@ TestDriver::testReading()
     }
   }
   if ( iObject != m_nObjects ) {
-    throw std::runtime_error( "Objects read different from objects written" );
+     throw std::runtime_error( std::string("Read ") + std::to_string(iObject) + " instead of " + std::to_string(m_nObjects));
   }
 
+  // Read the Strings
+  sc = storageExplorer->select( *fd, m_strContainerName, selectionObject );
+  if( sc.isSuccess() ) {
+     Token* stringToken = nullptr;
+     while( storageExplorer->next( selectionObject, stringToken ).isSuccess() ) {
+        const Guid& guid = stringToken->classID();
+        const pool::Shape* shape = 0;
+        if ( storSvc->getShape( *fd, guid, shape ) != pool::IStorageSvc::IS_PERSISTENT_SHAPE ) {
+           throw std::runtime_error( "Could not retrieve the String shape" );
+        }
+        RootType classType = pool::DbReflex::forGuid(guid);
+        if(!classType){
+           throw std::runtime_error( "Could not resolve the class by guid" );
+        }
+        DbString str;
+        void *ptr = &str;
+        if( !storSvc->read( *fd, *stringToken, shape, &ptr ).isSuccess() ) {
+           throw std::runtime_error( "failed to read an object back from the persistency" );
+        }
+
+        if ( shape->shapeID().toString() != "DA8F479C-09BC-49D4-94BC-99D025A23A3B" ) {
+           throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
+        }
+
+        cout << "Read back string: " << str << endl;
+        stringToken->release();
+     }
+  }
+
+  
   if ( ! ( storSvc->disconnect( *fd ).isSuccess() ) ) {
     throw std::runtime_error( "Could not disconnect." );
   }

@@ -1,17 +1,19 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include <exception>
-#include "TestDriver.h"
 
+#include "TestDriver.h"
 #include "StorageSvc/DbType.h"
 #include "PersistentDataModel/Token.h"
 
-void testTechnology( TestDriver& driver, const pool::DbType& tech )
+void testTechnology( TestDriver& driver, const pool::DbType& tech, bool commit_every_row )
 {
    driver.m_storageType = tech;
+   driver.m_commitEveryRow = commit_every_row;
+   
    std::cout << "[OVAL] Testing StorageSvc functionality for " << tech.storageName()
              << " storage technology" << std::endl;
    std::cout << "[OVAL] Testing the writing operations" << std::endl;
@@ -29,15 +31,19 @@ int main( int, char** )
    try {
       std::cout << "[OVAL] Creating the test driver." << std::endl;
       TestDriver driver;
-
       std::cout << "[OVAL] Loading the shared libraries." << std::endl;
       std::vector< std::string > libraries;
       libraries.push_back( "test_TestDictionaryDict" );
       driver.loadLibraries( libraries );
-
-      testTechnology( driver, pool::ROOTTREE_StorageType );
-      testTechnology( driver, pool::ROOTKEY_StorageType );
-      testTechnology( driver, pool::ROOTTREEINDEX_StorageType );
+      std::cout << std::endl;
+      testTechnology( driver, pool::ROOTTREE_StorageType, false );
+      std::cout << std::endl;
+      std::cout << "----- KEY-based Storage does not work for Strings" << std::endl;
+      std::cout << "----- If string values start to show up below it may actually mean an improvement" << std::endl;
+      testTechnology( driver, pool::ROOTKEY_StorageType, false );
+      std::cout << std::endl;
+      testTechnology( driver, pool::ROOTTREEINDEX_StorageType, false );
+      std::cout << std::endl;
    }
    catch ( std::exception& e ) {
       std::cerr << e.what() << std::endl;

@@ -111,7 +111,7 @@ SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 SimplePoolFile1...  DEBUG --->Reading Param:FID=[F2313678-C96A-964F-89E8-08BAB39F2DA7]
 SimplePoolFile1...  DEBUG --->Reading Param:PFN=[SimplePoolFile1.root]
 SimplePoolFile1...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile1...  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+SimplePoolFile1...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile1...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] MetaDataHdr(DataHeader)
 MetaDataHdr(Dat...  DEBUG Opening
@@ -167,7 +167,7 @@ SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 SimplePoolFile4...  DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
 SimplePoolFile4...  DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
 SimplePoolFile4...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
   + INPUT   ( 'DataHeader' , 'StoreGateSvc+EventSelector' ) 
   + INPUT   ( 'ExampleHitContainer' , 'StoreGateSvc+MyHits' ) 
@@ -250,7 +250,7 @@ SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_All] ##Param
 SimplePoolFile4...  DEBUG --->Reading Param:FID=[298DE14D-49CF-674A-9171-CEBBD9BEC6F8]
 SimplePoolFile4...  DEBUG --->Reading Param:PFN=[SimplePoolFile4.root]
 SimplePoolFile4...  DEBUG --->Reading Param:POOL_VSN=[1.1]
-SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[1.1]
+SimplePoolFile4...  DEBUG --->Reading Param:FORMAT_VSN=[2.0]
 ##Params            DEBUG No objects passing selection criteria... Container has 4 Entries in total.
 SimplePoolFile4...  DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] ConditionsContainerExampleHitContainer_p1(PedestalWriteData)
 ConditionsConta...  DEBUG Opening
@@ -981,16 +981,19 @@ MetaDataSvc         DEBUG handle() EndInputFile for FID:F2313678-C96A-964F-89E8-
 MetaDataSvc         DEBUG retireMetadataSource: FID:F2313678-C96A-964F-89E8-08BAB39F2DA7
 StorageSvc          DEBUG Disconnect request for database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7 PFN=SimplePoolFile1.root
 StorageSvc          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
+RootDatabase.close  DEBUG Closing DB SimplePoolFile1.root
 AthenaEventLoopMgr   INFO No more events in event selection 
 MetaDataSvc         DEBUG MetaDataSvc::stop()
 PoolSvc             DEBUG Disconnect request for contextId=0
 StorageSvc          DEBUG Disconnect request for database: FID=298DE14D-49CF-674A-9171-CEBBD9BEC6F8 PFN=SimplePoolFile4.root
 StorageSvc          DEBUG Closing database: FID=298DE14D-49CF-674A-9171-CEBBD9BEC6F8
+RootDatabase.close  DEBUG Closing DB SimplePoolFile4.root
 PoolSvc             DEBUG Disconnected PersistencySvc session
 PoolSvc             DEBUG Disconnect request for contextId=1
 PoolSvc             DEBUG Disconnect request for contextId=2
 StorageSvc          DEBUG Disconnect request for database: FID=298DE14D-49CF-674A-9171-CEBBD9BEC6F8 PFN=SimplePoolFile4.root
 StorageSvc          DEBUG Closing database: FID=298DE14D-49CF-674A-9171-CEBBD9BEC6F8
+RootDatabase.close  DEBUG Closing DB SimplePoolFile4.root
 PoolSvc             DEBUG Disconnected PersistencySvc session
 ApplicationMgr       INFO Application Manager Stopped successfully
 ReadCond             INFO in finalize()
