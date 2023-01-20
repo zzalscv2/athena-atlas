@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AthenaPoolConverter.cxx
@@ -33,7 +33,7 @@ StatusCode AthenaPoolConverter::initialize() {
       return(StatusCode::FAILURE);
    }
    IProperty* propertyServer(dynamic_cast<IProperty*>(m_athenaPoolCnvSvc.operator->()));
-   StringProperty containerPrefixProp("PoolContainerPrefix", "ROOTTREEINDEX:CollectionTree");
+   StringProperty containerPrefixProp("PoolContainerPrefix", "CollectionTree");
    StringProperty containerNameHintProp("TopLevelContainerName", "");
    StringProperty branchNameHintProp("SubLevelBranchName", "<type>/<key>");
    if (propertyServer != nullptr) {

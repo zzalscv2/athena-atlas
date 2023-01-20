@@ -1,26 +1,16 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-
-#include "AthContainers/AuxTypeRegistry.h"
-#include "AthContainers/tools/error.h"
 #include "AthContainers/exceptions.h"
-#include "AthContainersInterfaces/AuxDataOption.h"
 
 #include "RootAuxDynStore.h"
-#include "RootAuxDynReader.h"
-
-#include <iostream>
-using namespace std;
+#include "RootAuxDynIO/RootAuxDynIO.h"
 
 
-
-
-RootAuxDynStore::RootAuxDynStore(RootAuxDynReader& reader, long long entry, bool standalone,
-                                 std::recursive_mutex* iomtx)
+RootAuxDynStore::RootAuxDynStore(RootAuxDynIO::IRootAuxDynReader& reader,
+                                 long long entry, bool standalone, std::recursive_mutex* iomtx)
   : SG::AuxStoreInternal( standalone ),
-    m_reader(reader),
     m_entry(entry),
     m_iomutex(iomtx)
 {
@@ -29,7 +19,6 @@ RootAuxDynStore::RootAuxDynStore(RootAuxDynReader& reader, long long entry, bool
    }
    lock();
 }
-
 
       
 const void* RootAuxDynStore::getData(SG::auxid_t auxid) const
@@ -48,7 +37,7 @@ const void* RootAuxDynStore::getData(SG::auxid_t auxid) const
 
 void* RootAuxDynStore::getData(SG::auxid_t /*auxid*/, size_t /*size*/, size_t /*capacity*/)
 {
-  // MN:  how do we add new attributes to this store? A:for now we don't
+  // MN: how do we add new attributes to this store?  A:for now we don't
   throw("Non-const access to RootAuxDynStore is not supported");
 }
 
@@ -64,58 +53,6 @@ const void* RootAuxDynStore::getIOData(SG::auxid_t auxid) const
   }
   return ret;
 }
-
-
-bool RootAuxDynStore::readData(SG::auxid_t auxid)
-{
-   //cout << "RootAuxDynStore::getData() id=" << auxid << ",  name="
-   //     << reg.getName(auxid) << endl;
-   try {
-      // cout << "---  RootAuxDynStore  reading id=" << auxid << endl;
-      auto& brInfo = m_reader.getBranchInfo(auxid, *this);
-      if( !brInfo.branch ) return false; 
- 
-      // Make a 1-element vector.
-      SG::AuxStoreInternal::getDataInternal(auxid, 1, 1, true);
-      if( brInfo.isPackedContainer ) {
-         setOption (auxid, SG::AuxDataOption ("nbits", 32));
-      }
-
-      // get memory location where to write data from the branch entry
-      // const_cast because TTree::SetBranchAddress requires void*
-      void *       vector ATLAS_THREAD_SAFE = const_cast<void*>(SG::AuxStoreInternal::getIOData (auxid));
-      void *       data = &vector;
-      if( standalone() && !brInfo.tclass ) {
-         // reading fundamental type - ROOT expects a direct pointer
-         data = vector;
-      }
-
-      // if have mutex, lock to prevent potential concurrent I/O from elsewhere
-      auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
-         : std::unique_lock<std::recursive_mutex>();
-      // read branch
-      brInfo.setAddress(data);
-      int  nbytes = brInfo.branch->GetEntry(m_entry);
-      if( nbytes <= 0 )
-         throw string("Error reading branch ") + brInfo.branch->GetName();
-      // read OK
-      m_reader.addBytes(nbytes);
-      TTree::TClusterIterator clusterIterator = brInfo.branch->GetTree()->GetClusterIterator(m_entry);
-      clusterIterator.Next();
-      if (m_entry == clusterIterator.GetStartEntry() && brInfo.branch->GetTree()->GetMaxVirtualSize() != 0) {
-         for (int i = brInfo.branch->GetReadBasket(); i < brInfo.branch->GetMaxBaskets()
-	         && brInfo.branch->GetBasketEntry()[i] < clusterIterator.GetNextEntry(); i++) {
-            brInfo.branch->GetBasket(i);
-         }
-      }
-   }
-   catch(const string& e_str) {
-      ATHCONTAINERS_ERROR("RootAuxDynStore::getData", e_str);
-      return false;
-   }
-   return true;
-}
-
 
 /**
  * @brief Return the data vector for one aux data decoration item.

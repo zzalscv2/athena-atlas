@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -16,6 +16,7 @@ class Token;
 
 namespace pool {
   class IFileCatalog;
+  class DbType; 
 
   class TestDriver {
   public:
@@ -24,7 +25,7 @@ namespace pool {
     TestDriver(const TestDriver & ) = delete;
     TestDriver& operator=(const TestDriver & ) = delete;
     void loadLibraries( const std::vector<std::string>& libraries );
-    void write();
+    void write( pool::DbType storageType );
     void read();
     void readCollections();
     void updateObjects();

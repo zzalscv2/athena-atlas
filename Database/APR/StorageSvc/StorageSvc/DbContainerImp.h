@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -218,6 +218,7 @@ namespace pool    {
     virtual DbStatus clearStack();
     /// Fetch refined object address. Default implementation returns identity
     virtual DbStatus fetch(const Token::OID_t& linkH, Token::OID_t& stmt);
+
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
       * @param  shape     [IN]   Object type
@@ -225,8 +226,7 @@ namespace pool    {
       *
       * @return Status code indicating success or failure.
       */
-    virtual DbStatus loadObject( void** ptr, ShapeH shape, 
-                                 Token::OID_t& oid);
+    virtual DbStatus loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) = 0;
 
   };
 }       // End namespace pool

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -264,11 +264,10 @@ DbStatus DbContainerImp::fetch(const Token::OID_t& linkH, Token::OID_t& stmt)  {
   return linkH.second >= 0 && linkH.second < size() ? Success : Error;
 }
 
-// Interface Implementation: Find entry in container
+// Read object (oid) from a container container (linkH)
 DbStatus DbContainerImp::load( void** ptr, ShapeH shape, 
-                               const Token::OID_t& linkH,
-                               Token::OID_t& oid,
-                               bool          any_next)
+                               const Token::OID_t& linkH, Token::OID_t& oid,
+                               bool any_next )
 {
   DbStatus sc = Error;
   oid.second = linkH.second;
@@ -293,13 +292,6 @@ DbStatus DbContainerImp::load( void** ptr, ShapeH shape,
      sc = loadObject(ptr, shape, oid);
   }
   return sc;
-}
-
-/// Find object by object identifier and load it into memory
-DbStatus DbContainerImp::loadObject( void**, ShapeH,
-                                    Token::OID_t& /* oid  */)
-{
-  return Error;
 }
 
 /// Access section identifier from OID

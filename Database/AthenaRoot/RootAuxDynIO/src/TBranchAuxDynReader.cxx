@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
@@ -9,10 +9,11 @@
 #include "AthContainers/exceptions.h"
 #include "RootUtils/Type.h"
 
-#include "RootAuxDynReader.h"
-#include "RootAuxDynStore.h"
+#include "TBranchAuxDynReader.h"
+#include "TBranchAuxDynStore.h"
 #include "AthContainersRoot/getDynamicAuxID.h"
 
+#include "TTree.h"
 #include "TBranch.h"
 #include "TClass.h"
 #include "TClassTable.h"
@@ -21,12 +22,9 @@
 #include "TROOT.h"
 #include "TDictAttributeMap.h"
 
-#include <iostream>
-using namespace std;
-
+using std::string;
 
 namespace {
-
 
 const std::type_info* dataTypeToTypeInfo (EDataType type, std::string& typeName)
 {
@@ -112,103 +110,18 @@ getAuxIdForAttribute(const std::string& attr, TClass *tclass, EDataType edt, boo
    
    string elemen_type_name;
    string branch_type_name;
-   const type_info* ti = getAuxElementType(tclass, edt, standalone, elemen_type_name, branch_type_name);
+   const std::type_info* ti = getAuxElementType(tclass, edt, standalone, elemen_type_name, branch_type_name);
    if( !ti )
       return auxid;
 
    return SG::getDynamicAuxID (*ti, attr, elemen_type_name, branch_type_name, standalone);
 }
 
-
-std::string getKeyFromBranch (TBranch* branch)
-{
-  TClass *tc = 0;
-  EDataType type;
-  if( branch->GetExpectedType(tc, type) == 0  && tc != nullptr) {
-    const char* brname = branch->GetName();
-    const char* clname = tc->GetName();
-    size_t namelen = strlen (clname);
-    std::string key = brname;
-    if (strncmp (brname, clname, namelen) == 0 &&
-        brname[namelen] == '_')
-    {
-      key.erase (0, namelen+1);
-    }
-
-    if (key.size() >= 5 && key.substr(key.size()-4, 4) == RootAuxDynIO::AUX_POSTFIX )
-      key.erase(key.size()-4);
-    return key;
-  }
-  return "";
-}
-
-
-
 } // anonymous namespace
 
 
 
-namespace RootAuxDynIO
-{
-
-   std::string
-   auxBranchName(const std::string& attr_name, const std::string& baseBranchName)
-   {
-      string branch_name = baseBranchName;
-      if( branch_name.back() == '.' )  branch_name.pop_back();
-      branch_name += RootAuxDynIO::AUXDYN_POSTFIX + attr_name;
-      return branch_name;
-   }
-
-
-   bool
-   isAuxDynBranch(TBranch *branch)
-   {
-      const string bname = branch->GetName();
-      if( bname.size() >= 5 && bname.substr(bname.size()-4, 4) == RootAuxDynIO::AUX_POSTFIX )
-         return true;
-
-      TClass *tc = 0;
-      EDataType type;
-      if( branch->GetExpectedType(tc, type) ) {
-         // error - not expecting this to happen ever, but better report
-         errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RootAuxDynIO::isAuxDynBranch");
-         msg << "GetExpectedType() failed for branch: " << branch->GetName();
-         return false;
-      }
-      if( tc && tc->GetAttributeMap() && tc->GetAttributeMap()->HasKey("IAuxStore") )
-         return true;
-
-      return false;
-   }
-
-   
-   std::unique_ptr<IRootAuxDynReader>
-   getReaderForBranch(TBranch *branch)
-   {
-      if( isAuxDynBranch(branch) ) {
-         TClass *tc = 0;
-         EDataType type;
-         if( branch->GetExpectedType(tc, type) ) {
-            return nullptr;
-         }
-         // cout << "---  getReaderForClass: " << tc->GetName() << "  branch " << branch->GetName() << endl;
-
-         TClass *storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
-         if( storeTC ) {  
-            int store_holder_offset = tc->GetBaseClassOffset( storeTC );
-            return std::make_unique<RootAuxDynReader>(branch, store_holder_offset);
-         }
-      }
-      return nullptr;
-   }
-              
-}
-
-
-
-
-void RootAuxDynReader::BranchInfo::setAddress(void* data)
+void TBranchAuxDynReader::BranchInfo::setAddress(void* data)
 {
    if( needsSE ) {
       // reading through the TTree - allows for schema evolution
@@ -220,28 +133,38 @@ void RootAuxDynReader::BranchInfo::setAddress(void* data)
       branch->SetAddress(data);
    }
 }
-    
+
+
+// -----------------    TBranchAuxDynReader   ---------------------------------------
 
 // Fix Reader for a specific tree and branch base name.
 // Find all dynamic attribute branches that share the base name
-RootAuxDynReader::RootAuxDynReader(TBranch *branch, int store_holder_offset)
-      : m_tree( branch->GetTree() ),
-        m_baseBranchName( branch->GetName() ),
-        m_storeHolderOffset( store_holder_offset ),
-        m_key (getKeyFromBranch (branch))
+TBranchAuxDynReader::TBranchAuxDynReader(TTree *tree, TBranch *base_branch)
+   : m_baseBranchName( base_branch->GetName() ),
+     m_key( RootAuxDynIO::getKeyFromBranch(base_branch) ),
+     m_tree( tree )
 {
+   // The Branch here is the object (AuxContainer) branch, not the attribute branch
+   TClass *tc = nullptr, *storeTC = nullptr;
+   EDataType type;
+   base_branch->GetExpectedType(tc, type);    //MN: Errors would be coaught in isAuxDynBranch() earlier
+   if( tc ) storeTC = tc->GetBaseClass("SG::IAuxStoreHolder");
+   if( storeTC ) m_storeHolderOffset = tc->GetBaseClassOffset( storeTC );
+   if( m_storeHolderOffset < 0 ) {
+      const std::string name = (tc? tc->GetName() : m_baseBranchName);
+      errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "TBranchAuxDynReader");
+      msg << "IAuxStoreHolder interface not found in " << name << " - will not read dynamic attributes";
+   }
+   
    const SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
    string branch_prefix = RootAuxDynIO::auxBranchName("", m_baseBranchName);
-   // cout << "RootAuxDynReader: scanning for branches with prefix: " << branch_prefix << endl;
    TObjArray *all_branches = m_tree->GetListOfBranches();
    for( int i=0; i<all_branches->GetEntriesFast(); i++ ) {
       const char *bname =  (*all_branches)[i]->GetName();
       if( strncmp(bname, branch_prefix.c_str(), branch_prefix.size()) == 0 ) {
-         const string  attr_inFile  = bname+branch_prefix.size();
+         const string attr_inFile  = bname+branch_prefix.size();
          const string attr = r.inputRename (m_key, attr_inFile);
          m_branchMap[attr] = (TBranch*)(*all_branches)[i];
-         // m_attrNames.insert(attr); // may be useful
-         // cout <<  "  >>>  Branch " << bname << ", attr=" << attr << endl;
       }
    }
 }
@@ -249,10 +172,10 @@ RootAuxDynReader::RootAuxDynReader(TBranch *branch, int store_holder_offset)
 
 // Has to be a separate method because 'standalone' status is not know at construction time
 // Prepare all branch infos for dynamic attributes (auxids and types)
-void RootAuxDynReader::init(bool standalone)
+void TBranchAuxDynReader::init(bool standalone)
 {
-   if( m_initialized )
-      return;
+   if( m_initialized )  return;
+   
    for( const auto& attr2branch: m_branchMap ) {
       const string& attr = attr2branch.first;
       TBranch*      branch  = attr2branch.second;
@@ -267,20 +190,19 @@ void RootAuxDynReader::init(bool standalone)
       if (auxid != SG::null_auxid) {
          m_auxids.insert(auxid);
       } else {
-         errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "RootAuxDynReader::init");
+         errorcheck::ReportMessage msg (MSG::WARNING, ERRORCHECK_ARGS, "TBranchAuxDynReader::init");
          msg << "Could not find auxid for " << branch->GetName()
               << " type: " << expectedClass->GetName();
 
-      }
-      m_initialized = true;
+      } 
    }
+   m_initialized = true;
 }
   
-
 // Called by the AuxStore when it is reading new attribute data from the file
 // All information is cached in a BranchInfo object for better performance
-RootAuxDynReader::BranchInfo&
-RootAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store)
+TBranchAuxDynReader::BranchInfo&
+TBranchAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreInternal& store)
 {
    BranchInfo& brInfo = m_branchInfos[auxid];
    if( brInfo.status == BranchInfo::NotInitialized )
@@ -288,7 +210,6 @@ RootAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreInte
       SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
       brInfo.auxid = auxid;
       brInfo.attribName = r.getName(auxid);
-      
       // Don't match this attribute if it's been renamed.
       // For example, suppose we've renamed attribute `foo' to `foo_old',
       // and someone then comes and asks for `foo'.
@@ -328,18 +249,19 @@ RootAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreInte
             brInfo.isPackedContainer = true;
 
       string elem_tname, branch_tname;
-      const type_info* ti = getAuxElementType( brInfo.tclass, typ, store.standalone(),
-                                               elem_tname, branch_tname );
-      const type_info* reg_ti = r.getType(auxid);
+      const std::type_info* ti = getAuxElementType( brInfo.tclass, typ, store.standalone(),
+                                                    elem_tname, branch_tname );
+      const std::type_info* reg_ti = r.getType(auxid);
       if( ti && ti != reg_ti && strcmp(ti->name(), reg_ti->name()) != 0 )
       {
          // type in registry is different than type in the file.
          // will need to use ROOT auto schema evolution
          brInfo.needsSE = true;
-         errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "RootAuxDynReader");
+         errorcheck::ReportMessage msg (MSG::INFO, ERRORCHECK_ARGS, "TBranchAuxDynReader");
          msg << "attribute " << brInfo.attribName << " (id=" << auxid <<
             " typename=" << SG::AuxTypeRegistry::instance().getType(auxid)->name()
              << ") has different type than the branch " << branch_tname;
+         msg << "  Attempting schema evolution.";
 
          const std::type_info *tinf =  store.getIOType(auxid);
          brInfo.SE_tclass  = TClass::GetClass(*tinf);
@@ -359,34 +281,13 @@ RootAuxDynReader::getBranchInfo(const SG::auxid_t& auxid, const SG::AuxStoreInte
 }
 
 
-void RootAuxDynReader::addReaderToObject(void* object, size_t ttree_row, std::recursive_mutex* iomtx)
+void TBranchAuxDynReader::addReaderToObject(void* object, size_t ttree_row, std::recursive_mutex* iomtx)
 {
-   auto store_holder = reinterpret_cast<SG::IAuxStoreHolder*>((char*)object + m_storeHolderOffset);
-   bool standalone { store_holder->getStoreType()==SG::IAuxStoreHolder::AST_ObjectStore };
-   if( !m_initialized )
-      init(standalone);
-   store_holder->setStore( new RootAuxDynStore(*this, ttree_row, standalone, iomtx) );
-}              
-
-
-void  RootAuxDynReader::addBytes(size_t bytes)
-{
-   m_bytesRead += bytes;
+   if( m_storeHolderOffset >= 0 ) {
+      auto store_holder = reinterpret_cast<SG::IAuxStoreHolder*>((char*)object + m_storeHolderOffset);
+      bool standalone { store_holder->getStoreType()==SG::IAuxStoreHolder::AST_ObjectStore };
+      if( !m_initialized )
+         init(standalone);
+      store_holder->setStore( new TBranchAuxDynStore(*this, ttree_row, standalone, iomtx) );
+   }
 }
-
-size_t RootAuxDynReader::getBytesRead() {
-   return m_bytesRead;
-}
-
-void RootAuxDynReader::resetBytesRead() {
-   m_bytesRead = 0;
-}
-
-const SG::auxid_set_t& RootAuxDynReader::auxIDs() const
-{
-   return m_auxids;
-}
-     
-  
-
-

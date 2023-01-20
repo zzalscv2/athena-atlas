@@ -19,6 +19,7 @@ Syntax: post.sh
       ATLAS_CTEST_TESTSTATUS            test return code
       [ATLAS_CTEST_LOG_SELECT_PATTERN]  lines matching (regex) will be selected for the diff
       [ATLAS_CTEST_LOG_IGNORE_PATTERN]  lines matching (regex) will be ignored for the diff
+      [ATLAS_CTEST_LOG_IGNORE_PATTERN2] as above but not overwritten by ATLAS CMake  
 
 Post-processing script that checks the return code of an executable (expected
 in \$ATLAS_CTEST_TESTSTATUS) and compares its output with a reference.
@@ -36,6 +37,7 @@ fi
 
 selectpatterns=${ATLAS_CTEST_LOG_SELECT_PATTERN}
 ignorepatterns=${ATLAS_CTEST_LOG_IGNORE_PATTERN}
+ignorepatterns2=${ATLAS_CTEST_LOG_IGNORE_PATTERN2}
 
 if [ "$POST_SH_NOCOLOR" = "" ]; then
  YELLOW="[93;1m"
@@ -253,13 +255,20 @@ PP="$PP"'|Added successfully Conversion service:AthenaPoolCnvSvc'
 # Py:PropertyProxy
 PP="$PP"'|Py:PropertyProxy.*WARNING'
 
+# APR version numbers are not important
+PP="$PP"'|Reading Param:POOL_VSN=|Reading Param:FORMAT_VSN='
+
 ########################################### END #####################################################
 
-# Always use default ignore list
+# Combine the default ignore list with patterns from ENV (usually set in CMakeLists)
 if [ -n "$ignorepatterns" ]; then
     ignorepatterns="$PP|$ignorepatterns"
 else
     ignorepatterns=$PP
+fi
+# Add more ignore patterns from environment (development helper feature)
+if [ -n "$ignorepatterns2" ]; then
+    ignorepatterns="$ignorepatterns|$ignorepatterns2"
 fi
 
 # Make sure errors are not filtered

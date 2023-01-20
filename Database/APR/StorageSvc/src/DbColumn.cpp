@@ -129,7 +129,7 @@ DbStatus DbColumn::fromString( const string& string_rep)  {
 
 #define _NAME_(x) #x
 
-// Access the type name by type_info
+// Access the type name by typeID
 const string DbColumn::typeName(int typ)    {
   switch(typ)   {
   case UCHAR:

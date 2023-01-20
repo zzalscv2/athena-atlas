@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -16,6 +16,7 @@
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDomain.h"
 #include "POOLCore/DbPrint.h"
+#include "RootAuxDynIO/RootAuxDynIO.h"
 
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -32,6 +33,8 @@
 #include "TTree.h"
 #include "TTreeCache.h"
 #include "TSystem.h"
+#include "Compression.h"
+#include "TKey.h"
 
 using namespace pool;
 using namespace std;
@@ -138,7 +141,6 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
     } else {
       m_fileMgr = dynamic_cast<IFileMgr*>(is);
     }
-    
   }
 
   // FIXME: hack to avoid issue with setting up RecExCommon links
@@ -183,10 +185,6 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
 	m_file = (TFile*)vf;
       }
     }
-    if (m_file != nullptr) {
-      m_file->SetCompressionLevel(m_defCompression);
-      m_file->SetCompressionAlgorithm(m_defCompressionAlg);
-    }
   }
   else if ( pool::RECREATE == (mode&pool::RECREATE) )   {
     if (m_fileMgr == nullptr) {
@@ -202,10 +200,6 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
 	m_file = (TFile*)vf;
       }
     }
-    if (m_file != nullptr) {
-      m_file->SetCompressionLevel(m_defCompression);
-      m_file->SetCompressionAlgorithm(m_defCompressionAlg);
-    }
   }
   else if ( mode&pool::CREATE && result == kTRUE )   {
     if (m_fileMgr == nullptr) {
@@ -220,10 +214,6 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
       } else {      
 	m_file = (TFile*)vf;
       }
-    }
-    if (m_file != nullptr) {
-      m_file->SetCompressionLevel(m_defCompression);
-      m_file->SetCompressionAlgorithm(m_defCompressionAlg);
     }
   }
   else if ( mode&pool::CREATE && result == kFALSE )   {
@@ -252,7 +242,13 @@ DbStatus RootDatabase::open(const DbDomain& domH,const std::string& nam,DbAccess
         << " if it does not exists. " << DbPrint::endmsg;
   }
 
-  return (nullptr == m_file) ? Error : Success;
+  if( !m_file ) return Error;
+
+  if( mode != pool::READ ) {
+     m_file->SetCompressionLevel(m_defCompression);
+     m_file->SetCompressionAlgorithm(m_defCompressionAlg);
+  }
+  return Success;
 }
 
 /// Re-open database with changing access permissions
@@ -298,57 +294,55 @@ static void printErrno(DbPrint& log, const char* nam, int err) {
 
 /// Close the root Database: in CREATE/Update mode write the file header...
 DbStatus RootDatabase::close(DbAccessMode /* mode */ )  {
-  int n(0);
-  int err(0);
-  if ( m_file )   {
-    if ( m_file->IsOpen() )     {
-      DbPrint log("RootDatabase.close");
-      const char* nam = (m_file) ? m_file->GetName() : "UNKNOWN";
-      bool closed(false);
-      if ( byteCount(WRITE_COUNTER) > 0 )   {
-        TDirectory::TContext dirCtxt(0);
-        m_file->ResetErrno();
-        m_file->Write("0", m_defWritePolicy);
-        if (errno != ENOENT) {
-          // As of 6.20.02, ROOT may search for libraries during the Write()
-          // call, possibly setting errno to ENOENT.  This isn't an error
-          // of the write.
-          printErrno(log, nam, m_file->GetErrno());
-        }
-        //m_file->ls();
-        m_file->ResetErrno();
+   int err(0);
+   int fclose_rc = 0;
+   if( m_file ) {
+      if( m_file->IsOpen() ) {
+         const char* nam = m_file->GetName();
+         DbPrint log("RootDatabase.close");
+         log << DbPrintLvl::Debug << "Closing DB " << nam << DbPrint::endmsg;
+         bool closed(false);
 
-	if (m_fileMgr == nullptr) {
-	  m_file->Close();
-	} else {
-	  n = m_fileMgr->close(m_file,"RootDatabase");
-	}
-	closed = true;
-        err = m_file->GetErrno();
-        printErrno(log, nam, err);
-        if (m_file->GetSeekKeys() == 0)   {
-          log << DbPrintLvl::Error << "Failed to close file: " << nam
-            << " something wrong happened in Close." << DbPrint::endmsg;
-          err = 1;
-        }
-      }
-      log << DbPrintLvl::Debug
-          << "I/O READ  Bytes: " << byteCount(READ_COUNTER)  << DbPrint::endmsg
-          << "I/O WRITE Bytes: " << byteCount(WRITE_COUNTER) << DbPrint::endmsg
-          << "I/O OTHER Bytes: " << byteCount(OTHER_COUNTER) << DbPrint::endmsg;
+         if ( byteCount(WRITE_COUNTER) > 0 )   {
+            TDirectory::TContext dirCtxt(0);
+            m_file->ResetErrno();
+            m_file->Write("0", m_defWritePolicy);
+            if (errno != ENOENT) {
+               // As of 6.20.02, ROOT may search for libraries during the Write()
+               // call, possibly setting errno to ENOENT.  This isn't an error
+               // of the write.
+               printErrno(log, nam, m_file->GetErrno());
+            }
+            m_file->ResetErrno();
 
-      if (!closed && m_fileMgr != nullptr) {
-	n = m_fileMgr->close(m_file,"RootDatabase");
-      }      
-    }    
-  }
-  if (n == 0) {
-    if (!deletePtr(m_file).isSuccess()) err = 1;
-  }
-  if (err == 0) {
-     return Success;
-  }
-  return Error;
+            if (m_fileMgr == nullptr) {
+               m_file->Close();
+            } else {
+               fclose_rc = m_fileMgr->close(m_file,"RootDatabase");
+            }
+            closed = true;
+            err = m_file->GetErrno();
+            printErrno(log, nam, err);
+            if (m_file->GetSeekKeys() == 0)   {
+               log << DbPrintLvl::Error << "Failed to close file: " << nam
+                   << " something wrong happened in Close." << DbPrint::endmsg;
+               err = 1;
+            }
+         }
+         log << DbPrintLvl::Debug
+             << "I/O READ  Bytes: " << byteCount(READ_COUNTER)  << DbPrint::endmsg
+             << "I/O WRITE Bytes: " << byteCount(WRITE_COUNTER) << DbPrint::endmsg
+             << "I/O OTHER Bytes: " << byteCount(OTHER_COUNTER) << DbPrint::endmsg;
+
+         if (!closed && m_fileMgr != nullptr) {
+            fclose_rc = m_fileMgr->close(m_file,"RootDatabase");
+         }      
+      }    
+   }
+   if( fclose_rc == 0 ) {
+      if( !deletePtr(m_file).isSuccess() ) err = 1;
+   }
+   return (err == 0 ? Success : Error);
 }
 
 /// Do some statistics: add number of bytes read/written/other
@@ -860,8 +854,18 @@ void RootDatabase::registerBranchContainer(RootTreeContainer* cont)
 /// Execute Database Transaction action
 DbStatus RootDatabase::transAct(Transaction::Action action)
 {
+   // We only care about writing actions here
+   if( action != Transaction::TRANSACT_COMMIT and action != Transaction::TRANSACT_FLUSH )
+      return Success;
+
+   // MN: maybe !m_file should be an error
+   if( m_file == nullptr or !m_file->IsWritable() )
+      return Success;
+
+   if( fillBranchContainerTrees() != Success ) return Error;
+
    // process flush to write file
-   if( action == Transaction::TRANSACT_FLUSH && m_file != nullptr && m_file->IsWritable()) {
+   if( action == Transaction::TRANSACT_FLUSH ) {
       m_file->Write();
       if (dynamic_cast<TMemFile*>(m_file) == nullptr) {
          TIter nextKey(m_file->GetListOfKeys());
@@ -888,26 +892,96 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
          }
       }
       // check all TTrees, if Branch baskets are below max, after explicit Write() call
-      for( map< TTree*, ContainerSet_t >::iterator treeIt = m_containersInTree.begin(),
-              mapEnd = m_containersInTree.end(); treeIt != mapEnd; ++treeIt ) {
-         TTree *tree = treeIt->first;
-         TIter next(tree->GetListOfBranches());
-         TBranch * b = nullptr;
-         DbPrint log( m_file->GetName() );
-         while((b = (TBranch*)next())){
-            if (b->GetBasketSize() > m_maxBufferSize) {
-               log << DbPrintLvl::Debug << b->GetName() << " Basket size = " << b->GetBasketSize()
-                   << " reduced to " << m_maxBufferSize
-                   << DbPrint::endmsg;
-               b->SetBasketSize(m_maxBufferSize);
-            }
-         }
+      for( auto& el : m_containersInTree ) {
+         reduceBasketsSize( el.first );
       }
    }
    // process commits only
    if( action != Transaction::TRANSACT_COMMIT )
       return Success;
 
+   // process commits
+   DbPrint log( m_file->GetName() );
+   log << DbPrintLvl::Debug << "DB Action Commit" << DbPrint::endmsg; 
+
+   for( auto& el : m_containersInTree ) {
+      TTree *tree = el.first;
+      if( tree->GetEntries() == m_minBufferEntries ) {
+         increaseBasketsSize(tree);
+      }
+   }
+
+   if( !m_indexMaster.empty() ) {
+      log << DbPrintLvl::Debug << "Synchronizing indexes to master: " <<  m_indexMaster << DbPrint::endmsg;
+      std::vector<IDbContainer*> containers;
+      m_dbH.containers(containers);
+      m_indexMasterID = 0;
+      if( m_indexMaster == "*" ) {
+         // find the biggest index ID
+         for( auto c : containers ) {
+            long long nextID = c->nextRecordId() & 0xFFFFFFFF;
+            if( nextID > m_indexMasterID ) m_indexMasterID = nextID;
+         }
+      } else {
+         // look for the master by name
+         for( auto c = containers.begin(); c !=  containers.end(); ++c ) {
+            if( (*c)->name() == m_indexMaster ) {
+               m_indexMasterID = (*c)->nextRecordId() & 0xFFFFFFFF;
+               containers.erase(c);
+               break;
+            }
+         }
+      }
+      // synchronize all container indices
+      if( m_indexMasterID > 0 ) {
+         // go back by one, so nextID in other indices is equal the last ID in master
+         // this works if synchronizing in separate commits - but not in the same commit!
+         --m_indexMasterID;
+         for( auto c: containers ) {
+            c->useNextRecordId( m_indexMasterID );
+         }
+      }
+   }
+   return Success;
+}
+
+
+void RootDatabase::reduceBasketsSize(TTree* tree)
+{
+   if( !tree ) return;
+   TIter next(tree->GetListOfBranches());
+   TBranch * b = nullptr;
+   while((b = (TBranch*)next())){
+      if (b->GetBasketSize() > m_maxBufferSize) {
+         DbPrint log( m_file->GetName() );
+         log << DbPrintLvl::Debug << b->GetName() << " Basket size = " << b->GetBasketSize()
+             << " reduced to " << m_maxBufferSize
+             << DbPrint::endmsg;
+         b->SetBasketSize(m_maxBufferSize);
+      }
+   }
+}
+
+
+void RootDatabase::increaseBasketsSize(TTree* tree)
+{
+   if( !tree ) return;
+   TIter next(tree->GetListOfBranches());
+   TBranch * b = nullptr;
+   while((b = (TBranch*)next())){
+      if (b->GetBasketSize() < b->GetTotalSize()) {
+         DbPrint log( m_file->GetName() );
+         log << DbPrintLvl::Debug << b->GetName() << " Initial basket size = " << b->GetBasketSize()
+             << " increased to " << b->GetBasketSize() * (1 + int(b->GetTotalSize()/b->GetBasketSize()))
+             << DbPrint::endmsg;
+         b->SetBasketSize(b->GetBasketSize() * (1 + int(b->GetTotalSize()/b->GetBasketSize())));
+      }
+   }
+}
+
+
+DbStatus RootDatabase::fillBranchContainerTrees()
+{
    // check all TTrees with branch containers, if they need Filling
    for( map< TTree*, ContainerSet_t >::iterator treeIt = m_containersInTree.begin(),
            mapEnd = m_containersInTree.end(); treeIt != mapEnd; ++treeIt ) {
@@ -941,7 +1015,6 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
             int num_bytes = tree->Fill();
             if( num_bytes > 0 ) {
                addByteCount( RootDatabase::WRITE_COUNTER, num_bytes );
-               // cout << "-----XXXX---  Filled branch container TTree: " << tree->GetName() << endl;
             } else {
                DbPrint err( m_file->GetName() );
                err << DbPrintLvl::Error << "Write to " <<  tree->GetName() << " failed"
@@ -971,58 +1044,6 @@ DbStatus RootDatabase::transAct(Transaction::Action action)
          if( maxbranchlen > 0 )  tree->SetEntries( maxbranchlen );
       }
    }
-
-   for( map< TTree*, ContainerSet_t >::iterator treeIt = m_containersInTree.begin(),
-           mapEnd = m_containersInTree.end(); treeIt != mapEnd; ++treeIt ) {
-      TTree *tree = treeIt->first;
-      if( tree->GetEntries() == m_minBufferEntries ) {
-         TIter next(tree->GetListOfBranches());
-         TBranch * b = nullptr;
-         while((b = (TBranch*)next())){
-            if (b->GetBasketSize() < b->GetTotalSize()) {
-               DbPrint log( m_file->GetName() );
-               log << DbPrintLvl::Debug << b->GetName() << " Initial basket size = " << b->GetBasketSize()
-                   << " increased to " << b->GetBasketSize() * (1 + int(b->GetTotalSize()/b->GetBasketSize()))
-                   << DbPrint::endmsg;
-               b->SetBasketSize(b->GetBasketSize() * (1 + int(b->GetTotalSize()/b->GetBasketSize())));
-            }
-         }
-      }
-   }
-
-   if( !m_indexMaster.empty() ) {
-      DbPrint log( m_file->GetName() );
-      log << DbPrintLvl::Debug << "Synchronizing indexes to master: " <<  m_indexMaster << DbPrint::endmsg;
-      std::vector<IDbContainer*> containers;
-      m_dbH.containers(containers);
-      m_indexMasterID = 0;
-      if( m_indexMaster == "*" ) {
-         // find the biggest index ID
-         for( auto c : containers ) {
-            long long nextID = c->nextRecordId() & 0xFFFFFFFF;
-            if( nextID > m_indexMasterID ) m_indexMasterID = nextID;
-         }
-      } else {
-         // look for the master by name
-         for( auto c = containers.begin(); c !=  containers.end(); ++c ) {
-            if( (*c)->name() == m_indexMaster ) {
-               m_indexMasterID = (*c)->nextRecordId() & 0xFFFFFFFF;
-               // cout << "Found master index: " << (*c)->name() << "  next ID= " << m_indexMasterID  << endl;
-               containers.erase(c);
-               break;
-            }
-         }
-      }
-      // synchronize all container indices
-      if( m_indexMasterID > 0 ) {
-         // go back by one, so nextID in other indices is equal the last ID in master
-         // this works if synchronizing in separate commits - but not in the same commit!
-         --m_indexMasterID;
-         for( auto c: containers ) {
-            c->useNextRecordId( m_indexMasterID );
-         }
-      }
-   }
-   
    return Success;
 }
+
