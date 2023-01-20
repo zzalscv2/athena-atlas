@@ -53,7 +53,8 @@ namespace InDet {
     if (track->isAvailable<unsigned long>("patternRecoInfo") ) {
       const std::bitset<xAOD::NumberOfTrackRecoInfo> patternReco = track->patternRecoInfo();
       if(not patternReco.test(49)) {
-        ATH_MSG_WARNING( "Applying LRT uncertainties to non-LRT track!" );
+        ATH_MSG_DEBUG( "Applying LRT uncertainties to non-LRT track! Skipping" );
+        return true;
       }
     }
 
