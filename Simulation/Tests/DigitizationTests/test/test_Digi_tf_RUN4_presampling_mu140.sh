@@ -5,6 +5,7 @@
 # art-architecture:  '#x86_64-intel'
 # art-include: master/Athena
 # art-output: RUN4_presampling.mu140.RDO.pool.root
+# art-output: RDOAnalysis.root
 
 if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
   ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
@@ -37,14 +38,22 @@ rc=$?
 status=$rc
 echo "art-result: $rc digiCA"
 
+rc2=-9999
+if [ $rc -eq 0 ]; then
+  RunRDOAnalysis.py -i "$DigiOutFileName"
+  rc2=$?
+  status=$rc2
+fi
+echo "art-result: $rc2 analysis"
+
 if command -v art.py >/dev/null 2>&1; then
-  rc2=-9999
+  rc3=-9999
   if [ $rc -eq 0 ]; then
     art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --file="$DigiOutFileName"
-    rc2=$?
-    status=$rc2
+    rc3=$?
+    status=$rc3
   fi
-  echo "art-result: $rc2 regression"
+  echo "art-result: $rc3 regression"
 fi
 
 exit $status
