@@ -12,9 +12,7 @@ namespace Trk {
   AmbiguityProcessorBase::AmbiguityProcessorBase(const std::string& t, const std::string& n, const IInterface*  p ):
     AthAlgTool(t,n,p), 
     m_etaBounds{0.8, 1.6, 2.5, 4.0}, 
-    m_stat(m_etaBounds){
-      declareProperty("ObserverTool", m_observerTool, "track observer tool");
-}
+    m_stat(m_etaBounds){}
   //
   bool
   AmbiguityProcessorBase::shouldTryBremRecovery(const Trk::Track & track) const{

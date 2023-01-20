@@ -442,7 +442,7 @@ namespace InDet
          {this, "AssociationTool", "InDet::InDetPRDtoTrackMapToolGangedPixels" };
 
     /**Observer tool      This tool is used to observe the tracks and their 'score' */
-    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "TrackObserverTool", "", "track observer within ambiguity solver"};
+    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "ObserverTool", "", "track observer within ambiguity solver"};
 
     /** some cut values */
     IntegerProperty m_minHits{this, "minHits", 5, "Min Number of hits on track"};

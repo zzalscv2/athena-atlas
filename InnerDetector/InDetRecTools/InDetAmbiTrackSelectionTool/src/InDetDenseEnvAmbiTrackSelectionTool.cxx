@@ -34,10 +34,7 @@ InDet::InDetDenseEnvAmbiTrackSelectionTool::InDetDenseEnvAmbiTrackSelectionTool(
                                                                                 const std::string& n,
                                                                                 const IInterface*  p )
 :
-base_class(t,n,p)
-{
-  declareProperty("ObserverTool", m_observerTool, "track observer tool");
-}
+base_class(t,n,p){}
 
 //================ Initialisation =================================================
 

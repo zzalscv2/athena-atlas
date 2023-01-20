@@ -105,7 +105,7 @@ namespace Trk {
       {this, "SelectionTool", "InDet::InDetDenseEnvAmbiTrackSelectionTool/InDetAmbiTrackSelectionTool"};
 
     /**Observer tool      This tool is used to observe the tracks and their 'score' */
-    PublicToolHandle<Trk::ITrkObserverTool> m_observerToolWriter{this, "TrackObserverToolWriter", "", "track observer writer within ambiguity solver"};
+    PublicToolHandle<Trk::ITrkObserverTool> m_observerToolWriter{this, "ObserverToolWriter", "", "track observer writer within ambiguity solver"};
 
     bool m_rejectInvalidTracks{};
     /// If enabled, this flag will make the tool restore the hole information from the input track after a refit.
