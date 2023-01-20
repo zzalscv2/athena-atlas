@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file StoreGateSvc.icc
@@ -817,14 +817,6 @@ StoreGateSvc::retrieveAllVersions(std::list< SG::ObjectWithVersion<T> >& allVers
     }
   }
   return sc;
-}
-
-
-template <typename T>
-std::unique_ptr<T> 
-StoreGateSvc::readUniquePrivateCopy (const std::string& key) {
-  return std::unique_ptr<T>(SG::Storable_cast<T>(
-                                                 this->typeless_readPrivateCopy(ClassID_traits<T>::ID(), key)));
 }
 
 

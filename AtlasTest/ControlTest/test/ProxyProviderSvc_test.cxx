@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ProxyProviderSvc_test.cxx
@@ -118,61 +118,6 @@ void testRecordBeforeRead(StoreGateSvc& rSG, IProxyProviderSvc& rPPS) {
   cout << "*** ProxyProviderSvc_test RecordBeforeRead OK ***\n\n" <<endl;
 }
 
-void testReadPrivate(StoreGateSvc& rSG) {
-  cout << "*** ProxyProviderSvc_test readPrivate BEGINS ***" <<endl;
-  
-  std::unique_ptr<Foo> apFoo;
-  SGASSERTERROR((rSG.readUniquePrivateCopy<Foo>("NotThere")).get() != nullptr);
-  
-  apFoo=rSG.readUniquePrivateCopy<Foo>("diskFoo");
-  assert(nullptr != apFoo.get());
-  assert(floatEQ(0, static_cast<float>(apFoo->a()))); //check that our Foo is the def constr one
-
-  //now test the situation in which we have a transient obj in the way
-  //record must fail because we already have a provider
-  //not yet SGASSERTERROR(rSG.record(new Foo(6.28), "privFoo").isSuccess());
-  assert(rSG.record(new Foo(6.28), "privFoo").isSuccess());
-  assert(rSG.overwrite(std::make_unique<Foo>(6.28), "privFoo").isSuccess());
-  
-  apFoo=rSG.readUniquePrivateCopy<Foo>("privFoo");
-  assert(nullptr != apFoo.get());
-  assert(floatNEQ(6.28f, static_cast<float>(apFoo->a()))); //check that our Foo is a different one
-  apFoo->setA(3.14);
-  std::unique_ptr<Foo> bpFoo(rSG.readUniquePrivateCopy<Foo>("privFoo"));
-  assert(nullptr != bpFoo.get());
-  assert(&*bpFoo != &*apFoo); //two independent instances
-  assert(floatNEQ(6.28f, static_cast<float>(bpFoo->a()))); 
-  assert(floatNEQ(3.14f, static_cast<float>(bpFoo->a()))); 
-  assert(floatEQ(3.14f, static_cast<float>(apFoo->a()))); 
-  const Foo* plainFoo(nullptr);
-  assert(plainFoo = rSG.retrieve<Foo>("privFoo"));
-  assert(floatEQ(6.28f, static_cast<float>(plainFoo->a()))); //this is the old guy!
-  assert(plainFoo != &*apFoo); //yet another instance
-  assert(plainFoo != &*bpFoo); //yet another instance
-  //  cout << "---------ap " << &*apFoo << " bp " << &*bpFoo  <<endl;
-  //cout << " pFoo33 " << pFoo33 << endl;
-
-  const Foo* pFoo33Orig = apFoo.get();
-  assert(rSG.record(std::move(apFoo), "silly33").isSuccess());
-  const Foo *pFoo33(rSG.retrieve<Foo>("silly33"));
-  assert(nullptr != pFoo33);
-  assert(floatEQ(3.14f, static_cast<float>(pFoo33->a())));
-  assert(pFoo33 == pFoo33Orig); //the private copy we recorded.
-  assert(pFoo33 != &*bpFoo); //not one of the private copies
-  SGASSERTERROR((rSG.readUniquePrivateCopy<Foo>("silly33")).get() != nullptr);
-  assert(rSG.retrieve<Foo>("silly33"));
-  std::unique_ptr<Foo> aptrFoo33(rSG.retrieveUniquePrivateCopy<Foo>("silly33"));
-  assert(aptrFoo33.get() == pFoo33);
-  assert(floatEQ(3.14f, static_cast<float>(aptrFoo33->a())));
-  SGASSERTERROR((pFoo33 = rSG.retrieve<Foo>("silly33")) != nullptr);
-  
-  
-  cout << "*** ProxyProviderSvc_test readPrivate OK ***\n\n" <<endl;
-}
-
-
-
-
 void testHLTAutoKeyReset(StoreGateSvc& rSG, IProxyProviderSvc& rPPS) {
   cout << "*** ProxyProviderSvc_test HLTAutoKeyReset BEGINS ***" <<endl;
   assert(rSG.clearStore(true).isSuccess());
@@ -275,7 +220,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
 
   testRecordBeforeRead(*pStore, *pIPPSvc);
-  testReadPrivate(*pStore);
   testHLTAutoKeyReset(*pStore, *pIPPSvc);
   testOverwrite(*pStore, *pIPPSvc);
   assert(pStore->clearStore(true).isSuccess());
