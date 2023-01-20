@@ -98,6 +98,58 @@
     <y title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
   </h>
 
+  <!-- Detailed hit plots -->
+  <h id="nInnerMostPixelEndcapOutliers" type="TH1F" title="InnerMost Pixel Endcap Outliers">
+    <x title="# InnerMost Pixel Endcap Outliers" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+    <y title="Entries"/>
+  </h>
+  <h id="nInnerMostPixelEndcapOutliers_vs_eta" type="TProfile" title="InnerMost Pixel Endcap Outliers vs Eta">
+    <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+    <y title="# InnerMost Pixel Endcap Outliers" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelEndcapOutliers_vs_phi" type="TProfile" title="InnerMost Pixel Endcap Outliers vs Phi">
+    <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+    <y title="# InnerMost Pixel Endcap Outliers" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelEndcapOutliers_vs_mu" type="TProfile" title="InnerMost Pixel Endcap Outliers vs Mu">
+    <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+    <y title="# InnerMost Pixel Endcap Outliers" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+
+  <h id="nInnerMostPixelSharedEndcapHits" type="TH1F" title="InnerMost Pixel Endcap SharedHits">
+    <x title="# InnerMost Pixel Endcap SharedHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+    <y title="Entries"/>
+  </h>
+  <h id="nInnerMostPixelSharedEndcapHits_vs_eta" type="TProfile" title="InnerMost Pixel Endcap SharedHits vs Eta">
+    <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+    <y title="# InnerMost Pixel Endcap SharedHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelSharedEndcapHits_vs_phi" type="TProfile" title="InnerMost Pixel Endcap SharedHits vs Phi">
+    <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+    <y title="# InnerMost Pixel Endcap SharedHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelSharedEndcapHits_vs_mu" type="TProfile" title="InnerMost Pixel Endcap SharedHits vs Mu">
+    <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+    <y title="# InnerMost Pixel Endcap SharedHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+
+  <h id="nInnerMostPixelSplitEndcapHits" type="TH1F" title="InnerMost Pixel Endcap SplitHits">
+    <x title="# InnerMost Pixel SplitHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+    <y title="Entries"/>
+  </h>
+  <h id="nInnerMostPixelSplitEndcapHits_vs_eta" type="TProfile" title="InnerMost Pixel Endcap SplitHits vs Eta">
+    <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+    <y title="# InnerMost Pixel Endcap SplitHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelSplitEndcapHits_vs_phi" type="TProfile" title="InnerMost Pixel Endcap SplitHits vs Phi">
+    <x title="#phi" n="80" lo="-3.2" hi="3.2"/>
+    <y title="# InnerMost Pixel Endcap SplitHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+  <h id="nInnerMostPixelSplitEndcapHits_vs_mu" type="TProfile" title="InnerMost Pixel Endcap SplitHits vs Mu">
+    <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+    <y title="# InnerMost Pixel Endcap SplitHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
+  </h>
+
   <!--
       =======================================================
       end of innermost pixel hit plots for endcaps
