@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAOD_ANALYSIS
@@ -14,9 +14,10 @@
 
 
 TauTrackFinder::TauTrackFinder(const std::string& name) :
-  TauRecToolBase(name) {
-  m_EMSamplings = {CaloSampling::EME1, CaloSampling::EMB1};
-  m_HadSamplings = {CaloSampling::TileBar1, CaloSampling::HEC1, CaloSampling::TileExt1};
+  TauRecToolBase(name),
+  m_EMSamplings {CaloSampling::EME1, CaloSampling::EMB1},
+  m_HadSamplings {CaloSampling::TileBar1, CaloSampling::HEC1, CaloSampling::TileExt1}
+{  
 }
 
 TauTrackFinder::~TauTrackFinder() {

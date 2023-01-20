@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "tauRecTools/lwtnn/Stack.h"
@@ -610,12 +610,12 @@ namespace lwtDev {
 
   BidirectionalLayer::BidirectionalLayer(std::unique_ptr<IRecurrentLayer> forward_layer,
                                          std::unique_ptr<IRecurrentLayer> backward_layer,
-                                         std::string merge_mode,
+                                         const std::string& merge_mode,
                                          bool return_sequence):
   m_forward_layer(std::move(forward_layer)),
-  m_backward_layer(std::move(backward_layer))
+  m_backward_layer(std::move(backward_layer)),
+  m_merge_mode(merge_mode)
   {
-    m_merge_mode=merge_mode;
     //baseclass variable
     m_return_sequence=return_sequence;
   }

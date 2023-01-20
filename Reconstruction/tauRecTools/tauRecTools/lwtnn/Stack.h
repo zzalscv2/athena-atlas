@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STACK_HH_TAURECTOOLS
@@ -312,7 +312,7 @@ namespace lwtDev {
   public:
     BidirectionalLayer(std::unique_ptr<IRecurrentLayer> forward_layer,
                        std::unique_ptr<IRecurrentLayer> backward_layer,
-                       std::string merge_mode,
+                       const std::string& merge_mode,
                        bool return_sequence);
 
     virtual ~BidirectionalLayer() {};
