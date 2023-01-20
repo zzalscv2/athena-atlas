@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -67,7 +67,7 @@ MonopolePhysicsTool* MonopolePhysicsTool::GetPhysicsOption()
 void MonopolePhysicsTool::ConstructParticle()
 {
   ATH_MSG_DEBUG(" ConstructParticle for the Monopole being run");
-  CustomMonopoleFactory::loadCustomMonopoles();
+  CustomMonopoleFactory::instance();
 
 }
 void MonopolePhysicsTool::ConstructProcess()
@@ -79,7 +79,7 @@ void MonopolePhysicsTool::ConstructProcess()
     {
 
       CustomMonopole* particle = dynamic_cast<CustomMonopole*>(PARTICLEITERATOR->value());
-      if(CustomMonopoleFactory::isCustomMonopole(particle))
+      if(CustomMonopoleFactory::instance().isCustomMonopole(particle))
         {
           ATH_MSG_DEBUG( particle->GetParticleName() << " is Custom"  );
 

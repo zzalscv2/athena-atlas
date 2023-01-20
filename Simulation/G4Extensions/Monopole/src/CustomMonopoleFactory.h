@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MONOPOLE_CustomMonopoleFactory_h
@@ -17,15 +17,14 @@
 
 class CustomMonopoleFactory
 {
-private:
-  static bool loaded;
-  //  static std::set<G4ParticleDefinition *> m_particles;
-  static std::set<CustomMonopole *> m_particles;
-
 public:
-  static void loadCustomMonopoles();
-  //   static bool isCustomMonopole(G4ParticleDefinition *particle);
-  static bool isCustomMonopole(CustomMonopole *particle);
+  static const CustomMonopoleFactory& instance();
+  void loadCustomMonopoles();
+  bool isCustomMonopole(CustomMonopole *particle) const;
+
+private:
+  CustomMonopoleFactory();
+  std::set<CustomMonopole *> m_particles;
 
 
 };
