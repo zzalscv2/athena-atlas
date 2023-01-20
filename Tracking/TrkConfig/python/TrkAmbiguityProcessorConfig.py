@@ -429,11 +429,11 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
         if flags.InDet.Tracking.materialInteractions else 0)
 
     if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
-        from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
+        from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg, WriterTrkObserverToolCfg
         TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
         acc.addPublicTool(TrkObserverTool)
         kwargs.setdefault("ObserverTool", TrkObserverTool)
-        TrkObserverToolWriter = acc.popToolsAndMerge(TrkObserverToolCfg(flags, name = "TrackObserverToolWriter"))
+        TrkObserverToolWriter = acc.popToolsAndMerge(WriterTrkObserverToolCfg(flags, name = "TrackObserverToolWriter"))
         acc.addPublicTool(TrkObserverToolWriter)
         kwargs.setdefault("ObserverToolWriter", TrkObserverToolWriter)
 

@@ -54,26 +54,32 @@ def TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
     kwargs.setdefault("DecorationPrefix", "")
     kwargs.setdefault("PRDtoTrackMap", "PRDtoTrackMapCombinedInDetTracks")
 
-    if name == "ObserverTrackStateOnSurfaceDecorator":
-        kwargs["ContainerName"] = "InDetObservedTrackParticles"
-        kwargs["DecorationPrefix"] = "ObservedTrack_"
-        kwargs["PixelMsosName"] = "ObservedTrack_Pixel_MSOSs"
-        kwargs["SctMsosName"] = "ObservedTrack_SCT_MSOSs"
-        kwargs["TrtMsosName"] = "ObservedTrack_TRT_MSOSs"
-        kwargs["AddPRD"] = True
-
-    if name == "PseudoTrackStateOnSurfaceDecorator":
-        kwargs["ContainerName"] = "InDetPseudoTrackParticles"
-        kwargs["DecorationPrefix"] = "Pseudo_"
-        kwargs["PixelMsosName"] = "Pseudo_Pixel_MSOSs"
-        kwargs["SctMsosName"] = "Pseudo_SCT_MSOSs"
-        kwargs["TrtMsosName"] = "Pseudo_TRT_MSOSs"
-        kwargs["AddPRD"] = True
-
     TrackStateOnSurfaceDecorator = CompFactory.DerivationFramework.TrackStateOnSurfaceDecorator
     acc.addPublicTool(TrackStateOnSurfaceDecorator(name, **kwargs),
                       primary = True)
     return acc
+
+def ObserverTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
+                                            name="ObserverTrackStateOnSurfaceDecorator",
+                                            **kwargs):
+    kwargs.setdefault("ContainerName", "InDetObservedTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "ObservedTrack_")
+    kwargs.setdefault("PixelMsosName", "ObservedTrack_Pixel_MSOSs")
+    kwargs.setdefault("SctMsosName", "ObservedTrack_SCT_MSOSs")
+    kwargs.setdefault("TrtMsosName", "ObservedTrack_TRT_MSOSs")
+    kwargs.setdefault("AddPRD", True)
+    return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
+  
+def PseudoTrackStateOnSurfaceDecoratorCfg(ConfigFlags,
+                                          name="PseudoTrackStateOnSurfaceDecorator",
+                                          **kwargs):
+    kwargs.setdefault("ContainerName", "InDetPseudoTrackParticles")
+    kwargs.setdefault("DecorationPrefix", "Pseudo_")
+    kwargs.setdefault("PixelMsosName", "Pseudo_Pixel_MSOSs")
+    kwargs.setdefault("SctMsosName", "Pseudo_SCT_MSOSs")
+    kwargs.setdefault("TrtMsosName", "Pseudo_TRT_MSOSs")
+    kwargs.setdefault("AddPRD", True)
+    return TrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs)
 
 def ITkTrackStateOnSurfaceDecoratorCfg(ConfigFlags, name, **kwargs):
     """Configure the TSOS decorator"""

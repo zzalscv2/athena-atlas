@@ -9,13 +9,18 @@ def TrkObserverToolCfg(flags,
                        name="TrackObserverTool",
                        **kwargs):
     acc = ComponentAccumulator()
-    if "Writer" in name:
-        kwargs.setdefault("ObsTrackCollection", "ObservedTracksCollection")
-        kwargs.setdefault("ObsTrackCollectionMap", "ObservedTracksCollectionMap")
-    from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
-    ObserverFitter = acc.popToolsAndMerge(InDetTrackFitterCfg(flags))
-    acc.addPublicTool(ObserverFitter)
-    kwargs.setdefault("Fitter", ObserverFitter)
+    if "Fitter" not in kwargs:
+        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
+        ObserverFitter = acc.popToolsAndMerge(InDetTrackFitterCfg(flags))
+        acc.addPublicTool(ObserverFitter)
+        kwargs.setdefault("Fitter", ObserverFitter)
     kwargs.setdefault("HadROIPhiRZEtContainer", "InDetHadCaloClusterROIPhiRZEt")
     acc.setPrivateTools(CompFactory.Trk.TrkObserverTool(name, **kwargs))
     return acc
+
+def WriterTrkObserverToolCfg(flags,
+                             name="WriterTrackObserverTool",
+                             **kwargs):
+    kwargs.setdefault("ObsTrackCollection", "ObservedTracksCollection")
+    kwargs.setdefault("ObsTrackCollectionMap", "ObservedTracksCollectionMap")
+    return TrkObserverToolCfg(flags, name, **kwargs)

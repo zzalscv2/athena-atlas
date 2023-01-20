@@ -106,12 +106,6 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
     kwargs.setdefault("TrackContainerName", "CombinedInDetTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
 
-    if name == "ObserverTrackParticleCnvAlg":
-        kwargs["TrackContainerName"] = "ObservedTracksCollection"
-        kwargs["xAODTrackParticlesFromTracksContainerName"] = "InDetObservedTrackParticles"
-        kwargs.setdefault("AugmentObservedTracks", True)
-        kwargs.setdefault("TracksMapName", "ObservedTracksCollectionMap")
-
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import TrackParticleCreatorToolCfg
         kwargs.setdefault("TrackParticleCreator", result.popToolsAndMerge(
@@ -163,6 +157,16 @@ def TrackParticleCnvAlgNoPIDCfg(flags, name, **kwargs):
 
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
+
+def ObserverTrackParticleCnvAlgCfg(flags, name="ObserverTrackParticleCnvAlg",
+                                   ClusterSplitProbabilityName = "",
+                                   AssociationMapName = "",
+                                   **kwargs):
+    kwargs.setdefault("TrackContainerName", "ObservedTracksCollection")
+    kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetObservedTrackParticles")
+    kwargs.setdefault("AugmentObservedTracks", True)
+    kwargs.setdefault("TracksMapName", "ObservedTracksCollectionMap")    
+    return TrackParticleCnvAlgCfg(flags, name, ClusterSplitProbabilityName, AssociationMapName, **kwargs)
 
 def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
                               ClusterSplitProbabilityName = "",

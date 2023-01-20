@@ -402,9 +402,11 @@ def InDetTrackRecoCfg(flags):
                                         AssociationMapName = "PRDtoTrackMapCombinedInDetTracks"))
 
     if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
-        from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
-        result.merge(TrackParticleCnvAlgCfg(flags, name = "ObserverTrackParticleCnvAlg"))
-
+        from xAODTrackingCnv.xAODTrackingCnvConfig import ObserverTrackParticleCnvAlgCfg
+        result.merge(ObserverTrackParticleCnvAlgCfg(flags,
+                                                    name = "ObserverTrackParticleCnvAlg",
+                                                    ClusterSplitProbabilityName = "",
+                                                    AssociationMapName = ""))
     if flags.InDet.Tracking.doStoreTrackSeeds:
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgNoPIDCfg
         result.merge(TrackParticleCnvAlgNoPIDCfg(flags,
@@ -432,10 +434,12 @@ def InDetTrackRecoCfg(flags):
         TrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="TrackStateOnSurfaceDecorator"))
         result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("InDetCommonKernel", AugmentationTools = [TrackStateOnSurfaceDecorator]))
         if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
-            ObserverTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="ObserverTrackStateOnSurfaceDecorator"))
+            from DerivationFrameworkInDet.InDetToolsConfig import ObserverTrackStateOnSurfaceDecoratorCfg
+            ObserverTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(ObserverTrackStateOnSurfaceDecoratorCfg(flags))
             result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("ObserverInDetCommonKernel", AugmentationTools = [ObserverTrackStateOnSurfaceDecorator]))
         if flags.InDet.Tracking.doPseudoTracking:
-            PseudoTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(TrackStateOnSurfaceDecoratorCfg(flags, name="PseudoTrackStateOnSurfaceDecorator"))
+            from DerivationFrameworkInDet.InDetToolsConfig import PseudoTrackStateOnSurfaceDecoratorCfg
+            PseudoTrackStateOnSurfaceDecorator = result.getPrimaryAndMerge(PseudoTrackStateOnSurfaceDecoratorCfg(flags))
             result.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation("PseudoInDetCommonKernel", AugmentationTools = [PseudoTrackStateOnSurfaceDecorator]))
 
         if flags.Input.isMC:
@@ -560,11 +564,6 @@ def InDetTrackRecoOutputCfg(flags):
 
     if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring:
         toESD += ["TrackCollection#ObservedTracksCollection"]
-        toESD += ["xAOD::TrackParticleContainer#InDetObservedTrackParticles"]
-        toESD += [f"xAOD::TrackParticleAuxContainer#InDetObservedTrackParticlesAux.{excludedAuxData}"]
-        if flags.InDet.doTruth:
-            toESD += ["TrackTruthCollection#InDetObservedTrackTruthCollection"]
-            toESD += ["DetailedTrackTruthCollection#ObservedDetailedTracksTruth"]
 
     # add the forward tracks for combined muon reconstruction
     if flags.InDet.Tracking.doForwardTracks:
