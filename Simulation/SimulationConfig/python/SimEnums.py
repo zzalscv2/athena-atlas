@@ -53,6 +53,9 @@ class SimulationFlavour(FlagEnum):
     def usesFastCaloSim(self):
         return 'ATLFAST' in self.value
 
+    def usesFatras(self):
+        return 'ATLFASTIIF' in self.value or 'ATLFAST3F' in self.value # TODO Extend for Acts::Fatras in the future
+
     def isQuasiStable(self):
         return 'QS' in self.value
 

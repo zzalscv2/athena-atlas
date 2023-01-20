@@ -165,12 +165,14 @@ def _getInDetTrackingGeometryBuilder(name, flags,
         # volumes
         TRT_LayerBinning = 1
         from AthenaConfiguration.Enums import ProductionStep
-        from SimulationConfig.SimEnums import SimulationFlavour
-        if (buildTrtStrawLayers or
-            (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain]
-             and flags.Sim.ISF.Simulator not in [SimulationFlavour.ATLFASTIIMT])):
+        if buildTrtStrawLayers or (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator.usesFatras()):
+            # We do not need a detailed TRT description if we are not running Fatras
             TRT_LayerBinning = 2
             TRT_LayerBuilder.ModelLayersOnly = False
+        if not (flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain] and flags.Sim.ISF.Simulator.usesFatras()):
+            # We do not need a detailed TRT description if we are not running Fatras
+            TRT_LayerBuilder.BarrelLayerBinsZ = 1
+            TRT_LayerBuilder.EndcapLayerBinsR = 1
         # TRT -> ToolSvc
         result.addPublicTool(TRT_LayerBuilder)
 
