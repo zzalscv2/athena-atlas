@@ -53,7 +53,11 @@ StatusCode ISF::SimEventFilter::finalize()
 }
 
 /** check if the given particle passes all filters */
+#ifdef HEPMC3
 bool ISF::SimEventFilter::passesFilters(HepMC::ConstGenParticlePtr& part, const ToolHandleArray<IGenParticleFilter>& filters) const
+#else
+bool ISF::SimEventFilter::passesFilters(HepMC::ConstGenParticlePtr part, const ToolHandleArray<IGenParticleFilter>& filters) const
+#endif
 {
   // TODO: implement this as a std::find_if with a lambda function
   for ( const auto& filter : filters ) {
@@ -93,7 +97,6 @@ StatusCode ISF::SimEventFilter::execute(const EventContext &ctx) const
     ATH_MSG_DEBUG("Starting check of GenEvent with"
                   " signal_process_id=" << HepMC::signal_process_id(eventPtr) <<
                   " and event_number=" << eventPtr->event_number() );
-
     for (auto p : *eventPtr) {
       ATH_MSG_VERBOSE("Checking filters for particle: "<< p);
       ATH_MSG_VERBOSE("Common filters:");
