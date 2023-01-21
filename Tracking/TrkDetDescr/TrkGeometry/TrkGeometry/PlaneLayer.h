@@ -81,7 +81,7 @@ public:
      components and MaterialProperties
      - shared bounds */
   PlaneLayer(const Amg::Transform3D & transform,
-             Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
+             const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds,
              const Trk::LayerMaterialProperties& laymatprop,
              double thickness = 0., std::unique_ptr<Trk::OverlapDescriptor> olap = nullptr,
              int laytyp = int(Trk::active));
