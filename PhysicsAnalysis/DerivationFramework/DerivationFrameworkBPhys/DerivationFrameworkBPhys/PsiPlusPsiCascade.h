@@ -86,7 +86,12 @@ namespace DerivationFramework {
     bool   m_constrJpsi2;
     bool   m_constrDiTrk1;
     bool   m_constrDiTrk2;
+    double m_chi2cut_Psi1;
+    double m_chi2cut_Psi2;
     double m_chi2cut;
+    bool   m_removeDuplicatePairs;
+    unsigned int m_maxPsi1Candidates;
+    unsigned int m_maxPsi2Candidates;
 
     ServiceHandle<IBeamCondSvc>                      m_beamSpotSvc;
     ToolHandle < Trk::TrkVKalVrtFitter >             m_iVertexFitter;
