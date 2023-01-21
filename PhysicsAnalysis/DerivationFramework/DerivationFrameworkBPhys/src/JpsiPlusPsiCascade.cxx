@@ -128,7 +128,8 @@ namespace DerivationFramework {
     SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
     SG::AuxElement::Decorator<float> chi2_SV1_decor("ChiSquared_SV1");
     SG::AuxElement::Decorator<float> chi2_nc_SV1_decor("ChiSquared_nc_SV1");
-    SG::AuxElement::Decorator<int> ndof_nc_SV1_decor("nDoF_nc_SV1");
+    SG::AuxElement::Decorator<float> chi2_V1_decor("ChiSquared_V1");
+    SG::AuxElement::Decorator<int> ndof_V1_decor("nDoF_V1");
     SG::AuxElement::Decorator<float> lxy_SV1_decor("lxy_SV1");
     SG::AuxElement::Decorator<float> lxyErr_SV1_decor("lxyErr_SV1");
     SG::AuxElement::Decorator<float> a0xy_SV1_decor("a0xy_SV1");
@@ -137,7 +138,8 @@ namespace DerivationFramework {
     SG::AuxElement::Decorator<float> a0zErr_SV1_decor("a0zErr_SV1");
     SG::AuxElement::Decorator<float> chi2_SV2_decor("ChiSquared_SV2");
     SG::AuxElement::Decorator<float> chi2_nc_SV2_decor("ChiSquared_nc_SV2");
-    SG::AuxElement::Decorator<int> ndof_nc_SV2_decor("nDoF_nc_SV2");
+    SG::AuxElement::Decorator<float> chi2_V2_decor("ChiSquared_V2");
+    SG::AuxElement::Decorator<int> ndof_V2_decor("nDoF_V2");
     SG::AuxElement::Decorator<float> lxy_SV2_decor("lxy_SV2");
     SG::AuxElement::Decorator<float> lxyErr_SV2_decor("lxyErr_SV2");
     SG::AuxElement::Decorator<float> a0xy_SV2_decor("a0xy_SV2");
@@ -236,13 +238,14 @@ namespace DerivationFramework {
       // chi2 and ndof (the default chi2 of mainVertex is != the chi2 of the full cascade fit!)
       chi2_decor(*mainVertex)     = cascade_info->fitChi2();
       ndof_decor(*mainVertex)     = cascade_info->nDoF();
-      chi2_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->fitChi2() : 999999.;
-      ndof_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->nDoF() : 1;
+      chi2_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->fitChi2() : -999999.;
+      ndof_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->nDoF() : -1;
 
       // decorate the Psi vertex
       chi2_SV1_decor(*cascadeVertices[0])    = m_V0Tools->chisq(cascadeVertices[0]);
-      chi2_nc_SV1_decor(*cascadeVertices[0]) = m_V0Tools->chisq(psiVertex);
-      ndof_nc_SV1_decor(*cascadeVertices[0]) = m_V0Tools->ndof(psiVertex);
+      chi2_nc_SV1_decor(*cascadeVertices[0]) = cascade_info_noConstr ? m_V0Tools->chisq(cascade_info_noConstr->vertices()[0]) : -999999.;
+      chi2_V1_decor(*cascadeVertices[0])     = m_V0Tools->chisq(psiVertex);
+      ndof_V1_decor(*cascadeVertices[0])     = m_V0Tools->ndof(psiVertex);
       lxy_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],mainVertex);
       lxyErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info->getCovariance()[0],cascadeVertices[0],mainVertex);
       a0z_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],mainVertex);
@@ -252,8 +255,9 @@ namespace DerivationFramework {
 
       // decorate the Jpsi vertex
       chi2_SV2_decor(*cascadeVertices[1])    = m_V0Tools->chisq(cascadeVertices[1]);
-      chi2_nc_SV2_decor(*cascadeVertices[1]) = m_V0Tools->chisq(jpsiVertex);
-      ndof_nc_SV2_decor(*cascadeVertices[1]) = m_V0Tools->ndof(jpsiVertex);
+      chi2_nc_SV2_decor(*cascadeVertices[1]) = cascade_info_noConstr ? m_V0Tools->chisq(cascade_info_noConstr->vertices()[1]) : -999999.;
+      chi2_V2_decor(*cascadeVertices[1])     = m_V0Tools->chisq(jpsiVertex);
+      ndof_V2_decor(*cascadeVertices[1])     = m_V0Tools->ndof(jpsiVertex);
       lxy_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
       lxyErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
       a0z_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
@@ -312,7 +316,10 @@ namespace DerivationFramework {
     m_constrJpsi(false),
     m_constrDiTrk(false),
     m_constrJpsi2(false),
+    m_chi2cut_Psi(-1.0),
+    m_chi2cut_Jpsi(-1.0),
     m_chi2cut(-1.0),
+    m_maxPsiCandidates(0),
     m_beamSpotSvc("BeamCondSvc",name),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_pvRefitter("Analysis::PrimaryVertexRefitter"),
@@ -351,7 +358,10 @@ namespace DerivationFramework {
     declareProperty("ApplyDiTrackMassConstraint", m_constrDiTrk); // only effective when m_vtx1Daug_num=4
     declareProperty("ApplyPsiMassConstraint",     m_constrPsi);
     declareProperty("ApplyJpsi2MassConstraint",   m_constrJpsi2);
+    declareProperty("Chi2CutPsi",                 m_chi2cut_Psi);
+    declareProperty("Chi2CutJpsi",                m_chi2cut_Jpsi);
     declareProperty("Chi2Cut",                    m_chi2cut);
+    declareProperty("MaxPsiCandidates",           m_maxPsiCandidates);
     declareProperty("RefitPV",                    m_refitPV         = true);
     declareProperty("MaxnPV",                     m_PV_max          = 1000);
     declareProperty("MinNTracksInPV",             m_PV_minNTracks   = 0);
@@ -409,6 +419,10 @@ namespace DerivationFramework {
       // Check Jpsi candidate invariant mass and skip if need be
       double mass_jpsi2 = m_V0Tools->invariantMass(*vxcItr, massesJpsi2);
       if (mass_jpsi2 < m_jpsi2MassLower || mass_jpsi2 > m_jpsi2MassUpper) continue;
+
+      double chi2DOF = (*vxcItr)->chiSquared()/(*vxcItr)->numberDoF();
+      if(m_chi2cut_Jpsi>0 && chi2DOF>m_chi2cut_Jpsi) continue;
+
       selectedJpsiCandidates.push_back(*vxcItr);
     }
     if(selectedJpsiCandidates.size()<1) return StatusCode::SUCCESS;
@@ -454,9 +468,17 @@ namespace DerivationFramework {
 	if (mass_diTrk < m_diTrackMassLower || mass_diTrk > m_diTrackMassUpper) continue;
       }
 
+      double chi2DOF = (*vxcItr)->chiSquared()/(*vxcItr)->numberDoF();
+      if(m_chi2cut_Psi>0 && chi2DOF>m_chi2cut_Psi) continue;
+
       selectedPsiCandidates.push_back(*vxcItr);
     }
     if(selectedPsiCandidates.size()<1) return StatusCode::SUCCESS;
+
+    std::sort( selectedPsiCandidates.begin(), selectedPsiCandidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
+    if(m_maxPsiCandidates>0 && selectedPsiCandidates.size()>m_maxPsiCandidates) {
+      selectedPsiCandidates.erase(selectedPsiCandidates.begin()+m_maxPsiCandidates, selectedPsiCandidates.end());
+    }
 
     // Select Jpsi+Psi candidates
     // Iterate over Jpsi vertices
