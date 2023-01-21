@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """ToolFactories to instantiate
 all egammaTools with default configuration"""
@@ -9,9 +9,6 @@ from ElectronPhotonSelectorTools.EgammaPIDdefs import egammaPID
 from egammaTools import egammaToolsConf
 from egammaRec.Factories import ToolFactory
 from egammaRec import egammaKeys
-from egammaCaloTools.egammaCaloToolsFactories import (
-  egammaShowerShape, egammaIso)
-from CaloIdentifier import SUBCALO
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 
@@ -71,12 +68,3 @@ class EMPIDBuilderPhotonBase (egammaToolsConf.EMPIDBuilder):
 PhotonPIDBuilder = ToolFactory(
     EMPIDBuilderPhotonBase,
     name="PhotonPIDBuilder")
-
-
-EMShowerBuilder = ToolFactory(
-    egammaToolsConf.EMShowerBuilder,
-    CellsName=egammaKeys.caloCellKey(),
-    CaloNums=[SUBCALO.LAREM, SUBCALO.LARHEC, SUBCALO.TILE],
-    ShowerShapeTool=egammaShowerShape,
-    HadronicLeakageTool=egammaIso,
-    Print=False)
