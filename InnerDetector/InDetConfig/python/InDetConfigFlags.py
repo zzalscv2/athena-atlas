@@ -206,6 +206,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doIdealPseudoTracking", False)
     # Switch for track observer tool
     icf.addFlag("InDet.Tracking.doTIDE_AmbiTrackMonitoring", False)
+    # Save SiSP tracks (input to the ambiguity solver)
+    icf.addFlag("InDet.Tracking.doStoreSiSPSeededTracks", False)
     # Skip ambiguity solver entirely
     icf.addFlag("InDet.Tracking.doSkipAmbi", False)
     # Skip ambiguity solver in hadronic ROI
