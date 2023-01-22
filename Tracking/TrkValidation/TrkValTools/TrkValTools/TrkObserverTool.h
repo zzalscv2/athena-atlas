@@ -26,8 +26,6 @@
 //need to include the following, since its a typedef and can't be forward declared.
 #include "TrkTrack/TrackCollection.h"
 
-// Track fitter
-#include "TrkFitterInterfaces/ITrackFitter.h"
 // for hadronic ROI studies
 #include "TrkCaloClusterROI/ROIPhiRZEtContainer.h"
 
@@ -66,8 +64,6 @@ namespace Trk {
 			// name of the observed (saved) track collection
 		    SG::WriteHandleKey<TrackCollection> m_savedTracksWriteKey;
 		    SG::WriteHandleKey<ObservedTracksMap> m_savedTracksMapWriteKey;
-			// track fitter
-		    ToolHandle<ITrackFitter> m_fitterTool;
 			// hadronic ROI container
 			SG::ReadHandleKey<ROIPhiRZEtContainer> m_inputHadClusterContainerKey;
 		    FloatProperty m_hadEtMin{this, "hadEtMin", 150000., "in MeV"};

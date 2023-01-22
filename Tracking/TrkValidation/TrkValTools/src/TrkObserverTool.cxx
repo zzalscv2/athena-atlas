@@ -61,7 +61,6 @@
 Trk::TrkObserverTool::TrkObserverTool(const std::string& type, const std::string& name, const IInterface* parent)
 	: AthAlgTool(type, name, parent){
 			declareInterface< ITrkObserverTool >(this);
-		    declareProperty("Fitter", m_fitterTool );
 			declareProperty("ObsTrackCollection", m_savedTracksWriteKey);
 			declareProperty("ObsTrackCollectionMap", m_savedTracksMapWriteKey);
 			declareProperty("HadROIPhiRZEtContainer", m_inputHadClusterContainerKey);
@@ -82,7 +81,6 @@ StatusCode Trk::TrkObserverTool::initialize() {
 	ATH_CHECK(m_savedTracksWriteKey.initialize(!m_savedTracksWriteKey.key().empty()));
 	ATH_CHECK(m_savedTracksMapWriteKey.initialize(!m_savedTracksMapWriteKey.key().empty()));
 	ATH_CHECK(m_inputHadClusterContainerKey.initialize(!m_inputHadClusterContainerKey.key().empty()));
-	ATH_CHECK(m_fitterTool.retrieve());
 	ATH_MSG_INFO("Initialized TrkObserverTool");
 	return StatusCode::SUCCESS;
 }
@@ -183,19 +181,7 @@ void Trk::TrkObserverTool::addInputTrack(int uid, const Trk::Track& track) const
 		ent->m_evt = ctx.evt();
 	}
 	// add input track to cache map
-	std::unique_ptr<Trk::Track> copiedTrack;
-	if (!track.perigeeParameters()) {
-		ATH_MSG_DEBUG("addInputTrack: fitting input track due to lack of perigee");
-		copiedTrack = m_fitterTool->fit(ctx, track);
-		if (!copiedTrack){
-			ATH_MSG_WARNING("addInputTrack: track fit failed!");
-			return;
-		}
-	}
-	else {
-		ATH_MSG_DEBUG("addInputTrack: simply copying input track");
-		copiedTrack = std::make_unique<Trk::Track>(track);
-	}
+	std::unique_ptr<Trk::Track> copiedTrack = std::make_unique<Trk::Track>(track);
 	std::vector<xAOD::RejectionStep> v_rejectStep = {xAOD::RejectionStep::solveTracks};
 	std::vector<xAOD::RejectionReason> v_rejectReason = {xAOD::RejectionReason::acceptedTrack};
 	ATH_MSG_DEBUG("addInputTrack: getting m_inputHadClusterContainerKey = "<<m_inputHadClusterContainerKey);
@@ -235,19 +221,7 @@ void Trk::TrkObserverTool::addSubTrack(int track_uid, int parent_uid, const Trk:
 	ObservedTracksMap* trk_map = getTrackMap(ctx);
 
 	// deep copy of the track (because some subtracks get deleted), information has to be available later
-	std::unique_ptr<Trk::Track> copiedTrack;
-	if (!track.perigeeParameters()) {
-		ATH_MSG_DEBUG("addSubTrack: fitting subtrack due to lack of perigee");
-		copiedTrack = m_fitterTool->fit(ctx, track);
-		if (!copiedTrack){
-			ATH_MSG_WARNING("addSubTrack: track fit failed!");
-			return;
-		}
-	}
-	else {
-		ATH_MSG_DEBUG("addSubTrack: simply copying subtrack");
-		copiedTrack = std::make_unique<Trk::Track>(track);
-	}
+	std::unique_ptr<Trk::Track> copiedTrack = std::make_unique<Trk::Track>(track);
 	// get score and rejection step from parent element
 	double score = -1;
 	xAOD::RejectionStep rejectStep = xAOD::RejectionStep::solveTracks;
