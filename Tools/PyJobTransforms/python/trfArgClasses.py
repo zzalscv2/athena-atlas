@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfArgClasses
 # @brief Transform argument class definitions
@@ -2352,26 +2352,23 @@ class argSubstepSteering(argSubstep):
     # "doOverlay" - run event overlay on presampled RDOs instead of standard HITtoRDO digitization
     # "doFCwOverlay" - run FastChain with MC-overlay (EVNTtoRDOwOverlay) instead of standard PU digitization (EVNTtoRDO)
     # "afterburn" - run the B decay afterburner for event generation
-    # "doRAWtoALL" - produce all DESDs and AODs directly from bytestream
-    # "doTRIGtoALL" - produce AODs directly from trigger RDOs
+    # "doRAWtoESD" - run legacy split workflow (RAWtoESD + ESDtoAOD)
+    # "doRAWtoALL" - (deprecated) produce all DESDs and AODs directly from bytestream
+    # "doTRIGtoALL" - (deprecated) produce AODs directly from trigger RDOs
     steeringAlises = {
                       'no': {},
-                      'doRDO_TRIG': {'RAWtoESD': [('in', '-', 'RDO'), ('in', '+', 'RDO_TRIG'), ('in', '-', 'BS')]},
+                      'doRDO_TRIG': {'RAWtoALL': [('in', '-', 'RDO'), ('in', '+', 'RDO_TRIG'), ('in', '-', 'BS')]},
                       'doOverlay': {'HITtoRDO': [('in', '-', 'HITS'), ('out', '-', 'RDO'), ('out', '-', 'RDO_FILT')],
                                     'Overlay': [('in', '+', ('HITS', 'RDO_BKG')), ('out', '+', 'RDO')]},
                       'doFCwOverlay': {'EVNTtoRDO': [('in', '-', 'EVNT'), ('out', '-', 'RDO')],
                                        'EVNTtoRDOwOverlay': [('in', '+', ('EVNT', 'RDO_BKG')), ('out', '+', 'RDO'), ('out', '+', 'RDO_SGNL')]},
                       'afterburn': {'generate': [('out', '-', 'EVNT')]},
-                      'doRAWtoALL': {'RAWtoALL': [('in', '+', 'BS'), ('in', '+', 'RDO'),
-                                                  ('in', '+', 'DRAW_ZMUMU'), ('in', '+', 'DRAW_ZEE'), ('in', '+', 'DRAW_EMU'), ('in', '+', 'DRAW_RPVLL'), 
-                                                  ('out', '+', 'ESD'), ('out', '+', 'AOD'), ('out', '+', 'HIST_R2A')],
-                                     'RAWtoESD': [('in', '-', 'BS'), ('in', '-', 'RDO'),
-                                                  ('out', '-', 'ESD'),],
-                                     'ESDtoAOD': [('in', '-', 'ESD'), ('out', '-', 'AOD'),]},
-                      'doTRIGtoALL': {'RAWtoALL': [('in', '+', 'RDO_TRIG'),
-                                                   ('out', '+', 'ESD'), ('out', '+', 'AOD'), ('out', '+', 'HIST_R2A')],
-                                     'RAWtoESD': [('in', '-', 'RDO_TRIG'), ('out', '-', 'ESD'),],
-                                     'ESDtoAOD': [('in', '-', 'ESD'), ('out', '-', 'AOD'),]}
+                      'doRAWtoESD': {'RAWtoALL': [('in', '-', 'BS'), ('in', '-', 'RDO'),
+                                                  ('out', '-', 'ESD'), ('out', '-', 'AOD')],
+                                     'RAWtoESD': [('in', '+', 'BS'), ('in', '+', 'RDO'),
+                                                  ('out', '+', 'ESD'),]},
+                      'doRAWtoALL': {},
+                      'doTRIGtoALL': {}
                       }
     
     # Reset getter

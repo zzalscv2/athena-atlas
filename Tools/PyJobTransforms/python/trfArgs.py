@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ## @Package PyJobTransforms.trfArgs
 #  @brief Standard arguments supported by trf infrastructure
@@ -218,18 +218,13 @@ def addMetadataArguments(parser):
 # @param pick Optional list of DPD types to add (use short names, e.g., @c DESDM_MUON)
 # @param transform Transform object. DPD data types will be added to the correct executor (by name or substep)
 # @param multipleOK If the @c multipleOK flag should be set for this argument
-# @param RAWtoALL Flag if DPDs should be made direct from bytestream, instead of 'classic' workflow
 # \@silent
-def addPrimaryDPDArguments(parser, pick = None, transform = None, multipleOK=False, RAWtoALL=False):
+def addPrimaryDPDArguments(parser, pick = None, transform = None, multipleOK=False):
     parser.defineArgGroup('Primary DPDs', 'Primary DPD File Options')
     # list* really gives just a list of DPD names
     try:
         from PrimaryDPDMaker.PrimaryDPDFlags import listRAWtoDPD,listESDtoDPD,listAODtoDPD
-        if RAWtoALL:
-            listRAWtoDPD.extend(listESDtoDPD)
-            matchedOutputList = [(['r2a'], listRAWtoDPD), (['a2d'], listAODtoDPD)]
-        else:
-            matchedOutputList = [(['r2e'], listRAWtoDPD), (['e2d'], listESDtoDPD), (['a2d'], listAODtoDPD)]
+        matchedOutputList = [(['r2a'], listRAWtoDPD + listESDtoDPD), (['a2d'], listAODtoDPD)]
         for substep, dpdList in matchedOutputList:
             for dpdName in [ dpd.replace('Stream', '') for dpd in dpdList ]:
                 msg.debug('Handling {0}'.format(dpdName))
