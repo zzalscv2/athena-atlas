@@ -1976,7 +1976,10 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
   }
 
   const Trk::Perigee* trkPerigee = track->perigeeParameters();
-
+  if (not trkPerigee) {
+    ATH_MSG_ERROR("trkPerigee pointer is null in IDPerfMonZmumu::FillRecParametersSimple");
+    return StatusCode::FAILURE;
+  }
   double px = 0;
   double py = 0;
   double pt = 0;
@@ -1990,20 +1993,18 @@ StatusCode IDPerfMonZmumu::FillRecParametersSimple (const Trk::Track* track, flo
   double z0_err = 999.;
   
   //
-  if (trkPerigee != nullptr){
-    double qOverP   = trkPerigee->parameters()[Trk::qOverP];
-    if (qOverP) {
-      px = trkPerigee->momentum().x();
-      py = trkPerigee->momentum().y();
-      pt = std::abs(trkPerigee->pT()); 
-      pz = trkPerigee->momentum().z();
-      phi= trkPerigee->parameters()[Trk::phi];
-      eta= trkPerigee->eta();
-      d0 = trkPerigee->parameters()[Trk::d0];
-      z0 = trkPerigee->parameters()[Trk::z0];
-      d0_err = Amg::error(*trkPerigee->covariance(),Trk::d0);
-      z0_err = Amg::error(*trkPerigee->covariance(),Trk::z0);
-    }
+  double qOverP   = trkPerigee->parameters()[Trk::qOverP];
+  if (qOverP) {
+    px = trkPerigee->momentum().x();
+    py = trkPerigee->momentum().y();
+    pt = std::abs(trkPerigee->pT()); 
+    pz = trkPerigee->momentum().z();
+    phi= trkPerigee->parameters()[Trk::phi];
+    eta= trkPerigee->eta();
+    d0 = trkPerigee->parameters()[Trk::d0];
+    z0 = trkPerigee->parameters()[Trk::z0];
+    d0_err = Amg::error(*trkPerigee->covariance(),Trk::d0);
+    z0_err = Amg::error(*trkPerigee->covariance(),Trk::z0);
   }
 
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey, ctx };
