@@ -441,20 +441,27 @@ def SCT_SiliconConditionsCfg(flags, name="SCT_Silicon", **kwargs):
 
     # Condition algorithms
     algkwargs = {}
-    DCSConditionsTool = kwargs.get("DCSConditionsTool")
-    if DCSConditionsTool:
+
+    useDCS = kwargs.get("useDCS", True)
+    toolkwargs = {}
+    if  useDCS:
+      DCSConditionsTool = kwargs.get("DCSConditionsTool")
+      if DCSConditionsTool:
         algkwargs["UseState"] = DCSConditionsTool.ReadAllDBFolders
         algkwargs["DCSConditionsTool"] = DCSConditionsTool
-    else:
+      else:
         algkwargs["UseState"] = not flags.Common.isOnline
         algkwargs["DCSConditionsTool"] = acc.popToolsAndMerge(SCT_DCSConditionsCfg(flags))
-    acc.addCondAlgo(CompFactory.SCT_SiliconHVCondAlg(name=f"{name}HVCondAlg", **algkwargs))
-    acc.addCondAlgo(CompFactory.SCT_SiliconTempCondAlg(name=f"{name}TempCondAlg", **algkwargs))
+        
+      acc.addCondAlgo(CompFactory.SCT_SiliconHVCondAlg(name=f"{name}HVCondAlg", **algkwargs))
+      acc.addCondAlgo(CompFactory.SCT_SiliconTempCondAlg(name=f"{name}TempCondAlg", **algkwargs))
 
-    # Condition tool
-    toolkwargs = {}
-    toolkwargs["UseDB"] = kwargs.get("UseDB", True)
-    toolkwargs["ForceUseGeoModel"] = kwargs.get("ForceUseGeoModel", False)
+      toolkwargs["UseDB"] = kwargs.get("UseDB", True)
+      toolkwargs["ForceUseGeoModel"] = kwargs.get("ForceUseGeoModel", False)
+    else:
+      toolkwargs["UseDB"] = kwargs.get("UseDB", False)
+      toolkwargs["ForceUseGeoModel"] = kwargs.get("ForceUseGeoModel", True)
+
     acc.setPrivateTools(CompFactory.SCT_SiliconConditionsTool(name=f"{name}ConditionsTool", **toolkwargs))
 
     return acc
