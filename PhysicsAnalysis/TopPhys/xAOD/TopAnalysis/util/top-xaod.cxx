@@ -50,6 +50,7 @@
 #include "TopObjectSelectionTools/EventCleaningSelection.h"
 
 #include "TopPartons/CalcTtbarPartonHistory.h"
+#include "TopPartons/CalcTthPartonHistory.h"
 #include "TopPartons/CalcTtbarLightPartonHistory.h"
 #include "TopPartons/CalcTbbarPartonHistory.h"
 #include "TopPartons/CalcWtbPartonHistory.h"
@@ -343,8 +344,10 @@ int main(int argc, char** argv) {
       std::unique_ptr<top::CalcTopPartonHistory>(new top::CalcTzqPartonHistory("top::CalcTzqPartonHistory"));
     top::check(topPartonHistory->setProperty("config", topConfig),
                "Failed to setProperty of top::CalcTzqPartonHistory");
+  } else if (settings->value("TopPartonHistory") == "ttH") {
+    topPartonHistory = std::unique_ptr<top::CalcTopPartonHistory> (new top::CalcTthPartonHistory("top::CalcTthPartonHistory"));
+    top::check(topPartonHistory->setProperty("config", topConfig), "Failed to setProperty of top::CalcTthPartonHistory");
   }
-
 
   //LHAPDF SF calculation
   std::unique_ptr<top::PDFScaleFactorCalculator> PDF_SF(nullptr);

@@ -39,6 +39,7 @@ namespace top {
   {
     return decorateCollectionWithLinksToAnotherCollection("TruthBoson","TruthBosonsWithDecayParticles","AT_linkToTruthBosonsWithDecayParticles");
   }
+  
   StatusCode CalcTopPartonHistory::decorateCollectionWithLinksToAnotherCollection(const std::string &collectionToDecorate, const std::string &collectionToLink, const std::string &nameOfDecoration)
   {
     const xAOD::TruthParticleContainer* cont1(nullptr);
