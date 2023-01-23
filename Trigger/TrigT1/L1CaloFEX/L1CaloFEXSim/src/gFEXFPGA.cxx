@@ -16,7 +16,8 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-#include <vector>
+#include <array>
+#include <algorithm>
 
 
 namespace LVL1 {
@@ -129,11 +130,8 @@ namespace LVL1 {
       uint32_t gFEXtowerID = 0;
 
       // Assign ID based on FPGA (FPGA-A 0->0; FPGA-B 1->10000, FPGA-C 2->20000) and gTower number assigned as per firmware convention
-      if (Fpga == 0){
-         gFEXtowerID = gFEXtowerID;
-      }
-      else if (Fpga == 1){
-         gFEXtowerID = gFEXtowerID + 10000;
+      if (Fpga == 1){
+         gFEXtowerID +=10000;
       }
 
       SG::ReadHandle<gTowerContainer> gFEXFPGA_gTowerContainer(m_gFEXFPGA_gTowerContainerKey/*,ctx*/);
@@ -260,13 +258,13 @@ void gFEXFPGA::getEtaPhi ( float &Eta, float &Phi, int iEta, int iPhi) const{
    float s_centralPhiWidth = (2*M_PI)/32; //In central region, gFex has 32 bins in phi
    float s_forwardPhiWidth = (2*M_PI)/16; //In forward region, gFex has 16 bins in phi (before rearranging bins)
 
-   const std::vector<float> s_EtaCenter = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
+   constexpr std::array<float, 40> s_EtaCenter = { -4.7, -4.2, -3.7, -3.4, -3.2, -3, 
                                             -2.8, -2.6, -2.35, -2.1, -1.9, -1.7, -1.5, -1.3, -1.1, -0.9,  
                                             -0.7, -0.5, -0.3, -0.1, 0.1, 0.3, 0.5, 0.7, 0.9, 1.1,                                                 
                                             1.3, 1.5, 1.7, 1.9, 2.1, 2.35, 2.6, 2.8, 3.0,
                                             3.2, 3.4, 3.7, 4.2, 4.7};
 
-   Eta = s_EtaCenter[iEta]; 
+   Eta = s_EtaCenter.at(iEta); 
 
    float Phi_gFex = -99;
    if (( iEta <= 3 ) || ( (iEta >= 36) )){
