@@ -5,7 +5,7 @@
 #include "TrigT1NSWSimTools/MMT_Road.h"
 
 MMT_Road::MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
-                   const float pitch, const float eta1, const float eta2, const int iroadx, const int iroadu, const int iroadv) {
+                   const double pitch, const double eta1, const double eta2, const int iroadx, const int iroadu, const int iroadv) {
   m_sector = sector;
   m_iroad  = iroadx;
   m_iroadx = iroadx;
@@ -57,29 +57,30 @@ void MMT_Road::addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits) {
 
 bool MMT_Road::containsNeighbors(const MMT_Hit* hit) const {
 
-  if (this->getSector() != hit->getSector()) return false;
+  if (m_sector != hit->getSector()) return false;
 
   int iroad = 0;
   unsigned short int olow = 0, ohigh = 0;
   if (hit->isX()) {
-    iroad = this->iRoadx();
-    olow  = this->getRoadSizeDownX();
-    ohigh = this->getRoadSizeUpX();
+    iroad = m_iroadx;
+    olow  = m_roadSizeDownX;
+    ohigh = m_roadSizeUpX;
   }
   else if (hit->isU()) {
-    iroad = this->iRoadu();
-    olow  = this->getRoadSizeDownUV();
-    ohigh = this->getRoadSizeUpUV();
+    iroad = m_iroadu;
+    olow  = m_roadSizeDownUV;
+    ohigh = m_roadSizeUpUV;
   }
   else if (hit->isV()) {
-    iroad = this->iRoadv();
-    olow  = this->getRoadSizeDownUV();
-    ohigh = this->getRoadSizeUpUV();
+    iroad = m_iroadv;
+    olow  = m_roadSizeDownUV;
+    ohigh = m_roadSizeUpUV;
   }
   else return false;
 
-  double slow  = (this->getLowerBound(hit->getStationEta()) + (this->getRoadSize()*iroad     + 0.5 - olow )*this->getPitch() + hit->getShift())*hit->getOneOverZ();
-  double shigh = (this->getLowerBound(hit->getStationEta()) + (this->getRoadSize()*(iroad+1) + 0.5 + ohigh)*this->getPitch() + hit->getShift())*hit->getOneOverZ();
+  double R = (std::abs(hit->getStationEta()) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
+  double slow  = (R + (m_roadSize*iroad     + 0.5 - olow )*m_pitch + hit->getShift())*hit->getOneOverZ();
+  double shigh = (R + (m_roadSize*(iroad+1) + 0.5 + ohigh)*m_pitch + hit->getShift())*hit->getOneOverZ();
 
   if (hit->getRZSlope() > 0.) return (hit->getRZSlope() >= slow && hit->getRZSlope() < shigh);
   else return (hit->getRZSlope() >= shigh && hit->getRZSlope() < slow);
@@ -162,17 +163,13 @@ bool MMT_Road::evaluateLowRes() const {
   return (nhits1 < 4 || nhits2 < 4);
 }
 
-double MMT_Road::getLowerBound(const int eta) const {
-  return (std::abs(eta) == 1) ? m_innerRadiusEta1 : m_innerRadiusEta2;
-}
-
 bool MMT_Road::horizontalCheck() const {
   int nx1 = 0, nx2 = 0;
   for (const auto &hit : m_road_hits) {
     if (hit->getPlane() >-1 && hit->getPlane() < 2) nx1++;
     if (hit->getPlane() > 5 && hit->getPlane() < 8) nx2++;
   }
-  return (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= this->getXthreshold());
+  return (nx1 > 0 && nx2 > 0 && (nx1+nx2) >= m_xthr);
 }
 
 void MMT_Road::incrementAge(const int &bcwind) {
@@ -222,5 +219,5 @@ bool MMT_Road::stereoCheck() const {
     if (hit->getPlane() == 3 || hit->getPlane() == 5) nv++;
   }
 
-  return (nu > 0 && nv > 0 && (nu+nv) >= this->getUVthreshold());
+  return (nu > 0 && nv > 0 && (nu+nv) >= m_uvthr);
 }

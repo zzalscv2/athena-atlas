@@ -129,6 +129,7 @@ MMT_Hit::MMT_Hit(const MMT_Hit* hit)
     m_age (hit->m_age),
     m_Y (hit->m_Y),
     m_Z (hit->m_Z),
+    m_oneOverZ (hit->m_oneOverZ),
     m_R (hit->m_R),
     m_Ri (hit->m_Ri),
     m_isNoise (hit->m_isNoise),

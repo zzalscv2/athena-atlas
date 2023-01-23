@@ -12,7 +12,7 @@
 class MMT_Road {
   public:
     MMT_Road(const char sector, const int roadSize, const int UpX, const int DownX, const int UpUV, const int DownUV, const int xthr, const int uvthr,
-             const float pitch, const float eta1, const float eta2, const int iroadx, const int iroadu = -1, const int iroadv = -1);
+             const double pitch, const double eta1, const double eta2, const int iroadx, const int iroadu = -1, const int iroadv = -1);
     ~MMT_Road()=default;
 
     void addHits(std::vector<std::shared_ptr<MMT_Hit> > &hits);
@@ -28,7 +28,6 @@ class MMT_Road {
     bool evaluateLowRes() const;
     bool horizontalCheck() const;
     void incrementAge(const int &bcwind);
-    double getLowerBound(const int eta) const;
     double getPitch() const { return m_pitch; }
     const std::vector<std::unique_ptr<MMT_Hit> >& getHitVector() const { return m_road_hits; }
     int getRoadSize() const { return m_roadSize; }
