@@ -1028,6 +1028,10 @@ if ( rec.doAOD() or rec.doWriteAOD()) and not rec.readAOD() :
             if rec.readESD() or recAlgs.doTrackParticleCellAssociation():
                 addClusterToCaloCellAOD("InDetTrackParticlesAssociatedClusters")
 
+                from InDetRecExample.InDetJobProperties import InDetFlags
+                if InDetFlags.doR3LargeD0() and InDetFlags.storeSeparateLargeD0Container():
+                    addClusterToCaloCellAOD("InDetLargeD0TrackParticlesAssociatedClusters")
+
         except Exception:
             treatException("Could not make AOD cells" )
 

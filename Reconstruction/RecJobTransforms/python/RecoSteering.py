@@ -121,7 +121,18 @@ def RecoSteering(flags):
     if flags.Reco.EnableTrackCellAssociation:
         from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
             TrackParticleCellAssociationAlgCfg)
-        acc.merge(TrackParticleCellAssociationAlgCfg(flags))
+        acc.merge(TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
+
+        from AthenaConfiguration.Enums import LHCPeriod
+        if (flags.InDet.Tracking.storeSeparateLargeD0Container if
+            flags.GeoModel.Run<=LHCPeriod.Run3 else
+            flags.ITk.Tracking.storeSeparateLargeD0Container) and \
+            (flags.InDet.Tracking.doR3LargeD0 if
+            flags.GeoModel.Run<=LHCPeriod.Run3 else
+            flags.ITk.Tracking.doLargeD0):
+            from TrackParticleAssociationAlgs.TrackParticleAssociationAlgsConfig import (
+                LargeD0TrackParticleCellAssociationAlgCfg)
+            acc.merge(LargeD0TrackParticleCellAssociationAlgCfg(flags, PtCut=10000))
         log.info("---------- Configured track particle-cell association")
 
     # PFlow
