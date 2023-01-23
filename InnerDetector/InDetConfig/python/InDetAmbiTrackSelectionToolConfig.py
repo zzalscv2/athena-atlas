@@ -64,6 +64,11 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
         kwargs.setdefault("minPtBjetROI"              , 10000)
         kwargs.setdefault("phiWidthEM"                , 0.05)     #Split cluster ROI size
         kwargs.setdefault("etaWidthEM"                , 0.05)     #Split cluster ROI size
+        if flags.InDet.Tracking.doTIDE_AmbiTrackMonitoring and flags.InDet.Tracking.ActiveConfig.extension == "":
+            from TrkConfig.TrkValToolsConfig import TrkObserverToolCfg
+            TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
+            acc.addPublicTool(TrkObserverTool)
+            kwargs.setdefault("ObserverTool", TrkObserverTool)
 
     else:
         kwargs.setdefault("sharedProbCut", 0.10)

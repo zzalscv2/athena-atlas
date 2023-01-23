@@ -58,7 +58,6 @@ Trk::DenseEnvironmentsAmbiguityProcessorTool::
   declareProperty("caloSeededBrem"       , m_caloSeededBrem     = false);
   declareProperty("pTminBrem"            , m_pTminBrem          = 1000.);
   declareProperty("etaBounds"            , m_etaBounds,"eta intervals for internal monitoring");
-  declareProperty("ObserverToolWriter"   , m_observerToolWriter, "track observer tool writer");
 }
 //==================================================================================================
 

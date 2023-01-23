@@ -36,7 +36,6 @@ Trk::DenseEnvironmentsAmbiguityScoreProcessorTool::DenseEnvironmentsAmbiguitySco
   declareProperty("sharedProbCut"        , m_sharedProbCut           = 0.3);
   declareProperty("sharedProbCut2"       , m_sharedProbCut2          = 0.3);
   declareProperty("etaBounds"            , m_etaBounds,"eta intervals for internal monitoring");
-  declareProperty("ObserverTool"         , m_observerTool, "track observer tool");
 
 }
 //==================================================================================================

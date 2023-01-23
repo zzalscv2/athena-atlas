@@ -29,6 +29,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.doSplitReco", False)
     # Turn running of truth matching on and off (by default on for MC off for data)
     icf.addFlag("InDet.doTruth", lambda prevFlags: prevFlags.Input.isMC)
+    # Toggle track slimming
+    icf.addFlag("InDet.doSlimming", True)
     # defines if the X1X mode is used for the offline or not
     icf.addFlag("InDet.selectSCTIntimeHits", lambda prevFlags: (
         not(prevFlags.Beam.Type is BeamType.Cosmics or prevFlags.InDet.Tracking.doVtxBeamSpot)))
@@ -202,6 +204,8 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doPseudoTracking", False)
     # Special pass using truth information for pattern recognition, removes assumed in-efficencies applied to PseudoTracking
     icf.addFlag("InDet.Tracking.doIdealPseudoTracking", False)
+    # Switch for track observer tool
+    icf.addFlag("InDet.Tracking.doTIDE_AmbiTrackMonitoring", False)
 
 
     from InDetConfig.TrackingPassFlags import (

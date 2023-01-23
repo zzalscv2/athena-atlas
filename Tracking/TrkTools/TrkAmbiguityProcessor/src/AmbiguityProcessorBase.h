@@ -127,7 +127,7 @@ namespace Trk {
        @todo The actual tool that is used should be configured through job options*/
     ToolHandle<ITrackScoringTool> m_scoringTool{this, "ScoringTool", "", "track scoring tool"};
     /**Observer tool      This tool is used to observe the tracks and their 'score' */
-    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "TrackObserverTool", "", "track observer within ambiguity solver"};
+    PublicToolHandle<Trk::ITrkObserverTool> m_observerTool{this, "ObserverTool", "", "track observer within ambiguity solver"};
     ToolHandle<Trk::IExtendedTrackSummaryTool> m_trackSummaryTool{this, "TrackSummaryTool", "InDetTrackSummaryToolNoHoleSearch"};
 
   private:
