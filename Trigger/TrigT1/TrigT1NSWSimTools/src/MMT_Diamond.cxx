@@ -24,6 +24,7 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   entry.stationPhi = (par->getSector() == 'S') ? phi*2-1 : phi*2-2;
 
   std::string sector = (par->getSector() == 'L') ? "MML" : "MMS";
+  const double pitch = par->getPitch(), eta1 = par->getLowerBoundEta1(), eta2 = par->getLowerBoundEta2();
 
   /*
    * The following for-loop merges all plane global coordinates in one single shot:
@@ -66,63 +67,36 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   entry.side = (std::all_of(entry.ev_hits.begin(), entry.ev_hits.end(), [] (const auto hit) { return hit->getStationEta() < 0; })) ? 'C' : 'A';
 
   for (int i = 0; i < nroad; i++) {
-    auto myroad = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                             this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                             this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                             this->getXthreshold(), this->getUVthreshold(),
-                                             par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(), i);
+    auto myroad = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                             m_xthr, m_uvthr, pitch, eta1, eta2, i);
     entry.ev_roads.push_back(myroad);
 
     int nuv = (this->getUV()) ? this->getUVfactor() : 0;
     for (int uv = 1; uv <= nuv; uv++) {
       if (i-uv < 0) continue;
 
-      auto myroad_0 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                                 this->getXthreshold(), this->getUVthreshold(),
-                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
-                                                 i, i+uv, i-uv);
+      auto myroad_0 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i+uv, i-uv);
       entry.ev_roads.push_back(myroad_0);
 
-      auto myroad_1 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                                 this->getXthreshold(), this->getUVthreshold(),
-                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
-                                                 i, i-uv, i+uv);
+      auto myroad_1 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i-uv, i+uv);
       entry.ev_roads.push_back(myroad_1);
 
-      auto myroad_2 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                                 this->getXthreshold(), this->getUVthreshold(),
-                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
-                                                 i, i+uv-1, i-uv);
+      auto myroad_2 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i+uv-1, i-uv);
       entry.ev_roads.push_back(myroad_2);
 
-      auto myroad_3 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                                 this->getXthreshold(), this->getUVthreshold(),
-                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
-                                                 i, i-uv, i+uv-1);
+      auto myroad_3 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i-uv, i+uv-1);
       entry.ev_roads.push_back(myroad_3);
 
-      auto myroad_4 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                                 this->getXthreshold(), this->getUVthreshold(),
-                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
-                                                 i, i-uv+1, i+uv);
+      auto myroad_4 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i-uv+1, i+uv);
       entry.ev_roads.push_back(myroad_4);
 
-      auto myroad_5 = std::make_shared<MMT_Road>(par->getSector(), this->getRoadSize(),
-                                                 this->getRoadSizeUpX(), this->getRoadSizeDownX(),
-                                                 this->getRoadSizeUpUV(), this->getRoadSizeDownUV(),
-                                                 this->getXthreshold(), this->getUVthreshold(),
-                                                 par->getPitch(), par->getLowerBoundEta1(), par->getLowerBoundEta2(),
-                                                 i, i+uv, i-uv+1);
+      auto myroad_5 = std::make_shared<MMT_Road>(sector[2], m_roadSize, m_roadSizeUpX, m_roadSizeDownX, m_roadSizeUpUV, m_roadSizeDownUV,
+                                                 m_xthr, m_uvthr, pitch, eta1, eta2, i, i+uv, i-uv+1);
       entry.ev_roads.push_back(myroad_5);
     }
   }
