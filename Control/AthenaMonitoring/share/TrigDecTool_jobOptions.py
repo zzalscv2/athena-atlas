@@ -1,17 +1,17 @@
 tdt_local_logger = logging.getLogger('TrigDecTool_jobOptions')
 
 # Set up the trigger decision tool (for trigger-aware monitoring)
-if not 'DQMonFlags' in dir():
+if 'DQMonFlags' not in dir():
    tdt_local_logger.debug("DQMonFlags not yet imported - I import them now")
    from AthenaMonitoring.DQMonFlags import DQMonFlags
 
 if DQMonFlags.useTrigger():
-   if not 'rec' in dir():
+   if 'rec' not in dir():
       from RecExConfig.RecFlags import rec
 
    if rec.readESD() and (DQMonFlags.monManEnvironment=='tier0ESD'):
       # set up trigger config service
-      if not 'TriggerConfigGetter' in dir():
+      if 'TriggerConfigGetter' not in dir():
          from TriggerJobOpts.TriggerConfigGetter import TriggerConfigGetter
          cfg = TriggerConfigGetter()
 
@@ -49,4 +49,4 @@ if DQMonFlags.useTrigger():
       triggerMapping = tdt_mapping)
    ToolSvc += monTrigTransTool
 
-del tdt_local_logger, tdt_local_hltconfig, tdt_mapping
+del tdt_local_logger, tdt_mapping
