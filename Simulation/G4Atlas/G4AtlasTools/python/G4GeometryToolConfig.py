@@ -234,16 +234,6 @@ def MuonGeoDetectorToolCfg(flags, name='Muon', **kwargs):
     return result
 
 
-#todo - set this up
-def getCavernInfraGeoDetectorTool(flags, name='CavernInfra', **kwargs):
-    result = ComponentAccumulator() #needs geometry setting up!
-    kwargs.setdefault("DetectorName", "CavernInfra")
-    #add the GeometryNotifierSvc
-    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
-    result.setPrivateTools(GeoDetectorTool(name, **kwargs))
-    return result
-
-
 def ITKEnvelopeCfg(flags, name="ITK", **kwargs):
     result = ComponentAccumulator()
 
@@ -769,7 +759,7 @@ def G4AtlasDetectorConstructionToolCfg(flags, name="G4AtlasDetectorConstructionT
         kwargs.setdefault("RegionCreators", getTB_RegionCreatorList(flags))
         kwargs.setdefault("FieldManagers", getTB_FieldMgrList(flags))
     else:
-        if flags.Beam.Type is BeamType.Cosmics or (flags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Signal]):
+        if flags.Detector.GeometryCavern:
             kwargs.setdefault("World", result.popToolsAndMerge(CavernWorldCfg(flags)))
         else:
             kwargs.setdefault("World", result.popToolsAndMerge(ATLASEnvelopeCfg(flags)))
@@ -787,8 +777,11 @@ def CavernInfraGeoDetectorToolCfg(flags, name='CavernInfra', **kwargs):
     from AtlasGeoModel.CavernGMConfig import CavernGeometryCfg
     result = CavernGeometryCfg(flags)
     kwargs.setdefault("DetectorName", "CavernInfra")
+    #add the GeometryNotifierSvc
+    kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(flags)).name)
     result.setPrivateTools(GeoDetectorTool(name, **kwargs))
     return result
+
 
 def CavernWorldCfg(flags, name="Cavern", **kwargs):
     result = ComponentAccumulator()
