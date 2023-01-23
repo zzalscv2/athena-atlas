@@ -507,9 +507,8 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
 	   LArNeighbours::nextInPhi};
   
   for (const auto& dir : dirs){
-    std::vector<IdentifierHash> path;
+
     auto calc_phihashes = [&dir,
-			   &path,
 			   &cc_id=m_calocell_id,
 			   nphi=m_er_nphi](auto hash){ //hash: pass by value
       std::vector<IdentifierHash> path;
