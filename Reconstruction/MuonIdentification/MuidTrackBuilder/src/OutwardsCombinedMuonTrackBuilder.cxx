@@ -28,7 +28,16 @@
 #include "VxVertex/RecVertex.h"
 #include "MuonTrackMakerUtils/MuonTSOSHelper.h"
 namespace Rec {
-
+    inline double nDoF(const Trk::Track& track) {
+        if (track.fitQuality()) return  track.fitQuality()->doubleNumberDoF();
+        return 0.;
+    }
+    inline double normalizedChi2(const Trk::Track& track) {
+        if (nDoF(track)) {
+              return track.fitQuality()->chiSquared() / nDoF(track);
+        }
+        return FLT_MAX;
+    }
     OutwardsCombinedMuonTrackBuilder::OutwardsCombinedMuonTrackBuilder(const std::string& type, const std::string& name,
                                                                        const IInterface* parent) :
         AthAlgTool(type, name, parent) {}
@@ -162,7 +171,7 @@ namespace Rec {
                             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> type;
                             type.set(Trk::TrackStateOnSurface::Measurement);
                             trackStateOnSurfaces.push_back(
-                                new const Trk::TrackStateOnSurface(std::move(vertexInFit), nullptr, nullptr, type));
+                                std::make_unique<Trk::TrackStateOnSurface>(std::move(vertexInFit), nullptr, nullptr, type));
                             ATH_MSG_DEBUG(" found Perigee and added vertex " << itsos);
                         }
                     }
@@ -205,7 +214,7 @@ namespace Rec {
                             auto energyLossNew = std::make_unique<Trk::EnergyLoss>(
                                 energyLoss->deltaE(), energyLoss->sigmaDeltaE(), energyLoss->sigmaDeltaE(), energyLoss->sigmaDeltaE());
 
-                            auto scatNew = Trk::ScatteringAngles(0., 0., sigmaDeltaPhi, sigmaDeltaTheta);
+                            Trk::ScatteringAngles scatNew{0., 0., sigmaDeltaPhi, sigmaDeltaTheta};
 
                             const Trk::Surface& surfNew = (**t).trackParameters()->associatedSurface();
 
@@ -226,10 +235,10 @@ namespace Rec {
                             std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePatternScat(0);
                             typePatternScat.set(Trk::TrackStateOnSurface::Scatterer);
 
-                            const Trk::TrackStateOnSurface* newTSOS =
-                                new Trk::TrackStateOnSurface(nullptr, std::move(parsNew), std::move(meotNew), typePatternScat);
+                            std::unique_ptr<Trk::TrackStateOnSurface> newTSOS =
+                                std::make_unique<Trk::TrackStateOnSurface>(nullptr, std::move(parsNew), std::move(meotNew), typePatternScat);
 
-                            trackStateOnSurfaces.push_back(newTSOS);
+                            trackStateOnSurfaces.push_back(std::move(newTSOS));
                         }
                     }
                 }
@@ -245,8 +254,7 @@ namespace Rec {
 
             if ((**t).alignmentEffectsOnTrack()) continue;
 
-            const Trk::TrackStateOnSurface* TSOS = (**t).clone();
-            trackStateOnSurfaces.push_back(TSOS);
+            trackStateOnSurfaces.push_back((**t).clone());
         }
 
         ATH_MSG_DEBUG(" trackStateOnSurfaces found " << trackStateOnSurfaces.size() << " from total " << itsos);
@@ -269,7 +277,7 @@ namespace Rec {
     }
 
     /** refit a track */
-    std::unique_ptr<Trk::Track> OutwardsCombinedMuonTrackBuilder::fit(const EventContext& ctx, Trk::Track& track, 
+    std::unique_ptr<Trk::Track> OutwardsCombinedMuonTrackBuilder::fit(const EventContext& ctx, const Trk::Track& track, 
                                                                       const Trk::RunOutlierRemoval runOutlier,
                                                                       const Trk::ParticleHypothesis particleHypothesis) const {
         // check valid particleHypothesis
@@ -371,7 +379,7 @@ namespace Rec {
                 }
             }
         }
-
+       
         if (m_recoverCombined && fittedTrack) {
             std::unique_ptr<Trk::Track> recoveredTrack{m_muonHoleRecovery->recover(*fittedTrack, ctx)};
             double oldfitqual = fittedTrack->fitQuality()->chiSquared() / fittedTrack->fitQuality()->numberDoF();
@@ -382,8 +390,33 @@ namespace Rec {
                     fittedTrack.swap(recoveredTrack);
                 }
             }
-        }
+            /*
+             * DO NOT REMOVE THE CODE BELOW BECAUSE IT WILL BE NEEDED IN A FUTURE MR
+            using MSTrackRecovery = Muon::IMuonHoleRecoveryTool::MSTrackRecovery;    
+            MSTrackRecovery recoverResult{};
+            do {
+             recoverResult = m_muonHoleRecovery->recover(ctx,*fittedTrack);
+             if (!recoverResult.track) {
+                ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" track got lost during hole recovery. That should not happen");
+                break;
+             }
+             /// refit the track if new measurements were added
+             if (recoverResult.new_meas) {
+                recoverResult.track = fit(ctx, *recoverResult.track, false, Trk::muon);
+                if (!recoverResult.track) {
+                    ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" track got lost during refit of recovery.");
+                    break;
+                }
+                const double oldFitQual = normalizedChi2(*fittedTrack);
+                const double newFitQual = normalizedChi2(*recoverResult.track);
+                /// Check that the new track actually performs better
+                if (newFitQual < oldFitQual) fittedTrack.swap(recoverResult.track);
+                else break;
+             } else std::swap(recoverResult.track, fittedTrack);
 
+            } while (recoverResult.new_meas);
+        */
+        }        
         if (fittedTrack && !fittedTrack->perigeeParameters()) {
             ATH_MSG_WARNING(" Fitter returned a track without perigee, failing fit");
             return nullptr;

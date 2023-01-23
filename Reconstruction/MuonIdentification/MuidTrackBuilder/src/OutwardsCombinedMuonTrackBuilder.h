@@ -69,8 +69,8 @@ namespace Rec {
         virtual std::unique_ptr<Trk::Track> standaloneRefit( const EventContext& ctx, const Trk::Track& combinedTrack, const Amg::Vector3D& bs) const override;
 
         /** refit a track */
-        virtual std::unique_ptr<Trk::Track> fit(const EventContext& ctx, Trk::Track& track, const Trk::RunOutlierRemoval runOutlier,
-                                                const Trk::ParticleHypothesis particleHypothesis) const override;
+        std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const Trk::Track& track, const Trk::RunOutlierRemoval runOutlier,
+                                        const Trk::ParticleHypothesis particleHypothesis) const;
 
     private:
         /**
