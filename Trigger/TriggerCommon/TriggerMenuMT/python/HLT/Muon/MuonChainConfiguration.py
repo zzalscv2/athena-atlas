@@ -13,7 +13,7 @@ from ..Config.ChainConfigurationBase import ChainConfigurationBase
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 
 if isComponentAccumulatorCfg():
-    from .generateMuon import muFastSequence, muEFSASequence, muCombSequence, muEFCBSequence
+    from .generateMuon import muFastSequence, muEFSASequence, muCombSequence, muEFCBSequence,  muCombOvlpRmSequence, muFastOvlpRmSequence
 else: 
     from .MuonMenuSequences import muFastSequence, muFastCalibSequence, muFastOvlpRmSequence, mul2mtSAOvlpRmSequence, muCombSequence, muCombLRTSequence, muCombOvlpRmSequence, mul2mtCBOvlpRmSequence, mul2IOOvlpRmSequence, muEFSASequence, muEFCBSequence, muEFCBIDperfSequence, muEFCBLRTSequence, muEFCBLRTIDperfSequence, muEFSAFSSequence, muEFCBFSSequence, muEFIsoSequence, muEFMSIsoSequence, efLateMuRoISequence, efLateMuSequence, muRoiClusterSequence, muEFIDtpSequence
 

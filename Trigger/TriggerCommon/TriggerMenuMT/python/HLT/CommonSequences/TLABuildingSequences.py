@@ -10,7 +10,6 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 log = logging.getLogger(__name__)
 
 
-
 def addTLAStep(chain, chainDict):
     '''
     Add one extra chain step for TLA Activities
@@ -26,7 +25,7 @@ def addTLAStep(chain, chainDict):
         # call the sequence from their respective signatures
         tlaSequencesList.append(getTLASignatureSequence(ConfigFlags, chainDict=chainDict, chainPart=cPart)), #signature=cPart['signature'])),
             
-    log.debug("addTLAStep: About to add a step with: %d, parallel sequences.", len(tlaSequencesList))            
+    log.debug("addTLAStep: About to add a step with: %d parallel sequences.", len(tlaSequencesList))            
     
     # we add one step per TLA chain, with sequences matching the list of signatures
     # and multiplicities matching those of the previous step of the chain (already merged if combined)

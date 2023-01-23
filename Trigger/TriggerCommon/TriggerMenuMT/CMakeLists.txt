@@ -19,6 +19,7 @@ atlas_install_scripts( scripts/generateL1MenuRun3.py
                        scripts/runTriggerAPIExample.py
                        scripts/generateUnprescaledLists.py
                        scripts/test_menu_dump.py
+		       scripts/test_menu_CA.py
                        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Shell scripts without flake8 checking:
@@ -113,6 +114,14 @@ atlas_add_test(generateMenuMT_newJO
    PRIVATE_WORKING_DIRECTORY
    PROPERTIES TIMEOUT 500
    POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( test_menu_CA
+   SCRIPT test_menu_CA.py
+   PRIVATE_WORKING_DIRECTORY
+   PROPERTIES TIMEOUT 500
+   POST_EXEC_SCRIPT "check_log.py --errors --config checklogTriggerTest.conf ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/unitTestRun_test_menu_CA/test_menu_CA.log" 
+   )
+   
 
 # test for menu name consistency
 atlas_add_test( test_menu_dump

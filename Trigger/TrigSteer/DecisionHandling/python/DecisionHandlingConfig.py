@@ -1,7 +1,7 @@
 #
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # 
-
+from AthenaConfiguration.ComponentFactory import CompFactory
 EnableFilterMonitoring = False  # Can be changed in a precommand/preExec
 
 def setupFilterMonitoring( flags, filterAlg ):
@@ -31,7 +31,7 @@ def TriggerSummaryAlg( flags, name ):
     alg.MonTool = monTool
     return alg
 
-def ComboHypoCfg( name ):
-    from DecisionHandling.DecisionHandlingConf import ComboHypo
-    alg = ComboHypo( name )
+def ComboHypoCfg( name ):    
+    alg = CompFactory.ComboHypo( name )
     return alg
+

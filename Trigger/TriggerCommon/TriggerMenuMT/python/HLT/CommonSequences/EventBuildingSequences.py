@@ -47,7 +47,7 @@ def addEventBuildingSequence(flags, chain, eventBuildType, chainDict):
                          chainDicts=[chainDict])
     else:
         # standard PEB chain
-        prevStep = chain.steps[-1]
+        prevStep = chain.steps[-1]        
         step_name = 'Step_merged{:s}_PEBInfoWriter_{:s}'.format(prevStep.name, eventBuildType)
         step = ChainStep(name=step_name,
                          Sequences=[seq for leg in prevStep.legIds],
