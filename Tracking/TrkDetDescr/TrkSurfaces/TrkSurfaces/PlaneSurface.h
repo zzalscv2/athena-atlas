@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -151,7 +151,7 @@ public:
 
   /** Constructor for Planes with shared object*/
   PlaneSurface(const Amg::Transform3D& htrans,
-               Trk::SharedObject<const Trk::SurfaceBounds>& sbounds);
+               const Trk::SharedObject<const Trk::SurfaceBounds>& sbounds);
 
   /**Equality operator*/
   virtual bool operator==(const Surface& sf) const override;

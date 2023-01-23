@@ -767,8 +767,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtBox(Trk::Volume*& v
     if (volBounds) {
         double yv = volBounds->halflengthY();
         double zv = volBounds->halflengthZ();
-        Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(yv, zv);
-        Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
+        const auto bounds = std::make_shared<Trk::RectangleBounds>(yv, zv);
         for (unsigned int iloop = 0; iloop < x_array.size(); iloop++) {
             // x-y plane -> y-z plane
             thickness = x_thickness[iloop];
@@ -797,7 +796,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtBox(Trk::Volume*& v
         currX = minX;
         for (unsigned int i = 0; i < layers.size(); i++) {
             const Amg::Transform3D ltransf = layers[i]->transform();
-            layerOrder.push_back(Trk::SharedObject<Trk::Layer>(layers[i]));
+            layerOrder.emplace_back(layers[i]);
             if (i < layers.size() - 1) {
                 currX = ltransf.translation()[0] + 0.5 * layers[i]->thickness();
                 binSteps.push_back(currX);
@@ -907,8 +906,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtTrd(Trk::Volume*& v
         double x2v = volBounds->maxHalflengthX();
         double yv = volBounds->halflengthY();
         // x-y plane -> y-z plane
-        Trk::TrapezoidBounds* tbounds = new Trk::TrapezoidBounds(x1v, x2v, yv);
-        Trk::SharedObject<const Trk::SurfaceBounds> bounds(tbounds);
+        auto bounds = std::make_shared<const Trk::TrapezoidBounds>(x1v, x2v, yv);
         for (unsigned int iloop = 0; iloop < x_array.size(); iloop++) {
             thickness = x_thickness[iloop];
             if (!x_mat[iloop]) ATH_MSG_WARNING("Undefined MDT layer material");
@@ -932,7 +930,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtTrd(Trk::Volume*& v
             currX = minX;
             for (unsigned int i = 0; i < layers.size(); i++) {
                 const Amg::Transform3D ltransf = layers[i]->transform();
-                layerOrder.push_back(Trk::SharedObject<Trk::Layer>(layers[i]));
+                layerOrder.emplace_back(layers[i]);
                 if (i < layers.size() - 1) {
                     currX = ltransf.translation()[0] + 0.5 * layers[i]->thickness();
                     binSteps.push_back(currX);
@@ -975,8 +973,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*& vol,
             Trk::PlaneLayer* layer;
             double thickness = 2 * xs;
             std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
-            Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(ys, zs);
-            Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
+            auto bounds = std::make_shared<const Trk::RectangleBounds>(ys, zs);
             Amg::Transform3D cTr(transfc[ic] * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                  Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)));
             Trk::MaterialProperties rpcMat(0., 10.e10, 10.e10, 13., 26., 0.);  // default
@@ -1028,8 +1025,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*& vol,
                 Trk::PlaneLayer* layer;
                 double thickness = 2 * xs1;
                 std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
-                Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(ys1, zs);
-                Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
+                auto bounds = std::make_shared<const Trk::RectangleBounds>(ys1, zs);
                 Amg::Transform3D cTr(transfc[ic] * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                      Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.)));
                 Trk::MaterialProperties rpcMat(0., 10.e10, 10.e10, 13., 26., 0.);  // default
@@ -1174,27 +1170,25 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
             double zs = box->getZHalfLength();
             // translating into layer; find minimal size
             Trk::PlaneLayer* layer;
-            Trk::RectangleBounds* rbounds = nullptr;
+            Trk::SharedObject<const Trk::SurfaceBounds> bounds = nullptr;
             double thickness = 0.;
             Amg::Transform3D cTr;
             if (zs <= xs && zs <= ys) {  // x-y plane
-                rbounds = new Trk::RectangleBounds(xs, ys);
+                bounds = std::make_shared<const Trk::RectangleBounds>(xs, ys);
                 thickness = 2 * zs;
                 cTr = Amg::Transform3D(transf[ic]);
             } else if (xs <= ys && xs <= zs) {  // x-y plane -> y-z plane
-                rbounds = new Trk::RectangleBounds(ys, zs);
+                bounds = std::make_shared<Trk::RectangleBounds>(ys, zs);
                 thickness = 2 * xs;
                 cTr = Amg::Transform3D(transf[ic] * Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 1., 0.)) *
                                        Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 0., 1.)));
             } else {  // x-y plane -> x-z plane
-                rbounds = new Trk::RectangleBounds(xs, zs);
+                bounds = std::make_shared<Trk::RectangleBounds>(xs, zs);
                 thickness = 2 * ys;
                 cTr = Amg::Transform3D(transf[ic] * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(1., 0., 0.)));
             }
             Trk::MaterialProperties material(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
             Trk::HomogeneousLayerMaterial spacerMaterial(material, 0.);
-            Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
-
             layer = new Trk::PlaneLayer(cTr, bounds, spacerMaterial, thickness, nullptr, 0);
             layers.push_back(layer);
         } else if (clv->getShape()->type() == "Subtraction") {
@@ -1203,16 +1197,14 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                 // LB
                 const GeoBox* boxA = dynamic_cast<const GeoBox*>(sub->getOpA());
                 const GeoBox* boxB = dynamic_cast<const GeoBox*>(sub->getOpB());
-                Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(boxA->getYHalfLength(), boxA->getZHalfLength());
+                auto bounds = std::make_shared<const Trk::RectangleBounds>(boxA->getYHalfLength(), boxA->getZHalfLength());
                 double thickness = (boxA->getXHalfLength() - boxB->getXHalfLength());
                 double shift = 0.5 * (boxA->getXHalfLength() + boxB->getXHalfLength());
                 Trk::MaterialProperties material(0., 10.e10, 10.e10, 13., 26., 0.);
                 Trk::HomogeneousLayerMaterial spacerMaterial;
-                Trk::SharedObject<const Trk::SurfaceBounds> bounds;
                 if (thickness > 0.) {
                     material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                     spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
-                    bounds = Trk::SharedObject<const Trk::SurfaceBounds>(rbounds);
                     Trk::PlaneLayer* layx = new Trk::PlaneLayer(Amg::Transform3D(transf[ic] * Amg::Translation3D(shift, 0., 0.) *
                                                                                  Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 1., 0.)) *
                                                                                  Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 0., 1.))),
@@ -1223,10 +1215,6 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                                                                                   Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 1., 0.)) *
                                                                                   Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 0., 1.))),
                                                                  bounds2, spacerMaterial, thickness, nullptr, 0);
-                    // TODO find out why copy with shift crashes in the destructor (
-                    // double transform delete )
-                    // Trk::PlaneLayer* layxx = new
-                    // Trk::PlaneLayer(*layx,Amg::Transform3D(Amg::Translation3D(-2*shift,0.,0.)));
                     layers.push_back(layxx);
                 }
                 thickness = (boxA->getYHalfLength() - boxB->getYHalfLength());
@@ -1234,8 +1222,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                     material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                     spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
                     shift = 0.5 * (boxA->getYHalfLength() + boxB->getYHalfLength());
-                    rbounds = new Trk::RectangleBounds(boxB->getXHalfLength(), boxA->getZHalfLength());
-                    bounds = Trk::SharedObject<const Trk::SurfaceBounds>(rbounds);
+                    bounds = std::make_shared<const Trk::RectangleBounds>(boxB->getXHalfLength(), boxA->getZHalfLength());
                     Trk::PlaneLayer* lay = new Trk::PlaneLayer(Amg::Transform3D(transf[ic] * Amg::Translation3D(0., shift, 0.) *
                                                                                 Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(1., 0., 0.))),
                                                                bounds, spacerMaterial, thickness, nullptr, 0);
@@ -1244,10 +1231,6 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                     Trk::PlaneLayer* layy = new Trk::PlaneLayer(Amg::Transform3D(transf[ic] * Amg::Translation3D(0., -shift, 0.) *
                                                                                  Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(1., 0., 0.))),
                                                                 bounds2, spacerMaterial, thickness, nullptr, 0);
-                    // TODO find out why copy with shift crashes in the destructor (
-                    // double transform delete )
-                    // Trk::PlaneLayer* layy = new
-                    // Trk::PlaneLayer(*lay,Amg::Transform3D(Amg::Translation3D(0.,-2*shift,0.)));
                     layers.push_back(layy);
                 }
                 thickness = (boxA->getZHalfLength() - boxB->getZHalfLength());
@@ -1255,18 +1238,13 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                     material = Trk::MaterialProperties(thickness, cmat.X0, cmat.L0, cmat.A, cmat.Z, cmat.rho);
                     spacerMaterial = Trk::HomogeneousLayerMaterial(material, 0.);
                     shift = 0.5 * (boxA->getZHalfLength() + boxB->getZHalfLength());
-                    rbounds = new Trk::RectangleBounds(boxB->getXHalfLength(), boxB->getYHalfLength());
-                    bounds = Trk::SharedObject<const Trk::SurfaceBounds>(rbounds);
+                    bounds = std::make_shared<const Trk::RectangleBounds>(boxB->getXHalfLength(), boxB->getYHalfLength());
                     Trk::PlaneLayer* layz = new Trk::PlaneLayer(Amg::Transform3D(transf[ic] * Amg::Translation3D(0., 0., shift)), bounds,
                                                                 spacerMaterial, thickness, nullptr, 0);
                     layers.push_back(layz);
                     Trk::SharedObject<const Trk::SurfaceBounds> bounds2(bounds);
                     Trk::PlaneLayer* layzz = new Trk::PlaneLayer(Amg::Transform3D(transf[ic] * Amg::Translation3D(0., 0., -shift)), bounds2,
                                                                  spacerMaterial, thickness, nullptr, 0);
-                    // TODO find out why copy with shift crashes in the destructor (
-                    // double transform delete )
-                    // Trk::PlaneLayer* layzz = new
-                    // Trk::PlaneLayer(*layz,Amg::Transform3D(Amg::Translation3D(0.,0.,-2*shift)));
                     layers.push_back(layzz);
                 }
             } else if (sub) {
@@ -1298,10 +1276,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
 
                     const GeoBox* boxB = dynamic_cast<const GeoBox*>(subVs[2].first);
                     if (boxB && v1 && v2) {
-                        Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(box->getYHalfLength(), box->getZHalfLength());
+                        auto bounds = std::make_shared<const Trk::RectangleBounds>(box->getYHalfLength(), box->getZHalfLength());
                         double thickness = (box->getXHalfLength() - boxB->getXHalfLength());
                         double shift = 0.5 * (box->getXHalfLength() + boxB->getXHalfLength());
-                        Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
                         Trk::Volume* cVol = new Trk::Volume(new Amg::Transform3D(Amg::Translation3D(-shift, 0., 0.)),
                                                             new Trk::CombinedVolumeBounds(v1, v2, false));
                         volExcl = new Trk::VolumeExcluder(cVol);
@@ -1324,11 +1301,10 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
                         layers.push_back(layxx);
                         delete subPlane;
 
-                        rbounds = new Trk::RectangleBounds(boxB->getXHalfLength(), box->getZHalfLength());
+                        bounds = std::make_shared<const Trk::RectangleBounds>(boxB->getXHalfLength(), box->getZHalfLength());
                         thickness = subVs[2].second.translation().mag();
                         Trk::VolumeExcluder* volEx =
                             new Trk::VolumeExcluder(new Trk::Volume(*cVol, Amg::Transform3D(Amg::Translation3D(2 * shift, 0., 0.))));
-                        bounds = Trk::SharedObject<const Trk::SurfaceBounds>(rbounds);
                         subPlane = new Trk::SubtractedPlaneSurface(
                             Trk::PlaneSurface(Amg::Transform3D(transf[ic] * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(1., 0., 0.))),
                                               bounds),
@@ -2307,12 +2283,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
     if (cubBounds) {
         double thickness = 2 * cubBounds->halflengthX();
         double sf = 4 * cubBounds->halflengthZ() * cubBounds->halflengthY();
-        // const std::vector<const Trk::Surface*>* surfs =
-        // cubBounds->decomposeToSurfaces(Trk::s_idTransform); const
-        // Trk::RectangleBounds* rbounds = dynamic_cast<const Trk::RectangleBounds*>
-        // (&(*(surfs))[0]->bounds());
-        Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(cubBounds->halflengthY(), cubBounds->halflengthZ());
-        Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
+        auto bounds = std::make_shared<Trk::RectangleBounds>(cubBounds->halflengthY(), cubBounds->halflengthZ());
         std::unique_ptr<Trk::OverlapDescriptor> od = nullptr;
         Trk::MaterialProperties matProp = collectStationMaterial(trVol, sf);
         ATH_MSG_VERBOSE(" collectStationMaterial cub " << matProp);
@@ -2595,8 +2566,7 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
                                         scale * matEx->averageRho());
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
 
-        Trk::RectangleBounds* rbounds = new Trk::RectangleBounds(cubBounds->halflengthY(), cubBounds->halflengthZ());
-        Trk::SharedObject<const Trk::SurfaceBounds> bounds(rbounds);
+        auto bounds = std::make_shared<const Trk::RectangleBounds>(cubBounds->halflengthY(), cubBounds->halflengthZ());
         layer = new Trk::PlaneLayer(Amg::Transform3D(trVol->transform() * Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 1., 0.)) *
                                                      Amg::AngleAxis3D(M_PI_2, Amg::Vector3D(0., 0., 1.))),
                                     bounds, mat, thickness, std::move(od), 1);
