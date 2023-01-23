@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: JetObjectCollectionMaker.h 809674 2017-08-23 14:10:24Z iconnell $
@@ -44,6 +44,7 @@
 #include "JetCPInterfaces/ICPJetUncertaintiesTool.h"
 #include "JetCPInterfaces/ICPJetCorrectionTool.h"
 #include "JetInterface/IJetUpdateJvt.h"
+#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 #include "TopJetSubstructure/TopJetSubstructure.h"
 
@@ -86,7 +87,7 @@ namespace top {
     // return all recommendedSystematics
     inline const std::list<CP::SystematicSet>& recommendedSystematics()   const {return m_recommendedSystematics;}
   protected:
-  
+
     // Function will return prefix which will be added to systematic names obtained from tools
     virtual std::string getLargeRModName(const std::string& NPModel) const;
     // specify Systematic
@@ -149,6 +150,7 @@ namespace top {
     std::unordered_map<std::string, ToolHandle<IJetDecorator> > m_boostedJetTaggers;
 
     ToolHandle<IJetUpdateJvt> m_jetUpdateJvtTool;
+    ToolHandle<CP::IJetJvtEfficiency> m_jetJvtEfficiencyTool;
     ToolHandle<IJetModifier> m_jetSelectfJvtTool;
 
     std::string m_truthJetCollForHS;

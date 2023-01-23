@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopCPTools/TopJetMETCPTools.h"
@@ -24,6 +24,7 @@
 #include "JetJvtEfficiency/JetJvtEfficiency.h"
 #include "JetSelectorTools/EventCleaningTool.h"
 #include "JetUncertainties/FFJetSmearingTool.h"
+#include "JetAnalysisInterfaces/IJetJvtEfficiency.h"
 
 
 // MET include(s):
@@ -225,40 +226,32 @@ namespace top {
       m_jetCalibrationTool = jetCalibrationTool;
     }
 
-    ///-- Update JVT --///
-    const std::string jvt_update_name = "JetUpdateJvtTool";
-    if (asg::ToolStore::contains<IJetUpdateJvt>(jvt_update_name)) {
-      m_jetUpdateJvtTool = asg::ToolStore::get<IJetUpdateJvt>(jvt_update_name);
-    } else {
-      IJetUpdateJvt* jetUpdateJvtTool = new JetVertexTaggerTool(jvt_update_name);
-      top::check(asg::setProperty(jetUpdateJvtTool, "JVTFileName", "JetMomentTools/" + m_jetJVT_ConfigFile),
-                 "Failed to set JVTFileName for JetUpdateJvtTool");
-      top::check(asg::setProperty(jetUpdateJvtTool, "JetContainer", m_config->sgKeyJets()),
-                 "Failed to set JetContainer for JetUpdateJvtTool");
-      top::check(jetUpdateJvtTool->initialize(), "Failed to initialize");
-      m_jetUpdateJvtTool = jetUpdateJvtTool;
-    }
-    
     ///-- Calculate fJVT --///
-    //Only setup fJVT tool if user actually wants it
+    // We don't need this for normal JVT, since the recalculation can be performed directly in JetJvtEfficiency there
+    // Only setup fJVT tool if user actually wants it
     if (m_config->doForwardJVTinMET() || m_config->getfJVTWP() != "None") {
-    
+      // Currently, fJVT does not work correctly in R22, so this failure will be placed here temporarily
+      ATH_MSG_ERROR("fJVT and fJVT in MET does not yet work in R22!");
+      return StatusCode::FAILURE;
+
       const std::string fjvt_tool_name = "JetSelectfJvtTool";
       if (asg::ToolStore::contains<IJetModifier>(fjvt_tool_name)) {
         m_jetSelectfJvtTool = asg::ToolStore::get<IJetModifier>(fjvt_tool_name);
       } else {
         IJetModifier* JetSelectfJvtTool = new JetForwardJvtTool(fjvt_tool_name);
-        top::check(asg::setProperty(JetSelectfJvtTool, "JvtMomentName", "AnalysisTop_JVT"), //fJVT uses JVT decision
+        top::check(asg::setProperty(JetSelectfJvtTool, "JvtMomentName", "NNJvt"),  // fJVT uses JVT decision
         	   "Failed to set JvtMomentName for JetForwardJvtTool");
         
-        //Default fJVT WP is medium but this can't be used with default Tight MET WP
-        //MET WP takes precidence so making ATop default fJVT=Tight 
+        // Default fJVT WP is medium but this can't be used with default Tight MET WP
+        // MET WP takes precedence so making ATop default fJVT=Tight
         if (m_config->getfJVTWP() != "Medium"){ 
           top::check(asg::setProperty(JetSelectfJvtTool, "UseTightOP", true),
                            "Failed to set UseTightOP for JetForwardJvtTool");
         }
+        top::check(asg::setProperty(JetSelectfJvtTool, "JetContainer", m_config->sgKeyJets()),
+                   "Failed to set JetContainer for JetForwardJvtTool");
         top::check(asg::setProperty(JetSelectfJvtTool, "OutputDec", "AnalysisTop_fJVTdecision"), //Adds custom decorator, 'AnalysisTop_fJVTdecision', to all jets
-        	   "Failed to set OutputDec for JetForwardJvtTool");
+        	       "Failed to set OutputDec for JetForwardJvtTool");
   
         top::check(JetSelectfJvtTool->initialize(), "Failed to initialize " + fjvt_tool_name);
         m_jetSelectfJvtTool = JetSelectfJvtTool;
@@ -549,26 +542,28 @@ namespace top {
     // <tom.neep@cern.ch> Added 16th Feb 2016.
     // Jet JVT tool - can be used for both selection and for SFs
     // Since we use this for jet selection we also need it for data
-    const std::string jvt_tool_name = "JetJvtEfficiencyTool";
-    const std::string JVT_SFFile =
-      (m_config->sgKeyJets() == "AntiKt4LCTopoJets") ?
-      "JetJvtEfficiency/Moriond2018/JvtSFFile_LC.root" :      // LC jets
-      (m_config->useParticleFlowJets()) ?
-      "JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlow.root" : // pflow jets
-      "JetJvtEfficiency/Moriond2018/JvtSFFile_EMTopoJets.root";      // default is EM jets
 
+    // <chris.scheulen@cern.ch> Modified 2022-12-04
+    // Added support for new NNJvt Algorithm used by default in R22
+    const std::string jvt_tool_name = "JetJvtEfficiencyTool";
+
+    // Use Jet/Etmiss provided enum to associate Tagging Algo option with their naming scheme
+    CP::JvtTagger JVT_Algo = CP::JvtTagger::NNJvt;
+    std::string JVT_SFFile = "DummySFs.root";  // Currently, there are no dedicated SFs available
     const std::string JVT_WP = m_config->getJVTWP();
 
     if (asg::ToolStore::contains<CP::IJetJvtEfficiency>(jvt_tool_name)) {
       m_jetJvtTool = asg::ToolStore::get<CP::IJetJvtEfficiency>(jvt_tool_name);
     } else {
       CP::JetJvtEfficiency* jetJvtTool = new CP::JetJvtEfficiency(jvt_tool_name);
+      top::check(jetJvtTool->setProperty("TaggingAlg", JVT_Algo),
+                 "Failed to set JVT Algorithm");
       top::check(jetJvtTool->setProperty("WorkingPoint", JVT_WP),
                  "Failed to set JVT WP");
       top::check(jetJvtTool->setProperty("SFFile", JVT_SFFile),
                  "Failed to set JVT SFFile name");
-      top::check(jetJvtTool->setProperty("JetJvtMomentName", "AnalysisTop_JVT"),
-                 "Failed to set JVT decoration name");
+      top::check(jetJvtTool->setProperty("JetJvtMomentName", "NNJvt"),
+                 "Failed to set NNJvt decoration name");
       top::check(jetJvtTool->setProperty("TruthLabel", "AnalysisTop_isHS"),
                  "Failed to set JVT TruthLabel decoration name");
       top::check(jetJvtTool->setProperty("TruthJetContainerName", m_truthJetCollForHS),
@@ -576,66 +571,75 @@ namespace top {
       top::check(jetJvtTool->initialize(), "Failed to initialize JVT tool");
       m_jetJvtTool = jetJvtTool;
     }
- 
+
     // <jonathan.jamieson@cern.ch> Added 9th June 2020.
     // Jet fJVT tool - uses same tool as for JVT,
     // Only setup fJVT Efficiency tool if user actually wants it
+
+    // <chris.scheulen@cern.ch> Modified 2022-12-04.
+    // For R22, we now have an option 'TaggingAlg', which needs to be set to fJVT mode explicitly.
     if (m_config->getfJVTWP() != "None") {
       const std::string fjvt_tool_name = "JetForwardJvtEfficiencyTool";
       const std::string fJVT_SFFile =
-	(m_config->useParticleFlowJets()) ?
-	"JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root" : // pflow jets
-	"JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root";      // default is EM jets
-
+        (m_config->useParticleFlowJets()) ?
+        "JetJvtEfficiency/May2020/fJvtSFFile.EMPFlow.root" :  // pflow jets
+        "JetJvtEfficiency/May2020/fJvtSFFile.EMtopo.root";    // default is EM jet
       std::string fJVT_WP = m_config->getfJVTWP();
-      if (fJVT_WP == "Medium"){
-	fJVT_WP = "Loose"; //Efficiency tool still uses old WP names...
+      if (fJVT_WP == "Medium") {
+        fJVT_WP = "Loose";  // Efficiency tool still uses old WP names...
       }
 
+      CP::JvtTagger fJVT_Algo = CP::JvtTagger::fJvt;
+
       if (asg::ToolStore::contains<CP::IJetJvtEfficiency>(fjvt_tool_name)) {
-	m_jetfJvtTool = asg::ToolStore::get<CP::IJetJvtEfficiency>(fjvt_tool_name);
+        m_jetfJvtTool = asg::ToolStore::get<CP::IJetJvtEfficiency>(fjvt_tool_name);
       } else {
-	CP::JetJvtEfficiency* jetfJvtTool = new CP::JetJvtEfficiency(fjvt_tool_name);
-	top::check(jetfJvtTool->setProperty("WorkingPoint", fJVT_WP),
-		   "Failed to set fJVT WP");
-	top::check(jetfJvtTool->setProperty("SFFile", fJVT_SFFile),
-		   "Failed to set fJVT SFFile name");
-	top::check(jetfJvtTool->setProperty("UseMuSFFormat", true),
-		   "Failed to set fJVT SFFile to updated mu binning");
-	top::check(jetfJvtTool->setProperty("ScaleFactorDecorationName", "fJVTSF"),
-		   "Failed to set fJVT SF decoration name");
-	top::check(jetfJvtTool->setProperty("JetfJvtMomentName", "AnalysisTop_fJVTdecision"),
-		   "Failed to set fJVT pass/fail decoration name");
-	top::check(jetfJvtTool->setProperty("TruthLabel", "AnalysisTop_isHS"),
-		   "Failed to set fJVT TruthLabel decoration name");
-	top::check(jetfJvtTool->setProperty("TruthJetContainerName", m_truthJetCollForHS),
-		   "Failed to set fJVT TruthJetContainerName decoration name");
-	top::check(jetfJvtTool->initialize(), "Failed to initialize fJVT Efficiency tool");
-	m_jetfJvtTool = jetfJvtTool;
+        CP::JetJvtEfficiency* jetfJvtTool = new CP::JetJvtEfficiency(fjvt_tool_name);
+        top::check(jetfJvtTool->setProperty("TaggingAlg", fJVT_Algo),
+                   "Failed to set fJVT Algorithm");
+        top::check(jetfJvtTool->setProperty("WorkingPoint", fJVT_WP),
+                   "Failed to set fJVT WP");
+        top::check(jetfJvtTool->setProperty("SFFile", fJVT_SFFile),
+                   "Failed to set fJVT SFFile name");
+        top::check(jetfJvtTool->setProperty("UseMuSFFormat", true),
+                   "Failed to set fJVT SFFile to updated mu binning");
+        top::check(jetfJvtTool->setProperty("ScaleFactorDecorationName", "fJVTSF"),
+                   "Failed to set fJVT SF decoration name");
+        top::check(jetfJvtTool->setProperty("JetJvtMomentName", "DFCommonJets_fJvt"),
+                   "Failed to set fJVT pass/fail decoration name");
+        top::check(jetfJvtTool->setProperty("TruthLabel", "AnalysisTop_isHS"),
+                   "Failed to set fJVT TruthLabel decoration name");
+        top::check(jetfJvtTool->setProperty("TruthJetContainerName", m_truthJetCollForHS),
+                   "Failed to set fJVT TruthJetContainerName decoration name");
+        top::check(jetfJvtTool->initialize(), "Failed to initialize fJVT Efficiency tool");
+        m_jetfJvtTool = jetfJvtTool;
       }
     }
     return StatusCode::SUCCESS;
   }
 
   StatusCode JetMETCPTools::setupMET() {
-    // See https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/EtmissRecommendationsRel21p2
+    // See https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JetMetR22MigrationGuide#MET_Building_and_Systematics
+    // <chris.scheulen@cern.ch> modified 2023-01-18: Adapted for NNJvt usage in R22
     // METMaker tool
     if (asg::ToolStore::contains<IMETMaker>("met::METMaker")) {
       m_met_maker = asg::ToolStore::get<IMETMaker>("met::METMaker");
     } else {
       met::METMaker* metMaker = new met::METMaker("met::METMaker");
-      top::check(metMaker->setProperty("JetJvtMomentName", "AnalysisTop_JVT"),
-                 "Failed to set METMaker JVT moment name");
+      top::check(metMaker->setProperty("JetSelection", m_config->getMETJetSelectionWP()),
+                 "Failed to set METMaker Jvt WP");
 
       if (m_config->useParticleFlowJets()) {
         top::check(metMaker->setProperty("DoPFlow", true), "Failed to set METMaker DoPFlow to true");
       }
-     
-      if (m_config->doForwardJVTinMET()) { 
+
+      if (m_config->doForwardJVTinMET()) {
         if (m_config->getfJVTWP() == "Medium") {
-          top::check(metMaker->setProperty("JetSelection", "Tenacious"), "Failed to set METMaker JetSelection to Tenacious");
+          top::check(metMaker->setProperty("JetSelection", "Tenacious"),
+                     "Failed to set METMaker JetSelection to Tenacious");
         }
-        top::check(metMaker->setProperty("JetRejectionDec","AnalysisTop_fJVTdecision"), "Failed to set METMaker JetRejectionDec to AnalysisTop_fJVTdecision");
+        top::check(metMaker->setProperty("JetRejectionDec", "DFCommonJets_fJvt"),
+                   "Failed to set METMaker JetRejectionDec to DFCommonJets_fJvt");
       }
       top::check(metMaker->initialize(), "Failed to initialize");
       metMaker->msg().setLevel(MSG::INFO);

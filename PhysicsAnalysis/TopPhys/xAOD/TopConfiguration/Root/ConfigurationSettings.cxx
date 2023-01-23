@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TopConfiguration/ConfigurationSettings.h"
@@ -205,7 +205,7 @@ namespace top {
     registerParameter("JVTinMETCalculation",
                       "Perfom a JVT cut on the jets in the MET recalculation? True (default) or False.", "True");
     registerParameter("SaveFailJVTJets", "Save the jets that failed the JVT cut? False (default) or True.", "False");
-    registerParameter("JVTWP", "Set JVT WP, default is set to \'Default\' (Tight for PFlow and Medium for Topo).",
+    registerParameter("JVTWP", "Set JVT WP, default is set to \'Default\' (FixedEffPt for PFlow NNJvt, Tight for PFlow Jvt, and Medium for Topo Jvt).",
                       "Default");
     registerParameter("ForwardJVTWP", "Set fJVT Working Point for selecting forward jets (|eta|>2.5 & 20GeV<pT<60GeV)"
 		      "\'None\': No fJVT (doesn't run tool for selection) - use this if you don't have forward jets in your selection or if using using PFlow jets with a derivation older than p4173, \'Tight\' (fJVT<0.4, recommended), \'Medium\': (fJVT<0.5, if combined with ForwardJVTinMETCalculation this will set MET WP to Tenacious with stricter JVTinMET requirements",
@@ -220,6 +220,9 @@ namespace top {
     registerParameter("METSignificanceSoftTermParam",
                       "String that sets the type of resolutions that are used for the soft term, Random(met::Random), PthardParam(met::PthardParam), TSTParam(met::TSTParam)",
                       "Random", {"Random", "PthardParam", "TSTParam"});
+    registerParameter("METJetSelectionWP",
+                      "Set JetSelection WP to use within MetMaker with NNJvt, by default \'Tight\' is used.",
+                      "Tight", {"Loose", "Tight", "Tighter"});
     registerParameter("JetPtGhostTracks",
                       "Jet pT threshold for ghost track systematic variations calculation (in MeV). Default 25 GeV.",
                       "25000.");
