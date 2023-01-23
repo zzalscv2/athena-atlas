@@ -615,8 +615,155 @@ namespace xAOD {
     this->auxdecor< float >("MC_Zdecay2_phi") = -1000;
     this->auxdecor< int >("MC_Zdecay2_pdgId") = -9999;
     this->auxdecor< int >("MC_Zdecay2_status") = -9999;
+  }
+
+  // Initialize variables for an additional final-state Z.
+  void PartonHistory::IniVarTth() {
+
+    // Higgs variables
+    this->auxdecor< float >("MC_Higgs_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_eta") = -1000;
+    this->auxdecor< float >("MC_Higgs_phi") = -1000;
+
+    this->auxdecor< float >("MC_Higgs_decay1_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_phi") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_eta") = -1000;
+    this->auxdecor< int >("MC_Higgs_tau_decay1_isHadronic") = -1000;
+    this->auxdecor< int >("MC_Higgs_decay1_pdgId") = -1000;
+
+    this->auxdecor< float >("MC_Higgs_decay2_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_phi") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_eta") = -1000;
+    this->auxdecor< int >("MC_Higgs_tau_decay2_isHadronic") = -1000;
+    this->auxdecor< int >("MC_Higgs_decay2_pdgId") = -1000;
+
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay1_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay1_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay1_phi") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay1_eta") = -1000;
+    this->auxdecor< int >("MC_Higgs_tau_decay1_from_decay1_isHadronic") = -1000;
+    this->auxdecor< int >("MC_Higgs_decay1_from_decay1_pdgId") = -1000;
+
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay1_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay1_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay1_phi") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay1_eta") = -1000;
+    this->auxdecor< int >("MC_Higgs_tau_decay2_from_decay1_isHadronic") = -1000;
+    this->auxdecor< int >("MC_Higgs_decay2_from_decay1_pdgId") = -1000;
+
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay2_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay2_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay2_phi") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay1_from_decay2_eta") = -1000;
+    this->auxdecor< int >("MC_Higgs_tau_decay1_from_decay2_isHadronic") = -1000;
+    this->auxdecor< int >("MC_Higgs_decay1_from_decay2_pdgId") = -1000;
+
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay2_m") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay2_pt") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay2_phi") = -1000;
+    this->auxdecor< float >("MC_Higgs_decay2_from_decay2_eta") = -1000;
+    this->auxdecor< int >("MC_Higgs_tau_decay2_from_decay2_isHadronic") = -1000;
+    this->auxdecor< int >("MC_Higgs_decay2_from_decay2_pdgId") = -1000;
+
+    //ttbar variables
+    this->auxdecor< float >("MC_ttbar_beforeFSR_m") = -1;
+    this->auxdecor< float >("MC_ttbar_beforeFSR_pt") = -1;
+    this->auxdecor< float >("MC_ttbar_beforeFSR_eta") = -1000;
+    this->auxdecor< float >("MC_ttbar_beforeFSR_phi") = -1000;
+
+    this->auxdecor< float >("MC_ttbar_afterFSR_m") = -1;
+    this->auxdecor< float >("MC_ttbar_afterFSR_pt") = -1;
+    this->auxdecor< float >("MC_ttbar_afterFSR_eta") = -1000;
+    this->auxdecor< float >("MC_ttbar_afterFSR_phi") = -1000;
+
+    this->auxdecor< float >("MC_ttbar_afterFSR_beforeDecay_m") = -1;
+    this->auxdecor< float >("MC_ttbar_afterFSR_beforeDecay_pt") = -1;
+    this->auxdecor< float >("MC_ttbar_afterFSR_beforeDecay_eta") = -1000;
+    this->auxdecor< float >("MC_ttbar_afterFSR_beforeDecay_phi") = -1000;
+
+    //t variables
+    this->auxdecor< float >("MC_t_beforeFSR_m") = -1;
+    this->auxdecor< float >("MC_t_beforeFSR_pt") = -1;
+    this->auxdecor< float >("MC_t_beforeFSR_eta") = -1000;
+    this->auxdecor< float >("MC_t_beforeFSR_phi") = -1000;
+
+    this->auxdecor< float >("MC_t_afterFSR_m") = -1;
+    this->auxdecor< float >("MC_t_afterFSR_pt") = -1;
+    this->auxdecor< float >("MC_t_afterFSR_eta") = -1000;
+    this->auxdecor< float >("MC_t_afterFSR_phi") = -1000;
+
+    this->auxdecor< float >("MC_t_afterFSR_SC_m") = -1;
+    this->auxdecor< float >("MC_t_afterFSR_SC_pt") = -1;
+    this->auxdecor< float >("MC_t_afterFSR_SC_eta") = -1000;
+    this->auxdecor< float >("MC_t_afterFSR_SC_phi") = -1000;
+
+    //tbar variables
+    this->auxdecor< float >("MC_tbar_beforeFSR_m") = -1;
+    this->auxdecor< float >("MC_tbar_beforeFSR_pt") = -1;
+    this->auxdecor< float >("MC_tbar_beforeFSR_eta") = -1000;
+    this->auxdecor< float >("MC_tbar_beforeFSR_phi") = -1000;
+
+    this->auxdecor< float >("MC_tbar_afterFSR_m") = -1;
+    this->auxdecor< float >("MC_tbar_afterFSR_pt") = -1;
+    this->auxdecor< float >("MC_tbar_afterFSR_eta") = -1000;
+    this->auxdecor< float >("MC_tbar_afterFSR_phi") = -1000;
+
+    this->auxdecor< float >("MC_tbar_afterFSR_SC_m") = -1;
+    this->auxdecor< float >("MC_tbar_afterFSR_SC_pt") = -1;
+    this->auxdecor< float >("MC_tbar_afterFSR_SC_eta") = -1000;
+    this->auxdecor< float >("MC_tbar_afterFSR_SC_phi") = -1000;
+
+    // W's from t/tbar
+    this->auxdecor< float >("MC_W_from_t_m") = -1;
+    this->auxdecor< float >("MC_W_from_t_pt") = -1;
+    this->auxdecor< float >("MC_W_from_t_eta") = -1000;
+    this->auxdecor< float >("MC_W_from_t_phi") = -1000;
+
+    this->auxdecor< float >("MC_W_from_tbar_m") = -1;
+    this->auxdecor< float >("MC_W_from_tbar_pt") = -1;
+    this->auxdecor< float >("MC_W_from_tbar_eta") = -1000;
+    this->auxdecor< float >("MC_W_from_tbar_phi") = -1000;
     
-    
- }
+    // decays 1 and 2 from W's from t, all combos
+    this->auxdecor< float >("MC_Wdecay1_from_t_m") = -1;
+    this->auxdecor< float >("MC_Wdecay1_from_t_pt") = -1;
+    this->auxdecor< float >("MC_Wdecay1_from_t_eta") = -1000;
+    this->auxdecor< float >("MC_Wdecay1_from_t_phi") = -1000;
+    this->auxdecor< int >("MC_Wdecay1_from_t_pdgId") = 0;
+
+    this->auxdecor< float >("MC_Wdecay2_from_t_m") = -1;
+    this->auxdecor< float >("MC_Wdecay2_from_t_pt") = -1;
+    this->auxdecor< float >("MC_Wdecay2_from_t_eta") = -1000;
+    this->auxdecor< float >("MC_Wdecay2_from_t_phi") = -1000;
+    this->auxdecor< int >("MC_Wdecay2_from_t_pdgId") = 0;
+
+    // decays 1 and 2 from W's from tbar, all combos
+    this->auxdecor< float >("MC_Wdecay1_from_tbar_m") = -1;
+    this->auxdecor< float >("MC_Wdecay1_from_tbar_pt") = -1;
+    this->auxdecor< float >("MC_Wdecay1_from_tbar_eta") = -1000;
+    this->auxdecor< float >("MC_Wdecay1_from_tbar_phi") = -1000;
+    this->auxdecor< int >("MC_Wdecay1_from_tbar_pdgId") = 0;
+
+    this->auxdecor< float >("MC_Wdecay2_from_tbar_m") = -1;
+    this->auxdecor< float >("MC_Wdecay2_from_tbar_pt") = -1;
+    this->auxdecor< float >("MC_Wdecay2_from_tbar_eta") = -1000;
+    this->auxdecor< float >("MC_Wdecay2_from_tbar_phi") = -1000;
+    this->auxdecor< int >("MC_Wdecay2_from_tbar_pdgId") = 0;
+
+    // b's from t/tbar
+    this->auxdecor< float >("MC_b_from_t_m") = -1;
+    this->auxdecor< float >("MC_b_from_t_pt") = -1;
+    this->auxdecor< float >("MC_b_from_t_eta") = -1000;
+    this->auxdecor< float >("MC_b_from_t_phi") = -1000;
+
+    this->auxdecor< float >("MC_b_from_tbar_m") = -1;
+    this->auxdecor< float >("MC_b_from_tbar_pt") = -1;
+    this->auxdecor< float >("MC_b_from_tbar_eta") = -1000;
+    this->auxdecor< float >("MC_b_from_tbar_phi") = -1000;
+
+  }
 }
 ADD_NS_DV_PROXY(xAOD, PartonHistoryContainer);
