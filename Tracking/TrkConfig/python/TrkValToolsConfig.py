@@ -10,6 +10,11 @@ def TrkObserverToolCfg(flags,
                        **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("HadROIPhiRZEtContainer", "InDetHadCaloClusterROIPhiRZEt")
+    if "Fitter" not in kwargs:
+        from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
+        ObserverFitter = acc.popToolsAndMerge(InDetTrackFitterCfg(flags))
+        acc.addPublicTool(ObserverFitter)
+        kwargs.setdefault("Fitter", ObserverFitter)
     acc.setPrivateTools(CompFactory.Trk.TrkObserverTool(name, **kwargs))
     return acc
 

@@ -433,7 +433,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
         TrkObserverTool = acc.popToolsAndMerge(TrkObserverToolCfg(flags))
         acc.addPublicTool(TrkObserverTool)
         kwargs.setdefault("ObserverTool", TrkObserverTool)
-        TrkObserverToolWriter = acc.popToolsAndMerge(WriterTrkObserverToolCfg(flags, name = "TrackObserverToolWriter"))
+        TrkObserverToolWriter = acc.popToolsAndMerge(WriterTrkObserverToolCfg(flags))
         acc.addPublicTool(TrkObserverToolWriter)
         kwargs.setdefault("ObserverToolWriter", TrkObserverToolWriter)
 
