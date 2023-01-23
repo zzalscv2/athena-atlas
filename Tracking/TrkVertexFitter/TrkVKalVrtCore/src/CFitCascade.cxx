@@ -592,10 +592,16 @@ int processCascade(CascadeEvent & cascadeEvent_ )
      vShift = sqrt( (vk->refV[0]-targetVertex[0])*(vk->refV[0]-targetVertex[0])
 	           +(vk->refV[1]-targetVertex[1])*(vk->refV[1]-targetVertex[1])
                    +(vk->refV[2]-targetVertex[2])*(vk->refV[2]-targetVertex[2]) );
-//std::cout<<"target="<<targetVertex[0]<<", "<<targetVertex[1]<<", "<<targetVertex[2]<<" vsht="<<vShift<<'\n';
+     for(auto pvx : vk->includedVrt){ //Check space position of internal vertex
+        double dirMom=(pvx->refIterV[0]-targetVertex[0])*pvx->fitMom[0]+
+                      (pvx->refIterV[1]-targetVertex[1])*pvx->fitMom[1]+
+                      (pvx->refIterV[2]-targetVertex[2])*pvx->fitMom[2];
+        if(dirMom<0.)cfdcopy(pvx->refIterV,targetVertex,3);
+     }
      bool insideGoodVolume=false;
-     if(vk->vk_fitterControl && vk->vk_fitterControl->vk_objProp) { insideGoodVolume = vk->vk_fitterControl->vk_objProp->checkTarget(targetVertex, *vk->vk_fitterControl->vk_istate);}
-     else                                                      { insideGoodVolume = myPropagator.checkTarget(targetVertex); }
+     if(vk->vk_fitterControl && vk->vk_fitterControl->vk_objProp) 
+          { insideGoodVolume = vk->vk_fitterControl->vk_objProp->checkTarget(targetVertex, *vk->vk_fitterControl->vk_istate);}
+     else { insideGoodVolume = myPropagator.checkTarget(targetVertex); }
      if(!insideGoodVolume) { return -16; }       //Vertex is definitely outside working volume
      for(it=0; it<NTRK; it++){
        trk=vk->TrackList[it].get();
