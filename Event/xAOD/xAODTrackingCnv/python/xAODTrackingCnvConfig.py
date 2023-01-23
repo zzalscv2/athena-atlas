@@ -200,6 +200,17 @@ def TrackParticleCnvAlgNoPIDCfg(flags, name, **kwargs):
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
 
+def ObserverTrackParticleCnvAlgCfg(flags, name="ObserverTrackParticleCnvAlg",
+                                   ClusterSplitProbabilityName = "",
+                                   AssociationMapName = "",
+                                   **kwargs):
+     kwargs.setdefault("TrackContainerName", "ObservedTracksCollection")
+     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetObservedTrackParticles")
+     kwargs.setdefault("AugmentObservedTracks", True)
+     kwargs.setdefault("TracksMapName", "ObservedTracksCollectionMap")
+
+     return TrackParticleCnvAlgCfg(flags, name, ClusterSplitProbabilityName, AssociationMapName, **kwargs)
+
 def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
                               ClusterSplitProbabilityName = "",
                               AssociationMapName = "",
