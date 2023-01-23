@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKSYSTEMATICSTOOL_H
@@ -44,7 +44,7 @@ namespace InDet {
     std::unique_ptr<TFile> getFile( const std::string& ) const;
 
     /// a function to initialize an object from a root file
-    template <class T> StatusCode initObject(T*& obj, std::string rootFileName, std::string objName) const;
+    template <class T> StatusCode initObject(T*& obj, const std::string& rootFileName, const std::string& objName) const;
 
     // a map from a general set to a set that is filtered for the ones we use
     // note that SystematicSet caches its hashes so this is probably not as slow as it might seem
@@ -60,7 +60,7 @@ namespace InDet {
 
 // must define template function in header
 template <class T>
-StatusCode InDet::InDetTrackSystematicsTool::initObject(T*& obj, std::string rootFileName, std::string objName) const
+StatusCode InDet::InDetTrackSystematicsTool::initObject(T*& obj, const std::string& rootFileName, const std::string& objName) const
 {
   if (obj != nullptr) ATH_MSG_WARNING( obj->GetName() << " is not null, yet we are now attempting to initialize from " << rootFileName );
   std::unique_ptr<TFile> F = getFile(rootFileName);
