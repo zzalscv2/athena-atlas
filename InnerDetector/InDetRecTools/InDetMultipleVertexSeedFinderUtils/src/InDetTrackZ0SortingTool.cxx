@@ -59,7 +59,7 @@ namespace InDet
  
 //here we want to make an extrapolation    
      Trk::PerigeeSurface perigeeSurface(reference->position());
-     perigee = m_extrapolator->extrapolate(
+     perigee = m_extrapolator->extrapolateTrack(
              ctx,
              **tb,perigeeSurface,
 					   Trk::anyDirection,true, 

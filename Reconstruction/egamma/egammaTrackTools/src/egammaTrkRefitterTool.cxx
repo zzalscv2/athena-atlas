@@ -243,7 +243,7 @@ egammaTrkRefitterTool::provideVotFromBeamspot(const EventContext& ctx,
   // calculate perigee parameters wrt. beam-spot
   std::unique_ptr<const Trk::Perigee> perigee = nullptr;
   std::unique_ptr<const Trk::TrackParameters> tmp =
-      m_extrapolator->extrapolate(ctx, *track, surface);
+      m_extrapolator->extrapolateTrack(ctx, *track, surface);
   if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
     perigee.reset(static_cast<const Trk::Perigee*>(tmp.release()));
   }

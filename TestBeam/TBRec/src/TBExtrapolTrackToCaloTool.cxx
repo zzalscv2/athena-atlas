@@ -477,7 +477,7 @@ TBExtrapolTrackToCaloTool::extrapolate(const Trk::Track* trk,
 
   ATH_MSG_DEBUG ("Trying to propagate to Surface ... " << (*surf) );
   
-  param = m_extrapolator->extrapolate( 
+  param = m_extrapolator->extrapolateTrack( 
     Gaudi::Hive::currentContext(),
     *trk, *surf,
     Trk::alongMomentum,

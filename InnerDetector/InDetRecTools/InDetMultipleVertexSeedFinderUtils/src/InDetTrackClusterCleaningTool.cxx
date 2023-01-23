@@ -58,10 +58,10 @@ namespace InDet
   {
    const Trk::TrackParameters * perigee(nullptr);
    if(!reference) perigee = (*i)->perigeeParameters();
-   else perigee = m_extrapolator->extrapolate(ctx,
-                                              **i,perigeeSurface,
-                                              Trk::anyDirection,true, 
-                                              Trk::pion).release(); 
+   else perigee = m_extrapolator->extrapolateTrack(ctx,
+                                                   **i,perigeeSurface,
+                                                   Trk::anyDirection,true, 
+                                                   Trk::pion).release(); 
    
    if(perigee)
    { 
@@ -86,7 +86,7 @@ namespace InDet
    else{
      
      //here we want to make an extrapolation
-     measPerigee = m_extrapolator->extrapolate(
+     measPerigee = m_extrapolator->extrapolateTrack(
        ctx, **i, perigeeSurface, Trk::anyDirection, true, Trk::pion).release();
    }
 

@@ -966,7 +966,7 @@ namespace Muon {
 
         } else {
             ATH_MSG_VERBOSE("Extrapolating from track (no closest point found):\n" << m_printer->print(track));
-            exPars = m_extrapolator->extrapolate(ctx, track, detEl.surface(), Trk::anyDirection, false, Trk::muon);
+            exPars = m_extrapolator->extrapolateTrack(ctx, track, detEl.surface(), Trk::anyDirection, false, Trk::muon);
         }
         if (!exPars) {
             ATH_MSG_DEBUG("Extrapolation did not succeed");
