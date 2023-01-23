@@ -9,6 +9,8 @@
 #include "AthLinks/ElementLink.h"
 #include "AsgMessaging/StatusCode.h"
 
+#include <set>
+
 namespace TrigCompositeUtils {
   /**
    * @brief Additional information returned by the TrigerDecisionTool's feature retrieval, contained within the LinkInfo.
@@ -25,8 +27,18 @@ namespace TrigCompositeUtils {
   template<typename T>
   struct LinkInfo {
     LinkInfo() = default;
-    LinkInfo(const Decision* s, const ElementLink<T>& l, ActiveState as = ActiveState::UNSET)
-      : source{s}, link{l}, state{as} {}
+    LinkInfo(
+      const Decision* s, const ElementLink<T>& l, ActiveState as = ActiveState::UNSET)
+      : source{s}, link{l}, state{as} {
+        if (s)
+        {
+          decisions.insert(s->decisions().begin(), s->decisions().end());
+        }
+      }
+    
+    LinkInfo(
+      const Decision* s, const ElementLink<T>& l, ActiveState as, const DecisionIDContainer &decisions)
+      : source{s}, link{l}, state{as}, decisions(decisions) {}
 
     bool isValid() const {
       return source && link.isValid();
@@ -38,9 +50,19 @@ namespace TrigCompositeUtils {
       return (isValid() ? StatusCode::SUCCESS : StatusCode::FAILURE);
     }
 
+    /**
+     * @brief The node in the NavGraph for this feature
+     *
+     * Note that when retrieving features for multi-leg chains the same feature can be
+     * attached to multiple nodes and only one of those nodes will be returned here.
+    */
     const Decision* source{nullptr};
+    /// Link to the feature
     ElementLink<T> link;
+    /// Was the linked feature active for any requested chains
     ActiveState state{ActiveState::UNSET};
+    /// All decision IDs active for this feature
+    DecisionIDContainer decisions;
   };
 } //> end namespace TrigCompositeUtils
 

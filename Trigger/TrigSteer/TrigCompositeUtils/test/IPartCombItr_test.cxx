@@ -28,7 +28,9 @@ namespace
     std::size_t index = idxBase++;
     return LinkInfo<xAOD::IParticleContainer>(
         owning.back().get(),
-        ElementLink<xAOD::IParticleContainer>(key, index));
+        ElementLink<xAOD::IParticleContainer>(key, index),
+        ActiveState::UNSET,
+        {});
   }
 
   /// Allow comparing link info objects
