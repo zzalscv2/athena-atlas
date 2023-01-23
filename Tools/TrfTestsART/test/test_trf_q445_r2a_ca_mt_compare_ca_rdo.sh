@@ -10,7 +10,6 @@ cd ca
 Reco_tf.py --CA \
   --AMI q445  \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
   --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/dev/x86_64-centos7-gcc11-opt/mc21a_ttbar.CA.RDO.pool.root \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
@@ -27,7 +26,6 @@ cd def
 Reco_tf.py \
   --AMI q445  \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
   --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/dev/x86_64-centos7-gcc11-opt/mc21a_ttbar.CA.RDO.pool.root \
   --outputAODFile myAOD_def.pool.root \
   --outputESDFile myESD_def.pool.root \

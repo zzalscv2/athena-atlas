@@ -73,7 +73,6 @@ run "RAWtoALL" Reco_tf.py \
   --multithreaded "True" \
   --postInclude "all:PyJobTransforms.UseFrontier" \
   --preInclude "all:Campaigns.PhaseIINoPileUp" \
-  --steering "doRAWtoALL" \
   --inputHitsFile "HITS.pool.root" \
   --outputAODFile "AOD.pool.root" \
   --maxEvents ${number_of_events}
