@@ -348,7 +348,7 @@ namespace CP {
         if (!m_custom_file_Calo.empty()) return resolve_file_location(m_custom_file_Calo);
         else if (m_Type != CP::MuonEfficiencyType::Reco) {
             return filename_Central();
-        } else return resolve_file_location("Reco_CaloTag_Z.root");
+        } else return resolve_file_location("Reco_CaloTag_Z.root"); //note that in rel22 we switched from CaloTag to CaloScore. Now, we're not updating the filename yet to ensure backward compatibility, but it must be clear that in rel22 calibration areas this file will actually contain the CaloScore SFs. 
     }
     std::string MuonEfficiencyScaleFactors::filename_HighEta()const {
 
@@ -371,7 +371,7 @@ namespace CP {
         // for the no reco WPs, we currently use the existing Z SF also for the low pt regime
         else if (m_Type != CP::MuonEfficiencyType::Reco || m_lowpt_threshold < 0) {
             return filename_Central();
-        } else return resolve_file_location("Reco_CaloTag_JPsi.root");
+        } else return resolve_file_location("Reco_CaloTag_JPsi.root"); //note that in rel22 we switched from CaloTag to CaloScore. Now, we're not updating the filename yet to ensure backward compatibility, but it must be clear that in rel22 calibration areas this file will actually contain the CaloScore SFs. 
     }
     // load the SF histos
     
