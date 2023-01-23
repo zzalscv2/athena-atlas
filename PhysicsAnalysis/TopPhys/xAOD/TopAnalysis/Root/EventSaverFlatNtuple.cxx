@@ -2785,8 +2785,8 @@ namespace top {
         // the following are in DC14
 
         m_jet_jvt[i] = -1;
-        if (jetPtr->isAvailable<float>("AnalysisTop_JVT")) {
-          m_jet_jvt[i] = jetPtr->auxdataConst<float>("AnalysisTop_JVT");
+        if (jetPtr->isAvailable<float>("NNJvt")) {
+          m_jet_jvt[i] = jetPtr->auxdataConst<float>("NNJvt");
         }
 
         m_jet_fjvt[i] = -1;
@@ -2932,8 +2932,8 @@ namespace top {
 	}
 
         m_failJvt_jet_jvt[i] = -1;
-        if (jetPtr->isAvailable<float>("AnalysisTop_JVT")) {
-          m_failJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("AnalysisTop_JVT");
+        if (jetPtr->isAvailable<float>("NNJvt")) {
+          m_failJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("NNJvt");
         }
 
         m_failJvt_jet_fjvt[i] = -1;
@@ -3053,12 +3053,12 @@ namespace top {
 	}
 
         m_failFJvt_jet_jvt[i] = -1;
-        if (jetPtr->isAvailable<float>("AnalysisTop_JVT")) {
-          m_failFJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("AnalysisTop_JVT");
+        if (jetPtr->isAvailable<float>("NNJvt")) {
+          m_failFJvt_jet_jvt[i] = jetPtr->auxdataConst<float>("NNJvt");
         }
         m_failFJvt_jet_passjvt[i] = -1;
-        if (jetPtr->isAvailable<char>("passJVT")) {
-          m_failFJvt_jet_passjvt[i] = jetPtr->getAttribute<char>("passJVT");
+        if (jetPtr->isAvailable<char>("NNJvtPass")) {
+          m_failFJvt_jet_passjvt[i] = jetPtr->getAttribute<char>("NNJvtPass");
         }
         m_failFJvt_jet_fjvt[i] = -1;
         if (jetPtr->isAvailable<float>("fJvt")) { 

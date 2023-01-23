@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 // $Id: JetScaleFactorCalculator.cxx 794672 2017-01-31 00:41:04Z tpelzer $
@@ -18,7 +18,7 @@ namespace top {
     m_systNominal(CP::SystematicSet()),
     m_systUP(CP::SystematicSet()),
     m_systDOWN(CP::SystematicSet()),
-    m_jvt_tool("JetJvtEfficiencyTool"), 
+    m_jvt_tool("JetJvtEfficiencyTool"),
     m_fjvt_tool("JetForwardJvtEfficiencyTool") {
     declareProperty("config", m_config);
   }
@@ -28,8 +28,8 @@ namespace top {
 
     top::check(m_jvt_tool.retrieve(), "Failed to retrieve JVT tool");
 
-    m_systUP.insert(CP::SystematicVariation(CP::JvtEfficiencyUp));
-    m_systDOWN.insert(CP::SystematicVariation(CP::JvtEfficiencyDown));
+    m_systUP.insert(CP::SystematicVariation(CP::NNJvtEfficiencyUp));
+    m_systDOWN.insert(CP::SystematicVariation(CP::NNJvtEfficiencyDown));
 
     // fJVT Efficiency tool is only set up if user requests it
     if (m_config->getfJVTWP() != "None") {
@@ -38,7 +38,6 @@ namespace top {
       m_systUP.insert(CP::SystematicVariation(CP::fJvtEfficiencyUp));
       m_systDOWN.insert(CP::SystematicVariation(CP::fJvtEfficiencyDown));
     }
-
 
     return StatusCode::SUCCESS;
   }
@@ -51,7 +50,7 @@ namespace top {
       top::check(evtStore()->retrieve(jets, currentSystematic.second), "failed to retrieve jets in JetScaleFactorCalculator::execute()");
       top::check(this->decorateJets(jets,currentSystematic.first == m_config->nominalHashValue()),"failed to decorate jets in JetScaleFactorCalculator::execute()");
     }
-    
+
     if(m_config->doLooseEvents() && m_config->applyElectronInJetSubtraction())
     {
       for (auto currentSystematic : *m_config->systSgKeyMapJets(true)) {
@@ -83,7 +82,7 @@ namespace top {
         }
 
         if (passSelection) {
-	  ///-- JVT first --///
+          ///-- JVT first --///
           // Set to nominal first...
           top::check(m_jvt_tool->applySystematicVariation(m_systNominal),
                      "Failed to set JVT nominal SF");
@@ -136,54 +135,54 @@ namespace top {
             jetPtr->auxdecor<float>("JET_SF_jvt_DOWN") = jvtSF_down;
 
           } // Calibration systematic is nominal, so calculate SF systematics
-	
-	  ///-- Then fJVT --///
-	  if (m_config->getfJVTWP() != "None") {
-	    top::check(m_fjvt_tool->applySystematicVariation(m_systNominal),
-		       "Failed to set fJVT nominal SF");
-	    float fjvtSF(1.);
 
-	    if (!jetPtr->isAvailable<char>("AnalysisTop_fJVTdecision")) {
-	      ATH_MSG_ERROR(" Can't find jet decoration \"AnalysisTop_fJVTdecision\" - we need it to calculate the jet fJVT scale-factors!");
-	      return StatusCode::FAILURE;
-	    }
-	    int passes_fjvt = jetPtr->auxdataConst< char >("AnalysisTop_fJVTdecision");
-	    if (passes_fjvt < 0) continue;
-	    if (passes_fjvt) top::check(m_fjvt_tool->getEfficiencyScaleFactor(*jetPtr, fjvtSF),
-				       "Failed to getEfficiencyScaleFactor for fJVT");
-	    else {
-	      top::check(m_fjvt_tool->getInefficiencyScaleFactor(*jetPtr, fjvtSF),
-			 "Failed to getInefficiencyScaleFactor for fJVT");
-	    }
-	    jetPtr->auxdecor<float>("JET_SF_fjvt") = fjvtSF;
-	  
-	    if (isNominal) {
-	      float fjvtSF_up(1.), fjvtSF_down(1.);  // made up values
-	      if (passes_fjvt) {
-		top::check(m_fjvt_tool->applySystematicVariation(m_systUP),
-			   "Failed to applySystematicVariation up for fJVT");
-		top::check(m_fjvt_tool->getEfficiencyScaleFactor(*jetPtr, fjvtSF_up),
-			   "Failed to get fJVT SF (systematic up)");
-		top::check(m_fjvt_tool->applySystematicVariation(m_systDOWN),
-			   "Failed to applySystematicVariation down for fJVT");
-		top::check(m_fjvt_tool->getEfficiencyScaleFactor(*jetPtr, fjvtSF_down),
-			   "Failed to get fJVT SF (systematic down)");
-	      } else {
-		top::check(m_fjvt_tool->applySystematicVariation(m_systUP),
-			   "Failed to applySystematicVariation up for fJVT");
-		top::check(m_fjvt_tool->getInefficiencyScaleFactor(*jetPtr, fjvtSF_up),
-			   "Failed to get fJVT SF (systematic up)");
-		top::check(m_fjvt_tool->applySystematicVariation(m_systDOWN),
-			   "Failed to applySystematicVariation down for fJVT");
-		top::check(m_fjvt_tool->getInefficiencyScaleFactor(*jetPtr, fjvtSF_down),
-			   "Failed to get fJVT SF (systematic down)");
-	      }
-	      ///-- Decorate --///
-	      jetPtr->auxdecor<float>("JET_SF_fjvt_UP") = fjvtSF_up;
-	      jetPtr->auxdecor<float>("JET_SF_fjvt_DOWN") = fjvtSF_down;
-	
-	    } // Calibration systematic is nominal, so calculate SF systematics
-	  }
+          ///-- Then fJVT --///
+          if (m_config->getfJVTWP() != "None") {
+            top::check(m_fjvt_tool->applySystematicVariation(m_systNominal),
+                       "Failed to set fJVT nominal SF");
+            float fjvtSF(1.);
+
+            if (!jetPtr->isAvailable<char>("AnalysisTop_fJVTdecision")) {
+              ATH_MSG_ERROR(" Can't find jet decoration \"AnalysisTop_fJVTdecision\" - we need it to calculate the jet fJVT scale-factors!");
+              return StatusCode::FAILURE;
+            }
+            int passes_fjvt = jetPtr->auxdataConst< char >("AnalysisTop_fJVTdecision");
+            if (passes_fjvt < 0) continue;
+            if (passes_fjvt) top::check(m_fjvt_tool->getEfficiencyScaleFactor(*jetPtr, fjvtSF),
+                                        "Failed to getEfficiencyScaleFactor for fJVT");
+            else {
+              top::check(m_fjvt_tool->getInefficiencyScaleFactor(*jetPtr, fjvtSF),
+                         "Failed to getInefficiencyScaleFactor for fJVT");
+            }
+            jetPtr->auxdecor<float>("JET_SF_fjvt") = fjvtSF;
+
+            if (isNominal) {
+              float fjvtSF_up(1.), fjvtSF_down(1.);  // made up values
+              if (passes_fjvt) {
+                top::check(m_fjvt_tool->applySystematicVariation(m_systUP),
+                           "Failed to applySystematicVariation up for fJVT");
+                top::check(m_fjvt_tool->getEfficiencyScaleFactor(*jetPtr, fjvtSF_up),
+                           "Failed to get fJVT SF (systematic up)");
+                top::check(m_fjvt_tool->applySystematicVariation(m_systDOWN),
+                           "Failed to applySystematicVariation down for fJVT");
+                top::check(m_fjvt_tool->getEfficiencyScaleFactor(*jetPtr, fjvtSF_down),
+                           "Failed to get fJVT SF (systematic down)");
+              } else {
+                top::check(m_fjvt_tool->applySystematicVariation(m_systUP),
+                           "Failed to applySystematicVariation up for fJVT");
+                top::check(m_fjvt_tool->getInefficiencyScaleFactor(*jetPtr, fjvtSF_up),
+                           "Failed to get fJVT SF (systematic up)");
+                top::check(m_fjvt_tool->applySystematicVariation(m_systDOWN),
+                           "Failed to applySystematicVariation down for fJVT");
+                top::check(m_fjvt_tool->getInefficiencyScaleFactor(*jetPtr, fjvtSF_down),
+                           "Failed to get fJVT SF (systematic down)");
+              }
+              ///-- Decorate --///
+              jetPtr->auxdecor<float>("JET_SF_fjvt_UP") = fjvtSF_up;
+              jetPtr->auxdecor<float>("JET_SF_fjvt_DOWN") = fjvtSF_down;
+
+            } // Calibration systematic is nominal, so calculate SF systematics
+          }
         }
       }
     return StatusCode::SUCCESS;
