@@ -4,7 +4,6 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-
 import abc
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg

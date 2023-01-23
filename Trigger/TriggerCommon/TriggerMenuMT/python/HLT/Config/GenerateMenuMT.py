@@ -10,6 +10,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+
 class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):

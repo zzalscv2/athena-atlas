@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.MenuAlignmentTools import get_alignment_group_ordering as getAlignmentGroupOrdering
-from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, EmptyMenuSequence, RecoFragmentsPool, EmptyMenuSequenceCA
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
@@ -155,7 +155,12 @@ def getEmptySeqName(stepName, chain_index, step_number, alignGroup):
     return seqName
 
 def EmptyMenuSequenceCfg(flags, name):
-    return EmptyMenuSequence(name)
+    # to clean up
+    if isComponentAccumulatorCfg():
+        return EmptyMenuSequenceCA(name)
+    else:
+        return EmptyMenuSequence(name)
+    
 
 def getEmptyMenuSequence(flags, name):
     if isComponentAccumulatorCfg():

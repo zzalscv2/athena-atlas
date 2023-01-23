@@ -98,7 +98,7 @@ def generateEmuMenu(ConfigFlags):
     import TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO
     # set DEBUG flag on the control-flow builder (before building)
     TriggerMenuMT.HLT.Config.ControlFlow.HLTCFConfig_newJO.log.setLevel(DEBUG)
-    menuAcc = generateDecisionTree(ConfigFlags, HLTMenuConfig.configsList()) 
+    menuAcc = generateDecisionTree(ConfigFlags, HLTMenuConfig)
     
     menuAcc.wasMerged()   
     menuAcc.printConfig()

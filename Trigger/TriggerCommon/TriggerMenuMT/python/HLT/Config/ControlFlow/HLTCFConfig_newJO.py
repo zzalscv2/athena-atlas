@@ -143,7 +143,7 @@ def commonWithOtherOutput(acc, newInputColl, filterAlg ):
     return None
 
 
-def generateDecisionTree(flags, chains):
+def generateDecisionTree(flags, HLTMenuConfig):
     """Creates CF algorithms
     
     The implementation relies of functions that build a small element of it.
@@ -152,6 +152,7 @@ def generateDecisionTree(flags, chains):
 
     The functions check the global boolean theCFisFixed - and if set to True no CF algorithms are further constructed (assertion error is generated).
     """
+    chains=HLTMenuConfig.configsList()
     acc = ComponentAccumulator()
     mainSequence = seqOR('HLTAllSteps')
     acc.addSequence( mainSequence )
@@ -424,7 +425,6 @@ def generateDecisionTree(flags, chains):
                 needCombo = False
                 for sequenceCounter, sequence in enumerate(step.sequences):
                     if not isinstance(sequence, EmptyMenuSequence): # not an empty sequence
-                        log.debug("Sequence %d: IM=%s, Hypo=%s, comboReco=%s", sequenceCounter, sequence.ca.inputMaker().name,  sequence.ca.hypo().name, comboRecoSeq.name)
                         connectIMAndHypo(sequence.ca.inputMaker(), sequence.ca.hypo()) # setup basic CF                        
                         acc.merge( sequence.ca, sequenceName=comboRecoSeq.name)
                         log.debug("MERGE: sequence %s, sequenceName=%s", sequence, comboRecoSeq.name)

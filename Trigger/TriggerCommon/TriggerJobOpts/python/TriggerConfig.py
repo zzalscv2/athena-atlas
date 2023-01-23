@@ -10,6 +10,7 @@ from AthenaCommon.Logging import logging
 from .TriggerRecoConfig import TriggerMetadataWriterCfg
 __log = logging.getLogger('TriggerConfig')
 
+
 def __isCombo(alg):
     return hasProp( alg, "MultiplicitiesMap" )
 
@@ -40,7 +41,7 @@ def collectHypos( steps ):
         __log.debug( "collecting hypos from step %s", stepSeq.getName() )
 #        start = {}
         for seq,algs in flatAlgorithmSequences(stepSeq).items():
-            for alg in sorted(algs, key=lambda t: str(t.name)):
+            for alg in sorted(algs, key=lambda t: str(t.getName())):
                 if isSequence( alg ):
                     continue
                 # will replace by function once dependencies are sorted
@@ -196,7 +197,7 @@ def triggerSummaryCfg(flags, hypos):
             hypoChains, hypoOutputKeys = __decisionsFromHypo( hypo )
             for chain in hypoChains:
                 if chain not in chainToCollectionInStep:
-                    chainToCollectionInStep[chain] = hypoOutputKeys
+                    chainToCollectionInStep[chain] = hypoOutputKeys                    
         chainToLastCollection.update( chainToCollectionInStep )
 
     from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
@@ -628,6 +629,10 @@ def triggerRunCfg( flags, menu=None ):
     filters = collectFilters( HLTSteps )
     acc.addSequence( parOR("HLTEndSeq"), parentName="HLTTop" )
     acc.addSequence( seqAND("HLTFinalizeSeq"), parentName="HLTEndSeq" )
+
+    nfilters = sum(len(v) for v in filters.values())
+    nhypos = sum(len(v) for v in hypos.values())
+    __log.info( "Algorithms counting: Number of Filter algorithms: %d  -  Number of Hypo algoirthms: %d", nfilters , nhypos)
 
     summaryAcc, summaryAlg = triggerSummaryCfg( flags, hypos )
     acc.merge( summaryAcc, sequenceName="HLTFinalizeSeq" )

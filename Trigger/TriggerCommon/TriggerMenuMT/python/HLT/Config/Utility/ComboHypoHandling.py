@@ -10,6 +10,7 @@ logging.getLogger().info("Importing %s",__name__)
 import math
 import re
 from TrigConfHLTUtils.HLTUtils import string2hash
+from AthenaConfiguration.ComponentFactory import CompFactory
 
 topoLegIndices = "ABCDEF"
 
@@ -53,7 +54,6 @@ from TriggerMenuMT.HLT.MinBias.MinBiasChainConfiguration import TrigAFPDijetComb
 from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassHypoToolCfg
 
 def TrigComboHypoToolFromDict(chainDict):
-    from TrigHypoCommonTools.TrigHypoCommonToolsConf import TrigComboHypoTool
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
     chainName = chainDict['chainName']
@@ -195,7 +195,7 @@ def TrigComboHypoToolFromDict(chainDict):
     
     # convert list of dicts into dict of lists
     toolProps = {k:[thedef[k] for thedef in topoDefs] for k in topoDefs[0]}
-    tool = TrigComboHypoTool(chainName, SkipLegCheck=skipLegCheck, **toolProps)
+    tool = CompFactory.TrigComboHypoTool(chainName, SkipLegCheck=skipLegCheck, **toolProps)
 
     return tool
 
