@@ -71,8 +71,7 @@ public:
     m_finalised(true),
     m_printInfo(true),
     m_ptmin(0),
-    m_parentTruthPdgId(parentTruthPdgId),
-    m_tida_first(true)
+    m_parentTruthPdgId(parentTruthPdgId)
   {  
     /// leave in this debug printout ...
     /// std::cout << "AnalysisConfig_Ntuple::AnalysisConfig_Ntuple() " << chainNames.size() << std::endl;
@@ -197,8 +196,6 @@ protected:
 
   int m_parentTruthPdgId;
 
-  bool m_tida_first;
-  
 };
 
 
