@@ -179,7 +179,7 @@ namespace InDet {
       }
       absEta = std::clamp(absEta, m_etaBins.value().front(), m_etaBins.value().back());
       const auto pVal =  std::lower_bound(m_etaBins.value().begin(), m_etaBins.value().end(), absEta);
-      const int bin = std::distance(m_etaBins.value().begin(), pVal);
+      const int bin = std::distance(m_etaBins.value().begin(), pVal) - 1;
       ATH_MSG_DEBUG("Checking (abs(eta)/bin) = (" << absEta << "," << bin << ")");
       return bin;
     }
