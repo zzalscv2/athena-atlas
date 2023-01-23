@@ -177,7 +177,7 @@ public:
   /** Main extrapolation interface starting from a Trk::Track and aiming
    * at Surface. It uses the navigator to find the closest parameters
    * of the track to the surface. */
-  virtual std::unique_ptr<TrackParameters> extrapolate(
+  virtual std::unique_ptr<TrackParameters> extrapolateTrack(
     const EventContext& ctx,
     const Track& trk,
     const Surface& sf,
@@ -221,13 +221,14 @@ public:
    * mainly for muons and Particle Flow.
    */
   virtual std::unique_ptr<
-    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-  extrapolate(const EventContext& ctx,
-              const Trk::TrackParameters& parm,
-              Trk::PropDirection dir,
-              Trk::ParticleHypothesis particle,
-              std::vector<const Trk::TrackStateOnSurface*>*& material,
-              int destination = 3) const override final;
+      std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
+  collectIntersections(
+    const EventContext& ctx,
+    const Trk::TrackParameters& parm,
+    Trk::PropDirection dir,
+    Trk::ParticleHypothesis particle,
+    std::vector<const Trk::TrackStateOnSurface*>*& material,
+    int destination = 3) const override final;
 
   /** Extrapolation to the next active layer with material collection*/
   virtual std::pair<std::unique_ptr<TrackParameters>, const Layer*> extrapolateToNextActiveLayerM(
@@ -249,9 +250,6 @@ public:
 
   /** Return the TrackingGeometry used by the Extrapolator (forward information from Navigator)*/
   virtual const TrackingGeometry* trackingGeometry() const override final;
-
-  /** Validation Action,*/
-  virtual void validationAction() const override final;
 
 private:
 

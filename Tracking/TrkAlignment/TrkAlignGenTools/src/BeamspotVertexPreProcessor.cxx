@@ -440,7 +440,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromVertex(const Trac
       const PerigeeSurface surface(globPos);
       const Perigee* perigee = nullptr;
       std::unique_ptr<const Trk::TrackParameters> tmp =
-        m_extrapolator->extrapolate(ctx, *track, surface);
+        m_extrapolator->extrapolateTrack(ctx, *track, surface);
       //pass ownership only if of correct type
       if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
          perigee = static_cast<const Perigee*> (tmp.release()); 
@@ -561,7 +561,7 @@ const VertexOnTrack* BeamspotVertexPreProcessor::provideVotFromBeamspot(const Tr
     // calculate perigee parameters wrt. beam-spot
     const Perigee* perigee = nullptr;
     std::unique_ptr<const Trk::TrackParameters> tmp =
-      m_extrapolator->extrapolate(ctx, *track, *surface);
+      m_extrapolator->extrapolateTrack(ctx, *track, *surface);
     // pass ownership only if of correct type
     if (tmp && tmp->associatedSurface().type() == Trk::SurfaceType::Perigee) {
       perigee = static_cast<const Perigee*>(tmp.release());
@@ -655,7 +655,7 @@ BeamspotVertexPreProcessor::doConstraintRefit(
       // get track parameters at the vertex:
       const PerigeeSurface&         surface=vot->associatedSurface();
       ATH_MSG_DEBUG(" Track reference surface will be:  " << surface);
-      const TrackParameters* parsATvertex=m_extrapolator->extrapolate(ctx, *track, surface).release();
+      const TrackParameters* parsATvertex=m_extrapolator->extrapolateTrack(ctx, *track, surface).release();
 
       ATH_MSG_DEBUG(" Track will be refitted at this surface  ");
       newTrack = (fitter->fit(ctx, measurementCollection, 

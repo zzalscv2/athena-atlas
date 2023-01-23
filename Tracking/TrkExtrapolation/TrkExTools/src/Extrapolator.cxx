@@ -2058,14 +2058,15 @@ Trk::Extrapolator::extrapolateStepwise(const EventContext& ctx,
 }
 
 std::unique_ptr<Trk::TrackParameters>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const Trk::Track& trk,
-                               const Trk::Surface& sf,
-                               Trk::PropDirection dir,
-                               const Trk::BoundaryCheck& bcheck,
-                               Trk::ParticleHypothesis particle,
-                               MaterialUpdateMode matupmode,
-                               Trk::ExtrapolationCache* extrapolationCache) const
+Trk::Extrapolator::extrapolateTrack(
+  const EventContext& ctx,
+  const Trk::Track& trk,
+  const Trk::Surface& sf,
+  Trk::PropDirection dir,
+  const Trk::BoundaryCheck& bcheck,
+  Trk::ParticleHypothesis particle,
+  MaterialUpdateMode matupmode,
+  Trk::ExtrapolationCache* extrapolationCache) const
 {
   const IPropagator* searchProp = nullptr;
   // use global propagator for the search
@@ -2255,17 +2256,6 @@ Trk::Extrapolator::extrapolateM(const EventContext& ctx,
   cache.m_matstates = nullptr;
   // retunr the material states
   return tmpMatStates;
-}
-
-// the validation action -> propagated to the SubTools
-void
-Trk::Extrapolator::validationAction() const
-{
-  // record the updator validation information
-  for (const auto *subupdater : m_subupdaters) {
-    subupdater->validationAction();
-  }
-  // record the navigator validation information
 }
 
 /* Private methods
@@ -4538,12 +4528,13 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
 
 
 std::unique_ptr<std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>>
-Trk::Extrapolator::extrapolate(const EventContext& ctx,
-                               const Trk::TrackParameters& parm,
-                               Trk::PropDirection dir,
-                               Trk::ParticleHypothesis particle,
-                               std::vector<const Trk::TrackStateOnSurface*>*& material,
-                               int destination) const
+Trk::Extrapolator::collectIntersections(
+  const EventContext& ctx,
+  const Trk::TrackParameters& parm,
+  Trk::PropDirection dir,
+  Trk::ParticleHypothesis particle,
+  std::vector<const Trk::TrackStateOnSurface*>*& material,
+  int destination) const
 {
 
   // extrapolation method intended for collection of intersections with active layers/volumes

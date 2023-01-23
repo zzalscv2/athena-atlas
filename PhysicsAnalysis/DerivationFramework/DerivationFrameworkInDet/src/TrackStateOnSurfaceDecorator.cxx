@@ -654,7 +654,7 @@ namespace DerivationFramework {
 
 
         // Track extrapolation
-        std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolate(ctx,*trkTrack,trackState->surface()) );
+        std::unique_ptr<const Trk::TrackParameters> extrap( m_extrapolator->extrapolateTrack(ctx,*trkTrack,trackState->surface()) );
 
         // Set local positions on the surface
         if (tp) { 

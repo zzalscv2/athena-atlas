@@ -137,7 +137,7 @@ std::unique_ptr<Trk::Perigee> Reco::TrackToVertex::perigeeAtVertex(const EventCo
   Trk::PerigeeSurface persf(gp);
   std::unique_ptr<Trk::Perigee> vertexPerigee;
   std::unique_ptr<Trk::TrackParameters> extrapResult =
-    m_extrapolator->extrapolate(ctx,track, persf);
+    m_extrapolator->extrapolateTrack(ctx,track, persf);
   if (extrapResult && extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
     vertexPerigee.reset( static_cast<Trk::Perigee*>(extrapResult.release()));
   }
@@ -181,7 +181,7 @@ Reco::TrackToVertex::perigeeAtBeamline(
 
   std::unique_ptr<Trk::Perigee> vertexPerigee;
   std::unique_ptr<Trk::TrackParameters> extrapResult =
-    m_extrapolator->extrapolate(ctx,track, persf);
+    m_extrapolator->extrapolateTrack(ctx,track, persf);
   if (extrapResult && extrapResult->surfaceType() == Trk::SurfaceType::Perigee) {
     vertexPerigee.reset(static_cast<Trk::Perigee*>(extrapResult.release()));
   }
@@ -263,7 +263,7 @@ std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const
 std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const EventContext& ctx, const Trk::Track& trk,
                                 const Trk::StraightLineSurface* beamline) const
 {
-  return m_extrapolator->extrapolate(ctx, trk, *beamline);
+  return m_extrapolator->extrapolateTrack(ctx, trk, *beamline);
 }
 
 std::unique_ptr<Trk::TrackParameters> Reco::TrackToVertex::trackAtBeamline(const EventContext& ctx, const Trk::TrackParameters& tpars,

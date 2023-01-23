@@ -651,12 +651,12 @@ RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                res
                                                 Trk::muon);
   }
   else if (track_particle->track()) {
-    detParameters = m_extrapolator->extrapolate(ctx,
-                                                *(track_particle->track()),
-                                                gapSurface,
-                                                result.direction,
-                                                true,
-                                                Trk::muon);
+    detParameters = m_extrapolator->extrapolateTrack(ctx,
+                                                     *(track_particle->track()),
+                                                     gapSurface,
+                                                     result.direction,
+                                                     true,
+                                                     Trk::muon);
   }
   else {
     return detParameters;

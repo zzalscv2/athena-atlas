@@ -132,7 +132,7 @@ namespace InDet
 
    const Trk::TrackParameters* exPerigee =
      m_extrapolator
-       ->extrapolate(ctx, *preselectedTracks[indexOfSorted[0]], perigeeSurface, Trk::anyDirection, true, Trk::pion)
+       ->extrapolateTrack(ctx, *preselectedTracks[indexOfSorted[0]], perigeeSurface, Trk::anyDirection, true, Trk::pion)
        .release();
 
    double lastTrackZ0  = -999.;
@@ -149,7 +149,7 @@ namespace InDet
    {
      const Trk::TrackParameters* lexPerigee =
        m_extrapolator
-         ->extrapolate(ctx, *preselectedTracks[i], perigeeSurface, Trk::anyDirection, true, Trk::pion)
+         ->extrapolateTrack(ctx, *preselectedTracks[i], perigeeSurface, Trk::anyDirection, true, Trk::pion)
          .release();
 
      double currentTrackZ0 = lexPerigee->parameters()[Trk::z0];
