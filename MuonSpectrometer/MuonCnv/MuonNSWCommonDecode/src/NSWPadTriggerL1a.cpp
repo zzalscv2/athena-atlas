@@ -143,12 +143,6 @@ uint32_t Muon::nsw::NSWPadTriggerL1a::roundUpIfOdd(const uint32_t nbytes) const
   return nbytes + 1;
 }
 
-bool Muon::nsw::NSWPadTriggerL1a::isLarge(const uint32_t secid) const
-{
-  // NB: secid=0 = A01 = Large
-  return secid % 2 == 0;
-}
-
 Muon::nsw::NSWPadTriggerL1a::OneBCOfData
 Muon::nsw::NSWPadTriggerL1a::getOneBcOfCompressedData(const std::vector<uint32_t>& words,
                                                        const uint32_t bitIndex,

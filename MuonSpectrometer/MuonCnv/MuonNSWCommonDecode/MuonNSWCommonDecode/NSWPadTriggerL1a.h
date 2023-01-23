@@ -11,6 +11,8 @@
 #include <bitset>
 #include <numeric>
 
+#include "eformat/eformat.h"
+#include "MuonNSWCommonDecode/MapperSTG.h"
 #include "MuonNSWCommonDecode/NSWTriggerElink.h"
 
 namespace Muon
@@ -30,6 +32,8 @@ namespace Muon
       // NSW trigger general
       constexpr uint32_t NPFEBS            = 24;
       constexpr uint32_t NPADS             = 104;
+      constexpr uint32_t NLAYERS           = 8;
+      constexpr uint32_t NLAYERS_PER_QUAD  = 4;
       constexpr uint32_t N_BITS_IN_PHIID   = 6;
       constexpr uint32_t N_BITS_IN_BANDID  = 8;
       constexpr uint32_t N_SEGMENTS_IN_BC  = 4;
@@ -139,7 +143,6 @@ namespace Muon
 
       NSWPadTriggerL1a(const uint32_t* bs, const uint32_t remaining);
       virtual ~NSWPadTriggerL1a() = default;
-      bool isLarge(uint32_t secid) const;
 
       /*
         Public interface
@@ -182,6 +185,117 @@ namespace Muon
       uint32_t getOrbitid() const { return m_decoded.orbitid; };
       uint32_t getOrbit1()  const { return m_decoded.orbit1; };
       uint32_t getStatus()  const { return m_decoded.status; };
+
+      /*
+        Decode large sector from sector [0x0-0xf]
+        NB: sector=0 = A01 = Large
+      */
+      static bool isLarge(const uint32_t sec) {
+        return sec % 2 == 0;
+      }
+
+      /*
+        Decode small sector from sector [0x0-0xf]
+      */
+      static bool isSmall(const uint32_t sec) {
+        return not isLarge(sec);
+      }
+
+      /*
+        Decode A-side from sourceid
+      */
+      static bool isA(const uint32_t sourceid) {
+        return static_cast<eformat::SubDetector>((sourceid >> 16) & 0xff)
+          == eformat::MUON_STGC_ENDCAP_A_SIDE;
+      }
+
+      /*
+        Decode C-side from sourceid
+      */
+      static bool isC(const uint32_t sourceid) {
+        return not isA(sourceid);
+      }
+
+      /*
+        Decode radius [0-2] from pfeb index [0-23]
+      */
+      static uint32_t radius(const uint32_t pfeb) {
+        return pfeb / Constants::NLAYERS;
+      }
+
+      /*
+        Decode layer [0-7] from pfeb index [0-23]
+      */
+      static uint32_t layer(const uint32_t pfeb) {
+        return pfeb % Constants::NLAYERS;
+      }
+
+      /*
+        Decode sector [0x0-0xf] from sourceid [0xXXXXXXX0-0xXXXXXXXf]
+      */
+      static uint32_t sector(const uint32_t sourceid) {
+        return sourceid & 0xf;
+      }
+
+      /*
+        Decode quad [0-1] from pfeb [0-23]
+      */
+      static uint32_t quad(const uint32_t pfeb) {
+        return layer(pfeb) / Constants::NLAYERS_PER_QUAD;
+      }
+
+      /*
+        Decode quad layer [0-3] from pfeb [0-23]
+      */
+      static uint32_t quadlayer(const uint32_t pfeb) {
+        return layer(pfeb) % Constants::NLAYERS_PER_QUAD;
+      }
+
+      /*
+        Decode offline gasgap [1-4] from pfeb [0-23]
+      */
+      static uint32_t offlineGasgap(const uint32_t pfeb) {
+        return quadlayer(layer(pfeb)) + 1;
+      }
+
+      /*
+        Decode offline multilayer [1-2] from pfeb [0-23]
+      */
+      static uint32_t offlineMultilayer(const uint32_t pfeb) {
+        return quad(layer(pfeb)) + 1;
+      }
+
+      /*
+        Decode offline channel number from electronics numbering
+      */
+      static uint32_t offlineChannelNumber(const uint32_t sec,
+                                           const uint32_t pfeb,
+                                           const uint32_t vmm,
+                                           const uint32_t vmmchan) {
+        static const Muon::nsw::MapperSTG mapper;
+        return mapper.channel_number(Muon::nsw::OFFLINE_CHANNEL_TYPE_PAD, isLarge(sec), radius(pfeb), layer(pfeb), vmm, vmmchan);
+      }
+
+      /*
+        Decode offline station eta [1-3] from pfeb index [0-23]
+      */
+      static uint32_t offlineStationAbsEta(const uint32_t pfeb) {
+        return radius(pfeb) + 1;
+      }
+
+      /*
+        Decode offline station phi [1-8] from sourceid [0xXXXXXXX0-0xXXXXXXXf]
+      */
+      static uint32_t offlineStationPhi(const uint32_t sourceid) {
+        return sector(sourceid) / 2 + 1;
+      }
+
+      /*
+        Decode offline station name/type [STL, STS] from sector [0x0-0xf]
+      */
+      static std::string offlineStationName(const uint32_t sec) {
+        return isLarge(sec) ? "STL" : "STS";
+      }
 
     private:
 
