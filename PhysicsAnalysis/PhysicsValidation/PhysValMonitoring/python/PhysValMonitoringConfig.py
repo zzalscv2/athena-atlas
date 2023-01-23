@@ -81,6 +81,9 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=[], **kwargs):
     if flags.PhysVal.doActs:
         from ActsTrkAnalysisTools.ActsTrkAnalysisToolsConfig import PhysValActsCfg
         tools.append(acc.popToolsAndMerge(PhysValActsCfg(flags)))
+    if flags.PhysVal.doLLPSecVtx:
+        from InDetSecVertexValidation.InDetSecVertexValidationConfig import PhysValSecVtxCfg
+        tools.append(acc.popToolsAndMerge(PhysValSecVtxCfg(flags)))
 
     kwargs.setdefault("AthenaMonTools", tools)
 
