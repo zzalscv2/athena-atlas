@@ -40,7 +40,7 @@ echo "art-result: $rc digiCA"
 
 rc2=-9999
 if [ $rc -eq 0 ]; then
-  RunRDOAnalysis.py -i "$DigiOutFileName"
+  RunRDOAnalysis.py -i "$DigiOutFileName" -p
   rc2=$?
   status=$rc2
 fi

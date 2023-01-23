@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
+#include "GeneratorObjects/McEventCollection.h"
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -38,6 +39,7 @@ public:
 private:
   SG::ReadHandleKey<PixelRDO_Container> m_inputKey;
   SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey;
+  SG::ReadHandleKey<McEventCollection> m_inputMcEventCollectionKey;
   const PixelID *m_pixelID;
   // RDO
   std::vector<unsigned long long>* m_rdoID;

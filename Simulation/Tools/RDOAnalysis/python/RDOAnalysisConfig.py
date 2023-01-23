@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -38,6 +38,14 @@ def PixelRDOAnalysisCfg(flags, name="PixelRDOAnalysis", **kwargs):
     kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
     kwargs.setdefault("NtupleTreeName", "Pixel")
     kwargs.setdefault("HistPath", "/RDOAnalysis/Pixel/")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("InputKey", f"{flags.Overlay.BkgPrefix}PixelRDOs")
+        kwargs.setdefault("InputTruthKey", f"{flags.Overlay.BkgPrefix}PixelSDO_Map")
+        kwargs.setdefault("InputMcEventCollectionKey", f"{flags.Overlay.BkgPrefix}TruthEvent")
+    else:
+        kwargs.setdefault("InputKey", "PixelRDOs")
+        kwargs.setdefault("InputTruthKey", "PixelSDO_Map")
+        kwargs.setdefault("InputMcEventCollectionKey", "TruthEvent")
 
     result.addEventAlgo(CompFactory.PixelRDOAnalysis(name, **kwargs))
 
@@ -54,6 +62,14 @@ def SCT_RDOAnalysisCfg(flags, name="SCT_RDOAnalysis", **kwargs):
     kwargs.setdefault("NtupleDirectoryName", "/ntuples/")
     kwargs.setdefault("NtupleTreeName", "SCT")
     kwargs.setdefault("HistPath", "/RDOAnalysis/SCT/")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("InputKey", f"{flags.Overlay.BkgPrefix}SCT_RDOs")
+        kwargs.setdefault("InputTruthKey", f"{flags.Overlay.BkgPrefix}SCT_SDO_Map")
+        kwargs.setdefault("InputMcEventCollectionKey", f"{flags.Overlay.BkgPrefix}TruthEvent")
+    else:
+        kwargs.setdefault("InputKey", "SCT_RDOs")
+        kwargs.setdefault("InputTruthKey", "SCT_SDO_Map")
+        kwargs.setdefault("InputMcEventCollectionKey", "TruthEvent")
 
     result.addEventAlgo(CompFactory.SCT_RDOAnalysis(name, **kwargs))
 
@@ -69,6 +85,14 @@ def ITkPixelRDOAnalysisCfg(flags, name="ITkPixelRDOAnalysis", **kwargs):
     kwargs.setdefault("NtuplePath", "/RDOAnalysis/ntuples/")
     kwargs.setdefault("HistPath", "/RDOAnalysis/ITkPixel/")
     kwargs.setdefault("SharedHistPath", "/RDOAnalysis/histos/")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("CollectionName", f"{flags.Overlay.BkgPrefix}ITkPixelRDOs")
+        kwargs.setdefault("SDOCollectionName", f"{flags.Overlay.BkgPrefix}ITkPixelSDO_Map")
+        kwargs.setdefault("McEventCollectionName", f"{flags.Overlay.BkgPrefix}TruthEvent")
+    else:
+        kwargs.setdefault("CollectionName", "ITkPixelRDOs")
+        kwargs.setdefault("SDOCollectionName", "ITkPixelSDO_Map")
+        kwargs.setdefault("McEventCollectionName", "TruthEvent")
 
     result.addEventAlgo(CompFactory.ITk.PixelRDOAnalysis(name, **kwargs))
 
@@ -84,6 +108,14 @@ def ITkStripRDOAnalysisCfg(flags, name="ITkStripRDOAnalysis", **kwargs):
     kwargs.setdefault("NtuplePath", "/RDOAnalysis/ntuples/")
     kwargs.setdefault("HistPath", "/RDOAnalysis/ITkStrip/")
     kwargs.setdefault("SharedHistPath", "/RDOAnalysis/histos/")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("CollectionName", f"{flags.Overlay.BkgPrefix}ITkStripRDOs")
+        kwargs.setdefault("SDOCollectionName", f"{flags.Overlay.BkgPrefix}ITkStripSDO_Map")
+        kwargs.setdefault("McEventCollectionName", f"{flags.Overlay.BkgPrefix}TruthEvent")
+    else:
+        kwargs.setdefault("CollectionName", "ITkStripRDOs")
+        kwargs.setdefault("SDOCollectionName", "ITkStripSDO_Map")
+        kwargs.setdefault("McEventCollectionName", "TruthEvent")
 
     result.addEventAlgo(CompFactory.ITk.StripRDOAnalysis(name, **kwargs))
 
@@ -96,8 +128,14 @@ def PLR_RDOAnalysisCfg(flags, name="PLR_RDOAnalysis", **kwargs):
     from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
     result = PLR_ReadoutGeometryCfg(flags)
 
-    kwargs.setdefault("CollectionName", "PLR_RDOs")
-    kwargs.setdefault("SDOCollectionName", "PLR_SDO_Map")
+    if flags.Common.ProductionStep is ProductionStep.PileUpPresampling:
+        kwargs.setdefault("CollectionName", f"{flags.Overlay.BkgPrefix}PLR_RDOs")
+        kwargs.setdefault("SDOCollectionName", f"{flags.Overlay.BkgPrefix}PLR_SDO_Map")
+        kwargs.setdefault("McEventCollectionName", f"{flags.Overlay.BkgPrefix}TruthEvent")
+    else:
+        kwargs.setdefault("CollectionName", "PLR_RDOs")
+        kwargs.setdefault("SDOCollectionName", "PLR_SDO_Map")
+        kwargs.setdefault("McEventCollectionName", "TruthEvent")
     kwargs.setdefault("HistPath", "/RDOAnalysis/PLR/")
     kwargs.setdefault("SharedHistPath", "/RDOAnalysis/histos/")
     kwargs.setdefault("NtuplePath", "/RDOAnalysis/ntuples/")

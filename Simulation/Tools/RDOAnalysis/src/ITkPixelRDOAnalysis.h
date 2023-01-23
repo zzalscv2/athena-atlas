@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITK_PIXEL_RDO_ANALYSIS_H
@@ -11,6 +11,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadHandleKey.h"
 
+#include "GeneratorObjects/McEventCollection.h"
 #include "InDetRawData/InDetRawDataCLASS_DEF.h"
 #include "InDetRawData/InDetRawDataContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -47,6 +48,7 @@ public:
 private:
   SG::ReadHandleKey<PixelRDO_Container> m_inputKey {this, "CollectionName", "ITkPixelRDOs", "Input ITk Pixel RDO collection name"};
   SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey {this, "SDOCollectionName", "ITkPixelSDO_Map", "Input ITk Pixel SDO collection name"};
+  SG::ReadHandleKey<McEventCollection> m_inputMcEventCollectionKey {this, "McEventCollectionName", "TruthEvent", "Input McEventCollection name"};
   const PixelID *m_pixelID{};
   const InDetDD::PixelDetectorManager *m_pixelManager{};
   Gaudi::Property<std::string> m_detectorName
