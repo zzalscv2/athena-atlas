@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
 # DAOD_HIGG1D1.py
@@ -334,24 +334,15 @@ def HIGG1D1Cfg(ConfigFlags):
     HIGG1D1SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
 
 
-    # Add the variables for Gain adn Cluster energy  --  need to get the tools first to use existing functions 
-    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import getGainDecorations, getClusterEnergyPerLayerDecorations  
-    GainDecoratorTool = None
-    ClusterEnergyPerLayerDecorators = []  
-    for toolStr in acc.getEventAlgo("HIGG1D1Kernel").AugmentationTools:
-        toolStr  = f"{toolStr}"
-        splitStr = toolStr.split('/')
-        tool =  acc.getPublicTool(splitStr[1])
-        if splitStr[0]== "DerivationFramework::GainDecorator":
-            GainDecoratorTool = tool
-        elif splitStr[0] ==  "DerivationFramework::ClusterEnergyPerLayerDecorator":
-            ClusterEnergyPerLayerDecorators.append( tool )
-
-    if GainDecoratorTool :
-        HIGG1D1SlimmingHelper.ExtraVariables.extend( getGainDecorations(GainDecoratorTool) )
-    for tool in ClusterEnergyPerLayerDecorators:
-        HIGG1D1SlimmingHelper.ExtraVariables.extend( getClusterEnergyPerLayerDecorations(tool) )
-    
+    # Add the variables for Gain and Cluster energy
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        getGainDecorations, getClusterEnergyPerLayerDecorations )
+    gainDecorations = getGainDecorations(acc, 'HIGG1D1Kernel')
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(gainDecorations)
+    clusterEnergyDecorations = getClusterEnergyPerLayerDecorations(
+        acc, 'HIGG1D1Kernel' )
+    HIGG1D1SlimmingHelper.ExtraVariables.extend(clusterEnergyDecorations)
+        
     # Add HTXS variables
     HIGG1D1SlimmingHelper.ExtraVariables.extend(["EventInfo.HTXS_prodMode",
                                                  "EventInfo.HTXS_errorCode",
