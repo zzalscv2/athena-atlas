@@ -115,7 +115,6 @@ bool TFCSEnergyAndHitGANV2::fillEnergy(TFCSSimulationState& simulstate, const TF
    else Einit=Ekin;
 
   ATH_MSG_VERBOSE("Momentum " << truth->P() <<" pdgId " << truth->pdgid());
-  m_slice->Print();
   // check that the network exists
   if(!m_slice->IsGanCorrectlyLoaded()){
     ATH_MSG_WARNING("GAN not loaded correctly.");
