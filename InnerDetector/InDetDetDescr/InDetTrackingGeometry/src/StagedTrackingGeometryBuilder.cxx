@@ -233,7 +233,6 @@ InDet::StagedTrackingGeometryBuilder::trackingGeometry
 
 Trk::TrackingVolume*
 InDet::StagedTrackingGeometryBuilder::packVolumeTriple
-ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingVolume::registerColorCode method is used.
 (InDet::LayerSetup& layerSetup,
  double rMin,
  double& rMax,
@@ -418,7 +417,6 @@ InDet::StagedTrackingGeometryBuilder::setupFitsCache(
 /** Private helper method to flush the cache into the id volumes - return volume is the one to be provided */
 Trk::TrackingVolume*
 InDet::StagedTrackingGeometryBuilder::createFlushVolume
-ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingVolume::registerColorCode method is used.
 (std::vector<InDet::LayerSetup>& layerSetupCache,
  double innerRadius,
  double& outerRadius,
