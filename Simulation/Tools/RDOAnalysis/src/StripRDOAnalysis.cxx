@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StripRDOAnalysis.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
-#include "GeneratorObjects/McEventCollection.h"
 #include "StoreGate/ReadHandle.h"
 #include "TTree.h"
 #include "TString.h"
@@ -31,6 +30,7 @@ StatusCode StripRDOAnalysis::initialize() {
   // properly by job configuration.
   ATH_CHECK( m_inputKey.initialize() );
   ATH_CHECK( m_inputTruthKey.initialize() );
+  ATH_CHECK( m_inputMcEventCollectionKey.initialize() );
 
   // Grab SCT_ID helper
   ATH_CHECK(detStore()->retrieve(m_sctID, "SCT_ID"));
@@ -350,7 +350,7 @@ StatusCode StripRDOAnalysis::execute() {
   SG::ReadHandle<SCT_RDO_Container> p_SCT_RDO_cont (m_inputKey);
   //Adding SimMap and McEvent here for added truthMatching checks
   SG::ReadHandle<InDetSimDataCollection> simDataMapSCT (m_inputTruthKey);
-  SG::ReadHandle<McEventCollection> mcEventCollection("TruthEvent");
+  SG::ReadHandle<McEventCollection> mcEventCollection (m_inputMcEventCollectionKey);
 
   const HepMC::GenEvent* hardScatterEvent(nullptr);
   bool doTruthMatching = true;
