@@ -118,7 +118,7 @@ if( XAOD_STANDALONE )
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_p5440.PHYS.pool.root
              maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
              PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc21a_dsid601229_FS.root
-             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20220922/ilumicalc_histograms_None_428648-430648_OflLumi-Run3-001.root
+             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20230116/ilumicalc_histograms_None_431810-440613_OflLumi-Run3-002.root 
       LOG_IGNORE_PATTERN ${extra_patterns}
       PROPERTIES TIMEOUT 300
    )

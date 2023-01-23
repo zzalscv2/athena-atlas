@@ -477,6 +477,7 @@ bool SUSYObjDef_xAOD::IsCosmicMuon(const xAOD::Muon& input, float z0cut, float d
     }
   }
 
+
   if (isoSF) {
     float sf_iso(1.);
     if (acc_isolHighPt(mu) && mu.pt()>m_muIsoHighPtThresh) {
@@ -491,6 +492,7 @@ bool SUSYObjDef_xAOD::IsCosmicMuon(const xAOD::Muon& input, float z0cut, float d
     ATH_MSG_VERBOSE( "MuonIso ScaleFactor " << sf_iso );
     sf *= sf_iso;
   }
+
 
   dec_effscalefact(mu) = sf;
   return sf;
@@ -512,8 +514,15 @@ double SUSYObjDef_xAOD::GetMuonTriggerEfficiency(const xAOD::Muon& mu, const std
 
 
 double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons, const std::string& trigExpr) {
+ 
+  unsigned int runNumber = GetRandomRunNumber(true);
+  if(m_isRun3 && (runNumber < 430536 || runNumber > 439927)) { //to be extended when trigger SF will be provided for beyond 2022 period H
+    ATH_MSG_WARNING("Muon Trigger SF not defined for this run! returning 1" );
+    return 1.;
+  } 
 
   if (trigExpr.empty() || sfmuons.empty()) return 1.;
+
 
   double trig_sf = 1.;
 
@@ -540,13 +549,13 @@ double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons
   }
   else{ //Case 3: let's go the hard way...
         //Following https://twiki.cern.ch/twiki/bin/view/Atlas/TrigMuonEfficiency
-
     std::string newtrigExpr = TString(trigExpr).Copy().ReplaceAll("HLT_2","").Data();
 
     //redefine dimuon triggers here (2mu14 --> mu14_mu14)
     if (isdimuon) { newtrigExpr += "_"+newtrigExpr;  }
     boost::replace_all(newtrigExpr, "HLT_", "");
     boost::char_separator<char> sep("_");
+
     for (const auto& mutrig : boost::tokenizer<boost::char_separator<char>>(newtrigExpr, sep)) {
       double dataFactor = 1.;
       double mcFactor   = 1.;
