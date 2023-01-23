@@ -805,7 +805,7 @@ bool L2MuonSAIOMon :: isOverlap( const xAOD::L2CombinedMuon* matchSA_L2IOobject1
   // dR(by L2SA) cut
   bool dRbySAisClose = false;
   const xAOD::L2StandAloneMuon* muSA1 = matchSA_L2IOobject1->muSATrack();
-  const xAOD::L2StandAloneMuon* muSA2 = matchSA_L2IOobject1->muSATrack();
+  const xAOD::L2StandAloneMuon* muSA2 = matchSA_L2IOobject2->muSATrack();
   if( m_RequireDRbySA ) {
     // here, we do not check (eta,phi) of mF is not (0,0)
     // (i.e. we apply muComb based cut even if muFast rec is failed)
