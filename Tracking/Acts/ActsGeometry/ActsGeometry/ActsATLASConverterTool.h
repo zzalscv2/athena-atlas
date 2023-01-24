@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSATLASCONVERTERTOOL_H
@@ -19,18 +19,6 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometryTool.h"
 
 #include "Acts/EventData/TrackParameters.hpp"
-
-namespace Trk {
-  class Surface;
-  class Track;
-  class MeasurementBase;
-}
-
-namespace Acts {
-  class Surface;
-}
-
-class ATLASSourceLinkContainer;
 
 class ActsATLASConverterTool : public extends<AthAlgTool, IActsATLASConverterTool>
 {
@@ -62,6 +50,13 @@ public:
   virtual 
   const ATLASSourceLink
   ATLASMeasurementToSourceLink(const Acts::GeometryContext& gctx, const Trk::MeasurementBase *measurement) const override;
+
+  /// Create an SourceLink from an ATLAS uncalibrated measurment
+  /// Works for 1 and 2D measurmenent.
+  /// A pointer to the measurment is kept in the SourceLink
+  virtual 
+  const ATLASUncalibSourceLink
+  UncalibratedMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, const xAOD::UncalibratedMeasurement *measurement) const override;
 
   /// Transform an ATLAS track into a vector of SourceLink to be use in the avts tracking
   /// Transform both measurement and outliers.

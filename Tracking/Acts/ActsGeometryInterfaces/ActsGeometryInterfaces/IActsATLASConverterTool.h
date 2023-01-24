@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRYINTERFACES_IACTSATLASCONVERTERTOOL_H
@@ -9,6 +9,7 @@
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "TrkParameters/TrackParameters.h" //typedef, cannot fwd declare
+#include "xAODMeasurementBase/UncalibratedMeasurement.h" //typedef, cannot fwd declare
 #include "Acts/EventData/TrackParameters.hpp"
 #include <memory>
 
@@ -18,12 +19,18 @@ namespace Trk {
   class MeasurementBase;
 }
 
+namespace InDetDD {
+  class SiDetectorElementCollection;
+}
+
 namespace Acts {
   class Surface;
 }
 
 class IActsTrackingGeometryTool;
-class ATLASSourceLink;
+template <typename measurement_t> class ATLASSourceLinkGeneric;
+using ATLASSourceLink = ATLASSourceLinkGeneric<Trk::MeasurementBase>;
+using ATLASUncalibSourceLink = ATLASSourceLinkGeneric<xAOD::UncalibratedMeasurement>;
 
 class IActsATLASConverterTool : virtual public IAlgTool {
   public:
@@ -41,6 +48,10 @@ class IActsATLASConverterTool : virtual public IAlgTool {
   virtual 
   const ATLASSourceLink
   ATLASMeasurementToSourceLink(const Acts::GeometryContext& gctx, const Trk::MeasurementBase *measurement) const = 0;
+
+  virtual 
+  const ATLASUncalibSourceLink
+  UncalibratedMeasurementToSourceLink(const InDetDD::SiDetectorElementCollection &detectorElements, const xAOD::UncalibratedMeasurement *measurement) const = 0;
 
   virtual
   const std::vector<ATLASSourceLink>

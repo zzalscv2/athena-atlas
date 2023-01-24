@@ -11,6 +11,7 @@ class TrackingComponent(FlagEnum):
     ValidateActsClusters = "ValidateActsClusters"
     ValidateActsSpacePoints = "ValidateActsSpacePoints" 
     ValidateActsSeeds = "ValidateActsSeeds"
+    ValidateActsTracks = "ValidateActsTracks"
 
 # TODO : Add some exta levels?
 

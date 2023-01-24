@@ -28,4 +28,7 @@ def createActsConfigFlags():
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, enum=SeedingStrategy)  # Define Seeding Strategy
 
+    # Track finding
+    actscf.addFlag('Acts.doRotCorrection', True)
+
     return actscf
