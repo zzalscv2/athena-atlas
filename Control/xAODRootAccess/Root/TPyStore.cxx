@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s):
@@ -107,7 +107,8 @@ namespace xAOD {
       // Simply forward the call to the appropriate function from the base
       // class:
       RETURN_CHECK( "xAOD::TPyStore::record",
-                    TStore::record( obj, key, type, kFALSE ) );
+                    TStore::record( obj, key, type,
+                                    /*isOwner*/kFALSE, /*isConst*/kFALSE ) );
 
       // Return gracefully:
       return StatusCode::SUCCESS;

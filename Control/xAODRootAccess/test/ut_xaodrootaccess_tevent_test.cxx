@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -191,9 +191,14 @@ int main() {
       new ConstDataVector< DataVector< ClassA > >( SG::VIEW_ELEMENTS );
    RETURN_CHECK( APP_NAME, store.record( cdv, "ConstDataVector" ) );
 
+   store.print();
+
    // Try to retrieve it in all possible ways:
    ConstDataVector< DataVector< ClassA > >* cdv1 = 0;
-   RETURN_CHECK( APP_NAME, event.retrieve( cdv1, "ConstDataVector" ) );
+   if ( event.retrieve( cdv1, "ConstDataVector" ).isSuccess() ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of ConstDataVector should not work" ) );
+      return 1;
+   }
    const ConstDataVector< DataVector< ClassA > >* cdv2 = 0;
    RETURN_CHECK( APP_NAME, event.retrieve( cdv2, "ConstDataVector" ) );
    const DataVector< ClassA >* cdv3 = 0;
@@ -202,7 +207,7 @@ int main() {
    // But this should not work:
    DataVector< ClassA >* cdv4 = 0;
    if( event.retrieve( cdv4, "ConstDataVector" ).isSuccess() ) {
-      ::Error( APP_NAME, XAOD_MESSAGE( "Problem detected" ) );
+      ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of ConstDataVector should not work" ) );
       return 1;
    }
 

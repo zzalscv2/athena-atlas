@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TClass.h>
@@ -41,20 +41,26 @@ namespace {
       return xAOD::THolder::OTHER;
    }
 
+   /// Helper to do a "safe" const_cast for use in delegating constructors
+   void* safe_const_cast(const void* object) {
+      void* nc ATLAS_THREAD_SAFE = const_cast<void*>(object);
+      return nc;
+   }
+
 } // private namespace
 
 namespace xAOD {
 
    THolder::THolder()
       : m_object( 0 ), m_type( 0 ), m_typeInfo( 0 ), m_owner( kFALSE ),
-        m_typeKind( OTHER ) {
+        m_typeKind( OTHER ), m_const( kFALSE ) {
 
    }
 
    THolder::THolder( void* object, ::TClass* type, ::Bool_t owner )
       : m_object( object ), m_type( type ),
         m_typeInfo( m_type ? m_type->GetTypeInfo() : 0 ), m_owner( owner ),
-        m_typeKind( getTypeKind( type ) ) {
+        m_typeKind( getTypeKind( type ) ), m_const( kFALSE ) {
 
       // Complain if the passed dictionary will be unusable later on:
       if( m_type && ( ! m_type->IsLoaded() ) ) {
@@ -70,12 +76,24 @@ namespace xAOD {
 
    THolder::THolder( void* object, const std::type_info& type, ::Bool_t owner )
       : m_object( object ), m_type( 0 ), m_typeInfo( &type ), m_owner( owner ),
-        m_typeKind( OTHER ) {
+        m_typeKind( OTHER ), m_const( kFALSE ) {
 
       // Increase the object count:
       if( m_object && m_owner ) {
          Internal::THolderCache::instance().incRef( m_object );
       }
+   }
+
+   THolder::THolder( const void* object, ::TClass* type, ::Bool_t owner )
+      : THolder( safe_const_cast(object), type, owner ) {
+
+      m_const = kTRUE;
+   }
+
+   THolder::THolder( const void* object, const std::type_info& type, ::Bool_t owner )
+      : THolder( safe_const_cast(object), type, owner ) {
+
+      m_const = kTRUE;
    }
 
    /// The copy constructor takes the pointer from the parent object, and based
@@ -87,7 +105,7 @@ namespace xAOD {
    THolder::THolder( const THolder& parent )
       : m_object( parent.m_object ), m_type( parent.m_type ),
         m_typeInfo( parent.m_typeInfo ), m_owner( parent.m_owner ),
-        m_typeKind( parent.m_typeKind ) {
+        m_typeKind( parent.m_typeKind ), m_const( parent.m_const ) {
 
       // Increase the object count:
       if( m_object && m_owner ) {
@@ -108,7 +126,7 @@ namespace xAOD {
    THolder::THolder( THolder&& parent )
       : m_object( parent.m_object ), m_type( parent.m_type ),
         m_typeInfo( parent.m_typeInfo ), m_owner( parent.m_owner ),
-        m_typeKind( parent.m_typeKind ) {
+        m_typeKind( parent.m_typeKind ), m_const( parent.m_const ) {
 
       // Tell the parent that it no longer owns the object:
       parent.m_owner = kFALSE;
@@ -146,6 +164,7 @@ namespace xAOD {
       m_typeInfo = rhs.m_typeInfo;
       m_owner    = rhs.m_owner;
       m_typeKind = rhs.m_typeKind;
+      m_const    = rhs.m_const;
 
       // Increase the object count:
       if( m_object && m_owner ) {
@@ -182,6 +201,7 @@ namespace xAOD {
       m_typeInfo = rhs.m_typeInfo;
       m_owner    = rhs.m_owner;
       m_typeKind = rhs.m_typeKind;
+      m_const    = rhs.m_const;
 
       // Instead of doing anything with the shared count here, just make the
       // parent not own the object anymore. The logic is the same as discussed
@@ -192,7 +212,12 @@ namespace xAOD {
       return *this;
    }
 
-   void* THolder::get() const {
+   const void* THolder::get() const {
+
+      return m_object;
+   }
+
+   void* THolder::get() {
 
       return m_object;
    }
@@ -251,17 +276,25 @@ namespace xAOD {
       return;
    }
 
-   /// This function is used for retrieving an object as one of its
-   /// bases. It is used when the caller requires a non-const pointer to the
-   /// managed object.
+   ::Bool_t THolder::isConst() const {
+
+      return m_const;
+   }
+
+   void THolder::setConst() {
+
+      m_const = kTRUE;
+   }
+
+   /// Internal helper or getAs and getAsConst
    ///
    /// @param tid The type as which the object is to be retrieved
    /// @param silent When <code>kTRUE</code>, the call will fail
    ///               silently when unsuccessful
-   /// @returns A non-const pointer that can be cast to the requested type
+   /// @returns A pointer that can be cast to the requested type
    ///
-   void* THolder::getAs( const std::type_info& tid,
-                         ::Bool_t silent ) const {
+   void* THolder::getImpl( const std::type_info& tid,
+                           ::Bool_t silent ) const {
 
       // If there is no dictionary for the object, then the logic is pretty
       // simple:
@@ -326,6 +359,30 @@ namespace xAOD {
    }
 
    /// This function is used for retrieving an object as one of its
+   /// bases. It is used when the caller requires a non-const pointer to the
+   /// managed object.
+   ///
+   /// @param tid The type as which the object is to be retrieved
+   /// @param silent When <code>kTRUE</code>, the call will fail
+   ///               silently when unsuccessful
+   /// @returns A non-const pointer that can be cast to the requested type
+   ///
+   void* THolder::getAs( const std::type_info& tid,
+                         ::Bool_t silent ) const {
+
+      if( m_const ) {
+         if( ! silent ) {
+            ::Warning( "xAOD::THolder::getAs",
+                       "Trying to retrieve const \"%s\" via non-const pointer \"%s\"",
+                       m_type->GetName(),
+                       SG::normalizedTypeinfoName( tid ).c_str() );
+         }
+         return nullptr;
+      }
+      return getImpl( tid, silent );
+   }
+
+   /// This function is used for retrieving an object as one of its
    /// bases. It is used when the caller need a const pointer to the
    /// managed object.
    ///
@@ -337,9 +394,8 @@ namespace xAOD {
    const void* THolder::getAsConst( const std::type_info& tid,
                                     ::Bool_t silent ) const {
 
-      // In the generic case we just forward this call to the non-const
-      // implementation:
-      return getAs( tid, silent );
+      // In the generic case we just forward this call:
+      return getImpl( tid, silent );
    }
 
    const ::TClass* THolder::getClass() const {

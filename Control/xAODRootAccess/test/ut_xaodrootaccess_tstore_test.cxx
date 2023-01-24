@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: ut_xaodrootaccess_tstore_test.cxx 663791 2015-04-29 13:08:06Z krasznaa $
 
 // System include(s):
 #include <memory>
@@ -114,6 +113,20 @@ int main() {
    const ClassB* dummy4 = 0;
    RETURN_CHECK( APP_NAME, store.retrieve( dummy4, "MyObjB" ) );
 
+   // Record and retrieve a const object:
+   std::unique_ptr< const ClassA > objA_const( new ClassA() );
+   RETURN_CHECK( APP_NAME, store.record( std::move( objA_const ), "MyConstObjA" ) );
+   const ClassA* dummy5 = 0;
+   RETURN_CHECK( APP_NAME, store.retrieve( dummy5, "MyConstObjA" ) );
+
+   // This is not supposed to work:
+   ClassA* dummy6 = 0;
+   store.print();
+   if( store.retrieve( dummy6, "MyConstObjA" ).isSuccess() ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "Non-const retrieval of const object should not work" ) );
+      return 1;
+   }
+
    // This is not supposed to work:
    if( store.retrieve( dummy3, "MyObjB" ).isSuccess() ) {
       ::Error( APP_NAME, XAOD_MESSAGE( "Something strange happened" ) );
@@ -174,6 +187,10 @@ int main() {
    RETURN_CHECK( APP_NAME, store.record( std::move( dv ), "DataVector" ) );
    RETURN_CHECK( APP_NAME, store.record( std::move( cdv ),
                                          "ConstDataVector" ) );
+
+   // Print store content:
+   store.print();
+
    // The smart pointers should by now be invalid:
    SIMPLE_ASSERT( APP_NAME, dv.get() == 0 );
    SIMPLE_ASSERT( APP_NAME, cdv.get() == 0 );
@@ -183,10 +200,17 @@ int main() {
    RETURN_CHECK( APP_NAME, store.retrieve( dv1, "DataVector" ) );
    DataVector< ClassA >* dv2 = 0;
    RETURN_CHECK( APP_NAME, store.retrieve( dv2, "DataVector" ) );
+
    const ConstDataVector< DataVector< ClassA > >* cdv1 = 0;
    RETURN_CHECK( APP_NAME, store.retrieve( cdv1, "ConstDataVector" ) );
+
+   // Retrieving CDV as non-const is supposed to fail:
    ConstDataVector< DataVector< ClassA > >* cdv2 = 0;
-   RETURN_CHECK( APP_NAME, store.retrieve( cdv2, "ConstDataVector" ) );
+   if( store.retrieve( cdv2, "ConstDataVector" ).isSuccess() ) {
+      ::Error( APP_NAME, XAOD_MESSAGE( "This was not supposed to work..." ) );
+      return 1;
+   }
+
    const DataVector< ClassA >* cdv3 = 0;
    RETURN_CHECK( APP_NAME, store.retrieve( cdv3, "ConstDataVector" ) );
 
@@ -200,7 +224,7 @@ int main() {
    // Test the isConst function:
    typedef ConstDataVector< DataVector< ClassA > > CDV_t;
    SIMPLE_ASSERT( APP_NAME,
-                  store.isConst< CDV_t >( "ConstDataVector" ) == kFALSE );
+                  store.isConst< CDV_t >( "ConstDataVector" ) == kTRUE );
    typedef DataVector< ClassA > DV_t;
    SIMPLE_ASSERT( APP_NAME,
                   store.isConst< DV_t >( "ConstDataVector" ) == kTRUE );

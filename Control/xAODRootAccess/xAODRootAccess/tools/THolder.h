@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_THOLDER_H
 #define XAODROOTACCESS_TOOLS_THOLDER_H
@@ -37,11 +37,18 @@ namespace xAOD {
    public:
       /// Default constructor
       THolder();
-      /// Constructor pointing to an object in memory 
+      /// Constructor pointing to an object in memory
       THolder( void* object, ::TClass* type, ::Bool_t owner = kTRUE );
       /// Constructor pointing to an object in memory
       THolder( void* object, const std::type_info& type,
                ::Bool_t owner = kTRUE );
+
+      /// Constructor pointing to a const object in memory
+      THolder( const void* object, ::TClass* type, ::Bool_t owner = kTRUE );
+      /// Constructor pointing to a const object in memory
+      THolder( const void* object, const std::type_info& type,
+               ::Bool_t owner = kTRUE );
+
       /// Copy constructor
       THolder( const THolder& parent );
       /// Move constructor
@@ -54,8 +61,11 @@ namespace xAOD {
       /// Move operator
       THolder& operator=( THolder&& rhs );
 
+      /// Return a typeless const pointer to the held object
+      const void* get() const;
       /// Return a typeless pointer to the held object
-      void* get() const;
+      void* get();
+
       /// Return a typeless pointer to the held object's pointer
       void** getPtr();
 
@@ -66,6 +76,11 @@ namespace xAOD {
       ::Bool_t isOwner() const;
       /// Set whether the holder should own its object
       void setOwner( ::Bool_t state = kTRUE );
+
+      /// Check if the object is const
+      ::Bool_t isConst() const;
+      /// Mark the object as const
+      void setConst();
 
       /// Return the object as a specific pointer
       virtual void* getAs( const std::type_info& tid,
@@ -100,6 +115,10 @@ namespace xAOD {
       /// Internal function used to delete the managed object from memory
       void deleteObject();
 
+      /// Internal function to get an object
+      void* getImpl( const std::type_info& tid,
+                     ::Bool_t silent = kFALSE ) const;
+
       /// Typeless pointer to the object in memory
       void* m_object;
       /// Concrete type of the object being held on to
@@ -110,6 +129,8 @@ namespace xAOD {
       ::Bool_t m_owner;
       /// Type of the object held
       TypeKind m_typeKind;
+      /// Is the held object const?
+      ::Bool_t m_const;
 
    }; // class THolder
 

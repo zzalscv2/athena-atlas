@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -112,7 +112,12 @@ namespace xAOD {
       return m_branch->GetEntry( entry, getall );
    }
 
-   void* TPrimitiveAuxBranchManager::object() const {
+   const void* TPrimitiveAuxBranchManager::object() const {
+
+      return std::as_const(*m_holder).get();
+   }
+
+   void* TPrimitiveAuxBranchManager::object() {
 
       return m_holder->get();
    }
