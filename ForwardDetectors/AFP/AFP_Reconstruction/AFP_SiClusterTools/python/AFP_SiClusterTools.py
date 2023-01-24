@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #==============================================================
 # Job options file for the AFP_SiClusterTools package
@@ -74,7 +74,7 @@ def AFP_SiClusterTools_HLT(flags):
         
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-        monTool_AFP_SiClusterTool = GenericMonitoringTool("MonTool_AFP_SiClusterTool")
+        monTool_AFP_SiClusterTool = GenericMonitoringTool(flags, "MonTool_AFP_SiClusterTool")
         monTool_AFP_SiClusterTool.defineHistogram( 'HitsSize', path='EXPERT', type='TH1F', title='SID hits size',xbins=50, xmin=0, xmax=50 )
         monTool_AFP_SiClusterTool.defineHistogram( 'ClusterSize', path='EXPERT', type='TH1F', title='SID cluster size',xbins=50, xmin=0, xmax=50 )
         AFP_SiCl.clusterRecoTool.MonTool = monTool_AFP_SiClusterTool
