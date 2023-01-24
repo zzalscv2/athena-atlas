@@ -34,6 +34,18 @@ def xAODStringSkimmingToolCfg(ConfigFlags, name, **kwargs):
                       primary = True)
     return acc
 
+### Trigger skimming list
+def TriggerSkimmingToolCfg(ConfigFlags, name, **kwargs):
+    acc = ComponentAccumulator()
+    the_tool = CompFactory.DerivationFramework.TriggerSkimmingTool(name,**kwargs)
+    acc.addPublicTool(the_tool, primary = True)
+    return acc
+### Invariant mass tool config
+def InvariantMassToolCfg(ConfigFlags, name , **kwargs):
+    acc= ComponentAccumulator()
+    the_tool = CompFactory.DerivationFramework.InvariantMassTool(name,**kwargs)
+    acc.addPublicTool(the_tool, primary = True)
+    return acc
 # Prescale tool
 def PrescaleToolCfg(ConfigFlags, name, **kwargs):
     """Configure the DAOD prescale tool"""

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef DERIVATIONFRAMEWORK_ANALYSISMUONTHINNINGTOOL__H
-#define DERIVATIONFRAMEWORK_ANALYSISMUONTHINNINGTOOL__H
+#ifndef DERIVATIONFRAMEWORK_ANALYSISMUONTHINNINGALG__H
+#define DERIVATIONFRAMEWORK_ANALYSISMUONTHINNINGALG__H
 
-#include <AthenaBaseComps/AthAlgTool.h>
+#include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <DerivationFrameworkInterfaces/IThinningTool.h>
 #include <MuonAnalysisInterfaces/IMuonSelectionTool.h>
 #include <StoreGate/ReadDecorHandleKeyArray.h>
@@ -13,15 +13,15 @@
 
 namespace DerivationFramework {
 
-    class AnalysisMuonThinningTool : public AthAlgTool, virtual public IThinningTool {
+    class AnalysisMuonThinningAlg : public AthReentrantAlgorithm {
     public:
-        AnalysisMuonThinningTool(const std::string& t, const std::string& n, const IInterface* p);
+        AnalysisMuonThinningAlg(const std::string& n, ISvcLocator* p);
 
-        ~AnalysisMuonThinningTool() = default;
+        ~AnalysisMuonThinningAlg() = default;
 
         virtual StatusCode initialize() override;
 
-        virtual StatusCode doThinning() const override;
+        virtual StatusCode execute(const EventContext& ctx) const override;
 
     private:
         ToolHandle<CP::IMuonSelectionTool> m_muonSelTool{this, "SelectionTool", "", "Configured instance of the MuonSelectionTool"};
@@ -37,21 +37,21 @@ namespace DerivationFramework {
         /// Thinning of unneeded muon tracks
         Gaudi::Property<std::string> m_streamName{this, "StreamName", "", "Name of the stream being thinned"};
 
-        SG::ThinningHandleKey<xAOD::MuonContainer> m_muonKey{this, "muonThinning", "Muons", "Name of the muon container behind"};
-        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_IdTrkKey{this, "IdTrkThinnig", "InnerDetectorTrackParticles",
+        SG::ThinningHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonThinning", "Muons", "Name of the muon container behind"};
+        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_IdTrkKey{this, "IdTrkThinnig", "InDetTrackParticles",
                                                                        "Thin the unneeded ID track particles associated with muons"};
         SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_FwdIdTrkKey{
-            this, "IdTrkThinning", "InnerDetectorTrackParticles",
+            this, "IdTrkFwdThinning", "InDetForwardTrackParticles",
             "Thin the unneeded forward ID tracks (Needed for Sillicon associated Forward)"};
-        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_MSTrkKey{this, "MSTrkThinning", "MSTrackParticles",
+        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_MSTrkKey{this, "MSTrkThinning", "MuonSpectrometerTrackParticles",
                                                                        "Key to get rid of the unneeded MS tracks"};
-        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_METrkKey{this, "METrkThinning", "METrackParticles",
+        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_METrkKey{this, "METrkThinning", "ExtrapolatedMuonTrackParticles",
                                                                        "Key to get rid of the unneeded ME tracks"};
-        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_MSOETrkKey{this, "MSOETrkThinning", "MSOETrackParticles",
+        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_MSOETrkKey{this, "MSOETrkThinning", "MSOnlyExtrapolatedMuonTrackParticles",
                                                                          "Key to get rid of the unneeded MSOE tracks"};
-        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_CmbTrkKey{this, "CmbTrkThinning", "CombinedTrackParticles",
+        SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_CmbTrkKey{this, "CmbTrkThinning", "CombinedMuonTrackParticles",
                                                                         "Key to get rid of the unneeded MSOE tracks"};
-        SG::ThinningHandleKey<xAOD::MuonSegmentContainer> m_SegmentKey{this, "SegmentThinning", "Segments",
+        SG::ThinningHandleKey<xAOD::MuonSegmentContainer> m_SegmentKey{this, "SegmentThinning", "MuonSegments",
                                                                        "Key to get rid of the unneeded segments"};
     };
 

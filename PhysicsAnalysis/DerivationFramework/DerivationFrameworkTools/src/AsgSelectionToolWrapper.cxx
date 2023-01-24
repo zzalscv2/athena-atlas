@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,68 +9,56 @@
 //
 
 #include "DerivationFrameworkTools/AsgSelectionToolWrapper.h"
-#include "xAODBase/IParticleContainer.h"
 #include "PATCore/AcceptData.h"
-#include <vector>
-#include <string>
+#include <StoreGate/ReadHandle.h>
+
 
 namespace DerivationFramework {
 
   AsgSelectionToolWrapper::AsgSelectionToolWrapper(const std::string& t,
       const std::string& n,
       const IInterface* p) : 
-    AthAlgTool(t,n,p),
-    m_cut(""),
-    m_sgName(""),
-    m_containerName("")
+    AthAlgTool(t,n,p)
+   
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
-    declareProperty("AsgSelectionTool", m_tool);
-    declareProperty("CutType", m_cut);
-    declareProperty("StoreGateEntryName", m_sgName);
-    declareProperty("ContainerName", m_containerName);
+   
   }
 
-  StatusCode AsgSelectionToolWrapper::initialize()
-  {
-    if (m_sgName.empty()) {
+  StatusCode AsgSelectionToolWrapper::initialize() {
+    if (m_sgName.value().empty()) {
       ATH_MSG_ERROR("No SG name provided for the output of invariant mass tool!");
       return StatusCode::FAILURE;
     }
-    CHECK(m_tool.retrieve());
+    ATH_CHECK(m_tool.retrieve());
+    ATH_CHECK(m_containerKey.initialize());
+    m_decorKey = m_containerKey.key() + "." + m_sgName;
+    ATH_CHECK(m_decorKey.initialize());
     return StatusCode::SUCCESS;
   }
 
-  StatusCode AsgSelectionToolWrapper::finalize()
-  {
-    return StatusCode::SUCCESS;
-  }
+  
 
   StatusCode AsgSelectionToolWrapper::addBranches() const
   {
     // retrieve container
-    const xAOD::IParticleContainer* particles = evtStore()->retrieve< const xAOD::IParticleContainer >( m_containerName );
-    if( ! particles ) {
-        ATH_MSG_ERROR ("Couldn't retrieve IParticles with key: " << m_containerName );
+    
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ReadHandle<xAOD::IParticleContainer> particles{m_containerKey, ctx};
+    if( ! particles.isValid() ) {
+        ATH_MSG_ERROR ("Couldn't retrieve IParticles with key: " << m_containerKey.fullKey() );
         return StatusCode::FAILURE;
     }
     // Decorator
-    SG::AuxElement::Decorator< char > decorator(m_sgName);
+    const SG::AuxElement::Decorator< char > decorator(m_sgName);
     
     // Write mask for each element and record to SG for subsequent selection
-    for (xAOD::IParticleContainer::const_iterator pItr = particles->begin(); pItr!=particles->end(); ++pItr) {
-      auto theAccept = m_tool->accept(*pItr);  // asg::AcceptData or TAccept
+    for ( const xAOD::IParticle* part : *particles) {
+      auto theAccept = m_tool->accept(part);  // asg::AcceptData or TAccept
       if(m_cut.empty()){
-	bool pass_selection = (bool) theAccept;
-	if(pass_selection) decorator(**pItr) = 1;
-	else decorator(**pItr) = 0;
-      }
-      else{
-	if (theAccept.getCutResult(m_cut)) {
-	  decorator(**pItr) = 1;
-	} else {
-	  decorator(**pItr) = 0;
-	}
+          decorator(*part) = true && theAccept;    
+      } else{
+        decorator(*part) = true && theAccept.getCutResult(m_cut);
       }
     }
         
