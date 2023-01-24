@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <DerivationFrameworkMuons/AnalysisMuonThinningTool.h>
+#include <DerivationFrameworkMuons/AnalysisMuonThinningAlg.h>
 #include <StoreGate/ThinningHandle.h>
 namespace {
     using TrkThinKey = SG::ThinningHandleKey<xAOD::TrackParticleContainer>;
@@ -17,10 +17,10 @@ namespace {
 }  // namespace
 namespace DerivationFramework {
 
-    AnalysisMuonThinningTool::AnalysisMuonThinningTool(const std::string& t, const std::string& n, const IInterface* p) :
-        AthAlgTool(t, n, p) {}
+    AnalysisMuonThinningAlg::AnalysisMuonThinningAlg(const std::string& n, ISvcLocator* p):
+    AthReentrantAlgorithm(n, p) {}
 
-    StatusCode AnalysisMuonThinningTool::initialize() {
+    StatusCode AnalysisMuonThinningAlg::initialize() {
         const std::string& stream = m_streamName.value();
         if (stream.empty()) {
             ATH_MSG_FATAL("Please give a valid stream for thinning");
@@ -41,9 +41,7 @@ namespace DerivationFramework {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode AnalysisMuonThinningTool::doThinning() const {
-        const EventContext& ctx = Gaudi::Hive::currentContext();
-
+    StatusCode AnalysisMuonThinningAlg::execute(const EventContext& ctx) const {
         /// The Muon container thinning
         SG::ThinningHandle<xAOD::MuonContainer> MuonContainer{m_muonKey, ctx};
         if (!MuonContainer.isValid()) {
@@ -96,7 +94,7 @@ namespace DerivationFramework {
             /// The muon is rejected by the selection tool
             /// & not marked as pass by the augmentation tools upstream
             if (m_muonSelTool->getQuality(*muon) > m_quality &&
-                std::find_if(mu_passFlags.begin(), mu_passFlags.end(), [muon](const MuonPassDecor& decor) { return decor(*muon); }) !=
+                std::find_if(mu_passFlags.begin(), mu_passFlags.end(), [muon](const MuonPassDecor& decor) { return decor(*muon); }) ==
                     mu_passFlags.end())
                 continue;
             keep_muo[muon->index()] = true;
@@ -116,7 +114,7 @@ namespace DerivationFramework {
                 KeepMap::iterator itr = std::find_if(thin_decisions.begin(), thin_decisions.end(),
                                                      [track](const KeepPair& pair) { return pair.first == track->container(); });
                 if (itr == thin_decisions.end()) {
-                    ATH_MSG_ALWAYS("Could not find for track pT " << track->pt() << " eta: " << track->eta() << ", phi: " << track->phi()
+                    ATH_MSG_WARNING("Could not find for track pT " << track->pt() << " eta: " << track->eta() << ", phi: " << track->phi()
                                                                   << " a valid associated container");
                     continue;
                 }

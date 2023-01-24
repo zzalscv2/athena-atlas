@@ -79,6 +79,17 @@ def fromRunArgs(runArgs):
         ConfigFlags.Output.doWriteDAOD = True
         log.info("---------- Configured DAOD_IDTIDE output")
 
+    if hasattr(runArgs, 'outputDESDM_MCPFile'):
+        flagString = 'Output.DESDM_MCPFileName'
+        ConfigFlags.addFlag(flagString, runArgs.outputDESDM_MCPFile)
+        ConfigFlags.Output.doWriteDAOD = True
+        log.info("---------- Configured DESDM_MCP output")
+    
+    if hasattr(runArgs, 'outputDRAW_ZMUMUFile'):
+        flagString = 'Output.DRAW_ZmumuFileName'
+        ConfigFlags.addFlag(flagString, runArgs.outputDRAW_ZMUMUFile)
+        ConfigFlags.Output.doWriteBS = True
+        log.info("---------- Configured DRAW ZMUMU output")
     if hasattr(runArgs, 'outputDRAW_EGZFile'):
         flagString = 'Output.DRAW_EGZFileName'
         ConfigFlags.addFlag(flagString, runArgs.outputDRAW_EGZFile)
@@ -130,6 +141,18 @@ def fromRunArgs(runArgs):
         from DerivationFrameworkInDet.IDTIDE import IDTIDECfg
         cfg.merge(IDTIDECfg(ConfigFlags))
         log.info("---------- Configured IDTIDE perfDPD")
+
+    # DESDM_MCP
+    for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DESDM_MCPFileName" in key)]:
+        from PrimaryDPDMaker.DESDM_MCP import DESDM_MCPCfg
+        cfg.merge(DESDM_MCPCfg(ConfigFlags))
+        log.info("---------- Configured DESDM_MCP perfDPD")
+
+    # DRAW ZMUMU
+    for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DRAW_ZmumuFileName" in key)]:
+        from PrimaryDPDMaker.DRAW_ZMUMU import DRAW_ZmumuCfg
+        cfg.merge(DRAW_ZmumuCfg(ConfigFlags))
+        log.info("---------- Configured DRAW_ZMUMU perfDPD")
 
     #DRAW_EGZ
     for flag in [key for key in ConfigFlags._flagdict.keys() if ("Output.DRAW_EGZFileName" in key)]:
