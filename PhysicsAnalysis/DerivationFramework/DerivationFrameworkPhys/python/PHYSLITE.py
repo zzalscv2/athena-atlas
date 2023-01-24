@@ -288,7 +288,7 @@ def PHYSLITECfg(ConfigFlags):
         'Kt4EMPFlowEventShape.Density',
         'TauTracks.pt.eta.phi.flagSet.trackLinks',
         'AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2',
-        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET.timeStampNSOffset'
+        'EventInfo.RandomRunNumber.PileupWeight_NOSYS.GenFiltHT.GenFiltMET'
     ]
 
     if ConfigFlags.Input.isMC:
