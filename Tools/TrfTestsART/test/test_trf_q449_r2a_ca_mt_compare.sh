@@ -14,7 +14,6 @@ Reco_tf.py --CA \
   --conditionsTag=CONDBR2-BLKPA-2022-07 \
   --geometryVersion=ATLAS-R3S-2021-03-00-00 \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
   --outputHISTFile myHIST_ca.root \
@@ -34,7 +33,6 @@ Reco_tf.py \
   --conditionsTag=CONDBR2-BLKPA-2022-07 \
   --geometryVersion=ATLAS-R3S-2021-03-00-00 \
   --multithreaded="True" \
-  --steering "doRAWtoALL" \
   --outputAODFile myAOD_def.pool.root \
   --outputESDFile myESD_def.pool.root \
   --outputHISTFile myHIST_def.root \

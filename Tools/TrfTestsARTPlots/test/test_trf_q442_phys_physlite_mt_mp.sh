@@ -11,7 +11,6 @@ export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q442 \
   --sharedWriter True \
-  --steering doRAWtoALL \
   --outputDAODFile art.pool.root \
   --reductionConf PHYS PHYSLITE \
   --athenaopts "RAWtoALL:--threads=${ATHENA_CORE_NUMBER} --nprocs=0" "AODtoDAOD:--threads=0 --nprocs=${ATHENA_CORE_NUMBER}" \

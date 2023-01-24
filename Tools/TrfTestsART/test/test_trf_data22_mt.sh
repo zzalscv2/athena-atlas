@@ -20,7 +20,6 @@ timeout 64800 Reco_tf.py \
   --conditionsTag "all:CONDBR2-BLKPA-2022-07" \
   --geometryVersion="all:ATLAS-R3S-2021-03-00-00" \
   --runNumber="429782" \
-  --steering="doRAWtoALL" \
   --postExec 'FPEAuditor.NStacktracesOnFPE=10' \
   --maxEvents='-1'
 

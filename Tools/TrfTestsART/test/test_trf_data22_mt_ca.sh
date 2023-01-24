@@ -20,7 +20,6 @@ timeout 64800 Reco_tf.py --CA \
   --conditionsTag "all:CONDBR2-BLKPA-2022-07" \
   --geometryVersion="all:ATLAS-R3S-2021-03-00-00" \
   --runNumber="431493" \
-  --steering="doRAWtoALL" \
   --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10' \
   --maxEvents='-1'
 
