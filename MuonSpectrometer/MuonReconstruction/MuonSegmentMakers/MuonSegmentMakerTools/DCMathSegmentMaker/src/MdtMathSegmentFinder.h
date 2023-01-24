@@ -31,40 +31,51 @@ namespace Muon {
         ToolHandle<IDCSLFitProvider> m_dcslFitProvider{
             this,
             "DCFitProvider",
-            "",
+            ""
         };
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{
             this,
             "MuonIdHelperSvc",
-            "Muon::MuonIdHelperSvc/MuonIdHelperSvc",
+            "Muon::MuonIdHelperSvc/MuonIdHelperSvc"
         };
+  
+        Gaudi::Property<int> m_finderDebugLevel{this, "FinderDebugLevel", 0, "switch on debug output of finder"};
+        Gaudi::Property<bool> m_doDrop{this, "DoDrop",  true, "Recursive outlier removal"};        
+        Gaudi::Property<bool> m_useChamberTheta{this, "UseChamberTheta", true, "Always look for pointing segments"};
+       
+        Gaudi::Property<bool> m_enableSeedCleaning {this, "EnableSeedCleaning",  false, "only use dc witout neighbours as seeds"};
+        Gaudi::Property<double> m_occupancyThreshold{this, "OccupancyThreshold", 0.3, "occupancy threshold before enabling seed cleaning"};
+        Gaudi::Property<double> m_occupancyCutOff {this, "OccupancyCutoff", 0.8, "above the occupancy threshold no segment finding"};
+        Gaudi::Property<double> m_roadWidth {this, "AssociationRoadWidth", 1.5, "Road width used during hit association with seed lines"};
+        Gaudi::Property<double> m_chi2PerDofDrop {this, "Chi2PerDofDropping", 10., "Chi2 cut for recursive outlier removal"};
+        Gaudi::Property<double> m_ratioEmptyTubesCut{this, "RatioEmptyTubeCut", 1.1, "holes/hits cut - holes are all non-hits along the line"};
+        
+        Gaudi::Property<double> m_rpcAssociationPullCut{this, "RPCAssocationPullcut", 5., "Association cut for RPCs"};
+        Gaudi::Property<double> m_tgcAssociationPullCut{this, "TGCAssocationPullcut", 5., "Association cut for TGCs"};
+        Gaudi::Property<double> m_mdtAssociationPullCut{this, "MDTAssocationPullcut", 5., "Association cut for MDTs"};
+        
+        Gaudi::Property<bool> m_doAllHitSort{this, "SortSegmentWithAllHits", true, "Including triggers in segment selection"};
+       
+        Gaudi::Property<bool> m_doRoadAngleSeeding{this, "DoRoadSeeding", true, "use angle of road to seed segment search"};
+        
+        
+        Gaudi::Property<bool> m_doIPAngleSeeding{this, "DoIPSeeding",  true, "use angle of IP to seed segment search"};
+        Gaudi::Property<double> m_tightRoadCut{this, "TightRoadCut",  0.1, 
+                                                "tight cut on angle with prediction, used for very busy chambers"};
+        
+        Gaudi::Property<bool> m_doSingleMultiLayerScan{this, "DoSingleMultiLayerScan", true, "Look for segments in one multi layer"};
+       
+        Gaudi::Property<bool> m_recoverMdtOutliers{this, "RecoverMdtOutliers", true, "Recover MDT outliers after fit"};
+       
+        Gaudi::Property<bool> m_removeSingleOutliers{this, "RemoveSingleMdtOutliers", true, "Remove single MDT outliers"};        
+        Gaudi::Property<bool> m_doCurvedSegmentFinder{this, "DoCurvedSegmentFinder", false, "Use the curved segment finding routine"};
+        Gaudi::Property<double> m_deltaCutT0Segments{this, "DeltaCutT0Segments",  5., "Delta cut for segments with T0 fit"};
+        Gaudi::Property<double> m_residualCutT0Segments {this, "ResidualCutT0Segments", 1., "Residual cut for segments with T0 fit"};
+        Gaudi::Property<bool> m_useSegmentQuality{this, "UseSegmentQuality", false, "Use segment quality in hit dropping"};
 
-        int m_finderDebugLevel;          //<! additional debug output
-        bool m_doDrop;                   //<! enable dropping of hits from segment
-        bool m_useChamberTheta;          //<! enable to usage of the angle from the chamber position to seed the finder
-        bool m_enableSeedCleaning;       //<! enable seed cleaning for busy events
-        double m_occupancyThreshold;     //<! threshold use when seeding is enabled
-        double m_occupancyCutOff;        //<! threshold above which no segment finding is performed
-        double m_roadWidth;              //<! width of road used to associate hits to seed lines
-        double m_chi2PerDofDrop;         //<! maximum chi2 per dof used during cleaning
-        double m_ratioEmptyTubesCut;     //<! cut on the ratio empty tubes/(hits on track + delta)
-        double m_mdtAssociationPullCut;  //<! cut on the pull of MDT hits during association to segment
-        double m_rpcAssociationPullCut;  //<! cut on the pull of RPC hits during association to segment
-        double m_tgcAssociationPullCut;  //<! cut on the pull of TGC hits during association to segment
-        bool m_doAllHitSort;             //<! configure the SegmentFinder to include trigger hits in sorting of segments
-        bool m_doRoadAngleSeeding;       //<! use angle of road to seed segment search
-        bool m_doIPAngleSeeding;         //<! use angle of IP to seed segment search
-        double m_tightRoadCut;           //<! tight cut on angle with prediction, used for very busy chambers
-        bool m_doSingleMultiLayerScan;   //<! perform single ml scan
-        bool m_recoverMdtOutliers;       //<! recover MDT outliers
-        bool m_removeSingleOutliers;     //<! remove single bad hits from segment
-        bool m_doCurvedSegmentFinder;    //<! use curved segment finding routine
-        double m_deltaCutT0Segments;     //<! delta cut for segments with T0
-        double m_residualCutT0Segments;  //<! residual cut for segments with T0
-        bool m_useSegmentQuality;        //<! use segment quality in hit dropping instead of chi2
-
-        unsigned int m_maxHitsPerFullSearch;  //<! maximum number of hits, above will use faster search mode
+        Gaudi::Property<unsigned int> m_maxHitsPerFullSearch{this, "MaxHitsPerFullSearch", 100, 
+                                                        "maximum number of hits, above will use faster search mode"};
     };
 
 }  // namespace Muon
