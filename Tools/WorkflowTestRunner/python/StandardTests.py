@@ -42,8 +42,8 @@ class QTest(WorkflowTest):
         # TODO: disable RDO comparison for now
         # if type == WorkflowType.MCReco:
         #     self.output_checks.append(FrozenTier0PolicyCheck(setup, "RDO", 10))
-        self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
         self.output_checks.append(FrozenTier0PolicyCheck(setup, "AOD", 60))
+        self.output_checks.append(FrozenTier0PolicyCheck(setup, "ESD", 20))
 
         self.digest_checks = []
         if "--CA" not in extra_args:
