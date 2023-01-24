@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -2495,7 +2495,9 @@ void MuonGMCheck::buildCscRegionSelectorMap() {
         if (aux1 == 0 || aux3 == 0) {
             ATH_MSG_ERROR("There is something wrong in buildCscRegionSelectorMap!");
             ATH_MSG_ERROR("Variables aux1 and/or aux3 not initialized - Taking emergency exit!");
-            throw;
+            throw std::runtime_error("There is something wrong in buildCscRegionSelectorMap! "
+                                     "Variables aux1 and/or aux3 not initialized");
+                                     
         }
 
         ATH_MSG_INFO(extid << " hash Id " << Idhash << " new format " << new_extid);
