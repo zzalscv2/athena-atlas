@@ -4,8 +4,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 
 def MainServicesMiniCfg(loopMgr='AthenaEventLoopMgr', masterSequence='AthAlgSeq'):
-    #Mininmal basic config, just good enough for HelloWorld and alike
-    cfg=ComponentAccumulator(CompFactory.AthSequencer(masterSequence,Sequential=True))
+    """Mininmal basic config, just good enough for HelloWorld and alike"""
+    cfg = ComponentAccumulator(CompFactory.AthSequencer(masterSequence,Sequential=True))
     cfg.setAsTopLevel()
     cfg.setAppProperty('TopAlg',['AthSequencer/'+masterSequence])
     cfg.setAppProperty('MessageSvcType', 'MessageSvc')
@@ -41,7 +41,6 @@ def OutputUsageIgnoreCfg(flags, algorithm):
 
 
 def AthenaEventLoopMgrCfg(flags):
-
     cfg = ComponentAccumulator()
     elmgr = CompFactory.AthenaEventLoopMgr()
     if flags.Input.OverrideRunNumber:
@@ -59,15 +58,14 @@ def AthenaEventLoopMgrCfg(flags):
 
 
 def AthenaHiveEventLoopMgrCfg(flags):
-
     cfg = ComponentAccumulator()
-    hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc")
-    hivesvc.NSlots = flags.Concurrency.NumConcurrentEvents
+    hivesvc = CompFactory.SG.HiveMgrSvc("EventDataSvc",
+                                        NSlots = flags.Concurrency.NumConcurrentEvents)
     cfg.addService( hivesvc )
 
     from AthenaCommon.Constants import INFO
-    arp = CompFactory.AlgResourcePool( OutputLevel = INFO )
-    arp.TopAlg = ["AthMasterSeq"] #this should enable control flow
+    arp = CompFactory.AlgResourcePool(OutputLevel = INFO,
+                                      TopAlg = ["AthMasterSeq"]) #this should enable control flow
     cfg.addService( arp )
 
     scheduler = cfg.getPrimaryAndMerge(AvalancheSchedulerSvcCfg(flags))
@@ -78,24 +76,24 @@ def AthenaHiveEventLoopMgrCfg(flags):
     # to True eventually.
     inputloader_ca = SGInputLoaderCfg(flags, FailIfNoProxy=flags.Input.FailOnUnknownCollections)
     cfg.merge(inputloader_ca, sequenceName="AthAlgSeq")
+
     # Specifying DataLoaderAlg makes the Scheduler automatically assign
-    # all unmet data dependencies to that algorithm
+    # all unmet data dependencies to that algorithm.
     if flags.Scheduler.AutoLoadUnmetDependencies:
         scheduler.DataLoaderAlg = inputloader_ca.getPrimary().getName()
 
-    elmgr = CompFactory.AthenaHiveEventLoopMgr()
-    elmgr.WhiteboardSvc = "EventDataSvc"
-    elmgr.SchedulerSvc = scheduler.getName()
-    elmgr.OutStreamType = 'AthenaOutputStream'
+    elmgr = CompFactory.AthenaHiveEventLoopMgr(
+        WhiteboardSvc = "EventDataSvc",
+        SchedulerSvc = scheduler.getName(),
+        OutStreamType = 'AthenaOutputStream')
 
     if flags.Input.OverrideRunNumber:
         from AthenaKernel.EventIdOverrideConfig import EvtIdModifierSvcCfg
-        elmgr.EvtIdModifierSvc =  cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
+        elmgr.EvtIdModifierSvc = cfg.getPrimaryAndMerge(EvtIdModifierSvcCfg(flags)).name
 
-    if flags.Common.isOverlay:
-        if not flags.Overlay.DataOverlay:
-            elmgr.RequireInputAttributeList = True
-            elmgr.UseSecondaryEventNumber = True
+    if flags.Common.isOverlay and not flags.Overlay.DataOverlay:
+        elmgr.RequireInputAttributeList = True
+        elmgr.UseSecondaryEventNumber = True
 
     cfg.addService( elmgr )
 
@@ -104,9 +102,9 @@ def AthenaHiveEventLoopMgrCfg(flags):
 
 def MessageSvcCfg(flags):
     cfg = ComponentAccumulator()
-    msgsvc = CompFactory.MessageSvc()
-    msgsvc.OutputLevel = flags.Exec.OutputLevel
-    msgsvc.Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength)
+    msgsvc = CompFactory.MessageSvc(OutputLevel = flags.Exec.OutputLevel,
+                                    Format = "% F%{:d}W%C%7W%R%T %0W%M".format(flags.Common.MsgSourceLength))
+
     from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep not in [ProductionStep.Default, ProductionStep.Reconstruction]:
         msgsvc.Format = "% F%18W%S%7W%R%T %0W%M" # Temporary to match legacy configuration for serial simulation/digitization/overlay jobs
@@ -129,98 +127,112 @@ def MessageSvcCfg(flags):
     return cfg
 
 
-def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
-    # Run a serial job for threads=0
-    if flags.Concurrency.NumThreads>0:
-        if flags.Concurrency.NumConcurrentEvents==0:
-            # In a threaded job this will mess you up because no events will be processed
-            raise Exception("Requested Concurrency.NumThreads>0 and Concurrency.NumConcurrentEvents==0, which will not process events!")
-        LoopMgr = "AthenaHiveEventLoopMgr"
+def addMainSequences(flags, cfg):
+    """Add the standard sequences to cfg"""
 
-    if flags.Concurrency.NumProcs>0:
-        LoopMgr = "AthMpEvtLoopMgr"
-
-    ########################################################################
-    # Core components needed for serial and threaded jobs
-    cfg=MainServicesMiniCfg(loopMgr=LoopMgr, masterSequence='AthMasterSeq')
-    cfg.setAppProperty('OutStreamType', 'AthenaOutputStream')
-
-    #Build standard sequences:
+    # Build standard sequences:
     AthSequencer = CompFactory.AthSequencer
-    cfg.addSequence(AthSequencer('AthAlgEvtSeq',Sequential=True, StopOverride=True),parentName="AthMasterSeq")
-    cfg.addSequence(AthSequencer('AthOutSeq',StopOverride=True),parentName="AthMasterSeq")
+    cfg.addSequence(AthSequencer('AthAlgEvtSeq', Sequential=True, StopOverride=True), parentName='AthMasterSeq')
+    cfg.addSequence(AthSequencer('AthOutSeq', StopOverride=True), parentName='AthMasterSeq')
 
-    cfg.addSequence(AthSequencer('AthBeginSeq',Sequential=True),parentName='AthAlgEvtSeq')
-    cfg.addSequence(AthSequencer('AthAllAlgSeq',StopOverride=True),parentName='AthAlgEvtSeq')
+    cfg.addSequence(AthSequencer('AthBeginSeq', Sequential=True), parentName='AthAlgEvtSeq')
+    cfg.addSequence(AthSequencer('AthAllAlgSeq', StopOverride=True), parentName='AthAlgEvtSeq')
+
+    athAlgSeq = AthSequencer('AthAlgSeq', IgnoreFilterPassed=True, StopOverride=True, ProcessDynamicDataDependencies=True, ExtraDataForDynamicConsumers=[])
+    athCondSeq = AthSequencer('AthCondSeq',StopOverride=True)
 
     if flags.Concurrency.NumThreads==0:
         # For serial execution, we need the CondAlgs to execute first.
-        cfg.addSequence(AthSequencer('AthCondSeq',StopOverride=True),parentName='AthAllAlgSeq')
-        cfg.addSequence(AthSequencer('AthAlgSeq',IgnoreFilterPassed=True,StopOverride=True, ProcessDynamicDataDependencies=True, ExtraDataForDynamicConsumers=[] ),parentName='AthAllAlgSeq')
+        cfg.addSequence(athCondSeq, parentName='AthAllAlgSeq')
+        cfg.addSequence(athAlgSeq, parentName='AthAllAlgSeq')
     else:
         # In MT, the order of execution is irrelevant (determined by data deps).
         # We add the conditions sequence later such that the CondInputLoader gets
         # initialized after all other user Algorithms for MT, so the base classes
         # of data deps can be correctly determined.
-        cfg.addSequence(AthSequencer('AthAlgSeq', IgnoreFilterPassed=True, StopOverride=True, ProcessDynamicDataDependencies=True, ExtraDataForDynamicConsumers=[]), parentName='AthAllAlgSeq')
-        cfg.addSequence(AthSequencer('AthCondSeq',StopOverride=True),parentName='AthAllAlgSeq')
+        cfg.addSequence(athAlgSeq, parentName='AthAllAlgSeq')
+        cfg.addSequence(athCondSeq, parentName='AthAllAlgSeq')
 
-    cfg.addSequence(AthSequencer('AthEndSeq',Sequential=True),parentName='AthAlgEvtSeq')
-    cfg.setAppProperty('PrintAlgsSequence', True)
+    cfg.addSequence(AthSequencer('AthEndSeq', Sequential=True), parentName='AthAlgEvtSeq')
 
-    #Set up incident firing:
-    AthIncFirerAlg=CompFactory.AthIncFirerAlg
-    IncidentProcAlg=CompFactory.IncidentProcAlg
+    # Set up incident firing:
+    AthIncFirerAlg = CompFactory.AthIncFirerAlg
+    IncidentProcAlg = CompFactory.IncidentProcAlg
 
     previousPerfmonDomain = cfg.getCurrentPerfmonDomain()
     cfg.flagPerfmonDomain('Incidents')
 
-    cfg.addEventAlgo(AthIncFirerAlg("BeginIncFiringAlg",FireSerial=False,Incidents=['BeginEvent']),sequenceName='AthBeginSeq')
-    cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg1'),sequenceName='AthBeginSeq')
+    cfg.addEventAlgo(AthIncFirerAlg("BeginIncFiringAlg", FireSerial=False, Incidents=['BeginEvent']),
+                     sequenceName='AthBeginSeq')
 
-    cfg.addEventAlgo(AthIncFirerAlg('EndIncFiringAlg',FireSerial=False,Incidents=['EndEvent']), sequenceName="AthEndSeq")
-    cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg2'),sequenceName="AthEndSeq")
+    cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg1'),
+                     sequenceName='AthBeginSeq')
 
-    # Should be after all other algorithms.
-    cfg.addEventAlgo(AthIncFirerAlg('EndAlgorithmsFiringAlg',FireSerial=False,Incidents=['EndAlgorithms']), sequenceName="AthMasterSeq")
-    cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg3'),sequenceName="AthMasterSeq")
+    cfg.addEventAlgo(AthIncFirerAlg('EndIncFiringAlg', FireSerial=False, Incidents=['EndEvent']),
+                     sequenceName="AthEndSeq")
+
+    cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg2'),
+                     sequenceName="AthEndSeq")
+
+    # Should be after all other algorithms:
+    cfg.addEventAlgo(AthIncFirerAlg('EndAlgorithmsFiringAlg', FireSerial=False, Incidents=['EndAlgorithms']),
+                     sequenceName="AthMasterSeq")
+
+    cfg.addEventAlgo(IncidentProcAlg('IncidentProcAlg3'),
+                     sequenceName="AthMasterSeq")
 
     cfg.flagPerfmonDomain(previousPerfmonDomain)
 
-    #Basic services:
-    ClassIDSvc=CompFactory.ClassIDSvc
-    cfg.addService(ClassIDSvc(CLIDDBFiles= ['clid.db',"Gaudi_clid.db" ]))
 
-    AlgContextSvc=CompFactory.AlgContextSvc
-    cfg.addService(AlgContextSvc(BypassIncidents=True))
+def MainServicesCfg(flags, LoopMgr='AthenaEventLoopMgr'):
+    # Run a serial job for threads=0
+    if flags.Concurrency.NumThreads > 0:
+        if flags.Concurrency.NumConcurrentEvents==0:
+            raise Exception("Requested Concurrency.NumThreads>0 and Concurrency.NumConcurrentEvents==0, "
+                            "which will not process events!")
+        LoopMgr = "AthenaHiveEventLoopMgr"
+
+    if flags.Concurrency.NumProcs > 0:
+        LoopMgr = "AthMpEvtLoopMgr"
+
+    # Core components needed for serial and threaded jobs:
+    cfg = MainServicesMiniCfg(loopMgr=LoopMgr, masterSequence='AthMasterSeq')
+
+    # Main sequences and incident handling:
+    addMainSequences(flags, cfg)
+
+    # Basic services:
+    cfg.addService(CompFactory.ClassIDSvc(CLIDDBFiles = ['clid.db','Gaudi_clid.db']))
+
+    cfg.addService(CompFactory.AlgContextSvc(BypassIncidents=True))
     cfg.addAuditor(CompFactory.AlgContextAuditor())
-    cfg.setAppProperty("AuditAlgorithms", True)
 
-    StoreGateSvc=CompFactory.StoreGateSvc
-    cfg.addService(StoreGateSvc())
-    cfg.addService(StoreGateSvc("DetectorStore"))
-    cfg.addService(StoreGateSvc("HistoryStore"))
-    cfg.addService(StoreGateSvc("ConditionStore"))
+    cfg.addService(CompFactory.StoreGateSvc())
+    cfg.addService(CompFactory.StoreGateSvc("DetectorStore"))
+    cfg.addService(CompFactory.StoreGateSvc("HistoryStore"))
+    cfg.addService(CompFactory.StoreGateSvc("ConditionStore"))
+
+    cfg.merge(MessageSvcCfg(flags))
+
     from AthenaConfiguration.FPEAndCoreDumpConfig import FPEAndCoreDumpCfg
     cfg.merge(FPEAndCoreDumpCfg(flags))
 
-    cfg.setAppProperty('InitializationLoopCheck',False)
-
+    # ApplicationMgr properties:
+    cfg.setAppProperty('OutStreamType', 'AthenaOutputStream')
+    cfg.setAppProperty('AuditAlgorithms', True)
+    cfg.setAppProperty('InitializationLoopCheck', False)
     cfg.setAppProperty('EvtMax', flags.Exec.MaxEvents)
-
-    cfg.merge(MessageSvcCfg(flags))
 
     if flags.Exec.DebugStage != "":
         cfg.setDebugStage(flags.Exec.DebugStage)
 
-    if flags.Concurrency.NumProcs>0:
+    if flags.Concurrency.NumProcs > 0:
         from AthenaMP.AthenaMPConfig import AthenaMPCfg
         mploop = AthenaMPCfg(flags)
         cfg.merge(mploop)
 
-    ########################################################################
-    # Additional components needed for threaded jobs only
-    if flags.Concurrency.NumThreads>0:
+    # Additional components needed for threaded jobs only:
+    if flags.Concurrency.NumThreads > 0:
         cfg.merge(AthenaHiveEventLoopMgrCfg(flags))
         # Setup SGCommitAuditor to sweep new DataObjects at end of Alg execute
         cfg.addAuditor( CompFactory.SGCommitAuditor() )
@@ -245,6 +257,7 @@ def MainEvgenServicesCfg(flags, LoopMgr='AthenaEventLoopMgr',seqName="AthAlgSeq"
     cfg.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(AODKey = 'McEventInfo'),sequenceName=seqName)
 
     return cfg
+
 
 if __name__=="__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
