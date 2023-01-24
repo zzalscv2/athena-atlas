@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # Module to collect JSON specific trigger configuration helpers
 #
@@ -36,17 +36,21 @@ def create_joboptions_json(pkl_file, json_file):
 def modifyConfigForP1(json_file, db_file):
    """ modifies a number of job properties to run from the TriggerDB and writes out modified JSON
    """
+   from AthenaCommon.Logging import logging
+   log = logging.getLogger("JsonUtils")
 
    with open(json_file, 'r') as f:
       jocat = json.load(f)
       properties = jocat['properties']
 
       def mod(props, alg, prop, fnc):
-         if alg in props and prop in props[alg]:
-            origVal = props[alg][prop]
-         else:
-            origVal = ""
+         if alg not in props:
+            log.warning("Asked to modify property of %s but it does not exist", alg)
+            return
+
+         origVal = props[alg].get(prop, "")
          props[alg][prop] = fnc(origVal)
+
 
       # L1 and HLT Config Svc must read from db
       mod( properties, "LVL1ConfigSvc", "InputType", lambda x : "db" )
