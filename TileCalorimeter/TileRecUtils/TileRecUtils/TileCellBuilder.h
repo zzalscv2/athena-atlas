@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILECELLBUILDER_H
@@ -29,7 +29,7 @@
 #include "TileIdentifier/TileFragHash.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileConditions/ITileBadChanTool.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/ITileDCSTool.h"
@@ -203,8 +203,11 @@ private:
     ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
         "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
         "TileCondToolTiming", "TileCondToolTiming", "Tile timing tool"};
