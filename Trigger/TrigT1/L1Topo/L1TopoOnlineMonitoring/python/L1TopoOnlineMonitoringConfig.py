@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -91,7 +91,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
                                           doComp = doComp,
                                           forceCTPasHdw=forceCtp)
     if logLevel : alg.OutputLevel=logLevel
-    alg.MonTool = GenericMonitoringTool('MonTool')
+    alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
     configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp)
 
@@ -209,7 +209,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
 def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', configBS = True, logLevel = None):
     alg = CompFactory.L1TopoLegacyOnlineMonitor()
     if logLevel : alg.OutputLevel=logLevel
-    alg.MonTool = GenericMonitoringTool('MonTool')
+    alg.MonTool = GenericMonitoringTool(flags, 'MonTool')
     alg.MonTool.HistPath = name
     configureLegacyHistograms(alg, flags)
 

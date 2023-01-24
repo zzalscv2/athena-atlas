@@ -1,10 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def TrigMuCombMonitoring(name = "TrigMuCombMonitoring"):
+def TrigMuCombMonitoring(flags, name = "TrigMuCombMonitoring"):
 
-    montool = GenericMonitoringTool(name, HistPath = name)
+    montool = GenericMonitoringTool(flags, name, HistPath = name)
 
     montool.defineHistogram('Efficiency', path='EXPERT', type='TH1F', title="Monitored Track matching efficiency from #muComb", xbins=3, xmin=-1.5, xmax=1.5)
     montool.defineHistogram('ErrorFlagMC', path='EXPERT', type='TH1F', title="Error Flags during event processing from #muComb; Error Code", xbins=12, xmin=-1.5, xmax=10.5)

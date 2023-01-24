@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
@@ -43,7 +43,7 @@ def eFexByteStreamToolCfg(name, flags, *, writeBS=False, TOBs=True, xTOBs=False,
   if flags.Output.HISTFileName != '' or flags.Trigger.doHLT:
     if flags.Trigger.doHLT:
       from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-      monTool = GenericMonitoringTool('MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
+      monTool = GenericMonitoringTool(flags,'MonTool',HistPath = f'HLTFramework/L1BSConverters/{name}')
       topDir = "EXPERT"
     else:
       # if used in offline reconstruction respect DQ convention (ATR-26371)

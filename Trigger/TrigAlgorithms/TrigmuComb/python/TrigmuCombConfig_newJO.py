@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 #  This file configs the muComb reco alg with the newJO
 
@@ -31,8 +31,8 @@ def muCombCfg(flags, postFix="", useBackExtrp=True):
         idScanEndcap3Res = [0.036, 0.0000004]
         idScanEndcap4Res = [0.046, 0.0000002]
     from TrigmuComb.TrigmuCombMonitoring import TrigMuCombMonitoring
-    muComb = CompFactory.muComb
-    muCombAlg = muComb(name                  = "MuComb"+postFix,
+    muCombAlg = CompFactory.muComb(
+                       name                  = "MuComb"+postFix,
                        MuCombStrategy        = 0,
                        UseBackExtrapolatorG4 = useBackExtrp,
                        MinPtTRK              = 0.,
@@ -45,7 +45,7 @@ def muCombCfg(flags, postFix="", useBackExtrp=True):
                        IDSCANEndcap3Res      = idScanEndcap3Res,
                        IDSCANEndcap4Res      = idScanEndcap4Res,
                        IDalgo                = "InDetTrigTrackingxAODCnv_Muon_FTF",
-                       MonTool = TrigMuCombMonitoring())
+                       MonTool = TrigMuCombMonitoring(flags))
 
     return acc, muCombAlg
 

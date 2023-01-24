@@ -6,7 +6,7 @@ import math
 
 
 def CTPUnpackingMonitoring(flags, maxItems, maxChains):
-    tool = GenericMonitoringTool('MonTool')
+    tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath="HLTFramework/HLTSeeding"
     tool.defineHistogram('TAVItems', path='EXPERT', type='TH1F', title='Number of active L1 TAV items;N Items;N Events',
                          xbins=maxItems, xmin=0, xmax=maxItems),
@@ -16,7 +16,7 @@ def CTPUnpackingMonitoring(flags, maxItems, maxChains):
 
 
 def RoIsUnpackingMonitoring(flags, prefix, maxCount, maxEta=3.):
-    tool = GenericMonitoringTool('MonTool')
+    tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath = f'HLTFramework/HLTSeeding/RoIs_{prefix}'
     tool.defineHistogram('count', path='EXPERT', type='TH1F', title=f'Number of {prefix} RoIs;N RoIs;N Events',
                          xbins=maxCount, xmin=0, xmax=maxCount),
@@ -31,7 +31,7 @@ def RoIsUnpackingMonitoring(flags, prefix, maxCount, maxEta=3.):
 
 
 def PrescalingMonitoring(flags):
-    tool = GenericMonitoringTool('MonTool')
+    tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath="HLTFramework/HLTSeeding"
     tool.defineHistogram('LB,HLTPSK', path='EXPERT', type='TH2I', opt='kAddBinsDynamically',
                          title='HLT prescale key used in LB;Lumiblock;HLTPSK',
@@ -43,7 +43,7 @@ def PrescalingMonitoring(flags):
 
 
 def L1DataConsistencyMonitoring(flags):
-    tool = GenericMonitoringTool('MonTool')
+    tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath="HLTFramework/HLTSeeding/L1DataConsistencyChecker"
 
     tool.defineHistogram('TIME_consistencyCheck', path='EXPERT', type='TH1F',

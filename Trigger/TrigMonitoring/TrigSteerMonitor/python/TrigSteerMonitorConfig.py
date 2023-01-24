@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -6,7 +6,7 @@ from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
 def SchedulerMonSvcCfg(flags, name='SchedulerMonSvc'):
     monsvc = CompFactory.SchedulerMonSvc(name)
-    monsvc.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+    monsvc.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
 
     # Helper functions
     def getFlag(flagName, defaultValue):
@@ -75,9 +75,9 @@ def SchedulerMonSvcCfg(flags, name='SchedulerMonSvc'):
     acc.addService(monsvc)
     return acc
 
-def getTrigErrorMonTool(name='TrigErrorMonTool'):
+def getTrigErrorMonTool(flags, name='TrigErrorMonTool'):
     errorMonTool = CompFactory.TrigErrorMonTool(name)
-    errorMonTool.MonTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+    errorMonTool.MonTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
 
     errorMonTool.MonTool.defineHistogram(
         'ErrorAlgName,ErrorCode', path='EXPERT', type='TH2I',

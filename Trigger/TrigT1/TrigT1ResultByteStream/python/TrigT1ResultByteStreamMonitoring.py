@@ -1,11 +1,11 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 def L1MuonBSConverterMonitoring(name, flags, encoder=False):
-    tool = GenericMonitoringTool('MonTool')
+    tool = GenericMonitoringTool(flags, 'MonTool')
     tool.HistPath = f'HLTFramework/L1BSConverters/{name}'
     tool.defineHistogram('NumWordsInROD', path='EXPERT', type='TH1F',
                          title='Size of the MUCTPI ROD payload;N words;N events',
@@ -72,7 +72,7 @@ def L1MuonBSConverterMonitoring(name, flags, encoder=False):
 def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
 
     if flags.Trigger.doHLT:
-        monTool = GenericMonitoringTool('MonTool', HistPath = f'HLTFramework/L1BSConverters/{name}')
+        monTool = GenericMonitoringTool(flags, 'MonTool', HistPath = f'HLTFramework/L1BSConverters/{name}')
         topDir = 'EXPERT'
     elif flags.DQ.Steering.doHLTMon: # if used in offline reconstruction respect DQ convention (ATR-26371)
         from AthenaMonitoring import AthMonitorCfgHelper
