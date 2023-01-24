@@ -537,7 +537,7 @@ DbStatus RootTreeContainer::open( DbDatabase& dbH,
                           << DbPrint::endmsg;
                       return Error;
                    }
-                   dsc = std::move( BranchDesc(cl, pBranch, leaf, cl->New(), c) );
+                   dsc = BranchDesc(cl, pBranch, leaf, cl->New(), c);
                    if( RootAuxDynIO::isAuxDynBranch(pBranch) ) {
                       dsc.auxdyn_reader = RootAuxDynIO::getBranchAuxDynReader( m_tree, pBranch );
                       if( !dsc.auxdyn_reader ) {
