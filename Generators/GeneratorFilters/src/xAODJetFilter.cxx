@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "GaudiKernel/PhysicalConstants.h"
-#include "TruthUtils/HepMCHelpers.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleAuxContainer.h"
 #include "xAODTruth/TruthParticleContainer.h"
@@ -75,7 +74,7 @@ StatusCode xAODJetFilter::filterEvent() {
     unsigned int nPart = (genEvt)->nTruthParticles();
     for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
       const xAOD::TruthParticle* part = (genEvt)->truthParticle(iPart);
-      if (MC::isGenStable(part->status(), part->barcode())) {  // stables only
+      if (part->isGenStable()) {  // stables only
         if ((part->pdgId() != 13) && (part->pdgId() != -13) &&
             (part->pdgId() != 12) && (part->pdgId() != -12) &&
             (part->pdgId() != 14) && (part->pdgId() != -14) &&
