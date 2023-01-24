@@ -128,8 +128,7 @@ def DCMathSegmentMakerCfg(flags,
                           doSegmentT0Fit=False,
                           **kwargs):
     
-    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, MuonClusterOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
-    from MuonConfig.MuonCondAlgConfig import MdtCondDbAlgCfg
+    from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSegmentSelectionToolCfg
     
     # This in general is a pretty problematic piece of code. It seems to have a lot of potential issues, because it has loads of mutables / subtools etc
@@ -175,11 +174,10 @@ def DCMathSegmentMakerCfg(flags,
     
     # Now stuff that wasn't explicitly configured before.
     
-    result.merge( MuonStationIntersectCondAlgCfg(flags))
+    result.merge(MuonStationIntersectCondAlgCfg(flags))
 
     kwargs.setdefault("MdtCreator", result.getPrimaryAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags)))
     # Set MdtCreatorT0 below
-    kwargs.setdefault("MuonClusterCreator", result.getPrimaryAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
     kwargs.setdefault("MuonCompetingClustersCreator", result.getPrimaryAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags)))
     edm_printer = result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ) # Needed again below
     kwargs.setdefault("EDMPrinter", edm_printer )
@@ -194,13 +192,7 @@ def DCMathSegmentMakerCfg(flags,
     kwargs.setdefault("SegmentFitter", result.getPrimaryAndMerge(MuonSegmentFittingToolCfg(flags, name="MuonSegmentFittingTool")))
     
     kwargs.setdefault("SegmentSelector", result.popToolsAndMerge(MuonSegmentSelectionToolCfg(flags)))
-    
-    # Needs MdtCondDbData
-    acc = MdtCondDbAlgCfg(flags)
-    result.merge(acc)
-    
-    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
-  
+   
     dc_segment_maker = CompFactory.Muon.DCMathSegmentMaker(name=name, **kwargs)
     result.setPrivateTools(dc_segment_maker)
     return result

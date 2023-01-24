@@ -82,11 +82,6 @@ namespace Muon {
             ATH_CHECK(m_trackSelector.retrieve());
             ATH_MSG_INFO("Track selection enabled: " << m_trackSelector);
         }
-        if (!m_segmentMerger.empty()) {
-            ATH_CHECK(m_segmentMerger.retrieve());
-            ATH_MSG_INFO("Segment merging enabled: " << m_segmentMerger);
-        }
-
         return StatusCode::SUCCESS;
     }
 
@@ -111,16 +106,10 @@ namespace Muon {
                                             ChSet& chambersWithSegments, StSet& stationsWithSegments, GarbageContainer& trash_bin) const {
         if (coll.empty()) return false;
 
-        MuonSegmentCollection theSegments;
-        if (!m_segmentMerger.empty()) {
-            theSegments = m_segmentMerger->findDuplicates(coll);
-        } else {
-            theSegments = coll;
-        }
-        ATH_MSG_DEBUG("New collection " << theSegments.size());
+        ATH_MSG_DEBUG("New collection " << coll.size());
 
         // Sort the input collection by chamber & station IDs
-        for (const MuonSegment* segment : theSegments) {
+        for (const MuonSegment* segment : coll) {
             ATH_MSG_DEBUG("Adding segment ");
             std::unique_ptr<MuPatSegment> aSeg = m_candidateTool->createSegInfo(ctx, *segment, trash_bin);
             ATH_MSG_DEBUG(" -> MuPatSegment " << m_candidateTool->print(*aSeg));
