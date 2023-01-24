@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -13,7 +13,7 @@
 // Tile includes
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileRecUtils/ITileRawChannelTool.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/ITileBadChanTool.h"
 #include "TileConditions/TileCondToolNoiseSample.h"
 #include "TileEvent/TileDQstatus.h"
@@ -59,8 +59,11 @@ class TileRawChannelNoiseFilter: public extends<AthAlgTool, ITileRawChannelTool>
 
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile noise sample tool"};
