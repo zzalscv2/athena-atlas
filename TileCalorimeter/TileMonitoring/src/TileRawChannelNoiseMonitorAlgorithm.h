@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILERAWCHANNELNOISEMONITORALGORITHM_H
@@ -9,7 +9,7 @@
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileConditions/TileDCSState.h"
 #include "TileConditions/TileBadChannels.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCablingSvc.h"
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
@@ -61,8 +61,11 @@ class TileRawChannelNoiseMonitorAlgorithm : public AthMonitorAlgorithm {
     SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
         "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
-    ToolHandle<TileCondToolEmscale> m_tileCondToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+     SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+         "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     /**
      * @brief Name of Tile cabling service
