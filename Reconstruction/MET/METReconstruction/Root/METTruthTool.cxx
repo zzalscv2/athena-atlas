@@ -30,7 +30,7 @@
 #include "AthContainers/ConstDataVector.h"
 
 // Truth Utilities
-#include "TruthUtils/TruthParticleHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace met {
 
@@ -121,7 +121,7 @@ namespace met {
   {
     ATH_MSG_VERBOSE("Check nonint");
     // stable and non-interacting
-    if (MC::isGenStable(truth->status(),truth->barcode()) && MC::isNonInteracting(truth->pdgId())) return true;
+    if (truth->isGenStable() && MC::isNonInteracting(truth->pdgId())) return true;
 
     return false;
   }
@@ -132,7 +132,7 @@ namespace met {
     // not muon
     if(truth->isMuon()) return false;
     // stable
-    if(!MC::isGenStable(truth->status(),truth->barcode())) return false;
+    if(!truth->isGenStable()) return false;
     // interacting
     if(MC::isNonInteracting(truth->pdgId())) return false;
     // in acceptance
@@ -152,7 +152,7 @@ namespace met {
       if( (fabs(truth->eta())<m_det_maxEta) ) return false;
     }
     // stable
-    if(!MC::isGenStable(truth->status(),truth->barcode())) return false;
+    if(!truth->isGenStable()) return false;
     // interacting
     if(MC::isNonInteracting(truth->pdgId())) return false;
 
@@ -165,7 +165,7 @@ namespace met {
     // muon
     if(!truth->isMuon()) return false;
     // stable
-    if(!MC::isGenStable(truth->status(),truth->barcode())) return false;
+    if(!truth->isGenStable()) return false;
     // in acceptance
     if(truth->pt()<m_truthmu_minPt || fabs(truth->eta())>m_truthmu_maxEta) return false;
 

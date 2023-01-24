@@ -84,7 +84,7 @@ StatusCode xAODTruthParticleSlimmerMET::execute()
           //https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/DerivationFramework/DerivationFrameworkMCTruth/python/MCTruthCommon.py#L183
           // which in turn use the implementation from Reconstruction
           //https://gitlab.cern.ch/atlas/athena/blob/21.0/Reconstruction/MET/METReconstruction/Root/METTruthTool.cxx#L143
-          if (!MC::isGenStable(theParticle->status(),theParticle->barcode())) continue;
+          if (!theParticle->isGenStable()) continue;
           if (!MC::isNonInteracting(theParticle->pdgId())) continue;
 
 

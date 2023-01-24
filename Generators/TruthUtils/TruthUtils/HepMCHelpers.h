@@ -9,11 +9,11 @@
 /// ATLAS-specific HepMC functions not suitable for MCUtils.
 
 #include "TruthUtils/PIDHelpers.h"
-#include "TruthUtils/TruthParticleHelpers.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/Relatives.h"
+#include "AtlasHepMC/MagicNumbers.h"
 namespace MC
 {
 using namespace MCUtils::PID;

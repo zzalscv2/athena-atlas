@@ -138,7 +138,7 @@ StatusCode xAODHTFilter::filterEvent()
           continue;
         int pdgid = theParticle->pdgId();
 
-        if (m_UseNu && MC::PID::isNeutrino(pdgid) && (MC::isGenStable(theParticle->status(), theParticle->barcode())))
+        if (m_UseNu && MC::PID::isNeutrino(pdgid) && (theParticle->isGenStable()))
         {
           if (fromWZ(theParticle) || fromTau(theParticle))
           {
@@ -147,7 +147,7 @@ StatusCode xAODHTFilter::filterEvent()
         }
 
         // pick muons and electrons specifically -- isLepton selects both charged leptons and neutrinos
-        if (m_UseLep && (std::abs(pdgid) == 11 || std::abs(pdgid) == 13) && (MC::isGenStable(theParticle->status(), theParticle->barcode())) && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
+        if (m_UseLep && (std::abs(pdgid) == 11 || std::abs(pdgid) == 13) && theParticle->isGenStable() && (theParticle)->pt() > m_MinLepPt * Gaudi::Units::GeV && std::abs(theParticle->eta()) < m_MaxLepEta)
         {
           bool isFromWZ = fromWZ(theParticle);
           if (isFromWZ || fromTau(theParticle))
