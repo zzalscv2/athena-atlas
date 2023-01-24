@@ -112,7 +112,7 @@ ZDCFitExpFermiVariableTausRun3::ZDCFitExpFermiVariableTausRun3(const std::string
 
 
 ZDCFitExpFermiFixedTaus::ZDCFitExpFermiFixedTaus(const std::string& tag, float tmin, float tmax, float tau1, float tau2) :
-  ZDCFitWrapper(std::make_shared<TF1>(("ExpFermiFixedTaus" + tag).c_str(), this, tmin, tmax, 3 - 1)),
+  ZDCFitWrapper(std::make_shared<TF1>(("ExpFermiFixedTaus" + tag).c_str(), this, tmin, tmax, 3)),
   m_tau1(tau1), m_tau2(tau2)
 {
   std::shared_ptr<TF1> theTF1 = ZDCFitWrapper::GetWrapperTF1();
