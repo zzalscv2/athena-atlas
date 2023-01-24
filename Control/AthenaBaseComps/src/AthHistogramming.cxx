@@ -25,6 +25,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+#include "TEfficiency.h"
 #include "TTree.h"
 #include "TGraph.h"
 
@@ -142,6 +143,54 @@ TH1* AthHistogramming::bookGetPointer( TH1& histRef, std::string tDir, std::stri
 }
 
 
+TEfficiency* AthHistogramming::bookGetPointer( TEfficiency& effRef, std::string tDir, std::string stream )
+{
+  // Modify the name and title according to the prefixes of this classes instance
+  std::string effName(effRef.GetName());
+  const std::string effTitle(effRef.GetTitle());
+  std::string bookingString("");
+
+  this->buildBookingString( bookingString, effName, tDir, stream );
+  effRef.SetTitle((m_histTitlePrefix+effTitle+m_histTitlePostfix).c_str() );
+  effRef.SetName(effName.c_str());
+
+  // Check if the hash for this effName already exists, i.e., if we have a hash collision
+  const hash_t effHash = this->hash(effName);
+  EffMap_t::const_iterator it = m_effMap.find( effHash );
+  if ( it != m_effMap.end() ) // It does exist!
+    {
+      m_msg << MSG::WARNING
+            << "Detected a hash collision. The hash for the TEfficiency with name=" << effName
+            << " already exists and points to a TEfficiency with name=" << it->second->GetName()
+            << " NOT going to book the new TEfficiency and returning a NULL pointer!" << endmsg;
+      return NULL;
+    }
+
+  // Set the new name and title for the TEfficiency, based on the prefixes that the user set for this class instance
+  // Create a clone that has the new name
+
+  // Massage the final string to book things
+
+  // Register the TEfficiency into the THistSvc
+  if ( !((histSvc()->regEfficiency(bookingString, &effRef)).isSuccess()) )
+    {
+      m_msg << MSG::WARNING
+            << "Problem registering TEfficiency with name " << effName
+            << ", name prefix " << m_histNamePrefix
+            << ", title " << effTitle
+            << ", tile prefix " << m_histTitlePrefix
+            << ", and tile postfix " << m_histTitlePostfix
+            << " in " << m_name << "!" << endmsg;
+      return NULL;
+    }
+
+  // Also register it in the local map of string to pointer
+  m_effMap.insert( m_effMap.end(), std::pair< const hash_t, TEfficiency* >( effHash, &effRef ) );
+
+  return &effRef;
+}
+
+
 
 // =============================================================================
 // Simplify the retrieval of registered histograms of any type
@@ -195,6 +244,57 @@ TH1* AthHistogramming::hist( const std::string& histName, const std::string& tDi
 
 
   // Return the pointer to the histogram that we got from the local cache map
+  return it->second;
+}
+
+TEfficiency* AthHistogramming::efficiency( const std::string& effName, const std::string& tDir, const std::string& stream )
+{
+  // Build a 32 bit hash out of the name
+  const hash_t effHash = this->hash(effName);
+
+  // See if this entry exists in the map
+  EffMap_t::const_iterator it = m_effMap.find( effHash );
+  if ( it == m_effMap.end() ) // It doesn't exist!
+    { // Let's see into the THistSvc if somebody else has registered the TEfficiency...
+
+      // Need to copy the strings as we will massage them from here on
+      std::string effNameCopy = effName;
+      std::string tDirCopy     = tDir;
+      std::string streamCopy   = stream;
+
+      // Massage the final string to book things
+      std::string bookingString("");
+      this->buildBookingString( bookingString, effNameCopy, tDirCopy, streamCopy ,false);
+
+      TEfficiency* effPointer(NULL);
+      if ( !((histSvc()->getEfficiency(bookingString, effPointer)).isSuccess()) )
+        {
+          // Massage the final string to book things
+          std::string bookingString("");
+          this->buildBookingString( bookingString, effNameCopy, tDirCopy, streamCopy, true );
+
+          if ( !((histSvc()->getEfficiency(bookingString, effPointer)).isSuccess()) )
+            {
+              m_msg << MSG::WARNING
+                    << "Problem retrieving the TEfficiency with name (including pre- and post-fixes) "
+                    << m_histNamePrefix + effNameCopy + m_histNamePostfix
+                    << " or with name " << effNameCopy
+                    << " in " << m_name << "... it doesn't exist, neither in the cached map nor in the THistSvc!"
+                    << " Will return an NULL pointer... you have to handle it correctly!" << endmsg;
+              return NULL;
+            }
+          // If we get to here, we actually found the TEfficiency in the THistSvc.
+          // So let's add it to the local cache map and return its pointer
+          m_effMap.insert( m_effMap.end(), std::pair< const hash_t, TEfficiency* >( effHash, effPointer ) );
+          return effPointer;
+        }
+      // If we get to here, we actually found the TEfficiency in the THistSvc.
+      // So let's add it to the local cache map and return its pointer
+      m_effMap.insert( m_effMap.end(), std::pair< const hash_t, TEfficiency* >( effHash, effPointer ) );
+      return effPointer;
+    }
+
+  // Return the pointer to the TEfficiency that we got from the local cache map
   return it->second;
 }
 
