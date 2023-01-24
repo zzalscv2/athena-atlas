@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import FlagEnum
@@ -21,5 +21,8 @@ def createActsConfigFlags():
 
     # Seeding
     actscf.addFlag("Acts.SeedingStrategy", SeedingStrategy.Default, enum=SeedingStrategy)  # Define Seeding Strategy
+
+    # Track finding
+    actscf.addFlag('Acts.doRotCorrection', True)
 
     return actscf

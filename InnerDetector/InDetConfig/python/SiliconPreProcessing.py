@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
 
@@ -111,6 +111,11 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         doAthenaClustering = True
         doActsSpacePointFormation = True
     if TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain:
+        doAthenaClustering = True
+        doActsSpacePointFormation = True
+    if TrackingComponent.ValidateActsTracks in flags.ITk.Tracking.recoChain:
+        # Trk::Track creation in ActsTrkFinding doesn't work with xAOD clusters created by doActsClustering
+        doActsClustering = False
         doAthenaClustering = True
         doActsSpacePointFormation = True
 

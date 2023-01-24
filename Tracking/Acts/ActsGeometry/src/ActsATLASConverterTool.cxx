@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Trk
@@ -14,6 +14,8 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkExUtils/RungeKuttaUtils.h"
+#include "InDetReadoutGeometry/SiDetectorElementCollection.h"
+#include "xAODMeasurementBase/UncalibratedMeasurement.h"
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -77,7 +79,7 @@ const Trk::Surface&
 ActsATLASConverterTool::ActsSurfaceToATLAS(const Acts::Surface &actsSurface) const {
 
   const auto* actsElement = dynamic_cast<const ActsDetectorElement*>(actsSurface.associatedDetectorElement());
-  if ( actsSurface.associatedDetectorElement() && actsElement){
+  if ( actsElement){
     return actsElement->atlasSurface();
   }
   throw std::domain_error("No ATLAS surface corresponding to to the Acts one");
@@ -87,8 +89,9 @@ const Acts::Surface&
 ActsATLASConverterTool::ATLASSurfaceToActs(const Trk::Surface &atlasSurface) const {
   
   Identifier atlasID = atlasSurface.associatedDetectorElementIdentifier();
-  if (m_actsSurfaceMap.find(atlasID) != m_actsSurfaceMap.end()){
-    return m_actsSurfaceMap.at(atlasID);
+  auto it = m_actsSurfaceMap.find(atlasID);
+  if (it != m_actsSurfaceMap.end()){
+    return it->second;
   }
   throw std::domain_error("No Acts surface corresponding to the ATLAS one");
 }
@@ -205,6 +208,43 @@ ActsATLASConverterTool::ATLASMeasurementToSourceLink(
 
   return ATLASSourceLink(surface, *measurement, dim, loc, cov);
 }
+
+const ATLASUncalibSourceLink
+ActsATLASConverterTool::UncalibratedMeasurementToSourceLink(
+    const InDetDD::SiDetectorElementCollection &detectorElements,
+    const xAOD::UncalibratedMeasurement *measurement) const
+{
+  const InDetDD::SiDetectorElement *elem = detectorElements.getDetectorElement(measurement->identifierHash());
+  if (!elem)
+  {
+    throw std::domain_error("No detector element for measurement");
+  }
+  const Acts::Surface &surface = ATLASSurfaceToActs(elem->surface());
+  Acts::BoundVector loc = Acts::BoundVector::Zero();
+  Acts::BoundMatrix cov = Acts::BoundMatrix::Zero();
+  xAOD::UncalibMeasType typ = measurement->type();
+  size_t dim;
+  if (typ == xAOD::UncalibMeasType::StripClusterType)
+  {
+    dim = 1;
+    loc[Acts::eBoundLoc0] = measurement->localPosition<1>()[Trk::locX];
+    cov.topLeftCorner<1, 1>() = measurement->localCovariance<1>().cast<Acts::ActsScalar>();
+  }
+  else if (typ == xAOD::UncalibMeasType::PixelClusterType)
+  {
+    dim = 2;
+    loc[Acts::eBoundLoc0] = measurement->localPosition<2>()[Trk::locX];
+    loc[Acts::eBoundLoc1] = measurement->localPosition<2>()[Trk::locY];
+    cov.topLeftCorner<2, 2>() = measurement->localCovariance<2>().cast<Acts::ActsScalar>();
+  }
+  else
+  {
+    throw std::domain_error("Can only handle measurement type pixel or strip");
+  }
+
+  return ATLASUncalibSourceLink(surface, *measurement, dim, loc, cov);
+}
+
 
 const std::vector<ATLASSourceLink>
 ActsATLASConverterTool::ATLASTrackToSourceLink(const Acts::GeometryContext& gctx, const Trk::Track &track) const {

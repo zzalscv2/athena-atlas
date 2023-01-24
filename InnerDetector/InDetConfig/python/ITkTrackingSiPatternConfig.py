@@ -48,6 +48,10 @@ def ITkTrackingSiPatternCfg(flags,
     if TrackingComponent.ValidateActsSeeds in flags.ITk.Tracking.recoChain:
         doSeedingActs = True
         doTrackFindingAthena = True
+    if TrackingComponent.ValidateActsTracks in flags.ITk.Tracking.recoChain:
+        doSeedingActs = True
+        doTrackFindingActs = True
+        doTrackFindingAthena = False
 
     # Seeding does not have a real EDM converter (nor we want it!)
     # There is however an Acts-based SiSpacePointSeedMaker that acts the same way (Acts -> Athena EDM converter)
@@ -76,8 +80,11 @@ def ITkTrackingSiPatternCfg(flags,
             log.warning('ROI-based track-finding is not available yet in ACTS, so the default one is used')
 
     if doTrackFindingActs:
-        # To be added
-        pass
+        from ActsTrkFinding.ActsTrkFindingConfig import ActsTrkFindingCfg
+        if doTrackFindingAthena:
+            acc.merge(ActsTrkFindingCfg(flags))
+        else: # send output TrackCollection to Athena ambiguity scorer etc
+            acc.merge(ActsTrkFindingCfg(flags, TracksLocation=SiSPSeededTrackCollectionKey))
 
     # ------------------------------------------------------------
     #
