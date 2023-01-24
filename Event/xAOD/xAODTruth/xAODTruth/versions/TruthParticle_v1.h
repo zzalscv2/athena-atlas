@@ -294,7 +294,9 @@ namespace xAOD {
       bool isGenSpecific() const;
       /// Check if this is a BSM particle
       bool isBSM() const;
-
+      /// Check if this is generator stable particle
+      bool isGenStable() const;
+      
       /// @}
 
       /// @name Polarization properties (optional)

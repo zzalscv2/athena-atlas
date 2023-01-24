@@ -94,7 +94,7 @@ StatusCode xAODChargedTracksWeightFilter::filterEvent() {
         for (unsigned int iPart = 0; iPart < nPart; ++iPart) {
             const xAOD::TruthParticle* part =  (*itr)->truthParticle(iPart);
             // We only care about stable particles
-            if (!MC::isGenStable(part->status(),part->barcode())) continue;
+            if (!part->isGenStable()) continue;
 
             // Particle's charge
             int pID = part->pdgId();

@@ -31,7 +31,7 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 //#include "xAODEgamma/EgammaTruthxAODHelpers.h"
 #include "xAODTruth/xAODTruthHelpers.h"
-#include "TruthUtils/TruthParticleHelpers.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 // DeltaR calculation
 #include "FourMomUtils/xAODP4Helpers.h"
@@ -235,7 +235,7 @@ namespace met {
     for(const auto part : *uniqueTruth) {
       const xAOD::TruthParticle* truth = static_cast<const xAOD::TruthParticle*>(part);
       // stable
-      if(!MC::isGenStable(truth->status(),truth->barcode())) continue;
+      if(!truth->isGenStable()) continue;
       // interacting
       if(MC::isNonInteracting(truth->pdgId())) continue;
       if(truth->pt()<1 || fabs(truth->eta())>5) continue;
@@ -281,7 +281,7 @@ namespace met {
     const xAOD::Electron* el = static_cast<const xAOD::Electron*>(obj);
     // El --> TruthParticles
     const xAOD::TruthParticle* eltruth = TruthHelpers::getTruthParticle( *el );
-    if(eltruth && MC::isGenStable(eltruth->status(),eltruth->barcode()))
+    if(eltruth && eltruth->isGenStable())
       truthlist.push_back(eltruth);
 
     // for(size_t iTrk=0; iTrk<el->nTrackParticles(); ++iTrk) {
@@ -312,7 +312,7 @@ namespace met {
     for(const auto truth : truthParticleCont) {
       if(truth->pt()<1) continue;
       // stable
-      if(!MC::isGenStable(truth->status(),truth->barcode())) continue;
+      if(!truth->isGenStable()) continue;
       // interacting
       if(MC::isNonInteracting(truth->pdgId())) continue;
       float etasize = 0.025/2;
@@ -362,7 +362,7 @@ namespace met {
     const xAOD::Photon* ph = static_cast<const xAOD::Photon*>(obj);
     // Ph --> TruthParticles
     const xAOD::TruthParticle* phtruth = TruthHelpers::getTruthParticle( *ph );
-    if(phtruth && MC::isGenStable(phtruth->status(),phtruth->barcode()))
+    if(phtruth && phtruth->isGenStable())
       truthlist.push_back(phtruth);
 
     // std::vector<const xAOD::TrackParticle*> phtrks;
@@ -405,7 +405,7 @@ namespace met {
     for(const auto truth : truthParticleCont) {
       if(!truth || truth->pt()<1) continue;
       // stable
-      if(!MC::isGenStable(truth->status(),truth->barcode())) continue;
+      if(!truth->isGenStable()) continue;
       // interacting
       if(MC::isNonInteracting(truth->pdgId())) continue;
       float etasize(0.025/2);
@@ -460,7 +460,7 @@ namespace met {
     const TrackParticle* trk = mu->primaryTrackParticle();
     const xAOD::TruthParticle* truth(0);
     if(trk) truth = TruthHelpers::getTruthParticle( *trk );
-    if(truth && MC::isGenStable(truth->status(),truth->barcode()))
+    if(truth && truth->isGenStable())
       truthlist.push_back(truth);
     return StatusCode::SUCCESS;
   }
