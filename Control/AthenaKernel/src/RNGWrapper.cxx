@@ -60,6 +60,12 @@ void ATHRNG::calculateSeedsMC21(long* seeds, const std::string& algName, uint64_
   return;
 }
 
+long ATHRNG::calculateSeedsPython(const std::string& algName, uint64_t ev, uint64_t run, uint64_t offset) {
+  long seeds[7];
+  calculateSeedsMC21(seeds, algName, ev, run, offset);
+  return seeds[0];
+}
+
 ATHRNG::RNGWrapper::RNGWrapper(const factoryFunc& genFact, size_t nSlots)
 {
   // Construct the random engines; one per event slot.

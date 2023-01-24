@@ -78,13 +78,9 @@ MuonDetectorTool = GeoModelSvc.DetectorTools[ "MuonDetectorTool" ]
 MuonDetectorTool.UseConditionDb = 1
 MuonDetectorTool.OutputLevel=VERBOSE
 
-from RngComps.RngCompsConf import AtRanluxGenSvc
-ServiceMgr += AtRanluxGenSvc()
-ServiceMgr.AtRanluxGenSvc.Seeds = ["SINGLE 2040160768 443921183"]
-
 ## Run ParticleGun
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream="SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 pg.sampler.pid = (999)
 pg.sampler.pos = PG.PosSampler(x=0, y=0, z=0, t=0)
 pg.sampler.mom = PG.EEtaMPhiSampler(energy=100000, eta=[-3,3], phi=[-PG.PI, PG.PI])

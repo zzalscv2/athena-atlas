@@ -22,6 +22,8 @@
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/ISecondaryEventSelector.h"
 
+#include "AthenaKernel/RNGWrapper.h"
+
 #include "AthenaKernel/DsoDb.h"
 #include "AthenaKernel/AthDsoUtils.h"
 #include "AthenaKernel/DataBucketBase.h"

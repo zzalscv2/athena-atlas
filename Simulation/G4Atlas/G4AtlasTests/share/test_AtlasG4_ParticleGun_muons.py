@@ -44,7 +44,7 @@ simFlags.EventFilter.set_On()
 ## Use single particle generator
 import AthenaCommon.AtlasUnixGeneratorJob
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 pg.sampler.pid = PG.CyclicSeqSampler([-13,13])
 pg.sampler.mom = PG.PtEtaMPhiSampler(pt=50000, eta=[-4,4])
 job += pg
@@ -100,13 +100,6 @@ job.G4TestAlg.SimTestTools += [CfgGetter.getPrivateTool("TGCHitsTestTool", check
 from AtlasGeant4.AtlasGeant4Conf import G4AtlasAlg
 g4AtlasAlg = G4AtlasAlg()
 g4AtlasAlg.RandomGenerator = "athena"
-from AthenaCommon.AppMgr import ServiceMgr
-from RngComps.RngCompsConf import AtRndmGenSvc
-atRndmGenSvc = AtRndmGenSvc()
-atRndmGenSvc.Seeds += ["AtlasG4 1234 5678"]
-atRndmGenSvc.Seeds += ["SINGLE 2345 6789"]
-atRndmGenSvc.OutputLevel = WARNING
-ServiceMgr += atRndmGenSvc
 
 ## For saving seeds
 #from G4AtlasApps import AtlasG4Eng

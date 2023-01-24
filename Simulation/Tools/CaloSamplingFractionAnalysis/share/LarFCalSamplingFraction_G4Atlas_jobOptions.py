@@ -96,12 +96,6 @@ simFlags.EventFilter.set_Off()
 ## Set CalibrationRun
 simFlags.CalibrationRun = "LAr"
 
-## Set random seeds
-## Seeds need to explicitly set, otherwise default constants are used
-simFlags.RandomSeedList.addSeed('AtlasG4',random.randint(10000, 99999999), random.randint(10000, 99999999))
-simFlags.RandomSeedList.addSeed('VERTEX', random.randint(10000, 99999999), random.randint(10000, 99999999))
-simFlags.RandomSeedList.addSeed('SINGLE', random.randint(10000, 99999999), random.randint(10000, 99999999))
-
 ## No magnetic field
 # simFlags.MagneticField.set_Off()
 
@@ -126,7 +120,7 @@ athenaCommonFlags.SkipEvents.set_Off()
 ## Set particle gun parameters
 import AthenaCommon.AtlasUnixGeneratorJob
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = random.randint(10000, 99999999))
 pg.sampler.pid = 11
 pg.sampler.mom = PG.EEtaMPhiSampler(energy=params['pg_E'], eta=params['pg_eta'])
 pg.sampler.pos = PG.PosSampler(x=params['pg_x'], y=params['pg_y'], z=params['pg_z'], t=params['pg_z'])
