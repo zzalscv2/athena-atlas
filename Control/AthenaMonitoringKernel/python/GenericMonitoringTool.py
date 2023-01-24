@@ -1,7 +1,8 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from AthenaCommon.Logging import logging
 
@@ -12,25 +13,51 @@ import json
 
 log = logging.getLogger(__name__)
 
-def _isOnline():
+
+def _isOnline(flags):
     if isComponentAccumulatorCfg():
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        return ConfigFlags.Common.isOnline
+        return flags.Common.isOnline
     else:
         from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
         return athenaCommonFlags.isOnline()
 
-def GenericMonitoringTool(name='GenericMonitoringTool', **kwargs):
+
+def GenericMonitoringTool(*args, **kwargs):
     '''Create GenericMonitoringTool'''
+
+    # TODO: currently we need to use *args for backwards compatibility until
+    # all instances of GenericMonitoringTool properly pass configuration flags
+    # as the first argument. *args parsing can be removed at that point
+    tool_name = 'GenericMonitoringTool'
+    flags = None
+
+    arg_list = list(args)
+    if arg_list:
+        tmp = arg_list.pop(0)
+        if isinstance(tmp, AthConfigFlags):
+            flags = tmp
+            if arg_list:
+                tmp = arg_list.pop(0)
+        if isinstance(tmp, str):
+            tool_name = tmp
+
+    if flags is None:
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags
+        flags = ConfigFlags
+
     if isComponentAccumulatorCfg():
-        return GenericMonitoringTool_v2(name, **kwargs)
+        return GenericMonitoringTool_v2(flags, tool_name, **kwargs)
     else:
-        return GenericMonitoringTool_v1(name, **kwargs)
+        instance = GenericMonitoringTool_v1(tool_name, **kwargs)
+        instance.flags = flags
+        return instance
+
 
 class GenericMonitoringToolMixin:
     '''Mixin class for GenericMonitoringTool'''
 
-    def __init__(self, name='GenericMonitoringTool', **kwargs):
+    def __init__(self, flags, **kwargs):
+        self.flags = flags
         self._convention = ''
         self._defaultDuration = kwargs.pop('defaultDuration', None)
 
@@ -61,7 +88,7 @@ class GenericMonitoringToolMixin:
         # if an overall path for tool is specified, can leave path argument empty
         if getattr(self, 'HistPath', '') != '':
             kwargs.setdefault('path', '')
-        toadd = deffunc(*args, **kwargs)
+        toadd = deffunc(self.flags, *args, **kwargs)
         if toadd:
             self.Histograms.append(toadd)
 
@@ -71,27 +98,29 @@ class GenericMonitoringToolMixin:
     def defineTree(self, *args, **kwargs):
         self._coreDefine(defineTree, *args, **kwargs)
 
+
 class GenericMonitoringTool_v1(_GMT1, GenericMonitoringToolMixin):
     '''Legacy Configurable'''
     def __init__(self, name='GenericMonitoringTool', **kwargs):
         # cannot use super() because configurable base classes don't use it either
         _GMT1.__init__(self, name, **kwargs)
-        GenericMonitoringToolMixin.__init__(self, name, **kwargs)
+        GenericMonitoringToolMixin.__init__(self, None, **kwargs)
+
 
 class GenericMonitoringTool_v2(_GMT2, GenericMonitoringToolMixin):
     '''GaudiConfig2 Configurable'''
-    def __init__(self, name='GenericMonitoringTool', **kwargs):
+    def __init__(self, flags, name='GenericMonitoringTool', **kwargs):
         _GMT2.__init__(self, name, **kwargs)
-        GenericMonitoringToolMixin.__init__(self, name, **kwargs)
+        GenericMonitoringToolMixin.__init__(self, flags, **kwargs)
 
 
 class GenericMonitoringArray:
     '''Array of configurables of GenericMonitoringTool objects'''
-    def __init__(self, name, dimensions, **kwargs):
+    def __init__(self, flags, name, dimensions, **kwargs):
         self.Tools = {}
         self.Postfixes, self.Accessors = GenericMonitoringArray._postfixes(dimensions)
         for postfix in self.Postfixes:
-            self.Tools[postfix] = GenericMonitoringTool(name+postfix,**kwargs)
+            self.Tools[postfix] = GenericMonitoringTool(flags, name+postfix,**kwargs)
 
     def __getitem__(self,index):
         '''Forward operator[] on class to the list of tools'''
@@ -207,13 +236,15 @@ class GenericMonitoringArray:
 #  use awkward. Also there are additional constraints from OH and MDA archiving for
 #  online running (ATR-15173).
 #
+#  @param flags configuration flags
 #  @param name string to check
 #  @return set of forbidden characters found
-def _invalidName(name):
+def _invalidName(flags, name):
     blacklist = '/\\'
-    if _isOnline():
+    if _isOnline(flags):
         blacklist += '=,:.()'
     return set(name).intersection(blacklist)
+
 
 ## Generate an alias for a set of variables
 #
@@ -233,6 +264,7 @@ def _alias(varname):
         message = 'Invalid variable or alias for {}. Histogram(s) not defined.'
         log.warning(message.format(varname))
         return None, None
+
 
 ## Validate user inputs for "opt" argument of defineHistogram
 #
@@ -255,6 +287,7 @@ def _validateOptions(user, default):
         else:
             assert isinstance(defaultVal, userType),\
                 f'{key} provided {userType}, expected {defaultType}'
+
 
 ## Generate dictionary entries for opt strings
 #  @param opt string or dictionary specifying type
@@ -297,9 +330,11 @@ def _options(opt):
         settings = vars(known)
     return settings
 
+
 ## Generate histogram definition string for the `GenericMonitoringTool.Histograms` property
 #
 #  For full details see the GenericMonitoringTool documentation.
+#  @param flags    configuration flags object
 #  @param varname  one (1D) or two (2D) variable names separated by comma
 #                  optionally give histogram name by appending ";" plus the name
 #  @param type     histogram type
@@ -314,7 +349,7 @@ def _options(opt):
 #  @param zlabels  List of x bin labels.
 #  @param merge    Merge method to use for object, if not default. Possible algorithms for offline DQM
 #                  are given in https://twiki.cern.ch/twiki/bin/view/Atlas/DQMergeAlgs
-def defineHistogram(varname, type='TH1F', path=None,
+def defineHistogram(flags, varname, type='TH1F', path=None,
                     title=None, weight=None,
                     xbins=100, xmin=0, xmax=1, xlabels=None,
                     ybins=None, ymin=None, ymax=None, ylabels=None,
@@ -341,7 +376,7 @@ def defineHistogram(varname, type='TH1F', path=None,
         log.warning(f'Unable to define histogram using definition "{varname}" since we cannot determine its name.')
         return ''
 
-    invalid = _invalidName(alias)
+    invalid = _invalidName(flags, alias)
     if invalid:
         log.warning('%s is not a valid histogram name. Illegal characters: %s',
                     alias, ' '.join(invalid))
@@ -360,7 +395,7 @@ def defineHistogram(varname, type='TH1F', path=None,
     nVars = len(varList)
 
     # Type
-    if _isOnline() and type in ['TTree']:
+    if _isOnline(flags) and type in ['TTree']:
         log.warning('Object %s of type %s is not supported for online running and '
                     'will not be added.', varname, type)
         return ''
@@ -452,7 +487,7 @@ def defineHistogram(varname, type='TH1F', path=None,
 
     # some things need merging
     if ((settings['kAddBinsDynamically'] or settings['kRebinAxes'] or settings['kCanRebin'])
-        and (not _isOnline() and 'OFFLINE' in settings['convention'])):
+        and (not _isOnline(flags) and 'OFFLINE' in settings['convention'])):
         if merge is None:
             log.warning(f'Merge method for {alias} is not specified but needs to be "merge" due to histogram definition; overriding for your convenience')
             merge = 'merge'
@@ -469,14 +504,16 @@ def defineHistogram(varname, type='TH1F', path=None,
     assert settings['kLBNHistoryDepth']==0 or settings['kLive']==0,\
     f'Cannot use both kLBNHistoryDepth and kLive for histogram {alias}.'
     # kLive histograms are only available for Online monitoring.
-    assert settings['kLive']==0 or _isOnline(),\
+    assert settings['kLive']==0 or _isOnline(flags),\
     f'Cannot use kLive with offline histogram {alias}.'
 
     return json.dumps(settings)
 
+
 ## Generate tree definition string for the `GenericMonitoringTool.Histograms` property. Convenience tool for 
 #
 #  For full details see the GenericMonitoringTool documentation.
+#  @param flags    configuration flags object
 #  @param varname  at least one variable name (more than one should be separated by comma);
 #                  optionally give the name of the tree by appending ";" plus the tree name
 #  @param treedef  TTree branch definition string. Looks like the standard TTree definition
@@ -489,10 +526,9 @@ def defineHistogram(varname, type='TH1F', path=None,
 #  @param cutmask  Name of the boolean-castable variable that determines if the plot is filled
 #  @param opt      TTree options (none currently)
 #  @param convention Expert option for how the objects are placed in ROOT
-
-def defineTree(varname, treedef, path=None, title=None,
+def defineTree(flags, varname, treedef, path=None, title=None,
                opt='', convention=None,
                cutmask=None):
-    return defineHistogram(varname, type='TTree', path=path, title=title,
+    return defineHistogram(flags, varname, type='TTree', path=path, title=title,
                            treedef=treedef, opt=opt, convention=convention,
                            cutmask=cutmask)
