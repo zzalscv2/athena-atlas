@@ -6,7 +6,6 @@ n_events=2
 
 # Run reconstruction and produce AOD with persistified Acts EDM
 Reco_tf.py --CA \
-  --steering doRAWtoALL \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsInterop.ActsCIFlags.actsWorkflowFlags" \
   --postInclude "ActsInterop.ActsPostIncludes.PersistifyActsEDMCfg" \
   --inputRDOFile ${input_rdo} \
