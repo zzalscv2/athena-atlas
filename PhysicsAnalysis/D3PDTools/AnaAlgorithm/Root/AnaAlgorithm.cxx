@@ -16,6 +16,7 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <TH3.h>
+#include <TEfficiency.h>
 #include <stdexcept>
 
 #ifdef XAOD_STANDALONE
@@ -128,6 +129,15 @@ namespace EL
 
 
 
+  ::StatusCode AnaAlgorithm ::
+  book (const TEfficiency& hist)
+  {
+    histogramWorker()->addOutput (hist.Clone());
+    return ::StatusCode::SUCCESS;
+  }
+
+
+
   TH1 *AnaAlgorithm ::
   hist (const std::string& name) const
   {
@@ -153,6 +163,17 @@ namespace EL
     TH3 *hist = dynamic_cast<TH3*>(histogramWorker()->getOutputHist (name));
     if (hist == nullptr)
       throw std::runtime_error ("histogram not a 3d-histogram: " + name);
+    return hist;
+  }
+
+
+
+  TEfficiency *AnaAlgorithm ::
+  histeff (const std::string& name) const
+  {
+    TEfficiency *hist = dynamic_cast<TEfficiency*>(histogramWorker()->getOutputHist (name));
+    if (hist == nullptr)
+      throw std::runtime_error ("histogram not a TEfficiency: " + name);
     return hist;
   }
 

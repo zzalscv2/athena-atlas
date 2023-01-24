@@ -29,6 +29,7 @@
 class TH1;
 class TH2;
 class TH3;
+class TEfficiency;
 class TTree;
 class ISvcLocator;
 
@@ -148,6 +149,15 @@ namespace EL
     ::StatusCode book (const TH1& hist);
 
 
+    /// \brief book the given histogram
+    /// \par Guarantee
+    ///   strong
+    /// \par Failures
+    ///   histogram booking error
+  public:
+    ::StatusCode book (const TEfficiency& hist);
+
+
     /// \brief get the histogram with the given name
     /// \par Guarantee
     ///   strong
@@ -173,6 +183,15 @@ namespace EL
     ///   histogram not found
   public:
     TH3 *hist3d (const std::string& name) const;
+
+
+    /// \brief get the 3-d histogram with the given name
+    /// \par Guarantee
+    ///   strong
+    /// \par Failures
+    ///   histogram not found
+  public:
+    TEfficiency *histeff (const std::string& name) const;
 
 
     /// \brief the histogram worker interface
