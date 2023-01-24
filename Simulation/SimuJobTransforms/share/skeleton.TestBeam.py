@@ -184,7 +184,7 @@ topSeq.TimeOut = 43200 * Units.s
 if not athenaCommonFlags.PoolEvgenInput.statusOn:
     import AthenaCommon.AtlasUnixGeneratorJob
     import ParticleGun as PG
-    pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+    pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 
     # 50 GeV pions
     #pg.sampler.pid = 211

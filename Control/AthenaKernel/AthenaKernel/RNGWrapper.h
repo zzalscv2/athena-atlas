@@ -35,7 +35,7 @@ namespace ATHRNG{
   /// current slot, event, and run numbers. MC21 seeding algorithm
  void calculateSeedsMC21(long* seeds, const std::string& algName, uint64_t ev, uint64_t run, uint64_t offset=0);
 
-
+ long calculateSeedsPython(const std::string& algName, uint64_t ev, uint64_t run, uint64_t offset=0);
   /// @class RNGWrapper
   /// @brief A wrapper class for event-slot-local random engines.
   ///

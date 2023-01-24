@@ -4,8 +4,9 @@ print ('SINGLE PARTICLE GENERATOR')
 import AthenaCommon.AtlasUnixGeneratorJob
 from AthenaCommon.AlgSequence import AlgSequence
 job = AlgSequence()
+from G4AtlasApps.SimFlags import simFlags
 import ParticleGun as PG
-pg = PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
+pg = PG.ParticleGun(randomStream = "SINGLE", randomSeed = simFlags.RandomSeedOffset.get_Value())
 pg.sampler.pid = PG.CyclicSeqSampler([2112, 22, 2112, 22])
 esampler = PG.CyclicSeqSampler([1360000, 500000, 1360000, 500000])
 thsampler = PG.CyclicSeqSampler([0, 0, PG.PI, PG.PI])
