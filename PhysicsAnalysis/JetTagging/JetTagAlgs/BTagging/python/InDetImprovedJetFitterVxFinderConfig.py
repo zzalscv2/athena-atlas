@@ -21,7 +21,7 @@ def InDetImprovedJetFitterVxFinderCfg(flags, name, suffix = "", useBTagFlagsDefa
     if useBTagFlagsDefaults:
         InDetJetFitterMultiStageFit = acc.popToolsAndMerge( InDetJetFitterMultiStageFitCfg(flags,"JetFitterMultiStageFit"+suffix,suffix) )
         InDetJetFitterTrackSelectorTool = acc.popToolsAndMerge( InDetJetFitterTrackSelectorToolCfg(flags,"JetFitterTrackSelectorTool"+suffix,suffix) )
-        InDetJetFitterTwoTrackVtxFinderTool = acc.popToolsAndMerge( InDetJetFitterTwoTrackVtxFinderToolCfg("InDetJetFitterTwoTrackVtxFinderTool"+suffix,suffix) )
+        InDetJetFitterTwoTrackVtxFinderTool = acc.popToolsAndMerge( InDetJetFitterTwoTrackVtxFinderToolCfg(flags, "InDetJetFitterTwoTrackVtxFinderTool"+suffix,suffix) )
         InDetJetFitterV0FinderTool = acc.popToolsAndMerge( JetFitterV0FinderToolCfg(flags,"JetFitterV0FinderTool"+suffix,suffix) )
         defaults = { 'JetFitterTrackSelectorTool' : InDetJetFitterTrackSelectorTool ,
                      'JetFitterTwoTrackVtxFinderTool' : InDetJetFitterTwoTrackVtxFinderTool ,
@@ -33,6 +33,3 @@ def InDetImprovedJetFitterVxFinderCfg(flags, name, suffix = "", useBTagFlagsDefa
     options['name'] = name
     acc.setPrivateTools( CompFactory.InDet.InDetImprovedJetFitterVxFinder(**options) )
     return acc
-
-
-

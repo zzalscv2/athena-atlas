@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.JetFitterFullLinearizedTrackFactoryConfig import JetFitterFullLinearizedTrackFactoryCfg
 from BTagging.JetFitterSequentialVertexSmootherConfig import JetFitterSequentialVertexSmootherCfg
 
-def JetFitterSequentialVertexFitterCfg(name, useBTagFlagsDefaults = True, **options):
+def JetFitterSequentialVertexFitterCfg(flags, name, useBTagFlagsDefaults = True, **options):
     """Sets up a JetFitterSequentialVertexFitter tool and returns it.
 
     input:             name: The name of the tool (should be unique).
@@ -16,8 +16,8 @@ def JetFitterSequentialVertexFitterCfg(name, useBTagFlagsDefaults = True, **opti
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg('JFFullLinearizedTrackFactory'))
-        jetFitterSequentialVertexSmoother = acc.popToolsAndMerge(JetFitterSequentialVertexSmootherCfg('JFSequentialVertexSmoother'))
+        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg(flags, 'JFFullLinearizedTrackFactory'))
+        jetFitterSequentialVertexSmoother = acc.popToolsAndMerge(JetFitterSequentialVertexSmootherCfg(flags, 'JFSequentialVertexSmoother'))
         defaults = { 'LinearizedTrackFactory' : jetFitterFullLinearizedTrackFactory,
                      'VertexSmoother'         : jetFitterSequentialVertexSmoother, }
         for option in defaults:

@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 
-def JetFitterFullLinearizedTrackFactoryCfg(name, useBTagFlagsDefaults = True, **options):
+def JetFitterFullLinearizedTrackFactoryCfg(flags, name, useBTagFlagsDefaults = True, **options):
     """Sets up a JetFitterFullLinearizedTrackFactory tool and returns it.
 
     input:             name: The name of the tool (should be unique).
@@ -18,9 +18,6 @@ def JetFitterFullLinearizedTrackFactoryCfg(name, useBTagFlagsDefaults = True, **
 
     # @TODO migrate to run3 style job options
     if 'Extrapolator' not in options :
-        # @TODO the ConfigFlags should be passed from the outside as argument
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        flags=ConfigFlags
         Extrapolator_acc = AtlasExtrapolatorCfg(flags)
         extrapolator=acc.popToolsAndMerge(Extrapolator_acc)
         acc.addPublicTool(extrapolator)

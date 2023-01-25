@@ -25,8 +25,8 @@ def InDetInDetJetFitterVxFinderCfg(flags, name, suffix="", useBTagFlagsDefaults 
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg('ImprovedJFInitHelper'+suffix))
-        improvedJetFitterRoutines = acc.popToolsAndMerge(ImprovedJetFitterRoutinesCfg('ImprovedJFRoutines'+suffix))
+        improvedJetFitterInitializationHelper = acc.popToolsAndMerge(ImprovedJetFitterInitializationHelperCfg(flags, 'ImprovedJFInitHelper'+suffix))
+        improvedJetFitterRoutines = acc.popToolsAndMerge(ImprovedJetFitterRoutinesCfg(flags, 'ImprovedJFRoutines'+suffix))
         inDetImprovedJetFitterTrackSelectorTool = acc.popToolsAndMerge(InDetImprovedJetFitterTrackSelectorToolCfg(flags, 'InDetImprovedJFTrackSelTool'+suffix))
         defaults = { 'MaxNumDeleteIterations'              : 30,
                      'VertexProbCut'                       : 0.001,

@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.JetFitterSequentialVertexFitterConfig import JetFitterSequentialVertexFitterCfg
 
-def InDetJetFitterTwoTrackVtxFinderToolCfg(name, suffix="", useBTagFlagsDefaults = True, **options):
+def InDetJetFitterTwoTrackVtxFinderToolCfg(flags, name, suffix="", useBTagFlagsDefaults = True, **options):
 
     """Sets up a InDetJetFitterTwoTrackVtxFinderTool tool and returns it.
 
@@ -22,7 +22,7 @@ def InDetJetFitterTwoTrackVtxFinderToolCfg(name, suffix="", useBTagFlagsDefaults
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        jetFitterSequentialVertexFitter = acc.popToolsAndMerge(JetFitterSequentialVertexFitterCfg('JFSeqVxFitter'+suffix))
+        jetFitterSequentialVertexFitter = acc.popToolsAndMerge(JetFitterSequentialVertexFitterCfg(flags, 'JFSeqVxFitter'+suffix))
         defaults = { 'ID_maxR' : 1150.,
                      'ID_maxZ' : 2727.,
                      'twoVertexProbabilityCut' : 0.034,
