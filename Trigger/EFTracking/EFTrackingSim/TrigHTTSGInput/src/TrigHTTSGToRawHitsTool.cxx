@@ -757,7 +757,7 @@ void TrigHTTSGToRawHitsTool::getTruthInformation(InDetSimDataCollection::const_i
     // reject unstable particles
     if (particleLink->status() % 1000 != 1) { continue; }
     // reject secondaries and low pT (<400 MeV) pileup
-    if (HepMC::barcode(particleLink.cptr()) > m_simBarcodeOffset || HepMC::barcode(particleLink.cptr()) == 0) { continue; }
+    if (HepMC::is_simulation_particle(particleLink.cptr()) || HepMC::barcode(particleLink.cptr()) == 0) { continue; }
     // reject far forward particles
     if (fabs(genEta) > m_maxEta) { continue; }
     // "bestParent" is the highest pt particle
