@@ -48,7 +48,7 @@ def JETM10Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM10TriggerListsHelper = TriggerListsHelper()
+    JETM10TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation
     acc.merge(JETM10KernelCfg(ConfigFlags, name="JETM10Kernel", StreamName = 'StreamDAOD_JETM10', TriggerListsHelper = JETM10TriggerListsHelper))

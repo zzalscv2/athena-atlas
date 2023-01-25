@@ -295,7 +295,7 @@ def EGAM4Cfg(ConfigFlags):
     # TODO: this should ideally be called higher up to avoid it being run
     # multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM4TriggerListsHelper = TriggerListsHelper()
+    EGAM4TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM4KernelCfg(ConfigFlags,

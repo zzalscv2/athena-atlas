@@ -316,7 +316,7 @@ def EGAM5Cfg(ConfigFlags):
     # multiple times in a train.
     # DODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM5TriggerListsHelper = TriggerListsHelper()
+    EGAM5TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     #EGAM5TriggerListsHelper.Run3TriggerNames = EGAM5TriggerListsHelper.Run3TriggerNamesNoTau
     #EGAM5TriggerListsHelper.Run3TriggerNamesTau = []
     #EGAM5TriggerListsHelper.Run2TriggerNamesTau = []

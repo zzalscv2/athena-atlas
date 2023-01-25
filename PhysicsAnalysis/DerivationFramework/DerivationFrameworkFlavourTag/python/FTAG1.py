@@ -39,7 +39,7 @@ def FTAG1Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    FTAG1TriggerListsHelper = TriggerListsHelper()
+    FTAG1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(FTAG1KernelCfg(ConfigFlags, name="FTAG1Kernel", StreamName = 'StreamDAOD_FTAG1', TriggerListsHelper = FTAG1TriggerListsHelper))

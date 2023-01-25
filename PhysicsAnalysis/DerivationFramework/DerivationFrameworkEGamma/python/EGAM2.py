@@ -331,7 +331,7 @@ def EGAM2Cfg(ConfigFlags):
     # multiple times in a train.
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM2TriggerListsHelper = TriggerListsHelper()
+    EGAM2TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM2KernelCfg(ConfigFlags,

@@ -106,7 +106,7 @@ def STDM7Cfg(flags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    STDM7TriggerListsHelper = TriggerListsHelper()
+    STDM7TriggerListsHelper = TriggerListsHelper(flags)
 
     # Common augmentations
     acc.merge(STDM7KernelCfg(flags, name="STDM7Kernel", StreamName = 'StreamDAOD_STDM7', TriggerListsHelper = STDM7TriggerListsHelper))

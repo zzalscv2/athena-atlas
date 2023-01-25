@@ -194,7 +194,7 @@ def HIGG1D1Cfg(ConfigFlags):
     acc = ComponentAccumulator()
     
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    HIGG1D1TriggerListsHelper = TriggerListsHelper()
+    HIGG1D1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     
     acc.merge(HIGG1D1KernelCfg(ConfigFlags, name="HIGG1D1Kernel", StreamName = 'StreamDAOD_HIGG1D1', TriggerListsHelper = HIGG1D1TriggerListsHelper))
 
