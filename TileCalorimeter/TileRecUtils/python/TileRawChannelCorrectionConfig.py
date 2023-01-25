@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile correction tools and algorithm"""
 
@@ -67,10 +67,8 @@ def TileRawChannelNoiseFilterCfg(flags, **kwargs):
     from TileConditions.TileInfoLoaderConfig import TileInfoLoaderCfg
     acc.merge( TileInfoLoaderCfg(flags) )
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-        kwargs['TileCondToolEmscale'] = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if 'TileCondToolNoiseSample' not in kwargs:
         from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
