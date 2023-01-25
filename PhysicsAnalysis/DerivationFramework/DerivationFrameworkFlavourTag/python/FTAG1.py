@@ -76,7 +76,6 @@ def FTAG1Cfg(ConfigFlags):
             "BTagging_AntiKt4EMPFlowSecVtx",
             "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
             "UFOCSSK",
-            "CaloCalTopoClusters",
             "GlobalChargedParticleFlowObjects",
             "GlobalNeutralParticleFlowObjects",
             "CHSGChargedParticleFlowObjects",
