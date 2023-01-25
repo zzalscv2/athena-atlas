@@ -92,7 +92,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken)
     else :
         input = jetContainer
     jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
-                                           runJvtUpdate = True, runNNJvtUpdate = True,
+                                           runJvtUpdate = False, runNNJvtUpdate = True,
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
                                            runGhostMuonAssociation = not isPhyslite)
 
@@ -517,7 +517,7 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
 
     # Include, and then set up the jet analysis algorithm sequence:
     configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
-    configSeq.setOptionValue ('.runJvtUpdate', True)
+    configSeq.setOptionValue ('.runJvtUpdate', False )
     configSeq.setOptionValue ('.runNNJvtUpdate', True )
 
     btagger = "DL1dv01"
