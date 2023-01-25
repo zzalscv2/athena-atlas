@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileRawChannelNoiseMonitorAlgorithm.py
@@ -26,10 +26,8 @@ def TileRawChannelNoiseMonitoringConfig(flags, **kwargs):
     from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
     result.merge( TileBadChannelsCondAlgCfg(flags, **kwargs) )
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        emScaleTool = result.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-        kwargs['TileCondToolEmscale'] = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    result.merge( TileEMScaleCondAlgCfg(flags) )
 
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
     if kwargs['CheckDCS']:
