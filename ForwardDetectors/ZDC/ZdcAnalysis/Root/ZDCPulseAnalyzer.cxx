@@ -390,7 +390,7 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
 
     m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
   }
-  if (m_fitFunction == "FermiExpRun3") {
+  else if (m_fitFunction == "FermiExpRun3") {
     if (!m_fixTau1 || !m_fixTau2) {
       //
       // Use the variable tau version of the expFermiFit
@@ -1112,33 +1112,34 @@ void ZDCPulseAnalyzer::DoFit()
     fitWrapper->ConstrainFit();
 
     TFitResultPtr constrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+    fitWrapper->UnconstrainFit();
+
     if ((int) constrFitResult_ptr != 0) {
       //
       // Even the constrained fit failed, so we quit.
       //
       m_fitFailed = true;
     }
-
-    // Now we release the constraint and re-fit
-    //
-    fitWrapper->UnconstrainFit();
-
-    TFitResultPtr unconstrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-    if ((int) unconstrFitResult_ptr != 0) {
+    else {
+      // Now we try the fit again with the constraint removed
       //
-      // The unconstrained fit failed again, so we redo the constrained fit
-      //
-      fitWrapper->ConstrainFit();
+      TFitResultPtr unconstrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+      if ((int) unconstrFitResult_ptr != 0) {
+	//
+	// The unconstrained fit failed again, so we redo the constrained fit
+	//
+	fitWrapper->ConstrainFit();
       
-      TFitResultPtr constrFit2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-      if ((int) constrFit2Result_ptr != 0) {
-      //
-      // Even the constrained fit failed the second time, so we quit.
-      //
-	m_fitFailed = true;
+	TFitResultPtr constrFit2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+	if ((int) constrFit2Result_ptr != 0) {
+	  //
+	  // Even the constrained fit failed the second time, so we quit.
+	  //
+	  m_fitFailed = true;
+	}
+	
+	fitWrapper->UnconstrainFit();
       }
-
-      fitWrapper->UnconstrainFit();
     }
   }
 
@@ -1148,11 +1149,6 @@ void ZDCPulseAnalyzer::DoFit()
   }
 
   m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
-  if (std::abs(m_bkgdMaxFraction) > 0.25) {
-    m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-    m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
-  }
-
   m_fitAmplitude = fitWrapper->GetAmplitude();
   m_fitTime      = fitWrapper->GetTime();
 
