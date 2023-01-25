@@ -40,10 +40,8 @@ def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
             from TileConditions.TileDSPThresholdConfig import TileCondToolDspThresholdCfg
             kwargs['TileCondToolDspThreshold'] = acc.popToolsAndMerge( TileCondToolDspThresholdCfg(flags) )
 
-        if 'TileCondToolEmscale' not in kwargs:
-            from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-            kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-
+        from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+        acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     TileRawChannelOF1Corrector=CompFactory.TileRawChannelOF1Corrector
     acc.setPrivateTools( TileRawChannelOF1Corrector(**kwargs) )
@@ -113,10 +111,8 @@ def TileTimeBCOffsetFilterCfg(flags, **kwargs):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge(TileCablingSvcCfg(flags))
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-        kwargs['TileCondToolEmscale'] = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if 'TileBadChanTool' not in kwargs:
         from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg

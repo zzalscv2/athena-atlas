@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -77,8 +77,7 @@ StatusCode TileTimeBCOffsetFilter::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  //=== get TileCondToolEmscale
-  ATH_CHECK( m_tileToolEmscale.retrieve() );
+  ATH_CHECK( m_emScaleKey.initialize() );
 
   //=== get TileBadChanTool
   ATH_CHECK( m_tileBadChanTool.retrieve() );
@@ -106,6 +105,9 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
 
   // Now retrieve the TileDQstatus
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
+
+  SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
+  ATH_CHECK( emScale.isValid() );
 
   const char * part[5] = {"AUX","LBA","LBC","EBA","EBC"};
   const int nchan_dmu = 3; // number of channels in a single DMU
@@ -176,7 +178,7 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
               (! ch_masked_or_empty(ros,drawer,ch_p_tmp,gain,DQstatus))) {
             float amp = rch->amplitude();
             if (rchUnit != TileRawChannelUnit::OnlineMegaElectronVolts) {
-              amp = m_tileToolEmscale->channelCalib(drawerIdx, ch_p_tmp, gain, amp, rchUnit, TileRawChannelUnit::MegaElectronVolts);
+              amp = emScale->calibrateChannel(drawerIdx, ch_p_tmp, gain, amp, rchUnit, TileRawChannelUnit::MegaElectronVolts);
             }
             if (amp > ch_p_amp) {
               ch_p = ch_p_tmp;
@@ -223,7 +225,7 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
         } else {
           ch_amp[i]    = rch->amplitude();
           if (rchUnit != TileRawChannelUnit::OnlineMegaElectronVolts) {
-            ch_amp[i] = m_tileToolEmscale->channelCalib(drawerIdx, ch, gain, ch_amp[i], rchUnit, TileRawChannelUnit::MegaElectronVolts);
+            ch_amp[i] = emScale->calibrateChannel(drawerIdx, ch, gain, ch_amp[i], rchUnit, TileRawChannelUnit::MegaElectronVolts);
           }
           ch_time[i]   = rch->time();
           ch_mask[i]   = false;

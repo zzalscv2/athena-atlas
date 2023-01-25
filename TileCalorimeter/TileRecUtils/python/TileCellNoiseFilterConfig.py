@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured private Tile Cell noise filter tool"""
 
@@ -24,9 +24,8 @@ def TileCellNoiseFilterCfg(flags, **kwargs):
     TileCellNoiseFilter=CompFactory.TileCellNoiseFilter
     tileCellNoiseFilter = TileCellNoiseFilter()
 
-    from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-    emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-    tileCellNoiseFilter.TileCondToolEmscale = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if useCaloNoise:
         from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
