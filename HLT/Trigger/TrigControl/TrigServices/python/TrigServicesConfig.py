@@ -50,6 +50,18 @@ def setupMessageSvc():
    MessageSvc.statLevel = WARNING
 
 
+def getTHistSvc():
+   from TrigServices.TriggerUnixStandardSetup import _Conf  # could also use flags for this
+   if _Conf.useOnlineTHistSvc:
+      log.debug("Using online histogramming service (TrigMonTHistSvc)")
+      svc = CompFactory.TrigMonTHistSvc("THistSvc")
+   else:
+      log.debug("Using offline histogramming service (THistSvc)")
+      svc = CompFactory.THistSvc()
+
+   return svc
+
+
 # Finalize COOL update configuration (called from TriggerUnixStandardSetup.setupCommonServicesEnd)
 def enableCOOLFolderUpdates():
    '''Enable COOL folder updates'''
@@ -175,8 +187,8 @@ def getHltEventLoopMgr(flags, name='HltEventLoopMgr'):
 def TrigServicesCfg(flags):
    acc = ComponentAccumulator()
 
-   rob_data_provider = getHltROBDataProviderSvc(flags)
-   acc.addService(rob_data_provider)
+   acc.addService( getTHistSvc() )
+   acc.addService( getHltROBDataProviderSvc(flags) )
 
    loop_mgr = getHltEventLoopMgr(flags)
    loop_mgr.CoolUpdateTool = getTrigCOOLUpdateHelper(flags)

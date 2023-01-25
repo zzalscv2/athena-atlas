@@ -1,7 +1,7 @@
 #!/bin/sh
 # -*- mode: python -*-
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 # This is a script that is born as shell to setup the preloading and then
 # resurrected as python script for the actual athenaHLT.py application.
@@ -431,6 +431,7 @@ def main():
    # set default OutputLevels and file inclusion
    import AthenaCommon.Logging
    AthenaCommon.Logging.log.setLevel(getattr(logging, args.log_level[0]))
+   AthenaCommon.Logging.log.setFormat("%(asctime)s  Py:%(name)-31s %(levelname)7s %(message)s")
    from AthenaCommon.Include import include
    include.setShowIncludes( args.show_includes )
 
