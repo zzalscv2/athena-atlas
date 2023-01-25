@@ -266,7 +266,7 @@ def EGAM9Cfg(ConfigFlags):
     # multiple times in a train.
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM9TriggerListsHelper = TriggerListsHelper()
+    EGAM9TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM9KernelCfg(ConfigFlags,

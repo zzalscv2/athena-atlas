@@ -341,7 +341,7 @@ def EGAM8Cfg(ConfigFlags):
     # multiple times in a train
     
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM8TriggerListsHelper = TriggerListsHelper()
+    EGAM8TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM8KernelCfg(ConfigFlags,

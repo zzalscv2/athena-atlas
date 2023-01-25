@@ -111,7 +111,7 @@ def JETM5Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    JETM5TriggerListsHelper = TriggerListsHelper()
+    JETM5TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Skimming, thinning, augmentation, extra content
     acc.merge(JETM5KernelCfg(ConfigFlags, name="JETM5Kernel", StreamName = 'StreamDAOD_JETM5', TriggerListsHelper = JETM5TriggerListsHelper))

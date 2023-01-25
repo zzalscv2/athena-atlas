@@ -165,7 +165,7 @@ def PHYSLITECfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    PHYSLITETriggerListsHelper = TriggerListsHelper()
+    PHYSLITETriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Set the stream name - varies depending on whether the input is AOD or DAOD_PHYS
     streamName = 'StreamDAOD_PHYSLITE' if 'StreamAOD' in ConfigFlags.Input.ProcessingTags else 'StreamD2AOD_PHYSLITE' 

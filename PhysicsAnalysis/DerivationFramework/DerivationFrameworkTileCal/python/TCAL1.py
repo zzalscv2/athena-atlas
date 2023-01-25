@@ -124,7 +124,7 @@ def TCAL1Cfg(ConfigFlags):
 
     TCAL1Prefix = 'TCAL1_'
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TCAL1TriggerListsHelper = TriggerListsHelper()
+    TCAL1TriggerListsHelper = TriggerListsHelper(ConfigFlags)
     
     acc = ComponentAccumulator()
     acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="OutputStreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))

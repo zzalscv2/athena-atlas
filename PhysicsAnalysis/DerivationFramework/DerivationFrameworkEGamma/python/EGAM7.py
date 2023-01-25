@@ -314,7 +314,7 @@ def EGAM7Cfg(ConfigFlags):
     # multiple times in a train.
     # DODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM7TriggerListsHelper = TriggerListsHelper()
+    EGAM7TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM7KernelCfg(ConfigFlags,

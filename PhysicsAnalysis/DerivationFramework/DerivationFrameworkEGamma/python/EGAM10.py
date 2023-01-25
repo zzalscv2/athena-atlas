@@ -241,7 +241,7 @@ def EGAM10Cfg(ConfigFlags):
     # multiple times in a train.
     # TODO: restrict it to relevant triggers
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    EGAM10TriggerListsHelper = TriggerListsHelper()
+    EGAM10TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # configure skimming/thinning/augmentation tools
     acc.merge(EGAM10KernelCfg(ConfigFlags,

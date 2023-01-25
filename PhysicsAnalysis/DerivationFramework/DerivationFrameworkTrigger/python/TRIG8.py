@@ -160,7 +160,7 @@ def TRIG8Cfg(ConfigFlags):
     # for actually configuring the matching, so we create it here and pass it down
     # TODO: this should ideally be called higher up to avoid it being run multiple times in a train
     from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
-    TRIG8TriggerListsHelper = TriggerListsHelper()
+    TRIG8TriggerListsHelper = TriggerListsHelper(ConfigFlags)
 
     # Common augmentations
     acc.merge(TRIG8KernelCfg(ConfigFlags, name="TRIG8Kernel", StreamName = 'StreamDAOD_TRIG8', TriggerListsHelper = TRIG8TriggerListsHelper))
