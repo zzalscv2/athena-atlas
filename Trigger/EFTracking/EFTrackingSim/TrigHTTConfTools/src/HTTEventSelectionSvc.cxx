@@ -14,6 +14,7 @@
 #include "TrigHTTObjects/HTTLogicalEventInputHeader.h"
 #include "TrigHTTObjects/HTTTypes.h"
 #include <AsgMessaging/MessageCheck.h>
+#include "AtlasHepMC/MagicNumbers.h"
 
 using namespace asg::msgUserCode;
 
@@ -241,7 +242,7 @@ bool HTTEventSelectionSvc::passMatching(HTTTrack const & track) const
 bool HTTEventSelectionSvc::passMatching(HTTTruthTrack const & truthTrack) const
 {
   if (truthTrack.getBarcode() == 0 || truthTrack.getQ() == 0) return false;
-  if ((!m_allowHighBarcode) && m_st != SampleType::skipTruth && truthTrack.getBarcode() > 200000) return false;
+  if ((!m_allowHighBarcode) && m_st != SampleType::skipTruth && HepMC::is_simulation_particle(truthTrack.getBarcode())) return false;
   if (!passCuts(truthTrack)) return false;
 
   return true;
