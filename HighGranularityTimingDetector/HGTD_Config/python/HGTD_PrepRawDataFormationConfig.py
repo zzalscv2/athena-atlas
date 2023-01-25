@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -12,7 +12,11 @@ def HGTD_ClusterMakerToolCfg(flags, name = "HGTD_ClusterMakerTool", **kwargs):
 
 def SinglePadClusterToolCfg(flags, name = "SinglePadClusterTool", **kwargs):
     """Configures a tool that creates 1-to-1 HGTD clusters out of single pads """
-    acc = ComponentAccumulator()
+    if flags.HGTD.Geometry.useGeoModelXml:
+        from HGTD_GeoModelXml.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    else:
+        from HGTD_GeoModel.HGTD_GeoModelConfig import HGTD_ReadoutGeometryCfg
+    acc = HGTD_ReadoutGeometryCfg(flags)
 
     kwargs.setdefault("ClusterMakerTool", acc.popToolsAndMerge(HGTD_ClusterMakerToolCfg(flags)))
     acc.setPrivateTools(CompFactory.HGTD.SinglePadClusterTool(name, **kwargs))
