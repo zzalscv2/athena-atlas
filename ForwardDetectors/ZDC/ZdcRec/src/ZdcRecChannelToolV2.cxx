@@ -183,7 +183,7 @@ int ZdcRecChannelToolV2::convertTT2ZM(const xAOD::TriggerTowerContainer* ttColle
     {
       xAOD::ZdcModule* new_sum = new xAOD::ZdcModule();
       zdcSums->push_back(xAOD::ZdcModuleContainer::unique_type(new_sum));
-      new_sum->setZdcSide(iside);
+      new_sum->setZdcSide(iside ? 1 : -1);
     }
 
   return 0;
