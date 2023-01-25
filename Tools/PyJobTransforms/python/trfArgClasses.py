@@ -1280,8 +1280,8 @@ class argYODAFile(argFile):
                     fileTXT = tar.extractfile(untar)
                     next = False
                     if fileTXT is not None :
-                        lines = fileTXT.readlines()
-                        for line in lines :
+                        for line in fileTXT :
+                            line = line.decode("utf-8")
                             if next :
                                 try :
                                     w = float(re.sub(' +',' ',line).split(" ")[2])
