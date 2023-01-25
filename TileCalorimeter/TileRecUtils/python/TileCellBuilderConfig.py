@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Cell builder tool"""
 
@@ -44,9 +44,8 @@ def TileCellBuilderCfg(flags, **kwargs):
         from TileConditions.TileBadChannelsConfig import TileBadChanToolCfg
         kwargs['TileBadChanTool'] = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if 'TileCondToolTiming' not in kwargs:
         from TileConditions.TileTimingConfig import TileCondToolTimingCfg
