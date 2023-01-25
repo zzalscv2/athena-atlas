@@ -23,6 +23,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
             AddTruthCollectionNavigationDecorationsCfg)
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthCollectionMakerCfg
         PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(TruthCollectionMakerCfg(
+            ConfigFlags,
             name                    = "PhysCommonTruthCharmTool",
             NewCollectionName       = "TruthCharm",
             KeepNavigationInfo      = False,
@@ -33,6 +34,7 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
         acc.merge(AddHFAndDownstreamParticlesCfg(ConfigFlags))
         acc.merge(AddStandardTruthContentsCfg(ConfigFlags))
         acc.merge(AddTruthCollectionNavigationDecorationsCfg(
+            ConfigFlags,
             TruthCollections=["TruthElectrons", 
                               "TruthMuons", 
                               "TruthPhotons", 
