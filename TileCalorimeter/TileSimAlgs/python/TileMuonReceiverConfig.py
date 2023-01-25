@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile pulse for muon receiver algorithm"""
 
@@ -41,9 +41,8 @@ def TilePulseForTileMuonReceiverCfg(flags, **kwargs):
         from TileConditions.TileSampleNoiseConfig import TileCondToolNoiseSampleCfg
         kwargs['TileCondToolNoiseSample'] = acc.popToolsAndMerge(TileCondToolNoiseSampleCfg(flags))
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge(TileCondToolEmscaleCfg(flags))
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if kwargs['MaskBadChannels']:
         if 'TileBadChanTool' not in kwargs:

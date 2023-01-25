@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -30,7 +30,7 @@
 // Tile includes
 #include "TileEvent/TileHitContainer.h"
 #include "TileEvent/TileTTL1Container.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/ITileBadChanTool.h"
 #include "TileConditions/TileCablingSvc.h"
 #include "TileConditions/TileSamplingFraction.h"
@@ -140,8 +140,11 @@ class TileHitToTTL1: public AthReentrantAlgorithm {
     /// Random Stream Name
     Gaudi::Property<std::string> m_randomStreamName{this, "RandomStreamName", "Tile_HitToTTL1", ""};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+     * @brief Name of TileEMScale in condition store
+     */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+        "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
         "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};

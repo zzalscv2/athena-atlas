@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile hits to TTL1 algorithm"""
 
@@ -38,9 +38,8 @@ def TileHitToTTL1Cfg(flags, **kwargs):
         badChannelsTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
         kwargs['TileBadChanTool'] = badChannelsTool
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        kwargs['TileCondToolEmscale'] = acc.popToolsAndMerge(TileCondToolEmscaleCfg(flags))
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault('TileTTL1Container', flags.Overlay.BkgPrefix + 'TileTTL1Cnt')
