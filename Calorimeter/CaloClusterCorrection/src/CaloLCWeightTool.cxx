@@ -19,7 +19,7 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include "CaloUtils/CaloLCWeightTool.h"
+#include "CaloLCWeightTool.h"
 #include "CaloConditions/CaloLocalHadDefs.h"
 #include "CaloUtils/CaloSamplingHelper.h"
 #include "CaloUtils/CaloLCCoeffHelper.h"

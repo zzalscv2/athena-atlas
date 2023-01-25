@@ -7,14 +7,14 @@ atlas_subdir( xAODCaloEventCnv )
 atlas_add_library( xAODCaloEventCnvLib
                    xAODCaloEventCnv/*.h
                    INTERFACE
-                   PUBLIC_HEADERS xAODCaloEventCnv
+                   PUBLIC_HEADERS xAODCaloEventCnv 
                    LINK_LIBRARIES GaudiKernel xAODCaloEvent )
 
 # Component(s) in the package:
 atlas_add_component( xAODCaloEventCnv
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES xAODCaloEventCnvLib xAODCaloEvent CaloEvent AthenaBaseComps AthenaKernel GaudiKernel )
+                     LINK_LIBRARIES CaloInterfaceLib xAODCaloEventCnvLib xAODCaloEvent CaloEvent AthenaBaseComps AthenaKernel GaudiKernel )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

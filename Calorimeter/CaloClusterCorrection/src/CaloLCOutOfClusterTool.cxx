@@ -19,7 +19,7 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include "CaloUtils/CaloLCOutOfClusterTool.h"
+#include "CaloLCOutOfClusterTool.h"
 #include "CaloConditions/CaloLocalHadDefs.h"
 #include "CaloUtils/CaloLCCoeffHelper.h"
 #include "CaloUtils/CaloSamplingHelper.h"
@@ -27,12 +27,6 @@
 #include "CaloEvent/CaloPrefetch.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
-
-/*
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ListItem.h"
-*/
 
 using xAOD::CaloCluster;
 

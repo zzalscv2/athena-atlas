@@ -14,7 +14,7 @@ from AthenaCommon.JobProperties import jobproperties as jp
 import traceback
 
 #from CaloUtils.CaloUtilsConf import H1ClusterCellWeightTool, EMFracClusterClassificationTool, OutOfClusterCorrectionTool, DeadMaterialCorrectionTool2
-from CaloUtils.CaloUtilsConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
+from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
 
 from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
 #>> new PL May 4, 2009

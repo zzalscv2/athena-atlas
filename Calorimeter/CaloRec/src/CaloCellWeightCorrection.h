@@ -53,9 +53,7 @@ class CaloCellWeightCorrection : public CaloCellCorrection
  private:
 
   // properties
-
-  std::vector< std::string > m_cellWeightToolNames;
-  std::vector< ICellWeightTool* > m_cellWeightTools;
+  ToolHandleArray<ICellWeightTool> m_cellWeightToolNames{this,"CellWeightToolNames",{},"Cell weight tools" };
   
 
 };

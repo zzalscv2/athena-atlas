@@ -11,7 +11,7 @@
 /////////////////////////////////////////////////////////////////// 
 
 // CaloUtils includes
-#include "CaloUtils/xAODClusterCompressor.h"
+#include "xAODClusterCompressor.h"
 #include <bitset>
 
 // Constructors
