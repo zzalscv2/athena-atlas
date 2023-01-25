@@ -27,7 +27,7 @@
 #include "CaloEvent/CaloTopoTowerContainer.h"
 #include "CaloEvent/CaloCluster.h"
 
-#include "CaloUtils/CaloTopoTowerBuilderTool.h"
+#include "CaloTopoTowerBuilderTool.h"
 
 #include <string>
 #include <cmath>

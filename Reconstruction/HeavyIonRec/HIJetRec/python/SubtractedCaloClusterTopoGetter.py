@@ -7,7 +7,7 @@ from AthenaCommon.Logging import logging
 from RecExConfig.Configured import Configured
 from RecExConfig.ObjKeyStore import objKeyStore
 
-from CaloUtils.CaloUtilsConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
+from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
 
 from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
 from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterCellWeightCalib

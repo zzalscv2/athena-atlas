@@ -19,7 +19,7 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include "CaloUtils/CaloLCClassificationTool.h"
+#include "CaloLCClassificationTool.h"
 #include "CaloUtils/CaloLCCoeffHelper.h"
 #include "xAODCaloEvent/CaloCluster.h"
 

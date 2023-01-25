@@ -4,7 +4,7 @@
 
 #undef DEBUG_DMTHINGS
 #undef MAKE_MOMENTS
-#include "CaloUtils/CaloLCDeadMaterialTool.h"
+#include "CaloLCDeadMaterialTool.h"
 #include "CaloUtils/CaloLCCoeffHelper.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"

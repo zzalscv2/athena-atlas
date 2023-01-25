@@ -16,7 +16,7 @@ PURPOSE: Loops over list of ICellWeightTools and applies weight to cell
 
 // Calo Header files:
 
-#include "CaloUtils/CaloCellWeightCorrection.h"
+#include "CaloCellWeightCorrection.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloCell.h"
 
@@ -31,11 +31,7 @@ CaloCellWeightCorrection::CaloCellWeightCorrection(const std::string& type,
 				     const std::string& name, 
 				     const IInterface* parent) 
   : CaloCellCorrection(type, name, parent)
-{
-
-  declareProperty( "CellWeightToolNames", m_cellWeightToolNames);
-
- }
+{ }
 
 // DESTRUCTOR:
 
@@ -48,36 +44,8 @@ CaloCellWeightCorrection::~CaloCellWeightCorrection()
 
 StatusCode CaloCellWeightCorrection::initialize() {
 
-//---- retrieve the noisetool ----------------
-  IToolSvc* toolSvc = nullptr;// Pointer to Tool Service
-  ATH_CHECK( service("ToolSvc", toolSvc) );
-
-// access tools  and store them
-
- std::vector<std::string>::const_iterator itrName=m_cellWeightToolNames.begin();
- std::vector<std::string>::const_iterator endName= m_cellWeightToolNames.end();
-
- IAlgTool* algtool;    
- for (; itrName!=endName;++itrName){
-
-   ListItem theItem(*itrName);
-
-
-   ATH_MSG_DEBUG( "Retrieving " << *itrName  );
-   StatusCode sc = toolSvc->retrieveTool(theItem.type(), theItem.name(), algtool);
-
-   if (sc.isFailure()) {
-     ATH_MSG_INFO( "Unable to find tool for " <<(*itrName) );
-   }
-   else 
-     { 
-       ATH_MSG_INFO( (*itrName) << " successfully retrieved" );
-
-       m_cellWeightTools.push_back( dynamic_cast<ICellWeightTool*>(algtool) );
-     }
- }
-
-
+  ATH_CHECK(m_cellWeightToolNames.retrieve());
+  
   // Return status code.
   return StatusCode::SUCCESS;
 }
@@ -118,7 +86,7 @@ CaloCellWeightCorrection::MakeCorrection ( CaloCell* theCell,
                                            const EventContext& /*ctx*/) const
 {
   double weight = 1.0;
-  for (const ICellWeightTool* tool : m_cellWeightTools) {
+  for (const auto& tool : m_cellWeightToolNames) {
     // need to be able to initialize tool (i.e. set container)    
     weight *= tool->wtCell( theCell );    
   }

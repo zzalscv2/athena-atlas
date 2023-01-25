@@ -55,12 +55,6 @@ atlas_add_test( CaloTowerStore_test
    LOG_IGNORE_PATTERN "Reading file|Unable to locate catalog|Cache alignment|MetaReader|AutoConfiguration|IOVDbSvc +INFO"
    PROPERTIES TIMEOUT 500 )
 
-atlas_add_test( CaloTowerBuilderTool_test
-   SCRIPT athena.py CaloUtils/CaloTowerBuilderTool_test.py
-   LOG_IGNORE_PATTERN "Reading file|Unable to locate catalog|Cache alignment|MetaReader|AutoConfiguration|IOVDbSvc +INFO|INFO Initializing"
-   ENVIRONMENT "ATLAS_REFERENCE_TAG=CaloUtils/CaloUtils-01-00-20"
-   PROPERTIES TIMEOUT 500 )
-
 atlas_add_test( ToolWithConstants_test
    SCRIPT test/ToolWithConstants_test.py
    LOG_IGNORE_PATTERN "no dictionary for|by peeking into|Current filenames:|IOVDbSvc +INFO|Added successfully Conversion|DetDescrCnvSvc +INFO|GeoModelSvc +INFO|IOVSvc +INFO|with default tag|^Py:MetaReader" )

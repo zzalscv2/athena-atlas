@@ -14,7 +14,6 @@
 
 // Athena
 #include "CaloUtils/CaloTopoTowerBuilderToolBase.h"
-#include "CaloUtils/CaloTopoTowerBuilderTool.h"
 
 
 CaloTopoTowerContainerCnv::CaloTopoTowerContainerCnv(ISvcLocator* svcloc)

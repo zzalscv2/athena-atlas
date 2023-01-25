@@ -77,7 +77,7 @@ class TrigCaloClusterMaker_topo (TrigCaloClusterMakerBase):
 
         self.Cells=cells
 
-        from CaloUtils.CaloUtilsConf import CaloLCWeightTool, CaloLCClassificationTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
+        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCWeightTool, CaloLCClassificationTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
         from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
         from CaloRec.CaloRecConf import CaloTopoClusterMaker, CaloTopoClusterSplitter, CaloClusterMomentsMaker
         from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
@@ -362,7 +362,7 @@ class TrigCaloClusterCalibrator_LC(TrigCaloClusterCalibrator):
         super(TrigCaloClusterCalibrator_LC, self).__init__(name, **kwargs)
 
         from CaloTools.CaloNoiseCondAlg import CaloNoiseCondAlg
-        from CaloUtils.CaloUtilsConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
+        from CaloClusterCorrection.CaloClusterCorrectionConf import CaloLCClassificationTool, CaloLCWeightTool, CaloLCOutOfClusterTool, CaloLCDeadMaterialTool
         from CaloClusterCorrection.CaloClusterCorrectionConf import CaloClusterLocalCalib
         from AthenaCommon.GlobalFlags import globalflags
 
