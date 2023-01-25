@@ -50,7 +50,7 @@ namespace Rec {
 
         /*refit a track */
         virtual std::unique_ptr<Trk::Track> fit(const EventContext& ctx, const Trk::Track& track, const Trk::RunOutlierRemoval runOutlier,
-                                                const Trk::ParticleHypothesis particleHypothesis) const;
+                                                const Trk::ParticleHypothesis particleHypothesis) const override;
     protected:
         /**
             fit a set of MeasurementBase objects with starting value for perigeeParameters */
