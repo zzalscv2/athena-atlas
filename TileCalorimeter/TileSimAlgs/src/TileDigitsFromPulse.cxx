@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -564,7 +564,7 @@ StatusCode TileDigitsFromPulse::finalize() {
 	return StatusCode::SUCCESS;
 }
 
-bool TileDigitsFromPulse::makeDist(TFile*& file, TH1F*& hist, std::string fileName, std::string histName) {
+bool TileDigitsFromPulse::makeDist(TFile*& file, TH1F*& hist, const std::string& fileName, const std::string& histName) {
 	file = new TFile(fileName.c_str());
 	if (file->IsZombie()) {
 		ATH_MSG_FATAL("Error reading amplitude distribution from " << fileName << ".");
@@ -582,7 +582,7 @@ bool TileDigitsFromPulse::makeDist(TFile*& file, TH1F*& hist, std::string fileNa
 
 }
 
-bool TileDigitsFromPulse::makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, std::string fileName) {
+bool TileDigitsFromPulse::makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, const std::string& fileName) {
 
 	std::string histName;
 	TKey *key;
