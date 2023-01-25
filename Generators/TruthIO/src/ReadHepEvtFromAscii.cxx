@@ -153,6 +153,7 @@ StatusCode ReadHepEvtFromAscii::execute() {
 	  p->set_momentum(newMomentum);
 
       }
+  HepMC::fillBarcodesAttribute(evt);
   mcEvtColl->push_back(evt);
   
   // End of execution for each event

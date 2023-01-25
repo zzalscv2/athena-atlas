@@ -673,7 +673,8 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
   if(beams[0]->momentum().pz() * procBeams[0]->momentum().pz() < 0.) std::swap(procBeams[0],procBeams[1]);
   for (auto p: procBeams[0]->end_vertex()->particles_out())  beams[0]->end_vertex()->add_particle_out(p);
   for (auto p: procBeams[1]->end_vertex()->particles_out())  beams[1]->end_vertex()->add_particle_out(p);
-
+   
+  HepMC::fillBarcodesAttribute(procEvent);
 #else
   HepMC::GenEvent *procEvent = new HepMC::GenEvent(evt->momentum_unit(), evt->length_unit());
 

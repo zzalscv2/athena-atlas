@@ -207,6 +207,7 @@ TEST_F(InputConverter_test, convertParticle_using_generated_mass) {
   ge.add_vertex( prodVtx );
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
+  HepMC::fillBarcodesAttribute(&ge);
   HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode, 0, EBC_SECONDPUEVCOLL);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
@@ -263,6 +264,7 @@ TEST_F(InputConverter_test, convertParticle_using_particleDataTable_photon) {
   ge.add_vertex( prodVtx );
   //AV: we set barcode here because only here the particle in HepMC3 enters event and can have a meaningful barcode.
   HepMC::suggest_barcode(genPart,particleBarcode);
+  HepMC::fillBarcodesAttribute(&ge);
   HepMcParticleLink* trackLink = new HepMcParticleLink(particleBarcode);
 
   Amg::Vector3D expectedPos(9.8, 7.65, 4.3);
