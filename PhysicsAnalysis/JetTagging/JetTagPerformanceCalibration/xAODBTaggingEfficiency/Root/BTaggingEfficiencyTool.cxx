@@ -301,13 +301,14 @@ StatusCode BTaggingEfficiencyTool::initialize() {
       prepend = "dev/";
     }
     prepend += "xAODBTaggingEfficiency/";
-    m_SFFile = PathResolverFindCalibFile(prepend + m_SFFile);
-    if (m_SFFile == "")
+    m_SFFile = prepend + m_SFFile;
+    m_SFFileFull = PathResolverFindCalibFile(m_SFFile);
+    if (m_SFFileFull == "")
       ATH_MSG_WARNING(" Unable to retrieve b-tagging scale factor calibration file!");
     else
       ATH_MSG_DEBUG(" Retrieving b-tagging scale factor calibration file as " << m_SFFile);
   } else {
-    m_SFFile = location;
+    m_SFFileFull = location;
   }
   // The situation for the efficiency file is a bit simpler since it need not reside under "xAODBTaggingEfficiency"
   m_EffFile = trim(m_EffFile);
@@ -316,7 +317,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   // Note that the instantiation below does not leave a choice: the Eigenvector variations and generator-specific scale factors are always used
   std::vector<std::string> jetAliases;
   m_CDI = std::shared_ptr<Analysis::CalibrationDataInterfaceROOT>( new Analysis::CalibrationDataInterfaceROOT(m_taggerName,                              // tagger name: always needed
-						     m_SFFile.c_str(),                          // full pathname of the SF calibration file: always needed
+						     m_SFFileFull.c_str(),                          // full pathname of the SF calibration file: always needed
 						     (m_EffFile == "") ? 0 : m_EffFile.c_str(), // full pathname of optional efficiency file
 						     jetAliases,                                // since we configure the jet "collection name" by hand, we don't need this
 						     m_SFNames,                                 // names of the scale factor calibrations to be used
