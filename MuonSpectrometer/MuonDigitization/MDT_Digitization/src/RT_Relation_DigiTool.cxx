@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDT_Digitization/RT_Relation_DigiTool.h"
@@ -56,7 +56,7 @@ bool RT_Relation_DigiTool::initializeTube(const MuonGM::MuonDetectorManager* det
         ATH_MSG_DEBUG("Found file " << file);
         m_rt.push_back(new Rt_relation);
         std::ifstream rt_file(file.c_str());
-        m_rt[0]->set_name(file.c_str());
+        m_rt[0]->set_name(file);
         if (!rt_file.good()) {
             ATH_MSG_FATAL("Could not open RT relation file " << m_rt[0]->name());
             return false;
