@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CaloGeometryFromFile_h
@@ -12,8 +12,9 @@ class CaloGeometryFromFile : public CaloGeometry
 public:
   CaloGeometryFromFile();
 
-  bool LoadGeometryFromFile(const std::string& fileName, const std::string& treeName,
-                            std::string hashFileName
+  bool LoadGeometryFromFile(const std::string& fileName,
+                            const std::string& treeName,
+                            const std::string& hashFileName
                             = "/eos/atlas/atlascerngroupdisk/proj-simul/"
                               "CaloGeometry/cellId_vs_cellHashId_map.txt");
   bool LoadFCalGeometryFromFiles(const std::array<std::string, 3> &fileNames);
