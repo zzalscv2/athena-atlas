@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEMONITORING_TILEDQFRAGMONITORALGORITHM_H
@@ -8,7 +8,7 @@
 #include "TileEvent/TileDQstatus.h"
 #include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
-#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileBadChannels.h"
 #include "TileConditions/TileDCSState.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCablingSvc.h"
@@ -75,8 +75,11 @@ class TileDQFragMonitorAlgorithm : public AthMonitorAlgorithm {
     Gaudi::Property<float> m_minGapEnergy{this,
         "MinEnergyGap", -10000.0F, "Gap channel energy threshold for masking"};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
-        "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
+    /**
+     * @brief Name of TileBadChannels in condition store
+     */
+    SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
+        "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
     /**
      * @brief Name of Tile cabling service
