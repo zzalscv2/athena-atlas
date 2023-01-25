@@ -99,12 +99,12 @@ if options.algorithm_timer :
     job.options().setBool( ROOT.EL.Job.optAlgorithmTimer, True )
 
 
-from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
+from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence, printSequenceAlgs
 algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
                        noSystematics = options.no_systematics,
                        hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
                        noPhysliteBroken=noPhysliteBroken)
-print( algSeq ) # For debugging
+printSequenceAlgs( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 
 # Make sure that both the ntuple and the xAOD dumper have a stream to write to.
