@@ -307,6 +307,7 @@ private:
 
   /// name of the data/MC efficiency scale factor calibration file (may be changed by the @c PathResolver)
   std::string m_SFFile;
+  std::string m_SFFileFull;
   /// name of the optional MC efficiency file (may be changed by the @c PathResolver)
   std::string m_EffFile;
   std::string m_EffConfigFile;
