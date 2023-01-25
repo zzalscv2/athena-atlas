@@ -4,6 +4,7 @@
 
 + AsgExternal/Asg_Test
 + AtlasGeometryCommon/BeamPipeGeoModel
++ AtlasGeometryCommon/CrackRegionGeoModel
 + AtlasGeometryCommon/GeoModelEnvelopes
 + AtlasGeometryCommon/SubDetectorEnvelopes
 + AtlasTest/CITest

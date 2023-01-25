@@ -1,4 +1,4 @@
-#Copyright (C) 2021 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArGeoBarrel )
@@ -12,5 +12,5 @@ atlas_add_library( LArGeoBarrel
                    PUBLIC_HEADERS LArGeoBarrel
                    INCLUDE_DIRS ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEOMODEL_LIBRARIES} LArGeoCode StoreGateLib
-                   PRIVATE_LINK_LIBRARIES GeoModelUtilities GaudiKernel LArReadoutGeometry RDBAccessSvcLib )
+                   PRIVATE_LINK_LIBRARIES GeoModelUtilities GaudiKernel LArReadoutGeometry RDBAccessSvcLib CrackRegionGeoModel )
 
