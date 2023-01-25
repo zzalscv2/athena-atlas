@@ -228,6 +228,11 @@ namespace {
         return std::log(std::sqrt(t.definingParametersCovMatrixDiagVec().at(1)));
       });
     }
+    if (name == "z0RelativeToBeamspotUncertainty") {
+      return TJGetter([](const Tp& t, const Jet&) {
+        return std::sqrt(t.definingParametersCovMatrixDiagVec().at(1));
+      });
+    }
 
     if (name == "numberOfPixelHitsInclDead") {
       SG::AuxElement::ConstAccessor<unsigned char> pix_hits("numberOfPixelHits");
