@@ -528,7 +528,7 @@ protected:
 
     auto inputEvgen = std::make_unique<McEventCollection>();
     auto* genEvent = new HepMC::GenEvent{};
-
+    HepMC::fillBarcodesAttribute(genEvent);
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
     ASSERT_TRUE(testInputEvgenKey.initialize().isSuccess());
@@ -561,7 +561,7 @@ protected:
     genVertex->add_particle_out(genPart);
     genVertex->add_particle_out(genPart2);
     genEvent->add_vertex(genVertex);
-
+    HepMC::fillBarcodesAttribute(genEvent);
     auto inputEvgen = std::make_unique<McEventCollection>();
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
@@ -783,7 +783,7 @@ protected:
     auto genVertex = HepMC::newGenVertexPtr(pos);
     genVertex->add_particle_out(genPart);
     genEvent->add_vertex(genVertex);
-
+    HepMC::fillBarcodesAttribute(genEvent);
     auto inputEvgen = std::make_unique<McEventCollection>();
     inputEvgen->push_back(genEvent);
     SG::WriteHandleKey<McEventCollection> testInputEvgenKey{"testInputEvgenCollection"};
