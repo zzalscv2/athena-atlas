@@ -44,10 +44,10 @@ class JetJvtAnalysisConfig (ConfigBlock) :
                 alg.particles = config.readName (self.containerName)
 
         if self.runSelection:
-            config.addSelection (self.containerName, '', 'jvt_selection',
+            config.addSelection (self.containerName, 'jvt', 'jvt_selection',
                                  bits=1, preselection=False)
             if self.enableFJvt :
-                config.addSelection (self.containerName, '', 'fjvt_selection',
+                config.addSelection (self.containerName, 'jvt', 'fjvt_selection',
                                      bits=1, preselection=False)
 
 

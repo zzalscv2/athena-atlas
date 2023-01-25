@@ -92,7 +92,7 @@ def makeSequenceOld (dataType, algSeq, forCompare, isPhyslite, noPhysliteBroken)
     else :
         input = jetContainer
     jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
-                                           runJvtUpdate = True, runNNJvtUpdate = True,
+                                           runJvtUpdate = False, runNNJvtUpdate = True,
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
                                            runGhostMuonAssociation = not isPhyslite)
 
@@ -515,6 +515,41 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig ('Event.Cleaning', None)
 
 
+    # Include, and then set up the jet analysis algorithm sequence:
+    configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
+    configSeq.setOptionValue ('.runJvtUpdate', False )
+    configSeq.setOptionValue ('.runNNJvtUpdate', True )
+
+    btagger = "DL1dv01"
+    btagWP = "FixedCutBEff_60"
+    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
+    configSeq.setOptionValue ('.noEfficiency', False)
+    configSeq.setOptionValue ('.btagger', btagger)
+    configSeq.setOptionValue ('.btagWP', btagWP)
+    configSeq.setOptionValue ('.kinematicSelection', True )
+    if not noPhysliteBroken :
+        btagger = "DL1r"
+        btagWP = "FixedCutBEff_77"
+        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
+        configSeq.setOptionValue ('.noEfficiency', False)
+        configSeq.setOptionValue ('.legacyRecommendations', True)
+        configSeq.setOptionValue ('.btagger', btagger)
+        configSeq.setOptionValue ('.btagWP', btagWP)
+        configSeq.setOptionValue ('.kinematicSelection', True )
+
+    configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
+
+    if largeRJets :
+        configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
+        configSeq.setOptionValue ('.postfix', 'largeR_jets' )
+        outputContainers['larger_jet_'] = 'OutLargeRJets'
+
+    if trackJets :
+        configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
+        configSeq.setOptionValue ('.postfix', 'track_jets' )
+        outputContainers['track_jet_'] = 'OutTrackJets'
+
+
     # Include, and then set up the electron analysis algorithm sequence:
 
     likelihood = True
@@ -557,41 +592,6 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configSeq += makeConfig ('TauJets', 'AnaTauJets')
     configSeq += makeConfig ('TauJets.Selection', 'AnaTauJets.tight')
     configSeq.setOptionValue ('.quality', 'Tight')
-
-    # Include, and then set up the jet analysis algorithm sequence:
-    configSeq += makeConfig( 'Jets', 'AnaJets', jetCollection='AntiKt4EMPFlowJets')
-    configSeq.setOptionValue ('.runJvtUpdate', True)
-    configSeq.setOptionValue ('.runNNJvtUpdate', True )
-
-    configSeq += makeConfig( 'Jets.Jvt', 'AnaJets' )
-
-    btagger = "DL1dv01"
-    btagWP = "FixedCutBEff_60"
-    configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag' )
-    configSeq.setOptionValue ('.noEfficiency', False)
-    configSeq.setOptionValue ('.btagger', btagger)
-    configSeq.setOptionValue ('.btagWP', btagWP)
-    configSeq.setOptionValue ('.kinematicSelection', True )
-    if not noPhysliteBroken :
-        btagger = "DL1r"
-        btagWP = "FixedCutBEff_77"
-        configSeq += makeConfig( 'FlavourTagging', 'AnaJets.ftag_legacy' )
-        configSeq.setOptionValue ('.noEfficiency', False)
-        configSeq.setOptionValue ('.legacyRecommendations', True)
-        configSeq.setOptionValue ('.btagger', btagger)
-        configSeq.setOptionValue ('.btagWP', btagWP)
-        configSeq.setOptionValue ('.kinematicSelection', True )
-
-
-    if largeRJets :
-        configSeq += makeConfig( 'Jets', 'AnaLargeRJets', jetCollection='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets')
-        configSeq.setOptionValue ('.postfix', 'largeR_jets' )
-        outputContainers['larger_jet_'] = 'OutLargeRJets'
-
-    if trackJets :
-        configSeq += makeConfig( 'Jets', 'AnaTrackJets', jetCollection='AntiKtVR30Rmax4Rmin02PV0TrackJets')
-        configSeq.setOptionValue ('.postfix', 'track_jets' )
-        outputContainers['track_jet_'] = 'OutTrackJets'
 
 
     if dataType != 'data' :
@@ -696,6 +696,21 @@ def makeSequenceBlocks (dataType, algSeq, forCompare, isPhyslite, noPhysliteBrok
     configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)
     configSeq.fullConfigure (configAccumulator)
 
+
+def printSequenceAlgs (sequence) :
+    """print the algorithms in the sequence without the sequence structure
+
+    This is mostly meant for easy comparison of different sequences
+    during configuration, particularly the sequences resulting from
+    the old sequence configuration and the new block configuration.
+    Those have different sequence structures in the output, but the
+    algorithms should essentially be configured the same way."""
+    if isinstance (sequence, AlgSequence) :
+        for alg in sequence :
+            printSequenceAlgs (alg)
+    else :
+        # assume this is an algorithm then
+        print (sequence)
 
 
 def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False) :

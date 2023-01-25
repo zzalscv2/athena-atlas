@@ -158,6 +158,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+postfix )
             config.addPrivateTool( 'jvtTool', 'JetVertexTaggerTool' )
             alg.jvtTool.JetContainer = self.jetCollection
+            alg.jvtTool.SuppressInputDependence=True
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
