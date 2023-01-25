@@ -11,7 +11,7 @@ class BaseMonitoringTool:
     madness.
     """
     def __init__(self, flags, name):
-        self.monTool = GenericMonitoringTool(name)
+        self.monTool = GenericMonitoringTool(flags, name)
 
     def makeHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt=None, **kw):
         self.monTool.defineHistogram(

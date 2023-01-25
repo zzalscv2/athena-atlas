@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -77,7 +77,7 @@ def MistimeMonSequenceCfg(flags):
         inputMaker.RoIs="MistimeMonInputRoIs"
 
         outputName = recordable("HLT_TrigCompositeMistimeJ400")
-        recoAlg = L1CorrelationAlgCfg("MistimeMonj400", ItemList=['L1_J400'], 
+        recoAlg = L1CorrelationAlgCfg(flags, "MistimeMonj400", ItemList=['L1_J400'],
                                       TrigCompositeWrieHandleKey=outputName, trigCompPassKey=outputName+".pass",
                                       l1AKey=outputName+".l1a_type", otherTypeKey=outputName+".other_type",
                                       beforeAfterKey=outputName+".beforeafterflag")

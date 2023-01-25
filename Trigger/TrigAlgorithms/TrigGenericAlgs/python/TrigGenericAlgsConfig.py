@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -36,15 +36,15 @@ def EndOfEventFilterAlgCfg(name, chainName):
 def TrigEventInfoRecorderAlgCfg(name):
     return CompFactory.TrigEventInfoRecorderAlg(name)
 
-def L1CorrelationMonitoringCfg(name):
+def L1CorrelationMonitoringCfg(flags, name):
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     monTool.defineHistogram('EF_L1Corr_beforeafterflag', path='EXPERT', type='TH1F', title='beforeafterflag', xbins=4, xmin=-1.5, xmax=2.5)
     monTool.defineHistogram('EF_L1Corr_l1a_type, EF_L1Corr_other_type', path='EXPERT', type='TH2F', title="typeMatrix ; L1A; Other", xbins=8, xmin=-0.5, xmax=7.5, ybins=8, ymin=-0.5, ymax=7.5)
     return monTool
 
-def L1CorrelationAlgCfg(name, **kwargs):
-    kwargs.setdefault("MonTool",L1CorrelationMonitoringCfg("L1CorrelationAlg"))
+def L1CorrelationAlgCfg(flags, name, **kwargs):
+    kwargs.setdefault("MonTool",L1CorrelationMonitoringCfg(flags, "L1CorrelationAlg"))
     return CompFactory.L1CorrelationAlg(name, **kwargs)
 
 def ROBPrefetchingAlgCfg(flags, name, regSelDets=[], **kwargs):

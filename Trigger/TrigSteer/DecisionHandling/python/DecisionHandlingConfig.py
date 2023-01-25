@@ -8,7 +8,7 @@ def setupFilterMonitoring( flags, filterAlg ):
     if not EnableFilterMonitoring or not hasattr(filterAlg, "Input"):
         return
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool')
+    monTool = GenericMonitoringTool(flags, 'MonTool')
     
     inputKeys = [str(i) for i in filterAlg.Input]
 
@@ -24,7 +24,7 @@ def TriggerSummaryAlg( flags, name ):
     from AthenaConfiguration.ComponentFactory import CompFactory
     alg = CompFactory.TriggerSummaryAlg( name )
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
-    monTool = GenericMonitoringTool('MonTool', HistPath='HLTFramework/'+name)
+    monTool = GenericMonitoringTool(flags, 'MonTool', HistPath='HLTFramework/'+name)
     monTool.defineHistogram('TIME_SinceEventStart', path='EXPERT', type='TH1F',
                                    title='Time since beginning of event processing;time [ms]',
                                    xbins=100, xmin=0, xmax=3.5e3   )

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ##############################
 # L2 muComb Fex Algorithm Configuration:
@@ -9,6 +9,7 @@
 from TrigmuComb.TrigmuCombConf import muComb
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaCommon.GlobalFlags import globalflags
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TrigmuComb.TrigmuCombMonitoring import TrigMuCombMonitoring
 
 class TrigmuCombConfig (muComb):
@@ -45,5 +46,4 @@ class TrigmuCombConfig (muComb):
         self.IDSCANEndcap3Res = [0.04755,0.0007718]
         self.IDSCANEndcap4Res = [0.06035,0.0001145]
 
-      self.MonTool = TrigMuCombMonitoring()
-
+      self.MonTool = TrigMuCombMonitoring(ConfigFlags)
