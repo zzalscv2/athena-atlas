@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloTools )
@@ -26,5 +26,5 @@ atlas_add_test( CaloEstimatedGainToolConfig_test
 atlas_add_test( CaloEstimatedGainTool_test
                 SCRIPT python -m CaloTools.CaloEstimatedGainTool_test
                 PROPERTIES TIMEOUT 300
-                LOG_SELECT_PATTERN "ERROR|error|WARNING [^U]|FATAL|processing|TestAlg" )
-
+                LOG_SELECT_PATTERN "ERROR|error|WARNING [^U]|FATAL|processing|TestAlg"
+                LOG_IGNORE_PATTERN "no dictionary for class DataHeader_p2|DataHeaderElement_p2|PoolToken_p1" )

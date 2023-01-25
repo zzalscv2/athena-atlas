@@ -83,10 +83,5 @@ phi_module    4
 eta_module    5
 phi_index     6
 eta_index     7
-Warning in <TClass::Init>: no dictionary for class DataHeader_p1 is available
-Warning in <TClass::Init>: no dictionary for class DataHeaderElement_p1 is available
-Warning in <TClass::Init>: no dictionary for class DataHeader_p2 is available
-Warning in <TClass::Init>: no dictionary for class DataHeaderElement_p2 is available
-Warning in <TClass::Init>: no dictionary for class PoolToken_p1 is available
 testalg1          VERBOSE execute
 testalg1          VERBOSE execute
