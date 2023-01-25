@@ -119,7 +119,7 @@ def TrigTauRecMergedOnlyMVACfg(flags):
     # Decorate the clusters
     tools.append(CompFactory.TauClusterFinder(UseOriginalCluster = False)) # TODO use JetRec.doVertexCorrection once available
 
-    tools.append(CompFactory.TauVertexedClusterDecorator(SeedJet = flags.Trigger.Offline.Tau.SeedJetCollection))
+    tools.append(CompFactory.TauVertexedClusterDecorator(SeedJet = flags.Trigger.Offline.Tau.ActiveConfig.SeedJetCollection))
 
     # Calibrate to TES
     # non-MVA TES calibration is deprecated and should be phased out
