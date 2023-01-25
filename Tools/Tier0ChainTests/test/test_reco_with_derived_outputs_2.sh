@@ -5,6 +5,7 @@
 # art-include: 21.0/Athena
 # art-include: 21.0-TrigMC/Athena
 # art-include: master/Athena
+# art-include: 23.0/Athena
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 21.3/Athena
@@ -14,7 +15,7 @@
 
 Reco_tf.py \
 --AMI=f739 \
---preExec 'r2a:from InDetPrepRawDataToxAOD.SCTxAODJobProperties import SCTxAODFlags;SCTxAODFlags.Prescale.set_Value_and_Lock(50);from AthenaMonitoring.DQMonFlags import DQMonFlags; DQMonFlags.doHLTMon=False' \
+--preExec 'r2a:from InDetPrepRawDataToxAOD.SCTxAODJobProperties import SCTxAODFlags;SCTxAODFlags.Prescale.set_Value_and_Lock(50);from AthenaMonitoring.DQMonFlags import DQMonFlags; DQMonFlags.doHLTMon=False; DQMonFlags.doMonitoring=True;DQMonFlags.doNewMonitoring=True;DQMonFlags.doStreamAwareMon=False;DQMonFlags.enableLumiAccess=False;DQMonFlags.doCTPMon=False;' \
 --conditionsTag=CONDBR2-BLKPA-RUN2-09 \
 --geometryVersion='ATLAS-R2-2016-01-00-01' \
 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data16_13TeV.00304008.physics_Main.daq.RAW._lb0838._SFO-6._0001.data \
