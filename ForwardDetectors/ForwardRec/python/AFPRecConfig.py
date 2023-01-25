@@ -94,32 +94,32 @@ def AFPRecCfg(flags):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Scheduler.CheckDependencies = True
+    flags.Scheduler.ShowDataDeps = True
+    flags.Scheduler.ShowDataFlow = True
+    flags.Scheduler.ShowControlFlow = True
+    flags.Scheduler.EnableVerboseViews = True
     
-    ConfigFlags.Scheduler.CheckDependencies = True
-    ConfigFlags.Scheduler.ShowDataDeps = True
-    ConfigFlags.Scheduler.ShowDataFlow = True
-    ConfigFlags.Scheduler.ShowControlFlow = True
-    ConfigFlags.Scheduler.EnableVerboseViews = True
+    flags.Input.Files = ["/afs/cern.ch/work/p/pbalek/public/data17_13TeV.00338480.physics_Main.daq.RAW/data17_13TeV.00338480.physics_Main.daq.RAW._lb0275._SFO-7._0007.data"]
     
-    ConfigFlags.Input.Files = ["/afs/cern.ch/work/p/pbalek/public/data17_13TeV.00338480.physics_Main.daq.RAW/data17_13TeV.00338480.physics_Main.daq.RAW._lb0275._SFO-7._0007.data"]
-    
-    ConfigFlags.Output.doWriteAOD = True
-    ConfigFlags.Output.AODFileName = "AOD.pool.root"
-    ConfigFlags.Exec.MaxEvents = 500
-    ConfigFlags.Concurrency.NumThreads = 4
+    flags.Output.doWriteAOD = True
+    flags.Output.AODFileName = "AOD.pool.root"
+    flags.Exec.MaxEvents = 500
+    flags.Concurrency.NumThreads = 4
  
-    ConfigFlags.fillFromArgs() # enable unit tests to switch only parts of reco: python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal = 0 and so on
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.fillFromArgs() # enable unit tests to switch only parts of reco: python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal = 0 and so on
+    flags.lock()
+    flags.dump()
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
     
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge(ByteStreamReadCfg(ConfigFlags))
+    acc.merge(ByteStreamReadCfg(flags))
 
-    acc.merge(AFPRecCfg(ConfigFlags))
+    acc.merge(AFPRecCfg(flags))
     
     from AthenaCommon.Constants import DEBUG
     acc.foreach_component("*AFP*").OutputLevel=DEBUG

@@ -23,16 +23,17 @@ def LucidRecCfg(flags):
 
 if __name__=="__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
     log.setLevel(DEBUG)
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
-    acc = MainServicesCfg( ConfigFlags )
-    acc.merge(LucidRecCfg(ConfigFlags))
+    acc = MainServicesCfg(flags)
+    acc.merge(LucidRecCfg(flags))
 
     acc.run(10)
