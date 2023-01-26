@@ -37,7 +37,7 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
     
     int eta = iEta-8; // needed to substract 8 to be in the FPGA core area
     int phi = iPhi-8; // needed to substract 8 to be in the FPGA core area
-    int sat = 0; //1 bit for saturation flag, not coded yet
+    int sat = 1; //1 bit for saturation flag, not coded yet
     
     // correcting C-side. mirror symmetry
     if(jFEX == 1 || jFEX == 2){
@@ -51,7 +51,6 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
     if (et > 0x7ff) { //0x7ff is 11 bits
         ATH_MSG_DEBUG("Et saturated: " << et );
         et = 0x7ff;
-        sat=1;
     }
 
     unsigned int iso = IsoRing/Resolution;
@@ -65,7 +64,7 @@ uint32_t jFEXFormTOBs::formTauTOB(int jFEX, int iPhi, int iEta, int EtClus, int 
 
     unsigned int minEtThreshold = ptMinToTopo/Resolution;
 
-    if (et < minEtThreshold) return 0;
+    if (et <= minEtThreshold) return 0;
     else return tobWord;
 
 }    
@@ -100,7 +99,7 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     unsigned int phi = 0;
     unsigned int jFEXSmallRJetTOBEt = 0;
     int Res = 0; // 11 bits reserved
-    int Sat = 0; //  1 bit for saturation. Set to 1 when jet energy is saturated
+    int Sat = 1; //  1 bit for saturation. Set to 1 when jet energy is saturated
 
     if(jFEX == 1 || jFEX == 2) {
 
@@ -139,10 +138,14 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
         } 
     }
     
+    //Appliying jet calibration
     jFEXSmallRJetTOBEt = Get_calibrated_SRj_ET(EtClus,jFEX)/Resolution;
+    
+    // COMENTED FOR NOW, in the firmware the calibration is not applied yet. Needs COOL DB implementation!
+    //jFEXSmallRJetTOBEt = EtClus/Resolution;
+    
     if(jFEXSmallRJetTOBEt > 0x7ff) {
         jFEXSmallRJetTOBEt = 0x7ff;
-        Sat = 1;
     }
     //create basic tobword with 32 bits
     tobWord = tobWord + (Res << FEXAlgoSpaceDefs::jJ_resBit) + (jFEXSmallRJetTOBEt << FEXAlgoSpaceDefs::jJ_etBit) + (eta << FEXAlgoSpaceDefs::jJ_etaBit) + (phi << FEXAlgoSpaceDefs::jJ_phiBit)  + (Sat);
@@ -151,7 +154,7 @@ uint32_t jFEXFormTOBs::formSRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     // retrieving the threshold for the TOB Et
     unsigned int minEtThreshold = ptMinToTopo/Resolution;
     
-    if (jFEXSmallRJetTOBEt < minEtThreshold) return 0;
+    if (jFEXSmallRJetTOBEt <= minEtThreshold) return 0;
     else return tobWord;
 }
 
@@ -164,7 +167,7 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     unsigned int phi = 0;
     unsigned int jFEXLargeRJetTOBEt = 0;
     int Res = 0; // 9 bits reserved
-    int Sat = 0; //  1 bit for saturation. Set to 1 when jet energy is saturated
+    int Sat = 1; //  1 bit for saturation. Set to 1 when jet energy is saturated
 
     if(jFEX == 1 || jFEX == 2) {
 
@@ -206,7 +209,6 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     jFEXLargeRJetTOBEt = EtClus/Resolution;
     if (jFEXLargeRJetTOBEt > 0x1fff) {
         jFEXLargeRJetTOBEt = 0x1fff;  //0x1fff is 13 bits
-        Sat = 1;
     }
     //create basic tobword with 32 bits
     tobWord = tobWord + (Res << FEXAlgoSpaceDefs::jLJ_resBit) + (jFEXLargeRJetTOBEt << FEXAlgoSpaceDefs::jLJ_etBit) + (eta << FEXAlgoSpaceDefs::jLJ_etaBit) + (phi << FEXAlgoSpaceDefs::jLJ_phiBit) + (Sat);
@@ -215,7 +217,7 @@ uint32_t jFEXFormTOBs::formLRJetTOB(int jFEX, int iPhi, int iEta, int EtClus, in
     
     unsigned int minEtThreshold = ptMinToTopo/Resolution;
 
-    if (jFEXLargeRJetTOBEt < minEtThreshold) return 0;
+    if (jFEXLargeRJetTOBEt <= minEtThreshold) return 0;
     else return tobWord;
 }
 

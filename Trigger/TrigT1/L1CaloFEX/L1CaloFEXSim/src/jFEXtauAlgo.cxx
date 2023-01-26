@@ -51,8 +51,19 @@ StatusCode LVL1::jFEXtauAlgo::safetyTest() {
 void LVL1::jFEXtauAlgo::setup(int TTwindow[5][5], int seed[3][3]) {
 
     ATH_MSG_DEBUG(m_color.BLUE<<"---------------- jFEXtauAlgo::setup ----------------"<<m_color.END);
-    std::copy(&TTwindow[0][0], &TTwindow[0][0] + 25, &m_TTwindow[0][0]);
-    std::copy(&seed[0][0], &seed[0][0] + 9 , &m_SeedIDs[0][0]);
+    
+    for(int phi=0; phi<5; phi++) {
+        for (int eta=0; eta<5; eta++) {
+            m_TTwindow[phi][eta] = TTwindow[4-phi][eta];
+        }
+    }
+    
+    for(int phi=0; phi<3; phi++) {
+        for (int eta=0; eta<3; eta++) {
+            m_SeedIDs[phi][eta] = seed[2-phi][eta];
+        }
+    }
+    
 
 }
      
@@ -84,8 +95,6 @@ void LVL1::jFEXtauAlgo::buildSeeds()
 
     m_seedSet = true;
     ATH_MSG_DEBUG("---------------- jFEXtauAlgo::buildsSeeds finished ----------------");
-
-
 }
 
 
@@ -109,23 +118,20 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima(){
                     continue;
                 }
                 else if( (iphi > ieta) || (ieta==2 && iphi==2) ) { //strictly less than central
-                    if(central_seed<=m_SeedConditions_ET[iphi][ieta]) {
+                    if(central_seed<m_SeedConditions_ET[iphi][ieta]) {
                         return false;
                     }
                 }
                 else if((ieta > iphi) || (ieta == 0 && iphi == 0)) { //less than or equal to central
-                    if(central_seed< m_SeedConditions_ET[iphi][ieta]) {
+                    if(central_seed<=m_SeedConditions_ET[iphi][ieta]) {
                         return false;
                     }
                 }
-
             }
         }
     }
     m_isLocalMaxima=true;
-    
 
-    
     ATH_MSG_DEBUG("Local Maxima found. with ClusterET = "<<m_ClusterEt);
     return true;
 }

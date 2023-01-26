@@ -267,6 +267,7 @@ namespace LVL1 {
       tmp_jTowersIDs_subset_FPGA[myrow][mycol] = tmp_jTowersIDs_subset[myrow+24][mycol]; // For columns 8-END: Fills target rows 8-31 with source rows 32-55
     }
   }
+
   //FPGA 2 correcponds to U4, index 3
   ATH_CHECK(m_jFEXFPGATool->init(3, m_id));
   m_jFEXFPGATool->SetTowersAndCells_SG(tmp_jTowersIDs_subset_FPGA);

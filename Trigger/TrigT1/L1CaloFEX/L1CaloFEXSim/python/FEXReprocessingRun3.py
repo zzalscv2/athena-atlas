@@ -20,6 +20,7 @@ if __name__ == '__main__':
                                    Example: python -m L1CaloFEXTools.L1CaloFEXToolsConfig --filesInput "data22*" --evtMax 10 --outputs eTOBs """)
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
+    parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
     parser.add_argument('--outputs',nargs='+',choices={"jFex","eFex","gFex"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
@@ -31,16 +32,17 @@ if __name__ == '__main__':
     from AthenaCommon import Constants
     algLogLevel = getattr(Constants,args.outputLevel)
 
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         flags.Trigger.triggerConfig='DB'
 
     flags.Exec.OutputLevel = algLogLevel
     flags.Exec.MaxEvents = args.evtMax
+    flags.Exec.SkipEvents = args.skipEvents
     flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
   
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         s=args.filesInput[0].replace('*','').replace('.data','')
         flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
     else:
@@ -151,6 +153,7 @@ if __name__ == '__main__':
         ##################################################    
         jFEX = CompFactory.LVL1.jFEXDriver('jFEXDriver')
         jFEX.jSuperCellTowerMapperTool = CompFactory.LVL1.jSuperCellTowerMapper('jSuperCellTowerMapper')
+        jFEX.jSuperCellTowerMapperTool.SCellMasking = True
         jFEX.jFEXSysSimTool = CompFactory.LVL1.jFEXSysSim('jFEXSysSimTool')
         
         #TOBs
@@ -198,7 +201,18 @@ if __name__ == '__main__':
         outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', 'L1_jFexFwdElRoI')
         outputEDM += addEDM('xAOD::jFexSumETRoIContainer', 'L1_jFexSumETRoI')
         outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , 'L1_jFexMETRoI'  ) 
-        
+
+        ##################################################
+        # jFEX decoded Towers
+        ##################################################  
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
+        inputjFexTool = jFexInputByteStreamToolCfg('jFexInputBSDecoder', flags)
+        for module_id in inputjFexTool.ROBIDs:
+            maybeMissingRobs.append(module_id)
+
+        decoderTools += [inputjFexTool]
+        # saving/adding the jTower xAOD container
+        outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)        
 
     if "gFex" in args.outputs:    
 
@@ -263,7 +277,12 @@ if __name__ == '__main__':
 
     
     decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder", DecoderTools=decoderTools, MaybeMissingROBs=maybeMissingRobs)
-    acc.addEventAlgo(decoderAlg, primary=True, sequenceName='AthAlgSeq')
+    acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
+    
+    # Uses SCell to decorate the jTowers
+    from L1CaloFEXAlgos.L1CaloFEXAlgosConfig import L1CaloFEXDecoratorCfg
+    DecoratorAlgo = L1CaloFEXDecoratorCfg('jFexTower2SCellDecorator')   
+    acc.merge(DecoratorAlgo)
    
     
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
