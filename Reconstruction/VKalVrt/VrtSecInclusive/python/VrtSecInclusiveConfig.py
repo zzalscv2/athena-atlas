@@ -16,12 +16,24 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
     from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
     from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
     from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
-    from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
-
 
     kwargs.setdefault("Extrapolator"                 , acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
     kwargs.setdefault("VertexFitterTool"             , acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags, IterationNumber = 30)))
-    kwargs.setdefault("PixelConditionsSummaryTool"   , acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags, UseByteStreamFEI4 = False, UseByteStreamFEI3 = False)))
+
+    if flags.Detector.GeometryPixel:
+        from PixelConditionsTools.PixelConditionsSummaryConfig import (
+            PixelConditionsSummaryCfg)
+        kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
+            PixelConditionsSummaryCfg(flags,
+                                      UseByteStreamFEI4 = False,
+                                      UseByteStreamFEI3 = False)))
+    elif flags.Detector.GeometryITkPixel:
+        from PixelConditionsTools.ITkPixelConditionsSummaryConfig import (
+            ITkPixelConditionsSummaryCfg)
+        kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(
+            ITkPixelConditionsSummaryCfg(flags,
+                                         UseByteStreamFEI4 = False,
+                                         UseByteStreamFEI3 = False)))
 
     TrackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags))
     acc.addPublicTool(TrackToVertexTool)
