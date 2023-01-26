@@ -40,29 +40,32 @@ public:
   SampleXsection& operator = (const SampleXsection& xs);
 
   bool readFromFile(const char* fName);
-  void setSample(const int dsid, const double xSect, const double kFact, const showering shower, const double xSectDw,
-                 const double xSectUp);
+  void setSample(const int dsid, const double xSect, const double kFact, const showering shower, const std::string showerJES);
 
   double getRawXsection(const int dsid) const;
   double getKfactor(const int dsid) const;
   double getXsection(const int dsid) const;
-  double getXsectionUp(const int dsid) const;
-  double getXsectionDown(const int dsid) const;
-  std::pair<double, double> getXsectionDownUp(const int dsid) const;
+  
   showering getShowering(const int dsid) const;
   std::string getShoweringString(const int dsid) const;
   int getShoweringIndex(const int dsid) const;
+
+  std::string getShowering_JES(const int dsid) const; 
+
   void setTranslator(const std::unordered_map<std::string, std::string>& map) {m_translator = map;}
+
+  bool checkShower_JES(const std::string& name) const;
 
 private:
   std::map<int, std::pair<double, double> > m_Xsects;
-  std::map<int, std::pair<double, double> > m_Uncert;
   std::map<int, showering > m_Showering;
+  std::map<int, std::string > m_ShoweringJES;
   std::unordered_map<std::string, std::string> m_translator;
 
   showering applyTranslation(const showering shower) const;
   std::string showerToString(const showering shower) const;
   showering stringToShower(const std::string& name) const;
+
 };
 
 #endif // SAMPLEXSECTION_H

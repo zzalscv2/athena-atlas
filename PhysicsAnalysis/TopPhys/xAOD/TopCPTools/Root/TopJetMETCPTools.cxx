@@ -300,10 +300,16 @@ namespace top {
       top::check(asg::setProperty(jetCalibrationTool, "IsData", !m_config->isMC()),
                  "Failed to set IsData " + std::to_string (!m_config->isMC()));
 
-      // experimental! Jet response MC-to-MC corrections
+      // Jet response MC-to-MC corrections
       // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ApplyJetCalibrationR21#MC_to_MC_calibrations_this_is_cu
       if (m_config->jetMCtoMCCalibration() != "None" && m_config->jetMCtoMCCalibration() != "pythia" && m_config->isMC()) {
 	ATH_MSG_INFO("JES Calibration MC-to-MC      : " << m_config->jetMCtoMCCalibration());
+
+	if (m_config->jetMCtoMCCalibration() == "Undefined" && m_config->useJESPrecisionFlavourUncertainties()) {
+	  ATH_MSG_ERROR("useJESPrecisionFlavourUncertainties option provided but jetMCtoMCCalibration option is Undefined! This means you are using a TopDataPreparation file that does NOT contain the shower information for JES.");
+	  return StatusCode::FAILURE;
+	}
+
 	top::check(asg::setProperty(jetCalibrationTool, "ShowerModel", m_config->jetMCtoMCCalibration()),
 		   "Failed to set ShowerModel " + m_config->jetMCtoMCCalibration());
 	top::check(asg::setProperty(jetCalibrationTool, "CalibSequence", calibSequence + "_MC2MC"),
@@ -392,6 +398,7 @@ namespace top {
 	ATH_MSG_ERROR("useJESPrecisionFlavourUncertainties option provided but jetMCtoMCCalibration option is None! You have to provide a valid jetMCtoMCCalibration option.");
         return StatusCode::FAILURE;
       }
+
       ATH_MSG_INFO("useJESPrecisionFlavourUncertainties option provided. JES precision flavour uncertainties are used.");
       conference = "Summer2022"; // case where we want JES precision flavour uncertainties
       if (JMSOption != "") {
