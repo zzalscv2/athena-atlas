@@ -24,22 +24,33 @@ def histogramDictionary(histogramList):
 class TestGMT(unittest.TestCase):
     """Tests for GenericMonitoringTool"""
 
+    def assertCheckName(self, tool, name):
+        if callable(tool.name):
+            tool_name = tool.name()
+        else:
+            tool_name = tool.name
+        self.assertEqual(tool_name, name)
+
     def test_createGMT(self):
         flags = initConfigFlags()
         gmt = GenericMonitoringTool(flags)
+        self.assertCheckName(gmt, 'GenericMonitoringTool')
         self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
 
     def test_createGMT_withName(self):
         flags = initConfigFlags()
-        gmt = GenericMonitoringTool(flags, 'GenericMonitoringTool')
+        gmt = GenericMonitoringTool(flags, 'gmt')
+        self.assertCheckName(gmt, 'gmt')
         self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
 
     def test_createGMT_legacy(self):
         gmt = GenericMonitoringTool()
+        self.assertCheckName(gmt, 'GenericMonitoringTool')
         self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
 
     def test_createGMT_legacyName(self):
-        gmt = GenericMonitoringTool('GenericMonitoringTool')
+        gmt = GenericMonitoringTool('gmt')
+        self.assertCheckName(gmt, 'gmt')
         self.assertIsInstance(gmt, CompFactory.GenericMonitoringTool)
 
     def test_pickle(self):
@@ -179,9 +190,20 @@ class TestLegacy(TestGMT):
         from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
         self.assertFalse(isComponentAccumulatorCfg())
 
-    def test_configurableType(self):
+    def test_configurableTypeWithFlags(self):
         flags = initConfigFlags()
         gmt = GenericMonitoringTool(flags, 'gmt')
+        self.assertCheckName(gmt, 'gmt')
+        self.assertFalse(hasattr(gmt,'__cpp_type__'))
+
+    def test_configurableTypeWithNoneFlags(self):
+        gmt = GenericMonitoringTool(None, 'gmt')
+        self.assertCheckName(gmt, 'gmt')
+        self.assertFalse(hasattr(gmt,'__cpp_type__'))
+
+    def test_configurableTypeWithoutFlags(self):
+        gmt = GenericMonitoringTool('gmt')
+        self.assertCheckName(gmt, 'gmt')
         self.assertFalse(hasattr(gmt,'__cpp_type__'))
 
 
