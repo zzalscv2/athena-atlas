@@ -3,7 +3,7 @@
 # art-description: Express processing at Tier0
 # art-type: grid
 # art-include: master/Athena
-# art-include: 22.0/Athena
+# art-include: 23.0/Athena
 # art-athena-mt: 8
 
 Reco_tf.py  \

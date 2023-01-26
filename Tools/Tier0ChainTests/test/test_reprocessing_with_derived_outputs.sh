@@ -5,6 +5,7 @@
 # art-include: 21.0/Athena
 # art-include: 21.0-TrigMC/Athena
 # art-include: master/Athena
+# art-include: 23.0/Athena
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
 # art-include: 21.3/Athena
@@ -14,7 +15,7 @@
 
 Reco_tf.py  \
 --AMI=r12391 \
---athenaopts "RDOtoRDOTrigger:--threads=8" "RAWtoESD:--threads=8" "ESDtoAOD:--threads=8" \
+--athenaopts="--threads=8" \
 --maxEvents=500 \
 --ignoreErrors=False \
 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data16_13TeV.00304008.physics_Main.daq.RAW._lb0838._SFO-6._0001.data \
