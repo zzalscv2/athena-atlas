@@ -303,9 +303,9 @@ namespace dqutils {
     virtual bool setFile(const std::string & fileName);
 
 
-    virtual void printDirectories() const;
+    virtual void printDirectories();
 
-    virtual void printStatistics() const;
+    virtual void printStatistics();
 
 
     /**
@@ -318,7 +318,7 @@ namespace dqutils {
     static std::string getHanResults( const std::string & hanResultsDir, const std::string & input, 
 				       const std::string & hcfg, const std::string & hcfg_min10, const std::string & hcfg_min30);
 
-    virtual void printHanConfig() const;
+    virtual void printHanConfig();
 
     virtual std::string FindCommon(const std::string & name1, const std::string & name2) const;
   protected:
