@@ -66,16 +66,28 @@ def setupLoggingLevels(flags, ca):
         This is to support pattern when large group of components is set to less verbose logging mode
         and with more specific selection more verbosity is enabled. E.g. all algorithms can be set to WARNING, 
         the all having calo in the name to INFO, and CaloCellMaker to DEBUG.  
-        
+
         Each setting can be either a string or a list of strings.
+
+        If the component-path contains no '/' it is assumed to be a plain component-name. In this case, 
+        the output-level is set using the property MessageSvc.setDebug (or equivalent). This works also
+        for converters that do not inherit PropertyHolder. 
     """
+    
+    msgSvc=ca.getService("MessageSvc") #by the time this snippet runs, the ComponentAccumulator should really contain the MessageSvc
+
+
+    
     from AthenaCommon.Constants import ERROR,WARNING,INFO,DEBUG,VERBOSE
     def __tolist(d):
         return ([d] if d != '' else []) if isinstance(d, str) else d
-    for flag_val, level in [(flags.Exec.ErrorMessageComponents, ERROR),
-                            (flags.Exec.WarningMessageComponents, WARNING),
-                            (flags.Exec.InfoMessageComponents, INFO),
-                            (flags.Exec.DebugMessageComponents, DEBUG),
-                            (flags.Exec.VerboseMessageComponents, VERBOSE) ]:
+    for flag_val, level,setter in [(flags.Exec.ErrorMessageComponents, ERROR, msgSvc.setError),
+                                   (flags.Exec.WarningMessageComponents, WARNING, msgSvc.setWarning),
+                                   (flags.Exec.InfoMessageComponents, INFO, msgSvc.setInfo),
+                                   (flags.Exec.DebugMessageComponents, DEBUG, msgSvc.setDebug),
+                                   (flags.Exec.VerboseMessageComponents, VERBOSE, msgSvc.setVerbose) ]:
         for c in __tolist(flag_val):
-            ca.foreach_component(c).OutputLevel=level
+            if "/" in c:
+                ca.foreach_component(c).OutputLevel=level
+            else: # a plain component name is given
+                setter.append(c)
