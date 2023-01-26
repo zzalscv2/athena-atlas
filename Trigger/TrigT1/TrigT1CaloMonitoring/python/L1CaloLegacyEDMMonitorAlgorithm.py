@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def L1CaloLegacyEDMMonitoringConfig(inputFlags):
     '''Function to configure LVL1 L1CaloLegacyEDM algorithm in the monitoring system.'''
@@ -83,27 +83,27 @@ def L1CaloLegacyEDMMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
 
     inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
 
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
-
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    L1CaloLegacyEDMMonitorCfg = L1CaloLegacyEDMMonitoringConfig(ConfigFlags)
+    L1CaloLegacyEDMMonitorCfg = L1CaloLegacyEDMMonitoringConfig(flags)
     cfg.merge(L1CaloLegacyEDMMonitorCfg)
 
     # options - print all details of algorithms, very short summary 

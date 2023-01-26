@@ -36,8 +36,9 @@ include("RecExCond/AllDet_detDescr.py")
 
 # menu with default configuration for testing
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
+flags = initConfigFlags()
 flags.Input.Files = athenaCommonFlags.FilesInput()
 flags.Trigger.triggerConfig = "FILE"
 flags.lock()

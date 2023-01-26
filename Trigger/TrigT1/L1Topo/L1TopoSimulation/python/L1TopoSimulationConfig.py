@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from L1TopoSimulation.L1TopoSimulationConf import LVL1__L1TopoSimulation, LVL1__RoiB2TopoInputDataCnv
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena
@@ -205,7 +205,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
 
 
 if __name__ == '__main__':
-  from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+  from AthenaConfiguration.AllConfigFlags import initConfigFlags
   from AthenaCommon.Logging import logging
   from AthenaCommon.Constants import VERBOSE,DEBUG,WARNING
   import argparse
@@ -241,7 +241,9 @@ if __name__ == '__main__':
   if args.log == 'warning': algLogLevel = WARNING
   if args.log == 'debug': algLogLevel = DEBUG
   if args.log == 'verbose': algLogLevel = VERBOSE
-  
+
+  flags = initConfigFlags()
+
   if "data22" in filename:
     flags.Trigger.triggerConfig='DB'
   flags.Exec.OutputLevel = WARNING

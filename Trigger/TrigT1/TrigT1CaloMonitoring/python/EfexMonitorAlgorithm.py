@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def EfexMonitoringConfig(inputFlags):
     '''Function to configure LVL1 Efex algorithm in the monitoring system.'''
@@ -151,27 +151,28 @@ def EfexMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
 
     # MCs processed adding L1_eEMRoI
     inputs = glob.glob('/eos/user/t/thompson/ATLAS/LVL1_mon/MC_ESD/l1calo.361024.Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ4W.eFex_gFex_2022-01-13T2101.root')
-    
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
 
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
+
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    EfexMonitorCfg = EfexMonitoringConfig(ConfigFlags)
+    EfexMonitorCfg = EfexMonitoringConfig(flags)
     cfg.merge(EfexMonitorCfg)
 
     # options - print all details of algorithms, very short summary 
