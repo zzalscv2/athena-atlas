@@ -646,7 +646,7 @@ namespace ST {
       ATH_MSG_INFO( "JET AverageLArQF: " << AverageLArQF );
     }
 
-    ATH_MSG_VERBOSE( "JET isbad?: " << (int) acc_bad(input) );
+    ATH_MSG_VERBOSE( "JET isbad?: " << static_cast<int>(acc_bad(input)));
 
     return isgoodjet;
   }
@@ -676,7 +676,7 @@ namespace ST {
       ATH_MSG_VERBOSE("Jet cleaning is available only for EMTopo jet collection (InputType == 1), your jet collection: " << m_jetInputType );
     }
 
-    ATH_MSG_VERBOSE( "JET isbad?: " << (int) acc_bad(input) );
+    ATH_MSG_VERBOSE( "JET isbad?: " << static_cast<int>(acc_bad(input)));
 
     return acc_bad(input);
   }
