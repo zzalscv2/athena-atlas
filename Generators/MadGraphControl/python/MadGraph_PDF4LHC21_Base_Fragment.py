@@ -2,8 +2,8 @@
 
 import MadGraphControl.MadGraphUtils
 MadGraphControl.MadGraphUtils.MADGRAPH_PDFSETTING={
-    'central_pdf': 303000, #NNPDF30_nlo_as_0118_hessian    
-    'pdf_variations':[303000,93300], # NNPDF30_nlo_as_0118_hessian PDF4LHC21_40_pdfas
+    'central_pdf': 93300, #NNPDF30_nlo_as_0118_hessian    
+    'pdf_variations':[303000,93300], # NNPDF30_nlo_as_0118_hessian PDF4LHC21_40
     'alternative_pdfs':[266000, #NNPDF30_nlo_as_0119
                         265000, #NNPDF30_nlo_as_0117
                         303200, #NNPDF30_nnlo_as_0118_hessian
