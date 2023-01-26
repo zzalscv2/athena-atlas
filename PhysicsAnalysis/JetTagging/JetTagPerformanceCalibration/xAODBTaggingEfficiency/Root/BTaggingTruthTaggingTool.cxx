@@ -564,6 +564,9 @@ StatusCode BTaggingTruthTaggingTool::CalculateResults(TRFinfo &trfinf, Analysis:
   results.syst_names.clear();
 
   for(unsigned int i = 0; i< n_systs; i++){
+    if(i!=0 && m_useSys) {
+      ANA_CHECK( m_effTool->applySystematicVariation(m_eff_syst[i]) );
+    }
     
     results.syst_names.push_back(m_sys_name.at(i));
     
@@ -579,7 +582,7 @@ StatusCode BTaggingTruthTaggingTool::CalculateResults(TRFinfo &trfinf, Analysis:
       for(auto t : results.is_tagged){
         is_tagged.push_back(static_cast<int>(t));
       }
-      results.map_SF[m_sys_name.at(i)]=getEvtSF(trfinf,is_tagged, i);
+      results.map_SF[m_sys_name.at(i)]=getEvtSF(trfinf,is_tagged);
     }
 
     //go over the ntag combinations 
@@ -590,13 +593,19 @@ StatusCode BTaggingTruthTaggingTool::CalculateResults(TRFinfo &trfinf, Analysis:
       	ATH_MSG_DEBUG("number of jets: " <<trfinf.njets <<" less than max btag: " <<m_nbtag <<". Return BTag SF = 1. Consider applying an event pre-selection if this happens too often.");
       }
       else{
-      	results.map_SF_ex[m_sys_name.at(i)].at(j) = getEvtSF(trfinf,results.trf_bin_ex.at(j), i);
-      	results.map_SF_in[m_sys_name.at(i)].at(j) = getEvtSF(trfinf,results.trf_bin_in.at(j), i);
+	results.map_SF_ex[m_sys_name.at(i)].at(j) = getEvtSF(trfinf,results.trf_bin_ex.at(j));
+	results.map_SF_in[m_sys_name.at(i)].at(j) = getEvtSF(trfinf,results.trf_bin_in.at(j));
       }
       
       results.map_trf_weight_ex[m_sys_name.at(i)].at(j) = trfinf.trfw_ex.at(j) * results.map_SF_ex[m_sys_name.at(i)].at(j);
       results.map_trf_weight_in[m_sys_name.at(i)].at(j) = trfinf.trfw_in.at(j) * results.map_SF_in[m_sys_name.at(i)].at(j);
     }
+  }
+
+  if(m_useSys) {  // reset syst to nominal
+    CP::SystematicSet defaultSet;
+    
+    ANA_CHECK( m_effTool->applySystematicVariation(defaultSet) );
   }
 
   return StatusCode::SUCCESS;
@@ -1172,7 +1181,7 @@ StatusCode BTaggingTruthTaggingTool::getDirectTaggedJets(TRFinfo &trfinf,std::ve
 }
 
 
-float BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf, std::vector<int>& quantiles, int sys){
+float BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf, std::vector<int>& quantiles){
 
   ANA_CHECK_SET_TYPE (StatusCode);
 
@@ -1180,10 +1189,6 @@ float BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf, std::vector<int>& quan
 
   if (m_ignoreSF) 
     return SF;
-
-  if(sys!=0 && m_useSys) {
-    ANA_CHECK( m_effTool->applySystematicVariation(m_eff_syst[sys]) );
-  }
 
   for(unsigned int i =0; i< trfinf.njets; i++) {
     float jetSF = 1;
@@ -1214,11 +1219,6 @@ float BTaggingTruthTaggingTool::getEvtSF(TRFinfo &trfinf, std::vector<int>& quan
     SF*=jetSF;
   } //loop over jets
   
-  if(sys!=0 && m_useSys) {  // reset syst to nominal
-    CP::SystematicSet defaultSet;
-    
-    ANA_CHECK( m_effTool->applySystematicVariation(defaultSet) );
-  }
   ATH_MSG_DEBUG(" FINAL SF : " <<SF);
   return SF;
 }

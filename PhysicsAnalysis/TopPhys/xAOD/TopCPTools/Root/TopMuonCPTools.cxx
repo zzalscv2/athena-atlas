@@ -281,7 +281,7 @@ namespace top {
       tool = new CP::MuonTriggerScaleFactors(name);
       top::check(asg::setProperty(tool, "MuonQuality", quality),
                  "Failed to set MuonQuality for " + name);
-      top::check(asg::setProperty(tool, "AllowZeroSF", true),
+      top::check(asg::setProperty(tool, "AllowZeroSF", false),
                  "Failed to set AllowZeroSF for " + name);
       if (m_config->muonSFCustomInputFolder() != " ") {
         top::check(asg::setProperty(tool, "CustomInputFolder", m_config->muonSFCustomInputFolder()),

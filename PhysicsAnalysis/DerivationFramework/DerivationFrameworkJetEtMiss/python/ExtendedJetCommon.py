@@ -329,6 +329,8 @@ def getJetExternalAssocTool(jetalg, extjetalg, **options):
 
     return jetassoctool
 
+##################################################################
+
 def applyJetCalibration(jetalg,algname,sequence,fatjetconfig = 'comb', suffix = ''):
     calibtoolname = 'DFJetCalib_'+jetalg
     jetaugtool = getJetAugmentationTool(jetalg, suffix)
@@ -912,6 +914,7 @@ def addCSSKSoftDropJets(sequence, seq_name, logger=extjetlog):
                     writeUngroomed=True, mods="lctopo_groomed",
                     constmods=["CS", "SK"])
 
+
 ##################################################################
 applyJetCalibration_xAODColl("AntiKt4EMTopo")
 updateJVT_xAODColl("AntiKt4EMTopo")
@@ -943,4 +946,25 @@ def addOriginCorrectedClusters(slimhelper,writeLC=False,writeEM=False):
             slimhelper.AppendToDictionary["EMOriginTopoClustersAux"]='xAOD::ShallowAuxContainer'
             slimhelper.ExtraVariables.append('EMOriginTopoClusters.calE.calEta.calPhi')
 
-
+##################################################################
+# Schedule the clustermet tool: Saves manually calculated MET as 
+# doubles to event info.
+##################################################################
+def addClusterMet(sequence=DerivationFrameworkJob):
+    if hasattr(sequence,"ClusterMetAugmentation"):
+        dfjetlog.warning( "ClusterMetAugmentation: ClusterMetAugmentation already scheduled on sequence "+sequence.name )
+    else:
+        clustermetaug = CfgMgr.DerivationFramework__CommonAugmentation("ClusterMetAugmentation")
+        sequence += clustermetaug
+        clustermetaugtool = None
+        from AthenaCommon.AppMgr import ToolSvc
+        if hasattr(ToolSvc,"ClusterMetAugmentationTool"):
+            clustermetaugtool = getattr(ToolSvc,"ClusterMetAugmentationTool")
+        else:
+            clustermetaugtool = CfgMgr.DerivationFramework__ClusterMetAugmentationTool("ClusterMetAugmentationTool")
+            ToolSvc += clustermetaugtool
+        if not clustermetaugtool in clustermetaug.AugmentationTools:
+            clustermetaug.AugmentationTools.append(clustermetaugtool)    
+            
+if not usingEVNT:
+    addClusterMet(DerivationFrameworkJob)

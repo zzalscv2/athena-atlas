@@ -82,14 +82,23 @@ const xAOD::Vertex* CorrectPFOTool::getPrimaryVertex() const {
 StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont) const { 
 
   const xAOD::Vertex* vtx = nullptr;
+  bool goodVtx = true;
   if(m_correctneutral) {
     vtx = getPrimaryVertex();
     if(vtx==nullptr) {
       ATH_MSG_ERROR("Primary vertex container was empty or no valid vertex found!");
       return StatusCode::FAILURE;
-    } else if (vtx->vertexType()==xAOD::VxType::NoVtx) {
-      ATH_MSG_VERBOSE("No genuine primary vertex found. Will not apply origin correction");
     }
+    // Don't correct to vertices outside the inner tracker, this can lead to pathologies
+    // Numbers below are in mm and correspond to inner detector volume (also valid for ITk)
+    float vtxRadius = TMath::Sqrt((vtx->x())*(vtx->x()) + (vtx->y())*(vtx->y()));
+    goodVtx = ((vtxRadius < 1100) && (fabs(vtx->z()) < 3500));
+    if (vtx->vertexType()==xAOD::VxType::NoVtx) {
+      ATH_MSG_VERBOSE("No genuine primary vertex found. Will not apply origin correction");
+      goodVtx = false;
+    }
+    else if (!goodVtx)
+      ATH_MSG_VERBOSE("Primary vertex is outside of the inner detector volume. Will not apply origin correction");
   }
 
   //CP::PFO_JetMETConfig_inputScale inscale = m_inputIsEM ? CP::EM : CP::LC;
@@ -101,7 +110,7 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont) const {
 
     if ( fabs(ppfo->charge())<FLT_MIN) { // Neutral PFOs
       if(m_correctneutral) {
-        ATH_CHECK( applyNeutralCorrection(*ppfo, *vtx) );
+        ATH_CHECK( applyNeutralCorrection(*ppfo, *vtx, goodVtx) );
       }
     } else { // Charged PFOs
       if(m_correctcharged) {
@@ -174,21 +183,22 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CorrectPFOTool::applyNeutralCorrection(xAOD::PFO& pfo, const xAOD::Vertex& vtx) const {
+StatusCode CorrectPFOTool::applyNeutralCorrection(xAOD::PFO& pfo, const xAOD::Vertex& vtx, bool goodVtx) const {
   if (pfo.e() < FLT_MIN) { //This is necessary to avoid changing sign of pT for pT<0 PFO
     pfo.setP4(0,0,0,0);
-  } else {
-    if ( !m_inputIsEM || m_calibrate ) { // Use LC four-vector
-      // Only correct if we really reconstructed a vertex
-      if(vtx.vertexType()==xAOD::VxType::PriVtx) {
-	pfo.setP4(pfo.GetVertexCorrectedFourVec(vtx));
-      }
-    } else { // Use EM four-vector
-      // Only apply origin correction if we really reconstructed a vertex
-      if(vtx.vertexType()==xAOD::VxType::PriVtx) {
-	pfo.setP4(pfo.GetVertexCorrectedEMFourVec(vtx));
-      } else {pfo.setP4(pfo.p4EM());} // Just set EM 4-vec
-    }
+    return StatusCode::SUCCESS;
+  }
+  if ( !m_inputIsEM || m_calibrate ) { // Use LC four-vector
+    // Only correct if we really reconstructed a vertex
+    if(goodVtx && vtx.vertexType()==xAOD::VxType::PriVtx)
+      pfo.setP4(pfo.GetVertexCorrectedFourVec(vtx));
+  }
+  else { // Use EM four-vector
+    // Only apply origin correction if we really reconstructed a vertex
+    if(goodVtx && vtx.vertexType()==xAOD::VxType::PriVtx)
+      pfo.setP4(pfo.GetVertexCorrectedEMFourVec(vtx));
+    else
+      pfo.setP4(pfo.p4EM()); // Just set EM 4-vec
   }
   return StatusCode::SUCCESS;
 }
