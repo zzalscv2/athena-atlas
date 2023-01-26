@@ -1454,7 +1454,6 @@ namespace top {
       this->doLargeRPseudodataJER(true);
     }
     this->jetCalibSequence(settings->value("JetCalibSequence"));
-    this->jetMCtoMCCalibration(settings->value("JetMCtoMCCalibration"));
     this->useJESPrecisionFlavourUncertainties(settings->value("useJESPrecisionFlavourUncertainties") == "True");
     this->allowSmallRJMSforAFII(settings->value("AllowJMSforAFII") == "True");
     this->doJVTinMET(settings->retrieve("JVTinMETCalculation"));

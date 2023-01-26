@@ -69,7 +69,7 @@ namespace top {
     // TDP path
     void setTDPPath(const std::string& s);
     inline const std::string& getTDPPath() const {return m_topDataPreparationPath;}
-    
+
     //showering algorithm
     void setShoweringAlgorithm(SampleXsection::showering in) { m_showeringAlgo=in; }
     SampleXsection::showering getShoweringAlgorithm() const {return m_showeringAlgo;}

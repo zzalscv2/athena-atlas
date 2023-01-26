@@ -277,6 +277,11 @@ int main(int argc, char** argv) {
       ATH_MSG_INFO("DSID: " << topConfig->getDSID() << "\t" << "ShowerIndex: " << ShowerIndex << " PS generator: "<< tdp.getShoweringString(topConfig->getDSID()));
       topConfig->setMapIndex(ShowerIndex);
       topConfig->setShoweringAlgorithm(tdp.getShowering(topConfig->getDSID()));
+      
+      if(topConfig->useJESPrecisionFlavourUncertainties()){
+	topConfig->jetMCtoMCCalibration(tdp.getShowering_JES(topConfig->getDSID())); // sets the shower value for the precision JES recommendations
+	ATH_MSG_INFO("DSID: " << topConfig->getDSID() << "\t" << " PS generator for JES recommendations: "<< tdp.getShowering_JES(topConfig->getDSID()));
+      }
     }
     // check year
     {

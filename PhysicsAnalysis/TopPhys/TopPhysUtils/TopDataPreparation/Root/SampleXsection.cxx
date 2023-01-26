@@ -15,7 +15,6 @@ using namespace std;
 SampleXsection& SampleXsection::operator = (const SampleXsection& xs) {
   if (this != &xs) {
     m_Xsects = xs.m_Xsects;
-    m_Uncert = xs.m_Uncert;
   }
   return *this;
 }
@@ -31,10 +30,11 @@ bool SampleXsection::readFromFile(const char* fName) {
     if (!line.empty() && line[0] != '#') {
       istringstream istr(line);
       int dsid = -1;
-      double xSect, kFact, xSectDw, xSectUp;
-      string s_shower, s_xSectDw, s_xSectUp;
+      double xSect, kFact;
+      string s_shower, s_showerJES;
       showering shower;
-      istr >> dsid >> xSect >> kFact >> s_shower >> s_xSectDw >> s_xSectUp;
+
+      istr >> dsid >> xSect >> kFact >> s_shower >> s_showerJES;
       if (!s_shower.empty() && s_shower[0] != '#') {
         shower = stringToShower(s_shower);
         if (shower == showering::unknown) {
@@ -42,27 +42,24 @@ bool SampleXsection::readFromFile(const char* fName) {
           "ERROR!! TopDataPreparation::SampleXsection::readFromFile: unknown showering (which is needed for btagging SF!!!) : "
                << s_shower << " for DSID= " << dsid << endl;
         }
-
-        if (!s_xSectDw.empty() && s_xSectDw[0] != '#') {
-          xSectDw = atof(s_xSectDw.c_str());
-          if (!s_xSectUp.empty()) {
-            xSectUp = atof(s_xSectUp.c_str());
-          } else {
-            cerr << "ERROR!! SampleXsection::readFromFile: xSectDw of " << dsid << " is defined ( " << s_xSectDw <<
-            " ), but not xSectUp" << endl;
-            xSectUp = -1.;
-          }
-        } else {
-          xSectDw = -1.;
-          xSectUp = -1.;
-        }
+	
       }// !s_showering.empty()
       else {
-        xSectDw = -1.;
-        xSectUp = -1.;
         shower = unknown;
       }
-      setSample(dsid, xSect, kFact, shower, xSectDw, xSectUp);
+      
+      if (!s_showerJES.empty() && s_showerJES[0] != '#') {
+	if(!checkShower_JES(s_showerJES)){
+	  cerr <<
+	    "ERROR!! TopDataPreparation::SampleXsection::readFromFile: unknown showering (which is needed for JES MC2MC scale factors!!!) : "
+               << s_showerJES << " for DSID= " << dsid << endl;
+	}
+      }
+      else {
+	s_showerJES = "Undefined";
+      }
+
+      setSample(dsid, xSect, kFact, shower, s_showerJES);
     }
   }
 
@@ -71,7 +68,7 @@ bool SampleXsection::readFromFile(const char* fName) {
 }
 
 void SampleXsection::setSample(const int dsid, const double xSect, const double kFact, const showering shower,
-                               const double xSectDw, const double xSectUp) {
+			       std::string showerJES) {
   if (dsid < 0) return;
 
   map<int, pair<double, double> >::const_iterator it = m_Xsects.find(dsid);
@@ -81,8 +78,8 @@ void SampleXsection::setSample(const int dsid, const double xSect, const double 
     // it->second.first <<endl;
   }
   m_Xsects[dsid] = pair<double, double>(xSect, kFact);
-  m_Uncert[dsid] = pair<double, double>(xSectDw, xSectUp);
   m_Showering[dsid] = shower;
+  m_ShoweringJES[dsid] = showerJES;
 }
 
 double SampleXsection::getRawXsection(const int dsid) const {
@@ -106,28 +103,6 @@ double SampleXsection::getXsection(const int dsid) const {
   return -1;
 }
 
-double SampleXsection::getXsectionDown(const int dsid) const {
-  map<int, pair<double, double> >::const_iterator it = m_Uncert.find(dsid);
-  if (it != m_Uncert.end()) return it->second.first;
-
-  return -1;
-}
-
-double SampleXsection::getXsectionUp(const int dsid) const {
-  map<int, pair<double, double> >::const_iterator it = m_Uncert.find(dsid);
-  if (it != m_Uncert.end()) return it->second.second;
-
-  return -1;
-}
-
-pair<double, double> SampleXsection::getXsectionDownUp(const int dsid) const {
-  map<int, pair<double, double> >::const_iterator it = m_Uncert.find(dsid);
-  if (it != m_Uncert.end()) return it->second;
-
-  pair<double, double> temp = pair<double, double>(-1, -1);
-  return temp;
-}
-
 SampleXsection::showering SampleXsection::getShowering(const int dsid) const {
   map<int, showering >::const_iterator it = m_Showering.find(dsid);
   if (it != m_Showering.end()) {
@@ -141,6 +116,21 @@ SampleXsection::showering SampleXsection::getShowering(const int dsid) const {
 
   return unknown;
 }
+
+std::string SampleXsection::getShowering_JES(const int dsid) const {
+ 
+  std::string shower = "Undefined";
+
+  map<int, std::string >::const_iterator it = m_ShoweringJES.find(dsid);
+  if (it != m_ShoweringJES.end()) {
+
+    shower = it->second;
+    
+  }
+
+  return shower;
+}
+
 
 std::string SampleXsection::getShoweringString(const int dsid) const
 {
@@ -221,4 +211,22 @@ SampleXsection::showering SampleXsection::stringToShower(const std::string& name
   else if (name == "herwigpp721") return showering::herwigpp721;
 
   return showering::unknown;
+}
+
+bool SampleXsection::checkShower_JES(const std::string& name) const{
+  
+  if (name == "pythia") return true;
+  else if (name == "H713") return true;
+  else if (name == "H716") return true;
+  else if (name == "H716dip") return true;
+  else if (name == "H721") return true;
+  else if (name == "Sh221") return true;
+  else if (name == "Sh222") return true;
+  else if (name == "Sh225") return true;
+  else if (name == "Sh225Lund") return true;
+  else if (name == "Sh2211") return true;
+  else if (name == "Sh2211tun") return true;
+  else if (name == "None") return true;
+  else return false;
+  
 }
