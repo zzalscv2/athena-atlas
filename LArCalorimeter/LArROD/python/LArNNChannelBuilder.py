@@ -1,8 +1,9 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from LArRecUtils.LArADC2MeVCondAlgConfig import LArADC2MeVCondAlgCfg
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
+from LArRecUtils.LArRecUtilsConfig import LArOFCCondAlgCfg
 from LArConfiguration.LArConfigFlags import RawChannelSource
 
 
@@ -13,21 +14,50 @@ def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwar
 
     # the NN always requires 1 sample in the past
     kwargs.setdefault("firstSample", (configFlags.LAr.ROD.nPreceedingSamples-1) if configFlags.LAr.ROD.nPreceedingSamples!=0 else configFlags.LAr.ROD.FirstSample)
+    obj = "AthenaAttributeList" 
+    dspkey = 'Run2DSPThresholdsKey'
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
 
     if configFlags.Input.isMC:
+        acc.merge(LArOFCCondAlgCfg(configFlags))
         kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
 
-        if configFlags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        if configFlags.GeoModel.Run is LHCPeriod.Run1:  # back to flat threshold
+           kwargs.setdefault("useDB", False)
+           dspkey = ''
+        else:
+           fld="/LAR/NoiseOfl/DSPThresholds"
+           sgkey=fld
+           dbString="OFLP200"
+           dbInstance="LAR_OFL"
+           acc.merge(addFolders(configFlags,fld, dbInstance, className=obj, db=dbString))
+
+        if configFlags.Common.ProductionStep is ProductionStep.PileUpPresampling:
             kwargs.setdefault("LArDigitKey", configFlags.Overlay.BkgPrefix + "LArDigitContainer_MC")
         else:
             kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
     else:
         acc.merge(LArElecCalibDbCfg(configFlags,("OFC","Shape","Pedestal")))
         if configFlags.Overlay.DataOverlay:
-            kwargs.setdefault("LArDigitKey", "Bkg_LArDigitContainer_MC")
+            kwargs.setdefault("LArDigitKey", "LArDigitContainer_MC")
             kwargs.setdefault("LArRawChannelKey", "LArRawChannels")
         else:
             kwargs.setdefault("LArRawChannelKey", "LArRawChannels_FromDigits")
+        
+        if 'COMP200' in configFlags.IOVDb.DatabaseInstance:
+            fld='/LAR/Configuration/DSPThreshold/Thresholds'
+            obj='LArDSPThresholdsComplete'
+            dspkey = 'Run1DSPThresholdsKey'
+            sgkey='LArDSPThresholds'
+            dbString = 'COMP200'
+        else:
+            fld="/LAR/Configuration/DSPThresholdFlat/Thresholds"
+            sgkey=fld
+            dbString="CONDBR2"
+        dbInstance="LAR_ONL"
+        acc.merge(addFolders(configFlags,fld, dbInstance, className=obj, db=dbString))
+
+    kwargs.setdefault(dspkey, sgkey)
 
     if configFlags.LAr.ROD.forceIter or configFlags.LAr.RawChannelSource is RawChannelSource.Calculated:
         # iterative OFC procedure
