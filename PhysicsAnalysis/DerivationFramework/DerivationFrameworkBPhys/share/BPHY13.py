@@ -570,12 +570,10 @@ BPHY13_AllVariables += ["InDetTrackParticles"]
 ## combined / extrapolated muon track particles 
 ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
 ##        are store in InDetTrackParticles collection)
-BPHY13_AllVariables += ["CombinedMuonTrackParticles"]
-BPHY13_AllVariables += ["ExtrapolatedMuonTrackParticles"]
+BPHY13_AllVariables += ["CombinedMuonTrackParticles", "ExtrapolatedMuonTrackParticles"]
 
 ## muon container
-BPHY13_AllVariables += ["Muons"]
-BPHY13_AllVariables += ["MuonSegments"]
+BPHY13_AllVariables += ["Muons", "MuonSegments"]
 
 BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
 BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
@@ -617,6 +615,7 @@ BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPH
 if isSimulation:
     BPHY13_AllVariables += ["TruthEvents","TruthParticles","TruthVertices","MuonTruthParticles"]
 
+BPHY13SlimmingHelper.SmartCollections = ["Muons", "PrimaryVertices", "InDetTrackParticles"]
 BPHY13SlimmingHelper.AllVariables = BPHY13_AllVariables
 BPHY13SlimmingHelper.StaticContent = BPHY13_StaticContent
 BPHY13SlimmingHelper.AppendContentToStream(BPHY13Stream)

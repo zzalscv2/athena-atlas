@@ -17,6 +17,7 @@
 #include "DerivationFrameworkBPhys/LocalVector.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include <algorithm>
+#include <functional>
 
 namespace DerivationFramework {
   typedef ElementLink<xAOD::VertexContainer> VertexLink;
@@ -131,7 +132,8 @@ namespace DerivationFramework {
     SG::AuxElement::Decorator<float> PtErr_decor("PtErr");
     SG::AuxElement::Decorator<float> chi2_SV1_decor("ChiSquared_SV1");
     SG::AuxElement::Decorator<float> chi2_nc_SV1_decor("ChiSquared_nc_SV1");
-    SG::AuxElement::Decorator<int> ndof_nc_SV1_decor("nDoF_nc_SV1");
+    SG::AuxElement::Decorator<float> chi2_V1_decor("ChiSquared_V1");
+    SG::AuxElement::Decorator<int> ndof_V1_decor("nDoF_V1");
     SG::AuxElement::Decorator<float> lxy_SV1_decor("lxy_SV1");
     SG::AuxElement::Decorator<float> lxyErr_SV1_decor("lxyErr_SV1");
     SG::AuxElement::Decorator<float> a0xy_SV1_decor("a0xy_SV1");
@@ -140,7 +142,8 @@ namespace DerivationFramework {
     SG::AuxElement::Decorator<float> a0zErr_SV1_decor("a0zErr_SV1");
     SG::AuxElement::Decorator<float> chi2_SV2_decor("ChiSquared_SV2");
     SG::AuxElement::Decorator<float> chi2_nc_SV2_decor("ChiSquared_nc_SV2");
-    SG::AuxElement::Decorator<int> ndof_nc_SV2_decor("nDoF_nc_SV2");
+    SG::AuxElement::Decorator<float> chi2_V2_decor("ChiSquared_V2");
+    SG::AuxElement::Decorator<int> ndof_V2_decor("nDoF_V2");
     SG::AuxElement::Decorator<float> lxy_SV2_decor("lxy_SV2");
     SG::AuxElement::Decorator<float> lxyErr_SV2_decor("lxyErr_SV2");
     SG::AuxElement::Decorator<float> a0xy_SV2_decor("a0xy_SV2");
@@ -152,7 +155,8 @@ namespace DerivationFramework {
     const xAOD::VertexContainer *psi1Container(nullptr);
     ATH_CHECK(evtStore()->retrieve(psi1Container, m_vertexPsi1ContainerKey));
     const xAOD::VertexContainer *psi2Container(nullptr);
-    ATH_CHECK(evtStore()->retrieve(psi2Container, m_vertexPsi2ContainerKey));
+    if(m_vertexPsi2ContainerKey == m_vertexPsi1ContainerKey) psi2Container = psi1Container;
+    else ATH_CHECK(evtStore()->retrieve(psi2Container, m_vertexPsi2ContainerKey));
 
     for(unsigned int ic=0; ic<cascadeinfoContainer.size(); ic++) {
       Trk::VxCascadeInfo* cascade_info = cascadeinfoContainer[ic];
@@ -241,13 +245,14 @@ namespace DerivationFramework {
       // chi2 and ndof (the default chi2 of mainVertex is != the chi2 of the full cascade fit!)
       chi2_decor(*mainVertex)     = cascade_info->fitChi2();
       ndof_decor(*mainVertex)     = cascade_info->nDoF();
-      chi2_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->fitChi2() : 999999.;
-      ndof_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->nDoF() : 1;
+      chi2_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->fitChi2() : -999999.;
+      ndof_nc_decor(*mainVertex)  = cascade_info_noConstr ? cascade_info_noConstr->nDoF() : -1;
 
       // decorate the Psi1 vertex
       chi2_SV1_decor(*cascadeVertices[0])    = m_V0Tools->chisq(cascadeVertices[0]);
-      chi2_nc_SV1_decor(*cascadeVertices[0]) = m_V0Tools->chisq(psi1Vertex);
-      ndof_nc_SV1_decor(*cascadeVertices[0]) = m_V0Tools->ndof(psi1Vertex);
+      chi2_nc_SV1_decor(*cascadeVertices[0]) = cascade_info_noConstr ? m_V0Tools->chisq(cascade_info_noConstr->vertices()[0]) : -999999.;
+      chi2_V1_decor(*cascadeVertices[0])     = m_V0Tools->chisq(psi1Vertex);
+      ndof_V1_decor(*cascadeVertices[0])     = m_V0Tools->ndof(psi1Vertex);
       lxy_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->lxy(moms[0],cascadeVertices[0],mainVertex);
       lxyErr_SV1_decor(*cascadeVertices[0])  = m_CascadeTools->lxyError(moms[0],cascade_info->getCovariance()[0],cascadeVertices[0],mainVertex);
       a0z_SV1_decor(*cascadeVertices[0])     = m_CascadeTools->a0z(moms[0],cascadeVertices[0],mainVertex);
@@ -257,15 +262,16 @@ namespace DerivationFramework {
 
       // decorate the Psi2 vertex
       chi2_SV2_decor(*cascadeVertices[1])    = m_V0Tools->chisq(cascadeVertices[1]);
-      chi2_nc_SV2_decor(*cascadeVertices[1]) = m_V0Tools->chisq(psi2Vertex);
-      ndof_nc_SV2_decor(*cascadeVertices[1]) = m_V0Tools->ndof(psi2Vertex);
+      chi2_nc_SV2_decor(*cascadeVertices[1]) = cascade_info_noConstr ? m_V0Tools->chisq(cascade_info_noConstr->vertices()[1]) : -999999.;
+      chi2_V2_decor(*cascadeVertices[1])     = m_V0Tools->chisq(psi2Vertex);
+      ndof_V2_decor(*cascadeVertices[1])     = m_V0Tools->ndof(psi2Vertex);
       lxy_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->lxy(moms[1],cascadeVertices[1],mainVertex);
       lxyErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->lxyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
       a0z_SV2_decor(*cascadeVertices[1])     = m_CascadeTools->a0z(moms[1],cascadeVertices[1],mainVertex);
       a0zErr_SV2_decor(*cascadeVertices[1])  = m_CascadeTools->a0zError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
       a0xy_SV2_decor(*cascadeVertices[1])    = m_CascadeTools->a0xy(moms[1],cascadeVertices[1],mainVertex);
       a0xyErr_SV2_decor(*cascadeVertices[1]) = m_CascadeTools->a0xyError(moms[1],cascade_info->getCovariance()[1],cascadeVertices[1],mainVertex);
-      
+
       double Mass_Moth = m_CascadeTools->invariantMass(moms[2]); // size=2
       ATH_CHECK(helper.FillCandwithRefittedVertices(m_refitPV, pvContainer, refPvContainer.get(), &(*m_pvRefitter), m_PV_max, m_DoVertexType, cascade_info, 2, Mass_Moth, vtx));
     } // loop over cascadeinfoContainer
@@ -328,7 +334,12 @@ namespace DerivationFramework {
     m_constrJpsi2(false),
     m_constrDiTrk1(false),
     m_constrDiTrk2(false),
+    m_chi2cut_Psi1(-1.0),
+    m_chi2cut_Psi2(-1.0),
     m_chi2cut(-1.0),
+    m_removeDuplicatePairs(false),
+    m_maxPsi1Candidates(0),
+    m_maxPsi2Candidates(0),
     m_beamSpotSvc("BeamCondSvc",name),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
     m_pvRefitter("Analysis::PrimaryVertexRefitter"),
@@ -378,7 +389,12 @@ namespace DerivationFramework {
     declareProperty("ApplyJpsi2MassConstraint", m_constrJpsi2);
     declareProperty("ApplyDiTrk1MassConstraint",m_constrDiTrk1); // only effective when m_vtx1Daug_num=4
     declareProperty("ApplyDiTrk2MassConstraint",m_constrDiTrk2); // only effective when m_vtx2Daug_num=4
+    declareProperty("Chi2CutPsi1",              m_chi2cut_Psi1);
+    declareProperty("Chi2CutPsi2",              m_chi2cut_Psi2);
     declareProperty("Chi2Cut",                  m_chi2cut);
+    declareProperty("RemoveDuplicatePairs",     m_removeDuplicatePairs); // only effective when m_vertexPsi1ContainerKey == m_vertexPsi2ContainerKey
+    declareProperty("MaxPsi1Candidates",        m_maxPsi1Candidates);
+    declareProperty("MaxPsi2Candidates",        m_maxPsi2Candidates);
     declareProperty("RefitPV",                  m_refitPV         = true);
     declareProperty("MaxnPV",                   m_PV_max          = 1000);
     declareProperty("MinNTracksInPV",           m_PV_minNTracks   = 0);
@@ -421,7 +437,8 @@ namespace DerivationFramework {
 
     // Get Psi2 container
     const xAOD::VertexContainer *psi2Container(nullptr);
-    ATH_CHECK(evtStore()->retrieve(psi2Container, m_vertexPsi2ContainerKey));
+    if(m_vertexPsi2ContainerKey == m_vertexPsi1ContainerKey) psi2Container = psi1Container;
+    else ATH_CHECK(evtStore()->retrieve(psi2Container, m_vertexPsi2ContainerKey));
 
     // Select the Psi2 candidates before calling cascade fit
     std::vector<const xAOD::Vertex*> selectedPsi2Candidates;
@@ -464,9 +481,17 @@ namespace DerivationFramework {
 	if (mass_diTrk2 < m_diTrack2MassLower || mass_diTrk2 > m_diTrack2MassUpper) continue;
       }
 
+      double chi2DOF = (*vxcItr)->chiSquared()/(*vxcItr)->numberDoF();
+      if(m_chi2cut_Psi2>0 && chi2DOF>m_chi2cut_Psi2) continue;
+
       selectedPsi2Candidates.push_back(*vxcItr);
     }
     if(selectedPsi2Candidates.size()<1) return StatusCode::SUCCESS;
+
+    std::sort( selectedPsi2Candidates.begin(), selectedPsi2Candidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
+    if(m_maxPsi1Candidates>0 && selectedPsi2Candidates.size()>m_maxPsi1Candidates) {
+      selectedPsi2Candidates.erase(selectedPsi2Candidates.begin()+m_maxPsi1Candidates, selectedPsi2Candidates.end());
+    }
 
     // Select the Psi1 candidates before calling cascade fit
     std::vector<const xAOD::Vertex*> selectedPsi1Candidates;
@@ -509,9 +534,19 @@ namespace DerivationFramework {
 	if (mass_diTrk1 < m_diTrack1MassLower || mass_diTrk1 > m_diTrack1MassUpper) continue;
       }
 
+      double chi2DOF = (*vxcItr)->chiSquared()/(*vxcItr)->numberDoF();
+      if(m_chi2cut_Psi1>0 && chi2DOF>m_chi2cut_Psi1) continue;
+
       selectedPsi1Candidates.push_back(*vxcItr);
     }
     if(selectedPsi1Candidates.size()<1) return StatusCode::SUCCESS;
+
+    std::sort( selectedPsi1Candidates.begin(), selectedPsi1Candidates.end(), [](const xAOD::Vertex* a, const xAOD::Vertex* b) { return a->chiSquared()/a->numberDoF() < b->chiSquared()/b->numberDoF(); } );
+    if(m_maxPsi1Candidates>0 && selectedPsi1Candidates.size()>m_maxPsi1Candidates) {
+      selectedPsi1Candidates.erase(selectedPsi1Candidates.begin()+m_maxPsi1Candidates, selectedPsi1Candidates.end());
+    }
+
+    std::vector<std::pair<const xAOD::Vertex*, const xAOD::Vertex*> > candidates;
 
     // Select Psi1+Psi2 candidates
     // Iterate over Psi2 vertices
@@ -533,6 +568,7 @@ namespace DerivationFramework {
 
       // Iterate over Psi1 vertices
       for(auto psi1Itr=selectedPsi1Candidates.cbegin(); psi1Itr!=selectedPsi1Candidates.cend(); ++psi1Itr) {
+	if((*psi1Itr) == (*psi2Itr)) continue;
 	// Check identical tracks in input
 	if(std::find(tracksPsi2.cbegin(), tracksPsi2.cend(), (*psi1Itr)->trackParticle(0)) != tracksPsi2.cend()) continue;
 	if(std::find(tracksPsi2.cbegin(), tracksPsi2.cend(), (*psi1Itr)->trackParticle(1)) != tracksPsi2.cend()) continue;
@@ -568,6 +604,19 @@ namespace DerivationFramework {
 	}
 	if (p4_moth.M() < m_MassLower || p4_moth.M() > m_MassUpper) continue;
 
+	bool isDuplicate = false;
+	if(m_vertexPsi1ContainerKey == m_vertexPsi2ContainerKey && m_removeDuplicatePairs) {
+	  for(std::pair<const xAOD::Vertex*, const xAOD::Vertex*> c : candidates) {
+	    if((c.first==(*psi1Itr) && c.second==(*psi2Itr)) || (c.first==(*psi2Itr) && c.second==(*psi1Itr))) {
+	      isDuplicate = true;
+	      break;
+	    }
+	  }
+	}
+	if(isDuplicate) continue;
+	
+	candidates.push_back(std::pair<const xAOD::Vertex*, const xAOD::Vertex*>(*psi1Itr,*psi2Itr));
+	
 	// Apply the user's settings to the fitter
 	// Reset
 	m_iVertexFitter->setDefault();

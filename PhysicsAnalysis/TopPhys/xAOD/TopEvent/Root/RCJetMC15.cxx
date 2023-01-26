@@ -314,18 +314,15 @@ StatusCode RCJetMC15::execute(const top::Event& event) {
         std::vector<fastjet::PseudoJet> clusters;
 
 
-        if (m_config->sgKeyJetsTDS(hash_factor * m_config->nominalHashValue(),
-                                   false).find("AntiKt4EMTopoJets") != std::string::npos) {
+        if (m_config->sgKeyJetsType().find("AntiKt4EMTopoJets") != std::string::npos) {
 	  getEMTopoClusters(clusters,rcjet); // use subjet constituents
 	}
-        else if (m_config->sgKeyJetsTDS(hash_factor * m_config->nominalHashValue(),
-                                        false).find("AntiKt4EMPFlowJets") != std::string::npos) {
+        else if (m_config->sgKeyJetsType().find("AntiKt4EMPFlowJets") != std::string::npos) {
 	  getPflowConstituent(clusters, rcjet, event); // use ghost-matched tracks
 	}
         else getLCTopoClusters(clusters, rcjet); //  // use LCTOPO CLUSTERS matched to subjet
 
-        if (m_config->sgKeyJetsTDS(hash_factor * m_config->nominalHashValue(),
-                                   false).find("AntiKt4EMPFlowJets") == std::string::npos) {
+        if (m_config->sgKeyJetsType().find("AntiKt4EMPFlowJets") == std::string::npos) {
           // In case of AntiKt4EMPFlowJets the tracks could be removed by the pile-up cuts
           top::check(
             !clusters.empty(),

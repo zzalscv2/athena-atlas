@@ -7,6 +7,9 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import *
 from DerivationFrameworkJetEtMiss.JetCommon import *
 from DerivationFrameworkJetEtMiss.ExtendedJetCommon import *
 from DerivationFrameworkInDet.InDetCommon import *
+from DerivationFrameworkEGamma.EGammaCommon import *
+from DerivationFrameworkMuons.MuonsCommon import *
+
 
 # Include TRUTH3 containers
 if DerivationFrameworkHasTruth:
@@ -319,3 +322,4 @@ if DerivationFrameworkHasTruth:
 JETM1SlimmingHelper.AppendContentToStream(JETM1Stream)
 JETM1Stream.RemoveItem("xAOD::TrigNavigation#*")
 JETM1Stream.RemoveItem("xAOD::TrigNavigationAuxInfo#*")
+
