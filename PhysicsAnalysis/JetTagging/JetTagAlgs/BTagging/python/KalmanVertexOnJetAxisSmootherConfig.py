@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def KalmanVertexOnJetAxisSmootherCfg(name, **options):
+def KalmanVertexOnJetAxisSmootherCfg(flags, name, **options):
     acc = ComponentAccumulator()
     options['name'] = name
     acc.setPrivateTools(CompFactory.Trk.KalmanVertexOnJetAxisSmoother(**options))

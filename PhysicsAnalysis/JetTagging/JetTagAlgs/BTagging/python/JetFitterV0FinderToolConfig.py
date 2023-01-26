@@ -48,7 +48,7 @@ def JetFitterV0FinderToolCfg(flags, name, suffix="", useBTagFlagsDefaults = True
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
         inDetJetFitterUtils = acc.popToolsAndMerge(InDetJetFitterUtilsCfg(flags,'InDetJFUtils'+suffix))
-        jetFitterMode3dTo1dFinder = acc.popToolsAndMerge(JetFitterMode3dTo1dFinderCfg('JFMode3dTo1dFinder'+suffix))
+        jetFitterMode3dTo1dFinder = acc.popToolsAndMerge(JetFitterMode3dTo1dFinderCfg(flags, 'JFMode3dTo1dFinder'+suffix))
         defaults = { 'revertFromPositiveToNegativeTags' : True if (suffix=="FLIP_SIGN") else False,
                      'cutTwoTrkVtxVtxProbForBFirstSelectCriteriumA' : 0.05 ,
                      'cutTwoTrkVtxVtxProbForBFirstSelectCriteriumB' : 0.034 ,

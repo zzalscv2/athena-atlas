@@ -6,7 +6,7 @@ from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCf
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 
 
-def BTagTrackAugmenterAlgCfg(ConfigFlags, TrackCollection = 'InDetTrackParticles', PrimaryVertexCollectionName = 'PrimaryVertices', **options):
+def BTagTrackAugmenterAlgCfg(flags, TrackCollection = 'InDetTrackParticles', PrimaryVertexCollectionName = 'PrimaryVertices', **options):
 
     acc = ComponentAccumulator()
     # Minimal configuration
@@ -16,9 +16,9 @@ def BTagTrackAugmenterAlgCfg(ConfigFlags, TrackCollection = 'InDetTrackParticles
     options['TrackContainer'] = TrackCollection
     options['PrimaryVertexContainer'] = PrimaryVertexCollectionName
     if 'TrackToVertexIPEstimator' not in  options :
-        options.setdefault('TrackToVertexIPEstimator',acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(ConfigFlags, 'TrkToVxIPEstimator') ))
+        options.setdefault('TrackToVertexIPEstimator',acc.popToolsAndMerge(AtlasTrackToVertexIPEstimatorCfg(flags, 'TrkToVxIPEstimator') ))
     if 'Extrapolator' not in options :
-        options.setdefault('Extrapolator', acc.popToolsAndMerge(AtlasExtrapolatorCfg(ConfigFlags)))
+        options.setdefault('Extrapolator', acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
 
     # -- create the track augmenter algorithm
     acc.addEventAlgo(CompFactory.Analysis.BTagTrackAugmenterAlg(**options))

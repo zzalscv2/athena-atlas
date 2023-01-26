@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.JetFitterFullLinearizedTrackFactoryConfig import JetFitterFullLinearizedTrackFactoryCfg
 
-def ImprovedJetFitterInitializationHelperCfg(name, useBTagFlagsDefaults = True, **options):
+def ImprovedJetFitterInitializationHelperCfg(flags, name, useBTagFlagsDefaults = True, **options):
     """Sets up a ImprovedJetFitterInitializationHelper tool and returns it.
 
     The following options have BTaggingFlags defaults:
@@ -16,7 +16,7 @@ def ImprovedJetFitterInitializationHelperCfg(name, useBTagFlagsDefaults = True, 
     output: The actual tool, which can then by added to ToolSvc via ToolSvc += output."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg('JFFullLinearizedTrackFactory'))
+        jetFitterFullLinearizedTrackFactory = acc.popToolsAndMerge(JetFitterFullLinearizedTrackFactoryCfg(flags, 'JFFullLinearizedTrackFactory'))
         defaults = {'LinearizedTrackFactory' : jetFitterFullLinearizedTrackFactory}
         for option in defaults:
             options.setdefault(option, defaults[option])

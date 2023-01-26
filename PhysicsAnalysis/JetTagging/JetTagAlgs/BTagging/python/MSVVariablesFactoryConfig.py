@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MSVVariablesFactoryCfg(name, **options):
+def MSVVariablesFactoryCfg(flags, name, **options):
     """Sets up a MSVVariablesFactory tool and returns it.
 
     The following options have BTaggingFlags defaults:

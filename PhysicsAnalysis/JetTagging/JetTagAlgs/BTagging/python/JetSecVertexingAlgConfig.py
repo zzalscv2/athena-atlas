@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.MSVVariablesFactoryConfig import MSVVariablesFactoryCfg
 
 
-def JetSecVertexingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, BTaggingCollection, JetCollection, TrackCollection, PrimaryVertexCollectionName="", SVFinder="", **options):
+def JetSecVertexingAlgCfg(flags, BTagVxSecVertexInfoName, SVAlgName, BTaggingCollection, JetCollection, TrackCollection, PrimaryVertexCollectionName="", SVFinder="", **options):
     """Adds a SecVtxTool instance and registers it.
 
     input: name:               The tool's name.
@@ -27,7 +27,7 @@ def JetSecVertexingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, BTagg
     if SVFinder == 'MSV':
         JetSVLink = 'MSecVtx' # Maybe no used
 
-    varFactory = acc.popToolsAndMerge(MSVVariablesFactoryCfg("MSVVarFactory"))
+    varFactory = acc.popToolsAndMerge(MSVVariablesFactoryCfg(flags, "MSVVarFactory"))
 
     options = {}
     options.setdefault('SecVtxFinderxAODBaseName', SVFinder)
