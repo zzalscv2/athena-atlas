@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 '''
 @file TileCellMonitorAlgorithm.py
@@ -25,6 +25,9 @@ def TileCellMonitoringConfig(flags, **kwargs):
 
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     result.merge( TileCablingSvcCfg(flags) )
+
+    from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+    result.merge( TileBadChannelsCondAlgCfg(flags) )
 
     # The following class will make a sequence, configure algorithms, and link
     # them to GenericMonitoringTools
