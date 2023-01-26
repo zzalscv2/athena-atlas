@@ -37,7 +37,7 @@ def TrackingGeometrySvcCfg(flags , name = 'AtlasTrackingGeometrySvc',
         atlas_geometry_processors += [ result.popToolsAndMerge(
             LayerMaterialProviderCfg(flags,
                                      LayerMaterialMapName = CoolDataBaseFolder,
-                                     LayerMaterialMapKey = CoolDataBaseFolder)) ]
+                                     LayerMaterialMapKey = '')) ] # Different from AtlasTrackingGeometryCondAlgConfig
 
         # Setup DBs
         from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import _setupCondDB
