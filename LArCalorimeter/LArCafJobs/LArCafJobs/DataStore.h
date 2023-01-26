@@ -29,7 +29,7 @@ namespace LArSamples {
   class EventData;
   class RunData;
   
-  class DataStore  {
+  class ATLAS_NOT_THREAD_SAFE DataStore  {
   
    public:
    

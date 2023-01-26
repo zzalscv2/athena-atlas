@@ -19,7 +19,7 @@
 class CaloCell_ID;
 
 
-class LArReadCells: public ::AthAlgorithm { 
+class  ATLAS_NOT_THREAD_SAFE LArReadCells: public ::AthAlgorithm { 
  public: 
   LArReadCells( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~LArReadCells(); 
