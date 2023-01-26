@@ -1028,7 +1028,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     }
 
     // Retrieve the input file
-    int DSID_INT = (int) dsid;
+    int DSID_INT = static_cast<int>(dsid);
     prwConfigFile += "DSID" + std::to_string(DSID_INT/1000) + "xxx/pileup_" + mcCampaignMD + "_dsid" + std::to_string(DSID_INT) + "_" + simType + ".root";
 
     if (RPVLLmode) prwConfigFile = TString(prwConfigFile).ReplaceAll(".root","_rpvll.root").Data();
@@ -1144,7 +1144,7 @@ void SUSYObjDef_xAOD::configFromFile(bool& property, const std::string& propname
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject(propname.c_str() ) );
     return;
   }
-  property = rEnv.GetValue(propname.c_str(), (int) defaultValue);
+  property = rEnv.GetValue(propname.c_str(), static_cast<int>(defaultValue));
   ATH_MSG_INFO( "configFromFile(): Loaded property \"" << propname << "\" with value " << property );
   // Remove the item from the table
   rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject(propname.c_str() ) );
@@ -1227,21 +1227,21 @@ StatusCode SUSYObjDef_xAOD::readConfig()
 
   if (m_jetInputType == xAOD::JetInput::Uncategorized) {
     m_jetInputType = xAOD::JetInput::Type(rEnv.GetValue("Jet.InputType", 9));
-    ATH_MSG_INFO( "readConfig(): Loaded property Jet.InputType with value " << (int)m_jetInputType);
+    ATH_MSG_INFO( "readConfig(): Loaded property Jet.InputType with value " << static_cast<int>(m_jetInputType));
   }
   // Remove the item from the table
   rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("Jet.InputType") );
 
   if (m_muId == static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))) {
     int muIdTmp = rEnv.GetValue("Muon.Id", 1);
-    m_muId = (muIdTmp<4 ? (int)xAOD::Muon::Quality(muIdTmp) : muIdTmp);
+    m_muId = (muIdTmp<4 ? static_cast<int>(xAOD::Muon::Quality(muIdTmp)) : muIdTmp);
     ATH_MSG_INFO( "readConfig(): Loaded property Muon.Id with value " << m_muId);
     // Remove the item from the table
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("Muon.Id") );
   }
   if (m_muIdBaseline == static_cast<int>(xAOD::Muon::Quality(xAOD::Muon::VeryLoose))) {
     int muIdTmp = rEnv.GetValue("MuonBaseline.Id", 1);
-    m_muIdBaseline = (muIdTmp<4 ? (int)xAOD::Muon::Quality(muIdTmp) : muIdTmp);
+    m_muIdBaseline = (muIdTmp<4 ? static_cast<int>(xAOD::Muon::Quality(muIdTmp)) : muIdTmp);
     ATH_MSG_INFO( "readConfig(): Loaded property MuonBaseline.Id with value " << m_muIdBaseline);
     // Remove the item from the table
     rEnv.GetTable()->Remove( rEnv.GetTable()->FindObject("MuonBaseline.Id") );

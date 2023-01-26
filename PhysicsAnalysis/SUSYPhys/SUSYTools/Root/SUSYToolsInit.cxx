@@ -82,7 +82,7 @@ using namespace ST;
     std::vector< std::string > corrFileNameList = {CORRFILE}; \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrectionFileNameList", corrFileNameList) ); \
     if(!isData())                                                        \
-      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", (int) data_type) ); \
+      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", static_cast<int>(data_type))); \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrelationModel", m_EG_corrModel) ); \
     ATH_CHECK( TOOLHANDLE.setProperty("OutputLevel", this->msg().level()) ); \
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
@@ -94,7 +94,7 @@ using namespace ST;
     ATH_MSG_INFO( "Will now set key \"" << KEYNAME << "\" to value \"" << KEY << "\" when configuring an AsgElectronEfficiencyCorrectionTool" ); \
     ATH_CHECK( TOOLHANDLE.setProperty(KEYNAME, KEY) );                  \
     if(!isData())                                                        \
-      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", (int) data_type) ); \
+      ATH_CHECK (TOOLHANDLE.setProperty("ForceDataType", static_cast<int>(data_type))); \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrelationModel", m_EG_corrModel) ); \
     ATH_CHECK( TOOLHANDLE.setProperty("OutputLevel", this->msg().level()) ); \
     ATH_CHECK( TOOLHANDLE.initialize() );                                \
@@ -523,16 +523,16 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     std::string muQualBaseline = "";
     switch (m_muIdBaseline) {
-    case (int)xAOD::Muon::Quality(xAOD::Muon::VeryLoose):  muQualBaseline = "VeryLoose";
+    case xAOD::Muon::VeryLoose: muQualBaseline = "VeryLoose";
       ATH_MSG_WARNING("No muon scale factors are available for VeryLoose working point.");
       break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Loose):  muQualBaseline = "Loose";  break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Medium): muQualBaseline = "Medium"; break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Tight):  muQualBaseline = "Tight";  break;
-    case 4:  muQualBaseline = "HighPt";  break;
-    case 5:  muQualBaseline = "LowPt";  break;
-    case 6:  muQualBaseline = "LowPtMVA"; break;
-    case 7:  muQualBaseline = "HighPt3Layers"; break;
+    case xAOD::Muon::Loose:     muQualBaseline = "Loose";  break;
+    case xAOD::Muon::Medium:    muQualBaseline = "Medium"; break;
+    case xAOD::Muon::Tight:     muQualBaseline = "Tight";  break;
+    case 4:                     muQualBaseline = "HighPt";  break;
+    case 5:                     muQualBaseline = "LowPt";  break;
+    case 6:                     muQualBaseline = "LowPtMVA"; break;
+    case 7:                     muQualBaseline = "HighPt3Layers"; break;
     default:
       ATH_MSG_ERROR("Invalid muon working point provided: " << m_muIdBaseline << ". Cannot initialise!");
       return StatusCode::FAILURE;
@@ -585,16 +585,16 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
     std::string muQual = "";
     switch (m_muId) {
-    case (int)xAOD::Muon::Quality(xAOD::Muon::VeryLoose):  muQual = "VeryLoose";
+    case xAOD::Muon::VeryLoose: muQual = "VeryLoose";
       ATH_MSG_WARNING("No muon scale factors are available for VeryLoose working point.");
       break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Loose):  muQual = "Loose";  break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Medium): muQual = "Medium"; break;
-    case (int)xAOD::Muon::Quality(xAOD::Muon::Tight):  muQual = "Tight";  break;
-    case 4:  muQual = "HighPt";  break;
-    case 5:  muQual = "LowPt";  break;
-    case 6:  muQual = "LowPtMVA"; break;
-    case 7:  muQual = "HighPt3Layers"; break;
+    case xAOD::Muon::Loose:     muQual = "Loose";  break;
+    case xAOD::Muon::Medium:    muQual = "Medium"; break;
+    case xAOD::Muon::Tight:     muQual = "Tight";  break;
+    case 4:                     muQual = "HighPt";  break;
+    case 5:                     muQual = "LowPt";  break;
+    case 6:                     muQual = "LowPtMVA"; break;
+    case 7:                     muQual = "HighPt3Layers"; break;
     default:
       ATH_MSG_ERROR("Invalid muon working point provided: " << m_muId << ". Cannot initialise!");
       return StatusCode::FAILURE;
@@ -960,10 +960,10 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
                             (EleIso.find("Tight_VarRad")!=std::string::npos)||
                             (EleIso.find("Loose_VarRad")!=std::string::npos))) {
             if (isAtlfast()) ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool/"+toolName+"). Your selected electron Iso WP (" + EleIso + ") don't have AFII SF. Falling back to FullSim");
-            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", (int) PATCore::ParticleDataType::Full) );
+            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", static_cast<int>(PATCore::ParticleDataType::Full)));
           }
           else if (!isData()){
-            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", (int) data_type) );
+            ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", static_cast<int>(data_type)));
           }
           ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("CorrelationModel", m_EG_corrModel) );
           ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("OutputLevel", this->msg().level()) );

@@ -67,15 +67,15 @@ StatusCode SUSYObjDef_xAOD::MergeElectrons(const xAOD::ElectronContainer & elect
     if (electrons.empty()) return StatusCode::SUCCESS;
     for (const xAOD::Electron* electron: electrons) {
         if (ElectronsToRemove.find(electron) != ElectronsToRemove.end()){
-            ATH_MSG_DEBUG("Removing electron from output collection (isLRT?) : (" << (int)electron->auxdecor<char>("isLRT") << ")" );
-	    ATH_MSG_DEBUG( "ELECTRON cl eta: " << electron->caloCluster()->eta() );
-	    ATH_MSG_DEBUG( "ELECTRON cl phi: " << electron->caloCluster()->phi() );
+            ATH_MSG_DEBUG( "Removing electron from output collection (isLRT?) : ("<< static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
+            ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
+            ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             continue;
         // add electron into output 
         } else {
-            ATH_MSG_DEBUG("Adding electron to output collection (isLRT?) : (" << (int)electron->auxdecor<char>("isLRT") << ")" );
-	    ATH_MSG_DEBUG( "ELECTRON cl eta: " << electron->caloCluster()->eta() );
-	    ATH_MSG_DEBUG( "ELECTRON cl phi: " << electron->caloCluster()->phi() );
+            ATH_MSG_DEBUG( "Adding electron to output collection (isLRT?) : ("    << static_cast<int>(electron->auxdecor<char>("isLRT")) << ")" );
+            ATH_MSG_DEBUG( "ELECTRON cl eta: "                                    << electron->caloCluster()->eta());
+            ATH_MSG_DEBUG( "ELECTRON cl phi: "                                    << electron->caloCluster()->phi());
             newElectron = new xAOD::Electron(*electron);
 
             ElementLink<xAOD::ElectronContainer> eleLink;
@@ -120,8 +120,8 @@ StatusCode SUSYObjDef_xAOD::GetElectrons(xAOD::ElectronContainer*& copy, xAOD::S
       m_elecLRTORTool->checkOverlap(*prompt_electrons, *lrt_electrons, ElectronsToRemove);
     
       // Decorate muons with prompt/LRT
-      for (const xAOD::Electron* el : *prompt_electrons) dec_isLRT(*el) = 0;
-      for (const xAOD::Electron* el : *lrt_electrons) dec_isLRT(*el) = 1;
+      for (const xAOD::Electron* el : *prompt_electrons)  dec_isLRT(*el) = 0;
+      for (const xAOD::Electron* el : *lrt_electrons)     dec_isLRT(*el) = 1;
 
       // Create merged StdWithLRTElectrons container
       outputCol->reserve(prompt_electrons->size() + lrt_electrons->size());
@@ -235,18 +235,18 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
     input.trackParticle()->summaryValue(el_nPixHits, xAOD::numberOfPixelHits);
     input.trackParticle()->summaryValue(el_nSCTHits, xAOD::numberOfSCTHits);
 
-    ATH_MSG_INFO( "ELECTRON eta: " << input.eta() );
-    ATH_MSG_INFO( "ELECTRON phi: " << input.phi() );
-    ATH_MSG_INFO( "ELECTRON cl eta: " << input.caloCluster()->eta() );
-    ATH_MSG_INFO( "ELECTRON cl phi: " << input.caloCluster()->phi() );
-    ATH_MSG_INFO( "ELECTRON cl e: " << input.caloCluster()->e() );
-    ATH_MSG_INFO( "ELECTRON trk eta: " << input.trackParticle()->eta() );
-    ATH_MSG_INFO( "ELECTRON trk phi: " << input.trackParticle()->phi() );
-    ATH_MSG_INFO( "ELECTRON author: " << input.author() );
-    ATH_MSG_INFO( "ELECTRON OQ: " << acc_OQ(input) );
-    ATH_MSG_INFO( "ELECTRON nPixHits: " << (int) el_nPixHits );
-    ATH_MSG_INFO( "ELECTRON nSCTHits: " << (int) el_nSCTHits );
-    ATH_MSG_INFO( "ELECTRON deadHVTools: " << pass_deadHVTool );
+    ATH_MSG_INFO( "ELECTRON eta: "         << input.eta());
+    ATH_MSG_INFO( "ELECTRON phi: "         << input.phi());
+    ATH_MSG_INFO( "ELECTRON cl eta: "      << input.caloCluster()->eta());
+    ATH_MSG_INFO( "ELECTRON cl phi: "      << input.caloCluster()->phi());
+    ATH_MSG_INFO( "ELECTRON cl e: "        << input.caloCluster()->e());
+    ATH_MSG_INFO( "ELECTRON trk eta: "     << input.trackParticle()->eta());
+    ATH_MSG_INFO( "ELECTRON trk phi: "     << input.trackParticle()->phi());
+    ATH_MSG_INFO( "ELECTRON author: "      << input.author());
+    ATH_MSG_INFO( "ELECTRON OQ: "          << acc_OQ(input));
+    ATH_MSG_INFO( "ELECTRON nPixHits: "    << static_cast<int>(el_nPixHits));
+    ATH_MSG_INFO( "ELECTRON nSCTHits: "    << static_cast<int>(el_nSCTHits));
+    ATH_MSG_INFO( "ELECTRON deadHVTools: " << static_cast<bool>(pass_deadHVTool));
   }
 
   if (!pass_deadHVTool) return StatusCode::SUCCESS;

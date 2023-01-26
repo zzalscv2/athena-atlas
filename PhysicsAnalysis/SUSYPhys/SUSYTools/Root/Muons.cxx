@@ -257,21 +257,21 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
       track->summaryValue( nTRTOutliers, xAOD::numberOfTRTOutliers);
     }
 
-    ATH_MSG_INFO( "MUON pt: " << input.pt() );
-    ATH_MSG_INFO( "MUON eta: " << input.eta() );
-    ATH_MSG_INFO( "MUON phi: " << input.phi() );
-    ATH_MSG_INFO( "MUON comb: " << (int)(input.muonType() == xAOD::Muon::Combined) );
-    ATH_MSG_INFO( "MUON sTag: " << (int)(input.muonType() == xAOD::Muon::SegmentTagged));
-    ATH_MSG_INFO( "MUON loose: " << (int)(input.quality() == xAOD::Muon::Loose ) );
-    ATH_MSG_INFO( "MUON bHit: " << (int) nBLHits );
-    ATH_MSG_INFO( "MUON pHit: " << (int) nPixHits );
-    ATH_MSG_INFO( "MUON pDead: " << (int) nPixelDeadSensors );
-    ATH_MSG_INFO( "MUON pHole: " << (int) nPixHoles );
-    ATH_MSG_INFO( "MUON sHit: "  << (int) nSCTHits);
-    ATH_MSG_INFO( "MUON sDead: " << (int) nSCTDeadSensors );
-    ATH_MSG_INFO( "MUON sHole: " << (int) nSCTHoles );
-    ATH_MSG_INFO( "MUON tHit: "  << (int) nTRTHits );
-    ATH_MSG_INFO( "MUON tOut: "  << (int) nTRTOutliers );
+    ATH_MSG_INFO( "MUON pt:   " << input.pt() );
+    ATH_MSG_INFO( "MUON eta:  " << input.eta() );
+    ATH_MSG_INFO( "MUON phi:  " << input.phi() );
+    ATH_MSG_INFO( "MUON comb: " << (input.muonType() == xAOD::Muon::Combined));
+    ATH_MSG_INFO( "MUON sTag: " << (input.muonType() == xAOD::Muon::SegmentTagged));
+    ATH_MSG_INFO( "MUON loose:" << (input.quality() == xAOD::Muon::Loose));
+    ATH_MSG_INFO( "MUON bHit: " << static_cast<int>( nBLHits ));
+    ATH_MSG_INFO( "MUON pHit: " << static_cast<int>( nPixHits ));
+    ATH_MSG_INFO( "MUON pDead:" << static_cast<int>( nPixelDeadSensors ));
+    ATH_MSG_INFO( "MUON pHole:" << static_cast<int>( nPixHoles ));
+    ATH_MSG_INFO( "MUON sHit: " << static_cast<int>( nSCTHits));
+    ATH_MSG_INFO( "MUON sDead:" << static_cast<int>( nSCTDeadSensors ));
+    ATH_MSG_INFO( "MUON sHole:" << static_cast<int>( nSCTHoles ));
+    ATH_MSG_INFO( "MUON tHit: " << static_cast<int>( nTRTHits ));
+    ATH_MSG_INFO( "MUON tOut: " << static_cast<int>( nTRTOutliers ));
 
     const xAOD::TrackParticle* idtrack =
       input.trackParticle( xAOD::Muon::InnerDetectorTrackParticle );
@@ -279,7 +279,7 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
     if ( !idtrack) {
       ATH_MSG_VERBOSE( "No ID track!! " );
     } else {
-      ATH_MSG_VERBOSE( "ID track pt: "  << idtrack->pt() );
+      ATH_MSG_VERBOSE( "ID track pt: "  << idtrack->pt());
     }
   }
   
@@ -333,14 +333,14 @@ bool SUSYObjDef_xAOD::IsSignalMuon(const xAOD::Muon & input, float ptcut, float 
   dec_signal(input) = true;
 
   if (m_muId == 4) { //i.e. HighPt muons
-    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt " << input.pt()
-                     << " signal? " << (int) acc_signal(input)
-                     << " isolation? " << (int) acc_isol(input)
-                     << " passedHighPtCuts? " << (int) acc_passedHighPtCuts(input));
+    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt "   << input.pt()
+                     << " signal? "           << static_cast<int>(acc_signal(input))
+                     << " isolation? "        << static_cast<int>(acc_isol(input))
+                     << " passedHighPtCuts? " << static_cast<int>(acc_passedHighPtCuts(input)));
   } else {
-    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt " << input.pt()
-                     << " signal? " << (int) acc_signal(input)
-                     << " isolation? " << (int) acc_isol(input));
+    ATH_MSG_VERBOSE( "IsSignalMuon: mu pt "   << input.pt()
+                     << " signal? "           << static_cast<int>( acc_signal(input))
+                     << " isolation? "        << static_cast<int>( acc_isol(input)));
     // Don't show HighPtFlag ... we didn't set it!
   }
 
