@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import os
 
@@ -374,7 +374,9 @@ if __name__ == "__main__":
     class Tests(unittest.TestCase):
         def test_recoFlags(self):
             """Check if offline reco flags can be added to trigger"""
-            from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+            from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+            flags = initConfigFlags()
             flags.Trigger.Offline.Tau.doTauRec=False
             flags.Tau.doTauRec=True
             self.assertEqual(flags.Trigger.Offline.Tau.doTauRec, False, " dependent flag setting does not work")
