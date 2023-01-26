@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVALHISTUTILS_RECOINFOPLOTS_H
@@ -12,7 +12,7 @@ namespace Trk{
 
 class RecoInfoPlots: public PlotBase {
   public:
- RecoInfoPlots(PlotBase *pParent, std::string sDir, std::string sType=""):PlotBase(pParent, sDir),m_sType(sType){ init();}
+ RecoInfoPlots(PlotBase *pParent, const std::string& sDir, const std::string& sType=""):PlotBase(pParent, sDir),m_sType(sType){ init();}
   void fill(const xAOD::TrackParticle& trkprt, float weight=1.0);
  		
     TH1* trackfitchi2;
