@@ -369,7 +369,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, std::vector<int>& 
 }
 
 // sets node_feat which will be used by the onnx tool (continuos mode)
-StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw){
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw){
   ANA_CHECK_SET_TYPE (StatusCode);
   if(node_feat.size()!=tagw.size()){
     ATH_MSG_ERROR( "Vectors of node_feat (outer axis) and tagw should have same size" );
@@ -399,7 +399,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<
 }
 
 // sets node_feat which will be used by the onnx tool (continuos2D mode)
-StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c){
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw_b, const std::vector<float>& tagw_c){
   ANA_CHECK_SET_TYPE (StatusCode);
   if(node_feat.size()!=tagw_b.size() || node_feat.size()!=tagw_c.size()){
     ATH_MSG_ERROR( "Vectors of node_feat (outer axis) and tagw_b/c should have same size" );
@@ -626,7 +626,7 @@ StatusCode BTaggingTruthTaggingTool::CalculateResults(const xAOD::JetContainer& 
 }
 
 // setting inputs that the onnx tool will use (continuous mode)
-StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw, Analysis::TruthTagResults& results, int rand_seed){
+StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw, Analysis::TruthTagResults& results, int rand_seed){
 
   ANA_CHECK_SET_TYPE (StatusCode);
 
@@ -638,7 +638,7 @@ StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const std::vector<std:
 }
 
 // setting inputs that the onnx tool will use (continuous2D mode)
-StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c, Analysis::TruthTagResults& results, int rand_seed){
+StatusCode BTaggingTruthTaggingTool::CalculateResultsONNX(const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw_b, const std::vector<float>& tagw_c, Analysis::TruthTagResults& results, int rand_seed){
 
   ANA_CHECK_SET_TYPE (StatusCode);
 
@@ -742,53 +742,59 @@ StatusCode BTaggingTruthTaggingTool::updateEfficiencyForHT(TRFinfo &trfinf){
 
   if (!m_doHybridTag){
     return StatusCode::SUCCESS;
-  } else {
-    if(m_continuous) {
-      if (m_continuous2D){
-        for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
-          if (trfinf.jets.at(jet_index).flav == m_directTagFlavForHybridTag){
-            int quantile = m_selTool->getQuantile(trfinf.jets.at(jet_index).vars.jetPt, trfinf.jets.at(jet_index).vars.jetEta, trfinf.jets.at(jet_index).vars.jetTagWeightB, trfinf.jets.at(jet_index).vars.jetTagWeightC);
-            for (int bin=0; bin<m_nbins; bin++){
-              if (bin == quantile){ // for continuous2D bin count starts from 0
-                trfinf.effMC_allBins[bin][jet_index] = 1;
-              } else{
-                trfinf.effMC_allBins[bin][jet_index] = 0;
-              }
-            }
-          }
-        }   
-      } else {
-        for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
-          if (trfinf.jets.at(jet_index).flav == m_directTagFlavForHybridTag){
-            int quantile = m_selTool->getQuantile(trfinf.jets.at(jet_index).vars.jetPt, trfinf.jets.at(jet_index).vars.jetEta, trfinf.jets.at(jet_index).vars.jetTagWeightB);
-            for (int bin=0; bin<m_nbins; bin++){
-              if (bin == quantile - 1){ // for continuous bin count starts from 1
-                trfinf.effMC_allBins[bin][jet_index] = 1;
-              } else{
-                trfinf.effMC_allBins[bin][jet_index] = 0;
-              }
-            }
-          }
-        }   
+  }
+
+  if(m_continuous && m_continuous2D){
+    for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
+      if (trfinf.jets.at(jet_index).flav != m_directTagFlavForHybridTag){
+        continue;
       }
-    } // m_continuous
-    else{
-      bool is_jettag = false;
-      for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
-        if (trfinf.jets.at(jet_index).flav == m_directTagFlavForHybridTag){
-          is_jettag = m_selTool->accept(trfinf.jets.at(jet_index).vars.jetPt, trfinf.jets.at(jet_index).vars.jetEta, trfinf.jets.at(jet_index).vars.jetTagWeight);
-          if (is_jettag){
-            trfinf.effMC_allBins.at(0).at(jet_index) = 0;
-            trfinf.effMC_allBins.at(1).at(jet_index) = 1;
-          } else {
-            trfinf.effMC_allBins.at(0).at(jet_index) = 1;
-            trfinf.effMC_allBins.at(1).at(jet_index) = 0;
-          }
+      int quantile = m_selTool->getQuantile(trfinf.jets.at(jet_index).vars.jetPt, trfinf.jets.at(jet_index).vars.jetEta, trfinf.jets.at(jet_index).vars.jetTagWeightB, trfinf.jets.at(jet_index).vars.jetTagWeightC);
+      for (int bin=0; bin<m_nbins; bin++){
+        if (bin == quantile){ // for continuous2D bin count starts from 0
+          trfinf.effMC_allBins[bin][jet_index] = 1;
+        } else{
+          trfinf.effMC_allBins[bin][jet_index] = 0;
+        }
+      }      
+    }
+  } // m_continuous && m_continuous2D
+  return StatusCode::SUCCESS;
+
+  if(m_continuous && !m_continuous2D){
+    for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
+      if (trfinf.jets.at(jet_index).flav != m_directTagFlavForHybridTag){
+        continue;
+      }
+      int quantile = m_selTool->getQuantile(trfinf.jets.at(jet_index).vars.jetPt, trfinf.jets.at(jet_index).vars.jetEta, trfinf.jets.at(jet_index).vars.jetTagWeightB);
+      for (int bin=0; bin<m_nbins; bin++){
+        if (bin == quantile - 1){ // for continuous bin count starts from 1
+          trfinf.effMC_allBins[bin][jet_index] = 1;
+        } else{
+          trfinf.effMC_allBins[bin][jet_index] = 0;
         }
       }
-    } // !m_continuous    
-    return StatusCode::SUCCESS;
-  }
+    }
+  } // m_continuous && !m_continuous2D
+  return StatusCode::SUCCESS;
+
+  if (!m_continuous){
+    bool is_jettag = false;
+    for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
+      if (trfinf.jets.at(jet_index).flav != m_directTagFlavForHybridTag){
+        continue;
+      }
+      is_jettag = m_selTool->accept(trfinf.jets.at(jet_index).vars.jetPt, trfinf.jets.at(jet_index).vars.jetEta, trfinf.jets.at(jet_index).vars.jetTagWeight);
+      if (is_jettag){
+        trfinf.effMC_allBins.at(0).at(jet_index) = 0;
+        trfinf.effMC_allBins.at(1).at(jet_index) = 1;
+      } else {
+        trfinf.effMC_allBins.at(0).at(jet_index) = 1;
+        trfinf.effMC_allBins.at(1).at(jet_index) = 0;
+      }
+    }
+  } // !m_continuous    
+  return StatusCode::SUCCESS;
 }
 
 std::vector<std::vector<bool> > BTaggingTruthTaggingTool::generatePermutations(int njets, int tags, int start){

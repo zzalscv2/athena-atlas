@@ -125,8 +125,8 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   StatusCode CalculateResults( const xAOD::JetContainer& jets, Analysis::TruthTagResults& results,int rand_seed = -1);
         
   // will use onnxtool
-  StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw,  Analysis::TruthTagResults& results, int rand_seed=-1);
-  StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c,  Analysis::TruthTagResults& results, int rand_seed=-1);
+  StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw,  Analysis::TruthTagResults& results, int rand_seed=-1);
+  StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw_b, const std::vector<float>& tagw_c,  Analysis::TruthTagResults& results, int rand_seed=-1);
   StatusCode CalculateResultsONNX( const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat, Analysis::TruthTagResults& results, int rand_seed = -1);
 
   StatusCode setEffMapIndex(const std::string& flavour, unsigned int index);
@@ -150,9 +150,9 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars);
 
   // overloaded with node_feat that is used by onnx tool
-  StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw);
+  StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw);
   StatusCode setJets(TRFinfo &trfinf, const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat);
-  StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c);
+  StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw_b, const std::vector<float>& tagw_c);
   StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars, const std::vector<std::vector<float>>& node_feat);
             
   // get truth tagging weights

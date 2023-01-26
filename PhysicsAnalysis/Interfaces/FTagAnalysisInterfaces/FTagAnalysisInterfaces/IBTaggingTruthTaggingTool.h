@@ -49,10 +49,10 @@ class IBTaggingTruthTaggingTool : virtual public CP::ISystematicsTool {
   */
 
   // continuous mode
-  virtual StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw,  Analysis::TruthTagResults& results, int rand_seed=-1)=0 ;
+  virtual StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw,  Analysis::TruthTagResults& results, int rand_seed=-1)=0 ;
   
   // continuous2D mode
-  virtual StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw_b, std::vector<float>& tagw_c, Analysis::TruthTagResults& results, int rand_seed=-1)=0 ;
+  virtual StatusCode CalculateResultsONNX( const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw_b, const std::vector<float>& tagw_c, Analysis::TruthTagResults& results, int rand_seed=-1)=0 ;
     
   virtual StatusCode CalculateResultsONNX( const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat, Analysis::TruthTagResults& results, int rand_seed=-1)=0;
 
