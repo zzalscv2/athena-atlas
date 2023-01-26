@@ -18,25 +18,26 @@ if __name__=="__main__":
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Input.ProjectName = "mc16_13TeV"
-    ConfigFlags.Input.RunNumber = 310000 # MC16e 2018 run number
-    ConfigFlags.Input.TimeStamp = 1550000000 # MC16e 2018 time stamp
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-01"
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Input.isMC = True
+    flags.Input.ProjectName = "mc16_13TeV"
+    flags.Input.RunNumber = 310000 # MC16e 2018 run number
+    flags.Input.TimeStamp = 1550000000 # MC16e 2018 time stamp
+    flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-01"
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    flags.Detector.GeometrySCT = True
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
-    cfg.merge(McEventSelectorCfg(ConfigFlags))
+    cfg.merge(McEventSelectorCfg(flags))
 
     algkwargs = {}
     algkwargs["OutputLevel"] = INFO
-    cfg.merge(SCT_MonitorConditionsTestAlgCfg(ConfigFlags, **algkwargs))
+    cfg.merge(SCT_MonitorConditionsTestAlgCfg(flags, **algkwargs))
 
     cfg.run(maxEvents=20)
