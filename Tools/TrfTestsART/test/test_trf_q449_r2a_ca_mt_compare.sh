@@ -17,7 +17,7 @@ Reco_tf.py --CA \
   --outputAODFile myAOD_ca.pool.root \
   --outputESDFile myESD_ca.pool.root \
   --outputHISTFile myHIST_ca.root \
-  --preExec "all:ConfigFlags.Jet.WriteToAOD=True; ConfigFlags.MET.WritetoAOD=True;ConfigFlags.Trigger.triggerConfig='DB'" \
+  --preExec "all:flags.Jet.WriteToAOD=True; flags.MET.WritetoAOD=True;" \
   --imf="False" \
   --maxEvents 100
 
