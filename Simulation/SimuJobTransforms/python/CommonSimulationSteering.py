@@ -51,8 +51,12 @@ def CommonSimulationCfg(flags, log):
             cfg.merge(CosmicGeneratorCfg(flags))
         else:
             # Case 3a: Configure ParticleGun
-            log.error("On-the-fly generation other than with CosmicGenerator is not supported yet!")
-            pass
+            fragment = flags.Sim.GenerationConfiguration
+            if fragment and fragment != 'NONE':
+                executeFromFragment(fragment, flags, cfg)
+                log.info("On-the-fly generation using ParticleGun!")
+            else:
+                log.error("No input file or on-the-fly generation configuration provided!")
     else:
         # Cases 1, 2a, 2b, 2c, 4
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -91,12 +95,16 @@ def CommonSimulationCfg(flags, log):
         from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
         cfg.merge(BeamEffectsAlgCfg(flags))
         if flags.Input.Files:
+            #Cases 1, 2
             if "xAOD::EventInfo#EventInfo" not in flags.Input.TypedCollections:
                 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg
                 cfg.merge(EventInfoCnvAlgCfg(flags)) ## TODO: update config so that ReSim can use the same xAOD::EventInfo
             else:
                 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoUpdateFromContextAlgCfg
                 cfg.merge(EventInfoUpdateFromContextAlgCfg(flags))
+        else:
+            #Case 3: xAOD::EventInfo#EventInfo will have already been created
+            pass
 
     AcceptAlgNames=[]
     if flags.Sim.ISFRun:
