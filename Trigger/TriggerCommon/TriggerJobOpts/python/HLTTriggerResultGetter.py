@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
@@ -9,10 +9,7 @@ from RecExConfig.ObjKeyStore import objKeyStore
 
 _log = logging.getLogger("HLTTriggerResultGetter.py")
 
-def HLTTriggerResultGetter(flags=None):
-    if flags is None:
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        flags = ConfigFlags
+def HLTTriggerResultGetter(flags):
 
     if flags.Input.Format is Format.BS and flags.Trigger.DecodeHLT:
         _log.info("Configuring BS unpacking")
