@@ -137,8 +137,8 @@ if help:
     sys.exit()
 
 
-connStr=schema+'/'+instance
-connStr2=schema2+'/'+instance2
+connStr=schema+'/'+instance   if ':' not in schema and ';' not in schema and '/' not in schema  else schema
+connStr2=schema2+'/'+instance2   if ':' not in schema2 and ';' not in schema2 and '/' not in schema2  else schema2
 
 #===================================================================
 #====================== FILL DB parameters BELOW ===================
