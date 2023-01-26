@@ -455,7 +455,6 @@ GepPi0Alg::crawl_strategy(const CaloCell* seed,
   phi_starts.push_back(seed_hash);
 
   
-  auto cur_hash = seed_hash;
   std::vector<LArNeighbours::neighbourOption>
     dirs {LArNeighbours::prevInEta, LArNeighbours::nextInEta};
 
