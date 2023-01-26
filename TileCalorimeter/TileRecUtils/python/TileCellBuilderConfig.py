@@ -51,9 +51,9 @@ def TileCellBuilderCfg(flags, **kwargs):
         from TileConditions.TileTimingConfig import TileCondToolTimingCfg
         kwargs['TileCondToolTiming'] = acc.popToolsAndMerge( TileCondToolTimingCfg(flags) )
 
-    if kwargs['CheckDCS'] and 'TileDCSTool' not in kwargs:
-        from TileConditions.TileDCSConfig import TileDCSToolCfg
-        kwargs['TileDCSTool'] = acc.popToolsAndMerge( TileDCSToolCfg(flags) )
+    if kwargs['CheckDCS']:
+        from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
+        acc.merge( TileDCSCondAlgCfg(flags) )
 
     if not (flags.Input.isMC or flags.Overlay.DataOverlay) and 'TileDSPRawChannelContainer' not in kwargs:
         from TileRecUtils.TileRawChannelCorrectionConfig import TileRawChannelCorrectionAlgCfg

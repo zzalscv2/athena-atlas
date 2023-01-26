@@ -26,7 +26,7 @@
 #include "TileRecUtils/ITileRawChannelTool.h"
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCablingSvc.h"
-#include "TileConditions/ITileDCSTool.h"
+#include "TileConditions/TileDCSState.h"
 #include "TileConditions/ITileBadChanTool.h"
 #include "TileEvent/TileDQstatus.h"
 #include "TileEvent/TileDigitsContainer.h"
@@ -71,8 +71,7 @@ class TileTimeBCOffsetFilter: public extends<AthAlgTool, ITileRawChannelTool> {
     bool drawer_ok(const int drawerIndex, std::vector<int> & channel_time_ok,
                    std::vector<int> & bad_dmu) const;
     bool ch_masked_or_empty(int ros, int drawer, int channel, int gain,
-                            const TileDQstatus* DQstatus) const;
-    bool isChanDCSgood(int ros, int drawer, int channel) const;
+                            const TileDQstatus* DQstatus, const TileDCSState* dcsState) const;
     float ref_digits_maxmindiff(int ros, int drawer, int ref_channel) const;
 
     const TileHWID* m_tileHWID; //!< Pointer to TileHWID
@@ -82,7 +81,11 @@ class TileTimeBCOffsetFilter: public extends<AthAlgTool, ITileRawChannelTool> {
     ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
         "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
 
-    ToolHandle<ITileDCSTool> m_tileDCS{this, "TileDCSTool", "TileDCSTool", "Tile DCS tool"};
+   /**
+     * @brief Name of TileDCSState object in condition store
+     */
+    SG::ReadCondHandleKey<TileDCSState> m_DCSStateKey{this,
+        "TileDCS", "TileDCS", "Input Tile DCS status"};
 
    /**
     * @brief Name of TileEMScale in condition store

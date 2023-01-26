@@ -32,7 +32,7 @@
 #include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCondToolTiming.h"
 #include "TileConditions/TileCablingSvc.h"
-#include "TileConditions/ITileDCSTool.h"
+#include "TileConditions/TileDCSState.h"
 #include "TileRecUtils/ITileRawChannelTool.h"
 
 // Calo includes
@@ -215,7 +215,11 @@ private:
     ToolHandleArray<ITileRawChannelTool> m_noiseFilterTools{this,
         "NoiseFilterTools", {}, "Tile noise filter tools"};
 
-    ToolHandle<ITileDCSTool> m_tileDCS{this, "TileDCSTool", "TileDCSTool", "Tile DCS tool"};
+   /**
+     * @brief Name of TileDCSState object in condition store
+     */
+    SG::ReadCondHandleKey<TileDCSState> m_DCSStateKey{this,
+        "TileDCS", "TileDCS", "Input Tile DCS status"};
 
     /**
      * @brief Name of Tile cabling service
@@ -275,10 +279,10 @@ private:
      or recovers from single-channel failure. It returns true if cell was changed, false otherwise
      */
     bool maskBadChannel (TileDrawerEvtStatusArray& drawerEvtStatus,
-                         const TileDQstatus* DQstatus,
+                         const TileDQstatus* DQstatus, const TileDCSState* dcsState,
                          TileCell* pCell, HWIdentifier hwid) const;
     bool maskBadChannels (TileDrawerEvtStatusArray& drawerEvtStatus,
-                          const TileDQstatus* DQstatus,
+                          const TileDQstatus* DQstatus, const TileDCSState* dcsState,
                           TileCell* pCell) const;
 
     void correctCell(TileCell* pCell, int correction, int pmt, int gain, float ener, float time,
@@ -296,8 +300,6 @@ private:
                          bool count_over, bool good_time, bool good_ener,
                          bool overflow, bool underflow,
                          bool good_overflowfit) const;
-
-    bool isChanDCSgood (int ros, int drawer, int channel) const;
 
     template<typename T, typename V>
     class DoubleVectorIterator {

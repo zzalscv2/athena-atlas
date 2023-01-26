@@ -119,9 +119,9 @@ def TileTimeBCOffsetFilterCfg(flags, **kwargs):
         badChanTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
         kwargs['TileBadChanTool'] = badChanTool
 
-    if kwargs['CheckDCS'] and 'TileDCSTool' not in kwargs:
-        from TileConditions.TileDCSConfig import TileDCSToolCfg
-        kwargs['TileDCSTool'] = acc.popToolsAndMerge( TileDCSToolCfg(flags) )
+    if kwargs['CheckDCS']:
+        from TileConditions.TileDCSConfig import TileDCSCondAlgCfg
+        acc.merge( TileDCSCondAlgCfg(flags) )
 
     TileTimeBCOffsetFilter=CompFactory.TileTimeBCOffsetFilter
     acc.setPrivateTools( TileTimeBCOffsetFilter(**kwargs) )

@@ -82,7 +82,7 @@ StatusCode TileTimeBCOffsetFilter::initialize() {
   //=== get TileBadChanTool
   ATH_CHECK( m_tileBadChanTool.retrieve() );
 
-  CHECK( m_tileDCS.retrieve(EnableTool{m_checkDCS}) );
+  ATH_CHECK( m_DCSStateKey.initialize(m_checkDCS) );
 
   ATH_CHECK( m_cablingSvc.retrieve() );
   m_cabling = m_cablingSvc->cablingService();
@@ -105,6 +105,7 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
 
   // Now retrieve the TileDQstatus
   const TileDQstatus* DQstatus = SG::makeHandle (m_DQstatusKey, ctx).get();
+  const TileDCSState* dcsState = m_checkDCS ? SG::ReadCondHandle(m_DCSStateKey, ctx).cptr() : nullptr;
 
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
@@ -175,7 +176,7 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
           }
           int gain = m_tileHWID->adc(adc_id);
           if (channel_time_ok[ch_p_tmp]==0 &&
-              (! ch_masked_or_empty(ros,drawer,ch_p_tmp,gain,DQstatus))) {
+              (! ch_masked_or_empty(ros, drawer, ch_p_tmp, gain, DQstatus, dcsState))) {
             float amp = rch->amplitude();
             if (rchUnit != TileRawChannelUnit::OnlineMegaElectronVolts) {
               amp = emScale->calibrateChannel(drawerIdx, ch_p_tmp, gain, amp, rchUnit, TileRawChannelUnit::MegaElectronVolts);
@@ -217,7 +218,7 @@ TileTimeBCOffsetFilter::process (TileMutableRawChannelContainer& rchCont, const 
           continue;
         }
         int gain = m_tileHWID->adc(adc_id);
-        if (ch_masked_or_empty(ros,drawer,ch,gain,DQstatus)) {
+        if (ch_masked_or_empty(ros, drawer, ch, gain, DQstatus, dcsState)) {
           ch_number[i] = -10;
           ch_amp[i] = 0;
           ch_time[i] = 0;
@@ -373,7 +374,8 @@ bool TileTimeBCOffsetFilter::drawer_ok(int drawerIdx,
 }
 
 bool TileTimeBCOffsetFilter::ch_masked_or_empty(int ros, int drawer, int channel, int gain,
-                                                const TileDQstatus* DQstatus) const {
+                                                const TileDQstatus* DQstatus,
+                                                const TileDCSState* dcsState) const {
   // check if channel is connected
   int index, pmt;
   m_cabling->h2s_cell_id_index(ros, drawer, channel, index, pmt);
@@ -384,31 +386,11 @@ bool TileTimeBCOffsetFilter::ch_masked_or_empty(int ros, int drawer, int channel
   TileBchStatus chStatus = m_tileBadChanTool->getAdcStatus(drawerIdx, channel, gain);
   if (chStatus.isBad()) return true;
 
-  // check DQstatus now
-  bool bad = !(DQstatus->isAdcDQgood(ros, drawer, channel, gain)
-               && isChanDCSgood(ros, drawer, channel));
+  // check DQstatus or DCS now
+  bool bad = !(DQstatus->isAdcDQgood(ros, drawer, channel, gain))
+    || (dcsState ? dcsState->isStatusBad(ros, drawer, channel) : false);
   return bad;
 }
-
-bool TileTimeBCOffsetFilter::isChanDCSgood (int ros, int drawer, int channel) const
-{
-  bool good=true;
-
-  if (m_checkDCS) {
-    
-    TileDCSState::TileDCSStatus status = m_tileDCS->getDCSStatus(ros, drawer, channel);
-
-    if (status > TileDCSState::WARNING) {
-      good=false;
-      ATH_MSG_DEBUG("Module=" << TileCalibUtils::getDrawerString(ros, drawer)
-                    << " channel=" << channel
-                    << " masking becasue of bad DCS status=" << status);
-    } 
-  }
-
-  return good;
-}
-
 
 int TileTimeBCOffsetFilter::find_partner(int ros, int ch) const {
   /* returns the "partner" channel, i.e. the channel reading the same cell
