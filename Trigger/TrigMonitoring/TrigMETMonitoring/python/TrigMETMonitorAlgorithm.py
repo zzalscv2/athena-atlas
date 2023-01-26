@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigMETMonitoringAlgorithm.py
@@ -857,22 +857,23 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
     file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    ConfigFlags.Input.Files = [nightly+file]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'TrigMETMonitorOutput.root'
+    flags = initConfigFlags()
+    flags.Input.Files = [nightly+file]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'TrigMETMonitorOutput.root'
 
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigMETMonitorAcc = TrigMETMonConfig(ConfigFlags)
+    trigMETMonitorAcc = TrigMETMonConfig(flags)
     cfg.merge(trigMETMonitorAcc)
 
     # If you want to turn on more detailed messages ...

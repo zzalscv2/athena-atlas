@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigEgammaMonitorAlgorithm.py
@@ -55,23 +55,24 @@ if __name__=='__main__':
     ROOT6Setup()
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     path = '/afs/cern.ch/work/j/jodafons/public/valid_sampleA/valid1.361106.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zee.recon.AOD.e5112_s3214_d1731_r13252_tid27512952_00'
     path+='/AOD.27512952._000185.pool.root.1'
-    ConfigFlags.Input.Files = [path]
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.Output.HISTFileName = 'TrigEgammaMonitorOutput.root'
+    flags = initConfigFlags()
+    flags.Input.Files = [path]
+    flags.Input.isMC = True
+    flags.Output.HISTFileName = 'TrigEgammaMonitorOutput.root'
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigEgammaMonitorAcc = TrigEgammaMonConfig(ConfigFlags)
+    trigEgammaMonitorAcc = TrigEgammaMonConfig(flags)
     cfg.merge(trigEgammaMonitorAcc)
   
 
