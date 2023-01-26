@@ -9,7 +9,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/DataHandle.h"
 
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
@@ -18,7 +17,7 @@
 class ILArShape;
 class LArOnlineID;
 
-class LArShapeDumperTool : public AthAlgTool, public virtual ILArShapeDumperTool
+class ATLAS_NOT_THREAD_SAFE LArShapeDumperTool : public AthAlgTool, public virtual ILArShapeDumperTool
 {
  public:
  
@@ -44,6 +43,5 @@ class LArShapeDumperTool : public AthAlgTool, public virtual ILArShapeDumperTool
   const LArEM_ID* m_emId{nullptr};
   const LArHEC_ID* m_hecId{nullptr};
   const LArFCAL_ID* m_fcalId{nullptr};
-  const DataHandle<ILArShape> m_shape;
 };
 #endif

@@ -11,6 +11,7 @@
 #include "TArrayI.h"
 #include <vector>
 #include "AthenaKernel/CLASS_DEF.h"
+#include "CxxUtils/checker_macros.h"
 
 #ifndef LArSamples_HistoryContainer_H
 #define LArSamples_HistoryContainer_H
@@ -25,7 +26,7 @@ namespace LArSamples {
   class CellInfo;
   class OFC;
   
-  class HistoryContainer  {
+  class ATLAS_NOT_THREAD_SAFE HistoryContainer  {
   
    public:
    

@@ -17,17 +17,18 @@
 
 #include "CaloIdentifier/CaloGain.h"
 //#include "LArCafJobs/TestObject2.h"
+#include "CxxUtils/checker_macros.h"
 
 class TH2;
 class TH2D;
 class TProfile2D;
 
-namespace LArSamples {
+namespace  LArSamples {
 
   class ShapeInfo;
 
   
-  class CellInfo final{
+  class ATLAS_NOT_THREAD_SAFE CellInfo final{
   
    public:
 
