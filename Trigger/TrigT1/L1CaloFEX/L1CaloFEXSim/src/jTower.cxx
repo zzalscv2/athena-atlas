@@ -133,7 +133,7 @@ void jTower::set_LAr_Et(Identifier ID, int cell, float et, int layer)
         throw std::runtime_error(errMsg.str().c_str());
         return;
     }
-
+    
     addET(et, cell);
 
     if(layer == 0) {
@@ -152,7 +152,7 @@ void jTower::Do_LAr_encoding(){
     
     //multi linear digitisation encoding
     for(uint layer=0; layer<m_et_float_raw.size(); layer++){
-        unsigned int ecode = jFEXCompression::Compress(m_et_float_raw[layer]); 
+        unsigned int ecode = jFEXCompression::Compress( std::round( m_et_float_raw[layer]) ); 
         int outET = jFEXCompression::Expand(ecode); 
         
         m_et[layer] = outET;         

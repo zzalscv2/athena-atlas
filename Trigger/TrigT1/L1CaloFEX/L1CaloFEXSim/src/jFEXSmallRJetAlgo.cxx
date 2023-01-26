@@ -55,7 +55,11 @@ StatusCode LVL1::jFEXSmallRJetAlgo::safetyTest(){
 
 void LVL1::jFEXSmallRJetAlgo::setup(int inputTable[7][7]) {
 
-  std::copy(&inputTable[0][0], &inputTable[0][0] + 49, &m_jFEXalgoTowerID[0][0]);
+    for(int phi=0; phi<7; phi++) {
+        for (int eta=0; eta<7; eta++) {
+            m_jFEXalgoTowerID[phi][eta] = inputTable[6-phi][eta];
+        }
+    }
 }
 
 
@@ -111,12 +115,13 @@ void LVL1::jFEXSmallRJetAlgo::buildSeeds()
     m_LMDisplaced = false;
     for(int mphi = 1; mphi < 6; mphi++) {
         for(int meta = 1; meta< 6; meta++) {
-            int et_tmp = 0;
+            
             int seedTotalET = 0;
             for(int iphi = -1; iphi < 2; iphi++) {
                 for(int ieta = -1; ieta < 2; ieta++) {
                     //for that TT, build the seed
                     //here we sum TT ET to calculate seed
+                    int et_tmp = 0;
                     et_tmp = getTTowerET(m_jFEXalgoTowerID[mphi + iphi][meta + ieta]);
                     seedTotalET += et_tmp;
                 }
@@ -125,10 +130,18 @@ void LVL1::jFEXSmallRJetAlgo::buildSeeds()
         }
     }
 
-    int centralTT_ET = getTTowerET(m_jFEXalgoTowerID[3][3]);
-    if(centralTT_ET==m_jFEXalgoSearchWindowSeedET[3][3]) {
+
+    // checking diagonals, can be shifted
+    unsigned int centralTT_ET = getTTowerET(m_jFEXalgoTowerID[3][3]);
+    unsigned int below_centralTT_ET = getTTowerET(m_jFEXalgoTowerID[4][2]);
+    unsigned int avobe_centralTT_ET = getTTowerET(m_jFEXalgoTowerID[2][4]);
+    unsigned int avobe_seed_ET = m_jFEXalgoSearchWindowSeedET[1][3];
+    unsigned int central_seed_ET = m_jFEXalgoSearchWindowSeedET[2][2];
+
+    if( centralTT_ET < below_centralTT_ET or (centralTT_ET < avobe_centralTT_ET and central_seed_ET<=avobe_seed_ET)) {
         m_LMDisplaced = true;
     }
+    
     m_seedSet = true;
 }
 
@@ -152,13 +165,13 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
                 }
                 //strictly less than central
                 if( (iphi >= ieta) && !(ieta == 3 && iphi == 3) && !(ieta == 4 && iphi == 4) ) {
-                    if(central_seed<m_jFEXalgoSearchWindowSeedET[iphi][ieta]) {
+                    if(central_seed< m_jFEXalgoSearchWindowSeedET[iphi][ieta]) {
                         return false;
                     }
                 }
                 //less than or equal to central
                 if((ieta > iphi) || (ieta == 3 && iphi == 3) || (ieta == 4 && iphi == 4)) {
-                    if(central_seed<= m_jFEXalgoSearchWindowSeedET[iphi][ieta]) {
+                    if(central_seed<=m_jFEXalgoSearchWindowSeedET[iphi][ieta]) {
                         return false;
                     }
                 }
@@ -167,7 +180,6 @@ bool LVL1::jFEXSmallRJetAlgo::isSeedLocalMaxima() {
     }
 
     return true;
-
 }
 
 
@@ -183,7 +195,6 @@ unsigned int LVL1::jFEXSmallRJetAlgo::getSmallClusterET() {
     int SRJetClusterET = 0;
     for(int nphi = -3; nphi< 4; nphi++) {
         for(int neta = -3; neta< 4; neta++) {
-            
             int DeltaRSquared = std::pow(nphi,2)+std::pow(neta,2);
             if(DeltaRSquared < 16) {
                 SRJetClusterET += getTTowerET(m_jFEXalgoTowerID[3+nphi][3+neta]);
