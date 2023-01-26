@@ -1,6 +1,6 @@
 #!/bin/env python
 
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # file   AFP_DigitizationConfig_test.py
 # author Petr Balek <petr.balek@cern.ch>
@@ -19,34 +19,35 @@ if __name__ == "__main__":
     
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from Digitization.DigitizationSteering import DigitizationMainCfg, DigitizationMessageSvcCfg
 
     # Set up logging and new style config
     log.setLevel(DEBUG)
 
     # Configure
-    ConfigFlags.Input.Files = ["test.pool.root"]
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.Concurrency.NumThreads = 1
-    ConfigFlags.Concurrency.NumConcurrentEvents=1
-    ConfigFlags.Exec.MaxEvents=3
-    ConfigFlags.Beam.NumberOfCollisions = 0.
-    ConfigFlags.Output.RDOFileName = "myRDO.pool.root"
+    flags = initConfigFlags()
+    flags.Input.Files = ["test.pool.root"]
+    flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
+    flags.GeoModel.Align.Dynamic = False
+    flags.Concurrency.NumThreads = 1
+    flags.Concurrency.NumConcurrentEvents=1
+    flags.Exec.MaxEvents=3
+    flags.Beam.NumberOfCollisions = 0.
+    flags.Output.RDOFileName = "myRDO.pool.root"
 
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags.fillFromArgs()
+    flags.lock()
 
     # Construct our accumulator to run
-    acc = DigitizationMainCfg(ConfigFlags)
-    acc.merge(DigitizationMessageSvcCfg(ConfigFlags))
+    acc = DigitizationMainCfg(flags)
+    acc.merge(DigitizationMessageSvcCfg(flags))
 
     # Dump config
     acc.getService("StoreGateSvc").Dump = True
     acc.getService("ConditionStore").Dump = True
     acc.printConfig(withDetails=True)
-    ConfigFlags.dump()
+    flags.dump()
 
     acc.foreach_component("*AFP*").OutputLevel=DEBUG
 
