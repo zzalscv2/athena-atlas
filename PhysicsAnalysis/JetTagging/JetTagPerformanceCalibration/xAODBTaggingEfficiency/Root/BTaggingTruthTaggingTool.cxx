@@ -407,7 +407,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<
   }
 
   std::vector<int> flav;
-  auto vars = std::make_unique<std::vector<Analysis::CalibrationDataVariables>>(0);
+  auto vars = std::make_unique<std::vector<Analysis::CalibrationDataVariables>>();
   for(unsigned int i =0; i<tagw_b.size(); i++){
     Analysis::CalibrationDataVariables vars_appo;
       
