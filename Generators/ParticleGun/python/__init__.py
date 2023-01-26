@@ -48,15 +48,13 @@ class ParticleGun(EvgenAlg):
         seed = ROOT.ATHRNG.calculateSeedsPython(self.randomStream, self._ctx.eventID().event_number(), self._ctx.eventID().run_number(), offset)
 
         if seed is None:
-            self.msg.warning("ParticleGun: Failed to find a seed for the random stream named '%s' ", self.randomStream)
+            self.msg.warning("Failed to find a seed for the random stream named '%s'.", self.randomStream)
             seed = self.randomSeed
-        else:
-            self.msg.debug("ParticleGun: set random seed to, %s", str(seed))
         if seed is not None:
+            self.msg.debug("Set random seed to %s.", str(seed))
             random.seed(seed)
-            self.msg.debug("ParticleGun: randomSeed property set")
         else:
-            self.msg.error("ParticleGun: randomSeed property not set")
+            self.msg.error("Failed to set random seed.")
             return StatusCode.Failure
 
         ## Set event weight(s)

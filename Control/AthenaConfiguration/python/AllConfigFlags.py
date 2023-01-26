@@ -237,6 +237,7 @@ def initConfigFlags():
 
 #Random engine Flags:
     acf.addFlag("Random.Engine", "dSFMT") # Random service used in {"dSFMT", "Ranlux64", "Ranecu"}
+    acf.addFlag("Random.SeedOffset", 0) # TODO replace usage of Digitization.RandomSeedOffset with this flag
 
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags

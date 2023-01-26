@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
@@ -236,6 +236,8 @@ def createSimConfigFlags():
 
     scf.addFlag("Sim.BeamPipeCut", 100.0)
     scf.addFlag("Sim.TightMuonStepping", False)
+
+    scf.addFlag('Sim.GenerationConfiguration', 'NONE') # TODO replace this property with something more central for all Generator configuration
 
     return scf
 
