@@ -48,7 +48,7 @@ class L1CaloGeometryConvertor:
          endUtime = int(time.time())
          startValKey = startUtime * self.UNIX2COOL
          endValKey = endUtime * self.UNIX2COOL
-         chsel = cool.ChannelSelection(0,sys.maxint)
+         chsel = cool.ChannelSelection(0,sys.maxsize)
 
          try:
            itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -258,8 +258,6 @@ def WriteSqlite(name,input_dict):
   now = int(time.time())
 
   since = now*UNIX2COOL
-# since = 0
-#  until = sys.maxint
   until = cool.ValidityKeyMax
   db.createFolderSet('/TRIGGER')
   db.createFolderSet('/TRIGGER/Receivers')
@@ -287,7 +285,7 @@ class GainsFromSqlite:
 #       self.cut_offset_high = 10.
 
        self.cut_gain_low    = 0.                    # all gains that are not completly crazy...
-       self.cut_gain_high   = 2.3
+       self.cut_gain_high   = 3
        self.cut_offset_low  = -100.
        self.cut_offset_high = 100.
 
@@ -320,7 +318,7 @@ class GainsFromSqlite:
        endUtime = int(time.time())
        startValKey = startUtime * self.UNIX2COOL
        endValKey = endUtime * self.UNIX2COOL
-       chsel = cool.ChannelSelection(0,sys.maxint)
+       chsel = cool.ChannelSelection(0,sys.maxsize)
 
        try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)
@@ -367,7 +365,10 @@ class GainsFromSqlite:
 #            not (self.geometry_convertor.isCoolHad(i) and self.geometry_convertor.isPPMFCAL(i)) ):
             not (self.geometry_convertor.isPPMFCAL(i)) ):
 
-           good_gains[i]=[self.measured_gains[i],self.measured_error_code[i]]      
+           good_gains[i]=[self.measured_gains[i],self.measured_error_code[i]]
+
+         elif self.geometry_convertor.isPPMFCAL(i):
+           good_gains[i]=[self.measured_gains[i]/2,self.measured_error_code[i]]
 
          else:
            print ("GainsFromSqlite::getGoodGains have rejected channel ", i)
@@ -398,7 +399,7 @@ class GainsFromOracle:
        endUtime = int(time.time())
        startValKey = startUtime * self.UNIX2COOL
        endValKey = endUtime * self.UNIX2COOL
-       chsel = cool.ChannelSelection(0,sys.maxint)
+       chsel = cool.ChannelSelection(0,sys.maxsize)
 
        try:
          itr=folder.browseObjects(startValKey, endValKey, chsel)

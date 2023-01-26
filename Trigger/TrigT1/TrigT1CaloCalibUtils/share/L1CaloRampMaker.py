@@ -53,12 +53,10 @@ def main():
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
     from TrigT1CaloByteStream.LVL1CaloRun2ByteStreamConfig import LVL1CaloRun2ReadBSCfg
     
     acc = MainServicesCfg(flags)
     acc.merge( ByteStreamReadCfg(flags) )
-    acc.merge( L1TriggerByteStreamDecoderCfg(flags) )
     acc.merge( LVL1CaloRun2ReadBSCfg(flags))
     
     
