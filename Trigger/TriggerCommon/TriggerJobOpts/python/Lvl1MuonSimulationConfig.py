@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -22,8 +22,8 @@ def TMDBConfig(flags):
     from TileConditions.TileCablingSvcConfig import TileCablingSvcCfg
     acc.merge(TileCablingSvcCfg(flags))
 
-    from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-    emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     tmdbAlg = CompFactory.TileMuonReceiverDecision('TileMuonReceiverDecision'
                                                    , TileRawChannelContainer = "MuRcvRawChCnt" # input
@@ -37,8 +37,7 @@ def TMDBConfig(flags):
                                                    # run 3 thresholds
                                                    , MuonReceiverEneThreshCellD5 = 500
                                                    , MuonReceiverEneThreshCellD6 = 500
-                                                   , MuonReceiverEneThreshCellD5andD6 = 500
-                                                   , TileCondToolEmscale = emScaleTool)
+                                                   , MuonReceiverEneThreshCellD5andD6 = 500)
     acc.addEventAlgo(tmdbAlg)
     return acc
 

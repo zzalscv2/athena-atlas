@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -36,7 +36,7 @@
 // Tile includes
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileContainer.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/TileCablingSvc.h"
 
 // Atlas includes
@@ -97,8 +97,11 @@ class TileMuonReceiverDecision: public AthReentrantAlgorithm {
   float m_threshold_d5d6;
   float m_selCutQf;
 
-  ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-      "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+  /**
+    * @brief Name of TileEMScale in condition store
+    */
+  SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+      "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
   /**
    * @brief Name of Tile cabling service
