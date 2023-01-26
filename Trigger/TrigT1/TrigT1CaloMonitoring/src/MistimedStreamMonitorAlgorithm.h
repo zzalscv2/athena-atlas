@@ -13,7 +13,7 @@
 #include "TrigT1CaloToolInterfaces/IL1TriggerTowerToolRun3.h"
 #include "TrigT1Interfaces/TrigT1CaloDefs.h"
 #include "TrigT1CaloCalibConditions/L1CaloRunParametersContainer.h"  
-#include "TrigT1CaloCalibConditions/L1CaloReadoutConfigContainer.h"
+#include "TrigT1CaloCalibConditions/L1CaloReadoutConfigContainerJSON.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "xAODTrigL1Calo/CPMTowerContainer.h" 
 #include "xAODTrigL1Calo/JetElementContainer.h"
@@ -81,7 +81,7 @@ private:
   
   // L1Calo Conditions 
   SG::ReadCondHandleKey<L1CaloRunParametersContainer>  m_runParametersContainer{ this, "InputKeyRunParameters", "L1CaloRunParametersContainer"};
-  SG::ReadCondHandleKey<L1CaloReadoutConfigContainer>  m_readoutConfigContainer{ this, "InputKeyReadoutConfig", "L1CaloReadoutConfigContainer"};
+  SG::ReadCondHandleKey<L1CaloReadoutConfigContainerJSON>  m_readoutConfigContainerJSON{ this, "InputKeyReadoutConfig", "L1CaloReadoutConfigContainerJSON"};
 
 
 
