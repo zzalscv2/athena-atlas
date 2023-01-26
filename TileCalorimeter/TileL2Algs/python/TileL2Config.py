@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile L2 builder tool and algorithm"""
 
@@ -30,10 +30,8 @@ def TileL2BuilderCfg(flags, **kwargs):
         badChannelsTool = acc.popToolsAndMerge( TileBadChanToolCfg(flags) )
         kwargs['TileBadChanTool'] = badChannelsTool
 
-    if 'TileCondToolEmscale' not in kwargs:
-        from TileConditions.TileEMScaleConfig import TileCondToolEmscaleCfg
-        emScaleTool = acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
-        kwargs['TileCondToolEmscale'] = emScaleTool
+    from TileConditions.TileEMScaleConfig import TileEMScaleCondAlgCfg
+    acc.merge( TileEMScaleCondAlgCfg(flags) )
 
     TileL2Builder=CompFactory.TileL2Builder
     acc.setPrivateTools( TileL2Builder(**kwargs) )

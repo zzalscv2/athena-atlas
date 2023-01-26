@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -23,12 +23,13 @@
 #include "TileEvent/TileContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileIdentifier/TileFragHash.h"
-#include "TileConditions/TileCondToolEmscale.h"
+#include "TileConditions/TileEMScale.h"
 #include "TileConditions/ITileBadChanTool.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -55,6 +56,7 @@ class TileL2Builder: public AthAlgTool {
     virtual StatusCode finalize() override;
 
     virtual StatusCode process(int fragmin, int fragmax, TileL2Container *l2Container) const;
+    virtual StatusCode process(int fragmin, int fragmax, TileL2Container *l2Container, const EventContext& ctx) const;
 
     /** Return collection ID for a given index  */
     inline int indexToId(int i) const {
@@ -187,9 +189,11 @@ class TileL2Builder: public AthAlgTool {
     /** Pointer to TileHWID */
     const TileHWID* m_tileHWID;
 
-    /** Handle to Tile calibration tool */
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
-        "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"};
+   /**
+    * @brief Name of TileEMScale in condition store
+    */
+    SG::ReadCondHandleKey<TileEMScale> m_emScaleKey{this,
+        "TileEMScale", "TileEMScale", "Input Tile EMS calibration constants"};
 
     /** Handle to Tile bad channel tool */
     ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
