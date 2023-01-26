@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FASTTRT_DIGITIZATION_FASTTRT_DIGITIZATIONTOOL_H
@@ -92,7 +92,9 @@ private:
   StatusCode initializeNumericalConstants();    // once per run 
   StatusCode setNumericalConstants();    // once per event (pileup-dependent constants) 
 
-  StatusCode produceDriftCircles(const EventContext& ctx, CLHEP::HepRandomEngine* rndmEngine);
+  StatusCode produceDriftCircles(const EventContext& ctx,
+                                 CLHEP::HepRandomEngine* rndmEngine,
+                                 TimedHitCollection< TRTUncompressedHit >& thpctrt);
 
   Identifier getIdentifier( int hitID, IdentifierHash &hash, Identifier &layer_id, bool &status ) const;
 

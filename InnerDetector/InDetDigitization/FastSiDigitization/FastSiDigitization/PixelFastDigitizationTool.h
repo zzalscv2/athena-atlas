@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -77,7 +77,8 @@ public:
                                SubEventIterator eSubEvents );
   StatusCode processAllSubEvents(const EventContext& ctx);
   StatusCode mergeEvent(const EventContext& ctx);
-  StatusCode digitize(const EventContext& ctx);
+  StatusCode digitize(const EventContext& ctx,
+                      TimedHitCollection<SiHit>& thpcsi);
   StatusCode createAndStoreRIOs(const EventContext& ctx);
 
 
