@@ -34,6 +34,8 @@ def GenericMonitoringTool(*args, **kwargs):
     arg_list = list(args)
     if arg_list:
         tmp = arg_list.pop(0)
+        if tmp is None and arg_list: # empty flags passed
+            tmp = arg_list.pop(0)
         if isinstance(tmp, AthConfigFlags):
             flags = tmp
             if arg_list:
