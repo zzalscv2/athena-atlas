@@ -31,6 +31,7 @@
 #include "TrkMaterialOnTrack/ScatteringAngles.h"
 #include "TrkSurfaces/Surface.h"
 #include "TrkTrack/TrackStateOnSurface.h"
+#include "AthenaKernel/RNGWrapper.h"
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
@@ -1194,8 +1195,7 @@ propagateRungeKuttaImpl(Cache& cache,
         , m_maxSteps(10000)     // Maximum number of allowed steps (to avoid infinite loops).
         , m_layXmax(1.)         // maximal layer thickness for multiple scattering calculations
         , m_simulation(false)   // flag for simulation mode
-        , m_rndGenSvc("AtDSFMTGenSvc", n)
-        , m_randomEngine(nullptr)
+        , m_rndGenSvc("AthRNGSvc", n)
         , m_randomEngineName("FatrasRnd")
       {
         declareInterface<Trk::IPropagator>(this);
@@ -1248,16 +1248,8 @@ propagateRungeKuttaImpl(Cache& cache,
 
         if (m_simulation) {
           // get the random generator serice
-          if (m_rndGenSvc.retrieve().isFailure()) {
-            ATH_MSG_WARNING("Could not retrieve " << m_rndGenSvc << ", no smearing done.");
-            m_randomEngine = nullptr;
-          } else {
-            // Get own engine with own seeds:
-            m_randomEngine = m_rndGenSvc->GetEngine(m_randomEngineName);
-            if (!m_randomEngine) {
-              ATH_MSG_WARNING("Could not get random engine '" << m_randomEngineName << "', no smearing done.");
-            }
-          }
+          ATH_CHECK( m_rndGenSvc.retrieve() );
+          m_rngWrapper = m_rndGenSvc->getEngine (this, m_randomEngineName);
         }
 
         return StatusCode::SUCCESS;
@@ -1296,7 +1288,7 @@ propagateRungeKuttaImpl(Cache& cache,
         // ATH_MSG_WARNING( "[STEP_Propagator] enter 1");
 
         double Jacobian[25];
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1348,7 +1340,7 @@ propagateRungeKuttaImpl(Cache& cache,
         const Trk::TrackingVolume* tVol) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1415,7 +1407,7 @@ propagateRungeKuttaImpl(Cache& cache,
         std::vector<Trk::HitInfo>*& hitVector) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1519,7 +1511,7 @@ propagateRungeKuttaImpl(Cache& cache,
         Trk::ExtrapolationCache* extrapCache) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1589,7 +1581,7 @@ propagateRungeKuttaImpl(Cache& cache,
       {
 
         double Jacobian[25];
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1653,7 +1645,7 @@ propagateRungeKuttaImpl(Cache& cache,
       {
 
         double Jacobian[25];
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1700,7 +1692,7 @@ propagateRungeKuttaImpl(Cache& cache,
 
         double Jacobian[25];
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1754,7 +1746,7 @@ propagateRungeKuttaImpl(Cache& cache,
                                                                        const Trk::TrackingVolume* tVol) const
       {
 
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -1926,7 +1918,7 @@ propagateRungeKuttaImpl(Cache& cache,
                                                  ParticleHypothesis particle,
                                                  const Trk::TrackingVolume* tVol) const
       {
-        Cache cache{};
+        Cache cache (ctx);
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
@@ -2102,7 +2094,7 @@ propagateRungeKuttaImpl(Cache& cache,
         double path = 0.;
 
         // activate brem photon emission if required
-        cache.m_brem = m_simulation && particle == Trk::electron && m_simMatUpdator && m_randomEngine;
+        cache.m_brem = m_simulation && particle == Trk::electron && m_simMatUpdator;
 
         // loop while valid solutions
         bool validStep = true;
@@ -2191,7 +2183,7 @@ propagateRungeKuttaImpl(Cache& cache,
         }
 
         // simulation mode : smear momentum
-        if (m_simulation && cache.m_matPropOK && m_randomEngine) {
+        if (m_simulation && cache.m_matPropOK) {
           double radDist = totalPath / cache.m_material->x0();
           smear(cache, localp[2], localp[3], trackParameters.get(), radDist);
         }
@@ -2940,6 +2932,10 @@ propagateRungeKuttaImpl(Cache& cache,
         if (!parms)
           return;
 
+        if (!cache.m_randomEngine) {
+          cache.m_randomEngine = getRandomEngine (cache.m_ctx);
+        }
+
         // Calculate polar angle
         double particleMass = Trk::ParticleMasses::mass[cache.m_particle]; // Get particle mass from
                                                                            // ParticleHypothesis
@@ -2947,12 +2943,12 @@ propagateRungeKuttaImpl(Cache& cache,
         double energy = std::sqrt(momentum * momentum + particleMass * particleMass);
         double beta = momentum / energy;
         double th = std::sqrt(2.) * 15. * std::sqrt(radDist) / (beta * momentum) *
-                    CLHEP::RandGauss::shoot(m_randomEngine); // Moliere
+                    CLHEP::RandGauss::shoot(cache.m_randomEngine); // Moliere
         // double th = (sqrt(2.)*13.6*std::sqrt(radDist)/(beta*momentum)) *
         // (1.+0.038*log(radDist/(beta*beta))) * m_gaussian->shoot(); //Highland
 
         // Calculate azimuthal angle
-        double ph = 2. * M_PI * CLHEP::RandFlat::shoot(m_randomEngine);
+        double ph = 2. * M_PI * CLHEP::RandFlat::shoot(cache.m_randomEngine);
 
         Amg::Transform3D rot(Amg::AngleAxis3D(-theta, Amg::Vector3D(0., 1., 0.)) *
                              Amg::AngleAxis3D(-phi, Amg::Vector3D(0., 0., 1.)));
@@ -2969,8 +2965,11 @@ propagateRungeKuttaImpl(Cache& cache,
       void
       Trk::STEP_Propagator::sampleBrem(Cache& cache, double mom) const
       {
-        double rndx = CLHEP::RandFlat::shoot(m_randomEngine);
-        double rnde = CLHEP::RandFlat::shoot(m_randomEngine);
+        if (!cache.m_randomEngine) {
+          cache.m_randomEngine = getRandomEngine (cache.m_ctx);
+        }
+        double rndx = CLHEP::RandFlat::shoot(cache.m_randomEngine);
+        double rnde = CLHEP::RandFlat::shoot(cache.m_randomEngine);
 
         // sample visible fraction of the mother momentum taken according to 1/f
         double eps = cache.m_momentumCutOff / mom;
@@ -2992,3 +2991,17 @@ propagateRungeKuttaImpl(Cache& cache,
         fieldCondObj->getInitializedCache(cache.m_fieldCache);
       }
 
+CLHEP::HepRandomEngine*
+Trk::STEP_Propagator::getRandomEngine (const EventContext& ctx) const
+{
+  if (!m_simulation || !m_rngWrapper) {
+    return nullptr;
+  }
+  if (m_rngWrapper->evtSeeded(ctx) != ctx.evt()) {
+    // Ok, the wrappers are unique to this algorithm and a given slot,
+    // so cannot be accessed concurrently.
+    ATHRNG::RNGWrapper* wrapper_nc ATLAS_THREAD_SAFE = m_rngWrapper;
+    wrapper_nc->setSeed (this->name(), ctx);
+  }
+  return m_rngWrapper->getEngine (ctx);
+}
