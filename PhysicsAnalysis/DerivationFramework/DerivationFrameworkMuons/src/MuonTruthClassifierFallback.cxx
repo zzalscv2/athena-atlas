@@ -10,6 +10,7 @@
 #include "DerivationFrameworkMuons/MuonTruthClassifierFallback.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "TruthUtils/MagicNumbers.h"
 #include "xAODMuon/MuonContainer.h"
 
 namespace {
@@ -23,8 +24,6 @@ namespace {
 
     static const SG::AuxElement::Accessor<int> acc_tT("truthType");
     static const SG::AuxElement::Accessor<int> acc_tO("truthOrigin");
-
-    constexpr int geant4_barcode_cutoff = 200000;
 
 }  // namespace
 // Constructor
@@ -103,7 +102,7 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches() const
         for (const xAOD::TruthEvent* event : *tec) {
             for (size_t parti = 0; parti < event->nTruthParticles(); parti++) {
                 const xAOD::TruthParticle* tpart = event->truthParticle(parti);
-                if (!tpart || tpart->status() != 1 || tpart->barcode() > geant4_barcode_cutoff || !tpart->charge() || tpart->isMuon() ||
+                if (!tpart || tpart->status() != 1 || HepMC::is_simulation_particle(tpart) || !tpart->charge() || tpart->isMuon() ||
                     tpart->pt() < m_minPt)
                     continue;
                 const float dR = xAOD::P4Helpers::deltaR2(tpart, part);
@@ -137,7 +136,7 @@ StatusCode DerivationFramework::MuonTruthClassifierFallback::addBranches() const
         for (auto event : *tpec) {
             for (size_t parti = 0; parti < event->nTruthParticles(); parti++) {
                 const xAOD::TruthParticle* tpart = event->truthParticle(parti);
-                if (!tpart || tpart->status() != 1 || tpart->barcode() > geant4_barcode_cutoff || !tpart->charge() || tpart->isMuon() ||
+                if (!tpart || tpart->status() != 1 || HepMC::is_simulation_particle(tpart) || !tpart->charge() || tpart->isMuon() ||
                     tpart->pt() < m_minPt)
                     continue;
                 const float dR = xAOD::P4Helpers::deltaR2(tpart, part);

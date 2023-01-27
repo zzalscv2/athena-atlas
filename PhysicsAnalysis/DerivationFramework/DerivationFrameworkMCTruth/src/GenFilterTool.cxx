@@ -8,6 +8,7 @@
 // EDM includes
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 
 // Tool handle interface
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -44,7 +45,6 @@ namespace DerivationFramework {
     declareProperty("MaxJetEta",m_MaxJetEta = 2.5);
     declareProperty("MinLeptonPt",m_MinLepPt = 25e3);
     declareProperty("MaxLeptonEta",m_MaxLepEta = 2.5);
-    declareProperty("SimBarcodeOffset", m_SimBarcodeOffset = 200000);
   }
 
 
@@ -134,7 +134,7 @@ namespace DerivationFramework {
     float MEx(0.), MEy(0.);
     for (const auto *const tp : *tpc){
       int pdgid = tp->pdgId();
-      if (tp->barcode() >= m_SimBarcodeOffset) continue; // Particle is from G4
+      if (HepMC::is_simulation_particle(tp)) continue; // Particle is from G4
       if (pdgid==21 && tp->e()==0) continue; // Work around for an old generator bug
       if ( tp->status() %1000 !=1 ) continue; // Stable!
 
@@ -168,14 +168,14 @@ namespace DerivationFramework {
     bool AllowSameCharge_PTZ = false;
     for (const xAOD::TruthParticle* pitr1 : *tpc){
       int pdgId1 = pitr1->pdgId();
-      if (pitr1->barcode() >= m_SimBarcodeOffset) continue;
+      if (HepMC::is_simulation_particle(pitr1)) continue;
       if (pitr1->status()!=1) continue;
       // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < m_maxEta
-      if (abs(pdgId1) == 11 || abs(pdgId1) == 13) {
+      if (std::abs(pdgId1) == 11 || abs(pdgId1) == 13) {
         if (pitr1->pt() >= MinPt_PTZ && fabs(pitr1->eta()) <= MaxEta_PTZ){
           for (const xAOD::TruthParticle* pitr2 : *tpc){
             if (pitr2==pitr1) continue;
-            if (pitr2->barcode() >= m_SimBarcodeOffset) continue;
+            if (HepMC::is_simulation_particle(pitr2)) continue;
             if (pitr2->status()!=1) continue;
             int pdgId2 = pitr2->pdgId();
             // Pick electrons or muons with Pt > MinPt_PTZ and |eta| < MaxEta_PTZ

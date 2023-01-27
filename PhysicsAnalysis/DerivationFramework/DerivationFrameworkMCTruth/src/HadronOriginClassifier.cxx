@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
-
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework{
 
@@ -199,7 +199,7 @@ namespace DerivationFramework{
 
         const xAOD::TruthParticle* part = truthevent->truthParticle(i);
         if(!part) continue;
-        if(part->barcode() >= 200000) break;
+        if(HepMC::is_simulation_particle(part)) break;
 
         bool isbquark=false;
         bool iscquark=false;
@@ -315,7 +315,7 @@ namespace DerivationFramework{
 
   bool HadronOriginClassifier::isBHadron(const xAOD::TruthParticle* part) {
 
-    if(part->barcode() >= 200000) return false;
+    if(HepMC::is_simulation_particle(part)) return false;
     int type = hadronType(part->pdgId());
     return type == 5;
 
@@ -324,7 +324,7 @@ namespace DerivationFramework{
 
   bool HadronOriginClassifier::isCHadron(const xAOD::TruthParticle* part) {
 
-    if(part->barcode() >= 200000) return false;
+    if(HepMC::is_simulation_particle(part)) return false;
     int type = hadronType(part->pdgId());
     return type == 4;
 

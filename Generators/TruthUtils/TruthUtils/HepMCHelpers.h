@@ -138,10 +138,6 @@ namespace MC {
   //@{
 
   /// @brief Determine if the particle is stable at the generator (not det-sim) level,
-  ///
-  /// The receipe for this is barcode < 200k and status = 1. Gen-stable particles decayed by
-  /// G4 are not set to have status = 2 in ATLAS, but simply have more status = 1 children,
-  /// with barcodes > 200k.
   inline bool isGenStable(HepMC::ConstGenParticlePtr p) {
     // Retrieving the barcode is relatively expensive with HepMC3,
     // so test status first.

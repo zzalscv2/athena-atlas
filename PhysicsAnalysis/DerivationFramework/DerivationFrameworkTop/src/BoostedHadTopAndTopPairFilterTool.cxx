@@ -3,6 +3,7 @@
 */
 
 #include "DerivationFrameworkTop/BoostedHadTopAndTopPairFilterTool.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework{
 
@@ -75,11 +76,11 @@ StatusCode BoostedHadTopAndTopPairFilterTool::finalize() {return StatusCode::SUC
       // particle would have had an impact on what we do further down.
       if (not part){
           // We could possibly also use break since the thinned truth particles
-          // in principle should have barcode >= 200000.
+          // in principle should have no simulated particles.
           continue;
       }
 
-      if(part->barcode() >= 200000) break;
+      if(HepMC::is_simulation_particle(part)) break; 
       int pdgId = part->pdgId();
 
       // pdgId t quark = 6
