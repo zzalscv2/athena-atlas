@@ -440,31 +440,9 @@ def LLP1Cfg(ConfigFlags):
                                          )
     # Run 3
     elif ConfigFlags.Trigger.EDMVersion == 3:
-        from DerivationFrameworkLLP.LLPToolsConfig import LLP1TriggerMatchingToolRun2Cfg
-        acc.merge(LLP1TriggerMatchingToolRun2Cfg(ConfigFlags,
-                                              name = "LRTTriggerMatchingTool",
-                                              OutputContainerPrefix = "LRTTrigMatch_",
-                                              TriggerList = LLP1TriggerListsHelper.Run3TriggerNamesNoTau,
-                                              InputElectrons=MergedElectronContainer,
-                                              InputMuons=MergedMuonContainer
-                                              ))
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
         AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(LLP1SlimmingHelper)
-        # Run 2 is added here temporarily to allow testing/comparison/debugging
-        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = LLP1TriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                         OutputContainerPrefix = "TrigMatch_",
-                                         TriggerList = LLP1TriggerListsHelper.Run3TriggerNamesNoTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = LLP1SlimmingHelper,
-                                         name = "LRTDFTriggerMatchingTool",
-                                         OutputContainerPrefix = "LRTTrigMatch_",
-                                         TriggerList = LLP1TriggerListsHelper.Run3TriggerNamesNoTau,
-                                         InputElectrons=MergedElectronContainer,
-                                         InputMuons=MergedMuonContainer
-                                         )
+
 
     # Output stream
     LLP1ItemList = LLP1SlimmingHelper.GetItemList()
