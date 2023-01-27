@@ -14,6 +14,7 @@
 #include "PhotonTruthTool.h"
 #include "xAODEgamma/Photon.h"
 #include "AthenaKernel/errorcheck.h"
+#include "TruthUtils/MagicNumbers.h"
 #include <vector>
 #include <cmath>
 
@@ -229,13 +230,13 @@ PhotonTruthTool::isFinalState(const xAOD::TruthParticle* truePart) const
   if ( truePart->status()!=1 ) return false ; 
   // 
   if ( ! m_useG4Particles ) {
-    return ( truePart->barcode() < 200000 ) ;
+    return ( !HepMC::is_simulation_particle(truePart) ) ;
   }
   else {
     // if it is a photon, keep it regardless of its Geant interaction
     if ( truePart->pdgId()==22 ) return true ; 
     // reject Geant electron from conversion
-    if ( abs(truePart->pdgId())==11 && truePart->barcode()>=200000 ) {
+    if ( std::abs(truePart->pdgId())==11 && HepMC::is_simulation_particle(truePart) ) {
       const xAOD::TruthParticle* mother = getMother(truePart) ;
       if ( mother!=0 && mother->pdgId()==22 )  return false ;
     }

@@ -6,6 +6,7 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODJet/JetContainer.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework {
 
@@ -37,7 +38,6 @@ namespace DerivationFramework {
     declareProperty("MaxJetEta",m_MaxJetEta = 2.5);
     declareProperty("MinLeptonPt",m_MinLepPt = 25e3);
     declareProperty("MaxLeptonEta",m_MaxLepEta = 2.5);
-    declareProperty("SimBarcodeOffset", m_SimBarcodeOffset = 200000);
   }
   
   
@@ -135,7 +135,7 @@ namespace DerivationFramework {
     float MEx(0.), MEy(0.);
     for (const auto tp : *tpc){
       int pdgid = tp->pdgId();
-      if (tp->barcode() >= m_SimBarcodeOffset) continue; // Particle is from G4
+      if (HepMC::is_simulation_particle(tp)) continue; // Particle is from G4
       if (pdgid==21 && tp->e()==0) continue; // Work around for an old generator bug
       if ( tp->status() %1000 !=1 ) continue; // Stable!
 

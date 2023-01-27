@@ -3,6 +3,7 @@
 */
 
 #include "DerivationFrameworkTop/TTbarPlusHeavyFlavorFilterTool.h"
+#include "TruthUtils/MagicNumbers.h"
 
 namespace DerivationFramework{
 
@@ -72,11 +73,11 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
       // particle would have had an impact on what we do further down.
       if (not part){
           // We could possibly also use break since the thinned truth particles
-          // in principle should have barcode >= 200000.
+          // in principle should have no simulation particles.
           continue;
       }
 
-      if(part->barcode() >= 200000) break;
+      if(HepMC::is_simulation_particle(part)) break;
 
       bool isbquark=false;
       bool iscquark=false;
@@ -84,7 +85,7 @@ int TTbarPlusHeavyFlavorFilterTool::filterFlag() const{
       bool isbhadron=false;
       bool ischadron=false;
 
-      int pdgid = abs(part->pdgId());
+      int pdgid = std::abs(part->pdgId());
 
       //// don't loose time checking all if one found
       if(pdgid == 5 ){
@@ -190,8 +191,8 @@ bool TTbarPlusHeavyFlavorFilterTool::passCSelection(const xAOD::TruthParticle* p
 
 int TTbarPlusHeavyFlavorFilterTool::hadronType(int pdgid) const{
 
-  int rest1(abs(pdgid%1000));
-  int rest2(abs(pdgid%10000));
+  int rest1(std::abs(pdgid%1000));
+  int rest2(std::abs(pdgid%10000));
 
   if ( rest2 >= 5000 && rest2 < 6000 ) return 5;
   if( rest1 >= 500 && rest1 < 600 ) return 5;
@@ -206,7 +207,7 @@ int TTbarPlusHeavyFlavorFilterTool::hadronType(int pdgid) const{
 
 bool TTbarPlusHeavyFlavorFilterTool::isBHadron(const xAOD::TruthParticle* part) const{
 
-  if(part->barcode() >= 200000) return false;
+  if(HepMC::is_simulation_particle(part)) return false;
   int type = hadronType(part->pdgId());
   if(type == 5)  return true;
 
@@ -217,7 +218,7 @@ bool TTbarPlusHeavyFlavorFilterTool::isBHadron(const xAOD::TruthParticle* part) 
 
 bool TTbarPlusHeavyFlavorFilterTool::isCHadron(const xAOD::TruthParticle* part) const{
 
-  if(part->barcode() >= 200000) return false;
+  if(HepMC::is_simulation_particle(part)) return false;
   int type = hadronType(part->pdgId());
   if(type == 4)  return true;
 

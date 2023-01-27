@@ -9,6 +9,7 @@
 
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "TruthUtils/MagicNumbers.h"
 using namespace MCTruthPartClassifier;
 using std::abs;
 
@@ -3176,7 +3177,7 @@ MCTruthClassifier::findParticleDaughters(const xAOD::TruthParticle* thePart,
       const xAOD::TruthParticle* theDaughter = endVtx->outgoingParticle(i);
       if (theDaughter == nullptr)
         continue;
-      if (theDaughter->status() == 1 && theDaughter->barcode() < 200000) {
+      if (theDaughter->status() == 1 && !HepMC::is_simulation_particle(theDaughter)) {
         // Add descendants with status code 1
         daughters.insert(theDaughter);
       }
