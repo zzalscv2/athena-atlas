@@ -58,7 +58,7 @@ namespace Trk
   {
     const Amg::MatrixX& lc = this->localCovariance();
 
-    Amg::MatrixX cov(3,3);
+    Eigen::Matrix3d cov;
 
     cov<<
       lc(0,0),lc(0,1),0.,
