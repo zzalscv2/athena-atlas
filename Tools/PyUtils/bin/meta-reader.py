@@ -43,7 +43,11 @@ def _tree_print(content, indent=2, pad=0, list_max_items=-1, dict_sort=None, asc
 			if hide_content and (key in ['itemList', 'metadata_items'] or 'EventFormatStream' in key):
 				continue
 
-			if hide_trigger and key in ['TriggerMenu', 'TriggerMenuJson_HLT', 'TriggerMenuJson_HLTMonitoring', 'TriggerMenuJson_HLTPS', 'TriggerMenuJson_L1', 'TriggerMenuJson_L1PS']:
+			if hide_trigger and key in [
+				'TriggerMenu', 'TriggerMenuJson_HLT', 'TriggerMenuJson_HLTMonitoring', 'TriggerMenuJson_HLTPS', 'TriggerMenuJson_L1', 'TriggerMenuJson_L1PS',
+				'/TRIGGER/HLT/Groups', '/TRIGGER/HLT/HltConfigKeys', '/TRIGGER/HLT/Menu', '/TRIGGER/HLT/PrescaleKey', '/TRIGGER/HLT/Prescales',
+				'/TRIGGER/LVL1/ItemDef', '/TRIGGER/LVL1/Lvl1ConfigKey', '/TRIGGER/LVL1/Menu', '/TRIGGER/LVL1/Prescales', '/TRIGGER/LVL1/Thresholds',
+			]:
 				continue
 
 			if pad == 0:
