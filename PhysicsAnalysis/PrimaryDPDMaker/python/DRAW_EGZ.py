@@ -82,6 +82,7 @@ def DRAW_EGZCfg(configFlags):
             StopOverride = True))
     
     bsesoSvc = CompFactory.ByteStreamEventStorageOutputSvc(
+        name           = "BSEventStorageOutputSvcDRAW_EGZ",
         MaxFileMB      = 15000,
         MaxFileNE      = 15000000,
         OutputDirectory= './',
@@ -96,14 +97,13 @@ def DRAW_EGZCfg(configFlags):
     bsCopyTool = CompFactory.ByteStreamOutputStreamCopyTool(
         ByteStreamOutputSvc = bsesoSvc,
         ByteStreamInputSvc  = bsIS)
-    outCA.addPublicTool(bsCopyTool)
 
     bsCnvSvc = CompFactory.ByteStreamCnvSvc(
         ByteStreamOutputSvcList=[bsesoSvc.getName()])
     outCA.addService(bsCnvSvc)
         
     outCA.addEventAlgo(CompFactory.AthenaOutputStream(
-        name             = 'BSOutputStreamAlg',
+        name             = 'BSOutputStreamAlgDRAW_EGZ',
         WritingTool      = bsCopyTool,
         EvtConversionSvc = bsCnvSvc.name,
         RequireAlgs      = ['DRAW_EGZKernel'],

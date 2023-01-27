@@ -84,7 +84,7 @@ def DRAW_ZmumuCfg(flags):
     result.merge(DRAW_ZmumuKernelCfg(flags), sequenceName = "DRAWZMUMU_Sequence")
     
     bsesoSvc = CompFactory.ByteStreamEventStorageOutputSvc(
-        name = "BSEventStorageOutputSvc",
+        name           = "BSEventStorageOutputSvcDRAW_ZMUMU",
         MaxFileMB      = 15000,
         MaxFileNE      = 15000000,
         OutputDirectory= './',
@@ -99,7 +99,6 @@ def DRAW_ZmumuCfg(flags):
     bsCopyTool = CompFactory.ByteStreamOutputStreamCopyTool(
         ByteStreamOutputSvc = bsesoSvc,
         ByteStreamInputSvc  = bsIS)
-    result.addPublicTool(bsCopyTool)
 
     bsCnvSvc = CompFactory.ByteStreamCnvSvc(
         ByteStreamOutputSvcList=[bsesoSvc.getName()])
