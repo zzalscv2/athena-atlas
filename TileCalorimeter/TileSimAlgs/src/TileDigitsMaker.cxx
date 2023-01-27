@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -470,13 +470,12 @@ StatusCode TileDigitsMaker::execute(const EventContext &ctx) const {
   SG::ReadCondHandle<TileEMScale> emScale(m_emScaleKey, ctx);
   ATH_CHECK( emScale.isValid() );
 
-  const TileCalibDataFlt* pulseShape = nullptr;
+  const TilePulse* pulse = nullptr;
   if (m_useCoolPulseShapes) {
-    SG::ReadCondHandle<TileCalibDataFlt> pulseShapeHandle(m_pulseShapeKey, ctx);
-    ATH_CHECK( pulseShapeHandle.isValid() );
-    pulseShape = pulseShapeHandle.retrieve();
+    SG::ReadCondHandle<TilePulse> pulseShape(m_pulseShapeKey, ctx);
+    ATH_CHECK( pulseShape.isValid() );
+    pulse = pulseShape.retrieve();
   }
-  TilePulse pulse(pulseShape);
 
   SG::ReadCondHandle<TileSamplingFraction> samplingFraction(m_samplingFractionKey, ctx);
   ATH_CHECK( samplingFraction.isValid() );
@@ -1100,7 +1099,7 @@ StatusCode TileDigitsMaker::fillDigitCollection(const TileHitCollection* hitColl
                                                 std::vector<std::vector<double>>& drawerBufferHi,
                                                 std::vector<int>& igain, std::vector<int>& over_gain, std::vector<double>& ech_int,
                                                 std::vector<bool> &signal_in_channel, const TileEMScale* emScale,
-                                                const TileSamplingFraction* samplingFraction, const TilePulse& pulse) const{
+                                                const TileSamplingFraction* samplingFraction, const TilePulse* pulse) const{
   
   constexpr int nchMax = 48; // number of channels per drawer
   std::array<int, nchMax> ntot_ch; ntot_ch.fill(0);
@@ -1187,7 +1186,7 @@ StatusCode TileDigitsMaker::fillDigitCollection(const TileHitCollection* hitColl
         if (m_useCoolPulseShapes) {
           float phase = (k - m_binTime0Hi) * m_timeStepHi;
           float y, dy;
-          pulse.getPulseShapeYDY(drawerIdx, ich, 1, phase, y, dy);
+          pulse->getPulseShapeYDY(drawerIdx, ich, 1, phase, y, dy);
           double ampl = (double) y;
           digitSamplesHi[js] += amp_ch * ampl;
           ATH_MSG_VERBOSE( "Sample no.=" << js
@@ -1215,7 +1214,7 @@ StatusCode TileDigitsMaker::fillDigitCollection(const TileHitCollection* hitColl
         if (m_useCoolPulseShapes) {
           float phase = (k - m_binTime0Lo) * m_timeStepLo;
           float y, dy;
-          pulse.getPulseShapeYDY(drawerIdx, ich, 0, phase, y, dy);
+          pulse->getPulseShapeYDY(drawerIdx, ich, 0, phase, y, dy);
           double ampl = (double) y;
           digitSamplesLo[js] += amp_ch_lo * ampl;
           ATH_MSG_VERBOSE( "Sample no.=" << js

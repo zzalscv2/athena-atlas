@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile pulse shape conditions tool and algorithm"""
 
@@ -75,10 +75,10 @@ def TilePulseShapeCondAlgCfg(flags, **kwargs):
     else:
         raise(Exception("Invalid source: %s" % source))
 
-    TileCalibFltCondAlg=CompFactory.getComp("TileCalibCondAlg<TileCalibDrawerFlt>")
-    pulseShapeCondAlg = TileCalibFltCondAlg( name = name,
-                                             ConditionsProxy = pulseProxy,
-                                             TileCalibData = pulseShape)
+    TilePulseShapeCondAlg = CompFactory.getComp("TileCondAlg<TilePulse,TileCalibDrawerFlt>")
+    pulseShapeCondAlg = TilePulseShapeCondAlg( name = name,
+                                               ConditionsProxy = pulseProxy,
+                                               TileCondData = pulseShape)
 
     acc.addCondAlgo(pulseShapeCondAlg)
 

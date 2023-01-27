@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -12,6 +12,7 @@
 #include "TileConditions/TileCondToolIntegrator.h"
 #include "TileCalibBlobObjs/TileCalibDrawerFlt.h"
 #include "TileConditions/TileCalibData.h"
+#include "TileConditions/TilePulse.h"
 
 #include "TestTools/FLOATassert.h"
 #include "TestTools/initGaudi.h"
@@ -92,13 +93,7 @@ float getCondtionsData(unsigned channel, unsigned int gain, unsigned int index) 
 }
 
 
-void initTileTestCondtions(std::string conditionName, unsigned int version) {
-
-
-  SG::WriteCondHandleKey<TileCalibDataFlt> calibDataKey{conditionName};
-  assert(calibDataKey.initialize().isSuccess());
-
-  SG::WriteCondHandle<TileCalibDataFlt> calibData{calibDataKey};
+std::unique_ptr<TileCalibDataFlt> getTileTestCondtions(unsigned int version) {
 
   std::unique_ptr<TileCalibDataFlt> data = std::make_unique<TileCalibDataFlt>();
 
@@ -108,14 +103,12 @@ void initTileTestCondtions(std::string conditionName, unsigned int version) {
   std::unique_ptr<TileCalibDrawerFlt> defaultCalibDrawer = std::make_unique<TileCalibDrawerFlt>(*tmpDefaultCalibDrawer);
   data->setCalibDrawer(DEF_DRAWER_IDX, defaultCalibDrawer.release());
 
-
   std::vector<std::vector<float>> channelData{MAX_GAIN, std::vector<float>(MAX_INDEX, 0.0F)};
 
   std::unique_ptr<coral::Blob> drawerBlob = std::make_unique<coral::Blob>(0);
   std::unique_ptr<TileCalibDrawerFlt> tmpCalibDrawer(TileCalibDrawerFlt::getInstance(*drawerBlob, channelData, MAX_CHANNEL, version));
   // Trick to make calib drawer to own blob
   std::unique_ptr<TileCalibDrawerFlt> calibDrawer = std::make_unique<TileCalibDrawerFlt>(*tmpCalibDrawer);
-
 
   std::vector<float> gainData(MAX_INDEX, 0.0F);
   for (unsigned int channel = 0; channel < MAX_CHANNEL; ++channel) {
@@ -135,9 +128,31 @@ void initTileTestCondtions(std::string conditionName, unsigned int version) {
     data->setCalibDrawer(drawerIdx, data->getCalibDrawer(defaultDrawerIdx));
   }
 
+  return data;
+}
 
+
+void initTileTestCondtions(const std::string& conditionName, unsigned int version, const EventContext& ctx) {
+
+  SG::WriteCondHandleKey<TileCalibDataFlt> calibDataKey{conditionName};
+  assert(calibDataKey.initialize().isSuccess());
+
+  SG::WriteCondHandle<TileCalibDataFlt> calibData{calibDataKey, ctx};
+
+  std::unique_ptr<TileCalibDataFlt> data = getTileTestCondtions(version);
   assert(calibData.record(EVENT_RANGE, data.release()).isSuccess());
+}
 
+void initTilePulseTestCondtions(const std::string& conditionName, unsigned int version, const EventContext& ctx) {
+
+  SG::WriteCondHandleKey<TilePulse> pulseKey{conditionName};
+  assert(pulseKey.initialize().isSuccess());
+
+  SG::WriteCondHandle<TilePulse> pulse{pulseKey, ctx};
+
+  std::unique_ptr<TileCalibDataFlt> data = getTileTestCondtions(version);
+  auto pulseData = std::make_unique<TilePulse>(std::move(data));
+  assert(pulse.record(EVENT_RANGE, pulseData.release()).isSuccess());
 }
 
 
@@ -382,9 +397,6 @@ int main() {
   ServiceHandle<StoreGateSvc> conditionStore("ConditionStore", "");
   assert(conditionStore.retrieve().isSuccess());
 
-  initTileTestCondtions(TILE_TEST_CONDITION, OBJ_VERSION);
-  initTileTestCondtions(TILE_PULSE_TEST_CONDITION, PULSE_OBJ_VERSION);
-
   EventIDBase eventId;
   eventId.set_run_number(EventIDBase::UNDEFNUM / 4);
   eventId.set_lumi_block(EventIDBase::UNDEFNUM / 4);
@@ -393,6 +405,9 @@ int main() {
   ctx.setEventID(eventId);
   ctx.setExtension( Atlas::ExtendedEventContext(&*conditionStore) );
   Gaudi::Hive::setCurrentContext(ctx);
+
+  initTileTestCondtions(TILE_TEST_CONDITION, OBJ_VERSION, ctx);
+  initTilePulseTestCondtions(TILE_PULSE_TEST_CONDITION, PULSE_OBJ_VERSION, ctx);
 
   testTileCondToolTiming(svcLoc);
   testTileCondToolAutoCr(svcLoc);
