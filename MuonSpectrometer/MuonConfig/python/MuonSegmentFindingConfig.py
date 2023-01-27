@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # This file configures the Muon segment finding. It is based on a few files in the old configuration system:
 # Tools, which are configured here: 
@@ -87,16 +87,15 @@ def MdtMathSegmentFinderCfg(flags,name="MdtMathSegmentFinder", **kwargs):
 
     kwargs.setdefault("FinderDebugLevel", 0) # This is just to avoid that the tool seems unconfigured. Real fix is to use default name.
 
-    if doSegmentT0Fit:
-        kwargs.setdefault("AssociationRoadWidth", 3.)
-        kwargs.setdefault("MDTAssocationPullcut", 3.)
-        kwargs.setdefault("RecoverMdtOutliers", False)
-        kwargs.setdefault("DCFitProvider", result.popToolsAndMerge(MdtSegmentT0FitterCfg(flags) ) )
-
     if flags.Beam.Type in [BeamType.SingleBeam, BeamType.Cosmics] or flags.Input.isMC is False:
         kwargs.setdefault("AssociationRoadWidth", 2.)
         kwargs.setdefault("MDTAssocationPullcut", 4.)
         kwargs.setdefault("RecoverMdtOutliers", True )
+    elif doSegmentT0Fit:
+        kwargs.setdefault("AssociationRoadWidth", 3.)
+        kwargs.setdefault("MDTAssocationPullcut", 3.)
+        kwargs.setdefault("RecoverMdtOutliers", False)
+        kwargs.setdefault("DCFitProvider", result.popToolsAndMerge(MdtSegmentT0FitterCfg(flags) ) )
 
     if flags.Muon.enableCurvedSegmentFinding:
         kwargs.setdefault("DoCurvedSegmentFinder",True)
@@ -466,7 +465,7 @@ def MooSegmentFinderCfg(flags, name='MooSegmentFinder', **kwargs):
 
 def MuonClusterSegmentFinderToolCfg(flags, name='MuonClusterSegmentFinderTool', **kwargs):
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
+    from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg, MuonTrackSummaryToolCfg
     result=ComponentAccumulator()
     # Won't explicitly configure MuonIdHelperSvc
     # Won't explicitly configure MuonEDMHelperSvc
@@ -476,7 +475,10 @@ def MuonClusterSegmentFinderToolCfg(flags, name='MuonClusterSegmentFinderTool', 
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags)) )
 
     kwargs.setdefault('TrackCleaner', result.popToolsAndMerge( MuonTrackCleanerCfg(flags, name='MuonTrackCleaner_seg',seg=True) ) ) 
-    kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonCombinedTrackSummaryToolCfg(flags, name='CombinedMuonTrackSummary') ) ) 
+    if flags.Muon.MuonTrigger:
+        kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonTrackSummaryToolCfg(flags, name='MuonTrackSummary') ) ) 
+    else:
+        kwargs.setdefault('TrackSummaryTool', result.popToolsAndMerge( MuonCombinedTrackSummaryToolCfg(flags, name='CombinedMuonTrackSummary') ) ) 
     
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MuonClusterOnTrackCreatorCfg
     kwargs.setdefault("MuonClusterCreator", result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)) )
