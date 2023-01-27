@@ -392,6 +392,7 @@ def get_ami_tag(client, tag, suppressNonJobOptions = True):
         command = [
                 'AMIGetAMITagInfo',
                 '-amiTag="%s"' % tag,
+                '-cached',
         ]
 
         if suppressNonJobOptions:
