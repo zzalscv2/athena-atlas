@@ -116,3 +116,7 @@ atlas_add_test( CaloCellMakerTest
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/CaloCellMakerConfig.py
                 POST_EXEC_SCRIPT " /usr/bin/diff CaloCells.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/CaloCells.txt.ref > diff.log " )
 
+atlas_add_test( CaloTowerStore_test
+   SCRIPT athena.py CaloRec/CaloTowerStore_test.py
+   LOG_IGNORE_PATTERN "Reading file|Unable to locate catalog|Cache alignment|MetaReader|AutoConfiguration|IOVDbSvc +INFO"
+   PROPERTIES TIMEOUT 500 )

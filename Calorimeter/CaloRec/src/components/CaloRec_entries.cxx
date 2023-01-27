@@ -44,6 +44,9 @@
 #include "../CaloTopoTowerMaker.h"
 #include "../CaloTopoTowerBuilderTool.h"
 
+#include "../CaloTowerStoreTestAlg.h"
+
+
 DECLARE_COMPONENT( CaloTowerMonitor )
 DECLARE_COMPONENT( CaloTowerAlgorithm )
 DECLARE_COMPONENT( CaloTopoTowerAlgorithm )
@@ -95,3 +98,5 @@ DECLARE_COMPONENT( CaloTopoTowerMaker )
 DECLARE_COMPONENT( CaloCellWeightCorrection )
 
 DECLARE_COMPONENT ( CaloTopoTowerBuilderTool )
+
+DECLARE_COMPONENT( CaloTowerStoreTestAlg )

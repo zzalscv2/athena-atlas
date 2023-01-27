@@ -21,6 +21,11 @@ atlas_add_component( CaloClusterCorrection
                      src/components/*.cxx
                      LINK_LIBRARIES CaloClusterCorrectionLib )
 
+
+atlas_add_dictionary( CaloClusterCorrectionDict
+   CaloClusterCorrection/CaloClusterCorrectionDict.h CaloClusterCorrection/selection.xml
+   LINK_LIBRARIES CaloClusterCorrectionLib )
+
 # Test(s) in the package:
 atlas_add_test( interpolate_test
                 SOURCES
@@ -37,6 +42,12 @@ atlas_add_test( CaloScaleCluster_test
                 SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/CaloScaleCluster_test.py
                 PROPERTIES TIMEOUT 300
                 LOG_IGNORE_PATTERN "Reading file|no dictionary for class|by peeking|IdDictDetDescrCnv|Unable to locate catalog|Current filenames|Global tag|Cache alignment|^Py:MetaReader|AthDictLoaderSvc +INFO" )
+
+
+atlas_add_test( ToolWithConstants_test
+   SCRIPT test/ToolWithConstants_test.py
+   LOG_IGNORE_PATTERN "no dictionary for|by peeking into|Current filenames:|IOVDbSvc +INFO|Added successfully Conversion|DetDescrCnvSvc +INFO|GeoModelSvc +INFO|IOVSvc +INFO|with default tag|^Py:MetaReader" )
+
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
