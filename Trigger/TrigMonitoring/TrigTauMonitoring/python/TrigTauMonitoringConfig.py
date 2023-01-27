@@ -99,7 +99,7 @@ class TrigTauMonAlgBuilder:
   def get_monitoring_mode(self):
 
     self.__logger.info("TrigTauMonToolBuilder.get_monitoring_mode()")
-    self.data_type = self.helper.inputFlags.DQ.DataType
+    self.data_type = self.helper.flags.DQ.DataType
     if self.data_type == 'monteCarlo': 
       self.mc_mode = True
       return True
@@ -138,7 +138,7 @@ class TrigTauMonAlgBuilder:
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess=getHLTMonitoringAccess(self.helper.inputFlags)
+    moniAccess=getHLTMonitoringAccess(self.helper.flags)
     monitoring_tau=moniAccess.monitoredChains(signatures="tauMon",monLevels=["shifter","t0","val"])
   
     # if mon groups not found fall back to hard-coded trigger monitoring list
@@ -212,7 +212,7 @@ class TrigTauMonAlgBuilder:
       self.tauMonAlg = self.helper.addAlgorithm( CompFactory.TrigTauMonitorAlgorithm, "TrigTauMonAlg" )
       self.tauMonAlg.TriggerList=self.tauList    
       isMC = False
-      self.data_type = self.helper.inputFlags.DQ.DataType
+      self.data_type = self.helper.flags.DQ.DataType
       if self.data_type == 'monteCarlo':
          isMC = True
       self.tauMonAlg.isMC = isMC

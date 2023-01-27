@@ -23,7 +23,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess = getHLTMonitoringAccess(helper.inputFlags)
+    moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     MonitoredChains = [c for c in Chains if '2mu14' not in c]
   
@@ -35,7 +35,7 @@ def TrigMuonEfficiencyMonTTbarConfig(helper):
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ttbar_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.inputFlags, MuQuality=1)))
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
         monAlg.EventTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
         monAlg.TagTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
@@ -61,7 +61,7 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
 
     ### monitorig groups
     from TrigConfigSvc.TriggerConfigAccess import getHLTMonitoringAccess
-    moniAccess = getHLTMonitoringAccess(helper.inputFlags)
+    moniAccess = getHLTMonitoringAccess(helper.flags)
     Chains = moniAccess.monitoredChains(signatures="muonMon",monLevels=["shifter","t0","val"])
     MonitoredChains = [c for c in Chains if '2mu14' not in c]
   
@@ -73,7 +73,7 @@ def TrigMuonEfficiencyMonZTPConfig(helper):
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     for chain in MonitoredChains:
         monAlg = helper.addAlgorithm(CompFactory.TrigMuonEfficiencyMon,'TrigMuEff_ZTP_'+chain,
-                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.inputFlags, MuQuality=1)))
+                                     MuonSelectionTool = helper.result().popToolsAndMerge(MuonSelectionToolCfg(helper.flags, MuQuality=1)))
 
         monAlg.EventTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
         monAlg.TagTrigger = 'HLT_mu24_ivarmedium_L1MU14FCH'
