@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
@@ -12,7 +12,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict):
     log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     listOfChainDicts = splitChainDict(chainDict)
@@ -32,10 +32,10 @@ def generateChainConfigs( chainDict ):
             jetConfig = JetChainConfiguration(chainDict)
             jetName = jetConfig.jetName
             log.debug("Jet name %s", jetConfig.jetName)
-            jet =  jetConfig.assembleChain()
+            jet =  jetConfig.assembleChain(flags)
             log.debug('Input jet collection name is %s \n', jetName)
 
-            Beamspot = BeamspotChainConfiguration(subChainDict, jetName).assembleChain()
+            Beamspot = BeamspotChainConfiguration(subChainDict, jetName).assembleChain(flags)
             jet.append_step_to_jet(Beamspot.steps)
 
             listOfChainDefs += [ jet ]
@@ -43,7 +43,7 @@ def generateChainConfigs( chainDict ):
 
         else:
             log.debug("Traditional beamspot chain")
-            Beamspot = BeamspotChainConfiguration(subChainDict).assembleChain()             
+            Beamspot = BeamspotChainConfiguration(subChainDict).assembleChain(flags)             
             
             listOfChainDefs += [Beamspot]
             log.debug('length of chaindefs %s', len(listOfChainDefs) )

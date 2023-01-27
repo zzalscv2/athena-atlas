@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ########################################################################
 #
@@ -62,7 +62,7 @@ class TauChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):                            
+    def assembleChainImpl(self, flags):                            
         chainSteps = []
         log.debug("Assembling chain for %s", self.chainName)
 
@@ -83,9 +83,9 @@ class TauChainConfiguration(ChainConfigurationBase):
         for step in steps:
             is_probe_leg = self.chainPart['tnpInfo']=='probe'
             if 'Empty' in step:
-                chainstep = getattr(self, step)()
+                chainstep = getattr(self, step)(flags)
             else:
-                chainstep = getattr(self, step)(is_probe_leg=is_probe_leg)
+                chainstep = getattr(self, step)(flags, is_probe_leg=is_probe_leg)
             chainSteps+=[chainstep]
     
         myChain = self.buildChain(chainSteps)
@@ -93,71 +93,80 @@ class TauChainConfiguration(ChainConfigurationBase):
 
 
     # --------------------
-    def getCaloMVASeq(self, is_probe_leg=False):
+    def getCaloMVASeq(self, flags, is_probe_leg=False):
         stepName = 'MVA_tau'
-        return self.getStep(1,stepName, [getTauCaloMVACfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,1,stepName, [getTauCaloMVACfg], is_probe_leg=is_probe_leg)
         
     # --------------------
-    def getFTFCore(self, is_probe_leg=False):
+    def getFTFCore(self, flags, is_probe_leg=False):
         stepName = 'FTFCore_tau'
-        return self.getStep(2,stepName, [getFTFCoreCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,2,stepName, [getFTFCoreCfg], is_probe_leg=is_probe_leg)
 
     # --------------------
-    def getFTFLRT(self, is_probe_leg=False):
+    def getFTFLRT(self, flags, is_probe_leg=False):
         stepName = 'FTFLRT_tau'
-        return self.getStep(2,stepName, [getFTFLRTCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,2,stepName, [getFTFLRTCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------                                                                                                                                   
-    def getFTFEmpty(self):
+    # --------------------
+
+    def getFTFEmpty(self, flags):
         stepName = 'FTFEmpty_tau'
         return self.getEmptyStep(2,stepName)
 
-    # --------------------                                                                                                      
-    def getFTFIso(self, is_probe_leg=False):
+    # --------------------
+
+    def getFTFIso(self, flags, is_probe_leg=False):
         stepName = 'FTFIso_tau'
-        return self.getStep(3,stepName, [getFTFIsoCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,3,stepName, [getFTFIsoCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------                                                                                                                                                                         
-    def getFTFIsoBDT(self, is_probe_leg=False):
+    # --------------------
+
+    def getFTFIsoBDT(self, flags, is_probe_leg=False):
         stepName = 'FTFIsoBDT_tau'
-        return self.getStep(3,stepName, [getFTFIsoBDTCfg], is_probe_leg=is_probe_leg)
+        return self.getStep(flags,3,stepName, [getFTFIsoBDTCfg], is_probe_leg=is_probe_leg)
 
-    # --------------------                                                                                                                                   
-    def getTrkEmpty(self):
+    # --------------------
+
+    def getTrkEmpty(self, flags):
         stepName = 'TrkEmpty_tau'
         return self.getEmptyStep(3,stepName)
 
-    # --------------------                                                                                                                                   
-    def getPrecTrackIso(self, is_probe_leg=False):
+    # --------------------
+
+    def getPrecTrackIso(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkIso_tau'
-        return self.getStep(4,stepName,[getPrecTrackIsoCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,4,stepName,[getPrecTrackIsoCfg],is_probe_leg=is_probe_leg)
 
     # --------------------
-    def getPrecTrackLRT(self, is_probe_leg=False):
+    def getPrecTrackLRT(self, flags, is_probe_leg=False):
         stepName = 'PrecTrkLRT_tau'
-        return self.getStep(4,stepName,[getPrecTrackLRTCfg],is_probe_leg=is_probe_leg)
+        return self.getStep(flags,4,stepName,[getPrecTrackLRTCfg],is_probe_leg=is_probe_leg)
 
-    # --------------------                                                                                                                                   
-    def getPTEmpty(self):
+    # --------------------
+
+    def getPTEmpty(self, flags):
         stepName = 'PTEmpty_tau'
         return self.getEmptyStep(4,stepName)
 
-    # --------------------                                                                                                      
-    def getTrackTwoMVA(self, is_probe_leg=False):
-        stepName = "TrkTwoMVA_tau"
-        return self.getStep(5,stepName,[getTrackTwoMVACfg],is_probe_leg=is_probe_leg)
+    # --------------------
 
-    # --------------------                                                                                                      
-    def getTrackTwoLLP(self, is_probe_leg=False):
-        stepName = "TrkTwoLLP_tau"
-        return self.getStep(5,stepName,[getTrackTwoLLPCfg],is_probe_leg=is_probe_leg)
+    def getTrackTwoMVA(self, flags, is_probe_leg=False):
+        stepName = "TrkTwoMVA_tau"
+        return self.getStep(flags,5,stepName,[getTrackTwoMVACfg],is_probe_leg=is_probe_leg)
 
     # --------------------
-    def getTrackLRT(self, is_probe_leg=False):
-        stepName = "TrkLRT_tau"
-        return self.getStep(5,stepName,[getTrackLRTCfg],is_probe_leg=is_probe_leg)
 
-    # --------------------                                                                                                                                   
-    def getIDEmpty(self):
+    def getTrackTwoLLP(self, flags, is_probe_leg=False):
+        stepName = "TrkTwoLLP_tau"
+        return self.getStep(flags,5,stepName,[getTrackTwoLLPCfg],is_probe_leg=is_probe_leg)
+
+    # --------------------
+    def getTrackLRT(self, flags, is_probe_leg=False):
+        stepName = "TrkLRT_tau"
+        return self.getStep(flags,5,stepName,[getTrackLRTCfg],is_probe_leg=is_probe_leg)
+
+    # --------------------
+
+    def getIDEmpty(self, flags):
         stepName = 'IDEmpty_tau'
         return self.getEmptyStep(5,stepName)

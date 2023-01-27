@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
     log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     
@@ -20,7 +20,7 @@ def generateChainConfigs( chainDict ):
 
     for subChainDict in listOfChainDicts:
         log.debug('Assembling subChainsDict %s for chain %s', len(listOfChainDefs), subChainDict['chainName'] )  
-        Photon = PhotonChainConfiguration(subChainDict).assembleChain() 
+        Photon = PhotonChainConfiguration(subChainDict).assembleChain(flags) 
 
         listOfChainDefs += [Photon]
         

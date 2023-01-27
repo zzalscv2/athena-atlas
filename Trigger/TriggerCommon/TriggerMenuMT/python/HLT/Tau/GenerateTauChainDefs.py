@@ -13,14 +13,14 @@ from TriggerMenuMT.HLT.Config.Utility.ChainMerging import mergeChainDefs
 from .TauChainConfiguration import TauChainConfiguration
 
 
-def generateChainConfigs(chainDict):
+def generateChainConfigs(flags, chainDict):
     
     listOfChainDicts = splitChainDict(chainDict)
     listOfChainDefs=[]
 
     for subChainDict in listOfChainDicts:
         log.debug('Assembling subChainsDict %s for chain %s', len(listOfChainDefs), subChainDict['chainName'] )        
-        Tau = TauChainConfiguration(subChainDict).assembleChain() 
+        Tau = TauChainConfiguration(subChainDict).assembleChain(flags) 
 
         listOfChainDefs += [Tau]
         

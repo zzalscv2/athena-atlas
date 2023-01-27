@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.HLT.Config.Utility.ChainDictTools import splitChainDict
 from ..Electron.ElectronChainConfiguration import ElectronChainConfiguration
@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags, chainDict ):
     log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     
@@ -20,7 +20,7 @@ def generateChainConfigs( chainDict ):
 
     for subChainDict in listOfChainDicts:
         log.debug('Assembling subChainsDict %s for chain %s', len(listOfChainDefs), subChainDict['chainName'] )
-        Electron = ElectronChainConfiguration(subChainDict).assembleChain() 
+        Electron = ElectronChainConfiguration(subChainDict).assembleChain(flags) 
 
         listOfChainDefs += [Electron]
         

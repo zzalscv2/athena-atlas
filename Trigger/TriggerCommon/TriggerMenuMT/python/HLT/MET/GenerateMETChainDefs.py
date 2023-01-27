@@ -11,7 +11,7 @@ log.info("Importing %s",__name__)
 
 
 
-def generateChainConfigs( chainDict ):
+def generateChainConfigs(flags,  chainDict ):
     log.debug('dictionary is: %s\n', pprint.pformat(chainDict))
 
     
@@ -22,7 +22,7 @@ def generateChainConfigs( chainDict ):
 
     for subChainDict in listOfChainDicts:
         
-        MET = METChainConfiguration(subChainDict).assembleChain() 
+        MET = METChainConfiguration(subChainDict).assembleChain(flags) 
 
         listOfChainDefs += [MET]
         log.debug('length of chaindefs %s', len(listOfChainDefs) )

@@ -221,7 +221,7 @@ The following list will describe the available files and their functionality:
      ```
      , assembles the chain
      ```python
-      jet = JetChainConfiguration(chainDict).assembleChain()
+      jet = JetChainConfiguration(chainDict).assembleChain(flags)
      ```
      and checks whether the signature is `Bjet` or `Jet`, i.e. whether `bTag` option is set or not.\
      If the signature is '*Jet*', the chain consists only of jet-code ('*JetChainConfiguration*').
@@ -231,7 +231,7 @@ The following list will describe the available files and their functionality:
      ```
      If the signature is '*Bjet*', also bjet-code ('*BjetChainConfiguration*') is added to the chain
      ```python
-      Bjet = BjetChainConfiguration(subChainDict, jet).assembleChain() 
+      Bjet = BjetChainConfiguration(subChainDict, jet).assembleChain(flags) 
       jet.steps = jet.steps + Bjet.steps
       listOfChainDefs += [jet]
      ```
@@ -252,7 +252,7 @@ The following list will describe the available files and their functionality:
 In '*BjetChainConfiguration.py*' the bjet sequence is added as one step of the chain part steps. The sequence is extracted from `getBJetSequence`, which is defined in '*BjetMenuSequence*'.
      ```python
       stepName = f"Step2_{self.jc_name}_bjet"
-      chainSteps = [self.getStep(2, stepName, [bjetSequenceCfg])]
+      chainSteps = [self.getStep(flags,2, stepName, [bjetSequenceCfg])]
      ```
      Based on these steps the chain is being build
      ```python

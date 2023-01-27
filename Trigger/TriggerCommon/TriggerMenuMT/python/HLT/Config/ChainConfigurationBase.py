@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
 from AthenaCommon.Logging import logging
@@ -7,7 +7,6 @@ log = logging.getLogger(__name__)
 import abc
 from TriggerMenuMT.HLT.Config.MenuComponents import Chain, ChainStep, RecoFragmentsPool
 from DecisionHandling.DecisionHandlingConfig import ComboHypoCfg
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import isComponentAccumulatorCfg
 from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 
@@ -43,7 +42,7 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         self.chainPartNameNoMult = self.chainPartName[1:] if self.mult > 1 else self.chainPartName
         self.chainPartNameNoMultwL1 += "_"+self.chainL1Item
 
-    def getStep(self, stepID, stepPartName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], flags=ConfigFlags, **stepArgs):
+    def getStep(self, flags, stepID, stepPartName, sequenceCfgArray, comboHypoCfg=ComboHypoCfg, comboTools=[], **stepArgs):
         stepName = 'Step%d'%stepID + '_' + stepPartName
         log.debug("Configuring step %s", stepName)
         seqArray = []                
@@ -107,8 +106,8 @@ class ChainConfigurationBase(metaclass=abc.ABCMeta):
         return myChain
 
     @abc.abstractmethod
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         return
 
-    def assembleChain(self):
-        return self.assembleChainImpl()
+    def assembleChain(self, flags):
+        return self.assembleChainImpl(flags)

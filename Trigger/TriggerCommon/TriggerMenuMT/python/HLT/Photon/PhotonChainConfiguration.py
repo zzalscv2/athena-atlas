@@ -118,7 +118,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
         # This will contain the name of the steps we will want to configure
         steps = self.prepareSequence()
@@ -128,7 +128,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
         log.debug("stepNames: %s", steps)
         for step in steps:
             log.debug('Adding photon trigger step %s', step)
-            chainstep = getattr(self, step)()
+            chainstep = getattr(self, step)(flags)
             chainSteps+=[chainstep]
 
         myChain = self.buildChain(chainSteps)
@@ -138,30 +138,30 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     # --------------------
     # Configuration of steps
     # --------------------
-    def getFastCalo(self):
+    def getFastCalo(self, flags):
         stepName = "PhotonFastCalo"
         doRinger = 'ringer' in self.chainPart['L2IDAlg']
 
-        return self.getStep(1,stepName,[ fastCaloMenuSequence], name = 'Photon', doRinger = doRinger)
+        return self.getStep(flags,1,stepName,[ fastCaloMenuSequence], name = 'Photon', doRinger = doRinger)
 
-    def getFastPhoton(self):
+    def getFastPhoton(self, flags):
         stepName = "FastPhoton"
-        return self.getStep(2,stepName,[ fastPhotonMenuSequence])
+        return self.getStep(flags,2,stepName,[ fastPhotonMenuSequence])
 
-    def getPrecisionCaloPhoton(self):
+    def getPrecisionCaloPhoton(self, flags):
         do_ion = 'ion' in self.chainPart['extra']
         if do_ion:
             stepName = "PhotonPrecisionHICalo"
         else:
             stepName = "PhotonPrecisionCalo"
 
-        return self.getStep(3,stepName,[ precisionCaloMenuSequence], name = 'Photon', ion=do_ion)
+        return self.getStep(flags,3,stepName,[ precisionCaloMenuSequence], name = 'Photon', ion=do_ion)
     
-    def getHipTRT(self):
+    def getHipTRT(self, flags):
         stepName = "hipTRT"
-        return self.getStep(2,stepName,[ hipTRTMenuSequence])
+        return self.getStep(flags,2,stepName,[ hipTRTMenuSequence])
 
-    def getPrecisionPhoton(self):
+    def getPrecisionPhoton(self, flags):
 
         stepName = "precision_photon"
         do_ion = 'ion' in self.chainPart['extra'] == 'ion'
@@ -170,9 +170,9 @@ class PhotonChainConfiguration(ChainConfigurationBase):
             stepName += '_ion'
         
 
-        return self.getStep(4,stepName,sequenceCfgArray=[precisionPhotonMenuSequence], name = 'Photon',  ion=do_ion)
+        return self.getStep(flags,4,stepName,sequenceCfgArray=[precisionPhotonMenuSequence], name = 'Photon',  ion=do_ion)
 
-    def getPhotonCaloIso(self):
+    def getPhotonCaloIso(self, flags):
 
         stepName = "precision_photon_CaloIso"
         comboTools = []
@@ -191,5 +191,5 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
        
 
-        return self.getStep(5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequence], name = 'Photon', comboTools=comboTools, ion=do_ion)
+        return self.getStep(flags,5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequence], name = 'Photon', comboTools=comboTools, ion=do_ion)
     

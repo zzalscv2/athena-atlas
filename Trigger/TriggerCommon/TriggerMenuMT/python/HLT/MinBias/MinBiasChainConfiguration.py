@@ -90,55 +90,55 @@ class MinBiasChainConfig(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):
+    def assembleChainImpl(self, flags):
         log.debug("Assembling chain for %s", self.chainName)
         steps = []
 
         if "mbts" == self.chainPart['recoAlg'][0] or "mbts" in self.chainName:
-            steps.append(self.getMinBiasMbtsStep())
+            steps.append(self.getMinBiasMbtsStep(flags))
         elif "afprec" == self.chainPart['recoAlg'][0]:
-            steps.append(self.getAFPTrkStep())
+            steps.append(self.getAFPTrkStep(flags))
         else:
-            steps.append(self.getMinBiasEmptyMbtsStep())
+            steps.append(self.getMinBiasEmptyMbtsStep(flags))
 
         if "afptof" in self.chainPart['recoAlg']:
-            steps.append(self.getAFPGlobalStep())
+            steps.append(self.getAFPGlobalStep(flags))
 
         if self.chainPart['recoAlg'][0] in ['sp', 'sptrk', 'hmt', 'excl']:
-            steps.append(self.getMinBiasSpStep())
+            steps.append(self.getMinBiasSpStep(flags))
 
         if self.chainPart['recoAlg'][0] in ['sptrk', 'hmt', 'excl']:
-            steps.append(self.getMinBiasZFindStep())
-            steps.append(self.getMinBiasTrkStep())
+            steps.append(self.getMinBiasZFindStep(flags))
+            steps.append(self.getMinBiasTrkStep(flags))
 
         if "_alfaperf" in self.chainName:
-            steps.append(self.getALFAPerfStep())
+            steps.append(self.getALFAPerfStep(flags))
 
         return self.buildChain(steps)
 
-    def getMinBiasMbtsStep(self):
-        return self.getStep(1, 'Mbts',[MinBiasMbtsSequenceCfg])
+    def getMinBiasMbtsStep(self, flags):
+        return self.getStep(flags,1,'Mbts',[MinBiasMbtsSequenceCfg])
 
-    def getMinBiasEmptyMbtsStep(self):
-        return self.getStep(1,'EmptyMbts',[MinBiasMbtsEmptySequenceCfg])
+    def getMinBiasEmptyMbtsStep(self, flags):
+        return self.getStep(flags,1,'EmptyMbts',[MinBiasMbtsEmptySequenceCfg])
 
-    def getMinBiasSpStep(self):
-        return self.getStep(2,'SPCount',[MinBiasSPSequenceCfg])
+    def getMinBiasSpStep(self, flags):
+        return self.getStep(flags,2,'SPCount',[MinBiasSPSequenceCfg])
 
-    def getMinBiasZFindStep(self):
-        return self.getStep(3,'ZFind',[MinBiasZVertexFinderCfg])
+    def getMinBiasZFindStep(self, flags):
+        return self.getStep(flags,3,'ZFind',[MinBiasZVertexFinderCfg])
 
-    def getMinBiasEmptyZFindStep(self):
-        return self.getStep(3,'EmptyZFind',[MinBiasZFindEmptySequenceCfg])
+    def getMinBiasEmptyZFindStep(self, flags):
+        return self.getStep(flags,3,'EmptyZFind',[MinBiasZFindEmptySequenceCfg])
 
-    def getMinBiasTrkStep(self):
-        return self.getStep(4,'TrkCount',[MinBiasTrkSequenceCfg])
+    def getMinBiasTrkStep(self, flags):
+        return self.getStep(flags,4,'TrkCount',[MinBiasTrkSequenceCfg])
 
-    def getAFPTrkStep(self):
-         return self.getStep(1,'AFPTrk',[AFPTrkSequenceCfg])
+    def getAFPTrkStep(self, flags):
+         return self.getStep(flags,1,'AFPTrk',[AFPTrkSequenceCfg])
 
-    def getAFPGlobalStep(self):
-         return self.getStep(1,'AFPGlobal',[AFPGlobalSequenceCfg])
+    def getAFPGlobalStep(self, flags):
+         return self.getStep(flags,1,'AFPGlobal',[AFPGlobalSequenceCfg])
 
-    def getALFAPerfStep(self):
-        return self.getStep(1,'ALFAPerf',[ALFAPerfSequenceCfg])
+    def getALFAPerfStep(self, flags):
+        return self.getStep(flags,1,'ALFAPerf',[ALFAPerfSequenceCfg])
