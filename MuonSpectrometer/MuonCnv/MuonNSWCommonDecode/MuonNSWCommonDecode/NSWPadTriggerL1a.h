@@ -297,6 +297,30 @@ namespace Muon
         return isLarge(sec) ? "STL" : "STS";
       }
 
+      /*
+        Convert from pad trigger channel to TDS channel
+      */
+      static uint8_t getPadTriggerToTds(const size_t pfeb,
+                                        const size_t chan,
+                                        const std::string& size) {
+        const auto& chans = (size == "S") ?
+          m_mapPadTriggerToTdsS:
+          m_mapPadTriggerToTdsL;
+        return chans.at(pfeb).at(chan);
+      }
+
+      /*
+        Convert from TDS channel to pad trigger channel
+      */
+      static uint8_t getTdsToPadTrigger(const size_t pfeb,
+                                        const uint8_t tdschan,
+                                        const std::string& size) {
+        const auto& chans = (size == "S") ?
+          m_mapPadTriggerToTdsS.at(pfeb) :
+          m_mapPadTriggerToTdsL.at(pfeb);
+        return std::distance(chans.begin(), std::find(chans.begin(), chans.end(), tdschan));
+      }
+
     private:
 
       // Struct for 1 BC of decompressed data
