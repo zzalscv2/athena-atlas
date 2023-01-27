@@ -643,6 +643,18 @@
   <x title="num. strips" n="10" lo="0" hi="10"/>
   <y title="Entries"/>
 </h>
+<h id="clusterPhiWidth_eta_pixel" type="TProfile" title="Cluster width in phi vs eta: Pixel">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Cluster width in phi"/>
+</h>
+<h id="clusterPhiWidth_eta_sct" type="TProfile" title="Cluster width in phi vs eta: Strips">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Cluster width in phi"/>
+</h>
+<h id="clusterEtaWidth_eta_pixel" type="TProfile" title="Cluster width in eta vs eta: Pixel">
+  <x title="#eta" n="80" lo="-&ETA;" hi="&ETA;"/>
+  <y title="Cluster width in eta"/>
+</h>
 <!--
    =======================================================
    end of hit residuals & cluster width plots

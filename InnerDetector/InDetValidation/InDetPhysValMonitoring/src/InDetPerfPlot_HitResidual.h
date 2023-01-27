@@ -49,18 +49,21 @@ private:
 
   void initializePlots();
 
-  TH1* m_residualx_1hit[TRT][N_REGIONS]; // excludes TRT, DBM
-  TH1* m_residualx_2ormorehits[TRT][N_REGIONS]; // excludes TRT, DBM
-  TH1* m_residualx[N_SUBDETECTORS][N_REGIONS];
+  std::vector<std::vector<TH1*>> m_residualx_1hit = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
+  std::vector<std::vector<TH1*>> m_residualx_2ormorehits = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
+  std::vector<std::vector<TH1*>> m_residualx = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
   //
-  TH1* m_residualy_1hit[TRT][N_REGIONS]; // excludes TRT, DBM
-  TH1* m_residualy_2ormorehits[TRT][N_REGIONS]; // excludes TRT, DBM
-  TH1* m_residualy[N_SUBDETECTORS][N_REGIONS];
+  std::vector<std::vector<TH1*>> m_residualy_1hit = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
+  std::vector<std::vector<TH1*>> m_residualy_2ormorehits = {N_SUBDETECTORS, {N_REGIONS, nullptr}}; // excludes TRT, DBM
+  std::vector<std::vector<TH1*>> m_residualy = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
   //
-  TH1* m_pullx[N_SUBDETECTORS][N_REGIONS];
-  TH1* m_pully[N_SUBDETECTORS][N_REGIONS];
-  TH1* m_phiWidth[N_SUBDETECTORS][N_REGIONS];
-  TH1* m_etaWidth[N_SUBDETECTORS][N_REGIONS];
+  std::vector<std::vector<TH1*>> m_pullx = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH1*>> m_pully = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH1*>> m_phiWidth = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+  std::vector<std::vector<TH1*>> m_etaWidth = {N_SUBDETECTORS, {N_REGIONS, nullptr}};
+
+  std::vector<TProfile*> m_phiWidthEta = {N_SUBDETECTORS, nullptr};
+  std::vector<TProfile*> m_etaWidthEta = {N_SUBDETECTORS, nullptr};
 
   mutable std::atomic<int> m_warnCount{0};
 };
