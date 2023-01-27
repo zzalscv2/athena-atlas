@@ -767,8 +767,8 @@ StatusCode BTaggingTruthTaggingTool::updateEfficiencyForHT(TRFinfo &trfinf){
         }
       }      
     }
+    return StatusCode::SUCCESS;
   } // m_continuous && m_continuous2D
-  return StatusCode::SUCCESS;
 
   if(m_continuous && !m_continuous2D){
     for (unsigned int jet_index=0; jet_index<trfinf.njets; jet_index++){
@@ -784,8 +784,8 @@ StatusCode BTaggingTruthTaggingTool::updateEfficiencyForHT(TRFinfo &trfinf){
         }
       }
     }
+    return StatusCode::SUCCESS;
   } // m_continuous && !m_continuous2D
-  return StatusCode::SUCCESS;
 
   if (!m_continuous){
     bool is_jettag = false;
