@@ -35,7 +35,7 @@ def TrackingGeometrySvcCfg(flags , name = 'AtlasTrackingGeometrySvc',
         from TrackingGeometryCondAlg.TrkDetDescrToolsConfig import (
             LayerMaterialProviderCfg)
         atlas_geometry_processors += [ result.popToolsAndMerge(
-            LayerMaterialProviderCfg(flags,
+            LayerMaterialProviderCfg(flags, name='AtlasMaterialProvider',
                                      LayerMaterialMapName = CoolDataBaseFolder,
                                      LayerMaterialMapKey = '')) ] # Different from AtlasTrackingGeometryCondAlgConfig
 
