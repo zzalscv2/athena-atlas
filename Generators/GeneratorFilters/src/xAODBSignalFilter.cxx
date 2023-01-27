@@ -115,7 +115,7 @@ StatusCode xAODBSignalFilter::filterEvent()
         // ** Check HepMC for particles activating LVL1 trigger, if that is what user wishes **
         //
         bool LVL1Passed = false;
-        int LVL1MuonBarcode = 0;
+        const xAOD::TruthParticle* LVL1Muon = 0;
         //
         if (m_localLVL1MuonCutOn)
         {
@@ -127,7 +127,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                 if (LVL1Result)
                 {
                     LVL1Passed = true;
-                    LVL1MuonBarcode = part->barcode();//HepMC::barcode(part); // Remember the muon for LVL2 testing
+                    LVL1Muon = part; // Remember the muon for LVL2 testing
                     break;
                 }
             }
@@ -145,7 +145,7 @@ StatusCode xAODBSignalFilter::filterEvent()
                 bool LVL2Result = LVL2_eMu_Trigger(part);
                 if (LVL2Result)
                 {
-                    if (part->barcode() != LVL1MuonBarcode) // Check the particle triggering LVL2 isn't
+                    if (part != LVL1Muon) // Check the particle triggering LVL2 isn't
                         LVL2Passed = true;                       // the muon that triggered LVL1 --> Artificial,
                                                                  // since, effectively, LVL2 trigger is not applied.
                                                                  // This is needed to "trigger" the 2nd muon!
