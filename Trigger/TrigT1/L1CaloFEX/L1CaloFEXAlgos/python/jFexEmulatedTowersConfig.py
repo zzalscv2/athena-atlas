@@ -6,32 +6,19 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 
-def jFexEmulatedTowersCfg(name):
-    
+def jFexEmulatedTowersCfg(  flags, name, writeKey="L1_jFexEmulatedTowers"):
+    """
+    Config for emulating jFex input data from LATOME readout
+    """
     acc=ComponentAccumulator()
     
     emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
-    emulator.jTowersWriteKey   = "L1_jFexEmulatedTowers"
+    emulator.jTowersWriteKey = writeKey 
     acc.addEventAlgo(emulator)
 
     return acc
 
 
-def jFexEmulatedTowersDerivationCfg(name,flags):
-    """
-    Create emulated towers for derivation jobs running on RAWD
-    Requires to decode the SCells (the legacy TriggerTowers are already available)
-    """
-    acc=ComponentAccumulator()
-
-    from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
-    acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
-
-    emulator = CompFactory.LVL1.jFexEmulatedTowers(name)
-    emulator.jTowersWriteKey   = "L1_jFexEmulatedTowers"
-    acc.addEventAlgo(emulator)
-
-    return acc
 
 if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
@@ -56,7 +43,7 @@ if __name__ == '__main__':
     algLogLevel = getattr(Constants,args.outputLevel)
 
     flags = initConfigFlags()
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         flags.Trigger.triggerConfig='DB'
 
     flags.Exec.OutputLevel = algLogLevel
@@ -65,7 +52,7 @@ if __name__ == '__main__':
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
   
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         s=args.filesInput[0].replace('*','').replace('.data','')
         flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
     else:
@@ -126,7 +113,7 @@ if __name__ == '__main__':
     # Emulated jFex Towers
     ########################################
     
-    jFexEmulatedTool = jFexEmulatedTowersCfg('jFexEmulatedTowers')
+    jFexEmulatedTool = jFexEmulatedTowersCfg(flags,'jFexEmulatedTowers')
     acc.merge(jFexEmulatedTool)
     outputEDM += addEDM('xAOD::jFexTowerContainer', 'L1_jFexEmulatedTowers')
     

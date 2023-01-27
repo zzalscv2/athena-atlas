@@ -30,18 +30,31 @@ jFexTower2SCellDecorator::jFexTower2SCellDecorator(const std::string& name, ISvc
 
 StatusCode jFexTower2SCellDecorator::initialize() {
     ATH_MSG_INFO( "L1CaloFEXTools/jFexTower2SCellDecorator::initialize()");
+    
     ATH_CHECK( m_SCellKey.initialize() );
     ATH_CHECK( m_triggerTowerKey.initialize() );
     ATH_CHECK( m_jTowersReadKey.initialize() );
-    ATH_CHECK( m_SCellEtdecorKey.initialize() );
-    ATH_CHECK( m_SCellEtadecorKey.initialize() );
-    ATH_CHECK( m_SCellPhidecorKey.initialize() );
-    ATH_CHECK( m_SCellIDdecorKey.initialize() );
-    ATH_CHECK( m_jtowerEtMeVdecorKey.initialize() );
-    ATH_CHECK( m_TileEtMeVdecorKey.initialize() );
-    ATH_CHECK( m_TileEtadecorKey.initialize() );
-    ATH_CHECK( m_TilePhidecorKey.initialize() );
     
+    // This will avoid extra variables when the Key is different than DataTowers
+    if( (m_jTowersReadKey.key()).compare(m_ReadKey_name) != 0 ){
+        m_save_emulated_var = false;
+    }    
+    
+    //Decarator keys
+    ATH_CHECK( m_jtowerEtMeVdecorKey.initialize() );
+    ATH_CHECK( m_SCellEtMeVdecorKey.initialize() );
+    ATH_CHECK( m_TileEtMeVdecorKey.initialize() );
+    ATH_CHECK( m_jTowerEtdecorKey.initialize(m_save_emulated_var) );    
+    
+    ATH_CHECK( m_SCellEtdecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_SCellEtadecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_SCellPhidecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_SCellIDdecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_TileEtdecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_TileEtadecorKey.initialize(m_save_extras) );
+    ATH_CHECK( m_TilePhidecorKey.initialize(m_save_extras) );        
+    
+
     
     //Reading from CVMFS Trigger Tower and their corresponding SCell ID
     ATH_CHECK(ReadSCfromFile(m_jFEX2Scellmapping));
@@ -96,22 +109,13 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         map_TileID2ptr[tower->coolId()]=tower;
     }    
         
-    //Setup Decorator Handlers
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt    (m_SCellEtdecorKey     , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta   (m_SCellEtadecorKey    , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi   (m_SCellPhidecorKey    , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<int> >   jTowerSCellID    (m_SCellIDdecorKey     , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerEtMeV      (m_jtowerEtMeVdecorKey , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEt     (m_TileEtMeVdecorKey   , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta    (m_TileEtadecorKey     , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi    (m_TilePhidecorKey     , ctx);
-    
     //looping over the jTowers to decorate them!
     for(const xAOD::jFexTower* jTower : *jTowerContainer){
         
         uint32_t jFexID = jTower->jFEXtowerID();
         uint8_t  source = jTower->Calosource();
         uint16_t jFexEt = 0;
+        uint16_t jFexEtencoded = 0;
         
         if(source < 7){
             jFexEt = jTower->jTowerEt();
@@ -124,7 +128,8 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         std::vector<float> scEta;
         std::vector<float> scPhi;
         std::vector<int>   scID;
-        int TileEt = -99;
+        float SCellEt = 0.0;
+        int   TileEt  = 0;
         float TileEta = -99.0;
         float TilePhi = -99.0;
         
@@ -164,17 +169,28 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
                 else{
                     const CaloCell* myCell = it_ScellID2ptr->second;
                     
-                    scEt.push_back(myCell->et());
+                    float et = myCell->et();
+                    
+                    if( (myCell->provenance() >> 7 & 0x1) and m_apply_masking ) {
+                        //if masked then Et = 0
+                        et = 0.0;
+                    }
+                    
+                    scEt.push_back(et);
                     scEta.push_back(myCell->eta());
                     scPhi.push_back(myCell->phi());
                     // bit shifting to get only a 32 bit number
                     scID.push_back( SCellID >> 32 );                    
                 }
-
-
-
-            }   
-
+            }
+            
+            //emulated encoded Et
+            float tmpSCellEt = 0;
+            for(const auto& tmpet : scEt){
+                tmpSCellEt += tmpet;
+            }
+            SCellEt = tmpSCellEt;
+            jFexEtencoded = jFEXCompression::Compress( std::round( tmpSCellEt) );
         }
         else if(source == 1){
             
@@ -191,30 +207,59 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
             auto it_TileID2ptr = map_TileID2ptr.find(TileID);
             if(it_TileID2ptr == map_TileID2ptr.end()) {
                 ATH_MSG_WARNING("Scell ID: 0x"<<std::hex<<TileID<<std::dec<< " not found on map map_TileID2ptr");
-
-                TileEt    = 0;
-                TileEta   = -99;
-                TilePhi   = -99; 
+                
+                jFexEtencoded = 0;
+                TileEt        = 0;
+                TileEta       = -99;
+                TilePhi       = -99; 
             }
             else{
-                TileEt    = (it_TileID2ptr->second)->cpET();
-                TileEta   = (it_TileID2ptr->second)->eta();
-                float phi = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
-                TilePhi   = phi;                
+                jFexEtencoded = (it_TileID2ptr->second)->cpET();
+                TileEt        = jFexEtencoded*500; // cf 500 since it is cpET
+                TileEta       = (it_TileID2ptr->second)->eta();
+                float phi     = (it_TileID2ptr->second)->phi() < M_PI ? (it_TileID2ptr->second)->phi() : (it_TileID2ptr->second)->phi()-2*M_PI;
+                TilePhi       = phi;    
             }           
+            
             
 
         }
         
         // Decorating the tower with the corresponding information
-        jTowerSCellEt   (*jTower) = scEt;
-        jTowerSCellEta  (*jTower) = scEta;
-        jTowerSCellPhi  (*jTower) = scPhi;
-        jTowerSCellID   (*jTower) = scID;
+        //Setup Decorator Handlers
+        if(m_save_extras) {
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt    (m_SCellEtdecorKey  , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta   (m_SCellEtadecorKey , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi   (m_SCellPhidecorKey , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<int> >   jTowerSCellID    (m_SCellIDdecorKey  , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEt     (m_TileEtdecorKey   , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta    (m_TileEtadecorKey  , ctx);
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi    (m_TilePhidecorKey  , ctx);
+
+            jTowerSCellEt   (*jTower) = scEt;
+            jTowerSCellEta  (*jTower) = scEta;
+            jTowerSCellPhi  (*jTower) = scPhi;
+            jTowerSCellID   (*jTower) = scID;
+            jTowerTileEt    (*jTower) = static_cast<int>( TileEt );
+            jTowerTileEta   (*jTower) = TileEta;
+            jTowerTilePhi   (*jTower) = TilePhi;
+        }
+        
+        
+        SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtMeV     (m_jtowerEtMeVdecorKey , ctx);
+        SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > SCellEtMeV      (m_SCellEtMeVdecorKey  , ctx);
+        SG::WriteDecorHandle<xAOD::jFexTowerContainer, float > TileEtMeV       (m_TileEtMeVdecorKey   , ctx);
+                
+        
         jTowerEtMeV     (*jTower) = static_cast<int>( jFEXCompression::Expand(jFexEt) );
-        jTowerTileEt    (*jTower) = static_cast<int>( TileEt );
-        jTowerTileEta   (*jTower) = TileEta;
-        jTowerTilePhi   (*jTower) = TilePhi;
+        SCellEtMeV      (*jTower) = SCellEt;
+        TileEtMeV       (*jTower) = TileEt;
+        
+        if(m_save_emulated_var){
+            SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >   jTowerEtencoded (m_jTowerEtdecorKey    , ctx);
+            jTowerEtencoded (*jTower) = jFexEtencoded;
+        }
+        
         
     }
     

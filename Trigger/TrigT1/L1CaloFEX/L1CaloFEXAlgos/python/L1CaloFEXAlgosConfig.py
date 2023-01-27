@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexInputByteStreamToolCfg
 from AthenaConfiguration.Enums import Format
 
-def L1CaloFEXDecoratorCfg(name):
+def L1CaloFEXDecoratorCfg(flags, name):
     
     acc=ComponentAccumulator()
     
@@ -17,7 +17,7 @@ def L1CaloFEXDecoratorCfg(name):
     return acc
 
 
-def jFexEmulatedTowersDerivationCfg(name,flags):
+def jFexEmulatedTowersDerivationCfg(flags, name):
     """
     Create emulated towers for derivation jobs running on RAWD
     Requires to decode the SCells (the legacy TriggerTowers are already available)
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     algLogLevel = getattr(Constants,args.outputLevel)
 
     flags = initConfigFlags()
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         flags.Trigger.triggerConfig='DB'
 
     flags.Exec.OutputLevel = algLogLevel
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     flags.Concurrency.NumThreads = 1
     flags.Concurrency.NumConcurrentEvents = 1
   
-    if any(["data22" in f for f in args.filesInput]):
+    if any(["data" in f for f in args.filesInput]):
         s=args.filesInput[0].replace('*','').replace('.data','')
         flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
     else:
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     acc.merge(TriggerTowersInputCfg(flags))
     
     # Uses SCell to decorate the jTowers
-    DecoratorAlgo = L1CaloFEXDecoratorCfg('jFexTower2SCellDecorator')   
+    DecoratorAlgo = L1CaloFEXDecoratorCfg(flags, 'jFexTower2SCellDecorator')   
     acc.merge(DecoratorAlgo)
 
 

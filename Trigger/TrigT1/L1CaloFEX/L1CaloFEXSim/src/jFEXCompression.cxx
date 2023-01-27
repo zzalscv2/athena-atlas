@@ -9,6 +9,7 @@
  ***************************************************************************/
 
 #include "L1CaloFEXSim/jFEXCompression.h"
+#include <cmath>
 
 namespace LVL1 {
 
@@ -18,30 +19,30 @@ const int jFEXCompression::s_minCode[] = {2, 384, 768, 1536, 3072};
 
 unsigned int jFEXCompression::Compress(int Et) {
 
-  // Check for overflow
-  if (Et >= s_maxET) return s_LArOverflow;
- 
-  // Find which range the ET value is in
-  int range = -1;
-  for (unsigned int i = 0; i < s_nRanges; i++) {
-    if (Et < s_minET[i]) break;
-    range = i;
-  }
+    // Check for overflow
+    if (Et >= s_maxET) return s_LArOverflow;
 
-  // Calculate code
-  unsigned int code = 0;
+    // Find which range the ET value is in
+    int range = -1;
+    for (unsigned int i = 0; i < s_nRanges; i++) {
+        if (Et < s_minET[i]) break;
+        range = i;
+    }
 
-  if (range < 0) {
-    // Below minimum value
-    code = s_LArUnderflow; 
-  }
-  else {
-    // Lies inside one of the value ranges
-    int steps = (Et - s_minET[range])/s_steps[range];
-    code = s_minCode[range] + steps;
-  }
+    // Calculate code
+    unsigned int code = 0;
 
-  return code;
+    if (range < 0) {
+        // Below minimum value
+        code = s_LArUnderflow;
+    }
+    else {
+        // Lies inside one of the value ranges
+        int steps = std::round( (Et - s_minET[range])/s_steps[range] );
+        code = static_cast<int>(s_minCode[range] + steps);
+    }
+
+    return code;
 }
 
 int jFEXCompression::Expand(unsigned int code) {
