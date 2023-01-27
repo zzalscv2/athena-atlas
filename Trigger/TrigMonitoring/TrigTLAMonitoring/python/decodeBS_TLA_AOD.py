@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -88,21 +88,22 @@ def setupDecodeCfgCA(flags):
 
 if __name__ == "__main__":
    
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
 
     args = GetCustomAthArgs()
+    flags = initConfigFlags()
 
     # Setup custom input file
-    ConfigFlags.Input.Files = args.filesInput
+    flags.Input.Files = args.filesInput
 
-    ConfigFlags.Trigger.triggerConfig = "DB"
-    ConfigFlags.Input.isMC = False
+    flags.Trigger.triggerConfig = "DB"
+    flags.Input.isMC = False
 
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # setup CA 
-    cfg = setupDecodeCfgCA(ConfigFlags)
+    cfg = setupDecodeCfgCA(flags)
 
     # Execute
     import sys

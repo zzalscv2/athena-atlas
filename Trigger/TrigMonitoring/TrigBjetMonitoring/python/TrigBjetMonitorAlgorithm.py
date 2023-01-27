@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigBjetMonitorAlgorithm.py
@@ -603,37 +603,31 @@ if __name__=='__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     # Input files
-
-    # Original data input file from P.Onyisi and C.Burton:
-    #nightly = '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs/'
-    #file = 'data16_13TeV.00311321.physics_Main.recon.AOD.r9264/AOD.11038520._000001.pool.root.1'
-    #ConfigFlags.Input.Files = [nightly+file]
-    #ConfigFlags.Input.isMC = False
-
     # AOD file to be run w/ MT access and Mon Groups implemented
     file = '/eos/user/e/enagy/ARTfiles/MCtest171022.AOD.pool.root'
 
-    ConfigFlags.Input.Files = [file]
-    ConfigFlags.Input.isMC = True
+    flags.Input.Files = [file]
+    flags.Input.isMC = True
 
     # Output file (root)
 
-    ConfigFlags.Output.HISTFileName = 'TrigBjetMonitorOutput.root'
+    flags.Output.HISTFileName = 'TrigBjetMonitorOutput.root'
 
-    # ConfigFlags.Trigger.triggerMenuSetup="Physics_pp_v7_primaries"
+    # flags.Trigger.triggerMenuSetup="Physics_pp_v7_primaries"
     
-    ConfigFlags.lock()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    trigBjetMonitorAcc = TrigBjetMonConfig(ConfigFlags)
+    trigBjetMonitorAcc = TrigBjetMonConfig(flags)
     cfg.merge(trigBjetMonitorAcc)
 
     # If you want to turn on more detailed messages ...
