@@ -332,6 +332,11 @@ def createTriggerRecoFlags():
         from TrigInDetConfig.TrigTrackingPassFlagsITk import createTrigTrackingPassFlagsITk
         return createTrigTrackingPassFlagsITk()
     flags.addFlagsCategory( 'Trigger.ITkTracking', __idITk )
+
+    def __trigCalo():
+        from TrigCaloRec.TrigCaloConfigFlags import createTrigCaloConfigFlags
+        return createTrigCaloConfigFlags()
+    flags.addFlagsCategory( 'Trigger.Calo', __trigCalo )
      
     # NB: Longer term it may be worth moving these into a PF set of config flags, but right now the only ones that exist do not seem to be used in the HLT.
     # When we use component accumulators for this in the HLT maybe we should revisit this
