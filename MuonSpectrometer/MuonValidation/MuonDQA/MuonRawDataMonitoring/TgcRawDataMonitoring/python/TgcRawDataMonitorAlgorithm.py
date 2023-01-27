@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -1183,39 +1183,39 @@ if __name__=='__main__':
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-    ConfigFlags.Input.isMC = True
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.isMC = True
 
     import glob
     import sys
     if len(sys.argv) == 3:
         inputs = sys.argv[1].split(',')
-        ConfigFlags.Input.Files = inputs
-        ConfigFlags.Output.HISTFileName = sys.argv[2]
+        flags.Input.Files = inputs
+        flags.Output.HISTFileName = sys.argv[2]
     else:
         inputs = glob.glob('data/*')
-        ConfigFlags.Input.Files = inputs
-        ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput.root'
+        flags.Input.Files = inputs
+        flags.Output.HISTFileName = 'ExampleMonitorOutput.root'
 
-    ConfigFlags.Trigger.triggerConfig = "FILE"
-    ConfigFlags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
+    flags.Trigger.triggerConfig = "FILE"
+    flags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
 
-    if not ConfigFlags.Input.isMC:
-        ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
+    if not flags.Input.isMC:
+        flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-10"
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    tgcRawDataMonitorAcc = TgcRawDataMonitoringConfig(ConfigFlags)
+    tgcRawDataMonitorAcc = TgcRawDataMonitoringConfig(flags)
     cfg.merge(tgcRawDataMonitorAcc)
     cfg.getEventAlgo('TgcRawDataMonAlg').OutputLevel = INFO
     cfg.getEventAlgo('TgcRawDataMonAlg').MonitorThresholdPatterns = True
@@ -1234,10 +1234,10 @@ if __name__=='__main__':
     cfg.getEventAlgo('TgcRawDataMonAlg').TagMuonInDifferentSystem = False
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
+    cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
-    cfg.merge(L1ConfigSvcCfg(ConfigFlags))
-    generateL1Menu(ConfigFlags)
+    cfg.merge(L1ConfigSvcCfg(flags))
+    generateL1Menu(flags)
 
     cfg.printConfig(withDetails=False, summariseProps = False)
 

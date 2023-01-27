@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # This file configures the Muon segment finding. It is based on a few files in the old configuration system:
 # Tools, which are configured here: 
@@ -746,11 +746,11 @@ if __name__=="__main__":
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 
     args = SetupMuonStandaloneArguments()
-    ConfigFlags = SetupMuonStandaloneConfigFlags(args)
-    cfg = SetupMuonStandaloneCA(args,ConfigFlags)
+    flags = SetupMuonStandaloneConfigFlags(args)
+    cfg = SetupMuonStandaloneCA(args,flags)
 
     # Run the actual test.
-    acc = MuonSegmentFindingCfg(ConfigFlags, cardinality=args.threads)
+    acc = MuonSegmentFindingCfg(flags, cardinality=args.threads)
     cfg.merge(acc)
     
     if args.threads>1 and args.forceclone:
@@ -775,7 +775,7 @@ if __name__=="__main__":
     cfg.addService(ars)
 
     itemsToRecord = ["Trk::SegmentCollection#TrackMuonSegments", "Trk::SegmentCollection#NCB_TrackMuonSegments"]
-    SetupMuonStandaloneOutput(cfg, ConfigFlags, itemsToRecord)
+    SetupMuonStandaloneOutput(cfg, flags, itemsToRecord)
 
     # cfg.getService("StoreGateSvc").Dump = True
     cfg.printConfig()

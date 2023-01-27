@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -345,16 +345,17 @@ def MuonRDOtoPRDConvertorsCfg(flags):
 
 # This function runs the decoding on a data file
 def muonRdoDecodeTestData( forTrigger = False ):
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
 
     # Set global tag by hand for now
-    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"#"ATLAS-R2-2015-03-01-00"
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2018-13"#"CONDBR2-BLKPA-2015-17"
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"#"ATLAS-R2-2015-03-01-00"
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaCommon.Logging import log
 
@@ -368,13 +369,13 @@ def muonRdoDecodeTestData( forTrigger = False ):
     if forTrigger:
         # cache creators loaded independently
         from MuonConfig.MuonBytestreamDecodeConfig import MuonCacheCfg
-        cfg.merge( MuonCacheCfg(ConfigFlags) )
+        cfg.merge( MuonCacheCfg(flags) )
 
-    if ConfigFlags.Input.Format is Format.BS:
+    if flags.Input.Format is Format.BS:
         from MuonConfig.MuonBytestreamDecodeConfig import MuonByteStreamDecodersCfg
-        cfg.merge( MuonByteStreamDecodersCfg( ConfigFlags) )
+        cfg.merge( MuonByteStreamDecodersCfg( flags) )
 
-    cfg.merge( MuonRDOtoPRDConvertorsCfg( ConfigFlags) )
+    cfg.merge( MuonRDOtoPRDConvertorsCfg( flags) )
 
     log.info('Print Config')
     cfg.printConfig(withDetails=True)
@@ -394,11 +395,12 @@ def muonRdoDecodeTestData( forTrigger = False ):
 # This function runs the decoding on a MC file
 def muonRdoDecodeTestMC():
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.110401.PowhegPythia_P2012_ttbar_nonallhad.recon.RDO.e3099_s2578_r7572_tid07644622_00/RDO.07644622._000001.pool.root.1"]
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TriggerTest/valid1.110401.PowhegPythia_P2012_ttbar_nonallhad.recon.RDO.e3099_s2578_r7572_tid07644622_00/RDO.07644622._000001.pool.root.1"]
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     from AthenaCommon.Logging import log
 
@@ -409,10 +411,10 @@ def muonRdoDecodeTestMC():
 
     # We are reading a pool file for this test
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
     # Schedule RDO conversion
-    cfg.merge( MuonRDOtoPRDConvertorsCfg( ConfigFlags) )
+    cfg.merge( MuonRDOtoPRDConvertorsCfg( flags) )
 
     log.info('Print Config')
     cfg.printConfig(withDetails=True)

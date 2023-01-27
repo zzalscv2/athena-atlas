@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -512,11 +512,11 @@ if __name__=="__main__":
     from MuonConfig.MuonConfigUtils import SetupMuonStandaloneArguments, SetupMuonStandaloneConfigFlags, SetupMuonStandaloneOutput, SetupMuonStandaloneCA
 
     args = SetupMuonStandaloneArguments()
-    ConfigFlags = SetupMuonStandaloneConfigFlags(args)
-    cfg = SetupMuonStandaloneCA(args,ConfigFlags)
+    flags = SetupMuonStandaloneConfigFlags(args)
+    cfg = SetupMuonStandaloneCA(args,flags)
           
     # Run the actual test.
-    acc = MuonTrackBuildingCfg(ConfigFlags)
+    acc = MuonTrackBuildingCfg(flags)
     cfg.merge(acc)
     
     if args.threads>1 and args.forceclone:
@@ -540,7 +540,7 @@ if __name__=="__main__":
     cfg.addService(ars)
 
     itemsToRecord = ["TrackCollection#MuonSpectrometerTracks"] 
-    SetupMuonStandaloneOutput(cfg, ConfigFlags, itemsToRecord)
+    SetupMuonStandaloneOutput(cfg, flags, itemsToRecord)
     
     cfg.printConfig(withDetails = True)
               

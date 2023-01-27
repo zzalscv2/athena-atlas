@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration #
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration #
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -142,7 +142,7 @@ def sTgcMonitoringConfig(inputFlags):
     result.merge(acc)
     return result
 if __name__=='__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import argparse
 
     parser = argparse.ArgumentParser()
@@ -151,24 +151,25 @@ if __name__=='__main__':
     parser.add_argument("--output", default = "monitor_sTgc.root", help = 'Name of the output ROOT file.')
     args = parser.parse_args()
 
-    ConfigFlags.Input.Files = []
-    ConfigFlags.Input.Files += args.samples 
+    flags = initConfigFlags()
+    flags.Input.Files = []
+    flags.Input.Files += args.samples 
     
-    ConfigFlags.Output.HISTFileName = args.output
+    flags.Output.HISTFileName = args.output
 
-    ConfigFlags.Detector.GeometrysTGC = True
-    ConfigFlags.DQ.useTrigger = False
+    flags.Detector.GeometrysTGC = True
+    flags.DQ.useTrigger = False
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
-    sTgcMonitorAcc  =  sTgcMonitoringConfig(ConfigFlags)
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+    sTgcMonitorAcc  =  sTgcMonitoringConfig(flags)
     sTgcMonitorAcc.OutputLevel = 2
     cfg.merge(sTgcMonitorAcc)           
     

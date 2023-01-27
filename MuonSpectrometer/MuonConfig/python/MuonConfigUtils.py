@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # This file is just for shared functions etc used by this package.
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -27,57 +27,58 @@ def SetupMuonStandaloneArguments():
     return args
     
 def SetupMuonStandaloneConfigFlags(args):
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
     # Keeping this commented out so we can easily switch to the default for testing against that.
     # from AthenaConfiguration.TestDefaults import defaultTestFiles
-    # ConfigFlags.Input.Files = defaultTestFiles.ESD
-    ConfigFlags.Input.Files = args.input
+    # flags.Input.Files = defaultTestFiles.ESD
+    flags.Input.Files = args.input
     
-    ConfigFlags.Concurrency.NumThreads=args.threads
-    ConfigFlags.Concurrency.NumConcurrentEvents=args.threads # Might change this later, but good enough for the moment.
+    flags.Concurrency.NumThreads=args.threads
+    flags.Concurrency.NumConcurrentEvents=args.threads # Might change this later, but good enough for the moment.
 
-    ConfigFlags.Detector.GeometryMDT   = True 
-    ConfigFlags.Detector.GeometryTGC   = True
-    ConfigFlags.Detector.GeometryCSC   = True     
-    ConfigFlags.Detector.GeometryRPC   = True
+    flags.Detector.GeometryMDT   = True 
+    flags.Detector.GeometryTGC   = True
+    flags.Detector.GeometryCSC   = True     
+    flags.Detector.GeometryRPC   = True
     # TODO: disable these for now, to be determined if needed
-    ConfigFlags.Detector.GeometryCalo  = False
-    ConfigFlags.Detector.GeometryID    = False
+    flags.Detector.GeometryCalo  = False
+    flags.Detector.GeometryID    = False
 
     # FIXME This is temporary. I think it can be removed with some other refactoring
-    ConfigFlags.Muon.makePRDs          = False
+    flags.Muon.makePRDs          = False
 
-    ConfigFlags.Output.ESDFileName=args.output
+    flags.Output.ESDFileName=args.output
     
-    ConfigFlags.Input.isMC = True
-    ConfigFlags.lock()
-    ConfigFlags.dump()
-    return ConfigFlags
+    flags.Input.isMC = True
+    flags.lock()
+    flags.dump()
+    return flags
     
-def SetupMuonStandaloneCA(args,ConfigFlags):
+def SetupMuonStandaloneCA(args,flags):
     # When running from a pickled file, athena inserts some services automatically. So only use this if running now.
     if args.run:
         from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-        cfg = MainServicesCfg(ConfigFlags)
+        cfg = MainServicesCfg(flags)
         msgService = cfg.getService('MessageSvc')
         msgService.Format = "S:%s E:%e % F%128W%S%7W%R%T  %0W%M"
     else:
         cfg=ComponentAccumulator()
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg.merge(PoolReadCfg(flags))
 
-    if ConfigFlags.Input.isMC:
+    if flags.Input.isMC:
         from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
-        cfg.merge(GEN_AOD2xAODCfg(ConfigFlags))
+        cfg.merge(GEN_AOD2xAODCfg(flags))
 
     return cfg
     
-def SetupMuonStandaloneOutput(cfg, ConfigFlags, itemsToRecord):
+def SetupMuonStandaloneOutput(cfg, flags, itemsToRecord):
     # Set up output
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 
-    cfg.merge( OutputStreamCfg( ConfigFlags, 'ESD', ItemList=itemsToRecord) )
+    cfg.merge( OutputStreamCfg( flags, 'ESD', ItemList=itemsToRecord) )
     outstream = cfg.getEventAlgo("OutputStreamESD")
     outstream.ForceRead = True
 

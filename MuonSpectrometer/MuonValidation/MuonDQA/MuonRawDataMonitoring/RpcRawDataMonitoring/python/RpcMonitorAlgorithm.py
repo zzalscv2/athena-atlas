@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -352,7 +352,8 @@ if __name__=="__main__":
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
 
     # Config Input/Output 
     import os
@@ -370,36 +371,33 @@ if __name__=="__main__":
         print ("file input.txt does not exist")
         print ("WIll use files: \n", file_list)
 
-    ConfigFlags.Input.Files = file_list
+    flags.Input.Files = file_list
 
-    ConfigFlags.Output.HISTFileName = 'RPCMonitoringOutput.root'
+    flags.Output.HISTFileName = 'RPCMonitoringOutput.root'
 
-    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
+    flags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
-
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr.Dump = False
+    flags.lock()
+    flags.dump()
 
     # Initialize configuration object, add accumulator, merge and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    acc = RpcMonitoringConfig(ConfigFlags)
+    acc = RpcMonitoringConfig(flags)
     acc.OutputLevel = INFO
     cfg.merge(acc)
 
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    cfg.merge(AtlasFieldCacheCondAlgCfg(ConfigFlags))
+    cfg.merge(AtlasFieldCacheCondAlgCfg(flags))
 
-    if ConfigFlags.DQ.Steering.Muon.doTrackMon:
+    if flags.DQ.Steering.Muon.doTrackMon:
         # do not run in RAW->ESD
-        if ConfigFlags.DQ.Environment not in ('tier0Raw',):
+        if flags.DQ.Environment not in ('tier0Raw',):
             from MuonTrackMonitoring.MuonTrackMonitorAlgorithm import MuonTrackConfig
-            cfg.merge(MuonTrackConfig(ConfigFlags))
+            cfg.merge(MuonTrackConfig(flags))
 
     cfg.printConfig(withDetails=True, summariseProps = True)
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -15,7 +15,7 @@ def RPCCablingConfigCfg(flags):
     rpcTrigPhi="/RPC/TRIGGER/CM_THR_PHI"
 
     # This block with conditions override is only used in Trigger and Reco, and only needed until mid-May 2022.
-    # See ATR-25059 for discussion. To avoid this ConfigFlags based block being executed in simulation/digitization,
+    # See ATR-25059 for discussion. To avoid this block being executed in simulation/digitization,
     # skip this if ProductionStep is not Reconstruction or Default (i.e. unset)
     from AthenaConfiguration.Enums import ProductionStep
     if flags.Common.ProductionStep in [ProductionStep.Reconstruction, ProductionStep.Default] and \
@@ -148,16 +148,15 @@ def MuonCablingConfigCfg(flags):
     return acc
 
 if __name__ == '__main__':
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    result = MuonCablingConfigCfg(ConfigFlags)
+    result = MuonCablingConfigCfg(flags)
     acc.merge( result )
 
     f=open('MuonCabling.pkl','wb')

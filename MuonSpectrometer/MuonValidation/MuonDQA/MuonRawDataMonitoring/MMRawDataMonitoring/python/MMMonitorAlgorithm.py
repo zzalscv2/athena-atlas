@@ -1,5 +1,5 @@
 #
-#Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -179,26 +179,27 @@ if __name__=='__main__':
     from AthenaCommon.Constants import DEBUG
     
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    #ConfigFlags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000008.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000013.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000020.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000022.ESD.pool.root']
-    ConfigFlags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root']
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    #flags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000008.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000013.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000020.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000022.ESD.pool.root']
+    flags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root']
 
 
     #from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-    ConfigFlags.Output.HISTFileName = 'monitor.root'
+    flags.Output.HISTFileName = 'monitor.root'
 
-    ConfigFlags.Detector.GeometryMM=True
-    ConfigFlags.DQ.useTrigger=False
+    flags.Detector.GeometryMM=True
+    flags.DQ.useTrigger=False
 
-    ConfigFlags.lock()
-    ConfigFlags.dump()
+    flags.lock()
+    flags.dump()
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
     
-    mmMonitorAcc  =  MMMonitoringConfig(ConfigFlags)
+    mmMonitorAcc  =  MMMonitoringConfig(flags)
     mmMonitorAcc.OutputLevel=DEBUG
     cfg.merge(mmMonitorAcc)
     #cfg.printConfig(withDetails=True, summariseProps = True)
