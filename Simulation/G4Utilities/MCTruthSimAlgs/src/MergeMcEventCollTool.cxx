@@ -547,10 +547,7 @@ bool MergeMcEventCollTool::isInitialCollisionVertex(const HepMC::ConstGenVertexP
 #ifdef HEPMC3
 for (const auto& pCurrentVertexParticle: pCurrentVertex->particles_in())
       {  
-         if ( (4==pCurrentVertexParticle->status()) ||  (2212==pCurrentVertexParticle->pdg_id()
-           && (1==HepMC::barcode(pCurrentVertexParticle) || 2==HepMC::barcode(pCurrentVertexParticle)) ) ) {
-           return true;
-         }
+         if (4==pCurrentVertexParticle->status()) return true;
       }
 #else
   HepMC::GenVertex::particles_in_const_iterator currentVertexParticleIter(pCurrentVertex->particles_in_const_begin());
