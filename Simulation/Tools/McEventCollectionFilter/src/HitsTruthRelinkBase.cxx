@@ -36,7 +36,7 @@ StatusCode HitsTruthRelinkBase::getReferenceBarcode(const EventContext &ctx, int
     ATH_MSG_ERROR("Truth collection should have at least one vertex!");
     return StatusCode::FAILURE;
   }
-  const HepMC::ConstGenVertexPtr& genVtx = genEvt->vertices().back()  
+  const HepMC::ConstGenVertexPtr& genVtx = genEvt->vertices().back();
   size_t nParticles = genVtx->particles_out().size();
   if (nParticles == 0) {
     ATH_MSG_ERROR("Truth vertex should have at least one particle!");
