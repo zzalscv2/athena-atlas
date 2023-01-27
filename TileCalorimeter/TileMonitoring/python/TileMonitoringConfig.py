@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -66,30 +66,31 @@ def TileMonitoringCfg(flags):
 
 if __name__=='__main__':
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import INFO
     log.setLevel(INFO)
 
-    ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/22.0/v1/myESD.pool.root']
-    ConfigFlags.Output.HISTFileName = 'TileMonitoringOutput.root'
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.Environment = 'tier0'
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q431/22.0/v1/myESD.pool.root']
+    flags.Output.HISTFileName = 'TileMonitoringOutput.root'
+    flags.DQ.enableLumiAccess = False
+    flags.DQ.useTrigger = False
+    flags.DQ.Environment = 'tier0'
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    acc = MainServicesCfg(ConfigFlags)
-    acc.merge(PoolReadCfg(ConfigFlags))
+    acc = MainServicesCfg(flags)
+    acc.merge(PoolReadCfg(flags))
 
-    acc.merge( TileMonitoringCfg(ConfigFlags) )
+    acc.merge( TileMonitoringCfg(flags) )
 
     acc.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
     acc.store(open("TileMonitoring.pkl","wb"))
 
     sc = acc.run()

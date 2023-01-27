@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile EM scale"""
 
@@ -11,7 +11,7 @@ def TileEMScaleCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile EM scale conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of EM scale conditions (COOL, FILE). Defaults to COOL.
         TileEMScale -- name of Tile EM scale conditions object. Defaults to TileEMScale.
@@ -126,7 +126,7 @@ def TileCondToolEmscaleCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile EM scale tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of EM scale conditions (COOL, FILE). Defaults to COOL.
         TileEMScale -- name of Tile EM scale conditions object. Defaults to TileEMScale.
@@ -156,7 +156,7 @@ def TileExpertToolEmscaleCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile expert EM scale tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of EM scale conditions (COOL, FILE). Defaults to COOL.
         TileEMScale -- name of Tile EM scale conditions object. Defaults to TileEMScale.
@@ -184,7 +184,7 @@ def TileExpertToolEmscaleCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -192,15 +192,16 @@ if __name__ == "__main__":
     # test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    emScaleTool =  acc.popToolsAndMerge( TileCondToolEmscaleCfg(ConfigFlags) )
+    emScaleTool =  acc.popToolsAndMerge( TileCondToolEmscaleCfg(flags) )
     print(emScaleTool)
 
-    emScaleExpertTool =  acc.popToolsAndMerge( TileExpertToolEmscaleCfg(ConfigFlags) )
+    emScaleExpertTool =  acc.popToolsAndMerge( TileExpertToolEmscaleCfg(flags) )
     print(emScaleExpertTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

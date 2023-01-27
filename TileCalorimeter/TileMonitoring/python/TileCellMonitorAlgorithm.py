@@ -346,32 +346,32 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.ESD
-    ConfigFlags.Output.HISTFileName = 'TileCellMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs()
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.ESD
+    flags.Output.HISTFileName = 'TileCellMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs()
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     l1Triggers = ['bit0_RNDM', 'bit1_ZeroBias', 'bit2_L1Cal', 'bit3_Muon',
                   'bit4_RPC', 'bit5_FTK', 'bit6_CTP', 'bit7_Calib', 'AnyPhysTrig']
 
-    cfg.merge( TileCellMonitoringConfig(ConfigFlags,
+    cfg.merge( TileCellMonitoringConfig(flags,
                                         fillHistogramsForL1Triggers = l1Triggers,
                                         fillTimeAndEnergyDiffHistograms = True) )
 
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileCellMonitorAlgorithm.pkl','wb') )
 

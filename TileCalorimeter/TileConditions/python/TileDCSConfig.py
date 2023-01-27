@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile DCS tool and conditions algorithm"""
 
@@ -9,7 +9,7 @@ def TileDCSCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile DCS conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         ReadHV -- Read Tile DCS HV folder from DB. Defaults True.
         ReadHVSET -- Read Tile DCS HVSET folder from DB. Defaults to False.
@@ -68,7 +68,7 @@ def TileDCSCondAlgCfg(flags, **kwargs):
 def TileDCSToolCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile DCS tool
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         ReadHV -- Read Tile DCS HV folder from DB. Defaults True.
         ReadHVSET -- Read Tile DCS HVSET folder from DB. Defaults to False.
@@ -95,7 +95,7 @@ def TileDCSToolCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -103,12 +103,13 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    dcsTool =  acc.popToolsAndMerge( TileDCSToolCfg(ConfigFlags) )
+    dcsTool =  acc.popToolsAndMerge( TileDCSToolCfg(flags) )
     print(dcsTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

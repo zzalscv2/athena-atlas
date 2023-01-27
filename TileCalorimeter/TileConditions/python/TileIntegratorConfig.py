@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define methods to construct configured Tile integrator conditions tool and algorithm"""
 
@@ -9,7 +9,7 @@ def TileIntegratorCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile integrator conditions algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile integrator conditions (COOL, FILE). Defaults to COOL.
         TileIntegrator -- name of Tile integrator conditions object. Defaults to TileIntegrator.
@@ -59,7 +59,7 @@ def TileIntegratorCondAlgCfg(flags, **kwargs):
 def TileCondToolIntegratorCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile integrator tool
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     Keyword arguments:
         Source -- source of Tile integrator conditions (COOL, FILE). Defaults to COOL.
         TileIntegrator -- name of Tile integrator conditions object. Defaults to TileIntegrator.
@@ -83,7 +83,7 @@ def TileCondToolIntegratorCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -91,12 +91,13 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.lock()
 
     acc = ComponentAccumulator()
 
-    integratorTool = acc.popToolsAndMerge( TileCondToolIntegratorCfg(ConfigFlags) )
+    integratorTool = acc.popToolsAndMerge( TileCondToolIntegratorCfg(flags) )
     print(integratorTool)
 
     acc.printConfig(withDetails = True, summariseProps = True)

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile DQ status tool and algorithm"""
 
@@ -11,7 +11,7 @@ def TileDQstatusToolCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile DQ status tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         SimulateTrips - flag to simulate drawer trips. Defaults to False.
     """
 
@@ -34,7 +34,7 @@ def TileDQstatusAlgCfg(flags, **kwargs):
     """Return component accumulator with configured Tile DQ status algorithm
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
         TileDQstatus - name of Tile DQ status produced
         TileDigitsContainer - name of Tile digits container, provided it will be used,
                               otherwise it will be determined automatically depending on flags.
@@ -91,7 +91,7 @@ def TileDQstatusAlgCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -99,19 +99,20 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(ConfigFlags, ['TileDigitsContainer/TileDigitsCnt']) )
+    acc.merge( ByteStreamReadCfg(flags, ['TileDigitsContainer/TileDigitsCnt']) )
 
-    acc.merge( TileDQstatusAlgCfg(ConfigFlags) )
+    acc.merge( TileDQstatusAlgCfg(flags) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileDQstatus.pkl','wb') )
 

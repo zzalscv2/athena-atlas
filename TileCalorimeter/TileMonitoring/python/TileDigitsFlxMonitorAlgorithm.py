@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -92,8 +92,9 @@ if __name__=='__main__':
     log.setLevel(INFO)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    parser = ConfigFlags.getArgumentParser()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    parser = flags.getArgumentParser()
     parser.add_argument('--postExec', help='Code to execute after setup')
     parser.add_argument('--digits', default="TileDigitsCnt", help='Tile digits container to be monitored')
     parser.add_argument('--frag-ids', dest='fragIDs', nargs="*", default=['0x201','0x402'], help='Tile Frag IDs of modules to be monitored. Empty=ALL')
@@ -102,23 +103,23 @@ if __name__=='__main__':
     fragIDs = [int(fragID, base=16) for fragID in args.fragIDs]
 
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Output.HISTFileName = 'TileDigitsFlxMonitorOutput.root'
-    ConfigFlags.DQ.useTrigger = False
-    ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.Exec.MaxEvents = 3
-    ConfigFlags.fillFromArgs(parser=parser)
-    ConfigFlags.lock()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Output.HISTFileName = 'TileDigitsFlxMonitorOutput.root'
+    flags.DQ.useTrigger = False
+    flags.DQ.enableLumiAccess = False
+    flags.Exec.MaxEvents = 3
+    flags.fillFromArgs(parser=parser)
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    cfg = MainServicesCfg(ConfigFlags)
+    cfg = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     tileTypeNames = [f'TileDigitsContainer/{args.digits}']
-    cfg.merge( ByteStreamReadCfg(ConfigFlags, type_names = tileTypeNames) )
+    cfg.merge( ByteStreamReadCfg(flags, type_names = tileTypeNames) )
 
-    tileDigitsFlxMonitorAccumulator  = TileDigitsFlxMonitoringConfig(ConfigFlags,
+    tileDigitsFlxMonitorAccumulator  = TileDigitsFlxMonitoringConfig(flags,
                                                                      fragIDs = fragIDs,
                                                                      TileDigitsContainer=args.digits)
 
@@ -130,7 +131,7 @@ if __name__=='__main__':
         exec(args.postExec)
 
     cfg.printConfig(withDetails = True, summariseProps = True)
-    ConfigFlags.dump()
+    flags.dump()
 
     cfg.store( open('TileDigitsFlxMonitorAlgorithm.pkl','wb') )
 

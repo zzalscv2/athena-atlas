@@ -9,7 +9,7 @@ def TileRawChannelOF1CorrectorCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile OF1 raw channel correction tool
 
     Arguments:
-        flags  -- Athena configuration flags (ConfigFlags)
+        flags  -- Athena configuration flags
     """
 
     acc = ComponentAccumulator()
@@ -183,7 +183,7 @@ def TileRawChannelCorrectionAlgCfg(flags, **kwargs):
 
 if __name__ == "__main__":
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG
@@ -191,21 +191,22 @@ if __name__ == "__main__":
     # Test setup
     log.setLevel(DEBUG)
 
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Tile.RunType = 'PHY'
-    ConfigFlags.Tile.correctPedestalDifference = True
-    ConfigFlags.Tile.zeroAmplitudeWithoutDigits = True
-    ConfigFlags.lock()
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Tile.RunType = 'PHY'
+    flags.Tile.correctPedestalDifference = True
+    flags.Tile.zeroAmplitudeWithoutDigits = True
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
+    acc = MainServicesCfg(flags)
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg(ConfigFlags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
+    acc.merge( ByteStreamReadCfg(flags, ['TileRawChannelContainer/TileRawChannelCnt', 'TileDigitsContainer/TileDigitsCnt']) )
 
-    acc.merge( TileRawChannelCorrectionAlgCfg(ConfigFlags) )
+    acc.merge( TileRawChannelCorrectionAlgCfg(flags) )
 
-    ConfigFlags.dump()
+    flags.dump()
     acc.printConfig(withDetails = True, summariseProps = True)
     acc.store( open('TileRawChannelCorrection.pkl','wb') )
 
