@@ -17,7 +17,7 @@ Trk::LayerProviderImpl::LayerProviderImpl(const std::string& t,
 
 
 const std::vector<Trk::Layer*>
-Trk::LayerProviderImpl::cylindricalLayersToCentralLayers(std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylinderLayers) const
+Trk::LayerProviderImpl::cylindricalLayersToCentralLayers(std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylinderLayers) 
 {
   // central layers
   std::vector<Trk::Layer*> cLayers;
@@ -32,7 +32,7 @@ Trk::LayerProviderImpl::cylindricalLayersToCentralLayers(std::unique_ptr<const s
 
 
 std::pair<const std::vector<Trk::Layer*>, const std::vector<Trk::Layer*> >
-  Trk::LayerProviderImpl::discLayersToEndcapLayers(std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers) const
+  Trk::LayerProviderImpl::discLayersToEndcapLayers(std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers) 
 {
 
   // get the disc layers

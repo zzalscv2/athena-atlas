@@ -33,11 +33,11 @@ public:
   virtual ~LayerProviderImpl() = default;
 
  protected:
-  std::pair<const std::vector<Trk::Layer*>, const std::vector<Trk::Layer*> >
-  discLayersToEndcapLayers(std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers) const;
+  static std::pair<const std::vector<Trk::Layer*>, const std::vector<Trk::Layer*> >
+  discLayersToEndcapLayers(std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers) ;
 
-  const std::vector<Trk::Layer*>
-  cylindricalLayersToCentralLayers(std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylinderLayers) const;
+  static const std::vector<Trk::Layer*>
+  cylindricalLayersToCentralLayers(std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylinderLayers) ;
 };
 
 } // end of namespace

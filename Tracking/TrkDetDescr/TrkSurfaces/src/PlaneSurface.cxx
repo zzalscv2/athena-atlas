@@ -121,49 +121,13 @@ Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, double minhalep
   , m_bounds(std::make_shared<Trk::TrapezoidBounds>(minhalephi, maxhalephi, haleta))
 {}
 
-// construct annulus module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::AnnulusBounds* tbounds)
+// construct with bounds
+Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, const Trk::SurfaceBounds* tbounds)
   : Trk::Surface(htrans)
   , m_bounds(tbounds)
 {}
 
-// construct rectangle surface by giving RectangleBounds
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D& htrans, Trk::RectangleBounds* rbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(rbounds)
-{}
-
-// construct triangle surface by giving TriangleBounds
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::TriangleBounds* rbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(rbounds)
-{}
-
-// construct trapezoidal module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::TrapezoidBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct rotated trapezoidal module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::RotatedTrapezoidBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct diamond module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::DiamondBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct elliptic module with parameters
-Trk::PlaneSurface::PlaneSurface(const Amg::Transform3D & htrans, Trk::EllipseBounds* tbounds)
-  : Trk::Surface(htrans)
-  , m_bounds(tbounds)
-{}
-
-// construct module with shared boundaries - change to reference
+// construct module with shared boundaries
 Trk::PlaneSurface::PlaneSurface(
     const Amg::Transform3D & htrans,
     const Trk::SharedObject<const Trk::SurfaceBounds>& tbounds)
