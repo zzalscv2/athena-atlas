@@ -177,8 +177,9 @@ StatusCode TruthClosureCheck::compareGenVertex(HepMC::ConstGenVertexPtr origVert
 
   std::vector<HepMC::ConstGenParticlePtr> OriginalListOfParticlesOut = origVertex->particles_out();
   std::vector<HepMC::ConstGenParticlePtr> ResetListOfParticlesOut = resetVertex->particles_out();
-  std::sort(OriginalListOfParticlesOut.begin(), OriginalListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return HepMC::barcode(a) > HepMC::barcode(b); });
-  std::sort(ResetListOfParticlesOut.begin(), ResetListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return HepMC::barcode(a) > HepMC::barcode(b); });
+//AV: please remember that the best quantities to compare particles are physical quantities.  
+  std::sort(OriginalListOfParticlesOut.begin(), OriginalListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
+  std::sort(ResetListOfParticlesOut.begin(), ResetListOfParticlesOut.end(), [](auto& a, auto& b) -> bool{return a->momentum().pz() > b->momentum().pz(); });
 
   for ( std::vector<HepMC::ConstGenParticlePtr>::iterator originalPartOutIter(OriginalListOfParticlesOut.begin()), resetPartOutIter(ResetListOfParticlesOut.begin()); 
         originalPartOutIter != OriginalListOfParticlesOut.end() && resetPartOutIter != ResetListOfParticlesOut.end(); 
