@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -156,7 +156,8 @@ def LArOFCPhysCfg(flags,loadPhysAC=True):
 if __name__ == "__main__":
 
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    ConfigFlags=initConfigFlags()
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     addLArCalibFlags(ConfigFlags)
 
@@ -176,7 +177,7 @@ if __name__ == "__main__":
     ConfigFlags.LAr.doAlign=False
     ConfigFlags.Input.RunNumber=ConfigFlags.LArCalib.Input.RunNumbers[0]
     #ConfigFlags.Exec.OutputLevel=1
-
+    ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
     cfg=MainServicesCfg(ConfigFlags)
     cfg.merge(LArOFCPhysCfg(ConfigFlags))
