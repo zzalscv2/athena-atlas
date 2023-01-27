@@ -30,7 +30,7 @@ namespace LArSamples {
   class SimpleShape;
   class Residuals;
   
-  class DigitMonitor : public MonitorBase  
+  class ATLAS_NOT_THREAD_SAFE DigitMonitor : public MonitorBase  
   {
   
     public:

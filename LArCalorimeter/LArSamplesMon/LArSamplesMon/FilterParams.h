@@ -25,7 +25,7 @@ namespace LArSamples {
   class Data;
   class CellInfo;
   
-  struct ChannelSpec {
+  struct ATLAS_NOT_THREAD_SAFE ChannelSpec {
     ChannelSpec(CaloId cal, unsigned int ft, unsigned int s, unsigned int c) :
         calo(cal), feedThrough(ft), slot(s), channel(c) { }
     bool match(const CellInfo& info) const;
@@ -47,7 +47,7 @@ namespace LArSamples {
   };
 #endif
 
-  class FilterParams  {
+  class ATLAS_NOT_THREAD_SAFE FilterParams  {
   
    public:
    

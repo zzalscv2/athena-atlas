@@ -17,13 +17,14 @@
 #include <vector>
 
 #include "LArCafJobs/Definitions.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
 
   class AbsShape;
   class ShapeErrorData;
   
-  class OFC : public IndexRange {
+  class ATLAS_NOT_THREAD_SAFE OFC : public IndexRange {
   
    public:
    

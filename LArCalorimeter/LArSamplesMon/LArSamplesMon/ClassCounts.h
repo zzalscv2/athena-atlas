@@ -12,10 +12,11 @@
 
 #include "TString.h"
 #include <map>
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
   
-  class ClassCounts {
+  class ATLAS_NOT_THREAD_SAFE ClassCounts {
   
     public:
    

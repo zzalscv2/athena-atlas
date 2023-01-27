@@ -13,12 +13,13 @@
 #include "LArSamplesMon/CaloD3PDClass.h"
 #include "LArSamplesMon/Interface.h"
 #include "TString.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <map>
 
 namespace LArSamples {
 
-  class D3PDConverter : public CaloD3PDClass
+  class ATLAS_NOT_THREAD_SAFE D3PDConverter : public CaloD3PDClass
   {
 
     public:

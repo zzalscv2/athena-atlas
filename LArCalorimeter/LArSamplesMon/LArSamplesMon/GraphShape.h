@@ -29,7 +29,7 @@ namespace LArSamples {
     double time, value, error;
   };    
   
-  class GraphShape : public AbsShape {
+  class ATLAS_NOT_THREAD_SAFE GraphShape : public AbsShape {
   
    public:
    

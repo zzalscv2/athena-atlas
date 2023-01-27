@@ -10,12 +10,14 @@
 #ifndef LArSamples_HistoryIterator_H
 #define LArSamples_HistoryIterator_H
 
+#include "CxxUtils/checker_macros.h"
+
 namespace LArSamples {
   
   class Interface;
   class History;
   
-  class HistoryIterator  {
+  class ATLAS_NOT_THREAD_SAFE HistoryIterator  {
   
     public:
    
