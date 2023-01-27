@@ -545,8 +545,6 @@ def InDetTrackRecoOutputCfg(flags):
     if flags.InDet.Tracking.doStoreTrackSeeds:
         toESD += ["TrackCollection#SiSPSeedSegments"]
 
-    toESD += ["TrackCollection#SiSPSeededTracks"]
-
     if flags.InDet.Tracking.doTrackSegmentsPixel:
         toESD += ["TrackCollection#ResolvedPixelTracks"]
         if flags.InDet.doTruth:
