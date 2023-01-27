@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RingerSelectorTools_tools_onnx_Model_h 
@@ -23,7 +23,7 @@ namespace Ringer{
       public:
         
         /*! Constructor */ 
-        Model( std::string modelPath, AthONNX::IONNXRuntimeSvc *svc,
+        Model( const std::string& modelPath, AthONNX::IONNXRuntimeSvc *svc,
                float etmin, float etmax, float etamin, float etamax,
                unsigned barcode);
         

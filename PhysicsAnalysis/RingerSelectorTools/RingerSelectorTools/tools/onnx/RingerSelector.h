@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef RingerSelectorTools_tools_onnx_RingerSelector_h 
 #define RingerSelectorTools_tools_onnx_RingerSelector_h 
@@ -30,7 +30,7 @@ namespace Ringer {
       public:
     
         /** Standard constructor */
-        RingerSelector( std::string name );
+        RingerSelector( const std::string& name );
     
         /** Standard destructor */
         ~RingerSelector()=default;
@@ -39,7 +39,7 @@ namespace Ringer {
         /**
          * @brief read tunings from configuration file
          **/
-        StatusCode read_from( std::string, AthONNX::IONNXRuntimeSvc *);
+        StatusCode read_from( const std::string&, AthONNX::IONNXRuntimeSvc *);
 
 
         /**
@@ -74,7 +74,7 @@ namespace Ringer {
         /// @brief Get the list of paths inside of tenv
         std::vector<std::string> GetPaths(const std::string& input, TEnv& env);  
         /// @brief Get basepath from calib path
-        std::string GetBasePath(std::string &path);
+        std::string GetBasePath(const std::string &path);
 
     };
  
