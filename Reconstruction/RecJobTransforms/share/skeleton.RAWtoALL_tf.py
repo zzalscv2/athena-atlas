@@ -90,7 +90,7 @@ if hasattr(runArgs,"inputRDO_TRIGFile"):
     DQMonFlags.doLVL1CaloMon = False
     # Configure HLT output
     from TriggerJobOpts.HLTTriggerResultGetter import HLTTriggerResultGetter
-    hltOutput = HLTTriggerResultGetter()
+    hltOutput = HLTTriggerResultGetter(ConfigFlags)
     # Add Trigger menu metadata
     from RecExConfig.ObjKeyStore import objKeyStore
     if rec.doFileMetaData():
