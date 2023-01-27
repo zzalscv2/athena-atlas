@@ -16,6 +16,7 @@
 #include "TVectorD.h"
 #include <vector>
 #include <map>
+#include "CxxUtils/checker_macros.h"
 
 class TH1D;
 
@@ -24,7 +25,7 @@ namespace LArSamples
   class ShapeErrorData;
   
   
-  class Residual : public IndexRange
+  class ATLAS_NOT_THREAD_SAFE Residual : public IndexRange
   {
     public:
     
@@ -56,7 +57,7 @@ namespace LArSamples
       double m_adcMax, m_time;
   };
   
-  class ResidualCompare
+  class ATLAS_NOT_THREAD_SAFE ResidualCompare
   {
     public:
       ResidualCompare(int sampling) : m_sampling(sampling) { }
@@ -67,7 +68,7 @@ namespace LArSamples
   
   class ResidualCalculator;
   
-  class Residuals : public IndexRange
+  class ATLAS_NOT_THREAD_SAFE Residuals : public IndexRange
   {
     public:
       Residuals() { }
@@ -96,7 +97,7 @@ namespace LArSamples
   };
 
   
-  class ResidualCalculator : public IndexRange
+  class ATLAS_NOT_THREAD_SAFE ResidualCalculator : public IndexRange
   {
     public:
       

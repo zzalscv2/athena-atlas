@@ -13,10 +13,11 @@
 
 #include "LArSamplesMon/LArIdTranslatorHelper.h"
 #include "TString.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
 
-  class LArCellsEmptyMonitoring
+  class ATLAS_NOT_THREAD_SAFE LArCellsEmptyMonitoring
   {
   
     public:

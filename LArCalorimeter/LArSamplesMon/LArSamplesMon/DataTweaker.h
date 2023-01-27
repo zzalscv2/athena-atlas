@@ -12,7 +12,7 @@
 
 #include <map>
 #include "LArSamplesMon/Chi2Calc.h"
-
+#include "CxxUtils/checker_macros.h"
 
 namespace LArSamples {
   
@@ -20,7 +20,7 @@ namespace LArSamples {
   class EventData;
   class ScaledErrorData;
   
-  class DataTweaker  {
+  class ATLAS_NOT_THREAD_SAFE DataTweaker  {
   
    public:
    

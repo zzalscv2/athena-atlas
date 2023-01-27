@@ -29,7 +29,7 @@ namespace LArSamples {
   class EventData;
   class RunData;
 
-  class TreeAccessor : public Accessor, public PersistentAccessor {
+  class ATLAS_NOT_THREAD_SAFE TreeAccessor : public Accessor, public PersistentAccessor {
   
     public:
    

@@ -18,6 +18,7 @@
 #include "TVectorD.h"
 #include "LArCafJobs/Definitions.h"
 #include <vector>
+#include "CxxUtils/checker_macros.h"
 
 class TH2D;
 
@@ -27,7 +28,7 @@ namespace LArSamples {
   class ResidualCalculator;
   class Interface;
   
-  class TreeShapeErrorGetter : public AbsShapeErrorGetter {
+  class ATLAS_NOT_THREAD_SAFE TreeShapeErrorGetter : public AbsShapeErrorGetter {
   
     public:
       

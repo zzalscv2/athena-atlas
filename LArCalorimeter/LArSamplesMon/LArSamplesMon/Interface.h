@@ -33,7 +33,7 @@ namespace LArSamples {
   class DataTweaker;
   class AbsShapeErrorGetter;
 
-  class Interface : public Accessor {
+  class ATLAS_NOT_THREAD_SAFE Interface : public Accessor {
   
     public:
    

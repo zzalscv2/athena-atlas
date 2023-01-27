@@ -12,12 +12,14 @@
 
 #include "LArCafJobs/CaloId.h"
 #include "TString.h"
+#include "CxxUtils/checker_macros.h"
+
 
 namespace LArSamples {
   
   class Interface;
   
-  class Splitter  {
+  class ATLAS_NOT_THREAD_SAFE Splitter  {
   
     public:
    
