@@ -148,8 +148,8 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , st
     passFilter = passFilter && ( (m_minDecayRadiusQS < particle->end_vertex()->position().perp()) || (m_minDecayRadiusQS < particle->production_vertex()->position().perp()) );
     if (passFilter) {
       // Break loops
-      if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::barcode(particle->end_vertex()) )==used_vertices.end() ){
-        used_vertices.push_back( HepMC::barcode(particle->end_vertex()) );
+      if ( std::find( used_vertices.begin() , used_vertices.end() , particle->end_vertex()->id() )==used_vertices.end() ){
+        used_vertices.push_back( particle->end_vertex()->id() );
         for (auto pit: particle->end_vertex()->particles_out()){
           passFilter = passFilter && pass( pit , used_vertices );
           if (!passFilter) {
