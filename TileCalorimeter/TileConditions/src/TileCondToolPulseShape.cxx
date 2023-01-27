@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -38,7 +38,7 @@ StatusCode TileCondToolPulseShape::initialize() {
   ATH_MSG_DEBUG( "In initialize()" );
 
   //=== Initialize conditions data key with pulse shape
-  ATH_CHECK( m_calibPulseShapeKey.initialize() );
+  ATH_CHECK( m_pulseShapeKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
@@ -56,8 +56,8 @@ bool TileCondToolPulseShape::getPulseShapeYDY(unsigned int drawerIdx, unsigned i
                                               float time, float &y, float &dy,
                                               const EventContext &ctx) const {
 
-  SG::ReadCondHandle<TileCalibData<TileCalibDrawerFlt>> calibPulseShape(m_calibPulseShapeKey, ctx);
-  return calibPulseShape->getCalibDrawer(drawerIdx)->getYDY(channel, adc, time, y, dy);
+  SG::ReadCondHandle<TilePulse> pulseShape(m_pulseShapeKey, ctx);
+  return pulseShape->getPulseShapeYDY(drawerIdx, channel, adc, time, y, dy);
 }
 
 //
