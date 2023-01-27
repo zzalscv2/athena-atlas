@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
@@ -452,7 +452,7 @@ def muEFSAAlgSequence(ConfigFlags):
     #Run decoding again since we are using updated RoIs
     viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=efsaViewsMaker.InViewRoIs.path())
     ### get EF reco sequence ###    
-    muEFSARecoSequence, sequenceOut = muEFSARecoSequence( efsaViewsMaker.InViewRoIs, 'RoI' )
+    muEFSARecoSequence, sequenceOut = muEFSARecoSequence(muonflags, efsaViewsMaker.InViewRoIs, 'RoI' )
 
     muefSASequence = parOR("muEFSARecoSequence", [viewAlgs_MuonPRD, muEFSARecoSequence])
     efsaViewsMaker.ViewNodeName = muefSASequence.name()
@@ -514,7 +514,10 @@ def muEFCBAlgSequence(ConfigFlags):
     muonFilter.MuonContainerLocation = sequenceOutCB
 
     #inside-out reco sequence - runs only if filter is passed
-    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence( efcbViewsMaker.InViewRoIs, "RoI")
+    #Clone and replace offline flags so we can set muon trigger specific values
+    muonflags = ConfigFlags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon') 
+
+    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence(muonflags, efcbViewsMaker.InViewRoIs, "RoI")
     muonInsideOutSequence = seqAND("muonEFInsideOutSequence", [muonFilter,muonEFInsideOutRecoSequence])
 
     #combine outside-in and inside-out sequences
@@ -673,7 +676,7 @@ def muEFSAFSAlgSequence(ConfigFlags):
     muonflags = ConfigFlags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon') 
     from .MuonRecoSequences import muEFSARecoSequence, muonDecodeCfg
     viewAlgs_MuonPRD = algorithmCAToGlobalWrapper(muonDecodeCfg,muonflags,RoIs=efsafsInputMaker.InViewRoIs.path())
-    muEFSAFSRecoSequence, sequenceOut = muEFSARecoSequence( efsafsInputMaker.InViewRoIs,'FS' )
+    muEFSAFSRecoSequence, sequenceOut = muEFSARecoSequence(muonflags, efsafsInputMaker.InViewRoIs,'FS' )
 
     muEFFSRecoSequence = parOR("muEFSAFSRecoSequence",[viewAlgs_MuonPRD, muEFSAFSRecoSequence])
     efsafsInputMaker.ViewNodeName = muEFFSRecoSequence.name()
@@ -730,7 +733,9 @@ def muEFCBFSAlgSequence(ConfigFlags):
     muonFilter.MuonContainerLocation = sequenceOutCB
 
     #If filter passed
-    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence( efcbfsInputMaker.InViewRoIs, "FS" )
+    #Clone and replace offline flags so we can set muon trigger specific values
+    muonflags = ConfigFlags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon') 
+    muonEFInsideOutRecoSequence, sequenceOutInsideOut = muEFInsideOutRecoSequence(muonflags, efcbfsInputMaker.InViewRoIs, "FS" )
     muonInsideOutSequence =  seqAND("muonEFCBFSInsideOutSequence", [muonFilter,muonEFInsideOutRecoSequence])
 
     #combine O-I and I-O seqs
@@ -830,7 +835,9 @@ def efLateMuAlgSequence(ConfigFlags):
     #ID fast tracking
     muFastIDRecoSequence = muonIDFastTrackingSequence( eflateViewsMaker.InViewRoIs,"Late" )
     #inside-out reco sequence
-    muonEFInsideOutRecoSequence, sequenceOut = muEFInsideOutRecoSequence( eflateViewsMaker.InViewRoIs, "LateMu")
+    #Clone and replace offline flags so we can set muon trigger specific values
+    muonflags = ConfigFlags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon') 
+    muonEFInsideOutRecoSequence, sequenceOut = muEFInsideOutRecoSequence(muonflags, eflateViewsMaker.InViewRoIs, "LateMu")
 
     lateMuRecoSequence = parOR("lateMuonRecoSequence", [viewAlgs_MuonPRD, muFastIDRecoSequence, muonEFInsideOutRecoSequence])
 

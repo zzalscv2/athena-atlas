@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 ### JobOptions to run MuGirlTag in xAOD
 
@@ -21,6 +21,7 @@ from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 def MuonInsideOutRecoTool( name="MuonInsideOutRecoTool", **kwargs ):
    if ConfigFlags.Muon.MuonTrigger:
       kwargs.setdefault("VertexContainer", "")
+      kwargs.setdefault("MuonLayerAmbiguitySolverTool", getPublicTool("MuonLayerAmbiguitySolverTool"))
    import MuonCombinedRecExample.CombinedMuonTrackSummary  # noqa: F401 (import side-effects)
    from AthenaCommon.AppMgr import ToolSvc
    kwargs.setdefault("TrackSummaryTool", ToolSvc.CombinedMuonTrackSummary)
@@ -39,6 +40,9 @@ def MuonLayerSegmentMatchingTool( name="MuonLayerSegmentMatchingTool",**kwargs):
    return CfgMgr.Muon__MuonLayerSegmentMatchingTool(name,**kwargs)
 
 def MuonLayerAmbiguitySolverTool( name="MuonLayerAmbiguitySolverTool",**kwargs):
+   if ConfigFlags.Muon.MuonTrigger:
+      from AthenaCommon.CfgGetter import getPrivateTool
+      kwargs.setdefault("MuonSegmentTrackBuilder",  getPrivateTool("MooTrackBuilderTemplate"))
    return CfgMgr.Muon__MuonLayerAmbiguitySolverTool(name,**kwargs)
 
 def DCMathStauSegmentMaker( name="DCMathStauSegmentMaker", **kwargs ):
