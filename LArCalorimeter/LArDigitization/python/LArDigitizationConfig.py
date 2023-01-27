@@ -156,7 +156,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
     acc.setPrivateTools(LArPileUpTool(name, **kwargs))
     return acc
 
-def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlgCfg", **kwargs):
+def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
     """Return ComponentAccumulator with configured LArHitEMapToDigitAlg"""
     acc = LArGMCfg(flags)
 
