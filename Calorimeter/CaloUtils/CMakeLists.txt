@@ -14,9 +14,6 @@ atlas_add_library( CaloUtilsLib CaloUtils/*.h CaloUtils/*.icc src/*.h src/*.cxx
    LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib CxxUtils FourMom GaudiKernel Navigation StoreGateLib xAODCaloEvent AthLinks
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} Identifier SGTools TestTools )
 
-atlas_add_component( CaloUtils src/components/*.cxx
-   LINK_LIBRARIES CaloUtilsLib )
-
 atlas_add_dictionary( CaloUtilsDict
    CaloUtils/CaloUtilsDict.h CaloUtils/selection.xml
    LINK_LIBRARIES CaloUtilsLib )
@@ -50,14 +47,6 @@ atlas_add_test( exceptions_test
    SOURCES test/exceptions_test.cxx
    LINK_LIBRARIES CaloUtilsLib )
 
-atlas_add_test( CaloTowerStore_test
-   SCRIPT athena.py CaloUtils/CaloTowerStore_test.py
-   LOG_IGNORE_PATTERN "Reading file|Unable to locate catalog|Cache alignment|MetaReader|AutoConfiguration|IOVDbSvc +INFO"
-   PROPERTIES TIMEOUT 500 )
-
-atlas_add_test( ToolWithConstants_test
-   SCRIPT test/ToolWithConstants_test.py
-   LOG_IGNORE_PATTERN "no dictionary for|by peeking into|Current filenames:|IOVDbSvc +INFO|Added successfully Conversion|DetDescrCnvSvc +INFO|GeoModelSvc +INFO|IOVSvc +INFO|with default tag|^Py:MetaReader" )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.txt share/*.py )

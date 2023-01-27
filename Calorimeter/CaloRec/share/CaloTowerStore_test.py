@@ -33,7 +33,7 @@ IOVDbSvc().GlobalTag = 'OFLCOND-SDR-BS14T-IBL-06'
 from AthenaCommon.AlgSequence import AlgSequence
 topSequence = AlgSequence()
 
-from CaloUtils.CaloUtilsConf import CaloTowerStoreTestAlg
+from CaloRec.CaloRecConf import CaloTowerStoreTestAlg
 topSequence += CaloTowerStoreTestAlg ('towertest')
 
 theApp.EvtMax = 1

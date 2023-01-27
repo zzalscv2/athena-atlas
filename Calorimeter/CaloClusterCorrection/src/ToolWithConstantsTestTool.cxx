@@ -9,7 +9,7 @@
  */
 
 
-#include "CaloUtils/ToolWithConstantsTestTool.h"
+#include "CaloClusterCorrection/ToolWithConstantsTestTool.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "AthenaKernel/IRCUSvc.h"
 #include "AthenaKernel/ClassID_traits.h"
