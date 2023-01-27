@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONCLUSTERSEGMENTFINDER_H
@@ -49,9 +49,10 @@ namespace Trk {
 namespace Muon {
 
     struct candEvent {
-        candEvent() {
-            m_segTrkColl = std::make_unique<TrackCollection>();
-            m_resolvedTracks = std::make_unique<TrackCollection>();
+        candEvent()
+          : m_segTrkColl (std::make_unique<TrackCollection>()),
+            m_resolvedTracks (std::make_unique<TrackCollection>())
+        {
         }
         ~candEvent() = default;
 
