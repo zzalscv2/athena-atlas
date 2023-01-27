@@ -424,7 +424,8 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
   //RoI preparation/update
 
   if (m_standaloneMode) {
-    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(true);
+    //the default fullscan TrigRoiDescriptor settings for beamspot width (z-range) are incorrect
+    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(0, -4.5, 4.5, 0, -M_PI, M_PI, 0, -168.0, 168.0);
 
     ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
 
