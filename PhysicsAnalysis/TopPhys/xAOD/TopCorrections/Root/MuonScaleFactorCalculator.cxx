@@ -68,13 +68,25 @@ namespace top {
     m_reco_qcd_template_DOWN("MUON_EFF_RECO_QCDTEMPLATE__1down"),
     m_reco_supression_scale_UP("MUON_EFF_RECO_SUPRESSIONSCALE__1up"),
     m_reco_supression_scale_DOWN("MUON_EFF_RECO_SUPRESSIONSCALE__1down"),
-    m_reco_sys_UP("MUON_EFF_RECO_SYS__1up"),
-    m_reco_sys_DOWN("MUON_EFF_RECO_SYS__1down"),
     m_reco_truth_UP("MUON_EFF_RECO_TRUTH__1up"),
     m_reco_truth_DOWN("MUON_EFF_RECO_TRUTH__1down"),
     m_reco_truth_lowpt_UP("MUON_EFF_RECO_TRUTH_LOWPT__1up"),
     m_reco_truth_lowpt_DOWN("MUON_EFF_RECO_TRUTH_LOWPT__1down"),
-
+    m_reco_cr1_UP("MUON_EFF_RECO_CR1__1up"),
+    m_reco_cr1_DOWN("MUON_EFF_RECO_CR1__1down"),
+    m_reco_cr2_UP("MUON_EFF_RECO_CR2__1up"),
+    m_reco_cr2_DOWN("MUON_EFF_RECO_CR2__1down"),
+    m_reco_cr3_UP("MUON_EFF_RECO_CR3__1up"),
+    m_reco_cr3_DOWN("MUON_EFF_RECO_CR3__1down"),
+    m_reco_higheta_probeip_UP("MUON_EFF_RECO_HIGHETA_PROBEIP__1up"),
+    m_reco_higheta_probeip_DOWN("MUON_EFF_RECO_HIGHETA_PROBEIP__1down"),
+    m_reco_higheta_probeiso_UP("MUON_EFF_RECO_HIGHETA_PROBEISO__1up"),
+    m_reco_higheta_probeiso_DOWN("MUON_EFF_RECO_HIGHETA_PROBEISO__1down"),
+    m_reco_tagpt_UP("MUON_EFF_RECO_TAGPT__1up"),
+    m_reco_tagpt_DOWN("MUON_EFF_RECO_TAGPT__1down"),
+    m_reco_extrapolation_UP("MUON_EFF_RECO_EXTRAPOLATION__1up"),
+    m_reco_extrapolation_DOWN("MUON_EFF_RECO_EXTRAPOLATION__1down"),
+    
     m_reco_stat_lowpt_UP("MUON_EFF_RECO_STAT_LOWPT__1up"),
     m_reco_stat_lowpt_DOWN("MUON_EFF_RECO_STAT_LOWPT__1down"),
     m_reco_syst_lowpt_UP("MUON_EFF_RECO_SYS_LOWPT__1up"),
@@ -86,6 +98,25 @@ namespace top {
     m_iso_stat_DOWN("MUON_EFF_ISO_STAT__1down"),
     m_iso_syst_UP("MUON_EFF_ISO_SYS__1up"),
     m_iso_syst_DOWN("MUON_EFF_ISO_SYS__1down"),
+    
+    m_iso_bkg_fraction_UP("MUON_EFF_ISO_BKGFRACTION__1up"),
+    m_iso_bkg_fraction_DOWN("MUON_EFF_ISO_BKGFRACTION__1down"),
+    m_iso_drmuj_UP("MUON_EFF_ISO_DRMUJ__1up"),
+    m_iso_drmuj_DOWN("MUON_EFF_ISO_DRMUJ__1down"),
+    m_iso_lumi_uncert_UP("MUON_EFF_ISO_LUMIUNCERT__1up"),
+    m_iso_lumi_uncert_DOWN("MUON_EFF_ISO_LUMIUNCERT__1down"),
+    m_iso_mc_xsec_UP("MUON_EFF_ISO_MCXSEC__1up"),
+    m_iso_mc_xsec_DOWN("MUON_EFF_ISO_MCXSEC__1down"),
+    m_iso_mllwindow_UP("MUON_EFF_ISO_MLLWINDOW__1up"),
+    m_iso_mllwindow_DOWN("MUON_EFF_ISO_MLLWINDOW__1down"),
+    m_iso_qcd_template_UP("MUON_EFF_ISO_QCDTEMPLATE__1up"),
+    m_iso_qcd_template_DOWN("MUON_EFF_ISO_QCDTEMPLATE__1down"),
+    m_iso_sherpa_powheg_UP("MUON_EFF_ISO_SHERPA_POWHEG__1up"),
+    m_iso_sherpa_powheg_DOWN("MUON_EFF_ISO_SHERPA_POWHEG__1down"),
+    m_iso_supression_scale_UP("MUON_EFF_ISO_SUPRESSIONSCALE__1up"),
+    m_iso_supression_scale_DOWN("MUON_EFF_ISO_SUPRESSIONSCALE__1down"),
+    m_iso_extrapolation_UP("MUON_EFF_ISO_EXTRAPOLATION__1up"),
+    m_iso_extrapolation_DOWN("MUON_EFF_ISO_EXTRAPOLATION__1down"),
 
     m_TTVA_stat_UP("MUON_EFF_TTVA_STAT__1up"),
     m_TTVA_stat_DOWN("MUON_EFF_TTVA_STAT__1down"),
@@ -101,7 +132,9 @@ namespace top {
     m_TTVA_qcd_template_UP("MUON_EFF_TTVA_QCDTEMPLATE__1up"),
     m_TTVA_qcd_template_DOWN("MUON_EFF_TTVA_QCDTEMPLATE__1down"),
     m_TTVA_supression_scale_UP("MUON_EFF_TTVA_SUPRESSIONSCALE__1up"),
-    m_TTVA_supression_scale_DOWN("MUON_EFF_TTVA_SUPRESSIONSCALE__1down") {
+    m_TTVA_supression_scale_DOWN("MUON_EFF_TTVA_SUPRESSIONSCALE__1down"),
+    m_TTVA_extrapolation_UP("MUON_EFF_TTVA_EXTRAPOLATION__1up"),
+    m_TTVA_extrapolation_DOWN("MUON_EFF_TTVA_EXTRAPOLATION__1down"){
     declareProperty("config", m_config);
   }
 
@@ -116,7 +149,15 @@ namespace top {
     if (m_config->muonBreakDownSystematics()) {
       implemented_systematics = {
         "MUON_EFF_ISO_STAT",
-        "MUON_EFF_ISO_SYS",
+        "MUON_EFF_ISO_BKGFRACTION",
+        "MUON_EFF_ISO_DRMUJ",
+        "MUON_EFF_ISO_LUMIUNCERT",
+        "MUON_EFF_ISO_MCXSEC",
+        "MUON_EFF_ISO_MLLWINDOW",
+        "MUON_EFF_ISO_QCDTEMPLATE",
+        "MUON_EFF_ISO_SHERPA_POWHEG",
+        "MUON_EFF_ISO_SUPRESSIONSCALE",
+        "MUON_EFF_ISO_EXTRAPOLATION",
         "MUON_EFF_RECO_BKGFRACTION",
         "MUON_EFF_RECO_FITMODEL_LOWPT",
         "MUON_EFF_RECO_LUMIUNCERT",
@@ -128,7 +169,6 @@ namespace top {
         "MUON_EFF_RECO_STAT",
         "MUON_EFF_RECO_STAT_LOWPT",
         "MUON_EFF_RECO_SUPRESSIONSCALE",
-        "MUON_EFF_RECO_SYS",
         "MUON_EFF_RECO_TRUTH",
         "MUON_EFF_RECO_TRUTH_LOWPT",
         "MUON_EFF_RECO_CR1",
@@ -137,12 +177,14 @@ namespace top {
         "MUON_EFF_RECO_HIGHETA_PROBEIP",
         "MUON_EFF_RECO_HIGHETA_PROBEISO",
         "MUON_EFF_RECO_TAGPT",
+        "MUON_EFF_RECO_EXTRAPOLATION",
         "MUON_EFF_TTVA_BKGFRACTION",
         "MUON_EFF_TTVA_LUMIUNCERT",
         "MUON_EFF_TTVA_MCXSEC",
         "MUON_EFF_TTVA_QCDTEMPLATE",
         "MUON_EFF_TTVA_STAT",
         "MUON_EFF_TTVA_SUPRESSIONSCALE",
+        "MUON_EFF_TTVA_EXTRAPOLATION",
         "MUON_EFF_TrigStatUncertainty",
         "MUON_EFF_TrigSystUncertainty",
       };
@@ -645,8 +687,49 @@ namespace top {
     static SG::AuxElement::Decorator<float> iso_sf_loose_decor_stat_down(m_decor_isoSF_loose + "_STAT_DOWN");
     static SG::AuxElement::Decorator<float> iso_sf_loose_decor_syst_up(m_decor_isoSF_loose + "_SYST_UP");
     static SG::AuxElement::Decorator<float> iso_sf_loose_decor_syst_down(m_decor_isoSF_loose + "_SYST_DOWN");
+    
+    //breakdown
+    static SG::AuxElement::Decorator<float> iso_sf_decor_bkg_fraction_up(m_decor_isoSF + "_BKG_FRACTION_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_bkg_fraction_down(m_decor_isoSF + "_BKG_FRACTION_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_drmuj_up(m_decor_isoSF + "_DRMUJ_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_drmuj_down(m_decor_isoSF + "_DRMUJ_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_lumi_uncert_up(m_decor_isoSF + "_LUMI_UNCERT_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_lumi_uncert_down(m_decor_isoSF + "_LUMI_UNCERT_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_mc_xsec_up(m_decor_isoSF + "_MC_XSEC_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_mc_xsec_down(m_decor_isoSF + "_MC_XSEC_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_mllwindow_up(m_decor_isoSF + "_MLLWINDOW_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_mllwindow_down(m_decor_isoSF + "_MLLWINDOW_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_qcd_template_up(m_decor_isoSF + "_QCD_TEMPLATE_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_qcd_template_down(m_decor_isoSF + "_QCD_TEMPLATE_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_sherpa_powheg_up(m_decor_isoSF + "_SHERPA_POWHEG_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_sherpa_powheg_down(m_decor_isoSF + "_SHERPA_POWHEG_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_supression_scale_up(m_decor_isoSF + "_SUPRESSION_SCALE_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_supression_scale_down(m_decor_isoSF + "_SUPRESSION_SCALE_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_extrapolation_up(m_decor_isoSF + "_EXTRAPOLATION_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_decor_extrapolation_down(m_decor_isoSF + "_EXTRAPOLATION_DOWN");
+
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_bkg_fraction_up(m_decor_isoSF_loose + "_BKG_FRACTION_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_bkg_fraction_down(m_decor_isoSF_loose + "_BKG_FRACTION_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_drmuj_up(m_decor_isoSF_loose + "_DRMUJ_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_drmuj_down(m_decor_isoSF_loose + "_DRMUJ_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_lumi_uncert_up(m_decor_isoSF_loose + "_LUMI_UNCERT_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_lumi_uncert_down(m_decor_isoSF_loose + "_LUMI_UNCERT_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_mc_xsec_up(m_decor_isoSF_loose + "_MC_XSEC_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_mc_xsec_down(m_decor_isoSF_loose + "_MC_XSEC_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_mllwindow_up(m_decor_isoSF_loose + "_MLLWINDOW_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_mllwindow_down(m_decor_isoSF_loose + "_MLLWINDOW_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_qcd_template_up(m_decor_isoSF_loose + "_QCD_TEMPLATE_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_qcd_template_down(m_decor_isoSF_loose + "_QCD_TEMPLATE_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_sherpa_powheg_up(m_decor_isoSF_loose + "_SHERPA_POWHEG_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_sherpa_powheg_down(m_decor_isoSF_loose + "_SHERPA_POWHEG_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_supression_scale_up(m_decor_isoSF_loose + "_SUPRESSION_SCALE_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_supression_scale_down(m_decor_isoSF_loose + "_SUPRESSION_SCALE_DOWN");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_extrapolation_up(m_decor_isoSF_loose + "_EXTRAPOLATION_UP");
+    static SG::AuxElement::Decorator<float> iso_sf_loose_decor_extrapolation_down(m_decor_isoSF_loose + "_EXTRAPOLATION_DOWN");
+
 
     if (m_do_muon_isolation_SFs) {
+      
       ///-- Stat UP --///
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,
                                  m_iso_stat_UP, muon,
@@ -655,14 +738,49 @@ namespace top {
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,
                                  m_iso_stat_DOWN, muon,
                                  iso_sf_decor_stat_down);
-      ///-- Syst UP --///
-      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,
-                                 m_iso_syst_UP, muon,
-                                 iso_sf_decor_syst_up);
-      ///-- Syst DOWN --///
-      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,
-                                 m_iso_syst_DOWN, muon,
-                                 iso_sf_decor_syst_down);
+                                 
+      if (m_config->muonBreakDownSystematics()) 
+      {
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_bkg_fraction_UP,muon,iso_sf_decor_bkg_fraction_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_bkg_fraction_DOWN,muon,iso_sf_decor_bkg_fraction_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_drmuj_UP,muon,iso_sf_decor_drmuj_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_drmuj_DOWN,muon,iso_sf_decor_drmuj_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_lumi_uncert_UP,muon,iso_sf_decor_lumi_uncert_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_lumi_uncert_DOWN,muon,iso_sf_decor_lumi_uncert_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_mc_xsec_UP,muon,iso_sf_decor_mc_xsec_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_mc_xsec_DOWN,muon,iso_sf_decor_mc_xsec_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_mllwindow_UP,muon,iso_sf_decor_mllwindow_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_mllwindow_DOWN,muon,iso_sf_decor_mllwindow_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_qcd_template_UP,muon,iso_sf_decor_qcd_template_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_qcd_template_DOWN,muon,iso_sf_decor_qcd_template_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_sherpa_powheg_UP,muon,iso_sf_decor_sherpa_powheg_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_sherpa_powheg_DOWN,muon,iso_sf_decor_sherpa_powheg_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_supression_scale_UP,muon,iso_sf_decor_supression_scale_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_supression_scale_DOWN,muon,iso_sf_decor_supression_scale_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_extrapolation_UP,muon,iso_sf_decor_extrapolation_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,m_iso_extrapolation_DOWN,muon,iso_sf_decor_extrapolation_down);
+      }
+      else
+      {
+        ///-- Syst UP --///
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,
+                                   m_iso_syst_UP, muon,
+                                   iso_sf_decor_syst_up);
+        ///-- Syst DOWN --///
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolIso,
+                                   m_iso_syst_DOWN, muon,
+                                   iso_sf_decor_syst_down);
+      }
+      
+      
     } else {
       // If we aren't using muon isolation then still
       // decorate with isolation SFs of 1.0
@@ -681,14 +799,47 @@ namespace top {
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,
                                  m_iso_stat_DOWN, muon,
                                  iso_sf_loose_decor_stat_down);
-      ///-- Syst UP --///
-      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,
-                                 m_iso_syst_UP, muon,
-                                 iso_sf_loose_decor_syst_up);
-      ///-- Syst DOWN --///
-      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,
-                                 m_iso_syst_DOWN, muon,
-                                 iso_sf_loose_decor_syst_down);
+                                 
+      if (m_config->muonBreakDownSystematics()) 
+      {
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_bkg_fraction_UP,muon,iso_sf_loose_decor_bkg_fraction_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_bkg_fraction_DOWN,muon,iso_sf_loose_decor_bkg_fraction_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_drmuj_UP,muon,iso_sf_loose_decor_drmuj_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_drmuj_DOWN,muon,iso_sf_loose_decor_drmuj_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_lumi_uncert_UP,muon,iso_sf_loose_decor_lumi_uncert_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_lumi_uncert_DOWN,muon,iso_sf_loose_decor_lumi_uncert_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_mc_xsec_UP,muon,iso_sf_loose_decor_mc_xsec_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_mc_xsec_DOWN,muon,iso_sf_loose_decor_mc_xsec_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_mllwindow_UP,muon,iso_sf_loose_decor_mllwindow_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_mllwindow_DOWN,muon,iso_sf_loose_decor_mllwindow_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_qcd_template_UP,muon,iso_sf_loose_decor_qcd_template_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_qcd_template_DOWN,muon,iso_sf_loose_decor_qcd_template_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_sherpa_powheg_UP,muon,iso_sf_loose_decor_sherpa_powheg_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_sherpa_powheg_DOWN,muon,iso_sf_loose_decor_sherpa_powheg_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_supression_scale_UP,muon,iso_sf_loose_decor_supression_scale_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_supression_scale_DOWN,muon,iso_sf_loose_decor_supression_scale_down);
+        
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_extrapolation_UP,muon,iso_sf_loose_decor_extrapolation_up);
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,m_iso_extrapolation_DOWN,muon,iso_sf_loose_decor_extrapolation_down);
+      }
+      else
+      {
+        ///-- Syst UP --///
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,
+                                   m_iso_syst_UP, muon,
+                                   iso_sf_loose_decor_syst_up);
+        ///-- Syst DOWN --///
+        this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolLooseIso,
+                                   m_iso_syst_DOWN, muon,
+                                   iso_sf_loose_decor_syst_down);
+      }
     } else {
       // If we aren't using muon isolation then still
       // decorate with isolation SFs of 1.0
@@ -714,7 +865,14 @@ namespace top {
     static SG::AuxElement::Decorator<float> TTVA_decor_qcd_template_down(m_decor_TTVA + "_QCD_TEMPLATE_DOWN");
     static SG::AuxElement::Decorator<float> TTVA_decor_supression_scale_up(m_decor_TTVA + "_SUPRESSION_SCALE_UP");
     static SG::AuxElement::Decorator<float> TTVA_decor_supression_scale_down(m_decor_TTVA + "_SUPRESSION_SCALE_DOWN");
-
+    static SG::AuxElement::Decorator<float> TTVA_decor_extrapolation_up(m_decor_TTVA + "_EXTRAPOLATION_UP");
+    static SG::AuxElement::Decorator<float> TTVA_decor_extrapolation_down(m_decor_TTVA + "_EXTRAPOLATION_DOWN");
+    
+    this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
+                                 m_TTVA_stat_UP, muon, TTVA_decor_stat_up);
+    this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
+                                 m_TTVA_stat_DOWN, muon, TTVA_decor_stat_down);
+                                 
     if (m_config->muonBreakDownSystematics()) {
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
                                  m_TTVA_stat_UP, muon, TTVA_decor_stat_up);
@@ -740,11 +898,11 @@ namespace top {
                                  m_TTVA_supression_scale_UP, muon, TTVA_decor_supression_scale_up);
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
                                  m_TTVA_supression_scale_DOWN, muon, TTVA_decor_supression_scale_down);
+      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
+                                 m_TTVA_extrapolation_UP, muon, TTVA_decor_extrapolation_up);
+      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
+                                 m_TTVA_extrapolation_DOWN, muon, TTVA_decor_extrapolation_down);
     } else {
-      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
-                                 m_TTVA_stat_UP, muon, TTVA_decor_stat_up);
-      this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
-                                 m_TTVA_stat_DOWN, muon, TTVA_decor_stat_down);
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
                                  m_TTVA_syst_UP, muon, TTVA_decor_syst_up);
       this->decorateEfficiencySF(m_muonEfficiencyCorrectionsToolTTVA,
@@ -832,11 +990,6 @@ namespace top {
     const static SG::AuxElement::Decorator<float> id_sf_decor_supression_scale_down(m_decor_idSF + "_SUPRESSION_SCALE_DOWN");
     const static SG::AuxElement::Decorator<float> id_sf_loose_decor_supression_scale_down(m_decor_idSF_loose + "_SUPRESSION_SCALE_DOWN");
 
-    const static SG::AuxElement::Decorator<float> id_sf_decor_sys_up(m_decor_idSF + "_SYS_UP");
-    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_sys_up(m_decor_idSF_loose + "_SYS_UP");
-    const static SG::AuxElement::Decorator<float> id_sf_decor_sys_down(m_decor_idSF + "_SYS_DOWN");
-    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_sys_down(m_decor_idSF_loose + "_SYS_DOWN");
-
     const static SG::AuxElement::Decorator<float> id_sf_decor_truth_up(m_decor_idSF + "_TRUTH_UP");
     const static SG::AuxElement::Decorator<float> id_sf_loose_decor_truth_up(m_decor_idSF_loose + "_TRUTH_UP");
     const static SG::AuxElement::Decorator<float> id_sf_decor_truth_down(m_decor_idSF + "_TRUTH_DOWN");
@@ -882,33 +1035,39 @@ namespace top {
     const static SG::AuxElement::Decorator<float> id_sf_decor_tagpt_down(m_decor_idSF + "_TAGPT_DOWN");
     const static SG::AuxElement::Decorator<float> id_sf_loose_decor_tagpt_down(m_decor_idSF_loose + "_TAGPT_DOWN");
     
-    if (m_config->muonBreakDownSystematics()) {
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+    const static SG::AuxElement::Decorator<float> id_sf_decor_extrapolation_up(m_decor_idSF + "_EXTRAPOLATION_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_extrapolation_up(m_decor_idSF_loose + "_EXTRAPOLATION_UP");
+    const static SG::AuxElement::Decorator<float> id_sf_decor_extrapolation_down(m_decor_idSF + "_EXTRAPOLATION_DOWN");
+    const static SG::AuxElement::Decorator<float> id_sf_loose_decor_extrapolation_down(m_decor_idSF_loose + "_EXTRAPOLATION_DOWN");
+    
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_stat_UP, muon,
                                    id_sf_decor_stat_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_UP, muon,
-                                   id_sf_loose_decor_stat_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_stat_DOWN, muon,
-                                   id_sf_decor_stat_down);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_DOWN, muon,
-                                   id_sf_loose_decor_stat_down);
-
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                 m_reco_stat_UP, muon,
+                                 id_sf_loose_decor_stat_up);
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                 m_reco_stat_DOWN, muon,
+                                 id_sf_decor_stat_down);
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                 m_reco_stat_DOWN, muon,
+                                 id_sf_loose_decor_stat_down);
+                                
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_stat_lowpt_UP, muon,
                                    id_sf_decor_stat_lowpt_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_lowpt_UP, muon,
-                                   id_sf_loose_decor_stat_lowpt_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_stat_lowpt_DOWN, muon,
-                                   id_sf_decor_stat_lowpt_down);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_lowpt_DOWN, muon,
-                                   id_sf_loose_decor_stat_lowpt_down);
-
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                 m_reco_stat_lowpt_UP, muon,
+                                 id_sf_loose_decor_stat_lowpt_up);
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                 m_reco_stat_lowpt_DOWN, muon,
+                                 id_sf_decor_stat_lowpt_down);
+    this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                 m_reco_stat_lowpt_DOWN, muon,
+                                 id_sf_loose_decor_stat_lowpt_down);
+                                   
+    if (m_config->muonBreakDownSystematics()) {
+      
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_bkg_fraction_UP, muon,
                                    id_sf_decor_bkg_fraction_up);
@@ -1027,19 +1186,6 @@ namespace top {
                                    id_sf_loose_decor_supression_scale_down);
 
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_sys_UP, muon,
-                                   id_sf_decor_sys_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_sys_UP, muon,
-                                   id_sf_loose_decor_sys_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_sys_DOWN, muon,
-                                   id_sf_decor_sys_down);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_sys_DOWN, muon,
-                                   id_sf_loose_decor_sys_down);
-
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_truth_UP, muon,
                                    id_sf_decor_truth_up);
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
@@ -1142,22 +1288,20 @@ namespace top {
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
                                    m_reco_tagpt_DOWN, muon,
                                    id_sf_loose_decor_tagpt_down);
+                                   
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_extrapolation_UP, muon,
+                                   id_sf_decor_extrapolation_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_extrapolation_UP, muon,
+                                   id_sf_loose_decor_extrapolation_up);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
+                                   m_reco_extrapolation_DOWN, muon,
+                                   id_sf_decor_extrapolation_down);
+      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
+                                   m_reco_extrapolation_DOWN, muon,
+                                   id_sf_loose_decor_extrapolation_down);
     } else {
-      ///-- Stat UP --///
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_stat_UP, muon,
-                                   id_sf_decor_stat_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_UP, muon,
-                                   id_sf_loose_decor_stat_up);
-
-      ///-- Stat DOWN --///
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_stat_DOWN, muon,
-                                   id_sf_decor_stat_down);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_DOWN, muon,
-                                   id_sf_loose_decor_stat_down);
       ///-- Syst UP --///
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_syst_UP, muon,
@@ -1173,22 +1317,6 @@ namespace top {
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
                                    m_reco_syst_DOWN, muon,
                                    id_sf_loose_decor_syst_down);
-
-      ///-- Stat UP --///
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_stat_lowpt_UP, muon,
-                                   id_sf_decor_stat_lowpt_up);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_lowpt_UP, muon,
-                                   id_sf_loose_decor_stat_lowpt_up);
-
-      ///-- Stat DOWN --///
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
-                                   m_reco_stat_lowpt_DOWN, muon,
-                                   id_sf_decor_stat_lowpt_down);
-      this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsToolLoose,
-                                   m_reco_stat_lowpt_DOWN, muon,
-                                   id_sf_loose_decor_stat_lowpt_down);
       ///-- Syst UP --///
       this->decorateIDSFandRecoEff(m_muonEfficiencyCorrectionsTool,
                                    m_reco_syst_lowpt_UP, muon,

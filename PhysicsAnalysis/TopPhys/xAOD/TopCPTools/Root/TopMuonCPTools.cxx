@@ -282,7 +282,7 @@ namespace top {
   }
 
   CP::IMuonEfficiencyScaleFactors*
-  MuonCPTools::setupMuonSFTool(const std::string& name, const std::string& WP, const bool isIso) {
+  MuonCPTools::setupMuonSFTool(const std::string& name, const std::string& WP, const bool /*isIso*/) {
     CP::IMuonEfficiencyScaleFactors* tool = nullptr;
     if (asg::ToolStore::contains<CP::IMuonEfficiencyScaleFactors>(name)) {
       tool = asg::ToolStore::get<CP::MuonEfficiencyScaleFactors>(name);
@@ -297,14 +297,11 @@ namespace top {
                    "Failed to set CustomInputFolder property for MuonEfficiencyScaleFactors tool");
       }
       if (m_config->isRun3()) {
-        top::check(asg::setProperty(tool, "CalibrationRelease", "221121_Preliminary_r22run3"),
+        top::check(asg::setProperty(tool, "CalibrationRelease", "230123_Preliminary_r22run3"),
                    "Failed to set CalibrationRelease property for MuonEfficiencyScaleFactors tool");
       }
-
-      if (!isIso) {
-        top::check(asg::setProperty(tool, "BreakDownSystematics", m_config->muonBreakDownSystematics()), 
+      top::check(asg::setProperty(tool, "BreakDownSystematics", m_config->muonBreakDownSystematics()), 
                   "Failed to set BreakDownSystematics for " + name + " tool");
-      }
       top::check(tool->initialize(),
                  "Failed to set initialize " + name);
     }
