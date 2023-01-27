@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from AthenaConfiguration.Enums import Format
@@ -228,11 +227,11 @@ def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', config
     if getAlgProp('PrescaleDAQROBAccess') >= 1 and flags.Input.Format is Format.BS and configBS:
         # Add BS converter for DAQ L1Topo RDO collection
         from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRDOCollectionBSCnvCfg
-        CAtoGlobalWrapper(L1TopoRDOCollectionBSCnvCfg, ConfigFlags)
+        CAtoGlobalWrapper(L1TopoRDOCollectionBSCnvCfg, flags)
         if getAlgProp('doSimMon') and not flags.Trigger.doLVL1:
             # Add BS converter for CTP_RDO
             from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
-            CAtoGlobalWrapper(ByteStreamReadCfg, ConfigFlags, type_names=['CTP_RDO/CTP_RDO'])
+            CAtoGlobalWrapper(ByteStreamReadCfg, flags, type_names=['CTP_RDO/CTP_RDO'])
 
     return alg
 

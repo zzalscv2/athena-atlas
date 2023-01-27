@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 
@@ -22,9 +22,11 @@ def createTrigMUCTPIConfigFlags():
 
 
 if __name__ == "__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
 
-    ConfigFlags.lock()
-    ConfigFlags.dump("MUCTPI|Trigger")
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+
+    flags.lock()
+    flags.dump("MUCTPI|Trigger")

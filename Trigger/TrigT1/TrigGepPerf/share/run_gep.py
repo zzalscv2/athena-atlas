@@ -51,10 +51,12 @@ if __name__ == '__main__':
     ##################################################
     # Configure all the flags
     ##################################################
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from TrigValTools.TrigValSteering import Input
 
     assert not (args.gepInput and args.gepInputRun3)
+
+    flags = initConfigFlags()
     
     if args.gepInput:
          ifile = (

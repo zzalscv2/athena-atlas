@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 # TODO: I haven't yet migrated any of the new control flags so this is essentially hardcoded to one configuration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -10,11 +10,11 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
 
-def JTowerMappingDataCondAlgCfg(ConfigFlags):
+def JTowerMappingDataCondAlgCfg(flags):
     """ Create the mapping maker for JTowers """
     result = ComponentAccumulator()
-    result.merge(DetDescrCnvSvcCfg(ConfigFlags))
-    result.merge(GeoModelCfg(ConfigFlags))
+    result.merge(DetDescrCnvSvcCfg(flags))
+    result.merge(GeoModelCfg(flags))
     result.addCondAlgo(
         CompFactory.LVL1.JTowerMappingDataCondAlg(
             "JTowerMappingDataCondAlg",
@@ -26,11 +26,11 @@ def JTowerMappingDataCondAlgCfg(ConfigFlags):
     return result
 
 
-def GTowerMappingDataCondAlgCfg(ConfigFlags):
+def GTowerMappingDataCondAlgCfg(flags):
     """ Create the mapping maker for GTowers """
     result = ComponentAccumulator()
-    result.merge(DetDescrCnvSvcCfg(ConfigFlags))
-    result.merge(GeoModelCfg(ConfigFlags))
+    result.merge(DetDescrCnvSvcCfg(flags))
+    result.merge(GeoModelCfg(flags))
     result.addCondAlgo(
         CompFactory.LVL1.GTowerMappingDataCondAlg(
             "GTowerMappingDataCondAlg",
@@ -42,10 +42,10 @@ def GTowerMappingDataCondAlgCfg(ConfigFlags):
     return result
 
 
-def JTowerBuilderCfg(ConfigFlags, superCellsIn):
+def JTowerBuilderCfg(flags, superCellsIn):
     """ Create the JTower building algorithm """
     result = ComponentAccumulator()
-    result.merge(JTowerMappingDataCondAlgCfg(ConfigFlags))
+    result.merge(JTowerMappingDataCondAlgCfg(flags))
     # TODO: FLAGS
     result.addEventAlgo(
         CompFactory.LVL1.JGTowerBuilder(
@@ -65,10 +65,10 @@ def JTowerBuilderCfg(ConfigFlags, superCellsIn):
     return result
 
 
-def GTowerBuilderCfg(ConfigFlags, superCellsIn):
+def GTowerBuilderCfg(flags, superCellsIn):
     """ Create the GCaloTower building algorithm """
     result = ComponentAccumulator()
-    result.merge(GTowerMappingDataCondAlgCfg(ConfigFlags))
+    result.merge(GTowerMappingDataCondAlgCfg(flags))
     # TODO: FLAGS
     result.addEventAlgo(
         CompFactory.LVL1.JGTowerBuilder(
@@ -88,13 +88,13 @@ def GTowerBuilderCfg(ConfigFlags, superCellsIn):
     return result
 
 
-def JTowersCfg(ConfigFlags, superCellsIn):
+def JTowersCfg(flags, superCellsIn):
     """Create the algorithms required for the JTower configuration
 
     Sequences the builder and the noise algorithm
     """
     result = ComponentAccumulator()
-    result.merge(JTowerBuilderCfg(ConfigFlags, superCellsIn))
+    result.merge(JTowerBuilderCfg(flags, superCellsIn))
     result.addEventAlgo(
         CompFactory.LVL1.JGTowerNoiseAlg(
             "JTowerNoiseAlg", InputTowers="JTowers", DoJFEX=True
@@ -103,13 +103,13 @@ def JTowersCfg(ConfigFlags, superCellsIn):
     return result
 
 
-def GTowersCfg(ConfigFlags, superCellsIn):
+def GTowersCfg(flags, superCellsIn):
     """Create the algorithms required for the GTower configuration
 
     Sequences the GCaloTower builder, then the GTower and noise algorithms
     """
     result = ComponentAccumulator()
-    result.merge(GTowerBuilderCfg(ConfigFlags, superCellsIn))
+    result.merge(GTowerBuilderCfg(flags, superCellsIn))
     result.addEventAlgo(
         CompFactory.LVL1.GTowersFromGCaloTowers(
             "GTowersFromGCaloTowers",
@@ -128,12 +128,12 @@ def GTowersCfg(ConfigFlags, superCellsIn):
     return result
 
 
-def AllJGTowerContainersCfg(ConfigFlags, superCellsIn):
+def AllJGTowerContainersCfg(flags, superCellsIn):
     """ Helper method to create all of the J/G tower containers commonly used """
     result = ComponentAccumulator()
 
     # JTowers
-    result.merge(JTowersCfg(ConfigFlags, superCellsIn=superCellsIn))
+    result.merge(JTowersCfg(flags, superCellsIn=superCellsIn))
     result.addEventAlgo(
         CompFactory.LVL1.JTowerRhoSubtractionAlg(
             "JTowerRhoSubtractionAlg",
@@ -144,7 +144,7 @@ def AllJGTowerContainersCfg(ConfigFlags, superCellsIn):
     )
 
     # GTowers
-    result.merge(GTowersCfg(ConfigFlags, superCellsIn))
+    result.merge(GTowersCfg(flags, superCellsIn))
     result.addEventAlgo(
         CompFactory.LVL1.GTowerRhoSubtractionAlg(
             "GTowerRhoSubtractionAlg",

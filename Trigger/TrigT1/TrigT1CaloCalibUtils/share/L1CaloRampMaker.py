@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
-import glob, os, sys
-from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+import glob, sys
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 ###################################    
@@ -28,7 +28,7 @@ def main():
     parser.set_defaults(InputFiles="/eos/atlas/atlastier0/rucio/data22_calib/calibration_L1CaloEnergyScan/00419051/data22_calib.00419051.calibration_L1CaloEnergyScan.daq.RAW/data22_calib.00419051.calibration_L1CaloEnergyScan.daq.RAW._lb0000._SFO-1._0001.data", doLAr=False, doTile=False)
     (options,args) = parser.parse_args()
     
-
+    flags = initConfigFlags()
     flags.Input.Files = glob.glob(options.InputFiles)
     
     flags.Exec.MaxEvents = -1

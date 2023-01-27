@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def JfexInputMonitoringConfig(inputFlags):
     '''Function to configure LVL1 JfexInput algorithm in the monitoring system.'''
@@ -120,26 +120,27 @@ def JfexInputMonitoringConfig(inputFlags):
 
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
 
     inputs = glob.glob('data22_13p6TeV.00440613.physics_Main.daq.RAW._lb0180-0189.data')
 
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1_MC.root'
 
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags.lock()
+    flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    JfexInputMonitorCfg = JfexInputMonitoringConfig(ConfigFlags)
+    JfexInputMonitorCfg = JfexInputMonitoringConfig(flags)
     cfg.merge(JfexInputMonitorCfg)
 
     # options - print all details of algorithms, very short summary 

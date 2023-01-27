@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 def BSMonitoringConfig(inputFlags):
     '''Function to configure LVL1 BSMonitoring algorithm in the monitoring system.'''
@@ -48,7 +48,6 @@ def BSMonitoringConfig(inputFlags):
             # Wrap everything in a sequence which will force algs to execute in order, even in MT mode
             #from AthenaCommon.AlgSequence import AthSequencer
             #CTPMonSeq=AthSequencer('CTPMonSeq')
-            #from AthenaConfiguration.AllConfigFlags import ConfigFlags
             #if 'IS_SIMULATION' not in metadata['eventTypes']:
             
             #none of these 2 work - pretty unsatisfying! - to be fixed asap!!!!! 
@@ -63,7 +62,7 @@ def BSMonitoringConfig(inputFlags):
                 #CTPMonSeq += CTPSimulationOnData("CTPSimulation")
                 
                 #from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import L1MuctpiPhase1_on_Data #MUCTPI_AthAlgCfg #L1MuctpiPhase1 #L1MuctpiPhase1_on_Data
-                #CTPMonSeq += L1MuctpiPhase1_on_Data("MUCTPI_AthTool") # MUCTPI_AthAlgCfg(ConfigFlags) #L1MuctpiPhase1() #L1MuctpiPhase1_on_Data()
+                #CTPMonSeq += L1MuctpiPhase1_on_Data("MUCTPI_AthTool") # MUCTPI_AthAlgCfg(inputFlags) #L1MuctpiPhase1() #L1MuctpiPhase1_on_Data()
                 
         # check if global muons are on 
         if not inputFlags.Reco.EnableCombinedMuon:
@@ -645,24 +644,25 @@ def BSMonitoringConfig(inputFlags):
 if __name__=='__main__':
 
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     import glob
     inputs = glob.glob('/eos/atlas/atlastier0/rucio/data18_13TeV/physics_Main/00354311/data18_13TeV.00354311.physics_Main.recon.ESD.f1129/data18_13TeV.00354311.physics_Main.recon.ESD.f1129._lb0013._SFO-8._0001.1')
-
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
-    ConfigFlags.lock()
-    #ConfigFlags.dump() # print all the configs
+  
+    flags = initConfigFlags()
+    flags.Input.Files = inputs
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_CTPMonitoring.root'
+    flags.lock()
+    #flags.dump() # print all the configs
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg  
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
-    BSMonitorCfg = BSMonitoringConfig(ConfigFlags)
+    BSMonitorCfg = BSMonitoringConfig(flags)
     cfg.merge(BSMonitorCfg)
     # message level for algorithm
     BSMonitorCfg.getEventAlgo('BSMonAlg').OutputLevel = 1 # 1/2 INFO/DEBUG

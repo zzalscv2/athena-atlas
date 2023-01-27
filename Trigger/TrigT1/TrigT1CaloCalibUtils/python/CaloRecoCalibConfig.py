@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 def CaloRecoCalibCfg(configFlags):
   
@@ -51,20 +51,21 @@ def CaloRecoCalibCfg(configFlags):
 
 
 if __name__=="__main__":
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
     from AthenaCommon.Constants import DEBUG
 
-    ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/rucio/data22_calib/calibration_L1CaloEnergyScan/00408980/data22_calib.00408980.calibration_L1CaloEnergyScan.daq.RAW/data22_calib.00408980.calibration_L1CaloEnergyScan.daq.RAW._lb0000._SFO-1._0001.data']
-    ConfigFlags.LAr.doHVCorr = False
+    flags = initConfigFlags()
+    flags.Input.Files = ['/eos/atlas/atlastier0/rucio/data22_calib/calibration_L1CaloEnergyScan/00408980/data22_calib.00408980.calibration_L1CaloEnergyScan.daq.RAW/data22_calib.00408980.calibration_L1CaloEnergyScan.daq.RAW._lb0000._SFO-1._0001.data']
+    flags.LAr.doHVCorr = False
     from LArConfiguration.LArConfigFlags import RawChannelSource
-    ConfigFlags.LAr.RawChannelSource = RawChannelSource.Calculated
-    ConfigFlags.Exec.OutputLEvel=DEBUG
+    flags.LAr.RawChannelSource = RawChannelSource.Calculated
+    flags.Exec.OutputLEvel=DEBUG
 
-    ConfigFlags.lock()
+    flags.lock()
 
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    acc = MainServicesCfg(ConfigFlags)
-    acc.merge(CaloRecoCalibCfg(ConfigFlags))
+    acc = MainServicesCfg(flags)
+    acc.merge(CaloRecoCalibCfg(flags))
     
 
     acc.run(10)
