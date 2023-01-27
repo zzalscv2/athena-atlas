@@ -65,7 +65,7 @@ class AthMonitorCfgHelper(object):
 
         # configure these properties; users really should have no reason to override them
         algObj.Environment = self.flags.DQ.Environment
-        algObj.DataType = self.flags.DQ.DataType
+        algObj.DataType = self.flags.DQ.DataType.value
         if self.flags.DQ.useTrigger:
             algObj.TrigDecisionTool = self.resobj.getPublicTool("TrigDecisionTool")
             algObj.TriggerTranslatorTool = self.resobj.popToolsAndMerge(getTriggerTranslatorToolSimple(self.flags))
