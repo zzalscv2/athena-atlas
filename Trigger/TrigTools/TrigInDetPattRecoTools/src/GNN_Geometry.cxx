@@ -53,6 +53,8 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
     m_etaBin = deltaEta;
     if(m_layer.m_type == 0) {//barrel
       m_radii.push_back(m_layer.m_refCoord);
+      m_minRadius.push_back(m_layer.m_refCoord - 2.0);
+      m_maxRadius.push_back(m_layer.m_refCoord + 2.0);
       m_minBinCoord.push_back(m_layer.m_minBound);
       m_maxBinCoord.push_back(m_layer.m_maxBound);
     }
@@ -60,6 +62,8 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
       float eta = 0.5*(m_maxEta + m_minEta);
       float r = m_layer.m_refCoord*std::exp(-eta)/(1-std::exp(-eta)*std::exp(-eta));
       m_radii.push_back(r);
+      m_minRadius.push_back(m_layer.m_minBound - 2.0);
+      m_maxRadius.push_back(m_layer.m_maxBound + 2.0);
       m_minBinCoord.push_back(m_layer.m_minBound);
       m_maxBinCoord.push_back(m_layer.m_maxBound);
     }
@@ -75,6 +79,8 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
       m_bins.push_back(binCounter++);
       if(m_layer.m_type == 0) {//barrel
 	m_radii.push_back(m_layer.m_refCoord);
+	m_minRadius.push_back(m_layer.m_refCoord - 2.0);
+        m_maxRadius.push_back(m_layer.m_refCoord + 2.0);
 	m_minBinCoord.push_back(m_layer.m_minBound);
 	m_maxBinCoord.push_back(m_layer.m_maxBound);
       }
@@ -82,6 +88,8 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
 	float eta = 0.5*(m_maxEta + m_minEta);
 	float r = 2*m_layer.m_refCoord*std::exp(-eta)/(1-std::exp(-eta)*std::exp(-eta));
 	m_radii.push_back(r);
+	m_minRadius.push_back(m_layer.m_minBound - 2.0);
+        m_maxRadius.push_back(m_layer.m_maxBound + 2.0);
 	m_minBinCoord.push_back(m_layer.m_minBound);
 	m_maxBinCoord.push_back(m_layer.m_maxBound);
       }
@@ -99,6 +107,8 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
 	
 	if(m_layer.m_type == 0) {//barrel
 	  m_radii.push_back(m_layer.m_refCoord);
+	  m_minRadius.push_back(m_layer.m_refCoord - 2.0);
+          m_maxRadius.push_back(m_layer.m_refCoord + 2.0);
 	  float z1 = 0.5*m_layer.m_refCoord*(std::exp(e1)-std::exp(-e1));
 	  m_minBinCoord.push_back(z1);
 	  float z2 = 0.5*m_layer.m_refCoord*(std::exp(e2)-std::exp(-e2));
@@ -109,8 +119,11 @@ TrigFTF_GNN_Layer::TrigFTF_GNN_Layer(const TrigInDetSiLayer& ls, float ew, int b
 	  m_radii.push_back(r);
 	  r = 2*m_layer.m_refCoord*std::exp(-e1)/(1-std::exp(-e1)*std::exp(-e1));
 	  m_minBinCoord.push_back(r);
+	  m_minRadius.push_back(r - 2.0);
 	  r = 2*m_layer.m_refCoord*std::exp(-e2)/(1-std::exp(-e2)*std::exp(-e2));
 	  m_maxBinCoord.push_back(r);
+	  m_maxRadius.push_back(r + 2.0);
+	  
 	}
 	
 	eta += m_etaBin;
@@ -198,9 +211,23 @@ int TrigFTF_GNN_Layer::getEtaBin(float zh, float rh) const {
 
 float TrigFTF_GNN_Layer::getBinRadius(int idx) const {
   if(idx >= static_cast<int>(m_radii.size())) idx = idx-1;
-  if(idx < 0) return 0;
+  if(idx < 0) idx = 0;
   
   return m_radii.at(idx);
+}
+
+float TrigFTF_GNN_Layer::getMinBinRadius(int idx) const {
+  if(idx >= static_cast<int>(m_minRadius.size())) idx = idx-1;
+  if(idx < 0) idx = 0;
+  
+  return m_minRadius.at(idx);
+}
+
+float TrigFTF_GNN_Layer::getMaxBinRadius(int idx) const {
+  if(idx >= static_cast<int>(m_maxRadius.size())) idx = idx-1;
+  if(idx < 0) idx = 0;
+  
+  return m_maxRadius.at(idx);
 }
 
 TrigFTF_GNN_Layer::~TrigFTF_GNN_Layer() {

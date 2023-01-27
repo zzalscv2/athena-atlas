@@ -29,14 +29,11 @@ TrigTrackSeedGeneratorITk::TrigTrackSeedGeneratorITk(const TrigCombinatorialSett
   m_maxDeltaRadius = m_settings.m_doublet_dR_Max;
   m_phiSliceWidth = 2*M_PI/m_settings.m_nMaxPhiSlice;
 
-  m_storage = new TrigFTF_GNN_DataStorage(*m_settings.m_geo, m_phiSliceWidth);
-
-  //mult scatt. variance for doublet matching
-  const double radLen = 0.036;
-  m_CovMS = std::pow((13.6/m_settings.m_tripletPtMin),2)*radLen;
+  m_storage = new TrigFTF_GNN_DataStorage(*m_settings.m_geo);
+  
   const double ptCoeff = 0.29997*1.9972/2.0;// ~0.3*B/2 - assumes nominal field of 2*T
   m_minR_squ = m_settings.m_tripletPtMin*m_settings.m_tripletPtMin/std::pow(ptCoeff,2);
-  m_dtPreCut = std::tan(2.0*m_settings.m_tripletDtCut*sqrt(m_CovMS));
+  m_maxCurv = ptCoeff/m_settings.m_tripletPtMin;
 
 }
 
@@ -62,7 +59,7 @@ void TrigTrackSeedGeneratorITk::loadSpacePoints(const std::vector<TrigSiSpacePoi
 
 void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor) {
 
-  const int MaxEdges = 1500000;
+  const int MaxEdges = 2000000;
 
   const float cut_dphi_min      =-0.012;
   const float cut_dphi_max      = 0.012;
@@ -83,8 +80,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
   std::vector<TrigFTF_GNN_Edge> edgeStorage;
   
-  edgeStorage.resize(MaxEdges);
-
+  edgeStorage.reserve(MaxEdges);
+  
   int nEdges = 0;
 
   for(std::map<int, std::vector<FASTRACK_CONNECTION*> >::const_iterator it = conn.m_connMap.begin();it!=conn.m_connMap.end();++it, currentStage++) {
@@ -120,6 +117,8 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	if(B1.empty()) continue;
 
+	float rb1 = pL1->getMinBinRadius(b1);
+
 	for(int b2=0;b2<nSrcBins;b2++) {//loop over bins in Layer 2
 	  
 	  if(m_settings.m_useEtaBinning) {
@@ -130,9 +129,15 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
           if(B2.empty()) continue;
 
+	  float rb2 = pL2->getMaxBinRadius(b2);
+
 	  //calculated delta Phi for rb1 ---> rb2 extrapolation
 
-	  float deltaPhi = 0.5*m_phiSliceWidth;
+	  float deltaPhi = 0.5*m_phiSliceWidth;//the default sliding window along phi
+
+	  if(m_settings.m_useEtaBinning) {
+            deltaPhi = 0.001 + m_maxCurv*std::fabs(rb2-rb1);
+          }
 
 	  //loop over nodes in Layer 1
 
@@ -215,7 +220,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
 
 	      float kappa = D*D*L2; 
 	      
-	      if(kappa > 0.4/m_minR_squ) {// was 0.4
+	      if(kappa > 0.8/m_minR_squ) {// was 0.4
 		continue;
 	      }
 
@@ -231,6 +236,7 @@ void TrigTrackSeedGeneratorITk::createSeeds(const IRoiDescriptor* roiDescriptor)
               
 	      if(nEdges < MaxEdges) {
 
+		edgeStorage.push_back(TrigFTF_GNN_Edge());
 		TrigFTF_GNN_Edge* pE = &(edgeStorage.at(nEdges));
 		
 		float* params = pE->m_p;//exp(-eta), curvature, phi1, phi2

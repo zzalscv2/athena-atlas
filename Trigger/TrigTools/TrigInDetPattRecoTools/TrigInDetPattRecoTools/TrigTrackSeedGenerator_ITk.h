@@ -39,7 +39,7 @@ private:
   float m_phiSliceWidth;
   float m_minDeltaRadius, m_maxDeltaRadius;
 
-  float m_CovMS, m_minR_squ, m_dtPreCut;
+  float m_minR_squ, m_maxCurv;
 
   INTERNAL_TRIPLET_BUFFER m_triplets;
 

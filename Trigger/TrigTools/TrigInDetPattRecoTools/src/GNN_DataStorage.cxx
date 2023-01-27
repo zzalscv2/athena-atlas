@@ -64,7 +64,7 @@ void TrigFTF_GNN_EtaBin::generatePhiIndexing(float dphi) {
 }
 
 
-TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g, float fw) : m_geo(g), m_phiBinWidth(fw) {
+TrigFTF_GNN_DataStorage::TrigFTF_GNN_DataStorage(const TrigFTF_GNN_Geometry& g) : m_geo(g) {
 
 
   for(int k=0;k<g.num_bins();k++) {

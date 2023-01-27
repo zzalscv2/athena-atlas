@@ -37,8 +37,10 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                                                     layerNumberTool   = acc.getPublicTool("TrigL2LayerNumberTool_FTF") ) )
 
     from TrigFastTrackFinder.TrigFastTrackFinder_Config import TrigFastTrackFinderMonitoring
-    monTool = TrigFastTrackFinderMonitoring(name = "TrigFastTrackFinder_", doResMon=False)
-
+    from TriggerJobOpts.TriggerHistSvcConfig import TriggerHistSvcConfig
+    acc.merge(TriggerHistSvcConfig(newflags))
+    monTool = TrigFastTrackFinderMonitoring(name = "FullScan", doResMon=False)
+    
     ftf = CompFactory.TrigFastTrackFinder( name = "TrigFastTrackFinder_",
                                             LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
                                             SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool"),
@@ -54,13 +56,15 @@ def ITkFastTrackFinderStandaloneCfg(flags):
                                             Triplet_D0Max            = 4,
                                             Triplet_D0_PPS_Max       = 1.7,
                                             Triplet_MaxBufferLength  = 3,
-                                            Triplet_MinPtFrac        = 1,
+                                            Triplet_MinPtFrac        = 0.7,
                                             Triplet_nMaxPhiSlice     = 53,
                                             doCloneRemoval           = True,
+                                            UseTrigSeedML            = 1,
                                             doResMon                 = False,
-                                            doSeedRedundancyCheck    = False,
+                                            doSeedRedundancyCheck    = True,
                                             pTmin                    = 1000.0,
                                             useNewLayerNumberScheme  = True,
+                                            UseEtaBinning            = False,
                                             MinHits                  = 5,
                                             useGPU                   = False,
                                             DoubletDR_Max            = 270,
