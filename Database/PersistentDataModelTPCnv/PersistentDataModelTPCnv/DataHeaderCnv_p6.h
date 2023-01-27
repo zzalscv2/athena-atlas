@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODELTPCNV_DATAHEADERCNV_P6_H
@@ -27,8 +27,10 @@ public:
 
    /// convert single DH element to persistent represenation
    void elemToPers(const DataHeaderElement* trans, DataHeader_p6* pers, DataHeaderForm_p6& form);
+
    /// restore single DH element from persistent represenation
-   void persToElem(const DataHeader_p6* pers, unsigned p_idx, DataHeaderElement* trans,
+   /// return false if p_idx is out of bounds for the Form
+   bool persToElem(const DataHeader_p6* pers, unsigned p_idx, DataHeaderElement* trans,
                    const DataHeaderForm_p6& form );
 
    /// insert DH self reference as one of the DHElements. Contains the stream Key

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PERSISTENTDATAMODEL_DATAHEADER_H
@@ -195,6 +195,7 @@ private:
    friend class DataHeaderCnv_p4;
    friend class DataHeaderCnv_p5;
    friend class DataHeaderCnv_p6;
+   friend class DataHeaderCnv;
 
    /// vector with DataHeaderElement to "DataObject".
    std::vector<DataHeaderElement> m_dataHeader;
