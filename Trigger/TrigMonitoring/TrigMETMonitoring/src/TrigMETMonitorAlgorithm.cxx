@@ -1,7 +1,7 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
+#include "LArRecEvent/LArEventBitInfo.h"
 #include "TrigMETMonitorAlgorithm.h"
 #include <TVector3.h>
 
@@ -774,6 +774,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         fill(tool,met_Ex,met_Ey,met_Et,met_sumEt,
              met_Ex_log,met_Ey_log,met_Et_log,met_sumEt_log,
              met_eta,met_phi);
+
       }
     }
     
@@ -825,6 +826,73 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         }
       }
     }
+
+    for (const std::string& alg : m_LArNoiseBurstVetoAlgs) {
+      if (alg == "cell" && hlt_cell_met_cont.isValid() && hlt_cell_met_cont->size() > 0) {
+      hlt_met = hlt_cell_met_cont->at(0);
+      } else if (alg == "mht" && hlt_mht_met_cont.isValid() && hlt_mht_met_cont->size() > 0) {
+      hlt_met = hlt_mht_met_cont->at(0);
+      } else if (alg == "tc" && hlt_tc_met_cont.isValid() && hlt_tc_met_cont->size() > 0) {
+      hlt_met = hlt_tc_met_cont->at(0);
+      } else if (alg == "tc_em" && hlt_tc_em_met_cont.isValid() && hlt_tc_em_met_cont->size() > 0) {
+      hlt_met = hlt_tc_em_met_cont->at(0);
+      } else if (alg == "tcpufit" && hlt_tcpufit_met_cont.isValid() && hlt_tcpufit_met_cont->size() > 0) {
+      hlt_met = hlt_tcpufit_met_cont->at(0);
+      } else if (alg == "trkmht" && hlt_trkmht_met_cont.isValid() && hlt_trkmht_met_cont->size() > 0) {
+      hlt_met = hlt_trkmht_met_cont->at(0);
+      } else if (alg == "pfsum" && hlt_pfsum_met_cont.isValid() && hlt_pfsum_met_cont->size() > 0) {
+      hlt_met = hlt_pfsum_met_cont->at(0);
+      } else if (alg == "pfsum_cssk" && hlt_pfsum_cssk_met_cont.isValid() && hlt_pfsum_cssk_met_cont->size() > 0) {
+      hlt_met = hlt_pfsum_cssk_met_cont->at(0);
+      } else if (alg == "pfsum_vssk" && hlt_pfsum_vssk_met_cont.isValid() && hlt_pfsum_vssk_met_cont->size() > 0) {
+      hlt_met = hlt_pfsum_vssk_met_cont->at(0);
+      } else if (alg == "pfopufit" && hlt_pfopufit_met_cont.isValid() && hlt_pfopufit_met_cont->size() > 0) {
+      hlt_met = hlt_pfopufit_met_cont->at(0);
+      } else if (alg == "cvfpufit" && hlt_cvfpufit_met_cont.isValid() && hlt_cvfpufit_met_cont->size() > 0) {
+      hlt_met = hlt_cvfpufit_met_cont->at(0);
+      } else if (alg == "mhtpufit_pf" && hlt_mhtpufit_pf_met_cont.isValid() && hlt_mhtpufit_pf_met_cont->size() > 0) {
+      hlt_met = hlt_mhtpufit_pf_met_cont->at(0);
+      } else if (alg == "mhtpufit_em" && hlt_mhtpufit_em_met_cont.isValid() && hlt_mhtpufit_em_met_cont->size() > 0) {
+      hlt_met = hlt_mhtpufit_em_met_cont->at(0);
+      } else {
+      hlt_met = 0;
+      }
+
+      if ( hlt_met ) {
+        float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
+        float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
+        float hlt_Ez = hlt_met->ez()/Gaudi::Units::GeV;
+        float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
+        float hlt_sumEt = hlt_met->sumEt()/Gaudi::Units::GeV;
+        float hlt_Ex_log = signed_log(hlt_Ex, epsilon);
+        float hlt_Ey_log = signed_log(hlt_Ey, epsilon);
+        float hlt_Et_log = signed_log(hlt_Et, epsilon);
+        float hlt_sumEt_log = signed_log(hlt_sumEt, epsilon); 
+        TVector3 v(hlt_Ex, hlt_Ey, hlt_Ez);
+        float hlt_eta = v.Eta();
+        float hlt_phi = v.Phi();
+
+
+        // LAr noiseburst Veto
+        bool LArNoiseBurst = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO);
+        if (!LArNoiseBurst){
+          auto met_Ex = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_Ex", static_cast<float>(hlt_Ex));
+          auto met_Ey = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_Ey", static_cast<float>(hlt_Ey));
+          auto met_Et = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_Et", static_cast<float>(hlt_Et));
+          auto met_sumEt = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_sumEt", static_cast<float>(hlt_sumEt));
+          auto met_Ex_log = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_Ex_log", static_cast<float>(hlt_Ex_log));
+          auto met_Ey_log = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_Ey_log", static_cast<float>(hlt_Ey_log));
+          auto met_Et_log = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_Et_log", static_cast<float>(hlt_Et_log));
+          auto met_sumEt_log = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_sumEt_log", static_cast<float>(hlt_sumEt_log));
+          auto met_phi = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_phi", static_cast<float>(hlt_phi));
+          auto met_eta = Monitored::Scalar<float>(alg+"_LArNoiseBurstVeto_eta", static_cast<float>(hlt_eta));
+          fill(tool,met_Ex,met_Ey,met_Et,met_sumEt,
+               met_Ex_log,met_Ey_log,met_Et_log,met_sumEt_log,
+               met_eta,met_phi);
+        }
+      }
+    }
+
 
     for (const std::string& alg : m_signalLepAlgs) {
       if (alg == "cell" && hlt_cell_met_cont.isValid() && hlt_cell_met_cont->size() > 0) {
