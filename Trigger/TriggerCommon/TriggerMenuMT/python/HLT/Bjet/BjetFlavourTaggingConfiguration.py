@@ -1,8 +1,7 @@
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
 # standard b-tagging
 from BTagging.JetParticleAssociationAlgConfig import JetParticleAssociationAlgCfg
@@ -13,19 +12,17 @@ from BTagging.BTagConfig import BTagAlgsCfg
 from FlavorTagDiscriminants.FlavorTagNNConfig import getStaticTrackVars
 from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
 
-def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
+def getFlavourTagging( flags, inputJets, inputVertex, inputTracks, BTagName,
                        inputMuons = ""):
 
     # because Cfg functions internally re-append the 'Jets' string
     inputJetsPrefix = inputJets.replace("bJets","b")
 
-    trigFlags = ConfigFlags
-
     acc = ComponentAccumulator()
 
     #Track Augmenter
     acc.merge(BTagTrackAugmenterAlgCfg(
-        trigFlags,
+        flags,
         TrackCollection=inputTracks,
         PrimaryVertexCollectionName=inputVertex
     ))
@@ -45,7 +42,7 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
     ]
 
     acc.merge(BTagAlgsCfg(
-        inputFlags=trigFlags,
+        inputFlags=flags,
         JetCollection=inputJetsPrefix,
         nnList=nnList,
         trackCollection=inputTracks,

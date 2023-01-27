@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 # menu components
@@ -70,7 +70,7 @@ def getBJetSequence(flags, jc_name=None):
     with ConfigurableCABehavior():
         # Flavour Tagging
         from TriggerMenuMT.HLT.Bjet.BjetFlavourTaggingConfiguration import getFlavourTagging
-        acc_flavourTaggingAlgs = getFlavourTagging(
+        acc_flavourTaggingAlgs = getFlavourTagging(flags,
             inputJets=str(InputMakerAlg.InViewJets),
             inputVertex=prmVtxKey,
             inputTracks=PTTrackParticles[0],

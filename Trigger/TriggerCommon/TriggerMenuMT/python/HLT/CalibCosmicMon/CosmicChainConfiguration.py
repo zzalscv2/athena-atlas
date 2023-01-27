@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -57,7 +57,7 @@ class CosmicChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):       
+    def assembleChainImpl(self, flags):       
                          
         steps = []
         log.debug("Assembling chain for %s", self.chainName)
@@ -65,8 +65,8 @@ class CosmicChainConfiguration(ChainConfigurationBase):
         # define here the names of the steps and obtain the chainStep configuration         
         # --------------------
         if 'cosmic_id' in self.chainName:
-            steps += [  self.getStep(1, 'Empty', [EmptyMSBeforeCosmicID]),
-                        self.getStep(2, 'CosmicTracking', [CosmicsTrkSequence]) ]
+            steps += [  self.getStep(flags, 1, 'Empty', [EmptyMSBeforeCosmicID]),
+                        self.getStep(flags, 2, 'CosmicTracking', [CosmicsTrkSequence]) ]
 
         return self.buildChain(steps)
 

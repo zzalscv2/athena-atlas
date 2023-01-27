@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.Logging import logging
 logging.getLogger().info("Importing %s",__name__)
@@ -80,7 +80,7 @@ class TestChainConfiguration(ChainConfigurationBase):
     # ----------------------
     # Assemble the chain depending on information from chainName
     # ----------------------
-    def assembleChainImpl(self):                            
+    def assembleChainImpl(self, flags):
         chainSteps = []
         stepDictionary = self.getStepDictionary()
         key = self.chainPart['extra']
@@ -92,7 +92,7 @@ class TestChainConfiguration(ChainConfigurationBase):
             raise RuntimeError("Chain configuration unknown for electron chain with key: " + key )
         
         for step in steps:
-            chainstep = getattr(self, step)()
+            chainstep = getattr(self, step)(flags)
             chainSteps+=[chainstep]
 
             
@@ -126,59 +126,59 @@ class TestChainConfiguration(ChainConfigurationBase):
 
     ## Muons    
     
-    def Step_mu11(self):
-        return self.getStep(1,"mu11",[ muCfg111 ])
+    def Step_mu11(self, flags):
+        return self.getStep(flags,1,"mu11",[ muCfg111 ])
 
-    def Step_mu21(self):
-        return self.getStep(2,"mu21",[ muCfg211 ])
+    def Step_mu21(self, flags):
+        return self.getStep(flags,2,"mu21",[ muCfg211 ])
 
-    def Step_mu11Dr(self):
-        return self.getStep(1,"mu11",[ muCfg111 ], comboTools=[dimuDrComboHypoTool])
+    def Step_mu11Dr(self, flags):
+        return self.getStep(flags,1,"mu11",[ muCfg111 ], comboTools=[dimuDrComboHypoTool])
 
-    def Step_mu21Dr(self):
-        return self.getStep(2,"mu21",[ muCfg211 ], comboTools=[dimuDrComboHypoTool])
+    def Step_mu21Dr(self, flags):
+        return self.getStep(flags,2,"mu21",[ muCfg211 ], comboTools=[dimuDrComboHypoTool])
 
-    def Step_mu22(self):
-        return self.getStep(2,"mu22",[ muCfg222 ])
+    def Step_mu22(self, flags):
+        return self.getStep(flags,2,"mu22",[ muCfg222 ])
 
-    def Step_mu31(self):
-        return self.getStep(3,"mu31",[ muCfg311 ])
+    def Step_mu31(self, flags):
+        return self.getStep(flags,3,"mu31",[ muCfg311 ])
 
-    def Step_mu32(self):
-        return self.getStep(3,"mu32",[ muCfg322 ])
+    def Step_mu32(self, flags):
+        return self.getStep(flags,3,"mu32",[ muCfg322 ])
    
-    def Step_mu41(self):
-        return self.getStep(4,"mu41",[ muCfg411 ])
+    def Step_mu41(self, flags):
+        return self.getStep(flags,4,"mu41",[ muCfg411 ])
 
-    def Step_empty1(self):
+    def Step_empty1(self, flags):
         return self.getEmptyStep(1,'empty')
 
-    def Step_empty2(self):
+    def Step_empty2(self, flags):
         return self.getEmptyStep(2,'empty')
 
     # Electrons
 
-    def Step_em11(self):
-        return self.getStep(1,"em11",[ elCfg111 ])
+    def Step_em11(self, flags):
+        return self.getStep(flags,1,"em11",[ elCfg111 ])
     
-    def Step_em11Dr(self):
-        return self.getStep(1,"em11",[ elCfg111 ], comboTools=[dimuDrComboHypoTool])
+    def Step_em11Dr(self, flags):
+        return self.getStep(flags,1,"em11",[ elCfg111 ], comboTools=[dimuDrComboHypoTool])
 
-    def Step_em21(self):
-        return self.getStep(2,"em21",[ elCfg211 ])
+    def Step_em21(self, flags):
+        return self.getStep(flags,2,"em21",[ elCfg211 ])
 
-    def Step_em21Dr(self):
-        return self.getStep(2,"em21",[ elCfg211 ], comboTools=[dimuDrComboHypoTool])
+    def Step_em21Dr(self, flags):
+        return self.getStep(flags,2,"em21",[ elCfg211 ], comboTools=[dimuDrComboHypoTool])
 
-    def Step_em22(self):
-        return self.getStep(2,"em22",[ elCfg222 ])
+    def Step_em22(self, flags):
+        return self.getStep(flags,2,"em22",[ elCfg222 ])
 
-    def Step_em23(self):
-        return self.getStep(2,"em23",[ elCfg223 ])
+    def Step_em23(self, flags):
+        return self.getStep(flags,2,"em23",[ elCfg223 ])
 
-    def Step_em31(self):
-        return self.getStep(3,"em31",[ elCfg311 ])
+    def Step_em31(self, flags):
+        return self.getStep(flags,3,"em31",[ elCfg311 ])
 
-    def Step_gam11(self):
-        return self.getStep(1,"gam11",[ gamCfg111 ])
+    def Step_gam11(self, flags):
+        return self.getStep(flags,1,"gam11",[ gamCfg111 ])
 

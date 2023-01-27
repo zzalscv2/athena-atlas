@@ -216,7 +216,7 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
                 endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','PhysicsTLA','CosmicCalo']
 
                 from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoSequence
-                recoSeq = getLArNoiseBurstRecoSequence()
+                recoSeq = getLArNoiseBurstRecoSequence(flags)
                 acceptedEventSeq += conf2toConfigurable(recoSeq)
             elif any(purpose.startswith("met") for purpose in purposes):
                 from TriggerMenuMT.HLT.MET.EndOfEvent import getMETRecoSequences

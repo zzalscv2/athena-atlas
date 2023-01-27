@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 import importlib
 import string
@@ -367,7 +367,7 @@ class GenerateMenuMT(object, metaclass=Singleton):
             if currentSig in self.availableSignatures:
                 try:
                     log.debug("[__generateChainConfigs] Trying to get chain config for %s", currentSig)
-                    chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(chainPartDict)
+                    chainPartConfig = self.chainDefModule[currentSig].generateChainConfigs(flags, chainPartDict)
                 except Exception:
                     log.error('[__generateChainConfigs] Problems creating ChainDef for chain %s ', chainName)
                     log.error('[__generateChainConfigs] I am in chain part\n %s ', chainPartDict)
