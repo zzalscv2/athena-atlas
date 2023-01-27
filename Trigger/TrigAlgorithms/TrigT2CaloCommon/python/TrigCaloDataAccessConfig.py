@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -102,19 +102,21 @@ def trigCaloDataAccessSvcCfg( flags ):
 
 if __name__ == "__main__":
     from AthenaConfiguration.TestDefaults import defaultTestFiles
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = defaultTestFiles.RAW
-    ConfigFlags.Input.isMC=False
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+
+    flags = initConfigFlags()
+    flags.Input.Files = defaultTestFiles.RAW
+    flags.Input.isMC=False
+    flags.lock()
     acc = ComponentAccumulator()
     from AthenaCommon.CFElements import parOR
 
     acc.addSequence(parOR("HLTBeginSeq"))
 
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
-    acc.merge( ByteStreamReadCfg( ConfigFlags ) )
+    acc.merge( ByteStreamReadCfg( flags ) )
 
-    acc.merge( trigCaloDataAccessSvcCfg( ConfigFlags ) )
+    acc.merge( trigCaloDataAccessSvcCfg( flags ) )
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     import math

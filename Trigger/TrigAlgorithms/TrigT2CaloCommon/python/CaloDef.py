@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND, parOR
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -223,38 +223,38 @@ def clusterFSInputMaker( ):
   return InputMakerAlg
 
 
-def HLTCellMaker(ConfigFlags,RoIs=caloFSRoI, outputName="CaloCells", algSuffix=""):
+def HLTCellMaker(flags,RoIs=caloFSRoI, outputName="CaloCells", algSuffix=""):
     cellMakerAlgo = _algoHLTCaloCell(name="HLTCaloCellMaker"+algSuffix, inputEDM=RoIs, outputEDM=outputName, RoIMode=True)
     return cellMakerAlgo
 
 
-def HLTFSCellMakerRecoSequence(ConfigFlags,RoIs=caloFSRoI):
-    cellMaker = HLTCellMaker(ConfigFlags, RoIs, outputName="CaloCellsFS", algSuffix="FS")
+def HLTFSCellMakerRecoSequence(flags,RoIs=caloFSRoI):
+    cellMaker = HLTCellMaker(flags, RoIs, outputName="CaloCellsFS", algSuffix="FS")
     RecoSequence = parOR("ClusterRecoSequenceFS", [cellMaker])
     return (RecoSequence, cellMaker.CellsName)
 
 
-def HLTFSTopoRecoSequence(ConfigFlags,RoIs):
-    cellMaker = HLTCellMaker(ConfigFlags, RoIs, outputName="CaloCellsFS", algSuffix="FS")
+def HLTFSTopoRecoSequence(flags,RoIs):
+    cellMaker = HLTCellMaker(flags, RoIs, outputName="CaloCellsFS", algSuffix="FS")
     topoClusterMaker = _algoHLTTopoCluster(inputEDM = cellMaker.CellsName, algSuffix="FS")
     RecoSequence = parOR("TopoClusterRecoSequenceFS", [cellMaker, topoClusterMaker])
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
 
-def HLTRoITopoRecoSequence(ConfigFlags, RoIs, algSuffix=''):
+def HLTRoITopoRecoSequence(flags, RoIs, algSuffix=''):
     import AthenaCommon.CfgMgr as CfgMgr
     HLTRoITopoRecoSequenceVDV = CfgMgr.AthViews__ViewDataVerifier("HLTRoITopoRecoSequenceVDV%s"%algSuffix)
     HLTRoITopoRecoSequenceVDV.DataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+PrecisionCaloRoIs%s'%algSuffix ),
                                              ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                                              ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
 
-    cellMaker = HLTCellMaker(ConfigFlags, RoIs, algSuffix="RoI%s"%algSuffix)
+    cellMaker = HLTCellMaker(flags, RoIs, algSuffix="RoI%s"%algSuffix)
     topoClusterMaker = _algoHLTTopoCluster(inputEDM = cellMaker.CellsName, algSuffix="RoI%s"%algSuffix)
     RecoSequence = parOR("RoITopoClusterRecoSequence%s"%algSuffix, [HLTRoITopoRecoSequenceVDV, cellMaker, topoClusterMaker])
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
 
-def HLTHIRoITopoRecoSequence(ConfigFlags, RoIs, algSuffix=''):
+def HLTHIRoITopoRecoSequence(flags, RoIs, algSuffix=''):
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys()
@@ -267,7 +267,7 @@ def HLTHIRoITopoRecoSequence(ConfigFlags, RoIs, algSuffix=''):
                                              ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
                                              ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
 
-    cellMaker = HLTCellMaker(ConfigFlags, RoIs, algSuffix="HIRoI")
+    cellMaker = HLTCellMaker(flags, RoIs, algSuffix="HIRoI")
     cellCorrector = _algoHLTCaloCellCorrector(
         name='HLTRoICaloCellCorrector',
         inputEDM=cellMaker.CellsName,
@@ -279,8 +279,8 @@ def HLTHIRoITopoRecoSequence(ConfigFlags, RoIs, algSuffix=''):
     return (RecoSequence, topoClusterMaker.CaloClusters)
 
 
-def HLTLCTopoRecoSequence(ConfigFlags, RoIs='InViewRoIs'):
-    cellMaker = HLTCellMaker(ConfigFlags, RoIs, outputName="CaloCellsLC", algSuffix="LC")
+def HLTLCTopoRecoSequence(flags, RoIs='InViewRoIs'):
+    cellMaker = HLTCellMaker(flags, RoIs, outputName="CaloCellsLC", algSuffix="LC")
     cellMaker.TileCellsInROI = True
     topoClusterMaker = _algoHLTTopoClusterLC(inputEDM = cellMaker.CellsName, algSuffix="LC")
     RecoSequence = parOR("TopoClusterRecoSequenceLC",[cellMaker,topoClusterMaker])
