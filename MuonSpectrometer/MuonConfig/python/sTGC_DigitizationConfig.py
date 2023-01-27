@@ -144,8 +144,7 @@ def sTGC_OverlayDigitizationBasicCfg(flags, **kwargs):
     # Set common overlay extra inputs
     kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    TGCDigitizer = CompFactory.TGCDigitizer
-    acc.addEventAlgo(TGCDigitizer(name="STGC_OverlayDigitizer", **kwargs))
+    acc.addEventAlgo(CompFactory.sTGC_Digitizer(name="STGC_OverlayDigitizer", **kwargs))
     return acc
 
 
