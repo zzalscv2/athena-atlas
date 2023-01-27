@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence, algorithmCAToGlobalWrapper
@@ -64,8 +64,6 @@ def cellRecoSequence(flags, name="HLTCaloCellMakerFS", RoIs=caloFSRoI, outputNam
     if not RoIs:
         from HLTSeeding.HLTSeedingConfig import mapThresholdToL1RoICollection
         RoIs = mapThresholdToL1RoICollection("FSNOSEED")
-    from TrigT2CaloCommon.CaloDef import setMinimalCaloSetup
-    setMinimalCaloSetup()
     from AthenaCommon.AppMgr import ServiceMgr as svcMgr
     from TrigCaloRec.TrigCaloRecConfig import HLTCaloCellMaker
     alg = HLTCaloCellMaker(name)

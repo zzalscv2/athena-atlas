@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from TrigCaloRec.TrigCaloRecConf import (TrigCaloClusterMaker,
                                          TrigCaloTowerMaker,
@@ -322,8 +322,6 @@ class HLTCaloCellSeedLessMaker (_HLTCaloCellMaker):
     __slots__ = []
     def __init__(self, name="CaloCellSeedLessFS"):
         super( HLTCaloCellSeedLessMaker, self ).__init__(name)
-        from TrigT2CaloCommon.CaloDef import setMinimalCaloSetup
-        setMinimalCaloSetup()
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
         from TrigT2CaloCommon.TrigCaloDataAccessConfig import CaloDataAccessSvcDependencies
         self.ExtraInputs=CaloDataAccessSvcDependencies
