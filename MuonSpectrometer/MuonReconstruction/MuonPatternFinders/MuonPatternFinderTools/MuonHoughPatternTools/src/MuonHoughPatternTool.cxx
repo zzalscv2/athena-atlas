@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonHoughPatternTools/MuonHoughPatternTool.h"
@@ -1378,8 +1378,8 @@ std::unique_ptr<Muon::MuonPrdPattern> MuonHoughPatternTool::houghPatternToCleanP
                 phi = newpattern2->getEPhi();
                 r0 = newpattern2->getERPhi();
                 newsize = newpattern2->size();
-                newpattern = newpattern2.get();
                 pat_owner = std::move(newpattern2);
+                newpattern = pat_owner.get();
                 scphi = CxxUtils::sincos(phi);
             }
         }
