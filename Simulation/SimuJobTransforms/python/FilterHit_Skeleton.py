@@ -119,6 +119,9 @@ def fromRunArgs(runArgs):
     else:
         raise RuntimeError('No outputHITS_FILTFile defined')
 
+    # force TreeAutoFlush=1 as events will be accessed randomly
+    flags.Output.TreeAutoFlush = {'HITS': 1}
+
     # Pre-include
     processPreInclude(runArgs, flags)
 
@@ -134,8 +137,7 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     cfg.merge(PoolReadCfg(flags))
-    # force TreeAutoFlush=1 as events will be accessed randomly
-    cfg.merge(PoolWriteCfg(flags, forceTreeAutoFlush=1))
+    cfg.merge(PoolWriteCfg(flags))
 
     # Ensure proper metadata propagation
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
