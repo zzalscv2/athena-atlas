@@ -139,7 +139,14 @@ StatusCode jFexEmulatedTowers::execute(const EventContext& ctx) const {
                 }
 
                 const CaloCell* myCell = it_ScellID2ptr->second;
-                Total_Et += myCell->et();
+                
+                float et = myCell->et();
+                if( (myCell->provenance() >> 7 & 0x1) and m_apply_masking ) {
+                    //if masked then Et = 0
+                    et = 0.0;
+                }
+                
+                Total_Et += et;
                 
             }      
             
