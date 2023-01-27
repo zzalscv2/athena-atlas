@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file DataHeaderCnv.cxx
@@ -332,7 +332,17 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
          mapToken.setAuxString( m_i_poolToken->auxString() );  // set PersSvc context
       }
       if (mapToken.classID() != Guid::null()) {
-         m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
+         try {
+            m_athenaPoolCnvSvc->setObjPtr(voidPtr2, &mapToken);
+            if( dhFormToken.find("CNT=MetaDataHdr") == std::string::npos ) m_lastGoodDHFRef = dhFormToken;
+         } catch(const std::exception& err) {
+            // if there is no good lastGoodDHFRef then the only option is to pass on the exception
+            if( m_lastGoodDHFRef.empty() ) throw;
+            // try to reuse the last good DHForm Ref (object is already cached)
+            ATH_MSG_WARNING("DataHeaderForm read exception: " << err.what() << " - reusing the last good DHForm");
+            header->setDhFormToken(m_lastGoodDHFRef);
+            return header;
+         }
          if (voidPtr2 == nullptr) {
             throw std::runtime_error("Could not get object for token = " + mapToken.toString());
          }
@@ -346,6 +356,29 @@ std::unique_ptr<DataHeader_p6> DataHeaderCnv::poolReadObject_p6()
 DataHeader_p6* DataHeaderCnv::createPersistent(DataHeader* transObj, DataHeaderForm_p6* dh_form)
 {
    return m_tpOutConverter.createPersistent( transObj, *dh_form );
+}
+
+//______________________________________________________________________________
+void DataHeaderCnv::removeBadElements(DataHeader* dh)
+{
+   auto iter = dh->m_dataHeader.begin();
+   while( iter != dh->m_dataHeader.end() ) {
+      if( iter->getToken()->dbID() == Guid::null() ) {
+         ATH_MSG_WARNING("Removed incomplete DataObject Element");
+         iter = dh->m_dataHeader.erase(iter);
+      } else {
+         ++iter;
+      }
+   }
+   iter = dh->m_inputDataHeader.begin();
+   while( iter != dh->m_inputDataHeader.end() ) {
+      if( iter->getToken()->dbID() == Guid::null() ) {
+         ATH_MSG_WARNING("Removed incomplete Input Element");
+         iter = dh->m_inputDataHeader.erase(iter);
+      } else {
+         ++iter;
+      }
+   }
 }
 
 //______________________________________________________________________________
@@ -371,6 +404,7 @@ DataHeader* DataHeaderCnv::createTransient() {
          std::unique_ptr<DataHeader_p6> header( poolReadObject_p6() );
          auto dh = m_tpInConverter.createTransient( header.get(), *(m_inputDHForms[ header->dhFormToken() ]) );
          dh->setEvtRefTokenStr( m_i_poolToken->toString() );
+         removeBadElements(dh);
          // To dump the DataHeader uncomment below
          // std::ostringstream ss;  dh->dump(ss); std::cout << ss.str() << std::endl;
          return dh;
