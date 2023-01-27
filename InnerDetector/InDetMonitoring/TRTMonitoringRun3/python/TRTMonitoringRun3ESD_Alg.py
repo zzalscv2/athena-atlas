@@ -225,30 +225,31 @@ if __name__ == '__main__':
     log.setLevel(DEBUG)
 
     # Set the Athena configuration flags
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files = ['/afs/cern.ch/work/y/ysmirnov/public/NikitasEsdToFeedToTrtMonitoring/data18_13TeV.00349944.physics_Main.daq.ESD._lb0244._f1138._0001.root']
-    ConfigFlags.Input.isMC = False
-    ConfigFlags.Output.HISTFileName = 'TRTMonitoringRun3_ToolOutput.root'
-    ConfigFlags.GeoModel.Align.Dynamic = False
-    ConfigFlags.Detector.GeometryPixel = True
-    ConfigFlags.Detector.GeometrySCT = True
-    ConfigFlags.Detector.GeometryTRT = True
-    ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-03"
-    ConfigFlags.lock()
+    from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    flags = initConfigFlags()
+    flags.Input.Files = ['/afs/cern.ch/work/y/ysmirnov/public/NikitasEsdToFeedToTrtMonitoring/data18_13TeV.00349944.physics_Main.daq.ESD._lb0244._f1138._0001.root']
+    flags.Input.isMC = False
+    flags.Output.HISTFileName = 'TRTMonitoringRun3_ToolOutput.root'
+    flags.GeoModel.Align.Dynamic = False
+    flags.Detector.GeometryPixel = True
+    flags.Detector.GeometrySCT = True
+    flags.Detector.GeometryTRT = True
+    flags.IOVDb.GlobalTag = "CONDBR2-BLKPA-RUN2-03"
+    flags.lock()
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     from AthenaCommon.AppMgr import ServiceMgr
-    cfg = MainServicesCfg(ConfigFlags)
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
 
     # Force special handling of converters
     from TrkConfig.TrackCollectionReadConfig import TrackCollectionReadCfg
-    cfg.merge (TrackCollectionReadCfg (ConfigFlags, 'CombinedInDetTracks'))
-    cfg.merge (TrackCollectionReadCfg (ConfigFlags, 'Tracks'))
+    cfg.merge (TrackCollectionReadCfg (flags, 'CombinedInDetTracks'))
+    cfg.merge (TrackCollectionReadCfg (flags, 'Tracks'))
 
-    TRTMonitoringRun3Acc = TRTMonitoringRun3ESD_AlgConfig(ConfigFlags)
+    TRTMonitoringRun3Acc = TRTMonitoringRun3ESD_AlgConfig(flags)
     ServiceMgr.Dump = False
 
     cfg.merge(TRTMonitoringRun3Acc)
