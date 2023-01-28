@@ -368,7 +368,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, std::vector<int>& 
   return StatusCode::SUCCESS;
 }
 
-// sets node_feat which will be used by the onnx tool (continuos mode)
+// sets node_feat which will be used by the onnx tool (continuous mode)
 StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, const std::vector<float>& tagw){
   ANA_CHECK_SET_TYPE (StatusCode);
   if(node_feat.size()!=tagw.size()){
