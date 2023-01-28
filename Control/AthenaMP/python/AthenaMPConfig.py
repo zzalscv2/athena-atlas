@@ -114,8 +114,6 @@ def AthenaMPCfg(flags):
                 outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool_0",
                                                              SharedMemoryName=f"OutputStream{str(os.getpid())}")
 
-                from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-                result.merge(PoolWriteCfg(flags))
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
                 result.merge(AthenaPoolCnvSvcCfg(flags,
                                                  OutputStreamingTool=[outputStreamingTool]))
