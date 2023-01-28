@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
@@ -138,8 +138,7 @@ def initConfigFlags():
         (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
     acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
 
-
-
+    # output
     acf.addFlag('Output.EVNTFileName', '')
     acf.addFlag('Output.EVNT_TRFileName', '')
     acf.addFlag('Output.HITSFileName', '')
@@ -149,13 +148,14 @@ def initConfigFlags():
     acf.addFlag('Output.AODFileName',  '')
     acf.addFlag('Output.HISTFileName', '')
 
-
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName)) # write out RDO file
     acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName)) # write out RDO_SGNL file
     acf.addFlag('Output.doWriteESD', lambda prevFlags: bool(prevFlags.Output.ESDFileName)) # write out ESD file
     acf.addFlag('Output.doWriteAOD', lambda prevFlags: bool(prevFlags.Output.AODFileName)) # write out AOD file
     acf.addFlag('Output.doWriteBS',  False) # write out RDO ByteStream file
     acf.addFlag('Output.doWriteDAOD',  False) # write out at least one DAOD file
+
+    acf.addFlag('Output.TreeAutoFlush', {})  # {} = automatic for all streams, otherwise {'STREAM': 123}
 
     # Might move this elsewhere in the future.
     # Some flags from https://gitlab.cern.ch/atlas/athena/blob/master/Tracking/TrkDetDescr/TrkDetDescrSvc/python/TrkDetDescrJobProperties.py

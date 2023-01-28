@@ -187,8 +187,12 @@ class DerivationTest(WorkflowTest):
             threads = setup.custom_threads
 
         if "maxEvents" not in extra_args:
-            events = 100
+            base_events = 100
+            events = threads * base_events + 1
+            flush = 80
+
             extra_args += f" --maxEvents {events}"
+            extra_args += f" --preExec 'ConfigFlags.Output.TreeAutoFlush={{\"DAOD_{format}\": {flush}}}'"
         if "inputAODFile" not in extra_args:
             extra_args += f" --inputAODFile {input_AOD[run][data_type]}"
 
