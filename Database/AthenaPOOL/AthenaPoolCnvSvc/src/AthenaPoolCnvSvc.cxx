@@ -522,9 +522,17 @@ StatusCode AthenaPoolCnvSvc::commitOutput(const std::string& outputConnectionSpe
                         return abortSharedWrClients(num);
                      }
                      dataHeaderSeen = true;
+                     // This dataHeaderID is used in DataHeaderCnv to index the DataHeaderForm cache.
+                     // It must be unique per worker per stream so that we have a correct DataHeader(Form) association.
+                     // This is achieved by building it as "CONTID/WORKERID/DBID".
+                     // CONTID, e.g., POOLContainer(DataHeader), allows us to distinguish data and metadata headers,
+                     // WORKERID allows us to distinguish AthenaMP workers,
+                     // and DBID allows us to distinguish streams.
                      dataHeaderID = token->contID();
                      dataHeaderID += '/';
                      dataHeaderID += oss2.str();
+                     dataHeaderID += '/';
+                     dataHeaderID += token->dbID().toString();
                   } else if (dataHeaderSeen) {
                      dataHeaderSeen = false;
                      // next object after DataHeader - may be a DataHeaderForm
