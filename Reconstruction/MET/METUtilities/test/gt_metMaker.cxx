@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 // #ifdef XAOD_STANDALONE
@@ -68,6 +68,7 @@ namespace met {
 
   }; // METMakerTest
 
+  // cppcheck-suppress syntaxError
   TEST_F( METMakerTest, TestInitialize ){
     ASSERT_TRUE(tool.initialize().isSuccess());
   }

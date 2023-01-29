@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 // METSignificance.cxx
 // Implementation file for class METSignificance
@@ -1039,12 +1039,6 @@ namespace met {
   }
 
   void METSignificance::AddResoMap(const double varL, const double varT, const double CvLT, const int term){
-
-    if(m_term_VarL.find(term)==m_term_VarL.end()){
-      m_term_VarL[term] = 0.0;
-      m_term_VarT[term] = 0.0;
-      m_term_CvLT[term] = 0.0;
-    }
 
     m_term_VarL[term] += varL;
     m_term_VarT[term] += varT;
