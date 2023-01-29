@@ -42,11 +42,11 @@ namespace {
     }
 
   bool isMuon(const xAOD::TruthParticle* truthPart) {
-    return ( abs(truthPart->pdgId()) == 13) ;        
+    return ( std::abs(truthPart->pdgId()) == 13) ;        
   }
 
   bool isWZDecay(const xAOD::TruthParticle* p) {
-    int pdg_id = abs(p->pdgId() );
+    int pdg_id = std::abs(p->pdgId() );
     int mom_pdg_id = pdg_id;
     const xAOD::TruthVertex* vprod = p->prodVtx();
     const xAOD::TruthVertex*oldVprod = vprod;
@@ -338,13 +338,13 @@ JetTruthParticleSelectorTool::finalize()
         {
           int n=it->second;
           double p=m_avP[it->first]/n;
-          double p2=sqrt(m_av2P[it->first]/n-
+          double p2=std::sqrt(m_av2P[it->first]/n-
                          m_avP[it->first]*m_avP[it->first]/n/n);
           double pt=m_avPt[it->first]/n;
-          double pt2=sqrt(m_av2Pt[it->first]/n-
+          double pt2=std::sqrt(m_av2Pt[it->first]/n-
                           m_avPt[it->first]*m_avPt[it->first]/n/n);
           double eta=m_avEta[it->first]/n;
-          double eta2=sqrt(m_av2Eta[it->first]/n-
+          double eta2=std::sqrt(m_av2Eta[it->first]/n-
                            m_avEta[it->first]*m_avEta[it->first]/n/n);
           msg(MSG::INFO) << "|"
                          << std::setw(15) << it->first << " |"
@@ -361,12 +361,12 @@ JetTruthParticleSelectorTool::finalize()
         {
           int n=it->second;
           double phi=m_avPhi[it->first]/n;
-          double phi2=sqrt(m_av2Phi[it->first]/n-
+          double phi2=std::sqrt(m_av2Phi[it->first]/n-
                            m_avPhi[it->first]*m_avPhi[it->first]/n/n);
           double m=m_avM[it->first]/n;
           double m2=0;
           if ( m_av2M[it->first]/n > m_avM[it->first]*m_avM[it->first]/n/n)
-            m2=sqrt(m_av2M[it->first]/n-
+            m2=std::sqrt(m_av2M[it->first]/n-
                     m_avM[it->first]*m_avM[it->first]/n/n);
           msg(MSG::INFO) << "|"
                          << std::setw(15) << it->first << " |"
