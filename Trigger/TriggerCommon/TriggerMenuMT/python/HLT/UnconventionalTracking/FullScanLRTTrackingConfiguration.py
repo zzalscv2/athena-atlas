@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.CFElements import parOR
 from ..CommonSequences.FullScanDefs import trkFSRoI
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
@@ -8,13 +8,13 @@ logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def FullScanLRTTriggerSequence(ConfigFlags):
+def FullScanLRTTriggerSequence(flags):
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     lrtcfg = getInDetTrigConfig("fullScanLRT")
 
     from TriggerMenuMT.HLT.UnconventionalTracking.CommonConfiguration import getCommonInDetFullScanLRTSequence
 
-    ftf_seqs, im_alg, seqOut = RecoFragmentsPool.retrieve(getCommonInDetFullScanLRTSequence,ConfigFlags)
+    ftf_seqs, im_alg, seqOut = RecoFragmentsPool.retrieve(getCommonInDetFullScanLRTSequence,flags)
 
 
     from TrigInDetConfig.InDetTrigPrecisionTracking import makeInDetTrigPrecisionTracking
@@ -33,12 +33,11 @@ def FullScanLRTTriggerSequence(ConfigFlags):
 
 
 
-def FullScanLRTTriggerMenuSequence():
+def FullScanLRTTriggerMenuSequence(flags):
     from TrigLongLivedParticlesHypo.TrigFullScanLRTHypoTool import TrigLRTHypoToolFromDict
     from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConf import (FastTrackFinderLRTHypoAlg)
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ( TrkSeq,im_alg, sequenceOut) = RecoFragmentsPool.retrieve(FullScanLRTTriggerSequence,ConfigFlags)
+    ( TrkSeq,im_alg, sequenceOut) = RecoFragmentsPool.retrieve(FullScanLRTTriggerSequence,flags)
 
     theHypoAlg = FastTrackFinderLRTHypoAlg("FullScanLRTHypoAlg")
 

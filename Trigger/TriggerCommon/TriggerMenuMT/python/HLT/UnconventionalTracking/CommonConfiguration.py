@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND, parOR
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
@@ -9,7 +9,7 @@ log = logging.getLogger(__name__)
 
 # ---------------------
 
-def getCommonInDetFullScanSequence(ConfigFlag):
+def getCommonInDetFullScanSequence(flags):
 
     from TriggerMenuMT.HLT.Jet.JetMenuSequences import getTrackingInputMaker
     InputMakerAlg=getTrackingInputMaker("ftf")
@@ -33,13 +33,12 @@ def getCommonInDetFullScanSequence(ConfigFlag):
 
 # ---------------------
 
-def getFullScanRecoOnlySequence():
+def getFullScanRecoOnlySequence(flags):
 
     from TrigStreamerHypo.TrigStreamerHypoConf import TrigStreamerHypoAlg
     from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,ConfigFlags)
+    ( TrkSeq, InputMakerAlg, sequenceOut) = RecoFragmentsPool.retrieve(getCommonInDetFullScanSequence,flags)
 
     HypoAlg = TrigStreamerHypoAlg("UncTrkDummyStream")
 
@@ -49,7 +48,7 @@ def getFullScanRecoOnlySequence():
                          Hypo        = HypoAlg,
                          HypoToolGen = StreamerHypoToolGenerator )
 
-def getCommonInDetFullScanLRTSequence(ConfigFlags):
+def getCommonInDetFullScanLRTSequence(flags):
     from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
     std_cfg = getInDetTrigConfig("jet" )
     lrt_cfg = getInDetTrigConfig("fullScanLRT")

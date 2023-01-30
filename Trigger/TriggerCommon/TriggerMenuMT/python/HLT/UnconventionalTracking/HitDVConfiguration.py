@@ -1,20 +1,18 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CFElements import seqAND
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.Logging import logging
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
 logging.getLogger().info("Importing %s",__name__)
 log = logging.getLogger(__name__)
 
 
-def UTTJetRecoSequence():
+def UTTJetRecoSequence(flags):
 
         from TriggerMenuMT.HLT.CommonSequences.CaloSequences import caloClusterRecoSequence
         topoClusterSequence, clustersKey = RecoFragmentsPool.retrieve(
-                caloClusterRecoSequence, flags=ConfigFlags, RoIs='')
+                caloClusterRecoSequence, flags, RoIs='')
  
         from TrigStreamerHypo.TrigStreamerHypoConf   import TrigStreamerHypoAlg
         from TrigStreamerHypo.TrigStreamerHypoConfig import StreamerHypoToolGenerator
@@ -32,7 +30,7 @@ def UTTJetRecoSequence():
 
         JetSeq, jetName, jetDef = RecoFragmentsPool.retrieve(
             jetRecoSequence,
-            ConfigFlags,
+            flags,
             clustersKey=clustersKey,
             **trkcolls,
             **jetRecoDict,
