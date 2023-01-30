@@ -15,16 +15,13 @@ Offline configurations are available here:
 # athena imports
 from AthenaConfiguration.Enums import BeamType
 
-# flags
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
-
 # Calo tools imports
 from CaloTools.CaloToolsConf import CaloAffectedTool
 from egammaCaloTools.egammaCaloToolsFactories import egammaShowerShape, egammaIso
 from CaloIdentifier import SUBCALO 
 
 from TriggerMenuMT.HLT.Egamma.TrigEgammaMVACalibFactories import trigPrecCaloEgammaMVASvc
+from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import getTrigEgammaKeys
 
 # Egamma imports
 from egammaRec.Factories import ToolFactory, AlgFactory
@@ -107,16 +104,19 @@ tit_lrt.TracksInConeTool    = tpict_lrt
 
     
 """Configuring EMTrackMatchBuilder Tool """
-TrigEMTrackMatchBuilder = ToolFactory( egammaToolsConf.EMTrackMatchBuilder,
-                      TrackParticlesName = TrigEgammaKeys.precisionTrackingContainer,
-                      ExtrapolationTool  = EMExtrapolationTools,
-                      broadDeltaEta      = 0.1, #candidate match is done in 2 times this  so +- 0.2
-                      broadDeltaPhi      = 0.15,  #candidate match is done in 2 times this  so +- 0.3
-                      useCandidateMatch  = True,
-                      useScoring         = True,
-                      SecondPassRescale  = True,
-                      UseRescaleMetric   = True,
-                      isCosmics          = (ConfigFlags.Beam.Type == BeamType.Cosmics) )
+def TrigEMTrackMatchBuilder(flags):
+    EMTrackMatchBuilder = ToolFactory( egammaToolsConf.EMTrackMatchBuilder,
+        TrackParticlesName = TrigEgammaKeys.precisionTrackingContainer,
+        ExtrapolationTool  = EMExtrapolationTools,
+        broadDeltaEta      = 0.1, #candidate match is done in 2 times this  so +- 0.2
+        broadDeltaPhi      = 0.15,  #candidate match is done in 2 times this  so +- 0.3
+        useCandidateMatch  = True,
+        useScoring         = True,
+        SecondPassRescale  = True,
+        UseRescaleMetric   = True,
+        isCosmics          = (flags.Beam.Type == BeamType.Cosmics) )
+    return EMTrackMatchBuilder
+
 
 """Configuring the builder of Egamma shower shapes"""
 TrigEMShowerBuilder = ToolFactory( egammaToolsConf.EMShowerBuilder,
@@ -276,14 +276,13 @@ H_ClIT.EFlowEDCentralContainer='TrigIsoEventShape'
 H_ClIT.EFlowEDForwardContainer='TrigIsoEventShape'
 
 
-def TrigEgammaPseudoJetAlgCfg(name='TrigEgammaPseudoJetAlg'):
+def TrigEgammaPseudoJetAlgCfg(flags, name='TrigEgammaPseudoJetAlg'):
     # This is to run pseudoJetAlgorithm to compute event density over FullScan TopoClusters for TrigEgamma. This is used by the Calorimeter isolation to correct for detector activity
     
     # Lets just bring the FS reco sequence from CaloSequence. This will call/include the FS cellMaker already configured/instantiated 
     from ..CommonSequences.CaloSequences import caloClusterRecoSequence
     from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    FSTopoSequence, clustersKey = RecoFragmentsPool.retrieve( caloClusterRecoSequence, flags=ConfigFlags, RoIs = '') # As no RoI defined, it should use roisKey='' 
+    FSTopoSequence, clustersKey = RecoFragmentsPool.retrieve( caloClusterRecoSequence, flags, RoIs = '') # As no RoI defined, it should use roisKey=''
     from JetRec.JetRecConf import PseudoJetAlgorithm
     TrigEgammaPseudoJetAlgBuilder = PseudoJetAlgorithm(
         name               = name,
@@ -377,12 +376,12 @@ def egammaFSCaloRecoSequence():
 
     return parOR("egammaFSRecoSequence", [cellMaker, eventShapeMaker])
 
-def egammaFSEventDensitySequence():
+def egammaFSEventDensitySequence(flags):
     from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigIsoEventShapeAlgCfg, TrigEgammaPseudoJetAlgCfg
     from AthenaCommon.CFElements import parOR
 
     thesequence = parOR( "precisionPhotonFSEventDensity") # This thing creates the sequence with name precisionPhotonAlgs
-    FSTopoSequence, TrigEgammaPseudoJetAlg = TrigEgammaPseudoJetAlgCfg('TrigPhotonEgammaPSeudoJetBuilder')
+    FSTopoSequence, TrigEgammaPseudoJetAlg = TrigEgammaPseudoJetAlgCfg(flags, 'TrigPhotonEgammaPSeudoJetBuilder')
     thesequence += FSTopoSequence
     thesequence += TrigEgammaPseudoJetAlg
     thesequence += TrigIsoEventShapeAlgCfg('TrigPhotonIsoEventShapeAlg')

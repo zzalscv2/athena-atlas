@@ -31,55 +31,55 @@ def electronFastCaloCfg( flags, is_probe_leg=False ):
     return fastCaloMenuSequence(flags, "Electron", is_probe_leg=is_probe_leg)
 
 def fastTrackingSequenceCfg( flags, is_probe_leg=False ):
-    return fastTrackingMenuSequence('Electron', is_probe_leg=is_probe_leg)
+    return fastTrackingMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def fastTrackingSequenceCfg_lrt( flags, is_probe_leg=False ):
-    return fastTrackingMenuSequence_LRT('Electron', is_probe_leg=is_probe_leg)
+    return fastTrackingMenuSequence_LRT(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def fastElectronSequenceCfg( flags, is_probe_leg=False ):
-    return fastElectronMenuSequence(is_probe_leg=is_probe_leg)
+    return fastElectronMenuSequence(flags, is_probe_leg=is_probe_leg)
 
 def fastElectronSequenceCfg_lrt( flags, is_probe_leg=False ):
-    return fastElectronMenuSequence_LRT(is_probe_leg=is_probe_leg)
+    return fastElectronMenuSequence_LRT(flags, is_probe_leg=is_probe_leg)
 
 def precisionCaloSequenceCfg( flags, is_probe_leg=False ):
-    return precisionCaloMenuSequence('Electron', is_probe_leg=is_probe_leg)
+    return precisionCaloMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def precisionCaloSequenceCfg_lrt( flags, is_probe_leg=False ):
-    return precisionCaloMenuSequence_LRT('Electron', is_probe_leg=is_probe_leg)
+    return precisionCaloMenuSequence_LRT(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def precisionCaloSequenceCfg_ion( flags, is_probe_leg=False ):
-    return precisionCaloMenuSequence('Electron', is_probe_leg=is_probe_leg, ion=True)
+    return precisionCaloMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg, ion=True)
 
 def precisionTrackingSequenceCfg( flags, is_probe_leg=False ):
-    return precisionTrackingMenuSequence('Electron', is_probe_leg=is_probe_leg)
+    return precisionTrackingMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def precisionTrackingSequenceCfg_ion( flags, is_probe_leg=False ):
-    return precisionTrackingMenuSequence('Electron', is_probe_leg=is_probe_leg, ion=True)
+    return precisionTrackingMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg, ion=True)
 
 def precisionTrackingSequenceCfg_lrt( flags, is_probe_leg=False ):
-    return precisionTrackingMenuSequence_LRT('Electron', is_probe_leg=is_probe_leg)
+    return precisionTrackingMenuSequence_LRT(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def precisionTrack_GSFRefittedSequenceCfg( flags, is_probe_leg=False ):
-    return precisionTracks_GSFRefittedMenuSequence('Electron', is_probe_leg=is_probe_leg)
+    return precisionTracks_GSFRefittedMenuSequence(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def precisionTrack_GSFRefittedSequenceCfg_lrt( flags, is_probe_leg=False ):
-    return precisionTracks_GSFRefittedMenuSequence_LRT('Electron', is_probe_leg=is_probe_leg)
+    return precisionTracks_GSFRefittedMenuSequence_LRT(flags, 'Electron', is_probe_leg=is_probe_leg)
 
 def precisionElectronSequenceCfg( flags, is_probe_leg=False ):
-    return precisionElectronMenuSequence(is_probe_leg=is_probe_leg)
+    return precisionElectronMenuSequence(flags, is_probe_leg=is_probe_leg)
 
 def precisionElectronSequenceCfg_ion( flags, is_probe_leg=False ):
-    return precisionElectronMenuSequence(is_probe_leg=is_probe_leg, ion=True)
+    return precisionElectronMenuSequence(flags, is_probe_leg=is_probe_leg, ion=True)
 
 def precisionGSFElectronSequenceCfg( flags, is_probe_leg=False):
-    return precisionElectronMenuSequence_GSF(is_probe_leg=is_probe_leg)
+    return precisionElectronMenuSequence_GSF(flags, is_probe_leg=is_probe_leg)
 
 def precisionGSFElectronSequenceCfg_lrt( flags, is_probe_leg=False):
-    return precisionElectronMenuSequence_LRTGSF(is_probe_leg=is_probe_leg)
+    return precisionElectronMenuSequence_LRTGSF(flags, is_probe_leg=is_probe_leg)
 
 def precisionElectronSequenceCfg_lrt( flags, is_probe_leg=False):
-    return precisionElectronMenuSequence_LRT(is_probe_leg=is_probe_leg)
+    return precisionElectronMenuSequence_LRT(flags, is_probe_leg=is_probe_leg)
 
 
 

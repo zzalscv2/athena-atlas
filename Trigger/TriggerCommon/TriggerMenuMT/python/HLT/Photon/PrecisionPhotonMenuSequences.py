@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 # menu components   
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 def tag(ion):
     return 'precision' + ('HI' if ion is True else '') + 'Photon'
 
-def precisionPhotonSequence(ConfigFlags, ion=False):
+def precisionPhotonSequence(flags, ion=False):
     """ This function creates the PrecisionPhoton sequence"""
     # Prepare first the EventView
     InViewRoIs="PrecisionPhotonRoIs"                                          
@@ -41,12 +41,11 @@ def precisionPhotonSequence(ConfigFlags, ion=False):
 
 
 def precisionPhotonMenuSequence(flags, name,ion=False):
+    """Creates precisionPhoton  sequence"""
 
     # This will be executed after pricisionCalo, so we need to pickup indeed the topoClusters by precisionCalo and add them here as requirements
 
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    """Creates precisionPhoton  sequence"""
-    (sequence, precisionPhotonViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionPhotonSequence,ConfigFlags,ion=ion)
+    (sequence, precisionPhotonViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionPhotonSequence,flags,ion=ion)
 
     # Hypo 
     from TrigEgammaHypo.TrigEgammaPrecisionPhotonHypoTool import createTrigEgammaPrecisionPhotonHypoAlg

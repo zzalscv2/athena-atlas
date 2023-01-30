@@ -1,10 +1,8 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
-# menu components   
+# menu components
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
 from AthenaCommon.CFElements import parOR, seqAND
 import AthenaCommon.CfgMgr as CfgMgr
@@ -14,7 +12,7 @@ from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
 from TrigTRTHighTHitCounter.TrigTRTHTHCounterConfig import TrigTRTHTHCounterFex
 
-def TRTHitGeneratorSequence(ConfigFlags):
+def TRTHitGeneratorSequence(flags):
 
     from TriggerMenuMT.HLT.Egamma.TrigEgammaKeys import  getTrigEgammaKeys
     TrigEgammaKeys = getTrigEgammaKeys()
@@ -63,7 +61,7 @@ def TRTHitGeneratorSequence(ConfigFlags):
 
 def hipTRTMenuSequence(flags):
     """ Creates TRTDataGenerator MENU sequence """
-    (sequenceOut, trtDataSequence, trtViewsMaker) = RecoFragmentsPool.retrieve(TRTHitGeneratorSequence, ConfigFlags)
+    (sequenceOut, trtDataSequence, trtViewsMaker) = RecoFragmentsPool.retrieve(TRTHitGeneratorSequence, flags)
 
     #Hypo
     from TrigTRTHighTHitCounter.TrigTRTHighTHitCounterConf import TrigTRTHTHhypoAlg

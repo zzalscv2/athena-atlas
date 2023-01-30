@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 from AthenaCommon.Logging import logging
 
 __doc__ = "ToolFactories to configure egammaAlgs to be used at the HLT" 
@@ -25,30 +25,32 @@ from egammaRec.Factories import AlgFactory, FcnWrapper
     
 # Prepare first egammaRec:
 
-"""Configuring egammaRecBuilder """
-TrigEgammaRecElectron = AlgFactory( egammaAlgsConf.egammaRecBuilder,
-                            name = 'TrigEgammaRecElectron',
-                            InputClusterContainerName= "precisionCaloCluster",
-                            egammaRecContainer= TrigEgammaKeys.precisionEgammaRecCollection,
-                            doConversions = False,
-                            doAdd= False,
-                            # Builder tools
-                            TrackMatchBuilderTool = TrigEMTrackMatchBuilder)
+def TrigEgammaRecElectronCfg(flags, name = 'TrigEgammaRecElectron'):
+    """Configuring egammaRecBuilder """
+    TrigEgammaRecElectron = AlgFactory( egammaAlgsConf.egammaRecBuilder, name = name,
+                                        InputClusterContainerName= "precisionCaloCluster",
+                                        egammaRecContainer= TrigEgammaKeys.precisionEgammaRecCollection,
+                                        doConversions = False,
+                                        doAdd= False,
+                                        # Builder tools
+                                        TrackMatchBuilderTool = TrigEMTrackMatchBuilder(flags))
+    return TrigEgammaRecElectron()
 
-"""Configuring electronSuperClusterBuilder"""                                        
-TrigElectronSuperClusterBuilder = AlgFactory( egammaAlgsConf.electronSuperClusterBuilder,
-                                              name = 'TrigElectronSuperClusterBuilder',
-                                              InputEgammaRecContainerName = TrigEgammaKeys.precisionEgammaRecCollection,
-                                              SuperElectronRecCollectionName = TrigEgammaKeys.precisionElectronSuperClusterRecCollection,
-                                              SuperClusterCollectionName = TrigEgammaKeys.precisionElectronSuperClusterCollection,
-                                              ClusterCorrectionTool=egammaSwSuperClusterTool,
-                                              MVACalibSvc=trigPrecEgammaMVASvc,
-                                              EtThresholdCut=1000,
-                                              TrackMatchBuilderTool = TrigEMTrackMatchBuilder,
-                                              doAdd= False,
-                                              LinkToConstituents = False,
-                                             )
 
+def TrigElectronSuperClusterBuilderCfg(flags, name = 'TrigElectronSuperClusterBuilder'):
+    """Configuring electronSuperClusterBuilder"""
+    builder = AlgFactory( egammaAlgsConf.electronSuperClusterBuilder, name = name,
+                          InputEgammaRecContainerName = TrigEgammaKeys.precisionEgammaRecCollection,
+                          SuperElectronRecCollectionName = TrigEgammaKeys.precisionElectronSuperClusterRecCollection,
+                          SuperClusterCollectionName = TrigEgammaKeys.precisionElectronSuperClusterCollection,
+                          ClusterCorrectionTool=egammaSwSuperClusterTool,
+                          MVACalibSvc=trigPrecEgammaMVASvc,
+                          EtThresholdCut=1000,
+                          TrackMatchBuilderTool = TrigEMTrackMatchBuilder(flags),
+                          doAdd= False,
+                          LinkToConstituents = False,
+                         )
+    return builder()
 
 
 def TrigTopoEgammaElectronCfg(name='topoEgammaBuilder_TrigElectrons'):
