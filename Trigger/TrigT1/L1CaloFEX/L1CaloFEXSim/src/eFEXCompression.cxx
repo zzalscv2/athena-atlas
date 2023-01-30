@@ -136,9 +136,6 @@ unsigned int eFEXCompression::decode(int EtVal, int layer) {
   /// Expand the ET value
   int Et = eFEXCompression::expand(code);
   
-  // Check for overflow
-  if (Et >= s_maxET) return s_eFEXOverflow;
-
   /// Convert to eFEX digit scale: 25 MeV
   unsigned int eFexET = Et/s_eFEXstep;
 

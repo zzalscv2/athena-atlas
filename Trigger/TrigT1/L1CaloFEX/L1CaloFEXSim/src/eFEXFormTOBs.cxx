@@ -47,7 +47,7 @@ uint32_t eFEXFormTOBs::formTauTOBWord(int & fpga, int & eta, int & phi, unsigned
   if (etTob > 0xfff) etTob = 0xfff;
 
   // Create tob word with et, eta, phi, and fpga index, bitshifted to the appropriate locations
-  tobWord = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + etTob;
+  tobWord = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift) + etTob;
 
   ATH_MSG_DEBUG("Tau tobword: " << std::bitset<32>(tobWord) );
 
@@ -71,7 +71,7 @@ std::vector<uint32_t>  eFEXFormTOBs::formTauxTOBWords(int & efexid, int & fpga, 
   uint8_t efex  = efexid%12;
 
   // Create tob word 0 with eta, phi, and fpga index, bitshifted to the appropriate locations
-  tobWords[0] = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift);
+  tobWords[0] = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_taurhadShift) + (rcore << m_taurcoreShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift);
 
   // Create tob word 1 with et, efex and shelf indices, bitshifted to the appropriate locations
   tobWords[1] = (shelf << m_shelfShift) + (efex << m_efexShift) + etTob;
@@ -96,7 +96,7 @@ uint32_t eFEXFormTOBs::formEmTOBWord(int & fpga, int & eta, int & phi, unsigned 
   if (etTob > 0xfff) etTob = 0xfff;
 
   // Create bare minimum tob word with et, eta, phi, and fpga index, bitshifted to the appropriate locations
-  tobWord = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_rhadShift) + (wstot << m_wstotShift) + (reta << m_retaShift) + (seed << m_seedShift) + (und << m_undShift) + etTob;
+  tobWord = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_rhadShift) + (wstot << m_wstotShift) + (reta << m_retaShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift) + etTob;
 
   ATH_MSG_DEBUG("EM tobword: " << std::bitset<32>(tobWord) );
 
@@ -119,7 +119,7 @@ std::vector<uint32_t> eFEXFormTOBs::formEmxTOBWords(int & efexid, int & fpga, in
   uint8_t efex  = efexid%12;
 
   // Create tob word 0 with eta, phi, and fpga index, bitshifted to the appropriate locations
-  tobWords[0] = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_rhadShift) + (wstot << m_wstotShift) + (reta << m_retaShift) + (seed << m_seedShift) + (und << m_undShift);
+  tobWords[0] = (fpga << m_fpgaShift) + (eta << m_etaShift) + (phi << m_phiShift) + (rhad << m_rhadShift) + (wstot << m_wstotShift) + (reta << m_retaShift) + (seed << m_seedShift) + (und << m_undShift) + (0x1 << m_seedMaxShift);
 
   // Create tob word 1 with et, efex and shelf indices, bitshifted to the appropriate locations
   tobWords[1] = (shelf << m_shelfShift) + (efex << m_efexShift) + etTob;

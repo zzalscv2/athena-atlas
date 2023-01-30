@@ -115,6 +115,7 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   
   for(int ieta = min_eta; ieta < overflow_eta; ieta++) {
     for(int iphi = 1; iphi < 9; iphi++) {
+
       int tobtable[3][3]={
         {ieta > 0 ? m_eTowersIDs[iphi-1][ieta-1] : 0,
          m_eTowersIDs[iphi-1][ieta],
@@ -147,9 +148,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       eEMTobEt = m_eFEXegAlgoTool->getET();
             
       // thresholds from Trigger menu
-      auto iso_loose  = thr_eEM.isolation(TrigConf::Selection::WP::LOOSE, ieta);
-      auto iso_medium = thr_eEM.isolation(TrigConf::Selection::WP::MEDIUM, ieta);
-      auto iso_tight  = thr_eEM.isolation(TrigConf::Selection::WP::TIGHT, ieta);  
+      // the menu eta runs from -25 to 24
+      int menuEta = m_id*4 + (m_efexid%3)*16 + ieta - 25;
+      auto iso_loose  = thr_eEM.isolation(TrigConf::Selection::WP::LOOSE, menuEta);
+      auto iso_medium = thr_eEM.isolation(TrigConf::Selection::WP::MEDIUM, menuEta);
+      auto iso_tight  = thr_eEM.isolation(TrigConf::Selection::WP::TIGHT, menuEta);  
 
       std::vector<unsigned int> threshReta;
       threshReta.push_back(iso_loose.reta_fw());
@@ -188,8 +191,8 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       unsigned int RhadBitS = 3;
       unsigned int WstotBitS = 5;
 
-      unsigned int maxEtCounts = thr_eEM.maxEtCounts(m_eFexStep);
-      if (eEMTobEt >= maxEtCounts){
+      unsigned int maxEtCountsEm = thr_eEM.maxEtCounts(m_eFexStep);
+      if (eEMTobEt >= maxEtCountsEm){
 	       RetaWP = 3;
 	       RhadWP = 3;
 	       WstotWP = 3;
@@ -283,9 +286,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       eTauTobEt = m_eFEXtauAlgoTool->getEt();
 
       // thresholds from Trigger menu
-      auto iso_loose  = thr_eTAU.isolation(TrigConf::Selection::WP::LOOSE, ieta);
-      auto iso_medium = thr_eTAU.isolation(TrigConf::Selection::WP::MEDIUM, ieta);
-      auto iso_tight  = thr_eTAU.isolation(TrigConf::Selection::WP::TIGHT, ieta);  
+      // the menu eta runs from -25 to 24
+      int menuEta = m_id*4 + (m_efexid%3)*16 + ieta - 25;
+      auto iso_loose  = thr_eTAU.isolation(TrigConf::Selection::WP::LOOSE, menuEta);
+      auto iso_medium = thr_eTAU.isolation(TrigConf::Selection::WP::MEDIUM, menuEta);
+      auto iso_tight  = thr_eTAU.isolation(TrigConf::Selection::WP::TIGHT, menuEta);  
 
       std::vector<unsigned int> threshRCore;
       threshRCore.push_back(iso_loose.rCore_fw());
@@ -312,14 +317,13 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       unsigned int RcoreBitS = 3;
       unsigned int RhadBitS = 3;
 
-      SetIsoWP(rCoreVec,threshRCore,rCoreWP,RcoreBitS);
-      SetIsoWP(rHadVec,threshRHad,rHadWP,RhadBitS);
-
-      // Currently only one WP defined for tau rCore iso, decided to set as Medium WP for freedom to add looser and tighter WPs in the future 
-      if (rCoreWP >= 2) {
-        rCoreWP = 2;
+      unsigned int maxEtCountsTau = thr_eTAU.maxEtCounts(m_eFexStep);
+      if (eTauTobEt >= maxEtCountsTau) {
+	rCoreWP = 3;
+	rHadWP = 3;
       } else {
-        rCoreWP = 0;
+	SetIsoWP(rCoreVec,threshRCore,rCoreWP,RcoreBitS);
+	SetIsoWP(rHadVec,threshRHad,rHadWP,RhadBitS);
       }
 
       unsigned int seed = 0;
@@ -498,44 +502,28 @@ void eFEXFPGA::SetTowersAndCells_SG(int tmp_eTowersIDs_subset[][6]){
 
 void eFEXFPGA::SetIsoWP(std::vector<unsigned int> & CoreEnv, std::vector<unsigned int> & thresholds, unsigned int & workingPoint, unsigned int & bitshift) {
   // Working point evaluted by Core * 2^bitshift > Threshold * Environment conditions
-  bool CoreOverflow = false;
-  bool EnvOverflow = false;
-  bool ThrEnvOverflowL = false;
-  bool ThrEnvOverflowM = false;
-  bool ThrEnvOverflowT = false;
-
   std::unordered_map<unsigned int, unsigned int> bsmap { {3, 8}, {5, 32}};
 
-  if (CoreEnv[0]*bsmap[bitshift] > 0xffff) CoreOverflow = true;
-  if (CoreEnv[1] > 0xffff) EnvOverflow = true;
-  if (CoreEnv[1]*thresholds[0] > 0xffff) ThrEnvOverflowL = true;
-  if (CoreEnv[1]*thresholds[1] > 0xffff) ThrEnvOverflowM = true;
-  if (CoreEnv[1]*thresholds[2] > 0xffff) ThrEnvOverflowT = true;
+  int large = CoreEnv[0]*bsmap[bitshift]; // core
+  int small = CoreEnv[1]; // env
 
-  if (CoreOverflow ==  false) {
-    if (EnvOverflow == false) {
-      if ( (CoreEnv[0]*bsmap[bitshift] < (thresholds[0]*CoreEnv[1])) || ThrEnvOverflowL == true ) {
-	workingPoint = 0;
-      }
-      else if ( (CoreEnv[0]*bsmap[bitshift] < (thresholds[1]*CoreEnv[1])) || ThrEnvOverflowM == true ) {
-	workingPoint = 1;
-      }
-      else if ( (CoreEnv[0]*bsmap[bitshift] < (thresholds[2]*CoreEnv[1])) || ThrEnvOverflowT == true ) {
-        workingPoint = 2;
-      }
-      else {
-        workingPoint = 3;
-      }
-    } else {
-      //env overflow
-      workingPoint = 0;
-    }
-  } 
-  else {
-    // core overflow
-    workingPoint = 3;
+  unsigned int shifted = large;// <<bitShift;
+  if ( shifted > 0xffff )
+    shifted = 0xffff;
+  if ( shifted >= small*thresholds[2] ) {
+    workingPoint=3;
+    return;
   }
-
+  if ( shifted >= small*thresholds[1] ) {
+    workingPoint=2;
+    return;
+  }
+  if ( shifted >= small*thresholds[0] ) {
+    workingPoint=1;
+    return;
+  }
+  workingPoint=0;
+  return;
 }
 
 } // end of namespace bracket

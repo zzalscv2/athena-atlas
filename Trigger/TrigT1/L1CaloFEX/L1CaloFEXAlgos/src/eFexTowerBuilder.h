@@ -59,9 +59,7 @@ class eFexTowerBuilder : public AthReentrantAlgorithm
 
   SG::ReadHandleKey<CaloCellContainer> m_scellKey { this, "CaloCellContainerReadKey", "SCell", "Read handle key for the supercells"};
   SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttKey { this, "TriggerTowerContainerReadKey", "xAODTriggerTowers", "Read handle key for the triggerTowers"};
-  SG::WriteHandleKey<xAOD::eFexTowerContainer> m_outKey {this, "eFexContainerWriteKey", "L1_eTowers_fromSCells", "Name of the output container"};
-
-    SG::ReadCondHandleKey<LArBadChannelCont> m_BCKey {this, "BadChanKey", "LArBadChannel", "SG key for LArBadChan object"};
+  SG::WriteHandleKey<xAOD::eFexTowerContainer> m_outKey {this, "eFexContainerWriteKey", "L1_eFexEmulatedTowers", "Name of the output container"};
 
     // Used during 'mapping verification'
     Gaudi::Property<bool> m_mappingVerificationMode {this, "MappingVerificationMode", false, "if true will compare logical mapping to static mapping"};

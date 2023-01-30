@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 */
 
 //*************************************************************************
@@ -373,11 +373,9 @@ void LVL1::eFEXtauAlgo::setUnDAndOffPhi()
 
   unsigned int upwardEt = 0;
   upwardEt += m_em2cells[m_seed][2];
-  upwardEt += m_em1cells[m_seed][2];
   
   unsigned int downwardEt = 0;
   downwardEt += m_em2cells[m_seed][0];
-  downwardEt += m_em1cells[m_seed][0];
 
   if (downwardEt > upwardEt) {
     m_offPhi = 0;
@@ -410,10 +408,10 @@ void LVL1::eFEXtauAlgo::getSums(unsigned int seed, bool UnD,
 // Find the supercell seed eta value, must be in central cell so in the range 4-7 inclusive
 void LVL1::eFEXtauAlgo::setSupercellSeed()
 {
-  unsigned int seed = 4;
+  unsigned int seed = 7;
   int max_et = 0;
   int cell_et = 0;
-  for(unsigned int i = 4; i < 8; i++)
+  for(unsigned int i = 7; i > 3; --i)
   {
     cell_et = m_em2cells[i][1];
     if (cell_et > max_et)
