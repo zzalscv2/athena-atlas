@@ -1,6 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaMonitoring.DQConfigFlags import DQDataType
 
 import math
 
@@ -100,13 +101,13 @@ class TrigTauMonAlgBuilder:
 
     self.__logger.info("TrigTauMonToolBuilder.get_monitoring_mode()")
     self.data_type = self.helper.flags.DQ.DataType
-    if self.data_type == 'monteCarlo': 
+    if self.data_type is DQDataType.MC:
       self.mc_mode = True
       return True
-    elif self.data_type == 'collisions': 
+    elif self.data_type is DQDataType.Collisions:
       self.pp_mode = True
       return True
-    elif self.data_type == 'cosmics':
+    elif self.data_type is DQDataType.Cosmics:
       self.cosmic_mode = True
       return True
     else:
@@ -213,7 +214,7 @@ class TrigTauMonAlgBuilder:
       self.tauMonAlg.TriggerList=self.tauList    
       isMC = False
       self.data_type = self.helper.flags.DQ.DataType
-      if self.data_type == 'monteCarlo':
+      if self.data_type == DQDataType.MC:
          isMC = True
       self.tauMonAlg.isMC = isMC
 

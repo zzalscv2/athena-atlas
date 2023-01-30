@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 #
 
 def LArCalibPedMonConfig(inputFlags,gain="",doAccDigit=False,doCalibDigit=False,doAccCalibDigit=False):
@@ -134,7 +134,7 @@ if __name__=='__main__':
    from AthenaCommon.Constants import DEBUG
    log.setLevel(DEBUG)
 
-
+   from AthenaMonitoring.DQConfigFlags import DQDataType
    from LArMonitoring.LArMonConfigFlags import createLArMonConfigFlags
    createLArMonConfigFlags()
 
@@ -152,7 +152,7 @@ if __name__=='__main__':
    ConfigFlags.LAr.doAlign=False
    from AthenaConfiguration.Enums import BeamType
    ConfigFlags.Beam.Type = BeamType.Collisions
-   ConfigFlags.DQ.DataType = 'collisions'
+   ConfigFlags.DQ.DataType = DQDataType.Collisions
    ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
    ConfigFlags.Detector.GeometryCSC=False
    ConfigFlags.Detector.GeometrysTGC=False
