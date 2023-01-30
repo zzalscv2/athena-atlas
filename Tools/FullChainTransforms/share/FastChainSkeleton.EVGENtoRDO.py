@@ -22,7 +22,6 @@ fast_chain_log.info( str(runArgs) )
 
 from AthenaCommon import CfgGetter
 import AthenaCommon.SystemOfUnits as Units
-from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 
 ### Start of Sim
 
@@ -142,6 +141,8 @@ if hasattr(runArgs, 'geometryVersion'):
 else:
     raise RuntimeError("No geometryVersion provided.")
 
+# Need to be set up after globalflags.DetDescrVersion() are set
+from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 
 ## AthenaCommon flags
 # Jobs should stop if an include fails.
