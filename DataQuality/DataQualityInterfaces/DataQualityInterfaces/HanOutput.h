@@ -39,7 +39,7 @@ namespace dqi
   public:
     enum Version { V1 = 1, V2 = 2 };
 
-    Version HanOutput_FileVersion = V1;
+    Version HanOutput_FileVersion = V2;
 
     typedef std::map<std::string, TSeqCollection*> DQOutputMap_t;
 
